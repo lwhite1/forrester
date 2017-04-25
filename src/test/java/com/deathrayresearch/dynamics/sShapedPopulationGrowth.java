@@ -22,8 +22,7 @@ public class sShapedPopulationGrowth {
     public void testRun1() {
         Model model = new Model("Population with S-Shaped Growth");
 
-        Quantity<Item> count = new Quantity<>(10, People.getInstance());
-        Stock<Item> population = new Stock<>("pop", count);
+        Stock<Item> population = new Stock<>("pop", 10, People.getInstance());
 
         Quantity<Item> carryingCapacity = new Quantity<>(1000, People.getInstance());
 
@@ -36,7 +35,7 @@ public class sShapedPopulationGrowth {
             return population.getCurrentValue().multiply(fractionalNetBirthRate.getCurrentValue() * (1 - ratio));
         };
 
-        Flow births = new Flow("Births", birthRate);
+        Flow<Item> births = new Flow<>("Births", birthRate);
 
         population.addInflow(births);
 

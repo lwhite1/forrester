@@ -22,22 +22,23 @@ public class SirInfectiousDiseaseModel {
     public void testRun1() {
         Model model = new Model("SIR Infectious Disease Model");
 
-        Quantity<Item> susceptible = new Quantity<>(1000, People.getInstance());
-        Stock<Item> susceptiblePopulation = new Stock<>("Susceptible", susceptible);
+        Stock<Item> susceptiblePopulation = new Stock<>("Susceptible", 1000, People.getInstance());
 
-        Quantity<Item> infectious = new Quantity<>(10, People.getInstance());
-        Stock<Item> infectiousPopulation = new Stock<>("Infectious", infectious);
+        Stock<Item> infectiousPopulation = new Stock<>("Infectious", 10, People.getInstance());
 
-        Quantity<Item> recovering = new Quantity<>(0, People.getInstance());
-        Stock<Item> recoveredPopulation = new Stock<>("Recovered", recovering);
+        Stock<Item> recoveredPopulation = new Stock<>("Recovered", 0, People.getInstance());
 
         Constant contactRate = new Constant("Contact Rate", 10);
 
         Rate<Item> infectiousRate = timeUnit -> {
 
-            Quantity<Item> population = susceptible.add(infectious).add(recovering);
+            Quantity<Item> population =
+                    susceptiblePopulation.getCurrentValue()
+                    .add(infectiousPopulation.getCurrentValue())
+                    .add(recoveredPopulation.getCurrentValue());
 
-            double infectiousPortion = infectious.getValue()/(population.getValue());
+            double infectiousPortion = infectiousPopulation.getCurrentValue().getValue()
+                                        / (population.getValue());
 
             double infectivity = .333; // every third encounter with an infectious person results in infection
 

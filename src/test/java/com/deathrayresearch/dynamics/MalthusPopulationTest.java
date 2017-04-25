@@ -1,7 +1,6 @@
 package com.deathrayresearch.dynamics;
 
 import com.deathrayresearch.dynamics.measure.Dimension;
-import com.deathrayresearch.dynamics.measure.Quantity;
 import com.deathrayresearch.dynamics.measure.units.time.Day;
 import com.deathrayresearch.dynamics.measure.units.time.Times;
 import com.deathrayresearch.dynamics.measure.Unit;
@@ -21,11 +20,10 @@ public class MalthusPopulationTest {
     public void testRun1() {
         Model model = new Model("Population with unconstrained growth");
 
-        Quantity<Item> count = new Quantity<>(100, People.getInstance());
-        Stock<Item> population = new Stock<>("pop", count);
+        Stock<Item> population = new Stock<>("population", 100, People.getInstance());
 
         Rate<Item> birthRate = timeUnit -> population.getCurrentValue().multiply(0.04);
-        Flow births = new Flow("Births", birthRate);
+        Flow<Item> births = new Flow<>("Births", birthRate);
 
         Rate<Item> deathRate = timeUnit -> population.getCurrentValue().multiply(0.02);
         Flow<Item> deaths = new Flow<>("Deaths", deathRate);

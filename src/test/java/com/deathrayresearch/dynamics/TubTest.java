@@ -22,8 +22,8 @@ public class TubTest {
     public void testRun1() {
 
         Model model = new Model("Tub model");
-        Quantity<Volume> waterInTub = Volumes.liters(3);
-        Stock<Volume> tub = new Stock<>("Water in tub", waterInTub);
+        
+        Stock<Volume> tub = new Stock<>("Water in tub", Volumes.liters(3));
 
         Quantity<Volume> litersPerMinuteOut = Volumes.liters(3.0);
 

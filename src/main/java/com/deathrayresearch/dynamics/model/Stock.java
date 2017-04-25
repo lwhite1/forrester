@@ -2,6 +2,7 @@ package com.deathrayresearch.dynamics.model;
 
 import com.deathrayresearch.dynamics.measure.Dimension;
 import com.deathrayresearch.dynamics.measure.Quantity;
+import com.deathrayresearch.dynamics.measure.Unit;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -19,6 +20,11 @@ public class Stock<E extends Dimension> extends Element implements Source<E>, Si
     public Stock(String name, Quantity<E> quantity) {
         super(name);
         this.currentValue = quantity;
+    }
+
+    public Stock(String name, double initialAmount, Unit<E> unit) {
+        super(name);
+        this.currentValue = new Quantity<>(initialAmount, unit);
     }
 
     public void addInflow(Flow<E> inFlow) {
