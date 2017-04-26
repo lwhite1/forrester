@@ -40,7 +40,7 @@ public class SirInfectiousDiseaseModel {
 
             double infectiousPortion = infectiousPopulation.getCurrentValue().getValue() / (population.getValue());
 
-            double infectivity = .125; // proportion of encounters with an infectious person results in infection
+            double infectivity = .10; // proportion of encounters with an infectious person results in infection
 
             double numberOfInfectedMet = contactRate.getCurrentValue() * infectiousPortion;
 
@@ -53,7 +53,7 @@ public class SirInfectiousDiseaseModel {
         };
 
         Rate<Item> recoveryRate = timeUnit -> {
-            double recoveredProportion = .1; //10% recover per day
+            double recoveredProportion = .2; //20% recover per day
             return new Quantity<>(
                     infectiousPopulation.getCurrentValue().getValue()
                             * recoveredProportion,

@@ -10,7 +10,7 @@ import java.util.Set;
 /**
  *
  */
-public class Stock<E extends Dimension> extends Element implements Source<E>, Sink<E> {
+public class Stock<E extends Dimension> extends Element {
 
     private Set<Flow<E>> inflows = new HashSet<>();
     private Set<Flow<E>> outflows = new HashSet<>();
@@ -31,7 +31,6 @@ public class Stock<E extends Dimension> extends Element implements Source<E>, Si
         inflows.add(inFlow);
     }
 
-    @Override
     public void addOutflow(Flow<E> outFlow) {
         outflows.add(outFlow);
     }
