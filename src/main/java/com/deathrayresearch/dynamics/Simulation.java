@@ -15,6 +15,7 @@ import com.deathrayresearch.dynamics.ui.ChartViewer;
 import com.google.common.eventbus.EventBus;
 
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.Set;
 
 /**
@@ -47,7 +48,7 @@ public class Simulation {
     public void execute() {
 
         EventBus eventBus = new EventBus();
-        CsvSubscriber.newInstance(eventBus, "run1.out.csv");
+        CsvSubscriber.newInstance(eventBus, "run2.out.csv");
         ChartViewer.newInstance(eventBus);
 
         eventBus.post(new SimulationStartEvent(this));
@@ -56,26 +57,42 @@ public class Simulation {
 
         double totalSteps =  (duration.getValue() * durationInBaseUnits) / (timeStep.ratioToBaseUnit());
         int step = 0;
-
         while (step < totalSteps) {
+            HashMap<String, Quantity<Dimension>> flows = new HashMap<>();
+
             eventBus.post(new TimestepEvent(currentDateTime, model));
+
             for (Stock<Dimension> stock : model.getStocks()) {
+
                 Quantity<Dimension> qCurrent = stock.getCurrentValue();
+                System.out.println(stock.getName() + " : " + qCurrent);
+
                 Set<Flow<Dimension>> stockInflows = stock.getInflows();
-                for (Flow inflow : stockInflows) {
-                    Quantity<Dimension> q = inflow.getRate().flowPerTimeUnit(timeStep);
+                for (Flow<Dimension> inflow : stockInflows) {
+                    Quantity<Dimension> q;
+                    if (flows.containsKey(inflow.getName())) {
+                        q = flows.get(inflow.getName());
+                    } else {
+                        q = inflow.getRate().flowPerTimeUnit(timeStep);
+                        flows.put(inflow.getName(), q);
+                    }
                     qCurrent = qCurrent.add(q);
                     stock.setCurrentValue(qCurrent);
                 }
                 Set<Flow<Dimension>> stockOutflows = stock.getOutflows();
                 for (Flow outflow : stockOutflows) {
-                    Quantity q = outflow.getRate().flowPerTimeUnit(timeStep);
+                    Quantity<Dimension> q;
+                    if (flows.containsKey(outflow.getName())) {
+                        q = flows.get(outflow.getName());
+                    } else {
+                        q = outflow.getRate().flowPerTimeUnit(timeStep);
+                        flows.put(outflow.getName(), q);
+                    }
                     qCurrent = qCurrent.subtract(q);
                     stock.setCurrentValue(qCurrent);
                 }
-                addStep(currentDateTime);
-                System.out.println(stock.getName() + " : " + qCurrent);
             }
+            addStep(currentDateTime);
             step++;
         }
 

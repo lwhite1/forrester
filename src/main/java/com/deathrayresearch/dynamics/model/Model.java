@@ -1,5 +1,7 @@
 package com.deathrayresearch.dynamics.model;
 
+import com.deathrayresearch.dynamics.measure.Dimension;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -9,7 +11,7 @@ import java.util.List;
 public class Model {
 
     private String name;
-    private List<Stock> stocks = new ArrayList<>();
+    private List<Stock<Dimension>> stocks = new ArrayList<>();
 
     public Model(String name) {
         this.name = name;
@@ -27,7 +29,7 @@ public class Model {
         stocks.remove(stock);
     }
 
-    public List<Stock> getStocks() {
+    public List<Stock<Dimension>> getStocks() {
         return stocks;
     }
 

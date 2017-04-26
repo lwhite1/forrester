@@ -13,6 +13,8 @@ import com.deathrayresearch.dynamics.model.Stock;
 import com.deathrayresearch.dynamics.rate.Rate;
 import org.junit.Test;
 
+import java.util.Random;
+
 /**
  *
  */
@@ -28,27 +30,26 @@ public class SirInfectiousDiseaseModel {
 
         Stock<Item> recoveredPopulation = new Stock<>("Recovered", 0, People.getInstance());
 
-        Constant contactRate = new Constant("Contact Rate", 10);
+        // at each step, each susceptible person meets n other people
+        Constant contactRate = new Constant("Contact Rate", 8);
 
+        // The number of newly infected at each step, they get moved from susceptible to infectious status.
         Rate<Item> infectiousRate = timeUnit -> {
 
-            Quantity<Item> population =
-                    susceptiblePopulation.getCurrentValue()
-                    .add(infectiousPopulation.getCurrentValue())
-                    .add(recoveredPopulation.getCurrentValue());
+            Quantity<Item> population = new Quantity<>(1010, People.getInstance());
 
-            double infectiousPortion = infectiousPopulation.getCurrentValue().getValue()
-                                        / (population.getValue());
+            double infectiousPortion = infectiousPopulation.getCurrentValue().getValue() / (population.getValue());
 
-            double infectivity = .333; // every third encounter with an infectious person results in infection
+            double infectivity = .125; // proportion of encounters with an infectious person results in infection
 
             double numberOfInfectedMet = contactRate.getCurrentValue() * infectiousPortion;
 
-            return new Quantity<>(
-                    susceptiblePopulation.getCurrentValue().getValue()
-                            * infectivity
-                            * numberOfInfectedMet,
-                    People.getInstance());
+            double infectedCount = numberOfInfectedMet * susceptiblePopulation.getCurrentValue().getValue() * infectivity;
+
+            if (infectedCount > susceptiblePopulation.getCurrentValue().getValue()) {
+                infectedCount = susceptiblePopulation.getCurrentValue().getValue();
+            }
+            return new Quantity<>(infectedCount, People.getInstance());
         };
 
         Rate<Item> recoveryRate = timeUnit -> {
@@ -71,8 +72,20 @@ public class SirInfectiousDiseaseModel {
         model.addStock(infectiousPopulation);
         model.addStock(recoveredPopulation);
 
-        Simulation run = new Simulation(model, Day.getInstance(), Times.weeks(20));
+        Simulation run = new Simulation(model, Day.getInstance(), Times.weeks(8));
         run.execute();
+    }
+
+    private boolean isInfected(double susceptible, double numberOfInfectedMet, double infectivity) {
+        Random random = new Random(System.currentTimeMillis());
+        double infectedCount = numberOfInfectedMet * susceptible * infectivity;
+
+        for (int i = 0; i < infectedCount; i++) {
+            if (random.nextDouble() < infectivity) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private static class People implements Unit<Item> {

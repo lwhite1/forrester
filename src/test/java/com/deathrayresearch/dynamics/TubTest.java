@@ -22,7 +22,7 @@ public class TubTest {
     public void testRun1() {
 
         Model model = new Model("Tub model");
-        
+
         Stock<Volume> tub = new Stock<>("Water in tub", Volumes.liters(3));
 
         Quantity<Volume> litersPerMinuteOut = Volumes.liters(3.0);
@@ -35,7 +35,7 @@ public class TubTest {
 
         Flow<Volume> outflow = new Flow<>("Out", outRate);
 
-        Quantity<Volume> litersPerMinuteIn =  new Quantity<>(2.96, Liter.getInstance());
+        Quantity<Volume> litersPerMinuteIn =  Volumes.liters(2.96);
         FixedRate<Volume> inRate = new FixedRate<>(litersPerMinuteIn, Minute.getInstance());
         Flow<Volume> inflow = new Flow<>("In", inRate);
 

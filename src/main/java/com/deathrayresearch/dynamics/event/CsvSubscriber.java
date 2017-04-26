@@ -1,7 +1,6 @@
 package com.deathrayresearch.dynamics.event;
 
 import com.deathrayresearch.dynamics.model.Model;
-import com.deathrayresearch.dynamics.model.Stock;
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
 import com.opencsv.CSVWriter;
@@ -10,9 +9,9 @@ import org.slf4j.LoggerFactory;
 
 import java.io.FileWriter;
 import java.io.IOException;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  *
@@ -42,11 +41,14 @@ public class CsvSubscriber implements EventHandler {
     @Subscribe
     public void handleTimestepEvent(TimestepEvent event) {
         Model model = event.getModel();
-        String[] values = new String[model.getStocks().size()];
-        for (int i = 0; i < values.length; i++) {
-            values[i] = String.valueOf(model.getStockValues().get(i));
+        List<String> values = new ArrayList<>();
+
+        values.add(event.getCurrentTime().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
+
+        for (int i = 0; i < model.getStockValues().size(); i++) {
+            values.add(String.valueOf(model.getStockValues().get(i)));
         }
-        csvWriter.writeNext(values);
+        csvWriter.writeNext(values.toArray(new String[values.size()]));
     }
 
     @Override
@@ -55,16 +57,23 @@ public class CsvSubscriber implements EventHandler {
         logger.info("Starting simulation: " + event.getModel().getName());
 
         Model model = event.getModel();
-        String[] values = new String[model.getStocks().size()];
-        for (int i = 0; i < values.length; i++) {
-            values[i] = model.getStockNames().get(i);
+        List<String> values = new ArrayList<>();
+        values.add("Date time");
+        for (int i = 0; i < model.getStockNames().size(); i++) {
+            values.add(model.getStockNames().get(i));
         }
-        csvWriter.writeNext(values);
+        csvWriter.writeNext(values.toArray(new String[model.getStockNames().size() + 1]));
     }
 
     @Override
     @Subscribe
     public void handleSimulationEndEvent(SimulationEndEvent event) {
+        try {
+            csvWriter.flush();
+            csvWriter.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         logger.info("Ending simulation");
     }
 }

@@ -9,8 +9,6 @@ import com.deathrayresearch.dynamics.rate.Rate;
 public class Flow<E extends Dimension> extends Element {
 
     private Rate rate;
-    private Source<E> source;
-    private Sink<E> sink;
 
     public Rate getRate() {
         return rate;
@@ -20,16 +18,12 @@ public class Flow<E extends Dimension> extends Element {
         this.rate = rate;
     }
 
+    public String getName() {
+        return super.getName();
+    }
+
     public Flow(String name, Rate<E> rate) {
         super(name);
         this.rate = rate;
-    }
-
-    public Source<E> getSource() {
-        return source;
-    }
-
-    public Sink<E> getSink() {
-        return sink;
     }
 }

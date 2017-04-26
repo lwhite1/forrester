@@ -11,4 +11,5 @@ import com.deathrayresearch.dynamics.measure.dimension.Time;
 public interface Rate<Q extends Dimension> {
 
     Quantity<Q> flowPerTimeUnit(Unit<Time> timeUnit);
+
 }
