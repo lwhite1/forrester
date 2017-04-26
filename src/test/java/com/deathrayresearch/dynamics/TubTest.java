@@ -11,6 +11,7 @@ import com.deathrayresearch.dynamics.model.Model;
 import com.deathrayresearch.dynamics.rate.FixedRate;
 import com.deathrayresearch.dynamics.model.Stock;
 import com.deathrayresearch.dynamics.rate.Rate;
+import com.deathrayresearch.dynamics.ui.ChartViewer;
 import org.junit.Test;
 
 /**
@@ -45,6 +46,7 @@ public class TubTest {
         model.addStock(tub);
 
         Simulation run = new Simulation(model, Minute.getInstance(), Times.hours(2));
+        run.addEventHandler(ChartViewer.newInstance(run.getEventBus()));
         run.execute();
     }
 }

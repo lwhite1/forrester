@@ -1,6 +1,7 @@
 package com.deathrayresearch.dynamics;
 
 import com.deathrayresearch.dynamics.event.CsvSubscriber;
+import com.deathrayresearch.dynamics.event.EventHandler;
 import com.deathrayresearch.dynamics.event.SimulationEndEvent;
 import com.deathrayresearch.dynamics.event.SimulationStartEvent;
 import com.deathrayresearch.dynamics.event.TimestepEvent;
@@ -16,6 +17,7 @@ import com.google.common.eventbus.EventBus;
 
 import java.time.LocalDateTime;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Set;
 
 /**
@@ -31,11 +33,16 @@ public class Simulation {
 
     private LocalDateTime currentDateTime;
 
+    private final Set<EventHandler> eventHandlers = new HashSet<>();
+
+    private final EventBus eventBus;
+
     public Simulation(Model model, Unit<Time> timeStep, Quantity<Time> duration) {
         this.model = model;
         this.timeStep = timeStep;
         this.duration = duration;
         this.currentDateTime = LocalDateTime.now();
+        eventBus = new EventBus();
     }
 
     public Simulation(Model model, Unit<Time> timeStep, Quantity<Time> duration, LocalDateTime startTime) {
@@ -43,13 +50,23 @@ public class Simulation {
         this.timeStep = timeStep;
         this.duration = duration;
         this.currentDateTime = startTime;
+        eventBus = new EventBus();
+    }
+
+
+    public void addEventHandler(EventHandler handler) {
+        eventHandlers.add(handler);
+    }
+
+    public void removeEventHandler(EventHandler handler) {
+        eventHandlers.remove(handler);
+    }
+
+    public EventBus getEventBus() {
+        return eventBus;
     }
 
     public void execute() {
-
-        EventBus eventBus = new EventBus();
-        CsvSubscriber.newInstance(eventBus, "run2.out.csv");
-        ChartViewer.newInstance(eventBus);
 
         eventBus.post(new SimulationStartEvent(this));
 

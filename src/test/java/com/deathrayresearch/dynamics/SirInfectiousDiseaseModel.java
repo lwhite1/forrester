@@ -1,5 +1,6 @@
 package com.deathrayresearch.dynamics;
 
+import com.deathrayresearch.dynamics.event.CsvSubscriber;
 import com.deathrayresearch.dynamics.measure.Dimension;
 import com.deathrayresearch.dynamics.measure.Quantity;
 import com.deathrayresearch.dynamics.measure.Unit;
@@ -11,9 +12,8 @@ import com.deathrayresearch.dynamics.model.Flow;
 import com.deathrayresearch.dynamics.model.Model;
 import com.deathrayresearch.dynamics.model.Stock;
 import com.deathrayresearch.dynamics.rate.Rate;
+import com.deathrayresearch.dynamics.ui.ChartViewer;
 import org.junit.Test;
-
-import java.util.Random;
 
 /**
  *
@@ -73,19 +73,9 @@ public class SirInfectiousDiseaseModel {
         model.addStock(recoveredPopulation);
 
         Simulation run = new Simulation(model, Day.getInstance(), Times.weeks(8));
+        run.addEventHandler(CsvSubscriber.newInstance(run.getEventBus(), "run1.out.csv"));
+        run.addEventHandler(ChartViewer.newInstance(run.getEventBus()));
         run.execute();
-    }
-
-    private boolean isInfected(double susceptible, double numberOfInfectedMet, double infectivity) {
-        Random random = new Random(System.currentTimeMillis());
-        double infectedCount = numberOfInfectedMet * susceptible * infectivity;
-
-        for (int i = 0; i < infectedCount; i++) {
-            if (random.nextDouble() < infectivity) {
-                return true;
-            }
-        }
-        return false;
     }
 
     private static class People implements Unit<Item> {

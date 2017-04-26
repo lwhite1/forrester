@@ -11,6 +11,7 @@ import com.deathrayresearch.dynamics.model.Flow;
 import com.deathrayresearch.dynamics.model.Model;
 import com.deathrayresearch.dynamics.model.Stock;
 import com.deathrayresearch.dynamics.rate.Rate;
+import com.deathrayresearch.dynamics.ui.ChartViewer;
 import org.junit.Test;
 
 /**
@@ -42,6 +43,7 @@ public class sShapedPopulationGrowth {
         model.addStock(population);
 
         Simulation run = new Simulation(model, Day.getInstance(), Times.weeks(32));
+        run.addEventHandler(ChartViewer.newInstance(run.getEventBus()));
         run.execute();
     }
 
