@@ -1,5 +1,8 @@
 package com.deathrayresearch.dynamics.model;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  *  Parent of all model elements: Stock, Flow, etc.
  */

@@ -5,18 +5,15 @@ package com.deathrayresearch.dynamics.model;
  */
 public class Variable extends Element {
 
-    private double currentValue;
+    private Formula formula;
 
-    public Variable(String name, double currentValue) {
+    public Variable(String name, Formula formula) {
         super(name);
-        this.currentValue = currentValue;
+        this.formula = formula;
     }
 
     public double getCurrentValue() {
-        return currentValue;
+        return formula.getCurrentValue();
     }
 
-    public void setCurrentValue(double currentValue) {
-        this.currentValue = currentValue;
-    }
 }

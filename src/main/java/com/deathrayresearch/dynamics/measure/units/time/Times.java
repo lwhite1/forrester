@@ -33,4 +33,9 @@ public class Times {
         Unit<Time> timeUnit = Week.getInstance();
         return new Quantity<>(value, timeUnit);
     }
+
+    public static Quantity<Time> years(double value) {
+        Unit<Time> timeUnit = Year.getInstance();
+        return new Quantity<>(value, timeUnit);
+    }
 }

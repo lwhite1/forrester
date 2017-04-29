@@ -72,7 +72,7 @@ public class Simulation {
 
         double durationInBaseUnits = duration.getUnit().ratioToBaseUnit();
 
-        double totalSteps =  (duration.getValue() * durationInBaseUnits) / (timeStep.ratioToBaseUnit());
+        double totalSteps = (duration.getValue() * durationInBaseUnits) / (timeStep.ratioToBaseUnit());
         int step = 0;
         while (step < totalSteps) {
             HashMap<String, Quantity<Dimension>> flows = new HashMap<>();
@@ -109,6 +109,7 @@ public class Simulation {
                     stock.setCurrentValue(qCurrent);
                 }
             }
+
             addStep(currentDateTime);
             step++;
         }

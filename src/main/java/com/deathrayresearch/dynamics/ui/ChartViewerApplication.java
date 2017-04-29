@@ -55,7 +55,6 @@ public class ChartViewerApplication extends Application {
         } else {
             formatter = DateTimeFormatter.ISO_LOCAL_TIME;
         }
-
     }
 
     @Override
@@ -101,8 +100,9 @@ public class ChartViewerApplication extends Application {
      *
      * @param modelEntityNames list of model entity names.
      */
-    public static void addSeries(List<String> modelEntityNames) {
+    public static void addSeries(List<String> modelEntityNames, List<String> modelVariableNames) {
         ChartViewerApplication.series = new ArrayList<>();
+        modelEntityNames.addAll(modelVariableNames);
         for (String modelEntityName : modelEntityNames) {
             Series s = new Series();
             s.setName(modelEntityName);
@@ -116,10 +116,11 @@ public class ChartViewerApplication extends Application {
      * @param modelEntityValues list of model entity values.
      * @param currentTime       current model time.
      */
-    public static void addValues(List<Double> modelEntityValues, LocalDateTime currentTime) {
+    public static void addValues(List<Double> modelEntityValues, List<Double>variableValues, LocalDateTime currentTime) {
+        modelEntityValues.addAll(variableValues);
+
         for (int i = 0; i < modelEntityValues.size(); i++) {
             double value = modelEntityValues.get(i);
-
             ChartViewerApplication.series.get(i)
                     .getData()
                     .add(new XYChart.Data(currentTime.format(formatter), value));
