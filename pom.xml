@@ -42,25 +42,6 @@
             <artifactId>opencsv</artifactId>
             <version>3.8</version>
         </dependency>
-<!--
-        &lt;!&ndash; Java Units of measurement framework &ndash;&gt;
-        <dependency>
-            <groupId>tec.uom</groupId>
-            <artifactId>uom-se</artifactId>
-            <version>1.0.5</version>
-        </dependency>
-        &lt;!&ndash; https://mvnrepository.com/artifact/si.uom/si-units-java8 &ndash;&gt;
-        <dependency>
-            <groupId>si.uom</groupId>
-            <artifactId>si-measure-java8</artifactId>
-            <version>0.6.5</version>
-        </dependency>
-        <dependency>
-            <groupId>javax.measure</groupId>
-            <artifactId>unit-api</artifactId>
-            <version>1.0</version>
-        </dependency>
--->
 
         <!-- Java currency framework -->
         <dependency>
@@ -68,6 +49,7 @@
             <artifactId>moneta</artifactId>
             <version>1.1</version>
         </dependency>
+
         <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-core</artifactId>
@@ -83,10 +65,11 @@
             <artifactId>slf4j-api</artifactId>
             <version>1.7.25</version>
         </dependency>
+
         <dependency>
             <groupId>com.github.lwhite1</groupId>
             <artifactId>tablesaw</artifactId>
-            <version>0.7-SNAPSHOT</version>
+            <version>LATEST</version>
         </dependency>
 
     </dependencies>

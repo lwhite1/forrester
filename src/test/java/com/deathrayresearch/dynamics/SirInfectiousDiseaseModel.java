@@ -61,7 +61,7 @@ public class SirInfectiousDiseaseModel {
         };
 
         Flow<Item> infected = new Flow<>("Infected", infectiousRate);
-        Flow<Item> recovered = new Flow<>("recovered", recoveryRate);
+        Flow<Item> recovered = new Flow<>("Recovered", recoveryRate);
 
         susceptiblePopulation.addOutflow(infected);
         infectiousPopulation.addInflow(infected);
