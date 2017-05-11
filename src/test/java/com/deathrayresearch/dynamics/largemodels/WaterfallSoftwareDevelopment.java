@@ -18,11 +18,10 @@ import org.junit.Test;
  */
 public class WaterfallSoftwareDevelopment {
 
-
-    SubSystem workforce = getWorkforce();
+    private static final People PEOPLE = People.getInstance();
+    private SubSystem workforce = getWorkforce();
     SubSystem development = new SubSystem("Development");
     SubSystem testAndRework = new SubSystem("Testing and Rework");
-
 
     @Test
     public void testRun1() {
@@ -42,7 +41,7 @@ public class WaterfallSoftwareDevelopment {
     }
 
     private SubSystem getWorkforce() {
-
+        
         // initial variables and constants
         final int averageEmploymentInDays = 673;
         final int hiringDelayInDays = 40;
@@ -50,8 +49,8 @@ public class WaterfallSoftwareDevelopment {
 
         SubSystem workforce = new SubSystem("Workforce");
 
-        Quantity<Item> newHires = new Quantity<>(2.0, People.getInstance());
-        Quantity<Item> experienced = new Quantity<>(4.0, People.getInstance());
+        Quantity<Item> newHires = new Quantity<>(2.0, PEOPLE);
+        Quantity<Item> experienced = new Quantity<>(4.0, PEOPLE);
 
         Stock<Item> newlyHiredWorkforce = new Stock<>("Newly hired", newHires);
         Stock<Item> experiencedWorkforce = new Stock<>("Experienced", experienced);
@@ -71,22 +70,21 @@ public class WaterfallSoftwareDevelopment {
         Variable workforceGap = new Variable("Workforce Gap",
                 () -> workforceLevelSought.getCurrentValue() - totalWorkforce.getCurrentValue());
 
-
         Variable fractionExperiencedWorkforce = new Variable("Fraction of Workforce with Experience",
                 () -> experiencedWorkforce.getCurrentValue().getValue() / totalWorkforce.getCurrentValue());
 
-
-        Rate<Item> hiringRate = timeUnit -> new Quantity<>(workforceGap.getCurrentValue() / hiringDelayInDays, People.getInstance());
+        Rate<Item> hiringRate = timeUnit -> 
+                new Quantity<>(workforceGap.getCurrentValue() / hiringDelayInDays, PEOPLE);
 
         Flow<Item> newHireFlow = new Flow<>("New hires", hiringRate);
 
         Rate<Item> assimilationRate = timeUnit ->
-                new Quantity<>(newHires.getValue() / assimilationDelayInDays, People.getInstance());
+                new Quantity<>(newHires.getValue() / assimilationDelayInDays, PEOPLE);
         Flow<Item> assimilationFlow = new Flow<>("Assimilated hires", assimilationRate);
 
         Rate<Item> quitRate = timeUnit ->
                 new Quantity<>(experiencedWorkforce.getCurrentValue().getValue()
-                        / averageEmploymentInDays, People.getInstance());
+                        / averageEmploymentInDays, PEOPLE);
         Flow<Item> resignationFlow = new Flow<>("Employees quiting", quitRate);
 
         workforce.addStock(newlyHiredWorkforce);
