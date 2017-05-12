@@ -21,4 +21,4 @@
  * Quantities are measurable attributes of a thing that have a unit.
  *
  */
-package com.deathrayresearch.dynamics;
+package com.deathrayresearch.dynamics.measure;

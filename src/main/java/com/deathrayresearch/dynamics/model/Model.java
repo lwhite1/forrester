@@ -13,6 +13,7 @@ public class Model {
     private String name;
     private List<Stock<Dimension>> stocks = new ArrayList<>();
     private List<Variable> variables = new ArrayList<>();
+    private List<SubSystem> subSystems = new ArrayList<>();
 
     public Model(String name) {
         this.name = name;
@@ -36,6 +37,14 @@ public class Model {
 
     public void removeVariable(Variable variable) {
         variables.remove(variable);
+    }
+
+    public void addSubSystem(SubSystem subSystem) {
+        subSystems.add(subSystem);
+    }
+
+    public List<SubSystem> getSubSystems() {
+        return subSystems;
     }
 
     public List<Stock<Dimension>> getStocks() {
@@ -73,6 +82,14 @@ public class Model {
         List<Double> results = new ArrayList<>();
         for (Variable variable : variables) {
             results.add(variable.getCurrentValue());
+        }
+        return results;
+    }
+
+    public List<String> getSubSystemNames() {
+        List<String> results = new ArrayList<>();
+        for (SubSystem subSystem : subSystems) {
+            results.add(subSystem.getName());
         }
         return results;
     }

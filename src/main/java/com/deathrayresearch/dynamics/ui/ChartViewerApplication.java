@@ -38,16 +38,13 @@ public class ChartViewerApplication extends Application {
 
     private static Scene scene;
     private static ArrayList<Series> series;
-    private static ArrayList<CheckBox> checkBoxes;
     private static double width = 800;
     private static double height = 600;
     private static LineChart lineChart;
-    private static Simulation simulation;
     private static DateTimeFormatter formatter;
     private static String title;
 
     public static void setSimulation(Simulation simulation) {
-        ChartViewerApplication.simulation = simulation;
         title = simulation.getModel().getName();
 
         if (simulation.getDuration().isGreaterThan(Times.days(1))) {
@@ -74,7 +71,7 @@ public class ChartViewerApplication extends Application {
         addLineChartContextMenu();
 
         // add checkboxes
-        checkBoxes = new ArrayList<>();
+        ArrayList<CheckBox> checkBoxes = new ArrayList<>();
         for (Series s : series) {
             CheckBox cb = new CheckBox(s.getName());
             cb.setOnAction(this::refreshChart);

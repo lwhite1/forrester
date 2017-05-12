@@ -1,6 +1,5 @@
 package com.deathrayresearch.dynamics;
 
-import com.deathrayresearch.dynamics.event.CsvSubscriber;
 import com.deathrayresearch.dynamics.event.EventHandler;
 import com.deathrayresearch.dynamics.event.SimulationEndEvent;
 import com.deathrayresearch.dynamics.event.SimulationStartEvent;
@@ -12,7 +11,7 @@ import com.deathrayresearch.dynamics.measure.dimension.Time;
 import com.deathrayresearch.dynamics.model.Flow;
 import com.deathrayresearch.dynamics.model.Model;
 import com.deathrayresearch.dynamics.model.Stock;
-import com.deathrayresearch.dynamics.ui.ChartViewer;
+import com.deathrayresearch.dynamics.model.SubSystem;
 import com.google.common.eventbus.EventBus;
 
 import java.time.LocalDateTime;
@@ -110,6 +109,56 @@ public class Simulation {
                 }
             }
 
+            addStep(currentDateTime);
+            step++;
+        }
+
+        eventBus.post(new SimulationEndEvent());
+    }
+    public void executeSubSystems() {
+
+        eventBus.post(new SimulationStartEvent(this));
+
+        double durationInBaseUnits = duration.getUnit().ratioToBaseUnit();
+
+        double totalSteps = (duration.getValue() * durationInBaseUnits) / (timeStep.ratioToBaseUnit());
+        int step = 0;
+        while (step < totalSteps) {
+            HashMap<String, Quantity<Dimension>> flows = new HashMap<>();
+
+            eventBus.post(new TimestepEvent(currentDateTime, model));
+            for (SubSystem subSystem : model.getSubSystems()) {
+                for (Stock<Dimension> stock : subSystem.getStocks()) {
+
+                    Quantity<Dimension> qCurrent = stock.getCurrentValue();
+                    System.out.println(stock.getName() + " : " + qCurrent);
+
+                    Set<Flow<Dimension>> stockInflows = stock.getInflows();
+                    for (Flow<Dimension> inflow : stockInflows) {
+                        Quantity<Dimension> q;
+                        if (flows.containsKey(inflow.getName())) {
+                            q = flows.get(inflow.getName());
+                        } else {
+                            q = inflow.getRate().flowPerTimeUnit(timeStep);
+                            flows.put(inflow.getName(), q);
+                        }
+                        qCurrent = qCurrent.add(q);
+                        stock.setCurrentValue(qCurrent);
+                    }
+                    Set<Flow<Dimension>> stockOutflows = stock.getOutflows();
+                    for (Flow outflow : stockOutflows) {
+                        Quantity<Dimension> q;
+                        if (flows.containsKey(outflow.getName())) {
+                            q = flows.get(outflow.getName());
+                        } else {
+                            q = outflow.getRate().flowPerTimeUnit(timeStep);
+                            flows.put(outflow.getName(), q);
+                        }
+                        qCurrent = qCurrent.subtract(q);
+                        stock.setCurrentValue(qCurrent);
+                    }
+                }
+            }
             addStep(currentDateTime);
             step++;
         }

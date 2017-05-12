@@ -4,7 +4,9 @@ import com.deathrayresearch.dynamics.measure.Quantity;
 import com.deathrayresearch.dynamics.measure.Unit;
 import com.deathrayresearch.dynamics.measure.dimension.Time;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -46,5 +48,13 @@ public class SubSystem extends Element {
 
     public void addVariable(Variable variable) {
         variables.put(variable.getName(), variable);
+    }
+
+    public List<Stock> getStocks() {
+        List<Stock> stockList = new ArrayList<>();
+        for (Stock stock: stocks.values()) {
+            stockList.add(stock);
+        }
+        return stockList;
     }
 }
