@@ -25,7 +25,7 @@ public class ExponentialDecayTest {
         Quantity<Item> count = new Quantity<>(100, People.getInstance());
         Stock<Item> population = new Stock<>("pop", count);
 
-        Rate<Item> deathRate = timeUnit -> population.getCurrentValue().multiply(0.02);
+        Rate<Item> deathRate = timeUnit -> population.getCurrentValue().divide(80);
         Flow<Item> deaths = new Flow<>("Deaths", deathRate);
 
         population.addOutflow(deaths);

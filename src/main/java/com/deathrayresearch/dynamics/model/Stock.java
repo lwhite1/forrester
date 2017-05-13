@@ -50,4 +50,9 @@ public class Stock<E extends Dimension> extends Element {
     public void setCurrentValue(Quantity<E> currentValue) {
         this.currentValue = currentValue;
     }
+
+    @Override
+    public String toString() {
+        return "Stock (" + getName() +"): " + currentValue;
+    }
 }

@@ -1,7 +1,13 @@
 package com.deathrayresearch.dynamics.measure;
 
 /**
+ * A dimension-aware amount of something. It consists of a dimension (like time, mass, length, money, etc.)
+ * and a value (like 2.54). Individual values are expressed in Units (like hours), and the units have
+ * the specific dimension (in this case time).
  *
+ * It lets you express things like 2.54 miles, and add that distance to 1,312 meters, handling the units conversion for
+ * you. It also lets you compare two quantities in the same dimension to assert that 2.54 miles > 1,312 meters, again
+ * handling any conversions, while preventing you from comparing 2.54 miles with 2.54 pounds.
  */
 public class Quantity <E extends Dimension> {
 
@@ -96,7 +102,6 @@ public class Quantity <E extends Dimension> {
 
         if (Double.compare(quantity.inBaseUnits().getValue(), inBaseUnits().getValue()) != 0) return false;
         return getUnit().equals(quantity.getUnit());
-
     }
 
     @Override

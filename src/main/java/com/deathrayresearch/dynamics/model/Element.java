@@ -9,6 +9,7 @@ import java.util.List;
 abstract class Element {
 
     private String name;
+    private String comment;
 
     public String getName() {
         return name;
@@ -25,5 +26,13 @@ abstract class Element {
     @Override
     public String toString() {
         return name;
+    }
+
+    public String getComment() {
+        return comment;
+    }
+
+    public void setComment(String comment) {
+        this.comment = comment;
     }
 }
