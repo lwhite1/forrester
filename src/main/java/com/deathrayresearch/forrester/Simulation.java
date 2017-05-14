@@ -5,6 +5,7 @@ import com.deathrayresearch.forrester.event.SimulationEndEvent;
 import com.deathrayresearch.forrester.event.SimulationStartEvent;
 import com.deathrayresearch.forrester.event.TimestepEvent;
 import com.deathrayresearch.forrester.measure.Quantity;
+import com.deathrayresearch.forrester.measure.TimeUnit;
 import com.deathrayresearch.forrester.measure.Unit;
 import com.deathrayresearch.forrester.model.Flow;
 import com.deathrayresearch.forrester.model.Model;
@@ -27,7 +28,7 @@ public class Simulation {
 
     private final Quantity duration;
 
-    private final Unit timeStep;
+    private final TimeUnit timeStep;
 
     private LocalDateTime currentDateTime;
 
@@ -35,7 +36,7 @@ public class Simulation {
 
     private final EventBus eventBus;
 
-    public Simulation(Model model, Unit timeStep, Quantity duration) {
+    public Simulation(Model model, TimeUnit timeStep, Quantity duration) {
         this.model = model;
         this.timeStep = timeStep;
         this.duration = duration;
@@ -43,7 +44,7 @@ public class Simulation {
         eventBus = new EventBus();
     }
 
-    public Simulation(Model model, Unit timeStep, Quantity duration, LocalDateTime startTime) {
+    public Simulation(Model model, TimeUnit timeStep, Quantity duration, LocalDateTime startTime) {
         this.model = model;
         this.timeStep = timeStep;
         this.duration = duration;

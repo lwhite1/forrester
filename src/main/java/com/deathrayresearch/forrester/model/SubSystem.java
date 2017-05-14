@@ -1,7 +1,7 @@
 package com.deathrayresearch.forrester.model;
 
 import com.deathrayresearch.forrester.measure.Quantity;
-import com.deathrayresearch.forrester.measure.Unit;
+import com.deathrayresearch.forrester.measure.TimeUnit;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -25,7 +25,7 @@ public class SubSystem extends Element {
         return stocks.get(stockName).getCurrentValue();
     }
 
-    public Quantity valueOfFlow(String flowName, Unit timeUnit) {
+    public Quantity valueOfFlow(String flowName, TimeUnit timeUnit) {
         return flows.get(flowName).getRate().flowPerTimeUnit(timeUnit);
     }
 

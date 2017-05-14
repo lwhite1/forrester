@@ -1,7 +1,7 @@
 package com.deathrayresearch.forrester.measure.units.time;
 
 import com.deathrayresearch.forrester.measure.Dimension;
-import com.deathrayresearch.forrester.measure.Unit;
+import com.deathrayresearch.forrester.measure.TimeUnit;
 import com.deathrayresearch.forrester.measure.dimension.Time;
 
 import java.time.temporal.ChronoUnit;
@@ -9,7 +9,7 @@ import java.time.temporal.ChronoUnit;
 /**
  *
  */
-public class Second implements Unit {
+public class Second implements TimeUnit {
 
     public static final String NAME = "Second";
     public static final ChronoUnit chronoUnit = ChronoUnit.SECONDS;

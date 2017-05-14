@@ -1,9 +1,7 @@
 package com.deathrayresearch.forrester.largemodels.waterfall;
 
 import com.deathrayresearch.forrester.measure.Quantity;
-import com.deathrayresearch.forrester.measure.Unit;
-import com.deathrayresearch.forrester.measure.dimension.Item;
-import com.deathrayresearch.forrester.measure.dimension.Time;
+import com.deathrayresearch.forrester.measure.TimeUnit;
 import com.deathrayresearch.forrester.model.Constant;
 import com.deathrayresearch.forrester.model.Flow;
 import com.deathrayresearch.forrester.model.Formula;
@@ -66,7 +64,7 @@ class Development {
     private static Flow getDevelopmentFlow() {
         Rate softwareDevelopmentRate = new Rate() {
             @Override
-            public Quantity flowPerTimeUnit(Unit timeUnit) {
+            public Quantity flowPerTimeUnit(TimeUnit timeUnit) {
                 return new Quantity(1, WaterfallSoftwareDevelopment.TASKS);
             }
         };

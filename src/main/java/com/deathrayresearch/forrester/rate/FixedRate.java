@@ -2,6 +2,7 @@ package com.deathrayresearch.forrester.rate;
 
 
 import com.deathrayresearch.forrester.measure.Quantity;
+import com.deathrayresearch.forrester.measure.TimeUnit;
 import com.deathrayresearch.forrester.measure.Unit;
 
 /**
@@ -12,7 +13,7 @@ public class FixedRate implements Rate {
     private Quantity quantity;
     private Unit timeUnit;
 
-    public FixedRate(Quantity quantity, Unit timeUnit) {
+    public FixedRate(Quantity quantity, TimeUnit timeUnit) {
         this.quantity = quantity;
         this.timeUnit = timeUnit;
     }
@@ -26,7 +27,7 @@ public class FixedRate implements Rate {
     }
 
     @Override
-    public Quantity flowPerTimeUnit(Unit timeUnit) {
+    public Quantity flowPerTimeUnit(TimeUnit timeUnit) {
         double newUnitInBaseUnits = timeUnit.ratioToBaseUnit();
         double valueInBaseUnits = this.getTimeUnit().ratioToBaseUnit();
         double resultInBaseUnits = newUnitInBaseUnits / valueInBaseUnits;
