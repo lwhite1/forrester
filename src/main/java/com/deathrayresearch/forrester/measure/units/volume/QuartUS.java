@@ -11,7 +11,7 @@ import com.deathrayresearch.forrester.measure.dimension.Volume;
 public class QuartUS implements Unit {
 
     public static final String NAME = "Quart (US)";
-    public static final Dimension DIMENSION = Volume.getInstance();
+    public static final Dimension DIMENSION = Dimension.VOLUME;
 
     private static final QuartUS instance = new QuartUS();
 

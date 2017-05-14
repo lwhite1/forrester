@@ -10,7 +10,7 @@ import com.deathrayresearch.forrester.measure.dimension.Mass;
 public class Kilogram implements Unit {
 
     public static final String NAME = "Kilogram";
-    public static final Dimension DIMENSION = Mass.getInstance();
+    public static final Dimension DIMENSION = Dimension.MASS;
     private static final Kilogram instance = new Kilogram();
 
     @Override

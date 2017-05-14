@@ -15,7 +15,7 @@ public class Week implements TimeUnit {
     public static final String NAME = "Week";
     public static final ChronoUnit chronoUnit = ChronoUnit.WEEKS;
 
-    public static final Dimension DIMENSION = Time.getInstance();
+    public static final Dimension DIMENSION = Dimension.TIME;
     private static final Week instance = new Week();
 
     @Override

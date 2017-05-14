@@ -15,7 +15,7 @@ public class Hour implements TimeUnit {
     public static final String NAME = "Hour";
     public static final ChronoUnit chronoUnit = ChronoUnit.HOURS;
 
-    public static final Dimension DIMENSION = Time.getInstance();
+    public static final Dimension DIMENSION = Dimension.TIME;
     private static final Hour instance = new Hour();
 
     @Override

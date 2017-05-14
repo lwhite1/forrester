@@ -11,7 +11,7 @@ import com.deathrayresearch.forrester.measure.dimension.Length;
 public class Inch implements Unit {
 
     public static final String NAME = "Inch";
-    public static final Dimension DIMENSION = Length.getInstance();
+    public static final Dimension DIMENSION = Dimension.LENGTH;
     private static final Inch instance = new Inch();
 
     @Override

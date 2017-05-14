@@ -3,7 +3,6 @@ package com.deathrayresearch.forrester.measure.units.money;
 
 import com.deathrayresearch.forrester.measure.Dimension;
 import com.deathrayresearch.forrester.measure.Unit;
-import com.deathrayresearch.forrester.measure.dimension.Time;
 
 /**
  *
@@ -11,7 +10,7 @@ import com.deathrayresearch.forrester.measure.dimension.Time;
 public class USD implements Unit {
 
     public static final String NAME = "USD";
-    public static final Dimension DIMENSION = Time.getInstance();
+    public static final Dimension DIMENSION = Dimension.MONEY;
     private static final USD instance = new USD();
 
     @Override

@@ -15,7 +15,7 @@ public class Day implements TimeUnit {
 
     public static final String NAME = "Day";
     public static final ChronoUnit chronoUnit = ChronoUnit.DAYS;
-    public static final Dimension DIMENSION = Time.getInstance();
+    public static final Dimension DIMENSION = Dimension.TIME;
     private static final Day instance = new Day();
 
     @Override

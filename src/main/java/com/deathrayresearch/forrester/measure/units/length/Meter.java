@@ -11,7 +11,7 @@ import com.deathrayresearch.forrester.measure.dimension.Length;
 public class Meter implements Unit {
 
     public static final String NAME = "Meter";
-    public static final Dimension DIMENSION = Length.getInstance();
+    public static final Dimension DIMENSION = Dimension.LENGTH;
     private static final Meter instance = new Meter();
 
     @Override

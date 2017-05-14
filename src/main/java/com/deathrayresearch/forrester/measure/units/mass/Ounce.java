@@ -10,7 +10,7 @@ import com.deathrayresearch.forrester.measure.dimension.Mass;
 public class Ounce implements Unit {
 
     public static final String NAME = "Ounce";
-    public static final Dimension DIMENSION = Mass.getInstance();
+    public static final Dimension DIMENSION = Dimension.MASS;
     private static final Ounce instance = new Ounce();
 
     @Override

@@ -11,7 +11,7 @@ import com.deathrayresearch.forrester.measure.dimension.Volume;
 public class FluidOunceUS implements Unit {
 
     public static final String NAME = "Fluid ounce (US)";
-    public static final Dimension DIMENSION = Volume.getInstance();
+    public static final Dimension DIMENSION = Dimension.VOLUME;
 
     private static final FluidOunceUS instance = new FluidOunceUS();
 

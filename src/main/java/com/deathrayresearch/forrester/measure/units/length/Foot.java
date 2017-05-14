@@ -11,7 +11,7 @@ import com.deathrayresearch.forrester.measure.dimension.Length;
 public class Foot implements Unit {
 
     public static final String NAME = "Foot";
-    public static final Dimension DIMENSION = Length.getInstance();
+    public static final Dimension DIMENSION = Dimension.LENGTH;
     private static final Foot instance = new Foot();
 
     @Override

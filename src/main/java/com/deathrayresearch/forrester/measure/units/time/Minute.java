@@ -14,7 +14,7 @@ public class Minute implements TimeUnit {
     public static final String NAME = "Minute";
     public static final ChronoUnit chronoUnit = ChronoUnit.MINUTES;
 
-    public static final Dimension DIMENSION = Time.getInstance();
+    public static final Dimension DIMENSION = Dimension.TIME;
     private static final Minute instance = new Minute();
 
     @Override

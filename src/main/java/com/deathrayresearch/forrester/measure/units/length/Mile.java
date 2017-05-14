@@ -11,7 +11,7 @@ import com.deathrayresearch.forrester.measure.dimension.Length;
 public class Mile implements Unit {
 
     public static final String NAME = "Mile";
-    public static final Dimension DIMENSION = Length.getInstance();
+    public static final Dimension DIMENSION = Dimension.LENGTH;
     private static final Mile instance = new Mile();
 
     @Override

@@ -10,7 +10,7 @@ import com.deathrayresearch.forrester.measure.dimension.Length;
 public class NauticalMile implements Unit {
 
     public static final String NAME = "Nautical Mile";
-    public static final Dimension DIMENSION = Length.getInstance();
+    public static final Dimension DIMENSION = Dimension.LENGTH;
     private static final NauticalMile instance = new NauticalMile();
 
     @Override

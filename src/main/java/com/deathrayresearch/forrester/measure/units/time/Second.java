@@ -14,7 +14,7 @@ public class Second implements TimeUnit {
     public static final String NAME = "Second";
     public static final ChronoUnit chronoUnit = ChronoUnit.SECONDS;
 
-    public static final Dimension DIMENSION = Time.getInstance();
+    public static final Dimension DIMENSION = Dimension.TIME;
     private static final Second instance = new Second();
 
     @Override

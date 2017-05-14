@@ -10,7 +10,7 @@ import com.deathrayresearch.forrester.measure.dimension.Mass;
 public class Pound implements Unit {
 
     public static final String NAME = "Pound";
-    public static final Dimension DIMENSION = Mass.getInstance();
+    public static final Dimension DIMENSION = Dimension.MASS;
     private static final Pound instance = new Pound();
 
     @Override

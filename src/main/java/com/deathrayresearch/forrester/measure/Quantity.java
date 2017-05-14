@@ -39,6 +39,14 @@ public class Quantity {
         return new Quantity(d + getValue(), this.getUnit());
     }
 
+    public Quantity subtract(double d) {
+        return new Quantity(getValue() - d, this.getUnit());
+    }
+
+    public Quantity divide(double d) {
+        return new Quantity(getValue() / d, this.getUnit());
+    }
+
     public Quantity add(Quantity other) {
         Quantity otherInBaseUnits = other.inBaseUnits();
         Quantity thisInBaseUnits = inBaseUnits();
@@ -53,14 +61,6 @@ public class Quantity {
         Quantity result = new Quantity(thisInBaseUnits.getValue() - otherInBaseUnits.getValue(),
                 this.getUnit().getBaseUnit());
         return getUnit().fromBaseUnits(result);
-    }
-
-    public Quantity subtract(double d) {
-        return new Quantity(getValue() - d, this.getUnit());
-    }
-
-    public Quantity divide(double d) {
-        return new Quantity(getValue() / d, this.getUnit());
     }
 
     @Override

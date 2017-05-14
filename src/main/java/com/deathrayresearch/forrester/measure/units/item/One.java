@@ -10,7 +10,7 @@ import com.deathrayresearch.forrester.measure.dimension.Item;
 public class One implements Unit {
 
     public static final String NAME = "One";
-    public static final Dimension DIMENSION = Item.getInstance();
+    public static final Dimension DIMENSION = Dimension.ITEM;
     private static final One instance = new One();
 
     @Override

@@ -10,7 +10,7 @@ import com.deathrayresearch.forrester.measure.dimension.Volume;
 public class Liter implements Unit {
 
     public static final String NAME = "Liter";
-    public static final Dimension DIMENSION = Volume.getInstance();
+    public static final Dimension DIMENSION = Dimension.VOLUME;
 
     private static final Liter instance = new Liter();
 

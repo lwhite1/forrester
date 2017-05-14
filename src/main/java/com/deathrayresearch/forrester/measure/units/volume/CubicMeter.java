@@ -11,7 +11,7 @@ import com.deathrayresearch.forrester.measure.dimension.Volume;
 public class CubicMeter implements Unit {
 
     public static final String NAME = "Cubic meter";
-    public static final Dimension DIMENSION = Volume.getInstance();
+    public static final Dimension DIMENSION = Dimension.VOLUME;
 
     private static final CubicMeter instance = new CubicMeter();
 
