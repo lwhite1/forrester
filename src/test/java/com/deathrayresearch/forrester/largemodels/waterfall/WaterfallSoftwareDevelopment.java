@@ -2,6 +2,7 @@ package com.deathrayresearch.forrester.largemodels.waterfall;
 
 import com.deathrayresearch.forrester.Simulation;
 import com.deathrayresearch.forrester.measure.Quantity;
+import com.deathrayresearch.forrester.measure.units.item.People;
 import com.deathrayresearch.forrester.measure.units.time.Day;
 import com.deathrayresearch.forrester.measure.units.time.Year;
 import com.deathrayresearch.forrester.model.Model;

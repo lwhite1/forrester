@@ -1,31 +1,27 @@
 package com.deathrayresearch.forrester.measure.dimension;
 
-
 import com.deathrayresearch.forrester.measure.Converter;
 import com.deathrayresearch.forrester.measure.Dimension;
 import com.deathrayresearch.forrester.measure.Unit;
-import com.deathrayresearch.forrester.measure.units.item.Thing;
 
 /**
- *
+ * Represents a "dimensionless" dimension (like a pure fraction)
  */
-public class Item implements Dimension {
+public class Dimensionless implements Dimension {
 
-    private static Item ourInstance = new Item();
+    private static Dimensionless ourInstance = new Dimensionless();
 
-    public static Item getInstance() {
+    public static Dimensionless getInstance() {
         return ourInstance;
-    }
-
-    private Item() {}
-
-    @Override
-    public Unit getBaseUnit() {
-        return Thing.getInstance();
     }
 
     @Override
     public Converter getConverter() {
+        return null;
+    }
+
+    @Override
+    public Unit getBaseUnit() {
         return null;
     }
 }

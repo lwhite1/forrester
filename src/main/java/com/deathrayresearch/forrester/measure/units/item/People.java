@@ -1,4 +1,4 @@
-package com.deathrayresearch.forrester.largemodels.waterfall;
+package com.deathrayresearch.forrester.measure.units.item;
 
 
 import com.deathrayresearch.forrester.measure.Dimension;
@@ -8,8 +8,7 @@ import com.deathrayresearch.forrester.measure.dimension.Item;
 /**
  *
  */
-
-class People implements Unit {
+public class People extends Thing {
 
     private static final People instance = new People();
 
@@ -20,7 +19,7 @@ class People implements Unit {
 
     @Override
     public Dimension getDimension() {
-        return Item.getInstance();
+        return Dimension.ITEM;
     }
 
     @Override
@@ -28,7 +27,7 @@ class People implements Unit {
         return 1.0;
     }
 
-    static People getInstance() {
+    public static People getInstance() {
         return instance;
     }
 }

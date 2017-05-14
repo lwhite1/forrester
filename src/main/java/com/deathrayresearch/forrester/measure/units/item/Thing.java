@@ -2,16 +2,15 @@ package com.deathrayresearch.forrester.measure.units.item;
 
 import com.deathrayresearch.forrester.measure.Dimension;
 import com.deathrayresearch.forrester.measure.Unit;
-import com.deathrayresearch.forrester.measure.dimension.Item;
 
 /**
- * The base unit for items
+ * The base unit for items. Subclass as needed
  */
-public class One implements Unit {
+public class Thing implements Unit {
 
-    public static final String NAME = "One";
+    public static final String NAME = "Thing";
     public static final Dimension DIMENSION = Dimension.ITEM;
-    private static final One instance = new One();
+    private static final Thing instance = new Thing();
 
     @Override
     public String getName() {
@@ -28,7 +27,7 @@ public class One implements Unit {
         return 1.0;
     }
 
-    public static One getInstance() {
+    public static Thing getInstance() {
         return instance;
     }
 

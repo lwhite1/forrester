@@ -1,10 +1,8 @@
 package com.deathrayresearch.forrester;
 
-import com.deathrayresearch.forrester.measure.Dimension;
+import com.deathrayresearch.forrester.measure.units.item.People;
 import com.deathrayresearch.forrester.measure.units.time.Day;
 import com.deathrayresearch.forrester.measure.units.time.Times;
-import com.deathrayresearch.forrester.measure.Unit;
-import com.deathrayresearch.forrester.measure.dimension.Item;
 import com.deathrayresearch.forrester.model.Flow;
 import com.deathrayresearch.forrester.model.Model;
 import com.deathrayresearch.forrester.model.Stock;
@@ -37,29 +35,5 @@ public class MalthusPopulationTest {
         Simulation run = new Simulation(model, Day.getInstance(), Times.weeks(52));
         run.addEventHandler(ChartViewer.newInstance(run.getEventBus()));
         run.execute();
-    }
-
-    private static class People implements Unit {
-
-        private static final People instance = new People();
-
-        @Override
-        public String getName() {
-            return "Person";
-        }
-
-        @Override
-        public Dimension getDimension() {
-            return Item.getInstance();
-        }
-
-        @Override
-        public double ratioToBaseUnit() {
-            return 1.0;
-        }
-
-        static People getInstance() {
-            return instance;
-        }
     }
 }

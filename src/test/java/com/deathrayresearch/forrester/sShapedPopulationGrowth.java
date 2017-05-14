@@ -1,9 +1,8 @@
 package com.deathrayresearch.forrester;
 
-import com.deathrayresearch.forrester.measure.Dimension;
 import com.deathrayresearch.forrester.measure.Quantity;
-import com.deathrayresearch.forrester.measure.Unit;
-import com.deathrayresearch.forrester.measure.dimension.Item;
+import com.deathrayresearch.forrester.measure.units.dimensionless.DimensionlessUnit;
+import com.deathrayresearch.forrester.measure.units.item.People;
 import com.deathrayresearch.forrester.measure.units.time.Day;
 import com.deathrayresearch.forrester.measure.units.time.Times;
 import com.deathrayresearch.forrester.model.Constant;
@@ -27,7 +26,10 @@ public class sShapedPopulationGrowth {
 
         Quantity carryingCapacity = new Quantity(1000, People.getInstance());
 
-        Constant fractionalNetBirthRate = new Constant("Maximum Fractional Birth Rate", 0.04);
+        Constant fractionalNetBirthRate = new Constant(
+                "Maximum Fractional Birth Rate",
+                DimensionlessUnit.getInstance(),
+                0.04);
 
         // Rates of birth and death vary with the relationship of population to carrying capacity
         // This is a Logistic Growth Model
@@ -45,29 +47,5 @@ public class sShapedPopulationGrowth {
         Simulation run = new Simulation(model, Day.getInstance(), Times.weeks(32));
         run.addEventHandler(ChartViewer.newInstance(run.getEventBus()));
         run.execute();
-    }
-
-    private static class People implements Unit {
-
-        private static final People instance = new People();
-
-        @Override
-        public String getName() {
-            return "Person";
-        }
-
-        @Override
-        public Dimension getDimension() {
-            return Item.getInstance();
-        }
-
-        @Override
-        public double ratioToBaseUnit() {
-            return 1.0;
-        }
-
-        static People getInstance() {
-            return instance;
-        }
     }
 }

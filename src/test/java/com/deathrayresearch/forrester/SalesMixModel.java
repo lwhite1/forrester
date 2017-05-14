@@ -5,6 +5,7 @@ import com.deathrayresearch.forrester.measure.Dimension;
 import com.deathrayresearch.forrester.measure.Quantity;
 import com.deathrayresearch.forrester.measure.Unit;
 import com.deathrayresearch.forrester.measure.dimension.Item;
+import com.deathrayresearch.forrester.measure.units.item.People;
 import com.deathrayresearch.forrester.measure.units.time.Times;
 import com.deathrayresearch.forrester.measure.units.time.Week;
 import com.deathrayresearch.forrester.model.Constant;
@@ -26,8 +27,12 @@ public class SalesMixModel {
     public void testModel() {
         Model model = new Model("Hardware/software sales mix");
 
-        Constant hardwareSalesCustomer = new Constant("Hardware sales per new customer", 1000);
-        Constant serviceSalesCustomerMonth = new Constant("Service sales per customer per month", 10);
+        Constant hardwareSalesCustomer = new Constant("Hardware sales per new customer",
+                Sales.getInstance(),
+                1000);
+        Constant serviceSalesCustomerMonth = new Constant("Service sales per customer per month",
+                Sales.getInstance(),
+                10);
 
         Stock customers = new Stock("customers", 0, People.getInstance());
 
@@ -64,13 +69,13 @@ public class SalesMixModel {
         run.execute();
     }
 
-    private static class People implements Unit {
+    private static class Sales implements Unit {
 
-        private static final People instance = new People();
+        private static final Sales instance = new Sales();
 
         @Override
         public String getName() {
-            return "Person";
+            return "Sale";
         }
 
         @Override
@@ -83,9 +88,8 @@ public class SalesMixModel {
             return 1.0;
         }
 
-        static People getInstance() {
+        static Sales getInstance() {
             return instance;
         }
     }
-
 }

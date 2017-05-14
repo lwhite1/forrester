@@ -1,7 +1,5 @@
 package com.deathrayresearch.forrester.model;
 
-import com.deathrayresearch.dynamics.measure.Dimension;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;

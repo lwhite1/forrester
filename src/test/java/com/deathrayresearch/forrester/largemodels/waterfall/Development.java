@@ -2,6 +2,7 @@ package com.deathrayresearch.forrester.largemodels.waterfall;
 
 import com.deathrayresearch.forrester.measure.Quantity;
 import com.deathrayresearch.forrester.measure.TimeUnit;
+import com.deathrayresearch.forrester.measure.units.item.Thing;
 import com.deathrayresearch.forrester.model.Constant;
 import com.deathrayresearch.forrester.model.Flow;
 import com.deathrayresearch.forrester.model.Formula;
@@ -48,7 +49,7 @@ class Development {
         Stock cumulativeManDaysExpended =
                 new Stock("Cumulative Person-Days Expended", 0.0001, PersonDays.getInstance());
 
-        Constant qualityObjective = new Constant("Quality Objective", 0);
+        Constant qualityObjective = new Constant("Quality Objective", Thing.getInstance(), 0);
 
         tasksDeveloped.addInflow(developmentFlow);
 

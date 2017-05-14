@@ -1,10 +1,9 @@
 package com.deathrayresearch.forrester;
 
 import com.deathrayresearch.forrester.event.CsvSubscriber;
-import com.deathrayresearch.forrester.measure.Dimension;
 import com.deathrayresearch.forrester.measure.Quantity;
-import com.deathrayresearch.forrester.measure.Unit;
-import com.deathrayresearch.forrester.measure.dimension.Item;
+import com.deathrayresearch.forrester.measure.units.item.People;
+import com.deathrayresearch.forrester.measure.units.item.Thing;
 import com.deathrayresearch.forrester.measure.units.time.Day;
 import com.deathrayresearch.forrester.measure.units.time.Times;
 import com.deathrayresearch.forrester.model.Constant;
@@ -31,7 +30,7 @@ public class SirInfectiousDiseaseModel {
         Stock recoveredPopulation = new Stock("Recovered", 0, People.getInstance());
 
         // at each step, each susceptible person meets n other people
-        Constant contactRate = new Constant("Contact Rate", 8);
+        Constant contactRate = new Constant("Contact Rate", Thing.getInstance(), 8);
 
         // The number of newly infected at each step, they get moved from susceptible to infectious status.
         Rate infectiousRate = timeUnit -> {
@@ -76,29 +75,5 @@ public class SirInfectiousDiseaseModel {
         run.addEventHandler(CsvSubscriber.newInstance(run.getEventBus(), "run1.out.csv"));
         run.addEventHandler(ChartViewer.newInstance(run.getEventBus()));
         run.execute();
-    }
-
-    private static class People implements Unit {
-
-        private static final People instance = new People();
-
-        @Override
-        public String getName() {
-            return "Person";
-        }
-
-        @Override
-        public Dimension getDimension() {
-            return Item.getInstance();
-        }
-
-        @Override
-        public double ratioToBaseUnit() {
-            return 1.0;
-        }
-
-        static People getInstance() {
-            return instance;
-        }
     }
 }

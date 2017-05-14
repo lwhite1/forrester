@@ -2,6 +2,8 @@ package com.deathrayresearch.forrester.largemodels.waterfall;
 
 
 import com.deathrayresearch.forrester.measure.Quantity;
+import com.deathrayresearch.forrester.measure.units.item.People;
+import com.deathrayresearch.forrester.measure.units.item.Thing;
 import com.deathrayresearch.forrester.model.Constant;
 import com.deathrayresearch.forrester.model.Flow;
 import com.deathrayresearch.forrester.model.Stock;
@@ -14,14 +16,14 @@ import com.deathrayresearch.forrester.rate.Rate;
  */
 class Workforce {
 
-    static final Constant AVERAGE_DAILY_MAN_POWER_PER_STAFF = new Constant("ADMPPPS", 1);
+    static final Constant AVERAGE_DAILY_MAN_POWER_PER_STAFF = new Constant("ADMPPPS", Thing.getInstance(), 1);
 
     static SubSystem getWorkforce() {
 
         SubSystem workforce = new SubSystem(WaterfallSoftwareDevelopment.WORKFORCE);
 
-        Stock newlyHiredWorkforce = new Stock(WaterfallSoftwareDevelopment.NEWLY_HIRED, 2.0, WaterfallSoftwareDevelopment.PEOPLE);
-        Stock experiencedWorkforce = new Stock(WaterfallSoftwareDevelopment.EXPERIENCED, 4.0, WaterfallSoftwareDevelopment.PEOPLE);
+        Stock newlyHiredWorkforce = new Stock(WaterfallSoftwareDevelopment.NEWLY_HIRED, 2.0, People.getInstance());
+        Stock experiencedWorkforce = new Stock(WaterfallSoftwareDevelopment.EXPERIENCED, 4.0, People.getInstance());
 
         Variable totalWorkforce = new Variable(WaterfallSoftwareDevelopment.TOTAL_WORKFORCE, () ->
                 newlyHiredWorkforce.getCurrentValue().getValue()
@@ -35,7 +37,7 @@ class Workforce {
         Variable workforceNeed = new Variable(WaterfallSoftwareDevelopment.WORKFORCE_NEED, () -> 30.0);
 
         Constant maxNewHiresPerExperiencedStaff =
-                new Constant("Max New Hires per Experienced Staff", 3.0);
+                new Constant("Max New Hires per Experienced Staff", People.getInstance(), 3.0);
 
         Variable newHireCap = new Variable(WaterfallSoftwareDevelopment.NEW_HIRE_CAP, () ->
                 maxNewHiresPerExperiencedStaff.getCurrentValue()
@@ -90,7 +92,7 @@ class Workforce {
             double result = gap / hiringDelayInDays;
             double maxAmount = Math.max(result, 0.0);
 
-            return new Quantity(maxAmount, WaterfallSoftwareDevelopment.PEOPLE);
+            return new Quantity(maxAmount, People.getInstance());
         };
 
         return new Flow(WaterfallSoftwareDevelopment.NEW_HIRES, hiringRate);
@@ -100,7 +102,7 @@ class Workforce {
         double averageEmploymentInDays = 673.0;
         Rate quitRate = timeUnit ->
                 new Quantity(experiencedWorkforce.getCurrentValue().getValue()
-                        / averageEmploymentInDays, WaterfallSoftwareDevelopment.PEOPLE);
+                        / averageEmploymentInDays, People.getInstance());
         return new Flow("Employees quiting", quitRate);
     }
 
