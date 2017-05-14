@@ -30,7 +30,7 @@ public class Day implements TimeUnit {
 
     @Override
     public double ratioToBaseUnit() {
-        return 60 * 60 * 24;
+        return 3600 * 24;
     }
 
     public static Day getInstance() {

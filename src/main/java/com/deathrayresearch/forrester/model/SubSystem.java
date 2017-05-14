@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- *
+ * Part of a model, broken to reduce complexity in creating and maintaining the model
  */
 public class SubSystem extends Element {
 
@@ -51,9 +51,7 @@ public class SubSystem extends Element {
 
     public List<Stock> getStocks() {
         List<Stock> stockList = new ArrayList<>();
-        for (Stock stock: stocks.values()) {
-            stockList.add(stock);
-        }
+        stockList.addAll(stocks.values());
         return stockList;
     }
 }

@@ -2,6 +2,7 @@ package com.deathrayresearch.forrester;
 
 import com.deathrayresearch.forrester.event.CsvSubscriber;
 import com.deathrayresearch.forrester.measure.Quantity;
+import com.deathrayresearch.forrester.measure.TimeUnit;
 import com.deathrayresearch.forrester.measure.units.item.People;
 import com.deathrayresearch.forrester.measure.units.item.Thing;
 import com.deathrayresearch.forrester.measure.units.time.Day;
@@ -51,12 +52,14 @@ public class SirInfectiousDiseaseModel {
             return new Quantity(infectedCount, People.getInstance());
         };
 
-        Rate recoveryRate = timeUnit -> {
-            double recoveredProportion = .2; //20% recover per day
-            return new Quantity(
-                    infectiousPopulation.getCurrentValue().getValue()
-                            * recoveredProportion,
-                    People.getInstance());
+        Rate recoveryRate = new Rate() {
+
+            @Override
+            public Quantity flowPerTimeUnit(TimeUnit timeUnit) {
+                double recoveredProportion = .2; //20% recover per day
+                return new Quantity(infectiousPopulation.getCurrentValue().getValue() * recoveredProportion,
+                        People.getInstance());
+            }
         };
 
         Flow infected = new Flow("Infected", infectiousRate);

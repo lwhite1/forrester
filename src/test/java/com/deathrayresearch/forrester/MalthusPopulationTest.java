@@ -1,11 +1,13 @@
 package com.deathrayresearch.forrester;
 
+import com.deathrayresearch.forrester.measure.Quantity;
 import com.deathrayresearch.forrester.measure.units.item.People;
 import com.deathrayresearch.forrester.measure.units.time.Day;
 import com.deathrayresearch.forrester.measure.units.time.Times;
 import com.deathrayresearch.forrester.model.Flow;
 import com.deathrayresearch.forrester.model.Model;
 import com.deathrayresearch.forrester.model.Stock;
+import com.deathrayresearch.forrester.rate.RatePerDay;
 import com.deathrayresearch.forrester.rate.Rate;
 import com.deathrayresearch.forrester.ui.ChartViewer;
 import org.junit.Test;
@@ -21,7 +23,14 @@ public class MalthusPopulationTest {
 
         Stock population = new Stock("population", 100, People.getInstance());
 
-        Rate birthRate = timeUnit -> population.getCurrentValue().multiply(0.04);
+        RatePerDay birthRate = new RatePerDay() {
+            @Override
+            protected Quantity quantityPerDay() {
+                return population.getCurrentValue().multiply(0.04);
+            }
+        };
+
+
         Flow births = new Flow("Births", birthRate);
 
         Rate deathRate = timeUnit -> population.getCurrentValue().multiply(0.02);

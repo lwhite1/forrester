@@ -30,4 +30,6 @@ public class People extends Thing {
     public static People getInstance() {
         return instance;
     }
+
+
 }

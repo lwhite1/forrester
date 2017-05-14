@@ -9,6 +9,7 @@ import com.deathrayresearch.forrester.model.Constant;
 import com.deathrayresearch.forrester.model.Flow;
 import com.deathrayresearch.forrester.model.Model;
 import com.deathrayresearch.forrester.model.Stock;
+import com.deathrayresearch.forrester.rate.RatePerDay;
 import com.deathrayresearch.forrester.rate.Rate;
 import com.deathrayresearch.forrester.ui.ChartViewer;
 import org.junit.Test;
@@ -33,9 +34,12 @@ public class sShapedPopulationGrowth {
 
         // Rates of birth and death vary with the relationship of population to carrying capacity
         // This is a Logistic Growth Model
-        Rate birthRate = timeUnit -> {
-            double ratio = population.getCurrentValue().getValue() / carryingCapacity.getValue();
-            return population.getCurrentValue().multiply(fractionalNetBirthRate.getCurrentValue() * (1 - ratio));
+        Rate birthRate = new RatePerDay() {
+            @Override
+            protected Quantity quantityPerDay() {
+                double ratio = population.getCurrentValue().getValue() / carryingCapacity.getValue();
+                return population.getCurrentValue().multiply(fractionalNetBirthRate.getCurrentValue() * (1 - ratio));
+            }
         };
 
         Flow births = new Flow("Births", birthRate);

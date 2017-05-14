@@ -28,7 +28,8 @@ public class Quantity {
     }
 
     public Quantity inBaseUnits() {
-        return new Quantity(unit.ratioToBaseUnit() * getValue(), unit.getBaseUnit());
+        return unit.toBaseUnits(this);
+        //return new Quantity(unit.ratioToBaseUnit() * getValue(), unit.getBaseUnit());
     }
 
     public Quantity multiply(double d) {

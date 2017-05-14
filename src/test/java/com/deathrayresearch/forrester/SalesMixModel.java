@@ -14,6 +14,7 @@ import com.deathrayresearch.forrester.model.Formula;
 import com.deathrayresearch.forrester.model.Model;
 import com.deathrayresearch.forrester.model.Stock;
 import com.deathrayresearch.forrester.model.Variable;
+import com.deathrayresearch.forrester.rate.RatePerDay;
 import com.deathrayresearch.forrester.rate.Rate;
 import com.deathrayresearch.forrester.ui.ChartViewer;
 import org.junit.Test;
@@ -36,7 +37,13 @@ public class SalesMixModel {
 
         Stock customers = new Stock("customers", 0, People.getInstance());
 
-        Rate acquisitionRate = timeUnit -> new Quantity(10, People.getInstance());
+        Rate acquisitionRate = new RatePerDay() {
+
+            @Override
+            protected Quantity quantityPerDay() {
+                return new Quantity(10, People.getInstance());
+            }
+        };
 
         Formula hardwareSalesFormula = () -> hardwareSalesCustomer.getCurrentValue()
                 * acquisitionRate.flowPerTimeUnit(Week.getInstance()).getValue();

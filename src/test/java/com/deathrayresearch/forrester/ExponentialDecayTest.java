@@ -7,6 +7,7 @@ import com.deathrayresearch.forrester.measure.units.time.Times;
 import com.deathrayresearch.forrester.model.Flow;
 import com.deathrayresearch.forrester.model.Model;
 import com.deathrayresearch.forrester.model.Stock;
+import com.deathrayresearch.forrester.rate.RatePerDay;
 import com.deathrayresearch.forrester.rate.Rate;
 import com.deathrayresearch.forrester.ui.ChartViewer;
 import org.junit.Test;
@@ -23,7 +24,14 @@ public class ExponentialDecayTest {
         Quantity count = new Quantity(100, People.getInstance());
         Stock population = new Stock("pop", count);
 
-        Rate deathRate = timeUnit -> population.getCurrentValue().divide(80);
+        Rate deathRate = new RatePerDay() {
+            @Override
+            protected Quantity quantityPerDay() {
+                return population.getCurrentValue().divide(80);
+            }
+        };
+
+
         Flow deaths = new Flow("Deaths", deathRate);
 
         population.addOutflow(deaths);

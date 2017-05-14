@@ -9,6 +9,13 @@ import com.deathrayresearch.forrester.measure.TimeUnit;
  */
 public class Times {
 
+    public static Second SECOND = Second.getInstance();
+    public static Minute MINUTE = Minute.getInstance();
+    public static Hour HOUR = Hour.getInstance();
+    public static Day DAY = Day.getInstance();
+    public static Week WEEK = Week.getInstance();
+    public static Year YEAR = Year.getInstance();
+
     public static Quantity seconds(double value) {
         TimeUnit timeUnit = Second.getInstance();
         return new Quantity(value, timeUnit);
