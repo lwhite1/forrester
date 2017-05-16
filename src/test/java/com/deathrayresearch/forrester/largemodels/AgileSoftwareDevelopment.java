@@ -26,7 +26,7 @@ public class AgileSoftwareDevelopment {
     double inexperiencedStaff = 10;
     double experiencedStaff = 10;
 
-    double nominalProductivityPerPersonWeek = 200;
+    double nominalProductivityPerPersonWeek = 200; // tasks
     double relativeProductivityOfNewStaff = .20;
 
     double nominalFractionCorrectAndComplete = .80;

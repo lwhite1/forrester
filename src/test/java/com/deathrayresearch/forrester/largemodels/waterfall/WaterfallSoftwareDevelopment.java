@@ -46,6 +46,7 @@ public class WaterfallSoftwareDevelopment {
 
     static final String NEWLY_HIRED = "Newly hired";
     static final String WORKFORCE_GAP = "Workforce Gap";
+    static final String DAILY_MP_FOR_TRAINING = "Daily overhead for training";
 
     // development constants
     static final String TASKS_DEVELOPED = "Tasks Developed";
@@ -61,6 +62,7 @@ public class WaterfallSoftwareDevelopment {
         model.addVariable(workforce.getVariable(TOTAL_WORKFORCE));
         model.addVariable(workforce.getVariable(FRACTION_OF_WORKFORCE_WITH_EXPERIENCE));
         model.addVariable(workforce.getVariable(WORKFORCE_FTE));
+        model.addVariable(workforce.getVariable(DAILY_MP_FOR_TRAINING));
         //model.addVariable(workforce.getVariable(TOTAL_WORKFORCE_CAP));
         model.addVariable(workforce.getVariable(WORKFORCE_NEED));
         //model.addVariable(workforce.getVariable(NEW_HIRE_CAP));

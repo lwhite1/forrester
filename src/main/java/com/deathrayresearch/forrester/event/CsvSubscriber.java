@@ -10,7 +10,6 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -36,7 +35,7 @@ public class CsvSubscriber implements EventHandler {
 
         File file = Paths.get(fileName).toFile();
         file.getParentFile().mkdirs();
-        
+
         try {
             fileWriter = new FileWriter(fileName);
         } catch (IOException e) {

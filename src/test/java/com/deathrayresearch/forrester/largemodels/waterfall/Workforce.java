@@ -7,10 +7,13 @@ import com.deathrayresearch.forrester.measure.units.item.People;
 import com.deathrayresearch.forrester.measure.units.item.Thing;
 import com.deathrayresearch.forrester.model.Constant;
 import com.deathrayresearch.forrester.model.Flow;
+import com.deathrayresearch.forrester.model.Formula;
 import com.deathrayresearch.forrester.model.Stock;
 import com.deathrayresearch.forrester.model.Module;
 import com.deathrayresearch.forrester.model.Variable;
 import com.deathrayresearch.forrester.rate.Rate;
+
+import static com.deathrayresearch.forrester.largemodels.waterfall.WaterfallSoftwareDevelopment.*;
 
 /**
  *
@@ -23,41 +26,50 @@ class Workforce {
 
     static Module getWorkforce() {
 
-        Module workforce = new Module(WaterfallSoftwareDevelopment.WORKFORCE);
+        Module workforce = new Module(WORKFORCE);
 
-        Stock newlyHiredWorkforce = new Stock(WaterfallSoftwareDevelopment.NEWLY_HIRED, 2.0, People.getInstance());
-        Stock experiencedWorkforce = new Stock(WaterfallSoftwareDevelopment.EXPERIENCED, 4.0, People.getInstance());
+        Stock newlyHiredWorkforce = new Stock(NEWLY_HIRED, 2.0, People.getInstance());
+        Stock experiencedWorkforce = new Stock(EXPERIENCED, 4.0, People.getInstance());
 
-        Variable totalWorkforce = new Variable(WaterfallSoftwareDevelopment.TOTAL_WORKFORCE, PEOPLE, () ->
+        Variable totalWorkforce = new Variable(TOTAL_WORKFORCE, PEOPLE, () ->
                 newlyHiredWorkforce.getCurrentValue().getValue()
                         + experiencedWorkforce.getCurrentValue().getValue());
 
         Variable fullTimeEquivalentExperiencedWorkforce =
-                new Variable(WaterfallSoftwareDevelopment.WORKFORCE_FTE, DIMENSIONLESS_UNIT, () ->
+                new Variable(WORKFORCE_FTE, DIMENSIONLESS_UNIT, () ->
                         AVERAGE_DAILY_MAN_POWER_PER_STAFF.getCurrentValue()
                                 * totalWorkforce.getCurrentValue());
 
-        Variable workforceNeed = new Variable(WaterfallSoftwareDevelopment.WORKFORCE_NEED, PEOPLE,
+        Variable workforceNeed = new Variable(WORKFORCE_NEED, PEOPLE,
                 () -> 30.0);
 
         Constant maxNewHiresPerExperiencedStaff =
                 new Constant("Max New Hires per Experienced Staff", People.getInstance(), 3.0);
 
-        Variable newHireCap = new Variable(WaterfallSoftwareDevelopment.NEW_HIRE_CAP, PEOPLE, () ->
+        Variable newHireCap = new Variable(NEW_HIRE_CAP, PEOPLE, () ->
                 maxNewHiresPerExperiencedStaff.getCurrentValue()
                         * fullTimeEquivalentExperiencedWorkforce.getCurrentValue());
 
-        Variable totalWorkforceCap = new Variable(WaterfallSoftwareDevelopment.TOTAL_WORKFORCE_CAP, PEOPLE, () ->
+        Variable totalWorkforceCap = new Variable(TOTAL_WORKFORCE_CAP, PEOPLE, () ->
                 newHireCap.getCurrentValue() + experiencedWorkforce.getCurrentValue().getValue());
 
-        Variable workforceLevelSought = new Variable(WaterfallSoftwareDevelopment.DESIRED_WORKFORCE, PEOPLE, () ->
+        Variable workforceLevelSought = new Variable(DESIRED_WORKFORCE, PEOPLE, () ->
                 Math.min(workforceNeed.getCurrentValue(), totalWorkforceCap.getCurrentValue()));
 
-        Variable workforceGap = new Variable(WaterfallSoftwareDevelopment.WORKFORCE_GAP, PEOPLE, () ->
+        Variable workforceGap = new Variable(WORKFORCE_GAP, PEOPLE, () ->
                 workforceLevelSought.getCurrentValue() - totalWorkforce.getCurrentValue());
 
+        Constant trainersPerNewHire = new Constant("Trainers per New Hire", DIMENSIONLESS_UNIT, 0.2);
+
+        Variable dailyManPowerForTraining = new Variable(DAILY_MP_FOR_TRAINING, PEOPLE, new Formula() {
+            @Override
+            public double getCurrentValue() {
+                return trainersPerNewHire.getCurrentValue() * newlyHiredWorkforce.getCurrentValue().getValue();
+            }
+        });
+
         Variable fractionExperiencedWorkforce =
-                new Variable(WaterfallSoftwareDevelopment.FRACTION_OF_WORKFORCE_WITH_EXPERIENCE,
+                new Variable(FRACTION_OF_WORKFORCE_WITH_EXPERIENCE,
                         DIMENSIONLESS_UNIT, () ->
                         experiencedWorkforce.getCurrentValue().getValue() / totalWorkforce.getCurrentValue());
 
@@ -79,6 +91,7 @@ class Workforce {
         workforce.addFlow(assimilationFlow);
         workforce.addFlow(resignationFlow);
 
+        workforce.addVariable(dailyManPowerForTraining);
         workforce.addVariable(workforceGap);
         workforce.addVariable(totalWorkforce);
         workforce.addVariable(fractionExperiencedWorkforce);
