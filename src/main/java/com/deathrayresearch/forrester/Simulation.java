@@ -10,7 +10,7 @@ import com.deathrayresearch.forrester.measure.Unit;
 import com.deathrayresearch.forrester.model.Flow;
 import com.deathrayresearch.forrester.model.Model;
 import com.deathrayresearch.forrester.model.Stock;
-import com.deathrayresearch.forrester.model.SubSystem;
+import com.deathrayresearch.forrester.model.Module;
 
 import com.google.common.eventbus.EventBus;
 
@@ -81,7 +81,7 @@ public class Simulation {
             for (Stock stock : model.getStocks()) {
 
                 Quantity qCurrent = stock.getCurrentValue();
-                System.out.println(stock.getName() + " : " + qCurrent);
+               // System.out.println(stock.getName() + " : " + qCurrent);
 
                 Set<Flow> stockInflows = stock.getInflows();
                 for (Flow inflow : stockInflows) {
@@ -127,11 +127,11 @@ public class Simulation {
             HashMap<String, Quantity> flows = new HashMap<>();
 
             eventBus.post(new TimestepEvent(currentDateTime, model));
-            for (SubSystem subSystem : model.getSubSystems()) {
-                for (Stock stock : subSystem.getStocks()) {
+            for (Module module : model.getModules()) {
+                for (Stock stock : module.getStocks()) {
 
                     Quantity qCurrent = stock.getCurrentValue();
-                    System.out.println(stock.getName() + " : " + qCurrent);
+                    //System.out.println(stock.getName() + " : " + qCurrent);
 
                     Set<Flow> stockInflows = stock.getInflows();
                     for (Flow inflow : stockInflows) {

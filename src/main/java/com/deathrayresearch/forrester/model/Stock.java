@@ -28,6 +28,7 @@ public class Stock extends Element {
     }
 
     public void addInflow(Flow inFlow) {
+
         inflows.add(inFlow);
     }
 

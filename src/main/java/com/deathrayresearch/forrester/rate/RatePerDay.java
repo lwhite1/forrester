@@ -5,7 +5,7 @@ import com.deathrayresearch.forrester.measure.TimeUnit;
 import com.deathrayresearch.forrester.measure.units.time.Times;
 
 /**
- *
+ * A rate specified as a quantity per day (a.k.a. a daily rate)
  */
 public abstract class RatePerDay extends AbstractRate {
 

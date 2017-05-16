@@ -8,8 +8,8 @@ import com.deathrayresearch.forrester.measure.units.volume.Volumes;
 import com.deathrayresearch.forrester.model.Flow;
 import com.deathrayresearch.forrester.model.Model;
 import com.deathrayresearch.forrester.model.Stock;
-import com.deathrayresearch.forrester.rate.FixedRate;
 import com.deathrayresearch.forrester.rate.Rate;
+import com.deathrayresearch.forrester.rate.RatePerMinute;
 import com.deathrayresearch.forrester.ui.ChartViewer;
 import org.junit.Test;
 
@@ -28,15 +28,25 @@ public class TubTest {
         Quantity litersPerMinuteOut = Volumes.liters(3.0);
 
         // the water drains at the rate of the outflow capacity or the amount of water in the tub, whichever is less
-        Rate outRate = timeUnit ->
-                new Quantity(
-                    Math.min(litersPerMinuteOut.getValue(), tub.getCurrentValue().getValue()),
-                    Liter.getInstance());
+        Rate outRate = new RatePerMinute() {
+            @Override
+            public Quantity quantityPerMinute() {
+                return new Quantity(
+                        Math.min(litersPerMinuteOut.getValue(), tub.getCurrentValue().getValue()),
+                        Liter.getInstance());
+            }
+        };
 
         Flow outflow = new Flow("Out", outRate);
 
         Quantity litersPerMinuteIn =  Volumes.liters(2.96);
-        FixedRate inRate = new FixedRate(litersPerMinuteIn, Minute.getInstance());
+
+        RatePerMinute inRate = new RatePerMinute() {
+            @Override
+            protected Quantity quantityPerMinute() {
+                return litersPerMinuteIn;
+            }
+        };
         Flow inflow = new Flow("In", inRate);
 
         tub.addInflow(inflow);

@@ -6,14 +6,14 @@ import java.util.List;
 import java.util.Map;
 
 /**
- *
+ * One representation of a dynamic system
  */
 public class Model {
 
     private String name;
     private List<Stock> stocks = new ArrayList<>();
     private Map<String, Variable> variables = new HashMap<>();
-    private List<SubSystem> subSystems = new ArrayList<>();
+    private List<Module> modules = new ArrayList<>();
 
     public Model(String name) {
         this.name = name;
@@ -39,12 +39,12 @@ public class Model {
         variables.remove(variable.getName());
     }
 
-    public void addSubSystem(SubSystem subSystem) {
-        subSystems.add(subSystem);
+    public void addSubSystem(Module module) {
+        modules.add(module);
     }
 
-    public List<SubSystem> getSubSystems() {
-        return subSystems;
+    public List<Module> getModules() {
+        return modules;
     }
 
     public List<Stock> getStocks() {
@@ -86,8 +86,8 @@ public class Model {
 
     public List<String> getSubSystemNames() {
         List<String> results = new ArrayList<>();
-        for (SubSystem subSystem : subSystems) {
-            results.add(subSystem.getName());
+        for (Module module : modules) {
+            results.add(module.getName());
         }
         return results;
     }

@@ -31,6 +31,7 @@ public class ExponentialDecayTest {
             }
         };
 
+        System.out.println(deathRate.flowPerTimeUnit(Times.YEAR));
 
         Flow deaths = new Flow("Deaths", deathRate);
 

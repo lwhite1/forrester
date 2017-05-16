@@ -11,13 +11,13 @@ import java.util.Map;
 /**
  * Part of a model, broken to reduce complexity in creating and maintaining the model
  */
-public class SubSystem extends Element {
+public class Module extends Element {
 
     private Map<String, Stock> stocks = new HashMap<>();
     private Map<String, Flow> flows = new HashMap<>();
     private Map<String, Variable> variables = new HashMap<>();
 
-    public SubSystem(String name) {
+    public Module(String name) {
         super(name);
     }
 

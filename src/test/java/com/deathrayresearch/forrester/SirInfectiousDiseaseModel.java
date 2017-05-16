@@ -75,7 +75,7 @@ public class SirInfectiousDiseaseModel {
         model.addStock(recoveredPopulation);
 
         Simulation run = new Simulation(model, Day.getInstance(), Times.weeks(8));
-        run.addEventHandler(CsvSubscriber.newInstance(run.getEventBus(), "run1.out.csv"));
+        run.addEventHandler(CsvSubscriber.newInstance(run.getEventBus(), "/tmp/forrester/run1out.csv"));
         run.addEventHandler(ChartViewer.newInstance(run.getEventBus()));
         run.execute();
     }

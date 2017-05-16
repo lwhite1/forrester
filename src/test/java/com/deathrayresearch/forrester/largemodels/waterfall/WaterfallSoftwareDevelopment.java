@@ -6,7 +6,7 @@ import com.deathrayresearch.forrester.measure.units.item.People;
 import com.deathrayresearch.forrester.measure.units.time.Day;
 import com.deathrayresearch.forrester.measure.units.time.Year;
 import com.deathrayresearch.forrester.model.Model;
-import com.deathrayresearch.forrester.model.SubSystem;
+import com.deathrayresearch.forrester.model.Module;
 import com.deathrayresearch.forrester.ui.ChartViewer;
 import org.junit.Test;
 
@@ -22,9 +22,9 @@ public class WaterfallSoftwareDevelopment {
     static final Tasks TASKS = Tasks.getInstance();
 
     // model subsystems
-    private SubSystem workforce = Workforce.getWorkforce();
-    private SubSystem development = Development.getDevelopmentSubSystem(model);
-    private SubSystem testAndRework = TestAndRework.getTestAndReworkSubSystem();
+    private Module workforce = Workforce.getWorkforce();
+    private Module development = Development.getDevelopmentSubSystem(model);
+    private Module testAndRework = TestAndRework.getTestAndReworkSubSystem();
 
     // subsystem constants
     static final String WORKFORCE = "Workforce";

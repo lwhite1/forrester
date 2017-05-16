@@ -1,7 +1,7 @@
 package com.deathrayresearch.forrester.largemodels.waterfall;
 
 
-import com.deathrayresearch.forrester.model.SubSystem;
+import com.deathrayresearch.forrester.model.Module;
 
 import static com.deathrayresearch.forrester.largemodels.waterfall.WaterfallSoftwareDevelopment.TESTING_AND_REWORK;
 
@@ -10,10 +10,10 @@ import static com.deathrayresearch.forrester.largemodels.waterfall.WaterfallSoft
 
 class TestAndRework {
 
-    static SubSystem getTestAndReworkSubSystem() {
-        SubSystem subSystem = new SubSystem(TESTING_AND_REWORK);
+    static Module getTestAndReworkSubSystem() {
+        Module module = new Module(TESTING_AND_REWORK);
 
-        return subSystem;
+        return module;
     }
 
 }

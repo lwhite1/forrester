@@ -1,5 +1,9 @@
 package com.deathrayresearch.forrester.measure;
 
+import com.google.common.base.Preconditions;
+
+import javax.annotation.concurrent.Immutable;
+
 /**
  * A dimension-aware amount of something. It consists of a dimension (like time, mass, length, money, etc.)
  * and a value (like 2.54). Individual values are expressed in Units (like hours), and the units have
@@ -9,10 +13,12 @@ package com.deathrayresearch.forrester.measure;
  * you. It also lets you compare two quantities in the same dimension to assert that 2.54 miles > 1,312 meters, again
  * handling any conversions, while preventing you from comparing 2.54 miles with 2.54 pounds.
  */
-public class Quantity {
+@Immutable
+public final class Quantity {
 
-    private double value;
-    private Unit unit;
+    public static final String INCOMPATIBLE_ERROR_MESSAGE = "Combined quantities must have compatible units";
+    private final double value;
+    private final Unit unit;
 
     public Quantity(double value, Unit unit) {
         this.value = value;
@@ -29,19 +35,10 @@ public class Quantity {
 
     public Quantity inBaseUnits() {
         return unit.toBaseUnits(this);
-        //return new Quantity(unit.ratioToBaseUnit() * getValue(), unit.getBaseUnit());
     }
 
     public Quantity multiply(double d) {
         return new Quantity(d * getValue(), this.getUnit());
-    }
-
-    public Quantity add(double d) {
-        return new Quantity(d + getValue(), this.getUnit());
-    }
-
-    public Quantity subtract(double d) {
-        return new Quantity(getValue() - d, this.getUnit());
     }
 
     public Quantity divide(double d) {
@@ -49,6 +46,8 @@ public class Quantity {
     }
 
     public Quantity add(Quantity other) {
+        Preconditions.checkArgument(other.isCompatibleWith(this), INCOMPATIBLE_ERROR_MESSAGE);
+
         Quantity otherInBaseUnits = other.inBaseUnits();
         Quantity thisInBaseUnits = inBaseUnits();
         Quantity result = new Quantity(otherInBaseUnits.getValue() + thisInBaseUnits.getValue(),
@@ -57,6 +56,8 @@ public class Quantity {
     }
 
     public Quantity subtract(Quantity other) {
+        Preconditions.checkArgument(other.isCompatibleWith(this), INCOMPATIBLE_ERROR_MESSAGE);
+
         Quantity otherInBaseUnits = other.inBaseUnits();
         Quantity thisInBaseUnits = inBaseUnits();
         Quantity result = new Quantity(thisInBaseUnits.getValue() - otherInBaseUnits.getValue(),
@@ -87,11 +88,20 @@ public class Quantity {
         return Double.compare(inBaseUnits().getValue(), other.inBaseUnits().getValue()) >= 0;
     }
 
+    // TODO(lwhite): Extend this to handle inherited compatibility
+    public boolean isCompatibleWith(Quantity other) {
+        return other.getDimension().equals(this.getDimension());
+    }
+
     /**
      * Returns true if this quantity is equal to the other quantity in base units
      */
     public boolean isEqual(Quantity other) {
         return Double.compare(inBaseUnits().getValue(), other.inBaseUnits().getValue()) == 0;
+    }
+
+    public Dimension getDimension() {
+        return getUnit().getDimension();
     }
 
     @Override

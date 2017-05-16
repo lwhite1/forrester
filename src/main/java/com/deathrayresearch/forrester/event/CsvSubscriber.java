@@ -7,8 +7,11 @@ import com.opencsv.CSVWriter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
@@ -30,6 +33,10 @@ public class CsvSubscriber implements EventHandler {
 
     private CsvSubscriber(String fileName) {
         FileWriter fileWriter = null;
+
+        File file = Paths.get(fileName).toFile();
+        file.getParentFile().mkdirs();
+        
         try {
             fileWriter = new FileWriter(fileName);
         } catch (IOException e) {

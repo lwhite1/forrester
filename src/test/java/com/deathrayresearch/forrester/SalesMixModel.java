@@ -4,7 +4,9 @@ import com.deathrayresearch.forrester.event.CsvSubscriber;
 import com.deathrayresearch.forrester.measure.Dimension;
 import com.deathrayresearch.forrester.measure.Quantity;
 import com.deathrayresearch.forrester.measure.Unit;
+import com.deathrayresearch.forrester.measure.dimension.Dimensionless;
 import com.deathrayresearch.forrester.measure.dimension.Item;
+import com.deathrayresearch.forrester.measure.units.dimensionless.DimensionlessUnit;
 import com.deathrayresearch.forrester.measure.units.item.People;
 import com.deathrayresearch.forrester.measure.units.time.Times;
 import com.deathrayresearch.forrester.measure.units.time.Week;
@@ -48,18 +50,18 @@ public class SalesMixModel {
         Formula hardwareSalesFormula = () -> hardwareSalesCustomer.getCurrentValue()
                 * acquisitionRate.flowPerTimeUnit(Week.getInstance()).getValue();
 
-        Variable hardwareSales = new Variable("Hardware sales", hardwareSalesFormula);
+        Variable hardwareSales = new Variable("Hardware sales", Sales.getInstance(), hardwareSalesFormula);
 
         Formula serviceSalesFormula = () -> serviceSalesCustomerMonth.getCurrentValue()
                 * customers.getCurrentValue().getValue();
 
-        Variable serviceSales = new Variable("Service sales", serviceSalesFormula);
+        Variable serviceSales = new Variable("Service sales", Sales.getInstance(), serviceSalesFormula);
 
         Formula totalSalesFormula = () -> hardwareSales.getCurrentValue() + serviceSales.getCurrentValue();
 
-        Variable totalSales = new Variable("Total sales", totalSalesFormula);
+        Variable totalSales = new Variable("Total sales", Sales.getInstance(), totalSalesFormula);
 
-        Variable proportionHardwareSales = new Variable("Proportion hardware",
+        Variable proportionHardwareSales = new Variable("Proportion hardware", DimensionlessUnit.getInstance(),
                 () -> hardwareSales.getCurrentValue() / totalSales.getCurrentValue());
 
         Flow customerAcquisition = new Flow("Customer acquisition", acquisitionRate);
@@ -72,7 +74,7 @@ public class SalesMixModel {
 
         com.deathrayresearch.forrester.Simulation run = new com.deathrayresearch.forrester.Simulation(model, Week.getInstance(), Times.years(10));
         run.addEventHandler(ChartViewer.newInstance(run.getEventBus()));
-        run.addEventHandler(CsvSubscriber.newInstance(run.getEventBus(), "run1out.csv"));
+        run.addEventHandler(CsvSubscriber.newInstance(run.getEventBus(), "/tmp/forrester/run1out.csv"));
         run.execute();
     }
 
