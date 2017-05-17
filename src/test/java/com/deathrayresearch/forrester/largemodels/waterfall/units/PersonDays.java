@@ -1,4 +1,4 @@
-package com.deathrayresearch.forrester.largemodels.waterfall;
+package com.deathrayresearch.forrester.largemodels.waterfall.units;
 
 
 import com.deathrayresearch.forrester.measure.Dimension;
@@ -9,7 +9,7 @@ import com.deathrayresearch.forrester.measure.dimension.Item;
  *
  */
 
-class PersonDays implements Unit {
+public class PersonDays implements Unit {
 
     private static final PersonDays instance = new PersonDays();
 
@@ -28,7 +28,7 @@ class PersonDays implements Unit {
         return 1.0;
     }
 
-    static PersonDays getInstance() {
+    public static PersonDays getInstance() {
         return instance;
     }
 }

@@ -1,6 +1,7 @@
 package com.deathrayresearch.forrester.largemodels.waterfall;
 
 import com.deathrayresearch.forrester.Simulation;
+import com.deathrayresearch.forrester.largemodels.waterfall.units.Tasks;
 import com.deathrayresearch.forrester.measure.Quantity;
 import com.deathrayresearch.forrester.measure.units.item.People;
 import com.deathrayresearch.forrester.measure.units.time.Day;
@@ -25,14 +26,17 @@ public class WaterfallSoftwareDevelopment {
     private Module workforce = Workforce.getWorkforce();
     private Module development = Development.getDevelopmentSubSystem(model);
     private Module testAndRework = TestAndRework.getTestAndReworkSubSystem();
+    private Module staffAllocation = StaffAllocation.getStaffAllocationModule(model);
 
     // subsystem constants
     static final String WORKFORCE = "Workforce";
     static final String DEVELOPMENT = "Development";
     static final String TESTING_AND_REWORK = "Testing and Rework";
+    static final String STAFF_ALLOCATION = "Staff Allocation";
 
     // Workforce constants
     static final String WORKFORCE_FTE = "Full Time Equivalent workforce";
+    static final String EXPERIENCED_WORKFORCE_FTE = "Full Time Equivalent Experienced Workforce";
 
     static final String NEW_HIRES = "New hires";
     static final String EXPERIENCED = "Experienced workers";
@@ -46,32 +50,45 @@ public class WaterfallSoftwareDevelopment {
 
     static final String NEWLY_HIRED = "Newly hired";
     static final String WORKFORCE_GAP = "Workforce Gap";
-    static final String DAILY_MP_FOR_TRAINING = "Daily overhead for training";
+    static final String DAILY_RESOURCES_FOR_TRAINING = "Daily overhead for training";
+   // static final String CUM_MP_FOR_TRAINING = "Cumulative overhead for training";
 
     // development constants
     static final String TASKS_DEVELOPED = "Tasks Developed";
+    static final String POTENTIAL_PRODUCTIVITY = "Potential productivity";
 
+
+    // staff allocation constants
+    static final String DAILY_RESOURCES_FOR_SOFTWARE_PRODUCTION = "Daily resources for software production";
+    static final String DAILY_RESOURCES_PERFORMING_QA = "Daily resources performing QA";
 
     @Test
     public void testRun1() {
 
         model.addStock(workforce.getStock(NEWLY_HIRED));
         model.addStock(workforce.getStock(EXPERIENCED));
+       // model.addStock(workforce.getStock(CUM_MP_FOR_TRAINING));
+
         model.addVariable(workforce.getVariable(DESIRED_WORKFORCE));
         model.addVariable(workforce.getVariable(WORKFORCE_GAP));
         model.addVariable(workforce.getVariable(TOTAL_WORKFORCE));
         model.addVariable(workforce.getVariable(FRACTION_OF_WORKFORCE_WITH_EXPERIENCE));
         model.addVariable(workforce.getVariable(WORKFORCE_FTE));
-        model.addVariable(workforce.getVariable(DAILY_MP_FOR_TRAINING));
+        model.addVariable(workforce.getVariable(DAILY_RESOURCES_FOR_TRAINING));
         //model.addVariable(workforce.getVariable(TOTAL_WORKFORCE_CAP));
         model.addVariable(workforce.getVariable(WORKFORCE_NEED));
         //model.addVariable(workforce.getVariable(NEW_HIRE_CAP));
 
-        model.addStock(development.getStock(TASKS_DEVELOPED));
+        model.addVariable(staffAllocation.getVariable(DAILY_RESOURCES_FOR_SOFTWARE_PRODUCTION));
+        model.addVariable(staffAllocation.getVariable(DAILY_RESOURCES_PERFORMING_QA));
 
-        model.addSubSystem(workforce);
-        model.addSubSystem(development);
-        model.addSubSystem(testAndRework);
+        model.addStock(development.getStock(TASKS_DEVELOPED));
+        model.addVariable(development.getVariable(POTENTIAL_PRODUCTIVITY));
+
+        model.addModule(workforce);
+        model.addModule(staffAllocation);
+        model.addModule(development);
+        model.addModule(testAndRework);
 
         Quantity duration = new Quantity(1, Year.getInstance());
         Simulation simulation = new Simulation(model, Day.getInstance(), duration);

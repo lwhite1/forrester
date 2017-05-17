@@ -39,7 +39,7 @@ public class Model {
         variables.remove(variable.getName());
     }
 
-    public void addSubSystem(Module module) {
+    public void addModule(Module module) {
         modules.add(module);
     }
 
@@ -62,6 +62,7 @@ public class Model {
         }
         return results;
     }
+
     public List<Double> getStockValues() {
         List<Double> results = new ArrayList<>();
         for (Stock stock : stocks) {
@@ -84,7 +85,7 @@ public class Model {
         return results;
     }
 
-    public List<String> getSubSystemNames() {
+    public List<String> getModuleNames() {
         List<String> results = new ArrayList<>();
         for (Module module : modules) {
             results.add(module.getName());

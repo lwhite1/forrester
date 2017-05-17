@@ -1,4 +1,4 @@
-package com.deathrayresearch.forrester.largemodels.waterfall;
+package com.deathrayresearch.forrester.largemodels.waterfall.units;
 
 
 import com.deathrayresearch.forrester.measure.Dimension;
@@ -9,13 +9,13 @@ import com.deathrayresearch.forrester.measure.dimension.Item;
  *
  */
 
-class Tasks implements Unit {
+public class TasksPerPersonDay implements Unit {
 
-    private static final Tasks instance = new Tasks();
+    private static final TasksPerPersonDay instance = new TasksPerPersonDay();
 
     @Override
     public String getName() {
-        return "Task";
+        return "Tasks per person day";
     }
 
     @Override
@@ -28,7 +28,7 @@ class Tasks implements Unit {
         return 1.0;
     }
 
-    static Tasks getInstance() {
+    public static TasksPerPersonDay getInstance() {
         return instance;
     }
 }

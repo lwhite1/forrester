@@ -1,4 +1,4 @@
-package com.deathrayresearch.forrester.largemodels;
+package com.deathrayresearch.forrester.largemodels.agile;
 
 import com.deathrayresearch.forrester.Simulation;
 import com.deathrayresearch.forrester.measure.Dimension;

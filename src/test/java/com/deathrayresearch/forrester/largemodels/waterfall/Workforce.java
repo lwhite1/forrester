@@ -30,18 +30,28 @@ class Workforce {
 
         Stock newlyHiredWorkforce = new Stock(NEWLY_HIRED, 2.0, People.getInstance());
         Stock experiencedWorkforce = new Stock(EXPERIENCED, 4.0, People.getInstance());
+       // Stock cumulativeOverheadForTraining = new Stock(CUM_MP_FOR_TRAINING, 0.0, DIMENSIONLESS_UNIT);
+
 
         Variable totalWorkforce = new Variable(TOTAL_WORKFORCE, PEOPLE, () ->
                 newlyHiredWorkforce.getCurrentValue().getValue()
                         + experiencedWorkforce.getCurrentValue().getValue());
 
-        Variable fullTimeEquivalentExperiencedWorkforce =
+        Variable fullTimeEquivalentWorkforce =
                 new Variable(WORKFORCE_FTE, DIMENSIONLESS_UNIT, () ->
                         AVERAGE_DAILY_MAN_POWER_PER_STAFF.getCurrentValue()
                                 * totalWorkforce.getCurrentValue());
 
-        Variable workforceNeed = new Variable(WORKFORCE_NEED, PEOPLE,
-                () -> 30.0);
+        Variable fullTimeEquivalentExperiencedWorkforce = new Variable(
+                EXPERIENCED_WORKFORCE_FTE, PEOPLE, new Formula() {
+            @Override
+            public double getCurrentValue() {
+                return experiencedWorkforce.getCurrentValue().getValue()
+                        * AVERAGE_DAILY_MAN_POWER_PER_STAFF.getCurrentValue();
+            }
+        });
+
+        Variable workforceNeed = new Variable(WORKFORCE_NEED, PEOPLE, () -> 30.0);
 
         Constant maxNewHiresPerExperiencedStaff =
                 new Constant("Max New Hires per Experienced Staff", People.getInstance(), 3.0);
@@ -61,7 +71,7 @@ class Workforce {
 
         Constant trainersPerNewHire = new Constant("Trainers per New Hire", DIMENSIONLESS_UNIT, 0.2);
 
-        Variable dailyManPowerForTraining = new Variable(DAILY_MP_FOR_TRAINING, PEOPLE, new Formula() {
+        Variable dailyManPowerForTraining = new Variable(DAILY_RESOURCES_FOR_TRAINING, PEOPLE, new Formula() {
             @Override
             public double getCurrentValue() {
                 return trainersPerNewHire.getCurrentValue() * newlyHiredWorkforce.getCurrentValue().getValue();
@@ -99,7 +109,7 @@ class Workforce {
         workforce.addVariable(workforceNeed);
         workforce.addVariable(totalWorkforceCap);
         workforce.addVariable(newHireCap);
-        workforce.addVariable(fullTimeEquivalentExperiencedWorkforce);
+        workforce.addVariable(fullTimeEquivalentWorkforce);
 
         return workforce;
     }
@@ -132,5 +142,4 @@ class Workforce {
 
         return new Flow("Assimilated hires", assimilationRate);
     }
-
 }
