@@ -5,7 +5,6 @@ import com.deathrayresearch.forrester.largemodels.waterfall.units.Tasks;
 import com.deathrayresearch.forrester.largemodels.waterfall.units.TasksPerPersonDay;
 import com.deathrayresearch.forrester.measure.Quantity;
 import com.deathrayresearch.forrester.measure.units.dimensionless.DimensionlessUnit;
-import com.deathrayresearch.forrester.measure.units.item.People;
 import com.deathrayresearch.forrester.model.Constant;
 import com.deathrayresearch.forrester.model.Flow;
 import com.deathrayresearch.forrester.model.Formula;
