@@ -16,7 +16,7 @@ public class AbstractRateTest {
     public void flowPerHour() throws Exception {
 
 
-        Rate dailyRate = new AbstractRate(Times.DAY) {
+        Rate dailyRate = new AbstractRate("A daily rate", Times.DAY) {
 
             @Override
             public Quantity flowPerTimeUnit(TimeUnit timeUnit) {
@@ -35,7 +35,7 @@ public class AbstractRateTest {
     @Test
     public void flowPerWeek() throws Exception {
 
-        Rate dailyRate = new AbstractRate(Times.DAY) {
+        Rate dailyRate = new AbstractRate("A daily rate", Times.DAY) {
 
             @Override
             public Quantity flowPerTimeUnit(TimeUnit timeUnit) {

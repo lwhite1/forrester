@@ -8,7 +8,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
- *
+ * A level or store of some quantity of interest
  */
 public class Stock extends Element {
 

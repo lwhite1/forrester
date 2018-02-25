@@ -39,33 +39,33 @@ class TestAndRework {
 
 
 
-        Rate errorGenerationRate = new RatePerDay() {
+        Rate errorGenerationRate = new RatePerDay("Error Generation rate"){
+
             @Override
             protected Quantity quantityPerDay() {
-                return null;
+                return new Quantity(10, Errors.getInstance());
             }
         };
 
         Flow errorGenerationFlow = new Flow("New errors", errorGenerationRate);
 
-        Rate errorDiscoveryRate = new RatePerDay() {
+        Rate errorDiscoveryRate = new RatePerDay("Error discovery rate") {
             @Override
             protected Quantity quantityPerDay() {
-                return null;
+                return new Quantity(3, Errors.getInstance());
             }
         };
 
         Flow errorDiscoveryFlow = new Flow("Discovered errors", errorDiscoveryRate);
 
-        Rate errorFixRate = new RatePerDay() {
+        Rate errorFixRate = new RatePerDay("Error fix rate") {
             @Override
             protected Quantity quantityPerDay() {
-                return null;
+                return new Quantity(1, Errors.getInstance());
             }
         };
 
         Flow errorFixFlow = new Flow("Fixed errors", errorFixRate);
-
 
         latentDefects.addInflow(errorGenerationFlow);
         latentDefects.addOutflow(errorDiscoveryFlow);

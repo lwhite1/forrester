@@ -112,7 +112,7 @@ class Development {
     }
 
     private static Flow getDevelopmentFlow(Module module) {
-        Rate softwareDevelopmentRate = new RatePerDay() {
+        Rate softwareDevelopmentRate = new RatePerDay("Software development rate") {
             @Override
             protected Quantity quantityPerDay() {
                 double value = module.getVariable("Development Staffing").getCurrentValue()

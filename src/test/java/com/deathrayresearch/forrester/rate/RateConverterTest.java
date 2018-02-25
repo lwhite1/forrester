@@ -1,10 +1,10 @@
-package com.deathrayresearch.forrester.measure;
+package com.deathrayresearch.forrester.rate;
 
+import com.deathrayresearch.forrester.measure.Quantity;
 import com.deathrayresearch.forrester.measure.units.length.Mile;
 import com.deathrayresearch.forrester.measure.units.time.Day;
 import com.deathrayresearch.forrester.measure.units.time.Hour;
 import com.deathrayresearch.forrester.measure.units.time.Minute;
-import com.deathrayresearch.forrester.rate.RateConverter;
 import org.junit.Test;
 
 import static org.junit.Assert.*;

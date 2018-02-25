@@ -9,8 +9,8 @@ import com.deathrayresearch.forrester.measure.units.time.Times;
  */
 public abstract class RatePerMinute extends AbstractRate {
 
-    public RatePerMinute() {
-        super(Times.MINUTE);
+    public RatePerMinute(String name) {
+        super(name, Times.MINUTE);
     }
 
     private Quantity convert(Quantity quantity, TimeUnit newTimeUnit) {

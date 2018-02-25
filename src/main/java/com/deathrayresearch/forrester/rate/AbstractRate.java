@@ -7,13 +7,20 @@ import com.deathrayresearch.forrester.measure.TimeUnit;
  */
 public abstract class AbstractRate implements Rate {
 
+    private final String name;
     private final TimeUnit timeUnit;
 
-    public AbstractRate(TimeUnit unit) {
+    AbstractRate(String name, TimeUnit unit) {
+        this.name = name;
         this.timeUnit = unit;
     }
 
     public TimeUnit getTimeUnit() {
         return timeUnit;
+    }
+
+    @Override
+    public String name() {
+        return name;
     }
 }

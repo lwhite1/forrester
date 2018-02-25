@@ -29,7 +29,7 @@ public class NegativeFeedbackWithGoalTest {
         Quantity goal = new Quantity(860, Inventory.getInstance());
         double adjustmentTimeInTimeSteps = 8;
 
-        Rate productionRate = new RatePerDay() {
+        Rate productionRate = new RatePerDay("Production rate") {
 
             @Override
             protected Quantity quantityPerDay() {

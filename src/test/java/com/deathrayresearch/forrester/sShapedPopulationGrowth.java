@@ -34,7 +34,7 @@ public class sShapedPopulationGrowth {
 
         // Rates of birth and death vary with the relationship of population to carrying capacity
         // This is a Logistic Growth Model
-        Rate birthRate = new RatePerDay() {
+        Rate birthRate = new RatePerDay("Birth rate") {
             @Override
             protected Quantity quantityPerDay() {
                 double ratio = population.getCurrentValue().getValue() / carryingCapacity.getValue();

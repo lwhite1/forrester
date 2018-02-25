@@ -28,7 +28,7 @@ public class TubTest {
         Quantity litersPerMinuteOut = Volumes.liters(3.0);
 
         // the water drains at the rate of the outflow capacity or the amount of water in the tub, whichever is less
-        Rate outRate = new RatePerMinute() {
+        Rate outRate = new RatePerMinute("Outflow Rate") {
             @Override
             public Quantity quantityPerMinute() {
                 return new Quantity(
@@ -41,7 +41,7 @@ public class TubTest {
 
         Quantity litersPerMinuteIn =  Volumes.liters(2.96);
 
-        RatePerMinute inRate = new RatePerMinute() {
+        RatePerMinute inRate = new RatePerMinute("Inflow Rate") {
             @Override
             protected Quantity quantityPerMinute() {
                 return litersPerMinuteIn;

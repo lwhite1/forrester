@@ -20,7 +20,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
- *
+ * Simulation is the execution environment for a model
  */
 public class Simulation {
 
@@ -81,7 +81,6 @@ public class Simulation {
             for (Stock stock : model.getStocks()) {
 
                 Quantity qCurrent = stock.getCurrentValue();
-               // System.out.println(stock.getName() + " : " + qCurrent);
 
                 Set<Flow> stockInflows = stock.getInflows();
                 for (Flow inflow : stockInflows) {
@@ -131,7 +130,6 @@ public class Simulation {
                 for (Stock stock : module.getStocks()) {
 
                     Quantity qCurrent = stock.getCurrentValue();
-                    //System.out.println(stock.getName() + " : " + qCurrent);
 
                     Set<Flow> stockInflows = stock.getInflows();
                     for (Flow inflow : stockInflows) {

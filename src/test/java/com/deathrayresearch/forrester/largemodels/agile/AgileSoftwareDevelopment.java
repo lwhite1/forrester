@@ -11,6 +11,8 @@ import com.deathrayresearch.forrester.model.Flow;
 import com.deathrayresearch.forrester.model.Model;
 import com.deathrayresearch.forrester.model.Stock;
 import com.deathrayresearch.forrester.rate.Rate;
+import com.deathrayresearch.forrester.rate.RatePerDay;
+import com.deathrayresearch.forrester.rate.RatePerWeek;
 import com.deathrayresearch.forrester.ui.ChartViewer;
 import org.junit.Test;
 
@@ -20,9 +22,9 @@ import org.junit.Test;
 public class AgileSoftwareDevelopment {
 
     // model parameters
-    double projectSize = 200_000;  // tasks
-    double releaseSize = 40_000;
-    double sprintSize = 10_000;
+    double projectSize = 100_000;  // tasks
+    double releaseSize = 25_000;
+    double sprintSize = 2_500;
     double inexperiencedStaff = 10;
     double experiencedStaff = 10;
 
@@ -44,21 +46,34 @@ public class AgileSoftwareDevelopment {
         Stock latentDefects = new Stock("latent defects", 0, Defect.getInstance());
         Stock knownDefects = new Stock("known defects", 0, Defect.getInstance());
 
-        Rate completionRate = timeUnit -> {
-            if (sprintBacklog.getCurrentValue().getValue() <= 0) {
-                return new Quantity(0, Work.getInstance());
+        Rate completionRate = new RatePerWeek("Completion rate") {
+            @Override
+            protected Quantity quantityPerWeek() {
+                if (sprintBacklog.getCurrentValue().getValue() <= 0) {
+                    return new Quantity(0, Work.getInstance());
+                }
+                return new Quantity(Math.min(sprintBacklog.getCurrentValue().getValue(), nominalProductivityPerPersonWeek), Work.getInstance());
             }
-            return new Quantity(Math.min(sprintBacklog.getCurrentValue().getValue(), nominalProductivityPerPersonWeek), Work.getInstance());
         };
+
         Flow workCompletion = new Flow("Completed work", completionRate);
 
-        Rate defectCreationRate = timeUnit ->
-                workCompletion.getRate().flowPerTimeUnit(Day.getInstance())
+        Rate defectCreationRate = new RatePerWeek("Defect creation rate") {
+            @Override
+            protected Quantity quantityPerWeek() {
+                return workCompletion.getRate().flowPerTimeUnit(Day.getInstance())
                         .multiply(1.0 - nominalFractionCorrectAndComplete);
+            }
+        };
 
         Flow createdDefects = new Flow("Created defects", defectCreationRate);
 
-        Rate sprintDefectFindRate = timeUnit -> latentDefects.getCurrentValue().multiply(0.4);
+        Rate sprintDefectFindRate = new RatePerWeek("Sprint defect find rate") {
+            @Override
+            protected Quantity quantityPerWeek() {
+                return latentDefects.getCurrentValue().multiply(0.4);
+            }
+        };
 
         Flow foundDefects = new Flow("Found defects", sprintDefectFindRate);
 

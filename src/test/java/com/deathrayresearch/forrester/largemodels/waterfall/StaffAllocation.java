@@ -15,12 +15,12 @@ import static com.deathrayresearch.forrester.largemodels.waterfall.WaterfallSoft
 
 /**
  */
-public class StaffAllocation {
+class StaffAllocation {
 
     private static final PersonDaysPerDay PERSON_DAYS_PER_DAY = PersonDaysPerDay.getInstance();
     private static final DimensionlessUnit DIMENSIONLESS_UNIT = DimensionlessUnit.getInstance();
 
-    public static Module getStaffAllocationModule(Model model) {
+    static Module getStaffAllocationModule(Model model) {
 
         Module module = new Module(WaterfallSoftwareDevelopment.STAFF_ALLOCATION);
 

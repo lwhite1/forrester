@@ -4,7 +4,6 @@ import com.deathrayresearch.forrester.event.CsvSubscriber;
 import com.deathrayresearch.forrester.measure.Dimension;
 import com.deathrayresearch.forrester.measure.Quantity;
 import com.deathrayresearch.forrester.measure.Unit;
-import com.deathrayresearch.forrester.measure.dimension.Dimensionless;
 import com.deathrayresearch.forrester.measure.dimension.Item;
 import com.deathrayresearch.forrester.measure.units.dimensionless.DimensionlessUnit;
 import com.deathrayresearch.forrester.measure.units.item.People;
@@ -39,7 +38,7 @@ public class SalesMixModel {
 
         Stock customers = new Stock("customers", 0, People.getInstance());
 
-        Rate acquisitionRate = new RatePerDay() {
+        Rate acquisitionRate = new RatePerDay("Acquisition rate") {
 
             @Override
             protected Quantity quantityPerDay() {

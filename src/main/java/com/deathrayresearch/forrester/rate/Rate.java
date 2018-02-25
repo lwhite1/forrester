@@ -11,4 +11,5 @@ public interface Rate {
 
     Quantity flowPerTimeUnit(TimeUnit timeUnit);
 
+    String name();
 }

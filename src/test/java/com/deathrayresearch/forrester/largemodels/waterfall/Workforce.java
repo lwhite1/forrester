@@ -12,6 +12,7 @@ import com.deathrayresearch.forrester.model.Stock;
 import com.deathrayresearch.forrester.model.Module;
 import com.deathrayresearch.forrester.model.Variable;
 import com.deathrayresearch.forrester.rate.Rate;
+import com.deathrayresearch.forrester.rate.RatePerDay;
 
 import static com.deathrayresearch.forrester.largemodels.waterfall.WaterfallSoftwareDevelopment.*;
 
@@ -43,13 +44,8 @@ class Workforce {
                                 * totalWorkforce.getCurrentValue());
 
         Variable fullTimeEquivalentExperiencedWorkforce = new Variable(
-                EXPERIENCED_WORKFORCE_FTE, PEOPLE, new Formula() {
-            @Override
-            public double getCurrentValue() {
-                return experiencedWorkforce.getCurrentValue().getValue()
-                        * AVERAGE_DAILY_MAN_POWER_PER_STAFF.getCurrentValue();
-            }
-        });
+                EXPERIENCED_WORKFORCE_FTE, PEOPLE, () -> experiencedWorkforce.getCurrentValue().getValue()
+                        * AVERAGE_DAILY_MAN_POWER_PER_STAFF.getCurrentValue());
 
         Variable workforceNeed = new Variable(WORKFORCE_NEED, PEOPLE, () -> 30.0);
 
@@ -115,13 +111,19 @@ class Workforce {
     }
 
     private static Flow getNewHireFlow(Variable workforceGap) {
-        final double hiringDelayInDays = 8.0 * 7;
-        Rate hiringRate = timeUnit -> {
-            double gap = workforceGap.getCurrentValue();
-            double result = gap / hiringDelayInDays;
-            double maxAmount = Math.max(result, 0.0);
 
-            return new Quantity(maxAmount, People.getInstance());
+        final double hiringDelayInDays = 8.0 * 7;
+
+        Rate hiringRate = new RatePerDay("Hiring Rate") {
+
+            @Override
+            protected Quantity quantityPerDay() {
+                double gap = workforceGap.getCurrentValue();
+                double result = gap / hiringDelayInDays;
+                double maxAmount = Math.max(result, 0.0);
+
+                return new Quantity(maxAmount, People.getInstance());
+            }
         };
 
         return new Flow(WaterfallSoftwareDevelopment.NEW_HIRES, hiringRate);
@@ -129,16 +131,25 @@ class Workforce {
 
     private static Flow getResignationFlow(Stock experiencedWorkforce) {
         double averageEmploymentInDays = 673.0;
-        Rate quitRate = timeUnit ->
-                new Quantity(experiencedWorkforce.getCurrentValue().getValue()
+        Rate quitRate = new RatePerDay("Quit rate") {
+            @Override
+            protected Quantity quantityPerDay() {
+                return new Quantity(experiencedWorkforce.getCurrentValue().getValue()
                         / averageEmploymentInDays, People.getInstance());
+            }
+        };
         return new Flow("Employees quiting", quitRate);
     }
 
     private static Flow getAssimilationFlow(Stock newHires) {
         final double assimilationDelayInDays = 16.0 * 7;
 
-        Rate assimilationRate = timeUnit -> newHires.getCurrentValue().divide(assimilationDelayInDays);
+        Rate assimilationRate = new RatePerDay("Assimilation rate") {
+            @Override
+            protected Quantity quantityPerDay() {
+                return newHires.getCurrentValue().divide(assimilationDelayInDays);
+            }
+        };
 
         return new Flow("Assimilated hires", assimilationRate);
     }

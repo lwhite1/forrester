@@ -19,12 +19,13 @@ public class ExponentialDecayTest {
 
     @Test
     public void testRun1() {
+
         Model model = new Model("Population with exponential decay");
 
         Quantity count = new Quantity(100, People.getInstance());
         Stock population = new Stock("pop", count);
 
-        Rate deathRate = new RatePerDay() {
+        Rate deathRate = new RatePerDay("Death rate") {
             @Override
             protected Quantity quantityPerDay() {
                 return population.getCurrentValue().divide(80);

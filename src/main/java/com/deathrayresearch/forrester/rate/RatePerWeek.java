@@ -9,8 +9,8 @@ import com.deathrayresearch.forrester.measure.units.time.Times;
  */
 public abstract class RatePerWeek extends AbstractRate {
 
-    public RatePerWeek() {
-        super(Times.WEEK);
+    public RatePerWeek(String name) {
+        super(name, Times.WEEK);
     }
 
     private Quantity convert(Quantity quantity, TimeUnit newTimeUnit) {
