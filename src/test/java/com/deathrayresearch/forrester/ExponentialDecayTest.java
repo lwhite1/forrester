@@ -22,25 +22,25 @@ public class ExponentialDecayTest {
 
         Model model = new Model("Population with exponential decay");
 
-        Quantity count = new Quantity(100, People.getInstance());
-        Stock population = new Stock("pop", count);
+        Quantity count = new Quantity("Population",100, People.getInstance());
+        Stock population = new Stock(count);
 
-        Rate deathRate = new RatePerDay("Death rate") {
+        Rate deathRate = new RatePerDay() {
             @Override
             protected Quantity quantityPerDay() {
-                return population.getCurrentValue().divide(80);
+                return count.divide("Deaths", 80);
             }
         };
 
         System.out.println(deathRate.flowPerTimeUnit(Times.YEAR));
 
-        Flow deaths = new Flow("Deaths", deathRate);
+        Flow deaths = new Flow(deathRate);
 
         population.addOutflow(deaths);
 
         model.addStock(population);
 
-        Simulation run = new Simulation(model, Day.getInstance(), Times.weeks(52));
+        Simulation run = new Simulation(model, Day.getInstance(), Times.weeks("Simulation duration", 52));
         run.addEventHandler(ChartViewer.newInstance(run.getEventBus()));
         run.execute();
     }

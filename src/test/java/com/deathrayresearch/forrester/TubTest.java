@@ -23,38 +23,39 @@ public class TubTest {
 
         Model model = new Model("Tub model");
 
-        Stock tub = new Stock("Water in tub", Volumes.liters(3));
-
-        Quantity litersPerMinuteOut = Volumes.liters(3.0);
+        Stock tub = new Stock(Volumes.liters("Water in Tub", 3));
 
         // the water drains at the rate of the outflow capacity or the amount of water in the tub, whichever is less
-        Rate outRate = new RatePerMinute("Outflow Rate") {
+        Rate outRate = new RatePerMinute() {
+            Quantity litersPerMinuteOut = Volumes.liters("Liters out", 3.0);
+
             @Override
             public Quantity quantityPerMinute() {
-                return new Quantity(
+                return new Quantity("Outflow",
                         Math.min(litersPerMinuteOut.getValue(), tub.getCurrentValue().getValue()),
                         Liter.getInstance());
             }
         };
 
-        Flow outflow = new Flow("Out", outRate);
+        Flow outflow = new Flow(outRate);
 
-        Quantity litersPerMinuteIn =  Volumes.liters(2.96);
 
-        RatePerMinute inRate = new RatePerMinute("Inflow Rate") {
+        RatePerMinute inRate = new RatePerMinute() {
+            Quantity litersPerMinuteIn =  Volumes.liters("Inflow", 2.96);
+
             @Override
             protected Quantity quantityPerMinute() {
                 return litersPerMinuteIn;
             }
         };
-        Flow inflow = new Flow("In", inRate);
+        Flow inflow = new Flow(inRate);
 
         tub.addInflow(inflow);
         tub.addOutflow(outflow);
 
         model.addStock(tub);
 
-        Simulation run = new Simulation(model, Minute.getInstance(), Times.hours(2));
+        Simulation run = new Simulation(model, Minute.getInstance(), Times.HOUR, 2);
         run.addEventHandler(ChartViewer.newInstance(run.getEventBus()));
         run.execute();
     }

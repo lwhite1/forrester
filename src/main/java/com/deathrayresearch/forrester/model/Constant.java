@@ -9,11 +9,17 @@ public class Constant extends Element {
 
     private final double currentValue;
     private final Unit unit;
+    private final String name;
 
     public Constant(String name, Unit unit, double currentValue) {
-        super(name);
+        this.name = name;
         this.unit = unit;
         this.currentValue = currentValue;
+    }
+
+    @Override
+    public String getName() {
+        return name;
     }
 
     public double getCurrentValue() {

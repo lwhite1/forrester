@@ -9,29 +9,29 @@ import com.deathrayresearch.forrester.measure.Unit;
  */
 public final class Volumes {
 
-    public static Quantity liters(double value) {
+    public static Quantity liters(String name, double value) {
         Unit unit = Liter.getInstance();
-        return new Quantity(value, unit);
+        return new Quantity(name, value, unit);
     }
 
-    public static Quantity gallonsUS(double value) {
+    public static Quantity gallonsUS(String name, double value) {
         Unit unit = GallonUS.getInstance();
-        return new Quantity(value, unit);
+        return new Quantity(name, value, unit);
     }
 
-    public static Quantity cubicMeters(double value) {
+    public static Quantity cubicMeters(String name, double value) {
         Unit unit = CubicMeter.getInstance();
-        return new Quantity(value, unit);
+        return new Quantity(name, value, unit);
     }
 
-    public static Quantity fluidOuncesUS(double value) {
+    public static Quantity fluidOuncesUS(String name, double value) {
         Unit unit = FluidOunceUS.getInstance();
-        return new Quantity(value, unit);
+        return new Quantity(name, value, unit);
     }
 
-    public static Quantity quartsUS(double value) {
+    public static Quantity quartsUS(String name, double value) {
         Unit unit = QuartUS.getInstance();
-        return new Quantity(value, unit);
+        return new Quantity(name, value, unit);
     }
 
     private Volumes() {}

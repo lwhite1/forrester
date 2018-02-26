@@ -17,14 +17,12 @@ public class Stock extends Element {
 
     private Quantity currentValue;
 
-    public Stock(String name, Quantity quantity) {
-        super(name);
+    public Stock(Quantity quantity) {
         this.currentValue = quantity;
     }
 
     public Stock(String name, double initialAmount, Unit unit) {
-        super(name);
-        this.currentValue = new Quantity(initialAmount, unit);
+        this.currentValue = new Quantity(name, initialAmount, unit);
     }
 
     public void addInflow(Flow inFlow) {
@@ -50,6 +48,11 @@ public class Stock extends Element {
 
     public void setCurrentValue(Quantity currentValue) {
         this.currentValue = currentValue;
+    }
+
+    @Override
+    public String getName() {
+        return currentValue.getName();
     }
 
     @Override

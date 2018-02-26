@@ -25,7 +25,7 @@ public class sShapedPopulationGrowth {
 
         Stock population = new Stock("pop", 10, People.getInstance());
 
-        Quantity carryingCapacity = new Quantity(1000, People.getInstance());
+        Quantity carryingCapacity = new Quantity("Carrying capacity", 1000, People.getInstance());
 
         Constant fractionalNetBirthRate = new Constant(
                 "Maximum Fractional Birth Rate",
@@ -34,21 +34,23 @@ public class sShapedPopulationGrowth {
 
         // Rates of birth and death vary with the relationship of population to carrying capacity
         // This is a Logistic Growth Model
-        Rate birthRate = new RatePerDay("Birth rate") {
+        Rate birthRate = new RatePerDay() {
             @Override
             protected Quantity quantityPerDay() {
                 double ratio = population.getCurrentValue().getValue() / carryingCapacity.getValue();
-                return population.getCurrentValue().multiply(fractionalNetBirthRate.getCurrentValue() * (1 - ratio));
+                return population.getCurrentValue().multiply(
+                        "Births",
+                        fractionalNetBirthRate.getCurrentValue() * (1 - ratio));
             }
         };
 
-        Flow births = new Flow("Births", birthRate);
+        Flow births = new Flow(birthRate);
 
         population.addInflow(births);
 
         model.addStock(population);
 
-        Simulation run = new Simulation(model, Day.getInstance(), Times.weeks(32));
+        Simulation run = new Simulation(model, Day.getInstance(), Times.WEEK, 32);
         run.addEventHandler(ChartViewer.newInstance(run.getEventBus()));
         run.execute();
     }

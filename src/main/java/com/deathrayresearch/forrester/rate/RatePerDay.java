@@ -10,8 +10,13 @@ import com.google.common.base.Preconditions;
  */
 public abstract class RatePerDay extends AbstractRate {
 
-    public RatePerDay(String name) {
-        super(name, Times.DAY);
+    public RatePerDay() {
+        super(Times.DAY);
+    }
+
+    @Override
+    public String name() {
+        return quantityPerDay().getName();
     }
 
     private Quantity convert(Quantity quantity, TimeUnit newTimeUnit) {

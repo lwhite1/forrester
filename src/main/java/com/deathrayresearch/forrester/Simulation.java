@@ -44,6 +44,14 @@ public class Simulation {
         eventBus = new EventBus();
     }
 
+    public Simulation(Model model, TimeUnit timeStep, TimeUnit durationUnits, double durationAmount) {
+        this.model = model;
+        this.timeStep = timeStep;
+        this.duration = new Quantity("Simulation duration", durationAmount, durationUnits);
+        this.currentDateTime = LocalDateTime.now();
+        eventBus = new EventBus();
+    }
+
     public Simulation(Model model, TimeUnit timeStep, Quantity duration, LocalDateTime startTime) {
         this.model = model;
         this.timeStep = timeStep;

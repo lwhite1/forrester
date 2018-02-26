@@ -47,7 +47,7 @@ public class ChartViewerApplication extends Application {
     public static void setSimulation(Simulation simulation) {
         title = simulation.getModel().getName();
 
-        if (simulation.getDuration().isGreaterThan(Times.days(1))) {
+        if (simulation.getDuration().isGreaterThan(Times.days("Simulation duration", 1))) {
             formatter = DateTimeFormatter.BASIC_ISO_DATE;
         } else {
             formatter = DateTimeFormatter.ISO_LOCAL_TIME;

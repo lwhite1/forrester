@@ -11,7 +11,6 @@ import com.deathrayresearch.forrester.model.Flow;
 import com.deathrayresearch.forrester.model.Model;
 import com.deathrayresearch.forrester.model.Stock;
 import com.deathrayresearch.forrester.rate.Rate;
-import com.deathrayresearch.forrester.rate.RatePerDay;
 import com.deathrayresearch.forrester.rate.RatePerWeek;
 import com.deathrayresearch.forrester.ui.ChartViewer;
 import org.junit.Test;
@@ -46,36 +45,36 @@ public class AgileSoftwareDevelopment {
         Stock latentDefects = new Stock("latent defects", 0, Defect.getInstance());
         Stock knownDefects = new Stock("known defects", 0, Defect.getInstance());
 
-        Rate completionRate = new RatePerWeek("Completion rate") {
+        Rate completionRate = new RatePerWeek() {
             @Override
             protected Quantity quantityPerWeek() {
                 if (sprintBacklog.getCurrentValue().getValue() <= 0) {
-                    return new Quantity(0, Work.getInstance());
+                    return new Quantity("Work completed",0, Work.getInstance());
                 }
-                return new Quantity(Math.min(sprintBacklog.getCurrentValue().getValue(), nominalProductivityPerPersonWeek), Work.getInstance());
+                return new Quantity("Work completed", Math.min(sprintBacklog.getCurrentValue().getValue(), nominalProductivityPerPersonWeek), Work.getInstance());
             }
         };
 
-        Flow workCompletion = new Flow("Completed work", completionRate);
+        Flow workCompletion = new Flow(completionRate);
 
-        Rate defectCreationRate = new RatePerWeek("Defect creation rate") {
+        Rate defectCreationRate = new RatePerWeek() {
             @Override
             protected Quantity quantityPerWeek() {
                 return workCompletion.getRate().flowPerTimeUnit(Day.getInstance())
-                        .multiply(1.0 - nominalFractionCorrectAndComplete);
+                        .multiply("Created defects", 1.0 - nominalFractionCorrectAndComplete);
             }
         };
 
-        Flow createdDefects = new Flow("Created defects", defectCreationRate);
+        Flow createdDefects = new Flow(defectCreationRate);
 
-        Rate sprintDefectFindRate = new RatePerWeek("Sprint defect find rate") {
+        Rate sprintDefectFindRate = new RatePerWeek() {
             @Override
             protected Quantity quantityPerWeek() {
-                return latentDefects.getCurrentValue().multiply(0.4);
+                return latentDefects.getCurrentValue().multiply("Found defects", 0.4);
             }
         };
 
-        Flow foundDefects = new Flow("Found defects", sprintDefectFindRate);
+        Flow foundDefects = new Flow(sprintDefectFindRate);
 
         completedWork.addInflow(workCompletion);
         sprintBacklog.addOutflow(workCompletion);
@@ -91,7 +90,7 @@ public class AgileSoftwareDevelopment {
         model.addStock(latentDefects);
         model.addStock(knownDefects);
 
-        Simulation run = new Simulation(model, Day.getInstance(), Times.weeks(52));
+        Simulation run = new Simulation(model, Day.getInstance(), Times.WEEK,52);
         run.addEventHandler(ChartViewer.newInstance(run.getEventBus()));
         run.execute();
     }

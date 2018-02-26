@@ -19,11 +19,10 @@ public class Flow extends Element {
     }
 
     public String getName() {
-        return super.getName();
+        return rate.name();
     }
 
-    public Flow(String name, Rate rate) {
-        super(name);
+    public Flow(Rate rate) {
         this.rate = rate;
     }
 }

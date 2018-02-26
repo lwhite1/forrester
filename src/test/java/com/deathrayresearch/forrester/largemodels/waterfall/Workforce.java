@@ -114,7 +114,7 @@ class Workforce {
 
         final double hiringDelayInDays = 8.0 * 7;
 
-        Rate hiringRate = new RatePerDay("Hiring Rate") {
+        Rate hiringRate = new RatePerDay() {
 
             @Override
             protected Quantity quantityPerDay() {
@@ -122,35 +122,35 @@ class Workforce {
                 double result = gap / hiringDelayInDays;
                 double maxAmount = Math.max(result, 0.0);
 
-                return new Quantity(maxAmount, People.getInstance());
+                return new Quantity("Hired", maxAmount, People.getInstance());
             }
         };
 
-        return new Flow(WaterfallSoftwareDevelopment.NEW_HIRES, hiringRate);
+        return new Flow(hiringRate);
     }
 
     private static Flow getResignationFlow(Stock experiencedWorkforce) {
         double averageEmploymentInDays = 673.0;
-        Rate quitRate = new RatePerDay("Quit rate") {
+        Rate quitRate = new RatePerDay() {
             @Override
             protected Quantity quantityPerDay() {
-                return new Quantity(experiencedWorkforce.getCurrentValue().getValue()
+                return new Quantity("Resigned", experiencedWorkforce.getCurrentValue().getValue()
                         / averageEmploymentInDays, People.getInstance());
             }
         };
-        return new Flow("Employees quiting", quitRate);
+        return new Flow(quitRate);
     }
 
     private static Flow getAssimilationFlow(Stock newHires) {
         final double assimilationDelayInDays = 16.0 * 7;
 
-        Rate assimilationRate = new RatePerDay("Assimilation rate") {
+        Rate assimilationRate = new RatePerDay() {
             @Override
             protected Quantity quantityPerDay() {
-                return newHires.getCurrentValue().divide(assimilationDelayInDays);
+                return newHires.getCurrentValue().divide("Assimilated hires", assimilationDelayInDays);
             }
         };
 
-        return new Flow("Assimilated hires", assimilationRate);
+        return new Flow(assimilationRate);
     }
 }

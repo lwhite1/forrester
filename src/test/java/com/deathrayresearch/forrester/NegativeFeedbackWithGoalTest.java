@@ -23,28 +23,28 @@ public class NegativeFeedbackWithGoalTest {
     public void testRun1() {
         Model model = new Model("Negative feedback with goal");
 
-        Quantity count = new Quantity(1000, Inventory.getInstance());
-        Stock inventoryOnHand = new Stock("on-hand", count);
+        Quantity count = new Quantity("Inventory on-hand", 1000, Inventory.getInstance());
+        Stock inventoryOnHand = new Stock(count);
 
-        Quantity goal = new Quantity(860, Inventory.getInstance());
+        Quantity goal = new Quantity("Target inventory", 860, Inventory.getInstance());
         double adjustmentTimeInTimeSteps = 8;
 
-        Rate productionRate = new RatePerDay("Production rate") {
+        Rate productionRate = new RatePerDay() {
 
             @Override
             protected Quantity quantityPerDay() {
                 Quantity delta = goal.subtract(inventoryOnHand.getCurrentValue());
-                return delta.divide(adjustmentTimeInTimeSteps);
+                return delta.divide("Production", adjustmentTimeInTimeSteps);
             }
         };
 
-        Flow production = new Flow("Production", productionRate);
+        Flow production = new Flow(productionRate);
 
         inventoryOnHand.addInflow(production);
 
         model.addStock(inventoryOnHand);
 
-        Simulation run = new Simulation(model, Day.getInstance(), Times.weeks(12));
+        Simulation run = new Simulation(model, Day.getInstance(), Times.WEEK, 12);
         run.addEventHandler(ChartViewer.newInstance(run.getEventBus()));
         run.execute();
     }

@@ -11,8 +11,8 @@ import static org.junit.Assert.*;
  */
 public class UnitTest {
 
-    private Quantity miles = new Quantity(100, Mile.getInstance());
-    private Quantity meters = new Quantity(160934, Meter.getInstance());
+    private Quantity miles = new Quantity("Distance 1", 100, Mile.getInstance());
+    private Quantity meters = new Quantity("Distance 2", 160934, Meter.getInstance());
 
     @Test
     public void ratioToBaseUnit() throws Exception {

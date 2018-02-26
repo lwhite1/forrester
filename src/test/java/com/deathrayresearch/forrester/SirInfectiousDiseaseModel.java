@@ -20,27 +20,33 @@ import org.junit.Test;
  */
 public class SirInfectiousDiseaseModel {
 
+    private final static People PEOPLE = People.getInstance();
+
     @Test
     public void testRun1() {
         Model model = new Model("SIR Infectious Disease Model");
 
-        Stock susceptiblePopulation = new Stock("Susceptible", 1000, People.getInstance());
+        Stock susceptiblePopulation = new Stock("Susceptible", 1000, PEOPLE);
 
-        Stock infectiousPopulation = new Stock("Infectious", 10, People.getInstance());
+        Stock infectiousPopulation = new Stock("Infectious", 10, PEOPLE);
 
-        Stock recoveredPopulation = new Stock("Recovered", 0, People.getInstance());
+        Stock recoveredPopulation = new Stock("Recovered", 0, PEOPLE);
 
         // at each step, each susceptible person meets n other people
         Constant contactRate = new Constant("Contact Rate", Thing.getInstance(), 8);
 
         // The number of newly infected at each step, they get moved from susceptible to infectious status.
-        Rate infectiousRate = new RatePerDay("Infectious rate") {
+        Rate infectiousRate = new RatePerDay() {
 
 
             @Override
             public Quantity quantityPerDay() {
 
-                Quantity population = new Quantity(1010, People.getInstance());
+                double totalPop = susceptiblePopulation.getCurrentValue().getValue()
+                        + infectiousPopulation.getCurrentValue().getValue()
+                        + recoveredPopulation.getCurrentValue().getValue();
+
+                Quantity population = new Quantity("Total Population", totalPop, PEOPLE);
 
                 double infectiousPortion = infectiousPopulation.getCurrentValue().getValue() / (population.getValue());
 
@@ -53,22 +59,22 @@ public class SirInfectiousDiseaseModel {
                 if (infectedCount > susceptiblePopulation.getCurrentValue().getValue()) {
                     infectedCount = susceptiblePopulation.getCurrentValue().getValue();
                 }
-                return new Quantity(infectedCount, People.getInstance());
+                return new Quantity("Infected", infectedCount, PEOPLE);
             }
         };
 
-        Rate recoveryRate = new RatePerDay("Recovery Rate") {
+        Rate recoveryRate = new RatePerDay() {
 
             @Override
             public Quantity quantityPerDay() {
                 double recoveredProportion = .2; //20% recover per day
-                return new Quantity(infectiousPopulation.getCurrentValue().getValue() * recoveredProportion,
-                        People.getInstance());
+                return new Quantity("Recovered", infectiousPopulation.getCurrentValue().getValue() * recoveredProportion,
+                        PEOPLE);
             }
         };
 
-        Flow infected = new Flow("Infected", infectiousRate);
-        Flow recovered = new Flow("Recovered", recoveryRate);
+        Flow infected = new Flow(infectiousRate);
+        Flow recovered = new Flow(recoveryRate);
 
         susceptiblePopulation.addOutflow(infected);
         infectiousPopulation.addInflow(infected);
@@ -79,7 +85,7 @@ public class SirInfectiousDiseaseModel {
         model.addStock(infectiousPopulation);
         model.addStock(recoveredPopulation);
 
-        Simulation run = new Simulation(model, Day.getInstance(), Times.weeks(8));
+        Simulation run = new Simulation(model, Day.getInstance(), Times.weeks("Simulation duration", 8));
         run.addEventHandler(CsvSubscriber.newInstance(run.getEventBus(), "/tmp/forrester/run1out.csv"));
         run.addEventHandler(ChartViewer.newInstance(run.getEventBus()));
         run.execute();

@@ -17,7 +17,7 @@ public interface Unit {
 
     default Quantity fromBaseUnits(Quantity inBaseUnits) {
         double numberOfCurrentUnitsInArgument = inBaseUnits.getValue() / ratioToBaseUnit();
-        return new Quantity(numberOfCurrentUnitsInArgument, this);
+        return new Quantity(inBaseUnits.getName(), numberOfCurrentUnitsInArgument, this);
     }
 
     default double fromBaseUnits(double inBaseUnits) {
@@ -25,7 +25,7 @@ public interface Unit {
     }
 
     default Quantity toBaseUnits(Quantity quantity) {
-        return new Quantity(quantity.getValue() * ratioToBaseUnit(), getBaseUnit());
+        return new Quantity(quantity.getName(),quantity.getValue() * ratioToBaseUnit(), getBaseUnit());
     }
 
     default double toBaseUnits(double amount) {

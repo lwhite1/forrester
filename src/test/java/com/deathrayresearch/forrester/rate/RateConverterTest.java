@@ -17,28 +17,28 @@ public class RateConverterTest {
 
     @Test
     public void convert() throws Exception {
-        Quantity original = new Quantity(100, Mile.getInstance());
+        Quantity original = new Quantity("Distance", 100, Mile.getInstance());
         Quantity newQuantity = RateConverter.convert(original, Hour.getInstance(), Day.getInstance());
         assertEquals(2400, newQuantity.getValue(), 0.0);
     }
 
     @Test
     public void convert2() throws Exception {
-        Quantity original = new Quantity(10, Mile.getInstance());
+        Quantity original = new Quantity("Distance", 10, Mile.getInstance());
         Quantity newQuantity = RateConverter.convert(original, Hour.getInstance(), Day.getInstance());
         assertEquals(240, newQuantity.getValue(), 0.0);
     }
 
     @Test
     public void convert3() throws Exception {
-        Quantity original = new Quantity(2400, Mile.getInstance());
+        Quantity original = new Quantity("Distance", 2400, Mile.getInstance());
         Quantity newQuantity = RateConverter.convert(original, Day.getInstance(), Hour.getInstance());
         assertEquals(100, newQuantity.getValue(), 0.0);
     }
 
     @Test
     public void convert4() throws Exception {
-        Quantity original = new Quantity(60, Mile.getInstance());
+        Quantity original = new Quantity("Distance", 60, Mile.getInstance());
         Quantity newQuantity = RateConverter.convert(original, Hour.getInstance(), Minute.getInstance());
         assertEquals(1, newQuantity.getValue(), 0.0);
     }

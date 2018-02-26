@@ -38,11 +38,11 @@ public class SalesMixModel {
 
         Stock customers = new Stock("customers", 0, People.getInstance());
 
-        Rate acquisitionRate = new RatePerDay("Acquisition rate") {
+        Rate acquisitionRate = new RatePerDay() {
 
             @Override
             protected Quantity quantityPerDay() {
-                return new Quantity(10, People.getInstance());
+                return new Quantity("New customers", 10, People.getInstance());
             }
         };
 
@@ -63,7 +63,7 @@ public class SalesMixModel {
         Variable proportionHardwareSales = new Variable("Proportion hardware", DimensionlessUnit.getInstance(),
                 () -> hardwareSales.getCurrentValue() / totalSales.getCurrentValue());
 
-        Flow customerAcquisition = new Flow("Customer acquisition", acquisitionRate);
+        Flow customerAcquisition = new Flow(acquisitionRate);
         customers.addInflow(customerAcquisition);
 
         model.addStock(customers);
@@ -71,7 +71,7 @@ public class SalesMixModel {
         model.addVariable(serviceSales);
         model.addVariable(proportionHardwareSales);
 
-        com.deathrayresearch.forrester.Simulation run = new com.deathrayresearch.forrester.Simulation(model, Week.getInstance(), Times.years(10));
+        Simulation run = new Simulation(model, Week.getInstance(), Times.years("Simulation Duration", 10));
         run.addEventHandler(ChartViewer.newInstance(run.getEventBus()));
         run.addEventHandler(CsvSubscriber.newInstance(run.getEventBus(), "/tmp/forrester/run1out.csv"));
         run.execute();

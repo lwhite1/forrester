@@ -23,31 +23,31 @@ public class MalthusPopulationTest {
 
         Stock population = new Stock("population", 100, People.getInstance());
 
-        RatePerDay birthRate = new RatePerDay("Birth rate") {
+        RatePerDay birthRate = new RatePerDay() {
             @Override
             protected Quantity quantityPerDay() {
-                return population.getCurrentValue().multiply(0.04);
+                return population.getCurrentValue().multiply("Births", 0.04);
             }
         };
 
 
-        Flow births = new Flow("Births", birthRate);
+        Flow births = new Flow(birthRate);
 
-        Rate deathRate = new RatePerDay("Birth rate") {
+        Rate deathRate = new RatePerDay() {
             @Override
             protected Quantity quantityPerDay() {
-                return population.getCurrentValue().multiply(0.02);
+                return population.getCurrentValue().multiply("Deaths", 0.02);
             }
         };
 
-        Flow deaths = new Flow("Deaths", deathRate);
+        Flow deaths = new Flow(deathRate);
 
         population.addInflow(births);
         population.addOutflow(deaths);
 
         model.addStock(population);
 
-        Simulation run = new Simulation(model, Day.getInstance(), Times.weeks(52));
+        Simulation run = new Simulation(model, Day.getInstance(), Times.WEEK, 52);
         run.addEventHandler(ChartViewer.newInstance(run.getEventBus()));
         run.execute();
     }

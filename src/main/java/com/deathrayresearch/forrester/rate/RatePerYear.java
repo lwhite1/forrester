@@ -9,12 +9,17 @@ import com.deathrayresearch.forrester.measure.units.time.Times;
  */
 public abstract class RatePerYear extends AbstractRate {
 
-    public RatePerYear(String name) {
-        super(name, Times.YEAR);
+    public RatePerYear() {
+        super(Times.YEAR);
     }
 
     private Quantity convert(Quantity quantity, TimeUnit newTimeUnit) {
         return RateConverter.convert(quantity, getTimeUnit(), newTimeUnit);
+    }
+
+    @Override
+    public String name() {
+        return quantityPerYear().getName();
     }
 
     @Override
