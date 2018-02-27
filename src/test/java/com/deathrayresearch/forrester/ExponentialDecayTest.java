@@ -28,7 +28,7 @@ public class ExponentialDecayTest {
         Rate deathRate = new RatePerDay() {
             @Override
             protected Quantity quantityPerDay() {
-                return count.divide("Deaths", 80);
+                return population.getCurrentValue().divide("Deaths", 80);
             }
         };
 

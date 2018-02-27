@@ -14,6 +14,8 @@ import com.deathrayresearch.forrester.rate.RatePerMinute;
 import com.deathrayresearch.forrester.ui.ChartViewer;
 import org.junit.Test;
 
+import java.time.Duration;
+
 /**
  *
  */
@@ -25,7 +27,7 @@ public class TubTest {
         Model model = new Model("Tub model");
         Simulation run = new Simulation(model, Minute.getInstance(), Times.HOUR, 1);
 
-        Stock tub = new Stock(Volumes.liters("Water in Tub", 3));
+        Stock tub = new Stock(Volumes.liters("Water in Tub", 30));
 
         // the water drains at the rate of the outflow capacity or the amount of water in the tub, whichever is less
         Rate outRate = new RatePerMinute() {
@@ -41,13 +43,15 @@ public class TubTest {
 
         Flow outflow = new Flow(outRate);
 
-
         RatePerMinute inRate = new RatePerMinute() {
             Quantity litersPerMinuteIn =  Volumes.liters("Inflow", 2.96);
-
+            Quantity lowInflow = Volumes.liters("Inflow", 1.0);
             @Override
             protected Quantity quantityPerMinute() {
-
+                // waits five minutes before adding any inflow
+                if (durationIsLessThan(run.getElapsedTime(), Duration.ofMinutes(5))) {
+                    return lowInflow;
+                }
                 return litersPerMinuteIn;
             }
         };
@@ -61,5 +65,9 @@ public class TubTest {
         run.addEventHandler(ChartViewer.newInstance(run.getEventBus()));
         run.addEventHandler(CsvSubscriber.newInstance(run.getEventBus(), "tub.csv"));
         run.execute();
+    }
+
+    private static boolean durationIsLessThan(Duration d1, Duration d2) {
+        return d1.compareTo(d2) < 0;
     }
 }

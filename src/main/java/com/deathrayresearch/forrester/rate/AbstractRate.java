@@ -16,4 +16,10 @@ public abstract class AbstractRate implements Rate {
     public TimeUnit getTimeUnit() {
         return timeUnit;
     }
+
+    @Override
+    public String toString() {
+        return name() + ": " + flowPerTimeUnit(timeUnit);
+    }
+
 }

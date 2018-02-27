@@ -7,24 +7,38 @@ import com.deathrayresearch.forrester.event.TimestepEvent;
 import com.deathrayresearch.forrester.measure.Quantity;
 import com.deathrayresearch.forrester.measure.TimeUnit;
 import com.deathrayresearch.forrester.measure.Unit;
+import com.deathrayresearch.forrester.measure.units.time.*;
 import com.deathrayresearch.forrester.model.Flow;
 import com.deathrayresearch.forrester.model.Model;
 import com.deathrayresearch.forrester.model.Stock;
 import com.deathrayresearch.forrester.model.Module;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableList;
 import com.google.common.eventbus.EventBus;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 /**
  * Simulation is the execution environment for a model
  */
 public class Simulation {
+
+    private static final List<TimeUnit> SUPPORTED_TIMESTEPS = ImmutableList.of(
+        Second.getInstance(),
+        Minute.getInstance(),
+        Hour.getInstance(),
+        Day.getInstance(),
+        Week.getInstance()
+    );
+
+    private static final String UNSUPPORTED_TIME_UNIT_MESSSAGE
+        = "The provided time unit is not supported as a timeStep";
 
     private final Model model;
 
@@ -41,6 +55,7 @@ public class Simulation {
     private final EventBus eventBus;
 
     public Simulation(Model model, TimeUnit timeStep, Quantity duration) {
+        Preconditions.checkArgument(SUPPORTED_TIMESTEPS.contains(timeStep), UNSUPPORTED_TIME_UNIT_MESSSAGE);
         this.model = model;
         this.timeStep = timeStep;
         this.duration = duration;
@@ -49,6 +64,7 @@ public class Simulation {
     }
 
     public Simulation(Model model, TimeUnit timeStep, TimeUnit durationUnits, double durationAmount) {
+        Preconditions.checkArgument(SUPPORTED_TIMESTEPS.contains(timeStep), UNSUPPORTED_TIME_UNIT_MESSSAGE);
         this.model = model;
         this.timeStep = timeStep;
         this.duration = new Quantity("Simulation duration", durationAmount, durationUnits);
@@ -57,13 +73,13 @@ public class Simulation {
     }
 
     public Simulation(Model model, TimeUnit timeStep, Quantity duration, LocalDateTime startTime) {
+        Preconditions.checkArgument(SUPPORTED_TIMESTEPS.contains(timeStep), UNSUPPORTED_TIME_UNIT_MESSSAGE);
         this.model = model;
         this.timeStep = timeStep;
         this.duration = duration;
         this.currentDateTime = startTime;
         eventBus = new EventBus();
     }
-
 
     public void addEventHandler(EventHandler handler) {
         eventHandlers.add(handler);
@@ -216,5 +232,9 @@ public class Simulation {
 
     public LocalDateTime getCurrentDateTime() {
         return currentDateTime;
+    }
+
+    public Duration getElapsedTime() {
+        return elapsedTime;
     }
 }
