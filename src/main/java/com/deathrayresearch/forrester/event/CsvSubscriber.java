@@ -34,8 +34,10 @@ public class CsvSubscriber implements EventHandler {
         FileWriter fileWriter = null;
 
         File file = Paths.get(fileName).toFile();
-        file.getParentFile().mkdirs();
-
+        File parent = file.getParentFile();
+        if (parent != null) {
+            file.getParentFile().mkdirs();
+        }
         try {
             fileWriter = new FileWriter(fileName);
         } catch (IOException e) {
@@ -45,7 +47,7 @@ public class CsvSubscriber implements EventHandler {
     }
 
     @Subscribe
-    public void handleTimestepEvent(TimestepEvent event) {
+    public void handleTimeStepEvent(TimestepEvent event) {
         Model model = event.getModel();
 
         List<String> values = new ArrayList<>();

@@ -20,7 +20,7 @@ public class ChartViewer implements EventHandler {
 
     @Override
     @Subscribe
-    public void handleTimestepEvent(TimestepEvent event) {
+    public void handleTimeStepEvent(TimestepEvent event) {
         ChartViewerApplication.addValues(event.getModel().getStockValues(),
                 event.getModel().getVariableValues(), event.getCurrentTime());
     }

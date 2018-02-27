@@ -1,5 +1,6 @@
 package com.deathrayresearch.forrester;
 
+import com.deathrayresearch.forrester.event.CsvSubscriber;
 import com.deathrayresearch.forrester.measure.Quantity;
 import com.deathrayresearch.forrester.measure.units.time.Minute;
 import com.deathrayresearch.forrester.measure.units.time.Times;
@@ -22,6 +23,7 @@ public class TubTest {
     public void testRun1() {
 
         Model model = new Model("Tub model");
+        Simulation run = new Simulation(model, Minute.getInstance(), Times.HOUR, 1);
 
         Stock tub = new Stock(Volumes.liters("Water in Tub", 3));
 
@@ -45,6 +47,7 @@ public class TubTest {
 
             @Override
             protected Quantity quantityPerMinute() {
+
                 return litersPerMinuteIn;
             }
         };
@@ -55,8 +58,8 @@ public class TubTest {
 
         model.addStock(tub);
 
-        Simulation run = new Simulation(model, Minute.getInstance(), Times.HOUR, 2);
         run.addEventHandler(ChartViewer.newInstance(run.getEventBus()));
+        run.addEventHandler(CsvSubscriber.newInstance(run.getEventBus(), "tub.csv"));
         run.execute();
     }
 }

@@ -12,8 +12,10 @@ import com.deathrayresearch.forrester.model.Model;
 import com.deathrayresearch.forrester.model.Stock;
 import com.deathrayresearch.forrester.model.Module;
 
+import com.google.common.base.Preconditions;
 import com.google.common.eventbus.EventBus;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -31,6 +33,8 @@ public class Simulation {
     private final TimeUnit timeStep;
 
     private LocalDateTime currentDateTime;
+
+    private Duration elapsedTime = Duration.ZERO;
 
     private final Set<EventHandler> eventHandlers = new HashSet<>();
 
@@ -177,18 +181,23 @@ public class Simulation {
         switch (timeStepName) {
             case "Second" :
                 currentDateTime = dateTime.plusSeconds(1);
+                elapsedTime = elapsedTime.plusSeconds(1);
                 break;
             case "Minute" :
                 currentDateTime = dateTime.plusMinutes(1);
+                elapsedTime = elapsedTime.plusMinutes(1);
                 break;
             case "Hour" :
                 currentDateTime = dateTime.plusHours(1);
+                elapsedTime = elapsedTime.plusHours(1);
                 break;
             case "Day" :
                 currentDateTime = dateTime.plusDays(1);
+                elapsedTime = elapsedTime.plusDays(1);
                 break;
             case "Week" :
                 currentDateTime = dateTime.plusWeeks(1);
+                elapsedTime = elapsedTime.plusDays(7);
                 break;
         }
     }
