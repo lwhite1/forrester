@@ -1,6 +1,5 @@
 package com.deathrayresearch.forrester.model;
 
-
 import com.deathrayresearch.forrester.measure.Quantity;
 import com.deathrayresearch.forrester.measure.Unit;
 
@@ -26,7 +25,6 @@ public class Stock extends Element {
     }
 
     public void addInflow(Flow inFlow) {
-
         inflows.add(inFlow);
     }
 

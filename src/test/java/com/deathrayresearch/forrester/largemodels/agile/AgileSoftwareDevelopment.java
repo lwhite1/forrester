@@ -35,7 +35,13 @@ public class AgileSoftwareDevelopment {
     @Test
     public void testRun1() {
 
-        Model model = new Model("Software development");
+        Simulation run = new Simulation(getModel(), Day.getInstance(), Times.WEEK,52);
+        run.addEventHandler(ChartViewer.newInstance(run.getEventBus()));
+        run.execute();
+    }
+
+    public Model getModel() {
+        Model model = new Model("Agile software development");
 
         Stock productBacklog = new Stock("product backlog", projectSize, Work.getInstance());
         Stock releaseBacklog = new Stock("release backlog", releaseSize, Work.getInstance());
@@ -49,9 +55,9 @@ public class AgileSoftwareDevelopment {
             @Override
             protected Quantity quantityPerWeek() {
                 if (sprintBacklog.getCurrentValue().getValue() <= 0) {
-                    return new Quantity("Work completed",0, Work.getInstance());
+                    return new Quantity("Completed Work",0, Work.getInstance());
                 }
-                return new Quantity("Work completed", Math.min(sprintBacklog.getCurrentValue().getValue(), nominalProductivityPerPersonWeek), Work.getInstance());
+                return new Quantity("Completed Work", Math.min(sprintBacklog.getCurrentValue().getValue(), nominalProductivityPerPersonWeek), Work.getInstance());
             }
         };
 
@@ -61,7 +67,7 @@ public class AgileSoftwareDevelopment {
             @Override
             protected Quantity quantityPerWeek() {
                 return workCompletion.getRate().flowPerTimeUnit(Day.getInstance())
-                        .multiply("Created defects", 1.0 - nominalFractionCorrectAndComplete);
+                    .multiply("Created defects", 1.0 - nominalFractionCorrectAndComplete);
             }
         };
 
@@ -80,8 +86,9 @@ public class AgileSoftwareDevelopment {
         sprintBacklog.addOutflow(workCompletion);
 
         latentDefects.addInflow(createdDefects);
-        knownDefects.addInflow(foundDefects);
         latentDefects.addOutflow(foundDefects);
+
+        knownDefects.addInflow(foundDefects);
 
         model.addStock(productBacklog);
         model.addStock(releaseBacklog);
@@ -89,10 +96,7 @@ public class AgileSoftwareDevelopment {
         model.addStock(completedWork);
         model.addStock(latentDefects);
         model.addStock(knownDefects);
-
-        Simulation run = new Simulation(model, Day.getInstance(), Times.WEEK,52);
-        run.addEventHandler(ChartViewer.newInstance(run.getEventBus()));
-        run.execute();
+        return model;
     }
 
     private static class Work implements Unit {

@@ -65,9 +65,17 @@ public class WaterfallSoftwareDevelopment {
     @Test
     public void testRun1() {
 
+        Quantity duration = new Quantity("Simulation duration", 1, Year.getInstance());
+        Simulation simulation = new Simulation(model, Day.getInstance(), duration);
+        simulation.addEventHandler(ChartViewer.newInstance(simulation.getEventBus()));
+
+        simulation.executeSubSystems();
+    }
+
+    public Model getModel() {
         model.addStock(workforce.getStock(NEWLY_HIRED));
         model.addStock(workforce.getStock(EXPERIENCED));
-       // model.addStock(workforce.getStock(CUM_MP_FOR_TRAINING));
+        // model.addStock(workforce.getStock(CUM_MP_FOR_TRAINING));
 
         model.addVariable(workforce.getVariable(DESIRED_WORKFORCE));
         model.addVariable(workforce.getVariable(WORKFORCE_GAP));
@@ -90,11 +98,7 @@ public class WaterfallSoftwareDevelopment {
         model.addModule(development);
         model.addModule(testAndRework);
 
-        Quantity duration = new Quantity("Simulation duration", 1, Year.getInstance());
-        Simulation simulation = new Simulation(model, Day.getInstance(), duration);
-        simulation.addEventHandler(ChartViewer.newInstance(simulation.getEventBus()));
-
-        simulation.executeSubSystems();
+        return model;
     }
 
 }

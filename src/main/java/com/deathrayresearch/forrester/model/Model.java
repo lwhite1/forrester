@@ -14,6 +14,7 @@ public class Model {
     private List<Stock> stocks = new ArrayList<>();
     private Map<String, Variable> variables = new HashMap<>();
     private List<Module> modules = new ArrayList<>();
+    private List<Constant> constants = new ArrayList<>();
 
     public Model(String name) {
         this.name = name;
@@ -95,5 +96,13 @@ public class Model {
 
     public Variable getVariable(String variableName) {
         return variables.get(variableName);
+    }
+
+    public List<Constant> getConstants() {
+        return constants;
+    }
+
+    public void addConstant(Constant constant) {
+        constants.add(constant);
     }
 }

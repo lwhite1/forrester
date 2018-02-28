@@ -31,9 +31,7 @@ public class ExponentialDecayTest {
                 return population.getCurrentValue().divide("Deaths", 80);
             }
         };
-
-        System.out.println(deathRate.flowPerTimeUnit(Times.YEAR));
-
+        
         Flow deaths = new Flow(deathRate);
 
         population.addOutflow(deaths);

@@ -1,6 +1,6 @@
 package com.deathrayresearch.forrester;
 
-import com.deathrayresearch.forrester.event.CsvSubscriber;
+import com.deathrayresearch.forrester.io.CsvSubscriber;
 import com.deathrayresearch.forrester.measure.Quantity;
 import com.deathrayresearch.forrester.measure.units.time.Minute;
 import com.deathrayresearch.forrester.measure.units.time.Times;
