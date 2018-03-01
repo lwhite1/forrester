@@ -26,7 +26,7 @@ public class MalthusPopulationTest {
         RatePerDay birthRate = new RatePerDay() {
             @Override
             protected Quantity quantityPerDay() {
-                return population.getCurrentValue().multiply("Births", 0.04);
+                return population.getQuantity().multiply("Births", 0.04);
             }
         };
 
@@ -36,7 +36,7 @@ public class MalthusPopulationTest {
         Rate deathRate = new RatePerDay() {
             @Override
             protected Quantity quantityPerDay() {
-                return population.getCurrentValue().multiply("Deaths", 0.02);
+                return population.getQuantity().multiply("Deaths", 0.02);
             }
         };
 

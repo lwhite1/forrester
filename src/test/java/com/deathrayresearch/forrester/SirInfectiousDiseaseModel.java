@@ -42,22 +42,22 @@ public class SirInfectiousDiseaseModel {
             @Override
             public Quantity quantityPerDay() {
 
-                double totalPop = susceptiblePopulation.getCurrentValue().getValue()
-                        + infectiousPopulation.getCurrentValue().getValue()
-                        + recoveredPopulation.getCurrentValue().getValue();
+                double totalPop = susceptiblePopulation.getQuantity().getValue()
+                        + infectiousPopulation.getQuantity().getValue()
+                        + recoveredPopulation.getQuantity().getValue();
 
                 Quantity population = new Quantity("Total Population", totalPop, PEOPLE);
 
-                double infectiousPortion = infectiousPopulation.getCurrentValue().getValue() / (population.getValue());
+                double infectiousPortion = infectiousPopulation.getQuantity().getValue() / (population.getValue());
 
                 double infectivity = .10; // proportion of encounters with an infectious person results in infection
 
                 double numberOfInfectedMet = contactRate.getCurrentValue() * infectiousPortion;
 
-                double infectedCount = numberOfInfectedMet * susceptiblePopulation.getCurrentValue().getValue() * infectivity;
+                double infectedCount = numberOfInfectedMet * susceptiblePopulation.getQuantity().getValue() * infectivity;
 
-                if (infectedCount > susceptiblePopulation.getCurrentValue().getValue()) {
-                    infectedCount = susceptiblePopulation.getCurrentValue().getValue();
+                if (infectedCount > susceptiblePopulation.getQuantity().getValue()) {
+                    infectedCount = susceptiblePopulation.getQuantity().getValue();
                 }
                 return new Quantity("Infected", infectedCount, PEOPLE);
             }
@@ -68,7 +68,7 @@ public class SirInfectiousDiseaseModel {
             @Override
             public Quantity quantityPerDay() {
                 double recoveredProportion = .2; //20% recover per day
-                return new Quantity("Recovered", infectiousPopulation.getCurrentValue().getValue() * recoveredProportion,
+                return new Quantity("Recovered", infectiousPopulation.getQuantity().getValue() * recoveredProportion,
                         PEOPLE);
             }
         };

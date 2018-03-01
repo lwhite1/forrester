@@ -54,10 +54,10 @@ public class AgileSoftwareDevelopment {
         Rate completionRate = new RatePerWeek() {
             @Override
             protected Quantity quantityPerWeek() {
-                if (sprintBacklog.getCurrentValue().getValue() <= 0) {
+                if (sprintBacklog.getQuantity().getValue() <= 0) {
                     return new Quantity("Completed Work",0, Work.getInstance());
                 }
-                return new Quantity("Completed Work", Math.min(sprintBacklog.getCurrentValue().getValue(), nominalProductivityPerPersonWeek), Work.getInstance());
+                return new Quantity("Completed Work", Math.min(sprintBacklog.getQuantity().getValue(), nominalProductivityPerPersonWeek), Work.getInstance());
             }
         };
 
@@ -76,7 +76,7 @@ public class AgileSoftwareDevelopment {
         Rate sprintDefectFindRate = new RatePerWeek() {
             @Override
             protected Quantity quantityPerWeek() {
-                return latentDefects.getCurrentValue().multiply("Found defects", 0.4);
+                return latentDefects.getQuantity().multiply("Found defects", 0.4);
             }
         };
 

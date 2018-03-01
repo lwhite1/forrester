@@ -40,7 +40,11 @@ public class Stock extends Element {
         return outflows;
     }
 
-    public Quantity getCurrentValue() {
+    public double getCurrentValue() {
+        return currentValue.getValue();
+    }
+
+    public Quantity getQuantity() {
         return currentValue;
     }
 

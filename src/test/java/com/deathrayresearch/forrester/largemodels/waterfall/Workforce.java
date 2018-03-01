@@ -35,8 +35,8 @@ class Workforce {
 
 
         Variable totalWorkforce = new Variable(TOTAL_WORKFORCE, PEOPLE, () ->
-                newlyHiredWorkforce.getCurrentValue().getValue()
-                        + experiencedWorkforce.getCurrentValue().getValue());
+                newlyHiredWorkforce.getQuantity().getValue()
+                        + experiencedWorkforce.getQuantity().getValue());
 
         Variable fullTimeEquivalentWorkforce =
                 new Variable(WORKFORCE_FTE, DIMENSIONLESS_UNIT, () ->
@@ -44,7 +44,7 @@ class Workforce {
                                 * totalWorkforce.getCurrentValue());
 
         Variable fullTimeEquivalentExperiencedWorkforce = new Variable(
-                EXPERIENCED_WORKFORCE_FTE, PEOPLE, () -> experiencedWorkforce.getCurrentValue().getValue()
+                EXPERIENCED_WORKFORCE_FTE, PEOPLE, () -> experiencedWorkforce.getQuantity().getValue()
                         * AVERAGE_DAILY_MAN_POWER_PER_STAFF.getCurrentValue());
 
         Variable workforceNeed = new Variable(WORKFORCE_NEED, PEOPLE, () -> 30.0);
@@ -57,7 +57,7 @@ class Workforce {
                         * fullTimeEquivalentExperiencedWorkforce.getCurrentValue());
 
         Variable totalWorkforceCap = new Variable(TOTAL_WORKFORCE_CAP, PEOPLE, () ->
-                newHireCap.getCurrentValue() + experiencedWorkforce.getCurrentValue().getValue());
+                newHireCap.getCurrentValue() + experiencedWorkforce.getQuantity().getValue());
 
         Variable workforceLevelSought = new Variable(DESIRED_WORKFORCE, PEOPLE, () ->
                 Math.min(workforceNeed.getCurrentValue(), totalWorkforceCap.getCurrentValue()));
@@ -70,14 +70,14 @@ class Workforce {
         Variable dailyManPowerForTraining = new Variable(DAILY_RESOURCES_FOR_TRAINING, PEOPLE, new Formula() {
             @Override
             public double getCurrentValue() {
-                return trainersPerNewHire.getCurrentValue() * newlyHiredWorkforce.getCurrentValue().getValue();
+                return trainersPerNewHire.getCurrentValue() * newlyHiredWorkforce.getQuantity().getValue();
             }
         });
 
         Variable fractionExperiencedWorkforce =
                 new Variable(FRACTION_OF_WORKFORCE_WITH_EXPERIENCE,
                         DIMENSIONLESS_UNIT, () ->
-                        experiencedWorkforce.getCurrentValue().getValue() / totalWorkforce.getCurrentValue());
+                        experiencedWorkforce.getQuantity().getValue() / totalWorkforce.getCurrentValue());
 
         Flow newHireFlow = getNewHireFlow(workforceGap);
 
@@ -134,7 +134,7 @@ class Workforce {
         Rate quitRate = new RatePerDay() {
             @Override
             protected Quantity quantityPerDay() {
-                return new Quantity("Resigned", experiencedWorkforce.getCurrentValue().getValue()
+                return new Quantity("Resigned", experiencedWorkforce.getQuantity().getValue()
                         / averageEmploymentInDays, People.getInstance());
             }
         };
@@ -147,7 +147,7 @@ class Workforce {
         Rate assimilationRate = new RatePerDay() {
             @Override
             protected Quantity quantityPerDay() {
-                return newHires.getCurrentValue().divide("Assimilated hires", assimilationDelayInDays);
+                return newHires.getQuantity().divide("Assimilated hires", assimilationDelayInDays);
             }
         };
 

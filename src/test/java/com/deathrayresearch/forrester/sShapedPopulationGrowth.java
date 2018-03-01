@@ -37,8 +37,8 @@ public class sShapedPopulationGrowth {
         Rate birthRate = new RatePerDay() {
             @Override
             protected Quantity quantityPerDay() {
-                double ratio = population.getCurrentValue().getValue() / carryingCapacity.getValue();
-                return population.getCurrentValue().multiply(
+                double ratio = population.getQuantity().getValue() / carryingCapacity.getValue();
+                return population.getQuantity().multiply(
                         "Births",
                         fractionalNetBirthRate.getCurrentValue() * (1 - ratio));
             }

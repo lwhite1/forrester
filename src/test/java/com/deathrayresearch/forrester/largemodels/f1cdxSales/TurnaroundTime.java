@@ -4,10 +4,7 @@ import com.deathrayresearch.forrester.Simulation;
 import com.deathrayresearch.forrester.measure.Quantity;
 import com.deathrayresearch.forrester.measure.units.item.Thing;
 import com.deathrayresearch.forrester.measure.units.time.Day;
-import com.deathrayresearch.forrester.model.Constant;
-import com.deathrayresearch.forrester.model.Flow;
-import com.deathrayresearch.forrester.model.Model;
-import com.deathrayresearch.forrester.model.Stock;
+import com.deathrayresearch.forrester.model.*;
 import com.deathrayresearch.forrester.rate.RatePerDay;
 import com.deathrayresearch.forrester.ui.ChartViewer;
 
@@ -22,8 +19,20 @@ public class TurnaroundTime {
     Constant Capacity = new Constant("Capacity", TEST,190);
 
     Stock WIP = new Stock("WIP", 1000, TEST);
-    Stock Variance = new Stock("TAT Variance", 0, DAY);
 
+    Formula TATFormula = () -> 16;
+
+    Variable TATActual = new Variable("TAT",  TEST, TATFormula);
+
+    Formula VarianceFormula = () -> TATActual.getCurrentValue() - TATGoal.getCurrentValue();
+    Variable Variance = new Variable("TAT Variance", TEST, VarianceFormula);
+
+    Flow TH = new Flow(new RatePerDay() {
+        @Override
+        protected Quantity quantityPerDay() {
+            return new Quantity("Throughput", Math.min(Capacity.getCurrentValue(), WIP.getCurrentValue()), TEST);
+        }
+    });
 
     public static void main(String[] args) {
         TurnaroundTime tat = new TurnaroundTime();
@@ -54,11 +63,15 @@ public class TurnaroundTime {
         );
 
         WIP.addInflow(Demand);
-        WIP.addOutflow(Throughput);
+        WIP.addOutflow(TH);
 
         tatModel.addStock(WIP);
+
         tatModel.addConstant(TATGoal);
-        tatModel.addStock(Variance);
+        tatModel.addConstant(Capacity);
+
+        tatModel.addVariable(Variance);
+        tatModel.addVariable(TATActual);
 
         Simulation sim = new Simulation(tatModel, Day.getInstance(), WEEK, 12);
         sim.addEventHandler(ChartViewer.newInstance(sim.getEventBus()));

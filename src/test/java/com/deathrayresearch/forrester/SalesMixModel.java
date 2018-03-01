@@ -52,7 +52,7 @@ public class SalesMixModel {
         Variable hardwareSales = new Variable("Hardware sales", Sales.getInstance(), hardwareSalesFormula);
 
         Formula serviceSalesFormula = () -> serviceSalesCustomerMonth.getCurrentValue()
-                * customers.getCurrentValue().getValue();
+                * customers.getQuantity().getValue();
 
         Variable serviceSales = new Variable("Service sales", Sales.getInstance(), serviceSalesFormula);
 

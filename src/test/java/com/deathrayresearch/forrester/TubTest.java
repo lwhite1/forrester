@@ -36,7 +36,7 @@ public class TubTest {
             @Override
             public Quantity quantityPerMinute() {
                 return new Quantity("Outflow",
-                        Math.min(litersPerMinuteOut.getValue(), tub.getCurrentValue().getValue()),
+                        Math.min(litersPerMinuteOut.getValue(), tub.getQuantity().getValue()),
                         Liter.getInstance());
             }
         };

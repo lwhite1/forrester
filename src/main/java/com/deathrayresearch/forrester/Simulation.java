@@ -108,7 +108,7 @@ public class Simulation {
 
             for (Stock stock : model.getStocks()) {
 
-                Quantity qCurrent = stock.getCurrentValue();
+                Quantity qCurrent = stock.getQuantity();
 
                 Set<Flow> stockInflows = stock.getInflows();
                 for (Flow inflow : stockInflows) {
@@ -157,7 +157,7 @@ public class Simulation {
             for (Module module : model.getModules()) {
                 for (Stock stock : module.getStocks()) {
 
-                    Quantity qCurrent = stock.getCurrentValue();
+                    Quantity qCurrent = stock.getQuantity();
 
                     Set<Flow> stockInflows = stock.getInflows();
                     for (Flow inflow : stockInflows) {

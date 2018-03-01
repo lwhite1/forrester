@@ -33,7 +33,7 @@ public class NegativeFeedbackWithGoalTest {
 
             @Override
             protected Quantity quantityPerDay() {
-                Quantity delta = goal.subtract(inventoryOnHand.getCurrentValue());
+                Quantity delta = goal.subtract(inventoryOnHand.getQuantity());
                 return delta.divide("Production", adjustmentTimeInTimeSteps);
             }
         };

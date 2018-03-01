@@ -28,7 +28,7 @@ public class Module extends Element {
     }
 
     public Quantity valueOfStock(String stockName) {
-        return stocks.get(stockName).getCurrentValue();
+        return stocks.get(stockName).getQuantity();
     }
 
     public Quantity valueOfFlow(String flowName, TimeUnit timeUnit) {
