@@ -22,12 +22,6 @@ public class WaterfallSoftwareDevelopment {
     static final People PEOPLE = People.getInstance();
     static final Tasks TASKS = Tasks.getInstance();
 
-    // model subsystems
-    private Module workforce = Workforce.getWorkforce();
-    private Module development = Development.getDevelopmentSubSystem(model);
-    private Module testAndRework = TestAndRework.getTestAndReworkSubSystem();
-    private Module staffAllocation = StaffAllocation.getStaffAllocationModule(model);
-
     // subsystem constants
     static final String WORKFORCE = "Workforce";
     static final String DEVELOPMENT = "Development";
@@ -62,6 +56,13 @@ public class WaterfallSoftwareDevelopment {
     static final String DAILY_RESOURCES_FOR_SOFTWARE_PRODUCTION = "Daily resources for software production";
     static final String DAILY_RESOURCES_PERFORMING_QA = "Daily resources performing QA";
 
+    // model subsystems
+    private Module staffAllocation = StaffAllocation.getStaffAllocationModule(model);
+    private Module workforce = Workforce.getWorkforce();
+    private Module testAndRework = TestAndRework.getTestAndReworkSubSystem();
+
+    private Module development = Development.getDevelopmentSubSystem(model);
+
     @Test
     public void testRun1() {
 
@@ -69,7 +70,7 @@ public class WaterfallSoftwareDevelopment {
         Simulation simulation = new Simulation(model, Day.getInstance(), duration);
         simulation.addEventHandler(ChartViewer.newInstance(simulation.getEventBus()));
 
-        simulation.executeSubSystems();
+        simulation.execute();
     }
 
     public Model getModel() {

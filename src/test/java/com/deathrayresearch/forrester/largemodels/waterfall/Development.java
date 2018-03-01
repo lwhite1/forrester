@@ -90,33 +90,33 @@ class Development {
                 new Formula() {
                     @Override
                     public double getCurrentValue() {
-                        return model.getVariable(DAILY_RESOURCES_FOR_SOFTWARE_PRODUCTION).getCurrentValue();
+                        return module.getVariable(DAILY_RESOURCES_FOR_SOFTWARE_PRODUCTION).getCurrentValue();
                     }
                 });
-
-        Flow developmentFlow = getDevelopmentFlow(module);
-
-        tasksDeveloped.addInflow(developmentFlow);
-
-        module.addFlow(developmentFlow);
-        module.addStock(tasksDeveloped);
-        module.addStock(actualFractionOfPersonDayOnProject);
 
         module.addVariable(communicationOverhead);
         module.addVariable(averageNominalPotentialProductivity);
         module.addVariable(potentialProductivity);
         module.addVariable(developmentProductivity);
         module.addVariable(developmentStaffing);
-        return module;
 
+        Flow developmentFlow = getDevelopmentFlow(module);
+        module.addFlow(developmentFlow);
+
+        tasksDeveloped.addInflow(developmentFlow);
+
+        module.addStock(tasksDeveloped);
+        module.addStock(actualFractionOfPersonDayOnProject);
+        return module;
     }
 
     private static Flow getDevelopmentFlow(Module module) {
         Rate softwareDevelopmentRate = new RatePerDay() {
             @Override
             protected Quantity quantityPerDay() {
-                double value = module.getVariable("Development Staffing").getCurrentValue()
-                        * module.getVariable("Development Productivity").getCurrentValue();
+                double staffing = module.getVariable("Development Staffing").getCurrentValue();
+                double productivity = module.getVariable("Development Productivity").getCurrentValue();
+                double value = staffing * productivity;
                 return new Quantity("Tasks completed", value, TASKS);
             }
         };

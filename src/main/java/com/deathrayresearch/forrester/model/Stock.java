@@ -16,10 +16,6 @@ public class Stock extends Element {
 
     private Quantity currentValue;
 
-    public Stock(Quantity quantity) {
-        this.currentValue = quantity;
-    }
-
     public Stock(String name, double initialAmount, Unit unit) {
         this.currentValue = new Quantity(name, initialAmount, unit);
     }
@@ -44,8 +40,12 @@ public class Stock extends Element {
         return currentValue;
     }
 
-    public void setCurrentValue(Quantity currentValue) {
-        this.currentValue = currentValue;
+    public Unit getUnit() {
+        return currentValue.getUnit();
+    }
+
+    public void setValue(double value) {
+        this.getCurrentValue().setValue(value);
     }
 
     @Override

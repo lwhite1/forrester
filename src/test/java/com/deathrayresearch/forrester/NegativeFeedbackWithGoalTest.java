@@ -23,8 +23,7 @@ public class NegativeFeedbackWithGoalTest {
     public void testRun1() {
         Model model = new Model("Negative feedback with goal");
 
-        Quantity count = new Quantity("Inventory on-hand", 1000, Inventory.getInstance());
-        Stock inventoryOnHand = new Stock(count);
+        Stock inventoryOnHand = new Stock("Inventory on-hand", 1000, Inventory.getInstance());
 
         Quantity goal = new Quantity("Target inventory", 860, Inventory.getInstance());
         double adjustmentTimeInTimeSteps = 8;

@@ -41,14 +41,11 @@ public class F1CdxSales {
 
         Model model = new Model("F1 Cdx Sales");
 
-        Stock cancerPatients = new Stock(
-                new Quantity("Cancer Patients", CANCER_PATIENT_STARTING_POPULATION, PEOPLE));
+        Stock cancerPatients = new Stock("Cancer Patients", CANCER_PATIENT_STARTING_POPULATION, PEOPLE);
 
-        Stock cgxTestedPatients = new Stock(
-                new Quantity("CGx-tested Cancer Patients", CGX_PATIENT_STARTING_POPULATION, PEOPLE));
+        Stock cgxTestedPatients = new Stock("CGx-tested Cancer Patients", CGX_PATIENT_STARTING_POPULATION, PEOPLE);
 
-        Stock ngsTestedPatients = new Stock(
-                new Quantity("NGS-tested Cancer Patients", NGS_CANCER_PATIENT_STARTING_POPULATION, PEOPLE));
+        Stock ngsTestedPatients = new Stock("NGS-tested Cancer Patients", NGS_CANCER_PATIENT_STARTING_POPULATION, PEOPLE);
 
         Flow newCancerPatients = new Flow( new RatePerYear() {
             @Override

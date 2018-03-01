@@ -1,5 +1,6 @@
 package com.deathrayresearch.forrester;
 
+import com.deathrayresearch.forrester.archetypes.SimpleExponentialChange;
 import com.deathrayresearch.forrester.measure.Quantity;
 import com.deathrayresearch.forrester.measure.units.item.People;
 import com.deathrayresearch.forrester.measure.units.time.Day;
@@ -15,20 +16,19 @@ import org.junit.Test;
 /**
  *
  */
-public class ExponentialDecayTest {
+public class ExponentialDecayModel {
 
     @Test
     public void testRun1() {
 
         Model model = new Model("Population with exponential decay");
 
-        Quantity count = new Quantity("Population",100, People.getInstance());
-        Stock population = new Stock(count);
+        Stock population = new Stock("Population", 100, People.getInstance());
 
         Rate deathRate = new RatePerDay() {
             @Override
             protected Quantity quantityPerDay() {
-                return population.getCurrentValue().divide("Deaths", 80);
+                return SimpleExponentialChange.from("Deaths", population, 1/80.0);
             }
         };
         

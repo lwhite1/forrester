@@ -19,7 +19,7 @@ public final class Quantity {
     private static final String INCOMPATIBLE_ERROR_MESSAGE = "Combined quantities must have compatible units";
 
     private String name;
-    private final double value;
+    private double value;
     private final Unit unit;
 
     public Quantity(String name, double value, Unit unit) {
@@ -90,6 +90,10 @@ public final class Quantity {
         Quantity result = new Quantity(name, thisInBaseUnits.getValue() - otherInBaseUnits.getValue(),
                 this.getUnit().getBaseUnit());
         return getUnit().fromBaseUnits(result);
+    }
+
+    public void setValue(double value) {
+        this.value = value;
     }
 
     @Override

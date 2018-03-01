@@ -27,7 +27,7 @@ public class TubTest {
         Model model = new Model("Tub model");
         Simulation run = new Simulation(model, Minute.getInstance(), Times.HOUR, 1);
 
-        Stock tub = new Stock(Volumes.liters("Water in Tub", 30));
+        Stock tub = new Stock("Water in Tub", 30, Liter.getInstance());
 
         // the water drains at the rate of the outflow capacity or the amount of water in the tub, whichever is less
         Rate outRate = new RatePerMinute() {

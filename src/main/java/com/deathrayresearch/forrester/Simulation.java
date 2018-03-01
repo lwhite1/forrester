@@ -102,94 +102,49 @@ public class Simulation {
         double totalSteps = (duration.getValue() * durationInBaseUnits) / (timeStep.ratioToBaseUnit());
         int step = 0;
         while (step < totalSteps) {
-            HashMap<String, Quantity> flows = new HashMap<>();
+            HashMap<String, Quantity> flowMap = new HashMap<>();
 
             eventBus.post(new TimestepEvent(currentDateTime, model));
-
-            for (Stock stock : model.getStocks()) {
-
-                Quantity qCurrent = stock.getCurrentValue();
-
-                Set<Flow> stockInflows = stock.getInflows();
-                for (Flow inflow : stockInflows) {
-                    Quantity q;
-                    if (flows.containsKey(inflow.getName())) {
-                        q = flows.get(inflow.getName());
-                    } else {
-                        q = inflow.getRate().flowPerTimeUnit(timeStep);
-                        flows.put(inflow.getName(), q);
-                    }
-                    qCurrent = qCurrent.add(q);
-                    stock.setCurrentValue(qCurrent);
-                }
-                Set<Flow> stockOutflows = stock.getOutflows();
-                for (Flow outflow : stockOutflows) {
-                    Quantity q;
-                    if (flows.containsKey(outflow.getName())) {
-                        q = flows.get(outflow.getName());
-                    } else {
-                        q = outflow.getRate().flowPerTimeUnit(timeStep);
-                        flows.put(outflow.getName(), q);
-                    }
-                    qCurrent = qCurrent.subtract(q);
-                    stock.setCurrentValue(qCurrent);
-                }
+            List<Stock> stocks = model.getStocks();
+            updateStocks(flowMap, stocks);
+            for (Module module : model.getModules()) {
+                stocks = module.getStocks();
+                flowMap.clear();
+                updateStocks(flowMap, stocks);
             }
-
             addStep(currentDateTime);
             step++;
         }
 
         eventBus.post(new SimulationEndEvent());
     }
-    public void executeSubSystems() {
 
-        eventBus.post(new SimulationStartEvent(this));
-
-        double durationInBaseUnits = duration.getUnit().ratioToBaseUnit();
-
-        double totalSteps = (duration.getValue() * durationInBaseUnits) / (timeStep.ratioToBaseUnit());
-        int step = 0;
-        while (step < totalSteps) {
-            HashMap<String, Quantity> flows = new HashMap<>();
-
-            eventBus.post(new TimestepEvent(currentDateTime, model));
-            for (Module module : model.getModules()) {
-                for (Stock stock : module.getStocks()) {
-
-                    Quantity qCurrent = stock.getCurrentValue();
-
-                    Set<Flow> stockInflows = stock.getInflows();
-                    for (Flow inflow : stockInflows) {
-                        Quantity q;
-                        if (flows.containsKey(inflow.getName())) {
-                            q = flows.get(inflow.getName());
-                        } else {
-                            q = inflow.getRate().flowPerTimeUnit(timeStep);
-                            flows.put(inflow.getName(), q);
-                        }
-                        qCurrent = qCurrent.add(q);
-                        stock.setCurrentValue(qCurrent);
-                    }
-                    Set<Flow> stockOutflows = stock.getOutflows();
-                    for (Flow outflow : stockOutflows) {
-                        Quantity q;
-                        if (flows.containsKey(outflow.getName())) {
-                            q = flows.get(outflow.getName());
-                        } else {
-                            q = outflow.getRate().flowPerTimeUnit(timeStep);
-                            flows.put(outflow.getName(), q);
-                        }
-                        qCurrent = qCurrent.subtract(q);
-                        stock.setCurrentValue(qCurrent);
-                    }
-                }
-            }
-            addStep(currentDateTime);
-            step++;
+    private void updateStocks(HashMap<String, Quantity> flowMap, List<Stock> stocks) {
+        for (Stock stock : stocks) {
+            Quantity qCurrent = stock.getCurrentValue();
+            Set<Flow> stockInflows = stock.getInflows();
+            handleFlows(true, flowMap, stock, qCurrent, stockInflows);
+            Set<Flow> stockOutflows = stock.getOutflows();
+            handleFlows(false, flowMap, stock, qCurrent, stockOutflows);
         }
+    }
 
-        eventBus.post(new SimulationEndEvent());
+    private void handleFlows(boolean isInflow, HashMap<String, Quantity> flows, Stock stock, Quantity qCurrent, Set<Flow> flowSet) {
+        for (Flow flow : flowSet) {
+            Quantity q;
+            if (flows.containsKey(flow.getName())) {
+                q = flows.get(flow.getName());
+            } else {
+                q = flow.getRate().flowPerTimeUnit(timeStep);
+                flows.put(flow.getName(), q);
+            }
+            if (isInflow) {
+                qCurrent = qCurrent.add(q);
+            } else {
+                qCurrent = qCurrent.subtract(q);
+            }
+            stock.setValue(qCurrent.getValue());
+        }
     }
 
     private void addStep(LocalDateTime dateTime) {
