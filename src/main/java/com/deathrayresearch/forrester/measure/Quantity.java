@@ -1,5 +1,6 @@
 package com.deathrayresearch.forrester.measure;
 
+import com.deathrayresearch.forrester.measure.units.volume.QuartUS;
 import com.google.common.base.Preconditions;
 
 import javax.annotation.concurrent.Immutable;
@@ -128,5 +129,9 @@ public final class Quantity {
         result = (int) (temp ^ (temp >>> 32));
         result = 31 * result + getUnit().hashCode();
         return result;
+    }
+
+    public Quantity convertUnits(Unit newUnit) {
+        return unit.getDimension().getConverter().convert(this, newUnit);
     }
 }

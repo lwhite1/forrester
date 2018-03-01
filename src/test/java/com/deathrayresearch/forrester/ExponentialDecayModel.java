@@ -24,14 +24,14 @@ public class ExponentialDecayModel {
 
         Stock population = new Stock("Population", 100, People.getInstance());
 
-        Flow deathRate = new FlowPerDay("Deaths") {
+        Flow deaths = new FlowPerDay("Deaths") {
             @Override
             protected Quantity quantityPerDay() {
                 return SimpleExponentialChange.from(population, 1/80.0);
             }
         };
 
-        population.addOutflow(deathRate);
+        population.addOutflow(deaths);
 
         model.addStock(population);
 

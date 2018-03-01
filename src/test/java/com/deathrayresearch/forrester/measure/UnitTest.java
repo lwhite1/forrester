@@ -30,6 +30,11 @@ public class UnitTest {
     }
 
     @Test
+    public void converter() throws Exception {
+        assertEquals(160934.0, miles.convertUnits(Meter.getInstance()).getValue(), 0.0);
+    }
+
+    @Test
     public void toBaseUnits() throws Exception {
         assertEquals(160934.0, miles.inBaseUnits().getValue(), 0.0);
         assertEquals(Meter.getInstance(), miles.inBaseUnits().getUnit());
