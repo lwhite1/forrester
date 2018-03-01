@@ -5,7 +5,6 @@ import com.deathrayresearch.forrester.measure.Quantity;
 import com.deathrayresearch.forrester.measure.Unit;
 import com.deathrayresearch.forrester.measure.dimension.Item;
 import com.deathrayresearch.forrester.measure.units.time.Day;
-import com.deathrayresearch.forrester.measure.units.time.Times;
 import com.deathrayresearch.forrester.model.Flow;
 import com.deathrayresearch.forrester.model.Model;
 import com.deathrayresearch.forrester.model.Stock;
@@ -13,6 +12,8 @@ import com.deathrayresearch.forrester.rate.RatePerDay;
 import com.deathrayresearch.forrester.rate.Rate;
 import com.deathrayresearch.forrester.ui.ChartViewer;
 import org.junit.Test;
+
+import static com.deathrayresearch.forrester.measure.Units.WEEK;
 
 /**
  *
@@ -43,8 +44,8 @@ public class NegativeFeedbackWithGoalTest {
 
         model.addStock(inventoryOnHand);
 
-        Simulation run = new Simulation(model, Day.getInstance(), Times.WEEK, 12);
-        run.addEventHandler(ChartViewer.newInstance(run.getEventBus()));
+        Simulation run = new Simulation(model, Day.getInstance(), WEEK, 12);
+        run.addEventHandler(new ChartViewer());
         run.execute();
     }
 

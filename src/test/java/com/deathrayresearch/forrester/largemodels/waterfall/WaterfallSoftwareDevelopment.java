@@ -68,7 +68,7 @@ public class WaterfallSoftwareDevelopment {
 
         Quantity duration = new Quantity("Simulation duration", 1, Year.getInstance());
         Simulation simulation = new Simulation(model, Day.getInstance(), duration);
-        simulation.addEventHandler(ChartViewer.newInstance(simulation.getEventBus()));
+        simulation.addEventHandler(new ChartViewer());
 
         simulation.execute();
     }

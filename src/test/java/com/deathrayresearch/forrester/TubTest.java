@@ -2,9 +2,6 @@ package com.deathrayresearch.forrester;
 
 import com.deathrayresearch.forrester.io.CsvSubscriber;
 import com.deathrayresearch.forrester.measure.Quantity;
-import com.deathrayresearch.forrester.measure.units.time.Minute;
-import com.deathrayresearch.forrester.measure.units.time.Times;
-import com.deathrayresearch.forrester.measure.units.volume.Liter;
 import com.deathrayresearch.forrester.measure.units.volume.Volumes;
 import com.deathrayresearch.forrester.model.Flow;
 import com.deathrayresearch.forrester.model.Model;
@@ -16,6 +13,8 @@ import org.junit.Test;
 
 import java.time.Duration;
 
+import static com.deathrayresearch.forrester.measure.Units.*;
+
 /**
  *
  */
@@ -25,9 +24,9 @@ public class TubTest {
     public void testRun1() {
 
         Model model = new Model("Tub model");
-        Simulation run = new Simulation(model, Minute.getInstance(), Times.HOUR, 1);
+        Simulation run = new Simulation(model, MINUTE, HOUR, 1);
 
-        Stock tub = new Stock("Water in Tub", 30, Liter.getInstance());
+        Stock tub = new Stock("Water in Tub", 30, LITER);
 
         // the water drains at the rate of the outflow capacity or the amount of water in the tub, whichever is less
         Rate outRate = new RatePerMinute() {
@@ -37,7 +36,7 @@ public class TubTest {
             public Quantity quantityPerMinute() {
                 return new Quantity("Outflow",
                         Math.min(litersPerMinuteOut.getValue(), tub.getCurrentValue().getValue()),
-                        Liter.getInstance());
+                        LITER);
             }
         };
 
@@ -62,8 +61,8 @@ public class TubTest {
 
         model.addStock(tub);
 
-        run.addEventHandler(ChartViewer.newInstance(run.getEventBus()));
-        run.addEventHandler(CsvSubscriber.newInstance(run.getEventBus(), "tub.csv"));
+        run.addEventHandler(new ChartViewer());
+        run.addEventHandler(new CsvSubscriber("tub.csv"));
         run.execute();
     }
 

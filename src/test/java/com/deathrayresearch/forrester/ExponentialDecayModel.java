@@ -39,7 +39,7 @@ public class ExponentialDecayModel {
         model.addStock(population);
 
         Simulation run = new Simulation(model, Day.getInstance(), Times.weeks("Simulation duration", 52));
-        run.addEventHandler(ChartViewer.newInstance(run.getEventBus()));
+        run.addEventHandler(new ChartViewer());
         run.execute();
     }
 }

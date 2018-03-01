@@ -5,7 +5,6 @@ import com.deathrayresearch.forrester.event.SimulationEndEvent;
 import com.deathrayresearch.forrester.event.SimulationStartEvent;
 import com.deathrayresearch.forrester.event.TimestepEvent;
 import com.deathrayresearch.forrester.model.Model;
-import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
 import com.opencsv.CSVWriter;
 import org.slf4j.Logger;
@@ -28,13 +27,7 @@ public class CsvSubscriber implements EventHandler {
 
     private CSVWriter csvWriter;
 
-    public static CsvSubscriber newInstance(EventBus eventBus, String fileName) {
-        CsvSubscriber subscriber = new CsvSubscriber(fileName);
-        eventBus.register(subscriber);
-        return subscriber;
-    }
-
-    private CsvSubscriber(String fileName) {
+    public CsvSubscriber(String fileName) {
         FileWriter fileWriter = null;
 
         File file = Paths.get(fileName).toFile();

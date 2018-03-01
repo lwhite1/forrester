@@ -4,13 +4,14 @@ import com.deathrayresearch.forrester.Simulation;
 import com.deathrayresearch.forrester.measure.Quantity;
 import com.deathrayresearch.forrester.measure.units.item.People;
 import com.deathrayresearch.forrester.measure.units.time.Day;
-import com.deathrayresearch.forrester.measure.units.time.Times;
 import com.deathrayresearch.forrester.model.Flow;
 import com.deathrayresearch.forrester.model.Model;
 import com.deathrayresearch.forrester.model.Stock;
 import com.deathrayresearch.forrester.rate.RatePerYear;
 import com.deathrayresearch.forrester.ui.ChartViewer;
 import org.junit.Test;
+
+import static com.deathrayresearch.forrester.measure.Units.YEAR;
 
 /**
  *
@@ -81,8 +82,8 @@ public class F1CdxSales {
         model.addStock(ngsTestedPatients);
        // model.addStock(F1CdxTestedPatients);
 
-        Simulation run = new Simulation(model, Day.getInstance(), Times.YEAR,3);
-        run.addEventHandler(ChartViewer.newInstance(run.getEventBus()));
+        Simulation run = new Simulation(model, Day.getInstance(), YEAR,3);
+        run.addEventHandler(new ChartViewer());
         run.execute();
     }
 

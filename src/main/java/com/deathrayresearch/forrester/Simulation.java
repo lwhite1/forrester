@@ -82,10 +82,12 @@ public class Simulation {
     }
 
     public void addEventHandler(EventHandler handler) {
+        eventBus.register(handler);
         eventHandlers.add(handler);
     }
 
     public void removeEventHandler(EventHandler handler) {
+        eventBus.unregister(handler);
         eventHandlers.remove(handler);
     }
 

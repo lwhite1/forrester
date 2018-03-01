@@ -12,7 +12,7 @@ import com.deathrayresearch.forrester.rate.Rate;
 import com.deathrayresearch.forrester.ui.ChartViewer;
 import org.junit.Test;
 
-import static com.deathrayresearch.forrester.measure.units.time.Times.WEEK;
+import static com.deathrayresearch.forrester.measure.Units.WEEK;
 
 /**
  *
@@ -52,7 +52,7 @@ public class ExponentialGrowthModel {
         model.addStock(population);
 
         Simulation run = new Simulation(model, Day.getInstance(), WEEK, 52);
-        run.addEventHandler(ChartViewer.newInstance(run.getEventBus()));
+        run.addEventHandler(new ChartViewer());
         run.execute();
     }
 }

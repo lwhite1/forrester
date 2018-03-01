@@ -2,8 +2,9 @@ package com.deathrayresearch.forrester.rate;
 
 import com.deathrayresearch.forrester.measure.Quantity;
 import com.deathrayresearch.forrester.measure.TimeUnit;
-import com.deathrayresearch.forrester.measure.units.time.Times;
 import com.google.common.base.Preconditions;
+
+import static com.deathrayresearch.forrester.measure.Units.DAY;
 
 /**
  * A rate specified as a quantity per day (a.k.a. a daily rate)
@@ -11,7 +12,7 @@ import com.google.common.base.Preconditions;
 public abstract class RatePerDay extends AbstractRate {
 
     public RatePerDay() {
-        super(Times.DAY);
+        super(DAY);
     }
 
     @Override
@@ -22,7 +23,7 @@ public abstract class RatePerDay extends AbstractRate {
     private Quantity convert(Quantity quantity, TimeUnit newTimeUnit) {
         Preconditions.checkArgument(quantity!= null, "quantity is null in " + name());
         Preconditions.checkArgument(newTimeUnit!= null, "newTimeUnit is null in " + name());
-        return RateConverter.convert(quantity, Times.DAY, newTimeUnit);
+        return RateConverter.convert(quantity, DAY, newTimeUnit);
     }
 
     @Override

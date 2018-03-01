@@ -3,12 +3,13 @@ package com.deathrayresearch.forrester;
 import com.deathrayresearch.forrester.measure.Quantity;
 import com.deathrayresearch.forrester.measure.units.item.Thing;
 import com.deathrayresearch.forrester.measure.units.time.Day;
-import com.deathrayresearch.forrester.measure.units.time.Times;
 import com.deathrayresearch.forrester.model.Flow;
 import com.deathrayresearch.forrester.model.Model;
 import com.deathrayresearch.forrester.model.Stock;
 import com.deathrayresearch.forrester.rate.RatePerYear;
 import com.deathrayresearch.forrester.ui.ChartViewer;
+
+import static com.deathrayresearch.forrester.measure.Units.YEAR;
 
 public class PredatorPreyModel {
 
@@ -34,8 +35,8 @@ public class PredatorPreyModel {
 
         model.addStock(prey);
 
-        Simulation run = new Simulation(model, Day.getInstance(), Times.YEAR, 1);
-        run.addEventHandler(ChartViewer.newInstance(run.getEventBus()));
+        Simulation run = new Simulation(model, Day.getInstance(), YEAR, 1);
+        run.addEventHandler(new ChartViewer());
         run.execute();
 
     }

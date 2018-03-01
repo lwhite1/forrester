@@ -2,7 +2,8 @@ package com.deathrayresearch.forrester.rate;
 
 import com.deathrayresearch.forrester.measure.Quantity;
 import com.deathrayresearch.forrester.measure.TimeUnit;
-import com.deathrayresearch.forrester.measure.units.time.Times;
+
+import static com.deathrayresearch.forrester.measure.Units.HOUR;
 
 /**
  *
@@ -10,7 +11,7 @@ import com.deathrayresearch.forrester.measure.units.time.Times;
 public abstract class RatePerHour extends AbstractRate {
 
     public RatePerHour() {
-        super(Times.HOUR);
+        super(HOUR);
     }
 
     @Override

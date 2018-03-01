@@ -11,8 +11,8 @@ import com.deathrayresearch.forrester.model.Stock;
 import com.deathrayresearch.forrester.rate.RatePerDay;
 import com.deathrayresearch.forrester.ui.ChartViewer;
 
-import static com.deathrayresearch.forrester.measure.units.time.Times.DAY;
-import static com.deathrayresearch.forrester.measure.units.time.Times.WEEK;
+import static com.deathrayresearch.forrester.measure.Units.DAY;
+import static com.deathrayresearch.forrester.measure.Units.WEEK;
 
 public class TurnaroundTime {
 
@@ -61,7 +61,7 @@ public class TurnaroundTime {
         tatModel.addStock(Variance);
 
         Simulation sim = new Simulation(tatModel, Day.getInstance(), WEEK, 12);
-        sim.addEventHandler(ChartViewer.newInstance(sim.getEventBus()));
+        sim.addEventHandler(new ChartViewer());
         sim.execute();
         return tatModel;
     }

@@ -2,9 +2,6 @@ package com.deathrayresearch.forrester;
 
 import com.deathrayresearch.forrester.io.CsvSubscriber;
 import com.deathrayresearch.forrester.measure.Quantity;
-import com.deathrayresearch.forrester.measure.units.item.People;
-import com.deathrayresearch.forrester.measure.units.item.Thing;
-import com.deathrayresearch.forrester.measure.units.time.Day;
 import com.deathrayresearch.forrester.measure.units.time.Times;
 import com.deathrayresearch.forrester.model.Constant;
 import com.deathrayresearch.forrester.model.Flow;
@@ -15,12 +12,12 @@ import com.deathrayresearch.forrester.rate.RatePerDay;
 import com.deathrayresearch.forrester.ui.ChartViewer;
 import org.junit.Test;
 
+import static com.deathrayresearch.forrester.measure.Units.*;
+
 /**
  *
  */
 public class SirInfectiousDiseaseModel {
-
-    private final static People PEOPLE = People.getInstance();
 
     @Test
     public void testRun1() {
@@ -33,7 +30,7 @@ public class SirInfectiousDiseaseModel {
         Stock recoveredPopulation = new Stock("Recovered", 0, PEOPLE);
 
         // at each step, each susceptible person meets n other people
-        Constant contactRate = new Constant("Contact Rate", Thing.getInstance(), 8);
+        Constant contactRate = new Constant("Contact Rate", PEOPLE, 8);
 
         // The number of newly infected at each step, they get moved from susceptible to infectious status.
         Rate infectiousRate = new RatePerDay() {
@@ -85,9 +82,9 @@ public class SirInfectiousDiseaseModel {
         model.addStock(infectiousPopulation);
         model.addStock(recoveredPopulation);
 
-        Simulation run = new Simulation(model, Day.getInstance(), Times.weeks("Simulation duration", 8));
-        run.addEventHandler(CsvSubscriber.newInstance(run.getEventBus(), "/tmp/forrester/run1out.csv"));
-        run.addEventHandler(ChartViewer.newInstance(run.getEventBus()));
+        Simulation run = new Simulation(model, DAY, Times.weeks("Simulation duration", 8));
+        run.addEventHandler(new CsvSubscriber("/tmp/forrester/run1out.csv"));
+        run.addEventHandler(new ChartViewer());
         run.execute();
     }
 }
