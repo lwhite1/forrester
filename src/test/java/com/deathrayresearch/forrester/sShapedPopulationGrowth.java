@@ -1,10 +1,8 @@
 package com.deathrayresearch.forrester;
 
+import com.deathrayresearch.forrester.archetypes.ExponentialChangeWithLimit;
 import com.deathrayresearch.forrester.measure.Quantity;
-import com.deathrayresearch.forrester.measure.units.dimensionless.DimensionlessUnit;
 import com.deathrayresearch.forrester.measure.units.item.People;
-import com.deathrayresearch.forrester.measure.units.time.Day;
-import com.deathrayresearch.forrester.measure.units.time.Times;
 import com.deathrayresearch.forrester.model.Constant;
 import com.deathrayresearch.forrester.model.Flow;
 import com.deathrayresearch.forrester.model.Model;
@@ -13,6 +11,10 @@ import com.deathrayresearch.forrester.rate.RatePerDay;
 import com.deathrayresearch.forrester.rate.Rate;
 import com.deathrayresearch.forrester.ui.ChartViewer;
 import org.junit.Test;
+
+import static com.deathrayresearch.forrester.measure.Units.DIMENSIONLESS;
+import static com.deathrayresearch.forrester.measure.units.time.Times.DAY;
+import static com.deathrayresearch.forrester.measure.units.time.Times.WEEK;
 
 /**
  *
@@ -29,18 +31,17 @@ public class sShapedPopulationGrowth {
 
         Constant fractionalNetBirthRate = new Constant(
                 "Maximum Fractional Birth Rate",
-                DimensionlessUnit.getInstance(),
+                DIMENSIONLESS,
                 0.04);
 
-        // Rates of birth and death vary with the relationship of population to carrying capacity
-        // This is a Logistic Growth Model
         Rate birthRate = new RatePerDay() {
             @Override
             protected Quantity quantityPerDay() {
-                double ratio = population.getCurrentValue().getValue() / carryingCapacity.getValue();
-                return population.getCurrentValue().multiply(
+                return ExponentialChangeWithLimit.from(
                         "Births",
-                        fractionalNetBirthRate.getCurrentValue() * (1 - ratio));
+                        population,
+                        fractionalNetBirthRate.getCurrentValue(),
+                        carryingCapacity.getValue());
             }
         };
 
@@ -50,7 +51,7 @@ public class sShapedPopulationGrowth {
 
         model.addStock(population);
 
-        Simulation run = new Simulation(model, Day.getInstance(), Times.WEEK, 32);
+        Simulation run = new Simulation(model, DAY, WEEK, 32);
         run.addEventHandler(ChartViewer.newInstance(run.getEventBus()));
         run.execute();
     }
