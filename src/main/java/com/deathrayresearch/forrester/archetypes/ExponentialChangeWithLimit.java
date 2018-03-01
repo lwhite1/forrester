@@ -13,15 +13,13 @@ public class ExponentialChangeWithLimit {
 
     private final double growthAmount;
     private final Stock stock;
-    private final String name;
     private final double limit;
 
-    public static Quantity from(String name, Stock stock, double growthAmount, double limit) {
-        return new ExponentialChangeWithLimit(name, stock, growthAmount, limit).getCurrentQuantity();
+    public static Quantity from(Stock stock, double growthAmount, double limit) {
+        return new ExponentialChangeWithLimit(stock, growthAmount, limit).getCurrentQuantity();
     }
 
-    private ExponentialChangeWithLimit(String name, Stock stock, double growthAmount, double limit) {
-        this.name = name;
+    private ExponentialChangeWithLimit(Stock stock, double growthAmount, double limit) {
         this.growthAmount = growthAmount;
         this.stock = stock;
         this.limit = limit;
@@ -30,6 +28,6 @@ public class ExponentialChangeWithLimit {
     public Quantity getCurrentQuantity() {
         double ratio = stock.getCurrentValue().getValue() / limit;
         double result = stock.getCurrentValue().getValue() * growthAmount * (1 - ratio);
-        return new Quantity(name, result, stock.getUnit());
+        return new Quantity(result, stock.getUnit());
     }
 }

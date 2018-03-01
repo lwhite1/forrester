@@ -14,11 +14,6 @@ public abstract class FlowPerMinute extends Flow {
         super(name, MINUTE);
     }
 
-    @Override
-    public String getName() {
-        return quantityPerMinute().getName();
-    }
-
     private Quantity convert(Quantity quantity, TimeUnit newTimeUnit) {
         return RateConverter.convert(quantity, getTimeUnit(), newTimeUnit);
     }

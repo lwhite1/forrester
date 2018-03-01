@@ -27,7 +27,7 @@ public class ExponentialDecayModel {
         Flow deathRate = new FlowPerDay("Deaths") {
             @Override
             protected Quantity quantityPerDay() {
-                return SimpleExponentialChange.from("Deaths", population, 1/80.0);
+                return SimpleExponentialChange.from(population, 1/80.0);
             }
         };
 
@@ -35,7 +35,7 @@ public class ExponentialDecayModel {
 
         model.addStock(population);
 
-        Simulation run = new Simulation(model, Day.getInstance(), Times.weeks("Simulation duration", 52));
+        Simulation run = new Simulation(model, Day.getInstance(), Times.weeks( 52));
         run.addEventHandler(new ChartViewer());
         run.execute();
     }

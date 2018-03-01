@@ -15,10 +15,12 @@ public class Stock extends Element {
     private Set<Flow> inflows = new HashSet<>();
     private Set<Flow> outflows = new HashSet<>();
 
-    private Quantity currentValue;
+    private final String name;
+    private final Quantity currentValue;
 
     public Stock(String name, double initialAmount, Unit unit) {
-        this.currentValue = new Quantity(name, initialAmount, unit);
+        this.name = name;
+        this.currentValue = new Quantity(initialAmount, unit);
     }
 
     public void addInflow(Flow inFlow) {
@@ -51,7 +53,7 @@ public class Stock extends Element {
 
     @Override
     public String getName() {
-        return currentValue.getName();
+        return name;
     }
 
     @Override

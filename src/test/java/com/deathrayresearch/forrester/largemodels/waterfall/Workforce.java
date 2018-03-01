@@ -116,7 +116,7 @@ class Workforce {
                 double result = gap / hiringDelayInDays;
                 double maxAmount = Math.max(result, 0.0);
 
-                return new Quantity("Hired", maxAmount, People.getInstance());
+                return new Quantity(maxAmount, People.getInstance());
             }
         };
     }
@@ -126,7 +126,7 @@ class Workforce {
         return new FlowPerDay("Resigned") {
             @Override
             protected Quantity quantityPerDay() {
-                return new Quantity("Resigned", experiencedWorkforce.getCurrentValue().getValue()
+                return new Quantity(experiencedWorkforce.getCurrentValue().getValue()
                         / averageEmploymentInDays, People.getInstance());
             }
         };
@@ -138,7 +138,7 @@ class Workforce {
         return new FlowPerDay("Assimilated hires") {
             @Override
             protected Quantity quantityPerDay() {
-                return newHires.getCurrentValue().divide("Assimilated hires", assimilationDelayInDays);
+                return newHires.getCurrentValue().divide(assimilationDelayInDays);
             }
         };
     }

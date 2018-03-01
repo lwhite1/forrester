@@ -9,33 +9,33 @@ import com.deathrayresearch.forrester.measure.TimeUnit;
  */
 public class Times {
 
-    public static Quantity seconds(String name, double value) {
+    public static Quantity seconds(double value) {
         TimeUnit timeUnit = Second.getInstance();
-        return new Quantity(name, value, timeUnit);
+        return new Quantity(value, timeUnit);
     }
 
-    public static Quantity minutes(String name, double value) {
+    public static Quantity minutes(double value) {
         TimeUnit timeUnit = Minute.getInstance();
-        return new Quantity(name, value, timeUnit);
+        return new Quantity(value, timeUnit);
     }
 
-    public static Quantity hours(String name, double value) {
+    public static Quantity hours(double value) {
         TimeUnit timeUnit = Hour.getInstance();
-        return new Quantity(name, value, timeUnit);
+        return new Quantity(value, timeUnit);
     }
 
-    public static Quantity days(String name, double value) {
+    public static Quantity days(double value) {
         TimeUnit timeUnit = Day.getInstance();
-        return new Quantity(name, value, timeUnit);
+        return new Quantity(value, timeUnit);
     }
 
-    public static Quantity weeks(String name, double value) {
+    public static Quantity weeks(double value) {
         TimeUnit timeUnit = Week.getInstance();
-        return new Quantity(name, value, timeUnit);
+        return new Quantity(value, timeUnit);
     }
 
-    public static Quantity years(String name, double value) {
+    public static Quantity years(double value) {
         TimeUnit timeUnit = Year.getInstance();
-        return new Quantity(name, value, timeUnit);
+        return new Quantity(value, timeUnit);
     }
 }

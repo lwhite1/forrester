@@ -39,8 +39,7 @@ public class FlowTime {
             new FlowPerDay("New Orders") {
                 @Override
                 protected Quantity quantityPerDay() {
-                    return SimpleLinearChange.from("New Orders", WIP, 200);
-                    //return new Quantity("New Orders", 200, TEST);
+                    return SimpleLinearChange.from( WIP, 200);
                 }
             };
 
@@ -49,7 +48,7 @@ public class FlowTime {
                 @Override
                 protected Quantity quantityPerDay() {
                     double throughput = Math.min(Capacity.getCurrentValue(), Demand.flowPerTimeUnit(DAY).getValue());
-                    return new Quantity("Delivered Reports", throughput, TEST);
+                    return new Quantity(throughput, TEST);
                 }
             };
 

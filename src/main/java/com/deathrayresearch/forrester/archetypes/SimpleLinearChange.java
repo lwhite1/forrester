@@ -11,19 +11,17 @@ public class SimpleLinearChange {
 
     private final double growthAmount;
     private final Stock stock;
-    private final String name;
 
-    public static Quantity from(String name, Stock stock, double growthAmount) {
-        return new SimpleLinearChange(name, stock, growthAmount).getCurrentQuantity();
+    public static Quantity from(Stock stock, double growthAmount) {
+        return new SimpleLinearChange(stock, growthAmount).getCurrentQuantity();
     }
 
-    private SimpleLinearChange(String name, Stock stock, double growthAmount) {
-        this.name = name;
+    private SimpleLinearChange(Stock stock, double growthAmount) {
         this.growthAmount = growthAmount;
         this.stock = stock;
     }
 
     public Quantity getCurrentQuantity() {
-        return new Quantity(name, growthAmount, stock.getUnit());
+        return new Quantity(growthAmount, stock.getUnit());
     }
 }

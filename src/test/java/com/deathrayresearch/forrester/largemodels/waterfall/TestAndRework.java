@@ -37,25 +37,25 @@ class TestAndRework {
 
 
 
-        Flow errorGenerationFlow = new FlowPerDay("New Errors"){
+        Flow errorGenerationFlow = new FlowPerDay("New Errors") {
 
             @Override
             protected Quantity quantityPerDay() {
-                return new Quantity("New Errors", 10, Errors.getInstance());
+                return new Quantity(10, Errors.getInstance());
             }
         };
 
         Flow errorDiscoveryFlow = new FlowPerDay("Errors discovered") {
             @Override
             protected Quantity quantityPerDay() {
-                return new Quantity("Errors discovered",3, Errors.getInstance());
+                return new Quantity(3, Errors.getInstance());
             }
         };
 
         Flow errorFixedFlow = new FlowPerDay("Errors fixed") {
             @Override
             protected Quantity quantityPerDay() {
-                return new Quantity("Errors fixed",1, Errors.getInstance());
+                return new Quantity(1, Errors.getInstance());
             }
         };
 

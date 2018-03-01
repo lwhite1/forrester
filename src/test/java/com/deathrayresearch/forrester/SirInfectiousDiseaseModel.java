@@ -41,7 +41,7 @@ public class SirInfectiousDiseaseModel {
                         + infectiousPopulation.getCurrentValue().getValue()
                         + recoveredPopulation.getCurrentValue().getValue();
 
-                Quantity population = new Quantity("Total Population", totalPop, PEOPLE);
+                Quantity population = new Quantity(totalPop, PEOPLE);
 
                 double infectiousPortion = infectiousPopulation.getCurrentValue().getValue() / (population.getValue());
 
@@ -54,7 +54,7 @@ public class SirInfectiousDiseaseModel {
                 if (infectedCount > susceptiblePopulation.getCurrentValue().getValue()) {
                     infectedCount = susceptiblePopulation.getCurrentValue().getValue();
                 }
-                return new Quantity("Infected", infectedCount, PEOPLE);
+                return new Quantity(infectedCount, PEOPLE);
             }
         };
 
@@ -63,7 +63,7 @@ public class SirInfectiousDiseaseModel {
             @Override
             public Quantity quantityPerDay() {
                 double recoveredProportion = .2; //20% recover per day
-                return new Quantity("Recovered", infectiousPopulation.getCurrentValue().getValue() * recoveredProportion,
+                return new Quantity(infectiousPopulation.getCurrentValue().getValue() * recoveredProportion,
                         PEOPLE);
             }
         };
@@ -77,7 +77,7 @@ public class SirInfectiousDiseaseModel {
         model.addStock(infectiousPopulation);
         model.addStock(recoveredPopulation);
 
-        Simulation run = new Simulation(model, DAY, Times.weeks("Simulation duration", 8));
+        Simulation run = new Simulation(model, DAY, Times.weeks(8));
         run.addEventHandler(new CsvSubscriber("/tmp/forrester/run1out.csv"));
         run.addEventHandler(new ChartViewer());
         run.execute();

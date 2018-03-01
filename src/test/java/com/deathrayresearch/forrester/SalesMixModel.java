@@ -36,7 +36,7 @@ public class SalesMixModel {
         Flow acquisitionRate = new FlowPerDay("New customers") {
             @Override
             protected Quantity quantityPerDay() {
-                return SimpleLinearChange.from("New customers", customers, 10);
+                return SimpleLinearChange.from(customers, 10);
             }
         };
 
@@ -64,7 +64,7 @@ public class SalesMixModel {
         model.addVariable(serviceSales);
         model.addVariable(proportionHardwareSales);
 
-        Simulation run = new Simulation(model, WEEK, Times.years("Simulation Duration", 10));
+        Simulation run = new Simulation(model, WEEK, Times.years( 10));
 
         run.addEventHandler(new ChartViewer());
         run.addEventHandler(new CsvSubscriber("/tmp/forrester/run1out.csv"));

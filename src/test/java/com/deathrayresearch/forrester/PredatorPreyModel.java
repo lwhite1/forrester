@@ -25,7 +25,7 @@ public class PredatorPreyModel {
             @Override
             protected Quantity quantityPerYear() {
                 double rate = prey.getCurrentValue().getValue();
-                return new Quantity("Births", 0, RABBIT);
+                return new Quantity(0, RABBIT);
             }
         };
         model.addStock(predator);

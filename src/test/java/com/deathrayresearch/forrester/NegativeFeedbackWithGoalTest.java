@@ -25,7 +25,7 @@ public class NegativeFeedbackWithGoalTest {
 
         Stock inventoryOnHand = new Stock("Inventory on-hand", 1000, Inventory.getInstance());
 
-        Quantity goal = new Quantity("Target inventory", 860, Inventory.getInstance());
+        Quantity goal = new Quantity(860, Inventory.getInstance());
         double adjustmentTimeInTimeSteps = 8;
 
         Flow production = new FlowPerDay("Production") {
@@ -33,7 +33,7 @@ public class NegativeFeedbackWithGoalTest {
             @Override
             protected Quantity quantityPerDay() {
                 Quantity delta = goal.subtract(inventoryOnHand.getCurrentValue());
-                return delta.divide("Production", adjustmentTimeInTimeSteps);
+                return delta.divide(adjustmentTimeInTimeSteps);
             }
         };
 

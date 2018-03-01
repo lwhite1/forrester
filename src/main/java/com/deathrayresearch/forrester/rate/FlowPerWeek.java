@@ -19,11 +19,6 @@ public abstract class FlowPerWeek extends Flow {
     }
 
     @Override
-    public String getName() {
-        return quantityPerWeek().getName();
-    }
-
-    @Override
     public Quantity flowPerTimeUnit(TimeUnit timeUnit) {
         return convert(quantityPerWeek(), timeUnit);
     }

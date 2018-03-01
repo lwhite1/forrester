@@ -37,7 +37,6 @@ public class sShapedPopulationGrowth {
             @Override
             protected Quantity quantityPerDay() {
                 return ExponentialChangeWithLimit.from(
-                        "Births",
                         population,
                         fractionalNetBirthRate.getCurrentValue(),
                         carryingCapacity.getCurrentValue());

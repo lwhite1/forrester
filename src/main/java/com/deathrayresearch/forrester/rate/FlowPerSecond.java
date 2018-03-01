@@ -19,11 +19,6 @@ public abstract class FlowPerSecond extends Flow {
     }
 
     @Override
-    public String getName() {
-        return quantityPerSecond().getName();
-    }
-
-    @Override
     public Quantity flowPerTimeUnit(TimeUnit timeUnit) {
         return convert(quantityPerSecond(), timeUnit);
     }

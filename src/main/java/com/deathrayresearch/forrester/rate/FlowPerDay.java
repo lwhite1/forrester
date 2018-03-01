@@ -15,11 +15,6 @@ public abstract class FlowPerDay extends Flow {
         super(name, DAY);
     }
 
-    @Override
-    public String getName() {
-        return quantityPerDay().getName();
-    }
-
     private Quantity convert(Quantity quantity, TimeUnit newTimeUnit) {
         Preconditions.checkArgument(quantity!= null, "quantity is null in " + getName());
         Preconditions.checkArgument(newTimeUnit!= null, "newTimeUnit is null in " + getName());

@@ -67,7 +67,7 @@ public class Simulation {
         Preconditions.checkArgument(SUPPORTED_TIMESTEPS.contains(timeStep), UNSUPPORTED_TIME_UNIT_MESSSAGE);
         this.model = model;
         this.timeStep = timeStep;
-        this.duration = new Quantity("Simulation duration", durationAmount, durationUnits);
+        this.duration = new Quantity(durationAmount, durationUnits);
         this.currentDateTime = LocalDateTime.now();
         eventBus = new EventBus();
     }

@@ -11,19 +11,17 @@ public class SimpleExponentialChange {
 
     private final double growthAmount;
     private final Stock stock;
-    private final String name;
 
-    public static Quantity from(String name, Stock stock, double growthAmount) {
-        return new SimpleExponentialChange(name, stock, growthAmount).getCurrentQuantity();
+    public static Quantity from(Stock stock, double growthAmount) {
+        return new SimpleExponentialChange(stock, growthAmount).getCurrentQuantity();
     }
 
-    private SimpleExponentialChange(String name, Stock stock, double growthAmount) {
-        this.name = name;
+    private SimpleExponentialChange(Stock stock, double growthAmount) {
         this.growthAmount = growthAmount;
         this.stock = stock;
     }
 
     public Quantity getCurrentQuantity() {
-        return new Quantity(name,stock.getCurrentValue().getValue() * growthAmount, stock.getUnit());
+        return new Quantity(stock.getCurrentValue().getValue() * growthAmount, stock.getUnit());
     }
 }

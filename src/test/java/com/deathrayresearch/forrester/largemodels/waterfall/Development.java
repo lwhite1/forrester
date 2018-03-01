@@ -116,7 +116,7 @@ class Development {
                 double staffing = module.getVariable("Development Staffing").getCurrentValue();
                 double productivity = module.getVariable("Development Productivity").getCurrentValue();
                 double value = staffing * productivity;
-                return new Quantity("Tasks completed", value, TASKS);
+                return new Quantity(value, TASKS);
             }
         };
     }

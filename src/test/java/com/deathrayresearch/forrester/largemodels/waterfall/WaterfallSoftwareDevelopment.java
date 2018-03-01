@@ -66,7 +66,7 @@ public class WaterfallSoftwareDevelopment {
     @Test
     public void testRun1() {
 
-        Quantity duration = new Quantity("Simulation duration", 1, Year.getInstance());
+        Quantity duration = new Quantity(1, Year.getInstance());
         Simulation simulation = new Simulation(model, Day.getInstance(), duration);
         simulation.addEventHandler(new ChartViewer());
 

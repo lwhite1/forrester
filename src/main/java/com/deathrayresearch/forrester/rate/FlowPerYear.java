@@ -19,11 +19,6 @@ public abstract class FlowPerYear extends Flow {
     }
 
     @Override
-    public String getName() {
-        return quantityPerYear().getName();
-    }
-
-    @Override
     public Quantity flowPerTimeUnit(TimeUnit timeUnit) {
         return convert(quantityPerYear(), timeUnit);
     }
