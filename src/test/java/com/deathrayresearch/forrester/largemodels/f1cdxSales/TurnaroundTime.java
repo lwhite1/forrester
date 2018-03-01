@@ -18,7 +18,7 @@ public class TurnaroundTime {
 
     static final Thing TEST = Thing.getInstance();
 
-    Constant TATGoal = new Constant("TAT Goal", DAY, 14);
+    Constant TATGoal = new Constant("TAT Target", DAY, 14);
     Constant Capacity = new Constant("Capacity", TEST,190);
 
     Stock WIP = new Stock("WIP", 1000, TEST);
