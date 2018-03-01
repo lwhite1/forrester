@@ -2,6 +2,7 @@ package com.deathrayresearch.forrester.model;
 
 import com.deathrayresearch.forrester.measure.Quantity;
 import com.deathrayresearch.forrester.measure.Unit;
+import com.deathrayresearch.forrester.rate.Flow;
 
 import java.util.HashSet;
 import java.util.Set;

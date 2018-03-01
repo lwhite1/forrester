@@ -3,11 +3,10 @@ package com.deathrayresearch.forrester;
 import com.deathrayresearch.forrester.io.CsvSubscriber;
 import com.deathrayresearch.forrester.measure.Quantity;
 import com.deathrayresearch.forrester.measure.units.volume.Volumes;
-import com.deathrayresearch.forrester.model.Flow;
 import com.deathrayresearch.forrester.model.Model;
 import com.deathrayresearch.forrester.model.Stock;
-import com.deathrayresearch.forrester.rate.Rate;
-import com.deathrayresearch.forrester.rate.RatePerMinute;
+import com.deathrayresearch.forrester.rate.Flow;
+import com.deathrayresearch.forrester.rate.FlowPerMinute;
 import com.deathrayresearch.forrester.ui.ChartViewer;
 import org.junit.Test;
 
@@ -29,7 +28,8 @@ public class TubTest {
         Stock tub = new Stock("Water in Tub", 30, LITER);
 
         // the water drains at the rate of the outflow capacity or the amount of water in the tub, whichever is less
-        Rate outRate = new RatePerMinute() {
+        Flow outflow = new FlowPerMinute("Outflow") {
+
             Quantity litersPerMinuteOut = Volumes.liters("Liters out", 3.0);
 
             @Override
@@ -40,10 +40,10 @@ public class TubTest {
             }
         };
 
-        Flow outflow = new Flow(outRate);
+        FlowPerMinute inflow = new FlowPerMinute("Inflow") {
 
-        RatePerMinute inRate = new RatePerMinute() {
-            Quantity litersPerMinuteIn =  Volumes.liters("Inflow", 2.96);
+            Quantity litersPerMinuteIn =  Volumes.liters("Liters in", 2.96);
+
             Quantity lowInflow = Volumes.liters("Inflow", 1.0);
             @Override
             protected Quantity quantityPerMinute() {
@@ -54,7 +54,6 @@ public class TubTest {
                 return litersPerMinuteIn;
             }
         };
-        Flow inflow = new Flow(inRate);
 
         tub.addInflow(inflow);
         tub.addOutflow(outflow);

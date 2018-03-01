@@ -6,13 +6,12 @@ import com.deathrayresearch.forrester.measure.units.dimensionless.DimensionlessU
 import com.deathrayresearch.forrester.measure.units.item.People;
 import com.deathrayresearch.forrester.measure.units.item.Thing;
 import com.deathrayresearch.forrester.model.Constant;
-import com.deathrayresearch.forrester.model.Flow;
 import com.deathrayresearch.forrester.model.Formula;
 import com.deathrayresearch.forrester.model.Stock;
 import com.deathrayresearch.forrester.model.Module;
 import com.deathrayresearch.forrester.model.Variable;
-import com.deathrayresearch.forrester.rate.Rate;
-import com.deathrayresearch.forrester.rate.RatePerDay;
+import com.deathrayresearch.forrester.rate.Flow;
+import com.deathrayresearch.forrester.rate.FlowPerDay;
 
 import static com.deathrayresearch.forrester.largemodels.waterfall.WaterfallSoftwareDevelopment.*;
 
@@ -79,23 +78,18 @@ class Workforce {
                         DIMENSIONLESS_UNIT, () ->
                         experiencedWorkforce.getCurrentValue().getValue() / totalWorkforce.getCurrentValue());
 
-        Flow newHireFlow = getNewHireFlow(workforceGap);
-
-        Flow assimilationFlow = getAssimilationFlow(newlyHiredWorkforce);
-
-        Flow resignationFlow = getResignationFlow(experiencedWorkforce);
 
         workforce.addStock(newlyHiredWorkforce);
         workforce.addStock(experiencedWorkforce);
 
-        newlyHiredWorkforce.addInflow(newHireFlow);
-        newlyHiredWorkforce.addOutflow(assimilationFlow);
-        experiencedWorkforce.addInflow(assimilationFlow);
+        newlyHiredWorkforce.addInflow(getNewHireFlow(workforceGap));
+        newlyHiredWorkforce.addOutflow(getAssimilationFlow(newlyHiredWorkforce));
+        experiencedWorkforce.addInflow(getAssimilationFlow(newlyHiredWorkforce));
         //experiencedWorkforce.addOutflow(resignationFlow);
 
-        workforce.addFlow(newHireFlow);
-        workforce.addFlow(assimilationFlow);
-        workforce.addFlow(resignationFlow);
+        workforce.addFlow(getNewHireFlow(workforceGap));
+        workforce.addFlow(getAssimilationFlow(newlyHiredWorkforce));
+        workforce.addFlow(getResignationFlow(experiencedWorkforce));
 
         workforce.addVariable(dailyManPowerForTraining);
         workforce.addVariable(workforceGap);
@@ -114,7 +108,7 @@ class Workforce {
 
         final double hiringDelayInDays = 8.0 * 7;
 
-        Rate hiringRate = new RatePerDay() {
+        return new FlowPerDay("Hired") {
 
             @Override
             protected Quantity quantityPerDay() {
@@ -125,32 +119,27 @@ class Workforce {
                 return new Quantity("Hired", maxAmount, People.getInstance());
             }
         };
-
-        return new Flow(hiringRate);
     }
 
     private static Flow getResignationFlow(Stock experiencedWorkforce) {
         double averageEmploymentInDays = 673.0;
-        Rate quitRate = new RatePerDay() {
+        return new FlowPerDay("Resigned") {
             @Override
             protected Quantity quantityPerDay() {
                 return new Quantity("Resigned", experiencedWorkforce.getCurrentValue().getValue()
                         / averageEmploymentInDays, People.getInstance());
             }
         };
-        return new Flow(quitRate);
     }
 
     private static Flow getAssimilationFlow(Stock newHires) {
         final double assimilationDelayInDays = 16.0 * 7;
 
-        Rate assimilationRate = new RatePerDay() {
+        return new FlowPerDay("Assimilated hires") {
             @Override
             protected Quantity quantityPerDay() {
                 return newHires.getCurrentValue().divide("Assimilated hires", assimilationDelayInDays);
             }
         };
-
-        return new Flow(assimilationRate);
     }
 }

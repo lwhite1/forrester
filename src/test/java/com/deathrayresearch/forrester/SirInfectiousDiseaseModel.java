@@ -4,11 +4,10 @@ import com.deathrayresearch.forrester.io.CsvSubscriber;
 import com.deathrayresearch.forrester.measure.Quantity;
 import com.deathrayresearch.forrester.measure.units.time.Times;
 import com.deathrayresearch.forrester.model.Constant;
-import com.deathrayresearch.forrester.model.Flow;
 import com.deathrayresearch.forrester.model.Model;
 import com.deathrayresearch.forrester.model.Stock;
-import com.deathrayresearch.forrester.rate.Rate;
-import com.deathrayresearch.forrester.rate.RatePerDay;
+import com.deathrayresearch.forrester.rate.Flow;
+import com.deathrayresearch.forrester.rate.FlowPerDay;
 import com.deathrayresearch.forrester.ui.ChartViewer;
 import org.junit.Test;
 
@@ -30,11 +29,10 @@ public class SirInfectiousDiseaseModel {
         Stock recoveredPopulation = new Stock("Recovered", 0, PEOPLE);
 
         // at each step, each susceptible person meets n other people
-        Constant contactRate = new Constant("Contact Rate", PEOPLE, 8);
+        Constant contactRate = new Constant("Contact Flow", PEOPLE, 8);
 
         // The number of newly infected at each step, they get moved from susceptible to infectious status.
-        Rate infectiousRate = new RatePerDay() {
-
+        Flow infectiousRate = new FlowPerDay("Infected") {
 
             @Override
             public Quantity quantityPerDay() {
@@ -60,7 +58,7 @@ public class SirInfectiousDiseaseModel {
             }
         };
 
-        Rate recoveryRate = new RatePerDay() {
+        Flow recoveryRate = new FlowPerDay("Recovered") {
 
             @Override
             public Quantity quantityPerDay() {
@@ -70,13 +68,10 @@ public class SirInfectiousDiseaseModel {
             }
         };
 
-        Flow infected = new Flow(infectiousRate);
-        Flow recovered = new Flow(recoveryRate);
-
-        susceptiblePopulation.addOutflow(infected);
-        infectiousPopulation.addInflow(infected);
-        infectiousPopulation.addOutflow(recovered);
-        recoveredPopulation.addInflow(recovered);
+        susceptiblePopulation.addOutflow(infectiousRate);
+        infectiousPopulation.addInflow(infectiousRate);
+        infectiousPopulation.addOutflow(recoveryRate);
+        recoveredPopulation.addInflow(recoveryRate);
 
         model.addStock(susceptiblePopulation);
         model.addStock(infectiousPopulation);

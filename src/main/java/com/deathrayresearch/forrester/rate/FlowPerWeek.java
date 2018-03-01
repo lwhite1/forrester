@@ -8,10 +8,10 @@ import static com.deathrayresearch.forrester.measure.Units.WEEK;
 /**
  *
  */
-public abstract class RatePerWeek extends AbstractRate {
+public abstract class FlowPerWeek extends Flow {
 
-    public RatePerWeek() {
-        super(WEEK);
+    public FlowPerWeek(String name) {
+        super(name, WEEK);
     }
 
     private Quantity convert(Quantity quantity, TimeUnit newTimeUnit) {
@@ -19,7 +19,7 @@ public abstract class RatePerWeek extends AbstractRate {
     }
 
     @Override
-    public String name() {
+    public String getName() {
         return quantityPerWeek().getName();
     }
 

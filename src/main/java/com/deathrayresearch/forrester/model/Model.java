@@ -8,7 +8,7 @@ import java.util.Map;
 /**
  * One representation of a dynamic system
  */
-public class Model {
+public class Model extends Element {
 
     private String name;
     private List<Stock> stocks = new ArrayList<>();

@@ -29,6 +29,4 @@ class RateConverter {
 
         return new Quantity(originalQuantity.getName(), convertedValue * originalQuantity.getValue(), originalQuantity.getUnit());
     }
-
-
 }

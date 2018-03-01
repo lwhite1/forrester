@@ -8,11 +8,11 @@ import com.deathrayresearch.forrester.measure.Quantity;
 import com.deathrayresearch.forrester.measure.TimeUnit;
 import com.deathrayresearch.forrester.measure.Unit;
 import com.deathrayresearch.forrester.measure.units.time.*;
-import com.deathrayresearch.forrester.model.Flow;
 import com.deathrayresearch.forrester.model.Model;
 import com.deathrayresearch.forrester.model.Stock;
 import com.deathrayresearch.forrester.model.Module;
 
+import com.deathrayresearch.forrester.rate.Flow;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import com.google.common.eventbus.EventBus;
@@ -137,7 +137,7 @@ public class Simulation {
             if (flows.containsKey(flow.getName())) {
                 q = flows.get(flow.getName());
             } else {
-                q = flow.getRate().flowPerTimeUnit(timeStep);
+                q = flow.flowPerTimeUnit(timeStep);
                 flows.put(flow.getName(), q);
             }
             if (isInflow) {

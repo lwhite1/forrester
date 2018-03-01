@@ -1,15 +1,19 @@
 package com.deathrayresearch.forrester.rate;
 
+import com.deathrayresearch.forrester.measure.Quantity;
 import com.deathrayresearch.forrester.measure.TimeUnit;
 
 /**
  * Helps to create rates that are convertible to any time unit
  */
-public abstract class AbstractRate implements Rate {
+public abstract class Flow {
 
     private final TimeUnit timeUnit;
 
-    AbstractRate(TimeUnit unit) {
+    private final String name;
+
+    Flow(String name, TimeUnit unit) {
+        this.name = name;
         this.timeUnit = unit;
     }
 
@@ -19,7 +23,13 @@ public abstract class AbstractRate implements Rate {
 
     @Override
     public String toString() {
-        return name() + ": " + flowPerTimeUnit(timeUnit);
+        return getName() + ": " + flowPerTimeUnit(timeUnit);
     }
+
+    public String getName() {
+        return name;
+    }
+
+    public abstract Quantity flowPerTimeUnit(TimeUnit timeUnit);
 
 }

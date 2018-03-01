@@ -5,11 +5,10 @@ import com.deathrayresearch.forrester.measure.Quantity;
 import com.deathrayresearch.forrester.measure.Unit;
 import com.deathrayresearch.forrester.measure.dimension.Item;
 import com.deathrayresearch.forrester.measure.units.time.Day;
-import com.deathrayresearch.forrester.model.Flow;
 import com.deathrayresearch.forrester.model.Model;
 import com.deathrayresearch.forrester.model.Stock;
-import com.deathrayresearch.forrester.rate.RatePerDay;
-import com.deathrayresearch.forrester.rate.Rate;
+import com.deathrayresearch.forrester.rate.Flow;
+import com.deathrayresearch.forrester.rate.FlowPerDay;
 import com.deathrayresearch.forrester.ui.ChartViewer;
 import org.junit.Test;
 
@@ -29,7 +28,7 @@ public class NegativeFeedbackWithGoalTest {
         Quantity goal = new Quantity("Target inventory", 860, Inventory.getInstance());
         double adjustmentTimeInTimeSteps = 8;
 
-        Rate productionRate = new RatePerDay() {
+        Flow production = new FlowPerDay("Production") {
 
             @Override
             protected Quantity quantityPerDay() {
@@ -37,8 +36,6 @@ public class NegativeFeedbackWithGoalTest {
                 return delta.divide("Production", adjustmentTimeInTimeSteps);
             }
         };
-
-        Flow production = new Flow(productionRate);
 
         inventoryOnHand.addInflow(production);
 

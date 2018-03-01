@@ -6,14 +6,13 @@ import com.deathrayresearch.forrester.largemodels.waterfall.units.TasksPerPerson
 import com.deathrayresearch.forrester.measure.Quantity;
 import com.deathrayresearch.forrester.measure.units.dimensionless.DimensionlessUnit;
 import com.deathrayresearch.forrester.model.Constant;
-import com.deathrayresearch.forrester.model.Flow;
 import com.deathrayresearch.forrester.model.Formula;
 import com.deathrayresearch.forrester.model.Model;
 import com.deathrayresearch.forrester.model.Stock;
 import com.deathrayresearch.forrester.model.Module;
 import com.deathrayresearch.forrester.model.Variable;
-import com.deathrayresearch.forrester.rate.Rate;
-import com.deathrayresearch.forrester.rate.RatePerDay;
+import com.deathrayresearch.forrester.rate.Flow;
+import com.deathrayresearch.forrester.rate.FlowPerDay;
 
 import static com.deathrayresearch.forrester.largemodels.waterfall.WaterfallSoftwareDevelopment.*;
 
@@ -111,7 +110,7 @@ class Development {
     }
 
     private static Flow getDevelopmentFlow(Module module) {
-        Rate softwareDevelopmentRate = new RatePerDay() {
+        return new FlowPerDay("Tasks completed") {
             @Override
             protected Quantity quantityPerDay() {
                 double staffing = module.getVariable("Development Staffing").getCurrentValue();
@@ -120,7 +119,5 @@ class Development {
                 return new Quantity("Tasks completed", value, TASKS);
             }
         };
-
-        return new Flow(softwareDevelopmentRate);
     }
 }
