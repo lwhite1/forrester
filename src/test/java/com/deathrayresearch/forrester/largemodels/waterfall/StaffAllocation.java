@@ -26,8 +26,8 @@ class StaffAllocation {
 
         Variable totalDailyStaffing = new Variable("Total daily dev. resources",
                 PEOPLE,
-                () -> model.getVariable(WaterfallSoftwareDevelopment.TOTAL_WORKFORCE).getCurrentValue()
-                        * Workforce.AVERAGE_DAILY_MAN_POWER_PER_STAFF.getCurrentValue());
+                () -> model.getVariable(WaterfallSoftwareDevelopment.TOTAL_WORKFORCE).getValue()
+                        * Workforce.AVERAGE_DAILY_MAN_POWER_PER_STAFF.getValue());
 
 
         Constant plannedFractionOfStaffForQA = 
@@ -39,8 +39,8 @@ class StaffAllocation {
                         new Formula() {
                             @Override
                             public double getCurrentValue() {
-                                return totalDailyStaffing.getCurrentValue() 
-                                        - model.getVariable(DAILY_RESOURCES_FOR_TRAINING).getCurrentValue();
+                                return totalDailyStaffing.getValue()
+                                        - model.getVariable(DAILY_RESOURCES_FOR_TRAINING).getValue();
                             }
                         });
         
@@ -48,7 +48,7 @@ class StaffAllocation {
                 new Variable("Actual fraction of resources for QA", DimensionlessUnit.getInstance(), new Formula() {
                     @Override
                     public double getCurrentValue() {
-                        return plannedFractionOfStaffForQA.getCurrentValue();
+                        return plannedFractionOfStaffForQA.getValue();
                     }
                 });
 
@@ -61,9 +61,9 @@ class StaffAllocation {
                             @Override
                             public double getCurrentValue() {
                                 return Math.min(
-                                        actualFractionOfStaffForQA.getCurrentValue() * totalDailyStaffing.getCurrentValue(),
-                                        (1.0 - lossFromOverhead.getCurrentValue()) 
-                                                * dailyResourcesAvailableAfterTrainingOverhead.getCurrentValue());
+                                        actualFractionOfStaffForQA.getValue() * totalDailyStaffing.getValue(),
+                                        (1.0 - lossFromOverhead.getValue())
+                                                * dailyResourcesAvailableAfterTrainingOverhead.getValue());
                             }
                         }
                 );
@@ -74,8 +74,8 @@ class StaffAllocation {
                         new Formula() {
                             @Override
                             public double getCurrentValue() {
-                                return dailyResourcesAvailableAfterTrainingOverhead.getCurrentValue()
-                                        - dailyResourcesForQA.getCurrentValue();
+                                return dailyResourcesAvailableAfterTrainingOverhead.getValue()
+                                        - dailyResourcesForQA.getValue();
                             }
                         });
         

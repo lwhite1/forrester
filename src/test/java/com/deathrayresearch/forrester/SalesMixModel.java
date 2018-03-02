@@ -1,24 +1,20 @@
 package com.deathrayresearch.forrester;
 
+import com.deathrayresearch.forrester.archetypes.SimpleLinearChange;
 import com.deathrayresearch.forrester.io.CsvSubscriber;
-import com.deathrayresearch.forrester.measure.Dimension;
 import com.deathrayresearch.forrester.measure.Quantity;
-import com.deathrayresearch.forrester.measure.Unit;
-import com.deathrayresearch.forrester.measure.dimension.Item;
-import com.deathrayresearch.forrester.measure.units.dimensionless.DimensionlessUnit;
-import com.deathrayresearch.forrester.measure.units.item.People;
 import com.deathrayresearch.forrester.measure.units.time.Times;
-import com.deathrayresearch.forrester.measure.units.time.Week;
 import com.deathrayresearch.forrester.model.Constant;
-import com.deathrayresearch.forrester.model.Flow;
 import com.deathrayresearch.forrester.model.Formula;
 import com.deathrayresearch.forrester.model.Model;
 import com.deathrayresearch.forrester.model.Stock;
 import com.deathrayresearch.forrester.model.Variable;
-import com.deathrayresearch.forrester.rate.RatePerDay;
-import com.deathrayresearch.forrester.rate.Rate;
+import com.deathrayresearch.forrester.rate.Flow;
+import com.deathrayresearch.forrester.rate.FlowPerDay;
 import com.deathrayresearch.forrester.ui.ChartViewer;
 import org.junit.Test;
+
+import static com.deathrayresearch.forrester.measure.Units.*;
 
 /**
  *
@@ -30,74 +26,48 @@ public class SalesMixModel {
         Model model = new Model("Hardware/software sales mix");
 
         Constant hardwareSalesCustomer = new Constant("Hardware sales per new customer",
-                Sales.getInstance(),
-                1000);
+                US_DOLLAR, 1000);
+
         Constant serviceSalesCustomerMonth = new Constant("Service sales per customer per month",
-                Sales.getInstance(),
-                10);
+                US_DOLLAR, 10);
 
-        Stock customers = new Stock("customers", 0, People.getInstance());
+        Stock customers = new Stock("customers", 0, PEOPLE);
 
-        Rate acquisitionRate = new RatePerDay() {
-
+        Flow acquisitionRate = new FlowPerDay("New customers") {
             @Override
             protected Quantity quantityPerDay() {
-                return new Quantity("New customers", 10, People.getInstance());
+                return SimpleLinearChange.from(customers, 10);
             }
         };
 
-        Formula hardwareSalesFormula = () -> hardwareSalesCustomer.getCurrentValue()
-                * acquisitionRate.flowPerTimeUnit(Week.getInstance()).getValue();
+        Formula hardwareSalesFormula = () -> hardwareSalesCustomer.getValue()
+                * acquisitionRate.flowPerTimeUnit(WEEK).getValue();
 
-        Variable hardwareSales = new Variable("Hardware sales", Sales.getInstance(), hardwareSalesFormula);
+        Variable hardwareSales = new Variable("Hardware sales", US_DOLLAR, hardwareSalesFormula);
 
-        Formula serviceSalesFormula = () -> serviceSalesCustomerMonth.getCurrentValue()
+        Formula serviceSalesFormula = () -> serviceSalesCustomerMonth.getValue()
                 * customers.getQuantity().getValue();
 
-        Variable serviceSales = new Variable("Service sales", Sales.getInstance(), serviceSalesFormula);
+        Variable serviceSales = new Variable("Service sales", US_DOLLAR, serviceSalesFormula);
 
-        Formula totalSalesFormula = () -> hardwareSales.getCurrentValue() + serviceSales.getCurrentValue();
+        Formula totalSalesFormula = () -> hardwareSales.getValue() + serviceSales.getValue();
 
-        Variable totalSales = new Variable("Total sales", Sales.getInstance(), totalSalesFormula);
+        Variable totalSales = new Variable("Total sales", US_DOLLAR, totalSalesFormula);
 
-        Variable proportionHardwareSales = new Variable("Proportion hardware", DimensionlessUnit.getInstance(),
-                () -> hardwareSales.getCurrentValue() / totalSales.getCurrentValue());
+        Variable proportionHardwareSales = new Variable("Proportion hardware", DIMENSIONLESS,
+                () -> hardwareSales.getValue() / totalSales.getValue());
 
-        Flow customerAcquisition = new Flow(acquisitionRate);
-        customers.addInflow(customerAcquisition);
+        customers.addInflow(acquisitionRate);
 
         model.addStock(customers);
         model.addVariable(hardwareSales);
         model.addVariable(serviceSales);
         model.addVariable(proportionHardwareSales);
 
-        Simulation run = new Simulation(model, Week.getInstance(), Times.years("Simulation Duration", 10));
-        run.addEventHandler(ChartViewer.newInstance(run.getEventBus()));
-        run.addEventHandler(CsvSubscriber.newInstance(run.getEventBus(), "/tmp/forrester/run1out.csv"));
+        Simulation run = new Simulation(model, WEEK, Times.years( 10));
+
+        run.addEventHandler(new ChartViewer());
+        run.addEventHandler(new CsvSubscriber("/tmp/forrester/run1out.csv"));
         run.execute();
-    }
-
-    private static class Sales implements Unit {
-
-        private static final Sales instance = new Sales();
-
-        @Override
-        public String getName() {
-            return "Sale";
-        }
-
-        @Override
-        public Dimension getDimension() {
-            return Item.getInstance();
-        }
-
-        @Override
-        public double ratioToBaseUnit() {
-            return 1.0;
-        }
-
-        static Sales getInstance() {
-            return instance;
-        }
     }
 }

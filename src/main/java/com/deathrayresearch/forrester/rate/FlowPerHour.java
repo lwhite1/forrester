@@ -2,15 +2,16 @@ package com.deathrayresearch.forrester.rate;
 
 import com.deathrayresearch.forrester.measure.Quantity;
 import com.deathrayresearch.forrester.measure.TimeUnit;
-import com.deathrayresearch.forrester.measure.units.time.Times;
+
+import static com.deathrayresearch.forrester.measure.Units.HOUR;
 
 /**
  *
  */
-public abstract class RatePerWeek extends AbstractRate {
+public abstract class FlowPerHour extends Flow {
 
-    public RatePerWeek() {
-        super(Times.WEEK);
+    public FlowPerHour(String name) {
+        super(name, HOUR);
     }
 
     private Quantity convert(Quantity quantity, TimeUnit newTimeUnit) {
@@ -18,15 +19,10 @@ public abstract class RatePerWeek extends AbstractRate {
     }
 
     @Override
-    public String name() {
-        return quantityPerWeek().getName();
-    }
-
-    @Override
     public Quantity flowPerTimeUnit(TimeUnit timeUnit) {
-        return convert(quantityPerWeek(), timeUnit);
+        return convert(quantityPerHour(), timeUnit);
     }
 
-    protected abstract Quantity quantityPerWeek();
+    protected abstract Quantity quantityPerHour();
 
 }

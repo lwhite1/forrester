@@ -1,5 +1,6 @@
 package com.deathrayresearch.forrester.measure;
 
+import com.deathrayresearch.forrester.measure.units.volume.QuartUS;
 import com.google.common.base.Preconditions;
 
 import javax.annotation.concurrent.Immutable;
@@ -18,18 +19,12 @@ public final class Quantity {
 
     private static final String INCOMPATIBLE_ERROR_MESSAGE = "Combined quantities must have compatible units";
 
-    private String name;
-    private final double value;
+    private double value;
     private final Unit unit;
 
-    public Quantity(String name, double value, Unit unit) {
-        this.name = name;
+    public Quantity(double value, Unit unit) {
         this.value = value;
         this.unit = unit;
-    }
-
-    public String getName() {
-        return name;
     }
 
     public double getValue() {
@@ -45,19 +40,11 @@ public final class Quantity {
     }
 
     public Quantity multiply(double d) {
-        return new Quantity(this.name, d * getValue(), this.getUnit());
-    }
-
-    public Quantity multiply(String newName, double d) {
-        return new Quantity(newName, d * getValue(), this.getUnit());
+        return new Quantity(d * getValue(), this.getUnit());
     }
 
     public Quantity divide(double d) {
-        return new Quantity(this.name, getValue() / d, this.getUnit());
-    }
-
-    public Quantity divide(String newName, double d) {
-        return new Quantity(newName, getValue() / d, this.getUnit());
+        return new Quantity( getValue() / d, this.getUnit());
     }
 
     public Quantity add(Quantity other) {
@@ -65,21 +52,9 @@ public final class Quantity {
 
         Quantity otherInBaseUnits = other.inBaseUnits();
         Quantity thisInBaseUnits = inBaseUnits();
-        Quantity result = new Quantity(name, otherInBaseUnits.getValue() + thisInBaseUnits.getValue(),
+        Quantity result = new Quantity(otherInBaseUnits.getValue() + thisInBaseUnits.getValue(),
                 this.getUnit().getBaseUnit());
         return getUnit().fromBaseUnits(result);
-    }
-
-    public Quantity add(String newName, Quantity other) {
-        Quantity quantity = add(other);
-        quantity.setName(newName);
-        return quantity;
-    }
-
-    public Quantity subtract(String newName, Quantity other) {
-        Quantity quantity = subtract(other);
-        quantity.setName(newName);
-        return quantity;
     }
 
     public Quantity subtract(Quantity other) {
@@ -87,9 +62,13 @@ public final class Quantity {
 
         Quantity otherInBaseUnits = other.inBaseUnits();
         Quantity thisInBaseUnits = inBaseUnits();
-        Quantity result = new Quantity(name, thisInBaseUnits.getValue() - otherInBaseUnits.getValue(),
+        Quantity result = new Quantity(thisInBaseUnits.getValue() - otherInBaseUnits.getValue(),
                 this.getUnit().getBaseUnit());
         return getUnit().fromBaseUnits(result);
+    }
+
+    public void setValue(double value) {
+        this.value = value;
     }
 
     @Override
@@ -152,7 +131,7 @@ public final class Quantity {
         return result;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public Quantity convertUnits(Unit newUnit) {
+        return unit.getDimension().getConverter().convert(this, newUnit);
     }
 }

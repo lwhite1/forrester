@@ -22,7 +22,7 @@ public class Constant extends Element {
         return name;
     }
 
-    public double getCurrentValue() {
+    public double getValue() {
         return currentValue;
     }
 

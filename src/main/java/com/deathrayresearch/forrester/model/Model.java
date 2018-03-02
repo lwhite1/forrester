@@ -8,7 +8,7 @@ import java.util.Map;
 /**
  * One representation of a dynamic system
  */
-public class Model {
+public class Model extends Element {
 
     private String name;
     private List<Stock> stocks = new ArrayList<>();
@@ -81,7 +81,7 @@ public class Model {
     public List<Double> getVariableValues() {
         List<Double> results = new ArrayList<>();
         for (Variable variable : variables.values()) {
-            results.add(variable.getCurrentValue());
+            results.add(variable.getValue());
         }
         return results;
     }

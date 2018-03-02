@@ -12,12 +12,6 @@ import com.google.common.eventbus.Subscribe;
  */
 public class ChartViewer implements EventHandler {
 
-    public static ChartViewer newInstance(EventBus eventBus) {
-        ChartViewer subscriber = new ChartViewer();
-        eventBus.register(subscriber);
-        return subscriber;
-    }
-
     @Override
     @Subscribe
     public void handleTimeStepEvent(TimestepEvent event) {

@@ -2,20 +2,16 @@ package com.deathrayresearch.forrester.rate;
 
 import com.deathrayresearch.forrester.measure.Quantity;
 import com.deathrayresearch.forrester.measure.TimeUnit;
-import com.deathrayresearch.forrester.measure.units.time.Times;
+
+import static com.deathrayresearch.forrester.measure.Units.MINUTE;
 
 /**
  *
  */
-public abstract class RatePerMinute extends AbstractRate {
+public abstract class FlowPerMinute extends Flow {
 
-    public RatePerMinute() {
-        super(Times.MINUTE);
-    }
-
-    @Override
-    public String name() {
-        return quantityPerMinute().getName();
+    public FlowPerMinute(String name) {
+        super(name, MINUTE);
     }
 
     private Quantity convert(Quantity quantity, TimeUnit newTimeUnit) {

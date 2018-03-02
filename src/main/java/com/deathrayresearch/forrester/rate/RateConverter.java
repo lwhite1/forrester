@@ -27,8 +27,6 @@ class RateConverter {
         double convertedValue =
             inBaseUnits == 0 ? 0 : (newTimeUnit.ratioToBaseUnit() / inBaseUnits) * originalQuantity.getValue();
 
-        return new Quantity(originalQuantity.getName(), convertedValue * originalQuantity.getValue(), originalQuantity.getUnit());
+        return new Quantity(convertedValue * originalQuantity.getValue(), originalQuantity.getUnit());
     }
-
-
 }

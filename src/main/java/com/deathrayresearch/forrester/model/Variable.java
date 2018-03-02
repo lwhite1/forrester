@@ -22,7 +22,7 @@ public class Variable extends Element {
         return name;
     }
 
-    public double getCurrentValue() {
+    public double getValue() {
         return formula.getCurrentValue();
     }
 

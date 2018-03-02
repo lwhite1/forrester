@@ -1,18 +1,19 @@
 package com.deathrayresearch.forrester;
 
+import com.deathrayresearch.forrester.archetypes.ExponentialChangeWithLimit;
 import com.deathrayresearch.forrester.measure.Quantity;
-import com.deathrayresearch.forrester.measure.units.dimensionless.DimensionlessUnit;
-import com.deathrayresearch.forrester.measure.units.item.People;
-import com.deathrayresearch.forrester.measure.units.time.Day;
-import com.deathrayresearch.forrester.measure.units.time.Times;
 import com.deathrayresearch.forrester.model.Constant;
-import com.deathrayresearch.forrester.model.Flow;
 import com.deathrayresearch.forrester.model.Model;
 import com.deathrayresearch.forrester.model.Stock;
-import com.deathrayresearch.forrester.rate.RatePerDay;
-import com.deathrayresearch.forrester.rate.Rate;
+import com.deathrayresearch.forrester.rate.Flow;
+import com.deathrayresearch.forrester.rate.FlowPerDay;
 import com.deathrayresearch.forrester.ui.ChartViewer;
 import org.junit.Test;
+
+import static com.deathrayresearch.forrester.measure.Units.DIMENSIONLESS;
+import static com.deathrayresearch.forrester.measure.Units.PEOPLE;
+import static com.deathrayresearch.forrester.measure.Units.DAY;
+import static com.deathrayresearch.forrester.measure.Units.WEEK;
 
 /**
  *
@@ -23,35 +24,31 @@ public class sShapedPopulationGrowth {
     public void testRun1() {
         Model model = new Model("Population with S-Shaped Growth");
 
-        Stock population = new Stock("pop", 10, People.getInstance());
+        Stock population = new Stock("population", 10, PEOPLE);
 
-        Quantity carryingCapacity = new Quantity("Carrying capacity", 1000, People.getInstance());
+        Constant carryingCapacity = new Constant("Carrying capacity", PEOPLE,1000);
 
         Constant fractionalNetBirthRate = new Constant(
-                "Maximum Fractional Birth Rate",
-                DimensionlessUnit.getInstance(),
+                "Maximum Fractional Birth Flow",
+                DIMENSIONLESS,
                 0.04);
 
-        // Rates of birth and death vary with the relationship of population to carrying capacity
-        // This is a Logistic Growth Model
-        Rate birthRate = new RatePerDay() {
+        Flow births = new FlowPerDay("Births") {
             @Override
             protected Quantity quantityPerDay() {
-                double ratio = population.getQuantity().getValue() / carryingCapacity.getValue();
-                return population.getQuantity().multiply(
-                        "Births",
-                        fractionalNetBirthRate.getCurrentValue() * (1 - ratio));
+                return ExponentialChangeWithLimit.from(
+                        population,
+                        fractionalNetBirthRate.getValue(),
+                        carryingCapacity.getValue());
             }
         };
-
-        Flow births = new Flow(birthRate);
 
         population.addInflow(births);
 
         model.addStock(population);
 
-        Simulation run = new Simulation(model, Day.getInstance(), Times.WEEK, 32);
-        run.addEventHandler(ChartViewer.newInstance(run.getEventBus()));
+        Simulation run = new Simulation(model, DAY, WEEK, 32);
+        run.addEventHandler(new ChartViewer());
         run.execute();
     }
 }

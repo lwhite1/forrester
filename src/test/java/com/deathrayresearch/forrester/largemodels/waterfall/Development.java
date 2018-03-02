@@ -6,14 +6,13 @@ import com.deathrayresearch.forrester.largemodels.waterfall.units.TasksPerPerson
 import com.deathrayresearch.forrester.measure.Quantity;
 import com.deathrayresearch.forrester.measure.units.dimensionless.DimensionlessUnit;
 import com.deathrayresearch.forrester.model.Constant;
-import com.deathrayresearch.forrester.model.Flow;
 import com.deathrayresearch.forrester.model.Formula;
 import com.deathrayresearch.forrester.model.Model;
 import com.deathrayresearch.forrester.model.Stock;
 import com.deathrayresearch.forrester.model.Module;
 import com.deathrayresearch.forrester.model.Variable;
-import com.deathrayresearch.forrester.rate.Rate;
-import com.deathrayresearch.forrester.rate.RatePerDay;
+import com.deathrayresearch.forrester.rate.Flow;
+import com.deathrayresearch.forrester.rate.FlowPerDay;
 
 import static com.deathrayresearch.forrester.largemodels.waterfall.WaterfallSoftwareDevelopment.*;
 
@@ -62,12 +61,12 @@ class Development {
                             @Override
                             public double getCurrentValue() {
                                 double fractionExperienced =
-                                        model.getVariable(FRACTION_OF_WORKFORCE_WITH_EXPERIENCE).getCurrentValue();
+                                        model.getVariable(FRACTION_OF_WORKFORCE_WITH_EXPERIENCE).getValue();
                                 return
-                                        (nominalPotentialProductivityOfExperiencedEmployee.getCurrentValue()
+                                        (nominalPotentialProductivityOfExperiencedEmployee.getValue()
                                             * fractionExperienced)
                                         + ((1 - fractionExperienced)
-                                                * nominalPotentialProductivityOfNewEmployee.getCurrentValue())
+                                                * nominalPotentialProductivityOfNewEmployee.getValue())
                                         ;}});
 
         Variable potentialProductivity =
@@ -76,7 +75,7 @@ class Development {
                         new Formula() {
                             @Override
                             public double getCurrentValue() {
-                                return averageNominalPotentialProductivity.getCurrentValue();
+                                return averageNominalPotentialProductivity.getValue();
                             }
                         });
 
@@ -84,43 +83,41 @@ class Development {
         Variable developmentProductivity =
                 new Variable("Development Productivity",
                     TASKS_PER_PERSON_DAY,
-                        potentialProductivity::getCurrentValue);
+                        potentialProductivity::getValue);
 
         Variable developmentStaffing = new Variable("Development Staffing", PersonDaysPerDay.getInstance(),
                 new Formula() {
                     @Override
                     public double getCurrentValue() {
-                        return model.getVariable(DAILY_RESOURCES_FOR_SOFTWARE_PRODUCTION).getCurrentValue();
+                        return module.getVariable(DAILY_RESOURCES_FOR_SOFTWARE_PRODUCTION).getValue();
                     }
                 });
-
-        Flow developmentFlow = getDevelopmentFlow(module);
-
-        tasksDeveloped.addInflow(developmentFlow);
-
-        module.addFlow(developmentFlow);
-        module.addStock(tasksDeveloped);
-        module.addStock(actualFractionOfPersonDayOnProject);
 
         module.addVariable(communicationOverhead);
         module.addVariable(averageNominalPotentialProductivity);
         module.addVariable(potentialProductivity);
         module.addVariable(developmentProductivity);
         module.addVariable(developmentStaffing);
-        return module;
 
+        Flow developmentFlow = getDevelopmentFlow(module);
+        module.addFlow(developmentFlow);
+
+        tasksDeveloped.addInflow(developmentFlow);
+
+        module.addStock(tasksDeveloped);
+        module.addStock(actualFractionOfPersonDayOnProject);
+        return module;
     }
 
     private static Flow getDevelopmentFlow(Module module) {
-        Rate softwareDevelopmentRate = new RatePerDay() {
+        return new FlowPerDay("Tasks completed") {
             @Override
             protected Quantity quantityPerDay() {
-                double value = module.getVariable("Development Staffing").getCurrentValue()
-                        * module.getVariable("Development Productivity").getCurrentValue();
-                return new Quantity("Tasks completed", value, TASKS);
+                double staffing = module.getVariable("Development Staffing").getValue();
+                double productivity = module.getVariable("Development Productivity").getValue();
+                double value = staffing * productivity;
+                return new Quantity(value, TASKS);
             }
         };
-
-        return new Flow(softwareDevelopmentRate);
     }
 }

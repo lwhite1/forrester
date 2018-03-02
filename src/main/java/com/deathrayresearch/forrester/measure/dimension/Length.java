@@ -6,19 +6,17 @@ import com.deathrayresearch.forrester.measure.Dimension;
 import com.deathrayresearch.forrester.measure.Quantity;
 import com.deathrayresearch.forrester.measure.Unit;
 import com.deathrayresearch.forrester.measure.units.length.Meter;
+import com.google.common.base.Preconditions;
 
 /**
  *
  */
 public class Length implements Dimension {
 
-    private Converter converter = new Converter() {
-
-        @Override
-        public Quantity convert(Quantity originalQuantity, Unit newUnit) {
-            Quantity inBaseUnits = originalQuantity.inBaseUnits();
-            return newUnit.fromBaseUnits(inBaseUnits);
-        }
+    private Converter converter = (originalQuantity, newUnit) -> {
+        Preconditions.checkArgument(newUnit.getDimension().equals(Length.getInstance()));
+        Quantity inBaseUnits = originalQuantity.inBaseUnits();
+        return newUnit.fromBaseUnits(inBaseUnits);
     };
 
     private static Length ourInstance = new Length();

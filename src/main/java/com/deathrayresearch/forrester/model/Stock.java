@@ -2,6 +2,7 @@ package com.deathrayresearch.forrester.model;
 
 import com.deathrayresearch.forrester.measure.Quantity;
 import com.deathrayresearch.forrester.measure.Unit;
+import com.deathrayresearch.forrester.rate.Flow;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -14,14 +15,12 @@ public class Stock extends Element {
     private Set<Flow> inflows = new HashSet<>();
     private Set<Flow> outflows = new HashSet<>();
 
-    private Quantity currentValue;
-
-    public Stock(Quantity quantity) {
-        this.currentValue = quantity;
-    }
+    private final String name;
+    private final Quantity currentValue;
 
     public Stock(String name, double initialAmount, Unit unit) {
-        this.currentValue = new Quantity(name, initialAmount, unit);
+        this.name = name;
+        this.currentValue = new Quantity(initialAmount, unit);
     }
 
     public void addInflow(Flow inFlow) {
@@ -40,21 +39,25 @@ public class Stock extends Element {
         return outflows;
     }
 
-    public double getCurrentValue() {
-        return currentValue.getValue();
-    }
-
     public Quantity getQuantity() {
         return currentValue;
     }
 
-    public void setCurrentValue(Quantity currentValue) {
-        this.currentValue = currentValue;
+    public Unit getUnit() {
+        return currentValue.getUnit();
+    }
+
+    public void setValue(double value) {
+        this.getQuantity().setValue(value);
+    }
+
+    public double getValue() {
+        return getQuantity().getValue();
     }
 
     @Override
     public String getName() {
-        return currentValue.getName();
+        return name;
     }
 
     @Override

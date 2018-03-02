@@ -4,19 +4,17 @@ package com.deathrayresearch.forrester.largemodels.waterfall;
 import com.deathrayresearch.forrester.largemodels.waterfall.units.Errors;
 import com.deathrayresearch.forrester.largemodels.waterfall.units.ErrorsPerTask;
 import com.deathrayresearch.forrester.measure.Quantity;
-import com.deathrayresearch.forrester.model.Flow;
 import com.deathrayresearch.forrester.model.Formula;
 import com.deathrayresearch.forrester.model.Module;
 import com.deathrayresearch.forrester.model.Stock;
 import com.deathrayresearch.forrester.model.Variable;
-import com.deathrayresearch.forrester.rate.Rate;
-import com.deathrayresearch.forrester.rate.RatePerDay;
+import com.deathrayresearch.forrester.rate.Flow;
+import com.deathrayresearch.forrester.rate.FlowPerDay;
 
 import static com.deathrayresearch.forrester.largemodels.waterfall.WaterfallSoftwareDevelopment.TESTING_AND_REWORK;
 
 /**
  */
-
 class TestAndRework {
 
     static Module getTestAndReworkSubSystem() {
@@ -39,41 +37,35 @@ class TestAndRework {
 
 
 
-        Rate errorGenerationRate = new RatePerDay(){
+        Flow errorGenerationFlow = new FlowPerDay("New Errors") {
 
             @Override
             protected Quantity quantityPerDay() {
-                return new Quantity("New Errors", 10, Errors.getInstance());
+                return new Quantity(10, Errors.getInstance());
             }
         };
 
-        Flow errorGenerationFlow = new Flow(errorGenerationRate);
-
-        Rate errorDiscoveryRate = new RatePerDay() {
+        Flow errorDiscoveryFlow = new FlowPerDay("Errors discovered") {
             @Override
             protected Quantity quantityPerDay() {
-                return new Quantity("Errors discovered",3, Errors.getInstance());
+                return new Quantity(3, Errors.getInstance());
             }
         };
 
-        Flow errorDiscoveryFlow = new Flow(errorDiscoveryRate);
-
-        Rate errorFixRate = new RatePerDay() {
+        Flow errorFixedFlow = new FlowPerDay("Errors fixed") {
             @Override
             protected Quantity quantityPerDay() {
-                return new Quantity("Errors fixed",1, Errors.getInstance());
+                return new Quantity(1, Errors.getInstance());
             }
         };
-
-        Flow errorFixFlow = new Flow(errorFixRate);
 
         latentDefects.addInflow(errorGenerationFlow);
         latentDefects.addOutflow(errorDiscoveryFlow);
 
         knownDefects.addInflow(errorDiscoveryFlow);
-        knownDefects.addOutflow(errorFixFlow);
+        knownDefects.addOutflow(errorFixedFlow);
 
-        fixedDefects.addInflow(errorFixFlow);
+        fixedDefects.addInflow(errorFixedFlow);
 
         module.addStock(latentDefects);
         module.addStock(knownDefects);

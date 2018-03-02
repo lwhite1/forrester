@@ -2,19 +2,17 @@ package com.deathrayresearch.forrester;
 
 import com.deathrayresearch.forrester.io.CsvSubscriber;
 import com.deathrayresearch.forrester.measure.Quantity;
-import com.deathrayresearch.forrester.measure.units.time.Minute;
-import com.deathrayresearch.forrester.measure.units.time.Times;
-import com.deathrayresearch.forrester.measure.units.volume.Liter;
 import com.deathrayresearch.forrester.measure.units.volume.Volumes;
-import com.deathrayresearch.forrester.model.Flow;
 import com.deathrayresearch.forrester.model.Model;
 import com.deathrayresearch.forrester.model.Stock;
-import com.deathrayresearch.forrester.rate.Rate;
-import com.deathrayresearch.forrester.rate.RatePerMinute;
+import com.deathrayresearch.forrester.rate.Flow;
+import com.deathrayresearch.forrester.rate.FlowPerMinute;
 import com.deathrayresearch.forrester.ui.ChartViewer;
 import org.junit.Test;
 
 import java.time.Duration;
+
+import static com.deathrayresearch.forrester.measure.Units.*;
 
 /**
  *
@@ -25,45 +23,45 @@ public class TubTest {
     public void testRun1() {
 
         Model model = new Model("Tub model");
-        Simulation run = new Simulation(model, Minute.getInstance(), Times.HOUR, 1);
+        Simulation run = new Simulation(model, MINUTE, MINUTE, 10);
 
-        Stock tub = new Stock(Volumes.liters("Water in Tub", 30));
+        Stock tub = new Stock("Water in Tub", 50, GALLON_US);
 
         // the water drains at the rate of the outflow capacity or the amount of water in the tub, whichever is less
-        Rate outRate = new RatePerMinute() {
-            Quantity litersPerMinuteOut = Volumes.liters("Liters out", 3.0);
+        Flow outflow = new FlowPerMinute("Outflow") {
+
+            Quantity volumeOut = Volumes.gallonsUS( 5.0);
 
             @Override
             public Quantity quantityPerMinute() {
-                return new Quantity("Outflow",
-                        Math.min(litersPerMinuteOut.getValue(), tub.getQuantity().getValue()),
-                        Liter.getInstance());
+                return new Quantity(
+                        Math.min(volumeOut.getValue(), tub.getQuantity().getValue()),
+                        GALLON_US);
             }
         };
 
-        Flow outflow = new Flow(outRate);
+        FlowPerMinute inflow = new FlowPerMinute("Inflow") {
 
-        RatePerMinute inRate = new RatePerMinute() {
-            Quantity litersPerMinuteIn =  Volumes.liters("Inflow", 2.96);
-            Quantity lowInflow = Volumes.liters("Inflow", 1.0);
+            Quantity volumeIn =  Volumes.gallonsUS( 5);
+
+            Quantity lowInflow = Volumes.gallonsUS(0.0);
             @Override
             protected Quantity quantityPerMinute() {
                 // waits five minutes before adding any inflow
                 if (durationIsLessThan(run.getElapsedTime(), Duration.ofMinutes(5))) {
                     return lowInflow;
                 }
-                return litersPerMinuteIn;
+                return volumeIn;
             }
         };
-        Flow inflow = new Flow(inRate);
 
         tub.addInflow(inflow);
         tub.addOutflow(outflow);
 
         model.addStock(tub);
 
-        run.addEventHandler(ChartViewer.newInstance(run.getEventBus()));
-        run.addEventHandler(CsvSubscriber.newInstance(run.getEventBus(), "tub.csv"));
+        run.addEventHandler(new ChartViewer());
+        run.addEventHandler(new CsvSubscriber("tub.csv"));
         run.execute();
     }
 

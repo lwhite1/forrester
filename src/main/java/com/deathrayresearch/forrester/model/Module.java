@@ -2,6 +2,7 @@ package com.deathrayresearch.forrester.model;
 
 import com.deathrayresearch.forrester.measure.Quantity;
 import com.deathrayresearch.forrester.measure.TimeUnit;
+import com.deathrayresearch.forrester.rate.Flow;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -32,7 +33,7 @@ public class Module extends Element {
     }
 
     public Quantity valueOfFlow(String flowName, TimeUnit timeUnit) {
-        return flows.get(flowName).getRate().flowPerTimeUnit(timeUnit);
+        return flows.get(flowName).flowPerTimeUnit(timeUnit);
     }
 
     public void addStock(Stock stock) {
