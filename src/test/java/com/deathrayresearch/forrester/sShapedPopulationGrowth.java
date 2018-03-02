@@ -38,8 +38,8 @@ public class sShapedPopulationGrowth {
             protected Quantity quantityPerDay() {
                 return ExponentialChangeWithLimit.from(
                         population,
-                        fractionalNetBirthRate.getCurrentValue(),
-                        carryingCapacity.getCurrentValue());
+                        fractionalNetBirthRate.getValue(),
+                        carryingCapacity.getValue());
             }
         };
 

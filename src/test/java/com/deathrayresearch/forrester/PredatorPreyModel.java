@@ -24,7 +24,7 @@ public class PredatorPreyModel {
         new FlowPerYear("Births") {
             @Override
             protected Quantity quantityPerYear() {
-                double rate = prey.getCurrentValue().getValue();
+                double rate = prey.getQuantity().getValue();
                 return new Quantity(0, RABBIT);
             }
         };

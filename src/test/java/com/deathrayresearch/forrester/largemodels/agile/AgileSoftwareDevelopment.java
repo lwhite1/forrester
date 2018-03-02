@@ -54,10 +54,10 @@ public class AgileSoftwareDevelopment {
         Flow completionRate = new FlowPerWeek("Completed Work") {
             @Override
             protected Quantity quantityPerWeek() {
-                if (sprintBacklog.getCurrentValue().getValue() <= 0) {
+                if (sprintBacklog.getQuantity().getValue() <= 0) {
                     return new Quantity(0, Work.getInstance());
                 }
-                return new Quantity(Math.min(sprintBacklog.getCurrentValue().getValue(), nominalProductivityPerPersonWeek), Work.getInstance());
+                return new Quantity(Math.min(sprintBacklog.getQuantity().getValue(), nominalProductivityPerPersonWeek), Work.getInstance());
             }
         };
 
@@ -72,7 +72,7 @@ public class AgileSoftwareDevelopment {
         Flow sprintDefectFindRate = new FlowPerWeek("Found defects") {
             @Override
             protected Quantity quantityPerWeek() {
-                return latentDefects.getCurrentValue().multiply(0.4);
+                return latentDefects.getQuantity().multiply(0.4);
             }
         };
 

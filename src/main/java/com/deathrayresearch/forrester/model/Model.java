@@ -67,7 +67,7 @@ public class Model extends Element {
     public List<Double> getStockValues() {
         List<Double> results = new ArrayList<>();
         for (Stock stock : stocks) {
-            results.add(stock.getCurrentValue().getValue());
+            results.add(stock.getQuantity().getValue());
         }
         return results;
     }
@@ -81,7 +81,7 @@ public class Model extends Element {
     public List<Double> getVariableValues() {
         List<Double> results = new ArrayList<>();
         for (Variable variable : variables.values()) {
-            results.add(variable.getCurrentValue());
+            results.add(variable.getValue());
         }
         return results;
     }

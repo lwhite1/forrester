@@ -61,12 +61,12 @@ class Development {
                             @Override
                             public double getCurrentValue() {
                                 double fractionExperienced =
-                                        model.getVariable(FRACTION_OF_WORKFORCE_WITH_EXPERIENCE).getCurrentValue();
+                                        model.getVariable(FRACTION_OF_WORKFORCE_WITH_EXPERIENCE).getValue();
                                 return
-                                        (nominalPotentialProductivityOfExperiencedEmployee.getCurrentValue()
+                                        (nominalPotentialProductivityOfExperiencedEmployee.getValue()
                                             * fractionExperienced)
                                         + ((1 - fractionExperienced)
-                                                * nominalPotentialProductivityOfNewEmployee.getCurrentValue())
+                                                * nominalPotentialProductivityOfNewEmployee.getValue())
                                         ;}});
 
         Variable potentialProductivity =
@@ -75,7 +75,7 @@ class Development {
                         new Formula() {
                             @Override
                             public double getCurrentValue() {
-                                return averageNominalPotentialProductivity.getCurrentValue();
+                                return averageNominalPotentialProductivity.getValue();
                             }
                         });
 
@@ -83,13 +83,13 @@ class Development {
         Variable developmentProductivity =
                 new Variable("Development Productivity",
                     TASKS_PER_PERSON_DAY,
-                        potentialProductivity::getCurrentValue);
+                        potentialProductivity::getValue);
 
         Variable developmentStaffing = new Variable("Development Staffing", PersonDaysPerDay.getInstance(),
                 new Formula() {
                     @Override
                     public double getCurrentValue() {
-                        return module.getVariable(DAILY_RESOURCES_FOR_SOFTWARE_PRODUCTION).getCurrentValue();
+                        return module.getVariable(DAILY_RESOURCES_FOR_SOFTWARE_PRODUCTION).getValue();
                     }
                 });
 
@@ -113,8 +113,8 @@ class Development {
         return new FlowPerDay("Tasks completed") {
             @Override
             protected Quantity quantityPerDay() {
-                double staffing = module.getVariable("Development Staffing").getCurrentValue();
-                double productivity = module.getVariable("Development Productivity").getCurrentValue();
+                double staffing = module.getVariable("Development Staffing").getValue();
+                double productivity = module.getVariable("Development Productivity").getValue();
                 double value = staffing * productivity;
                 return new Quantity(value, TASKS);
             }

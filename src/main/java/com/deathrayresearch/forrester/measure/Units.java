@@ -12,6 +12,7 @@ import com.deathrayresearch.forrester.measure.units.mass.Kilogram;
 import com.deathrayresearch.forrester.measure.units.mass.Ounce;
 import com.deathrayresearch.forrester.measure.units.mass.Pound;
 import com.deathrayresearch.forrester.measure.units.money.USD;
+import com.deathrayresearch.forrester.measure.units.temperature.Centigrade;
 import com.deathrayresearch.forrester.measure.units.time.Day;
 import com.deathrayresearch.forrester.measure.units.time.Hour;
 import com.deathrayresearch.forrester.measure.units.time.Minute;
@@ -63,5 +64,9 @@ public class Units {
     public static final FluidOunceUS FLUID_OUNCE_US = FluidOunceUS.getInstance();
     public static final GallonUS GALLON_US = GallonUS.getInstance();
     public static final QuartUS QUART_US = QuartUS.getInstance();
+
+    // temperature
+    public static final Centigrade CENTIGRADE = Centigrade.getInstance();
+
 
 }

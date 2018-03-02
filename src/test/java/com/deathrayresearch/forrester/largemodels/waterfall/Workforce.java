@@ -34,17 +34,17 @@ class Workforce {
 
 
         Variable totalWorkforce = new Variable(TOTAL_WORKFORCE, PEOPLE, () ->
-                newlyHiredWorkforce.getCurrentValue().getValue()
-                        + experiencedWorkforce.getCurrentValue().getValue());
+                newlyHiredWorkforce.getQuantity().getValue()
+                        + experiencedWorkforce.getQuantity().getValue());
 
         Variable fullTimeEquivalentWorkforce =
                 new Variable(WORKFORCE_FTE, DIMENSIONLESS_UNIT, () ->
-                        AVERAGE_DAILY_MAN_POWER_PER_STAFF.getCurrentValue()
-                                * totalWorkforce.getCurrentValue());
+                        AVERAGE_DAILY_MAN_POWER_PER_STAFF.getValue()
+                                * totalWorkforce.getValue());
 
         Variable fullTimeEquivalentExperiencedWorkforce = new Variable(
-                EXPERIENCED_WORKFORCE_FTE, PEOPLE, () -> experiencedWorkforce.getCurrentValue().getValue()
-                        * AVERAGE_DAILY_MAN_POWER_PER_STAFF.getCurrentValue());
+                EXPERIENCED_WORKFORCE_FTE, PEOPLE, () -> experiencedWorkforce.getQuantity().getValue()
+                        * AVERAGE_DAILY_MAN_POWER_PER_STAFF.getValue());
 
         Variable workforceNeed = new Variable(WORKFORCE_NEED, PEOPLE, () -> 30.0);
 
@@ -52,31 +52,31 @@ class Workforce {
                 new Constant("Max New Hires per Experienced Staff", People.getInstance(), 3.0);
 
         Variable newHireCap = new Variable(NEW_HIRE_CAP, PEOPLE, () ->
-                maxNewHiresPerExperiencedStaff.getCurrentValue()
-                        * fullTimeEquivalentExperiencedWorkforce.getCurrentValue());
+                maxNewHiresPerExperiencedStaff.getValue()
+                        * fullTimeEquivalentExperiencedWorkforce.getValue());
 
         Variable totalWorkforceCap = new Variable(TOTAL_WORKFORCE_CAP, PEOPLE, () ->
-                newHireCap.getCurrentValue() + experiencedWorkforce.getCurrentValue().getValue());
+                newHireCap.getValue() + experiencedWorkforce.getQuantity().getValue());
 
         Variable workforceLevelSought = new Variable(DESIRED_WORKFORCE, PEOPLE, () ->
-                Math.min(workforceNeed.getCurrentValue(), totalWorkforceCap.getCurrentValue()));
+                Math.min(workforceNeed.getValue(), totalWorkforceCap.getValue()));
 
         Variable workforceGap = new Variable(WORKFORCE_GAP, PEOPLE, () ->
-                workforceLevelSought.getCurrentValue() - totalWorkforce.getCurrentValue());
+                workforceLevelSought.getValue() - totalWorkforce.getValue());
 
         Constant trainersPerNewHire = new Constant("Trainers per New Hire", DIMENSIONLESS_UNIT, 0.2);
 
         Variable dailyManPowerForTraining = new Variable(DAILY_RESOURCES_FOR_TRAINING, PEOPLE, new Formula() {
             @Override
             public double getCurrentValue() {
-                return trainersPerNewHire.getCurrentValue() * newlyHiredWorkforce.getCurrentValue().getValue();
+                return trainersPerNewHire.getValue() * newlyHiredWorkforce.getQuantity().getValue();
             }
         });
 
         Variable fractionExperiencedWorkforce =
                 new Variable(FRACTION_OF_WORKFORCE_WITH_EXPERIENCE,
                         DIMENSIONLESS_UNIT, () ->
-                        experiencedWorkforce.getCurrentValue().getValue() / totalWorkforce.getCurrentValue());
+                        experiencedWorkforce.getQuantity().getValue() / totalWorkforce.getValue());
 
 
         workforce.addStock(newlyHiredWorkforce);
@@ -112,7 +112,7 @@ class Workforce {
 
             @Override
             protected Quantity quantityPerDay() {
-                double gap = workforceGap.getCurrentValue();
+                double gap = workforceGap.getValue();
                 double result = gap / hiringDelayInDays;
                 double maxAmount = Math.max(result, 0.0);
 
@@ -126,7 +126,7 @@ class Workforce {
         return new FlowPerDay("Resigned") {
             @Override
             protected Quantity quantityPerDay() {
-                return new Quantity(experiencedWorkforce.getCurrentValue().getValue()
+                return new Quantity(experiencedWorkforce.getQuantity().getValue()
                         / averageEmploymentInDays, People.getInstance());
             }
         };
@@ -138,7 +138,7 @@ class Workforce {
         return new FlowPerDay("Assimilated hires") {
             @Override
             protected Quantity quantityPerDay() {
-                return newHires.getCurrentValue().divide(assimilationDelayInDays);
+                return newHires.getQuantity().divide(assimilationDelayInDays);
             }
         };
     }

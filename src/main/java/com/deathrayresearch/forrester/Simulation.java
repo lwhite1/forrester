@@ -103,7 +103,7 @@ public class Simulation {
 
         double totalSteps = (duration.getValue() * durationInBaseUnits) / (timeStep.ratioToBaseUnit());
         int step = 0;
-        while (step < totalSteps) {
+        while (step <= totalSteps) {
             HashMap<String, Quantity> flowMap = new HashMap<>();
 
             eventBus.post(new TimestepEvent(currentDateTime, model));
@@ -123,7 +123,7 @@ public class Simulation {
 
     private void updateStocks(HashMap<String, Quantity> flowMap, List<Stock> stocks) {
         for (Stock stock : stocks) {
-            Quantity qCurrent = stock.getCurrentValue();
+            Quantity qCurrent = stock.getQuantity();
             Set<Flow> stockInflows = stock.getInflows();
             handleFlows(true, flowMap, stock, qCurrent, stockInflows);
             Set<Flow> stockOutflows = stock.getOutflows();

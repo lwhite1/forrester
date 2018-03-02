@@ -39,7 +39,7 @@ public class Stock extends Element {
         return outflows;
     }
 
-    public Quantity getCurrentValue() {
+    public Quantity getQuantity() {
         return currentValue;
     }
 
@@ -48,7 +48,11 @@ public class Stock extends Element {
     }
 
     public void setValue(double value) {
-        this.getCurrentValue().setValue(value);
+        this.getQuantity().setValue(value);
+    }
+
+    public double getValue() {
+        return getQuantity().getValue();
     }
 
     @Override

@@ -23,35 +23,35 @@ public class TubTest {
     public void testRun1() {
 
         Model model = new Model("Tub model");
-        Simulation run = new Simulation(model, MINUTE, HOUR, 1);
+        Simulation run = new Simulation(model, MINUTE, MINUTE, 10);
 
-        Stock tub = new Stock("Water in Tub", 30, LITER);
+        Stock tub = new Stock("Water in Tub", 50, GALLON_US);
 
         // the water drains at the rate of the outflow capacity or the amount of water in the tub, whichever is less
         Flow outflow = new FlowPerMinute("Outflow") {
 
-            Quantity litersPerMinuteOut = Volumes.liters( 3.0);
+            Quantity volumeOut = Volumes.gallonsUS( 5.0);
 
             @Override
             public Quantity quantityPerMinute() {
                 return new Quantity(
-                        Math.min(litersPerMinuteOut.getValue(), tub.getCurrentValue().getValue()),
-                        LITER);
+                        Math.min(volumeOut.getValue(), tub.getQuantity().getValue()),
+                        GALLON_US);
             }
         };
 
         FlowPerMinute inflow = new FlowPerMinute("Inflow") {
 
-            Quantity litersPerMinuteIn =  Volumes.liters( 2.96);
+            Quantity volumeIn =  Volumes.gallonsUS( 5);
 
-            Quantity lowInflow = Volumes.liters(1.0);
+            Quantity lowInflow = Volumes.gallonsUS(0.0);
             @Override
             protected Quantity quantityPerMinute() {
                 // waits five minutes before adding any inflow
                 if (durationIsLessThan(run.getElapsedTime(), Duration.ofMinutes(5))) {
                     return lowInflow;
                 }
-                return litersPerMinuteIn;
+                return volumeIn;
             }
         };
 

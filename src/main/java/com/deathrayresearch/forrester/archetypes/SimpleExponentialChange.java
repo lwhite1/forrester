@@ -22,6 +22,6 @@ public class SimpleExponentialChange {
     }
 
     public Quantity getCurrentQuantity() {
-        return new Quantity(stock.getCurrentValue().getValue() * growthAmount, stock.getUnit());
+        return new Quantity(stock.getQuantity().getValue() * growthAmount, stock.getUnit());
     }
 }

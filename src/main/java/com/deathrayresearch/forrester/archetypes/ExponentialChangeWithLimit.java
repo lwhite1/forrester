@@ -26,8 +26,8 @@ public class ExponentialChangeWithLimit {
     }
 
     public Quantity getCurrentQuantity() {
-        double ratio = stock.getCurrentValue().getValue() / limit;
-        double result = stock.getCurrentValue().getValue() * growthAmount * (1 - ratio);
+        double ratio = stock.getQuantity().getValue() / limit;
+        double result = stock.getQuantity().getValue() * growthAmount * (1 - ratio);
         return new Quantity(result, stock.getUnit());
     }
 }

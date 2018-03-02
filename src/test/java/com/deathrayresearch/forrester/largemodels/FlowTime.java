@@ -47,7 +47,7 @@ public class FlowTime {
             new FlowPerDay("Delivered Reports") {
                 @Override
                 protected Quantity quantityPerDay() {
-                    double throughput = Math.min(Capacity.getCurrentValue(), Demand.flowPerTimeUnit(DAY).getValue());
+                    double throughput = Math.min(Capacity.getValue(), Demand.flowPerTimeUnit(DAY).getValue());
                     return new Quantity(throughput, TEST);
                 }
             };

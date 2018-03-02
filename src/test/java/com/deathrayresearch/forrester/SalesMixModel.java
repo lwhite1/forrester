@@ -40,22 +40,22 @@ public class SalesMixModel {
             }
         };
 
-        Formula hardwareSalesFormula = () -> hardwareSalesCustomer.getCurrentValue()
+        Formula hardwareSalesFormula = () -> hardwareSalesCustomer.getValue()
                 * acquisitionRate.flowPerTimeUnit(WEEK).getValue();
 
         Variable hardwareSales = new Variable("Hardware sales", US_DOLLAR, hardwareSalesFormula);
 
-        Formula serviceSalesFormula = () -> serviceSalesCustomerMonth.getCurrentValue()
-                * customers.getCurrentValue().getValue();
+        Formula serviceSalesFormula = () -> serviceSalesCustomerMonth.getValue()
+                * customers.getQuantity().getValue();
 
         Variable serviceSales = new Variable("Service sales", US_DOLLAR, serviceSalesFormula);
 
-        Formula totalSalesFormula = () -> hardwareSales.getCurrentValue() + serviceSales.getCurrentValue();
+        Formula totalSalesFormula = () -> hardwareSales.getValue() + serviceSales.getValue();
 
         Variable totalSales = new Variable("Total sales", US_DOLLAR, totalSalesFormula);
 
         Variable proportionHardwareSales = new Variable("Proportion hardware", DIMENSIONLESS,
-                () -> hardwareSales.getCurrentValue() / totalSales.getCurrentValue());
+                () -> hardwareSales.getValue() / totalSales.getValue());
 
         customers.addInflow(acquisitionRate);
 
