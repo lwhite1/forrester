@@ -5,9 +5,9 @@ import com.deathrayresearch.forrester.measure.Quantity;
 import com.deathrayresearch.forrester.measure.units.item.People;
 import com.deathrayresearch.forrester.measure.units.time.Day;
 import com.deathrayresearch.forrester.measure.units.time.Times;
+import com.deathrayresearch.forrester.model.Flow;
 import com.deathrayresearch.forrester.model.Model;
 import com.deathrayresearch.forrester.model.Stock;
-import com.deathrayresearch.forrester.model.Flow;
 import com.deathrayresearch.forrester.model.flows.FlowPerDay;
 import com.deathrayresearch.forrester.ui.StockLevelChartViewer;
 import org.junit.Test;
@@ -17,25 +17,29 @@ import static com.deathrayresearch.forrester.measure.Units.PEOPLE;
 /**
  *
  */
-public class ExponentialDecayModel {
+public class FirstOrderMaterialDelay {
 
     @Test
     public void testRun1() {
 
-        Model model = new Model("Population with exponential decay");
+        Model model = new Model("First order material delay");
+        model.setComment("A 1st order material delay is basically an exponential decay function. It is based on " +
+                "the assumption that the stock is completely mixed, like the water in a tub, so FIFO is not possible. " +
+                "The flow is simply the stock level divided by the average delay");
 
-        Stock population = new Stock("Population", 100, PEOPLE);
+        Stock potentialCustomers = new Stock("Potential Customers", 1000, PEOPLE);
 
-        Flow deaths = new FlowPerDay("Deaths") {
+        Flow sales = new FlowPerDay("Sales") {
             @Override
             protected Quantity quantityPerDay() {
-                return SimpleExponentialChange.from(population, 1/80.0);
+                double averageDelay = 120; // 120 days
+                return potentialCustomers.getQuantity().divide(averageDelay);
             }
         };
 
-        population.addOutflow(deaths);
+        potentialCustomers.addOutflow(sales);
 
-        model.addStock(population);
+        model.addStock(potentialCustomers);
 
         Simulation run = new Simulation(model, Day.getInstance(), Times.weeks( 52));
         run.addEventHandler(new StockLevelChartViewer());

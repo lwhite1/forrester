@@ -48,6 +48,7 @@ public class CsvSubscriber implements EventHandler {
         Model model = event.getModel();
 
         List<String> values = new ArrayList<>();
+        values.add(String.valueOf(event.getStep()));
         values.add(event.getCurrentTime().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
 
         for (int i = 0; i < model.getStockValues().size(); i++) {
@@ -66,6 +67,7 @@ public class CsvSubscriber implements EventHandler {
 
         Model model = event.getModel();
         List<String> values = new ArrayList<>();
+        values.add("Step");
         values.add("Date time");
         for (int i = 0; i < model.getStockNames().size(); i++) {
             values.add(model.getStockNames().get(i));
