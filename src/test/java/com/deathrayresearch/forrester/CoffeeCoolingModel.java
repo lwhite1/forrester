@@ -50,7 +50,7 @@ public class CoffeeCoolingModel {
         model.addStock(coffeeTemperature);
 
         Simulation run = new Simulation(model, MINUTE, MINUTE, 8);
-        //run.addEventHandler(new StockLevelChartViewer());
+        // run.addEventHandler(new StockLevelChartViewer());
         run.addEventHandler(new FlowChartViewer(cooling));
         run.execute();
     }

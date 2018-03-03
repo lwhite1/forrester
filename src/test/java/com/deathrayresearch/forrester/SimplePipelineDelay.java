@@ -1,5 +1,6 @@
 package com.deathrayresearch.forrester;
 
+import com.deathrayresearch.forrester.archetypes.PipelineDelay;
 import com.deathrayresearch.forrester.measure.Quantity;
 import com.deathrayresearch.forrester.measure.units.time.Day;
 import com.deathrayresearch.forrester.model.Constant;
@@ -40,10 +41,7 @@ public class SimplePipelineDelay {
         Flow departures = new FlowPerDay("Departures") {
             @Override
             protected Quantity quantityPerDay() {
-                int step = run.getCurrentStep();
-                int referenceStep = step - Math.toIntExact(Math.round(delay.getValue()));
-                double value = arrivals.getHistoryAtTimeStep(referenceStep);
-                return new Quantity(value, THING);
+                return PipelineDelay.from(arrivals, run.getCurrentStep(), delay.getIntValue());
             }
         };
 

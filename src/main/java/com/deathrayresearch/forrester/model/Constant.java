@@ -26,6 +26,10 @@ public class Constant extends Element {
         return currentValue;
     }
 
+    public int getIntValue() {
+        return Math.toIntExact(Math.round(currentValue));
+    }
+
     public Unit getUnit() {
         return unit;
     }

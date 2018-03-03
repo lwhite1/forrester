@@ -16,6 +16,8 @@ public abstract class Flow {
     private final String name;
 
     private final List<Double> history = new ArrayList<>();
+    private Stock source;
+    private Stock sink;
 
     public Flow(String name, TimeUnit unit) {
         this.name = name;
@@ -46,5 +48,21 @@ public abstract class Flow {
             return 0;
         }
         return history.get(i);
+    }
+
+    public void setSource(Stock stock) {
+        this.source = stock;
+    }
+
+    public void setSink(Stock stock) {
+        this.sink = stock;
+    }
+
+    public Stock getSource() {
+        return source;
+    }
+
+    public Stock getSink() {
+        return sink;
     }
 }

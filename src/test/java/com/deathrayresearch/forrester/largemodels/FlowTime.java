@@ -52,8 +52,8 @@ public class FlowTime {
                 @Override
                 protected Quantity quantityPerDay() {
 
-                    double demandDelay = TAT.getValue();
-                    int stepToGet = sim.getCurrentStep() - Math.toIntExact(Math.round(demandDelay));
+                    int demandDelay = Math.toIntExact(Math.round(TAT.getValue()));
+                    int stepToGet = sim.getCurrentStep() - demandDelay;
 
                     double demandPlusDelay = Demand.getHistoryAtTimeStep(stepToGet);
 

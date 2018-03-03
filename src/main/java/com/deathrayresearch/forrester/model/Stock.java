@@ -29,6 +29,7 @@ public class Stock extends Element {
                 "Inflow " + inFlow.getName() + " is incompatible with stock " + name + ". They're units" +
                         " have different dimensions. ");
         inflows.add(inFlow);
+        inFlow.setSink(this);
     }
 
     public void addOutflow(Flow outFlow) {
@@ -36,6 +37,7 @@ public class Stock extends Element {
                 "Outflow " + outFlow.getName() + " is incompatible with stock " + name + ". They're units" +
                         " have different dimensions. ");
         outflows.add(outFlow);
+        outFlow.setSource(this);
     }
 
     public Set<Flow> getInflows() {
