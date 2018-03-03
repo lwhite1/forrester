@@ -11,7 +11,7 @@ import com.deathrayresearch.forrester.model.Stock;
 import com.deathrayresearch.forrester.model.Variable;
 import com.deathrayresearch.forrester.model.Flow;
 import com.deathrayresearch.forrester.model.flows.FlowPerDay;
-import com.deathrayresearch.forrester.ui.ChartViewer;
+import com.deathrayresearch.forrester.ui.StockLevelChartViewer;
 import org.junit.Test;
 
 import static com.deathrayresearch.forrester.measure.Units.*;
@@ -66,7 +66,7 @@ public class SalesMixModel {
 
         Simulation run = new Simulation(model, WEEK, Times.years( 10));
 
-        run.addEventHandler(new ChartViewer());
+        run.addEventHandler(new StockLevelChartViewer());
         run.addEventHandler(new CsvSubscriber("/tmp/forrester/run1out.csv"));
         run.execute();
     }

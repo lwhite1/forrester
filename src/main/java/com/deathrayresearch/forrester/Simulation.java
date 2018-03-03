@@ -3,7 +3,7 @@ package com.deathrayresearch.forrester;
 import com.deathrayresearch.forrester.event.EventHandler;
 import com.deathrayresearch.forrester.event.SimulationEndEvent;
 import com.deathrayresearch.forrester.event.SimulationStartEvent;
-import com.deathrayresearch.forrester.event.TimestepEvent;
+import com.deathrayresearch.forrester.event.TimeStepEvent;
 import com.deathrayresearch.forrester.measure.Quantity;
 import com.deathrayresearch.forrester.measure.TimeUnit;
 import com.deathrayresearch.forrester.measure.Unit;
@@ -108,7 +108,7 @@ public class Simulation {
         while (currentStep <= totalSteps) {
             HashMap<String, Quantity> flowMap = new HashMap<>();
 
-            eventBus.post(new TimestepEvent(currentDateTime, model));
+            eventBus.post(new TimeStepEvent(currentDateTime, model, currentStep, timeStep));
             List<Stock> stocks = model.getStocks();
             updateStocks(flowMap, stocks);
             for (Module module : model.getModules()) {

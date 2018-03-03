@@ -6,7 +6,7 @@ import com.deathrayresearch.forrester.measure.units.time.Day;
 import com.deathrayresearch.forrester.model.Model;
 import com.deathrayresearch.forrester.model.Stock;
 import com.deathrayresearch.forrester.model.flows.FlowPerYear;
-import com.deathrayresearch.forrester.ui.ChartViewer;
+import com.deathrayresearch.forrester.ui.StockLevelChartViewer;
 
 import static com.deathrayresearch.forrester.measure.Units.YEAR;
 
@@ -33,7 +33,7 @@ public class PredatorPreyModel {
         model.addStock(prey);
 
         Simulation run = new Simulation(model, Day.getInstance(), YEAR, 1);
-        run.addEventHandler(new ChartViewer());
+        run.addEventHandler(new StockLevelChartViewer());
         run.execute();
     }
 }

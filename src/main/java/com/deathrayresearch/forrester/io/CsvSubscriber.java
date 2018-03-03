@@ -3,7 +3,7 @@ package com.deathrayresearch.forrester.io;
 import com.deathrayresearch.forrester.event.EventHandler;
 import com.deathrayresearch.forrester.event.SimulationEndEvent;
 import com.deathrayresearch.forrester.event.SimulationStartEvent;
-import com.deathrayresearch.forrester.event.TimestepEvent;
+import com.deathrayresearch.forrester.event.TimeStepEvent;
 import com.deathrayresearch.forrester.model.Model;
 import com.google.common.eventbus.Subscribe;
 import com.opencsv.CSVWriter;
@@ -44,7 +44,7 @@ public class CsvSubscriber implements EventHandler {
     }
 
     @Subscribe
-    public void handleTimeStepEvent(TimestepEvent event) {
+    public void handleTimeStepEvent(TimeStepEvent event) {
         Model model = event.getModel();
 
         List<String> values = new ArrayList<>();

@@ -7,7 +7,7 @@ import com.deathrayresearch.forrester.model.Model;
 import com.deathrayresearch.forrester.model.Stock;
 import com.deathrayresearch.forrester.model.Flow;
 import com.deathrayresearch.forrester.model.flows.FlowPerDay;
-import com.deathrayresearch.forrester.ui.ChartViewer;
+import com.deathrayresearch.forrester.ui.StockLevelChartViewer;
 import org.junit.Test;
 
 import static com.deathrayresearch.forrester.measure.Units.DIMENSIONLESS;
@@ -48,7 +48,7 @@ public class sShapedPopulationGrowth {
         model.addStock(population);
 
         Simulation run = new Simulation(model, DAY, WEEK, 32);
-        run.addEventHandler(new ChartViewer());
+        run.addEventHandler(new StockLevelChartViewer());
         run.execute();
     }
 }

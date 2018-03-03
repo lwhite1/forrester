@@ -7,7 +7,7 @@ import com.deathrayresearch.forrester.model.Model;
 import com.deathrayresearch.forrester.model.Stock;
 import com.deathrayresearch.forrester.model.Flow;
 import com.deathrayresearch.forrester.model.flows.FlowPerMinute;
-import com.deathrayresearch.forrester.ui.ChartViewer;
+import com.deathrayresearch.forrester.ui.StockLevelChartViewer;
 import org.junit.Test;
 
 import java.time.Duration;
@@ -60,7 +60,7 @@ public class TubTest {
 
         model.addStock(tub);
 
-        run.addEventHandler(new ChartViewer());
+        run.addEventHandler(new StockLevelChartViewer());
         run.addEventHandler(new CsvSubscriber("tub.csv"));
         run.execute();
     }

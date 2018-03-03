@@ -3,20 +3,22 @@ package com.deathrayresearch.forrester.ui;
 import com.deathrayresearch.forrester.event.EventHandler;
 import com.deathrayresearch.forrester.event.SimulationEndEvent;
 import com.deathrayresearch.forrester.event.SimulationStartEvent;
-import com.deathrayresearch.forrester.event.TimestepEvent;
-import com.google.common.eventbus.EventBus;
+import com.deathrayresearch.forrester.event.TimeStepEvent;
 import com.google.common.eventbus.Subscribe;
 
 /**
- * Class that implements the {@link EventHandler} interface and controls the chart printing.
+ * Class that implements the {@link EventHandler} interface and controls the display of plots of stock levels.
  */
-public class ChartViewer implements EventHandler {
+public class StockLevelChartViewer implements EventHandler {
 
     @Override
     @Subscribe
-    public void handleTimeStepEvent(TimestepEvent event) {
-        ChartViewerApplication.addValues(event.getModel().getStockValues(),
-                event.getModel().getVariableValues(), event.getCurrentTime());
+    public void handleTimeStepEvent(TimeStepEvent event) {
+        ChartViewerApplication.addValues(
+                event.getModel().getStockValues(),
+                event.getModel().getVariableValues(),
+                //event.getCurrentTime(),
+                event.getStep());
     }
 
     @Override

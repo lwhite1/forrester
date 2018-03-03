@@ -8,7 +8,7 @@ import com.deathrayresearch.forrester.measure.units.time.Day;
 import com.deathrayresearch.forrester.measure.units.time.Year;
 import com.deathrayresearch.forrester.model.Model;
 import com.deathrayresearch.forrester.model.Module;
-import com.deathrayresearch.forrester.ui.ChartViewer;
+import com.deathrayresearch.forrester.ui.StockLevelChartViewer;
 import org.junit.Test;
 
 /**
@@ -68,7 +68,7 @@ public class WaterfallSoftwareDevelopment {
 
         Quantity duration = new Quantity(1, Year.getInstance());
         Simulation simulation = new Simulation(model, Day.getInstance(), duration);
-        simulation.addEventHandler(new ChartViewer());
+        simulation.addEventHandler(new StockLevelChartViewer());
 
         simulation.execute();
     }

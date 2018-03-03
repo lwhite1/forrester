@@ -10,7 +10,7 @@ import com.deathrayresearch.forrester.model.Model;
 import com.deathrayresearch.forrester.model.Stock;
 import com.deathrayresearch.forrester.model.Flow;
 import com.deathrayresearch.forrester.model.flows.FlowPerWeek;
-import com.deathrayresearch.forrester.ui.ChartViewer;
+import com.deathrayresearch.forrester.ui.StockLevelChartViewer;
 import org.junit.Test;
 
 import static com.deathrayresearch.forrester.measure.Units.WEEK;
@@ -36,7 +36,7 @@ public class AgileSoftwareDevelopment {
     public void testRun1() {
 
         Simulation run = new Simulation(getModel(), Day.getInstance(), WEEK,52);
-        run.addEventHandler(new ChartViewer());
+        run.addEventHandler(new StockLevelChartViewer());
         run.execute();
     }
 

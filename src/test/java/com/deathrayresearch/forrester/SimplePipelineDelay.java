@@ -7,7 +7,7 @@ import com.deathrayresearch.forrester.model.Model;
 import com.deathrayresearch.forrester.model.Stock;
 import com.deathrayresearch.forrester.model.Flow;
 import com.deathrayresearch.forrester.model.flows.FlowPerDay;
-import com.deathrayresearch.forrester.ui.ChartViewer;
+import com.deathrayresearch.forrester.ui.StockLevelChartViewer;
 import org.junit.Test;
 
 import static com.deathrayresearch.forrester.measure.Units.*;
@@ -21,6 +21,9 @@ public class SimplePipelineDelay {
 
 
         Model model = new Model("Simple Pipeline Delay");
+        model.setComment("This model illustrates a pipeline delay, where a stock (WIP) is bounded by " +
+                "arrival and departure flows. The departure flow is calculated by adding a constant " +
+                "number of days to the arrival flow");
         Simulation run = new Simulation(model, DAY, WEEK, 5);
 
 
@@ -46,10 +49,10 @@ public class SimplePipelineDelay {
 
         population.addInflow(arrivals);
         population.addOutflow(departures);
-
         model.addStock(population);
 
-        run.addEventHandler(new ChartViewer());
+        System.out.println(model.getComment());
+        run.addEventHandler(new StockLevelChartViewer());
         run.execute();
     }
 }

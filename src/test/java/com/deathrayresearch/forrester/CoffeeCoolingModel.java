@@ -7,7 +7,8 @@ import com.deathrayresearch.forrester.model.Stock;
 import com.deathrayresearch.forrester.model.Variable;
 import com.deathrayresearch.forrester.model.Flow;
 import com.deathrayresearch.forrester.model.flows.FlowPerMinute;
-import com.deathrayresearch.forrester.ui.ChartViewer;
+import com.deathrayresearch.forrester.ui.FlowChartViewer;
+import com.deathrayresearch.forrester.ui.StockLevelChartViewer;
 import org.junit.Test;
 
 import static com.deathrayresearch.forrester.measure.Units.*;
@@ -49,7 +50,8 @@ public class CoffeeCoolingModel {
         model.addStock(coffeeTemperature);
 
         Simulation run = new Simulation(model, MINUTE, MINUTE, 8);
-        run.addEventHandler(new ChartViewer());
+        //run.addEventHandler(new StockLevelChartViewer());
+        run.addEventHandler(new FlowChartViewer(cooling));
         run.execute();
     }
 }

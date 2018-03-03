@@ -1,6 +1,7 @@
 package com.deathrayresearch.forrester.ui;
 
 import com.deathrayresearch.forrester.Simulation;
+import com.deathrayresearch.forrester.measure.TimeUnit;
 import com.deathrayresearch.forrester.measure.units.time.Times;
 import javafx.application.Application;
 import javafx.embed.swing.SwingFXUtils;
@@ -43,9 +44,11 @@ public class ChartViewerApplication extends Application {
     private static LineChart lineChart;
     private static DateTimeFormatter formatter;
     private static String title;
+    private static String xAxisLabel;
 
     public static void setSimulation(Simulation simulation) {
         title = simulation.getModel().getName();
+        xAxisLabel = simulation.getTimeStep().getName();
 
         if (simulation.getDuration().isGreaterThan(Times.days(1))) {
             formatter = DateTimeFormatter.BASIC_ISO_DATE;
@@ -108,12 +111,28 @@ public class ChartViewerApplication extends Application {
     }
 
     /**
+     * Method to add series to chart.
+     *
+     * @param flowNames list of flows to plot.
+     */
+    public static void addFlowSeries(List<String> flowNames) {
+        ChartViewerApplication.series = new ArrayList<>();
+        for (String modelEntityName : flowNames) {
+            Series s = new Series();
+            s.setName(modelEntityName);
+            ChartViewerApplication.series.add(s);
+        }
+    }
+
+    /**
      * Method to add values to chart series.
      *
      * @param modelEntityValues list of model entity values.
      * @param currentTime       current model time.
      */
-    public static void addValues(List<Double> modelEntityValues, List<Double>variableValues, LocalDateTime currentTime) {
+    public static void addValues(List<Double> modelEntityValues,
+                                 List<Double>variableValues,
+                                 LocalDateTime currentTime) {
         modelEntityValues.addAll(variableValues);
 
         for (int i = 0; i < modelEntityValues.size(); i++) {
@@ -121,6 +140,24 @@ public class ChartViewerApplication extends Application {
             ChartViewerApplication.series.get(i)
                     .getData()
                     .add(new XYChart.Data(currentTime.format(formatter), value));
+        }
+    }
+
+    /**
+     * Method to add values to chart series.
+     *
+     * @param modelEntityValues list of model entity values.
+     */
+    public static void addValues(List<Double> modelEntityValues,
+                                 List<Double>variableValues,
+                                 int step) {
+        modelEntityValues.addAll(variableValues);
+
+        for (int i = 0; i < modelEntityValues.size(); i++) {
+            double value = modelEntityValues.get(i);
+            ChartViewerApplication.series.get(i)
+                    .getData()
+                    .add(new XYChart.Data(String.valueOf(step), value));
         }
     }
 
@@ -153,7 +190,7 @@ public class ChartViewerApplication extends Application {
         //defining the axes
         CategoryAxis xAxis = new CategoryAxis();
         NumberAxis yAxis = new NumberAxis();
-        xAxis.setLabel("Timestep");
+        xAxis.setLabel(xAxisLabel);
         yAxis.setLabel("Value");
         //creating the chart
         LineChart<String, Number> lineChart = new LineChart<>(xAxis, yAxis);
