@@ -1,7 +1,7 @@
 package com.deathrayresearch.forrester.io;
 
 import com.deathrayresearch.forrester.model.*;
-import com.deathrayresearch.forrester.rate.Flow;
+import com.deathrayresearch.forrester.model.Flow;
 
 import java.util.Map;
 

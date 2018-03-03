@@ -5,7 +5,7 @@ import com.deathrayresearch.forrester.measure.units.item.Thing;
 import com.deathrayresearch.forrester.measure.units.time.Day;
 import com.deathrayresearch.forrester.model.Model;
 import com.deathrayresearch.forrester.model.Stock;
-import com.deathrayresearch.forrester.rate.FlowPerYear;
+import com.deathrayresearch.forrester.model.flows.FlowPerYear;
 import com.deathrayresearch.forrester.ui.ChartViewer;
 
 import static com.deathrayresearch.forrester.measure.Units.YEAR;

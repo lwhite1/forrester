@@ -5,8 +5,8 @@ import com.deathrayresearch.forrester.measure.Quantity;
 import com.deathrayresearch.forrester.model.Constant;
 import com.deathrayresearch.forrester.model.Model;
 import com.deathrayresearch.forrester.model.Stock;
-import com.deathrayresearch.forrester.rate.Flow;
-import com.deathrayresearch.forrester.rate.FlowPerDay;
+import com.deathrayresearch.forrester.model.Flow;
+import com.deathrayresearch.forrester.model.flows.FlowPerDay;
 import com.deathrayresearch.forrester.ui.ChartViewer;
 import org.junit.Test;
 

@@ -8,8 +8,8 @@ import com.deathrayresearch.forrester.measure.dimension.Item;
 import com.deathrayresearch.forrester.measure.units.time.Day;
 import com.deathrayresearch.forrester.model.Model;
 import com.deathrayresearch.forrester.model.Stock;
-import com.deathrayresearch.forrester.rate.Flow;
-import com.deathrayresearch.forrester.rate.FlowPerWeek;
+import com.deathrayresearch.forrester.model.Flow;
+import com.deathrayresearch.forrester.model.flows.FlowPerWeek;
 import com.deathrayresearch.forrester.ui.ChartViewer;
 import org.junit.Test;
 

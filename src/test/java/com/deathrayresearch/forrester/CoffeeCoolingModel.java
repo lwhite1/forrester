@@ -5,13 +5,12 @@ import com.deathrayresearch.forrester.model.Constant;
 import com.deathrayresearch.forrester.model.Model;
 import com.deathrayresearch.forrester.model.Stock;
 import com.deathrayresearch.forrester.model.Variable;
-import com.deathrayresearch.forrester.rate.Flow;
-import com.deathrayresearch.forrester.rate.FlowPerMinute;
+import com.deathrayresearch.forrester.model.Flow;
+import com.deathrayresearch.forrester.model.flows.FlowPerMinute;
 import com.deathrayresearch.forrester.ui.ChartViewer;
 import org.junit.Test;
 
-import static com.deathrayresearch.forrester.measure.Units.CENTIGRADE;
-import static com.deathrayresearch.forrester.measure.Units.MINUTE;
+import static com.deathrayresearch.forrester.measure.Units.*;
 
 /**
  *

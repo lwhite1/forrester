@@ -2,7 +2,6 @@ package com.deathrayresearch.forrester.model;
 
 import com.deathrayresearch.forrester.measure.Quantity;
 import com.deathrayresearch.forrester.measure.TimeUnit;
-import com.deathrayresearch.forrester.rate.Flow;
 
 import java.util.ArrayList;
 import java.util.HashMap;

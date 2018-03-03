@@ -1,4 +1,4 @@
-package com.deathrayresearch.forrester.rate;
+package com.deathrayresearch.forrester.model.flows;
 
 import com.deathrayresearch.forrester.measure.Quantity;
 import com.deathrayresearch.forrester.measure.TimeUnit;

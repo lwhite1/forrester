@@ -11,8 +11,8 @@ import com.deathrayresearch.forrester.model.Model;
 import com.deathrayresearch.forrester.model.Stock;
 import com.deathrayresearch.forrester.model.Module;
 import com.deathrayresearch.forrester.model.Variable;
-import com.deathrayresearch.forrester.rate.Flow;
-import com.deathrayresearch.forrester.rate.FlowPerDay;
+import com.deathrayresearch.forrester.model.Flow;
+import com.deathrayresearch.forrester.model.flows.FlowPerDay;
 
 import static com.deathrayresearch.forrester.largemodels.waterfall.WaterfallSoftwareDevelopment.*;
 

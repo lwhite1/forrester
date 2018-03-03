@@ -2,7 +2,8 @@ package com.deathrayresearch.forrester.model;
 
 import com.deathrayresearch.forrester.measure.Quantity;
 import com.deathrayresearch.forrester.measure.Unit;
-import com.deathrayresearch.forrester.rate.Flow;
+import com.deathrayresearch.forrester.measure.units.time.Day;
+import com.google.common.base.Preconditions;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -24,10 +25,16 @@ public class Stock extends Element {
     }
 
     public void addInflow(Flow inFlow) {
+        Preconditions.checkArgument(inFlow.flowPerTimeUnit(Day.getInstance()).isCompatibleWith(currentValue),
+                "Inflow " + inFlow.getName() + " is incompatible with stock " + name + ". They're units" +
+                        " have different dimensions. ");
         inflows.add(inFlow);
     }
 
     public void addOutflow(Flow outFlow) {
+        Preconditions.checkArgument(outFlow.flowPerTimeUnit(Day.getInstance()).isCompatibleWith(currentValue),
+                "Outflow " + outFlow.getName() + " is incompatible with stock " + name + ". They're units" +
+                        " have different dimensions. ");
         outflows.add(outFlow);
     }
 

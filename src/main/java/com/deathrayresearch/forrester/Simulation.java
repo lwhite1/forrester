@@ -12,7 +12,7 @@ import com.deathrayresearch.forrester.model.Model;
 import com.deathrayresearch.forrester.model.Stock;
 import com.deathrayresearch.forrester.model.Module;
 
-import com.deathrayresearch.forrester.rate.Flow;
+import com.deathrayresearch.forrester.model.Flow;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import com.google.common.eventbus.EventBus;
@@ -45,6 +45,8 @@ public class Simulation {
     private final Quantity duration;
 
     private final TimeUnit timeStep;
+
+    private int currentStep = 0;
 
     private LocalDateTime currentDateTime;
 
@@ -102,8 +104,8 @@ public class Simulation {
         double durationInBaseUnits = duration.getUnit().ratioToBaseUnit();
 
         double totalSteps = (duration.getValue() * durationInBaseUnits) / (timeStep.ratioToBaseUnit());
-        int step = 0;
-        while (step <= totalSteps) {
+
+        while (currentStep <= totalSteps) {
             HashMap<String, Quantity> flowMap = new HashMap<>();
 
             eventBus.post(new TimestepEvent(currentDateTime, model));
@@ -115,7 +117,7 @@ public class Simulation {
                 updateStocks(flowMap, stocks);
             }
             addStep(currentDateTime);
-            step++;
+            currentStep++;
         }
 
         eventBus.post(new SimulationEndEvent());
@@ -140,11 +142,14 @@ public class Simulation {
                 q = flow.flowPerTimeUnit(timeStep);
                 flows.put(flow.getName(), q);
             }
+            flow.recordValue(q);
+
             if (isInflow) {
                 qCurrent = qCurrent.add(q);
             } else {
                 qCurrent = qCurrent.subtract(q);
             }
+
             stock.setValue(qCurrent.getValue());
         }
     }
@@ -193,5 +198,9 @@ public class Simulation {
 
     public Duration getElapsedTime() {
         return elapsedTime;
+    }
+
+    public int getCurrentStep() {
+        return currentStep;
     }
 }
