@@ -18,16 +18,16 @@ import static com.deathrayresearch.forrester.measure.Units.*;
 /**
  *
  */
-public class SecondOrderMaterialDelay {
+public class ThirdOrderMaterialDelay {
 
     @Test
     public void testRun1() {
 
-        Model model = new Model("Second order material delay");
-        model.setComment("A 2nd order material delay is a chain of two first order material delays. Each of the " +
+        Model model = new Model("Third order material delay");
+        model.setComment("A 34d order material delay is a chain of three first order material delays. Each of the " +
                 "individual first order delays is based on " +
                 "the assumption that the stock is completely mixed, like the water in a tub, so FIFO is not possible. " +
-                "The outflow of the first delay is the input to the second delay");
+                "The outflow of the first delay is the input to the second delay, and so on");
 
         Stock step1 = new Stock("Step 1", 100, THING);
         Stock step2 = new Stock("Step 2", 0, THING);

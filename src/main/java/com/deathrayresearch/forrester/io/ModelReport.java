@@ -59,7 +59,7 @@ public class ModelReport {
 
         builder.append(LF);
         builder.append("Variables:");
-        for (Map.Entry<String, Variable> entry : model.getVariables().entrySet()) {
+        for (Map.Entry<String, Variable> entry : model.getVariableMap().entrySet()) {
             builder.append(entry.getKey())
                 .append(": ")
                 .append(entry.getValue().getName())

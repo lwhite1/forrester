@@ -13,6 +13,7 @@ import com.deathrayresearch.forrester.model.Stock;
 import com.deathrayresearch.forrester.model.Module;
 
 import com.deathrayresearch.forrester.model.Flow;
+import com.deathrayresearch.forrester.model.Variable;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import com.google.common.eventbus.EventBus;
@@ -126,10 +127,15 @@ public class Simulation {
     private void updateStocks(HashMap<String, Quantity> flowMap, List<Stock> stocks) {
         for (Stock stock : stocks) {
             Quantity qCurrent = stock.getQuantity();
-            Set<Flow> stockInflows = stock.getInflows();
-            handleFlows(true, flowMap, stock, qCurrent, stockInflows);
-            Set<Flow> stockOutflows = stock.getOutflows();
-            handleFlows(false, flowMap, stock, qCurrent, stockOutflows);
+            recordVariableValues();
+            handleFlows(true, flowMap, stock, qCurrent, stock.getInflows());
+            handleFlows(false, flowMap, stock, qCurrent, stock.getOutflows());
+        }
+    }
+
+    private void recordVariableValues() {
+        for (Variable variable : model.getVariables()) {
+            variable.recordValue();
         }
     }
 
