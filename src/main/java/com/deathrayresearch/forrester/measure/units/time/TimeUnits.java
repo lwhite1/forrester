@@ -8,6 +8,11 @@ import java.time.temporal.ChronoUnit;
 /**
  * Standard units of time, from seconds to years. Each constant stores its ratio to the
  * base unit (seconds) and the corresponding {@link java.time.temporal.ChronoUnit}.
+ *
+ * <p>{@code YEAR} uses a flat 365-day approximation (31,536,000 seconds) rather than the
+ * Gregorian average of 365.2425 days. This is the standard convention in system dynamics
+ * tools (Vensim, Stella, AnyLogic) and keeps step calculations exact. The ~0.07% difference
+ * is well below typical parameter uncertainty in SD models.
  */
 public enum TimeUnits implements TimeUnit {
 
