@@ -11,10 +11,6 @@ public enum Length implements Dimension {
 
     INSTANCE;
 
-    public static Length getInstance() {
-        return INSTANCE;
-    }
-
     @Override
     public Unit getBaseUnit() {
         return LengthUnits.METER;

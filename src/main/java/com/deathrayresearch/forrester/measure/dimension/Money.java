@@ -11,10 +11,6 @@ public enum Money implements Dimension {
 
     INSTANCE;
 
-    public static Money getInstance() {
-        return INSTANCE;
-    }
-
     @Override
     public Unit getBaseUnit() {
         return MoneyUnits.USD;

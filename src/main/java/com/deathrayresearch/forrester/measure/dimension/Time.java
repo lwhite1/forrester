@@ -11,10 +11,6 @@ public enum Time implements Dimension {
 
     INSTANCE;
 
-    public static Time getInstance() {
-        return INSTANCE;
-    }
-
     @Override
     public Unit getBaseUnit() {
         return TimeUnits.SECOND;

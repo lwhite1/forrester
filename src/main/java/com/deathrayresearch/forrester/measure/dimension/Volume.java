@@ -11,10 +11,6 @@ public enum Volume implements Dimension {
 
     INSTANCE;
 
-    public static Volume getInstance() {
-        return INSTANCE;
-    }
-
     @Override
     public Unit getBaseUnit() {
         return VolumeUnits.LITER;

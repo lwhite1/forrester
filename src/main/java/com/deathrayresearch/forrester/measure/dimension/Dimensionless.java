@@ -13,10 +13,6 @@ public enum Dimensionless implements Dimension {
 
     INSTANCE;
 
-    public static Dimensionless getInstance() {
-        return INSTANCE;
-    }
-
     @Override
     public Converter getConverter() {
         throw new UnsupportedOperationException("Dimensionless quantities have no unit conversion");

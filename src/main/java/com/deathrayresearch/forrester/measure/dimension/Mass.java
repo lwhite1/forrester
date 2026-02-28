@@ -11,10 +11,6 @@ public enum Mass implements Dimension {
 
     INSTANCE;
 
-    public static Mass getInstance() {
-        return INSTANCE;
-    }
-
     @Override
     public Unit getBaseUnit() {
         return MassUnits.KILOGRAM;

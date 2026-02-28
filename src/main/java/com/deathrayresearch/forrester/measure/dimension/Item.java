@@ -11,10 +11,6 @@ public enum Item implements Dimension {
 
     INSTANCE;
 
-    public static Item getInstance() {
-        return INSTANCE;
-    }
-
     @Override
     public Unit getBaseUnit() {
         return ItemUnits.THING;

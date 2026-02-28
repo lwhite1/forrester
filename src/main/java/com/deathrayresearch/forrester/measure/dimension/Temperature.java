@@ -13,10 +13,6 @@ public enum Temperature implements Dimension {
 
     INSTANCE;
 
-    public static Temperature getInstance() {
-        return INSTANCE;
-    }
-
     @Override
     public Unit getBaseUnit() {
         return TemperatureUnits.CENTIGRADE;
