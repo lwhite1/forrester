@@ -3,7 +3,6 @@ package com.deathrayresearch.forrester.demo.waterfall;
 import com.deathrayresearch.forrester.Simulation;
 import com.deathrayresearch.forrester.measure.Quantity;
 import com.deathrayresearch.forrester.measure.Unit;
-import com.deathrayresearch.forrester.measure.units.item.ItemUnit;
 import com.deathrayresearch.forrester.measure.units.item.ItemUnits;
 import com.deathrayresearch.forrester.measure.units.time.TimeUnits;
 import com.deathrayresearch.forrester.model.Model;
@@ -21,12 +20,10 @@ import com.deathrayresearch.forrester.ui.StockLevelChartViewer;
  */
 public class WaterfallSoftwareDevelopmentDemo {
 
-    private Model model = new Model("Waterfall");
+    private final Model model = new Model("Waterfall");
 
     // new units
     static final Unit PEOPLE = ItemUnits.PEOPLE;
-    static final Unit TASKS = new ItemUnit("Task");
-
     // subsystem constants
     static final String WORKFORCE = "Workforce";
     static final String DEVELOPMENT = "Development";
@@ -37,7 +34,6 @@ public class WaterfallSoftwareDevelopmentDemo {
     static final String WORKFORCE_FTE = "Full Time Equivalent workforce";
     static final String EXPERIENCED_WORKFORCE_FTE = "Full Time Equivalent Experienced Workforce";
 
-    static final String NEW_HIRES = "New hires";
     static final String EXPERIENCED = "Experienced workers";
     static final String TOTAL_WORKFORCE = "Total Workforce";
     static final String FRACTION_OF_WORKFORCE_WITH_EXPERIENCE = "Fraction of Workforce with Experience";
