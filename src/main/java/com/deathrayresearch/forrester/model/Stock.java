@@ -13,8 +13,8 @@ import java.util.Set;
  */
 public class Stock extends Element {
 
-    private Set<Flow> inflows = new HashSet<>();
-    private Set<Flow> outflows = new HashSet<>();
+    private final Set<Flow> inflows = new HashSet<>();
+    private final Set<Flow> outflows = new HashSet<>();
 
     private final String name;
     private final Quantity currentValue;

@@ -10,7 +10,7 @@ import com.deathrayresearch.forrester.measure.units.money.USD;
  */
 public class Money implements Dimension {
 
-    private static Money ourInstance = new Money();
+    private static final Money ourInstance = new Money();
 
     public static Money getInstance() {
         return ourInstance;

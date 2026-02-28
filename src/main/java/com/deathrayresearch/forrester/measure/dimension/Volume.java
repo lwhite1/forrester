@@ -11,7 +11,7 @@ import com.deathrayresearch.forrester.measure.units.volume.Liter;
  */
 public class Volume implements Dimension {
 
-    private static Volume ourInstance = new Volume();
+    private static final Volume ourInstance = new Volume();
 
     public static Volume getInstance() {
         return ourInstance;

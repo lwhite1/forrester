@@ -4,14 +4,13 @@ import com.deathrayresearch.forrester.measure.Converter;
 import com.deathrayresearch.forrester.measure.Dimension;
 import com.deathrayresearch.forrester.measure.Unit;
 import com.deathrayresearch.forrester.measure.units.temperature.Centigrade;
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 /**
  *
  */
 public class Temperature implements Dimension {
 
-    private static Temperature ourInstance = new Temperature();
+    private static final Temperature ourInstance = new Temperature();
 
     public static Temperature getInstance() {
         return ourInstance;

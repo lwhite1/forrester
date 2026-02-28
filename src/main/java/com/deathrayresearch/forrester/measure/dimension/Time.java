@@ -10,7 +10,7 @@ import com.deathrayresearch.forrester.measure.units.time.Second;
  */
 public class Time implements Dimension {
 
-    private static Time ourInstance = new Time();
+    private static final Time ourInstance = new Time();
 
     public static Time getInstance() {
         return ourInstance;

@@ -8,7 +8,6 @@ import com.deathrayresearch.forrester.model.Variable;
 import com.deathrayresearch.forrester.model.Flow;
 import com.deathrayresearch.forrester.model.flows.FlowPerMinute;
 import com.deathrayresearch.forrester.ui.FlowChartViewer;
-import com.deathrayresearch.forrester.ui.StockLevelChartViewer;
 import org.junit.Test;
 
 import static com.deathrayresearch.forrester.measure.Units.*;
@@ -35,7 +34,7 @@ public class CoffeeCoolingModel {
 
         Flow cooling = new FlowPerMinute("Cooling") {
 
-            double coolingRate = 0.10;
+            final double coolingRate = 0.10;
 
             @Override
             protected Quantity quantityPerMinute() {
