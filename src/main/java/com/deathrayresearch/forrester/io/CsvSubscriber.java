@@ -82,7 +82,7 @@ public class CsvSubscriber implements EventHandler {
             csvWriter.flush();
             csvWriter.close();
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.error("Failed to close CSV writer", e);
         }
         logger.info("Ending simulation");
     }
