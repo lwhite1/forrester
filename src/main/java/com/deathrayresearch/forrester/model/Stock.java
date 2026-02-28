@@ -14,11 +14,10 @@ public class Stock extends Element {
     private final Set<Flow> inflows = new HashSet<>();
     private final Set<Flow> outflows = new HashSet<>();
 
-    private final String name;
     private final Quantity currentValue;
 
     public Stock(String name, double initialAmount, Unit unit) {
-        this.name = name;
+        super(name);
         this.currentValue = new Quantity(initialAmount, unit);
     }
 
@@ -54,11 +53,6 @@ public class Stock extends Element {
 
     public double getValue() {
         return getQuantity().getValue();
-    }
-
-    @Override
-    public String getName() {
-        return name;
     }
 
     @Override

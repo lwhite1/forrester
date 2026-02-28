@@ -13,18 +13,12 @@ import java.util.Map;
  */
 public class Module extends Element {
 
-    private String name;
     private Map<String, Stock> stocks = new HashMap<>();
     private Map<String, Flow> flows = new HashMap<>();
     private Map<String, Variable> variables = new HashMap<>();
 
     public Module(String name) {
-        this.name = name;
-    }
-
-    @Override
-    public String getName() {
-        return name;
+        super(name);
     }
 
     public Quantity valueOfStock(String stockName) {

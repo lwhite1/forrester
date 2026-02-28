@@ -11,18 +11,13 @@ import java.util.Map;
  */
 public class Model extends Element {
 
-    private String name;
     private List<Stock> stocks = new ArrayList<>();
     private Map<String, Variable> variables = new HashMap<>();
     private List<Module> modules = new ArrayList<>();
     private List<Constant> constants = new ArrayList<>();
 
     public Model(String name) {
-        this.name = name;
-    }
-
-    public String getName() {
-        return name;
+        super(name);
     }
 
     public void addStock(Stock stock) {

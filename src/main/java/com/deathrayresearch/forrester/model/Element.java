@@ -5,9 +5,16 @@ package com.deathrayresearch.forrester.model;
  */
 abstract class Element {
 
+    private final String name;
     private String comment;
 
-    public abstract String getName();
+    protected Element(String name) {
+        this.name = name;
+    }
+
+    public String getName() {
+        return name;
+    }
 
     @Override
     public String toString() {

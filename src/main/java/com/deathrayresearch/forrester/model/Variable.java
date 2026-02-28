@@ -11,19 +11,13 @@ public class Variable extends Element {
 
     private final Formula formula;
     private final Unit unit;
-    private final String name;
 
     private final List<Double> history = new ArrayList<>();
 
     public Variable(String name, Unit unit, Formula formula) {
-        this.name = name;
+        super(name);
         this.formula = formula;
         this.unit = unit;
-    }
-
-    @Override
-    public String getName() {
-        return name;
     }
 
     public double getValue() {
