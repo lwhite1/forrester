@@ -181,6 +181,27 @@ sim.addEventHandler(new StockLevelChartViewer());
 sim.execute();
 ```
 
+## Learning System Dynamics
+
+New to system dynamics? These resources provide a solid introduction to the methodology behind this framework:
+
+### Books
+
+- [Thinking in Systems: A Primer](https://www.chelseagreen.com/product/thinking-in-systems/) by Donella Meadows — the classic accessible introduction to stocks, flows, feedback loops, and system behavior. Several of this project's demo models are drawn from examples in the book.
+
+### Online Courses
+
+- [MIT OCW: Introduction to System Dynamics](https://ocw.mit.edu/courses/15-871-introduction-to-system-dynamics-fall-2013/) — full MIT course with lectures, readings, and assignments covering conceptual and modeling skills
+- [MIT OCW: System Dynamics Self Study](https://ocw.mit.edu/courses/15-988-system-dynamics-self-study-fall-1998-spring-1999/) — comprehensive self-paced "Road Maps" series with papers and simulation exercises
+- [MIT OCW: Systems Thinking and Modeling for a Complex World](https://ocw.mit.edu/courses/res-15-004-system-dynamics-systems-thinking-and-modeling-for-a-complex-world-january-iap-2020/) — shorter IAP workshop covering core concepts
+
+### Tutorials & References
+
+- [System Dynamics Society: Introduction to System Dynamics](https://systemdynamics.org/introduction-to-system-dynamics-modeling/) — overview and webinars from the professional society
+- [System Dynamics Learning Guide](https://pressbooks.lib.jmu.edu/sdlearningguide/chapter/chapter-4-introduction-to-system-dynamics-modeling/) — open textbook chapter on modeling fundamentals
+- [Donella Meadows Project: Systems Thinking Resources](https://donellameadows.org/systems-thinking-resources/) — curated collection from the Donella Meadows Institute
+- [Wikipedia: System Dynamics](https://en.wikipedia.org/wiki/System_dynamics) — broad overview of the field's history, concepts, and applications
+
 ## Project Status
 
 The project is at version 1.0-SNAPSHOT and is under active development. Recent work has focused on:
