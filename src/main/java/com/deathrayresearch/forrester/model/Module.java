@@ -3,6 +3,8 @@ package com.deathrayresearch.forrester.model;
 import com.deathrayresearch.forrester.measure.Quantity;
 import com.deathrayresearch.forrester.measure.TimeUnit;
 
+import com.google.common.base.Preconditions;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -24,11 +26,15 @@ public class Module extends Element {
     }
 
     public Quantity valueOfStock(String stockName) {
-        return stocks.get(stockName).getQuantity();
+        Stock stock = stocks.get(stockName);
+        Preconditions.checkArgument(stock != null, "No stock found with name: %s", stockName);
+        return stock.getQuantity();
     }
 
     public Quantity valueOfFlow(String flowName, TimeUnit timeUnit) {
-        return flows.get(flowName).flowPerTimeUnit(timeUnit);
+        Flow flow = flows.get(flowName);
+        Preconditions.checkArgument(flow != null, "No flow found with name: %s", flowName);
+        return flow.flowPerTimeUnit(timeUnit);
     }
 
     public void addStock(Stock stock) {
