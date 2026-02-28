@@ -13,7 +13,7 @@ import org.junit.Test;
 
 import static com.deathrayresearch.forrester.measure.Units.*;
 
-public class InventoryModel {
+public class InventoryModelTest {
 
     private static final Unit CARS = THING;
 

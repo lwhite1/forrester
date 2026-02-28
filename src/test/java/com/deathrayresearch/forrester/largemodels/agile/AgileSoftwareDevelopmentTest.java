@@ -18,7 +18,7 @@ import static com.deathrayresearch.forrester.measure.Units.WEEK;
 /**
  *
  */
-public class AgileSoftwareDevelopment {
+public class AgileSoftwareDevelopmentTest {
 
     // model parameters
     double projectSize = 100_000;  // tasks

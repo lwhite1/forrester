@@ -1,6 +1,6 @@
 package com.deathrayresearch.forrester.io;
 
-import com.deathrayresearch.forrester.largemodels.agile.AgileSoftwareDevelopment;
+import com.deathrayresearch.forrester.largemodels.agile.AgileSoftwareDevelopmentTest;
 import com.deathrayresearch.forrester.largemodels.waterfall.WaterfallSoftwareDevelopment;
 import com.deathrayresearch.forrester.model.Model;
 import org.junit.Test;
@@ -17,7 +17,7 @@ public class ModelReportTest {
     @Test
     public void produceModelReport2() {
 
-        Model model = new AgileSoftwareDevelopment().getModel();
+        Model model = new AgileSoftwareDevelopmentTest().getModel();
         System.out.println(ModelReport.create(model));
     }
 }

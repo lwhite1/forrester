@@ -14,22 +14,22 @@ import com.deathrayresearch.forrester.ui.StockLevelChartViewer;
 
 import static com.deathrayresearch.forrester.measure.Units.*;
 
-public class FlowTime {
+public class FlowTimeTest {
 
     private static final ItemUnits TEST = ItemUnits.THING;
 
-    private Constant TATGoal = new Constant("TAT Target", HOUR, 336);
-    private Constant Capacity = new Constant("Capacity", TEST,190);
+    private final Constant TATGoal = new Constant("TAT Target", HOUR, 336);
+    private final Constant Capacity = new Constant("Capacity", TEST,190);
 
-    private Stock WIP = new Stock("WIP", 1000, TEST);
+    private final Stock WIP = new Stock("WIP", 1000, TEST);
 
-    private Stock TAT = new Stock("TAT", TATGoal.getValue(), HOUR);
+    private final Stock TAT = new Stock("TAT", TATGoal.getValue(), HOUR);
 
-    private Variable discrepancy = new Variable("Discrepancy", HOUR,
+    private final Variable discrepancy = new Variable("Discrepancy", HOUR,
             () -> TATGoal.getValue() - TAT.getValue());
 
     public static void main(String[] args) {
-        FlowTime tat = new FlowTime();
+        FlowTimeTest tat = new FlowTimeTest();
         tat.tatModel();
     }
 
