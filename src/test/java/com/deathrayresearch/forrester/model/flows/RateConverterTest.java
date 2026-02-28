@@ -5,7 +5,7 @@ import com.deathrayresearch.forrester.measure.units.length.LengthUnits;
 import com.deathrayresearch.forrester.measure.units.time.TimeUnits;
 import org.junit.Test;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 public class RateConverterTest {
 
