@@ -5,10 +5,9 @@ import com.deathrayresearch.forrester.io.CsvSubscriber;
 import com.deathrayresearch.forrester.measure.Quantity;
 import com.deathrayresearch.forrester.measure.units.time.Times;
 import com.deathrayresearch.forrester.model.Constant;
+import com.deathrayresearch.forrester.model.Flow;
 import com.deathrayresearch.forrester.model.Model;
 import com.deathrayresearch.forrester.model.Stock;
-import com.deathrayresearch.forrester.model.Flow;
-import com.deathrayresearch.forrester.model.flows.FlowPerDay;
 import com.deathrayresearch.forrester.ui.StockLevelChartViewer;
 
 import static com.deathrayresearch.forrester.measure.Units.DAY;
@@ -41,41 +40,32 @@ public class SirInfectiousDiseaseDemo {
         Constant contactRate = new Constant("Contact Flow", PEOPLE, 8);
 
         // The number of newly infected at each step, they get moved from susceptible to infectious status.
-        Flow infectiousRate = new FlowPerDay("Infected") {
+        Flow infectiousRate = Flow.create("Infected", DAY, () -> {
+            double totalPop = susceptiblePopulation.getQuantity().getValue()
+                    + infectiousPopulation.getQuantity().getValue()
+                    + recoveredPopulation.getQuantity().getValue();
 
-            @Override
-            public Quantity quantityPerTimeUnit() {
+            Quantity population = new Quantity(totalPop, PEOPLE);
 
-                double totalPop = susceptiblePopulation.getQuantity().getValue()
-                        + infectiousPopulation.getQuantity().getValue()
-                        + recoveredPopulation.getQuantity().getValue();
+            double infectiousPortion = infectiousPopulation.getQuantity().getValue() / (population.getValue());
 
-                Quantity population = new Quantity(totalPop, PEOPLE);
+            double infectivity = .10; // proportion of encounters with an infectious person results in infection
 
-                double infectiousPortion = infectiousPopulation.getQuantity().getValue() / (population.getValue());
+            double numberOfInfectedMet = contactRate.getValue() * infectiousPortion;
 
-                double infectivity = .10; // proportion of encounters with an infectious person results in infection
+            double infectedCount = numberOfInfectedMet * susceptiblePopulation.getQuantity().getValue() * infectivity;
 
-                double numberOfInfectedMet = contactRate.getValue() * infectiousPortion;
-
-                double infectedCount = numberOfInfectedMet * susceptiblePopulation.getQuantity().getValue() * infectivity;
-
-                if (infectedCount > susceptiblePopulation.getQuantity().getValue()) {
-                    infectedCount = susceptiblePopulation.getQuantity().getValue();
-                }
-                return new Quantity(infectedCount, PEOPLE);
+            if (infectedCount > susceptiblePopulation.getQuantity().getValue()) {
+                infectedCount = susceptiblePopulation.getQuantity().getValue();
             }
-        };
+            return new Quantity(infectedCount, PEOPLE);
+        });
 
-        Flow recoveryRate = new FlowPerDay("Recovered") {
-
-            @Override
-            public Quantity quantityPerTimeUnit() {
-                double recoveredProportion = .2; //20% recover per day
-                return new Quantity(infectiousPopulation.getQuantity().getValue() * recoveredProportion,
-                        PEOPLE);
-            }
-        };
+        Flow recoveryRate = Flow.create("Recovered", DAY, () -> {
+            double recoveredProportion = .2; //20% recover per day
+            return new Quantity(infectiousPopulation.getQuantity().getValue() * recoveredProportion,
+                    PEOPLE);
+        });
 
         susceptiblePopulation.addOutflow(infectiousRate);
         infectiousPopulation.addInflow(infectiousRate);

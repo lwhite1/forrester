@@ -11,8 +11,8 @@ import com.deathrayresearch.forrester.model.Stock;
 import com.deathrayresearch.forrester.model.Module;
 import com.deathrayresearch.forrester.model.Variable;
 import com.deathrayresearch.forrester.model.Flow;
-import com.deathrayresearch.forrester.model.flows.FlowPerDay;
 
+import static com.deathrayresearch.forrester.measure.Units.DAY;
 import static com.deathrayresearch.forrester.demo.waterfall.WaterfallSoftwareDevelopmentDemo.DAILY_RESOURCES_FOR_SOFTWARE_PRODUCTION;
 import static com.deathrayresearch.forrester.demo.waterfall.WaterfallSoftwareDevelopmentDemo.DEVELOPMENT;
 import static com.deathrayresearch.forrester.demo.waterfall.WaterfallSoftwareDevelopmentDemo.FRACTION_OF_WORKFORCE_WITH_EXPERIENCE;
@@ -113,14 +113,11 @@ class Development {
     }
 
     private static Flow getDevelopmentFlow(Module module) {
-        return new FlowPerDay("Tasks completed") {
-            @Override
-            protected Quantity quantityPerTimeUnit() {
-                double staffing = module.getVariable("Development Staffing").getValue();
-                double productivity = module.getVariable("Development Productivity").getValue();
-                double value = staffing * productivity;
-                return new Quantity(value, TASKS);
-            }
-        };
+        return Flow.create("Tasks completed", DAY, () -> {
+            double staffing = module.getVariable("Development Staffing").getValue();
+            double productivity = module.getVariable("Development Productivity").getValue();
+            double value = staffing * productivity;
+            return new Quantity(value, TASKS);
+        });
     }
 }

@@ -1,7 +1,7 @@
 package com.deathrayresearch.forrester.model;
 
 import com.deathrayresearch.forrester.measure.Quantity;
-import com.deathrayresearch.forrester.model.flows.FlowPerMinute;
+import com.deathrayresearch.forrester.measure.Unit;
 import org.junit.jupiter.api.Test;
 
 import static com.deathrayresearch.forrester.measure.Units.GALLON_US;
@@ -70,13 +70,7 @@ public class StockTest {
         assertTrue(stock.toString().contains("Tank"));
     }
 
-    private static FlowPerMinute createConstantFlow(String name, double value,
-                                                     com.deathrayresearch.forrester.measure.Unit unit) {
-        return new FlowPerMinute(name) {
-            @Override
-            protected Quantity quantityPerTimeUnit() {
-                return new Quantity(value, unit);
-            }
-        };
+    private static Flow createConstantFlow(String name, double value, Unit unit) {
+        return Flow.create(name, MINUTE, () -> new Quantity(value, unit));
     }
 }

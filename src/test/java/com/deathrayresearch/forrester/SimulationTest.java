@@ -6,7 +6,6 @@ import com.deathrayresearch.forrester.model.Model;
 import com.deathrayresearch.forrester.model.Module;
 import com.deathrayresearch.forrester.model.Stock;
 import com.deathrayresearch.forrester.model.Variable;
-import com.deathrayresearch.forrester.model.flows.FlowPerMinute;
 import org.junit.jupiter.api.Test;
 
 import static com.deathrayresearch.forrester.measure.Units.GALLON_US;
@@ -22,12 +21,7 @@ public class SimulationTest {
         Model model = new Model("Drain");
         Stock tank = new Stock("Tank", 100, GALLON_US);
 
-        Flow outflow = new FlowPerMinute("Drain") {
-            @Override
-            protected Quantity quantityPerTimeUnit() {
-                return new Quantity(10, GALLON_US);
-            }
-        };
+        Flow outflow = Flow.create("Drain", MINUTE, () -> new Quantity(10, GALLON_US));
 
         tank.addOutflow(outflow);
         model.addStock(tank);
@@ -44,12 +38,7 @@ public class SimulationTest {
         Model model = new Model("Fill");
         Stock tank = new Stock("Tank", 0, GALLON_US);
 
-        Flow inflow = new FlowPerMinute("Fill") {
-            @Override
-            protected Quantity quantityPerTimeUnit() {
-                return new Quantity(5, GALLON_US);
-            }
-        };
+        Flow inflow = Flow.create("Fill", MINUTE, () -> new Quantity(5, GALLON_US));
 
         tank.addInflow(inflow);
         model.addStock(tank);
@@ -66,19 +55,8 @@ public class SimulationTest {
         Model model = new Model("Balance");
         Stock tank = new Stock("Tank", 50, GALLON_US);
 
-        Flow inflow = new FlowPerMinute("In") {
-            @Override
-            protected Quantity quantityPerTimeUnit() {
-                return new Quantity(10, GALLON_US);
-            }
-        };
-
-        Flow outflow = new FlowPerMinute("Out") {
-            @Override
-            protected Quantity quantityPerTimeUnit() {
-                return new Quantity(10, GALLON_US);
-            }
-        };
+        Flow inflow = Flow.create("In", MINUTE, () -> new Quantity(10, GALLON_US));
+        Flow outflow = Flow.create("Out", MINUTE, () -> new Quantity(10, GALLON_US));
 
         tank.addInflow(inflow);
         tank.addOutflow(outflow);
@@ -111,12 +89,7 @@ public class SimulationTest {
         Model model = new Model("Flow History");
         Stock tank = new Stock("Tank", 100, GALLON_US);
 
-        FlowPerMinute outflow = new FlowPerMinute("Out") {
-            @Override
-            protected Quantity quantityPerTimeUnit() {
-                return new Quantity(7, GALLON_US);
-            }
-        };
+        Flow outflow = Flow.create("Out", MINUTE, () -> new Quantity(7, GALLON_US));
 
         tank.addOutflow(outflow);
         model.addStock(tank);
@@ -134,12 +107,7 @@ public class SimulationTest {
         Module module = new Module("M1");
 
         Stock stock = new Stock("Inventory", 50, THING);
-        Flow outflow = new FlowPerMinute("Consume") {
-            @Override
-            protected Quantity quantityPerTimeUnit() {
-                return new Quantity(5, THING);
-            }
-        };
+        Flow outflow = Flow.create("Consume", MINUTE, () -> new Quantity(5, THING));
         stock.addOutflow(outflow);
 
         module.addStock(stock);

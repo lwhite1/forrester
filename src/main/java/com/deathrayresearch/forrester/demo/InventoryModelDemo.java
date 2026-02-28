@@ -8,7 +8,6 @@ import com.deathrayresearch.forrester.model.Formula;
 import com.deathrayresearch.forrester.model.Model;
 import com.deathrayresearch.forrester.model.Stock;
 import com.deathrayresearch.forrester.model.Variable;
-import com.deathrayresearch.forrester.model.flows.FlowPerDay;
 import com.deathrayresearch.forrester.ui.StockLevelChartViewer;
 
 import static com.deathrayresearch.forrester.measure.Units.DAY;
@@ -55,25 +54,16 @@ public class InventoryModelDemo {
                     }
                 });
 
-        Flow sales = new FlowPerDay("Sales") {
-            @Override
-            protected Quantity quantityPerTimeUnit() {
-                return new Quantity(
-                        Math.min(carsOnLot.getValue(), demand.getValue()),
-                        CARS);
-            }
-        };
+        Flow sales = Flow.create("Sales", DAY, () ->
+                new Quantity(Math.min(carsOnLot.getValue(), demand.getValue()), CARS));
 
         Stock perceivedSales = new Stock("Perceived Sales", 20, CARS);
 
-        Flow perceptionAdjustment = new FlowPerDay("Perception Adjustment") {
-            @Override
-            protected Quantity quantityPerTimeUnit() {
-                double adjustment = (sales.flowPerTimeUnit(DAY).getValue() - perceivedSales.getValue())
-                        / PERCEPTION_DELAY;
-                return new Quantity(adjustment, CARS);
-            }
-        };
+        Flow perceptionAdjustment = Flow.create("Perception Adjustment", DAY, () -> {
+            double adjustment = (sales.flowPerTimeUnit(DAY).getValue() - perceivedSales.getValue())
+                    / PERCEPTION_DELAY;
+            return new Quantity(adjustment, CARS);
+        });
 
         perceivedSales.addInflow(perceptionAdjustment);
 
@@ -92,16 +82,13 @@ public class InventoryModelDemo {
 
         int totalDelay = Math.toIntExact(Math.round(RESPONSE_DELAY + DELIVERY_DELAY));
 
-        Flow deliveries = new FlowPerDay("Deliveries") {
-            @Override
-            protected Quantity quantityPerTimeUnit() {
-                if (run.getCurrentStep() <= totalDelay) {
-                    return new Quantity(20, CARS);
-                }
-                int priorStep = run.getCurrentStep() - totalDelay;
-                return new Quantity(ordersToFactory.getHistoryAtTimeStep(priorStep), CARS);
+        Flow deliveries = Flow.create("Deliveries", DAY, () -> {
+            if (run.getCurrentStep() <= totalDelay) {
+                return new Quantity(20, CARS);
             }
-        };
+            int priorStep = run.getCurrentStep() - totalDelay;
+            return new Quantity(ordersToFactory.getHistoryAtTimeStep(priorStep), CARS);
+        });
 
         carsOnLot.addInflow(deliveries);
         carsOnLot.addOutflow(sales);

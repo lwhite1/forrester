@@ -6,13 +6,13 @@ import com.deathrayresearch.forrester.measure.Unit;
 import com.deathrayresearch.forrester.measure.units.dimensionless.DimensionlessUnits;
 import com.deathrayresearch.forrester.measure.units.item.ItemUnits;
 import com.deathrayresearch.forrester.model.Constant;
+import com.deathrayresearch.forrester.model.Flow;
 import com.deathrayresearch.forrester.model.Formula;
 import com.deathrayresearch.forrester.model.Stock;
 import com.deathrayresearch.forrester.model.Module;
 import com.deathrayresearch.forrester.model.Variable;
-import com.deathrayresearch.forrester.model.Flow;
-import com.deathrayresearch.forrester.model.flows.FlowPerDay;
 
+import static com.deathrayresearch.forrester.measure.Units.DAY;
 import static com.deathrayresearch.forrester.demo.waterfall.WaterfallSoftwareDevelopmentDemo.DAILY_RESOURCES_FOR_TRAINING;
 import static com.deathrayresearch.forrester.demo.waterfall.WaterfallSoftwareDevelopmentDemo.DESIRED_WORKFORCE;
 import static com.deathrayresearch.forrester.demo.waterfall.WaterfallSoftwareDevelopmentDemo.EXPERIENCED;
@@ -121,41 +121,27 @@ class Workforce {
     }
 
     private static Flow getNewHireFlow(Variable workforceGap) {
-
         final double hiringDelayInDays = 8.0 * 7;
 
-        return new FlowPerDay("Hired") {
-
-            @Override
-            protected Quantity quantityPerTimeUnit() {
-                double gap = workforceGap.getValue();
-                double result = gap / hiringDelayInDays;
-                double maxAmount = Math.max(result, 0.0);
-
-                return new Quantity(maxAmount, ItemUnits.PEOPLE);
-            }
-        };
+        return Flow.create("Hired", DAY, () -> {
+            double gap = workforceGap.getValue();
+            double result = gap / hiringDelayInDays;
+            double maxAmount = Math.max(result, 0.0);
+            return new Quantity(maxAmount, ItemUnits.PEOPLE);
+        });
     }
 
     private static Flow getResignationFlow(Stock experiencedWorkforce) {
         double averageEmploymentInDays = 673.0;
-        return new FlowPerDay("Resigned") {
-            @Override
-            protected Quantity quantityPerTimeUnit() {
-                return new Quantity(experiencedWorkforce.getQuantity().getValue()
-                        / averageEmploymentInDays, ItemUnits.PEOPLE);
-            }
-        };
+        return Flow.create("Resigned", DAY, () ->
+                new Quantity(experiencedWorkforce.getQuantity().getValue()
+                        / averageEmploymentInDays, ItemUnits.PEOPLE));
     }
 
     private static Flow getAssimilationFlow(Stock newHires) {
         final double assimilationDelayInDays = 16.0 * 7;
 
-        return new FlowPerDay("Assimilated hires") {
-            @Override
-            protected Quantity quantityPerTimeUnit() {
-                return newHires.getQuantity().divide(assimilationDelayInDays);
-            }
-        };
+        return Flow.create("Assimilated hires", DAY, () ->
+                newHires.getQuantity().divide(assimilationDelayInDays));
     }
 }

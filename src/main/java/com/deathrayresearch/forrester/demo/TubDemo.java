@@ -4,10 +4,9 @@ import com.deathrayresearch.forrester.Simulation;
 import com.deathrayresearch.forrester.io.CsvSubscriber;
 import com.deathrayresearch.forrester.measure.Quantity;
 import com.deathrayresearch.forrester.measure.units.volume.Volumes;
+import com.deathrayresearch.forrester.model.Flow;
 import com.deathrayresearch.forrester.model.Model;
 import com.deathrayresearch.forrester.model.Stock;
-import com.deathrayresearch.forrester.model.Flow;
-import com.deathrayresearch.forrester.model.flows.FlowPerMinute;
 import com.deathrayresearch.forrester.ui.StockLevelChartViewer;
 
 import java.time.Duration;
@@ -36,33 +35,24 @@ public class TubDemo {
 
         Stock tub = new Stock("Water in Tub", 50, GALLON_US);
 
+        Quantity volumeOut = Volumes.gallonsUS(5.0);
+
         // the water drains at the rate of the outflow capacity or the amount of water in the tub, whichever is less
-        Flow outflow = new FlowPerMinute("Outflow") {
-
-            final Quantity volumeOut = Volumes.gallonsUS( 5.0);
-
-            @Override
-            public Quantity quantityPerTimeUnit() {
-                return new Quantity(
+        Flow outflow = Flow.create("Outflow", MINUTE, () ->
+                new Quantity(
                         Math.min(volumeOut.getValue(), tub.getQuantity().getValue()),
-                        GALLON_US);
+                        GALLON_US));
+
+        Quantity volumeIn = Volumes.gallonsUS(5);
+        Quantity lowInflow = Volumes.gallonsUS(0.0);
+
+        Flow inflow = Flow.create("Inflow", MINUTE, () -> {
+            // waits five minutes before adding any inflow
+            if (durationIsLessThan(run.getElapsedTime(), Duration.ofMinutes(5))) {
+                return lowInflow;
             }
-        };
-
-        FlowPerMinute inflow = new FlowPerMinute("Inflow") {
-
-            final Quantity volumeIn =  Volumes.gallonsUS( 5);
-
-            final Quantity lowInflow = Volumes.gallonsUS(0.0);
-            @Override
-            protected Quantity quantityPerTimeUnit() {
-                // waits five minutes before adding any inflow
-                if (durationIsLessThan(run.getElapsedTime(), Duration.ofMinutes(5))) {
-                    return lowInflow;
-                }
-                return volumeIn;
-            }
-        };
+            return volumeIn;
+        });
 
         tub.addInflow(inflow);
         tub.addOutflow(outflow);

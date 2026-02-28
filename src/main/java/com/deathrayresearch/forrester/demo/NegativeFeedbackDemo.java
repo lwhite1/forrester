@@ -5,12 +5,12 @@ import com.deathrayresearch.forrester.measure.Quantity;
 import com.deathrayresearch.forrester.measure.Unit;
 import com.deathrayresearch.forrester.measure.units.item.ItemUnit;
 import com.deathrayresearch.forrester.measure.units.time.TimeUnits;
+import com.deathrayresearch.forrester.model.Flow;
 import com.deathrayresearch.forrester.model.Model;
 import com.deathrayresearch.forrester.model.Stock;
-import com.deathrayresearch.forrester.model.Flow;
-import com.deathrayresearch.forrester.model.flows.FlowPerDay;
 import com.deathrayresearch.forrester.ui.StockLevelChartViewer;
 
+import static com.deathrayresearch.forrester.measure.Units.DAY;
 import static com.deathrayresearch.forrester.measure.Units.WEEK;
 
 /**
@@ -36,14 +36,10 @@ public class NegativeFeedbackDemo {
         Quantity goal = new Quantity(860, INVENTORY);
         double adjustmentTimeInTimeSteps = 8;
 
-        Flow production = new FlowPerDay("Production") {
-
-            @Override
-            protected Quantity quantityPerTimeUnit() {
-                Quantity delta = goal.subtract(inventoryOnHand.getQuantity());
-                return delta.divide(adjustmentTimeInTimeSteps);
-            }
-        };
+        Flow production = Flow.create("Production", DAY, () -> {
+            Quantity delta = goal.subtract(inventoryOnHand.getQuantity());
+            return delta.divide(adjustmentTimeInTimeSteps);
+        });
 
         inventoryOnHand.addInflow(production);
 

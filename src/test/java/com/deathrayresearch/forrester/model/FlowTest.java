@@ -1,13 +1,6 @@
 package com.deathrayresearch.forrester.model;
 
 import com.deathrayresearch.forrester.measure.Quantity;
-import com.deathrayresearch.forrester.measure.TimeUnit;
-import com.deathrayresearch.forrester.model.flows.FlowPerDay;
-import com.deathrayresearch.forrester.model.flows.FlowPerHour;
-import com.deathrayresearch.forrester.model.flows.FlowPerMinute;
-import com.deathrayresearch.forrester.model.flows.FlowPerSecond;
-import com.deathrayresearch.forrester.model.flows.FlowPerWeek;
-import com.deathrayresearch.forrester.model.flows.FlowPerYear;
 
 import org.junit.jupiter.api.Test;
 
@@ -24,13 +17,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class FlowTest {
 
-    private FlowPerMinute createTestFlow(String name, double valuePerMinute) {
-        return new FlowPerMinute(name) {
-            @Override
-            protected Quantity quantityPerTimeUnit() {
-                return new Quantity(valuePerMinute, THING);
-            }
-        };
+    private Flow createTestFlow(String name, double valuePerMinute) {
+        return Flow.create(name, MINUTE, () -> new Quantity(valuePerMinute, THING));
     }
 
     @Test
@@ -124,60 +112,35 @@ public class FlowTest {
         assertEquals(49, perWeek.getValue(), 0.001);
     }
 
-    // FlowPer* subclass time unit tests
+    // Time unit tests via Flow.create()
 
     @Test
-    public void flowPerDayShouldReturnDay() {
-        FlowPerDay flow = new FlowPerDay("daily") {
-            @Override
-            protected Quantity quantityPerTimeUnit() {
-                return new Quantity(1, THING);
-            }
-        };
+    public void flowWithDayTimeUnitShouldReturnDay() {
+        Flow flow = Flow.create("daily", DAY, () -> new Quantity(1, THING));
         assertEquals(DAY, flow.getTimeUnit());
     }
 
     @Test
-    public void flowPerHourShouldReturnHour() {
-        FlowPerHour flow = new FlowPerHour("hourly") {
-            @Override
-            protected Quantity quantityPerTimeUnit() {
-                return new Quantity(1, THING);
-            }
-        };
+    public void flowWithHourTimeUnitShouldReturnHour() {
+        Flow flow = Flow.create("hourly", HOUR, () -> new Quantity(1, THING));
         assertEquals(HOUR, flow.getTimeUnit());
     }
 
     @Test
-    public void flowPerSecondShouldReturnSecond() {
-        FlowPerSecond flow = new FlowPerSecond("perSecond") {
-            @Override
-            protected Quantity quantityPerTimeUnit() {
-                return new Quantity(1, THING);
-            }
-        };
+    public void flowWithSecondTimeUnitShouldReturnSecond() {
+        Flow flow = Flow.create("perSecond", SECOND, () -> new Quantity(1, THING));
         assertEquals(SECOND, flow.getTimeUnit());
     }
 
     @Test
-    public void flowPerWeekShouldReturnWeek() {
-        FlowPerWeek flow = new FlowPerWeek("weekly") {
-            @Override
-            protected Quantity quantityPerTimeUnit() {
-                return new Quantity(1, THING);
-            }
-        };
+    public void flowWithWeekTimeUnitShouldReturnWeek() {
+        Flow flow = Flow.create("weekly", WEEK, () -> new Quantity(1, THING));
         assertEquals(WEEK, flow.getTimeUnit());
     }
 
     @Test
-    public void flowPerYearShouldReturnYear() {
-        FlowPerYear flow = new FlowPerYear("yearly") {
-            @Override
-            protected Quantity quantityPerTimeUnit() {
-                return new Quantity(1, THING);
-            }
-        };
+    public void flowWithYearTimeUnitShouldReturnYear() {
+        Flow flow = Flow.create("yearly", YEAR, () -> new Quantity(1, THING));
         assertEquals(YEAR, flow.getTimeUnit());
     }
 }

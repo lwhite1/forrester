@@ -9,10 +9,9 @@ import com.deathrayresearch.forrester.model.Formula;
 import com.deathrayresearch.forrester.model.Model;
 import com.deathrayresearch.forrester.model.Stock;
 import com.deathrayresearch.forrester.model.Variable;
-import com.deathrayresearch.forrester.model.flows.FlowPerDay;
-import com.deathrayresearch.forrester.model.flows.FlowPerHour;
 import com.deathrayresearch.forrester.ui.StockLevelChartViewer;
 
+import static com.deathrayresearch.forrester.measure.Units.DAY;
 import static com.deathrayresearch.forrester.measure.Units.HOUR;
 import static com.deathrayresearch.forrester.measure.Units.THING;
 
@@ -42,40 +41,25 @@ public class ThirdOrderMaterialDelayDemo {
         Stock step2 = new Stock("Step 2", 0, THING);
         Stock step3 = new Stock("Step 3", 0, THING);
 
-        Flow demand = new FlowPerDay("Process Demand") {
-            @Override
-            protected Quantity quantityPerTimeUnit() {
-                return new Quantity(48, THING);
-            }
-        };
+        Flow demand = Flow.create("Process Demand", DAY, () -> new Quantity(48, THING));
 
-        Flow step1Delay = new FlowPerHour("Step 1 delay") {
-            @Override
-            protected Quantity quantityPerTimeUnit() {
-                double averageDelay = 7; // 7 hour average activity time for this step
-                return new Quantity(
-                        Math.min(step1.getValue(), step1.getValue()/averageDelay), THING);
-                //return step1.getQuantity().divide(averageDelay);
-            }
-        };
+        Flow step1Delay = Flow.create("Step 1 delay", HOUR, () -> {
+            double averageDelay = 7; // 7 hour average activity time for this step
+            return new Quantity(
+                    Math.min(step1.getValue(), step1.getValue()/averageDelay), THING);
+        });
 
-        Flow step2Delay = new FlowPerHour("Step 2 delay") {
-            @Override
-            protected Quantity quantityPerTimeUnit() {
-                double averageDelay = 6.3; // 6.3 hour average activity time for this step
-                return new Quantity(
-                        Math.min(step2.getValue(), step2.getValue()/ averageDelay), THING);
-            }
-        };
+        Flow step2Delay = Flow.create("Step 2 delay", HOUR, () -> {
+            double averageDelay = 6.3; // 6.3 hour average activity time for this step
+            return new Quantity(
+                    Math.min(step2.getValue(), step2.getValue()/ averageDelay), THING);
+        });
 
-        Flow step3Delay = new FlowPerHour("Step 3 delay") {
-            @Override
-            protected Quantity quantityPerTimeUnit() {
-                double averageDelay = 3.2; // 3.2 hour average activity time for this step
-                return new Quantity(
-                        Math.min(step3.getValue(), step3.getValue()/ averageDelay), THING);
-            }
-        };
+        Flow step3Delay = Flow.create("Step 3 delay", HOUR, () -> {
+            double averageDelay = 3.2; // 3.2 hour average activity time for this step
+            return new Quantity(
+                    Math.min(step3.getValue(), step3.getValue()/ averageDelay), THING);
+        });
 
         step1.addInflow(demand);
         step1.addOutflow(step1Delay);

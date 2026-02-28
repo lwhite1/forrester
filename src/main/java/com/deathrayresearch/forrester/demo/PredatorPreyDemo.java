@@ -5,10 +5,12 @@ import com.deathrayresearch.forrester.measure.Quantity;
 import com.deathrayresearch.forrester.measure.units.item.ItemUnits;
 import com.deathrayresearch.forrester.measure.units.time.TimeUnits;
 import com.deathrayresearch.forrester.measure.units.time.Times;
+import com.deathrayresearch.forrester.model.Flow;
 import com.deathrayresearch.forrester.model.Model;
 import com.deathrayresearch.forrester.model.Stock;
-import com.deathrayresearch.forrester.model.flows.FlowPerYear;
 import com.deathrayresearch.forrester.ui.StockLevelChartViewer;
+
+import static com.deathrayresearch.forrester.measure.Units.YEAR;
 
 /**
  * Classic Lotka-Volterra predator-prey model.
@@ -39,38 +41,26 @@ public class PredatorPreyDemo {
         Stock prey = new Stock("Rabbits", 100, RABBIT);
         Stock predator = new Stock("Coyotes", 10, COYOTE);
 
-        FlowPerYear preyBirths = new FlowPerYear("Prey Births") {
-            @Override
-            protected Quantity quantityPerTimeUnit() {
-                double value = PREY_BIRTH_RATE * prey.getValue();
-                return new Quantity(value, RABBIT);
-            }
-        };
+        Flow preyBirths = Flow.create("Prey Births", YEAR, () -> {
+            double value = PREY_BIRTH_RATE * prey.getValue();
+            return new Quantity(value, RABBIT);
+        });
 
-        FlowPerYear preyDeaths = new FlowPerYear("Prey Deaths") {
-            @Override
-            protected Quantity quantityPerTimeUnit() {
-                double value = PREDATION_RATE * prey.getValue() * predator.getValue();
-                return new Quantity(value, RABBIT);
-            }
-        };
+        Flow preyDeaths = Flow.create("Prey Deaths", YEAR, () -> {
+            double value = PREDATION_RATE * prey.getValue() * predator.getValue();
+            return new Quantity(value, RABBIT);
+        });
 
-        FlowPerYear predatorBirths = new FlowPerYear("Predator Births") {
-            @Override
-            protected Quantity quantityPerTimeUnit() {
-                double value = PREDATOR_EFFICIENCY * PREDATION_RATE
-                        * prey.getValue() * predator.getValue();
-                return new Quantity(value, COYOTE);
-            }
-        };
+        Flow predatorBirths = Flow.create("Predator Births", YEAR, () -> {
+            double value = PREDATOR_EFFICIENCY * PREDATION_RATE
+                    * prey.getValue() * predator.getValue();
+            return new Quantity(value, COYOTE);
+        });
 
-        FlowPerYear predatorDeaths = new FlowPerYear("Predator Deaths") {
-            @Override
-            protected Quantity quantityPerTimeUnit() {
-                double value = PREDATOR_DEATH_RATE * predator.getValue();
-                return new Quantity(value, COYOTE);
-            }
-        };
+        Flow predatorDeaths = Flow.create("Predator Deaths", YEAR, () -> {
+            double value = PREDATOR_DEATH_RATE * predator.getValue();
+            return new Quantity(value, COYOTE);
+        });
 
         prey.addInflow(preyBirths);
         prey.addOutflow(preyDeaths);

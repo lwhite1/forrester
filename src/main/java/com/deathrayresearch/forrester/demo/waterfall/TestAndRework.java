@@ -4,13 +4,13 @@ package com.deathrayresearch.forrester.demo.waterfall;
 import com.deathrayresearch.forrester.measure.Quantity;
 import com.deathrayresearch.forrester.measure.Unit;
 import com.deathrayresearch.forrester.measure.units.item.ItemUnit;
+import com.deathrayresearch.forrester.model.Flow;
 import com.deathrayresearch.forrester.model.Formula;
 import com.deathrayresearch.forrester.model.Module;
 import com.deathrayresearch.forrester.model.Stock;
 import com.deathrayresearch.forrester.model.Variable;
-import com.deathrayresearch.forrester.model.Flow;
-import com.deathrayresearch.forrester.model.flows.FlowPerDay;
 
+import static com.deathrayresearch.forrester.measure.Units.DAY;
 import static com.deathrayresearch.forrester.demo.waterfall.WaterfallSoftwareDevelopmentDemo.TESTING_AND_REWORK;
 
 /**
@@ -40,29 +40,18 @@ class TestAndRework {
 
 
 
-        Flow errorGenerationFlow = new FlowPerDay("New Errors") {
+        Flow errorGenerationFlow = Flow.create("New Errors", DAY, () ->
+                new Quantity(10, ERRORS));
 
-            @Override
-            protected Quantity quantityPerTimeUnit() {
-                return new Quantity(10, ERRORS);
-            }
-        };
+        Flow errorDiscoveryFlow = Flow.create("Errors discovered", DAY, () -> {
+            double discoveryFraction = 0.1;
+            return new Quantity(latentDefects.getValue() * discoveryFraction, ERRORS);
+        });
 
-        Flow errorDiscoveryFlow = new FlowPerDay("Errors discovered") {
-            @Override
-            protected Quantity quantityPerTimeUnit() {
-                double discoveryFraction = 0.1;
-                return new Quantity(latentDefects.getValue() * discoveryFraction, ERRORS);
-            }
-        };
-
-        Flow errorFixedFlow = new FlowPerDay("Errors fixed") {
-            @Override
-            protected Quantity quantityPerTimeUnit() {
-                double fixFraction = 0.2;
-                return new Quantity(knownDefects.getValue() * fixFraction, ERRORS);
-            }
-        };
+        Flow errorFixedFlow = Flow.create("Errors fixed", DAY, () -> {
+            double fixFraction = 0.2;
+            return new Quantity(knownDefects.getValue() * fixFraction, ERRORS);
+        });
 
         latentDefects.addInflow(errorGenerationFlow);
         latentDefects.addOutflow(errorDiscoveryFlow);

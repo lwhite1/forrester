@@ -1,15 +1,14 @@
 package com.deathrayresearch.forrester.demo;
 
 import com.deathrayresearch.forrester.Simulation;
-import com.deathrayresearch.forrester.measure.Quantity;
 import com.deathrayresearch.forrester.measure.units.time.TimeUnits;
 import com.deathrayresearch.forrester.measure.units.time.Times;
 import com.deathrayresearch.forrester.model.Flow;
 import com.deathrayresearch.forrester.model.Model;
 import com.deathrayresearch.forrester.model.Stock;
-import com.deathrayresearch.forrester.model.flows.FlowPerDay;
 import com.deathrayresearch.forrester.ui.StockLevelChartViewer;
 
+import static com.deathrayresearch.forrester.measure.Units.DAY;
 import static com.deathrayresearch.forrester.measure.Units.PEOPLE;
 
 /**
@@ -34,13 +33,10 @@ public class FirstOrderMaterialDelayDemo {
 
         Stock potentialCustomers = new Stock("Potential Customers", 1000, PEOPLE);
 
-        Flow sales = new FlowPerDay("Sales") {
-            @Override
-            protected Quantity quantityPerTimeUnit() {
-                double averageDelay = 120; // 120 days
-                return potentialCustomers.getQuantity().divide(averageDelay);
-            }
-        };
+        double averageDelay = 120; // 120 days
+
+        Flow sales = Flow.create("Sales", DAY, () ->
+                potentialCustomers.getQuantity().divide(averageDelay));
 
         potentialCustomers.addOutflow(sales);
 

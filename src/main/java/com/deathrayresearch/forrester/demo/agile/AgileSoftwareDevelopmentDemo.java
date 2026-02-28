@@ -5,10 +5,9 @@ import com.deathrayresearch.forrester.measure.Quantity;
 import com.deathrayresearch.forrester.measure.Unit;
 import com.deathrayresearch.forrester.measure.units.item.ItemUnit;
 import com.deathrayresearch.forrester.measure.units.time.TimeUnits;
+import com.deathrayresearch.forrester.model.Flow;
 import com.deathrayresearch.forrester.model.Model;
 import com.deathrayresearch.forrester.model.Stock;
-import com.deathrayresearch.forrester.model.Flow;
-import com.deathrayresearch.forrester.model.flows.FlowPerWeek;
 import com.deathrayresearch.forrester.ui.StockLevelChartViewer;
 
 import static com.deathrayresearch.forrester.measure.Units.WEEK;
@@ -61,37 +60,22 @@ public class AgileSoftwareDevelopmentDemo {
         Stock latentDefects = new Stock("latent defects", 0, DEFECT);
         Stock knownDefects = new Stock("known defects", 0, DEFECT);
 
-        Flow completionRate = new FlowPerWeek("Completed Work") {
-            @Override
-            protected Quantity quantityPerTimeUnit() {
-                if (sprintBacklog.getQuantity().getValue() <= 0) {
-                    return new Quantity(0, WORK);
-                }
-                return new Quantity(Math.min(sprintBacklog.getQuantity().getValue(), nominalProductivityPerPersonWeek), WORK);
+        Flow completionRate = Flow.create("Completed Work", WEEK, () -> {
+            if (sprintBacklog.getQuantity().getValue() <= 0) {
+                return new Quantity(0, WORK);
             }
-        };
+            return new Quantity(Math.min(sprintBacklog.getQuantity().getValue(), nominalProductivityPerPersonWeek), WORK);
+        });
 
-        Flow defectCreationRate = new FlowPerWeek("Created defects") {
-            @Override
-            protected Quantity quantityPerTimeUnit() {
-                return completionRate.flowPerTimeUnit(TimeUnits.DAY)
-                    .multiply(1.0 - nominalFractionCorrectAndComplete);
-            }
-        };
+        Flow defectCreationRate = Flow.create("Created defects", WEEK, () ->
+                completionRate.flowPerTimeUnit(TimeUnits.DAY)
+                    .multiply(1.0 - nominalFractionCorrectAndComplete));
 
-        Flow sprintDefectFindRate = new FlowPerWeek("Found defects") {
-            @Override
-            protected Quantity quantityPerTimeUnit() {
-                return latentDefects.getQuantity().multiply(0.4);
-            }
-        };
+        Flow sprintDefectFindRate = Flow.create("Found defects", WEEK, () ->
+                latentDefects.getQuantity().multiply(0.4));
 
-        Flow defectFixRate = new FlowPerWeek("Fixed defects") {
-            @Override
-            protected Quantity quantityPerTimeUnit() {
-                return knownDefects.getQuantity().multiply(0.5);
-            }
-        };
+        Flow defectFixRate = Flow.create("Fixed defects", WEEK, () ->
+                knownDefects.getQuantity().multiply(0.5));
 
         completedWork.addInflow(completionRate);
         sprintBacklog.addOutflow(completionRate);

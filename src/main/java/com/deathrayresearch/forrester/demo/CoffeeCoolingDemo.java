@@ -7,7 +7,6 @@ import com.deathrayresearch.forrester.model.Model;
 import com.deathrayresearch.forrester.model.Stock;
 import com.deathrayresearch.forrester.model.Variable;
 import com.deathrayresearch.forrester.model.Flow;
-import com.deathrayresearch.forrester.model.flows.FlowPerMinute;
 import com.deathrayresearch.forrester.ui.FlowChartViewer;
 
 import static com.deathrayresearch.forrester.measure.Units.CENTIGRADE;
@@ -40,17 +39,10 @@ public class CoffeeCoolingDemo {
         Variable discrepancy = new Variable("Discrepancy", CENTIGRADE,
                 () -> coffeeTemperature.getValue() - roomTemperature.getValue());
 
-        Flow cooling = new FlowPerMinute("Cooling") {
+        double coolingRate = 0.10;
 
-            final double coolingRate = 0.10;
-
-            @Override
-            protected Quantity quantityPerTimeUnit() {
-                return new Quantity(
-                        discrepancy.getValue() * coolingRate,
-                        CENTIGRADE);
-            }
-        };
+        Flow cooling = Flow.create("Cooling", MINUTE, () ->
+                new Quantity(discrepancy.getValue() * coolingRate, CENTIGRADE));
 
         coffeeTemperature.addOutflow(cooling);
 
