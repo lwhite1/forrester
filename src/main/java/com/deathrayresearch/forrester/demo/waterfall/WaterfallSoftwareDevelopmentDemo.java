@@ -79,6 +79,7 @@ public class WaterfallSoftwareDevelopmentDemo {
     }
 
     public void run() {
+        getModel();
 
         Quantity duration = new Quantity(1, TimeUnits.YEAR);
         Simulation simulation = new Simulation(model, TimeUnits.DAY, duration);

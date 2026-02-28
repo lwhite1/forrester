@@ -10,6 +10,7 @@ import com.deathrayresearch.forrester.model.Stock;
 import com.deathrayresearch.forrester.model.Flow;
 import com.deathrayresearch.forrester.model.Variable;
 import com.deathrayresearch.forrester.model.flows.FlowPerDay;
+import com.deathrayresearch.forrester.model.flows.FlowPerHour;
 import com.deathrayresearch.forrester.ui.StockLevelChartViewer;
 
 import static com.deathrayresearch.forrester.measure.Units.HOUR;
@@ -63,12 +64,25 @@ public class FlowTimeDemo {
                 }
             };
 
+        double hoursPerDay = 24.0;
+        double adjustmentTime = 24.0; // hours
+
+        Flow tatAdjustment = new FlowPerHour("TAT Adjustment") {
+            @Override
+            protected Quantity quantityPerTimeUnit() {
+                double actualTAT = (WIP.getValue() / Capacity.getValue()) * hoursPerDay;
+                return new Quantity((actualTAT - TAT.getValue()) / adjustmentTime, HOUR);
+            }
+        };
+
         WIP.addInflow(Demand);
         WIP.addOutflow(Throughput);
+        TAT.addInflow(tatAdjustment);
 
         tatModel.addStock(WIP);
         tatModel.addStock(TAT);
         tatModel.addConstant(TATGoal);
+        tatModel.addVariable(discrepancy);
 
         sim.addEventHandler(new StockLevelChartViewer());
         sim.execute();

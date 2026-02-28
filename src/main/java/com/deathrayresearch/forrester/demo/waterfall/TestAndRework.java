@@ -51,14 +51,16 @@ class TestAndRework {
         Flow errorDiscoveryFlow = new FlowPerDay("Errors discovered") {
             @Override
             protected Quantity quantityPerTimeUnit() {
-                return new Quantity(3, ERRORS);
+                double discoveryFraction = 0.1;
+                return new Quantity(latentDefects.getValue() * discoveryFraction, ERRORS);
             }
         };
 
         Flow errorFixedFlow = new FlowPerDay("Errors fixed") {
             @Override
             protected Quantity quantityPerTimeUnit() {
-                return new Quantity(1, ERRORS);
+                double fixFraction = 0.2;
+                return new Quantity(knownDefects.getValue() * fixFraction, ERRORS);
             }
         };
 

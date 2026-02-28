@@ -73,7 +73,7 @@ public class ThirdOrderMaterialDelayDemo {
             }
         };
 
-        //step1.addInflow(demand);
+        step1.addInflow(demand);
         step1.addOutflow(step1Delay);
 
         step2.addInflow(step1Delay);

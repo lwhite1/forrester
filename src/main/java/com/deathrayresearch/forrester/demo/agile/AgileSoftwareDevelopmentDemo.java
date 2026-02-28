@@ -80,6 +80,13 @@ public class AgileSoftwareDevelopmentDemo {
             }
         };
 
+        Flow defectFixRate = new FlowPerWeek("Fixed defects") {
+            @Override
+            protected Quantity quantityPerTimeUnit() {
+                return knownDefects.getQuantity().multiply(0.5);
+            }
+        };
+
         completedWork.addInflow(completionRate);
         sprintBacklog.addOutflow(completionRate);
 
@@ -87,6 +94,7 @@ public class AgileSoftwareDevelopmentDemo {
         latentDefects.addOutflow(sprintDefectFindRate);
 
         knownDefects.addInflow(sprintDefectFindRate);
+        knownDefects.addOutflow(defectFixRate);
 
         model.addStock(productBacklog);
         model.addStock(releaseBacklog);
