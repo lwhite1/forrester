@@ -3,6 +3,9 @@ package com.deathrayresearch.forrester.measure.units.temperature;
 import com.deathrayresearch.forrester.measure.Dimension;
 import com.deathrayresearch.forrester.measure.Unit;
 
+/**
+ * Units of temperature. Currently only centigrade (Celsius) is defined.
+ */
 public enum TemperatureUnits implements Unit {
 
     CENTIGRADE("Centigrade", 1.0);

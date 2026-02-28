@@ -5,6 +5,10 @@ import com.deathrayresearch.forrester.measure.TimeUnit;
 
 import java.time.temporal.ChronoUnit;
 
+/**
+ * Standard units of time, from seconds to years. Each constant stores its ratio to the
+ * base unit (seconds) and the corresponding {@link java.time.temporal.ChronoUnit}.
+ */
 public enum TimeUnits implements TimeUnit {
 
     SECOND("Second", 1.0, ChronoUnit.SECONDS),

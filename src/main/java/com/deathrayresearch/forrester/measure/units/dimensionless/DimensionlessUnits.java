@@ -4,6 +4,9 @@ import com.deathrayresearch.forrester.measure.Dimension;
 import com.deathrayresearch.forrester.measure.Unit;
 import com.deathrayresearch.forrester.measure.dimension.Dimensionless;
 
+/**
+ * Units for dimensionless quantities (ratios, percentages, pure numbers).
+ */
 public enum DimensionlessUnits implements Unit {
 
     DIMENSIONLESS("Dimensionless unit", 1.0);

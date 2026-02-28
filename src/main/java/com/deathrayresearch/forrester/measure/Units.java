@@ -9,6 +9,11 @@ import com.deathrayresearch.forrester.measure.units.temperature.TemperatureUnits
 import com.deathrayresearch.forrester.measure.units.time.TimeUnits;
 import com.deathrayresearch.forrester.measure.units.volume.VolumeUnits;
 
+/**
+ * Central registry of commonly used unit constants across all dimensions.
+ * Provides convenient static access to units of time, length, mass, volume, money,
+ * temperature, and items.
+ */
 public class Units {
 
     // dimensionless

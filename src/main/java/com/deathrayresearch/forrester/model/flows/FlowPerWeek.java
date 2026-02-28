@@ -9,6 +9,11 @@ import static com.deathrayresearch.forrester.measure.Units.WEEK;
  */
 public abstract class FlowPerWeek extends Flow {
 
+    /**
+     * Creates a new weekly flow with the given name.
+     *
+     * @param name the flow name
+     */
     public FlowPerWeek(String name) {
         super(name, WEEK);
     }

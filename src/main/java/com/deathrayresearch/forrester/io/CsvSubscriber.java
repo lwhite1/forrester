@@ -19,7 +19,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- *
+ * An {@link EventHandler} that writes simulation output to a CSV file.
+ * Each row contains the step number, timestamp, stock values, and variable values.
  */
 public class CsvSubscriber implements EventHandler {
 
@@ -27,6 +28,12 @@ public class CsvSubscriber implements EventHandler {
 
     private CSVWriter csvWriter;
 
+    /**
+     * Creates a new CSV subscriber that writes to the specified file path.
+     * Parent directories are created if they do not exist.
+     *
+     * @param fileName the path of the CSV file to write
+     */
     public CsvSubscriber(String fileName) {
         File file = Paths.get(fileName).toFile();
         File parent = file.getParentFile();
@@ -40,6 +47,10 @@ public class CsvSubscriber implements EventHandler {
         }
     }
 
+    /**
+     * Writes a data row for the current time step, including step number, timestamp,
+     * stock values, and variable values.
+     */
     @Subscribe
     public void handleTimeStepEvent(TimeStepEvent event) {
         Model model = event.getModel();
@@ -57,6 +68,9 @@ public class CsvSubscriber implements EventHandler {
         csvWriter.writeNext(values.toArray(new String[values.size()]));
     }
 
+    /**
+     * Writes the CSV header row with column names derived from the model's stocks and variables.
+     */
     @Override
     @Subscribe
     public void handleSimulationStartEvent(SimulationStartEvent event) {
@@ -75,6 +89,9 @@ public class CsvSubscriber implements EventHandler {
         csvWriter.writeNext(values.toArray(new String[values.size()]));
     }
 
+    /**
+     * Flushes and closes the CSV writer when the simulation ends.
+     */
     @Override
     @Subscribe
     public void handleSimulationEndEvent(SimulationEndEvent event) {

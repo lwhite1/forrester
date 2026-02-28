@@ -5,6 +5,10 @@ import com.deathrayresearch.forrester.measure.Dimension;
 import com.deathrayresearch.forrester.measure.Unit;
 import com.deathrayresearch.forrester.measure.units.dimensionless.DimensionlessUnits;
 
+/**
+ * A pseudo-dimension for quantities that have no physical dimension (e.g., ratios, percentages).
+ * Unit conversion is not supported for dimensionless quantities.
+ */
 public enum Dimensionless implements Dimension {
 
     INSTANCE;

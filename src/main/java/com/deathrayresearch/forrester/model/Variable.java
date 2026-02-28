@@ -14,12 +14,22 @@ public class Variable extends Element {
 
     private final List<Double> history = new ArrayList<>();
 
+    /**
+     * Creates a new variable with the given name, unit, and formula.
+     *
+     * @param name    the variable name
+     * @param unit    the unit of measure for this variable's value
+     * @param formula the formula that computes this variable's current value
+     */
     public Variable(String name, Unit unit, Formula formula) {
         super(name);
         this.formula = formula;
         this.unit = unit;
     }
 
+    /**
+     * Returns the current value of this variable as computed by its formula.
+     */
     public double getValue() {
         return formula.getCurrentValue();
     }
@@ -32,6 +42,11 @@ public class Variable extends Element {
         return formula;
     }
 
+    /**
+     * Returns the recorded value at the given time step index, or 0 if the index is out of range.
+     *
+     * @param i the zero-based time step index
+     */
     public double getHistoryAtTimeStep(int i) {
         if (i < 0 || history.size() <= i) {
             return 0;
@@ -39,6 +54,9 @@ public class Variable extends Element {
         return history.get(i);
     }
 
+    /**
+     * Records the current value of this variable in its history for the current time step.
+     */
     public void recordValue() {
         history.add(getValue());
     }

@@ -18,11 +18,20 @@ public abstract class Flow extends Element {
     private Stock source;
     private Stock sink;
 
+    /**
+     * Creates a new flow with the given name and native time unit.
+     *
+     * @param name the flow name
+     * @param unit the time unit in which this flow's rate is expressed
+     */
     public Flow(String name, TimeUnit unit) {
         super(name);
         this.timeUnit = unit;
     }
 
+    /**
+     * Returns the time unit in which this flow's rate is natively expressed.
+     */
     public TimeUnit getTimeUnit() {
         return timeUnit;
     }
@@ -32,16 +41,32 @@ public abstract class Flow extends Element {
         return getName() + ": " + flowPerTimeUnit(timeUnit);
     }
 
+    /**
+     * Returns this flow's rate converted to the given time unit.
+     *
+     * @param timeUnit the target time unit
+     * @return the rate expressed per one unit of the given time unit
+     */
     public Quantity flowPerTimeUnit(TimeUnit timeUnit) {
         return RateConverter.convert(quantityPerTimeUnit(), this.timeUnit, timeUnit);
     }
 
     protected abstract Quantity quantityPerTimeUnit();
 
+    /**
+     * Records the given quantity's value in this flow's history for the current time step.
+     *
+     * @param q the quantity to record
+     */
     public void recordValue(Quantity q) {
         history.add(q.getValue());
     }
 
+    /**
+     * Returns the recorded flow value at the given time step index, or 0 if the index is out of range.
+     *
+     * @param i the zero-based time step index
+     */
     public double getHistoryAtTimeStep(int i) {
         if (i < 0 || history.size() <= i) {
             return 0;

@@ -9,7 +9,9 @@ import com.deathrayresearch.forrester.measure.dimension.Time;
 import com.deathrayresearch.forrester.measure.dimension.Volume;
 
 /**
- *
+ * Represents a physical or conceptual dimension such as time, length, mass, or money.
+ * Each dimension has a base unit and provides a converter for translating quantities
+ * between compatible units within the same dimension.
  */
 public interface Dimension {
 
@@ -21,6 +23,10 @@ public interface Dimension {
     Dimension ITEM = Item.INSTANCE;
     Dimension TEMPERATURE = Temperature.INSTANCE;
 
+    /**
+     * Returns a converter that can translate quantities between units in this dimension.
+     * Throws {@link IllegalArgumentException} if the target unit belongs to a different dimension.
+     */
     default Converter getConverter() {
         return (originalQuantity, newUnit) -> {
             if (!newUnit.getDimension().equals(originalQuantity.getUnit().getDimension())) {
@@ -30,5 +36,8 @@ public interface Dimension {
         };
     }
 
+    /**
+     * Returns the base unit for this dimension. All conversions pass through the base unit.
+     */
     Unit getBaseUnit();
 }

@@ -5,6 +5,9 @@ package com.deathrayresearch.forrester.model;
  */
 public interface Formula {
 
+    /**
+     * Computes and returns the current value of the variable that uses this formula.
+     */
     double getCurrentValue();
 
 }

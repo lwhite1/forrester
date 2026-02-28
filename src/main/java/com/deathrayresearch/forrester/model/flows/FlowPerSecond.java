@@ -9,6 +9,11 @@ import static com.deathrayresearch.forrester.measure.Units.SECOND;
  */
 public abstract class FlowPerSecond extends Flow {
 
+    /**
+     * Creates a new per-second flow with the given name.
+     *
+     * @param name the flow name
+     */
     public FlowPerSecond(String name) {
         super(name, SECOND);
     }

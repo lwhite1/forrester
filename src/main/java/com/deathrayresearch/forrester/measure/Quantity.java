@@ -31,18 +31,39 @@ public final class Quantity {
         return unit;
     }
 
+    /**
+     * Returns this quantity converted to the dimension's base unit.
+     */
     public Quantity inBaseUnits() {
         return unit.toBaseUnits(this);
     }
 
+    /**
+     * Returns a new quantity whose value is this quantity's value multiplied by the given scalar.
+     *
+     * @param d the scalar multiplier
+     */
     public Quantity multiply(double d) {
         return new Quantity(d * getValue(), this.getUnit());
     }
 
+    /**
+     * Returns a new quantity whose value is this quantity's value divided by the given scalar.
+     *
+     * @param d the divisor
+     */
     public Quantity divide(double d) {
         return new Quantity( getValue() / d, this.getUnit());
     }
 
+    /**
+     * Adds another quantity to this one, converting units through the base unit if necessary.
+     * Both quantities must share the same dimension.
+     *
+     * @param other the quantity to add
+     * @return the sum, expressed in this quantity's unit
+     * @throws IllegalArgumentException if the dimensions are incompatible
+     */
     public Quantity add(Quantity other) {
         Preconditions.checkArgument(other.isCompatibleWith(this), INCOMPATIBLE_ERROR_MESSAGE);
 
@@ -53,6 +74,14 @@ public final class Quantity {
         return getUnit().fromBaseUnits(result);
     }
 
+    /**
+     * Subtracts another quantity from this one, converting units through the base unit if necessary.
+     * Both quantities must share the same dimension.
+     *
+     * @param other the quantity to subtract
+     * @return the difference, expressed in this quantity's unit
+     * @throws IllegalArgumentException if the dimensions are incompatible
+     */
     public Quantity subtract(Quantity other) {
         Preconditions.checkArgument(other.isCompatibleWith(this), INCOMPATIBLE_ERROR_MESSAGE);
 
@@ -70,22 +99,42 @@ public final class Quantity {
                 "(s)";
     }
 
+    /**
+     * Returns {@code true} if this quantity is strictly less than the other quantity,
+     * comparing in base units.
+     */
     public boolean isLessThan(Quantity other) {
         return Double.compare(inBaseUnits().getValue(), other.inBaseUnits().getValue()) < 0;
     }
 
+    /**
+     * Returns {@code true} if this quantity is less than or equal to the other quantity,
+     * comparing in base units.
+     */
     public boolean isLessThanOrEqualTo(Quantity other) {
         return Double.compare(inBaseUnits().getValue(), other.inBaseUnits().getValue()) <= 0;
     }
 
+    /**
+     * Returns {@code true} if this quantity is strictly greater than the other quantity,
+     * comparing in base units.
+     */
     public boolean isGreaterThan(Quantity other) {
         return Double.compare(inBaseUnits().getValue(), other.inBaseUnits().getValue()) > 0;
     }
 
+    /**
+     * Returns {@code true} if this quantity is greater than or equal to the other quantity,
+     * comparing in base units.
+     */
     public boolean isGreaterThanOrEqualTo(Quantity other) {
         return Double.compare(inBaseUnits().getValue(), other.inBaseUnits().getValue()) >= 0;
     }
 
+    /**
+     * Returns {@code true} if this quantity shares the same dimension as the other quantity,
+     * meaning they can be added, subtracted, or compared.
+     */
     // TODO(lwhite): Extend this to handle inherited compatibility
     public boolean isCompatibleWith(Quantity other) {
         return other.getDimension().equals(this.getDimension());
@@ -121,6 +170,12 @@ public final class Quantity {
         return result;
     }
 
+    /**
+     * Converts this quantity to the specified unit within the same dimension.
+     *
+     * @param newUnit the target unit
+     * @return an equivalent quantity expressed in the new unit
+     */
     public Quantity convertUnits(Unit newUnit) {
         return unit.getDimension().getConverter().convert(this, newUnit);
     }

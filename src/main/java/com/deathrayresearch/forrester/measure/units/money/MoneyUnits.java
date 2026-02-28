@@ -3,6 +3,9 @@ package com.deathrayresearch.forrester.measure.units.money;
 import com.deathrayresearch.forrester.measure.Dimension;
 import com.deathrayresearch.forrester.measure.Unit;
 
+/**
+ * Units of currency. Currently only US dollars are defined.
+ */
 public enum MoneyUnits implements Unit {
 
     USD("USD", 1.0);

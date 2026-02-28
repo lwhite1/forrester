@@ -17,42 +17,74 @@ public class Model extends Element {
     private final List<Module> modules = new ArrayList<>();
     private final List<Constant> constants = new ArrayList<>();
 
+    /**
+     * Creates a new model with the given name.
+     *
+     * @param name the model name
+     */
     public Model(String name) {
         super(name);
     }
 
+    /**
+     * Adds a stock to this model.
+     */
     public void addStock(Stock stock) {
         stocks.add(stock);
     }
 
+    /**
+     * Removes a stock from this model.
+     */
     public void removeStock(Stock stock) {
         stocks.remove(stock);
     }
 
+    /**
+     * Adds a variable to this model, keyed by its name.
+     */
     public void addVariable(Variable variable) {
         variables.put(variable.getName(), variable);
     }
 
+    /**
+     * Removes a variable from this model.
+     */
     public void removeVariable(Variable variable) {
         variables.remove(variable.getName());
     }
 
+    /**
+     * Adds a module to this model.
+     */
     public void addModule(Module module) {
         modules.add(module);
     }
 
+    /**
+     * Returns an unmodifiable list of modules in this model.
+     */
     public List<Module> getModules() {
         return Collections.unmodifiableList(modules);
     }
 
+    /**
+     * Returns an unmodifiable list of stocks in this model.
+     */
     public List<Stock> getStocks() {
         return Collections.unmodifiableList(stocks);
     }
 
+    /**
+     * Returns an unmodifiable map of variable names to variables.
+     */
     public Map<String, Variable> getVariableMap() {
         return Collections.unmodifiableMap(variables);
     }
 
+    /**
+     * Returns the names of all stocks in this model.
+     */
     public List<String> getStockNames() {
         List<String> results = new ArrayList<>();
         for (Stock stock : stocks) {
@@ -61,6 +93,9 @@ public class Model extends Element {
         return results;
     }
 
+    /**
+     * Returns the current numeric values of all stocks in this model.
+     */
     public List<Double> getStockValues() {
         List<Double> results = new ArrayList<>();
         for (Stock stock : stocks) {
@@ -69,14 +104,23 @@ public class Model extends Element {
         return results;
     }
 
+    /**
+     * Returns the names of all variables in this model.
+     */
     public List<String> getVariableNames() {
         return new ArrayList<>(variables.keySet());
     }
 
+    /**
+     * Returns an unmodifiable collection of all variables in this model.
+     */
     public Collection<Variable> getVariables() {
         return Collections.unmodifiableCollection(variables.values());
     }
 
+    /**
+     * Returns the current numeric values of all variables in this model.
+     */
     public List<Double> getVariableValues() {
         List<Double> results = new ArrayList<>();
         for (Variable variable : variables.values()) {
@@ -85,6 +129,9 @@ public class Model extends Element {
         return results;
     }
 
+    /**
+     * Returns the names of all modules in this model.
+     */
     public List<String> getModuleNames() {
         List<String> results = new ArrayList<>();
         for (Module module : modules) {
@@ -93,14 +140,25 @@ public class Model extends Element {
         return results;
     }
 
+    /**
+     * Returns the variable with the given name, or {@code null} if not found.
+     *
+     * @param variableName the variable name to look up
+     */
     public Variable getVariable(String variableName) {
         return variables.get(variableName);
     }
 
+    /**
+     * Returns an unmodifiable list of constants in this model.
+     */
     public List<Constant> getConstants() {
         return Collections.unmodifiableList(constants);
     }
 
+    /**
+     * Adds a constant to this model.
+     */
     public void addConstant(Constant constant) {
         constants.add(constant);
     }

@@ -8,10 +8,20 @@ import com.deathrayresearch.forrester.model.Variable;
 
 import java.util.Map;
 
+/**
+ * Generates a plain-text summary report of a model's structure, listing its stocks,
+ * inflows, outflows, constants, and variables.
+ */
 public class ModelReport {
 
     private static final char LF = '\n';
 
+    /**
+     * Creates a human-readable text report describing the given model's structure.
+     *
+     * @param model the model to report on
+     * @return a formatted string summarizing the model's stocks, flows, constants, and variables
+     */
     public static String create(Model model) {
 
         StringBuilder builder = new StringBuilder();

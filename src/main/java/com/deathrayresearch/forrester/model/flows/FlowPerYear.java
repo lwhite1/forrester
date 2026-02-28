@@ -9,6 +9,11 @@ import static com.deathrayresearch.forrester.measure.Units.YEAR;
  */
 public abstract class FlowPerYear extends Flow {
 
+    /**
+     * Creates a new yearly flow with the given name.
+     *
+     * @param name the flow name
+     */
     public FlowPerYear(String name) {
         super(name, YEAR);
     }

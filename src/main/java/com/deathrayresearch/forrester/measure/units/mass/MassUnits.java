@@ -3,6 +3,9 @@ package com.deathrayresearch.forrester.measure.units.mass;
 import com.deathrayresearch.forrester.measure.Dimension;
 import com.deathrayresearch.forrester.measure.Unit;
 
+/**
+ * Standard units of mass. Each constant stores its ratio to the base unit (kilograms).
+ */
 public enum MassUnits implements Unit {
 
     KILOGRAM("Kilogram", 1.0),

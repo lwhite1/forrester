@@ -3,6 +3,9 @@ package com.deathrayresearch.forrester.measure.units.volume;
 import com.deathrayresearch.forrester.measure.Dimension;
 import com.deathrayresearch.forrester.measure.Unit;
 
+/**
+ * Standard units of volume. Each constant stores its ratio to the base unit (liters).
+ */
 public enum VolumeUnits implements Unit {
 
     LITER("Liter", 1.0),

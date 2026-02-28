@@ -9,6 +9,11 @@ import static com.deathrayresearch.forrester.measure.Units.DAY;
  */
 public abstract class FlowPerDay extends Flow {
 
+    /**
+     * Creates a new daily flow with the given name.
+     *
+     * @param name the flow name
+     */
     public FlowPerDay(String name) {
         super(name, DAY);
     }

@@ -3,6 +3,9 @@ package com.deathrayresearch.forrester.measure.units.length;
 import com.deathrayresearch.forrester.measure.Dimension;
 import com.deathrayresearch.forrester.measure.Unit;
 
+/**
+ * Standard units of length. Each constant stores its ratio to the base unit (meters).
+ */
 public enum LengthUnits implements Unit {
 
     METER("Meter", 1.0),

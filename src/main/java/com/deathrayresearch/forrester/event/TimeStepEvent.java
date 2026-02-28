@@ -6,7 +6,8 @@ import com.deathrayresearch.forrester.model.Model;
 import java.time.LocalDateTime;
 
 /**
- *
+ * Event fired after each time step of a simulation has been computed.
+ * Contains a snapshot of the simulation clock, model state, and step metadata.
  */
 public class TimeStepEvent {
 
@@ -15,6 +16,14 @@ public class TimeStepEvent {
     private final Model model;
     private final TimeUnit timeStep;
 
+    /**
+     * Creates a new time step event.
+     *
+     * @param currentTime the simulation clock time after this step
+     * @param model       the model whose state was updated
+     * @param step        the zero-based step index
+     * @param timeStep    the time unit duration of each step
+     */
     public TimeStepEvent(LocalDateTime currentTime, Model model, int step, TimeUnit timeStep) {
         this.currentTime = currentTime;
         this.model = model;
@@ -22,18 +31,30 @@ public class TimeStepEvent {
         this.timeStep = timeStep;
     }
 
+    /**
+     * Returns the simulation clock time after this step.
+     */
     public LocalDateTime getCurrentTime() {
         return currentTime;
     }
 
+    /**
+     * Returns the zero-based index of this time step.
+     */
     public int getStep() {
         return step;
     }
 
+    /**
+     * Returns the time unit duration of each step.
+     */
     public TimeUnit getTimeStep() {
         return timeStep;
     }
 
+    /**
+     * Returns the model whose state was updated in this step.
+     */
     public Model getModel() {
         return model;
     }

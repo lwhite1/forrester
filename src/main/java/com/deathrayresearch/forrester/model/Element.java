@@ -16,6 +16,9 @@ public abstract class Element {
         this.name = name;
     }
 
+    /**
+     * Returns the name of this element.
+     */
     public String getName() {
         return name;
     }
@@ -25,10 +28,18 @@ public abstract class Element {
         return getName();
     }
 
+    /**
+     * Returns the optional descriptive comment for this element, or {@code null} if none has been set.
+     */
     public String getComment() {
         return comment;
     }
 
+    /**
+     * Sets an optional descriptive comment for this element.
+     *
+     * @param comment the comment text
+     */
     public void setComment(String comment) {
         this.comment = comment;
     }
