@@ -17,18 +17,33 @@ public class Stock extends Element {
 
     private final Unit unit;
     private double value;
+    private NegativeValuePolicy negativeValuePolicy;
 
     /**
      * Creates a new stock with the given name, initial value, and unit.
+     * Uses {@link NegativeValuePolicy#CLAMP_TO_ZERO} by default.
      *
      * @param name          the stock name
      * @param initialAmount the initial quantity stored in this stock
      * @param unit          the unit of measure for the stored quantity
      */
     public Stock(String name, double initialAmount, Unit unit) {
+        this(name, initialAmount, unit, NegativeValuePolicy.CLAMP_TO_ZERO);
+    }
+
+    /**
+     * Creates a new stock with the given name, initial value, unit, and negative-value policy.
+     *
+     * @param name                the stock name
+     * @param initialAmount       the initial quantity stored in this stock
+     * @param unit                the unit of measure for the stored quantity
+     * @param negativeValuePolicy the policy for handling negative values
+     */
+    public Stock(String name, double initialAmount, Unit unit, NegativeValuePolicy negativeValuePolicy) {
         super(name);
         this.unit = unit;
-        this.value = initialAmount;
+        this.negativeValuePolicy = negativeValuePolicy;
+        this.value = applyPolicy(initialAmount);
     }
 
     /**
@@ -77,11 +92,31 @@ public class Stock extends Element {
     }
 
     public void setValue(double value) {
-        this.value = value;
+        this.value = applyPolicy(value);
     }
 
     public double getValue() {
         return value;
+    }
+
+    public NegativeValuePolicy getNegativeValuePolicy() {
+        return negativeValuePolicy;
+    }
+
+    public void setNegativeValuePolicy(NegativeValuePolicy negativeValuePolicy) {
+        this.negativeValuePolicy = negativeValuePolicy;
+    }
+
+    private double applyPolicy(double candidateValue) {
+        if (candidateValue >= 0) {
+            return candidateValue;
+        }
+        return switch (negativeValuePolicy) {
+            case ALLOW -> candidateValue;
+            case CLAMP_TO_ZERO -> 0;
+            case THROW -> throw new IllegalArgumentException(
+                    "Stock '" + getName() + "' cannot have a negative value: " + candidateValue);
+        };
     }
 
     @Override

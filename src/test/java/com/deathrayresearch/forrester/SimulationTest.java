@@ -122,6 +122,23 @@ public class SimulationTest {
     }
 
     @Test
+    public void shouldClampStockToZeroWhenOutflowExceedsValue() {
+        Model model = new Model("Clamp Test");
+        Stock tank = new Stock("Tank", 10, GALLON_US);
+
+        Flow outflow = Flow.create("BigDrain", MINUTE, () -> new Quantity(100, GALLON_US));
+
+        tank.addOutflow(outflow);
+        model.addStock(tank);
+
+        Simulation sim = new Simulation(model, MINUTE, MINUTE, 2);
+        sim.execute();
+
+        // Outflow of 100/step far exceeds the stock of 10; should clamp to 0, not go negative
+        assertEquals(0, tank.getValue(), 0.01);
+    }
+
+    @Test
     public void shouldTrackElapsedTime() {
         Model model = new Model("Time Test");
         Simulation sim = new Simulation(model, MINUTE, MINUTE, 5);

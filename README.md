@@ -28,10 +28,11 @@ The engine is designed for creating training simulations, games, scenario testin
 
 System Dynamics models are built from four fundamental elements:
 
-- **Stocks** - Accumulations that represent the state of a system (e.g., population, inventory, money). Stocks change only through inflows and outflows.
+- **Stocks** - Accumulations that represent the state of a system (e.g., population, inventory, money). Stocks change only through inflows and outflows. By default, stocks clamp negative values to zero (configurable via `NegativeValuePolicy`).
 - **Flows** - Rates of change that add to or drain from stocks (e.g., birth rate, sales rate, spending rate). Flows are defined per unit of time.
 - **Variables** - Calculated quantities derived from formulas that may reference stocks, constants, or other variables.
 - **Constants** - Fixed exogenous values that parameterize the model.
+- **Lookup Tables** - Piecewise interpolation curves for modeling nonlinear effects (e.g., "effect of crowding on birth rate"). Supports linear and cubic spline interpolation.
 
 These elements are connected into feedback loops that drive system behavior over time.
 
@@ -102,6 +103,53 @@ Flow cooling = Flow.create("Cooling", MINUTE, () ->
 | `Flows.exponentialGrowthWithLimit(name, timeUnit, stock, rate, limit)` | S-shaped growth that levels off at a carrying capacity |
 | `Flows.pipelineDelay(name, timeUnit, inflow, stepSupplier, delay)` | FIFO material delay based on historical inflow values |
 
+### Lookup Tables
+
+`LookupTable` implements `Formula` and provides the standard SD "table function" for modeling nonlinear relationships. Input values are mapped to output values via interpolation between user-defined data points. Out-of-range inputs are clamped to the nearest endpoint (standard SD convention).
+
+**Static factories:**
+
+```java
+LookupTable effect = LookupTable.linear(
+    new double[]{0, 0.5, 1.0, 1.5, 2.0},
+    new double[]{1.2, 1.0, 0.5, 0.1, 0.0},
+    () -> population.getValue() / carryingCapacity);
+```
+
+**Fluent builder** (auto-sorts by x):
+
+```java
+LookupTable effect = LookupTable.builder()
+    .at(0.0, 1.2).at(0.5, 1.0).at(1.0, 0.5).at(1.5, 0.1).at(2.0, 0.0)
+    .buildLinear(() -> population.getValue() / carryingCapacity);
+```
+
+| Method | Min points | Behavior |
+|---|---|---|
+| `LookupTable.linear()` / `buildLinear()` | 2 | Straight-line segments between points |
+| `LookupTable.spline()` / `buildSpline()` | 3 | Cubic spline for smooth curves (may overshoot with steep transitions) |
+
+### Negative-Stock Guardrails
+
+Stocks enforce a `NegativeValuePolicy` that controls what happens when a value would go negative. The default policy (`CLAMP_TO_ZERO`) prevents physical quantities from going negative — matching the behavior of SD tools like Vensim and Stella.
+
+| Policy | Behavior |
+|---|---|
+| `CLAMP_TO_ZERO` (default) | Silently clamp to zero |
+| `ALLOW` | Permit negative values (e.g., bank balances) |
+| `THROW` | Throw `IllegalArgumentException` |
+
+```java
+// Default: negative values are clamped to zero
+Stock inventory = new Stock("Inventory", 100, THING);
+
+// Allow negative values via constructor
+Stock balance = new Stock("Balance", -500, US_DOLLAR, NegativeValuePolicy.ALLOW);
+
+// Change policy after construction
+inventory.setNegativeValuePolicy(NegativeValuePolicy.THROW);
+```
+
 ### Output & Visualization
 
 - **CsvSubscriber** - Writes simulation results to CSV files (columns: step, datetime, stock levels, variable values)
@@ -128,6 +176,8 @@ The demo package (`src/main/java/.../demo/`) contains a rich set of example mode
 **SShapedPopulationGrowthDemo** — Models logistic population growth constrained by a carrying capacity (1,000). Growth starts exponentially, inflects at the midpoint, and levels off — the S-curve produced by a balancing loop limiting a reinforcing loop.
 
 **FlowTimeDemo** — Models turnaround time (TAT) for a work queue with demand and capacity constraints. Two stocks (WIP and TAT) interact through flows defined at different time units (per-day demand, per-hour adjustment), demonstrating the engine's automatic rate conversion.
+
+**LookupTableDemo** — Models population growth modulated by a crowding-effect lookup table. As the population-to-capacity ratio increases, a `LookupTable` maps it to a declining growth multiplier, producing S-shaped growth with a user-defined nonlinear curve rather than an algebraic approximation.
 
 ### Delays
 
@@ -208,6 +258,8 @@ New to system dynamics? These resources provide a solid introduction to the meth
 
 The project is at version 1.0-SNAPSHOT and is under active development. Recent work has focused on:
 
+- Adding `LookupTable` for piecewise interpolation curves (linear and cubic spline) — the standard SD mechanism for nonlinear effects
+- Adding `NegativeValuePolicy` guardrails to `Stock` — prevents physical quantities from going negative by default
 - Adding `Flows` factory class and `Flow.create()` to eliminate flow boilerplate — common patterns are now one-liners
 - Consolidating archetype logic into `Flows` and removing the `archetypes` package
 - Removing `FlowPer*` convenience subclasses in favor of lambda-based `Flow.create()`

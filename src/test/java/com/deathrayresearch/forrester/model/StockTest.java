@@ -70,6 +70,48 @@ public class StockTest {
         assertTrue(stock.toString().contains("Tank"));
     }
 
+    @Test
+    public void shouldClampNegativeValueToZeroByDefault() {
+        Stock stock = new Stock("Water", 100, GALLON_US);
+        stock.setValue(-50);
+        assertEquals(0, stock.getValue(), 0.0);
+    }
+
+    @Test
+    public void shouldClampNegativeInitialValueToZero() {
+        Stock stock = new Stock("Water", -10, GALLON_US);
+        assertEquals(0, stock.getValue(), 0.0);
+    }
+
+    @Test
+    public void shouldAllowNegativeValueWhenPolicyIsAllow() {
+        Stock stock = new Stock("Balance", -500, GALLON_US, NegativeValuePolicy.ALLOW);
+        assertEquals(-500, stock.getValue(), 0.0);
+        stock.setValue(-100);
+        assertEquals(-100, stock.getValue(), 0.0);
+    }
+
+    @Test
+    public void shouldThrowWhenValueIsNegativeAndPolicyIsThrow() {
+        Stock stock = new Stock("Water", 10, GALLON_US, NegativeValuePolicy.THROW);
+        assertThrows(IllegalArgumentException.class, () -> stock.setValue(-1));
+    }
+
+    @Test
+    public void shouldAcceptPolicyInFourArgConstructor() {
+        Stock stock = new Stock("Water", 100, GALLON_US, NegativeValuePolicy.ALLOW);
+        assertEquals(NegativeValuePolicy.ALLOW, stock.getNegativeValuePolicy());
+        assertEquals(100, stock.getValue(), 0.0);
+    }
+
+    @Test
+    public void shouldUpdatePolicyViaSetter() {
+        Stock stock = new Stock("Water", 100, GALLON_US);
+        assertEquals(NegativeValuePolicy.CLAMP_TO_ZERO, stock.getNegativeValuePolicy());
+        stock.setNegativeValuePolicy(NegativeValuePolicy.ALLOW);
+        assertEquals(NegativeValuePolicy.ALLOW, stock.getNegativeValuePolicy());
+    }
+
     private static Flow createConstantFlow(String name, double value, Unit unit) {
         return Flow.create(name, MINUTE, () -> new Quantity(value, unit));
     }
