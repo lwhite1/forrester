@@ -16,7 +16,7 @@ The engine is designed for creating training simulations, games, scenario testin
 
 | Dependency | Version | Purpose |
 |---|---|---|
-| JUnit 4 | 4.12 | Testing |
+| JUnit 5 | 5.11.4 | Testing |
 | Google Guava | 33.4.0-jre | Event bus, collections |
 | Apache Commons Math | 3.6.1 | Mathematical functions |
 | OpenCSV | 5.9 | CSV output |
@@ -42,9 +42,8 @@ These elements are connected into feedback loops that drive system behavior over
 ```
 com.deathrayresearch.forrester
 ├── Simulation.java              # Core simulation engine
-├── model/                       # Model elements (Stock, Flow, Variable, Constant, Module)
-│   └── flows/                   # Time-unit-specific flow implementations
-├── archetypes/                  # Reusable behavioral patterns
+├── model/                       # Model elements (Stock, Flow, Flows, Variable, Constant, Module)
+│   └── flows/                   # Rate conversion utilities
 ├── measure/                     # Dimensional analysis and unit system
 ├── event/                       # Event-driven communication
 ├── io/                          # CSV export and reporting
@@ -82,20 +81,26 @@ A dimension-aware quantity system ensures unit correctness:
 - **Unit conversion** is handled automatically; incompatible dimensions (e.g., adding miles to pounds) are rejected
 - `Quantity` objects are fully immutable - all operations return new instances
 
-### Flow Rate Conversion
+### Flow Creation
 
-Flows are defined with a natural time unit (e.g., `FlowPerDay`, `FlowPerWeek`, `FlowPerYear`) and the `RateConverter` automatically translates rates to match the simulation's time step. Each `FlowPer*` class is a convenience constructor that sets the time unit; callers override `quantityPerTimeUnit()` directly from `Flow`.
+Flows are created via the `Flow.create()` static factory or the higher-level `Flows` utility class. Both accept a name, time unit, and a lambda that computes the quantity per time step. The `RateConverter` automatically translates rates to match the simulation's time step.
 
-### Archetypes (Reusable Patterns)
+**`Flow.create()`** — general-purpose factory for any custom flow formula:
 
-The `archetypes` package provides common system dynamics building blocks:
+```java
+Flow cooling = Flow.create("Cooling", MINUTE, () ->
+        new Quantity(discrepancy.getValue() * coolingRate, CENTIGRADE));
+```
 
-| Archetype | Behavior |
+**`Flows`** — factory methods for common system dynamics patterns:
+
+| Method | Behavior |
 |---|---|
-| `SimpleLinearChange` | Constant amount added/removed per time step |
-| `SimpleExponentialChange` | Growth or decay by a fixed multiplier |
-| `ExponentialChangeWithLimit` | S-shaped growth that levels off at a carrying capacity |
-| `PipelineDelay` | FIFO material delay based on historical inflow values |
+| `Flows.constant(name, timeUnit, quantity)` | Fixed quantity per time step |
+| `Flows.linearGrowth(name, timeUnit, stock, amount)` | Constant amount added/removed per step |
+| `Flows.exponentialGrowth(name, timeUnit, stock, rate)` | Growth or decay proportional to stock level |
+| `Flows.exponentialGrowthWithLimit(name, timeUnit, stock, rate, limit)` | S-shaped growth that levels off at a carrying capacity |
+| `Flows.pipelineDelay(name, timeUnit, inflow, stepSupplier, delay)` | FIFO material delay based on historical inflow values |
 
 ### Output & Visualization
 
@@ -130,7 +135,7 @@ The demo package (`src/main/java/.../demo/`) contains a rich set of example mode
 
 **ThirdOrderMaterialDelayDemo** — Chains three first-order material delays (7 h, 6.3 h, 3.2 h activity times) to form a third-order delay. A Total WIP variable tracks combined inventory. The cascaded stages smooth output more than a single delay, producing a bell-shaped throughput response to a step input.
 
-**SimplePipelineDelayDemo** — Demonstrates a FIFO pipeline delay. A WIP stock receives 5 items/day; departures replay the arrival history shifted by a 3-day constant using the `PipelineDelay` archetype. WIP rises for 3 days then stabilizes — in contrast to the material delays which assume mixing.
+**SimplePipelineDelayDemo** — Demonstrates a FIFO pipeline delay. A WIP stock receives 5 items/day; departures replay the arrival history shifted by a 3-day constant using `Flows.pipelineDelay()`. WIP rises for 3 days then stabilizes — in contrast to the material delays which assume mixing.
 
 ### Feedback & Interaction
 
@@ -162,26 +167,19 @@ Model model = new Model("My Model");
 Stock population = new Stock("Population", 1000, ItemUnits.PEOPLE);
 model.addStock(population);
 
-// 3. Define flows attached to stocks
-Flow births = new FlowPerYear("Births") {
-    @Override
-    protected Quantity quantityPerTimeUnit() {
-        return new Quantity(population.getValue() * birthRate, ItemUnits.PEOPLE);
-    }
-};
+// 3. Define flows — use Flows factory for common patterns, or Flow.create() for custom formulas
+Constant birthRate = new Constant("Birth Rate", DimensionlessUnits.DIMENSIONLESS, 0.03);
+Flow births = Flows.exponentialGrowth("Births", YEAR, population, birthRate.getValue());
 population.addInflow(births);
 
-// 4. Add variables and constants as needed
-Constant birthRate = new Constant("Birth Rate", DimensionlessUnits.DIMENSIONLESS, 0.03);
-
-// 5. Create and configure the simulation
+// 4. Create and configure the simulation
 Simulation sim = new Simulation(model, TimeUnits.DAY, Units.YEAR, 1);
 
-// 6. Attach output handlers
+// 5. Attach output handlers
 sim.addEventHandler(new CsvSubscriber("output.csv"));
 sim.addEventHandler(new StockLevelChartViewer());
 
-// 7. Run
+// 6. Run
 sim.execute();
 ```
 
@@ -210,8 +208,10 @@ New to system dynamics? These resources provide a solid introduction to the meth
 
 The project is at version 1.0-SNAPSHOT and is under active development. Recent work has focused on:
 
+- Adding `Flows` factory class and `Flow.create()` to eliminate flow boilerplate — common patterns are now one-liners
+- Consolidating archetype logic into `Flows` and removing the `archetypes` package
+- Removing `FlowPer*` convenience subclasses in favor of lambda-based `Flow.create()`
 - Making `Quantity` fully immutable for safer value semantics
-- Simplifying the `FlowPer*` class hierarchy to thin convenience constructors
 - Introducing `ItemUnit` for user-defined units with `Item` dimension
 - Adding input validation and null safety across core model elements
-- Improving test coverage with dedicated unit tests for the simulation engine, stocks, models, modules, and rate conversion
+- Improving test coverage with dedicated unit tests for the simulation engine, stocks, flows, models, modules, and rate conversion
