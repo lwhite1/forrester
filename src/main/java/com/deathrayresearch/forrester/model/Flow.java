@@ -57,10 +57,16 @@ public abstract class Flow extends Element {
         this.sink = stock;
     }
 
+    /**
+     * Returns the stock that this flow drains from, or {@code null} if this flow has no source stock.
+     */
     public Stock getSource() {
         return source;
     }
 
+    /**
+     * Returns the stock that this flow feeds into, or {@code null} if this flow has no sink stock.
+     */
     public Stock getSink() {
         return sink;
     }

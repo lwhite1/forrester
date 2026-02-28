@@ -4,6 +4,8 @@ import com.deathrayresearch.forrester.measure.Quantity;
 import com.deathrayresearch.forrester.model.Flow;
 import com.deathrayresearch.forrester.model.Stock;
 
+import com.google.common.base.Preconditions;
+
 /**
  * Encapsulates a formula for a pipeline delay: the kind of delay you see in an assembly line where units pass through
  * in fifo order, and the delay is a constant value of timeSteps. This formula is for the outflow from the stock,
@@ -30,6 +32,8 @@ public class PipelineDelay {
     public Quantity getCurrentQuantity() {
         int referenceStep = currentStep - delay;
         double value = inflow.getHistoryAtTimeStep(referenceStep);
-        return new Quantity(value, inflow.getSink().getUnit());
+        Stock sink = inflow.getSink();
+        Preconditions.checkArgument(sink != null, "inflow must have a sink stock assigned");
+        return new Quantity(value, sink.getUnit());
     }
 }
