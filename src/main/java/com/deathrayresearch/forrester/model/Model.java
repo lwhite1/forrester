@@ -12,10 +12,10 @@ import java.util.Map;
  */
 public class Model extends Element {
 
-    private List<Stock> stocks = new ArrayList<>();
-    private Map<String, Variable> variables = new HashMap<>();
-    private List<Module> modules = new ArrayList<>();
-    private List<Constant> constants = new ArrayList<>();
+    private final List<Stock> stocks = new ArrayList<>();
+    private final Map<String, Variable> variables = new HashMap<>();
+    private final List<Module> modules = new ArrayList<>();
+    private final List<Constant> constants = new ArrayList<>();
 
     public Model(String name) {
         super(name);

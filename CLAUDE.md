@@ -175,3 +175,5 @@ throw new RuntimeException("not found");
 - **Commit messages**: imperative mood, concise — `Add user registration endpoint`
 - Keep PRs focused and small; one feature or fix per PR
 - All tests must pass before merging
+- No mentions of Claude in commit message descriptions or summaries
+- No mention of Claude in pull requests
