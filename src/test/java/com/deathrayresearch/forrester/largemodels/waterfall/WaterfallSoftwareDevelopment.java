@@ -57,11 +57,23 @@ public class WaterfallSoftwareDevelopment {
     static final String DAILY_RESOURCES_PERFORMING_QA = "Daily resources performing QA";
 
     // model subsystems
-    private Module staffAllocation = StaffAllocation.getStaffAllocationModule(model);
-    private Module workforce = Workforce.getWorkforce();
-    private Module testAndRework = TestAndRework.getTestAndReworkSubSystem();
+    private final Module staffAllocation;
+    private final Module workforce;
+    private final Module testAndRework;
+    private final Module development;
 
-    private Module development = Development.getDevelopmentSubSystem(model);
+    public WaterfallSoftwareDevelopment() {
+        staffAllocation = StaffAllocation.getStaffAllocationModule(model);
+        workforce = Workforce.getWorkforce();
+        testAndRework = TestAndRework.getTestAndReworkSubSystem();
+
+        // Development's flow formulas reference staffAllocation variables via model,
+        // and Stock.addInflow eagerly evaluates the flow for compatibility checking,
+        // so the variable must be on the model before constructing development.
+        model.addVariable(staffAllocation.getVariable(DAILY_RESOURCES_FOR_SOFTWARE_PRODUCTION));
+
+        development = Development.getDevelopmentSubSystem(model);
+    }
 
     @Test
     public void testRun1() {

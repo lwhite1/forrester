@@ -89,7 +89,7 @@ class Development {
                 new Formula() {
                     @Override
                     public double getCurrentValue() {
-                        return module.getVariable(DAILY_RESOURCES_FOR_SOFTWARE_PRODUCTION).getValue();
+                        return model.getVariable(DAILY_RESOURCES_FOR_SOFTWARE_PRODUCTION).getValue();
                     }
                 });
 
