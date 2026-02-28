@@ -102,8 +102,9 @@ public class ChartViewerApplication extends Application {
      */
     public static void addSeries(List<String> modelEntityNames, List<String> modelVariableNames) {
         ChartViewerApplication.series = new ArrayList<>();
-        modelEntityNames.addAll(modelVariableNames);
-        for (String modelEntityName : modelEntityNames) {
+        List<String> allNames = new ArrayList<>(modelEntityNames);
+        allNames.addAll(modelVariableNames);
+        for (String modelEntityName : allNames) {
             Series s = new Series();
             s.setName(modelEntityName);
             ChartViewerApplication.series.add(s);
@@ -133,10 +134,11 @@ public class ChartViewerApplication extends Application {
     public static void addValues(List<Double> modelEntityValues,
                                  List<Double>variableValues,
                                  LocalDateTime currentTime) {
-        modelEntityValues.addAll(variableValues);
+        List<Double> allValues = new ArrayList<>(modelEntityValues);
+        allValues.addAll(variableValues);
 
-        for (int i = 0; i < modelEntityValues.size(); i++) {
-            double value = modelEntityValues.get(i);
+        for (int i = 0; i < allValues.size(); i++) {
+            double value = allValues.get(i);
             ChartViewerApplication.series.get(i)
                     .getData()
                     .add(new XYChart.Data(currentTime.format(formatter), value));
@@ -151,10 +153,11 @@ public class ChartViewerApplication extends Application {
     public static void addValues(List<Double> modelEntityValues,
                                  List<Double>variableValues,
                                  int step) {
-        modelEntityValues.addAll(variableValues);
+        List<Double> allValues = new ArrayList<>(modelEntityValues);
+        allValues.addAll(variableValues);
 
-        for (int i = 0; i < modelEntityValues.size(); i++) {
-            double value = modelEntityValues.get(i);
+        for (int i = 0; i < allValues.size(); i++) {
+            double value = allValues.get(i);
             ChartViewerApplication.series.get(i)
                     .getData()
                     .add(new XYChart.Data(String.valueOf(step), value));

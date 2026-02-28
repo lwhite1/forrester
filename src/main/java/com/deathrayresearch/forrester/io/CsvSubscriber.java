@@ -28,19 +28,16 @@ public class CsvSubscriber implements EventHandler {
     private CSVWriter csvWriter;
 
     public CsvSubscriber(String fileName) {
-        FileWriter fileWriter = null;
-
         File file = Paths.get(fileName).toFile();
         File parent = file.getParentFile();
         if (parent != null) {
             file.getParentFile().mkdirs();
         }
         try {
-            fileWriter = new FileWriter(fileName);
+            csvWriter = new CSVWriter(new FileWriter(fileName));
         } catch (IOException e) {
-            e.printStackTrace();
+            throw new RuntimeException("Failed to open CSV file: " + fileName, e);
         }
-        csvWriter = new CSVWriter(fileWriter);
     }
 
     @Subscribe
