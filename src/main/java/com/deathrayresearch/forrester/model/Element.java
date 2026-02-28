@@ -1,5 +1,7 @@
 package com.deathrayresearch.forrester.model;
 
+import com.google.common.base.Preconditions;
+
 /**
  *  Parent of all model elements: Stock, Flow, etc.
  */
@@ -9,6 +11,8 @@ public abstract class Element {
     private String comment;
 
     protected Element(String name) {
+        Preconditions.checkArgument(name != null, "name cannot be null");
+        Preconditions.checkArgument(!name.isEmpty(), "name cannot be empty");
         this.name = name;
     }
 
