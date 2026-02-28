@@ -34,14 +34,14 @@ public class SimplePipelineDelay {
 
         Flow arrivals = new FlowPerDay("Arrivals") {
             @Override
-            protected Quantity quantityPerDay() {
+            protected Quantity quantityPerTimeUnit() {
                 return new Quantity(5, THING);
             }
         };
 
         Flow departures = new FlowPerDay("Departures") {
             @Override
-            protected Quantity quantityPerDay() {
+            protected Quantity quantityPerTimeUnit() {
                 return PipelineDelay.from(arrivals, run.getCurrentStep(), delay.getIntValue());
             }
         };

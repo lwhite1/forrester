@@ -38,7 +38,7 @@ public class SalesMixModel {
 
         Flow acquisitionRate = new FlowPerDay("New customers") {
             @Override
-            protected Quantity quantityPerDay() {
+            protected Quantity quantityPerTimeUnit() {
                 return SimpleLinearChange.from(customers, 10);
             }
         };

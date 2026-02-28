@@ -1,6 +1,5 @@
 package com.deathrayresearch.forrester.model.flows;
 
-import com.deathrayresearch.forrester.measure.Quantity;
 import com.deathrayresearch.forrester.model.Flow;
 
 import static com.deathrayresearch.forrester.measure.Units.YEAR;
@@ -13,11 +12,4 @@ public abstract class FlowPerYear extends Flow {
     public FlowPerYear(String name) {
         super(name, YEAR);
     }
-
-    @Override
-    protected Quantity quantityPerTimeUnit() {
-        return quantityPerYear();
-    }
-
-    protected abstract Quantity quantityPerYear();
 }

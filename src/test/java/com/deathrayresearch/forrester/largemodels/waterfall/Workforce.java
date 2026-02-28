@@ -127,7 +127,7 @@ class Workforce {
         return new FlowPerDay("Hired") {
 
             @Override
-            protected Quantity quantityPerDay() {
+            protected Quantity quantityPerTimeUnit() {
                 double gap = workforceGap.getValue();
                 double result = gap / hiringDelayInDays;
                 double maxAmount = Math.max(result, 0.0);
@@ -141,7 +141,7 @@ class Workforce {
         double averageEmploymentInDays = 673.0;
         return new FlowPerDay("Resigned") {
             @Override
-            protected Quantity quantityPerDay() {
+            protected Quantity quantityPerTimeUnit() {
                 return new Quantity(experiencedWorkforce.getQuantity().getValue()
                         / averageEmploymentInDays, ItemUnits.PEOPLE);
             }
@@ -153,7 +153,7 @@ class Workforce {
 
         return new FlowPerDay("Assimilated hires") {
             @Override
-            protected Quantity quantityPerDay() {
+            protected Quantity quantityPerTimeUnit() {
                 return newHires.getQuantity().divide(assimilationDelayInDays);
             }
         };

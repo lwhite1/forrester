@@ -46,7 +46,7 @@ public class InventoryModelTest {
 
         Flow sales = new FlowPerDay("Sales") {
             @Override
-            protected Quantity quantityPerDay() {
+            protected Quantity quantityPerTimeUnit() {
                 return new Quantity(
                         Math.min(carsOnLot.getValue(), demand.getValue()),
                         CARS);
@@ -71,7 +71,7 @@ public class InventoryModelTest {
 
         Flow deliveries = new FlowPerDay("Deliveries") {
             @Override
-            protected Quantity quantityPerDay() {
+            protected Quantity quantityPerTimeUnit() {
                 if (run.getCurrentStep() <= 5) {
                     return new Quantity(
                             20,

@@ -1,9 +1,8 @@
 package com.deathrayresearch.forrester.largemodels.waterfall;
 
-import com.deathrayresearch.forrester.largemodels.waterfall.units.PersonDaysPerDay;
-import com.deathrayresearch.forrester.largemodels.waterfall.units.Tasks;
-import com.deathrayresearch.forrester.largemodels.waterfall.units.TasksPerPersonDay;
 import com.deathrayresearch.forrester.measure.Quantity;
+import com.deathrayresearch.forrester.measure.Unit;
+import com.deathrayresearch.forrester.measure.units.item.ItemUnit;
 import com.deathrayresearch.forrester.measure.units.dimensionless.DimensionlessUnits;
 import com.deathrayresearch.forrester.model.Constant;
 import com.deathrayresearch.forrester.model.Formula;
@@ -25,9 +24,9 @@ import static com.deathrayresearch.forrester.largemodels.waterfall.WaterfallSoft
  */
 class Development {
 
-    private static final Tasks TASKS = Tasks.getInstance();
+    private static final Unit TASKS = new ItemUnit("Task");
     private static final DimensionlessUnits DIMENSIONLESS_UNIT = DimensionlessUnits.DIMENSIONLESS;
-    private static final TasksPerPersonDay TASKS_PER_PERSON_DAY = TasksPerPersonDay.getInstance();
+    private static final Unit TASKS_PER_PERSON_DAY = new ItemUnit("Tasks per person day");
 
     static Module getDevelopmentSubSystem(Model model) {
 
@@ -89,7 +88,7 @@ class Development {
                     TASKS_PER_PERSON_DAY,
                         potentialProductivity::getValue);
 
-        Variable developmentStaffing = new Variable("Development Staffing", PersonDaysPerDay.getInstance(),
+        Variable developmentStaffing = new Variable("Development Staffing", new ItemUnit("Person days per day"),
                 new Formula() {
                     @Override
                     public double getCurrentValue() {
@@ -116,7 +115,7 @@ class Development {
     private static Flow getDevelopmentFlow(Module module) {
         return new FlowPerDay("Tasks completed") {
             @Override
-            protected Quantity quantityPerDay() {
+            protected Quantity quantityPerTimeUnit() {
                 double staffing = module.getVariable("Development Staffing").getValue();
                 double productivity = module.getVariable("Development Productivity").getValue();
                 double value = staffing * productivity;

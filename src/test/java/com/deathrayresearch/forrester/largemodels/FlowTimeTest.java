@@ -43,7 +43,7 @@ public class FlowTimeTest {
         Flow Demand =
             new FlowPerDay("New Orders") {
                 @Override
-                protected Quantity quantityPerDay() {
+                protected Quantity quantityPerTimeUnit() {
                     return SimpleLinearChange.from( WIP, 200);
                 }
             };
@@ -51,7 +51,7 @@ public class FlowTimeTest {
         Flow Throughput =
             new FlowPerDay("Delivered Reports") {
                 @Override
-                protected Quantity quantityPerDay() {
+                protected Quantity quantityPerTimeUnit() {
 
                     int demandDelay = Math.toIntExact(Math.round(TAT.getValue()));
                     int stepToGet = sim.getCurrentStep() - demandDelay;

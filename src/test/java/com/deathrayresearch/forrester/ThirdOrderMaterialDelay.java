@@ -37,14 +37,14 @@ public class ThirdOrderMaterialDelay {
 
         Flow demand = new FlowPerDay("Process Demand") {
             @Override
-            protected Quantity quantityPerDay() {
+            protected Quantity quantityPerTimeUnit() {
                 return new Quantity(48, THING);
             }
         };
 
         Flow step1Delay = new FlowPerHour("Step 1 delay") {
             @Override
-            protected Quantity quantityPerHour() {
+            protected Quantity quantityPerTimeUnit() {
                 double averageDelay = 7; // 4 hour average activity time for this step
                 return new Quantity(
                         Math.min(step1.getValue(), step1.getValue()/averageDelay), THING);
@@ -54,7 +54,7 @@ public class ThirdOrderMaterialDelay {
 
         Flow step2Delay = new FlowPerHour("Step 2 delay") {
             @Override
-            protected Quantity quantityPerHour() {
+            protected Quantity quantityPerTimeUnit() {
                 double averageDelay = 6.3; // 6.3 hour average activity time for this step
                 return new Quantity(
                         Math.min(step2.getValue(), step2.getValue()/ averageDelay), THING);
@@ -63,7 +63,7 @@ public class ThirdOrderMaterialDelay {
 
         Flow step3Delay = new FlowPerHour("Step 3 delay") {
             @Override
-            protected Quantity quantityPerHour() {
+            protected Quantity quantityPerTimeUnit() {
                 double averageDelay = 3.2; // 3.2 hour average activity time for this step
                 return new Quantity(
                         Math.min(step3.getValue(), step3.getValue()/ averageDelay), THING);

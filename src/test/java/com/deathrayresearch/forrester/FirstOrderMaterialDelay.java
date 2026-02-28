@@ -30,7 +30,7 @@ public class FirstOrderMaterialDelay {
 
         Flow sales = new FlowPerDay("Sales") {
             @Override
-            protected Quantity quantityPerDay() {
+            protected Quantity quantityPerTimeUnit() {
                 double averageDelay = 120; // 120 days
                 return potentialCustomers.getQuantity().divide(averageDelay);
             }

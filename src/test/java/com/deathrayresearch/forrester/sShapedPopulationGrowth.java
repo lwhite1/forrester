@@ -35,7 +35,7 @@ public class sShapedPopulationGrowth {
 
         Flow births = new FlowPerDay("Births") {
             @Override
-            protected Quantity quantityPerDay() {
+            protected Quantity quantityPerTimeUnit() {
                 return ExponentialChangeWithLimit.from(
                         population,
                         fractionalNetBirthRate.getValue(),

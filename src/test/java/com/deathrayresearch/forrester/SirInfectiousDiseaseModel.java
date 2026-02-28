@@ -36,7 +36,7 @@ public class SirInfectiousDiseaseModel {
         Flow infectiousRate = new FlowPerDay("Infected") {
 
             @Override
-            public Quantity quantityPerDay() {
+            public Quantity quantityPerTimeUnit() {
 
                 double totalPop = susceptiblePopulation.getQuantity().getValue()
                         + infectiousPopulation.getQuantity().getValue()
@@ -62,7 +62,7 @@ public class SirInfectiousDiseaseModel {
         Flow recoveryRate = new FlowPerDay("Recovered") {
 
             @Override
-            public Quantity quantityPerDay() {
+            public Quantity quantityPerTimeUnit() {
                 double recoveredProportion = .2; //20% recover per day
                 return new Quantity(infectiousPopulation.getQuantity().getValue() * recoveredProportion,
                         PEOPLE);

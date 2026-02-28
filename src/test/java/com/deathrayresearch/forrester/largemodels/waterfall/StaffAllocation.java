@@ -1,8 +1,8 @@
 package com.deathrayresearch.forrester.largemodels.waterfall;
 
-import com.deathrayresearch.forrester.largemodels.waterfall.units.PersonDays;
-import com.deathrayresearch.forrester.largemodels.waterfall.units.PersonDaysPerDay;
+import com.deathrayresearch.forrester.measure.Unit;
 import com.deathrayresearch.forrester.measure.units.dimensionless.DimensionlessUnits;
+import com.deathrayresearch.forrester.measure.units.item.ItemUnit;
 import com.deathrayresearch.forrester.measure.units.item.ItemUnits;
 import com.deathrayresearch.forrester.model.Constant;
 import com.deathrayresearch.forrester.model.Formula;
@@ -22,7 +22,7 @@ import static com.deathrayresearch.forrester.largemodels.waterfall.WaterfallSoft
  */
 class StaffAllocation {
 
-    private static final PersonDaysPerDay PERSON_DAYS_PER_DAY = PersonDaysPerDay.getInstance();
+    private static final Unit PERSON_DAYS_PER_DAY = new ItemUnit("Person days per day");
     private static final DimensionlessUnits DIMENSIONLESS_UNIT = DimensionlessUnits.DIMENSIONLESS;
 
     static Module getStaffAllocationModule(Model model) {
@@ -87,7 +87,7 @@ class StaffAllocation {
         Constant qualityObjective = new Constant("Quality Objective", ItemUnits.THING, 0);
 
         Stock cumulativeManDaysExpended =
-                new Stock("Cumulative Person-Days Expended", 0.0001, PersonDays.getInstance());
+                new Stock("Cumulative Person-Days Expended", 0.0001, new ItemUnit("Person day"));
 
         module.addStock(cumulativeManDaysExpended);
         module.addVariable(dailyResourcesAvailableAfterTrainingOverhead);

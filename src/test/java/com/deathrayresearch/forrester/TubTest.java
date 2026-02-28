@@ -34,7 +34,7 @@ public class TubTest {
             final Quantity volumeOut = Volumes.gallonsUS( 5.0);
 
             @Override
-            public Quantity quantityPerMinute() {
+            public Quantity quantityPerTimeUnit() {
                 return new Quantity(
                         Math.min(volumeOut.getValue(), tub.getQuantity().getValue()),
                         GALLON_US);
@@ -47,7 +47,7 @@ public class TubTest {
 
             final Quantity lowInflow = Volumes.gallonsUS(0.0);
             @Override
-            protected Quantity quantityPerMinute() {
+            protected Quantity quantityPerTimeUnit() {
                 // waits five minutes before adding any inflow
                 if (durationIsLessThan(run.getElapsedTime(), Duration.ofMinutes(5))) {
                     return lowInflow;

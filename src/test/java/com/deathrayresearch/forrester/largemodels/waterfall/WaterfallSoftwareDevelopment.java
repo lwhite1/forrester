@@ -1,9 +1,9 @@
 package com.deathrayresearch.forrester.largemodels.waterfall;
 
 import com.deathrayresearch.forrester.Simulation;
-import com.deathrayresearch.forrester.largemodels.waterfall.units.Tasks;
 import com.deathrayresearch.forrester.measure.Quantity;
 import com.deathrayresearch.forrester.measure.Unit;
+import com.deathrayresearch.forrester.measure.units.item.ItemUnit;
 import com.deathrayresearch.forrester.measure.units.item.ItemUnits;
 import com.deathrayresearch.forrester.measure.units.time.TimeUnits;
 import com.deathrayresearch.forrester.model.Model;
@@ -20,7 +20,7 @@ public class WaterfallSoftwareDevelopment {
 
     // new units
     static final Unit PEOPLE = ItemUnits.PEOPLE;
-    static final Tasks TASKS = Tasks.getInstance();
+    static final Unit TASKS = new ItemUnit("Task");
 
     // subsystem constants
     static final String WORKFORCE = "Workforce";

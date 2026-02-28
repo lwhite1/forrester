@@ -1,20 +1,20 @@
-package com.deathrayresearch.forrester.largemodels.waterfall.units;
-
+package com.deathrayresearch.forrester.measure.units.item;
 
 import com.deathrayresearch.forrester.measure.Dimension;
 import com.deathrayresearch.forrester.measure.Unit;
 import com.deathrayresearch.forrester.measure.dimension.Item;
 
-/**
- *
- */
-public class Errors implements Unit {
+public class ItemUnit implements Unit {
 
-    private static final Errors instance = new Errors();
+    private final String name;
+
+    public ItemUnit(String name) {
+        this.name = name;
+    }
 
     @Override
     public String getName() {
-        return "Error";
+        return name;
     }
 
     @Override
@@ -25,9 +25,5 @@ public class Errors implements Unit {
     @Override
     public double ratioToBaseUnit() {
         return 1.0;
-    }
-
-    public static Errors getInstance() {
-        return instance;
     }
 }

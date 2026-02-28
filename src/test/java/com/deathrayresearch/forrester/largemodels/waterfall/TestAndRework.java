@@ -1,9 +1,9 @@
 package com.deathrayresearch.forrester.largemodels.waterfall;
 
 
-import com.deathrayresearch.forrester.largemodels.waterfall.units.Errors;
-import com.deathrayresearch.forrester.largemodels.waterfall.units.ErrorsPerTask;
 import com.deathrayresearch.forrester.measure.Quantity;
+import com.deathrayresearch.forrester.measure.Unit;
+import com.deathrayresearch.forrester.measure.units.item.ItemUnit;
 import com.deathrayresearch.forrester.model.Formula;
 import com.deathrayresearch.forrester.model.Module;
 import com.deathrayresearch.forrester.model.Stock;
@@ -17,17 +17,20 @@ import static com.deathrayresearch.forrester.largemodels.waterfall.WaterfallSoft
  */
 class TestAndRework {
 
+    private static final Unit ERRORS = new ItemUnit("Error");
+    private static final Unit ERRORS_PER_TASK = new ItemUnit("Errors per task");
+
     static Module getTestAndReworkSubSystem() {
 
         Module module = new Module(TESTING_AND_REWORK);
 
-        Stock latentDefects = new Stock("Latent defects", 0.0, Errors.getInstance());
-        Stock knownDefects = new Stock("Known defects", 0.0, Errors.getInstance());
-        Stock fixedDefects = new Stock("Fixed defects", 0.0, Errors.getInstance());
+        Stock latentDefects = new Stock("Latent defects", 0.0, ERRORS);
+        Stock knownDefects = new Stock("Known defects", 0.0, ERRORS);
+        Stock fixedDefects = new Stock("Fixed defects", 0.0, ERRORS);
 
         Variable nominalErrorsCommittedPerTask =
                 new Variable("Nominal errors committed per task",
-                        ErrorsPerTask.getInstance(),
+                        ERRORS_PER_TASK,
                         new Formula() {
                             @Override
                             public double getCurrentValue() {
@@ -40,22 +43,22 @@ class TestAndRework {
         Flow errorGenerationFlow = new FlowPerDay("New Errors") {
 
             @Override
-            protected Quantity quantityPerDay() {
-                return new Quantity(10, Errors.getInstance());
+            protected Quantity quantityPerTimeUnit() {
+                return new Quantity(10, ERRORS);
             }
         };
 
         Flow errorDiscoveryFlow = new FlowPerDay("Errors discovered") {
             @Override
-            protected Quantity quantityPerDay() {
-                return new Quantity(3, Errors.getInstance());
+            protected Quantity quantityPerTimeUnit() {
+                return new Quantity(3, ERRORS);
             }
         };
 
         Flow errorFixedFlow = new FlowPerDay("Errors fixed") {
             @Override
-            protected Quantity quantityPerDay() {
-                return new Quantity(1, Errors.getInstance());
+            protected Quantity quantityPerTimeUnit() {
+                return new Quantity(1, ERRORS);
             }
         };
 

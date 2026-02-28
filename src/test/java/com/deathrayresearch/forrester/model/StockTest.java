@@ -69,7 +69,7 @@ public class StockTest {
                                                      com.deathrayresearch.forrester.measure.Unit unit) {
         return new FlowPerMinute(name) {
             @Override
-            protected Quantity quantityPerMinute() {
+            protected Quantity quantityPerTimeUnit() {
                 return new Quantity(value, unit);
             }
         };

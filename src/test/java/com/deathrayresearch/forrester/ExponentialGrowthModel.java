@@ -29,14 +29,14 @@ public class ExponentialGrowthModel {
 
         FlowPerDay births = new FlowPerDay("Births") {
             @Override
-            protected Quantity quantityPerDay() {
+            protected Quantity quantityPerTimeUnit() {
                 return SimpleExponentialChange.from(population, 0.04);
             }
         };
 
         Flow deaths = new FlowPerDay("Deaths") {
             @Override
-            protected Quantity quantityPerDay() {
+            protected Quantity quantityPerTimeUnit() {
                 return SimpleExponentialChange.from(population, 0.03);
             }
         };

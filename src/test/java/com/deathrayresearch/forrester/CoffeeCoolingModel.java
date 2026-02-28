@@ -38,7 +38,7 @@ public class CoffeeCoolingModel {
             final double coolingRate = 0.10;
 
             @Override
-            protected Quantity quantityPerMinute() {
+            protected Quantity quantityPerTimeUnit() {
                 return new Quantity(
                         discrepancy.getValue() * coolingRate,
                         CENTIGRADE);

@@ -1,10 +1,9 @@
 package com.deathrayresearch.forrester.largemodels.agile;
 
 import com.deathrayresearch.forrester.Simulation;
-import com.deathrayresearch.forrester.measure.Dimension;
 import com.deathrayresearch.forrester.measure.Quantity;
 import com.deathrayresearch.forrester.measure.Unit;
-import com.deathrayresearch.forrester.measure.dimension.Item;
+import com.deathrayresearch.forrester.measure.units.item.ItemUnit;
 import com.deathrayresearch.forrester.measure.units.time.TimeUnits;
 import com.deathrayresearch.forrester.model.Model;
 import com.deathrayresearch.forrester.model.Stock;
@@ -19,6 +18,9 @@ import static com.deathrayresearch.forrester.measure.Units.WEEK;
  *
  */
 public class AgileSoftwareDevelopmentTest {
+
+    private static final Unit WORK = new ItemUnit("task");
+    private static final Unit DEFECT = new ItemUnit("defect");
 
     // model parameters
     double projectSize = 100_000;  // tasks
@@ -43,27 +45,27 @@ public class AgileSoftwareDevelopmentTest {
     public Model getModel() {
         Model model = new Model("Agile software development");
 
-        Stock productBacklog = new Stock("product backlog", projectSize, Work.getInstance());
-        Stock releaseBacklog = new Stock("release backlog", releaseSize, Work.getInstance());
-        Stock sprintBacklog = new Stock("sprint backlog", sprintSize, Work.getInstance());
+        Stock productBacklog = new Stock("product backlog", projectSize, WORK);
+        Stock releaseBacklog = new Stock("release backlog", releaseSize, WORK);
+        Stock sprintBacklog = new Stock("sprint backlog", sprintSize, WORK);
 
-        Stock completedWork = new Stock("completed tasks", 0, Work.getInstance());
-        Stock latentDefects = new Stock("latent defects", 0, Defect.getInstance());
-        Stock knownDefects = new Stock("known defects", 0, Defect.getInstance());
+        Stock completedWork = new Stock("completed tasks", 0, WORK);
+        Stock latentDefects = new Stock("latent defects", 0, DEFECT);
+        Stock knownDefects = new Stock("known defects", 0, DEFECT);
 
         Flow completionRate = new FlowPerWeek("Completed Work") {
             @Override
-            protected Quantity quantityPerWeek() {
+            protected Quantity quantityPerTimeUnit() {
                 if (sprintBacklog.getQuantity().getValue() <= 0) {
-                    return new Quantity(0, Work.getInstance());
+                    return new Quantity(0, WORK);
                 }
-                return new Quantity(Math.min(sprintBacklog.getQuantity().getValue(), nominalProductivityPerPersonWeek), Work.getInstance());
+                return new Quantity(Math.min(sprintBacklog.getQuantity().getValue(), nominalProductivityPerPersonWeek), WORK);
             }
         };
 
         Flow defectCreationRate = new FlowPerWeek("Created defects") {
             @Override
-            protected Quantity quantityPerWeek() {
+            protected Quantity quantityPerTimeUnit() {
                 return completionRate.flowPerTimeUnit(TimeUnits.DAY)
                     .multiply(1.0 - nominalFractionCorrectAndComplete);
             }
@@ -71,7 +73,7 @@ public class AgileSoftwareDevelopmentTest {
 
         Flow sprintDefectFindRate = new FlowPerWeek("Found defects") {
             @Override
-            protected Quantity quantityPerWeek() {
+            protected Quantity quantityPerTimeUnit() {
                 return latentDefects.getQuantity().multiply(0.4);
             }
         };
@@ -91,53 +93,5 @@ public class AgileSoftwareDevelopmentTest {
         model.addStock(latentDefects);
         model.addStock(knownDefects);
         return model;
-    }
-
-    private static class Work implements Unit {
-
-        private static final Work instance = new Work();
-
-        @Override
-        public String getName() {
-            return "task";
-        }
-
-        @Override
-        public Dimension getDimension() {
-            return Item.INSTANCE;
-        }
-
-        @Override
-        public double ratioToBaseUnit() {
-            return 1.0;
-        }
-
-        static Work getInstance() {
-            return instance;
-        }
-    }
-
-    private static class Defect implements Unit {
-
-        private static final Defect instance = new Defect();
-
-        @Override
-        public String getName() {
-            return "defect";
-        }
-
-        @Override
-        public Dimension getDimension() {
-            return Item.INSTANCE;
-        }
-
-        @Override
-        public double ratioToBaseUnit() {
-            return 1.0;
-        }
-
-        static Defect getInstance() {
-            return instance;
-        }
     }
 }

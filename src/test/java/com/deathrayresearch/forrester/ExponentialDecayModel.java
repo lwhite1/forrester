@@ -27,7 +27,7 @@ public class ExponentialDecayModel {
 
         Flow deaths = new FlowPerDay("Deaths") {
             @Override
-            protected Quantity quantityPerDay() {
+            protected Quantity quantityPerTimeUnit() {
                 return SimpleExponentialChange.from(population, 1/80.0);
             }
         };

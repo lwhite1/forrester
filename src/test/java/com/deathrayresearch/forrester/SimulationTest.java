@@ -24,7 +24,7 @@ public class SimulationTest {
 
         Flow outflow = new FlowPerMinute("Drain") {
             @Override
-            protected Quantity quantityPerMinute() {
+            protected Quantity quantityPerTimeUnit() {
                 return new Quantity(10, GALLON_US);
             }
         };
@@ -46,7 +46,7 @@ public class SimulationTest {
 
         Flow inflow = new FlowPerMinute("Fill") {
             @Override
-            protected Quantity quantityPerMinute() {
+            protected Quantity quantityPerTimeUnit() {
                 return new Quantity(5, GALLON_US);
             }
         };
@@ -68,14 +68,14 @@ public class SimulationTest {
 
         Flow inflow = new FlowPerMinute("In") {
             @Override
-            protected Quantity quantityPerMinute() {
+            protected Quantity quantityPerTimeUnit() {
                 return new Quantity(10, GALLON_US);
             }
         };
 
         Flow outflow = new FlowPerMinute("Out") {
             @Override
-            protected Quantity quantityPerMinute() {
+            protected Quantity quantityPerTimeUnit() {
                 return new Quantity(10, GALLON_US);
             }
         };
@@ -113,7 +113,7 @@ public class SimulationTest {
 
         FlowPerMinute outflow = new FlowPerMinute("Out") {
             @Override
-            protected Quantity quantityPerMinute() {
+            protected Quantity quantityPerTimeUnit() {
                 return new Quantity(7, GALLON_US);
             }
         };
@@ -136,7 +136,7 @@ public class SimulationTest {
         Stock stock = new Stock("Inventory", 50, THING);
         Flow outflow = new FlowPerMinute("Consume") {
             @Override
-            protected Quantity quantityPerMinute() {
+            protected Quantity quantityPerTimeUnit() {
                 return new Quantity(5, THING);
             }
         };
