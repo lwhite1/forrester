@@ -1,7 +1,8 @@
 package com.deathrayresearch.forrester.model;
 
 import com.deathrayresearch.forrester.measure.Unit;
-import it.unimi.dsi.fastutil.doubles.DoubleArrayList;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  *  A variable is an object that returns its current value at any time as determined by the Formula.
@@ -12,7 +13,7 @@ public class Variable extends Element {
     private final Unit unit;
     private final String name;
 
-    private final DoubleArrayList history = new DoubleArrayList();
+    private final List<Double> history = new ArrayList<>();
 
     public Variable(String name, Unit unit, Formula formula) {
         this.name = name;
@@ -41,7 +42,7 @@ public class Variable extends Element {
         if (i < 0 || history.size() <= i) {
             return 0;
         }
-        return history.getDouble(i);
+        return history.get(i);
     }
 
     public void recordValue() {
