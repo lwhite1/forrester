@@ -110,9 +110,8 @@ public class Simulation {
 
     private void updateStocks(HashMap<String, Quantity> flowMap, List<Stock> stocks) {
         for (Stock stock : stocks) {
-            Quantity qCurrent = stock.getQuantity();
-            handleFlows(true, flowMap, stock, qCurrent, stock.getInflows());
-            handleFlows(false, flowMap, stock, qCurrent, stock.getOutflows());
+            handleFlows(true, flowMap, stock, stock.getInflows());
+            handleFlows(false, flowMap, stock, stock.getOutflows());
         }
     }
 
@@ -130,7 +129,7 @@ public class Simulation {
         }
     }
 
-    private void handleFlows(boolean isInflow, HashMap<String, Quantity> flows, Stock stock, Quantity qCurrent, Set<Flow> flowSet) {
+    private void handleFlows(boolean isInflow, HashMap<String, Quantity> flows, Stock stock, Set<Flow> flowSet) {
         for (Flow flow : flowSet) {
             Quantity q;
             if (flows.containsKey(flow.getName())) {
@@ -141,6 +140,7 @@ public class Simulation {
             }
             flow.recordValue(q);
 
+            Quantity qCurrent = stock.getQuantity();
             if (isInflow) {
                 qCurrent = qCurrent.add(q);
             } else {

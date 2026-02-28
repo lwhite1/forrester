@@ -123,13 +123,6 @@ public class QuantityTest {
     }
 
     @Test
-    public void shouldSetValue() {
-        Quantity q = new Quantity(10, METER);
-        q.setValue(20);
-        assertEquals(20, q.getValue(), 0.0);
-    }
-
-    @Test
     public void shouldConvertToBaseUnits() {
         Quantity miles = new Quantity(1, MILE);
         Quantity base = miles.inBaseUnits();

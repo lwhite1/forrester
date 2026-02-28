@@ -15,11 +15,13 @@ public class Stock extends Element {
     private final Set<Flow> inflows = new HashSet<>();
     private final Set<Flow> outflows = new HashSet<>();
 
-    private final Quantity currentValue;
+    private final Unit unit;
+    private double value;
 
     public Stock(String name, double initialAmount, Unit unit) {
         super(name);
-        this.currentValue = new Quantity(initialAmount, unit);
+        this.unit = unit;
+        this.value = initialAmount;
     }
 
     public void addInflow(Flow inFlow) {
@@ -41,23 +43,23 @@ public class Stock extends Element {
     }
 
     public Quantity getQuantity() {
-        return currentValue;
+        return new Quantity(value, unit);
     }
 
     public Unit getUnit() {
-        return currentValue.getUnit();
+        return unit;
     }
 
     public void setValue(double value) {
-        this.getQuantity().setValue(value);
+        this.value = value;
     }
 
     public double getValue() {
-        return getQuantity().getValue();
+        return value;
     }
 
     @Override
     public String toString() {
-        return "Stock (" + getName() +"): " + currentValue;
+        return "Stock (" + getName() +"): " + getQuantity();
     }
 }

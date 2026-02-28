@@ -11,12 +11,11 @@ import com.google.common.base.Preconditions;
  * you. It also lets you compare two quantities in the same dimension to assert that 2.54 miles > 1,312 meters, again
  * handling any conversions, while preventing you from comparing 2.54 miles with 2.54 pounds.
  */
-// TODO: This would ideally be immutable, if it's not too expensive
 public final class Quantity {
 
     private static final String INCOMPATIBLE_ERROR_MESSAGE = "Combined quantities must have compatible units";
 
-    private double value;
+    private final double value;
     private final Unit unit;
 
     public Quantity(double value, Unit unit) {
@@ -62,10 +61,6 @@ public final class Quantity {
         Quantity result = new Quantity(thisInBaseUnits.getValue() - otherInBaseUnits.getValue(),
                 this.getUnit().getBaseUnit());
         return getUnit().fromBaseUnits(result);
-    }
-
-    public void setValue(double value) {
-        this.value = value;
     }
 
     @Override

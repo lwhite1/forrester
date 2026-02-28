@@ -8,21 +8,21 @@ The engine is designed for creating training simulations, games, scenario testin
 
 ## Build & Configuration
 
-- **Language:** Java 8+
+- **Language:** Java 17+
 - **Build system:** Maven
 - **Artifact:** `com.deathrayresearch:dynamics:1.0-SNAPSHOT`
 
 ### Key Dependencies
 
-| Dependency | Purpose |
-|---|---|
-| JUnit 4.12 | Testing |
-| Google Guava 19.0 | Event bus, collections |
-| Apache Commons Math 3.6.1 | Mathematical functions |
-| OpenCSV 3.8 | CSV output |
-| JavaMoney Moneta 1.1 | Currency handling |
-| Logback 1.2.3 | Logging |
-| TableSaw | Data analysis and visualization |
+| Dependency | Version | Purpose |
+|---|---|---|
+| JUnit 4 | 4.12 | Testing |
+| Google Guava | 33.4.0-jre | Event bus, collections |
+| Apache Commons Math | 3.6.1 | Mathematical functions |
+| OpenCSV | 5.9 | CSV output |
+| JavaMoney Moneta | 1.4.4 | Currency handling |
+| Logback | 1.5.16 | Logging |
+| OpenJFX | 21 | Chart visualization |
 
 ## Core Concepts
 
@@ -80,11 +80,11 @@ A dimension-aware quantity system ensures unit correctness:
 - **Dimensions:** Time, Mass, Length, Volume, Money, Item, Temperature, Dimensionless
 - **25+ predefined units** including Second, Minute, Hour, Day, Week, Year, People, Thing, Meter, Foot, Mile, Kilogram, Pound, USD, Liter, Gallon, Centigrade, and more
 - **Unit conversion** is handled automatically; incompatible dimensions (e.g., adding miles to pounds) are rejected
-- `Quantity` objects are immutable - arithmetic operations return new instances
+- `Quantity` objects are fully immutable - all operations return new instances
 
 ### Flow Rate Conversion
 
-Flows are defined with a natural time unit (e.g., `FlowPerDay`, `FlowPerWeek`, `FlowPerYear`) and the `RateConverter` automatically translates rates to match the simulation's time step. This lets modelers express rates naturally while the engine handles the math.
+Flows are defined with a natural time unit (e.g., `FlowPerDay`, `FlowPerWeek`, `FlowPerYear`) and the `RateConverter` automatically translates rates to match the simulation's time step. Each `FlowPer*` class is a convenience constructor that sets the time unit; callers override `quantityPerTimeUnit()` directly from `Flow`.
 
 ### Archetypes (Reusable Patterns)
 
@@ -157,23 +157,23 @@ A typical workflow for building and running a model:
 Model model = new Model("My Model");
 
 // 2. Define stocks with initial values
-Stock population = new Stock("Population", new Quantity(1000, People.getInstance()));
+Stock population = new Stock("Population", 1000, ItemUnits.PEOPLE);
 model.addStock(population);
 
 // 3. Define flows attached to stocks
 Flow births = new FlowPerYear("Births") {
-    public double quantityPerYear() {
-        return population.getCurrentValue() * birthRate;
+    @Override
+    protected Quantity quantityPerTimeUnit() {
+        return new Quantity(population.getValue() * birthRate, ItemUnits.PEOPLE);
     }
 };
 population.addInflow(births);
 
 // 4. Add variables and constants as needed
-Constant birthRateConstant = new Constant("Birth Rate", new Quantity(0.03));
-model.addConstant(birthRateConstant);
+Constant birthRate = new Constant("Birth Rate", DimensionlessUnits.DIMENSIONLESS, 0.03);
 
 // 5. Create and configure the simulation
-Simulation sim = new Simulation(model, Day.getInstance(), new Quantity(365, Day.getInstance()));
+Simulation sim = new Simulation(model, TimeUnits.DAY, Units.YEAR, 1);
 
 // 6. Attach output handlers
 sim.addEventHandler(new CsvSubscriber("output.csv"));
@@ -185,4 +185,10 @@ sim.execute();
 
 ## Project Status
 
-The project is at version 1.0-SNAPSHOT and is under active development. Recent work has focused on material delays (first, second, and third order), pipeline delays, inventory modeling, and flow visualization.
+The project is at version 1.0-SNAPSHOT and is under active development. Recent work has focused on:
+
+- Making `Quantity` fully immutable for safer value semantics
+- Simplifying the `FlowPer*` class hierarchy to thin convenience constructors
+- Introducing `ItemUnit` for user-defined units with `Item` dimension
+- Adding input validation and null safety across core model elements
+- Improving test coverage with dedicated unit tests for the simulation engine, stocks, models, modules, and rate conversion
