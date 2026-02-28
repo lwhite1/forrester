@@ -4,15 +4,12 @@ import com.deathrayresearch.forrester.measure.Converter;
 import com.deathrayresearch.forrester.measure.Dimension;
 import com.deathrayresearch.forrester.measure.Unit;
 
-/**
- * Represents a "dimensionless" dimension (like a pure fraction)
- */
-public class Dimensionless implements Dimension {
+public enum Dimensionless implements Dimension {
 
-    private static Dimensionless ourInstance = new Dimensionless();
+    INSTANCE;
 
     public static Dimensionless getInstance() {
-        return ourInstance;
+        return INSTANCE;
     }
 
     @Override

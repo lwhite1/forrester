@@ -2,21 +2,18 @@ package com.deathrayresearch.forrester.measure.dimension;
 
 import com.deathrayresearch.forrester.measure.Dimension;
 import com.deathrayresearch.forrester.measure.Unit;
-import com.deathrayresearch.forrester.measure.units.money.USD;
+import com.deathrayresearch.forrester.measure.units.money.MoneyUnits;
 
-/**
- *
- */
-public class Money implements Dimension {
+public enum Money implements Dimension {
 
-    private static final Money ourInstance = new Money();
+    INSTANCE;
 
     public static Money getInstance() {
-        return ourInstance;
+        return INSTANCE;
     }
 
     @Override
     public Unit getBaseUnit() {
-        return USD.getInstance();
+        return MoneyUnits.USD;
     }
 }

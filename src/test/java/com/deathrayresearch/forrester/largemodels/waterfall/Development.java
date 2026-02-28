@@ -4,7 +4,7 @@ import com.deathrayresearch.forrester.largemodels.waterfall.units.PersonDaysPerD
 import com.deathrayresearch.forrester.largemodels.waterfall.units.Tasks;
 import com.deathrayresearch.forrester.largemodels.waterfall.units.TasksPerPersonDay;
 import com.deathrayresearch.forrester.measure.Quantity;
-import com.deathrayresearch.forrester.measure.units.dimensionless.DimensionlessUnit;
+import com.deathrayresearch.forrester.measure.units.dimensionless.DimensionlessUnits;
 import com.deathrayresearch.forrester.model.Constant;
 import com.deathrayresearch.forrester.model.Formula;
 import com.deathrayresearch.forrester.model.Model;
@@ -22,7 +22,7 @@ import static com.deathrayresearch.forrester.largemodels.waterfall.WaterfallSoft
 class Development {
 
     private static final Tasks TASKS = Tasks.getInstance();
-    private static final DimensionlessUnit DIMENSIONLESS_UNIT = DimensionlessUnit.getInstance();
+    private static final DimensionlessUnits DIMENSIONLESS_UNIT = DimensionlessUnits.DIMENSIONLESS;
     private static final TasksPerPersonDay TASKS_PER_PERSON_DAY = TasksPerPersonDay.getInstance();
 
     static Module getDevelopmentSubSystem(Model model) {

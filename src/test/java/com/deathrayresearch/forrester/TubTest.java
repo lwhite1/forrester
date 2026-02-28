@@ -30,7 +30,7 @@ public class TubTest {
         // the water drains at the rate of the outflow capacity or the amount of water in the tub, whichever is less
         Flow outflow = new FlowPerMinute("Outflow") {
 
-            Quantity volumeOut = Volumes.gallonsUS( 5.0);
+            final Quantity volumeOut = Volumes.gallonsUS( 5.0);
 
             @Override
             public Quantity quantityPerMinute() {
@@ -42,9 +42,9 @@ public class TubTest {
 
         FlowPerMinute inflow = new FlowPerMinute("Inflow") {
 
-            Quantity volumeIn =  Volumes.gallonsUS( 5);
+            final Quantity volumeIn =  Volumes.gallonsUS( 5);
 
-            Quantity lowInflow = Volumes.gallonsUS(0.0);
+            final Quantity lowInflow = Volumes.gallonsUS(0.0);
             @Override
             protected Quantity quantityPerMinute() {
                 // waits five minutes before adding any inflow

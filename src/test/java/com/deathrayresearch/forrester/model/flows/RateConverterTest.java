@@ -1,12 +1,8 @@
 package com.deathrayresearch.forrester.model.flows;
 
 import com.deathrayresearch.forrester.measure.Quantity;
-import com.deathrayresearch.forrester.measure.units.length.Mile;
-import com.deathrayresearch.forrester.measure.units.time.Day;
-import com.deathrayresearch.forrester.measure.units.time.Hour;
-import com.deathrayresearch.forrester.measure.units.time.Minute;
-import com.deathrayresearch.forrester.measure.units.time.Second;
-import com.deathrayresearch.forrester.measure.units.time.Week;
+import com.deathrayresearch.forrester.measure.units.length.LengthUnits;
+import com.deathrayresearch.forrester.measure.units.time.TimeUnits;
 import org.junit.Test;
 
 import static org.junit.Assert.*;
@@ -15,79 +11,79 @@ public class RateConverterTest {
 
     @Test
     public void hoursToDay_scalesUp() {
-        Quantity perHour = new Quantity(100, Mile.getInstance());
-        Quantity perDay = RateConverter.convert(perHour, Hour.getInstance(), Day.getInstance());
+        Quantity perHour = new Quantity(100, LengthUnits.MILE);
+        Quantity perDay = RateConverter.convert(perHour, TimeUnits.HOUR, TimeUnits.DAY);
         assertEquals(2400, perDay.getValue(), 0.0);
     }
 
     @Test
     public void hoursToDay_smallValue() {
-        Quantity perHour = new Quantity(10, Mile.getInstance());
-        Quantity perDay = RateConverter.convert(perHour, Hour.getInstance(), Day.getInstance());
+        Quantity perHour = new Quantity(10, LengthUnits.MILE);
+        Quantity perDay = RateConverter.convert(perHour, TimeUnits.HOUR, TimeUnits.DAY);
         assertEquals(240, perDay.getValue(), 0.0);
     }
 
     @Test
     public void dayToHours_scalesDown() {
-        Quantity perDay = new Quantity(2400, Mile.getInstance());
-        Quantity perHour = RateConverter.convert(perDay, Day.getInstance(), Hour.getInstance());
+        Quantity perDay = new Quantity(2400, LengthUnits.MILE);
+        Quantity perHour = RateConverter.convert(perDay, TimeUnits.DAY, TimeUnits.HOUR);
         assertEquals(100, perHour.getValue(), 0.0);
     }
 
     @Test
     public void hoursToMinutes() {
-        Quantity perHour = new Quantity(60, Mile.getInstance());
-        Quantity perMinute = RateConverter.convert(perHour, Hour.getInstance(), Minute.getInstance());
+        Quantity perHour = new Quantity(60, LengthUnits.MILE);
+        Quantity perMinute = RateConverter.convert(perHour, TimeUnits.HOUR, TimeUnits.MINUTE);
         assertEquals(1, perMinute.getValue(), 0.0);
     }
 
     @Test
     public void weekToDay() {
-        Quantity perWeek = new Quantity(700, Mile.getInstance());
-        Quantity perDay = RateConverter.convert(perWeek, Week.getInstance(), Day.getInstance());
+        Quantity perWeek = new Quantity(700, LengthUnits.MILE);
+        Quantity perDay = RateConverter.convert(perWeek, TimeUnits.WEEK, TimeUnits.DAY);
         assertEquals(100, perDay.getValue(), 0.0);
     }
 
     @Test
     public void dayToWeek() {
-        Quantity perDay = new Quantity(100, Mile.getInstance());
-        Quantity perWeek = RateConverter.convert(perDay, Day.getInstance(), Week.getInstance());
+        Quantity perDay = new Quantity(100, LengthUnits.MILE);
+        Quantity perWeek = RateConverter.convert(perDay, TimeUnits.DAY, TimeUnits.WEEK);
         assertEquals(700, perWeek.getValue(), 0.0);
     }
 
     @Test
     public void minutesToSeconds() {
-        Quantity perMinute = new Quantity(120, Mile.getInstance());
-        Quantity perSecond = RateConverter.convert(perMinute, Minute.getInstance(), Second.getInstance());
+        Quantity perMinute = new Quantity(120, LengthUnits.MILE);
+        Quantity perSecond = RateConverter.convert(perMinute, TimeUnits.MINUTE, TimeUnits.SECOND);
         assertEquals(2, perSecond.getValue(), 0.0);
     }
 
     @Test
     public void sameUnit_returnsOriginalValue() {
-        Quantity perHour = new Quantity(42, Mile.getInstance());
-        Quantity result = RateConverter.convert(perHour, Hour.getInstance(), Hour.getInstance());
+        Quantity perHour = new Quantity(42, LengthUnits.MILE);
+        Quantity result = RateConverter.convert(perHour, TimeUnits.HOUR, TimeUnits.HOUR);
         assertEquals(42, result.getValue(), 0.0);
     }
 
     @Test
     public void zeroQuantity_returnsZero() {
-        Quantity zero = new Quantity(0, Mile.getInstance());
-        Quantity result = RateConverter.convert(zero, Hour.getInstance(), Day.getInstance());
+        Quantity zero = new Quantity(0, LengthUnits.MILE);
+        Quantity result = RateConverter.convert(zero, TimeUnits.HOUR, TimeUnits.DAY);
         assertEquals(0, result.getValue(), 0.0);
     }
 
     @Test
     public void roundTrip_isIdentity() {
-        Quantity original = new Quantity(365, Mile.getInstance());
-        Quantity converted = RateConverter.convert(original, Day.getInstance(), Minute.getInstance());
-        Quantity backAgain = RateConverter.convert(converted, Minute.getInstance(), Day.getInstance());
+        Quantity original = new Quantity(365, LengthUnits.MILE);
+        Quantity converted = RateConverter.convert(original, TimeUnits.DAY, TimeUnits.MINUTE);
+        Quantity backAgain = RateConverter.convert(converted, TimeUnits.MINUTE, TimeUnits.DAY);
         assertEquals(original.getValue(), backAgain.getValue(), 1e-9);
     }
 
     @Test
     public void preservesUnit() {
-        Quantity perHour = new Quantity(100, Mile.getInstance());
-        Quantity perDay = RateConverter.convert(perHour, Hour.getInstance(), Day.getInstance());
-        assertEquals(Mile.getInstance(), perDay.getUnit());
+        Quantity perHour = new Quantity(100, LengthUnits.MILE);
+        Quantity perDay = RateConverter.convert(perHour, TimeUnits.HOUR, TimeUnits.DAY);
+        assertEquals(LengthUnits.MILE, perDay.getUnit());
     }
 }

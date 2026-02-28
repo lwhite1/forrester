@@ -2,21 +2,18 @@ package com.deathrayresearch.forrester.measure.dimension;
 
 import com.deathrayresearch.forrester.measure.Dimension;
 import com.deathrayresearch.forrester.measure.Unit;
-import com.deathrayresearch.forrester.measure.units.mass.Kilogram;
+import com.deathrayresearch.forrester.measure.units.mass.MassUnits;
 
-/**
- *
- */
-public class Mass implements Dimension {
+public enum Mass implements Dimension {
 
-    private static final Mass ourInstance = new Mass();
+    INSTANCE;
 
     public static Mass getInstance() {
-        return ourInstance;
+        return INSTANCE;
     }
 
     @Override
     public Unit getBaseUnit() {
-        return Kilogram.getInstance();
+        return MassUnits.KILOGRAM;
     }
 }

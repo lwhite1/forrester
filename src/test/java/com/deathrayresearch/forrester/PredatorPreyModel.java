@@ -1,8 +1,8 @@
 package com.deathrayresearch.forrester;
 
 import com.deathrayresearch.forrester.measure.Quantity;
-import com.deathrayresearch.forrester.measure.units.item.Thing;
-import com.deathrayresearch.forrester.measure.units.time.Day;
+import com.deathrayresearch.forrester.measure.units.item.ItemUnits;
+import com.deathrayresearch.forrester.measure.units.time.TimeUnits;
 import com.deathrayresearch.forrester.model.Model;
 import com.deathrayresearch.forrester.model.Stock;
 import com.deathrayresearch.forrester.model.flows.FlowPerYear;
@@ -14,8 +14,8 @@ public class PredatorPreyModel {
 
     private static Model model = new Model("Predator-Prey model");
 
-    private static final Thing RABBIT = Thing.getInstance();
-    private static final Thing COYOTE = Thing.getInstance();
+    private static final ItemUnits RABBIT = ItemUnits.THING;
+    private static final ItemUnits COYOTE = ItemUnits.THING;
     public static void main(String[] args) {
 
         Stock predator = new Stock("Coyotes", 10, COYOTE);
@@ -32,7 +32,7 @@ public class PredatorPreyModel {
 
         model.addStock(prey);
 
-        Simulation run = new Simulation(model, Day.getInstance(), YEAR, 1);
+        Simulation run = new Simulation(model, TimeUnits.DAY, YEAR, 1);
         run.addEventHandler(new StockLevelChartViewer());
         run.execute();
     }

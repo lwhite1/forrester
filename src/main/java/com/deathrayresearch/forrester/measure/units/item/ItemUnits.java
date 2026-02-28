@@ -1,20 +1,24 @@
 package com.deathrayresearch.forrester.measure.units.item;
 
-
 import com.deathrayresearch.forrester.measure.Dimension;
 import com.deathrayresearch.forrester.measure.Unit;
-import com.deathrayresearch.forrester.measure.dimension.Item;
 
-/**
- *
- */
-public class People extends Thing {
+public enum ItemUnits implements Unit {
 
-    private static final People instance = new People();
+    THING("Thing", 1.0),
+    PEOPLE("Person", 1.0);
+
+    private final String name;
+    private final double ratioToBaseUnit;
+
+    ItemUnits(String name, double ratioToBaseUnit) {
+        this.name = name;
+        this.ratioToBaseUnit = ratioToBaseUnit;
+    }
 
     @Override
     public String getName() {
-        return "Person";
+        return name;
     }
 
     @Override
@@ -24,12 +28,6 @@ public class People extends Thing {
 
     @Override
     public double ratioToBaseUnit() {
-        return 1.0;
+        return ratioToBaseUnit;
     }
-
-    public static People getInstance() {
-        return instance;
-    }
-
-
 }

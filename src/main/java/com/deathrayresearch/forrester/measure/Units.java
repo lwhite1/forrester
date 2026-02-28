@@ -1,72 +1,56 @@
 package com.deathrayresearch.forrester.measure;
 
-import com.deathrayresearch.forrester.measure.units.dimensionless.DimensionlessUnit;
-import com.deathrayresearch.forrester.measure.units.item.People;
-import com.deathrayresearch.forrester.measure.units.item.Thing;
-import com.deathrayresearch.forrester.measure.units.length.Foot;
-import com.deathrayresearch.forrester.measure.units.length.Inch;
-import com.deathrayresearch.forrester.measure.units.length.Meter;
-import com.deathrayresearch.forrester.measure.units.length.Mile;
-import com.deathrayresearch.forrester.measure.units.length.NauticalMile;
-import com.deathrayresearch.forrester.measure.units.mass.Kilogram;
-import com.deathrayresearch.forrester.measure.units.mass.Ounce;
-import com.deathrayresearch.forrester.measure.units.mass.Pound;
-import com.deathrayresearch.forrester.measure.units.money.USD;
-import com.deathrayresearch.forrester.measure.units.temperature.Centigrade;
-import com.deathrayresearch.forrester.measure.units.time.Day;
-import com.deathrayresearch.forrester.measure.units.time.Hour;
-import com.deathrayresearch.forrester.measure.units.time.Minute;
-import com.deathrayresearch.forrester.measure.units.time.Second;
-import com.deathrayresearch.forrester.measure.units.time.Week;
-import com.deathrayresearch.forrester.measure.units.time.Year;
-import com.deathrayresearch.forrester.measure.units.volume.CubicMeter;
-import com.deathrayresearch.forrester.measure.units.volume.FluidOunceUS;
-import com.deathrayresearch.forrester.measure.units.volume.GallonUS;
-import com.deathrayresearch.forrester.measure.units.volume.Liter;
-import com.deathrayresearch.forrester.measure.units.volume.QuartUS;
+import com.deathrayresearch.forrester.measure.units.dimensionless.DimensionlessUnits;
+import com.deathrayresearch.forrester.measure.units.item.ItemUnits;
+import com.deathrayresearch.forrester.measure.units.length.LengthUnits;
+import com.deathrayresearch.forrester.measure.units.mass.MassUnits;
+import com.deathrayresearch.forrester.measure.units.money.MoneyUnits;
+import com.deathrayresearch.forrester.measure.units.temperature.TemperatureUnits;
+import com.deathrayresearch.forrester.measure.units.time.TimeUnits;
+import com.deathrayresearch.forrester.measure.units.volume.VolumeUnits;
 
 public class Units {
 
     // dimensionless
-    public static final DimensionlessUnit DIMENSIONLESS = DimensionlessUnit.getInstance();
+    public static final Unit DIMENSIONLESS = DimensionlessUnits.DIMENSIONLESS;
 
     // items
-    public static final People PEOPLE = People.getInstance();
-    public static final Thing THING = Thing.getInstance();
+    public static final Unit PEOPLE = ItemUnits.PEOPLE;
+    public static final Unit THING = ItemUnits.THING;
 
     // length
-    public static final Foot FOOT = Foot.getInstance();
-    public static final Inch INCH = Inch.getInstance();
-    public static final Meter METER = Meter.getInstance();
-    public static final Mile MILE = Mile.getInstance();
-    public static final NauticalMile NAUTICAL_MILE = NauticalMile.getInstance();
+    public static final Unit FOOT = LengthUnits.FOOT;
+    public static final Unit INCH = LengthUnits.INCH;
+    public static final Unit METER = LengthUnits.METER;
+    public static final Unit MILE = LengthUnits.MILE;
+    public static final Unit NAUTICAL_MILE = LengthUnits.NAUTICAL_MILE;
 
     // mass
-    public static final Kilogram KILOGRAM = Kilogram.getInstance();
-    public static final Ounce OUNCE = Ounce.getInstance();
-    public static final Pound POUND = Pound.getInstance();
+    public static final Unit KILOGRAM = MassUnits.KILOGRAM;
+    public static final Unit OUNCE = MassUnits.OUNCE;
+    public static final Unit POUND = MassUnits.POUND;
 
     // money
-    public static final USD US_DOLLAR = USD.getInstance();
+    public static final Unit US_DOLLAR = MoneyUnits.USD;
 
     // time
-    public static final Day DAY = Day.getInstance();
-    public static final Hour HOUR = Hour.getInstance();
-    public static final Minute MINUTE = Minute.getInstance();
-    public static final Second SECOND = Second.getInstance();
-    public static final Week WEEK = Week.getInstance();
-    public static final Year YEAR = Year.getInstance();
+    public static final TimeUnit DAY = TimeUnits.DAY;
+    public static final TimeUnit HOUR = TimeUnits.HOUR;
+    public static final TimeUnit MINUTE = TimeUnits.MINUTE;
+    public static final TimeUnit SECOND = TimeUnits.SECOND;
+    public static final TimeUnit WEEK = TimeUnits.WEEK;
+    public static final TimeUnit YEAR = TimeUnits.YEAR;
 
     // volume
-    public static final CubicMeter CUBIC_METER = CubicMeter.getInstance();
-    public static final Liter LITER = Liter.getInstance();
+    public static final Unit CUBIC_METER = VolumeUnits.CUBIC_METER;
+    public static final Unit LITER = VolumeUnits.LITER;
 
-    public static final FluidOunceUS FLUID_OUNCE_US = FluidOunceUS.getInstance();
-    public static final GallonUS GALLON_US = GallonUS.getInstance();
-    public static final QuartUS QUART_US = QuartUS.getInstance();
+    public static final Unit FLUID_OUNCE_US = VolumeUnits.FLUID_OUNCE_US;
+    public static final Unit GALLON_US = VolumeUnits.GALLON_US;
+    public static final Unit QUART_US = VolumeUnits.QUART_US;
 
     // temperature
-    public static final Centigrade CENTIGRADE = Centigrade.getInstance();
+    public static final Unit CENTIGRADE = TemperatureUnits.CENTIGRADE;
 
 
 }

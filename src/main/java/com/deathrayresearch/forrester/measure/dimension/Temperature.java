@@ -3,24 +3,19 @@ package com.deathrayresearch.forrester.measure.dimension;
 import com.deathrayresearch.forrester.measure.Converter;
 import com.deathrayresearch.forrester.measure.Dimension;
 import com.deathrayresearch.forrester.measure.Unit;
-import com.deathrayresearch.forrester.measure.units.temperature.Centigrade;
+import com.deathrayresearch.forrester.measure.units.temperature.TemperatureUnits;
 
-/**
- *
- */
-public class Temperature implements Dimension {
+public enum Temperature implements Dimension {
 
-    private static final Temperature ourInstance = new Temperature();
+    INSTANCE;
 
     public static Temperature getInstance() {
-        return ourInstance;
+        return INSTANCE;
     }
-
-    private Temperature() {}
 
     @Override
     public Unit getBaseUnit() {
-        return Centigrade.getInstance();
+        return TemperatureUnits.CENTIGRADE;
     }
 
     @Override

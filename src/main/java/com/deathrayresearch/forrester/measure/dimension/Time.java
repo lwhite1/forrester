@@ -1,26 +1,19 @@
 package com.deathrayresearch.forrester.measure.dimension;
 
-import com.deathrayresearch.forrester.measure.Converter;
 import com.deathrayresearch.forrester.measure.Dimension;
 import com.deathrayresearch.forrester.measure.Unit;
-import com.deathrayresearch.forrester.measure.units.time.Second;
+import com.deathrayresearch.forrester.measure.units.time.TimeUnits;
 
-/**
- *
- */
-public class Time implements Dimension {
+public enum Time implements Dimension {
 
-    private static final Time ourInstance = new Time();
+    INSTANCE;
 
     public static Time getInstance() {
-        return ourInstance;
+        return INSTANCE;
     }
-
-    private Time() {}
 
     @Override
     public Unit getBaseUnit() {
-        return Second.getInstance();
+        return TimeUnits.SECOND;
     }
-
 }

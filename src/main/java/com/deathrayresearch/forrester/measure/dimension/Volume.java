@@ -1,24 +1,19 @@
 package com.deathrayresearch.forrester.measure.dimension;
 
-
-import com.deathrayresearch.forrester.measure.Converter;
 import com.deathrayresearch.forrester.measure.Dimension;
 import com.deathrayresearch.forrester.measure.Unit;
-import com.deathrayresearch.forrester.measure.units.volume.Liter;
+import com.deathrayresearch.forrester.measure.units.volume.VolumeUnits;
 
-/**
- *
- */
-public class Volume implements Dimension {
+public enum Volume implements Dimension {
 
-    private static final Volume ourInstance = new Volume();
+    INSTANCE;
 
     public static Volume getInstance() {
-        return ourInstance;
+        return INSTANCE;
     }
 
     @Override
     public Unit getBaseUnit() {
-        return Liter.getInstance();
+        return VolumeUnits.LITER;
     }
 }

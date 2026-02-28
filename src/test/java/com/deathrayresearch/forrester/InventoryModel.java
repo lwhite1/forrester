@@ -1,7 +1,7 @@
 package com.deathrayresearch.forrester;
 
 import com.deathrayresearch.forrester.measure.Quantity;
-import com.deathrayresearch.forrester.measure.units.item.Thing;
+import com.deathrayresearch.forrester.measure.Unit;
 import com.deathrayresearch.forrester.model.Flow;
 import com.deathrayresearch.forrester.model.Formula;
 import com.deathrayresearch.forrester.model.Model;
@@ -15,7 +15,7 @@ import static com.deathrayresearch.forrester.measure.Units.*;
 
 public class InventoryModel {
 
-    private static final Thing CARS = THING;
+    private static final Unit CARS = THING;
 
     // delays
     private static final double PERCEPTION_DELAY = 0;

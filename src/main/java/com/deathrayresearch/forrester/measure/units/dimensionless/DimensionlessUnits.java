@@ -4,29 +4,30 @@ import com.deathrayresearch.forrester.measure.Dimension;
 import com.deathrayresearch.forrester.measure.Unit;
 import com.deathrayresearch.forrester.measure.dimension.Dimensionless;
 
-/**
- *
- */
-public class DimensionlessUnit implements Unit {
+public enum DimensionlessUnits implements Unit {
 
-    private static final DimensionlessUnit instance = new DimensionlessUnit();
+    DIMENSIONLESS("Dimensionless unit", 1.0);
 
-    public static DimensionlessUnit getInstance() {
-        return instance;
+    private final String name;
+    private final double ratioToBaseUnit;
+
+    DimensionlessUnits(String name, double ratioToBaseUnit) {
+        this.name = name;
+        this.ratioToBaseUnit = ratioToBaseUnit;
     }
 
     @Override
     public String getName() {
-        return "Dimensionless unit";
+        return name;
     }
 
     @Override
     public Dimension getDimension() {
-        return Dimensionless.getInstance();
+        return Dimensionless.INSTANCE;
     }
 
     @Override
     public double ratioToBaseUnit() {
-        return 1.0;
+        return ratioToBaseUnit;
     }
 }

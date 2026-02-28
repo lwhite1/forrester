@@ -1,8 +1,8 @@
 package com.deathrayresearch.forrester;
 
 import com.deathrayresearch.forrester.measure.Quantity;
-import com.deathrayresearch.forrester.measure.units.item.People;
-import com.deathrayresearch.forrester.measure.units.time.Day;
+import com.deathrayresearch.forrester.measure.units.item.ItemUnits;
+import com.deathrayresearch.forrester.measure.units.time.TimeUnits;
 import com.deathrayresearch.forrester.archetypes.SimpleExponentialChange;
 import com.deathrayresearch.forrester.model.Model;
 import com.deathrayresearch.forrester.model.Stock;
@@ -19,7 +19,7 @@ import static com.deathrayresearch.forrester.measure.Units.WEEK;
 public class ExponentialGrowthModel {
 
 
-    private static final People PEOPLE = People.getInstance();
+    private static final ItemUnits PEOPLE = ItemUnits.PEOPLE;
 
     @Test
     public void testRun1() {
@@ -46,7 +46,7 @@ public class ExponentialGrowthModel {
 
         model.addStock(population);
 
-        Simulation run = new Simulation(model, Day.getInstance(), WEEK, 52);
+        Simulation run = new Simulation(model, TimeUnits.DAY, WEEK, 52);
         run.addEventHandler(new StockLevelChartViewer());
         run.execute();
     }

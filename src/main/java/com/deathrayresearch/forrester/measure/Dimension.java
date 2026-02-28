@@ -13,13 +13,13 @@ import com.deathrayresearch.forrester.measure.dimension.Volume;
  */
 public interface Dimension {
 
-    Dimension TIME = Time.getInstance();
-    Dimension MONEY = Money.getInstance();
-    Dimension MASS = Mass.getInstance();
-    Dimension LENGTH = Length.getInstance();
-    Dimension VOLUME = Volume.getInstance();
-    Dimension ITEM = Item.getInstance();
-    Dimension TEMPERATURE = Temperature.getInstance();
+    Dimension TIME = Time.INSTANCE;
+    Dimension MONEY = Money.INSTANCE;
+    Dimension MASS = Mass.INSTANCE;
+    Dimension LENGTH = Length.INSTANCE;
+    Dimension VOLUME = Volume.INSTANCE;
+    Dimension ITEM = Item.INSTANCE;
+    Dimension TEMPERATURE = Temperature.INSTANCE;
 
     default Converter getConverter() {
         return (originalQuantity, newUnit) -> {

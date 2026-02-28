@@ -1,25 +1,19 @@
 package com.deathrayresearch.forrester.measure.dimension;
 
-
 import com.deathrayresearch.forrester.measure.Dimension;
 import com.deathrayresearch.forrester.measure.Unit;
-import com.deathrayresearch.forrester.measure.units.length.Meter;
+import com.deathrayresearch.forrester.measure.units.length.LengthUnits;
 
-/**
- *
- */
-public class Length implements Dimension {
+public enum Length implements Dimension {
 
-    private static final Length ourInstance = new Length();
+    INSTANCE;
 
     public static Length getInstance() {
-        return ourInstance;
+        return INSTANCE;
     }
-
-    private Length() {}
 
     @Override
     public Unit getBaseUnit() {
-        return Meter.getInstance();
+        return LengthUnits.METER;
     }
 }

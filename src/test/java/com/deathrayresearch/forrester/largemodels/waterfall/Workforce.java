@@ -2,9 +2,9 @@ package com.deathrayresearch.forrester.largemodels.waterfall;
 
 
 import com.deathrayresearch.forrester.measure.Quantity;
-import com.deathrayresearch.forrester.measure.units.dimensionless.DimensionlessUnit;
-import com.deathrayresearch.forrester.measure.units.item.People;
-import com.deathrayresearch.forrester.measure.units.item.Thing;
+import com.deathrayresearch.forrester.measure.Unit;
+import com.deathrayresearch.forrester.measure.units.dimensionless.DimensionlessUnits;
+import com.deathrayresearch.forrester.measure.units.item.ItemUnits;
 import com.deathrayresearch.forrester.model.Constant;
 import com.deathrayresearch.forrester.model.Formula;
 import com.deathrayresearch.forrester.model.Stock;
@@ -20,16 +20,16 @@ import static com.deathrayresearch.forrester.largemodels.waterfall.WaterfallSoft
  */
 class Workforce {
 
-    static final Constant AVERAGE_DAILY_MAN_POWER_PER_STAFF = new Constant("ADMPPPS", Thing.getInstance(), 1);
-    private static final People PEOPLE = People.getInstance();
-    private static final DimensionlessUnit DIMENSIONLESS_UNIT = DimensionlessUnit.getInstance();
+    static final Constant AVERAGE_DAILY_MAN_POWER_PER_STAFF = new Constant("ADMPPPS", ItemUnits.THING, 1);
+    private static final Unit PEOPLE = ItemUnits.PEOPLE;
+    private static final DimensionlessUnits DIMENSIONLESS_UNIT = DimensionlessUnits.DIMENSIONLESS;
 
     static Module getWorkforce() {
 
         Module workforce = new Module(WORKFORCE);
 
-        Stock newlyHiredWorkforce = new Stock(NEWLY_HIRED, 2.0, People.getInstance());
-        Stock experiencedWorkforce = new Stock(EXPERIENCED, 4.0, People.getInstance());
+        Stock newlyHiredWorkforce = new Stock(NEWLY_HIRED, 2.0, ItemUnits.PEOPLE);
+        Stock experiencedWorkforce = new Stock(EXPERIENCED, 4.0, ItemUnits.PEOPLE);
        // Stock cumulativeOverheadForTraining = new Stock(CUM_MP_FOR_TRAINING, 0.0, DIMENSIONLESS_UNIT);
 
 
@@ -49,7 +49,7 @@ class Workforce {
         Variable workforceNeed = new Variable(WORKFORCE_NEED, PEOPLE, () -> 30.0);
 
         Constant maxNewHiresPerExperiencedStaff =
-                new Constant("Max New Hires per Experienced Staff", People.getInstance(), 3.0);
+                new Constant("Max New Hires per Experienced Staff", ItemUnits.PEOPLE, 3.0);
 
         Variable newHireCap = new Variable(NEW_HIRE_CAP, PEOPLE, () ->
                 maxNewHiresPerExperiencedStaff.getValue()
@@ -116,7 +116,7 @@ class Workforce {
                 double result = gap / hiringDelayInDays;
                 double maxAmount = Math.max(result, 0.0);
 
-                return new Quantity(maxAmount, People.getInstance());
+                return new Quantity(maxAmount, ItemUnits.PEOPLE);
             }
         };
     }
@@ -127,7 +127,7 @@ class Workforce {
             @Override
             protected Quantity quantityPerDay() {
                 return new Quantity(experiencedWorkforce.getQuantity().getValue()
-                        / averageEmploymentInDays, People.getInstance());
+                        / averageEmploymentInDays, ItemUnits.PEOPLE);
             }
         };
     }

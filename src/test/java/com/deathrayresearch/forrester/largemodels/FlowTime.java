@@ -3,7 +3,7 @@ package com.deathrayresearch.forrester.largemodels;
 import com.deathrayresearch.forrester.Simulation;
 import com.deathrayresearch.forrester.archetypes.SimpleLinearChange;
 import com.deathrayresearch.forrester.measure.Quantity;
-import com.deathrayresearch.forrester.measure.units.item.Thing;
+import com.deathrayresearch.forrester.measure.units.item.ItemUnits;
 import com.deathrayresearch.forrester.model.Constant;
 import com.deathrayresearch.forrester.model.Model;
 import com.deathrayresearch.forrester.model.Stock;
@@ -16,7 +16,7 @@ import static com.deathrayresearch.forrester.measure.Units.*;
 
 public class FlowTime {
 
-    private static final Thing TEST = Thing.getInstance();
+    private static final ItemUnits TEST = ItemUnits.THING;
 
     private Constant TATGoal = new Constant("TAT Target", HOUR, 336);
     private Constant Capacity = new Constant("Capacity", TEST,190);

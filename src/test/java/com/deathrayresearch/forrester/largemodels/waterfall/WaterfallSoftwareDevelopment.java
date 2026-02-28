@@ -3,9 +3,9 @@ package com.deathrayresearch.forrester.largemodels.waterfall;
 import com.deathrayresearch.forrester.Simulation;
 import com.deathrayresearch.forrester.largemodels.waterfall.units.Tasks;
 import com.deathrayresearch.forrester.measure.Quantity;
-import com.deathrayresearch.forrester.measure.units.item.People;
-import com.deathrayresearch.forrester.measure.units.time.Day;
-import com.deathrayresearch.forrester.measure.units.time.Year;
+import com.deathrayresearch.forrester.measure.Unit;
+import com.deathrayresearch.forrester.measure.units.item.ItemUnits;
+import com.deathrayresearch.forrester.measure.units.time.TimeUnits;
 import com.deathrayresearch.forrester.model.Model;
 import com.deathrayresearch.forrester.model.Module;
 import com.deathrayresearch.forrester.ui.StockLevelChartViewer;
@@ -19,7 +19,7 @@ public class WaterfallSoftwareDevelopment {
     private Model model = new Model("Waterfall");
 
     // new units
-    static final People PEOPLE = People.getInstance();
+    static final Unit PEOPLE = ItemUnits.PEOPLE;
     static final Tasks TASKS = Tasks.getInstance();
 
     // subsystem constants
@@ -78,8 +78,8 @@ public class WaterfallSoftwareDevelopment {
     @Test
     public void testRun1() {
 
-        Quantity duration = new Quantity(1, Year.getInstance());
-        Simulation simulation = new Simulation(model, Day.getInstance(), duration);
+        Quantity duration = new Quantity(1, TimeUnits.YEAR);
+        Simulation simulation = new Simulation(model, TimeUnits.DAY, duration);
         simulation.addEventHandler(new StockLevelChartViewer());
 
         simulation.execute();

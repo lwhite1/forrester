@@ -2,7 +2,7 @@ package com.deathrayresearch.forrester;
 
 import com.deathrayresearch.forrester.archetypes.PipelineDelay;
 import com.deathrayresearch.forrester.measure.Quantity;
-import com.deathrayresearch.forrester.measure.units.time.Day;
+import com.deathrayresearch.forrester.measure.units.time.TimeUnits;
 import com.deathrayresearch.forrester.model.Constant;
 import com.deathrayresearch.forrester.model.Model;
 import com.deathrayresearch.forrester.model.Stock;
@@ -29,7 +29,7 @@ public class SimplePipelineDelay {
 
 
         Stock population = new Stock("WIP", 0, THING);
-        Constant delay = new Constant("Activity Time", Day.getInstance(), 3);
+        Constant delay = new Constant("Activity Time", TimeUnits.DAY, 3);
 
         Flow arrivals = new FlowPerDay("Arrivals") {
             @Override

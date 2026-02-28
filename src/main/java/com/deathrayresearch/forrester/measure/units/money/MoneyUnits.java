@@ -1,0 +1,32 @@
+package com.deathrayresearch.forrester.measure.units.money;
+
+import com.deathrayresearch.forrester.measure.Dimension;
+import com.deathrayresearch.forrester.measure.Unit;
+
+public enum MoneyUnits implements Unit {
+
+    USD("USD", 1.0);
+
+    private final String name;
+    private final double ratioToBaseUnit;
+
+    MoneyUnits(String name, double ratioToBaseUnit) {
+        this.name = name;
+        this.ratioToBaseUnit = ratioToBaseUnit;
+    }
+
+    @Override
+    public String getName() {
+        return name;
+    }
+
+    @Override
+    public Dimension getDimension() {
+        return Dimension.MONEY;
+    }
+
+    @Override
+    public double ratioToBaseUnit() {
+        return ratioToBaseUnit;
+    }
+}

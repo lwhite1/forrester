@@ -20,7 +20,7 @@ public class Tasks implements Unit {
 
     @Override
     public Dimension getDimension() {
-        return Item.getInstance();
+        return Item.INSTANCE;
     }
 
     @Override

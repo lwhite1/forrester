@@ -5,7 +5,7 @@ import com.deathrayresearch.forrester.measure.Dimension;
 import com.deathrayresearch.forrester.measure.Quantity;
 import com.deathrayresearch.forrester.measure.Unit;
 import com.deathrayresearch.forrester.measure.dimension.Item;
-import com.deathrayresearch.forrester.measure.units.time.Day;
+import com.deathrayresearch.forrester.measure.units.time.TimeUnits;
 import com.deathrayresearch.forrester.model.Model;
 import com.deathrayresearch.forrester.model.Stock;
 import com.deathrayresearch.forrester.model.Flow;
@@ -35,7 +35,7 @@ public class AgileSoftwareDevelopment {
     @Test
     public void testRun1() {
 
-        Simulation run = new Simulation(getModel(), Day.getInstance(), WEEK,52);
+        Simulation run = new Simulation(getModel(), TimeUnits.DAY, WEEK,52);
         run.addEventHandler(new StockLevelChartViewer());
         run.execute();
     }
@@ -64,7 +64,7 @@ public class AgileSoftwareDevelopment {
         Flow defectCreationRate = new FlowPerWeek("Created defects") {
             @Override
             protected Quantity quantityPerWeek() {
-                return completionRate.flowPerTimeUnit(Day.getInstance())
+                return completionRate.flowPerTimeUnit(TimeUnits.DAY)
                     .multiply(1.0 - nominalFractionCorrectAndComplete);
             }
         };
@@ -104,7 +104,7 @@ public class AgileSoftwareDevelopment {
 
         @Override
         public Dimension getDimension() {
-            return Item.getInstance();
+            return Item.INSTANCE;
         }
 
         @Override
@@ -128,7 +128,7 @@ public class AgileSoftwareDevelopment {
 
         @Override
         public Dimension getDimension() {
-            return Item.getInstance();
+            return Item.INSTANCE;
         }
 
         @Override

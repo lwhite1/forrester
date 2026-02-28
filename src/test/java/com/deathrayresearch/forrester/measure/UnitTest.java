@@ -1,7 +1,6 @@
 package com.deathrayresearch.forrester.measure;
 
-import com.deathrayresearch.forrester.measure.units.length.Meter;
-import com.deathrayresearch.forrester.measure.units.length.Mile;
+import com.deathrayresearch.forrester.measure.units.length.LengthUnits;
 import org.junit.Test;
 
 import static org.junit.Assert.*;
@@ -11,8 +10,8 @@ import static org.junit.Assert.*;
  */
 public class UnitTest {
 
-    private Quantity miles = new Quantity(100, Mile.getInstance());
-    private Quantity meters = new Quantity(160934, Meter.getInstance());
+    private Quantity miles = new Quantity(100, LengthUnits.MILE);
+    private Quantity meters = new Quantity(160934, LengthUnits.METER);
 
     @Test
     public void ratioToBaseUnit() throws Exception {
@@ -21,23 +20,23 @@ public class UnitTest {
 
     @Test
     public void getBaseUnit() throws Exception {
-        assertEquals(Meter.getInstance(), miles.getUnit().getBaseUnit());
+        assertEquals(LengthUnits.METER, miles.getUnit().getBaseUnit());
     }
 
     @Test
     public void fromBaseUnits() throws Exception {
-        assertEquals(100, Mile.getInstance().fromBaseUnits(meters).getValue(), 0.0);
+        assertEquals(100, LengthUnits.MILE.fromBaseUnits(meters).getValue(), 0.0);
     }
 
     @Test
     public void converter() throws Exception {
-        assertEquals(160934.0, miles.convertUnits(Meter.getInstance()).getValue(), 0.0);
+        assertEquals(160934.0, miles.convertUnits(LengthUnits.METER).getValue(), 0.0);
     }
 
     @Test
     public void toBaseUnits() throws Exception {
         assertEquals(160934.0, miles.inBaseUnits().getValue(), 0.0);
-        assertEquals(Meter.getInstance(), miles.inBaseUnits().getUnit());
+        assertEquals(LengthUnits.METER, miles.inBaseUnits().getUnit());
     }
 
 }

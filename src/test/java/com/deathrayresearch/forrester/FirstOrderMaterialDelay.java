@@ -2,8 +2,7 @@ package com.deathrayresearch.forrester;
 
 import com.deathrayresearch.forrester.archetypes.SimpleExponentialChange;
 import com.deathrayresearch.forrester.measure.Quantity;
-import com.deathrayresearch.forrester.measure.units.item.People;
-import com.deathrayresearch.forrester.measure.units.time.Day;
+import com.deathrayresearch.forrester.measure.units.time.TimeUnits;
 import com.deathrayresearch.forrester.measure.units.time.Times;
 import com.deathrayresearch.forrester.model.Flow;
 import com.deathrayresearch.forrester.model.Model;
@@ -41,7 +40,7 @@ public class FirstOrderMaterialDelay {
 
         model.addStock(potentialCustomers);
 
-        Simulation run = new Simulation(model, Day.getInstance(), Times.weeks( 52));
+        Simulation run = new Simulation(model, TimeUnits.DAY, Times.weeks( 52));
         run.addEventHandler(new StockLevelChartViewer());
         run.execute();
     }

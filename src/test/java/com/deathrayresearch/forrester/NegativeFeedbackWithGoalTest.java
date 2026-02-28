@@ -4,7 +4,7 @@ import com.deathrayresearch.forrester.measure.Dimension;
 import com.deathrayresearch.forrester.measure.Quantity;
 import com.deathrayresearch.forrester.measure.Unit;
 import com.deathrayresearch.forrester.measure.dimension.Item;
-import com.deathrayresearch.forrester.measure.units.time.Day;
+import com.deathrayresearch.forrester.measure.units.time.TimeUnits;
 import com.deathrayresearch.forrester.model.Model;
 import com.deathrayresearch.forrester.model.Stock;
 import com.deathrayresearch.forrester.model.Flow;
@@ -41,7 +41,7 @@ public class NegativeFeedbackWithGoalTest {
 
         model.addStock(inventoryOnHand);
 
-        Simulation run = new Simulation(model, Day.getInstance(), WEEK, 12);
+        Simulation run = new Simulation(model, TimeUnits.DAY, WEEK, 12);
         run.addEventHandler(new StockLevelChartViewer());
         run.execute();
     }
@@ -57,7 +57,7 @@ public class NegativeFeedbackWithGoalTest {
 
         @Override
         public Dimension getDimension() {
-            return Item.getInstance();
+            return Item.INSTANCE;
         }
 
         @Override
