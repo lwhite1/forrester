@@ -108,45 +108,43 @@ The chart viewers support series toggling via checkboxes and image export.
 
 ## Example Models
 
-The test suite contains a rich set of example models demonstrating the framework's capabilities:
+The demo package (`src/main/java/.../demo/`) contains a rich set of example models demonstrating the framework's capabilities. Each demo has a `main()` entry point and can be run directly.
 
 ### Fundamental
 
-| Model | Demonstrates |
+| Demo | Demonstrates |
 |---|---|
-| `ExponentialGrowthModel` | Unconstrained population growth with birth/death rates |
-| `ExponentialDecayModel` | Exponential decay pattern |
-| `CoffeeCoolingModel` | Newton's law of cooling via negative feedback |
-| `TubTest` | Simple bathtub inflow/outflow |
-| `sShapedPopulationGrowth` | Logistic growth with a carrying capacity |
+| `ExponentialGrowthDemo` | Unconstrained population growth with birth/death rates |
+| `ExponentialDecayDemo` | Exponential decay pattern |
+| `CoffeeCoolingDemo` | Newton's law of cooling via negative feedback |
+| `TubDemo` | Simple bathtub inflow/outflow |
+| `SShapedPopulationGrowthDemo` | Logistic growth with a carrying capacity |
+| `FlowTimeDemo` | Flow rate behavior across different time units |
 
 ### Delays
 
-| Model | Demonstrates |
+| Demo | Demonstrates |
 |---|---|
-| `FirstOrderMaterialDelay` | Exponential smoothing delay |
-| `SecondOrderMaterialDelay` | Two-stage material delay |
-| `ThirdOrderMaterialDelay` | Three-stage material delay |
-| `SimplePipelineDelay` | FIFO pipeline delay |
+| `FirstOrderMaterialDelayDemo` | Exponential smoothing delay |
+| `ThirdOrderMaterialDelayDemo` | Three-stage material delay |
+| `SimplePipelineDelayDemo` | FIFO pipeline delay |
 
 ### Feedback & Interaction
 
-| Model | Demonstrates |
+| Demo | Demonstrates |
 |---|---|
-| `NegativeFeedbackWithGoalTest` | Inventory adjustment toward a target level |
-| `SirInfectiousDiseaseModel` | SIR epidemiological model (Susceptible/Infected/Recovered) |
-| `PredatorPreyModel` | Lotka-Volterra predator-prey dynamics |
-| `InventoryModel` | Inventory management with perception, response, and delivery delays |
-| `SalesModel` | Sales pipeline dynamics |
+| `NegativeFeedbackDemo` | Inventory adjustment toward a target level |
+| `SirInfectiousDiseaseDemo` | SIR epidemiological model (Susceptible/Infected/Recovered) |
+| `PredatorPreyDemo` | Lotka-Volterra predator-prey dynamics |
+| `InventoryModelDemo` | Inventory management with perception, response, and delivery delays |
+| `SalesMixDemo` | Sales mix dynamics across product categories |
 
 ### Software Development
 
-| Model | Demonstrates |
+| Demo | Demonstrates |
 |---|---|
-| `AgileSoftwareDevelopment` | Agile team with backlog, defects, and productivity |
-| `WaterfallSoftwareDevelopment` | Waterfall methodology with rework cycles |
-
-The `largemodels/` directory contains more elaborate versions of the software development models with separate modules for development, workforce, testing, rework, and staff allocation.
+| `AgileSoftwareDevelopmentDemo` | Agile team with backlog, defects, and productivity |
+| `WaterfallSoftwareDevelopmentDemo` | Waterfall methodology with rework cycles and separate modules for development, workforce, testing, rework, and staff allocation |
 
 ## Usage Pattern
 
