@@ -47,6 +47,7 @@ com.deathrayresearch.forrester
 │   └── flows/                   # Rate conversion utilities
 ├── measure/                     # Dimensional analysis and unit system
 ├── event/                       # Event-driven communication
+├── sweep/                       # Parameter sweep runner and CSV output
 ├── io/                          # CSV export and reporting
 └── ui/                          # JavaFX chart visualization
 ```
@@ -184,6 +185,31 @@ Delay3 delayed = Delay3.of(() -> orders.getValue(), 6, sim::getCurrentStep);
 
 Smooth and Delay3 default their initial value to the first input (standard SD convention). An explicit initial value can be provided as an optional parameter.
 
+### Parameter Sweep (`sweep/` package)
+
+The `ParameterSweep` runner iterates an array of parameter values, builds a fresh model per value via a `DoubleFunction<Model>` factory, runs each simulation, and collects results. Each run gets its own object graph — no shared mutable state, no reset needed.
+
+```java
+SweepResult result = ParameterSweep.builder()
+    .parameterName("Contact Rate")
+    .parameterValues(ParameterSweep.linspace(2.0, 14.0, 2.0))
+    .modelFactory(this::buildSirModel)
+    .timeStep(DAY)
+    .duration(Times.weeks(8))
+    .build()
+    .execute();
+
+result.writeTimeSeriesCsv("sweep-timeseries.csv");
+result.writeSummaryCsv("sweep-summary.csv");
+```
+
+| Class | Purpose |
+|---|---|
+| `ParameterSweep` | Builder API + execute loop; includes `linspace()` utility for evenly spaced values |
+| `RunResult` | `EventHandler` that snapshots stock/variable values at each timestep for one run |
+| `SweepResult` | Aggregates run results; delegates to `SweepCsvWriter` for CSV export |
+| `SweepCsvWriter` | Static methods for time-series CSV (all steps, all runs) and summary CSV (final/peak per run) |
+
 ### Output & Visualization
 
 - **CsvSubscriber** - Writes simulation results to CSV files (columns: step, datetime, stock levels, variable values)
@@ -226,6 +252,8 @@ The demo package (`src/main/java/.../demo/`) contains a rich set of example mode
 **NegativeFeedbackDemo** — Demonstrates goal-seeking behavior via negative feedback. An Inventory stock (1,000 units) adjusts toward a target of 860 through a production inflow proportional to the gap divided by an 8-day adjustment time, approaching the goal asymptotically.
 
 **SirInfectiousDiseaseDemo** — Implements the classic SIR epidemiological model with three stocks: Susceptible (1,000), Infectious (10), and Recovered (0). Infection depends on contact rate, infectious fraction, and infectivity. Produces the characteristic epidemic curve — Infectious peaks then falls as the susceptible pool is depleted.
+
+**SirSweepDemo** — Demonstrates parameter sweeps using the SIR model. Sweeps contact rate from 2 to 14 (step 2) across 7 runs, writing time-series and summary CSVs to the system temp directory. Higher contact rates produce dramatically higher peak infections (10 → 480) and deplete the susceptible pool more completely.
 
 **PredatorPreyDemo** — Implements the Lotka-Volterra predator-prey model. Prey (Rabbits) and predator (Foxes) populations are coupled through birth and death flows that depend on both species' levels. The model produces sustained oscillations where predator peaks lag prey peaks.
 
@@ -292,6 +320,7 @@ New to system dynamics? These resources provide a solid introduction to the meth
 
 The project is at version 1.0-SNAPSHOT and is under active development. Recent work has focused on:
 
+- Adding `ParameterSweep` runner for multi-run analysis — sweeps a parameter across an array of values, builds a fresh model per value, and collects results into time-series and summary CSV output
 - Adding standard SD functions: `Step`, `Ramp`, `Smooth` (first-order information delay), and `Delay3` (third-order material delay)
 - Adding `LookupTable` for piecewise interpolation curves (linear and cubic spline) — the standard SD mechanism for nonlinear effects
 - Adding `NegativeValuePolicy` guardrails to `Stock` — prevents physical quantities from going negative by default
