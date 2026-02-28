@@ -3,7 +3,7 @@ package com.deathrayresearch.forrester.io;
 import com.deathrayresearch.forrester.demo.agile.AgileSoftwareDevelopmentDemo;
 import com.deathrayresearch.forrester.demo.waterfall.WaterfallSoftwareDevelopmentDemo;
 import com.deathrayresearch.forrester.model.Model;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class ModelReportTest {
 

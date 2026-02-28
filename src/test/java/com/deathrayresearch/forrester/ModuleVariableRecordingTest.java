@@ -4,12 +4,12 @@ import com.deathrayresearch.forrester.model.Model;
 import com.deathrayresearch.forrester.model.Module;
 import com.deathrayresearch.forrester.model.Stock;
 import com.deathrayresearch.forrester.model.Variable;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static com.deathrayresearch.forrester.measure.Units.DAY;
 import static com.deathrayresearch.forrester.measure.Units.DIMENSIONLESS;
 import static com.deathrayresearch.forrester.measure.Units.PEOPLE;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class ModuleVariableRecordingTest {
 

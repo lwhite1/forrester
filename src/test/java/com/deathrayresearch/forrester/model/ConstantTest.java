@@ -1,9 +1,9 @@
 package com.deathrayresearch.forrester.model;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static com.deathrayresearch.forrester.measure.Units.THING;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class ConstantTest {
 

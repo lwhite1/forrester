@@ -3,9 +3,9 @@ package com.deathrayresearch.forrester.model.flows;
 import com.deathrayresearch.forrester.measure.Quantity;
 import com.deathrayresearch.forrester.measure.units.length.LengthUnits;
 import com.deathrayresearch.forrester.measure.units.time.TimeUnits;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class RateConverterTest {
 

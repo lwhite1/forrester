@@ -1,16 +1,17 @@
 package com.deathrayresearch.forrester.measure;
 
 import com.deathrayresearch.forrester.measure.units.length.LengthUnits;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static com.deathrayresearch.forrester.measure.Units.GALLON_US;
 import static com.deathrayresearch.forrester.measure.Units.LITER;
 import static com.deathrayresearch.forrester.measure.Units.METER;
 import static com.deathrayresearch.forrester.measure.Units.MILE;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class QuantityTest {
 
@@ -52,18 +53,18 @@ public class QuantityTest {
         assertEquals(20, result.getValue(), 0.0);
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void shouldRejectAddingIncompatibleQuantities() {
         Quantity meters = new Quantity(10, METER);
         Quantity gallons = new Quantity(5, GALLON_US);
-        meters.add(gallons);
+        assertThrows(IllegalArgumentException.class, () -> meters.add(gallons));
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void shouldRejectSubtractingIncompatibleQuantities() {
         Quantity meters = new Quantity(10, METER);
         Quantity gallons = new Quantity(5, GALLON_US);
-        meters.subtract(gallons);
+        assertThrows(IllegalArgumentException.class, () -> meters.subtract(gallons));
     }
 
     @Test

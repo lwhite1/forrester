@@ -7,13 +7,13 @@ import com.deathrayresearch.forrester.model.Module;
 import com.deathrayresearch.forrester.model.Stock;
 import com.deathrayresearch.forrester.model.Variable;
 import com.deathrayresearch.forrester.model.flows.FlowPerMinute;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static com.deathrayresearch.forrester.measure.Units.GALLON_US;
 import static com.deathrayresearch.forrester.measure.Units.MINUTE;
 import static com.deathrayresearch.forrester.measure.Units.THING;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class SimulationTest {
 

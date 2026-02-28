@@ -2,12 +2,13 @@ package com.deathrayresearch.forrester.model;
 
 import com.deathrayresearch.forrester.measure.Quantity;
 import com.deathrayresearch.forrester.model.flows.FlowPerMinute;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static com.deathrayresearch.forrester.measure.Units.GALLON_US;
 import static com.deathrayresearch.forrester.measure.Units.MINUTE;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class StockTest {
 
@@ -47,16 +48,20 @@ public class StockTest {
         assertEquals(stock, outflow.getSource());
     }
 
-    @Test(expected = UnsupportedOperationException.class)
+    @Test
     public void shouldReturnUnmodifiableInflows() {
         Stock stock = new Stock("Water", 0, GALLON_US);
-        stock.getInflows().add(createConstantFlow("X", 1, GALLON_US));
+        assertThrows(UnsupportedOperationException.class, () -> {
+            stock.getInflows().add(createConstantFlow("X", 1, GALLON_US));
+        });
     }
 
-    @Test(expected = UnsupportedOperationException.class)
+    @Test
     public void shouldReturnUnmodifiableOutflows() {
         Stock stock = new Stock("Water", 0, GALLON_US);
-        stock.getOutflows().add(createConstantFlow("X", 1, GALLON_US));
+        assertThrows(UnsupportedOperationException.class, () -> {
+            stock.getOutflows().add(createConstantFlow("X", 1, GALLON_US));
+        });
     }
 
     @Test

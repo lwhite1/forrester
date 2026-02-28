@@ -1,18 +1,19 @@
 package com.deathrayresearch.forrester.model;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import static com.deathrayresearch.forrester.measure.Units.THING;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class ModelTest {
 
     private Model model;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         model = new Model("Test Model");
     }
@@ -67,23 +68,31 @@ public class ModelTest {
         assertEquals(1, model.getConstants().size());
     }
 
-    @Test(expected = UnsupportedOperationException.class)
+    @Test
     public void shouldReturnUnmodifiableStocks() {
-        model.getStocks().add(new Stock("X", 0, THING));
+        assertThrows(UnsupportedOperationException.class, () -> {
+            model.getStocks().add(new Stock("X", 0, THING));
+        });
     }
 
-    @Test(expected = UnsupportedOperationException.class)
+    @Test
     public void shouldReturnUnmodifiableModules() {
-        model.getModules().add(new Module("X"));
+        assertThrows(UnsupportedOperationException.class, () -> {
+            model.getModules().add(new Module("X"));
+        });
     }
 
-    @Test(expected = UnsupportedOperationException.class)
+    @Test
     public void shouldReturnUnmodifiableVariables() {
-        model.getVariables().add(new Variable("X", THING, () -> 0));
+        assertThrows(UnsupportedOperationException.class, () -> {
+            model.getVariables().add(new Variable("X", THING, () -> 0));
+        });
     }
 
-    @Test(expected = UnsupportedOperationException.class)
+    @Test
     public void shouldReturnUnmodifiableConstants() {
-        model.getConstants().add(new Constant("X", THING, 0));
+        assertThrows(UnsupportedOperationException.class, () -> {
+            model.getConstants().add(new Constant("X", THING, 0));
+        });
     }
 }

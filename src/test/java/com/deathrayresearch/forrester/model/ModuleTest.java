@@ -1,18 +1,19 @@
 package com.deathrayresearch.forrester.model;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import static com.deathrayresearch.forrester.measure.Units.MINUTE;
 import static com.deathrayresearch.forrester.measure.Units.THING;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class ModuleTest {
 
     private Module module;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         module = new Module("Test Module");
     }
@@ -30,14 +31,14 @@ public class ModuleTest {
         assertEquals(25.0, module.valueOfStock("S1").getValue(), 0.0);
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void shouldFailOnMissingStockName() {
-        module.valueOfStock("nonexistent");
+        assertThrows(IllegalArgumentException.class, () -> module.valueOfStock("nonexistent"));
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void shouldFailOnMissingFlowName() {
-        module.valueOfFlow("nonexistent", MINUTE);
+        assertThrows(IllegalArgumentException.class, () -> module.valueOfFlow("nonexistent", MINUTE));
     }
 
     @Test
