@@ -72,7 +72,7 @@ public class CsvSubscriber implements EventHandler {
         for (int i = 0; i < model.getVariableNames().size(); i++) {
             values.add(model.getVariableNames().get(i));
         }
-        csvWriter.writeNext(values.toArray(new String[model.getStockNames().size() + 1]));
+        csvWriter.writeNext(values.toArray(new String[values.size()]));
     }
 
     @Override

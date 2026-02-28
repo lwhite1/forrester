@@ -3,6 +3,7 @@ package com.deathrayresearch.forrester.measure.dimension;
 import com.deathrayresearch.forrester.measure.Converter;
 import com.deathrayresearch.forrester.measure.Dimension;
 import com.deathrayresearch.forrester.measure.Unit;
+import com.deathrayresearch.forrester.measure.units.dimensionless.DimensionlessUnits;
 
 public enum Dimensionless implements Dimension {
 
@@ -19,6 +20,6 @@ public enum Dimensionless implements Dimension {
 
     @Override
     public Unit getBaseUnit() {
-        return null;
+        return DimensionlessUnits.DIMENSIONLESS;
     }
 }

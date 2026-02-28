@@ -1,7 +1,10 @@
 package com.deathrayresearch.forrester.io;
 
-import com.deathrayresearch.forrester.model.*;
+import com.deathrayresearch.forrester.model.Constant;
 import com.deathrayresearch.forrester.model.Flow;
+import com.deathrayresearch.forrester.model.Model;
+import com.deathrayresearch.forrester.model.Stock;
+import com.deathrayresearch.forrester.model.Variable;
 
 import java.util.Map;
 
