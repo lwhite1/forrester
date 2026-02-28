@@ -12,7 +12,8 @@ import org.junit.Test;
 
 import java.time.Duration;
 
-import static com.deathrayresearch.forrester.measure.Units.*;
+import static com.deathrayresearch.forrester.measure.Units.GALLON_US;
+import static com.deathrayresearch.forrester.measure.Units.MINUTE;
 
 /**
  *

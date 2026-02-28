@@ -11,7 +11,8 @@ import com.deathrayresearch.forrester.model.flows.FlowPerDay;
 import com.deathrayresearch.forrester.ui.StockLevelChartViewer;
 import org.junit.Test;
 
-import static com.deathrayresearch.forrester.measure.Units.*;
+import static com.deathrayresearch.forrester.measure.Units.DAY;
+import static com.deathrayresearch.forrester.measure.Units.THING;
 
 public class InventoryModelTest {
 

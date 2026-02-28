@@ -13,7 +13,9 @@ import com.deathrayresearch.forrester.model.flows.FlowPerHour;
 import com.deathrayresearch.forrester.ui.StockLevelChartViewer;
 import org.junit.Test;
 
-import static com.deathrayresearch.forrester.measure.Units.*;
+import static com.deathrayresearch.forrester.measure.Units.HOUR;
+import static com.deathrayresearch.forrester.measure.Units.THING;
+import static com.deathrayresearch.forrester.measure.Units.WEEK;
 
 /**
  *

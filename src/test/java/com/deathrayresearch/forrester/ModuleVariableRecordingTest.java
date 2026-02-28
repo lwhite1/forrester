@@ -6,7 +6,9 @@ import com.deathrayresearch.forrester.model.Stock;
 import com.deathrayresearch.forrester.model.Variable;
 import org.junit.Test;
 
-import static com.deathrayresearch.forrester.measure.Units.*;
+import static com.deathrayresearch.forrester.measure.Units.DAY;
+import static com.deathrayresearch.forrester.measure.Units.DIMENSIONLESS;
+import static com.deathrayresearch.forrester.measure.Units.PEOPLE;
 import static org.junit.Assert.assertEquals;
 
 public class ModuleVariableRecordingTest {

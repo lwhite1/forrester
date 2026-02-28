@@ -12,7 +12,8 @@ import com.deathrayresearch.forrester.model.Variable;
 import com.deathrayresearch.forrester.model.flows.FlowPerDay;
 import com.deathrayresearch.forrester.ui.StockLevelChartViewer;
 
-import static com.deathrayresearch.forrester.measure.Units.*;
+import static com.deathrayresearch.forrester.measure.Units.HOUR;
+import static com.deathrayresearch.forrester.measure.Units.WEEK;
 
 public class FlowTimeTest {
 

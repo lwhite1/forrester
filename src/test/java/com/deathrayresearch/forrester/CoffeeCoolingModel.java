@@ -10,7 +10,8 @@ import com.deathrayresearch.forrester.model.flows.FlowPerMinute;
 import com.deathrayresearch.forrester.ui.FlowChartViewer;
 import org.junit.Test;
 
-import static com.deathrayresearch.forrester.measure.Units.*;
+import static com.deathrayresearch.forrester.measure.Units.CENTIGRADE;
+import static com.deathrayresearch.forrester.measure.Units.MINUTE;
 
 /**
  *

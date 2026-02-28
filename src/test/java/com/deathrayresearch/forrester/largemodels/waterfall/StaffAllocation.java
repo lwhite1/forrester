@@ -11,7 +11,12 @@ import com.deathrayresearch.forrester.model.Module;
 import com.deathrayresearch.forrester.model.Stock;
 import com.deathrayresearch.forrester.model.Variable;
 
-import static com.deathrayresearch.forrester.largemodels.waterfall.WaterfallSoftwareDevelopment.*;
+import static com.deathrayresearch.forrester.largemodels.waterfall.WaterfallSoftwareDevelopment.DAILY_RESOURCES_FOR_SOFTWARE_PRODUCTION;
+import static com.deathrayresearch.forrester.largemodels.waterfall.WaterfallSoftwareDevelopment.PEOPLE;
+import static com.deathrayresearch.forrester.largemodels.waterfall.WaterfallSoftwareDevelopment.DAILY_RESOURCES_FOR_TRAINING;
+import static com.deathrayresearch.forrester.largemodels.waterfall.WaterfallSoftwareDevelopment.DAILY_RESOURCES_PERFORMING_QA;
+import static com.deathrayresearch.forrester.largemodels.waterfall.WaterfallSoftwareDevelopment.STAFF_ALLOCATION;
+import static com.deathrayresearch.forrester.largemodels.waterfall.WaterfallSoftwareDevelopment.TOTAL_WORKFORCE;
 
 /**
  */

@@ -14,7 +14,10 @@ import com.deathrayresearch.forrester.model.flows.FlowPerDay;
 import com.deathrayresearch.forrester.ui.StockLevelChartViewer;
 import org.junit.Test;
 
-import static com.deathrayresearch.forrester.measure.Units.*;
+import static com.deathrayresearch.forrester.measure.Units.DIMENSIONLESS;
+import static com.deathrayresearch.forrester.measure.Units.PEOPLE;
+import static com.deathrayresearch.forrester.measure.Units.US_DOLLAR;
+import static com.deathrayresearch.forrester.measure.Units.WEEK;
 
 /**
  *

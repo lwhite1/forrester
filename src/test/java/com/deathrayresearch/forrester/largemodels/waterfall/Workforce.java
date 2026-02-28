@@ -13,7 +13,19 @@ import com.deathrayresearch.forrester.model.Variable;
 import com.deathrayresearch.forrester.model.Flow;
 import com.deathrayresearch.forrester.model.flows.FlowPerDay;
 
-import static com.deathrayresearch.forrester.largemodels.waterfall.WaterfallSoftwareDevelopment.*;
+import static com.deathrayresearch.forrester.largemodels.waterfall.WaterfallSoftwareDevelopment.DAILY_RESOURCES_FOR_TRAINING;
+import static com.deathrayresearch.forrester.largemodels.waterfall.WaterfallSoftwareDevelopment.DESIRED_WORKFORCE;
+import static com.deathrayresearch.forrester.largemodels.waterfall.WaterfallSoftwareDevelopment.EXPERIENCED;
+import static com.deathrayresearch.forrester.largemodels.waterfall.WaterfallSoftwareDevelopment.EXPERIENCED_WORKFORCE_FTE;
+import static com.deathrayresearch.forrester.largemodels.waterfall.WaterfallSoftwareDevelopment.FRACTION_OF_WORKFORCE_WITH_EXPERIENCE;
+import static com.deathrayresearch.forrester.largemodels.waterfall.WaterfallSoftwareDevelopment.NEW_HIRE_CAP;
+import static com.deathrayresearch.forrester.largemodels.waterfall.WaterfallSoftwareDevelopment.NEWLY_HIRED;
+import static com.deathrayresearch.forrester.largemodels.waterfall.WaterfallSoftwareDevelopment.TOTAL_WORKFORCE;
+import static com.deathrayresearch.forrester.largemodels.waterfall.WaterfallSoftwareDevelopment.TOTAL_WORKFORCE_CAP;
+import static com.deathrayresearch.forrester.largemodels.waterfall.WaterfallSoftwareDevelopment.WORKFORCE;
+import static com.deathrayresearch.forrester.largemodels.waterfall.WaterfallSoftwareDevelopment.WORKFORCE_FTE;
+import static com.deathrayresearch.forrester.largemodels.waterfall.WaterfallSoftwareDevelopment.WORKFORCE_GAP;
+import static com.deathrayresearch.forrester.largemodels.waterfall.WaterfallSoftwareDevelopment.WORKFORCE_NEED;
 
 /**
  *

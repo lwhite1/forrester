@@ -3,7 +3,7 @@ package com.deathrayresearch.forrester.measure;
 import com.deathrayresearch.forrester.measure.units.length.LengthUnits;
 import org.junit.Test;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 /**
  * Tests for Unit conversion
