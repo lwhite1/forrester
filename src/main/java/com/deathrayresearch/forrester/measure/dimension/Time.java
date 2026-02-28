@@ -23,8 +23,4 @@ public class Time implements Dimension {
         return Second.getInstance();
     }
 
-    @Override
-    public Converter getConverter() {
-        return null;
-    }
 }

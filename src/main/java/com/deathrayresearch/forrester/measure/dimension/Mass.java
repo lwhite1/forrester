@@ -17,11 +17,6 @@ public class Mass implements Dimension {
     }
 
     @Override
-    public Converter getConverter() {
-        return null;
-    }
-
-    @Override
     public Unit getBaseUnit() {
         return Kilogram.getInstance();
     }

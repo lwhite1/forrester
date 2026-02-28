@@ -21,7 +21,14 @@ public interface Dimension {
     Dimension ITEM = Item.getInstance();
     Dimension TEMPERATURE = Temperature.getInstance();
 
-    Converter getConverter();
+    default Converter getConverter() {
+        return (originalQuantity, newUnit) -> {
+            if (!newUnit.getDimension().equals(originalQuantity.getUnit().getDimension())) {
+                throw new IllegalArgumentException("Cannot convert between incompatible dimensions");
+            }
+            return newUnit.fromBaseUnits(originalQuantity.inBaseUnits());
+        };
+    }
 
     Unit getBaseUnit();
 }

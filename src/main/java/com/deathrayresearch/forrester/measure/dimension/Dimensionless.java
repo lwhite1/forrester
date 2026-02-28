@@ -17,7 +17,7 @@ public class Dimensionless implements Dimension {
 
     @Override
     public Converter getConverter() {
-        return null;
+        throw new UnsupportedOperationException("Dimensionless quantities have no unit conversion");
     }
 
     @Override

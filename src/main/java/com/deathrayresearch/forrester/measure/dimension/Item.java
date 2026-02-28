@@ -24,8 +24,4 @@ public class Item implements Dimension {
         return Thing.getInstance();
     }
 
-    @Override
-    public Converter getConverter() {
-        return null;
-    }
 }

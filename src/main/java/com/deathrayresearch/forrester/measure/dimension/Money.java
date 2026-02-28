@@ -17,11 +17,6 @@ public class Money implements Dimension {
     }
 
     @Override
-    public Converter getConverter() {
-        return null;
-    }
-
-    @Override
     public Unit getBaseUnit() {
         return USD.getInstance();
     }

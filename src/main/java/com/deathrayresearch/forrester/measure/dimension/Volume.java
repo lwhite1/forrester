@@ -18,11 +18,6 @@ public class Volume implements Dimension {
     }
 
     @Override
-    public Converter getConverter() {
-        return null;
-    }
-
-    @Override
     public Unit getBaseUnit() {
         return Liter.getInstance();
     }
