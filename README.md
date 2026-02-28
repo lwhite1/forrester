@@ -210,6 +210,48 @@ result.writeSummaryCsv("sweep-summary.csv");
 | `SweepResult` | Aggregates run results; delegates to `SweepCsvWriter` for CSV export |
 | `SweepCsvWriter` | Static methods for time-series CSV (all steps, all runs) and summary CSV (final/peak per run) |
 
+### Monte Carlo Simulation (`sweep/` package)
+
+The `MonteCarlo` runner extends the sweep infrastructure to uncertainty analysis. Multiple parameters are sampled from probability distributions (using Apache Commons Math) across hundreds of runs. Results are aggregated into percentile envelopes for statistical analysis and fan chart visualization.
+
+**Sampling methods:**
+
+| Method | Description |
+|---|---|
+| `RANDOM` | Pure Monte Carlo — independent random draws from each distribution |
+| `LATIN_HYPERCUBE` (default) | Stratified sampling — better coverage of the parameter space with fewer iterations |
+
+```java
+MonteCarloResult result = MonteCarlo.builder()
+    .parameter("Contact Rate", new NormalDistribution(8, 2))
+    .parameter("Infectivity", new UniformRealDistribution(0.05, 0.15))
+    .modelFactory(params -> buildModel(params.get("Contact Rate"), params.get("Infectivity")))
+    .iterations(200)
+    .sampling(SamplingMethod.LATIN_HYPERCUBE)
+    .seed(42L)
+    .timeStep(DAY)
+    .duration(Times.weeks(8))
+    .build()
+    .execute();
+
+// Extract percentile series for analysis
+double[] median = result.getPercentileSeries("Infectious", 50);
+double[] mean = result.getMeanSeries("Infectious");
+
+// Export percentile envelope to CSV
+result.writePercentileCsv("output.csv", "Infectious", 2.5, 25, 50, 75, 97.5);
+
+// Display interactive fan chart
+FanChart.show(result, "Infectious");
+```
+
+| Class | Purpose |
+|---|---|
+| `MonteCarlo` | Builder API + execute loop with random/LHS sampling; accepts `RealDistribution` per parameter |
+| `MonteCarloResult` | Aggregates run results; computes percentile and mean series via `DescriptiveStatistics`; CSV export |
+| `SamplingMethod` | Enum: `RANDOM` or `LATIN_HYPERCUBE` |
+| `FanChart` | JavaFX Canvas-based fan chart — renders nested percentile bands (95%, 75%, 50%) with median line |
+
 ### Output & Visualization
 
 - **CsvSubscriber** - Writes simulation results to CSV files (columns: step, datetime, stock levels, variable values)
@@ -254,6 +296,8 @@ The demo package (`src/main/java/.../demo/`) contains a rich set of example mode
 **SirInfectiousDiseaseDemo** — Implements the classic SIR epidemiological model with three stocks: Susceptible (1,000), Infectious (10), and Recovered (0). Infection depends on contact rate, infectious fraction, and infectivity. Produces the characteristic epidemic curve — Infectious peaks then falls as the susceptible pool is depleted.
 
 **SirSweepDemo** — Demonstrates parameter sweeps using the SIR model. Sweeps contact rate from 2 to 14 (step 2) across 7 runs, writing time-series and summary CSVs to the system temp directory. Higher contact rates produce dramatically higher peak infections (10 → 480) and deplete the susceptible pool more completely.
+
+**SirMonteCarloDemo** — Demonstrates Monte Carlo simulation on the SIR model with two uncertain parameters: contact rate (Normal distribution, mean=8, sd=2) and infectivity (Uniform distribution, 0.05–0.15). Runs 200 iterations with Latin Hypercube Sampling, writes percentile CSV output, and displays a fan chart showing the uncertainty envelope around the Infectious stock trajectory.
 
 **PredatorPreyDemo** — Implements the Lotka-Volterra predator-prey model. Prey (Rabbits) and predator (Foxes) populations are coupled through birth and death flows that depend on both species' levels. The model produces sustained oscillations where predator peaks lag prey peaks.
 
@@ -320,6 +364,7 @@ New to system dynamics? These resources provide a solid introduction to the meth
 
 The project is at version 1.0-SNAPSHOT and is under active development. Recent work has focused on:
 
+- Adding `MonteCarlo` runner for uncertainty analysis — samples multiple parameters from probability distributions (Normal, Uniform, Triangular, etc.) via random or Latin Hypercube Sampling, aggregates results into percentile envelopes, and visualizes as fan charts
 - Adding `ParameterSweep` runner for multi-run analysis — sweeps a parameter across an array of values, builds a fresh model per value, and collects results into time-series and summary CSV output
 - Adding standard SD functions: `Step`, `Ramp`, `Smooth` (first-order information delay), and `Delay3` (third-order material delay)
 - Adding `LookupTable` for piecewise interpolation curves (linear and cubic spline) — the standard SD mechanism for nonlinear effects

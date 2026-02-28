@@ -9,10 +9,10 @@
     Flow births = Flows.exponentialGrowth("Births", DAY, population, 0.04);
     population.addInflow(births);
 
-- Strong demo collection. The 15 demos cover the core SD curriculum well — exponential
+- Strong demo collection. The 15+ demos cover the core SD curriculum well — exponential
   growth/decay, S-curves, goal-seeking, pipeline delays, material delays, predator-prey, SIR
-  epidemiology, inventory oscillations, software project dynamics, and parameter sweeps. Several
-  are drawn directly from Meadows' Thinking in Systems.
+  epidemiology, inventory oscillations, software project dynamics, parameter sweeps, and Monte
+  Carlo uncertainty analysis. Several are drawn directly from Meadows' Thinking in Systems.
 
 - Dimensional analysis is a standout. The measurement system with 8 dimensions, 25+ units,
   automatic rate conversion, and immutable quantities is cleaner than what most commercial SD tools
@@ -29,16 +29,17 @@
   output. The builder API is clean and the model-factory approach avoids shared mutable state.
   The SIR sweep demo clearly shows how contact rate drives epidemic severity.
 
+- Monte Carlo simulation enables uncertainty analysis. The `MonteCarlo` runner samples multiple
+  parameters from probability distributions (Normal, Uniform, Triangular, etc.) using random or
+  Latin Hypercube Sampling across hundreds of runs. Results are aggregated into percentile
+  envelopes with statistical summaries (percentiles, means) and fan chart visualization. This
+  closes the biggest gap between "educational tool" and "useful analysis tool."
+
 ## Limitations
 
 - No visual editor. This is the biggest gap for learning. Commercial tools (Vensim, Stella,
 AnyLogic) let you draw stock-and-flow diagrams and see feedback structure visually. Here,
 learners must infer loop structure from code alone.
-- No Monte Carlo / uncertainty analysis. Parameter sweeps cover deterministic sensitivity
-  (one parameter at a time), but there's no support for random sampling from distributions,
-  multi-parameter Latin hypercube designs, or confidence interval output. This is the natural
-  next step — the sweep infrastructure already accepts arrays, so Monte Carlo is primarily
-  about adding distribution sampling and statistical summary.
 - No optimization or goal-seeking. Can't automatically find parameter values that minimize an
   objective function (e.g., "what contact rate keeps peak infections below 100?").
 - No arrays/subscripts. Can't model multiple products, regions, or age cohorts without duplicating
@@ -53,9 +54,9 @@ learners must infer loop structure from code alone.
 | SD courses for engineers | Very good — demos cover the standard curriculum |
 | Prototyping before Vensim/Stella | Good — quick to iterate, then migrate |
 | Deterministic sensitivity analysis | Good — parameter sweeps with CSV output cover single-parameter what-if analysis |
+| Uncertainty analysis / research | Good — Monte Carlo with LHS, percentile envelopes, and fan charts cover multi-parameter uncertainty quantification |
 | Non-programmers | Poor — no visual editor |
-| Production/enterprise modeling | Fair — has sensitivity analysis but lacks optimization and uncertainty quantification |
-| Research requiring uncertainty analysis | Poor — no Monte Carlo or distribution sampling |
+| Production/enterprise modeling | Fair — has sensitivity and uncertainty analysis but lacks optimization |
 
 ## Bottom Line
 
@@ -63,38 +64,32 @@ learners must infer loop structure from code alone.
 pedagogically sound, and the dimensional analysis is genuinely excellent. It's well-suited for
 learning the mechanics of SD (stocks, flows, feedback, delays) through hands-on coding.
 
-- The addition of parameter sweeps moves Forrester from "educational only" toward "useful for
-  analysis." A user can now sweep a parameter, export CSV, and draw conclusions about model
-  sensitivity — a real workflow that commercial tools support.
+- The addition of parameter sweeps and Monte Carlo simulation moves Forrester from "educational
+  only" toward "useful for analysis." A user can now sweep parameters deterministically, run
+  Monte Carlo with distribution sampling and Latin Hypercube designs, extract percentile
+  envelopes, export CSV, and visualize uncertainty via fan charts — a real workflow that
+  commercial tools support.
 
-- It's not a replacement for Vensim or Stella for serious modeling work. The absence of Monte
-  Carlo analysis, optimization, and visual diagrams means analysts would hit walls on real-world
-  models that require uncertainty quantification or multi-parameter exploration.
+- It's not a replacement for Vensim or Stella for serious modeling work. The absence of
+  optimization and visual diagrams means analysts would hit walls on models that require
+  automated calibration or visual feedback-loop analysis.
 
 ## What Matters Most Next
 
 Ranked by impact on the gap between "educational tool" and "useful modeling tool":
 
-1. **Monte Carlo runner** — Highest leverage. The sweep infrastructure already iterates arrays and
-   collects results. Monte Carlo adds: (a) distribution sampling (uniform, normal, triangular) to
-   produce the array, (b) multi-parameter support (sample N parameters jointly), and (c) statistical
-   summary output (mean, percentiles, confidence intervals). This unlocks uncertainty analysis —
-   the single biggest gap for research and production use.
-
-2. **Multi-parameter sweeps** — Currently sweeps vary one parameter at a time. Supporting
+1. **Multi-parameter sweeps** — Currently sweeps vary one parameter at a time. Supporting
    combinatorial grids (sweep parameter A x parameter B) or correlated sampling would enable
    interaction analysis. The model-factory pattern already supports this — the factory just needs
    to accept a parameter vector instead of a single double.
-
-3. **Programmatic result access** — `RunResult` captures full time series, but there's no
-   aggregation API for cross-run analysis (e.g., "mean trajectory across all runs," "percentile
-   bands at each timestep"). Adding statistical summaries to `SweepResult` would make Monte Carlo
-   output immediately useful without requiring external tools.
-
-4. **Visual diagram generation** — The biggest learning gap. Even generating a static DOT/Graphviz
+2. **Visual diagram generation** — The biggest learning gap. Even generating a static DOT/Graphviz
    diagram of the stock-flow structure from a `Model` object would help learners see feedback loops.
    Doesn't need to be interactive to be valuable.
-
-5. **Arrays/subscripts** — Important for real-world models (age cohorts, regions, product lines)
+3. **Optimization / calibration** — Automatically finding parameter values that minimize an
+   objective function would enable model calibration against historical data and policy
+   optimization. Could build on the Monte Carlo infrastructure.
+4. **Arrays/subscripts** — Important for real-world models (age cohorts, regions, product lines)
    but a large design effort. Lower priority than the analysis features above because the current
    workaround (duplicate stocks) is ugly but functional for small models.
+5. **Nested Modules** — Current support for modules is limited to one level. Necessary for building
+   larger, more complex models.
