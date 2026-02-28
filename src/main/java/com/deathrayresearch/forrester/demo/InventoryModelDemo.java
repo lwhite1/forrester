@@ -1,5 +1,6 @@
-package com.deathrayresearch.forrester;
+package com.deathrayresearch.forrester.demo;
 
+import com.deathrayresearch.forrester.Simulation;
 import com.deathrayresearch.forrester.measure.Quantity;
 import com.deathrayresearch.forrester.measure.Unit;
 import com.deathrayresearch.forrester.model.Flow;
@@ -9,12 +10,11 @@ import com.deathrayresearch.forrester.model.Stock;
 import com.deathrayresearch.forrester.model.Variable;
 import com.deathrayresearch.forrester.model.flows.FlowPerDay;
 import com.deathrayresearch.forrester.ui.StockLevelChartViewer;
-import org.junit.Test;
 
 import static com.deathrayresearch.forrester.measure.Units.DAY;
 import static com.deathrayresearch.forrester.measure.Units.THING;
 
-public class InventoryModelTest {
+public class InventoryModelDemo {
 
     private static final Unit CARS = THING;
 
@@ -23,8 +23,11 @@ public class InventoryModelTest {
     private static final double RESPONSE_DELAY = 0;
     private static final double DELIVERY_DELAY = 0;
 
-    @Test
-    public void testRun1() {
+    public static void main(String[] args) {
+        new InventoryModelDemo().run();
+    }
+
+    public void run() {
 
         Model model = new Model("Inventory Model");
         model.setComment("From 'Thinking in Systems': Illustrates the effects of delays. ");

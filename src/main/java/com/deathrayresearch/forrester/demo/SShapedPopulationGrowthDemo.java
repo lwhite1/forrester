@@ -1,5 +1,6 @@
-package com.deathrayresearch.forrester;
+package com.deathrayresearch.forrester.demo;
 
+import com.deathrayresearch.forrester.Simulation;
 import com.deathrayresearch.forrester.archetypes.ExponentialChangeWithLimit;
 import com.deathrayresearch.forrester.measure.Quantity;
 import com.deathrayresearch.forrester.model.Constant;
@@ -8,7 +9,6 @@ import com.deathrayresearch.forrester.model.Stock;
 import com.deathrayresearch.forrester.model.Flow;
 import com.deathrayresearch.forrester.model.flows.FlowPerDay;
 import com.deathrayresearch.forrester.ui.StockLevelChartViewer;
-import org.junit.Test;
 
 import static com.deathrayresearch.forrester.measure.Units.DIMENSIONLESS;
 import static com.deathrayresearch.forrester.measure.Units.PEOPLE;
@@ -18,10 +18,13 @@ import static com.deathrayresearch.forrester.measure.Units.WEEK;
 /**
  *
  */
-public class sShapedPopulationGrowth {
+public class SShapedPopulationGrowthDemo {
 
-    @Test
-    public void testRun1() {
+    public static void main(String[] args) {
+        new SShapedPopulationGrowthDemo().run();
+    }
+
+    public void run() {
         Model model = new Model("Population with S-Shaped Growth");
 
         Stock population = new Stock("population", 10, PEOPLE);

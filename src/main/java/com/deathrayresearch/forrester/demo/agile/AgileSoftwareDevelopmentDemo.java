@@ -1,4 +1,4 @@
-package com.deathrayresearch.forrester.largemodels.agile;
+package com.deathrayresearch.forrester.demo.agile;
 
 import com.deathrayresearch.forrester.Simulation;
 import com.deathrayresearch.forrester.measure.Quantity;
@@ -10,14 +10,13 @@ import com.deathrayresearch.forrester.model.Stock;
 import com.deathrayresearch.forrester.model.Flow;
 import com.deathrayresearch.forrester.model.flows.FlowPerWeek;
 import com.deathrayresearch.forrester.ui.StockLevelChartViewer;
-import org.junit.Test;
 
 import static com.deathrayresearch.forrester.measure.Units.WEEK;
 
 /**
  *
  */
-public class AgileSoftwareDevelopmentTest {
+public class AgileSoftwareDevelopmentDemo {
 
     private static final Unit WORK = new ItemUnit("task");
     private static final Unit DEFECT = new ItemUnit("defect");
@@ -34,8 +33,11 @@ public class AgileSoftwareDevelopmentTest {
 
     double nominalFractionCorrectAndComplete = .80;
 
-    @Test
-    public void testRun1() {
+    public static void main(String[] args) {
+        new AgileSoftwareDevelopmentDemo().run();
+    }
+
+    public void run() {
 
         Simulation run = new Simulation(getModel(), TimeUnits.DAY, WEEK,52);
         run.addEventHandler(new StockLevelChartViewer());

@@ -1,4 +1,4 @@
-package com.deathrayresearch.forrester.largemodels.waterfall;
+package com.deathrayresearch.forrester.demo.waterfall;
 
 import com.deathrayresearch.forrester.measure.Unit;
 import com.deathrayresearch.forrester.measure.units.dimensionless.DimensionlessUnits;
@@ -11,12 +11,12 @@ import com.deathrayresearch.forrester.model.Module;
 import com.deathrayresearch.forrester.model.Stock;
 import com.deathrayresearch.forrester.model.Variable;
 
-import static com.deathrayresearch.forrester.largemodels.waterfall.WaterfallSoftwareDevelopment.DAILY_RESOURCES_FOR_SOFTWARE_PRODUCTION;
-import static com.deathrayresearch.forrester.largemodels.waterfall.WaterfallSoftwareDevelopment.PEOPLE;
-import static com.deathrayresearch.forrester.largemodels.waterfall.WaterfallSoftwareDevelopment.DAILY_RESOURCES_FOR_TRAINING;
-import static com.deathrayresearch.forrester.largemodels.waterfall.WaterfallSoftwareDevelopment.DAILY_RESOURCES_PERFORMING_QA;
-import static com.deathrayresearch.forrester.largemodels.waterfall.WaterfallSoftwareDevelopment.STAFF_ALLOCATION;
-import static com.deathrayresearch.forrester.largemodels.waterfall.WaterfallSoftwareDevelopment.TOTAL_WORKFORCE;
+import static com.deathrayresearch.forrester.demo.waterfall.WaterfallSoftwareDevelopmentDemo.DAILY_RESOURCES_FOR_SOFTWARE_PRODUCTION;
+import static com.deathrayresearch.forrester.demo.waterfall.WaterfallSoftwareDevelopmentDemo.PEOPLE;
+import static com.deathrayresearch.forrester.demo.waterfall.WaterfallSoftwareDevelopmentDemo.DAILY_RESOURCES_FOR_TRAINING;
+import static com.deathrayresearch.forrester.demo.waterfall.WaterfallSoftwareDevelopmentDemo.DAILY_RESOURCES_PERFORMING_QA;
+import static com.deathrayresearch.forrester.demo.waterfall.WaterfallSoftwareDevelopmentDemo.STAFF_ALLOCATION;
+import static com.deathrayresearch.forrester.demo.waterfall.WaterfallSoftwareDevelopmentDemo.TOTAL_WORKFORCE;
 
 /**
  */
@@ -27,11 +27,11 @@ class StaffAllocation {
 
     static Module getStaffAllocationModule(Model model) {
 
-        Module module = new Module(WaterfallSoftwareDevelopment.STAFF_ALLOCATION);
+        Module module = new Module(WaterfallSoftwareDevelopmentDemo.STAFF_ALLOCATION);
 
         Variable totalDailyStaffing = new Variable("Total daily dev. resources",
                 PEOPLE,
-                () -> model.getVariable(WaterfallSoftwareDevelopment.TOTAL_WORKFORCE).getValue()
+                () -> model.getVariable(WaterfallSoftwareDevelopmentDemo.TOTAL_WORKFORCE).getValue()
                         * Workforce.AVERAGE_DAILY_MAN_POWER_PER_STAFF.getValue());
 
 

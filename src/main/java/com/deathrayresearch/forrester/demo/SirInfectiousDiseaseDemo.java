@@ -1,5 +1,6 @@
-package com.deathrayresearch.forrester;
+package com.deathrayresearch.forrester.demo;
 
+import com.deathrayresearch.forrester.Simulation;
 import com.deathrayresearch.forrester.io.CsvSubscriber;
 import com.deathrayresearch.forrester.measure.Quantity;
 import com.deathrayresearch.forrester.measure.units.time.Times;
@@ -9,7 +10,6 @@ import com.deathrayresearch.forrester.model.Stock;
 import com.deathrayresearch.forrester.model.Flow;
 import com.deathrayresearch.forrester.model.flows.FlowPerDay;
 import com.deathrayresearch.forrester.ui.StockLevelChartViewer;
-import org.junit.Test;
 
 import static com.deathrayresearch.forrester.measure.Units.DAY;
 import static com.deathrayresearch.forrester.measure.Units.PEOPLE;
@@ -17,10 +17,13 @@ import static com.deathrayresearch.forrester.measure.Units.PEOPLE;
 /**
  *
  */
-public class SirInfectiousDiseaseModel {
+public class SirInfectiousDiseaseDemo {
 
-    @Test
-    public void testRun1() {
+    public static void main(String[] args) {
+        new SirInfectiousDiseaseDemo().run();
+    }
+
+    public void run() {
         Model model = new Model("SIR Infectious Disease Model");
 
         Stock susceptiblePopulation = new Stock("Susceptible", 1000, PEOPLE);

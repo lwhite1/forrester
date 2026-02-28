@@ -1,5 +1,6 @@
-package com.deathrayresearch.forrester;
+package com.deathrayresearch.forrester.demo;
 
+import com.deathrayresearch.forrester.Simulation;
 import com.deathrayresearch.forrester.io.CsvSubscriber;
 import com.deathrayresearch.forrester.measure.Quantity;
 import com.deathrayresearch.forrester.measure.units.volume.Volumes;
@@ -8,7 +9,6 @@ import com.deathrayresearch.forrester.model.Stock;
 import com.deathrayresearch.forrester.model.Flow;
 import com.deathrayresearch.forrester.model.flows.FlowPerMinute;
 import com.deathrayresearch.forrester.ui.StockLevelChartViewer;
-import org.junit.Test;
 
 import java.time.Duration;
 
@@ -18,10 +18,13 @@ import static com.deathrayresearch.forrester.measure.Units.MINUTE;
 /**
  *
  */
-public class TubTest {
+public class TubDemo {
 
-    @Test
-    public void testRun1() {
+    public static void main(String[] args) {
+        new TubDemo().run();
+    }
+
+    public void run() {
 
         Model model = new Model("Tub model");
         Simulation run = new Simulation(model, MINUTE, MINUTE, 10);

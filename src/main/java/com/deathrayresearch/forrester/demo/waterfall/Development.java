@@ -1,4 +1,4 @@
-package com.deathrayresearch.forrester.largemodels.waterfall;
+package com.deathrayresearch.forrester.demo.waterfall;
 
 import com.deathrayresearch.forrester.measure.Quantity;
 import com.deathrayresearch.forrester.measure.Unit;
@@ -13,11 +13,11 @@ import com.deathrayresearch.forrester.model.Variable;
 import com.deathrayresearch.forrester.model.Flow;
 import com.deathrayresearch.forrester.model.flows.FlowPerDay;
 
-import static com.deathrayresearch.forrester.largemodels.waterfall.WaterfallSoftwareDevelopment.DAILY_RESOURCES_FOR_SOFTWARE_PRODUCTION;
-import static com.deathrayresearch.forrester.largemodels.waterfall.WaterfallSoftwareDevelopment.DEVELOPMENT;
-import static com.deathrayresearch.forrester.largemodels.waterfall.WaterfallSoftwareDevelopment.FRACTION_OF_WORKFORCE_WITH_EXPERIENCE;
-import static com.deathrayresearch.forrester.largemodels.waterfall.WaterfallSoftwareDevelopment.POTENTIAL_PRODUCTIVITY;
-import static com.deathrayresearch.forrester.largemodels.waterfall.WaterfallSoftwareDevelopment.TASKS_DEVELOPED;
+import static com.deathrayresearch.forrester.demo.waterfall.WaterfallSoftwareDevelopmentDemo.DAILY_RESOURCES_FOR_SOFTWARE_PRODUCTION;
+import static com.deathrayresearch.forrester.demo.waterfall.WaterfallSoftwareDevelopmentDemo.DEVELOPMENT;
+import static com.deathrayresearch.forrester.demo.waterfall.WaterfallSoftwareDevelopmentDemo.FRACTION_OF_WORKFORCE_WITH_EXPERIENCE;
+import static com.deathrayresearch.forrester.demo.waterfall.WaterfallSoftwareDevelopmentDemo.POTENTIAL_PRODUCTIVITY;
+import static com.deathrayresearch.forrester.demo.waterfall.WaterfallSoftwareDevelopmentDemo.TASKS_DEVELOPED;
 
 /**
  *

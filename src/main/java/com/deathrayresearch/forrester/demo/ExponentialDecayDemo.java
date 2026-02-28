@@ -1,5 +1,6 @@
-package com.deathrayresearch.forrester;
+package com.deathrayresearch.forrester.demo;
 
+import com.deathrayresearch.forrester.Simulation;
 import com.deathrayresearch.forrester.archetypes.SimpleExponentialChange;
 import com.deathrayresearch.forrester.measure.Quantity;
 import com.deathrayresearch.forrester.measure.units.time.TimeUnits;
@@ -9,17 +10,19 @@ import com.deathrayresearch.forrester.model.Stock;
 import com.deathrayresearch.forrester.model.Flow;
 import com.deathrayresearch.forrester.model.flows.FlowPerDay;
 import com.deathrayresearch.forrester.ui.StockLevelChartViewer;
-import org.junit.Test;
 
 import static com.deathrayresearch.forrester.measure.Units.PEOPLE;
 
 /**
  *
  */
-public class ExponentialDecayModel {
+public class ExponentialDecayDemo {
 
-    @Test
-    public void testRun1() {
+    public static void main(String[] args) {
+        new ExponentialDecayDemo().run();
+    }
+
+    public void run() {
 
         Model model = new Model("Population with exponential decay");
 

@@ -1,6 +1,6 @@
-package com.deathrayresearch.forrester;
+package com.deathrayresearch.forrester.demo;
 
-import com.deathrayresearch.forrester.archetypes.SimpleExponentialChange;
+import com.deathrayresearch.forrester.Simulation;
 import com.deathrayresearch.forrester.measure.Quantity;
 import com.deathrayresearch.forrester.measure.units.time.TimeUnits;
 import com.deathrayresearch.forrester.measure.units.time.Times;
@@ -9,17 +9,19 @@ import com.deathrayresearch.forrester.model.Model;
 import com.deathrayresearch.forrester.model.Stock;
 import com.deathrayresearch.forrester.model.flows.FlowPerDay;
 import com.deathrayresearch.forrester.ui.StockLevelChartViewer;
-import org.junit.Test;
 
 import static com.deathrayresearch.forrester.measure.Units.PEOPLE;
 
 /**
  *
  */
-public class FirstOrderMaterialDelay {
+public class FirstOrderMaterialDelayDemo {
 
-    @Test
-    public void testRun1() {
+    public static void main(String[] args) {
+        new FirstOrderMaterialDelayDemo().run();
+    }
+
+    public void run() {
 
         Model model = new Model("First order material delay");
         model.setComment("A 1st order material delay is basically an exponential decay function. It is based on " +

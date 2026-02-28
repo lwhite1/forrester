@@ -1,4 +1,4 @@
-package com.deathrayresearch.forrester.largemodels.waterfall;
+package com.deathrayresearch.forrester.demo.waterfall;
 
 import com.deathrayresearch.forrester.Simulation;
 import com.deathrayresearch.forrester.measure.Quantity;
@@ -9,12 +9,11 @@ import com.deathrayresearch.forrester.measure.units.time.TimeUnits;
 import com.deathrayresearch.forrester.model.Model;
 import com.deathrayresearch.forrester.model.Module;
 import com.deathrayresearch.forrester.ui.StockLevelChartViewer;
-import org.junit.Test;
 
 /**
  *
  */
-public class WaterfallSoftwareDevelopment {
+public class WaterfallSoftwareDevelopmentDemo {
 
     private Model model = new Model("Waterfall");
 
@@ -62,7 +61,7 @@ public class WaterfallSoftwareDevelopment {
     private final Module testAndRework;
     private final Module development;
 
-    public WaterfallSoftwareDevelopment() {
+    public WaterfallSoftwareDevelopmentDemo() {
         staffAllocation = StaffAllocation.getStaffAllocationModule(model);
         workforce = Workforce.getWorkforce();
         testAndRework = TestAndRework.getTestAndReworkSubSystem();
@@ -75,8 +74,11 @@ public class WaterfallSoftwareDevelopment {
         development = Development.getDevelopmentSubSystem(model);
     }
 
-    @Test
-    public void testRun1() {
+    public static void main(String[] args) {
+        new WaterfallSoftwareDevelopmentDemo().run();
+    }
+
+    public void run() {
 
         Quantity duration = new Quantity(1, TimeUnits.YEAR);
         Simulation simulation = new Simulation(model, TimeUnits.DAY, duration);

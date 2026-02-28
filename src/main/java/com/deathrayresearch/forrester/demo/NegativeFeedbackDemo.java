@@ -1,5 +1,6 @@
-package com.deathrayresearch.forrester;
+package com.deathrayresearch.forrester.demo;
 
+import com.deathrayresearch.forrester.Simulation;
 import com.deathrayresearch.forrester.measure.Quantity;
 import com.deathrayresearch.forrester.measure.Unit;
 import com.deathrayresearch.forrester.measure.units.item.ItemUnit;
@@ -9,19 +10,21 @@ import com.deathrayresearch.forrester.model.Stock;
 import com.deathrayresearch.forrester.model.Flow;
 import com.deathrayresearch.forrester.model.flows.FlowPerDay;
 import com.deathrayresearch.forrester.ui.StockLevelChartViewer;
-import org.junit.Test;
 
 import static com.deathrayresearch.forrester.measure.Units.WEEK;
 
 /**
  *
  */
-public class NegativeFeedbackWithGoalTest {
+public class NegativeFeedbackDemo {
 
     private static final Unit INVENTORY = new ItemUnit("Units");
 
-    @Test
-    public void testRun1() {
+    public static void main(String[] args) {
+        new NegativeFeedbackDemo().run();
+    }
+
+    public void run() {
         Model model = new Model("Negative feedback with goal");
 
         Stock inventoryOnHand = new Stock("Inventory on-hand", 1000, INVENTORY);

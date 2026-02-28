@@ -1,5 +1,6 @@
-package com.deathrayresearch.forrester;
+package com.deathrayresearch.forrester.demo;
 
+import com.deathrayresearch.forrester.Simulation;
 import com.deathrayresearch.forrester.archetypes.PipelineDelay;
 import com.deathrayresearch.forrester.measure.Quantity;
 import com.deathrayresearch.forrester.measure.units.time.TimeUnits;
@@ -9,18 +10,18 @@ import com.deathrayresearch.forrester.model.Stock;
 import com.deathrayresearch.forrester.model.Flow;
 import com.deathrayresearch.forrester.model.flows.FlowPerDay;
 import com.deathrayresearch.forrester.ui.StockLevelChartViewer;
-import org.junit.Test;
 
 import static com.deathrayresearch.forrester.measure.Units.DAY;
 import static com.deathrayresearch.forrester.measure.Units.THING;
 import static com.deathrayresearch.forrester.measure.Units.WEEK;
 
-public class SimplePipelineDelay {
+public class SimplePipelineDelayDemo {
 
+    public static void main(String[] args) {
+        new SimplePipelineDelayDemo().run();
+    }
 
-    @Test
-    public void testRun1() {
-
+    public void run() {
 
         Model model = new Model("Simple Pipeline Delay");
         model.setComment("This model illustrates a pipeline delay, where a stock (WIP) is bounded by " +

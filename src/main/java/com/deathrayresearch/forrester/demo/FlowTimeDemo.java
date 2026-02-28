@@ -1,4 +1,4 @@
-package com.deathrayresearch.forrester.largemodels;
+package com.deathrayresearch.forrester.demo;
 
 import com.deathrayresearch.forrester.Simulation;
 import com.deathrayresearch.forrester.archetypes.SimpleLinearChange;
@@ -15,7 +15,7 @@ import com.deathrayresearch.forrester.ui.StockLevelChartViewer;
 import static com.deathrayresearch.forrester.measure.Units.HOUR;
 import static com.deathrayresearch.forrester.measure.Units.WEEK;
 
-public class FlowTimeTest {
+public class FlowTimeDemo {
 
     private static final ItemUnits TEST = ItemUnits.THING;
 
@@ -30,7 +30,7 @@ public class FlowTimeTest {
             () -> TATGoal.getValue() - TAT.getValue());
 
     public static void main(String[] args) {
-        FlowTimeTest tat = new FlowTimeTest();
+        FlowTimeDemo tat = new FlowTimeDemo();
         tat.tatModel();
     }
 

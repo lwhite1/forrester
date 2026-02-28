@@ -1,5 +1,6 @@
-package com.deathrayresearch.forrester;
+package com.deathrayresearch.forrester.demo;
 
+import com.deathrayresearch.forrester.Simulation;
 import com.deathrayresearch.forrester.archetypes.SimpleLinearChange;
 import com.deathrayresearch.forrester.io.CsvSubscriber;
 import com.deathrayresearch.forrester.measure.Quantity;
@@ -12,7 +13,6 @@ import com.deathrayresearch.forrester.model.Variable;
 import com.deathrayresearch.forrester.model.Flow;
 import com.deathrayresearch.forrester.model.flows.FlowPerDay;
 import com.deathrayresearch.forrester.ui.StockLevelChartViewer;
-import org.junit.Test;
 
 import static com.deathrayresearch.forrester.measure.Units.DIMENSIONLESS;
 import static com.deathrayresearch.forrester.measure.Units.PEOPLE;
@@ -22,10 +22,13 @@ import static com.deathrayresearch.forrester.measure.Units.WEEK;
 /**
  *
  */
-public class SalesMixModel {
+public class SalesMixDemo {
 
-    @Test
-    public void testModel() {
+    public static void main(String[] args) {
+        new SalesMixDemo().run();
+    }
+
+    public void run() {
         Model model = new Model("Hardware/software sales mix");
 
         Constant hardwareSalesCustomer = new Constant("Hardware sales per new customer",

@@ -1,5 +1,6 @@
-package com.deathrayresearch.forrester;
+package com.deathrayresearch.forrester.demo;
 
+import com.deathrayresearch.forrester.Simulation;
 import com.deathrayresearch.forrester.measure.Quantity;
 import com.deathrayresearch.forrester.model.Constant;
 import com.deathrayresearch.forrester.model.Model;
@@ -8,7 +9,6 @@ import com.deathrayresearch.forrester.model.Variable;
 import com.deathrayresearch.forrester.model.Flow;
 import com.deathrayresearch.forrester.model.flows.FlowPerMinute;
 import com.deathrayresearch.forrester.ui.FlowChartViewer;
-import org.junit.Test;
 
 import static com.deathrayresearch.forrester.measure.Units.CENTIGRADE;
 import static com.deathrayresearch.forrester.measure.Units.MINUTE;
@@ -16,10 +16,13 @@ import static com.deathrayresearch.forrester.measure.Units.MINUTE;
 /**
  *
  */
-public class CoffeeCoolingModel {
+public class CoffeeCoolingDemo {
 
-    @Test
-    public void testRun1() {
+    public static void main(String[] args) {
+        new CoffeeCoolingDemo().run();
+    }
+
+    public void run() {
 
         Model model = new Model("Coffee Cooling");
         model.setComment("Illustrates decay to a target value for the stock. The rate of decay is based on " +

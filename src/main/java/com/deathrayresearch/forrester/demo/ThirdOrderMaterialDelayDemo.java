@@ -1,5 +1,6 @@
-package com.deathrayresearch.forrester;
+package com.deathrayresearch.forrester.demo;
 
+import com.deathrayresearch.forrester.Simulation;
 import com.deathrayresearch.forrester.io.CsvSubscriber;
 import com.deathrayresearch.forrester.measure.Quantity;
 import com.deathrayresearch.forrester.measure.units.time.Times;
@@ -11,7 +12,6 @@ import com.deathrayresearch.forrester.model.Variable;
 import com.deathrayresearch.forrester.model.flows.FlowPerDay;
 import com.deathrayresearch.forrester.model.flows.FlowPerHour;
 import com.deathrayresearch.forrester.ui.StockLevelChartViewer;
-import org.junit.Test;
 
 import static com.deathrayresearch.forrester.measure.Units.HOUR;
 import static com.deathrayresearch.forrester.measure.Units.THING;
@@ -20,10 +20,13 @@ import static com.deathrayresearch.forrester.measure.Units.WEEK;
 /**
  *
  */
-public class ThirdOrderMaterialDelay {
+public class ThirdOrderMaterialDelayDemo {
 
-    @Test
-    public void testRun1() {
+    public static void main(String[] args) {
+        new ThirdOrderMaterialDelayDemo().run();
+    }
+
+    public void run() {
 
         Model model = new Model("Third order material delay");
         model.setComment("A 34d order material delay is a chain of three first order material delays. Each of the " +

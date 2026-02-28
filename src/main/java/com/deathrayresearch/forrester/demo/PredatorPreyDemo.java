@@ -1,5 +1,6 @@
-package com.deathrayresearch.forrester;
+package com.deathrayresearch.forrester.demo;
 
+import com.deathrayresearch.forrester.Simulation;
 import com.deathrayresearch.forrester.measure.Quantity;
 import com.deathrayresearch.forrester.measure.units.item.ItemUnits;
 import com.deathrayresearch.forrester.measure.units.time.TimeUnits;
@@ -10,12 +11,13 @@ import com.deathrayresearch.forrester.ui.StockLevelChartViewer;
 
 import static com.deathrayresearch.forrester.measure.Units.YEAR;
 
-public class PredatorPreyModel {
+public class PredatorPreyDemo {
 
     private static Model model = new Model("Predator-Prey model");
 
     private static final ItemUnits RABBIT = ItemUnits.THING;
     private static final ItemUnits COYOTE = ItemUnits.THING;
+
     public static void main(String[] args) {
 
         Stock predator = new Stock("Coyotes", 10, COYOTE);
