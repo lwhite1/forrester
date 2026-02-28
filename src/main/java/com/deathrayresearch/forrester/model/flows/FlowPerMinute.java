@@ -1,13 +1,12 @@
 package com.deathrayresearch.forrester.model.flows;
 
 import com.deathrayresearch.forrester.measure.Quantity;
-import com.deathrayresearch.forrester.measure.TimeUnit;
 import com.deathrayresearch.forrester.model.Flow;
 
 import static com.deathrayresearch.forrester.measure.Units.MINUTE;
 
 /**
- *
+ * A rate specified as a quantity per minute
  */
 public abstract class FlowPerMinute extends Flow {
 
@@ -15,15 +14,10 @@ public abstract class FlowPerMinute extends Flow {
         super(name, MINUTE);
     }
 
-    private Quantity convert(Quantity quantity, TimeUnit newTimeUnit) {
-        return RateConverter.convert(quantity, getTimeUnit(), newTimeUnit);
-    }
-
     @Override
-    public Quantity flowPerTimeUnit(TimeUnit timeUnit) {
-        return convert(quantityPerMinute(), timeUnit);
+    protected Quantity quantityPerTimeUnit() {
+        return quantityPerMinute();
     }
 
     protected abstract Quantity quantityPerMinute();
-
 }

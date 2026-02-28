@@ -2,6 +2,7 @@ package com.deathrayresearch.forrester.model;
 
 import com.deathrayresearch.forrester.measure.Quantity;
 import com.deathrayresearch.forrester.measure.TimeUnit;
+import com.deathrayresearch.forrester.model.flows.RateConverter;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,7 +32,11 @@ public abstract class Flow extends Element {
         return getName() + ": " + flowPerTimeUnit(timeUnit);
     }
 
-    public abstract Quantity flowPerTimeUnit(TimeUnit timeUnit);
+    public Quantity flowPerTimeUnit(TimeUnit timeUnit) {
+        return RateConverter.convert(quantityPerTimeUnit(), this.timeUnit, timeUnit);
+    }
+
+    protected abstract Quantity quantityPerTimeUnit();
 
     public void recordValue(Quantity q) {
         history.add(q.getValue());

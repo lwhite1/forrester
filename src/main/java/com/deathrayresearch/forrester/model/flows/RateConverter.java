@@ -7,7 +7,7 @@ import com.google.common.base.Preconditions;
 /**
  * Converts quantities associated with a rate from one time unit to another
  */
-class RateConverter {
+public class RateConverter {
 
     /**
      * Returns a new Quantity from the original quantity.
@@ -17,7 +17,7 @@ class RateConverter {
      * For example, if the originalQuantity was 700, the originalTimeUnit was a week, and the newTimeUnit a day,
      * the result would be 100
      */
-    static Quantity convert(Quantity originalQuantity, TimeUnit originalTimeUnit, TimeUnit newTimeUnit) {
+    public static Quantity convert(Quantity originalQuantity, TimeUnit originalTimeUnit, TimeUnit newTimeUnit) {
         Preconditions.checkArgument(originalQuantity != null, "originalQuantity cannot be null");
         Preconditions.checkArgument(originalTimeUnit != null, "originalTimeUnit cannot be null");
         Preconditions.checkArgument(newTimeUnit != null, "newTimeUnit cannot be null");
