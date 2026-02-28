@@ -13,9 +13,9 @@ import java.util.Map;
  */
 public class Module extends Element {
 
-    private Map<String, Stock> stocks = new HashMap<>();
-    private Map<String, Flow> flows = new HashMap<>();
-    private Map<String, Variable> variables = new HashMap<>();
+    private final Map<String, Stock> stocks = new HashMap<>();
+    private final Map<String, Flow> flows = new HashMap<>();
+    private final Map<String, Variable> variables = new HashMap<>();
 
     public Module(String name) {
         super(name);
@@ -50,8 +50,6 @@ public class Module extends Element {
     }
 
     public List<Stock> getStocks() {
-        List<Stock> stockList = new ArrayList<>();
-        stockList.addAll(stocks.values());
-        return stockList;
+        return new ArrayList<>(stocks.values());
     }
 }

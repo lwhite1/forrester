@@ -9,18 +9,16 @@ import java.util.List;
 /**
  * Helps to create rates that are convertible to any time unit
  */
-public abstract class Flow {
+public abstract class Flow extends Element {
 
     private final TimeUnit timeUnit;
-
-    private final String name;
 
     private final List<Double> history = new ArrayList<>();
     private Stock source;
     private Stock sink;
 
     public Flow(String name, TimeUnit unit) {
-        this.name = name;
+        super(name);
         this.timeUnit = unit;
     }
 
@@ -31,10 +29,6 @@ public abstract class Flow {
     @Override
     public String toString() {
         return getName() + ": " + flowPerTimeUnit(timeUnit);
-    }
-
-    public String getName() {
-        return name;
     }
 
     public abstract Quantity flowPerTimeUnit(TimeUnit timeUnit);

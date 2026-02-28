@@ -2,6 +2,7 @@ package com.deathrayresearch.forrester.model;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -41,15 +42,15 @@ public class Model extends Element {
     }
 
     public List<Module> getModules() {
-        return modules;
+        return Collections.unmodifiableList(modules);
     }
 
     public List<Stock> getStocks() {
-        return stocks;
+        return Collections.unmodifiableList(stocks);
     }
 
     public Map<String, Variable> getVariableMap() {
-        return variables;
+        return Collections.unmodifiableMap(variables);
     }
 
     public List<String> getStockNames() {
@@ -69,13 +70,11 @@ public class Model extends Element {
     }
 
     public List<String> getVariableNames() {
-        List<String> results = new ArrayList<>();
-        results.addAll(variables.keySet());
-        return results;
+        return new ArrayList<>(variables.keySet());
     }
 
     public Collection<Variable> getVariables() {
-        return(variables.values());
+        return Collections.unmodifiableCollection(variables.values());
     }
 
     public List<Double> getVariableValues() {
@@ -99,7 +98,7 @@ public class Model extends Element {
     }
 
     public List<Constant> getConstants() {
-        return constants;
+        return Collections.unmodifiableList(constants);
     }
 
     public void addConstant(Constant constant) {

@@ -3,7 +3,7 @@ package com.deathrayresearch.forrester.model;
 /**
  *  Parent of all model elements: Stock, Flow, etc.
  */
-abstract class Element {
+public abstract class Element {
 
     private final String name;
     private String comment;

@@ -3,6 +3,7 @@ package com.deathrayresearch.forrester.model;
 import com.deathrayresearch.forrester.measure.Quantity;
 import com.deathrayresearch.forrester.measure.Unit;
 
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -32,11 +33,11 @@ public class Stock extends Element {
     }
 
     public Set<Flow> getInflows() {
-        return inflows;
+        return Collections.unmodifiableSet(inflows);
     }
 
     public Set<Flow> getOutflows() {
-        return outflows;
+        return Collections.unmodifiableSet(outflows);
     }
 
     public Quantity getQuantity() {
