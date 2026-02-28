@@ -70,7 +70,7 @@ public class SalesMixModel {
         Simulation run = new Simulation(model, WEEK, Times.years( 10));
 
         run.addEventHandler(new StockLevelChartViewer());
-        run.addEventHandler(new CsvSubscriber("/tmp/forrester/run1out.csv"));
+        run.addEventHandler(new CsvSubscriber(System.getProperty("java.io.tmpdir") + "/forrester-run1out.csv"));
         run.execute();
     }
 }
