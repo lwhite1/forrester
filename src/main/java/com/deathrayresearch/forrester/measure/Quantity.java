@@ -121,7 +121,7 @@ public final class Quantity {
     @Override
     public int hashCode() {
         int result;
-        result = Double.hashCode(getValue());
+        result = Double.hashCode(inBaseUnits().getValue());
         result = 31 * result + getUnit().hashCode();
         return result;
     }

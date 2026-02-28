@@ -22,11 +22,9 @@ class RateConverter {
         Preconditions.checkArgument(originalTimeUnit != null, "originalTimeUnit cannot be null");
         Preconditions.checkArgument(newTimeUnit != null, "newTimeUnit cannot be null");
 
-        double inBaseUnits = originalTimeUnit.toBaseUnits(originalQuantity.getValue());
-
         double convertedValue =
-            inBaseUnits == 0 ? 0 : (newTimeUnit.ratioToBaseUnit() / inBaseUnits) * originalQuantity.getValue();
+            originalQuantity.getValue() * newTimeUnit.ratioToBaseUnit() / originalTimeUnit.ratioToBaseUnit();
 
-        return new Quantity(convertedValue * originalQuantity.getValue(), originalQuantity.getUnit());
+        return new Quantity(convertedValue, originalQuantity.getUnit());
     }
 }
