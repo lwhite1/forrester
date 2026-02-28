@@ -79,17 +79,21 @@ class Workforce {
                         experiencedWorkforce.getQuantity().getValue() / totalWorkforce.getValue());
 
 
+        Flow hireFlow = getNewHireFlow(workforceGap);
+        Flow assimilationFlow = getAssimilationFlow(newlyHiredWorkforce);
+        Flow resignationFlow = getResignationFlow(experiencedWorkforce);
+
         workforce.addStock(newlyHiredWorkforce);
         workforce.addStock(experiencedWorkforce);
 
-        newlyHiredWorkforce.addInflow(getNewHireFlow(workforceGap));
-        newlyHiredWorkforce.addOutflow(getAssimilationFlow(newlyHiredWorkforce));
-        experiencedWorkforce.addInflow(getAssimilationFlow(newlyHiredWorkforce));
+        newlyHiredWorkforce.addInflow(hireFlow);
+        newlyHiredWorkforce.addOutflow(assimilationFlow);
+        experiencedWorkforce.addInflow(assimilationFlow);
         //experiencedWorkforce.addOutflow(resignationFlow);
 
-        workforce.addFlow(getNewHireFlow(workforceGap));
-        workforce.addFlow(getAssimilationFlow(newlyHiredWorkforce));
-        workforce.addFlow(getResignationFlow(experiencedWorkforce));
+        workforce.addFlow(hireFlow);
+        workforce.addFlow(assimilationFlow);
+        workforce.addFlow(resignationFlow);
 
         workforce.addVariable(dailyManPowerForTraining);
         workforce.addVariable(workforceGap);
