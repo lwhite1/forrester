@@ -42,7 +42,7 @@ public class PredatorPreyDemo {
         FlowPerYear preyBirths = new FlowPerYear("Prey Births") {
             @Override
             protected Quantity quantityPerTimeUnit() {
-                double value = PREY_BIRTH_RATE * prey.getQuantity().getValue();
+                double value = PREY_BIRTH_RATE * prey.getValue();
                 return new Quantity(value, RABBIT);
             }
         };
@@ -50,7 +50,7 @@ public class PredatorPreyDemo {
         FlowPerYear preyDeaths = new FlowPerYear("Prey Deaths") {
             @Override
             protected Quantity quantityPerTimeUnit() {
-                double value = PREDATION_RATE * prey.getQuantity().getValue() * predator.getQuantity().getValue();
+                double value = PREDATION_RATE * prey.getValue() * predator.getValue();
                 return new Quantity(value, RABBIT);
             }
         };
@@ -59,7 +59,7 @@ public class PredatorPreyDemo {
             @Override
             protected Quantity quantityPerTimeUnit() {
                 double value = PREDATOR_EFFICIENCY * PREDATION_RATE
-                        * prey.getQuantity().getValue() * predator.getQuantity().getValue();
+                        * prey.getValue() * predator.getValue();
                 return new Quantity(value, COYOTE);
             }
         };
@@ -67,7 +67,7 @@ public class PredatorPreyDemo {
         FlowPerYear predatorDeaths = new FlowPerYear("Predator Deaths") {
             @Override
             protected Quantity quantityPerTimeUnit() {
-                double value = PREDATOR_DEATH_RATE * predator.getQuantity().getValue();
+                double value = PREDATOR_DEATH_RATE * predator.getValue();
                 return new Quantity(value, COYOTE);
             }
         };

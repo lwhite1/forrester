@@ -15,7 +15,6 @@ import com.deathrayresearch.forrester.ui.StockLevelChartViewer;
 
 import static com.deathrayresearch.forrester.measure.Units.HOUR;
 import static com.deathrayresearch.forrester.measure.Units.THING;
-import static com.deathrayresearch.forrester.measure.Units.WEEK;
 
 /**
  *
@@ -29,7 +28,7 @@ public class ThirdOrderMaterialDelayDemo {
     public void run() {
 
         Model model = new Model("Third order material delay");
-        model.setComment("A 34d order material delay is a chain of three first order material delays. Each of the " +
+        model.setComment("A 3rd order material delay is a chain of three first order material delays. Each of the " +
                 "individual first order delays is based on " +
                 "the assumption that the stock is completely mixed, like the water in a tub, so FIFO is not possible. " +
                 "The outflow of the first delay is the input to the second delay, and so on");
@@ -48,7 +47,7 @@ public class ThirdOrderMaterialDelayDemo {
         Flow step1Delay = new FlowPerHour("Step 1 delay") {
             @Override
             protected Quantity quantityPerTimeUnit() {
-                double averageDelay = 7; // 4 hour average activity time for this step
+                double averageDelay = 7; // 7 hour average activity time for this step
                 return new Quantity(
                         Math.min(step1.getValue(), step1.getValue()/averageDelay), THING);
                 //return step1.getQuantity().divide(averageDelay);
@@ -89,12 +88,10 @@ public class ThirdOrderMaterialDelayDemo {
             }
         });
 
-        Variable totalDelay = new Variable("Total Delay", THING, new Formula() {
+        Variable pipelineOutput = new Variable("Pipeline Output Rate", THING, new Formula() {
             @Override
             public double getCurrentValue() {
-                return step1Delay.flowPerTimeUnit(HOUR).getValue()
-                        + step2Delay.flowPerTimeUnit(HOUR).getValue()
-                        + step3Delay.flowPerTimeUnit(HOUR).getValue();
+                return step3Delay.flowPerTimeUnit(HOUR).getValue();
             }
         });
 
@@ -103,11 +100,11 @@ public class ThirdOrderMaterialDelayDemo {
         model.addStock(step3);
 
         model.addVariable(totalWIP);
-        model.addVariable(totalDelay);
+        model.addVariable(pipelineOutput);
 
         Simulation run = new Simulation(model, HOUR, Times.hours( 48));
         run.addEventHandler(new StockLevelChartViewer());
-        run.addEventHandler(new CsvSubscriber("2nd order.csv"));
+        run.addEventHandler(new CsvSubscriber("3rd order.csv"));
         run.execute();
     }
 }
