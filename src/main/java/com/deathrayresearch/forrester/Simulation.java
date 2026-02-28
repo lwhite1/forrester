@@ -7,15 +7,11 @@ import com.deathrayresearch.forrester.event.TimeStepEvent;
 import com.deathrayresearch.forrester.measure.Quantity;
 import com.deathrayresearch.forrester.measure.TimeUnit;
 import com.deathrayresearch.forrester.measure.Unit;
-import com.deathrayresearch.forrester.measure.units.time.*;
 import com.deathrayresearch.forrester.model.Model;
 import com.deathrayresearch.forrester.model.Stock;
 import com.deathrayresearch.forrester.model.Module;
-
 import com.deathrayresearch.forrester.model.Flow;
 import com.deathrayresearch.forrester.model.Variable;
-import com.google.common.base.Preconditions;
-import com.google.common.collect.ImmutableList;
 import com.google.common.eventbus.EventBus;
 
 import java.time.Duration;
@@ -29,17 +25,6 @@ import java.util.Set;
  * Simulation is the execution environment for a model
  */
 public class Simulation {
-
-    private static final List<TimeUnit> SUPPORTED_TIMESTEPS = ImmutableList.of(
-        Second.getInstance(),
-        Minute.getInstance(),
-        Hour.getInstance(),
-        Day.getInstance(),
-        Week.getInstance()
-    );
-
-    private static final String UNSUPPORTED_TIME_UNIT_MESSSAGE
-        = "The provided time unit is not supported as a timeStep";
 
     private final Model model;
 
@@ -58,7 +43,6 @@ public class Simulation {
     private final EventBus eventBus;
 
     public Simulation(Model model, TimeUnit timeStep, Quantity duration) {
-        Preconditions.checkArgument(SUPPORTED_TIMESTEPS.contains(timeStep), UNSUPPORTED_TIME_UNIT_MESSSAGE);
         this.model = model;
         this.timeStep = timeStep;
         this.duration = duration;
@@ -67,7 +51,6 @@ public class Simulation {
     }
 
     public Simulation(Model model, TimeUnit timeStep, TimeUnit durationUnits, double durationAmount) {
-        Preconditions.checkArgument(SUPPORTED_TIMESTEPS.contains(timeStep), UNSUPPORTED_TIME_UNIT_MESSSAGE);
         this.model = model;
         this.timeStep = timeStep;
         this.duration = new Quantity(durationAmount, durationUnits);
@@ -76,7 +59,6 @@ public class Simulation {
     }
 
     public Simulation(Model model, TimeUnit timeStep, Quantity duration, LocalDateTime startTime) {
-        Preconditions.checkArgument(SUPPORTED_TIMESTEPS.contains(timeStep), UNSUPPORTED_TIME_UNIT_MESSSAGE);
         this.model = model;
         this.timeStep = timeStep;
         this.duration = duration;
@@ -110,6 +92,7 @@ public class Simulation {
             HashMap<String, Quantity> flowMap = new HashMap<>();
 
             eventBus.post(new TimeStepEvent(currentDateTime, model, currentStep, timeStep));
+            recordVariableValues();
             List<Stock> stocks = model.getStocks();
             updateStocks(flowMap, stocks);
             for (Module module : model.getModules()) {
@@ -127,7 +110,6 @@ public class Simulation {
     private void updateStocks(HashMap<String, Quantity> flowMap, List<Stock> stocks) {
         for (Stock stock : stocks) {
             Quantity qCurrent = stock.getQuantity();
-            recordVariableValues();
             handleFlows(true, flowMap, stock, qCurrent, stock.getInflows());
             handleFlows(false, flowMap, stock, qCurrent, stock.getOutflows());
         }
@@ -161,29 +143,9 @@ public class Simulation {
     }
 
     private void addStep(LocalDateTime dateTime) {
-        String timeStepName = timeStep.getName();
-        switch (timeStepName) {
-            case "Second" :
-                currentDateTime = dateTime.plusSeconds(1);
-                elapsedTime = elapsedTime.plusSeconds(1);
-                break;
-            case "Minute" :
-                currentDateTime = dateTime.plusMinutes(1);
-                elapsedTime = elapsedTime.plusMinutes(1);
-                break;
-            case "Hour" :
-                currentDateTime = dateTime.plusHours(1);
-                elapsedTime = elapsedTime.plusHours(1);
-                break;
-            case "Day" :
-                currentDateTime = dateTime.plusDays(1);
-                elapsedTime = elapsedTime.plusDays(1);
-                break;
-            case "Week" :
-                currentDateTime = dateTime.plusWeeks(1);
-                elapsedTime = elapsedTime.plusDays(7);
-                break;
-        }
+        long seconds = (long) timeStep.ratioToBaseUnit();
+        currentDateTime = dateTime.plusSeconds(seconds);
+        elapsedTime = elapsedTime.plusSeconds(seconds);
     }
 
     public Model getModel() {
