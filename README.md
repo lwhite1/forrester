@@ -150,6 +150,40 @@ Stock balance = new Stock("Balance", -500, US_DOLLAR, NegativeValuePolicy.ALLOW)
 inventory.setNegativeValuePolicy(NegativeValuePolicy.THROW);
 ```
 
+### Standard SD Functions
+
+The framework provides built-in implementations of the four standard SD input and delay functions. All implement `Formula` and take an `IntSupplier` for the current simulation timestep.
+
+**Input functions:**
+
+```java
+// Step: returns 0 before step 10, then 100
+Variable shock = new Variable("Demand Shock", THING, Step.of(100, 10, sim::getCurrentStep));
+
+// Ramp: increases by 5 per step starting at step 10 (optionally bounded)
+Variable ramp = new Variable("Demand Ramp", THING, Ramp.of(5, 10, sim::getCurrentStep));
+Variable bounded = new Variable("Bounded Ramp", THING, Ramp.of(5, 10, 20, sim::getCurrentStep));
+```
+
+**Delay functions:**
+
+```java
+// Smooth (first-order information delay): smooths input over 5 timesteps
+Smooth perceived = Smooth.of(() -> actualDemand.getValue(), 5, sim::getCurrentStep);
+
+// Delay3 (third-order material delay): delays input by 6 timesteps
+Delay3 delayed = Delay3.of(() -> orders.getValue(), 6, sim::getCurrentStep);
+```
+
+| Function | Type | Behavior |
+|---|---|---|
+| `Step.of(height, stepTime, currentStep)` | Input | Returns 0 before step time, constant height after |
+| `Ramp.of(slope, startStep, [endStep], currentStep)` | Input | Linearly increasing from start, optionally bounded |
+| `Smooth.of(input, smoothingTime, [initialValue], currentStep)` | Delay | First-order exponential smoothing (information delay) |
+| `Delay3.of(input, delayTime, [initialValue], currentStep)` | Delay | Third-order material delay with 3 internal stages |
+
+Smooth and Delay3 default their initial value to the first input (standard SD convention). An explicit initial value can be provided as an optional parameter.
+
 ### Output & Visualization
 
 - **CsvSubscriber** - Writes simulation results to CSV files (columns: step, datetime, stock levels, variable values)
@@ -258,6 +292,7 @@ New to system dynamics? These resources provide a solid introduction to the meth
 
 The project is at version 1.0-SNAPSHOT and is under active development. Recent work has focused on:
 
+- Adding standard SD functions: `Step`, `Ramp`, `Smooth` (first-order information delay), and `Delay3` (third-order material delay)
 - Adding `LookupTable` for piecewise interpolation curves (linear and cubic spline) — the standard SD mechanism for nonlinear effects
 - Adding `NegativeValuePolicy` guardrails to `Stock` — prevents physical quantities from going negative by default
 - Adding `Flows` factory class and `Flow.create()` to eliminate flow boilerplate — common patterns are now one-liners
