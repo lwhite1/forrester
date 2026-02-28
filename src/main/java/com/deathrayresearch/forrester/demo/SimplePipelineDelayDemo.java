@@ -1,14 +1,13 @@
 package com.deathrayresearch.forrester.demo;
 
 import com.deathrayresearch.forrester.Simulation;
-import com.deathrayresearch.forrester.archetypes.PipelineDelay;
 import com.deathrayresearch.forrester.measure.Quantity;
 import com.deathrayresearch.forrester.measure.units.time.TimeUnits;
 import com.deathrayresearch.forrester.model.Constant;
+import com.deathrayresearch.forrester.model.Flow;
+import com.deathrayresearch.forrester.model.Flows;
 import com.deathrayresearch.forrester.model.Model;
 import com.deathrayresearch.forrester.model.Stock;
-import com.deathrayresearch.forrester.model.Flow;
-import com.deathrayresearch.forrester.model.flows.FlowPerDay;
 import com.deathrayresearch.forrester.ui.StockLevelChartViewer;
 
 import static com.deathrayresearch.forrester.measure.Units.DAY;
@@ -40,19 +39,10 @@ public class SimplePipelineDelayDemo {
         Stock population = new Stock("WIP", 0, THING);
         Constant delay = new Constant("Activity Time", TimeUnits.DAY, 3);
 
-        Flow arrivals = new FlowPerDay("Arrivals") {
-            @Override
-            protected Quantity quantityPerTimeUnit() {
-                return new Quantity(5, THING);
-            }
-        };
+        Flow arrivals = Flows.constant("Arrivals", DAY, new Quantity(5, THING));
 
-        Flow departures = new FlowPerDay("Departures") {
-            @Override
-            protected Quantity quantityPerTimeUnit() {
-                return PipelineDelay.from(arrivals, run.getCurrentStep(), delay.getIntValue());
-            }
-        };
+        Flow departures = Flows.pipelineDelay("Departures", DAY, arrivals,
+                run::getCurrentStep, delay.getIntValue());
 
         population.addInflow(arrivals);
         population.addOutflow(departures);

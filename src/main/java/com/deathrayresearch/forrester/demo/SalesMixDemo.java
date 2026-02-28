@@ -1,19 +1,18 @@
 package com.deathrayresearch.forrester.demo;
 
 import com.deathrayresearch.forrester.Simulation;
-import com.deathrayresearch.forrester.archetypes.SimpleLinearChange;
 import com.deathrayresearch.forrester.io.CsvSubscriber;
-import com.deathrayresearch.forrester.measure.Quantity;
 import com.deathrayresearch.forrester.measure.units.time.Times;
 import com.deathrayresearch.forrester.model.Constant;
+import com.deathrayresearch.forrester.model.Flow;
+import com.deathrayresearch.forrester.model.Flows;
 import com.deathrayresearch.forrester.model.Formula;
 import com.deathrayresearch.forrester.model.Model;
 import com.deathrayresearch.forrester.model.Stock;
 import com.deathrayresearch.forrester.model.Variable;
-import com.deathrayresearch.forrester.model.Flow;
-import com.deathrayresearch.forrester.model.flows.FlowPerDay;
 import com.deathrayresearch.forrester.ui.StockLevelChartViewer;
 
+import static com.deathrayresearch.forrester.measure.Units.DAY;
 import static com.deathrayresearch.forrester.measure.Units.DIMENSIONLESS;
 import static com.deathrayresearch.forrester.measure.Units.PEOPLE;
 import static com.deathrayresearch.forrester.measure.Units.US_DOLLAR;
@@ -44,12 +43,7 @@ public class SalesMixDemo {
 
         Stock customers = new Stock("customers", 0, PEOPLE);
 
-        Flow acquisitionRate = new FlowPerDay("New customers") {
-            @Override
-            protected Quantity quantityPerTimeUnit() {
-                return SimpleLinearChange.from(customers, 10);
-            }
-        };
+        Flow acquisitionRate = Flows.linearGrowth("New customers", DAY, customers, 10);
 
         Formula hardwareSalesFormula = () -> hardwareSalesCustomer.getValue()
                 * acquisitionRate.flowPerTimeUnit(WEEK).getValue();

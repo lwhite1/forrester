@@ -3,6 +3,7 @@ package com.deathrayresearch.forrester.model;
 /**
  * A formula is a calculation that returns the current value of its variable
  */
+@FunctionalInterface
 public interface Formula {
 
     /**

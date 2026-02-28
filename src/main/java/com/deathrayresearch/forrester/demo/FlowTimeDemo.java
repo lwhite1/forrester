@@ -1,18 +1,17 @@
 package com.deathrayresearch.forrester.demo;
 
 import com.deathrayresearch.forrester.Simulation;
-import com.deathrayresearch.forrester.archetypes.SimpleLinearChange;
 import com.deathrayresearch.forrester.measure.Quantity;
 import com.deathrayresearch.forrester.measure.units.item.ItemUnits;
 import com.deathrayresearch.forrester.model.Constant;
+import com.deathrayresearch.forrester.model.Flow;
+import com.deathrayresearch.forrester.model.Flows;
 import com.deathrayresearch.forrester.model.Model;
 import com.deathrayresearch.forrester.model.Stock;
-import com.deathrayresearch.forrester.model.Flow;
 import com.deathrayresearch.forrester.model.Variable;
-import com.deathrayresearch.forrester.model.flows.FlowPerDay;
-import com.deathrayresearch.forrester.model.flows.FlowPerHour;
 import com.deathrayresearch.forrester.ui.StockLevelChartViewer;
 
+import static com.deathrayresearch.forrester.measure.Units.DAY;
 import static com.deathrayresearch.forrester.measure.Units.HOUR;
 import static com.deathrayresearch.forrester.measure.Units.WEEK;
 
@@ -49,39 +48,25 @@ public class FlowTimeDemo {
 
         Simulation sim = new Simulation(tatModel, HOUR, WEEK, 4);
 
-        Flow Demand =
-            new FlowPerDay("New Orders") {
-                @Override
-                protected Quantity quantityPerTimeUnit() {
-                    return SimpleLinearChange.from( WIP, 200);
-                }
-            };
+        Flow Demand = Flows.linearGrowth("New Orders", DAY, WIP, 200);
 
-        Flow Throughput =
-            new FlowPerDay("Delivered Reports") {
-                @Override
-                protected Quantity quantityPerTimeUnit() {
+        Flow Throughput = Flow.create("Delivered Reports", DAY, () -> {
+            int demandDelay = Math.toIntExact(Math.round(TAT.getValue()));
+            int stepToGet = sim.getCurrentStep() - demandDelay;
 
-                    int demandDelay = Math.toIntExact(Math.round(TAT.getValue()));
-                    int stepToGet = sim.getCurrentStep() - demandDelay;
+            double demandPlusDelay = Demand.getHistoryAtTimeStep(stepToGet);
 
-                    double demandPlusDelay = Demand.getHistoryAtTimeStep(stepToGet);
-
-                    double throughput = Math.min(Capacity.getValue(), demandPlusDelay);
-                    return new Quantity(throughput, TEST);
-                }
-            };
+            double throughput = Math.min(Capacity.getValue(), demandPlusDelay);
+            return new Quantity(throughput, TEST);
+        });
 
         double hoursPerDay = 24.0;
         double adjustmentTime = 24.0; // hours
 
-        Flow tatAdjustment = new FlowPerHour("TAT Adjustment") {
-            @Override
-            protected Quantity quantityPerTimeUnit() {
-                double actualTAT = (WIP.getValue() / Capacity.getValue()) * hoursPerDay;
-                return new Quantity((actualTAT - TAT.getValue()) / adjustmentTime, HOUR);
-            }
-        };
+        Flow tatAdjustment = Flow.create("TAT Adjustment", HOUR, () -> {
+            double actualTAT = (WIP.getValue() / Capacity.getValue()) * hoursPerDay;
+            return new Quantity((actualTAT - TAT.getValue()) / adjustmentTime, HOUR);
+        });
 
         WIP.addInflow(Demand);
         WIP.addOutflow(Throughput);

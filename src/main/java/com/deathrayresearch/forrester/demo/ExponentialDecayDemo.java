@@ -1,16 +1,15 @@
 package com.deathrayresearch.forrester.demo;
 
 import com.deathrayresearch.forrester.Simulation;
-import com.deathrayresearch.forrester.archetypes.SimpleExponentialChange;
-import com.deathrayresearch.forrester.measure.Quantity;
 import com.deathrayresearch.forrester.measure.units.time.TimeUnits;
 import com.deathrayresearch.forrester.measure.units.time.Times;
+import com.deathrayresearch.forrester.model.Flow;
+import com.deathrayresearch.forrester.model.Flows;
 import com.deathrayresearch.forrester.model.Model;
 import com.deathrayresearch.forrester.model.Stock;
-import com.deathrayresearch.forrester.model.Flow;
-import com.deathrayresearch.forrester.model.flows.FlowPerDay;
 import com.deathrayresearch.forrester.ui.StockLevelChartViewer;
 
+import static com.deathrayresearch.forrester.measure.Units.DAY;
 import static com.deathrayresearch.forrester.measure.Units.PEOPLE;
 
 /**
@@ -32,12 +31,7 @@ public class ExponentialDecayDemo {
 
         Stock population = new Stock("Population", 100, PEOPLE);
 
-        Flow deaths = new FlowPerDay("Deaths") {
-            @Override
-            protected Quantity quantityPerTimeUnit() {
-                return SimpleExponentialChange.from(population, 1/80.0);
-            }
-        };
+        Flow deaths = Flows.exponentialGrowth("Deaths", DAY, population, 1/80.0);
 
         population.addOutflow(deaths);
 

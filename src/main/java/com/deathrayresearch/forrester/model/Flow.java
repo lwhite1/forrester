@@ -6,6 +6,7 @@ import com.deathrayresearch.forrester.model.flows.RateConverter;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Supplier;
 
 /**
  * Helps to create rates that are convertible to any time unit
@@ -27,6 +28,24 @@ public abstract class Flow extends Element {
     public Flow(String name, TimeUnit unit) {
         super(name);
         this.timeUnit = unit;
+    }
+
+    /**
+     * Creates a flow from a lambda that supplies the quantity per time unit, eliminating
+     * the need for anonymous subclasses.
+     *
+     * @param name     the flow name
+     * @param timeUnit the time unit in which this flow's rate is expressed
+     * @param formula  a supplier that computes the quantity per time unit on each evaluation
+     * @return a new flow that delegates to the given formula
+     */
+    public static Flow create(String name, TimeUnit timeUnit, Supplier<Quantity> formula) {
+        return new Flow(name, timeUnit) {
+            @Override
+            protected Quantity quantityPerTimeUnit() {
+                return formula.get();
+            }
+        };
     }
 
     /**

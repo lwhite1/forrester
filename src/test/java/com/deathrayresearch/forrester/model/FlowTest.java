@@ -102,6 +102,28 @@ public class FlowTest {
         assertTrue(flow.toString().contains("myFlow"));
     }
 
+    // Flow.create() static factory tests
+
+    @Test
+    public void createShouldReturnFlowWithCorrectTimeUnit() {
+        Flow flow = Flow.create("test", DAY, () -> new Quantity(10, THING));
+        assertEquals(DAY, flow.getTimeUnit());
+    }
+
+    @Test
+    public void createShouldReturnFlowWithCorrectRate() {
+        Flow flow = Flow.create("test", DAY, () -> new Quantity(10, THING));
+        Quantity rate = flow.flowPerTimeUnit(DAY);
+        assertEquals(10, rate.getValue(), 0.001);
+    }
+
+    @Test
+    public void createShouldConvertRateToOtherTimeUnit() {
+        Flow flow = Flow.create("test", DAY, () -> new Quantity(7, THING));
+        Quantity perWeek = flow.flowPerTimeUnit(WEEK);
+        assertEquals(49, perWeek.getValue(), 0.001);
+    }
+
     // FlowPer* subclass time unit tests
 
     @Test

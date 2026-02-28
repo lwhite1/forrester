@@ -1,18 +1,16 @@
 package com.deathrayresearch.forrester.demo;
 
 import com.deathrayresearch.forrester.Simulation;
-import com.deathrayresearch.forrester.archetypes.ExponentialChangeWithLimit;
-import com.deathrayresearch.forrester.measure.Quantity;
 import com.deathrayresearch.forrester.model.Constant;
+import com.deathrayresearch.forrester.model.Flow;
+import com.deathrayresearch.forrester.model.Flows;
 import com.deathrayresearch.forrester.model.Model;
 import com.deathrayresearch.forrester.model.Stock;
-import com.deathrayresearch.forrester.model.Flow;
-import com.deathrayresearch.forrester.model.flows.FlowPerDay;
 import com.deathrayresearch.forrester.ui.StockLevelChartViewer;
 
+import static com.deathrayresearch.forrester.measure.Units.DAY;
 import static com.deathrayresearch.forrester.measure.Units.DIMENSIONLESS;
 import static com.deathrayresearch.forrester.measure.Units.PEOPLE;
-import static com.deathrayresearch.forrester.measure.Units.DAY;
 import static com.deathrayresearch.forrester.measure.Units.WEEK;
 
 /**
@@ -41,15 +39,8 @@ public class SShapedPopulationGrowthDemo {
                 DIMENSIONLESS,
                 0.04);
 
-        Flow births = new FlowPerDay("Births") {
-            @Override
-            protected Quantity quantityPerTimeUnit() {
-                return ExponentialChangeWithLimit.from(
-                        population,
-                        fractionalNetBirthRate.getValue(),
-                        carryingCapacity.getValue());
-            }
-        };
+        Flow births = Flows.exponentialGrowthWithLimit("Births", DAY, population,
+                fractionalNetBirthRate.getValue(), carryingCapacity.getValue());
 
         population.addInflow(births);
 
