@@ -16,6 +16,7 @@ import com.google.common.eventbus.EventBus;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -118,6 +119,14 @@ public class Simulation {
     private void recordVariableValues() {
         for (Variable variable : model.getVariables()) {
             variable.recordValue();
+        }
+        Collection<Variable> modelVariables = model.getVariables();
+        for (Module module : model.getModules()) {
+            for (Variable variable : module.getVariables()) {
+                if (!modelVariables.contains(variable)) {
+                    variable.recordValue();
+                }
+            }
         }
     }
 

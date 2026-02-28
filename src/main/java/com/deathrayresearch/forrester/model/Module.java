@@ -4,6 +4,8 @@ import com.deathrayresearch.forrester.measure.Quantity;
 import com.deathrayresearch.forrester.measure.TimeUnit;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -47,6 +49,10 @@ public class Module extends Element {
 
     public void addVariable(Variable variable) {
         variables.put(variable.getName(), variable);
+    }
+
+    public Collection<Variable> getVariables() {
+        return Collections.unmodifiableCollection(variables.values());
     }
 
     public List<Stock> getStocks() {
