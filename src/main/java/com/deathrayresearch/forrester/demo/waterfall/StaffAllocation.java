@@ -19,6 +19,12 @@ import static com.deathrayresearch.forrester.demo.waterfall.WaterfallSoftwareDev
 import static com.deathrayresearch.forrester.demo.waterfall.WaterfallSoftwareDevelopmentDemo.TOTAL_WORKFORCE;
 
 /**
+ * Staff allocation subsystem for the waterfall software project model.
+ *
+ * <p>Divides the available workforce between software production and QA based on a planned
+ * QA fraction. Daily resources are first reduced by the training overhead from the
+ * {@link Workforce} module, then split between development and quality assurance. An
+ * overhead loss constant further reduces the effective capacity available for productive work.
  */
 class StaffAllocation {
 

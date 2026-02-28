@@ -20,7 +20,12 @@ import static com.deathrayresearch.forrester.demo.waterfall.WaterfallSoftwareDev
 import static com.deathrayresearch.forrester.demo.waterfall.WaterfallSoftwareDevelopmentDemo.TASKS_DEVELOPED;
 
 /**
+ * Development subsystem for the waterfall software project model.
  *
+ * <p>Models task completion as a function of development staffing (from
+ * {@link StaffAllocation}) and productivity. Productivity depends on the workforce
+ * experience mix — experienced workers are twice as productive as new hires. The daily
+ * task completion rate is staffing multiplied by development productivity.
  */
 class Development {
 

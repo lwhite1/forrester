@@ -28,7 +28,13 @@ import static com.deathrayresearch.forrester.demo.waterfall.WaterfallSoftwareDev
 import static com.deathrayresearch.forrester.demo.waterfall.WaterfallSoftwareDevelopmentDemo.WORKFORCE_NEED;
 
 /**
+ * Workforce subsystem for the waterfall software project model.
  *
+ * <p>Models hiring, assimilation, and resignation dynamics. New hires are recruited at a rate
+ * proportional to the workforce gap (desired minus actual), delayed by an 8-week hiring lag.
+ * New hires assimilate into experienced workers over a 16-week period. The module tracks
+ * total workforce, the fraction with experience, full-time equivalent capacity, and the
+ * daily training overhead imposed by new hires on experienced staff.
  */
 class Workforce {
 

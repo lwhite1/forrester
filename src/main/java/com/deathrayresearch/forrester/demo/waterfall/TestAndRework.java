@@ -14,6 +14,12 @@ import static com.deathrayresearch.forrester.measure.Units.DAY;
 import static com.deathrayresearch.forrester.demo.waterfall.WaterfallSoftwareDevelopmentDemo.TESTING_AND_REWORK;
 
 /**
+ * Test and rework subsystem for the waterfall software project model.
+ *
+ * <p>Models the defect lifecycle: errors are generated at a constant rate into a latent
+ * defects stock, discovered at 10% per day into known defects, and fixed at 20% per day
+ * into a fixed defects stock. The three-stock pipeline (latent → known → fixed) captures
+ * the delay between defect injection and resolution that drives rework dynamics.
  */
 class TestAndRework {
 
