@@ -11,3 +11,6 @@ dynamics.iml
 run1.out.csv
 run2.out.csv
 target/
+.claude/
+tub.csv
+doc/temp/
