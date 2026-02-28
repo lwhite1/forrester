@@ -9,14 +9,12 @@ import com.deathrayresearch.forrester.measure.TimeUnit;
 import com.deathrayresearch.forrester.measure.Unit;
 import com.deathrayresearch.forrester.model.Model;
 import com.deathrayresearch.forrester.model.Stock;
-import com.deathrayresearch.forrester.model.Module;
 import com.deathrayresearch.forrester.model.Flow;
 import com.deathrayresearch.forrester.model.Variable;
 import com.google.common.eventbus.EventBus;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -86,13 +84,7 @@ public class Simulation {
 
             eventBus.post(new TimeStepEvent(currentDateTime, model, currentStep, timeStep));
             recordVariableValues();
-            List<Stock> stocks = model.getStocks();
-            updateStocks(flowMap, stocks);
-            for (Module module : model.getModules()) {
-                stocks = module.getStocks();
-                flowMap.clear();
-                updateStocks(flowMap, stocks);
-            }
+            updateStocks(flowMap, model.getStocks());
             addStep(currentDateTime);
             currentStep++;
         }
@@ -110,14 +102,6 @@ public class Simulation {
     private void recordVariableValues() {
         for (Variable variable : model.getVariables()) {
             variable.recordValue();
-        }
-        Collection<Variable> modelVariables = model.getVariables();
-        for (Module module : model.getModules()) {
-            for (Variable variable : module.getVariables()) {
-                if (!modelVariables.contains(variable)) {
-                    variable.recordValue();
-                }
-            }
         }
     }
 

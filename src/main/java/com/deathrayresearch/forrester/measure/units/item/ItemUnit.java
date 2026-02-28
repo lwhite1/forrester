@@ -2,7 +2,6 @@ package com.deathrayresearch.forrester.measure.units.item;
 
 import com.deathrayresearch.forrester.measure.Dimension;
 import com.deathrayresearch.forrester.measure.Unit;
-import com.deathrayresearch.forrester.measure.dimension.Item;
 
 /**
  * A custom item unit with a user-defined name. Allows models to use domain-specific
@@ -23,7 +22,7 @@ public class ItemUnit implements Unit {
 
     @Override
     public Dimension getDimension() {
-        return Item.INSTANCE;
+        return Dimension.ITEM;
     }
 
     @Override

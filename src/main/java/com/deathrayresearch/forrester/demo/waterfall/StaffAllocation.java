@@ -5,18 +5,9 @@ import com.deathrayresearch.forrester.measure.units.dimensionless.DimensionlessU
 import com.deathrayresearch.forrester.measure.units.item.ItemUnit;
 import com.deathrayresearch.forrester.measure.units.item.ItemUnits;
 import com.deathrayresearch.forrester.model.Constant;
-import com.deathrayresearch.forrester.model.Formula;
-import com.deathrayresearch.forrester.model.Model;
 import com.deathrayresearch.forrester.model.Module;
 import com.deathrayresearch.forrester.model.Stock;
 import com.deathrayresearch.forrester.model.Variable;
-
-import static com.deathrayresearch.forrester.demo.waterfall.WaterfallSoftwareDevelopmentDemo.DAILY_RESOURCES_FOR_SOFTWARE_PRODUCTION;
-import static com.deathrayresearch.forrester.demo.waterfall.WaterfallSoftwareDevelopmentDemo.PEOPLE;
-import static com.deathrayresearch.forrester.demo.waterfall.WaterfallSoftwareDevelopmentDemo.DAILY_RESOURCES_FOR_TRAINING;
-import static com.deathrayresearch.forrester.demo.waterfall.WaterfallSoftwareDevelopmentDemo.DAILY_RESOURCES_PERFORMING_QA;
-import static com.deathrayresearch.forrester.demo.waterfall.WaterfallSoftwareDevelopmentDemo.STAFF_ALLOCATION;
-import static com.deathrayresearch.forrester.demo.waterfall.WaterfallSoftwareDevelopmentDemo.TOTAL_WORKFORCE;
 
 /**
  * Staff allocation subsystem for the waterfall software project model.
@@ -26,20 +17,24 @@ import static com.deathrayresearch.forrester.demo.waterfall.WaterfallSoftwareDev
  * {@link Workforce} module, then split between development and quality assurance. An
  * overhead loss constant further reduces the effective capacity available for productive work.
  */
-class StaffAllocation {
+public class StaffAllocation {
 
     private static final Unit PERSON_DAYS_PER_DAY = new ItemUnit("Person days per day");
     private static final DimensionlessUnits DIMENSIONLESS_UNIT = DimensionlessUnits.DIMENSIONLESS;
 
-    static Module getStaffAllocationModule(Model model) {
+    private final Module module;
+    private final Variable dailyResourcesForProduction;
+    private final Variable dailyResourcesForQA;
 
-        Module module = new Module(WaterfallSoftwareDevelopmentDemo.STAFF_ALLOCATION);
+    public StaffAllocation(Variable totalWorkforce, Variable dailyTrainingOverhead) {
+        module = new Module("Staff Allocation");
+
+        Constant averageDailyManPowerPerStaff =
+                new Constant("ADMPPPS", ItemUnits.THING, 1);
 
         Variable totalDailyStaffing = new Variable("Total daily dev. resources",
-                PEOPLE,
-                () -> model.getVariable(WaterfallSoftwareDevelopmentDemo.TOTAL_WORKFORCE).getValue()
-                        * Workforce.AVERAGE_DAILY_MAN_POWER_PER_STAFF.getValue());
-
+                ItemUnits.PEOPLE,
+                () -> totalWorkforce.getValue() * averageDailyManPowerPerStaff.getValue());
 
         Constant plannedFractionOfStaffForQA =
                 new Constant("Planned fraction of resources for QA", DIMENSIONLESS_UNIT, .15);
@@ -47,50 +42,25 @@ class StaffAllocation {
         Variable dailyResourcesAvailableAfterTrainingOverhead =
                 new Variable("Daily resources available after training overhead",
                         PERSON_DAYS_PER_DAY,
-                        new Formula() {
-                            @Override
-                            public double getCurrentValue() {
-                                return totalDailyStaffing.getValue()
-                                        - model.getVariable(DAILY_RESOURCES_FOR_TRAINING).getValue();
-                            }
-                        });
+                        () -> totalDailyStaffing.getValue() - dailyTrainingOverhead.getValue());
 
         Variable actualFractionOfStaffForQA =
-                new Variable("Actual fraction of resources for QA", DimensionlessUnits.DIMENSIONLESS, new Formula() {
-                    @Override
-                    public double getCurrentValue() {
-                        return plannedFractionOfStaffForQA.getValue();
-                    }
-                });
+                new Variable("Actual fraction of resources for QA", DimensionlessUnits.DIMENSIONLESS,
+                        plannedFractionOfStaffForQA::getValue);
 
         Constant lossFromOverhead = new Constant("Loss from overhead", DimensionlessUnits.DIMENSIONLESS, .1);
 
-        Variable dailyResourcesForQA =
-                new Variable(DAILY_RESOURCES_PERFORMING_QA,
-                        PERSON_DAYS_PER_DAY,
-                        new Formula() {
-                            @Override
-                            public double getCurrentValue() {
-                                return Math.min(
-                                        actualFractionOfStaffForQA.getValue() * totalDailyStaffing.getValue(),
-                                        (1.0 - lossFromOverhead.getValue())
-                                                * dailyResourcesAvailableAfterTrainingOverhead.getValue());
-                            }
-                        }
-                );
+        dailyResourcesForQA = new Variable("Daily resources performing QA",
+                PERSON_DAYS_PER_DAY,
+                () -> Math.min(
+                        actualFractionOfStaffForQA.getValue() * totalDailyStaffing.getValue(),
+                        (1.0 - lossFromOverhead.getValue())
+                                * dailyResourcesAvailableAfterTrainingOverhead.getValue()));
 
-        Variable dailyResourcesForSoftwareProduction =
-                new Variable(DAILY_RESOURCES_FOR_SOFTWARE_PRODUCTION,
-                        PERSON_DAYS_PER_DAY,
-                        new Formula() {
-                            @Override
-                            public double getCurrentValue() {
-                                return dailyResourcesAvailableAfterTrainingOverhead.getValue()
-                                        - dailyResourcesForQA.getValue();
-                            }
-                        });
-
-        Constant qualityObjective = new Constant("Quality Objective", ItemUnits.THING, 0);
+        dailyResourcesForProduction = new Variable("Daily resources for software production",
+                PERSON_DAYS_PER_DAY,
+                () -> dailyResourcesAvailableAfterTrainingOverhead.getValue()
+                        - dailyResourcesForQA.getValue());
 
         Stock cumulativeManDaysExpended =
                 new Stock("Cumulative Person-Days Expended", 0.0001, new ItemUnit("Person day"));
@@ -100,8 +70,18 @@ class StaffAllocation {
         module.addVariable(actualFractionOfStaffForQA);
         module.addVariable(totalDailyStaffing);
         module.addVariable(dailyResourcesForQA);
-        module.addVariable(dailyResourcesForSoftwareProduction);
+        module.addVariable(dailyResourcesForProduction);
+    }
 
+    public Module getModule() {
         return module;
+    }
+
+    public Variable getDailyResourcesForProduction() {
+        return dailyResourcesForProduction;
+    }
+
+    public Variable getDailyResourcesForQA() {
+        return dailyResourcesForQA;
     }
 }

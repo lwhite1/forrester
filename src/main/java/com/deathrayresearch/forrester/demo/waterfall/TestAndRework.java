@@ -1,17 +1,14 @@
 package com.deathrayresearch.forrester.demo.waterfall;
 
-
 import com.deathrayresearch.forrester.measure.Quantity;
 import com.deathrayresearch.forrester.measure.Unit;
 import com.deathrayresearch.forrester.measure.units.item.ItemUnit;
 import com.deathrayresearch.forrester.model.Flow;
-import com.deathrayresearch.forrester.model.Formula;
 import com.deathrayresearch.forrester.model.Module;
 import com.deathrayresearch.forrester.model.Stock;
 import com.deathrayresearch.forrester.model.Variable;
 
 import static com.deathrayresearch.forrester.measure.Units.DAY;
-import static com.deathrayresearch.forrester.demo.waterfall.WaterfallSoftwareDevelopmentDemo.TESTING_AND_REWORK;
 
 /**
  * Test and rework subsystem for the waterfall software project model.
@@ -21,30 +18,22 @@ import static com.deathrayresearch.forrester.demo.waterfall.WaterfallSoftwareDev
  * into a fixed defects stock. The three-stock pipeline (latent → known → fixed) captures
  * the delay between defect injection and resolution that drives rework dynamics.
  */
-class TestAndRework {
+public class TestAndRework {
 
     private static final Unit ERRORS = new ItemUnit("Error");
     private static final Unit ERRORS_PER_TASK = new ItemUnit("Errors per task");
 
-    static Module getTestAndReworkSubSystem() {
+    private final Module module;
 
-        Module module = new Module(TESTING_AND_REWORK);
+    public TestAndRework() {
+        module = new Module("Testing and Rework");
 
         Stock latentDefects = new Stock("Latent defects", 0.0, ERRORS);
         Stock knownDefects = new Stock("Known defects", 0.0, ERRORS);
         Stock fixedDefects = new Stock("Fixed defects", 0.0, ERRORS);
 
         Variable nominalErrorsCommittedPerTask =
-                new Variable("Nominal errors committed per task",
-                        ERRORS_PER_TASK,
-                        new Formula() {
-                            @Override
-                            public double getCurrentValue() {
-                                return 0;
-                            }
-                        });
-
-
+                new Variable("Nominal errors committed per task", ERRORS_PER_TASK, () -> 0);
 
         Flow errorGenerationFlow = Flow.create("New Errors", DAY, () ->
                 new Quantity(10, ERRORS));
@@ -70,8 +59,9 @@ class TestAndRework {
         module.addStock(latentDefects);
         module.addStock(knownDefects);
         module.addStock(fixedDefects);
-
-        return module;
     }
 
+    public Module getModule() {
+        return module;
+    }
 }

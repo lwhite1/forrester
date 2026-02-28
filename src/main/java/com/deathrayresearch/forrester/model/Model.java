@@ -55,10 +55,19 @@ public class Model extends Element {
     }
 
     /**
-     * Adds a module to this model.
+     * Adds a module to this model, automatically registering its stocks and variables
+     * into the model's own collections (skipping duplicates).
      */
     public void addModule(Module module) {
         modules.add(module);
+        for (Stock stock : module.getStocks()) {
+            if (!stocks.contains(stock)) {
+                stocks.add(stock);
+            }
+        }
+        for (Variable variable : module.getVariables()) {
+            variables.putIfAbsent(variable.getName(), variable);
+        }
     }
 
     /**
