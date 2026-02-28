@@ -19,9 +19,9 @@ public class InventoryModelDemo {
     private static final Unit CARS = THING;
 
     // delays
-    private static final double PERCEPTION_DELAY = 0;
-    private static final double RESPONSE_DELAY = 0;
-    private static final double DELIVERY_DELAY = 0;
+    private static final double PERCEPTION_DELAY = 5;  // days to perceive demand changes
+    private static final double RESPONSE_DELAY = 3;     // days to process and send order
+    private static final double DELIVERY_DELAY = 5;     // days for factory to ship cars
 
     public static void main(String[] args) {
         new InventoryModelDemo().run();
@@ -56,8 +56,18 @@ public class InventoryModelDemo {
             }
         };
 
-        Variable perceivedSales = new Variable("Perceived Sales", CARS,
-                () -> sales.flowPerTimeUnit(DAY).getValue());
+        Stock perceivedSales = new Stock("Perceived Sales", 20, CARS);
+
+        Flow perceptionAdjustment = new FlowPerDay("Perception Adjustment") {
+            @Override
+            protected Quantity quantityPerTimeUnit() {
+                double adjustment = (sales.flowPerTimeUnit(DAY).getValue() - perceivedSales.getValue())
+                        / PERCEPTION_DELAY;
+                return new Quantity(adjustment, CARS);
+            }
+        };
+
+        perceivedSales.addInflow(perceptionAdjustment);
 
         Variable desiredInventory = new Variable("Desired Inventory", CARS, new Formula() {
             @Override
@@ -72,15 +82,15 @@ public class InventoryModelDemo {
         Variable ordersToFactory = new Variable("Orders to Factory", CARS,
                 () -> Math.max(perceivedSales.getValue() + inventoryGap.getValue(), 0));
 
+        int totalDelay = Math.toIntExact(Math.round(RESPONSE_DELAY + DELIVERY_DELAY));
+
         Flow deliveries = new FlowPerDay("Deliveries") {
             @Override
             protected Quantity quantityPerTimeUnit() {
-                if (run.getCurrentStep() <= 5) {
-                    return new Quantity(
-                            20,
-                            CARS);
+                if (run.getCurrentStep() <= totalDelay) {
+                    return new Quantity(20, CARS);
                 }
-                int priorStep = run.getCurrentStep() - Math.toIntExact(Math.round(DELIVERY_DELAY));
+                int priorStep = run.getCurrentStep() - totalDelay;
                 return new Quantity(ordersToFactory.getHistoryAtTimeStep(priorStep), CARS);
             }
         };
@@ -89,6 +99,11 @@ public class InventoryModelDemo {
         carsOnLot.addOutflow(sales);
 
         model.addStock(carsOnLot);
+        model.addStock(perceivedSales);
+        model.addVariable(demand);
+        model.addVariable(desiredInventory);
+        model.addVariable(inventoryGap);
+        model.addVariable(ordersToFactory);
 
         run.addEventHandler(new StockLevelChartViewer());
         run.execute();
