@@ -14,6 +14,14 @@ import com.deathrayresearch.forrester.ui.StockLevelChartViewer;
 import static com.deathrayresearch.forrester.measure.Units.DAY;
 import static com.deathrayresearch.forrester.measure.Units.THING;
 
+/**
+ * Models a car dealership's inventory system with perception, response, and delivery delays.
+ *
+ * <p>Inspired by the inventory example in <em>Thinking in Systems</em>. A Cars-on-Lot stock is
+ * drained by sales and replenished by factory deliveries. Three delays — perception (5 days),
+ * response (3 days), and delivery (5 days) — cause the dealer to overshoot and oscillate before
+ * settling, demonstrating how delays in feedback loops amplify fluctuations.
+ */
 public class InventoryModelDemo {
 
     private static final Unit CARS = THING;

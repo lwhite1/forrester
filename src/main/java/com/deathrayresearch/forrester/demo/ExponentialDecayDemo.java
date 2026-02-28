@@ -14,7 +14,11 @@ import com.deathrayresearch.forrester.ui.StockLevelChartViewer;
 import static com.deathrayresearch.forrester.measure.Units.PEOPLE;
 
 /**
+ * Models a population declining through exponential decay with no births.
  *
+ * <p>A single Population stock drains through a death outflow proportional to its current level
+ * (1/80 per day). With no inflow the stock decays asymptotically toward zero, illustrating
+ * the basic exponential decay pattern used throughout system dynamics.
  */
 public class ExponentialDecayDemo {
 

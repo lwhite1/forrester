@@ -14,7 +14,13 @@ import com.deathrayresearch.forrester.ui.StockLevelChartViewer;
 import static com.deathrayresearch.forrester.measure.Units.WEEK;
 
 /**
+ * Models an agile software project with backlogs, defect creation, and defect resolution.
  *
+ * <p>Stocks include a product backlog, release backlog, sprint backlog, completed work, latent
+ * defects, and known defects. Work flows from sprint backlog to completion at a bounded
+ * productivity rate, generating defects at a fraction of the completion rate. Defects are
+ * discovered and fixed through separate feedback loops, illustrating rework dynamics in
+ * iterative development.
  */
 public class AgileSoftwareDevelopmentDemo {
 

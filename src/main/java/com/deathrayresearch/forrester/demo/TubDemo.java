@@ -16,7 +16,12 @@ import static com.deathrayresearch.forrester.measure.Units.GALLON_US;
 import static com.deathrayresearch.forrester.measure.Units.MINUTE;
 
 /**
+ * The classic bathtub model — the simplest stock-and-flow demonstration.
  *
+ * <p>A Water-in-Tub stock (50 gallons) drains at 5 gal/min from the start while the inflow is
+ * delayed for 5 minutes and then adds 5 gal/min. The tub drains down, then stabilizes once
+ * inflow begins, illustrating how a stock is the accumulation of the difference between its
+ * inflow and outflow over time.
  */
 public class TubDemo {
 

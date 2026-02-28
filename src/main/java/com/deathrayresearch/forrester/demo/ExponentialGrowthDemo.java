@@ -14,7 +14,11 @@ import com.deathrayresearch.forrester.ui.StockLevelChartViewer;
 import static com.deathrayresearch.forrester.measure.Units.WEEK;
 
 /**
+ * Models unconstrained population growth where births exceed deaths.
  *
+ * <p>A single Population stock has an exponential birth inflow (4% per day) and an exponential
+ * death outflow (3% per day). Because the net rate is positive, the population grows
+ * exponentially — the fundamental "positive feedback loop" archetype in system dynamics.
  */
 public class ExponentialGrowthDemo {
 

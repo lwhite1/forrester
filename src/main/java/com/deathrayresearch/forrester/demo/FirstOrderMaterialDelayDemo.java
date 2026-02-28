@@ -13,7 +13,11 @@ import com.deathrayresearch.forrester.ui.StockLevelChartViewer;
 import static com.deathrayresearch.forrester.measure.Units.PEOPLE;
 
 /**
+ * Demonstrates a first-order material delay (exponential smoothing).
  *
+ * <p>A Potential Customers stock drains through a sales outflow equal to the stock level divided
+ * by an average delay of 120 days. This assumes the stock is fully mixed (no FIFO ordering),
+ * producing exponential decay — the simplest material delay in system dynamics.
  */
 public class FirstOrderMaterialDelayDemo {
 

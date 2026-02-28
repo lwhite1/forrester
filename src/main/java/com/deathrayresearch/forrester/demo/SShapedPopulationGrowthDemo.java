@@ -16,7 +16,12 @@ import static com.deathrayresearch.forrester.measure.Units.DAY;
 import static com.deathrayresearch.forrester.measure.Units.WEEK;
 
 /**
+ * Models logistic (S-shaped) population growth constrained by a carrying capacity.
  *
+ * <p>A Population stock grows via a birth inflow whose rate diminishes as the population
+ * approaches the carrying capacity (1,000). Growth starts exponentially, inflects at the
+ * midpoint, and levels off — the classic S-curve produced by a balancing feedback loop that
+ * limits a reinforcing loop.
  */
 public class SShapedPopulationGrowthDemo {
 

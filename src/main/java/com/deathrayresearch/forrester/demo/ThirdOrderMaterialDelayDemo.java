@@ -17,7 +17,12 @@ import static com.deathrayresearch.forrester.measure.Units.HOUR;
 import static com.deathrayresearch.forrester.measure.Units.THING;
 
 /**
+ * Demonstrates a third-order material delay as a chain of three first-order delays.
  *
+ * <p>Items enter Step 1, flow to Step 2, then Step 3, each with its own average activity time
+ * (7 h, 6.3 h, 3.2 h). A Total WIP variable tracks combined inventory across all stages. The
+ * cascaded stages smooth output more than a single first-order delay, producing a bell-shaped
+ * throughput response to a step input.
  */
 public class ThirdOrderMaterialDelayDemo {
 

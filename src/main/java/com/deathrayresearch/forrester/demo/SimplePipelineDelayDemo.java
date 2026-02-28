@@ -15,6 +15,13 @@ import static com.deathrayresearch.forrester.measure.Units.DAY;
 import static com.deathrayresearch.forrester.measure.Units.THING;
 import static com.deathrayresearch.forrester.measure.Units.WEEK;
 
+/**
+ * Demonstrates a FIFO pipeline delay where output exactly mirrors input after a fixed lag.
+ *
+ * <p>A WIP stock receives a constant arrival flow of 5 items/day. The departure flow replays
+ * the arrival history shifted by a 3-day delay constant, using the {@code PipelineDelay}
+ * archetype. WIP rises for the first 3 days then stabilizes once departures begin.
+ */
 public class SimplePipelineDelayDemo {
 
     public static void main(String[] args) {

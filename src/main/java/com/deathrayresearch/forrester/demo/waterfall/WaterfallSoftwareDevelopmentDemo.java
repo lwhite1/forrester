@@ -11,7 +11,13 @@ import com.deathrayresearch.forrester.model.Module;
 import com.deathrayresearch.forrester.ui.StockLevelChartViewer;
 
 /**
+ * Models a waterfall software project with modular subsystems for workforce, development,
+ * testing, rework, and staff allocation.
  *
+ * <p>Four {@link com.deathrayresearch.forrester.model.Module Modules} — Workforce, Development,
+ * Staff Allocation, and Test &amp; Rework — are composed into a single model. Hiring delays,
+ * training overhead, defect injection, and rework cycles interact to show how phased development
+ * with late testing can lead to schedule overruns and staffing oscillations.
  */
 public class WaterfallSoftwareDevelopmentDemo {
 

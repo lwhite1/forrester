@@ -16,6 +16,14 @@ import com.deathrayresearch.forrester.ui.StockLevelChartViewer;
 import static com.deathrayresearch.forrester.measure.Units.HOUR;
 import static com.deathrayresearch.forrester.measure.Units.WEEK;
 
+/**
+ * Models turnaround time (TAT) for a work-in-process queue with demand and capacity constraints.
+ *
+ * <p>Two stocks — WIP (work items) and TAT (hours) — interact through flows defined at
+ * different time units (per-day demand, per-hour TAT adjustment). Throughput is bounded by
+ * capacity and delayed by the current TAT, demonstrating how flow rates expressed in different
+ * time units are automatically converted by the simulation engine.
+ */
 public class FlowTimeDemo {
 
     private static final ItemUnits TEST = ItemUnits.THING;

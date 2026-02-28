@@ -20,7 +20,12 @@ import static com.deathrayresearch.forrester.measure.Units.US_DOLLAR;
 import static com.deathrayresearch.forrester.measure.Units.WEEK;
 
 /**
+ * Models the evolving sales mix between hardware and recurring service revenue.
  *
+ * <p>A Customers stock grows linearly at 10 per day. Hardware sales are a one-time amount per
+ * new customer, while service sales accumulate over the full customer base. Over time the
+ * proportion of hardware revenue falls as the recurring service base grows, illustrating how
+ * stock-dependent flows can shift a business's revenue composition.
  */
 public class SalesMixDemo {
 

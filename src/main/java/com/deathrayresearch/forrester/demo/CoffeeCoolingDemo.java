@@ -14,7 +14,11 @@ import static com.deathrayresearch.forrester.measure.Units.CENTIGRADE;
 import static com.deathrayresearch.forrester.measure.Units.MINUTE;
 
 /**
+ * Simulates Newton's law of cooling applied to a cup of coffee.
  *
+ * <p>A Coffee Temperature stock (initially 100 °C) cools toward a Room Temperature constant
+ * (18 °C) via a negative-feedback outflow proportional to the temperature discrepancy. The
+ * cooling rate decelerates as the gap narrows, producing the classic goal-seeking decay curve.
  */
 public class CoffeeCoolingDemo {
 

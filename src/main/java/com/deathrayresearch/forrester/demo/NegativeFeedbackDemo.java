@@ -14,7 +14,11 @@ import com.deathrayresearch.forrester.ui.StockLevelChartViewer;
 import static com.deathrayresearch.forrester.measure.Units.WEEK;
 
 /**
+ * Demonstrates negative (balancing) feedback driving a stock toward a goal.
  *
+ * <p>An Inventory stock (initially 1,000 units) adjusts toward a target of 860 through a
+ * production inflow proportional to the gap divided by an adjustment time of 8 days. The stock
+ * approaches its goal asymptotically — the classic goal-seeking archetype in system dynamics.
  */
 public class NegativeFeedbackDemo {
 

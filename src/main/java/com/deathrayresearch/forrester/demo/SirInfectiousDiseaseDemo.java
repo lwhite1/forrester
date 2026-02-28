@@ -15,7 +15,12 @@ import static com.deathrayresearch.forrester.measure.Units.DAY;
 import static com.deathrayresearch.forrester.measure.Units.PEOPLE;
 
 /**
+ * Implements the classic SIR (Susceptible-Infectious-Recovered) epidemiological model.
  *
+ * <p>Three stocks — Susceptible (1,000), Infectious (10), and Recovered (0) — are linked by
+ * infection and recovery flows. The infection rate depends on a contact rate, the infectious
+ * fraction of the population, and an infectivity constant. The model produces a characteristic
+ * epidemic curve: Infectious rises to a peak then falls as the susceptible pool is depleted.
  */
 public class SirInfectiousDiseaseDemo {
 

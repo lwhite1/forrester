@@ -112,39 +112,43 @@ The demo package (`src/main/java/.../demo/`) contains a rich set of example mode
 
 ### Fundamental
 
-| Demo | Demonstrates |
-|---|---|
-| `ExponentialGrowthDemo` | Unconstrained population growth with birth/death rates |
-| `ExponentialDecayDemo` | Exponential decay pattern |
-| `CoffeeCoolingDemo` | Newton's law of cooling via negative feedback |
-| `TubDemo` | Simple bathtub inflow/outflow |
-| `SShapedPopulationGrowthDemo` | Logistic growth with a carrying capacity |
-| `FlowTimeDemo` | Flow rate behavior across different time units |
+**ExponentialGrowthDemo** — Models unconstrained population growth. A single Population stock has an exponential birth inflow (4%/day) and death outflow (3%/day). The positive net rate produces the classic exponential growth curve driven by a reinforcing feedback loop.
+
+**ExponentialDecayDemo** — Models a population declining with no births. A Population stock drains through a death outflow proportional to its current level (1/80 per day), decaying asymptotically toward zero — the basic exponential decay pattern.
+
+**CoffeeCoolingDemo** — Simulates Newton's law of cooling. A Coffee Temperature stock (100 °C) cools toward room temperature (18 °C) via a negative-feedback outflow proportional to the temperature gap. The cooling rate decelerates as the gap narrows, producing a goal-seeking decay curve.
+
+**TubDemo** — The classic bathtub model, the simplest stock-and-flow demonstration. A Water-in-Tub stock (50 gallons) drains at 5 gal/min while inflow is delayed 5 minutes. The tub level drops then stabilizes, showing how a stock accumulates the difference between inflow and outflow.
+
+**SShapedPopulationGrowthDemo** — Models logistic population growth constrained by a carrying capacity (1,000). Growth starts exponentially, inflects at the midpoint, and levels off — the S-curve produced by a balancing loop limiting a reinforcing loop.
+
+**FlowTimeDemo** — Models turnaround time (TAT) for a work queue with demand and capacity constraints. Two stocks (WIP and TAT) interact through flows defined at different time units (per-day demand, per-hour adjustment), demonstrating the engine's automatic rate conversion.
 
 ### Delays
 
-| Demo | Demonstrates |
-|---|---|
-| `FirstOrderMaterialDelayDemo` | Exponential smoothing delay |
-| `ThirdOrderMaterialDelayDemo` | Three-stage material delay |
-| `SimplePipelineDelayDemo` | FIFO pipeline delay |
+**FirstOrderMaterialDelayDemo** — Demonstrates a first-order material delay (exponential smoothing). A Potential Customers stock drains at a rate equal to stock level divided by a 120-day average delay. Assumes full mixing (no FIFO), producing exponential decay — the simplest material delay.
+
+**ThirdOrderMaterialDelayDemo** — Chains three first-order material delays (7 h, 6.3 h, 3.2 h activity times) to form a third-order delay. A Total WIP variable tracks combined inventory. The cascaded stages smooth output more than a single delay, producing a bell-shaped throughput response to a step input.
+
+**SimplePipelineDelayDemo** — Demonstrates a FIFO pipeline delay. A WIP stock receives 5 items/day; departures replay the arrival history shifted by a 3-day constant using the `PipelineDelay` archetype. WIP rises for 3 days then stabilizes — in contrast to the material delays which assume mixing.
 
 ### Feedback & Interaction
 
-| Demo | Demonstrates |
-|---|---|
-| `NegativeFeedbackDemo` | Inventory adjustment toward a target level |
-| `SirInfectiousDiseaseDemo` | SIR epidemiological model (Susceptible/Infected/Recovered) |
-| `PredatorPreyDemo` | Lotka-Volterra predator-prey dynamics |
-| `InventoryModelDemo` | Inventory management with perception, response, and delivery delays |
-| `SalesMixDemo` | Sales mix dynamics across product categories |
+**NegativeFeedbackDemo** — Demonstrates goal-seeking behavior via negative feedback. An Inventory stock (1,000 units) adjusts toward a target of 860 through a production inflow proportional to the gap divided by an 8-day adjustment time, approaching the goal asymptotically.
+
+**SirInfectiousDiseaseDemo** — Implements the classic SIR epidemiological model with three stocks: Susceptible (1,000), Infectious (10), and Recovered (0). Infection depends on contact rate, infectious fraction, and infectivity. Produces the characteristic epidemic curve — Infectious peaks then falls as the susceptible pool is depleted.
+
+**PredatorPreyDemo** — Implements the Lotka-Volterra predator-prey model. Prey (Rabbits) and predator (Foxes) populations are coupled through birth and death flows that depend on both species' levels. The model produces sustained oscillations where predator peaks lag prey peaks.
+
+**InventoryModelDemo** — Models a car dealership's inventory with perception (5-day), response (3-day), and delivery (5-day) delays, inspired by *Thinking in Systems*. A step increase in demand causes the dealer to overshoot and oscillate before settling, demonstrating how delays in feedback loops amplify fluctuations.
+
+**SalesMixDemo** — Models the evolving revenue mix between one-time hardware sales and recurring service revenue. A Customers stock grows linearly; hardware revenue scales with new acquisitions while service revenue scales with total customers. Over time the hardware proportion falls, showing how stock-dependent flows shift composition.
 
 ### Software Development
 
-| Demo | Demonstrates |
-|---|---|
-| `AgileSoftwareDevelopmentDemo` | Agile team with backlog, defects, and productivity |
-| `WaterfallSoftwareDevelopmentDemo` | Waterfall methodology with rework cycles and separate modules for development, workforce, testing, rework, and staff allocation |
+**AgileSoftwareDevelopmentDemo** — Models an agile project with product/release/sprint backlogs, completed work, latent defects, and known defects. Work flows from sprint backlog to completion at a bounded productivity rate, generating defects at a fraction of the completion rate. Defects are discovered and fixed through separate feedback loops, illustrating rework dynamics.
+
+**WaterfallSoftwareDevelopmentDemo** — Models a waterfall project using four composable Modules: Workforce, Development, Staff Allocation, and Test & Rework. Hiring delays, training overhead, defect injection, and rework cycles interact to show how phased development with late testing can lead to schedule overruns and staffing oscillations.
 
 ## Usage Pattern
 
