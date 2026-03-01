@@ -26,7 +26,7 @@ Five rounds of fixes resolved **50 bugs and improvements** including 4 critical 
 | Test source lines | ~5,200 |
 | Test-to-source ratio | 0.55 |
 | Packages | 20 |
-| Test count | 439 (all passing) |
+| Test count | 509 (all passing) |
 | Build time | ~4 seconds |
 | Dependencies | Guava 33.4, Commons Math 3, OpenCSV, JavaFX, SLF4J |
 | Java version | 17+ |
@@ -176,6 +176,7 @@ All Priority 1 bugs have been fixed. No remaining bugs.
 | Time units | `TimeUnitsTest` | Good — all 8 units, ratios, MILLISECOND/MONTH conversion |
 | ItemUnit | `ItemUnitTest` | Good — equality, hashCode, toString |
 | Subscripts | `ArrayedStockTest`, `ArrayedVariableTest`, `SubscriptRangeTest`, `MultiArrayed*Test` | Good — expansion, naming, index math, scalar flow rejection |
+| IndexedValue | `IndexedValueTest` | Good — factory methods, accessors, scalar/elementwise/cross-dimension broadcasting, aggregation (`sum`, `mean`, `max`, `min`, `sumOver`), chained operations, null validation, bounds checking, single-element subscripts, reversed dimension order, convenience accessors on arrayed model elements (70 tests) |
 | Parameter sweep | `ParameterSweepTest` | Good — single, multi, linspace, CSV output |
 | Monte Carlo | `MonteCarloTest` | Good — sampling modes, percentiles, result aggregation |
 | Optimizer | `OptimizerTest` | Good — all 3 algorithms, bounds, convergence |
@@ -235,6 +236,7 @@ Five rounds of fixes addressed all critical and high-severity bugs with comprehe
 - Comprehensive analysis toolkit (sweep, MC, optimization)
 - Strong measurement system with dimensional analysis and explicit Fahrenheit blocking
 - Good demo collection covering the SD curriculum
+- Intelligent arrays (`IndexedValue`) with automatic broadcasting, null validation, bounds checking, and allocation-free inner loops
 - Consistent use of immutable Quantity, static factories, and builder patterns
 - EventHandler with default no-ops and proper `@Subscribe` annotations
 - Immutable NegativeValuePolicy on Stock (final field)
@@ -244,7 +246,7 @@ Five rounds of fixes addressed all critical and high-severity bugs with comprehe
 - Smooth and Delay3 resettable for simulation re-runs
 - CSV output with explicit UTF-8 encoding
 - MultiParameterSweep size guard against OOM
-- 439 tests with regression coverage for all major bug fixes
+- 509 tests with regression coverage for all major bug fixes
 
 **Areas for improvement:**
 - No model-level flow accessor (flows only reachable through stocks)

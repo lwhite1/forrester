@@ -1,5 +1,7 @@
 package com.deathrayresearch.forrester.model;
 
+import com.google.common.base.Preconditions;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -51,6 +53,8 @@ public final class IndexedValue {
      * @throws IllegalArgumentException if the array length doesn't match the subscript size
      */
     public static IndexedValue of(Subscript subscript, double... values) {
+        Preconditions.checkNotNull(subscript, "subscript must not be null");
+        Preconditions.checkNotNull(values, "values must not be null");
         SubscriptRange range = new SubscriptRange(List.of(subscript));
         if (values.length != range.totalSize()) {
             throw new IllegalArgumentException(
@@ -67,6 +71,8 @@ public final class IndexedValue {
      * @throws IllegalArgumentException if the array length doesn't match the range's total size
      */
     public static IndexedValue of(SubscriptRange range, double[] values) {
+        Preconditions.checkNotNull(range, "range must not be null");
+        Preconditions.checkNotNull(values, "values must not be null");
         if (values.length != range.totalSize()) {
             throw new IllegalArgumentException(
                     "Expected " + range.totalSize() + " values but got " + values.length);
@@ -78,6 +84,7 @@ public final class IndexedValue {
      * Creates an indexed value with every element set to the same value.
      */
     public static IndexedValue fill(SubscriptRange range, double value) {
+        Preconditions.checkNotNull(range, "range must not be null");
         double[] values = new double[range.totalSize()];
         Arrays.fill(values, value);
         return new IndexedValue(range, values);
@@ -87,6 +94,7 @@ public final class IndexedValue {
      * Creates an indexed value with every element set to the same value, for a single subscript.
      */
     public static IndexedValue fill(Subscript subscript, double value) {
+        Preconditions.checkNotNull(subscript, "subscript must not be null");
         return fill(new SubscriptRange(List.of(subscript)), value);
     }
 
@@ -115,8 +123,14 @@ public final class IndexedValue {
 
     /**
      * Returns the value at the given flat index.
+     *
+     * @throws IndexOutOfBoundsException if the index is out of range
      */
     public double get(int flatIndex) {
+        if (flatIndex < 0 || flatIndex >= values.length) {
+            throw new IndexOutOfBoundsException(
+                    "Flat index " + flatIndex + " out of range (size=" + values.length + ")");
+        }
         return values[flatIndex];
     }
 
@@ -284,16 +298,24 @@ public final class IndexedValue {
         }
         SubscriptRange reducedRange = range.removeDimension(dimIndex);
         double[] result = new double[reducedRange.totalSize()];
+
+        int[] srcStrides = range.getStrides();
+        int[] dstStrides = reducedRange.getStrides();
+        int dims = range.dimensionCount();
+
         for (int flatIdx = 0; flatIdx < range.totalSize(); flatIdx++) {
-            int[] coords = range.toCoordinates(flatIdx);
-            int[] reducedCoords = new int[coords.length - 1];
-            int j = 0;
-            for (int d = 0; d < coords.length; d++) {
+            // Decompose flatIdx into coordinates and recompose without the collapsed dimension,
+            // all using stride arithmetic — no array allocation per iteration.
+            int remaining = flatIdx;
+            int reducedFlat = 0;
+            int dstDim = 0;
+            for (int d = 0; d < dims; d++) {
+                int coord = remaining / srcStrides[d];
+                remaining %= srcStrides[d];
                 if (d != dimIndex) {
-                    reducedCoords[j++] = coords[d];
+                    reducedFlat += coord * dstStrides[dstDim++];
                 }
             }
-            int reducedFlat = reducedRange.toFlatIndex(reducedCoords);
             result[reducedFlat] += values[flatIdx];
         }
         return new IndexedValue(reducedRange, result);
@@ -363,42 +385,40 @@ public final class IndexedValue {
         }
         SubscriptRange resultRange = new SubscriptRange(resultDims);
 
-        // Build mappings from result dimension index to left/right dimension index
-        // -1 means the dimension is absent in that operand (broadcast)
-        int[] leftDimMap = new int[resultDims.size()];
-        int[] rightDimMap = new int[resultDims.size()];
-        Arrays.fill(leftDimMap, -1);
-        Arrays.fill(rightDimMap, -1);
+        // Precompute stride-based mappings for the inner loop.
+        // For each result dimension, compute:
+        //   - leftStride: the stride contribution to the left flat index (0 if absent)
+        //   - rightStride: the stride contribution to the right flat index (0 if absent)
+        int resultDimCount = resultDims.size();
+        int[] resultStrides = resultRange.getStrides();
+        int[] leftStrideMap = new int[resultDimCount];
+        int[] rightStrideMap = new int[resultDimCount];
 
-        for (int rd = 0; rd < resultDims.size(); rd++) {
+        int[] leftStrides = this.range.getStrides();
+        int[] rightStrides = other.range.getStrides();
+
+        for (int rd = 0; rd < resultDimCount; rd++) {
             String name = resultDims.get(rd).getName();
-            leftDimMap[rd] = findDimensionByName(leftDims, name);
-            rightDimMap[rd] = findDimensionByName(rightDims, name);
+            int leftDim = findDimensionByName(leftDims, name);
+            int rightDim = findDimensionByName(rightDims, name);
+            leftStrideMap[rd] = leftDim >= 0 ? leftStrides[leftDim] : 0;
+            rightStrideMap[rd] = rightDim >= 0 ? rightStrides[rightDim] : 0;
         }
 
+        // Inner loop: decompose result flat index into coordinates via result strides,
+        // then recompose into left/right flat indices using the stride maps.
+        // No per-iteration array allocation.
         double[] result = new double[resultRange.totalSize()];
-        int[] leftCoords = new int[leftDims.size()];
-        int[] rightCoords = new int[rightDims.size()];
-
-        for (int i = 0; i < resultRange.totalSize(); i++) {
-            int[] resultCoords = resultRange.toCoordinates(i);
-
-            // Map result coordinates to left operand coordinates
-            for (int rd = 0; rd < resultDims.size(); rd++) {
-                if (leftDimMap[rd] >= 0) {
-                    leftCoords[leftDimMap[rd]] = resultCoords[rd];
-                }
+        for (int i = 0; i < result.length; i++) {
+            int remaining = i;
+            int leftFlat = 0;
+            int rightFlat = 0;
+            for (int rd = 0; rd < resultDimCount; rd++) {
+                int coord = remaining / resultStrides[rd];
+                remaining %= resultStrides[rd];
+                leftFlat += coord * leftStrideMap[rd];
+                rightFlat += coord * rightStrideMap[rd];
             }
-
-            // Map result coordinates to right operand coordinates
-            for (int rd = 0; rd < resultDims.size(); rd++) {
-                if (rightDimMap[rd] >= 0) {
-                    rightCoords[rightDimMap[rd]] = resultCoords[rd];
-                }
-            }
-
-            int leftFlat = this.range.toFlatIndex(leftCoords);
-            int rightFlat = other.range.toFlatIndex(rightCoords);
             result[i] = op.apply(this.values[leftFlat], other.values[rightFlat]);
         }
 

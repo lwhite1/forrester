@@ -46,7 +46,8 @@ com.deathrayresearch.forrester
 ├── Simulation.java              # Core simulation engine
 ├── model/                       # Model elements (Stock, Flow, Flows, Variable, Constant, Module,
 │   │                            #   Subscript, ArrayedStock, ArrayedFlow, ArrayedVariable,
-│   │                            #   SubscriptRange, MultiArrayedStock, MultiArrayedFlow, MultiArrayedVariable)
+│   │                            #   SubscriptRange, MultiArrayedStock, MultiArrayedFlow, MultiArrayedVariable,
+│   │                            #   IndexedValue)
 │   └── flows/                   # Rate conversion utilities
 ├── measure/                     # Dimensional analysis and unit system
 ├── event/                       # Event-driven communication
@@ -271,6 +272,74 @@ Stock[] northStocks = pop.slice(0, "North");  // 3 stocks: [North,Young], [North
 | `MultiArrayedStock` | Wraps N×M×... `Stock` instances with coordinate access, `sum()`, `sumOver()`, `slice()` |
 | `MultiArrayedFlow` | Wraps N×M×... `Flow` instances with coordinate-aware or flat-index formulas |
 | `MultiArrayedVariable` | Wraps N×M×... `Variable` instances with coordinate-aware or flat-index formulas |
+
+### Intelligent Arrays (IndexedValue)
+
+`IndexedValue` provides immutable multi-dimensional values with automatic broadcasting arithmetic — matching the "intelligent array" semantics of tools like Analytica. When two values with different dimensions are combined, shared dimensions align by name and non-shared dimensions expand via outer product. This eliminates manual looping over subscript combinations.
+
+**Broadcasting rules:**
+
+| Left | Right | Result |
+|---|---|---|
+| `[Region]` | `[Region]` | Elementwise `[Region]` |
+| `scalar` | `[Region]` | Broadcast scalar to every element → `[Region]` |
+| `[Region]` | `[AgeGroup]` | Outer product → `[Region × AgeGroup]` |
+| `[Region × AgeGroup]` | `[Region]` | Broadcast Region-only value across AgeGroup → `[Region × AgeGroup]` |
+| `[Region × AgeGroup]` | `[AgeGroup × Scenario]` | Shared AgeGroup aligned, others expanded → `[Region × AgeGroup × Scenario]` |
+
+**Create indexed values:**
+
+```java
+// Scalar
+IndexedValue rate = IndexedValue.scalar(0.03);
+
+// One-dimensional
+IndexedValue population = IndexedValue.of(region, 1000, 2000, 500);
+
+// Multi-dimensional
+IndexedValue grid = IndexedValue.of(range, new double[]{1, 2, 3, 4, 5, 6, 7, 8, 9});
+
+// Fill all elements with a constant
+IndexedValue uniform = IndexedValue.fill(region, 100.0);
+```
+
+**Arithmetic with broadcasting:**
+
+```java
+// Scalar broadcast: multiply every region by a rate
+IndexedValue growth = population.multiply(rate);
+
+// Cross-dimension: population[Region] * rate[AgeGroup] → [Region × AgeGroup]
+IndexedValue byRegion = IndexedValue.of(region, 1000, 2000, 500);
+IndexedValue byAge = IndexedValue.of(ageGroup, 0.1, 0.2, 0.3);
+IndexedValue product = byRegion.multiply(byAge);  // 9-element result
+
+// Chained operations
+IndexedValue netGrowth = population.multiply(birthRate).subtract(population.multiply(deathRate));
+```
+
+**Aggregation:**
+
+```java
+double total = population.sum();
+double avg = population.mean();
+double highest = population.max();
+
+// Collapse a dimension by summing over it
+IndexedValue byAge = product.sumOver(region);  // [Region × AgeGroup] → [AgeGroup]
+```
+
+**Access from arrayed model elements:**
+
+```java
+// Convenience methods on ArrayedStock, ArrayedVariable, MultiArrayedStock, MultiArrayedVariable
+IndexedValue popValues = arrayedStock.getIndexedValue();
+IndexedValue densityValues = multiArrayedVariable.getIndexedValue();
+```
+
+| Class | Purpose |
+|---|---|
+| `IndexedValue` | Immutable multi-dimensional value with broadcasting arithmetic, aggregation (`sum`, `mean`, `max`, `min`, `sumOver`), and named-dimension access |
 
 ### Standard SD Functions
 
@@ -568,6 +637,7 @@ New to system dynamics? These resources provide a solid introduction to the meth
 
 The project is at version 1.0-SNAPSHOT and is under active development. Recent work has focused on:
 
+- Adding intelligent arrays (`IndexedValue`) — immutable multi-dimensional values with automatic broadcasting arithmetic. Shared dimensions align by name; non-shared dimensions expand via outer product. Supports elementwise and cross-dimension operations, scalar broadcasting, aggregation (`sum`, `mean`, `max`, `min`, `sumOver`), and convenience accessors on arrayed model elements
 - Adding multi-dimensional subscripts — `SubscriptRange`, `MultiArrayedStock`, `MultiArrayedFlow`, and `MultiArrayedVariable` enable cross-tabulated dimensions (e.g., Region × AgeGroup) with coordinate access, aggregation (`sumOver`, `slice`), and transparent expansion
 - Adding arrays/subscripts support — `Subscript`, `ArrayedStock`, `ArrayedFlow`, and `ArrayedVariable` enable dimensioned model elements (regions, cohorts, products) that transparently expand into the flat simulation loop
 - Adding `Optimizer` for model calibration — wraps Apache Commons Math derivative-free optimizers (Nelder-Mead, BOBYQA, CMA-ES) behind a builder API with built-in objective functions (SSE fit-to-data, minimize, maximize, target, minimize-peak) for automated parameter fitting against observed data

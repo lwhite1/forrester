@@ -97,6 +97,14 @@ public class SubscriptRange {
     }
 
     /**
+     * Returns a copy of the row-major strides array. For subscripts with sizes
+     * {@code [d0, d1, ...]}, strides are {@code [d1*d2*..., d2*d3*..., ..., 1]}.
+     */
+    public int[] getStrides() {
+        return strides.clone();
+    }
+
+    /**
      * Returns an unmodifiable list of all subscript dimensions.
      */
     public List<Subscript> getSubscripts() {

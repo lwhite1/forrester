@@ -16,6 +16,8 @@
 - Modularity works. The Module system (demonstrated in the Waterfall demo with 4 subsystems) supports composing models from reusable parts.
 
 - Arrays/subscripts enable dimensioned modeling. `Subscript`, `ArrayedStock`, `ArrayedFlow`, and `ArrayedVariable` let users define a dimension (e.g., Region) and expand model elements into one instance per label. Multi-dimensional subscripts (`SubscriptRange`, `MultiArrayedStock`, `MultiArrayedFlow`, `MultiArrayedVariable`) compose multiple dimensions (e.g., Region × AgeGroup) with coordinate access, aggregation (`sumOver`, `slice`), and transparent expansion — matching the subscript capability of Vensim and Stella. Cross-element flows (e.g., migration between regions) work naturally through scalar flows referencing specific array elements. The multi-region SIR demo shows single-dimension arrays; the population region-age demo shows multi-dimensional subscripts with aging, births, deaths, and migration across 9 stocks.
+
+- Intelligent arrays (`IndexedValue`) bring Analytica-style broadcasting to subscripted values. When two `IndexedValue` instances with different dimensions are combined (added, multiplied, etc.), shared dimensions align by name and non-shared dimensions expand via outer product — no manual looping required. `[Region] * [AgeGroup]` automatically produces a `[Region × AgeGroup]` result; `[Region × AgeGroup] + [Region]` broadcasts the region-only value across all age groups. Aggregation functions (`sumOver`) collapse dimensions. Convenience methods on `ArrayedStock`, `ArrayedVariable`, `MultiArrayedStock`, and `MultiArrayedVariable` produce `IndexedValue` snapshots from model state. This closes the gap between Forrester's subscript system and Analytica's array abstraction.
   
 - Parameter sweeps enable sensitivity analysis. The `ParameterSweep` runner iterates an array of values, builds a fresh model per value via a factory function, and collects results into CSV output. The builder API is clean and the model-factory approach avoids shared mutable state. The SIR sweep demo clearly shows how contact rate drives epidemic severity.
 
@@ -55,7 +57,8 @@ AnyLogic) let you draw stock-and-flow diagrams and see feedback structure visual
 | Uncertainty analysis / research | Good — Monte Carlo with LHS, percentile envelopes, and fan charts cover multi-parameter uncertainty quantification |
 | Non-programmers | Poor — no visual editor |
 | Model calibration / optimization | Good — derivative-free optimization with multiple algorithms and built-in objective functions for fitting to data |
-| Production/enterprise modeling | Fair — has analysis tools and multi-dimensional subscripts but lacks visual diagrams |
+| Subscripted array computation | Very good — intelligent arrays with automatic broadcasting, named-dimension alignment, and aggregation match Analytica semantics |
+| Production/enterprise modeling | Fair — has analysis tools, multi-dimensional subscripts, and intelligent arrays but lacks visual diagrams |
 
 ## Bottom Line
 

@@ -583,4 +583,167 @@ class IndexedValueTest {
             assertEquals(180, byAge.getAt("Elder"), 1e-10);
         }
     }
+
+    @Nested
+    class NullValidation {
+
+        @Test
+        void shouldRejectNullSubscriptInOf() {
+            assertThrows(NullPointerException.class, () ->
+                    IndexedValue.of((Subscript) null, 1, 2, 3));
+        }
+
+        @Test
+        void shouldRejectNullValuesInOfSubscript() {
+            assertThrows(NullPointerException.class, () ->
+                    IndexedValue.of(region, (double[]) null));
+        }
+
+        @Test
+        void shouldRejectNullRangeInOf() {
+            assertThrows(NullPointerException.class, () ->
+                    IndexedValue.of((SubscriptRange) null, new double[]{1, 2}));
+        }
+
+        @Test
+        void shouldRejectNullValuesInOfRange() {
+            SubscriptRange range = new SubscriptRange(List.of(region));
+            assertThrows(NullPointerException.class, () ->
+                    IndexedValue.of(range, null));
+        }
+
+        @Test
+        void shouldRejectNullRangeInFill() {
+            assertThrows(NullPointerException.class, () ->
+                    IndexedValue.fill((SubscriptRange) null, 1.0));
+        }
+
+        @Test
+        void shouldRejectNullSubscriptInFill() {
+            assertThrows(NullPointerException.class, () ->
+                    IndexedValue.fill((Subscript) null, 1.0));
+        }
+    }
+
+    @Nested
+    class BoundsChecking {
+
+        @Test
+        void shouldRejectNegativeFlatIndex() {
+            IndexedValue v = IndexedValue.of(region, 1, 2, 3);
+            assertThrows(IndexOutOfBoundsException.class, () -> v.get(-1));
+        }
+
+        @Test
+        void shouldRejectFlatIndexEqualToSize() {
+            IndexedValue v = IndexedValue.of(region, 1, 2, 3);
+            assertThrows(IndexOutOfBoundsException.class, () -> v.get(3));
+        }
+
+        @Test
+        void shouldRejectFlatIndexBeyondSize() {
+            IndexedValue v = IndexedValue.of(region, 1, 2, 3);
+            assertThrows(IndexOutOfBoundsException.class, () -> v.get(100));
+        }
+
+        @Test
+        void shouldRejectWrongCoordinateCount() {
+            SubscriptRange range = new SubscriptRange(List.of(region, ageGroup));
+            IndexedValue v = IndexedValue.of(range, new double[]{1, 2, 3, 4, 5, 6, 7, 8, 9});
+            // Pass 1 coordinate for a 2-D value
+            assertThrows(IllegalArgumentException.class, () -> v.getAt(0));
+        }
+    }
+
+    @Nested
+    class SingleElementSubscript {
+
+        @Test
+        void shouldWorkWithSingleLabel() {
+            Subscript single = new Subscript("Only", "One");
+            IndexedValue v = IndexedValue.of(single, 42);
+            assertEquals(1, v.size());
+            assertEquals(42, v.getAt("One"));
+        }
+
+        @Test
+        void shouldBroadcastSingleElementWithMultiElement() {
+            Subscript single = new Subscript("Scenario", "Base");
+            IndexedValue base = IndexedValue.of(single, 1.5);
+            IndexedValue byRegion = IndexedValue.of(region, 100, 200, 300);
+            IndexedValue result = byRegion.multiply(base);
+
+            assertEquals(3, result.size());
+            assertEquals(150, result.getAt("North", "Base"));
+            assertEquals(300, result.getAt("South", "Base"));
+            assertEquals(450, result.getAt("East", "Base"));
+        }
+
+        @Test
+        void shouldSumOverSingleElement() {
+            Subscript single = new Subscript("Only", "One");
+            IndexedValue v = IndexedValue.of(single, 42);
+            IndexedValue result = v.sumOver(single);
+            assertTrue(result.isScalar());
+            assertEquals(42, result.scalarValue());
+        }
+    }
+
+    @Nested
+    class ScalarConvenienceOverloads {
+
+        @Test
+        void shouldSubtractDouble() {
+            IndexedValue v = IndexedValue.of(region, 10, 20, 30);
+            assertArrayEquals(new double[]{7, 17, 27}, v.subtract(3).toArray());
+        }
+
+        @Test
+        void shouldDivideByDouble() {
+            IndexedValue v = IndexedValue.of(region, 10, 20, 30);
+            assertArrayEquals(new double[]{5, 10, 15}, v.divide(2).toArray());
+        }
+
+        @Test
+        void shouldRejectDivideByZeroDouble() {
+            IndexedValue v = IndexedValue.of(region, 10, 20, 30);
+            assertThrows(ArithmeticException.class, () -> v.divide(0));
+        }
+    }
+
+    @Nested
+    class ReversedDimensionOrder {
+
+        @Test
+        void shouldAlignSharedDimensionsRegardlessOfOrder() {
+            // [Region × AgeGroup] + [AgeGroup × Region]
+            // Both have Region and AgeGroup but in different order.
+            // Result should be [Region × AgeGroup] (left dimension order preserved).
+            SubscriptRange rangeRA = new SubscriptRange(List.of(region, ageGroup));
+            SubscriptRange rangeAR = new SubscriptRange(List.of(ageGroup, region));
+
+            // [Region × AgeGroup]: N,Y=1  N,A=2  N,E=3  S,Y=4  S,A=5  S,E=6  E,Y=7  E,A=8  E,E=9
+            IndexedValue ra = IndexedValue.of(rangeRA, new double[]{1, 2, 3, 4, 5, 6, 7, 8, 9});
+            // [AgeGroup × Region]: Y,N=10  Y,S=20  Y,E=30  A,N=40  A,S=50  A,E=60  E,N=70  E,S=80  E,E=90
+            IndexedValue ar = IndexedValue.of(rangeAR,
+                    new double[]{10, 20, 30, 40, 50, 60, 70, 80, 90});
+
+            IndexedValue result = ra.add(ar);
+
+            // Result should be [Region × AgeGroup] since left dims come first
+            // and right has no new dims. All dims are shared.
+            assertEquals(9, result.size());
+
+            // North,Young: ra[N,Y]=1 + ar[Y,N]=10 → 11
+            assertEquals(11, result.getAt("North", "Young"));
+            // North,Adult: ra[N,A]=2 + ar[A,N]=40 → 42
+            assertEquals(42, result.getAt("North", "Adult"));
+            // South,Young: ra[S,Y]=4 + ar[Y,S]=20 → 24
+            assertEquals(24, result.getAt("South", "Young"));
+            // East,Elder: ra[E,E]=9 + ar[E,E]=90 → 99
+            assertEquals(99, result.getAt("East", "Elder"));
+            // South,Elder: ra[S,E]=6 + ar[E,S]=80 → 86
+            assertEquals(86, result.getAt("South", "Elder"));
+        }
+    }
 }
