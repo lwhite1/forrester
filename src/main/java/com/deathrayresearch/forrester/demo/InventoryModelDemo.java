@@ -72,12 +72,13 @@ public class InventoryModelDemo {
                 () -> perceivedSales.getValue() * desiredInventoryMultiplier);
 
         Variable inventoryGap = new Variable("Gap between desired and actual inventory", CARS,
-                () -> carsOnLot.getValue() - desiredInventory.getValue());
+                () -> desiredInventory.getValue() - carsOnLot.getValue());
 
         Variable ordersToFactory = new Variable("Orders to Factory", CARS,
-                () -> Math.max(perceivedSales.getValue() + inventoryGap.getValue(), 0));
+                () -> Math.max(perceivedSales.getValue()
+                        + inventoryGap.getValue() / responseDelay, 0));
 
-        int totalDelay = Math.toIntExact(Math.round(responseDelay + deliveryDelay));
+        int totalDelay = Math.toIntExact(Math.round(deliveryDelay));
 
         Flow deliveries = Flow.create("Deliveries", DAY, () -> {
             if (run.getCurrentStep() <= totalDelay) {

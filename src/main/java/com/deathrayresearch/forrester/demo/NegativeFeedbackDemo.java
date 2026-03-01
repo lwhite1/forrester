@@ -25,7 +25,7 @@ public class NegativeFeedbackDemo {
     private static final Unit INVENTORY = new ItemUnit("Units");
 
     public static void main(String[] args) {
-        double initialInventory = 1000;
+        double initialInventory = 100;
         double goalInventory = 860;
         double adjustmentTimeDays = 8;
         double durationWeeks = 12;

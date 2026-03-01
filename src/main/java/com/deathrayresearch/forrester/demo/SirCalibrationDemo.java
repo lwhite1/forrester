@@ -21,6 +21,12 @@ import static com.deathrayresearch.forrester.measure.Units.PEOPLE;
  * Twin experiment: generates synthetic observed data by running an SIR model with known
  * parameters, then uses the Optimizer to recover those parameters from the synthetic data.
  * Reports recovered vs true values and the fit error.
+ *
+ * <p><strong>Note on identifiability:</strong> The infection equation uses the product
+ * {@code contactRate * infectivity}, so the optimizer can only identify this product (beta),
+ * not the individual factors. Different factor combinations yielding the same beta produce
+ * identical dynamics. The twin experiment succeeds because the search landscape has a
+ * valley of equivalent solutions, and Nelder-Mead typically finds one near the true values.
  */
 public class SirCalibrationDemo {
 

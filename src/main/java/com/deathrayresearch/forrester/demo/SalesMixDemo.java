@@ -49,8 +49,9 @@ public class SalesMixDemo {
         Variable hardwareSales = new Variable("Hardware sales", US_DOLLAR,
                 () -> hardwareSalesPerCustomer * acquisitionRate.flowPerTimeUnit(WEEK).getValue());
 
+        double weeksPerMonth = 52.0 / 12.0;
         Variable serviceSales = new Variable("Service sales", US_DOLLAR,
-                () -> serviceSalesPerCustomerPerMonth * customers.getValue());
+                () -> serviceSalesPerCustomerPerMonth / weeksPerMonth * customers.getValue());
 
         Variable totalSales = new Variable("Total sales", US_DOLLAR,
                 () -> hardwareSales.getValue() + serviceSales.getValue());

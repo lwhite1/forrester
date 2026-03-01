@@ -45,6 +45,7 @@ public class CoffeeCoolingDemo {
         coffeeTemperature.addOutflow(cooling);
 
         model.addStock(coffeeTemperature);
+        model.addVariable(discrepancy);
 
         Simulation run = new Simulation(model, MINUTE, MINUTE, durationMinutes);
         run.addEventHandler(new FlowChartViewer(cooling));
