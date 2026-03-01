@@ -24,6 +24,27 @@ import java.util.List;
  *       → {@code [Region × AgeGroup]}</li>
  * </ul>
  *
+ * <h3>Result dimension ordering</h3>
+ *
+ * <p>When broadcasting produces a result with dimensions from both operands, the result
+ * dimensions are ordered as: <em>all left-operand dimensions first</em> (preserving their
+ * original order), followed by any <em>right-only dimensions</em> (dimensions present in the
+ * right operand but not the left). This means operand order affects dimension layout:
+ *
+ * <ul>
+ *   <li>{@code [Region] + [AgeGroup]} → {@code [Region × AgeGroup]}</li>
+ *   <li>{@code [AgeGroup] + [Region]} → {@code [AgeGroup × Region]}</li>
+ * </ul>
+ *
+ * <p>Both results contain the same values, but the dimension ordering differs. This affects
+ * positional access via {@link #getAt(int...)} and the flat layout returned by {@link #toArray()}.
+ * <strong>Label-based access via {@link #getAt(String...)} is unaffected</strong> — dimensions
+ * are matched by name regardless of their position.
+ *
+ * <p>When both operands share all their dimensions (same dimensions, possibly in different
+ * order), the result uses the left operand's dimension order. Shared dimensions are always
+ * aligned by name, never by position.
+ *
  * <p>A scalar {@code IndexedValue} has a null range and a single-element value array.
  */
 public final class IndexedValue {
@@ -176,19 +197,39 @@ public final class IndexedValue {
     }
 
     // --- Arithmetic with broadcasting ---
+    // Result dimension order: this (left) operand's dimensions first, then right-only dimensions.
+    // Shared dimensions are aligned by name. See class Javadoc for details.
 
+    /**
+     * Adds this value and {@code other} with automatic broadcasting.
+     * Result dimensions: left dimensions first, then right-only dimensions.
+     */
     public IndexedValue add(IndexedValue other) {
         return binaryOp(other, Double::sum);
     }
 
+    /**
+     * Subtracts {@code other} from this value with automatic broadcasting.
+     * Result dimensions: left dimensions first, then right-only dimensions.
+     */
     public IndexedValue subtract(IndexedValue other) {
         return binaryOp(other, (a, b) -> a - b);
     }
 
+    /**
+     * Multiplies this value by {@code other} with automatic broadcasting.
+     * Result dimensions: left dimensions first, then right-only dimensions.
+     */
     public IndexedValue multiply(IndexedValue other) {
         return binaryOp(other, (a, b) -> a * b);
     }
 
+    /**
+     * Divides this value by {@code other} with automatic broadcasting.
+     * Result dimensions: left dimensions first, then right-only dimensions.
+     *
+     * @throws ArithmeticException if any element of {@code other} is zero
+     */
     public IndexedValue divide(IndexedValue other) {
         return binaryOp(other, (a, b) -> {
             if (b == 0) {
