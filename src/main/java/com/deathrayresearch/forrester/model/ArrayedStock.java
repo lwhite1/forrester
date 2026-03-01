@@ -216,6 +216,17 @@ public class ArrayedStock {
                 + size() + " times. Use addOutflow(ArrayedFlow) or wire individual stocks via getStock(i).");
     }
 
+    /**
+     * Returns a snapshot of the current stock values as an {@link IndexedValue}.
+     */
+    public IndexedValue getIndexedValue() {
+        double[] vals = new double[stocks.length];
+        for (int i = 0; i < stocks.length; i++) {
+            vals[i] = stocks[i].getValue();
+        }
+        return IndexedValue.of(subscript, vals);
+    }
+
     public Subscript getSubscript() {
         return subscript;
     }

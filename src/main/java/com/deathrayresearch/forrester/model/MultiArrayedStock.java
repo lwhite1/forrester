@@ -307,6 +307,17 @@ public class MultiArrayedStock {
         return stocks.length;
     }
 
+    /**
+     * Returns a snapshot of the current stock values as an {@link IndexedValue}.
+     */
+    public IndexedValue getIndexedValue() {
+        double[] vals = new double[stocks.length];
+        for (int i = 0; i < stocks.length; i++) {
+            vals[i] = stocks[i].getValue();
+        }
+        return IndexedValue.of(range, vals);
+    }
+
     public SubscriptRange getRange() {
         return range;
     }

@@ -102,6 +102,17 @@ public class ArrayedVariable {
         return variables.length;
     }
 
+    /**
+     * Returns a snapshot of the current variable values as an {@link IndexedValue}.
+     */
+    public IndexedValue getIndexedValue() {
+        double[] vals = new double[variables.length];
+        for (int i = 0; i < variables.length; i++) {
+            vals[i] = variables[i].getValue();
+        }
+        return IndexedValue.of(subscript, vals);
+    }
+
     public String getBaseName() {
         return baseName;
     }
