@@ -54,7 +54,7 @@ public final class IndexedValue {
 
     private IndexedValue(SubscriptRange range, double[] values) {
         this.range = range;
-        this.values = values;
+        this.values = values.clone();
     }
 
     // --- Factory methods ---
@@ -86,7 +86,7 @@ public final class IndexedValue {
                     "Expected " + range.totalSize() + " values but got " + values.length);
         }
         validateFinite(values);
-        return new IndexedValue(range, values.clone());
+        return new IndexedValue(range, values);
     }
 
     /**
@@ -105,7 +105,7 @@ public final class IndexedValue {
                     "Expected " + range.totalSize() + " values but got " + values.length);
         }
         validateFinite(values);
-        return new IndexedValue(range, values.clone());
+        return new IndexedValue(range, values);
     }
 
     /**
