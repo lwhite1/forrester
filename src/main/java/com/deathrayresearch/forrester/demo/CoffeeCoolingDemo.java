@@ -9,7 +9,7 @@ import com.deathrayresearch.forrester.model.Variable;
 import com.deathrayresearch.forrester.model.Flow;
 import com.deathrayresearch.forrester.ui.FlowChartViewer;
 
-import static com.deathrayresearch.forrester.measure.Units.CENTIGRADE;
+import static com.deathrayresearch.forrester.measure.Units.CELSIUS;
 import static com.deathrayresearch.forrester.measure.Units.MINUTE;
 
 /**
@@ -32,17 +32,17 @@ public class CoffeeCoolingDemo {
                 "the difference between " +
                 "the target and the current value of the stock");
 
-        Stock coffeeTemperature = new Stock("Coffee Temperature", 100, CENTIGRADE);
+        Stock coffeeTemperature = new Stock("Coffee Temperature", 100, CELSIUS);
 
-        Constant roomTemperature = new Constant("Room Temperature", CENTIGRADE, 18);
+        Constant roomTemperature = new Constant("Room Temperature", CELSIUS, 18);
 
-        Variable discrepancy = new Variable("Discrepancy", CENTIGRADE,
+        Variable discrepancy = new Variable("Discrepancy", CELSIUS,
                 () -> coffeeTemperature.getValue() - roomTemperature.getValue());
 
         double coolingRate = 0.10;
 
         Flow cooling = Flow.create("Cooling", MINUTE, () ->
-                new Quantity(discrepancy.getValue() * coolingRate, CENTIGRADE));
+                new Quantity(discrepancy.getValue() * coolingRate, CELSIUS));
 
         coffeeTemperature.addOutflow(cooling);
 

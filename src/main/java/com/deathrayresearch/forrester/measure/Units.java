@@ -55,7 +55,6 @@ public class Units {
     public static final Unit QUART_US = VolumeUnits.QUART_US;
 
     // temperature
-    public static final Unit CENTIGRADE = TemperatureUnits.CENTIGRADE;
-
-
+    public static final Unit CELSIUS = TemperatureUnits.CELSIUS;
+    public static final Unit FAHRENHEIT = TemperatureUnits.FAHRENHEIT;
 }

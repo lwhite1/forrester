@@ -6,8 +6,10 @@ import com.deathrayresearch.forrester.measure.Unit;
 import com.deathrayresearch.forrester.measure.units.temperature.TemperatureUnits;
 
 /**
- * The temperature dimension. Base unit is centigrade (Celsius).
- * Unit conversion is not yet supported for temperature.
+ * The temperature dimension. Base unit is Celsius.
+ *
+ * <p>Unit conversion between Celsius and Fahrenheit is not supported because it requires
+ * an affine transformation (offset + scale) that the ratio-based converter cannot express.
  */
 public enum Temperature implements Dimension {
 
@@ -15,7 +17,7 @@ public enum Temperature implements Dimension {
 
     @Override
     public Unit getBaseUnit() {
-        return TemperatureUnits.CENTIGRADE;
+        return TemperatureUnits.CELSIUS;
     }
 
     @Override

@@ -79,7 +79,7 @@ Event types:
 A dimension-aware quantity system ensures unit correctness:
 
 - **Dimensions:** Time, Mass, Length, Volume, Money, Item, Temperature, Dimensionless
-- **25+ predefined units** including Second, Minute, Hour, Day, Week, Year, People, Thing, Meter, Foot, Mile, Kilogram, Pound, USD, Liter, Gallon, Centigrade, and more
+- **25+ predefined units** including Second, Minute, Hour, Day, Week, Year, People, Thing, Meter, Foot, Mile, Kilogram, Pound, USD, Liter, Gallon, Celsius, Fahrenheit, and more
 - **Unit conversion** is handled automatically; incompatible dimensions (e.g., adding miles to pounds) are rejected
 - `Quantity` objects are fully immutable - all operations return new instances
 
@@ -91,7 +91,7 @@ Flows are created via the `Flow.create()` static factory or the higher-level `Fl
 
 ```java
 Flow cooling = Flow.create("Cooling", MINUTE, () ->
-        new Quantity(discrepancy.getValue() * coolingRate, CENTIGRADE));
+        new Quantity(discrepancy.getValue() * coolingRate, CELSIUS));
 ```
 
 **`Flows`** — factory methods for common system dynamics patterns:
