@@ -31,6 +31,21 @@ import static com.deathrayresearch.forrester.measure.Units.DAY;
  *   <li><b>Integration Effort Multiplier</b> — makes rework progressively more expensive as
  *       the project nears completion, modeling the waterfall integration tax</li>
  * </ul>
+ *
+ * <h3>Expected behavior with default parameters</h3>
+ *
+ * <p><b>Development phase (days 0–84):</b> Tasks Remaining drains from 500 to zero. FCC hovers
+ * around 0.69–0.80, meaning roughly 20–30% of completed work carries hidden errors. Undiscovered
+ * Rework peaks at ~13 tasks around day 30, then declines as the Rework Discovery Fraction rises
+ * from 0.05 toward 0.33. Rework to Do accumulates steadily to ~86 tasks by the time development
+ * ends. The Integration Effort Multiplier reaches ~1.9x.
+ *
+ * <p><b>Rework phase (days 84–175):</b> With no tasks remaining, all development resources are
+ * idle; only QA staff work through the rework backlog. The Integration Effort Multiplier (2.0–
+ * 2.4x) makes each fix expensive, and rework itself injects new errors (FCC &lt; 1), creating a
+ * long tail. Rework to Do drains to zero around day 175. Final Tasks Completed stabilizes at
+ * ~479 out of 500 — the ~21-task deficit reflects tasks permanently lost to the compounding
+ * error-on-error cycle.
  */
 public class SoftwareProduction {
 

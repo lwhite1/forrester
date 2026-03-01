@@ -15,6 +15,14 @@ import com.deathrayresearch.forrester.model.Variable;
  * QA fraction. Daily resources are first reduced by training overhead (from {@link Workforce})
  * and communication overhead (Brooks's Law), then split between development and quality
  * assurance. An overhead loss constant further reduces the effective capacity.
+ *
+ * <h3>Expected behavior with default parameters</h3>
+ *
+ * <p>With 15% planned for QA and 10% overhead loss, the initial 6-person team yields about
+ * 4.6 person-days/day for development and 0.9 for QA (after training and communication
+ * overhead). As the team grows to ~28, development resources peak around 20 person-days/day
+ * and QA around 4.2, though communication overhead increasingly erodes the gains from a
+ * larger team.
  */
 public class StaffAllocation {
 

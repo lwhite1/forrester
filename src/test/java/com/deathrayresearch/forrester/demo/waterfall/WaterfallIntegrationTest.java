@@ -16,7 +16,7 @@ class WaterfallIntegrationTest {
         Model model = demo.getModel();
 
         Simulation sim = new Simulation(model, TimeUnits.DAY,
-                new Quantity(548, TimeUnits.DAY));
+                new Quantity(200, TimeUnits.DAY));
         sim.execute();
 
         // Verify tasks were completed
@@ -49,20 +49,9 @@ class WaterfallIntegrationTest {
         double totalWorkforce = newlyHired + experienced;
         assertTrue(totalWorkforce > 6, "Workforce should have grown from initial 6");
 
-        // Verify rework cycle is active
-        double undiscoveredRework = model.getStocks().stream()
-                .filter(s -> s.getName().equals("Undiscovered Rework"))
-                .findFirst()
-                .orElseThrow()
-                .getValue();
-        double reworkToDo = model.getStocks().stream()
-                .filter(s -> s.getName().equals("Rework to Do"))
-                .findFirst()
-                .orElseThrow()
-                .getValue();
-        // At least one of these should have had activity (may be drained by end)
+        // Verify significant tasks completed in 200 days (rework clears ~day 175)
         assertTrue(tasksCompleted > 100,
-                "Significant tasks should be completed in 1.5 years");
+                "Significant tasks should be completed in 200 days");
     }
 
     @Test

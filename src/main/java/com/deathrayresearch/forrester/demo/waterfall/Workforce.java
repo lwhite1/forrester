@@ -20,6 +20,16 @@ import static com.deathrayresearch.forrester.measure.Units.DAY;
  * total workforce, the fraction with experience, full-time equivalent capacity, the
  * daily training overhead imposed by new hires on experienced staff, and communication
  * overhead from Brooks's Law (overhead grows as n*(n-1) with team size).
+ *
+ * <h3>Expected behavior with default parameters</h3>
+ *
+ * <p>The team starts at 6 (2 new hires + 4 experienced) and grows toward the need of 30. The
+ * 8-week hiring delay and 16-week assimilation delay create a ramp: the workforce reaches ~19
+ * by day 80 and ~28 by day 175. Fraction experienced starts at 0.67, dips to ~0.68 during
+ * rapid hiring, then recovers above 0.88 as new hires assimilate. Communication overhead
+ * starts at 0.09 (6-person team) and grows to ~2.4 (28-person team), progressively reducing
+ * effective capacity. Resignation drains experienced workers at ~1/673 per day — a slow leak
+ * that prevents the experienced pool from growing without bound.
  */
 public class Workforce {
 
