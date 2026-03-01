@@ -1,6 +1,7 @@
 package com.deathrayresearch.forrester.measure.units.temperature;
 
 import com.deathrayresearch.forrester.measure.Dimension;
+import com.deathrayresearch.forrester.measure.Quantity;
 import com.deathrayresearch.forrester.measure.Unit;
 
 /**
@@ -15,7 +16,21 @@ import com.deathrayresearch.forrester.measure.Unit;
 public enum TemperatureUnits implements Unit {
 
     CELSIUS("Celsius", 1.0),
-    FAHRENHEIT("Fahrenheit", 5.0 / 9.0);
+    FAHRENHEIT("Fahrenheit", 5.0 / 9.0) {
+        @Override
+        public Quantity toBaseUnits(Quantity quantity) {
+            throw new UnsupportedOperationException(
+                    "Fahrenheit ↔ Celsius conversion requires an offset and cannot use ratio-based conversion. "
+                    + "Use a single temperature unit per model.");
+        }
+
+        @Override
+        public Quantity fromBaseUnits(Quantity inBaseUnits) {
+            throw new UnsupportedOperationException(
+                    "Fahrenheit ↔ Celsius conversion requires an offset and cannot use ratio-based conversion. "
+                    + "Use a single temperature unit per model.");
+        }
+    };
 
     private final String name;
     private final double ratioToBaseUnit;

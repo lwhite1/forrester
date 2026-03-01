@@ -85,7 +85,10 @@ public class Smooth implements Formula {
             initialized = true;
             lastStep = step;
         } else if (step > lastStep) {
-            smoothed += (input.getAsDouble() - smoothed) / smoothingTime;
+            int delta = step - lastStep;
+            for (int i = 0; i < delta; i++) {
+                smoothed += (input.getAsDouble() - smoothed) / smoothingTime;
+            }
             lastStep = step;
         }
         return smoothed;

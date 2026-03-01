@@ -104,6 +104,7 @@ public final class Quantity {
      * comparing in base units.
      */
     public boolean isLessThan(Quantity other) {
+        Preconditions.checkArgument(other.isCompatibleWith(this), INCOMPATIBLE_ERROR_MESSAGE);
         return Double.compare(inBaseUnits().getValue(), other.inBaseUnits().getValue()) < 0;
     }
 
@@ -112,6 +113,7 @@ public final class Quantity {
      * comparing in base units.
      */
     public boolean isLessThanOrEqualTo(Quantity other) {
+        Preconditions.checkArgument(other.isCompatibleWith(this), INCOMPATIBLE_ERROR_MESSAGE);
         return Double.compare(inBaseUnits().getValue(), other.inBaseUnits().getValue()) <= 0;
     }
 
@@ -120,6 +122,7 @@ public final class Quantity {
      * comparing in base units.
      */
     public boolean isGreaterThan(Quantity other) {
+        Preconditions.checkArgument(other.isCompatibleWith(this), INCOMPATIBLE_ERROR_MESSAGE);
         return Double.compare(inBaseUnits().getValue(), other.inBaseUnits().getValue()) > 0;
     }
 
@@ -128,6 +131,7 @@ public final class Quantity {
      * comparing in base units.
      */
     public boolean isGreaterThanOrEqualTo(Quantity other) {
+        Preconditions.checkArgument(other.isCompatibleWith(this), INCOMPATIBLE_ERROR_MESSAGE);
         return Double.compare(inBaseUnits().getValue(), other.inBaseUnits().getValue()) >= 0;
     }
 
@@ -144,6 +148,7 @@ public final class Quantity {
      * Returns true if this quantity is equal to the other quantity in base units
      */
     public boolean isEqual(Quantity other) {
+        Preconditions.checkArgument(other.isCompatibleWith(this), INCOMPATIBLE_ERROR_MESSAGE);
         return Double.compare(inBaseUnits().getValue(), other.inBaseUnits().getValue()) == 0;
     }
 

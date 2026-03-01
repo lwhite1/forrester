@@ -6,7 +6,6 @@ import com.deathrayresearch.forrester.event.SimulationStartEvent;
 import com.deathrayresearch.forrester.event.TimeStepEvent;
 import com.deathrayresearch.forrester.measure.Quantity;
 import com.deathrayresearch.forrester.measure.TimeUnit;
-import com.deathrayresearch.forrester.measure.Unit;
 import com.deathrayresearch.forrester.model.Model;
 import com.deathrayresearch.forrester.model.Stock;
 import com.deathrayresearch.forrester.model.Flow;
@@ -15,9 +14,10 @@ import com.google.common.eventbus.EventBus;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.util.HashMap;
 import java.util.HashSet;
+import java.util.IdentityHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -30,6 +30,8 @@ public class Simulation {
     private final Quantity duration;
 
     private final TimeUnit timeStep;
+
+    private final LocalDateTime startTime;
 
     private int currentStep = 0;
 
@@ -53,6 +55,7 @@ public class Simulation {
         this.model = model;
         this.timeStep = timeStep;
         this.duration = duration;
+        this.startTime = startTime;
         this.currentDateTime = startTime;
         this.eventBus = new EventBus();
     }
@@ -72,27 +75,33 @@ public class Simulation {
     }
 
     public void execute() {
+        // Reset state so the simulation can be re-run
+        currentStep = 0;
+        currentDateTime = startTime;
+        elapsedTime = Duration.ZERO;
 
         eventBus.post(new SimulationStartEvent(this));
 
         double durationInBaseUnits = duration.getUnit().ratioToBaseUnit();
+        long totalSteps = Math.round(
+                (duration.getValue() * durationInBaseUnits) / timeStep.ratioToBaseUnit());
 
-        double totalSteps = (duration.getValue() * durationInBaseUnits) / (timeStep.ratioToBaseUnit());
+        try {
+            while (currentStep <= totalSteps) {
+                Map<Flow, Quantity> flowMap = new IdentityHashMap<>();
 
-        while (currentStep <= totalSteps) {
-            HashMap<String, Quantity> flowMap = new HashMap<>();
-
-            eventBus.post(new TimeStepEvent(currentDateTime, model, currentStep, timeStep));
-            recordVariableValues();
-            updateStocks(flowMap, model.getStocks());
-            addStep(currentDateTime);
-            currentStep++;
+                eventBus.post(new TimeStepEvent(currentDateTime, model, currentStep, timeStep));
+                recordVariableValues();
+                updateStocks(flowMap, model.getStocks());
+                addStep(currentDateTime);
+                currentStep++;
+            }
+        } finally {
+            eventBus.post(new SimulationEndEvent());
         }
-
-        eventBus.post(new SimulationEndEvent());
     }
 
-    private void updateStocks(HashMap<String, Quantity> flowMap, List<Stock> stocks) {
+    private void updateStocks(Map<Flow, Quantity> flowMap, List<Stock> stocks) {
         for (Stock stock : stocks) {
             handleFlows(true, flowMap, stock, stock.getInflows());
             handleFlows(false, flowMap, stock, stock.getOutflows());
@@ -105,16 +114,16 @@ public class Simulation {
         }
     }
 
-    private void handleFlows(boolean isInflow, HashMap<String, Quantity> flows, Stock stock, Set<Flow> flowSet) {
+    private void handleFlows(boolean isInflow, Map<Flow, Quantity> flows, Stock stock, Set<Flow> flowSet) {
         for (Flow flow : flowSet) {
             Quantity q;
-            if (flows.containsKey(flow.getName())) {
-                q = flows.get(flow.getName());
+            if (flows.containsKey(flow)) {
+                q = flows.get(flow);
             } else {
                 q = flow.flowPerTimeUnit(timeStep);
-                flows.put(flow.getName(), q);
+                flows.put(flow, q);
+                flow.recordValue(q);
             }
-            flow.recordValue(q);
 
             Quantity qCurrent = stock.getQuantity();
             if (isInflow) {
@@ -128,9 +137,10 @@ public class Simulation {
     }
 
     private void addStep(LocalDateTime dateTime) {
-        long seconds = (long) timeStep.ratioToBaseUnit();
-        currentDateTime = dateTime.plusSeconds(seconds);
-        elapsedTime = elapsedTime.plusSeconds(seconds);
+        long nanos = Math.round(timeStep.ratioToBaseUnit() * 1_000_000_000L);
+        Duration stepDuration = Duration.ofNanos(nanos);
+        currentDateTime = dateTime.plus(stepDuration);
+        elapsedTime = elapsedTime.plus(stepDuration);
     }
 
     public Model getModel() {
@@ -141,7 +151,7 @@ public class Simulation {
         return duration;
     }
 
-    public Unit getTimeStep() {
+    public TimeUnit getTimeStep() {
         return timeStep;
     }
 

@@ -184,7 +184,10 @@ public class ArrayedStock {
 
     /**
      * Connects a single scalar flow as an inflow to ALL underlying stocks.
-     * Useful for shared cloud inflows.
+     * <p><strong>Note:</strong> The flow's {@code sink} will be set to the last stock in the array
+     * because {@link Stock#addInflow(Flow)} calls {@code flow.setSink(this)} for each stock.
+     * This is acceptable when the flow formula does not depend on its sink reference.
+     * For per-element flow wiring, use {@link #addInflow(ArrayedFlow)} instead.
      *
      * @param flow the scalar flow to add as inflow to every element
      */
@@ -196,7 +199,10 @@ public class ArrayedStock {
 
     /**
      * Connects a single scalar flow as an outflow from ALL underlying stocks.
-     * Useful for shared cloud outflows.
+     * <p><strong>Note:</strong> The flow's {@code source} will be set to the last stock in the array
+     * because {@link Stock#addOutflow(Flow)} calls {@code flow.setSource(this)} for each stock.
+     * This is acceptable when the flow formula does not depend on its source reference.
+     * For per-element flow wiring, use {@link #addOutflow(ArrayedFlow)} instead.
      *
      * @param flow the scalar flow to add as outflow from every element
      */

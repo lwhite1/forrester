@@ -81,6 +81,13 @@ public class ParameterSweep {
      * @return an array of parameter values
      */
     public static double[] linspace(double start, double end, double step) {
+        if (step <= 0) {
+            throw new IllegalArgumentException("step must be positive, but got " + step);
+        }
+        if (end < start) {
+            throw new IllegalArgumentException(
+                    "end (" + end + ") must be >= start (" + start + ")");
+        }
         List<Double> values = new ArrayList<>();
         int count = (int) Math.floor((end - start) / step);
         for (int i = 0; i <= count; i++) {

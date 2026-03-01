@@ -103,18 +103,20 @@ public class Delay3 implements Formula {
             lastStep = step;
         } else if (step > lastStep) {
             double stageTime = delayTime / 3.0;
+            int delta = step - lastStep;
+            for (int d = 0; d < delta; d++) {
+                // Compute outflow rates from current stage levels
+                double rate1 = stage1 / stageTime;
+                double rate2 = stage2 / stageTime;
+                double rate3 = stage3 / stageTime;
 
-            // Compute outflow rates from current stage levels
-            double rate1 = stage1 / stageTime;
-            double rate2 = stage2 / stageTime;
-            double rate3 = stage3 / stageTime;
+                // Update stage levels (Euler integration, dt = 1 timestep)
+                stage1 += input.getAsDouble() - rate1;
+                stage2 += rate1 - rate2;
+                stage3 += rate2 - rate3;
 
-            // Update stage levels (Euler integration, dt = 1 timestep)
-            stage1 += input.getAsDouble() - rate1;
-            stage2 += rate1 - rate2;
-            stage3 += rate2 - rate3;
-
-            output = rate3;
+                output = rate3;
+            }
             lastStep = step;
         }
         return output;

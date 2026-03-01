@@ -76,7 +76,7 @@ public class MonteCarlo {
             }
 
             Model model = modelFactory.apply(paramMap);
-            RunResult runResult = new RunResult(i);
+            RunResult runResult = new RunResult(paramMap);
 
             Simulation simulation = new Simulation(model, timeStep, duration);
             simulation.addEventHandler(runResult);
@@ -109,11 +109,13 @@ public class MonteCarlo {
     private double[][] generateRandom(MersenneTwister rng, List<RealDistribution> distributions,
                                       int paramCount) {
         double[][] vectors = new double[iterations][paramCount];
+        // Reseed each distribution once before sampling, not per-sample
+        for (int p = 0; p < paramCount; p++) {
+            distributions.get(p).reseedRandomGenerator(rng.nextLong());
+        }
         for (int i = 0; i < iterations; i++) {
             for (int p = 0; p < paramCount; p++) {
-                RealDistribution dist = distributions.get(p);
-                dist.reseedRandomGenerator(rng.nextLong());
-                vectors[i][p] = dist.sample();
+                vectors[i][p] = distributions.get(p).sample();
             }
         }
         return vectors;

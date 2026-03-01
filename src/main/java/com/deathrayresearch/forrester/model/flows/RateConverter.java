@@ -7,7 +7,11 @@ import com.google.common.base.Preconditions;
 /**
  * Converts quantities associated with a rate from one time unit to another
  */
-public class RateConverter {
+public final class RateConverter {
+
+    private RateConverter() {
+        // prevent instantiation
+    }
 
     /**
      * Returns a new Quantity from the original quantity.

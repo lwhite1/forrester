@@ -79,6 +79,7 @@ public final class Flows {
      */
     public static Flow exponentialGrowthWithLimit(String name, TimeUnit timeUnit, Stock stock,
                                                   double rate, double limit) {
+        Preconditions.checkArgument(limit > 0, "limit must be positive, but got %s", limit);
         return Flow.create(name, timeUnit, () -> {
             double value = stock.getQuantity().getValue();
             double result = value * rate * (1 - value / limit);

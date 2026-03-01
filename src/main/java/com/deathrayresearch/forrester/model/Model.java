@@ -3,7 +3,7 @@ package com.deathrayresearch.forrester.model;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -13,7 +13,7 @@ import java.util.Map;
 public class Model extends Element {
 
     private final List<Stock> stocks = new ArrayList<>();
-    private final Map<String, Variable> variables = new HashMap<>();
+    private final Map<String, Variable> variables = new LinkedHashMap<>();
     private final List<Module> modules = new ArrayList<>();
     private final List<Constant> constants = new ArrayList<>();
 

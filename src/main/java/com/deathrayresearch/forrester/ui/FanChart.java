@@ -76,6 +76,13 @@ public class FanChart extends Application {
 
     private void drawFanChart(GraphicsContext gc, MonteCarloResult result, String variableName) {
         int stepCount = result.getStepCount();
+        if (stepCount <= 1) {
+            gc.setFill(Color.BLACK);
+            gc.setFont(Font.font(14));
+            gc.fillText("Not enough data points to draw chart (need at least 2 steps).",
+                    MARGIN_LEFT, HEIGHT / 2);
+            return;
+        }
 
         // Compute all percentile series we need
         double[] p2_5 = result.getPercentileSeries(variableName, 2.5);
@@ -91,7 +98,7 @@ public class FanChart extends Application {
 
         // Compute axis ranges
         double minVal = Double.MAX_VALUE;
-        double maxVal = Double.MIN_VALUE;
+        double maxVal = -Double.MAX_VALUE;
         for (int i = 0; i < stepCount; i++) {
             minVal = Math.min(minVal, p2_5[i]);
             maxVal = Math.max(maxVal, p97_5[i]);

@@ -4,7 +4,7 @@ import com.deathrayresearch.forrester.measure.Quantity;
 import com.deathrayresearch.forrester.measure.Unit;
 
 import java.util.Collections;
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Set;
 
 /**
@@ -12,8 +12,8 @@ import java.util.Set;
  */
 public class Stock extends Element {
 
-    private final Set<Flow> inflows = new HashSet<>();
-    private final Set<Flow> outflows = new HashSet<>();
+    private final Set<Flow> inflows = new LinkedHashSet<>();
+    private final Set<Flow> outflows = new LinkedHashSet<>();
 
     private final Unit unit;
     private double value;
@@ -108,6 +108,10 @@ public class Stock extends Element {
     }
 
     private double applyPolicy(double candidateValue) {
+        if (Double.isNaN(candidateValue) || Double.isInfinite(candidateValue)) {
+            throw new IllegalArgumentException(
+                    "Stock '" + getName() + "' received non-finite value: " + candidateValue);
+        }
         if (candidateValue >= 0) {
             return candidateValue;
         }

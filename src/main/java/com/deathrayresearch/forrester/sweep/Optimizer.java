@@ -83,9 +83,12 @@ public class Optimizer {
         MultivariateFunction adapter = point -> {
             evalCount[0]++;
 
+            // Clamp parameters to bounds (Nelder-Mead does not enforce bounds natively)
             Map<String, Double> paramMap = new LinkedHashMap<>();
             for (int i = 0; i < n; i++) {
-                paramMap.put(parameters.get(i).name(), point[i]);
+                double v = Math.max(parameters.get(i).lowerBound(),
+                        Math.min(parameters.get(i).upperBound(), point[i]));
+                paramMap.put(parameters.get(i).name(), v);
             }
 
             Model model = modelFactory.apply(paramMap);
@@ -117,6 +120,14 @@ public class Optimizer {
             case CMAES -> executeCmaes(adapter, initialGuess, n);
         }
 
+        // Guard against no improvement (all evaluations returned MAX_VALUE or NaN)
+        if (bestParams[0] == null) {
+            Map<String, Double> fallback = new LinkedHashMap<>();
+            for (int i = 0; i < n; i++) {
+                fallback.put(parameters.get(i).name(), initialGuess[i]);
+            }
+            return new OptimizationResult(fallback, bestObjective[0], bestRun[0], evalCount[0]);
+        }
         return new OptimizationResult(bestParams[0], bestObjective[0], bestRun[0], evalCount[0]);
     }
 
