@@ -1,7 +1,7 @@
 # Code Quality Assessment — Forrester SD Library
 
 **Date:** 2026-03-01
-**Scope:** Full codebase audit after four rounds of fixes and comprehensive regression testing
+**Scope:** Full codebase audit after five rounds of fixes and comprehensive regression testing
 **Methodology:** Manual code review of all 105 source files across 20 packages by 5 specialized audit agents, cross-referenced with 439 passing tests
 
 ---
@@ -10,7 +10,7 @@
 
 Forrester is a **9,500-line Java system dynamics simulation library** with 27 demo programs, a measurement system covering 8 physical dimensions, parameter sweep / Monte Carlo / optimization analysis tools, single- and multi-dimensional subscripts, and JavaFX visualization.
 
-Four rounds of fixes resolved **48 bugs and improvements** including 4 critical bugs, 7 high-severity bugs, and 37 medium/low items. Eighty new tests were added covering regression scenarios, temperature units, time units, Quantity edge cases, ArrayedVariable, CsvSubscriber, and ItemUnit.
+Five rounds of fixes resolved **50 bugs and improvements** including 4 critical bugs, 7 high-severity bugs, and 39 medium/low items. Eighty new tests were added covering regression scenarios, temperature units, time units, Quantity edge cases, ArrayedVariable, CsvSubscriber, and ItemUnit.
 
 **Overall Quality Rating: A** — Core simulation logic is correct and well-tested. Analysis tools work reliably. The measurement system handles unit conversions correctly (with Fahrenheit explicitly unsupported). CSV output uses explicit UTF-8 encoding. All 439 tests pass.
 
@@ -35,24 +35,24 @@ Four rounds of fixes resolved **48 bugs and improvements** including 4 critical 
 
 ## Remaining Findings
 
-After four rounds of fixes, **53 findings remain** — none are high-severity bugs. The remaining items are design concerns, latent/inherent edge cases, and minor issues that do not affect the library's primary use case.
+After five rounds of fixes, **52 findings remain** — none are high-severity bugs. The remaining items are design concerns, latent/inherent edge cases, and minor issues that do not affect the library's primary use case.
 
 ### Summary by Severity
 
 | Severity | Count | Description |
 |----------|-------|-------------|
-| Bug (medium) | 4 | Edge-case failures unlikely in normal usage |
+| Bug (medium) | 3 | Edge-case failures unlikely in normal usage |
 | Bug (low/latent) | 6 | Inherent limitations or extremely unlikely triggers |
 | Design | 18 | API inconsistencies, missing defensive measures, extensibility gaps |
 | Minor | 25 | Code style, naming, documentation, minor redundancies |
-| **Total** | **53** | |
+| **Total** | **52** | |
 
 ### Summary by Subsystem
 
 | Subsystem | Bugs | Design | Minor | Total |
 |-----------|------|--------|-------|-------|
 | Simulation engine & events | 0 | 2 | 4 | 6 |
-| Core model (Stock, Flow, Variable, Model, Module) | 3 | 4 | 4 | 11 |
+| Core model (Stock, Flow, Variable, Model, Module) | 2 | 4 | 4 | 10 |
 | Measurement system (Dimension, Unit, Quantity) | 0 | 6 | 3 | 9 |
 | Sweep / Monte Carlo / Optimizer | 3 | 6 | 3 | 12 |
 | SD functions & IO/UI | 3 | 6 | 8 | 17 |
@@ -64,7 +64,7 @@ After four rounds of fixes, **53 findings remain** — none are high-severity bu
 
 ### 1. Simulation Engine & Events
 
-No remaining bugs. `EventHandler` now provides default no-op methods with `@Subscribe`, eliminating the silent-delivery trap. `Simulation` Javadoc documents the single-threaded contract. `Simulation.clearHistory()` delegates to all flows and variables.
+No remaining bugs. `EventHandler` now provides default no-op methods with `@Subscribe`, eliminating the silent-delivery trap. `Simulation` Javadoc documents the single-threaded contract. `Simulation.clearHistory()` delegates to all flows and variables and is auto-invoked at the start of each `execute()` call.
 
 **Design:**
 
@@ -81,7 +81,6 @@ No remaining bugs. `EventHandler` now provides default no-op methods with `@Subs
 
 | # | Impact | Finding |
 |---|--------|---------|
-| M2 | Medium | **removeStock doesn't detach flows.** Removing a stock from a model leaves its connected flows referencing the removed stock. |
 | M3 | Medium | **addModule doesn't register module flows.** Module's stocks and variables merge into the model, but flows are not. Flows still execute (referenced by stocks), but model-level flow queries won't find them. |
 | M4 | Low | **Flow history records phantom amounts on clamped stocks.** When `NegativeValuePolicy` clamps to zero, the flow's recorded value reflects the unclamped amount. |
 
@@ -203,7 +202,7 @@ All Priority 1 bugs have been fixed. No remaining bugs.
 | **Correctness** | A | All critical and high bugs fixed with regression tests. Core simulation, SD functions, and analysis tools produce correct results. |
 | **Robustness** | A | Strong input validation. Fahrenheit explicitly unsupported (throws). NaN/Infinity rejected. Scalar-flow-to-array blocked. Flow source/sink reassignment throws. |
 | **API Design** | A- | Clean SD-vocabulary API. Builder patterns, static factories, lambdas. EventHandler has default no-ops. Smooth/Delay3 resettable. Some inconsistencies remain (dual RunResult constructors, unused parameters). |
-| **Maintainability** | B+ | Good package structure. Deterministic ordering (LinkedHashMap/Set). Bidirectional Stock↔Flow coupling is the main concern. |
+| **Maintainability** | A- | Good package structure. Deterministic ordering (LinkedHashMap/Set). removeStock properly detaches flows. clearHistory auto-invoked on execute(). |
 | **Documentation** | A- | Good Javadoc on public API. Class-level docs explain SD concepts. Threading contract documented. |
 | **Test Quality** | B+ | 439 tests, all passing. Regression coverage for all major bugs. Remaining gaps are UI and edge cases. |
 | **Security** | A- | No network exposure, no SQL, no user input parsing. CSV writers use explicit UTF-8 encoding. |
@@ -218,9 +217,7 @@ All Priority 1 bugs have been fixed. No remaining bugs.
 
 ### Priority 2 — Nice to Have
 
-2. Add `Simulation.clearHistory()` auto-invocation at start of `execute()` (currently requires manual call).
-3. Fix `removeStock` to detach flows from the removed stock. (Finding M2)
-4. Register module flows at the model level in `addModule`. (Finding M3)
+2. Register module flows at the model level in `addModule`. (Finding M3)
 
 ---
 
@@ -230,7 +227,7 @@ All Priority 1 bugs have been fixed. No remaining bugs.
 
 Forrester is a well-designed educational and research-grade SD library. The core simulation mechanics are correct — stocks accumulate, flows transfer, feedback loops work, SD functions (Smooth, Delay3, Step, Ramp, LookupTable) behave as expected, and the analysis tools (parameter sweep, Monte Carlo, optimization) produce reliable results.
 
-Four rounds of fixes addressed all critical and high-severity bugs with comprehensive regression tests. The remaining 53 findings are design concerns, inherent limitations, and minor issues that do not affect the library's primary use case.
+Five rounds of fixes addressed all critical and high-severity bugs with comprehensive regression tests. The remaining 52 findings are design concerns, inherent limitations, and minor issues that do not affect the library's primary use case.
 
 **Strengths:**
 - Clean API that maps directly to SD vocabulary
@@ -242,6 +239,8 @@ Four rounds of fixes addressed all critical and high-severity bugs with comprehe
 - EventHandler with default no-ops and proper `@Subscribe` annotations
 - Immutable NegativeValuePolicy on Stock (final field)
 - Flow source/sink reassignment validation
+- removeStock properly detaches connected flows
+- Simulation auto-clears history on each execute() call
 - Smooth and Delay3 resettable for simulation re-runs
 - CSV output with explicit UTF-8 encoding
 - MultiParameterSweep size guard against OOM

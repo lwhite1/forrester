@@ -34,10 +34,18 @@ public class Model extends Element {
     }
 
     /**
-     * Removes a stock from this model.
+     * Removes a stock from this model, detaching all connected flows so they do not
+     * retain stale references to the removed stock.
      */
     public void removeStock(Stock stock) {
-        stocks.remove(stock);
+        if (stocks.remove(stock)) {
+            for (Flow flow : stock.getInflows()) {
+                flow.setSink(null);
+            }
+            for (Flow flow : stock.getOutflows()) {
+                flow.setSource(null);
+            }
+        }
     }
 
     /**

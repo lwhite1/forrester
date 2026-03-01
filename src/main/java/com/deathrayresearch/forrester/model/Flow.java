@@ -101,13 +101,14 @@ public abstract class Flow extends Element {
     }
 
     /**
-     * Sets the source stock for this flow. Throws if the flow already has a different source.
+     * Sets the source stock for this flow. Pass {@code null} to clear the source.
+     * Throws if the flow already has a different non-null source.
      *
-     * @param stock the source stock
+     * @param stock the source stock, or {@code null} to clear
      * @throws IllegalStateException if this flow already has a different source
      */
     public void setSource(Stock stock) {
-        if (this.source != null && this.source != stock) {
+        if (stock != null && this.source != null && this.source != stock) {
             throw new IllegalStateException(
                     "Flow '" + getName() + "' already has source stock '" + source.getName()
                     + "'; cannot reassign to '" + stock.getName() + "'");
@@ -116,13 +117,14 @@ public abstract class Flow extends Element {
     }
 
     /**
-     * Sets the sink stock for this flow. Throws if the flow already has a different sink.
+     * Sets the sink stock for this flow. Pass {@code null} to clear the sink.
+     * Throws if the flow already has a different non-null sink.
      *
-     * @param stock the sink stock
+     * @param stock the sink stock, or {@code null} to clear
      * @throws IllegalStateException if this flow already has a different sink
      */
     public void setSink(Stock stock) {
-        if (this.sink != null && this.sink != stock) {
+        if (stock != null && this.sink != null && this.sink != stock) {
             throw new IllegalStateException(
                     "Flow '" + getName() + "' already has sink stock '" + sink.getName()
                     + "'; cannot reassign to '" + stock.getName() + "'");

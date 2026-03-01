@@ -1,6 +1,6 @@
 # System-Wide Code Audit — Remaining Findings
 
-Audit of the Forrester simulation library after four rounds of fixes (commits `bca62d9`, `68a2457`, `169f0f3`, and the current round). All critical and high-severity bugs have been resolved. This document lists only the **remaining open items**.
+Audit of the Forrester simulation library after five rounds of fixes (commits `bca62d9`, `68a2457`, `169f0f3`, `988f495`, and the current round). All critical and high-severity bugs have been resolved. This document lists only the **remaining open items**.
 
 For the full fix history and quality assessment, see `doc/CodeQualityAssessment.md`.
 
@@ -28,9 +28,6 @@ Allows external code to post arbitrary events.
 ---
 
 ## 2. Core Model (Stock, Flow, Variable, Constant, Model, Module)
-
-### DESIGN — Model.removeStock does not disconnect flows (Medium)
-Removed stock's connected flows retain stale references.
 
 ### DESIGN — Model.addModule does not propagate flows (Medium)
 Module's stocks and variables merge, but flows are not registered at the model level.

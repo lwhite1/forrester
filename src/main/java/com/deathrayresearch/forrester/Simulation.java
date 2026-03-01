@@ -101,6 +101,7 @@ public class Simulation {
         currentStep = 0;
         currentDateTime = startTime;
         elapsedTime = Duration.ZERO;
+        clearHistory();
 
         eventBus.post(new SimulationStartEvent(this));
 
