@@ -79,7 +79,7 @@ Event types:
 A dimension-aware quantity system ensures unit correctness:
 
 - **Dimensions:** Time, Mass, Length, Volume, Money, Item, Temperature, Dimensionless
-- **40+ predefined units** including Second, Minute, Hour, Day, Week, Year, People, Thing, Millimeter, Centimeter, Meter, Kilometer, Inch, Foot, Yard, Mile, Gram, Kilogram, Metric Ton, Ounce, Pound, USD, Milliliter, Liter, Gallon, Barrel, Celsius, Fahrenheit, and more
+- **40 predefined units** across 8 dimensions including Millisecond, Second, Minute, Hour, Day, Week, Month, Year, Millimeter, Centimeter, Meter, Kilometer, Inch, Foot, Yard, Mile, Nautical Mile, Milligram, Gram, Kilogram, Metric Ton, Ounce, Pound, Short Ton, Milliliter, Liter, Cubic Meter, Cup, Pint, Quart, Gallon, Imperial Gallon, Barrel, Celsius, Fahrenheit, USD, People, Thing
 - **Unit conversion** is handled automatically; incompatible dimensions (e.g., adding miles to pounds) are rejected
 - `Quantity` objects are fully immutable - all operations return new instances
 

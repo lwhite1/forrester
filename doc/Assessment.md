@@ -9,7 +9,7 @@
   
 - Strong demo collection. The 15+ demos cover the core SD curriculum well — exponential growth/decay, S-curves, goal-seeking, pipeline delays, material delays, predator-prey, SIR epidemiology, inventory oscillations, software project dynamics, parameter sweeps, and Monte Carlo uncertainty analysis. Several are drawn directly from Meadows' Thinking in Systems.
   
-- Dimensional analysis is a standout. The measurement system with 8 dimensions, 40+ units, automatic rate conversion, and immutable quantities is cleaner than what most commercial SD tools offer. Unit mismatches are caught at runtime.
+- Dimensional analysis is a standout. The measurement system with 8 dimensions, 40 predefined units (time, length, mass, volume, temperature, money, items, dimensionless), automatic rate conversion, and immutable quantities is cleaner than what most commercial SD tools offer. Unit mismatches are caught at runtime.
   
 - Lambda-based Flows API eliminates boilerplate. Common patterns are one-liners; custom formulas are concise lambdas. This is a genuine ergonomic advantage over older Java-based SD tools.
   
