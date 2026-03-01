@@ -17,18 +17,30 @@ public enum TemperatureUnits implements Unit {
 
     CELSIUS("Celsius", 1.0),
     FAHRENHEIT("Fahrenheit", 5.0 / 9.0) {
-        @Override
-        public Quantity toBaseUnits(Quantity quantity) {
-            throw new UnsupportedOperationException(
+        private UnsupportedOperationException conversionError() {
+            return new UnsupportedOperationException(
                     "Fahrenheit ↔ Celsius conversion requires an offset and cannot use ratio-based conversion. "
                     + "Use a single temperature unit per model.");
         }
 
         @Override
+        public Quantity toBaseUnits(Quantity quantity) {
+            throw conversionError();
+        }
+
+        @Override
+        public double toBaseUnits(double amount) {
+            throw conversionError();
+        }
+
+        @Override
         public Quantity fromBaseUnits(Quantity inBaseUnits) {
-            throw new UnsupportedOperationException(
-                    "Fahrenheit ↔ Celsius conversion requires an offset and cannot use ratio-based conversion. "
-                    + "Use a single temperature unit per model.");
+            throw conversionError();
+        }
+
+        @Override
+        public double fromBaseUnits(double inBaseUnits) {
+            throw conversionError();
         }
     };
 

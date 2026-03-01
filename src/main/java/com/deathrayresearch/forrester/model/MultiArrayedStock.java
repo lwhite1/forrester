@@ -269,21 +269,35 @@ public class MultiArrayedStock {
     }
 
     /**
-     * Connects a single scalar flow as an inflow to ALL underlying stocks.
+     * Wiring a single scalar flow to a multi-arrayed stock is not supported because the flow's
+     * computed value would be applied to each of the N underlying stocks.
+     *
+     * <p>Use {@link #addInflow(MultiArrayedFlow)} or wire individual stocks via
+     * {@link #getStockAt(int...)}.
+     *
+     * @param flow unused — always throws
+     * @throws UnsupportedOperationException always
      */
     public void addInflow(Flow flow) {
-        for (Stock stock : stocks) {
-            stock.addInflow(flow);
-        }
+        throw new UnsupportedOperationException(
+                "Cannot wire a single scalar flow to a multi-arrayed stock — the flow would be applied "
+                + size() + " times. Use addInflow(MultiArrayedFlow) or wire individual stocks.");
     }
 
     /**
-     * Connects a single scalar flow as an outflow from ALL underlying stocks.
+     * Wiring a single scalar flow to a multi-arrayed stock is not supported because the flow's
+     * computed value would be applied to each of the N underlying stocks.
+     *
+     * <p>Use {@link #addOutflow(MultiArrayedFlow)} or wire individual stocks via
+     * {@link #getStockAt(int...)}.
+     *
+     * @param flow unused — always throws
+     * @throws UnsupportedOperationException always
      */
     public void addOutflow(Flow flow) {
-        for (Stock stock : stocks) {
-            stock.addOutflow(flow);
-        }
+        throw new UnsupportedOperationException(
+                "Cannot wire a single scalar flow to a multi-arrayed stock — the flow would be applied "
+                + size() + " times. Use addOutflow(MultiArrayedFlow) or wire individual stocks.");
     }
 
     /**

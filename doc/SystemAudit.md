@@ -1,431 +1,170 @@
-# System-Wide Code Audit
+# System-Wide Code Audit — Remaining Findings
 
-Full audit of the Forrester simulation library, organized by subsystem. Each issue includes severity, file/line references, and a suggested fix. Issues are deduplicated across the overlapping reports from 5 parallel audit agents.
+Audit of the Forrester simulation library after three rounds of fixes (commits `bca62d9`, `68a2457`, and the current round). All critical and high-severity bugs have been resolved. This document lists only the **remaining open items**.
 
-Items marked **[FIXED]** have been resolved in commit `bca62d9`.
+For the full fix history and quality assessment, see `doc/CodeQualityAssessment.md`.
 
 ---
 
 ## 1. Simulation Engine
 
-### [FIXED] BUG — Flow values recorded multiple times per step (Critical)
-**File:** `Simulation.java`
-
-When a flow connects two stocks (outflow of A, inflow of B), `flow.recordValue(q)` was called once per stock encounter — i.e., twice for a transfer flow. This corrupted `Flow.history`, breaking `pipelineDelay` and any history-dependent computation.
-
-**Fix applied:** Moved `flow.recordValue(q)` inside the `else` branch (cache-miss path only), so it is called exactly once when the flow is first evaluated.
-
-### [FIXED] BUG — Sub-second time steps truncated to zero (Critical)
-**File:** `Simulation.java`
-
-`addStep()` cast `timeStep.ratioToBaseUnit()` to `long`. For MILLISECOND (ratio 0.001), this truncated to 0 — `currentDateTime` and `elapsedTime` never advanced.
-
-**Fix applied:** Uses `Duration.ofNanos(Math.round(timeStep.ratioToBaseUnit() * 1_000_000_000L))`.
-
-### BUG — Off-by-one: simulation runs N+1 steps (High)
-**File:** `Simulation.java:90`
-
-`while (currentStep <= totalSteps)` runs steps 0 through N inclusive = N+1 iterations. A "5-step simulation" actually runs 6 steps. Tests are written to match this behavior, but it contradicts the standard SD convention.
-
-**Fix:** Change `<=` to `<`, or document the inclusive-endpoint semantics. Not fixed yet because existing tests and demos depend on the current behavior — changing it requires a coordinated update across all tests and demos.
-
-### [FIXED] BUG — Floating-point totalSteps can miss a step (High)
-**File:** `Simulation.java`
-
-`totalSteps` was a `double`. Rounding could produce `9.999...` instead of `10.0`, causing one fewer iteration.
-
-**Fix applied:** `long totalSteps = Math.round(...)`.
-
-### [FIXED] BUG — Simulation is not re-entrant (High)
-**File:** `Simulation.java`
-
-`currentStep`, `currentDateTime`, `elapsedTime` were never reset. Calling `execute()` a second time silently did nothing.
-
-**Fix applied:** Reset all state at the top of `execute()`.
-
-### [FIXED] BUG — SimulationEndEvent not guaranteed on exception (Medium)
-**File:** `Simulation.java`
-
-If a flow formula or event handler threw, `SimulationEndEvent` was never posted. `CsvSubscriber`'s file handle leaked.
-
-**Fix applied:** Wrapped the simulation loop in `try/finally`.
-
-### [FIXED] BUG — Flow cache keyed by name — collisions possible (Medium)
-**File:** `Simulation.java`
-
-`flowMap` was `HashMap<String, Quantity>` keyed by flow name. Two distinct flows with the same name silently shared cached values.
-
-**Fix applied:** Changed to `IdentityHashMap<Flow, Quantity>`.
-
-### DESIGN — TimeStepEvent fires before stock update (Medium)
-**File:** `Simulation.java:93`
-
-Event handlers see pre-update stock values. The Javadoc says "fired after each time step has been computed", which is false.
-
-**Fix:** Move `eventBus.post()` to after `updateStocks()`, or correct the Javadoc.
-
 ### DESIGN — EventHandler interface does not carry @Subscribe (Medium)
 **File:** `EventHandler.java`
 
-Guava EventBus requires `@Subscribe` on methods, but the interface doesn't annotate them. Implementing `EventHandler` without manually adding `@Subscribe` causes silent delivery failure.
+Guava EventBus requires `@Subscribe` on methods, but the interface doesn't annotate them. Implementing `EventHandler` without manually adding `@Subscribe` causes silent delivery failure. All existing implementations are correct, but this is a trap for new implementations.
 
-**Fix:** Add `@Subscribe` to interface methods, or replace EventBus with direct dispatch.
+**Fix:** Add `@Subscribe` to interface methods, add default no-op implementations, or replace EventBus with direct dispatch.
 
-### DESIGN — SimulationEndEvent carries no context (Low)
-**File:** `SimulationEndEvent.java`
-
-Unlike `SimulationStartEvent`, the end event has no fields — handlers can't identify which simulation ended.
-
-### DESIGN — No validation that duration is a TIME quantity (Low)
+### DESIGN — Off-by-one: simulation runs N+1 steps (Documented)
 **File:** `Simulation.java`
 
-Passing `new Quantity(5, GALLON_US)` as duration produces nonsensical results.
+`while (currentStep <= totalSteps)` runs steps 0 through N inclusive = N+1 iterations. Documented in class Javadoc. Not changed because all tests and demos depend on the current behavior.
 
-### [FIXED] DESIGN — `getTimeStep()` returns `Unit` instead of `TimeUnit` (Low)
-**File:** `Simulation.java`
+### DESIGN — `getEventBus()` exposes raw Guava EventBus (Low)
+Allows external code to post arbitrary events.
 
-The field was `TimeUnit` but the getter widened to `Unit`.
+### DESIGN — Asymmetric event objects (Low)
+`SimulationStartEvent` carries model + simulation; `SimulationEndEvent` carries model but not simulation.
 
-**Fix applied:** Return type changed to `TimeUnit`.
+### DESIGN — No thread-safety documentation (Low)
+Simulation is single-threaded by design but the constraint is not stated in Javadoc.
 
-### MINOR — No null checks on constructor parameters (Medium)
-**File:** `Simulation.java`
-
-### MINOR — No validation for zero/negative duration (Medium)
-**File:** `Simulation.java`
+### MINOR
+- Misleading local variable `q` for cached flow quantities
+- `addStep` name implies adding to a collection
+- No null check on `addEventHandler`/`removeEventHandler`
+- `TimeStepEvent` Javadoc `@param` references old field name
 
 ---
 
 ## 2. Core Model (Stock, Flow, Variable, Constant, Model, Module)
 
-### BUG — ArrayedStock scalar addInflow/addOutflow overwrites sink/source N times (High)
-**File:** `ArrayedStock.java:191-207`
-
-Wiring a single scalar Flow to all N underlying stocks calls `flow.setSink(this)` N times. Only the last stock "wins" — the flow's sink is inconsistent with the first N-1 stocks' inflow sets.
-
-**[DOCUMENTED]** Added Javadoc warning explaining the behavior and recommending `ArrayedFlow` for per-element wiring. The underlying behavior is inherent to having a single-source/single-sink flow wired to multiple stocks. The flow value is cached by identity in the simulation loop, so it is computed once and applied to each stock.
-
 ### BUG — Stock allows conflicting source/sink assignments without error (Medium)
 **File:** `Stock.java`
 
-`addInflow` calls `flow.setSink(this)` without checking if the flow already has a different sink.
-
-### [FIXED] DESIGN — Model stores variables in HashMap (nondeterministic) (Medium)
-**File:** `Model.java`
-
-`variables` was `HashMap<String, Variable>`, making iteration order nondeterministic across JVM runs.
-
-**Fix applied:** Changed to `LinkedHashMap<String, Variable>`.
+`addInflow` calls `flow.setSink(this)` without checking if the flow already has a different sink. A flow wired to two stocks silently reassigns its sink.
 
 ### DESIGN — Model.removeStock does not disconnect flows (Medium)
-**File:** `Model.java`
-
 Removed stock's connected flows retain stale references.
 
-### DESIGN — Model.addModule does not propagate flows or constants (Medium)
-**File:** `Model.java`
-
-Module's stocks and variables are merged, but flows are not.
+### DESIGN — Model.addModule does not propagate flows (Medium)
+Module's stocks and variables merge, but flows are not registered at the model level.
 
 ### DESIGN — No equals/hashCode on Element/Stock/Flow/Variable (Medium)
-**File:** `Element.java`
-
-All rely on identity equality. Two objects with the same name are not considered equal.
+All rely on identity equality.
 
 ### DESIGN — Flow.history and Variable.history grow unboundedly (Medium)
-**File:** `Flow.java`, `Variable.java`
+`clearHistory()` exists but is not called automatically.
 
-No way to clear or cap history. Long simulations consume excessive memory.
+### DESIGN — No model-level accessor for all flows (Low)
+Flows are only reachable through stocks.
 
-### [FIXED] DESIGN — Flows.exponentialGrowthWithLimit — no guard for limit=0 (Medium)
-**File:** `Flows.java`
+### DESIGN — `Stock.setNegativeValuePolicy()` allows mid-simulation mutation (Low)
 
-`value * rate * (1 - value / limit)` produced NaN/Infinity when limit was 0.
+### DESIGN — `addStock`/`addConstant` allow duplicate names without warning (Low)
 
-**Fix applied:** Added `Preconditions.checkArgument(limit > 0)`.
+### BUG — Flow history records phantom amounts on clamped stocks (Low)
+When `NegativeValuePolicy` clamps to zero, the flow's recorded value reflects the unclamped amount.
 
-### DESIGN — ArrayedFlow.create overload ignores its stock parameter (Medium)
-**File:** `ArrayedFlow.java`
-
-The stock parameter is accepted but unused. Misleading API.
-
-### [FIXED] DESIGN — NaN/Infinity silently accepted or masked by stocks (Medium)
-**File:** `Stock.java`
-
-NaN fell through `applyPolicy` to `CLAMP_TO_ZERO`, masking formula bugs. Infinity passed unchecked.
-
-**Fix applied:** Added explicit NaN/Infinity validation at the top of `applyPolicy`. Throws `IllegalArgumentException` with descriptive message.
-
-### [FIXED] DESIGN — Stock uses HashSet for flows (nondeterministic iteration) (Low)
-**File:** `Stock.java`
-
-`inflows` and `outflows` were `HashSet<Flow>`, making flow processing order nondeterministic.
-
-**Fix applied:** Changed to `LinkedHashSet<Flow>`.
-
-### MINOR — No null validation on constructors (Stock, Variable, Constant, Flow) (Medium)
-**File:** Multiple
-
-### MINOR — Module.getStocks returns mutable copy; getVariables returns unmodifiable (Low)
-**File:** `Module.java`
-
-### MINOR — Element.setComment accepts null without documenting it (Low)
-
-### [FIXED] MINOR — RateConverter is not final, has public constructor (Low)
-**File:** `RateConverter.java`
-
-**Fix applied:** Made class `final` with private constructor.
-
-### MINOR — Constant.getIntValue throws ArithmeticException for large values (Low)
-**File:** `Constant.java`
-
-### API — Module missing addArrayedVariable, addArrayedFlow (Low)
+### MINOR
+- No null check on `Flow` timeUnit constructor parameter
+- `NegativeValuePolicy` field not final
+- `Constant` accepts NaN as initial value
+- `Element.setComment(null)` undocumented
+- `ArrayedFlow.create` overload accepts unused stock parameter
 
 ---
 
 ## 3. SD Functions (Smooth, Delay3, Step, Ramp, LookupTable)
 
-### [FIXED] BUG — Smooth skips integration steps when simulation advances by >1 (High)
-**File:** `Smooth.java`
-
-`getCurrentValue()` only integrated once when `step > lastStep`, regardless of gap size.
-
-**Fix applied:** Added loop `for (int i = 0; i < delta; i++)` around the integration step.
-
-### [FIXED] BUG — Delay3 has the same multi-step skip bug (High)
-**File:** `Delay3.java`
-
-Same issue as Smooth — single Euler pass regardless of skipped steps.
-
-**Fix applied:** Added loop `for (int d = 0; d < delta; d++)` around all three stage computations.
-
 ### DESIGN — Smooth and Delay3 are not resettable (Medium)
-**File:** `Smooth.java`, `Delay3.java`
-
-Mutable internal state with no `reset()` method. Cannot re-run simulations without recreating objects.
+No `reset()` method. Cannot reuse across simulation runs without recreating objects.
 
 ### DESIGN — Smooth and Delay3 internal stages are opaque (Low)
-No accessors for Delay3's `stage1/2/3` or Smooth's `smoothed` value, preventing debugging and conservation-of-material verification.
+No accessors for debugging or conservation-of-material verification.
 
-### DESIGN — Step/Ramp do not validate stepTime >= 0 (Low)
-**File:** `Step.java`, `Ramp.java`
+### DESIGN — LookupTable.Builder doesn't detect duplicate x values (Low)
+Silently passes invalid data to the interpolator.
 
-Negative step times silently accepted.
-
-### MINOR — LookupTable NaN input falls through to interpolation (Low)
-**File:** `LookupTable.java`
-
-NaN input bypasses clamping logic; `interpolation.value(NaN)` propagates NaN silently.
+### BUG — Smooth/Delay3 multi-step catch-up uses stale input (Inherent limitation)
+The fix loops N times when N steps are skipped, but each iteration reads the *current* input value (intermediate values are unknowable).
 
 ---
 
 ## 4. Sweep / Monte Carlo / Optimizer
 
-### [FIXED] BUG — MonteCarlo discards sampled parameter values in RunResult (Critical)
-**File:** `MonteCarlo.java`
-
-`new RunResult(i)` stored the iteration index, not the sampled parameters. `getParameterMap()` returned empty for all Monte Carlo runs.
-
-**Fix applied:** Changed to `new RunResult(paramMap)`.
-
-### [FIXED] BUG — MonteCarlo RANDOM sampling reseeds every distribution on every draw (High)
-**File:** `MonteCarlo.java`
-
-Calling `dist.reseedRandomGenerator(rng.nextLong())` per sample was wasteful and destroyed the distribution's internal RNG state.
-
-**Fix applied:** Reseed each distribution once before the sampling loop.
-
-### [FIXED] BUG — Nelder-Mead does not enforce parameter bounds (High)
-**File:** `Optimizer.java`
-
-User-specified bounds were silently ignored. Nelder-Mead explored unbounded space.
-
-**Fix applied:** Added parameter clamping to bounds inside the `MultivariateFunction` adapter lambda.
-
-### [FIXED] BUG — Optimizer NPE when no evaluation improves (High)
-**File:** `Optimizer.java`
-
-If all evaluations returned >= `Double.MAX_VALUE` or NaN, `bestParams[0]` stayed null, causing NPE.
-
-**Fix applied:** Added null guard that falls back to initial-guess parameters.
-
-### BUG — RunResult crashes on zero-step runs (Medium)
-**File:** `RunResult.java`
-
-`getFinalStockValue` accesses `stockSnapshots.get(-1)` when empty.
+### BUG — Optimizer `bestRun[0]` null in fallback path (Medium)
+If all evaluations fail, `bestRun[0]` remains null. Callers get a null RunResult.
 
 ### BUG — Objectives.fitToTimeSeries silently truncates length mismatch (Medium)
-**File:** `Objectives.java`
+`Math.min()` silently discards tail data without warning.
 
-`Math.min(simulated.length, observedData.length)` silently discards tail data.
+### BUG — RunResult.getMaxStockValue returns NEGATIVE_INFINITY on empty (Low)
+Missing stock name returns `NEGATIVE_INFINITY` instead of throwing.
+
+### BUG — MonteCarloResult stock/variable name collision (Low)
+Same-named stock and variable: `getPercentileSeries` silently picks the first match.
 
 ### DESIGN — RunResult has two constructors with lossy semantics (Medium)
-**File:** `RunResult.java`
+Can't populate both `parameterValue` and `parameterMap`.
 
-`RunResult(double)` sets parameterMap to empty; `RunResult(Map)` hardcodes parameterValue to 0. No way to populate both.
+### DESIGN — Platform-default encoding in CSV writers (Low)
+`CsvSubscriber` / `SweepCsvWriter` should specify UTF-8.
 
-### [FIXED] DESIGN — linspace does not validate step > 0 (Medium)
-**File:** `ParameterSweep.java`
+### DESIGN — `MonteCarlo.reseedRandomGenerator` mutates caller's objects (Low)
+Side effect not documented.
 
-Step=0 caused OOM; negative step returned empty array silently.
+### DESIGN — No defensive copy of arrays/lists (Low)
+`ParameterSweep.Builder`, `SweepResult`, `MonteCarloResult` don't defensively copy.
 
-**Fix applied:** Added validation for `step > 0` and `end >= start`.
+### DESIGN — Cartesian product OOM risk (Low)
+`MultiParameterSweep` has no size guard on the parameter grid.
 
-### DESIGN — SweepResult/MultiSweepResult/MonteCarloResult don't defensively copy input lists (Low)
+### DESIGN — RuntimeException wrapping loses type information (Low)
 
-### DESIGN — ParameterSweep.Builder doesn't clone parameterValues array (Low)
-
-### MINOR — MonteCarloResult.getPercentileSeries recomputes sorting for each percentile (Low)
-
-### MINOR — MonteCarloResult stock/variable name ambiguity silently resolved (Low)
-
----
-
-## 5. Measurement System & IO/UI
-
-### [FIXED] BUG — Temperature conversion via ratio produces wrong results (Critical)
-**File:** `TemperatureUnits.java`
-
-Fahrenheit used ratio-based conversion (multiply by 5/9), which is fundamentally wrong for absolute temperature values. `100°F.inBaseUnits()` produced 55.56°C instead of 37.78°C.
-
-**Fix applied:** Overrode `toBaseUnits(Quantity)` and `fromBaseUnits(Quantity)` on FAHRENHEIT to throw `UnsupportedOperationException` with a descriptive message. The `ratioToBaseUnit()` value (5/9) remains correct for temperature *differences* (degree-size scaling).
-
-### BUG — Quantity.equals() has contradictory semantics (High)
-**File:** `Quantity.java`
-
-Compares base-unit values (cross-unit equality) but then also requires same unit. Neither "physical equality" nor "exact equality" is implemented consistently.
-
-### [FIXED] BUG — FanChart uses Double.MIN_VALUE for max-finding (Medium)
-**File:** `FanChart.java`
-
-`Double.MIN_VALUE` (~4.9E-324) is the smallest positive double, not the most negative. Broke when all values were negative.
-
-**Fix applied:** Changed to `-Double.MAX_VALUE`.
-
-### [FIXED] BUG — FanChart division by zero when stepCount=1 (Medium)
-**File:** `FanChart.java`
-
-`plotWidth / (stepCount - 1)` caused division by zero.
-
-**Fix applied:** Added early return with message when `stepCount <= 1`.
-
-### [FIXED] DESIGN — Quantity comparison methods don't check dimension compatibility (Medium)
-**File:** `Quantity.java`
-
-`isLessThan()`, `isGreaterThan()`, `isLessThanOrEqualTo()`, `isGreaterThanOrEqualTo()`, and `isEqual()` allowed comparing meters to dollars.
-
-**Fix applied:** Added `Preconditions.checkArgument(other.isCompatibleWith(this), INCOMPATIBLE_ERROR_MESSAGE)` to all 5 comparison methods.
-
-### DESIGN — CsvSubscriber does not close writer on exception (Medium)
-**File:** `CsvSubscriber.java`
-
-File opened in constructor, closed only in `handleSimulationEndEvent`. If simulation throws, file handle leaks. Does not implement `Closeable`.
-
-### DESIGN — ChartViewerApplication uses all-static state (Medium)
-**File:** `ChartViewerApplication.java`
-
-Only one chart per JVM. `Application.launch()` can only be called once.
-
-### DESIGN — ItemUnit lacks equals/hashCode (Medium)
-**File:** `ItemUnit.java`
-
-Non-enum unit class; two `ItemUnit("Widget")` instances are not equal.
-
-### DESIGN — Quantity constructor does not validate null unit or NaN (Low)
-**File:** `Quantity.java`
-
-### DESIGN — Quantity.divide(0) silently produces Infinity (Low)
-**File:** `Quantity.java`
-
-### MINOR — CsvSubscriber calls getStockValues()/getVariableNames() in every loop iteration — O(n²) (Low)
-**File:** `CsvSubscriber.java`
-
-### MINOR — FlowChartViewer Javadoc says "stock levels" — copy-paste error (Low)
-**File:** `FlowChartViewer.java`
-
-### MINOR — ModelReport output order nondeterministic (HashMap iteration) (Low)
+### MINOR
+- `linspace` name implies `numpy.linspace` (endpoint-inclusive) but uses start-step-end semantics
+- `formatPercentile` relies on specific double-to-string formatting
+- `File.mkdirs()` return value ignored
 
 ---
 
-## 6. Test Coverage Gaps (Cross-Cutting)
+## 5. IO & UI
 
-| Area | Gap |
-|------|-----|
-| ArrayedVariable | No test file exists at all |
-| CsvSubscriber | Zero test coverage |
-| UI classes | Zero test coverage (StockLevelChartViewer, FlowChartViewer, FanChart, ChartViewerApplication) |
-| Simulation events | No test for event ordering, count, or handler registration/removal |
-| Mixed time units | No test for simulation with different time-step and duration units |
-| MILLISECOND/MONTH | No tests for recently-added time units |
-| Temperature units | No tests |
-| Dimensionless | No tests |
-| ItemUnit | No tests |
-| ModelReportTest | Has no assertions (smoke test only) |
-| Flow.recordValue double-counting | No test exposes the duplicate-recording bug |
-| Smooth/Delay3 multi-step jump | No tests for step gaps > 1 |
-| Optimizer edge cases | No test for TooManyEvaluationsException, initial guess out of bounds |
-| linspace edge cases | No test for step=0, step<0, start>end |
-| pipelineDelay null sink | No test for the precondition failure path |
-| Quantity edge cases | No tests for divide(0), NaN, null unit, cross-dimension comparison |
-| MonteCarloResult CSV content | File existence tested, but content never verified |
+### DESIGN — `FanChart` and `ChartViewerApplication` use all-static state (Medium)
+Only one chart per JVM lifetime.
+
+### DESIGN — `ChartViewerApplication.launch()` can only be called once (Medium)
+JavaFX limitation. Second simulation with chart viewer fails.
+
+### DESIGN — `CsvSubscriber` opens file in constructor (Low)
+Prevents deferred initialization.
+
+### DESIGN — `CsvSubscriber.close()` doesn't guard against post-close events (Low)
+Sets writer to null but doesn't prevent subsequent event handler calls.
+
+### DESIGN — `ModelReport` output format ends without trailing newline (Low)
+
+### BUG — CsvSubscriber NPE if `getCurrentTime()` null (Low)
+Unlikely — Simulation always provides non-null timestamp.
+
+### BUG — ChartViewerApplication series/values size mismatch (Low)
+Only triggers with asymmetric stock/flow chart setup.
+
+### MINOR
+- Unused imports in some demo files
+- Commented-out code in `ChartViewerApplication`
+- Ramp uses `Integer.MAX_VALUE` sentinel for unbounded end
+- Redundant `ModelReport` console output
+- Missing `@Override` on some event handlers
 
 ---
 
-## Fix Summary
+## 6. Remaining Test Gaps
 
-### Fixed (19 items in commit `bca62d9`)
-
-| # | Severity | Issue | Files |
-|---|----------|-------|-------|
-| 1 | Critical | Flow double-recording | `Simulation.java` |
-| 2 | Critical | Sub-second time truncation | `Simulation.java` |
-| 3 | Critical | MonteCarlo discards parameter map | `MonteCarlo.java` |
-| 4 | Critical | Temperature ratio-based conversion | `TemperatureUnits.java` |
-| 5 | High | Floating-point totalSteps | `Simulation.java` |
-| 6 | High | Simulation not re-entrant | `Simulation.java` |
-| 7 | High | MonteCarlo per-sample reseeding | `MonteCarlo.java` |
-| 8 | High | Nelder-Mead ignores bounds | `Optimizer.java` |
-| 9 | High | Optimizer NPE | `Optimizer.java` |
-| 10 | High | Smooth multi-step skip | `Smooth.java` |
-| 11 | High | Delay3 multi-step skip | `Delay3.java` |
-| 12 | Medium | SimulationEndEvent not guaranteed | `Simulation.java` |
-| 13 | Medium | Flow cache keyed by name | `Simulation.java` |
-| 14 | Medium | NaN/Infinity in stocks | `Stock.java` |
-| 15 | Medium | FanChart Double.MIN_VALUE | `FanChart.java` |
-| 16 | Medium | FanChart div-by-zero | `FanChart.java` |
-| 17 | Medium | Quantity comparison dimension checks | `Quantity.java` |
-| 18 | Medium | linspace validation | `ParameterSweep.java` |
-| 19 | Medium | Flows limit validation | `Flows.java` |
-
-Plus minor fixes: `RateConverter` made final, `Stock` uses `LinkedHashSet`, `Model` uses `LinkedHashMap`, `Simulation.getTimeStep()` return type corrected, `ArrayedStock` scalar flow behavior documented.
-
-### Fixed (Round 2 — commit `68a2457`, 17 files)
-
-| Category | Changes |
-|----------|---------|
-| `Quantity.java` | Physical equality (dimension + base-unit value) for equals/hashCode, null-unit validation, divide-by-zero check |
-| `Simulation.java` | Constructor null checks + positive-duration + TIME-dimension validation, LinkedHashSet for handlers, model reference in SimulationEndEvent |
-| `SimulationEndEvent.java` | Added Model reference field |
-| `TimeStepEvent.java` | Javadoc corrected (fires before stock update) |
-| `Flow.java`, `Variable.java` | Added `clearHistory()`, null checks for unit/formula |
-| `Stock.java` | Null checks for unit and negativeValuePolicy |
-| `Constant.java` | Null check for unit, getIntValue clamps instead of throwing |
-| `ItemUnit.java` | Added equals/hashCode/toString |
-| `Module.java` | LinkedHashMap, unmodifiable getStocks(), added addArrayedVariable/addArrayedFlow/getFlows |
-| `RunResult.java` | Guard getFinalStockValue against empty snapshots |
-| `CsvSubscriber.java` | Implements Closeable, O(n) per step, null-safe close |
-| `LookupTable.java` | NaN input returns NaN |
-| `Step.java`, `Ramp.java` | Non-negative time validation |
-
-### Remaining (post-Round 2 re-audit)
-
-A full re-audit after both fix rounds found **76 remaining findings** — 17 bugs (mostly edge-case or latent), 27 design concerns, and 32 minor issues. See `doc/CodeQualityAssessment.md` for the complete re-audit with risk assessment and recommendations.
-
-| Severity | Count | Key items |
-|----------|-------|-----------|
-| Bug (high) | 3 | Fahrenheit double-overload still uses ratio math, Quantity.equals throws for Fahrenheit, ArrayedStock scalar flow × N amplification |
-| Bug (medium) | 6 | Flow sink overwrite, removeStock dangling refs, addModule missing flows, Optimizer null RunResult, CsvSubscriber NPE on null time, ChartViewer series mismatch |
-| Bug (low/latent) | 8 | Smooth/Delay3 stale input on catch-up, RunResult NEGATIVE_INFINITY, MC name collision, Optimizer concurrency, re-run history, identity conversion, flow phantom amounts, Constant NaN |
-| Design | 27 | EventBus/@Subscribe trap, unbounded history, bidirectional coupling, static UI state, encoding, etc. |
-| Minor | 32 | Naming, documentation, unused parameters, style |
-| Test Gaps | 12 | ArrayedVariable, CsvSubscriber, temperature, MILLISECOND/MONTH, events, Quantity edge cases |
+| Area | Gap | Risk |
+|------|-----|------|
+| UI classes (FanChart, ChartViewerApplication, viewers) | No tests | Low — visual output |
+| Simulation events | No test for event ordering or handler lifecycle | Low |
+| Optimizer edge cases | No TooManyEvaluations test | Low |
+| MonteCarloResult CSV content | File existence tested, content not verified | Low |

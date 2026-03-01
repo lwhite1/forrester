@@ -106,38 +106,54 @@ public final class Quantity {
     }
 
     /**
-     * Returns {@code true} if this quantity is strictly less than the other quantity,
-     * comparing in base units.
+     * Returns {@code true} if this quantity is strictly less than the other quantity.
+     * When both quantities share the same unit, values are compared directly;
+     * otherwise, both are converted to base units for comparison.
      */
     public boolean isLessThan(Quantity other) {
         Preconditions.checkArgument(other.isCompatibleWith(this), INCOMPATIBLE_ERROR_MESSAGE);
+        if (unit.equals(other.unit)) {
+            return Double.compare(value, other.value) < 0;
+        }
         return Double.compare(inBaseUnits().getValue(), other.inBaseUnits().getValue()) < 0;
     }
 
     /**
-     * Returns {@code true} if this quantity is less than or equal to the other quantity,
-     * comparing in base units.
+     * Returns {@code true} if this quantity is less than or equal to the other quantity.
+     * When both quantities share the same unit, values are compared directly;
+     * otherwise, both are converted to base units for comparison.
      */
     public boolean isLessThanOrEqualTo(Quantity other) {
         Preconditions.checkArgument(other.isCompatibleWith(this), INCOMPATIBLE_ERROR_MESSAGE);
+        if (unit.equals(other.unit)) {
+            return Double.compare(value, other.value) <= 0;
+        }
         return Double.compare(inBaseUnits().getValue(), other.inBaseUnits().getValue()) <= 0;
     }
 
     /**
-     * Returns {@code true} if this quantity is strictly greater than the other quantity,
-     * comparing in base units.
+     * Returns {@code true} if this quantity is strictly greater than the other quantity.
+     * When both quantities share the same unit, values are compared directly;
+     * otherwise, both are converted to base units for comparison.
      */
     public boolean isGreaterThan(Quantity other) {
         Preconditions.checkArgument(other.isCompatibleWith(this), INCOMPATIBLE_ERROR_MESSAGE);
+        if (unit.equals(other.unit)) {
+            return Double.compare(value, other.value) > 0;
+        }
         return Double.compare(inBaseUnits().getValue(), other.inBaseUnits().getValue()) > 0;
     }
 
     /**
-     * Returns {@code true} if this quantity is greater than or equal to the other quantity,
-     * comparing in base units.
+     * Returns {@code true} if this quantity is greater than or equal to the other quantity.
+     * When both quantities share the same unit, values are compared directly;
+     * otherwise, both are converted to base units for comparison.
      */
     public boolean isGreaterThanOrEqualTo(Quantity other) {
         Preconditions.checkArgument(other.isCompatibleWith(this), INCOMPATIBLE_ERROR_MESSAGE);
+        if (unit.equals(other.unit)) {
+            return Double.compare(value, other.value) >= 0;
+        }
         return Double.compare(inBaseUnits().getValue(), other.inBaseUnits().getValue()) >= 0;
     }
 
@@ -151,10 +167,15 @@ public final class Quantity {
     }
 
     /**
-     * Returns true if this quantity is equal to the other quantity in base units
+     * Returns true if this quantity is equal to the other quantity.
+     * When both quantities share the same unit, values are compared directly;
+     * otherwise, both are converted to base units for comparison.
      */
     public boolean isEqual(Quantity other) {
         Preconditions.checkArgument(other.isCompatibleWith(this), INCOMPATIBLE_ERROR_MESSAGE);
+        if (unit.equals(other.unit)) {
+            return Double.compare(value, other.value) == 0;
+        }
         return Double.compare(inBaseUnits().getValue(), other.inBaseUnits().getValue()) == 0;
     }
 
@@ -166,6 +187,10 @@ public final class Quantity {
      * Two quantities are equal if they have the same dimension and represent the same
      * physical amount (equal values when converted to base units). The specific unit
      * does not matter — 1000 meters equals 1 kilometer.
+     *
+     * <p>When both quantities share the same unit, values are compared directly without
+     * base-unit conversion. This allows equality checks for units that do not support
+     * ratio-based conversion (e.g., Fahrenheit).
      */
     @Override
     public boolean equals(Object o) {
@@ -175,24 +200,34 @@ public final class Quantity {
         Quantity quantity = (Quantity) o;
 
         if (!getDimension().equals(quantity.getDimension())) return false;
+        if (unit.equals(quantity.unit)) {
+            return Double.compare(value, quantity.value) == 0;
+        }
         return Double.compare(quantity.inBaseUnits().getValue(), inBaseUnits().getValue()) == 0;
     }
 
     @Override
     public int hashCode() {
-        int result;
-        result = Double.hashCode(inBaseUnits().getValue());
-        result = 31 * result + getDimension().hashCode();
-        return result;
+        try {
+            double baseValue = inBaseUnits().getValue();
+            return 31 * Double.hashCode(baseValue) + getDimension().hashCode();
+        } catch (UnsupportedOperationException e) {
+            // Units that don't support base-unit conversion (e.g., Fahrenheit)
+            return 31 * Double.hashCode(value) + unit.hashCode();
+        }
     }
 
     /**
      * Converts this quantity to the specified unit within the same dimension.
+     * Returns {@code this} if the target unit is the same as the current unit.
      *
      * @param newUnit the target unit
      * @return an equivalent quantity expressed in the new unit
      */
     public Quantity convertUnits(Unit newUnit) {
+        if (unit.equals(newUnit)) {
+            return this;
+        }
         return unit.getDimension().getConverter().convert(this, newUnit);
     }
 }

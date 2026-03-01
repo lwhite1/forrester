@@ -100,25 +100,17 @@ public class ArrayedStockTest {
     }
 
     @Test
-    public void shouldWireScalarFlowAsInflowToAllStocks() {
+    public void shouldRejectScalarFlowAsInflow() {
         ArrayedStock pop = new ArrayedStock("Population", region, 100, PEOPLE);
         Flow immigration = Flow.create("Immigration", DAY, () -> new Quantity(10, PEOPLE));
-        pop.addInflow(immigration);
-
-        for (int i = 0; i < region.size(); i++) {
-            assertEquals(1, pop.getStock(i).getInflows().size());
-        }
+        assertThrows(UnsupportedOperationException.class, () -> pop.addInflow(immigration));
     }
 
     @Test
-    public void shouldWireScalarFlowAsOutflowFromAllStocks() {
+    public void shouldRejectScalarFlowAsOutflow() {
         ArrayedStock pop = new ArrayedStock("Population", region, 100, PEOPLE);
         Flow emigration = Flow.create("Emigration", DAY, () -> new Quantity(5, PEOPLE));
-        pop.addOutflow(emigration);
-
-        for (int i = 0; i < region.size(); i++) {
-            assertEquals(1, pop.getStock(i).getOutflows().size());
-        }
+        assertThrows(UnsupportedOperationException.class, () -> pop.addOutflow(emigration));
     }
 
     @Test

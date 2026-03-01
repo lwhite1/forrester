@@ -183,33 +183,37 @@ public class ArrayedStock {
     }
 
     /**
-     * Connects a single scalar flow as an inflow to ALL underlying stocks.
-     * <p><strong>Note:</strong> The flow's {@code sink} will be set to the last stock in the array
-     * because {@link Stock#addInflow(Flow)} calls {@code flow.setSink(this)} for each stock.
-     * This is acceptable when the flow formula does not depend on its sink reference.
-     * For per-element flow wiring, use {@link #addInflow(ArrayedFlow)} instead.
+     * Wiring a single scalar flow to an arrayed stock is not supported because the flow's
+     * computed value would be applied to each of the N underlying stocks, effectively
+     * multiplying the flow's effect by N.
      *
-     * @param flow the scalar flow to add as inflow to every element
+     * <p>Use {@link #addInflow(ArrayedFlow)} with a per-element arrayed flow instead,
+     * or wire individual stocks directly via {@link #getStock(int)}.
+     *
+     * @param flow unused — always throws
+     * @throws UnsupportedOperationException always
      */
     public void addInflow(Flow flow) {
-        for (Stock stock : stocks) {
-            stock.addInflow(flow);
-        }
+        throw new UnsupportedOperationException(
+                "Cannot wire a single scalar flow to an arrayed stock — the flow would be applied "
+                + size() + " times. Use addInflow(ArrayedFlow) or wire individual stocks via getStock(i).");
     }
 
     /**
-     * Connects a single scalar flow as an outflow from ALL underlying stocks.
-     * <p><strong>Note:</strong> The flow's {@code source} will be set to the last stock in the array
-     * because {@link Stock#addOutflow(Flow)} calls {@code flow.setSource(this)} for each stock.
-     * This is acceptable when the flow formula does not depend on its source reference.
-     * For per-element flow wiring, use {@link #addOutflow(ArrayedFlow)} instead.
+     * Wiring a single scalar flow to an arrayed stock is not supported because the flow's
+     * computed value would be applied to each of the N underlying stocks, effectively
+     * multiplying the flow's effect by N.
      *
-     * @param flow the scalar flow to add as outflow from every element
+     * <p>Use {@link #addOutflow(ArrayedFlow)} with a per-element arrayed flow instead,
+     * or wire individual stocks directly via {@link #getStock(int)}.
+     *
+     * @param flow unused — always throws
+     * @throws UnsupportedOperationException always
      */
     public void addOutflow(Flow flow) {
-        for (Stock stock : stocks) {
-            stock.addOutflow(flow);
-        }
+        throw new UnsupportedOperationException(
+                "Cannot wire a single scalar flow to an arrayed stock — the flow would be applied "
+                + size() + " times. Use addOutflow(ArrayedFlow) or wire individual stocks via getStock(i).");
     }
 
     public Subscript getSubscript() {
