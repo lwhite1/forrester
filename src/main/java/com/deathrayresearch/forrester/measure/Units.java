@@ -55,12 +55,16 @@ public class Units {
     public static final TimeUnit YEAR = TimeUnits.YEAR;
 
     // volume
-    public static final Unit CUBIC_METER = VolumeUnits.CUBIC_METER;
+    public static final Unit MILLILITER = VolumeUnits.MILLILITER;
     public static final Unit LITER = VolumeUnits.LITER;
-
+    public static final Unit CUBIC_METER = VolumeUnits.CUBIC_METER;
     public static final Unit FLUID_OUNCE_US = VolumeUnits.FLUID_OUNCE_US;
-    public static final Unit GALLON_US = VolumeUnits.GALLON_US;
+    public static final Unit CUP_US = VolumeUnits.CUP_US;
+    public static final Unit PINT_US = VolumeUnits.PINT_US;
     public static final Unit QUART_US = VolumeUnits.QUART_US;
+    public static final Unit GALLON_US = VolumeUnits.GALLON_US;
+    public static final Unit IMPERIAL_GALLON = VolumeUnits.IMPERIAL_GALLON;
+    public static final Unit BARREL = VolumeUnits.BARREL;
 
     // temperature
     public static final Unit CELSIUS = TemperatureUnits.CELSIUS;
