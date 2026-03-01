@@ -126,6 +126,24 @@ public class RunResult implements EventHandler {
     }
 
     /**
+     * Returns the full time series of values for the stock with the given name.
+     *
+     * @param stockName the stock name
+     * @return an array of stock values, one per recorded step
+     */
+    public double[] getStockSeries(String stockName) {
+        int stockIndex = stockNames.indexOf(stockName);
+        if (stockIndex < 0) {
+            throw new IllegalArgumentException("Unknown stock: " + stockName);
+        }
+        double[] series = new double[stockSnapshots.size()];
+        for (int i = 0; i < stockSnapshots.size(); i++) {
+            series[i] = stockSnapshots.get(i).get(stockIndex);
+        }
+        return series;
+    }
+
+    /**
      * Returns the maximum value of the stock with the given name across all recorded steps.
      *
      * @param stockName the stock name

@@ -18,7 +18,7 @@ The engine is designed for creating training simulations, games, scenario testin
 |---|---|---|
 | JUnit 5 | 5.11.4 | Testing |
 | Google Guava | 33.4.0-jre | Event bus, collections |
-| Apache Commons Math | 3.6.1 | Mathematical functions |
+| Apache Commons Math | 3.6.1 | Mathematical functions, derivative-free optimization |
 | OpenCSV | 5.9 | CSV output |
 | JavaMoney Moneta | 1.4.4 | Currency handling |
 | Logback | 1.5.16 | Logging |
@@ -47,7 +47,7 @@ com.deathrayresearch.forrester
 │   └── flows/                   # Rate conversion utilities
 ├── measure/                     # Dimensional analysis and unit system
 ├── event/                       # Event-driven communication
-├── sweep/                       # Parameter sweep runner and CSV output
+├── sweep/                       # Parameter sweep, Monte Carlo, optimization, and CSV output
 ├── io/                          # CSV export and reporting
 └── ui/                          # JavaFX chart visualization
 ```
@@ -277,6 +277,56 @@ FanChart.show(result, "Infectious");
 | `SamplingMethod` | Enum: `RANDOM` or `LATIN_HYPERCUBE` |
 | `FanChart` | JavaFX Canvas-based fan chart — renders nested percentile bands (95%, 75%, 50%) with median line |
 
+### Optimization / Calibration (`sweep/` package)
+
+The `Optimizer` finds parameter values that minimize an objective function evaluated on simulation output. It wraps Apache Commons Math derivative-free optimizers behind a builder API consistent with the sweep and Monte Carlo runners. The optimizer runs the simulation repeatedly, tracking the best result across all evaluations.
+
+**Algorithms:**
+
+| Algorithm | Description |
+|---|---|
+| `NELDER_MEAD` (default) | Simplex-based; good general-purpose choice for low-dimensional problems |
+| `BOBYQA` | Quadratic interpolation within bounds; requires at least 2 parameters |
+| `CMAES` | Population-based evolution strategy; well-suited for higher-dimensional problems |
+
+**Built-in objective functions (`Objectives` class):**
+
+| Method | Behavior |
+|---|---|
+| `fitToTimeSeries(stockName, observed)` | Sum of squared errors against observed data |
+| `minimize(stockName)` | Minimize final stock value |
+| `maximize(stockName)` | Maximize final stock value (negated internally) |
+| `target(stockName, targetValue)` | Minimize squared deviation from target |
+| `minimizePeak(stockName)` | Minimize peak stock value across all steps |
+
+```java
+OptimizationResult result = Optimizer.builder()
+    .parameter("Contact Rate", 1.0, 20.0)
+    .parameter("Infectivity", 0.01, 0.50)
+    .modelFactory(params -> buildSirModel(
+            params.get("Contact Rate"), params.get("Infectivity")))
+    .objective(Objectives.fitToTimeSeries("Infectious", observedData))
+    .algorithm(OptimizationAlgorithm.NELDER_MEAD)
+    .maxEvaluations(500)
+    .timeStep(DAY)
+    .duration(Times.weeks(8))
+    .build()
+    .execute();
+
+Map<String, Double> best = result.getBestParameters();
+double sse = result.getBestObjectiveValue();
+RunResult bestRun = result.getBestRunResult();
+```
+
+| Class | Purpose |
+|---|---|
+| `Optimizer` | Builder API + execute loop; dispatches to Commons Math optimizers with best-tracking adapter |
+| `OptimizationResult` | Immutable result: best parameters, objective value, run result, evaluation count |
+| `OptimizationParameter` | Record: name, bounds, optional initial guess |
+| `OptimizationAlgorithm` | Enum: `NELDER_MEAD`, `BOBYQA`, `CMAES` |
+| `ObjectiveFunction` | Functional interface: `double evaluate(RunResult)` |
+| `Objectives` | Static factory methods for common objective functions |
+
 ### Output & Visualization
 
 - **CsvSubscriber** - Writes simulation results to CSV files (columns: step, datetime, stock levels, variable values)
@@ -325,6 +375,8 @@ The demo package (`src/main/java/.../demo/`) contains a rich set of example mode
 **SirMultiSweepDemo** — Demonstrates multi-parameter sweep on the SIR model. Sweeps contact rate (2, 6, 10, 14) across infectivity (0.05, 0.10, 0.15) for 12 combinations, writing time-series and summary CSVs to the system temp directory. The summary CSV shows how higher contact rate combined with higher infectivity produces dramatically larger epidemic peaks.
 
 **SirMonteCarloDemo** — Demonstrates Monte Carlo simulation on the SIR model with two uncertain parameters: contact rate (Normal distribution, mean=8, sd=2) and infectivity (Uniform distribution, 0.05–0.15). Runs 200 iterations with Latin Hypercube Sampling, writes percentile CSV output, and displays a fan chart showing the uncertainty envelope around the Infectious stock trajectory.
+
+**SirCalibrationDemo** — Demonstrates model calibration via a twin experiment. Generates synthetic observed data by running the SIR model with known parameters (contactRate=8.0, infectivity=0.10), then uses the `Optimizer` with Nelder-Mead and a sum-of-squared-errors objective to recover those parameters from the synthetic data. Reports recovered vs true values and fit error.
 
 **PredatorPreyDemo** — Implements the Lotka-Volterra predator-prey model. Prey (Rabbits) and predator (Foxes) populations are coupled through birth and death flows that depend on both species' levels. The model produces sustained oscillations where predator peaks lag prey peaks.
 
@@ -391,6 +443,7 @@ New to system dynamics? These resources provide a solid introduction to the meth
 
 The project is at version 1.0-SNAPSHOT and is under active development. Recent work has focused on:
 
+- Adding `Optimizer` for model calibration — wraps Apache Commons Math derivative-free optimizers (Nelder-Mead, BOBYQA, CMA-ES) behind a builder API with built-in objective functions (SSE fit-to-data, minimize, maximize, target, minimize-peak) for automated parameter fitting against observed data
 - Adding `MultiParameterSweep` runner for combinatorial grid analysis — computes the Cartesian product of N parameter arrays, runs every combination, and exports multi-column CSV output for interaction analysis
 - Adding `MonteCarlo` runner for uncertainty analysis — samples multiple parameters from probability distributions (Normal, Uniform, Triangular, etc.) via random or Latin Hypercube Sampling, aggregates results into percentile envelopes, and visualizes as fan charts
 - Adding `ParameterSweep` runner for multi-run analysis — sweeps a parameter across an array of values, builds a fresh model per value, and collects results into time-series and summary CSV output
