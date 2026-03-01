@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Static utility methods for writing {@link SweepResult} data to CSV files using OpenCSV.
@@ -98,6 +99,94 @@ public final class SweepCsvWriter {
 
             writer.flush();
             logger.info("Wrote summary CSV to {}", filePath);
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to write summary CSV: " + filePath, e);
+        }
+    }
+
+    /**
+     * Writes the full time series for all runs of a multi-parameter sweep to a CSV file.
+     * Each row contains the parameter values, step number, and all stock and variable values.
+     *
+     * @param result   the multi-sweep result to write
+     * @param filePath the output file path
+     */
+    public static void writeTimeSeries(MultiSweepResult result, String filePath) {
+        ensureParentDir(filePath);
+
+        try (CSVWriter writer = new CSVWriter(new FileWriter(filePath))) {
+            // Header
+            List<String> header = new ArrayList<>();
+            header.addAll(result.getParameterNames());
+            header.add("Step");
+            header.addAll(result.getStockNames());
+            header.addAll(result.getVariableNames());
+            writer.writeNext(header.toArray(new String[0]));
+
+            // Data rows
+            List<String> paramNames = result.getParameterNames();
+            for (RunResult run : result.getResults()) {
+                Map<String, Double> paramMap = run.getParameterMap();
+                for (int i = 0; i < run.getStepCount(); i++) {
+                    List<String> row = new ArrayList<>();
+                    for (String name : paramNames) {
+                        row.add(String.valueOf(paramMap.get(name)));
+                    }
+                    row.add(String.valueOf(run.getStep(i)));
+                    for (double v : run.getStockValuesAtStep(i)) {
+                        row.add(String.valueOf(v));
+                    }
+                    for (double v : run.getVariableValuesAtStep(i)) {
+                        row.add(String.valueOf(v));
+                    }
+                    writer.writeNext(row.toArray(new String[0]));
+                }
+            }
+
+            writer.flush();
+            logger.info("Wrote multi-sweep time series CSV to {}", filePath);
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to write time series CSV: " + filePath, e);
+        }
+    }
+
+    /**
+     * Writes a summary CSV for a multi-parameter sweep with one row per parameter combination.
+     * Each row contains the parameter values and the final and maximum values for each stock.
+     *
+     * @param result   the multi-sweep result to write
+     * @param filePath the output file path
+     */
+    public static void writeSummary(MultiSweepResult result, String filePath) {
+        ensureParentDir(filePath);
+
+        try (CSVWriter writer = new CSVWriter(new FileWriter(filePath))) {
+            // Header
+            List<String> header = new ArrayList<>();
+            header.addAll(result.getParameterNames());
+            for (String stockName : result.getStockNames()) {
+                header.add(stockName + "_final");
+                header.add(stockName + "_max");
+            }
+            writer.writeNext(header.toArray(new String[0]));
+
+            // Data rows
+            List<String> paramNames = result.getParameterNames();
+            for (RunResult run : result.getResults()) {
+                List<String> row = new ArrayList<>();
+                Map<String, Double> paramMap = run.getParameterMap();
+                for (String name : paramNames) {
+                    row.add(String.valueOf(paramMap.get(name)));
+                }
+                for (String stockName : run.getStockNames()) {
+                    row.add(String.valueOf(run.getFinalStockValue(stockName)));
+                    row.add(String.valueOf(run.getMaxStockValue(stockName)));
+                }
+                writer.writeNext(row.toArray(new String[0]));
+            }
+
+            writer.flush();
+            logger.info("Wrote multi-sweep summary CSV to {}", filePath);
         } catch (IOException e) {
             throw new RuntimeException("Failed to write summary CSV: " + filePath, e);
         }

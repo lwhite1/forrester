@@ -2,20 +2,13 @@
 
 ## Overview
 
-Decision Analysis (DA) is a related but distinct field from System Dynamics. The two share
-a concern with modeling uncertain outcomes over time, but differ in structure: SD models are
-feedback-driven simulations with stocks and flows, while DA models are typically decision trees,
-influence diagrams, or Markov cohort models evaluated by backward induction or forward simulation.
+Decision Analysis (DA) is a related but distinct field from System Dynamics. The two share a concern with modeling uncertain outcomes over time, but differ in structure: SD models are feedback-driven simulations with stocks and flows, while DA models are typically decision trees, influence diagrams, or Markov cohort models evaluated by backward induction or forward simulation.
 
-This document assesses how much of Forrester's existing infrastructure can be reused for DA
-modeling, identifies gaps, and outlines what would need to be built.
+This document assesses how much of Forrester's existing infrastructure can be reused for DA modeling, identifies gaps, and outlines what would need to be built.
 
 ## Markov Cohort Models: ~80% Reuse
 
-Markov cohort models are the workhorse of health decision analysis and cost-effectiveness
-research. They track a population (cohort) moving through discrete health states over time,
-accumulating costs and health outcomes (QALYs) along the way. Structurally, they are almost
-identical to SD models.
+Markov cohort models are the workhorse of health decision analysis and cost-effectiveness research. They track a population (cohort) moving through discrete health states over time, accumulating costs and health outcomes (QALYs) along the way. Structurally, they are almost identical to SD models.
 
 ### Direct mapping
 
@@ -28,15 +21,13 @@ identical to SD models.
 | Absorbing states (e.g., Death) | `Stock` with inflows only, no outflows | Native |
 | State-dependent transitions | `Flow.create()` lambda reading multiple stocks | Native |
 | Probabilistic sensitivity analysis | `MonteCarlo` with LHS + distributions | Native |
-| Deterministic sensitivity analysis | `ParameterSweep` | Native |
+| Deterministic sensitivity analysis | `ParameterSweep`, `MultiParameterSweep` | Native |
 | Percentile envelopes | `MonteCarloResult.getPercentileSeries()` | Native |
 | Fan chart visualization | `FanChart` | Native |
 | CSV export | `SweepCsvWriter`, `MonteCarloResult` | Native |
 | Competing risks (multiple exits) | Multiple `addOutflow()` on one stock | Native |
 
-The SIR model already in the demo collection **is** a 3-state Markov cohort model. The same
-structure — with different state names and transition rates — would model cancer progression,
-HIV treatment pathways, or surgical vs. medical management strategies.
+The SIR model already in the demo collection **is** a 3-state Markov cohort model. The same structure — with different state names and transition rates — would model cancer progression, HIV treatment pathways, or surgical vs. medical management strategies.
 
 ### What works today with no changes
 
@@ -60,8 +51,7 @@ sick.addOutflow(diseaseDeath);
 dead.addInflow(diseaseDeath);
 ```
 
-**Cost accumulation via accumulator stocks.** DA models attach per-cycle costs and health
-utilities to each state. Forrester has no built-in reward mechanism, but the idiom is natural:
+**Cost accumulation via accumulator stocks.** DA models attach per-cycle costs and health utilities to each state. Forrester has no built-in reward mechanism, but the idiom is natural:
 
 ```java
 Stock totalCost = new Stock("Total Cost", 0, US_DOLLAR);
@@ -90,10 +80,7 @@ Flow discountedCost = Flow.create("Discounted Cost", YEAR, () -> {
 discountedCostAccum.addInflow(discountedCost);
 ```
 
-**Strategy comparison via model factory.** The `ParameterSweep` and `MonteCarlo` builders
-already accept a factory function that builds a fresh model per run. Different strategies
-(e.g., treatment A vs. B) can be expressed as different factory functions or as a parameter
-that controls flow wiring inside the factory:
+**Strategy comparison via model factory.** The `ParameterSweep` and `MonteCarlo` builders already accept a factory function that builds a fresh model per run. Different strategies (e.g., treatment A vs. B) can be expressed as different factory functions or as a parameter that controls flow wiring inside the factory:
 
 ```java
 Model buildModel(double treatmentEffectiveness) {
@@ -114,27 +101,15 @@ SweepResult result = ParameterSweep.builder()
     .execute();
 ```
 
-**Monte Carlo on a Markov model.** Uncertainty in transition probabilities, costs, and
-utilities is handled by the existing `MonteCarlo` builder — sample from distributions,
-run hundreds of iterations, extract percentile envelopes.
+**Monte Carlo on a Markov model.** Uncertainty in transition probabilities, costs, and utilities is handled by the existing `MonteCarlo` builder — sample from distributions, run hundreds of iterations, extract percentile envelopes.
 
 ### Caveats with the current engine
 
-**Competing risks and large step sizes.** When multiple outflows leave a state simultaneously,
-each flow is computed from the pre-update stock value but subtracted sequentially. If the
-combined outflows exceed the stock, `NegativeValuePolicy.CLAMP_TO_ZERO` silently truncates.
-This is correct for small transition probabilities (typical in annual Markov cycles) but can
-cause conservation errors with large rates. Manual guards (like the SIR demo's
-`min(infected, susceptible)` check) are needed for high-rate transitions.
+**Competing risks and large step sizes.** When multiple outflows leave a state simultaneously, each flow is computed from the pre-update stock value but subtracted sequentially. If the combined outflows exceed the stock, `NegativeValuePolicy.CLAMP_TO_ZERO` silently truncates. This is correct for small transition probabilities (typical in annual Markov cycles) but can cause conservation errors with large rates. Manual guards (like the SIR demo's `min(infected, susceptible)` check) are needed for high-rate transitions.
 
-**Euler integration only.** The simulation engine uses simple Euler forward stepping. For
-Markov cohort models with discrete annual cycles, this is fine — Markov models are inherently
-discrete. For continuous-time models or very short time steps, numerical accuracy may suffer.
+**Euler integration only.** The simulation engine uses simple Euler forward stepping. For Markov cohort models with discrete annual cycles, this is fine — Markov models are inherently discrete. For continuous-time models or very short time steps, numerical accuracy may suffer.
 
-**No half-cycle correction.** Standard Markov convention assumes transitions occur mid-cycle.
-The engine applies transitions at the start of each cycle. A half-cycle correction (add half
-a cycle's reward at the start and end) would need to be applied as a post-processing
-adjustment on accumulator stocks.
+**No half-cycle correction.** Standard Markov convention assumes transitions occur mid-cycle. The engine applies transitions at the start of each cycle. A half-cycle correction (add half a cycle's reward at the start and end) would need to be applied as a post-processing adjustment on accumulator stocks.
 
 ## Small additions needed (utility-level)
 
@@ -203,27 +178,22 @@ The data generation is a thin wrapper around `ParameterSweep`; the chart is a ne
 
 ### 6. Cost-effectiveness acceptability curves (CEACs)
 
-From Monte Carlo output: at each willingness-to-pay threshold lambda, compute the fraction of
-iterations where strategy B has positive net monetary benefit vs. strategy A:
+From Monte Carlo output: at each willingness-to-pay threshold lambda, compute the fraction of iterations where strategy B has positive net monetary benefit vs. strategy A:
 
 ```
 NMB = lambda * delta_Effect - delta_Cost
 P(cost-effective) = fraction of iterations where NMB > 0
 ```
 
-The raw data exists in `MonteCarloResult` (per-run cost and effect values). The aggregation
-logic and plotting are new.
+The raw data exists in `MonteCarloResult` (per-run cost and effect values). The aggregation logic and plotting are new.
 
 ### 7. Cost-effectiveness plane scatter plots
 
-Plot each Monte Carlo iteration as a point on (delta_Cost, delta_Effect) axes. Shows the
-joint distribution of incremental costs and effects. Quadrant analysis indicates dominance.
+Plot each Monte Carlo iteration as a point on (delta_Cost, delta_Effect) axes. Shows the joint distribution of incremental costs and effects. Quadrant analysis indicates dominance.
 
 ### 8. Net monetary benefit analysis
 
-For a given willingness-to-pay threshold, convert health outcomes to monetary terms and
-compare strategies on a single scale. Useful for probabilistic sensitivity analysis where
-ICERs can be undefined (negative denominators).
+For a given willingness-to-pay threshold, convert health outcomes to monetary terms and compare strategies on a single scale. Useful for probabilistic sensitivity analysis where ICERs can be undefined (negative denominators).
 
 ## What doesn't map — new engines needed
 
@@ -234,23 +204,17 @@ Fundamentally different structure. A decision tree has:
 - **Chance nodes** — branches weighted by probabilities
 - **Terminal nodes** — payoffs (cost, QALYs, utility)
 
-Evaluation is **backward induction** (fold from leaves to root), not forward simulation.
-Nothing in Forrester's simulation engine applies here. This would be a new `decisiontree`
-package with its own `Tree`, `Node`, and `TreeEvaluator` classes.
+Evaluation is **backward induction** (fold from leaves to root), not forward simulation. Nothing in Forrester's simulation engine applies here. This would be a new `decisiontree`package with its own `Tree`, `Node`, and `TreeEvaluator` classes.
 
-However, the Monte Carlo sampling infrastructure (`MonteCarlo`, distributions, LHS) could
-be reused to run probabilistic decision trees.
+However, the Monte Carlo sampling infrastructure (`MonteCarlo`, distributions, LHS) could be reused to run probabilistic decision trees.
 
 ### 10. Influence diagrams
 
-Directed acyclic graphs evaluated by variable elimination or arc reversal. Different
-topology (no feedback loops) and different evaluation algorithm. New engine.
+Directed acyclic graphs evaluated by variable elimination or arc reversal. Different topology (no feedback loops) and different evaluation algorithm. New engine.
 
 ### 11. Value of Information (VOI)
 
-Requires comparing expected value of a decision with vs. without a diagnostic test or signal.
-Conceptually: "run the tree twice with different information structures and compare." Needs
-the decision tree engine first.
+Requires comparing expected value of a decision with vs. without a diagnostic test or signal. Conceptually: "run the tree twice with different information structures and compare." Needs the decision tree engine first.
 
 ## Reuse summary
 
@@ -260,7 +224,7 @@ the decision tree engine first.
 | `Flow` (transitions) | Direct reuse | Not applicable |
 | `Simulation` (time stepping) | Direct reuse | Not applicable |
 | `MonteCarlo` (sampling + LHS) | Direct reuse | Reuse sampling only |
-| `ParameterSweep` | Direct reuse | Reuse for sensitivity |
+| `ParameterSweep` / `MultiParameterSweep` | Direct reuse | Reuse for sensitivity |
 | `MonteCarloResult` (percentiles) | Direct reuse | Partial reuse |
 | `FanChart` (visualization) | Direct reuse | Not applicable |
 | Measurement system (units) | Direct reuse | Direct reuse |
@@ -271,22 +235,14 @@ the decision tree engine first.
 
 ## Recommended implementation path
 
-1. **Reward utilities** — `Rewards` class with `perCycle()`, `discounted()`,
-   `qualityAdjusted()` convenience methods. Enables Markov cost-effectiveness models
-   as clean one-liners. Small effort, high impact.
-
-2. **ICER and strategy comparison** — utility class that takes sweep/Monte Carlo results
-   for two strategies and computes ICERs, net monetary benefit, and probability of
-   cost-effectiveness. Unlocks the core DA output.
-
-3. **Tornado diagram** — thin wrapper around `ParameterSweep` + a JavaFX horizontal
-   bar chart. The most-requested DA visualization after fan charts.
-
-4. **CEAC and CE plane** — statistical aggregation on Monte Carlo output + scatter plot
-   visualization. Completes the standard probabilistic sensitivity analysis toolkit.
-
-5. **Decision tree engine** — if needed. This is a separate module with its own evaluation
-   algorithm. The Monte Carlo and distribution infrastructure carries over; everything
-   else is new.
+1. **Reward utilities** — `Rewards` class with `perCycle()`, `discounted()`,`qualityAdjusted()` convenience methods. Enables Markov cost-effectiveness models as clean one-liners. Small effort, high impact.
+   
+2. **ICER and strategy comparison** — utility class that takes sweep/Monte Carlo results for two strategies and computes ICERs, net monetary benefit, and probability of cost-effectiveness. Unlocks the core DA output.
+   
+3. **Tornado diagram** — thin wrapper around `ParameterSweep` + a JavaFX horizontal bar chart. The most-requested DA visualization after fan charts.
+   
+4. **CEAC and CE plane** — statistical aggregation on Monte Carlo output + scatter plot visualization. Completes the standard probabilistic sensitivity analysis toolkit.
+   
+5. **Decision tree engine** — if needed. This is a separate module with its own evaluation algorithm. The Monte Carlo and distribution infrastructure carries over; everything else is new.
 
 Steps 1-4 are incremental additions to the existing codebase. Step 5 is a new subsystem.

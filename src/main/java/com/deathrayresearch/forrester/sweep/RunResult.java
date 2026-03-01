@@ -9,7 +9,9 @@ import com.google.common.eventbus.Subscribe;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * An {@link EventHandler} that captures stock and variable values at each time step
@@ -19,6 +21,7 @@ import java.util.List;
 public class RunResult implements EventHandler {
 
     private final double parameterValue;
+    private final Map<String, Double> parameterMap;
 
     private List<String> stockNames = Collections.emptyList();
     private List<String> variableNames = Collections.emptyList();
@@ -34,6 +37,17 @@ public class RunResult implements EventHandler {
      */
     public RunResult(double parameterValue) {
         this.parameterValue = parameterValue;
+        this.parameterMap = Collections.emptyMap();
+    }
+
+    /**
+     * Creates a new run result for a multi-parameter combination.
+     *
+     * @param parameterMap the parameter name-value pairs used for this run
+     */
+    public RunResult(Map<String, Double> parameterMap) {
+        this.parameterMap = new LinkedHashMap<>(parameterMap);
+        this.parameterValue = 0.0;
     }
 
     @Override
@@ -61,6 +75,16 @@ public class RunResult implements EventHandler {
 
     public double getParameterValue() {
         return parameterValue;
+    }
+
+    /**
+     * Returns the full parameter map for this run, or an empty map if the single-parameter
+     * constructor was used.
+     *
+     * @return an unmodifiable map of parameter name to value
+     */
+    public Map<String, Double> getParameterMap() {
+        return Collections.unmodifiableMap(parameterMap);
     }
 
     public List<String> getStockNames() {

@@ -210,6 +210,31 @@ result.writeSummaryCsv("sweep-summary.csv");
 | `SweepResult` | Aggregates run results; delegates to `SweepCsvWriter` for CSV export |
 | `SweepCsvWriter` | Static methods for time-series CSV (all steps, all runs) and summary CSV (final/peak per run) |
 
+### Multi-Parameter Sweep (`sweep/` package)
+
+The `MultiParameterSweep` runner extends single-parameter sweeps to combinatorial grids. It computes the Cartesian product of N parameter arrays and runs every combination, enabling interaction analysis across multiple parameters simultaneously.
+
+The factory signature matches `MonteCarlo`'s (`Function<Map<String, Double>, Model>`), so model factories can be shared between sweep and Monte Carlo analysis.
+
+```java
+MultiSweepResult result = MultiParameterSweep.builder()
+    .parameter("Contact Rate", ParameterSweep.linspace(2.0, 14.0, 4.0))
+    .parameter("Infectivity", new double[]{0.05, 0.10, 0.15})
+    .modelFactory(params -> buildModel(params.get("Contact Rate"), params.get("Infectivity")))
+    .timeStep(DAY)
+    .duration(Times.weeks(8))
+    .build()
+    .execute();
+
+result.writeTimeSeriesCsv("multisweep-timeseries.csv");
+result.writeSummaryCsv("multisweep-summary.csv");
+```
+
+| Class | Purpose |
+|---|---|
+| `MultiParameterSweep` | Builder API + execute loop; computes Cartesian product of parameter arrays |
+| `MultiSweepResult` | Aggregates run results with ordered parameter names; delegates to `SweepCsvWriter` for CSV export |
+
 ### Monte Carlo Simulation (`sweep/` package)
 
 The `MonteCarlo` runner extends the sweep infrastructure to uncertainty analysis. Multiple parameters are sampled from probability distributions (using Apache Commons Math) across hundreds of runs. Results are aggregated into percentile envelopes for statistical analysis and fan chart visualization.
@@ -297,6 +322,8 @@ The demo package (`src/main/java/.../demo/`) contains a rich set of example mode
 
 **SirSweepDemo** — Demonstrates parameter sweeps using the SIR model. Sweeps contact rate from 2 to 14 (step 2) across 7 runs, writing time-series and summary CSVs to the system temp directory. Higher contact rates produce dramatically higher peak infections (10 → 480) and deplete the susceptible pool more completely.
 
+**SirMultiSweepDemo** — Demonstrates multi-parameter sweep on the SIR model. Sweeps contact rate (2, 6, 10, 14) across infectivity (0.05, 0.10, 0.15) for 12 combinations, writing time-series and summary CSVs to the system temp directory. The summary CSV shows how higher contact rate combined with higher infectivity produces dramatically larger epidemic peaks.
+
 **SirMonteCarloDemo** — Demonstrates Monte Carlo simulation on the SIR model with two uncertain parameters: contact rate (Normal distribution, mean=8, sd=2) and infectivity (Uniform distribution, 0.05–0.15). Runs 200 iterations with Latin Hypercube Sampling, writes percentile CSV output, and displays a fan chart showing the uncertainty envelope around the Infectious stock trajectory.
 
 **PredatorPreyDemo** — Implements the Lotka-Volterra predator-prey model. Prey (Rabbits) and predator (Foxes) populations are coupled through birth and death flows that depend on both species' levels. The model produces sustained oscillations where predator peaks lag prey peaks.
@@ -364,6 +391,7 @@ New to system dynamics? These resources provide a solid introduction to the meth
 
 The project is at version 1.0-SNAPSHOT and is under active development. Recent work has focused on:
 
+- Adding `MultiParameterSweep` runner for combinatorial grid analysis — computes the Cartesian product of N parameter arrays, runs every combination, and exports multi-column CSV output for interaction analysis
 - Adding `MonteCarlo` runner for uncertainty analysis — samples multiple parameters from probability distributions (Normal, Uniform, Triangular, etc.) via random or Latin Hypercube Sampling, aggregates results into percentile envelopes, and visualizes as fan charts
 - Adding `ParameterSweep` runner for multi-run analysis — sweeps a parameter across an array of values, builds a fresh model per value, and collects results into time-series and summary CSV output
 - Adding standard SD functions: `Step`, `Ramp`, `Smooth` (first-order information delay), and `Delay3` (third-order material delay)
