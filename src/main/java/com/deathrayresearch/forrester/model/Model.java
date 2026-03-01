@@ -95,8 +95,8 @@ public class Model extends Element {
     }
 
     /**
-     * Adds a module to this model, automatically registering its stocks and variables
-     * into the model's own collections (skipping duplicates).
+     * Adds a module to this model, automatically registering its stocks, variables,
+     * and flows into the model's own collections (skipping duplicates).
      */
     public void addModule(Module module) {
         modules.add(module);

@@ -10,18 +10,28 @@ import com.deathrayresearch.forrester.model.Model;
 import com.deathrayresearch.forrester.model.Stock;
 import com.deathrayresearch.forrester.model.Flow;
 import com.deathrayresearch.forrester.model.Variable;
+import com.deathrayresearch.forrester.measure.Dimension;
+import com.google.common.base.Preconditions;
 import com.google.common.eventbus.EventBus;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 /**
- * Simulation is the execution environment for a model
+ * Simulation is the execution environment for a model.
+ *
+ * <p>The simulation runs from step 0 through step N (inclusive), where N is the total number
+ * of steps computed from the duration and time step. This means a simulation of 5 days with
+ * a 1-day time step runs 6 steps (0, 1, 2, 3, 4, 5), capturing both the initial state and
+ * the state after 5 elapsed time steps.
+ *
+ * <p>At each step, events are fired <em>before</em> stocks are updated, so event handlers
+ * observe the stock values from the previous step (or initial values at step 0).
  */
 public class Simulation {
 
@@ -39,7 +49,7 @@ public class Simulation {
 
     private Duration elapsedTime = Duration.ZERO;
 
-    private final Set<EventHandler> eventHandlers = new HashSet<>();
+    private final Set<EventHandler> eventHandlers = new LinkedHashSet<>();
 
     private final EventBus eventBus;
 
@@ -52,6 +62,14 @@ public class Simulation {
     }
 
     public Simulation(Model model, TimeUnit timeStep, Quantity duration, LocalDateTime startTime) {
+        Preconditions.checkNotNull(model, "model must not be null");
+        Preconditions.checkNotNull(timeStep, "timeStep must not be null");
+        Preconditions.checkNotNull(duration, "duration must not be null");
+        Preconditions.checkNotNull(startTime, "startTime must not be null");
+        Preconditions.checkArgument(duration.getValue() > 0,
+                "duration must be positive, but got %s", duration.getValue());
+        Preconditions.checkArgument(duration.getDimension().equals(Dimension.TIME),
+                "duration must be a TIME quantity, but got dimension %s", duration.getDimension());
         this.model = model;
         this.timeStep = timeStep;
         this.duration = duration;
@@ -97,7 +115,7 @@ public class Simulation {
                 currentStep++;
             }
         } finally {
-            eventBus.post(new SimulationEndEvent());
+            eventBus.post(new SimulationEndEvent(model));
         }
     }
 

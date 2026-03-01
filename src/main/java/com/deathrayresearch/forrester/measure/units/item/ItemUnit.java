@@ -29,4 +29,22 @@ public class ItemUnit implements Unit {
     public double ratioToBaseUnit() {
         return 1.0;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        ItemUnit itemUnit = (ItemUnit) o;
+        return name.equals(itemUnit.name);
+    }
+
+    @Override
+    public int hashCode() {
+        return name.hashCode();
+    }
+
+    @Override
+    public String toString() {
+        return name;
+    }
 }

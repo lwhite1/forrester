@@ -26,6 +26,8 @@ public class Step implements Formula {
 
     private Step(double height, int stepTime, IntSupplier currentStep) {
         Preconditions.checkNotNull(currentStep, "currentStep supplier must not be null");
+        Preconditions.checkArgument(stepTime >= 0,
+                "stepTime must be non-negative, but got %s", stepTime);
         this.height = height;
         this.stepTime = stepTime;
         this.currentStep = currentStep;

@@ -115,6 +115,9 @@ public class LookupTable implements Formula {
     @Override
     public double getCurrentValue() {
         double input = inputSupplier.getAsDouble();
+        if (Double.isNaN(input)) {
+            return Double.NaN;
+        }
         if (input <= xMin) {
             return yAtXMin;
         }

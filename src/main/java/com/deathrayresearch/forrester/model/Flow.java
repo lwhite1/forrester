@@ -93,6 +93,13 @@ public abstract class Flow extends Element {
         return history.get(i);
     }
 
+    /**
+     * Clears this flow's recorded history. Useful when re-running simulations.
+     */
+    public void clearHistory() {
+        history.clear();
+    }
+
     public void setSource(Stock stock) {
         this.source = stock;
     }

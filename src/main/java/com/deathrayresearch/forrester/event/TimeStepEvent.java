@@ -6,8 +6,9 @@ import com.deathrayresearch.forrester.model.Model;
 import java.time.LocalDateTime;
 
 /**
- * Event fired after each time step of a simulation has been computed.
- * Contains a snapshot of the simulation clock, model state, and step metadata.
+ * Event fired at each time step of a simulation, <em>before</em> stocks are updated
+ * for that step. Handlers observe stock values from the previous step (or initial values
+ * at step 0). Contains the simulation clock, model reference, and step metadata.
  */
 public class TimeStepEvent {
 

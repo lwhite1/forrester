@@ -8,7 +8,7 @@ import com.google.common.base.Preconditions;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -17,9 +17,9 @@ import java.util.Map;
  */
 public class Module extends Element {
 
-    private final Map<String, Stock> stocks = new HashMap<>();
-    private final Map<String, Flow> flows = new HashMap<>();
-    private final Map<String, Variable> variables = new HashMap<>();
+    private final Map<String, Stock> stocks = new LinkedHashMap<>();
+    private final Map<String, Flow> flows = new LinkedHashMap<>();
+    private final Map<String, Variable> variables = new LinkedHashMap<>();
 
     /**
      * Creates a new module with the given name.
@@ -125,9 +125,34 @@ public class Module extends Element {
     }
 
     /**
-     * Returns all stocks in this module.
+     * Returns an unmodifiable list of all stocks in this module.
      */
     public List<Stock> getStocks() {
-        return new ArrayList<>(stocks.values());
+        return Collections.unmodifiableList(new ArrayList<>(stocks.values()));
+    }
+
+    /**
+     * Expands an arrayed variable into this module's variable map.
+     */
+    public void addArrayedVariable(ArrayedVariable arrayedVariable) {
+        for (Variable variable : arrayedVariable.getVariables()) {
+            variables.put(variable.getName(), variable);
+        }
+    }
+
+    /**
+     * Expands an arrayed flow into this module's flow map.
+     */
+    public void addArrayedFlow(ArrayedFlow arrayedFlow) {
+        for (Flow flow : arrayedFlow.getFlows()) {
+            flows.put(flow.getName(), flow);
+        }
+    }
+
+    /**
+     * Returns an unmodifiable collection of all flows in this module.
+     */
+    public Collection<Flow> getFlows() {
+        return Collections.unmodifiableCollection(flows.values());
     }
 }

@@ -122,6 +122,9 @@ public class RunResult implements EventHandler {
         if (stockIndex < 0) {
             throw new IllegalArgumentException("Unknown stock: " + stockName);
         }
+        if (stockSnapshots.isEmpty()) {
+            throw new IllegalStateException("No steps have been recorded yet");
+        }
         return stockSnapshots.get(stockSnapshots.size() - 1).get(stockIndex);
     }
 

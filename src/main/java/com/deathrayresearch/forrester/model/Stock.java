@@ -2,6 +2,7 @@ package com.deathrayresearch.forrester.model;
 
 import com.deathrayresearch.forrester.measure.Quantity;
 import com.deathrayresearch.forrester.measure.Unit;
+import com.google.common.base.Preconditions;
 
 import java.util.Collections;
 import java.util.LinkedHashSet;
@@ -41,6 +42,8 @@ public class Stock extends Element {
      */
     public Stock(String name, double initialAmount, Unit unit, NegativeValuePolicy negativeValuePolicy) {
         super(name);
+        Preconditions.checkNotNull(unit, "unit must not be null");
+        Preconditions.checkNotNull(negativeValuePolicy, "negativeValuePolicy must not be null");
         this.unit = unit;
         this.negativeValuePolicy = negativeValuePolicy;
         this.value = applyPolicy(initialAmount);

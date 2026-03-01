@@ -10,6 +10,7 @@ import com.opencsv.CSVWriter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.Closeable;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -21,8 +22,11 @@ import java.util.List;
 /**
  * An {@link EventHandler} that writes simulation output to a CSV file.
  * Each row contains the step number, timestamp, stock values, and variable values.
+ *
+ * <p>Implements {@link Closeable} so callers can ensure the writer is closed even if
+ * the simulation throws before firing {@link SimulationEndEvent}.
  */
-public class CsvSubscriber implements EventHandler {
+public class CsvSubscriber implements EventHandler, Closeable {
 
     private static final Logger logger = LoggerFactory.getLogger(CsvSubscriber.class);
 
@@ -38,7 +42,7 @@ public class CsvSubscriber implements EventHandler {
         File file = Paths.get(fileName).toFile();
         File parent = file.getParentFile();
         if (parent != null) {
-            file.getParentFile().mkdirs();
+            parent.mkdirs();
         }
         try {
             csvWriter = new CSVWriter(new FileWriter(fileName));
@@ -55,17 +59,20 @@ public class CsvSubscriber implements EventHandler {
     public void handleTimeStepEvent(TimeStepEvent event) {
         Model model = event.getModel();
 
-        List<String> values = new ArrayList<>();
+        List<Double> stockValues = model.getStockValues();
+        List<Double> variableValues = model.getVariableValues();
+
+        List<String> values = new ArrayList<>(2 + stockValues.size() + variableValues.size());
         values.add(String.valueOf(event.getStep()));
         values.add(event.getCurrentTime().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
 
-        for (int i = 0; i < model.getStockValues().size(); i++) {
-            values.add(String.valueOf(model.getStockValues().get(i)));
+        for (Double stockValue : stockValues) {
+            values.add(String.valueOf(stockValue));
         }
-        for (int i = 0; i < model.getVariableValues().size(); i++) {
-            values.add(String.valueOf(model.getVariableValues().get(i)));
+        for (Double variableValue : variableValues) {
+            values.add(String.valueOf(variableValue));
         }
-        csvWriter.writeNext(values.toArray(new String[values.size()]));
+        csvWriter.writeNext(values.toArray(new String[0]));
     }
 
     /**
@@ -77,16 +84,15 @@ public class CsvSubscriber implements EventHandler {
         logger.info("Starting simulation: " + event.getModel().getName());
 
         Model model = event.getModel();
-        List<String> values = new ArrayList<>();
+        List<String> stockNames = model.getStockNames();
+        List<String> variableNames = model.getVariableNames();
+
+        List<String> values = new ArrayList<>(2 + stockNames.size() + variableNames.size());
         values.add("Step");
         values.add("Date time");
-        for (int i = 0; i < model.getStockNames().size(); i++) {
-            values.add(model.getStockNames().get(i));
-        }
-        for (int i = 0; i < model.getVariableNames().size(); i++) {
-            values.add(model.getVariableNames().get(i));
-        }
-        csvWriter.writeNext(values.toArray(new String[values.size()]));
+        values.addAll(stockNames);
+        values.addAll(variableNames);
+        csvWriter.writeNext(values.toArray(new String[0]));
     }
 
     /**
@@ -95,12 +101,23 @@ public class CsvSubscriber implements EventHandler {
     @Override
     @Subscribe
     public void handleSimulationEndEvent(SimulationEndEvent event) {
-        try {
-            csvWriter.flush();
-            csvWriter.close();
-        } catch (IOException e) {
-            logger.error("Failed to close CSV writer", e);
-        }
+        close();
         logger.info("Ending simulation");
+    }
+
+    /**
+     * Closes the underlying CSV writer, flushing any buffered data.
+     */
+    @Override
+    public void close() {
+        if (csvWriter != null) {
+            try {
+                csvWriter.flush();
+                csvWriter.close();
+            } catch (IOException e) {
+                logger.error("Failed to close CSV writer", e);
+            }
+            csvWriter = null;
+        }
     }
 }

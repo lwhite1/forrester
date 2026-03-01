@@ -19,6 +19,9 @@ public final class Quantity {
     private final Unit unit;
 
     public Quantity(double value, Unit unit) {
+        if (unit == null) {
+            throw new IllegalArgumentException("unit must not be null");
+        }
         this.value = value;
         this.unit = unit;
     }
@@ -53,7 +56,10 @@ public final class Quantity {
      * @param d the divisor
      */
     public Quantity divide(double d) {
-        return new Quantity( getValue() / d, this.getUnit());
+        if (d == 0) {
+            throw new ArithmeticException("Cannot divide quantity by zero");
+        }
+        return new Quantity(getValue() / d, this.getUnit());
     }
 
     /**
@@ -156,6 +162,11 @@ public final class Quantity {
         return getUnit().getDimension();
     }
 
+    /**
+     * Two quantities are equal if they have the same dimension and represent the same
+     * physical amount (equal values when converted to base units). The specific unit
+     * does not matter — 1000 meters equals 1 kilometer.
+     */
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -163,15 +174,15 @@ public final class Quantity {
 
         Quantity quantity = (Quantity) o;
 
-        if (Double.compare(quantity.inBaseUnits().getValue(), inBaseUnits().getValue()) != 0) return false;
-        return getUnit().equals(quantity.getUnit());
+        if (!getDimension().equals(quantity.getDimension())) return false;
+        return Double.compare(quantity.inBaseUnits().getValue(), inBaseUnits().getValue()) == 0;
     }
 
     @Override
     public int hashCode() {
         int result;
         result = Double.hashCode(inBaseUnits().getValue());
-        result = 31 * result + getUnit().hashCode();
+        result = 31 * result + getDimension().hashCode();
         return result;
     }
 

@@ -1,6 +1,7 @@
 package com.deathrayresearch.forrester.model;
 
 import com.deathrayresearch.forrester.measure.Unit;
+import com.google.common.base.Preconditions;
 
 /**
  *  An unchanging exogenous value used in a model
@@ -19,6 +20,7 @@ public class Constant extends Element {
      */
     public Constant(String name, Unit unit, double currentValue) {
         super(name);
+        Preconditions.checkNotNull(unit, "unit must not be null");
         this.unit = unit;
         this.currentValue = currentValue;
     }
@@ -32,9 +34,12 @@ public class Constant extends Element {
 
     /**
      * Returns the value of this constant rounded to the nearest integer.
+     * Values outside the int range are clamped to {@link Integer#MAX_VALUE}
+     * or {@link Integer#MIN_VALUE}.
      */
     public int getIntValue() {
-        return Math.toIntExact(Math.round(currentValue));
+        long rounded = Math.round(currentValue);
+        return (int) Math.max(Integer.MIN_VALUE, Math.min(Integer.MAX_VALUE, rounded));
     }
 
     public Unit getUnit() {

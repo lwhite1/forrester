@@ -30,6 +30,8 @@ public class Ramp implements Formula {
 
     private Ramp(double slope, int startStep, int endStep, IntSupplier currentStep) {
         Preconditions.checkNotNull(currentStep, "currentStep supplier must not be null");
+        Preconditions.checkArgument(startStep >= 0,
+                "startStep must be non-negative, but got %s", startStep);
         Preconditions.checkArgument(endStep >= startStep,
                 "endStep (%s) must be >= startStep (%s)", endStep, startStep);
         this.slope = slope;

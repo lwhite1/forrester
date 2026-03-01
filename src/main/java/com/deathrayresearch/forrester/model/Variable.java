@@ -1,6 +1,8 @@
 package com.deathrayresearch.forrester.model;
 
 import com.deathrayresearch.forrester.measure.Unit;
+import com.google.common.base.Preconditions;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -23,6 +25,8 @@ public class Variable extends Element {
      */
     public Variable(String name, Unit unit, Formula formula) {
         super(name);
+        Preconditions.checkNotNull(unit, "unit must not be null");
+        Preconditions.checkNotNull(formula, "formula must not be null");
         this.formula = formula;
         this.unit = unit;
     }
@@ -59,5 +63,12 @@ public class Variable extends Element {
      */
     public void recordValue() {
         history.add(getValue());
+    }
+
+    /**
+     * Clears this variable's recorded history. Useful when re-running simulations.
+     */
+    public void clearHistory() {
+        history.clear();
     }
 }

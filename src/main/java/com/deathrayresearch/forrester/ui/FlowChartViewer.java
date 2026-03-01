@@ -12,7 +12,7 @@ import java.util.Arrays;
 import java.util.stream.Collectors;
 
 /**
- * Class that implements the {@link EventHandler} interface and controls the display of plots of stock levels.
+ * An {@link EventHandler} that controls the display of plots of flow rates over time.
  */
 public class FlowChartViewer implements EventHandler {
 
