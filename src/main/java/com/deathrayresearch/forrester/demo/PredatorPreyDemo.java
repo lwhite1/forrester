@@ -2,7 +2,6 @@ package com.deathrayresearch.forrester.demo;
 
 import com.deathrayresearch.forrester.Simulation;
 import com.deathrayresearch.forrester.measure.Quantity;
-import com.deathrayresearch.forrester.measure.units.item.ItemUnits;
 import com.deathrayresearch.forrester.measure.units.time.TimeUnits;
 import com.deathrayresearch.forrester.measure.units.time.Times;
 import com.deathrayresearch.forrester.model.Flow;
@@ -10,6 +9,7 @@ import com.deathrayresearch.forrester.model.Model;
 import com.deathrayresearch.forrester.model.Stock;
 import com.deathrayresearch.forrester.ui.StockLevelChartViewer;
 
+import static com.deathrayresearch.forrester.measure.Units.THING;
 import static com.deathrayresearch.forrester.measure.Units.YEAR;
 
 /**
@@ -23,43 +23,46 @@ import static com.deathrayresearch.forrester.measure.Units.YEAR;
  */
 public class PredatorPreyDemo {
 
-    private static final ItemUnits RABBIT = ItemUnits.THING;
-    private static final ItemUnits COYOTE = ItemUnits.THING;
-
-    private static final double PREY_BIRTH_RATE = 1.0;
-    private static final double PREDATION_RATE = 0.01;
-    private static final double PREDATOR_EFFICIENCY = 0.5;
-    private static final double PREDATOR_DEATH_RATE = 0.8;
-
     public static void main(String[] args) {
-        new PredatorPreyDemo().run();
+        double initialPrey = 100;
+        double initialPredators = 10;
+        double preyBirthRate = 1.0;
+        double predationRate = 0.01;
+        double predatorEfficiency = 0.5;
+        double predatorDeathRate = 0.8;
+        double durationYears = 20;
+
+        new PredatorPreyDemo().run(initialPrey, initialPredators, preyBirthRate,
+                predationRate, predatorEfficiency, predatorDeathRate, durationYears);
     }
 
-    public void run() {
+    public void run(double initialPrey, double initialPredators, double preyBirthRate,
+                    double predationRate, double predatorEfficiency, double predatorDeathRate,
+                    double durationYears) {
         Model model = new Model("Predator-Prey model");
 
-        Stock prey = new Stock("Rabbits", 100, RABBIT);
-        Stock predator = new Stock("Coyotes", 10, COYOTE);
+        Stock prey = new Stock("Rabbits", initialPrey, THING);
+        Stock predator = new Stock("Coyotes", initialPredators, THING);
 
         Flow preyBirths = Flow.create("Prey Births", YEAR, () -> {
-            double value = PREY_BIRTH_RATE * prey.getValue();
-            return new Quantity(value, RABBIT);
+            double value = preyBirthRate * prey.getValue();
+            return new Quantity(value, THING);
         });
 
         Flow preyDeaths = Flow.create("Prey Deaths", YEAR, () -> {
-            double value = PREDATION_RATE * prey.getValue() * predator.getValue();
-            return new Quantity(value, RABBIT);
+            double value = predationRate * prey.getValue() * predator.getValue();
+            return new Quantity(value, THING);
         });
 
         Flow predatorBirths = Flow.create("Predator Births", YEAR, () -> {
-            double value = PREDATOR_EFFICIENCY * PREDATION_RATE
+            double value = predatorEfficiency * predationRate
                     * prey.getValue() * predator.getValue();
-            return new Quantity(value, COYOTE);
+            return new Quantity(value, THING);
         });
 
         Flow predatorDeaths = Flow.create("Predator Deaths", YEAR, () -> {
-            double value = PREDATOR_DEATH_RATE * predator.getValue();
-            return new Quantity(value, COYOTE);
+            double value = predatorDeathRate * predator.getValue();
+            return new Quantity(value, THING);
         });
 
         prey.addInflow(preyBirths);
@@ -70,7 +73,7 @@ public class PredatorPreyDemo {
         model.addStock(prey);
         model.addStock(predator);
 
-        Simulation run = new Simulation(model, TimeUnits.DAY, Times.years(20));
+        Simulation run = new Simulation(model, TimeUnits.DAY, Times.years(durationYears));
         run.addEventHandler(new StockLevelChartViewer());
         run.execute();
     }

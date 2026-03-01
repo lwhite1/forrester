@@ -3,7 +3,6 @@ package com.deathrayresearch.forrester.demo;
 import com.deathrayresearch.forrester.Simulation;
 import com.deathrayresearch.forrester.io.CsvSubscriber;
 import com.deathrayresearch.forrester.measure.Quantity;
-import com.deathrayresearch.forrester.measure.units.volume.Volumes;
 import com.deathrayresearch.forrester.model.Flow;
 import com.deathrayresearch.forrester.model.Model;
 import com.deathrayresearch.forrester.model.Stock;
@@ -17,41 +16,41 @@ import static com.deathrayresearch.forrester.measure.Units.MINUTE;
 /**
  * The classic bathtub model — the simplest stock-and-flow demonstration.
  *
- * <p>A Water-in-Tub stock (50 gallons) drains at 5 gal/min from the start while the inflow is
- * delayed for 5 minutes and then adds 5 gal/min. The tub drains down, then stabilizes once
+ * <p>A Water-in-Tub stock drains at a constant rate from the start while the inflow is
+ * delayed and then adds at a constant rate. The tub drains down, then stabilizes once
  * inflow begins, illustrating how a stock is the accumulation of the difference between its
  * inflow and outflow over time.
  */
 public class TubDemo {
 
     public static void main(String[] args) {
-        new TubDemo().run();
+        double initialWater = 50;        // gallons
+        double outflowRate = 5;          // gallons per minute
+        double inflowRate = 5;           // gallons per minute
+        int inflowDelayMinutes = 5;      // minutes before inflow starts
+        double durationMinutes = 10;
+
+        new TubDemo().run(initialWater, outflowRate, inflowRate, inflowDelayMinutes,
+                durationMinutes);
     }
 
-    public void run() {
-
+    public void run(double initialWater, double outflowRate, double inflowRate,
+                    int inflowDelayMinutes, double durationMinutes) {
         Model model = new Model("Tub model");
-        Simulation run = new Simulation(model, MINUTE, MINUTE, 10);
+        Simulation run = new Simulation(model, MINUTE, MINUTE, durationMinutes);
 
-        Stock tub = new Stock("Water in Tub", 50, GALLON_US);
+        Stock tub = new Stock("Water in Tub", initialWater, GALLON_US);
 
-        Quantity volumeOut = Volumes.gallonsUS(5.0);
-
-        // the water drains at the rate of the outflow capacity or the amount of water in the tub, whichever is less
         Flow outflow = Flow.create("Outflow", MINUTE, () ->
                 new Quantity(
-                        Math.min(volumeOut.getValue(), tub.getQuantity().getValue()),
+                        Math.min(outflowRate, tub.getQuantity().getValue()),
                         GALLON_US));
 
-        Quantity volumeIn = Volumes.gallonsUS(5);
-        Quantity lowInflow = Volumes.gallonsUS(0.0);
-
         Flow inflow = Flow.create("Inflow", MINUTE, () -> {
-            // waits five minutes before adding any inflow
-            if (durationIsLessThan(run.getElapsedTime(), Duration.ofMinutes(5))) {
-                return lowInflow;
+            if (run.getElapsedTime().compareTo(Duration.ofMinutes(inflowDelayMinutes)) < 0) {
+                return new Quantity(0.0, GALLON_US);
             }
-            return volumeIn;
+            return new Quantity(inflowRate, GALLON_US);
         });
 
         tub.addInflow(inflow);
@@ -62,9 +61,5 @@ public class TubDemo {
         run.addEventHandler(new StockLevelChartViewer());
         run.addEventHandler(new CsvSubscriber("tub.csv"));
         run.execute();
-    }
-
-    private static boolean durationIsLessThan(Duration d1, Duration d2) {
-        return d1.compareTo(d2) < 0;
     }
 }

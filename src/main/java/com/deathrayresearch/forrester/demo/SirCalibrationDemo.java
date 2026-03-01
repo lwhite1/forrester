@@ -3,7 +3,6 @@ package com.deathrayresearch.forrester.demo;
 import com.deathrayresearch.forrester.Simulation;
 import com.deathrayresearch.forrester.measure.Quantity;
 import com.deathrayresearch.forrester.measure.units.time.Times;
-import com.deathrayresearch.forrester.model.Constant;
 import com.deathrayresearch.forrester.model.Flow;
 import com.deathrayresearch.forrester.model.Model;
 import com.deathrayresearch.forrester.model.Stock;
@@ -20,24 +19,46 @@ import static com.deathrayresearch.forrester.measure.Units.PEOPLE;
 
 /**
  * Twin experiment: generates synthetic observed data by running an SIR model with known
- * parameters (contactRate=8.0, infectivity=0.10), then uses the Optimizer to recover those
- * parameters from the synthetic data. Reports recovered vs true values and the fit error.
+ * parameters, then uses the Optimizer to recover those parameters from the synthetic data.
+ * Reports recovered vs true values and the fit error.
  */
 public class SirCalibrationDemo {
 
-    private static final double TRUE_CONTACT_RATE = 8.0;
-    private static final double TRUE_INFECTIVITY = 0.10;
-
     public static void main(String[] args) {
-        new SirCalibrationDemo().run();
+        double trueContactRate = 8.0;
+        double trueInfectivity = 0.10;
+        double initialSusceptible = 1000;
+        double initialInfectious = 10;
+        double initialRecovered = 0;
+        double recoveryProportion = 0.2;
+        double contactRateSearchMin = 1.0;
+        double contactRateSearchMax = 20.0;
+        double infectivitySearchMin = 0.01;
+        double infectivitySearchMax = 0.50;
+        int maxEvaluations = 500;
+        double durationWeeks = 8;
+
+        new SirCalibrationDemo().run(trueContactRate, trueInfectivity,
+                initialSusceptible, initialInfectious, initialRecovered, recoveryProportion,
+                contactRateSearchMin, contactRateSearchMax,
+                infectivitySearchMin, infectivitySearchMax,
+                maxEvaluations, durationWeeks);
     }
 
-    public void run() {
-        // Step 1: Generate synthetic observed data with known "true" parameters
-        System.out.println("Generating synthetic data with Contact Rate=" + TRUE_CONTACT_RATE
-                + ", Infectivity=" + TRUE_INFECTIVITY);
+    public void run(double trueContactRate, double trueInfectivity,
+                    double initialSusceptible, double initialInfectious,
+                    double initialRecovered, double recoveryProportion,
+                    double contactRateSearchMin, double contactRateSearchMax,
+                    double infectivitySearchMin, double infectivitySearchMax,
+                    int maxEvaluations, double durationWeeks) {
 
-        RunResult syntheticRun = runSirModel(TRUE_CONTACT_RATE, TRUE_INFECTIVITY);
+        // Step 1: Generate synthetic observed data with known "true" parameters
+        System.out.println("Generating synthetic data with Contact Rate=" + trueContactRate
+                + ", Infectivity=" + trueInfectivity);
+
+        RunResult syntheticRun = runSirModel(trueContactRate, trueInfectivity,
+                initialSusceptible, initialInfectious, initialRecovered,
+                recoveryProportion, durationWeeks);
         double[] observedInfectious = syntheticRun.getStockSeries("Infectious");
 
         System.out.println("Observed data: " + observedInfectious.length + " time steps");
@@ -47,15 +68,17 @@ public class SirCalibrationDemo {
         System.out.println("Running Nelder-Mead optimization...");
 
         OptimizationResult result = Optimizer.builder()
-                .parameter("Contact Rate", 1.0, 20.0)
-                .parameter("Infectivity", 0.01, 0.50)
+                .parameter("Contact Rate", contactRateSearchMin, contactRateSearchMax)
+                .parameter("Infectivity", infectivitySearchMin, infectivitySearchMax)
                 .modelFactory(params -> buildSirModel(
-                        params.get("Contact Rate"), params.get("Infectivity")))
+                        params.get("Contact Rate"), params.get("Infectivity"),
+                        initialSusceptible, initialInfectious, initialRecovered,
+                        recoveryProportion))
                 .objective(Objectives.fitToTimeSeries("Infectious", observedInfectious))
                 .algorithm(OptimizationAlgorithm.NELDER_MEAD)
-                .maxEvaluations(500)
+                .maxEvaluations(maxEvaluations)
                 .timeStep(DAY)
-                .duration(Times.weeks(8))
+                .duration(Times.weeks(durationWeeks))
                 .build()
                 .execute();
 
@@ -67,56 +90,54 @@ public class SirCalibrationDemo {
         System.out.println();
         System.out.println("=== Calibration Results ===");
         System.out.printf("Contact Rate:  true=%.4f  recovered=%.4f  error=%.4f%n",
-                TRUE_CONTACT_RATE, recoveredContactRate,
-                Math.abs(TRUE_CONTACT_RATE - recoveredContactRate));
+                trueContactRate, recoveredContactRate,
+                Math.abs(trueContactRate - recoveredContactRate));
         System.out.printf("Infectivity:   true=%.4f  recovered=%.4f  error=%.4f%n",
-                TRUE_INFECTIVITY, recoveredInfectivity,
-                Math.abs(TRUE_INFECTIVITY - recoveredInfectivity));
+                trueInfectivity, recoveredInfectivity,
+                Math.abs(trueInfectivity - recoveredInfectivity));
         System.out.printf("SSE: %.6f%n", result.getBestObjectiveValue());
         System.out.printf("Evaluations: %d%n", result.getEvaluationCount());
     }
 
-    private RunResult runSirModel(double contactRate, double infectivity) {
-        Model model = buildSirModel(contactRate, infectivity);
+    private RunResult runSirModel(double contactRate, double infectivity,
+                                  double initialSusceptible, double initialInfectious,
+                                  double initialRecovered, double recoveryProportion,
+                                  double durationWeeks) {
+        Model model = buildSirModel(contactRate, infectivity,
+                initialSusceptible, initialInfectious, initialRecovered, recoveryProportion);
         RunResult runResult = new RunResult(
                 Map.of("Contact Rate", contactRate, "Infectivity", infectivity));
 
-        Simulation simulation = new Simulation(model, DAY, Times.weeks(8));
+        Simulation simulation = new Simulation(model, DAY, Times.weeks(durationWeeks));
         simulation.addEventHandler(runResult);
         simulation.execute();
 
         return runResult;
     }
 
-    private Model buildSirModel(double contactRate, double infectivity) {
+    private Model buildSirModel(double contactRate, double infectivity,
+                                double initialSusceptible, double initialInfectious,
+                                double initialRecovered, double recoveryProportion) {
         Model model = new Model("SIR Calibration");
 
-        Stock susceptible = new Stock("Susceptible", 1000, PEOPLE);
-        Stock infectious = new Stock("Infectious", 10, PEOPLE);
-        Stock recovered = new Stock("Recovered", 0, PEOPLE);
-
-        Constant contactRateConstant = new Constant("Contact Rate", PEOPLE, contactRate);
+        Stock susceptible = new Stock("Susceptible", initialSusceptible, PEOPLE);
+        Stock infectious = new Stock("Infectious", initialInfectious, PEOPLE);
+        Stock recovered = new Stock("Recovered", initialRecovered, PEOPLE);
 
         Flow infectionRate = Flow.create("Infected", DAY, () -> {
-            double totalPop = susceptible.getQuantity().getValue()
-                    + infectious.getQuantity().getValue()
-                    + recovered.getQuantity().getValue();
-
-            double infectiousFraction = infectious.getQuantity().getValue() / totalPop;
-            double contactsMadeInfectious = contactRateConstant.getValue() * infectiousFraction;
-            double infectedCount = contactsMadeInfectious
-                    * susceptible.getQuantity().getValue() * infectivity;
-
-            if (infectedCount > susceptible.getQuantity().getValue()) {
-                infectedCount = susceptible.getQuantity().getValue();
+            double totalPop = susceptible.getValue() + infectious.getValue()
+                    + recovered.getValue();
+            double infectiousFraction = infectious.getValue() / totalPop;
+            double infectedCount = contactRate * infectiousFraction * infectivity
+                    * susceptible.getValue();
+            if (infectedCount > susceptible.getValue()) {
+                infectedCount = susceptible.getValue();
             }
             return new Quantity(infectedCount, PEOPLE);
         });
 
-        Flow recoveryRate = Flow.create("Recovered", DAY, () -> {
-            double recoveredProportion = 0.2;
-            return new Quantity(infectious.getQuantity().getValue() * recoveredProportion, PEOPLE);
-        });
+        Flow recoveryRate = Flow.create("Recovered", DAY, () ->
+                new Quantity(infectious.getValue() * recoveryProportion, PEOPLE));
 
         susceptible.addOutflow(infectionRate);
         infectious.addInflow(infectionRate);

@@ -28,27 +28,32 @@ import static com.deathrayresearch.forrester.measure.Units.PEOPLE;
 public class MultiRegionSirDemo {
 
     public static void main(String[] args) {
-        new MultiRegionSirDemo().run();
+        double[] initialSusceptible = {990, 1000, 1000};
+        double[] initialInfectious = {10, 0, 0};
+        double[] initialRecovered = {0, 0, 0};
+        double contactRate = 8.0;
+        double infectivity = 0.10;
+        double recoveryProportion = 0.20;
+        double migrationRate = 0.01;     // fraction of infectious per day
+        double durationWeeks = 12;
+
+        new MultiRegionSirDemo().run(initialSusceptible, initialInfectious, initialRecovered,
+                contactRate, infectivity, recoveryProportion, migrationRate, durationWeeks);
     }
 
-    public void run() {
+    public void run(double[] initialSusceptible, double[] initialInfectious,
+                    double[] initialRecovered, double contactRate, double infectivity,
+                    double recoveryProportion, double migrationRate, double durationWeeks) {
         Model model = new Model("Multi-Region SIR Model");
 
         Subscript region = new Subscript("Region", "North", "South", "East");
 
-        // Initial populations: North has the outbreak seed
         ArrayedStock susceptible = new ArrayedStock("Susceptible", region,
-                new double[]{990, 1000, 1000}, PEOPLE);
+                initialSusceptible, PEOPLE);
         ArrayedStock infectious = new ArrayedStock("Infectious", region,
-                new double[]{10, 0, 0}, PEOPLE);
+                initialInfectious, PEOPLE);
         ArrayedStock recovered = new ArrayedStock("Recovered", region,
-                new double[]{0, 0, 0}, PEOPLE);
-
-        // --- Per-region infection and recovery flows ---
-
-        double contactRate = 8.0;
-        double infectivity = 0.10;
-        double recoveryProportion = 0.20;
+                initialRecovered, PEOPLE);
 
         ArrayedFlow infectionFlow = ArrayedFlow.create("Infection", DAY, region, i -> {
             double s = susceptible.getValue(i);
@@ -74,29 +79,23 @@ public class MultiRegionSirDemo {
         infectious.addOutflow(recoveryFlow);
         recovered.addInflow(recoveryFlow);
 
-        // --- Cross-region migration of infectious people ---
-        // Small daily migration: 1% of infectious in each region move to the next region
-        double migrationRate = 0.01;
-
+        // Cross-region migration of infectious people (circular: N→S→E→N)
         for (int i = 0; i < region.size(); i++) {
             int from = i;
             int to = (i + 1) % region.size();
             Flow migration = Flow.create(
                     "Migration[" + region.getLabel(from) + "->" + region.getLabel(to) + "]",
                     DAY,
-                    () -> new Quantity(infectious.getValue(from) * migrationRate, PEOPLE)
-            );
+                    () -> new Quantity(infectious.getValue(from) * migrationRate, PEOPLE));
             infectious.getStock(from).addOutflow(migration);
             infectious.getStock(to).addInflow(migration);
         }
 
-        // --- Add to model ---
         model.addArrayedStock(susceptible);
         model.addArrayedStock(infectious);
         model.addArrayedStock(recovered);
 
-        // --- Run simulation ---
-        Simulation run = new Simulation(model, DAY, Times.weeks(12));
+        Simulation run = new Simulation(model, DAY, Times.weeks(durationWeeks));
         run.addEventHandler(new CsvSubscriber(
                 System.getProperty("java.io.tmpdir") + "/forrester-multi-region-sir.csv"));
         run.addEventHandler(new StockLevelChartViewer());

@@ -15,34 +15,32 @@ import static com.deathrayresearch.forrester.measure.Units.PEOPLE;
  * Demonstrates a first-order material delay (exponential smoothing).
  *
  * <p>A Potential Customers stock drains through a sales outflow equal to the stock level divided
- * by an average delay of 120 days. This assumes the stock is fully mixed (no FIFO ordering),
+ * by an average delay. This assumes the stock is fully mixed (no FIFO ordering),
  * producing exponential decay — the simplest material delay in system dynamics.
  */
 public class FirstOrderMaterialDelayDemo {
 
     public static void main(String[] args) {
-        new FirstOrderMaterialDelayDemo().run();
+        double initialCustomers = 1000;
+        double averageDelayDays = 120;
+        double durationWeeks = 52;
+
+        new FirstOrderMaterialDelayDemo().run(initialCustomers, averageDelayDays, durationWeeks);
     }
 
-    public void run() {
-
+    public void run(double initialCustomers, double averageDelayDays, double durationWeeks) {
         Model model = new Model("First order material delay");
-        model.setComment("A 1st order material delay is basically an exponential decay function. It is based on " +
-                "the assumption that the stock is completely mixed, like the water in a tub, so FIFO is not possible. " +
-                "The flow is simply the stock level divided by the average delay");
 
-        Stock potentialCustomers = new Stock("Potential Customers", 1000, PEOPLE);
-
-        double averageDelay = 120; // 120 days
+        Stock potentialCustomers = new Stock("Potential Customers", initialCustomers, PEOPLE);
 
         Flow sales = Flow.create("Sales", DAY, () ->
-                potentialCustomers.getQuantity().divide(averageDelay));
+                potentialCustomers.getQuantity().divide(averageDelayDays));
 
         potentialCustomers.addOutflow(sales);
 
         model.addStock(potentialCustomers);
 
-        Simulation run = new Simulation(model, TimeUnits.DAY, Times.weeks( 52));
+        Simulation run = new Simulation(model, TimeUnits.DAY, Times.weeks(durationWeeks));
         run.addEventHandler(new StockLevelChartViewer());
         run.execute();
     }

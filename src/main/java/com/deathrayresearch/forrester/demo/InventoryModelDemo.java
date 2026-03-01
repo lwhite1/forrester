@@ -4,7 +4,6 @@ import com.deathrayresearch.forrester.Simulation;
 import com.deathrayresearch.forrester.measure.Quantity;
 import com.deathrayresearch.forrester.measure.Unit;
 import com.deathrayresearch.forrester.model.Flow;
-import com.deathrayresearch.forrester.model.Formula;
 import com.deathrayresearch.forrester.model.Model;
 import com.deathrayresearch.forrester.model.Stock;
 import com.deathrayresearch.forrester.model.Variable;
@@ -17,62 +16,60 @@ import static com.deathrayresearch.forrester.measure.Units.THING;
  * Models a car dealership's inventory system with perception, response, and delivery delays.
  *
  * <p>Inspired by the inventory example in <em>Thinking in Systems</em>. A Cars-on-Lot stock is
- * drained by sales and replenished by factory deliveries. Three delays — perception (5 days),
- * response (3 days), and delivery (5 days) — cause the dealer to overshoot and oscillate before
+ * drained by sales and replenished by factory deliveries. Three delays — perception,
+ * response, and delivery — cause the dealer to overshoot and oscillate before
  * settling, demonstrating how delays in feedback loops amplify fluctuations.
  */
 public class InventoryModelDemo {
 
     private static final Unit CARS = THING;
 
-    // delays
-    private static final double PERCEPTION_DELAY = 5;  // days to perceive demand changes
-    private static final double RESPONSE_DELAY = 3;     // days to process and send order
-    private static final double DELIVERY_DELAY = 5;     // days for factory to ship cars
-
     public static void main(String[] args) {
-        new InventoryModelDemo().run();
+        double initialCarsOnLot = 200;
+        double initialPerceivedSales = 20;
+        double baseDemand = 20;         // cars/day before step change
+        double stepDemand = 22;         // cars/day after step change
+        int demandStepChangeDay = 25;   // day when demand shifts
+        double perceptionDelay = 5;     // days
+        double responseDelay = 3;       // days
+        double deliveryDelay = 5;       // days
+        double desiredInventoryMultiplier = 10;  // times perceived sales
+        double durationDays = 100;
+
+        new InventoryModelDemo().run(initialCarsOnLot, initialPerceivedSales,
+                baseDemand, stepDemand, demandStepChangeDay,
+                perceptionDelay, responseDelay, deliveryDelay,
+                desiredInventoryMultiplier, durationDays);
     }
 
-    public void run() {
+    public void run(double initialCarsOnLot, double initialPerceivedSales,
+                    double baseDemand, double stepDemand, int demandStepChangeDay,
+                    double perceptionDelay, double responseDelay, double deliveryDelay,
+                    double desiredInventoryMultiplier, double durationDays) {
 
         Model model = new Model("Inventory Model");
-        model.setComment("From 'Thinking in Systems': Illustrates the effects of delays. ");
+        Simulation run = new Simulation(model, DAY, DAY, durationDays);
 
-        Simulation run = new Simulation(model, DAY, DAY, 100);
-
-        Stock carsOnLot = new Stock("Cars on Lot", 200, CARS);
+        Stock carsOnLot = new Stock("Cars on Lot", initialCarsOnLot, CARS);
 
         Variable demand = new Variable("Customer Demand", CARS,
-                new Formula() {
-                    @Override
-                    public double getCurrentValue() {
-                        if (run.getCurrentStep() <= 25) {
-                            return 20;
-                        }
-                        return 22;
-                    }
-                });
+                () -> run.getCurrentStep() <= demandStepChangeDay ? baseDemand : stepDemand);
 
         Flow sales = Flow.create("Sales", DAY, () ->
                 new Quantity(Math.min(carsOnLot.getValue(), demand.getValue()), CARS));
 
-        Stock perceivedSales = new Stock("Perceived Sales", 20, CARS);
+        Stock perceivedSales = new Stock("Perceived Sales", initialPerceivedSales, CARS);
 
         Flow perceptionAdjustment = Flow.create("Perception Adjustment", DAY, () -> {
             double adjustment = (sales.flowPerTimeUnit(DAY).getValue() - perceivedSales.getValue())
-                    / PERCEPTION_DELAY;
+                    / perceptionDelay;
             return new Quantity(adjustment, CARS);
         });
 
         perceivedSales.addInflow(perceptionAdjustment);
 
-        Variable desiredInventory = new Variable("Desired Inventory", CARS, new Formula() {
-            @Override
-            public double getCurrentValue() {
-                return perceivedSales.getValue() * 10;
-            }
-        });
+        Variable desiredInventory = new Variable("Desired Inventory", CARS,
+                () -> perceivedSales.getValue() * desiredInventoryMultiplier);
 
         Variable inventoryGap = new Variable("Gap between desired and actual inventory", CARS,
                 () -> carsOnLot.getValue() - desiredInventory.getValue());
@@ -80,11 +77,11 @@ public class InventoryModelDemo {
         Variable ordersToFactory = new Variable("Orders to Factory", CARS,
                 () -> Math.max(perceivedSales.getValue() + inventoryGap.getValue(), 0));
 
-        int totalDelay = Math.toIntExact(Math.round(RESPONSE_DELAY + DELIVERY_DELAY));
+        int totalDelay = Math.toIntExact(Math.round(responseDelay + deliveryDelay));
 
         Flow deliveries = Flow.create("Deliveries", DAY, () -> {
             if (run.getCurrentStep() <= totalDelay) {
-                return new Quantity(20, CARS);
+                return new Quantity(initialPerceivedSales, CARS);
             }
             int priorStep = run.getCurrentStep() - totalDelay;
             return new Quantity(ordersToFactory.getHistoryAtTimeStep(priorStep), CARS);

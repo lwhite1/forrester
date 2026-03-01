@@ -16,36 +16,42 @@ import static com.deathrayresearch.forrester.measure.Units.WEEK;
 /**
  * Demonstrates negative (balancing) feedback driving a stock toward a goal.
  *
- * <p>An Inventory stock (initially 1,000 units) adjusts toward a target of 860 through a
- * production inflow proportional to the gap divided by an adjustment time of 8 days. The stock
- * approaches its goal asymptotically — the classic goal-seeking archetype in system dynamics.
+ * <p>An Inventory stock adjusts toward a target through a production inflow proportional to
+ * the gap divided by an adjustment time. The stock approaches its goal asymptotically —
+ * the classic goal-seeking archetype in system dynamics.
  */
 public class NegativeFeedbackDemo {
 
     private static final Unit INVENTORY = new ItemUnit("Units");
 
     public static void main(String[] args) {
-        new NegativeFeedbackDemo().run();
+        double initialInventory = 1000;
+        double goalInventory = 860;
+        double adjustmentTimeDays = 8;
+        double durationWeeks = 12;
+
+        new NegativeFeedbackDemo().run(initialInventory, goalInventory, adjustmentTimeDays,
+                durationWeeks);
     }
 
-    public void run() {
+    public void run(double initialInventory, double goalInventory, double adjustmentTimeDays,
+                    double durationWeeks) {
         Model model = new Model("Negative feedback with goal");
 
-        Stock inventoryOnHand = new Stock("Inventory on-hand", 1000, INVENTORY);
+        Stock inventoryOnHand = new Stock("Inventory on-hand", initialInventory, INVENTORY);
 
-        Quantity goal = new Quantity(860, INVENTORY);
-        double adjustmentTimeInTimeSteps = 8;
+        Quantity goal = new Quantity(goalInventory, INVENTORY);
 
         Flow production = Flow.create("Production", DAY, () -> {
             Quantity delta = goal.subtract(inventoryOnHand.getQuantity());
-            return delta.divide(adjustmentTimeInTimeSteps);
+            return delta.divide(adjustmentTimeDays);
         });
 
         inventoryOnHand.addInflow(production);
 
         model.addStock(inventoryOnHand);
 
-        Simulation run = new Simulation(model, TimeUnits.DAY, WEEK, 12);
+        Simulation run = new Simulation(model, TimeUnits.DAY, WEEK, durationWeeks);
         run.addEventHandler(new StockLevelChartViewer());
         run.execute();
     }

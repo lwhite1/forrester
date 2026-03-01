@@ -2,7 +2,6 @@ package com.deathrayresearch.forrester.demo;
 
 import com.deathrayresearch.forrester.measure.Quantity;
 import com.deathrayresearch.forrester.measure.units.time.Times;
-import com.deathrayresearch.forrester.model.Constant;
 import com.deathrayresearch.forrester.model.Flow;
 import com.deathrayresearch.forrester.model.Model;
 import com.deathrayresearch.forrester.model.Stock;
@@ -15,23 +14,42 @@ import static com.deathrayresearch.forrester.measure.Units.PEOPLE;
 
 /**
  * Demonstrates multi-parameter sweep on the SIR infectious disease model. Sweeps
- * contact rate (2, 6, 10, 14) x infectivity (0.05, 0.10, 0.15) = 12 combinations.
- * Writes time series and summary CSVs to the system temp directory.
+ * contact rate and infectivity across their respective ranges, producing one run
+ * per combination. Writes time series and summary CSVs to the system temp directory.
  */
 public class SirMultiSweepDemo {
 
     public static void main(String[] args) {
-        new SirMultiSweepDemo().run();
+        double initialSusceptible = 1000;
+        double initialInfectious = 10;
+        double initialRecovered = 0;
+        double recoveryProportion = 0.2;
+        double contactRateMin = 2.0;
+        double contactRateMax = 14.0;
+        double contactRateStep = 4.0;
+        double[] infectivityValues = {0.05, 0.10, 0.15};
+        double durationWeeks = 8;
+
+        new SirMultiSweepDemo().run(initialSusceptible, initialInfectious, initialRecovered,
+                recoveryProportion, contactRateMin, contactRateMax, contactRateStep,
+                infectivityValues, durationWeeks);
     }
 
-    public void run() {
+    public void run(double initialSusceptible, double initialInfectious,
+                    double initialRecovered, double recoveryProportion,
+                    double contactRateMin, double contactRateMax, double contactRateStep,
+                    double[] infectivityValues, double durationWeeks) {
+
         MultiSweepResult result = MultiParameterSweep.builder()
-                .parameter("Contact Rate", ParameterSweep.linspace(2.0, 14.0, 4.0))
-                .parameter("Infectivity", new double[]{0.05, 0.10, 0.15})
+                .parameter("Contact Rate", ParameterSweep.linspace(
+                        contactRateMin, contactRateMax, contactRateStep))
+                .parameter("Infectivity", infectivityValues)
                 .modelFactory(params -> buildSirModel(
-                        params.get("Contact Rate"), params.get("Infectivity")))
+                        params.get("Contact Rate"), params.get("Infectivity"),
+                        initialSusceptible, initialInfectious, initialRecovered,
+                        recoveryProportion))
                 .timeStep(DAY)
-                .duration(Times.weeks(8))
+                .duration(Times.weeks(durationWeeks))
                 .build()
                 .execute();
 
@@ -47,35 +65,29 @@ public class SirMultiSweepDemo {
         System.out.println("Summary CSV:     " + summaryPath);
     }
 
-    private Model buildSirModel(double contactRate, double infectivity) {
+    private Model buildSirModel(double contactRate, double infectivity,
+                                double initialSusceptible, double initialInfectious,
+                                double initialRecovered, double recoveryProportion) {
         Model model = new Model("SIR Multi-Sweep");
 
-        Stock susceptible = new Stock("Susceptible", 1000, PEOPLE);
-        Stock infectious = new Stock("Infectious", 10, PEOPLE);
-        Stock recovered = new Stock("Recovered", 0, PEOPLE);
-
-        Constant contactRateConstant = new Constant("Contact Rate", PEOPLE, contactRate);
+        Stock susceptible = new Stock("Susceptible", initialSusceptible, PEOPLE);
+        Stock infectious = new Stock("Infectious", initialInfectious, PEOPLE);
+        Stock recovered = new Stock("Recovered", initialRecovered, PEOPLE);
 
         Flow infectionRate = Flow.create("Infected", DAY, () -> {
-            double totalPop = susceptible.getQuantity().getValue()
-                    + infectious.getQuantity().getValue()
-                    + recovered.getQuantity().getValue();
-
-            double infectiousFraction = infectious.getQuantity().getValue() / totalPop;
-            double contactsMadeInfectious = contactRateConstant.getValue() * infectiousFraction;
-            double infectedCount = contactsMadeInfectious
-                    * susceptible.getQuantity().getValue() * infectivity;
-
-            if (infectedCount > susceptible.getQuantity().getValue()) {
-                infectedCount = susceptible.getQuantity().getValue();
+            double totalPop = susceptible.getValue() + infectious.getValue()
+                    + recovered.getValue();
+            double infectiousFraction = infectious.getValue() / totalPop;
+            double infectedCount = contactRate * infectiousFraction * infectivity
+                    * susceptible.getValue();
+            if (infectedCount > susceptible.getValue()) {
+                infectedCount = susceptible.getValue();
             }
             return new Quantity(infectedCount, PEOPLE);
         });
 
-        Flow recoveryRate = Flow.create("Recovered", DAY, () -> {
-            double recoveredProportion = 0.2;
-            return new Quantity(infectious.getQuantity().getValue() * recoveredProportion, PEOPLE);
-        });
+        Flow recoveryRate = Flow.create("Recovered", DAY, () ->
+                new Quantity(infectious.getValue() * recoveryProportion, PEOPLE));
 
         susceptible.addOutflow(infectionRate);
         infectious.addInflow(infectionRate);

@@ -3,10 +3,8 @@ package com.deathrayresearch.forrester.demo;
 import com.deathrayresearch.forrester.Simulation;
 import com.deathrayresearch.forrester.io.CsvSubscriber;
 import com.deathrayresearch.forrester.measure.units.time.Times;
-import com.deathrayresearch.forrester.model.Constant;
 import com.deathrayresearch.forrester.model.Flow;
 import com.deathrayresearch.forrester.model.Flows;
-import com.deathrayresearch.forrester.model.Formula;
 import com.deathrayresearch.forrester.model.Model;
 import com.deathrayresearch.forrester.model.Stock;
 import com.deathrayresearch.forrester.model.Variable;
@@ -21,43 +19,41 @@ import static com.deathrayresearch.forrester.measure.Units.WEEK;
 /**
  * Models the evolving sales mix between hardware and recurring service revenue.
  *
- * <p>A Customers stock grows linearly at 10 per day. Hardware sales are a one-time amount per
+ * <p>A Customers stock grows linearly. Hardware sales are a one-time amount per
  * new customer, while service sales accumulate over the full customer base. Over time the
- * proportion of hardware revenue falls as the recurring service base grows, illustrating how
- * stock-dependent flows can shift a business's revenue composition.
+ * proportion of hardware revenue falls as the recurring service base grows.
  */
 public class SalesMixDemo {
 
     public static void main(String[] args) {
-        new SalesMixDemo().run();
+        double initialCustomers = 0;
+        double newCustomersPerDay = 10;
+        double hardwareSalesPerCustomer = 1000;  // dollars
+        double serviceSalesPerCustomerPerMonth = 10;  // dollars
+        double durationYears = 10;
+
+        new SalesMixDemo().run(initialCustomers, newCustomersPerDay,
+                hardwareSalesPerCustomer, serviceSalesPerCustomerPerMonth, durationYears);
     }
 
-    public void run() {
+    public void run(double initialCustomers, double newCustomersPerDay,
+                    double hardwareSalesPerCustomer, double serviceSalesPerCustomerPerMonth,
+                    double durationYears) {
         Model model = new Model("Hardware/software sales mix");
 
-        Constant hardwareSalesCustomer = new Constant("Hardware sales per new customer",
-                US_DOLLAR, 1000);
+        Stock customers = new Stock("customers", initialCustomers, PEOPLE);
 
-        Constant serviceSalesCustomerMonth = new Constant("Service sales per customer per month",
-                US_DOLLAR, 10);
+        Flow acquisitionRate = Flows.linearGrowth("New customers", DAY, customers,
+                newCustomersPerDay);
 
-        Stock customers = new Stock("customers", 0, PEOPLE);
+        Variable hardwareSales = new Variable("Hardware sales", US_DOLLAR,
+                () -> hardwareSalesPerCustomer * acquisitionRate.flowPerTimeUnit(WEEK).getValue());
 
-        Flow acquisitionRate = Flows.linearGrowth("New customers", DAY, customers, 10);
+        Variable serviceSales = new Variable("Service sales", US_DOLLAR,
+                () -> serviceSalesPerCustomerPerMonth * customers.getValue());
 
-        Formula hardwareSalesFormula = () -> hardwareSalesCustomer.getValue()
-                * acquisitionRate.flowPerTimeUnit(WEEK).getValue();
-
-        Variable hardwareSales = new Variable("Hardware sales", US_DOLLAR, hardwareSalesFormula);
-
-        Formula serviceSalesFormula = () -> serviceSalesCustomerMonth.getValue()
-                * customers.getQuantity().getValue();
-
-        Variable serviceSales = new Variable("Service sales", US_DOLLAR, serviceSalesFormula);
-
-        Formula totalSalesFormula = () -> hardwareSales.getValue() + serviceSales.getValue();
-
-        Variable totalSales = new Variable("Total sales", US_DOLLAR, totalSalesFormula);
+        Variable totalSales = new Variable("Total sales", US_DOLLAR,
+                () -> hardwareSales.getValue() + serviceSales.getValue());
 
         Variable proportionHardwareSales = new Variable("Proportion hardware", DIMENSIONLESS,
                 () -> hardwareSales.getValue() / totalSales.getValue());
@@ -69,10 +65,11 @@ public class SalesMixDemo {
         model.addVariable(serviceSales);
         model.addVariable(proportionHardwareSales);
 
-        Simulation run = new Simulation(model, WEEK, Times.years( 10));
+        Simulation run = new Simulation(model, WEEK, Times.years(durationYears));
 
         run.addEventHandler(new StockLevelChartViewer());
-        run.addEventHandler(new CsvSubscriber(System.getProperty("java.io.tmpdir") + "/forrester-run1out.csv"));
+        run.addEventHandler(new CsvSubscriber(
+                System.getProperty("java.io.tmpdir") + "/forrester-run1out.csv"));
         run.execute();
     }
 }

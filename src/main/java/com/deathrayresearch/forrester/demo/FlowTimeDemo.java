@@ -3,7 +3,6 @@ package com.deathrayresearch.forrester.demo;
 import com.deathrayresearch.forrester.Simulation;
 import com.deathrayresearch.forrester.measure.Quantity;
 import com.deathrayresearch.forrester.measure.units.item.ItemUnits;
-import com.deathrayresearch.forrester.model.Constant;
 import com.deathrayresearch.forrester.model.Flow;
 import com.deathrayresearch.forrester.model.Flows;
 import com.deathrayresearch.forrester.model.Model;
@@ -27,54 +26,52 @@ public class FlowTimeDemo {
 
     private static final ItemUnits TEST = ItemUnits.THING;
 
-    private final Constant TATGoal = new Constant("TAT Target", HOUR, 336);
-    private final Constant Capacity = new Constant("Capacity", TEST,190);
-
-    private final Stock WIP = new Stock("WIP", 1000, TEST);
-
-    private final Stock TAT = new Stock("TAT", TATGoal.getValue(), HOUR);
-
-    private final Variable discrepancy = new Variable("Discrepancy", HOUR,
-            () -> TATGoal.getValue() - TAT.getValue());
-
     public static void main(String[] args) {
-        FlowTimeDemo tat = new FlowTimeDemo();
-        tat.tatModel();
+        double initialWip = 1000;
+        double tatGoalHours = 336;
+        double capacity = 190;
+        double newOrdersPerDay = 200;
+        double hoursPerDay = 24.0;
+        double tatAdjustmentTimeHours = 24.0;
+        double durationWeeks = 4;
+
+        new FlowTimeDemo().run(initialWip, tatGoalHours, capacity, newOrdersPerDay,
+                hoursPerDay, tatAdjustmentTimeHours, durationWeeks);
     }
 
-    private void tatModel() {
-
+    public void run(double initialWip, double tatGoalHours, double capacity,
+                    double newOrdersPerDay, double hoursPerDay, double tatAdjustmentTimeHours,
+                    double durationWeeks) {
         Model tatModel = new Model("TAT Model");
 
-        Simulation sim = new Simulation(tatModel, HOUR, WEEK, 4);
+        Stock wip = new Stock("WIP", initialWip, TEST);
+        Stock tat = new Stock("TAT", tatGoalHours, HOUR);
 
-        Flow Demand = Flows.linearGrowth("New Orders", DAY, WIP, 200);
+        Variable discrepancy = new Variable("Discrepancy", HOUR,
+                () -> tatGoalHours - tat.getValue());
 
-        Flow Throughput = Flow.create("Delivered Reports", DAY, () -> {
-            int demandDelay = Math.toIntExact(Math.round(TAT.getValue()));
+        Simulation sim = new Simulation(tatModel, HOUR, WEEK, durationWeeks);
+
+        Flow demand = Flows.linearGrowth("New Orders", DAY, wip, newOrdersPerDay);
+
+        Flow throughput = Flow.create("Delivered Reports", DAY, () -> {
+            int demandDelay = Math.toIntExact(Math.round(tat.getValue()));
             int stepToGet = sim.getCurrentStep() - demandDelay;
-
-            double demandPlusDelay = Demand.getHistoryAtTimeStep(stepToGet);
-
-            double throughput = Math.min(Capacity.getValue(), demandPlusDelay);
-            return new Quantity(throughput, TEST);
+            double demandPlusDelay = demand.getHistoryAtTimeStep(stepToGet);
+            return new Quantity(Math.min(capacity, demandPlusDelay), TEST);
         });
-
-        double hoursPerDay = 24.0;
-        double adjustmentTime = 24.0; // hours
 
         Flow tatAdjustment = Flow.create("TAT Adjustment", HOUR, () -> {
-            double actualTAT = (WIP.getValue() / Capacity.getValue()) * hoursPerDay;
-            return new Quantity((actualTAT - TAT.getValue()) / adjustmentTime, HOUR);
+            double actualTAT = (wip.getValue() / capacity) * hoursPerDay;
+            return new Quantity((actualTAT - tat.getValue()) / tatAdjustmentTimeHours, HOUR);
         });
 
-        WIP.addInflow(Demand);
-        WIP.addOutflow(Throughput);
-        TAT.addInflow(tatAdjustment);
+        wip.addInflow(demand);
+        wip.addOutflow(throughput);
+        tat.addInflow(tatAdjustment);
 
-        tatModel.addStock(WIP);
-        tatModel.addStock(TAT);
-        tatModel.addConstant(TATGoal);
+        tatModel.addStock(wip);
+        tatModel.addStock(tat);
         tatModel.addVariable(discrepancy);
 
         sim.addEventHandler(new StockLevelChartViewer());
