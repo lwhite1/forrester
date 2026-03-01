@@ -399,11 +399,33 @@ Non-enum unit class; two `ItemUnit("Widget")` instances are not equal.
 
 Plus minor fixes: `RateConverter` made final, `Stock` uses `LinkedHashSet`, `Model` uses `LinkedHashMap`, `Simulation.getTimeStep()` return type corrected, `ArrayedStock` scalar flow behavior documented.
 
-### Remaining (open items)
+### Fixed (Round 2 — commit `68a2457`, 17 files)
+
+| Category | Changes |
+|----------|---------|
+| `Quantity.java` | Physical equality (dimension + base-unit value) for equals/hashCode, null-unit validation, divide-by-zero check |
+| `Simulation.java` | Constructor null checks + positive-duration + TIME-dimension validation, LinkedHashSet for handlers, model reference in SimulationEndEvent |
+| `SimulationEndEvent.java` | Added Model reference field |
+| `TimeStepEvent.java` | Javadoc corrected (fires before stock update) |
+| `Flow.java`, `Variable.java` | Added `clearHistory()`, null checks for unit/formula |
+| `Stock.java` | Null checks for unit and negativeValuePolicy |
+| `Constant.java` | Null check for unit, getIntValue clamps instead of throwing |
+| `ItemUnit.java` | Added equals/hashCode/toString |
+| `Module.java` | LinkedHashMap, unmodifiable getStocks(), added addArrayedVariable/addArrayedFlow/getFlows |
+| `RunResult.java` | Guard getFinalStockValue against empty snapshots |
+| `CsvSubscriber.java` | Implements Closeable, O(n) per step, null-safe close |
+| `LookupTable.java` | NaN input returns NaN |
+| `Step.java`, `Ramp.java` | Non-negative time validation |
+
+### Remaining (post-Round 2 re-audit)
+
+A full re-audit after both fix rounds found **76 remaining findings** — 17 bugs (mostly edge-case or latent), 27 design concerns, and 32 minor issues. See `doc/CodeQualityAssessment.md` for the complete re-audit with risk assessment and recommendations.
 
 | Severity | Count | Key items |
 |----------|-------|-----------|
-| High | 2 | Off-by-one N+1 steps, Quantity.equals semantics |
-| Medium | 14 | CsvSubscriber leak, EventHandler @Subscribe, Stock conflicting sink, RunResult lossy constructors, Model.removeStock stale refs, etc. |
-| Low | 12 | SimulationEndEvent context, duration validation, null checks, etc. |
-| Test Gaps | 17 | ArrayedVariable, CsvSubscriber, temperature, millisecond, event ordering, etc. |
+| Bug (high) | 3 | Fahrenheit double-overload still uses ratio math, Quantity.equals throws for Fahrenheit, ArrayedStock scalar flow × N amplification |
+| Bug (medium) | 6 | Flow sink overwrite, removeStock dangling refs, addModule missing flows, Optimizer null RunResult, CsvSubscriber NPE on null time, ChartViewer series mismatch |
+| Bug (low/latent) | 8 | Smooth/Delay3 stale input on catch-up, RunResult NEGATIVE_INFINITY, MC name collision, Optimizer concurrency, re-run history, identity conversion, flow phantom amounts, Constant NaN |
+| Design | 27 | EventBus/@Subscribe trap, unbounded history, bidirectional coupling, static UI state, encoding, etc. |
+| Minor | 32 | Naming, documentation, unused parameters, style |
+| Test Gaps | 12 | ArrayedVariable, CsvSubscriber, temperature, MILLISECOND/MONTH, events, Quantity edge cases |
