@@ -47,11 +47,13 @@ public class Units {
     public static final Unit US_DOLLAR = MoneyUnits.USD;
 
     // time
-    public static final TimeUnit DAY = TimeUnits.DAY;
-    public static final TimeUnit HOUR = TimeUnits.HOUR;
-    public static final TimeUnit MINUTE = TimeUnits.MINUTE;
+    public static final TimeUnit MILLISECOND = TimeUnits.MILLISECOND;
     public static final TimeUnit SECOND = TimeUnits.SECOND;
+    public static final TimeUnit MINUTE = TimeUnits.MINUTE;
+    public static final TimeUnit HOUR = TimeUnits.HOUR;
+    public static final TimeUnit DAY = TimeUnits.DAY;
     public static final TimeUnit WEEK = TimeUnits.WEEK;
+    public static final TimeUnit MONTH = TimeUnits.MONTH;
     public static final TimeUnit YEAR = TimeUnits.YEAR;
 
     // volume

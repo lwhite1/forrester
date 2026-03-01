@@ -9,6 +9,13 @@ import com.deathrayresearch.forrester.measure.TimeUnit;
 public class Times {
 
     /**
+     * Creates a quantity of the given value in milliseconds.
+     */
+    public static Quantity milliseconds(double value) {
+        return new Quantity(value, TimeUnits.MILLISECOND);
+    }
+
+    /**
      * Creates a quantity of the given value in seconds.
      */
     public static Quantity seconds(double value) {
@@ -46,6 +53,13 @@ public class Times {
     public static Quantity weeks(double value) {
         TimeUnit timeUnit = TimeUnits.WEEK;
         return new Quantity(value, timeUnit);
+    }
+
+    /**
+     * Creates a quantity of the given value in months (30-day approximation).
+     */
+    public static Quantity months(double value) {
+        return new Quantity(value, TimeUnits.MONTH);
     }
 
     /**

@@ -63,7 +63,7 @@ The simulation engine manages execution of a model over a specified duration wit
    - Record variable and flow values
 3. Post `SimulationEndEvent`
 
-Supported time steps: Second, Minute, Hour, Day, Week.
+Supported time steps: Millisecond, Second, Minute, Hour, Day, Week, Month, Year.
 
 ### Event System
 
