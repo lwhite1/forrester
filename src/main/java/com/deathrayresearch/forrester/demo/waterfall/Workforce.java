@@ -15,10 +15,11 @@ import static com.deathrayresearch.forrester.measure.Units.DAY;
  * Workforce subsystem for the waterfall software project model.
  *
  * <p>Models hiring, assimilation, and resignation dynamics. New hires are recruited at a rate
- * proportional to the workforce gap (desired minus actual), delayed by an 8-week hiring lag.
- * New hires assimilate into experienced workers over a 16-week period. The module tracks
- * total workforce, the fraction with experience, full-time equivalent capacity, and the
- * daily training overhead imposed by new hires on experienced staff.
+ * proportional to the workforce gap (desired minus actual), delayed by a hiring lag.
+ * New hires assimilate into experienced workers over an assimilation period. The module tracks
+ * total workforce, the fraction with experience, full-time equivalent capacity, the
+ * daily training overhead imposed by new hires on experienced staff, and communication
+ * overhead from Brooks's Law (overhead grows as n*(n-1) with team size).
  */
 public class Workforce {
 
@@ -28,16 +29,21 @@ public class Workforce {
     private final Variable totalWorkforce;
     private final Variable fractionExperienced;
     private final Variable dailyTrainingOverhead;
+    private final Variable communicationOverhead;
     private final Variable workforceFte;
 
-    public Workforce() {
+    public Workforce(double initialNewHires, double initialExperienced, double workforceNeedValue,
+                     double hiringDelayWeeks, double assimilationDelayWeeks,
+                     double trainersPerNewHireValue, double avgEmploymentDays,
+                     double communicationOverheadPerPair) {
         module = new Module("Workforce");
 
         Constant averageDailyManPowerPerStaff =
                 new Constant("ADMPPPS", ItemUnits.THING, 1);
 
-        Stock newlyHiredWorkforce = new Stock("Newly hired", 2.0, ItemUnits.PEOPLE);
-        Stock experiencedWorkforce = new Stock("Experienced workers", 4.0, ItemUnits.PEOPLE);
+        Stock newlyHiredWorkforce = new Stock("Newly hired", initialNewHires, ItemUnits.PEOPLE);
+        Stock experiencedWorkforce =
+                new Stock("Experienced workers", initialExperienced, ItemUnits.PEOPLE);
 
         totalWorkforce = new Variable("Total Workforce", ItemUnits.PEOPLE, () ->
                 newlyHiredWorkforce.getQuantity().getValue()
@@ -51,7 +57,8 @@ public class Workforce {
                 experiencedWorkforce.getQuantity().getValue()
                         * averageDailyManPowerPerStaff.getValue());
 
-        Variable workforceNeed = new Variable("Workforce need", ItemUnits.PEOPLE, () -> 30.0);
+        Variable workforceNeed = new Variable("Workforce need", ItemUnits.PEOPLE,
+                () -> workforceNeedValue);
 
         Constant maxNewHiresPerExperiencedStaff =
                 new Constant("Max New Hires per Experienced Staff", ItemUnits.PEOPLE, 3.0);
@@ -69,18 +76,41 @@ public class Workforce {
         Variable workforceGap = new Variable("Workforce Gap", ItemUnits.PEOPLE, () ->
                 workforceLevelSought.getValue() - totalWorkforce.getValue());
 
-        Constant trainersPerNewHire = new Constant("Trainers per New Hire", DIMENSIONLESS_UNIT, 0.2);
+        Constant trainersPerNewHire =
+                new Constant("Trainers per New Hire", DIMENSIONLESS_UNIT, trainersPerNewHireValue);
 
         dailyTrainingOverhead = new Variable("Daily overhead for training", ItemUnits.PEOPLE, () ->
                 trainersPerNewHire.getValue() * newlyHiredWorkforce.getQuantity().getValue());
 
-        fractionExperienced = new Variable("Fraction of Workforce with Experience",
-                DIMENSIONLESS_UNIT, () ->
-                experiencedWorkforce.getQuantity().getValue() / totalWorkforce.getValue());
+        communicationOverhead = new Variable("Communication overhead", DIMENSIONLESS_UNIT, () -> {
+            double teamSize = totalWorkforce.getValue();
+            return teamSize * (teamSize - 1) * communicationOverheadPerPair;
+        });
 
-        Flow hireFlow = createNewHireFlow(workforceGap);
-        Flow assimilationFlow = createAssimilationFlow(newlyHiredWorkforce);
-        Flow resignationFlow = createResignationFlow(experiencedWorkforce);
+        fractionExperienced = new Variable("Fraction of Workforce with Experience",
+                DIMENSIONLESS_UNIT, () -> {
+                    double total = totalWorkforce.getValue();
+                    if (total <= 0) {
+                        return 0.0;
+                    }
+                    return experiencedWorkforce.getQuantity().getValue() / total;
+                });
+
+        double hiringDelayInDays = hiringDelayWeeks * 7;
+        double assimilationDelayInDays = assimilationDelayWeeks * 7;
+
+        Flow hireFlow = Flow.create("Hired", DAY, () -> {
+            double gap = workforceGap.getValue();
+            double result = gap / hiringDelayInDays;
+            return new Quantity(Math.max(result, 0.0), ItemUnits.PEOPLE);
+        });
+
+        Flow assimilationFlow = Flow.create("Assimilated hires", DAY, () ->
+                newlyHiredWorkforce.getQuantity().divide(assimilationDelayInDays));
+
+        Flow resignationFlow = Flow.create("Resigned", DAY, () ->
+                new Quantity(experiencedWorkforce.getQuantity().getValue()
+                        / avgEmploymentDays, ItemUnits.PEOPLE));
 
         module.addStock(newlyHiredWorkforce);
         module.addStock(experiencedWorkforce);
@@ -88,12 +118,14 @@ public class Workforce {
         newlyHiredWorkforce.addInflow(hireFlow);
         newlyHiredWorkforce.addOutflow(assimilationFlow);
         experiencedWorkforce.addInflow(assimilationFlow);
+        experiencedWorkforce.addOutflow(resignationFlow);
 
         module.addFlow(hireFlow);
         module.addFlow(assimilationFlow);
         module.addFlow(resignationFlow);
 
         module.addVariable(dailyTrainingOverhead);
+        module.addVariable(communicationOverhead);
         module.addVariable(workforceGap);
         module.addVariable(totalWorkforce);
         module.addVariable(fractionExperienced);
@@ -102,6 +134,10 @@ public class Workforce {
         module.addVariable(totalWorkforceCap);
         module.addVariable(newHireCap);
         module.addVariable(workforceFte);
+    }
+
+    public Workforce() {
+        this(2, 4, 30, 8, 16, 0.2, 673, 0.003);
     }
 
     public Module getModule() {
@@ -120,30 +156,11 @@ public class Workforce {
         return dailyTrainingOverhead;
     }
 
+    public Variable getCommunicationOverhead() {
+        return communicationOverhead;
+    }
+
     public Variable getWorkforceFte() {
         return workforceFte;
-    }
-
-    private static Flow createNewHireFlow(Variable workforceGap) {
-        final double hiringDelayInDays = 8.0 * 7;
-        return Flow.create("Hired", DAY, () -> {
-            double gap = workforceGap.getValue();
-            double result = gap / hiringDelayInDays;
-            double maxAmount = Math.max(result, 0.0);
-            return new Quantity(maxAmount, ItemUnits.PEOPLE);
-        });
-    }
-
-    private static Flow createResignationFlow(Stock experiencedWorkforce) {
-        double averageEmploymentInDays = 673.0;
-        return Flow.create("Resigned", DAY, () ->
-                new Quantity(experiencedWorkforce.getQuantity().getValue()
-                        / averageEmploymentInDays, ItemUnits.PEOPLE));
-    }
-
-    private static Flow createAssimilationFlow(Stock newHires) {
-        final double assimilationDelayInDays = 16.0 * 7;
-        return Flow.create("Assimilated hires", DAY, () ->
-                newHires.getQuantity().divide(assimilationDelayInDays));
     }
 }

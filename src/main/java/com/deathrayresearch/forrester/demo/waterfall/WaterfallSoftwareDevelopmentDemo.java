@@ -7,45 +7,103 @@ import com.deathrayresearch.forrester.model.Model;
 import com.deathrayresearch.forrester.ui.StockLevelChartViewer;
 
 /**
- * Models a waterfall software project with modular subsystems for workforce, development,
- * testing, rework, and staff allocation.
+ * Models a waterfall software project using the Abdel-Hamid &amp; Madnick (1991) structure.
  *
- * <p>Four {@link com.deathrayresearch.forrester.model.Module Modules} — Workforce, Development,
- * Staff Allocation, and Test &amp; Rework — are composed into a single model. Hiring delays,
- * training overhead, defect injection, and rework cycles interact to show how phased development
- * with late testing can lead to schedule overruns and staffing oscillations.
+ * <p>Three modules — Workforce, Staff Allocation, and Software Production — are composed into
+ * a single model. The core rework cycle in Software Production drives the classic waterfall
+ * pathology: deferred integration causes errors to stay hidden until late in the project,
+ * when rework becomes expensive and floods the schedule.
+ *
+ * <p>Key dynamics demonstrated:
+ * <ul>
+ *   <li>Brooks's Law — communication overhead grows quadratically with team size</li>
+ *   <li>Rework cycle — FCC splits work into correct and erroneous; errors accumulate hidden</li>
+ *   <li>Waterfall integration tax — rework discovery and cost increase late in the project</li>
+ * </ul>
  */
 public class WaterfallSoftwareDevelopmentDemo {
 
     public static void main(String[] args) {
-        new WaterfallSoftwareDevelopmentDemo().run();
+        new WaterfallSoftwareDevelopmentDemo().run(
+                // Workforce parameters
+                2, 4, 30, 8, 16, 0.2, 673, 0.003,
+                // StaffAllocation parameters
+                0.15, 0.10,
+                // SoftwareProduction parameters
+                500, 0.80, 1.0, 0.5, 0.05, 0.40, 1.5,
+                // Simulation duration in days (1.5 years ≈ 548 days)
+                548
+        );
     }
 
-    public void run() {
-        Model model = getModel();
+    public void run(double initialNewHires, double initialExperienced, double workforceNeed,
+                    double hiringDelayWeeks, double assimilationDelayWeeks,
+                    double trainersPerNewHire, double avgEmploymentDays,
+                    double communicationOverheadPerPair,
+                    double plannedFractionForQA, double overheadLoss,
+                    double projectSize, double baseFCC,
+                    double nominalProductivityExp, double nominalProductivityNew,
+                    double baseReworkDiscoveryFraction, double testingReworkDiscoveryFraction,
+                    double integrationCoefficient,
+                    int durationDays) {
 
-        Quantity duration = new Quantity(1, TimeUnits.YEAR);
+        Model model = getModel(
+                initialNewHires, initialExperienced, workforceNeed,
+                hiringDelayWeeks, assimilationDelayWeeks,
+                trainersPerNewHire, avgEmploymentDays, communicationOverheadPerPair,
+                plannedFractionForQA, overheadLoss,
+                projectSize, baseFCC,
+                nominalProductivityExp, nominalProductivityNew,
+                baseReworkDiscoveryFraction, testingReworkDiscoveryFraction,
+                integrationCoefficient);
+
+        Quantity duration = new Quantity(durationDays, TimeUnits.DAY);
         Simulation simulation = new Simulation(model, TimeUnits.DAY, duration);
         simulation.addEventHandler(new StockLevelChartViewer());
-
         simulation.execute();
     }
 
     public Model getModel() {
-        Workforce workforce = new Workforce();
+        return getModel(2, 4, 30, 8, 16, 0.2, 673, 0.003,
+                0.15, 0.10,
+                500, 0.80, 1.0, 0.5, 0.05, 0.40, 1.5);
+    }
+
+    public Model getModel(double initialNewHires, double initialExperienced, double workforceNeed,
+                           double hiringDelayWeeks, double assimilationDelayWeeks,
+                           double trainersPerNewHire, double avgEmploymentDays,
+                           double communicationOverheadPerPair,
+                           double plannedFractionForQA, double overheadLoss,
+                           double projectSize, double baseFCC,
+                           double nominalProductivityExp, double nominalProductivityNew,
+                           double baseReworkDiscoveryFraction,
+                           double testingReworkDiscoveryFraction,
+                           double integrationCoefficient) {
+
+        Workforce workforce = new Workforce(
+                initialNewHires, initialExperienced, workforceNeed,
+                hiringDelayWeeks, assimilationDelayWeeks,
+                trainersPerNewHire, avgEmploymentDays, communicationOverheadPerPair);
+
         StaffAllocation staffAllocation = new StaffAllocation(
                 workforce.getTotalWorkforce(),
-                workforce.getDailyTrainingOverhead());
-        Development development = new Development(
+                workforce.getDailyTrainingOverhead(),
+                workforce.getCommunicationOverhead(),
+                plannedFractionForQA, overheadLoss);
+
+        SoftwareProduction softwareProduction = new SoftwareProduction(
                 staffAllocation.getDailyResourcesForProduction(),
-                workforce.getFractionExperienced());
-        TestAndRework testAndRework = new TestAndRework();
+                staffAllocation.getDailyResourcesForQA(),
+                workforce.getFractionExperienced(),
+                projectSize, baseFCC,
+                nominalProductivityExp, nominalProductivityNew,
+                baseReworkDiscoveryFraction, testingReworkDiscoveryFraction,
+                integrationCoefficient);
 
         Model model = new Model("Waterfall");
         model.addModule(workforce.getModule());
         model.addModule(staffAllocation.getModule());
-        model.addModule(development.getModule());
-        model.addModule(testAndRework.getModule());
+        model.addModule(softwareProduction.getModule());
         return model;
     }
 }
