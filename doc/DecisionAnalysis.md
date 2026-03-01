@@ -105,9 +105,11 @@ SweepResult result = ParameterSweep.builder()
 
 ### Caveats with the current engine
 
-**Competing risks and large step sizes.** When multiple outflows leave a state simultaneously, each flow is computed from the pre-update stock value but subtracted sequentially. If the combined outflows exceed the stock, `NegativeValuePolicy.CLAMP_TO_ZERO` silently truncates. This is correct for small transition probabilities (typical in annual Markov cycles) but can cause conservation errors with large rates. Manual guards (like the SIR demo's `min(infected, susceptible)` check) are needed for high-rate transitions.
+**Competing risks and large step sizes.** When multiple outflows leave a state simultaneously, each flow is computed from the pre-update stock value but subtracted sequentially. If the combined outflows exceed the stock, `NegativeValuePolicy.CLAMP_TO_ZERO` silently truncates. This is correct for small transition probabilities (typical in annual Markov cycles) but can cause conservation errors with large rates. Manual guards (like the SIR demo's `min(infected, susceptible)` check) are needed for high-rate transitions. Note: NaN and Infinity values in stocks are now caught and rejected immediately — formula bugs that produce non-finite results will surface as clear errors rather than propagating silently.
 
-**Euler integration only.** The simulation engine uses simple Euler forward stepping. For Markov cohort models with discrete annual cycles, this is fine — Markov models are inherently discrete. For continuous-time models or very short time steps, numerical accuracy may suffer.
+**Euler integration only.** The simulation engine uses simple Euler forward stepping. For Markov cohort models with discrete annual cycles, this is fine — Markov models are inherently discrete. For continuous-time models or very short time steps, numerical accuracy may suffer. Note: sub-second time steps (MILLISECOND) now work correctly.
+
+**Simulation re-runs.** The simulation engine now supports re-entrancy — calling `execute()` resets internal state, so Monte Carlo and parameter sweep runners work correctly with repeated runs. `SimulationEndEvent` is guaranteed even when formulas throw, ensuring file handles and other resources are released.
 
 **No half-cycle correction.** Standard Markov convention assumes transitions occur mid-cycle. The engine applies transitions at the start of each cycle. A half-cycle correction (add half a cycle's reward at the start and end) would need to be applied as a post-processing adjustment on accumulator stocks.
 

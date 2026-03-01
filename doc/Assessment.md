@@ -9,7 +9,7 @@
   
 - Strong demo collection. The 16+ demos cover the core SD curriculum well — exponential growth/decay, S-curves, goal-seeking, pipeline delays, material delays, predator-prey, SIR epidemiology, inventory oscillations, software project dynamics, parameter sweeps, and Monte Carlo uncertainty analysis. Several are drawn directly from Meadows' Thinking in Systems.
   
-- Dimensional analysis is a standout. The measurement system with 8 dimensions, 40 predefined units (time, length, mass, volume, temperature, money, items, dimensionless), automatic rate conversion, and immutable quantities is cleaner than what most commercial SD tools offer. Unit mismatches are caught at runtime.
+- Dimensional analysis is a standout. The measurement system with 8 dimensions, 40 predefined units (time, length, mass, volume, temperature, money, items, dimensionless), automatic rate conversion, and immutable quantities is cleaner than what most commercial SD tools offer. Unit mismatches are caught at runtime. All quantity comparison methods (`isLessThan`, `isGreaterThan`, etc.) enforce dimension compatibility — comparing meters to dollars throws `IllegalArgumentException`.
   
 - Lambda-based Flows API eliminates boilerplate. Common patterns are one-liners; custom formulas are concise lambdas. This is a genuine ergonomic advantage over older Java-based SD tools.
   
@@ -23,7 +23,20 @@
   
 - Monte Carlo simulation enables uncertainty analysis. The `MonteCarlo` runner samples multiple parameters from probability distributions (Normal, Uniform, Triangular, etc.) using random or Latin Hypercube Sampling across hundreds of runs. Results are aggregated into percentile envelopes with statistical summaries (percentiles, means) and fan chart visualization. This closes the biggest gap between "educational tool" and "useful analysis tool."
 
-- Optimization and calibration enable automated parameter fitting. The `Optimizer` wraps Apache Commons Math derivative-free optimizers (Nelder-Mead, BOBYQA, CMA-ES) behind a builder API consistent with the sweep and Monte Carlo runners. Users define parameter bounds, a model factory, and an objective function (SSE against observed data, minimize/maximize a stock, target a value, minimize peak). The optimizer runs the simulation repeatedly, tracking the best result. The `SirCalibrationDemo` demonstrates recovering SIR parameters from synthetic data.
+- Optimization and calibration enable automated parameter fitting. The `Optimizer` wraps Apache Commons Math derivative-free optimizers (Nelder-Mead, BOBYQA, CMA-ES) behind a builder API consistent with the sweep and Monte Carlo runners. Users define parameter bounds, a model factory, and an objective function (SSE against observed data, minimize/maximize a stock, target a value, minimize peak). The optimizer runs the simulation repeatedly, tracking the best result. All algorithms respect user-specified parameter bounds — Nelder-Mead clamps parameters to bounds on each evaluation since it doesn't enforce them natively. The `SirCalibrationDemo` demonstrates recovering SIR parameters from synthetic data.
+
+## Robustness
+
+The simulation engine and analysis tools have been hardened via a system-wide audit (see `doc/SystemAudit.md`):
+
+- **Simulation engine:** Flow values are computed and recorded exactly once per step (identity-based caching). Sub-second time units (MILLISECOND) work correctly. Simulations are re-entrant — `execute()` resets state. `SimulationEndEvent` is guaranteed via try/finally even when formulas throw. Time step counting uses exact integer arithmetic.
+- **SD functions:** `Smooth` and `Delay3` correctly handle multi-step gaps by looping through missed integration steps. `Flows.exponentialGrowthWithLimit` validates that the carrying capacity is positive.
+- **Stocks:** NaN and Infinity values are rejected with descriptive errors rather than being silently masked. Flow iteration order is deterministic (LinkedHashSet).
+- **Monte Carlo:** Sampled parameter values are preserved in results. Random sampling reseeds distributions once rather than per-draw.
+- **Optimizer:** Parameter bounds are enforced for all algorithms including Nelder-Mead. Graceful fallback when no evaluation improves over the initial guess.
+- **Measurement:** Fahrenheit-to-Celsius quantity conversion explicitly throws `UnsupportedOperationException` (affine offset incompatible with ratio-based conversion) instead of producing silently wrong results.
+- **Visualization:** Fan charts handle negative values and single-step edge cases correctly.
+- **Parameter sweeps:** `linspace` validates step > 0 and end >= start.
 
 ## Limitations
 

@@ -2,6 +2,8 @@
 
 Scope: `SubscriptRange`, `MultiArrayedStock`, `MultiArrayedFlow`, `MultiArrayedVariable`, modifications to `Model`/`Module`, tests, demo, and documentation updates.
 
+**Note:** Some issues found here overlap with the system-wide audit (`doc/SystemAudit.md`). Where the system-wide fixes also address multi-dim concerns, those items are noted below.
+
 ## Bugs (fix now)
 
 | # | File | Issue |
