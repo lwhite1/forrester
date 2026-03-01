@@ -61,8 +61,11 @@ public final class IndexedValue {
 
     /**
      * Creates a scalar (dimensionless) indexed value.
+     *
+     * @throws IllegalArgumentException if the value is NaN or Infinity
      */
     public static IndexedValue scalar(double value) {
+        validateFinite(value);
         return new IndexedValue(null, new double[]{value});
     }
 
@@ -71,7 +74,8 @@ public final class IndexedValue {
      *
      * @param subscript the dimension
      * @param values    one value per subscript label
-     * @throws IllegalArgumentException if the array length doesn't match the subscript size
+     * @throws IllegalArgumentException if the array length doesn't match the subscript size,
+     *                                  or if any value is NaN or Infinity
      */
     public static IndexedValue of(Subscript subscript, double... values) {
         Preconditions.checkNotNull(subscript, "subscript must not be null");
@@ -81,6 +85,7 @@ public final class IndexedValue {
             throw new IllegalArgumentException(
                     "Expected " + range.totalSize() + " values but got " + values.length);
         }
+        validateFinite(values);
         return new IndexedValue(range, values.clone());
     }
 
@@ -89,7 +94,8 @@ public final class IndexedValue {
      *
      * @param range  the multi-dimensional range
      * @param values one value per element in row-major order
-     * @throws IllegalArgumentException if the array length doesn't match the range's total size
+     * @throws IllegalArgumentException if the array length doesn't match the range's total size,
+     *                                  or if any value is NaN or Infinity
      */
     public static IndexedValue of(SubscriptRange range, double[] values) {
         Preconditions.checkNotNull(range, "range must not be null");
@@ -98,14 +104,18 @@ public final class IndexedValue {
             throw new IllegalArgumentException(
                     "Expected " + range.totalSize() + " values but got " + values.length);
         }
+        validateFinite(values);
         return new IndexedValue(range, values.clone());
     }
 
     /**
      * Creates an indexed value with every element set to the same value.
+     *
+     * @throws IllegalArgumentException if the value is NaN or Infinity
      */
     public static IndexedValue fill(SubscriptRange range, double value) {
         Preconditions.checkNotNull(range, "range must not be null");
+        validateFinite(value);
         double[] values = new double[range.totalSize()];
         Arrays.fill(values, value);
         return new IndexedValue(range, values);
@@ -484,6 +494,21 @@ public final class IndexedValue {
             }
         }
         return -1;
+    }
+
+    private static void validateFinite(double value) {
+        if (Double.isNaN(value) || Double.isInfinite(value)) {
+            throw new IllegalArgumentException("IndexedValue does not accept NaN or Infinity");
+        }
+    }
+
+    private static void validateFinite(double[] values) {
+        for (int i = 0; i < values.length; i++) {
+            if (Double.isNaN(values[i]) || Double.isInfinite(values[i])) {
+                throw new IllegalArgumentException(
+                        "IndexedValue does not accept NaN or Infinity (found at index " + i + ")");
+            }
+        }
     }
 
     private static boolean rangesEqual(SubscriptRange a, SubscriptRange b) {

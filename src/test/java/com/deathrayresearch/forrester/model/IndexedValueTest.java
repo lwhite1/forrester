@@ -712,6 +712,74 @@ class IndexedValueTest {
     }
 
     @Nested
+    class NaNInfinityValidation {
+
+        @Test
+        void shouldRejectNaNInScalar() {
+            assertThrows(IllegalArgumentException.class, () ->
+                    IndexedValue.scalar(Double.NaN));
+        }
+
+        @Test
+        void shouldRejectPositiveInfinityInScalar() {
+            assertThrows(IllegalArgumentException.class, () ->
+                    IndexedValue.scalar(Double.POSITIVE_INFINITY));
+        }
+
+        @Test
+        void shouldRejectNegativeInfinityInScalar() {
+            assertThrows(IllegalArgumentException.class, () ->
+                    IndexedValue.scalar(Double.NEGATIVE_INFINITY));
+        }
+
+        @Test
+        void shouldRejectNaNInOfSubscript() {
+            assertThrows(IllegalArgumentException.class, () ->
+                    IndexedValue.of(region, 1, Double.NaN, 3));
+        }
+
+        @Test
+        void shouldRejectInfinityInOfSubscript() {
+            assertThrows(IllegalArgumentException.class, () ->
+                    IndexedValue.of(region, 1, Double.POSITIVE_INFINITY, 3));
+        }
+
+        @Test
+        void shouldRejectNaNInOfRange() {
+            SubscriptRange range = new SubscriptRange(List.of(region));
+            assertThrows(IllegalArgumentException.class, () ->
+                    IndexedValue.of(range, new double[]{1, Double.NaN, 3}));
+        }
+
+        @Test
+        void shouldRejectInfinityInOfRange() {
+            SubscriptRange range = new SubscriptRange(List.of(region));
+            assertThrows(IllegalArgumentException.class, () ->
+                    IndexedValue.of(range, new double[]{1, Double.NEGATIVE_INFINITY, 3}));
+        }
+
+        @Test
+        void shouldRejectNaNInFillRange() {
+            SubscriptRange range = new SubscriptRange(List.of(region));
+            assertThrows(IllegalArgumentException.class, () ->
+                    IndexedValue.fill(range, Double.NaN));
+        }
+
+        @Test
+        void shouldRejectInfinityInFillSubscript() {
+            assertThrows(IllegalArgumentException.class, () ->
+                    IndexedValue.fill(region, Double.POSITIVE_INFINITY));
+        }
+
+        @Test
+        void shouldReportIndexOfBadValue() {
+            IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () ->
+                    IndexedValue.of(region, 1, 2, Double.NaN));
+            assertTrue(ex.getMessage().contains("index 2"));
+        }
+    }
+
+    @Nested
     class ReversedDimensionOrder {
 
         @Test
