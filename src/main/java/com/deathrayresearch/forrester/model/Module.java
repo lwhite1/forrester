@@ -72,6 +72,15 @@ public class Module extends Element {
     }
 
     /**
+     * Expands a multi-arrayed stock into this module's stock map.
+     */
+    public void addMultiArrayedStock(MultiArrayedStock multiArrayedStock) {
+        for (Stock stock : multiArrayedStock.getStocks()) {
+            stocks.put(stock.getName(), stock);
+        }
+    }
+
+    /**
      * Adds a flow to this module.
      */
     public void addFlow(Flow rate) {

@@ -15,7 +15,7 @@
   
 - Modularity works. The Module system (demonstrated in the Waterfall demo with 4 subsystems) supports composing models from reusable parts.
 
-- Arrays/subscripts enable dimensioned modeling. `Subscript`, `ArrayedStock`, `ArrayedFlow`, and `ArrayedVariable` let users define a dimension (e.g., Region) and expand model elements into one instance per label — matching the subscript capability of Vensim and Stella. Cross-element flows (e.g., migration between regions) work naturally through scalar flows referencing specific array elements. The multi-region SIR demo shows three regions with independent epidemics and inter-region migration.
+- Arrays/subscripts enable dimensioned modeling. `Subscript`, `ArrayedStock`, `ArrayedFlow`, and `ArrayedVariable` let users define a dimension (e.g., Region) and expand model elements into one instance per label. Multi-dimensional subscripts (`SubscriptRange`, `MultiArrayedStock`, `MultiArrayedFlow`, `MultiArrayedVariable`) compose multiple dimensions (e.g., Region × AgeGroup) with coordinate access, aggregation (`sumOver`, `slice`), and transparent expansion — matching the subscript capability of Vensim and Stella. Cross-element flows (e.g., migration between regions) work naturally through scalar flows referencing specific array elements. The multi-region SIR demo shows single-dimension arrays; the population region-age demo shows multi-dimensional subscripts with aging, births, deaths, and migration across 9 stocks.
   
 - Parameter sweeps enable sensitivity analysis. The `ParameterSweep` runner iterates an array of values, builds a fresh model per value via a factory function, and collects results into CSV output. The builder API is clean and the model-factory approach avoids shared mutable state. The SIR sweep demo clearly shows how contact rate drives epidemic severity.
 
@@ -29,7 +29,6 @@
 
 - No visual editor. This is the biggest gap for learning. Commercial tools (Vensim, Stella,
 AnyLogic) let you draw stock-and-flow diagrams and see feedback structure visually. Here, learners must infer loop structure from code alone.
-- Single-dimension subscripts only. The current implementation supports one dimension per arrayed element (e.g., `Population[Region]`). Multi-dimensional subscripts (e.g., `Population[Region, AgeGroup]`) would require a follow-up.
 - Single-level module nesting. No modules-within-modules for very large models.
 
 ## Verdict by Audience
@@ -43,7 +42,7 @@ AnyLogic) let you draw stock-and-flow diagrams and see feedback structure visual
 | Uncertainty analysis / research | Good — Monte Carlo with LHS, percentile envelopes, and fan charts cover multi-parameter uncertainty quantification |
 | Non-programmers | Poor — no visual editor |
 | Model calibration / optimization | Good — derivative-free optimization with multiple algorithms and built-in objective functions for fitting to data |
-| Production/enterprise modeling | Fair — has analysis tools and single-dimension subscripts but lacks visual diagrams and multi-dimensional subscripts |
+| Production/enterprise modeling | Fair — has analysis tools and multi-dimensional subscripts but lacks visual diagrams |
 
 ## Bottom Line
 
@@ -52,12 +51,11 @@ AnyLogic) let you draw stock-and-flow diagrams and see feedback structure visual
 - The addition of parameter sweeps (single and multi-parameter), Monte Carlo simulation, optimization/calibration, and combinatorial grid analysis moves Forrester from "educational only" toward "useful for analysis." A user can now sweep one parameter, sweep a grid of N parameters to study interactions, run Monte Carlo with distribution sampling and Latin Hypercube designs, extract percentile envelopes, export CSV, visualize uncertainty via fan charts, and calibrate model parameters against observed data using derivative-free optimization — a real workflow that commercial tools support.
 
 - It's not a replacement for Vensim or Stella for serious modeling work. The absence of
-  visual diagrams means analysts would hit walls on models that require visual feedback-loop analysis. Single-dimension subscripts cover many use cases (regions, products) but multi-dimensional subscripts (e.g., Region × AgeGroup) are not yet supported.
+  visual diagrams means analysts would hit walls on models that require visual feedback-loop analysis.
 
 ## What Matters Most Next
 
 Ranked by impact on the gap between "educational tool" and "useful modeling tool":
 
 1. **Visual diagram generation** — The biggest learning gap. Even generating a static DOT/Graphviz diagram of the stock-flow structure from a `Model` object would help learners see feedback loops. Doesn't need to be interactive to be valuable.
-2. **Multi-dimensional subscripts** — Single-dimension subscripts are now supported (`Population[Region]`). The next step is multi-dimensional subscripts (e.g., `Population[Region, AgeGroup]`) for models that require cross-tabulated dimensions.
-3. **Nested Modules** — Current support for modules is limited to one level. Necessary for building larger, more complex models.
+2. **Nested Modules** — Current support for modules is limited to one level. Necessary for building larger, more complex models.

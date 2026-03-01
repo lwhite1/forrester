@@ -33,7 +33,7 @@ System Dynamics models are built from four fundamental elements:
 - **Variables** - Calculated quantities derived from formulas that may reference stocks, constants, or other variables.
 - **Constants** - Fixed exogenous values that parameterize the model.
 - **Lookup Tables** - Piecewise interpolation curves for modeling nonlinear effects (e.g., "effect of crowding on birth rate"). Supports linear and cubic spline interpolation.
-- **Subscripts / Arrays** - Dimensions that expand a single stock, flow, or variable definition into N parallel instances (e.g., `Population[North]`, `Population[South]`, `Population[East]`). Enables modeling of multiple regions, products, or cohorts without duplicating stocks manually.
+- **Subscripts / Arrays** - Dimensions that expand a single stock, flow, or variable definition into N parallel instances (e.g., `Population[North]`, `Population[South]`, `Population[East]`). Supports single-dimension arrays and multi-dimensional subscripts (e.g., `Population[North,Young]`, `Population[South,Elder]`) for cross-tabulated modeling. Enables modeling of multiple regions, products, cohorts, or any combination without duplicating stocks manually.
 
 These elements are connected into feedback loops that drive system behavior over time.
 
@@ -45,7 +45,8 @@ These elements are connected into feedback loops that drive system behavior over
 com.deathrayresearch.forrester
 ├── Simulation.java              # Core simulation engine
 ├── model/                       # Model elements (Stock, Flow, Flows, Variable, Constant, Module,
-│   │                            #   Subscript, ArrayedStock, ArrayedFlow, ArrayedVariable)
+│   │                            #   Subscript, ArrayedStock, ArrayedFlow, ArrayedVariable,
+│   │                            #   SubscriptRange, MultiArrayedStock, MultiArrayedFlow, MultiArrayedVariable)
 │   └── flows/                   # Rate conversion utilities
 ├── measure/                     # Dimensional analysis and unit system
 ├── event/                       # Event-driven communication
@@ -208,6 +209,68 @@ infectious.getStock("South").addInflow(migration);
 | `ArrayedStock` | Wraps N `Stock` instances — uniform or per-element initial values |
 | `ArrayedFlow` | Wraps N `Flow` instances with index-aware formula |
 | `ArrayedVariable` | Wraps N `Variable` instances with index-aware formula |
+
+### Multi-Dimensional Subscripts
+
+Multi-dimensional subscripts compose two or more `Subscript` dimensions into a `SubscriptRange`, expanding model elements to one instance per combination. Each expanded element is named with comma-separated labels (e.g., `"Population[North,Young]"`), following the Vensim convention. Like single-dimension arrays, the expansion is transparent — the simulation loop and all output infrastructure work without changes.
+
+**Define dimensions and create multi-arrayed elements:**
+
+```java
+// Define two subscript dimensions
+Subscript region = new Subscript("Region", "North", "South", "East");
+Subscript ageGroup = new Subscript("AgeGroup", "Young", "Adult", "Elder");
+
+// Compose into a multi-dimensional range
+SubscriptRange range = new SubscriptRange(List.of(region, ageGroup));  // 3×3 = 9 elements
+
+// Create a multi-arrayed stock — one Stock per combination
+MultiArrayedStock pop = new MultiArrayedStock("Population", range, 1000, PEOPLE);
+
+// Per-element initial values (row-major order: [North,Young], [North,Adult], ...)
+MultiArrayedStock pop2 = new MultiArrayedStock("Population", range,
+    new double[]{500,400,100, 500,400,100, 500,400,100}, PEOPLE);
+
+// Create a multi-arrayed flow with coordinate-aware formula
+MultiArrayedFlow births = MultiArrayedFlow.create("Births", DAY, range,
+    coords -> new Quantity(pop.getValueAt(coords) * 0.04, PEOPLE));
+pop.addInflow(births);
+
+// Create a multi-arrayed variable
+MultiArrayedVariable density = MultiArrayedVariable.create("Density", PEOPLE, range,
+    coords -> pop.getValueAt(coords) / area[coords[0]]);
+
+// Add to model — expands into 9 stocks automatically
+model.addMultiArrayedStock(pop);
+model.addMultiArrayedVariable(density);
+```
+
+**Access individual elements:**
+
+```java
+double val = pop.getValueAt(1, 2);               // by coordinate indices (South, Elder)
+double val2 = pop.getValueAt("North", "Young");   // by labels
+Stock stock = pop.getStockAt("South", "Adult");    // raw Stock access
+double total = pop.sum();                          // aggregate all elements
+```
+
+**Aggregation and slicing:**
+
+```java
+// Sum over one dimension
+double[] perRegion = pop.sumOver(1);   // collapse AgeGroup → double[3], one per Region
+double[] perAge = pop.sumOver(0);      // collapse Region → double[3], one per AgeGroup
+
+// Fix one dimension to get a slice
+Stock[] northStocks = pop.slice(0, "North");  // 3 stocks: [North,Young], [North,Adult], [North,Elder]
+```
+
+| Class | Purpose |
+|---|---|
+| `SubscriptRange` | Multi-dimensional index manager — cartesian product, flat↔coordinate index math, name composition |
+| `MultiArrayedStock` | Wraps N×M×... `Stock` instances with coordinate access, `sum()`, `sumOver()`, `slice()` |
+| `MultiArrayedFlow` | Wraps N×M×... `Flow` instances with coordinate-aware or flat-index formulas |
+| `MultiArrayedVariable` | Wraps N×M×... `Variable` instances with coordinate-aware or flat-index formulas |
 
 ### Standard SD Functions
 
@@ -438,6 +501,8 @@ The demo package (`src/main/java/.../demo/`) contains a rich set of example mode
 
 **MultiRegionSirDemo** — Extends the SIR model to three regions (North, South, East) using subscripts. Each region has its own S/I/R arrayed stocks with independent infection and recovery dynamics. Small daily migration flows (1% of infectious) move infected individuals between regions, seeding outbreaks that started in the North. Demonstrates `Subscript`, `ArrayedStock`, `ArrayedFlow`, and cross-element scalar flows.
 
+**PopulationRegionAgeDemo** — A population model with Region (North, South, East) × AgeGroup (Young, Adult, Elder) = 9 stocks using multi-dimensional subscripts. Demonstrates `SubscriptRange` and `MultiArrayedStock` with per-element initial values, aging flows (Young→Adult→Elder) within each region, birth flows proportional to adult population, death flows for elders, and circular migration between regions per age group.
+
 **PredatorPreyDemo** — Implements the Lotka-Volterra predator-prey model. Prey (Rabbits) and predator (Foxes) populations are coupled through birth and death flows that depend on both species' levels. The model produces sustained oscillations where predator peaks lag prey peaks.
 
 **InventoryModelDemo** — Models a car dealership's inventory with perception (5-day), response (3-day), and delivery (5-day) delays, inspired by *Thinking in Systems*. A step increase in demand causes the dealer to overshoot and oscillate before settling, demonstrating how delays in feedback loops amplify fluctuations.
@@ -503,6 +568,7 @@ New to system dynamics? These resources provide a solid introduction to the meth
 
 The project is at version 1.0-SNAPSHOT and is under active development. Recent work has focused on:
 
+- Adding multi-dimensional subscripts — `SubscriptRange`, `MultiArrayedStock`, `MultiArrayedFlow`, and `MultiArrayedVariable` enable cross-tabulated dimensions (e.g., Region × AgeGroup) with coordinate access, aggregation (`sumOver`, `slice`), and transparent expansion
 - Adding arrays/subscripts support — `Subscript`, `ArrayedStock`, `ArrayedFlow`, and `ArrayedVariable` enable dimensioned model elements (regions, cohorts, products) that transparently expand into the flat simulation loop
 - Adding `Optimizer` for model calibration — wraps Apache Commons Math derivative-free optimizers (Nelder-Mead, BOBYQA, CMA-ES) behind a builder API with built-in objective functions (SSE fit-to-data, minimize, maximize, target, minimize-peak) for automated parameter fitting against observed data
 - Adding `MultiParameterSweep` runner for combinatorial grid analysis — computes the Cartesian product of N parameter arrays, runs every combination, and exports multi-column CSV output for interaction analysis
