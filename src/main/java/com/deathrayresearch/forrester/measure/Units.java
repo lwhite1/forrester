@@ -35,9 +35,13 @@ public class Units {
     public static final Unit NAUTICAL_MILE = LengthUnits.NAUTICAL_MILE;
 
     // mass
+    public static final Unit MILLIGRAM = MassUnits.MILLIGRAM;
+    public static final Unit GRAM = MassUnits.GRAM;
     public static final Unit KILOGRAM = MassUnits.KILOGRAM;
+    public static final Unit METRIC_TON = MassUnits.METRIC_TON;
     public static final Unit OUNCE = MassUnits.OUNCE;
     public static final Unit POUND = MassUnits.POUND;
+    public static final Unit SHORT_TON = MassUnits.SHORT_TON;
 
     // money
     public static final Unit US_DOLLAR = MoneyUnits.USD;
