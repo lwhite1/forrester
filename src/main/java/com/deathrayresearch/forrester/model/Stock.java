@@ -18,7 +18,7 @@ public class Stock extends Element {
 
     private final Unit unit;
     private double value;
-    private NegativeValuePolicy negativeValuePolicy;
+    private final NegativeValuePolicy negativeValuePolicy;
 
     /**
      * Creates a new stock with the given name, initial value, and unit.
@@ -106,9 +106,6 @@ public class Stock extends Element {
         return negativeValuePolicy;
     }
 
-    public void setNegativeValuePolicy(NegativeValuePolicy negativeValuePolicy) {
-        this.negativeValuePolicy = negativeValuePolicy;
-    }
 
     private double applyPolicy(double candidateValue) {
         if (Double.isNaN(candidateValue) || Double.isInfinite(candidateValue)) {

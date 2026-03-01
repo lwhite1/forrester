@@ -1,8 +1,8 @@
 # Code Quality Assessment — Forrester SD Library
 
 **Date:** 2026-03-01
-**Scope:** Full codebase audit after three rounds of fixes and comprehensive regression testing
-**Methodology:** Manual code review of all 105 source files across 20 packages by 5 specialized audit agents, cross-referenced with 440 passing tests
+**Scope:** Full codebase audit after four rounds of fixes and comprehensive regression testing
+**Methodology:** Manual code review of all 105 source files across 20 packages by 5 specialized audit agents, cross-referenced with 439 passing tests
 
 ---
 
@@ -10,9 +10,9 @@
 
 Forrester is a **9,500-line Java system dynamics simulation library** with 27 demo programs, a measurement system covering 8 physical dimensions, parameter sweep / Monte Carlo / optimization analysis tools, single- and multi-dimensional subscripts, and JavaFX visualization.
 
-Three rounds of fixes resolved **39 bugs and improvements** including 4 critical bugs, 7 high-severity bugs, and 28 medium/low items. Eighty new tests were added covering regression scenarios, temperature units, time units, Quantity edge cases, ArrayedVariable, CsvSubscriber, and ItemUnit.
+Four rounds of fixes resolved **48 bugs and improvements** including 4 critical bugs, 7 high-severity bugs, and 37 medium/low items. Eighty new tests were added covering regression scenarios, temperature units, time units, Quantity edge cases, ArrayedVariable, CsvSubscriber, and ItemUnit.
 
-**Overall Quality Rating: A-** — Core simulation logic is correct and well-tested. Analysis tools work reliably. The measurement system handles unit conversions correctly (with Fahrenheit explicitly unsupported). All 440 tests pass.
+**Overall Quality Rating: A** — Core simulation logic is correct and well-tested. Analysis tools work reliably. The measurement system handles unit conversions correctly (with Fahrenheit explicitly unsupported). CSV output uses explicit UTF-8 encoding. All 439 tests pass.
 
 ---
 
@@ -26,7 +26,7 @@ Three rounds of fixes resolved **39 bugs and improvements** including 4 critical
 | Test source lines | ~5,200 |
 | Test-to-source ratio | 0.55 |
 | Packages | 20 |
-| Test count | 440 (all passing) |
+| Test count | 439 (all passing) |
 | Build time | ~4 seconds |
 | Dependencies | Guava 33.4, Commons Math 3, OpenCSV, JavaFX, SLF4J |
 | Java version | 17+ |
@@ -35,27 +35,27 @@ Three rounds of fixes resolved **39 bugs and improvements** including 4 critical
 
 ## Remaining Findings
 
-After three rounds of fixes, **62 findings remain** — none are high-severity bugs. The remaining items are design concerns, latent/inherent edge cases, and minor issues that do not affect the library's primary use case.
+After four rounds of fixes, **53 findings remain** — none are high-severity bugs. The remaining items are design concerns, latent/inherent edge cases, and minor issues that do not affect the library's primary use case.
 
 ### Summary by Severity
 
 | Severity | Count | Description |
 |----------|-------|-------------|
-| Bug (medium) | 5 | Edge-case failures unlikely in normal usage |
+| Bug (medium) | 4 | Edge-case failures unlikely in normal usage |
 | Bug (low/latent) | 6 | Inherent limitations or extremely unlikely triggers |
-| Design | 25 | API inconsistencies, missing defensive measures, extensibility gaps |
-| Minor | 26 | Code style, naming, documentation, minor redundancies |
-| **Total** | **62** | |
+| Design | 18 | API inconsistencies, missing defensive measures, extensibility gaps |
+| Minor | 25 | Code style, naming, documentation, minor redundancies |
+| **Total** | **53** | |
 
 ### Summary by Subsystem
 
 | Subsystem | Bugs | Design | Minor | Total |
 |-----------|------|--------|-------|-------|
-| Simulation engine & events | 1 | 4 | 5 | 10 |
-| Core model (Stock, Flow, Variable, Model, Module) | 4 | 6 | 5 | 15 |
+| Simulation engine & events | 0 | 2 | 4 | 6 |
+| Core model (Stock, Flow, Variable, Model, Module) | 3 | 4 | 4 | 11 |
 | Measurement system (Dimension, Unit, Quantity) | 0 | 6 | 3 | 9 |
-| Sweep / Monte Carlo / Optimizer | 3 | 8 | 3 | 14 |
-| SD functions & IO/UI | 3 | 7 | 8 | 18 |
+| Sweep / Monte Carlo / Optimizer | 3 | 6 | 3 | 12 |
+| SD functions & IO/UI | 3 | 6 | 8 | 17 |
 | Remaining test gaps | 0 | 0 | 2 | 2 |
 
 ---
@@ -64,22 +64,16 @@ After three rounds of fixes, **62 findings remain** — none are high-severity b
 
 ### 1. Simulation Engine & Events
 
-**Bugs:**
-
-| # | Impact | Finding |
-|---|--------|---------|
-| S1 | Medium | **EventBus/@Subscribe disconnect.** `EventHandler` interface defines handler methods but Guava EventBus requires `@Subscribe` on the *concrete* method. Implementing `EventHandler` without manually adding `@Subscribe` causes silent delivery failure. All existing implementations do this correctly, but it is a trap for new implementations. |
+No remaining bugs. `EventHandler` now provides default no-op methods with `@Subscribe`, eliminating the silent-delivery trap. `Simulation` Javadoc documents the single-threaded contract. `Simulation.clearHistory()` delegates to all flows and variables.
 
 **Design:**
 
 | # | Finding |
 |---|---------|
 | S2 | `getEventBus()` exposes the raw Guava EventBus, allowing external code to post arbitrary events. |
-| S3 | `EventHandler` forces all 3 handler methods — implementing just one requires empty stubs for the other two. Should have default no-op implementations. |
 | S4 | Asymmetric event objects: `SimulationStartEvent` carries model + simulation; `SimulationEndEvent` carries model but not simulation. |
-| S5 | No thread-safety documentation on `Simulation` (single-threaded by design, but not stated). |
 
-**Minor:** Misleading local variable `q` for cached flow quantities; `addStep` name implies adding to a collection; no null check on `addEventHandler`/`removeEventHandler`; `TimeStepEvent` Javadoc `@param` references old field name; off-by-one N+1 steps documented but not resolved.
+**Minor:** Misleading local variable `q` for cached flow quantities; `addStep` name implies adding to a collection; no null check on `addEventHandler`/`removeEventHandler`; off-by-one N+1 steps documented but not resolved.
 
 ### 2. Core Model Classes
 
@@ -87,7 +81,6 @@ After three rounds of fixes, **62 findings remain** — none are high-severity b
 
 | # | Impact | Finding |
 |---|--------|---------|
-| M1 | Medium | **Flow source/sink silently overwritten.** `addInflow(flow)` calls `flow.setSink(this)` without checking if the flow already has a different sink. A flow wired to two stocks as an inflow silently reassigns its sink. |
 | M2 | Medium | **removeStock doesn't detach flows.** Removing a stock from a model leaves its connected flows referencing the removed stock. |
 | M3 | Medium | **addModule doesn't register module flows.** Module's stocks and variables merge into the model, but flows are not. Flows still execute (referenced by stocks), but model-level flow queries won't find them. |
 | M4 | Low | **Flow history records phantom amounts on clamped stocks.** When `NegativeValuePolicy` clamps to zero, the flow's recorded value reflects the unclamped amount. |
@@ -97,13 +90,11 @@ After three rounds of fixes, **62 findings remain** — none are high-severity b
 | # | Finding |
 |---|---------|
 | M5 | No null check on `Flow` timeUnit constructor parameter. |
-| M6 | `Flow.history` and `Variable.history` grow unboundedly. `clearHistory()` exists but is not called automatically. |
 | M7 | Bidirectional coupling between Stock and Flow. Keeping both in sync is error-prone. |
 | M8 | No model-level accessor for all flows — flows are only reachable through stocks. |
-| M9 | `Stock.setNegativeValuePolicy()` allows mid-simulation mutation. |
 | M10 | `addStock` allows duplicate names without warning; same for `addConstant`. |
 
-**Minor:** `checkArgument` used where `checkNotNull` is more appropriate in some places; `NegativeValuePolicy` field not final; `Constant` accepts NaN as initial value; `Element.setComment(null)` undocumented; `ArrayedFlow.create` overload accepts unused Stock parameter.
+**Minor:** `checkArgument` used where `checkNotNull` is more appropriate in some places; `Constant` accepts NaN as initial value; `Element.setComment(null)` undocumented; `ArrayedFlow.create` overload accepts unused Stock parameter.
 
 ### 3. Measurement System
 
@@ -137,12 +128,10 @@ All Priority 1 bugs have been fixed. No remaining bugs.
 | # | Finding |
 |---|---------|
 | A4 | `Objectives.fitToTimeSeries` silently truncates when simulated/observed arrays differ in length. |
-| A5 | `CsvSubscriber` / `SweepCsvWriter` use platform-default encoding. Should specify UTF-8. |
 | A6 | `MonteCarlo.reseedRandomGenerator` mutates the caller's distribution objects. Side effect not documented. |
 | A7 | CMA-ES population size hardcoded — adequate but not configurable. |
 | A8 | `RunResult` dual constructor (`double` vs `Map`) — lossy, can't populate both. |
 | A9 | No defensive copy of `parameterValues` array in `ParameterSweep.Builder`. |
-| A10 | Cartesian product in `MultiParameterSweep` can OOM for large parameter grids — no size guard. |
 | A11 | `RuntimeException` wrapping of checked exceptions loses type information. |
 
 **Minor:** `linspace` name implies `numpy.linspace` semantics; `formatPercentile` relies on specific double-to-string formatting; `File.mkdirs()` return value ignored.
@@ -165,7 +154,6 @@ All Priority 1 bugs have been fixed. No remaining bugs.
 | F5 | `ChartViewerApplication.launch()` can only be called once per JVM (JavaFX limitation). |
 | F6 | `ModelReport` output format ends without a trailing newline. |
 | F7 | `CsvSubscriber` opens the file in its constructor — prevents deferred initialization. |
-| F8 | `Smooth` and `Delay3` have no `reset()` method. |
 | F9 | `LookupTable.Builder` doesn't detect duplicate x values. |
 | F10 | `CsvSubscriber.close()` doesn't prevent subsequent event handler calls on a closed writer. |
 
@@ -213,12 +201,12 @@ All Priority 1 bugs have been fixed. No remaining bugs.
 | Dimension | Rating | Notes |
 |-----------|--------|-------|
 | **Correctness** | A | All critical and high bugs fixed with regression tests. Core simulation, SD functions, and analysis tools produce correct results. |
-| **Robustness** | A- | Strong input validation. Fahrenheit explicitly unsupported (throws). NaN/Infinity rejected. Scalar-flow-to-array blocked. |
-| **API Design** | B+ | Clean SD-vocabulary API. Builder patterns, static factories, lambdas. Some inconsistencies remain (dual RunResult constructors, unused parameters). |
+| **Robustness** | A | Strong input validation. Fahrenheit explicitly unsupported (throws). NaN/Infinity rejected. Scalar-flow-to-array blocked. Flow source/sink reassignment throws. |
+| **API Design** | A- | Clean SD-vocabulary API. Builder patterns, static factories, lambdas. EventHandler has default no-ops. Smooth/Delay3 resettable. Some inconsistencies remain (dual RunResult constructors, unused parameters). |
 | **Maintainability** | B+ | Good package structure. Deterministic ordering (LinkedHashMap/Set). Bidirectional Stock↔Flow coupling is the main concern. |
-| **Documentation** | B+ | Good Javadoc on public API. Class-level docs explain SD concepts. Stale Javadoc corrected. |
-| **Test Quality** | B+ | 440 tests, all passing. Regression coverage for all major bugs. Remaining gaps are UI and edge cases. |
-| **Security** | B+ | No network exposure, no SQL, no user input parsing. Platform-default encoding in CSV is the only concern. |
+| **Documentation** | A- | Good Javadoc on public API. Class-level docs explain SD concepts. Threading contract documented. |
+| **Test Quality** | B+ | 439 tests, all passing. Regression coverage for all major bugs. Remaining gaps are UI and edge cases. |
+| **Security** | A- | No network exposure, no SQL, no user input parsing. CSV writers use explicit UTF-8 encoding. |
 
 ---
 
@@ -226,30 +214,23 @@ All Priority 1 bugs have been fixed. No remaining bugs.
 
 ### Priority 1 — Design Improvements
 
-1. **Add default no-op methods** to `EventHandler` interface, or add `@Subscribe` to the interface methods, to prevent the silent-failure trap. (Finding S1)
-
-2. **Add `Model.getFlows()`** method that returns all flows across all stocks. (Finding M8)
-
-3. **Document single-threaded contract** on `Simulation` class Javadoc. (Finding S5)
+1. **Add `Model.getFlows()`** method that returns all flows across all stocks. (Finding M8)
 
 ### Priority 2 — Nice to Have
 
-4. Replace platform-default encoding with explicit UTF-8 in CSV writers.
-5. Add `Simulation.clearHistory()` that delegates to all flows and variables.
-6. Add size guard on `MultiParameterSweep` Cartesian product.
-7. Make `NegativeValuePolicy` field final on `Stock`.
-8. Validate flow source/sink reassignment (warn or throw on overwrite).
-9. Add `reset()` to `Smooth` and `Delay3`.
+2. Add `Simulation.clearHistory()` auto-invocation at start of `execute()` (currently requires manual call).
+3. Fix `removeStock` to detach flows from the removed stock. (Finding M2)
+4. Register module flows at the model level in `addModule`. (Finding M3)
 
 ---
 
 ## Overall Assessment
 
-**Grade: A-**
+**Grade: A**
 
 Forrester is a well-designed educational and research-grade SD library. The core simulation mechanics are correct — stocks accumulate, flows transfer, feedback loops work, SD functions (Smooth, Delay3, Step, Ramp, LookupTable) behave as expected, and the analysis tools (parameter sweep, Monte Carlo, optimization) produce reliable results.
 
-Three rounds of fixes addressed all critical and high-severity bugs with comprehensive regression tests. The remaining 62 findings are design concerns, inherent limitations, and minor issues that do not affect the library's primary use case.
+Four rounds of fixes addressed all critical and high-severity bugs with comprehensive regression tests. The remaining 53 findings are design concerns, inherent limitations, and minor issues that do not affect the library's primary use case.
 
 **Strengths:**
 - Clean API that maps directly to SD vocabulary
@@ -258,10 +239,16 @@ Three rounds of fixes addressed all critical and high-severity bugs with compreh
 - Strong measurement system with dimensional analysis and explicit Fahrenheit blocking
 - Good demo collection covering the SD curriculum
 - Consistent use of immutable Quantity, static factories, and builder patterns
-- 440 tests with regression coverage for all major bug fixes
+- EventHandler with default no-ops and proper `@Subscribe` annotations
+- Immutable NegativeValuePolicy on Stock (final field)
+- Flow source/sink reassignment validation
+- Smooth and Delay3 resettable for simulation re-runs
+- CSV output with explicit UTF-8 encoding
+- MultiParameterSweep size guard against OOM
+- 439 tests with regression coverage for all major bug fixes
 
 **Areas for improvement:**
-- EventBus/@Subscribe coupling (framework design issue — trap for new implementations)
+- No model-level flow accessor (flows only reachable through stocks)
 - Bidirectional Stock↔Flow coupling
 - Some API inconsistencies (dual RunResult constructors, unused flow parameters)
 - UI layer is all-static (single chart per JVM)

@@ -104,14 +104,6 @@ public class StockTest {
         assertEquals(100, stock.getValue(), 0.0);
     }
 
-    @Test
-    public void shouldUpdatePolicyViaSetter() {
-        Stock stock = new Stock("Water", 100, GALLON_US);
-        assertEquals(NegativeValuePolicy.CLAMP_TO_ZERO, stock.getNegativeValuePolicy());
-        stock.setNegativeValuePolicy(NegativeValuePolicy.ALLOW);
-        assertEquals(NegativeValuePolicy.ALLOW, stock.getNegativeValuePolicy());
-    }
-
     private static Flow createConstantFlow(String name, double value, Unit unit) {
         return Flow.create(name, MINUTE, () -> new Quantity(value, unit));
     }

@@ -1,19 +1,12 @@
 # System-Wide Code Audit — Remaining Findings
 
-Audit of the Forrester simulation library after three rounds of fixes (commits `bca62d9`, `68a2457`, and the current round). All critical and high-severity bugs have been resolved. This document lists only the **remaining open items**.
+Audit of the Forrester simulation library after four rounds of fixes (commits `bca62d9`, `68a2457`, `169f0f3`, and the current round). All critical and high-severity bugs have been resolved. This document lists only the **remaining open items**.
 
 For the full fix history and quality assessment, see `doc/CodeQualityAssessment.md`.
 
 ---
 
 ## 1. Simulation Engine
-
-### DESIGN — EventHandler interface does not carry @Subscribe (Medium)
-**File:** `EventHandler.java`
-
-Guava EventBus requires `@Subscribe` on methods, but the interface doesn't annotate them. Implementing `EventHandler` without manually adding `@Subscribe` causes silent delivery failure. All existing implementations are correct, but this is a trap for new implementations.
-
-**Fix:** Add `@Subscribe` to interface methods, add default no-op implementations, or replace EventBus with direct dispatch.
 
 ### DESIGN — Off-by-one: simulation runs N+1 steps (Documented)
 **File:** `Simulation.java`
@@ -26,9 +19,6 @@ Allows external code to post arbitrary events.
 ### DESIGN — Asymmetric event objects (Low)
 `SimulationStartEvent` carries model + simulation; `SimulationEndEvent` carries model but not simulation.
 
-### DESIGN — No thread-safety documentation (Low)
-Simulation is single-threaded by design but the constraint is not stated in Javadoc.
-
 ### MINOR
 - Misleading local variable `q` for cached flow quantities
 - `addStep` name implies adding to a collection
@@ -39,11 +29,6 @@ Simulation is single-threaded by design but the constraint is not stated in Java
 
 ## 2. Core Model (Stock, Flow, Variable, Constant, Model, Module)
 
-### BUG — Stock allows conflicting source/sink assignments without error (Medium)
-**File:** `Stock.java`
-
-`addInflow` calls `flow.setSink(this)` without checking if the flow already has a different sink. A flow wired to two stocks silently reassigns its sink.
-
 ### DESIGN — Model.removeStock does not disconnect flows (Medium)
 Removed stock's connected flows retain stale references.
 
@@ -53,13 +38,8 @@ Module's stocks and variables merge, but flows are not registered at the model l
 ### DESIGN — No equals/hashCode on Element/Stock/Flow/Variable (Medium)
 All rely on identity equality.
 
-### DESIGN — Flow.history and Variable.history grow unboundedly (Medium)
-`clearHistory()` exists but is not called automatically.
-
 ### DESIGN — No model-level accessor for all flows (Low)
 Flows are only reachable through stocks.
-
-### DESIGN — `Stock.setNegativeValuePolicy()` allows mid-simulation mutation (Low)
 
 ### DESIGN — `addStock`/`addConstant` allow duplicate names without warning (Low)
 
@@ -68,7 +48,6 @@ When `NegativeValuePolicy` clamps to zero, the flow's recorded value reflects th
 
 ### MINOR
 - No null check on `Flow` timeUnit constructor parameter
-- `NegativeValuePolicy` field not final
 - `Constant` accepts NaN as initial value
 - `Element.setComment(null)` undocumented
 - `ArrayedFlow.create` overload accepts unused stock parameter
@@ -76,9 +55,6 @@ When `NegativeValuePolicy` clamps to zero, the flow's recorded value reflects th
 ---
 
 ## 3. SD Functions (Smooth, Delay3, Step, Ramp, LookupTable)
-
-### DESIGN — Smooth and Delay3 are not resettable (Medium)
-No `reset()` method. Cannot reuse across simulation runs without recreating objects.
 
 ### DESIGN — Smooth and Delay3 internal stages are opaque (Low)
 No accessors for debugging or conservation-of-material verification.
@@ -108,17 +84,11 @@ Same-named stock and variable: `getPercentileSeries` silently picks the first ma
 ### DESIGN — RunResult has two constructors with lossy semantics (Medium)
 Can't populate both `parameterValue` and `parameterMap`.
 
-### DESIGN — Platform-default encoding in CSV writers (Low)
-`CsvSubscriber` / `SweepCsvWriter` should specify UTF-8.
-
 ### DESIGN — `MonteCarlo.reseedRandomGenerator` mutates caller's objects (Low)
 Side effect not documented.
 
 ### DESIGN — No defensive copy of arrays/lists (Low)
 `ParameterSweep.Builder`, `SweepResult`, `MonteCarloResult` don't defensively copy.
-
-### DESIGN — Cartesian product OOM risk (Low)
-`MultiParameterSweep` has no size guard on the parameter grid.
 
 ### DESIGN — RuntimeException wrapping loses type information (Low)
 

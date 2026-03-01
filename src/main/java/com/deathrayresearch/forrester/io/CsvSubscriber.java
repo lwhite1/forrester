@@ -12,8 +12,10 @@ import org.slf4j.LoggerFactory;
 
 import java.io.Closeable;
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -45,7 +47,8 @@ public class CsvSubscriber implements EventHandler, Closeable {
             parent.mkdirs();
         }
         try {
-            csvWriter = new CSVWriter(new FileWriter(fileName));
+            csvWriter = new CSVWriter(new OutputStreamWriter(
+                    Files.newOutputStream(Paths.get(fileName)), StandardCharsets.UTF_8));
         } catch (IOException e) {
             throw new RuntimeException("Failed to open CSV file: " + fileName, e);
         }

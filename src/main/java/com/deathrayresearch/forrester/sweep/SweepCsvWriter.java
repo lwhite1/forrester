@@ -5,8 +5,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
@@ -33,7 +35,8 @@ public final class SweepCsvWriter {
     public static void writeTimeSeries(SweepResult sweepResult, String filePath) {
         ensureParentDir(filePath);
 
-        try (CSVWriter writer = new CSVWriter(new FileWriter(filePath))) {
+        try (CSVWriter writer = new CSVWriter(new OutputStreamWriter(
+                    Files.newOutputStream(Paths.get(filePath)), StandardCharsets.UTF_8))) {
             // Header
             List<String> header = new ArrayList<>();
             header.add(sweepResult.getParameterName());
@@ -76,7 +79,8 @@ public final class SweepCsvWriter {
     public static void writeSummary(SweepResult sweepResult, String filePath) {
         ensureParentDir(filePath);
 
-        try (CSVWriter writer = new CSVWriter(new FileWriter(filePath))) {
+        try (CSVWriter writer = new CSVWriter(new OutputStreamWriter(
+                    Files.newOutputStream(Paths.get(filePath)), StandardCharsets.UTF_8))) {
             // Header
             List<String> header = new ArrayList<>();
             header.add(sweepResult.getParameterName());
@@ -114,7 +118,8 @@ public final class SweepCsvWriter {
     public static void writeTimeSeries(MultiSweepResult result, String filePath) {
         ensureParentDir(filePath);
 
-        try (CSVWriter writer = new CSVWriter(new FileWriter(filePath))) {
+        try (CSVWriter writer = new CSVWriter(new OutputStreamWriter(
+                    Files.newOutputStream(Paths.get(filePath)), StandardCharsets.UTF_8))) {
             // Header
             List<String> header = new ArrayList<>();
             header.addAll(result.getParameterNames());
@@ -160,7 +165,8 @@ public final class SweepCsvWriter {
     public static void writeSummary(MultiSweepResult result, String filePath) {
         ensureParentDir(filePath);
 
-        try (CSVWriter writer = new CSVWriter(new FileWriter(filePath))) {
+        try (CSVWriter writer = new CSVWriter(new OutputStreamWriter(
+                    Files.newOutputStream(Paths.get(filePath)), StandardCharsets.UTF_8))) {
             // Header
             List<String> header = new ArrayList<>();
             header.addAll(result.getParameterNames());

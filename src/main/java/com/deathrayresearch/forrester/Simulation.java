@@ -32,6 +32,10 @@ import java.util.Set;
  *
  * <p>At each step, events are fired <em>before</em> stocks are updated, so event handlers
  * observe the stock values from the previous step (or initial values at step 0).
+ *
+ * <p><strong>Threading:</strong> This class is not thread-safe. A single {@code Simulation}
+ * instance must be accessed from one thread at a time. The {@link #execute()} method runs
+ * the entire simulation loop synchronously on the calling thread.
  */
 public class Simulation {
 
@@ -183,5 +187,23 @@ public class Simulation {
 
     public int getCurrentStep() {
         return currentStep;
+    }
+
+    /**
+     * Clears recorded history from all flows and variables in the model.
+     * Call this before re-running a simulation to avoid stale history data.
+     */
+    public void clearHistory() {
+        for (Stock stock : model.getStocks()) {
+            for (Flow flow : stock.getInflows()) {
+                flow.clearHistory();
+            }
+            for (Flow flow : stock.getOutflows()) {
+                flow.clearHistory();
+            }
+        }
+        for (Variable variable : model.getVariables()) {
+            variable.clearHistory();
+        }
     }
 }

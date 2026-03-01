@@ -46,9 +46,23 @@ public class MultiParameterSweep {
      *
      * @return a {@link MultiSweepResult} containing one {@link RunResult} per combination
      */
+    /** Maximum number of parameter combinations allowed before the sweep refuses to execute. */
+    private static final int MAX_COMBINATIONS = 1_000_000;
+
     public MultiSweepResult execute() {
         List<String> paramNames = new ArrayList<>(parameters.keySet());
         List<double[]> paramArrays = new ArrayList<>(parameters.values());
+
+        long combinationCount = 1;
+        for (double[] arr : paramArrays) {
+            combinationCount *= arr.length;
+            if (combinationCount > MAX_COMBINATIONS) {
+                throw new IllegalStateException(
+                        "Cartesian product of parameter arrays exceeds " + MAX_COMBINATIONS
+                        + " combinations. Reduce the number of parameter values to avoid out-of-memory errors.");
+            }
+        }
+
         List<Map<String, Double>> combinations = cartesianProduct(paramNames, paramArrays);
 
         List<RunResult> results = new ArrayList<>();

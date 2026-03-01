@@ -77,6 +77,16 @@ public class Smooth implements Formula {
         return new Smooth(input, smoothingTime, currentStep, initialValue, true);
     }
 
+    /**
+     * Resets this Smooth to its uninitialized state so it can be reused across simulation runs.
+     * The next call to {@link #getCurrentValue()} will re-initialize from the input or explicit initial value.
+     */
+    public void reset() {
+        smoothed = 0;
+        initialized = false;
+        lastStep = -1;
+    }
+
     @Override
     public double getCurrentValue() {
         int step = currentStep.getAsInt();
