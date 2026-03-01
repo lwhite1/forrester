@@ -24,9 +24,13 @@ public class Units {
     public static final Unit THING = ItemUnits.THING;
 
     // length
-    public static final Unit FOOT = LengthUnits.FOOT;
-    public static final Unit INCH = LengthUnits.INCH;
+    public static final Unit MILLIMETER = LengthUnits.MILLIMETER;
+    public static final Unit CENTIMETER = LengthUnits.CENTIMETER;
     public static final Unit METER = LengthUnits.METER;
+    public static final Unit KILOMETER = LengthUnits.KILOMETER;
+    public static final Unit INCH = LengthUnits.INCH;
+    public static final Unit FOOT = LengthUnits.FOOT;
+    public static final Unit YARD = LengthUnits.YARD;
     public static final Unit MILE = LengthUnits.MILE;
     public static final Unit NAUTICAL_MILE = LengthUnits.NAUTICAL_MILE;
 
