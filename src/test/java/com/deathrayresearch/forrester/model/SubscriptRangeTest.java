@@ -180,6 +180,44 @@ public class SubscriptRangeTest {
     }
 
     @Test
+    public void shouldThrowWhenLabelIsInvalid() {
+        SubscriptRange range = new SubscriptRange(List.of(region, ageGroup));
+        assertThrows(IllegalArgumentException.class,
+                () -> range.toFlatIndex("North", "INVALID"));
+        assertThrows(IllegalArgumentException.class,
+                () -> range.toFlatIndex("INVALID", "Young"));
+    }
+
+    @Test
+    public void shouldRemoveMiddleDimensionFrom3D() {
+        Subscript dim1 = new Subscript("A", "a0", "a1");
+        Subscript dim2 = new Subscript("B", "b0", "b1", "b2");
+        Subscript dim3 = new Subscript("C", "c0", "c1");
+        SubscriptRange range = new SubscriptRange(List.of(dim1, dim2, dim3));
+        SubscriptRange reduced = range.removeDimension(1);  // remove B
+        assertEquals(2, reduced.dimensionCount());
+        assertEquals("A", reduced.getSubscript(0).getName());
+        assertEquals("C", reduced.getSubscript(1).getName());
+        assertEquals(4, reduced.totalSize());  // 2 * 2
+        assertEquals(0, reduced.toFlatIndex(0, 0));
+        assertEquals(3, reduced.toFlatIndex(1, 1));
+    }
+
+    @Test
+    public void shouldThrowOnOverflow() {
+        // Create subscripts whose product would overflow int
+        // 50000 * 50000 = 2.5 billion > Integer.MAX_VALUE
+        String[] labels = new String[50000];
+        for (int i = 0; i < labels.length; i++) {
+            labels[i] = "L" + i;
+        }
+        Subscript big1 = new Subscript("Big1", labels);
+        Subscript big2 = new Subscript("Big2", labels);
+        assertThrows(IllegalArgumentException.class,
+                () -> new SubscriptRange(List.of(big1, big2)));
+    }
+
+    @Test
     public void shouldWorkWithThreeDimensions() {
         Subscript dim1 = new Subscript("A", "a0", "a1");
         Subscript dim2 = new Subscript("B", "b0", "b1", "b2");

@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class SubscriptTest {
@@ -81,5 +82,34 @@ public class SubscriptTest {
         Subscript region = new Subscript("Region", "North", "South");
         String str = region.toString();
         assertEquals("Region[North, South]", str);
+    }
+
+    @Test
+    public void shouldBeEqualWhenSameNameAndLabels() {
+        Subscript a = new Subscript("Region", "North", "South", "East");
+        Subscript b = new Subscript("Region", "North", "South", "East");
+        assertEquals(a, b);
+        assertEquals(a.hashCode(), b.hashCode());
+    }
+
+    @Test
+    public void shouldNotBeEqualWhenDifferentName() {
+        Subscript a = new Subscript("Region", "North", "South");
+        Subscript b = new Subscript("Area", "North", "South");
+        assertNotEquals(a, b);
+    }
+
+    @Test
+    public void shouldNotBeEqualWhenDifferentLabels() {
+        Subscript a = new Subscript("Region", "North", "South");
+        Subscript b = new Subscript("Region", "East", "West");
+        assertNotEquals(a, b);
+    }
+
+    @Test
+    public void shouldNotBeEqualWhenDifferentLabelOrder() {
+        Subscript a = new Subscript("Region", "North", "South");
+        Subscript b = new Subscript("Region", "South", "North");
+        assertNotEquals(a, b);
     }
 }

@@ -51,14 +51,13 @@ public class ArrayedFlow {
     }
 
     /**
-     * Convenience factory that captures an arrayed stock reference for use in the formula.
-     * Identical to {@link #create(String, TimeUnit, Subscript, IntFunction)} but makes the
-     * stock dependency explicit in the API.
+     * Convenience factory identical to {@link #create(String, TimeUnit, Subscript, IntFunction)}
+     * that accepts a stock parameter for API documentation purposes. The stock should be referenced
+     * via closure in the formula; the parameter itself is not used.
      *
      * @param baseName  the base name
      * @param timeUnit  the time unit for the flow rate
-     * @param stock     the arrayed stock this flow operates on (for documentation; the formula
-     *                  should reference it via closure)
+     * @param stock     the arrayed stock (for documentation; reference via closure in the formula)
      * @param subscript the subscript dimension
      * @param formula   a function from element index to the quantity per time unit
      * @return a new arrayed flow

@@ -21,8 +21,11 @@ public class MultiArrayedVariable {
     private final SubscriptRange range;
     private final Variable[] variables;
 
-    private MultiArrayedVariable(String baseName, SubscriptRange range, Variable[] variables) {
+    private final Unit unit;
+
+    private MultiArrayedVariable(String baseName, Unit unit, SubscriptRange range, Variable[] variables) {
         this.baseName = baseName;
+        this.unit = unit;
         this.range = range;
         this.variables = variables;
     }
@@ -47,7 +50,7 @@ public class MultiArrayedVariable {
                     () -> formula.applyAsDouble(coords)
             );
         }
-        return new MultiArrayedVariable(baseName, range, variables);
+        return new MultiArrayedVariable(baseName, unit, range, variables);
     }
 
     /**
@@ -70,7 +73,7 @@ public class MultiArrayedVariable {
                     () -> formula.applyAsDouble(index)
             );
         }
-        return new MultiArrayedVariable(baseName, range, variables);
+        return new MultiArrayedVariable(baseName, unit, range, variables);
     }
 
     /**
@@ -171,6 +174,10 @@ public class MultiArrayedVariable {
 
     public String getBaseName() {
         return baseName;
+    }
+
+    public Unit getUnit() {
+        return unit;
     }
 
     public SubscriptRange getRange() {

@@ -131,6 +131,7 @@ public class MultiArrayedVariableTest {
         MultiArrayedVariable var = MultiArrayedVariable.create("V", PEOPLE, range,
                 coords -> 0);
         assertEquals("V", var.getBaseName());
+        assertEquals(PEOPLE, var.getUnit());
         assertEquals(range, var.getRange());
     }
 }

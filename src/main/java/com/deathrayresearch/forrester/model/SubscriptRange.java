@@ -46,13 +46,18 @@ public class SubscriptRange {
         }
         this.subscripts = Collections.unmodifiableList(new ArrayList<>(subscripts));
 
-        // Compute strides (row-major)
+        // Compute strides (row-major), using Math.multiplyExact to detect overflow
         int dims = subscripts.size();
         this.strides = new int[dims];
         int stride = 1;
         for (int d = dims - 1; d >= 0; d--) {
             strides[d] = stride;
-            stride *= subscripts.get(d).size();
+            try {
+                stride = Math.multiplyExact(stride, subscripts.get(d).size());
+            } catch (ArithmeticException e) {
+                throw new IllegalArgumentException(
+                        "SubscriptRange total size overflows int: product of dimension sizes is too large");
+            }
         }
         this.totalSize = stride;
 
@@ -174,6 +179,10 @@ public class SubscriptRange {
      * @return the composed name
      */
     public String composeName(String baseName, int flatIndex) {
+        if (flatIndex < 0 || flatIndex >= totalSize) {
+            throw new IllegalArgumentException(
+                    "Flat index " + flatIndex + " out of range (totalSize=" + totalSize + ")");
+        }
         List<String> labels = combinations.get(flatIndex);
         StringJoiner joiner = new StringJoiner(",");
         for (String label : labels) {
@@ -189,6 +198,10 @@ public class SubscriptRange {
      * @return an unmodifiable list of labels, one per dimension
      */
     public List<String> getLabelsAt(int flatIndex) {
+        if (flatIndex < 0 || flatIndex >= totalSize) {
+            throw new IllegalArgumentException(
+                    "Flat index " + flatIndex + " out of range (totalSize=" + totalSize + ")");
+        }
         return combinations.get(flatIndex);
     }
 

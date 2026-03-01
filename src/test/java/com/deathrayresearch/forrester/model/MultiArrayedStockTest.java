@@ -7,6 +7,7 @@ import java.util.List;
 
 import static com.deathrayresearch.forrester.measure.Units.DAY;
 import static com.deathrayresearch.forrester.measure.Units.PEOPLE;
+import static com.deathrayresearch.forrester.measure.Units.US_DOLLAR;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -228,5 +229,85 @@ public class MultiArrayedStockTest {
         assertEquals("X[a1,b1,c1]", stock.getStock(7).getName());
         assertEquals(10, stock.getValueAt(1, 0, 1), 0.0);
         assertEquals(80, stock.sum(), 0.0);
+    }
+
+    @Test
+    public void shouldSumOverMiddleDimensionIn3D() {
+        Subscript dim1 = new Subscript("A", "a0", "a1");
+        Subscript dim2 = new Subscript("B", "b0", "b1");
+        Subscript dim3 = new Subscript("C", "c0", "c1");
+        SubscriptRange range3d = new SubscriptRange(List.of(dim1, dim2, dim3));
+
+        // Values 0..7 in row-major order
+        double[] values = {0, 1, 2, 3, 4, 5, 6, 7};
+        MultiArrayedStock stock = new MultiArrayedStock("X", range3d, values, PEOPLE);
+
+        // Collapse middle dim (B, size 2): result has 2*2=4 elements for A×C
+        // [a0,c0]: val[a0,b0,c0]+val[a0,b1,c0] = 0+2 = 2
+        // [a0,c1]: val[a0,b0,c1]+val[a0,b1,c1] = 1+3 = 4
+        // [a1,c0]: val[a1,b0,c0]+val[a1,b1,c0] = 4+6 = 10
+        // [a1,c1]: val[a1,b0,c1]+val[a1,b1,c1] = 5+7 = 12
+        double[] result = stock.sumOver(1);
+        assertEquals(4, result.length);
+        assertEquals(2, result[0], 0.0);
+        assertEquals(4, result[1], 0.0);
+        assertEquals(10, result[2], 0.0);
+        assertEquals(12, result[3], 0.0);
+    }
+
+    @Test
+    public void shouldSliceMiddleDimensionIn3D() {
+        Subscript dim1 = new Subscript("A", "a0", "a1");
+        Subscript dim2 = new Subscript("B", "b0", "b1");
+        Subscript dim3 = new Subscript("C", "c0", "c1");
+        SubscriptRange range3d = new SubscriptRange(List.of(dim1, dim2, dim3));
+
+        double[] values = {0, 1, 2, 3, 4, 5, 6, 7};
+        MultiArrayedStock stock = new MultiArrayedStock("X", range3d, values, PEOPLE);
+
+        // Fix B to "b1" (index 1) → elements where coords[1]==1
+        // [a0,b1,c0]=2, [a0,b1,c1]=3, [a1,b1,c0]=6, [a1,b1,c1]=7
+        Stock[] slice = stock.slice(1, "b1");
+        assertEquals(4, slice.length);
+        assertEquals("X[a0,b1,c0]", slice[0].getName());
+        assertEquals("X[a0,b1,c1]", slice[1].getName());
+        assertEquals("X[a1,b1,c0]", slice[2].getName());
+        assertEquals("X[a1,b1,c1]", slice[3].getName());
+        assertEquals(2, slice[0].getValue(), 0.0);
+        assertEquals(7, slice[3].getValue(), 0.0);
+    }
+
+    @Test
+    public void shouldThrowWhenWiringMismatchedSizeFlow() {
+        Subscript s1 = new Subscript("S1", "x", "y");
+        Subscript s2 = new Subscript("S2", "a", "b");
+        SubscriptRange range2x2 = new SubscriptRange(List.of(s1, s2));
+
+        MultiArrayedStock stock = new MultiArrayedStock("Pop", range, 100, PEOPLE);  // 3x3 = 9
+        MultiArrayedFlow flow = MultiArrayedFlow.create("F", DAY, range2x2,
+                coords -> new Quantity(1, PEOPLE));  // 2x2 = 4
+
+        assertThrows(IllegalArgumentException.class, () -> stock.addInflow(flow));
+        assertThrows(IllegalArgumentException.class, () -> stock.addOutflow(flow));
+    }
+
+    @Test
+    public void shouldSupportNegativeValuePolicyAllow() {
+        MultiArrayedStock balance = new MultiArrayedStock("Balance", range,
+                -100, US_DOLLAR, NegativeValuePolicy.ALLOW);
+        assertEquals(-100, balance.getValue(0), 0.0);
+        assertEquals(-100, balance.getValueAt("North", "Young"), 0.0);
+    }
+
+    @Test
+    public void shouldSupportNegativeValuePolicyThrow() {
+        assertThrows(IllegalArgumentException.class,
+                () -> new MultiArrayedStock("X", range, -1, PEOPLE, NegativeValuePolicy.THROW));
+    }
+
+    @Test
+    public void shouldDefaultToClampToZero() {
+        MultiArrayedStock stock = new MultiArrayedStock("X", range, -50, PEOPLE);
+        assertEquals(0, stock.getValue(0), 0.0);
     }
 }

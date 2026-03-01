@@ -75,9 +75,9 @@ public class MultiArrayedFlow {
     }
 
     /**
-     * Convenience factory that captures a multi-arrayed stock reference for use in the formula.
-     * Identical to {@link #create(String, TimeUnit, SubscriptRange, Function)} but makes the
-     * stock dependency explicit in the API.
+     * Convenience factory identical to {@link #create(String, TimeUnit, SubscriptRange, Function)}
+     * that accepts a stock parameter for API documentation purposes. The stock should be referenced
+     * via closure in the formula; the parameter itself is not used.
      */
     public static MultiArrayedFlow create(String baseName, TimeUnit timeUnit, MultiArrayedStock stock,
                                            SubscriptRange range, Function<int[], Quantity> formula) {

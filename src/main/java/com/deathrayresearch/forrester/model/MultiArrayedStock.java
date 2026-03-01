@@ -24,6 +24,7 @@ public class MultiArrayedStock {
 
     /**
      * Creates a multi-arrayed stock with the same initial value for every element.
+     * Uses {@link NegativeValuePolicy#CLAMP_TO_ZERO} by default.
      *
      * @param baseName     the base name (each stock is named "baseName[label0,label1,...]")
      * @param range        the multi-dimensional subscript range
@@ -31,17 +32,33 @@ public class MultiArrayedStock {
      * @param unit         the unit of measure
      */
     public MultiArrayedStock(String baseName, SubscriptRange range, double initialValue, Unit unit) {
+        this(baseName, range, initialValue, unit, NegativeValuePolicy.CLAMP_TO_ZERO);
+    }
+
+    /**
+     * Creates a multi-arrayed stock with the same initial value for every element and
+     * an explicit negative-value policy.
+     *
+     * @param baseName            the base name
+     * @param range               the multi-dimensional subscript range
+     * @param initialValue        the initial value for every element
+     * @param unit                the unit of measure
+     * @param negativeValuePolicy the policy for handling negative values
+     */
+    public MultiArrayedStock(String baseName, SubscriptRange range, double initialValue, Unit unit,
+                              NegativeValuePolicy negativeValuePolicy) {
         this.baseName = baseName;
         this.range = range;
         this.unit = unit;
         this.stocks = new Stock[range.totalSize()];
         for (int i = 0; i < range.totalSize(); i++) {
-            stocks[i] = new Stock(range.composeName(baseName, i), initialValue, unit);
+            stocks[i] = new Stock(range.composeName(baseName, i), initialValue, unit, negativeValuePolicy);
         }
     }
 
     /**
      * Creates a multi-arrayed stock with per-element initial values in row-major order.
+     * Uses {@link NegativeValuePolicy#CLAMP_TO_ZERO} by default.
      *
      * @param baseName      the base name
      * @param range         the multi-dimensional subscript range
@@ -50,6 +67,21 @@ public class MultiArrayedStock {
      * @throws IllegalArgumentException if the array length doesn't match the range's total size
      */
     public MultiArrayedStock(String baseName, SubscriptRange range, double[] initialValues, Unit unit) {
+        this(baseName, range, initialValues, unit, NegativeValuePolicy.CLAMP_TO_ZERO);
+    }
+
+    /**
+     * Creates a multi-arrayed stock with per-element initial values and an explicit negative-value policy.
+     *
+     * @param baseName            the base name
+     * @param range               the multi-dimensional subscript range
+     * @param initialValues       the initial values, one per element in row-major order
+     * @param unit                the unit of measure
+     * @param negativeValuePolicy the policy for handling negative values
+     * @throws IllegalArgumentException if the array length doesn't match the range's total size
+     */
+    public MultiArrayedStock(String baseName, SubscriptRange range, double[] initialValues, Unit unit,
+                              NegativeValuePolicy negativeValuePolicy) {
         if (initialValues.length != range.totalSize()) {
             throw new IllegalArgumentException(
                     "Expected " + range.totalSize() + " initial values but got " + initialValues.length);
@@ -59,7 +91,7 @@ public class MultiArrayedStock {
         this.unit = unit;
         this.stocks = new Stock[range.totalSize()];
         for (int i = 0; i < range.totalSize(); i++) {
-            stocks[i] = new Stock(range.composeName(baseName, i), initialValues[i], unit);
+            stocks[i] = new Stock(range.composeName(baseName, i), initialValues[i], unit, negativeValuePolicy);
         }
     }
 
@@ -208,8 +240,14 @@ public class MultiArrayedStock {
 
     /**
      * Connects each flow in the multi-arrayed flow as an inflow to the corresponding stock (1:1 by flat index).
+     *
+     * @throws IllegalArgumentException if the flow's size doesn't match this stock's size
      */
     public void addInflow(MultiArrayedFlow multiArrayedFlow) {
+        if (multiArrayedFlow.size() != stocks.length) {
+            throw new IllegalArgumentException(
+                    "Flow size (" + multiArrayedFlow.size() + ") does not match stock size (" + stocks.length + ")");
+        }
         for (int i = 0; i < stocks.length; i++) {
             stocks[i].addInflow(multiArrayedFlow.getFlow(i));
         }
@@ -217,8 +255,14 @@ public class MultiArrayedStock {
 
     /**
      * Connects each flow in the multi-arrayed flow as an outflow from the corresponding stock (1:1 by flat index).
+     *
+     * @throws IllegalArgumentException if the flow's size doesn't match this stock's size
      */
     public void addOutflow(MultiArrayedFlow multiArrayedFlow) {
+        if (multiArrayedFlow.size() != stocks.length) {
+            throw new IllegalArgumentException(
+                    "Flow size (" + multiArrayedFlow.size() + ") does not match stock size (" + stocks.length + ")");
+        }
         for (int i = 0; i < stocks.length; i++) {
             stocks[i].addOutflow(multiArrayedFlow.getFlow(i));
         }

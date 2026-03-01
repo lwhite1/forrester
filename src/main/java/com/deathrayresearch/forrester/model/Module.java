@@ -81,6 +81,15 @@ public class Module extends Element {
     }
 
     /**
+     * Expands a multi-arrayed variable into this module's variable map.
+     */
+    public void addMultiArrayedVariable(MultiArrayedVariable multiArrayedVariable) {
+        for (Variable variable : multiArrayedVariable.getVariables()) {
+            variables.put(variable.getName(), variable);
+        }
+    }
+
+    /**
      * Adds a flow to this module.
      */
     public void addFlow(Flow rate) {

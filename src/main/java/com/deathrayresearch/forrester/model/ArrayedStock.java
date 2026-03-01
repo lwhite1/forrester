@@ -24,6 +24,7 @@ public class ArrayedStock {
 
     /**
      * Creates an arrayed stock with the same initial value for every element.
+     * Uses {@link NegativeValuePolicy#CLAMP_TO_ZERO} by default.
      *
      * @param baseName     the base name (each stock is named "baseName[label]")
      * @param subscript    the subscript dimension
@@ -31,17 +32,34 @@ public class ArrayedStock {
      * @param unit         the unit of measure
      */
     public ArrayedStock(String baseName, Subscript subscript, double initialValue, Unit unit) {
+        this(baseName, subscript, initialValue, unit, NegativeValuePolicy.CLAMP_TO_ZERO);
+    }
+
+    /**
+     * Creates an arrayed stock with the same initial value for every element and
+     * an explicit negative-value policy.
+     *
+     * @param baseName            the base name
+     * @param subscript           the subscript dimension
+     * @param initialValue        the initial value for every element
+     * @param unit                the unit of measure
+     * @param negativeValuePolicy the policy for handling negative values
+     */
+    public ArrayedStock(String baseName, Subscript subscript, double initialValue, Unit unit,
+                         NegativeValuePolicy negativeValuePolicy) {
         this.baseName = baseName;
         this.subscript = subscript;
         this.unit = unit;
         this.stocks = new Stock[subscript.size()];
         for (int i = 0; i < subscript.size(); i++) {
-            stocks[i] = new Stock(baseName + "[" + subscript.getLabel(i) + "]", initialValue, unit);
+            stocks[i] = new Stock(baseName + "[" + subscript.getLabel(i) + "]", initialValue, unit,
+                    negativeValuePolicy);
         }
     }
 
     /**
      * Creates an arrayed stock with per-element initial values.
+     * Uses {@link NegativeValuePolicy#CLAMP_TO_ZERO} by default.
      *
      * @param baseName      the base name (each stock is named "baseName[label]")
      * @param subscript     the subscript dimension
@@ -50,6 +68,21 @@ public class ArrayedStock {
      * @throws IllegalArgumentException if the array length doesn't match the subscript size
      */
     public ArrayedStock(String baseName, Subscript subscript, double[] initialValues, Unit unit) {
+        this(baseName, subscript, initialValues, unit, NegativeValuePolicy.CLAMP_TO_ZERO);
+    }
+
+    /**
+     * Creates an arrayed stock with per-element initial values and an explicit negative-value policy.
+     *
+     * @param baseName            the base name
+     * @param subscript           the subscript dimension
+     * @param initialValues       the initial values, one per subscript element
+     * @param unit                the unit of measure
+     * @param negativeValuePolicy the policy for handling negative values
+     * @throws IllegalArgumentException if the array length doesn't match the subscript size
+     */
+    public ArrayedStock(String baseName, Subscript subscript, double[] initialValues, Unit unit,
+                         NegativeValuePolicy negativeValuePolicy) {
         if (initialValues.length != subscript.size()) {
             throw new IllegalArgumentException(
                     "Expected " + subscript.size() + " initial values but got " + initialValues.length);
@@ -59,7 +92,8 @@ public class ArrayedStock {
         this.unit = unit;
         this.stocks = new Stock[subscript.size()];
         for (int i = 0; i < subscript.size(); i++) {
-            stocks[i] = new Stock(baseName + "[" + subscript.getLabel(i) + "]", initialValues[i], unit);
+            stocks[i] = new Stock(baseName + "[" + subscript.getLabel(i) + "]", initialValues[i], unit,
+                    negativeValuePolicy);
         }
     }
 
@@ -120,8 +154,13 @@ public class ArrayedStock {
      * Connects each flow in the arrayed flow as an inflow to the corresponding stock.
      *
      * @param arrayedFlow the arrayed flow whose elements become inflows
+     * @throws IllegalArgumentException if the flow's size doesn't match this stock's size
      */
     public void addInflow(ArrayedFlow arrayedFlow) {
+        if (arrayedFlow.size() != stocks.length) {
+            throw new IllegalArgumentException(
+                    "Flow size (" + arrayedFlow.size() + ") does not match stock size (" + stocks.length + ")");
+        }
         for (int i = 0; i < stocks.length; i++) {
             stocks[i].addInflow(arrayedFlow.getFlow(i));
         }
@@ -131,8 +170,13 @@ public class ArrayedStock {
      * Connects each flow in the arrayed flow as an outflow from the corresponding stock.
      *
      * @param arrayedFlow the arrayed flow whose elements become outflows
+     * @throws IllegalArgumentException if the flow's size doesn't match this stock's size
      */
     public void addOutflow(ArrayedFlow arrayedFlow) {
+        if (arrayedFlow.size() != stocks.length) {
+            throw new IllegalArgumentException(
+                    "Flow size (" + arrayedFlow.size() + ") does not match stock size (" + stocks.length + ")");
+        }
         for (int i = 0; i < stocks.length; i++) {
             stocks[i].addOutflow(arrayedFlow.getFlow(i));
         }
