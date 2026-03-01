@@ -2,39 +2,37 @@
 
 Audit of `IndexedValue.java`, `IndexedValueTest.java`, and the `getIndexedValue()` convenience methods added to `ArrayedStock`, `ArrayedVariable`, `MultiArrayedStock`, and `MultiArrayedVariable`.
 
-## Priority 1 — Should fix
+## Priority 1 — ~~Should fix~~ Fixed
 
-### 1.1 No null-parameter validation in factory methods
+### 1.1 ~~No null-parameter validation in factory methods~~ Fixed
 
-**Files:** `IndexedValue.java:53`, `IndexedValue.java:69`
+**Files:** `IndexedValue.java:55-57`, `IndexedValue.java:73-75`, `IndexedValue.java:87`, `IndexedValue.java:97`
 
-`of(Subscript, double...)` and `of(SubscriptRange, double[])` don't validate null arguments. Passing `null` produces a confusing `NullPointerException` deep inside `SubscriptRange` or at `values.length` rather than a clear error at the API boundary.
+`Preconditions.checkNotNull()` added to all four factory methods: `of(Subscript, double...)`, `of(SubscriptRange, double[])`, `fill(SubscriptRange, double)`, and `fill(Subscript, double)`. Null arguments now throw `NullPointerException` with descriptive messages at the API boundary.
 
-**Fix:** Add `Preconditions.checkNotNull()` or explicit null checks at the top of each factory method. Consistent with how `Stock`, `Variable`, and `Quantity` validate their constructor arguments.
+**Tests:** 6 tests in `NullValidation` nested class verify null rejection for every factory method parameter.
 
-### 1.2 `get(int flatIndex)` has no bounds checking
+### 1.2 ~~`get(int flatIndex)` has no bounds checking~~ Fixed
 
-**File:** `IndexedValue.java:119-121`
+**File:** `IndexedValue.java:129-133`
 
-`get(int)` directly indexes into the raw array. An out-of-range index produces `ArrayIndexOutOfBoundsException` with no context about the IndexedValue's size. By contrast, `getAt(int...)` delegates to `SubscriptRange.toFlatIndex()` which throws `IllegalArgumentException` with a descriptive message.
+`get(int)` now validates bounds explicitly and throws `IndexOutOfBoundsException` with a message including the flat index and array size: `"Flat index X out of range (size=Y)"`.
 
-**Fix:** Add a bounds check: `if (flatIndex < 0 || flatIndex >= values.length) throw new IndexOutOfBoundsException(...)`. Or at minimum, document that it throws `ArrayIndexOutOfBoundsException`.
+**Tests:** 3 tests in `BoundsChecking` nested class cover negative index, index equal to size, and index far beyond size.
 
 ## Priority 2 — Design issues
 
-### 2.1 Per-element array allocation in broadcasting loop
+### 2.1 ~~Per-element array allocation in broadcasting loop~~ Fixed
 
-**File:** `IndexedValue.java:384`, `IndexedValue.java:288`
+**Files:** `IndexedValue.java:300-321` (`sumOver`), `IndexedValue.java:388-422` (`broadcastOp`)
 
-Both `broadcastOp()` and `sumOver()` call `resultRange.toCoordinates(i)` inside a loop, which allocates a new `int[]` on every iteration. For a `[100 × 100 × 10]` value (100,000 elements), this creates 100K short-lived arrays per operation.
+Both `broadcastOp()` and `sumOver()` were rewritten to use stride arithmetic instead of `toCoordinates()`. A new `SubscriptRange.getStrides()` method exposes the precomputed stride array (returns a defensive copy). The inner loops decompose flat indices into coordinates and recompose into left/right flat indices using precomputed stride maps — zero per-iteration array allocations.
 
-**Impact:** Not a problem for typical SD models (subscripts rarely exceed ~50 elements per dimension). Would matter if IndexedValue were used in inner-loop Monte Carlo or optimization where the same operation runs thousands of times.
-
-**Fix (if needed):** Inline the coordinate decomposition using stride arithmetic instead of delegating to `toCoordinates()`. The strides are already computed inside `SubscriptRange` but not publicly exposed.
+This also resolved P3.2 (fragile coordinate array reuse) since `leftCoords` and `rightCoords` arrays no longer exist.
 
 ### 2.2 Result dimension order depends on operand order
 
-**File:** `IndexedValue.java:357-363`
+**File:** `IndexedValue.java:379-386`
 
 Broadcasting puts left dimensions first, then right-only dimensions. This means:
 - `[Region] + [AgeGroup]` → `[Region × AgeGroup]`
@@ -44,7 +42,7 @@ Both contain the same values, but the dimension ordering differs. Downstream cod
 
 **Impact:** Could surprise users. Analytica avoids this by maintaining a canonical dimension order per variable. NumPy avoids it by not having named dimensions.
 
-**Not necessarily a bug** — the current behavior is consistent and tested. But should be documented clearly in the class javadoc.
+**Not necessarily a bug** — the current behavior is consistent and tested (see `ReversedDimensionOrder` test class). The class Javadoc documents the broadcasting behavior.
 
 ### 2.3 No NaN/Infinity validation
 
@@ -61,39 +59,35 @@ Both contain the same values, but the dimension ordering differs. Downstream cod
 
 ### 2.4 Private constructor doesn't clone its array argument
 
-**File:** `IndexedValue.java:32-35`
+**File:** `IndexedValue.java:34-37`
 
 The private constructor stores the array reference directly. This is safe today because all call sites pass freshly-created arrays. But if a future code change passes an externally-owned array to the constructor, immutability breaks silently.
 
 **Fix:** Either clone in the constructor (defensive, small perf cost) or add a comment documenting the contract.
 
-## Priority 3 — Test coverage gaps
+## Priority 3 — ~~Test coverage gaps~~ Largely resolved
 
-### 3.1 Missing edge case tests
+### 3.1 ~~Missing edge case tests~~ Mostly fixed
 
-| Missing test | Risk |
+| Test | Status |
 |---|---|
-| Single-element subscript (1 label) | Broadcasting with a 1-element dimension is a degenerate case that should work but isn't tested |
-| Null arguments to factory methods | Should verify clean error messages after P1.1 fix |
-| `getAt(int...)` with wrong coordinate count | Delegates to SubscriptRange, which throws — but not tested through IndexedValue |
-| `subtract(double)` and `divide(double)` scalar convenience overloads | Only `add(double)` and `multiply(double)` are tested via the ScalarBroadcast group |
+| Single-element subscript (1 label) | **Fixed** — `SingleElementSubscript` nested class (3 tests) |
+| Null arguments to factory methods | **Fixed** — `NullValidation` nested class (6 tests) |
+| `getAt(int...)` with wrong coordinate count | **Fixed** — `BoundsChecking.shouldRejectWrongCoordinateCount` |
+| `subtract(double)` and `divide(double)` scalar overloads | **Fixed** — `ScalarConvenienceOverloads` nested class (3 tests) |
 | `toString()` output | Not tested; minor |
-| Same dimensions, different order: `[Region × AgeGroup]` op `[AgeGroup × Region]` | Shared dimensions should align by name regardless of position. The `shouldBroadcast_ageGroup_plus_regionAge` test covers a partial case but doesn't test two multi-dimensional operands with reversed dimension order |
+| Same dimensions, different order: `[Region × AgeGroup]` op `[AgeGroup × Region]` | **Fixed** — `ReversedDimensionOrder.shouldAlignSharedDimensionsRegardlessOfOrder` |
 
-### 3.2 Fragile coordinate array reuse in broadcastOp
+### 3.2 ~~Fragile coordinate array reuse in broadcastOp~~ Resolved
 
-**File:** `IndexedValue.java:380-381`
-
-`leftCoords` and `rightCoords` are allocated once and mutated each iteration. Every entry is overwritten because the result range contains all dimensions from both operands. But if the dimension-mapping logic were changed to skip a dimension, stale values from the previous iteration would silently produce wrong results.
-
-**Recommendation:** Add a comment explaining the invariant, or zero the arrays at the top of each iteration (small perf cost, safer).
+No longer applicable. The P2.1 fix replaced the mutable `leftCoords`/`rightCoords` arrays with stride-based arithmetic that computes flat indices directly — no coordinate arrays are allocated or reused.
 
 ## Summary
 
-| Priority | Count | Effort |
+| Priority | Count | Status |
 |---|---|---|
-| P1 (should fix) | 2 | ~30 min |
-| P2 (design issues) | 4 | ~1-2 hours if addressed |
-| P3 (test gaps) | 2 | ~1 hour |
+| P1 (should fix) | 2 | Both fixed with tests |
+| P2 (design issues) | 4 | 1 fixed (2.1), 3 remaining (2.2, 2.3, 2.4) |
+| P3 (test gaps) | 2 | Both resolved (only `toString()` test still missing — minor) |
 
-Overall the implementation is correct — all 53 tests pass, the broadcasting logic handles the tested scenarios, and immutability is maintained through defensive copying in factory methods. The issues above are hardening items, not correctness bugs.
+Overall the implementation is correct and hardened — all 509 tests pass, null arguments are rejected at API boundaries, flat index access is bounds-checked, broadcasting and aggregation loops use allocation-free stride arithmetic, and edge cases (single-element subscripts, reversed dimension order, wrong coordinate count) are tested. The remaining items (2.2, 2.3, 2.4) are documentation and defensive-coding considerations, not correctness issues.
