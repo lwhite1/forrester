@@ -33,6 +33,7 @@ System Dynamics models are built from four fundamental elements:
 - **Variables** - Calculated quantities derived from formulas that may reference stocks, constants, or other variables.
 - **Constants** - Fixed exogenous values that parameterize the model.
 - **Lookup Tables** - Piecewise interpolation curves for modeling nonlinear effects (e.g., "effect of crowding on birth rate"). Supports linear and cubic spline interpolation.
+- **Subscripts / Arrays** - Dimensions that expand a single stock, flow, or variable definition into N parallel instances (e.g., `Population[North]`, `Population[South]`, `Population[East]`). Enables modeling of multiple regions, products, or cohorts without duplicating stocks manually.
 
 These elements are connected into feedback loops that drive system behavior over time.
 
@@ -43,7 +44,8 @@ These elements are connected into feedback loops that drive system behavior over
 ```
 com.deathrayresearch.forrester
 ├── Simulation.java              # Core simulation engine
-├── model/                       # Model elements (Stock, Flow, Flows, Variable, Constant, Module)
+├── model/                       # Model elements (Stock, Flow, Flows, Variable, Constant, Module,
+│   │                            #   Subscript, ArrayedStock, ArrayedFlow, ArrayedVariable)
 │   └── flows/                   # Rate conversion utilities
 ├── measure/                     # Dimensional analysis and unit system
 ├── event/                       # Event-driven communication
@@ -150,6 +152,62 @@ Stock balance = new Stock("Balance", -500, US_DOLLAR, NegativeValuePolicy.ALLOW)
 // Change policy after construction
 inventory.setNegativeValuePolicy(NegativeValuePolicy.THROW);
 ```
+
+### Subscripts / Arrays
+
+Subscripts let you define a dimension (e.g., Region) and create arrayed stocks, flows, and variables that expand to one instance per element. Each expanded element is named `"BaseName[label]"` (e.g., `"Population[North]"`), and is transparently expanded into the model's flat stock/variable list — the simulation loop and all output infrastructure work without changes.
+
+**Define a dimension and create arrayed elements:**
+
+```java
+// Define a subscript dimension
+Subscript region = new Subscript("Region", "North", "South", "East");
+
+// Create an arrayed stock — one Stock per element
+ArrayedStock population = new ArrayedStock("Population", region, 1000, PEOPLE);
+
+// Per-element initial values
+ArrayedStock infectious = new ArrayedStock("Infectious", region,
+    new double[]{10, 0, 0}, PEOPLE);
+
+// Create an arrayed flow with index-aware formula
+ArrayedFlow births = ArrayedFlow.create("Births", DAY, region,
+    i -> new Quantity(population.getValue(i) * 0.04, PEOPLE));
+population.addInflow(births);
+
+// Create an arrayed variable
+ArrayedVariable totalPop = ArrayedVariable.create("TotalPop", PEOPLE, region,
+    i -> susceptible.getValue(i) + infectious.getValue(i) + recovered.getValue(i));
+
+// Add to model — expands into 3 stocks + 3 flows automatically
+model.addArrayedStock(population);
+model.addArrayedVariable(totalPop);
+```
+
+**Access individual elements:**
+
+```java
+double north = population.getValue(0);            // by index
+double south = population.getValue("South");       // by label
+double total = population.sum();                   // aggregate
+Stock northStock = population.getStock(0);         // raw Stock access
+```
+
+**Cross-element flows** (e.g., migration between regions) use scalar `Flow.create()` referencing specific array elements:
+
+```java
+Flow migration = Flow.create("Migration[North->South]", DAY,
+    () -> new Quantity(infectious.getValue("North") * migrationRate, PEOPLE));
+infectious.getStock("North").addOutflow(migration);
+infectious.getStock("South").addInflow(migration);
+```
+
+| Class | Purpose |
+|---|---|
+| `Subscript` | Immutable dimension definition with name and labels |
+| `ArrayedStock` | Wraps N `Stock` instances — uniform or per-element initial values |
+| `ArrayedFlow` | Wraps N `Flow` instances with index-aware formula |
+| `ArrayedVariable` | Wraps N `Variable` instances with index-aware formula |
 
 ### Standard SD Functions
 
@@ -378,6 +436,8 @@ The demo package (`src/main/java/.../demo/`) contains a rich set of example mode
 
 **SirCalibrationDemo** — Demonstrates model calibration via a twin experiment. Generates synthetic observed data by running the SIR model with known parameters (contactRate=8.0, infectivity=0.10), then uses the `Optimizer` with Nelder-Mead and a sum-of-squared-errors objective to recover those parameters from the synthetic data. Reports recovered vs true values and fit error.
 
+**MultiRegionSirDemo** — Extends the SIR model to three regions (North, South, East) using subscripts. Each region has its own S/I/R arrayed stocks with independent infection and recovery dynamics. Small daily migration flows (1% of infectious) move infected individuals between regions, seeding outbreaks that started in the North. Demonstrates `Subscript`, `ArrayedStock`, `ArrayedFlow`, and cross-element scalar flows.
+
 **PredatorPreyDemo** — Implements the Lotka-Volterra predator-prey model. Prey (Rabbits) and predator (Foxes) populations are coupled through birth and death flows that depend on both species' levels. The model produces sustained oscillations where predator peaks lag prey peaks.
 
 **InventoryModelDemo** — Models a car dealership's inventory with perception (5-day), response (3-day), and delivery (5-day) delays, inspired by *Thinking in Systems*. A step increase in demand causes the dealer to overshoot and oscillate before settling, demonstrating how delays in feedback loops amplify fluctuations.
@@ -443,6 +503,7 @@ New to system dynamics? These resources provide a solid introduction to the meth
 
 The project is at version 1.0-SNAPSHOT and is under active development. Recent work has focused on:
 
+- Adding arrays/subscripts support — `Subscript`, `ArrayedStock`, `ArrayedFlow`, and `ArrayedVariable` enable dimensioned model elements (regions, cohorts, products) that transparently expand into the flat simulation loop
 - Adding `Optimizer` for model calibration — wraps Apache Commons Math derivative-free optimizers (Nelder-Mead, BOBYQA, CMA-ES) behind a builder API with built-in objective functions (SSE fit-to-data, minimize, maximize, target, minimize-peak) for automated parameter fitting against observed data
 - Adding `MultiParameterSweep` runner for combinatorial grid analysis — computes the Cartesian product of N parameter arrays, runs every combination, and exports multi-column CSV output for interaction analysis
 - Adding `MonteCarlo` runner for uncertainty analysis — samples multiple parameters from probability distributions (Normal, Uniform, Triangular, etc.) via random or Latin Hypercube Sampling, aggregates results into percentile envelopes, and visualizes as fan charts
