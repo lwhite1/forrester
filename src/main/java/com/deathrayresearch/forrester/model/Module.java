@@ -63,6 +63,15 @@ public class Module extends Element {
     }
 
     /**
+     * Expands an arrayed stock into this module's stock map.
+     */
+    public void addArrayedStock(ArrayedStock arrayedStock) {
+        for (Stock stock : arrayedStock.getStocks()) {
+            stocks.put(stock.getName(), stock);
+        }
+    }
+
+    /**
      * Adds a flow to this module.
      */
     public void addFlow(Flow rate) {

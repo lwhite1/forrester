@@ -55,6 +55,26 @@ public class Model extends Element {
     }
 
     /**
+     * Expands an arrayed stock into this model's flat stock list, skipping duplicates.
+     */
+    public void addArrayedStock(ArrayedStock arrayedStock) {
+        for (Stock stock : arrayedStock.getStocks()) {
+            if (!stocks.contains(stock)) {
+                stocks.add(stock);
+            }
+        }
+    }
+
+    /**
+     * Expands an arrayed variable into this model's flat variable map, skipping duplicates.
+     */
+    public void addArrayedVariable(ArrayedVariable arrayedVariable) {
+        for (Variable variable : arrayedVariable.getVariables()) {
+            variables.putIfAbsent(variable.getName(), variable);
+        }
+    }
+
+    /**
      * Adds a module to this model, automatically registering its stocks and variables
      * into the model's own collections (skipping duplicates).
      */
