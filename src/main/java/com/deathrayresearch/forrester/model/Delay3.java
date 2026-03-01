@@ -29,6 +29,11 @@ import java.util.function.IntSupplier;
  * <p>If no initial value is provided, the first input value is used (standard SD convention).
  * The three stages are initialized so that the output equals the initial value at time zero.
  *
+ * <p>Response characteristics: a step increase in input produces a smooth S-shaped rise
+ * in output, reaching ~95% of the new level after approximately 2x the delay time. The
+ * peak output rate for a pulse input occurs at the delay time. This makes DELAY3 useful
+ * for modeling supply chains, manufacturing pipelines, and construction delays.
+ *
  * <pre>{@code
  * // Delay material shipments by 6 timesteps
  * Delay3 delayed = Delay3.of(() -> orders.getValue(), 6, sim::getCurrentStep);

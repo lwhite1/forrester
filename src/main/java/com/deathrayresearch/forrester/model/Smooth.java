@@ -20,6 +20,10 @@ import java.util.function.IntSupplier;
  *
  * <p>If no initial value is provided, the first input value is used (standard SD convention).
  *
+ * <p>Response characteristics: after one smoothing time, the output reaches ~63% of a
+ * step change in the input. After three smoothing times, it reaches ~95%. This makes
+ * SMOOTH useful for modeling perception delays, trend averaging, and adaptive expectations.
+ *
  * <pre>{@code
  * // Smooth perceived demand over 5 timesteps
  * Smooth perceived = Smooth.of(() -> actualDemand.getValue(), 5, sim::getCurrentStep);
