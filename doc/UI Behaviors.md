@@ -26,6 +26,30 @@ This document serves as the source of truth for user-facing documentation and he
 - Stocks, auxiliaries, and constants get a rectangular indicator
 - Flow indicators get a diamond-shaped indicator matching their shape
 
+## Element Creation
+
+| Action | Input | Notes |
+|--------|-------|-------|
+| Enter placement mode | Click a toolbar button (Stock, Flow, Auxiliary, Constant) | Button stays toggled; cursor is ready to place elements |
+| Place element | Left-click on empty canvas (in placement mode) | Creates element at click position with auto-generated name |
+| Exit placement mode | Press Escape, or click the Select button | Returns to select/drag mode |
+
+- Elements are auto-named with incrementing numbers: "Stock 1", "Stock 2", "Flow 3", etc.
+- Newly created flows start as cloud-to-cloud (no stock connections)
+- After placement, the new element is automatically selected
+- Connectors (info links) are regenerated after each creation
+
+## Element Deletion
+
+| Action | Input | Notes |
+|--------|-------|-------|
+| Delete selected | Delete or Backspace key | Removes all selected elements from the model |
+
+- If a deleted stock is referenced as a flow's source or sink, that connection becomes a cloud (null)
+- Formula references to deleted elements become invalid (user must fix manually)
+- No cascade deletion — only the selected elements are removed
+- Connectors (info links) are regenerated after deletion
+
 ## Element Manipulation
 
 | Action | Input | Notes |
@@ -39,14 +63,24 @@ This document serves as the source of truth for user-facing documentation and he
 |--------|-------|-------|
 | Resize | Drag window border | Canvas redraws to fill available space |
 
+## Keyboard Shortcuts
+
+| Key | Action |
+|-----|--------|
+| Delete / Backspace | Delete selected elements |
+| Escape | Reset tool to Select mode |
+| Space (hold) | Enable pan mode while held |
+
 ## Not Yet Implemented
 
+- Port-based drag to connect flows to stocks
+- Double-click inline equation editing
+- Element renaming
 - Rubber-band (marquee) selection
 - Context toolbar near selection
-- Drag from port to create flow/connector
-- Double-click inline equation editing
 - Functional resize handles
 - Hover highlighting / feedback loop highlighting
 - Cursor shape changes (hand for pan, move for drag, etc.)
-- Keyboard shortcuts (Delete to remove, Ctrl+A to select all, etc.)
+- Additional keyboard shortcuts (Ctrl+A to select all, etc.)
 - Undo/redo
+- Model save/load to disk

@@ -2,8 +2,9 @@ package com.deathrayresearch.forrester.app.canvas;
 
 import com.deathrayresearch.forrester.model.def.ConnectorRoute;
 import com.deathrayresearch.forrester.model.def.ConstantDef;
+import com.deathrayresearch.forrester.model.def.ElementPlacement;
 import com.deathrayresearch.forrester.model.def.FlowDef;
-import com.deathrayresearch.forrester.model.def.ModelDefinition;
+import com.deathrayresearch.forrester.model.def.StockDef;
 import com.deathrayresearch.forrester.model.def.ViewDef;
 
 import javafx.scene.canvas.Canvas;
@@ -14,23 +15,30 @@ import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.ScrollEvent;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
  * Canvas component that renders a model using the Layered Flow Diagram visual language.
  * Supports pan (Space+drag, middle/right drag), zoom (scroll wheel),
- * click-to-select, and drag-to-move.
+ * click-to-select, drag-to-move, element creation (toolbar placement mode),
+ * and element deletion (Delete/Backspace key).
  */
 public class ModelCanvas extends Canvas {
 
     private static final double ZOOM_FACTOR = 1.1;
 
-    private ModelDefinition definition;
-    private ViewDef view;
+    private ModelEditor editor;
+    private List<ConnectorRoute> connectors = List.of();
 
     private final Viewport viewport = new Viewport();
     private final CanvasState canvasState = new CanvasState();
+
+    // Tool state
+    private CanvasToolBar.Tool activeTool = CanvasToolBar.Tool.SELECT;
+    private CanvasToolBar toolBar;
 
     // Drag/pan state
     private boolean dragging;
@@ -56,13 +64,27 @@ public class ModelCanvas extends Canvas {
     }
 
     /**
-     * Sets the model and view data, triggering a redraw.
+     * Sets the model editor and loads canvas state from a layout view, triggering a redraw.
      */
-    public void setModel(ModelDefinition definition, ViewDef view) {
-        this.definition = definition;
-        this.view = view;
+    public void setModel(ModelEditor editor, ViewDef view) {
+        this.editor = editor;
         canvasState.loadFrom(view);
+        this.connectors = editor.generateConnectors();
         redraw();
+    }
+
+    /**
+     * Sets the active tool (called by toolbar callback).
+     */
+    public void setActiveTool(CanvasToolBar.Tool tool) {
+        this.activeTool = tool;
+    }
+
+    /**
+     * Sets a reference to the toolbar so the canvas can reset it on Escape.
+     */
+    public void setToolBar(CanvasToolBar toolBar) {
+        this.toolBar = toolBar;
     }
 
     @Override
@@ -94,19 +116,19 @@ public class ModelCanvas extends Canvas {
         gc.setFill(ColorPalette.BACKGROUND);
         gc.fillRect(0, 0, w, h);
 
-        if (definition == null || view == null) {
+        if (editor == null) {
             return;
         }
 
         // Build lookup for constant values
         Map<String, ConstantDef> constantMap = new HashMap<>();
-        for (ConstantDef c : definition.constants()) {
+        for (ConstantDef c : editor.getConstants()) {
             constantMap.put(c.name(), c);
         }
 
         // Build lookup for stock units
         Map<String, String> stockUnitMap = new HashMap<>();
-        for (var s : definition.stocks()) {
+        for (StockDef s : editor.getStocks()) {
             stockUnitMap.put(s.name(), s.unit());
         }
 
@@ -166,7 +188,7 @@ public class ModelCanvas extends Canvas {
      * Reads positions from CanvasState.
      */
     private void drawMaterialFlows(GraphicsContext gc) {
-        for (FlowDef flow : definition.flows()) {
+        for (FlowDef flow : editor.getFlows()) {
             double sourceX = Double.NaN;
             double sourceY = Double.NaN;
             double sinkX = Double.NaN;
@@ -186,11 +208,11 @@ public class ModelCanvas extends Canvas {
     }
 
     /**
-     * Draws info link dashed arrows based on connector routes.
+     * Draws info link dashed arrows based on cached connector routes.
      * Reads positions from CanvasState.
      */
     private void drawInfoLinks(GraphicsContext gc) {
-        for (ConnectorRoute route : view.connectors()) {
+        for (ConnectorRoute route : connectors) {
             String fromName = route.from();
             String toName = route.to();
 
@@ -219,6 +241,66 @@ public class ModelCanvas extends Canvas {
         }
     }
 
+    /**
+     * Creates a new element at the given world coordinates based on the active tool.
+     * Adds to both the model editor and canvas state, then regenerates connectors.
+     */
+    private void createElementAt(double worldX, double worldY) {
+        if (editor == null) {
+            return;
+        }
+
+        String name;
+        String type;
+
+        switch (activeTool) {
+            case PLACE_STOCK -> {
+                name = editor.addStock();
+                type = "stock";
+            }
+            case PLACE_FLOW -> {
+                name = editor.addFlow();
+                type = "flow";
+            }
+            case PLACE_AUX -> {
+                name = editor.addAux();
+                type = "aux";
+            }
+            case PLACE_CONSTANT -> {
+                name = editor.addConstant();
+                type = "constant";
+            }
+            default -> {
+                return;
+            }
+        }
+
+        canvasState.addElement(name, type, worldX, worldY);
+        connectors = editor.generateConnectors();
+        canvasState.clearSelection();
+        canvasState.select(name);
+        redraw();
+    }
+
+    /**
+     * Deletes all currently selected elements from the model and canvas.
+     * Regenerates connectors after removal.
+     */
+    private void deleteSelected() {
+        if (editor == null || canvasState.getSelection().isEmpty()) {
+            return;
+        }
+
+        List<String> toDelete = new ArrayList<>(canvasState.getSelection());
+        for (String name : toDelete) {
+            editor.removeElement(name);
+            canvasState.removeElement(name);
+        }
+
+        connectors = editor.generateConnectors();
+        redraw();
+    }
+
     // --- Event handlers ---
 
     private void handleScroll(ScrollEvent event) {
@@ -245,6 +327,18 @@ public class ModelCanvas extends Canvas {
         if (event.getButton() == MouseButton.PRIMARY) {
             double worldX = viewport.toWorldX(event.getX());
             double worldY = viewport.toWorldY(event.getY());
+
+            // Placement mode: if a PLACE_* tool is active and click is on empty space, create element
+            if (activeTool != CanvasToolBar.Tool.SELECT) {
+                String hit = HitTester.hitTest(canvasState, worldX, worldY);
+                if (hit == null) {
+                    createElementAt(worldX, worldY);
+                    event.consume();
+                    return;
+                }
+            }
+
+            // Select mode
             String hit = HitTester.hitTest(canvasState, worldX, worldY);
 
             if (hit != null) {
@@ -315,6 +409,15 @@ public class ModelCanvas extends Canvas {
     private void handleKeyPressed(KeyEvent event) {
         if (event.getCode() == KeyCode.SPACE) {
             spaceDown = true;
+            event.consume();
+        } else if (event.getCode() == KeyCode.DELETE || event.getCode() == KeyCode.BACK_SPACE) {
+            deleteSelected();
+            event.consume();
+        } else if (event.getCode() == KeyCode.ESCAPE) {
+            if (toolBar != null) {
+                toolBar.resetToSelect();
+            }
+            activeTool = CanvasToolBar.Tool.SELECT;
             event.consume();
         }
     }

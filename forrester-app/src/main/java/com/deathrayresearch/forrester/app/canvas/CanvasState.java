@@ -131,4 +131,26 @@ public class CanvasState {
     public boolean hasElement(String name) {
         return positions.containsKey(name);
     }
+
+    /**
+     * Adds a new element to the canvas state with the given position and type.
+     * If an element with the same name already exists, it is overwritten.
+     */
+    public void addElement(String name, String type, double x, double y) {
+        positions.put(name, new double[]{x, y});
+        types.put(name, type);
+        if (!drawOrder.contains(name)) {
+            drawOrder.add(name);
+        }
+    }
+
+    /**
+     * Removes the named element from all canvas state (positions, types, draw order, selection).
+     */
+    public void removeElement(String name) {
+        positions.remove(name);
+        types.remove(name);
+        drawOrder.remove(name);
+        selection.remove(name);
+    }
 }

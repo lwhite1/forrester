@@ -197,4 +197,91 @@ class CanvasStateTest {
             assertThat(state.getSelection()).isEmpty();
         }
     }
+
+    @Nested
+    @DisplayName("addElement")
+    class AddElement {
+
+        @Test
+        void shouldAddNewElement() {
+            state.addElement("NewStock", "stock", 300, 400);
+
+            assertThat(state.hasElement("NewStock")).isTrue();
+            assertThat(state.getX("NewStock")).isCloseTo(300, within(0.001));
+            assertThat(state.getY("NewStock")).isCloseTo(400, within(0.001));
+            assertThat(state.getType("NewStock")).isEqualTo("stock");
+        }
+
+        @Test
+        void shouldAppendToDrawOrder() {
+            state.addElement("A", "stock", 0, 0);
+            state.addElement("B", "aux", 100, 0);
+
+            assertThat(state.getDrawOrder()).containsExactly("A", "B");
+        }
+
+        @Test
+        void shouldOverwriteExistingElement() {
+            state.addElement("X", "stock", 10, 20);
+            state.addElement("X", "aux", 50, 60);
+
+            assertThat(state.getType("X")).isEqualTo("aux");
+            assertThat(state.getX("X")).isCloseTo(50, within(0.001));
+            // Should not duplicate in draw order
+            assertThat(state.getDrawOrder()).containsExactly("X");
+        }
+    }
+
+    @Nested
+    @DisplayName("removeElement")
+    class RemoveElement {
+
+        @BeforeEach
+        void loadElements() {
+            ViewDef view = new ViewDef("test", List.of(
+                    new ElementPlacement("A", "stock", 0, 0),
+                    new ElementPlacement("B", "stock", 100, 0),
+                    new ElementPlacement("C", "aux", 200, 0)
+            ), List.of(), List.of());
+            state.loadFrom(view);
+        }
+
+        @Test
+        void shouldRemoveFromPositions() {
+            state.removeElement("B");
+
+            assertThat(state.hasElement("B")).isFalse();
+            assertThat(state.getX("B")).isNaN();
+        }
+
+        @Test
+        void shouldRemoveFromDrawOrder() {
+            state.removeElement("B");
+
+            assertThat(state.getDrawOrder()).containsExactly("A", "C");
+        }
+
+        @Test
+        void shouldRemoveFromSelection() {
+            state.select("B");
+            state.removeElement("B");
+
+            assertThat(state.getSelection()).isEmpty();
+        }
+
+        @Test
+        void shouldRemoveFromTypes() {
+            state.removeElement("B");
+
+            assertThat(state.getType("B")).isNull();
+        }
+
+        @Test
+        void shouldNotAffectOtherElements() {
+            state.removeElement("B");
+
+            assertThat(state.hasElement("A")).isTrue();
+            assertThat(state.hasElement("C")).isTrue();
+        }
+    }
 }
