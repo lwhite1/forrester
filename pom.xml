@@ -13,6 +13,7 @@
         <module>forrester-engine</module>
         <module>forrester-ui</module>
         <module>forrester-demos</module>
+        <module>forrester-app</module>
     </modules>
 
     <properties>
@@ -44,11 +45,21 @@
                 <artifactId>forrester-ui</artifactId>
                 <version>${project.version}</version>
             </dependency>
+            <dependency>
+                <groupId>com.deathrayresearch</groupId>
+                <artifactId>forrester-app</artifactId>
+                <version>${project.version}</version>
+            </dependency>
 
             <!-- JavaFX -->
             <dependency>
                 <groupId>org.openjfx</groupId>
                 <artifactId>javafx-controls</artifactId>
+                <version>${javafx.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.openjfx</groupId>
+                <artifactId>javafx-graphics</artifactId>
                 <version>${javafx.version}</version>
             </dependency>
             <dependency>

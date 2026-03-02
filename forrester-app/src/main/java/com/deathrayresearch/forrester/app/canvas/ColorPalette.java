@@ -1,0 +1,25 @@
+package com.deathrayresearch.forrester.app.canvas;
+
+import javafx.scene.paint.Color;
+
+/**
+ * Layered Flow Diagram color constants.
+ */
+public final class ColorPalette {
+
+    private ColorPalette() {
+    }
+
+    public static final Color STOCK_BORDER = Color.web("#2C3E50");
+    public static final Color STOCK_FILL = Color.WHITE;
+    public static final Color AUX_BORDER = Color.web("#7F8C8D");
+    public static final Color CONSTANT_BORDER = Color.web("#BDC3C7");
+    public static final Color MATERIAL_FLOW = Color.web("#2C3E50");
+    public static final Color INFO_LINK = Color.web("#7F8C8D", 0.6);
+    public static final Color SAME_DIRECTION = Color.web("#4A90D9");
+    public static final Color OPPOSITE_DIRECTION = Color.web("#D97B4A");
+    public static final Color BACKGROUND = Color.web("#F8F9FA");
+    public static final Color TEXT = Color.web("#2C3E50");
+    public static final Color TEXT_SECONDARY = Color.web("#7F8C8D");
+    public static final Color CLOUD = Color.web("#BDC3C7");
+}
