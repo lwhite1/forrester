@@ -4,7 +4,9 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.within;
 
 @DisplayName("ExprParser")
 class ExprParserTest {
@@ -16,42 +18,42 @@ class ExprParserTest {
         @Test
         void shouldParseInteger() {
             Expr result = ExprParser.parse("42");
-            assertInstanceOf(Expr.Literal.class, result);
-            assertEquals(42.0, ((Expr.Literal) result).value());
+            assertThat(result).isInstanceOf(Expr.Literal.class);
+            assertThat(((Expr.Literal) result).value()).isEqualTo(42.0);
         }
 
         @Test
         void shouldParseDecimal() {
             Expr result = ExprParser.parse("3.14");
-            assertInstanceOf(Expr.Literal.class, result);
-            assertEquals(3.14, ((Expr.Literal) result).value(), 1e-10);
+            assertThat(result).isInstanceOf(Expr.Literal.class);
+            assertThat(((Expr.Literal) result).value()).isCloseTo(3.14, within(1e-10));
         }
 
         @Test
         void shouldParseScientificNotation() {
             Expr result = ExprParser.parse("1.5e3");
-            assertInstanceOf(Expr.Literal.class, result);
-            assertEquals(1500.0, ((Expr.Literal) result).value());
+            assertThat(result).isInstanceOf(Expr.Literal.class);
+            assertThat(((Expr.Literal) result).value()).isEqualTo(1500.0);
         }
 
         @Test
         void shouldParseNegativeExponent() {
             Expr result = ExprParser.parse("2.5E-4");
-            assertInstanceOf(Expr.Literal.class, result);
-            assertEquals(2.5e-4, ((Expr.Literal) result).value(), 1e-15);
+            assertThat(result).isInstanceOf(Expr.Literal.class);
+            assertThat(((Expr.Literal) result).value()).isCloseTo(2.5e-4, within(1e-15));
         }
 
         @Test
         void shouldParseLeadingDecimalPoint() {
             Expr result = ExprParser.parse(".5");
-            assertInstanceOf(Expr.Literal.class, result);
-            assertEquals(0.5, ((Expr.Literal) result).value());
+            assertThat(result).isInstanceOf(Expr.Literal.class);
+            assertThat(((Expr.Literal) result).value()).isEqualTo(0.5);
         }
 
         @Test
         void shouldParseZero() {
             Expr result = ExprParser.parse("0");
-            assertEquals(new Expr.Literal(0.0), result);
+            assertThat(result).isEqualTo(new Expr.Literal(0.0));
         }
     }
 
@@ -62,25 +64,25 @@ class ExprParserTest {
         @Test
         void shouldParseSimpleIdentifier() {
             Expr result = ExprParser.parse("Population");
-            assertEquals(new Expr.Ref("Population"), result);
+            assertThat(result).isEqualTo(new Expr.Ref("Population"));
         }
 
         @Test
         void shouldParseIdentifierWithUnderscore() {
             Expr result = ExprParser.parse("Birth_Rate");
-            assertEquals(new Expr.Ref("Birth_Rate"), result);
+            assertThat(result).isEqualTo(new Expr.Ref("Birth_Rate"));
         }
 
         @Test
         void shouldParseQuotedIdentifier() {
             Expr result = ExprParser.parse("`Tasks Remaining`");
-            assertEquals(new Expr.Ref("Tasks Remaining"), result);
+            assertThat(result).isEqualTo(new Expr.Ref("Tasks Remaining"));
         }
 
         @Test
         void shouldParseQuotedIdentifierWithSpecialChars() {
             Expr result = ExprParser.parse("`Coffee Temperature`");
-            assertEquals(new Expr.Ref("Coffee Temperature"), result);
+            assertThat(result).isEqualTo(new Expr.Ref("Coffee Temperature"));
         }
     }
 
@@ -91,81 +93,73 @@ class ExprParserTest {
         @Test
         void shouldParseAddition() {
             Expr result = ExprParser.parse("a + b");
-            assertEquals(
-                    new Expr.BinaryOp(new Expr.Ref("a"), BinaryOperator.ADD, new Expr.Ref("b")),
-                    result);
+            assertThat(result).isEqualTo(
+                    new Expr.BinaryOp(new Expr.Ref("a"), BinaryOperator.ADD, new Expr.Ref("b")));
         }
 
         @Test
         void shouldParseSubtraction() {
             Expr result = ExprParser.parse("a - b");
-            assertEquals(
-                    new Expr.BinaryOp(new Expr.Ref("a"), BinaryOperator.SUB, new Expr.Ref("b")),
-                    result);
+            assertThat(result).isEqualTo(
+                    new Expr.BinaryOp(new Expr.Ref("a"), BinaryOperator.SUB, new Expr.Ref("b")));
         }
 
         @Test
         void shouldParseMultiplication() {
             Expr result = ExprParser.parse("a * b");
-            assertEquals(
-                    new Expr.BinaryOp(new Expr.Ref("a"), BinaryOperator.MUL, new Expr.Ref("b")),
-                    result);
+            assertThat(result).isEqualTo(
+                    new Expr.BinaryOp(new Expr.Ref("a"), BinaryOperator.MUL, new Expr.Ref("b")));
         }
 
         @Test
         void shouldParseDivision() {
             Expr result = ExprParser.parse("a / b");
-            assertEquals(
-                    new Expr.BinaryOp(new Expr.Ref("a"), BinaryOperator.DIV, new Expr.Ref("b")),
-                    result);
+            assertThat(result).isEqualTo(
+                    new Expr.BinaryOp(new Expr.Ref("a"), BinaryOperator.DIV, new Expr.Ref("b")));
         }
 
         @Test
         void shouldParseModulo() {
             Expr result = ExprParser.parse("a % b");
-            assertEquals(
-                    new Expr.BinaryOp(new Expr.Ref("a"), BinaryOperator.MOD, new Expr.Ref("b")),
-                    result);
+            assertThat(result).isEqualTo(
+                    new Expr.BinaryOp(new Expr.Ref("a"), BinaryOperator.MOD, new Expr.Ref("b")));
         }
 
         @Test
         void shouldParsePower() {
             Expr result = ExprParser.parse("a ^ b");
-            assertEquals(
-                    new Expr.BinaryOp(new Expr.Ref("a"), BinaryOperator.POW, new Expr.Ref("b")),
-                    result);
+            assertThat(result).isEqualTo(
+                    new Expr.BinaryOp(new Expr.Ref("a"), BinaryOperator.POW, new Expr.Ref("b")));
         }
 
         @Test
         void shouldParseComparisons() {
-            assertEquals(BinaryOperator.EQ,
-                    ((Expr.BinaryOp) ExprParser.parse("a == b")).operator());
-            assertEquals(BinaryOperator.NE,
-                    ((Expr.BinaryOp) ExprParser.parse("a != b")).operator());
-            assertEquals(BinaryOperator.LT,
-                    ((Expr.BinaryOp) ExprParser.parse("a < b")).operator());
-            assertEquals(BinaryOperator.LE,
-                    ((Expr.BinaryOp) ExprParser.parse("a <= b")).operator());
-            assertEquals(BinaryOperator.GT,
-                    ((Expr.BinaryOp) ExprParser.parse("a > b")).operator());
-            assertEquals(BinaryOperator.GE,
-                    ((Expr.BinaryOp) ExprParser.parse("a >= b")).operator());
+            assertThat(((Expr.BinaryOp) ExprParser.parse("a == b")).operator())
+                    .isEqualTo(BinaryOperator.EQ);
+            assertThat(((Expr.BinaryOp) ExprParser.parse("a != b")).operator())
+                    .isEqualTo(BinaryOperator.NE);
+            assertThat(((Expr.BinaryOp) ExprParser.parse("a < b")).operator())
+                    .isEqualTo(BinaryOperator.LT);
+            assertThat(((Expr.BinaryOp) ExprParser.parse("a <= b")).operator())
+                    .isEqualTo(BinaryOperator.LE);
+            assertThat(((Expr.BinaryOp) ExprParser.parse("a > b")).operator())
+                    .isEqualTo(BinaryOperator.GT);
+            assertThat(((Expr.BinaryOp) ExprParser.parse("a >= b")).operator())
+                    .isEqualTo(BinaryOperator.GE);
         }
 
         @Test
         void shouldParseLogicalOr() {
             Expr result = ExprParser.parse("a || b");
-            assertEquals(
-                    new Expr.BinaryOp(new Expr.Ref("a"), BinaryOperator.OR, new Expr.Ref("b")),
-                    result);
+            assertThat(result).isEqualTo(
+                    new Expr.BinaryOp(new Expr.Ref("a"), BinaryOperator.OR, new Expr.Ref("b")));
         }
 
         @Test
         void shouldParseLogicalAnd() {
             Expr result = ExprParser.parse("a && b");
-            assertEquals(
-                    new Expr.BinaryOp(new Expr.Ref("a"), BinaryOperator.AND, new Expr.Ref("b")),
-                    result);
+            assertThat(result).isEqualTo(
+                    new Expr.BinaryOp(new Expr.Ref("a"), BinaryOperator.AND, new Expr.Ref("b")));
         }
     }
 
@@ -178,10 +172,10 @@ class ExprParserTest {
             // a + b * c  should parse as  a + (b * c)
             Expr result = ExprParser.parse("a + b * c");
             Expr.BinaryOp top = (Expr.BinaryOp) result;
-            assertEquals(BinaryOperator.ADD, top.operator());
-            assertEquals(new Expr.Ref("a"), top.left());
+            assertThat(top.operator()).isEqualTo(BinaryOperator.ADD);
+            assertThat(top.left()).isEqualTo(new Expr.Ref("a"));
             Expr.BinaryOp right = (Expr.BinaryOp) top.right();
-            assertEquals(BinaryOperator.MUL, right.operator());
+            assertThat(right.operator()).isEqualTo(BinaryOperator.MUL);
         }
 
         @Test
@@ -189,8 +183,8 @@ class ExprParserTest {
             // (a + b) * c
             Expr result = ExprParser.parse("(a + b) * c");
             Expr.BinaryOp top = (Expr.BinaryOp) result;
-            assertEquals(BinaryOperator.MUL, top.operator());
-            assertInstanceOf(Expr.BinaryOp.class, top.left());
+            assertThat(top.operator()).isEqualTo(BinaryOperator.MUL);
+            assertThat(top.left()).isInstanceOf(Expr.BinaryOp.class);
         }
 
         @Test
@@ -198,12 +192,12 @@ class ExprParserTest {
             // a ^ b ^ c  should parse as  a ^ (b ^ c)
             Expr result = ExprParser.parse("a ^ b ^ c");
             Expr.BinaryOp top = (Expr.BinaryOp) result;
-            assertEquals(BinaryOperator.POW, top.operator());
-            assertEquals(new Expr.Ref("a"), top.left());
+            assertThat(top.operator()).isEqualTo(BinaryOperator.POW);
+            assertThat(top.left()).isEqualTo(new Expr.Ref("a"));
             Expr.BinaryOp right = (Expr.BinaryOp) top.right();
-            assertEquals(BinaryOperator.POW, right.operator());
-            assertEquals(new Expr.Ref("b"), right.left());
-            assertEquals(new Expr.Ref("c"), right.right());
+            assertThat(right.operator()).isEqualTo(BinaryOperator.POW);
+            assertThat(right.left()).isEqualTo(new Expr.Ref("b"));
+            assertThat(right.right()).isEqualTo(new Expr.Ref("c"));
         }
 
         @Test
@@ -211,10 +205,10 @@ class ExprParserTest {
             // a - b + c  should parse as  (a - b) + c
             Expr result = ExprParser.parse("a - b + c");
             Expr.BinaryOp top = (Expr.BinaryOp) result;
-            assertEquals(BinaryOperator.ADD, top.operator());
-            assertEquals(new Expr.Ref("c"), top.right());
+            assertThat(top.operator()).isEqualTo(BinaryOperator.ADD);
+            assertThat(top.right()).isEqualTo(new Expr.Ref("c"));
             Expr.BinaryOp left = (Expr.BinaryOp) top.left();
-            assertEquals(BinaryOperator.SUB, left.operator());
+            assertThat(left.operator()).isEqualTo(BinaryOperator.SUB);
         }
 
         @Test
@@ -223,7 +217,7 @@ class ExprParserTest {
             // Should parse as: a || (b && ((c == (d + (e * f)))))
             Expr result = ExprParser.parse("a || b && c == d + e * f");
             Expr.BinaryOp top = (Expr.BinaryOp) result;
-            assertEquals(BinaryOperator.OR, top.operator());
+            assertThat(top.operator()).isEqualTo(BinaryOperator.OR);
         }
     }
 
@@ -234,29 +228,29 @@ class ExprParserTest {
         @Test
         void shouldParseNegation() {
             Expr result = ExprParser.parse("-x");
-            assertEquals(new Expr.UnaryOp(UnaryOperator.NEGATE, new Expr.Ref("x")), result);
+            assertThat(result).isEqualTo(new Expr.UnaryOp(UnaryOperator.NEGATE, new Expr.Ref("x")));
         }
 
         @Test
         void shouldParseNot() {
             Expr result = ExprParser.parse("!flag");
-            assertEquals(new Expr.UnaryOp(UnaryOperator.NOT, new Expr.Ref("flag")), result);
+            assertThat(result).isEqualTo(new Expr.UnaryOp(UnaryOperator.NOT, new Expr.Ref("flag")));
         }
 
         @Test
         void shouldParseDoubleNegation() {
             Expr result = ExprParser.parse("--x");
             Expr.UnaryOp outer = (Expr.UnaryOp) result;
-            assertEquals(UnaryOperator.NEGATE, outer.operator());
+            assertThat(outer.operator()).isEqualTo(UnaryOperator.NEGATE);
             Expr.UnaryOp inner = (Expr.UnaryOp) outer.operand();
-            assertEquals(UnaryOperator.NEGATE, inner.operator());
-            assertEquals(new Expr.Ref("x"), inner.operand());
+            assertThat(inner.operator()).isEqualTo(UnaryOperator.NEGATE);
+            assertThat(inner.operand()).isEqualTo(new Expr.Ref("x"));
         }
 
         @Test
         void shouldParseNegationOfExpression() {
             Expr result = ExprParser.parse("-(a + b)");
-            assertInstanceOf(Expr.UnaryOp.class, result);
+            assertThat(result).isInstanceOf(Expr.UnaryOp.class);
         }
     }
 
@@ -268,52 +262,52 @@ class ExprParserTest {
         void shouldParseSingleArgFunction() {
             Expr result = ExprParser.parse("ABS(x)");
             Expr.FunctionCall call = (Expr.FunctionCall) result;
-            assertEquals("ABS", call.name());
-            assertEquals(1, call.arguments().size());
-            assertEquals(new Expr.Ref("x"), call.arguments().get(0));
+            assertThat(call.name()).isEqualTo("ABS");
+            assertThat(call.arguments().size()).isEqualTo(1);
+            assertThat(call.arguments().get(0)).isEqualTo(new Expr.Ref("x"));
         }
 
         @Test
         void shouldParseMultiArgFunction() {
             Expr result = ExprParser.parse("SMOOTH(input, 5)");
             Expr.FunctionCall call = (Expr.FunctionCall) result;
-            assertEquals("SMOOTH", call.name());
-            assertEquals(2, call.arguments().size());
-            assertEquals(new Expr.Ref("input"), call.arguments().get(0));
-            assertEquals(new Expr.Literal(5.0), call.arguments().get(1));
+            assertThat(call.name()).isEqualTo("SMOOTH");
+            assertThat(call.arguments().size()).isEqualTo(2);
+            assertThat(call.arguments().get(0)).isEqualTo(new Expr.Ref("input"));
+            assertThat(call.arguments().get(1)).isEqualTo(new Expr.Literal(5.0));
         }
 
         @Test
         void shouldParseThreeArgFunction() {
             Expr result = ExprParser.parse("SMOOTH(input, 5, 10)");
             Expr.FunctionCall call = (Expr.FunctionCall) result;
-            assertEquals(3, call.arguments().size());
+            assertThat(call.arguments().size()).isEqualTo(3);
         }
 
         @Test
         void shouldParseNestedFunctionCalls() {
             Expr result = ExprParser.parse("MAX(ABS(x), ABS(y))");
             Expr.FunctionCall call = (Expr.FunctionCall) result;
-            assertEquals("MAX", call.name());
-            assertEquals(2, call.arguments().size());
-            assertInstanceOf(Expr.FunctionCall.class, call.arguments().get(0));
-            assertInstanceOf(Expr.FunctionCall.class, call.arguments().get(1));
+            assertThat(call.name()).isEqualTo("MAX");
+            assertThat(call.arguments().size()).isEqualTo(2);
+            assertThat(call.arguments().get(0)).isInstanceOf(Expr.FunctionCall.class);
+            assertThat(call.arguments().get(1)).isInstanceOf(Expr.FunctionCall.class);
         }
 
         @Test
         void shouldParseZeroArgFunctions() {
             Expr result = ExprParser.parse("TIME");
             Expr.FunctionCall call = (Expr.FunctionCall) result;
-            assertEquals("TIME", call.name());
-            assertTrue(call.arguments().isEmpty());
+            assertThat(call.name()).isEqualTo("TIME");
+            assertThat(call.arguments().isEmpty()).isTrue();
         }
 
         @Test
         void shouldParseDT() {
             Expr result = ExprParser.parse("DT");
             Expr.FunctionCall call = (Expr.FunctionCall) result;
-            assertEquals("DT", call.name());
-            assertTrue(call.arguments().isEmpty());
+            assertThat(call.name()).isEqualTo("DT");
+            assertThat(call.arguments().isEmpty()).isTrue();
         }
     }
 
@@ -324,18 +318,18 @@ class ExprParserTest {
         @Test
         void shouldParseSimpleIf() {
             Expr result = ExprParser.parse("IF(x > 0, x, 0)");
-            assertInstanceOf(Expr.Conditional.class, result);
+            assertThat(result).isInstanceOf(Expr.Conditional.class);
             Expr.Conditional cond = (Expr.Conditional) result;
-            assertInstanceOf(Expr.BinaryOp.class, cond.condition());
-            assertEquals(new Expr.Ref("x"), cond.thenExpr());
-            assertEquals(new Expr.Literal(0.0), cond.elseExpr());
+            assertThat(cond.condition()).isInstanceOf(Expr.BinaryOp.class);
+            assertThat(cond.thenExpr()).isEqualTo(new Expr.Ref("x"));
+            assertThat(cond.elseExpr()).isEqualTo(new Expr.Literal(0.0));
         }
 
         @Test
         void shouldParseNestedIf() {
             Expr result = ExprParser.parse("IF(a > b, IF(c > d, 1, 2), 3)");
             Expr.Conditional outer = (Expr.Conditional) result;
-            assertInstanceOf(Expr.Conditional.class, outer.thenExpr());
+            assertThat(outer.thenExpr()).isInstanceOf(Expr.Conditional.class);
         }
     }
 
@@ -347,20 +341,20 @@ class ExprParserTest {
         void shouldParseSIRInfectionFormula() {
             String formula = "Contact_Rate * Infectious / (Susceptible + Infectious + Recovered) * Infectivity * Susceptible";
             Expr result = ExprParser.parse(formula);
-            assertNotNull(result);
+            assertThat(result).isNotNull();
         }
 
         @Test
         void shouldParseFormulaWithQuotedIds() {
             String formula = "`Contact Rate` * `Infectious` / (`Susceptible` + `Infectious` + `Recovered`)";
             Expr result = ExprParser.parse(formula);
-            assertNotNull(result);
+            assertThat(result).isNotNull();
         }
 
         @Test
         void shouldParseExpressionWithMixedOps() {
             Expr result = ExprParser.parse("a + b * c - d / e ^ f");
-            assertNotNull(result);
+            assertThat(result).isNotNull();
         }
     }
 
@@ -370,56 +364,57 @@ class ExprParserTest {
 
         @Test
         void shouldThrowOnEmptyInput() {
-            assertThrows(ParseException.class, () -> ExprParser.parse(""));
+            assertThatThrownBy(() -> ExprParser.parse("")).isInstanceOf(ParseException.class);
         }
 
         @Test
         void shouldThrowOnNullInput() {
-            assertThrows(ParseException.class, () -> ExprParser.parse(null));
+            assertThatThrownBy(() -> ExprParser.parse(null)).isInstanceOf(ParseException.class);
         }
 
         @Test
         void shouldThrowOnBlankInput() {
-            assertThrows(ParseException.class, () -> ExprParser.parse("   "));
+            assertThatThrownBy(() -> ExprParser.parse("   ")).isInstanceOf(ParseException.class);
         }
 
         @Test
         void shouldThrowOnUnterminatedQuote() {
-            assertThrows(ParseException.class, () -> ExprParser.parse("`unterminated"));
+            assertThatThrownBy(() -> ExprParser.parse("`unterminated")).isInstanceOf(ParseException.class);
         }
 
         @Test
         void shouldThrowOnMissingOperand() {
-            assertThrows(ParseException.class, () -> ExprParser.parse("a +"));
+            assertThatThrownBy(() -> ExprParser.parse("a +")).isInstanceOf(ParseException.class);
         }
 
         @Test
         void shouldThrowOnUnmatchedParen() {
-            assertThrows(ParseException.class, () -> ExprParser.parse("(a + b"));
+            assertThatThrownBy(() -> ExprParser.parse("(a + b")).isInstanceOf(ParseException.class);
         }
 
         @Test
         void shouldThrowOnExtraCloseParen() {
-            assertThrows(ParseException.class, () -> ExprParser.parse("a + b)"));
+            assertThatThrownBy(() -> ExprParser.parse("a + b)")).isInstanceOf(ParseException.class);
         }
 
         @Test
         void shouldThrowOnEmptyQuotedIdentifier() {
-            assertThrows(ParseException.class, () -> ExprParser.parse("``"));
+            assertThatThrownBy(() -> ExprParser.parse("``")).isInstanceOf(ParseException.class);
         }
     }
 
     @Nested
-    @DisplayName("Round-trip: parse → stringify → parse")
+    @DisplayName("Round-trip: parse -> stringify -> parse")
     class RoundTrip {
 
         private void assertRoundTrips(String input) {
             Expr first = ExprParser.parse(input);
             String stringified = ExprStringifier.stringify(first);
             Expr second = ExprParser.parse(stringified);
-            assertEquals(first, second,
+            assertThat(second).as(
                     "Round-trip failed.\n  Input:       " + input
-                            + "\n  Stringified: " + stringified);
+                            + "\n  Stringified: " + stringified)
+                    .isEqualTo(first);
         }
 
         @Test

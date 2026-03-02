@@ -181,8 +181,14 @@ public class Module extends Element {
 
     /**
      * Adds a sub-module to this module.
+     *
+     * @throws IllegalArgumentException if the module is this module (self-reference)
      */
     public void addSubModule(Module module) {
+        if (module == this) {
+            throw new IllegalArgumentException(
+                    "Cannot add module '" + module.getName() + "' as its own sub-module");
+        }
         subModules.put(module.getName(), module);
     }
 

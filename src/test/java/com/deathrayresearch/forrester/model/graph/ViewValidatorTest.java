@@ -11,7 +11,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 @DisplayName("ViewValidator")
 class ViewValidatorTest {
@@ -38,7 +38,7 @@ class ViewValidatorTest {
                 List.of());
 
         List<String> errors = ViewValidator.validate(view, def);
-        assertTrue(errors.isEmpty(), "Valid view should have no errors: " + errors);
+        assertThat(errors.isEmpty()).as("Valid view should have no errors: " + errors).isTrue();
     }
 
     @Test
@@ -57,8 +57,8 @@ class ViewValidatorTest {
                 List.of());
 
         List<String> errors = ViewValidator.validate(view, def);
-        assertEquals(1, errors.size());
-        assertTrue(errors.get(0).contains("Ghost"), "Should mention the non-existent element");
+        assertThat(errors.size()).isEqualTo(1);
+        assertThat(errors.get(0).contains("Ghost")).as("Should mention the non-existent element").isTrue();
     }
 
     @Test
@@ -78,8 +78,8 @@ class ViewValidatorTest {
                 List.of());
 
         List<String> errors = ViewValidator.validate(view, def);
-        assertEquals(1, errors.size());
-        assertTrue(errors.get(0).contains("NonExistent"));
+        assertThat(errors.size()).isEqualTo(1);
+        assertThat(errors.get(0).contains("NonExistent")).isTrue();
     }
 
     @Test
@@ -95,8 +95,8 @@ class ViewValidatorTest {
                 List.of());
 
         List<String> errors = ViewValidator.validate(view, def);
-        assertEquals(1, errors.size());
-        assertTrue(errors.get(0).contains("Missing"));
+        assertThat(errors.size()).isEqualTo(1);
+        assertThat(errors.get(0).contains("Missing")).isTrue();
     }
 
     @Test
@@ -117,7 +117,7 @@ class ViewValidatorTest {
 
         List<String> errors = ViewValidator.validate(view, def);
         // A, B placements + X, Y connector endpoints = 4 errors
-        assertEquals(4, errors.size());
+        assertThat(errors.size()).isEqualTo(4);
     }
 
     @Test
@@ -130,7 +130,7 @@ class ViewValidatorTest {
         ViewDef view = new ViewDef("Empty View", List.of(), List.of(), List.of());
 
         List<String> errors = ViewValidator.validate(view, def);
-        assertTrue(errors.isEmpty());
+        assertThat(errors.isEmpty()).isTrue();
     }
 
     @Test
@@ -146,7 +146,7 @@ class ViewValidatorTest {
                 .build();
 
         List<String> errors = com.deathrayresearch.forrester.model.def.DefinitionValidator.validate(def);
-        assertFalse(errors.isEmpty(), "DefinitionValidator should report view errors");
-        assertTrue(errors.stream().anyMatch(e -> e.contains("Ghost")));
+        assertThat(errors.isEmpty()).as("DefinitionValidator should report view errors").isFalse();
+        assertThat(errors.stream().anyMatch(e -> e.contains("Ghost"))).isTrue();
     }
 }

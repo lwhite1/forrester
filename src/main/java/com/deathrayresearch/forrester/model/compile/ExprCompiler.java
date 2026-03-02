@@ -142,6 +142,10 @@ public class ExprCompiler {
                 };
             }
             case "MEAN" -> {
+                if (args.isEmpty()) {
+                    throw new CompilationException(
+                            "MEAN requires at least 1 argument", "MEAN");
+                }
                 List<DoubleSupplier> compiled = new ArrayList<>();
                 for (Expr arg : args) {
                     compiled.add(compileExpr(arg));
@@ -205,7 +209,7 @@ public class ExprCompiler {
         requireArgs("STEP", args, 2);
         double height = evaluateConstant(args.get(0), "STEP height");
         double time = evaluateConstant(args.get(1), "STEP time");
-        Step step = Step.of(height, (int) time, context.getCurrentStep());
+        Step step = Step.of(height, (int) Math.round(time), context.getCurrentStep());
         return step::getCurrentValue;
     }
 
@@ -219,9 +223,10 @@ public class ExprCompiler {
         Ramp ramp;
         if (args.size() == 3) {
             double end = evaluateConstant(args.get(2), "RAMP endStep");
-            ramp = Ramp.of(slope, (int) start, (int) end, context.getCurrentStep());
+            ramp = Ramp.of(slope, (int) Math.round(start), (int) Math.round(end),
+                    context.getCurrentStep());
         } else {
-            ramp = Ramp.of(slope, (int) start, context.getCurrentStep());
+            ramp = Ramp.of(slope, (int) Math.round(start), context.getCurrentStep());
         }
         return ramp::getCurrentValue;
     }

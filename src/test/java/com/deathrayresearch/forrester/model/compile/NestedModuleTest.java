@@ -13,7 +13,7 @@ import org.junit.jupiter.api.Test;
 import java.util.List;
 import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 @DisplayName("Nested Module Compilation")
 class NestedModuleTest {
@@ -48,12 +48,12 @@ class NestedModuleTest {
 
         // The tank should have drained
         List<Stock> stocks = compiled.getModel().getStocks();
-        assertFalse(stocks.isEmpty());
+        assertThat(stocks.isEmpty()).isFalse();
         Stock tank = stocks.stream()
                 .filter(s -> s.getName().equals("Tank"))
                 .findFirst().orElseThrow();
-        assertTrue(tank.getValue() < 100, "Tank should have drained");
-        assertTrue(tank.getValue() > 30, "Tank should not be fully drained");
+        assertThat(tank.getValue() < 100).as("Tank should have drained").isTrue();
+        assertThat(tank.getValue() > 30).as("Tank should not be fully drained").isTrue();
     }
 
     @Test
@@ -77,8 +77,8 @@ class NestedModuleTest {
                 .build();
 
         CompiledModel compiled = compiler.compile(outer);
-        assertNotNull(compiled.getModel().getVariable("ProducerOutput"),
-                "Output binding should create variable in parent model");
+        assertThat(compiled.getModel().getVariable("ProducerOutput"))
+                .as("Output binding should create variable in parent model").isNotNull();
     }
 
     @Test
@@ -102,24 +102,24 @@ class NestedModuleTest {
 
         // Both counters should have incremented independently
         List<Stock> stocks = compiled.getModel().getStocks();
-        assertEquals(2, stocks.size());
+        assertThat(stocks).hasSize(2);
     }
 
     @Test
     void shouldSupportQualifiedNameParsing() {
         QualifiedName qn = QualifiedName.parse("Workforce.Total Workforce");
-        assertEquals(2, qn.parts().size());
-        assertEquals("Workforce", qn.parts().get(0));
-        assertEquals("Total Workforce", qn.leaf());
-        assertTrue(qn.isQualified());
+        assertThat(qn.parts()).hasSize(2);
+        assertThat(qn.parts().get(0)).isEqualTo("Workforce");
+        assertThat(qn.leaf()).isEqualTo("Total Workforce");
+        assertThat(qn.isQualified()).isTrue();
     }
 
     @Test
     void shouldSupportSimpleQualifiedName() {
         QualifiedName qn = QualifiedName.parse("Population");
-        assertEquals(1, qn.parts().size());
-        assertEquals("Population", qn.leaf());
-        assertFalse(qn.isQualified());
+        assertThat(qn.parts()).hasSize(1);
+        assertThat(qn.leaf()).isEqualTo("Population");
+        assertThat(qn.isQualified()).isFalse();
     }
 
     @Test
@@ -137,11 +137,11 @@ class NestedModuleTest {
 
         CompiledModel compiled = compiler.compile(outer);
         List<Module> modules = compiled.getModel().getModules();
-        assertFalse(modules.isEmpty());
+        assertThat(modules.isEmpty()).isFalse();
         Module m = modules.stream()
                 .filter(mod -> mod.getName().equals("m1"))
                 .findFirst().orElseThrow();
-        assertNotNull(m.getStock("S"));
-        assertEquals(42, m.getStock("S").getValue());
+        assertThat(m.getStock("S")).isNotNull();
+        assertThat(m.getStock("S").getValue()).isEqualTo(42);
     }
 }

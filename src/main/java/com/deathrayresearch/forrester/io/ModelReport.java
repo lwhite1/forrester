@@ -92,6 +92,16 @@ public class ModelReport {
     }
 
     private static void appendModule(StringBuilder builder, Module module, String indent) {
+        appendModule(builder, module, indent, new java.util.HashSet<>());
+    }
+
+    private static void appendModule(StringBuilder builder, Module module, String indent,
+                                     java.util.Set<String> visited) {
+        if (!visited.add(module.getName())) {
+            builder.append(indent).append("Module: ").append(module.getName())
+                    .append(" (cycle detected, skipping)").append(LF);
+            return;
+        }
         builder.append(indent).append("Module: ").append(module.getName()).append(LF);
         for (Stock stock : module.getStocks()) {
             builder.append(indent).append("  Stock: ").append(stock.getName()).append(LF);
@@ -106,7 +116,7 @@ public class ModelReport {
             builder.append(indent).append("  Constant: ").append(entry.getKey()).append(LF);
         }
         for (Module sub : module.getSubModules().values()) {
-            appendModule(builder, sub, indent + "  ");
+            appendModule(builder, sub, indent + "  ", new java.util.HashSet<>(visited));
         }
     }
 

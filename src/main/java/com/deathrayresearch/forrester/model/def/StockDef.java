@@ -21,6 +21,10 @@ public record StockDef(
         if (name == null || name.isBlank()) {
             throw new IllegalArgumentException("Stock name must not be blank");
         }
+        if (Double.isNaN(initialValue) || Double.isInfinite(initialValue)) {
+            throw new IllegalArgumentException(
+                    "Stock '" + name + "' initialValue must be finite, got " + initialValue);
+        }
     }
 
     public StockDef(String name, double initialValue, String unit) {

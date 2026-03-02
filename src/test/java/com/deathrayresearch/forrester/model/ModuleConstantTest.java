@@ -4,7 +4,8 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static com.deathrayresearch.forrester.measure.Units.THING;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @DisplayName("Module constants and sub-modules")
 class ModuleConstantTest {
@@ -15,8 +16,8 @@ class ModuleConstantTest {
         Constant c = new Constant("Rate", THING, 0.05);
         module.addConstant(c);
 
-        assertEquals(0.05, module.getConstant("Rate").getValue());
-        assertEquals(1, module.getConstants().size());
+        assertThat(module.getConstant("Rate").getValue()).isEqualTo(0.05);
+        assertThat(module.getConstants()).hasSize(1);
     }
 
     @Test
@@ -25,33 +26,35 @@ class ModuleConstantTest {
         Module child = new Module("Child");
         parent.addSubModule(child);
 
-        assertSame(child, parent.getSubModule("Child"));
-        assertEquals(1, parent.getSubModules().size());
+        assertThat(parent.getSubModule("Child")).isSameAs(child);
+        assertThat(parent.getSubModules()).hasSize(1);
     }
 
     @Test
     void shouldReturnNullForMissingConstant() {
         Module module = new Module("TestModule");
-        assertNull(module.getConstant("NonExistent"));
+        assertThat(module.getConstant("NonExistent")).isNull();
     }
 
     @Test
     void shouldReturnNullForMissingSubModule() {
         Module module = new Module("TestModule");
-        assertNull(module.getSubModule("NonExistent"));
+        assertThat(module.getSubModule("NonExistent")).isNull();
     }
 
     @Test
     void shouldReturnUnmodifiableConstants() {
         Module module = new Module("TestModule");
-        assertThrows(UnsupportedOperationException.class, () ->
-                module.getConstants().put("x", new Constant("x", THING, 1)));
+        assertThatThrownBy(() ->
+                module.getConstants().put("x", new Constant("x", THING, 1)))
+                .isInstanceOf(UnsupportedOperationException.class);
     }
 
     @Test
     void shouldReturnUnmodifiableSubModules() {
         Module module = new Module("TestModule");
-        assertThrows(UnsupportedOperationException.class, () ->
-                module.getSubModules().put("x", new Module("x")));
+        assertThatThrownBy(() ->
+                module.getSubModules().put("x", new Module("x")))
+                .isInstanceOf(UnsupportedOperationException.class);
     }
 }

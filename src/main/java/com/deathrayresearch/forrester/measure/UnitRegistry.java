@@ -21,8 +21,11 @@ import java.util.Map;
  */
 public class UnitRegistry {
 
+    private static final int MAX_CUSTOM_UNITS = 10_000;
+
     private final Map<String, Unit> byName = new LinkedHashMap<>();
     private final Map<String, Unit> byNameLower = new LinkedHashMap<>();
+    private int customUnitCount;
 
     /**
      * Creates a new registry pre-loaded with all built-in unit enums.
@@ -66,9 +69,15 @@ public class UnitRegistry {
             return unit;
         }
         // Auto-create custom ItemUnit for unknown names
+        if (customUnitCount >= MAX_CUSTOM_UNITS) {
+            throw new IllegalStateException(
+                    "Unit registry exceeded " + MAX_CUSTOM_UNITS
+                            + " custom units — possible unbounded auto-creation");
+        }
         com.deathrayresearch.forrester.measure.units.item.ItemUnit custom =
                 new com.deathrayresearch.forrester.measure.units.item.ItemUnit(name);
         register(custom);
+        customUnitCount++;
         return custom;
     }
 

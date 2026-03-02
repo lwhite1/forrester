@@ -11,7 +11,8 @@ import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.within;
 
 @DisplayName("JSON round-trip: build → compile → simulate → serialize → deserialize → compile → simulate")
 class JsonRoundTripTest {
@@ -39,10 +40,10 @@ class JsonRoundTripTest {
         List<Double> roundTrippedStockValues = compiled2.getModel().getStockValues();
 
         // Compare stock values
-        assertEquals(originalStockValues.size(), roundTrippedStockValues.size());
+        assertThat(roundTrippedStockValues).hasSameSizeAs(originalStockValues);
         for (int i = 0; i < originalStockValues.size(); i++) {
-            assertEquals(originalStockValues.get(i), roundTrippedStockValues.get(i), 0.001,
-                    "Stock " + i + " values should match");
+            assertThat(roundTrippedStockValues.get(i)).as("Stock " + i + " values should match")
+                    .isCloseTo(originalStockValues.get(i), within(0.001));
         }
     }
 
@@ -68,7 +69,7 @@ class JsonRoundTripTest {
         sim2.execute();
         double roundTrippedPop = compiled2.getModel().getStocks().get(0).getValue();
 
-        assertEquals(originalPop, roundTrippedPop, 0.001);
+        assertThat(roundTrippedPop).isCloseTo(originalPop, within(0.001));
     }
 
     @Test
@@ -93,7 +94,7 @@ class JsonRoundTripTest {
         List<Stock> stocks1 = compiled1.getModel().getStocks();
         List<Stock> stocks2 = compiled2.getModel().getStocks();
         for (int i = 0; i < stocks1.size(); i++) {
-            assertEquals(stocks1.get(i).getValue(), stocks2.get(i).getValue(), 0.001);
+            assertThat(stocks2.get(i).getValue()).isCloseTo(stocks1.get(i).getValue(), within(0.001));
         }
     }
 

@@ -5,7 +5,8 @@ import com.deathrayresearch.forrester.measure.units.time.TimeUnits;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @DisplayName("UnitRegistry")
 class UnitRegistryTest {
@@ -14,74 +15,74 @@ class UnitRegistryTest {
 
     @Test
     void shouldFindTimeUnits() {
-        assertSame(TimeUnits.DAY, registry.find("Day"));
-        assertSame(TimeUnits.WEEK, registry.find("Week"));
-        assertSame(TimeUnits.MONTH, registry.find("Month"));
-        assertSame(TimeUnits.YEAR, registry.find("Year"));
+        assertThat(registry.find("Day")).isSameAs(TimeUnits.DAY);
+        assertThat(registry.find("Week")).isSameAs(TimeUnits.WEEK);
+        assertThat(registry.find("Month")).isSameAs(TimeUnits.MONTH);
+        assertThat(registry.find("Year")).isSameAs(TimeUnits.YEAR);
     }
 
     @Test
     void shouldResolveTimeUnit() {
         TimeUnit day = registry.resolveTimeUnit("Day");
-        assertSame(TimeUnits.DAY, day);
+        assertThat(day).isSameAs(TimeUnits.DAY);
     }
 
     @Test
     void shouldThrowForNonTimeUnit() {
-        assertThrows(IllegalArgumentException.class,
-                () -> registry.resolveTimeUnit("Person"));
+        assertThatThrownBy(() -> registry.resolveTimeUnit("Person"))
+                .isInstanceOf(IllegalArgumentException.class);
     }
 
     @Test
     void shouldFindItemUnits() {
-        assertNotNull(registry.find("Person"));
-        assertNotNull(registry.find("Thing"));
+        assertThat(registry.find("Person")).isNotNull();
+        assertThat(registry.find("Thing")).isNotNull();
     }
 
     @Test
     void shouldFindDimensionlessUnit() {
-        assertNotNull(registry.find("Dimensionless unit"));
+        assertThat(registry.find("Dimensionless unit")).isNotNull();
     }
 
     @Test
     void shouldFindCaseInsensitive() {
-        assertNotNull(registry.find("day"));
-        assertNotNull(registry.find("DAY"));
+        assertThat(registry.find("day")).isNotNull();
+        assertThat(registry.find("DAY")).isNotNull();
     }
 
     @Test
     void shouldAutoCreateCustomUnit() {
         Unit widget = registry.resolve("Widget");
-        assertNotNull(widget);
-        assertEquals("Widget", widget.getName());
-        assertInstanceOf(ItemUnit.class, widget);
+        assertThat(widget).isNotNull();
+        assertThat(widget.getName()).isEqualTo("Widget");
+        assertThat(widget).isInstanceOf(ItemUnit.class);
     }
 
     @Test
     void shouldReturnSameCustomUnitOnReResolve() {
         Unit first = registry.resolve("Error");
         Unit second = registry.resolve("Error");
-        assertSame(first, second);
+        assertThat(second).isSameAs(first);
     }
 
     @Test
     void shouldRegisterCustomUnit() {
         ItemUnit custom = new ItemUnit("Defect");
         registry.register(custom);
-        assertSame(custom, registry.find("Defect"));
+        assertThat(registry.find("Defect")).isSameAs(custom);
     }
 
     @Test
     void shouldReturnNullForUnknownFind() {
-        assertNull(registry.find("NonExistentUnit12345"));
+        assertThat(registry.find("NonExistentUnit12345")).isNull();
     }
 
     @Test
     void shouldNotLeaveSpuriousUnitAfterResolveTimeUnitFails() {
         String unknownName = "SomeCustomThing";
-        assertThrows(IllegalArgumentException.class,
-                () -> registry.resolveTimeUnit(unknownName));
+        assertThatThrownBy(() -> registry.resolveTimeUnit(unknownName))
+                .isInstanceOf(IllegalArgumentException.class);
         // The failed resolveTimeUnit should not have auto-created a unit
-        assertNull(registry.find(unknownName));
+        assertThat(registry.find(unknownName)).isNull();
     }
 }

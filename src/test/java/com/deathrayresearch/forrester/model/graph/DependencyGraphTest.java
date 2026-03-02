@@ -9,7 +9,7 @@ import org.junit.jupiter.api.Test;
 import java.util.List;
 import java.util.Set;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 @DisplayName("DependencyGraph")
 class DependencyGraphTest {
@@ -27,12 +27,12 @@ class DependencyGraphTest {
 
         // Tank and Rate influence Drain (formula deps)
         Set<String> drainDeps = graph.dependenciesOf("Drain");
-        assertTrue(drainDeps.contains("Tank"), "Tank should be a dependency of Drain");
-        assertTrue(drainDeps.contains("Rate"), "Rate should be a dependency of Drain");
+        assertThat(drainDeps.contains("Tank")).as("Tank should be a dependency of Drain").isTrue();
+        assertThat(drainDeps.contains("Rate")).as("Rate should be a dependency of Drain").isTrue();
 
         // Drain influences Tank (flow→source connection)
         Set<String> drainDependents = graph.dependentsOf("Drain");
-        assertTrue(drainDependents.contains("Tank"), "Drain should flow into Tank (source)");
+        assertThat(drainDependents.contains("Tank")).as("Drain should flow into Tank (source)").isTrue();
     }
 
     @Test
@@ -55,16 +55,16 @@ class DependencyGraphTest {
 
         // Infection should depend on Contact Rate, Infectious, Susceptible, Recovered, Infectivity
         Set<String> infectionDeps = graph.dependenciesOf("Infection");
-        assertTrue(infectionDeps.contains("Contact Rate"), "Infection depends on Contact Rate");
-        assertTrue(infectionDeps.contains("Infectious"), "Infection depends on Infectious");
-        assertTrue(infectionDeps.contains("Susceptible"), "Infection depends on Susceptible");
-        assertTrue(infectionDeps.contains("Recovered"), "Infection depends on Recovered");
-        assertTrue(infectionDeps.contains("Infectivity"), "Infection depends on Infectivity");
+        assertThat(infectionDeps.contains("Contact Rate")).as("Infection depends on Contact Rate").isTrue();
+        assertThat(infectionDeps.contains("Infectious")).as("Infection depends on Infectious").isTrue();
+        assertThat(infectionDeps.contains("Susceptible")).as("Infection depends on Susceptible").isTrue();
+        assertThat(infectionDeps.contains("Recovered")).as("Infection depends on Recovered").isTrue();
+        assertThat(infectionDeps.contains("Infectivity")).as("Infection depends on Infectivity").isTrue();
 
         // Recovery depends on Infectious and Duration
         Set<String> recoveryDeps = graph.dependenciesOf("Recovery");
-        assertTrue(recoveryDeps.contains("Infectious"), "Recovery depends on Infectious");
-        assertTrue(recoveryDeps.contains("Duration"), "Recovery depends on Duration");
+        assertThat(recoveryDeps.contains("Infectious")).as("Recovery depends on Infectious").isTrue();
+        assertThat(recoveryDeps.contains("Duration")).as("Recovery depends on Duration").isTrue();
     }
 
     @Test
@@ -80,11 +80,11 @@ class DependencyGraphTest {
         DependencyGraph graph = DependencyGraph.fromDefinition(def);
         Set<String> nodes = graph.allNodes();
 
-        assertEquals(4, nodes.size());
-        assertTrue(nodes.contains("S"));
-        assertTrue(nodes.contains("C"));
-        assertTrue(nodes.contains("F"));
-        assertTrue(nodes.contains("A"));
+        assertThat(nodes.size()).isEqualTo(4);
+        assertThat(nodes.contains("S")).isTrue();
+        assertThat(nodes.contains("C")).isTrue();
+        assertThat(nodes.contains("F")).isTrue();
+        assertThat(nodes.contains("A")).isTrue();
     }
 
     @Test
@@ -98,12 +98,12 @@ class DependencyGraphTest {
         DependencyGraph graph = DependencyGraph.fromDefinition(def);
         List<String[]> edges = graph.allEdges();
 
-        assertFalse(edges.isEmpty());
+        assertThat(edges.isEmpty()).isFalse();
         // S → F (formula dependency) and F → S (flow source connection)
         boolean hasStoF = edges.stream().anyMatch(e -> e[0].equals("S") && e[1].equals("F"));
         boolean hasFtoS = edges.stream().anyMatch(e -> e[0].equals("F") && e[1].equals("S"));
-        assertTrue(hasStoF, "Should have edge S → F (formula dep)");
-        assertTrue(hasFtoS, "Should have edge F → S (source connection)");
+        assertThat(hasStoF).as("Should have edge S → F (formula dep)").isTrue();
+        assertThat(hasFtoS).as("Should have edge F → S (source connection)").isTrue();
     }
 
     @Test
@@ -120,8 +120,8 @@ class DependencyGraphTest {
         List<String> sorted = graph.topologicalSort();
 
         // C should come before A (C influences A)
-        assertTrue(sorted.indexOf("C") < sorted.indexOf("A"),
-                "C should precede A in topological sort");
+        assertThat(sorted.indexOf("C") < sorted.indexOf("A"))
+                .as("C should precede A in topological sort").isTrue();
     }
 
     @Test
@@ -137,7 +137,7 @@ class DependencyGraphTest {
 
         // Population → Births (formula dep) and Births → Population (flow sink)
         // This creates a cycle
-        assertTrue(graph.hasCycle(), "Stock-flow feedback loop should be detected as a cycle");
+        assertThat(graph.hasCycle()).as("Stock-flow feedback loop should be detected as a cycle").isTrue();
     }
 
     @Test
@@ -150,7 +150,7 @@ class DependencyGraphTest {
                 .build();
 
         DependencyGraph graph = DependencyGraph.fromDefinition(def);
-        assertFalse(graph.hasCycle(), "Acyclic model should not have cycles");
+        assertThat(graph.hasCycle()).as("Acyclic model should not have cycles").isFalse();
     }
 
     @Test
@@ -167,16 +167,16 @@ class DependencyGraphTest {
 
         // A1 depends on S and C
         Set<String> a1Deps = graph.dependenciesOf("A1");
-        assertTrue(a1Deps.contains("S"));
-        assertTrue(a1Deps.contains("C"));
+        assertThat(a1Deps.contains("S")).isTrue();
+        assertThat(a1Deps.contains("C")).isTrue();
 
         // A2 depends on A1
         Set<String> a2Deps = graph.dependenciesOf("A2");
-        assertTrue(a2Deps.contains("A1"));
+        assertThat(a2Deps.contains("A1")).isTrue();
 
         // S influences A1
         Set<String> sDependents = graph.dependentsOf("S");
-        assertTrue(sDependents.contains("A1"));
+        assertThat(sDependents.contains("A1")).isTrue();
     }
 
     @Test
@@ -187,9 +187,9 @@ class DependencyGraphTest {
 
         DependencyGraph graph = DependencyGraph.fromDefinition(def);
 
-        assertTrue(graph.allNodes().isEmpty());
-        assertTrue(graph.allEdges().isEmpty());
-        assertFalse(graph.hasCycle());
-        assertTrue(graph.topologicalSort().isEmpty());
+        assertThat(graph.allNodes().isEmpty()).isTrue();
+        assertThat(graph.allEdges().isEmpty()).isTrue();
+        assertThat(graph.hasCycle()).isFalse();
+        assertThat(graph.topologicalSort().isEmpty()).isTrue();
     }
 }

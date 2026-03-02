@@ -19,6 +19,10 @@ public record ConstantDef(
         if (name == null || name.isBlank()) {
             throw new IllegalArgumentException("Constant name must not be blank");
         }
+        if (Double.isNaN(value) || Double.isInfinite(value)) {
+            throw new IllegalArgumentException(
+                    "Constant '" + name + "' value must be finite, got " + value);
+        }
     }
 
     public ConstantDef(String name, double value, String unit) {

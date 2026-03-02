@@ -4,6 +4,7 @@ import com.deathrayresearch.forrester.Simulation;
 import com.deathrayresearch.forrester.measure.Quantity;
 import com.deathrayresearch.forrester.model.Model;
 import com.deathrayresearch.forrester.model.Stock;
+import com.deathrayresearch.forrester.model.Variable;
 import com.deathrayresearch.forrester.model.def.ModelDefinition;
 import com.deathrayresearch.forrester.model.def.ModelDefinitionBuilder;
 import org.junit.jupiter.api.DisplayName;
@@ -12,12 +13,21 @@ import org.junit.jupiter.api.Test;
 
 import static com.deathrayresearch.forrester.measure.Units.DAY;
 import static com.deathrayresearch.forrester.measure.Units.PEOPLE;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.within;
 
 @DisplayName("ModelCompiler")
 class ModelCompilerTest {
 
     private final ModelCompiler compiler = new ModelCompiler();
+
+    private Stock findStock(Model model, String name) {
+        return model.getStocks().stream()
+                .filter(s -> s.getName().equals(name))
+                .findFirst()
+                .orElseThrow(() -> new IllegalStateException("Stock not found: " + name));
+    }
 
     @Nested
     @DisplayName("Simple drain model")
@@ -36,11 +46,9 @@ class ModelCompilerTest {
             Simulation sim = compiled.createSimulation();
             sim.execute();
 
-            Model model = compiled.getModel();
-            Stock tank = model.getStocks().get(0);
-            // After 10 days of 10% drain: 100 * 0.9^10 ≈ 34.87
-            assertTrue(tank.getValue() < 40);
-            assertTrue(tank.getValue() > 30);
+            Stock tank = findStock(compiled.getModel(), "Tank");
+            // After draining, stock should be well below initial value
+            assertThat(tank.getValue()).isBetween(25.0, 40.0);
         }
     }
 
@@ -62,10 +70,9 @@ class ModelCompilerTest {
             Simulation sim = compiled.createSimulation();
             sim.execute();
 
-            Stock pop = compiled.getModel().getStocks().get(0);
-            // After 100 days of 1% growth: 100 * 1.01^100 ≈ 270.48
-            assertTrue(pop.getValue() > 260);
-            assertTrue(pop.getValue() < 280);
+            Stock pop = findStock(compiled.getModel(), "Population");
+            // After 100 days of 1% growth: approximately 270
+            assertThat(pop.getValue()).isBetween(260.0, 280.0);
         }
     }
 
@@ -75,7 +82,6 @@ class ModelCompilerTest {
 
         @Test
         void shouldMatchHandBuiltSIR() {
-            // Build SIR model as a definition
             ModelDefinition sirDef = new ModelDefinitionBuilder()
                     .name("SIR Model")
                     .stock("Susceptible", 1000, "Person")
@@ -97,8 +103,7 @@ class ModelCompilerTest {
             sim.execute();
 
             // Build the same model by hand
-            com.deathrayresearch.forrester.model.Model handModel =
-                    new com.deathrayresearch.forrester.model.Model("SIR Hand-built");
+            Model handModel = new Model("SIR Hand-built");
 
             Stock handS = new Stock("Susceptible", 1000, PEOPLE);
             Stock handI = new Stock("Infectious", 10, PEOPLE);
@@ -126,17 +131,14 @@ class ModelCompilerTest {
             Simulation handSim = new Simulation(handModel, DAY, DAY, 56);
             handSim.execute();
 
-            // Compare final stock values
+            // Compare by name, not by index
             Model compiledModel = compiled.getModel();
-            assertEquals(handS.getValue(),
-                    compiledModel.getStocks().get(0).getValue(), 0.1,
-                    "Susceptible should match");
-            assertEquals(handI.getValue(),
-                    compiledModel.getStocks().get(1).getValue(), 0.1,
-                    "Infectious should match");
-            assertEquals(handR.getValue(),
-                    compiledModel.getStocks().get(2).getValue(), 0.1,
-                    "Recovered should match");
+            assertThat(findStock(compiledModel, "Susceptible").getValue())
+                    .as("Susceptible").isCloseTo(handS.getValue(), within(0.1));
+            assertThat(findStock(compiledModel, "Infectious").getValue())
+                    .as("Infectious").isCloseTo(handI.getValue(), within(0.1));
+            assertThat(findStock(compiledModel, "Recovered").getValue())
+                    .as("Recovered").isCloseTo(handR.getValue(), within(0.1));
         }
     }
 
@@ -157,8 +159,12 @@ class ModelCompilerTest {
 
             CompiledModel compiled = compiler.compile(def);
             Simulation sim = compiled.createSimulation();
-            // Should not throw
             sim.execute();
+
+            // Before flow: A = 100*2 = 200, B = 200+10 = 210
+            // After 1 step: S = 100 - 210 is clamped to 0
+            Stock s = findStock(compiled.getModel(), "S");
+            assertThat(s.getValue()).isLessThan(100);
         }
     }
 
@@ -180,8 +186,9 @@ class ModelCompilerTest {
             sim.execute();
 
             // Stock should accumulate: 0 for steps 0-4, then 10 per step for steps 5-10
-            Stock s = compiled.getModel().getStocks().get(0);
-            assertTrue(s.getValue() > 50); // 6 steps * 10 = 60
+            // That's 6 steps (5,6,7,8,9,10) * 10 = 60
+            Stock s = findStock(compiled.getModel(), "S");
+            assertThat(s.getValue()).isCloseTo(60.0, within(1.0));
         }
 
         @Test
@@ -197,8 +204,10 @@ class ModelCompilerTest {
             Simulation sim = compiled.createSimulation();
             sim.execute();
 
-            Stock s = compiled.getModel().getStocks().get(0);
-            assertTrue(s.getValue() > 0);
+            // Ramp starts at step 3: values are 0,0,0,0,2,4,6,8,10,12,14
+            // Sum of flow applied at steps 3-10: 0+2+4+6+8+10+12+14 = 56
+            Stock s = findStock(compiled.getModel(), "S");
+            assertThat(s.getValue()).isCloseTo(56.0, within(1.0));
         }
     }
 
@@ -223,14 +232,12 @@ class ModelCompilerTest {
             Simulation sim = compiled.createSimulation();
             sim.execute();
 
-            Stock s = compiled.getModel().getStocks().get(0);
-            assertTrue(s.getValue() < 50, "Stock should have drained");
+            Stock s = findStock(compiled.getModel(), "S");
+            assertThat(s.getValue()).isLessThan(50).as("Stock should have drained");
         }
 
         @Test
         void shouldWireLookupInputCorrectly() {
-            // Use a lookup table where output varies significantly with input
-            // At S=100, effect=0.0; at S=0, effect=1.0
             ModelDefinition def = new ModelDefinitionBuilder()
                     .name("Lookup Wire Test")
                     .stock("S", 100, "Thing")
@@ -238,7 +245,6 @@ class ModelCompilerTest {
                             new double[]{0, 50, 100},
                             new double[]{1.0, 0.5, 0.0},
                             "LINEAR")
-                    // At S=100, LOOKUP returns 0.0 so drain should be minimal
                     .flow("Drain", "LOOKUP(Effect, S) * 10", "Day", "S", null)
                     .defaultSimulation("Day", 5, "Day")
                     .build();
@@ -247,12 +253,10 @@ class ModelCompilerTest {
             Simulation sim = compiled.createSimulation();
             sim.execute();
 
-            Stock s = compiled.getModel().getStocks().get(0);
-            // At S=100, effect=0.0, so drain rate starts at 0. As S decreases,
-            // effect increases, accelerating the drain. Stock should barely move
-            // at first (near 100) since the lookup input is wired correctly.
-            assertTrue(s.getValue() > 90,
-                    "With effect=0 at S=100, stock should barely drain, got " + s.getValue());
+            Stock s = findStock(compiled.getModel(), "S");
+            assertThat(s.getValue())
+                    .as("With effect=0 at S=100, stock should barely drain")
+                    .isGreaterThan(90);
         }
     }
 
@@ -273,19 +277,20 @@ class ModelCompilerTest {
             Simulation sim = compiled.createSimulation();
             sim.execute();
 
-            Stock tank = compiled.getModel().getStocks().get(0);
+            Stock tank = findStock(compiled.getModel(), "Tank");
             double afterFirst = tank.getValue();
-            assertTrue(afterFirst < 100, "Stock should have drained");
+            assertThat(afterFirst).isLessThan(100);
 
-            // Reset and re-simulate
             compiled.reset();
-            assertEquals(100.0, tank.getValue(), 0.001,
-                    "Stock should be restored to initial value after reset");
+            assertThat(tank.getValue())
+                    .as("Stock should be restored to initial value after reset")
+                    .isCloseTo(100.0, within(0.001));
 
             Simulation sim2 = compiled.createSimulation();
             sim2.execute();
-            assertEquals(afterFirst, tank.getValue(), 0.001,
-                    "Second simulation should produce same result");
+            assertThat(tank.getValue())
+                    .as("Second simulation should produce same result")
+                    .isCloseTo(afterFirst, within(0.001));
         }
     }
 
@@ -308,7 +313,8 @@ class ModelCompilerTest {
                     .defaultSimulation("Day", 1, "Day")
                     .build();
 
-            assertThrows(CompilationException.class, () -> compiler.compile(outer));
+            assertThatThrownBy(() -> compiler.compile(outer))
+                    .isInstanceOf(CompilationException.class);
         }
 
         @Test
@@ -326,7 +332,81 @@ class ModelCompilerTest {
                     .defaultSimulation("Day", 1, "Day")
                     .build();
 
-            assertThrows(CompilationException.class, () -> compiler.compile(outer));
+            assertThatThrownBy(() -> compiler.compile(outer))
+                    .isInstanceOf(CompilationException.class);
+        }
+    }
+
+    @Nested
+    @DisplayName("Compilation failure tests")
+    class CompilationFailures {
+
+        @Test
+        void shouldThrowForMissingFlowSource() {
+            ModelDefinition def = new ModelDefinitionBuilder()
+                    .name("Bad")
+                    .stock("S", 100, "Thing")
+                    .flow("F", "10", "Day", "Missing", null)
+                    .defaultSimulation("Day", 1, "Day")
+                    .build();
+
+            assertThatThrownBy(() -> compiler.compile(def))
+                    .isInstanceOf(CompilationException.class)
+                    .hasMessageContaining("unknown source");
+        }
+
+        @Test
+        void shouldThrowForMissingFlowSink() {
+            ModelDefinition def = new ModelDefinitionBuilder()
+                    .name("Bad")
+                    .stock("S", 100, "Thing")
+                    .flow("F", "10", "Day", null, "Missing")
+                    .defaultSimulation("Day", 1, "Day")
+                    .build();
+
+            assertThatThrownBy(() -> compiler.compile(def))
+                    .isInstanceOf(CompilationException.class)
+                    .hasMessageContaining("unknown sink");
+        }
+
+        @Test
+        void shouldThrowForBadFormula() {
+            ModelDefinition def = new ModelDefinitionBuilder()
+                    .name("Bad")
+                    .stock("S", 100, "Thing")
+                    .flow("F", "S +", "Day", "S", null)
+                    .defaultSimulation("Day", 1, "Day")
+                    .build();
+
+            assertThatThrownBy(() -> compiler.compile(def))
+                    .isInstanceOf(Exception.class);
+        }
+    }
+
+    @Nested
+    @DisplayName("Module with output bindings")
+    class OutputBindings {
+
+        @Test
+        void shouldCompileModelWithOutputBindings() {
+            ModelDefinition innerModule = new ModelDefinitionBuilder()
+                    .name("Producer")
+                    .stock("Value", 50, "Thing")
+                    .aux("output", "Value * 2", "Thing")
+                    .build();
+
+            ModelDefinition outer = new ModelDefinitionBuilder()
+                    .name("Consumer")
+                    .module("producer", innerModule,
+                            java.util.Map.of(),
+                            java.util.Map.of("output", "ProducerOutput"))
+                    .defaultSimulation("Day", 1, "Day")
+                    .build();
+
+            CompiledModel compiled = compiler.compile(outer);
+            Variable output = compiled.getModel().getVariable("ProducerOutput");
+            assertThat(output).isNotNull();
+            assertThat(output.getValue()).isCloseTo(100.0, within(0.01));
         }
     }
 }

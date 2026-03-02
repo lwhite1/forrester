@@ -27,16 +27,25 @@ import java.util.List;
  */
 public class ExprParser {
 
-    private final String input;
-    private int pos;
+    private static final int MAX_DEPTH = 200;
 
-    private ExprParser(String input) {
+    private final String input;
+    private final int trimOffset;
+    private int pos;
+    private int depth;
+
+    private ExprParser(String input, int trimOffset) {
         this.input = input;
+        this.trimOffset = trimOffset;
         this.pos = 0;
     }
 
     /**
      * Parses the given expression string into an {@link Expr} AST.
+     *
+     * <p>The reserved identifiers {@code TIME} and {@code DT} are always parsed as zero-argument
+     * function calls, consistent with standard System Dynamics convention. Model elements must
+     * not use these names.
      *
      * @throws ParseException if the input is not a valid expression
      */
@@ -44,19 +53,32 @@ public class ExprParser {
         if (input == null || input.isBlank()) {
             throw new ParseException("Expression is empty", 0);
         }
-        ExprParser parser = new ExprParser(input.trim());
+        int trimOffset = 0;
+        while (trimOffset < input.length() && Character.isWhitespace(input.charAt(trimOffset))) {
+            trimOffset++;
+        }
+        ExprParser parser = new ExprParser(input.trim(), trimOffset);
         Expr result = parser.parseExpr();
         parser.skipWhitespace();
         if (parser.pos < parser.input.length()) {
             throw new ParseException(
                     "Unexpected character '" + parser.input.charAt(parser.pos) + "'",
-                    parser.pos);
+                    parser.pos + parser.trimOffset);
         }
         return result;
     }
 
     private Expr parseExpr() {
-        return parseOr();
+        depth++;
+        if (depth > MAX_DEPTH) {
+            throw new ParseException("Expression nesting too deep (max " + MAX_DEPTH + ")",
+                    pos + trimOffset);
+        }
+        try {
+            return parseOr();
+        } finally {
+            depth--;
+        }
     }
 
     private Expr parseOr() {
@@ -158,23 +180,17 @@ public class ExprParser {
             Expr operand = parseUnary();
             return new Expr.UnaryOp(UnaryOperator.NOT, operand);
         }
-        if (matchUnaryMinus()) {
+        if (matchMinus()) {
             Expr operand = parseUnary();
             return new Expr.UnaryOp(UnaryOperator.NEGATE, operand);
         }
-        return parseCall();
-    }
-
-    private Expr parseCall() {
-        Expr primary = parsePrimary();
-        // Function calls are handled inside parsePrimary for identifiers
-        return primary;
+        return parsePrimary();
     }
 
     private Expr parsePrimary() {
         skipWhitespace();
         if (pos >= input.length()) {
-            throw new ParseException("Unexpected end of expression", pos);
+            throw new ParseException("Unexpected end of expression", pos + trimOffset);
         }
 
         char c = input.charAt(pos);
@@ -203,7 +219,7 @@ public class ExprParser {
             return parseIdentifierOrCall();
         }
 
-        throw new ParseException("Unexpected character '" + c + "'", pos);
+        throw new ParseException("Unexpected character '" + c + "'", pos + trimOffset);
     }
 
     private Expr parseNumber() {
@@ -226,7 +242,7 @@ public class ExprParser {
                 pos++;
             }
             if (pos >= input.length() || !Character.isDigit(input.charAt(pos))) {
-                throw new ParseException("Invalid scientific notation", start);
+                throw new ParseException("Invalid scientific notation", start + trimOffset);
             }
             while (pos < input.length() && Character.isDigit(input.charAt(pos))) {
                 pos++;
@@ -236,7 +252,7 @@ public class ExprParser {
         try {
             return new Expr.Literal(Double.parseDouble(numStr));
         } catch (NumberFormatException e) {
-            throw new ParseException("Invalid number: " + numStr, start, e);
+            throw new ParseException("Invalid number: " + numStr, start + trimOffset, e);
         }
     }
 
@@ -247,12 +263,12 @@ public class ExprParser {
             pos++;
         }
         if (pos >= input.length()) {
-            throw new ParseException("Unterminated quoted identifier", start - 1);
+            throw new ParseException("Unterminated quoted identifier", start - 1 + trimOffset);
         }
         String name = input.substring(start, pos);
         pos++; // skip closing backtick
         if (name.isEmpty()) {
-            throw new ParseException("Empty quoted identifier", start - 1);
+            throw new ParseException("Empty quoted identifier", start - 1 + trimOffset);
         }
         return new Expr.Ref(name);
     }
@@ -343,18 +359,6 @@ public class ExprParser {
         return false;
     }
 
-    /**
-     * Matches a unary minus: a '-' that appears in unary position.
-     */
-    private boolean matchUnaryMinus() {
-        skipWhitespace();
-        if (pos < input.length() && input.charAt(pos) == '-') {
-            pos++;
-            return true;
-        }
-        return false;
-    }
-
     private boolean matchChar(char c) {
         skipWhitespace();
         if (pos < input.length() && input.charAt(pos) == c) {
@@ -367,7 +371,7 @@ public class ExprParser {
     private void expectChar(char c) {
         skipWhitespace();
         if (pos >= input.length() || input.charAt(pos) != c) {
-            throw new ParseException("Expected '" + c + "'", pos);
+            throw new ParseException("Expected '" + c + "'", pos + trimOffset);
         }
         pos++;
     }

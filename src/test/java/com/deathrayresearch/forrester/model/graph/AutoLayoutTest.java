@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 @DisplayName("AutoLayout")
 class AutoLayoutTest {
@@ -31,19 +31,19 @@ class AutoLayoutTest {
 
         ViewDef view = AutoLayout.layout(def);
 
-        assertNotNull(view);
-        assertEquals("Auto Layout", view.name());
+        assertThat(view).isNotNull();
+        assertThat(view.name()).isEqualTo("Auto Layout");
 
         Set<String> placedNames = view.elements().stream()
                 .map(ElementPlacement::name)
                 .collect(Collectors.toSet());
 
-        assertTrue(placedNames.contains("S1"), "S1 should be placed");
-        assertTrue(placedNames.contains("S2"), "S2 should be placed");
-        assertTrue(placedNames.contains("F1"), "F1 should be placed");
-        assertTrue(placedNames.contains("A1"), "A1 should be placed");
-        assertTrue(placedNames.contains("C1"), "C1 should be placed");
-        assertEquals(5, view.elements().size());
+        assertThat(placedNames.contains("S1")).as("S1 should be placed").isTrue();
+        assertThat(placedNames.contains("S2")).as("S2 should be placed").isTrue();
+        assertThat(placedNames.contains("F1")).as("F1 should be placed").isTrue();
+        assertThat(placedNames.contains("A1")).as("A1 should be placed").isTrue();
+        assertThat(placedNames.contains("C1")).as("C1 should be placed").isTrue();
+        assertThat(view.elements().size()).isEqualTo(5);
     }
 
     @Test
@@ -60,13 +60,13 @@ class AutoLayoutTest {
 
         for (ElementPlacement p : view.elements()) {
             if (p.name().equals("S")) {
-                assertEquals("stock", p.type());
+                assertThat(p.type()).isEqualTo("stock");
             } else if (p.name().equals("F")) {
-                assertEquals("flow", p.type());
+                assertThat(p.type()).isEqualTo("flow");
             } else if (p.name().equals("A")) {
-                assertEquals("aux", p.type());
+                assertThat(p.type()).isEqualTo("aux");
             } else if (p.name().equals("C")) {
-                assertEquals("constant", p.type());
+                assertThat(p.type()).isEqualTo("constant");
             }
         }
     }
@@ -91,8 +91,8 @@ class AutoLayoutTest {
         Set<String> positions = new HashSet<>();
         for (ElementPlacement p : elements) {
             String pos = p.x() + "," + p.y();
-            assertTrue(positions.add(pos),
-                    "Elements should not overlap: duplicate position " + pos + " for " + p.name());
+            assertThat(positions.add(pos))
+                    .as("Elements should not overlap: duplicate position " + pos + " for " + p.name()).isTrue();
         }
     }
 
@@ -122,8 +122,8 @@ class AutoLayoutTest {
         }
 
         // Auxiliaries should be above stocks, constants below
-        assertTrue(auxY < stockY, "Auxiliaries should be above stocks (lower y)");
-        assertTrue(constantY > stockY, "Constants should be below stocks (higher y)");
+        assertThat(auxY < stockY).as("Auxiliaries should be above stocks (lower y)").isTrue();
+        assertThat(constantY > stockY).as("Constants should be below stocks (higher y)").isTrue();
     }
 
     @Test
@@ -137,7 +137,7 @@ class AutoLayoutTest {
 
         ViewDef view = AutoLayout.layout(def);
 
-        assertFalse(view.connectors().isEmpty(), "Should generate connectors from dependencies");
+        assertThat(view.connectors().isEmpty()).as("Should generate connectors from dependencies").isFalse();
     }
 
     @Test
@@ -148,9 +148,9 @@ class AutoLayoutTest {
 
         ViewDef view = AutoLayout.layout(def);
 
-        assertNotNull(view);
-        assertTrue(view.elements().isEmpty());
-        assertTrue(view.connectors().isEmpty());
+        assertThat(view).isNotNull();
+        assertThat(view.elements().isEmpty()).isTrue();
+        assertThat(view.connectors().isEmpty()).isTrue();
     }
 
     @Test
@@ -167,11 +167,11 @@ class AutoLayoutTest {
                 .map(ElementPlacement::name)
                 .collect(Collectors.toSet());
 
-        assertTrue(placedNames.contains("Effect"), "Lookup table should be placed");
+        assertThat(placedNames.contains("Effect")).as("Lookup table should be placed").isTrue();
 
         ElementPlacement lookupPlacement = view.elements().stream()
                 .filter(p -> p.name().equals("Effect"))
                 .findFirst().orElseThrow();
-        assertEquals("lookup", lookupPlacement.type());
+        assertThat(lookupPlacement.type()).isEqualTo("lookup");
     }
 }

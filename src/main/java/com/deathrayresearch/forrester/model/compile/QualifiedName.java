@@ -14,12 +14,23 @@ public record QualifiedName(List<String> parts) {
         if (parts.isEmpty()) {
             throw new IllegalArgumentException("Qualified name must have at least one part");
         }
+        for (String part : parts) {
+            if (part == null || part.isBlank()) {
+                throw new IllegalArgumentException(
+                        "Qualified name must not contain blank parts: " + parts);
+            }
+        }
     }
 
     /**
      * Parses a dot-separated qualified name string.
+     *
+     * @throws IllegalArgumentException if the name is null, blank, or contains empty parts
      */
     public static QualifiedName parse(String name) {
+        if (name == null || name.isBlank()) {
+            throw new IllegalArgumentException("Qualified name must not be blank");
+        }
         return new QualifiedName(Arrays.asList(name.split("\\.")));
     }
 

@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Test;
 import java.util.List;
 import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 @DisplayName("DefinitionValidator")
 class DefinitionValidatorTest {
@@ -15,7 +15,7 @@ class DefinitionValidatorTest {
     void shouldPassForValidSIRModel() {
         ModelDefinition sir = buildSIR();
         List<String> errors = DefinitionValidator.validate(sir);
-        assertTrue(errors.isEmpty(), "Expected no errors but got: " + errors);
+        assertThat(errors.isEmpty()).as("Expected no errors but got: " + errors).isTrue();
     }
 
     @Test
@@ -26,7 +26,7 @@ class DefinitionValidatorTest {
                 .constant("S", 5.0, "Person") // same name as stock
                 .build();
         List<String> errors = DefinitionValidator.validate(def);
-        assertTrue(errors.stream().anyMatch(e -> e.contains("Duplicate")));
+        assertThat(errors.stream().anyMatch(e -> e.contains("Duplicate"))).isTrue();
     }
 
     @Test
@@ -37,7 +37,7 @@ class DefinitionValidatorTest {
                 .flow("F", "A * 0.1", "Day", "NonExistent", "A")
                 .build();
         List<String> errors = DefinitionValidator.validate(def);
-        assertTrue(errors.stream().anyMatch(e -> e.contains("non-existent source")));
+        assertThat(errors.stream().anyMatch(e -> e.contains("non-existent source"))).isTrue();
     }
 
     @Test
@@ -48,7 +48,7 @@ class DefinitionValidatorTest {
                 .flow("F", "A * 0.1", "Day", "A", "NonExistent")
                 .build();
         List<String> errors = DefinitionValidator.validate(def);
-        assertTrue(errors.stream().anyMatch(e -> e.contains("non-existent sink")));
+        assertThat(errors.stream().anyMatch(e -> e.contains("non-existent sink"))).isTrue();
     }
 
     @Test
@@ -59,7 +59,7 @@ class DefinitionValidatorTest {
                 .flow("F", "A +", "Day", "A", null) // invalid expression
                 .build();
         List<String> errors = DefinitionValidator.validate(def);
-        assertTrue(errors.stream().anyMatch(e -> e.contains("invalid equation")));
+        assertThat(errors.stream().anyMatch(e -> e.contains("invalid equation"))).isTrue();
     }
 
     @Test
@@ -75,7 +75,7 @@ class DefinitionValidatorTest {
                 .module("sub", inner, Map.of(), Map.of())
                 .build();
         List<String> errors = DefinitionValidator.validate(outer);
-        assertTrue(errors.stream().anyMatch(e -> e.contains("Circular")));
+        assertThat(errors.stream().anyMatch(e -> e.contains("Circular"))).isTrue();
     }
 
     @Test
@@ -85,7 +85,7 @@ class DefinitionValidatorTest {
                 .flow("Inflow", "10", "Day", null, null)
                 .build();
         List<String> errors = DefinitionValidator.validate(def);
-        assertTrue(errors.isEmpty(), "Null source/sink should be allowed: " + errors);
+        assertThat(errors.isEmpty()).as("Null source/sink should be allowed: " + errors).isTrue();
     }
 
     @Test
@@ -118,8 +118,8 @@ class DefinitionValidatorTest {
                 .build();
 
         List<String> errors = DefinitionValidator.validate(outer);
-        assertTrue(errors.stream().anyMatch(e -> e.contains("Circular")),
-                "Should detect B→C→B cycle even though root is 'Outer': " + errors);
+        assertThat(errors.stream().anyMatch(e -> e.contains("Circular")))
+                .as("Should detect B→C→B cycle even though root is 'Outer': " + errors).isTrue();
     }
 
     @Test
@@ -138,7 +138,18 @@ class DefinitionValidatorTest {
                         Map.of())
                 .build();
         List<String> errors = DefinitionValidator.validate(outer);
-        assertTrue(errors.stream().anyMatch(e -> e.contains("non-existent input port")));
+        assertThat(errors.stream().anyMatch(e -> e.contains("non-existent input port"))).isTrue();
+    }
+
+    @Test
+    void shouldDetectInvalidAuxEquation() {
+        ModelDefinition def = new ModelDefinitionBuilder()
+                .name("Bad")
+                .stock("S", 100, "Person")
+                .aux("Bad Aux", "S +", "Person")
+                .build();
+        List<String> errors = DefinitionValidator.validate(def);
+        assertThat(errors).anyMatch(e -> e.contains("invalid equation"));
     }
 
     private ModelDefinition buildSIR() {

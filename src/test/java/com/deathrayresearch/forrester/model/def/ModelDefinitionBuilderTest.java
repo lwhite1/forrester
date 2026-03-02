@@ -5,7 +5,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 @DisplayName("ModelDefinitionBuilder")
 class ModelDefinitionBuilderTest {
@@ -29,12 +29,12 @@ class ModelDefinitionBuilderTest {
                 .defaultSimulation("Day", 56, "Day")
                 .build();
 
-        assertEquals("SIR Model", sir.name());
-        assertEquals(3, sir.stocks().size());
-        assertEquals(2, sir.flows().size());
-        assertEquals(3, sir.constants().size());
-        assertNotNull(sir.defaultSimulation());
-        assertEquals(56, sir.defaultSimulation().duration());
+        assertThat(sir.name()).isEqualTo("SIR Model");
+        assertThat(sir.stocks().size()).isEqualTo(3);
+        assertThat(sir.flows().size()).isEqualTo(2);
+        assertThat(sir.constants().size()).isEqualTo(3);
+        assertThat(sir.defaultSimulation()).isNotNull();
+        assertThat(sir.defaultSimulation().duration()).isEqualTo(56);
     }
 
     @Test
@@ -42,11 +42,11 @@ class ModelDefinitionBuilderTest {
         ModelDefinition def = new ModelDefinitionBuilder()
                 .name("Empty")
                 .build();
-        assertEquals("Empty", def.name());
-        assertTrue(def.stocks().isEmpty());
-        assertTrue(def.flows().isEmpty());
-        assertTrue(def.auxiliaries().isEmpty());
-        assertTrue(def.constants().isEmpty());
+        assertThat(def.name()).isEqualTo("Empty");
+        assertThat(def.stocks().isEmpty()).isTrue();
+        assertThat(def.flows().isEmpty()).isTrue();
+        assertThat(def.auxiliaries().isEmpty()).isTrue();
+        assertThat(def.constants().isEmpty()).isTrue();
     }
 
     @Test
@@ -57,8 +57,8 @@ class ModelDefinitionBuilderTest {
                 .aux("Birth Rate", "Population * Fertility", "Person")
                 .constant("Fertility", 0.03, "Dimensionless")
                 .build();
-        assertEquals(1, def.auxiliaries().size());
-        assertEquals("Birth Rate", def.auxiliaries().get(0).name());
+        assertThat(def.auxiliaries().size()).isEqualTo(1);
+        assertThat(def.auxiliaries().get(0).name()).isEqualTo("Birth Rate");
     }
 
     @Test
@@ -70,8 +70,8 @@ class ModelDefinitionBuilderTest {
                         new double[]{1.0, 0.9, 0.7, 0.4, 0.1},
                         "LINEAR")
                 .build();
-        assertEquals(1, def.lookupTables().size());
-        assertEquals(5, def.lookupTables().get(0).xValues().length);
+        assertThat(def.lookupTables().size()).isEqualTo(1);
+        assertThat(def.lookupTables().get(0).xValues().length).isEqualTo(5);
     }
 
     @Test
@@ -80,8 +80,8 @@ class ModelDefinitionBuilderTest {
                 .name("Sim Test")
                 .defaultSimulation("Week", 52, "Week")
                 .build();
-        assertEquals("Week", def.defaultSimulation().timeStep());
-        assertEquals(52, def.defaultSimulation().duration());
+        assertThat(def.defaultSimulation().timeStep()).isEqualTo("Week");
+        assertThat(def.defaultSimulation().duration()).isEqualTo(52);
     }
 
     @Test
@@ -102,6 +102,6 @@ class ModelDefinitionBuilderTest {
                 .build();
 
         List<String> errors = DefinitionValidator.validate(sir);
-        assertTrue(errors.isEmpty(), "SIR model should validate: " + errors);
+        assertThat(errors.isEmpty()).as("SIR model should validate: " + errors).isTrue();
     }
 }

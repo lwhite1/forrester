@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 @DisplayName("ConnectorGenerator")
 class ConnectorGeneratorTest {
@@ -27,14 +27,14 @@ class ConnectorGeneratorTest {
 
         List<ConnectorRoute> connectors = ConnectorGenerator.generate(def);
 
-        assertFalse(connectors.isEmpty());
+        assertThat(connectors.isEmpty()).isFalse();
         // Should have connectors for: Tank → Drain, Rate → Drain, Drain → Tank
         Set<String> keys = connectors.stream()
                 .map(c -> c.from() + " -> " + c.to())
                 .collect(Collectors.toSet());
-        assertTrue(keys.contains("Tank -> Drain"), "Tank influences Drain");
-        assertTrue(keys.contains("Rate -> Drain"), "Rate influences Drain");
-        assertTrue(keys.contains("Drain -> Tank"), "Drain connects to Tank (source)");
+        assertThat(keys.contains("Tank -> Drain")).as("Tank influences Drain").isTrue();
+        assertThat(keys.contains("Rate -> Drain")).as("Rate influences Drain").isTrue();
+        assertThat(keys.contains("Drain -> Tank")).as("Drain connects to Tank (source)").isTrue();
     }
 
     @Test
@@ -52,7 +52,7 @@ class ConnectorGeneratorTest {
         long sToFCount = connectors.stream()
                 .filter(c -> c.from().equals("S") && c.to().equals("F"))
                 .count();
-        assertEquals(1, sToFCount, "S → F should appear only once");
+        assertThat(sToFCount).as("S → F should appear only once").isEqualTo(1);
     }
 
     @Test
@@ -78,23 +78,23 @@ class ConnectorGeneratorTest {
                 .collect(Collectors.toSet());
 
         // Infection formula refs
-        assertTrue(keys.contains("Contact Rate -> Infection"));
-        assertTrue(keys.contains("Infectivity -> Infection"));
-        assertTrue(keys.contains("Susceptible -> Infection"));
-        assertTrue(keys.contains("Infectious -> Infection"));
-        assertTrue(keys.contains("Recovered -> Infection"));
+        assertThat(keys.contains("Contact Rate -> Infection")).isTrue();
+        assertThat(keys.contains("Infectivity -> Infection")).isTrue();
+        assertThat(keys.contains("Susceptible -> Infection")).isTrue();
+        assertThat(keys.contains("Infectious -> Infection")).isTrue();
+        assertThat(keys.contains("Recovered -> Infection")).isTrue();
 
         // Infection flow connections
-        assertTrue(keys.contains("Infection -> Susceptible")); // source
-        assertTrue(keys.contains("Infection -> Infectious"));  // sink
+        assertThat(keys.contains("Infection -> Susceptible")).isTrue(); // source
+        assertThat(keys.contains("Infection -> Infectious")).isTrue();  // sink
 
         // Recovery formula refs
-        assertTrue(keys.contains("Infectious -> Recovery"));
-        assertTrue(keys.contains("Duration -> Recovery"));
+        assertThat(keys.contains("Infectious -> Recovery")).isTrue();
+        assertThat(keys.contains("Duration -> Recovery")).isTrue();
 
         // Recovery flow connections
-        assertTrue(keys.contains("Recovery -> Infectious")); // source
-        assertTrue(keys.contains("Recovery -> Recovered"));  // sink
+        assertThat(keys.contains("Recovery -> Infectious")).isTrue(); // source
+        assertThat(keys.contains("Recovery -> Recovered")).isTrue();  // sink
     }
 
     @Test
@@ -106,7 +106,7 @@ class ConnectorGeneratorTest {
                 .build();
 
         List<ConnectorRoute> connectors = ConnectorGenerator.generate(def);
-        assertTrue(connectors.isEmpty());
+        assertThat(connectors.isEmpty()).isTrue();
     }
 
     @Test
@@ -124,7 +124,7 @@ class ConnectorGeneratorTest {
                 .map(c -> c.from() + " -> " + c.to())
                 .collect(Collectors.toSet());
 
-        assertTrue(keys.contains("S -> Total"), "S influences Total");
-        assertTrue(keys.contains("C -> Total"), "C influences Total");
+        assertThat(keys.contains("S -> Total")).as("S influences Total").isTrue();
+        assertThat(keys.contains("C -> Total")).as("C influences Total").isTrue();
     }
 }

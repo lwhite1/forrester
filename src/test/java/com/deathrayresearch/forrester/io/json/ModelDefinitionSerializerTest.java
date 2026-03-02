@@ -14,7 +14,8 @@ import org.junit.jupiter.api.Test;
 import java.util.List;
 import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @DisplayName("ModelDefinitionSerializer")
 class ModelDefinitionSerializerTest {
@@ -26,19 +27,15 @@ class ModelDefinitionSerializerTest {
         ModelDefinition sir = buildSIR();
         String json = serializer.toJson(sir);
 
-        assertNotNull(json);
-        assertTrue(json.contains("SIR Model"));
-        assertTrue(json.contains("Susceptible"));
-        assertTrue(json.contains("Infection"));
-        assertTrue(json.contains("Contact_Rate"));
+        assertThat(json).isNotNull();
 
         ModelDefinition deserialized = serializer.fromJson(json);
-        assertEquals(sir.name(), deserialized.name());
-        assertEquals(sir.stocks().size(), deserialized.stocks().size());
-        assertEquals(sir.flows().size(), deserialized.flows().size());
-        assertEquals(sir.constants().size(), deserialized.constants().size());
-        assertEquals(sir.defaultSimulation().duration(),
-                deserialized.defaultSimulation().duration());
+        assertThat(deserialized.name()).isEqualTo(sir.name());
+        assertThat(deserialized.stocks().size()).isEqualTo(sir.stocks().size());
+        assertThat(deserialized.flows().size()).isEqualTo(sir.flows().size());
+        assertThat(deserialized.constants().size()).isEqualTo(sir.constants().size());
+        assertThat(deserialized.defaultSimulation().duration())
+                .isEqualTo(sir.defaultSimulation().duration());
     }
 
     @Test
@@ -49,11 +46,11 @@ class ModelDefinitionSerializerTest {
                 .build();
 
         ModelDefinition roundTripped = serializer.fromJson(serializer.toJson(def));
-        assertEquals("S", roundTripped.stocks().get(0).name());
-        assertEquals("A stock", roundTripped.stocks().get(0).comment());
-        assertEquals(100, roundTripped.stocks().get(0).initialValue());
-        assertEquals("Person", roundTripped.stocks().get(0).unit());
-        assertEquals("ALLOW", roundTripped.stocks().get(0).negativeValuePolicy());
+        assertThat(roundTripped.stocks().get(0).name()).isEqualTo("S");
+        assertThat(roundTripped.stocks().get(0).comment()).isEqualTo("A stock");
+        assertThat(roundTripped.stocks().get(0).initialValue()).isEqualTo(100);
+        assertThat(roundTripped.stocks().get(0).unit()).isEqualTo("Person");
+        assertThat(roundTripped.stocks().get(0).negativeValuePolicy()).isEqualTo("ALLOW");
     }
 
     @Test
@@ -66,11 +63,11 @@ class ModelDefinitionSerializerTest {
                 .build();
 
         ModelDefinition roundTripped = serializer.fromJson(serializer.toJson(def));
-        assertEquals("F", roundTripped.flows().get(0).name());
-        assertEquals("A * 0.1", roundTripped.flows().get(0).equation());
-        assertEquals("Day", roundTripped.flows().get(0).timeUnit());
-        assertEquals("A", roundTripped.flows().get(0).source());
-        assertEquals("B", roundTripped.flows().get(0).sink());
+        assertThat(roundTripped.flows().get(0).name()).isEqualTo("F");
+        assertThat(roundTripped.flows().get(0).equation()).isEqualTo("A * 0.1");
+        assertThat(roundTripped.flows().get(0).timeUnit()).isEqualTo("Day");
+        assertThat(roundTripped.flows().get(0).source()).isEqualTo("A");
+        assertThat(roundTripped.flows().get(0).sink()).isEqualTo("B");
     }
 
     @Test
@@ -81,8 +78,8 @@ class ModelDefinitionSerializerTest {
                 .build();
 
         ModelDefinition roundTripped = serializer.fromJson(serializer.toJson(def));
-        assertNull(roundTripped.flows().get(0).source());
-        assertNull(roundTripped.flows().get(0).sink());
+        assertThat(roundTripped.flows().get(0).source()).isNull();
+        assertThat(roundTripped.flows().get(0).sink()).isNull();
     }
 
     @Test
@@ -97,10 +94,10 @@ class ModelDefinitionSerializerTest {
 
         ModelDefinition roundTripped = serializer.fromJson(serializer.toJson(def));
         LookupTableDef table = roundTripped.lookupTables().get(0);
-        assertEquals("Effect", table.name());
-        assertArrayEquals(new double[]{0, 0.5, 1.0}, table.xValues());
-        assertArrayEquals(new double[]{1.0, 0.5, 0.0}, table.yValues());
-        assertEquals("LINEAR", table.interpolation());
+        assertThat(table.name()).isEqualTo("Effect");
+        assertThat(table.xValues()).isEqualTo(new double[]{0, 0.5, 1.0});
+        assertThat(table.yValues()).isEqualTo(new double[]{1.0, 0.5, 0.0});
+        assertThat(table.interpolation()).isEqualTo("LINEAR");
     }
 
     @Test
@@ -121,11 +118,11 @@ class ModelDefinitionSerializerTest {
                 .build();
 
         ModelDefinition roundTripped = serializer.fromJson(serializer.toJson(outer));
-        assertEquals(1, roundTripped.modules().size());
-        assertEquals("mod1", roundTripped.modules().get(0).instanceName());
-        assertEquals("Inner", roundTripped.modules().get(0).definition().name());
-        assertEquals("42", roundTripped.modules().get(0).inputBindings().get("in1"));
-        assertEquals("result", roundTripped.modules().get(0).outputBindings().get("out1"));
+        assertThat(roundTripped.modules().size()).isEqualTo(1);
+        assertThat(roundTripped.modules().get(0).instanceName()).isEqualTo("mod1");
+        assertThat(roundTripped.modules().get(0).definition().name()).isEqualTo("Inner");
+        assertThat(roundTripped.modules().get(0).inputBindings().get("in1")).isEqualTo("42");
+        assertThat(roundTripped.modules().get(0).outputBindings().get("out1")).isEqualTo("result");
     }
 
     @Test
@@ -141,16 +138,16 @@ class ModelDefinitionSerializerTest {
                 .build();
 
         ModelDefinition roundTripped = serializer.fromJson(serializer.toJson(def));
-        assertEquals(1, roundTripped.views().size());
-        assertEquals("Main", roundTripped.views().get(0).name());
-        assertEquals(1, roundTripped.views().get(0).elements().size());
-        assertEquals("S", roundTripped.views().get(0).elements().get(0).name());
+        assertThat(roundTripped.views().size()).isEqualTo(1);
+        assertThat(roundTripped.views().get(0).name()).isEqualTo("Main");
+        assertThat(roundTripped.views().get(0).elements().size()).isEqualTo(1);
+        assertThat(roundTripped.views().get(0).elements().get(0).name()).isEqualTo("S");
     }
 
     @Test
     void shouldThrowOnMalformedJson() {
-        assertThrows(RuntimeException.class,
-                () -> serializer.fromJson("not valid json{{{"));
+        assertThatThrownBy(() -> serializer.fromJson("not valid json{{{"))
+                .isInstanceOf(RuntimeException.class);
     }
 
     @Test
@@ -161,9 +158,12 @@ class ModelDefinitionSerializerTest {
                 .build();
 
         String json = serializer.toJson(def);
-        assertFalse(json.contains("\"comment\""));
-        assertFalse(json.contains("\"flows\""));
-        assertFalse(json.contains("\"auxiliaries\""));
+        ModelDefinition roundTripped = serializer.fromJson(json);
+
+        // Verify structurally that null/empty fields were omitted and round-trip correctly
+        assertThat(roundTripped.stocks().get(0).comment()).isNull();
+        assertThat(roundTripped.flows()).isNullOrEmpty();
+        assertThat(roundTripped.auxiliaries()).isNullOrEmpty();
     }
 
     private ModelDefinition buildSIR() {

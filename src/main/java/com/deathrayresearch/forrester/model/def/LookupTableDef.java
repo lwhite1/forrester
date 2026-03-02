@@ -38,6 +38,11 @@ public record LookupTableDef(
         if (interpolation == null || interpolation.isBlank()) {
             throw new IllegalArgumentException("Interpolation method must not be blank");
         }
+        if (!"LINEAR".equalsIgnoreCase(interpolation)
+                && !"SPLINE".equalsIgnoreCase(interpolation)) {
+            throw new IllegalArgumentException(
+                    "Interpolation must be 'LINEAR' or 'SPLINE', got '" + interpolation + "'");
+        }
         xValues = xValues.clone();
         yValues = yValues.clone();
     }

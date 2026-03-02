@@ -1,7 +1,9 @@
 package com.deathrayresearch.forrester.model.graph;
 
 import com.deathrayresearch.forrester.model.def.AuxDef;
+import com.deathrayresearch.forrester.model.def.ConstantDef;
 import com.deathrayresearch.forrester.model.def.FlowDef;
+import com.deathrayresearch.forrester.model.def.LookupTableDef;
 import com.deathrayresearch.forrester.model.def.ModelDefinition;
 import com.deathrayresearch.forrester.model.def.StockDef;
 import com.deathrayresearch.forrester.model.expr.ExprDependencies;
@@ -49,10 +51,10 @@ public class DependencyGraph {
         for (AuxDef a : def.auxiliaries()) {
             allNodes.add(a.name());
         }
-        for (var c : def.constants()) {
+        for (ConstantDef c : def.constants()) {
             allNodes.add(c.name());
         }
-        for (var t : def.lookupTables()) {
+        for (LookupTableDef t : def.lookupTables()) {
             allNodes.add(t.name());
         }
 

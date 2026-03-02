@@ -100,6 +100,7 @@ public class Delay3 implements Formula, Resettable {
      * Resets this Delay3 to its uninitialized state so it can be reused across simulation runs.
      * The next call to {@link #getCurrentValue()} will re-initialize from the input or explicit initial value.
      */
+    @Override
     public void reset() {
         stage1 = 0;
         stage2 = 0;

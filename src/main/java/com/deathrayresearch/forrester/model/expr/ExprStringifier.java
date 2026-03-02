@@ -6,6 +6,12 @@ package com.deathrayresearch.forrester.model.expr;
  */
 public final class ExprStringifier {
 
+    /** Lowest possible context precedence — used when no surrounding operator constrains. */
+    private static final int MIN_PRECEDENCE = -10;
+
+    /** High precedence context for unary operands — forces parentheses on inner binary ops. */
+    private static final int UNARY_CONTEXT_PRECEDENCE = 10;
+
     private ExprStringifier() {
     }
 
@@ -14,7 +20,7 @@ public final class ExprStringifier {
      */
     public static String stringify(Expr expr) {
         StringBuilder sb = new StringBuilder();
-        appendExpr(sb, expr, -10); // -10 = lowest possible context precedence
+        appendExpr(sb, expr, MIN_PRECEDENCE);
         return sb.toString();
     }
 
@@ -103,7 +109,7 @@ public final class ExprStringifier {
         if (needParens) {
             sb.append('(');
         }
-        appendExpr(sb, un.operand(), 10); // high precedence so inner binary ops get parens
+        appendExpr(sb, un.operand(), UNARY_CONTEXT_PRECEDENCE);
         if (needParens) {
             sb.append(')');
         }
@@ -120,18 +126,18 @@ public final class ExprStringifier {
             if (i > 0) {
                 sb.append(", ");
             }
-            appendExpr(sb, call.arguments().get(i), -10);
+            appendExpr(sb, call.arguments().get(i), MIN_PRECEDENCE);
         }
         sb.append(')');
     }
 
     private static void appendConditional(StringBuilder sb, Expr.Conditional cond) {
         sb.append("IF(");
-        appendExpr(sb, cond.condition(), -10);
+        appendExpr(sb, cond.condition(), MIN_PRECEDENCE);
         sb.append(", ");
-        appendExpr(sb, cond.thenExpr(), -10);
+        appendExpr(sb, cond.thenExpr(), MIN_PRECEDENCE);
         sb.append(", ");
-        appendExpr(sb, cond.elseExpr(), -10);
+        appendExpr(sb, cond.elseExpr(), MIN_PRECEDENCE);
         sb.append(')');
     }
 }

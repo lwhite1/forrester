@@ -17,6 +17,9 @@ public record SimulationSettings(
         if (timeStep == null || timeStep.isBlank()) {
             throw new IllegalArgumentException("Time step must not be blank");
         }
+        if (Double.isNaN(duration) || Double.isInfinite(duration)) {
+            throw new IllegalArgumentException("Duration must be finite, got " + duration);
+        }
         if (duration <= 0) {
             throw new IllegalArgumentException("Duration must be positive");
         }

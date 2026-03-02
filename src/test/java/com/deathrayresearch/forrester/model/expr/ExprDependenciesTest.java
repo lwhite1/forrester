@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Test;
 import java.util.List;
 import java.util.Set;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 @DisplayName("ExprDependencies")
 class ExprDependenciesTest {
@@ -14,43 +14,43 @@ class ExprDependenciesTest {
     @Test
     void shouldReturnEmptyForLiteral() {
         Set<String> deps = ExprDependencies.extract(new Expr.Literal(42));
-        assertTrue(deps.isEmpty());
+        assertThat(deps.isEmpty()).isTrue();
     }
 
     @Test
     void shouldReturnSingletonForRef() {
         Set<String> deps = ExprDependencies.extract(new Expr.Ref("Population"));
-        assertEquals(Set.of("Population"), deps);
+        assertThat(deps).isEqualTo(Set.of("Population"));
     }
 
     @Test
     void shouldReturnUnionForBinaryOp() {
         Expr expr = new Expr.BinaryOp(
                 new Expr.Ref("a"), BinaryOperator.ADD, new Expr.Ref("b"));
-        assertEquals(Set.of("a", "b"), ExprDependencies.extract(expr));
+        assertThat(ExprDependencies.extract(expr)).isEqualTo(Set.of("a", "b"));
     }
 
     @Test
     void shouldDeduplicateRefs() {
-        // x * x → should return {"x"}, not {"x", "x"}
+        // x * x -> should return {"x"}, not {"x", "x"}
         Expr expr = new Expr.BinaryOp(
                 new Expr.Ref("x"), BinaryOperator.MUL, new Expr.Ref("x"));
         Set<String> deps = ExprDependencies.extract(expr);
-        assertEquals(1, deps.size());
-        assertTrue(deps.contains("x"));
+        assertThat(deps.size()).isEqualTo(1);
+        assertThat(deps.contains("x")).isTrue();
     }
 
     @Test
     void shouldExtractFromUnaryOp() {
         Expr expr = new Expr.UnaryOp(UnaryOperator.NEGATE, new Expr.Ref("x"));
-        assertEquals(Set.of("x"), ExprDependencies.extract(expr));
+        assertThat(ExprDependencies.extract(expr)).isEqualTo(Set.of("x"));
     }
 
     @Test
     void shouldExtractFromFunctionArgs() {
         Expr expr = new Expr.FunctionCall("SMOOTH",
                 List.of(new Expr.Ref("input"), new Expr.Literal(5)));
-        assertEquals(Set.of("input"), ExprDependencies.extract(expr));
+        assertThat(ExprDependencies.extract(expr)).isEqualTo(Set.of("input"));
     }
 
     @Test
@@ -59,8 +59,8 @@ class ExprDependenciesTest {
                 new Expr.Ref("condition"),
                 new Expr.Ref("thenVal"),
                 new Expr.Ref("elseVal"));
-        assertEquals(Set.of("condition", "thenVal", "elseVal"),
-                ExprDependencies.extract(expr));
+        assertThat(ExprDependencies.extract(expr))
+                .isEqualTo(Set.of("condition", "thenVal", "elseVal"));
     }
 
     @Test
@@ -69,13 +69,13 @@ class ExprDependenciesTest {
         Expr expr = ExprParser.parse(
                 "Contact_Rate * Infectious / (Susceptible + Infectious + Recovered) * Infectivity * Susceptible");
         Set<String> deps = ExprDependencies.extract(expr);
-        assertEquals(Set.of("Contact_Rate", "Infectious", "Susceptible", "Recovered", "Infectivity"),
-                deps);
+        assertThat(deps)
+                .isEqualTo(Set.of("Contact_Rate", "Infectious", "Susceptible", "Recovered", "Infectivity"));
     }
 
     @Test
     void shouldExtractFromNestedFunctions() {
         Expr expr = ExprParser.parse("MAX(ABS(x), MIN(y, z))");
-        assertEquals(Set.of("x", "y", "z"), ExprDependencies.extract(expr));
+        assertThat(ExprDependencies.extract(expr)).isEqualTo(Set.of("x", "y", "z"));
     }
 }
