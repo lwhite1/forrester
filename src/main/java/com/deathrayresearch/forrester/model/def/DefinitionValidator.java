@@ -1,5 +1,7 @@
 package com.deathrayresearch.forrester.model.def;
 
+import com.deathrayresearch.forrester.model.expr.Expr;
+import com.deathrayresearch.forrester.model.expr.ExprDependencies;
 import com.deathrayresearch.forrester.model.expr.ExprParser;
 import com.deathrayresearch.forrester.model.expr.ParseException;
 import com.deathrayresearch.forrester.model.graph.ViewValidator;
@@ -94,6 +96,14 @@ public final class DefinitionValidator {
             }
         }
 
+        // Validate that formula references resolve to known element names
+        Set<String> knownNames = new HashSet<>(allNames);
+        // Add module output port aliases as known names
+        for (ModuleInstanceDef module : def.modules()) {
+            knownNames.addAll(module.outputBindings().values());
+        }
+        validateFormulaReferences(def, knownNames, errors);
+
         // Validate module interface bindings
         for (ModuleInstanceDef module : def.modules()) {
             ModuleInterface iface = module.definition().moduleInterface();
@@ -144,6 +154,46 @@ public final class DefinitionValidator {
         }
 
         return errors;
+    }
+
+    private static final Set<String> BUILTIN_NAMES = Set.of(
+            "TIME", "DT", "Pi", "PI", "E");
+
+    private static void validateFormulaReferences(ModelDefinition def,
+                                                   Set<String> knownNames,
+                                                   List<String> errors) {
+        for (FlowDef flow : def.flows()) {
+            try {
+                Expr expr = ExprParser.parse(flow.equation());
+                Set<String> refs = ExprDependencies.extract(expr);
+                for (String ref : refs) {
+                    String resolved = ref.replace('_', ' ');
+                    if (!knownNames.contains(ref) && !knownNames.contains(resolved)
+                            && !BUILTIN_NAMES.contains(ref)) {
+                        errors.add("Flow '" + flow.name()
+                                + "' references unknown element: " + ref);
+                    }
+                }
+            } catch (ParseException ignored) {
+                // Already reported as a parse error above
+            }
+        }
+        for (AuxDef aux : def.auxiliaries()) {
+            try {
+                Expr expr = ExprParser.parse(aux.equation());
+                Set<String> refs = ExprDependencies.extract(expr);
+                for (String ref : refs) {
+                    String resolved = ref.replace('_', ' ');
+                    if (!knownNames.contains(ref) && !knownNames.contains(resolved)
+                            && !BUILTIN_NAMES.contains(ref)) {
+                        errors.add("Auxiliary '" + aux.name()
+                                + "' references unknown element: " + ref);
+                    }
+                }
+            } catch (ParseException ignored) {
+                // Already reported as a parse error above
+            }
+        }
     }
 
     private static boolean hasCircularReference(ModelDefinition def, Set<String> pathNames) {

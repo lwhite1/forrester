@@ -258,19 +258,26 @@ public class ExprCompiler {
         }
         String tableName = ref.name();
         String resolvedName = tableName;
-        LookupTable table = context.resolveLookupTable(tableName);
-        if (table == null && tableName.contains("_")) {
+        // Verify table exists
+        LookupTable existing = context.resolveLookupTable(tableName);
+        if (existing == null && tableName.contains("_")) {
             resolvedName = tableName.replace('_', ' ');
-            table = context.resolveLookupTable(resolvedName);
+            existing = context.resolveLookupTable(resolvedName);
         }
-        if (table == null) {
+        if (existing == null) {
             throw new CompilationException(
                     "Lookup table not found: " + tableName, tableName);
         }
-        // Wire the compiled input expression to the table's input holder
+        // Create a fresh LookupTable for this reference with its own isolated input,
+        // preventing cross-formula interference when multiple formulas use the same table
         DoubleSupplier input = compileExpr(args.get(1));
+        LookupTable freshTable = context.createFreshLookupTable(resolvedName, input);
+        if (freshTable != null) {
+            return freshTable::getCurrentValue;
+        }
+        // Fallback: use shared holder (for tables registered without a def)
         double[] inputHolder = context.resolveLookupInputHolder(resolvedName);
-        LookupTable finalTable = table;
+        LookupTable finalTable = existing;
         return () -> {
             inputHolder[0] = input.getAsDouble();
             return finalTable.getCurrentValue();

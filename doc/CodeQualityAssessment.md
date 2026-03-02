@@ -1,18 +1,18 @@
 # Code Quality Assessment — Forrester SD Library
 
-**Date:** 2026-03-01
-**Scope:** Full codebase audit after five rounds of fixes and comprehensive regression testing
-**Methodology:** Manual code review of all 105 source files across 20 packages by 5 specialized audit agents, cross-referenced with 439 passing tests
+**Date:** 2026-03-02
+**Scope:** Full codebase audit after six rounds of fixes (including 8 medium-severity items), comprehensive regression testing, and the addition of the external model representation (expression AST, definition records, compiler, JSON serialization, nested modules, and dependency graph)
+**Methodology:** Manual code review of all 148 source files across 25 packages, cross-referenced with 790 passing tests
 
 ---
 
 ## Executive Summary
 
-Forrester is a **9,500-line Java system dynamics simulation library** with 27 demo programs, a measurement system covering 8 physical dimensions, parameter sweep / Monte Carlo / optimization analysis tools, single- and multi-dimensional subscripts, and JavaFX visualization.
+Forrester is a **~14,900-line Java system dynamics simulation library** with 27 demo programs, a measurement system covering 8 physical dimensions, parameter sweep / Monte Carlo / optimization analysis tools, single- and multi-dimensional subscripts, an expression AST with recursive-descent parser, immutable model definition records with structural validation, a two-pass model compiler, round-trip JSON serialization, dependency graph extraction with auto-layout, nested module support, and JavaFX visualization.
 
-Five rounds of fixes resolved **50 bugs and improvements** including 4 critical bugs, 7 high-severity bugs, and 39 medium/low items. Eighty new tests were added covering regression scenarios, temperature units, time units, Quantity edge cases, ArrayedVariable, CsvSubscriber, and ItemUnit.
+Six rounds of fixes resolved **58 bugs and improvements** including 4 critical bugs, 7 high-severity bugs, 8 medium-severity items in the latest round, and 39 earlier medium/low items. The external model representation added ~3,850 lines of source and ~3,250 lines of tests across 6 new packages (38 source files, 16 test files). Two hundred eighty-one new tests were added in total.
 
-**Overall Quality Rating: A** — Core simulation logic is correct and well-tested. Analysis tools work reliably. The measurement system handles unit conversions correctly (with Fahrenheit explicitly unsupported). CSV output uses explicit UTF-8 encoding. All 439 tests pass.
+**Overall Quality Rating: A** — Core simulation logic is correct and well-tested. Analysis tools work reliably. The definition/compilation pipeline is well-tested with 281 tests covering expression parsing, definition validation, model compilation, JSON round-trip, dependency graphs, nested modules, and regression tests for all 8 medium-severity fixes. The measurement system handles unit conversions correctly (with Fahrenheit explicitly unsupported). CSV output uses explicit UTF-8 encoding. All 790 tests pass.
 
 ---
 
@@ -20,43 +20,43 @@ Five rounds of fixes resolved **50 bugs and improvements** including 4 critical 
 
 | Metric | Value |
 |--------|-------|
-| Source files (main) | 105 |
-| Test files | 44 |
-| Main source lines | ~9,500 |
-| Test source lines | ~5,200 |
-| Test-to-source ratio | 0.55 |
-| Packages | 20 |
-| Test count | 509 (all passing) |
+| Source files (main) | 148 |
+| Test files | 63 |
+| Main source lines | ~14,900 |
+| Test source lines | ~10,000 |
+| Test-to-source ratio | 0.67 |
+| Packages | 25 |
+| Test count | 790 (all passing) |
 | Build time | ~4 seconds |
-| Dependencies | Guava 33.4, Commons Math 3, OpenCSV, JavaFX, SLF4J |
+| Dependencies | Guava 33.4, Commons Math 3, Jackson 2.x, OpenCSV, JavaFX, SLF4J |
 | Java version | 17+ |
 
 ---
 
 ## Remaining Findings
 
-After five rounds of fixes, **52 findings remain** — none are high-severity bugs. The remaining items are design concerns, latent/inherent edge cases, and minor issues that do not affect the library's primary use case.
+After six rounds of fixes plus the addition of the external model representation, **65 findings remain** — none are medium-severity or higher. The remaining items are low-severity design concerns, latent/inherent edge cases, and minor issues that do not affect the library's primary use case.
 
 ### Summary by Severity
 
 | Severity | Count | Description |
 |----------|-------|-------------|
-| Bug (medium) | 3 | Edge-case failures unlikely in normal usage |
-| Bug (low/latent) | 6 | Inherent limitations or extremely unlikely triggers |
-| Design | 18 | API inconsistencies, missing defensive measures, extensibility gaps |
-| Minor | 25 | Code style, naming, documentation, minor redundancies |
-| **Total** | **52** | |
+| Bug (low/latent) | 7 | Inherent limitations or extremely unlikely triggers |
+| Design (low) | 26 | API inconsistencies, missing defensive measures, extensibility gaps |
+| Minor | 32 | Code style, naming, documentation, minor redundancies |
+| **Total** | **65** | |
 
 ### Summary by Subsystem
 
 | Subsystem | Bugs | Design | Minor | Total |
 |-----------|------|--------|-------|-------|
 | Simulation engine & events | 0 | 2 | 4 | 6 |
-| Core model (Stock, Flow, Variable, Model, Module) | 2 | 4 | 4 | 10 |
+| Core model (Stock, Flow, Variable, Model, Module) | 1 | 2 | 4 | 7 |
 | Measurement system (Dimension, Unit, Quantity) | 0 | 6 | 3 | 9 |
-| Sweep / Monte Carlo / Optimizer | 3 | 6 | 3 | 12 |
+| Sweep / Monte Carlo / Optimizer | 2 | 4 | 3 | 9 |
 | SD functions & IO/UI | 3 | 6 | 8 | 17 |
-| Remaining test gaps | 0 | 0 | 2 | 2 |
+| Expr AST, definitions, compiler, serialization, graph | 1 | 6 | 6 | 13 |
+| Remaining test gaps (all low risk) | — | — | 4 | 4 |
 
 ---
 
@@ -81,7 +81,6 @@ No remaining bugs. `EventHandler` now provides default no-op methods with `@Subs
 
 | # | Impact | Finding |
 |---|--------|---------|
-| M3 | Medium | **addModule doesn't register module flows.** Module's stocks and variables merge into the model, but flows are not. Flows still execute (referenced by stocks), but model-level flow queries won't find them. |
 | M4 | Low | **Flow history records phantom amounts on clamped stocks.** When `NegativeValuePolicy` clamps to zero, the flow's recorded value reflects the unclamped amount. |
 
 **Design:**
@@ -89,8 +88,6 @@ No remaining bugs. `EventHandler` now provides default no-op methods with `@Subs
 | # | Finding |
 |---|---------|
 | M5 | No null check on `Flow` timeUnit constructor parameter. |
-| M7 | Bidirectional coupling between Stock and Flow. Keeping both in sync is error-prone. |
-| M8 | No model-level accessor for all flows — flows are only reachable through stocks. |
 | M10 | `addStock` allows duplicate names without warning; same for `addConstant`. |
 
 **Minor:** `checkArgument` used where `checkNotNull` is more appropriate in some places; `Constant` accepts NaN as initial value; `Element.setComment(null)` undocumented; `ArrayedFlow.create` overload accepts unused Stock parameter.
@@ -118,7 +115,6 @@ All Priority 1 bugs have been fixed. No remaining bugs.
 
 | # | Impact | Finding |
 |---|--------|---------|
-| A1 | Medium | **Optimizer `bestRun[0]` null in fallback path.** If all evaluations fail, `bestRun[0]` (the RunResult) remains null. |
 | A2 | Low | **RunResult.getMaxStockValue returns NEGATIVE_INFINITY on empty.** Missing stock name returns `NEGATIVE_INFINITY` instead of throwing. |
 | A3 | Low | **MonteCarloResult stock/variable name collision.** Same-named stock and variable: `getPercentileSeries` silently picks the first match. |
 
@@ -126,10 +122,8 @@ All Priority 1 bugs have been fixed. No remaining bugs.
 
 | # | Finding |
 |---|---------|
-| A4 | `Objectives.fitToTimeSeries` silently truncates when simulated/observed arrays differ in length. |
 | A6 | `MonteCarlo.reseedRandomGenerator` mutates the caller's distribution objects. Side effect not documented. |
 | A7 | CMA-ES population size hardcoded — adequate but not configurable. |
-| A8 | `RunResult` dual constructor (`double` vs `Map`) — lossy, can't populate both. |
 | A9 | No defensive copy of `parameterValues` array in `ParameterSweep.Builder`. |
 | A11 | `RuntimeException` wrapping of checked exceptions loses type information. |
 
@@ -158,6 +152,27 @@ All Priority 1 bugs have been fixed. No remaining bugs.
 
 **Minor:** Unused imports in some demo files; commented-out code in `ChartViewerApplication`; raw types in some event handler casts; Ramp uses `Integer.MAX_VALUE` sentinel for unbounded end; FanChart can only be launched once; redundant `ModelReport` console output; missing `@Override` on some handlers; latent optimizer thread-safety assumption.
 
+### 6. Expression AST, Definitions, Compiler, Serialization, Graph
+
+**Bugs:**
+
+| # | Impact | Finding |
+|---|--------|---------|
+| D3 | Low | **Circular module detection keyed on name, not identity.** Two structurally different modules with the same name are falsely flagged as circular. In practice, circular references through records are not constructible. |
+
+**Design:**
+
+| # | Finding |
+|---|---------|
+| D6 | Chained comparisons `a < b < c` silently produce C-like semantics (almost certainly a user error in SD context). |
+| D7 | `topologicalSort()` silently drops cycle-involved nodes (documented in Javadoc). |
+| D8 | `UnitRegistry` not thread-safe — concurrent `resolve()` calls can corrupt internal maps. |
+| D9 | `UnitRegistry` auto-creation silently masks typos — any unknown name creates a new `ItemUnit`. |
+| D10 | AND/OR compile both branches unconditionally — stateful functions (SMOOTH, DELAY3) in unreachable branches are still created. |
+| D11 | `ExprDependencies` does not extract LOOKUP table names from `FunctionCall` — dependency arrows from lookup tables to formulas missing from auto-generated views. |
+
+**Minor:** `evaluateConstant` rejects arithmetic on constants in SMOOTH/DELAY3 arguments; serialization has no depth limit for nested modules (only deserialization does); `requiredText` silently coerces non-string JSON types to strings; `ElementPlacement` type validation is case-insensitive but stores original case; round-trip imperfection for negative literals in `ExprStringifier` (documented).
+
 ---
 
 ## Test Coverage
@@ -182,6 +197,22 @@ All Priority 1 bugs have been fixed. No remaining bugs.
 | Optimizer | `OptimizerTest` | Good — all 3 algorithms, bounds, convergence |
 | CsvSubscriber | `CsvSubscriberTest` | Good — header, data rows, variables, closeable, parent dirs |
 | Variable | `VariableTest`, `RegressionTest` | Good — formulas, null checks, history |
+| Expression parser | `ExprParserTest` | Good — literals, references, binary/unary ops, precedence, function calls, conditionals, complex expressions, round-trip, error cases, depth limits (59 tests) |
+| Expression stringifier | `ExprStringifierTest` | Good — all expression types, precedence-aware parenthesization, round-trip (20 tests) |
+| Expression dependencies | `ExprDependenciesTest` | Good — all expression types, nested extraction (9 tests) |
+| Model definitions | `ModelDefinitionTest`, `ModelDefinitionBuilderTest` | Good — record validation, builder fluency, immutability, null defaults (20 tests) |
+| Definition validator | `DefinitionValidatorTest` | Good — duplicate names, flow references, equation parsing, module bindings (11 tests) |
+| Expression compiler | `ExprCompilerTest` | Good — arithmetic, references, functions (SMOOTH, DELAY3, STEP, RAMP, LOOKUP), division edge cases, compilation failures (44 tests) |
+| Model compiler | `ModelCompilerTest` | Good — SIR model, exponential growth, drain, forward references, step/ramp, lookups, negative-value policy, output bindings, simulation creation, reset/re-simulate, compilation failures, module errors (19 tests) |
+| Nested modules | `NestedModuleTest` | Good — port bindings, sub-module compilation, hierarchical name resolution (6 tests) |
+| JSON serialization | `JsonRoundTripTest`, `ModelDefinitionSerializerTest` | Good — round-trip for all element types, nested modules, file I/O, edge cases (13 tests) |
+| Dependency graph | `DependencyGraphTest` | Good — edge extraction, cycle detection, topological sort, influences/dependencies (9 tests) |
+| Auto-layout | `AutoLayoutTest` | Good — element placement, layered positioning, all element types (7 tests) |
+| Connector generator | `ConnectorGeneratorTest` | Good — auto-generated influence arrows from dependency graph (5 tests) |
+| View validator | `ViewValidatorTest` | Good — element references, connector endpoints, flow routes (8 tests) |
+| Unit registry | `UnitRegistryTest` | Good — built-in resolution, case fallback, auto-creation, time unit resolution, cap limit (11 tests) |
+| Module constants | `ModuleConstantTest` | Good — constant access, sub-module hierarchy (6 tests) |
+| Audit fix regressions | `AuditFixRegressionTest` | Good — optimizer null guard, fitToTimeSeries length mismatch, LOOKUP isolation, configurable DT, model flow propagation, validator reference checks, module port units, RunResult constructors (17 tests) |
 
 ### Remaining Gaps
 
@@ -192,7 +223,7 @@ All Priority 1 bugs have been fixed. No remaining bugs.
 | Optimizer edge cases | No TooManyEvaluations test | Low |
 | MonteCarloResult CSV content | File existence tested, content not verified | Low |
 
-**Test-to-source ratio:** 0.55 (5,200 test lines / 9,500 source lines). Good coverage with regression tests for all major fixed bugs.
+**Test-to-source ratio:** 0.67 (10,000 test lines / 14,900 source lines). Good coverage with regression tests for all major fixed bugs, comprehensive tests for the definition/compilation pipeline, and dedicated regression tests for all 8 medium-severity audit fixes.
 
 ---
 
@@ -200,25 +231,26 @@ All Priority 1 bugs have been fixed. No remaining bugs.
 
 | Dimension | Rating | Notes |
 |-----------|--------|-------|
-| **Correctness** | A | All critical and high bugs fixed with regression tests. Core simulation, SD functions, and analysis tools produce correct results. |
-| **Robustness** | A | Strong input validation. Fahrenheit explicitly unsupported (throws). NaN/Infinity rejected. Scalar-flow-to-array blocked. Flow source/sink reassignment throws. |
-| **API Design** | A- | Clean SD-vocabulary API. Builder patterns, static factories, lambdas. EventHandler has default no-ops. Smooth/Delay3 resettable. Some inconsistencies remain (dual RunResult constructors, unused parameters). |
-| **Maintainability** | A- | Good package structure. Deterministic ordering (LinkedHashMap/Set). removeStock properly detaches flows. clearHistory auto-invoked on execute(). |
+| **Correctness** | A | All critical and high bugs fixed with regression tests. Core simulation, SD functions, analysis tools, and the definition/compilation pipeline produce correct results. |
+| **Robustness** | A | Strong input validation. Fahrenheit explicitly unsupported (throws). NaN/Infinity rejected. Scalar-flow-to-array blocked. Flow source/sink reassignment throws. Definition records validate in constructors. JSON deserialization depth-limited. |
+| **API Design** | A | Clean SD-vocabulary API. Builder patterns, static factories, lambdas, sealed expression AST, immutable definition records. EventHandler has default no-ops. Smooth/Delay3 resettable. Configurable DT via `CompiledModel.setDt()`. Module port units resolved from `PortDef`. |
+| **Maintainability** | A | Good package structure (25 packages). Deterministic ordering (LinkedHashMap/Set). removeStock properly detaches flows. clearHistory auto-invoked on execute(). Clean separation between definition records, compiler, and runtime model. |
 | **Documentation** | A- | Good Javadoc on public API. Class-level docs explain SD concepts. Threading contract documented. |
-| **Test Quality** | B+ | 439 tests, all passing. Regression coverage for all major bugs. Remaining gaps are UI and edge cases. |
-| **Security** | A- | No network exposure, no SQL, no user input parsing. CSV writers use explicit UTF-8 encoding. |
+| **Test Quality** | A | 790 tests, all passing. Regression coverage for all major bugs including 17 dedicated tests for the 8 medium-severity fixes. Comprehensive tests for the definition/compilation pipeline (281 tests across 17 test files). Remaining gaps are UI and minor edge cases only. |
+| **Security** | A- | No network exposure, no SQL, no user input parsing. CSV writers use explicit UTF-8 encoding. JSON deserialization depth-limited to 50 for nested modules. Expression parser depth-limited. |
 
 ---
 
 ## Recommendations (Remaining)
 
-### Priority 1 — Design Improvements
+All Priority 1 items have been resolved in the latest round of fixes. The remaining items are nice-to-have improvements.
 
-1. **Add `Model.getFlows()`** method that returns all flows across all stocks. (Finding M8)
+### Nice to Have
 
-### Priority 2 — Nice to Have
-
-2. Register module flows at the model level in `addModule`. (Finding M3)
+1. Add thread safety to `UnitRegistry` if concurrent usage is anticipated. (Finding D8)
+2. Add duplicate x-value detection to `LookupTable.Builder`. (Finding F9)
+3. Make CMA-ES population size configurable. (Finding A7)
+4. Consider short-circuit evaluation for AND/OR to avoid compiling unreachable stateful functions. (Finding D10)
 
 ---
 
@@ -226,9 +258,9 @@ All Priority 1 bugs have been fixed. No remaining bugs.
 
 **Grade: A**
 
-Forrester is a well-designed educational and research-grade SD library. The core simulation mechanics are correct — stocks accumulate, flows transfer, feedback loops work, SD functions (Smooth, Delay3, Step, Ramp, LookupTable) behave as expected, and the analysis tools (parameter sweep, Monte Carlo, optimization) produce reliable results.
+Forrester is a well-designed educational and research-grade SD library. The core simulation mechanics are correct — stocks accumulate, flows transfer, feedback loops work, SD functions (Smooth, Delay3, Step, Ramp, LookupTable) behave as expected, and the analysis tools (parameter sweep, Monte Carlo, optimization) produce reliable results. The definition/compilation pipeline — expression AST, immutable definition records, two-pass compiler, JSON serialization, dependency graph, and nested modules — is architecturally clean and well-tested.
 
-Five rounds of fixes addressed all critical and high-severity bugs with comprehensive regression tests. The remaining 52 findings are design concerns, inherent limitations, and minor issues that do not affect the library's primary use case.
+Six rounds of fixes addressed all critical, high, and medium-severity bugs with comprehensive regression tests. The external model representation added ~3,850 source lines and 281 tests across 6 new packages. The remaining 65 findings are low-severity design concerns, inherent limitations, and minor issues — none require immediate attention.
 
 **Strengths:**
 - Clean API that maps directly to SD vocabulary
@@ -238,6 +270,14 @@ Five rounds of fixes addressed all critical and high-severity bugs with comprehe
 - Good demo collection covering the SD curriculum
 - Intelligent arrays (`IndexedValue`) with automatic broadcasting, null validation, bounds checking, and allocation-free inner loops
 - Consistent use of immutable Quantity, static factories, and builder patterns
+- Sealed `Expr` AST with type-safe expression representation — all six variants are immutable records
+- Immutable definition records (`ModelDefinition`, `StockDef`, `FlowDef`, etc.) with constructor validation — pure data, no closures
+- Fluent `ModelDefinitionBuilder` and structural `DefinitionValidator`
+- Two-pass `ModelCompiler` with forward-reference support via indirection holders
+- Round-trip JSON serialization via `ModelDefinitionSerializer` with depth-limited deserialization
+- Dependency graph extraction, auto-layout, connector generation, and view validation
+- Nested module support with hierarchical `CompilationContext` scoping and `QualifiedName` resolution
+- `UnitRegistry` with case-insensitive fallback and auto-creation cap
 - EventHandler with default no-ops and proper `@Subscribe` annotations
 - Immutable NegativeValuePolicy on Stock (final field)
 - Flow source/sink reassignment validation
@@ -246,10 +286,9 @@ Five rounds of fixes addressed all critical and high-severity bugs with comprehe
 - Smooth and Delay3 resettable for simulation re-runs
 - CSV output with explicit UTF-8 encoding
 - MultiParameterSweep size guard against OOM
-- 509 tests with regression coverage for all major bug fixes
+- 790 tests with regression coverage for all major bug fixes, including 17 dedicated tests for the 8 medium-severity audit fixes
 
 **Areas for improvement:**
-- No model-level flow accessor (flows only reachable through stocks)
 - Bidirectional Stock↔Flow coupling
-- Some API inconsistencies (dual RunResult constructors, unused flow parameters)
+- UnitRegistry auto-creation silently masks unit name typos
 - UI layer is all-static (single chart per JVM)

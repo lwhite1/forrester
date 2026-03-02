@@ -260,7 +260,7 @@ class ExprCompilerTest {
     void shouldCompileDTWithCustomValue() {
         UnitRegistry registry = new UnitRegistry();
         CompilationContext customContext = new CompilationContext(
-                registry, () -> step[0], null, 0.25);
+                registry, () -> step[0], null, new double[]{0.25});
         ExprCompiler customCompiler = new ExprCompiler(customContext, resettables);
         Formula formula = customCompiler.compile("DT");
         assertThat(formula.getCurrentValue()).isEqualTo(0.25);

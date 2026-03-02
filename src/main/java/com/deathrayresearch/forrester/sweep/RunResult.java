@@ -47,7 +47,9 @@ public class RunResult implements EventHandler {
      */
     public RunResult(Map<String, Double> parameterMap) {
         this.parameterMap = new LinkedHashMap<>(parameterMap);
-        this.parameterValue = 0.0;
+        // Derive single parameterValue from first entry for backward compatibility
+        this.parameterValue = parameterMap.isEmpty() ? 0.0
+                : parameterMap.values().iterator().next();
     }
 
     @Override

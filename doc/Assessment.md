@@ -13,7 +13,7 @@
   
 - Lambda-based Flows API eliminates boilerplate. Common patterns are one-liners; custom formulas are concise lambdas. This is a genuine ergonomic advantage over older Java-based SD tools.
   
-- Modularity works. The Module system (demonstrated in the Waterfall demo with 4 subsystems) supports composing models from reusable parts.
+- Modularity works well. The Module system supports composing models from reusable parts with nested sub-modules, constants, and hierarchical structural reports. The Waterfall demo demonstrates runtime composition with 4 subsystems; the definition-based API adds `ModuleInstanceDef` with input/output port bindings for data-driven module reuse.
 
 - Arrays/subscripts enable dimensioned modeling. `Subscript`, `ArrayedStock`, `ArrayedFlow`, and `ArrayedVariable` let users define a dimension (e.g., Region) and expand model elements into one instance per label. Multi-dimensional subscripts (`SubscriptRange`, `MultiArrayedStock`, `MultiArrayedFlow`, `MultiArrayedVariable`) compose multiple dimensions (e.g., Region × AgeGroup) with coordinate access, aggregation (`sumOver`, `slice`), and transparent expansion — matching the subscript capability of Vensim and Stella. Cross-element flows (e.g., migration between regions) work naturally through scalar flows referencing specific array elements. The multi-region SIR demo shows single-dimension arrays; the population region-age demo shows multi-dimensional subscripts with aging, births, deaths, and migration across 9 stocks.
 
@@ -26,6 +26,10 @@
 - Monte Carlo simulation enables uncertainty analysis. The `MonteCarlo` runner samples multiple parameters from probability distributions (Normal, Uniform, Triangular, etc.) using random or Latin Hypercube Sampling across hundreds of runs. Results are aggregated into percentile envelopes with statistical summaries (percentiles, means) and fan chart visualization. This closes the biggest gap between "educational tool" and "useful analysis tool."
 
 - Optimization and calibration enable automated parameter fitting. The `Optimizer` wraps Apache Commons Math derivative-free optimizers (Nelder-Mead, BOBYQA, CMA-ES) behind a builder API consistent with the sweep and Monte Carlo runners. Users define parameter bounds, a model factory, and an objective function (SSE against observed data, minimize/maximize a stock, target a value, minimize peak). The optimizer runs the simulation repeatedly, tracking the best result. All algorithms respect user-specified parameter bounds — Nelder-Mead clamps parameters to bounds on each evaluation since it doesn't enforce them natively. The `SirCalibrationDemo` demonstrates recovering SIR parameters from synthetic data.
+
+- Data-driven model definitions enable serialization and external tooling. The `model/def` package provides an immutable record hierarchy (`ModelDefinition`, `StockDef`, `FlowDef`, `AuxDef`, `ConstantDef`, `LookupTableDef`, `ModuleInstanceDef`) with a fluent builder and structural validator. The `model/expr` package adds a sealed `Expr` AST with a recursive-descent parser, stringifier, and dependency extractor — formulas are represented as data rather than lambdas. `ModelDefinitionSerializer` provides round-trip JSON persistence via Jackson, and `ModelCompiler` translates definitions into runnable models using two-pass compilation with forward-reference support. This means models can be saved, shared, version-controlled, loaded from external sources, and compiled — a significant step toward interoperability with other SD tools.
+
+- Dependency graph and auto-layout provide structural analysis. `DependencyGraph` extracts a directed graph from model definitions (which elements influence which), `ConnectorGenerator` auto-generates influence arrows, `AutoLayout` produces layered element placement, and `ViewValidator` checks view integrity. These are the building blocks for visual diagram generation.
 
 ## Robustness
 
@@ -42,9 +46,7 @@ The simulation engine and analysis tools have been hardened via a system-wide au
 
 ## Limitations
 
-- No visual editor. This is the biggest gap for learning. Commercial tools (Vensim, Stella,
-AnyLogic) let you draw stock-and-flow diagrams and see feedback structure visually. Here, learners must infer loop structure from code alone.
-- Single-level module nesting. No modules-within-modules for very large models.
+- No visual editor. This is the biggest remaining gap for learning. Commercial tools (Vensim, Stella, AnyLogic) let you draw stock-and-flow diagrams and see feedback structure visually. The dependency graph, auto-layout, and view definition infrastructure provide the data model for diagrams, but there is no interactive visual editor or rendered diagram output yet. Generating static diagrams (e.g., DOT/Graphviz or SVG from the `DependencyGraph` and `AutoLayout` data) would be a natural next step.
 
 ## Verdict by Audience
 
@@ -52,13 +54,14 @@ AnyLogic) let you draw stock-and-flow diagrams and see feedback structure visual
 |---|---|
 | Programmers learning SD | Excellent — code-first approach maps concepts clearly |
 | SD courses for engineers | Very good — demos cover the standard curriculum |
-| Prototyping before Vensim/Stella | Good — quick to iterate, then migrate |
+| Prototyping before Vensim/Stella | Good — quick to iterate; JSON serialization enables model exchange |
 | Deterministic sensitivity analysis | Very good — single-parameter and multi-parameter sweeps with CSV output cover what-if and interaction analysis |
 | Uncertainty analysis / research | Good — Monte Carlo with LHS, percentile envelopes, and fan charts cover multi-parameter uncertainty quantification |
 | Non-programmers | Poor — no visual editor |
 | Model calibration / optimization | Good — derivative-free optimization with multiple algorithms and built-in objective functions for fitting to data |
 | Subscripted array computation | Very good — intelligent arrays with automatic broadcasting, named-dimension alignment, and aggregation match Analytica semantics |
-| Production/enterprise modeling | Fair — has analysis tools, multi-dimensional subscripts, and intelligent arrays but lacks visual diagrams |
+| Model sharing / interoperability | Good — JSON round-trip serialization, structural validation, and nested module support enable saving and exchanging models as data |
+| Production/enterprise modeling | Fair — has analysis tools, serialization, nested modules, multi-dimensional subscripts, and intelligent arrays but lacks visual diagrams |
 
 ## Bottom Line
 
@@ -66,12 +69,13 @@ AnyLogic) let you draw stock-and-flow diagrams and see feedback structure visual
 
 - The addition of parameter sweeps (single and multi-parameter), Monte Carlo simulation, optimization/calibration, and combinatorial grid analysis moves Forrester from "educational only" toward "useful for analysis." A user can now sweep one parameter, sweep a grid of N parameters to study interactions, run Monte Carlo with distribution sampling and Latin Hypercube designs, extract percentile envelopes, export CSV, visualize uncertainty via fan charts, and calibrate model parameters against observed data using derivative-free optimization — a real workflow that commercial tools support.
 
-- It's not a replacement for Vensim or Stella for serious modeling work. The absence of
-  visual diagrams means analysts would hit walls on models that require visual feedback-loop analysis.
+- The data-driven definition and serialization pipeline is a significant architectural milestone. Models can now be described as pure data (no lambdas), validated structurally, serialized to/from JSON, and compiled to runnable simulations — with full support for nested modules, expression parsing, dependency extraction, and forward references. This opens the door to external model editors, model exchange between tools, and version-controlled model definitions. The dependency graph and auto-layout infrastructure provide the foundation for visual diagram generation.
+
+- It's not a replacement for Vensim or Stella for serious modeling work. The dependency graph and auto-layout data are available, but there is no rendered diagram output yet — analysts would still hit walls on models that require visual feedback-loop analysis.
 
 ## What Matters Most Next
 
 Ranked by impact on the gap between "educational tool" and "useful modeling tool":
 
-1. **Visual diagram generation** — The biggest learning gap. Even generating a static DOT/Graphviz diagram of the stock-flow structure from a `Model` object would help learners see feedback loops. Doesn't need to be interactive to be valuable.
-2. **Nested Modules** — Current support for modules is limited to one level. Necessary for building larger, more complex models.
+1. **Visual diagram rendering** — The biggest remaining learning gap. The dependency graph, auto-layout, and view definition infrastructure are in place — the next step is rendering them to a visual format (DOT/Graphviz, SVG, or an interactive JavaFX diagram). Even a static stock-and-flow diagram generated from `DependencyGraph` + `AutoLayout` would help learners see feedback loops.
+2. **XMILE / Vensim import-export** — The JSON serialization and `ModelDefinition` record hierarchy provide a clean internal representation. Adding adapters for standard SD file formats (XMILE, Vensim `.mdl`) would enable model exchange with commercial tools.

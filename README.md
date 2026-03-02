@@ -48,11 +48,15 @@ com.deathrayresearch.forrester
 │   │                            #   Subscript, ArrayedStock, ArrayedFlow, ArrayedVariable,
 │   │                            #   SubscriptRange, MultiArrayedStock, MultiArrayedFlow, MultiArrayedVariable,
 │   │                            #   IndexedValue)
-│   └── flows/                   # Rate conversion utilities
-├── measure/                     # Dimensional analysis and unit system
+│   ├── flows/                   # Rate conversion utilities
+│   ├── expr/                    # Sealed Expr AST, recursive-descent parser, stringifier, dependency extractor
+│   ├── def/                     # Immutable definition records (ModelDefinition, StockDef, FlowDef, etc.)
+│   ├── compile/                 # Two-pass ModelCompiler: definition → runnable Model
+│   └── graph/                   # Dependency graph, connector generation, auto-layout, view validation
+├── measure/                     # Dimensional analysis, unit system, and UnitRegistry
 ├── event/                       # Event-driven communication
 ├── sweep/                       # Parameter sweep, Monte Carlo, optimization, and CSV output
-├── io/                          # CSV export and reporting
+├── io/                          # CSV export, reporting, and JSON serialization
 └── ui/                          # JavaFX chart visualization
 ```
 
@@ -375,6 +379,273 @@ Delay3 delayed = Delay3.of(() -> orders.getValue(), 6, sim::getCurrentStep);
 
 Smooth and Delay3 default their initial value to the first input (standard SD convention). An explicit initial value can be provided as an optional parameter.
 
+### Model Definitions (`model/def/` package)
+
+Model definitions provide a pure-data representation of a system dynamics model — no lambdas, no closures, fully serializable. Every element is an immutable Java record with constructor validation. This is the foundation for JSON persistence, external tooling, and the compilation pipeline.
+
+**Build a definition with the fluent builder:**
+
+```java
+ModelDefinition def = new ModelDefinitionBuilder()
+    .name("SIR Model")
+    .stock("Susceptible", 990, "Person")
+    .stock("Infected", 10, "Person")
+    .stock("Recovered", 0, "Person")
+    .flow("Infection", "Susceptible * Infected * contact_rate", "Day", "Susceptible", "Infected")
+    .flow("Recovery", "Infected * recovery_rate", "Day", "Infected", "Recovered")
+    .constant("contact_rate", 0.005, "1/Day")
+    .constant("recovery_rate", 0.1, "1/Day")
+    .lookupTable("effect_of_crowding", new double[]{0, 0.5, 1.0}, new double[]{1.0, 0.5, 0.0}, "LINEAR")
+    .defaultSimulation("Day", 100, "Day")
+    .build();
+```
+
+**Validate before compiling:**
+
+```java
+List<String> errors = DefinitionValidator.validate(def);
+// Checks: no duplicate names, flow source/sink references exist, equations parse, port bindings match
+```
+
+**Nested modules** are supported via `ModuleInstanceDef`, which embeds a child `ModelDefinition` with input/output port bindings:
+
+```java
+ModelDefinition workforce = new ModelDefinitionBuilder()
+    .name("Workforce")
+    .moduleInterface(inputs, outputs)   // declare ports
+    .stock("Staff", 10, "Person")
+    .flow("Hiring", "vacancy * hire_rate", "Month", null, "Staff")
+    .build();
+
+ModelDefinition parent = new ModelDefinitionBuilder()
+    .name("Project")
+    .moduleInstance("workforce", workforce, inputBindings, outputBindings)
+    .build();
+```
+
+| Record | Purpose |
+|---|---|
+| `ModelDefinition` | Top-level container: stocks, flows, auxiliaries, constants, lookup tables, modules, subscripts, views, simulation settings |
+| `StockDef` | Accumulator with initial value, unit, and optional negative-value policy |
+| `FlowDef` | Rate with equation string, time unit, and optional source/sink stock names |
+| `AuxDef` | Auxiliary variable with equation string and unit |
+| `ConstantDef` | Fixed exogenous value with unit |
+| `LookupTableDef` | Table function with x/y arrays and interpolation mode (`LINEAR` or `SPLINE`) |
+| `SubscriptDef` | Dimension label set |
+| `ModuleInstanceDef` | Nested module with input/output port bindings |
+| `ModuleInterface` / `PortDef` | Public interface and port declarations for reusable modules |
+| `SimulationSettings` | Default time step, duration, and duration unit |
+| `ViewDef` / `ElementPlacement` / `ConnectorRoute` / `FlowRoute` | Graphical view layout data |
+| `ModelDefinitionBuilder` | Fluent builder for constructing `ModelDefinition` instances |
+| `DefinitionValidator` | Structural validation returning a list of error messages |
+
+### Expression AST (`model/expr/` package)
+
+The expression system provides a sealed `Expr` AST for representing formulas as data rather than lambdas. Expressions can be parsed from strings, traversed for dependency extraction, stringified back to text, and compiled to executable lambdas.
+
+**Expr types** (sealed hierarchy):
+
+| Type | Example | Description |
+|---|---|---|
+| `Literal` | `3.14` | Numeric constant |
+| `Ref` | `Population`, `` `Birth Rate` `` | Reference to a model element (backtick-quoted names supported) |
+| `BinaryOp` | `A + B`, `X * Y` | Binary operation with operator precedence |
+| `UnaryOp` | `-X`, `!flag` | Negation or logical NOT |
+| `FunctionCall` | `SMOOTH(input, 5)` | Built-in function call |
+| `Conditional` | `IF(X > 0, X, 0)` | Conditional expression |
+
+**Parse, extract dependencies, and stringify:**
+
+```java
+// Parse an expression string into an AST
+Expr expr = ExprParser.parse("Population * birth_rate + Immigration");
+
+// Extract all referenced element names
+Set<String> deps = ExprDependencies.extract(expr);  // {Population, birth_rate, Immigration}
+
+// Convert back to a string
+String text = ExprStringifier.stringify(expr);       // "Population * birth_rate + Immigration"
+```
+
+The parser supports standard arithmetic (`+`, `-`, `*`, `/`, `^`, `%`), comparisons (`==`, `!=`, `<`, `<=`, `>`, `>=`), logical operators (`&&`, `||`, `!`), and the reserved names `TIME` and `DT`.
+
+| Class | Purpose |
+|---|---|
+| `Expr` | Sealed interface with six record variants |
+| `ExprParser` | Recursive-descent parser with operator-precedence climbing |
+| `ExprStringifier` | AST to human-readable infix string with minimal parentheses |
+| `ExprDependencies` | Extracts the set of referenced element names from an AST |
+| `BinaryOperator` / `UnaryOperator` | Operator enums with symbol and precedence |
+
+### Model Compiler (`model/compile/` package)
+
+The compiler bridges the gap between pure-data definitions and executable simulations. It translates a `ModelDefinition` (expression strings, no behavior) into a runnable `Model` with compiled lambda formulas.
+
+**Compile and run:**
+
+```java
+ModelCompiler compiler = new ModelCompiler();
+CompiledModel compiled = compiler.compile(def);
+
+// Create simulation using the definition's default settings
+Simulation sim = compiled.createSimulation();
+sim.execute();
+
+// Or specify settings explicitly
+Simulation sim2 = compiled.createSimulation(TimeUnits.DAY, 200, TimeUnits.DAY);
+```
+
+**Two-pass compilation strategy:**
+1. **Pass 1:** Create all model elements (stocks, flows, variables, constants, lookup tables) with placeholder `DoubleSupplier` holders
+2. **Pass 2:** Compile all formula expressions and fill in the holders
+
+This indirection allows forward references — a flow's formula can reference a variable defined later in the model.
+
+**Nested module compilation:** The compiler handles `ModuleInstanceDef` entries recursively, creating child `CompilationContext` scopes with parent lookups for port bindings. Qualified names (e.g., `Workforce.Staff`) resolve through the module hierarchy.
+
+**Built-in functions** available in expressions: `SMOOTH`, `DELAY3`, `STEP`, `RAMP`, `LOOKUP`, `MIN`, `MAX`, `ABS`, `SQRT`, `EXP`, `LN`, `LOG10`, `SIN`, `COS`, `IF`, `TIME`, `DT`.
+
+| Class | Purpose |
+|---|---|
+| `ModelCompiler` | Entry point: compiles `ModelDefinition` → `CompiledModel` |
+| `ExprCompiler` | Compiles `Expr` AST nodes into executable `DoubleSupplier` lambdas |
+| `CompilationContext` | Name resolution and scoping with parent-chain lookup for nested modules |
+| `CompiledModel` | Result container: runnable `Model`, resettable state, convenience `createSimulation()` |
+| `QualifiedName` | Dot-separated name parsing for hierarchical module references (e.g., `Workforce.Staff`) |
+| `Resettable` | Interface for stateful formula objects (Smooth, Delay3) that need resetting between runs |
+
+### JSON Serialization (`io/json/` package)
+
+`ModelDefinitionSerializer` provides round-trip JSON persistence for `ModelDefinition` using Jackson. Models can be saved to files, loaded back, and compiled — enabling external tools, model sharing, and version control of model structure.
+
+**Serialize and deserialize:**
+
+```java
+ModelDefinitionSerializer serializer = new ModelDefinitionSerializer();
+
+// To/from JSON string
+String json = serializer.toJson(def);
+ModelDefinition loaded = serializer.fromJson(json);
+
+// To/from file
+serializer.toFile(def, Paths.get("sir_model.json"));
+ModelDefinition fromFile = serializer.fromFile(Paths.get("sir_model.json"));
+```
+
+**JSON structure:**
+
+```json
+{
+  "name": "SIR Model",
+  "stocks": [
+    { "name": "Susceptible", "initialValue": 990.0, "unit": "Person" }
+  ],
+  "flows": [
+    { "name": "Infection", "equation": "Susceptible * Infected * contact_rate",
+      "timeUnit": "Day", "source": "Susceptible", "sink": "Infected" }
+  ],
+  "constants": [
+    { "name": "contact_rate", "value": 0.005, "unit": "1/Day" }
+  ],
+  "defaultSimulation": { "timeStep": "Day", "duration": 100.0, "durationUnit": "Day" }
+}
+```
+
+Nested modules are serialized recursively (depth-limited to 50). All definition information is preserved losslessly.
+
+**Full workflow — define, serialize, reload, compile, run:**
+
+```java
+// Build and save
+ModelDefinition def = new ModelDefinitionBuilder()
+    .name("SIR").stock("S", 990, "Person").stock("I", 10, "Person").stock("R", 0, "Person")
+    .flow("Infection", "S * I * 0.005", "Day", "S", "I")
+    .flow("Recovery", "I * 0.1", "Day", "I", "R")
+    .defaultSimulation("Day", 100, "Day")
+    .build();
+new ModelDefinitionSerializer().toFile(def, Paths.get("sir.json"));
+
+// Load and run
+ModelDefinition loaded = new ModelDefinitionSerializer().fromFile(Paths.get("sir.json"));
+CompiledModel compiled = new ModelCompiler().compile(loaded);
+compiled.createSimulation().execute();
+```
+
+### Dependency Graph & Auto-Layout (`model/graph/` package)
+
+The graph package extracts structural information from model definitions for visualization and analysis.
+
+**Dependency graph** — builds a directed graph from all equations and flow connections:
+
+```java
+DependencyGraph graph = DependencyGraph.fromDefinition(def);
+
+Set<String> influencers = graph.dependenciesOf("Infection");  // elements that feed into Infection
+Set<String> affected = graph.influencesOf("contact_rate");    // elements influenced by contact_rate
+String[][] edges = graph.allEdges();                          // all [from, to] pairs
+```
+
+**Connector generation** — auto-generates influence arrows from the dependency graph:
+
+```java
+List<ConnectorRoute> connectors = ConnectorGenerator.generate(def);
+```
+
+**Auto-layout** — places all elements in a simple layered arrangement (stocks center, auxiliaries above, constants below):
+
+```java
+ViewDef view = AutoLayout.layout(def);
+```
+
+**View validation** — checks that element placements, connectors, and flow routes reference existing model elements:
+
+```java
+List<String> errors = ViewValidator.validate(view, def);
+```
+
+| Class | Purpose |
+|---|---|
+| `DependencyGraph` | Directed graph extracted from equations: `dependenciesOf()`, `influencesOf()`, `allEdges()` |
+| `ConnectorGenerator` | Auto-generates `ConnectorRoute` influence arrows from the dependency graph |
+| `AutoLayout` | Generates a `ViewDef` with layered element placement |
+| `ViewValidator` | Validates view integrity against the model definition |
+
+### Modules
+
+`Module` supports hierarchical model composition — sub-modules, constants, and all arrayed element types. Modules are used both in the lambda-based API (runtime composition) and as compilation targets for `ModuleInstanceDef`.
+
+```java
+Module workforce = new Module("Workforce");
+workforce.addStock(staff);
+workforce.addFlow(hiring);
+workforce.addConstant(hireRate);
+
+Module project = new Module("Project");
+project.addSubModule(workforce);
+
+// Access nested elements
+Module wf = project.getSubModule("Workforce");
+Map<String, Constant> constants = wf.getConstants();
+```
+
+The `ModelReport` class generates hierarchical structural reports that recurse into sub-modules, listing all stocks, flows, variables, and constants at each level.
+
+### Unit Registry (`measure/` package)
+
+`UnitRegistry` maps unit name strings (as used in `ModelDefinition` records) to `Unit` objects for the compiler. It pre-loads all 40+ built-in units and auto-creates custom `ItemUnit` instances for unknown names.
+
+```java
+UnitRegistry registry = new UnitRegistry();
+
+Unit day = registry.resolve("Day");             // built-in TimeUnit
+Unit people = registry.resolve("Person");       // built-in ItemUnit
+Unit custom = registry.resolve("Widget");       // auto-creates ItemUnit("Widget")
+
+TimeUnit month = registry.resolveTimeUnit("Month");  // returns TimeUnit or throws
+```
+
+Resolution is case-sensitive with a case-insensitive fallback. Auto-created custom units are capped at 10,000 to prevent unbounded growth.
+
 ### Parameter Sweep (`sweep/` package)
 
 The `ParameterSweep` runner iterates an array of parameter values, builds a fresh model per value via a `DoubleFunction<Model>` factory, runs each simulation, and collects results. Each run gets its own object graph — no shared mutable state, no reset needed.
@@ -584,9 +855,11 @@ The demo package (`src/main/java/.../demo/`) contains a rich set of example mode
 
 **WaterfallSoftwareDevelopmentDemo** — Models a waterfall project using four composable Modules: Workforce, Development, Staff Allocation, and Test & Rework. Hiring delays, training overhead, defect injection, and rework cycles interact to show how phased development with late testing can lead to schedule overruns and staffing oscillations.
 
-## Usage Pattern
+## Usage Patterns
 
-A typical workflow for building and running a model:
+### Lambda-based API (programmatic)
+
+Build models directly in Java using stocks, flows, and lambda formulas:
 
 ```java
 // 1. Create a model
@@ -611,6 +884,39 @@ sim.addEventHandler(new StockLevelChartViewer());
 // 6. Run
 sim.execute();
 ```
+
+### Definition-based API (data-driven)
+
+Define models as pure data, serialize to JSON, and compile to runnable simulations:
+
+```java
+// 1. Build a model definition (pure data — no lambdas)
+ModelDefinition def = new ModelDefinitionBuilder()
+    .name("Population Model")
+    .stock("Population", 1000, "Person")
+    .flow("Births", "Population * birth_rate", "Year", null, "Population")
+    .flow("Deaths", "Population * death_rate", "Year", "Population", null)
+    .constant("birth_rate", 0.03, "1/Year")
+    .constant("death_rate", 0.01, "1/Year")
+    .defaultSimulation("Day", 365, "Day")
+    .build();
+
+// 2. Validate
+List<String> errors = DefinitionValidator.validate(def);
+
+// 3. Save to JSON (and load later)
+ModelDefinitionSerializer serializer = new ModelDefinitionSerializer();
+serializer.toFile(def, Paths.get("population.json"));
+
+// 4. Compile to a runnable model
+CompiledModel compiled = new ModelCompiler().compile(def);
+
+// 5. Run
+Simulation sim = compiled.createSimulation();
+sim.execute();
+```
+
+Both APIs produce the same simulation output. The lambda-based API is best for models built and run within a single Java program. The definition-based API is best when models need to be saved, shared, loaded from external sources, or composed from reusable module definitions.
 
 ## Learning System Dynamics
 
@@ -637,6 +943,7 @@ New to system dynamics? These resources provide a solid introduction to the meth
 
 The project is at version 1.0-SNAPSHOT and is under active development. Recent work has focused on:
 
+- Adding an external model representation with expression AST, definition records, model compiler, JSON serialization, nested modules, and dependency graph — six new packages (`model/expr`, `model/def`, `model/compile`, `io/json`, `model/graph`, `measure/UnitRegistry`) that enable defining models as pure data, persisting them to JSON, compiling them to runnable simulations, and extracting dependency graphs for visualization
 - Adding intelligent arrays (`IndexedValue`) — immutable multi-dimensional values with automatic broadcasting arithmetic. Shared dimensions align by name; non-shared dimensions expand via outer product. Supports elementwise and cross-dimension operations, scalar broadcasting, aggregation (`sum`, `mean`, `max`, `min`, `sumOver`), and convenience accessors on arrayed model elements
 - Adding multi-dimensional subscripts — `SubscriptRange`, `MultiArrayedStock`, `MultiArrayedFlow`, and `MultiArrayedVariable` enable cross-tabulated dimensions (e.g., Region × AgeGroup) with coordinate access, aggregation (`sumOver`, `slice`), and transparent expansion
 - Adding arrays/subscripts support — `Subscript`, `ArrayedStock`, `ArrayedFlow`, and `ArrayedVariable` enable dimensioned model elements (regions, cohorts, products) that transparently expand into the flat simulation loop

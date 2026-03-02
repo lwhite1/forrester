@@ -1,10 +1,15 @@
 package com.deathrayresearch.forrester.sweep;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * Static factory methods for common {@link ObjectiveFunction} implementations.
  * All objectives follow the convention that lower values are better (minimization).
  */
 public final class Objectives {
+
+    private static final Logger log = LoggerFactory.getLogger(Objectives.class);
 
     private Objectives() {
     }
@@ -20,6 +25,12 @@ public final class Objectives {
     public static ObjectiveFunction fitToTimeSeries(String stockName, double[] observedData) {
         return runResult -> {
             double[] simulated = runResult.getStockSeries(stockName);
+            if (simulated.length != observedData.length) {
+                log.warn("fitToTimeSeries: simulated length ({}) differs from observed length ({}); "
+                        + "comparing only the first {} steps",
+                        simulated.length, observedData.length,
+                        Math.min(simulated.length, observedData.length));
+            }
             int length = Math.min(simulated.length, observedData.length);
             double sse = 0.0;
             for (int i = 0; i < length; i++) {

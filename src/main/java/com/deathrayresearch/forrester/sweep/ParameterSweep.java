@@ -7,6 +7,7 @@ import com.deathrayresearch.forrester.model.Model;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.function.DoubleFunction;
 
 /**
@@ -52,7 +53,7 @@ public class ParameterSweep {
 
         for (double value : parameterValues) {
             Model model = modelFactory.apply(value);
-            RunResult runResult = new RunResult(value);
+            RunResult runResult = new RunResult(Map.of(parameterName, value));
 
             Simulation simulation = new Simulation(model, timeStep, duration);
             simulation.addEventHandler(runResult);

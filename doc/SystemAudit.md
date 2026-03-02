@@ -1,6 +1,6 @@
 # System-Wide Code Audit — Remaining Findings
 
-Audit of the Forrester simulation library after five rounds of fixes (commits `bca62d9`, `68a2457`, `169f0f3`, `988f495`, and the current round). All critical and high-severity bugs have been resolved. This document lists only the **remaining open items**.
+Audit of the Forrester simulation library after six rounds of fixes (commits `bca62d9`, `68a2457`, `169f0f3`, `988f495`, the initial additions, and the current round targeting 8 medium-severity items) plus the external model representation (commit `d314ffe`). All critical, high, and medium-severity bugs have been resolved. This document lists only the **remaining open items**.
 
 For the full fix history and quality assessment, see `doc/CodeQualityAssessment.md`.
 
@@ -29,14 +29,8 @@ Allows external code to post arbitrary events.
 
 ## 2. Core Model (Stock, Flow, Variable, Constant, Model, Module)
 
-### DESIGN — Model.addModule does not propagate flows (Medium)
-Module's stocks and variables merge, but flows are not registered at the model level.
-
-### DESIGN — No equals/hashCode on Element/Stock/Flow/Variable (Medium)
+### DESIGN — No equals/hashCode on Element/Stock/Flow/Variable (Low)
 All rely on identity equality.
-
-### DESIGN — No model-level accessor for all flows (Low)
-Flows are only reachable through stocks.
 
 ### DESIGN — `addStock`/`addConstant` allow duplicate names without warning (Low)
 
@@ -66,20 +60,11 @@ The fix loops N times when N steps are skipped, but each iteration reads the *cu
 
 ## 4. Sweep / Monte Carlo / Optimizer
 
-### BUG — Optimizer `bestRun[0]` null in fallback path (Medium)
-If all evaluations fail, `bestRun[0]` remains null. Callers get a null RunResult.
-
-### BUG — Objectives.fitToTimeSeries silently truncates length mismatch (Medium)
-`Math.min()` silently discards tail data without warning.
-
 ### BUG — RunResult.getMaxStockValue returns NEGATIVE_INFINITY on empty (Low)
 Missing stock name returns `NEGATIVE_INFINITY` instead of throwing.
 
 ### BUG — MonteCarloResult stock/variable name collision (Low)
 Same-named stock and variable: `getPercentileSeries` silently picks the first match.
-
-### DESIGN — RunResult has two constructors with lossy semantics (Medium)
-Can't populate both `parameterValue` and `parameterMap`.
 
 ### DESIGN — `MonteCarlo.reseedRandomGenerator` mutates caller's objects (Low)
 Side effect not documented.
@@ -127,7 +112,49 @@ Only triggers with asymmetric stock/flow chart setup.
 
 ---
 
-## 6. Remaining Test Gaps
+## 6. Expression AST, Definition Records, Compiler, Serialization, and Graph
+
+### BUG — Circular module detection keyed on name, not identity (Low)
+**File:** `DefinitionValidator.java`
+
+Two structurally different module definitions with the same name are flagged as circular when they are not. In practice, circular reference through records is not constructible, so this is unlikely to cause real problems.
+
+### DESIGN — Chained comparisons silently produce wrong semantics (Low)
+**File:** `ExprParser.java`
+
+`a < b < c` parses as `(a < b) < c`, where `(a < b)` yields 0.0 or 1.0, then is compared with `c`. No warning is produced. Standard C-like behavior but almost certainly a user error in an SD modeling context.
+
+### DESIGN — `topologicalSort()` silently drops cycle-involved nodes (Low)
+**File:** `DependencyGraph.java`
+
+Documented in Javadoc. The `hasCycle()` method works by comparing sort result size to node count. But callers using `topologicalSort()` directly for evaluation order will silently skip elements in cycles.
+
+### DESIGN — UnitRegistry not thread-safe (Low)
+**File:** `UnitRegistry.java`
+
+The internal maps are plain `LinkedHashMap` with no synchronization. Concurrent `resolve()` calls that trigger auto-creation can corrupt internal state. Only relevant if a `UnitRegistry` is shared across threads.
+
+### DESIGN — UnitRegistry auto-creation silently masks typos (Low)
+**File:** `UnitRegistry.java`
+
+Any unknown unit name silently creates a new `ItemUnit`. A typo like `"Dallar"` instead of `"Dollar"` produces no error. The `MAX_CUSTOM_UNITS` cap (10,000) is a safety net but does not help with correctness.
+
+### DESIGN — AND/OR compile both branches unconditionally (Low)
+**File:** `ExprCompiler.java`
+
+Stateful functions (SMOOTH, DELAY3) in unreachable branches are still compiled and registered as `Resettable`, accumulating unnecessary state.
+
+### MINOR
+- `evaluateConstant` rejects arithmetic on constants (e.g. `2 + 3` as a SMOOTH argument) — only literal, constant ref, and negation are supported
+- LOOKUP table name not included in `ExprDependencies.extract()` output — dependency arrows from lookup tables to consuming formulas missing from auto-generated views
+- Serialization has no depth limit for nested modules (only deserialization has `MAX_MODULE_DEPTH = 50`)
+- `requiredText` in `ModelDefinitionSerializer` silently coerces non-string JSON types to strings via Jackson's `asText()`
+- `ElementPlacement` type validation is case-insensitive but storage preserves original case — downstream `equals("stock")` checks may fail for `"Stock"`
+- Round-trip imperfection for negative literals in `ExprStringifier` (documented)
+
+---
+
+## 7. Remaining Test Gaps
 
 | Area | Gap | Risk |
 |------|-----|------|

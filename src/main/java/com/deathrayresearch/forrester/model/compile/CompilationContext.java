@@ -6,10 +6,12 @@ import com.deathrayresearch.forrester.model.Flow;
 import com.deathrayresearch.forrester.model.LookupTable;
 import com.deathrayresearch.forrester.model.Stock;
 import com.deathrayresearch.forrester.model.Variable;
+import com.deathrayresearch.forrester.model.def.LookupTableDef;
 
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.function.DoubleSupplier;
 import java.util.function.IntSupplier;
 
 /**
@@ -24,27 +26,29 @@ public class CompilationContext {
     private final Map<String, Constant> constants = new LinkedHashMap<>();
     private final Map<String, LookupTable> lookupTables = new LinkedHashMap<>();
     private final Map<String, double[]> lookupInputHolders = new LinkedHashMap<>();
+    private final Map<String, LookupTableDef> lookupTableDefs = new LinkedHashMap<>();
 
     private final CompilationContext parent;
     private final UnitRegistry unitRegistry;
     private final IntSupplier currentStep;
-    private final double dt;
+    private final double[] dtHolder;
 
     public CompilationContext(UnitRegistry unitRegistry, IntSupplier currentStep) {
-        this(unitRegistry, currentStep, null, 1.0);
+        this(unitRegistry, currentStep, null, new double[]{1.0});
     }
 
     public CompilationContext(UnitRegistry unitRegistry, IntSupplier currentStep,
                               CompilationContext parent) {
-        this(unitRegistry, currentStep, parent, 1.0);
+        this(unitRegistry, currentStep, parent,
+                parent != null ? parent.dtHolder : new double[]{1.0});
     }
 
     public CompilationContext(UnitRegistry unitRegistry, IntSupplier currentStep,
-                              CompilationContext parent, double dt) {
+                              CompilationContext parent, double[] dtHolder) {
         this.unitRegistry = unitRegistry;
         this.currentStep = currentStep;
         this.parent = parent;
-        this.dt = dt;
+        this.dtHolder = dtHolder;
     }
 
     public void addStock(String name, Stock stock) {
@@ -66,6 +70,47 @@ public class CompilationContext {
     public void addLookupTable(String name, LookupTable table, double[] inputHolder) {
         lookupTables.put(name, table);
         lookupInputHolders.put(name, inputHolder);
+    }
+
+    public void addLookupTableDef(String name, LookupTableDef def) {
+        lookupTableDefs.put(name, def);
+    }
+
+    /**
+     * Resolves a LookupTableDef by name so callers can create fresh LookupTable instances
+     * with isolated input holders.
+     */
+    public LookupTableDef resolveLookupTableDef(String name) {
+        LookupTableDef def = lookupTableDefs.get(name);
+        if (def != null) {
+            return def;
+        }
+        if (name.contains("_")) {
+            String spaceName = name.replace('_', ' ');
+            def = lookupTableDefs.get(spaceName);
+            if (def != null) {
+                return def;
+            }
+        }
+        if (parent != null) {
+            return parent.resolveLookupTableDef(name);
+        }
+        return null;
+    }
+
+    /**
+     * Creates a fresh LookupTable from the stored definition with the given input supplier.
+     * Each caller gets an isolated table with its own input, preventing cross-formula interference.
+     */
+    public LookupTable createFreshLookupTable(String name, DoubleSupplier inputSupplier) {
+        LookupTableDef def = resolveLookupTableDef(name);
+        if (def == null) {
+            return null;
+        }
+        if ("SPLINE".equalsIgnoreCase(def.interpolation())) {
+            return LookupTable.spline(def.xValues(), def.yValues(), inputSupplier);
+        }
+        return LookupTable.linear(def.xValues(), def.yValues(), inputSupplier);
     }
 
     /**
@@ -198,6 +243,10 @@ public class CompilationContext {
     }
 
     public double getDt() {
-        return dt;
+        return dtHolder[0];
+    }
+
+    public double[] getDtHolder() {
+        return dtHolder;
     }
 }

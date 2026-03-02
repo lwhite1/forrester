@@ -100,6 +100,10 @@ public class Optimizer {
 
             double value = objective.evaluate(runResult);
 
+            // Always capture the first run to prevent null bestRun in fallback
+            if (bestRun[0] == null) {
+                bestRun[0] = runResult;
+            }
             if (value < bestObjective[0]) {
                 bestObjective[0] = value;
                 bestParams[0] = paramMap;

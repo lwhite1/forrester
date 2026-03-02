@@ -18,6 +18,7 @@ import com.deathrayresearch.forrester.model.def.FlowDef;
 import com.deathrayresearch.forrester.model.def.LookupTableDef;
 import com.deathrayresearch.forrester.model.def.ModelDefinition;
 import com.deathrayresearch.forrester.model.def.ModuleInstanceDef;
+import com.deathrayresearch.forrester.model.def.PortDef;
 import com.deathrayresearch.forrester.model.def.StockDef;
 import com.deathrayresearch.forrester.model.expr.ExprParser;
 
@@ -58,12 +59,14 @@ public class ModelCompiler {
         Model model = new Model(def.name());
         List<Resettable> resettables = new ArrayList<>();
         int[] stepHolder = {0};
+        double[] dtHolder = {1.0};
 
-        CompilationContext context = new CompilationContext(unitRegistry, () -> stepHolder[0]);
+        CompilationContext context = new CompilationContext(
+                unitRegistry, () -> stepHolder[0], null, dtHolder);
 
         compileInto(def, model, context, resettables, stepHolder);
 
-        return new CompiledModel(model, resettables, def, stepHolder, unitRegistry);
+        return new CompiledModel(model, resettables, def, stepHolder, dtHolder, unitRegistry);
     }
 
     /**
@@ -140,7 +143,7 @@ public class ModelCompiler {
             ExprCompiler parentCompiler = new ExprCompiler(parentContext, resettables);
             DoubleSupplier supplier = parentCompiler.compileExpr(
                     ExprParser.parse(expression));
-            Unit bindingUnit = unitRegistry.resolve("Thing");
+            Unit bindingUnit = resolvePortUnit(portName, mDef);
             Variable bindingVar = new Variable(portName, bindingUnit,
                     supplier::getAsDouble);
             moduleContext.addVariable(portName, bindingVar);
@@ -224,6 +227,7 @@ public class ModelCompiler {
                         () -> inputHolder[0]);
             }
             context.addLookupTable(tDef.name(), table, inputHolder);
+            context.addLookupTableDef(tDef.name(), tDef);
         }
     }
 
@@ -292,6 +296,17 @@ public class ModelCompiler {
             throw new CompilationException(
                     "Unknown NegativeValuePolicy: " + policyName, policyName);
         }
+    }
+
+    private Unit resolvePortUnit(String portName, ModuleInstanceDef mDef) {
+        if (mDef.definition().moduleInterface() != null) {
+            for (PortDef port : mDef.definition().moduleInterface().inputs()) {
+                if (port.name().equals(portName) && port.unit() != null) {
+                    return unitRegistry.resolve(port.unit());
+                }
+            }
+        }
+        return unitRegistry.resolve("Thing");
     }
 
     private Unit resolveFlowUnit(FlowDef fDef, CompilationContext context) {

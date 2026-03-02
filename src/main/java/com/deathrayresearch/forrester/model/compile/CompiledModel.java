@@ -26,15 +26,17 @@ public class CompiledModel {
     private final List<Resettable> resettables;
     private final ModelDefinition source;
     private final int[] stepHolder;
+    private final double[] dtHolder;
     private final UnitRegistry unitRegistry;
     private final Map<Stock, Double> initialStockValues;
 
     public CompiledModel(Model model, List<Resettable> resettables, ModelDefinition source,
-                         int[] stepHolder, UnitRegistry unitRegistry) {
+                         int[] stepHolder, double[] dtHolder, UnitRegistry unitRegistry) {
         this.model = model;
         this.resettables = List.copyOf(resettables);
         this.source = source;
         this.stepHolder = stepHolder;
+        this.dtHolder = dtHolder;
         this.unitRegistry = unitRegistry;
         this.initialStockValues = new LinkedHashMap<>();
         for (Stock stock : model.getStocks()) {
@@ -52,6 +54,23 @@ public class CompiledModel {
 
     public ModelDefinition getSource() {
         return source;
+    }
+
+    /**
+     * Sets the DT (integration time step) value used by formulas that reference DT.
+     * Defaults to 1.0 (one simulation step = one time unit).
+     *
+     * @param dt the time step value
+     */
+    public void setDt(double dt) {
+        dtHolder[0] = dt;
+    }
+
+    /**
+     * Returns the current DT value.
+     */
+    public double getDt() {
+        return dtHolder[0];
     }
 
     /**

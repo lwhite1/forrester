@@ -13,6 +13,7 @@ import java.util.Map;
 public class Model extends Element {
 
     private final List<Stock> stocks = new ArrayList<>();
+    private final List<Flow> flows = new ArrayList<>();
     private final Map<String, Variable> variables = new LinkedHashMap<>();
     private final List<Module> modules = new ArrayList<>();
     private final List<Constant> constants = new ArrayList<>();
@@ -103,14 +104,19 @@ public class Model extends Element {
     }
 
     /**
-     * Adds a module to this model, automatically registering its stocks, variables,
-     * and flows into the model's own collections (skipping duplicates).
+     * Adds a module to this model, automatically registering its stocks, flows, and
+     * variables into the model's own collections (skipping duplicates).
      */
     public void addModule(Module module) {
         modules.add(module);
         for (Stock stock : module.getStocks()) {
             if (!stocks.contains(stock)) {
                 stocks.add(stock);
+            }
+        }
+        for (Flow flow : module.getFlows()) {
+            if (!flows.contains(flow)) {
+                flows.add(flow);
             }
         }
         for (Variable variable : module.getVariables()) {
@@ -140,6 +146,20 @@ public class Model extends Element {
      */
     public List<Stock> getStocks() {
         return Collections.unmodifiableList(stocks);
+    }
+
+    /**
+     * Adds a flow to this model's flow registry.
+     */
+    public void addFlow(Flow flow) {
+        flows.add(flow);
+    }
+
+    /**
+     * Returns an unmodifiable list of all flows registered in this model.
+     */
+    public List<Flow> getFlows() {
+        return Collections.unmodifiableList(flows);
     }
 
     /**
