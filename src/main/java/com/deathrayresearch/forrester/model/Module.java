@@ -20,6 +20,8 @@ public class Module extends Element {
     private final Map<String, Stock> stocks = new LinkedHashMap<>();
     private final Map<String, Flow> flows = new LinkedHashMap<>();
     private final Map<String, Variable> variables = new LinkedHashMap<>();
+    private final Map<String, Constant> constants = new LinkedHashMap<>();
+    private final Map<String, Module> subModules = new LinkedHashMap<>();
 
     /**
      * Creates a new module with the given name.
@@ -154,5 +156,47 @@ public class Module extends Element {
      */
     public Collection<Flow> getFlows() {
         return Collections.unmodifiableCollection(flows.values());
+    }
+
+    /**
+     * Adds a constant to this module.
+     */
+    public void addConstant(Constant constant) {
+        constants.put(constant.getName(), constant);
+    }
+
+    /**
+     * Returns the constant with the given name, or {@code null} if not found.
+     */
+    public Constant getConstant(String name) {
+        return constants.get(name);
+    }
+
+    /**
+     * Returns an unmodifiable map of constants in this module.
+     */
+    public Map<String, Constant> getConstants() {
+        return Collections.unmodifiableMap(constants);
+    }
+
+    /**
+     * Adds a sub-module to this module.
+     */
+    public void addSubModule(Module module) {
+        subModules.put(module.getName(), module);
+    }
+
+    /**
+     * Returns the sub-module with the given name, or {@code null} if not found.
+     */
+    public Module getSubModule(String name) {
+        return subModules.get(name);
+    }
+
+    /**
+     * Returns an unmodifiable map of sub-modules in this module.
+     */
+    public Map<String, Module> getSubModules() {
+        return Collections.unmodifiableMap(subModules);
     }
 }

@@ -119,6 +119,16 @@ public class Model extends Element {
     }
 
     /**
+     * Adds a module to this model for organization/views without flattening its
+     * contents. Unlike {@link #addModule(Module)}, this preserves the module
+     * tree hierarchy. Use for compiled models where stocks/flows are already
+     * registered at the top level.
+     */
+    public void addModulePreserved(Module module) {
+        modules.add(module);
+    }
+
+    /**
      * Returns an unmodifiable list of modules in this model.
      */
     public List<Module> getModules() {

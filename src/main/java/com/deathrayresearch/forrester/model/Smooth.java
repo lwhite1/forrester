@@ -2,6 +2,8 @@ package com.deathrayresearch.forrester.model;
 
 import com.google.common.base.Preconditions;
 
+import com.deathrayresearch.forrester.model.compile.Resettable;
+
 import java.util.function.DoubleSupplier;
 import java.util.function.IntSupplier;
 
@@ -30,7 +32,7 @@ import java.util.function.IntSupplier;
  * Variable perceivedDemand = new Variable("Perceived Demand", THING, perceived);
  * }</pre>
  */
-public class Smooth implements Formula {
+public class Smooth implements Formula, Resettable {
 
     private final DoubleSupplier input;
     private final double smoothingTime;

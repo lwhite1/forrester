@@ -3,6 +3,7 @@ package com.deathrayresearch.forrester.io;
 import com.deathrayresearch.forrester.model.Constant;
 import com.deathrayresearch.forrester.model.Flow;
 import com.deathrayresearch.forrester.model.Model;
+import com.deathrayresearch.forrester.model.Module;
 import com.deathrayresearch.forrester.model.Stock;
 import com.deathrayresearch.forrester.model.Variable;
 
@@ -79,8 +80,34 @@ public class ModelReport {
                 .append(LF);
         }
 
+        // Modules (hierarchical)
+        if (!model.getModules().isEmpty()) {
+            builder.append(LF).append("Modules:").append(LF);
+            for (Module module : model.getModules()) {
+                appendModule(builder, module, "  ");
+            }
+        }
 
         return builder.toString();
+    }
+
+    private static void appendModule(StringBuilder builder, Module module, String indent) {
+        builder.append(indent).append("Module: ").append(module.getName()).append(LF);
+        for (Stock stock : module.getStocks()) {
+            builder.append(indent).append("  Stock: ").append(stock.getName()).append(LF);
+        }
+        for (Variable variable : module.getVariables()) {
+            builder.append(indent).append("  Variable: ").append(variable.getName()).append(LF);
+        }
+        for (Flow flow : module.getFlows()) {
+            builder.append(indent).append("  Flow: ").append(flow.getName()).append(LF);
+        }
+        for (Map.Entry<String, Constant> entry : module.getConstants().entrySet()) {
+            builder.append(indent).append("  Constant: ").append(entry.getKey()).append(LF);
+        }
+        for (Module sub : module.getSubModules().values()) {
+            appendModule(builder, sub, indent + "  ");
+        }
     }
 
 }
