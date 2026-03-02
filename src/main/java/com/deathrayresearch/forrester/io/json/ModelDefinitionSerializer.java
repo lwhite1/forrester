@@ -39,6 +39,8 @@ import java.util.Map;
  */
 public class ModelDefinitionSerializer {
 
+    private static final int MAX_MODULE_DEPTH = 50;
+
     private final ObjectMapper mapper;
 
     public ModelDefinitionSerializer() {
@@ -333,6 +335,14 @@ public class ModelDefinitionSerializer {
     // === Deserialization ===
 
     private ModelDefinition fromJsonNode(JsonNode root) {
+        return fromJsonNode(root, 0);
+    }
+
+    private ModelDefinition fromJsonNode(JsonNode root, int depth) {
+        if (depth > MAX_MODULE_DEPTH) {
+            throw new RuntimeException(
+                    "Module nesting depth exceeds maximum of " + MAX_MODULE_DEPTH);
+        }
         String name = requiredText(root, "name");
         String comment = textOrNull(root, "comment");
 
@@ -407,7 +417,7 @@ public class ModelDefinitionSerializer {
                 Map<String, String> outputBindings = jsonToMap(n.get("outputBindings"));
                 modules.add(new ModuleInstanceDef(
                         requiredText(n, "instanceName"),
-                        fromJsonNode(requiredNode(n, "definition")),
+                        fromJsonNode(requiredNode(n, "definition"), depth + 1),
                         inputBindings,
                         outputBindings));
             }
@@ -417,7 +427,8 @@ public class ModelDefinitionSerializer {
         if (root.has("subscripts")) {
             for (JsonNode n : root.get("subscripts")) {
                 List<String> labels = new ArrayList<>();
-                for (JsonNode l : n.get("labels")) {
+                JsonNode labelsNode = requiredNode(n, "labels");
+                for (JsonNode l : labelsNode) {
                     labels.add(l.asText());
                 }
                 subscripts.add(new SubscriptDef(requiredText(n, "name"), labels));

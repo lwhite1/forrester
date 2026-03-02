@@ -379,7 +379,8 @@ class ModelCompilerTest {
                     .build();
 
             assertThatThrownBy(() -> compiler.compile(def))
-                    .isInstanceOf(Exception.class);
+                    .isInstanceOfAny(CompilationException.class,
+                            com.deathrayresearch.forrester.model.expr.ParseException.class);
         }
     }
 

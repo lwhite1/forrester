@@ -67,8 +67,20 @@ public class ExprCompiler {
             case ADD -> () -> left.getAsDouble() + right.getAsDouble();
             case SUB -> () -> left.getAsDouble() - right.getAsDouble();
             case MUL -> () -> left.getAsDouble() * right.getAsDouble();
-            case DIV -> () -> left.getAsDouble() / right.getAsDouble();
-            case MOD -> () -> left.getAsDouble() % right.getAsDouble();
+            case DIV -> () -> {
+                double divisor = right.getAsDouble();
+                if (divisor == 0) {
+                    return 0.0;
+                }
+                return left.getAsDouble() / divisor;
+            };
+            case MOD -> () -> {
+                double divisor = right.getAsDouble();
+                if (divisor == 0) {
+                    return 0.0;
+                }
+                return left.getAsDouble() % divisor;
+            };
             case POW -> () -> Math.pow(left.getAsDouble(), right.getAsDouble());
             case EQ -> () -> Math.abs(left.getAsDouble() - right.getAsDouble()) < 1e-10 ? 1.0 : 0.0;
             case NE -> () -> Math.abs(left.getAsDouble() - right.getAsDouble()) >= 1e-10 ? 1.0 : 0.0;

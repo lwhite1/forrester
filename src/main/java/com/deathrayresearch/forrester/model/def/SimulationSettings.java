@@ -23,5 +23,8 @@ public record SimulationSettings(
         if (duration <= 0) {
             throw new IllegalArgumentException("Duration must be positive");
         }
+        if (durationUnit == null || durationUnit.isBlank()) {
+            throw new IllegalArgumentException("Duration unit must not be blank");
+        }
     }
 }

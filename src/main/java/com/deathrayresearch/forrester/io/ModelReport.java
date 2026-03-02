@@ -7,7 +7,9 @@ import com.deathrayresearch.forrester.model.Module;
 import com.deathrayresearch.forrester.model.Stock;
 import com.deathrayresearch.forrester.model.Variable;
 
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Generates a plain-text summary report of a model's structure, listing its stocks,
@@ -92,11 +94,11 @@ public class ModelReport {
     }
 
     private static void appendModule(StringBuilder builder, Module module, String indent) {
-        appendModule(builder, module, indent, new java.util.HashSet<>());
+        appendModule(builder, module, indent, new HashSet<>());
     }
 
     private static void appendModule(StringBuilder builder, Module module, String indent,
-                                     java.util.Set<String> visited) {
+                                     Set<String> visited) {
         if (!visited.add(module.getName())) {
             builder.append(indent).append("Module: ").append(module.getName())
                     .append(" (cycle detected, skipping)").append(LF);
@@ -116,7 +118,7 @@ public class ModelReport {
             builder.append(indent).append("  Constant: ").append(entry.getKey()).append(LF);
         }
         for (Module sub : module.getSubModules().values()) {
-            appendModule(builder, sub, indent + "  ", new java.util.HashSet<>(visited));
+            appendModule(builder, sub, indent + "  ", new HashSet<>(visited));
         }
     }
 

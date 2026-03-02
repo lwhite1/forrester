@@ -1,5 +1,8 @@
 package com.deathrayresearch.forrester.model.def;
 
+import java.util.Locale;
+import java.util.Set;
+
 /**
  * Placement of an element in a graphical view.
  *
@@ -15,7 +18,7 @@ public record ElementPlacement(
         double y
 ) {
 
-    private static final java.util.Set<String> VALID_TYPES = java.util.Set.of(
+    private static final Set<String> VALID_TYPES = Set.of(
             "stock", "flow", "aux", "constant", "module", "lookup");
 
     public ElementPlacement {
@@ -25,7 +28,7 @@ public record ElementPlacement(
         if (type == null || type.isBlank()) {
             throw new IllegalArgumentException("Element type must not be blank");
         }
-        if (!VALID_TYPES.contains(type)) {
+        if (!VALID_TYPES.contains(type.toLowerCase(Locale.ROOT))) {
             throw new IllegalArgumentException(
                     "Element type must be one of " + VALID_TYPES + ", got '" + type + "'");
         }

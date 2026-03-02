@@ -19,8 +19,8 @@ class ModelDefinitionTest {
                 "Test", null, null,
                 null, null, null, null, null, null, null, null, null);
         assertThat(def.name()).isEqualTo("Test");
-        assertThat(def.stocks().isEmpty()).isTrue();
-        assertThat(def.flows().isEmpty()).isTrue();
+        assertThat(def.stocks()).isEmpty();
+        assertThat(def.flows()).isEmpty();
     }
 
     @Test
@@ -88,8 +88,8 @@ class ModelDefinitionTest {
         ModuleInterface iface = new ModuleInterface(
                 List.of(new PortDef("in1", "Person")),
                 List.of(new PortDef("out1", "Person")));
-        assertThat(iface.inputs().size()).isEqualTo(1);
-        assertThat(iface.outputs().size()).isEqualTo(1);
+        assertThat(iface.inputs()).hasSize(1);
+        assertThat(iface.outputs()).hasSize(1);
     }
 
     @Test

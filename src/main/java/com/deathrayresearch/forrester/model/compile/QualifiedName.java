@@ -31,7 +31,7 @@ public record QualifiedName(List<String> parts) {
         if (name == null || name.isBlank()) {
             throw new IllegalArgumentException("Qualified name must not be blank");
         }
-        return new QualifiedName(Arrays.asList(name.split("\\.")));
+        return new QualifiedName(Arrays.asList(name.split("\\.", -1)));
     }
 
     /**

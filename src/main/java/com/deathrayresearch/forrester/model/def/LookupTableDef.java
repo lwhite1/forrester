@@ -35,6 +35,23 @@ public record LookupTableDef(
             throw new IllegalArgumentException(
                     "LookupTable must have at least 2 data points");
         }
+        for (double v : xValues) {
+            if (Double.isNaN(v) || Double.isInfinite(v)) {
+                throw new IllegalArgumentException("xValues must be finite, got " + v);
+            }
+        }
+        for (double v : yValues) {
+            if (Double.isNaN(v) || Double.isInfinite(v)) {
+                throw new IllegalArgumentException("yValues must be finite, got " + v);
+            }
+        }
+        for (int i = 1; i < xValues.length; i++) {
+            if (xValues[i] <= xValues[i - 1]) {
+                throw new IllegalArgumentException(
+                        "xValues must be strictly increasing, but xValues[" + (i - 1) + "]="
+                                + xValues[i - 1] + " >= xValues[" + i + "]=" + xValues[i]);
+            }
+        }
         if (interpolation == null || interpolation.isBlank()) {
             throw new IllegalArgumentException("Interpolation method must not be blank");
         }
@@ -45,6 +62,22 @@ public record LookupTableDef(
         }
         xValues = xValues.clone();
         yValues = yValues.clone();
+    }
+
+    /**
+     * Returns a defensive copy of the x-axis data points.
+     */
+    @Override
+    public double[] xValues() {
+        return xValues.clone();
+    }
+
+    /**
+     * Returns a defensive copy of the y-axis data points.
+     */
+    @Override
+    public double[] yValues() {
+        return yValues.clone();
     }
 
     public LookupTableDef(String name, double[] xValues, double[] yValues, String interpolation) {

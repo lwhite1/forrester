@@ -48,12 +48,12 @@ class NestedModuleTest {
 
         // The tank should have drained
         List<Stock> stocks = compiled.getModel().getStocks();
-        assertThat(stocks.isEmpty()).isFalse();
+        assertThat(stocks).isNotEmpty();
         Stock tank = stocks.stream()
                 .filter(s -> s.getName().equals("Tank"))
                 .findFirst().orElseThrow();
-        assertThat(tank.getValue() < 100).as("Tank should have drained").isTrue();
-        assertThat(tank.getValue() > 30).as("Tank should not be fully drained").isTrue();
+        assertThat(tank.getValue()).as("Tank should have drained").isLessThan(100);
+        assertThat(tank.getValue()).as("Tank should not be fully drained").isGreaterThan(30);
     }
 
     @Test
@@ -137,7 +137,7 @@ class NestedModuleTest {
 
         CompiledModel compiled = compiler.compile(outer);
         List<Module> modules = compiled.getModel().getModules();
-        assertThat(modules.isEmpty()).isFalse();
+        assertThat(modules).isNotEmpty();
         Module m = modules.stream()
                 .filter(mod -> mod.getName().equals("m1"))
                 .findFirst().orElseThrow();

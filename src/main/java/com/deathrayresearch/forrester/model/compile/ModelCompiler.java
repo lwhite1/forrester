@@ -91,7 +91,7 @@ public class ModelCompiler {
         // Auxiliaries — use DoubleSupplier[] holders for indirection
         List<DoubleSupplier[]> auxHolders = new ArrayList<>();
         for (AuxDef aDef : def.auxiliaries()) {
-            DoubleSupplier[] holder = createAuxHolder(aDef, context);
+            DoubleSupplier[] holder = createAuxHolder();
             auxHolders.add(holder);
             Variable variable = new Variable(aDef.name(), unitRegistry.resolve(aDef.unit()),
                     () -> holder[0].getAsDouble());
@@ -158,7 +158,7 @@ public class ModelCompiler {
         // Auxiliaries with holder indirection
         List<DoubleSupplier[]> auxHolders = new ArrayList<>();
         for (AuxDef aDef : innerDef.auxiliaries()) {
-            DoubleSupplier[] holder = createAuxHolder(aDef, moduleContext);
+            DoubleSupplier[] holder = createAuxHolder();
             auxHolders.add(holder);
             Variable variable = new Variable(aDef.name(), unitRegistry.resolve(aDef.unit()),
                     () -> holder[0].getAsDouble());
@@ -184,12 +184,16 @@ public class ModelCompiler {
             String portName = binding.getKey();
             String alias = binding.getValue();
             Variable moduleVar = moduleContext.getVariables().get(portName);
-            if (moduleVar != null) {
-                Variable aliasVar = new Variable(alias, moduleVar.getUnit(),
-                        moduleVar::getValue);
-                parentContext.addVariable(alias, aliasVar);
-                parentModel.addVariable(aliasVar);
+            if (moduleVar == null) {
+                throw new CompilationException(
+                        "Module '" + mDef.instanceName()
+                                + "' output binding references unknown port: " + portName,
+                        portName);
             }
+            Variable aliasVar = new Variable(alias, moduleVar.getUnit(),
+                    moduleVar::getValue);
+            parentContext.addVariable(alias, aliasVar);
+            parentModel.addVariable(aliasVar);
         }
 
         parentModel.addModule(module);
@@ -223,7 +227,7 @@ public class ModelCompiler {
         }
     }
 
-    private DoubleSupplier[] createAuxHolder(AuxDef aDef, CompilationContext context) {
+    private DoubleSupplier[] createAuxHolder() {
         return new DoubleSupplier[]{() -> 0};
     }
 

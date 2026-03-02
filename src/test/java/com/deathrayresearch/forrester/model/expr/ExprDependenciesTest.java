@@ -14,7 +14,7 @@ class ExprDependenciesTest {
     @Test
     void shouldReturnEmptyForLiteral() {
         Set<String> deps = ExprDependencies.extract(new Expr.Literal(42));
-        assertThat(deps.isEmpty()).isTrue();
+        assertThat(deps).isEmpty();
     }
 
     @Test
@@ -36,8 +36,7 @@ class ExprDependenciesTest {
         Expr expr = new Expr.BinaryOp(
                 new Expr.Ref("x"), BinaryOperator.MUL, new Expr.Ref("x"));
         Set<String> deps = ExprDependencies.extract(expr);
-        assertThat(deps.size()).isEqualTo(1);
-        assertThat(deps.contains("x")).isTrue();
+        assertThat(deps).hasSize(1).contains("x");
     }
 
     @Test

@@ -20,6 +20,13 @@ class JsonRoundTripTest {
     private final ModelDefinitionSerializer serializer = new ModelDefinitionSerializer();
     private final ModelCompiler compiler = new ModelCompiler();
 
+    private Stock findStock(List<Stock> stocks, String name) {
+        return stocks.stream()
+                .filter(s -> s.getName().equals(name))
+                .findFirst()
+                .orElseThrow(() -> new IllegalStateException("Stock not found: " + name));
+    }
+
     @Test
     void shouldProduceIdenticalSIRResults() {
         // Build and simulate the original
@@ -27,7 +34,6 @@ class JsonRoundTripTest {
         CompiledModel compiled1 = compiler.compile(original);
         Simulation sim1 = compiled1.createSimulation();
         sim1.execute();
-        List<Double> originalStockValues = compiled1.getModel().getStockValues();
 
         // Serialize and deserialize
         String json = serializer.toJson(original);
@@ -37,13 +43,16 @@ class JsonRoundTripTest {
         CompiledModel compiled2 = compiler.compile(deserialized);
         Simulation sim2 = compiled2.createSimulation();
         sim2.execute();
-        List<Double> roundTrippedStockValues = compiled2.getModel().getStockValues();
 
-        // Compare stock values
-        assertThat(roundTrippedStockValues).hasSameSizeAs(originalStockValues);
-        for (int i = 0; i < originalStockValues.size(); i++) {
-            assertThat(roundTrippedStockValues.get(i)).as("Stock " + i + " values should match")
-                    .isCloseTo(originalStockValues.get(i), within(0.001));
+        // Compare stock values by name
+        List<Stock> stocks1 = compiled1.getModel().getStocks();
+        List<Stock> stocks2 = compiled2.getModel().getStocks();
+        assertThat(stocks2).hasSameSizeAs(stocks1);
+        for (Stock s1 : stocks1) {
+            Stock s2 = findStock(stocks2, s1.getName());
+            assertThat(s2.getValue())
+                    .as("Stock '%s' values should match", s1.getName())
+                    .isCloseTo(s1.getValue(), within(0.001));
         }
     }
 
@@ -60,14 +69,14 @@ class JsonRoundTripTest {
         CompiledModel compiled1 = compiler.compile(original);
         Simulation sim1 = compiled1.createSimulation();
         sim1.execute();
-        double originalPop = compiled1.getModel().getStocks().get(0).getValue();
+        double originalPop = findStock(compiled1.getModel().getStocks(), "Population").getValue();
 
         String json = serializer.toJson(original);
         ModelDefinition deserialized = serializer.fromJson(json);
         CompiledModel compiled2 = compiler.compile(deserialized);
         Simulation sim2 = compiled2.createSimulation();
         sim2.execute();
-        double roundTrippedPop = compiled2.getModel().getStocks().get(0).getValue();
+        double roundTrippedPop = findStock(compiled2.getModel().getStocks(), "Population").getValue();
 
         assertThat(roundTrippedPop).isCloseTo(originalPop, within(0.001));
     }
@@ -93,8 +102,11 @@ class JsonRoundTripTest {
 
         List<Stock> stocks1 = compiled1.getModel().getStocks();
         List<Stock> stocks2 = compiled2.getModel().getStocks();
-        for (int i = 0; i < stocks1.size(); i++) {
-            assertThat(stocks2.get(i).getValue()).isCloseTo(stocks1.get(i).getValue(), within(0.001));
+        for (Stock s1 : stocks1) {
+            Stock s2 = findStock(stocks2, s1.getName());
+            assertThat(s2.getValue())
+                    .as("Stock '%s' values should match", s1.getName())
+                    .isCloseTo(s1.getValue(), within(0.001));
         }
     }
 
