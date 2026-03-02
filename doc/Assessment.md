@@ -31,6 +31,8 @@
 
 - Vensim .mdl import enables model exchange with the most widely used SD tool. `VensimImporter` reads Vensim `.mdl` files and produces a `ModelDefinition` that can be compiled and simulated. Supports stocks (INTEG), constants, auxiliaries, lookup tables (standalone and WITH LOOKUP), subscript ranges, simulation settings (INITIAL TIME, FINAL TIME, TIME STEP), sketch/view data, and expression translation for common Vensim functions (IF THEN ELSE, XIDZ, ZIDZ, SMOOTH3, DELAY1, logical operators). Unsupported constructs (macros, data variables, PULSE, DELAY FIXED) emit warnings rather than failing. The import pipeline has been audited and hardened with fixes for CRLF handling, case-insensitive matching, operator precedence preservation, duplicate name detection, and false-positive avoidance.
 
+- XMILE import and export enables bidirectional model exchange with Stella/iThink and other XMILE-compatible tools. `XmileImporter` reads XMILE XML files (the OASIS standard format for System Dynamics) and produces a `ModelDefinition` that can be compiled and simulated. `XmileExporter` writes any `ModelDefinition` back to valid XMILE 1.0 XML. Supports stocks, flows, auxiliaries, constants, lookup tables (standalone and embedded `<gf>`), simulation settings (`<sim_specs>`), view data, and bidirectional expression translation (IF_THEN_ELSE, AND/OR/NOT, equality/inequality operators, Time variable, SMTH3/SMTH1→SMOOTH approximation). Unsupported constructs (modules, groups, macros, arrays) emit warnings rather than failing. Combined with the existing Vensim `.mdl` importer, Forrester can now exchange models with both major SD tool ecosystems. Round-trip tested: import XMILE → compile → simulate → verify values; export → re-import → compare.
+
 - Dependency graph and auto-layout provide structural analysis. `DependencyGraph` extracts a directed graph from model definitions (which elements influence which), `ConnectorGenerator` auto-generates influence arrows, `AutoLayout` produces layered element placement, and `ViewValidator` checks view integrity. These are the building blocks for visual diagram generation.
 
 ## Robustness
@@ -62,7 +64,7 @@ The simulation engine and analysis tools have been hardened via a system-wide au
 | Non-programmers | Poor — no visual editor |
 | Model calibration / optimization | Good — derivative-free optimization with multiple algorithms and built-in objective functions for fitting to data |
 | Subscripted array computation | Very good — intelligent arrays with automatic broadcasting, named-dimension alignment, and aggregation match Analytica semantics |
-| Model sharing / interoperability | Good — JSON round-trip serialization, Vensim .mdl import, structural validation, and nested module support enable saving and exchanging models as data |
+| Model sharing / interoperability | Very good — JSON round-trip serialization, Vensim .mdl import, XMILE import/export, structural validation, and nested module support enable saving and exchanging models with both major SD tool ecosystems |
 | Production/enterprise modeling | Fair — has analysis tools, serialization, nested modules, multi-dimensional subscripts, and intelligent arrays but lacks visual diagrams |
 
 ## Bottom Line
@@ -80,4 +82,3 @@ The simulation engine and analysis tools have been hardened via a system-wide au
 Ranked by impact on the gap between "educational tool" and "useful modeling tool":
 
 1. **Visual diagram rendering** — The biggest remaining learning gap. The dependency graph, auto-layout, and view definition infrastructure are in place — the next step is rendering them to a visual format (DOT/Graphviz, SVG, or an interactive JavaFX diagram). Even a static stock-and-flow diagram generated from `DependencyGraph` + `AutoLayout` would help learners see feedback loops.
-2. **XMILE import-export** — Vensim `.mdl` import is now implemented. Adding XMILE support would enable model exchange with Stella/iThink and other XMILE-compatible tools.

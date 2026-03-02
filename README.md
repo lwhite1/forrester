@@ -56,7 +56,7 @@ com.deathrayresearch.forrester
 ├── measure/                     # Dimensional analysis, unit system, and UnitRegistry
 ├── event/                       # Event-driven communication
 ├── sweep/                       # Parameter sweep, Monte Carlo, optimization, and CSV output
-├── io/                          # CSV export, reporting, JSON serialization, and Vensim .mdl import
+├── io/                          # CSV export, reporting, JSON serialization, Vensim .mdl import, and XMILE import/export
 └── ui/                          # JavaFX chart visualization
 ```
 
@@ -623,6 +623,68 @@ Unsupported constructs (macros, data variables, PULSE, DELAY FIXED, etc.) emit w
 | `SketchParser` | Sketch section → `ViewDef` records |
 | `MdlEquation` | Parsed equation data record |
 
+### XMILE Import & Export (`io/xmile/` package)
+
+`XmileImporter` reads XMILE XML files (the OASIS standard format used by Stella/iThink) and produces a `ModelDefinition`. `XmileExporter` writes any `ModelDefinition` to valid XMILE 1.0 XML. Together they enable bidirectional model exchange with the second-most-popular SD tool ecosystem.
+
+**Import an XMILE file:**
+
+```java
+XmileImporter importer = new XmileImporter();
+ImportResult result = importer.importModel(Path.of("model.xmile"));
+if (!result.isClean()) {
+    result.warnings().forEach(System.out::println);
+}
+ModelDefinition def = result.definition();
+```
+
+**Export to XMILE:**
+
+```java
+String xml = XmileExporter.toXmile(modelDefinition);
+XmileExporter.toFile(modelDefinition, Path.of("model.xmile"));
+```
+
+**Full workflow — import, compile, simulate:**
+
+```java
+ImportResult result = new XmileImporter().importModel(Path.of("sir.xmile"));
+CompiledModel compiled = new ModelCompiler().compile(result.definition());
+Simulation sim = compiled.createSimulation();
+sim.execute();
+```
+
+**Supported constructs:**
+
+| XMILE Construct | Forrester Element |
+|---|---|
+| `<stock>` with `<eqn>` | `StockDef` (eqn = initial value) |
+| `<flow>` with `<eqn>` | `FlowDef` (source/sink from stock `<inflow>`/`<outflow>`) |
+| `<aux>` with numeric `<eqn>` | `ConstantDef` |
+| `<aux>` with expression `<eqn>` | `AuxDef` |
+| `<aux>` or `<flow>` with `<gf>` | `LookupTableDef` + `AuxDef` |
+| `<sim_specs>` | `SimulationSettings` (start, stop, dt, time_units) |
+| `<views>` / `<view>` | `ViewDef` with element placements and connectors |
+| `IF_THEN_ELSE` | `IF` |
+| `AND` / `OR` / `NOT` | `&&` / `\|\|` / `!` |
+| `=` / `<>` (comparison) | `==` / `!=` |
+| `SMTH3` / `SMTH1` | `SMOOTH` (with approximation warning) |
+| `Time` | `TIME` |
+| `<non_negative>` | `NegativeValuePolicy.CLAMP_TO_ZERO` |
+
+**Import limitations:** Non-literal stock initial values default to 0 (with warning). Start time offset and dt value are not preserved in `SimulationSettings`. Unsupported elements (`<group>`, `<module>`, `<macro>`, arrays, vendor-specific extensions) emit warnings rather than failing.
+
+**Export limitations:** Constants are exported as `<aux>` with numeric equations (re-imported correctly). Start time is always 0. Subscripts and module instances are not exported.
+
+| Class | Purpose |
+|---|---|
+| `XmileImporter` | Main entry point implementing `ModelImporter` |
+| `XmileExporter` | Static methods: `toXmile(def)`, `toFile(def, path)` |
+| `XmileExprTranslator` | Bidirectional expression syntax translation |
+| `XmileViewParser` | View XML → `ViewDef` records |
+| `XmileViewWriter` | `ViewDef` records → view XML |
+| `XmileConstants` | Namespace URIs and element/attribute name constants |
+
 ### Dependency Graph & Auto-Layout (`model/graph/` package)
 
 The graph package extracts structural information from model definitions for visualization and analysis.
@@ -995,6 +1057,7 @@ New to system dynamics? These resources provide a solid introduction to the meth
 
 The project is at version 1.0-SNAPSHOT and is under active development. Recent work has focused on:
 
+- Adding XMILE import and export (`io/xmile/` package) — bidirectional model exchange with Stella/iThink and other XMILE-compatible tools via the OASIS standard XML format. `XmileImporter` reads XMILE files to `ModelDefinition`; `XmileExporter` writes any `ModelDefinition` to valid XMILE 1.0 XML. Supports stocks, flows, auxiliaries, constants, lookup tables (standalone and embedded `<gf>`), simulation settings, view data, and bidirectional expression translation. Audited and hardened with 65 tests including round-trip compile+simulate and export→re-import verification
 - Adding Vensim `.mdl` import (`io/vensim/` package) — reads Vensim model files and produces `ModelDefinition` records that can be compiled and simulated. Supports stocks, constants, auxiliaries, lookup tables, subscript ranges, simulation settings, sketch data, and expression translation for common Vensim functions. Audited and hardened with 75 tests covering CRLF handling, case-insensitive matching, operator precedence, and duplicate name detection
 - Adding an external model representation with expression AST, definition records, model compiler, JSON serialization, nested modules, and dependency graph — six new packages (`model/expr`, `model/def`, `model/compile`, `io/json`, `model/graph`, `measure/UnitRegistry`) that enable defining models as pure data, persisting them to JSON, compiling them to runnable simulations, and extracting dependency graphs for visualization
 - Adding intelligent arrays (`IndexedValue`) — immutable multi-dimensional values with automatic broadcasting arithmetic. Shared dimensions align by name; non-shared dimensions expand via outer product. Supports elementwise and cross-dimension operations, scalar broadcasting, aggregation (`sum`, `mean`, `max`, `min`, `sumOver`), and convenience accessors on arrayed model elements

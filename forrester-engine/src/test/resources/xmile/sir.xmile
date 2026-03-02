@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xmile xmlns="http://docs.oasis-open.org/xmile/ns/XMILE/v1.0" version="1.0">
+  <header>
+    <name>SIR</name>
+    <vendor>Test</vendor>
+    <product>Test</product>
+  </header>
+  <sim_specs time_units="day">
+    <start>0</start>
+    <stop>200</stop>
+    <dt>0.25</dt>
+  </sim_specs>
+  <model>
+    <variables>
+      <stock name="Susceptible">
+        <eqn>9999</eqn>
+        <outflow>infection</outflow>
+        <units>People</units>
+      </stock>
+      <stock name="Infected">
+        <eqn>1</eqn>
+        <inflow>infection</inflow>
+        <outflow>recovery</outflow>
+        <units>People</units>
+      </stock>
+      <stock name="Recovered">
+        <eqn>0</eqn>
+        <inflow>recovery</inflow>
+        <units>People</units>
+      </stock>
+      <flow name="infection">
+        <eqn>Susceptible * Infected * Contact_Rate / Total_Population</eqn>
+        <units>People/Day</units>
+      </flow>
+      <flow name="recovery">
+        <eqn>Infected / Recovery_Time</eqn>
+        <units>People/Day</units>
+      </flow>
+      <aux name="Contact_Rate">
+        <eqn>0.3</eqn>
+        <units>1/Day</units>
+      </aux>
+      <aux name="Recovery_Time">
+        <eqn>5</eqn>
+        <units>Day</units>
+      </aux>
+      <aux name="Total_Population">
+        <eqn>10000</eqn>
+        <units>People</units>
+      </aux>
+      <aux name="Infection_Rate">
+        <eqn>Susceptible * Infected * Contact_Rate / Total_Population</eqn>
+        <units>People/Day</units>
+      </aux>
+    </variables>
+    <views>
+      <view name="Main">
+        <stock name="Susceptible" x="100" y="200"/>
+        <stock name="Infected" x="300" y="200"/>
+        <stock name="Recovered" x="500" y="200"/>
+        <flow name="infection" x="200" y="200"/>
+        <flow name="recovery" x="400" y="200"/>
+        <aux name="Contact_Rate" x="200" y="350"/>
+        <aux name="Recovery_Time" x="400" y="350"/>
+        <aux name="Total_Population" x="200" y="100"/>
+        <connector>
+          <from>Susceptible</from>
+          <to>infection</to>
+        </connector>
+        <connector>
+          <from>Infected</from>
+          <to>infection</to>
+        </connector>
+        <connector>
+          <from>Contact_Rate</from>
+          <to>infection</to>
+        </connector>
+        <connector>
+          <from>Total_Population</from>
+          <to>infection</to>
+        </connector>
+        <connector>
+          <from>Infected</from>
+          <to>recovery</to>
+        </connector>
+        <connector>
+          <from>Recovery_Time</from>
+          <to>recovery</to>
+        </connector>
+      </view>
+    </views>
+  </model>
+</xmile>
