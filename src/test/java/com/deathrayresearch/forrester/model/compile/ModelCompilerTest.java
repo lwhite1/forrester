@@ -257,6 +257,39 @@ class ModelCompilerTest {
     }
 
     @Nested
+    @DisplayName("Reset and re-simulate")
+    class ResetAndReSimulate {
+
+        @Test
+        void shouldRestoreStockValuesOnReset() {
+            ModelDefinition def = new ModelDefinitionBuilder()
+                    .name("Reset Test")
+                    .stock("Tank", 100, "Thing")
+                    .flow("Drain", "Tank * 0.1", "Day", "Tank", null)
+                    .defaultSimulation("Day", 10, "Day")
+                    .build();
+
+            CompiledModel compiled = compiler.compile(def);
+            Simulation sim = compiled.createSimulation();
+            sim.execute();
+
+            Stock tank = compiled.getModel().getStocks().get(0);
+            double afterFirst = tank.getValue();
+            assertTrue(afterFirst < 100, "Stock should have drained");
+
+            // Reset and re-simulate
+            compiled.reset();
+            assertEquals(100.0, tank.getValue(), 0.001,
+                    "Stock should be restored to initial value after reset");
+
+            Simulation sim2 = compiled.createSimulation();
+            sim2.execute();
+            assertEquals(afterFirst, tank.getValue(), 0.001,
+                    "Second simulation should produce same result");
+        }
+    }
+
+    @Nested
     @DisplayName("Module compilation errors")
     class ModuleErrors {
 

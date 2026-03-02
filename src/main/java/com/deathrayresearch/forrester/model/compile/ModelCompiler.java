@@ -63,7 +63,7 @@ public class ModelCompiler {
 
         compileInto(def, model, context, resettables, stepHolder);
 
-        return new CompiledModel(model, resettables, def, stepHolder);
+        return new CompiledModel(model, resettables, def, stepHolder, unitRegistry);
     }
 
     /**

@@ -172,6 +172,27 @@ class ExprCompilerTest {
     }
 
     @Test
+    void shouldUseEpsilonForEqualityComparison() {
+        // 0.1 + 0.2 != 0.3 in IEEE 754, but should be equal with epsilon
+        context.addConstant("A", new Constant("A", ItemUnits.THING, 0.1));
+        context.addConstant("B", new Constant("B", ItemUnits.THING, 0.2));
+        context.addConstant("C", new Constant("C", ItemUnits.THING, 0.3));
+        Formula formula = compiler.compile("(A + B) == C");
+        assertEquals(1.0, formula.getCurrentValue(),
+                "0.1 + 0.2 should equal 0.3 with epsilon comparison");
+    }
+
+    @Test
+    void shouldUseEpsilonForInequalityComparison() {
+        context.addConstant("A", new Constant("A", ItemUnits.THING, 0.1));
+        context.addConstant("B", new Constant("B", ItemUnits.THING, 0.2));
+        context.addConstant("C", new Constant("C", ItemUnits.THING, 0.3));
+        Formula formula = compiler.compile("(A + B) != C");
+        assertEquals(0.0, formula.getCurrentValue(),
+                "0.1 + 0.2 should not be != 0.3 with epsilon comparison");
+    }
+
+    @Test
     void shouldCompileDTWithCustomValue() {
         UnitRegistry registry = new UnitRegistry();
         CompilationContext customContext = new CompilationContext(

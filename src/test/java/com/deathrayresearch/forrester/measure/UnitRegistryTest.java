@@ -75,4 +75,13 @@ class UnitRegistryTest {
     void shouldReturnNullForUnknownFind() {
         assertNull(registry.find("NonExistentUnit12345"));
     }
+
+    @Test
+    void shouldNotLeaveSpuriousUnitAfterResolveTimeUnitFails() {
+        String unknownName = "SomeCustomThing";
+        assertThrows(IllegalArgumentException.class,
+                () -> registry.resolveTimeUnit(unknownName));
+        // The failed resolveTimeUnit should not have auto-created a unit
+        assertNull(registry.find(unknownName));
+    }
 }

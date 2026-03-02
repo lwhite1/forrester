@@ -80,7 +80,11 @@ public class UnitRegistry {
      * @throws IllegalArgumentException if the name does not resolve to a TimeUnit
      */
     public TimeUnit resolveTimeUnit(String name) {
-        Unit unit = resolve(name);
+        Unit unit = find(name);
+        if (unit == null) {
+            throw new IllegalArgumentException(
+                    "'" + name + "' is not a known time unit");
+        }
         if (unit instanceof TimeUnit timeUnit) {
             return timeUnit;
         }

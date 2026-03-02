@@ -2,107 +2,73 @@
 
 **Date:** 2026-03-01
 **Scope:** 36 source files, 17 test files across 6 phases (commit d314ffe)
-**Result:** 724 tests pass. Design gaps and style issues identified below.
-
----
-
-## High-Priority Issues
-
-### 1. `resolveTimeUnit` auto-creates spurious ItemUnit before failing
-
-**File:** `UnitRegistry.java` (lines ~83-89)
-
-When `resolveTimeUnit` is called with an unknown name, `resolve()` auto-creates and permanently registers a new `ItemUnit`. Then the `instanceof TimeUnit` check fails and throws `IllegalArgumentException`. The spurious unit remains in the registry, so a subsequent `resolve()` call with the same name returns a non-time unit instead of erroring.
-
-### 2. `createSimulation()` no-arg creates a fresh UnitRegistry
-
-**File:** `CompiledModel.java` (lines ~62-73)
-
-The no-arg `createSimulation()` overload constructs a new `UnitRegistry` instead of using the one from compilation. Any custom units registered during compilation are lost. If the model's `SimulationSettings` references a custom time unit, it will fail or auto-create the wrong unit type.
-
-### 3. `reset()` does not restore stock initial values
-
-**File:** `CompiledModel.java`
-
-The `reset()` method resets the step counter and stateful formulas (Smooth, Delay3), but stocks retain their final simulation values. Re-simulating after `reset()` starts from wherever stocks ended.
-
-### 4. Mutable internal maps exposed by CompilationContext
-
-**File:** `CompilationContext.java` (lines ~148-165)
-
-`getStocks()`, `getFlows()`, `getVariables()`, `getConstants()` return mutable internal maps. Callers can modify the compilation context's state.
-
-### 5. Floating-point equality in EQ/NE operators
-
-**File:** `ExprCompiler.java` (lines ~73-74)
-
-The `EQ` and `NE` operators use `==` and `!=` on `double` values. Floating-point equality is unreliable for computed values (e.g., `0.1 + 0.2 == 0.3` is false in IEEE 754).
+**Result:** 728 tests pass. Design gaps and style issues identified below.
 
 ---
 
 ## Medium-Priority Issues
 
-### 6. Silent fall-through in ExprStringifier and ExprDependencies
+### 1. Silent fall-through in ExprStringifier and ExprDependencies
 
 **Files:** `ExprStringifier.java` (lines 21-34), `ExprDependencies.java`
 
 Both use `if-else instanceof` chains over the sealed `Expr` interface. If a new variant is added, the stringifier silently produces empty output and the dependency extractor silently returns an incomplete set. Should throw `IllegalArgumentException` in the else branch (or use exhaustive switch when migrating to Java 21+).
 
-### 7. NaN/Infinity break round-trip contract
+### 2. NaN/Infinity break round-trip contract
 
 **File:** `ExprStringifier.java`
 
 `Literal(Double.NaN)` stringifies to `"NaN"` and `Literal(Double.POSITIVE_INFINITY)` to `"Infinity"`, which the parser cannot parse back. This breaks the documented round-trip contract.
 
-### 8. No null validation in Expr record constructors
+### 3. No null validation in Expr record constructors
 
 **File:** `Expr.java`
 
 `Ref`, `BinaryOp`, `UnaryOp`, `Conditional`, and `FunctionCall.name` accept null without validation. Null values propagate to the parser/stringifier where they cause confusing NPEs.
 
-### 9. `ExprDependencies.extract()` returns mutable set
+### 4. `ExprDependencies.extract()` returns mutable set
 
 **File:** `ExprDependencies.java`
 
 Returns the internal `LinkedHashSet` directly. Callers can mutate the returned collection.
 
-### 10. `DependencyGraph.dependentsOf()` returns mutable internal set
+### 5. `DependencyGraph.dependentsOf()` returns mutable internal set
 
 **File:** `DependencyGraph.java` (line ~108)
 
 Returns either a mutable `LinkedHashSet` from the adjacency map or an empty immutable set. When returning the internal set, callers can corrupt the graph.
 
-### 11. Inconsistent null handling for lists in records
+### 6. Inconsistent null handling for lists in records
 
 **Files:** `ModuleInterface.java`, `SubscriptDef.java`
 
 These call `List.copyOf()` directly without null-checking, throwing NPE on null input. All other records in the package use the `== null ? List.of() : List.copyOf(...)` pattern.
 
-### 12. `double[]` in records breaks equals/hashCode
+### 7. `double[]` in records breaks equals/hashCode
 
 **Files:** `LookupTableDef.java`, `ConnectorRoute.java`, `FlowRoute.java`
 
 Java records auto-generate `equals()` and `hashCode()` using array identity, not structural equality. Two records with identical data report as unequal. Additionally, `ConnectorRoute` and `FlowRoute` do not clone inner `double[]` elements, so external holders can mutate "immutable" record data.
 
-### 13. Massive code duplication between compileInto and compileModule
+### 8. Massive code duplication between compileInto and compileModule
 
 **File:** `ModelCompiler.java`
 
 `compileInto()` (~100 lines) and `compileModule()` (~120 lines) duplicate nearly identical logic for creating constants, stocks, lookup tables, aux holders, flow holders, and compiling formulas. Changes to compilation logic must be applied in both places.
 
-### 14. ModelDefinitionSerializer NPE on missing required JSON fields
+### 9. ModelDefinitionSerializer NPE on missing required JSON fields
 
 **File:** `ModelDefinitionSerializer.java`
 
 Calls like `root.get("name").asText()` do not guard against null return from `get()`. Missing required fields produce unhelpful NullPointerExceptions instead of descriptive error messages.
 
-### 15. ViewValidator does not validate FlowRoute endpoints
+### 10. ViewValidator does not validate FlowRoute endpoints
 
 **File:** `ViewValidator.java`
 
 Validates `ElementPlacement` and `ConnectorRoute` references but does not check `FlowRoute.flowName()` against existing model elements.
 
-### 16. AutoLayout does not place module instances
+### 11. AutoLayout does not place module instances
 
 **File:** `AutoLayout.java`
 
@@ -112,52 +78,52 @@ The layout loops over stocks, flows, auxiliaries, constants, and lookup tables, 
 
 ## Low-Priority Issues
 
-### 17. ExprParser dead code
+### 12. ExprParser dead code
 `parseCall()` method serves no purpose; function calls are handled inside `parsePrimary()`. The method contradicts the documented grammar.
 
-### 18. ExprParser identical methods
+### 13. ExprParser identical methods
 `matchMinus()` and `matchUnaryMinus()` have identical implementations. Only differentiated by call site.
 
-### 19. ExprParser no depth limit
+### 14. ExprParser no depth limit
 Recursive descent with no depth limit. Deeply nested expressions cause StackOverflowError.
 
-### 20. ExprParser position reporting
+### 15. ExprParser position reporting
 Input is trimmed before parsing, so error positions in ParseException are relative to trimmed input, not the original string.
 
-### 21. ExprParser hardcoded TIME/DT
+### 16. ExprParser hardcoded TIME/DT
 `TIME` and `DT` are always parsed as zero-arg function calls, shadowing any model elements named TIME or DT.
 
-### 22. ExprCompiler STEP/RAMP truncation
+### 17. ExprCompiler STEP/RAMP truncation
 `double` step/ramp times are silently cast to `int`, truncating fractional values.
 
-### 23. ExprCompiler MEAN with zero args
+### 18. ExprCompiler MEAN with zero args
 Returns `0.0 / 0 = NaN` silently. No argument count validation.
 
-### 24. QualifiedName.parse allows blank parts
+### 19. QualifiedName.parse allows blank parts
 `"a..b"` produces a name with an empty middle part. `""` produces a single blank part. No validation on individual part content.
 
-### 25. UnitRegistry unbounded auto-creation
+### 20. UnitRegistry unbounded auto-creation
 Any unknown unit name causes a new ItemUnit to be created and permanently registered. Could be a memory concern with untrusted input.
 
-### 26. ModelReport unbounded recursion
+### 21. ModelReport unbounded recursion
 `appendModule` recursively traverses sub-modules with no cycle detection. If modules form a cycle, this stack-overflows.
 
-### 27. Module.addSubModule no cycle detection
+### 22. Module.addSubModule no cycle detection
 A module can be added as its own sub-module, creating an infinite loop for any recursive traversal.
 
-### 28. No `@Override` on Resettable.reset()
+### 23. No `@Override` on Resettable.reset()
 `Smooth.reset()` and `Delay3.reset()` implement the interface method but lack `@Override`.
 
-### 29. Resettable could be @FunctionalInterface
+### 24. Resettable could be @FunctionalInterface
 Single abstract method interface without the annotation.
 
-### 30. AutoLayout fully-qualified type in method body
+### 25. AutoLayout fully-qualified type in method body
 `List<com.deathrayresearch.forrester.model.def.ConnectorRoute>` used inline instead of importing `ConnectorRoute`.
 
-### 31. String-typed enumerations throughout model/def
+### 26. String-typed enumerations throughout model/def
 `StockDef.negativeValuePolicy`, `LookupTableDef.interpolation`, and `ElementPlacement.type` use free-form strings where enums would be safer.
 
-### 32. No NaN/Infinity guards on double fields
+### 27. No NaN/Infinity guards on double fields
 `StockDef.initialValue`, `ConstantDef.value`, `SimulationSettings.duration`, and lookup table arrays accept NaN and Infinity silently.
 
 ---
@@ -211,9 +177,8 @@ No tests verify that the compiler produces meaningful errors for invalid definit
 
 | Category | Count |
 |----------|-------|
-| High-priority | 5 |
 | Medium-priority | 11 |
 | Low-priority | 16 |
 | Style violations | 4 |
 | Test coverage gaps | 7 |
-| **Total findings** | **43** |
+| **Total findings** | **38** |

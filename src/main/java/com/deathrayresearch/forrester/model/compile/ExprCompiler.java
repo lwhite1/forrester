@@ -70,8 +70,8 @@ public class ExprCompiler {
             case DIV -> () -> left.getAsDouble() / right.getAsDouble();
             case MOD -> () -> left.getAsDouble() % right.getAsDouble();
             case POW -> () -> Math.pow(left.getAsDouble(), right.getAsDouble());
-            case EQ -> () -> left.getAsDouble() == right.getAsDouble() ? 1.0 : 0.0;
-            case NE -> () -> left.getAsDouble() != right.getAsDouble() ? 1.0 : 0.0;
+            case EQ -> () -> Math.abs(left.getAsDouble() - right.getAsDouble()) < 1e-10 ? 1.0 : 0.0;
+            case NE -> () -> Math.abs(left.getAsDouble() - right.getAsDouble()) >= 1e-10 ? 1.0 : 0.0;
             case LT -> () -> left.getAsDouble() < right.getAsDouble() ? 1.0 : 0.0;
             case LE -> () -> left.getAsDouble() <= right.getAsDouble() ? 1.0 : 0.0;
             case GT -> () -> left.getAsDouble() > right.getAsDouble() ? 1.0 : 0.0;

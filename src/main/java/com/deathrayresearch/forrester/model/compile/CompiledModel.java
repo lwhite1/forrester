@@ -7,11 +7,14 @@ import com.deathrayresearch.forrester.measure.Quantity;
 import com.deathrayresearch.forrester.measure.TimeUnit;
 import com.deathrayresearch.forrester.measure.UnitRegistry;
 import com.deathrayresearch.forrester.model.Model;
+import com.deathrayresearch.forrester.model.Stock;
 import com.deathrayresearch.forrester.model.def.ModelDefinition;
 import com.deathrayresearch.forrester.model.def.SimulationSettings;
 import com.google.common.eventbus.Subscribe;
 
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * The result of compiling a {@link ModelDefinition}. Contains the runnable model,
@@ -23,13 +26,20 @@ public class CompiledModel {
     private final List<Resettable> resettables;
     private final ModelDefinition source;
     private final int[] stepHolder;
+    private final UnitRegistry unitRegistry;
+    private final Map<Stock, Double> initialStockValues;
 
     public CompiledModel(Model model, List<Resettable> resettables, ModelDefinition source,
-                         int[] stepHolder) {
+                         int[] stepHolder, UnitRegistry unitRegistry) {
         this.model = model;
         this.resettables = List.copyOf(resettables);
         this.source = source;
         this.stepHolder = stepHolder;
+        this.unitRegistry = unitRegistry;
+        this.initialStockValues = new LinkedHashMap<>();
+        for (Stock stock : model.getStocks()) {
+            initialStockValues.put(stock, stock.getValue());
+        }
     }
 
     public Model getModel() {
@@ -64,9 +74,8 @@ public class CompiledModel {
         if (settings == null) {
             throw new IllegalStateException("No default simulation settings defined");
         }
-        UnitRegistry registry = new UnitRegistry();
-        TimeUnit timeStep = registry.resolveTimeUnit(settings.timeStep());
-        TimeUnit durationUnit = registry.resolveTimeUnit(settings.durationUnit());
+        TimeUnit timeStep = unitRegistry.resolveTimeUnit(settings.timeStep());
+        TimeUnit durationUnit = unitRegistry.resolveTimeUnit(settings.durationUnit());
         Simulation sim = new Simulation(model, timeStep, new Quantity(settings.duration(), durationUnit));
         installStepSync(sim);
         return sim;
@@ -79,6 +88,9 @@ public class CompiledModel {
         stepHolder[0] = 0;
         for (Resettable r : resettables) {
             r.reset();
+        }
+        for (Map.Entry<Stock, Double> entry : initialStockValues.entrySet()) {
+            entry.getKey().setValue(entry.getValue());
         }
     }
 

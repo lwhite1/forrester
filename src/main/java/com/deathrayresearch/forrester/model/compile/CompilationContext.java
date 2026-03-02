@@ -7,6 +7,7 @@ import com.deathrayresearch.forrester.model.LookupTable;
 import com.deathrayresearch.forrester.model.Stock;
 import com.deathrayresearch.forrester.model.Variable;
 
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.function.IntSupplier;
@@ -155,19 +156,19 @@ public class CompilationContext {
     }
 
     public Map<String, Stock> getStocks() {
-        return stocks;
+        return Collections.unmodifiableMap(stocks);
     }
 
     public Map<String, Flow> getFlows() {
-        return flows;
+        return Collections.unmodifiableMap(flows);
     }
 
     public Map<String, Variable> getVariables() {
-        return variables;
+        return Collections.unmodifiableMap(variables);
     }
 
     public Map<String, Constant> getConstants() {
-        return constants;
+        return Collections.unmodifiableMap(constants);
     }
 
     public double[] resolveLookupInputHolder(String name) {
