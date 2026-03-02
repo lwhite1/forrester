@@ -89,6 +89,40 @@ class DefinitionValidatorTest {
     }
 
     @Test
+    void shouldDetectNonRootCircularModuleReference() {
+        // B contains C, C contains B — cycle that doesn't involve the root "Outer"
+        ModelDefinition defC = new ModelDefinitionBuilder()
+                .name("C")
+                .stock("S", 0, "Thing")
+                .build();
+        // B contains C — but we need C to contain B to form a cycle.
+        // Since ModelDefinition is immutable, we build them with matching names:
+        // B_inner contains a module named "C" whose definition is named "B" (same as B_inner).
+        ModelDefinition cycleBack = new ModelDefinitionBuilder()
+                .name("B")
+                .stock("S2", 0, "Thing")
+                .build();
+        ModelDefinition defCWithB = new ModelDefinitionBuilder()
+                .name("C")
+                .stock("S", 0, "Thing")
+                .module("back", cycleBack, Map.of(), Map.of())
+                .build();
+        ModelDefinition defB = new ModelDefinitionBuilder()
+                .name("B")
+                .stock("S", 0, "Thing")
+                .module("goToC", defCWithB, Map.of(), Map.of())
+                .build();
+        ModelDefinition outer = new ModelDefinitionBuilder()
+                .name("Outer")
+                .module("b", defB, Map.of(), Map.of())
+                .build();
+
+        List<String> errors = DefinitionValidator.validate(outer);
+        assertTrue(errors.stream().anyMatch(e -> e.contains("Circular")),
+                "Should detect B→C→B cycle even though root is 'Outer': " + errors);
+    }
+
+    @Test
     void shouldDetectBadModuleInputBinding() {
         ModelDefinition moduleDef = new ModelDefinitionBuilder()
                 .name("Module")

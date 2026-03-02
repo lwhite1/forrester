@@ -95,7 +95,7 @@ public class ExprCompiler {
 
         return switch (name) {
             case "TIME" -> () -> context.getCurrentStep().getAsInt();
-            case "DT" -> () -> 1.0;
+            case "DT" -> () -> context.getDt();
             case "ABS" -> {
                 requireArgs(name, args, 1);
                 DoubleSupplier a = compileExpr(args.get(0));
@@ -234,26 +234,22 @@ public class ExprCompiler {
                     "LOOKUP first argument must be a table name reference", "LOOKUP");
         }
         String tableName = ref.name();
+        String resolvedName = tableName;
         LookupTable table = context.resolveLookupTable(tableName);
-        if (table == null) {
-            // Try underscore→space
-            if (tableName.contains("_")) {
-                table = context.resolveLookupTable(tableName.replace('_', ' '));
-            }
-            if (table == null) {
-                throw new CompilationException(
-                        "Lookup table not found: " + tableName, tableName);
-            }
+        if (table == null && tableName.contains("_")) {
+            resolvedName = tableName.replace('_', ' ');
+            table = context.resolveLookupTable(resolvedName);
         }
-        // The lookup table already has its input wired — but in the compiled model
-        // we need to wire it with the compiled input expression
+        if (table == null) {
+            throw new CompilationException(
+                    "Lookup table not found: " + tableName, tableName);
+        }
+        // Wire the compiled input expression to the table's input holder
         DoubleSupplier input = compileExpr(args.get(1));
-        // Return a supplier that evaluates the table with the compiled input
+        double[] inputHolder = context.resolveLookupInputHolder(resolvedName);
         LookupTable finalTable = table;
         return () -> {
-            // We need a way to evaluate with a dynamic input.
-            // Since LookupTable wraps the input supplier, we'll rely on the table
-            // being created with our input supplier during compilation.
+            inputHolder[0] = input.getAsDouble();
             return finalTable.getCurrentValue();
         };
     }

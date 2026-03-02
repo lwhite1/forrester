@@ -22,20 +22,28 @@ public class CompilationContext {
     private final Map<String, Variable> variables = new LinkedHashMap<>();
     private final Map<String, Constant> constants = new LinkedHashMap<>();
     private final Map<String, LookupTable> lookupTables = new LinkedHashMap<>();
+    private final Map<String, double[]> lookupInputHolders = new LinkedHashMap<>();
 
     private final CompilationContext parent;
     private final UnitRegistry unitRegistry;
     private final IntSupplier currentStep;
+    private final double dt;
 
     public CompilationContext(UnitRegistry unitRegistry, IntSupplier currentStep) {
-        this(unitRegistry, currentStep, null);
+        this(unitRegistry, currentStep, null, 1.0);
     }
 
     public CompilationContext(UnitRegistry unitRegistry, IntSupplier currentStep,
                               CompilationContext parent) {
+        this(unitRegistry, currentStep, parent, 1.0);
+    }
+
+    public CompilationContext(UnitRegistry unitRegistry, IntSupplier currentStep,
+                              CompilationContext parent, double dt) {
         this.unitRegistry = unitRegistry;
         this.currentStep = currentStep;
         this.parent = parent;
+        this.dt = dt;
     }
 
     public void addStock(String name, Stock stock) {
@@ -54,8 +62,9 @@ public class CompilationContext {
         constants.put(name, constant);
     }
 
-    public void addLookupTable(String name, LookupTable table) {
+    public void addLookupTable(String name, LookupTable table, double[] inputHolder) {
         lookupTables.put(name, table);
+        lookupInputHolders.put(name, inputHolder);
     }
 
     /**
@@ -161,11 +170,33 @@ public class CompilationContext {
         return constants;
     }
 
+    public double[] resolveLookupInputHolder(String name) {
+        double[] holder = lookupInputHolders.get(name);
+        if (holder != null) {
+            return holder;
+        }
+        if (name.contains("_")) {
+            String spaceName = name.replace('_', ' ');
+            holder = lookupInputHolders.get(spaceName);
+            if (holder != null) {
+                return holder;
+            }
+        }
+        if (parent != null) {
+            return parent.resolveLookupInputHolder(name);
+        }
+        return null;
+    }
+
     public UnitRegistry getUnitRegistry() {
         return unitRegistry;
     }
 
     public IntSupplier getCurrentStep() {
         return currentStep;
+    }
+
+    public double getDt() {
+        return dt;
     }
 }

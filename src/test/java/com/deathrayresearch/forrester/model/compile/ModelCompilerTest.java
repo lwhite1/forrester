@@ -221,11 +221,79 @@ class ModelCompilerTest {
 
             CompiledModel compiled = compiler.compile(def);
             Simulation sim = compiled.createSimulation();
-            // Should not throw
             sim.execute();
 
             Stock s = compiled.getModel().getStocks().get(0);
             assertTrue(s.getValue() < 50, "Stock should have drained");
+        }
+
+        @Test
+        void shouldWireLookupInputCorrectly() {
+            // Use a lookup table where output varies significantly with input
+            // At S=100, effect=0.0; at S=0, effect=1.0
+            ModelDefinition def = new ModelDefinitionBuilder()
+                    .name("Lookup Wire Test")
+                    .stock("S", 100, "Thing")
+                    .lookupTable("Effect",
+                            new double[]{0, 50, 100},
+                            new double[]{1.0, 0.5, 0.0},
+                            "LINEAR")
+                    // At S=100, LOOKUP returns 0.0 so drain should be minimal
+                    .flow("Drain", "LOOKUP(Effect, S) * 10", "Day", "S", null)
+                    .defaultSimulation("Day", 5, "Day")
+                    .build();
+
+            CompiledModel compiled = compiler.compile(def);
+            Simulation sim = compiled.createSimulation();
+            sim.execute();
+
+            Stock s = compiled.getModel().getStocks().get(0);
+            // At S=100, effect=0.0, so drain rate starts at 0. As S decreases,
+            // effect increases, accelerating the drain. Stock should barely move
+            // at first (near 100) since the lookup input is wired correctly.
+            assertTrue(s.getValue() > 90,
+                    "With effect=0 at S=100, stock should barely drain, got " + s.getValue());
+        }
+    }
+
+    @Nested
+    @DisplayName("Module compilation errors")
+    class ModuleErrors {
+
+        @Test
+        void shouldThrowForBadModuleFlowSource() {
+            ModelDefinition moduleDef = new ModelDefinitionBuilder()
+                    .name("BadModule")
+                    .stock("Tank", 100, "Thing")
+                    .flow("Drain", "Tank * 0.1", "Day", "NonExistent", null)
+                    .build();
+
+            ModelDefinition outer = new ModelDefinitionBuilder()
+                    .name("Outer")
+                    .module("m1", moduleDef,
+                            java.util.Map.of(), java.util.Map.of())
+                    .defaultSimulation("Day", 1, "Day")
+                    .build();
+
+            assertThrows(CompilationException.class, () -> compiler.compile(outer));
+        }
+
+        @Test
+        void shouldThrowForBadModuleFlowSink() {
+            ModelDefinition moduleDef = new ModelDefinitionBuilder()
+                    .name("BadModule")
+                    .stock("Tank", 100, "Thing")
+                    .flow("Fill", "10", "Day", null, "NonExistent")
+                    .build();
+
+            ModelDefinition outer = new ModelDefinitionBuilder()
+                    .name("Outer")
+                    .module("m1", moduleDef,
+                            java.util.Map.of(), java.util.Map.of())
+                    .defaultSimulation("Day", 1, "Day")
+                    .build();
+
+            assertThrows(CompilationException.class, () -> compiler.compile(outer));
         }
     }
 }

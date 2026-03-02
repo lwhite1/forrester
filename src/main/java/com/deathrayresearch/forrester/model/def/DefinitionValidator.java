@@ -122,8 +122,10 @@ public final class DefinitionValidator {
         }
 
         // Check for circular module references
+        Set<String> rootPath = new HashSet<>();
+        rootPath.add(def.name());
         for (ModuleInstanceDef module : def.modules()) {
-            if (hasCircularReference(def.name(), module.definition(), new HashSet<>())) {
+            if (hasCircularReference(module.definition(), new HashSet<>(rootPath))) {
                 errors.add("Circular module reference detected involving module: "
                         + module.instanceName());
             }
@@ -137,16 +139,12 @@ public final class DefinitionValidator {
         return errors;
     }
 
-    private static boolean hasCircularReference(String rootName, ModelDefinition def,
-                                                Set<String> visited) {
-        if (def.name().equals(rootName)) {
-            return true;
-        }
-        if (!visited.add(def.name())) {
-            return false; // already visited this branch
+    private static boolean hasCircularReference(ModelDefinition def, Set<String> pathNames) {
+        if (!pathNames.add(def.name())) {
+            return true; // this definition name already appears on the current path
         }
         for (ModuleInstanceDef module : def.modules()) {
-            if (hasCircularReference(rootName, module.definition(), new HashSet<>(visited))) {
+            if (hasCircularReference(module.definition(), new HashSet<>(pathNames))) {
                 return true;
             }
         }

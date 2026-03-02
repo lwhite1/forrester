@@ -164,4 +164,20 @@ class ExprCompilerTest {
         Formula formula = compiler.compile("Population * Rate * Infectivity");
         assertEquals(1000 * 0.05 * 0.10, formula.getCurrentValue(), 1e-10);
     }
+
+    @Test
+    void shouldCompileDTWithDefaultValue() {
+        Formula formula = compiler.compile("DT");
+        assertEquals(1.0, formula.getCurrentValue());
+    }
+
+    @Test
+    void shouldCompileDTWithCustomValue() {
+        UnitRegistry registry = new UnitRegistry();
+        CompilationContext customContext = new CompilationContext(
+                registry, () -> step[0], null, 0.25);
+        ExprCompiler customCompiler = new ExprCompiler(customContext, resettables);
+        Formula formula = customCompiler.compile("DT");
+        assertEquals(0.25, formula.getCurrentValue());
+    }
 }

@@ -102,7 +102,7 @@ public class ModelCompiler {
                 table = LookupTable.linear(tDef.xValues(), tDef.yValues(),
                         () -> inputHolder[0]);
             }
-            context.addLookupTable(tDef.name(), table);
+            context.addLookupTable(tDef.name(), table, inputHolder);
         }
 
         // Auxiliaries — use DoubleSupplier[] holders for indirection
@@ -222,7 +222,7 @@ public class ModelCompiler {
                 table = LookupTable.linear(tDef.xValues(), tDef.yValues(),
                         () -> inputHolder[0]);
             }
-            moduleContext.addLookupTable(tDef.name(), table);
+            moduleContext.addLookupTable(tDef.name(), table, inputHolder);
         }
 
         // Auxiliaries with holder indirection
@@ -251,15 +251,25 @@ public class ModelCompiler {
 
             if (fDef.source() != null) {
                 Stock source = moduleContext.getStocks().get(fDef.source());
-                if (source != null) {
-                    source.addOutflow(flow);
+                if (source == null) {
+                    throw new CompilationException(
+                            "Flow '" + fDef.name() + "' in module '"
+                                    + mDef.instanceName()
+                                    + "' references unknown source: "
+                                    + fDef.source(), fDef.name());
                 }
+                source.addOutflow(flow);
             }
             if (fDef.sink() != null) {
                 Stock sink = moduleContext.getStocks().get(fDef.sink());
-                if (sink != null) {
-                    sink.addInflow(flow);
+                if (sink == null) {
+                    throw new CompilationException(
+                            "Flow '" + fDef.name() + "' in module '"
+                                    + mDef.instanceName()
+                                    + "' references unknown sink: "
+                                    + fDef.sink(), fDef.name());
                 }
+                sink.addInflow(flow);
             }
         }
 
