@@ -118,6 +118,13 @@ public final class DefinitionValidator {
                                 + "' binds non-existent output port: " + bindingPort);
                     }
                 }
+                // Check that all required input ports are bound
+                for (String inputPort : inputPortNames) {
+                    if (!module.inputBindings().containsKey(inputPort)) {
+                        errors.add("Module '" + module.instanceName()
+                                + "' is missing binding for required input port: " + inputPort);
+                    }
+                }
             }
         }
 

@@ -409,5 +409,78 @@ class ModelCompilerTest {
             assertThat(output).isNotNull();
             assertThat(output.getValue()).isCloseTo(100.0, within(0.01));
         }
+
+        @Test
+        void shouldThrowForBadOutputBinding() {
+            ModelDefinition innerModule = new ModelDefinitionBuilder()
+                    .name("Inner")
+                    .stock("Value", 50, "Thing")
+                    .build();
+
+            ModelDefinition outer = new ModelDefinitionBuilder()
+                    .name("Outer")
+                    .module("m1", innerModule,
+                            java.util.Map.of(),
+                            java.util.Map.of("nonExistent", "Alias"))
+                    .defaultSimulation("Day", 1, "Day")
+                    .build();
+
+            assertThatThrownBy(() -> compiler.compile(outer))
+                    .isInstanceOf(CompilationException.class)
+                    .hasMessageContaining("unknown port");
+        }
+    }
+
+    @Nested
+    @DisplayName("createSimulation")
+    class CreateSimulation {
+
+        @Test
+        void shouldThrowWithoutDefaultSettings() {
+            ModelDefinition def = new ModelDefinitionBuilder()
+                    .name("No Defaults")
+                    .stock("S", 100, "Thing")
+                    .build();
+
+            CompiledModel compiled = compiler.compile(def);
+            assertThatThrownBy(compiled::createSimulation)
+                    .isInstanceOf(IllegalStateException.class)
+                    .hasMessageContaining("No default simulation");
+        }
+
+        @Test
+        void shouldCreateSimulationWithExplicitTimeSteps() {
+            ModelDefinition def = new ModelDefinitionBuilder()
+                    .name("Explicit")
+                    .stock("S", 100, "Thing")
+                    .flow("F", "S * 0.1", "Day", "S", null)
+                    .build();
+
+            CompiledModel compiled = compiler.compile(def);
+            Simulation sim = compiled.createSimulation(DAY, 5, DAY);
+            sim.execute();
+
+            Stock s = findStock(compiled.getModel(), "S");
+            assertThat(s.getValue()).isLessThan(100);
+        }
+    }
+
+    @Nested
+    @DisplayName("NegativeValuePolicy")
+    class NegativeValuePolicyTests {
+
+        @Test
+        void shouldThrowForUnknownPolicy() {
+            ModelDefinition def = new ModelDefinitionBuilder()
+                    .name("BadPolicy")
+                    .stock("S", "comment", 100, "Thing", "INVALID_POLICY")
+                    .flow("F", "200", "Day", "S", null)
+                    .defaultSimulation("Day", 1, "Day")
+                    .build();
+
+            assertThatThrownBy(() -> compiler.compile(def))
+                    .isInstanceOf(CompilationException.class)
+                    .hasMessageContaining("Unknown NegativeValuePolicy");
+        }
     }
 }

@@ -36,6 +36,9 @@ public sealed interface Expr
 
         public Ref {
             Objects.requireNonNull(name, "Ref name must not be null");
+            if (name.isBlank()) {
+                throw new IllegalArgumentException("Ref name must not be blank");
+            }
         }
     }
 

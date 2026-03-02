@@ -31,9 +31,9 @@ class ModelDefinitionSerializerTest {
 
         ModelDefinition deserialized = serializer.fromJson(json);
         assertThat(deserialized.name()).isEqualTo(sir.name());
-        assertThat(deserialized.stocks().size()).isEqualTo(sir.stocks().size());
-        assertThat(deserialized.flows().size()).isEqualTo(sir.flows().size());
-        assertThat(deserialized.constants().size()).isEqualTo(sir.constants().size());
+        assertThat(deserialized.stocks()).hasSameSizeAs(sir.stocks());
+        assertThat(deserialized.flows()).hasSameSizeAs(sir.flows());
+        assertThat(deserialized.constants()).hasSameSizeAs(sir.constants());
         assertThat(deserialized.defaultSimulation().duration())
                 .isEqualTo(sir.defaultSimulation().duration());
     }
@@ -118,7 +118,7 @@ class ModelDefinitionSerializerTest {
                 .build();
 
         ModelDefinition roundTripped = serializer.fromJson(serializer.toJson(outer));
-        assertThat(roundTripped.modules().size()).isEqualTo(1);
+        assertThat(roundTripped.modules()).hasSize(1);
         assertThat(roundTripped.modules().get(0).instanceName()).isEqualTo("mod1");
         assertThat(roundTripped.modules().get(0).definition().name()).isEqualTo("Inner");
         assertThat(roundTripped.modules().get(0).inputBindings().get("in1")).isEqualTo("42");
@@ -138,16 +138,31 @@ class ModelDefinitionSerializerTest {
                 .build();
 
         ModelDefinition roundTripped = serializer.fromJson(serializer.toJson(def));
-        assertThat(roundTripped.views().size()).isEqualTo(1);
+        assertThat(roundTripped.views()).hasSize(1);
         assertThat(roundTripped.views().get(0).name()).isEqualTo("Main");
-        assertThat(roundTripped.views().get(0).elements().size()).isEqualTo(1);
+        assertThat(roundTripped.views().get(0).elements()).hasSize(1);
         assertThat(roundTripped.views().get(0).elements().get(0).name()).isEqualTo("S");
     }
 
     @Test
     void shouldThrowOnMalformedJson() {
         assertThatThrownBy(() -> serializer.fromJson("not valid json{{{"))
-                .isInstanceOf(RuntimeException.class);
+                .isInstanceOf(IllegalArgumentException.class);
+    }
+
+    @Test
+    void shouldThrowForNonNumericDoubleField() {
+        String json = """
+                {
+                  "name": "Bad",
+                  "stocks": [
+                    { "name": "S", "initialValue": "not_a_number", "unit": "Thing" }
+                  ]
+                }
+                """;
+        assertThatThrownBy(() -> serializer.fromJson(json))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("must be a number");
     }
 
     @Test

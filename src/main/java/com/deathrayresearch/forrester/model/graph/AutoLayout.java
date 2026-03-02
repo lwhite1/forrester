@@ -19,7 +19,10 @@ import java.util.List;
  * Stocks are placed in the center row, flows between their source/sink,
  * auxiliaries above, and constants below.
  */
-public class AutoLayout {
+public final class AutoLayout {
+
+    private AutoLayout() {
+    }
 
     private static final double X_SPACING = 150;
     private static final double Y_STOCK = 200;

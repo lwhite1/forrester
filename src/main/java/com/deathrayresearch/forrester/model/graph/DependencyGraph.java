@@ -9,8 +9,10 @@ import com.deathrayresearch.forrester.model.def.StockDef;
 import com.deathrayresearch.forrester.model.expr.ExprDependencies;
 import com.deathrayresearch.forrester.model.expr.ExprParser;
 
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Deque;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -143,7 +145,7 @@ public class DependencyGraph {
         }
 
         List<String> result = new ArrayList<>();
-        List<String> queue = new ArrayList<>();
+        Deque<String> queue = new ArrayDeque<>();
         for (Map.Entry<String, Integer> entry : inDegree.entrySet()) {
             if (entry.getValue() == 0) {
                 queue.add(entry.getKey());
@@ -151,7 +153,7 @@ public class DependencyGraph {
         }
 
         while (!queue.isEmpty()) {
-            String node = queue.remove(0);
+            String node = queue.poll();
             result.add(node);
             for (String dependent : adjacency.getOrDefault(node, Collections.emptySet())) {
                 int newDegree = inDegree.get(dependent) - 1;

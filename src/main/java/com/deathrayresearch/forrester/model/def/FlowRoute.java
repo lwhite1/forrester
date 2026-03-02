@@ -40,7 +40,7 @@ public record FlowRoute(
             return false;
         }
         return Objects.equals(flowName, that.flowName)
-                && pointListEquals(points, that.points);
+                && PointListUtil.pointListEquals(points, that.points);
     }
 
     @Override
@@ -50,17 +50,5 @@ public record FlowRoute(
             result = 31 * result + Arrays.hashCode(point);
         }
         return result;
-    }
-
-    private static boolean pointListEquals(List<double[]> a, List<double[]> b) {
-        if (a.size() != b.size()) {
-            return false;
-        }
-        for (int i = 0; i < a.size(); i++) {
-            if (!Arrays.equals(a.get(i), b.get(i))) {
-                return false;
-            }
-        }
-        return true;
     }
 }

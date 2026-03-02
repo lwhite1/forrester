@@ -297,5 +297,81 @@ class ExprCompilerTest {
                     .isInstanceOf(CompilationException.class)
                     .hasMessageContaining("constant");
         }
+
+        @Test
+        void shouldThrowForDELAY3WithTooManyArgs() {
+            assertThatThrownBy(() -> compiler.compile("DELAY3(1, 2, 3, 4)"))
+                    .isInstanceOf(CompilationException.class)
+                    .hasMessageContaining("2-3 arguments");
+        }
+
+        @Test
+        void shouldThrowForRAMPWithTooManyArgs() {
+            assertThatThrownBy(() -> compiler.compile("RAMP(1, 2, 3, 4)"))
+                    .isInstanceOf(CompilationException.class)
+                    .hasMessageContaining("2-3 arguments");
+        }
+
+        @Test
+        void shouldThrowForLOOKUPWithNonRefFirstArg() {
+            assertThatThrownBy(() -> compiler.compile("LOOKUP(42, 10)"))
+                    .isInstanceOf(CompilationException.class)
+                    .hasMessageContaining("table name reference");
+        }
+    }
+
+    @Nested
+    @DisplayName("Division and modulo edge cases")
+    class DivisionEdgeCases {
+
+        @Test
+        void shouldReturnZeroForDivisionByZero() {
+            Formula formula = compiler.compile("Population / 0");
+            assertThat(formula.getCurrentValue()).isEqualTo(0.0);
+        }
+
+        @Test
+        void shouldReturnZeroForModuloByZero() {
+            Formula formula = compiler.compile("Population % 0");
+            assertThat(formula.getCurrentValue()).isEqualTo(0.0);
+        }
+    }
+
+    @Nested
+    @DisplayName("SMOOTH over multiple steps")
+    class SmoothMultiStep {
+
+        @Test
+        void shouldSmoothInputOverSteps() {
+            Formula formula = compiler.compile("SMOOTH(Population, 5)");
+            // At step 0, should return initial value (input value)
+            assertThat(formula.getCurrentValue()).isCloseTo(1000.0, within(1.0));
+            assertThat(resettables).hasSize(1);
+        }
+    }
+
+    @Nested
+    @DisplayName("3-arg RAMP and LOOKUP")
+    class RampAndLookup {
+
+        @Test
+        void shouldCompileThreeArgRAMP() {
+            Formula formula = compiler.compile("RAMP(2, 3, 7)");
+            // At step 0 (before start), value is 0
+            assertThat(formula.getCurrentValue()).isEqualTo(0.0);
+        }
+
+        @Test
+        void shouldCompileLOOKUPWithUnderscoreToSpace() {
+            double[] inputHolder = {0};
+            LookupTable table = LookupTable.linear(
+                    new double[]{0, 50, 100},
+                    new double[]{1.0, 0.5, 0.0},
+                    () -> inputHolder[0]);
+            context.addLookupTable("My Table", table, inputHolder);
+            // Reference as "My_Table" — should resolve via underscore-to-space
+            Formula formula = compiler.compile("LOOKUP(My_Table, 50)");
+            assertThat(formula.getCurrentValue()).isCloseTo(0.5, within(0.01));
+        }
     }
 }

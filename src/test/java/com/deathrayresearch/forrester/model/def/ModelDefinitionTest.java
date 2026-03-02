@@ -129,8 +129,10 @@ class ModelDefinitionTest {
     }
 
     @Test
-    void shouldDefaultToEmptyLabelsWhenNull() {
-        SubscriptDef sub = new SubscriptDef("Empty", null);
-        assertThat(sub.labels()).isEmpty();
+    void shouldRejectNullOrEmptyLabels() {
+        assertThatThrownBy(() -> new SubscriptDef("Empty", null))
+                .isInstanceOf(IllegalArgumentException.class);
+        assertThatThrownBy(() -> new SubscriptDef("Empty", List.of()))
+                .isInstanceOf(IllegalArgumentException.class);
     }
 }

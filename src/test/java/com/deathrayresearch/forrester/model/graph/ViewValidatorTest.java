@@ -2,6 +2,7 @@ package com.deathrayresearch.forrester.model.graph;
 
 import com.deathrayresearch.forrester.model.def.ConnectorRoute;
 import com.deathrayresearch.forrester.model.def.ElementPlacement;
+import com.deathrayresearch.forrester.model.def.FlowRoute;
 import com.deathrayresearch.forrester.model.def.ModelDefinition;
 import com.deathrayresearch.forrester.model.def.ModelDefinitionBuilder;
 import com.deathrayresearch.forrester.model.def.ViewDef;
@@ -38,7 +39,7 @@ class ViewValidatorTest {
                 List.of());
 
         List<String> errors = ViewValidator.validate(view, def);
-        assertThat(errors.isEmpty()).as("Valid view should have no errors: " + errors).isTrue();
+        assertThat(errors).as("Valid view should have no errors").isEmpty();
     }
 
     @Test
@@ -57,8 +58,8 @@ class ViewValidatorTest {
                 List.of());
 
         List<String> errors = ViewValidator.validate(view, def);
-        assertThat(errors.size()).isEqualTo(1);
-        assertThat(errors.get(0).contains("Ghost")).as("Should mention the non-existent element").isTrue();
+        assertThat(errors).hasSize(1);
+        assertThat(errors.get(0)).contains("Ghost");
     }
 
     @Test
@@ -78,8 +79,8 @@ class ViewValidatorTest {
                 List.of());
 
         List<String> errors = ViewValidator.validate(view, def);
-        assertThat(errors.size()).isEqualTo(1);
-        assertThat(errors.get(0).contains("NonExistent")).isTrue();
+        assertThat(errors).hasSize(1);
+        assertThat(errors.get(0)).contains("NonExistent");
     }
 
     @Test
@@ -95,8 +96,8 @@ class ViewValidatorTest {
                 List.of());
 
         List<String> errors = ViewValidator.validate(view, def);
-        assertThat(errors.size()).isEqualTo(1);
-        assertThat(errors.get(0).contains("Missing")).isTrue();
+        assertThat(errors).hasSize(1);
+        assertThat(errors.get(0)).contains("Missing");
     }
 
     @Test
@@ -117,7 +118,7 @@ class ViewValidatorTest {
 
         List<String> errors = ViewValidator.validate(view, def);
         // A, B placements + X, Y connector endpoints = 4 errors
-        assertThat(errors.size()).isEqualTo(4);
+        assertThat(errors).hasSize(4);
     }
 
     @Test
@@ -130,7 +131,28 @@ class ViewValidatorTest {
         ViewDef view = new ViewDef("Empty View", List.of(), List.of(), List.of());
 
         List<String> errors = ViewValidator.validate(view, def);
-        assertThat(errors.isEmpty()).isTrue();
+        assertThat(errors).isEmpty();
+    }
+
+    @Test
+    void shouldDetectNonExistentFlowRoute() {
+        ModelDefinition def = new ModelDefinitionBuilder()
+                .name("Test")
+                .stock("Tank", 100, "Thing")
+                .flow("Drain", "Tank * 0.1", "Day", "Tank", null)
+                .build();
+
+        ViewDef view = new ViewDef("Main",
+                List.of(
+                        new ElementPlacement("Tank", "stock", 100, 200),
+                        new ElementPlacement("Drain", "flow", 175, 200)
+                ),
+                List.of(),
+                List.of(new FlowRoute("NonExistentFlow", List.of())));
+
+        List<String> errors = ViewValidator.validate(view, def);
+        assertThat(errors).hasSize(1);
+        assertThat(errors.get(0)).contains("NonExistentFlow");
     }
 
     @Test
@@ -146,7 +168,7 @@ class ViewValidatorTest {
                 .build();
 
         List<String> errors = com.deathrayresearch.forrester.model.def.DefinitionValidator.validate(def);
-        assertThat(errors.isEmpty()).as("DefinitionValidator should report view errors").isFalse();
-        assertThat(errors.stream().anyMatch(e -> e.contains("Ghost"))).isTrue();
+        assertThat(errors).as("DefinitionValidator should report view errors").isNotEmpty();
+        assertThat(errors).anyMatch(e -> e.contains("Ghost"));
     }
 }

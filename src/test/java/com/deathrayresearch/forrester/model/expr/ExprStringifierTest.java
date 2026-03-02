@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @DisplayName("ExprStringifier")
 class ExprStringifierTest {
@@ -113,5 +114,40 @@ class ExprStringifierTest {
                 BinaryOperator.POW,
                 new Expr.BinaryOp(new Expr.Ref("b"), BinaryOperator.POW, new Expr.Ref("c")));
         assertThat(ExprStringifier.stringify(expr)).isEqualTo("a ^ b ^ c");
+    }
+
+    @Test
+    void shouldThrowForNaNLiteral() {
+        assertThatThrownBy(() -> ExprStringifier.stringify(new Expr.Literal(Double.NaN)))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("non-finite");
+    }
+
+    @Test
+    void shouldThrowForInfinityLiteral() {
+        assertThatThrownBy(() -> ExprStringifier.stringify(new Expr.Literal(Double.POSITIVE_INFINITY)))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("non-finite");
+    }
+
+    @Test
+    void shouldStringifyNegativeLiteral() {
+        assertThat(ExprStringifier.stringify(new Expr.Literal(-5))).isEqualTo("-5");
+    }
+
+    @Test
+    void shouldStringifyUnaryWithBinaryOperand() {
+        // -(a + b) needs parens around binary operand
+        Expr expr = new Expr.UnaryOp(
+                UnaryOperator.NEGATE,
+                new Expr.BinaryOp(new Expr.Ref("a"), BinaryOperator.ADD, new Expr.Ref("b")));
+        assertThat(ExprStringifier.stringify(expr)).isEqualTo("-((a + b))");
+    }
+
+    @Test
+    void shouldQuoteReservedWords() {
+        assertThat(ExprStringifier.stringify(new Expr.Ref("IF"))).isEqualTo("`IF`");
+        assertThat(ExprStringifier.stringify(new Expr.Ref("TIME"))).isEqualTo("`TIME`");
+        assertThat(ExprStringifier.stringify(new Expr.Ref("DT"))).isEqualTo("`DT`");
     }
 }

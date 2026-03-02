@@ -56,7 +56,7 @@ public class ModelDefinitionSerializer {
             ObjectNode root = toJsonNode(def);
             return mapper.writeValueAsString(root);
         } catch (JsonProcessingException e) {
-            throw new RuntimeException("Failed to serialize model definition", e);
+            throw new IllegalArgumentException("Failed to serialize model definition", e);
         }
     }
 
@@ -68,7 +68,7 @@ public class ModelDefinitionSerializer {
             JsonNode root = mapper.readTree(json);
             return fromJsonNode(root);
         } catch (JsonProcessingException e) {
-            throw new RuntimeException("Failed to deserialize model definition", e);
+            throw new IllegalArgumentException("Failed to deserialize model definition", e);
         }
     }
 
@@ -340,7 +340,7 @@ public class ModelDefinitionSerializer {
 
     private ModelDefinition fromJsonNode(JsonNode root, int depth) {
         if (depth > MAX_MODULE_DEPTH) {
-            throw new RuntimeException(
+            throw new IllegalArgumentException(
                     "Module nesting depth exceeds maximum of " + MAX_MODULE_DEPTH);
         }
         String name = requiredText(root, "name");
@@ -582,6 +582,10 @@ public class ModelDefinitionSerializer {
         JsonNode child = node.get(field);
         if (child == null || child.isNull()) {
             throw new IllegalArgumentException("Missing required field: " + field);
+        }
+        if (!child.isNumber()) {
+            throw new IllegalArgumentException(
+                    "Field '" + field + "' must be a number, got: " + child.getNodeType());
         }
         return child.asDouble();
     }

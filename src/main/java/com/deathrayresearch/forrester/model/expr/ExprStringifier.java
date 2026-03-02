@@ -2,7 +2,12 @@ package com.deathrayresearch.forrester.model.expr;
 
 /**
  * Converts an {@link Expr} AST back into a readable infix string with minimal parentheses.
- * The output should round-trip through {@link ExprParser}: {@code parse(stringify(expr)) == expr}.
+ *
+ * <p>Note: round-tripping is not perfectly structural. A negative literal like
+ * {@code Literal(-5)} stringifies to {@code -5} but re-parses as
+ * {@code UnaryOp(NEGATE, Literal(5))}. Zero-arg function calls (e.g. {@code TIME})
+ * stringify without parentheses and re-parse as {@code Ref}. These are semantically
+ * equivalent but not structurally identical.
  */
 public final class ExprStringifier {
 

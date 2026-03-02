@@ -15,7 +15,7 @@ class DefinitionValidatorTest {
     void shouldPassForValidSIRModel() {
         ModelDefinition sir = buildSIR();
         List<String> errors = DefinitionValidator.validate(sir);
-        assertThat(errors.isEmpty()).as("Expected no errors but got: " + errors).isTrue();
+        assertThat(errors).as("Expected no errors").isEmpty();
     }
 
     @Test
@@ -26,7 +26,7 @@ class DefinitionValidatorTest {
                 .constant("S", 5.0, "Person") // same name as stock
                 .build();
         List<String> errors = DefinitionValidator.validate(def);
-        assertThat(errors.stream().anyMatch(e -> e.contains("Duplicate"))).isTrue();
+        assertThat(errors).anyMatch(e -> e.contains("Duplicate"));
     }
 
     @Test
@@ -37,7 +37,7 @@ class DefinitionValidatorTest {
                 .flow("F", "A * 0.1", "Day", "NonExistent", "A")
                 .build();
         List<String> errors = DefinitionValidator.validate(def);
-        assertThat(errors.stream().anyMatch(e -> e.contains("non-existent source"))).isTrue();
+        assertThat(errors).anyMatch(e -> e.contains("non-existent source"));
     }
 
     @Test
@@ -48,7 +48,7 @@ class DefinitionValidatorTest {
                 .flow("F", "A * 0.1", "Day", "A", "NonExistent")
                 .build();
         List<String> errors = DefinitionValidator.validate(def);
-        assertThat(errors.stream().anyMatch(e -> e.contains("non-existent sink"))).isTrue();
+        assertThat(errors).anyMatch(e -> e.contains("non-existent sink"));
     }
 
     @Test
@@ -59,7 +59,7 @@ class DefinitionValidatorTest {
                 .flow("F", "A +", "Day", "A", null) // invalid expression
                 .build();
         List<String> errors = DefinitionValidator.validate(def);
-        assertThat(errors.stream().anyMatch(e -> e.contains("invalid equation"))).isTrue();
+        assertThat(errors).anyMatch(e -> e.contains("invalid equation"));
     }
 
     @Test
@@ -75,7 +75,7 @@ class DefinitionValidatorTest {
                 .module("sub", inner, Map.of(), Map.of())
                 .build();
         List<String> errors = DefinitionValidator.validate(outer);
-        assertThat(errors.stream().anyMatch(e -> e.contains("Circular"))).isTrue();
+        assertThat(errors).anyMatch(e -> e.contains("Circular"));
     }
 
     @Test
@@ -85,7 +85,7 @@ class DefinitionValidatorTest {
                 .flow("Inflow", "10", "Day", null, null)
                 .build();
         List<String> errors = DefinitionValidator.validate(def);
-        assertThat(errors.isEmpty()).as("Null source/sink should be allowed: " + errors).isTrue();
+        assertThat(errors).as("Null source/sink should be allowed").isEmpty();
     }
 
     @Test
@@ -138,7 +138,27 @@ class DefinitionValidatorTest {
                         Map.of())
                 .build();
         List<String> errors = DefinitionValidator.validate(outer);
-        assertThat(errors.stream().anyMatch(e -> e.contains("non-existent input port"))).isTrue();
+        assertThat(errors).anyMatch(e -> e.contains("non-existent input port"));
+    }
+
+    @Test
+    void shouldDetectUnboundRequiredInputPort() {
+        ModelDefinition moduleDef = new ModelDefinitionBuilder()
+                .name("Module")
+                .moduleInterface(new ModuleInterface(
+                        List.of(new PortDef("input1", "Person"),
+                                new PortDef("input2", "Person")),
+                        List.of()))
+                .stock("S", 0, "Person")
+                .build();
+        ModelDefinition outer = new ModelDefinitionBuilder()
+                .name("Outer")
+                .module("m1", moduleDef,
+                        Map.of("input1", "10"), // only bind input1, missing input2
+                        Map.of())
+                .build();
+        List<String> errors = DefinitionValidator.validate(outer);
+        assertThat(errors).anyMatch(e -> e.contains("missing binding") && e.contains("input2"));
     }
 
     @Test

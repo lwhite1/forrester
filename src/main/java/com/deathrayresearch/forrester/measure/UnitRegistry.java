@@ -105,6 +105,9 @@ public class UnitRegistry {
      * Finds a unit by name without auto-creating. Returns null if not found.
      */
     public Unit find(String name) {
+        if (name == null) {
+            return null;
+        }
         Unit unit = byName.get(name);
         if (unit != null) {
             return unit;
