@@ -17,6 +17,6 @@ public record SubscriptDef(
         if (name == null || name.isBlank()) {
             throw new IllegalArgumentException("Subscript name must not be blank");
         }
-        labels = List.copyOf(labels);
+        labels = labels == null ? List.of() : List.copyOf(labels);
     }
 }

@@ -333,7 +333,7 @@ public class ModelDefinitionSerializer {
     // === Deserialization ===
 
     private ModelDefinition fromJsonNode(JsonNode root) {
-        String name = root.get("name").asText();
+        String name = requiredText(root, "name");
         String comment = textOrNull(root, "comment");
 
         ModuleInterface moduleInterface = null;
@@ -345,10 +345,10 @@ public class ModelDefinitionSerializer {
         if (root.has("stocks")) {
             for (JsonNode n : root.get("stocks")) {
                 stocks.add(new StockDef(
-                        n.get("name").asText(),
+                        requiredText(n, "name"),
                         textOrNull(n, "comment"),
-                        n.get("initialValue").asDouble(),
-                        n.get("unit").asText(),
+                        requiredDouble(n, "initialValue"),
+                        requiredText(n, "unit"),
                         textOrNull(n, "negativeValuePolicy")));
             }
         }
@@ -357,10 +357,10 @@ public class ModelDefinitionSerializer {
         if (root.has("flows")) {
             for (JsonNode n : root.get("flows")) {
                 flows.add(new FlowDef(
-                        n.get("name").asText(),
+                        requiredText(n, "name"),
                         textOrNull(n, "comment"),
-                        n.get("equation").asText(),
-                        n.get("timeUnit").asText(),
+                        requiredText(n, "equation"),
+                        requiredText(n, "timeUnit"),
                         textOrNull(n, "source"),
                         textOrNull(n, "sink")));
             }
@@ -370,10 +370,10 @@ public class ModelDefinitionSerializer {
         if (root.has("auxiliaries")) {
             for (JsonNode n : root.get("auxiliaries")) {
                 auxiliaries.add(new AuxDef(
-                        n.get("name").asText(),
+                        requiredText(n, "name"),
                         textOrNull(n, "comment"),
-                        n.get("equation").asText(),
-                        n.get("unit").asText()));
+                        requiredText(n, "equation"),
+                        requiredText(n, "unit")));
             }
         }
 
@@ -381,10 +381,10 @@ public class ModelDefinitionSerializer {
         if (root.has("constants")) {
             for (JsonNode n : root.get("constants")) {
                 constants.add(new ConstantDef(
-                        n.get("name").asText(),
+                        requiredText(n, "name"),
                         textOrNull(n, "comment"),
-                        n.get("value").asDouble(),
-                        n.get("unit").asText()));
+                        requiredDouble(n, "value"),
+                        requiredText(n, "unit")));
             }
         }
 
@@ -392,11 +392,11 @@ public class ModelDefinitionSerializer {
         if (root.has("lookupTables")) {
             for (JsonNode n : root.get("lookupTables")) {
                 lookupTables.add(new LookupTableDef(
-                        n.get("name").asText(),
+                        requiredText(n, "name"),
                         textOrNull(n, "comment"),
-                        jsonToDoubleArray(n.get("xValues")),
-                        jsonToDoubleArray(n.get("yValues")),
-                        n.get("interpolation").asText()));
+                        jsonToDoubleArray(requiredNode(n, "xValues")),
+                        jsonToDoubleArray(requiredNode(n, "yValues")),
+                        requiredText(n, "interpolation")));
             }
         }
 
@@ -406,8 +406,8 @@ public class ModelDefinitionSerializer {
                 Map<String, String> inputBindings = jsonToMap(n.get("inputBindings"));
                 Map<String, String> outputBindings = jsonToMap(n.get("outputBindings"));
                 modules.add(new ModuleInstanceDef(
-                        n.get("instanceName").asText(),
-                        fromJsonNode(n.get("definition")),
+                        requiredText(n, "instanceName"),
+                        fromJsonNode(requiredNode(n, "definition")),
                         inputBindings,
                         outputBindings));
             }
@@ -420,7 +420,7 @@ public class ModelDefinitionSerializer {
                 for (JsonNode l : n.get("labels")) {
                     labels.add(l.asText());
                 }
-                subscripts.add(new SubscriptDef(n.get("name").asText(), labels));
+                subscripts.add(new SubscriptDef(requiredText(n, "name"), labels));
             }
         }
 
@@ -435,9 +435,9 @@ public class ModelDefinitionSerializer {
         if (root.has("defaultSimulation")) {
             JsonNode s = root.get("defaultSimulation");
             defaultSimulation = new SimulationSettings(
-                    s.get("timeStep").asText(),
-                    s.get("duration").asDouble(),
-                    s.get("durationUnit").asText());
+                    requiredText(s, "timeStep"),
+                    requiredDouble(s, "duration"),
+                    requiredText(s, "durationUnit"));
         }
 
         return new ModelDefinition(name, comment, moduleInterface,
@@ -446,15 +446,15 @@ public class ModelDefinitionSerializer {
     }
 
     private ViewDef deserializeView(JsonNode n) {
-        String name = n.get("name").asText();
+        String name = requiredText(n, "name");
         List<ElementPlacement> elements = new ArrayList<>();
         if (n.has("elements")) {
             for (JsonNode ep : n.get("elements")) {
                 elements.add(new ElementPlacement(
-                        ep.get("name").asText(),
-                        ep.get("type").asText(),
-                        ep.get("x").asDouble(),
-                        ep.get("y").asDouble()));
+                        requiredText(ep, "name"),
+                        requiredText(ep, "type"),
+                        requiredDouble(ep, "x"),
+                        requiredDouble(ep, "y")));
             }
         }
         List<ConnectorRoute> connectors = new ArrayList<>();
@@ -465,8 +465,8 @@ public class ModelDefinitionSerializer {
                     controlPoints = deserializePointList(cr.get("controlPoints"));
                 }
                 connectors.add(new ConnectorRoute(
-                        cr.get("from").asText(),
-                        cr.get("to").asText(),
+                        requiredText(cr, "from"),
+                        requiredText(cr, "to"),
                         controlPoints));
             }
         }
@@ -477,7 +477,7 @@ public class ModelDefinitionSerializer {
                 if (fr.has("points")) {
                     points = deserializePointList(fr.get("points"));
                 }
-                flowRoutes.add(new FlowRoute(fr.get("flowName").asText(), points));
+                flowRoutes.add(new FlowRoute(requiredText(fr, "flowName"), points));
             }
         }
         return new ViewDef(name, elements, connectors, flowRoutes);
@@ -485,16 +485,16 @@ public class ModelDefinitionSerializer {
 
     private ModuleInterface deserializeModuleInterface(JsonNode node) {
         List<PortDef> inputs = new ArrayList<>();
-        for (JsonNode p : node.get("inputs")) {
+        for (JsonNode p : requiredNode(node, "inputs")) {
             inputs.add(new PortDef(
-                    p.get("name").asText(),
+                    requiredText(p, "name"),
                     textOrNull(p, "unit"),
                     textOrNull(p, "comment")));
         }
         List<PortDef> outputs = new ArrayList<>();
-        for (JsonNode p : node.get("outputs")) {
+        for (JsonNode p : requiredNode(node, "outputs")) {
             outputs.add(new PortDef(
-                    p.get("name").asText(),
+                    requiredText(p, "name"),
                     textOrNull(p, "unit"),
                     textOrNull(p, "comment")));
         }
@@ -557,5 +557,29 @@ public class ModelDefinitionSerializer {
 
     private String textOrNull(JsonNode node, String field) {
         return node.has(field) && !node.get(field).isNull() ? node.get(field).asText() : null;
+    }
+
+    private String requiredText(JsonNode node, String field) {
+        JsonNode child = node.get(field);
+        if (child == null || child.isNull()) {
+            throw new IllegalArgumentException("Missing required field: " + field);
+        }
+        return child.asText();
+    }
+
+    private double requiredDouble(JsonNode node, String field) {
+        JsonNode child = node.get(field);
+        if (child == null || child.isNull()) {
+            throw new IllegalArgumentException("Missing required field: " + field);
+        }
+        return child.asDouble();
+    }
+
+    private JsonNode requiredNode(JsonNode node, String field) {
+        JsonNode child = node.get(field);
+        if (child == null || child.isNull()) {
+            throw new IllegalArgumentException("Missing required field: " + field);
+        }
+        return child;
     }
 }

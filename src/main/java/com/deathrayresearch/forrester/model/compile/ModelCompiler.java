@@ -72,46 +72,28 @@ public class ModelCompiler {
     private void compileInto(ModelDefinition def, Model model,
                              CompilationContext context,
                              List<Resettable> resettables, int[] stepHolder) {
-        // === Pass 1: Constants, stocks, lookup tables, aux placeholders, flow placeholders ===
-
         // Constants
         for (ConstantDef cDef : def.constants()) {
-            Unit unit = unitRegistry.resolve(cDef.unit());
-            Constant constant = new Constant(cDef.name(), unit, cDef.value());
+            Constant constant = createConstant(cDef);
             model.addConstant(constant);
             context.addConstant(cDef.name(), constant);
         }
 
         // Stocks
         for (StockDef sDef : def.stocks()) {
-            Unit unit = unitRegistry.resolve(sDef.unit());
-            NegativeValuePolicy policy = resolvePolicy(sDef.negativeValuePolicy());
-            Stock stock = new Stock(sDef.name(), sDef.initialValue(), unit, policy);
+            Stock stock = createStock(sDef);
             model.addStock(stock);
             context.addStock(sDef.name(), stock);
         }
 
-        // Lookup tables — use input holders that get wired when LOOKUP() is compiled
-        for (LookupTableDef tDef : def.lookupTables()) {
-            double[] inputHolder = {0};
-            LookupTable table;
-            if ("SPLINE".equalsIgnoreCase(tDef.interpolation())) {
-                table = LookupTable.spline(tDef.xValues(), tDef.yValues(),
-                        () -> inputHolder[0]);
-            } else {
-                table = LookupTable.linear(tDef.xValues(), tDef.yValues(),
-                        () -> inputHolder[0]);
-            }
-            context.addLookupTable(tDef.name(), table, inputHolder);
-        }
+        buildLookupTables(def, context);
 
         // Auxiliaries — use DoubleSupplier[] holders for indirection
         List<DoubleSupplier[]> auxHolders = new ArrayList<>();
         for (AuxDef aDef : def.auxiliaries()) {
-            Unit unit = unitRegistry.resolve(aDef.unit());
-            DoubleSupplier[] holder = {() -> 0};
+            DoubleSupplier[] holder = createAuxHolder(aDef, context);
             auxHolders.add(holder);
-            Variable variable = new Variable(aDef.name(), unit,
+            Variable variable = new Variable(aDef.name(), unitRegistry.resolve(aDef.unit()),
                     () -> holder[0].getAsDouble());
             model.addVariable(variable);
             context.addVariable(aDef.name(), variable);
@@ -120,33 +102,11 @@ public class ModelCompiler {
         // Flows — use DoubleSupplier[] holders for indirection
         List<DoubleSupplier[]> flowHolders = new ArrayList<>();
         for (FlowDef fDef : def.flows()) {
-            TimeUnit timeUnit = unitRegistry.resolveTimeUnit(fDef.timeUnit());
-            Unit flowUnit = resolveFlowUnit(fDef, context);
             DoubleSupplier[] holder = {() -> 0};
             flowHolders.add(holder);
-            Flow flow = Flow.create(fDef.name(), timeUnit,
-                    () -> new Quantity(holder[0].getAsDouble(), flowUnit));
+            Flow flow = createFlow(fDef, holder, context);
             context.addFlow(fDef.name(), flow);
-
-            // Wire source/sink
-            if (fDef.source() != null) {
-                Stock source = context.getStocks().get(fDef.source());
-                if (source == null) {
-                    throw new CompilationException(
-                            "Flow '" + fDef.name() + "' references unknown source: "
-                                    + fDef.source(), fDef.name());
-                }
-                source.addOutflow(flow);
-            }
-            if (fDef.sink() != null) {
-                Stock sink = context.getStocks().get(fDef.sink());
-                if (sink == null) {
-                    throw new CompilationException(
-                            "Flow '" + fDef.name() + "' references unknown sink: "
-                                    + fDef.sink(), fDef.name());
-                }
-                sink.addInflow(flow);
-            }
+            wireFlowSourceSink(fDef, flow, context, "");
         }
 
         // Module instances
@@ -154,23 +114,7 @@ public class ModelCompiler {
             compileModule(mDef, model, context, resettables, stepHolder);
         }
 
-        // === Pass 2: Compile formulas and fill holders ===
-
-        ExprCompiler exprCompiler = new ExprCompiler(context, resettables);
-
-        for (int i = 0; i < def.auxiliaries().size(); i++) {
-            AuxDef aDef = def.auxiliaries().get(i);
-            DoubleSupplier compiled = exprCompiler.compileExpr(
-                    ExprParser.parse(aDef.equation()));
-            auxHolders.get(i)[0] = compiled;
-        }
-
-        for (int i = 0; i < def.flows().size(); i++) {
-            FlowDef fDef = def.flows().get(i);
-            DoubleSupplier compiled = exprCompiler.compileExpr(
-                    ExprParser.parse(fDef.equation()));
-            flowHolders.get(i)[0] = compiled;
-        }
+        compileFormulas(def, context, resettables, auxHolders, flowHolders);
     }
 
     private void compileModule(ModuleInstanceDef mDef, Model parentModel,
@@ -178,14 +122,14 @@ public class ModelCompiler {
                                List<Resettable> resettables, int[] stepHolder) {
         ModelDefinition innerDef = mDef.definition();
         Module module = new Module(mDef.instanceName());
+        String errorContext = " in module '" + mDef.instanceName() + "'";
 
         CompilationContext moduleContext = new CompilationContext(
                 unitRegistry, () -> stepHolder[0], parentContext);
 
         // Constants
         for (ConstantDef cDef : innerDef.constants()) {
-            Unit unit = unitRegistry.resolve(cDef.unit());
-            Constant constant = new Constant(cDef.name(), unit, cDef.value());
+            Constant constant = createConstant(cDef);
             moduleContext.addConstant(cDef.name(), constant);
         }
 
@@ -204,34 +148,19 @@ public class ModelCompiler {
 
         // Stocks
         for (StockDef sDef : innerDef.stocks()) {
-            Unit unit = unitRegistry.resolve(sDef.unit());
-            NegativeValuePolicy policy = resolvePolicy(sDef.negativeValuePolicy());
-            Stock stock = new Stock(sDef.name(), sDef.initialValue(), unit, policy);
+            Stock stock = createStock(sDef);
             module.addStock(stock);
             moduleContext.addStock(sDef.name(), stock);
         }
 
-        // Lookup tables
-        for (LookupTableDef tDef : innerDef.lookupTables()) {
-            double[] inputHolder = {0};
-            LookupTable table;
-            if ("SPLINE".equalsIgnoreCase(tDef.interpolation())) {
-                table = LookupTable.spline(tDef.xValues(), tDef.yValues(),
-                        () -> inputHolder[0]);
-            } else {
-                table = LookupTable.linear(tDef.xValues(), tDef.yValues(),
-                        () -> inputHolder[0]);
-            }
-            moduleContext.addLookupTable(tDef.name(), table, inputHolder);
-        }
+        buildLookupTables(innerDef, moduleContext);
 
         // Auxiliaries with holder indirection
         List<DoubleSupplier[]> auxHolders = new ArrayList<>();
         for (AuxDef aDef : innerDef.auxiliaries()) {
-            Unit unit = unitRegistry.resolve(aDef.unit());
-            DoubleSupplier[] holder = {() -> 0};
+            DoubleSupplier[] holder = createAuxHolder(aDef, moduleContext);
             auxHolders.add(holder);
-            Variable variable = new Variable(aDef.name(), unit,
+            Variable variable = new Variable(aDef.name(), unitRegistry.resolve(aDef.unit()),
                     () -> holder[0].getAsDouble());
             module.addVariable(variable);
             moduleContext.addVariable(aDef.name(), variable);
@@ -240,55 +169,15 @@ public class ModelCompiler {
         // Flows with holder indirection
         List<DoubleSupplier[]> flowHolders = new ArrayList<>();
         for (FlowDef fDef : innerDef.flows()) {
-            TimeUnit timeUnit = unitRegistry.resolveTimeUnit(fDef.timeUnit());
-            Unit flowUnit = resolveFlowUnit(fDef, moduleContext);
             DoubleSupplier[] holder = {() -> 0};
             flowHolders.add(holder);
-            Flow flow = Flow.create(fDef.name(), timeUnit,
-                    () -> new Quantity(holder[0].getAsDouble(), flowUnit));
+            Flow flow = createFlow(fDef, holder, moduleContext);
             module.addFlow(flow);
             moduleContext.addFlow(fDef.name(), flow);
-
-            if (fDef.source() != null) {
-                Stock source = moduleContext.getStocks().get(fDef.source());
-                if (source == null) {
-                    throw new CompilationException(
-                            "Flow '" + fDef.name() + "' in module '"
-                                    + mDef.instanceName()
-                                    + "' references unknown source: "
-                                    + fDef.source(), fDef.name());
-                }
-                source.addOutflow(flow);
-            }
-            if (fDef.sink() != null) {
-                Stock sink = moduleContext.getStocks().get(fDef.sink());
-                if (sink == null) {
-                    throw new CompilationException(
-                            "Flow '" + fDef.name() + "' in module '"
-                                    + mDef.instanceName()
-                                    + "' references unknown sink: "
-                                    + fDef.sink(), fDef.name());
-                }
-                sink.addInflow(flow);
-            }
+            wireFlowSourceSink(fDef, flow, moduleContext, errorContext);
         }
 
-        // Compile formulas
-        ExprCompiler moduleCompiler = new ExprCompiler(moduleContext, resettables);
-
-        for (int i = 0; i < innerDef.auxiliaries().size(); i++) {
-            AuxDef aDef = innerDef.auxiliaries().get(i);
-            DoubleSupplier compiled = moduleCompiler.compileExpr(
-                    ExprParser.parse(aDef.equation()));
-            auxHolders.get(i)[0] = compiled;
-        }
-
-        for (int i = 0; i < innerDef.flows().size(); i++) {
-            FlowDef fDef = innerDef.flows().get(i);
-            DoubleSupplier compiled = moduleCompiler.compileExpr(
-                    ExprParser.parse(fDef.equation()));
-            flowHolders.get(i)[0] = compiled;
-        }
+        compileFormulas(innerDef, moduleContext, resettables, auxHolders, flowHolders);
 
         // Output bindings
         for (Map.Entry<String, String> binding : mDef.outputBindings().entrySet()) {
@@ -304,6 +193,89 @@ public class ModelCompiler {
         }
 
         parentModel.addModule(module);
+    }
+
+    // === Shared helpers ===
+
+    private Constant createConstant(ConstantDef cDef) {
+        Unit unit = unitRegistry.resolve(cDef.unit());
+        return new Constant(cDef.name(), unit, cDef.value());
+    }
+
+    private Stock createStock(StockDef sDef) {
+        Unit unit = unitRegistry.resolve(sDef.unit());
+        NegativeValuePolicy policy = resolvePolicy(sDef.negativeValuePolicy());
+        return new Stock(sDef.name(), sDef.initialValue(), unit, policy);
+    }
+
+    private void buildLookupTables(ModelDefinition def, CompilationContext context) {
+        for (LookupTableDef tDef : def.lookupTables()) {
+            double[] inputHolder = {0};
+            LookupTable table;
+            if ("SPLINE".equalsIgnoreCase(tDef.interpolation())) {
+                table = LookupTable.spline(tDef.xValues(), tDef.yValues(),
+                        () -> inputHolder[0]);
+            } else {
+                table = LookupTable.linear(tDef.xValues(), tDef.yValues(),
+                        () -> inputHolder[0]);
+            }
+            context.addLookupTable(tDef.name(), table, inputHolder);
+        }
+    }
+
+    private DoubleSupplier[] createAuxHolder(AuxDef aDef, CompilationContext context) {
+        return new DoubleSupplier[]{() -> 0};
+    }
+
+    private Flow createFlow(FlowDef fDef, DoubleSupplier[] holder,
+                            CompilationContext context) {
+        TimeUnit timeUnit = unitRegistry.resolveTimeUnit(fDef.timeUnit());
+        Unit flowUnit = resolveFlowUnit(fDef, context);
+        return Flow.create(fDef.name(), timeUnit,
+                () -> new Quantity(holder[0].getAsDouble(), flowUnit));
+    }
+
+    private void wireFlowSourceSink(FlowDef fDef, Flow flow,
+                                    CompilationContext context, String errorContext) {
+        if (fDef.source() != null) {
+            Stock source = context.getStocks().get(fDef.source());
+            if (source == null) {
+                throw new CompilationException(
+                        "Flow '" + fDef.name() + "'" + errorContext
+                                + " references unknown source: " + fDef.source(),
+                        fDef.name());
+            }
+            source.addOutflow(flow);
+        }
+        if (fDef.sink() != null) {
+            Stock sink = context.getStocks().get(fDef.sink());
+            if (sink == null) {
+                throw new CompilationException(
+                        "Flow '" + fDef.name() + "'" + errorContext
+                                + " references unknown sink: " + fDef.sink(),
+                        fDef.name());
+            }
+            sink.addInflow(flow);
+        }
+    }
+
+    private void compileFormulas(ModelDefinition def, CompilationContext context,
+                                 List<Resettable> resettables,
+                                 List<DoubleSupplier[]> auxHolders,
+                                 List<DoubleSupplier[]> flowHolders) {
+        ExprCompiler exprCompiler = new ExprCompiler(context, resettables);
+        for (int i = 0; i < def.auxiliaries().size(); i++) {
+            AuxDef aDef = def.auxiliaries().get(i);
+            DoubleSupplier compiled = exprCompiler.compileExpr(
+                    ExprParser.parse(aDef.equation()));
+            auxHolders.get(i)[0] = compiled;
+        }
+        for (int i = 0; i < def.flows().size(); i++) {
+            FlowDef fDef = def.flows().get(i);
+            DoubleSupplier compiled = exprCompiler.compileExpr(
+                    ExprParser.parse(fDef.equation()));
+            flowHolders.get(i)[0] = compiled;
+        }
     }
 
     private NegativeValuePolicy resolvePolicy(String policyName) {

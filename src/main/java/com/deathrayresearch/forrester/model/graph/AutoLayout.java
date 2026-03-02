@@ -4,8 +4,10 @@ import com.deathrayresearch.forrester.model.def.AuxDef;
 import com.deathrayresearch.forrester.model.def.ConstantDef;
 import com.deathrayresearch.forrester.model.def.ElementPlacement;
 import com.deathrayresearch.forrester.model.def.FlowDef;
+import com.deathrayresearch.forrester.model.def.ConnectorRoute;
 import com.deathrayresearch.forrester.model.def.LookupTableDef;
 import com.deathrayresearch.forrester.model.def.ModelDefinition;
+import com.deathrayresearch.forrester.model.def.ModuleInstanceDef;
 import com.deathrayresearch.forrester.model.def.StockDef;
 import com.deathrayresearch.forrester.model.def.ViewDef;
 
@@ -25,6 +27,7 @@ public class AutoLayout {
     private static final double Y_AUX = 50;
     private static final double Y_CONSTANT = 350;
     private static final double Y_LOOKUP = 400;
+    private static final double Y_MODULE = 450;
 
     /**
      * Generates a {@link ViewDef} with all elements placed in a simple layered layout.
@@ -67,9 +70,15 @@ public class AutoLayout {
             x += X_SPACING;
         }
 
+        // Place module instances
+        x = 100;
+        for (ModuleInstanceDef m : def.modules()) {
+            placements.add(new ElementPlacement(m.instanceName(), "module", x, Y_MODULE));
+            x += X_SPACING;
+        }
+
         // Generate connectors from dependency graph
-        List<com.deathrayresearch.forrester.model.def.ConnectorRoute> connectors =
-                ConnectorGenerator.generate(def);
+        List<ConnectorRoute> connectors = ConnectorGenerator.generate(def);
 
         return new ViewDef("Auto Layout", placements, connectors, List.of());
     }

@@ -31,12 +31,18 @@ public final class ExprStringifier {
             appendFunctionCall(sb, call);
         } else if (expr instanceof Expr.Conditional cond) {
             appendConditional(sb, cond);
+        } else {
+            throw new IllegalArgumentException("Unknown Expr type: " + expr.getClass());
         }
     }
 
     private static void appendLiteral(StringBuilder sb, Expr.Literal lit) {
         double v = lit.value();
-        if (v == (long) v && !Double.isInfinite(v) && Math.abs(v) < 1e15) {
+        if (Double.isNaN(v) || Double.isInfinite(v)) {
+            throw new IllegalArgumentException(
+                    "Cannot stringify non-finite literal: " + v);
+        }
+        if (v == (long) v && Math.abs(v) < 1e15) {
             sb.append((long) v);
         } else {
             sb.append(v);

@@ -105,7 +105,11 @@ public class DependencyGraph {
      * Returns the set of elements that the given element influences (depends on it).
      */
     public Set<String> dependentsOf(String name) {
-        return adjacency.getOrDefault(name, Collections.emptySet());
+        Set<String> deps = adjacency.get(name);
+        if (deps == null) {
+            return Collections.emptySet();
+        }
+        return Collections.unmodifiableSet(deps);
     }
 
     /**

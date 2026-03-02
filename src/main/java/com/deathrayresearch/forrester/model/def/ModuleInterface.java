@@ -15,7 +15,7 @@ public record ModuleInterface(
 ) {
 
     public ModuleInterface {
-        inputs = List.copyOf(inputs);
-        outputs = List.copyOf(outputs);
+        inputs = inputs == null ? List.of() : List.copyOf(inputs);
+        outputs = outputs == null ? List.of() : List.copyOf(outputs);
     }
 }

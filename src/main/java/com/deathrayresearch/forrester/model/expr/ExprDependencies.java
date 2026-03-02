@@ -1,5 +1,6 @@
 package com.deathrayresearch.forrester.model.expr;
 
+import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
@@ -19,7 +20,7 @@ public final class ExprDependencies {
     public static Set<String> extract(Expr expr) {
         Set<String> deps = new LinkedHashSet<>();
         walk(expr, deps);
-        return deps;
+        return Collections.unmodifiableSet(deps);
     }
 
     private static void walk(Expr expr, Set<String> deps) {
@@ -40,6 +41,8 @@ public final class ExprDependencies {
             walk(cond.condition(), deps);
             walk(cond.thenExpr(), deps);
             walk(cond.elseExpr(), deps);
+        } else {
+            throw new IllegalArgumentException("Unknown Expr type: " + expr.getClass());
         }
     }
 }

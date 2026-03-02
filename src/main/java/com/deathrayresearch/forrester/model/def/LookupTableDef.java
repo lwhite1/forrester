@@ -1,5 +1,8 @@
 package com.deathrayresearch.forrester.model.def;
 
+import java.util.Arrays;
+import java.util.Objects;
+
 /**
  * Definition of a lookup table (nonlinear table function) in a model.
  *
@@ -41,5 +44,28 @@ public record LookupTableDef(
 
     public LookupTableDef(String name, double[] xValues, double[] yValues, String interpolation) {
         this(name, null, xValues, yValues, interpolation);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof LookupTableDef that)) {
+            return false;
+        }
+        return Objects.equals(name, that.name)
+                && Objects.equals(comment, that.comment)
+                && Arrays.equals(xValues, that.xValues)
+                && Arrays.equals(yValues, that.yValues)
+                && Objects.equals(interpolation, that.interpolation);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = Objects.hash(name, comment, interpolation);
+        result = 31 * result + Arrays.hashCode(xValues);
+        result = 31 * result + Arrays.hashCode(yValues);
+        return result;
     }
 }

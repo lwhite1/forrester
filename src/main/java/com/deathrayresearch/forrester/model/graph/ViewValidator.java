@@ -5,6 +5,7 @@ import com.deathrayresearch.forrester.model.def.ConnectorRoute;
 import com.deathrayresearch.forrester.model.def.ConstantDef;
 import com.deathrayresearch.forrester.model.def.ElementPlacement;
 import com.deathrayresearch.forrester.model.def.FlowDef;
+import com.deathrayresearch.forrester.model.def.FlowRoute;
 import com.deathrayresearch.forrester.model.def.LookupTableDef;
 import com.deathrayresearch.forrester.model.def.ModelDefinition;
 import com.deathrayresearch.forrester.model.def.ModuleInstanceDef;
@@ -50,6 +51,18 @@ public final class ViewValidator {
             if (!elementNames.contains(connector.to())) {
                 errors.add("View '" + view.name() + "' connector references non-existent element: "
                         + connector.to());
+            }
+        }
+
+        // Validate flow route references
+        Set<String> flowNames = new HashSet<>();
+        for (FlowDef f : def.flows()) {
+            flowNames.add(f.name());
+        }
+        for (FlowRoute flowRoute : view.flowRoutes()) {
+            if (!flowNames.contains(flowRoute.flowName())) {
+                errors.add("View '" + view.name() + "' flow route references non-existent flow: "
+                        + flowRoute.flowName());
             }
         }
 
