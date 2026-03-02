@@ -467,5 +467,25 @@ class ExprParserTest {
         void shouldRoundTripPower() {
             assertRoundTrips("a ^ b ^ c");
         }
+
+        @Test
+        void shouldRoundTripLeftAssociativePower() {
+            // (a ^ b) ^ c must preserve parens through round-trip
+            assertRoundTrips("(a ^ b) ^ c");
+        }
+    }
+
+    @Nested
+    @DisplayName("Depth limits")
+    class DepthLimits {
+
+        @Test
+        void shouldRejectDeeplyNestedUnaryChain() {
+            // 250 negations should exceed the MAX_DEPTH of 200
+            String expr = "-".repeat(250) + "x";
+            assertThatThrownBy(() -> ExprParser.parse(expr))
+                    .isInstanceOf(ParseException.class)
+                    .hasMessageContaining("too deep");
+        }
     }
 }

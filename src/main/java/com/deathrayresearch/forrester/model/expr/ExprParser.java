@@ -177,11 +177,23 @@ public class ExprParser {
 
     private Expr parseUnary() {
         if (matchChar('!')) {
+            depth++;
+            if (depth > MAX_DEPTH) {
+                throw new ParseException("Expression nesting too deep (max " + MAX_DEPTH + ")",
+                        pos + trimOffset);
+            }
             Expr operand = parseUnary();
+            depth--;
             return new Expr.UnaryOp(UnaryOperator.NOT, operand);
         }
         if (matchMinus()) {
+            depth++;
+            if (depth > MAX_DEPTH) {
+                throw new ParseException("Expression nesting too deep (max " + MAX_DEPTH + ")",
+                        pos + trimOffset);
+            }
             Expr operand = parseUnary();
+            depth--;
             return new Expr.UnaryOp(UnaryOperator.NEGATE, operand);
         }
         return parsePrimary();

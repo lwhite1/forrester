@@ -96,7 +96,9 @@ public final class ExprStringifier {
         if (needParens) {
             sb.append('(');
         }
-        appendExpr(sb, bin.left(), prec);
+        // Left operand: use prec+1 for right-associative (POW) to force parens on (a^b)^c
+        int leftContext = bin.operator() == BinaryOperator.POW ? prec + 1 : prec;
+        appendExpr(sb, bin.left(), leftContext);
         sb.append(' ').append(bin.operator().symbol()).append(' ');
 
         // Right operand: use prec+1 for left-associative, prec for right-associative (POW)
@@ -110,14 +112,8 @@ public final class ExprStringifier {
 
     private static void appendUnaryOp(StringBuilder sb, Expr.UnaryOp un) {
         sb.append(un.operator().symbol());
-        boolean needParens = un.operand() instanceof Expr.BinaryOp;
-        if (needParens) {
-            sb.append('(');
-        }
+        // UNARY_CONTEXT_PRECEDENCE forces binary operands to self-parenthesize
         appendExpr(sb, un.operand(), UNARY_CONTEXT_PRECEDENCE);
-        if (needParens) {
-            sb.append(')');
-        }
     }
 
     private static void appendFunctionCall(StringBuilder sb, Expr.FunctionCall call) {

@@ -106,8 +106,14 @@ public class ExprCompiler {
         List<Expr> args = call.arguments();
 
         return switch (name) {
-            case "TIME" -> () -> context.getCurrentStep().getAsInt();
-            case "DT" -> () -> context.getDt();
+            case "TIME" -> {
+                requireArgs(name, args, 0);
+                yield () -> context.getCurrentStep().getAsInt();
+            }
+            case "DT" -> {
+                requireArgs(name, args, 0);
+                yield () -> context.getDt();
+            }
             case "ABS" -> {
                 requireArgs(name, args, 1);
                 DoubleSupplier a = compileExpr(args.get(0));

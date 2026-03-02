@@ -117,6 +117,16 @@ class ExprStringifierTest {
     }
 
     @Test
+    void shouldAddParensForLeftAssociativePower() {
+        // (a ^ b) ^ c -> must emit "(a ^ b) ^ c" (not "a ^ b ^ c" which re-parses as a ^ (b ^ c))
+        Expr expr = new Expr.BinaryOp(
+                new Expr.BinaryOp(new Expr.Ref("a"), BinaryOperator.POW, new Expr.Ref("b")),
+                BinaryOperator.POW,
+                new Expr.Ref("c"));
+        assertThat(ExprStringifier.stringify(expr)).isEqualTo("(a ^ b) ^ c");
+    }
+
+    @Test
     void shouldThrowForNaNLiteral() {
         assertThatThrownBy(() -> ExprStringifier.stringify(new Expr.Literal(Double.NaN)))
                 .isInstanceOf(IllegalArgumentException.class)
@@ -141,7 +151,7 @@ class ExprStringifierTest {
         Expr expr = new Expr.UnaryOp(
                 UnaryOperator.NEGATE,
                 new Expr.BinaryOp(new Expr.Ref("a"), BinaryOperator.ADD, new Expr.Ref("b")));
-        assertThat(ExprStringifier.stringify(expr)).isEqualTo("-((a + b))");
+        assertThat(ExprStringifier.stringify(expr)).isEqualTo("-(a + b)");
     }
 
     @Test
