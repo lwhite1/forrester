@@ -55,6 +55,9 @@ public final class MdlParser {
             return new ParsedMdl(List.of(), List.of());
         }
 
+        // Normalize line endings to LF (Vensim files are typically CRLF on Windows)
+        content = content.replace("\r\n", "\n").replace("\r", "\n");
+
         content = stripHeader(content);
 
         String equationSection;

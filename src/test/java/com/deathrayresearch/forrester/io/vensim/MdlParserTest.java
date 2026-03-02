@@ -58,6 +58,26 @@ class MdlParserTest {
         }
 
         @Test
+        void shouldHandleCrlfLineEndings() {
+            String content = "x = 42\r\n\t~\tWidgets\r\n\t~\tA constant\r\n\t|";
+            MdlParser.ParsedMdl result = MdlParser.parse(content);
+
+            assertThat(result.equations()).hasSize(1);
+            MdlEquation eq = result.equations().get(0);
+            assertThat(eq.name()).isEqualTo("x");
+            assertThat(eq.expression()).isEqualTo("42");
+        }
+
+        @Test
+        void shouldHandleCrlfContinuationLines() {
+            String content = "Long Variable = a +\\\r\n\tb + c\r\n\t~\t\r\n\t~\t\r\n\t|";
+            MdlParser.ParsedMdl result = MdlParser.parse(content);
+
+            assertThat(result.equations()).hasSize(1);
+            assertThat(result.equations().get(0).expression()).contains("a + b + c");
+        }
+
+        @Test
         void shouldParseUnchangeableConstant() {
             String content = "Pi == 3.14159\n\t~\t\n\t~\t\n\t|";
             MdlParser.ParsedMdl result = MdlParser.parse(content);

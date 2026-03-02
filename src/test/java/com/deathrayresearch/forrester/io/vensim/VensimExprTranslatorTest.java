@@ -100,7 +100,17 @@ class VensimExprTranslatorTest {
         @Test
         void shouldTranslateNot() {
             var result = VensimExprTranslator.translate(":NOT: x > 0", "var", EMPTY_NAMES);
-            assertThat(result.expression()).isEqualTo("! x > 0");
+            assertThat(result.expression()).isEqualTo("!(x > 0)");
+        }
+
+        @Test
+        void shouldTranslateNotWithAndBoundary() {
+            var result = VensimExprTranslator.translate(
+                    ":NOT: x > 0 && y < 10", "var", EMPTY_NAMES);
+            // :NOT: captures up to the && boundary
+            assertThat(result.expression()).startsWith("!(x > 0)");
+            assertThat(result.expression()).contains("&&");
+            assertThat(result.expression()).contains("y < 10");
         }
     }
 
@@ -111,20 +121,29 @@ class VensimExprTranslatorTest {
         @Test
         void shouldTranslateXidz() {
             var result = VensimExprTranslator.translate("XIDZ(a, b, c)", "var", EMPTY_NAMES);
-            assertThat(result.expression()).isEqualTo("IF(b == 0, c, a / b)");
+            assertThat(result.expression()).isEqualTo("IF((b) == 0, c, (a) / (b))");
         }
 
         @Test
         void shouldTranslateZidz() {
             var result = VensimExprTranslator.translate("ZIDZ(a, b)", "var", EMPTY_NAMES);
-            assertThat(result.expression()).isEqualTo("IF(b == 0, 0, a / b)");
+            assertThat(result.expression()).isEqualTo("IF((b) == 0, 0, (a) / (b))");
         }
 
         @Test
         void shouldHandleNestedXidz() {
             var result = VensimExprTranslator.translate(
                     "XIDZ(XIDZ(a, b, 0), c, 1)", "var", EMPTY_NAMES);
-            assertThat(result.expression()).isEqualTo("IF(c == 0, 1, IF(b == 0, 0, a / b) / c)");
+            assertThat(result.expression()).isEqualTo(
+                    "IF((c) == 0, 1, (IF((b) == 0, 0, (a) / (b))) / (c))");
+        }
+
+        @Test
+        void shouldParenthesizeComplexXidzArgs() {
+            var result = VensimExprTranslator.translate(
+                    "XIDZ(a + b, c * d, 0)", "var", EMPTY_NAMES);
+            assertThat(result.expression()).isEqualTo(
+                    "IF((c * d) == 0, 0, (a + b) / (c * d))");
         }
     }
 
@@ -171,9 +190,15 @@ class VensimExprTranslatorTest {
         @Test
         void shouldNotTranslateTimeInsideOtherWords() {
             var result = VensimExprTranslator.translate("TimeStep + Overtime", "var", EMPTY_NAMES);
-            // "Time" at start of "TimeStep" should be replaced by word boundary,
-            // but "Overtime" should not be affected
+            // "Time" inside "TimeStep" and "Overtime" should not be affected due to word boundaries
             assertThat(result.expression()).doesNotContain("OverTIME");
+            assertThat(result.expression()).doesNotContain("TIMEStep");
+        }
+
+        @Test
+        void shouldTranslateLowercaseTime() {
+            var result = VensimExprTranslator.translate("time + 1", "var", EMPTY_NAMES);
+            assertThat(result.expression()).isEqualTo("TIME + 1");
         }
     }
 
@@ -226,6 +251,19 @@ class VensimExprTranslatorTest {
         void shouldWarnOnGame() {
             var result = VensimExprTranslator.translate("GAME(x)", "var", EMPTY_NAMES);
             assertThat(result.warnings()).anyMatch(w -> w.contains("GAME"));
+        }
+
+        @Test
+        void shouldNotWarnOnVariableNamedPulse() {
+            // A variable named "Pulse" (not a function call) should not trigger a warning
+            var result = VensimExprTranslator.translate("Pulse * 2", "var", EMPTY_NAMES);
+            assertThat(result.warnings()).noneMatch(w -> w.contains("PULSE"));
+        }
+
+        @Test
+        void shouldNotWarnOnVariableNamedGame() {
+            var result = VensimExprTranslator.translate("Game + 1", "var", EMPTY_NAMES);
+            assertThat(result.warnings()).noneMatch(w -> w.contains("GAME"));
         }
     }
 

@@ -40,7 +40,7 @@ public final class VensimExprTranslator {
     private static final Pattern DELAY1I_PATTERN = Pattern.compile(
             "(?i)DELAY1I\\s*\\(");
     private static final Pattern TIME_VAR_PATTERN = Pattern.compile(
-            "\\bTime\\b");
+            "(?i)\\bTime\\b");
     private static final Set<String> UNSUPPORTED_FUNCTIONS = Set.of(
             "PULSE", "PULSE TRAIN", "INTEGER", "GAME", "DELAY FIXED", "DELAY N",
             "FORECAST", "TREND", "NPV", "GET XLS DATA", "GET DIRECT DATA",
@@ -108,7 +108,11 @@ public final class VensimExprTranslator {
         // 4. Logical operators
         expr = AND_PATTERN.matcher(expr).replaceAll("&&");
         expr = OR_PATTERN.matcher(expr).replaceAll("||");
-        expr = NOT_PATTERN.matcher(expr).replaceAll("!");
+        // :NOT: in Vensim has lower precedence than comparisons, so :NOT: x > 0 means
+        // NOT(x > 0). We translate to !(...) by wrapping the remaining expression up to
+        // the next logical operator or closing paren. For simple cases, we insert !(
+        // and find the end of the operand.
+        expr = translateNot(expr);
 
         // 5. XIDZ and ZIDZ
         expr = translateXidz(expr, warnings);
@@ -121,11 +125,11 @@ public final class VensimExprTranslator {
         }
         if (SMOOTHI_PATTERN.matcher(expr).find()) {
             expr = SMOOTHI_PATTERN.matcher(expr).replaceAll("SMOOTH(");
-            warnings.add("SMOOTHI approximated as SMOOTH (initial value argument dropped)");
+            warnings.add("SMOOTHI approximated as SMOOTH (initial value semantics differ)");
         }
         if (SMOOTH3I_PATTERN.matcher(expr).find()) {
             expr = SMOOTH3I_PATTERN.matcher(expr).replaceAll("SMOOTH(");
-            warnings.add("SMOOTH3I approximated as SMOOTH (initial value argument dropped)");
+            warnings.add("SMOOTH3I approximated as SMOOTH (third-order + initial value semantics differ)");
         }
 
         // 7. DELAY1 → DELAY3 (with warning)
@@ -135,7 +139,7 @@ public final class VensimExprTranslator {
         }
         if (DELAY1I_PATTERN.matcher(expr).find()) {
             expr = DELAY1I_PATTERN.matcher(expr).replaceAll("DELAY3(");
-            warnings.add("DELAY1I approximated as DELAY3 (initial value argument dropped)");
+            warnings.add("DELAY1I approximated as DELAY3 (first-order + initial value semantics differ)");
         }
 
         // 8. Time → TIME (the built-in variable)
@@ -242,7 +246,7 @@ public final class VensimExprTranslator {
             String a = args.get(0).strip();
             String b = args.get(1).strip();
             String x = args.get(2).strip();
-            String replacement = "IF(" + b + " == 0, " + x + ", " + a + " / " + b + ")";
+            String replacement = "IF((" + b + ") == 0, " + x + ", (" + a + ") / (" + b + "))";
             expr = expr.substring(0, funcStart) + replacement + expr.substring(closeParen + 1);
         }
         return expr;
@@ -269,8 +273,48 @@ public final class VensimExprTranslator {
             }
             String a = args.get(0).strip();
             String b = args.get(1).strip();
-            String replacement = "IF(" + b + " == 0, 0, " + a + " / " + b + ")";
+            String replacement = "IF((" + b + ") == 0, 0, (" + a + ") / (" + b + "))";
             expr = expr.substring(0, funcStart) + replacement + expr.substring(closeParen + 1);
+        }
+        return expr;
+    }
+
+    private static String translateNot(String expr) {
+        // :NOT: in Vensim has lower precedence than comparisons.
+        // We wrap the operand (up to the next :AND:, :OR:, comma, or closing paren at depth 0)
+        // in parentheses: :NOT: x > 0 → !(x > 0)
+        Matcher m = NOT_PATTERN.matcher(expr);
+        while (m.find()) {
+            int notStart = m.start();
+            int operandStart = m.end();
+            // Find the end of the operand scope
+            int depth = 0;
+            int end = expr.length();
+            for (int i = operandStart; i < expr.length(); i++) {
+                char c = expr.charAt(i);
+                if (c == '(') {
+                    depth++;
+                } else if (c == ')') {
+                    if (depth == 0) {
+                        end = i;
+                        break;
+                    }
+                    depth--;
+                } else if (depth == 0 && c == ',') {
+                    end = i;
+                    break;
+                } else if (depth == 0 && i + 4 < expr.length()) {
+                    String ahead = expr.substring(i, Math.min(i + 5, expr.length()));
+                    if (ahead.matches("(?i)&&.*") || ahead.matches("(?i)\\|\\|.*")) {
+                        end = i;
+                        break;
+                    }
+                }
+            }
+            String operand = expr.substring(operandStart, end).strip();
+            String replacement = "!(" + operand + ")";
+            expr = expr.substring(0, notStart) + replacement + expr.substring(end);
+            m = NOT_PATTERN.matcher(expr);
         }
         return expr;
     }
@@ -402,8 +446,9 @@ public final class VensimExprTranslator {
         String upper = expr.toUpperCase();
         for (String func : UNSUPPORTED_FUNCTIONS) {
             if (upper.contains(func.toUpperCase())) {
-                // Verify it's actually a function call (followed by parenthesis or standalone)
-                Pattern p = Pattern.compile("(?i)\\b" + Pattern.quote(func) + "\\b");
+                // Verify it's a function call: name must be followed by whitespace+paren or direct paren
+                Pattern p = Pattern.compile(
+                        "(?i)\\b" + Pattern.quote(func) + "\\s*\\(");
                 if (p.matcher(expr).find()) {
                     warnings.add("Unsupported Vensim function: " + func);
                 }

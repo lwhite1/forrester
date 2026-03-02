@@ -8,7 +8,6 @@ import com.deathrayresearch.forrester.model.def.FlowDef;
 import com.deathrayresearch.forrester.model.def.LookupTableDef;
 import com.deathrayresearch.forrester.model.def.ModelDefinitionBuilder;
 import com.deathrayresearch.forrester.model.def.StockDef;
-import com.deathrayresearch.forrester.model.def.SubscriptDef;
 import com.deathrayresearch.forrester.model.def.ViewDef;
 
 import java.io.IOException;
@@ -47,10 +46,9 @@ public class VensimImporter implements ModelImporter {
     private static final Pattern INTEG_PATTERN = Pattern.compile(
             "(?i)^INTEG\\s*\\(");
     private static final Pattern NUMERIC_PATTERN = Pattern.compile(
-            "^-?\\d+(\\.\\d+)?([eE][+-]?\\d+)?$");
-    private static final Set<String> SYSTEM_VARS = Set.of(
-            "INITIAL TIME", "FINAL TIME", "TIME STEP", "SAVEPER",
-            "Initial Time", "Final Time", "Time Step", "Saveper");
+            "^[+-]?(\\d+\\.?\\d*|\\.\\d+)([eE][+-]?\\d+)?$");
+    private static final Set<String> SYSTEM_VAR_KEYS = Set.of(
+            "INITIAL TIME", "FINAL TIME", "TIME STEP", "SAVEPER");
     private static final Set<String> CONTROL_GROUPS = Set.of(".Control");
 
     @Override
@@ -91,6 +89,11 @@ public class VensimImporter implements ModelImporter {
         double timeStepValue = getDoubleFromControl(controlVars, "TIME STEP", 1.0, warnings);
         String timeUnit = inferTimeUnit(controlVars, "Day");
 
+        if (timeStepValue != 1.0) {
+            warnings.add("TIME STEP = " + timeStepValue
+                    + " (Forrester uses fixed step; value preserved as metadata only)");
+        }
+
         double duration = finalTime - initialTime;
         if (duration <= 0) {
             warnings.add("FINAL TIME (" + finalTime + ") <= INITIAL TIME ("
@@ -107,6 +110,7 @@ public class VensimImporter implements ModelImporter {
         Set<String> flowNames = new HashSet<>();
         Set<String> lookupNames = new HashSet<>();
         Set<String> constantNames = new HashSet<>();
+        Set<String> allNormalizedNames = new HashSet<>();
 
         // First sub-pass: identify stocks so we know which flows connect to them
         for (MdlEquation eq : parsed.equations()) {
@@ -137,28 +141,33 @@ public class VensimImporter implements ModelImporter {
         }
 
         // Second sub-pass: build definitions
+        Set<String> sketchFlowNames = new HashSet<>();
         for (MdlEquation eq : parsed.equations()) {
             String name = eq.name().strip();
             if (name.isEmpty() || isSystemVar(name)) {
                 continue;
             }
             String normalized = VensimExprTranslator.normalizeName(name);
+            if (!allNormalizedNames.add(normalized)) {
+                warnings.add("Duplicate normalized name '" + normalized
+                        + "' (from '" + name + "')");
+            }
             String unit = cleanUnits(eq.units());
             String comment = eq.comment().isBlank() ? name : eq.comment();
 
             try {
                 classifyAndBuild(eq, normalized, unit, comment, builder,
                         vensimNames, stockNames, flowNames, lookupNames,
-                        timeUnit, warnings);
-            } catch (Exception e) {
+                        sketchFlowNames, timeUnit, warnings);
+            } catch (IllegalArgumentException e) {
                 warnings.add("Error processing '" + name + "': " + e.getMessage());
             }
         }
 
-        // Parse sketch section
+        // Parse sketch section (use original sketch flow names, not auto-generated _net_flow names)
         if (!parsed.sketchLines().isEmpty()) {
             List<ViewDef> views = SketchParser.parse(
-                    parsed.sketchLines(), stockNames, flowNames, lookupNames);
+                    parsed.sketchLines(), stockNames, sketchFlowNames, lookupNames);
             for (ViewDef view : views) {
                 builder.view(view);
             }
@@ -171,6 +180,7 @@ public class VensimImporter implements ModelImporter {
                                    String comment, ModelDefinitionBuilder builder,
                                    Set<String> vensimNames, Set<String> stockNames,
                                    Set<String> flowNames, Set<String> lookupNames,
+                                   Set<String> sketchFlowNames,
                                    String timeUnit, List<String> warnings) {
         String operator = eq.operator();
         String expression = eq.expression();
@@ -204,7 +214,7 @@ public class VensimImporter implements ModelImporter {
         // Stock (INTEG function)
         if (INTEG_PATTERN.matcher(expression).find()) {
             buildStock(eq, normalized, expression, unit, comment, builder,
-                    vensimNames, flowNames, timeUnit, warnings);
+                    vensimNames, flowNames, sketchFlowNames, timeUnit, warnings);
             return;
         }
 
@@ -252,6 +262,7 @@ public class VensimImporter implements ModelImporter {
     private void buildStock(MdlEquation eq, String normalized, String expression,
                              String unit, String comment, ModelDefinitionBuilder builder,
                              Set<String> vensimNames, Set<String> flowNames,
+                             Set<String> sketchFlowNames,
                              String timeUnit, List<String> warnings) {
         // Parse INTEG(rate_expr, initial_value)
         Matcher m = INTEG_PATTERN.matcher(expression);
@@ -294,6 +305,9 @@ public class VensimImporter implements ModelImporter {
         builder.flow(new FlowDef(flowName, "Net flow for " + eq.name(),
                 tr.expression(), timeUnit, null, normalized));
         flowNames.add(flowName);
+        // Track original normalized name for sketch flow valve matching
+        sketchFlowNames.add(normalized);
+        sketchFlowNames.add(flowName);
     }
 
     private void buildLookupTable(String normalized, String expression, String unit,
@@ -347,7 +361,7 @@ public class VensimImporter implements ModelImporter {
     }
 
     private static boolean isSystemVar(String name) {
-        return SYSTEM_VARS.contains(name) || SYSTEM_VARS.contains(name.strip());
+        return SYSTEM_VAR_KEYS.contains(name.strip().toUpperCase(Locale.ROOT));
     }
 
     private static String normalizeSystemVarKey(String name) {

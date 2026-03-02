@@ -9,6 +9,11 @@ import com.deathrayresearch.forrester.model.def.ModelDefinition;
 import com.deathrayresearch.forrester.model.def.StockDef;
 import com.deathrayresearch.forrester.model.def.SubscriptDef;
 
+import com.deathrayresearch.forrester.Simulation;
+import com.deathrayresearch.forrester.model.Stock;
+import com.deathrayresearch.forrester.model.compile.CompiledModel;
+import com.deathrayresearch.forrester.model.compile.ModelCompiler;
+
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -472,6 +477,211 @@ class VensimImporterTest {
             assertThat(result.definition()).isNotNull();
             // Even clean models may have minor warnings, so just check definition exists
             assertThat(result.definition().name()).isEqualTo("Test");
+        }
+    }
+
+    @Nested
+    @DisplayName("Numeric literal handling")
+    class NumericLiterals {
+
+        @Test
+        void shouldClassifyDotFiveAsConstant() {
+            String mdl = """
+                    alpha = .5
+                    \t~\tDimensionless
+                    \t~\t
+                    \t|
+
+                    INITIAL TIME = 0
+                    \t~\tDay
+                    \t~\t
+                    \t|
+
+                    FINAL TIME = 10
+                    \t~\tDay
+                    \t~\t
+                    \t|
+
+                    TIME STEP = 1
+                    \t~\tDay
+                    \t~\t
+                    \t|
+                    """;
+
+            ImportResult result = importer.importModel(mdl, "Test");
+            assertThat(result.definition().constants()).hasSize(1);
+            ConstantDef c = result.definition().constants().get(0);
+            assertThat(c.name()).isEqualTo("alpha");
+            assertThat(c.value()).isEqualTo(0.5);
+        }
+
+        @Test
+        void shouldClassifyNegativeDotFiveAsConstant() {
+            String mdl = """
+                    alpha = -.5
+                    \t~\tDimensionless
+                    \t~\t
+                    \t|
+
+                    INITIAL TIME = 0
+                    \t~\tDay
+                    \t~\t
+                    \t|
+
+                    FINAL TIME = 10
+                    \t~\tDay
+                    \t~\t
+                    \t|
+
+                    TIME STEP = 1
+                    \t~\tDay
+                    \t~\t
+                    \t|
+                    """;
+
+            ImportResult result = importer.importModel(mdl, "Test");
+            assertThat(result.definition().constants()).hasSize(1);
+            assertThat(result.definition().constants().get(0).value()).isEqualTo(-0.5);
+        }
+    }
+
+    @Nested
+    @DisplayName("Case-insensitive system variables")
+    class CaseInsensitiveSystemVars {
+
+        @Test
+        void shouldRecognizeLowercaseSystemVars() {
+            String mdl = """
+                    x = 5
+                    \t~\t
+                    \t~\t
+                    \t|
+
+                    initial time = 0
+                    \t~\tDay
+                    \t~\t
+                    \t|
+
+                    final time = 10
+                    \t~\tDay
+                    \t~\t
+                    \t|
+
+                    time step = 1
+                    \t~\tDay
+                    \t~\t
+                    \t|
+                    """;
+
+            ImportResult result = importer.importModel(mdl, "Test");
+            // System vars should not appear as model elements
+            assertThat(result.definition().constants()).hasSize(1);
+            assertThat(result.definition().constants().get(0).name()).isEqualTo("x");
+            assertThat(result.definition().defaultSimulation().duration()).isEqualTo(10.0);
+        }
+    }
+
+    @Nested
+    @DisplayName("Duplicate name detection")
+    class DuplicateNames {
+
+        @Test
+        void shouldWarnOnDuplicateNormalizedNames() {
+            // "x_y" and "x y" both normalize to "x_y"
+            String mdl = """
+                    x_y = 100
+                    \t~\t
+                    \t~\t
+                    \t|
+
+                    x y = 200
+                    \t~\t
+                    \t~\t
+                    \t|
+
+                    INITIAL TIME = 0
+                    \t~\tDay
+                    \t~\t
+                    \t|
+
+                    FINAL TIME = 10
+                    \t~\tDay
+                    \t~\t
+                    \t|
+
+                    TIME STEP = 1
+                    \t~\tDay
+                    \t~\t
+                    \t|
+                    """;
+
+            ImportResult result = importer.importModel(mdl, "Test");
+            assertThat(result.warnings()).anyMatch(w -> w.contains("Duplicate normalized name"));
+        }
+    }
+
+    @Nested
+    @DisplayName("FINAL TIME <= INITIAL TIME edge case")
+    class FinalTimeLessThanInitialTime {
+
+        @Test
+        void shouldWarnAndDefaultWhenFinalTimeLessThanInitialTime() {
+            String mdl = """
+                    x = 5
+                    \t~\t
+                    \t~\t
+                    \t|
+
+                    INITIAL TIME = 100
+                    \t~\tDay
+                    \t~\t
+                    \t|
+
+                    FINAL TIME = 50
+                    \t~\tDay
+                    \t~\t
+                    \t|
+
+                    TIME STEP = 1
+                    \t~\tDay
+                    \t~\t
+                    \t|
+                    """;
+
+            ImportResult result = importer.importModel(mdl, "Test");
+            assertThat(result.warnings()).anyMatch(w -> w.contains("FINAL TIME"));
+            assertThat(result.definition().defaultSimulation().duration()).isEqualTo(100.0);
+        }
+    }
+
+    @Nested
+    @DisplayName("Import → compile → simulate round-trip")
+    class ImportCompileSimulate {
+
+        @Test
+        void shouldImportCompileAndSimulateTeacup() throws IOException {
+            Path path = Path.of("src/test/resources/vensim/teacup.mdl");
+            ImportResult result = importer.importModel(path);
+            ModelDefinition def = result.definition();
+
+            // Compile the imported definition
+            CompiledModel compiled = new ModelCompiler().compile(def);
+            assertThat(compiled).isNotNull();
+
+            // Run the simulation
+            Simulation sim = compiled.createSimulation();
+            sim.execute();
+
+            // The teacup should cool toward room temperature (70°F)
+            // Starting at 180°F, after 30 minutes it should be significantly cooler
+            Stock tempStock = compiled.getModel().getStocks().stream()
+                    .filter(s -> s.getName().contains("Teacup"))
+                    .findFirst()
+                    .orElseThrow();
+
+            double finalTemp = tempStock.getValue();
+            assertThat(finalTemp).isLessThan(180.0);
+            assertThat(finalTemp).isGreaterThan(70.0);
         }
     }
 }

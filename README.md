@@ -56,7 +56,7 @@ com.deathrayresearch.forrester
 ├── measure/                     # Dimensional analysis, unit system, and UnitRegistry
 ├── event/                       # Event-driven communication
 ├── sweep/                       # Parameter sweep, Monte Carlo, optimization, and CSV output
-├── io/                          # CSV export, reporting, and JSON serialization
+├── io/                          # CSV export, reporting, JSON serialization, and Vensim .mdl import
 └── ui/                          # JavaFX chart visualization
 ```
 
@@ -571,6 +571,58 @@ CompiledModel compiled = new ModelCompiler().compile(loaded);
 compiled.createSimulation().execute();
 ```
 
+### Vensim .mdl Import (`io/vensim/` package)
+
+`VensimImporter` reads Vensim `.mdl` model files and produces a `ModelDefinition` that can be compiled and simulated. This enables importing models from the most widely used System Dynamics tool.
+
+**Import a .mdl file:**
+
+```java
+VensimImporter importer = new VensimImporter();
+ImportResult result = importer.importModel(Path.of("model.mdl"));
+if (!result.isClean()) {
+    result.warnings().forEach(System.out::println);
+}
+ModelDefinition def = result.definition();
+```
+
+**Full workflow — import, compile, simulate:**
+
+```java
+ImportResult result = new VensimImporter().importModel(Path.of("sir.mdl"));
+CompiledModel compiled = new ModelCompiler().compile(result.definition());
+Simulation sim = compiled.createSimulation();
+sim.execute();
+```
+
+**Supported constructs:**
+
+| Vensim Construct | Forrester Element |
+|---|---|
+| `INTEG(rate, init)` | `StockDef` + `FlowDef` |
+| Numeric literal | `ConstantDef` |
+| Unchangeable (`==`) | `ConstantDef` |
+| Expression (`=`) | `AuxDef` |
+| Standalone lookup table | `LookupTableDef` |
+| `WITH LOOKUP(input, data)` | `AuxDef` + extracted `LookupTableDef` |
+| Subscript range (`:`) | `SubscriptDef` |
+| `IF THEN ELSE` | `IF` |
+| `XIDZ` / `ZIDZ` | `IF` with division guards |
+| `SMOOTH3` / `DELAY1` | `SMOOTH` / `DELAY3` (with warning) |
+| `:AND:` / `:OR:` / `:NOT:` | `&&` / `\|\|` / `!()` |
+| Sketch section | `ViewDef` with element placements and connectors |
+| Simulation settings | `SimulationSettings` (INITIAL TIME, FINAL TIME, TIME STEP) |
+
+Unsupported constructs (macros, data variables, PULSE, DELAY FIXED, etc.) emit warnings rather than failing.
+
+| Class | Purpose |
+|---|---|
+| `VensimImporter` | Main entry point implementing `ModelImporter` |
+| `MdlParser` | Low-level .mdl file parser (equations + sketch extraction) |
+| `VensimExprTranslator` | Expression syntax translation (Vensim → Forrester) |
+| `SketchParser` | Sketch section → `ViewDef` records |
+| `MdlEquation` | Parsed equation data record |
+
 ### Dependency Graph & Auto-Layout (`model/graph/` package)
 
 The graph package extracts structural information from model definitions for visualization and analysis.
@@ -943,6 +995,7 @@ New to system dynamics? These resources provide a solid introduction to the meth
 
 The project is at version 1.0-SNAPSHOT and is under active development. Recent work has focused on:
 
+- Adding Vensim `.mdl` import (`io/vensim/` package) — reads Vensim model files and produces `ModelDefinition` records that can be compiled and simulated. Supports stocks, constants, auxiliaries, lookup tables, subscript ranges, simulation settings, sketch data, and expression translation for common Vensim functions. Audited and hardened with 75 tests covering CRLF handling, case-insensitive matching, operator precedence, and duplicate name detection
 - Adding an external model representation with expression AST, definition records, model compiler, JSON serialization, nested modules, and dependency graph — six new packages (`model/expr`, `model/def`, `model/compile`, `io/json`, `model/graph`, `measure/UnitRegistry`) that enable defining models as pure data, persisting them to JSON, compiling them to runnable simulations, and extracting dependency graphs for visualization
 - Adding intelligent arrays (`IndexedValue`) — immutable multi-dimensional values with automatic broadcasting arithmetic. Shared dimensions align by name; non-shared dimensions expand via outer product. Supports elementwise and cross-dimension operations, scalar broadcasting, aggregation (`sum`, `mean`, `max`, `min`, `sumOver`), and convenience accessors on arrayed model elements
 - Adding multi-dimensional subscripts — `SubscriptRange`, `MultiArrayedStock`, `MultiArrayedFlow`, and `MultiArrayedVariable` enable cross-tabulated dimensions (e.g., Region × AgeGroup) with coordinate access, aggregation (`sumOver`, `slice`), and transparent expansion
