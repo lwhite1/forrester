@@ -29,6 +29,7 @@ import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Consumer;
@@ -103,6 +104,9 @@ public class ModelCanvas extends Canvas {
     private final NavigationStack navigationStack = new NavigationStack();
     private Runnable onNavigationChanged;
     private ContextMenu contextMenu;
+
+    // Hover highlighting
+    private String hoveredElement;
 
     // Feedback loop highlighting
     private boolean loopHighlightActive;
@@ -376,7 +380,7 @@ public class ModelCanvas extends Canvas {
                 : CanvasRenderer.MarqueeState.IDLE;
         renderer.render(getGraphicsContext2D(), getWidth(), getHeight(),
                 editor, connectors, flowCreation.getState(), reattachState, marqueeState,
-                loopHighlightActive ? loopAnalysis : null);
+                loopHighlightActive ? loopAnalysis : null, hoveredElement);
         fireStatusChanged();
     }
 
@@ -794,6 +798,15 @@ public class ModelCanvas extends Canvas {
             event.consume();
         }
 
+        // Update hover highlight
+        double worldX = viewport.toWorldX(event.getX());
+        double worldY = viewport.toWorldY(event.getY());
+        String hit = HitTester.hitTest(canvasState, worldX, worldY);
+        if (!Objects.equals(hit, hoveredElement)) {
+            hoveredElement = hit;
+            redraw();
+        }
+
         updateCursor();
     }
 
@@ -917,6 +930,8 @@ public class ModelCanvas extends Canvas {
     }
 
     private void handleMouseDragged(MouseEvent event) {
+        hoveredElement = null;
+
         if (marqueeActive) {
             marqueeEndWorldX = viewport.toWorldX(event.getX());
             marqueeEndWorldY = viewport.toWorldY(event.getY());

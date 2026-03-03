@@ -67,7 +67,8 @@ public class CanvasRenderer {
                        FlowCreationController.State flowState,
                        ReattachState reattachState,
                        MarqueeState marqueeState,
-                       FeedbackAnalysis loopAnalysis) {
+                       FeedbackAnalysis loopAnalysis,
+                       String hoveredElement) {
         // Background in screen space
         gc.clearRect(0, 0, width, height);
         gc.setFill(ColorPalette.BACKGROUND);
@@ -146,6 +147,11 @@ public class CanvasRenderer {
                     FeedbackLoopRenderer.drawLoopHighlight(gc, canvasState, name);
                 }
             }
+        }
+
+        // 2c. Draw hover indicator (above loops, below selection)
+        if (hoveredElement != null && !canvasState.getSelection().contains(hoveredElement)) {
+            SelectionRenderer.drawHoverIndicator(gc, canvasState, hoveredElement);
         }
 
         // 3. Draw selection indicators on top of everything
