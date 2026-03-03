@@ -412,7 +412,7 @@ public class ForresterApp extends Application {
     }
 
     private void updateBreadcrumb() {
-        if (breadcrumbBar != null) {
+        if (breadcrumbBar != null && canvas.getEditor() != null) {
             breadcrumbBar.update(canvas.getNavigationPath());
         }
         updateTitle();
