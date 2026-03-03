@@ -1,0 +1,212 @@
+package com.deathrayresearch.forrester.model.def;
+
+import com.deathrayresearch.forrester.model.def.ValidationIssue.Severity;
+import com.deathrayresearch.forrester.model.expr.Expr;
+import com.deathrayresearch.forrester.model.expr.ExprDependencies;
+import com.deathrayresearch.forrester.model.expr.ExprParser;
+import com.deathrayresearch.forrester.model.expr.ParseException;
+import com.deathrayresearch.forrester.model.graph.DependencyGraph;
+import com.deathrayresearch.forrester.model.graph.FeedbackAnalysis;
+
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+/**
+ * Validates a {@link ModelDefinition} for completeness and structural correctness.
+ * Returns a {@link ValidationResult} containing errors and warnings.
+ *
+ * <p>Checks performed:
+ * <ol>
+ *   <li>Delegates to {@link DefinitionValidator} — wraps each error as an ERROR issue</li>
+ *   <li>Disconnected flows — flows where both source and sink are null</li>
+ *   <li>Missing units — stocks, auxiliaries, constants with null/blank unit</li>
+ *   <li>Algebraic loops — cycle groups containing no stocks</li>
+ *   <li>Unused elements — constants and lookup tables not referenced by any equation</li>
+ * </ol>
+ */
+public final class ModelValidator {
+
+    private static final Pattern ELEMENT_NAME_PATTERN = Pattern.compile("'([^']+)'");
+
+    private ModelValidator() {
+    }
+
+    /**
+     * Validates the given model definition and returns all issues found.
+     */
+    public static ValidationResult validate(ModelDefinition def) {
+        List<ValidationIssue> issues = new ArrayList<>();
+
+        // 1. Delegate to DefinitionValidator and wrap errors
+        List<String> defErrors = DefinitionValidator.validate(def);
+        for (String error : defErrors) {
+            String elementName = extractElementName(error);
+            issues.add(new ValidationIssue(Severity.ERROR, elementName, error));
+        }
+
+        // 2. Disconnected flows
+        checkDisconnectedFlows(def, issues);
+
+        // 3. Missing units
+        checkMissingUnits(def, issues);
+
+        // 4. Algebraic loops (only if equations parse — avoid crashes on invalid models)
+        checkAlgebraicLoops(def, issues);
+
+        // 5. Unused elements
+        checkUnusedElements(def, issues);
+
+        return new ValidationResult(issues);
+    }
+
+    /**
+     * Extracts an element name from error messages that use the 'name' quoting pattern.
+     */
+    private static String extractElementName(String error) {
+        Matcher matcher = ELEMENT_NAME_PATTERN.matcher(error);
+        if (matcher.find()) {
+            return matcher.group(1);
+        }
+        return null;
+    }
+
+    private static void checkDisconnectedFlows(ModelDefinition def, List<ValidationIssue> issues) {
+        for (FlowDef flow : def.flows()) {
+            if (flow.source() == null && flow.sink() == null) {
+                issues.add(new ValidationIssue(Severity.WARNING, flow.name(),
+                        "Flow '" + flow.name() + "' is disconnected (no source or sink stock)"));
+            }
+        }
+    }
+
+    private static void checkMissingUnits(ModelDefinition def, List<ValidationIssue> issues) {
+        for (StockDef stock : def.stocks()) {
+            if (stock.unit() == null || stock.unit().isBlank()) {
+                issues.add(new ValidationIssue(Severity.WARNING, stock.name(),
+                        "Stock '" + stock.name() + "' has no unit specified"));
+            }
+        }
+        for (AuxDef aux : def.auxiliaries()) {
+            if (aux.unit() == null || aux.unit().isBlank()) {
+                issues.add(new ValidationIssue(Severity.WARNING, aux.name(),
+                        "Auxiliary '" + aux.name() + "' has no unit specified"));
+            }
+        }
+        for (ConstantDef constant : def.constants()) {
+            if (constant.unit() == null || constant.unit().isBlank()) {
+                issues.add(new ValidationIssue(Severity.WARNING, constant.name(),
+                        "Constant '" + constant.name() + "' has no unit specified"));
+            }
+        }
+    }
+
+    private static void checkAlgebraicLoops(ModelDefinition def, List<ValidationIssue> issues) {
+        // Only attempt graph analysis if equations are parseable
+        if (!equationsParseable(def)) {
+            return;
+        }
+
+        DependencyGraph graph = DependencyGraph.fromDefinition(def);
+        FeedbackAnalysis analysis = FeedbackAnalysis.analyze(graph);
+
+        Set<String> stockNames = new HashSet<>();
+        for (StockDef stock : def.stocks()) {
+            stockNames.add(stock.name());
+        }
+
+        for (Set<String> group : analysis.loopGroups()) {
+            boolean hasStock = false;
+            for (String member : group) {
+                if (stockNames.contains(member)) {
+                    hasStock = true;
+                    break;
+                }
+            }
+            if (!hasStock) {
+                String members = String.join(", ", group);
+                for (String member : group) {
+                    issues.add(new ValidationIssue(Severity.WARNING, member,
+                            "Algebraic loop detected: {" + members
+                                    + "} — circular dependency without a stock to break the loop"));
+                }
+            }
+        }
+    }
+
+    private static boolean equationsParseable(ModelDefinition def) {
+        for (FlowDef flow : def.flows()) {
+            try {
+                ExprParser.parse(flow.equation());
+            } catch (ParseException e) {
+                return false;
+            }
+        }
+        for (AuxDef aux : def.auxiliaries()) {
+            try {
+                ExprParser.parse(aux.equation());
+            } catch (ParseException e) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private static void checkUnusedElements(ModelDefinition def, List<ValidationIssue> issues) {
+        // Collect all references from flow and auxiliary equations
+        Set<String> referencedNames = new HashSet<>();
+
+        for (FlowDef flow : def.flows()) {
+            collectReferences(flow.equation(), referencedNames);
+            // Flows also reference their source/sink stocks
+            if (flow.source() != null) {
+                referencedNames.add(flow.source());
+            }
+            if (flow.sink() != null) {
+                referencedNames.add(flow.sink());
+            }
+        }
+        for (AuxDef aux : def.auxiliaries()) {
+            collectReferences(aux.equation(), referencedNames);
+        }
+
+        // Check constants
+        for (ConstantDef constant : def.constants()) {
+            if (!isReferenced(constant.name(), referencedNames)) {
+                issues.add(new ValidationIssue(Severity.WARNING, constant.name(),
+                        "Constant '" + constant.name() + "' is not referenced by any equation"));
+            }
+        }
+        // Check lookup tables
+        for (LookupTableDef table : def.lookupTables()) {
+            if (!isReferenced(table.name(), referencedNames)) {
+                issues.add(new ValidationIssue(Severity.WARNING, table.name(),
+                        "Lookup table '" + table.name() + "' is not referenced by any equation"));
+            }
+        }
+    }
+
+    private static void collectReferences(String equation, Set<String> refs) {
+        try {
+            Expr expr = ExprParser.parse(equation);
+            refs.addAll(ExprDependencies.extract(expr));
+        } catch (ParseException ignored) {
+            // Invalid equations are already reported by DefinitionValidator
+        }
+    }
+
+    /**
+     * Checks if a name is referenced, accounting for the underscore/space name resolution.
+     */
+    private static boolean isReferenced(String name, Set<String> referencedNames) {
+        if (referencedNames.contains(name)) {
+            return true;
+        }
+        // Check underscore variant (equations use underscores for names with spaces)
+        String underscored = name.replace(' ', '_');
+        return referencedNames.contains(underscored);
+    }
+}

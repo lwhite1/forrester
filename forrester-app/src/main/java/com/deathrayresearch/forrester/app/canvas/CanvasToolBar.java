@@ -1,5 +1,6 @@
 package com.deathrayresearch.forrester.app.canvas;
 
+import javafx.scene.control.Button;
 import javafx.scene.control.Separator;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.control.ToggleGroup;
@@ -30,8 +31,10 @@ public class CanvasToolBar extends ToolBar {
     private final ToggleGroup group = new ToggleGroup();
     private final ToggleButton selectButton;
     private final ToggleButton loopsButton;
+    private final Button validateButton;
     private Consumer<Tool> onToolChanged;
     private Consumer<Boolean> onLoopToggleChanged;
+    private Runnable onValidateClicked;
 
     public CanvasToolBar() {
         selectButton = makeButton("Select", Tool.SELECT);
@@ -52,9 +55,16 @@ public class CanvasToolBar extends ToolBar {
             }
         });
 
+        validateButton = new Button("Validate");
+        validateButton.setOnAction(event -> {
+            if (onValidateClicked != null) {
+                onValidateClicked.run();
+            }
+        });
+
         getItems().addAll(selectButton, new Separator(),
                 stockButton, flowButton, auxButton, constantButton, moduleButton, lookupButton,
-                new Separator(), loopsButton);
+                new Separator(), loopsButton, new Separator(), validateButton);
     }
 
     private ToggleButton makeButton(String label, Tool tool) {
@@ -121,5 +131,12 @@ public class CanvasToolBar extends ToolBar {
      */
     public void setOnLoopToggleChanged(Consumer<Boolean> callback) {
         this.onLoopToggleChanged = callback;
+    }
+
+    /**
+     * Sets a callback invoked when the Validate button is clicked.
+     */
+    public void setOnValidateClicked(Runnable callback) {
+        this.onValidateClicked = callback;
     }
 }

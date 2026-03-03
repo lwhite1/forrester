@@ -15,6 +15,7 @@ public class StatusBar extends HBox {
     private final Label selectionLabel = new Label();
     private final Label elementsLabel = new Label();
     private final Label loopLabel = new Label();
+    private final Label validationLabel = new Label();
     private final Label zoomLabel = new Label();
 
     public StatusBar() {
@@ -28,6 +29,9 @@ public class StatusBar extends HBox {
         loopLabel.setStyle(Styles.STATUS_LABEL);
         loopLabel.setVisible(false);
         loopLabel.setManaged(false);
+        validationLabel.setStyle(Styles.STATUS_LABEL);
+        validationLabel.setVisible(false);
+        validationLabel.setManaged(false);
         zoomLabel.setStyle(Styles.STATUS_LABEL);
 
         Region spacer1 = new Region();
@@ -44,8 +48,14 @@ public class StatusBar extends HBox {
         loopSep.visibleProperty().bind(loopLabel.visibleProperty());
         loopSep.managedProperty().bind(loopLabel.managedProperty());
 
+        Label validationSep = new Label("  |  ");
+        validationSep.setStyle(Styles.STATUS_LABEL);
+        validationSep.visibleProperty().bind(validationLabel.visibleProperty());
+        validationSep.managedProperty().bind(validationLabel.managedProperty());
+
         getChildren().addAll(toolLabel, sep1, selectionLabel,
-                loopSep, loopLabel, spacer1, elementsLabel, spacer2, sep2, zoomLabel);
+                loopSep, loopLabel, validationSep, validationLabel,
+                spacer1, elementsLabel, spacer2, sep2, zoomLabel);
 
         updateTool(CanvasToolBar.Tool.SELECT);
         updateSelection(0);
@@ -107,6 +117,26 @@ public class StatusBar extends HBox {
     public void clearLoops() {
         loopLabel.setVisible(false);
         loopLabel.setManaged(false);
+    }
+
+    public void updateValidation(int errorCount, int warningCount) {
+        validationLabel.setVisible(true);
+        validationLabel.setManaged(true);
+        if (errorCount > 0) {
+            validationLabel.setText(errorCount + " errors, " + warningCount + " warnings");
+            validationLabel.setStyle(Styles.STATUS_LABEL + "-fx-text-fill: #d62728;");
+        } else if (warningCount > 0) {
+            validationLabel.setText(warningCount + " warnings");
+            validationLabel.setStyle(Styles.STATUS_LABEL + "-fx-text-fill: #ff7f0e;");
+        } else {
+            validationLabel.setText("No issues");
+            validationLabel.setStyle(Styles.STATUS_LABEL);
+        }
+    }
+
+    public void clearValidation() {
+        validationLabel.setVisible(false);
+        validationLabel.setManaged(false);
     }
 
     public void updateZoom(double scale) {

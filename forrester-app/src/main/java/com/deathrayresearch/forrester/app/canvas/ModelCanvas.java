@@ -1099,6 +1099,16 @@ public class ModelCanvas extends Canvas {
         redraw();
     }
 
+    /**
+     * Selects a single element by name, clearing the current selection.
+     * Used by the validation dialog to highlight a specific element.
+     */
+    public void selectElement(String name) {
+        canvasState.clearSelection();
+        canvasState.select(name);
+        redraw();
+    }
+
     private void handleKeyPressed(KeyEvent event) {
         // Guard: ignore key events while inline editor is active
         if (inlineEdit.isActive()) {

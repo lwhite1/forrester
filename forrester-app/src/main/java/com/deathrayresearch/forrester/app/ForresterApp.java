@@ -11,10 +11,13 @@ import com.deathrayresearch.forrester.app.canvas.SimulationRunner;
 import com.deathrayresearch.forrester.app.canvas.SimulationSettingsDialog;
 import com.deathrayresearch.forrester.app.canvas.StatusBar;
 import com.deathrayresearch.forrester.app.canvas.UndoManager;
+import com.deathrayresearch.forrester.app.canvas.ValidationDialog;
 import com.deathrayresearch.forrester.io.json.ModelDefinitionSerializer;
 import com.deathrayresearch.forrester.model.def.ModelDefinition;
 import com.deathrayresearch.forrester.model.def.ModelDefinitionBuilder;
+import com.deathrayresearch.forrester.model.def.ModelValidator;
 import com.deathrayresearch.forrester.model.def.SimulationSettings;
+import com.deathrayresearch.forrester.model.def.ValidationResult;
 import com.deathrayresearch.forrester.model.def.ViewDef;
 import com.deathrayresearch.forrester.model.graph.AutoLayout;
 import com.deathrayresearch.forrester.model.graph.FeedbackAnalysis;
@@ -81,6 +84,7 @@ public class ForresterApp extends Application {
             canvas.setLoopHighlightActive(active);
             updateLoopStatus();
         });
+        toolBar.setOnValidateClicked(this::validateModel);
         canvas.setToolBar(toolBar);
         canvas.setOnStatusChanged(() -> {
             updateStatusBar();
@@ -202,7 +206,11 @@ public class ForresterApp extends Application {
         runItem.setAccelerator(new KeyCodeCombination(KeyCode.R, KeyCombination.SHORTCUT_DOWN));
         runItem.setOnAction(e -> runSimulation());
 
-        simulateMenu.getItems().addAll(settingsItem, runItem);
+        MenuItem validateItem = new MenuItem("Validate Model");
+        validateItem.setAccelerator(new KeyCodeCombination(KeyCode.B, KeyCombination.SHORTCUT_DOWN));
+        validateItem.setOnAction(e -> validateModel());
+
+        simulateMenu.getItems().addAll(settingsItem, runItem, new SeparatorMenuItem(), validateItem);
 
         return new MenuBar(fileMenu, editMenu, simulateMenu);
     }
@@ -336,6 +344,14 @@ public class ForresterApp extends Application {
         Thread thread = new Thread(task, "simulation-runner");
         thread.setDaemon(true);
         thread.start();
+    }
+
+    private void validateModel() {
+        ModelDefinition def = canvas.toModelDefinition();
+        ValidationResult result = ModelValidator.validate(def);
+        statusBar.updateValidation(result.errorCount(), result.warningCount());
+        ValidationDialog dialog = new ValidationDialog(result, canvas::selectElement);
+        dialog.show();
     }
 
     private void showError(String title, String message) {
