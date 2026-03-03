@@ -1,5 +1,6 @@
 package com.deathrayresearch.forrester.app;
 
+import com.deathrayresearch.forrester.app.canvas.BreadcrumbBar;
 import com.deathrayresearch.forrester.app.canvas.CanvasToolBar;
 import com.deathrayresearch.forrester.app.canvas.ModelCanvas;
 import com.deathrayresearch.forrester.app.canvas.ModelEditor;
@@ -48,6 +49,7 @@ public class ForresterApp extends Application {
     private ModelCanvas canvas;
     private ModelEditor editor;
     private StatusBar statusBar;
+    private BreadcrumbBar breadcrumbBar;
     private Path currentFile;
     private final UndoManager undoManager = new UndoManager();
     private MenuItem undoItem;
@@ -73,6 +75,13 @@ public class ForresterApp extends Application {
         canvas.setToolBar(toolBar);
         canvas.setOnStatusChanged(this::updateStatusBar);
 
+        breadcrumbBar = new BreadcrumbBar();
+        breadcrumbBar.setOnNavigateTo(depth -> {
+            canvas.navigateToDepth(depth);
+            canvas.requestFocus();
+        });
+        canvas.setOnNavigationChanged(this::updateBreadcrumb);
+
         // Start with an empty canvas
         newModel();
 
@@ -83,7 +92,7 @@ public class ForresterApp extends Application {
         canvas.setOverlayPane(canvasPane);
 
         MenuBar menuBar = createMenuBar();
-        VBox topContainer = new VBox(menuBar, toolBar);
+        VBox topContainer = new VBox(menuBar, toolBar, breadcrumbBar);
 
         BorderPane root = new BorderPane();
         root.setTop(topContainer);
@@ -180,6 +189,7 @@ public class ForresterApp extends Application {
 
         editor = new ModelEditor();
         editor.loadFrom(empty);
+        canvas.clearNavigation();
         canvas.setModel(editor, emptyView);
         undoManager.clear();
         currentFile = null;
@@ -208,6 +218,7 @@ public class ForresterApp extends Application {
                 view = AutoLayout.layout(def);
             }
 
+            canvas.clearNavigation();
             canvas.setModel(editor, view);
             undoManager.clear();
             currentFile = file.toPath();
@@ -308,23 +319,28 @@ public class ForresterApp extends Application {
     }
 
     private void updateStatusBar() {
-        if (statusBar == null || editor == null) {
+        if (statusBar == null) {
+            return;
+        }
+        ModelEditor activeEditor = canvas.getEditor();
+        if (activeEditor == null) {
             return;
         }
         statusBar.updateSelection(canvas.getSelectionCount());
         statusBar.updateElements(
-                editor.getStocks().size(),
-                editor.getFlows().size(),
-                editor.getAuxiliaries().size(),
-                editor.getConstants().size(),
-                editor.getModules().size());
+                activeEditor.getStocks().size(),
+                activeEditor.getFlows().size(),
+                activeEditor.getAuxiliaries().size(),
+                activeEditor.getConstants().size(),
+                activeEditor.getModules().size());
         statusBar.updateZoom(canvas.getZoomScale());
 
+        UndoManager activeUndo = canvas.getUndoManager();
         if (undoItem != null) {
-            undoItem.setDisable(!undoManager.canUndo());
+            undoItem.setDisable(activeUndo == null || !activeUndo.canUndo());
         }
         if (redoItem != null) {
-            redoItem.setDisable(!undoManager.canRedo());
+            redoItem.setDisable(activeUndo == null || !activeUndo.canRedo());
         }
     }
 
@@ -332,7 +348,18 @@ public class ForresterApp extends Application {
         String fileName = currentFile != null
                 ? currentFile.getFileName().toString()
                 : "Untitled";
-        stage.setTitle("Forrester \u2014 " + fileName);
+        String moduleSuffix = canvas.isInsideModule()
+                ? " [" + canvas.getCurrentModuleName() + "]"
+                : "";
+        stage.setTitle("Forrester \u2014 " + fileName + moduleSuffix);
+    }
+
+    private void updateBreadcrumb() {
+        if (breadcrumbBar != null) {
+            breadcrumbBar.update(canvas.getNavigationPath());
+        }
+        updateTitle();
+        updateStatusBar();
     }
 
     public static void main(String[] args) {

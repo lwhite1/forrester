@@ -92,6 +92,15 @@ public class Viewport {
         this.translateY = 0;
     }
 
+    /**
+     * Restores the viewport to a previously saved state.
+     */
+    public void restoreState(double translateX, double translateY, double scale) {
+        this.translateX = translateX;
+        this.translateY = translateY;
+        this.scale = scale;
+    }
+
     public double getTranslateX() {
         return translateX;
     }

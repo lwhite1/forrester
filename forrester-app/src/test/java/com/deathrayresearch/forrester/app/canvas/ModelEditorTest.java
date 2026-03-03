@@ -1049,4 +1049,178 @@ class ModelEditorTest {
             assertThat(name).isEqualTo("Module 6");
         }
     }
+
+    @Nested
+    @DisplayName("updateModuleDefinition")
+    class UpdateModuleDefinition {
+
+        @Test
+        void shouldReplaceDefinitionPreservingNameAndBindings() {
+            ModelDefinition innerDef = new ModelDefinitionBuilder()
+                    .name("Inner")
+                    .stock("S", 100, "u")
+                    .build();
+            ModuleInstanceDef moduleDef = new ModuleInstanceDef(
+                    "MyModule", innerDef, Map.of("in", "x"), Map.of("out", "y"));
+            ModelDefinition def = new ModelDefinitionBuilder()
+                    .name("Outer")
+                    .module(moduleDef)
+                    .build();
+            editor.loadFrom(def);
+
+            ModelDefinition newInner = new ModelDefinitionBuilder()
+                    .name("Updated")
+                    .stock("S", 200, "u")
+                    .constant("k", 0.5, "1/d")
+                    .build();
+            editor.updateModuleDefinition(0, newInner);
+
+            ModuleInstanceDef updated = editor.getModules().get(0);
+            assertThat(updated.instanceName()).isEqualTo("MyModule");
+            assertThat(updated.definition().stocks()).hasSize(1);
+            assertThat(updated.definition().constants()).hasSize(1);
+            assertThat(updated.inputBindings()).containsEntry("in", "x");
+            assertThat(updated.outputBindings()).containsEntry("out", "y");
+        }
+
+        @Test
+        void shouldDoNothingForInvalidIndex() {
+            editor.addModule();
+
+            editor.updateModuleDefinition(-1, new ModelDefinitionBuilder().name("X").build());
+            editor.updateModuleDefinition(5, new ModelDefinitionBuilder().name("X").build());
+
+            assertThat(editor.getModules()).hasSize(1);
+        }
+
+        @Test
+        void shouldUpdateCorrectModuleByIndex() {
+            editor.addModule(); // Module 1
+            editor.addModule(); // Module 2
+
+            ModelDefinition newDef = new ModelDefinitionBuilder()
+                    .name("Replaced")
+                    .stock("NewStock", 50, "u")
+                    .build();
+            editor.updateModuleDefinition(1, newDef);
+
+            assertThat(editor.getModules().get(0).definition().stocks()).isEmpty();
+            assertThat(editor.getModules().get(1).definition().stocks()).hasSize(1);
+            assertThat(editor.getModules().get(1).instanceName()).isEqualTo("Module 2");
+        }
+    }
+
+    @Nested
+    @DisplayName("updateModuleBindings")
+    class UpdateModuleBindings {
+
+        @Test
+        void shouldUpdateBindingsByName() {
+            editor.addModule(); // Module 1
+
+            boolean result = editor.updateModuleBindings("Module 1",
+                    Map.of("input1", "Stock_1 * 0.5"),
+                    Map.of("output1", "Result"));
+
+            assertThat(result).isTrue();
+            ModuleInstanceDef m = editor.getModules().get(0);
+            assertThat(m.inputBindings()).containsEntry("input1", "Stock_1 * 0.5");
+            assertThat(m.outputBindings()).containsEntry("output1", "Result");
+        }
+
+        @Test
+        void shouldReturnFalseForNonexistentModule() {
+            boolean result = editor.updateModuleBindings("Ghost",
+                    Map.of(), Map.of());
+
+            assertThat(result).isFalse();
+        }
+
+        @Test
+        void shouldReplaceExistingBindings() {
+            ModelDefinition innerDef = new ModelDefinitionBuilder()
+                    .name("Inner")
+                    .build();
+            ModuleInstanceDef moduleDef = new ModuleInstanceDef(
+                    "Mod", innerDef,
+                    Map.of("old_in", "val1"),
+                    Map.of("old_out", "val2"));
+            ModelDefinition def = new ModelDefinitionBuilder()
+                    .name("Outer")
+                    .module(moduleDef)
+                    .build();
+            editor.loadFrom(def);
+
+            editor.updateModuleBindings("Mod",
+                    Map.of("new_in", "val3"),
+                    Map.of("new_out", "val4"));
+
+            ModuleInstanceDef m = editor.getModules().get(0);
+            assertThat(m.inputBindings()).doesNotContainKey("old_in");
+            assertThat(m.inputBindings()).containsEntry("new_in", "val3");
+            assertThat(m.outputBindings()).doesNotContainKey("old_out");
+            assertThat(m.outputBindings()).containsEntry("new_out", "val4");
+        }
+
+        @Test
+        void shouldPreserveDefinitionWhenUpdatingBindings() {
+            ModelDefinition innerDef = new ModelDefinitionBuilder()
+                    .name("Inner")
+                    .stock("S", 100, "u")
+                    .build();
+            ModuleInstanceDef moduleDef = new ModuleInstanceDef(
+                    "Mod", innerDef, Map.of(), Map.of());
+            ModelDefinition def = new ModelDefinitionBuilder()
+                    .name("Outer")
+                    .module(moduleDef)
+                    .build();
+            editor.loadFrom(def);
+
+            editor.updateModuleBindings("Mod",
+                    Map.of("in", "expr"), Map.of());
+
+            ModuleInstanceDef m = editor.getModules().get(0);
+            assertThat(m.definition().stocks()).hasSize(1);
+            assertThat(m.definition().stocks().get(0).name()).isEqualTo("S");
+        }
+    }
+
+    @Nested
+    @DisplayName("getModuleByName")
+    class GetModuleByName {
+
+        @Test
+        void shouldReturnModuleWhenFound() {
+            editor.addModule(); // Module 1
+
+            ModuleInstanceDef result = editor.getModuleByName("Module 1");
+
+            assertThat(result).isNotNull();
+            assertThat(result.instanceName()).isEqualTo("Module 1");
+        }
+
+        @Test
+        void shouldReturnNullWhenNotFound() {
+            assertThat(editor.getModuleByName("Ghost")).isNull();
+        }
+    }
+
+    @Nested
+    @DisplayName("getModuleIndex")
+    class GetModuleIndex {
+
+        @Test
+        void shouldReturnIndexWhenFound() {
+            editor.addModule(); // Module 1
+            editor.addModule(); // Module 2
+
+            assertThat(editor.getModuleIndex("Module 1")).isZero();
+            assertThat(editor.getModuleIndex("Module 2")).isEqualTo(1);
+        }
+
+        @Test
+        void shouldReturnNegativeOneWhenNotFound() {
+            assertThat(editor.getModuleIndex("Ghost")).isEqualTo(-1);
+        }
+    }
 }

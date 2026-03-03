@@ -6,10 +6,15 @@ import com.deathrayresearch.forrester.model.def.ConstantDef;
 import com.deathrayresearch.forrester.model.def.ElementType;
 import com.deathrayresearch.forrester.model.def.FlowDef;
 import com.deathrayresearch.forrester.model.def.ModelDefinition;
+import com.deathrayresearch.forrester.model.def.ModuleInstanceDef;
 import com.deathrayresearch.forrester.model.def.ViewDef;
+import com.deathrayresearch.forrester.model.graph.AutoLayout;
 
 import javafx.scene.Cursor;
 import javafx.scene.canvas.Canvas;
+import javafx.scene.control.ContextMenu;
+import javafx.scene.control.MenuItem;
+import javafx.scene.control.SeparatorMenuItem;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseButton;
@@ -22,6 +27,7 @@ import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Consumer;
 
@@ -49,6 +55,7 @@ public class ModelCanvas extends Canvas {
     // Drag/pan state
     private boolean dragging;
     private boolean panning;
+    private boolean panMoved;
     private boolean spaceDown;
     private double dragStartX;
     private double dragStartY;
@@ -89,6 +96,11 @@ public class ModelCanvas extends Canvas {
 
     // Status change callback
     private Runnable onStatusChanged;
+
+    // Module navigation
+    private final NavigationStack navigationStack = new NavigationStack();
+    private Runnable onNavigationChanged;
+    private ContextMenu contextMenu;
 
     public ModelCanvas() {
         setFocusTraversable(true);
@@ -131,9 +143,29 @@ public class ModelCanvas extends Canvas {
 
     /**
      * Builds an immutable {@link ModelDefinition} snapshot including the current canvas layout.
+     * When inside a module, walks the navigation stack to reconstruct the full root definition.
      */
     public ModelDefinition toModelDefinition() {
-        return editor.toModelDefinition(canvasState.toViewDef());
+        if (navigationStack.isEmpty()) {
+            return editor.toModelDefinition(canvasState.toViewDef());
+        }
+
+        // Build current level's definition with its view
+        ModelDefinition childDef = editor.toModelDefinition(canvasState.toViewDef());
+
+        // Walk the stack from top (most recent parent) to bottom (root),
+        // writing each child into its parent
+        List<NavigationStack.Frame> frames = new ArrayList<>(navigationStack.frames());
+        // frames() returns bottom-to-top; we need to process top-to-bottom
+        for (int i = frames.size() - 1; i >= 0; i--) {
+            NavigationStack.Frame frame = frames.get(i);
+            ModelEditor parentEditor = new ModelEditor();
+            parentEditor.loadFrom(frame.editor().toModelDefinition(frame.viewSnapshot()));
+            parentEditor.updateModuleDefinition(frame.moduleIndex(), childDef);
+            childDef = parentEditor.toModelDefinition(frame.viewSnapshot());
+        }
+
+        return childDef;
     }
 
     /**
@@ -719,6 +751,7 @@ public class ModelCanvas extends Canvas {
                 || event.getButton() == MouseButton.SECONDARY
                 || (event.getButton() == MouseButton.PRIMARY && spaceDown)) {
             panning = true;
+            panMoved = false;
             updateCursor();
             event.consume();
             return;
@@ -728,13 +761,18 @@ public class ModelCanvas extends Canvas {
             double worldX = viewport.toWorldX(event.getX());
             double worldY = viewport.toWorldY(event.getY());
 
-            // Double-click: start inline editing (only in SELECT mode, not during pending flow)
+            // Double-click: drill into module or start inline editing
             if (event.getClickCount() == 2
                     && activeTool == CanvasToolBar.Tool.SELECT
                     && !flowCreation.isPending()) {
                 String hit = HitTester.hitTest(canvasState, worldX, worldY);
                 if (hit != null) {
-                    startInlineEdit(hit);
+                    ElementType hitType = canvasState.getType(hit);
+                    if (hitType == ElementType.MODULE) {
+                        drillInto(hit);
+                    } else {
+                        startInlineEdit(hit);
+                    }
                     event.consume();
                     return;
                 }
@@ -837,6 +875,7 @@ public class ModelCanvas extends Canvas {
         double screenDy = event.getY() - dragStartY;
 
         if (panning) {
+            panMoved = true;
             viewport.pan(screenDx, screenDy);
             dragStartX = event.getX();
             dragStartY = event.getY();
@@ -884,8 +923,24 @@ public class ModelCanvas extends Canvas {
             return;
         }
 
+        // Right-click release without drag: show context menu on module
+        if (panning && !panMoved && event.getButton() == MouseButton.SECONDARY) {
+            double worldX = viewport.toWorldX(event.getX());
+            double worldY = viewport.toWorldY(event.getY());
+            String hit = HitTester.hitTest(canvasState, worldX, worldY);
+            if (hit != null && canvasState.getType(hit) == ElementType.MODULE) {
+                panning = false;
+                panMoved = false;
+                showElementContextMenu(hit, event.getScreenX(), event.getScreenY());
+                updateCursor();
+                event.consume();
+                return;
+            }
+        }
+
         dragging = false;
         panning = false;
+        panMoved = false;
         dragTarget = null;
         dragStartPositions.clear();
         updateCursor();
@@ -973,6 +1028,8 @@ public class ModelCanvas extends Canvas {
         } else if (!canvasState.getSelection().isEmpty()) {
             canvasState.clearSelection();
             redraw();
+        } else if (!navigationStack.isEmpty()) {
+            navigateBack();
         }
         updateCursor();
     }
@@ -992,6 +1049,219 @@ public class ModelCanvas extends Canvas {
             updateCursor();
             event.consume();
         }
+    }
+
+    // --- Module navigation ---
+
+    /**
+     * Sets a callback invoked whenever the navigation state changes
+     * (drill in, navigate back, or clear).
+     */
+    public void setOnNavigationChanged(Runnable callback) {
+        this.onNavigationChanged = callback;
+    }
+
+    private void fireNavigationChanged() {
+        if (onNavigationChanged != null) {
+            onNavigationChanged.run();
+        }
+    }
+
+    /**
+     * Drills into the named module, pushing the current level onto the navigation stack
+     * and loading the module's inner definition for editing.
+     */
+    public void drillInto(String moduleName) {
+        if (editor == null) {
+            return;
+        }
+        ModuleInstanceDef module = editor.getModuleByName(moduleName);
+        if (module == null) {
+            return;
+        }
+        int moduleIndex = editor.getModuleIndex(moduleName);
+
+        // Push current state onto navigation stack
+        navigationStack.push(new NavigationStack.Frame(
+                moduleName,
+                moduleIndex,
+                editor,
+                canvasState.toViewDef(),
+                viewport.getTranslateX(),
+                viewport.getTranslateY(),
+                viewport.getScale(),
+                undoManager,
+                activeTool
+        ));
+
+        // Create new editor loaded with module's inner definition
+        ModelEditor moduleEditor = new ModelEditor();
+        moduleEditor.loadFrom(module.definition());
+
+        // Extract or auto-layout ViewDef from module's definition
+        ViewDef moduleView;
+        if (!module.definition().views().isEmpty()) {
+            moduleView = module.definition().views().get(0);
+        } else {
+            moduleView = AutoLayout.layout(module.definition());
+        }
+
+        // Create a new UndoManager for this level
+        UndoManager moduleUndoManager = new UndoManager();
+
+        // Switch to the module's editor and view
+        this.editor = moduleEditor;
+        this.undoManager = moduleUndoManager;
+        setModel(editor, moduleView);
+        viewport.reset();
+
+        // Reset tool to SELECT
+        if (toolBar != null) {
+            toolBar.resetToSelect();
+        } else {
+            activeTool = CanvasToolBar.Tool.SELECT;
+        }
+
+        fireNavigationChanged();
+        fireStatusChanged();
+    }
+
+    /**
+     * Navigates back to the parent level, writing the current level's definition
+     * back into the parent's module.
+     */
+    public void navigateBack() {
+        if (navigationStack.isEmpty()) {
+            return;
+        }
+
+        // Capture current level as a ModelDefinition with its view
+        ModelDefinition childDef = editor.toModelDefinition(canvasState.toViewDef());
+
+        // Pop parent frame
+        NavigationStack.Frame frame = navigationStack.pop();
+
+        // Restore parent editor and save undo before write-back
+        this.editor = frame.editor();
+        this.undoManager = frame.undoManager();
+
+        saveUndoState();
+        editor.updateModuleDefinition(frame.moduleIndex(), childDef);
+
+        // Restore parent canvas state and viewport
+        canvasState.loadFrom(frame.viewSnapshot());
+        viewport.restoreState(frame.viewportTranslateX(),
+                frame.viewportTranslateY(), frame.viewportScale());
+
+        // Restore active tool
+        if (toolBar != null) {
+            toolBar.selectTool(frame.activeTool());
+        } else {
+            activeTool = frame.activeTool();
+        }
+
+        // Regenerate connectors and redraw
+        connectors = editor.generateConnectors();
+        redraw();
+
+        fireNavigationChanged();
+        fireStatusChanged();
+    }
+
+    /**
+     * Navigates back to the given depth by repeatedly calling {@link #navigateBack()}.
+     *
+     * @param targetDepth the target depth (0 = root)
+     */
+    public void navigateToDepth(int targetDepth) {
+        while (navigationStack.depth() > targetDepth) {
+            navigateBack();
+        }
+    }
+
+    /**
+     * Returns true if currently editing inside a module (not at root level).
+     */
+    public boolean isInsideModule() {
+        return !navigationStack.isEmpty();
+    }
+
+    /**
+     * Returns the breadcrumb path from root to current level.
+     */
+    public List<String> getNavigationPath() {
+        String rootName = navigationStack.isEmpty()
+                ? editor.getModelName()
+                : navigationStack.frames().get(0).editor().getModelName();
+        return navigationStack.getPath(rootName, editor.getModelName());
+    }
+
+    /**
+     * Returns the name of the current module being edited, or null if at root.
+     */
+    public String getCurrentModuleName() {
+        if (navigationStack.isEmpty()) {
+            return null;
+        }
+        // The most recent frame's moduleName is what we drilled into
+        return navigationStack.peek().moduleName();
+    }
+
+    /**
+     * Clears the navigation stack without writing back changes.
+     * Used when opening a new file or creating a new model.
+     */
+    public void clearNavigation() {
+        navigationStack.clear();
+        fireNavigationChanged();
+    }
+
+    /**
+     * Shows a context menu for the given element at the specified screen coordinates.
+     */
+    private void showElementContextMenu(String elementName, double screenX, double screenY) {
+        if (contextMenu != null) {
+            contextMenu.hide();
+        }
+
+        ElementType type = canvasState.getType(elementName);
+        if (type != ElementType.MODULE) {
+            return;
+        }
+
+        contextMenu = new ContextMenu();
+
+        MenuItem drillItem = new MenuItem("Drill Into");
+        drillItem.setOnAction(e -> drillInto(elementName));
+
+        MenuItem bindingsItem = new MenuItem("Configure Bindings...");
+        bindingsItem.setOnAction(e -> openBindingsDialog(elementName));
+
+        MenuItem renameItem = new MenuItem("Rename");
+        renameItem.setOnAction(e -> startInlineEdit(elementName));
+
+        contextMenu.getItems().addAll(drillItem, bindingsItem,
+                new SeparatorMenuItem(), renameItem);
+        contextMenu.show(this, screenX, screenY);
+    }
+
+    /**
+     * Opens the bindings configuration dialog for the named module.
+     */
+    private void openBindingsDialog(String moduleName) {
+        ModuleInstanceDef module = editor.getModuleByName(moduleName);
+        if (module == null) {
+            return;
+        }
+
+        BindingConfigDialog dialog = new BindingConfigDialog(module);
+        Optional<BindingConfigDialog.BindingResult> result = dialog.showAndWait();
+        result.ifPresent(bindings -> {
+            saveUndoState();
+            editor.updateModuleBindings(moduleName,
+                    bindings.inputBindings(), bindings.outputBindings());
+            fireStatusChanged();
+        });
     }
 
 }

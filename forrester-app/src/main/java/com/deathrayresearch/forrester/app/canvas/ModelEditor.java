@@ -522,6 +522,64 @@ public class ModelEditor {
         return Collections.unmodifiableList(modules);
     }
 
+    /**
+     * Returns the module instance with the given name, or null if not found.
+     */
+    public ModuleInstanceDef getModuleByName(String name) {
+        for (ModuleInstanceDef m : modules) {
+            if (m.instanceName().equals(name)) {
+                return m;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Returns the index of the module with the given name, or -1 if not found.
+     */
+    public int getModuleIndex(String name) {
+        for (int i = 0; i < modules.size(); i++) {
+            if (modules.get(i).instanceName().equals(name)) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    /**
+     * Replaces the definition of the module at the given index, preserving
+     * the instance name and bindings.
+     */
+    public void updateModuleDefinition(int index, ModelDefinition newDef) {
+        if (index < 0 || index >= modules.size()) {
+            return;
+        }
+        ModuleInstanceDef existing = modules.get(index);
+        modules.set(index, new ModuleInstanceDef(
+                existing.instanceName(), newDef,
+                existing.inputBindings(), existing.outputBindings()));
+    }
+
+    /**
+     * Updates the input and output bindings of the module with the given name.
+     *
+     * @return true if the module was found and updated
+     */
+    public boolean updateModuleBindings(String name,
+                                         Map<String, String> inputBindings,
+                                         Map<String, String> outputBindings) {
+        for (int i = 0; i < modules.size(); i++) {
+            if (modules.get(i).instanceName().equals(name)) {
+                ModuleInstanceDef m = modules.get(i);
+                modules.set(i, new ModuleInstanceDef(
+                        m.instanceName(), m.definition(),
+                        inputBindings, outputBindings));
+                return true;
+            }
+        }
+        return false;
+    }
+
     public List<LookupTableDef> getLookupTables() {
         return Collections.unmodifiableList(lookupTables);
     }
