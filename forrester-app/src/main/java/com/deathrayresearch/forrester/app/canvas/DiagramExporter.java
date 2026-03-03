@@ -21,8 +21,9 @@ import java.util.Set;
 import javax.imageio.ImageIO;
 
 /**
- * Exports the diagram to a PNG or JPEG image file.
- * Renders to an offscreen canvas at 2x scale without selection/hover overlays.
+ * Exports the diagram to a PNG, JPEG, or SVG file.
+ * Raster formats are rendered to an offscreen canvas at 2x scale without selection/hover overlays.
+ * SVG export delegates to {@link SvgExporter} for lossless vector output.
  */
 public final class DiagramExporter {
 
@@ -108,7 +109,8 @@ public final class DiagramExporter {
         chooser.setTitle("Export Diagram");
         chooser.getExtensionFilters().addAll(
                 new FileChooser.ExtensionFilter("PNG Image (*.png)", "*.png"),
-                new FileChooser.ExtensionFilter("JPEG Image (*.jpg, *.jpeg)", "*.jpg", "*.jpeg"));
+                new FileChooser.ExtensionFilter("JPEG Image (*.jpg, *.jpeg)", "*.jpg", "*.jpeg"),
+                new FileChooser.ExtensionFilter("SVG Image (*.svg)", "*.svg"));
         chooser.setInitialFileName("diagram.png");
 
         File file = chooser.showSaveDialog(ownerWindow);
@@ -116,7 +118,23 @@ public final class DiagramExporter {
             return;
         }
 
-        // Save and clear selection so it doesn't render
+        // SVG export: delegate to SvgExporter (no selection clearing needed)
+        String fileName = file.getName().toLowerCase();
+        if (fileName.endsWith(".svg")) {
+            try {
+                SvgExporter.export(canvasState, editor, connectors, loopAnalysis, file);
+            } catch (IOException e) {
+                Alert alert = new Alert(Alert.AlertType.ERROR);
+                alert.setTitle("Export Error");
+                alert.setHeaderText(null);
+                alert.setContentText("Failed to export SVG: " + e.getMessage());
+                alert.initOwner(ownerWindow);
+                alert.showAndWait();
+            }
+            return;
+        }
+
+        // Save and clear selection so it doesn't render in raster export
         Set<String> savedSelection = Set.copyOf(canvasState.getSelection());
         canvasState.clearSelection();
 
@@ -151,7 +169,6 @@ public final class DiagramExporter {
             WritableImage image = offscreen.snapshot(params, null);
 
             // Determine format from file extension
-            String fileName = file.getName().toLowerCase();
             String format;
             if (fileName.endsWith(".jpg") || fileName.endsWith(".jpeg")) {
                 format = "jpg";
