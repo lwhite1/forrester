@@ -13,7 +13,9 @@ import com.deathrayresearch.forrester.model.graph.ConnectorGenerator;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Mutable model editing layer that sits between the UI and the engine's immutable
@@ -29,6 +31,7 @@ public class ModelEditor {
     private final List<AuxDef> auxiliaries = new ArrayList<>();
     private final List<ConstantDef> constants = new ArrayList<>();
     private final List<LookupTableDef> lookupTables = new ArrayList<>();
+    private final Set<String> nameIndex = new HashSet<>();
     private SimulationSettings simulationSettings;
     private int nextId = 1;
 
@@ -43,6 +46,7 @@ public class ModelEditor {
         auxiliaries.clear();
         constants.clear();
         lookupTables.clear();
+        nameIndex.clear();
 
         stocks.addAll(definition.stocks());
         flows.addAll(definition.flows());
@@ -50,6 +54,11 @@ public class ModelEditor {
         constants.addAll(definition.constants());
         lookupTables.addAll(definition.lookupTables());
         simulationSettings = definition.defaultSimulation();
+
+        stocks.forEach(s -> nameIndex.add(s.name()));
+        flows.forEach(f -> nameIndex.add(f.name()));
+        auxiliaries.forEach(a -> nameIndex.add(a.name()));
+        constants.forEach(c -> nameIndex.add(c.name()));
 
         // Set nextId past any existing numeric suffix
         nextId = 1;
@@ -83,6 +92,7 @@ public class ModelEditor {
     public String addStock() {
         String name = "Stock " + nextId++;
         stocks.add(new StockDef(name, 0, "units"));
+        nameIndex.add(name);
         return name;
     }
 
@@ -103,6 +113,7 @@ public class ModelEditor {
     public String addFlow(String source, String sink) {
         String name = "Flow " + nextId++;
         flows.add(new FlowDef(name, "0", "day", source, sink));
+        nameIndex.add(name);
         return name;
     }
 
@@ -113,6 +124,7 @@ public class ModelEditor {
     public String addAux() {
         String name = "Aux " + nextId++;
         auxiliaries.add(new AuxDef(name, "0", "units"));
+        nameIndex.add(name);
         return name;
     }
 
@@ -123,6 +135,7 @@ public class ModelEditor {
     public String addConstant() {
         String name = "Constant " + nextId++;
         constants.add(new ConstantDef(name, 0, "units"));
+        nameIndex.add(name);
         return name;
     }
 
@@ -132,6 +145,7 @@ public class ModelEditor {
      * that connection nullified (becomes a cloud).
      */
     public void removeElement(String name) {
+        nameIndex.remove(name);
         boolean wasStock = stocks.removeIf(s -> s.name().equals(name));
 
         if (wasStock) {
@@ -238,6 +252,9 @@ public class ModelEditor {
         if (!found) {
             return false;
         }
+
+        nameIndex.remove(oldName);
+        nameIndex.add(newName);
 
         // Update flow source/sink references
         for (int i = 0; i < flows.size(); i++) {
@@ -415,12 +432,10 @@ public class ModelEditor {
 
     /**
      * Returns true if any element (stock, flow, aux, or constant) has the given name.
+     * Uses an O(1) hash set lookup instead of scanning all four element lists.
      */
     public boolean hasElement(String name) {
-        return stocks.stream().anyMatch(s -> s.name().equals(name))
-                || flows.stream().anyMatch(f -> f.name().equals(name))
-                || auxiliaries.stream().anyMatch(a -> a.name().equals(name))
-                || constants.stream().anyMatch(c -> c.name().equals(name));
+        return nameIndex.contains(name);
     }
 
     /**

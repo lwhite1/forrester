@@ -213,7 +213,7 @@ public class ForresterApp extends Application {
             currentFile = file.toPath();
             updateTitle();
         } catch (IOException ex) {
-            ex.printStackTrace();
+            showError("Open Error", "Failed to open file: " + ex.getMessage());
         }
     }
 
@@ -249,7 +249,7 @@ public class ForresterApp extends Application {
             serializer.toFile(def, path);
             updateTitle();
         } catch (IOException ex) {
-            ex.printStackTrace();
+            showError("Save Error", "Failed to save file: " + ex.getMessage());
         }
     }
 
