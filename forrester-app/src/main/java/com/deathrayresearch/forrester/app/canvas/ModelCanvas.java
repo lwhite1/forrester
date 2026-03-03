@@ -262,7 +262,8 @@ public class ModelCanvas extends Canvas {
             startConstantNameEdit(elementName, screenX, screenY, fieldWidth);
         } else {
             inlineEditor.open(screenX, screenY, elementName, fieldWidth, newName -> {
-                if (newName != null && !newName.isBlank() && !newName.equals(elementName)) {
+                if (newName != null && !newName.equals(elementName)
+                        && ModelEditor.isValidName(newName)) {
                     applyRename(elementName, newName);
                 }
                 requestFocus();
@@ -277,7 +278,8 @@ public class ModelCanvas extends Canvas {
                                        double fieldWidth) {
         inlineEditor.open(screenX, screenY, elementName, fieldWidth, newName -> {
             String effectiveName;
-            if (newName != null && !newName.isBlank() && !newName.equals(elementName)) {
+            if (newName != null && !newName.equals(elementName)
+                    && ModelEditor.isValidName(newName)) {
                 applyRename(elementName, newName);
                 effectiveName = newName;
             } else {

@@ -103,6 +103,47 @@ class FlowCreationControllerTest {
     }
 
     @Nested
+    @DisplayName("validation")
+    class Validation {
+
+        @Test
+        void shouldRejectSelfLoop() {
+            controller.handleClick(100, 200, canvasState, editor); // Stock 1
+            String name = controller.handleClick(100, 200, canvasState, editor); // Stock 1 again
+
+            assertThat(name).isNull();
+            assertThat(controller.isPending()).isTrue(); // stays pending
+        }
+
+        @Test
+        void shouldRejectCloudToCloudFlow() {
+            controller.handleClick(250, 100, canvasState, editor); // cloud
+            String name = controller.handleClick(300, 300, canvasState, editor); // cloud
+
+            assertThat(name).isNull();
+            assertThat(controller.isPending()).isTrue(); // stays pending
+        }
+
+        @Test
+        void shouldAllowCloudSourceWithStockSink() {
+            controller.handleClick(250, 100, canvasState, editor); // cloud
+            String name = controller.handleClick(400, 200, canvasState, editor); // Stock 2
+
+            assertThat(name).isNotNull();
+            assertThat(controller.isPending()).isFalse();
+        }
+
+        @Test
+        void shouldAllowStockSourceWithCloudSink() {
+            controller.handleClick(100, 200, canvasState, editor); // Stock 1
+            String name = controller.handleClick(300, 300, canvasState, editor); // cloud
+
+            assertThat(name).isNotNull();
+            assertThat(controller.isPending()).isFalse();
+        }
+    }
+
+    @Nested
     @DisplayName("cancel")
     class Cancel {
 

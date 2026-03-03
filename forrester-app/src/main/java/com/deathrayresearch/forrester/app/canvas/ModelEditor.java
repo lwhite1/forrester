@@ -148,16 +148,21 @@ public class ModelEditor {
                     ));
                 }
             }
-            return;
         }
 
-        if (flows.removeIf(f -> f.name().equals(name))) {
-            return;
+        if (!wasStock) {
+            if (flows.removeIf(f -> f.name().equals(name))) {
+                // flow removed — fall through to clean equations
+            } else if (auxiliaries.removeIf(a -> a.name().equals(name))) {
+                // aux removed — fall through to clean equations
+            } else {
+                constants.removeIf(c -> c.name().equals(name));
+            }
         }
-        if (auxiliaries.removeIf(a -> a.name().equals(name))) {
-            return;
-        }
-        constants.removeIf(c -> c.name().equals(name));
+
+        // Clean equation references: replace deleted element's token with "0"
+        String deletedToken = name.replace(' ', '_');
+        updateEquationReferences(deletedToken, "0");
     }
 
     /**
@@ -374,6 +379,23 @@ public class ModelEditor {
                 || flows.stream().anyMatch(f -> f.name().equals(name))
                 || auxiliaries.stream().anyMatch(a -> a.name().equals(name))
                 || constants.stream().anyMatch(c -> c.name().equals(name));
+    }
+
+    /**
+     * Returns true if the given name is valid for an element identifier.
+     * A valid name is non-blank and contains only letters, digits, spaces, and underscores.
+     */
+    public static boolean isValidName(String name) {
+        if (name == null || name.isBlank()) {
+            return false;
+        }
+        for (int i = 0; i < name.length(); i++) {
+            char c = name.charAt(i);
+            if (!Character.isLetterOrDigit(c) && c != ' ' && c != '_') {
+                return false;
+            }
+        }
+        return true;
     }
 
     public String getModelName() {

@@ -251,6 +251,38 @@ class ModelEditorTest {
 
             assertThat(editor.getStocks()).hasSize(1);
         }
+
+        @Test
+        void shouldCleanEquationReferencesWhenConstantDeleted() {
+            ModelDefinition def = new ModelDefinitionBuilder()
+                    .name("Test")
+                    .stock("S", 100, "u")
+                    .constant("Rate", 0.5, "1/day")
+                    .flow("Drain", "S * Rate", "day", "S", null)
+                    .build();
+            editor.loadFrom(def);
+
+            editor.removeElement("Rate");
+
+            FlowDef flow = editor.getFlows().get(0);
+            assertThat(flow.equation()).isEqualTo("S * 0");
+        }
+
+        @Test
+        void shouldCleanEquationReferencesWhenStockDeleted() {
+            ModelDefinition def = new ModelDefinitionBuilder()
+                    .name("Test")
+                    .stock("Population", 1000, "people")
+                    .constant("k", 0.1, "1/day")
+                    .flow("Growth", "Population * k", "day", "Population", null)
+                    .build();
+            editor.loadFrom(def);
+
+            editor.removeElement("Population");
+
+            FlowDef flow = editor.getFlows().get(0);
+            assertThat(flow.equation()).isEqualTo("0 * k");
+        }
     }
 
     @Nested
@@ -529,6 +561,39 @@ class ModelEditorTest {
             ModelDefinition def = editor.toModelDefinition(null);
 
             assertThat(def.views()).isEmpty();
+        }
+    }
+
+    @Nested
+    @DisplayName("isValidName")
+    class IsValidName {
+
+        @Test
+        void shouldAcceptSimpleName() {
+            assertThat(ModelEditor.isValidName("Stock 1")).isTrue();
+        }
+
+        @Test
+        void shouldAcceptUnderscores() {
+            assertThat(ModelEditor.isValidName("Contact_Rate")).isTrue();
+        }
+
+        @Test
+        void shouldRejectBlank() {
+            assertThat(ModelEditor.isValidName("")).isFalse();
+            assertThat(ModelEditor.isValidName("   ")).isFalse();
+        }
+
+        @Test
+        void shouldRejectNull() {
+            assertThat(ModelEditor.isValidName(null)).isFalse();
+        }
+
+        @Test
+        void shouldRejectSpecialCharacters() {
+            assertThat(ModelEditor.isValidName("Rate*2")).isFalse();
+            assertThat(ModelEditor.isValidName("a+b")).isFalse();
+            assertThat(ModelEditor.isValidName("x/y")).isFalse();
         }
     }
 

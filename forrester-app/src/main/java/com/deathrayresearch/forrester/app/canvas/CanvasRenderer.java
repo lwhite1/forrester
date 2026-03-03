@@ -238,7 +238,7 @@ public class CanvasRenderer {
         double startY = state.sourceY();
 
         if (state.source() == null) {
-            ConnectionRenderer.drawCloudAt(gc, startX, startY);
+            ConnectionRenderer.drawCloud(gc, startX, startY);
         }
 
         gc.setStroke(RUBBER_BAND_COLOR);
@@ -256,6 +256,7 @@ public class CanvasRenderer {
 
     /**
      * Draws a rubber-band line for flow endpoint reattachment.
+     * Shows a stock highlight when hovering a stock, or a cloud preview on empty space.
      */
     private void drawReattachRubberBand(GraphicsContext gc, ReattachState state) {
         gc.setStroke(RUBBER_BAND_COLOR);
@@ -268,6 +269,9 @@ public class CanvasRenderer {
                 state.rubberBandX(), state.rubberBandY(), canvasState);
         if (hoverStock != null) {
             drawStockHoverHighlight(gc, hoverStock);
+        } else {
+            // Preview cloud at drop position when not hovering a stock
+            ConnectionRenderer.drawCloud(gc, state.rubberBandX(), state.rubberBandY());
         }
     }
 

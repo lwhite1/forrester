@@ -56,6 +56,16 @@ public class FlowCreationController {
             // Second click: set sink and create flow
             String sinkHit = hitTestStockOnly(worldX, worldY, canvasState);
 
+            // Prevent self-loop: source and sink must not be the same stock
+            if (sinkHit != null && sinkHit.equals(pendingSource)) {
+                return null;
+            }
+
+            // Prevent cloud-to-cloud: at least one end must be a stock
+            if (pendingSource == null && sinkHit == null) {
+                return null;
+            }
+
             double srcX = sourceX;
             double srcY = sourceY;
             double dstX;

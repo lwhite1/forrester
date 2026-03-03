@@ -51,6 +51,7 @@ public final class LayoutMetrics {
     // Cloud symbol
     public static final double CLOUD_RADIUS = 12;
     public static final double CLOUD_OFFSET = 80;
+    public static final double CLOUD_LINE_WIDTH = 1.5;
 
     // Fonts
     public static final Font STOCK_NAME_FONT = Font.font("System", FontWeight.BOLD, 13);
