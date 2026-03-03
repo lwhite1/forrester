@@ -7,6 +7,7 @@ import com.deathrayresearch.forrester.model.def.ElementType;
 import com.deathrayresearch.forrester.model.def.FlowDef;
 import com.deathrayresearch.forrester.model.def.ModelDefinition;
 import com.deathrayresearch.forrester.model.def.ModuleInstanceDef;
+import com.deathrayresearch.forrester.model.def.StockDef;
 import com.deathrayresearch.forrester.model.def.ViewDef;
 import com.deathrayresearch.forrester.model.graph.AutoLayout;
 import com.deathrayresearch.forrester.model.graph.DependencyGraph;
@@ -25,7 +26,9 @@ import javafx.scene.input.ScrollEvent;
 import javafx.scene.layout.Pane;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -89,6 +92,9 @@ public class ModelCanvas extends Canvas {
     private String hoveredElement;
     private ConnectionId hoveredConnection;
     private ConnectionId selectedConnection;
+
+    // Copy/paste clipboard
+    private final Clipboard clipboard = new Clipboard();
 
     // Feedback loop highlighting
     private boolean loopHighlightActive;
@@ -508,6 +514,190 @@ public class ModelCanvas extends Canvas {
         invalidateLoopAnalysis();
         redraw();
         updateCursor();
+    }
+
+    /**
+     * Copies the current selection to the clipboard.
+     */
+    private void copySelection() {
+        if (editor == null || canvasState.getSelection().isEmpty()) {
+            return;
+        }
+        clipboard.capture(canvasState, editor, canvasState.getSelection());
+    }
+
+    /**
+     * Pastes clipboard contents, creating new elements offset from the originals.
+     * Flow endpoints are reconnected if both ends were copied; equations referencing
+     * copied elements are updated to use the new names.
+     */
+    private void pasteClipboard() {
+        if (editor == null || clipboard.isEmpty()) {
+            return;
+        }
+
+        saveUndoState();
+
+        double offsetX = 30;
+        double offsetY = 30;
+
+        // Compute centroid of current selection (or use canvas center) as paste anchor
+        Set<String> currentSel = canvasState.getSelection();
+        double anchorX;
+        double anchorY;
+        if (!currentSel.isEmpty()) {
+            double sx = 0;
+            double sy = 0;
+            int cnt = 0;
+            for (String n : currentSel) {
+                double nx = canvasState.getX(n);
+                double ny = canvasState.getY(n);
+                if (!Double.isNaN(nx) && !Double.isNaN(ny)) {
+                    sx += nx;
+                    sy += ny;
+                    cnt++;
+                }
+            }
+            anchorX = cnt > 0 ? sx / cnt + offsetX : offsetX;
+            anchorY = cnt > 0 ? sy / cnt + offsetY : offsetY;
+        } else {
+            anchorX = offsetX;
+            anchorY = offsetY;
+        }
+
+        Map<String, String> nameMapping = new HashMap<>();
+        List<String> pastedNames = new ArrayList<>();
+
+        // First pass: create elements and build name mapping
+        for (Clipboard.Entry entry : clipboard.getEntries()) {
+            String newName;
+            switch (entry.type()) {
+                case STOCK -> newName = editor.addStockFrom((StockDef) entry.elementDef());
+                case FLOW -> {
+                    FlowDef flowDef = (FlowDef) entry.elementDef();
+                    // Defer reconnection; create with null endpoints for now
+                    newName = editor.addFlowFrom(flowDef, null, null);
+                }
+                case AUX -> {
+                    AuxDef auxDef = (AuxDef) entry.elementDef();
+                    newName = editor.addAuxFrom(auxDef, auxDef.equation());
+                }
+                case CONSTANT -> newName = editor.addConstantFrom((ConstantDef) entry.elementDef());
+                case MODULE -> newName = editor.addModuleFrom((ModuleInstanceDef) entry.elementDef());
+                default -> { continue; }
+            }
+
+            nameMapping.put(entry.originalName(), newName);
+            pastedNames.add(newName);
+
+            double px = anchorX + entry.relativeX();
+            double py = anchorY + entry.relativeY();
+            canvasState.addElement(newName, entry.type(), px, py);
+
+            if (entry.customWidth() > 0 && entry.customHeight() > 0) {
+                canvasState.setSize(newName, entry.customWidth(), entry.customHeight());
+            }
+        }
+
+        // Second pass: reconnect flows and update equations
+        for (Clipboard.Entry entry : clipboard.getEntries()) {
+            String newName = nameMapping.get(entry.originalName());
+            if (newName == null) {
+                continue;
+            }
+
+            if (entry.type() == ElementType.FLOW) {
+                FlowDef original = (FlowDef) entry.elementDef();
+                String newSource = original.source() != null
+                        ? nameMapping.get(original.source()) : null;
+                String newSink = original.sink() != null
+                        ? nameMapping.get(original.sink()) : null;
+                if (newSource != null) {
+                    editor.reconnectFlow(newName,
+                            FlowEndpointCalculator.FlowEnd.SOURCE, newSource);
+                }
+                if (newSink != null) {
+                    editor.reconnectFlow(newName,
+                            FlowEndpointCalculator.FlowEnd.SINK, newSink);
+                }
+
+                // Update equation references
+                String eq = editor.getFlowEquation(newName);
+                if (eq != null) {
+                    String updated = remapEquationTokens(eq, nameMapping);
+                    if (!updated.equals(eq)) {
+                        editor.setFlowEquation(newName, updated);
+                    }
+                }
+            } else if (entry.type() == ElementType.AUX) {
+                String eq = editor.getAuxEquation(newName);
+                if (eq != null) {
+                    String updated = remapEquationTokens(eq, nameMapping);
+                    if (!updated.equals(eq)) {
+                        editor.setAuxEquation(newName, updated);
+                    }
+                }
+            }
+        }
+
+        // Select all pasted elements
+        canvasState.clearSelection();
+        for (String name : pastedNames) {
+            canvasState.addToSelection(name);
+        }
+
+        connectors = editor.generateConnectors();
+        invalidateLoopAnalysis();
+        redraw();
+    }
+
+    /**
+     * Replaces equation tokens that reference original names with their new names.
+     */
+    private static String remapEquationTokens(String equation, Map<String, String> nameMapping) {
+        String result = equation;
+        for (Map.Entry<String, String> mapping : nameMapping.entrySet()) {
+            String oldToken = mapping.getKey().replace(' ', '_');
+            String newToken = mapping.getValue().replace(' ', '_');
+            result = replaceTokenInEquation(result, oldToken, newToken);
+        }
+        return result;
+    }
+
+    /**
+     * Word-boundary-aware token replacement in an equation string.
+     */
+    private static String replaceTokenInEquation(String equation, String oldToken, String newToken) {
+        StringBuilder result = new StringBuilder();
+        int len = equation.length();
+        int tokenLen = oldToken.length();
+        int i = 0;
+
+        while (i < len) {
+            int idx = equation.indexOf(oldToken, i);
+            if (idx < 0) {
+                result.append(equation, i, len);
+                break;
+            }
+
+            boolean startOk = idx == 0 || !isTokenChar(equation.charAt(idx - 1));
+            boolean endOk = idx + tokenLen >= len || !isTokenChar(equation.charAt(idx + tokenLen));
+
+            if (startOk && endOk) {
+                result.append(equation, i, idx);
+                result.append(newToken);
+                i = idx + tokenLen;
+            } else {
+                result.append(equation, i, idx + 1);
+                i = idx + 1;
+            }
+        }
+
+        return result.toString();
+    }
+
+    private static boolean isTokenChar(char c) {
+        return Character.isLetterOrDigit(c) || c == '_';
     }
 
     /**
@@ -1090,6 +1280,12 @@ public class ModelCanvas extends Canvas {
             event.consume();
         } else if (event.isShortcutDown() && event.getCode() == KeyCode.A) {
             selectAll();
+            event.consume();
+        } else if (event.isShortcutDown() && event.getCode() == KeyCode.C) {
+            copySelection();
+            event.consume();
+        } else if (event.isShortcutDown() && event.getCode() == KeyCode.V) {
+            pasteClipboard();
             event.consume();
         } else if (event.isShortcutDown()
                 && (event.getCode() == KeyCode.PLUS || event.getCode() == KeyCode.EQUALS

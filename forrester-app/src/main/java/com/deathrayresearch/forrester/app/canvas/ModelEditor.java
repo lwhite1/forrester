@@ -150,6 +150,66 @@ public class ModelEditor {
     }
 
     /**
+     * Adds a new stock copied from a template with an auto-generated name.
+     * @return the name of the created stock
+     */
+    public String addStockFrom(StockDef template) {
+        String name = "Stock " + nextId++;
+        stocks.add(new StockDef(name, template.comment(), template.initialValue(),
+                template.unit(), template.negativeValuePolicy()));
+        nameIndex.add(name);
+        return name;
+    }
+
+    /**
+     * Adds a new flow copied from a template with an auto-generated name
+     * and the specified source/sink connections.
+     * @return the name of the created flow
+     */
+    public String addFlowFrom(FlowDef template, String source, String sink) {
+        String name = "Flow " + nextId++;
+        flows.add(new FlowDef(name, template.comment(), template.equation(),
+                template.timeUnit(), source, sink));
+        nameIndex.add(name);
+        return name;
+    }
+
+    /**
+     * Adds a new auxiliary copied from a template with an auto-generated name
+     * and the specified equation.
+     * @return the name of the created auxiliary
+     */
+    public String addAuxFrom(AuxDef template, String equation) {
+        String name = "Aux " + nextId++;
+        auxiliaries.add(new AuxDef(name, template.comment(), equation, template.unit()));
+        nameIndex.add(name);
+        return name;
+    }
+
+    /**
+     * Adds a new constant copied from a template with an auto-generated name.
+     * @return the name of the created constant
+     */
+    public String addConstantFrom(ConstantDef template) {
+        String name = "Constant " + nextId++;
+        constants.add(new ConstantDef(name, template.comment(), template.value(), template.unit()));
+        nameIndex.add(name);
+        return name;
+    }
+
+    /**
+     * Adds a new module instance copied from a template with an auto-generated name.
+     * @return the instance name of the created module
+     */
+    public String addModuleFrom(ModuleInstanceDef template) {
+        String name = "Module " + nextId++;
+        modules.add(new ModuleInstanceDef(name, template.definition(),
+                template.inputBindings(), template.outputBindings()));
+        nameIndex.add(name);
+        return name;
+    }
+
+    /**
      * Adds a new module instance with an auto-generated name and empty definition.
      * @return the instance name of the created module
      */
