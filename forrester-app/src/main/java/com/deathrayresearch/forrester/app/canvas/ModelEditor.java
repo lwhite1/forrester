@@ -39,7 +39,12 @@ public class ModelEditor {
     private final List<LookupTableDef> lookupTables = new ArrayList<>();
     private final Set<String> nameIndex = new HashSet<>();
     private SimulationSettings simulationSettings;
-    private int nextId = 1;
+    private int nextStockId = 1;
+    private int nextFlowId = 1;
+    private int nextAuxId = 1;
+    private int nextConstantId = 1;
+    private int nextModuleId = 1;
+    private int nextLookupId = 1;
 
     /**
      * Loads all elements from an immutable {@link ModelDefinition} into mutable lists,
@@ -70,31 +75,30 @@ public class ModelEditor {
         modules.forEach(m -> nameIndex.add(m.instanceName()));
         lookupTables.forEach(lt -> nameIndex.add(lt.name()));
 
-        // Set nextId past any existing numeric suffix
-        nextId = 1;
-        updateNextId(stocks.stream().map(StockDef::name));
-        updateNextId(flows.stream().map(FlowDef::name));
-        updateNextId(auxiliaries.stream().map(AuxDef::name));
-        updateNextId(constants.stream().map(ConstantDef::name));
-        updateNextId(modules.stream().map(ModuleInstanceDef::instanceName));
-        updateNextId(lookupTables.stream().map(LookupTableDef::name));
+        // Set per-type counters past any existing numeric suffix
+        nextStockId = maxIdFrom(stocks.stream().map(StockDef::name), "Stock ");
+        nextFlowId = maxIdFrom(flows.stream().map(FlowDef::name), "Flow ");
+        nextAuxId = maxIdFrom(auxiliaries.stream().map(AuxDef::name), "Aux ");
+        nextConstantId = maxIdFrom(constants.stream().map(ConstantDef::name), "Constant ");
+        nextModuleId = maxIdFrom(modules.stream().map(ModuleInstanceDef::instanceName), "Module ");
+        nextLookupId = maxIdFrom(lookupTables.stream().map(LookupTableDef::name), "Lookup ");
     }
 
-    private void updateNextId(java.util.stream.Stream<String> names) {
+    private static int maxIdFrom(java.util.stream.Stream<String> names, String prefix) {
+        int[] max = {0};
         names.forEach(name -> {
-            // Try to extract trailing number from auto-generated names like "Stock 3"
-            int spaceIdx = name.lastIndexOf(' ');
-            if (spaceIdx >= 0) {
+            if (name.startsWith(prefix)) {
                 try {
-                    int num = Integer.parseInt(name.substring(spaceIdx + 1));
-                    if (num >= nextId) {
-                        nextId = num + 1;
+                    int num = Integer.parseInt(name.substring(prefix.length()));
+                    if (num > max[0]) {
+                        max[0] = num;
                     }
                 } catch (NumberFormatException ignored) {
                     // Not an auto-named element
                 }
             }
         });
+        return max[0] + 1;
     }
 
     /**
@@ -102,7 +106,7 @@ public class ModelEditor {
      * @return the name of the created stock
      */
     public String addStock() {
-        String name = "Stock " + nextId++;
+        String name = "Stock " + nextStockId++;
         stocks.add(new StockDef(name, 0, "units"));
         nameIndex.add(name);
         return name;
@@ -123,8 +127,8 @@ public class ModelEditor {
      * @return the name of the created flow
      */
     public String addFlow(String source, String sink) {
-        String name = "Flow " + nextId++;
-        flows.add(new FlowDef(name, "0", "day", source, sink));
+        String name = "Flow " + nextFlowId++;
+        flows.add(new FlowDef(name, "0", "Day", source, sink));
         nameIndex.add(name);
         return name;
     }
@@ -134,7 +138,7 @@ public class ModelEditor {
      * @return the name of the created auxiliary
      */
     public String addAux() {
-        String name = "Aux " + nextId++;
+        String name = "Aux " + nextAuxId++;
         auxiliaries.add(new AuxDef(name, "0", "units"));
         nameIndex.add(name);
         return name;
@@ -145,7 +149,7 @@ public class ModelEditor {
      * @return the name of the created constant
      */
     public String addConstant() {
-        String name = "Constant " + nextId++;
+        String name = "Constant " + nextConstantId++;
         constants.add(new ConstantDef(name, 0, "units"));
         nameIndex.add(name);
         return name;
@@ -156,7 +160,7 @@ public class ModelEditor {
      * @return the name of the created stock
      */
     public String addStockFrom(StockDef template) {
-        String name = "Stock " + nextId++;
+        String name = "Stock " + nextStockId++;
         stocks.add(new StockDef(name, template.comment(), template.initialValue(),
                 template.unit(), template.negativeValuePolicy()));
         nameIndex.add(name);
@@ -169,7 +173,7 @@ public class ModelEditor {
      * @return the name of the created flow
      */
     public String addFlowFrom(FlowDef template, String source, String sink) {
-        String name = "Flow " + nextId++;
+        String name = "Flow " + nextFlowId++;
         flows.add(new FlowDef(name, template.comment(), template.equation(),
                 template.timeUnit(), source, sink));
         nameIndex.add(name);
@@ -182,7 +186,7 @@ public class ModelEditor {
      * @return the name of the created auxiliary
      */
     public String addAuxFrom(AuxDef template, String equation) {
-        String name = "Aux " + nextId++;
+        String name = "Aux " + nextAuxId++;
         auxiliaries.add(new AuxDef(name, template.comment(), equation, template.unit()));
         nameIndex.add(name);
         return name;
@@ -193,7 +197,7 @@ public class ModelEditor {
      * @return the name of the created constant
      */
     public String addConstantFrom(ConstantDef template) {
-        String name = "Constant " + nextId++;
+        String name = "Constant " + nextConstantId++;
         constants.add(new ConstantDef(name, template.comment(), template.value(), template.unit()));
         nameIndex.add(name);
         return name;
@@ -204,7 +208,7 @@ public class ModelEditor {
      * @return the instance name of the created module
      */
     public String addModuleFrom(ModuleInstanceDef template) {
-        String name = "Module " + nextId++;
+        String name = "Module " + nextModuleId++;
         modules.add(new ModuleInstanceDef(name, template.definition(),
                 template.inputBindings(), template.outputBindings()));
         nameIndex.add(name);
@@ -216,7 +220,7 @@ public class ModelEditor {
      * @return the instance name of the created module
      */
     public String addModule() {
-        String name = "Module " + nextId++;
+        String name = "Module " + nextModuleId++;
         ModelDefinition emptyDef = new ModelDefinition(
                 name, null, null,
                 List.of(), List.of(), List.of(), List.of(),
@@ -231,7 +235,7 @@ public class ModelEditor {
      * @return the name of the created lookup table
      */
     public String addLookup() {
-        String name = "Lookup " + nextId++;
+        String name = "Lookup " + nextLookupId++;
         lookupTables.add(new LookupTableDef(name,
                 new double[]{0.0, 1.0}, new double[]{0.0, 1.0}, "LINEAR"));
         nameIndex.add(name);
@@ -243,7 +247,7 @@ public class ModelEditor {
      * @return the name of the created lookup table
      */
     public String addLookupFrom(LookupTableDef template) {
-        String name = "Lookup " + nextId++;
+        String name = "Lookup " + nextLookupId++;
         lookupTables.add(new LookupTableDef(name, template.comment(),
                 template.xValues(), template.yValues(), template.interpolation()));
         nameIndex.add(name);

@@ -2,6 +2,7 @@ package com.deathrayresearch.forrester.app.canvas;
 
 import com.deathrayresearch.forrester.model.def.AuxDef;
 
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.TextField;
 
 /**
@@ -14,7 +15,7 @@ class AuxForm implements ElementForm {
 
     private TextField nameField;
     private TextField equationField;
-    private TextField unitField;
+    private ComboBox<String> unitBox;
 
     AuxForm(FormContext ctx) {
         this.ctx = ctx;
@@ -37,9 +38,9 @@ class AuxForm implements ElementForm {
         EquationAutoComplete.attach(equationField, ctx.editor, ctx.elementName);
         ctx.addFieldRow(row++, "Equation", equationField);
 
-        unitField = ctx.createTextField(aux.unit() != null ? aux.unit() : "");
-        ctx.addCommitHandlers(unitField, this::commitUnit);
-        ctx.addFieldRow(row++, "Unit", unitField);
+        unitBox = ctx.createUnitComboBox(aux.unit());
+        ctx.addComboCommitHandlers(unitBox, this::commitUnit);
+        ctx.addFieldRow(row++, "Unit", unitBox);
 
         return row;
     }
@@ -52,7 +53,7 @@ class AuxForm implements ElementForm {
         }
         nameField.setText(ctx.elementName);
         equationField.setText(aux.equation());
-        unitField.setText(aux.unit() != null ? aux.unit() : "");
+        unitBox.setValue(aux.unit() != null ? aux.unit() : "");
     }
 
     @Override
@@ -76,8 +77,8 @@ class AuxForm implements ElementForm {
         ctx.canvas.applyAuxEquation(ctx.elementName, equation);
     }
 
-    private void commitUnit(TextField field) {
-        String unit = field.getText().trim();
+    private void commitUnit(ComboBox<String> box) {
+        String unit = box.getValue() != null ? box.getValue().trim() : "";
         AuxDef aux = ctx.editor.getAuxByName(ctx.elementName);
         if (aux != null && unit.equals(aux.unit())) {
             return;

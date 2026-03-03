@@ -144,13 +144,13 @@ class ModelEditorTest {
         }
 
         @Test
-        void shouldUseUniqueIdsAcrossTypes() {
+        void shouldNumberEachTypeIndependently() {
             editor.addStock();  // "Stock 1"
-            String flowName = editor.addFlow();  // "Flow 2"
-            String auxName = editor.addAux();  // "Aux 3"
+            String flowName = editor.addFlow();  // "Flow 1"
+            String auxName = editor.addAux();  // "Aux 1"
 
-            assertThat(flowName).isEqualTo("Flow 2");
-            assertThat(auxName).isEqualTo("Aux 3");
+            assertThat(flowName).isEqualTo("Flow 1");
+            assertThat(auxName).isEqualTo("Aux 1");
         }
     }
 
@@ -479,9 +479,9 @@ class ModelEditorTest {
         @Test
         void shouldRejectRenameToExistingNameAcrossTypes() {
             editor.addStock();     // "Stock 1"
-            editor.addConstant();  // "Constant 2"
+            editor.addConstant();  // "Constant 1"
 
-            boolean result = editor.renameElement("Stock 1", "Constant 2");
+            boolean result = editor.renameElement("Stock 1", "Constant 1");
 
             assertThat(result).isFalse();
             assertThat(editor.getStocks().get(0).name()).isEqualTo("Stock 1");
@@ -827,9 +827,9 @@ class ModelEditorTest {
         void shouldReconnectCloudSourceToStock() {
             editor.addStock(); // Stock 1
             editor.addStock(); // Stock 2
-            editor.addFlow(null, "Stock 2"); // Flow 3 with cloud source
+            editor.addFlow(null, "Stock 2"); // Flow 1 with cloud source
 
-            boolean result = editor.reconnectFlow("Flow 3",
+            boolean result = editor.reconnectFlow("Flow 1",
                     FlowEndpointCalculator.FlowEnd.SOURCE, "Stock 1");
 
             assertThat(result).isTrue();
@@ -842,9 +842,9 @@ class ModelEditorTest {
         void shouldReconnectCloudSinkToStock() {
             editor.addStock(); // Stock 1
             editor.addStock(); // Stock 2
-            editor.addFlow("Stock 1", null); // Flow 3 with cloud sink
+            editor.addFlow("Stock 1", null); // Flow 1 with cloud sink
 
-            boolean result = editor.reconnectFlow("Flow 3",
+            boolean result = editor.reconnectFlow("Flow 1",
                     FlowEndpointCalculator.FlowEnd.SINK, "Stock 2");
 
             assertThat(result).isTrue();
@@ -857,9 +857,9 @@ class ModelEditorTest {
         void shouldDisconnectSourceToCloud() {
             editor.addStock(); // Stock 1
             editor.addStock(); // Stock 2
-            editor.addFlow("Stock 1", "Stock 2"); // Flow 3
+            editor.addFlow("Stock 1", "Stock 2"); // Flow 1
 
-            boolean result = editor.reconnectFlow("Flow 3",
+            boolean result = editor.reconnectFlow("Flow 1",
                     FlowEndpointCalculator.FlowEnd.SOURCE, null);
 
             assertThat(result).isTrue();
@@ -873,9 +873,9 @@ class ModelEditorTest {
             editor.addStock(); // Stock 1
             editor.addStock(); // Stock 2
             editor.addStock(); // Stock 3
-            editor.addFlow("Stock 1", "Stock 2"); // Flow 4
+            editor.addFlow("Stock 1", "Stock 2"); // Flow 1
 
-            boolean result = editor.reconnectFlow("Flow 4",
+            boolean result = editor.reconnectFlow("Flow 1",
                     FlowEndpointCalculator.FlowEnd.SOURCE, "Stock 3");
 
             assertThat(result).isTrue();
@@ -895,9 +895,9 @@ class ModelEditorTest {
         @Test
         void shouldRejectNonexistentStockName() {
             editor.addStock(); // Stock 1
-            editor.addFlow(null, "Stock 1"); // Flow 2 with cloud source
+            editor.addFlow(null, "Stock 1"); // Flow 1 with cloud source
 
-            boolean result = editor.reconnectFlow("Flow 2",
+            boolean result = editor.reconnectFlow("Flow 1",
                     FlowEndpointCalculator.FlowEnd.SOURCE, "Ghost");
 
             assertThat(result).isFalse();
@@ -909,9 +909,9 @@ class ModelEditorTest {
         void shouldRejectSelfLoop() {
             editor.addStock(); // Stock 1
             editor.addStock(); // Stock 2
-            editor.addFlow("Stock 1", "Stock 2"); // Flow 3
+            editor.addFlow("Stock 1", "Stock 2"); // Flow 1
 
-            boolean result = editor.reconnectFlow("Flow 3",
+            boolean result = editor.reconnectFlow("Flow 1",
                     FlowEndpointCalculator.FlowEnd.SOURCE, "Stock 2");
 
             assertThat(result).isFalse();
@@ -960,9 +960,9 @@ class ModelEditorTest {
         @Test
         void shouldRejectRenameToExistingName() {
             editor.addModule(); // Module 1
-            editor.addStock();  // Stock 2
+            editor.addStock();  // Stock 1
 
-            boolean result = editor.renameElement("Module 1", "Stock 2");
+            boolean result = editor.renameElement("Module 1", "Stock 1");
 
             assertThat(result).isFalse();
             assertThat(editor.getModules().get(0).instanceName()).isEqualTo("Module 1");

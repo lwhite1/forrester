@@ -2,6 +2,7 @@ package com.deathrayresearch.forrester.app.canvas;
 
 import com.deathrayresearch.forrester.model.def.ConstantDef;
 
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.TextField;
 
 /**
@@ -14,7 +15,7 @@ class ConstantForm implements ElementForm {
 
     private TextField nameField;
     private TextField valueField;
-    private TextField unitField;
+    private ComboBox<String> unitBox;
 
     ConstantForm(FormContext ctx) {
         this.ctx = ctx;
@@ -37,10 +38,9 @@ class ConstantForm implements ElementForm {
         ctx.addCommitHandlers(valueField, this::commitValue);
         ctx.addFieldRow(row++, "Value", valueField);
 
-        unitField = ctx.createTextField(
-                constant.unit() != null ? constant.unit() : "");
-        ctx.addCommitHandlers(unitField, this::commitUnit);
-        ctx.addFieldRow(row++, "Unit", unitField);
+        unitBox = ctx.createUnitComboBox(constant.unit());
+        ctx.addComboCommitHandlers(unitBox, this::commitUnit);
+        ctx.addFieldRow(row++, "Unit", unitBox);
 
         return row;
     }
@@ -53,7 +53,7 @@ class ConstantForm implements ElementForm {
         }
         nameField.setText(ctx.elementName);
         valueField.setText(ElementRenderer.formatValue(constant.value()));
-        unitField.setText(constant.unit() != null ? constant.unit() : "");
+        unitBox.setValue(constant.unit() != null ? constant.unit() : "");
     }
 
     private void commitValue(TextField field) {
@@ -72,8 +72,8 @@ class ConstantForm implements ElementForm {
         }
     }
 
-    private void commitUnit(TextField field) {
-        String unit = field.getText().trim();
+    private void commitUnit(ComboBox<String> box) {
+        String unit = box.getValue() != null ? box.getValue().trim() : "";
         ConstantDef constant = ctx.editor.getConstantByName(ctx.elementName);
         if (constant != null && unit.equals(constant.unit())) {
             return;

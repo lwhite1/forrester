@@ -17,7 +17,7 @@ class StockForm implements ElementForm {
 
     private TextField nameField;
     private TextField initialValueField;
-    private TextField unitField;
+    private ComboBox<String> unitBox;
     private ComboBox<String> policyBox;
 
     StockForm(FormContext ctx) {
@@ -41,30 +41,20 @@ class StockForm implements ElementForm {
         ctx.addCommitHandlers(initialValueField, this::commitInitialValue);
         ctx.addFieldRow(row++, "Initial Value", initialValueField);
 
-        unitField = ctx.createTextField(stock.unit() != null ? stock.unit() : "");
-        ctx.addCommitHandlers(unitField, this::commitUnit);
-        ctx.addFieldRow(row++, "Unit", unitField);
+        unitBox = ctx.createUnitComboBox(stock.unit());
+        ctx.addComboCommitHandlers(unitBox, this::commitUnit);
+        ctx.addFieldRow(row++, "Unit", unitBox);
 
         policyBox = new ComboBox<>();
-        policyBox.getItems().addAll("Allow", "Clamp to Zero");
-        if ("CLAMP_TO_ZERO".equals(stock.negativeValuePolicy())) {
-            policyBox.setValue("Clamp to Zero");
-        } else {
-            policyBox.setValue("Allow");
-        }
+        policyBox.getItems().addAll("Clamp to Zero", "Allow");
+        policyBox.setValue(policyDisplayValue(stock.negativeValuePolicy()));
         policyBox.setMaxWidth(Double.MAX_VALUE);
         policyBox.setOnAction(e -> {
             if (!ctx.updatingFields) {
-                String policyValue = "Clamp to Zero".equals(policyBox.getValue())
-                        ? "CLAMP_TO_ZERO" : null;
-                StockDef s = ctx.editor.getStockByName(ctx.elementName);
-                if (s != null && Objects.equals(policyValue, s.negativeValuePolicy())) {
-                    return;
-                }
-                ctx.canvas.applyStockNegativeValuePolicy(ctx.elementName, policyValue);
+                commitPolicy();
             }
         });
-        ctx.addFieldRow(row++, "Policy", policyBox);
+        ctx.addFieldRow(row++, "Negative Values", policyBox);
 
         return row;
     }
@@ -78,12 +68,8 @@ class StockForm implements ElementForm {
         nameField.setText(ctx.elementName);
         initialValueField.setText(
                 ElementRenderer.formatValue(stock.initialValue()));
-        unitField.setText(stock.unit() != null ? stock.unit() : "");
-        if ("CLAMP_TO_ZERO".equals(stock.negativeValuePolicy())) {
-            policyBox.setValue("Clamp to Zero");
-        } else {
-            policyBox.setValue("Allow");
-        }
+        unitBox.setValue(stock.unit() != null ? stock.unit() : "");
+        policyBox.setValue(policyDisplayValue(stock.negativeValuePolicy()));
     }
 
     private void commitInitialValue(TextField field) {
@@ -102,12 +88,34 @@ class StockForm implements ElementForm {
         }
     }
 
-    private void commitUnit(TextField field) {
-        String unit = field.getText().trim();
+    private void commitUnit(ComboBox<String> box) {
+        String unit = box.getValue() != null ? box.getValue().trim() : "";
         StockDef stock = ctx.editor.getStockByName(ctx.elementName);
         if (stock != null && unit.equals(stock.unit())) {
             return;
         }
         ctx.canvas.applyStockUnit(ctx.elementName, unit);
+    }
+
+    private void commitPolicy() {
+        String policyValue = "Allow".equals(policyBox.getValue())
+                ? "ALLOW" : "CLAMP_TO_ZERO";
+        StockDef stock = ctx.editor.getStockByName(ctx.elementName);
+        if (stock != null && Objects.equals(policyValue,
+                stock.negativeValuePolicy() != null ? stock.negativeValuePolicy() : "CLAMP_TO_ZERO")) {
+            return;
+        }
+        ctx.canvas.applyStockNegativeValuePolicy(ctx.elementName, policyValue);
+    }
+
+    /**
+     * Maps the stored policy string to a display value.
+     * Null and "CLAMP_TO_ZERO" both display as "Clamp to Zero" (the engine default).
+     */
+    private static String policyDisplayValue(String policy) {
+        if ("ALLOW".equals(policy)) {
+            return "Allow";
+        }
+        return "Clamp to Zero";
     }
 }

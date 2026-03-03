@@ -1,11 +1,13 @@
 package com.deathrayresearch.forrester.app.canvas;
 
 import javafx.scene.Node;
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Priority;
 
+import java.util.List;
 import java.util.function.Consumer;
 
 /**
@@ -71,6 +73,58 @@ class FormContext {
         field.focusedProperty().addListener((obs, wasFocused, isFocused) -> {
             if (!isFocused && !updatingFields) {
                 handler.accept(field);
+            }
+        });
+    }
+
+    /** Common unit names for stock/aux/constant unit fields. */
+    static final List<String> COMMON_UNITS = List.of(
+            "Dimensionless",
+            "Person", "Thing",
+            "Day", "Week", "Month", "Year",
+            "Hour", "Minute", "Second",
+            "USD",
+            "Kilogram", "Gram", "Pound",
+            "Meter", "Kilometer", "Mile",
+            "Liter", "Gallon US",
+            "Celsius", "Fahrenheit"
+    );
+
+    /** Time unit names for flow time unit fields. */
+    static final List<String> TIME_UNITS = List.of(
+            "Day", "Week", "Month", "Year",
+            "Hour", "Minute", "Second", "Millisecond"
+    );
+
+    ComboBox<String> createUnitComboBox(String currentValue) {
+        ComboBox<String> box = new ComboBox<>();
+        box.getItems().addAll(COMMON_UNITS);
+        box.setEditable(true);
+        box.setValue(currentValue != null ? currentValue : "");
+        box.setMaxWidth(Double.MAX_VALUE);
+        GridPane.setHgrow(box, Priority.ALWAYS);
+        return box;
+    }
+
+    ComboBox<String> createTimeUnitComboBox(String currentValue) {
+        ComboBox<String> box = new ComboBox<>();
+        box.getItems().addAll(TIME_UNITS);
+        box.setEditable(true);
+        box.setValue(currentValue != null ? currentValue : "");
+        box.setMaxWidth(Double.MAX_VALUE);
+        GridPane.setHgrow(box, Priority.ALWAYS);
+        return box;
+    }
+
+    void addComboCommitHandlers(ComboBox<String> box, Consumer<ComboBox<String>> handler) {
+        box.setOnAction(e -> {
+            if (!updatingFields) {
+                handler.accept(box);
+            }
+        });
+        box.focusedProperty().addListener((obs, wasFocused, isFocused) -> {
+            if (!isFocused && !updatingFields) {
+                handler.accept(box);
             }
         });
     }

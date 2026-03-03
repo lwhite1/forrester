@@ -2,6 +2,7 @@ package com.deathrayresearch.forrester.app.canvas;
 
 import com.deathrayresearch.forrester.model.def.FlowDef;
 
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 
@@ -15,7 +16,7 @@ class FlowForm implements ElementForm {
 
     private TextField nameField;
     private TextField equationField;
-    private TextField timeUnitField;
+    private ComboBox<String> timeUnitBox;
     private Label sourceLabel;
     private Label sinkLabel;
 
@@ -40,10 +41,9 @@ class FlowForm implements ElementForm {
         EquationAutoComplete.attach(equationField, ctx.editor, ctx.elementName);
         ctx.addFieldRow(row++, "Equation", equationField);
 
-        timeUnitField = ctx.createTextField(
-                flow.timeUnit() != null ? flow.timeUnit() : "");
-        ctx.addCommitHandlers(timeUnitField, this::commitTimeUnit);
-        ctx.addFieldRow(row++, "Time Unit", timeUnitField);
+        timeUnitBox = ctx.createTimeUnitComboBox(flow.timeUnit());
+        ctx.addComboCommitHandlers(timeUnitBox, this::commitTimeUnit);
+        ctx.addFieldRow(row++, "Time Unit", timeUnitBox);
 
         sourceLabel = new Label(flow.source() != null ? flow.source() : "(cloud)");
         ctx.addReadOnlyRow(row++, "Source", sourceLabel);
@@ -61,7 +61,7 @@ class FlowForm implements ElementForm {
         }
         nameField.setText(ctx.elementName);
         equationField.setText(flow.equation());
-        timeUnitField.setText(flow.timeUnit() != null ? flow.timeUnit() : "");
+        timeUnitBox.setValue(flow.timeUnit() != null ? flow.timeUnit() : "");
         sourceLabel.setText(flow.source() != null ? flow.source() : "(cloud)");
         sinkLabel.setText(flow.sink() != null ? flow.sink() : "(cloud)");
     }
@@ -87,12 +87,12 @@ class FlowForm implements ElementForm {
         ctx.canvas.applyFlowEquation(ctx.elementName, equation);
     }
 
-    private void commitTimeUnit(TextField field) {
-        String timeUnit = field.getText().trim();
+    private void commitTimeUnit(ComboBox<String> box) {
+        String timeUnit = box.getValue() != null ? box.getValue().trim() : "";
         if (timeUnit.isEmpty()) {
             FlowDef flow = ctx.editor.getFlowByName(ctx.elementName);
             if (flow != null) {
-                field.setText(flow.timeUnit());
+                box.setValue(flow.timeUnit());
             }
             return;
         }
