@@ -35,7 +35,7 @@
 
 - Dependency graph and auto-layout provide structural analysis. `DependencyGraph` extracts a directed graph from model definitions (which elements influence which), `ConnectorGenerator` auto-generates influence arrows, `AutoLayout` produces layered element placement, and `ViewValidator` checks view integrity. These are the building blocks for visual diagram generation.
 
-- Interactive visual editor closes the biggest learning gap. The `forrester-app` module provides a JavaFX canvas-based editor for creating and editing stock-and-flow diagrams interactively. Users can create stocks, flows, auxiliaries, constants, and modules via toolbar or keyboard shortcuts (1–6), connect flows to stocks with a two-click protocol, edit names/values/equations inline with double-click, drag elements to reposition, and reattach flow endpoints by dragging clouds onto stocks. The editor includes pan (Space+drag, middle/right-drag), zoom (scroll wheel, Ctrl+Plus/Minus/0), rubber-band marquee selection, undo/redo (Ctrl+Z/Shift+Z, 100-level snapshot stack), context-sensitive cursor feedback for all 10 interaction states, and a status bar showing tool/selection/element counts/zoom. Models are saved to and loaded from JSON files with full view layout preservation. Simulation can be run directly from the editor (Ctrl+R) with results displayed in a sortable table. The editor renders the Layered Flow Diagram visual language with distinct shapes for each element type (including module containers with "mod" badge), material flow arrows routed through diamond indicators, dashed info link connectors, and cloud symbols for disconnected endpoints.
+- Interactive visual editor closes the biggest learning gap. The `forrester-app` module provides a JavaFX canvas-based editor for creating and editing stock-and-flow diagrams interactively. Users can create stocks, flows, auxiliaries, constants, and modules via toolbar or keyboard shortcuts (1–6), connect flows to stocks with a two-click protocol, edit names/values/equations inline with double-click, drag elements to reposition, and reattach flow endpoints by dragging clouds onto stocks. The editor includes pan (Space+drag, middle/right-drag), zoom (scroll wheel, Ctrl+Plus/Minus/0), rubber-band marquee selection, undo/redo (Ctrl+Z/Shift+Z, 100-level snapshot stack), context-sensitive cursor feedback for all 10 interaction states, and a status bar showing tool/selection/element counts/zoom. Models are saved to and loaded from JSON files with full view layout preservation. Simulation can be run directly from the editor (Ctrl+R) with results displayed in a tabbed dialog offering both a sortable table and an interactive line chart with per-series toggle checkboxes and PNG export. A "Loops" toggle button highlights feedback loop structures — elements and edges participating in cycles are drawn with colored borders and thickened lines, and the status bar shows the loop group count. The editor renders the Layered Flow Diagram visual language with distinct shapes for each element type (including module containers with "mod" badge), material flow arrows routed through diamond indicators, dashed info link connectors, and cloud symbols for disconnected endpoints.
 
 ## Robustness
 
@@ -52,7 +52,7 @@ The simulation engine and analysis tools have been hardened via a system-wide au
 
 ## Limitations
 
-- The visual editor covers core modeling operations but lacks some polish features found in commercial tools: no context toolbar near selection, no functional resize handles, no hover highlighting or feedback loop highlighting, no simulation results charting/graphing (only a table), and no module drill-down or binding configuration in the UI (modules can be placed and renamed but not expanded or connected to ports). These are refinement gaps rather than architectural gaps — the foundations (rendering, interaction, serialization, simulation integration) are solid.
+- The visual editor covers core modeling operations but lacks some polish features found in commercial tools: no context toolbar near selection, no functional resize handles, and no hover highlighting. These are refinement gaps rather than architectural gaps — the foundations (rendering, interaction, serialization, simulation integration) are solid.
 
 ## Verdict by Audience
 
@@ -63,7 +63,7 @@ The simulation engine and analysis tools have been hardened via a system-wide au
 | Prototyping before Vensim/Stella | Good — quick to iterate; JSON serialization enables model exchange |
 | Deterministic sensitivity analysis | Very good — single-parameter and multi-parameter sweeps with CSV output cover what-if and interaction analysis |
 | Uncertainty analysis / research | Good — Monte Carlo with LHS, percentile envelopes, and fan charts cover multi-parameter uncertainty quantification |
-| Non-programmers | Fair — visual editor enables diagram-based modeling but lacks some polish (no chart view, no feedback loop highlighting) |
+| Non-programmers | Fair — visual editor enables diagram-based modeling with integrated charting and feedback loop highlighting, but lacks some polish (no hover highlighting, no element properties panel) |
 | Model calibration / optimization | Good — derivative-free optimization with multiple algorithms and built-in objective functions for fitting to data |
 | Subscripted array computation | Very good — intelligent arrays with automatic broadcasting, named-dimension alignment, and aggregation match Analytica semantics |
 | Model sharing / interoperability | Very good — JSON round-trip serialization, Vensim .mdl import, XMILE import/export, structural validation, and nested module support enable saving and exchanging models with both major SD tool ecosystems |
@@ -83,7 +83,6 @@ The simulation engine and analysis tools have been hardened via a system-wide au
 
 Ranked by impact on the gap between "useful modeling tool" and "competitive with commercial tools":
 
-1. **Simulation results charting** — The results table is functional but charts and time-series graphs are essential for understanding dynamic behavior. Adding line charts (stock trajectories, flow rates) to the results dialog would dramatically improve the analysis workflow.
-2. **Feedback loop highlighting** — Hover an element to see which feedback loops it participates in; color-code reinforcing vs balancing loops. This is a core educational feature of commercial SD tools.
-3. **Module drill-down and binding configuration** — The visual editor can now place and rename module instances, but cannot yet expand them to view/edit their internal structure or configure input/output port bindings. Adding hierarchical navigation and port binding UI would complete the module workflow.
-4. **Context toolbar and element properties panel** — A floating toolbar near the selection and a side panel for editing all element properties (not just name/equation) would improve editing ergonomics.
+1. **Hover highlighting** — Visual feedback on hover (element outlines, connector emphasis) would bring the editor closer to commercial tool polish and improve discoverability.
+2. **Context toolbar and element properties panel** — A floating toolbar near the selection and a side panel for editing all element properties (not just name/equation) would improve editing ergonomics.
+3. **Resize handles** — Functional resize handles for elements would allow users to customize diagram layout beyond repositioning.
