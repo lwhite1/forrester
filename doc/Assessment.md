@@ -35,6 +35,8 @@
 
 - Dependency graph and auto-layout provide structural analysis. `DependencyGraph` extracts a directed graph from model definitions (which elements influence which), `ConnectorGenerator` auto-generates influence arrows, `AutoLayout` produces layered element placement, and `ViewValidator` checks view integrity. These are the building blocks for visual diagram generation.
 
+- Interactive visual editor closes the biggest learning gap. The `forrester-app` module provides a JavaFX canvas-based editor for creating and editing stock-and-flow diagrams interactively. Users can create stocks, flows, auxiliaries, and constants via toolbar or keyboard shortcuts (1–5), connect flows to stocks with a two-click protocol, edit names/values/equations inline with double-click, drag elements to reposition, and reattach flow endpoints by dragging clouds onto stocks. The editor includes pan (Space+drag, middle/right-drag), zoom (scroll wheel, Ctrl+Plus/Minus/0), rubber-band marquee selection, undo/redo (Ctrl+Z/Shift+Z, 100-level snapshot stack), context-sensitive cursor feedback for all 10 interaction states, and a status bar showing tool/selection/element counts/zoom. Models are saved to and loaded from JSON files with full view layout preservation. Simulation can be run directly from the editor (Ctrl+R) with results displayed in a sortable table. The editor renders the Layered Flow Diagram visual language with distinct shapes for each element type, material flow arrows routed through diamond indicators, dashed info link connectors, and cloud symbols for disconnected endpoints.
+
 ## Robustness
 
 The simulation engine and analysis tools have been hardened via a system-wide audit (see `doc/SystemAudit.md`):
@@ -50,7 +52,7 @@ The simulation engine and analysis tools have been hardened via a system-wide au
 
 ## Limitations
 
-- No visual editor. This is the biggest remaining gap for learning. Commercial tools (Vensim, Stella, AnyLogic) let you draw stock-and-flow diagrams and see feedback structure visually. The dependency graph, auto-layout, and view definition infrastructure provide the data model for diagrams, but there is no interactive visual editor or rendered diagram output yet. Generating static diagrams (e.g., DOT/Graphviz or SVG from the `DependencyGraph` and `AutoLayout` data) would be a natural next step.
+- The visual editor covers core modeling operations but lacks some polish features found in commercial tools: no context toolbar near selection, no functional resize handles, no hover highlighting or feedback loop highlighting, no simulation results charting/graphing (only a table), and no module/submodel support in the UI. These are refinement gaps rather than architectural gaps — the foundations (rendering, interaction, serialization, simulation integration) are solid.
 
 ## Verdict by Audience
 
@@ -61,11 +63,11 @@ The simulation engine and analysis tools have been hardened via a system-wide au
 | Prototyping before Vensim/Stella | Good — quick to iterate; JSON serialization enables model exchange |
 | Deterministic sensitivity analysis | Very good — single-parameter and multi-parameter sweeps with CSV output cover what-if and interaction analysis |
 | Uncertainty analysis / research | Good — Monte Carlo with LHS, percentile envelopes, and fan charts cover multi-parameter uncertainty quantification |
-| Non-programmers | Poor — no visual editor |
+| Non-programmers | Fair — visual editor enables diagram-based modeling but lacks some polish (no chart view, no feedback loop highlighting) |
 | Model calibration / optimization | Good — derivative-free optimization with multiple algorithms and built-in objective functions for fitting to data |
 | Subscripted array computation | Very good — intelligent arrays with automatic broadcasting, named-dimension alignment, and aggregation match Analytica semantics |
 | Model sharing / interoperability | Very good — JSON round-trip serialization, Vensim .mdl import, XMILE import/export, structural validation, and nested module support enable saving and exchanging models with both major SD tool ecosystems |
-| Production/enterprise modeling | Fair — has analysis tools, serialization, nested modules, multi-dimensional subscripts, and intelligent arrays but lacks visual diagrams |
+| Production/enterprise modeling | Good — has analysis tools, serialization, nested modules, multi-dimensional subscripts, intelligent arrays, and a visual editor with simulation integration |
 
 ## Bottom Line
 
@@ -75,10 +77,13 @@ The simulation engine and analysis tools have been hardened via a system-wide au
 
 - The data-driven definition and serialization pipeline is a significant architectural milestone. Models can now be described as pure data (no lambdas), validated structurally, serialized to/from JSON, and compiled to runnable simulations — with full support for nested modules, expression parsing, dependency extraction, and forward references. This opens the door to external model editors, model exchange between tools, and version-controlled model definitions. The dependency graph and auto-layout infrastructure provide the foundation for visual diagram generation.
 
-- It's not a replacement for Vensim or Stella for serious modeling work. The dependency graph and auto-layout data are available, but there is no rendered diagram output yet — analysts would still hit walls on models that require visual feedback-loop analysis.
+- The visual editor is a significant milestone that moves Forrester from "code-only" to "visual + code." Users can now build, edit, save, and simulate models entirely through the GUI — a workflow that was previously only available in commercial tools. The editor's rendering of the Layered Flow Diagram notation, combined with JSON persistence and integrated simulation, makes it a viable standalone modeling tool for small-to-medium models.
 
 ## What Matters Most Next
 
-Ranked by impact on the gap between "educational tool" and "useful modeling tool":
+Ranked by impact on the gap between "useful modeling tool" and "competitive with commercial tools":
 
-1. **Visual diagram rendering** — The biggest remaining learning gap. The dependency graph, auto-layout, and view definition infrastructure are in place — the next step is rendering them to a visual format (DOT/Graphviz, SVG, or an interactive JavaFX diagram). Even a static stock-and-flow diagram generated from `DependencyGraph` + `AutoLayout` would help learners see feedback loops.
+1. **Simulation results charting** — The results table is functional but charts and time-series graphs are essential for understanding dynamic behavior. Adding line charts (stock trajectories, flow rates) to the results dialog would dramatically improve the analysis workflow.
+2. **Feedback loop highlighting** — Hover an element to see which feedback loops it participates in; color-code reinforcing vs balancing loops. This is a core educational feature of commercial SD tools.
+3. **Module/submodel support in the UI** — The engine supports nested modules, but the visual editor has no way to create, expand, or navigate submodels. Adding hierarchical model composition to the UI would enable larger models.
+4. **Context toolbar and element properties panel** — A floating toolbar near the selection and a side panel for editing all element properties (not just name/equation) would improve editing ergonomics.

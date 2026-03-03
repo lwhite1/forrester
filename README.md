@@ -2,7 +2,7 @@
 
 ## Overview
 
-Forrester is a Java implementation of a System Dynamics simulation engine developed by Death Ray Research. System Dynamics is a methodology for modeling complex systems characterized by feedback loops, significant delays, and non-linear interactions. The framework provides the building blocks to construct, run, and visualize such models.
+Forrester is a Java implementation of a System Dynamics simulation engine and visual modeling tool developed by Death Ray Research. System Dynamics is a methodology for modeling complex systems characterized by feedback loops, significant delays, and non-linear interactions. The framework provides the building blocks to construct, run, and visualize such models — both programmatically through a code-first API and interactively through a JavaFX canvas-based visual editor.
 
 The engine is designed for creating training simulations, games, scenario testing, and planning models across domains including ecology, project management, software development, business strategy, operations, medicine, and international relations.
 
@@ -22,7 +22,7 @@ The engine is designed for creating training simulations, games, scenario testin
 | OpenCSV | 5.9 | CSV output |
 | JavaMoney Moneta | 1.4.4 | Currency handling |
 | Logback | 1.5.16 | Logging |
-| OpenJFX | 21 | Chart visualization |
+| OpenJFX | 21 | Visual editor canvas and chart visualization |
 
 ## Core Concepts
 
@@ -57,7 +57,9 @@ com.deathrayresearch.forrester
 ├── event/                       # Event-driven communication
 ├── sweep/                       # Parameter sweep, Monte Carlo, optimization, and CSV output
 ├── io/                          # CSV export, reporting, JSON serialization, Vensim .mdl import, and XMILE import/export
-└── ui/                          # JavaFX chart visualization
+├── ui/                          # JavaFX chart visualization
+└── app/                         # JavaFX canvas-based visual editor (forrester-app module)
+    └── canvas/                  # Canvas rendering, interaction, editing, and simulation integration
 ```
 
 ### Simulation Engine (`Simulation.java`)
@@ -724,6 +726,36 @@ List<String> errors = ViewValidator.validate(view, def);
 | `AutoLayout` | Generates a `ViewDef` with layered element placement |
 | `ViewValidator` | Validates view integrity against the model definition |
 
+### Visual Editor (`app/` package — `forrester-app` module)
+
+The `forrester-app` module provides a JavaFX canvas-based visual editor for creating and editing stock-and-flow diagrams interactively. Users can build, edit, save, and simulate models entirely through the GUI.
+
+**Core interactions:**
+
+- **Element creation** — toolbar or keyboard shortcuts (1–5) to place stocks, flows, auxiliaries, and constants on the canvas
+- **Flow connections** — two-click protocol: click source (stock or cloud), rubber-band follows cursor with stock hover highlight, click sink to create flow at midpoint
+- **Inline editing** — double-click any element to rename; constants chain name→value editing; flows and auxiliaries chain name→equation editing. Rename propagates to flow references and equation tokens
+- **Flow reattachment** — drag cloud endpoints onto stocks to reconnect, or drag connected endpoints off stocks to disconnect to cloud
+- **Selection** — click to select, Shift+click to toggle, rubber-band marquee to select multiple elements, Ctrl+A to select all
+- **Pan & zoom** — Space+drag or middle/right-drag to pan; scroll wheel to zoom at cursor; Ctrl+Plus/Minus/0 for keyboard zoom
+- **Undo/redo** — Ctrl+Z / Ctrl+Shift+Z with a 100-level snapshot stack capturing full model + view state
+- **File persistence** — New, Open, Save, Save As (JSON format with full view layout preservation)
+- **Simulation** — Ctrl+R compiles the model definition, runs on a background thread, and displays results in a sortable table window
+
+**Visual language:** The editor renders the Layered Flow Diagram notation with distinct shapes for each element type (rounded-rectangle stocks, diamond flow indicators, rounded-rectangle auxiliaries, dashed-border constants), material flow arrows routed through diamond indicators, dashed info link connectors, and cloud symbols for disconnected flow endpoints.
+
+| Class | Purpose |
+|---|---|
+| `ForresterApp` | JavaFX entry point, menus, undo/simulation wiring |
+| `ModelCanvas` | Event handling and editing orchestration |
+| `ModelEditor` | Mutable model editing layer with name index |
+| `CanvasRenderer` | Rendering coordinator (connections, elements, overlays) |
+| `CanvasState` | Mutable positions, types, draw order, selection |
+| `FlowCreationController` | Two-click flow creation state machine |
+| `FlowEndpointCalculator` | Cloud positions and endpoint hit testing |
+| `SimulationRunner` | Compile + run + capture simulation results |
+| `UndoManager` | Snapshot-based undo/redo stack |
+
 ### Modules
 
 `Module` supports hierarchical model composition — sub-modules, constants, and all arrayed element types. Modules are used both in the lambda-based API (runtime composition) and as compilation targets for `ModuleInstanceDef`.
@@ -1057,6 +1089,7 @@ New to system dynamics? These resources provide a solid introduction to the meth
 
 The project is at version 1.0-SNAPSHOT and is under active development. Recent work has focused on:
 
+- Adding a JavaFX canvas-based visual editor (`forrester-app` module) — interactive stock-and-flow diagram editor with element creation via toolbar or keyboard shortcuts, two-click flow connection protocol with rubber-band preview, inline name/value/equation editing with rename propagation, flow endpoint reattachment, rubber-band marquee selection, pan/zoom navigation, 100-level snapshot-based undo/redo, JSON file persistence with view layout, integrated simulation with background execution and sortable results table, context-sensitive cursor feedback for 10 interaction states, and a status bar showing tool/selection/element counts/zoom. Models can be built, edited, saved, and simulated entirely through the GUI
 - Adding XMILE import and export (`io/xmile/` package) — bidirectional model exchange with Stella/iThink and other XMILE-compatible tools via the OASIS standard XML format. `XmileImporter` reads XMILE files to `ModelDefinition`; `XmileExporter` writes any `ModelDefinition` to valid XMILE 1.0 XML. Supports stocks, flows, auxiliaries, constants, lookup tables (standalone and embedded `<gf>`), simulation settings, view data, and bidirectional expression translation. Audited and hardened with 65 tests including round-trip compile+simulate and export→re-import verification
 - Adding Vensim `.mdl` import (`io/vensim/` package) — reads Vensim model files and produces `ModelDefinition` records that can be compiled and simulated. Supports stocks, constants, auxiliaries, lookup tables, subscript ranges, simulation settings, sketch data, and expression translation for common Vensim functions. Audited and hardened with 75 tests covering CRLF handling, case-insensitive matching, operator precedence, and duplicate name detection
 - Adding an external model representation with expression AST, definition records, model compiler, JSON serialization, nested modules, and dependency graph — six new packages (`model/expr`, `model/def`, `model/compile`, `io/json`, `model/graph`, `measure/UnitRegistry`) that enable defining models as pure data, persisting them to JSON, compiling them to runnable simulations, and extracting dependency graphs for visualization
