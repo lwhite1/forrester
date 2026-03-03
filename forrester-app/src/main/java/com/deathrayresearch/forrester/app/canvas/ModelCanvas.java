@@ -555,6 +555,17 @@ public class ModelCanvas extends Canvas {
     }
 
     /**
+     * Cuts the current selection: copies to clipboard, then deletes.
+     */
+    private void cutSelection() {
+        if (editor == null || canvasState.getSelection().isEmpty()) {
+            return;
+        }
+        copyPaste.copy(canvasState, editor);
+        deleteSelected();
+    }
+
+    /**
      * Pastes clipboard contents, creating new elements offset from the originals.
      */
     private void pasteClipboard() {
@@ -1045,6 +1056,9 @@ public class ModelCanvas extends Canvas {
             event.consume();
         } else if (event.isShortcutDown() && event.getCode() == KeyCode.C) {
             copySelection();
+            event.consume();
+        } else if (event.isShortcutDown() && event.getCode() == KeyCode.X) {
+            cutSelection();
             event.consume();
         } else if (event.isShortcutDown() && event.getCode() == KeyCode.V) {
             pasteClipboard();
