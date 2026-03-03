@@ -10,6 +10,7 @@ import com.deathrayresearch.forrester.model.def.StockDef;
 import com.deathrayresearch.forrester.model.graph.ConnectorGenerator;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -170,6 +171,11 @@ public class ModelEditor {
             return false;
         }
 
+        // Reject if newName is already in use by any element
+        if (hasElement(newName)) {
+            return false;
+        }
+
         boolean found = false;
 
         // Rename in stocks
@@ -318,28 +324,38 @@ public class ModelEditor {
         return Character.isLetterOrDigit(c) || c == '_';
     }
 
+    /**
+     * Returns true if any element (stock, flow, aux, or constant) has the given name.
+     */
+    public boolean hasElement(String name) {
+        return stocks.stream().anyMatch(s -> s.name().equals(name))
+                || flows.stream().anyMatch(f -> f.name().equals(name))
+                || auxiliaries.stream().anyMatch(a -> a.name().equals(name))
+                || constants.stream().anyMatch(c -> c.name().equals(name));
+    }
+
     public String getModelName() {
         return modelName;
     }
 
     public List<StockDef> getStocks() {
-        return stocks;
+        return Collections.unmodifiableList(stocks);
     }
 
     public List<FlowDef> getFlows() {
-        return flows;
+        return Collections.unmodifiableList(flows);
     }
 
     public List<AuxDef> getAuxiliaries() {
-        return auxiliaries;
+        return Collections.unmodifiableList(auxiliaries);
     }
 
     public List<ConstantDef> getConstants() {
-        return constants;
+        return Collections.unmodifiableList(constants);
     }
 
     public List<LookupTableDef> getLookupTables() {
-        return lookupTables;
+        return Collections.unmodifiableList(lookupTables);
     }
 
     /**

@@ -297,6 +297,19 @@ class CanvasStateTest {
             assertThat(state.hasElement("B")).isTrue();
             assertThat(state.hasElement("C")).isTrue();
         }
+
+        @Test
+        void shouldRejectRenameToExistingName() {
+            boolean result = state.renameElement("A", "B");
+
+            assertThat(result).isFalse();
+            // Both elements preserved unchanged
+            assertThat(state.hasElement("A")).isTrue();
+            assertThat(state.hasElement("B")).isTrue();
+            assertThat(state.getType("A")).isEqualTo("stock");
+            assertThat(state.getType("B")).isEqualTo("flow");
+            assertThat(state.getDrawOrder()).containsExactly("A", "B", "C");
+        }
     }
 
     @Nested

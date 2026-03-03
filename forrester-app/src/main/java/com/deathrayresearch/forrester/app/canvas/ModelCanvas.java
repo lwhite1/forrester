@@ -220,26 +220,47 @@ public class ModelCanvas extends Canvas {
     }
 
     /**
-     * Draws material flow arrows between stocks based on flow definitions.
-     * Reads positions from CanvasState.
+     * Draws material flow arrows routed through the flow indicator (diamond).
+     * Path: source stock edge → diamond → sink stock edge.
+     * Uses direction-aware attachment points on stock borders.
      */
     private void drawMaterialFlows(GraphicsContext gc) {
         for (FlowDef flow : editor.getFlows()) {
+            // Flow indicator (diamond) must be on canvas to draw
+            if (!canvasState.hasElement(flow.name())) {
+                continue;
+            }
+            double midX = canvasState.getX(flow.name());
+            double midY = canvasState.getY(flow.name());
+
             double sourceX = Double.NaN;
             double sourceY = Double.NaN;
             double sinkX = Double.NaN;
             double sinkY = Double.NaN;
 
+            // Source stock → diamond: attachment point on stock border nearest to diamond
             if (flow.source() != null && canvasState.hasElement(flow.source())) {
-                sourceX = canvasState.getX(flow.source()) + LayoutMetrics.STOCK_WIDTH / 2;
-                sourceY = canvasState.getY(flow.source());
-            }
-            if (flow.sink() != null && canvasState.hasElement(flow.sink())) {
-                sinkX = canvasState.getX(flow.sink()) - LayoutMetrics.STOCK_WIDTH / 2;
-                sinkY = canvasState.getY(flow.sink());
+                double scx = canvasState.getX(flow.source());
+                double scy = canvasState.getY(flow.source());
+                double[] edge = clipToBorder(scx, scy,
+                        LayoutMetrics.STOCK_WIDTH / 2, LayoutMetrics.STOCK_HEIGHT / 2,
+                        midX, midY);
+                sourceX = edge[0];
+                sourceY = edge[1];
             }
 
-            ConnectionRenderer.drawMaterialFlow(gc, sourceX, sourceY, sinkX, sinkY, flow.name());
+            // Diamond → sink stock: attachment point on stock border nearest from diamond
+            if (flow.sink() != null && canvasState.hasElement(flow.sink())) {
+                double scx = canvasState.getX(flow.sink());
+                double scy = canvasState.getY(flow.sink());
+                double[] edge = clipToBorder(scx, scy,
+                        LayoutMetrics.STOCK_WIDTH / 2, LayoutMetrics.STOCK_HEIGHT / 2,
+                        midX, midY);
+                sinkX = edge[0];
+                sinkY = edge[1];
+            }
+
+            ConnectionRenderer.drawMaterialFlow(gc, sourceX, sourceY, midX, midY, sinkX, sinkY);
         }
     }
 
@@ -531,7 +552,9 @@ public class ModelCanvas extends Canvas {
      * then regenerates connectors and redraws.
      */
     private void applyRename(String oldName, String newName) {
-        editor.renameElement(oldName, newName);
+        if (!editor.renameElement(oldName, newName)) {
+            return;
+        }
         canvasState.renameElement(oldName, newName);
         connectors = editor.generateConnectors();
         redraw();
@@ -587,8 +610,10 @@ public class ModelCanvas extends Canvas {
             double worldX = viewport.toWorldX(event.getX());
             double worldY = viewport.toWorldY(event.getY());
 
-            // Double-click: start inline editing
-            if (event.getClickCount() == 2) {
+            // Double-click: start inline editing (only in SELECT mode, not during pending flow)
+            if (event.getClickCount() == 2
+                    && activeTool == CanvasToolBar.Tool.SELECT
+                    && !pendingFlow) {
                 String hit = HitTester.hitTest(canvasState, worldX, worldY);
                 if (hit != null) {
                     startInlineEdit(hit);

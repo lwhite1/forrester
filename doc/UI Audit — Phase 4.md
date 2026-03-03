@@ -4,66 +4,33 @@ Audit of all forrester-app UI/canvas code after Phase 4 implementation.
 
 ## 1. BUGS
 
-### BUG-1: `drawMaterialFlows` hardcodes source/sink attachment to left/right stock edges [Major]
-**File:** `ModelCanvas.java`, lines ~226-244
-
-Material flow drawing always attaches to the right edge of the source stock (`cx + STOCK_WIDTH/2`) and left edge of the sink stock (`cx - STOCK_WIDTH/2`). This assumes flows always go left-to-right. If a user places a sink stock to the LEFT of a source stock, the arrow draws backwards. The cloud fallback offsets (`-80` / `+80`) also assume left-to-right layout.
-
-**Suggested fix:** Use center-to-center direction to dynamically determine attachment points based on actual relative positions.
+### ~~BUG-1: `drawMaterialFlows` hardcodes source/sink attachment to left/right stock edges~~ [Fixed]
+Material flow routing now uses `clipToBorder` to compute direction-aware attachment points on stock borders toward/from the diamond. Works correctly regardless of stock layout direction.
 
 ---
 
-### BUG-2: `ConnectionRenderer.drawMaterialFlow` produces NaN coordinates for cloud-to-cloud flows [Major]
-**File:** `ConnectionRenderer.java`, lines 27-29
-
-When both source and sink are `NaN` (both null/cloud), the fallback:
-```java
-double startX = hasSource ? sourceX : sinkX - 80;  // NaN - 80 = NaN
-double endX = hasSink ? sinkX : sourceX + 80;       // NaN + 80 = NaN
-```
-All coordinates become NaN, producing invisible/undefined drawing. Cloud-to-cloud is the default `addFlow()` state.
-
-**Suggested fix:** Use the flow indicator's canvas position as anchor, or skip drawing for unconnected flows.
+### ~~BUG-2: `ConnectionRenderer.drawMaterialFlow` produces NaN coordinates for cloud-to-cloud flows~~ [Fixed]
+Cloud positions are now computed relative to the flow indicator (diamond) position. When both source and sink are clouds, the diamond serves as anchor and clouds are placed at fixed offsets along the natural flow direction. No more NaN coordinates.
 
 ---
 
-### BUG-3: `CanvasState.renameElement` does not check if `newName` already exists [Major]
-**File:** `CanvasState.java`, lines ~151-172
-
-Renaming "A" to "B" when "B" already exists silently overwrites B's data and creates duplicate entries in `drawOrder`. Same issue exists in `ModelEditor.renameElement`.
-
-**Suggested fix:** Both methods should check for name collisions and return false if the target name is already in use.
+### ~~BUG-3: `CanvasState.renameElement` does not check if `newName` already exists~~ [Fixed]
+Both `CanvasState.renameElement` and `ModelEditor.renameElement` now reject renames when the target name is already in use, returning false. `ModelEditor.hasElement(name)` added as a helper. Tests added for both.
 
 ---
 
-### BUG-4: `applyRename` does not check return values [Minor]
-**File:** `ModelCanvas.java`, `applyRename` method
-
-If `editor.renameElement()` fails (returns false), `canvasState.renameElement()` is still called, leaving model and canvas out of sync.
-
-**Suggested fix:** Only proceed with canvas rename if model rename succeeds.
+### ~~BUG-4: `applyRename` does not check return values~~ [Fixed]
+`ModelCanvas.applyRename` now checks the return value of `editor.renameElement()` and skips `canvasState.renameElement()` if the model rename failed.
 
 ---
 
-### BUG-5: Double-click on stock in PLACE_FLOW mode creates inconsistent state [Major]
-**File:** `ModelCanvas.java`, `handleMousePressed`
-
-Event sequence on double-click:
-1. First press (`clickCount == 1`) enters `handleFlowClick` — starts pending flow with stock as source
-2. Second press (`clickCount == 2`) hits the double-click check BEFORE the PLACE_FLOW check — opens inline editor on the stock
-
-This leaves a dangling pending flow and opens the inline editor simultaneously.
-
-**Suggested fix:** Add a `pendingFlow` guard before the double-click check, or check `activeTool == SELECT` before allowing inline edit.
+### ~~BUG-5: Double-click on stock in PLACE_FLOW mode creates inconsistent state~~ [Fixed]
+Inline editing on double-click is now guarded by `activeTool == SELECT && !pendingFlow`. Double-clicking in any placement mode or during a pending flow no longer opens the inline editor.
 
 ---
 
-### BUG-6: Material flow routing ignores flow indicator position [Major]
-**File:** `ModelCanvas.java`, `drawMaterialFlows`
-
-Material flows draw from source stock directly to sink stock, completely bypassing the flow indicator (diamond) position. If the user drags the flow indicator elsewhere, the diamond appears disconnected from its flow line.
-
-**Suggested fix:** Route the material flow line through the flow indicator's current position (source -> diamond -> sink).
+### ~~BUG-6: Material flow routing ignores flow indicator position~~ [Fixed]
+Material flows now route through the flow indicator (diamond): source → diamond → sink. The `ConnectionRenderer.drawMaterialFlow` method draws two line segments through the diamond. Dragging a flow indicator correctly bends the flow line.
 
 ---
 
@@ -131,10 +98,8 @@ Commit/cancel behavior, focus loss handling, and chained constant editing are un
 
 ---
 
-### TEST-GAP-3: No tests for rename-to-existing-name scenario [Major]
-**Files:** `ModelEditorTest.java`, `CanvasStateTest.java`
-
-No test verifies what happens when renaming to a name already in use. Related to BUG-3.
+### ~~TEST-GAP-3: No tests for rename-to-existing-name scenario~~ [Fixed]
+Tests added: `ModelEditorTest.shouldRejectRenameToExistingName`, `shouldRejectRenameToExistingNameAcrossTypes`, and `CanvasStateTest.shouldRejectRenameToExistingName`.
 
 ---
 
@@ -155,12 +120,8 @@ Private static pure function with geometric logic but no test coverage.
 
 ## 4. CODE QUALITY
 
-### QUALITY-1: Mutable internal lists exposed via ModelEditor getters [Major]
-**File:** `ModelEditor.java`, lines ~325-343
-
-`getStocks()`, `getFlows()`, etc. return direct references to internal `ArrayList` instances. External code can modify them, bypassing editor mutation methods.
-
-**Suggested fix:** Return `Collections.unmodifiableList()` from each getter.
+### ~~QUALITY-1: Mutable internal lists exposed via ModelEditor getters~~ [Fixed]
+All list getters (`getStocks`, `getFlows`, `getAuxiliaries`, `getConstants`, `getLookupTables`) now return `Collections.unmodifiableList()` wrappers. Internal code accesses the fields directly.
 
 ---
 
@@ -188,16 +149,14 @@ A `record Point(double x, double y)` would be cleaner and align with the project
 ---
 
 ### QUALITY-5: Magic numbers in `ConnectionRenderer` [Nit]
-The cloud offset `80` and cloud line width `1.5` are undeclared magic numbers.
+The cloud line width `1.5` is an undeclared magic number. (Cloud offset `80` was extracted to `CLOUD_OFFSET` constant.)
 
 ---
 
 ## 5. UX ISSUES
 
-### UX-1: Double-click in placement mode creates element AND opens inline editor [Minor]
-**File:** `ModelCanvas.java`, `handleMousePressed`
-
-First click creates the element (placement), second click (double-click) hits the just-created element and opens inline edit. Could be a useful shortcut but is undocumented and may surprise users.
+### ~~UX-1: Double-click in placement mode creates element AND opens inline editor~~ [Fixed]
+Inline editing is now restricted to SELECT mode only. Double-click in placement modes no longer triggers inline edit.
 
 ---
 
@@ -220,15 +179,10 @@ Uses `viewport.toScreenX/Y` directly as overlay pane coordinates. Works currentl
 
 ## Summary
 
-| Severity | Count |
-|----------|-------|
-| Major    | 7     |
-| Minor    | 13    |
-| Nit      | 5     |
+| Severity | Count | Fixed |
+|----------|-------|-------|
+| Major    | 7     | 7     |
+| Minor    | 13    | 2     |
+| Nit      | 5     | 0     |
 
-### Top Priority Fixes
-1. **BUG-5**: Double-click in flow mode creates dangling state — guard inline edit behind `!pendingFlow` and `activeTool == SELECT`
-2. **BUG-3**: Rename-to-existing-name corruption — add collision checks in both `ModelEditor` and `CanvasState`
-3. **BUG-2**: Cloud-to-cloud flow rendering NaN — skip drawing or anchor to flow indicator
-4. **BUG-6**: Flow routing bypasses diamond — route through flow indicator position
-5. **QUALITY-1**: Exposed mutable lists — return unmodifiable views
+All major findings have been resolved. 11 minor and 5 nit findings remain as documented above.

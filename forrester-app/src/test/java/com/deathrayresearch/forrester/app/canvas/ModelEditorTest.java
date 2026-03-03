@@ -391,6 +391,29 @@ class ModelEditorTest {
         }
 
         @Test
+        void shouldRejectRenameToExistingName() {
+            editor.addStock();  // "Stock 1"
+            editor.addStock();  // "Stock 2"
+
+            boolean result = editor.renameElement("Stock 1", "Stock 2");
+
+            assertThat(result).isFalse();
+            assertThat(editor.getStocks().get(0).name()).isEqualTo("Stock 1");
+            assertThat(editor.getStocks().get(1).name()).isEqualTo("Stock 2");
+        }
+
+        @Test
+        void shouldRejectRenameToExistingNameAcrossTypes() {
+            editor.addStock();     // "Stock 1"
+            editor.addConstant();  // "Constant 2"
+
+            boolean result = editor.renameElement("Stock 1", "Constant 2");
+
+            assertThat(result).isFalse();
+            assertThat(editor.getStocks().get(0).name()).isEqualTo("Stock 1");
+        }
+
+        @Test
         void shouldUpdateEquationTokensWithWordBoundaries() {
             ModelDefinition def = new ModelDefinitionBuilder()
                     .name("Test")

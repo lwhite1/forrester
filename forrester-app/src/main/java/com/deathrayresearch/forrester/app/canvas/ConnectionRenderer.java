@@ -12,24 +12,64 @@ public final class ConnectionRenderer {
     private ConnectionRenderer() {
     }
 
+    private static final double CLOUD_OFFSET = 80;
+
     /**
-     * Draws a material flow: thick solid line with large arrowhead at the sink.
-     * If sourceX/sourceY is NaN, draws a cloud at the source end.
-     * If sinkX/sinkY is NaN, draws a cloud at the sink end.
+     * Draws a material flow routed through the flow indicator (diamond) position.
+     * The path is: source → diamond → sink, with clouds at missing endpoints.
+     *
+     * @param sourceX  source stock edge X (NaN if cloud)
+     * @param sourceY  source stock edge Y (NaN if cloud)
+     * @param midX     flow indicator (diamond) center X
+     * @param midY     flow indicator (diamond) center Y
+     * @param sinkX    sink stock edge X (NaN if cloud)
+     * @param sinkY    sink stock edge Y (NaN if cloud)
      */
     public static void drawMaterialFlow(GraphicsContext gc,
                                         double sourceX, double sourceY,
-                                        double sinkX, double sinkY,
-                                        String flowName) {
+                                        double midX, double midY,
+                                        double sinkX, double sinkY) {
         boolean hasSource = !Double.isNaN(sourceX);
         boolean hasSink = !Double.isNaN(sinkX);
 
-        double startX = hasSource ? sourceX : sinkX - 80;
-        double startY = hasSource ? sourceY : sinkY;
-        double endX = hasSink ? sinkX : sourceX + 80;
-        double endY = hasSink ? sinkY : sourceY;
+        // Compute cloud positions relative to diamond when stock is missing
+        double startX;
+        double startY;
+        if (hasSource) {
+            startX = sourceX;
+            startY = sourceY;
+        } else {
+            double dx = hasSink ? midX - sinkX : -CLOUD_OFFSET;
+            double dy = hasSink ? midY - sinkY : 0;
+            double dist = Math.sqrt(dx * dx + dy * dy);
+            if (dist < 1) {
+                dx = -CLOUD_OFFSET;
+                dy = 0;
+                dist = CLOUD_OFFSET;
+            }
+            startX = midX + dx / dist * CLOUD_OFFSET;
+            startY = midY + dy / dist * CLOUD_OFFSET;
+        }
 
-        // Draw cloud at missing end
+        double endX;
+        double endY;
+        if (hasSink) {
+            endX = sinkX;
+            endY = sinkY;
+        } else {
+            double dx = hasSource ? midX - sourceX : CLOUD_OFFSET;
+            double dy = hasSource ? midY - sourceY : 0;
+            double dist = Math.sqrt(dx * dx + dy * dy);
+            if (dist < 1) {
+                dx = CLOUD_OFFSET;
+                dy = 0;
+                dist = CLOUD_OFFSET;
+            }
+            endX = midX + dx / dist * CLOUD_OFFSET;
+            endY = midY + dy / dist * CLOUD_OFFSET;
+        }
+
+        // Draw clouds at missing endpoints
         if (!hasSource) {
             drawCloud(gc, startX, startY);
         }
@@ -37,29 +77,19 @@ public final class ConnectionRenderer {
             drawCloud(gc, endX, endY);
         }
 
-        // Main line
+        // Source → diamond segment
         gc.setStroke(ColorPalette.MATERIAL_FLOW);
         gc.setLineWidth(LayoutMetrics.MATERIAL_FLOW_WIDTH);
         gc.setLineDashes();
-        gc.strokeLine(startX, startY, endX, endY);
+        gc.strokeLine(startX, startY, midX, midY);
 
-        // Arrowhead at sink
-        if (hasSink) {
-            drawArrowhead(gc, startX, startY, endX, endY,
-                    LayoutMetrics.ARROWHEAD_LENGTH, LayoutMetrics.ARROWHEAD_WIDTH,
-                    ColorPalette.MATERIAL_FLOW);
-        }
+        // Diamond → sink segment
+        gc.strokeLine(midX, midY, endX, endY);
 
-        // Flow name label at midpoint
-        if (flowName != null) {
-            double midX = (startX + endX) / 2;
-            double midY = (startY + endY) / 2;
-            gc.setFill(ColorPalette.TEXT);
-            gc.setFont(LayoutMetrics.FLOW_NAME_FONT);
-            gc.setTextAlign(TextAlignment.CENTER);
-            gc.setTextBaseline(VPos.BOTTOM);
-            gc.fillText(flowName, midX, midY - 6);
-        }
+        // Arrowhead at sink end
+        drawArrowhead(gc, midX, midY, endX, endY,
+                LayoutMetrics.ARROWHEAD_LENGTH, LayoutMetrics.ARROWHEAD_WIDTH,
+                ColorPalette.MATERIAL_FLOW);
     }
 
     /**

@@ -149,7 +149,8 @@ public class CanvasState {
      * @return true if the element was found and renamed
      */
     public boolean renameElement(String oldName, String newName) {
-        if (!positions.containsKey(oldName) || oldName.equals(newName)) {
+        if (!positions.containsKey(oldName) || oldName.equals(newName)
+                || positions.containsKey(newName)) {
             return false;
         }
 
