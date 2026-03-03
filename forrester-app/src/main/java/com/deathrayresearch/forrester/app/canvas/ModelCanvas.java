@@ -1100,12 +1100,27 @@ public class ModelCanvas extends Canvas {
     }
 
     /**
-     * Selects a single element by name, clearing the current selection.
+     * Selects a single element by name, clearing the current selection,
+     * and pans the viewport to center the element on screen.
      * Used by the validation dialog to highlight a specific element.
      */
     public void selectElement(String name) {
         canvasState.clearSelection();
         canvasState.select(name);
+
+        // Pan viewport to center the element on screen
+        double worldX = canvasState.getX(name);
+        double worldY = canvasState.getY(name);
+        if (!Double.isNaN(worldX) && !Double.isNaN(worldY)) {
+            double canvasCenterX = getWidth() / 2.0;
+            double canvasCenterY = getHeight() / 2.0;
+            double scale = viewport.getScale();
+            viewport.restoreState(
+                    canvasCenterX - worldX * scale,
+                    canvasCenterY - worldY * scale,
+                    scale);
+        }
+
         redraw();
     }
 

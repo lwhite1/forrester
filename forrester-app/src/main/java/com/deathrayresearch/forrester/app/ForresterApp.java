@@ -348,10 +348,29 @@ public class ForresterApp extends Application {
 
     private void validateModel() {
         ModelDefinition def = canvas.toModelDefinition();
-        ValidationResult result = ModelValidator.validate(def);
-        statusBar.updateValidation(result.errorCount(), result.warningCount());
-        ValidationDialog dialog = new ValidationDialog(result, canvas::selectElement);
-        dialog.show();
+
+        javafx.concurrent.Task<ValidationResult> task = new javafx.concurrent.Task<>() {
+            @Override
+            protected ValidationResult call() {
+                return ModelValidator.validate(def);
+            }
+        };
+
+        task.setOnSucceeded(e -> {
+            ValidationResult result = task.getValue();
+            statusBar.updateValidation(result.errorCount(), result.warningCount());
+            ValidationDialog dialog = new ValidationDialog(result, canvas::selectElement);
+            dialog.show();
+        });
+
+        task.setOnFailed(e -> {
+            Throwable ex = task.getException();
+            showError("Validation Error", ex != null ? ex.getMessage() : null);
+        });
+
+        Thread thread = new Thread(task, "model-validator");
+        thread.setDaemon(true);
+        thread.start();
     }
 
     private void showError(String title, String message) {

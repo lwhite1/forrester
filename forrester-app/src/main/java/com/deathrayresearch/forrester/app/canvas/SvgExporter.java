@@ -614,7 +614,7 @@ public final class SvgExporter {
         return color.getOpacity();
     }
 
-    private static String escapeXml(String text) {
+    static String escapeXml(String text) {
         if (text == null) {
             return "";
         }
