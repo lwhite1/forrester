@@ -254,12 +254,7 @@ public class ModelEditor {
      * Returns the lookup table with the given name, or null if not found.
      */
     public LookupTableDef getLookupTableByName(String name) {
-        for (LookupTableDef lt : lookupTables) {
-            if (lt.name().equals(name)) {
-                return lt;
-            }
-        }
-        return null;
+        return findByName(lookupTables, name, LookupTableDef::name);
     }
 
     /**
@@ -559,6 +554,49 @@ public class ModelEditor {
         return false;
     }
 
+    /**
+     * Returns the first element in the list whose name matches, or null if not found.
+     */
+    private <T> T findByName(List<T> list, String name, Function<T, String> nameGetter) {
+        for (T item : list) {
+            if (nameGetter.apply(item).equals(name)) {
+                return item;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Finds the flow or auxiliary with the given name and applies a transform to its equation.
+     * Returns true if the equation was actually changed.
+     */
+    private boolean updateEquationByName(String targetName, UnaryOperator<String> transform) {
+        for (int i = 0; i < flows.size(); i++) {
+            FlowDef f = flows.get(i);
+            if (f.name().equals(targetName)) {
+                String updated = transform.apply(f.equation());
+                if (!updated.equals(f.equation())) {
+                    flows.set(i, new FlowDef(f.name(), f.comment(), updated,
+                            f.timeUnit(), f.source(), f.sink()));
+                    return true;
+                }
+                return false;
+            }
+        }
+        for (int i = 0; i < auxiliaries.size(); i++) {
+            AuxDef a = auxiliaries.get(i);
+            if (a.name().equals(targetName)) {
+                String updated = transform.apply(a.equation());
+                if (!updated.equals(a.equation())) {
+                    auxiliaries.set(i, new AuxDef(a.name(), a.comment(), updated, a.unit()));
+                    return true;
+                }
+                return false;
+            }
+        }
+        return false;
+    }
+
     private void updateEquationReferences(String oldToken, String newToken) {
         if (oldToken.equals(newToken)) {
             return;
@@ -672,75 +710,43 @@ public class ModelEditor {
     }
 
     public ConstantDef getConstantByName(String name) {
-        for (ConstantDef c : constants) {
-            if (c.name().equals(name)) {
-                return c;
-            }
-        }
-        return null;
+        return findByName(constants, name, ConstantDef::name);
     }
 
     /**
      * Returns the stock with the given name, or null if not found.
      */
     public StockDef getStockByName(String name) {
-        for (StockDef s : stocks) {
-            if (s.name().equals(name)) {
-                return s;
-            }
-        }
-        return null;
+        return findByName(stocks, name, StockDef::name);
     }
 
     /**
      * Returns the flow with the given name, or null if not found.
      */
     public FlowDef getFlowByName(String name) {
-        for (FlowDef f : flows) {
-            if (f.name().equals(name)) {
-                return f;
-            }
-        }
-        return null;
+        return findByName(flows, name, FlowDef::name);
     }
 
     /**
      * Returns the auxiliary with the given name, or null if not found.
      */
     public AuxDef getAuxByName(String name) {
-        for (AuxDef a : auxiliaries) {
-            if (a.name().equals(name)) {
-                return a;
-            }
-        }
-        return null;
+        return findByName(auxiliaries, name, AuxDef::name);
     }
 
     public String getStockUnit(String name) {
-        for (StockDef s : stocks) {
-            if (s.name().equals(name)) {
-                return s.unit();
-            }
-        }
-        return null;
+        StockDef s = findByName(stocks, name, StockDef::name);
+        return s != null ? s.unit() : null;
     }
 
     public String getFlowEquation(String name) {
-        for (FlowDef f : flows) {
-            if (f.name().equals(name)) {
-                return f.equation();
-            }
-        }
-        return null;
+        FlowDef f = findByName(flows, name, FlowDef::name);
+        return f != null ? f.equation() : null;
     }
 
     public String getAuxEquation(String name) {
-        for (AuxDef a : auxiliaries) {
-            if (a.name().equals(name)) {
-                return a.equation();
-            }
-        }
-        return null;
+        AuxDef a = findByName(auxiliaries, name, AuxDef::name);
+        return a != null ? a.equation() : null;
     }
 
     public List<ModuleInstanceDef> getModules() {
@@ -751,12 +757,7 @@ public class ModelEditor {
      * Returns the module instance with the given name, or null if not found.
      */
     public ModuleInstanceDef getModuleByName(String name) {
-        for (ModuleInstanceDef m : modules) {
-            if (m.instanceName().equals(name)) {
-                return m;
-            }
-        }
-        return null;
+        return findByName(modules, name, ModuleInstanceDef::instanceName);
     }
 
     /**
@@ -847,35 +848,7 @@ public class ModelEditor {
      */
     public boolean removeConnectionReference(String fromName, String toName) {
         String fromToken = fromName.replace(' ', '_');
-
-        // Try flows first
-        for (int i = 0; i < flows.size(); i++) {
-            FlowDef f = flows.get(i);
-            if (f.name().equals(toName)) {
-                String updated = replaceToken(f.equation(), fromToken, "0");
-                if (!updated.equals(f.equation())) {
-                    flows.set(i, new FlowDef(f.name(), f.comment(), updated,
-                            f.timeUnit(), f.source(), f.sink()));
-                    return true;
-                }
-                return false;
-            }
-        }
-
-        // Try auxiliaries
-        for (int i = 0; i < auxiliaries.size(); i++) {
-            AuxDef a = auxiliaries.get(i);
-            if (a.name().equals(toName)) {
-                String updated = replaceToken(a.equation(), fromToken, "0");
-                if (!updated.equals(a.equation())) {
-                    auxiliaries.set(i, new AuxDef(a.name(), a.comment(), updated, a.unit()));
-                    return true;
-                }
-                return false;
-            }
-        }
-
-        return false;
+        return updateEquationByName(toName, eq -> replaceToken(eq, fromToken, "0"));
     }
 
     /**
@@ -887,33 +860,7 @@ public class ModelEditor {
     public boolean rerouteConnectionSource(String oldFrom, String newFrom, String to) {
         String oldToken = oldFrom.replace(' ', '_');
         String newToken = newFrom.replace(' ', '_');
-
-        for (int i = 0; i < flows.size(); i++) {
-            FlowDef f = flows.get(i);
-            if (f.name().equals(to)) {
-                String updated = replaceToken(f.equation(), oldToken, newToken);
-                if (!updated.equals(f.equation())) {
-                    flows.set(i, new FlowDef(f.name(), f.comment(), updated,
-                            f.timeUnit(), f.source(), f.sink()));
-                    return true;
-                }
-                return false;
-            }
-        }
-
-        for (int i = 0; i < auxiliaries.size(); i++) {
-            AuxDef a = auxiliaries.get(i);
-            if (a.name().equals(to)) {
-                String updated = replaceToken(a.equation(), oldToken, newToken);
-                if (!updated.equals(a.equation())) {
-                    auxiliaries.set(i, new AuxDef(a.name(), a.comment(), updated, a.unit()));
-                    return true;
-                }
-                return false;
-            }
-        }
-
-        return false;
+        return updateEquationByName(to, eq -> replaceToken(eq, oldToken, newToken));
     }
 
     /**
