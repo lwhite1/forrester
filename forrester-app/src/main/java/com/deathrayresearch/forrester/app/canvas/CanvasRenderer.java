@@ -68,7 +68,9 @@ public class CanvasRenderer {
                        ReattachState reattachState,
                        MarqueeState marqueeState,
                        FeedbackAnalysis loopAnalysis,
-                       String hoveredElement) {
+                       String hoveredElement,
+                       ConnectionId hoveredConnection,
+                       ConnectionId selectedConnection) {
         // Background in screen space
         gc.clearRect(0, 0, width, height);
         gc.setFill(ColorPalette.BACKGROUND);
@@ -149,7 +151,16 @@ public class CanvasRenderer {
             }
         }
 
-        // 2c. Draw hover indicator (above loops, below selection)
+        // 2c. Draw connection highlights (above loops, below element hover)
+        if (selectedConnection != null) {
+            drawConnectionHighlight(gc, connectors, selectedConnection, false);
+        }
+        if (hoveredConnection != null
+                && !hoveredConnection.equals(selectedConnection)) {
+            drawConnectionHighlight(gc, connectors, hoveredConnection, true);
+        }
+
+        // 2d. Draw hover indicator (above loops, below selection)
         if (hoveredElement != null && !canvasState.getSelection().contains(hoveredElement)) {
             SelectionRenderer.drawHoverIndicator(gc, canvasState, hoveredElement);
         }
@@ -397,6 +408,45 @@ public class CanvasRenderer {
         gc.setLineDashes(6, 3);
         gc.strokeRect(sx - halfW, sy - halfH, halfW * 2, halfH * 2);
         gc.setLineDashes();
+    }
+
+    /**
+     * Draws a hover or selection highlight for the given connection.
+     * Finds the matching connector, clips endpoints, and delegates to SelectionRenderer.
+     */
+    private void drawConnectionHighlight(GraphicsContext gc, List<ConnectorRoute> connectors,
+                                         ConnectionId connectionId, boolean isHover) {
+        for (ConnectorRoute route : connectors) {
+            if (route.from().equals(connectionId.from())
+                    && route.to().equals(connectionId.to())) {
+                if (!canvasState.hasElement(route.from())
+                        || !canvasState.hasElement(route.to())) {
+                    return;
+                }
+
+                double fromX = canvasState.getX(route.from());
+                double fromY = canvasState.getY(route.from());
+                double toX = canvasState.getX(route.to());
+                double toY = canvasState.getY(route.to());
+
+                double fromW = LayoutMetrics.effectiveWidth(canvasState, route.from()) / 2;
+                double fromH = LayoutMetrics.effectiveHeight(canvasState, route.from()) / 2;
+                double toW = LayoutMetrics.effectiveWidth(canvasState, route.to()) / 2;
+                double toH = LayoutMetrics.effectiveHeight(canvasState, route.to()) / 2;
+
+                double[] clippedFrom = clipToBorder(fromX, fromY, fromW, fromH, toX, toY);
+                double[] clippedTo = clipToBorder(toX, toY, toW, toH, fromX, fromY);
+
+                if (isHover) {
+                    SelectionRenderer.drawConnectionHover(gc,
+                            clippedFrom[0], clippedFrom[1], clippedTo[0], clippedTo[1]);
+                } else {
+                    SelectionRenderer.drawConnectionSelection(gc,
+                            clippedFrom[0], clippedFrom[1], clippedTo[0], clippedTo[1]);
+                }
+                return;
+            }
+        }
     }
 
     /**

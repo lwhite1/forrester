@@ -84,7 +84,12 @@ public class PropertiesPanel extends VBox {
         Set<String> selection = canvas.getSelectedElementNames();
 
         if (selection.isEmpty()) {
-            showPlaceholder();
+            ConnectionId conn = canvas.getSelectedConnection();
+            if (conn != null) {
+                showConnectionProperties(conn);
+            } else {
+                showPlaceholder();
+            }
         } else if (selection.size() == 1) {
             String name = selection.iterator().next();
             ElementType type = canvas.getSelectedElementType(name);
@@ -115,6 +120,20 @@ public class PropertiesPanel extends VBox {
         propertyGrid.getChildren().clear();
         propertyGrid.getRowCount();
         addReadOnlyRow(0, "Selection", count + " elements selected");
+
+        getChildren().addAll(contextToolbar, separator, scrollPane);
+    }
+
+    private void showConnectionProperties(ConnectionId connection) {
+        getChildren().clear();
+
+        contextToolbar.getChildren().clear();
+
+        propertyGrid.getChildren().clear();
+        int row = 0;
+        addReadOnlyRow(row++, "Type", "Info Link");
+        addReadOnlyRow(row++, "From", connection.from());
+        addReadOnlyRow(row++, "To", connection.to());
 
         getChildren().addAll(contextToolbar, separator, scrollPane);
     }

@@ -51,6 +51,31 @@ public final class SelectionRenderer {
     }
 
     /**
+     * Draws a hover highlight on a connection line (solid, thicker, hover color).
+     */
+    public static void drawConnectionHover(GraphicsContext gc,
+                                           double fromX, double fromY,
+                                           double toX, double toY) {
+        gc.setStroke(ColorPalette.HOVER);
+        gc.setLineWidth(3.0);
+        gc.setLineDashes();
+        gc.strokeLine(fromX, fromY, toX, toY);
+    }
+
+    /**
+     * Draws a selection indicator on a connection line (dashed, thicker, selection color).
+     */
+    public static void drawConnectionSelection(GraphicsContext gc,
+                                               double fromX, double fromY,
+                                               double toX, double toY) {
+        gc.setStroke(SELECTION_COLOR);
+        gc.setLineWidth(3.0);
+        gc.setLineDashes(SELECTION_DASH_LENGTH, SELECTION_DASH_GAP);
+        gc.strokeLine(fromX, fromY, toX, toY);
+        gc.setLineDashes();
+    }
+
+    /**
      * Draws a hover indicator around the named element.
      * Uses a solid outline (no dashes, no handles) to distinguish from selection.
      */
