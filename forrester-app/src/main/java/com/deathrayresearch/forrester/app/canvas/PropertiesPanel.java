@@ -57,6 +57,32 @@ public class PropertiesPanel extends VBox {
     /** Tracks the current element name, updated after renames to fix stale-name bug. */
     private String currentElementName;
 
+    // --- Cached form fields for same-type fast path ---
+    private ElementType cachedFormType;
+
+    // Stock
+    private TextField stockNameField;
+    private TextField stockInitialValueField;
+    private TextField stockUnitField;
+    private ComboBox<String> stockPolicyBox;
+
+    // Flow
+    private TextField flowNameField;
+    private TextField flowEquationField;
+    private TextField flowTimeUnitField;
+    private Label flowSourceLabel;
+    private Label flowSinkLabel;
+
+    // Aux
+    private TextField auxNameField;
+    private TextField auxEquationField;
+    private TextField auxUnitField;
+
+    // Constant
+    private TextField constantNameField;
+    private TextField constantValueField;
+    private TextField constantUnitField;
+
     public PropertiesPanel() {
         setPrefWidth(PREFERRED_WIDTH);
         setMinWidth(180);
@@ -112,7 +138,11 @@ public class PropertiesPanel extends VBox {
                 String name = selection.iterator().next();
                 ElementType type = canvas.getSelectedElementType(name);
                 currentElementName = name;
-                showSingleElement(name, type);
+                if (type == cachedFormType && isCacheableType(type)) {
+                    updateCachedFormValues(type);
+                } else {
+                    showSingleElement(name, type);
+                }
             } else {
                 showMultiSelection(selection.size());
             }
@@ -123,12 +153,14 @@ public class PropertiesPanel extends VBox {
 
     private void showPlaceholder() {
         currentElementName = null;
+        clearCachedFormFields();
         getChildren().clear();
         getChildren().add(placeholderLabel);
     }
 
     private void showMultiSelection(int count) {
         currentElementName = null;
+        clearCachedFormFields();
         getChildren().clear();
 
         contextToolbar.getChildren().clear();
@@ -149,6 +181,7 @@ public class PropertiesPanel extends VBox {
 
     private void showConnectionProperties(ConnectionId connection) {
         currentElementName = null;
+        clearCachedFormFields();
         getChildren().clear();
 
         contextToolbar.getChildren().clear();
@@ -163,6 +196,7 @@ public class PropertiesPanel extends VBox {
     }
 
     private void showSingleElement(String name, ElementType type) {
+        clearCachedFormFields();
         getChildren().clear();
 
         // Build context toolbar
@@ -230,6 +264,10 @@ public class PropertiesPanel extends VBox {
             default -> addReadOnlyRow(row++, "Name", name);
         }
 
+        if (isCacheableType(type)) {
+            cachedFormType = type;
+        }
+
         getChildren().addAll(contextToolbar, separator, scrollPane);
     }
 
@@ -240,29 +278,29 @@ public class PropertiesPanel extends VBox {
             return row;
         }
 
-        TextField nameField = createNameField(currentElementName);
-        addFieldRow(row++, "Name", nameField);
+        stockNameField = createNameField(currentElementName);
+        addFieldRow(row++, "Name", stockNameField);
 
-        TextField initialValueField = createTextField(
+        stockInitialValueField = createTextField(
                 ElementRenderer.formatValue(stock.initialValue()));
-        addCommitHandlers(initialValueField, this::commitStockInitialValue);
-        addFieldRow(row++, "Initial Value", initialValueField);
+        addCommitHandlers(stockInitialValueField, this::commitStockInitialValue);
+        addFieldRow(row++, "Initial Value", stockInitialValueField);
 
-        TextField unitField = createTextField(stock.unit() != null ? stock.unit() : "");
-        addCommitHandlers(unitField, this::commitStockUnit);
-        addFieldRow(row++, "Unit", unitField);
+        stockUnitField = createTextField(stock.unit() != null ? stock.unit() : "");
+        addCommitHandlers(stockUnitField, this::commitStockUnit);
+        addFieldRow(row++, "Unit", stockUnitField);
 
-        ComboBox<String> policyBox = new ComboBox<>();
-        policyBox.getItems().addAll("Allow", "Clamp to Zero");
+        stockPolicyBox = new ComboBox<>();
+        stockPolicyBox.getItems().addAll("Allow", "Clamp to Zero");
         if ("CLAMP_TO_ZERO".equals(stock.negativeValuePolicy())) {
-            policyBox.setValue("Clamp to Zero");
+            stockPolicyBox.setValue("Clamp to Zero");
         } else {
-            policyBox.setValue("Allow");
+            stockPolicyBox.setValue("Allow");
         }
-        policyBox.setMaxWidth(Double.MAX_VALUE);
-        policyBox.setOnAction(e -> {
+        stockPolicyBox.setMaxWidth(Double.MAX_VALUE);
+        stockPolicyBox.setOnAction(e -> {
             if (!updatingFields) {
-                String policyValue = "Clamp to Zero".equals(policyBox.getValue())
+                String policyValue = "Clamp to Zero".equals(stockPolicyBox.getValue())
                         ? "CLAMP_TO_ZERO" : null;
                 StockDef s = editor.getStockByName(currentElementName);
                 if (s != null && Objects.equals(policyValue, s.negativeValuePolicy())) {
@@ -271,7 +309,7 @@ public class PropertiesPanel extends VBox {
                 canvas.applyStockNegativeValuePolicy(currentElementName, policyValue);
             }
         });
-        addFieldRow(row++, "Policy", policyBox);
+        addFieldRow(row++, "Policy", stockPolicyBox);
 
         return row;
     }
@@ -283,20 +321,22 @@ public class PropertiesPanel extends VBox {
             return row;
         }
 
-        TextField nameField = createNameField(currentElementName);
-        addFieldRow(row++, "Name", nameField);
+        flowNameField = createNameField(currentElementName);
+        addFieldRow(row++, "Name", flowNameField);
 
-        TextField equationField = createTextField(flow.equation());
-        addCommitHandlers(equationField, this::commitFlowEquation);
-        addFieldRow(row++, "Equation", equationField);
+        flowEquationField = createTextField(flow.equation());
+        addCommitHandlers(flowEquationField, this::commitFlowEquation);
+        addFieldRow(row++, "Equation", flowEquationField);
 
-        TextField timeUnitField = createTextField(
+        flowTimeUnitField = createTextField(
                 flow.timeUnit() != null ? flow.timeUnit() : "");
-        addCommitHandlers(timeUnitField, this::commitFlowTimeUnit);
-        addFieldRow(row++, "Time Unit", timeUnitField);
+        addCommitHandlers(flowTimeUnitField, this::commitFlowTimeUnit);
+        addFieldRow(row++, "Time Unit", flowTimeUnitField);
 
-        addReadOnlyRow(row++, "Source", flow.source() != null ? flow.source() : "(cloud)");
-        addReadOnlyRow(row++, "Sink", flow.sink() != null ? flow.sink() : "(cloud)");
+        flowSourceLabel = new Label(flow.source() != null ? flow.source() : "(cloud)");
+        addReadOnlyRow(row++, "Source", flowSourceLabel);
+        flowSinkLabel = new Label(flow.sink() != null ? flow.sink() : "(cloud)");
+        addReadOnlyRow(row++, "Sink", flowSinkLabel);
 
         return row;
     }
@@ -308,16 +348,16 @@ public class PropertiesPanel extends VBox {
             return row;
         }
 
-        TextField nameField = createNameField(currentElementName);
-        addFieldRow(row++, "Name", nameField);
+        auxNameField = createNameField(currentElementName);
+        addFieldRow(row++, "Name", auxNameField);
 
-        TextField equationField = createTextField(aux.equation());
-        addCommitHandlers(equationField, this::commitAuxEquation);
-        addFieldRow(row++, "Equation", equationField);
+        auxEquationField = createTextField(aux.equation());
+        addCommitHandlers(auxEquationField, this::commitAuxEquation);
+        addFieldRow(row++, "Equation", auxEquationField);
 
-        TextField unitField = createTextField(aux.unit() != null ? aux.unit() : "");
-        addCommitHandlers(unitField, this::commitAuxUnit);
-        addFieldRow(row++, "Unit", unitField);
+        auxUnitField = createTextField(aux.unit() != null ? aux.unit() : "");
+        addCommitHandlers(auxUnitField, this::commitAuxUnit);
+        addFieldRow(row++, "Unit", auxUnitField);
 
         return row;
     }
@@ -329,18 +369,18 @@ public class PropertiesPanel extends VBox {
             return row;
         }
 
-        TextField nameField = createNameField(currentElementName);
-        addFieldRow(row++, "Name", nameField);
+        constantNameField = createNameField(currentElementName);
+        addFieldRow(row++, "Name", constantNameField);
 
-        TextField valueField = createTextField(
+        constantValueField = createTextField(
                 ElementRenderer.formatValue(constant.value()));
-        addCommitHandlers(valueField, this::commitConstantValue);
-        addFieldRow(row++, "Value", valueField);
+        addCommitHandlers(constantValueField, this::commitConstantValue);
+        addFieldRow(row++, "Value", constantValueField);
 
-        TextField unitField = createTextField(
+        constantUnitField = createTextField(
                 constant.unit() != null ? constant.unit() : "");
-        addCommitHandlers(unitField, this::commitConstantUnit);
-        addFieldRow(row++, "Unit", unitField);
+        addCommitHandlers(constantUnitField, this::commitConstantUnit);
+        addFieldRow(row++, "Unit", constantUnitField);
 
         return row;
     }
@@ -704,6 +744,15 @@ public class PropertiesPanel extends VBox {
         propertyGrid.add(field, 1, row);
     }
 
+    private void addReadOnlyRow(int row, String labelText, Label valueLabel) {
+        Label label = new Label(labelText);
+        label.setStyle(Styles.FIELD_LABEL);
+        valueLabel.setStyle(Styles.SMALL_TEXT);
+        valueLabel.setWrapText(true);
+        propertyGrid.add(label, 0, row);
+        propertyGrid.add(valueLabel, 1, row);
+    }
+
     private void addReadOnlyRow(int row, String labelText, String value) {
         Label label = new Label(labelText);
         label.setStyle(Styles.FIELD_LABEL);
@@ -718,6 +767,95 @@ public class PropertiesPanel extends VBox {
         Button button = new Button(text);
         button.setStyle(Styles.SMALL_TEXT);
         return button;
+    }
+
+    // --- Form caching support ---
+
+    private static boolean isCacheableType(ElementType type) {
+        return type == ElementType.STOCK || type == ElementType.FLOW
+                || type == ElementType.AUX || type == ElementType.CONSTANT;
+    }
+
+    private void clearCachedFormFields() {
+        cachedFormType = null;
+        stockNameField = null;
+        stockInitialValueField = null;
+        stockUnitField = null;
+        stockPolicyBox = null;
+        flowNameField = null;
+        flowEquationField = null;
+        flowTimeUnitField = null;
+        flowSourceLabel = null;
+        flowSinkLabel = null;
+        auxNameField = null;
+        auxEquationField = null;
+        auxUnitField = null;
+        constantNameField = null;
+        constantValueField = null;
+        constantUnitField = null;
+    }
+
+    private void updateCachedFormValues(ElementType type) {
+        switch (type) {
+            case STOCK -> updateStockFormValues();
+            case FLOW -> updateFlowFormValues();
+            case AUX -> updateAuxFormValues();
+            case CONSTANT -> updateConstantFormValues();
+            default -> { }
+        }
+    }
+
+    private void updateStockFormValues() {
+        StockDef stock = editor.getStockByName(currentElementName);
+        if (stock == null || stockNameField == null) {
+            showSingleElement(currentElementName, ElementType.STOCK);
+            return;
+        }
+        stockNameField.setText(currentElementName);
+        stockInitialValueField.setText(
+                ElementRenderer.formatValue(stock.initialValue()));
+        stockUnitField.setText(stock.unit() != null ? stock.unit() : "");
+        if ("CLAMP_TO_ZERO".equals(stock.negativeValuePolicy())) {
+            stockPolicyBox.setValue("Clamp to Zero");
+        } else {
+            stockPolicyBox.setValue("Allow");
+        }
+    }
+
+    private void updateFlowFormValues() {
+        FlowDef flow = editor.getFlowByName(currentElementName);
+        if (flow == null || flowNameField == null) {
+            showSingleElement(currentElementName, ElementType.FLOW);
+            return;
+        }
+        flowNameField.setText(currentElementName);
+        flowEquationField.setText(flow.equation());
+        flowTimeUnitField.setText(flow.timeUnit() != null ? flow.timeUnit() : "");
+        flowSourceLabel.setText(flow.source() != null ? flow.source() : "(cloud)");
+        flowSinkLabel.setText(flow.sink() != null ? flow.sink() : "(cloud)");
+    }
+
+    private void updateAuxFormValues() {
+        AuxDef aux = editor.getAuxByName(currentElementName);
+        if (aux == null || auxNameField == null) {
+            showSingleElement(currentElementName, ElementType.AUX);
+            return;
+        }
+        auxNameField.setText(currentElementName);
+        auxEquationField.setText(aux.equation());
+        auxUnitField.setText(aux.unit() != null ? aux.unit() : "");
+    }
+
+    private void updateConstantFormValues() {
+        ConstantDef constant = editor.getConstantByName(currentElementName);
+        if (constant == null || constantNameField == null) {
+            showSingleElement(currentElementName, ElementType.CONSTANT);
+            return;
+        }
+        constantNameField.setText(currentElementName);
+        constantValueField.setText(
+                ElementRenderer.formatValue(constant.value()));
+        constantUnitField.setText(constant.unit() != null ? constant.unit() : "");
     }
 
     private static String formatType(ElementType type) {
