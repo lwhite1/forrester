@@ -148,6 +148,11 @@ public class CanvasRenderer {
                             cy - LayoutMetrics.CONSTANT_HEIGHT / 2,
                             LayoutMetrics.CONSTANT_WIDTH, LayoutMetrics.CONSTANT_HEIGHT);
                 }
+                case MODULE -> {
+                    double w = LayoutMetrics.MODULE_WIDTH;
+                    double h = LayoutMetrics.MODULE_HEIGHT;
+                    ElementRenderer.drawModule(gc, name, cx - w / 2, cy - h / 2, w, h);
+                }
                 default -> { }
             }
         }

@@ -15,9 +15,9 @@ Displayed at the bottom of the window with a light gray background (#E8EAED) and
 
 | Section | Content | Example |
 |---------|---------|---------|
-| Active tool | Current tool name | "Select", "Place Stock", "Place Flow", "Place Auxiliary", "Place Constant" |
+| Active tool | Current tool name | "Select", "Place Stock", "Place Flow", "Place Auxiliary", "Place Constant", "Place Module" |
 | Selection count | Number of selected elements | "No selection", "1 selected", "3 selected" |
-| Element count | Breakdown of all elements | "5 elements (2 stocks, 1 flows, 1 aux, 1 const)" or "Empty model" |
+| Element count | Breakdown of all elements | "5 elements (2 stocks, 1 flows, 1 aux, 1 const)" or "6 elements (2 stocks, 1 flows, 1 aux, 1 const, 1 mod)" or "Empty model" |
 | Zoom level | Current zoom as percentage | "100%", "150%" |
 
 All sections update in real time as the user interacts with the canvas.
@@ -85,18 +85,18 @@ All sections update in real time as the user interacts with the canvas.
 
 - Selected elements show a **dashed blue outline** (#4A90D9 at 80% opacity) with 4px padding
 - Small solid square **corner handles** appear at each corner of the selection outline
-- Stocks, auxiliaries, and constants get a rectangular indicator
+- Stocks, auxiliaries, constants, and modules get a rectangular indicator
 - Flow indicators get a diamond-shaped indicator matching their shape
 
 ## Element Creation
 
 | Action | Input | Notes |
 |--------|-------|-------|
-| Enter placement mode | Click a toolbar button (Stock, Flow, Auxiliary, Constant), or press 2–5 | Button stays toggled; cursor is ready to place elements |
-| Place stock/aux/constant | Left-click on empty canvas (in placement mode) | Creates element at click position with auto-generated name |
+| Enter placement mode | Click a toolbar button (Stock, Flow, Auxiliary, Constant, Module), or press 2–6 | Button stays toggled; cursor is ready to place elements |
+| Place stock/aux/constant/module | Left-click on empty canvas (in placement mode) | Creates element at click position with auto-generated name |
 | Exit placement mode | Press Escape, or press 1, or click the Select button | Returns to select/drag mode |
 
-- Elements are auto-named with incrementing numbers: "Stock 1", "Stock 2", "Flow 3", etc.
+- Elements are auto-named with incrementing numbers: "Stock 1", "Stock 2", "Flow 3", "Module 4", etc.
 - After placement, the new element is automatically selected
 - Connectors (info links) are regenerated after each creation
 
@@ -159,6 +159,7 @@ All sections update in real time as the user interacts with the canvas.
 | Flow | Name | Equation (positioned below diamond + name label) |
 | Auxiliary | Name | Equation (positioned below name inside rectangle) |
 | Constant | Name | Value (positioned below name; must be a valid number) |
+| Module | Name | — |
 
 - The name editor opens first; on commit, the second editor opens automatically (for types that have one)
 - The current text is pre-selected for immediate overwriting
@@ -185,7 +186,7 @@ All sections update in real time as the user interacts with the canvas.
 - **History is cleared** when a new file is opened or a new model is created
 
 Operations that save undo state:
-- Element creation (stock, flow, auxiliary, constant)
+- Element creation (stock, flow, auxiliary, constant, module)
 - Element deletion
 - Element drag/move (one snapshot per drag, not per pixel)
 - Inline name edits (rename)
@@ -245,6 +246,12 @@ All elements have a white (#FFFFFF) fill color.
 - **Label:** 11pt font, slightly above center
 - **Value:** 9pt gray font below label; integers without decimal, floats as-is
 
+### Module
+- **Shape:** Rounded rectangle (6px corner radius)
+- **Border:** 2px solid line (#2C3E50, same as stock border color)
+- **Badge:** "mod" in 9pt gray, top-left corner
+- **Label:** Bold 13pt font, centered
+
 ### Connectors
 
 - **Material flow lines:** Thick solid arrows with arrowheads, clipped to element borders
@@ -274,7 +281,7 @@ The cursor changes shape to reflect the current interaction state.
 | Marquee selection | Crosshair | Rubber-band selection drag in progress |
 | Space held (pan ready) | Move (four-way arrow) | Spacebar held down, ready to pan |
 | Panning | Closed hand | Pan drag in progress (Space+drag, middle-drag, or right-drag) |
-| Placement mode | Crosshair | Any placement tool active (Stock, Flow, Auxiliary, Constant) |
+| Placement mode | Crosshair | Any placement tool active (Stock, Flow, Auxiliary, Constant, Module) |
 | Flow pending (rubber-band) | Crosshair | Waiting for second click during flow creation |
 | Reattaching endpoint | Closed hand | Dragging a flow endpoint to reattach |
 | Inline editor active | No change (TextField shows I-beam within its own bounds) | Canvas cursor unchanged; cursor updates resume when editor closes |
@@ -294,6 +301,7 @@ Priority order (highest to lowest): reattaching / panning / dragging > marquee >
 | 3 | Switch to Flow tool |
 | 4 | Switch to Auxiliary tool |
 | 5 | Switch to Constant tool |
+| 6 | Switch to Module tool |
 | Ctrl+A | Select all elements |
 | Ctrl+Z | Undo |
 | Ctrl+Shift+Z | Redo |

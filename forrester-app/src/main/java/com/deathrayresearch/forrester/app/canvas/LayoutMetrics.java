@@ -33,6 +33,12 @@ public final class LayoutMetrics {
     public static final double CONSTANT_DASH_LENGTH = 6;
     public static final double CONSTANT_DASH_GAP = 4;
 
+    // Module dimensions
+    public static final double MODULE_WIDTH = 120;
+    public static final double MODULE_HEIGHT = 70;
+    public static final double MODULE_BORDER_WIDTH = 2.0;
+    public static final double MODULE_CORNER_RADIUS = 6;
+
     // Flow indicator
     public static final double FLOW_INDICATOR_SIZE = 30;
     public static final double FLOW_HIT_HALF_WIDTH = 55;
@@ -73,6 +79,7 @@ public final class LayoutMetrics {
     public static final Font STOCK_NAME_FONT = Font.font("System", FontWeight.BOLD, 13);
     public static final Font AUX_NAME_FONT = Font.font("System", FontWeight.NORMAL, 12);
     public static final Font CONSTANT_NAME_FONT = Font.font("System", FontWeight.NORMAL, 11);
+    public static final Font MODULE_NAME_FONT = Font.font("System", FontWeight.BOLD, 13);
     public static final Font BADGE_FONT = Font.font("System", FontWeight.NORMAL, 9);
     public static final Font FLOW_NAME_FONT = Font.font("System", FontWeight.NORMAL, 11);
 
@@ -84,6 +91,7 @@ public final class LayoutMetrics {
             case STOCK -> STOCK_WIDTH;
             case AUX -> AUX_WIDTH;
             case CONSTANT -> CONSTANT_WIDTH;
+            case MODULE -> MODULE_WIDTH;
             case FLOW -> FLOW_INDICATOR_SIZE;
             default -> AUX_WIDTH;
         };
@@ -97,6 +105,7 @@ public final class LayoutMetrics {
             case STOCK -> STOCK_HEIGHT;
             case AUX -> AUX_HEIGHT;
             case CONSTANT -> CONSTANT_HEIGHT;
+            case MODULE -> MODULE_HEIGHT;
             case FLOW -> FLOW_INDICATOR_SIZE;
             default -> AUX_HEIGHT;
         };

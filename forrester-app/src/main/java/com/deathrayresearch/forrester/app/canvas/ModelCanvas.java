@@ -321,6 +321,10 @@ public class ModelCanvas extends Canvas {
                 name = editor.addConstant();
                 type = ElementType.CONSTANT;
             }
+            case PLACE_MODULE -> {
+                name = editor.addModule();
+                type = ElementType.MODULE;
+            }
             default -> {
                 return;
             }
@@ -940,6 +944,7 @@ public class ModelCanvas extends Canvas {
                 case DIGIT3 -> { switchTool(CanvasToolBar.Tool.PLACE_FLOW); event.consume(); }
                 case DIGIT4 -> { switchTool(CanvasToolBar.Tool.PLACE_AUX); event.consume(); }
                 case DIGIT5 -> { switchTool(CanvasToolBar.Tool.PLACE_CONSTANT); event.consume(); }
+                case DIGIT6 -> { switchTool(CanvasToolBar.Tool.PLACE_MODULE); event.consume(); }
                 default -> { }
             }
         }

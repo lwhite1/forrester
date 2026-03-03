@@ -22,7 +22,8 @@ public class CanvasToolBar extends ToolBar {
         PLACE_STOCK,
         PLACE_FLOW,
         PLACE_AUX,
-        PLACE_CONSTANT
+        PLACE_CONSTANT,
+        PLACE_MODULE
     }
 
     private final ToggleGroup group = new ToggleGroup();
@@ -35,11 +36,12 @@ public class CanvasToolBar extends ToolBar {
         ToggleButton flowButton = makeButton("Flow", Tool.PLACE_FLOW);
         ToggleButton auxButton = makeButton("Auxiliary", Tool.PLACE_AUX);
         ToggleButton constantButton = makeButton("Constant", Tool.PLACE_CONSTANT);
+        ToggleButton moduleButton = makeButton("Module", Tool.PLACE_MODULE);
 
         selectButton.setSelected(true);
 
         getItems().addAll(selectButton, new Separator(),
-                stockButton, flowButton, auxButton, constantButton);
+                stockButton, flowButton, auxButton, constantButton, moduleButton);
     }
 
     private ToggleButton makeButton(String label, Tool tool) {

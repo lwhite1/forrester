@@ -316,7 +316,8 @@ public class ForresterApp extends Application {
                 editor.getStocks().size(),
                 editor.getFlows().size(),
                 editor.getAuxiliaries().size(),
-                editor.getConstants().size());
+                editor.getConstants().size(),
+                editor.getModules().size());
         statusBar.updateZoom(canvas.getZoomScale());
 
         if (undoItem != null) {

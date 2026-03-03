@@ -732,7 +732,7 @@ The `forrester-app` module provides a JavaFX canvas-based visual editor for crea
 
 **Core interactions:**
 
-- **Element creation** — toolbar or keyboard shortcuts (1–5) to place stocks, flows, auxiliaries, and constants on the canvas
+- **Element creation** — toolbar or keyboard shortcuts (1–6) to place stocks, flows, auxiliaries, constants, and modules on the canvas
 - **Flow connections** — two-click protocol: click source (stock or cloud), rubber-band follows cursor with stock hover highlight, click sink to create flow at midpoint
 - **Inline editing** — double-click any element to rename; constants chain name→value editing; flows and auxiliaries chain name→equation editing. Rename propagates to flow references and equation tokens
 - **Flow reattachment** — drag cloud endpoints onto stocks to reconnect, or drag connected endpoints off stocks to disconnect to cloud
@@ -742,7 +742,7 @@ The `forrester-app` module provides a JavaFX canvas-based visual editor for crea
 - **File persistence** — New, Open, Save, Save As (JSON format with full view layout preservation)
 - **Simulation** — Ctrl+R compiles the model definition, runs on a background thread, and displays results in a sortable table window
 
-**Visual language:** The editor renders the Layered Flow Diagram notation with distinct shapes for each element type (rounded-rectangle stocks, diamond flow indicators, rounded-rectangle auxiliaries, dashed-border constants), material flow arrows routed through diamond indicators, dashed info link connectors, and cloud symbols for disconnected flow endpoints.
+**Visual language:** The editor renders the Layered Flow Diagram notation with distinct shapes for each element type (rounded-rectangle stocks, diamond flow indicators, rounded-rectangle auxiliaries, dashed-border constants, thick-bordered module containers with "mod" badge), material flow arrows routed through diamond indicators, dashed info link connectors, and cloud symbols for disconnected flow endpoints.
 
 | Class | Purpose |
 |---|---|
@@ -1089,7 +1089,7 @@ New to system dynamics? These resources provide a solid introduction to the meth
 
 The project is at version 1.0-SNAPSHOT and is under active development. Recent work has focused on:
 
-- Adding a JavaFX canvas-based visual editor (`forrester-app` module) — interactive stock-and-flow diagram editor with element creation via toolbar or keyboard shortcuts, two-click flow connection protocol with rubber-band preview, inline name/value/equation editing with rename propagation, flow endpoint reattachment, rubber-band marquee selection, pan/zoom navigation, 100-level snapshot-based undo/redo, JSON file persistence with view layout, integrated simulation with background execution and sortable results table, context-sensitive cursor feedback for 10 interaction states, and a status bar showing tool/selection/element counts/zoom. Models can be built, edited, saved, and simulated entirely through the GUI
+- Adding a JavaFX canvas-based visual editor (`forrester-app` module) — interactive stock-and-flow diagram editor with element creation via toolbar or keyboard shortcuts (including module/submodel placement), two-click flow connection protocol with rubber-band preview, inline name/value/equation editing with rename propagation, flow endpoint reattachment, rubber-band marquee selection, pan/zoom navigation, 100-level snapshot-based undo/redo, JSON file persistence with view layout, integrated simulation with background execution and sortable results table, context-sensitive cursor feedback for 10 interaction states, and a status bar showing tool/selection/element counts/zoom. Models can be built, edited, saved, and simulated entirely through the GUI
 - Adding XMILE import and export (`io/xmile/` package) — bidirectional model exchange with Stella/iThink and other XMILE-compatible tools via the OASIS standard XML format. `XmileImporter` reads XMILE files to `ModelDefinition`; `XmileExporter` writes any `ModelDefinition` to valid XMILE 1.0 XML. Supports stocks, flows, auxiliaries, constants, lookup tables (standalone and embedded `<gf>`), simulation settings, view data, and bidirectional expression translation. Audited and hardened with 65 tests including round-trip compile+simulate and export→re-import verification
 - Adding Vensim `.mdl` import (`io/vensim/` package) — reads Vensim model files and produces `ModelDefinition` records that can be compiled and simulated. Supports stocks, constants, auxiliaries, lookup tables, subscript ranges, simulation settings, sketch data, and expression translation for common Vensim functions. Audited and hardened with 75 tests covering CRLF handling, case-insensitive matching, operator precedence, and duplicate name detection
 - Adding an external model representation with expression AST, definition records, model compiler, JSON serialization, nested modules, and dependency graph — six new packages (`model/expr`, `model/def`, `model/compile`, `io/json`, `model/graph`, `measure/UnitRegistry`) that enable defining models as pure data, persisting them to JSON, compiling them to runnable simulations, and extracting dependency graphs for visualization

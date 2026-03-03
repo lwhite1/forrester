@@ -6,6 +6,7 @@ import com.deathrayresearch.forrester.model.def.ConstantDef;
 import com.deathrayresearch.forrester.model.def.FlowDef;
 import com.deathrayresearch.forrester.model.def.LookupTableDef;
 import com.deathrayresearch.forrester.model.def.ModelDefinition;
+import com.deathrayresearch.forrester.model.def.ModuleInstanceDef;
 import com.deathrayresearch.forrester.model.def.SimulationSettings;
 import com.deathrayresearch.forrester.model.def.StockDef;
 import com.deathrayresearch.forrester.model.def.ViewDef;
@@ -15,6 +16,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -30,6 +32,7 @@ public class ModelEditor {
     private final List<FlowDef> flows = new ArrayList<>();
     private final List<AuxDef> auxiliaries = new ArrayList<>();
     private final List<ConstantDef> constants = new ArrayList<>();
+    private final List<ModuleInstanceDef> modules = new ArrayList<>();
     private final List<LookupTableDef> lookupTables = new ArrayList<>();
     private final Set<String> nameIndex = new HashSet<>();
     private SimulationSettings simulationSettings;
@@ -45,6 +48,7 @@ public class ModelEditor {
         flows.clear();
         auxiliaries.clear();
         constants.clear();
+        modules.clear();
         lookupTables.clear();
         nameIndex.clear();
 
@@ -52,6 +56,7 @@ public class ModelEditor {
         flows.addAll(definition.flows());
         auxiliaries.addAll(definition.auxiliaries());
         constants.addAll(definition.constants());
+        modules.addAll(definition.modules());
         lookupTables.addAll(definition.lookupTables());
         simulationSettings = definition.defaultSimulation();
 
@@ -59,6 +64,7 @@ public class ModelEditor {
         flows.forEach(f -> nameIndex.add(f.name()));
         auxiliaries.forEach(a -> nameIndex.add(a.name()));
         constants.forEach(c -> nameIndex.add(c.name()));
+        modules.forEach(m -> nameIndex.add(m.instanceName()));
 
         // Set nextId past any existing numeric suffix
         nextId = 1;
@@ -66,6 +72,7 @@ public class ModelEditor {
         updateNextId(flows.stream().map(FlowDef::name));
         updateNextId(auxiliaries.stream().map(AuxDef::name));
         updateNextId(constants.stream().map(ConstantDef::name));
+        updateNextId(modules.stream().map(ModuleInstanceDef::instanceName));
     }
 
     private void updateNextId(java.util.stream.Stream<String> names) {
@@ -140,6 +147,21 @@ public class ModelEditor {
     }
 
     /**
+     * Adds a new module instance with an auto-generated name and empty definition.
+     * @return the instance name of the created module
+     */
+    public String addModule() {
+        String name = "Module " + nextId++;
+        ModelDefinition emptyDef = new ModelDefinition(
+                name, null, null,
+                List.of(), List.of(), List.of(), List.of(),
+                List.of(), List.of(), List.of(), List.of(), null);
+        modules.add(new ModuleInstanceDef(name, emptyDef, Map.of(), Map.of()));
+        nameIndex.add(name);
+        return name;
+    }
+
+    /**
      * Removes the element with the given name from the appropriate list.
      * If a stock is removed, any flow referencing it as source or sink has
      * that connection nullified (becomes a cloud).
@@ -172,8 +194,8 @@ public class ModelEditor {
                 // flow removed — fall through to clean equations
             } else if (auxiliaries.removeIf(a -> a.name().equals(name))) {
                 // aux removed — fall through to clean equations
-            } else {
-                constants.removeIf(c -> c.name().equals(name));
+            } else if (!constants.removeIf(c -> c.name().equals(name))) {
+                modules.removeIf(m -> m.instanceName().equals(name));
             }
         }
 
@@ -243,6 +265,19 @@ public class ModelEditor {
                 if (constants.get(i).name().equals(oldName)) {
                     ConstantDef c = constants.get(i);
                     constants.set(i, new ConstantDef(newName, c.comment(), c.value(), c.unit()));
+                    found = true;
+                    break;
+                }
+            }
+        }
+
+        // Rename in modules
+        if (!found) {
+            for (int i = 0; i < modules.size(); i++) {
+                if (modules.get(i).instanceName().equals(oldName)) {
+                    ModuleInstanceDef m = modules.get(i);
+                    modules.set(i, new ModuleInstanceDef(newName, m.definition(),
+                            m.inputBindings(), m.outputBindings()));
                     found = true;
                     break;
                 }
@@ -483,6 +518,10 @@ public class ModelEditor {
         return Collections.unmodifiableList(constants);
     }
 
+    public List<ModuleInstanceDef> getModules() {
+        return Collections.unmodifiableList(modules);
+    }
+
     public List<LookupTableDef> getLookupTables() {
         return Collections.unmodifiableList(lookupTables);
     }
@@ -509,7 +548,7 @@ public class ModelEditor {
                 List.copyOf(auxiliaries),
                 List.copyOf(constants),
                 List.copyOf(lookupTables),
-                List.of(),
+                List.copyOf(modules),
                 List.of(),
                 view != null ? List.of(view) : List.of(),
                 simulationSettings

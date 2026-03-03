@@ -6,10 +6,12 @@ import com.deathrayresearch.forrester.model.def.ElementType;
 import com.deathrayresearch.forrester.model.def.FlowDef;
 import com.deathrayresearch.forrester.model.def.ModelDefinition;
 import com.deathrayresearch.forrester.model.def.ModelDefinitionBuilder;
+import com.deathrayresearch.forrester.model.def.ModuleInstanceDef;
 import com.deathrayresearch.forrester.model.def.SimulationSettings;
 import com.deathrayresearch.forrester.model.def.ViewDef;
 
 import java.util.List;
+import java.util.Map;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -915,6 +917,136 @@ class ModelEditorTest {
             FlowDef flow = editor.getFlows().get(0);
             assertThat(flow.source()).isEqualTo("Stock 1"); // unchanged
             assertThat(flow.sink()).isEqualTo("Stock 2");
+        }
+    }
+
+    @Nested
+    @DisplayName("modules")
+    class Modules {
+
+        @Test
+        void shouldAutoNameModules() {
+            String name1 = editor.addModule();
+            String name2 = editor.addModule();
+
+            assertThat(name1).isEqualTo("Module 1");
+            assertThat(name2).isEqualTo("Module 2");
+            assertThat(editor.getModules()).hasSize(2);
+        }
+
+        @Test
+        void shouldRemoveModule() {
+            editor.addModule(); // Module 1
+
+            editor.removeElement("Module 1");
+
+            assertThat(editor.getModules()).isEmpty();
+            assertThat(editor.hasElement("Module 1")).isFalse();
+        }
+
+        @Test
+        void shouldRenameModule() {
+            editor.addModule(); // Module 1
+
+            boolean result = editor.renameElement("Module 1", "SIR Submodel");
+
+            assertThat(result).isTrue();
+            assertThat(editor.getModules().get(0).instanceName()).isEqualTo("SIR Submodel");
+            assertThat(editor.hasElement("Module 1")).isFalse();
+            assertThat(editor.hasElement("SIR Submodel")).isTrue();
+        }
+
+        @Test
+        void shouldRejectRenameToExistingName() {
+            editor.addModule(); // Module 1
+            editor.addStock();  // Stock 2
+
+            boolean result = editor.renameElement("Module 1", "Stock 2");
+
+            assertThat(result).isFalse();
+            assertThat(editor.getModules().get(0).instanceName()).isEqualTo("Module 1");
+        }
+
+        @Test
+        void shouldLoadFromWithModules() {
+            ModelDefinition innerDef = new ModelDefinitionBuilder()
+                    .name("Inner")
+                    .stock("S", 100, "u")
+                    .build();
+            ModuleInstanceDef moduleDef = new ModuleInstanceDef(
+                    "MyModule", innerDef, Map.of(), Map.of());
+            ModelDefinition def = new ModelDefinitionBuilder()
+                    .name("Outer")
+                    .module(moduleDef)
+                    .build();
+
+            editor.loadFrom(def);
+
+            assertThat(editor.getModules()).hasSize(1);
+            assertThat(editor.getModules().get(0).instanceName()).isEqualTo("MyModule");
+            assertThat(editor.hasElement("MyModule")).isTrue();
+        }
+
+        @Test
+        void shouldIncludeModulesInToModelDefinition() {
+            editor.addModule();
+
+            ModelDefinition def = editor.toModelDefinition();
+
+            assertThat(def.modules()).hasSize(1);
+            assertThat(def.modules().get(0).instanceName()).isEqualTo("Module 1");
+        }
+
+        @Test
+        void shouldRoundTripModules() {
+            ModelDefinition innerDef = new ModelDefinitionBuilder()
+                    .name("Inner")
+                    .stock("S", 0, "u")
+                    .build();
+            ModuleInstanceDef moduleDef = new ModuleInstanceDef(
+                    "Sub", innerDef, Map.of(), Map.of());
+            ModelDefinition original = new ModelDefinitionBuilder()
+                    .name("Test")
+                    .stock("S1", 100, "u")
+                    .module(moduleDef)
+                    .build();
+
+            editor.loadFrom(original);
+            ModelDefinition rebuilt = editor.toModelDefinition();
+
+            assertThat(rebuilt.modules()).hasSize(1);
+            assertThat(rebuilt.modules().get(0).instanceName()).isEqualTo("Sub");
+            assertThat(rebuilt.stocks()).hasSize(1);
+        }
+
+        @Test
+        void shouldClearModulesOnReload() {
+            editor.addModule();
+
+            ModelDefinition def = new ModelDefinitionBuilder()
+                    .name("Empty")
+                    .build();
+            editor.loadFrom(def);
+
+            assertThat(editor.getModules()).isEmpty();
+        }
+
+        @Test
+        void shouldContinueNumberingAfterLoad() {
+            ModelDefinition innerDef = new ModelDefinitionBuilder()
+                    .name("Inner")
+                    .build();
+            ModuleInstanceDef moduleDef = new ModuleInstanceDef(
+                    "Module 5", innerDef, Map.of(), Map.of());
+            ModelDefinition def = new ModelDefinitionBuilder()
+                    .name("Test")
+                    .module(moduleDef)
+                    .build();
+
+            editor.loadFrom(def);
+            String name = editor.addModule();
+
+            assertThat(name).isEqualTo("Module 6");
         }
     }
 }

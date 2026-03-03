@@ -175,6 +175,38 @@ public final class ElementRenderer {
     }
 
     /**
+     * Draws a module: thick-bordered rounded rectangle with "mod" badge and centered name.
+     */
+    public static void drawModule(GraphicsContext gc, String name,
+                                  double x, double y, double width, double height) {
+        double r = LayoutMetrics.MODULE_CORNER_RADIUS;
+
+        // Fill
+        gc.setFill(ColorPalette.STOCK_FILL);
+        gc.fillRoundRect(x, y, width, height, r, r);
+
+        // Border
+        gc.setStroke(ColorPalette.STOCK_BORDER);
+        gc.setLineWidth(LayoutMetrics.MODULE_BORDER_WIDTH);
+        gc.setLineDashes();
+        gc.strokeRoundRect(x, y, width, height, r, r);
+
+        // "mod" badge top-left
+        gc.setFill(ColorPalette.TEXT_SECONDARY);
+        gc.setFont(LayoutMetrics.BADGE_FONT);
+        gc.setTextAlign(TextAlignment.LEFT);
+        gc.setTextBaseline(VPos.TOP);
+        gc.fillText("mod", x + 5, y + 3);
+
+        // Name centered
+        gc.setFill(ColorPalette.TEXT);
+        gc.setFont(LayoutMetrics.MODULE_NAME_FONT);
+        gc.setTextAlign(TextAlignment.CENTER);
+        gc.setTextBaseline(VPos.CENTER);
+        gc.fillText(name, x + width / 2, y + height / 2);
+    }
+
+    /**
      * Returns true if the equation should be displayed on the canvas.
      * Suppresses null, blank, and the default placeholder "0".
      */

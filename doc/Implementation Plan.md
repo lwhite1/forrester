@@ -243,7 +243,7 @@ Added number-key tool switching, keyboard zoom controls, and context-sensitive c
 
 ---
 
-### Phase 10 — Rubber-Band (Marquee) Selection (current)
+### Phase 10 — Rubber-Band (Marquee) Selection
 
 Added marquee selection: drag on empty canvas to select multiple elements at once.
 
@@ -267,6 +267,26 @@ Added marquee selection: drag on empty canvas to select multiple elements at onc
 
 ---
 
+### Phase 11 — Module/Submodel Support (current)
+
+Added module as the 5th interactive element type. Modules are opaque container boxes — a thick-bordered rectangle with a "mod" badge. Click to place, double-click to rename, drag/select/delete/undo all work. No drill-down or binding configuration in this phase.
+
+| File | Change |
+|------|--------|
+| `LayoutMetrics.java` | `MODULE_WIDTH` (120), `MODULE_HEIGHT` (70), `MODULE_BORDER_WIDTH` (2.0), `MODULE_CORNER_RADIUS` (6), `MODULE_NAME_FONT` (bold 13pt), `MODULE` cases in `widthFor()` / `heightFor()` |
+| `ElementRenderer.java` | `drawModule()` — white fill, 2px #2C3E50 border, 6px corners, "mod" badge top-left, bold centered name |
+| `ModelEditor.java` | `modules` list, `ModuleInstanceDef` import, `loadFrom` clears/loads/indexes modules, `addModule()` auto-naming, `removeElement` handles modules, `renameElement` handles modules, `toModelDefinition` includes `List.copyOf(modules)`, `getModules()` getter |
+| `CanvasToolBar.java` | `PLACE_MODULE` in `Tool` enum, "Module" toggle button |
+| `StatusBar.java` | `PLACE_MODULE` → "Place Module", `updateElements` accepts `int modules` parameter, shows "X mod" when > 0 |
+| `CanvasRenderer.java` | `case MODULE` rendering block calling `ElementRenderer.drawModule()` |
+| `ModelCanvas.java` | `PLACE_MODULE` in `createElementAt()`, `DIGIT6` keyboard shortcut, MODULE uses default inline edit branch (name-only) |
+| `ForresterApp.java` | `editor.getModules().size()` in `updateStatusBar()` |
+| `ModelEditorTest.java` | `@Nested Modules` class with 9 tests: auto-naming, remove, rename, reject duplicate, loadFrom, toModelDefinition, round-trip, clear on reload, continue numbering |
+
+**Result:** Module is the 5th element type in the visual editor. Users can create modules via toolbar button or key 6, place on canvas, rename via double-click, drag/select/delete, undo/redo, and save/load with full JSON round-trip. Status bar shows module counts. Engine-level `ModuleInstanceDef` records are preserved through the editor layer.
+
+---
+
 ## Current State
 
 ### Source files (forrester-app)
@@ -281,14 +301,14 @@ src/main/java/com/deathrayresearch/forrester/app/
     ├── CanvasToolBar.java         — Tool toggle buttons
     ├── ColorPalette.java          — Color constants
     ├── ConnectionRenderer.java    — Material flows and info links
-    ├── ElementRenderer.java       — Stock, flow, aux, constant shapes + equation text
+    ├── ElementRenderer.java       — Stock, flow, aux, constant, module shapes + equation text
     ├── FlowCreationController.java — Two-click flow state machine
     ├── FlowEndpointCalculator.java — Cloud positions and endpoint hit testing
     ├── HitTester.java             — Click → element resolution
     ├── InlineEditor.java          — TextField overlay for inline editing
     ├── LayoutMetrics.java         — Dimensions, fonts, equation text metrics
     ├── ModelCanvas.java           — Event handling + editing orchestration
-    ├── ModelEditor.java           — Mutable model editing layer + simulation settings
+    ├── ModelEditor.java           — Mutable model editing layer + simulation settings + modules
     ├── SelectionRenderer.java     — Selection indicators
     ├── SimulationResultsDialog.java — Results table window
     ├── SimulationRunner.java      — Compile + run + capture simulation results
@@ -300,13 +320,13 @@ src/main/java/com/deathrayresearch/forrester/app/
 
 ### Test coverage
 
-- 195 tests, all passing
+- 204 tests, all passing
 - `ViewportTest` — coordinate transforms, zoom, pan (11 tests)
 - `HitTesterTest` — rect and diamond hit testing
 - `CanvasStateTest` — load, position, selection, add/remove/rename, toViewDef
 - `CanvasRendererTest` — rendering coordinator
 - `ElementRendererTest` — element formatting, equation text
-- `ModelEditorTest` — load, add, remove, rename, equations, reconnect, simulation settings, round-trip
+- `ModelEditorTest` — load, add, remove, rename, equations, reconnect, simulation settings, modules, round-trip
 - `FlowCreationControllerTest` — two-click state machine, self-loop prevention
 - `FlowEndpointCalculatorTest` — cloud positions, cloud hit testing, connected endpoint hit testing
 - `SimulationRunnerTest` — column names, row count, initial values, variable capture, error handling
@@ -322,4 +342,4 @@ src/main/java/com/deathrayresearch/forrester/app/
 - Functional resize handles
 - Hover highlighting / feedback loop highlighting
 - Simulation results charting/graphing
-- Module/submodel support in UI
+- Module drill-down / binding configuration in UI
