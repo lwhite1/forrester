@@ -466,8 +466,8 @@ public class ModelEditor {
     }
 
     /**
-     * Returns true if any element (stock, flow, aux, or constant) has the given name.
-     * Uses an O(1) hash set lookup instead of scanning all four element lists.
+     * Returns true if any element (stock, flow, aux, constant, or module) has the given name.
+     * Uses an O(1) hash set lookup instead of scanning all five element lists.
      */
     public boolean hasElement(String name) {
         return nameIndex.contains(name);
