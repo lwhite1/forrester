@@ -4,6 +4,7 @@ import com.deathrayresearch.forrester.model.def.AuxDef;
 import com.deathrayresearch.forrester.model.def.ElementPlacement;
 import com.deathrayresearch.forrester.model.def.ElementType;
 import com.deathrayresearch.forrester.model.def.FlowDef;
+import com.deathrayresearch.forrester.model.def.LookupTableDef;
 import com.deathrayresearch.forrester.model.def.ModelDefinition;
 import com.deathrayresearch.forrester.model.def.ModelDefinitionBuilder;
 import com.deathrayresearch.forrester.model.def.ModuleInstanceDef;
@@ -1371,6 +1372,141 @@ class ModelEditorTest {
             String name2 = editor.addStockFrom(editor.getStocks().get(0));
 
             assertThat(name1).isNotEqualTo(name2);
+        }
+    }
+
+    @Nested
+    @DisplayName("lookup tables")
+    class LookupTables {
+
+        @Test
+        void shouldAutoNameLookupWithDefaultValues() {
+            String name = editor.addLookup();
+
+            assertThat(name).startsWith("Lookup ");
+            assertThat(editor.getLookupTables()).hasSize(1);
+            LookupTableDef lt = editor.getLookupTableByName(name);
+            assertThat(lt).isNotNull();
+            assertThat(lt.xValues()).containsExactly(0.0, 1.0);
+            assertThat(lt.yValues()).containsExactly(0.0, 1.0);
+            assertThat(lt.interpolation()).isEqualTo("LINEAR");
+        }
+
+        @Test
+        void shouldCopyLookupFromTemplate() {
+            ModelDefinition def = new ModelDefinitionBuilder()
+                    .name("Test")
+                    .lookupTable("Table", new double[]{0, 5, 10},
+                            new double[]{1, 3, 9}, "SPLINE")
+                    .build();
+            editor.loadFrom(def);
+
+            String newName = editor.addLookupFrom(editor.getLookupTables().get(0));
+
+            assertThat(newName).isNotEqualTo("Table");
+            LookupTableDef copy = editor.getLookupTableByName(newName);
+            assertThat(copy).isNotNull();
+            assertThat(copy.xValues()).containsExactly(0, 5, 10);
+            assertThat(copy.yValues()).containsExactly(1, 3, 9);
+            assertThat(copy.interpolation()).isEqualTo("SPLINE");
+        }
+
+        @Test
+        void shouldReturnLookupByName() {
+            editor.addLookup();
+            String name = editor.getLookupTables().get(0).name();
+
+            LookupTableDef lt = editor.getLookupTableByName(name);
+
+            assertThat(lt).isNotNull();
+            assertThat(lt.name()).isEqualTo(name);
+        }
+
+        @Test
+        void shouldReturnNullForMissingLookup() {
+            assertThat(editor.getLookupTableByName("Ghost")).isNull();
+        }
+
+        @Test
+        void shouldSetLookupTableData() {
+            String name = editor.addLookup();
+            LookupTableDef updated = new LookupTableDef(name,
+                    new double[]{0, 10, 20}, new double[]{5, 15, 25}, "SPLINE");
+
+            boolean result = editor.setLookupTable(name, updated);
+
+            assertThat(result).isTrue();
+            LookupTableDef lt = editor.getLookupTableByName(name);
+            assertThat(lt.xValues()).containsExactly(0, 10, 20);
+            assertThat(lt.yValues()).containsExactly(5, 15, 25);
+            assertThat(lt.interpolation()).isEqualTo("SPLINE");
+        }
+
+        @Test
+        void shouldRemoveLookupAndNameIndex() {
+            String name = editor.addLookup();
+            assertThat(editor.hasElement(name)).isTrue();
+
+            editor.removeElement(name);
+
+            assertThat(editor.getLookupTables()).isEmpty();
+            assertThat(editor.hasElement(name)).isFalse();
+        }
+
+        @Test
+        void shouldRenameLookupPreservingData() {
+            ModelDefinition def = new ModelDefinitionBuilder()
+                    .name("Test")
+                    .lookupTable("OldTable", new double[]{0, 1, 2},
+                            new double[]{10, 20, 30}, "LINEAR")
+                    .build();
+            editor.loadFrom(def);
+
+            boolean renamed = editor.renameElement("OldTable", "NewTable");
+
+            assertThat(renamed).isTrue();
+            assertThat(editor.getLookupTableByName("OldTable")).isNull();
+            LookupTableDef lt = editor.getLookupTableByName("NewTable");
+            assertThat(lt).isNotNull();
+            assertThat(lt.xValues()).containsExactly(0, 1, 2);
+            assertThat(lt.yValues()).containsExactly(10, 20, 30);
+        }
+
+        @Test
+        void shouldIncludeLookupsInNameIndexOnLoad() {
+            ModelDefinition def = new ModelDefinitionBuilder()
+                    .name("Test")
+                    .lookupTable("MyTable", new double[]{0, 1},
+                            new double[]{0, 1}, "LINEAR")
+                    .build();
+
+            editor.loadFrom(def);
+
+            assertThat(editor.hasElement("MyTable")).isTrue();
+        }
+
+        @Test
+        void shouldContinueNumberingAfterLoadingLookups() {
+            ModelDefinition def = new ModelDefinitionBuilder()
+                    .name("Test")
+                    .lookupTable("Lookup 5", new double[]{0, 1},
+                            new double[]{0, 1}, "LINEAR")
+                    .build();
+            editor.loadFrom(def);
+
+            String name = editor.addLookup();
+
+            assertThat(name).isEqualTo("Lookup 6");
+        }
+
+        @Test
+        void shouldIncludeLookupsInToModelDefinition() {
+            String name = editor.addLookup();
+
+            ModelDefinition def = editor.toModelDefinition();
+
+            assertThat(def.lookupTables()).hasSize(1);
+            assertThat(def.lookupTables().get(0).name()).isEqualTo(name);
         }
     }
 
