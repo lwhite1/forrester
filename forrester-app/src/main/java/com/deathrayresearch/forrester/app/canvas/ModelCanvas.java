@@ -51,6 +51,7 @@ public class ModelCanvas extends Canvas {
     private final ReattachController reattachController = new ReattachController();
     private final FlowCreationController flowCreation = new FlowCreationController();
     private final CopyPasteController copyPaste = new CopyPasteController();
+    private final ConnectionRerouteController rerouteController = new ConnectionRerouteController();
     private final InlineEditController inlineEdit = new InlineEditController();
     private final ModuleNavigationController navController = new ModuleNavigationController();
 
@@ -393,6 +394,21 @@ public class ModelCanvas extends Canvas {
     }
 
     /**
+     * Builds the render state for connection rerouting.
+     */
+    private CanvasRenderer.RerouteState rerouteRenderState() {
+        if (!rerouteController.isActive() || !rerouteController.isDragStarted()) {
+            return CanvasRenderer.RerouteState.IDLE;
+        }
+        return new CanvasRenderer.RerouteState(
+                true,
+                rerouteController.getAnchorX(),
+                rerouteController.getAnchorY(),
+                rerouteController.getRubberBandX(),
+                rerouteController.getRubberBandY());
+    }
+
+    /**
      * Returns the canvas state for export or external rendering.
      */
     public CanvasState getCanvasState() {
@@ -470,6 +486,7 @@ public class ModelCanvas extends Canvas {
         renderer.render(getGraphicsContext2D(), getWidth(), getHeight(),
                 editor, connectors, flowCreation.getState(),
                 reattachController.toRenderState(),
+                rerouteRenderState(),
                 marqueeController.toRenderState(),
                 loopHighlightActive ? loopAnalysis : null, hoveredElement,
                 hoveredConnection, selectedConnection);
@@ -705,7 +722,8 @@ public class ModelCanvas extends Canvas {
 
         if (resizeController.isActive()) {
             cursor = ResizeController.cursorFor(resizeController.getHandle());
-        } else if (reattachController.isActive() || panning || dragController.isDragging()) {
+        } else if (reattachController.isActive() || rerouteController.isActive()
+                || panning || dragController.isDragging()) {
             cursor = Cursor.CLOSED_HAND;
         } else if (marqueeController.isActive()) {
             cursor = Cursor.CROSSHAIR;
@@ -865,6 +883,20 @@ public class ModelCanvas extends Canvas {
                 }
             }
 
+            // Connection reroute: clicking near an endpoint of the selected connection
+            if (activeTool == CanvasToolBar.Tool.SELECT && !flowCreation.isPending()
+                    && selectedConnection != null) {
+                ConnectionRerouteController.RerouteHit rerouteHit =
+                        ConnectionRerouteController.hitTestEndpoint(
+                                selectedConnection, canvasState, connectors, worldX, worldY);
+                if (rerouteHit != null) {
+                    rerouteController.prepare(rerouteHit);
+                    updateCursor();
+                    event.consume();
+                    return;
+                }
+            }
+
             // PLACE_FLOW: two-click protocol
             if (activeTool == CanvasToolBar.Tool.PLACE_FLOW) {
                 handleFlowClick(worldX, worldY);
@@ -942,6 +974,15 @@ public class ModelCanvas extends Canvas {
             return;
         }
 
+        if (rerouteController.isActive()) {
+            rerouteController.drag(
+                    viewport.toWorldX(event.getX()),
+                    viewport.toWorldY(event.getY()));
+            redraw();
+            event.consume();
+            return;
+        }
+
         if (resizeController.isActive()) {
             resizeController.drag(
                     viewport.toWorldX(event.getX()),
@@ -988,6 +1029,22 @@ public class ModelCanvas extends Canvas {
                     canvasState, editor, this::saveUndoState);
             connectors = editor.generateConnectors();
             invalidateLoopAnalysis();
+            redraw();
+            updateCursor();
+            event.consume();
+            return;
+        }
+
+        if (rerouteController.isActive()) {
+            boolean rerouted = rerouteController.complete(
+                    viewport.toWorldX(event.getX()),
+                    viewport.toWorldY(event.getY()),
+                    canvasState, editor, this::saveUndoState);
+            if (rerouted) {
+                selectedConnection = null;
+                connectors = editor.generateConnectors();
+                invalidateLoopAnalysis();
+            }
             redraw();
             updateCursor();
             event.consume();
@@ -1107,6 +1164,9 @@ public class ModelCanvas extends Canvas {
             redraw();
         } else if (reattachController.isActive()) {
             reattachController.cancel();
+            redraw();
+        } else if (rerouteController.isActive()) {
+            rerouteController.cancel();
             redraw();
         } else if (flowCreation.isPending()) {
             flowCreation.cancel();

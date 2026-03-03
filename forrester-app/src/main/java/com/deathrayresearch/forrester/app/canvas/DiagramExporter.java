@@ -110,6 +110,7 @@ public final class DiagramExporter {
                     editor, connectors,
                     FlowCreationController.State.IDLE,
                     CanvasRenderer.ReattachState.IDLE,
+                    CanvasRenderer.RerouteState.IDLE,
                     CanvasRenderer.MarqueeState.IDLE,
                     loopAnalysis,
                     null,   // hoveredElement

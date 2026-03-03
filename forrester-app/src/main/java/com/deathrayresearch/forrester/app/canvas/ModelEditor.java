@@ -822,6 +822,96 @@ public class ModelEditor {
     }
 
     /**
+     * Reroutes the source (from) end of an info link: in the target's equation,
+     * replaces the old source token with the new source token.
+     *
+     * @return true if the equation was updated
+     */
+    public boolean rerouteConnectionSource(String oldFrom, String newFrom, String to) {
+        String oldToken = oldFrom.replace(' ', '_');
+        String newToken = newFrom.replace(' ', '_');
+
+        for (int i = 0; i < flows.size(); i++) {
+            FlowDef f = flows.get(i);
+            if (f.name().equals(to)) {
+                String updated = replaceToken(f.equation(), oldToken, newToken);
+                if (!updated.equals(f.equation())) {
+                    flows.set(i, new FlowDef(f.name(), f.comment(), updated,
+                            f.timeUnit(), f.source(), f.sink()));
+                    return true;
+                }
+                return false;
+            }
+        }
+
+        for (int i = 0; i < auxiliaries.size(); i++) {
+            AuxDef a = auxiliaries.get(i);
+            if (a.name().equals(to)) {
+                String updated = replaceToken(a.equation(), oldToken, newToken);
+                if (!updated.equals(a.equation())) {
+                    auxiliaries.set(i, new AuxDef(a.name(), a.comment(), updated, a.unit()));
+                    return true;
+                }
+                return false;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Reroutes the target (to) end of an info link: removes the source reference
+     * from the old target's equation and adds it to the new target's equation.
+     *
+     * @return true if the reroute was performed
+     */
+    public boolean rerouteConnectionTarget(String from, String oldTo, String newTo) {
+        String fromToken = from.replace(' ', '_');
+
+        // Remove reference from old target
+        removeConnectionReference(from, oldTo);
+
+        // Add reference to new target's equation
+        return addConnectionReference(newTo, fromToken);
+    }
+
+    /**
+     * Adds a reference token to the named element's equation.
+     * If the equation is exactly "0", replaces it with the token.
+     * Otherwise appends " * token" to the equation.
+     */
+    private boolean addConnectionReference(String elementName, String token) {
+        for (int i = 0; i < flows.size(); i++) {
+            FlowDef f = flows.get(i);
+            if (f.name().equals(elementName)) {
+                String eq = f.equation();
+                if (eq.contains(token)) {
+                    return true; // Already references this token
+                }
+                String updated = "0".equals(eq.trim()) ? token : eq + " * " + token;
+                flows.set(i, new FlowDef(f.name(), f.comment(), updated,
+                        f.timeUnit(), f.source(), f.sink()));
+                return true;
+            }
+        }
+
+        for (int i = 0; i < auxiliaries.size(); i++) {
+            AuxDef a = auxiliaries.get(i);
+            if (a.name().equals(elementName)) {
+                String eq = a.equation();
+                if (eq.contains(token)) {
+                    return true; // Already references this token
+                }
+                String updated = "0".equals(eq.trim()) ? token : eq + " * " + token;
+                auxiliaries.set(i, new AuxDef(a.name(), a.comment(), updated, a.unit()));
+                return true;
+            }
+        }
+
+        return false; // Target is not a flow or auxiliary
+    }
+
+    /**
      * Generates connector routes from the current model state's dependency graph.
      */
     public List<ConnectorRoute> generateConnectors() {

@@ -36,6 +36,19 @@ public class CanvasRenderer {
     }
 
     /**
+     * State for connection reroute rubber-band rendering.
+     */
+    public record RerouteState(
+            boolean active,
+            double anchorX,
+            double anchorY,
+            double rubberBandX,
+            double rubberBandY
+    ) {
+        static final RerouteState IDLE = new RerouteState(false, 0, 0, 0, 0);
+    }
+
+    /**
      * State for reattachment rubber-band rendering.
      */
     public record ReattachState(
@@ -66,6 +79,7 @@ public class CanvasRenderer {
                        ModelEditor editor, List<ConnectorRoute> connectors,
                        FlowCreationController.State flowState,
                        ReattachState reattachState,
+                       RerouteState rerouteState,
                        MarqueeState marqueeState,
                        FeedbackAnalysis loopAnalysis,
                        String hoveredElement,
@@ -178,6 +192,11 @@ public class CanvasRenderer {
         // 5. Draw reattachment rubber-band
         if (reattachState.active()) {
             drawReattachRubberBand(gc, reattachState);
+        }
+
+        // 5b. Draw connection reroute rubber-band
+        if (rerouteState.active()) {
+            drawRerouteRubberBand(gc, rerouteState);
         }
 
         // 6. Draw marquee selection rectangle
@@ -366,6 +385,41 @@ public class CanvasRenderer {
         } else {
             ConnectionRenderer.drawCloud(gc, state.rubberBandX(), state.rubberBandY());
         }
+    }
+
+    /**
+     * Draws a rubber-band line for connection rerouting.
+     * Shows an element highlight when hovering a valid target.
+     */
+    private void drawRerouteRubberBand(GraphicsContext gc, RerouteState state) {
+        gc.setStroke(RUBBER_BAND_COLOR);
+        gc.setLineWidth(2);
+        gc.setLineDashes(RUBBER_BAND_DASH, RUBBER_BAND_GAP);
+        gc.strokeLine(state.anchorX(), state.anchorY(),
+                state.rubberBandX(), state.rubberBandY());
+        gc.setLineDashes();
+
+        String hitElement = HitTester.hitTest(canvasState,
+                state.rubberBandX(), state.rubberBandY());
+        if (hitElement != null) {
+            drawElementHoverHighlight(gc, hitElement);
+        }
+    }
+
+    /**
+     * Draws a dashed highlight rectangle around any element.
+     */
+    private void drawElementHoverHighlight(GraphicsContext gc, String elementName) {
+        double ex = canvasState.getX(elementName);
+        double ey = canvasState.getY(elementName);
+        double halfW = LayoutMetrics.effectiveWidth(canvasState, elementName) / 2 + 4;
+        double halfH = LayoutMetrics.effectiveHeight(canvasState, elementName) / 2 + 4;
+
+        gc.setStroke(STOCK_HOVER_COLOR);
+        gc.setLineWidth(2.5);
+        gc.setLineDashes(6, 3);
+        gc.strokeRect(ex - halfW, ey - halfH, halfW * 2, halfH * 2);
+        gc.setLineDashes();
     }
 
     /**
