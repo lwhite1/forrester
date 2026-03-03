@@ -114,6 +114,14 @@ public final class ConnectionRenderer {
     }
 
     /**
+     * Draws a cloud symbol at the given world coordinates.
+     * Public delegate for use by other renderers (e.g. rubber-band drawing).
+     */
+    public static void drawCloudAt(GraphicsContext gc, double cx, double cy) {
+        drawCloud(gc, cx, cy);
+    }
+
+    /**
      * Draws a small cloud symbol representing an external source/sink.
      */
     private static void drawCloud(GraphicsContext gc, double cx, double cy) {

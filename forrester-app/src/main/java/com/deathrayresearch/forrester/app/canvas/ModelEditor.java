@@ -86,8 +86,18 @@ public class ModelEditor {
      * @return the name of the created flow
      */
     public String addFlow() {
+        return addFlow(null, null);
+    }
+
+    /**
+     * Adds a new flow with an auto-generated name and the specified source/sink connections.
+     * @param source the source stock name (null for a cloud source)
+     * @param sink the sink stock name (null for a cloud sink)
+     * @return the name of the created flow
+     */
+    public String addFlow(String source, String sink) {
         String name = "Flow " + nextId++;
-        flows.add(new FlowDef(name, "0", "day", null, null));
+        flows.add(new FlowDef(name, "0", "day", source, sink));
         return name;
     }
 
@@ -146,6 +156,166 @@ public class ModelEditor {
             return;
         }
         constants.removeIf(c -> c.name().equals(name));
+    }
+
+    /**
+     * Renames an element across all model data. Updates the element's own name in
+     * the appropriate list, updates flow source/sink references, and updates equation
+     * references using the underscore token convention.
+     *
+     * @return true if the element was found and renamed
+     */
+    public boolean renameElement(String oldName, String newName) {
+        if (oldName == null || newName == null || oldName.equals(newName)) {
+            return false;
+        }
+
+        boolean found = false;
+
+        // Rename in stocks
+        for (int i = 0; i < stocks.size(); i++) {
+            if (stocks.get(i).name().equals(oldName)) {
+                StockDef s = stocks.get(i);
+                stocks.set(i, new StockDef(newName, s.comment(), s.initialValue(),
+                        s.unit(), s.negativeValuePolicy()));
+                found = true;
+                break;
+            }
+        }
+
+        // Rename in flows
+        if (!found) {
+            for (int i = 0; i < flows.size(); i++) {
+                if (flows.get(i).name().equals(oldName)) {
+                    FlowDef f = flows.get(i);
+                    flows.set(i, new FlowDef(newName, f.comment(), f.equation(),
+                            f.timeUnit(), f.source(), f.sink()));
+                    found = true;
+                    break;
+                }
+            }
+        }
+
+        // Rename in auxiliaries
+        if (!found) {
+            for (int i = 0; i < auxiliaries.size(); i++) {
+                if (auxiliaries.get(i).name().equals(oldName)) {
+                    AuxDef a = auxiliaries.get(i);
+                    auxiliaries.set(i, new AuxDef(newName, a.comment(), a.equation(), a.unit()));
+                    found = true;
+                    break;
+                }
+            }
+        }
+
+        // Rename in constants
+        if (!found) {
+            for (int i = 0; i < constants.size(); i++) {
+                if (constants.get(i).name().equals(oldName)) {
+                    ConstantDef c = constants.get(i);
+                    constants.set(i, new ConstantDef(newName, c.comment(), c.value(), c.unit()));
+                    found = true;
+                    break;
+                }
+            }
+        }
+
+        if (!found) {
+            return false;
+        }
+
+        // Update flow source/sink references
+        for (int i = 0; i < flows.size(); i++) {
+            FlowDef f = flows.get(i);
+            boolean sourceMatch = oldName.equals(f.source());
+            boolean sinkMatch = oldName.equals(f.sink());
+            if (sourceMatch || sinkMatch) {
+                flows.set(i, new FlowDef(
+                        f.name(), f.comment(), f.equation(), f.timeUnit(),
+                        sourceMatch ? newName : f.source(),
+                        sinkMatch ? newName : f.sink()));
+            }
+        }
+
+        // Update equation references (underscore convention)
+        String oldToken = oldName.replace(' ', '_');
+        String newToken = newName.replace(' ', '_');
+        updateEquationReferences(oldToken, newToken);
+
+        return true;
+    }
+
+    /**
+     * Sets the value of a constant.
+     *
+     * @return true if the constant was found and updated
+     */
+    public boolean setConstantValue(String name, double value) {
+        for (int i = 0; i < constants.size(); i++) {
+            if (constants.get(i).name().equals(name)) {
+                ConstantDef c = constants.get(i);
+                constants.set(i, new ConstantDef(name, c.comment(), value, c.unit()));
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private void updateEquationReferences(String oldToken, String newToken) {
+        if (oldToken.equals(newToken)) {
+            return;
+        }
+        for (int i = 0; i < flows.size(); i++) {
+            FlowDef f = flows.get(i);
+            String updated = replaceToken(f.equation(), oldToken, newToken);
+            if (!updated.equals(f.equation())) {
+                flows.set(i, new FlowDef(f.name(), f.comment(), updated,
+                        f.timeUnit(), f.source(), f.sink()));
+            }
+        }
+        for (int i = 0; i < auxiliaries.size(); i++) {
+            AuxDef a = auxiliaries.get(i);
+            String updated = replaceToken(a.equation(), oldToken, newToken);
+            if (!updated.equals(a.equation())) {
+                auxiliaries.set(i, new AuxDef(a.name(), a.comment(), updated, a.unit()));
+            }
+        }
+    }
+
+    private static String replaceToken(String equation, String oldToken, String newToken) {
+        // Word-boundary replacement: replace whole tokens only
+        // Tokens in equations use underscores for spaces (e.g. Contact_Rate)
+        StringBuilder result = new StringBuilder();
+        int len = equation.length();
+        int tokenLen = oldToken.length();
+        int i = 0;
+
+        while (i < len) {
+            int idx = equation.indexOf(oldToken, i);
+            if (idx < 0) {
+                result.append(equation, i, len);
+                break;
+            }
+
+            // Check word boundaries
+            boolean startOk = idx == 0 || !isTokenChar(equation.charAt(idx - 1));
+            boolean endOk = idx + tokenLen >= len || !isTokenChar(equation.charAt(idx + tokenLen));
+
+            if (startOk && endOk) {
+                result.append(equation, i, idx);
+                result.append(newToken);
+                i = idx + tokenLen;
+            } else {
+                result.append(equation, i, idx + 1);
+                i = idx + 1;
+            }
+        }
+
+        return result.toString();
+    }
+
+    private static boolean isTokenChar(char c) {
+        return Character.isLetterOrDigit(c) || c == '_';
     }
 
     public String getModelName() {

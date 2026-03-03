@@ -233,6 +233,73 @@ class CanvasStateTest {
     }
 
     @Nested
+    @DisplayName("renameElement")
+    class RenameElement {
+
+        @BeforeEach
+        void loadElements() {
+            ViewDef view = new ViewDef("test", List.of(
+                    new ElementPlacement("A", "stock", 100, 200),
+                    new ElementPlacement("B", "flow", 200, 200),
+                    new ElementPlacement("C", "aux", 300, 200)
+            ), List.of(), List.of());
+            state.loadFrom(view);
+        }
+
+        @Test
+        void shouldRenamePosition() {
+            state.renameElement("A", "Alpha");
+
+            assertThat(state.hasElement("A")).isFalse();
+            assertThat(state.hasElement("Alpha")).isTrue();
+            assertThat(state.getX("Alpha")).isCloseTo(100, within(0.001));
+            assertThat(state.getY("Alpha")).isCloseTo(200, within(0.001));
+        }
+
+        @Test
+        void shouldRenameType() {
+            state.renameElement("A", "Alpha");
+
+            assertThat(state.getType("A")).isNull();
+            assertThat(state.getType("Alpha")).isEqualTo("stock");
+        }
+
+        @Test
+        void shouldRenameInDrawOrder() {
+            state.renameElement("B", "Beta");
+
+            assertThat(state.getDrawOrder()).containsExactly("A", "Beta", "C");
+        }
+
+        @Test
+        void shouldRenameInSelection() {
+            state.select("A");
+            state.renameElement("A", "Alpha");
+
+            assertThat(state.isSelected("A")).isFalse();
+            assertThat(state.isSelected("Alpha")).isTrue();
+        }
+
+        @Test
+        void shouldReturnFalseForNonexistentElement() {
+            assertThat(state.renameElement("ghost", "new")).isFalse();
+        }
+
+        @Test
+        void shouldReturnFalseForSameName() {
+            assertThat(state.renameElement("A", "A")).isFalse();
+        }
+
+        @Test
+        void shouldNotAffectOtherElements() {
+            state.renameElement("A", "Alpha");
+
+            assertThat(state.hasElement("B")).isTrue();
+            assertThat(state.hasElement("C")).isTrue();
+        }
+    }
+
+    @Nested
     @DisplayName("removeElement")
     class RemoveElement {
 

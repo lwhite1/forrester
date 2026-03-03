@@ -145,6 +145,33 @@ public class CanvasState {
     }
 
     /**
+     * Renames an element atomically across all canvas state maps (positions, types, draw order, selection).
+     * @return true if the element was found and renamed
+     */
+    public boolean renameElement(String oldName, String newName) {
+        if (!positions.containsKey(oldName) || oldName.equals(newName)) {
+            return false;
+        }
+
+        double[] pos = positions.remove(oldName);
+        positions.put(newName, pos);
+
+        String type = types.remove(oldName);
+        types.put(newName, type);
+
+        int idx = drawOrder.indexOf(oldName);
+        if (idx >= 0) {
+            drawOrder.set(idx, newName);
+        }
+
+        if (selection.remove(oldName)) {
+            selection.add(newName);
+        }
+
+        return true;
+    }
+
+    /**
      * Removes the named element from all canvas state (positions, types, draw order, selection).
      */
     public void removeElement(String name) {

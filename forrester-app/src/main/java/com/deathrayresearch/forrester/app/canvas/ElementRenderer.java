@@ -147,7 +147,7 @@ public final class ElementRenderer {
         gc.fillText(formatValue(value), x + width / 2, y + height / 2 + 8);
     }
 
-    private static String formatValue(double value) {
+    static String formatValue(double value) {
         if (value == Math.floor(value) && !Double.isInfinite(value)) {
             return String.valueOf((long) value);
         }

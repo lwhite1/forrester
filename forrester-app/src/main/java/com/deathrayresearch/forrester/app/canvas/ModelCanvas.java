@@ -2,7 +2,6 @@ package com.deathrayresearch.forrester.app.canvas;
 
 import com.deathrayresearch.forrester.model.def.ConnectorRoute;
 import com.deathrayresearch.forrester.model.def.ConstantDef;
-import com.deathrayresearch.forrester.model.def.ElementPlacement;
 import com.deathrayresearch.forrester.model.def.FlowDef;
 import com.deathrayresearch.forrester.model.def.StockDef;
 import com.deathrayresearch.forrester.model.def.ViewDef;
@@ -14,6 +13,8 @@ import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.ScrollEvent;
+import javafx.scene.layout.Pane;
+import javafx.scene.paint.Color;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -24,11 +25,15 @@ import java.util.Map;
  * Canvas component that renders a model using the Layered Flow Diagram visual language.
  * Supports pan (Space+drag, middle/right drag), zoom (scroll wheel),
  * click-to-select, drag-to-move, element creation (toolbar placement mode),
- * and element deletion (Delete/Backspace key).
+ * two-click flow connection, inline name/value editing, and element deletion.
  */
 public class ModelCanvas extends Canvas {
 
     private static final double ZOOM_FACTOR = 1.1;
+    private static final Color RUBBER_BAND_COLOR = Color.web("#4A90D9", 0.6);
+    private static final Color STOCK_HOVER_COLOR = Color.web("#4A90D9", 0.4);
+    private static final double RUBBER_BAND_DASH = 8;
+    private static final double RUBBER_BAND_GAP = 4;
 
     private ModelEditor editor;
     private List<ConnectorRoute> connectors = List.of();
@@ -49,6 +54,18 @@ public class ModelCanvas extends Canvas {
     private String dragTarget;
     private final Map<String, double[]> dragStartPositions = new HashMap<>();
 
+    // Pending flow state (two-click protocol)
+    private boolean pendingFlow;
+    private String pendingFlowSource;
+    private double pendingFlowSourceX;
+    private double pendingFlowSourceY;
+    private double rubberBandEndX;
+    private double rubberBandEndY;
+
+    // Inline editor
+    private Pane overlayPane;
+    private InlineEditor inlineEditor;
+
     public ModelCanvas() {
         setFocusTraversable(true);
 
@@ -59,6 +76,7 @@ public class ModelCanvas extends Canvas {
         setOnMousePressed(this::handleMousePressed);
         setOnMouseDragged(this::handleMouseDragged);
         setOnMouseReleased(this::handleMouseReleased);
+        setOnMouseMoved(this::handleMouseMoved);
         setOnKeyPressed(this::handleKeyPressed);
         setOnKeyReleased(this::handleKeyReleased);
     }
@@ -75,8 +93,12 @@ public class ModelCanvas extends Canvas {
 
     /**
      * Sets the active tool (called by toolbar callback).
+     * Cancels any pending flow if the tool changes.
      */
     public void setActiveTool(CanvasToolBar.Tool tool) {
+        if (pendingFlow) {
+            cancelPendingFlow();
+        }
         this.activeTool = tool;
     }
 
@@ -85,6 +107,15 @@ public class ModelCanvas extends Canvas {
      */
     public void setToolBar(CanvasToolBar toolBar) {
         this.toolBar = toolBar;
+    }
+
+    /**
+     * Sets the parent pane for inline editor overlays and creates the InlineEditor.
+     * Must be called after the canvas is added to the pane.
+     */
+    public void setOverlayPane(Pane overlayPane) {
+        this.overlayPane = overlayPane;
+        this.inlineEditor = new InlineEditor(overlayPane);
     }
 
     @Override
@@ -104,7 +135,7 @@ public class ModelCanvas extends Canvas {
 
     /**
      * Redraws the entire canvas: background in screen space, then connections,
-     * elements, and selection indicators in world space via the viewport transform.
+     * elements, selection indicators, and rubber-band in world space via the viewport transform.
      */
     private void redraw() {
         double w = getWidth();
@@ -180,6 +211,11 @@ public class ModelCanvas extends Canvas {
             SelectionRenderer.drawSelectionIndicator(gc, canvasState, name);
         }
 
+        // 4. Draw rubber-band line during pending flow creation
+        if (pendingFlow) {
+            drawRubberBand(gc);
+        }
+
         gc.restore();
     }
 
@@ -244,6 +280,7 @@ public class ModelCanvas extends Canvas {
     /**
      * Creates a new element at the given world coordinates based on the active tool.
      * Adds to both the model editor and canvas state, then regenerates connectors.
+     * PLACE_FLOW is handled separately by {@link #handleFlowClick}.
      */
     private void createElementAt(double worldX, double worldY) {
         if (editor == null) {
@@ -257,10 +294,6 @@ public class ModelCanvas extends Canvas {
             case PLACE_STOCK -> {
                 name = editor.addStock();
                 type = "stock";
-            }
-            case PLACE_FLOW -> {
-                name = editor.addFlow();
-                type = "flow";
             }
             case PLACE_AUX -> {
                 name = editor.addAux();
@@ -301,6 +334,218 @@ public class ModelCanvas extends Canvas {
         redraw();
     }
 
+    // --- Two-click flow creation ---
+
+    /**
+     * Handles a click during PLACE_FLOW mode using a two-click protocol.
+     * First click: sets source (stock under cursor, or cloud if empty space).
+     * Second click: sets sink and creates the flow at the midpoint.
+     */
+    private void handleFlowClick(double worldX, double worldY) {
+        if (!pendingFlow) {
+            // First click: set source
+            String hit = hitTestStockOnly(worldX, worldY);
+            pendingFlow = true;
+            pendingFlowSource = hit;
+
+            if (hit != null) {
+                pendingFlowSourceX = canvasState.getX(hit);
+                pendingFlowSourceY = canvasState.getY(hit);
+            } else {
+                pendingFlowSourceX = worldX;
+                pendingFlowSourceY = worldY;
+            }
+            rubberBandEndX = worldX;
+            rubberBandEndY = worldY;
+            redraw();
+        } else {
+            // Second click: set sink and create flow
+            String sinkHit = hitTestStockOnly(worldX, worldY);
+
+            // Determine effective source/sink positions for midpoint calculation
+            double srcX = pendingFlowSourceX;
+            double srcY = pendingFlowSourceY;
+            double dstX;
+            double dstY;
+
+            if (sinkHit != null) {
+                dstX = canvasState.getX(sinkHit);
+                dstY = canvasState.getY(sinkHit);
+            } else {
+                dstX = worldX;
+                dstY = worldY;
+            }
+
+            double midX = (srcX + dstX) / 2;
+            double midY = (srcY + dstY) / 2;
+
+            String name = editor.addFlow(pendingFlowSource, sinkHit);
+            canvasState.addElement(name, "flow", midX, midY);
+            connectors = editor.generateConnectors();
+            canvasState.clearSelection();
+            canvasState.select(name);
+
+            cancelPendingFlow();
+            redraw();
+        }
+    }
+
+    /**
+     * Tests if the given world coordinates hit a stock element.
+     * Returns the stock name, or null if no stock is hit.
+     */
+    private String hitTestStockOnly(double worldX, double worldY) {
+        String hit = HitTester.hitTest(canvasState, worldX, worldY);
+        if (hit != null && "stock".equals(canvasState.getType(hit))) {
+            return hit;
+        }
+        return null;
+    }
+
+    /**
+     * Cancels any pending flow creation state.
+     */
+    private void cancelPendingFlow() {
+        pendingFlow = false;
+        pendingFlowSource = null;
+        pendingFlowSourceX = 0;
+        pendingFlowSourceY = 0;
+        rubberBandEndX = 0;
+        rubberBandEndY = 0;
+    }
+
+    /**
+     * Draws a rubber-band line from the pending flow source to the current mouse position.
+     * Also highlights any stock under the cursor.
+     */
+    private void drawRubberBand(GraphicsContext gc) {
+        double startX = pendingFlowSourceX;
+        double startY = pendingFlowSourceY;
+
+        // If source is a cloud, draw cloud symbol at source
+        if (pendingFlowSource == null) {
+            ConnectionRenderer.drawCloudAt(gc, startX, startY);
+        }
+
+        // Rubber-band line
+        gc.setStroke(RUBBER_BAND_COLOR);
+        gc.setLineWidth(2);
+        gc.setLineDashes(RUBBER_BAND_DASH, RUBBER_BAND_GAP);
+        gc.strokeLine(startX, startY, rubberBandEndX, rubberBandEndY);
+        gc.setLineDashes();
+
+        // Highlight stock under cursor
+        String hoverStock = hitTestStockOnly(rubberBandEndX, rubberBandEndY);
+        if (hoverStock != null) {
+            double sx = canvasState.getX(hoverStock);
+            double sy = canvasState.getY(hoverStock);
+            double halfW = LayoutMetrics.STOCK_WIDTH / 2 + 4;
+            double halfH = LayoutMetrics.STOCK_HEIGHT / 2 + 4;
+
+            gc.setStroke(STOCK_HOVER_COLOR);
+            gc.setLineWidth(2.5);
+            gc.setLineDashes(6, 3);
+            gc.strokeRect(sx - halfW, sy - halfH, halfW * 2, halfH * 2);
+            gc.setLineDashes();
+        }
+    }
+
+    // --- Inline editing ---
+
+    /**
+     * Starts inline editing for the given element on double-click.
+     */
+    private void startInlineEdit(String elementName) {
+        if (inlineEditor == null || inlineEditor.isActive()) {
+            return;
+        }
+
+        String type = canvasState.getType(elementName);
+        if (type == null) {
+            return;
+        }
+
+        double worldX = canvasState.getX(elementName);
+        double worldY = canvasState.getY(elementName);
+        double screenX = viewport.toScreenX(worldX);
+        double screenY = viewport.toScreenY(worldY);
+        double fieldWidth = LayoutMetrics.widthFor(type) + 20;
+
+        if ("constant".equals(type)) {
+            startConstantNameEdit(elementName, screenX, screenY, fieldWidth);
+        } else {
+            inlineEditor.open(screenX, screenY, elementName, fieldWidth, newName -> {
+                if (newName != null && !newName.isBlank() && !newName.equals(elementName)) {
+                    applyRename(elementName, newName);
+                }
+                requestFocus();
+            });
+        }
+    }
+
+    /**
+     * Starts editing a constant's name. On commit, proceeds to value editing.
+     */
+    private void startConstantNameEdit(String elementName, double screenX, double screenY,
+                                       double fieldWidth) {
+        inlineEditor.open(screenX, screenY, elementName, fieldWidth, newName -> {
+            String effectiveName;
+            if (newName != null && !newName.isBlank() && !newName.equals(elementName)) {
+                applyRename(elementName, newName);
+                effectiveName = newName;
+            } else {
+                effectiveName = elementName;
+            }
+            // Chain to value editing
+            startConstantValueEdit(effectiveName, screenX, screenY, fieldWidth);
+        });
+    }
+
+    /**
+     * Starts editing a constant's value after the name edit completes.
+     */
+    private void startConstantValueEdit(String constantName, double screenX, double screenY,
+                                        double fieldWidth) {
+        ConstantDef cd = findConstant(constantName);
+        String currentValue = cd != null ? ElementRenderer.formatValue(cd.value()) : "0";
+
+        // Position value editor slightly below name
+        double valueScreenY = screenY + 16;
+
+        inlineEditor.open(screenX, valueScreenY, currentValue, fieldWidth, valueText -> {
+            if (valueText != null && !valueText.isBlank()) {
+                try {
+                    double value = Double.parseDouble(valueText);
+                    editor.setConstantValue(constantName, value);
+                    redraw();
+                } catch (NumberFormatException ignored) {
+                    // Invalid number — ignore
+                }
+            }
+            requestFocus();
+        });
+    }
+
+    /**
+     * Applies a rename to both the model editor and canvas state,
+     * then regenerates connectors and redraws.
+     */
+    private void applyRename(String oldName, String newName) {
+        editor.renameElement(oldName, newName);
+        canvasState.renameElement(oldName, newName);
+        connectors = editor.generateConnectors();
+        redraw();
+    }
+
+    private ConstantDef findConstant(String name) {
+        for (ConstantDef c : editor.getConstants()) {
+            if (c.name().equals(name)) {
+                return c;
+            }
+        }
+        return null;
+    }
+
     // --- Event handlers ---
 
     private void handleScroll(ScrollEvent event) {
@@ -310,7 +555,21 @@ public class ModelCanvas extends Canvas {
         event.consume();
     }
 
+    private void handleMouseMoved(MouseEvent event) {
+        if (pendingFlow) {
+            rubberBandEndX = viewport.toWorldX(event.getX());
+            rubberBandEndY = viewport.toWorldY(event.getY());
+            redraw();
+            event.consume();
+        }
+    }
+
     private void handleMousePressed(MouseEvent event) {
+        // Guard: ignore mouse clicks while inline editor is active
+        if (inlineEditor != null && inlineEditor.isActive()) {
+            return;
+        }
+
         requestFocus();
         dragStartX = event.getX();
         dragStartY = event.getY();
@@ -328,7 +587,24 @@ public class ModelCanvas extends Canvas {
             double worldX = viewport.toWorldX(event.getX());
             double worldY = viewport.toWorldY(event.getY());
 
-            // Placement mode: if a PLACE_* tool is active and click is on empty space, create element
+            // Double-click: start inline editing
+            if (event.getClickCount() == 2) {
+                String hit = HitTester.hitTest(canvasState, worldX, worldY);
+                if (hit != null) {
+                    startInlineEdit(hit);
+                    event.consume();
+                    return;
+                }
+            }
+
+            // PLACE_FLOW: two-click protocol
+            if (activeTool == CanvasToolBar.Tool.PLACE_FLOW) {
+                handleFlowClick(worldX, worldY);
+                event.consume();
+                return;
+            }
+
+            // Placement mode: other PLACE_* tools — click on empty space to create
             if (activeTool != CanvasToolBar.Tool.SELECT) {
                 String hit = HitTester.hitTest(canvasState, worldX, worldY);
                 if (hit == null) {
@@ -407,6 +683,11 @@ public class ModelCanvas extends Canvas {
     }
 
     private void handleKeyPressed(KeyEvent event) {
+        // Guard: ignore key events while inline editor is active
+        if (inlineEditor != null && inlineEditor.isActive()) {
+            return;
+        }
+
         if (event.getCode() == KeyCode.SPACE) {
             spaceDown = true;
             event.consume();
@@ -414,10 +695,15 @@ public class ModelCanvas extends Canvas {
             deleteSelected();
             event.consume();
         } else if (event.getCode() == KeyCode.ESCAPE) {
-            if (toolBar != null) {
-                toolBar.resetToSelect();
+            if (pendingFlow) {
+                cancelPendingFlow();
+                redraw();
+            } else {
+                if (toolBar != null) {
+                    toolBar.resetToSelect();
+                }
+                activeTool = CanvasToolBar.Tool.SELECT;
             }
-            activeTool = CanvasToolBar.Tool.SELECT;
             event.consume();
         }
     }

@@ -40,6 +40,7 @@ public class ForresterApp extends Application {
         Pane canvasPane = new Pane(canvas);
         canvas.widthProperty().bind(canvasPane.widthProperty());
         canvas.heightProperty().bind(canvasPane.heightProperty());
+        canvas.setOverlayPane(canvasPane);
 
         BorderPane root = new BorderPane();
         root.setTop(toolBar);

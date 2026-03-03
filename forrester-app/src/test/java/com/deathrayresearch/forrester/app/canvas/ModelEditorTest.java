@@ -249,6 +249,203 @@ class ModelEditorTest {
     }
 
     @Nested
+    @DisplayName("addFlow with source/sink")
+    class AddFlowWithConnections {
+
+        @Test
+        void shouldCreateFlowWithSourceAndSink() {
+            ModelDefinition def = new ModelDefinitionBuilder()
+                    .name("Test")
+                    .stock("A", 100, "u")
+                    .stock("B", 0, "u")
+                    .build();
+            editor.loadFrom(def);
+
+            String name = editor.addFlow("A", "B");
+
+            assertThat(editor.getFlows()).hasSize(1);
+            FlowDef flow = editor.getFlows().get(0);
+            assertThat(flow.name()).isEqualTo(name);
+            assertThat(flow.source()).isEqualTo("A");
+            assertThat(flow.sink()).isEqualTo("B");
+        }
+
+        @Test
+        void shouldCreateFlowWithCloudSource() {
+            String name = editor.addFlow(null, "Tank");
+
+            FlowDef flow = editor.getFlows().get(0);
+            assertThat(flow.source()).isNull();
+            assertThat(flow.sink()).isEqualTo("Tank");
+        }
+
+        @Test
+        void shouldCreateFlowWithCloudSink() {
+            String name = editor.addFlow("Tank", null);
+
+            FlowDef flow = editor.getFlows().get(0);
+            assertThat(flow.source()).isEqualTo("Tank");
+            assertThat(flow.sink()).isNull();
+        }
+    }
+
+    @Nested
+    @DisplayName("renameElement")
+    class RenameElement {
+
+        @Test
+        void shouldRenameStock() {
+            editor.addStock(); // "Stock 1"
+
+            boolean result = editor.renameElement("Stock 1", "Population");
+
+            assertThat(result).isTrue();
+            assertThat(editor.getStocks().get(0).name()).isEqualTo("Population");
+        }
+
+        @Test
+        void shouldRenameFlow() {
+            editor.addFlow(); // "Flow 1"
+
+            boolean result = editor.renameElement("Flow 1", "Birth Rate");
+
+            assertThat(result).isTrue();
+            assertThat(editor.getFlows().get(0).name()).isEqualTo("Birth Rate");
+        }
+
+        @Test
+        void shouldRenameAux() {
+            editor.addAux();
+
+            boolean result = editor.renameElement(editor.getAuxiliaries().get(0).name(), "Rate");
+
+            assertThat(result).isTrue();
+            assertThat(editor.getAuxiliaries().get(0).name()).isEqualTo("Rate");
+        }
+
+        @Test
+        void shouldRenameConstant() {
+            editor.addConstant();
+
+            boolean result = editor.renameElement(editor.getConstants().get(0).name(), "k");
+
+            assertThat(result).isTrue();
+            assertThat(editor.getConstants().get(0).name()).isEqualTo("k");
+        }
+
+        @Test
+        void shouldReturnFalseForNonexistentElement() {
+            assertThat(editor.renameElement("ghost", "new")).isFalse();
+        }
+
+        @Test
+        void shouldReturnFalseForSameName() {
+            editor.addStock();
+            assertThat(editor.renameElement("Stock 1", "Stock 1")).isFalse();
+        }
+
+        @Test
+        void shouldUpdateFlowSourceReference() {
+            ModelDefinition def = new ModelDefinitionBuilder()
+                    .name("Test")
+                    .stock("Tank", 100, "u")
+                    .flow("Drain", "Tank * 0.1", "day", "Tank", null)
+                    .build();
+            editor.loadFrom(def);
+
+            editor.renameElement("Tank", "Reservoir");
+
+            FlowDef flow = editor.getFlows().get(0);
+            assertThat(flow.source()).isEqualTo("Reservoir");
+        }
+
+        @Test
+        void shouldUpdateFlowSinkReference() {
+            ModelDefinition def = new ModelDefinitionBuilder()
+                    .name("Test")
+                    .stock("Tank", 0, "u")
+                    .flow("Fill", "10", "day", null, "Tank")
+                    .build();
+            editor.loadFrom(def);
+
+            editor.renameElement("Tank", "Basin");
+
+            FlowDef flow = editor.getFlows().get(0);
+            assertThat(flow.sink()).isEqualTo("Basin");
+        }
+
+        @Test
+        void shouldUpdateEquationReferences() {
+            ModelDefinition def = new ModelDefinitionBuilder()
+                    .name("Test")
+                    .stock("S", 1000, "people")
+                    .constant("Contact Rate", 8, "c/p/d")
+                    .flow("Infection", "Contact_Rate * S", "day", "S", null)
+                    .build();
+            editor.loadFrom(def);
+
+            editor.renameElement("Contact Rate", "Beta");
+
+            FlowDef flow = editor.getFlows().get(0);
+            assertThat(flow.equation()).isEqualTo("Beta * S");
+        }
+
+        @Test
+        void shouldUpdateEquationTokensWithWordBoundaries() {
+            ModelDefinition def = new ModelDefinitionBuilder()
+                    .name("Test")
+                    .stock("S", 1000, "people")
+                    .constant("I", 10, "people")
+                    .flow("F", "I * Infectivity", "day", "S", null)
+                    .aux("A", "I + 1", "u")
+                    .build();
+            editor.loadFrom(def);
+
+            editor.renameElement("I", "Infectious");
+
+            // "I" in "Infectivity" should NOT be replaced
+            assertThat(editor.getFlows().get(0).equation()).isEqualTo("Infectious * Infectivity");
+            assertThat(editor.getAuxiliaries().get(0).equation()).isEqualTo("Infectious + 1");
+        }
+    }
+
+    @Nested
+    @DisplayName("setConstantValue")
+    class SetConstantValue {
+
+        @Test
+        void shouldUpdateConstantValue() {
+            editor.addConstant();
+            String name = editor.getConstants().get(0).name();
+
+            boolean result = editor.setConstantValue(name, 42.5);
+
+            assertThat(result).isTrue();
+            assertThat(editor.getConstants().get(0).value()).isEqualTo(42.5);
+        }
+
+        @Test
+        void shouldReturnFalseForNonexistentConstant() {
+            assertThat(editor.setConstantValue("ghost", 1.0)).isFalse();
+        }
+
+        @Test
+        void shouldPreserveNameAndUnit() {
+            ModelDefinition def = new ModelDefinitionBuilder()
+                    .name("Test")
+                    .constant("k", 0.5, "1/day")
+                    .build();
+            editor.loadFrom(def);
+
+            editor.setConstantValue("k", 0.75);
+
+            assertThat(editor.getConstants().get(0).name()).isEqualTo("k");
+            assertThat(editor.getConstants().get(0).unit()).isEqualTo("1/day");
+            assertThat(editor.getConstants().get(0).value()).isEqualTo(0.75);
+        }
+    }
+
+    @Nested
     @DisplayName("toModelDefinition")
     class ToModelDefinition {
 

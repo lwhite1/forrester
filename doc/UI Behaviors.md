@@ -31,13 +31,27 @@ This document serves as the source of truth for user-facing documentation and he
 | Action | Input | Notes |
 |--------|-------|-------|
 | Enter placement mode | Click a toolbar button (Stock, Flow, Auxiliary, Constant) | Button stays toggled; cursor is ready to place elements |
-| Place element | Left-click on empty canvas (in placement mode) | Creates element at click position with auto-generated name |
+| Place stock/aux/constant | Left-click on empty canvas (in placement mode) | Creates element at click position with auto-generated name |
 | Exit placement mode | Press Escape, or click the Select button | Returns to select/drag mode |
 
 - Elements are auto-named with incrementing numbers: "Stock 1", "Stock 2", "Flow 3", etc.
-- Newly created flows start as cloud-to-cloud (no stock connections)
 - After placement, the new element is automatically selected
 - Connectors (info links) are regenerated after each creation
+
+### Flow Connection (Two-Click Protocol)
+
+| Action | Input | Notes |
+|--------|-------|-------|
+| Start flow (from stock) | Click Flow button, then click a stock | Sets the stock as the flow source |
+| Start flow (from cloud) | Click Flow button, then click empty space | Sets a cloud as the flow source |
+| Complete flow (to stock) | Second click on a stock | Creates flow connected source → sink; diamond placed at midpoint |
+| Complete flow (to cloud) | Second click on empty space | Creates flow with cloud sink; diamond placed at midpoint |
+| Cancel pending flow | Press Escape during pending flow | Discards the pending flow, no element created |
+
+- A **rubber-band line** (blue dashed) follows the cursor from the source to the current mouse position during the pending state
+- When hovering over a stock during pending flow, a **blue dashed highlight** appears around the stock
+- If the source is a cloud, a cloud symbol is drawn at the source position
+- Switching tools while a flow is pending cancels the pending flow
 
 ## Element Deletion
 
@@ -49,6 +63,19 @@ This document serves as the source of truth for user-facing documentation and he
 - Formula references to deleted elements become invalid (user must fix manually)
 - No cascade deletion — only the selected elements are removed
 - Connectors (info links) are regenerated after deletion
+
+## Inline Editing
+
+| Action | Input | Notes |
+|--------|-------|-------|
+| Edit element name | Double-click on any element | Opens a TextField overlay at the element position |
+| Commit edit | Enter key or click away (focus loss) | Applies the new name/value |
+| Cancel edit | Escape key | Closes the editor without changes |
+
+- For **stocks, flows, and auxiliaries**: double-click opens a name editor
+- For **constants**: double-click opens a name editor, then on commit chains to a value editor
+- Rename propagation: renaming an element updates flow source/sink references and equation tokens automatically
+- While the inline editor is open, canvas keyboard shortcuts (Delete, Space) are suppressed
 
 ## Element Manipulation
 
@@ -68,14 +95,13 @@ This document serves as the source of truth for user-facing documentation and he
 | Key | Action |
 |-----|--------|
 | Delete / Backspace | Delete selected elements |
-| Escape | Reset tool to Select mode |
+| Escape | Cancel pending flow; or reset tool to Select mode; or cancel inline edit |
 | Space (hold) | Enable pan mode while held |
+| Enter | Commit inline edit (when editor is open) |
 
 ## Not Yet Implemented
 
-- Port-based drag to connect flows to stocks
-- Double-click inline equation editing
-- Element renaming
+- Full equation editor (currently only name/value editing)
 - Rubber-band (marquee) selection
 - Context toolbar near selection
 - Functional resize handles
