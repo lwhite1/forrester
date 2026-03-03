@@ -43,8 +43,8 @@ public final class FeedbackLoopRenderer {
             gc.fillPolygon(xPoints, yPoints, 4);
             gc.strokePolygon(xPoints, yPoints, 4);
         } else {
-            double halfW = LayoutMetrics.widthFor(type) / 2 + GLOW_PADDING;
-            double halfH = LayoutMetrics.heightFor(type) / 2 + GLOW_PADDING;
+            double halfW = LayoutMetrics.effectiveWidth(state, name) / 2 + GLOW_PADDING;
+            double halfH = LayoutMetrics.effectiveHeight(state, name) / 2 + GLOW_PADDING;
             double x = cx - halfW;
             double y = cy - halfH;
             double w = halfW * 2;

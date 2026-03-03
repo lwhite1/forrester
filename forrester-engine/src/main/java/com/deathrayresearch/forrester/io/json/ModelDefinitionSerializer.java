@@ -260,6 +260,10 @@ public class ModelDefinitionSerializer {
                     epNode.put("type", ep.type().label());
                     epNode.put("x", ep.x());
                     epNode.put("y", ep.y());
+                    if (ep.hasCustomSize()) {
+                        epNode.put("width", ep.width());
+                        epNode.put("height", ep.height());
+                    }
                     elements.add(epNode);
                 }
                 node.set("elements", elements);
@@ -462,11 +466,14 @@ public class ModelDefinitionSerializer {
         List<ElementPlacement> elements = new ArrayList<>();
         if (n.has("elements")) {
             for (JsonNode ep : n.get("elements")) {
+                double w = ep.has("width") ? ep.get("width").asDouble() : 0;
+                double h = ep.has("height") ? ep.get("height").asDouble() : 0;
                 elements.add(new ElementPlacement(
                         requiredText(ep, "name"),
                         ElementType.fromLabel(requiredText(ep, "type")),
                         requiredDouble(ep, "x"),
-                        requiredDouble(ep, "y")));
+                        requiredDouble(ep, "y"),
+                        w, h));
             }
         }
         List<ConnectorRoute> connectors = new ArrayList<>();

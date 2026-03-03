@@ -37,8 +37,8 @@ public final class HitTester {
                     return name;
                 }
             } else {
-                double halfW = LayoutMetrics.widthFor(type) / 2;
-                double halfH = LayoutMetrics.heightFor(type) / 2;
+                double halfW = LayoutMetrics.effectiveWidth(state, name) / 2;
+                double halfH = LayoutMetrics.effectiveHeight(state, name) / 2;
                 if (hitTestRect(worldX, worldY, cx, cy, halfW, halfH)) {
                     return name;
                 }

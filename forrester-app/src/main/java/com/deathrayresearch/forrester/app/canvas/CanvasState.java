@@ -24,7 +24,13 @@ public class CanvasState {
      */
     public record Position(double x, double y) {}
 
+    /**
+     * Custom width and height for an element (0 values mean use default).
+     */
+    public record Size(double width, double height) {}
+
     private final Map<String, Position> positions = new LinkedHashMap<>();
+    private final Map<String, Size> sizes = new LinkedHashMap<>();
     private final Map<String, ElementType> types = new LinkedHashMap<>();
     private final Set<String> selection = new LinkedHashSet<>();
     private final List<String> drawOrder = new ArrayList<>();
@@ -35,12 +41,16 @@ public class CanvasState {
     public void loadFrom(ViewDef view) {
         positions.clear();
         types.clear();
+        sizes.clear();
         selection.clear();
         drawOrder.clear();
 
         for (ElementPlacement ep : view.elements()) {
             positions.put(ep.name(), new Position(ep.x(), ep.y()));
             types.put(ep.name(), ep.type());
+            if (ep.hasCustomSize()) {
+                sizes.put(ep.name(), new Size(ep.width(), ep.height()));
+            }
             drawOrder.add(ep.name());
         }
     }
@@ -68,6 +78,39 @@ public class CanvasState {
         if (positions.containsKey(name)) {
             positions.put(name, new Position(x, y));
         }
+    }
+
+    /**
+     * Returns the custom width for the named element, or 0 if not set.
+     */
+    public double getWidth(String name) {
+        Size size = sizes.get(name);
+        return size != null ? size.width() : 0;
+    }
+
+    /**
+     * Returns the custom height for the named element, or 0 if not set.
+     */
+    public double getHeight(String name) {
+        Size size = sizes.get(name);
+        return size != null ? size.height() : 0;
+    }
+
+    /**
+     * Sets a custom size for the named element.
+     */
+    public void setSize(String name, double width, double height) {
+        if (positions.containsKey(name)) {
+            sizes.put(name, new Size(width, height));
+        }
+    }
+
+    /**
+     * Returns true if the named element has a custom (non-default) size.
+     */
+    public boolean hasCustomSize(String name) {
+        Size size = sizes.get(name);
+        return size != null && size.width() > 0 && size.height() > 0;
     }
 
     /**
@@ -181,6 +224,11 @@ public class CanvasState {
         ElementType type = types.remove(oldName);
         types.put(newName, type);
 
+        Size size = sizes.remove(oldName);
+        if (size != null) {
+            sizes.put(newName, size);
+        }
+
         int idx = drawOrder.indexOf(oldName);
         if (idx >= 0) {
             drawOrder.set(idx, newName);
@@ -201,7 +249,13 @@ public class CanvasState {
         List<ElementPlacement> placements = new ArrayList<>();
         for (String name : drawOrder) {
             Position pos = positions.get(name);
-            placements.add(new ElementPlacement(name, types.get(name), pos.x(), pos.y()));
+            Size size = sizes.get(name);
+            if (size != null && size.width() > 0 && size.height() > 0) {
+                placements.add(new ElementPlacement(
+                        name, types.get(name), pos.x(), pos.y(), size.width(), size.height()));
+            } else {
+                placements.add(new ElementPlacement(name, types.get(name), pos.x(), pos.y()));
+            }
         }
         return new ViewDef("Main", placements, List.of(), List.of());
     }
@@ -212,6 +266,7 @@ public class CanvasState {
     public void removeElement(String name) {
         positions.remove(name);
         types.remove(name);
+        sizes.remove(name);
         drawOrder.remove(name);
         selection.remove(name);
     }

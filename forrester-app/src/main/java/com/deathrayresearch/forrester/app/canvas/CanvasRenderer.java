@@ -103,11 +103,11 @@ public class CanvasRenderer {
 
             switch (type) {
                 case STOCK -> {
+                    double w = LayoutMetrics.effectiveWidth(canvasState, name);
+                    double h = LayoutMetrics.effectiveHeight(canvasState, name);
                     String unit = editor.getStockUnit(name);
                     ElementRenderer.drawStock(gc, name, unit,
-                            cx - LayoutMetrics.STOCK_WIDTH / 2,
-                            cy - LayoutMetrics.STOCK_HEIGHT / 2,
-                            LayoutMetrics.STOCK_WIDTH, LayoutMetrics.STOCK_HEIGHT);
+                            cx - w / 2, cy - h / 2, w, h);
                 }
                 case FLOW -> {
                     String flowEq = editor.getFlowEquation(name);
@@ -117,23 +117,23 @@ public class CanvasRenderer {
                             LayoutMetrics.FLOW_INDICATOR_SIZE, LayoutMetrics.FLOW_INDICATOR_SIZE);
                 }
                 case AUX -> {
+                    double w = LayoutMetrics.effectiveWidth(canvasState, name);
+                    double h = LayoutMetrics.effectiveHeight(canvasState, name);
                     String auxEq = editor.getAuxEquation(name);
                     ElementRenderer.drawAux(gc, name, auxEq,
-                            cx - LayoutMetrics.AUX_WIDTH / 2,
-                            cy - LayoutMetrics.AUX_HEIGHT / 2,
-                            LayoutMetrics.AUX_WIDTH, LayoutMetrics.AUX_HEIGHT);
+                            cx - w / 2, cy - h / 2, w, h);
                 }
                 case CONSTANT -> {
+                    double w = LayoutMetrics.effectiveWidth(canvasState, name);
+                    double h = LayoutMetrics.effectiveHeight(canvasState, name);
                     ConstantDef cd = editor.getConstantByName(name);
                     double value = cd != null ? cd.value() : 0;
                     ElementRenderer.drawConstant(gc, name, value,
-                            cx - LayoutMetrics.CONSTANT_WIDTH / 2,
-                            cy - LayoutMetrics.CONSTANT_HEIGHT / 2,
-                            LayoutMetrics.CONSTANT_WIDTH, LayoutMetrics.CONSTANT_HEIGHT);
+                            cx - w / 2, cy - h / 2, w, h);
                 }
                 case MODULE -> {
-                    double w = LayoutMetrics.MODULE_WIDTH;
-                    double h = LayoutMetrics.MODULE_HEIGHT;
+                    double w = LayoutMetrics.effectiveWidth(canvasState, name);
+                    double h = LayoutMetrics.effectiveHeight(canvasState, name);
                     ElementRenderer.drawModule(gc, name, cx - w / 2, cy - h / 2, w, h);
                 }
                 default -> { }
@@ -198,7 +198,8 @@ public class CanvasRenderer {
                 double scx = canvasState.getX(flow.source());
                 double scy = canvasState.getY(flow.source());
                 double[] edge = clipToBorder(scx, scy,
-                        LayoutMetrics.STOCK_WIDTH / 2, LayoutMetrics.STOCK_HEIGHT / 2,
+                        LayoutMetrics.effectiveWidth(canvasState, flow.source()) / 2,
+                        LayoutMetrics.effectiveHeight(canvasState, flow.source()) / 2,
                         midX, midY);
                 sourceX = edge[0];
                 sourceY = edge[1];
@@ -219,7 +220,8 @@ public class CanvasRenderer {
                 double scx = canvasState.getX(flow.sink());
                 double scy = canvasState.getY(flow.sink());
                 double[] edge = clipToBorder(scx, scy,
-                        LayoutMetrics.STOCK_WIDTH / 2, LayoutMetrics.STOCK_HEIGHT / 2,
+                        LayoutMetrics.effectiveWidth(canvasState, flow.sink()) / 2,
+                        LayoutMetrics.effectiveHeight(canvasState, flow.sink()) / 2,
                         midX, midY);
                 sinkX = edge[0];
                 sinkY = edge[1];
@@ -257,10 +259,10 @@ public class CanvasRenderer {
             ElementType fromType = canvasState.getType(fromName);
             ElementType toType = canvasState.getType(toName);
 
-            double fromW = LayoutMetrics.widthFor(fromType) / 2;
-            double fromH = LayoutMetrics.heightFor(fromType) / 2;
-            double toW = LayoutMetrics.widthFor(toType) / 2;
-            double toH = LayoutMetrics.heightFor(toType) / 2;
+            double fromW = LayoutMetrics.effectiveWidth(canvasState, fromName) / 2;
+            double fromH = LayoutMetrics.effectiveHeight(canvasState, fromName) / 2;
+            double toW = LayoutMetrics.effectiveWidth(canvasState, toName) / 2;
+            double toH = LayoutMetrics.effectiveHeight(canvasState, toName) / 2;
 
             double[] clippedFrom = clipToBorder(fromX, fromY, fromW, fromH, toX, toY);
             double[] clippedTo = clipToBorder(toX, toY, toW, toH, fromX, fromY);
@@ -292,13 +294,10 @@ public class CanvasRenderer {
             double toX = canvasState.getX(toName);
             double toY = canvasState.getY(toName);
 
-            ElementType fromType = canvasState.getType(fromName);
-            ElementType toType = canvasState.getType(toName);
-
-            double fromW = LayoutMetrics.widthFor(fromType) / 2;
-            double fromH = LayoutMetrics.heightFor(fromType) / 2;
-            double toW = LayoutMetrics.widthFor(toType) / 2;
-            double toH = LayoutMetrics.heightFor(toType) / 2;
+            double fromW = LayoutMetrics.effectiveWidth(canvasState, fromName) / 2;
+            double fromH = LayoutMetrics.effectiveHeight(canvasState, fromName) / 2;
+            double toW = LayoutMetrics.effectiveWidth(canvasState, toName) / 2;
+            double toH = LayoutMetrics.effectiveHeight(canvasState, toName) / 2;
 
             double[] clippedFrom = clipToBorder(fromX, fromY, fromW, fromH, toX, toY);
             double[] clippedTo = clipToBorder(toX, toY, toW, toH, fromX, fromY);
@@ -320,7 +319,8 @@ public class CanvasRenderer {
                 double scx = canvasState.getX(flow.source());
                 double scy = canvasState.getY(flow.source());
                 double[] edge = clipToBorder(scx, scy,
-                        LayoutMetrics.STOCK_WIDTH / 2, LayoutMetrics.STOCK_HEIGHT / 2,
+                        LayoutMetrics.effectiveWidth(canvasState, flow.source()) / 2,
+                        LayoutMetrics.effectiveHeight(canvasState, flow.source()) / 2,
                         midX, midY);
                 FeedbackLoopRenderer.drawLoopEdge(gc, midX, midY, edge[0], edge[1]);
             }
@@ -330,7 +330,8 @@ public class CanvasRenderer {
                 double scx = canvasState.getX(flow.sink());
                 double scy = canvasState.getY(flow.sink());
                 double[] edge = clipToBorder(scx, scy,
-                        LayoutMetrics.STOCK_WIDTH / 2, LayoutMetrics.STOCK_HEIGHT / 2,
+                        LayoutMetrics.effectiveWidth(canvasState, flow.sink()) / 2,
+                        LayoutMetrics.effectiveHeight(canvasState, flow.sink()) / 2,
                         midX, midY);
                 FeedbackLoopRenderer.drawLoopEdge(gc, midX, midY, edge[0], edge[1]);
             }
@@ -388,8 +389,8 @@ public class CanvasRenderer {
     private void drawStockHoverHighlight(GraphicsContext gc, String stockName) {
         double sx = canvasState.getX(stockName);
         double sy = canvasState.getY(stockName);
-        double halfW = LayoutMetrics.STOCK_WIDTH / 2 + 4;
-        double halfH = LayoutMetrics.STOCK_HEIGHT / 2 + 4;
+        double halfW = LayoutMetrics.effectiveWidth(canvasState, stockName) / 2 + 4;
+        double halfH = LayoutMetrics.effectiveHeight(canvasState, stockName) / 2 + 4;
 
         gc.setStroke(STOCK_HOVER_COLOR);
         gc.setLineWidth(2.5);

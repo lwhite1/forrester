@@ -111,7 +111,8 @@ public final class FlowEndpointCalculator {
                 double scx = canvasState.getX(flow.source());
                 double scy = canvasState.getY(flow.source());
                 double[] edge = CanvasRenderer.clipToBorder(scx, scy,
-                        LayoutMetrics.STOCK_WIDTH / 2, LayoutMetrics.STOCK_HEIGHT / 2,
+                        LayoutMetrics.effectiveWidth(canvasState, flow.source()) / 2,
+                        LayoutMetrics.effectiveHeight(canvasState, flow.source()) / 2,
                         midX, midY);
                 double dist = Math.hypot(worldX - edge[0], worldY - edge[1]);
                 if (dist <= ENDPOINT_HIT_RADIUS) {
@@ -124,7 +125,8 @@ public final class FlowEndpointCalculator {
                 double scx = canvasState.getX(flow.sink());
                 double scy = canvasState.getY(flow.sink());
                 double[] edge = CanvasRenderer.clipToBorder(scx, scy,
-                        LayoutMetrics.STOCK_WIDTH / 2, LayoutMetrics.STOCK_HEIGHT / 2,
+                        LayoutMetrics.effectiveWidth(canvasState, flow.sink()) / 2,
+                        LayoutMetrics.effectiveHeight(canvasState, flow.sink()) / 2,
                         midX, midY);
                 double dist = Math.hypot(worldX - edge[0], worldY - edge[1]);
                 if (dist <= ENDPOINT_HIT_RADIUS) {

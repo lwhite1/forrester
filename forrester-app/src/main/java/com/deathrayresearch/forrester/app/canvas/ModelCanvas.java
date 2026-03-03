@@ -97,6 +97,18 @@ public class ModelCanvas extends Canvas {
     private UndoManager undoManager;
     private boolean dragUndoSaved;
 
+    // Resize state
+    private boolean resizing;
+    private String resizeTarget;
+    private ResizeHandle resizeHandle;
+    private double resizeAnchorX;
+    private double resizeAnchorY;
+    private double resizeStartWidth;
+    private double resizeStartHeight;
+    private double resizeStartCenterX;
+    private double resizeStartCenterY;
+    private boolean resizeUndoSaved;
+
     // Status change callback
     private Runnable onStatusChanged;
 
@@ -732,6 +744,77 @@ public class ModelCanvas extends Canvas {
         marqueeInitialSelection = null;
     }
 
+    // --- Resize ---
+
+    private void startResize(ResizeHandle.HandleHit hit, double worldX, double worldY) {
+        resizing = true;
+        resizeTarget = hit.elementName();
+        resizeHandle = hit.handle();
+        resizeUndoSaved = false;
+
+        double cx = canvasState.getX(resizeTarget);
+        double cy = canvasState.getY(resizeTarget);
+        resizeStartCenterX = cx;
+        resizeStartCenterY = cy;
+        resizeStartWidth = LayoutMetrics.effectiveWidth(canvasState, resizeTarget);
+        resizeStartHeight = LayoutMetrics.effectiveHeight(canvasState, resizeTarget);
+
+        double halfW = resizeStartWidth / 2 + SelectionRenderer.SELECTION_PADDING;
+        double halfH = resizeStartHeight / 2 + SelectionRenderer.SELECTION_PADDING;
+
+        // Anchor is the corner opposite the grabbed handle
+        switch (resizeHandle) {
+            case TOP_LEFT -> { resizeAnchorX = cx + halfW; resizeAnchorY = cy + halfH; }
+            case TOP_RIGHT -> { resizeAnchorX = cx - halfW; resizeAnchorY = cy + halfH; }
+            case BOTTOM_LEFT -> { resizeAnchorX = cx + halfW; resizeAnchorY = cy - halfH; }
+            case BOTTOM_RIGHT -> { resizeAnchorX = cx - halfW; resizeAnchorY = cy - halfH; }
+        }
+    }
+
+    private void handleResizeDrag(double worldX, double worldY) {
+        if (!resizeUndoSaved) {
+            saveUndoState();
+            resizeUndoSaved = true;
+        }
+
+        ElementType type = canvasState.getType(resizeTarget);
+        double minW = LayoutMetrics.minWidthFor(type);
+        double minH = LayoutMetrics.minHeightFor(type);
+        double pad = SelectionRenderer.SELECTION_PADDING;
+
+        double rawW = Math.abs(worldX - resizeAnchorX) - pad;
+        double rawH = Math.abs(worldY - resizeAnchorY) - pad;
+        double newW = Math.max(minW, rawW);
+        double newH = Math.max(minH, rawH);
+
+        // Compute new center as midpoint between anchor and effective drag edge
+        double edgeX = resizeAnchorX + Math.signum(worldX - resizeAnchorX) * (newW / 2 + pad);
+        double edgeY = resizeAnchorY + Math.signum(worldY - resizeAnchorY) * (newH / 2 + pad);
+        double newCx = (resizeAnchorX + edgeX) / 2;
+        double newCy = (resizeAnchorY + edgeY) / 2;
+
+        canvasState.setSize(resizeTarget, newW, newH);
+        canvasState.setPosition(resizeTarget, newCx, newCy);
+    }
+
+    private void cancelResize() {
+        // If we saved an undo state, revert to it
+        if (resizeUndoSaved) {
+            performUndo();
+        }
+
+        resizing = false;
+        resizeTarget = null;
+        resizeHandle = null;
+    }
+
+    private static Cursor resizeCursorFor(ResizeHandle handle) {
+        return switch (handle) {
+            case TOP_LEFT, BOTTOM_RIGHT -> Cursor.NW_RESIZE;
+            case TOP_RIGHT, BOTTOM_LEFT -> Cursor.NE_RESIZE;
+        };
+    }
+
     // --- Cursor ---
 
     /**
@@ -744,7 +827,9 @@ public class ModelCanvas extends Canvas {
 
         Cursor cursor;
 
-        if (reattaching || panning || dragging) {
+        if (resizing) {
+            cursor = resizeCursorFor(resizeHandle);
+        } else if (reattaching || panning || dragging) {
             cursor = Cursor.CLOSED_HAND;
         } else if (marqueeActive) {
             cursor = Cursor.CROSSHAIR;
@@ -756,18 +841,24 @@ public class ModelCanvas extends Canvas {
             double worldX = viewport.toWorldX(lastMouseX);
             double worldY = viewport.toWorldY(lastMouseY);
 
-            FlowEndpointCalculator.CloudHit cloudHit =
-                    FlowEndpointCalculator.hitTestClouds(worldX, worldY, canvasState, editor);
-            if (cloudHit == null) {
-                cloudHit = FlowEndpointCalculator.hitTestConnectedEndpoints(
-                        worldX, worldY, canvasState, editor);
-            }
-
-            if (cloudHit != null) {
-                cursor = Cursor.HAND;
+            // Check resize handles first (when hovering over selected elements)
+            ResizeHandle.HandleHit handleHit = ResizeHandle.hitTest(canvasState, worldX, worldY);
+            if (handleHit != null) {
+                cursor = resizeCursorFor(handleHit.handle());
             } else {
-                String hit = HitTester.hitTest(canvasState, worldX, worldY);
-                cursor = hit != null ? Cursor.OPEN_HAND : Cursor.DEFAULT;
+                FlowEndpointCalculator.CloudHit cloudHit =
+                        FlowEndpointCalculator.hitTestClouds(worldX, worldY, canvasState, editor);
+                if (cloudHit == null) {
+                    cloudHit = FlowEndpointCalculator.hitTestConnectedEndpoints(
+                            worldX, worldY, canvasState, editor);
+                }
+
+                if (cloudHit != null) {
+                    cursor = Cursor.HAND;
+                } else {
+                    String hit = HitTester.hitTest(canvasState, worldX, worldY);
+                    cursor = hit != null ? Cursor.OPEN_HAND : Cursor.DEFAULT;
+                }
             }
         } else {
             cursor = Cursor.DEFAULT;
@@ -870,6 +961,17 @@ public class ModelCanvas extends Canvas {
                 }
             }
 
+            // Resize handle check: takes priority over move drag
+            if (activeTool == CanvasToolBar.Tool.SELECT && !flowCreation.isPending()) {
+                ResizeHandle.HandleHit handleHit = ResizeHandle.hitTest(canvasState, worldX, worldY);
+                if (handleHit != null) {
+                    startResize(handleHit, worldX, worldY);
+                    updateCursor();
+                    event.consume();
+                    return;
+                }
+            }
+
             // PLACE_FLOW: two-click protocol
             if (activeTool == CanvasToolBar.Tool.PLACE_FLOW) {
                 handleFlowClick(worldX, worldY);
@@ -949,6 +1051,13 @@ public class ModelCanvas extends Canvas {
             return;
         }
 
+        if (resizing) {
+            handleResizeDrag(viewport.toWorldX(event.getX()), viewport.toWorldY(event.getY()));
+            redraw();
+            event.consume();
+            return;
+        }
+
         double screenDx = event.getX() - dragStartX;
         double screenDy = event.getY() - dragStartY;
 
@@ -996,6 +1105,15 @@ public class ModelCanvas extends Canvas {
             completeReattachment(
                     viewport.toWorldX(event.getX()),
                     viewport.toWorldY(event.getY()));
+            updateCursor();
+            event.consume();
+            return;
+        }
+
+        if (resizing) {
+            resizing = false;
+            resizeTarget = null;
+            resizeHandle = null;
             updateCursor();
             event.consume();
             return;
@@ -1088,7 +1206,10 @@ public class ModelCanvas extends Canvas {
      * reset tool to Select, clear selection.
      */
     private void handleEscape() {
-        if (marqueeActive) {
+        if (resizing) {
+            cancelResize();
+            redraw();
+        } else if (marqueeActive) {
             cancelMarquee();
             redraw();
         } else if (reattaching) {

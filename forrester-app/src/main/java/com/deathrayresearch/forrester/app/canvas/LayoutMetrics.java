@@ -110,4 +110,54 @@ public final class LayoutMetrics {
             default -> AUX_HEIGHT;
         };
     }
+
+    /**
+     * Returns the effective width for the named element, using a custom size if set,
+     * otherwise the default width for the element's type.
+     */
+    public static double effectiveWidth(CanvasState state, String name) {
+        if (state.hasCustomSize(name)) {
+            return state.getWidth(name);
+        }
+        ElementType type = state.getType(name);
+        return type != null ? widthFor(type) : AUX_WIDTH;
+    }
+
+    /**
+     * Returns the effective height for the named element, using a custom size if set,
+     * otherwise the default height for the element's type.
+     */
+    public static double effectiveHeight(CanvasState state, String name) {
+        if (state.hasCustomSize(name)) {
+            return state.getHeight(name);
+        }
+        ElementType type = state.getType(name);
+        return type != null ? heightFor(type) : AUX_HEIGHT;
+    }
+
+    /**
+     * Returns the minimum width allowed when resizing an element of the given type.
+     */
+    public static double minWidthFor(ElementType type) {
+        return switch (type) {
+            case STOCK -> 80;
+            case AUX -> 60;
+            case CONSTANT -> 50;
+            case MODULE -> 70;
+            default -> 50;
+        };
+    }
+
+    /**
+     * Returns the minimum height allowed when resizing an element of the given type.
+     */
+    public static double minHeightFor(ElementType type) {
+        return switch (type) {
+            case STOCK -> 45;
+            case AUX -> 35;
+            case CONSTANT -> 30;
+            case MODULE -> 45;
+            default -> 30;
+        };
+    }
 }

@@ -11,11 +11,11 @@ import javafx.scene.paint.Color;
 public final class SelectionRenderer {
 
     private static final Color SELECTION_COLOR = Color.web("#4A90D9", 0.8);
-    private static final double SELECTION_PADDING = 4;
+    static final double SELECTION_PADDING = 4;
     private static final double SELECTION_LINE_WIDTH = 1.5;
     private static final double SELECTION_DASH_LENGTH = 5;
     private static final double SELECTION_DASH_GAP = 3;
-    private static final double HANDLE_SIZE = 6;
+    static final double HANDLE_SIZE = 6;
 
     private static final double HOVER_LINE_WIDTH = 1.0;
 
@@ -42,8 +42,8 @@ public final class SelectionRenderer {
         if (type == ElementType.FLOW) {
             drawDiamondIndicator(gc, cx, cy);
         } else {
-            double halfW = LayoutMetrics.widthFor(type) / 2 + SELECTION_PADDING;
-            double halfH = LayoutMetrics.heightFor(type) / 2 + SELECTION_PADDING;
+            double halfW = LayoutMetrics.effectiveWidth(state, name) / 2 + SELECTION_PADDING;
+            double halfH = LayoutMetrics.effectiveHeight(state, name) / 2 + SELECTION_PADDING;
             drawRectIndicator(gc, cx, cy, halfW, halfH);
         }
 
@@ -72,8 +72,8 @@ public final class SelectionRenderer {
             double[] yPoints = {cy - half, cy, cy + half, cy};
             gc.strokePolygon(xPoints, yPoints, 4);
         } else {
-            double halfW = LayoutMetrics.widthFor(type) / 2 + SELECTION_PADDING;
-            double halfH = LayoutMetrics.heightFor(type) / 2 + SELECTION_PADDING;
+            double halfW = LayoutMetrics.effectiveWidth(state, name) / 2 + SELECTION_PADDING;
+            double halfH = LayoutMetrics.effectiveHeight(state, name) / 2 + SELECTION_PADDING;
             gc.strokeRect(cx - halfW, cy - halfH, halfW * 2, halfH * 2);
         }
     }
