@@ -149,7 +149,14 @@ public class ForresterApp extends Application {
         });
         redoItem.setDisable(true);
 
-        editMenu.getItems().addAll(undoItem, redoItem);
+        MenuItem selectAllItem = new MenuItem("Select All");
+        selectAllItem.setAccelerator(new KeyCodeCombination(KeyCode.A, KeyCombination.SHORTCUT_DOWN));
+        selectAllItem.setOnAction(e -> {
+            canvas.selectAll();
+            canvas.requestFocus();
+        });
+
+        editMenu.getItems().addAll(undoItem, redoItem, new SeparatorMenuItem(), selectAllItem);
 
         Menu simulateMenu = new Menu("Simulate");
 

@@ -200,6 +200,46 @@ class CanvasStateTest {
     }
 
     @Nested
+    @DisplayName("selectAll")
+    class SelectAll {
+
+        @Test
+        void shouldSelectAllElements() {
+            ViewDef view = new ViewDef("test", List.of(
+                    new ElementPlacement("A", ElementType.STOCK, 0, 0),
+                    new ElementPlacement("B", ElementType.FLOW, 100, 0),
+                    new ElementPlacement("C", ElementType.AUX, 200, 0)
+            ), List.of(), List.of());
+            state.loadFrom(view);
+
+            state.selectAll();
+
+            assertThat(state.getSelection()).containsExactlyInAnyOrder("A", "B", "C");
+        }
+
+        @Test
+        void shouldDoNothingWhenEmpty() {
+            state.selectAll();
+
+            assertThat(state.getSelection()).isEmpty();
+        }
+
+        @Test
+        void shouldReplaceExistingSelection() {
+            ViewDef view = new ViewDef("test", List.of(
+                    new ElementPlacement("A", ElementType.STOCK, 0, 0),
+                    new ElementPlacement("B", ElementType.STOCK, 100, 0)
+            ), List.of(), List.of());
+            state.loadFrom(view);
+            state.select("A");
+
+            state.selectAll();
+
+            assertThat(state.getSelection()).containsExactlyInAnyOrder("A", "B");
+        }
+    }
+
+    @Nested
     @DisplayName("addElement")
     class AddElement {
 

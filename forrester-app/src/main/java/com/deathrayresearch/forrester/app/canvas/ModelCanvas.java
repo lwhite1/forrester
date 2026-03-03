@@ -738,6 +738,14 @@ public class ModelCanvas extends Canvas {
         event.consume();
     }
 
+    /**
+     * Selects all elements on the canvas.
+     */
+    public void selectAll() {
+        canvasState.selectAll();
+        redraw();
+    }
+
     private void handleKeyPressed(KeyEvent event) {
         // Guard: ignore key events while inline editor is active
         if (inlineEditor != null && inlineEditor.isActive()) {
@@ -750,6 +758,51 @@ public class ModelCanvas extends Canvas {
         } else if (event.getCode() == KeyCode.DELETE || event.getCode() == KeyCode.BACK_SPACE) {
             deleteSelected();
             event.consume();
+        } else if (event.isShortcutDown() && event.getCode() == KeyCode.A) {
+            selectAll();
+            event.consume();
+        } else if (event.isShortcutDown()
+                && (event.getCode() == KeyCode.PLUS || event.getCode() == KeyCode.EQUALS
+                        || event.getCode() == KeyCode.ADD)) {
+            viewport.zoomAt(getWidth() / 2, getHeight() / 2, ZOOM_FACTOR);
+            redraw();
+            event.consume();
+        } else if (event.isShortcutDown()
+                && (event.getCode() == KeyCode.MINUS || event.getCode() == KeyCode.SUBTRACT)) {
+            viewport.zoomAt(getWidth() / 2, getHeight() / 2, 1.0 / ZOOM_FACTOR);
+            redraw();
+            event.consume();
+        } else if (event.isShortcutDown() && event.getCode() == KeyCode.DIGIT0) {
+            viewport.reset();
+            redraw();
+            event.consume();
+        } else if (!event.isShortcutDown() && !event.isShiftDown() && !event.isAltDown()) {
+            switch (event.getCode()) {
+                case DIGIT1 -> { switchTool(CanvasToolBar.Tool.SELECT); event.consume(); }
+                case DIGIT2 -> { switchTool(CanvasToolBar.Tool.PLACE_STOCK); event.consume(); }
+                case DIGIT3 -> { switchTool(CanvasToolBar.Tool.PLACE_FLOW); event.consume(); }
+                case DIGIT4 -> { switchTool(CanvasToolBar.Tool.PLACE_AUX); event.consume(); }
+                case DIGIT5 -> { switchTool(CanvasToolBar.Tool.PLACE_CONSTANT); event.consume(); }
+                case ESCAPE -> {
+                    if (reattaching) {
+                        cancelReattachment();
+                        redraw();
+                    } else if (flowCreation.isPending()) {
+                        flowCreation.cancel();
+                        redraw();
+                    } else if (activeTool != CanvasToolBar.Tool.SELECT) {
+                        if (toolBar != null) {
+                            toolBar.resetToSelect();
+                        }
+                        activeTool = CanvasToolBar.Tool.SELECT;
+                    } else if (!canvasState.getSelection().isEmpty()) {
+                        canvasState.clearSelection();
+                        redraw();
+                    }
+                    event.consume();
+                }
+                default -> { }
+            }
         } else if (event.getCode() == KeyCode.ESCAPE) {
             if (reattaching) {
                 cancelReattachment();
@@ -765,6 +818,14 @@ public class ModelCanvas extends Canvas {
             }
             event.consume();
         }
+    }
+
+    private void switchTool(CanvasToolBar.Tool tool) {
+        if (toolBar != null) {
+            toolBar.selectTool(tool);
+        }
+        setActiveTool(tool);
+        fireStatusChanged();
     }
 
     private void handleKeyReleased(KeyEvent event) {

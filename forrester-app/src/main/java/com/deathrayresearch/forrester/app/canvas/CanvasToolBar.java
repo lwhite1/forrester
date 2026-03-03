@@ -79,6 +79,22 @@ public class CanvasToolBar extends ToolBar {
     }
 
     /**
+     * Programmatically selects the given tool. Iterates toggle buttons to find the
+     * matching one, selects it, and fires the tool-changed callback.
+     */
+    public void selectTool(Tool tool) {
+        for (javafx.scene.control.Toggle toggle : group.getToggles()) {
+            if (toggle.getUserData() == tool) {
+                toggle.setSelected(true);
+                if (onToolChanged != null) {
+                    onToolChanged.accept(tool);
+                }
+                return;
+            }
+        }
+    }
+
+    /**
      * Sets a callback invoked whenever the active tool changes.
      */
     public void setOnToolChanged(Consumer<Tool> callback) {

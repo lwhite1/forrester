@@ -3,11 +3,61 @@
 Catalog of all interactive behaviors in the Forrester canvas application.
 This document serves as the source of truth for user-facing documentation and help text.
 
+## Application Window
+
+- **Initial size:** 1200x800 pixels
+- **Title bar:** "Forrester — [filename]" or "Forrester — Untitled" when no file is loaded
+- **Layout:** Menu bar and toolbar at top, canvas in center, status bar at bottom
+
+### Status Bar
+
+Displayed at the bottom of the window with a light gray background (#E8EAED) and top border (#BDC3C7). Shows four sections:
+
+| Section | Content | Example |
+|---------|---------|---------|
+| Active tool | Current tool name | "Select", "Place Stock", "Place Flow", "Place Auxiliary", "Place Constant" |
+| Selection count | Number of selected elements | "No selection", "1 selected", "3 selected" |
+| Element count | Breakdown of all elements | "5 elements (2 stocks, 1 flows, 1 aux, 1 const)" or "Empty model" |
+| Zoom level | Current zoom as percentage | "100%", "150%" |
+
+All sections update in real time as the user interacts with the canvas.
+
+## Menu Bar
+
+### File Menu
+
+| Item | Accelerator | Behavior |
+|------|-------------|----------|
+| New | Ctrl+N | Replaces current model with an empty "Untitled" model. Clears undo history. |
+| Open... | Ctrl+O | Opens a file chooser (*.json filter). Loads the model definition and its saved view. If the file has no saved view, applies automatic layout. Clears undo history. |
+| Save | Ctrl+S | Saves to the current file path. If no file has been set yet, behaves like Save As. |
+| Save As... | Ctrl+Shift+S | Opens a save file chooser. Remembers the directory and filename of the current file. |
+| Close | Ctrl+W | Creates a new empty model (same as New). |
+| Exit | — | Closes the application window. |
+
+### Edit Menu
+
+| Item | Accelerator | Behavior |
+|------|-------------|----------|
+| Undo | Ctrl+Z | Restores the previous model and view snapshot. Disabled when undo stack is empty. |
+| Redo | Ctrl+Shift+Z | Re-applies the last undone snapshot. Disabled when redo stack is empty. |
+| Select All | Ctrl+A | Selects all elements on the canvas. |
+
+### Simulate Menu
+
+| Item | Accelerator | Behavior |
+|------|-------------|----------|
+| Simulation Settings... | — | Opens a modal dialog to configure time step, duration, and duration unit. |
+| Run Simulation | Ctrl+R | Runs the simulation in a background thread. If no settings have been configured, prompts for them first. Shows results dialog on completion, or error alert on failure. |
+
 ## Canvas Navigation
 
 | Action | Input | Notes |
 |--------|-------|-------|
 | Zoom in/out | Scroll wheel / trackpad two-finger scroll | Zooms toward cursor position. Scale range: 10%–500% |
+| Zoom in | Ctrl+Plus or Ctrl+Equals | Zooms in at canvas center |
+| Zoom out | Ctrl+Minus | Zooms out at canvas center |
+| Reset zoom | Ctrl+0 | Resets zoom to 100% and clears pan offset |
 | Pan | Space + left-drag | Hold spacebar, then click and drag to pan the canvas |
 | Pan (alt) | Middle-drag or right-drag | For users with a multi-button mouse |
 
@@ -17,7 +67,9 @@ This document serves as the source of truth for user-facing documentation and he
 |--------|-------|-------|
 | Select element | Left-click on element | Clears previous selection, selects clicked element |
 | Add/remove from selection | Shift + left-click on element | Toggles the clicked element without affecting others |
-| Clear selection | Left-click on empty canvas | Clears all selected elements |
+| Select all | Ctrl+A | Selects all elements on the canvas. Also available via Edit > Select All |
+| Clear selection | Left-click on empty canvas | Clears all selected elements (Shift+click on empty space preserves selection) |
+| Clear selection (keyboard) | Escape (when on Select tool with no pending operation) | Deselects all elements |
 
 ### Selection Visual Feedback
 
@@ -30,9 +82,9 @@ This document serves as the source of truth for user-facing documentation and he
 
 | Action | Input | Notes |
 |--------|-------|-------|
-| Enter placement mode | Click a toolbar button (Stock, Flow, Auxiliary, Constant) | Button stays toggled; cursor is ready to place elements |
+| Enter placement mode | Click a toolbar button (Stock, Flow, Auxiliary, Constant), or press 2–5 | Button stays toggled; cursor is ready to place elements |
 | Place stock/aux/constant | Left-click on empty canvas (in placement mode) | Creates element at click position with auto-generated name |
-| Exit placement mode | Press Escape, or click the Select button | Returns to select/drag mode |
+| Exit placement mode | Press Escape, or press 1, or click the Select button | Returns to select/drag mode |
 
 - Elements are auto-named with incrementing numbers: "Stock 1", "Stock 2", "Flow 3", etc.
 - After placement, the new element is automatically selected
@@ -44,14 +96,31 @@ This document serves as the source of truth for user-facing documentation and he
 |--------|-------|-------|
 | Start flow (from stock) | Click Flow button, then click a stock | Sets the stock as the flow source |
 | Start flow (from cloud) | Click Flow button, then click empty space | Sets a cloud as the flow source |
-| Complete flow (to stock) | Second click on a stock | Creates flow connected source → sink; diamond placed at midpoint |
+| Complete flow (to stock) | Second click on a stock | Creates flow connected source > sink; diamond placed at midpoint |
 | Complete flow (to cloud) | Second click on empty space | Creates flow with cloud sink; diamond placed at midpoint |
 | Cancel pending flow | Press Escape during pending flow | Discards the pending flow, no element created |
 
-- A **rubber-band line** (blue dashed) follows the cursor from the source to the current mouse position during the pending state
-- When hovering over a stock during pending flow, a **blue dashed highlight** appears around the stock
+- A **rubber-band line** (blue dashed, #4A90D9 at 60% opacity, 2px width) follows the cursor from the source to the current mouse position during the pending state
+- When hovering over a stock during pending flow, a **blue dashed highlight** rectangle appears around the stock (6px dash/3px gap, 4px padding)
 - If the source is a cloud, a cloud symbol is drawn at the source position
 - Switching tools while a flow is pending cancels the pending flow
+- **Self-loops are prevented** — source and sink cannot be the same stock
+- **Cloud-to-cloud flows are prevented** — at least one end must be a stock
+- Flow creation only snaps to stocks (not auxiliaries, constants, or other flows)
+
+### Flow Endpoint Reattachment
+
+| Action | Input | Notes |
+|--------|-------|-------|
+| Start reattachment | Left-drag on a cloud endpoint or connected stock endpoint of a flow (in Select mode) | Begins rubber-band drag from the flow diamond |
+| Complete reattachment (to stock) | Release on a stock | Reconnects the flow endpoint to that stock |
+| Complete reattachment (to cloud) | Release on empty space | Disconnects the endpoint to a cloud |
+| Cancel reattachment | Press Escape | Returns to previous state without changes |
+
+- Cloud hit radius: 18px (world space); connected endpoint hit radius: 14px
+- Clouds appear at 80px offset from the flow diamond center, in the direction away from the opposite connected stock
+- A rubber-band line (same blue dashed style) connects the diamond center to the current mouse position during the drag
+- When hovering over a stock during reattachment, the stock gets the same blue dashed highlight as during flow creation
 
 ## Element Deletion
 
@@ -59,7 +128,7 @@ This document serves as the source of truth for user-facing documentation and he
 |--------|-------|-------|
 | Delete selected | Delete or Backspace key | Removes all selected elements from the model |
 
-- If a deleted stock is referenced as a flow's source or sink, that connection becomes a cloud (null)
+- If a deleted stock is referenced as a flow's source or sink, that connection becomes a cloud
 - Formula references to deleted elements become invalid (user must fix manually)
 - No cascade deletion — only the selected elements are removed
 - Connectors (info links) are regenerated after deletion
@@ -68,14 +137,25 @@ This document serves as the source of truth for user-facing documentation and he
 
 | Action | Input | Notes |
 |--------|-------|-------|
-| Edit element name | Double-click on any element | Opens a TextField overlay at the element position |
-| Commit edit | Enter key or click away (focus loss) | Applies the new name/value |
+| Edit element | Double-click on any element (in Select mode) | Opens a TextField overlay at the element position |
+| Commit edit | Enter key or click away (focus loss) | Applies the new name/value/equation |
 | Cancel edit | Escape key | Closes the editor without changes |
 
-- For **stocks, flows, and auxiliaries**: double-click opens a name editor
-- For **constants**: double-click opens a name editor, then on commit chains to a value editor
+### Editing Chains by Element Type
+
+| Element type | First editor | Second editor |
+|-------------|-------------|---------------|
+| Stock | Name | — |
+| Flow | Name | Equation (positioned below diamond + name label) |
+| Auxiliary | Name | Equation (positioned below name inside rectangle) |
+| Constant | Name | Value (positioned below name; must be a valid number) |
+
+- The name editor opens first; on commit, the second editor opens automatically (for types that have one)
+- The current text is pre-selected for immediate overwriting
 - Rename propagation: renaming an element updates flow source/sink references and equation tokens automatically
-- While the inline editor is open, canvas keyboard shortcuts (Delete, Space) are suppressed
+- Equation editors use a wider field (minimum 100px width)
+- Invalid constant values (non-numeric) are silently ignored
+- While the inline editor is open, all canvas keyboard shortcuts and mouse interactions are suppressed
 
 ## Element Manipulation
 
@@ -84,29 +164,122 @@ This document serves as the source of truth for user-facing documentation and he
 | Move element | Left-drag on selected element | Drag to reposition; connections follow automatically |
 | Move multiple | Select multiple, then drag any selected element | All selected elements move together, maintaining relative positions |
 
-## Window
+- The first drag movement saves an undo snapshot; subsequent movements in the same drag do not create additional snapshots
 
-| Action | Input | Notes |
-|--------|-------|-------|
-| Resize | Drag window border | Canvas redraws to fill available space |
+## Undo / Redo
+
+- **Mechanism:** Snapshot-based — stores immutable pairs of (model definition + canvas view) on each mutation
+- **Stack depth:** Maximum 100 undo levels; oldest entries are discarded when the limit is exceeded
+- **Redo stack:** Cleared whenever a new mutation occurs (branching history discards the redo stack)
+- **Undo/redo menu items** are enabled/disabled dynamically based on stack state
+- **History is cleared** when a new file is opened or a new model is created
+
+Operations that save undo state:
+- Element creation (stock, flow, auxiliary, constant)
+- Element deletion
+- Element drag/move (one snapshot per drag, not per pixel)
+- Inline name edits (rename)
+- Inline value edits (constant value change)
+- Inline equation edits (flow/auxiliary equation change)
+- Flow endpoint reattachment
+
+## Simulation
+
+### Settings Dialog
+
+A modal dialog with three fields:
+
+| Field | Control | Default | Options |
+|-------|---------|---------|---------|
+| Time Step | ComboBox | Day | Day, Week, Month, Year, Hour, Minute, Second |
+| Duration | TextField | 100 | Any positive number (integer or decimal) |
+| Duration Unit | ComboBox | Day | Day, Week, Month, Year, Hour, Minute, Second |
+
+- OK button is disabled if the duration field is empty or contains a non-positive / non-numeric value
+- If the model already has settings, the dialog shows the existing values
+
+### Results Dialog
+
+- Opens as a **separate, non-modal window** (800x500 pixels)
+- Displays a **table** with one column per simulation variable, plus a "Step" column
+- Values are formatted as integers when whole numbers, or with 4 decimal places otherwise
+- User can scroll, resize columns, and close the window independently
+
+## Element Visual Styling
+
+All elements have a #F0F4F8 fill color.
+
+### Stock
+- **Shape:** Rounded rectangle (8px corner radius)
+- **Border:** 3px solid line
+- **Label:** Bold 13pt font, centered
+- **Badge:** Unit text in 9pt gray, bottom-right corner
+
+### Flow
+- **Shape:** Diamond (rotated square, 30px size)
+- **Border:** 1.5px solid line
+- **Label:** 11pt font, below diamond (4px gap)
+- **Equation:** 9pt gray font below label; hidden if null, blank, or "0"
+
+### Auxiliary
+- **Shape:** Rounded rectangle (6px corner radius)
+- **Border:** 1.5px solid line
+- **Badge:** "fx" in 9pt gray, top-left corner
+- **Label:** 12pt font, slightly above center
+- **Equation:** 9pt gray font below label; hidden if null, blank, or "0"
+
+### Constant
+- **Shape:** Rounded rectangle (4px corner radius)
+- **Border:** 1px dashed line (6px dash / 4px gap)
+- **Badge:** "pin" in 9pt gray, top-left corner
+- **Label:** 11pt font, slightly above center
+- **Value:** 9pt gray font below label; integers without decimal, floats as-is
+
+### Connectors
+
+- **Material flow lines:** Thick solid arrows with arrowheads, clipped to element borders
+- **Info link lines:** Thin dashed arrows, clipped to element borders
+
+### Rendering Order (bottom to top)
+
+1. Background fill (#F5F5F5)
+2. Material flow lines
+3. Info link lines
+4. Element shapes
+5. Selection indicators
+6. Pending flow rubber-band line
+7. Reattachment rubber-band line
 
 ## Keyboard Shortcuts
 
 | Key | Action |
 |-----|--------|
 | Delete / Backspace | Delete selected elements |
-| Escape | Cancel pending flow; or reset tool to Select mode; or cancel inline edit |
+| Escape | Cancel reattachment; cancel pending flow; reset tool to Select; clear selection; cancel inline edit (in priority order) |
 | Space (hold) | Enable pan mode while held |
 | Enter | Commit inline edit (when editor is open) |
+| 1 | Switch to Select tool |
+| 2 | Switch to Stock tool |
+| 3 | Switch to Flow tool |
+| 4 | Switch to Auxiliary tool |
+| 5 | Switch to Constant tool |
+| Ctrl+A | Select all elements |
+| Ctrl+Z | Undo |
+| Ctrl+Shift+Z | Redo |
+| Ctrl+N | New model |
+| Ctrl+O | Open file |
+| Ctrl+S | Save |
+| Ctrl+Shift+S | Save As |
+| Ctrl+W | Close (new model) |
+| Ctrl+R | Run simulation |
+| Ctrl+Plus / Ctrl+Equals | Zoom in at canvas center |
+| Ctrl+Minus | Zoom out at canvas center |
+| Ctrl+0 | Reset zoom to 100% |
 
 ## Not Yet Implemented
 
-- Full equation editor (currently only name/value editing)
 - Rubber-band (marquee) selection
 - Context toolbar near selection
 - Functional resize handles
 - Hover highlighting / feedback loop highlighting
 - Cursor shape changes (hand for pan, move for drag, etc.)
-- Additional keyboard shortcuts (Ctrl+A to select all, etc.)
-- Undo/redo
-- Model save/load to disk

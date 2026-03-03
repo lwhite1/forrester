@@ -87,6 +87,36 @@ class ViewportTest {
     }
 
     @Nested
+    @DisplayName("reset")
+    class Reset {
+
+        @Test
+        void shouldReturnToIdentityTransform() {
+            viewport.pan(100, -50);
+            viewport.zoomAt(200, 200, 2.0);
+
+            viewport.reset();
+
+            assertThat(viewport.getScale()).isEqualTo(1.0);
+            assertThat(viewport.getTranslateX()).isEqualTo(0);
+            assertThat(viewport.getTranslateY()).isEqualTo(0);
+        }
+
+        @Test
+        void shouldRestoreIdentityCoordinateMapping() {
+            viewport.pan(100, -50);
+            viewport.zoomAt(200, 200, 3.0);
+
+            viewport.reset();
+
+            assertThat(viewport.toWorldX(100)).isCloseTo(100, within(0.001));
+            assertThat(viewport.toWorldY(200)).isCloseTo(200, within(0.001));
+            assertThat(viewport.toScreenX(100)).isCloseTo(100, within(0.001));
+            assertThat(viewport.toScreenY(200)).isCloseTo(200, within(0.001));
+        }
+    }
+
+    @Nested
     @DisplayName("pan")
     class Pan {
 

@@ -109,6 +109,14 @@ public class CanvasState {
     }
 
     /**
+     * Selects all elements on the canvas.
+     */
+    public void selectAll() {
+        selection.clear();
+        selection.addAll(drawOrder);
+    }
+
+    /**
      * Clears all selections.
      */
     public void clearSelection() {

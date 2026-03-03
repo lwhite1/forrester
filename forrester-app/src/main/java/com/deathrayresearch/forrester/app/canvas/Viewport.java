@@ -83,6 +83,15 @@ public class Viewport {
         gc.scale(scale, scale);
     }
 
+    /**
+     * Resets the viewport to identity transform (no pan, no zoom).
+     */
+    public void reset() {
+        this.scale = 1.0;
+        this.translateX = 0;
+        this.translateY = 0;
+    }
+
     public double getTranslateX() {
         return translateX;
     }
