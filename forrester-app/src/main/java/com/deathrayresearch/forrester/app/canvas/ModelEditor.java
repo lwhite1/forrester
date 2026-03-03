@@ -314,6 +314,45 @@ public class ModelEditor {
         return false;
     }
 
+    /**
+     * Sets the equation of a flow.
+     *
+     * @return true if the flow was found and updated
+     */
+    public boolean setFlowEquation(String name, String equation) {
+        if (equation == null || equation.isBlank()) {
+            return false;
+        }
+        for (int i = 0; i < flows.size(); i++) {
+            if (flows.get(i).name().equals(name)) {
+                FlowDef f = flows.get(i);
+                flows.set(i, new FlowDef(f.name(), f.comment(), equation,
+                        f.timeUnit(), f.source(), f.sink()));
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Sets the equation of an auxiliary.
+     *
+     * @return true if the auxiliary was found and updated
+     */
+    public boolean setAuxEquation(String name, String equation) {
+        if (equation == null || equation.isBlank()) {
+            return false;
+        }
+        for (int i = 0; i < auxiliaries.size(); i++) {
+            if (auxiliaries.get(i).name().equals(name)) {
+                AuxDef a = auxiliaries.get(i);
+                auxiliaries.set(i, new AuxDef(a.name(), a.comment(), equation, a.unit()));
+                return true;
+            }
+        }
+        return false;
+    }
+
     private void updateEquationReferences(String oldToken, String newToken) {
         if (oldToken.equals(newToken)) {
             return;

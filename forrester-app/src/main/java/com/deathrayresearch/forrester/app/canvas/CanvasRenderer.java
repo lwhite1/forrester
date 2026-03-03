@@ -1,5 +1,6 @@
 package com.deathrayresearch.forrester.app.canvas;
 
+import com.deathrayresearch.forrester.model.def.AuxDef;
 import com.deathrayresearch.forrester.model.def.ConnectorRoute;
 import com.deathrayresearch.forrester.model.def.ConstantDef;
 import com.deathrayresearch.forrester.model.def.ElementType;
@@ -73,6 +74,18 @@ public class CanvasRenderer {
             stockUnitMap.put(s.name(), s.unit());
         }
 
+        // Build lookup for flow equations
+        Map<String, String> flowEquationMap = new HashMap<>();
+        for (FlowDef f : editor.getFlows()) {
+            flowEquationMap.put(f.name(), f.equation());
+        }
+
+        // Build lookup for auxiliary equations
+        Map<String, String> auxEquationMap = new HashMap<>();
+        for (AuxDef a : editor.getAuxiliaries()) {
+            auxEquationMap.put(a.name(), a.equation());
+        }
+
         // Apply viewport transform for world-space rendering
         gc.save();
         viewport.applyTo(gc);
@@ -99,14 +112,20 @@ public class CanvasRenderer {
                             cy - LayoutMetrics.STOCK_HEIGHT / 2,
                             LayoutMetrics.STOCK_WIDTH, LayoutMetrics.STOCK_HEIGHT);
                 }
-                case FLOW -> ElementRenderer.drawFlow(gc, name,
-                        cx - LayoutMetrics.FLOW_INDICATOR_SIZE / 2,
-                        cy - LayoutMetrics.FLOW_INDICATOR_SIZE / 2,
-                        LayoutMetrics.FLOW_INDICATOR_SIZE, LayoutMetrics.FLOW_INDICATOR_SIZE);
-                case AUX -> ElementRenderer.drawAux(gc, name,
-                        cx - LayoutMetrics.AUX_WIDTH / 2,
-                        cy - LayoutMetrics.AUX_HEIGHT / 2,
-                        LayoutMetrics.AUX_WIDTH, LayoutMetrics.AUX_HEIGHT);
+                case FLOW -> {
+                    String flowEq = flowEquationMap.get(name);
+                    ElementRenderer.drawFlow(gc, name, flowEq,
+                            cx - LayoutMetrics.FLOW_INDICATOR_SIZE / 2,
+                            cy - LayoutMetrics.FLOW_INDICATOR_SIZE / 2,
+                            LayoutMetrics.FLOW_INDICATOR_SIZE, LayoutMetrics.FLOW_INDICATOR_SIZE);
+                }
+                case AUX -> {
+                    String auxEq = auxEquationMap.get(name);
+                    ElementRenderer.drawAux(gc, name, auxEq,
+                            cx - LayoutMetrics.AUX_WIDTH / 2,
+                            cy - LayoutMetrics.AUX_HEIGHT / 2,
+                            LayoutMetrics.AUX_WIDTH, LayoutMetrics.AUX_HEIGHT);
+                }
                 case CONSTANT -> {
                     ConstantDef cd = constantMap.get(name);
                     double value = cd != null ? cd.value() : 0;

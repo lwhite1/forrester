@@ -1,5 +1,6 @@
 package com.deathrayresearch.forrester.app.canvas;
 
+import com.deathrayresearch.forrester.model.def.AuxDef;
 import com.deathrayresearch.forrester.model.def.ElementPlacement;
 import com.deathrayresearch.forrester.model.def.ElementType;
 import com.deathrayresearch.forrester.model.def.FlowDef;
@@ -594,6 +595,121 @@ class ModelEditorTest {
             assertThat(ModelEditor.isValidName("Rate*2")).isFalse();
             assertThat(ModelEditor.isValidName("a+b")).isFalse();
             assertThat(ModelEditor.isValidName("x/y")).isFalse();
+        }
+    }
+
+    @Nested
+    @DisplayName("setFlowEquation")
+    class SetFlowEquation {
+
+        @Test
+        void shouldUpdateFlowEquation() {
+            editor.addFlow();
+            String name = editor.getFlows().get(0).name();
+
+            boolean result = editor.setFlowEquation(name, "Stock_1 * 0.5");
+
+            assertThat(result).isTrue();
+            assertThat(editor.getFlows().get(0).equation()).isEqualTo("Stock_1 * 0.5");
+        }
+
+        @Test
+        void shouldReturnFalseForNonexistentFlow() {
+            assertThat(editor.setFlowEquation("ghost", "1")).isFalse();
+        }
+
+        @Test
+        void shouldRejectBlankEquation() {
+            editor.addFlow();
+            String name = editor.getFlows().get(0).name();
+
+            assertThat(editor.setFlowEquation(name, "")).isFalse();
+            assertThat(editor.setFlowEquation(name, "   ")).isFalse();
+            assertThat(editor.getFlows().get(0).equation()).isEqualTo("0");
+        }
+
+        @Test
+        void shouldRejectNullEquation() {
+            editor.addFlow();
+            String name = editor.getFlows().get(0).name();
+
+            assertThat(editor.setFlowEquation(name, null)).isFalse();
+            assertThat(editor.getFlows().get(0).equation()).isEqualTo("0");
+        }
+
+        @Test
+        void shouldPreserveOtherFields() {
+            ModelDefinition def = new ModelDefinitionBuilder()
+                    .name("Test")
+                    .stock("S", 100, "u")
+                    .flow("Drain", "S * 0.1", "day", "S", null)
+                    .build();
+            editor.loadFrom(def);
+
+            editor.setFlowEquation("Drain", "S * 0.2");
+
+            FlowDef flow = editor.getFlows().get(0);
+            assertThat(flow.name()).isEqualTo("Drain");
+            assertThat(flow.equation()).isEqualTo("S * 0.2");
+            assertThat(flow.timeUnit()).isEqualTo("day");
+            assertThat(flow.source()).isEqualTo("S");
+            assertThat(flow.sink()).isNull();
+        }
+    }
+
+    @Nested
+    @DisplayName("setAuxEquation")
+    class SetAuxEquation {
+
+        @Test
+        void shouldUpdateAuxEquation() {
+            editor.addAux();
+            String name = editor.getAuxiliaries().get(0).name();
+
+            boolean result = editor.setAuxEquation(name, "Stock_1 + Constant_2");
+
+            assertThat(result).isTrue();
+            assertThat(editor.getAuxiliaries().get(0).equation()).isEqualTo("Stock_1 + Constant_2");
+        }
+
+        @Test
+        void shouldReturnFalseForNonexistentAux() {
+            assertThat(editor.setAuxEquation("ghost", "1")).isFalse();
+        }
+
+        @Test
+        void shouldRejectBlankEquation() {
+            editor.addAux();
+            String name = editor.getAuxiliaries().get(0).name();
+
+            assertThat(editor.setAuxEquation(name, "")).isFalse();
+            assertThat(editor.setAuxEquation(name, "   ")).isFalse();
+            assertThat(editor.getAuxiliaries().get(0).equation()).isEqualTo("0");
+        }
+
+        @Test
+        void shouldRejectNullEquation() {
+            editor.addAux();
+            String name = editor.getAuxiliaries().get(0).name();
+
+            assertThat(editor.setAuxEquation(name, null)).isFalse();
+            assertThat(editor.getAuxiliaries().get(0).equation()).isEqualTo("0");
+        }
+
+        @Test
+        void shouldPreserveOtherFields() {
+            ModelDefinition def = new ModelDefinitionBuilder()
+                    .name("Test")
+                    .aux("Rate", "Stock_1 * 0.1", "1/day")
+                    .build();
+            editor.loadFrom(def);
+
+            editor.setAuxEquation("Rate", "Stock_1 * 0.2");
+
+            AuxDef aux = editor.getAuxiliaries().get(0);
+            assertThat(aux.name()).isEqualTo("Rate");
+            assertThat(aux.equation()).isEqualTo("Stock_1 * 0.2");
+            assertThat(aux.unit()).isEqualTo("1/day");
         }
     }
 

@@ -48,14 +48,14 @@ public final class ElementRenderer {
     }
 
     /**
-     * Draws a flow process indicator: small rounded diamond with name label.
+     * Draws a flow process indicator: small rounded diamond with name label and equation.
      *
      * @param x      top-left X
      * @param y      top-left Y
      * @param width  bounding box width
      * @param height bounding box height
      */
-    public static void drawFlow(GraphicsContext gc, String name,
+    public static void drawFlow(GraphicsContext gc, String name, String equation,
                                 double x, double y, double width, double height) {
         double cx = x + width / 2;
         double cy = y + height / 2;
@@ -78,12 +78,22 @@ public final class ElementRenderer {
         gc.setTextAlign(TextAlignment.CENTER);
         gc.setTextBaseline(VPos.TOP);
         gc.fillText(name, cx, cy + half + 4);
+
+        // Equation below the name
+        if (equation != null && !equation.isBlank()) {
+            gc.setFill(ColorPalette.TEXT_SECONDARY);
+            gc.setFont(LayoutMetrics.BADGE_FONT);
+            gc.setTextAlign(TextAlignment.CENTER);
+            gc.setTextBaseline(VPos.TOP);
+            gc.fillText(equation, cx, cy + half + 18);
+        }
     }
 
     /**
-     * Draws an auxiliary variable: medium rounded rectangle with "fx" badge and centered name.
+     * Draws an auxiliary variable: medium rounded rectangle with "fx" badge, centered name,
+     * and equation.
      */
-    public static void drawAux(GraphicsContext gc, String name,
+    public static void drawAux(GraphicsContext gc, String name, String equation,
                                double x, double y, double width, double height) {
         double r = LayoutMetrics.AUX_CORNER_RADIUS;
 
@@ -104,12 +114,21 @@ public final class ElementRenderer {
         gc.setTextBaseline(VPos.TOP);
         gc.fillText("fx", x + 5, y + 3);
 
-        // Name centered
+        // Name centered, slightly above middle
         gc.setFill(ColorPalette.TEXT);
         gc.setFont(LayoutMetrics.AUX_NAME_FONT);
         gc.setTextAlign(TextAlignment.CENTER);
         gc.setTextBaseline(VPos.CENTER);
-        gc.fillText(name, x + width / 2, y + height / 2);
+        gc.fillText(name, x + width / 2, y + height / 2 - 6);
+
+        // Equation below name
+        if (equation != null && !equation.isBlank()) {
+            gc.setFill(ColorPalette.TEXT_SECONDARY);
+            gc.setFont(LayoutMetrics.BADGE_FONT);
+            gc.setTextAlign(TextAlignment.CENTER);
+            gc.setTextBaseline(VPos.CENTER);
+            gc.fillText(equation, x + width / 2, y + height / 2 + 8);
+        }
     }
 
     /**

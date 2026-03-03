@@ -1,8 +1,10 @@
 package com.deathrayresearch.forrester.app.canvas;
 
+import com.deathrayresearch.forrester.model.def.AuxDef;
 import com.deathrayresearch.forrester.model.def.ConnectorRoute;
 import com.deathrayresearch.forrester.model.def.ConstantDef;
 import com.deathrayresearch.forrester.model.def.ElementType;
+import com.deathrayresearch.forrester.model.def.FlowDef;
 import com.deathrayresearch.forrester.model.def.ModelDefinition;
 import com.deathrayresearch.forrester.model.def.ViewDef;
 
@@ -293,6 +295,10 @@ public class ModelCanvas extends Canvas {
 
         if (type == ElementType.CONSTANT) {
             startConstantNameEdit(elementName, screenX, screenY, fieldWidth);
+        } else if (type == ElementType.FLOW) {
+            startFlowNameEdit(elementName, screenX, screenY, fieldWidth);
+        } else if (type == ElementType.AUX) {
+            startAuxNameEdit(elementName, screenX, screenY, fieldWidth);
         } else {
             inlineEditor.open(screenX, screenY, elementName, fieldWidth, newName -> {
                 if (newName != null && !newName.equals(elementName)
@@ -349,6 +355,82 @@ public class ModelCanvas extends Canvas {
     }
 
     /**
+     * Starts editing a flow's name. On commit, proceeds to equation editing.
+     */
+    private void startFlowNameEdit(String elementName, double screenX, double screenY,
+                                    double fieldWidth) {
+        inlineEditor.open(screenX, screenY, elementName, fieldWidth, newName -> {
+            String effectiveName;
+            if (newName != null && !newName.equals(elementName)
+                    && ModelEditor.isValidName(newName)) {
+                applyRename(elementName, newName);
+                effectiveName = newName;
+            } else {
+                effectiveName = elementName;
+            }
+            startFlowEquationEdit(effectiveName, screenX, screenY, fieldWidth);
+        });
+    }
+
+    /**
+     * Starts editing a flow's equation after the name edit completes.
+     */
+    private void startFlowEquationEdit(String flowName, double screenX, double screenY,
+                                        double fieldWidth) {
+        FlowDef fd = findFlow(flowName);
+        String currentEquation = fd != null ? fd.equation() : "0";
+
+        double eqScreenY = screenY + 16 * viewport.getScale();
+
+        inlineEditor.open(screenX, eqScreenY, currentEquation, fieldWidth, eqText -> {
+            if (eqText != null && !eqText.isBlank()) {
+                editor.setFlowEquation(flowName, eqText);
+                connectors = editor.generateConnectors();
+                redraw();
+            }
+            requestFocus();
+        });
+    }
+
+    /**
+     * Starts editing an auxiliary's name. On commit, proceeds to equation editing.
+     */
+    private void startAuxNameEdit(String elementName, double screenX, double screenY,
+                                   double fieldWidth) {
+        inlineEditor.open(screenX, screenY, elementName, fieldWidth, newName -> {
+            String effectiveName;
+            if (newName != null && !newName.equals(elementName)
+                    && ModelEditor.isValidName(newName)) {
+                applyRename(elementName, newName);
+                effectiveName = newName;
+            } else {
+                effectiveName = elementName;
+            }
+            startAuxEquationEdit(effectiveName, screenX, screenY, fieldWidth);
+        });
+    }
+
+    /**
+     * Starts editing an auxiliary's equation after the name edit completes.
+     */
+    private void startAuxEquationEdit(String auxName, double screenX, double screenY,
+                                       double fieldWidth) {
+        AuxDef ad = findAux(auxName);
+        String currentEquation = ad != null ? ad.equation() : "0";
+
+        double eqScreenY = screenY + 16 * viewport.getScale();
+
+        inlineEditor.open(screenX, eqScreenY, currentEquation, fieldWidth, eqText -> {
+            if (eqText != null && !eqText.isBlank()) {
+                editor.setAuxEquation(auxName, eqText);
+                connectors = editor.generateConnectors();
+                redraw();
+            }
+            requestFocus();
+        });
+    }
+
+    /**
      * Applies a rename to both the model editor and canvas state,
      * then regenerates connectors and redraws.
      */
@@ -365,6 +447,24 @@ public class ModelCanvas extends Canvas {
         for (ConstantDef c : editor.getConstants()) {
             if (c.name().equals(name)) {
                 return c;
+            }
+        }
+        return null;
+    }
+
+    private FlowDef findFlow(String name) {
+        for (FlowDef f : editor.getFlows()) {
+            if (f.name().equals(name)) {
+                return f;
+            }
+        }
+        return null;
+    }
+
+    private AuxDef findAux(String name) {
+        for (AuxDef a : editor.getAuxiliaries()) {
+            if (a.name().equals(name)) {
+                return a;
             }
         }
         return null;
