@@ -300,7 +300,7 @@ src/main/java/com/deathrayresearch/forrester/app/
 
 ### Test coverage
 
-- 190 tests, all passing
+- 195 tests, all passing
 - `ViewportTest` — coordinate transforms, zoom, pan (11 tests)
 - `HitTesterTest` — rect and diamond hit testing
 - `CanvasStateTest` — load, position, selection, add/remove/rename, toViewDef

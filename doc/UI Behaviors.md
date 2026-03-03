@@ -217,7 +217,7 @@ A modal dialog with three fields:
 
 ## Element Visual Styling
 
-All elements have a #F0F4F8 fill color.
+All elements have a white (#FFFFFF) fill color.
 
 ### Stock
 - **Shape:** Rounded rectangle (8px corner radius)
@@ -252,7 +252,7 @@ All elements have a #F0F4F8 fill color.
 
 ### Rendering Order (bottom to top)
 
-1. Background fill (#F5F5F5)
+1. Background fill (#F8F9FA)
 2. Material flow lines
 3. Info link lines
 4. Element shapes
