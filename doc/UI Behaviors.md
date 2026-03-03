@@ -250,6 +250,25 @@ All elements have a #F0F4F8 fill color.
 6. Pending flow rubber-band line
 7. Reattachment rubber-band line
 
+## Cursor Feedback
+
+The cursor changes shape to reflect the current interaction state.
+
+| State | Cursor | Condition |
+|-------|--------|-----------|
+| Default / idle | Default arrow | No special state active |
+| Hovering element (Select mode) | Open hand | Mouse over an element in Select tool mode |
+| Hovering cloud or connected endpoint | Pointing hand | Mouse over a flow's cloud endpoint or connected stock endpoint |
+| Dragging element | Closed hand | Element drag in progress |
+| Space held (pan ready) | Move (four-way arrow) | Spacebar held down, ready to pan |
+| Panning | Closed hand | Pan drag in progress (Space+drag, middle-drag, or right-drag) |
+| Placement mode | Crosshair | Any placement tool active (Stock, Flow, Auxiliary, Constant) |
+| Flow pending (rubber-band) | Crosshair | Waiting for second click during flow creation |
+| Reattaching endpoint | Closed hand | Dragging a flow endpoint to reattach |
+| Inline editor active | No change (TextField shows I-beam within its own bounds) | Canvas cursor unchanged; cursor updates resume when editor closes |
+
+Priority order (highest to lowest): reattaching / panning / dragging > space held > flow pending / placement mode > cloud/endpoint hover > element hover > default.
+
 ## Keyboard Shortcuts
 
 | Key | Action |
@@ -282,4 +301,3 @@ All elements have a #F0F4F8 fill color.
 - Context toolbar near selection
 - Functional resize handles
 - Hover highlighting / feedback loop highlighting
-- Cursor shape changes (hand for pan, move for drag, etc.)

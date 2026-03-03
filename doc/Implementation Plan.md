@@ -124,74 +124,179 @@ Drag cloud endpoints onto stocks to reconnect flows, or drag connected endpoints
 
 ---
 
+### Phase 6 — File Save/Load & Bug Fixes (commits 2a7d54f, 763a93a, 099719e)
+
+Two-part phase: added file persistence and fixed audit findings from Phase 5.
+
+#### Part 1: File Save/Load & Phase 5 Bug Fixes
+
+| File | Change |
+|------|--------|
+| `ForresterApp.java` | File menu with New, Open, Save, Save As (Ctrl+N/O/S/Shift+S); `ModelDefinitionSerializer` wiring; title bar shows filename |
+| `ModelEditor.java` | `loadFrom(ModelDefinition)`, `toModelDefinition(ViewDef)` for round-trip serialization |
+| `CanvasState.java` | `toViewDef()` to convert canvas state back to immutable `ViewDef` for serialization |
+| `ModelCanvas.java` | `setModel(editor, view)` and `toModelDefinition()` public API for load/save |
+| `ConnectionRenderer.java` | Consolidated duplicate `CLOUD_OFFSET` constant |
+| `FlowEndpointCalculator.java` | Uses `ConnectionRenderer.CLOUD_OFFSET` instead of own constant |
+| `ElementRenderer.java` | Fixed `formatValue` precision |
+| `CanvasStateTest.java` | Added `toViewDef` round-trip tests |
+| `ModelEditorTest.java` | Added `toModelDefinition` round-trip and rename propagation tests |
+
+#### Part 2: Remaining Audit Fixes
+
+| File | Change |
+|------|--------|
+| `ForresterApp.java` | Added Close and Exit menu items |
+| `ModelEditor.java` | Self-loop guard in `reconnectFlow`, stock existence validation, identifier validation |
+| `FlowCreationController.java` | Self-loop prevention (source == sink rejected) |
+| `CanvasRenderer.java` | Cloud preview when dropping reattachment on empty space |
+| `CanvasRendererTest.java` | **New.** Tests for rendering coordinator |
+| `ElementRendererTest.java` | **New.** Tests for element formatting |
+| `FlowCreationControllerTest.java` | Added self-loop rejection tests |
+| `ModelEditorTest.java` | Added validation and reconnect guard tests |
+
+**Result:** Models can be saved to and loaded from JSON files. All major Phase 5 audit bugs resolved: unified cloud offset, self-loop prevention, reconnect validation. File menu has full lifecycle (New, Open, Save, Save As, Close, Exit).
+
+**Audit:** See `doc/UI Audit — Phase 5.md` for the full list with resolution status.
+
+---
+
+### Phase 7 — Status Bar, Equation Editing & Undo (commits a2d7aad, 92bb4b1, cf18a6c)
+
+Added status bar, inline equation editing for flows and auxiliaries, and undo/redo support.
+
+| File | Change |
+|------|--------|
+| `StatusBar.java` | **New.** Shows active tool, selection count, element counts (stocks/flows/aux/constants), zoom level |
+| `UndoManager.java` | **New.** Snapshot-based undo/redo stack with `Snapshot(ModelDefinition, ViewDef)` pairs |
+| `UndoManagerTest.java` | **New.** 13 tests for undo/redo lifecycle, capacity limits, clear |
+| `ForresterApp.java` | Undo/Redo menu items (Ctrl+Z / Ctrl+Shift+Z), status bar wiring, undo manager integration |
+| `ModelCanvas.java` | Undo snapshots before mutations, `performUndo()` / `performRedo()` methods |
+| `ModelEditor.java` | `setFlowEquation()` / `setAuxEquation()` / `getFlowEquation()` / `getAuxEquation()` for equation editing |
+| `CanvasRenderer.java` | Renders equation text below flow diamonds and auxiliary circles |
+| `ElementRenderer.java` | Equation text rendering for flows and auxiliaries |
+| `LayoutMetrics.java` | Equation text font and positioning constants |
+| `HitTester.java` | Updated hit areas for elements with equation text |
+| `ElementRendererTest.java` | Added equation formatting tests |
+| `ModelEditorTest.java` | Added equation get/set, round-trip, and rename propagation tests |
+
+**Result:** Status bar shows tool, selection, element counts, and zoom. Double-click flows or auxiliaries to edit their equations inline. Undo/redo via Edit menu or keyboard shortcuts. Snapshots capture full model + view state before each mutation.
+
+**Audit:** See `doc/UI Audit — Phase 7.md` for findings and resolution status.
+
+---
+
+### Phase 8 — Simulation Running (commits 5c4c92a, ea56674)
+
+Wire the existing compilation and simulation pipeline to the UI with a Simulate menu.
+
+| File | Change |
+|------|--------|
+| `SimulationRunner.java` | **New.** Non-UI class: compiles `ModelDefinition`, runs `Simulation`, captures time-series via `DataCaptureHandler` |
+| `SimulationSettingsDialog.java` | **New.** Dialog for time step unit, duration, and duration unit configuration |
+| `SimulationResultsDialog.java` | **New.** Separate window with `TableView` showing simulation results |
+| `SimulationRunnerTest.java` | **New.** 9 tests: column names, row count, initial values, variable capture, error handling, empty model |
+| `ModelEditor.java` | Added `simulationSettings` field with getter/setter, round-trip through `toModelDefinition` |
+| `ModelEditorTest.java` | Added `SimulationSettings` round-trip tests (non-null and null) |
+| `ForresterApp.java` | Simulate menu: Simulation Settings dialog + Run Simulation (Ctrl+R) on background thread |
+| `ModelCanvas.java` | `setUndoManager()` wiring for undo integration |
+| `CanvasState.java` | Replaced mutable `double[]` positions with immutable `Position` record |
+
+**Result:** Ctrl+R compiles the model and runs a simulation on a background thread. If no settings exist, prompts first. Results displayed in a sortable table window. Simulation errors shown in an alert dialog. Settings saved/loaded with the model JSON.
+
+**Audit:** See `doc/UI Audit — Phase 8.md` for findings and resolution status.
+
+---
+
+### Phase 9 — Keyboard Shortcuts & Cursor Feedback (current)
+
+Added number-key tool switching, keyboard zoom controls, and context-sensitive cursor shapes.
+
+| File | Change |
+|------|--------|
+| `ModelCanvas.java` | Number keys 1–5 switch tools, Ctrl+Plus/Minus/0 zoom, Escape priority chain, `updateCursor()` with `lastMouseX`/`lastMouseY` tracking |
+| `CanvasToolBar.java` | `selectTool()` and `resetToSelect()` methods for programmatic tool switching |
+| `ForresterApp.java` | Edit menu Select All (Ctrl+A) |
+
+**Keyboard shortcuts added:**
+- 1–5: Switch tool (Select, Stock, Flow, Auxiliary, Constant)
+- Ctrl+Plus/Equals: Zoom in at center
+- Ctrl+Minus: Zoom out at center
+- Ctrl+0: Reset zoom to 100%
+- Ctrl+A: Select all elements
+
+**Cursor shapes added:**
+
+| State | Cursor |
+|-------|--------|
+| Default / idle | Default arrow |
+| Hovering element (Select mode) | Open hand |
+| Hovering cloud/connected endpoint | Pointing hand |
+| Dragging element | Closed hand |
+| Space held (pan ready) | Move (four-way arrow) |
+| Panning | Closed hand |
+| Placement mode | Crosshair |
+| Flow pending (rubber-band) | Crosshair |
+| Reattaching endpoint | Closed hand |
+
+**Result:** All tool modes accessible via keyboard. Cursor provides visual feedback for every interaction state. Priority chain ensures the most relevant cursor is always shown.
+
+---
+
 ## Current State
 
 ### Source files (forrester-app)
 
 ```
 src/main/java/com/deathrayresearch/forrester/app/
-├── ForresterApp.java              — JavaFX entry point
+├── ForresterApp.java              — JavaFX entry point, menus, undo/simulation wiring
 ├── Launcher.java                  — Main class
 └── canvas/
-    ├── CanvasRenderer.java        — Rendering coordinator
-    ├── CanvasState.java           — Mutable positions, types, draw order, selection
+    ├── CanvasRenderer.java        — Rendering coordinator (connections, elements, overlays)
+    ├── CanvasState.java           — Mutable positions (Position record), types, draw order, selection
     ├── CanvasToolBar.java         — Tool toggle buttons
     ├── ColorPalette.java          — Color constants
     ├── ConnectionRenderer.java    — Material flows and info links
-    ├── ElementRenderer.java       — Stock, flow, aux, constant shapes
+    ├── ElementRenderer.java       — Stock, flow, aux, constant shapes + equation text
     ├── FlowCreationController.java — Two-click flow state machine
     ├── FlowEndpointCalculator.java — Cloud positions and endpoint hit testing
     ├── HitTester.java             — Click → element resolution
     ├── InlineEditor.java          — TextField overlay for inline editing
-    ├── LayoutMetrics.java         — Dimensions, fonts
-    ├── ModelCanvas.java           — Event handling + editing orchestration (~560 lines)
-    ├── ModelEditor.java           — Mutable model editing layer
+    ├── LayoutMetrics.java         — Dimensions, fonts, equation text metrics
+    ├── ModelCanvas.java           — Event handling + editing orchestration
+    ├── ModelEditor.java           — Mutable model editing layer + simulation settings
     ├── SelectionRenderer.java     — Selection indicators
+    ├── SimulationResultsDialog.java — Results table window
+    ├── SimulationRunner.java      — Compile + run + capture simulation results
+    ├── SimulationSettingsDialog.java — Settings input dialog
+    ├── StatusBar.java             — Tool, selection, element counts, zoom display
+    ├── UndoManager.java           — Snapshot-based undo/redo stack
     └── Viewport.java              — Pan/zoom transforms
 ```
 
 ### Test coverage
 
-- 116 tests, all passing
+- 190 tests, all passing
 - `ViewportTest` — coordinate transforms, zoom, pan (11 tests)
 - `HitTesterTest` — rect and diamond hit testing
-- `CanvasStateTest` — load, position, selection, add/remove/rename
-- `ModelEditorTest` — load, add, remove, rename, setConstantValue, reconnectFlow, round-trip
-- `FlowCreationControllerTest` — two-click state machine (8 tests)
-- `FlowEndpointCalculatorTest` — cloud positions, cloud hit testing, connected endpoint hit testing (10 tests)
-- No tests for `ModelCanvas`, `InlineEditor`, renderers (JavaFX dependency)
+- `CanvasStateTest` — load, position, selection, add/remove/rename, toViewDef
+- `CanvasRendererTest` — rendering coordinator
+- `ElementRendererTest` — element formatting, equation text
+- `ModelEditorTest` — load, add, remove, rename, equations, reconnect, simulation settings, round-trip
+- `FlowCreationControllerTest` — two-click state machine, self-loop prevention
+- `FlowEndpointCalculatorTest` — cloud positions, cloud hit testing, connected endpoint hit testing
+- `SimulationRunnerTest` — column names, row count, initial values, variable capture, error handling
+- `UndoManagerTest` — undo/redo lifecycle, capacity limits, clear
+- No tests for `ModelCanvas`, `InlineEditor` (JavaFX dependency)
 
 ---
 
 ## Not Yet Implemented
 
 ### Features
-- Full equation editor (currently only name/value editing)
 - Rubber-band (marquee) selection
 - Context toolbar near selection
 - Functional resize handles
 - Hover highlighting / feedback loop highlighting
-- Cursor shape changes (hand for pan, move for drag, etc.)
-- Additional keyboard shortcuts (Ctrl+A to select all, etc.)
-- Undo/redo
-- Model save/load to disk
-
-### Known issues (from Phase 5 audit)
-
-**Major:**
-- Duplicate `CLOUD_OFFSET` constant in `ConnectionRenderer` and `FlowEndpointCalculator`
-- Cloud position computed differently in renderer vs hit-tester (clipped edge vs center direction)
-- Reattachment can create self-loop (source==sink) or no-op reconnection
-
-**Minor:**
-- Inline editor TextField width not scaled by zoom
-- Constant value editor Y offset ignores zoom
-- `reconnectFlow` does not validate stockName exists
-- Self-loop flows (same stock as source/sink) place diamond on top of stock
-- No name validation for identifiers
-- No user feedback when rename is rejected
-- Equation references to deleted elements not cleaned up
-- No cloud preview when dropping reattachment on empty space
-- No undo support
-
-See `doc/UI Audit — Phase 5.md` for the full list with file locations and suggested fixes.
+- Simulation results charting/graphing
+- Module/submodel support in UI

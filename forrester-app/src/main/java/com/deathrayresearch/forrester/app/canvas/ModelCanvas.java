@@ -8,6 +8,7 @@ import com.deathrayresearch.forrester.model.def.FlowDef;
 import com.deathrayresearch.forrester.model.def.ModelDefinition;
 import com.deathrayresearch.forrester.model.def.ViewDef;
 
+import javafx.scene.Cursor;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
@@ -51,6 +52,10 @@ public class ModelCanvas extends Canvas {
     private double dragStartY;
     private String dragTarget;
     private final Map<String, CanvasState.Position> dragStartPositions = new HashMap<>();
+
+    // Mouse position tracking for cursor updates
+    private double lastMouseX;
+    private double lastMouseY;
 
     // Two-click flow creation
     private final FlowCreationController flowCreation = new FlowCreationController();
@@ -226,6 +231,7 @@ public class ModelCanvas extends Canvas {
             flowCreation.cancel();
         }
         this.activeTool = tool;
+        updateCursor();
     }
 
     /**
@@ -332,6 +338,7 @@ public class ModelCanvas extends Canvas {
 
         connectors = editor.generateConnectors();
         redraw();
+        updateCursor();
     }
 
     // --- Two-click flow creation ---
@@ -386,6 +393,7 @@ public class ModelCanvas extends Canvas {
                     applyRename(elementName, newName);
                 }
                 requestFocus();
+                updateCursor();
             });
         }
     }
@@ -431,6 +439,7 @@ public class ModelCanvas extends Canvas {
                 }
             }
             requestFocus();
+            updateCursor();
         });
     }
 
@@ -454,6 +463,7 @@ public class ModelCanvas extends Canvas {
                 redraw();
             }
             requestFocus();
+            updateCursor();
         });
     }
 
@@ -477,6 +487,7 @@ public class ModelCanvas extends Canvas {
                 redraw();
             }
             requestFocus();
+            updateCursor();
         });
     }
 
@@ -563,16 +574,62 @@ public class ModelCanvas extends Canvas {
         reattachEnd = null;
     }
 
+    // --- Cursor ---
+
+    /**
+     * Updates the cursor shape based on the current interaction state.
+     */
+    private void updateCursor() {
+        if (inlineEditor != null && inlineEditor.isActive()) {
+            return;
+        }
+
+        Cursor cursor;
+
+        if (reattaching || panning || dragging) {
+            cursor = Cursor.CLOSED_HAND;
+        } else if (spaceDown) {
+            cursor = Cursor.MOVE;
+        } else if (flowCreation.isPending() || activeTool != CanvasToolBar.Tool.SELECT) {
+            cursor = Cursor.CROSSHAIR;
+        } else if (editor != null) {
+            double worldX = viewport.toWorldX(lastMouseX);
+            double worldY = viewport.toWorldY(lastMouseY);
+
+            FlowEndpointCalculator.CloudHit cloudHit =
+                    FlowEndpointCalculator.hitTestClouds(worldX, worldY, canvasState, editor);
+            if (cloudHit == null) {
+                cloudHit = FlowEndpointCalculator.hitTestConnectedEndpoints(
+                        worldX, worldY, canvasState, editor);
+            }
+
+            if (cloudHit != null) {
+                cursor = Cursor.HAND;
+            } else {
+                String hit = HitTester.hitTest(canvasState, worldX, worldY);
+                cursor = hit != null ? Cursor.OPEN_HAND : Cursor.DEFAULT;
+            }
+        } else {
+            cursor = Cursor.DEFAULT;
+        }
+
+        setCursor(cursor);
+    }
+
     // --- Event handlers ---
 
     private void handleScroll(ScrollEvent event) {
         double factor = event.getDeltaY() > 0 ? ZOOM_FACTOR : 1.0 / ZOOM_FACTOR;
         viewport.zoomAt(event.getX(), event.getY(), factor);
         redraw();
+        updateCursor();
         event.consume();
     }
 
     private void handleMouseMoved(MouseEvent event) {
+        lastMouseX = event.getX();
+        lastMouseY = event.getY();
+
         if (flowCreation.isPending()) {
             flowCreation.updateRubberBand(
                     viewport.toWorldX(event.getX()),
@@ -580,6 +637,8 @@ public class ModelCanvas extends Canvas {
             redraw();
             event.consume();
         }
+
+        updateCursor();
     }
 
     private void handleMousePressed(MouseEvent event) {
@@ -589,6 +648,8 @@ public class ModelCanvas extends Canvas {
         }
 
         requestFocus();
+        lastMouseX = event.getX();
+        lastMouseY = event.getY();
         dragStartX = event.getX();
         dragStartY = event.getY();
 
@@ -597,6 +658,7 @@ public class ModelCanvas extends Canvas {
                 || event.getButton() == MouseButton.SECONDARY
                 || (event.getButton() == MouseButton.PRIMARY && spaceDown)) {
             panning = true;
+            updateCursor();
             event.consume();
             return;
         }
@@ -627,6 +689,7 @@ public class ModelCanvas extends Canvas {
                 }
                 if (cloudHit != null) {
                     startReattachment(cloudHit);
+                    updateCursor();
                     event.consume();
                     return;
                 }
@@ -635,6 +698,7 @@ public class ModelCanvas extends Canvas {
             // PLACE_FLOW: two-click protocol
             if (activeTool == CanvasToolBar.Tool.PLACE_FLOW) {
                 handleFlowClick(worldX, worldY);
+                updateCursor();
                 event.consume();
                 return;
             }
@@ -644,6 +708,7 @@ public class ModelCanvas extends Canvas {
                 String hit = HitTester.hitTest(canvasState, worldX, worldY);
                 if (hit == null) {
                     createElementAt(worldX, worldY);
+                    updateCursor();
                     event.consume();
                     return;
                 }
@@ -677,6 +742,7 @@ public class ModelCanvas extends Canvas {
             }
 
             redraw();
+            updateCursor();
             event.consume();
         }
     }
@@ -727,6 +793,7 @@ public class ModelCanvas extends Canvas {
             completeReattachment(
                     viewport.toWorldX(event.getX()),
                     viewport.toWorldY(event.getY()));
+            updateCursor();
             event.consume();
             return;
         }
@@ -735,6 +802,7 @@ public class ModelCanvas extends Canvas {
         panning = false;
         dragTarget = null;
         dragStartPositions.clear();
+        updateCursor();
         event.consume();
     }
 
@@ -752,8 +820,12 @@ public class ModelCanvas extends Canvas {
             return;
         }
 
-        if (event.getCode() == KeyCode.SPACE) {
+        if (event.getCode() == KeyCode.ESCAPE) {
+            handleEscape();
+            event.consume();
+        } else if (event.getCode() == KeyCode.SPACE) {
             spaceDown = true;
+            updateCursor();
             event.consume();
         } else if (event.getCode() == KeyCode.DELETE || event.getCode() == KeyCode.BACK_SPACE) {
             deleteSelected();
@@ -766,15 +838,18 @@ public class ModelCanvas extends Canvas {
                         || event.getCode() == KeyCode.ADD)) {
             viewport.zoomAt(getWidth() / 2, getHeight() / 2, ZOOM_FACTOR);
             redraw();
+            updateCursor();
             event.consume();
         } else if (event.isShortcutDown()
                 && (event.getCode() == KeyCode.MINUS || event.getCode() == KeyCode.SUBTRACT)) {
             viewport.zoomAt(getWidth() / 2, getHeight() / 2, 1.0 / ZOOM_FACTOR);
             redraw();
+            updateCursor();
             event.consume();
         } else if (event.isShortcutDown() && event.getCode() == KeyCode.DIGIT0) {
             viewport.reset();
             redraw();
+            updateCursor();
             event.consume();
         } else if (!event.isShortcutDown() && !event.isShiftDown() && !event.isAltDown()) {
             switch (event.getCode()) {
@@ -783,54 +858,48 @@ public class ModelCanvas extends Canvas {
                 case DIGIT3 -> { switchTool(CanvasToolBar.Tool.PLACE_FLOW); event.consume(); }
                 case DIGIT4 -> { switchTool(CanvasToolBar.Tool.PLACE_AUX); event.consume(); }
                 case DIGIT5 -> { switchTool(CanvasToolBar.Tool.PLACE_CONSTANT); event.consume(); }
-                case ESCAPE -> {
-                    if (reattaching) {
-                        cancelReattachment();
-                        redraw();
-                    } else if (flowCreation.isPending()) {
-                        flowCreation.cancel();
-                        redraw();
-                    } else if (activeTool != CanvasToolBar.Tool.SELECT) {
-                        if (toolBar != null) {
-                            toolBar.resetToSelect();
-                        }
-                        activeTool = CanvasToolBar.Tool.SELECT;
-                    } else if (!canvasState.getSelection().isEmpty()) {
-                        canvasState.clearSelection();
-                        redraw();
-                    }
-                    event.consume();
-                }
                 default -> { }
             }
-        } else if (event.getCode() == KeyCode.ESCAPE) {
-            if (reattaching) {
-                cancelReattachment();
-                redraw();
-            } else if (flowCreation.isPending()) {
-                flowCreation.cancel();
-                redraw();
+        }
+    }
+
+    /**
+     * Handles Escape key with priority chain: cancel reattachment, cancel pending flow,
+     * reset tool to Select, clear selection.
+     */
+    private void handleEscape() {
+        if (reattaching) {
+            cancelReattachment();
+            redraw();
+        } else if (flowCreation.isPending()) {
+            flowCreation.cancel();
+            redraw();
+        } else if (activeTool != CanvasToolBar.Tool.SELECT) {
+            if (toolBar != null) {
+                toolBar.resetToSelect();
             } else {
-                if (toolBar != null) {
-                    toolBar.resetToSelect();
-                }
                 activeTool = CanvasToolBar.Tool.SELECT;
             }
-            event.consume();
+        } else if (!canvasState.getSelection().isEmpty()) {
+            canvasState.clearSelection();
+            redraw();
         }
+        updateCursor();
     }
 
     private void switchTool(CanvasToolBar.Tool tool) {
         if (toolBar != null) {
             toolBar.selectTool(tool);
+        } else {
+            setActiveTool(tool);
         }
-        setActiveTool(tool);
         fireStatusChanged();
     }
 
     private void handleKeyReleased(KeyEvent event) {
         if (event.getCode() == KeyCode.SPACE) {
             spaceDown = false;
+            updateCursor();
             event.consume();
         }
     }
