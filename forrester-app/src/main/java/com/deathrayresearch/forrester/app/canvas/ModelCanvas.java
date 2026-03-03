@@ -68,6 +68,10 @@ public class ModelCanvas extends Canvas {
     private Pane overlayPane;
     private InlineEditor inlineEditor;
 
+    // Undo/redo
+    private UndoManager undoManager;
+    private boolean dragUndoSaved;
+
     // Status change callback
     private Runnable onStatusChanged;
 
@@ -128,6 +132,74 @@ public class ModelCanvas extends Canvas {
     private void fireStatusChanged() {
         if (onStatusChanged != null) {
             onStatusChanged.run();
+        }
+    }
+
+    /**
+     * Sets the undo manager used for undo/redo operations.
+     */
+    public void setUndoManager(UndoManager undoManager) {
+        this.undoManager = undoManager;
+    }
+
+    /**
+     * Returns the undo manager, or null if not set.
+     */
+    public UndoManager getUndoManager() {
+        return undoManager;
+    }
+
+    /**
+     * Captures the current model and view state as an immutable snapshot.
+     */
+    private UndoManager.Snapshot captureSnapshot() {
+        return new UndoManager.Snapshot(
+                editor.toModelDefinition(canvasState.toViewDef()),
+                canvasState.toViewDef());
+    }
+
+    /**
+     * Saves the current state to the undo stack before a mutation.
+     */
+    private void saveUndoState() {
+        if (undoManager != null && editor != null) {
+            undoManager.pushUndo(captureSnapshot());
+        }
+    }
+
+    /**
+     * Restores a snapshot by reloading both the model editor and canvas state.
+     */
+    private void restoreSnapshot(UndoManager.Snapshot snapshot) {
+        editor.loadFrom(snapshot.model());
+        canvasState.loadFrom(snapshot.view());
+        connectors = editor.generateConnectors();
+        redraw();
+    }
+
+    /**
+     * Undoes the last operation, restoring the previous state.
+     */
+    public void performUndo() {
+        if (undoManager == null || editor == null) {
+            return;
+        }
+        UndoManager.Snapshot previous = undoManager.undo(captureSnapshot());
+        if (previous != null) {
+            restoreSnapshot(previous);
+        }
+    }
+
+    /**
+     * Redoes the last undone operation, restoring the next state.
+     */
+    public void performRedo() {
+        if (undoManager == null || editor == null) {
+            return;
+        }
+        UndoManager.Snapshot next = undoManager.redo(captureSnapshot());
+        if (next != null) {
+            restoreSnapshot(next);
         }
     }
 
@@ -211,6 +283,8 @@ public class ModelCanvas extends Canvas {
             return;
         }
 
+        saveUndoState();
+
         String name;
         ElementType type;
 
@@ -248,6 +322,8 @@ public class ModelCanvas extends Canvas {
             return;
         }
 
+        saveUndoState();
+
         List<String> toDelete = new ArrayList<>(canvasState.getSelection());
         for (String name : toDelete) {
             editor.removeElement(name);
@@ -264,6 +340,9 @@ public class ModelCanvas extends Canvas {
      * Handles a click during PLACE_FLOW mode by delegating to the FlowCreationController.
      */
     private void handleFlowClick(double worldX, double worldY) {
+        if (flowCreation.isPending()) {
+            saveUndoState();
+        }
         String name = flowCreation.handleClick(worldX, worldY, canvasState, editor);
         if (name != null) {
             connectors = editor.generateConnectors();
@@ -344,6 +423,7 @@ public class ModelCanvas extends Canvas {
             if (valueText != null && !valueText.isBlank()) {
                 try {
                     double value = Double.parseDouble(valueText);
+                    saveUndoState();
                     editor.setConstantValue(constantName, value);
                     redraw();
                 } catch (NumberFormatException ignored) {
@@ -368,6 +448,7 @@ public class ModelCanvas extends Canvas {
 
         inlineEditor.open(screenX, eqScreenY, currentEquation, eqFieldWidth, eqText -> {
             if (eqText != null && !eqText.isBlank()) {
+                saveUndoState();
                 editor.setFlowEquation(flowName, eqText);
                 connectors = editor.generateConnectors();
                 redraw();
@@ -390,6 +471,7 @@ public class ModelCanvas extends Canvas {
 
         inlineEditor.open(screenX, eqScreenY, currentEquation, eqFieldWidth, eqText -> {
             if (eqText != null && !eqText.isBlank()) {
+                saveUndoState();
                 editor.setAuxEquation(auxName, eqText);
                 connectors = editor.generateConnectors();
                 redraw();
@@ -403,6 +485,10 @@ public class ModelCanvas extends Canvas {
      * then regenerates connectors and redraws.
      */
     private void applyRename(String oldName, String newName) {
+        if (oldName.equals(newName) || editor.hasElement(newName)) {
+            return;
+        }
+        saveUndoState();
         if (!editor.renameElement(oldName, newName)) {
             return;
         }
@@ -460,6 +546,7 @@ public class ModelCanvas extends Canvas {
      * endpoint to that stock; if released on empty space, disconnects to cloud.
      */
     private void completeReattachment(double worldX, double worldY) {
+        saveUndoState();
         String stockHit = FlowCreationController.hitTestStockOnly(worldX, worldY, canvasState);
         editor.reconnectFlow(reattachFlowName, reattachEnd, stockHit);
         connectors = editor.generateConnectors();
@@ -575,6 +662,7 @@ public class ModelCanvas extends Canvas {
                 // Capture drag start positions for all selected elements
                 dragTarget = hit;
                 dragging = true;
+                dragUndoSaved = false;
                 dragStartPositions.clear();
                 for (String name : canvasState.getSelection()) {
                     dragStartPositions.put(name,
@@ -615,6 +703,10 @@ public class ModelCanvas extends Canvas {
         }
 
         if (dragging && dragTarget != null) {
+            if (!dragUndoSaved) {
+                saveUndoState();
+                dragUndoSaved = true;
+            }
             // Convert screen-space drag delta to world-space delta
             double worldDx = screenDx / viewport.getScale();
             double worldDy = screenDy / viewport.getScale();

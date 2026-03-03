@@ -3,15 +3,21 @@ package com.deathrayresearch.forrester.app;
 import com.deathrayresearch.forrester.app.canvas.CanvasToolBar;
 import com.deathrayresearch.forrester.app.canvas.ModelCanvas;
 import com.deathrayresearch.forrester.app.canvas.ModelEditor;
+import com.deathrayresearch.forrester.app.canvas.SimulationResultsDialog;
+import com.deathrayresearch.forrester.app.canvas.SimulationRunner;
+import com.deathrayresearch.forrester.app.canvas.SimulationSettingsDialog;
 import com.deathrayresearch.forrester.app.canvas.StatusBar;
+import com.deathrayresearch.forrester.app.canvas.UndoManager;
 import com.deathrayresearch.forrester.io.json.ModelDefinitionSerializer;
 import com.deathrayresearch.forrester.model.def.ModelDefinition;
 import com.deathrayresearch.forrester.model.def.ModelDefinitionBuilder;
+import com.deathrayresearch.forrester.model.def.SimulationSettings;
 import com.deathrayresearch.forrester.model.def.ViewDef;
 import com.deathrayresearch.forrester.model.graph.AutoLayout;
 
 import javafx.application.Application;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
@@ -29,6 +35,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * JavaFX entry point for the Forrester visual editor.
@@ -42,6 +49,9 @@ public class ForresterApp extends Application {
     private ModelEditor editor;
     private StatusBar statusBar;
     private Path currentFile;
+    private final UndoManager undoManager = new UndoManager();
+    private MenuItem undoItem;
+    private MenuItem redoItem;
 
     private final ModelDefinitionSerializer serializer = new ModelDefinitionSerializer();
 
@@ -51,6 +61,7 @@ public class ForresterApp extends Application {
 
         editor = new ModelEditor();
         canvas = new ModelCanvas();
+        canvas.setUndoManager(undoManager);
 
         statusBar = new StatusBar();
 
@@ -119,7 +130,39 @@ public class ForresterApp extends Application {
                 saveItem, saveAsItem, new SeparatorMenuItem(),
                 closeItem, exitItem);
 
-        return new MenuBar(fileMenu);
+        Menu editMenu = new Menu("Edit");
+
+        undoItem = new MenuItem("Undo");
+        undoItem.setAccelerator(new KeyCodeCombination(KeyCode.Z, KeyCombination.SHORTCUT_DOWN));
+        undoItem.setOnAction(e -> {
+            canvas.performUndo();
+            canvas.requestFocus();
+        });
+        undoItem.setDisable(true);
+
+        redoItem = new MenuItem("Redo");
+        redoItem.setAccelerator(new KeyCodeCombination(KeyCode.Z,
+                KeyCombination.SHORTCUT_DOWN, KeyCombination.SHIFT_DOWN));
+        redoItem.setOnAction(e -> {
+            canvas.performRedo();
+            canvas.requestFocus();
+        });
+        redoItem.setDisable(true);
+
+        editMenu.getItems().addAll(undoItem, redoItem);
+
+        Menu simulateMenu = new Menu("Simulate");
+
+        MenuItem settingsItem = new MenuItem("Simulation Settings...");
+        settingsItem.setOnAction(e -> openSimulationSettings());
+
+        MenuItem runItem = new MenuItem("Run Simulation");
+        runItem.setAccelerator(new KeyCodeCombination(KeyCode.R, KeyCombination.SHORTCUT_DOWN));
+        runItem.setOnAction(e -> runSimulation());
+
+        simulateMenu.getItems().addAll(settingsItem, runItem);
+
+        return new MenuBar(fileMenu, editMenu, simulateMenu);
     }
 
     private void newModel() {
@@ -131,6 +174,7 @@ public class ForresterApp extends Application {
         editor = new ModelEditor();
         editor.loadFrom(empty);
         canvas.setModel(editor, emptyView);
+        undoManager.clear();
         currentFile = null;
         updateTitle();
     }
@@ -158,6 +202,7 @@ public class ForresterApp extends Application {
             }
 
             canvas.setModel(editor, view);
+            undoManager.clear();
             currentFile = file.toPath();
             updateTitle();
         } catch (IOException ex) {
@@ -201,6 +246,45 @@ public class ForresterApp extends Application {
         }
     }
 
+    private void openSimulationSettings() {
+        SimulationSettingsDialog dialog = new SimulationSettingsDialog(
+                editor.getSimulationSettings());
+        Optional<SimulationSettings> result = dialog.showAndWait();
+        result.ifPresent(settings -> editor.setSimulationSettings(settings));
+    }
+
+    private void runSimulation() {
+        SimulationSettings settings = editor.getSimulationSettings();
+        if (settings == null) {
+            SimulationSettingsDialog dialog = new SimulationSettingsDialog(null);
+            Optional<SimulationSettings> result = dialog.showAndWait();
+            if (result.isEmpty()) {
+                return;
+            }
+            settings = result.get();
+            editor.setSimulationSettings(settings);
+        }
+
+        try {
+            ModelDefinition def = canvas.toModelDefinition();
+            SimulationRunner runner = new SimulationRunner();
+            SimulationRunner.SimulationResult simResult = runner.run(def, settings);
+
+            SimulationResultsDialog resultsDialog = new SimulationResultsDialog(simResult);
+            resultsDialog.show();
+        } catch (Exception ex) {
+            showError("Simulation Error", ex.getMessage());
+        }
+    }
+
+    private void showError(String title, String message) {
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle(title);
+        alert.setHeaderText(title);
+        alert.setContentText(message != null ? message : "An unexpected error occurred.");
+        alert.showAndWait();
+    }
+
     private void updateStatusBar() {
         if (statusBar == null || editor == null) {
             return;
@@ -212,6 +296,13 @@ public class ForresterApp extends Application {
                 editor.getAuxiliaries().size(),
                 editor.getConstants().size());
         statusBar.updateZoom(canvas.getZoomScale());
+
+        if (undoItem != null) {
+            undoItem.setDisable(!undoManager.canUndo());
+        }
+        if (redoItem != null) {
+            redoItem.setDisable(!undoManager.canRedo());
+        }
     }
 
     private void updateTitle() {

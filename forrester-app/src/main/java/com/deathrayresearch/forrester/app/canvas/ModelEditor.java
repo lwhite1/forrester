@@ -6,6 +6,7 @@ import com.deathrayresearch.forrester.model.def.ConstantDef;
 import com.deathrayresearch.forrester.model.def.FlowDef;
 import com.deathrayresearch.forrester.model.def.LookupTableDef;
 import com.deathrayresearch.forrester.model.def.ModelDefinition;
+import com.deathrayresearch.forrester.model.def.SimulationSettings;
 import com.deathrayresearch.forrester.model.def.StockDef;
 import com.deathrayresearch.forrester.model.def.ViewDef;
 import com.deathrayresearch.forrester.model.graph.ConnectorGenerator;
@@ -28,6 +29,7 @@ public class ModelEditor {
     private final List<AuxDef> auxiliaries = new ArrayList<>();
     private final List<ConstantDef> constants = new ArrayList<>();
     private final List<LookupTableDef> lookupTables = new ArrayList<>();
+    private SimulationSettings simulationSettings;
     private int nextId = 1;
 
     /**
@@ -47,6 +49,7 @@ public class ModelEditor {
         auxiliaries.addAll(definition.auxiliaries());
         constants.addAll(definition.constants());
         lookupTables.addAll(definition.lookupTables());
+        simulationSettings = definition.defaultSimulation();
 
         // Set nextId past any existing numeric suffix
         nextId = 1;
@@ -437,6 +440,14 @@ public class ModelEditor {
         return true;
     }
 
+    public SimulationSettings getSimulationSettings() {
+        return simulationSettings;
+    }
+
+    public void setSimulationSettings(SimulationSettings simulationSettings) {
+        this.simulationSettings = simulationSettings;
+    }
+
     public String getModelName() {
         return modelName;
     }
@@ -486,7 +497,7 @@ public class ModelEditor {
                 List.of(),
                 List.of(),
                 view != null ? List.of(view) : List.of(),
-                null
+                simulationSettings
         );
     }
 
