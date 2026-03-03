@@ -99,7 +99,16 @@ public class ForresterApp extends Application {
                 KeyCombination.SHORTCUT_DOWN, KeyCombination.SHIFT_DOWN));
         saveAsItem.setOnAction(e -> saveAs());
 
-        fileMenu.getItems().addAll(newItem, openItem, new SeparatorMenuItem(), saveItem, saveAsItem);
+        MenuItem closeItem = new MenuItem("Close");
+        closeItem.setAccelerator(new KeyCodeCombination(KeyCode.W, KeyCombination.SHORTCUT_DOWN));
+        closeItem.setOnAction(e -> newModel());
+
+        MenuItem exitItem = new MenuItem("Exit");
+        exitItem.setOnAction(e -> stage.close());
+
+        fileMenu.getItems().addAll(newItem, openItem, new SeparatorMenuItem(),
+                saveItem, saveAsItem, new SeparatorMenuItem(),
+                closeItem, exitItem);
 
         return new MenuBar(fileMenu);
     }
