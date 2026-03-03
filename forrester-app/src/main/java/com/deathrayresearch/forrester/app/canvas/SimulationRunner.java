@@ -4,8 +4,6 @@ import com.deathrayresearch.forrester.Simulation;
 import com.deathrayresearch.forrester.event.EventHandler;
 import com.deathrayresearch.forrester.event.SimulationStartEvent;
 import com.deathrayresearch.forrester.event.TimeStepEvent;
-import com.deathrayresearch.forrester.measure.TimeUnit;
-import com.deathrayresearch.forrester.measure.UnitRegistry;
 import com.deathrayresearch.forrester.model.Model;
 import com.deathrayresearch.forrester.model.Stock;
 import com.deathrayresearch.forrester.model.Variable;
@@ -26,38 +24,43 @@ public class SimulationRunner {
 
     /**
      * Immutable result of a simulation run containing column names and row data.
+     * Row arrays are defensively copied to ensure true immutability.
      */
     public record SimulationResult(List<String> columnNames, List<double[]> rows) {
 
         public SimulationResult {
             columnNames = List.copyOf(columnNames);
-            rows = List.copyOf(rows);
+            rows = rows.stream().map(double[]::clone).toList();
         }
     }
 
     /**
      * Compiles the model definition, runs a simulation with the given settings,
-     * and returns captured time-series data.
+     * and returns captured time-series data. Uses the compiler's internal
+     * {@link com.deathrayresearch.forrester.measure.UnitRegistry} for time unit
+     * resolution by embedding the settings in the definition before compilation.
      *
      * @param def the model definition to compile and simulate
      * @param settings the simulation settings (time step, duration, duration unit)
      * @return the captured simulation results
      */
     public SimulationResult run(ModelDefinition def, SimulationSettings settings) {
+        ModelDefinition defWithSettings = new ModelDefinition(
+                def.name(), def.comment(), def.moduleInterface(),
+                def.stocks(), def.flows(), def.auxiliaries(), def.constants(),
+                def.lookupTables(), def.modules(), def.subscripts(), def.views(),
+                settings
+        );
+
         ModelCompiler compiler = new ModelCompiler();
-        CompiledModel compiled = compiler.compile(def);
-
-        UnitRegistry registry = new UnitRegistry();
-        TimeUnit timeStep = registry.resolveTimeUnit(settings.timeStep());
-        TimeUnit durationUnit = registry.resolveTimeUnit(settings.durationUnit());
-
-        Simulation sim = compiled.createSimulation(timeStep, settings.duration(), durationUnit);
+        CompiledModel compiled = compiler.compile(defWithSettings);
+        Simulation sim = compiled.createSimulation();
 
         DataCaptureHandler handler = new DataCaptureHandler();
         sim.addEventHandler(handler);
         sim.execute();
 
-        return new SimulationResult(handler.columnNames, handler.rows);
+        return new SimulationResult(handler.getColumnNames(), handler.getRows());
     }
 
     /**
@@ -66,8 +69,8 @@ public class SimulationRunner {
      */
     static class DataCaptureHandler implements EventHandler {
 
-        final List<String> columnNames = new ArrayList<>();
-        final List<double[]> rows = new ArrayList<>();
+        private final List<String> columnNames = new ArrayList<>();
+        private final List<double[]> rows = new ArrayList<>();
 
         @Override
         public void handleSimulationStartEvent(SimulationStartEvent event) {
@@ -100,6 +103,14 @@ public class SimulationRunner {
                 row[idx++] = variable.getValue();
             }
             rows.add(row);
+        }
+
+        List<String> getColumnNames() {
+            return columnNames;
+        }
+
+        List<double[]> getRows() {
+            return rows;
         }
     }
 }

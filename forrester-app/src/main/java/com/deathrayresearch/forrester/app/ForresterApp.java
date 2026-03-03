@@ -265,22 +265,37 @@ public class ForresterApp extends Application {
             editor.setSimulationSettings(settings);
         }
 
-        try {
-            ModelDefinition def = canvas.toModelDefinition();
-            SimulationRunner runner = new SimulationRunner();
-            SimulationRunner.SimulationResult simResult = runner.run(def, settings);
+        ModelDefinition def = canvas.toModelDefinition();
+        SimulationSettings finalSettings = settings;
 
-            SimulationResultsDialog resultsDialog = new SimulationResultsDialog(simResult);
+        javafx.concurrent.Task<SimulationRunner.SimulationResult> task =
+                new javafx.concurrent.Task<>() {
+            @Override
+            protected SimulationRunner.SimulationResult call() {
+                SimulationRunner runner = new SimulationRunner();
+                return runner.run(def, finalSettings);
+            }
+        };
+
+        task.setOnSucceeded(e -> {
+            SimulationResultsDialog resultsDialog = new SimulationResultsDialog(task.getValue());
             resultsDialog.show();
-        } catch (Exception ex) {
-            showError("Simulation Error", ex.getMessage());
-        }
+        });
+
+        task.setOnFailed(e -> {
+            Throwable ex = task.getException();
+            showError("Simulation Error", ex != null ? ex.getMessage() : null);
+        });
+
+        Thread thread = new Thread(task, "simulation-runner");
+        thread.setDaemon(true);
+        thread.start();
     }
 
     private void showError(String title, String message) {
         Alert alert = new Alert(Alert.AlertType.ERROR);
         alert.setTitle(title);
-        alert.setHeaderText(title);
+        alert.setHeaderText(null);
         alert.setContentText(message != null ? message : "An unexpected error occurred.");
         alert.showAndWait();
     }

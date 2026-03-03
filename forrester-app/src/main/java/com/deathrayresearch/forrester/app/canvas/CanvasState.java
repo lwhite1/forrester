@@ -19,7 +19,12 @@ import java.util.Set;
  */
 public class CanvasState {
 
-    private final Map<String, double[]> positions = new LinkedHashMap<>();
+    /**
+     * An (x, y) position on the canvas in world coordinates.
+     */
+    public record Position(double x, double y) {}
+
+    private final Map<String, Position> positions = new LinkedHashMap<>();
     private final Map<String, ElementType> types = new LinkedHashMap<>();
     private final Set<String> selection = new LinkedHashSet<>();
     private final List<String> drawOrder = new ArrayList<>();
@@ -34,7 +39,7 @@ public class CanvasState {
         drawOrder.clear();
 
         for (ElementPlacement ep : view.elements()) {
-            positions.put(ep.name(), new double[]{ep.x(), ep.y()});
+            positions.put(ep.name(), new Position(ep.x(), ep.y()));
             types.put(ep.name(), ep.type());
             drawOrder.add(ep.name());
         }
@@ -44,26 +49,24 @@ public class CanvasState {
      * Returns the X position of the named element, or NaN if not found.
      */
     public double getX(String name) {
-        double[] pos = positions.get(name);
-        return pos != null ? pos[0] : Double.NaN;
+        Position pos = positions.get(name);
+        return pos != null ? pos.x() : Double.NaN;
     }
 
     /**
      * Returns the Y position of the named element, or NaN if not found.
      */
     public double getY(String name) {
-        double[] pos = positions.get(name);
-        return pos != null ? pos[1] : Double.NaN;
+        Position pos = positions.get(name);
+        return pos != null ? pos.y() : Double.NaN;
     }
 
     /**
      * Sets the position of the named element.
      */
     public void setPosition(String name, double x, double y) {
-        double[] pos = positions.get(name);
-        if (pos != null) {
-            pos[0] = x;
-            pos[1] = y;
+        if (positions.containsKey(name)) {
+            positions.put(name, new Position(x, y));
         }
     }
 
@@ -138,7 +141,7 @@ public class CanvasState {
      * If an element with the same name already exists, it is overwritten.
      */
     public void addElement(String name, ElementType type, double x, double y) {
-        positions.put(name, new double[]{x, y});
+        positions.put(name, new Position(x, y));
         types.put(name, type);
         if (!drawOrder.contains(name)) {
             drawOrder.add(name);
@@ -155,7 +158,7 @@ public class CanvasState {
             return false;
         }
 
-        double[] pos = positions.remove(oldName);
+        Position pos = positions.remove(oldName);
         positions.put(newName, pos);
 
         ElementType type = types.remove(oldName);
@@ -180,8 +183,8 @@ public class CanvasState {
     public ViewDef toViewDef() {
         List<ElementPlacement> placements = new ArrayList<>();
         for (String name : drawOrder) {
-            placements.add(new ElementPlacement(name, types.get(name),
-                    positions.get(name)[0], positions.get(name)[1]));
+            Position pos = positions.get(name);
+            placements.add(new ElementPlacement(name, types.get(name), pos.x(), pos.y()));
         }
         return new ViewDef("Main", placements, List.of(), List.of());
     }

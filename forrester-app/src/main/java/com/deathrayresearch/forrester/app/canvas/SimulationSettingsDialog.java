@@ -2,6 +2,7 @@ package com.deathrayresearch.forrester.app.canvas;
 
 import com.deathrayresearch.forrester.model.def.SimulationSettings;
 
+import javafx.beans.binding.Bindings;
 import javafx.collections.FXCollections;
 import javafx.geometry.Insets;
 import javafx.scene.control.ButtonBar;
@@ -36,7 +37,7 @@ public class SimulationSettingsDialog extends Dialog<SimulationSettings> {
 
         if (existing != null) {
             timeStepCombo.setValue(existing.timeStep());
-            durationField.setText(String.valueOf(existing.duration()));
+            durationField.setText(formatDuration(existing.duration()));
             durationUnitCombo.setValue(existing.durationUnit());
         } else {
             timeStepCombo.setValue("Day");
@@ -63,7 +64,7 @@ public class SimulationSettingsDialog extends Dialog<SimulationSettings> {
 
         // Validate: disable OK when duration is not a positive number
         getDialogPane().lookupButton(okButton).disableProperty().bind(
-                javafx.beans.binding.Bindings.createBooleanBinding(
+                Bindings.createBooleanBinding(
                         () -> !isValidDuration(durationField.getText()),
                         durationField.textProperty()
                 )
@@ -79,6 +80,13 @@ public class SimulationSettingsDialog extends Dialog<SimulationSettings> {
             }
             return null;
         });
+    }
+
+    private static String formatDuration(double value) {
+        if (value == Math.floor(value) && Double.isFinite(value)) {
+            return String.valueOf((long) value);
+        }
+        return String.valueOf(value);
     }
 
     private static boolean isValidDuration(String text) {

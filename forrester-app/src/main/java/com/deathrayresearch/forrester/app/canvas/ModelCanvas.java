@@ -50,7 +50,7 @@ public class ModelCanvas extends Canvas {
     private double dragStartX;
     private double dragStartY;
     private String dragTarget;
-    private final Map<String, double[]> dragStartPositions = new HashMap<>();
+    private final Map<String, CanvasState.Position> dragStartPositions = new HashMap<>();
 
     // Two-click flow creation
     private final FlowCreationController flowCreation = new FlowCreationController();
@@ -666,7 +666,7 @@ public class ModelCanvas extends Canvas {
                 dragStartPositions.clear();
                 for (String name : canvasState.getSelection()) {
                     dragStartPositions.put(name,
-                            new double[]{canvasState.getX(name), canvasState.getY(name)});
+                            new CanvasState.Position(canvasState.getX(name), canvasState.getY(name)));
                 }
             } else {
                 if (!event.isShiftDown()) {
@@ -711,11 +711,11 @@ public class ModelCanvas extends Canvas {
             double worldDx = screenDx / viewport.getScale();
             double worldDy = screenDy / viewport.getScale();
 
-            for (Map.Entry<String, double[]> entry : dragStartPositions.entrySet()) {
-                double[] startPos = entry.getValue();
+            for (Map.Entry<String, CanvasState.Position> entry : dragStartPositions.entrySet()) {
+                CanvasState.Position startPos = entry.getValue();
                 canvasState.setPosition(entry.getKey(),
-                        startPos[0] + worldDx,
-                        startPos[1] + worldDy);
+                        startPos.x() + worldDx,
+                        startPos.y() + worldDy);
             }
             redraw();
             event.consume();

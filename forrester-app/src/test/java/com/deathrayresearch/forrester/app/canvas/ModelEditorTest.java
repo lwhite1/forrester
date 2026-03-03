@@ -6,6 +6,7 @@ import com.deathrayresearch.forrester.model.def.ElementType;
 import com.deathrayresearch.forrester.model.def.FlowDef;
 import com.deathrayresearch.forrester.model.def.ModelDefinition;
 import com.deathrayresearch.forrester.model.def.ModelDefinitionBuilder;
+import com.deathrayresearch.forrester.model.def.SimulationSettings;
 import com.deathrayresearch.forrester.model.def.ViewDef;
 
 import java.util.List;
@@ -625,6 +626,45 @@ class ModelEditorTest {
             ModelDefinition def = editor.toModelDefinition(null);
 
             assertThat(def.views()).isEmpty();
+        }
+
+        @Test
+        void shouldRoundTripSimulationSettings() {
+            ModelDefinition original = new ModelDefinitionBuilder()
+                    .name("Test")
+                    .stock("S", 100, "units")
+                    .defaultSimulation("Day", 365, "Year")
+                    .build();
+
+            editor.loadFrom(original);
+
+            assertThat(editor.getSimulationSettings()).isNotNull();
+            assertThat(editor.getSimulationSettings().timeStep()).isEqualTo("Day");
+            assertThat(editor.getSimulationSettings().duration()).isEqualTo(365);
+            assertThat(editor.getSimulationSettings().durationUnit()).isEqualTo("Year");
+
+            ModelDefinition rebuilt = editor.toModelDefinition();
+
+            assertThat(rebuilt.defaultSimulation()).isNotNull();
+            assertThat(rebuilt.defaultSimulation().timeStep()).isEqualTo("Day");
+            assertThat(rebuilt.defaultSimulation().duration()).isEqualTo(365);
+            assertThat(rebuilt.defaultSimulation().durationUnit()).isEqualTo("Year");
+        }
+
+        @Test
+        void shouldRoundTripNullSimulationSettings() {
+            ModelDefinition original = new ModelDefinitionBuilder()
+                    .name("Test")
+                    .stock("S", 100, "units")
+                    .build();
+
+            editor.loadFrom(original);
+
+            assertThat(editor.getSimulationSettings()).isNull();
+
+            ModelDefinition rebuilt = editor.toModelDefinition();
+
+            assertThat(rebuilt.defaultSimulation()).isNull();
         }
     }
 
