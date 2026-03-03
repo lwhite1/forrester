@@ -26,6 +26,19 @@ public class CanvasRenderer {
     private static final double RUBBER_BAND_GAP = 4;
 
     /**
+     * State for marquee (rubber-band) selection rendering.
+     */
+    public record MarqueeState(
+            boolean active,
+            double startX,
+            double startY,
+            double endX,
+            double endY
+    ) {
+        static final MarqueeState IDLE = new MarqueeState(false, 0, 0, 0, 0);
+    }
+
+    /**
      * State for reattachment rubber-band rendering.
      */
     public record ReattachState(
@@ -52,7 +65,8 @@ public class CanvasRenderer {
     public void render(GraphicsContext gc, double width, double height,
                        ModelEditor editor, List<ConnectorRoute> connectors,
                        FlowCreationController.State flowState,
-                       ReattachState reattachState) {
+                       ReattachState reattachState,
+                       MarqueeState marqueeState) {
         // Background in screen space
         gc.clearRect(0, 0, width, height);
         gc.setFill(ColorPalette.BACKGROUND);
@@ -151,6 +165,11 @@ public class CanvasRenderer {
         // 5. Draw reattachment rubber-band
         if (reattachState.active()) {
             drawReattachRubberBand(gc, reattachState);
+        }
+
+        // 6. Draw marquee selection rectangle
+        if (marqueeState.active()) {
+            drawMarquee(gc, marqueeState);
         }
 
         gc.restore();
@@ -307,6 +326,25 @@ public class CanvasRenderer {
         gc.setLineWidth(2.5);
         gc.setLineDashes(6, 3);
         gc.strokeRect(sx - halfW, sy - halfH, halfW * 2, halfH * 2);
+        gc.setLineDashes();
+    }
+
+    /**
+     * Draws the marquee (rubber-band) selection rectangle.
+     */
+    private void drawMarquee(GraphicsContext gc, MarqueeState state) {
+        double x = Math.min(state.startX(), state.endX());
+        double y = Math.min(state.startY(), state.endY());
+        double w = Math.abs(state.endX() - state.startX());
+        double h = Math.abs(state.endY() - state.startY());
+
+        gc.setFill(Color.web("#4A90D9", 0.1));
+        gc.fillRect(x, y, w, h);
+
+        gc.setStroke(RUBBER_BAND_COLOR);
+        gc.setLineWidth(1);
+        gc.setLineDashes(6, 3);
+        gc.strokeRect(x, y, w, h);
         gc.setLineDashes();
     }
 

@@ -117,6 +117,15 @@ public class CanvasState {
     }
 
     /**
+     * Adds the given element to the selection without clearing existing selections.
+     */
+    public void addToSelection(String name) {
+        if (positions.containsKey(name)) {
+            selection.add(name);
+        }
+    }
+
+    /**
      * Clears all selections.
      */
     public void clearSelection() {

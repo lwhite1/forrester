@@ -67,9 +67,19 @@ All sections update in real time as the user interacts with the canvas.
 |--------|-------|-------|
 | Select element | Left-click on element | Clears previous selection, selects clicked element |
 | Add/remove from selection | Shift + left-click on element | Toggles the clicked element without affecting others |
+| Marquee select | Left-drag on empty canvas (in Select mode) | Draws a selection rectangle; all elements whose center falls inside are selected |
+| Marquee add to selection | Shift + left-drag on empty canvas | Adds elements inside the marquee to the existing selection |
+| Cancel marquee | Escape (while marquee is active) | Cancels the marquee and restores the previous selection |
 | Select all | Ctrl+A | Selects all elements on the canvas. Also available via Edit > Select All |
-| Clear selection | Left-click on empty canvas | Clears all selected elements (Shift+click on empty space preserves selection) |
+| Clear selection | Left-click on empty canvas (no drag) | Clears all selected elements (Shift+click preserves selection) |
 | Clear selection (keyboard) | Escape (when on Select tool with no pending operation) | Deselects all elements |
+
+### Marquee Visual Feedback
+
+- Semi-transparent blue fill (#4A90D9 at 10% opacity) with dashed blue border (#4A90D9 at 60% opacity, 6px dash / 3px gap, 1px width)
+- Selection updates live as the marquee is resized
+- Cursor shows crosshair during marquee drag
+- On mouse release the marquee rectangle disappears and the selection is finalized
 
 ### Selection Visual Feedback
 
@@ -249,6 +259,7 @@ All elements have a #F0F4F8 fill color.
 5. Selection indicators
 6. Pending flow rubber-band line
 7. Reattachment rubber-band line
+8. Marquee selection rectangle
 
 ## Cursor Feedback
 
@@ -260,6 +271,7 @@ The cursor changes shape to reflect the current interaction state.
 | Hovering element (Select mode) | Open hand | Mouse over an element in Select tool mode |
 | Hovering cloud or connected endpoint | Pointing hand | Mouse over a flow's cloud endpoint or connected stock endpoint |
 | Dragging element | Closed hand | Element drag in progress |
+| Marquee selection | Crosshair | Rubber-band selection drag in progress |
 | Space held (pan ready) | Move (four-way arrow) | Spacebar held down, ready to pan |
 | Panning | Closed hand | Pan drag in progress (Space+drag, middle-drag, or right-drag) |
 | Placement mode | Crosshair | Any placement tool active (Stock, Flow, Auxiliary, Constant) |
@@ -267,14 +279,14 @@ The cursor changes shape to reflect the current interaction state.
 | Reattaching endpoint | Closed hand | Dragging a flow endpoint to reattach |
 | Inline editor active | No change (TextField shows I-beam within its own bounds) | Canvas cursor unchanged; cursor updates resume when editor closes |
 
-Priority order (highest to lowest): reattaching / panning / dragging > space held > flow pending / placement mode > cloud/endpoint hover > element hover > default.
+Priority order (highest to lowest): reattaching / panning / dragging > marquee > space held > flow pending / placement mode > cloud/endpoint hover > element hover > default.
 
 ## Keyboard Shortcuts
 
 | Key | Action |
 |-----|--------|
 | Delete / Backspace | Delete selected elements |
-| Escape | Cancel reattachment; cancel pending flow; reset tool to Select; clear selection; cancel inline edit (in priority order) |
+| Escape | Cancel marquee; cancel reattachment; cancel pending flow; reset tool to Select; clear selection; cancel inline edit (in priority order) |
 | Space (hold) | Enable pan mode while held |
 | Enter | Commit inline edit (when editor is open) |
 | 1 | Switch to Select tool |
@@ -297,7 +309,6 @@ Priority order (highest to lowest): reattaching / panning / dragging > space hel
 
 ## Not Yet Implemented
 
-- Rubber-band (marquee) selection
 - Context toolbar near selection
 - Functional resize handles
 - Hover highlighting / feedback loop highlighting

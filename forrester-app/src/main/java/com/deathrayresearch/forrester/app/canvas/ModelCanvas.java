@@ -19,8 +19,10 @@ import javafx.scene.layout.Pane;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Consumer;
 
 /**
@@ -56,6 +58,14 @@ public class ModelCanvas extends Canvas {
     // Mouse position tracking for cursor updates
     private double lastMouseX;
     private double lastMouseY;
+
+    // Rubber-band (marquee) selection
+    private boolean marqueeActive;
+    private double marqueeStartWorldX;
+    private double marqueeStartWorldY;
+    private double marqueeEndWorldX;
+    private double marqueeEndWorldY;
+    private Set<String> marqueeInitialSelection;
 
     // Two-click flow creation
     private final FlowCreationController flowCreation = new FlowCreationController();
@@ -274,8 +284,12 @@ public class ModelCanvas extends Canvas {
                 ? new CanvasRenderer.ReattachState(true, reattachDiamondX, reattachDiamondY,
                         reattachRubberBandX, reattachRubberBandY)
                 : CanvasRenderer.ReattachState.IDLE;
+        CanvasRenderer.MarqueeState marqueeState = marqueeActive
+                ? new CanvasRenderer.MarqueeState(true, marqueeStartWorldX, marqueeStartWorldY,
+                        marqueeEndWorldX, marqueeEndWorldY)
+                : CanvasRenderer.MarqueeState.IDLE;
         renderer.render(getGraphicsContext2D(), getWidth(), getHeight(),
-                editor, connectors, flowCreation.getState(), reattachState);
+                editor, connectors, flowCreation.getState(), reattachState, marqueeState);
         fireStatusChanged();
     }
 
@@ -574,6 +588,47 @@ public class ModelCanvas extends Canvas {
         reattachEnd = null;
     }
 
+    // --- Marquee selection ---
+
+    /**
+     * Updates the selection based on elements inside the marquee rectangle.
+     * Restores initial selection first (for Shift+marquee behavior).
+     */
+    private void updateMarqueeSelection() {
+        double minX = Math.min(marqueeStartWorldX, marqueeEndWorldX);
+        double maxX = Math.max(marqueeStartWorldX, marqueeEndWorldX);
+        double minY = Math.min(marqueeStartWorldY, marqueeEndWorldY);
+        double maxY = Math.max(marqueeStartWorldY, marqueeEndWorldY);
+
+        canvasState.clearSelection();
+        if (marqueeInitialSelection != null) {
+            for (String name : marqueeInitialSelection) {
+                canvasState.addToSelection(name);
+            }
+        }
+        for (String name : canvasState.getDrawOrder()) {
+            double cx = canvasState.getX(name);
+            double cy = canvasState.getY(name);
+            if (cx >= minX && cx <= maxX && cy >= minY && cy <= maxY) {
+                canvasState.addToSelection(name);
+            }
+        }
+    }
+
+    /**
+     * Cancels the marquee selection, restoring the selection to its pre-marquee state.
+     */
+    private void cancelMarquee() {
+        canvasState.clearSelection();
+        if (marqueeInitialSelection != null) {
+            for (String name : marqueeInitialSelection) {
+                canvasState.addToSelection(name);
+            }
+        }
+        marqueeActive = false;
+        marqueeInitialSelection = null;
+    }
+
     // --- Cursor ---
 
     /**
@@ -588,6 +643,8 @@ public class ModelCanvas extends Canvas {
 
         if (reattaching || panning || dragging) {
             cursor = Cursor.CLOSED_HAND;
+        } else if (marqueeActive) {
+            cursor = Cursor.CROSSHAIR;
         } else if (spaceDown) {
             cursor = Cursor.MOVE;
         } else if (flowCreation.isPending() || activeTool != CanvasToolBar.Tool.SELECT) {
@@ -734,6 +791,13 @@ public class ModelCanvas extends Canvas {
                             new CanvasState.Position(canvasState.getX(name), canvasState.getY(name)));
                 }
             } else {
+                // Start marquee selection on empty space
+                marqueeActive = true;
+                marqueeStartWorldX = worldX;
+                marqueeStartWorldY = worldY;
+                marqueeEndWorldX = worldX;
+                marqueeEndWorldY = worldY;
+                marqueeInitialSelection = new LinkedHashSet<>(canvasState.getSelection());
                 if (!event.isShiftDown()) {
                     canvasState.clearSelection();
                 }
@@ -748,6 +812,15 @@ public class ModelCanvas extends Canvas {
     }
 
     private void handleMouseDragged(MouseEvent event) {
+        if (marqueeActive) {
+            marqueeEndWorldX = viewport.toWorldX(event.getX());
+            marqueeEndWorldY = viewport.toWorldY(event.getY());
+            updateMarqueeSelection();
+            redraw();
+            event.consume();
+            return;
+        }
+
         if (reattaching) {
             reattachRubberBandX = viewport.toWorldX(event.getX());
             reattachRubberBandY = viewport.toWorldY(event.getY());
@@ -789,6 +862,15 @@ public class ModelCanvas extends Canvas {
     }
 
     private void handleMouseReleased(MouseEvent event) {
+        if (marqueeActive) {
+            marqueeActive = false;
+            marqueeInitialSelection = null;
+            redraw();
+            updateCursor();
+            event.consume();
+            return;
+        }
+
         if (reattaching) {
             completeReattachment(
                     viewport.toWorldX(event.getX()),
@@ -868,7 +950,10 @@ public class ModelCanvas extends Canvas {
      * reset tool to Select, clear selection.
      */
     private void handleEscape() {
-        if (reattaching) {
+        if (marqueeActive) {
+            cancelMarquee();
+            redraw();
+        } else if (reattaching) {
             cancelReattachment();
             redraw();
         } else if (flowCreation.isPending()) {

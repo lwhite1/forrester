@@ -208,7 +208,7 @@ Wire the existing compilation and simulation pipeline to the UI with a Simulate 
 
 ---
 
-### Phase 9 — Keyboard Shortcuts & Cursor Feedback (current)
+### Phase 9 — Keyboard Shortcuts & Cursor Feedback
 
 Added number-key tool switching, keyboard zoom controls, and context-sensitive cursor shapes.
 
@@ -240,6 +240,30 @@ Added number-key tool switching, keyboard zoom controls, and context-sensitive c
 | Reattaching endpoint | Closed hand |
 
 **Result:** All tool modes accessible via keyboard. Cursor provides visual feedback for every interaction state. Priority chain ensures the most relevant cursor is always shown.
+
+---
+
+### Phase 10 — Rubber-Band (Marquee) Selection (current)
+
+Added marquee selection: drag on empty canvas to select multiple elements at once.
+
+| File | Change |
+|------|--------|
+| `ModelCanvas.java` | Marquee state fields, `updateMarqueeSelection()`, `cancelMarquee()`, marquee in `handleMousePressed` / `handleMouseDragged` / `handleMouseReleased` / `handleEscape`, crosshair cursor during marquee |
+| `CanvasRenderer.java` | `MarqueeState` record, `drawMarquee()` renders semi-transparent blue rect with dashed border |
+| `CanvasState.java` | `addToSelection(name)` method for non-clearing selection additions |
+
+**Behavior:**
+- Left-drag on empty space in Select mode draws a selection rectangle
+- Elements whose center falls inside the rectangle are selected live during drag
+- Shift+drag adds to existing selection instead of replacing it
+- Escape cancels the marquee and restores the pre-marquee selection
+- Mouse release finalizes the selection and removes the marquee rectangle
+- Cursor shows crosshair during marquee drag
+
+**Result:** Users can select multiple elements by dragging a rectangle on the canvas. Shift+marquee adds to the existing selection. Escape cancels without changing the original selection.
+
+**Audit:** See `doc/UI Audit — Phase 10.md` for findings and resolution status.
 
 ---
 
@@ -294,7 +318,6 @@ src/main/java/com/deathrayresearch/forrester/app/
 ## Not Yet Implemented
 
 ### Features
-- Rubber-band (marquee) selection
 - Context toolbar near selection
 - Functional resize handles
 - Hover highlighting / feedback loop highlighting
