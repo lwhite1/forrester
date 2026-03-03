@@ -1,0 +1,187 @@
+package com.deathrayresearch.forrester.app.canvas;
+
+import com.deathrayresearch.forrester.model.def.ModelDefinition;
+import com.deathrayresearch.forrester.model.def.ModelDefinitionBuilder;
+
+import java.util.List;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
+
+import static org.assertj.core.api.Assertions.assertThat;
+
+@DisplayName("EquationAutoComplete")
+class EquationAutoCompleteTest {
+
+    @Nested
+    @DisplayName("extractToken")
+    class ExtractToken {
+
+        @Test
+        void shouldExtractTokenAtEndOfExpression() {
+            var token = EquationAutoComplete.extractToken("Stock_A * Bi", 12);
+            assertThat(token).isNotNull();
+            assertThat(token.prefix()).isEqualTo("Bi");
+            assertThat(token.start()).isEqualTo(10);
+            assertThat(token.end()).isEqualTo(12);
+        }
+
+        @Test
+        void shouldReturnNullWhenCaretAfterOperator() {
+            var token = EquationAutoComplete.extractToken("Stock_A * ", 10);
+            assertThat(token).isNull();
+        }
+
+        @Test
+        void shouldReturnNullWhenCaretAfterParen() {
+            var token = EquationAutoComplete.extractToken("SMOOTH(", 7);
+            assertThat(token).isNull();
+        }
+
+        @Test
+        void shouldReturnNullForEmptyText() {
+            var token = EquationAutoComplete.extractToken("", 0);
+            assertThat(token).isNull();
+        }
+
+        @Test
+        void shouldExtractTokenFromStart() {
+            var token = EquationAutoComplete.extractToken("Pop", 3);
+            assertThat(token).isNotNull();
+            assertThat(token.prefix()).isEqualTo("Pop");
+            assertThat(token.start()).isEqualTo(0);
+            assertThat(token.end()).isEqualTo(3);
+        }
+
+        @Test
+        void shouldExtractTokenAfterOperator() {
+            var token = EquationAutoComplete.extractToken("A + B", 5);
+            assertThat(token).isNotNull();
+            assertThat(token.prefix()).isEqualTo("B");
+            assertThat(token.start()).isEqualTo(4);
+            assertThat(token.end()).isEqualTo(5);
+        }
+
+        @Test
+        void shouldReturnNullForNullText() {
+            var token = EquationAutoComplete.extractToken(null, 0);
+            assertThat(token).isNull();
+        }
+
+        @Test
+        void shouldHandleUnderscoresInIdentifiers() {
+            var token = EquationAutoComplete.extractToken("Birth_Ra", 8);
+            assertThat(token).isNotNull();
+            assertThat(token.prefix()).isEqualTo("Birth_Ra");
+            assertThat(token.start()).isEqualTo(0);
+            assertThat(token.end()).isEqualTo(8);
+        }
+    }
+
+    @Nested
+    @DisplayName("filterSuggestions")
+    class FilterSuggestions {
+
+        private final List<String> suggestions = List.of(
+                "Birth_Rate", "Stock_A", "STEP", "SMOOTH", "SUM");
+
+        @Test
+        void shouldMatchCaseInsensitivePrefix() {
+            assertThat(EquationAutoComplete.filterSuggestions(suggestions, "St"))
+                    .containsExactly("Stock_A", "STEP");
+        }
+
+        @Test
+        void shouldMatchLowerCasePrefix() {
+            assertThat(EquationAutoComplete.filterSuggestions(suggestions, "st"))
+                    .containsExactly("Stock_A", "STEP");
+        }
+
+        @Test
+        void shouldReturnEmptyForNoMatch() {
+            assertThat(EquationAutoComplete.filterSuggestions(suggestions, "xyz"))
+                    .isEmpty();
+        }
+
+        @Test
+        void shouldReturnEmptyForEmptyPrefix() {
+            assertThat(EquationAutoComplete.filterSuggestions(suggestions, ""))
+                    .isEmpty();
+        }
+
+        @Test
+        void shouldReturnEmptyForNullPrefix() {
+            assertThat(EquationAutoComplete.filterSuggestions(suggestions, null))
+                    .isEmpty();
+        }
+    }
+
+    @Nested
+    @DisplayName("getSuggestions")
+    class GetSuggestions {
+
+        private ModelEditor editor;
+
+        @BeforeEach
+        void setUp() {
+            editor = new ModelEditor();
+            ModelDefinition def = new ModelDefinitionBuilder()
+                    .name("Test")
+                    .stock("Population", 1000, "people")
+                    .flow("Birth Rate", "Population * 0.03", "year", null, "Population")
+                    .aux("Contact Rate", "5", "contacts/day")
+                    .constant("Growth Factor", 1.5, "dimensionless")
+                    .build();
+            editor.loadFrom(def);
+        }
+
+        @Test
+        void shouldExcludeSelfReference() {
+            List<String> suggestions = EquationAutoComplete.getSuggestions(
+                    editor, "Birth Rate");
+            assertThat(suggestions).doesNotContain("Birth_Rate");
+            assertThat(suggestions).contains("Population", "Contact_Rate", "Growth_Factor");
+        }
+
+        @Test
+        void shouldIncludeBuiltInFunctions() {
+            List<String> suggestions = EquationAutoComplete.getSuggestions(editor, null);
+            assertThat(suggestions).containsAll(EquationAutoComplete.BUILT_IN_FUNCTIONS);
+        }
+
+        @Test
+        void shouldReplaceSpacesWithUnderscores() {
+            List<String> suggestions = EquationAutoComplete.getSuggestions(editor, null);
+            assertThat(suggestions).contains("Birth_Rate", "Contact_Rate", "Growth_Factor");
+            assertThat(suggestions).doesNotContain("Birth Rate", "Contact Rate", "Growth Factor");
+        }
+
+        @Test
+        void shouldListElementsBeforeFunctions() {
+            List<String> suggestions = EquationAutoComplete.getSuggestions(editor, null);
+            int lastElementIdx = suggestions.indexOf("Population");
+            int firstFunctionIdx = suggestions.indexOf(
+                    EquationAutoComplete.BUILT_IN_FUNCTIONS.stream()
+                            .sorted().findFirst().orElseThrow());
+            assertThat(lastElementIdx).isLessThan(firstFunctionIdx);
+        }
+    }
+
+    @Nested
+    @DisplayName("isBuiltInFunction")
+    class IsBuiltInFunction {
+
+        @Test
+        void shouldReturnTrueForBuiltIn() {
+            assertThat(EquationAutoComplete.isBuiltInFunction("SMOOTH")).isTrue();
+            assertThat(EquationAutoComplete.isBuiltInFunction("TIME")).isTrue();
+        }
+
+        @Test
+        void shouldReturnFalseForNonBuiltIn() {
+            assertThat(EquationAutoComplete.isBuiltInFunction("Population")).isFalse();
+        }
+    }
+}

@@ -326,6 +326,7 @@ public class PropertiesPanel extends VBox {
 
         flowEquationField = createTextField(flow.equation());
         addCommitHandlers(flowEquationField, this::commitFlowEquation);
+        EquationAutoComplete.attach(flowEquationField, editor, currentElementName);
         addFieldRow(row++, "Equation", flowEquationField);
 
         flowTimeUnitField = createTextField(
@@ -353,6 +354,7 @@ public class PropertiesPanel extends VBox {
 
         auxEquationField = createTextField(aux.equation());
         addCommitHandlers(auxEquationField, this::commitAuxEquation);
+        EquationAutoComplete.attach(auxEquationField, editor, currentElementName);
         addFieldRow(row++, "Equation", auxEquationField);
 
         auxUnitField = createTextField(aux.unit() != null ? aux.unit() : "");
@@ -783,11 +785,13 @@ public class PropertiesPanel extends VBox {
         stockUnitField = null;
         stockPolicyBox = null;
         flowNameField = null;
+        EquationAutoComplete.detach(flowEquationField);
         flowEquationField = null;
         flowTimeUnitField = null;
         flowSourceLabel = null;
         flowSinkLabel = null;
         auxNameField = null;
+        EquationAutoComplete.detach(auxEquationField);
         auxEquationField = null;
         auxUnitField = null;
         constantNameField = null;

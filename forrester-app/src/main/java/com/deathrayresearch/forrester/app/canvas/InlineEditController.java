@@ -137,6 +137,7 @@ final class InlineEditController {
             }
             callbacks.postEdit();
         });
+        EquationAutoComplete.attach(inlineEditor.getTextField(), editor, flowName);
     }
 
     private void startAuxEquationEdit(String auxName, ModelEditor editor,
@@ -156,5 +157,6 @@ final class InlineEditController {
             }
             callbacks.postEdit();
         });
+        EquationAutoComplete.attach(inlineEditor.getTextField(), editor, auxName);
     }
 }

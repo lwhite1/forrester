@@ -30,6 +30,13 @@ public class InlineEditor {
     }
 
     /**
+     * Returns the current TextField, or null if no edit is active.
+     */
+    public TextField getTextField() {
+        return textField;
+    }
+
+    /**
      * Opens a TextField at the given screen coordinates for inline editing.
      *
      * @param screenX    X position in the overlay pane's coordinate space
