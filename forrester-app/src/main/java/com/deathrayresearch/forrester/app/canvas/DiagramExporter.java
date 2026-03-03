@@ -1,7 +1,6 @@
 package com.deathrayresearch.forrester.app.canvas;
 
 import com.deathrayresearch.forrester.model.def.ConnectorRoute;
-import com.deathrayresearch.forrester.model.def.FlowDef;
 import com.deathrayresearch.forrester.model.graph.FeedbackAnalysis;
 
 import javafx.embed.swing.SwingFXUtils;
@@ -28,7 +27,6 @@ import javax.imageio.ImageIO;
 public final class DiagramExporter {
 
     private static final double EXPORT_SCALE = 2.0;
-    private static final double PADDING = 50;
 
     private DiagramExporter() {
     }
@@ -56,53 +54,7 @@ public final class DiagramExporter {
             return;
         }
 
-        // Compute world-space bounding box
-        double minX = Double.MAX_VALUE;
-        double minY = Double.MAX_VALUE;
-        double maxX = -Double.MAX_VALUE;
-        double maxY = -Double.MAX_VALUE;
-
-        for (String name : canvasState.getDrawOrder()) {
-            double cx = canvasState.getX(name);
-            double cy = canvasState.getY(name);
-            double halfW = LayoutMetrics.effectiveWidth(canvasState, name) / 2;
-            double halfH = LayoutMetrics.effectiveHeight(canvasState, name) / 2;
-
-            minX = Math.min(minX, cx - halfW);
-            minY = Math.min(minY, cy - halfH);
-            maxX = Math.max(maxX, cx + halfW);
-            maxY = Math.max(maxY, cy + halfH);
-        }
-
-        // Include cloud positions in bounding box
-        for (FlowDef flow : editor.getFlows()) {
-            FlowGeometry.Point2D sourceCloud = FlowEndpointCalculator.cloudPosition(
-                    FlowEndpointCalculator.FlowEnd.SOURCE, flow, canvasState);
-            if (sourceCloud != null) {
-                minX = Math.min(minX, sourceCloud.x() - LayoutMetrics.CLOUD_OFFSET / 4);
-                minY = Math.min(minY, sourceCloud.y() - LayoutMetrics.CLOUD_OFFSET / 4);
-                maxX = Math.max(maxX, sourceCloud.x() + LayoutMetrics.CLOUD_OFFSET / 4);
-                maxY = Math.max(maxY, sourceCloud.y() + LayoutMetrics.CLOUD_OFFSET / 4);
-            }
-
-            FlowGeometry.Point2D sinkCloud = FlowEndpointCalculator.cloudPosition(
-                    FlowEndpointCalculator.FlowEnd.SINK, flow, canvasState);
-            if (sinkCloud != null) {
-                minX = Math.min(minX, sinkCloud.x() - LayoutMetrics.CLOUD_OFFSET / 4);
-                minY = Math.min(minY, sinkCloud.y() - LayoutMetrics.CLOUD_OFFSET / 4);
-                maxX = Math.max(maxX, sinkCloud.x() + LayoutMetrics.CLOUD_OFFSET / 4);
-                maxY = Math.max(maxY, sinkCloud.y() + LayoutMetrics.CLOUD_OFFSET / 4);
-            }
-        }
-
-        // Add padding
-        minX -= PADDING;
-        minY -= PADDING;
-        maxX += PADDING;
-        maxY += PADDING;
-
-        double worldWidth = maxX - minX;
-        double worldHeight = maxY - minY;
+        ExportBounds.Bounds bounds = ExportBounds.compute(canvasState, editor);
 
         // Show file chooser
         FileChooser chooser = new FileChooser();
@@ -140,16 +92,16 @@ public final class DiagramExporter {
 
         try {
             // Create offscreen canvas at 2x scale
-            double canvasWidth = worldWidth * EXPORT_SCALE;
-            double canvasHeight = worldHeight * EXPORT_SCALE;
+            double canvasWidth = bounds.width() * EXPORT_SCALE;
+            double canvasHeight = bounds.height() * EXPORT_SCALE;
             Canvas offscreen = new Canvas(canvasWidth, canvasHeight);
             GraphicsContext gc = offscreen.getGraphicsContext2D();
 
             // Set up export viewport: translate so bounding-box top-left maps to origin, scale = 2x
             Viewport exportViewport = new Viewport();
             exportViewport.restoreState(
-                    -minX * EXPORT_SCALE,
-                    -minY * EXPORT_SCALE,
+                    -bounds.minX() * EXPORT_SCALE,
+                    -bounds.minY() * EXPORT_SCALE,
                     EXPORT_SCALE);
 
             // Render with idle interactive states

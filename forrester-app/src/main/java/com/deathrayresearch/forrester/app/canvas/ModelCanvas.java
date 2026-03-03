@@ -1,13 +1,9 @@
 package com.deathrayresearch.forrester.app.canvas;
 
-import com.deathrayresearch.forrester.model.def.AuxDef;
 import com.deathrayresearch.forrester.model.def.ConnectorRoute;
-import com.deathrayresearch.forrester.model.def.ConstantDef;
 import com.deathrayresearch.forrester.model.def.ElementType;
-import com.deathrayresearch.forrester.model.def.FlowDef;
 import com.deathrayresearch.forrester.model.def.ModelDefinition;
 import com.deathrayresearch.forrester.model.def.ModuleInstanceDef;
-import com.deathrayresearch.forrester.model.def.StockDef;
 import com.deathrayresearch.forrester.model.def.ViewDef;
 import com.deathrayresearch.forrester.model.graph.AutoLayout;
 import com.deathrayresearch.forrester.model.graph.DependencyGraph;
@@ -15,9 +11,6 @@ import com.deathrayresearch.forrester.model.graph.FeedbackAnalysis;
 
 import javafx.scene.Cursor;
 import javafx.scene.canvas.Canvas;
-import javafx.scene.control.ContextMenu;
-import javafx.scene.control.MenuItem;
-import javafx.scene.control.SeparatorMenuItem;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseButton;
@@ -26,13 +19,9 @@ import javafx.scene.input.ScrollEvent;
 import javafx.scene.layout.Pane;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.Set;
-import java.util.function.Consumer;
 
 /**
  * Canvas component that renders a model using the Layered Flow Diagram visual language.
@@ -61,6 +50,9 @@ public class ModelCanvas extends Canvas {
     private final ResizeController resizeController = new ResizeController();
     private final ReattachController reattachController = new ReattachController();
     private final FlowCreationController flowCreation = new FlowCreationController();
+    private final CopyPasteController copyPaste = new CopyPasteController();
+    private final InlineEditController inlineEdit = new InlineEditController();
+    private final ModuleNavigationController navController = new ModuleNavigationController();
 
     // Pan state
     private boolean panning;
@@ -73,28 +65,16 @@ public class ModelCanvas extends Canvas {
     private double lastMouseX;
     private double lastMouseY;
 
-    // Inline editor
-    private Pane overlayPane;
-    private InlineEditor inlineEditor;
-
     // Undo/redo
     private UndoManager undoManager;
 
     // Status change callback
     private Runnable onStatusChanged;
 
-    // Module navigation
-    private final NavigationStack navigationStack = new NavigationStack();
-    private Runnable onNavigationChanged;
-    private ContextMenu contextMenu;
-
     // Hover highlighting
     private String hoveredElement;
     private ConnectionId hoveredConnection;
     private ConnectionId selectedConnection;
-
-    // Copy/paste clipboard
-    private final Clipboard clipboard = new Clipboard();
 
     // Feedback loop highlighting
     private boolean loopHighlightActive;
@@ -145,7 +125,7 @@ public class ModelCanvas extends Canvas {
      * When inside a module, walks the navigation stack to reconstruct the full root definition.
      */
     public ModelDefinition toModelDefinition() {
-        if (navigationStack.isEmpty()) {
+        if (!navController.isInsideModule()) {
             return editor.toModelDefinition(canvasState.toViewDef());
         }
 
@@ -154,7 +134,7 @@ public class ModelCanvas extends Canvas {
 
         // Walk the stack from top (most recent parent) to bottom (root),
         // writing each child into its parent
-        List<NavigationStack.Frame> frames = new ArrayList<>(navigationStack.frames());
+        List<NavigationStack.Frame> frames = new ArrayList<>(navController.frames());
         // frames() returns bottom-to-top; we need to process top-to-bottom
         for (int i = frames.size() - 1; i >= 0; i--) {
             NavigationStack.Frame frame = frames.get(i);
@@ -346,21 +326,70 @@ public class ModelCanvas extends Canvas {
     }
 
     /**
-     * Saves the current state to the undo stack (public accessor for PropertiesPanel).
-     */
-    public void pushUndoState() {
-        saveUndoState();
-    }
-
-    /**
      * Regenerates connectors from the current model state and redraws.
-     * Called by the properties panel after editing equations or other
-     * changes that affect dependency relationships.
      */
-    public void regenerateAndRedraw() {
+    private void regenerateAndRedraw() {
         connectors = editor.generateConnectors();
         invalidateLoopAnalysis();
         redraw();
+    }
+
+    // --- High-level mutation methods for PropertiesPanel ---
+    // Each wraps saveUndoState → editor.setXxx → regenerateAndRedraw,
+    // encapsulating the mutation protocol so callers don't need to know it.
+
+    public void applyStockInitialValue(String name, double value) {
+        saveUndoState();
+        editor.setStockInitialValue(name, value);
+        regenerateAndRedraw();
+    }
+
+    public void applyStockUnit(String name, String unit) {
+        saveUndoState();
+        editor.setStockUnit(name, unit);
+        regenerateAndRedraw();
+    }
+
+    public void applyStockNegativeValuePolicy(String name, String policy) {
+        saveUndoState();
+        editor.setStockNegativeValuePolicy(name, policy);
+        regenerateAndRedraw();
+    }
+
+    public void applyFlowEquation(String name, String equation) {
+        saveUndoState();
+        editor.setFlowEquation(name, equation);
+        regenerateAndRedraw();
+    }
+
+    public void applyFlowTimeUnit(String name, String timeUnit) {
+        saveUndoState();
+        editor.setFlowTimeUnit(name, timeUnit);
+        regenerateAndRedraw();
+    }
+
+    public void applyAuxEquation(String name, String equation) {
+        saveUndoState();
+        editor.setAuxEquation(name, equation);
+        regenerateAndRedraw();
+    }
+
+    public void applyAuxUnit(String name, String unit) {
+        saveUndoState();
+        editor.setAuxUnit(name, unit);
+        regenerateAndRedraw();
+    }
+
+    public void applyConstantValue(String name, double value) {
+        saveUndoState();
+        editor.setConstantValue(name, value);
+        regenerateAndRedraw();
+    }
+
+    public void applyConstantUnit(String name, String unit) {
+        saveUndoState();
+        editor.setConstantUnit(name, unit);
+        regenerateAndRedraw();
     }
 
     /**
@@ -415,8 +444,7 @@ public class ModelCanvas extends Canvas {
      * Must be called after the canvas is added to the pane.
      */
     public void setOverlayPane(Pane overlayPane) {
-        this.overlayPane = overlayPane;
-        this.inlineEditor = new InlineEditor(overlayPane);
+        inlineEdit.setOverlayPane(overlayPane);
     }
 
     @Override
@@ -520,127 +548,27 @@ public class ModelCanvas extends Canvas {
      * Copies the current selection to the clipboard.
      */
     private void copySelection() {
-        if (editor == null || canvasState.getSelection().isEmpty()) {
+        if (editor == null) {
             return;
         }
-        clipboard.capture(canvasState, editor, canvasState.getSelection());
+        copyPaste.copy(canvasState, editor);
     }
 
     /**
      * Pastes clipboard contents, creating new elements offset from the originals.
-     * Flow endpoints are reconnected if both ends were copied; equations referencing
-     * copied elements are updated to use the new names.
      */
     private void pasteClipboard() {
-        if (editor == null || clipboard.isEmpty()) {
+        if (editor == null || !copyPaste.hasContent()) {
             return;
         }
 
         saveUndoState();
 
-        double offsetX = 30;
-        double offsetY = 30;
-
-        // Compute centroid of current selection (or use canvas center) as paste anchor
-        Set<String> currentSel = canvasState.getSelection();
-        double anchorX;
-        double anchorY;
-        if (!currentSel.isEmpty()) {
-            double sx = 0;
-            double sy = 0;
-            int cnt = 0;
-            for (String n : currentSel) {
-                double nx = canvasState.getX(n);
-                double ny = canvasState.getY(n);
-                if (!Double.isNaN(nx) && !Double.isNaN(ny)) {
-                    sx += nx;
-                    sy += ny;
-                    cnt++;
-                }
-            }
-            anchorX = cnt > 0 ? sx / cnt + offsetX : offsetX;
-            anchorY = cnt > 0 ? sy / cnt + offsetY : offsetY;
-        } else {
-            anchorX = offsetX;
-            anchorY = offsetY;
+        List<String> pastedNames = copyPaste.paste(canvasState, editor);
+        if (pastedNames.isEmpty()) {
+            return;
         }
 
-        Map<String, String> nameMapping = new HashMap<>();
-        List<String> pastedNames = new ArrayList<>();
-
-        // First pass: create elements and build name mapping
-        for (Clipboard.Entry entry : clipboard.getEntries()) {
-            String newName;
-            switch (entry.type()) {
-                case STOCK -> newName = editor.addStockFrom((StockDef) entry.elementDef());
-                case FLOW -> {
-                    FlowDef flowDef = (FlowDef) entry.elementDef();
-                    // Defer reconnection; create with null endpoints for now
-                    newName = editor.addFlowFrom(flowDef, null, null);
-                }
-                case AUX -> {
-                    AuxDef auxDef = (AuxDef) entry.elementDef();
-                    newName = editor.addAuxFrom(auxDef, auxDef.equation());
-                }
-                case CONSTANT -> newName = editor.addConstantFrom((ConstantDef) entry.elementDef());
-                case MODULE -> newName = editor.addModuleFrom((ModuleInstanceDef) entry.elementDef());
-                default -> { continue; }
-            }
-
-            nameMapping.put(entry.originalName(), newName);
-            pastedNames.add(newName);
-
-            double px = anchorX + entry.relativeX();
-            double py = anchorY + entry.relativeY();
-            canvasState.addElement(newName, entry.type(), px, py);
-
-            if (entry.customWidth() > 0 && entry.customHeight() > 0) {
-                canvasState.setSize(newName, entry.customWidth(), entry.customHeight());
-            }
-        }
-
-        // Second pass: reconnect flows and update equations
-        for (Clipboard.Entry entry : clipboard.getEntries()) {
-            String newName = nameMapping.get(entry.originalName());
-            if (newName == null) {
-                continue;
-            }
-
-            if (entry.type() == ElementType.FLOW) {
-                FlowDef original = (FlowDef) entry.elementDef();
-                String newSource = original.source() != null
-                        ? nameMapping.get(original.source()) : null;
-                String newSink = original.sink() != null
-                        ? nameMapping.get(original.sink()) : null;
-                if (newSource != null) {
-                    editor.reconnectFlow(newName,
-                            FlowEndpointCalculator.FlowEnd.SOURCE, newSource);
-                }
-                if (newSink != null) {
-                    editor.reconnectFlow(newName,
-                            FlowEndpointCalculator.FlowEnd.SINK, newSink);
-                }
-
-                // Update equation references
-                String eq = editor.getFlowEquation(newName);
-                if (eq != null) {
-                    String updated = remapEquationTokens(eq, nameMapping);
-                    if (!updated.equals(eq)) {
-                        editor.setFlowEquation(newName, updated);
-                    }
-                }
-            } else if (entry.type() == ElementType.AUX) {
-                String eq = editor.getAuxEquation(newName);
-                if (eq != null) {
-                    String updated = remapEquationTokens(eq, nameMapping);
-                    if (!updated.equals(eq)) {
-                        editor.setAuxEquation(newName, updated);
-                    }
-                }
-            }
-        }
-
-        // Select all pasted elements
         canvasState.clearSelection();
         for (String name : pastedNames) {
             canvasState.addToSelection(name);
@@ -649,55 +577,6 @@ public class ModelCanvas extends Canvas {
         connectors = editor.generateConnectors();
         invalidateLoopAnalysis();
         redraw();
-    }
-
-    /**
-     * Replaces equation tokens that reference original names with their new names.
-     */
-    private static String remapEquationTokens(String equation, Map<String, String> nameMapping) {
-        String result = equation;
-        for (Map.Entry<String, String> mapping : nameMapping.entrySet()) {
-            String oldToken = mapping.getKey().replace(' ', '_');
-            String newToken = mapping.getValue().replace(' ', '_');
-            result = replaceTokenInEquation(result, oldToken, newToken);
-        }
-        return result;
-    }
-
-    /**
-     * Word-boundary-aware token replacement in an equation string.
-     */
-    private static String replaceTokenInEquation(String equation, String oldToken, String newToken) {
-        StringBuilder result = new StringBuilder();
-        int len = equation.length();
-        int tokenLen = oldToken.length();
-        int i = 0;
-
-        while (i < len) {
-            int idx = equation.indexOf(oldToken, i);
-            if (idx < 0) {
-                result.append(equation, i, len);
-                break;
-            }
-
-            boolean startOk = idx == 0 || !isTokenChar(equation.charAt(idx - 1));
-            boolean endOk = idx + tokenLen >= len || !isTokenChar(equation.charAt(idx + tokenLen));
-
-            if (startOk && endOk) {
-                result.append(equation, i, idx);
-                result.append(newToken);
-                i = idx + tokenLen;
-            } else {
-                result.append(equation, i, idx + 1);
-                i = idx + 1;
-            }
-        }
-
-        return result.toString();
-    }
-
-    private static boolean isTokenChar(char c) {
-        return Character.isLetterOrDigit(c) || c == '_';
     }
 
     /**
@@ -739,136 +618,46 @@ public class ModelCanvas extends Canvas {
 
     // --- Inline editing ---
 
+    private final InlineEditController.Callbacks inlineCallbacks =
+            new InlineEditController.Callbacks() {
+                @Override
+                public void applyRename(String oldName, String newName) {
+                    ModelCanvas.this.applyRename(oldName, newName);
+                }
+
+                @Override
+                public void saveAndSetConstantValue(String name, double value) {
+                    saveUndoState();
+                    editor.setConstantValue(name, value);
+                    redraw();
+                }
+
+                @Override
+                public void saveAndSetFlowEquation(String name, String equation) {
+                    saveUndoState();
+                    editor.setFlowEquation(name, equation);
+                    regenerateAndRedraw();
+                }
+
+                @Override
+                public void saveAndSetAuxEquation(String name, String equation) {
+                    saveUndoState();
+                    editor.setAuxEquation(name, equation);
+                    regenerateAndRedraw();
+                }
+
+                @Override
+                public void postEdit() {
+                    requestFocus();
+                    updateCursor();
+                }
+            };
+
     /**
      * Starts inline editing for the given element on double-click.
      */
     private void startInlineEdit(String elementName) {
-        if (inlineEditor == null || inlineEditor.isActive()) {
-            return;
-        }
-
-        ElementType type = canvasState.getType(elementName);
-        if (type == null) {
-            return;
-        }
-
-        double worldX = canvasState.getX(elementName);
-        double worldY = canvasState.getY(elementName);
-        double screenX = viewport.toScreenX(worldX);
-        double screenY = viewport.toScreenY(worldY);
-        double fieldWidth = (LayoutMetrics.widthFor(type) + 20) * viewport.getScale();
-
-        switch (type) {
-            case CONSTANT -> startNameEditThenChain(elementName, screenX, screenY, fieldWidth,
-                    name -> startConstantValueEdit(name, screenX, screenY, fieldWidth));
-            case FLOW -> startNameEditThenChain(elementName, screenX, screenY, fieldWidth,
-                    name -> startFlowEquationEdit(name, screenX, screenY));
-            case AUX -> startNameEditThenChain(elementName, screenX, screenY, fieldWidth,
-                    name -> startAuxEquationEdit(name, screenX, screenY));
-            default -> inlineEditor.open(screenX, screenY, elementName, fieldWidth, newName -> {
-                if (newName != null && !newName.equals(elementName)
-                        && ModelEditor.isValidName(newName)) {
-                    applyRename(elementName, newName);
-                }
-                requestFocus();
-                updateCursor();
-            });
-        }
-    }
-
-    /**
-     * Starts a name edit, then chains to a follow-up action (value or equation editing).
-     * Common logic for constants, flows, and auxiliaries.
-     */
-    private void startNameEditThenChain(String elementName, double screenX, double screenY,
-                                        double fieldWidth, Consumer<String> chainAction) {
-        inlineEditor.open(screenX, screenY, elementName, fieldWidth, newName -> {
-            String effectiveName;
-            if (newName != null && !newName.equals(elementName)
-                    && ModelEditor.isValidName(newName)) {
-                applyRename(elementName, newName);
-                effectiveName = newName;
-            } else {
-                effectiveName = elementName;
-            }
-            chainAction.accept(effectiveName);
-        });
-    }
-
-    /**
-     * Starts editing a constant's value after the name edit completes.
-     */
-    private void startConstantValueEdit(String constantName, double screenX, double screenY,
-                                        double fieldWidth) {
-        ConstantDef cd = findConstant(constantName);
-        String currentValue = cd != null ? ElementRenderer.formatValue(cd.value()) : "0";
-
-        double valueScreenY = screenY + 16 * viewport.getScale();
-
-        inlineEditor.open(screenX, valueScreenY, currentValue, fieldWidth, valueText -> {
-            if (valueText != null && !valueText.isBlank()) {
-                try {
-                    double value = Double.parseDouble(valueText);
-                    saveUndoState();
-                    editor.setConstantValue(constantName, value);
-                    redraw();
-                } catch (NumberFormatException ignored) {
-                    // Invalid number — ignore
-                }
-            }
-            requestFocus();
-            updateCursor();
-        });
-    }
-
-    /**
-     * Starts editing a flow's equation after the name edit completes.
-     * Uses wider field and positions below the diamond + name label.
-     */
-    private void startFlowEquationEdit(String flowName, double screenX, double screenY) {
-        FlowDef fd = findFlow(flowName);
-        String currentEquation = fd != null ? fd.equation() : "0";
-
-        double eqScreenY = screenY + LayoutMetrics.FLOW_EQUATION_EDITOR_OFFSET * viewport.getScale();
-        double eqFieldWidth = Math.max(LayoutMetrics.EQUATION_EDITOR_MIN_WIDTH,
-                LayoutMetrics.AUX_WIDTH + 20) * viewport.getScale();
-
-        inlineEditor.open(screenX, eqScreenY, currentEquation, eqFieldWidth, eqText -> {
-            if (eqText != null && !eqText.isBlank()) {
-                saveUndoState();
-                editor.setFlowEquation(flowName, eqText);
-                connectors = editor.generateConnectors();
-                invalidateLoopAnalysis();
-                redraw();
-            }
-            requestFocus();
-            updateCursor();
-        });
-    }
-
-    /**
-     * Starts editing an auxiliary's equation after the name edit completes.
-     * Uses wider field and positions below the name inside the rectangle.
-     */
-    private void startAuxEquationEdit(String auxName, double screenX, double screenY) {
-        AuxDef ad = findAux(auxName);
-        String currentEquation = ad != null ? ad.equation() : "0";
-
-        double eqScreenY = screenY + LayoutMetrics.LABEL_SUBLABEL_OFFSET * viewport.getScale();
-        double eqFieldWidth = Math.max(LayoutMetrics.EQUATION_EDITOR_MIN_WIDTH,
-                LayoutMetrics.AUX_WIDTH + 20) * viewport.getScale();
-
-        inlineEditor.open(screenX, eqScreenY, currentEquation, eqFieldWidth, eqText -> {
-            if (eqText != null && !eqText.isBlank()) {
-                saveUndoState();
-                editor.setAuxEquation(auxName, eqText);
-                connectors = editor.generateConnectors();
-                invalidateLoopAnalysis();
-                redraw();
-            }
-            requestFocus();
-            updateCursor();
-        });
+        inlineEdit.startEdit(elementName, canvasState, editor, viewport, inlineCallbacks);
     }
 
     /**
@@ -889,33 +678,6 @@ public class ModelCanvas extends Canvas {
         redraw();
     }
 
-    private ConstantDef findConstant(String name) {
-        for (ConstantDef c : editor.getConstants()) {
-            if (c.name().equals(name)) {
-                return c;
-            }
-        }
-        return null;
-    }
-
-    private FlowDef findFlow(String name) {
-        for (FlowDef f : editor.getFlows()) {
-            if (f.name().equals(name)) {
-                return f;
-            }
-        }
-        return null;
-    }
-
-    private AuxDef findAux(String name) {
-        for (AuxDef a : editor.getAuxiliaries()) {
-            if (a.name().equals(name)) {
-                return a;
-            }
-        }
-        return null;
-    }
-
     // --- Reattachment, marquee, resize, drag: delegated to controllers ---
 
     // --- Cursor ---
@@ -924,7 +686,7 @@ public class ModelCanvas extends Canvas {
      * Updates the cursor shape based on the current interaction state.
      */
     private void updateCursor() {
-        if (inlineEditor != null && inlineEditor.isActive()) {
+        if (inlineEdit.isActive()) {
             return;
         }
 
@@ -1022,7 +784,7 @@ public class ModelCanvas extends Canvas {
 
     private void handleMousePressed(MouseEvent event) {
         // Guard: ignore mouse clicks while inline editor is active
-        if (inlineEditor != null && inlineEditor.isActive()) {
+        if (inlineEdit.isActive()) {
             return;
         }
 
@@ -1260,7 +1022,7 @@ public class ModelCanvas extends Canvas {
 
     private void handleKeyPressed(KeyEvent event) {
         // Guard: ignore key events while inline editor is active
-        if (inlineEditor != null && inlineEditor.isActive()) {
+        if (inlineEdit.isActive()) {
             return;
         }
 
@@ -1347,7 +1109,7 @@ public class ModelCanvas extends Canvas {
         } else if (!canvasState.getSelection().isEmpty()) {
             canvasState.clearSelection();
             redraw();
-        } else if (!navigationStack.isEmpty()) {
+        } else if (navController.isInsideModule()) {
             navigateBack();
         }
         updateCursor();
@@ -1373,17 +1135,10 @@ public class ModelCanvas extends Canvas {
     // --- Module navigation ---
 
     /**
-     * Sets a callback invoked whenever the navigation state changes
-     * (drill in, navigate back, or clear).
+     * Sets a callback invoked whenever the navigation state changes.
      */
     public void setOnNavigationChanged(Runnable callback) {
-        this.onNavigationChanged = callback;
-    }
-
-    private void fireNavigationChanged() {
-        if (onNavigationChanged != null) {
-            onNavigationChanged.run();
-        }
+        navController.setOnNavigationChanged(callback);
     }
 
     /**
@@ -1400,24 +1155,14 @@ public class ModelCanvas extends Canvas {
         }
         int moduleIndex = editor.getModuleIndex(moduleName);
 
-        // Push current state onto navigation stack
-        navigationStack.push(new NavigationStack.Frame(
-                moduleName,
-                moduleIndex,
-                editor,
-                canvasState.toViewDef(),
-                viewport.getTranslateX(),
-                viewport.getTranslateY(),
-                viewport.getScale(),
-                undoManager,
-                activeTool
-        ));
+        navController.push(new NavigationStack.Frame(
+                moduleName, moduleIndex, editor, canvasState.toViewDef(),
+                viewport.getTranslateX(), viewport.getTranslateY(),
+                viewport.getScale(), undoManager, activeTool));
 
-        // Create new editor loaded with module's inner definition
         ModelEditor moduleEditor = new ModelEditor();
         moduleEditor.loadFrom(module.definition());
 
-        // Extract or auto-layout ViewDef from module's definition
         ViewDef moduleView;
         if (!module.definition().views().isEmpty()) {
             moduleView = module.definition().views().get(0);
@@ -1425,23 +1170,18 @@ public class ModelCanvas extends Canvas {
             moduleView = AutoLayout.layout(module.definition());
         }
 
-        // Create a new UndoManager for this level
-        UndoManager moduleUndoManager = new UndoManager();
-
-        // Switch to the module's editor and view
         this.editor = moduleEditor;
-        this.undoManager = moduleUndoManager;
+        this.undoManager = new UndoManager();
         setModel(editor, moduleView);
         viewport.reset();
 
-        // Reset tool to SELECT
         if (toolBar != null) {
             toolBar.resetToSelect();
         } else {
             activeTool = CanvasToolBar.Tool.SELECT;
         }
 
-        fireNavigationChanged();
+        navController.fireNavigationChanged();
         fireStatusChanged();
     }
 
@@ -1450,138 +1190,70 @@ public class ModelCanvas extends Canvas {
      * back into the parent's module.
      */
     public void navigateBack() {
-        if (navigationStack.isEmpty()) {
+        if (!navController.isInsideModule()) {
             return;
         }
 
-        // Capture current level as a ModelDefinition with its view
         ModelDefinition childDef = editor.toModelDefinition(canvasState.toViewDef());
+        NavigationStack.Frame frame = navController.pop();
 
-        // Pop parent frame
-        NavigationStack.Frame frame = navigationStack.pop();
-
-        // Restore parent editor and save undo before write-back
         this.editor = frame.editor();
         this.undoManager = frame.undoManager();
 
         saveUndoState();
         editor.updateModuleDefinition(frame.moduleIndex(), childDef);
 
-        // Restore parent canvas state and viewport
         canvasState.loadFrom(frame.viewSnapshot());
         viewport.restoreState(frame.viewportTranslateX(),
                 frame.viewportTranslateY(), frame.viewportScale());
 
-        // Restore active tool
         if (toolBar != null) {
             toolBar.selectTool(frame.activeTool());
         } else {
             activeTool = frame.activeTool();
         }
 
-        // Regenerate connectors and redraw
         connectors = editor.generateConnectors();
         invalidateLoopAnalysis();
         redraw();
 
-        fireNavigationChanged();
+        navController.fireNavigationChanged();
         fireStatusChanged();
     }
 
-    /**
-     * Navigates back to the given depth by repeatedly calling {@link #navigateBack()}.
-     *
-     * @param targetDepth the target depth (0 = root)
-     */
     public void navigateToDepth(int targetDepth) {
-        while (navigationStack.depth() > targetDepth) {
+        while (navController.depth() > targetDepth) {
             navigateBack();
         }
     }
 
-    /**
-     * Returns true if currently editing inside a module (not at root level).
-     */
     public boolean isInsideModule() {
-        return !navigationStack.isEmpty();
+        return navController.isInsideModule();
     }
 
-    /**
-     * Returns the breadcrumb path from root to current level.
-     */
     public List<String> getNavigationPath() {
-        String rootName = navigationStack.isEmpty()
-                ? editor.getModelName()
-                : navigationStack.frames().get(0).editor().getModelName();
-        return navigationStack.getPath(rootName);
+        String rootName = navController.isInsideModule()
+                ? navController.frames().get(0).editor().getModelName()
+                : editor.getModelName();
+        return navController.getPath(rootName);
     }
 
-    /**
-     * Returns the name of the current module being edited, or null if at root.
-     */
     public String getCurrentModuleName() {
-        if (navigationStack.isEmpty()) {
-            return null;
-        }
-        // The most recent frame's moduleName is what we drilled into
-        return navigationStack.peek().moduleName();
+        return navController.getCurrentModuleName();
     }
 
-    /**
-     * Clears the navigation stack without writing back changes.
-     * Used when opening a new file or creating a new model.
-     */
     public void clearNavigation() {
-        navigationStack.clear();
-        fireNavigationChanged();
+        navController.clear();
     }
 
-    /**
-     * Shows a context menu for the given element at the specified screen coordinates.
-     */
     private void showElementContextMenu(String elementName, double screenX, double screenY) {
-        if (contextMenu != null) {
-            contextMenu.hide();
-        }
-
-        ElementType type = canvasState.getType(elementName);
-        if (type != ElementType.MODULE) {
-            return;
-        }
-
-        contextMenu = new ContextMenu();
-
-        MenuItem drillItem = new MenuItem("Drill Into");
-        drillItem.setOnAction(e -> drillInto(elementName));
-
-        MenuItem bindingsItem = new MenuItem("Configure Bindings...");
-        bindingsItem.setOnAction(e -> openBindingsDialog(elementName));
-
-        MenuItem renameItem = new MenuItem("Rename");
-        renameItem.setOnAction(e -> startInlineEdit(elementName));
-
-        contextMenu.getItems().addAll(drillItem, bindingsItem,
-                new SeparatorMenuItem(), renameItem);
-        contextMenu.show(this, screenX, screenY);
+        navController.showContextMenu(this, elementName, canvasState, screenX, screenY,
+                this::drillInto, this::openBindingsDialog, this::startInlineEdit);
     }
 
-    /**
-     * Opens the bindings configuration dialog for the named module.
-     */
     private void openBindingsDialog(String moduleName) {
-        ModuleInstanceDef module = editor.getModuleByName(moduleName);
-        if (module == null) {
-            return;
-        }
-
-        BindingConfigDialog dialog = new BindingConfigDialog(module);
-        Optional<BindingConfigDialog.BindingResult> result = dialog.showAndWait();
-        result.ifPresent(bindings -> {
-            saveUndoState();
-            editor.updateModuleBindings(moduleName,
-                    bindings.inputBindings(), bindings.outputBindings());
-            fireStatusChanged();
-        });
+        navController.openBindingsDialog(moduleName, editor,
+                this::saveUndoState, this::fireStatusChanged);
     }
 
 }

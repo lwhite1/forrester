@@ -266,9 +266,7 @@ public class PropertiesPanel extends VBox {
                 if (s != null && Objects.equals(policyValue, s.negativeValuePolicy())) {
                     return;
                 }
-                canvas.pushUndoState();
-                editor.setStockNegativeValuePolicy(currentElementName, policyValue);
-                canvas.regenerateAndRedraw();
+                canvas.applyStockNegativeValuePolicy(currentElementName, policyValue);
             }
         });
         addFieldRow(row++, "Policy", policyBox);
@@ -422,9 +420,7 @@ public class PropertiesPanel extends VBox {
             if (stock == null || stock.initialValue() == value) {
                 return;
             }
-            canvas.pushUndoState();
-            editor.setStockInitialValue(currentElementName, value);
-            canvas.regenerateAndRedraw();
+            canvas.applyStockInitialValue(currentElementName, value);
         } catch (NumberFormatException ignored) {
             StockDef stock = editor.getStockByName(currentElementName);
             if (stock != null) {
@@ -439,9 +435,7 @@ public class PropertiesPanel extends VBox {
         if (stock != null && unit.equals(stock.unit())) {
             return;
         }
-        canvas.pushUndoState();
-        editor.setStockUnit(currentElementName, unit);
-        canvas.regenerateAndRedraw();
+        canvas.applyStockUnit(currentElementName, unit);
     }
 
     private void commitFlowEquation(TextField field) {
@@ -457,9 +451,7 @@ public class PropertiesPanel extends VBox {
         if (flow != null && equation.equals(flow.equation())) {
             return;
         }
-        canvas.pushUndoState();
-        editor.setFlowEquation(currentElementName, equation);
-        canvas.regenerateAndRedraw();
+        canvas.applyFlowEquation(currentElementName, equation);
     }
 
     private void commitFlowTimeUnit(TextField field) {
@@ -475,9 +467,7 @@ public class PropertiesPanel extends VBox {
         if (flow != null && timeUnit.equals(flow.timeUnit())) {
             return;
         }
-        canvas.pushUndoState();
-        editor.setFlowTimeUnit(currentElementName, timeUnit);
-        canvas.regenerateAndRedraw();
+        canvas.applyFlowTimeUnit(currentElementName, timeUnit);
     }
 
     private void commitAuxEquation(TextField field) {
@@ -493,9 +483,7 @@ public class PropertiesPanel extends VBox {
         if (aux != null && equation.equals(aux.equation())) {
             return;
         }
-        canvas.pushUndoState();
-        editor.setAuxEquation(currentElementName, equation);
-        canvas.regenerateAndRedraw();
+        canvas.applyAuxEquation(currentElementName, equation);
     }
 
     private void commitAuxUnit(TextField field) {
@@ -504,9 +492,7 @@ public class PropertiesPanel extends VBox {
         if (aux != null && unit.equals(aux.unit())) {
             return;
         }
-        canvas.pushUndoState();
-        editor.setAuxUnit(currentElementName, unit);
-        canvas.regenerateAndRedraw();
+        canvas.applyAuxUnit(currentElementName, unit);
     }
 
     private void commitConstantValue(TextField field) {
@@ -516,9 +502,7 @@ public class PropertiesPanel extends VBox {
             if (constant == null || constant.value() == value) {
                 return;
             }
-            canvas.pushUndoState();
-            editor.setConstantValue(currentElementName, value);
-            canvas.regenerateAndRedraw();
+            canvas.applyConstantValue(currentElementName, value);
         } catch (NumberFormatException ignored) {
             ConstantDef constant = editor.getConstantByName(currentElementName);
             if (constant != null) {
@@ -533,9 +517,7 @@ public class PropertiesPanel extends VBox {
         if (constant != null && unit.equals(constant.unit())) {
             return;
         }
-        canvas.pushUndoState();
-        editor.setConstantUnit(currentElementName, unit);
-        canvas.regenerateAndRedraw();
+        canvas.applyConstantUnit(currentElementName, unit);
     }
 
     // --- UI helpers ---

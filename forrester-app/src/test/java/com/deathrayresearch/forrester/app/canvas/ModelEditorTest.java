@@ -1223,4 +1223,190 @@ class ModelEditorTest {
             assertThat(editor.getModuleIndex("Ghost")).isEqualTo(-1);
         }
     }
+
+    @Nested
+    @DisplayName("removeConnectionReference")
+    class RemoveConnectionReference {
+
+        @Test
+        void shouldRemoveReferenceFromAuxEquation() {
+            ModelDefinition def = new ModelDefinitionBuilder()
+                    .name("Test")
+                    .constant("Rate", 0.5, null)
+                    .aux("Calc", "Rate * 10", null)
+                    .build();
+            editor.loadFrom(def);
+
+            boolean removed = editor.removeConnectionReference("Rate", "Calc");
+
+            assertThat(removed).isTrue();
+            AuxDef aux = editor.getAuxByName("Calc");
+            assertThat(aux.equation()).doesNotContain("Rate");
+            assertThat(aux.equation()).contains("0");
+        }
+
+        @Test
+        void shouldRemoveReferenceFromFlowEquation() {
+            ModelDefinition def = new ModelDefinitionBuilder()
+                    .name("Test")
+                    .stock("Population", 100, null)
+                    .constant("Growth Rate", 0.1, null)
+                    .flow("Growth", "Population * Growth_Rate", "day", "Population", null)
+                    .build();
+            editor.loadFrom(def);
+
+            boolean removed = editor.removeConnectionReference("Growth Rate", "Growth");
+
+            assertThat(removed).isTrue();
+            FlowDef flow = editor.getFlowByName("Growth");
+            assertThat(flow.equation()).doesNotContain("Growth_Rate");
+        }
+
+        @Test
+        void shouldReturnFalseWhenReferenceNotFound() {
+            ModelDefinition def = new ModelDefinitionBuilder()
+                    .name("Test")
+                    .aux("Calc", "10 + 5", null)
+                    .build();
+            editor.loadFrom(def);
+
+            boolean removed = editor.removeConnectionReference("Ghost", "Calc");
+
+            assertThat(removed).isFalse();
+        }
+
+        @Test
+        void shouldReturnFalseWhenTargetNotFound() {
+            ModelDefinition def = new ModelDefinitionBuilder()
+                    .name("Test")
+                    .constant("Rate", 0.5, null)
+                    .build();
+            editor.loadFrom(def);
+
+            boolean removed = editor.removeConnectionReference("Rate", "Ghost");
+
+            assertThat(removed).isFalse();
+        }
+    }
+
+    @Nested
+    @DisplayName("addXxxFrom (template copy)")
+    class AddFromTemplate {
+
+        @Test
+        void shouldCopyStockProperties() {
+            ModelDefinition def = new ModelDefinitionBuilder()
+                    .name("Test")
+                    .stock("Original", 42, "widgets")
+                    .build();
+            editor.loadFrom(def);
+
+            String newName = editor.addStockFrom(editor.getStocks().get(0));
+
+            assertThat(newName).isNotEqualTo("Original");
+            assertThat(editor.getStockByName(newName)).isNotNull();
+            assertThat(editor.getStockByName(newName).initialValue()).isEqualTo(42);
+            assertThat(editor.getStockByName(newName).unit()).isEqualTo("widgets");
+        }
+
+        @Test
+        void shouldCopyFlowWithNewEndpoints() {
+            ModelDefinition def = new ModelDefinitionBuilder()
+                    .name("Test")
+                    .stock("S1", 100, null)
+                    .stock("S2", 0, null)
+                    .flow("Transfer", "S1 * 0.1", "day", "S1", "S2")
+                    .build();
+            editor.loadFrom(def);
+
+            String newName = editor.addFlowFrom(
+                    editor.getFlows().get(0), null, null);
+
+            assertThat(newName).isNotEqualTo("Transfer");
+            FlowDef newFlow = editor.getFlowByName(newName);
+            assertThat(newFlow).isNotNull();
+            assertThat(newFlow.source()).isNull();
+            assertThat(newFlow.sink()).isNull();
+            assertThat(newFlow.equation()).isEqualTo("S1 * 0.1");
+        }
+
+        @Test
+        void shouldCopyAuxWithCustomEquation() {
+            ModelDefinition def = new ModelDefinitionBuilder()
+                    .name("Test")
+                    .aux("Ratio", "A / B", "fraction")
+                    .build();
+            editor.loadFrom(def);
+
+            String newName = editor.addAuxFrom(
+                    editor.getAuxiliaries().get(0), "X / Y");
+
+            assertThat(newName).isNotEqualTo("Ratio");
+            AuxDef newAux = editor.getAuxByName(newName);
+            assertThat(newAux).isNotNull();
+            assertThat(newAux.equation()).isEqualTo("X / Y");
+            assertThat(newAux.unit()).isEqualTo("fraction");
+        }
+
+        @Test
+        void shouldCopyConstantProperties() {
+            ModelDefinition def = new ModelDefinitionBuilder()
+                    .name("Test")
+                    .constant("Pi", 3.14159, "ratio")
+                    .build();
+            editor.loadFrom(def);
+
+            String newName = editor.addConstantFrom(editor.getConstants().get(0));
+
+            assertThat(newName).isNotEqualTo("Pi");
+            assertThat(editor.getConstantByName(newName)).isNotNull();
+            assertThat(editor.getConstantByName(newName).value()).isEqualTo(3.14159);
+            assertThat(editor.getConstantByName(newName).unit()).isEqualTo("ratio");
+        }
+
+        @Test
+        void shouldGenerateUniqueNamesOnMultipleCopies() {
+            editor.addStock();
+            String name1 = editor.addStockFrom(editor.getStocks().get(0));
+            String name2 = editor.addStockFrom(editor.getStocks().get(0));
+
+            assertThat(name1).isNotEqualTo(name2);
+        }
+    }
+
+    @Nested
+    @DisplayName("replaceToken")
+    class ReplaceToken {
+
+        @Test
+        void shouldReplaceWholeTokenOnly() {
+            String result = ModelEditor.replaceToken("A + AB + A_B", "A", "X");
+            assertThat(result).isEqualTo("X + AB + A_B");
+        }
+
+        @Test
+        void shouldReplaceMultipleOccurrences() {
+            String result = ModelEditor.replaceToken("A + A * A", "A", "B");
+            assertThat(result).isEqualTo("B + B * B");
+        }
+
+        @Test
+        void shouldHandleUnderscoreTokens() {
+            String result = ModelEditor.replaceToken(
+                    "Contact_Rate * Pop", "Contact_Rate", "New_Rate");
+            assertThat(result).isEqualTo("New_Rate * Pop");
+        }
+
+        @Test
+        void shouldNotReplacePartialMatch() {
+            String result = ModelEditor.replaceToken("Population", "Pop", "People");
+            assertThat(result).isEqualTo("Population");
+        }
+
+        @Test
+        void shouldHandleEmptyEquation() {
+            String result = ModelEditor.replaceToken("", "A", "B");
+            assertThat(result).isEmpty();
+        }
+    }
 }

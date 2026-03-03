@@ -21,8 +21,6 @@ import java.util.Locale;
  */
 public final class SvgExporter {
 
-    private static final double PADDING = 50;
-
     private SvgExporter() {
     }
 
@@ -40,59 +38,11 @@ public final class SvgExporter {
                               List<ConnectorRoute> connectors,
                               FeedbackAnalysis loopAnalysis,
                               File file) throws IOException {
-        // Compute bounding box (same logic as DiagramExporter)
-        double minX = Double.MAX_VALUE;
-        double minY = Double.MAX_VALUE;
-        double maxX = -Double.MAX_VALUE;
-        double maxY = -Double.MAX_VALUE;
-
-        for (String name : canvasState.getDrawOrder()) {
-            double cx = canvasState.getX(name);
-            double cy = canvasState.getY(name);
-            double halfW = LayoutMetrics.effectiveWidth(canvasState, name) / 2;
-            double halfH = LayoutMetrics.effectiveHeight(canvasState, name) / 2;
-
-            // For flows, include the label area below the diamond
-            if (canvasState.getType(name) == ElementType.FLOW) {
-                halfH = LayoutMetrics.FLOW_INDICATOR_SIZE / 2 + LayoutMetrics.FLOW_EQUATION_GAP + 12;
-            }
-
-            minX = Math.min(minX, cx - halfW);
-            minY = Math.min(minY, cy - halfH);
-            maxX = Math.max(maxX, cx + halfW);
-            maxY = Math.max(maxY, cy + halfH);
-        }
-
-        // Include cloud positions
-        for (FlowDef flow : editor.getFlows()) {
-            FlowGeometry.Point2D sourceCloud = FlowEndpointCalculator.cloudPosition(
-                    FlowEndpointCalculator.FlowEnd.SOURCE, flow, canvasState);
-            if (sourceCloud != null) {
-                double r = LayoutMetrics.CLOUD_OFFSET / 4;
-                minX = Math.min(minX, sourceCloud.x() - r);
-                minY = Math.min(minY, sourceCloud.y() - r);
-                maxX = Math.max(maxX, sourceCloud.x() + r);
-                maxY = Math.max(maxY, sourceCloud.y() + r);
-            }
-
-            FlowGeometry.Point2D sinkCloud = FlowEndpointCalculator.cloudPosition(
-                    FlowEndpointCalculator.FlowEnd.SINK, flow, canvasState);
-            if (sinkCloud != null) {
-                double r = LayoutMetrics.CLOUD_OFFSET / 4;
-                minX = Math.min(minX, sinkCloud.x() - r);
-                minY = Math.min(minY, sinkCloud.y() - r);
-                maxX = Math.max(maxX, sinkCloud.x() + r);
-                maxY = Math.max(maxY, sinkCloud.y() + r);
-            }
-        }
-
-        minX -= PADDING;
-        minY -= PADDING;
-        maxX += PADDING;
-        maxY += PADDING;
-
-        double width = maxX - minX;
-        double height = maxY - minY;
+        ExportBounds.Bounds bounds = ExportBounds.compute(canvasState, editor);
+        double minX = bounds.minX();
+        double minY = bounds.minY();
+        double width = bounds.width();
+        double height = bounds.height();
 
         try (PrintWriter w = new PrintWriter(file, StandardCharsets.UTF_8)) {
             w.println("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");

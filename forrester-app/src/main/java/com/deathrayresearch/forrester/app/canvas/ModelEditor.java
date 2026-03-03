@@ -523,9 +523,11 @@ public class ModelEditor {
         }
     }
 
-    private static String replaceToken(String equation, String oldToken, String newToken) {
-        // Word-boundary replacement: replace whole tokens only
-        // Tokens in equations use underscores for spaces (e.g. Contact_Rate)
+    /**
+     * Word-boundary-aware token replacement in an equation string.
+     * Tokens in equations use underscores for spaces (e.g. Contact_Rate).
+     */
+    static String replaceToken(String equation, String oldToken, String newToken) {
         StringBuilder result = new StringBuilder();
         int len = equation.length();
         int tokenLen = oldToken.length();
@@ -555,7 +557,7 @@ public class ModelEditor {
         return result.toString();
     }
 
-    private static boolean isTokenChar(char c) {
+    static boolean isTokenChar(char c) {
         return Character.isLetterOrDigit(c) || c == '_';
     }
 
