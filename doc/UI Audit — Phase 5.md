@@ -7,11 +7,11 @@ Audit of all `forrester-app` canvas code after Phase 5 implementation.
 | Phase 4 Finding | Status |
 |---|---|
 | BUG-7: Inline editor TextField width not scaled by zoom | **Fixed in Phase 6** |
-| EDGE-1: Self-loop flow (same stock source/sink) | **Still open** (flow creation path) |
-| EDGE-2: Clicking non-stock in flow mode = cloud | **Still open** |
-| EDGE-3: No name validation for identifiers | **Still open** |
-| EDGE-4: Rename to blank gives no feedback | **Still open** |
-| EDGE-5: Equation references to deleted elements not cleaned | **Still open** |
+| EDGE-1: Self-loop flow (same stock source/sink) | **Fixed in Phase 6b** |
+| EDGE-2: Clicking non-stock in flow mode = cloud | **Still open** (acceptable behavior) |
+| EDGE-3: No name validation for identifiers | **Fixed in Phase 6b** |
+| EDGE-4: Rename to blank gives no feedback | **Fixed in Phase 6b** |
+| EDGE-5: Equation references to deleted elements not cleaned | **Fixed in Phase 6b** |
 | QUALITY-2: String literals for element types | **Fixed** — `ElementType` enum |
 | QUALITY-3: ModelCanvas too many responsibilities | **Improved** — extracted 3 classes, ~760→560 lines |
 | QUALITY-4: `double[]` for positions | **Still open** |
@@ -201,3 +201,41 @@ Phase 6 addressed all 3 major bugs, 3 minor bugs, and 3 code quality findings fr
 - **Window title**: shows current filename or "Untitled"
 
 ### Test count: 123 passing (up from ~116)
+
+---
+
+## Phase 6b Resolution Status
+
+Phase 6b addressed the remaining minor bugs, edge cases, code quality issues, and test gaps.
+
+| Finding | Resolution |
+|---|---|
+| **EDGE-1**: Self-loop in flow creation | **Fixed** — `FlowCreationController` rejects second click on the same stock as the source |
+| **EDGE-6**: Cloud-to-cloud flow creation | **Fixed** — `FlowCreationController` requires at least one stock end |
+| **EDGE-5**: Equation refs to deleted elements | **Fixed** — `ModelEditor.removeElement()` now replaces deleted element's token with `0` in all equations |
+| **EDGE-3**: No name validation for identifiers | **Fixed** — added `ModelEditor.isValidName()` (letters, digits, spaces, underscores); inline editor rejects invalid names |
+| **EDGE-4**: Rename to blank gives no feedback | **Fixed** — blank names rejected by `isValidName()` |
+| **UX-5**: No cloud preview during reattachment disconnect | **Fixed** — `CanvasRenderer` draws cloud preview at cursor when not hovering a stock |
+| **QUALITY-7**: Trivial `drawCloudAt` delegate | **Fixed** — made `drawCloud` public, removed delegate |
+| **QUALITY-5**: Magic number cloud line width | **Fixed** — extracted `LayoutMetrics.CLOUD_LINE_WIDTH` |
+| **TEST-GAP-4**: No tests for `formatValue` | **Fixed** — added `ElementRendererTest` with 6 tests |
+| **TEST-GAP-5**: No tests for `clipToBorder` | **Fixed** — added `CanvasRendererTest` with 6 tests |
+
+### Remaining open items
+
+| Finding | Status |
+|---|---|
+| EDGE-2: No feedback when clicking non-stock during flow creation | Open (current behavior creates cloud — acceptable) |
+| UX-2: Escape in SELECT mode does nothing visible | Open |
+| UX-3: No cursor shape changes | Open |
+| UX-4: Inline editor assumes canvas at (0,0) | Non-issue in current layout (canvas fills canvasPane at origin) |
+| QUALITY-4: `double[]` for positions instead of record | Open (low priority) |
+| TEST-GAP-1: No tests for ModelCanvas event handling | Open (requires JavaFX test harness) |
+| TEST-GAP-2: No tests for InlineEditor | Open (requires JavaFX test harness) |
+| TEST-GAP-6: No test for `addFlow` with nonexistent stock names | Open |
+| TEST-GAP-7: No tests for ConnectionRenderer/SelectionRenderer | Open (requires JavaFX GraphicsContext) |
+| TEST-GAP-8: No tests for CanvasToolBar | Open (requires JavaFX test harness) |
+| UX-6: No undo support | Open |
+| UX-7/8/9: Context menu, keyboard shortcuts, status bar | Open |
+
+### Test count: 146 passing (up from 123)
