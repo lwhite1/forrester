@@ -207,6 +207,48 @@ public final class ElementRenderer {
     }
 
     /**
+     * Draws a lookup table: rounded rectangle with dot-dash border, "tbl" badge,
+     * name, and data point count.
+     */
+    public static void drawLookup(GraphicsContext gc, String name, int dataPoints,
+                                  double x, double y, double width, double height) {
+        double r = LayoutMetrics.LOOKUP_CORNER_RADIUS;
+
+        // Fill
+        gc.setFill(ColorPalette.STOCK_FILL);
+        gc.fillRoundRect(x, y, width, height, r, r);
+
+        // Dot-dash border
+        gc.setStroke(ColorPalette.AUX_BORDER);
+        gc.setLineWidth(LayoutMetrics.LOOKUP_BORDER_WIDTH);
+        gc.setLineDashes(8, 3, 2, 3);
+        gc.strokeRoundRect(x, y, width, height, r, r);
+        gc.setLineDashes();
+
+        // "tbl" badge top-left
+        gc.setFill(ColorPalette.TEXT_SECONDARY);
+        gc.setFont(LayoutMetrics.BADGE_FONT);
+        gc.setTextAlign(TextAlignment.LEFT);
+        gc.setTextBaseline(VPos.TOP);
+        gc.fillText("tbl", x + 4, y + 3);
+
+        // Name centered, slightly above middle
+        gc.setFill(ColorPalette.TEXT);
+        gc.setFont(LayoutMetrics.LOOKUP_NAME_FONT);
+        gc.setTextAlign(TextAlignment.CENTER);
+        gc.setTextBaseline(VPos.CENTER);
+        gc.fillText(name, x + width / 2, y + height / 2 + LayoutMetrics.LABEL_NAME_OFFSET);
+
+        // Data point count below name
+        gc.setFill(ColorPalette.TEXT_SECONDARY);
+        gc.setFont(LayoutMetrics.BADGE_FONT);
+        gc.setTextAlign(TextAlignment.CENTER);
+        gc.setTextBaseline(VPos.CENTER);
+        gc.fillText(dataPoints + " pts", x + width / 2,
+                y + height / 2 + LayoutMetrics.LABEL_SUBLABEL_OFFSET);
+    }
+
+    /**
      * Returns true if the equation should be displayed on the canvas.
      * Suppresses null, blank, and the default placeholder "0".
      */

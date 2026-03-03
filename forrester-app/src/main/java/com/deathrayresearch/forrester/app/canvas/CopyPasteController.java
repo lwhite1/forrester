@@ -4,6 +4,7 @@ import com.deathrayresearch.forrester.model.def.AuxDef;
 import com.deathrayresearch.forrester.model.def.ConstantDef;
 import com.deathrayresearch.forrester.model.def.ElementType;
 import com.deathrayresearch.forrester.model.def.FlowDef;
+import com.deathrayresearch.forrester.model.def.LookupTableDef;
 import com.deathrayresearch.forrester.model.def.ModuleInstanceDef;
 import com.deathrayresearch.forrester.model.def.StockDef;
 
@@ -94,6 +95,8 @@ final class CopyPasteController {
                         (ConstantDef) entry.elementDef());
                 case MODULE -> newName = editor.addModuleFrom(
                         (ModuleInstanceDef) entry.elementDef());
+                case LOOKUP -> newName = editor.addLookupFrom(
+                        (LookupTableDef) entry.elementDef());
                 default -> { continue; }
             }
 

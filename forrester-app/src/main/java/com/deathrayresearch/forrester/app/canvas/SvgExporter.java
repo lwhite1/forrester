@@ -4,6 +4,7 @@ import com.deathrayresearch.forrester.model.def.ConnectorRoute;
 import com.deathrayresearch.forrester.model.def.ConstantDef;
 import com.deathrayresearch.forrester.model.def.ElementType;
 import com.deathrayresearch.forrester.model.def.FlowDef;
+import com.deathrayresearch.forrester.model.def.LookupTableDef;
 import com.deathrayresearch.forrester.model.graph.FeedbackAnalysis;
 
 import javafx.scene.paint.Color;
@@ -96,6 +97,13 @@ public final class SvgExporter {
                     case MODULE -> writeModule(w, name, cx, cy,
                             LayoutMetrics.effectiveWidth(canvasState, name),
                             LayoutMetrics.effectiveHeight(canvasState, name));
+                    case LOOKUP -> {
+                        LookupTableDef lt = editor.getLookupTableByName(name);
+                        int pts = lt != null ? lt.xValues().length : 0;
+                        writeLookup(w, name, pts, cx, cy,
+                                LayoutMetrics.effectiveWidth(canvasState, name),
+                                LayoutMetrics.effectiveHeight(canvasState, name));
+                    }
                     default -> { }
                 }
             }
@@ -462,6 +470,47 @@ public final class SvgExporter {
                 "  <text x=\"%.2f\" y=\"%.2f\" text-anchor=\"middle\" dominant-baseline=\"central\" " +
                 "font-family=\"sans-serif\" font-size=\"13\" font-weight=\"bold\" fill=\"%s\">%s</text>%n",
                 cx, cy, svgColor(ColorPalette.TEXT), escapeXml(name));
+    }
+
+    private static void writeLookup(PrintWriter w, String name, int dataPoints,
+                                     double cx, double cy, double width, double height) {
+        double x = cx - width / 2;
+        double y = cy - height / 2;
+        double r = LayoutMetrics.LOOKUP_CORNER_RADIUS;
+
+        // Fill
+        w.printf(Locale.US,
+                "  <rect x=\"%.2f\" y=\"%.2f\" width=\"%.2f\" height=\"%.2f\" rx=\"%.1f\" " +
+                "fill=\"%s\"/>%n",
+                x, y, width, height, r, svgColor(ColorPalette.STOCK_FILL));
+
+        // Dot-dash border
+        w.printf(Locale.US,
+                "  <rect x=\"%.2f\" y=\"%.2f\" width=\"%.2f\" height=\"%.2f\" rx=\"%.1f\" " +
+                "fill=\"none\" stroke=\"%s\" stroke-width=\"%.1f\" " +
+                "stroke-dasharray=\"8 3 2 3\"/>%n",
+                x, y, width, height, r,
+                svgColor(ColorPalette.AUX_BORDER), LayoutMetrics.LOOKUP_BORDER_WIDTH);
+
+        // "tbl" badge
+        w.printf(Locale.US,
+                "  <text x=\"%.2f\" y=\"%.2f\" text-anchor=\"start\" dominant-baseline=\"hanging\" " +
+                "font-family=\"sans-serif\" font-size=\"9\" fill=\"%s\">tbl</text>%n",
+                x + 4, y + 3, svgColor(ColorPalette.TEXT_SECONDARY));
+
+        // Name centered
+        w.printf(Locale.US,
+                "  <text x=\"%.2f\" y=\"%.2f\" text-anchor=\"middle\" dominant-baseline=\"central\" " +
+                "font-family=\"sans-serif\" font-size=\"11\" fill=\"%s\">%s</text>%n",
+                cx, cy + LayoutMetrics.LABEL_NAME_OFFSET,
+                svgColor(ColorPalette.TEXT), escapeXml(name));
+
+        // Data point count
+        w.printf(Locale.US,
+                "  <text x=\"%.2f\" y=\"%.2f\" text-anchor=\"middle\" dominant-baseline=\"central\" " +
+                "font-family=\"sans-serif\" font-size=\"9\" fill=\"%s\">%s</text>%n",
+                cx, cy + LayoutMetrics.LABEL_SUBLABEL_OFFSET,
+                svgColor(ColorPalette.TEXT_SECONDARY), dataPoints + " pts");
     }
 
     // --- Loop highlights ---

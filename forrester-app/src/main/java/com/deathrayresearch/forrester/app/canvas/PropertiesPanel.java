@@ -4,6 +4,7 @@ import com.deathrayresearch.forrester.model.def.AuxDef;
 import com.deathrayresearch.forrester.model.def.ConstantDef;
 import com.deathrayresearch.forrester.model.def.ElementType;
 import com.deathrayresearch.forrester.model.def.FlowDef;
+import com.deathrayresearch.forrester.model.def.LookupTableDef;
 import com.deathrayresearch.forrester.model.def.ModuleInstanceDef;
 import com.deathrayresearch.forrester.model.def.StockDef;
 
@@ -225,6 +226,7 @@ public class PropertiesPanel extends VBox {
             case AUX -> row = buildAuxForm(row);
             case CONSTANT -> row = buildConstantForm(row);
             case MODULE -> row = buildModuleForm(row);
+            case LOOKUP -> row = buildLookupForm(row);
             default -> addReadOnlyRow(row++, "Name", name);
         }
 
@@ -378,6 +380,160 @@ public class PropertiesPanel extends VBox {
         }
 
         return row;
+    }
+
+    private int buildLookupForm(int row) {
+        LookupTableDef lookup = editor.getLookupTableByName(currentElementName);
+        if (lookup == null) {
+            addReadOnlyRow(row++, "Name", currentElementName);
+            return row;
+        }
+
+        TextField nameField = createNameField(currentElementName);
+        addFieldRow(row++, "Name", nameField);
+
+        // Interpolation dropdown
+        ComboBox<String> interpBox = new ComboBox<>();
+        interpBox.getItems().addAll("LINEAR", "SPLINE");
+        interpBox.setValue(lookup.interpolation());
+        interpBox.setMaxWidth(Double.MAX_VALUE);
+        interpBox.setOnAction(e -> {
+            if (!updatingFields) {
+                String newInterp = interpBox.getValue();
+                LookupTableDef lt = editor.getLookupTableByName(currentElementName);
+                if (lt != null && !Objects.equals(newInterp, lt.interpolation())) {
+                    canvas.applyLookupTable(currentElementName, new LookupTableDef(
+                            currentElementName, lt.comment(),
+                            lt.xValues(), lt.yValues(), newInterp));
+                }
+            }
+        });
+        addFieldRow(row++, "Interpolation", interpBox);
+
+        // Data points summary
+        double[] xs = lookup.xValues();
+        double[] ys = lookup.yValues();
+        addReadOnlyRow(row++, "Data Points", xs.length + " points");
+
+        // Editable table of x/y pairs
+        GridPane tableGrid = new GridPane();
+        tableGrid.setHgap(4);
+        tableGrid.setVgap(2);
+
+        Label xHeader = new Label("X");
+        xHeader.setStyle(Styles.FIELD_LABEL);
+        Label yHeader = new Label("Y");
+        yHeader.setStyle(Styles.FIELD_LABEL);
+        tableGrid.add(xHeader, 0, 0);
+        tableGrid.add(yHeader, 1, 0);
+
+        for (int i = 0; i < xs.length; i++) {
+            TextField xField = new TextField(ElementRenderer.formatValue(xs[i]));
+            TextField yField = new TextField(ElementRenderer.formatValue(ys[i]));
+            xField.setPrefWidth(70);
+            yField.setPrefWidth(70);
+
+            final int index = i;
+            Runnable commitRow = () -> commitLookupDataPoint(xField, yField, index);
+            xField.setOnAction(e -> commitRow.run());
+            xField.focusedProperty().addListener((obs, wasFocused, isFocused) -> {
+                if (!isFocused && !updatingFields) {
+                    commitRow.run();
+                }
+            });
+            yField.setOnAction(e -> commitRow.run());
+            yField.focusedProperty().addListener((obs, wasFocused, isFocused) -> {
+                if (!isFocused && !updatingFields) {
+                    commitRow.run();
+                }
+            });
+
+            tableGrid.add(xField, 0, i + 1);
+            tableGrid.add(yField, 1, i + 1);
+        }
+
+        propertyGrid.add(tableGrid, 0, row, 2, 1);
+        row++;
+
+        // Add/remove row buttons
+        HBox rowButtons = new HBox(4);
+        Button addRowBtn = new Button("+ Row");
+        addRowBtn.setStyle(Styles.SMALL_TEXT);
+        addRowBtn.setOnAction(e -> {
+            LookupTableDef lt = editor.getLookupTableByName(currentElementName);
+            if (lt == null) {
+                return;
+            }
+            double[] oldX = lt.xValues();
+            double[] oldY = lt.yValues();
+            double[] newX = new double[oldX.length + 1];
+            double[] newY = new double[oldY.length + 1];
+            System.arraycopy(oldX, 0, newX, 0, oldX.length);
+            System.arraycopy(oldY, 0, newY, 0, oldY.length);
+            newX[oldX.length] = oldX[oldX.length - 1] + 1;
+            newY[oldY.length] = oldY[oldY.length - 1];
+            canvas.applyLookupTable(currentElementName, new LookupTableDef(
+                    currentElementName, lt.comment(), newX, newY, lt.interpolation()));
+            updateSelection(canvas, editor);
+        });
+
+        Button removeRowBtn = new Button("- Row");
+        removeRowBtn.setStyle(Styles.SMALL_TEXT);
+        removeRowBtn.setOnAction(e -> {
+            LookupTableDef lt = editor.getLookupTableByName(currentElementName);
+            if (lt == null || lt.xValues().length <= 2) {
+                return;
+            }
+            double[] oldX = lt.xValues();
+            double[] oldY = lt.yValues();
+            double[] newX = new double[oldX.length - 1];
+            double[] newY = new double[oldY.length - 1];
+            System.arraycopy(oldX, 0, newX, 0, newX.length);
+            System.arraycopy(oldY, 0, newY, 0, newY.length);
+            canvas.applyLookupTable(currentElementName, new LookupTableDef(
+                    currentElementName, lt.comment(), newX, newY, lt.interpolation()));
+            updateSelection(canvas, editor);
+        });
+
+        rowButtons.getChildren().addAll(addRowBtn, removeRowBtn);
+        propertyGrid.add(rowButtons, 0, row, 2, 1);
+        row++;
+
+        return row;
+    }
+
+    private void commitLookupDataPoint(TextField xField, TextField yField, int index) {
+        LookupTableDef lt = editor.getLookupTableByName(currentElementName);
+        if (lt == null) {
+            return;
+        }
+        try {
+            double newX = Double.parseDouble(xField.getText().trim());
+            double newY = Double.parseDouble(yField.getText().trim());
+            double[] xs = lt.xValues();
+            double[] ys = lt.yValues();
+            if (index >= xs.length) {
+                return;
+            }
+            if (xs[index] == newX && ys[index] == newY) {
+                return;
+            }
+            xs[index] = newX;
+            ys[index] = newY;
+            // Validate: x values must be strictly increasing
+            for (int i = 1; i < xs.length; i++) {
+                if (xs[i] <= xs[i - 1]) {
+                    xField.setText(ElementRenderer.formatValue(lt.xValues()[index]));
+                    yField.setText(ElementRenderer.formatValue(lt.yValues()[index]));
+                    return;
+                }
+            }
+            canvas.applyLookupTable(currentElementName, new LookupTableDef(
+                    currentElementName, lt.comment(), xs, ys, lt.interpolation()));
+        } catch (NumberFormatException ignored) {
+            xField.setText(ElementRenderer.formatValue(lt.xValues()[index]));
+            yField.setText(ElementRenderer.formatValue(lt.yValues()[index]));
+        }
     }
 
     // --- Commit handlers ---

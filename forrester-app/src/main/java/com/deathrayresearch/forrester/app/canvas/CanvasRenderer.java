@@ -152,6 +152,14 @@ public class CanvasRenderer {
                     double h = LayoutMetrics.effectiveHeight(canvasState, name);
                     ElementRenderer.drawModule(gc, name, cx - w / 2, cy - h / 2, w, h);
                 }
+                case LOOKUP -> {
+                    double w = LayoutMetrics.effectiveWidth(canvasState, name);
+                    double h = LayoutMetrics.effectiveHeight(canvasState, name);
+                    var lt = editor.getLookupTableByName(name);
+                    int pts = lt != null ? lt.xValues().length : 0;
+                    ElementRenderer.drawLookup(gc, name, pts,
+                            cx - w / 2, cy - h / 2, w, h);
+                }
                 default -> { }
             }
         }

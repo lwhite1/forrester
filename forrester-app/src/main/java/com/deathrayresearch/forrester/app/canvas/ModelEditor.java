@@ -68,6 +68,7 @@ public class ModelEditor {
         auxiliaries.forEach(a -> nameIndex.add(a.name()));
         constants.forEach(c -> nameIndex.add(c.name()));
         modules.forEach(m -> nameIndex.add(m.instanceName()));
+        lookupTables.forEach(lt -> nameIndex.add(lt.name()));
 
         // Set nextId past any existing numeric suffix
         nextId = 1;
@@ -76,6 +77,7 @@ public class ModelEditor {
         updateNextId(auxiliaries.stream().map(AuxDef::name));
         updateNextId(constants.stream().map(ConstantDef::name));
         updateNextId(modules.stream().map(ModuleInstanceDef::instanceName));
+        updateNextId(lookupTables.stream().map(LookupTableDef::name));
     }
 
     private void updateNextId(java.util.stream.Stream<String> names) {
@@ -225,6 +227,56 @@ public class ModelEditor {
     }
 
     /**
+     * Adds a new lookup table with an auto-generated name and default data points.
+     * @return the name of the created lookup table
+     */
+    public String addLookup() {
+        String name = "Lookup " + nextId++;
+        lookupTables.add(new LookupTableDef(name,
+                new double[]{0.0, 1.0}, new double[]{0.0, 1.0}, "LINEAR"));
+        nameIndex.add(name);
+        return name;
+    }
+
+    /**
+     * Adds a new lookup table copied from a template with an auto-generated name.
+     * @return the name of the created lookup table
+     */
+    public String addLookupFrom(LookupTableDef template) {
+        String name = "Lookup " + nextId++;
+        lookupTables.add(new LookupTableDef(name, template.comment(),
+                template.xValues(), template.yValues(), template.interpolation()));
+        nameIndex.add(name);
+        return name;
+    }
+
+    /**
+     * Returns the lookup table with the given name, or null if not found.
+     */
+    public LookupTableDef getLookupTableByName(String name) {
+        for (LookupTableDef lt : lookupTables) {
+            if (lt.name().equals(name)) {
+                return lt;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Replaces the lookup table definition for the given name.
+     * @return true if the lookup table was found and updated
+     */
+    public boolean setLookupTable(String name, LookupTableDef updated) {
+        for (int i = 0; i < lookupTables.size(); i++) {
+            if (lookupTables.get(i).name().equals(name)) {
+                lookupTables.set(i, updated);
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
      * Removes the element with the given name from the appropriate list.
      * If a stock is removed, any flow referencing it as source or sink has
      * that connection nullified (becomes a cloud).
@@ -258,7 +310,9 @@ public class ModelEditor {
             } else if (auxiliaries.removeIf(a -> a.name().equals(name))) {
                 // aux removed — fall through to clean equations
             } else if (!constants.removeIf(c -> c.name().equals(name))) {
-                modules.removeIf(m -> m.instanceName().equals(name));
+                if (!lookupTables.removeIf(lt -> lt.name().equals(name))) {
+                    modules.removeIf(m -> m.instanceName().equals(name));
+                }
             }
         }
 
@@ -296,7 +350,10 @@ public class ModelEditor {
                 (c, n) -> new ConstantDef(n, c.comment(), c.value(), c.unit()))
                 || renameInList(modules, oldName, newName, ModuleInstanceDef::instanceName,
                 (m, n) -> new ModuleInstanceDef(n, m.definition(),
-                        m.inputBindings(), m.outputBindings()));
+                        m.inputBindings(), m.outputBindings()))
+                || renameInList(lookupTables, oldName, newName, LookupTableDef::name,
+                (lt, n) -> new LookupTableDef(n, lt.comment(),
+                        lt.xValues(), lt.yValues(), lt.interpolation()));
 
         if (!found) {
             return false;

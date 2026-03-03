@@ -23,7 +23,8 @@ public class CanvasToolBar extends ToolBar {
         PLACE_FLOW,
         PLACE_AUX,
         PLACE_CONSTANT,
-        PLACE_MODULE
+        PLACE_MODULE,
+        PLACE_LOOKUP
     }
 
     private final ToggleGroup group = new ToggleGroup();
@@ -39,6 +40,7 @@ public class CanvasToolBar extends ToolBar {
         ToggleButton auxButton = makeButton("Auxiliary", Tool.PLACE_AUX);
         ToggleButton constantButton = makeButton("Constant", Tool.PLACE_CONSTANT);
         ToggleButton moduleButton = makeButton("Module", Tool.PLACE_MODULE);
+        ToggleButton lookupButton = makeButton("Lookup", Tool.PLACE_LOOKUP);
 
         selectButton.setSelected(true);
 
@@ -51,7 +53,7 @@ public class CanvasToolBar extends ToolBar {
         });
 
         getItems().addAll(selectButton, new Separator(),
-                stockButton, flowButton, auxButton, constantButton, moduleButton,
+                stockButton, flowButton, auxButton, constantButton, moduleButton, lookupButton,
                 new Separator(), loopsButton);
     }
 

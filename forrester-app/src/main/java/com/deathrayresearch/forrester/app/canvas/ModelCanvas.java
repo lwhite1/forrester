@@ -2,6 +2,7 @@ package com.deathrayresearch.forrester.app.canvas;
 
 import com.deathrayresearch.forrester.model.def.ConnectorRoute;
 import com.deathrayresearch.forrester.model.def.ElementType;
+import com.deathrayresearch.forrester.model.def.LookupTableDef;
 import com.deathrayresearch.forrester.model.def.ModelDefinition;
 import com.deathrayresearch.forrester.model.def.ModuleInstanceDef;
 import com.deathrayresearch.forrester.model.def.ViewDef;
@@ -393,6 +394,12 @@ public class ModelCanvas extends Canvas {
         regenerateAndRedraw();
     }
 
+    public void applyLookupTable(String name, LookupTableDef updated) {
+        saveUndoState();
+        editor.setLookupTable(name, updated);
+        regenerateAndRedraw();
+    }
+
     /**
      * Builds the render state for connection rerouting.
      */
@@ -524,6 +531,10 @@ public class ModelCanvas extends Canvas {
             case PLACE_MODULE -> {
                 name = editor.addModule();
                 type = ElementType.MODULE;
+            }
+            case PLACE_LOOKUP -> {
+                name = editor.addLookup();
+                type = ElementType.LOOKUP;
             }
             default -> {
                 return;
@@ -1146,6 +1157,7 @@ public class ModelCanvas extends Canvas {
                 case DIGIT4 -> { switchTool(CanvasToolBar.Tool.PLACE_AUX); event.consume(); }
                 case DIGIT5 -> { switchTool(CanvasToolBar.Tool.PLACE_CONSTANT); event.consume(); }
                 case DIGIT6 -> { switchTool(CanvasToolBar.Tool.PLACE_MODULE); event.consume(); }
+                case DIGIT7 -> { switchTool(CanvasToolBar.Tool.PLACE_LOOKUP); event.consume(); }
                 default -> { }
             }
         }

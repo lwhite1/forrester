@@ -33,6 +33,13 @@ public final class LayoutMetrics {
     public static final double CONSTANT_DASH_LENGTH = 6;
     public static final double CONSTANT_DASH_GAP = 4;
 
+    // Lookup table dimensions
+    public static final double LOOKUP_WIDTH = 100;
+    public static final double LOOKUP_HEIGHT = 50;
+    public static final double LOOKUP_BORDER_WIDTH = 1.5;
+    public static final double LOOKUP_CORNER_RADIUS = 4;
+    public static final Font LOOKUP_NAME_FONT = Font.font("System", FontWeight.NORMAL, 11);
+
     // Module dimensions
     public static final double MODULE_WIDTH = 120;
     public static final double MODULE_HEIGHT = 70;
@@ -92,6 +99,7 @@ public final class LayoutMetrics {
             case AUX -> AUX_WIDTH;
             case CONSTANT -> CONSTANT_WIDTH;
             case MODULE -> MODULE_WIDTH;
+            case LOOKUP -> LOOKUP_WIDTH;
             case FLOW -> FLOW_INDICATOR_SIZE;
             default -> AUX_WIDTH;
         };
@@ -106,6 +114,7 @@ public final class LayoutMetrics {
             case AUX -> AUX_HEIGHT;
             case CONSTANT -> CONSTANT_HEIGHT;
             case MODULE -> MODULE_HEIGHT;
+            case LOOKUP -> LOOKUP_HEIGHT;
             case FLOW -> FLOW_INDICATOR_SIZE;
             default -> AUX_HEIGHT;
         };
@@ -144,6 +153,7 @@ public final class LayoutMetrics {
             case AUX -> 60;
             case CONSTANT -> 50;
             case MODULE -> 70;
+            case LOOKUP -> 60;
             default -> 50;
         };
     }
@@ -157,6 +167,7 @@ public final class LayoutMetrics {
             case AUX -> 35;
             case CONSTANT -> 30;
             case MODULE -> 45;
+            case LOOKUP -> 35;
             default -> 30;
         };
     }

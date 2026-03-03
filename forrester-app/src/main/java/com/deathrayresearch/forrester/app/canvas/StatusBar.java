@@ -61,6 +61,7 @@ public class StatusBar extends HBox {
             case PLACE_AUX -> "Place Auxiliary";
             case PLACE_CONSTANT -> "Place Constant";
             case PLACE_MODULE -> "Place Module";
+            case PLACE_LOOKUP -> "Place Lookup";
         };
         toolLabel.setText(name);
     }
