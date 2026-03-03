@@ -154,6 +154,7 @@ public class PropertiesPanel extends VBox {
 
     private void showSingleElement(String name, ElementType type) {
         disposeCurrentForm();
+        ctx.elementName = name;
         getChildren().clear();
 
         // Build context toolbar
