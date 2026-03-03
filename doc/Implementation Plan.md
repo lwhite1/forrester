@@ -152,13 +152,13 @@ src/main/java/com/deathrayresearch/forrester/app/
 
 ### Test coverage
 
-- 115 tests, all passing
+- 116 tests, all passing
 - `ViewportTest` — coordinate transforms, zoom, pan (11 tests)
 - `HitTesterTest` — rect and diamond hit testing
 - `CanvasStateTest` — load, position, selection, add/remove/rename
 - `ModelEditorTest` — load, add, remove, rename, setConstantValue, reconnectFlow, round-trip
 - `FlowCreationControllerTest` — two-click state machine (8 tests)
-- `FlowEndpointCalculatorTest` — cloud positions, cloud hit testing, connected endpoint hit testing (9 tests)
+- `FlowEndpointCalculatorTest` — cloud positions, cloud hit testing, connected endpoint hit testing (10 tests)
 - No tests for `ModelCanvas`, `InlineEditor`, renderers (JavaFX dependency)
 
 ---
@@ -176,12 +176,22 @@ src/main/java/com/deathrayresearch/forrester/app/
 - Undo/redo
 - Model save/load to disk
 
-### Known minor issues (from audit)
-- Inline editor TextField width not scaled by zoom
-- Self-loop flows (same stock as source and sink) place diamond on top of stock
-- No validation that element names are valid model identifiers
-- No user feedback when rename is rejected (blank name or collision)
-- Equation references to deleted elements are not cleaned up
-- Inline editor position assumes canvas is at (0,0) in overlay pane
+### Known issues (from Phase 5 audit)
 
-See `doc/UI Audit — Phase 4.md` for the full list with file locations and suggested fixes.
+**Major:**
+- Duplicate `CLOUD_OFFSET` constant in `ConnectionRenderer` and `FlowEndpointCalculator`
+- Cloud position computed differently in renderer vs hit-tester (clipped edge vs center direction)
+- Reattachment can create self-loop (source==sink) or no-op reconnection
+
+**Minor:**
+- Inline editor TextField width not scaled by zoom
+- Constant value editor Y offset ignores zoom
+- `reconnectFlow` does not validate stockName exists
+- Self-loop flows (same stock as source/sink) place diamond on top of stock
+- No name validation for identifiers
+- No user feedback when rename is rejected
+- Equation references to deleted elements not cleaned up
+- No cloud preview when dropping reattachment on empty space
+- No undo support
+
+See `doc/UI Audit — Phase 5.md` for the full list with file locations and suggested fixes.
