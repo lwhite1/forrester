@@ -3,6 +3,7 @@ package com.deathrayresearch.forrester.app;
 import com.deathrayresearch.forrester.app.canvas.CanvasToolBar;
 import com.deathrayresearch.forrester.app.canvas.ModelCanvas;
 import com.deathrayresearch.forrester.app.canvas.ModelEditor;
+import com.deathrayresearch.forrester.app.canvas.StatusBar;
 import com.deathrayresearch.forrester.io.json.ModelDefinitionSerializer;
 import com.deathrayresearch.forrester.model.def.ModelDefinition;
 import com.deathrayresearch.forrester.model.def.ModelDefinitionBuilder;
@@ -39,6 +40,7 @@ public class ForresterApp extends Application {
     private Stage stage;
     private ModelCanvas canvas;
     private ModelEditor editor;
+    private StatusBar statusBar;
     private Path currentFile;
 
     private final ModelDefinitionSerializer serializer = new ModelDefinitionSerializer();
@@ -50,9 +52,15 @@ public class ForresterApp extends Application {
         editor = new ModelEditor();
         canvas = new ModelCanvas();
 
+        statusBar = new StatusBar();
+
         CanvasToolBar toolBar = new CanvasToolBar();
-        toolBar.setOnToolChanged(canvas::setActiveTool);
+        toolBar.setOnToolChanged(tool -> {
+            canvas.setActiveTool(tool);
+            statusBar.updateTool(tool);
+        });
         canvas.setToolBar(toolBar);
+        canvas.setOnStatusChanged(this::updateStatusBar);
 
         // Start with an empty canvas
         newModel();
@@ -69,6 +77,7 @@ public class ForresterApp extends Application {
         BorderPane root = new BorderPane();
         root.setTop(topContainer);
         root.setCenter(canvasPane);
+        root.setBottom(statusBar);
 
         Scene scene = new Scene(root, 1200, 800);
         stage.setScene(scene);
@@ -190,6 +199,19 @@ public class ForresterApp extends Application {
         } catch (IOException ex) {
             ex.printStackTrace();
         }
+    }
+
+    private void updateStatusBar() {
+        if (statusBar == null || editor == null) {
+            return;
+        }
+        statusBar.updateSelection(canvas.getSelectionCount());
+        statusBar.updateElements(
+                editor.getStocks().size(),
+                editor.getFlows().size(),
+                editor.getAuxiliaries().size(),
+                editor.getConstants().size());
+        statusBar.updateZoom(canvas.getZoomScale());
     }
 
     private void updateTitle() {

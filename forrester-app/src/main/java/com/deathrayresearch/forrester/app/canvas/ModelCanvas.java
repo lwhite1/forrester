@@ -65,6 +65,9 @@ public class ModelCanvas extends Canvas {
     private Pane overlayPane;
     private InlineEditor inlineEditor;
 
+    // Status change callback
+    private Runnable onStatusChanged;
+
     public ModelCanvas() {
         setFocusTraversable(true);
 
@@ -112,6 +115,34 @@ public class ModelCanvas extends Canvas {
     }
 
     /**
+     * Sets a callback to be invoked whenever the canvas status changes
+     * (selection, tool, zoom, or element count changes).
+     */
+    public void setOnStatusChanged(Runnable callback) {
+        this.onStatusChanged = callback;
+    }
+
+    private void fireStatusChanged() {
+        if (onStatusChanged != null) {
+            onStatusChanged.run();
+        }
+    }
+
+    /**
+     * Returns the current selection count.
+     */
+    public int getSelectionCount() {
+        return canvasState.getSelection().size();
+    }
+
+    /**
+     * Returns the current zoom scale.
+     */
+    public double getZoomScale() {
+        return viewport.getScale();
+    }
+
+    /**
      * Sets the active tool (called by toolbar callback).
      * Cancels any pending flow if the tool changes.
      */
@@ -154,7 +185,8 @@ public class ModelCanvas extends Canvas {
     }
 
     /**
-     * Redraws the entire canvas by delegating to the CanvasRenderer.
+     * Redraws the entire canvas by delegating to the CanvasRenderer,
+     * then notifies the status bar of any changes.
      */
     private void redraw() {
         CanvasRenderer.ReattachState reattachState = reattaching
@@ -163,6 +195,7 @@ public class ModelCanvas extends Canvas {
                 : CanvasRenderer.ReattachState.IDLE;
         renderer.render(getGraphicsContext2D(), getWidth(), getHeight(),
                 editor, connectors, flowCreation.getState(), reattachState);
+        fireStatusChanged();
     }
 
     /**
