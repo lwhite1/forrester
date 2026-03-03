@@ -4,6 +4,7 @@ import com.deathrayresearch.forrester.app.canvas.BreadcrumbBar;
 import com.deathrayresearch.forrester.app.canvas.CanvasToolBar;
 import com.deathrayresearch.forrester.app.canvas.ModelCanvas;
 import com.deathrayresearch.forrester.app.canvas.ModelEditor;
+import com.deathrayresearch.forrester.app.canvas.PropertiesPanel;
 import com.deathrayresearch.forrester.app.canvas.SimulationResultsDialog;
 import com.deathrayresearch.forrester.app.canvas.SimulationRunner;
 import com.deathrayresearch.forrester.app.canvas.SimulationSettingsDialog;
@@ -24,6 +25,7 @@ import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.SeparatorMenuItem;
+import javafx.scene.control.SplitPane;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyCodeCombination;
 import javafx.scene.input.KeyCombination;
@@ -51,6 +53,7 @@ public class ForresterApp extends Application {
     private ModelEditor editor;
     private StatusBar statusBar;
     private BreadcrumbBar breadcrumbBar;
+    private PropertiesPanel propertiesPanel;
     private Path currentFile;
     private final UndoManager undoManager = new UndoManager();
     private MenuItem undoItem;
@@ -78,7 +81,12 @@ public class ForresterApp extends Application {
             updateLoopStatus();
         });
         canvas.setToolBar(toolBar);
-        canvas.setOnStatusChanged(this::updateStatusBar);
+        canvas.setOnStatusChanged(() -> {
+            updateStatusBar();
+            if (propertiesPanel != null) {
+                propertiesPanel.updateSelection(canvas, canvas.getEditor());
+            }
+        });
 
         breadcrumbBar = new BreadcrumbBar();
         breadcrumbBar.setOnNavigateTo(depth -> {
@@ -96,12 +104,18 @@ public class ForresterApp extends Application {
         canvas.heightProperty().bind(canvasPane.heightProperty());
         canvas.setOverlayPane(canvasPane);
 
+        propertiesPanel = new PropertiesPanel();
+
+        SplitPane splitPane = new SplitPane(canvasPane, propertiesPanel);
+        splitPane.setDividerPositions(0.75);
+        SplitPane.setResizableWithParent(propertiesPanel, false);
+
         MenuBar menuBar = createMenuBar();
         VBox topContainer = new VBox(menuBar, toolBar, breadcrumbBar);
 
         BorderPane root = new BorderPane();
         root.setTop(topContainer);
-        root.setCenter(canvasPane);
+        root.setCenter(splitPane);
         root.setBottom(statusBar);
 
         Scene scene = new Scene(root, 1200, 800);

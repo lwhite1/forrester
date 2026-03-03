@@ -328,6 +328,59 @@ public class ModelCanvas extends Canvas {
     }
 
     /**
+     * Returns the names of all currently selected elements.
+     */
+    public Set<String> getSelectedElementNames() {
+        return canvasState.getSelection();
+    }
+
+    /**
+     * Returns the type of the named element on the canvas.
+     */
+    public ElementType getSelectedElementType(String name) {
+        return canvasState.getType(name);
+    }
+
+    /**
+     * Public wrapper for deleting all currently selected elements.
+     */
+    public void deleteSelectedElements() {
+        deleteSelected();
+    }
+
+    /**
+     * Renames an element with undo support.
+     */
+    public void renameElement(String oldName, String newName) {
+        applyRename(oldName, newName);
+    }
+
+    /**
+     * Opens the bindings configuration dialog for the named module (public accessor).
+     */
+    public void triggerBindingConfig(String moduleName) {
+        openBindingsDialog(moduleName);
+    }
+
+    /**
+     * Saves the current state to the undo stack (public accessor for PropertiesPanel).
+     */
+    public void pushUndoState() {
+        saveUndoState();
+    }
+
+    /**
+     * Regenerates connectors from the current model state and redraws.
+     * Called by the properties panel after editing equations or other
+     * changes that affect dependency relationships.
+     */
+    public void regenerateAndRedraw() {
+        connectors = editor.generateConnectors();
+        invalidateLoopAnalysis();
+        redraw();
+    }
+
+    /**
      * Returns the current zoom scale.
      */
     public double getZoomScale() {

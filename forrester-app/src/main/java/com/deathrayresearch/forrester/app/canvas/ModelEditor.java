@@ -361,6 +361,118 @@ public class ModelEditor {
         return false;
     }
 
+    /**
+     * Sets the initial value of a stock.
+     *
+     * @return true if the stock was found and updated
+     */
+    public boolean setStockInitialValue(String name, double value) {
+        for (int i = 0; i < stocks.size(); i++) {
+            if (stocks.get(i).name().equals(name)) {
+                StockDef s = stocks.get(i);
+                stocks.set(i, new StockDef(name, s.comment(), value,
+                        s.unit(), s.negativeValuePolicy()));
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Sets the unit of a stock.
+     *
+     * @return true if the stock was found and updated
+     */
+    public boolean setStockUnit(String name, String unit) {
+        if (unit == null) {
+            return false;
+        }
+        for (int i = 0; i < stocks.size(); i++) {
+            if (stocks.get(i).name().equals(name)) {
+                StockDef s = stocks.get(i);
+                stocks.set(i, new StockDef(name, s.comment(), s.initialValue(),
+                        unit, s.negativeValuePolicy()));
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Sets the negative value policy of a stock.
+     *
+     * @return true if the stock was found and updated
+     */
+    public boolean setStockNegativeValuePolicy(String name, String policy) {
+        for (int i = 0; i < stocks.size(); i++) {
+            if (stocks.get(i).name().equals(name)) {
+                StockDef s = stocks.get(i);
+                stocks.set(i, new StockDef(name, s.comment(), s.initialValue(),
+                        s.unit(), policy));
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Sets the time unit of a flow.
+     *
+     * @return true if the flow was found and updated
+     */
+    public boolean setFlowTimeUnit(String name, String timeUnit) {
+        if (timeUnit == null || timeUnit.isBlank()) {
+            return false;
+        }
+        for (int i = 0; i < flows.size(); i++) {
+            if (flows.get(i).name().equals(name)) {
+                FlowDef f = flows.get(i);
+                flows.set(i, new FlowDef(f.name(), f.comment(), f.equation(),
+                        timeUnit, f.source(), f.sink()));
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Sets the unit of an auxiliary.
+     *
+     * @return true if the auxiliary was found and updated
+     */
+    public boolean setAuxUnit(String name, String unit) {
+        if (unit == null) {
+            return false;
+        }
+        for (int i = 0; i < auxiliaries.size(); i++) {
+            if (auxiliaries.get(i).name().equals(name)) {
+                AuxDef a = auxiliaries.get(i);
+                auxiliaries.set(i, new AuxDef(a.name(), a.comment(), a.equation(), unit));
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Sets the unit of a constant.
+     *
+     * @return true if the constant was found and updated
+     */
+    public boolean setConstantUnit(String name, String unit) {
+        if (unit == null) {
+            return false;
+        }
+        for (int i = 0; i < constants.size(); i++) {
+            if (constants.get(i).name().equals(name)) {
+                ConstantDef c = constants.get(i);
+                constants.set(i, new ConstantDef(name, c.comment(), c.value(), unit));
+                return true;
+            }
+        }
+        return false;
+    }
+
     private <T> boolean renameInList(List<T> list, String oldName, String newName,
                                       Function<T, String> nameGetter,
                                       BiFunction<T, String, T> renamer) {
@@ -487,6 +599,42 @@ public class ModelEditor {
         for (ConstantDef c : constants) {
             if (c.name().equals(name)) {
                 return c;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Returns the stock with the given name, or null if not found.
+     */
+    public StockDef getStockByName(String name) {
+        for (StockDef s : stocks) {
+            if (s.name().equals(name)) {
+                return s;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Returns the flow with the given name, or null if not found.
+     */
+    public FlowDef getFlowByName(String name) {
+        for (FlowDef f : flows) {
+            if (f.name().equals(name)) {
+                return f;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Returns the auxiliary with the given name, or null if not found.
+     */
+    public AuxDef getAuxByName(String name) {
+        for (AuxDef a : auxiliaries) {
+            if (a.name().equals(name)) {
+                return a;
             }
         }
         return null;
