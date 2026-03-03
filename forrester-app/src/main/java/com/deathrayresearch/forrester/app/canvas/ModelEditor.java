@@ -18,6 +18,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.BiFunction;
+import java.util.function.Function;
 
 /**
  * Mutable model editing layer that sits between the UI and the engine's immutable
@@ -221,68 +223,19 @@ public class ModelEditor {
             return false;
         }
 
-        boolean found = false;
-
-        // Rename in stocks
-        for (int i = 0; i < stocks.size(); i++) {
-            if (stocks.get(i).name().equals(oldName)) {
-                StockDef s = stocks.get(i);
-                stocks.set(i, new StockDef(newName, s.comment(), s.initialValue(),
-                        s.unit(), s.negativeValuePolicy()));
-                found = true;
-                break;
-            }
-        }
-
-        // Rename in flows
-        if (!found) {
-            for (int i = 0; i < flows.size(); i++) {
-                if (flows.get(i).name().equals(oldName)) {
-                    FlowDef f = flows.get(i);
-                    flows.set(i, new FlowDef(newName, f.comment(), f.equation(),
-                            f.timeUnit(), f.source(), f.sink()));
-                    found = true;
-                    break;
-                }
-            }
-        }
-
-        // Rename in auxiliaries
-        if (!found) {
-            for (int i = 0; i < auxiliaries.size(); i++) {
-                if (auxiliaries.get(i).name().equals(oldName)) {
-                    AuxDef a = auxiliaries.get(i);
-                    auxiliaries.set(i, new AuxDef(newName, a.comment(), a.equation(), a.unit()));
-                    found = true;
-                    break;
-                }
-            }
-        }
-
-        // Rename in constants
-        if (!found) {
-            for (int i = 0; i < constants.size(); i++) {
-                if (constants.get(i).name().equals(oldName)) {
-                    ConstantDef c = constants.get(i);
-                    constants.set(i, new ConstantDef(newName, c.comment(), c.value(), c.unit()));
-                    found = true;
-                    break;
-                }
-            }
-        }
-
-        // Rename in modules
-        if (!found) {
-            for (int i = 0; i < modules.size(); i++) {
-                if (modules.get(i).instanceName().equals(oldName)) {
-                    ModuleInstanceDef m = modules.get(i);
-                    modules.set(i, new ModuleInstanceDef(newName, m.definition(),
-                            m.inputBindings(), m.outputBindings()));
-                    found = true;
-                    break;
-                }
-            }
-        }
+        boolean found = renameInList(stocks, oldName, newName, StockDef::name,
+                (s, n) -> new StockDef(n, s.comment(), s.initialValue(),
+                        s.unit(), s.negativeValuePolicy()))
+                || renameInList(flows, oldName, newName, FlowDef::name,
+                (f, n) -> new FlowDef(n, f.comment(), f.equation(),
+                        f.timeUnit(), f.source(), f.sink()))
+                || renameInList(auxiliaries, oldName, newName, AuxDef::name,
+                (a, n) -> new AuxDef(n, a.comment(), a.equation(), a.unit()))
+                || renameInList(constants, oldName, newName, ConstantDef::name,
+                (c, n) -> new ConstantDef(n, c.comment(), c.value(), c.unit()))
+                || renameInList(modules, oldName, newName, ModuleInstanceDef::instanceName,
+                (m, n) -> new ModuleInstanceDef(n, m.definition(),
+                        m.inputBindings(), m.outputBindings()));
 
         if (!found) {
             return false;
@@ -408,6 +361,18 @@ public class ModelEditor {
         return false;
     }
 
+    private <T> boolean renameInList(List<T> list, String oldName, String newName,
+                                      Function<T, String> nameGetter,
+                                      BiFunction<T, String, T> renamer) {
+        for (int i = 0; i < list.size(); i++) {
+            if (nameGetter.apply(list.get(i)).equals(oldName)) {
+                list.set(i, renamer.apply(list.get(i), newName));
+                return true;
+            }
+        }
+        return false;
+    }
+
     private void updateEquationReferences(String oldToken, String newToken) {
         if (oldToken.equals(newToken)) {
             return;
@@ -516,6 +481,42 @@ public class ModelEditor {
 
     public List<ConstantDef> getConstants() {
         return Collections.unmodifiableList(constants);
+    }
+
+    public ConstantDef getConstantByName(String name) {
+        for (ConstantDef c : constants) {
+            if (c.name().equals(name)) {
+                return c;
+            }
+        }
+        return null;
+    }
+
+    public String getStockUnit(String name) {
+        for (StockDef s : stocks) {
+            if (s.name().equals(name)) {
+                return s.unit();
+            }
+        }
+        return null;
+    }
+
+    public String getFlowEquation(String name) {
+        for (FlowDef f : flows) {
+            if (f.name().equals(name)) {
+                return f.equation();
+            }
+        }
+        return null;
+    }
+
+    public String getAuxEquation(String name) {
+        for (AuxDef a : auxiliaries) {
+            if (a.name().equals(name)) {
+                return a.equation();
+            }
+        }
+        return null;
     }
 
     public List<ModuleInstanceDef> getModules() {

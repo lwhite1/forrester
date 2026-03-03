@@ -1,19 +1,15 @@
 package com.deathrayresearch.forrester.app.canvas;
 
-import com.deathrayresearch.forrester.model.def.AuxDef;
 import com.deathrayresearch.forrester.model.def.ConnectorRoute;
 import com.deathrayresearch.forrester.model.def.ConstantDef;
 import com.deathrayresearch.forrester.model.def.ElementType;
 import com.deathrayresearch.forrester.model.def.FlowDef;
-import com.deathrayresearch.forrester.model.def.StockDef;
 import com.deathrayresearch.forrester.model.graph.FeedbackAnalysis;
 
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Rendering coordinator for the model canvas.
@@ -81,30 +77,6 @@ public class CanvasRenderer {
             return;
         }
 
-        // Build lookup for constant values
-        Map<String, ConstantDef> constantMap = new HashMap<>();
-        for (ConstantDef c : editor.getConstants()) {
-            constantMap.put(c.name(), c);
-        }
-
-        // Build lookup for stock units
-        Map<String, String> stockUnitMap = new HashMap<>();
-        for (StockDef s : editor.getStocks()) {
-            stockUnitMap.put(s.name(), s.unit());
-        }
-
-        // Build lookup for flow equations
-        Map<String, String> flowEquationMap = new HashMap<>();
-        for (FlowDef f : editor.getFlows()) {
-            flowEquationMap.put(f.name(), f.equation());
-        }
-
-        // Build lookup for auxiliary equations
-        Map<String, String> auxEquationMap = new HashMap<>();
-        for (AuxDef a : editor.getAuxiliaries()) {
-            auxEquationMap.put(a.name(), a.equation());
-        }
-
         // Apply viewport transform for world-space rendering
         gc.save();
         viewport.applyTo(gc);
@@ -130,28 +102,28 @@ public class CanvasRenderer {
 
             switch (type) {
                 case STOCK -> {
-                    String unit = stockUnitMap.get(name);
+                    String unit = editor.getStockUnit(name);
                     ElementRenderer.drawStock(gc, name, unit,
                             cx - LayoutMetrics.STOCK_WIDTH / 2,
                             cy - LayoutMetrics.STOCK_HEIGHT / 2,
                             LayoutMetrics.STOCK_WIDTH, LayoutMetrics.STOCK_HEIGHT);
                 }
                 case FLOW -> {
-                    String flowEq = flowEquationMap.get(name);
+                    String flowEq = editor.getFlowEquation(name);
                     ElementRenderer.drawFlow(gc, name, flowEq,
                             cx - LayoutMetrics.FLOW_INDICATOR_SIZE / 2,
                             cy - LayoutMetrics.FLOW_INDICATOR_SIZE / 2,
                             LayoutMetrics.FLOW_INDICATOR_SIZE, LayoutMetrics.FLOW_INDICATOR_SIZE);
                 }
                 case AUX -> {
-                    String auxEq = auxEquationMap.get(name);
+                    String auxEq = editor.getAuxEquation(name);
                     ElementRenderer.drawAux(gc, name, auxEq,
                             cx - LayoutMetrics.AUX_WIDTH / 2,
                             cy - LayoutMetrics.AUX_HEIGHT / 2,
                             LayoutMetrics.AUX_WIDTH, LayoutMetrics.AUX_HEIGHT);
                 }
                 case CONSTANT -> {
-                    ConstantDef cd = constantMap.get(name);
+                    ConstantDef cd = editor.getConstantByName(name);
                     double value = cd != null ? cd.value() : 0;
                     ElementRenderer.drawConstant(gc, name, value,
                             cx - LayoutMetrics.CONSTANT_WIDTH / 2,

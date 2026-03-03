@@ -22,6 +22,32 @@ public class FlowCreationController {
         static final State IDLE = new State(false, null, 0, 0, 0, 0);
     }
 
+    /**
+     * Result of a flow creation click attempt.
+     */
+    public record FlowResult(String flowName, String rejectionReason) {
+
+        static FlowResult pending() {
+            return new FlowResult(null, null);
+        }
+
+        static FlowResult created(String name) {
+            return new FlowResult(name, null);
+        }
+
+        static FlowResult rejected(String reason) {
+            return new FlowResult(null, reason);
+        }
+
+        public boolean isCreated() {
+            return flowName != null;
+        }
+
+        public boolean isRejected() {
+            return rejectionReason != null;
+        }
+    }
+
     private boolean pending;
     private String pendingSource;
     private double sourceX;
@@ -31,11 +57,11 @@ public class FlowCreationController {
 
     /**
      * Handles a click during flow creation.
-     * First click: sets source (stock under cursor, or cloud if empty space). Returns null.
-     * Second click: sets sink and creates the flow at the midpoint. Returns the flow name.
+     * First click: sets source (stock under cursor, or cloud if empty space). Returns pending result.
+     * Second click: sets sink and creates the flow at the midpoint. Returns created or rejected result.
      */
-    public String handleClick(double worldX, double worldY,
-                              CanvasState canvasState, ModelEditor editor) {
+    public FlowResult handleClick(double worldX, double worldY,
+                                   CanvasState canvasState, ModelEditor editor) {
         if (!pending) {
             // First click: set source
             String hit = hitTestStockOnly(worldX, worldY, canvasState);
@@ -51,19 +77,21 @@ public class FlowCreationController {
             }
             rubberBandEndX = worldX;
             rubberBandEndY = worldY;
-            return null;
+            return FlowResult.pending();
         } else {
             // Second click: set sink and create flow
             String sinkHit = hitTestStockOnly(worldX, worldY, canvasState);
 
             // Prevent self-loop: source and sink must not be the same stock
             if (sinkHit != null && sinkHit.equals(pendingSource)) {
-                return null;
+                cancel();
+                return FlowResult.rejected("Cannot create a self-loop: source and sink are the same stock");
             }
 
             // Prevent cloud-to-cloud: at least one end must be a stock
             if (pendingSource == null && sinkHit == null) {
-                return null;
+                cancel();
+                return FlowResult.rejected("At least one end of a flow must connect to a stock");
             }
 
             double srcX = sourceX;
@@ -86,7 +114,7 @@ public class FlowCreationController {
             canvasState.addElement(name, ElementType.FLOW, midX, midY);
 
             cancel();
-            return name;
+            return FlowResult.created(name);
         }
     }
 

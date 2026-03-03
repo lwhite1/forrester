@@ -215,6 +215,9 @@ public final class ElementRenderer {
     }
 
     static String formatValue(double value) {
+        if (Double.isNaN(value)) {
+            return "NaN";
+        }
         if (value == Math.floor(value) && !Double.isInfinite(value)) {
             return String.valueOf((long) value);
         }

@@ -57,14 +57,4 @@ public final class HitTester {
                                double halfW, double halfH) {
         return Math.abs(worldX - cx) <= halfW && Math.abs(worldY - cy) <= halfH;
     }
-
-    /**
-     * Diamond (Manhattan distance) hit test: checks if (worldX, worldY) is within
-     * a diamond centered at (cx, cy) with the given half-size.
-     */
-    static boolean hitTestDiamond(double worldX, double worldY,
-                                  double cx, double cy,
-                                  double half) {
-        return Math.abs(worldX - cx) + Math.abs(worldY - cy) <= half;
-    }
 }

@@ -247,7 +247,9 @@ public class ForresterApp extends Application {
         chooser.getExtensionFilters().add(
                 new FileChooser.ExtensionFilter("Forrester Model (*.json)", "*.json"));
         if (currentFile != null) {
-            chooser.setInitialDirectory(currentFile.getParent().toFile());
+            if (currentFile.getParent() != null) {
+                chooser.setInitialDirectory(currentFile.getParent().toFile());
+            }
             chooser.setInitialFileName(currentFile.getFileName().toString());
         }
         File file = chooser.showSaveDialog(stage);

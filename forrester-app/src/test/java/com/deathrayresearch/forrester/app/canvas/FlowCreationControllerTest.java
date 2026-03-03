@@ -33,9 +33,11 @@ class FlowCreationControllerTest {
 
         @Test
         void shouldSetSourceWhenClickingStock() {
-            String result = controller.handleClick(100, 200, canvasState, editor);
+            FlowCreationController.FlowResult result =
+                    controller.handleClick(100, 200, canvasState, editor);
 
-            assertThat(result).isNull();
+            assertThat(result.isCreated()).isFalse();
+            assertThat(result.isRejected()).isFalse();
             assertThat(controller.isPending()).isTrue();
 
             FlowCreationController.State state = controller.getState();
@@ -47,9 +49,11 @@ class FlowCreationControllerTest {
 
         @Test
         void shouldSetCloudSourceWhenClickingEmptySpace() {
-            String result = controller.handleClick(250, 100, canvasState, editor);
+            FlowCreationController.FlowResult result =
+                    controller.handleClick(250, 100, canvasState, editor);
 
-            assertThat(result).isNull();
+            assertThat(result.isCreated()).isFalse();
+            assertThat(result.isRejected()).isFalse();
             assertThat(controller.isPending()).isTrue();
 
             FlowCreationController.State state = controller.getState();
@@ -66,9 +70,11 @@ class FlowCreationControllerTest {
         @Test
         void shouldCreateFlowBetweenStocks() {
             controller.handleClick(100, 200, canvasState, editor);
-            String name = controller.handleClick(400, 200, canvasState, editor);
+            FlowCreationController.FlowResult result =
+                    controller.handleClick(400, 200, canvasState, editor);
 
-            assertThat(name).isNotNull();
+            assertThat(result.isCreated()).isTrue();
+            String name = result.flowName();
             assertThat(controller.isPending()).isFalse();
             assertThat(canvasState.hasElement(name)).isTrue();
             assertThat(canvasState.getType(name)).isEqualTo(ElementType.FLOW);
@@ -80,9 +86,11 @@ class FlowCreationControllerTest {
         @Test
         void shouldCreateFlowWithCloudSink() {
             controller.handleClick(100, 200, canvasState, editor);
-            String name = controller.handleClick(300, 300, canvasState, editor);
+            FlowCreationController.FlowResult result =
+                    controller.handleClick(300, 300, canvasState, editor);
 
-            assertThat(name).isNotNull();
+            assertThat(result.isCreated()).isTrue();
+            String name = result.flowName();
             assertThat(controller.isPending()).isFalse();
             // Midpoint between (100,200) and (300,300)
             assertThat(canvasState.getX(name)).isEqualTo(200);
@@ -92,9 +100,11 @@ class FlowCreationControllerTest {
         @Test
         void shouldCreateFlowWithCloudSource() {
             controller.handleClick(250, 100, canvasState, editor); // cloud
-            String name = controller.handleClick(400, 200, canvasState, editor); // Stock 2
+            FlowCreationController.FlowResult result =
+                    controller.handleClick(400, 200, canvasState, editor); // Stock 2
 
-            assertThat(name).isNotNull();
+            assertThat(result.isCreated()).isTrue();
+            String name = result.flowName();
             assertThat(controller.isPending()).isFalse();
             // Midpoint between (250,100) and (400,200)
             assertThat(canvasState.getX(name)).isEqualTo(325);
@@ -109,36 +119,42 @@ class FlowCreationControllerTest {
         @Test
         void shouldRejectSelfLoop() {
             controller.handleClick(100, 200, canvasState, editor); // Stock 1
-            String name = controller.handleClick(100, 200, canvasState, editor); // Stock 1 again
+            FlowCreationController.FlowResult result =
+                    controller.handleClick(100, 200, canvasState, editor); // Stock 1 again
 
-            assertThat(name).isNull();
-            assertThat(controller.isPending()).isTrue(); // stays pending
+            assertThat(result.isRejected()).isTrue();
+            assertThat(result.rejectionReason()).contains("self-loop");
+            assertThat(controller.isPending()).isFalse();
         }
 
         @Test
         void shouldRejectCloudToCloudFlow() {
             controller.handleClick(250, 100, canvasState, editor); // cloud
-            String name = controller.handleClick(300, 300, canvasState, editor); // cloud
+            FlowCreationController.FlowResult result =
+                    controller.handleClick(300, 300, canvasState, editor); // cloud
 
-            assertThat(name).isNull();
-            assertThat(controller.isPending()).isTrue(); // stays pending
+            assertThat(result.isRejected()).isTrue();
+            assertThat(result.rejectionReason()).contains("stock");
+            assertThat(controller.isPending()).isFalse();
         }
 
         @Test
         void shouldAllowCloudSourceWithStockSink() {
             controller.handleClick(250, 100, canvasState, editor); // cloud
-            String name = controller.handleClick(400, 200, canvasState, editor); // Stock 2
+            FlowCreationController.FlowResult result =
+                    controller.handleClick(400, 200, canvasState, editor); // Stock 2
 
-            assertThat(name).isNotNull();
+            assertThat(result.isCreated()).isTrue();
             assertThat(controller.isPending()).isFalse();
         }
 
         @Test
         void shouldAllowStockSourceWithCloudSink() {
             controller.handleClick(100, 200, canvasState, editor); // Stock 1
-            String name = controller.handleClick(300, 300, canvasState, editor); // cloud
+            FlowCreationController.FlowResult result =
+                    controller.handleClick(300, 300, canvasState, editor); // cloud
 
-            assertThat(name).isNotNull();
+            assertThat(result.isCreated()).isTrue();
             assertThat(controller.isPending()).isFalse();
         }
     }

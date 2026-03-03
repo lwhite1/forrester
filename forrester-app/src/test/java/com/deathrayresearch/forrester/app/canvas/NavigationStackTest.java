@@ -54,7 +54,7 @@ class NavigationStackTest {
 
         @Test
         void shouldReturnRootOnlyPath() {
-            List<String> path = stack.getPath("Root", "Current");
+            List<String> path = stack.getPath("Root");
             assertThat(path).containsExactly("Root");
         }
     }
@@ -133,7 +133,7 @@ class NavigationStackTest {
 
         @Test
         void shouldReturnRootOnlyWhenEmpty() {
-            List<String> path = stack.getPath("MyModel", "MyModel");
+            List<String> path = stack.getPath("MyModel");
             assertThat(path).containsExactly("MyModel");
         }
 
@@ -141,7 +141,7 @@ class NavigationStackTest {
         void shouldReturnTwoSegmentsAtDepthOne() {
             stack.push(makeFrame("Sub Module", 0));
 
-            List<String> path = stack.getPath("Root Model", "Sub Module");
+            List<String> path = stack.getPath("Root Model");
             assertThat(path).containsExactly("Root Model", "Sub Module");
         }
 
@@ -150,7 +150,7 @@ class NavigationStackTest {
             stack.push(makeFrame("Level 1", 0));
             stack.push(makeFrame("Level 2", 0));
 
-            List<String> path = stack.getPath("Root", "Level 2");
+            List<String> path = stack.getPath("Root");
             assertThat(path).containsExactly("Root", "Level 1", "Level 2");
         }
     }

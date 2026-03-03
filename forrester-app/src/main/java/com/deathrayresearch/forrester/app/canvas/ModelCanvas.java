@@ -457,12 +457,13 @@ public class ModelCanvas extends Canvas {
         if (flowCreation.isPending()) {
             saveUndoState();
         }
-        String name = flowCreation.handleClick(worldX, worldY, canvasState, editor);
-        if (name != null) {
+        FlowCreationController.FlowResult result = flowCreation.handleClick(
+                worldX, worldY, canvasState, editor);
+        if (result.isCreated()) {
             connectors = editor.generateConnectors();
             invalidateLoopAnalysis();
             canvasState.clearSelection();
-            canvasState.select(name);
+            canvasState.select(result.flowName());
         }
         redraw();
     }
@@ -1256,7 +1257,7 @@ public class ModelCanvas extends Canvas {
         String rootName = navigationStack.isEmpty()
                 ? editor.getModelName()
                 : navigationStack.frames().get(0).editor().getModelName();
-        return navigationStack.getPath(rootName, editor.getModelName());
+        return navigationStack.getPath(rootName);
     }
 
     /**

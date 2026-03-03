@@ -98,7 +98,7 @@ public class Viewport {
     public void restoreState(double translateX, double translateY, double scale) {
         this.translateX = translateX;
         this.translateY = translateY;
-        this.scale = scale;
+        this.scale = Math.max(MIN_SCALE, Math.min(MAX_SCALE, scale));
     }
 
     public double getTranslateX() {

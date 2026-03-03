@@ -81,28 +81,18 @@ public class NavigationStack {
      * Builds the breadcrumb path from root to the current level.
      *
      * @param rootName the name to display for the root level
-     * @param currentName the name to display for the current level
      * @return ordered list of path segments from root to current
      */
-    public List<String> getPath(String rootName, String currentName) {
+    public List<String> getPath(String rootName) {
         List<String> path = new ArrayList<>();
         path.add(rootName);
 
-        // Stack is LIFO, so we need to reverse the iteration order
         List<Frame> frames = new ArrayList<>(stack);
         Collections.reverse(frames);
         for (Frame frame : frames) {
             path.add(frame.moduleName());
         }
 
-        // If we're inside a module, the current name is already included via frames
-        // unless the stack is empty (root level). When stack is non-empty, the last
-        // frame's moduleName is the current level, so currentName adds the active level.
-        // Actually, the frames represent parent levels. The current level is what we're
-        // editing now, so we need to add currentName only if depth > 0 but it's already
-        // added via the frame that pushed us here. Let's reconsider:
-        // Frame stores the moduleName we drilled into, so frames already contain
-        // the breadcrumb trail. No need to add currentName separately.
         return path;
     }
 
