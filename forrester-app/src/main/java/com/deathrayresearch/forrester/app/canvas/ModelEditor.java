@@ -720,6 +720,46 @@ public class ModelEditor {
     }
 
     /**
+     * Removes a single equation reference that creates the info link from {@code fromName}
+     * to {@code toName}. The reference token is replaced with "0" in the target element's
+     * equation only (not globally). Material flow connections are not affected.
+     *
+     * @return true if a reference was found and removed
+     */
+    public boolean removeConnectionReference(String fromName, String toName) {
+        String fromToken = fromName.replace(' ', '_');
+
+        // Try flows first
+        for (int i = 0; i < flows.size(); i++) {
+            FlowDef f = flows.get(i);
+            if (f.name().equals(toName)) {
+                String updated = replaceToken(f.equation(), fromToken, "0");
+                if (!updated.equals(f.equation())) {
+                    flows.set(i, new FlowDef(f.name(), f.comment(), updated,
+                            f.timeUnit(), f.source(), f.sink()));
+                    return true;
+                }
+                return false;
+            }
+        }
+
+        // Try auxiliaries
+        for (int i = 0; i < auxiliaries.size(); i++) {
+            AuxDef a = auxiliaries.get(i);
+            if (a.name().equals(toName)) {
+                String updated = replaceToken(a.equation(), fromToken, "0");
+                if (!updated.equals(a.equation())) {
+                    auxiliaries.set(i, new AuxDef(a.name(), a.comment(), updated, a.unit()));
+                    return true;
+                }
+                return false;
+            }
+        }
+
+        return false;
+    }
+
+    /**
      * Generates connector routes from the current model state's dependency graph.
      */
     public List<ConnectorRoute> generateConnectors() {

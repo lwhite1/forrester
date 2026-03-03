@@ -510,6 +510,23 @@ public class ModelCanvas extends Canvas {
         updateCursor();
     }
 
+    /**
+     * Deletes the currently selected info link connection by removing the equation reference.
+     */
+    private void deleteSelectedConnection() {
+        if (editor == null || selectedConnection == null) {
+            return;
+        }
+
+        saveUndoState();
+        editor.removeConnectionReference(selectedConnection.from(), selectedConnection.to());
+        selectedConnection = null;
+        connectors = editor.generateConnectors();
+        invalidateLoopAnalysis();
+        redraw();
+        updateCursor();
+    }
+
     // --- Two-click flow creation ---
 
     /**
@@ -1065,7 +1082,11 @@ public class ModelCanvas extends Canvas {
             updateCursor();
             event.consume();
         } else if (event.getCode() == KeyCode.DELETE || event.getCode() == KeyCode.BACK_SPACE) {
-            deleteSelected();
+            if (selectedConnection != null && canvasState.getSelection().isEmpty()) {
+                deleteSelectedConnection();
+            } else {
+                deleteSelected();
+            }
             event.consume();
         } else if (event.isShortcutDown() && event.getCode() == KeyCode.A) {
             selectAll();
