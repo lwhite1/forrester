@@ -56,13 +56,12 @@ public class BreadcrumbBar extends HBox {
         for (int i = 0; i < path.size() - 1; i++) {
             if (i > 0) {
                 Label sep = new Label(SEPARATOR);
-                sep.setStyle("-fx-text-fill: #888;");
+                sep.setStyle(Styles.MUTED_TEXT);
                 getChildren().add(sep);
             }
 
             Button button = new Button(path.get(i));
-            button.setStyle("-fx-background-color: transparent; -fx-text-fill: #0066cc; "
-                    + "-fx-cursor: hand; -fx-padding: 0 2 0 2; -fx-underline: true;");
+            button.setStyle(Styles.BREADCRUMB_LINK);
             int depth = i;
             button.setOnAction(e -> {
                 if (onNavigateTo != null) {
@@ -74,12 +73,12 @@ public class BreadcrumbBar extends HBox {
 
         // Separator before current
         Label sep = new Label(SEPARATOR);
-        sep.setStyle("-fx-text-fill: #888;");
+        sep.setStyle(Styles.MUTED_TEXT);
         getChildren().add(sep);
 
         // Bold label for current level (not clickable)
         Label current = new Label(path.get(path.size() - 1));
-        current.setStyle("-fx-font-weight: bold; -fx-padding: 0 2 0 2;");
+        current.setStyle(Styles.BREADCRUMB_CURRENT);
         getChildren().add(current);
     }
 }

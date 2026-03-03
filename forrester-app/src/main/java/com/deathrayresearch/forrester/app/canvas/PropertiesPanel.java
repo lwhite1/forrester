@@ -21,12 +21,23 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 /**
  * Right-side panel that displays properties of the currently selected canvas element.
  * Updates whenever the canvas selection changes. Contains a context toolbar with
  * action buttons and a form section with editable property fields.
+ *
+ * <p>Bug fixes over the original implementation:</p>
+ * <ul>
+ *   <li><b>Stale name:</b> All commit handlers use {@code currentElementName} (mutable field)
+ *       instead of the captured parameter, so renames propagate to subsequent edits.</li>
+ *   <li><b>updatingFields guard:</b> {@link #updateSelection} sets the flag so focus-loss
+ *       listeners don't fire spurious commits during programmatic updates.</li>
+ *   <li><b>Double commit:</b> Each commit checks if the value actually changed before
+ *       pushing undo state, so Enter + focus-loss doesn't push two undo entries.</li>
+ * </ul>
  */
 public class PropertiesPanel extends VBox {
 
@@ -41,6 +52,9 @@ public class PropertiesPanel extends VBox {
     private ModelCanvas canvas;
     private ModelEditor editor;
     private boolean updatingFields;
+
+    /** Tracks the current element name, updated after renames to fix stale-name bug. */
+    private String currentElementName;
 
     public PropertiesPanel() {
         setPrefWidth(PREFERRED_WIDTH);
@@ -60,7 +74,7 @@ public class PropertiesPanel extends VBox {
         scrollPane.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
         VBox.setVgrow(scrollPane, Priority.ALWAYS);
 
-        placeholderLabel.setStyle("-fx-text-fill: #7F8C8D; -fx-font-style: italic;");
+        placeholderLabel.setStyle(Styles.PLACEHOLDER_TEXT);
         placeholderLabel.setPadding(new Insets(20));
         placeholderLabel.setAlignment(Pos.CENTER);
         placeholderLabel.setMaxWidth(Double.MAX_VALUE);
@@ -71,40 +85,49 @@ public class PropertiesPanel extends VBox {
     /**
      * Updates the panel to reflect the current selection on the canvas.
      * Called by ForresterApp whenever the canvas status changes.
+     * Wrapped in updatingFields guard to prevent spurious focus-loss commits.
      */
     public void updateSelection(ModelCanvas canvas, ModelEditor editor) {
         this.canvas = canvas;
         this.editor = editor;
 
-        if (canvas == null || editor == null) {
-            showPlaceholder();
-            return;
-        }
-
-        Set<String> selection = canvas.getSelectedElementNames();
-
-        if (selection.isEmpty()) {
-            ConnectionId conn = canvas.getSelectedConnection();
-            if (conn != null) {
-                showConnectionProperties(conn);
-            } else {
+        updatingFields = true;
+        try {
+            if (canvas == null || editor == null) {
                 showPlaceholder();
+                return;
             }
-        } else if (selection.size() == 1) {
-            String name = selection.iterator().next();
-            ElementType type = canvas.getSelectedElementType(name);
-            showSingleElement(name, type);
-        } else {
-            showMultiSelection(selection.size());
+
+            Set<String> selection = canvas.getSelectedElementNames();
+
+            if (selection.isEmpty()) {
+                ConnectionId conn = canvas.getSelectedConnection();
+                if (conn != null) {
+                    showConnectionProperties(conn);
+                } else {
+                    showPlaceholder();
+                }
+            } else if (selection.size() == 1) {
+                String name = selection.iterator().next();
+                ElementType type = canvas.getSelectedElementType(name);
+                currentElementName = name;
+                showSingleElement(name, type);
+            } else {
+                showMultiSelection(selection.size());
+            }
+        } finally {
+            updatingFields = false;
         }
     }
 
     private void showPlaceholder() {
+        currentElementName = null;
         getChildren().clear();
         getChildren().add(placeholderLabel);
     }
 
     private void showMultiSelection(int count) {
+        currentElementName = null;
         getChildren().clear();
 
         contextToolbar.getChildren().clear();
@@ -118,13 +141,13 @@ public class PropertiesPanel extends VBox {
         contextToolbar.getChildren().add(deleteBtn);
 
         propertyGrid.getChildren().clear();
-        propertyGrid.getRowCount();
         addReadOnlyRow(0, "Selection", count + " elements selected");
 
         getChildren().addAll(contextToolbar, separator, scrollPane);
     }
 
     private void showConnectionProperties(ConnectionId connection) {
+        currentElementName = null;
         getChildren().clear();
 
         contextToolbar.getChildren().clear();
@@ -146,7 +169,6 @@ public class PropertiesPanel extends VBox {
 
         Button renameBtn = createToolbarButton("Rename");
         renameBtn.setOnAction(e -> {
-            // Focus the name field in the property grid if it exists
             for (javafx.scene.Node node : propertyGrid.getChildren()) {
                 if (node instanceof TextField tf && "nameField".equals(tf.getId())) {
                     tf.requestFocus();
@@ -170,7 +192,7 @@ public class PropertiesPanel extends VBox {
             Button drillBtn = createToolbarButton("Drill Into");
             drillBtn.setOnAction(e -> {
                 if (canvas != null) {
-                    canvas.drillInto(name);
+                    canvas.drillInto(currentElementName);
                     canvas.requestFocus();
                 }
             });
@@ -178,7 +200,7 @@ public class PropertiesPanel extends VBox {
             Button bindingsBtn = createToolbarButton("Bindings");
             bindingsBtn.setOnAction(e -> {
                 if (canvas != null) {
-                    canvas.triggerBindingConfig(name);
+                    canvas.triggerBindingConfig(currentElementName);
                     canvas.requestFocus();
                 }
             });
@@ -190,7 +212,6 @@ public class PropertiesPanel extends VBox {
         propertyGrid.getChildren().clear();
         int row = 0;
 
-        // Type label (always shown, read-only)
         addReadOnlyRow(row++, "Type", formatType(type));
 
         if (type == null) {
@@ -199,54 +220,39 @@ public class PropertiesPanel extends VBox {
         }
 
         switch (type) {
-            case STOCK -> row = buildStockForm(name, row);
-            case FLOW -> row = buildFlowForm(name, row);
-            case AUX -> row = buildAuxForm(name, row);
-            case CONSTANT -> row = buildConstantForm(name, row);
-            case MODULE -> row = buildModuleForm(name, row);
+            case STOCK -> row = buildStockForm(row);
+            case FLOW -> row = buildFlowForm(row);
+            case AUX -> row = buildAuxForm(row);
+            case CONSTANT -> row = buildConstantForm(row);
+            case MODULE -> row = buildModuleForm(row);
             default -> addReadOnlyRow(row++, "Name", name);
         }
 
         getChildren().addAll(contextToolbar, separator, scrollPane);
     }
 
-    private int buildStockForm(String name, int row) {
-        StockDef stock = editor.getStockByName(name);
+    private int buildStockForm(int row) {
+        StockDef stock = editor.getStockByName(currentElementName);
         if (stock == null) {
-            addReadOnlyRow(row++, "Name", name);
+            addReadOnlyRow(row++, "Name", currentElementName);
             return row;
         }
 
-        // Name
-        TextField nameField = createNameField(name);
+        TextField nameField = createNameField(currentElementName);
         addFieldRow(row++, "Name", nameField);
 
-        // Initial Value
         TextField initialValueField = createTextField(
                 ElementRenderer.formatValue(stock.initialValue()));
-        initialValueField.setOnAction(e -> commitStockInitialValue(name, initialValueField));
-        initialValueField.focusedProperty().addListener((obs, wasFocused, isFocused) -> {
-            if (!isFocused && !updatingFields) {
-                commitStockInitialValue(name, initialValueField);
-            }
-        });
+        addCommitHandlers(initialValueField, this::commitStockInitialValue);
         addFieldRow(row++, "Initial Value", initialValueField);
 
-        // Unit
         TextField unitField = createTextField(stock.unit() != null ? stock.unit() : "");
-        unitField.setOnAction(e -> commitStockUnit(name, unitField));
-        unitField.focusedProperty().addListener((obs, wasFocused, isFocused) -> {
-            if (!isFocused && !updatingFields) {
-                commitStockUnit(name, unitField);
-            }
-        });
+        addCommitHandlers(unitField, this::commitStockUnit);
         addFieldRow(row++, "Unit", unitField);
 
-        // Negative Value Policy
         ComboBox<String> policyBox = new ComboBox<>();
         policyBox.getItems().addAll("Allow", "Clamp to Zero");
-        String currentPolicy = stock.negativeValuePolicy();
-        if ("CLAMP_TO_ZERO".equals(currentPolicy)) {
+        if ("CLAMP_TO_ZERO".equals(stock.negativeValuePolicy())) {
             policyBox.setValue("Clamp to Zero");
         } else {
             policyBox.setValue("Allow");
@@ -256,8 +262,12 @@ public class PropertiesPanel extends VBox {
             if (!updatingFields) {
                 String policyValue = "Clamp to Zero".equals(policyBox.getValue())
                         ? "CLAMP_TO_ZERO" : null;
+                StockDef s = editor.getStockByName(currentElementName);
+                if (s != null && Objects.equals(policyValue, s.negativeValuePolicy())) {
+                    return;
+                }
                 canvas.pushUndoState();
-                editor.setStockNegativeValuePolicy(name, policyValue);
+                editor.setStockNegativeValuePolicy(currentElementName, policyValue);
                 canvas.regenerateAndRedraw();
             }
         });
@@ -266,152 +276,105 @@ public class PropertiesPanel extends VBox {
         return row;
     }
 
-    private int buildFlowForm(String name, int row) {
-        FlowDef flow = editor.getFlowByName(name);
+    private int buildFlowForm(int row) {
+        FlowDef flow = editor.getFlowByName(currentElementName);
         if (flow == null) {
-            addReadOnlyRow(row++, "Name", name);
+            addReadOnlyRow(row++, "Name", currentElementName);
             return row;
         }
 
-        // Name
-        TextField nameField = createNameField(name);
+        TextField nameField = createNameField(currentElementName);
         addFieldRow(row++, "Name", nameField);
 
-        // Equation
         TextField equationField = createTextField(flow.equation());
-        equationField.setOnAction(e -> commitFlowEquation(name, equationField));
-        equationField.focusedProperty().addListener((obs, wasFocused, isFocused) -> {
-            if (!isFocused && !updatingFields) {
-                commitFlowEquation(name, equationField);
-            }
-        });
+        addCommitHandlers(equationField, this::commitFlowEquation);
         addFieldRow(row++, "Equation", equationField);
 
-        // Time Unit
         TextField timeUnitField = createTextField(
                 flow.timeUnit() != null ? flow.timeUnit() : "");
-        timeUnitField.setOnAction(e -> commitFlowTimeUnit(name, timeUnitField));
-        timeUnitField.focusedProperty().addListener((obs, wasFocused, isFocused) -> {
-            if (!isFocused && !updatingFields) {
-                commitFlowTimeUnit(name, timeUnitField);
-            }
-        });
+        addCommitHandlers(timeUnitField, this::commitFlowTimeUnit);
         addFieldRow(row++, "Time Unit", timeUnitField);
 
-        // Source (read-only)
-        String source = flow.source() != null ? flow.source() : "(cloud)";
-        addReadOnlyRow(row++, "Source", source);
-
-        // Sink (read-only)
-        String sink = flow.sink() != null ? flow.sink() : "(cloud)";
-        addReadOnlyRow(row++, "Sink", sink);
+        addReadOnlyRow(row++, "Source", flow.source() != null ? flow.source() : "(cloud)");
+        addReadOnlyRow(row++, "Sink", flow.sink() != null ? flow.sink() : "(cloud)");
 
         return row;
     }
 
-    private int buildAuxForm(String name, int row) {
-        AuxDef aux = editor.getAuxByName(name);
+    private int buildAuxForm(int row) {
+        AuxDef aux = editor.getAuxByName(currentElementName);
         if (aux == null) {
-            addReadOnlyRow(row++, "Name", name);
+            addReadOnlyRow(row++, "Name", currentElementName);
             return row;
         }
 
-        // Name
-        TextField nameField = createNameField(name);
+        TextField nameField = createNameField(currentElementName);
         addFieldRow(row++, "Name", nameField);
 
-        // Equation
         TextField equationField = createTextField(aux.equation());
-        equationField.setOnAction(e -> commitAuxEquation(name, equationField));
-        equationField.focusedProperty().addListener((obs, wasFocused, isFocused) -> {
-            if (!isFocused && !updatingFields) {
-                commitAuxEquation(name, equationField);
-            }
-        });
+        addCommitHandlers(equationField, this::commitAuxEquation);
         addFieldRow(row++, "Equation", equationField);
 
-        // Unit
         TextField unitField = createTextField(aux.unit() != null ? aux.unit() : "");
-        unitField.setOnAction(e -> commitAuxUnit(name, unitField));
-        unitField.focusedProperty().addListener((obs, wasFocused, isFocused) -> {
-            if (!isFocused && !updatingFields) {
-                commitAuxUnit(name, unitField);
-            }
-        });
+        addCommitHandlers(unitField, this::commitAuxUnit);
         addFieldRow(row++, "Unit", unitField);
 
         return row;
     }
 
-    private int buildConstantForm(String name, int row) {
-        ConstantDef constant = editor.getConstantByName(name);
+    private int buildConstantForm(int row) {
+        ConstantDef constant = editor.getConstantByName(currentElementName);
         if (constant == null) {
-            addReadOnlyRow(row++, "Name", name);
+            addReadOnlyRow(row++, "Name", currentElementName);
             return row;
         }
 
-        // Name
-        TextField nameField = createNameField(name);
+        TextField nameField = createNameField(currentElementName);
         addFieldRow(row++, "Name", nameField);
 
-        // Value
         TextField valueField = createTextField(
                 ElementRenderer.formatValue(constant.value()));
-        valueField.setOnAction(e -> commitConstantValue(name, valueField));
-        valueField.focusedProperty().addListener((obs, wasFocused, isFocused) -> {
-            if (!isFocused && !updatingFields) {
-                commitConstantValue(name, valueField);
-            }
-        });
+        addCommitHandlers(valueField, this::commitConstantValue);
         addFieldRow(row++, "Value", valueField);
 
-        // Unit
         TextField unitField = createTextField(
                 constant.unit() != null ? constant.unit() : "");
-        unitField.setOnAction(e -> commitConstantUnit(name, unitField));
-        unitField.focusedProperty().addListener((obs, wasFocused, isFocused) -> {
-            if (!isFocused && !updatingFields) {
-                commitConstantUnit(name, unitField);
-            }
-        });
+        addCommitHandlers(unitField, this::commitConstantUnit);
         addFieldRow(row++, "Unit", unitField);
 
         return row;
     }
 
-    private int buildModuleForm(String name, int row) {
-        ModuleInstanceDef module = editor.getModuleByName(name);
+    private int buildModuleForm(int row) {
+        ModuleInstanceDef module = editor.getModuleByName(currentElementName);
         if (module == null) {
-            addReadOnlyRow(row++, "Name", name);
+            addReadOnlyRow(row++, "Name", currentElementName);
             return row;
         }
 
-        // Instance Name
-        TextField nameField = createNameField(name);
+        TextField nameField = createNameField(currentElementName);
         addFieldRow(row++, "Instance Name", nameField);
 
-        // Input Bindings (read-only)
         Map<String, String> inputs = module.inputBindings();
         if (inputs.isEmpty()) {
             addReadOnlyRow(row++, "Inputs", "(none)");
         } else {
             boolean first = true;
             for (Map.Entry<String, String> entry : inputs.entrySet()) {
-                String label = first ? "Inputs" : "";
-                addReadOnlyRow(row++, label, entry.getKey() + " = " + entry.getValue());
+                addReadOnlyRow(row++, first ? "Inputs" : "",
+                        entry.getKey() + " = " + entry.getValue());
                 first = false;
             }
         }
 
-        // Output Bindings (read-only)
         Map<String, String> outputs = module.outputBindings();
         if (outputs.isEmpty()) {
             addReadOnlyRow(row++, "Outputs", "(none)");
         } else {
             boolean first = true;
             for (Map.Entry<String, String> entry : outputs.entrySet()) {
-                String label = first ? "Outputs" : "";
-                addReadOnlyRow(row++, label, entry.getKey() + " -> " + entry.getValue());
+                addReadOnlyRow(row++, first ? "Outputs" : "",
+                        entry.getKey() + " -> " + entry.getValue());
                 first = false;
             }
         }
@@ -419,9 +382,26 @@ public class PropertiesPanel extends VBox {
         return row;
     }
 
-    // --- Commit helpers ---
+    // --- Commit handlers ---
+    // Each checks if the value actually changed before pushing undo,
+    // fixing the double-commit bug (Enter + focus-loss).
+    // All use currentElementName, fixing the stale-name bug after renames.
 
-    private void commitRename(String oldName, TextField nameField) {
+    /**
+     * Wires both onAction and focusedProperty listeners to a commit handler.
+     */
+    private void addCommitHandlers(TextField field,
+                                    java.util.function.Consumer<TextField> handler) {
+        field.setOnAction(e -> handler.accept(field));
+        field.focusedProperty().addListener((obs, wasFocused, isFocused) -> {
+            if (!isFocused && !updatingFields) {
+                handler.accept(field);
+            }
+        });
+    }
+
+    private void commitRename(TextField nameField) {
+        String oldName = currentElementName;
         String newName = nameField.getText().trim();
         if (newName.isEmpty() || newName.equals(oldName) || !ModelEditor.isValidName(newName)) {
             nameField.setText(oldName);
@@ -432,97 +412,129 @@ public class PropertiesPanel extends VBox {
             return;
         }
         canvas.renameElement(oldName, newName);
+        currentElementName = newName;
     }
 
-    private void commitStockInitialValue(String name, TextField field) {
+    private void commitStockInitialValue(TextField field) {
         try {
             double value = Double.parseDouble(field.getText().trim());
+            StockDef stock = editor.getStockByName(currentElementName);
+            if (stock == null || stock.initialValue() == value) {
+                return;
+            }
             canvas.pushUndoState();
-            editor.setStockInitialValue(name, value);
+            editor.setStockInitialValue(currentElementName, value);
             canvas.regenerateAndRedraw();
         } catch (NumberFormatException ignored) {
-            // Revert to current value
-            StockDef stock = editor.getStockByName(name);
+            StockDef stock = editor.getStockByName(currentElementName);
             if (stock != null) {
                 field.setText(ElementRenderer.formatValue(stock.initialValue()));
             }
         }
     }
 
-    private void commitStockUnit(String name, TextField field) {
+    private void commitStockUnit(TextField field) {
         String unit = field.getText().trim();
+        StockDef stock = editor.getStockByName(currentElementName);
+        if (stock != null && unit.equals(stock.unit())) {
+            return;
+        }
         canvas.pushUndoState();
-        editor.setStockUnit(name, unit);
+        editor.setStockUnit(currentElementName, unit);
         canvas.regenerateAndRedraw();
     }
 
-    private void commitFlowEquation(String name, TextField field) {
+    private void commitFlowEquation(TextField field) {
         String equation = field.getText().trim();
-        if (!equation.isEmpty()) {
-            canvas.pushUndoState();
-            editor.setFlowEquation(name, equation);
-            canvas.regenerateAndRedraw();
-        } else {
-            FlowDef flow = editor.getFlowByName(name);
+        if (equation.isEmpty()) {
+            FlowDef flow = editor.getFlowByName(currentElementName);
             if (flow != null) {
                 field.setText(flow.equation());
             }
+            return;
         }
-    }
-
-    private void commitFlowTimeUnit(String name, TextField field) {
-        String timeUnit = field.getText().trim();
-        if (!timeUnit.isEmpty()) {
-            canvas.pushUndoState();
-            editor.setFlowTimeUnit(name, timeUnit);
-            canvas.regenerateAndRedraw();
-        } else {
-            FlowDef flow = editor.getFlowByName(name);
-            if (flow != null) {
-                field.setText(flow.timeUnit());
-            }
+        FlowDef flow = editor.getFlowByName(currentElementName);
+        if (flow != null && equation.equals(flow.equation())) {
+            return;
         }
-    }
-
-    private void commitAuxEquation(String name, TextField field) {
-        String equation = field.getText().trim();
-        if (!equation.isEmpty()) {
-            canvas.pushUndoState();
-            editor.setAuxEquation(name, equation);
-            canvas.regenerateAndRedraw();
-        } else {
-            AuxDef aux = editor.getAuxByName(name);
-            if (aux != null) {
-                field.setText(aux.equation());
-            }
-        }
-    }
-
-    private void commitAuxUnit(String name, TextField field) {
-        String unit = field.getText().trim();
         canvas.pushUndoState();
-        editor.setAuxUnit(name, unit);
+        editor.setFlowEquation(currentElementName, equation);
         canvas.regenerateAndRedraw();
     }
 
-    private void commitConstantValue(String name, TextField field) {
+    private void commitFlowTimeUnit(TextField field) {
+        String timeUnit = field.getText().trim();
+        if (timeUnit.isEmpty()) {
+            FlowDef flow = editor.getFlowByName(currentElementName);
+            if (flow != null) {
+                field.setText(flow.timeUnit());
+            }
+            return;
+        }
+        FlowDef flow = editor.getFlowByName(currentElementName);
+        if (flow != null && timeUnit.equals(flow.timeUnit())) {
+            return;
+        }
+        canvas.pushUndoState();
+        editor.setFlowTimeUnit(currentElementName, timeUnit);
+        canvas.regenerateAndRedraw();
+    }
+
+    private void commitAuxEquation(TextField field) {
+        String equation = field.getText().trim();
+        if (equation.isEmpty()) {
+            AuxDef aux = editor.getAuxByName(currentElementName);
+            if (aux != null) {
+                field.setText(aux.equation());
+            }
+            return;
+        }
+        AuxDef aux = editor.getAuxByName(currentElementName);
+        if (aux != null && equation.equals(aux.equation())) {
+            return;
+        }
+        canvas.pushUndoState();
+        editor.setAuxEquation(currentElementName, equation);
+        canvas.regenerateAndRedraw();
+    }
+
+    private void commitAuxUnit(TextField field) {
+        String unit = field.getText().trim();
+        AuxDef aux = editor.getAuxByName(currentElementName);
+        if (aux != null && unit.equals(aux.unit())) {
+            return;
+        }
+        canvas.pushUndoState();
+        editor.setAuxUnit(currentElementName, unit);
+        canvas.regenerateAndRedraw();
+    }
+
+    private void commitConstantValue(TextField field) {
         try {
             double value = Double.parseDouble(field.getText().trim());
+            ConstantDef constant = editor.getConstantByName(currentElementName);
+            if (constant == null || constant.value() == value) {
+                return;
+            }
             canvas.pushUndoState();
-            editor.setConstantValue(name, value);
+            editor.setConstantValue(currentElementName, value);
             canvas.regenerateAndRedraw();
         } catch (NumberFormatException ignored) {
-            ConstantDef constant = editor.getConstantByName(name);
+            ConstantDef constant = editor.getConstantByName(currentElementName);
             if (constant != null) {
                 field.setText(ElementRenderer.formatValue(constant.value()));
             }
         }
     }
 
-    private void commitConstantUnit(String name, TextField field) {
+    private void commitConstantUnit(TextField field) {
         String unit = field.getText().trim();
+        ConstantDef constant = editor.getConstantByName(currentElementName);
+        if (constant != null && unit.equals(constant.unit())) {
+            return;
+        }
         canvas.pushUndoState();
-        editor.setConstantUnit(name, unit);
+        editor.setConstantUnit(currentElementName, unit);
         canvas.regenerateAndRedraw();
     }
 
@@ -531,10 +543,10 @@ public class PropertiesPanel extends VBox {
     private TextField createNameField(String currentName) {
         TextField nameField = createTextField(currentName);
         nameField.setId("nameField");
-        nameField.setOnAction(e -> commitRename(currentName, nameField));
+        nameField.setOnAction(e -> commitRename(nameField));
         nameField.focusedProperty().addListener((obs, wasFocused, isFocused) -> {
             if (!isFocused && !updatingFields) {
-                commitRename(currentName, nameField);
+                commitRename(nameField);
             }
         });
         return nameField;
@@ -549,16 +561,16 @@ public class PropertiesPanel extends VBox {
 
     private void addFieldRow(int row, String labelText, javafx.scene.Node field) {
         Label label = new Label(labelText);
-        label.setStyle("-fx-font-weight: bold; -fx-font-size: 11px;");
+        label.setStyle(Styles.FIELD_LABEL);
         propertyGrid.add(label, 0, row);
         propertyGrid.add(field, 1, row);
     }
 
     private void addReadOnlyRow(int row, String labelText, String value) {
         Label label = new Label(labelText);
-        label.setStyle("-fx-font-weight: bold; -fx-font-size: 11px;");
+        label.setStyle(Styles.FIELD_LABEL);
         Label valueLabel = new Label(value);
-        valueLabel.setStyle("-fx-font-size: 11px;");
+        valueLabel.setStyle(Styles.SMALL_TEXT);
         valueLabel.setWrapText(true);
         propertyGrid.add(label, 0, row);
         propertyGrid.add(valueLabel, 1, row);
@@ -566,7 +578,7 @@ public class PropertiesPanel extends VBox {
 
     private static Button createToolbarButton(String text) {
         Button button = new Button(text);
-        button.setStyle("-fx-font-size: 11px;");
+        button.setStyle(Styles.SMALL_TEXT);
         return button;
     }
 

@@ -20,16 +20,15 @@ public class StatusBar extends HBox {
     public StatusBar() {
         setSpacing(0);
         setPadding(new Insets(3, 8, 3, 8));
-        setStyle("-fx-background-color: #E8EAED; -fx-border-color: #BDC3C7; -fx-border-width: 1 0 0 0;");
+        setStyle(Styles.STATUS_BAR_BACKGROUND);
 
-        String labelStyle = "-fx-font-size: 11px; -fx-text-fill: #555;";
-        toolLabel.setStyle(labelStyle);
-        selectionLabel.setStyle(labelStyle);
-        elementsLabel.setStyle(labelStyle);
-        loopLabel.setStyle(labelStyle);
+        toolLabel.setStyle(Styles.STATUS_LABEL);
+        selectionLabel.setStyle(Styles.STATUS_LABEL);
+        elementsLabel.setStyle(Styles.STATUS_LABEL);
+        loopLabel.setStyle(Styles.STATUS_LABEL);
         loopLabel.setVisible(false);
         loopLabel.setManaged(false);
-        zoomLabel.setStyle(labelStyle);
+        zoomLabel.setStyle(Styles.STATUS_LABEL);
 
         Region spacer1 = new Region();
         HBox.setHgrow(spacer1, Priority.ALWAYS);
@@ -37,11 +36,11 @@ public class StatusBar extends HBox {
         HBox.setHgrow(spacer2, Priority.ALWAYS);
 
         Label sep1 = new Label("  |  ");
-        sep1.setStyle(labelStyle);
+        sep1.setStyle(Styles.STATUS_LABEL);
         Label sep2 = new Label("  |  ");
-        sep2.setStyle(labelStyle);
+        sep2.setStyle(Styles.STATUS_LABEL);
         Label loopSep = new Label("  |  ");
-        loopSep.setStyle(labelStyle);
+        loopSep.setStyle(Styles.STATUS_LABEL);
         loopSep.visibleProperty().bind(loopLabel.visibleProperty());
         loopSep.managedProperty().bind(loopLabel.managedProperty());
 

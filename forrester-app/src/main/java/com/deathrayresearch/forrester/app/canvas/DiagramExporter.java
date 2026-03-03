@@ -75,22 +75,22 @@ public final class DiagramExporter {
 
         // Include cloud positions in bounding box
         for (FlowDef flow : editor.getFlows()) {
-            double[] sourceCloud = FlowEndpointCalculator.cloudPosition(
+            FlowGeometry.Point2D sourceCloud = FlowEndpointCalculator.cloudPosition(
                     FlowEndpointCalculator.FlowEnd.SOURCE, flow, canvasState);
             if (sourceCloud != null) {
-                minX = Math.min(minX, sourceCloud[0] - LayoutMetrics.CLOUD_OFFSET / 4);
-                minY = Math.min(minY, sourceCloud[1] - LayoutMetrics.CLOUD_OFFSET / 4);
-                maxX = Math.max(maxX, sourceCloud[0] + LayoutMetrics.CLOUD_OFFSET / 4);
-                maxY = Math.max(maxY, sourceCloud[1] + LayoutMetrics.CLOUD_OFFSET / 4);
+                minX = Math.min(minX, sourceCloud.x() - LayoutMetrics.CLOUD_OFFSET / 4);
+                minY = Math.min(minY, sourceCloud.y() - LayoutMetrics.CLOUD_OFFSET / 4);
+                maxX = Math.max(maxX, sourceCloud.x() + LayoutMetrics.CLOUD_OFFSET / 4);
+                maxY = Math.max(maxY, sourceCloud.y() + LayoutMetrics.CLOUD_OFFSET / 4);
             }
 
-            double[] sinkCloud = FlowEndpointCalculator.cloudPosition(
+            FlowGeometry.Point2D sinkCloud = FlowEndpointCalculator.cloudPosition(
                     FlowEndpointCalculator.FlowEnd.SINK, flow, canvasState);
             if (sinkCloud != null) {
-                minX = Math.min(minX, sinkCloud[0] - LayoutMetrics.CLOUD_OFFSET / 4);
-                minY = Math.min(minY, sinkCloud[1] - LayoutMetrics.CLOUD_OFFSET / 4);
-                maxX = Math.max(maxX, sinkCloud[0] + LayoutMetrics.CLOUD_OFFSET / 4);
-                maxY = Math.max(maxY, sinkCloud[1] + LayoutMetrics.CLOUD_OFFSET / 4);
+                minX = Math.min(minX, sinkCloud.x() - LayoutMetrics.CLOUD_OFFSET / 4);
+                minY = Math.min(minY, sinkCloud.y() - LayoutMetrics.CLOUD_OFFSET / 4);
+                maxX = Math.max(maxX, sinkCloud.x() + LayoutMetrics.CLOUD_OFFSET / 4);
+                maxY = Math.max(maxY, sinkCloud.y() + LayoutMetrics.CLOUD_OFFSET / 4);
             }
         }
 

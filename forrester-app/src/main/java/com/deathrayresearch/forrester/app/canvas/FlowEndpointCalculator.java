@@ -33,9 +33,9 @@ public final class FlowEndpointCalculator {
      * @param end the endpoint to check
      * @param flow the flow definition
      * @param canvasState canvas state for position lookups
-     * @return {x, y} of the cloud, or null if the endpoint is connected
+     * @return cloud position, or null if the endpoint is connected
      */
-    public static double[] cloudPosition(FlowEnd end, FlowDef flow, CanvasState canvasState) {
+    public static FlowGeometry.Point2D cloudPosition(FlowEnd end, FlowDef flow, CanvasState canvasState) {
         if (!canvasState.hasElement(flow.name())) {
             return null;
         }
@@ -62,21 +62,21 @@ public final class FlowEndpointCalculator {
     public static CloudHit hitTestClouds(double worldX, double worldY,
                                          CanvasState canvasState, ModelEditor editor) {
         for (FlowDef flow : editor.getFlows()) {
-            double[] sourceCloud = cloudPosition(FlowEnd.SOURCE, flow, canvasState);
+            FlowGeometry.Point2D sourceCloud = cloudPosition(FlowEnd.SOURCE, flow, canvasState);
             if (sourceCloud != null) {
-                double dist = Math.hypot(worldX - sourceCloud[0], worldY - sourceCloud[1]);
+                double dist = Math.hypot(worldX - sourceCloud.x(), worldY - sourceCloud.y());
                 if (dist <= CLOUD_HIT_RADIUS) {
                     return new CloudHit(flow.name(), FlowEnd.SOURCE,
-                            sourceCloud[0], sourceCloud[1]);
+                            sourceCloud.x(), sourceCloud.y());
                 }
             }
 
-            double[] sinkCloud = cloudPosition(FlowEnd.SINK, flow, canvasState);
+            FlowGeometry.Point2D sinkCloud = cloudPosition(FlowEnd.SINK, flow, canvasState);
             if (sinkCloud != null) {
-                double dist = Math.hypot(worldX - sinkCloud[0], worldY - sinkCloud[1]);
+                double dist = Math.hypot(worldX - sinkCloud.x(), worldY - sinkCloud.y());
                 if (dist <= CLOUD_HIT_RADIUS) {
                     return new CloudHit(flow.name(), FlowEnd.SINK,
-                            sinkCloud[0], sinkCloud[1]);
+                            sinkCloud.x(), sinkCloud.y());
                 }
             }
         }
@@ -108,29 +108,21 @@ public final class FlowEndpointCalculator {
 
             // Check source endpoint
             if (flow.source() != null && canvasState.hasElement(flow.source())) {
-                double scx = canvasState.getX(flow.source());
-                double scy = canvasState.getY(flow.source());
-                double[] edge = CanvasRenderer.clipToBorder(scx, scy,
-                        LayoutMetrics.effectiveWidth(canvasState, flow.source()) / 2,
-                        LayoutMetrics.effectiveHeight(canvasState, flow.source()) / 2,
-                        midX, midY);
-                double dist = Math.hypot(worldX - edge[0], worldY - edge[1]);
+                FlowGeometry.Point2D edge = FlowGeometry.clipToElement(
+                        canvasState, flow.source(), midX, midY);
+                double dist = Math.hypot(worldX - edge.x(), worldY - edge.y());
                 if (dist <= ENDPOINT_HIT_RADIUS) {
-                    return new CloudHit(flow.name(), FlowEnd.SOURCE, edge[0], edge[1]);
+                    return new CloudHit(flow.name(), FlowEnd.SOURCE, edge.x(), edge.y());
                 }
             }
 
             // Check sink endpoint
             if (flow.sink() != null && canvasState.hasElement(flow.sink())) {
-                double scx = canvasState.getX(flow.sink());
-                double scy = canvasState.getY(flow.sink());
-                double[] edge = CanvasRenderer.clipToBorder(scx, scy,
-                        LayoutMetrics.effectiveWidth(canvasState, flow.sink()) / 2,
-                        LayoutMetrics.effectiveHeight(canvasState, flow.sink()) / 2,
-                        midX, midY);
-                double dist = Math.hypot(worldX - edge[0], worldY - edge[1]);
+                FlowGeometry.Point2D edge = FlowGeometry.clipToElement(
+                        canvasState, flow.sink(), midX, midY);
+                double dist = Math.hypot(worldX - edge.x(), worldY - edge.y());
                 if (dist <= ENDPOINT_HIT_RADIUS) {
-                    return new CloudHit(flow.name(), FlowEnd.SINK, edge[0], edge[1]);
+                    return new CloudHit(flow.name(), FlowEnd.SINK, edge.x(), edge.y());
                 }
             }
         }
@@ -142,10 +134,10 @@ public final class FlowEndpointCalculator {
      * The cloud is placed at LayoutMetrics.CLOUD_OFFSET distance from the diamond center,
      * in the direction away from the opposite endpoint (if connected).
      */
-    private static double[] computeCloudPosition(double midX, double midY,
-                                                  String oppositeStock,
-                                                  CanvasState canvasState,
-                                                  boolean isSource) {
+    private static FlowGeometry.Point2D computeCloudPosition(double midX, double midY,
+                                                              String oppositeStock,
+                                                              CanvasState canvasState,
+                                                              boolean isSource) {
         double dx;
         double dy;
 
@@ -173,6 +165,8 @@ public final class FlowEndpointCalculator {
             dist = LayoutMetrics.CLOUD_OFFSET;
         }
 
-        return new double[]{midX + dx / dist * LayoutMetrics.CLOUD_OFFSET, midY + dy / dist * LayoutMetrics.CLOUD_OFFSET};
+        return new FlowGeometry.Point2D(
+                midX + dx / dist * LayoutMetrics.CLOUD_OFFSET,
+                midY + dy / dist * LayoutMetrics.CLOUD_OFFSET);
     }
 }

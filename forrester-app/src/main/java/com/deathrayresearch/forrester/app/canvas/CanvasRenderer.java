@@ -206,20 +206,16 @@ public class CanvasRenderer {
             boolean sourceIsCloud;
 
             if (flow.source() != null && canvasState.hasElement(flow.source())) {
-                double scx = canvasState.getX(flow.source());
-                double scy = canvasState.getY(flow.source());
-                double[] edge = clipToBorder(scx, scy,
-                        LayoutMetrics.effectiveWidth(canvasState, flow.source()) / 2,
-                        LayoutMetrics.effectiveHeight(canvasState, flow.source()) / 2,
-                        midX, midY);
-                sourceX = edge[0];
-                sourceY = edge[1];
+                FlowGeometry.Point2D edge = FlowGeometry.clipToElement(
+                        canvasState, flow.source(), midX, midY);
+                sourceX = edge.x();
+                sourceY = edge.y();
                 sourceIsCloud = false;
             } else {
-                double[] cloud = FlowEndpointCalculator.cloudPosition(
+                FlowGeometry.Point2D cloud = FlowEndpointCalculator.cloudPosition(
                         FlowEndpointCalculator.FlowEnd.SOURCE, flow, canvasState);
-                sourceX = cloud != null ? cloud[0] : midX - LayoutMetrics.CLOUD_OFFSET;
-                sourceY = cloud != null ? cloud[1] : midY;
+                sourceX = cloud != null ? cloud.x() : midX - LayoutMetrics.CLOUD_OFFSET;
+                sourceY = cloud != null ? cloud.y() : midY;
                 sourceIsCloud = true;
             }
 
@@ -228,20 +224,16 @@ public class CanvasRenderer {
             boolean sinkIsCloud;
 
             if (flow.sink() != null && canvasState.hasElement(flow.sink())) {
-                double scx = canvasState.getX(flow.sink());
-                double scy = canvasState.getY(flow.sink());
-                double[] edge = clipToBorder(scx, scy,
-                        LayoutMetrics.effectiveWidth(canvasState, flow.sink()) / 2,
-                        LayoutMetrics.effectiveHeight(canvasState, flow.sink()) / 2,
-                        midX, midY);
-                sinkX = edge[0];
-                sinkY = edge[1];
+                FlowGeometry.Point2D edge = FlowGeometry.clipToElement(
+                        canvasState, flow.sink(), midX, midY);
+                sinkX = edge.x();
+                sinkY = edge.y();
                 sinkIsCloud = false;
             } else {
-                double[] cloud = FlowEndpointCalculator.cloudPosition(
+                FlowGeometry.Point2D cloud = FlowEndpointCalculator.cloudPosition(
                         FlowEndpointCalculator.FlowEnd.SINK, flow, canvasState);
-                sinkX = cloud != null ? cloud[0] : midX + LayoutMetrics.CLOUD_OFFSET;
-                sinkY = cloud != null ? cloud[1] : midY;
+                sinkX = cloud != null ? cloud.x() : midX + LayoutMetrics.CLOUD_OFFSET;
+                sinkY = cloud != null ? cloud.y() : midY;
                 sinkIsCloud = true;
             }
 
@@ -267,19 +259,13 @@ public class CanvasRenderer {
             double toX = canvasState.getX(toName);
             double toY = canvasState.getY(toName);
 
-            ElementType fromType = canvasState.getType(fromName);
-            ElementType toType = canvasState.getType(toName);
+            FlowGeometry.Point2D clippedFrom = FlowGeometry.clipToElement(
+                    canvasState, fromName, toX, toY);
+            FlowGeometry.Point2D clippedTo = FlowGeometry.clipToElement(
+                    canvasState, toName, fromX, fromY);
 
-            double fromW = LayoutMetrics.effectiveWidth(canvasState, fromName) / 2;
-            double fromH = LayoutMetrics.effectiveHeight(canvasState, fromName) / 2;
-            double toW = LayoutMetrics.effectiveWidth(canvasState, toName) / 2;
-            double toH = LayoutMetrics.effectiveHeight(canvasState, toName) / 2;
-
-            double[] clippedFrom = clipToBorder(fromX, fromY, fromW, fromH, toX, toY);
-            double[] clippedTo = clipToBorder(toX, toY, toW, toH, fromX, fromY);
-
-            ConnectionRenderer.drawInfoLink(gc, clippedFrom[0], clippedFrom[1],
-                    clippedTo[0], clippedTo[1]);
+            ConnectionRenderer.drawInfoLink(gc, clippedFrom.x(), clippedFrom.y(),
+                    clippedTo.x(), clippedTo.y());
         }
     }
 
@@ -305,19 +291,16 @@ public class CanvasRenderer {
             double toX = canvasState.getX(toName);
             double toY = canvasState.getY(toName);
 
-            double fromW = LayoutMetrics.effectiveWidth(canvasState, fromName) / 2;
-            double fromH = LayoutMetrics.effectiveHeight(canvasState, fromName) / 2;
-            double toW = LayoutMetrics.effectiveWidth(canvasState, toName) / 2;
-            double toH = LayoutMetrics.effectiveHeight(canvasState, toName) / 2;
+            FlowGeometry.Point2D clippedFrom = FlowGeometry.clipToElement(
+                    canvasState, fromName, toX, toY);
+            FlowGeometry.Point2D clippedTo = FlowGeometry.clipToElement(
+                    canvasState, toName, fromX, fromY);
 
-            double[] clippedFrom = clipToBorder(fromX, fromY, fromW, fromH, toX, toY);
-            double[] clippedTo = clipToBorder(toX, toY, toW, toH, fromX, fromY);
-
-            FeedbackLoopRenderer.drawLoopEdge(gc, clippedFrom[0], clippedFrom[1],
-                    clippedTo[0], clippedTo[1]);
+            FeedbackLoopRenderer.drawLoopEdge(gc, clippedFrom.x(), clippedFrom.y(),
+                    clippedTo.x(), clippedTo.y());
         }
 
-        // Highlight material flow edges (flow ↔ stock connections)
+        // Highlight material flow edges (flow <-> stock connections)
         for (FlowDef flow : editor.getFlows()) {
             if (!canvasState.hasElement(flow.name())) {
                 continue;
@@ -327,24 +310,16 @@ public class CanvasRenderer {
 
             if (flow.source() != null && canvasState.hasElement(flow.source())
                     && loopAnalysis.isLoopEdge(flow.name(), flow.source())) {
-                double scx = canvasState.getX(flow.source());
-                double scy = canvasState.getY(flow.source());
-                double[] edge = clipToBorder(scx, scy,
-                        LayoutMetrics.effectiveWidth(canvasState, flow.source()) / 2,
-                        LayoutMetrics.effectiveHeight(canvasState, flow.source()) / 2,
-                        midX, midY);
-                FeedbackLoopRenderer.drawLoopEdge(gc, midX, midY, edge[0], edge[1]);
+                FlowGeometry.Point2D edge = FlowGeometry.clipToElement(
+                        canvasState, flow.source(), midX, midY);
+                FeedbackLoopRenderer.drawLoopEdge(gc, midX, midY, edge.x(), edge.y());
             }
 
             if (flow.sink() != null && canvasState.hasElement(flow.sink())
                     && loopAnalysis.isLoopEdge(flow.name(), flow.sink())) {
-                double scx = canvasState.getX(flow.sink());
-                double scy = canvasState.getY(flow.sink());
-                double[] edge = clipToBorder(scx, scy,
-                        LayoutMetrics.effectiveWidth(canvasState, flow.sink()) / 2,
-                        LayoutMetrics.effectiveHeight(canvasState, flow.sink()) / 2,
-                        midX, midY);
-                FeedbackLoopRenderer.drawLoopEdge(gc, midX, midY, edge[0], edge[1]);
+                FlowGeometry.Point2D edge = FlowGeometry.clipToElement(
+                        canvasState, flow.sink(), midX, midY);
+                FeedbackLoopRenderer.drawLoopEdge(gc, midX, midY, edge.x(), edge.y());
             }
         }
     }
@@ -389,7 +364,6 @@ public class CanvasRenderer {
         if (hoverStock != null) {
             drawStockHoverHighlight(gc, hoverStock);
         } else {
-            // Preview cloud at drop position when not hovering a stock
             ConnectionRenderer.drawCloud(gc, state.rubberBandX(), state.rubberBandY());
         }
     }
@@ -412,7 +386,6 @@ public class CanvasRenderer {
 
     /**
      * Draws a hover or selection highlight for the given connection.
-     * Finds the matching connector, clips endpoints, and delegates to SelectionRenderer.
      */
     private void drawConnectionHighlight(GraphicsContext gc, List<ConnectorRoute> connectors,
                                          ConnectionId connectionId, boolean isHover) {
@@ -429,20 +402,19 @@ public class CanvasRenderer {
                 double toX = canvasState.getX(route.to());
                 double toY = canvasState.getY(route.to());
 
-                double fromW = LayoutMetrics.effectiveWidth(canvasState, route.from()) / 2;
-                double fromH = LayoutMetrics.effectiveHeight(canvasState, route.from()) / 2;
-                double toW = LayoutMetrics.effectiveWidth(canvasState, route.to()) / 2;
-                double toH = LayoutMetrics.effectiveHeight(canvasState, route.to()) / 2;
-
-                double[] clippedFrom = clipToBorder(fromX, fromY, fromW, fromH, toX, toY);
-                double[] clippedTo = clipToBorder(toX, toY, toW, toH, fromX, fromY);
+                FlowGeometry.Point2D clippedFrom = FlowGeometry.clipToElement(
+                        canvasState, route.from(), toX, toY);
+                FlowGeometry.Point2D clippedTo = FlowGeometry.clipToElement(
+                        canvasState, route.to(), fromX, fromY);
 
                 if (isHover) {
                     SelectionRenderer.drawConnectionHover(gc,
-                            clippedFrom[0], clippedFrom[1], clippedTo[0], clippedTo[1]);
+                            clippedFrom.x(), clippedFrom.y(),
+                            clippedTo.x(), clippedTo.y());
                 } else {
                     SelectionRenderer.drawConnectionSelection(gc,
-                            clippedFrom[0], clippedFrom[1], clippedTo[0], clippedTo[1]);
+                            clippedFrom.x(), clippedFrom.y(),
+                            clippedTo.x(), clippedTo.y());
                 }
                 return;
             }
@@ -468,22 +440,4 @@ public class CanvasRenderer {
         gc.setLineDashes();
     }
 
-    /**
-     * Clips a line from the center of a rectangle toward a target point,
-     * returning the intersection with the rectangle border.
-     */
-    static double[] clipToBorder(double cx, double cy, double halfW, double halfH,
-                                 double targetX, double targetY) {
-        double dx = targetX - cx;
-        double dy = targetY - cy;
-        if (dx == 0 && dy == 0) {
-            return new double[]{cx, cy};
-        }
-
-        double scaleX = halfW > 0 ? Math.abs(halfW / dx) : Double.MAX_VALUE;
-        double scaleY = halfH > 0 ? Math.abs(halfH / dy) : Double.MAX_VALUE;
-        double scale = Math.min(scaleX, scaleY);
-
-        return new double[]{cx + dx * scale, cy + dy * scale};
-    }
 }

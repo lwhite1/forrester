@@ -46,7 +46,7 @@ public class BindingConfigDialog extends Dialog<BindingConfigDialog.BindingResul
 
         // Input bindings section
         Label inputHeader = new Label("Input Bindings");
-        inputHeader.setStyle("-fx-font-weight: bold; -fx-font-size: 13px;");
+        inputHeader.setStyle(Styles.SECTION_HEADER);
         content.getChildren().add(inputHeader);
 
         if (iface != null && !iface.inputs().isEmpty()) {
@@ -55,13 +55,13 @@ public class BindingConfigDialog extends Dialog<BindingConfigDialog.BindingResul
             content.getChildren().add(inputGrid);
         } else {
             Label noInputs = new Label("(No input ports defined)");
-            noInputs.setStyle("-fx-text-fill: #888;");
+            noInputs.setStyle(Styles.MUTED_TEXT);
             content.getChildren().add(noInputs);
         }
 
         // Output bindings section
         Label outputHeader = new Label("Output Bindings");
-        outputHeader.setStyle("-fx-font-weight: bold; -fx-font-size: 13px;");
+        outputHeader.setStyle(Styles.SECTION_HEADER);
         content.getChildren().add(outputHeader);
 
         if (iface != null && !iface.outputs().isEmpty()) {
@@ -70,7 +70,7 @@ public class BindingConfigDialog extends Dialog<BindingConfigDialog.BindingResul
             content.getChildren().add(outputGrid);
         } else {
             Label noOutputs = new Label("(No output ports defined)");
-            noOutputs.setStyle("-fx-text-fill: #888;");
+            noOutputs.setStyle(Styles.MUTED_TEXT);
             content.getChildren().add(noOutputs);
         }
 
@@ -98,7 +98,7 @@ public class BindingConfigDialog extends Dialog<BindingConfigDialog.BindingResul
 
         grid.add(new Label("Port"), 0, 0);
         Label headerLabel = new Label(fieldLabel);
-        headerLabel.setStyle("-fx-font-weight: bold;");
+        headerLabel.setStyle(Styles.BOLD_TEXT);
         grid.add(headerLabel, 1, 0);
 
         int row = 1;

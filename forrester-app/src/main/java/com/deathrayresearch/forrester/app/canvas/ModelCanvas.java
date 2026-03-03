@@ -25,10 +25,7 @@ import javafx.scene.input.ScrollEvent;
 import javafx.scene.layout.Pane;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -55,39 +52,23 @@ public class ModelCanvas extends Canvas {
     private CanvasToolBar.Tool activeTool = CanvasToolBar.Tool.SELECT;
     private CanvasToolBar toolBar;
 
-    // Drag/pan state
-    private boolean dragging;
+    // Interaction controllers
+    private final DragController dragController = new DragController();
+    private final MarqueeController marqueeController = new MarqueeController();
+    private final ResizeController resizeController = new ResizeController();
+    private final ReattachController reattachController = new ReattachController();
+    private final FlowCreationController flowCreation = new FlowCreationController();
+
+    // Pan state
     private boolean panning;
     private boolean panMoved;
     private boolean spaceDown;
     private double dragStartX;
     private double dragStartY;
-    private String dragTarget;
-    private final Map<String, CanvasState.Position> dragStartPositions = new HashMap<>();
 
     // Mouse position tracking for cursor updates
     private double lastMouseX;
     private double lastMouseY;
-
-    // Rubber-band (marquee) selection
-    private boolean marqueeActive;
-    private double marqueeStartWorldX;
-    private double marqueeStartWorldY;
-    private double marqueeEndWorldX;
-    private double marqueeEndWorldY;
-    private Set<String> marqueeInitialSelection;
-
-    // Two-click flow creation
-    private final FlowCreationController flowCreation = new FlowCreationController();
-
-    // Flow endpoint reattachment drag
-    private boolean reattaching;
-    private String reattachFlowName;
-    private FlowEndpointCalculator.FlowEnd reattachEnd;
-    private double reattachDiamondX;
-    private double reattachDiamondY;
-    private double reattachRubberBandX;
-    private double reattachRubberBandY;
 
     // Inline editor
     private Pane overlayPane;
@@ -95,19 +76,6 @@ public class ModelCanvas extends Canvas {
 
     // Undo/redo
     private UndoManager undoManager;
-    private boolean dragUndoSaved;
-
-    // Resize state
-    private boolean resizing;
-    private String resizeTarget;
-    private ResizeHandle resizeHandle;
-    private double resizeAnchorX;
-    private double resizeAnchorY;
-    private double resizeStartWidth;
-    private double resizeStartHeight;
-    private double resizeStartCenterX;
-    private double resizeStartCenterY;
-    private boolean resizeUndoSaved;
 
     // Status change callback
     private Runnable onStatusChanged;
@@ -465,16 +433,10 @@ public class ModelCanvas extends Canvas {
      * then notifies the status bar of any changes.
      */
     private void redraw() {
-        CanvasRenderer.ReattachState reattachState = reattaching
-                ? new CanvasRenderer.ReattachState(true, reattachDiamondX, reattachDiamondY,
-                        reattachRubberBandX, reattachRubberBandY)
-                : CanvasRenderer.ReattachState.IDLE;
-        CanvasRenderer.MarqueeState marqueeState = marqueeActive
-                ? new CanvasRenderer.MarqueeState(true, marqueeStartWorldX, marqueeStartWorldY,
-                        marqueeEndWorldX, marqueeEndWorldY)
-                : CanvasRenderer.MarqueeState.IDLE;
         renderer.render(getGraphicsContext2D(), getWidth(), getHeight(),
-                editor, connectors, flowCreation.getState(), reattachState, marqueeState,
+                editor, connectors, flowCreation.getState(),
+                reattachController.toRenderState(),
+                marqueeController.toRenderState(),
                 loopHighlightActive ? loopAnalysis : null, hoveredElement,
                 hoveredConnection, selectedConnection);
         fireStatusChanged();
@@ -747,157 +709,7 @@ public class ModelCanvas extends Canvas {
         return null;
     }
 
-    // --- Flow endpoint reattachment ---
-
-    /**
-     * Begins a reattachment drag from a cloud or connected endpoint hit.
-     */
-    private void startReattachment(FlowEndpointCalculator.CloudHit hit) {
-        reattaching = true;
-        reattachFlowName = hit.flowName();
-        reattachEnd = hit.end();
-        // Diamond center of the flow
-        reattachDiamondX = canvasState.getX(hit.flowName());
-        reattachDiamondY = canvasState.getY(hit.flowName());
-        reattachRubberBandX = hit.cloudX();
-        reattachRubberBandY = hit.cloudY();
-        redraw();
-    }
-
-    /**
-     * Completes a reattachment drag: if released on a stock, reconnects the flow
-     * endpoint to that stock; if released on empty space, disconnects to cloud.
-     */
-    private void completeReattachment(double worldX, double worldY) {
-        saveUndoState();
-        String stockHit = FlowCreationController.hitTestStockOnly(worldX, worldY, canvasState);
-        editor.reconnectFlow(reattachFlowName, reattachEnd, stockHit);
-        connectors = editor.generateConnectors();
-        invalidateLoopAnalysis();
-        cancelReattachment();
-        redraw();
-    }
-
-    /**
-     * Cancels a reattachment drag without making any changes.
-     */
-    private void cancelReattachment() {
-        reattaching = false;
-        reattachFlowName = null;
-        reattachEnd = null;
-    }
-
-    // --- Marquee selection ---
-
-    /**
-     * Updates the selection based on elements inside the marquee rectangle.
-     * Restores initial selection first (for Shift+marquee behavior).
-     */
-    private void updateMarqueeSelection() {
-        double minX = Math.min(marqueeStartWorldX, marqueeEndWorldX);
-        double maxX = Math.max(marqueeStartWorldX, marqueeEndWorldX);
-        double minY = Math.min(marqueeStartWorldY, marqueeEndWorldY);
-        double maxY = Math.max(marqueeStartWorldY, marqueeEndWorldY);
-
-        canvasState.clearSelection();
-        if (marqueeInitialSelection != null) {
-            for (String name : marqueeInitialSelection) {
-                canvasState.addToSelection(name);
-            }
-        }
-        for (String name : canvasState.getDrawOrder()) {
-            double cx = canvasState.getX(name);
-            double cy = canvasState.getY(name);
-            if (cx >= minX && cx <= maxX && cy >= minY && cy <= maxY) {
-                canvasState.addToSelection(name);
-            }
-        }
-    }
-
-    /**
-     * Cancels the marquee selection, restoring the selection to its pre-marquee state.
-     */
-    private void cancelMarquee() {
-        canvasState.clearSelection();
-        if (marqueeInitialSelection != null) {
-            for (String name : marqueeInitialSelection) {
-                canvasState.addToSelection(name);
-            }
-        }
-        marqueeActive = false;
-        marqueeInitialSelection = null;
-    }
-
-    // --- Resize ---
-
-    private void startResize(ResizeHandle.HandleHit hit, double worldX, double worldY) {
-        resizing = true;
-        resizeTarget = hit.elementName();
-        resizeHandle = hit.handle();
-        resizeUndoSaved = false;
-
-        double cx = canvasState.getX(resizeTarget);
-        double cy = canvasState.getY(resizeTarget);
-        resizeStartCenterX = cx;
-        resizeStartCenterY = cy;
-        resizeStartWidth = LayoutMetrics.effectiveWidth(canvasState, resizeTarget);
-        resizeStartHeight = LayoutMetrics.effectiveHeight(canvasState, resizeTarget);
-
-        double halfW = resizeStartWidth / 2 + SelectionRenderer.SELECTION_PADDING;
-        double halfH = resizeStartHeight / 2 + SelectionRenderer.SELECTION_PADDING;
-
-        // Anchor is the corner opposite the grabbed handle
-        switch (resizeHandle) {
-            case TOP_LEFT -> { resizeAnchorX = cx + halfW; resizeAnchorY = cy + halfH; }
-            case TOP_RIGHT -> { resizeAnchorX = cx - halfW; resizeAnchorY = cy + halfH; }
-            case BOTTOM_LEFT -> { resizeAnchorX = cx + halfW; resizeAnchorY = cy - halfH; }
-            case BOTTOM_RIGHT -> { resizeAnchorX = cx - halfW; resizeAnchorY = cy - halfH; }
-        }
-    }
-
-    private void handleResizeDrag(double worldX, double worldY) {
-        if (!resizeUndoSaved) {
-            saveUndoState();
-            resizeUndoSaved = true;
-        }
-
-        ElementType type = canvasState.getType(resizeTarget);
-        double minW = LayoutMetrics.minWidthFor(type);
-        double minH = LayoutMetrics.minHeightFor(type);
-        double pad = SelectionRenderer.SELECTION_PADDING;
-
-        double rawW = Math.abs(worldX - resizeAnchorX) - pad;
-        double rawH = Math.abs(worldY - resizeAnchorY) - pad;
-        double newW = Math.max(minW, rawW);
-        double newH = Math.max(minH, rawH);
-
-        // Compute new center as midpoint between anchor and effective drag edge
-        double edgeX = resizeAnchorX + Math.signum(worldX - resizeAnchorX) * (newW / 2 + pad);
-        double edgeY = resizeAnchorY + Math.signum(worldY - resizeAnchorY) * (newH / 2 + pad);
-        double newCx = (resizeAnchorX + edgeX) / 2;
-        double newCy = (resizeAnchorY + edgeY) / 2;
-
-        canvasState.setSize(resizeTarget, newW, newH);
-        canvasState.setPosition(resizeTarget, newCx, newCy);
-    }
-
-    private void cancelResize() {
-        // If we saved an undo state, revert to it
-        if (resizeUndoSaved) {
-            performUndo();
-        }
-
-        resizing = false;
-        resizeTarget = null;
-        resizeHandle = null;
-    }
-
-    private static Cursor resizeCursorFor(ResizeHandle handle) {
-        return switch (handle) {
-            case TOP_LEFT, BOTTOM_RIGHT -> Cursor.NW_RESIZE;
-            case TOP_RIGHT, BOTTOM_LEFT -> Cursor.NE_RESIZE;
-        };
-    }
+    // --- Reattachment, marquee, resize, drag: delegated to controllers ---
 
     // --- Cursor ---
 
@@ -911,11 +723,11 @@ public class ModelCanvas extends Canvas {
 
         Cursor cursor;
 
-        if (resizing) {
-            cursor = resizeCursorFor(resizeHandle);
-        } else if (reattaching || panning || dragging) {
+        if (resizeController.isActive()) {
+            cursor = ResizeController.cursorFor(resizeController.getHandle());
+        } else if (reattachController.isActive() || panning || dragController.isDragging()) {
             cursor = Cursor.CLOSED_HAND;
-        } else if (marqueeActive) {
+        } else if (marqueeController.isActive()) {
             cursor = Cursor.CROSSHAIR;
         } else if (spaceDown) {
             cursor = Cursor.MOVE;
@@ -928,7 +740,7 @@ public class ModelCanvas extends Canvas {
             // Check resize handles first (when hovering over selected elements)
             ResizeHandle.HandleHit handleHit = ResizeHandle.hitTest(canvasState, worldX, worldY);
             if (handleHit != null) {
-                cursor = resizeCursorFor(handleHit.handle());
+                cursor = ResizeController.cursorFor(handleHit.handle());
             } else {
                 FlowEndpointCalculator.CloudHit cloudHit =
                         FlowEndpointCalculator.hitTestClouds(worldX, worldY, canvasState, editor);
@@ -1054,7 +866,8 @@ public class ModelCanvas extends Canvas {
                             worldX, worldY, canvasState, editor);
                 }
                 if (cloudHit != null) {
-                    startReattachment(cloudHit);
+                    reattachController.start(cloudHit, canvasState);
+                    redraw();
                     updateCursor();
                     event.consume();
                     return;
@@ -1065,7 +878,7 @@ public class ModelCanvas extends Canvas {
             if (activeTool == CanvasToolBar.Tool.SELECT && !flowCreation.isPending()) {
                 ResizeHandle.HandleHit handleHit = ResizeHandle.hitTest(canvasState, worldX, worldY);
                 if (handleHit != null) {
-                    startResize(handleHit, worldX, worldY);
+                    resizeController.start(handleHit, canvasState);
                     updateCursor();
                     event.consume();
                     return;
@@ -1104,15 +917,8 @@ public class ModelCanvas extends Canvas {
                     canvasState.select(hit);
                 }
 
-                // Capture drag start positions for all selected elements
-                dragTarget = hit;
-                dragging = true;
-                dragUndoSaved = false;
-                dragStartPositions.clear();
-                for (String name : canvasState.getSelection()) {
-                    dragStartPositions.put(name,
-                            new CanvasState.Position(canvasState.getX(name), canvasState.getY(name)));
-                }
+                // Start drag for all selected elements
+                dragController.start(hit, event.getX(), event.getY(), canvasState);
             } else {
                 // No element hit — check for connection click
                 ConnectionId connHit = HitTester.hitTestInfoLink(
@@ -1121,22 +927,10 @@ public class ModelCanvas extends Canvas {
                     // Connection click: select connection, clear element selection
                     selectedConnection = connHit;
                     canvasState.clearSelection();
-                    dragTarget = null;
-                    dragging = false;
                 } else {
                     // Empty space: clear connection selection, start marquee
                     selectedConnection = null;
-                    marqueeActive = true;
-                    marqueeStartWorldX = worldX;
-                    marqueeStartWorldY = worldY;
-                    marqueeEndWorldX = worldX;
-                    marqueeEndWorldY = worldY;
-                    marqueeInitialSelection = new LinkedHashSet<>(canvasState.getSelection());
-                    if (!event.isShiftDown()) {
-                        canvasState.clearSelection();
-                    }
-                    dragTarget = null;
-                    dragging = false;
+                    marqueeController.start(worldX, worldY, canvasState, event.isShiftDown());
                 }
             }
 
@@ -1150,35 +944,38 @@ public class ModelCanvas extends Canvas {
         hoveredElement = null;
         hoveredConnection = null;
 
-        if (marqueeActive) {
-            marqueeEndWorldX = viewport.toWorldX(event.getX());
-            marqueeEndWorldY = viewport.toWorldY(event.getY());
-            updateMarqueeSelection();
+        if (marqueeController.isActive()) {
+            marqueeController.drag(
+                    viewport.toWorldX(event.getX()),
+                    viewport.toWorldY(event.getY()), canvasState);
             redraw();
             event.consume();
             return;
         }
 
-        if (reattaching) {
-            reattachRubberBandX = viewport.toWorldX(event.getX());
-            reattachRubberBandY = viewport.toWorldY(event.getY());
+        if (reattachController.isActive()) {
+            reattachController.drag(
+                    viewport.toWorldX(event.getX()),
+                    viewport.toWorldY(event.getY()));
             redraw();
             event.consume();
             return;
         }
 
-        if (resizing) {
-            handleResizeDrag(viewport.toWorldX(event.getX()), viewport.toWorldY(event.getY()));
+        if (resizeController.isActive()) {
+            resizeController.drag(
+                    viewport.toWorldX(event.getX()),
+                    viewport.toWorldY(event.getY()),
+                    canvasState, this::saveUndoState);
             redraw();
             event.consume();
             return;
         }
-
-        double screenDx = event.getX() - dragStartX;
-        double screenDy = event.getY() - dragStartY;
 
         if (panning) {
             panMoved = true;
+            double screenDx = event.getX() - dragStartX;
+            double screenDy = event.getY() - dragStartY;
             viewport.pan(screenDx, screenDy);
             dragStartX = event.getX();
             dragStartY = event.getY();
@@ -1187,49 +984,38 @@ public class ModelCanvas extends Canvas {
             return;
         }
 
-        if (dragging && dragTarget != null) {
-            if (!dragUndoSaved) {
-                saveUndoState();
-                dragUndoSaved = true;
-            }
-            // Convert screen-space drag delta to world-space delta
-            double worldDx = screenDx / viewport.getScale();
-            double worldDy = screenDy / viewport.getScale();
-
-            for (Map.Entry<String, CanvasState.Position> entry : dragStartPositions.entrySet()) {
-                CanvasState.Position startPos = entry.getValue();
-                canvasState.setPosition(entry.getKey(),
-                        startPos.x() + worldDx,
-                        startPos.y() + worldDy);
-            }
+        if (dragController.isDragging()) {
+            dragController.drag(event.getX(), event.getY(),
+                    canvasState, viewport, this::saveUndoState);
             redraw();
             event.consume();
         }
     }
 
     private void handleMouseReleased(MouseEvent event) {
-        if (marqueeActive) {
-            marqueeActive = false;
-            marqueeInitialSelection = null;
+        if (marqueeController.isActive()) {
+            marqueeController.end();
             redraw();
             updateCursor();
             event.consume();
             return;
         }
 
-        if (reattaching) {
-            completeReattachment(
+        if (reattachController.isActive()) {
+            reattachController.complete(
                     viewport.toWorldX(event.getX()),
-                    viewport.toWorldY(event.getY()));
+                    viewport.toWorldY(event.getY()),
+                    canvasState, editor, this::saveUndoState);
+            connectors = editor.generateConnectors();
+            invalidateLoopAnalysis();
+            redraw();
             updateCursor();
             event.consume();
             return;
         }
 
-        if (resizing) {
-            resizing = false;
-            resizeTarget = null;
-            resizeHandle = null;
+        if (resizeController.isActive()) {
+            resizeController.end();
             updateCursor();
             event.consume();
             return;
@@ -1250,11 +1036,9 @@ public class ModelCanvas extends Canvas {
             }
         }
 
-        dragging = false;
+        dragController.end();
         panning = false;
         panMoved = false;
-        dragTarget = null;
-        dragStartPositions.clear();
         updateCursor();
         event.consume();
     }
@@ -1322,14 +1106,14 @@ public class ModelCanvas extends Canvas {
      * reset tool to Select, clear selection.
      */
     private void handleEscape() {
-        if (resizing) {
-            cancelResize();
+        if (resizeController.isActive()) {
+            resizeController.cancel(this::performUndo);
             redraw();
-        } else if (marqueeActive) {
-            cancelMarquee();
+        } else if (marqueeController.isActive()) {
+            marqueeController.cancel(canvasState);
             redraw();
-        } else if (reattaching) {
-            cancelReattachment();
+        } else if (reattachController.isActive()) {
+            reattachController.cancel();
             redraw();
         } else if (flowCreation.isPending()) {
             flowCreation.cancel();

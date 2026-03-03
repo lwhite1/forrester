@@ -20,6 +20,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.BiFunction;
 import java.util.function.Function;
+import java.util.function.UnaryOperator;
 
 /**
  * Mutable model editing layer that sits between the UI and the engine's immutable
@@ -312,14 +313,8 @@ public class ModelEditor {
      * @return true if the constant was found and updated
      */
     public boolean setConstantValue(String name, double value) {
-        for (int i = 0; i < constants.size(); i++) {
-            if (constants.get(i).name().equals(name)) {
-                ConstantDef c = constants.get(i);
-                constants.set(i, new ConstantDef(name, c.comment(), value, c.unit()));
-                return true;
-            }
-        }
-        return false;
+        return updateInList(constants, name, ConstantDef::name,
+                c -> new ConstantDef(name, c.comment(), value, c.unit()));
     }
 
     /**
@@ -331,15 +326,9 @@ public class ModelEditor {
         if (equation == null || equation.isBlank()) {
             return false;
         }
-        for (int i = 0; i < flows.size(); i++) {
-            if (flows.get(i).name().equals(name)) {
-                FlowDef f = flows.get(i);
-                flows.set(i, new FlowDef(f.name(), f.comment(), equation,
+        return updateInList(flows, name, FlowDef::name,
+                f -> new FlowDef(f.name(), f.comment(), equation,
                         f.timeUnit(), f.source(), f.sink()));
-                return true;
-            }
-        }
-        return false;
     }
 
     /**
@@ -351,14 +340,8 @@ public class ModelEditor {
         if (equation == null || equation.isBlank()) {
             return false;
         }
-        for (int i = 0; i < auxiliaries.size(); i++) {
-            if (auxiliaries.get(i).name().equals(name)) {
-                AuxDef a = auxiliaries.get(i);
-                auxiliaries.set(i, new AuxDef(a.name(), a.comment(), equation, a.unit()));
-                return true;
-            }
-        }
-        return false;
+        return updateInList(auxiliaries, name, AuxDef::name,
+                a -> new AuxDef(a.name(), a.comment(), equation, a.unit()));
     }
 
     /**
@@ -367,15 +350,9 @@ public class ModelEditor {
      * @return true if the stock was found and updated
      */
     public boolean setStockInitialValue(String name, double value) {
-        for (int i = 0; i < stocks.size(); i++) {
-            if (stocks.get(i).name().equals(name)) {
-                StockDef s = stocks.get(i);
-                stocks.set(i, new StockDef(name, s.comment(), value,
+        return updateInList(stocks, name, StockDef::name,
+                s -> new StockDef(name, s.comment(), value,
                         s.unit(), s.negativeValuePolicy()));
-                return true;
-            }
-        }
-        return false;
     }
 
     /**
@@ -387,15 +364,9 @@ public class ModelEditor {
         if (unit == null) {
             return false;
         }
-        for (int i = 0; i < stocks.size(); i++) {
-            if (stocks.get(i).name().equals(name)) {
-                StockDef s = stocks.get(i);
-                stocks.set(i, new StockDef(name, s.comment(), s.initialValue(),
+        return updateInList(stocks, name, StockDef::name,
+                s -> new StockDef(name, s.comment(), s.initialValue(),
                         unit, s.negativeValuePolicy()));
-                return true;
-            }
-        }
-        return false;
     }
 
     /**
@@ -404,15 +375,9 @@ public class ModelEditor {
      * @return true if the stock was found and updated
      */
     public boolean setStockNegativeValuePolicy(String name, String policy) {
-        for (int i = 0; i < stocks.size(); i++) {
-            if (stocks.get(i).name().equals(name)) {
-                StockDef s = stocks.get(i);
-                stocks.set(i, new StockDef(name, s.comment(), s.initialValue(),
+        return updateInList(stocks, name, StockDef::name,
+                s -> new StockDef(name, s.comment(), s.initialValue(),
                         s.unit(), policy));
-                return true;
-            }
-        }
-        return false;
     }
 
     /**
@@ -424,15 +389,9 @@ public class ModelEditor {
         if (timeUnit == null || timeUnit.isBlank()) {
             return false;
         }
-        for (int i = 0; i < flows.size(); i++) {
-            if (flows.get(i).name().equals(name)) {
-                FlowDef f = flows.get(i);
-                flows.set(i, new FlowDef(f.name(), f.comment(), f.equation(),
+        return updateInList(flows, name, FlowDef::name,
+                f -> new FlowDef(f.name(), f.comment(), f.equation(),
                         timeUnit, f.source(), f.sink()));
-                return true;
-            }
-        }
-        return false;
     }
 
     /**
@@ -444,14 +403,8 @@ public class ModelEditor {
         if (unit == null) {
             return false;
         }
-        for (int i = 0; i < auxiliaries.size(); i++) {
-            if (auxiliaries.get(i).name().equals(name)) {
-                AuxDef a = auxiliaries.get(i);
-                auxiliaries.set(i, new AuxDef(a.name(), a.comment(), a.equation(), unit));
-                return true;
-            }
-        }
-        return false;
+        return updateInList(auxiliaries, name, AuxDef::name,
+                a -> new AuxDef(a.name(), a.comment(), a.equation(), unit));
     }
 
     /**
@@ -463,22 +416,26 @@ public class ModelEditor {
         if (unit == null) {
             return false;
         }
-        for (int i = 0; i < constants.size(); i++) {
-            if (constants.get(i).name().equals(name)) {
-                ConstantDef c = constants.get(i);
-                constants.set(i, new ConstantDef(name, c.comment(), c.value(), unit));
-                return true;
-            }
-        }
-        return false;
+        return updateInList(constants, name, ConstantDef::name,
+                c -> new ConstantDef(name, c.comment(), c.value(), unit));
     }
 
     private <T> boolean renameInList(List<T> list, String oldName, String newName,
                                       Function<T, String> nameGetter,
                                       BiFunction<T, String, T> renamer) {
+        return updateInList(list, oldName, nameGetter, item -> renamer.apply(item, newName));
+    }
+
+    /**
+     * Finds the element with the given name in the list and replaces it with the
+     * result of applying the updater function. Returns true if the element was found.
+     */
+    private <T> boolean updateInList(List<T> list, String name,
+                                      Function<T, String> nameGetter,
+                                      UnaryOperator<T> updater) {
         for (int i = 0; i < list.size(); i++) {
-            if (nameGetter.apply(list.get(i)).equals(oldName)) {
-                list.set(i, renamer.apply(list.get(i), newName));
+            if (nameGetter.apply(list.get(i)).equals(name)) {
+                list.set(i, updater.apply(list.get(i)));
                 return true;
             }
         }

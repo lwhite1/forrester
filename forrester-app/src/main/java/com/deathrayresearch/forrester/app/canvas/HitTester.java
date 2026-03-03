@@ -73,16 +73,11 @@ public final class HitTester {
             double toX = state.getX(toName);
             double toY = state.getY(toName);
 
-            double fromW = LayoutMetrics.effectiveWidth(state, fromName) / 2;
-            double fromH = LayoutMetrics.effectiveHeight(state, fromName) / 2;
-            double toW = LayoutMetrics.effectiveWidth(state, toName) / 2;
-            double toH = LayoutMetrics.effectiveHeight(state, toName) / 2;
-
-            double[] clippedFrom = CanvasRenderer.clipToBorder(fromX, fromY, fromW, fromH, toX, toY);
-            double[] clippedTo = CanvasRenderer.clipToBorder(toX, toY, toW, toH, fromX, fromY);
+            FlowGeometry.Point2D clippedFrom = FlowGeometry.clipToElement(state, fromName, toX, toY);
+            FlowGeometry.Point2D clippedTo = FlowGeometry.clipToElement(state, toName, fromX, fromY);
 
             double dist = pointToSegmentDistance(worldX, worldY,
-                    clippedFrom[0], clippedFrom[1], clippedTo[0], clippedTo[1]);
+                    clippedFrom.x(), clippedFrom.y(), clippedTo.x(), clippedTo.y());
 
             if (dist <= CONNECTION_HIT_TOLERANCE) {
                 return new ConnectionId(fromName, toName);

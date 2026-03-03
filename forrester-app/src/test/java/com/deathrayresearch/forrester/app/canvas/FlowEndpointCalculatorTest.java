@@ -35,7 +35,7 @@ class FlowEndpointCalculatorTest {
             canvasState.addElement("Stock 2", ElementType.STOCK, 400, 200);
             canvasState.addElement(flow, ElementType.FLOW, 250, 200);
 
-            double[] pos = FlowEndpointCalculator.cloudPosition(
+            FlowGeometry.Point2D pos = FlowEndpointCalculator.cloudPosition(
                     FlowEndpointCalculator.FlowEnd.SOURCE,
                     editor.getFlows().get(0), canvasState);
 
@@ -51,7 +51,7 @@ class FlowEndpointCalculatorTest {
             canvasState.addElement("Stock 2", ElementType.STOCK, 400, 200);
             canvasState.addElement(flow, ElementType.FLOW, 250, 200);
 
-            double[] pos = FlowEndpointCalculator.cloudPosition(
+            FlowGeometry.Point2D pos = FlowEndpointCalculator.cloudPosition(
                     FlowEndpointCalculator.FlowEnd.SINK,
                     editor.getFlows().get(0), canvasState);
 
@@ -65,13 +65,13 @@ class FlowEndpointCalculatorTest {
             canvasState.addElement("Stock 1", ElementType.STOCK, 400, 200);
             canvasState.addElement(flow, ElementType.FLOW, 250, 200);
 
-            double[] pos = FlowEndpointCalculator.cloudPosition(
+            FlowGeometry.Point2D pos = FlowEndpointCalculator.cloudPosition(
                     FlowEndpointCalculator.FlowEnd.SOURCE,
                     editor.getFlows().get(0), canvasState);
 
             assertThat(pos).isNotNull();
             // Should be offset from diamond center away from sink direction
-            assertThat(pos[0]).isLessThan(250); // left of diamond (away from sink at 400)
+            assertThat(pos.x()).isLessThan(250); // left of diamond (away from sink at 400)
         }
 
         @Test
@@ -79,14 +79,14 @@ class FlowEndpointCalculatorTest {
             String flow = editor.addFlow(null, null);
             canvasState.addElement(flow, ElementType.FLOW, 250, 200);
 
-            double[] pos = FlowEndpointCalculator.cloudPosition(
+            FlowGeometry.Point2D pos = FlowEndpointCalculator.cloudPosition(
                     FlowEndpointCalculator.FlowEnd.SOURCE,
                     editor.getFlows().get(0), canvasState);
 
             assertThat(pos).isNotNull();
             // Default: left of diamond
-            assertThat(pos[0]).isCloseTo(250 - 80, within(1.0));
-            assertThat(pos[1]).isCloseTo(200, within(1.0));
+            assertThat(pos.x()).isCloseTo(250 - 80, within(1.0));
+            assertThat(pos.y()).isCloseTo(200, within(1.0));
         }
 
         @Test
@@ -94,14 +94,14 @@ class FlowEndpointCalculatorTest {
             String flow = editor.addFlow(null, null);
             canvasState.addElement(flow, ElementType.FLOW, 250, 200);
 
-            double[] pos = FlowEndpointCalculator.cloudPosition(
+            FlowGeometry.Point2D pos = FlowEndpointCalculator.cloudPosition(
                     FlowEndpointCalculator.FlowEnd.SINK,
                     editor.getFlows().get(0), canvasState);
 
             assertThat(pos).isNotNull();
             // Default: right of diamond
-            assertThat(pos[0]).isCloseTo(250 + 80, within(1.0));
-            assertThat(pos[1]).isCloseTo(200, within(1.0));
+            assertThat(pos.x()).isCloseTo(250 + 80, within(1.0));
+            assertThat(pos.y()).isCloseTo(200, within(1.0));
         }
     }
 
@@ -117,13 +117,13 @@ class FlowEndpointCalculatorTest {
             canvasState.addElement(flow, ElementType.FLOW, 250, 200);
 
             // Get cloud position to know where to click
-            double[] cloudPos = FlowEndpointCalculator.cloudPosition(
+            FlowGeometry.Point2D cloudPos = FlowEndpointCalculator.cloudPosition(
                     FlowEndpointCalculator.FlowEnd.SOURCE,
                     editor.getFlows().get(0), canvasState);
             assertThat(cloudPos).isNotNull();
 
             FlowEndpointCalculator.CloudHit hit = FlowEndpointCalculator.hitTestClouds(
-                    cloudPos[0], cloudPos[1], canvasState, editor);
+                    cloudPos.x(), cloudPos.y(), canvasState, editor);
 
             assertThat(hit).isNotNull();
             assertThat(hit.flowName()).isEqualTo(flow);
