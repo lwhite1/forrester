@@ -6,6 +6,7 @@ import com.deathrayresearch.forrester.model.def.ConstantDef;
 import com.deathrayresearch.forrester.model.def.ElementType;
 import com.deathrayresearch.forrester.model.def.FlowDef;
 import com.deathrayresearch.forrester.model.def.StockDef;
+import com.deathrayresearch.forrester.model.graph.FeedbackAnalysis;
 
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
@@ -61,12 +62,16 @@ public class CanvasRenderer {
 
     /**
      * Renders the full canvas: background, connections, elements, selection, and overlays.
+     *
+     * @param loopAnalysis optional feedback analysis; when non-null, loop participants
+     *                     and edges are highlighted with the loop color
      */
     public void render(GraphicsContext gc, double width, double height,
                        ModelEditor editor, List<ConnectorRoute> connectors,
                        FlowCreationController.State flowState,
                        ReattachState reattachState,
-                       MarqueeState marqueeState) {
+                       MarqueeState marqueeState,
+                       FeedbackAnalysis loopAnalysis) {
         // Background in screen space
         gc.clearRect(0, 0, width, height);
         gc.setFill(ColorPalette.BACKGROUND);
@@ -107,6 +112,11 @@ public class CanvasRenderer {
         // 1. Draw connections first (behind elements)
         drawMaterialFlows(gc, editor);
         drawInfoLinks(gc, connectors);
+
+        // 1b. Draw loop edge highlights (above normal connections, behind elements)
+        if (loopAnalysis != null) {
+            drawLoopEdges(gc, connectors, editor, loopAnalysis);
+        }
 
         // 2. Draw elements on top
         for (String name : canvasState.getDrawOrder()) {
@@ -154,6 +164,15 @@ public class CanvasRenderer {
                     ElementRenderer.drawModule(gc, name, cx - w / 2, cy - h / 2, w, h);
                 }
                 default -> { }
+            }
+        }
+
+        // 2b. Draw loop participant highlights around elements in loops
+        if (loopAnalysis != null) {
+            for (String name : loopAnalysis.loopParticipants()) {
+                if (canvasState.hasElement(name)) {
+                    FeedbackLoopRenderer.drawLoopHighlight(gc, canvasState, name);
+                }
             }
         }
 
@@ -270,6 +289,73 @@ public class CanvasRenderer {
 
             ConnectionRenderer.drawInfoLink(gc, clippedFrom[0], clippedFrom[1],
                     clippedTo[0], clippedTo[1]);
+        }
+    }
+
+    /**
+     * Draws highlighted edges for info links and material flows that are part of feedback loops.
+     */
+    private void drawLoopEdges(GraphicsContext gc, List<ConnectorRoute> connectors,
+                               ModelEditor editor, FeedbackAnalysis loopAnalysis) {
+        // Highlight info link edges
+        for (ConnectorRoute route : connectors) {
+            String fromName = route.from();
+            String toName = route.to();
+
+            if (!canvasState.hasElement(fromName) || !canvasState.hasElement(toName)) {
+                continue;
+            }
+            if (!loopAnalysis.isLoopEdge(fromName, toName)) {
+                continue;
+            }
+
+            double fromX = canvasState.getX(fromName);
+            double fromY = canvasState.getY(fromName);
+            double toX = canvasState.getX(toName);
+            double toY = canvasState.getY(toName);
+
+            ElementType fromType = canvasState.getType(fromName);
+            ElementType toType = canvasState.getType(toName);
+
+            double fromW = LayoutMetrics.widthFor(fromType) / 2;
+            double fromH = LayoutMetrics.heightFor(fromType) / 2;
+            double toW = LayoutMetrics.widthFor(toType) / 2;
+            double toH = LayoutMetrics.heightFor(toType) / 2;
+
+            double[] clippedFrom = clipToBorder(fromX, fromY, fromW, fromH, toX, toY);
+            double[] clippedTo = clipToBorder(toX, toY, toW, toH, fromX, fromY);
+
+            FeedbackLoopRenderer.drawLoopEdge(gc, clippedFrom[0], clippedFrom[1],
+                    clippedTo[0], clippedTo[1]);
+        }
+
+        // Highlight material flow edges (flow ↔ stock connections)
+        for (FlowDef flow : editor.getFlows()) {
+            if (!canvasState.hasElement(flow.name())) {
+                continue;
+            }
+            double midX = canvasState.getX(flow.name());
+            double midY = canvasState.getY(flow.name());
+
+            if (flow.source() != null && canvasState.hasElement(flow.source())
+                    && loopAnalysis.isLoopEdge(flow.name(), flow.source())) {
+                double scx = canvasState.getX(flow.source());
+                double scy = canvasState.getY(flow.source());
+                double[] edge = clipToBorder(scx, scy,
+                        LayoutMetrics.STOCK_WIDTH / 2, LayoutMetrics.STOCK_HEIGHT / 2,
+                        midX, midY);
+                FeedbackLoopRenderer.drawLoopEdge(gc, midX, midY, edge[0], edge[1]);
+            }
+
+            if (flow.sink() != null && canvasState.hasElement(flow.sink())
+                    && loopAnalysis.isLoopEdge(flow.name(), flow.sink())) {
+                double scx = canvasState.getX(flow.sink());
+                double scy = canvasState.getY(flow.sink());
+                double[] edge = clipToBorder(scx, scy,
+                        LayoutMetrics.STOCK_WIDTH / 2, LayoutMetrics.STOCK_HEIGHT / 2,
+                        midX, midY);
+                FeedbackLoopRenderer.drawLoopEdge(gc, midX, midY, edge[0], edge[1]);
+            }
         }
     }
 

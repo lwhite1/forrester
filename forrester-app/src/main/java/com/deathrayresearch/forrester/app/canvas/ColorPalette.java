@@ -22,4 +22,8 @@ public final class ColorPalette {
     public static final Color TEXT = Color.web("#2C3E50");
     public static final Color TEXT_SECONDARY = Color.web("#7F8C8D");
     public static final Color CLOUD = Color.web("#BDC3C7");
+
+    public static final Color LOOP_HIGHLIGHT = Color.web("#E74C3C", 0.8);
+    public static final Color LOOP_EDGE = Color.web("#E74C3C", 0.6);
+    public static final Color LOOP_FILL = Color.web("#E74C3C", 0.08);
 }

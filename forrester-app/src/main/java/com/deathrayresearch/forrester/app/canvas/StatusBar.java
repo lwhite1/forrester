@@ -14,6 +14,7 @@ public class StatusBar extends HBox {
     private final Label toolLabel = new Label();
     private final Label selectionLabel = new Label();
     private final Label elementsLabel = new Label();
+    private final Label loopLabel = new Label();
     private final Label zoomLabel = new Label();
 
     public StatusBar() {
@@ -25,6 +26,9 @@ public class StatusBar extends HBox {
         toolLabel.setStyle(labelStyle);
         selectionLabel.setStyle(labelStyle);
         elementsLabel.setStyle(labelStyle);
+        loopLabel.setStyle(labelStyle);
+        loopLabel.setVisible(false);
+        loopLabel.setManaged(false);
         zoomLabel.setStyle(labelStyle);
 
         Region spacer1 = new Region();
@@ -36,8 +40,13 @@ public class StatusBar extends HBox {
         sep1.setStyle(labelStyle);
         Label sep2 = new Label("  |  ");
         sep2.setStyle(labelStyle);
+        Label loopSep = new Label("  |  ");
+        loopSep.setStyle(labelStyle);
+        loopSep.visibleProperty().bind(loopLabel.visibleProperty());
+        loopSep.managedProperty().bind(loopLabel.managedProperty());
 
-        getChildren().addAll(toolLabel, sep1, selectionLabel, spacer1, elementsLabel, spacer2, sep2, zoomLabel);
+        getChildren().addAll(toolLabel, sep1, selectionLabel,
+                loopSep, loopLabel, spacer1, elementsLabel, spacer2, sep2, zoomLabel);
 
         updateTool(CanvasToolBar.Tool.SELECT);
         updateSelection(0);
@@ -81,6 +90,23 @@ public class StatusBar extends HBox {
             text += ")";
             elementsLabel.setText(text);
         }
+    }
+
+    public void updateLoops(int loopCount) {
+        loopLabel.setVisible(true);
+        loopLabel.setManaged(true);
+        if (loopCount == 0) {
+            loopLabel.setText("No loops");
+        } else if (loopCount == 1) {
+            loopLabel.setText("1 loop");
+        } else {
+            loopLabel.setText(loopCount + " loops");
+        }
+    }
+
+    public void clearLoops() {
+        loopLabel.setVisible(false);
+        loopLabel.setManaged(false);
     }
 
     public void updateZoom(double scale) {

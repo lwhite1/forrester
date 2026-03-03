@@ -15,6 +15,7 @@ import com.deathrayresearch.forrester.model.def.ModelDefinitionBuilder;
 import com.deathrayresearch.forrester.model.def.SimulationSettings;
 import com.deathrayresearch.forrester.model.def.ViewDef;
 import com.deathrayresearch.forrester.model.graph.AutoLayout;
+import com.deathrayresearch.forrester.model.graph.FeedbackAnalysis;
 
 import javafx.application.Application;
 import javafx.scene.Scene;
@@ -71,6 +72,10 @@ public class ForresterApp extends Application {
         toolBar.setOnToolChanged(tool -> {
             canvas.setActiveTool(tool);
             statusBar.updateTool(tool);
+        });
+        toolBar.setOnLoopToggleChanged(active -> {
+            canvas.setLoopHighlightActive(active);
+            updateLoopStatus();
         });
         canvas.setToolBar(toolBar);
         canvas.setOnStatusChanged(this::updateStatusBar);
@@ -341,6 +346,19 @@ public class ForresterApp extends Application {
         }
         if (redoItem != null) {
             redoItem.setDisable(activeUndo == null || !activeUndo.canRedo());
+        }
+    }
+
+    private void updateLoopStatus() {
+        if (statusBar == null) {
+            return;
+        }
+        if (canvas.isLoopHighlightActive()) {
+            FeedbackAnalysis analysis = canvas.getLoopAnalysis();
+            int count = analysis != null ? analysis.loopCount() : 0;
+            statusBar.updateLoops(count);
+        } else {
+            statusBar.clearLoops();
         }
     }
 

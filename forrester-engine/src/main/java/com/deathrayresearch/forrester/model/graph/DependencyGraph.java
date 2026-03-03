@@ -181,4 +181,11 @@ public class DependencyGraph {
     public Set<String> allNodes() {
         return Collections.unmodifiableSet(allNodes);
     }
+
+    /**
+     * Returns an unmodifiable view of the adjacency map (from → {to}).
+     */
+    public Map<String, Set<String>> adjacencyMap() {
+        return Collections.unmodifiableMap(adjacency);
+    }
 }

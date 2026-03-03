@@ -9,6 +9,8 @@ import com.deathrayresearch.forrester.model.def.ModelDefinition;
 import com.deathrayresearch.forrester.model.def.ModuleInstanceDef;
 import com.deathrayresearch.forrester.model.def.ViewDef;
 import com.deathrayresearch.forrester.model.graph.AutoLayout;
+import com.deathrayresearch.forrester.model.graph.DependencyGraph;
+import com.deathrayresearch.forrester.model.graph.FeedbackAnalysis;
 
 import javafx.scene.Cursor;
 import javafx.scene.canvas.Canvas;
@@ -102,6 +104,10 @@ public class ModelCanvas extends Canvas {
     private Runnable onNavigationChanged;
     private ContextMenu contextMenu;
 
+    // Feedback loop highlighting
+    private boolean loopHighlightActive;
+    private FeedbackAnalysis loopAnalysis;
+
     public ModelCanvas() {
         setFocusTraversable(true);
 
@@ -124,6 +130,7 @@ public class ModelCanvas extends Canvas {
         this.editor = editor;
         canvasState.loadFrom(view);
         this.connectors = editor.generateConnectors();
+        invalidateLoopAnalysis();
         redraw();
     }
 
@@ -183,6 +190,52 @@ public class ModelCanvas extends Canvas {
     }
 
     /**
+     * Toggles feedback loop highlighting. When activated, computes a
+     * {@link FeedbackAnalysis} from the current model and stores the result.
+     * When deactivated, clears the cached analysis.
+     */
+    public void setLoopHighlightActive(boolean active) {
+        this.loopHighlightActive = active;
+        if (active && editor != null) {
+            recomputeLoopAnalysis();
+        } else {
+            this.loopAnalysis = null;
+        }
+        redraw();
+    }
+
+    public boolean isLoopHighlightActive() {
+        return loopHighlightActive;
+    }
+
+    /**
+     * Returns the current loop analysis, or null if loop highlighting is not active.
+     */
+    public FeedbackAnalysis getLoopAnalysis() {
+        return loopAnalysis;
+    }
+
+    private void recomputeLoopAnalysis() {
+        if (editor == null) {
+            loopAnalysis = null;
+            return;
+        }
+        DependencyGraph graph = DependencyGraph.fromDefinition(
+                editor.toModelDefinition(canvasState.toViewDef()));
+        loopAnalysis = FeedbackAnalysis.analyze(graph);
+    }
+
+    /**
+     * Invalidates the cached loop analysis so it is recomputed on the next redraw
+     * (if loop highlighting is active).
+     */
+    private void invalidateLoopAnalysis() {
+        if (loopHighlightActive && editor != null) {
+            recomputeLoopAnalysis();
+        }
+    }
+
+    /**
      * Sets the undo manager used for undo/redo operations.
      */
     public void setUndoManager(UndoManager undoManager) {
@@ -221,6 +274,7 @@ public class ModelCanvas extends Canvas {
         editor.loadFrom(snapshot.model());
         canvasState.loadFrom(snapshot.view());
         connectors = editor.generateConnectors();
+        invalidateLoopAnalysis();
         redraw();
     }
 
@@ -321,7 +375,8 @@ public class ModelCanvas extends Canvas {
                         marqueeEndWorldX, marqueeEndWorldY)
                 : CanvasRenderer.MarqueeState.IDLE;
         renderer.render(getGraphicsContext2D(), getWidth(), getHeight(),
-                editor, connectors, flowCreation.getState(), reattachState, marqueeState);
+                editor, connectors, flowCreation.getState(), reattachState, marqueeState,
+                loopHighlightActive ? loopAnalysis : null);
         fireStatusChanged();
     }
 
@@ -364,6 +419,7 @@ public class ModelCanvas extends Canvas {
 
         canvasState.addElement(name, type, worldX, worldY);
         connectors = editor.generateConnectors();
+        invalidateLoopAnalysis();
         canvasState.clearSelection();
         canvasState.select(name);
         redraw();
@@ -387,6 +443,7 @@ public class ModelCanvas extends Canvas {
         }
 
         connectors = editor.generateConnectors();
+        invalidateLoopAnalysis();
         redraw();
         updateCursor();
     }
@@ -403,6 +460,7 @@ public class ModelCanvas extends Canvas {
         String name = flowCreation.handleClick(worldX, worldY, canvasState, editor);
         if (name != null) {
             connectors = editor.generateConnectors();
+            invalidateLoopAnalysis();
             canvasState.clearSelection();
             canvasState.select(name);
         }
@@ -510,6 +568,7 @@ public class ModelCanvas extends Canvas {
                 saveUndoState();
                 editor.setFlowEquation(flowName, eqText);
                 connectors = editor.generateConnectors();
+                invalidateLoopAnalysis();
                 redraw();
             }
             requestFocus();
@@ -534,6 +593,7 @@ public class ModelCanvas extends Canvas {
                 saveUndoState();
                 editor.setAuxEquation(auxName, eqText);
                 connectors = editor.generateConnectors();
+                invalidateLoopAnalysis();
                 redraw();
             }
             requestFocus();
@@ -555,6 +615,7 @@ public class ModelCanvas extends Canvas {
         }
         canvasState.renameElement(oldName, newName);
         connectors = editor.generateConnectors();
+        invalidateLoopAnalysis();
         redraw();
     }
 
@@ -611,6 +672,7 @@ public class ModelCanvas extends Canvas {
         String stockHit = FlowCreationController.hitTestStockOnly(worldX, worldY, canvasState);
         editor.reconnectFlow(reattachFlowName, reattachEnd, stockHit);
         connectors = editor.generateConnectors();
+        invalidateLoopAnalysis();
         cancelReattachment();
         redraw();
     }
@@ -1162,6 +1224,7 @@ public class ModelCanvas extends Canvas {
 
         // Regenerate connectors and redraw
         connectors = editor.generateConnectors();
+        invalidateLoopAnalysis();
         redraw();
 
         fireNavigationChanged();

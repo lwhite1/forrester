@@ -28,7 +28,9 @@ public class CanvasToolBar extends ToolBar {
 
     private final ToggleGroup group = new ToggleGroup();
     private final ToggleButton selectButton;
+    private final ToggleButton loopsButton;
     private Consumer<Tool> onToolChanged;
+    private Consumer<Boolean> onLoopToggleChanged;
 
     public CanvasToolBar() {
         selectButton = makeButton("Select", Tool.SELECT);
@@ -40,8 +42,17 @@ public class CanvasToolBar extends ToolBar {
 
         selectButton.setSelected(true);
 
+        // Independent toggle for loop highlighting (not in the tool group)
+        loopsButton = new ToggleButton("Loops");
+        loopsButton.setOnAction(event -> {
+            if (onLoopToggleChanged != null) {
+                onLoopToggleChanged.accept(loopsButton.isSelected());
+            }
+        });
+
         getItems().addAll(selectButton, new Separator(),
-                stockButton, flowButton, auxButton, constantButton, moduleButton);
+                stockButton, flowButton, auxButton, constantButton, moduleButton,
+                new Separator(), loopsButton);
     }
 
     private ToggleButton makeButton(String label, Tool tool) {
@@ -101,5 +112,12 @@ public class CanvasToolBar extends ToolBar {
      */
     public void setOnToolChanged(Consumer<Tool> callback) {
         this.onToolChanged = callback;
+    }
+
+    /**
+     * Sets a callback invoked when the Loops toggle button is toggled on or off.
+     */
+    public void setOnLoopToggleChanged(Consumer<Boolean> callback) {
+        this.onLoopToggleChanged = callback;
     }
 }
