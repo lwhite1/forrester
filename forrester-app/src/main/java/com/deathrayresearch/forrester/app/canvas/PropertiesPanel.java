@@ -10,6 +10,9 @@ import com.deathrayresearch.forrester.model.def.StockDef;
 
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.scene.chart.LineChart;
+import javafx.scene.chart.NumberAxis;
+import javafx.scene.chart.XYChart;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
@@ -497,6 +500,11 @@ public class PropertiesPanel extends VBox {
         propertyGrid.add(tableGrid, 0, row, 2, 1);
         row++;
 
+        // Inline chart preview
+        LineChart<Number, Number> lookupChart = buildLookupChart(xs, ys);
+        propertyGrid.add(lookupChart, 0, row, 2, 1);
+        row++;
+
         // Add/remove row buttons
         HBox rowButtons = new HBox(4);
         Button addRowBtn = new Button("+ Row");
@@ -576,6 +584,40 @@ public class PropertiesPanel extends VBox {
             xField.setText(ElementRenderer.formatValue(lt.xValues()[index]));
             yField.setText(ElementRenderer.formatValue(lt.yValues()[index]));
         }
+    }
+
+    private LineChart<Number, Number> buildLookupChart(double[] xs, double[] ys) {
+        NumberAxis xAxis = new NumberAxis();
+        xAxis.setLabel("X");
+        xAxis.setTickLabelFont(javafx.scene.text.Font.font(9));
+
+        NumberAxis yAxis = new NumberAxis();
+        yAxis.setLabel("Y");
+        yAxis.setTickLabelFont(javafx.scene.text.Font.font(9));
+
+        LineChart<Number, Number> chart = new LineChart<>(xAxis, yAxis);
+        chart.setCreateSymbols(true);
+        chart.setAnimated(false);
+        chart.setLegendVisible(false);
+        chart.setPrefHeight(160);
+        chart.setMinHeight(120);
+        chart.setPadding(Insets.EMPTY);
+
+        XYChart.Series<Number, Number> series = new XYChart.Series<>();
+        for (int i = 0; i < xs.length; i++) {
+            series.getData().add(new XYChart.Data<>(xs[i], ys[i]));
+        }
+        chart.getData().add(series);
+
+        // Style the line blue
+        chart.setStyle("-fx-padding: 0;");
+        series.nodeProperty().addListener((obs, oldNode, newNode) -> {
+            if (newNode != null) {
+                newNode.setStyle("-fx-stroke: #1f77b4; -fx-stroke-width: 2px;");
+            }
+        });
+
+        return chart;
     }
 
     // --- Commit handlers ---
