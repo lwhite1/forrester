@@ -50,10 +50,11 @@ public final class ElementRenderer {
     /**
      * Draws a flow process indicator: small rounded diamond with name label and equation.
      *
-     * @param x      top-left X
-     * @param y      top-left Y
-     * @param width  bounding box width
-     * @param height bounding box height
+     * @param equation the equation string (null or "0" suppresses display)
+     * @param x        top-left X
+     * @param y        top-left Y
+     * @param width    bounding box width
+     * @param height   bounding box height
      */
     public static void drawFlow(GraphicsContext gc, String name, String equation,
                                 double x, double y, double width, double height) {
@@ -77,21 +78,23 @@ public final class ElementRenderer {
         gc.setFont(LayoutMetrics.FLOW_NAME_FONT);
         gc.setTextAlign(TextAlignment.CENTER);
         gc.setTextBaseline(VPos.TOP);
-        gc.fillText(name, cx, cy + half + 4);
+        gc.fillText(name, cx, cy + half + LayoutMetrics.FLOW_NAME_GAP);
 
-        // Equation below the name
-        if (equation != null && !equation.isBlank()) {
+        // Equation below the name (suppress default "0")
+        if (isDisplayableEquation(equation)) {
             gc.setFill(ColorPalette.TEXT_SECONDARY);
             gc.setFont(LayoutMetrics.BADGE_FONT);
             gc.setTextAlign(TextAlignment.CENTER);
             gc.setTextBaseline(VPos.TOP);
-            gc.fillText(equation, cx, cy + half + 18);
+            gc.fillText(equation, cx, cy + half + LayoutMetrics.FLOW_EQUATION_GAP);
         }
     }
 
     /**
      * Draws an auxiliary variable: medium rounded rectangle with "fx" badge, centered name,
      * and equation.
+     *
+     * @param equation the equation string (null or "0" suppresses display)
      */
     public static void drawAux(GraphicsContext gc, String name, String equation,
                                double x, double y, double width, double height) {
@@ -119,15 +122,15 @@ public final class ElementRenderer {
         gc.setFont(LayoutMetrics.AUX_NAME_FONT);
         gc.setTextAlign(TextAlignment.CENTER);
         gc.setTextBaseline(VPos.CENTER);
-        gc.fillText(name, x + width / 2, y + height / 2 - 6);
+        gc.fillText(name, x + width / 2, y + height / 2 + LayoutMetrics.LABEL_NAME_OFFSET);
 
-        // Equation below name
-        if (equation != null && !equation.isBlank()) {
+        // Equation below name (suppress default "0")
+        if (isDisplayableEquation(equation)) {
             gc.setFill(ColorPalette.TEXT_SECONDARY);
             gc.setFont(LayoutMetrics.BADGE_FONT);
             gc.setTextAlign(TextAlignment.CENTER);
             gc.setTextBaseline(VPos.CENTER);
-            gc.fillText(equation, x + width / 2, y + height / 2 + 8);
+            gc.fillText(equation, x + width / 2, y + height / 2 + LayoutMetrics.LABEL_SUBLABEL_OFFSET);
         }
     }
 
@@ -161,14 +164,22 @@ public final class ElementRenderer {
         gc.setFont(LayoutMetrics.CONSTANT_NAME_FONT);
         gc.setTextAlign(TextAlignment.CENTER);
         gc.setTextBaseline(VPos.CENTER);
-        gc.fillText(name, x + width / 2, y + height / 2 - 6);
+        gc.fillText(name, x + width / 2, y + height / 2 + LayoutMetrics.LABEL_NAME_OFFSET);
 
         // Value below name
         gc.setFill(ColorPalette.TEXT_SECONDARY);
         gc.setFont(LayoutMetrics.BADGE_FONT);
         gc.setTextAlign(TextAlignment.CENTER);
         gc.setTextBaseline(VPos.CENTER);
-        gc.fillText(formatValue(value), x + width / 2, y + height / 2 + 8);
+        gc.fillText(formatValue(value), x + width / 2, y + height / 2 + LayoutMetrics.LABEL_SUBLABEL_OFFSET);
+    }
+
+    /**
+     * Returns true if the equation should be displayed on the canvas.
+     * Suppresses null, blank, and the default placeholder "0".
+     */
+    static boolean isDisplayableEquation(String equation) {
+        return equation != null && !equation.isBlank() && !"0".equals(equation.strip());
     }
 
     static String formatValue(double value) {

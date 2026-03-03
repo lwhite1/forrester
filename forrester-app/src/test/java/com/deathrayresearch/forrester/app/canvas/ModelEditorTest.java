@@ -284,6 +284,38 @@ class ModelEditorTest {
             FlowDef flow = editor.getFlows().get(0);
             assertThat(flow.equation()).isEqualTo("0 * k");
         }
+
+        @Test
+        void shouldCleanAuxEquationWhenReferencedElementDeleted() {
+            ModelDefinition def = new ModelDefinitionBuilder()
+                    .name("Test")
+                    .stock("S", 100, "u")
+                    .constant("k", 0.5, "1/day")
+                    .aux("Rate", "S * k", "u")
+                    .build();
+            editor.loadFrom(def);
+
+            editor.removeElement("k");
+
+            AuxDef aux = editor.getAuxiliaries().get(0);
+            assertThat(aux.equation()).isEqualTo("S * 0");
+        }
+
+        @Test
+        void shouldCleanFlowEquationWhenReferencedAuxDeleted() {
+            ModelDefinition def = new ModelDefinitionBuilder()
+                    .name("Test")
+                    .stock("S", 100, "u")
+                    .aux("Calc", "S * 2", "u")
+                    .flow("F", "Calc + 1", "day", "S", null)
+                    .build();
+            editor.loadFrom(def);
+
+            editor.removeElement("Calc");
+
+            FlowDef flow = editor.getFlows().get(0);
+            assertThat(flow.equation()).isEqualTo("0 + 1");
+        }
     }
 
     @Nested
@@ -449,6 +481,37 @@ class ModelEditorTest {
 
             assertThat(result).isFalse();
             assertThat(editor.getStocks().get(0).name()).isEqualTo("Stock 1");
+        }
+
+        @Test
+        void shouldUpdateAuxEquationWhenReferencedElementRenamed() {
+            ModelDefinition def = new ModelDefinitionBuilder()
+                    .name("Test")
+                    .stock("S", 100, "people")
+                    .aux("Rate", "S * 0.1", "1/day")
+                    .flow("F", "Rate * S", "day", "S", null)
+                    .build();
+            editor.loadFrom(def);
+
+            editor.renameElement("S", "Population");
+
+            assertThat(editor.getAuxiliaries().get(0).equation()).isEqualTo("Population * 0.1");
+            assertThat(editor.getFlows().get(0).equation()).isEqualTo("Rate * Population");
+        }
+
+        @Test
+        void shouldUpdateFlowEquationWhenReferencedAuxRenamed() {
+            ModelDefinition def = new ModelDefinitionBuilder()
+                    .name("Test")
+                    .stock("S", 100, "u")
+                    .aux("Calc", "S * 2", "u")
+                    .flow("F", "Calc + 1", "day", "S", null)
+                    .build();
+            editor.loadFrom(def);
+
+            editor.renameElement("Calc", "Result");
+
+            assertThat(editor.getFlows().get(0).equation()).isEqualTo("Result + 1");
         }
 
         @Test

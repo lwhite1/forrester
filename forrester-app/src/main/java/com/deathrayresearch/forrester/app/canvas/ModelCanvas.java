@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 
 /**
  * Canvas component that renders a model using the Layered Flow Diagram visual language.
@@ -293,14 +294,14 @@ public class ModelCanvas extends Canvas {
         double screenY = viewport.toScreenY(worldY);
         double fieldWidth = (LayoutMetrics.widthFor(type) + 20) * viewport.getScale();
 
-        if (type == ElementType.CONSTANT) {
-            startConstantNameEdit(elementName, screenX, screenY, fieldWidth);
-        } else if (type == ElementType.FLOW) {
-            startFlowNameEdit(elementName, screenX, screenY, fieldWidth);
-        } else if (type == ElementType.AUX) {
-            startAuxNameEdit(elementName, screenX, screenY, fieldWidth);
-        } else {
-            inlineEditor.open(screenX, screenY, elementName, fieldWidth, newName -> {
+        switch (type) {
+            case CONSTANT -> startNameEditThenChain(elementName, screenX, screenY, fieldWidth,
+                    name -> startConstantValueEdit(name, screenX, screenY, fieldWidth));
+            case FLOW -> startNameEditThenChain(elementName, screenX, screenY, fieldWidth,
+                    name -> startFlowEquationEdit(name, screenX, screenY));
+            case AUX -> startNameEditThenChain(elementName, screenX, screenY, fieldWidth,
+                    name -> startAuxEquationEdit(name, screenX, screenY));
+            default -> inlineEditor.open(screenX, screenY, elementName, fieldWidth, newName -> {
                 if (newName != null && !newName.equals(elementName)
                         && ModelEditor.isValidName(newName)) {
                     applyRename(elementName, newName);
@@ -311,10 +312,11 @@ public class ModelCanvas extends Canvas {
     }
 
     /**
-     * Starts editing a constant's name. On commit, proceeds to value editing.
+     * Starts a name edit, then chains to a follow-up action (value or equation editing).
+     * Common logic for constants, flows, and auxiliaries.
      */
-    private void startConstantNameEdit(String elementName, double screenX, double screenY,
-                                       double fieldWidth) {
+    private void startNameEditThenChain(String elementName, double screenX, double screenY,
+                                        double fieldWidth, Consumer<String> chainAction) {
         inlineEditor.open(screenX, screenY, elementName, fieldWidth, newName -> {
             String effectiveName;
             if (newName != null && !newName.equals(elementName)
@@ -324,8 +326,7 @@ public class ModelCanvas extends Canvas {
             } else {
                 effectiveName = elementName;
             }
-            // Chain to value editing
-            startConstantValueEdit(effectiveName, screenX, screenY, fieldWidth);
+            chainAction.accept(effectiveName);
         });
     }
 
@@ -337,7 +338,6 @@ public class ModelCanvas extends Canvas {
         ConstantDef cd = findConstant(constantName);
         String currentValue = cd != null ? ElementRenderer.formatValue(cd.value()) : "0";
 
-        // Position value editor slightly below name
         double valueScreenY = screenY + 16 * viewport.getScale();
 
         inlineEditor.open(screenX, valueScreenY, currentValue, fieldWidth, valueText -> {
@@ -355,34 +355,18 @@ public class ModelCanvas extends Canvas {
     }
 
     /**
-     * Starts editing a flow's name. On commit, proceeds to equation editing.
-     */
-    private void startFlowNameEdit(String elementName, double screenX, double screenY,
-                                    double fieldWidth) {
-        inlineEditor.open(screenX, screenY, elementName, fieldWidth, newName -> {
-            String effectiveName;
-            if (newName != null && !newName.equals(elementName)
-                    && ModelEditor.isValidName(newName)) {
-                applyRename(elementName, newName);
-                effectiveName = newName;
-            } else {
-                effectiveName = elementName;
-            }
-            startFlowEquationEdit(effectiveName, screenX, screenY, fieldWidth);
-        });
-    }
-
-    /**
      * Starts editing a flow's equation after the name edit completes.
+     * Uses wider field and positions below the diamond + name label.
      */
-    private void startFlowEquationEdit(String flowName, double screenX, double screenY,
-                                        double fieldWidth) {
+    private void startFlowEquationEdit(String flowName, double screenX, double screenY) {
         FlowDef fd = findFlow(flowName);
         String currentEquation = fd != null ? fd.equation() : "0";
 
-        double eqScreenY = screenY + 16 * viewport.getScale();
+        double eqScreenY = screenY + LayoutMetrics.FLOW_EQUATION_EDITOR_OFFSET * viewport.getScale();
+        double eqFieldWidth = Math.max(LayoutMetrics.EQUATION_EDITOR_MIN_WIDTH,
+                LayoutMetrics.AUX_WIDTH + 20) * viewport.getScale();
 
-        inlineEditor.open(screenX, eqScreenY, currentEquation, fieldWidth, eqText -> {
+        inlineEditor.open(screenX, eqScreenY, currentEquation, eqFieldWidth, eqText -> {
             if (eqText != null && !eqText.isBlank()) {
                 editor.setFlowEquation(flowName, eqText);
                 connectors = editor.generateConnectors();
@@ -393,34 +377,18 @@ public class ModelCanvas extends Canvas {
     }
 
     /**
-     * Starts editing an auxiliary's name. On commit, proceeds to equation editing.
-     */
-    private void startAuxNameEdit(String elementName, double screenX, double screenY,
-                                   double fieldWidth) {
-        inlineEditor.open(screenX, screenY, elementName, fieldWidth, newName -> {
-            String effectiveName;
-            if (newName != null && !newName.equals(elementName)
-                    && ModelEditor.isValidName(newName)) {
-                applyRename(elementName, newName);
-                effectiveName = newName;
-            } else {
-                effectiveName = elementName;
-            }
-            startAuxEquationEdit(effectiveName, screenX, screenY, fieldWidth);
-        });
-    }
-
-    /**
      * Starts editing an auxiliary's equation after the name edit completes.
+     * Uses wider field and positions below the name inside the rectangle.
      */
-    private void startAuxEquationEdit(String auxName, double screenX, double screenY,
-                                       double fieldWidth) {
+    private void startAuxEquationEdit(String auxName, double screenX, double screenY) {
         AuxDef ad = findAux(auxName);
         String currentEquation = ad != null ? ad.equation() : "0";
 
-        double eqScreenY = screenY + 16 * viewport.getScale();
+        double eqScreenY = screenY + LayoutMetrics.LABEL_SUBLABEL_OFFSET * viewport.getScale();
+        double eqFieldWidth = Math.max(LayoutMetrics.EQUATION_EDITOR_MIN_WIDTH,
+                LayoutMetrics.AUX_WIDTH + 20) * viewport.getScale();
 
-        inlineEditor.open(screenX, eqScreenY, currentEquation, fieldWidth, eqText -> {
+        inlineEditor.open(screenX, eqScreenY, currentEquation, eqFieldWidth, eqText -> {
             if (eqText != null && !eqText.isBlank()) {
                 editor.setAuxEquation(auxName, eqText);
                 connectors = editor.generateConnectors();

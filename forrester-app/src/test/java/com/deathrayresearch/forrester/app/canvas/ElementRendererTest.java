@@ -10,6 +10,39 @@ import static org.assertj.core.api.Assertions.assertThat;
 class ElementRendererTest {
 
     @Nested
+    @DisplayName("isDisplayableEquation")
+    class IsDisplayableEquation {
+
+        @Test
+        void shouldRejectNull() {
+            assertThat(ElementRenderer.isDisplayableEquation(null)).isFalse();
+        }
+
+        @Test
+        void shouldRejectBlank() {
+            assertThat(ElementRenderer.isDisplayableEquation("")).isFalse();
+            assertThat(ElementRenderer.isDisplayableEquation("   ")).isFalse();
+        }
+
+        @Test
+        void shouldRejectDefaultZero() {
+            assertThat(ElementRenderer.isDisplayableEquation("0")).isFalse();
+            assertThat(ElementRenderer.isDisplayableEquation(" 0 ")).isFalse();
+        }
+
+        @Test
+        void shouldAcceptRealEquation() {
+            assertThat(ElementRenderer.isDisplayableEquation("Stock_1 * 0.5")).isTrue();
+        }
+
+        @Test
+        void shouldAcceptZeroInExpression() {
+            assertThat(ElementRenderer.isDisplayableEquation("0.5")).isTrue();
+            assertThat(ElementRenderer.isDisplayableEquation("x + 0")).isTrue();
+        }
+    }
+
+    @Nested
     @DisplayName("formatValue")
     class FormatValue {
 

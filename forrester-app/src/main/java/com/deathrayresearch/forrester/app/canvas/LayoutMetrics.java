@@ -35,6 +35,8 @@ public final class LayoutMetrics {
 
     // Flow indicator
     public static final double FLOW_INDICATOR_SIZE = 30;
+    public static final double FLOW_HIT_HALF_WIDTH = 55;
+    public static final double FLOW_HIT_HALF_HEIGHT = 35;
 
     // Material flow line
     public static final double MATERIAL_FLOW_WIDTH = 4;
@@ -52,6 +54,20 @@ public final class LayoutMetrics {
     public static final double CLOUD_RADIUS = 12;
     public static final double CLOUD_OFFSET = 80;
     public static final double CLOUD_LINE_WIDTH = 1.5;
+
+    // Text positioning offsets
+    /** Gap below flow diamond to name label. */
+    public static final double FLOW_NAME_GAP = 4;
+    /** Gap below flow diamond to equation label. */
+    public static final double FLOW_EQUATION_GAP = 18;
+    /** Offset from element center for name when a sub-label is present. */
+    public static final double LABEL_NAME_OFFSET = -6;
+    /** Offset from element center for sub-label (equation or value). */
+    public static final double LABEL_SUBLABEL_OFFSET = 8;
+    /** Minimum width for equation editor text fields. */
+    public static final double EQUATION_EDITOR_MIN_WIDTH = 150;
+    /** Y offset from flow center to equation editor position (world units). */
+    public static final double FLOW_EQUATION_EDITOR_OFFSET = 28;
 
     // Fonts
     public static final Font STOCK_NAME_FONT = Font.font("System", FontWeight.BOLD, 13);

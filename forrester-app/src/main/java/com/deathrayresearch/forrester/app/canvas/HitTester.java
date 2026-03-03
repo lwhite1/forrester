@@ -31,7 +31,9 @@ public final class HitTester {
             }
 
             if (type == ElementType.FLOW) {
-                if (hitTestDiamond(worldX, worldY, cx, cy, LayoutMetrics.FLOW_INDICATOR_SIZE / 2)) {
+                if (hitTestRect(worldX, worldY, cx, cy,
+                        LayoutMetrics.FLOW_HIT_HALF_WIDTH,
+                        LayoutMetrics.FLOW_HIT_HALF_HEIGHT)) {
                     return name;
                 }
             } else {

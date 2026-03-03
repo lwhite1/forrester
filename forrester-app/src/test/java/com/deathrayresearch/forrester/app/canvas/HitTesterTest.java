@@ -113,7 +113,7 @@ class HitTesterTest {
     }
 
     @Nested
-    @DisplayName("flow hit testing (diamond)")
+    @DisplayName("flow hit testing (rectangular, covers name/equation text)")
     class FlowHitTest {
 
         @BeforeEach
@@ -130,21 +130,23 @@ class HitTesterTest {
         }
 
         @Test
-        void shouldHitAtDiamondTip() {
-            // Flow indicator size=30, half=15
-            assertThat(HitTester.hitTest(state, 200 + 15, 200)).isEqualTo("rate");
-            assertThat(HitTester.hitTest(state, 200, 200 + 15)).isEqualTo("rate");
+        void shouldHitInNameLabelArea() {
+            // Flow hit area extends 35 pixels below center, covering name/equation text
+            assertThat(HitTester.hitTest(state, 200, 200 + 30)).isEqualTo("rate");
         }
 
         @Test
-        void shouldMissAtDiamondCorner() {
-            // The point (cx+15, cy+15) has Manhattan distance 30 > 15, so should miss
-            assertThat(HitTester.hitTest(state, 200 + 15, 200 + 15)).isNull();
+        void shouldHitWideForTextLabels() {
+            // Flow hit area extends 55 pixels to each side, covering text labels
+            assertThat(HitTester.hitTest(state, 200 + 50, 200)).isEqualTo("rate");
+            assertThat(HitTester.hitTest(state, 200 - 50, 200)).isEqualTo("rate");
         }
 
         @Test
         void shouldMissOutside() {
-            assertThat(HitTester.hitTest(state, 200 + 16, 200)).isNull();
+            // Half-width=55, half-height=35
+            assertThat(HitTester.hitTest(state, 200 + 56, 200)).isNull();
+            assertThat(HitTester.hitTest(state, 200, 200 + 36)).isNull();
         }
     }
 
