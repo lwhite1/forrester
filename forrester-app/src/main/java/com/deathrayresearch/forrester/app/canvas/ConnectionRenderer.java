@@ -12,82 +12,45 @@ public final class ConnectionRenderer {
     private ConnectionRenderer() {
     }
 
-    private static final double CLOUD_OFFSET = 80;
-
     /**
      * Draws a material flow routed through the flow indicator (diamond) position.
-     * The path is: source → diamond → sink, with clouds at missing endpoints.
+     * The path is: source → diamond → sink, with clouds drawn at endpoints marked as clouds.
+     * All coordinates must be concrete (no NaN) — the caller is responsible for computing
+     * cloud positions via {@link FlowEndpointCalculator#cloudPosition}.
      *
-     * @param sourceX  source stock edge X (NaN if cloud)
-     * @param sourceY  source stock edge Y (NaN if cloud)
-     * @param midX     flow indicator (diamond) center X
-     * @param midY     flow indicator (diamond) center Y
-     * @param sinkX    sink stock edge X (NaN if cloud)
-     * @param sinkY    sink stock edge Y (NaN if cloud)
+     * @param sourceX       source endpoint X
+     * @param sourceY       source endpoint Y
+     * @param midX          flow indicator (diamond) center X
+     * @param midY          flow indicator (diamond) center Y
+     * @param sinkX         sink endpoint X
+     * @param sinkY         sink endpoint Y
+     * @param sourceIsCloud true if the source endpoint is a cloud (disconnected)
+     * @param sinkIsCloud   true if the sink endpoint is a cloud (disconnected)
      */
     public static void drawMaterialFlow(GraphicsContext gc,
                                         double sourceX, double sourceY,
                                         double midX, double midY,
-                                        double sinkX, double sinkY) {
-        boolean hasSource = !Double.isNaN(sourceX);
-        boolean hasSink = !Double.isNaN(sinkX);
-
-        // Compute cloud positions relative to diamond when stock is missing
-        double startX;
-        double startY;
-        if (hasSource) {
-            startX = sourceX;
-            startY = sourceY;
-        } else {
-            double dx = hasSink ? midX - sinkX : -CLOUD_OFFSET;
-            double dy = hasSink ? midY - sinkY : 0;
-            double dist = Math.sqrt(dx * dx + dy * dy);
-            if (dist < 1) {
-                dx = -CLOUD_OFFSET;
-                dy = 0;
-                dist = CLOUD_OFFSET;
-            }
-            startX = midX + dx / dist * CLOUD_OFFSET;
-            startY = midY + dy / dist * CLOUD_OFFSET;
+                                        double sinkX, double sinkY,
+                                        boolean sourceIsCloud, boolean sinkIsCloud) {
+        // Draw clouds at disconnected endpoints
+        if (sourceIsCloud) {
+            drawCloud(gc, sourceX, sourceY);
         }
-
-        double endX;
-        double endY;
-        if (hasSink) {
-            endX = sinkX;
-            endY = sinkY;
-        } else {
-            double dx = hasSource ? midX - sourceX : CLOUD_OFFSET;
-            double dy = hasSource ? midY - sourceY : 0;
-            double dist = Math.sqrt(dx * dx + dy * dy);
-            if (dist < 1) {
-                dx = CLOUD_OFFSET;
-                dy = 0;
-                dist = CLOUD_OFFSET;
-            }
-            endX = midX + dx / dist * CLOUD_OFFSET;
-            endY = midY + dy / dist * CLOUD_OFFSET;
-        }
-
-        // Draw clouds at missing endpoints
-        if (!hasSource) {
-            drawCloud(gc, startX, startY);
-        }
-        if (!hasSink) {
-            drawCloud(gc, endX, endY);
+        if (sinkIsCloud) {
+            drawCloud(gc, sinkX, sinkY);
         }
 
         // Source → diamond segment
         gc.setStroke(ColorPalette.MATERIAL_FLOW);
         gc.setLineWidth(LayoutMetrics.MATERIAL_FLOW_WIDTH);
         gc.setLineDashes();
-        gc.strokeLine(startX, startY, midX, midY);
+        gc.strokeLine(sourceX, sourceY, midX, midY);
 
         // Diamond → sink segment
-        gc.strokeLine(midX, midY, endX, endY);
+        gc.strokeLine(midX, midY, sinkX, sinkY);
 
         // Arrowhead at sink end
-        drawArrowhead(gc, midX, midY, endX, endY,
+        drawArrowhead(gc, midX, midY, sinkX, sinkY,
                 LayoutMetrics.ARROWHEAD_LENGTH, LayoutMetrics.ARROWHEAD_WIDTH,
                 ColorPalette.MATERIAL_FLOW);
     }

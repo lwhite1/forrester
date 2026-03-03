@@ -49,12 +49,17 @@ public final class ElementRenderer {
 
     /**
      * Draws a flow process indicator: small rounded diamond with name label.
+     *
+     * @param x      top-left X
+     * @param y      top-left Y
+     * @param width  bounding box width
+     * @param height bounding box height
      */
-    public static void drawFlow(GraphicsContext gc, String name, double x, double y) {
-        double size = LayoutMetrics.FLOW_INDICATOR_SIZE;
-        double half = size / 2;
-        double cx = x;
-        double cy = y;
+    public static void drawFlow(GraphicsContext gc, String name,
+                                double x, double y, double width, double height) {
+        double cx = x + width / 2;
+        double cy = y + height / 2;
+        double half = Math.min(width, height) / 2;
 
         // Diamond shape (rotated square with rounded appearance)
         double[] xPoints = {cx, cx + half, cx, cx - half};

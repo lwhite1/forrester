@@ -3,6 +3,7 @@ package com.deathrayresearch.forrester.app.canvas;
 import com.deathrayresearch.forrester.model.def.ConnectorRoute;
 import com.deathrayresearch.forrester.model.def.ConstantDef;
 import com.deathrayresearch.forrester.model.def.ElementType;
+import com.deathrayresearch.forrester.model.def.ModelDefinition;
 import com.deathrayresearch.forrester.model.def.ViewDef;
 
 import javafx.scene.canvas.Canvas;
@@ -87,6 +88,27 @@ public class ModelCanvas extends Canvas {
         canvasState.loadFrom(view);
         this.connectors = editor.generateConnectors();
         redraw();
+    }
+
+    /**
+     * Returns the current canvas layout as a {@link ViewDef} for serialization.
+     */
+    public ViewDef toViewDef() {
+        return canvasState.toViewDef();
+    }
+
+    /**
+     * Returns the model editor.
+     */
+    public ModelEditor getEditor() {
+        return editor;
+    }
+
+    /**
+     * Builds an immutable {@link ModelDefinition} snapshot including the current canvas layout.
+     */
+    public ModelDefinition toModelDefinition() {
+        return editor.toModelDefinition(canvasState.toViewDef());
     }
 
     /**
@@ -234,7 +256,7 @@ public class ModelCanvas extends Canvas {
         double worldY = canvasState.getY(elementName);
         double screenX = viewport.toScreenX(worldX);
         double screenY = viewport.toScreenY(worldY);
-        double fieldWidth = LayoutMetrics.widthFor(type) + 20;
+        double fieldWidth = (LayoutMetrics.widthFor(type) + 20) * viewport.getScale();
 
         if (type == ElementType.CONSTANT) {
             startConstantNameEdit(elementName, screenX, screenY, fieldWidth);
@@ -275,7 +297,7 @@ public class ModelCanvas extends Canvas {
         String currentValue = cd != null ? ElementRenderer.formatValue(cd.value()) : "0";
 
         // Position value editor slightly below name
-        double valueScreenY = screenY + 16;
+        double valueScreenY = screenY + 16 * viewport.getScale();
 
         inlineEditor.open(screenX, valueScreenY, currentValue, fieldWidth, valueText -> {
             if (valueText != null && !valueText.isBlank()) {

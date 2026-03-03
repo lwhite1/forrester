@@ -314,6 +314,67 @@ class CanvasStateTest {
     }
 
     @Nested
+    @DisplayName("toViewDef")
+    class ToViewDef {
+
+        @Test
+        void shouldRoundTripPositionsAndTypes() {
+            ViewDef original = new ViewDef("test", List.of(
+                    new ElementPlacement("S", ElementType.STOCK, 100, 200),
+                    new ElementPlacement("F", ElementType.FLOW, 200, 200),
+                    new ElementPlacement("C", ElementType.CONSTANT, 300, 400)
+            ), List.of(), List.of());
+            state.loadFrom(original);
+
+            ViewDef result = state.toViewDef();
+
+            assertThat(result.name()).isEqualTo("Main");
+            assertThat(result.elements()).hasSize(3);
+
+            ElementPlacement s = result.elements().get(0);
+            assertThat(s.name()).isEqualTo("S");
+            assertThat(s.type()).isEqualTo(ElementType.STOCK);
+            assertThat(s.x()).isCloseTo(100, within(0.001));
+            assertThat(s.y()).isCloseTo(200, within(0.001));
+
+            ElementPlacement f = result.elements().get(1);
+            assertThat(f.name()).isEqualTo("F");
+            assertThat(f.type()).isEqualTo(ElementType.FLOW);
+
+            ElementPlacement c = result.elements().get(2);
+            assertThat(c.name()).isEqualTo("C");
+            assertThat(c.type()).isEqualTo(ElementType.CONSTANT);
+            assertThat(c.x()).isCloseTo(300, within(0.001));
+            assertThat(c.y()).isCloseTo(400, within(0.001));
+        }
+
+        @Test
+        void shouldReflectMutatedPositions() {
+            ViewDef original = new ViewDef("test", List.of(
+                    new ElementPlacement("A", ElementType.STOCK, 10, 20)
+            ), List.of(), List.of());
+            state.loadFrom(original);
+            state.setPosition("A", 500, 600);
+
+            ViewDef result = state.toViewDef();
+
+            assertThat(result.elements().get(0).x()).isCloseTo(500, within(0.001));
+            assertThat(result.elements().get(0).y()).isCloseTo(600, within(0.001));
+        }
+
+        @Test
+        void shouldIncludeAddedElements() {
+            state.addElement("New", ElementType.AUX, 42, 84);
+
+            ViewDef result = state.toViewDef();
+
+            assertThat(result.elements()).hasSize(1);
+            assertThat(result.elements().get(0).name()).isEqualTo("New");
+            assertThat(result.elements().get(0).type()).isEqualTo(ElementType.AUX);
+        }
+    }
+
+    @Nested
     @DisplayName("removeElement")
     class RemoveElement {
 

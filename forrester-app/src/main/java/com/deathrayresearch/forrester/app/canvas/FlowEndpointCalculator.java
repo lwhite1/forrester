@@ -11,7 +11,6 @@ public final class FlowEndpointCalculator {
     private FlowEndpointCalculator() {
     }
 
-    private static final double CLOUD_OFFSET = 80;
     private static final double CLOUD_HIT_RADIUS = 18;
     private static final double ENDPOINT_HIT_RADIUS = 14;
 
@@ -138,7 +137,7 @@ public final class FlowEndpointCalculator {
 
     /**
      * Computes the cloud position for a disconnected endpoint.
-     * The cloud is placed at CLOUD_OFFSET distance from the diamond center,
+     * The cloud is placed at LayoutMetrics.CLOUD_OFFSET distance from the diamond center,
      * in the direction away from the opposite endpoint (if connected).
      */
     private static double[] computeCloudPosition(double midX, double midY,
@@ -151,32 +150,27 @@ public final class FlowEndpointCalculator {
         if (oppositeStock != null && canvasState.hasElement(oppositeStock)) {
             double oppX = canvasState.getX(oppositeStock);
             double oppY = canvasState.getY(oppositeStock);
-            // Direction away from the opposite endpoint
-            if (isSource) {
-                dx = midX - oppX;
-                dy = midY - oppY;
-            } else {
-                dx = midX - oppX;
-                dy = midY - oppY;
-            }
-            // For sink, we want the opposite direction (toward the sink side)
+            // Direction from opposite stock toward diamond
+            dx = midX - oppX;
+            dy = midY - oppY;
+            // For sink, negate to point away from the source side
             if (!isSource) {
                 dx = -dx;
                 dy = -dy;
             }
         } else {
             // No opposite stock: default left for source, right for sink
-            dx = isSource ? -CLOUD_OFFSET : CLOUD_OFFSET;
+            dx = isSource ? -LayoutMetrics.CLOUD_OFFSET : LayoutMetrics.CLOUD_OFFSET;
             dy = 0;
         }
 
         double dist = Math.sqrt(dx * dx + dy * dy);
         if (dist < 1) {
-            dx = isSource ? -CLOUD_OFFSET : CLOUD_OFFSET;
+            dx = isSource ? -LayoutMetrics.CLOUD_OFFSET : LayoutMetrics.CLOUD_OFFSET;
             dy = 0;
-            dist = CLOUD_OFFSET;
+            dist = LayoutMetrics.CLOUD_OFFSET;
         }
 
-        return new double[]{midX + dx / dist * CLOUD_OFFSET, midY + dy / dist * CLOUD_OFFSET};
+        return new double[]{midX + dx / dist * LayoutMetrics.CLOUD_OFFSET, midY + dy / dist * LayoutMetrics.CLOUD_OFFSET};
     }
 }

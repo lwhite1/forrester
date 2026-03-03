@@ -174,6 +174,19 @@ public class CanvasState {
     }
 
     /**
+     * Converts the current canvas state back to an immutable {@link ViewDef},
+     * preserving element positions and draw order for serialization.
+     */
+    public ViewDef toViewDef() {
+        List<ElementPlacement> placements = new ArrayList<>();
+        for (String name : drawOrder) {
+            placements.add(new ElementPlacement(name, types.get(name),
+                    positions.get(name)[0], positions.get(name)[1]));
+        }
+        return new ViewDef("Main", placements, List.of(), List.of());
+    }
+
+    /**
      * Removes the named element from all canvas state (positions, types, draw order, selection).
      */
     public void removeElement(String name) {

@@ -99,7 +99,10 @@ public class CanvasRenderer {
                             cy - LayoutMetrics.STOCK_HEIGHT / 2,
                             LayoutMetrics.STOCK_WIDTH, LayoutMetrics.STOCK_HEIGHT);
                 }
-                case FLOW -> ElementRenderer.drawFlow(gc, name, cx, cy);
+                case FLOW -> ElementRenderer.drawFlow(gc, name,
+                        cx - LayoutMetrics.FLOW_INDICATOR_SIZE / 2,
+                        cy - LayoutMetrics.FLOW_INDICATOR_SIZE / 2,
+                        LayoutMetrics.FLOW_INDICATOR_SIZE, LayoutMetrics.FLOW_INDICATOR_SIZE);
                 case AUX -> ElementRenderer.drawAux(gc, name,
                         cx - LayoutMetrics.AUX_WIDTH / 2,
                         cy - LayoutMetrics.AUX_HEIGHT / 2,
@@ -136,6 +139,8 @@ public class CanvasRenderer {
 
     /**
      * Draws material flow arrows routed through the flow indicator (diamond).
+     * Cloud positions are computed via {@link FlowEndpointCalculator#cloudPosition}
+     * so that rendering and hit-testing use the same logic.
      */
     private void drawMaterialFlows(GraphicsContext gc, ModelEditor editor) {
         for (FlowDef flow : editor.getFlows()) {
@@ -145,10 +150,9 @@ public class CanvasRenderer {
             double midX = canvasState.getX(flow.name());
             double midY = canvasState.getY(flow.name());
 
-            double sourceX = Double.NaN;
-            double sourceY = Double.NaN;
-            double sinkX = Double.NaN;
-            double sinkY = Double.NaN;
+            double sourceX;
+            double sourceY;
+            boolean sourceIsCloud;
 
             if (flow.source() != null && canvasState.hasElement(flow.source())) {
                 double scx = canvasState.getX(flow.source());
@@ -158,7 +162,18 @@ public class CanvasRenderer {
                         midX, midY);
                 sourceX = edge[0];
                 sourceY = edge[1];
+                sourceIsCloud = false;
+            } else {
+                double[] cloud = FlowEndpointCalculator.cloudPosition(
+                        FlowEndpointCalculator.FlowEnd.SOURCE, flow, canvasState);
+                sourceX = cloud != null ? cloud[0] : midX - LayoutMetrics.CLOUD_OFFSET;
+                sourceY = cloud != null ? cloud[1] : midY;
+                sourceIsCloud = true;
             }
+
+            double sinkX;
+            double sinkY;
+            boolean sinkIsCloud;
 
             if (flow.sink() != null && canvasState.hasElement(flow.sink())) {
                 double scx = canvasState.getX(flow.sink());
@@ -168,9 +183,17 @@ public class CanvasRenderer {
                         midX, midY);
                 sinkX = edge[0];
                 sinkY = edge[1];
+                sinkIsCloud = false;
+            } else {
+                double[] cloud = FlowEndpointCalculator.cloudPosition(
+                        FlowEndpointCalculator.FlowEnd.SINK, flow, canvasState);
+                sinkX = cloud != null ? cloud[0] : midX + LayoutMetrics.CLOUD_OFFSET;
+                sinkY = cloud != null ? cloud[1] : midY;
+                sinkIsCloud = true;
             }
 
-            ConnectionRenderer.drawMaterialFlow(gc, sourceX, sourceY, midX, midY, sinkX, sinkY);
+            ConnectionRenderer.drawMaterialFlow(gc, sourceX, sourceY, midX, midY,
+                    sinkX, sinkY, sourceIsCloud, sinkIsCloud);
         }
     }
 

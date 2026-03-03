@@ -1,8 +1,13 @@
 package com.deathrayresearch.forrester.app.canvas;
 
+import com.deathrayresearch.forrester.model.def.ElementPlacement;
+import com.deathrayresearch.forrester.model.def.ElementType;
 import com.deathrayresearch.forrester.model.def.FlowDef;
 import com.deathrayresearch.forrester.model.def.ModelDefinition;
 import com.deathrayresearch.forrester.model.def.ModelDefinitionBuilder;
+import com.deathrayresearch.forrester.model.def.ViewDef;
+
+import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -501,6 +506,30 @@ class ModelEditorTest {
             assertThat(def.stocks()).hasSize(1);
             assertThat(def.constants()).hasSize(1);
         }
+
+        @Test
+        void shouldIncludeViewDefWhenProvided() {
+            editor.addStock();
+
+            ViewDef view = new ViewDef("Main", List.of(
+                    new ElementPlacement("Stock 1", ElementType.STOCK, 100, 200)
+            ), List.of(), List.of());
+
+            ModelDefinition def = editor.toModelDefinition(view);
+
+            assertThat(def.views()).hasSize(1);
+            assertThat(def.views().get(0).name()).isEqualTo("Main");
+            assertThat(def.views().get(0).elements()).hasSize(1);
+        }
+
+        @Test
+        void shouldOmitViewsWhenNull() {
+            editor.addStock();
+
+            ModelDefinition def = editor.toModelDefinition(null);
+
+            assertThat(def.views()).isEmpty();
+        }
     }
 
     @Nested
@@ -574,6 +603,34 @@ class ModelEditorTest {
                     FlowEndpointCalculator.FlowEnd.SOURCE, "Stock 1");
 
             assertThat(result).isFalse();
+        }
+
+        @Test
+        void shouldRejectNonexistentStockName() {
+            editor.addStock(); // Stock 1
+            editor.addFlow(null, "Stock 1"); // Flow 2 with cloud source
+
+            boolean result = editor.reconnectFlow("Flow 2",
+                    FlowEndpointCalculator.FlowEnd.SOURCE, "Ghost");
+
+            assertThat(result).isFalse();
+            FlowDef flow = editor.getFlows().get(0);
+            assertThat(flow.source()).isNull(); // unchanged
+        }
+
+        @Test
+        void shouldRejectSelfLoop() {
+            editor.addStock(); // Stock 1
+            editor.addStock(); // Stock 2
+            editor.addFlow("Stock 1", "Stock 2"); // Flow 3
+
+            boolean result = editor.reconnectFlow("Flow 3",
+                    FlowEndpointCalculator.FlowEnd.SOURCE, "Stock 2");
+
+            assertThat(result).isFalse();
+            FlowDef flow = editor.getFlows().get(0);
+            assertThat(flow.source()).isEqualTo("Stock 1"); // unchanged
+            assertThat(flow.sink()).isEqualTo("Stock 2");
         }
     }
 }

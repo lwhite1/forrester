@@ -7,6 +7,7 @@ import com.deathrayresearch.forrester.model.def.FlowDef;
 import com.deathrayresearch.forrester.model.def.LookupTableDef;
 import com.deathrayresearch.forrester.model.def.ModelDefinition;
 import com.deathrayresearch.forrester.model.def.StockDef;
+import com.deathrayresearch.forrester.model.def.ViewDef;
 import com.deathrayresearch.forrester.model.graph.ConnectorGenerator;
 
 import java.util.ArrayList;
@@ -261,9 +262,24 @@ public class ModelEditor {
      */
     public boolean reconnectFlow(String flowName, FlowEndpointCalculator.FlowEnd end,
                                  String stockName) {
+        // Validate: if a stock name is given, it must actually exist
+        if (stockName != null && !hasElement(stockName)) {
+            return false;
+        }
+
         for (int i = 0; i < flows.size(); i++) {
             if (flows.get(i).name().equals(flowName)) {
                 FlowDef f = flows.get(i);
+
+                // Prevent self-loop: stockName must not equal the opposite endpoint
+                if (stockName != null) {
+                    String opposite = (end == FlowEndpointCalculator.FlowEnd.SOURCE)
+                            ? f.sink() : f.source();
+                    if (stockName.equals(opposite)) {
+                        return false;
+                    }
+                }
+
                 if (end == FlowEndpointCalculator.FlowEnd.SOURCE) {
                     flows.set(i, new FlowDef(f.name(), f.comment(), f.equation(),
                             f.timeUnit(), stockName, f.sink()));
@@ -388,6 +404,15 @@ public class ModelEditor {
      * Rebuilds an immutable {@link ModelDefinition} snapshot from the current editor state.
      */
     public ModelDefinition toModelDefinition() {
+        return toModelDefinition(null);
+    }
+
+    /**
+     * Rebuilds an immutable {@link ModelDefinition} snapshot including the given view layout.
+     *
+     * @param view the canvas layout to include, or null to omit view data
+     */
+    public ModelDefinition toModelDefinition(ViewDef view) {
         return new ModelDefinition(
                 modelName,
                 null,
@@ -399,7 +424,7 @@ public class ModelEditor {
                 List.copyOf(lookupTables),
                 List.of(),
                 List.of(),
-                List.of(),
+                view != null ? List.of(view) : List.of(),
                 null
         );
     }
