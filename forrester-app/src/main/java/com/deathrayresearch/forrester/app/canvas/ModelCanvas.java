@@ -119,6 +119,8 @@ public class ModelCanvas extends Canvas {
 
     // Hover highlighting
     private String hoveredElement;
+    private ConnectionId hoveredConnection;
+    private ConnectionId selectedConnection;
 
     // Feedback loop highlighting
     private boolean loopHighlightActive;
@@ -335,6 +337,13 @@ public class ModelCanvas extends Canvas {
     }
 
     /**
+     * Returns the currently selected connection, or null if no connection is selected.
+     */
+    public ConnectionId getSelectedConnection() {
+        return selectedConnection;
+    }
+
+    /**
      * Returns the type of the named element on the canvas.
      */
     public ElementType getSelectedElementType(String name) {
@@ -378,6 +387,27 @@ public class ModelCanvas extends Canvas {
         connectors = editor.generateConnectors();
         invalidateLoopAnalysis();
         redraw();
+    }
+
+    /**
+     * Returns the canvas state for export or external rendering.
+     */
+    public CanvasState getCanvasState() {
+        return canvasState;
+    }
+
+    /**
+     * Returns the current connector routes.
+     */
+    public List<ConnectorRoute> getConnectors() {
+        return connectors;
+    }
+
+    /**
+     * Returns the active loop analysis if loop highlighting is on, otherwise null.
+     */
+    public FeedbackAnalysis getActiveLoopAnalysis() {
+        return loopHighlightActive ? loopAnalysis : null;
     }
 
     /**
@@ -445,7 +475,8 @@ public class ModelCanvas extends Canvas {
                 : CanvasRenderer.MarqueeState.IDLE;
         renderer.render(getGraphicsContext2D(), getWidth(), getHeight(),
                 editor, connectors, flowCreation.getState(), reattachState, marqueeState,
-                loopHighlightActive ? loopAnalysis : null, hoveredElement);
+                loopHighlightActive ? loopAnalysis : null, hoveredElement,
+                hoveredConnection, selectedConnection);
         fireStatusChanged();
     }
 
@@ -910,7 +941,13 @@ public class ModelCanvas extends Canvas {
                     cursor = Cursor.HAND;
                 } else {
                     String hit = HitTester.hitTest(canvasState, worldX, worldY);
-                    cursor = hit != null ? Cursor.OPEN_HAND : Cursor.DEFAULT;
+                    if (hit != null) {
+                        cursor = Cursor.OPEN_HAND;
+                    } else if (hoveredConnection != null) {
+                        cursor = Cursor.HAND;
+                    } else {
+                        cursor = Cursor.DEFAULT;
+                    }
                 }
             }
         } else {
@@ -946,8 +983,18 @@ public class ModelCanvas extends Canvas {
         double worldX = viewport.toWorldX(event.getX());
         double worldY = viewport.toWorldY(event.getY());
         String hit = HitTester.hitTest(canvasState, worldX, worldY);
-        if (!Objects.equals(hit, hoveredElement)) {
+
+        // Connection hover: only when no element is hovered
+        ConnectionId connHit = null;
+        if (hit == null) {
+            connHit = HitTester.hitTestInfoLink(canvasState, connectors, worldX, worldY);
+        }
+
+        boolean changed = !Objects.equals(hit, hoveredElement)
+                || !Objects.equals(connHit, hoveredConnection);
+        if (changed) {
             hoveredElement = hit;
+            hoveredConnection = connHit;
             redraw();
         }
 
@@ -1048,6 +1095,9 @@ public class ModelCanvas extends Canvas {
             String hit = HitTester.hitTest(canvasState, worldX, worldY);
 
             if (hit != null) {
+                // Element click: clear connection selection
+                selectedConnection = null;
+
                 if (event.isShiftDown()) {
                     canvasState.toggleSelection(hit);
                 } else if (!canvasState.isSelected(hit)) {
@@ -1064,18 +1114,30 @@ public class ModelCanvas extends Canvas {
                             new CanvasState.Position(canvasState.getX(name), canvasState.getY(name)));
                 }
             } else {
-                // Start marquee selection on empty space
-                marqueeActive = true;
-                marqueeStartWorldX = worldX;
-                marqueeStartWorldY = worldY;
-                marqueeEndWorldX = worldX;
-                marqueeEndWorldY = worldY;
-                marqueeInitialSelection = new LinkedHashSet<>(canvasState.getSelection());
-                if (!event.isShiftDown()) {
+                // No element hit — check for connection click
+                ConnectionId connHit = HitTester.hitTestInfoLink(
+                        canvasState, connectors, worldX, worldY);
+                if (connHit != null) {
+                    // Connection click: select connection, clear element selection
+                    selectedConnection = connHit;
                     canvasState.clearSelection();
+                    dragTarget = null;
+                    dragging = false;
+                } else {
+                    // Empty space: clear connection selection, start marquee
+                    selectedConnection = null;
+                    marqueeActive = true;
+                    marqueeStartWorldX = worldX;
+                    marqueeStartWorldY = worldY;
+                    marqueeEndWorldX = worldX;
+                    marqueeEndWorldY = worldY;
+                    marqueeInitialSelection = new LinkedHashSet<>(canvasState.getSelection());
+                    if (!event.isShiftDown()) {
+                        canvasState.clearSelection();
+                    }
+                    dragTarget = null;
+                    dragging = false;
                 }
-                dragTarget = null;
-                dragging = false;
             }
 
             redraw();
@@ -1086,6 +1148,7 @@ public class ModelCanvas extends Canvas {
 
     private void handleMouseDragged(MouseEvent event) {
         hoveredElement = null;
+        hoveredConnection = null;
 
         if (marqueeActive) {
             marqueeEndWorldX = viewport.toWorldX(event.getX());
@@ -1277,6 +1340,9 @@ public class ModelCanvas extends Canvas {
             } else {
                 activeTool = CanvasToolBar.Tool.SELECT;
             }
+        } else if (selectedConnection != null) {
+            selectedConnection = null;
+            redraw();
         } else if (!canvasState.getSelection().isEmpty()) {
             canvasState.clearSelection();
             redraw();

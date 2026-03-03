@@ -2,6 +2,7 @@ package com.deathrayresearch.forrester.app;
 
 import com.deathrayresearch.forrester.app.canvas.BreadcrumbBar;
 import com.deathrayresearch.forrester.app.canvas.CanvasToolBar;
+import com.deathrayresearch.forrester.app.canvas.DiagramExporter;
 import com.deathrayresearch.forrester.app.canvas.ModelCanvas;
 import com.deathrayresearch.forrester.app.canvas.ModelEditor;
 import com.deathrayresearch.forrester.app.canvas.PropertiesPanel;
@@ -147,6 +148,12 @@ public class ForresterApp extends Application {
                 KeyCombination.SHORTCUT_DOWN, KeyCombination.SHIFT_DOWN));
         saveAsItem.setOnAction(e -> saveAs());
 
+        MenuItem exportItem = new MenuItem("Export Diagram...");
+        exportItem.setAccelerator(new KeyCodeCombination(KeyCode.E, KeyCombination.SHORTCUT_DOWN));
+        exportItem.setOnAction(e -> DiagramExporter.exportDiagram(
+                canvas.getCanvasState(), canvas.getEditor(),
+                canvas.getConnectors(), canvas.getActiveLoopAnalysis(), stage));
+
         MenuItem closeItem = new MenuItem("Close");
         closeItem.setAccelerator(new KeyCodeCombination(KeyCode.W, KeyCombination.SHORTCUT_DOWN));
         closeItem.setOnAction(e -> newModel());
@@ -155,7 +162,7 @@ public class ForresterApp extends Application {
         exitItem.setOnAction(e -> stage.close());
 
         fileMenu.getItems().addAll(newItem, openItem, new SeparatorMenuItem(),
-                saveItem, saveAsItem, new SeparatorMenuItem(),
+                saveItem, saveAsItem, exportItem, new SeparatorMenuItem(),
                 closeItem, exitItem);
 
         Menu editMenu = new Menu("Edit");
