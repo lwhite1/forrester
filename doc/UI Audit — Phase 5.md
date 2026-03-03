@@ -6,8 +6,8 @@ Audit of all `forrester-app` canvas code after Phase 5 implementation.
 
 | Phase 4 Finding | Status |
 |---|---|
-| BUG-7: Inline editor TextField width not scaled by zoom | **Still open** |
-| EDGE-1: Self-loop flow (same stock source/sink) | **Still open** |
+| BUG-7: Inline editor TextField width not scaled by zoom | **Fixed in Phase 6** |
+| EDGE-1: Self-loop flow (same stock source/sink) | **Still open** (flow creation path) |
 | EDGE-2: Clicking non-stock in flow mode = cloud | **Still open** |
 | EDGE-3: No name validation for identifiers | **Still open** |
 | EDGE-4: Rename to blank gives no feedback | **Still open** |
@@ -171,3 +171,33 @@ Both branches compute `dx = midX - oppX; dy = midY - oppY;` identically. The neg
 2. **BUG-10**: Prevent self-loop via reattachment
 3. **QUALITY-6**: Clean up misleading identical if/else
 4. **BUG-7 + BUG-11**: Fix zoom-scaling for inline editor
+
+---
+
+## Phase 6 Resolution Status
+
+Phase 6 addressed all 3 major bugs, 3 minor bugs, and 3 code quality findings from above, plus added file save/load.
+
+| Finding | Resolution |
+|---|---|
+| **BUG-8**: Duplicate CLOUD_OFFSET | **Fixed** — consolidated into `LayoutMetrics.CLOUD_OFFSET`, removed copies from `ConnectionRenderer` and `FlowEndpointCalculator` |
+| **BUG-9**: Divergent cloud position logic | **Fixed** — `CanvasRenderer.drawMaterialFlows()` now calls `FlowEndpointCalculator.cloudPosition()` for disconnected endpoints and passes concrete coords + boolean flags to `ConnectionRenderer` (NaN sentinels eliminated) |
+| **BUG-10**: Reattachment self-loop | **Fixed** — `ModelEditor.reconnectFlow()` rejects `stockName` equal to the opposite endpoint |
+| **BUG-7**: Inline editor width not scaled by zoom | **Fixed** — `fieldWidth` now multiplied by `viewport.getScale()` |
+| **BUG-11**: Constant value editor Y offset ignores zoom | **Fixed** — offset now scaled by `viewport.getScale()` |
+| **BUG-12**: `reconnectFlow` doesn't validate stockName | **Fixed** — rejects nonexistent stock names with `hasElement()` guard |
+| **QUALITY-6**: Identical if/else in `computeCloudPosition` | **Fixed** — removed redundant branches, compute `dx`/`dy` once then negate for sink |
+| **QUALITY-10**: `drawFlow` takes center coords | **Fixed** — standardized to `drawFlow(gc, name, x, y, width, height)` taking top-left like all other draw methods |
+| **QUALITY-11**: ForresterApp javadoc says "Phase 3" | **Fixed** — updated to describe current capabilities |
+| **TEST-GAP-9**: No test for self-loop via reconnect | **Fixed** — added `shouldRejectSelfLoop` and `shouldRejectNonexistentStockName` tests |
+
+### New functionality added in Phase 6
+
+- **File menu**: New (Ctrl+N), Open (Ctrl+O), Save (Ctrl+S), Save As (Ctrl+Shift+S)
+- **`CanvasState.toViewDef()`**: converts canvas positions back to `ViewDef` for serialization
+- **`ModelEditor.toModelDefinition(ViewDef)`**: includes view layout in serialized model
+- **`ModelCanvas.toModelDefinition()`**: convenience method wiring editor + canvas state
+- **Empty canvas on startup**: app no longer loads hardcoded SIR model
+- **Window title**: shows current filename or "Untitled"
+
+### Test count: 123 passing (up from ~116)
