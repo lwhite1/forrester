@@ -2,6 +2,7 @@ package com.deathrayresearch.forrester.io.json;
 
 import com.deathrayresearch.forrester.model.def.ConnectorRoute;
 import com.deathrayresearch.forrester.model.def.ElementPlacement;
+import com.deathrayresearch.forrester.model.def.ElementType;
 import com.deathrayresearch.forrester.model.def.LookupTableDef;
 import com.deathrayresearch.forrester.model.def.ModelDefinition;
 import com.deathrayresearch.forrester.model.def.ModelDefinitionBuilder;
@@ -128,7 +129,7 @@ class ModelDefinitionSerializerTest {
     @Test
     void shouldSerializeViews() {
         ViewDef view = new ViewDef("Main",
-                List.of(new ElementPlacement("S", "stock", 100, 200)),
+                List.of(new ElementPlacement("S", ElementType.STOCK, 100, 200)),
                 List.of(new ConnectorRoute("A", "B")),
                 List.of());
 

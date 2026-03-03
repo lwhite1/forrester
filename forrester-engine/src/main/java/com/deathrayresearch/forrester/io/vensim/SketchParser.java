@@ -2,6 +2,7 @@ package com.deathrayresearch.forrester.io.vensim;
 
 import com.deathrayresearch.forrester.model.def.ConnectorRoute;
 import com.deathrayresearch.forrester.model.def.ElementPlacement;
+import com.deathrayresearch.forrester.model.def.ElementType;
 import com.deathrayresearch.forrester.model.def.FlowRoute;
 import com.deathrayresearch.forrester.model.def.ViewDef;
 
@@ -129,7 +130,7 @@ public final class SketchParser {
         }
 
         idToName.put(id, name);
-        String type = classifyElementType(name, stockNames, flowNames, lookupNames);
+        ElementType type = classifyElementType(name, stockNames, flowNames, lookupNames);
         elements.add(new ElementPlacement(name, type, x, y));
     }
 
@@ -157,7 +158,7 @@ public final class SketchParser {
         }
 
         idToName.put(id, name);
-        elements.add(new ElementPlacement(name, "flow", x, y));
+        elements.add(new ElementPlacement(name, ElementType.FLOW, x, y));
         flowRoutes.add(new FlowRoute(name, List.of(new double[]{x, y})));
     }
 
@@ -180,18 +181,18 @@ public final class SketchParser {
         connectors.add(new ConnectorRoute(from, to));
     }
 
-    private static String classifyElementType(String name, Set<String> stockNames,
-                                               Set<String> flowNames,
-                                               Set<String> lookupNames) {
+    private static ElementType classifyElementType(String name, Set<String> stockNames,
+                                                    Set<String> flowNames,
+                                                    Set<String> lookupNames) {
         if (stockNames.contains(name)) {
-            return "stock";
+            return ElementType.STOCK;
         }
         if (flowNames.contains(name)) {
-            return "flow";
+            return ElementType.FLOW;
         }
         if (lookupNames.contains(name)) {
-            return "lookup";
+            return ElementType.LOOKUP;
         }
-        return "aux";
+        return ElementType.AUX;
     }
 }

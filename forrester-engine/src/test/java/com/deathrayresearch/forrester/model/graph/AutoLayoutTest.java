@@ -1,6 +1,7 @@
 package com.deathrayresearch.forrester.model.graph;
 
 import com.deathrayresearch.forrester.model.def.ElementPlacement;
+import com.deathrayresearch.forrester.model.def.ElementType;
 import com.deathrayresearch.forrester.model.def.ModelDefinition;
 import com.deathrayresearch.forrester.model.def.ModelDefinitionBuilder;
 import com.deathrayresearch.forrester.model.def.ViewDef;
@@ -60,13 +61,13 @@ class AutoLayoutTest {
 
         for (ElementPlacement p : view.elements()) {
             if (p.name().equals("S")) {
-                assertThat(p.type()).isEqualTo("stock");
+                assertThat(p.type()).isEqualTo(ElementType.STOCK);
             } else if (p.name().equals("F")) {
-                assertThat(p.type()).isEqualTo("flow");
+                assertThat(p.type()).isEqualTo(ElementType.FLOW);
             } else if (p.name().equals("A")) {
-                assertThat(p.type()).isEqualTo("aux");
+                assertThat(p.type()).isEqualTo(ElementType.AUX);
             } else if (p.name().equals("C")) {
-                assertThat(p.type()).isEqualTo("constant");
+                assertThat(p.type()).isEqualTo(ElementType.CONSTANT);
             }
         }
     }
@@ -172,6 +173,6 @@ class AutoLayoutTest {
         ElementPlacement lookupPlacement = view.elements().stream()
                 .filter(p -> p.name().equals("Effect"))
                 .findFirst().orElseThrow();
-        assertThat(lookupPlacement.type()).isEqualTo("lookup");
+        assertThat(lookupPlacement.type()).isEqualTo(ElementType.LOOKUP);
     }
 }

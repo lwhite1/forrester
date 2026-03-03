@@ -252,6 +252,32 @@ public class ModelEditor {
     }
 
     /**
+     * Reconnects a flow endpoint to a different stock, or disconnects it (pass null for stockName).
+     *
+     * @param flowName the flow to modify
+     * @param end which end (SOURCE or SINK) to reconnect
+     * @param stockName the new stock to connect to, or null to disconnect (cloud)
+     * @return true if the flow was found and updated
+     */
+    public boolean reconnectFlow(String flowName, FlowEndpointCalculator.FlowEnd end,
+                                 String stockName) {
+        for (int i = 0; i < flows.size(); i++) {
+            if (flows.get(i).name().equals(flowName)) {
+                FlowDef f = flows.get(i);
+                if (end == FlowEndpointCalculator.FlowEnd.SOURCE) {
+                    flows.set(i, new FlowDef(f.name(), f.comment(), f.equation(),
+                            f.timeUnit(), stockName, f.sink()));
+                } else {
+                    flows.set(i, new FlowDef(f.name(), f.comment(), f.equation(),
+                            f.timeUnit(), f.source(), stockName));
+                }
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
      * Sets the value of a constant.
      *
      * @return true if the constant was found and updated

@@ -1,5 +1,7 @@
 package com.deathrayresearch.forrester.app.canvas;
 
+import com.deathrayresearch.forrester.model.def.ElementType;
+
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
 
@@ -23,7 +25,7 @@ public final class SelectionRenderer {
      * Uses a dashed rectangle for stock/aux/constant and a dashed diamond for flow.
      */
     public static void drawSelectionIndicator(GraphicsContext gc, CanvasState state, String name) {
-        String type = state.getType(name);
+        ElementType type = state.getType(name);
         double cx = state.getX(name);
         double cy = state.getY(name);
 
@@ -35,7 +37,7 @@ public final class SelectionRenderer {
         gc.setLineWidth(SELECTION_LINE_WIDTH);
         gc.setLineDashes(SELECTION_DASH_LENGTH, SELECTION_DASH_GAP);
 
-        if ("flow".equals(type)) {
+        if (type == ElementType.FLOW) {
             drawDiamondIndicator(gc, cx, cy);
         } else {
             double halfW = LayoutMetrics.widthFor(type) / 2 + SELECTION_PADDING;

@@ -1,5 +1,7 @@
 package com.deathrayresearch.forrester.app.canvas;
 
+import com.deathrayresearch.forrester.model.def.ElementType;
+
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 
@@ -59,12 +61,12 @@ public final class LayoutMetrics {
     /**
      * Returns the width for a given element type.
      */
-    public static double widthFor(String type) {
+    public static double widthFor(ElementType type) {
         return switch (type) {
-            case "stock" -> STOCK_WIDTH;
-            case "aux" -> AUX_WIDTH;
-            case "constant" -> CONSTANT_WIDTH;
-            case "flow" -> FLOW_INDICATOR_SIZE;
+            case STOCK -> STOCK_WIDTH;
+            case AUX -> AUX_WIDTH;
+            case CONSTANT -> CONSTANT_WIDTH;
+            case FLOW -> FLOW_INDICATOR_SIZE;
             default -> AUX_WIDTH;
         };
     }
@@ -72,12 +74,12 @@ public final class LayoutMetrics {
     /**
      * Returns the height for a given element type.
      */
-    public static double heightFor(String type) {
+    public static double heightFor(ElementType type) {
         return switch (type) {
-            case "stock" -> STOCK_HEIGHT;
-            case "aux" -> AUX_HEIGHT;
-            case "constant" -> CONSTANT_HEIGHT;
-            case "flow" -> FLOW_INDICATOR_SIZE;
+            case STOCK -> STOCK_HEIGHT;
+            case AUX -> AUX_HEIGHT;
+            case CONSTANT -> CONSTANT_HEIGHT;
+            case FLOW -> FLOW_INDICATOR_SIZE;
             default -> AUX_HEIGHT;
         };
     }

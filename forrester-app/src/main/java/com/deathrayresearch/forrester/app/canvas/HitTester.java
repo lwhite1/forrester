@@ -1,5 +1,7 @@
 package com.deathrayresearch.forrester.app.canvas;
 
+import com.deathrayresearch.forrester.model.def.ElementType;
+
 import java.util.List;
 
 /**
@@ -20,7 +22,7 @@ public final class HitTester {
 
         for (int i = drawOrder.size() - 1; i >= 0; i--) {
             String name = drawOrder.get(i);
-            String type = state.getType(name);
+            ElementType type = state.getType(name);
             double cx = state.getX(name);
             double cy = state.getY(name);
 
@@ -28,7 +30,7 @@ public final class HitTester {
                 continue;
             }
 
-            if ("flow".equals(type)) {
+            if (type == ElementType.FLOW) {
                 if (hitTestDiamond(worldX, worldY, cx, cy, LayoutMetrics.FLOW_INDICATOR_SIZE / 2)) {
                     return name;
                 }

@@ -1,6 +1,7 @@
 package com.deathrayresearch.forrester.app.canvas;
 
 import com.deathrayresearch.forrester.model.def.ElementPlacement;
+import com.deathrayresearch.forrester.model.def.ElementType;
 import com.deathrayresearch.forrester.model.def.ViewDef;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -29,7 +30,7 @@ class HitTesterTest {
         @BeforeEach
         void loadStock() {
             ViewDef view = new ViewDef("test", List.of(
-                    new ElementPlacement("S", "stock", 200, 300)
+                    new ElementPlacement("S", ElementType.STOCK, 200, 300)
             ), List.of(), List.of());
             state.loadFrom(view);
         }
@@ -63,7 +64,7 @@ class HitTesterTest {
         @BeforeEach
         void loadAux() {
             ViewDef view = new ViewDef("test", List.of(
-                    new ElementPlacement("rate", "aux", 150, 250)
+                    new ElementPlacement("rate", ElementType.AUX, 150, 250)
             ), List.of(), List.of());
             state.loadFrom(view);
         }
@@ -94,7 +95,7 @@ class HitTesterTest {
         @BeforeEach
         void loadConstant() {
             ViewDef view = new ViewDef("test", List.of(
-                    new ElementPlacement("k", "constant", 100, 100)
+                    new ElementPlacement("k", ElementType.CONSTANT, 100, 100)
             ), List.of(), List.of());
             state.loadFrom(view);
         }
@@ -118,7 +119,7 @@ class HitTesterTest {
         @BeforeEach
         void loadFlow() {
             ViewDef view = new ViewDef("test", List.of(
-                    new ElementPlacement("rate", "flow", 200, 200)
+                    new ElementPlacement("rate", ElementType.FLOW, 200, 200)
             ), List.of(), List.of());
             state.loadFrom(view);
         }
@@ -155,8 +156,8 @@ class HitTesterTest {
         void shouldHitTopmostElementFirst() {
             // Two overlapping elements — second one drawn on top
             ViewDef view = new ViewDef("test", List.of(
-                    new ElementPlacement("bottom", "stock", 200, 200),
-                    new ElementPlacement("top", "stock", 200, 200)
+                    new ElementPlacement("bottom", ElementType.STOCK, 200, 200),
+                    new ElementPlacement("top", ElementType.STOCK, 200, 200)
             ), List.of(), List.of());
             state.loadFrom(view);
 

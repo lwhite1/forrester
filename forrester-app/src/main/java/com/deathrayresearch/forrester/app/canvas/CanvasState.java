@@ -1,6 +1,7 @@
 package com.deathrayresearch.forrester.app.canvas;
 
 import com.deathrayresearch.forrester.model.def.ElementPlacement;
+import com.deathrayresearch.forrester.model.def.ElementType;
 import com.deathrayresearch.forrester.model.def.ViewDef;
 
 import java.util.ArrayList;
@@ -19,7 +20,7 @@ import java.util.Set;
 public class CanvasState {
 
     private final Map<String, double[]> positions = new LinkedHashMap<>();
-    private final Map<String, String> types = new LinkedHashMap<>();
+    private final Map<String, ElementType> types = new LinkedHashMap<>();
     private final Set<String> selection = new LinkedHashSet<>();
     private final List<String> drawOrder = new ArrayList<>();
 
@@ -69,7 +70,7 @@ public class CanvasState {
     /**
      * Returns the type of the named element, or null if not found.
      */
-    public String getType(String name) {
+    public ElementType getType(String name) {
         return types.get(name);
     }
 
@@ -136,7 +137,7 @@ public class CanvasState {
      * Adds a new element to the canvas state with the given position and type.
      * If an element with the same name already exists, it is overwritten.
      */
-    public void addElement(String name, String type, double x, double y) {
+    public void addElement(String name, ElementType type, double x, double y) {
         positions.put(name, new double[]{x, y});
         types.put(name, type);
         if (!drawOrder.contains(name)) {
@@ -157,7 +158,7 @@ public class CanvasState {
         double[] pos = positions.remove(oldName);
         positions.put(newName, pos);
 
-        String type = types.remove(oldName);
+        ElementType type = types.remove(oldName);
         types.put(newName, type);
 
         int idx = drawOrder.indexOf(oldName);

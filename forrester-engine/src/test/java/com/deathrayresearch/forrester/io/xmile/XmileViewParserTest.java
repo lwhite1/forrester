@@ -2,6 +2,7 @@ package com.deathrayresearch.forrester.io.xmile;
 
 import com.deathrayresearch.forrester.model.def.ConnectorRoute;
 import com.deathrayresearch.forrester.model.def.ElementPlacement;
+import com.deathrayresearch.forrester.model.def.ElementType;
 import com.deathrayresearch.forrester.model.def.ViewDef;
 
 import org.junit.jupiter.api.DisplayName;
@@ -47,7 +48,7 @@ class XmileViewParserTest {
 
         ElementPlacement stock = view.elements().stream()
                 .filter(e -> e.name().equals("Population")).findFirst().orElseThrow();
-        assertThat(stock.type()).isEqualTo("stock");
+        assertThat(stock.type()).isEqualTo(ElementType.STOCK);
         assertThat(stock.x()).isEqualTo(100.0);
         assertThat(stock.y()).isEqualTo(200.0);
     }
@@ -96,11 +97,11 @@ class XmileViewParserTest {
         assertThat(views).hasSize(1);
         ElementPlacement lookup = views.get(0).elements().stream()
                 .filter(e -> e.name().equals("my_lookup")).findFirst().orElseThrow();
-        assertThat(lookup.type()).isEqualTo("lookup");
+        assertThat(lookup.type()).isEqualTo(ElementType.LOOKUP);
 
         ElementPlacement aux = views.get(0).elements().stream()
                 .filter(e -> e.name().equals("regular_aux")).findFirst().orElseThrow();
-        assertThat(aux.type()).isEqualTo("aux");
+        assertThat(aux.type()).isEqualTo(ElementType.AUX);
     }
 
     @Test

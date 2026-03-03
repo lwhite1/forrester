@@ -502,4 +502,78 @@ class ModelEditorTest {
             assertThat(def.constants()).hasSize(1);
         }
     }
+
+    @Nested
+    @DisplayName("reconnectFlow")
+    class ReconnectFlow {
+
+        @Test
+        void shouldReconnectCloudSourceToStock() {
+            editor.addStock(); // Stock 1
+            editor.addStock(); // Stock 2
+            editor.addFlow(null, "Stock 2"); // Flow 3 with cloud source
+
+            boolean result = editor.reconnectFlow("Flow 3",
+                    FlowEndpointCalculator.FlowEnd.SOURCE, "Stock 1");
+
+            assertThat(result).isTrue();
+            FlowDef flow = editor.getFlows().get(0);
+            assertThat(flow.source()).isEqualTo("Stock 1");
+            assertThat(flow.sink()).isEqualTo("Stock 2");
+        }
+
+        @Test
+        void shouldReconnectCloudSinkToStock() {
+            editor.addStock(); // Stock 1
+            editor.addStock(); // Stock 2
+            editor.addFlow("Stock 1", null); // Flow 3 with cloud sink
+
+            boolean result = editor.reconnectFlow("Flow 3",
+                    FlowEndpointCalculator.FlowEnd.SINK, "Stock 2");
+
+            assertThat(result).isTrue();
+            FlowDef flow = editor.getFlows().get(0);
+            assertThat(flow.source()).isEqualTo("Stock 1");
+            assertThat(flow.sink()).isEqualTo("Stock 2");
+        }
+
+        @Test
+        void shouldDisconnectSourceToCloud() {
+            editor.addStock(); // Stock 1
+            editor.addStock(); // Stock 2
+            editor.addFlow("Stock 1", "Stock 2"); // Flow 3
+
+            boolean result = editor.reconnectFlow("Flow 3",
+                    FlowEndpointCalculator.FlowEnd.SOURCE, null);
+
+            assertThat(result).isTrue();
+            FlowDef flow = editor.getFlows().get(0);
+            assertThat(flow.source()).isNull();
+            assertThat(flow.sink()).isEqualTo("Stock 2");
+        }
+
+        @Test
+        void shouldSwapConnectedEndpointToDifferentStock() {
+            editor.addStock(); // Stock 1
+            editor.addStock(); // Stock 2
+            editor.addStock(); // Stock 3
+            editor.addFlow("Stock 1", "Stock 2"); // Flow 4
+
+            boolean result = editor.reconnectFlow("Flow 4",
+                    FlowEndpointCalculator.FlowEnd.SOURCE, "Stock 3");
+
+            assertThat(result).isTrue();
+            FlowDef flow = editor.getFlows().get(0);
+            assertThat(flow.source()).isEqualTo("Stock 3");
+            assertThat(flow.sink()).isEqualTo("Stock 2");
+        }
+
+        @Test
+        void shouldReturnFalseForNonexistentFlow() {
+            boolean result = editor.reconnectFlow("Nonexistent",
+                    FlowEndpointCalculator.FlowEnd.SOURCE, "Stock 1");
+
+            assertThat(result).isFalse();
+        }
+    }
 }

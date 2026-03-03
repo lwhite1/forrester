@@ -2,6 +2,7 @@ package com.deathrayresearch.forrester.io.xmile;
 
 import com.deathrayresearch.forrester.model.def.ConnectorRoute;
 import com.deathrayresearch.forrester.model.def.ElementPlacement;
+import com.deathrayresearch.forrester.model.def.ElementType;
 import com.deathrayresearch.forrester.model.def.FlowRoute;
 import com.deathrayresearch.forrester.model.def.ViewDef;
 
@@ -9,7 +10,6 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import java.util.List;
-import java.util.Locale;
 
 /**
  * Writes {@link ViewDef} records to XMILE {@code <views>} XML elements.
@@ -126,10 +126,10 @@ public final class XmileViewWriter {
         viewElem.appendChild(connElem);
     }
 
-    private static String mapTypeToTag(String type) {
-        return switch (type.toLowerCase(Locale.ROOT)) {
-            case "stock" -> XmileConstants.STOCK;
-            case "flow" -> XmileConstants.FLOW;
+    private static String mapTypeToTag(ElementType type) {
+        return switch (type) {
+            case STOCK -> XmileConstants.STOCK;
+            case FLOW -> XmileConstants.FLOW;
             default -> XmileConstants.AUX;
         };
     }

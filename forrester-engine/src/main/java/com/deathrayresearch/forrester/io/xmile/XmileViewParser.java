@@ -2,6 +2,7 @@ package com.deathrayresearch.forrester.io.xmile;
 
 import com.deathrayresearch.forrester.model.def.ConnectorRoute;
 import com.deathrayresearch.forrester.model.def.ElementPlacement;
+import com.deathrayresearch.forrester.model.def.ElementType;
 import com.deathrayresearch.forrester.model.def.FlowRoute;
 import com.deathrayresearch.forrester.model.def.ViewDef;
 
@@ -62,8 +63,8 @@ public final class XmileViewParser {
             List<ConnectorRoute> connectors = new ArrayList<>();
             List<FlowRoute> flowRoutes = new ArrayList<>();
 
-            parseElements(viewElem, XmileConstants.STOCK, "stock", elements);
-            parseElements(viewElem, XmileConstants.FLOW, "flow", elements);
+            parseElements(viewElem, XmileConstants.STOCK, ElementType.STOCK, elements);
+            parseElements(viewElem, XmileConstants.FLOW, ElementType.FLOW, elements);
             parseFlowRoutes(viewElem, flowRoutes);
             parseElements(viewElem, XmileConstants.AUX, null, elements,
                     stockNames, flowNames, lookupNames);
@@ -75,12 +76,12 @@ public final class XmileViewParser {
         return views;
     }
 
-    private static void parseElements(Element viewElem, String tagName, String fixedType,
+    private static void parseElements(Element viewElem, String tagName, ElementType fixedType,
                                        List<ElementPlacement> elements) {
         parseElements(viewElem, tagName, fixedType, elements, Set.of(), Set.of(), Set.of());
     }
 
-    private static void parseElements(Element viewElem, String tagName, String fixedType,
+    private static void parseElements(Element viewElem, String tagName, ElementType fixedType,
                                        List<ElementPlacement> elements,
                                        Set<String> stockNames, Set<String> flowNames,
                                        Set<String> lookupNames) {
@@ -108,7 +109,7 @@ public final class XmileViewParser {
             try {
                 double x = Double.parseDouble(xStr);
                 double y = Double.parseDouble(yStr);
-                String type = fixedType;
+                ElementType type = fixedType;
                 if (type == null) {
                     type = resolveAuxType(name, stockNames, flowNames, lookupNames);
                 }
@@ -200,18 +201,18 @@ public final class XmileViewParser {
         return points;
     }
 
-    private static String resolveAuxType(String name, Set<String> stockNames,
-                                          Set<String> flowNames, Set<String> lookupNames) {
+    private static ElementType resolveAuxType(String name, Set<String> stockNames,
+                                               Set<String> flowNames, Set<String> lookupNames) {
         if (stockNames.contains(name)) {
-            return "stock";
+            return ElementType.STOCK;
         }
         if (flowNames.contains(name)) {
-            return "flow";
+            return ElementType.FLOW;
         }
         if (lookupNames.contains(name)) {
-            return "lookup";
+            return ElementType.LOOKUP;
         }
-        return "aux";
+        return ElementType.AUX;
     }
 
     private static String getChildText(Element parent, String tagName) {

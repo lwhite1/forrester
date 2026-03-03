@@ -2,19 +2,16 @@ package com.deathrayresearch.forrester.app.canvas;
 
 import com.deathrayresearch.forrester.model.def.ConnectorRoute;
 import com.deathrayresearch.forrester.model.def.ConstantDef;
-import com.deathrayresearch.forrester.model.def.FlowDef;
-import com.deathrayresearch.forrester.model.def.StockDef;
+import com.deathrayresearch.forrester.model.def.ElementType;
 import com.deathrayresearch.forrester.model.def.ViewDef;
 
 import javafx.scene.canvas.Canvas;
-import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.ScrollEvent;
 import javafx.scene.layout.Pane;
-import javafx.scene.paint.Color;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -30,16 +27,13 @@ import java.util.Map;
 public class ModelCanvas extends Canvas {
 
     private static final double ZOOM_FACTOR = 1.1;
-    private static final Color RUBBER_BAND_COLOR = Color.web("#4A90D9", 0.6);
-    private static final Color STOCK_HOVER_COLOR = Color.web("#4A90D9", 0.4);
-    private static final double RUBBER_BAND_DASH = 8;
-    private static final double RUBBER_BAND_GAP = 4;
 
     private ModelEditor editor;
     private List<ConnectorRoute> connectors = List.of();
 
     private final Viewport viewport = new Viewport();
     private final CanvasState canvasState = new CanvasState();
+    private final CanvasRenderer renderer = new CanvasRenderer(canvasState, viewport);
 
     // Tool state
     private CanvasToolBar.Tool activeTool = CanvasToolBar.Tool.SELECT;
@@ -54,13 +48,17 @@ public class ModelCanvas extends Canvas {
     private String dragTarget;
     private final Map<String, double[]> dragStartPositions = new HashMap<>();
 
-    // Pending flow state (two-click protocol)
-    private boolean pendingFlow;
-    private String pendingFlowSource;
-    private double pendingFlowSourceX;
-    private double pendingFlowSourceY;
-    private double rubberBandEndX;
-    private double rubberBandEndY;
+    // Two-click flow creation
+    private final FlowCreationController flowCreation = new FlowCreationController();
+
+    // Flow endpoint reattachment drag
+    private boolean reattaching;
+    private String reattachFlowName;
+    private FlowEndpointCalculator.FlowEnd reattachEnd;
+    private double reattachDiamondX;
+    private double reattachDiamondY;
+    private double reattachRubberBandX;
+    private double reattachRubberBandY;
 
     // Inline editor
     private Pane overlayPane;
@@ -96,8 +94,8 @@ public class ModelCanvas extends Canvas {
      * Cancels any pending flow if the tool changes.
      */
     public void setActiveTool(CanvasToolBar.Tool tool) {
-        if (pendingFlow) {
-            cancelPendingFlow();
+        if (flowCreation.isPending()) {
+            flowCreation.cancel();
         }
         this.activeTool = tool;
     }
@@ -134,168 +132,15 @@ public class ModelCanvas extends Canvas {
     }
 
     /**
-     * Redraws the entire canvas: background in screen space, then connections,
-     * elements, selection indicators, and rubber-band in world space via the viewport transform.
+     * Redraws the entire canvas by delegating to the CanvasRenderer.
      */
     private void redraw() {
-        double w = getWidth();
-        double h = getHeight();
-        GraphicsContext gc = getGraphicsContext2D();
-
-        // Background in screen space
-        gc.clearRect(0, 0, w, h);
-        gc.setFill(ColorPalette.BACKGROUND);
-        gc.fillRect(0, 0, w, h);
-
-        if (editor == null) {
-            return;
-        }
-
-        // Build lookup for constant values
-        Map<String, ConstantDef> constantMap = new HashMap<>();
-        for (ConstantDef c : editor.getConstants()) {
-            constantMap.put(c.name(), c);
-        }
-
-        // Build lookup for stock units
-        Map<String, String> stockUnitMap = new HashMap<>();
-        for (StockDef s : editor.getStocks()) {
-            stockUnitMap.put(s.name(), s.unit());
-        }
-
-        // Apply viewport transform for world-space rendering
-        gc.save();
-        viewport.applyTo(gc);
-
-        // 1. Draw connections first (behind elements)
-        drawMaterialFlows(gc);
-        drawInfoLinks(gc);
-
-        // 2. Draw elements on top
-        for (String name : canvasState.getDrawOrder()) {
-            String type = canvasState.getType(name);
-            double cx = canvasState.getX(name);
-            double cy = canvasState.getY(name);
-
-            if (type == null) {
-                continue;
-            }
-
-            switch (type) {
-                case "stock" -> {
-                    String unit = stockUnitMap.get(name);
-                    ElementRenderer.drawStock(gc, name, unit,
-                            cx - LayoutMetrics.STOCK_WIDTH / 2,
-                            cy - LayoutMetrics.STOCK_HEIGHT / 2,
-                            LayoutMetrics.STOCK_WIDTH, LayoutMetrics.STOCK_HEIGHT);
-                }
-                case "flow" -> ElementRenderer.drawFlow(gc, name, cx, cy);
-                case "aux" -> ElementRenderer.drawAux(gc, name,
-                        cx - LayoutMetrics.AUX_WIDTH / 2,
-                        cy - LayoutMetrics.AUX_HEIGHT / 2,
-                        LayoutMetrics.AUX_WIDTH, LayoutMetrics.AUX_HEIGHT);
-                case "constant" -> {
-                    ConstantDef cd = constantMap.get(name);
-                    double value = cd != null ? cd.value() : 0;
-                    ElementRenderer.drawConstant(gc, name, value,
-                            cx - LayoutMetrics.CONSTANT_WIDTH / 2,
-                            cy - LayoutMetrics.CONSTANT_HEIGHT / 2,
-                            LayoutMetrics.CONSTANT_WIDTH, LayoutMetrics.CONSTANT_HEIGHT);
-                }
-                default -> { }
-            }
-        }
-
-        // 3. Draw selection indicators on top of everything
-        for (String name : canvasState.getSelection()) {
-            SelectionRenderer.drawSelectionIndicator(gc, canvasState, name);
-        }
-
-        // 4. Draw rubber-band line during pending flow creation
-        if (pendingFlow) {
-            drawRubberBand(gc);
-        }
-
-        gc.restore();
-    }
-
-    /**
-     * Draws material flow arrows routed through the flow indicator (diamond).
-     * Path: source stock edge → diamond → sink stock edge.
-     * Uses direction-aware attachment points on stock borders.
-     */
-    private void drawMaterialFlows(GraphicsContext gc) {
-        for (FlowDef flow : editor.getFlows()) {
-            // Flow indicator (diamond) must be on canvas to draw
-            if (!canvasState.hasElement(flow.name())) {
-                continue;
-            }
-            double midX = canvasState.getX(flow.name());
-            double midY = canvasState.getY(flow.name());
-
-            double sourceX = Double.NaN;
-            double sourceY = Double.NaN;
-            double sinkX = Double.NaN;
-            double sinkY = Double.NaN;
-
-            // Source stock → diamond: attachment point on stock border nearest to diamond
-            if (flow.source() != null && canvasState.hasElement(flow.source())) {
-                double scx = canvasState.getX(flow.source());
-                double scy = canvasState.getY(flow.source());
-                double[] edge = clipToBorder(scx, scy,
-                        LayoutMetrics.STOCK_WIDTH / 2, LayoutMetrics.STOCK_HEIGHT / 2,
-                        midX, midY);
-                sourceX = edge[0];
-                sourceY = edge[1];
-            }
-
-            // Diamond → sink stock: attachment point on stock border nearest from diamond
-            if (flow.sink() != null && canvasState.hasElement(flow.sink())) {
-                double scx = canvasState.getX(flow.sink());
-                double scy = canvasState.getY(flow.sink());
-                double[] edge = clipToBorder(scx, scy,
-                        LayoutMetrics.STOCK_WIDTH / 2, LayoutMetrics.STOCK_HEIGHT / 2,
-                        midX, midY);
-                sinkX = edge[0];
-                sinkY = edge[1];
-            }
-
-            ConnectionRenderer.drawMaterialFlow(gc, sourceX, sourceY, midX, midY, sinkX, sinkY);
-        }
-    }
-
-    /**
-     * Draws info link dashed arrows based on cached connector routes.
-     * Reads positions from CanvasState.
-     */
-    private void drawInfoLinks(GraphicsContext gc) {
-        for (ConnectorRoute route : connectors) {
-            String fromName = route.from();
-            String toName = route.to();
-
-            if (!canvasState.hasElement(fromName) || !canvasState.hasElement(toName)) {
-                continue;
-            }
-
-            double fromX = canvasState.getX(fromName);
-            double fromY = canvasState.getY(fromName);
-            double toX = canvasState.getX(toName);
-            double toY = canvasState.getY(toName);
-
-            String fromType = canvasState.getType(fromName);
-            String toType = canvasState.getType(toName);
-
-            double fromW = LayoutMetrics.widthFor(fromType) / 2;
-            double fromH = LayoutMetrics.heightFor(fromType) / 2;
-            double toW = LayoutMetrics.widthFor(toType) / 2;
-            double toH = LayoutMetrics.heightFor(toType) / 2;
-
-            double[] clippedFrom = clipToBorder(fromX, fromY, fromW, fromH, toX, toY);
-            double[] clippedTo = clipToBorder(toX, toY, toW, toH, fromX, fromY);
-
-            ConnectionRenderer.drawInfoLink(gc, clippedFrom[0], clippedFrom[1],
-                    clippedTo[0], clippedTo[1]);
-        }
+        CanvasRenderer.ReattachState reattachState = reattaching
+                ? new CanvasRenderer.ReattachState(true, reattachDiamondX, reattachDiamondY,
+                        reattachRubberBandX, reattachRubberBandY)
+                : CanvasRenderer.ReattachState.IDLE;
+        renderer.render(getGraphicsContext2D(), getWidth(), getHeight(),
+                editor, connectors, flowCreation.getState(), reattachState);
     }
 
     /**
@@ -309,20 +154,20 @@ public class ModelCanvas extends Canvas {
         }
 
         String name;
-        String type;
+        ElementType type;
 
         switch (activeTool) {
             case PLACE_STOCK -> {
                 name = editor.addStock();
-                type = "stock";
+                type = ElementType.STOCK;
             }
             case PLACE_AUX -> {
                 name = editor.addAux();
-                type = "aux";
+                type = ElementType.AUX;
             }
             case PLACE_CONSTANT -> {
                 name = editor.addConstant();
-                type = "constant";
+                type = ElementType.CONSTANT;
             }
             default -> {
                 return;
@@ -358,117 +203,16 @@ public class ModelCanvas extends Canvas {
     // --- Two-click flow creation ---
 
     /**
-     * Handles a click during PLACE_FLOW mode using a two-click protocol.
-     * First click: sets source (stock under cursor, or cloud if empty space).
-     * Second click: sets sink and creates the flow at the midpoint.
+     * Handles a click during PLACE_FLOW mode by delegating to the FlowCreationController.
      */
     private void handleFlowClick(double worldX, double worldY) {
-        if (!pendingFlow) {
-            // First click: set source
-            String hit = hitTestStockOnly(worldX, worldY);
-            pendingFlow = true;
-            pendingFlowSource = hit;
-
-            if (hit != null) {
-                pendingFlowSourceX = canvasState.getX(hit);
-                pendingFlowSourceY = canvasState.getY(hit);
-            } else {
-                pendingFlowSourceX = worldX;
-                pendingFlowSourceY = worldY;
-            }
-            rubberBandEndX = worldX;
-            rubberBandEndY = worldY;
-            redraw();
-        } else {
-            // Second click: set sink and create flow
-            String sinkHit = hitTestStockOnly(worldX, worldY);
-
-            // Determine effective source/sink positions for midpoint calculation
-            double srcX = pendingFlowSourceX;
-            double srcY = pendingFlowSourceY;
-            double dstX;
-            double dstY;
-
-            if (sinkHit != null) {
-                dstX = canvasState.getX(sinkHit);
-                dstY = canvasState.getY(sinkHit);
-            } else {
-                dstX = worldX;
-                dstY = worldY;
-            }
-
-            double midX = (srcX + dstX) / 2;
-            double midY = (srcY + dstY) / 2;
-
-            String name = editor.addFlow(pendingFlowSource, sinkHit);
-            canvasState.addElement(name, "flow", midX, midY);
+        String name = flowCreation.handleClick(worldX, worldY, canvasState, editor);
+        if (name != null) {
             connectors = editor.generateConnectors();
             canvasState.clearSelection();
             canvasState.select(name);
-
-            cancelPendingFlow();
-            redraw();
         }
-    }
-
-    /**
-     * Tests if the given world coordinates hit a stock element.
-     * Returns the stock name, or null if no stock is hit.
-     */
-    private String hitTestStockOnly(double worldX, double worldY) {
-        String hit = HitTester.hitTest(canvasState, worldX, worldY);
-        if (hit != null && "stock".equals(canvasState.getType(hit))) {
-            return hit;
-        }
-        return null;
-    }
-
-    /**
-     * Cancels any pending flow creation state.
-     */
-    private void cancelPendingFlow() {
-        pendingFlow = false;
-        pendingFlowSource = null;
-        pendingFlowSourceX = 0;
-        pendingFlowSourceY = 0;
-        rubberBandEndX = 0;
-        rubberBandEndY = 0;
-    }
-
-    /**
-     * Draws a rubber-band line from the pending flow source to the current mouse position.
-     * Also highlights any stock under the cursor.
-     */
-    private void drawRubberBand(GraphicsContext gc) {
-        double startX = pendingFlowSourceX;
-        double startY = pendingFlowSourceY;
-
-        // If source is a cloud, draw cloud symbol at source
-        if (pendingFlowSource == null) {
-            ConnectionRenderer.drawCloudAt(gc, startX, startY);
-        }
-
-        // Rubber-band line
-        gc.setStroke(RUBBER_BAND_COLOR);
-        gc.setLineWidth(2);
-        gc.setLineDashes(RUBBER_BAND_DASH, RUBBER_BAND_GAP);
-        gc.strokeLine(startX, startY, rubberBandEndX, rubberBandEndY);
-        gc.setLineDashes();
-
-        // Highlight stock under cursor
-        String hoverStock = hitTestStockOnly(rubberBandEndX, rubberBandEndY);
-        if (hoverStock != null) {
-            double sx = canvasState.getX(hoverStock);
-            double sy = canvasState.getY(hoverStock);
-            double halfW = LayoutMetrics.STOCK_WIDTH / 2 + 4;
-            double halfH = LayoutMetrics.STOCK_HEIGHT / 2 + 4;
-
-            gc.setStroke(STOCK_HOVER_COLOR);
-            gc.setLineWidth(2.5);
-            gc.setLineDashes(6, 3);
-            gc.strokeRect(sx - halfW, sy - halfH, halfW * 2, halfH * 2);
-            gc.setLineDashes();
-        }
+        redraw();
     }
 
     // --- Inline editing ---
@@ -481,7 +225,7 @@ public class ModelCanvas extends Canvas {
             return;
         }
 
-        String type = canvasState.getType(elementName);
+        ElementType type = canvasState.getType(elementName);
         if (type == null) {
             return;
         }
@@ -492,7 +236,7 @@ public class ModelCanvas extends Canvas {
         double screenY = viewport.toScreenY(worldY);
         double fieldWidth = LayoutMetrics.widthFor(type) + 20;
 
-        if ("constant".equals(type)) {
+        if (type == ElementType.CONSTANT) {
             startConstantNameEdit(elementName, screenX, screenY, fieldWidth);
         } else {
             inlineEditor.open(screenX, screenY, elementName, fieldWidth, newName -> {
@@ -569,6 +313,44 @@ public class ModelCanvas extends Canvas {
         return null;
     }
 
+    // --- Flow endpoint reattachment ---
+
+    /**
+     * Begins a reattachment drag from a cloud or connected endpoint hit.
+     */
+    private void startReattachment(FlowEndpointCalculator.CloudHit hit) {
+        reattaching = true;
+        reattachFlowName = hit.flowName();
+        reattachEnd = hit.end();
+        // Diamond center of the flow
+        reattachDiamondX = canvasState.getX(hit.flowName());
+        reattachDiamondY = canvasState.getY(hit.flowName());
+        reattachRubberBandX = hit.cloudX();
+        reattachRubberBandY = hit.cloudY();
+        redraw();
+    }
+
+    /**
+     * Completes a reattachment drag: if released on a stock, reconnects the flow
+     * endpoint to that stock; if released on empty space, disconnects to cloud.
+     */
+    private void completeReattachment(double worldX, double worldY) {
+        String stockHit = FlowCreationController.hitTestStockOnly(worldX, worldY, canvasState);
+        editor.reconnectFlow(reattachFlowName, reattachEnd, stockHit);
+        connectors = editor.generateConnectors();
+        cancelReattachment();
+        redraw();
+    }
+
+    /**
+     * Cancels a reattachment drag without making any changes.
+     */
+    private void cancelReattachment() {
+        reattaching = false;
+        reattachFlowName = null;
+        reattachEnd = null;
+    }
+
     // --- Event handlers ---
 
     private void handleScroll(ScrollEvent event) {
@@ -579,9 +361,10 @@ public class ModelCanvas extends Canvas {
     }
 
     private void handleMouseMoved(MouseEvent event) {
-        if (pendingFlow) {
-            rubberBandEndX = viewport.toWorldX(event.getX());
-            rubberBandEndY = viewport.toWorldY(event.getY());
+        if (flowCreation.isPending()) {
+            flowCreation.updateRubberBand(
+                    viewport.toWorldX(event.getX()),
+                    viewport.toWorldY(event.getY()));
             redraw();
             event.consume();
         }
@@ -613,10 +396,25 @@ public class ModelCanvas extends Canvas {
             // Double-click: start inline editing (only in SELECT mode, not during pending flow)
             if (event.getClickCount() == 2
                     && activeTool == CanvasToolBar.Tool.SELECT
-                    && !pendingFlow) {
+                    && !flowCreation.isPending()) {
                 String hit = HitTester.hitTest(canvasState, worldX, worldY);
                 if (hit != null) {
                     startInlineEdit(hit);
+                    event.consume();
+                    return;
+                }
+            }
+
+            // Flow endpoint reattachment: check cloud + connected endpoints (SELECT mode only)
+            if (activeTool == CanvasToolBar.Tool.SELECT && !flowCreation.isPending()) {
+                FlowEndpointCalculator.CloudHit cloudHit =
+                        FlowEndpointCalculator.hitTestClouds(worldX, worldY, canvasState, editor);
+                if (cloudHit == null) {
+                    cloudHit = FlowEndpointCalculator.hitTestConnectedEndpoints(
+                            worldX, worldY, canvasState, editor);
+                }
+                if (cloudHit != null) {
+                    startReattachment(cloudHit);
                     event.consume();
                     return;
                 }
@@ -671,6 +469,14 @@ public class ModelCanvas extends Canvas {
     }
 
     private void handleMouseDragged(MouseEvent event) {
+        if (reattaching) {
+            reattachRubberBandX = viewport.toWorldX(event.getX());
+            reattachRubberBandY = viewport.toWorldY(event.getY());
+            redraw();
+            event.consume();
+            return;
+        }
+
         double screenDx = event.getX() - dragStartX;
         double screenDy = event.getY() - dragStartY;
 
@@ -700,6 +506,14 @@ public class ModelCanvas extends Canvas {
     }
 
     private void handleMouseReleased(MouseEvent event) {
+        if (reattaching) {
+            completeReattachment(
+                    viewport.toWorldX(event.getX()),
+                    viewport.toWorldY(event.getY()));
+            event.consume();
+            return;
+        }
+
         dragging = false;
         panning = false;
         dragTarget = null;
@@ -720,8 +534,11 @@ public class ModelCanvas extends Canvas {
             deleteSelected();
             event.consume();
         } else if (event.getCode() == KeyCode.ESCAPE) {
-            if (pendingFlow) {
-                cancelPendingFlow();
+            if (reattaching) {
+                cancelReattachment();
+                redraw();
+            } else if (flowCreation.isPending()) {
+                flowCreation.cancel();
                 redraw();
             } else {
                 if (toolBar != null) {
@@ -740,22 +557,4 @@ public class ModelCanvas extends Canvas {
         }
     }
 
-    /**
-     * Clips a line from the center of a rectangle toward a target point,
-     * returning the intersection with the rectangle border.
-     */
-    private static double[] clipToBorder(double cx, double cy, double halfW, double halfH,
-                                         double targetX, double targetY) {
-        double dx = targetX - cx;
-        double dy = targetY - cy;
-        if (dx == 0 && dy == 0) {
-            return new double[]{cx, cy};
-        }
-
-        double scaleX = halfW > 0 ? Math.abs(halfW / dx) : Double.MAX_VALUE;
-        double scaleY = halfH > 0 ? Math.abs(halfH / dy) : Double.MAX_VALUE;
-        double scale = Math.min(scaleX, scaleY);
-
-        return new double[]{cx + dx * scale, cy + dy * scale};
-    }
 }

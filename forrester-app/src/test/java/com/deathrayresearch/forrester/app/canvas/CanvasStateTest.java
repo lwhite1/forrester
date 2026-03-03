@@ -1,6 +1,7 @@
 package com.deathrayresearch.forrester.app.canvas;
 
 import com.deathrayresearch.forrester.model.def.ElementPlacement;
+import com.deathrayresearch.forrester.model.def.ElementType;
 import com.deathrayresearch.forrester.model.def.ViewDef;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -30,8 +31,8 @@ class CanvasStateTest {
         @Test
         void shouldCopyPositionsFromViewDef() {
             ViewDef view = new ViewDef("test", List.of(
-                    new ElementPlacement("S", "stock", 100, 200),
-                    new ElementPlacement("I", "stock", 300, 200)
+                    new ElementPlacement("S", ElementType.STOCK, 100, 200),
+                    new ElementPlacement("I", ElementType.STOCK, 300, 200)
             ), List.of(), List.of());
 
             state.loadFrom(view);
@@ -45,28 +46,28 @@ class CanvasStateTest {
         @Test
         void shouldCopyElementTypes() {
             ViewDef view = new ViewDef("test", List.of(
-                    new ElementPlacement("S", "stock", 100, 200),
-                    new ElementPlacement("rate", "flow", 200, 200),
-                    new ElementPlacement("k", "constant", 200, 300)
+                    new ElementPlacement("S", ElementType.STOCK, 100, 200),
+                    new ElementPlacement("rate", ElementType.FLOW, 200, 200),
+                    new ElementPlacement("k", ElementType.CONSTANT, 200, 300)
             ), List.of(), List.of());
 
             state.loadFrom(view);
 
-            assertThat(state.getType("S")).isEqualTo("stock");
-            assertThat(state.getType("rate")).isEqualTo("flow");
-            assertThat(state.getType("k")).isEqualTo("constant");
+            assertThat(state.getType("S")).isEqualTo(ElementType.STOCK);
+            assertThat(state.getType("rate")).isEqualTo(ElementType.FLOW);
+            assertThat(state.getType("k")).isEqualTo(ElementType.CONSTANT);
         }
 
         @Test
         void shouldClearPreviousState() {
             ViewDef view1 = new ViewDef("v1", List.of(
-                    new ElementPlacement("A", "stock", 10, 20)
+                    new ElementPlacement("A", ElementType.STOCK, 10, 20)
             ), List.of(), List.of());
             state.loadFrom(view1);
             state.select("A");
 
             ViewDef view2 = new ViewDef("v2", List.of(
-                    new ElementPlacement("B", "stock", 50, 60)
+                    new ElementPlacement("B", ElementType.STOCK, 50, 60)
             ), List.of(), List.of());
             state.loadFrom(view2);
 
@@ -78,9 +79,9 @@ class CanvasStateTest {
         @Test
         void shouldPreserveDrawOrder() {
             ViewDef view = new ViewDef("test", List.of(
-                    new ElementPlacement("first", "stock", 0, 0),
-                    new ElementPlacement("second", "aux", 100, 0),
-                    new ElementPlacement("third", "constant", 200, 0)
+                    new ElementPlacement("first", ElementType.STOCK, 0, 0),
+                    new ElementPlacement("second", ElementType.AUX, 100, 0),
+                    new ElementPlacement("third", ElementType.CONSTANT, 200, 0)
             ), List.of(), List.of());
 
             state.loadFrom(view);
@@ -96,7 +97,7 @@ class CanvasStateTest {
         @Test
         void shouldUpdatePosition() {
             ViewDef view = new ViewDef("test", List.of(
-                    new ElementPlacement("S", "stock", 100, 200)
+                    new ElementPlacement("S", ElementType.STOCK, 100, 200)
             ), List.of(), List.of());
             state.loadFrom(view);
 
@@ -126,9 +127,9 @@ class CanvasStateTest {
         @BeforeEach
         void loadElements() {
             ViewDef view = new ViewDef("test", List.of(
-                    new ElementPlacement("A", "stock", 0, 0),
-                    new ElementPlacement("B", "stock", 100, 0),
-                    new ElementPlacement("C", "aux", 200, 0)
+                    new ElementPlacement("A", ElementType.STOCK, 0, 0),
+                    new ElementPlacement("B", ElementType.STOCK, 100, 0),
+                    new ElementPlacement("C", ElementType.AUX, 200, 0)
             ), List.of(), List.of());
             state.loadFrom(view);
         }
@@ -204,28 +205,28 @@ class CanvasStateTest {
 
         @Test
         void shouldAddNewElement() {
-            state.addElement("NewStock", "stock", 300, 400);
+            state.addElement("NewStock", ElementType.STOCK, 300, 400);
 
             assertThat(state.hasElement("NewStock")).isTrue();
             assertThat(state.getX("NewStock")).isCloseTo(300, within(0.001));
             assertThat(state.getY("NewStock")).isCloseTo(400, within(0.001));
-            assertThat(state.getType("NewStock")).isEqualTo("stock");
+            assertThat(state.getType("NewStock")).isEqualTo(ElementType.STOCK);
         }
 
         @Test
         void shouldAppendToDrawOrder() {
-            state.addElement("A", "stock", 0, 0);
-            state.addElement("B", "aux", 100, 0);
+            state.addElement("A", ElementType.STOCK, 0, 0);
+            state.addElement("B", ElementType.AUX, 100, 0);
 
             assertThat(state.getDrawOrder()).containsExactly("A", "B");
         }
 
         @Test
         void shouldOverwriteExistingElement() {
-            state.addElement("X", "stock", 10, 20);
-            state.addElement("X", "aux", 50, 60);
+            state.addElement("X", ElementType.STOCK, 10, 20);
+            state.addElement("X", ElementType.AUX, 50, 60);
 
-            assertThat(state.getType("X")).isEqualTo("aux");
+            assertThat(state.getType("X")).isEqualTo(ElementType.AUX);
             assertThat(state.getX("X")).isCloseTo(50, within(0.001));
             // Should not duplicate in draw order
             assertThat(state.getDrawOrder()).containsExactly("X");
@@ -239,9 +240,9 @@ class CanvasStateTest {
         @BeforeEach
         void loadElements() {
             ViewDef view = new ViewDef("test", List.of(
-                    new ElementPlacement("A", "stock", 100, 200),
-                    new ElementPlacement("B", "flow", 200, 200),
-                    new ElementPlacement("C", "aux", 300, 200)
+                    new ElementPlacement("A", ElementType.STOCK, 100, 200),
+                    new ElementPlacement("B", ElementType.FLOW, 200, 200),
+                    new ElementPlacement("C", ElementType.AUX, 300, 200)
             ), List.of(), List.of());
             state.loadFrom(view);
         }
@@ -261,7 +262,7 @@ class CanvasStateTest {
             state.renameElement("A", "Alpha");
 
             assertThat(state.getType("A")).isNull();
-            assertThat(state.getType("Alpha")).isEqualTo("stock");
+            assertThat(state.getType("Alpha")).isEqualTo(ElementType.STOCK);
         }
 
         @Test
@@ -306,8 +307,8 @@ class CanvasStateTest {
             // Both elements preserved unchanged
             assertThat(state.hasElement("A")).isTrue();
             assertThat(state.hasElement("B")).isTrue();
-            assertThat(state.getType("A")).isEqualTo("stock");
-            assertThat(state.getType("B")).isEqualTo("flow");
+            assertThat(state.getType("A")).isEqualTo(ElementType.STOCK);
+            assertThat(state.getType("B")).isEqualTo(ElementType.FLOW);
             assertThat(state.getDrawOrder()).containsExactly("A", "B", "C");
         }
     }
@@ -319,9 +320,9 @@ class CanvasStateTest {
         @BeforeEach
         void loadElements() {
             ViewDef view = new ViewDef("test", List.of(
-                    new ElementPlacement("A", "stock", 0, 0),
-                    new ElementPlacement("B", "stock", 100, 0),
-                    new ElementPlacement("C", "aux", 200, 0)
+                    new ElementPlacement("A", ElementType.STOCK, 0, 0),
+                    new ElementPlacement("B", ElementType.STOCK, 100, 0),
+                    new ElementPlacement("C", ElementType.AUX, 200, 0)
             ), List.of(), List.of());
             state.loadFrom(view);
         }

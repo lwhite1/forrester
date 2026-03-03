@@ -3,6 +3,7 @@ package com.deathrayresearch.forrester.model.graph;
 import com.deathrayresearch.forrester.model.def.AuxDef;
 import com.deathrayresearch.forrester.model.def.ConstantDef;
 import com.deathrayresearch.forrester.model.def.ElementPlacement;
+import com.deathrayresearch.forrester.model.def.ElementType;
 import com.deathrayresearch.forrester.model.def.FlowDef;
 import com.deathrayresearch.forrester.model.def.ConnectorRoute;
 import com.deathrayresearch.forrester.model.def.LookupTableDef;
@@ -41,42 +42,42 @@ public final class AutoLayout {
 
         // Place stocks in center row
         for (StockDef s : def.stocks()) {
-            placements.add(new ElementPlacement(s.name(), "stock", x, Y_STOCK));
+            placements.add(new ElementPlacement(s.name(), ElementType.STOCK, x, Y_STOCK));
             x += X_SPACING;
         }
 
         // Place flows at the same y as stocks, offset between them
         x = 100 + X_SPACING / 2;
         for (FlowDef f : def.flows()) {
-            placements.add(new ElementPlacement(f.name(), "flow", x, Y_FLOW));
+            placements.add(new ElementPlacement(f.name(), ElementType.FLOW, x, Y_FLOW));
             x += X_SPACING;
         }
 
         // Place auxiliaries above
         x = 100;
         for (AuxDef a : def.auxiliaries()) {
-            placements.add(new ElementPlacement(a.name(), "aux", x, Y_AUX));
+            placements.add(new ElementPlacement(a.name(), ElementType.AUX, x, Y_AUX));
             x += X_SPACING;
         }
 
         // Place constants below
         x = 100;
         for (ConstantDef c : def.constants()) {
-            placements.add(new ElementPlacement(c.name(), "constant", x, Y_CONSTANT));
+            placements.add(new ElementPlacement(c.name(), ElementType.CONSTANT, x, Y_CONSTANT));
             x += X_SPACING;
         }
 
         // Place lookup tables at bottom
         x = 100;
         for (LookupTableDef t : def.lookupTables()) {
-            placements.add(new ElementPlacement(t.name(), "lookup", x, Y_LOOKUP));
+            placements.add(new ElementPlacement(t.name(), ElementType.LOOKUP, x, Y_LOOKUP));
             x += X_SPACING;
         }
 
         // Place module instances
         x = 100;
         for (ModuleInstanceDef m : def.modules()) {
-            placements.add(new ElementPlacement(m.instanceName(), "module", x, Y_MODULE));
+            placements.add(new ElementPlacement(m.instanceName(), ElementType.MODULE, x, Y_MODULE));
             x += X_SPACING;
         }
 

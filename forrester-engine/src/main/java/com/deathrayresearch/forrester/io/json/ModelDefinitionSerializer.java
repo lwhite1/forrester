@@ -4,6 +4,7 @@ import com.deathrayresearch.forrester.model.def.AuxDef;
 import com.deathrayresearch.forrester.model.def.ConnectorRoute;
 import com.deathrayresearch.forrester.model.def.ConstantDef;
 import com.deathrayresearch.forrester.model.def.ElementPlacement;
+import com.deathrayresearch.forrester.model.def.ElementType;
 import com.deathrayresearch.forrester.model.def.FlowDef;
 import com.deathrayresearch.forrester.model.def.FlowRoute;
 import com.deathrayresearch.forrester.model.def.LookupTableDef;
@@ -256,7 +257,7 @@ public class ModelDefinitionSerializer {
                 for (ElementPlacement ep : v.elements()) {
                     ObjectNode epNode = mapper.createObjectNode();
                     epNode.put("name", ep.name());
-                    epNode.put("type", ep.type());
+                    epNode.put("type", ep.type().label());
                     epNode.put("x", ep.x());
                     epNode.put("y", ep.y());
                     elements.add(epNode);
@@ -463,7 +464,7 @@ public class ModelDefinitionSerializer {
             for (JsonNode ep : n.get("elements")) {
                 elements.add(new ElementPlacement(
                         requiredText(ep, "name"),
-                        requiredText(ep, "type"),
+                        ElementType.fromLabel(requiredText(ep, "type")),
                         requiredDouble(ep, "x"),
                         requiredDouble(ep, "y")));
             }

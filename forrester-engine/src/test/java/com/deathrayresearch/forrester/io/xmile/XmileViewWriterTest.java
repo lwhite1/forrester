@@ -2,6 +2,7 @@ package com.deathrayresearch.forrester.io.xmile;
 
 import com.deathrayresearch.forrester.model.def.ConnectorRoute;
 import com.deathrayresearch.forrester.model.def.ElementPlacement;
+import com.deathrayresearch.forrester.model.def.ElementType;
 import com.deathrayresearch.forrester.model.def.FlowRoute;
 import com.deathrayresearch.forrester.model.def.ViewDef;
 
@@ -26,8 +27,8 @@ class XmileViewWriterTest {
     @Test
     void shouldWriteAndParseBackElementPlacements() throws Exception {
         ViewDef view = new ViewDef("Main", List.of(
-                new ElementPlacement("Pop", "stock", 100, 200),
-                new ElementPlacement("rate", "aux", 300, 400)
+                new ElementPlacement("Pop", ElementType.STOCK, 100, 200),
+                new ElementPlacement("rate", ElementType.AUX, 300, 400)
         ), List.of(), List.of());
 
         Document doc = createDocument();
