@@ -23,11 +23,6 @@ import java.util.Map;
  */
 public class OptimizationResultPane extends BorderPane {
 
-    private static final String[] SERIES_COLORS = {
-        "#1f77b4", "#ff7f0e", "#2ca02c", "#d62728", "#9467bd",
-        "#8c564b", "#e377c2", "#7f7f7f", "#bcbd22", "#17becf"
-    };
-
     public OptimizationResultPane(OptimizationResult result) {
         // Summary grid
         GridPane summaryGrid = new GridPane();
@@ -91,19 +86,7 @@ public class OptimizationResultPane extends BorderPane {
             chart.getData().add(series);
         }
 
-        // Apply colors
-        for (int i = 0; i < chart.getData().size(); i++) {
-            String color = SERIES_COLORS[i % SERIES_COLORS.length];
-            XYChart.Series<Number, Number> series = chart.getData().get(i);
-            series.nodeProperty().addListener((obs, oldNode, newNode) -> {
-                if (newNode != null) {
-                    newNode.setStyle("-fx-stroke: " + color + ";");
-                }
-            });
-            if (series.getNode() != null) {
-                series.getNode().setStyle("-fx-stroke: " + color + ";");
-            }
-        }
+        ChartUtils.applySeriesColors(chart.getData());
 
         return chart;
     }

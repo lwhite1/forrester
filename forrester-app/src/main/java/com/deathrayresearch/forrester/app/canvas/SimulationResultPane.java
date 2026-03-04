@@ -31,14 +31,8 @@ import javax.imageio.ImageIO;
 
 /**
  * Embeddable pane displaying simulation results as a chart and table.
- * Extracted from {@link SimulationResultsDialog} for use in the dashboard.
  */
 public class SimulationResultPane extends BorderPane {
-
-    private static final String[] SERIES_COLORS = {
-        "#1f77b4", "#ff7f0e", "#2ca02c", "#d62728", "#9467bd",
-        "#8c564b", "#e377c2", "#7f7f7f", "#bcbd22", "#17becf"
-    };
 
     private LineChart<Number, Number> chart;
 
@@ -67,7 +61,7 @@ public class SimulationResultPane extends BorderPane {
                     if (colIndex == 0) {
                         return new SimpleStringProperty(String.valueOf((int) val));
                     }
-                    return new SimpleStringProperty(formatNumber(val));
+                    return new SimpleStringProperty(ChartUtils.formatNumber(val));
                 }
                 return new SimpleStringProperty("");
             });
@@ -107,20 +101,22 @@ public class SimulationResultPane extends BorderPane {
         }
 
         chart.getData().addAll(allSeries);
-        applySeriesColors(allSeries);
+        ChartUtils.applySeriesColors(allSeries);
 
         VBox sidebar = new VBox(6);
         sidebar.setPadding(new Insets(10));
 
         for (int i = 0; i < allSeries.size(); i++) {
             XYChart.Series<Number, Number> series = allSeries.get(i);
-            String color = SERIES_COLORS[i % SERIES_COLORS.length];
+            String color = ChartUtils.SERIES_COLORS[i % ChartUtils.SERIES_COLORS.length];
 
             CheckBox cb = new CheckBox(series.getName());
             cb.setSelected(true);
             cb.setStyle("-fx-text-fill: " + color + ";");
             cb.selectedProperty().addListener((obs, wasSelected, isSelected) -> {
-                series.getNode().setVisible(isSelected);
+                if (series.getNode() != null) {
+                    series.getNode().setVisible(isSelected);
+                }
                 series.getData().forEach(d -> {
                     if (d.getNode() != null) {
                         d.getNode().setVisible(isSelected);
@@ -147,21 +143,6 @@ public class SimulationResultPane extends BorderPane {
         return pane;
     }
 
-    private void applySeriesColors(List<XYChart.Series<Number, Number>> allSeries) {
-        for (int i = 0; i < allSeries.size(); i++) {
-            String color = SERIES_COLORS[i % SERIES_COLORS.length];
-            XYChart.Series<Number, Number> series = allSeries.get(i);
-            series.nodeProperty().addListener((obs, oldNode, newNode) -> {
-                if (newNode != null) {
-                    newNode.setStyle("-fx-stroke: " + color + ";");
-                }
-            });
-            if (series.getNode() != null) {
-                series.getNode().setStyle("-fx-stroke: " + color + ";");
-            }
-        }
-    }
-
     private void saveChartAsPng() {
         if (chart == null) {
             return;
@@ -185,10 +166,4 @@ public class SimulationResultPane extends BorderPane {
         }
     }
 
-    private static String formatNumber(double value) {
-        if (value == Math.floor(value) && Double.isFinite(value)) {
-            return String.valueOf((long) value);
-        }
-        return String.format("%.4f", value);
-    }
 }

@@ -4,6 +4,8 @@ import javafx.beans.binding.Bindings;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
+import javafx.event.ActionEvent;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonBar;
 import javafx.scene.control.ButtonType;
@@ -137,6 +139,16 @@ public class OptimizerDialog extends Dialog<OptimizerDialog.Config> {
                         objectiveCombo.valueProperty(), targetVarCombo.valueProperty())
         );
 
+        Button okNode = (Button) getDialogPane().lookupButton(okButton);
+        okNode.addEventFilter(ActionEvent.ACTION, event -> {
+            boolean hasValid = paramRows.stream().anyMatch(ParamRow::isValid);
+            if (!hasValid) {
+                event.consume();
+                new Alert(Alert.AlertType.WARNING,
+                        "At least one parameter row must have valid values.").showAndWait();
+            }
+        });
+
         setResultConverter(button -> {
             if (button == okButton) {
                 List<ParamConfig> params = new ArrayList<>();
@@ -144,9 +156,6 @@ public class OptimizerDialog extends Dialog<OptimizerDialog.Config> {
                     if (row.isValid()) {
                         params.add(row.toConfig());
                     }
-                }
-                if (params.isEmpty()) {
-                    return null;
                 }
                 double targetVal = 0;
                 if (objectiveCombo.getValue() == ObjectiveType.TARGET) {

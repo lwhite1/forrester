@@ -67,10 +67,16 @@ import javafx.stage.Stage;
 import org.apache.commons.math3.distribution.NormalDistribution;
 import org.apache.commons.math3.distribution.UniformRealDistribution;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -111,7 +117,6 @@ public class ModelWindow {
     }
 
     private void buildUI() {
-        editor = new ModelEditor();
         canvas = new ModelCanvas(clipboard);
         canvas.setUndoManager(undoManager);
 
@@ -224,9 +229,11 @@ public class ModelWindow {
         MenuItem exitItem = new MenuItem("Exit");
         exitItem.setOnAction(e -> Platform.exit());
 
-        fileMenu.getItems().addAll(newWindowItem, newItem, openItem, new SeparatorMenuItem(),
-                saveItem, saveAsItem, exportItem, new SeparatorMenuItem(),
-                closeItem, exitItem);
+        Menu examplesMenu = buildExamplesMenu();
+
+        fileMenu.getItems().addAll(newWindowItem, newItem, openItem, examplesMenu,
+                new SeparatorMenuItem(), saveItem, saveAsItem, exportItem,
+                new SeparatorMenuItem(), closeItem, exitItem);
 
         Menu editMenu = new Menu("Edit");
 
@@ -334,6 +341,9 @@ public class ModelWindow {
                 .build();
         ViewDef emptyView = new ViewDef("Main", List.of(), List.of(), List.of());
 
+        if (editor != null) {
+            editor.removeListener(logListener);
+        }
         editor = new ModelEditor();
         editor.addListener(logListener);
         editor.loadFrom(empty);
@@ -341,6 +351,9 @@ public class ModelWindow {
         canvas.setModel(editor, emptyView);
         undoManager.clear();
         currentFile = null;
+        if (dashboardPanel != null) {
+            dashboardPanel.clear();
+        }
         updateTitle();
     }
 
@@ -356,6 +369,9 @@ public class ModelWindow {
 
         try {
             ModelDefinition def = serializer.fromFile(file.toPath());
+            if (editor != null) {
+                editor.removeListener(logListener);
+            }
             editor = new ModelEditor();
             editor.addListener(logListener);
             editor.loadFrom(def);
@@ -371,10 +387,89 @@ public class ModelWindow {
             canvas.setModel(editor, view);
             undoManager.clear();
             currentFile = file.toPath();
+            if (dashboardPanel != null) {
+                dashboardPanel.clear();
+            }
             updateTitle();
             fireLogEvent(l -> l.onModelOpened(file.getName()));
         } catch (IOException ex) {
             showError("Open Error", "Failed to open file: " + ex.getMessage());
+        }
+    }
+
+    private Menu buildExamplesMenu() {
+        Menu menu = new Menu("Open Example");
+        try (InputStream in = getClass().getResourceAsStream("/models/catalog.json")) {
+            if (in == null) {
+                MenuItem empty = new MenuItem("(no examples found)");
+                empty.setDisable(true);
+                menu.getItems().add(empty);
+                return menu;
+            }
+            ObjectMapper om = new ObjectMapper();
+            JsonNode root = om.readTree(in);
+            JsonNode models = root.get("models");
+            if (models == null || !models.isArray()) {
+                MenuItem empty = new MenuItem("(no examples found)");
+                empty.setDisable(true);
+                menu.getItems().add(empty);
+                return menu;
+            }
+
+            Map<String, Menu> categoryMenus = new LinkedHashMap<>();
+            for (JsonNode model : models) {
+                String name = model.get("name").asText();
+                String category = model.get("category").asText();
+                String path = model.get("path").asText();
+
+                Menu categoryMenu = categoryMenus.computeIfAbsent(category, c -> new Menu(c));
+                MenuItem item = new MenuItem(name);
+                item.setOnAction(e -> openExample(name, path));
+                categoryMenu.getItems().add(item);
+            }
+            menu.getItems().addAll(categoryMenus.values());
+        } catch (IOException ex) {
+            MenuItem empty = new MenuItem("(no examples found)");
+            empty.setDisable(true);
+            menu.getItems().add(empty);
+        }
+        return menu;
+    }
+
+    private void openExample(String name, String resourcePath) {
+        try (InputStream in = getClass().getResourceAsStream("/models/" + resourcePath)) {
+            if (in == null) {
+                showError("Open Example", "Example resource not found: " + resourcePath);
+                return;
+            }
+            String json = new String(in.readAllBytes(), StandardCharsets.UTF_8);
+            ModelDefinition def = serializer.fromJson(json);
+
+            if (editor != null) {
+                editor.removeListener(logListener);
+            }
+            editor = new ModelEditor();
+            editor.addListener(logListener);
+            editor.loadFrom(def);
+
+            ViewDef view;
+            if (!def.views().isEmpty()) {
+                view = def.views().getFirst();
+            } else {
+                view = AutoLayout.layout(def);
+            }
+
+            canvas.clearNavigation();
+            canvas.setModel(editor, view);
+            undoManager.clear();
+            currentFile = null;
+            if (dashboardPanel != null) {
+                dashboardPanel.clear();
+            }
+            updateTitle();
+            fireLogEvent(l -> l.onModelOpened(name));
+        } catch (IOException ex) {
+            showError("Open Example", "Failed to load example: " + ex.getMessage());
         }
     }
 

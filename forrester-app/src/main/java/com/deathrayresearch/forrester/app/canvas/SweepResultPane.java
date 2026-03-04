@@ -26,11 +26,6 @@ import java.util.List;
  */
 public class SweepResultPane extends BorderPane {
 
-    private static final String[] SERIES_COLORS = {
-        "#1f77b4", "#ff7f0e", "#2ca02c", "#d62728", "#9467bd",
-        "#8c564b", "#e377c2", "#7f7f7f", "#bcbd22", "#17becf"
-    };
-
     private final SweepResult result;
     private final String paramName;
 
@@ -85,7 +80,7 @@ public class SweepResultPane extends BorderPane {
             double paramValue = run.getParameterValue();
 
             XYChart.Series<Number, Number> series = new XYChart.Series<>();
-            series.setName(paramName + " = " + formatNumber(paramValue));
+            series.setName(paramName + " = " + ChartUtils.formatNumber(paramValue));
 
             for (int s = 0; s < run.getStepCount(); s++) {
                 double value = isStock
@@ -97,20 +92,22 @@ public class SweepResultPane extends BorderPane {
         }
 
         chart.getData().addAll(allSeries);
-        applyColors(allSeries);
+        ChartUtils.applySeriesColors(allSeries);
 
         VBox sidebar = new VBox(6);
         sidebar.setPadding(new Insets(10));
 
         for (int i = 0; i < allSeries.size(); i++) {
             XYChart.Series<Number, Number> series = allSeries.get(i);
-            String color = SERIES_COLORS[i % SERIES_COLORS.length];
+            String color = ChartUtils.SERIES_COLORS[i % ChartUtils.SERIES_COLORS.length];
 
             CheckBox cb = new CheckBox(series.getName());
             cb.setSelected(true);
             cb.setStyle("-fx-text-fill: " + color + ";");
             cb.selectedProperty().addListener((obs, wasSelected, isSelected) -> {
-                series.getNode().setVisible(isSelected);
+                if (series.getNode() != null) {
+                    series.getNode().setVisible(isSelected);
+                }
                 series.getData().forEach(d -> {
                     if (d.getNode() != null) {
                         d.getNode().setVisible(isSelected);
@@ -126,27 +123,5 @@ public class SweepResultPane extends BorderPane {
 
         setCenter(chart);
         setRight(sidebarScroll);
-    }
-
-    private void applyColors(List<XYChart.Series<Number, Number>> allSeries) {
-        for (int i = 0; i < allSeries.size(); i++) {
-            String color = SERIES_COLORS[i % SERIES_COLORS.length];
-            XYChart.Series<Number, Number> series = allSeries.get(i);
-            series.nodeProperty().addListener((obs, oldNode, newNode) -> {
-                if (newNode != null) {
-                    newNode.setStyle("-fx-stroke: " + color + ";");
-                }
-            });
-            if (series.getNode() != null) {
-                series.getNode().setStyle("-fx-stroke: " + color + ";");
-            }
-        }
-    }
-
-    private static String formatNumber(double value) {
-        if (value == Math.floor(value) && Double.isFinite(value)) {
-            return String.valueOf((long) value);
-        }
-        return String.format("%.4f", value);
     }
 }

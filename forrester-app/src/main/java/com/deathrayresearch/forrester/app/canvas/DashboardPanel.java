@@ -90,6 +90,18 @@ public class DashboardPanel extends VBox {
         return tab;
     }
 
+    /**
+     * Removes all result tabs and shows the placeholder. Called when the model changes.
+     */
+    public void clear() {
+        resultTabs.getTabs().clear();
+        simulationTab = null;
+        sweepTab = null;
+        monteCarloTab = null;
+        optimizationTab = null;
+        hideTabs();
+    }
+
     private void showTabs() {
         placeholder.setVisible(false);
         placeholder.setManaged(false);

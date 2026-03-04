@@ -29,19 +29,23 @@ public class FanChartPane extends Pane {
     };
 
     private final Canvas canvas;
+    private MonteCarloResult currentResult;
+    private String currentVariable;
 
     public FanChartPane(MonteCarloResult result, String variableName) {
+        this.currentResult = result;
+        this.currentVariable = variableName;
         canvas = new Canvas(800, 500);
         getChildren().add(canvas);
 
-        // Redraw when resized
+        // Redraw when resized — reads from mutable fields so redraw() updates are respected
         widthProperty().addListener((obs, old, val) -> {
             canvas.setWidth(val.doubleValue());
-            drawFanChart(canvas.getGraphicsContext2D(), result, variableName);
+            drawFanChart(canvas.getGraphicsContext2D(), currentResult, currentVariable);
         });
         heightProperty().addListener((obs, old, val) -> {
             canvas.setHeight(val.doubleValue());
-            drawFanChart(canvas.getGraphicsContext2D(), result, variableName);
+            drawFanChart(canvas.getGraphicsContext2D(), currentResult, currentVariable);
         });
 
         drawFanChart(canvas.getGraphicsContext2D(), result, variableName);
@@ -51,6 +55,8 @@ public class FanChartPane extends Pane {
      * Redraws the fan chart for a different variable.
      */
     public void redraw(MonteCarloResult result, String variableName) {
+        this.currentResult = result;
+        this.currentVariable = variableName;
         drawFanChart(canvas.getGraphicsContext2D(), result, variableName);
     }
 
@@ -96,6 +102,10 @@ public class FanChartPane extends Pane {
 
         double plotWidth = w - MARGIN_LEFT - MARGIN_RIGHT;
         double plotHeight = h - MARGIN_TOP - MARGIN_BOTTOM;
+
+        if (plotWidth <= 0 || plotHeight <= 0) {
+            return;
+        }
 
         // Draw bands
         for (int b = 0; b < BANDS.length; b++) {

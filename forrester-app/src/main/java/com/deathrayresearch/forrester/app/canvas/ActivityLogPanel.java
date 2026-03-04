@@ -51,7 +51,12 @@ public class ActivityLogPanel extends VBox {
         }
     }
 
+    private static final int MAX_ENTRIES = 1000;
+
     private void addEntry(ActivityLogEntry entry) {
+        if (entries.size() >= MAX_ENTRIES) {
+            entries.remove(0);
+        }
         entries.add(entry);
         listView.scrollTo(entries.size() - 1);
     }
