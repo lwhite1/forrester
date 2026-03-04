@@ -162,34 +162,27 @@ class LookupForm implements ElementForm {
         LineChart<Number, Number> newChart = new LineChart<>(xAxis, yAxis);
         newChart.setAnimated(false);
         newChart.setLegendVisible(false);
+        newChart.setCreateSymbols(false);
         newChart.setPrefHeight(160);
         newChart.setMinHeight(120);
         newChart.setPadding(Insets.EMPTY);
         newChart.setStyle("-fx-padding: 0;");
-        newChart.setCreateSymbols(true);
 
-        XYChart.Series<Number, Number> series = new XYChart.Series<>();
-
+        XYChart.Series<Number, Number> lineSeries = new XYChart.Series<>();
         if ("SPLINE".equals(interpolation) && xs.length >= 3) {
             var function = new SplineInterpolator().interpolate(xs, ys);
             double xMin = xs[0];
             double xMax = xs[xs.length - 1];
             for (int i = 0; i <= SPLINE_INTERPOLATION_POINTS; i++) {
                 double x = xMin + (xMax - xMin) * i / SPLINE_INTERPOLATION_POINTS;
-                series.getData().add(new XYChart.Data<>(x, function.value(x)));
+                lineSeries.getData().add(new XYChart.Data<>(x, function.value(x)));
             }
         } else {
             for (int i = 0; i < xs.length; i++) {
-                series.getData().add(new XYChart.Data<>(xs[i], ys[i]));
+                lineSeries.getData().add(new XYChart.Data<>(xs[i], ys[i]));
             }
         }
-
-        newChart.getData().add(series);
-        series.nodeProperty().addListener((obs, oldNode, newNode) -> {
-            if (newNode != null) {
-                newNode.setStyle("-fx-stroke: #1f77b4; -fx-stroke-width: 2px;");
-            }
-        });
+        newChart.getData().add(lineSeries);
 
         return newChart;
     }
