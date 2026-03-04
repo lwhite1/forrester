@@ -4,7 +4,7 @@
 
 A single-window application for building, simulating, and analyzing system dynamics models with an integrated LLM. The interface adapts its visual presentation, available affordances, and LLM behavior based on computable properties of the model's current state — its maturity — rather than requiring the user to select modes or workflow stages.
 
-The initial implementation is a JavaFX fat client talking to an LLM API over HTTP. The architecture assumes an eventual web port (likely TypeScript + Canvas/SVG) and keeps rendering logic and business logic separated accordingly.
+The initial implementation is a JavaFX fat client talking to an LLM API over HTTP. The architecture assumes an eventual web port (likely TypeScript + Canvas/SVG) and keeps rendering logic and business logic separated accordingly. The application also supports a no-AI mode (section 16) where all modeling, simulation, and analysis features work without an LLM connection, ensuring the tool remains fully functional for users who cannot afford or do not need AI integration.
 
 ### Design principles
 
@@ -109,9 +109,10 @@ The initial implementation is a JavaFX fat client talking to an LLM API over HTT
 │  │  ParameterSweep, MonteCarlo, RunResult          │  │
 │  └────────────────────────────────────────────────┘  │
 │  ┌────────────────────────────────────────────────┐  │
-│  │              LLM Integration Layer              │  │
+│  │        LLM Integration Layer (optional)         │  │
 │  │  (prompt assembly, posture selection,            │  │
 │  │   response parsing, tool-use protocol)           │  │
+│  │  Not instantiated in no-AI mode (section 16)     │  │
 │  └────────────────────────────────────────────────┘  │
 └─────────────────────────────────────────────────────┘
 ```
@@ -748,7 +749,7 @@ It does not:
 
 **Model action messages are compressed.** Instead of including every "Added stock X" action, the conversation history includes a summary: "Recent model changes: added 3 stocks (A, B, C), defined 2 equations, ran simulation once."
 
-> **Problem area: Context window cost.** Every LLM call includes 3,000–5,000 tokens of model context + 2,000–4,000 tokens of conversation history + 500–1,000 tokens of posture block + the user message. That's 6,000–10,000 tokens per call before the response. At current API pricing, a heavy user (200 LLM calls per session) generates $2–$8 per session in API costs. **This is manageable for a research tool but matters for a student persona if the tool is institutionally funded. Consider caching repeated model context across turns (most calls change only a few elements).**
+> **Problem area: Context window cost.** Every LLM call includes 3,000–5,000 tokens of model context + 2,000–4,000 tokens of conversation history + 500–1,000 tokens of posture block + the user message. That's 6,000–10,000 tokens per call before the response. At current API pricing, a heavy user (200 LLM calls per session) generates $2–$8 per session in API costs. **This is manageable for a research tool but matters for a student persona if the tool is institutionally funded. Consider caching repeated model context across turns (most calls change only a few elements). Users who cannot afford API costs can use no-AI mode (section 16), which provides the full modeling tool without any LLM calls.**
 
 ### 10.4 Tool use protocol
 
@@ -953,7 +954,7 @@ Build the window with three panels (conversation collapsed, canvas, dashboard co
 - Dashboard with basic time series chart.
 - Model persistence (save/load via `ModelDefinitionSerializer`).
 
-No LLM integration. No maturity system. This is the "better Vensim" baseline — can David build and simulate a model faster than in Vensim?
+No LLM integration. No maturity system. This is the "better Vensim" baseline — can David build and simulate a model faster than in Vensim? This phase also delivers **no-AI mode** (section 16) as a permanent first-class workflow: add the session start screen with the "Build without AI" option, and implement the activity log panel. Phase 1 is not a temporary limitation — it is the no-AI experience, and it must be good enough to stand on its own.
 
 ### Phase 2: Maturity system + visual adaptation
 
@@ -1111,34 +1112,9 @@ The AI can list its assumptions ("This model assumes hiring rate is constant, th
 
 **Not a separate application.** AI-only mode is Design 4 with the canvas hidden and the LLM in AUTONOMIST posture. Same Model Façade, same maturity system, same simulation engine, same `ModelDefinition`. One toggle at session start: "Build a model" (canvas visible, standard postures) or "Help me understand a problem" (canvas hidden, AUTONOMIST posture).
 
-**Session start UX.** The application opens with a simple choice:
+**Session start UX.** The application opens with a simple choice. See section 16.4 for the full session start screen including no-AI mode. The two AI-enabled options are shown here:
 
-```
-┌─────────────────────────────────────────────┐
-│                                             │
-│  How would you like to work?                │
-│                                             │
-│  ┌───────────────────────────────────────┐  │
-│  │  🔧 Build a model                    │  │
-│  │  I want to construct and test a       │  │
-│  │  system dynamics model.               │  │
-│  └───────────────────────────────────────┘  │
-│                                             │
-│  ┌───────────────────────────────────────┐  │
-│  │  💬 Explore a problem                 │  │
-│  │  I have a problem I want to           │  │
-│  │  understand. Help me think through    │  │
-│  │  the dynamics.                        │  │
-│  └───────────────────────────────────────┘  │
-│                                             │
-│  ┌───────────────────────────────────────┐  │
-│  │  📂 Open existing model               │  │
-│  └───────────────────────────────────────┘  │
-│                                             │
-└─────────────────────────────────────────────┘
-```
-
-"Build a model" enters the standard Design 4 interface. "Explore a problem" enters AI-only mode. The choice is not permanent — the user can reveal the canvas at any time and switch to full mode.
+"Build a model" enters the standard Design 4 interface. "Explore a problem" enters AI-only mode. "Build without AI" enters no-AI mode (section 16). The choice is not permanent — the user can reveal the canvas at any time and switch to full mode, or enable/disable AI mid-session.
 
 **Inline chart rendering.** In AI-only mode, charts that would appear in the behavior dashboard are instead rendered as inline cards in the conversation. These use the same chart components (time series, fan chart, scenario comparison) but sized for the conversation column width (~600px). Cards are interactive: hovering shows values, clicking expands to full size.
 
@@ -1164,6 +1140,136 @@ The highest-severity, highest-likelihood risk is: **the AI builds a canonical mo
 It is **not** a substitute for proper modeling and should not be presented as one. The interface must make clear that it produces quick structural hypotheses, not validated models. Every export, every summary, every session should carry a label: "This is an exploratory model built from conversation. It shows one possible explanation for what you're observing. A thorough analysis would require deeper data and expert review."
 
 The purpose of AI-only mode is to make SD thinking accessible to people who would otherwise never encounter it. If Elena walks out of a 20-minute session understanding that her hiring strategy triggers a reinforcing burnout loop, that is enormously valuable — even if the model behind it is crude, even if the numbers are wrong, even if a skilled modeler would have built it differently. The insight is in the structure, not the precision.
+
+---
+
+## 16. No-AI mode: full modeling without LLM costs
+
+### 16.1 The case for no-AI mode
+
+The integrated LLM is Design 4's differentiating feature, but it has a hard cost: every LLM call consumes API tokens. At current pricing, a heavy session generates $2–$8 in API costs (see 10.3). For a researcher with grant funding or a corporation, this is negligible. For a graduate student paying out of pocket, an underfunded university program, or a user in a region without easy access to payment infrastructure, it's a barrier to adoption.
+
+More fundamentally: the core value of a system dynamics tool is the ability to build, simulate, and analyze models. The LLM enhances that experience — it doesn't create it. David (section 2.2) builds models faster than the LLM can ask questions. He uses the LLM during analysis and presentation, not construction. A tool that requires an LLM connection to function at all excludes the users who need nothing more than a good canvas, a simulation engine, and clear output.
+
+No-AI mode is Design 4 without the LLM Integration Layer. The maturity system, the canvas, the behavior dashboard, the command palette, simulation, parameter sweeps, Monte Carlo — all of this works without a single API call. What's lost is the conversation panel's AI capabilities and the posture-driven guidance. What's preserved is everything else.
+
+### 16.2 What changes
+
+**Conversation panel becomes a log panel.** Without an LLM, the conversation panel serves no interactive purpose. It becomes a structured activity log: model changes, simulation runs, validation warnings, and maturity signal updates are displayed as timestamped entries. The user cannot type messages to an AI, but they can use the command palette (section 9) for all model operations — the command palette never required the LLM.
+
+**Maturity signals still compute, but don't drive posture selection.** The maturity system (section 4) is entirely local computation — it reads `ModelDefinition` and produces signals. In no-AI mode, these signals still drive visual adaptation on the canvas (amber accents for missing equations, red lines for unit mismatches, sparklines on simulated stocks, stale-result indicators). The posture selection logic (section 10.2) is simply not invoked.
+
+**The session start screen adds a third workflow option.** See 16.4.
+
+**No features are disabled or degraded.** Every canvas operation, every simulation mode, every export function, every keyboard shortcut works identically. No-AI mode is not a "lite" version — it is the full modeling tool without conversation.
+
+### 16.3 What's lost
+
+| Capability | Available in no-AI mode? | Workaround |
+|---|---|---|
+| Canvas building, editing, drag-and-drop | Yes | — |
+| Command palette | Yes | — |
+| Simulation, parameter sweeps, Monte Carlo | Yes | — |
+| Maturity visual indicators | Yes | — |
+| Unit mismatch warnings | Yes | — |
+| Model save/load/export | Yes | — |
+| Feedback loop detection and highlighting | Yes | — |
+| Inline equation editing | Yes | — |
+| Undo/redo | Yes | — |
+| LLM-guided elicitation (ELICITOR posture) | No | User must decide model structure without guidance |
+| Equation formalization help (FORMALIZER) | No | User writes equations manually |
+| Pre-simulation prediction prompts (ANTICIPATOR) | No | User must self-discipline about expectations |
+| Output interpretation (INTERPRETER) | No | User interprets charts and feedback loops directly |
+| Data-driven challenge (CHALLENGER) | No | User compares model output to data manually |
+| AI-only mode (AUTONOMIST) | No | Not available — requires LLM by definition |
+| Natural language model building | No | Use canvas or command palette |
+| Conversational documentation | No | User maintains notes externally |
+
+The losses are real but bounded. Every lost capability is an *enhancement* to a workflow that remains fully functional without it. A user in no-AI mode can still build, simulate, and analyze any model that a user in AI mode can — they just don't get conversational assistance while doing it.
+
+### 16.4 Session start UX
+
+The session start screen (section 15.8) adds a no-AI option:
+
+```
+┌─────────────────────────────────────────────┐
+│                                             │
+│  How would you like to work?                │
+│                                             │
+│  ┌───────────────────────────────────────┐  │
+│  │  Build a model                        │  │
+│  │  Construct and test a system dynamics │  │
+│  │  model with AI assistance.            │  │
+│  └───────────────────────────────────────┘  │
+│                                             │
+│  ┌───────────────────────────────────────┐  │
+│  │  Explore a problem                    │  │
+│  │  Describe a problem and let the AI    │  │
+│  │  build a model for you.               │  │
+│  └───────────────────────────────────────┘  │
+│                                             │
+│  ┌───────────────────────────────────────┐  │
+│  │  Build without AI                     │  │
+│  │  Full modeling tools, no AI costs.    │  │
+│  │  Canvas, simulation, and analysis     │  │
+│  │  without an LLM connection.           │  │
+│  └───────────────────────────────────────┘  │
+│                                             │
+│  ┌───────────────────────────────────────┐  │
+│  │  Open existing model                  │  │
+│  └───────────────────────────────────────┘  │
+│                                             │
+└─────────────────────────────────────────────┘
+```
+
+"Build without AI" is not hidden or de-emphasized. It is a first-class workflow. The label avoids negative framing ("offline mode," "free tier," "limited") — it states what the user gets, not what they're missing.
+
+If an API key is not configured, "Build a model" and "Explore a problem" are grayed out with a note: "Requires API key. Configure in Settings." "Build without AI" and "Open existing model" remain available. The application never refuses to launch because an API key is missing.
+
+### 16.5 Enabling AI mid-session
+
+A user who starts in no-AI mode can enable AI at any time by configuring an API key in Settings. The conversation panel activates, the posture system evaluates the current model state, and the LLM picks up wherever the model is — FORMALIZER if equations are missing, INTERPRETER if a simulation has been run, etc. No model state is lost. The transition is seamless.
+
+The reverse is also true: a user can disable AI mid-session (or the API key can expire / the service can become unreachable). The tool continues operating with the conversation panel reverting to log mode. In-flight LLM requests are cancelled gracefully, and the user sees a status message: "AI disconnected. All modeling tools remain available."
+
+### 16.6 Layout in no-AI mode
+
+The window layout mirrors the standard Design 4 layout (section 5) with the conversation panel replaced by a narrower activity log, or optionally hidden entirely to give the canvas more space:
+
+```
+┌─────────────────────────────────────────────────────┐
+│  Toolbar / Command Palette                          │
+├────────┬──────────────────────────┬─────────────────┤
+│Activity│                          │    Behavior     │
+│  Log   │       Canvas             │   Dashboard     │
+│(narrow)│                          │                 │
+│        │                          │                 │
+│        │                          │                 │
+├────────┴──────────────────────────┴─────────────────┤
+│ Status bar: maturity indicators │ zoom │ elements   │
+└─────────────────────────────────────────────────────┘
+```
+
+The activity log panel can be collapsed entirely via a toggle, giving the canvas the full width between the toolbar and the dashboard. The behavior dashboard remains — it displays simulation results, which have nothing to do with the LLM.
+
+### 16.7 Persona mapping
+
+**David** may prefer no-AI mode for construction, then enable AI for analysis and presentation. His workflow: build rapidly without conversational overhead, run simulations, then activate the LLM to generate plain-language summaries for stakeholders.
+
+**Maya** benefits most from AI guidance, but no-AI mode is still functional for her — she can build models using the canvas and command palette, guided by the maturity visual indicators (amber accents on missing equations, etc.). The indicators serve as a silent checklist. She loses the Socratic prompting that helps her think critically, but she can still complete her thesis model.
+
+**Elena** cannot use no-AI mode. Her workflow is entirely conversational and requires AUTONOMIST posture. This is expected — no-AI mode targets users who can build models, not users who need the AI to build for them.
+
+### 16.8 Implementation notes
+
+No-AI mode requires no additional engine work — it is the *absence* of the LLM Integration Layer, not a separate system. Implementation consists of:
+
+1. **Conditional initialization.** The LLM Integration Layer is instantiated only when an API key is present and the user selects an AI-enabled workflow. All other layers (Model Facade, Maturity System, Canvas, Dashboard) initialize unconditionally.
+2. **Activity log component.** A simple timestamped list view replacing the conversation panel. Entries are generated by existing change events from the Model Facade. Estimated effort: small — it's a simplified version of the conversation panel without message input or LLM response rendering.
+3. **Session start screen update.** Add the "Build without AI" option and API key detection logic.
+4. **Graceful degradation.** If the LLM service becomes unreachable mid-session, the UI transitions to no-AI mode automatically with a notification. No data is lost.
+
+This should be implemented as part of **Phase 1** (section 14), not deferred. Phase 1 already specifies "No LLM integration" — no-AI mode *is* the Phase 1 experience, formalized as a permanent first-class workflow rather than a temporary limitation. The activity log and session start screen are the only additions beyond what Phase 1 already delivers.
 
 ---
 
