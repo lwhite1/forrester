@@ -399,6 +399,36 @@ public class ModelCanvas extends Canvas {
         regenerateAndRedraw();
     }
 
+    public void applyStockComment(String name, String comment) {
+        saveUndoState();
+        editor.setStockComment(name, comment);
+        regenerateAndRedraw();
+    }
+
+    public void applyFlowComment(String name, String comment) {
+        saveUndoState();
+        editor.setFlowComment(name, comment);
+        regenerateAndRedraw();
+    }
+
+    public void applyAuxComment(String name, String comment) {
+        saveUndoState();
+        editor.setAuxComment(name, comment);
+        regenerateAndRedraw();
+    }
+
+    public void applyConstantComment(String name, String comment) {
+        saveUndoState();
+        editor.setConstantComment(name, comment);
+        regenerateAndRedraw();
+    }
+
+    public void applyLookupComment(String name, String comment) {
+        saveUndoState();
+        editor.setLookupComment(name, comment);
+        regenerateAndRedraw();
+    }
+
     /**
      * Builds the render state for connection rerouting.
      */

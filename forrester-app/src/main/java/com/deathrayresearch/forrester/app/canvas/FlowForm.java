@@ -4,7 +4,12 @@ import com.deathrayresearch.forrester.model.def.FlowDef;
 
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
+import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
+import javafx.scene.layout.GridPane;
+import javafx.scene.layout.Priority;
+
+import java.util.Objects;
 
 /**
  * Property form for flow elements. Builds editable fields for name,
@@ -19,6 +24,7 @@ class FlowForm implements ElementForm {
     private ComboBox<String> timeUnitBox;
     private Label sourceLabel;
     private Label sinkLabel;
+    private TextArea commentArea;
 
     FlowForm(FormContext ctx) {
         this.ctx = ctx;
@@ -56,6 +62,16 @@ class FlowForm implements ElementForm {
         ctx.addReadOnlyRow(row++, "Sink", sinkLabel,
                 "The stock this flow fills. (cloud) = unlimited external sink.");
 
+        commentArea = new TextArea(flow.comment() != null ? flow.comment() : "");
+        commentArea.setId("propComment");
+        commentArea.setPrefRowCount(2);
+        commentArea.setWrapText(true);
+        commentArea.setMaxWidth(Double.MAX_VALUE);
+        GridPane.setHgrow(commentArea, Priority.ALWAYS);
+        ctx.addTextAreaCommitHandlers(commentArea, this::commitComment);
+        ctx.addFieldRow(row++, "Comment", commentArea,
+                "Optional documentation for this element");
+
         return row;
     }
 
@@ -70,11 +86,22 @@ class FlowForm implements ElementForm {
         timeUnitBox.setValue(flow.timeUnit() != null ? flow.timeUnit() : "");
         sourceLabel.setText(flow.source() != null ? flow.source() : "(cloud)");
         sinkLabel.setText(flow.sink() != null ? flow.sink() : "(cloud)");
+        commentArea.setText(flow.comment() != null ? flow.comment() : "");
     }
 
     @Override
     public void dispose() {
         EquationAutoComplete.detach(equationField);
+    }
+
+    private void commitComment(TextArea area) {
+        String text = area.getText().trim();
+        String comment = text.isEmpty() ? null : text;
+        FlowDef flow = ctx.editor.getFlowByName(ctx.elementName);
+        if (flow == null || Objects.equals(comment, flow.comment())) {
+            return;
+        }
+        ctx.canvas.applyFlowComment(ctx.elementName, comment);
     }
 
     private void commitEquation(TextField field) {

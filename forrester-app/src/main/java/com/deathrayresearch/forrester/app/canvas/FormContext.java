@@ -4,6 +4,7 @@ import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
+import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.control.Tooltip;
 import javafx.scene.layout.GridPane;
@@ -153,6 +154,14 @@ class FormContext {
         box.setMaxWidth(Double.MAX_VALUE);
         GridPane.setHgrow(box, Priority.ALWAYS);
         return box;
+    }
+
+    void addTextAreaCommitHandlers(TextArea area, Consumer<TextArea> handler) {
+        area.focusedProperty().addListener((obs, wasFocused, isFocused) -> {
+            if (!isFocused && !updatingFields) {
+                handler.accept(area);
+            }
+        });
     }
 
     void addComboCommitHandlers(ComboBox<String> box, Consumer<ComboBox<String>> handler) {

@@ -11,6 +11,7 @@ import javafx.scene.chart.XYChart;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
+import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
@@ -133,6 +134,16 @@ class LookupForm implements ElementForm {
         ctx.grid.add(rowButtons, 0, row, 2, 1);
         row++;
 
+        TextArea commentArea = new TextArea(lookup.comment() != null ? lookup.comment() : "");
+        commentArea.setId("propComment");
+        commentArea.setPrefRowCount(2);
+        commentArea.setWrapText(true);
+        commentArea.setMaxWidth(Double.MAX_VALUE);
+        GridPane.setHgrow(commentArea, javafx.scene.layout.Priority.ALWAYS);
+        ctx.addTextAreaCommitHandlers(commentArea, this::commitComment);
+        ctx.addFieldRow(row++, "Comment", commentArea,
+                "Optional documentation for this element");
+
         return row;
     }
 
@@ -185,6 +196,16 @@ class LookupForm implements ElementForm {
         newChart.getData().add(lineSeries);
 
         return newChart;
+    }
+
+    private void commitComment(TextArea area) {
+        String text = area.getText().trim();
+        String comment = text.isEmpty() ? null : text;
+        LookupTableDef lt = ctx.editor.getLookupTableByName(ctx.elementName);
+        if (lt == null || Objects.equals(comment, lt.comment())) {
+            return;
+        }
+        ctx.canvas.applyLookupComment(ctx.elementName, comment);
     }
 
     private void commitDataPoint(TextField xField, TextField yField, int index) {

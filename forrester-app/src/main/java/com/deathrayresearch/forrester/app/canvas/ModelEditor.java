@@ -598,6 +598,59 @@ public class ModelEditor {
                 c -> new ConstantDef(name, c.comment(), c.value(), unit));
     }
 
+    /**
+     * Sets the comment of a stock.
+     *
+     * @return true if the stock was found and updated
+     */
+    public boolean setStockComment(String name, String comment) {
+        return updateInList(stocks, name, StockDef::name,
+                s -> new StockDef(name, comment, s.initialValue(),
+                        s.unit(), s.negativeValuePolicy()));
+    }
+
+    /**
+     * Sets the comment of a flow.
+     *
+     * @return true if the flow was found and updated
+     */
+    public boolean setFlowComment(String name, String comment) {
+        return updateInList(flows, name, FlowDef::name,
+                f -> new FlowDef(f.name(), comment, f.equation(),
+                        f.timeUnit(), f.source(), f.sink()));
+    }
+
+    /**
+     * Sets the comment of an auxiliary.
+     *
+     * @return true if the auxiliary was found and updated
+     */
+    public boolean setAuxComment(String name, String comment) {
+        return updateInList(auxiliaries, name, AuxDef::name,
+                a -> new AuxDef(a.name(), comment, a.equation(), a.unit()));
+    }
+
+    /**
+     * Sets the comment of a constant.
+     *
+     * @return true if the constant was found and updated
+     */
+    public boolean setConstantComment(String name, String comment) {
+        return updateInList(constants, name, ConstantDef::name,
+                c -> new ConstantDef(name, comment, c.value(), c.unit()));
+    }
+
+    /**
+     * Sets the comment of a lookup table.
+     *
+     * @return true if the lookup table was found and updated
+     */
+    public boolean setLookupComment(String name, String comment) {
+        return updateInList(lookupTables, name, LookupTableDef::name,
+                lt -> new LookupTableDef(name, comment,
+                        lt.xValues(), lt.yValues(), lt.interpolation()));
+    }
+
     private <T> boolean renameInList(List<T> list, String oldName, String newName,
                                       Function<T, String> nameGetter,
                                       BiFunction<T, String, T> renamer) {

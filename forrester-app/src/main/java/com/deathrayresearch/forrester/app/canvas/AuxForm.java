@@ -3,7 +3,12 @@ package com.deathrayresearch.forrester.app.canvas;
 import com.deathrayresearch.forrester.model.def.AuxDef;
 
 import javafx.scene.control.ComboBox;
+import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
+import javafx.scene.layout.GridPane;
+import javafx.scene.layout.Priority;
+
+import java.util.Objects;
 
 /**
  * Property form for auxiliary variable elements. Builds editable fields
@@ -16,6 +21,7 @@ class AuxForm implements ElementForm {
     private TextField nameField;
     private TextField equationField;
     private ComboBox<String> unitBox;
+    private TextArea commentArea;
 
     AuxForm(FormContext ctx) {
         this.ctx = ctx;
@@ -45,6 +51,16 @@ class AuxForm implements ElementForm {
         ctx.addFieldRow(row++, "Unit", unitBox,
                 "The unit of measurement");
 
+        commentArea = new TextArea(aux.comment() != null ? aux.comment() : "");
+        commentArea.setId("propComment");
+        commentArea.setPrefRowCount(2);
+        commentArea.setWrapText(true);
+        commentArea.setMaxWidth(Double.MAX_VALUE);
+        GridPane.setHgrow(commentArea, Priority.ALWAYS);
+        ctx.addTextAreaCommitHandlers(commentArea, this::commitComment);
+        ctx.addFieldRow(row++, "Comment", commentArea,
+                "Optional documentation for this element");
+
         return row;
     }
 
@@ -57,11 +73,22 @@ class AuxForm implements ElementForm {
         nameField.setText(ctx.elementName);
         equationField.setText(aux.equation());
         unitBox.setValue(aux.unit() != null ? aux.unit() : "");
+        commentArea.setText(aux.comment() != null ? aux.comment() : "");
     }
 
     @Override
     public void dispose() {
         EquationAutoComplete.detach(equationField);
+    }
+
+    private void commitComment(TextArea area) {
+        String text = area.getText().trim();
+        String comment = text.isEmpty() ? null : text;
+        AuxDef aux = ctx.editor.getAuxByName(ctx.elementName);
+        if (aux == null || Objects.equals(comment, aux.comment())) {
+            return;
+        }
+        ctx.canvas.applyAuxComment(ctx.elementName, comment);
     }
 
     private void commitEquation(TextField field) {

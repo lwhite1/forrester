@@ -3,7 +3,10 @@ package com.deathrayresearch.forrester.app.canvas;
 import com.deathrayresearch.forrester.model.def.StockDef;
 
 import javafx.scene.control.ComboBox;
+import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
+import javafx.scene.layout.GridPane;
+import javafx.scene.layout.Priority;
 
 import java.util.Objects;
 
@@ -19,6 +22,7 @@ class StockForm implements ElementForm {
     private TextField initialValueField;
     private ComboBox<String> unitBox;
     private ComboBox<String> policyBox;
+    private TextArea commentArea;
 
     StockForm(FormContext ctx) {
         this.ctx = ctx;
@@ -63,6 +67,16 @@ class StockForm implements ElementForm {
                 + "quantities like population or inventory).\n"
                 + "'Allow' permits negatives (e.g., bank balances, temperature deltas).");
 
+        commentArea = new TextArea(stock.comment() != null ? stock.comment() : "");
+        commentArea.setId("propComment");
+        commentArea.setPrefRowCount(2);
+        commentArea.setWrapText(true);
+        commentArea.setMaxWidth(Double.MAX_VALUE);
+        GridPane.setHgrow(commentArea, Priority.ALWAYS);
+        ctx.addTextAreaCommitHandlers(commentArea, this::commitComment);
+        ctx.addFieldRow(row++, "Comment", commentArea,
+                "Optional documentation for this element");
+
         return row;
     }
 
@@ -77,6 +91,7 @@ class StockForm implements ElementForm {
                 ElementRenderer.formatValue(stock.initialValue()));
         unitBox.setValue(stock.unit() != null ? stock.unit() : "");
         policyBox.setValue(policyDisplayValue(stock.negativeValuePolicy()));
+        commentArea.setText(stock.comment() != null ? stock.comment() : "");
     }
 
     private void commitInitialValue(TextField field) {
@@ -113,6 +128,16 @@ class StockForm implements ElementForm {
             return;
         }
         ctx.canvas.applyStockNegativeValuePolicy(ctx.elementName, policyValue);
+    }
+
+    private void commitComment(TextArea area) {
+        String text = area.getText().trim();
+        String comment = text.isEmpty() ? null : text;
+        StockDef stock = ctx.editor.getStockByName(ctx.elementName);
+        if (stock == null || Objects.equals(comment, stock.comment())) {
+            return;
+        }
+        ctx.canvas.applyStockComment(ctx.elementName, comment);
     }
 
     /**

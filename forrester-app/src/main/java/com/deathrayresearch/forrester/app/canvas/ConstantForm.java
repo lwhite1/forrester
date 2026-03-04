@@ -3,7 +3,12 @@ package com.deathrayresearch.forrester.app.canvas;
 import com.deathrayresearch.forrester.model.def.ConstantDef;
 
 import javafx.scene.control.ComboBox;
+import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
+import javafx.scene.layout.GridPane;
+import javafx.scene.layout.Priority;
+
+import java.util.Objects;
 
 /**
  * Property form for constant elements. Builds editable fields
@@ -16,6 +21,7 @@ class ConstantForm implements ElementForm {
     private TextField nameField;
     private TextField valueField;
     private ComboBox<String> unitBox;
+    private TextArea commentArea;
 
     ConstantForm(FormContext ctx) {
         this.ctx = ctx;
@@ -45,6 +51,16 @@ class ConstantForm implements ElementForm {
         ctx.addFieldRow(row++, "Unit", unitBox,
                 "The unit of measurement");
 
+        commentArea = new TextArea(constant.comment() != null ? constant.comment() : "");
+        commentArea.setId("propComment");
+        commentArea.setPrefRowCount(2);
+        commentArea.setWrapText(true);
+        commentArea.setMaxWidth(Double.MAX_VALUE);
+        GridPane.setHgrow(commentArea, Priority.ALWAYS);
+        ctx.addTextAreaCommitHandlers(commentArea, this::commitComment);
+        ctx.addFieldRow(row++, "Comment", commentArea,
+                "Optional documentation for this element");
+
         return row;
     }
 
@@ -57,6 +73,17 @@ class ConstantForm implements ElementForm {
         nameField.setText(ctx.elementName);
         valueField.setText(ElementRenderer.formatValue(constant.value()));
         unitBox.setValue(constant.unit() != null ? constant.unit() : "");
+        commentArea.setText(constant.comment() != null ? constant.comment() : "");
+    }
+
+    private void commitComment(TextArea area) {
+        String text = area.getText().trim();
+        String comment = text.isEmpty() ? null : text;
+        ConstantDef constant = ctx.editor.getConstantByName(ctx.elementName);
+        if (constant == null || Objects.equals(comment, constant.comment())) {
+            return;
+        }
+        ctx.canvas.applyConstantComment(ctx.elementName, comment);
     }
 
     private void commitValue(TextField field) {
