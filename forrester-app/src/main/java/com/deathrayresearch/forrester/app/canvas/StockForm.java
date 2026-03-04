@@ -34,16 +34,19 @@ class StockForm implements ElementForm {
 
         int row = startRow;
         nameField = ctx.createNameField();
-        ctx.addFieldRow(row++, "Name", nameField);
+        ctx.addFieldRow(row++, "Name", nameField,
+                "The name used to reference this stock in equations");
 
         initialValueField = ctx.createTextField(
                 ElementRenderer.formatValue(stock.initialValue()));
         ctx.addCommitHandlers(initialValueField, this::commitInitialValue);
-        ctx.addFieldRow(row++, "Initial Value", initialValueField);
+        ctx.addFieldRow(row++, "Initial Value", initialValueField,
+                "The starting value at the beginning of the simulation");
 
         unitBox = ctx.createUnitComboBox(stock.unit());
         ctx.addComboCommitHandlers(unitBox, this::commitUnit);
-        ctx.addFieldRow(row++, "Unit", unitBox);
+        ctx.addFieldRow(row++, "Unit", unitBox,
+                "The unit of measurement (e.g., Person, Kilogram, USD)");
 
         policyBox = new ComboBox<>();
         policyBox.getItems().addAll("Clamp to Zero", "Allow");
@@ -54,7 +57,11 @@ class StockForm implements ElementForm {
                 commitPolicy();
             }
         });
-        ctx.addFieldRow(row++, "Negative Values", policyBox);
+        ctx.addFieldRow(row++, "Negative Values", policyBox,
+                "What happens when the stock goes below zero.\n"
+                + "'Clamp to Zero' prevents negative values (common for physical "
+                + "quantities like population or inventory).\n"
+                + "'Allow' permits negatives (e.g., bank balances, temperature deltas).");
 
         return row;
     }

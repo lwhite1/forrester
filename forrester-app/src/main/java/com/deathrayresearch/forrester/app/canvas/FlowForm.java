@@ -34,21 +34,27 @@ class FlowForm implements ElementForm {
 
         int row = startRow;
         nameField = ctx.createNameField();
-        ctx.addFieldRow(row++, "Name", nameField);
+        ctx.addFieldRow(row++, "Name", nameField,
+                "The name used to reference this flow in equations");
 
         equationField = ctx.createTextField(flow.equation());
         ctx.addCommitHandlers(equationField, this::commitEquation);
         EquationAutoComplete.attach(equationField, ctx.editor, ctx.elementName);
-        ctx.addFieldRow(row++, "Equation", equationField);
+        ctx.addFieldRow(row++, "Equation", equationField,
+                "The rate equation determining how fast material flows.\n"
+                + "Use element names, operators (+, -, *, /), and functions.");
 
         timeUnitBox = ctx.createTimeUnitComboBox(flow.timeUnit());
         ctx.addComboCommitHandlers(timeUnitBox, this::commitTimeUnit);
-        ctx.addFieldRow(row++, "Time Unit", timeUnitBox);
+        ctx.addFieldRow(row++, "Time Unit", timeUnitBox,
+                "The time unit for the flow rate (e.g., units per Day)");
 
         sourceLabel = new Label(flow.source() != null ? flow.source() : "(cloud)");
-        ctx.addReadOnlyRow(row++, "Source", sourceLabel);
+        ctx.addReadOnlyRow(row++, "Source", sourceLabel,
+                "The stock this flow drains from. (cloud) = unlimited external source.");
         sinkLabel = new Label(flow.sink() != null ? flow.sink() : "(cloud)");
-        ctx.addReadOnlyRow(row++, "Sink", sinkLabel);
+        ctx.addReadOnlyRow(row++, "Sink", sinkLabel,
+                "The stock this flow fills. (cloud) = unlimited external sink.");
 
         return row;
     }

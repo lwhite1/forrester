@@ -31,16 +31,19 @@ class AuxForm implements ElementForm {
 
         int row = startRow;
         nameField = ctx.createNameField();
-        ctx.addFieldRow(row++, "Name", nameField);
+        ctx.addFieldRow(row++, "Name", nameField,
+                "The name used to reference this auxiliary in equations");
 
         equationField = ctx.createTextField(aux.equation());
         ctx.addCommitHandlers(equationField, this::commitEquation);
         EquationAutoComplete.attach(equationField, ctx.editor, ctx.elementName);
-        ctx.addFieldRow(row++, "Equation", equationField);
+        ctx.addFieldRow(row++, "Equation", equationField,
+                "A formula computed each time step from other model elements");
 
         unitBox = ctx.createUnitComboBox(aux.unit());
         ctx.addComboCommitHandlers(unitBox, this::commitUnit);
-        ctx.addFieldRow(row++, "Unit", unitBox);
+        ctx.addFieldRow(row++, "Unit", unitBox,
+                "The unit of measurement");
 
         return row;
     }

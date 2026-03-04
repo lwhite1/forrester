@@ -212,7 +212,31 @@ public class ForresterApp extends Application {
 
         simulateMenu.getItems().addAll(settingsItem, runItem, new SeparatorMenuItem(), validateItem);
 
-        return new MenuBar(fileMenu, editMenu, simulateMenu);
+        Menu helpMenu = new Menu("Help");
+
+        MenuItem gettingStartedItem = new MenuItem("Getting Started");
+        gettingStartedItem.setDisable(true);
+
+        MenuItem sdConceptsItem = new MenuItem("SD Concepts");
+        sdConceptsItem.setDisable(true);
+
+        MenuItem shortcutsItem = new MenuItem("Keyboard Shortcuts");
+        shortcutsItem.setDisable(true);
+
+        MenuItem aboutItem = new MenuItem("About Forrester");
+        aboutItem.setOnAction(e -> {
+            Alert about = new Alert(Alert.AlertType.INFORMATION);
+            about.setTitle("About Forrester");
+            about.setHeaderText("Forrester");
+            about.setContentText("A visual System Dynamics modeling environment.\nVersion 0.1");
+            about.showAndWait();
+        });
+
+        helpMenu.getItems().addAll(gettingStartedItem, sdConceptsItem,
+                new SeparatorMenuItem(), shortcutsItem,
+                new SeparatorMenuItem(), aboutItem);
+
+        return new MenuBar(fileMenu, editMenu, simulateMenu, helpMenu);
     }
 
     private void newModel() {

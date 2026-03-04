@@ -6,11 +6,15 @@ import com.deathrayresearch.forrester.model.expr.ExprDependencies;
 import com.deathrayresearch.forrester.model.expr.ExprParser;
 import com.deathrayresearch.forrester.model.expr.ParseException;
 import com.deathrayresearch.forrester.model.graph.DependencyGraph;
-import com.deathrayresearch.forrester.model.graph.FeedbackAnalysis;
 
+import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Deque;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -111,24 +115,76 @@ public final class ModelValidator {
         }
 
         DependencyGraph graph = DependencyGraph.fromDefinition(def);
-        FeedbackAnalysis analysis = FeedbackAnalysis.analyze(graph);
+        List<String> sorted = graph.topologicalSort();
+
+        if (sorted.size() == graph.allNodes().size()) {
+            return; // No cycles
+        }
+
+        Set<String> sortedSet = new HashSet<>(sorted);
+        Set<String> cycleNodes = new LinkedHashSet<>();
+        for (String node : graph.allNodes()) {
+            if (!sortedSet.contains(node)) {
+                cycleNodes.add(node);
+            }
+        }
 
         Set<String> stockNames = new HashSet<>();
         for (StockDef stock : def.stocks()) {
             stockNames.add(stock.name());
         }
 
-        for (Set<String> group : analysis.loopGroups()) {
+        // Group cycle participants into connected components
+        Map<String, Set<String>> adjacency = graph.adjacencyMap();
+        Map<String, Set<String>> undirected = new LinkedHashMap<>();
+        for (String node : cycleNodes) {
+            undirected.put(node, new HashSet<>());
+        }
+        for (String from : cycleNodes) {
+            Set<String> targets = adjacency.get(from);
+            if (targets == null) {
+                continue;
+            }
+            for (String to : targets) {
+                if (cycleNodes.contains(to)) {
+                    undirected.get(from).add(to);
+                    undirected.get(to).add(from);
+                }
+            }
+        }
+
+        Set<String> visited = new HashSet<>();
+        for (String start : cycleNodes) {
+            if (visited.contains(start)) {
+                continue;
+            }
+            Set<String> component = new LinkedHashSet<>();
+            Deque<String> queue = new ArrayDeque<>();
+            queue.add(start);
+            while (!queue.isEmpty()) {
+                String current = queue.poll();
+                if (!visited.add(current)) {
+                    continue;
+                }
+                component.add(current);
+                for (String neighbor : undirected.getOrDefault(current, Set.of())) {
+                    if (!visited.contains(neighbor)) {
+                        queue.add(neighbor);
+                    }
+                }
+            }
+
             boolean hasStock = false;
-            for (String member : group) {
+            for (String member : component) {
                 if (stockNames.contains(member)) {
                     hasStock = true;
                     break;
                 }
             }
+
             if (!hasStock) {
-                String members = String.join(", ", group);
-                for (String member : group) {
+                String members = String.join(", ", component);
+                for (String member : component) {
                     issues.add(new ValidationIssue(Severity.WARNING, member,
                             "Algebraic loop detected: {" + members
                                     + "} — circular dependency without a stock to break the loop"));

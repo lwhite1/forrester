@@ -7,7 +7,6 @@ import com.deathrayresearch.forrester.model.def.ModelDefinition;
 import com.deathrayresearch.forrester.model.def.ModuleInstanceDef;
 import com.deathrayresearch.forrester.model.def.ViewDef;
 import com.deathrayresearch.forrester.model.graph.AutoLayout;
-import com.deathrayresearch.forrester.model.graph.DependencyGraph;
 import com.deathrayresearch.forrester.model.graph.FeedbackAnalysis;
 
 import javafx.scene.Cursor;
@@ -194,9 +193,8 @@ public class ModelCanvas extends Canvas {
             loopAnalysis = null;
             return;
         }
-        DependencyGraph graph = DependencyGraph.fromDefinition(
+        loopAnalysis = FeedbackAnalysis.analyze(
                 editor.toModelDefinition(canvasState.toViewDef()));
-        loopAnalysis = FeedbackAnalysis.analyze(graph);
     }
 
     /**

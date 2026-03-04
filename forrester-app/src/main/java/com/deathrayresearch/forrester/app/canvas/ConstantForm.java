@@ -31,16 +31,19 @@ class ConstantForm implements ElementForm {
 
         int row = startRow;
         nameField = ctx.createNameField();
-        ctx.addFieldRow(row++, "Name", nameField);
+        ctx.addFieldRow(row++, "Name", nameField,
+                "The name used to reference this constant in equations");
 
         valueField = ctx.createTextField(
                 ElementRenderer.formatValue(constant.value()));
         ctx.addCommitHandlers(valueField, this::commitValue);
-        ctx.addFieldRow(row++, "Value", valueField);
+        ctx.addFieldRow(row++, "Value", valueField,
+                "A fixed numeric value that does not change during simulation");
 
         unitBox = ctx.createUnitComboBox(constant.unit());
         ctx.addComboCommitHandlers(unitBox, this::commitUnit);
-        ctx.addFieldRow(row++, "Unit", unitBox);
+        ctx.addFieldRow(row++, "Unit", unitBox,
+                "The unit of measurement");
 
         return row;
     }

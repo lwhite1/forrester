@@ -32,6 +32,10 @@ public final class Styles {
     public static final String SMALL_TEXT =
             "-fx-font-size: 11px;";
 
+    // --- Help icons ---
+    public static final String HELP_ICON =
+            "-fx-text-fill: #8899AA; -fx-font-size: 10px; -fx-cursor: hand;";
+
     // --- Binding config dialog ---
     public static final String SECTION_HEADER =
             "-fx-font-weight: bold; -fx-font-size: 13px;";
