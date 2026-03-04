@@ -32,6 +32,8 @@ import java.util.Set;
 public class ModelCanvas extends Canvas {
 
     private static final double ZOOM_FACTOR = 1.1;
+    /** Minimum drag distance squared (screen pixels) to commit a reattach. */
+    private static final double MIN_REATTACH_DRAG_SQ = 5 * 5;
 
     private ModelEditor editor;
     private List<ConnectorRoute> connectors = List.of();
@@ -1063,12 +1065,23 @@ public class ModelCanvas extends Canvas {
         }
 
         if (reattachController.isActive()) {
-            reattachController.complete(
-                    viewport.toWorldX(event.getX()),
-                    viewport.toWorldY(event.getY()),
-                    canvasState, editor, this::saveUndoState);
-            connectors = editor.generateConnectors();
-            invalidateLoopAnalysis();
+            double dx = event.getX() - dragStartX;
+            double dy = event.getY() - dragStartY;
+            if (dx * dx + dy * dy < MIN_REATTACH_DRAG_SQ) {
+                // Click (no meaningful drag): cancel and select the flow instead
+                String flow = reattachController.flowName();
+                reattachController.cancel();
+                if (flow != null) {
+                    canvasState.select(flow);
+                }
+            } else {
+                reattachController.complete(
+                        viewport.toWorldX(event.getX()),
+                        viewport.toWorldY(event.getY()),
+                        canvasState, editor, this::saveUndoState);
+                connectors = editor.generateConnectors();
+                invalidateLoopAnalysis();
+            }
             redraw();
             updateCursor();
             event.consume();

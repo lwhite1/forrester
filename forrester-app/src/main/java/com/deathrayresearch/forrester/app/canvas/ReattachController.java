@@ -19,6 +19,10 @@ final class ReattachController {
         return active;
     }
 
+    String flowName() {
+        return flowName;
+    }
+
     /**
      * Returns the renderer state for the current reattachment.
      */
