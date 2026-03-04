@@ -10,6 +10,7 @@ import com.deathrayresearch.forrester.model.def.StockDef;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -155,10 +156,42 @@ final class CopyPasteController {
                         editor.setAuxEquation(newName, updated);
                     }
                 }
+            } else if (entry.type() == ElementType.MODULE) {
+                ModuleInstanceDef module = editor.getModuleByName(newName);
+                if (module != null) {
+                    Map<String, String> newInputs =
+                            remapBindings(module.inputBindings(), nameMapping, editor);
+                    Map<String, String> newOutputs =
+                            remapBindings(module.outputBindings(), nameMapping, editor);
+                    if (!newInputs.equals(module.inputBindings())
+                            || !newOutputs.equals(module.outputBindings())) {
+                        editor.updateModuleBindings(newName, newInputs, newOutputs);
+                    }
+                }
             }
         }
 
         return pastedNames;
+    }
+
+    /**
+     * Remaps all binding expression values using the name mapping and clears dangling
+     * references against the target editor. Input bindings contain equation expressions;
+     * output bindings contain alias names — both are remapped the same way.
+     */
+    private static Map<String, String> remapBindings(Map<String, String> bindings,
+                                                     Map<String, String> nameMapping,
+                                                     ModelEditor editor) {
+        Map<String, String> result = new LinkedHashMap<>();
+        for (Map.Entry<String, String> binding : bindings.entrySet()) {
+            String value = binding.getValue();
+            if (value != null && !value.isBlank()) {
+                value = remapEquationTokens(value, nameMapping);
+                value = clearDanglingReferences(value, editor);
+            }
+            result.put(binding.getKey(), value);
+        }
+        return result;
     }
 
     /**

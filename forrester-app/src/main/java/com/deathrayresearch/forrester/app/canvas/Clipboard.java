@@ -9,6 +9,7 @@ import com.deathrayresearch.forrester.model.def.ModuleInstanceDef;
 import com.deathrayresearch.forrester.model.def.StockDef;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
@@ -93,6 +94,6 @@ public class Clipboard {
     }
 
     public List<Entry> getEntries() {
-        return entries;
+        return Collections.unmodifiableList(entries);
     }
 }

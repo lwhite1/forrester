@@ -4,6 +4,7 @@ import com.deathrayresearch.forrester.model.def.ElementType;
 import com.deathrayresearch.forrester.model.def.FlowDef;
 import com.deathrayresearch.forrester.model.def.ModelDefinition;
 import com.deathrayresearch.forrester.model.def.ModelDefinitionBuilder;
+import com.deathrayresearch.forrester.model.def.ModuleInstanceDef;
 
 import java.util.List;
 import java.util.Map;
@@ -306,6 +307,95 @@ class CopyPasteControllerTest {
                     .orElse(null);
             assertThat(pastedFlow.equation())
                     .contains(pastedStockName.replace(' ', '_'));
+        }
+    }
+
+    @Nested
+    @DisplayName("paste module bindings")
+    class PasteModuleBindings {
+
+        @Test
+        void shouldRemapModuleInputBindingsForCopiedElements() {
+            // Inner module definition (minimal)
+            ModelDefinition innerDef = new ModelDefinitionBuilder()
+                    .name("Inner")
+                    .stock("X", 0, null)
+                    .build();
+
+            // Source model with a constant and a module whose input binds to it
+            ModelDefinition def = new ModelDefinitionBuilder()
+                    .name("Test")
+                    .constant("Rate", 0.5, null)
+                    .module("Mod1", innerDef,
+                            Map.of("input_port", "Rate"),
+                            Map.of("output_port", "Rate"))
+                    .build();
+            editor.loadFrom(def);
+            canvasState.addElement("Rate", ElementType.CONSTANT, 100, 100);
+            canvasState.addElement("Mod1", ElementType.MODULE, 200, 200);
+
+            // Copy both the constant and module
+            canvasState.select("Rate");
+            canvasState.addToSelection("Mod1");
+            controller.copy(canvasState, editor);
+
+            // Paste into the same editor
+            List<String> pasted = controller.paste(canvasState, editor);
+            assertThat(pasted).hasSize(2);
+
+            String pastedModuleName = pasted.stream()
+                    .filter(n -> editor.getModuleByName(n) != null)
+                    .findFirst()
+                    .orElse(null);
+            assertThat(pastedModuleName).isNotNull();
+
+            String pastedConstName = pasted.stream()
+                    .filter(n -> editor.getConstantByName(n) != null
+                            && !n.equals("Rate"))
+                    .findFirst()
+                    .orElse(null);
+            assertThat(pastedConstName).isNotNull();
+
+            ModuleInstanceDef pastedModule = editor.getModuleByName(pastedModuleName);
+            // Input binding should reference the pasted constant, not original "Rate"
+            assertThat(pastedModule.inputBindings().get("input_port"))
+                    .isEqualTo(pastedConstName.replace(' ', '_'));
+            // Output binding should also be remapped
+            assertThat(pastedModule.outputBindings().get("output_port"))
+                    .isEqualTo(pastedConstName.replace(' ', '_'));
+        }
+
+        @Test
+        void shouldReplaceDanglingModuleBindingsWithZero() {
+            ModelDefinition innerDef = new ModelDefinitionBuilder()
+                    .name("Inner")
+                    .stock("X", 0, null)
+                    .build();
+
+            ModelDefinition def = new ModelDefinitionBuilder()
+                    .name("Test")
+                    .constant("Rate", 0.5, null)
+                    .module("Mod1", innerDef,
+                            Map.of("input_port", "Rate"),
+                            Map.of())
+                    .build();
+            editor.loadFrom(def);
+            canvasState.addElement("Rate", ElementType.CONSTANT, 100, 100);
+            canvasState.addElement("Mod1", ElementType.MODULE, 200, 200);
+
+            // Copy only the module (not the constant it references)
+            canvasState.select("Mod1");
+            controller.copy(canvasState, editor);
+
+            // Paste into a fresh editor
+            ModelEditor targetEditor = new ModelEditor();
+            CanvasState targetCanvas = new CanvasState();
+            List<String> pasted = controller.paste(targetCanvas, targetEditor);
+
+            assertThat(pasted).hasSize(1);
+            ModuleInstanceDef pastedModule = targetEditor.getModuleByName(pasted.get(0));
+            // "Rate" doesn't exist in target — should be replaced with 0
+            assertThat(pastedModule.inputBindings().get("input_port")).isEqualTo("0");
         }
     }
 
