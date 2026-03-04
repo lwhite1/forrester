@@ -1,4 +1,4 @@
-# Forrester - System Dynamics Simulation Engine
+# Forrester - System Dynamics Modeling Tool
 
 ## Overview
 
