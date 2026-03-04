@@ -4,8 +4,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import static com.deathrayresearch.forrester.measure.Units.THING;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -42,7 +42,7 @@ public class ModelTest {
         assertEquals(1, model.getVariables().size());
         assertEquals("V1", model.getVariableNames().get(0));
         assertEquals(42.0, model.getVariableValues().get(0), 0.0);
-        assertEquals(var, model.getVariable("V1"));
+        assertThat(model.getVariable("V1")).isPresent().contains(var);
 
         model.removeVariable(var);
         assertTrue(model.getVariables().isEmpty());
@@ -50,7 +50,7 @@ public class ModelTest {
 
     @Test
     public void shouldReturnNullForMissingVariable() {
-        assertNull(model.getVariable("nonexistent"));
+        assertThat(model.getVariable("nonexistent")).isEmpty();
     }
 
     @Test

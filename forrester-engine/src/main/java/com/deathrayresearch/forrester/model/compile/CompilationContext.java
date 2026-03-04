@@ -11,6 +11,8 @@ import com.deathrayresearch.forrester.model.def.LookupTableDef;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Optional;
+import java.util.OptionalDouble;
 import java.util.function.DoubleSupplier;
 import java.util.function.IntSupplier;
 
@@ -80,37 +82,35 @@ public class CompilationContext {
      * Resolves a LookupTableDef by name so callers can create fresh LookupTable instances
      * with isolated input holders.
      */
-    public LookupTableDef resolveLookupTableDef(String name) {
+    public Optional<LookupTableDef> resolveLookupTableDef(String name) {
         LookupTableDef def = lookupTableDefs.get(name);
         if (def != null) {
-            return def;
+            return Optional.of(def);
         }
         if (name.contains("_")) {
             String spaceName = name.replace('_', ' ');
             def = lookupTableDefs.get(spaceName);
             if (def != null) {
-                return def;
+                return Optional.of(def);
             }
         }
         if (parent != null) {
             return parent.resolveLookupTableDef(name);
         }
-        return null;
+        return Optional.empty();
     }
 
     /**
      * Creates a fresh LookupTable from the stored definition with the given input supplier.
      * Each caller gets an isolated table with its own input, preventing cross-formula interference.
      */
-    public LookupTable createFreshLookupTable(String name, DoubleSupplier inputSupplier) {
-        LookupTableDef def = resolveLookupTableDef(name);
-        if (def == null) {
-            return null;
-        }
-        if ("SPLINE".equalsIgnoreCase(def.interpolation())) {
-            return LookupTable.spline(def.xValues(), def.yValues(), inputSupplier);
-        }
-        return LookupTable.linear(def.xValues(), def.yValues(), inputSupplier);
+    public Optional<LookupTable> createFreshLookupTable(String name, DoubleSupplier inputSupplier) {
+        return resolveLookupTableDef(name).map(def -> {
+            if ("SPLINE".equalsIgnoreCase(def.interpolation())) {
+                return LookupTable.spline(def.xValues(), def.yValues(), inputSupplier);
+            }
+            return LookupTable.linear(def.xValues(), def.yValues(), inputSupplier);
+        });
     }
 
     /**
@@ -121,16 +121,16 @@ public class CompilationContext {
      */
     public double resolveValue(String name) {
         // Try exact match first
-        Double val = resolveValueLocal(name);
-        if (val != null) {
-            return val;
+        OptionalDouble val = resolveValueLocal(name);
+        if (val.isPresent()) {
+            return val.getAsDouble();
         }
         // Try underscore→space fallback
         if (name.contains("_")) {
             String spaceName = name.replace('_', ' ');
             val = resolveValueLocal(spaceName);
-            if (val != null) {
-                return val;
+            if (val.isPresent()) {
+                return val.getAsDouble();
             }
         }
         // Try parent
@@ -140,64 +140,64 @@ public class CompilationContext {
         throw new CompilationException("Unresolved reference: " + name, name);
     }
 
-    private Double resolveValueLocal(String name) {
+    private OptionalDouble resolveValueLocal(String name) {
         Stock stock = stocks.get(name);
         if (stock != null) {
-            return stock.getValue();
+            return OptionalDouble.of(stock.getValue());
         }
         Constant constant = constants.get(name);
         if (constant != null) {
-            return constant.getValue();
+            return OptionalDouble.of(constant.getValue());
         }
         Variable variable = variables.get(name);
         if (variable != null) {
-            return variable.getValue();
+            return OptionalDouble.of(variable.getValue());
         }
         Flow flow = flows.get(name);
         if (flow != null) {
-            return flow.flowPerTimeUnit(flow.getTimeUnit()).getValue();
+            return OptionalDouble.of(flow.flowPerTimeUnit(flow.getTimeUnit()).getValue());
         }
-        return null;
+        return OptionalDouble.empty();
     }
 
     /**
      * Resolves a constant value by name (for compile-time evaluation).
      * Returns null if not found as a constant.
      */
-    public Double resolveConstant(String name) {
+    public OptionalDouble resolveConstant(String name) {
         Constant constant = constants.get(name);
         if (constant != null) {
-            return constant.getValue();
+            return OptionalDouble.of(constant.getValue());
         }
         if (name.contains("_")) {
             String spaceName = name.replace('_', ' ');
             constant = constants.get(spaceName);
             if (constant != null) {
-                return constant.getValue();
+                return OptionalDouble.of(constant.getValue());
             }
         }
         if (parent != null) {
             return parent.resolveConstant(name);
         }
-        return null;
+        return OptionalDouble.empty();
     }
 
-    public LookupTable resolveLookupTable(String name) {
+    public Optional<LookupTable> resolveLookupTable(String name) {
         LookupTable table = lookupTables.get(name);
         if (table != null) {
-            return table;
+            return Optional.of(table);
         }
         if (name.contains("_")) {
             String spaceName = name.replace('_', ' ');
             table = lookupTables.get(spaceName);
             if (table != null) {
-                return table;
+                return Optional.of(table);
             }
         }
         if (parent != null) {
             return parent.resolveLookupTable(name);
         }
-        return null;
+        return Optional.empty();
     }
 
     public Map<String, Stock> getStocks() {
@@ -216,22 +216,22 @@ public class CompilationContext {
         return Collections.unmodifiableMap(constants);
     }
 
-    public double[] resolveLookupInputHolder(String name) {
+    public Optional<double[]> resolveLookupInputHolder(String name) {
         double[] holder = lookupInputHolders.get(name);
         if (holder != null) {
-            return holder;
+            return Optional.of(holder);
         }
         if (name.contains("_")) {
             String spaceName = name.replace('_', ' ');
             holder = lookupInputHolders.get(spaceName);
             if (holder != null) {
-                return holder;
+                return Optional.of(holder);
             }
         }
         if (parent != null) {
             return parent.resolveLookupInputHolder(name);
         }
-        return null;
+        return Optional.empty();
     }
 
     public UnitRegistry getUnitRegistry() {

@@ -78,7 +78,7 @@ class NestedModuleTest {
 
         CompiledModel compiled = compiler.compile(outer);
         assertThat(compiled.getModel().getVariable("ProducerOutput"))
-                .as("Output binding should create variable in parent model").isNotNull();
+                .as("Output binding should create variable in parent model").isPresent();
     }
 
     @Test
@@ -141,7 +141,7 @@ class NestedModuleTest {
         Module m = modules.stream()
                 .filter(mod -> mod.getName().equals("m1"))
                 .findFirst().orElseThrow();
-        assertThat(m.getStock("S")).isNotNull();
-        assertThat(m.getStock("S").getValue()).isEqualTo(42);
+        assertThat(m.getStock("S")).isPresent();
+        assertThat(m.getStock("S").orElseThrow().getValue()).isEqualTo(42);
     }
 }

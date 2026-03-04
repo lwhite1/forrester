@@ -11,6 +11,7 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * Part of a model, broken to reduce complexity in creating and maintaining the model
@@ -99,17 +100,17 @@ public class Module extends Element {
     }
 
     /**
-     * Returns the stock with the given name, or {@code null} if not found.
+     * Returns the stock with the given name, or empty if not found.
      */
-    public Stock getStock(String stockName) {
-        return stocks.get(stockName);
+    public Optional<Stock> getStock(String stockName) {
+        return Optional.ofNullable(stocks.get(stockName));
     }
 
     /**
-     * Returns the variable with the given name, or {@code null} if not found.
+     * Returns the variable with the given name, or empty if not found.
      */
-    public Variable getVariable(String variableName) {
-        return variables.get(variableName);
+    public Optional<Variable> getVariable(String variableName) {
+        return Optional.ofNullable(variables.get(variableName));
     }
 
     /**
@@ -166,10 +167,10 @@ public class Module extends Element {
     }
 
     /**
-     * Returns the constant with the given name, or {@code null} if not found.
+     * Returns the constant with the given name, or empty if not found.
      */
-    public Constant getConstant(String name) {
-        return constants.get(name);
+    public Optional<Constant> getConstant(String name) {
+        return Optional.ofNullable(constants.get(name));
     }
 
     /**
@@ -193,10 +194,10 @@ public class Module extends Element {
     }
 
     /**
-     * Returns the sub-module with the given name, or {@code null} if not found.
+     * Returns the sub-module with the given name, or empty if not found.
      */
-    public Module getSubModule(String name) {
-        return subModules.get(name);
+    public Optional<Module> getSubModule(String name) {
+        return Optional.ofNullable(subModules.get(name));
     }
 
     /**

@@ -1545,4 +1545,95 @@ class ModelEditorTest {
             assertThat(result).isEmpty();
         }
     }
+
+    @Nested
+    @DisplayName("SIR model flow source/sink")
+    class SirFlowSourceSink {
+
+        @Test
+        void shouldPreserveFlowSourceAndSinkFromBuilder() {
+            ModelDefinition def = new ModelDefinitionBuilder()
+                    .name("SIR")
+                    .stock("Susceptible", 1000, "Person")
+                    .stock("Infectious", 10, "Person")
+                    .stock("Recovered", 0, "Person")
+                    .flow("Infection", "Susceptible * 0.1", "Day",
+                            "Susceptible", "Infectious")
+                    .flow("Recovery", "Infectious * 0.2", "Day",
+                            "Infectious", "Recovered")
+                    .build();
+
+            editor.loadFrom(def);
+
+            FlowDef infection = editor.getFlowByName("Infection");
+            assertThat(infection).isNotNull();
+            assertThat(infection.source()).isEqualTo("Susceptible");
+            assertThat(infection.sink()).isEqualTo("Infectious");
+
+            FlowDef recovery = editor.getFlowByName("Recovery");
+            assertThat(recovery).isNotNull();
+            assertThat(recovery.source()).isEqualTo("Infectious");
+            assertThat(recovery.sink()).isEqualTo("Recovered");
+        }
+
+        @Test
+        void shouldPreserveFlowSourceAndSinkAfterUndoRoundTrip() {
+            ModelDefinition def = new ModelDefinitionBuilder()
+                    .name("SIR")
+                    .stock("Susceptible", 1000, "Person")
+                    .stock("Infectious", 10, "Person")
+                    .stock("Recovered", 0, "Person")
+                    .flow("Infection", "Susceptible * 0.1", "Day",
+                            "Susceptible", "Infectious")
+                    .flow("Recovery", "Infectious * 0.2", "Day",
+                            "Infectious", "Recovered")
+                    .build();
+
+            editor.loadFrom(def);
+
+            // Simulate an undo snapshot round-trip
+            ModelDefinition snapshot = editor.toModelDefinition();
+            ModelEditor restored = new ModelEditor();
+            restored.loadFrom(snapshot);
+
+            FlowDef infection = restored.getFlowByName("Infection");
+            assertThat(infection).isNotNull();
+            assertThat(infection.source()).isEqualTo("Susceptible");
+            assertThat(infection.sink()).isEqualTo("Infectious");
+
+            FlowDef recovery = restored.getFlowByName("Recovery");
+            assertThat(recovery).isNotNull();
+            assertThat(recovery.source()).isEqualTo("Infectious");
+            assertThat(recovery.sink()).isEqualTo("Recovered");
+        }
+
+        @Test
+        void shouldPreserveFlowSourceAndSinkFromJson() {
+            var serializer = new com.deathrayresearch.forrester.io.json.ModelDefinitionSerializer();
+            ModelDefinition def = new ModelDefinitionBuilder()
+                    .name("SIR")
+                    .stock("Susceptible", 1000, "Person")
+                    .stock("Infectious", 10, "Person")
+                    .stock("Recovered", 0, "Person")
+                    .flow("Infection", "Susceptible * 0.1", "Day",
+                            "Susceptible", "Infectious")
+                    .flow("Recovery", "Infectious * 0.2", "Day",
+                            "Infectious", "Recovered")
+                    .build();
+
+            String json = serializer.toJson(def);
+            ModelDefinition deserialized = serializer.fromJson(json);
+            editor.loadFrom(deserialized);
+
+            FlowDef infection = editor.getFlowByName("Infection");
+            assertThat(infection).isNotNull();
+            assertThat(infection.source()).isEqualTo("Susceptible");
+            assertThat(infection.sink()).isEqualTo("Infectious");
+
+            FlowDef recovery = editor.getFlowByName("Recovery");
+            assertThat(recovery).isNotNull();
+            assertThat(recovery.source()).isEqualTo("Infectious");
+            assertThat(recovery.sink()).isEqualTo("Recovered");
+        }
+    }
 }

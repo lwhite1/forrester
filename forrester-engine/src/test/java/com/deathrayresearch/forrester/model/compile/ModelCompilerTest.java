@@ -405,8 +405,8 @@ class ModelCompilerTest {
                     .build();
 
             CompiledModel compiled = compiler.compile(outer);
-            Variable output = compiled.getModel().getVariable("ProducerOutput");
-            assertThat(output).isNotNull();
+            assertThat(compiled.getModel().getVariable("ProducerOutput")).isPresent();
+            Variable output = compiled.getModel().getVariable("ProducerOutput").orElseThrow();
             assertThat(output.getValue()).isCloseTo(100.0, within(0.01));
         }
 

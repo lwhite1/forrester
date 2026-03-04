@@ -12,6 +12,8 @@ import com.deathrayresearch.forrester.model.expr.ExprParser;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+import java.util.OptionalDouble;
 import java.util.function.DoubleSupplier;
 
 /**
@@ -259,25 +261,27 @@ public class ExprCompiler {
         String tableName = ref.name();
         String resolvedName = tableName;
         // Verify table exists
-        LookupTable existing = context.resolveLookupTable(tableName);
-        if (existing == null && tableName.contains("_")) {
+        Optional<LookupTable> existing = context.resolveLookupTable(tableName);
+        if (existing.isEmpty() && tableName.contains("_")) {
             resolvedName = tableName.replace('_', ' ');
             existing = context.resolveLookupTable(resolvedName);
         }
-        if (existing == null) {
+        if (existing.isEmpty()) {
             throw new CompilationException(
                     "Lookup table not found: " + tableName, tableName);
         }
         // Create a fresh LookupTable for this reference with its own isolated input,
         // preventing cross-formula interference when multiple formulas use the same table
         DoubleSupplier input = compileExpr(args.get(1));
-        LookupTable freshTable = context.createFreshLookupTable(resolvedName, input);
-        if (freshTable != null) {
-            return freshTable::getCurrentValue;
+        Optional<LookupTable> freshTable = context.createFreshLookupTable(resolvedName, input);
+        if (freshTable.isPresent()) {
+            return freshTable.get()::getCurrentValue;
         }
         // Fallback: use shared holder (for tables registered without a def)
-        double[] inputHolder = context.resolveLookupInputHolder(resolvedName);
-        LookupTable finalTable = existing;
+        double[] inputHolder = context.resolveLookupInputHolder(resolvedName)
+                .orElseThrow(() -> new CompilationException(
+                        "No input holder found for lookup table: " + tableName, tableName));
+        LookupTable finalTable = existing.get();
         return () -> {
             inputHolder[0] = input.getAsDouble();
             return finalTable.getCurrentValue();
@@ -300,9 +304,9 @@ public class ExprCompiler {
             return lit.value();
         }
         if (expr instanceof Expr.Ref ref) {
-            Double val = context.resolveConstant(ref.name());
-            if (val != null) {
-                return val;
+            OptionalDouble val = context.resolveConstant(ref.name());
+            if (val.isPresent()) {
+                return val.getAsDouble();
             }
             throw new CompilationException(
                     paramDescription + ": reference '" + ref.name()

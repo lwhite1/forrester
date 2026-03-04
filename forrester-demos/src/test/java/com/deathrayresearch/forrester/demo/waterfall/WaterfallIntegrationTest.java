@@ -84,15 +84,15 @@ class WaterfallIntegrationTest {
         WaterfallSoftwareDevelopmentDemo demo = new WaterfallSoftwareDevelopmentDemo();
         Model model = demo.getModel();
 
-        assertTrue(model.getVariable("Total Workforce") != null,
+        assertTrue(model.getVariable("Total Workforce").isPresent(),
                 "Model should contain Workforce variable");
-        assertTrue(model.getVariable("Communication overhead") != null,
+        assertTrue(model.getVariable("Communication overhead").isPresent(),
                 "Model should contain Workforce communication overhead variable");
-        assertTrue(model.getVariable("Daily resources for software production") != null,
+        assertTrue(model.getVariable("Daily resources for software production").isPresent(),
                 "Model should contain StaffAllocation variable");
-        assertTrue(model.getVariable("Fraction Correct and Complete") != null,
+        assertTrue(model.getVariable("Fraction Correct and Complete").isPresent(),
                 "Model should contain SoftwareProduction FCC variable");
-        assertTrue(model.getVariable("Development Productivity") != null,
+        assertTrue(model.getVariable("Development Productivity").isPresent(),
                 "Model should contain SoftwareProduction productivity variable");
     }
 }

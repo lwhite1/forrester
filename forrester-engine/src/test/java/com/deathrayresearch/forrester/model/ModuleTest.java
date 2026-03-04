@@ -5,8 +5,8 @@ import org.junit.jupiter.api.Test;
 
 import static com.deathrayresearch.forrester.measure.Units.MINUTE;
 import static com.deathrayresearch.forrester.measure.Units.THING;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class ModuleTest {
@@ -27,7 +27,7 @@ public class ModuleTest {
     public void shouldAddAndRetrieveStock() {
         Stock stock = new Stock("S1", 25, THING);
         module.addStock(stock);
-        assertEquals(stock, module.getStock("S1"));
+        assertThat(module.getStock("S1")).isPresent().contains(stock);
         assertEquals(25.0, module.valueOfStock("S1").getValue(), 0.0);
     }
 
@@ -43,19 +43,19 @@ public class ModuleTest {
 
     @Test
     public void shouldReturnNullForMissingStockViaGet() {
-        assertNull(module.getStock("nonexistent"));
+        assertThat(module.getStock("nonexistent")).isEmpty();
     }
 
     @Test
     public void shouldAddAndRetrieveVariable() {
         Variable var = new Variable("V1", THING, () -> 99.0);
         module.addVariable(var);
-        assertEquals(var, module.getVariable("V1"));
+        assertThat(module.getVariable("V1")).isPresent().contains(var);
         assertEquals(1, module.getVariables().size());
     }
 
     @Test
     public void shouldReturnNullForMissingVariableViaGet() {
-        assertNull(module.getVariable("nonexistent"));
+        assertThat(module.getVariable("nonexistent")).isEmpty();
     }
 }

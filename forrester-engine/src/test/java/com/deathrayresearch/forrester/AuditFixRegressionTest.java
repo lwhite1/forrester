@@ -135,11 +135,11 @@ class AuditFixRegressionTest {
             CompiledModel compiled = compiler.compile(def);
             Model model = compiled.getModel();
 
-            Variable effectA = model.getVariable("Effect of A");
-            Variable effectB = model.getVariable("Effect of B");
+            assertThat(model.getVariable("Effect of A")).isPresent();
+            assertThat(model.getVariable("Effect of B")).isPresent();
 
-            assertThat(effectA).isNotNull();
-            assertThat(effectB).isNotNull();
+            Variable effectA = model.getVariable("Effect of A").orElseThrow();
+            Variable effectB = model.getVariable("Effect of B").orElseThrow();
 
             // A=10 → LOOKUP(Effect, 10) ≈ 0.1, B=90 → LOOKUP(Effect, 90) ≈ 0.9
             assertThat(effectA.getValue()).isCloseTo(0.1, within(0.01));
@@ -167,7 +167,7 @@ class AuditFixRegressionTest {
 
             // Default DT is 1.0
             assertThat(compiled.getDt()).isEqualTo(1.0);
-            Variable stepSize = compiled.getModel().getVariable("Step Size");
+            Variable stepSize = compiled.getModel().getVariable("Step Size").orElseThrow();
             assertThat(stepSize.getValue()).isEqualTo(1.0);
 
             // Change DT
@@ -199,8 +199,8 @@ class AuditFixRegressionTest {
             CompiledModel compiled = compiler.compile(outerDef);
 
             // Default DT=1.0: Result = 10 * 1.0 = 10
-            Variable result = compiled.getModel().getVariable("Result");
-            assertThat(result).isNotNull();
+            assertThat(compiled.getModel().getVariable("Result")).isPresent();
+            Variable result = compiled.getModel().getVariable("Result").orElseThrow();
             assertThat(result.getValue()).isCloseTo(10.0, within(0.01));
 
             // Change DT=0.5: Result = 10 * 0.5 = 5
@@ -337,9 +337,8 @@ class AuditFixRegressionTest {
 
             ModelCompiler compiler = new ModelCompiler();
             CompiledModel compiled = compiler.compile(outerDef);
-            Variable scaled = compiled.getModel().getVariable("Scaled");
-
-            assertThat(scaled).isNotNull();
+            assertThat(compiled.getModel().getVariable("Scaled")).isPresent();
+            Variable scaled = compiled.getModel().getVariable("Scaled").orElseThrow();
             assertThat(scaled.getValue()).isCloseTo(50.0, within(0.01));
         }
     }

@@ -16,7 +16,8 @@ class ModuleConstantTest {
         Constant c = new Constant("Rate", THING, 0.05);
         module.addConstant(c);
 
-        assertThat(module.getConstant("Rate").getValue()).isEqualTo(0.05);
+        assertThat(module.getConstant("Rate")).isPresent();
+        assertThat(module.getConstant("Rate").orElseThrow().getValue()).isEqualTo(0.05);
         assertThat(module.getConstants()).hasSize(1);
     }
 
@@ -26,20 +27,20 @@ class ModuleConstantTest {
         Module child = new Module("Child");
         parent.addSubModule(child);
 
-        assertThat(parent.getSubModule("Child")).isSameAs(child);
+        assertThat(parent.getSubModule("Child")).isPresent().containsSame(child);
         assertThat(parent.getSubModules()).hasSize(1);
     }
 
     @Test
     void shouldReturnNullForMissingConstant() {
         Module module = new Module("TestModule");
-        assertThat(module.getConstant("NonExistent")).isNull();
+        assertThat(module.getConstant("NonExistent")).isEmpty();
     }
 
     @Test
     void shouldReturnNullForMissingSubModule() {
         Module module = new Module("TestModule");
-        assertThat(module.getSubModule("NonExistent")).isNull();
+        assertThat(module.getSubModule("NonExistent")).isEmpty();
     }
 
     @Test

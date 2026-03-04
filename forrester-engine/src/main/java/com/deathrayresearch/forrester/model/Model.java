@@ -6,6 +6,7 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * One representation of a dynamic system
@@ -228,12 +229,12 @@ public class Model extends Element {
     }
 
     /**
-     * Returns the variable with the given name, or {@code null} if not found.
+     * Returns the variable with the given name, or empty if not found.
      *
      * @param variableName the variable name to look up
      */
-    public Variable getVariable(String variableName) {
-        return variables.get(variableName);
+    public Optional<Variable> getVariable(String variableName) {
+        return Optional.ofNullable(variables.get(variableName));
     }
 
     /**

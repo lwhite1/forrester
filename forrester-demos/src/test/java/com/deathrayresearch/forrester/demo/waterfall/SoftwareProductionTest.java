@@ -36,8 +36,8 @@ class SoftwareProductionTest {
                 new Quantity(100, TimeUnits.DAY));
         sim.execute();
 
-        Stock tasksCompleted = sp.getModule().getStock("Tasks Completed");
-        Stock tasksRemaining = sp.getModule().getStock("Tasks Remaining");
+        Stock tasksCompleted = sp.getModule().getStock("Tasks Completed").orElseThrow();
+        Stock tasksRemaining = sp.getModule().getStock("Tasks Remaining").orElseThrow();
 
         assertTrue(tasksCompleted.getValue() > 0,
                 "Tasks completed should be positive after 100 days");
@@ -57,7 +57,7 @@ class SoftwareProductionTest {
                 new Quantity(30, TimeUnits.DAY));
         sim.execute();
 
-        Stock undiscoveredRework = sp.getModule().getStock("Undiscovered Rework");
+        Stock undiscoveredRework = sp.getModule().getStock("Undiscovered Rework").orElseThrow();
         assertTrue(undiscoveredRework.getValue() > 0,
                 "Undiscovered rework should accumulate when FCC < 1");
     }
@@ -75,7 +75,7 @@ class SoftwareProductionTest {
                 new Quantity(100, TimeUnits.DAY));
         sim.execute();
 
-        Stock reworkToDo = sp.getModule().getStock("Rework to Do");
+        Stock reworkToDo = sp.getModule().getStock("Rework to Do").orElseThrow();
         assertTrue(reworkToDo.getValue() > 0,
                 "Rework to Do should be positive as errors are discovered");
     }
@@ -94,7 +94,7 @@ class SoftwareProductionTest {
         sim.execute();
 
         // The rework discovery fraction variable should be above the base (0.05)
-        Variable discoveryFrac = sp.getModule().getVariable("Rework Discovery Fraction");
+        Variable discoveryFrac = sp.getModule().getVariable("Rework Discovery Fraction").orElseThrow();
         assertTrue(discoveryFrac.getValue() > 0.05,
                 "Rework discovery fraction should increase above base as project progresses");
     }
@@ -110,7 +110,7 @@ class SoftwareProductionTest {
                 new Quantity(60, TimeUnits.DAY));
         sim.execute();
 
-        Variable multiplier = sp.getModule().getVariable("Integration Effort Multiplier");
+        Variable multiplier = sp.getModule().getVariable("Integration Effort Multiplier").orElseThrow();
         assertTrue(multiplier.getValue() > 1.0,
                 "Integration effort multiplier should exceed 1.0 as project progresses");
     }
@@ -127,8 +127,8 @@ class SoftwareProductionTest {
                 new Quantity(365, TimeUnits.DAY));
         sim.execute();
 
-        Stock tasksRemaining = sp.getModule().getStock("Tasks Remaining");
-        Stock tasksCompleted = sp.getModule().getStock("Tasks Completed");
+        Stock tasksRemaining = sp.getModule().getStock("Tasks Remaining").orElseThrow();
+        Stock tasksCompleted = sp.getModule().getStock("Tasks Completed").orElseThrow();
 
         // With 200 tasks and reasonable staffing for a year, project should be mostly done
         assertTrue(tasksRemaining.getValue() < 10,
@@ -154,10 +154,10 @@ class SoftwareProductionTest {
                 new Quantity(60, TimeUnits.DAY));
         newSim.execute();
 
-        double expRework = expTeam.getModule().getStock("Undiscovered Rework").getValue()
-                + expTeam.getModule().getStock("Rework to Do").getValue();
-        double newRework = newTeam.getModule().getStock("Undiscovered Rework").getValue()
-                + newTeam.getModule().getStock("Rework to Do").getValue();
+        double expRework = expTeam.getModule().getStock("Undiscovered Rework").orElseThrow().getValue()
+                + expTeam.getModule().getStock("Rework to Do").orElseThrow().getValue();
+        double newRework = newTeam.getModule().getStock("Undiscovered Rework").orElseThrow().getValue()
+                + newTeam.getModule().getStock("Rework to Do").orElseThrow().getValue();
 
         assertTrue(newRework > expRework,
                 "Inexperienced team should generate more rework: exp=" + expRework
