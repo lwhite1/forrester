@@ -73,6 +73,9 @@ import org.apache.commons.math3.distribution.UniformRealDistribution;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -91,6 +94,8 @@ import java.util.function.Function;
  * Each window owns its own canvas, editor, undo stack, and file state.
  */
 public class ModelWindow {
+
+    private static final Logger log = LoggerFactory.getLogger(ModelWindow.class);
 
     private final Stage stage;
     private final ForresterApp app;
@@ -384,7 +389,7 @@ public class ModelWindow {
 
             ViewDef view;
             if (!def.views().isEmpty()) {
-                view = def.views().get(0);
+                view = def.views().getFirst();
             } else {
                 view = AutoLayout.layout(def);
             }
@@ -424,9 +429,13 @@ public class ModelWindow {
 
             Map<String, Menu> categoryMenus = new LinkedHashMap<>();
             for (JsonNode model : models) {
-                String name = model.get("name").asText();
-                String category = model.get("category").asText();
-                String path = model.get("path").asText();
+                String name = model.path("name").asText(null);
+                String category = model.path("category").asText(null);
+                String path = model.path("path").asText(null);
+                if (name == null || category == null || path == null) {
+                    log.warn("Skipping malformed example entry: {}", model);
+                    continue;
+                }
 
                 Menu categoryMenu = categoryMenus.computeIfAbsent(category, c -> new Menu(c));
                 MenuItem item = new MenuItem(name);
@@ -434,7 +443,8 @@ public class ModelWindow {
                 categoryMenu.getItems().add(item);
             }
             menu.getItems().addAll(categoryMenus.values());
-        } catch (IOException ex) {
+        } catch (Exception ex) {
+            log.warn("Failed to load examples catalog", ex);
             MenuItem empty = new MenuItem("(no examples found)");
             empty.setDisable(true);
             menu.getItems().add(empty);
@@ -474,7 +484,7 @@ public class ModelWindow {
             }
             updateTitle();
             fireLogEvent(l -> l.onModelOpened(name));
-        } catch (IOException ex) {
+        } catch (Exception ex) {
             showError("Open Example", "Failed to load example: " + ex.getMessage());
         }
     }
