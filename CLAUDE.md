@@ -128,6 +128,11 @@ throw new RuntimeException("not found");
 - **Integration tests**: Use `@SpringBootTest` or `@DataJpaTest` for DB-layer tests
 - **Controller tests**: Use `@WebMvcTest` with `MockMvc`
 
+### UI Testability
+- **Isolate UI from logic**: Separate business logic and state management from UI components. This allows traditional unit testing of non-UI parts using JUnit without requiring a running JavaFX application
+- **Use observable properties**: Store application state in observable classes (e.g., JavaFX `Property` types) and bind UI elements to these properties. Tests can interact with and verify the state of the model directly, treating the UI as a reliable black box
+- **Use IDs for nodes**: Assign unique `fx:id` or CSS IDs to JavaFX scene graph nodes (e.g., `#myButton`). This makes it straightforward for testing frameworks like TestFX to locate and interact with specific elements programmatically
+
 ## Logging
 
 - Use **SLF4J** (`org.slf4j.Logger`) — never `System.out.println`
