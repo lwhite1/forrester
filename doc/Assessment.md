@@ -78,16 +78,3 @@ The simulation engine and analysis tools have been hardened via a system-wide au
 - The data-driven definition and serialization pipeline is a significant architectural milestone. Models can now be described as pure data (no lambdas), validated structurally, serialized to/from JSON, and compiled to runnable simulations — with full support for nested modules, expression parsing, dependency extraction, and forward references. This opens the door to external model editors, model exchange between tools, and version-controlled model definitions. The dependency graph and auto-layout infrastructure provide the foundation for visual diagram generation.
 
 - The visual editor is a significant milestone that moves Forrester from "code-only" to "visual + code." Users can now build, edit, save, and simulate models entirely through the GUI — a workflow that was previously only available in commercial tools. The editor's rendering of the Layered Flow Diagram notation, combined with JSON persistence and integrated simulation, makes it a viable standalone modeling tool for small-to-medium models.
-
-## What Matters Most Next
-
-All three previously identified gaps (lookup table chart visualization, equation autocomplete, model validation panel) have been completed. The remaining gaps compared to commercial tools are polish-level: cross-model paste, undo history visualization, keyboard-driven connection creation.
-
-### Recently Completed
-
-- **Lookup table chart visualization** — The lookup table properties panel now includes an inline line chart preview showing the table's x/y shape. The chart updates when data points are edited, added, or removed, giving immediate visual feedback on graphical function shape.
-- **Equation autocomplete** — Flow and auxiliary equation fields (properties panel and inline editor) suggest element names and built-in functions as the user types. Case-insensitive prefix matching, keyboard navigation (Up/Down/Enter/Tab/Escape), self-reference exclusion, and automatic opening-paren insertion for functions.
-- **Model validation panel** — Validate button in toolbar (Ctrl+B) checks for undefined equations, disconnected flows, missing units, algebraic loops, and unused elements. Results displayed in a TableView dialog with click-to-select navigation; status bar shows colored validation indicator.
-- **Cut (Ctrl+X)** — Copy, then delete in one action.
-- **Connection re-routing** — Click near either endpoint of a selected info link connection and drag to a different element to rewire the equation reference. Both from-end and to-end rerouting are supported.
-- **Lookup table editor** — Lookup tables can be placed via toolbar (key 7), rendered with a "tbl" badge showing point count, and edited in the properties panel with inline x/y data fields, add/remove row buttons, and interpolation mode selection. Supports copy/paste, rename, undo/redo, and SVG export.
