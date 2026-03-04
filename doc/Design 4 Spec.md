@@ -948,19 +948,55 @@ Elena has now crossed from the AI-only zone into the middle of the spectrum. She
 
 ## 14. Implementation phases
 
-### Phase 1: Core shell (estimated: foundation)
+### Phase 1: Core canvas editor (COMPLETE)
 
-Build the window with three panels (conversation collapsed, canvas, dashboard collapsed). Implement:
-- Canvas rendering of `ModelDefinition` elements in stock-and-flow style (skip CLD style initially).
-- Element creation via command palette (the 10 core commands).
-- Inline equation editing (plain text field, post-submit validation via `ExprParser`).
-- Simulation execution wired to existing `Simulation` class.
-- Dashboard with basic time series chart.
-- Model persistence (save/load via `ModelDefinitionSerializer`).
+The foundation: a fully functional no-AI canvas editor for building, simulating, and persisting system dynamics models.
 
-No LLM integration. No maturity system. This is the "better Vensim" baseline — can David build and simulate a model faster than in Vensim? This phase also delivers **no-AI mode** (section 16) as a permanent first-class workflow: add the session start screen with the "Build without AI" option, and implement the activity log panel. Phase 1 is not a temporary limitation — it is the no-AI experience, and it must be good enough to stand on its own.
+**Delivered:**
+- Canvas rendering of `ModelDefinition` elements in stock-and-flow style (Layered Flow Diagram notation).
+- Element creation via toolbar and keyboard shortcuts (Stock, Flow, Aux, Constant, Module, Lookup Table).
+- Inline equation editing with post-submit validation via `ExprParser` and autocomplete for element names and built-in functions.
+- Simulation execution wired to existing `Simulation` class with background-thread execution.
+- Simulation results dialog with sortable data table and interactive time series chart (per-series toggle, PNG export).
+- Model persistence (save/load via `ModelDefinitionSerializer`) with full view layout preservation.
+- Undo/redo (100-level snapshot stack), copy/paste/cut, rubber-band selection.
+- Connection creation, deletion, hover/selection highlighting, and drag-to-reroute.
+- Lookup table editor with inline chart preview, interpolation mode selection.
+- Model validation panel (undefined equations, disconnected flows, missing units, algebraic loops, unused elements).
+- Feedback loop highlighting.
+- Diagram export (PNG, JPEG, SVG).
+- Pan, zoom, resize, context-sensitive cursors, status bar.
 
-### Phase 2: Maturity system + visual adaptation
+No LLM integration. No maturity system. This is the "better Vensim" baseline for David — a capable standalone modeling tool.
+
+### Phase 2: No-AI workflow completion
+
+Complete the no-AI experience as a permanent first-class workflow, and add the analysis capabilities that make it useful for serious work.
+
+**Activity log panel.** Replace the conversation panel placeholder with a structured activity log: timestamped entries for model changes, simulation runs, validation warnings. Not interactive (no AI), but provides a record of the session. See section 16.2.
+
+**Integrated behavior dashboard.** Move simulation results from a separate dialog into a collapsible dashboard panel in the main window. The dashboard persists across simulation runs and serves as the home for all analysis output — time series charts, sweep results, Monte Carlo fan charts, optimization progress.
+
+**Analysis integration.** Wire the existing engine analysis tools into the GUI:
+- Parameter sweep UI: configure parameter, range, and steps; results displayed in dashboard.
+- Multi-parameter sweep UI: configure parameter grid; results in dashboard with CSV export.
+- Monte Carlo UI: configure distributions, iteration count, sampling method (random/LHS); fan chart and percentile envelopes in dashboard.
+- Optimization UI: configure objective function, parameter bounds, algorithm; progress and results in dashboard.
+
+These build on existing Forrester infrastructure (`ParameterSweep`, `MultiParameterSweep`, `MonteCarlo`, `MonteCarloResult`, `FanChart`, `Optimizer`). The engine work is done — this phase is GUI integration.
+
+**Baseline question:** Can David build a model, run sensitivity analysis, calibrate against data, and export results — all from the GUI — without needing Vensim?
+
+### Phase 3: UI scaffolding for AI readiness
+
+Build the structural UI elements that later phases depend on:
+- Three-panel window layout (activity log / conversation left, canvas center, dashboard right) with collapsible panels.
+- Command palette (Ctrl+K searchable, the core commands from Appendix B).
+- Session start screen with "Build a model" / "Build without AI" / "Open existing model" options.
+
+No LLM integration yet. These are the UI foundations that Phases 4–5 build on top of.
+
+### Phase 4: Maturity system + visual adaptation
 
 Implement the maturity signal computations. Wire them to canvas rendering:
 - Amber accents on elements missing equations.
@@ -972,7 +1008,7 @@ Implement the maturity signal computations. Wire them to canvas rendering:
 
 No LLM yet. Test whether the visual maturity indicators alone change how Maya builds models (does she notice and fix equation gaps without being told?).
 
-### Phase 3: LLM integration — INTERPRETER and FORMALIZER
+### Phase 5: LLM integration — INTERPRETER and FORMALIZER
 
 Add LLM integration with two postures — the safest ones:
 - INTERPRETER: Explain simulation output. Low risk of bad advice; the model is already built.
@@ -982,21 +1018,17 @@ Implement conversation panel with message types, model action messages, and diff
 
 This is the first version where the LLM is useful. Test with both personas.
 
-### Phase 4: Remaining postures + pace detection
+### Phase 6: Remaining postures + pace detection
 
 Add ELICITOR, ANTICIPATOR, CHALLENGER, and OBSERVER postures. Implement pace detection and posture transition hysteresis.
 
 Test posture transitions with scripted scenarios. Build the posture evaluation harness for regression testing prompt changes.
 
-### Phase 5: Analysis features
-
-Add parameter sweep integration, Monte Carlo integration, fan chart in dashboard, sensitivity summaries. These build on existing Forrester infrastructure (`ParameterSweep`, `MonteCarlo`, `MonteCarloResult`, `FanChart`).
-
-### Phase 6: Polish and export
+### Phase 7: Polish and export
 
 Conversation export. CLD-style rendering for unclassified elements. Cross-linking (click canvas element → scroll to conversation; click conversation element name → select on canvas). CSV data import and overlay. Subsystem grouping.
 
-### Phase 7: AI-only mode
+### Phase 8: AI-only mode
 
 Implement the session-start choice screen ("Build a model" / "Explore a problem"). Implement AUTONOMIST posture with autonomous model construction (no per-element approval). Implement inline chart rendering in conversation. Implement the "reveal" interaction (canvas slide-open from AI-only mode). Implement assumption tracking and display.
 
@@ -1273,7 +1305,7 @@ No-AI mode requires no additional engine work — it is the *absence* of the LLM
 3. **Session start screen update.** Add the "Build without AI" option and API key detection logic.
 4. **Graceful degradation.** If the LLM service becomes unreachable mid-session, the UI transitions to no-AI mode automatically with a notification. No data is lost.
 
-This should be implemented as part of **Phase 1** (section 14), not deferred. Phase 1 already specifies "No LLM integration" — no-AI mode *is* the Phase 1 experience, formalized as a permanent first-class workflow rather than a temporary limitation. The activity log and session start screen are the only additions beyond what Phase 1 already delivers.
+The activity log and integrated dashboard are implemented in **Phase 2** (section 14), building on the canvas editor delivered in Phase 1. The session start screen and command palette follow in Phase 3. No-AI mode is not a temporary limitation — it is a permanent first-class workflow that must stand on its own.
 
 ---
 
