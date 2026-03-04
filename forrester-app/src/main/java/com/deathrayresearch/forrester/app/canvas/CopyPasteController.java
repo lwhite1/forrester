@@ -141,6 +141,7 @@ final class CopyPasteController {
                 String eq = editor.getFlowEquation(newName);
                 if (eq != null) {
                     String updated = remapEquationTokens(eq, nameMapping);
+                    updated = clearDanglingReferences(updated, editor);
                     if (!updated.equals(eq)) {
                         editor.setFlowEquation(newName, updated);
                     }
@@ -149,6 +150,7 @@ final class CopyPasteController {
                 String eq = editor.getAuxEquation(newName);
                 if (eq != null) {
                     String updated = remapEquationTokens(eq, nameMapping);
+                    updated = clearDanglingReferences(updated, editor);
                     if (!updated.equals(eq)) {
                         editor.setAuxEquation(newName, updated);
                     }
@@ -170,5 +172,68 @@ final class CopyPasteController {
             result = ModelEditor.replaceToken(result, oldToken, newToken);
         }
         return result;
+    }
+
+    private static final Set<String> EQUATION_KEYWORDS = Set.of("TIME", "DT", "IF");
+
+    /**
+     * Replaces identifier tokens in the equation that do not correspond to any element
+     * in the target editor with "0". This prevents dangling references when pasting
+     * elements whose equations reference elements that were not part of the selection.
+     * Numbers, keywords (TIME, DT, IF), and function calls (token followed by '(') are
+     * left untouched.
+     */
+    static String clearDanglingReferences(String equation, ModelEditor editor) {
+        StringBuilder result = new StringBuilder();
+        int len = equation.length();
+        int i = 0;
+
+        while (i < len) {
+            char c = equation.charAt(i);
+            if (!ModelEditor.isTokenChar(c)) {
+                result.append(c);
+                i++;
+                continue;
+            }
+
+            // Extract the full token
+            int start = i;
+            while (i < len && ModelEditor.isTokenChar(equation.charAt(i))) {
+                i++;
+            }
+            String token = equation.substring(start, i);
+
+            // Skip numeric literals (start with a digit)
+            if (Character.isDigit(c)) {
+                result.append(token);
+                continue;
+            }
+
+            // Skip keywords
+            if (EQUATION_KEYWORDS.contains(token)) {
+                result.append(token);
+                continue;
+            }
+
+            // Skip function calls (token followed by optional whitespace then '(')
+            int peek = i;
+            while (peek < len && Character.isWhitespace(equation.charAt(peek))) {
+                peek++;
+            }
+            if (peek < len && equation.charAt(peek) == '(') {
+                result.append(token);
+                continue;
+            }
+
+            // Check if the element exists in the target editor
+            String elementName = token.replace('_', ' ');
+            if (editor.hasElement(elementName)) {
+                result.append(token);
+            } else {
+                result.append("0");
+            }
+        }
+
+        return result.toString();
     }
 }
