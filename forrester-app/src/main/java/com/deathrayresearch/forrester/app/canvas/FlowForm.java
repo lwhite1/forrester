@@ -55,13 +55,6 @@ class FlowForm implements ElementForm {
         ctx.addFieldRow(row++, "Time Unit", timeUnitBox,
                 "The time unit for the flow rate (e.g., units per Day)");
 
-        sourceLabel = new Label(flow.source() != null ? flow.source() : "(cloud)");
-        ctx.addReadOnlyRow(row++, "Source", sourceLabel,
-                "The stock this flow drains from. (cloud) = unlimited external source.");
-        sinkLabel = new Label(flow.sink() != null ? flow.sink() : "(cloud)");
-        ctx.addReadOnlyRow(row++, "Sink", sinkLabel,
-                "The stock this flow fills. (cloud) = unlimited external sink.");
-
         commentArea = new TextArea(flow.comment() != null ? flow.comment() : "");
         commentArea.setId("propComment");
         commentArea.setPrefRowCount(2);
@@ -71,6 +64,13 @@ class FlowForm implements ElementForm {
         ctx.addTextAreaCommitHandlers(commentArea, this::commitComment);
         ctx.addFieldRow(row++, "Comment", commentArea,
                 "Optional documentation for this element");
+
+        sourceLabel = new Label(flow.source() != null ? flow.source() : "(cloud)");
+        ctx.addReadOnlyRow(row++, "Source", sourceLabel,
+                "The stock this flow drains from. (cloud) = unlimited external source.");
+        sinkLabel = new Label(flow.sink() != null ? flow.sink() : "(cloud)");
+        ctx.addReadOnlyRow(row++, "Sink", sinkLabel,
+                "The stock this flow fills. (cloud) = unlimited external sink.");
 
         return row;
     }

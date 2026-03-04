@@ -10,6 +10,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.Separator;
 import javafx.scene.control.TextField;
+import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
@@ -55,6 +56,13 @@ public class PropertiesPanel extends VBox {
         propertyGrid.setHgap(8);
         propertyGrid.setVgap(6);
         propertyGrid.setPadding(new Insets(8));
+
+        ColumnConstraints labelCol = new ColumnConstraints();
+        labelCol.setMinWidth(70);
+        labelCol.setHgrow(Priority.NEVER);
+        ColumnConstraints fieldCol = new ColumnConstraints();
+        fieldCol.setHgrow(Priority.ALWAYS);
+        propertyGrid.getColumnConstraints().addAll(labelCol, fieldCol);
 
         scrollPane.setContent(propertyGrid);
         scrollPane.setFitToWidth(true);
