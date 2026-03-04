@@ -31,8 +31,10 @@ public class DashboardPanel extends VBox {
         Label placeholderLabel = new Label("Run a simulation to see results.");
         placeholderLabel.setStyle(Styles.PLACEHOLDER_TEXT);
         placeholder = new StackPane(placeholderLabel);
+        placeholder.setId("dashboardPlaceholder");
 
         resultTabs = new TabPane();
+        resultTabs.setId("dashboardResultTabs");
         resultTabs.setTabClosingPolicy(TabPane.TabClosingPolicy.SELECTED_TAB);
         resultTabs.setVisible(false);
         resultTabs.setManaged(false);

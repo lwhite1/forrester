@@ -9,16 +9,21 @@ import javafx.geometry.Insets;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
+import javafx.scene.control.Alert;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Label;
 import javafx.scene.control.MenuItem;
+import javafx.scene.control.ScrollPane;
+import javafx.util.StringConverter;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 
 import java.io.File;
@@ -41,6 +46,7 @@ public class MultiSweepResultPane extends BorderPane {
         this.result = result;
 
         TabPane tabPane = new TabPane();
+        tabPane.setId("multiSweepTabs");
         tabPane.setTabClosingPolicy(TabPane.TabClosingPolicy.UNAVAILABLE);
 
         Tab summaryTab = new Tab("Summary", buildSummaryTable());
@@ -52,6 +58,7 @@ public class MultiSweepResultPane extends BorderPane {
 
     private TableView<RunResult> buildSummaryTable() {
         TableView<RunResult> table = new TableView<>();
+        table.setId("multiSweepSummaryTable");
 
         List<String> paramNames = result.getParameterNames();
         for (String paramName : paramNames) {
@@ -106,29 +113,44 @@ public class MultiSweepResultPane extends BorderPane {
             runLabels.add(label);
         }
 
-        ComboBox<String> runCombo = new ComboBox<>(FXCollections.observableArrayList(runLabels));
+        List<Integer> indices = new ArrayList<>();
+        for (int i = 0; i < result.getRunCount(); i++) {
+            indices.add(i);
+        }
+
+        ComboBox<Integer> runCombo = new ComboBox<>(FXCollections.observableArrayList(indices));
+        runCombo.setId("multiSweepRunCombo");
+        runCombo.setConverter(new StringConverter<>() {
+            @Override
+            public String toString(Integer index) {
+                return index != null && index < runLabels.size() ? runLabels.get(index) : "";
+            }
+
+            @Override
+            public Integer fromString(String string) {
+                return null;
+            }
+        });
 
         HBox topBar = new HBox(8, new Label("Run:"), runCombo);
         topBar.setPadding(new Insets(8));
         pane.setTop(topBar);
 
         runCombo.valueProperty().addListener((obs, old, val) -> {
-            if (val != null) {
-                int index = runLabels.indexOf(val);
-                if (index >= 0) {
-                    pane.setCenter(buildRunChart(result.getResult(index)));
-                }
+            if (val != null && val >= 0 && val < result.getRunCount()) {
+                BorderPane chartPane = buildRunChart(result.getResult(val));
+                pane.setCenter(chartPane);
             }
         });
 
-        if (!runLabels.isEmpty()) {
-            runCombo.setValue(runLabels.get(0));
+        if (!indices.isEmpty()) {
+            runCombo.setValue(0);
         }
 
         return pane;
     }
 
-    private LineChart<Number, Number> buildRunChart(RunResult run) {
+    private BorderPane buildRunChart(RunResult run) {
         NumberAxis xAxis = new NumberAxis();
         xAxis.setLabel("Step");
         NumberAxis yAxis = new NumberAxis();
@@ -137,6 +159,7 @@ public class MultiSweepResultPane extends BorderPane {
         LineChart<Number, Number> chart = new LineChart<>(xAxis, yAxis);
         chart.setCreateSymbols(false);
         chart.setAnimated(false);
+        chart.setLegendVisible(false);
 
         List<String> allNames = new ArrayList<>();
         allNames.addAll(run.getStockNames());
@@ -163,6 +186,33 @@ public class MultiSweepResultPane extends BorderPane {
         chart.getData().addAll(allSeries);
         ChartUtils.applySeriesColors(allSeries);
 
+        VBox sidebar = new VBox(6);
+        sidebar.setPadding(new Insets(10));
+
+        for (int i = 0; i < allSeries.size(); i++) {
+            XYChart.Series<Number, Number> series = allSeries.get(i);
+            String color = ChartUtils.SERIES_COLORS[i % ChartUtils.SERIES_COLORS.length];
+
+            CheckBox cb = new CheckBox(series.getName());
+            cb.setSelected(true);
+            cb.setStyle("-fx-text-fill: " + color + ";");
+            cb.selectedProperty().addListener((obs, wasSelected, isSelected) -> {
+                if (series.getNode() != null) {
+                    series.getNode().setVisible(isSelected);
+                }
+                series.getData().forEach(d -> {
+                    if (d.getNode() != null) {
+                        d.getNode().setVisible(isSelected);
+                    }
+                });
+            });
+            sidebar.getChildren().add(cb);
+        }
+
+        ScrollPane sidebarScroll = new ScrollPane(sidebar);
+        sidebarScroll.setFitToWidth(true);
+        sidebarScroll.setPrefWidth(180);
+
         ContextMenu contextMenu = new ContextMenu();
         MenuItem exportTs = new MenuItem("Export CSV (Time Series)...");
         exportTs.setOnAction(e -> exportTimeSeriesCsv());
@@ -170,7 +220,10 @@ public class MultiSweepResultPane extends BorderPane {
         chart.setOnContextMenuRequested(e ->
                 contextMenu.show(chart, e.getScreenX(), e.getScreenY()));
 
-        return chart;
+        BorderPane chartPane = new BorderPane();
+        chartPane.setCenter(chart);
+        chartPane.setRight(sidebarScroll);
+        return chartPane;
     }
 
     private void exportSummaryCsv() {
@@ -182,7 +235,12 @@ public class MultiSweepResultPane extends BorderPane {
 
         File file = fileChooser.showSaveDialog(getScene() != null ? getScene().getWindow() : null);
         if (file != null) {
-            result.writeSummaryCsv(file.getAbsolutePath());
+            try {
+                result.writeSummaryCsv(file.getAbsolutePath());
+            } catch (RuntimeException e) {
+                new Alert(Alert.AlertType.ERROR,
+                        "Failed to export CSV: " + e.getMessage()).showAndWait();
+            }
         }
     }
 
@@ -195,7 +253,12 @@ public class MultiSweepResultPane extends BorderPane {
 
         File file = fileChooser.showSaveDialog(getScene() != null ? getScene().getWindow() : null);
         if (file != null) {
-            result.writeTimeSeriesCsv(file.getAbsolutePath());
+            try {
+                result.writeTimeSeriesCsv(file.getAbsolutePath());
+            } catch (RuntimeException e) {
+                new Alert(Alert.AlertType.ERROR,
+                        "Failed to export CSV: " + e.getMessage()).showAndWait();
+            }
         }
     }
 }

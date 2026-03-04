@@ -2,6 +2,7 @@ package com.deathrayresearch.forrester.app.canvas;
 
 import com.deathrayresearch.forrester.sweep.ParameterSweep;
 
+import javafx.beans.binding.Bindings;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -19,7 +20,9 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Dialog for configuring a multi-parameter sweep. Users add rows for each
@@ -35,7 +38,8 @@ public class MultiParameterSweepDialog extends Dialog<MultiParameterSweepDialog.
     public record Config(List<ParamConfig> parameters) {
     }
 
-    private static final int MAX_COMBINATIONS = 100_000;
+    private static final int MAX_COMBINATIONS = 10_000;
+    private static final int WARN_COMBINATIONS = 1_000;
 
     private final ObservableList<ParameterRow> parameterRows = FXCollections.observableArrayList();
     private final Label combinationCountLabel;
@@ -48,11 +52,13 @@ public class MultiParameterSweepDialog extends Dialog<MultiParameterSweepDialog.
         paramBox.setPadding(new Insets(5));
 
         combinationCountLabel = new Label("0 combinations");
+        combinationCountLabel.setId("multiSweepCombinationCount");
         combinationCountLabel.setPadding(new Insets(4, 0, 4, 0));
 
         Button addButton = new Button("Add Parameter");
+        addButton.setId("multiSweepAddParam");
         addButton.setOnAction(e -> {
-            ParameterRow row = new ParameterRow(constantNames, paramBox);
+            ParameterRow row = new ParameterRow(constantNames, paramBox, null);
             parameterRows.add(row);
             paramBox.getChildren().add(paramBox.getChildren().size() - 2, row.getPane());
             updateCombinationCount();
@@ -62,10 +68,8 @@ public class MultiParameterSweepDialog extends Dialog<MultiParameterSweepDialog.
 
         // Add two default rows
         for (int i = 0; i < 2; i++) {
-            ParameterRow row = new ParameterRow(constantNames, paramBox);
-            if (constantNames.size() > i) {
-                row.nameCombo.setValue(constantNames.get(i));
-            }
+            String defaultName = constantNames.size() > i ? constantNames.get(i) : null;
+            ParameterRow row = new ParameterRow(constantNames, paramBox, defaultName);
             parameterRows.add(row);
             paramBox.getChildren().add(paramBox.getChildren().size() - 2, row.getPane());
         }
@@ -86,6 +90,11 @@ public class MultiParameterSweepDialog extends Dialog<MultiParameterSweepDialog.
         ButtonType okButton = new ButtonType("OK", ButtonBar.ButtonData.OK_DONE);
         getDialogPane().getButtonTypes().addAll(okButton, ButtonType.CANCEL);
 
+        getDialogPane().lookupButton(okButton).disableProperty().bind(
+                Bindings.createBooleanBinding(() -> getValidParams().size() < 2,
+                        parameterRows)
+        );
+
         Button okNode = (Button) getDialogPane().lookupButton(okButton);
         okNode.addEventFilter(ActionEvent.ACTION, event -> {
             List<ParamConfig> validParams = getValidParams();
@@ -94,6 +103,16 @@ public class MultiParameterSweepDialog extends Dialog<MultiParameterSweepDialog.
                 new Alert(Alert.AlertType.WARNING,
                         "At least 2 valid parameter rows are required.").showAndWait();
                 return;
+            }
+            Set<String> names = new HashSet<>();
+            for (ParamConfig p : validParams) {
+                if (!names.add(p.name())) {
+                    event.consume();
+                    new Alert(Alert.AlertType.WARNING,
+                            "Duplicate parameter: " + p.name()
+                                    + ". Each parameter must be unique.").showAndWait();
+                    return;
+                }
             }
             long combos = computeCombinations(validParams);
             if (combos > MAX_COMBINATIONS) {
@@ -128,6 +147,8 @@ public class MultiParameterSweepDialog extends Dialog<MultiParameterSweepDialog.
         combinationCountLabel.setText(combos + " combinations");
         if (combos > MAX_COMBINATIONS) {
             combinationCountLabel.setStyle("-fx-text-fill: red; -fx-font-weight: bold;");
+        } else if (combos > WARN_COMBINATIONS) {
+            combinationCountLabel.setStyle("-fx-text-fill: #cc7700; -fx-font-weight: bold;");
         } else {
             combinationCountLabel.setStyle("-fx-font-weight: bold;");
         }
@@ -149,30 +170,38 @@ public class MultiParameterSweepDialog extends Dialog<MultiParameterSweepDialog.
     }
 
     private class ParameterRow {
-        final ComboBox<String> nameCombo;
+        private final ComboBox<String> nameCombo;
         private final TextField startField;
         private final TextField endField;
         private final TextField stepField;
         private final HBox pane;
 
-        ParameterRow(List<String> constantNames, VBox container) {
+        ParameterRow(List<String> constantNames, VBox container, String defaultName) {
+            int rowIndex = parameterRows.size();
+
             nameCombo = new ComboBox<>(FXCollections.observableArrayList(constantNames));
-            if (!constantNames.isEmpty()) {
+            if (defaultName != null) {
+                nameCombo.setValue(defaultName);
+            } else if (!constantNames.isEmpty()) {
                 nameCombo.setValue(constantNames.get(0));
             }
             nameCombo.setPrefWidth(130);
+            nameCombo.setId("multiSweepParamName" + rowIndex);
 
             startField = new TextField("0");
             startField.setPrefWidth(70);
             startField.setPromptText("Start");
+            startField.setId("multiSweepStart" + rowIndex);
 
             endField = new TextField("10");
             endField.setPrefWidth(70);
             endField.setPromptText("End");
+            endField.setId("multiSweepEnd" + rowIndex);
 
             stepField = new TextField("1");
             stepField.setPrefWidth(70);
             stepField.setPromptText("Step");
+            stepField.setId("multiSweepStep" + rowIndex);
 
             startField.textProperty().addListener((obs, o, n) -> updateCombinationCount());
             endField.textProperty().addListener((obs, o, n) -> updateCombinationCount());
@@ -207,7 +236,8 @@ public class MultiParameterSweepDialog extends Dialog<MultiParameterSweepDialog.
                 double start = Double.parseDouble(startField.getText().trim());
                 double end = Double.parseDouble(endField.getText().trim());
                 double step = Double.parseDouble(stepField.getText().trim());
-                return start < end && step > 0;
+                return Double.isFinite(start) && Double.isFinite(end)
+                        && Double.isFinite(step) && start <= end && step > 0;
             } catch (NumberFormatException e) {
                 return false;
             }

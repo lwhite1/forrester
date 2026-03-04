@@ -4,6 +4,7 @@ import com.deathrayresearch.forrester.sweep.MonteCarloResult;
 
 import javafx.collections.FXCollections;
 import javafx.geometry.Insets;
+import javafx.scene.control.Alert;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Label;
@@ -79,8 +80,13 @@ public class MonteCarloResultPane extends BorderPane {
 
         File file = fileChooser.showSaveDialog(getScene() != null ? getScene().getWindow() : null);
         if (file != null) {
-            result.writePercentileCsv(file.getAbsolutePath(), currentVariable,
-                    2.5, 25, 50, 75, 97.5);
+            try {
+                result.writePercentileCsv(file.getAbsolutePath(), currentVariable,
+                        2.5, 25, 50, 75, 97.5);
+            } catch (RuntimeException e) {
+                new Alert(Alert.AlertType.ERROR,
+                        "Failed to export CSV: " + e.getMessage()).showAndWait();
+            }
         }
     }
 }

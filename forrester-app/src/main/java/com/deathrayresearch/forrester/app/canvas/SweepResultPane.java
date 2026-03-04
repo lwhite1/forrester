@@ -8,6 +8,7 @@ import javafx.geometry.Insets;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
+import javafx.scene.control.Alert;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.ContextMenu;
@@ -147,7 +148,12 @@ public class SweepResultPane extends BorderPane {
 
         File file = fileChooser.showSaveDialog(getScene() != null ? getScene().getWindow() : null);
         if (file != null) {
-            result.writeTimeSeriesCsv(file.getAbsolutePath());
+            try {
+                result.writeTimeSeriesCsv(file.getAbsolutePath());
+            } catch (RuntimeException e) {
+                new Alert(Alert.AlertType.ERROR,
+                        "Failed to export CSV: " + e.getMessage()).showAndWait();
+            }
         }
     }
 
@@ -160,7 +166,12 @@ public class SweepResultPane extends BorderPane {
 
         File file = fileChooser.showSaveDialog(getScene() != null ? getScene().getWindow() : null);
         if (file != null) {
-            result.writeSummaryCsv(file.getAbsolutePath());
+            try {
+                result.writeSummaryCsv(file.getAbsolutePath());
+            } catch (RuntimeException e) {
+                new Alert(Alert.AlertType.ERROR,
+                        "Failed to export CSV: " + e.getMessage()).showAndWait();
+            }
         }
     }
 }

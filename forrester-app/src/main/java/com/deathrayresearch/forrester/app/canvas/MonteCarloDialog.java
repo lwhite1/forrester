@@ -106,7 +106,8 @@ public class MonteCarloDialog extends Dialog<MonteCarloDialog.Config> {
 
         getDialogPane().lookupButton(okButton).disableProperty().bind(
                 Bindings.createBooleanBinding(this::isInvalid,
-                        iterationsField.textProperty(), seedField.textProperty())
+                        iterationsField.textProperty(), seedField.textProperty(),
+                        parameterRows)
         );
 
         Button okNode = (Button) getDialogPane().lookupButton(okButton);
@@ -142,10 +143,13 @@ public class MonteCarloDialog extends Dialog<MonteCarloDialog.Config> {
         try {
             int iter = Integer.parseInt(iterationsField.getText().trim());
             Long.parseLong(seedField.getText().trim());
-            return iter < 1;
+            if (iter < 1) {
+                return true;
+            }
         } catch (NumberFormatException e) {
             return true;
         }
+        return parameterRows.stream().noneMatch(ParameterRow::isValid);
     }
 
     private class ParameterRow {

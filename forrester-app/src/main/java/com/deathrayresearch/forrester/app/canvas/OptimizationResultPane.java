@@ -50,14 +50,14 @@ public class OptimizationResultPane extends BorderPane {
         summaryGrid.add(headerLabel, 0, row++, 2, 1);
 
         summaryGrid.add(boldLabel("Objective Value:"), 0, row);
-        summaryGrid.add(new Label(formatNumber(result.getBestObjectiveValue())), 1, row++);
+        summaryGrid.add(new Label(ChartUtils.formatNumber(result.getBestObjectiveValue())), 1, row++);
 
         summaryGrid.add(boldLabel("Evaluations:"), 0, row);
         summaryGrid.add(new Label(String.valueOf(result.getEvaluationCount())), 1, row++);
 
         for (Map.Entry<String, Double> entry : result.getBestParameters().entrySet()) {
             summaryGrid.add(boldLabel(entry.getKey() + ":"), 0, row);
-            summaryGrid.add(new Label(formatNumber(entry.getValue())), 1, row++);
+            summaryGrid.add(new Label(ChartUtils.formatNumber(entry.getValue())), 1, row++);
         }
 
         // Best-run time series chart
@@ -157,10 +157,4 @@ public class OptimizationResultPane extends BorderPane {
         return label;
     }
 
-    private static String formatNumber(double value) {
-        if (value == Math.floor(value) && Double.isFinite(value)) {
-            return String.valueOf((long) value);
-        }
-        return String.format("%.6f", value);
-    }
 }
