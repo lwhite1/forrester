@@ -56,6 +56,7 @@ class LookupForm implements ElementForm {
                     ctx.canvas.applyLookupTable(ctx.elementName, new LookupTableDef(
                             ctx.elementName, lt.comment(),
                             lt.xValues(), lt.yValues(), newInterp));
+                    ctx.requestFormRebuild();
                 }
             }
         });

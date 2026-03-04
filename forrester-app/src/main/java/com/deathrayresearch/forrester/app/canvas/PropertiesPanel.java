@@ -65,6 +65,7 @@ public class PropertiesPanel extends VBox {
         placeholderLabel.setMaxWidth(Double.MAX_VALUE);
 
         ctx.grid = propertyGrid;
+        ctx.onFormRebuildRequested = () -> updateSelection(ctx.canvas, ctx.editor);
 
         showPlaceholder();
     }
