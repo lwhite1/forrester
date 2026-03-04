@@ -1,6 +1,7 @@
 package com.deathrayresearch.forrester.app.canvas;
 
 import com.deathrayresearch.forrester.sweep.MonteCarloResult;
+import com.deathrayresearch.forrester.sweep.MultiSweepResult;
 import com.deathrayresearch.forrester.sweep.OptimizationResult;
 import com.deathrayresearch.forrester.sweep.SweepResult;
 
@@ -24,6 +25,7 @@ public class DashboardPanel extends VBox {
     private Tab sweepTab;
     private Tab monteCarloTab;
     private Tab optimizationTab;
+    private Tab multiSweepTab;
 
     public DashboardPanel() {
         Label placeholderLabel = new Label("Run a simulation to see results.");
@@ -65,6 +67,12 @@ public class DashboardPanel extends VBox {
         resultTabs.getSelectionModel().select(optimizationTab);
     }
 
+    public void showMultiSweepResult(MultiSweepResult result) {
+        MultiSweepResultPane pane = new MultiSweepResultPane(result);
+        multiSweepTab = ensureTab(multiSweepTab, "Multi-Sweep", pane);
+        resultTabs.getSelectionModel().select(multiSweepTab);
+    }
+
     private Tab ensureTab(Tab existing, String title, Node content) {
         showTabs();
         if (existing != null && resultTabs.getTabs().contains(existing)) {
@@ -81,6 +89,8 @@ public class DashboardPanel extends VBox {
                 monteCarloTab = null;
             } else if (tab == optimizationTab) {
                 optimizationTab = null;
+            } else if (tab == multiSweepTab) {
+                multiSweepTab = null;
             }
             if (resultTabs.getTabs().isEmpty()) {
                 hideTabs();
@@ -99,6 +109,7 @@ public class DashboardPanel extends VBox {
         sweepTab = null;
         monteCarloTab = null;
         optimizationTab = null;
+        multiSweepTab = null;
         hideTabs();
     }
 

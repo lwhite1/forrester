@@ -10,12 +10,16 @@ import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
+import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Label;
+import javafx.scene.control.MenuItem;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
+import javafx.stage.FileChooser;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -121,7 +125,42 @@ public class SweepResultPane extends BorderPane {
         sidebarScroll.setFitToWidth(true);
         sidebarScroll.setPrefWidth(180);
 
+        ContextMenu contextMenu = new ContextMenu();
+        MenuItem exportTs = new MenuItem("Export CSV (Time Series)...");
+        exportTs.setOnAction(e -> exportTimeSeriesCsv());
+        MenuItem exportSummary = new MenuItem("Export CSV (Summary)...");
+        exportSummary.setOnAction(e -> exportSummaryCsv());
+        contextMenu.getItems().addAll(exportTs, exportSummary);
+        chart.setOnContextMenuRequested(e ->
+                contextMenu.show(chart, e.getScreenX(), e.getScreenY()));
+
         setCenter(chart);
         setRight(sidebarScroll);
+    }
+
+    private void exportTimeSeriesCsv() {
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Export Time Series CSV");
+        fileChooser.getExtensionFilters().add(
+                new FileChooser.ExtensionFilter("CSV Files", "*.csv"));
+        fileChooser.setInitialFileName("sweep_timeseries.csv");
+
+        File file = fileChooser.showSaveDialog(getScene() != null ? getScene().getWindow() : null);
+        if (file != null) {
+            result.writeTimeSeriesCsv(file.getAbsolutePath());
+        }
+    }
+
+    private void exportSummaryCsv() {
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Export Summary CSV");
+        fileChooser.getExtensionFilters().add(
+                new FileChooser.ExtensionFilter("CSV Files", "*.csv"));
+        fileChooser.setInitialFileName("sweep_summary.csv");
+
+        File file = fileChooser.showSaveDialog(getScene() != null ? getScene().getWindow() : null);
+        if (file != null) {
+            result.writeSummaryCsv(file.getAbsolutePath());
+        }
     }
 }

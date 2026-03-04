@@ -11,6 +11,7 @@ import com.deathrayresearch.forrester.app.canvas.ModelDefinitionFactory;
 import com.deathrayresearch.forrester.app.canvas.ModelEditListener;
 import com.deathrayresearch.forrester.app.canvas.ModelEditor;
 import com.deathrayresearch.forrester.app.canvas.MonteCarloDialog;
+import com.deathrayresearch.forrester.app.canvas.MultiParameterSweepDialog;
 import com.deathrayresearch.forrester.app.canvas.OptimizerDialog;
 import com.deathrayresearch.forrester.app.canvas.ParameterSweepDialog;
 import com.deathrayresearch.forrester.app.canvas.PropertiesPanel;
@@ -40,6 +41,8 @@ import com.deathrayresearch.forrester.sweep.ObjectiveFunction;
 import com.deathrayresearch.forrester.sweep.OptimizationAlgorithm;
 import com.deathrayresearch.forrester.sweep.OptimizationResult;
 import com.deathrayresearch.forrester.sweep.Optimizer;
+import com.deathrayresearch.forrester.sweep.MultiParameterSweep;
+import com.deathrayresearch.forrester.sweep.MultiSweepResult;
 import com.deathrayresearch.forrester.sweep.ParameterSweep;
 import com.deathrayresearch.forrester.sweep.SamplingMethod;
 import com.deathrayresearch.forrester.sweep.SweepResult;
@@ -298,6 +301,9 @@ public class ModelWindow {
         MenuItem sweepItem = new MenuItem("Parameter Sweep...");
         sweepItem.setOnAction(e -> runParameterSweep());
 
+        MenuItem multiSweepItem = new MenuItem("Multi-Parameter Sweep...");
+        multiSweepItem.setOnAction(e -> runMultiParameterSweep());
+
         MenuItem monteCarloItem = new MenuItem("Monte Carlo...");
         monteCarloItem.setOnAction(e -> runMonteCarlo());
 
@@ -306,7 +312,7 @@ public class ModelWindow {
 
         simulateMenu.getItems().addAll(settingsItem, runItem,
                 new SeparatorMenuItem(), validateItem,
-                new SeparatorMenuItem(), sweepItem, monteCarloItem, optimizeItem);
+                new SeparatorMenuItem(), sweepItem, multiSweepItem, monteCarloItem, optimizeItem);
 
         Menu helpMenu = new Menu("Help");
 
@@ -637,6 +643,77 @@ public class ModelWindow {
         });
 
         Thread thread = new Thread(task, "parameter-sweep");
+        thread.setDaemon(true);
+        thread.start();
+    }
+
+    private void runMultiParameterSweep() {
+        SimulationSettings settings = ensureSettings();
+        if (settings == null) {
+            return;
+        }
+
+        ModelEditor activeEditor = canvas.getEditor();
+        List<String> constantNames = activeEditor.getConstants().stream()
+                .map(ConstantDef::name).toList();
+
+        if (constantNames.size() < 2) {
+            showError("Multi-Parameter Sweep", "Model needs at least 2 constants to sweep.");
+            return;
+        }
+
+        MultiParameterSweepDialog dialog = new MultiParameterSweepDialog(constantNames);
+        Optional<MultiParameterSweepDialog.Config> configOpt = dialog.showAndWait();
+        if (configOpt.isEmpty()) {
+            return;
+        }
+
+        MultiParameterSweepDialog.Config config = configOpt.get();
+        ModelDefinition def = canvas.toModelDefinition();
+        SimulationSettings finalSettings = settings;
+
+        statusBar.showProgress("Running multi-parameter sweep...");
+
+        javafx.concurrent.Task<MultiSweepResult> task = new javafx.concurrent.Task<>() {
+            @Override
+            protected MultiSweepResult call() {
+                TimeUnit timeStep = ModelDefinitionFactory.resolveTimeStep(finalSettings);
+                Quantity duration = ModelDefinitionFactory.resolveDuration(finalSettings);
+                Function<Map<String, Double>, Model> factory =
+                        ModelDefinitionFactory.createFactory(def, finalSettings);
+
+                MultiParameterSweep.Builder builder = MultiParameterSweep.builder()
+                        .modelFactory(factory)
+                        .timeStep(timeStep)
+                        .duration(duration);
+
+                for (MultiParameterSweepDialog.ParamConfig p : config.parameters()) {
+                    builder.parameter(p.name(),
+                            ParameterSweep.linspace(p.start(), p.end(), p.step()));
+                }
+
+                return builder.build().execute();
+            }
+        };
+
+        task.setOnSucceeded(e -> {
+            statusBar.clearProgress();
+            dashboardPanel.showMultiSweepResult(task.getValue());
+            switchToDashboard();
+            String paramSummary = config.parameters().stream()
+                    .map(MultiParameterSweepDialog.ParamConfig::name)
+                    .reduce((a, b) -> a + ", " + b)
+                    .orElse("");
+            fireLogEvent(l -> l.onAnalysisRun("Multi-Parameter Sweep", paramSummary));
+        });
+
+        task.setOnFailed(e -> {
+            statusBar.clearProgress();
+            Throwable ex = task.getException();
+            showError("Multi-Sweep Error", ex != null ? ex.getMessage() : null);
+        });
+
+        Thread thread = new Thread(task, "multi-parameter-sweep");
         thread.setDaemon(true);
         thread.start();
     }

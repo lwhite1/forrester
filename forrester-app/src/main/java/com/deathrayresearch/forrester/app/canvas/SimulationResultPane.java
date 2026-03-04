@@ -22,8 +22,13 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 
+import com.opencsv.CSVWriter;
+
 import java.io.File;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -35,8 +40,10 @@ import javax.imageio.ImageIO;
 public class SimulationResultPane extends BorderPane {
 
     private LineChart<Number, Number> chart;
+    private SimulationRunner.SimulationResult simulationResult;
 
     public SimulationResultPane(SimulationRunner.SimulationResult result) {
+        this.simulationResult = result;
         TabPane tabPane = new TabPane();
         tabPane.setTabClosingPolicy(TabPane.TabClosingPolicy.UNAVAILABLE);
 
@@ -133,7 +140,9 @@ public class SimulationResultPane extends BorderPane {
         ContextMenu contextMenu = new ContextMenu();
         MenuItem saveItem = new MenuItem("Save as PNG...");
         saveItem.setOnAction(e -> saveChartAsPng());
-        contextMenu.getItems().add(saveItem);
+        MenuItem exportCsvItem = new MenuItem("Export CSV...");
+        exportCsvItem.setOnAction(e -> exportCsv());
+        contextMenu.getItems().addAll(saveItem, exportCsvItem);
         chart.setOnContextMenuRequested(e ->
                 contextMenu.show(chart, e.getScreenX(), e.getScreenY()));
 
@@ -141,6 +150,34 @@ public class SimulationResultPane extends BorderPane {
         pane.setCenter(chart);
         pane.setRight(sidebarScroll);
         return pane;
+    }
+
+    private void exportCsv() {
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Export CSV");
+        fileChooser.getExtensionFilters().add(
+                new FileChooser.ExtensionFilter("CSV Files", "*.csv"));
+        fileChooser.setInitialFileName("simulation.csv");
+
+        File file = fileChooser.showSaveDialog(getScene() != null ? getScene().getWindow() : null);
+        if (file != null) {
+            try (CSVWriter writer = new CSVWriter(new OutputStreamWriter(
+                    Files.newOutputStream(file.toPath()), StandardCharsets.UTF_8))) {
+                List<String> columns = simulationResult.columnNames();
+                writer.writeNext(columns.toArray(new String[0]));
+                for (double[] row : simulationResult.rows()) {
+                    String[] line = new String[row.length];
+                    for (int i = 0; i < row.length; i++) {
+                        line[i] = (i == 0) ? String.valueOf((int) row[i])
+                                : String.valueOf(row[i]);
+                    }
+                    writer.writeNext(line);
+                }
+            } catch (IOException e) {
+                new Alert(Alert.AlertType.ERROR,
+                        "Failed to export CSV: " + e.getMessage()).showAndWait();
+            }
+        }
     }
 
     private void saveChartAsPng() {

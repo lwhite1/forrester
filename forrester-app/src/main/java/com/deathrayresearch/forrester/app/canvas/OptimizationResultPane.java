@@ -3,15 +3,26 @@ package com.deathrayresearch.forrester.app.canvas;
 import com.deathrayresearch.forrester.sweep.OptimizationResult;
 import com.deathrayresearch.forrester.sweep.RunResult;
 
+import com.opencsv.CSVWriter;
+
 import javafx.geometry.Insets;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
+import javafx.scene.control.Alert;
+import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Label;
+import javafx.scene.control.MenuItem;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
+import javafx.stage.FileChooser;
 
+import java.io.File;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -23,7 +34,10 @@ import java.util.Map;
  */
 public class OptimizationResultPane extends BorderPane {
 
+    private final OptimizationResult result;
+
     public OptimizationResultPane(OptimizationResult result) {
+        this.result = result;
         // Summary grid
         GridPane summaryGrid = new GridPane();
         summaryGrid.setHgap(10);
@@ -49,6 +63,13 @@ public class OptimizationResultPane extends BorderPane {
         // Best-run time series chart
         RunResult bestRun = result.getBestRunResult();
         LineChart<Number, Number> chart = buildChart(bestRun);
+
+        ContextMenu contextMenu = new ContextMenu();
+        MenuItem exportCsv = new MenuItem("Export CSV (Best Run)...");
+        exportCsv.setOnAction(e -> exportBestRunCsv());
+        contextMenu.getItems().add(exportCsv);
+        chart.setOnContextMenuRequested(e ->
+                contextMenu.show(chart, e.getScreenX(), e.getScreenY()));
 
         VBox topSection = new VBox(summaryGrid);
         setTop(topSection);
@@ -89,6 +110,45 @@ public class OptimizationResultPane extends BorderPane {
         ChartUtils.applySeriesColors(chart.getData());
 
         return chart;
+    }
+
+    private void exportBestRunCsv() {
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Export Best Run CSV");
+        fileChooser.getExtensionFilters().add(
+                new FileChooser.ExtensionFilter("CSV Files", "*.csv"));
+        fileChooser.setInitialFileName("optimization_best_run.csv");
+
+        File file = fileChooser.showSaveDialog(getScene() != null ? getScene().getWindow() : null);
+        if (file != null) {
+            RunResult bestRun = result.getBestRunResult();
+            List<String> stockNames = bestRun.getStockNames();
+            List<String> varNames = bestRun.getVariableNames();
+
+            try (CSVWriter writer = new CSVWriter(new OutputStreamWriter(
+                    Files.newOutputStream(file.toPath()), StandardCharsets.UTF_8))) {
+                List<String> header = new ArrayList<>();
+                header.add("Step");
+                header.addAll(stockNames);
+                header.addAll(varNames);
+                writer.writeNext(header.toArray(new String[0]));
+
+                for (int s = 0; s < bestRun.getStepCount(); s++) {
+                    List<String> row = new ArrayList<>();
+                    row.add(String.valueOf(bestRun.getStep(s)));
+                    for (double v : bestRun.getStockValuesAtStep(s)) {
+                        row.add(String.valueOf(v));
+                    }
+                    for (double v : bestRun.getVariableValuesAtStep(s)) {
+                        row.add(String.valueOf(v));
+                    }
+                    writer.writeNext(row.toArray(new String[0]));
+                }
+            } catch (IOException e) {
+                new Alert(Alert.AlertType.ERROR,
+                        "Failed to export CSV: " + e.getMessage()).showAndWait();
+            }
+        }
     }
 
     private static Label boldLabel(String text) {
