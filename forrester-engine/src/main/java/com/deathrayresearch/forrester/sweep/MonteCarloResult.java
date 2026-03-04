@@ -204,8 +204,8 @@ public class MonteCarloResult {
 
     private void ensureParentDir(String filePath) {
         File parent = Paths.get(filePath).toFile().getParentFile();
-        if (parent != null) {
-            parent.mkdirs();
+        if (parent != null && !parent.mkdirs() && !parent.isDirectory()) {
+            throw new RuntimeException("Failed to create directory: " + parent.getAbsolutePath());
         }
     }
 }

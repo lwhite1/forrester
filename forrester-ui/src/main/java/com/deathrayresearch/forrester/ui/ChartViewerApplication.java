@@ -1,8 +1,8 @@
 package com.deathrayresearch.forrester.ui;
 
 import com.deathrayresearch.forrester.Simulation;
-import com.deathrayresearch.forrester.measure.TimeUnit;
 import com.deathrayresearch.forrester.measure.units.time.Times;
+
 import javafx.application.Application;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.event.ActionEvent;
@@ -21,6 +21,7 @@ import javafx.scene.image.WritableImage;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
+import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
 import javax.imageio.ImageIO;
@@ -33,58 +34,71 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Class that handles the chart printing.
+ * JavaFX Application that displays simulation results as a line chart.
+ *
+ * <p>Because {@link Application#launch} creates the instance internally, simulation data
+ * must be passed via static state. The static methods are synchronized to allow safe
+ * accumulation of data from the simulation thread before the FX thread reads it.
  */
 public class ChartViewerApplication extends Application {
 
-    private static Scene scene;
-    private static ArrayList<Series> series;
+    private static final Object LOCK = new Object();
+
+    private static List<Series<String, Number>> series = new ArrayList<>();
     private static double width = 800;
     private static double height = 600;
-    private static LineChart lineChart;
-    private static DateTimeFormatter formatter;
-    private static String title;
-    private static String xAxisLabel;
+    private static DateTimeFormatter formatter = DateTimeFormatter.BASIC_ISO_DATE;
+    private static String title = "";
+    private static String xAxisLabel = "";
+
+    private Scene scene;
+    private LineChart<String, Number> lineChart;
 
     public static void setSimulation(Simulation simulation) {
-        title = simulation.getModel().getName();
-        xAxisLabel = simulation.getTimeStep().getName();
+        synchronized (LOCK) {
+            title = simulation.getModel().getName();
+            xAxisLabel = simulation.getTimeStep().getName();
 
-        if (simulation.getDuration().isGreaterThan(Times.days(1))) {
-            formatter = DateTimeFormatter.BASIC_ISO_DATE;
-        } else {
-            formatter = DateTimeFormatter.ISO_LOCAL_TIME;
+            if (simulation.getDuration().isGreaterThan(Times.days(1))) {
+                formatter = DateTimeFormatter.BASIC_ISO_DATE;
+            } else {
+                formatter = DateTimeFormatter.ISO_LOCAL_TIME;
+            }
         }
     }
 
     @Override
     public void start(Stage stage) {
-        stage.setTitle(title);
+        List<Series<String, Number>> localSeries;
+        String localTitle;
+        String localXAxisLabel;
+        synchronized (LOCK) {
+            localSeries = new ArrayList<>(series);
+            localTitle = title;
+            localXAxisLabel = xAxisLabel;
+        }
+
+        stage.setTitle(localTitle);
 
         BorderPane root = new BorderPane();
-
-        // create scene
         scene = new Scene(root, width, height);
 
-        // creating the chart
-        lineChart = this.createLineChart("");
-        lineChart.getData().addAll(series);
+        lineChart = createLineChart("", localXAxisLabel);
+        lineChart.getData().addAll(localSeries);
         lineChart.setAnimated(false);
-        addTooltips();
-        addLineChartContextMenu();
+        addLineChartContextMenu(stage);
 
-        // add checkboxes
         ArrayList<CheckBox> checkBoxes = new ArrayList<>();
-        for (Series s : series) {
+        for (Series<String, Number> s : localSeries) {
             CheckBox cb = new CheckBox(s.getName());
-            cb.setOnAction(this::refreshChart);
+            cb.setOnAction(e -> refreshChart(e, localSeries));
             cb.setSelected(true);
             checkBoxes.add(cb);
         }
 
         Label dataLabel = new Label("Data:");
-        VBox vbox = new VBox(8); // spacing = 8
-        vbox.getChildren().addAll(dataLabel);
+        VBox vbox = new VBox(8);
+        vbox.getChildren().add(dataLabel);
         vbox.getChildren().addAll(checkBoxes);
         vbox.setPadding(new Insets(20, 10, 20, 0));
 
@@ -96,83 +110,85 @@ public class ChartViewerApplication extends Application {
     }
 
     /**
-     * Method to add series to chart.
-     *
-     * @param modelEntityNames list of model entity names.
+     * Initializes chart series from stock and variable names.
      */
     public static void addSeries(List<String> modelEntityNames, List<String> modelVariableNames) {
-        ChartViewerApplication.series = new ArrayList<>();
-        List<String> allNames = new ArrayList<>(modelEntityNames);
-        allNames.addAll(modelVariableNames);
-        for (String modelEntityName : allNames) {
-            Series s = new Series();
-            s.setName(modelEntityName);
-            ChartViewerApplication.series.add(s);
+        synchronized (LOCK) {
+            series = new ArrayList<>();
+            List<String> allNames = new ArrayList<>(modelEntityNames);
+            allNames.addAll(modelVariableNames);
+            for (String name : allNames) {
+                Series<String, Number> s = new Series<>();
+                s.setName(name);
+                series.add(s);
+            }
         }
     }
 
     /**
-     * Method to add series to chart.
-     *
-     * @param flowNames list of flows to plot.
+     * Initializes chart series from flow names.
      */
     public static void addFlowSeries(List<String> flowNames) {
-        ChartViewerApplication.series = new ArrayList<>();
-        for (String modelEntityName : flowNames) {
-            Series s = new Series();
-            s.setName(modelEntityName);
-            ChartViewerApplication.series.add(s);
+        synchronized (LOCK) {
+            series = new ArrayList<>();
+            for (String name : flowNames) {
+                Series<String, Number> s = new Series<>();
+                s.setName(name);
+                series.add(s);
+            }
         }
     }
 
     /**
-     * Method to add values to chart series.
-     *
-     * @param modelEntityValues list of model entity values.
-     * @param currentTime       current model time.
+     * Adds a data point to each series using a formatted timestamp as the x-axis label.
      */
     public static void addValues(List<Double> modelEntityValues,
-                                 List<Double>variableValues,
+                                 List<Double> variableValues,
                                  LocalDateTime currentTime) {
-        List<Double> allValues = new ArrayList<>(modelEntityValues);
-        allValues.addAll(variableValues);
+        synchronized (LOCK) {
+            List<Double> allValues = new ArrayList<>(modelEntityValues);
+            allValues.addAll(variableValues);
 
-        for (int i = 0; i < allValues.size(); i++) {
-            double value = allValues.get(i);
-            ChartViewerApplication.series.get(i)
-                    .getData()
-                    .add(new XYChart.Data(currentTime.format(formatter), value));
+            for (int i = 0; i < allValues.size() && i < series.size(); i++) {
+                double value = allValues.get(i);
+                series.get(i).getData()
+                        .add(new XYChart.Data<>(currentTime.format(formatter), value));
+            }
         }
     }
 
     /**
-     * Method to add values to chart series.
-     *
-     * @param modelEntityValues list of model entity values.
+     * Adds a data point to each series using the step number as the x-axis label.
      */
     public static void addValues(List<Double> modelEntityValues,
-                                 List<Double>variableValues,
+                                 List<Double> variableValues,
                                  int step) {
-        List<Double> allValues = new ArrayList<>(modelEntityValues);
-        allValues.addAll(variableValues);
+        synchronized (LOCK) {
+            List<Double> allValues = new ArrayList<>(modelEntityValues);
+            allValues.addAll(variableValues);
 
-        for (int i = 0; i < allValues.size(); i++) {
-            double value = allValues.get(i);
-            ChartViewerApplication.series.get(i)
-                    .getData()
-                    .add(new XYChart.Data(String.valueOf(step), value));
+            for (int i = 0; i < allValues.size() && i < series.size(); i++) {
+                double value = allValues.get(i);
+                series.get(i).getData()
+                        .add(new XYChart.Data<>(String.valueOf(step), value));
+            }
         }
     }
 
     /**
-     * Method to add / remove chart data.
-     *
-     * @param event ActionEvent
+     * Sets the scene dimensions for the chart window.
      */
-    private void refreshChart(ActionEvent event) {
+    public static void setSize(double width, double height) {
+        synchronized (LOCK) {
+            ChartViewerApplication.width = width;
+            ChartViewerApplication.height = height;
+        }
+    }
+
+    private void refreshChart(ActionEvent event, List<Series<String, Number>> allSeries) {
         CheckBox cb = (CheckBox) event.getSource();
         String text = cb.getText();
-        for (Series s : series) {
+        for (Series<String, Number> s : allSeries) {
             if (text.equals(s.getName())) {
                 if (cb.isSelected()) {
                     lineChart.getData().add(s);
@@ -183,35 +199,22 @@ public class ChartViewerApplication extends Application {
         }
     }
 
-    /**
-     * Method to create a LineChart
-     *
-     * @param title line chart title
-     * @return line chart
-     */
-    private LineChart createLineChart(String title) {
-        //defining the axes
+    private LineChart<String, Number> createLineChart(String chartTitle, String xLabel) {
         CategoryAxis xAxis = new CategoryAxis();
         NumberAxis yAxis = new NumberAxis();
-        xAxis.setLabel(xAxisLabel);
+        xAxis.setLabel(xLabel);
         yAxis.setLabel("Value");
-        //creating the chart
-        LineChart<String, Number> lineChart = new LineChart<>(xAxis, yAxis);
-        lineChart.setCreateSymbols(false);
-        lineChart.setTitle(title);
-        return lineChart;
+        LineChart<String, Number> chart = new LineChart<>(xAxis, yAxis);
+        chart.setCreateSymbols(false);
+        chart.setTitle(chartTitle);
+        return chart;
     }
 
-    /**
-     * Method to add a context menu to line chart.
-     */
-    private void addLineChartContextMenu() {
+    private void addLineChartContextMenu(Stage stage) {
         final MenuItem saveAsFile = new MenuItem("Save as file");
-        saveAsFile.setOnAction(event -> saveToFile(scene));
+        saveAsFile.setOnAction(event -> saveToFile(stage));
 
-        final ContextMenu menu = new ContextMenu(
-                saveAsFile
-        );
+        final ContextMenu menu = new ContextMenu(saveAsFile);
 
         lineChart.setOnMouseClicked(event -> {
             if (MouseButton.SECONDARY.equals(event.getButton())) {
@@ -220,53 +223,22 @@ public class ChartViewerApplication extends Application {
         });
     }
 
-    /**
-     * Method to add tooltips to chart.
-     */
-    private void addTooltips() {
-        /*
-         * Browsing through the Data and applying ToolTip as well as the class on hover
-         */
-
-/*
-        for (int i = 0; i < lineChart.getData().size(); i++) {
-            for (int j = 0; j < ((Series) lineChart.getData().get(i)).getData().size(); j++) {
-                XYChart.Data<String, Number> d = (XYChart.Data<String, Number>) ((Series) lineChart.getData().get(i)).getData().get(j);
-                Tooltip.install(d.getNode(), new Tooltip("timestep: " + d.getXValue() + "\nvalue: " + d.getYValue()));
-                // Adding class on hover
-                d.getNode().setOnMouseEntered(event -> d.getNode().getStyleClass().add("onHover"));
-                // Removing class on exit
-                d.getNode().setOnMouseExited(event -> d.getNode().getStyleClass().remove("onHover"));
-            }
+    private void saveToFile(Stage stage) {
+        FileChooser chooser = new FileChooser();
+        chooser.setTitle("Save Chart Image");
+        chooser.setInitialFileName("chart.png");
+        chooser.getExtensionFilters().add(
+                new FileChooser.ExtensionFilter("PNG Image", "*.png"));
+        File outputFile = chooser.showSaveDialog(stage);
+        if (outputFile == null) {
+            return;
         }
-*/
-
-    }
-
-    /**
-     * Set scene width and height.
-     *
-     * @param width  width.
-     * @param height height.
-     */
-    public static void setSize(double width, double height) {
-        ChartViewerApplication.width = width;
-        ChartViewerApplication.height = height;
-    }
-
-    /**
-     * Method to save the chart as an image.
-     *
-     * @param scene Scene
-     */
-    private static void saveToFile(Scene scene) {
         WritableImage image = scene.snapshot(null);
-        File outputFile = new File("chart.png");
         BufferedImage bImage = SwingFXUtils.fromFXImage(image, null);
         try {
             ImageIO.write(bImage, "png", outputFile);
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new RuntimeException("Failed to save chart image: " + outputFile, e);
         }
     }
 }

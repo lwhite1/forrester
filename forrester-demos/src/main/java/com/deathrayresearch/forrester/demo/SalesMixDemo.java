@@ -57,7 +57,7 @@ public class SalesMixDemo {
                 () -> hardwareSales.getValue() + serviceSales.getValue());
 
         Variable proportionHardwareSales = new Variable("Proportion hardware", DIMENSIONLESS,
-                () -> hardwareSales.getValue() / totalSales.getValue());
+                () -> totalSales.getValue() == 0 ? 0 : hardwareSales.getValue() / totalSales.getValue());
 
         customers.addInflow(acquisitionRate);
 

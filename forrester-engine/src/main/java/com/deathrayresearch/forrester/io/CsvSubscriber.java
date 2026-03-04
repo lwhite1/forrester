@@ -43,8 +43,8 @@ public class CsvSubscriber implements EventHandler, Closeable {
     public CsvSubscriber(String fileName) {
         File file = Paths.get(fileName).toFile();
         File parent = file.getParentFile();
-        if (parent != null) {
-            parent.mkdirs();
+        if (parent != null && !parent.mkdirs() && !parent.isDirectory()) {
+            throw new RuntimeException("Failed to create directory: " + parent.getAbsolutePath());
         }
         try {
             csvWriter = new CSVWriter(new OutputStreamWriter(

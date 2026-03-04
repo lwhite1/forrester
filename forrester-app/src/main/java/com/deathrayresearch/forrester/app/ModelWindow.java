@@ -1018,6 +1018,9 @@ public class ModelWindow {
      * Closes this window. The ForresterApp will be notified via the stage's onHidden handler.
      */
     public void close() {
+        if (editor != null && logListener != null) {
+            editor.removeListener(logListener);
+        }
         stage.close();
     }
 }
