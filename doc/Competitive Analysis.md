@@ -12,7 +12,7 @@ There are six free system dynamics tools worth comparing against. Each occupies 
 | **Simantics SD** | Windows (Eclipse) | Open source (EPL) | Research, large hierarchical models | No optimization, Windows-only |
 | **Minsky** | Windows, Mac, Linux | Open source (GPL) | Economics, monetary modeling | No Monte Carlo, no sweeps, no arrays |
 | **SageModeler** | Web browser | Open source | K-12 and introductory education | No equations, no simulation control |
-| **Forrester** | Windows, Mac, Linux (JVM) | Open source | Programmers, researchers, educators | No CLDs, no lookup table UI, requires JVM |
+| **Forrester** | Windows, Mac, Linux (JVM) | Open source | Programmers, researchers, educators | No CLDs, requires JVM |
 
 ## Head-to-Head Feature Comparison
 
@@ -23,12 +23,12 @@ There are six free system dynamics tools worth comparing against. Each occupies 
 | Stocks and flows | Yes | Yes | Yes (max 3 stocks) | Yes | Yes | Yes |
 | Auxiliaries / converters | Yes | Yes | Yes | Yes | Yes | Yes |
 | Constants | Yes | Yes | Yes | Yes | Yes | Yes |
-| Lookup tables (graphical functions) | Yes | Limited | Yes | Yes | No | Engine only (no UI editor yet) |
+| Lookup tables (graphical functions) | Yes | Limited | Yes | Yes | No | Yes (inline chart preview, spline/linear) |
 | Modules / subsystems | No | No | No (paid only) | Yes | No | Yes (nested, with port bindings) |
 | Subscripts / arrays | No | No | No (paid only) | Yes | No | Yes (multi-dimensional, with broadcasting) |
 | Causal loop diagrams | Yes | Yes | Yes | Yes | No | No |
 
-**Assessment.** Forrester matches or exceeds every free tool on structural modeling. Subscripts and modules are absent from most free tools — Stella has them but only in the paid Architect tier ($509+). Stella Online's free tier is severely constrained at 3 stocks maximum, which rules out any real modeling work. The lookup table gap is the one area where Vensim PLE and Stella currently beat Forrester's visual editor — both have graphical lookup editors, Forrester has the engine support but no UI for it yet.
+**Assessment.** Forrester matches or exceeds every free tool on structural modeling. Subscripts and modules are absent from most free tools — Stella has them but only in the paid Architect tier ($509+). Stella Online's free tier is severely constrained at 3 stocks maximum, which rules out any real modeling work. Forrester's lookup table editor includes an inline chart preview with linear and spline interpolation modes, matching the graphical editors in Vensim PLE and Stella.
 
 ### Simulation and Analysis
 
@@ -39,9 +39,10 @@ There are six free system dynamics tools worth comparing against. Each occupies 
 | Monte Carlo / sensitivity | No | Yes (basic) | No (paid only) | Yes | No | Yes (LHS, percentile envelopes, fan charts) |
 | Optimization / calibration | No | No | No | No | No | Yes (Nelder-Mead, BOBYQA, CMA-ES) |
 | Unit / dimensional analysis | Yes | No | Yes | Yes | No | Yes (8 dimensions, 40 units, runtime checking) |
-| Time series charting | Yes | Yes | Yes (1 pad, 3 graphs) | Yes | Yes | Yes |
+| Time series charting | Yes | Yes | Yes (1 pad, 3 graphs) | Yes | Yes | Yes (dashboard with per-series toggle) |
+| CSV export from GUI | Yes | Limited | Limited (free tier) | Yes | Yes | Yes (right-click export on all result panes) |
 
-**Assessment.** This is where Forrester pulls ahead decisively. Vensim PLE — the most commonly recommended free tool — has *no* Monte Carlo, *no* parameter sweeps, *no* optimization, and *no* subscripts. These are the features that separate "learning tool" from "analysis tool," and Vensim reserves them for the paid versions ($750–$2,195). Stella has sensitivity testing and Monte Carlo but only in the paid Architect tier ($509+); the free tier can barely hold a model, let alone analyze one. Forrester offers all analysis features for free. Simantics has sensitivity analysis but lacks optimization. Insight Maker has basic Monte Carlo but no parameter sweeps or optimization. Forrester is the only free tool with optimization/calibration — a capability that even some paid tools lack.
+**Assessment.** This is where Forrester pulls ahead decisively. Vensim PLE — the most commonly recommended free tool — has *no* Monte Carlo, *no* parameter sweeps, *no* optimization, and *no* subscripts. These are the features that separate "learning tool" from "analysis tool," and Vensim reserves them for the paid versions ($750–$2,195). Stella has sensitivity testing and Monte Carlo but only in the paid Architect tier ($509+); the free tier can barely hold a model, let alone analyze one. Forrester offers all analysis features for free, accessible from both the visual editor GUI (Simulate menu with dedicated dialogs for each analysis type, dashboard with tabbed results) and programmatically through the code API. Simantics has sensitivity analysis but lacks optimization. Insight Maker has basic Monte Carlo but no parameter sweeps or optimization. Forrester is the only free tool with optimization/calibration — a capability that even some paid tools lack.
 
 ### Visual Editor
 
@@ -57,9 +58,15 @@ There are six free system dynamics tools worth comparing against. Each occupies 
 | Diagram export (PNG/JPEG/SVG) | Yes (copy) | Screenshot | No (paid only) | ? | Yes | Yes (PNG, JPEG, SVG at 2x) |
 | Keyboard shortcuts for element creation | Limited | No | No | No | No | Yes (1-6 keys) |
 | Properties panel | Limited | Yes | Yes | Yes | No | Yes (with context toolbar) |
+| Equation autocomplete | No | No | No | No | No | Yes (element names + built-in functions) |
+| Bundled example models | Many | Yes | Yes | Limited | Limited | Yes (8 categorized models) |
+| Multi-window editing | Yes | No (tabs) | No | Yes | No | Yes (cross-window copy/paste) |
+| Dashboard / results panel | Yes | No | Yes | No | No | Yes (tabbed, per-result-type) |
+| Context-sensitive help | Yes | Yes (web) | Yes | No | No | Yes (F1 help for tools and elements) |
+| Activity log | Yes | No | No | Yes | No | Yes (timestamped event log) |
 | AI formula suggestions | No | No | Yes (paid Architect) | No | No | No (planned) |
 
-**Assessment.** Vensim PLE has the most mature visual editor through decades of refinement — its feel is polished and its keyboard workflow is fast for experts. Stella Online has a modern web-based editor with a clean UI, but the free tier's 3-stock limit makes it impractical for real work. Forrester's editor is newer but has features that no free tool offers: connection hover/selection, feedback loop highlighting, and high-resolution multi-format diagram export. The interaction model is modern (hover feedback, cursor changes, rubber-band selection) compared to Vensim's 1990s-era interface. Stella Architect's AI formula suggestions are a notable innovation, but require the $509+ paid version.
+**Assessment.** Vensim PLE has the most mature visual editor through decades of refinement — its feel is polished and its keyboard workflow is fast for experts. Stella Online has a modern web-based editor with a clean UI, but the free tier's 3-stock limit makes it impractical for real work. Forrester's editor is newer but has features that no free tool offers: connection hover/selection, feedback loop highlighting, equation autocomplete, high-resolution multi-format diagram export, a tabbed dashboard for all analysis result types, multi-window editing with cross-window copy/paste, and context-sensitive help. The interaction model is modern (hover feedback, cursor changes, rubber-band selection) compared to Vensim's 1990s-era interface. The bundled example model library (8 models across 5 categories) gives new users working models to explore immediately. Stella Architect's AI formula suggestions are a notable innovation, but require the $509+ paid version.
 
 ### Interoperability
 
@@ -88,7 +95,7 @@ There are six free system dynamics tools worth comparing against. Each occupies 
 
 These are areas where Forrester is unambiguously better than every free alternative today:
 
-1. **Analysis depth at zero cost.** Monte Carlo with LHS + parameter sweeps + multi-parameter grid sweeps + optimization/calibration. No other free tool offers this combination. Vensim charges $750+ for Monte Carlo and optimization. Forrester includes them out of the box.
+1. **Analysis depth at zero cost.** Monte Carlo with LHS + parameter sweeps + multi-parameter grid sweeps + optimization/calibration — all accessible from the visual editor's Simulate menu with dedicated dialogs and a tabbed dashboard showing results with interactive charts, summary tables, and right-click CSV export. No other free tool offers this combination. Vensim charges $750+ for Monte Carlo and optimization. Forrester includes them out of the box.
 
 2. **Interoperability.** Vensim .mdl import + XMILE import/export. No other free tool reads both formats. A user migrating from Vensim or Stella can bring their models and immediately access analysis features their previous tool locked behind a paywall.
 
@@ -108,11 +115,9 @@ Honest assessment of current gaps:
 
 3. **Causal loop diagrams.** Vensim PLE, Insight Maker, and Simantics all support CLDs as a first-class diagram type. Forrester has stock-and-flow only. CLDs are the entry point for most SD education — students draw CLDs before they learn stocks and flows. Missing CLDs means missing the first step of most SD courses.
 
-4. **Lookup table UI.** The engine supports `LookupTableDef` but the visual editor has no graphical table editor. Lookup tables (graphical functions) are a core SD pattern — modeling nonlinear relationships like "effect of workload on quality" requires them. Every competing tool has a lookup editor.
+4. **Web access.** Insight Maker and Stella Online run in a browser with zero installation. Forrester requires a JVM. For casual users, students on locked-down lab machines, or workshop participants, "open a URL" beats "install Java and download a JAR." Web access removes the adoption barrier entirely.
 
-5. **Web access.** Insight Maker and Stella Online run in a browser with zero installation. Forrester requires a JVM. For casual users, students on locked-down lab machines, or workshop participants, "open a URL" beats "install Java and download a JAR." Web access removes the adoption barrier entirely.
-
-6. **Documentation and learning materials.** Vensim has a comprehensive manual, tutorials, and a user guide. Insight Maker has interactive web tutorials. Forrester has code demos but no guided learning path, no tutorial sequence, no user manual for the visual editor.
+5. **Documentation and learning materials.** Vensim has a comprehensive manual, tutorials, and a user guide. Insight Maker has interactive web tutorials. Forrester has code demos but no guided learning path, no tutorial sequence, no user manual for the visual editor.
 
 ## What Would Make Forrester a Worthwhile Free Entry
 
@@ -149,9 +154,8 @@ The question isn't "can Forrester replace Vensim?" — it can't, and shouldn't t
 
 **What's needed to get there.**
 - **Causal loop diagrams.** This is the blocker. Most SD courses start with CLDs before moving to stock-and-flow. Without CLDs, Forrester can't be the primary tool for a standard SD course. Adding CLD support would open the educational market.
-- **Lookup table editor.** Nonlinear table functions are taught in every intermediate SD course. Without a visual editor for them, instructors have to teach students to edit JSON — a non-starter.
 - **Tutorial sequence.** A structured learning path: "Lesson 1: Your first stock-and-flow model. Lesson 2: Feedback loops. Lesson 3: Delays. Lesson 4: Sensitivity analysis." Tied to the visual editor, not the code API.
-- **Sample model library.** Importable .json models covering classic SD examples (Meadows' bathtub, SIR, supply chain oscillation, Bass diffusion, World3 simplified). Browseable from the session start screen.
+- **More example models.** The bundled library has 8 models covering introductory, ecology, epidemiology, population, and supply chain categories. Expanding to 15-20 with additional categories (project management, business strategy, economics) and more advanced models within existing categories would strengthen the educational offering.
 
 ### Opportunity 4: The interoperability bridge
 
@@ -170,23 +174,22 @@ What to build next, ranked by impact on making Forrester a worthwhile free entry
 
 | Priority | Item | Effort | Impact | Target audience |
 |---|---|---|---|---|
-| 1 | Lookup table editor in properties panel | Medium | High | All visual editor users |
-| 2 | Causal loop diagram support | Large | High | Educators, students |
-| 3 | Publish to Maven Central | Small | Medium | Programmers, researchers |
-| 4 | Tutorial sequence for visual editor | Medium | High | Students, new users |
-| 5 | "From Vensim PLE" migration guide | Small | Medium | Vensim PLE users hitting limits |
-| 6 | Sample model library (10-15 classic models) | Medium | Medium | Educators, students |
-| 7 | CLI conversion tool (mdl/xmile) | Small | Medium | Interoperability users |
-| 8 | Web version (or web export of models) | Large | High | Casual users, workshops |
-| 9 | Cut (Ctrl+X) and connection re-routing | Small | Low | All editor users (polish) |
-| 10 | Monte Carlo / sweep integration in GUI | Medium | High | Researchers using visual editor |
+| 1 | Causal loop diagram support | Large | High | Educators, students |
+| 2 | Publish to Maven Central | Small | Medium | Programmers, researchers |
+| 3 | Tutorial sequence for visual editor | Medium | High | Students, new users |
+| 4 | "From Vensim PLE" migration guide | Small | Medium | Vensim PLE users hitting limits |
+| 5 | Expand example model library to 15-20 | Medium | Medium | Educators, students |
+| 6 | CLI conversion tool (mdl/xmile) | Small | Medium | Interoperability users |
+| 7 | Web version (or web export of models) | Large | High | Casual users, workshops |
+
+**Completed since last review:** Lookup table editor with chart preview (was #1), Monte Carlo / sweep / multi-sweep / optimization integration in GUI with tabbed dashboard (was #10), sample model library with 8 bundled models (was #6 — partially complete), CSV export from all result panes, multi-window editing with cross-window copy/paste, equation autocomplete, context-sensitive help, activity log.
 
 ## The Honest Summary
 
 Forrester's engine is already stronger than any free SD tool. It has analysis features (Monte Carlo, sweeps, optimization, subscripts, modules) that Vensim charges $750+ for. It has interoperability (Vensim + XMILE import) that no other free tool matches. It has a code API that no competitor offers.
 
-The visual editor is functional and has unique features (connection interaction, loop highlighting, element resizing, multi-format export) but is younger and less polished than Vensim PLE's 30-year-old interface.
+The visual editor has matured significantly: lookup table editing with chart preview, equation autocomplete, analysis integration (Monte Carlo, sweeps, multi-parameter sweeps, optimization) with a tabbed dashboard, 8 bundled example models, multi-window editing with cross-window copy/paste, context-sensitive help, activity logging, and CSV export from all result panes. Combined with unique features (connection interaction, loop highlighting, element resizing, multi-format export), the editor is now a functional standalone modeling environment — younger than Vensim PLE's 30-year-old interface, but with capabilities that Vensim PLE doesn't offer.
 
-The real gaps are not technical — they're ecosystem gaps: documentation, tutorials, community, discoverability. A tool nobody knows about can't compete, no matter how good its features are. The single highest-leverage action is probably not writing more code — it's writing a "Why Forrester?" page and a 10-minute quickstart tutorial, and putting them where SD students will find them.
+The remaining gaps are primarily ecosystem gaps: documentation, tutorials, community, discoverability, and causal loop diagrams (the entry point for SD education). A tool nobody knows about can't compete, no matter how good its features are. The single highest-leverage action is probably not writing more code — it's writing a "Why Forrester?" page and a 10-minute quickstart tutorial, and putting them where SD students will find them.
 
 For the code-first researcher audience, Forrester is already the best free option. It just doesn't know it yet — and neither do they.

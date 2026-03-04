@@ -8,7 +8,7 @@ The engine is designed for creating training simulations, games, scenario testin
 
 ## Build & Configuration
 
-- **Language:** Java 17+
+- **Language:** Java 21+
 - **Build system:** Maven
 - **Artifact:** `com.deathrayresearch:dynamics:1.0-SNAPSHOT`
 
@@ -744,12 +744,19 @@ The `forrester-app` module provides a JavaFX canvas-based visual editor for crea
 - **File persistence** — New, Open, Save, Save As (JSON format with full view layout preservation)
 - **Properties panel** — right-side panel showing editable fields for the selected element (name, value, equation, unit, negative-value policy) with a context toolbar for rename, delete, drill-into, and bindings actions
 - **Simulation** — Ctrl+R compiles the model definition, runs on a background thread, and displays results in a sortable table window
+- **Analysis dialogs** — Simulate menu provides dedicated dialogs for parameter sweep (single-parameter, start/end/step), multi-parameter sweep (dynamic rows, live combination count, validation), Monte Carlo (distribution config, run count, LHS toggle), and optimization (algorithm selection, parameter bounds, objective function)
+- **Dashboard panel** — tabbed result display: simulation results (table + chart), sweep results (summary + time series), multi-sweep results (combination table + per-run charts with series toggles), Monte Carlo results (percentile envelopes), optimization results (best-run summary + chart). All panes support right-click CSV export
+- **Multi-window** — each model opens in its own `ModelWindow` with independent state; shared clipboard enables cross-window copy/paste with automatic name remapping
+- **Example models** — File → Open Example provides 8 bundled models across 5 categories (introductory, ecology, epidemiology, population, supply chain)
+- **Context-sensitive help** — F1 shows documentation for the current tool or selected element type
+- **Activity log** — timestamped event log for model creation, file operations, simulation runs, analysis executions, and validation checks
 
 **Visual language:** The editor renders the Layered Flow Diagram notation with distinct shapes for each element type (rounded-rectangle stocks, diamond flow indicators, rounded-rectangle auxiliaries, dashed-border constants, thick-bordered module containers with "mod" badge), material flow arrows routed through diamond indicators, dashed info link connectors, and cloud symbols for disconnected flow endpoints.
 
 | Class | Purpose |
 |---|---|
-| `ForresterApp` | JavaFX entry point, menus, undo/simulation wiring |
+| `ForresterApp` | JavaFX entry point and window management |
+| `ModelWindow` | Per-model window with menus, toolbar, editor, dashboard, and activity log |
 | `ModelCanvas` | Event handling and editing orchestration |
 | `ModelEditor` | Mutable model editing layer with name index |
 | `CanvasRenderer` | Rendering coordinator (connections, elements, overlays) |
@@ -757,7 +764,15 @@ The `forrester-app` module provides a JavaFX canvas-based visual editor for crea
 | `FlowCreationController` | Two-click flow creation state machine |
 | `FlowEndpointCalculator` | Cloud positions and endpoint hit testing |
 | `PropertiesPanel` | Right-side panel for viewing/editing element properties |
+| `DashboardPanel` | Tabbed result display for simulation, sweep, Monte Carlo, optimization |
 | `SimulationRunner` | Compile + run + capture simulation results |
+| `SimulationResultPane` | Table + chart view for simulation results with CSV export |
+| `SweepResultPane` | Summary + time-series view for parameter sweep results |
+| `MultiSweepResultPane` | Combination table + per-run charts for multi-parameter sweeps |
+| `MonteCarloResultPane` | Percentile envelope charts for Monte Carlo results |
+| `OptimizationResultPane` | Best-run summary + chart for optimization results |
+| `MultiParameterSweepDialog` | Dialog for configuring multi-parameter sweep parameters |
+| `MonteCarloDialog` | Dialog for configuring Monte Carlo analysis |
 | `UndoManager` | Snapshot-based undo/redo stack |
 
 ### Modules
@@ -1093,7 +1108,8 @@ New to system dynamics? These resources provide a solid introduction to the meth
 
 The project is at version 1.0-SNAPSHOT and is under active development. Recent work has focused on:
 
-- Adding a JavaFX canvas-based visual editor (`forrester-app` module) — interactive stock-and-flow diagram editor with element creation via toolbar or keyboard shortcuts (including module/submodel placement), two-click flow connection protocol with rubber-band preview, inline name/value/equation editing with rename propagation, flow endpoint reattachment, element resize via corner handles, hover highlighting for discoverability, a properties panel with context toolbar for editing element attributes, rubber-band marquee selection, pan/zoom navigation, 100-level snapshot-based undo/redo, JSON file persistence with view layout, integrated simulation with background execution and sortable results table, context-sensitive cursor feedback, and a status bar showing tool/selection/element counts/zoom. Models can be built, edited, saved, and simulated entirely through the GUI
+- Adding GUI analysis integration (Phase 2) — Simulate menu with dedicated dialogs for parameter sweep, multi-parameter sweep, Monte Carlo, and optimization; tabbed dashboard panel displaying results with interactive charts and right-click CSV export; multi-window editing with independent state and cross-window copy/paste; 8 bundled example models across 5 categories; context-sensitive help (F1); activity log with timestamped events. All analysis runs execute on background threads
+- Adding a JavaFX canvas-based visual editor (`forrester-app` module) — interactive stock-and-flow diagram editor with element creation via toolbar or keyboard shortcuts (including module/submodel placement), two-click flow connection protocol with rubber-band preview, inline name/value/equation editing with rename propagation, flow endpoint reattachment, element resize via corner handles, hover highlighting for discoverability, a properties panel with context toolbar for editing element attributes, rubber-band marquee selection, pan/zoom navigation, 100-level snapshot-based undo/redo, JSON file persistence with view layout, integrated simulation with background execution and sortable results table, context-sensitive cursor feedback, equation autocomplete for element names and built-in functions, lookup table editing with inline chart preview and interpolation mode selection, feedback loop highlighting, and a status bar showing tool/selection/element counts/zoom. Models can be built, edited, saved, and simulated entirely through the GUI
 - Adding XMILE import and export (`io/xmile/` package) — bidirectional model exchange with Stella/iThink and other XMILE-compatible tools via the OASIS standard XML format. `XmileImporter` reads XMILE files to `ModelDefinition`; `XmileExporter` writes any `ModelDefinition` to valid XMILE 1.0 XML. Supports stocks, flows, auxiliaries, constants, lookup tables (standalone and embedded `<gf>`), simulation settings, view data, and bidirectional expression translation. Audited and hardened with 65 tests including round-trip compile+simulate and export→re-import verification
 - Adding Vensim `.mdl` import (`io/vensim/` package) — reads Vensim model files and produces `ModelDefinition` records that can be compiled and simulated. Supports stocks, constants, auxiliaries, lookup tables, subscript ranges, simulation settings, sketch data, and expression translation for common Vensim functions. Audited and hardened with 75 tests covering CRLF handling, case-insensitive matching, operator precedence, and duplicate name detection
 - Adding an external model representation with expression AST, definition records, model compiler, JSON serialization, nested modules, and dependency graph — six new packages (`model/expr`, `model/def`, `model/compile`, `io/json`, `model/graph`, `measure/UnitRegistry`) that enable defining models as pure data, persisting them to JSON, compiling them to runnable simulations, and extracting dependency graphs for visualization
