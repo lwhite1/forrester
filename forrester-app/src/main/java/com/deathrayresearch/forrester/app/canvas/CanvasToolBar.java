@@ -38,25 +38,35 @@ public class CanvasToolBar extends ToolBar {
     private Runnable onValidateClicked;
 
     public CanvasToolBar() {
+        setId("canvasToolBar");
+
         selectButton = makeButton("Select", Tool.SELECT);
+        selectButton.setId("toolSelect");
         selectButton.setTooltip(new Tooltip("Select and move elements (S)"));
         ToggleButton stockButton = makeButton("Stock", Tool.PLACE_STOCK);
+        stockButton.setId("toolStock");
         stockButton.setTooltip(new Tooltip("Add a stock \u2014 an accumulator that holds a quantity"));
         ToggleButton flowButton = makeButton("Flow", Tool.PLACE_FLOW);
+        flowButton.setId("toolFlow");
         flowButton.setTooltip(new Tooltip("Add a flow \u2014 a rate that moves material between stocks"));
         ToggleButton auxButton = makeButton("Auxiliary", Tool.PLACE_AUX);
+        auxButton.setId("toolAux");
         auxButton.setTooltip(new Tooltip("Add an auxiliary \u2014 a computed intermediate variable"));
         ToggleButton constantButton = makeButton("Constant", Tool.PLACE_CONSTANT);
+        constantButton.setId("toolConstant");
         constantButton.setTooltip(new Tooltip("Add a constant \u2014 a fixed parameter value"));
         ToggleButton moduleButton = makeButton("Module", Tool.PLACE_MODULE);
+        moduleButton.setId("toolModule");
         moduleButton.setTooltip(new Tooltip("Add a module \u2014 a reusable sub-model"));
         ToggleButton lookupButton = makeButton("Lookup", Tool.PLACE_LOOKUP);
+        lookupButton.setId("toolLookup");
         lookupButton.setTooltip(new Tooltip("Add a lookup table \u2014 a graphical function"));
 
         selectButton.setSelected(true);
 
         // Independent toggle for loop highlighting (not in the tool group)
         loopsButton = new ToggleButton("Loops");
+        loopsButton.setId("toolLoops");
         loopsButton.setTooltip(new Tooltip("Highlight feedback loops in the model"));
         loopsButton.setOnAction(event -> {
             if (onLoopToggleChanged != null) {
@@ -65,6 +75,7 @@ public class CanvasToolBar extends ToolBar {
         });
 
         validateButton = new Button("Validate");
+        validateButton.setId("toolValidate");
         validateButton.setTooltip(new Tooltip("Check the model for structural issues"));
         validateButton.setOnAction(event -> {
             if (onValidateClicked != null) {

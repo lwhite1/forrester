@@ -32,8 +32,11 @@ public class SimulationSettingsDialog extends Dialog<SimulationSettings> {
         setHeaderText("Configure simulation parameters");
 
         timeStepCombo = new ComboBox<>(FXCollections.observableArrayList(TIME_UNIT_OPTIONS));
+        timeStepCombo.setId("simTimeStep");
         durationField = new TextField();
+        durationField.setId("simDuration");
         durationUnitCombo = new ComboBox<>(FXCollections.observableArrayList(TIME_UNIT_OPTIONS));
+        durationUnitCombo.setId("simDurationUnit");
 
         if (existing != null) {
             timeStepCombo.setValue(existing.timeStep());

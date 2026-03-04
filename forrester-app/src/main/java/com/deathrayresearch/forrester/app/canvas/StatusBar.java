@@ -23,16 +23,22 @@ public class StatusBar extends HBox {
     private final Label zoomLabel = new Label();
 
     public StatusBar() {
+        setId("statusBar");
         setSpacing(0);
         setPadding(new Insets(3, 8, 3, 8));
         setStyle(Styles.STATUS_BAR_BACKGROUND);
 
+        toolLabel.setId("statusTool");
         toolLabel.setStyle(Styles.STATUS_LABEL);
+        selectionLabel.setId("statusSelection");
         selectionLabel.setStyle(Styles.STATUS_LABEL);
+        elementsLabel.setId("statusElements");
         elementsLabel.setStyle(Styles.STATUS_LABEL);
+        loopLabel.setId("statusLoops");
         loopLabel.setStyle(Styles.STATUS_LABEL);
         loopLabel.setVisible(false);
         loopLabel.setManaged(false);
+        validationLabel.setId("statusValidation");
         validationLabel.setStyle(Styles.STATUS_LABEL);
         validationLabel.setVisible(false);
         validationLabel.setManaged(false);
@@ -42,6 +48,7 @@ public class StatusBar extends HBox {
         progressIndicator.setMaxSize(14, 14);
         progressIndicator.setVisible(false);
         progressIndicator.setManaged(false);
+        zoomLabel.setId("statusZoom");
         zoomLabel.setStyle(Styles.STATUS_LABEL);
 
         Region spacer1 = new Region();

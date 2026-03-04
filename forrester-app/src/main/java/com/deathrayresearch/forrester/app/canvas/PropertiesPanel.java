@@ -42,11 +42,13 @@ public class PropertiesPanel extends VBox {
     private ElementType cachedFormType;
 
     public PropertiesPanel() {
+        setId("propertiesPanel");
         setPrefWidth(PREFERRED_WIDTH);
         setMinWidth(180);
         setPadding(new Insets(4));
         setSpacing(4);
 
+        contextToolbar.setId("propertiesToolbar");
         contextToolbar.setPadding(new Insets(2));
         contextToolbar.setAlignment(Pos.CENTER_LEFT);
 
@@ -59,6 +61,7 @@ public class PropertiesPanel extends VBox {
         scrollPane.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
         VBox.setVgrow(scrollPane, Priority.ALWAYS);
 
+        placeholderLabel.setId("propertiesPlaceholder");
         placeholderLabel.setStyle(Styles.PLACEHOLDER_TEXT);
         placeholderLabel.setPadding(new Insets(20));
         placeholderLabel.setAlignment(Pos.CENTER);
@@ -162,6 +165,7 @@ public class PropertiesPanel extends VBox {
         contextToolbar.getChildren().clear();
 
         Button renameBtn = createToolbarButton("Rename");
+        renameBtn.setId("propertiesRename");
         renameBtn.setOnAction(e -> {
             for (javafx.scene.Node node : propertyGrid.getChildren()) {
                 if (node instanceof TextField tf && "nameField".equals(tf.getId())) {
@@ -173,6 +177,7 @@ public class PropertiesPanel extends VBox {
         });
 
         Button deleteBtn = createToolbarButton("Delete");
+        deleteBtn.setId("propertiesDelete");
         deleteBtn.setOnAction(e -> {
             if (ctx.canvas != null) {
                 ctx.canvas.deleteSelectedElements();
@@ -184,6 +189,7 @@ public class PropertiesPanel extends VBox {
 
         if (type == ElementType.MODULE) {
             Button drillBtn = createToolbarButton("Drill Into");
+            drillBtn.setId("propertiesDrill");
             drillBtn.setOnAction(e -> {
                 if (ctx.canvas != null) {
                     ctx.canvas.drillInto(ctx.elementName);
@@ -192,6 +198,7 @@ public class PropertiesPanel extends VBox {
             });
 
             Button bindingsBtn = createToolbarButton("Bindings");
+            bindingsBtn.setId("propertiesBindings");
             bindingsBtn.setOnAction(e -> {
                 if (ctx.canvas != null) {
                     ctx.canvas.triggerBindingConfig(ctx.elementName);

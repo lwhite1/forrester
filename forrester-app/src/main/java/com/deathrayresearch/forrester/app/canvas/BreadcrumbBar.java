@@ -20,6 +20,7 @@ public class BreadcrumbBar extends HBox {
     private IntConsumer onNavigateTo;
 
     public BreadcrumbBar() {
+        setId("breadcrumbBar");
         setSpacing(2);
         setPadding(new Insets(4, 8, 4, 8));
         setVisible(false);
@@ -78,6 +79,7 @@ public class BreadcrumbBar extends HBox {
 
         // Bold label for current level (not clickable)
         Label current = new Label(path.get(path.size() - 1));
+        current.setId("breadcrumbCurrent");
         current.setStyle(Styles.BREADCRUMB_CURRENT);
         getChildren().add(current);
     }

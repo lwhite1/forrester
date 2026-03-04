@@ -175,9 +175,12 @@ public class ModelWindow {
 
         // Right-side TabPane with Properties and Dashboard tabs
         rightTabPane = new TabPane();
+        rightTabPane.setId("rightTabPane");
         rightTabPane.setTabClosingPolicy(TabPane.TabClosingPolicy.UNAVAILABLE);
         Tab propertiesTab = new Tab("Properties", propertiesPanel);
+        propertiesTab.setId("propertiesTab");
         Tab dashboardTab = new Tab("Dashboard", dashboardPanel);
+        dashboardTab.setId("dashboardTab");
         rightTabPane.getTabs().addAll(propertiesTab, dashboardTab);
 
         SplitPane splitPane = new SplitPane(canvasPane, rightTabPane);
@@ -188,6 +191,7 @@ public class ModelWindow {
         VBox topContainer = new VBox(menuBar, toolBar, breadcrumbBar);
 
         root = new BorderPane();
+        root.setId("modelWindowRoot");
         root.setTop(topContainer);
         root.setCenter(splitPane);
         root.setBottom(statusBar);
@@ -203,28 +207,34 @@ public class ModelWindow {
         Menu fileMenu = new Menu("File");
 
         MenuItem newWindowItem = new MenuItem("New Window");
+        newWindowItem.setId("menuNewWindow");
         newWindowItem.setAccelerator(new KeyCodeCombination(KeyCode.N,
                 KeyCombination.SHORTCUT_DOWN, KeyCombination.SHIFT_DOWN));
         newWindowItem.setOnAction(e -> app.openNewWindow());
 
         MenuItem newItem = new MenuItem("New");
+        newItem.setId("menuNew");
         newItem.setAccelerator(new KeyCodeCombination(KeyCode.N, KeyCombination.SHORTCUT_DOWN));
         newItem.setOnAction(e -> newModel());
 
         MenuItem openItem = new MenuItem("Open...");
+        openItem.setId("menuOpen");
         openItem.setAccelerator(new KeyCodeCombination(KeyCode.O, KeyCombination.SHORTCUT_DOWN));
         openItem.setOnAction(e -> openFile());
 
         MenuItem saveItem = new MenuItem("Save");
+        saveItem.setId("menuSave");
         saveItem.setAccelerator(new KeyCodeCombination(KeyCode.S, KeyCombination.SHORTCUT_DOWN));
         saveItem.setOnAction(e -> save());
 
         MenuItem saveAsItem = new MenuItem("Save As...");
+        saveAsItem.setId("menuSaveAs");
         saveAsItem.setAccelerator(new KeyCodeCombination(KeyCode.S,
                 KeyCombination.SHORTCUT_DOWN, KeyCombination.SHIFT_DOWN));
         saveAsItem.setOnAction(e -> saveAs());
 
         MenuItem exportItem = new MenuItem("Export Diagram...");
+        exportItem.setId("menuExport");
         exportItem.setAccelerator(new KeyCodeCombination(KeyCode.E, KeyCombination.SHORTCUT_DOWN));
         exportItem.setOnAction(e -> DiagramExporter.exportDiagram(
                 canvas.getCanvasState(), canvas.getEditor(),
@@ -246,6 +256,7 @@ public class ModelWindow {
         Menu editMenu = new Menu("Edit");
 
         undoItem = new MenuItem("Undo");
+        undoItem.setId("menuUndo");
         undoItem.setAccelerator(new KeyCodeCombination(KeyCode.Z, KeyCombination.SHORTCUT_DOWN));
         undoItem.setOnAction(e -> {
             canvas.performUndo();
@@ -254,6 +265,7 @@ public class ModelWindow {
         undoItem.setDisable(true);
 
         redoItem = new MenuItem("Redo");
+        redoItem.setId("menuRedo");
         redoItem.setAccelerator(new KeyCodeCombination(KeyCode.Z,
                 KeyCombination.SHORTCUT_DOWN, KeyCombination.SHIFT_DOWN));
         redoItem.setOnAction(e -> {
@@ -296,6 +308,7 @@ public class ModelWindow {
         settingsItem.setOnAction(e -> openSimulationSettings());
 
         MenuItem runItem = new MenuItem("Run Simulation");
+        runItem.setId("menuRunSimulation");
         runItem.setAccelerator(new KeyCodeCombination(KeyCode.R, KeyCombination.SHORTCUT_DOWN));
         runItem.setOnAction(e -> runSimulation());
 
