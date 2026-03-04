@@ -21,7 +21,11 @@ import java.util.Set;
  */
 final class CopyPasteController {
 
-    private final Clipboard clipboard = new Clipboard();
+    private final Clipboard clipboard;
+
+    CopyPasteController(Clipboard clipboard) {
+        this.clipboard = clipboard;
+    }
 
     boolean hasContent() {
         return !clipboard.isEmpty();

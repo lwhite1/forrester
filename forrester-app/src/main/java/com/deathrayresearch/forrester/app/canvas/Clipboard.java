@@ -13,12 +13,13 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * Package-private clipboard for copy/paste of model elements.
+ * Clipboard for copy/paste of model elements.
  * Captures element definitions and positions relative to the selection centroid.
+ * A single instance can be shared across multiple windows for cross-window copy/paste.
  */
-class Clipboard {
+public class Clipboard {
 
-    record Entry(
+    public record Entry(
             String originalName,
             ElementType type,
             double relativeX,
@@ -34,7 +35,7 @@ class Clipboard {
      * Captures the selected elements into the clipboard.
      * Positions are stored relative to the centroid of the selection.
      */
-    void capture(CanvasState state, ModelEditor editor, Set<String> names) {
+    public void capture(CanvasState state, ModelEditor editor, Set<String> names) {
         entries.clear();
 
         if (names.isEmpty()) {
@@ -87,11 +88,11 @@ class Clipboard {
         }
     }
 
-    boolean isEmpty() {
+    public boolean isEmpty() {
         return entries.isEmpty();
     }
 
-    List<Entry> getEntries() {
+    public List<Entry> getEntries() {
         return entries;
     }
 }

@@ -2,6 +2,7 @@ package com.deathrayresearch.forrester.app;
 
 import com.deathrayresearch.forrester.app.canvas.BreadcrumbBar;
 import com.deathrayresearch.forrester.app.canvas.CanvasToolBar;
+import com.deathrayresearch.forrester.app.canvas.Clipboard;
 import com.deathrayresearch.forrester.app.canvas.DiagramExporter;
 import com.deathrayresearch.forrester.app.canvas.ModelCanvas;
 import com.deathrayresearch.forrester.app.canvas.ModelEditor;
@@ -53,6 +54,7 @@ public class ModelWindow {
 
     private final Stage stage;
     private final ForresterApp app;
+    private final Clipboard clipboard;
     private ModelCanvas canvas;
     private ModelEditor editor;
     private StatusBar statusBar;
@@ -65,15 +67,16 @@ public class ModelWindow {
 
     private final ModelDefinitionSerializer serializer = new ModelDefinitionSerializer();
 
-    public ModelWindow(Stage stage, ForresterApp app) {
+    public ModelWindow(Stage stage, ForresterApp app, Clipboard clipboard) {
         this.stage = stage;
         this.app = app;
+        this.clipboard = clipboard;
         buildUI();
     }
 
     private void buildUI() {
         editor = new ModelEditor();
-        canvas = new ModelCanvas();
+        canvas = new ModelCanvas(clipboard);
         canvas.setUndoManager(undoManager);
 
         statusBar = new StatusBar();

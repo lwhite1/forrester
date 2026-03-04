@@ -50,7 +50,7 @@ public class ModelCanvas extends Canvas {
     private final ResizeController resizeController = new ResizeController();
     private final ReattachController reattachController = new ReattachController();
     private final FlowCreationController flowCreation = new FlowCreationController();
-    private final CopyPasteController copyPaste = new CopyPasteController();
+    private final CopyPasteController copyPaste;
     private final ConnectionRerouteController rerouteController = new ConnectionRerouteController();
     private final InlineEditController inlineEdit = new InlineEditController();
     private final ModuleNavigationController navController = new ModuleNavigationController();
@@ -81,7 +81,8 @@ public class ModelCanvas extends Canvas {
     private boolean loopHighlightActive;
     private FeedbackAnalysis loopAnalysis;
 
-    public ModelCanvas() {
+    public ModelCanvas(Clipboard clipboard) {
+        this.copyPaste = new CopyPasteController(clipboard);
         setFocusTraversable(true);
 
         widthProperty().addListener(observable -> redraw());

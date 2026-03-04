@@ -25,7 +25,7 @@ class CopyPasteControllerTest {
 
     @BeforeEach
     void setUp() {
-        controller = new CopyPasteController();
+        controller = new CopyPasteController(new Clipboard());
         editor = new ModelEditor();
         canvasState = new CanvasState();
     }
