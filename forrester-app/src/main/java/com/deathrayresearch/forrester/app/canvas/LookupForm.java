@@ -24,6 +24,8 @@ import java.util.Objects;
 class LookupForm implements ElementForm {
 
     private final FormContext ctx;
+    private LineChart<Number, Number> chart;
+    private int chartRow;
 
     LookupForm(FormContext ctx) {
         this.ctx = ctx;
@@ -56,7 +58,7 @@ class LookupForm implements ElementForm {
                     ctx.canvas.applyLookupTable(ctx.elementName, new LookupTableDef(
                             ctx.elementName, lt.comment(),
                             lt.xValues(), lt.yValues(), newInterp));
-                    ctx.requestFormRebuild();
+                    replaceChart(lt.xValues(), lt.yValues(), newInterp);
                 }
             }
         });
@@ -112,7 +114,9 @@ class LookupForm implements ElementForm {
         row++;
 
         // Inline chart preview
-        ctx.grid.add(buildChart(xs, ys, lookup.interpolation()), 0, row, 2, 1);
+        chartRow = row;
+        chart = buildChart(xs, ys, lookup.interpolation());
+        ctx.grid.add(chart, 0, row, 2, 1);
         row++;
 
         // Add/remove row buttons
@@ -137,6 +141,12 @@ class LookupForm implements ElementForm {
         // Lookup forms are not cached — always rebuilt
     }
 
+    private void replaceChart(double[] xs, double[] ys, String interpolation) {
+        ctx.grid.getChildren().remove(chart);
+        chart = buildChart(xs, ys, interpolation);
+        ctx.grid.add(chart, 0, chartRow, 2, 1);
+    }
+
     private static final int SPLINE_INTERPOLATION_POINTS = 100;
 
     private LineChart<Number, Number> buildChart(double[] xs, double[] ys,
@@ -149,59 +159,39 @@ class LookupForm implements ElementForm {
         yAxis.setLabel("Y");
         yAxis.setTickLabelFont(javafx.scene.text.Font.font(9));
 
-        LineChart<Number, Number> chart = new LineChart<>(xAxis, yAxis);
-        chart.setAnimated(false);
-        chart.setLegendVisible(false);
-        chart.setPrefHeight(160);
-        chart.setMinHeight(120);
-        chart.setPadding(Insets.EMPTY);
-        chart.setStyle("-fx-padding: 0;");
+        LineChart<Number, Number> newChart = new LineChart<>(xAxis, yAxis);
+        newChart.setAnimated(false);
+        newChart.setLegendVisible(false);
+        newChart.setPrefHeight(160);
+        newChart.setMinHeight(120);
+        newChart.setPadding(Insets.EMPTY);
+        newChart.setStyle("-fx-padding: 0;");
+        newChart.setCreateSymbols(true);
+
+        XYChart.Series<Number, Number> series = new XYChart.Series<>();
 
         if ("SPLINE".equals(interpolation) && xs.length >= 3) {
-            // Render smooth curve via interpolated points (no symbols on curve)
-            chart.setCreateSymbols(false);
             var function = new SplineInterpolator().interpolate(xs, ys);
-            XYChart.Series<Number, Number> curveSeries = new XYChart.Series<>();
             double xMin = xs[0];
             double xMax = xs[xs.length - 1];
             for (int i = 0; i <= SPLINE_INTERPOLATION_POINTS; i++) {
                 double x = xMin + (xMax - xMin) * i / SPLINE_INTERPOLATION_POINTS;
-                curveSeries.getData().add(new XYChart.Data<>(x, function.value(x)));
+                series.getData().add(new XYChart.Data<>(x, function.value(x)));
             }
-            chart.getData().add(curveSeries);
-            curveSeries.nodeProperty().addListener((obs, oldNode, newNode) -> {
-                if (newNode != null) {
-                    newNode.setStyle("-fx-stroke: #1f77b4; -fx-stroke-width: 2px;");
-                }
-            });
-
-            // Overlay original data points as a second series (symbols only)
-            XYChart.Series<Number, Number> pointSeries = new XYChart.Series<>();
-            for (int i = 0; i < xs.length; i++) {
-                pointSeries.getData().add(new XYChart.Data<>(xs[i], ys[i]));
-            }
-            chart.getData().add(pointSeries);
-            pointSeries.nodeProperty().addListener((obs, oldNode, newNode) -> {
-                if (newNode != null) {
-                    newNode.setStyle("-fx-stroke: transparent; -fx-stroke-width: 0;");
-                }
-            });
         } else {
-            // Linear: straight segments through data points
-            chart.setCreateSymbols(true);
-            XYChart.Series<Number, Number> series = new XYChart.Series<>();
             for (int i = 0; i < xs.length; i++) {
                 series.getData().add(new XYChart.Data<>(xs[i], ys[i]));
             }
-            chart.getData().add(series);
-            series.nodeProperty().addListener((obs, oldNode, newNode) -> {
-                if (newNode != null) {
-                    newNode.setStyle("-fx-stroke: #1f77b4; -fx-stroke-width: 2px;");
-                }
-            });
         }
 
-        return chart;
+        newChart.getData().add(series);
+        series.nodeProperty().addListener((obs, oldNode, newNode) -> {
+            if (newNode != null) {
+                newNode.setStyle("-fx-stroke: #1f77b4; -fx-stroke-width: 2px;");
+            }
+        });
+
+        return newChart;
     }
 
     private void commitDataPoint(TextField xField, TextField yField, int index) {
