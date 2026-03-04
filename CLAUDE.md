@@ -132,6 +132,7 @@ throw new RuntimeException("not found");
 - **Isolate UI from logic**: Separate business logic and state management from UI components. This allows traditional unit testing of non-UI parts using JUnit without requiring a running JavaFX application
 - **Use observable properties**: Store application state in observable classes (e.g., JavaFX `Property` types) and bind UI elements to these properties. Tests can interact with and verify the state of the model directly, treating the UI as a reliable black box
 - **Use IDs for nodes**: Assign unique `fx:id` or CSS IDs to JavaFX scene graph nodes (e.g., `#myButton`). This makes it straightforward for testing frameworks like TestFX to locate and interact with specific elements programmatically
+- **Use TestFX for UI interaction tests**: When testing UI behavior that is easier to verify through actual user interaction (clicking buttons, filling forms, verifying dialog behavior) than through unit tests alone, write TestFX tests. JUnit 5 remains the primary framework for logic and state testing; TestFX augments it for cases where simulating real user interaction provides better coverage
 
 ## Logging
 
