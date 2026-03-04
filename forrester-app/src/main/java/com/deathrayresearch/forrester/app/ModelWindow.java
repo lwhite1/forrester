@@ -1,36 +1,60 @@
 package com.deathrayresearch.forrester.app;
 
+import com.deathrayresearch.forrester.app.canvas.ActivityLogPanel;
 import com.deathrayresearch.forrester.app.canvas.BreadcrumbBar;
 import com.deathrayresearch.forrester.app.canvas.CanvasToolBar;
 import com.deathrayresearch.forrester.app.canvas.Clipboard;
+import com.deathrayresearch.forrester.app.canvas.DashboardPanel;
 import com.deathrayresearch.forrester.app.canvas.DiagramExporter;
 import com.deathrayresearch.forrester.app.canvas.ModelCanvas;
+import com.deathrayresearch.forrester.app.canvas.ModelDefinitionFactory;
+import com.deathrayresearch.forrester.app.canvas.ModelEditListener;
 import com.deathrayresearch.forrester.app.canvas.ModelEditor;
+import com.deathrayresearch.forrester.app.canvas.MonteCarloDialog;
+import com.deathrayresearch.forrester.app.canvas.OptimizerDialog;
+import com.deathrayresearch.forrester.app.canvas.ParameterSweepDialog;
 import com.deathrayresearch.forrester.app.canvas.PropertiesPanel;
-import com.deathrayresearch.forrester.app.canvas.SimulationResultsDialog;
 import com.deathrayresearch.forrester.app.canvas.SimulationRunner;
 import com.deathrayresearch.forrester.app.canvas.SimulationSettingsDialog;
 import com.deathrayresearch.forrester.app.canvas.StatusBar;
 import com.deathrayresearch.forrester.app.canvas.UndoManager;
 import com.deathrayresearch.forrester.app.canvas.ValidationDialog;
 import com.deathrayresearch.forrester.io.json.ModelDefinitionSerializer;
+import com.deathrayresearch.forrester.measure.Quantity;
+import com.deathrayresearch.forrester.measure.TimeUnit;
+import com.deathrayresearch.forrester.model.Model;
+import com.deathrayresearch.forrester.model.def.ConstantDef;
 import com.deathrayresearch.forrester.model.def.ModelDefinition;
 import com.deathrayresearch.forrester.model.def.ModelDefinitionBuilder;
 import com.deathrayresearch.forrester.model.def.ModelValidator;
 import com.deathrayresearch.forrester.model.def.SimulationSettings;
+import com.deathrayresearch.forrester.model.def.StockDef;
 import com.deathrayresearch.forrester.model.def.ValidationResult;
 import com.deathrayresearch.forrester.model.def.ViewDef;
 import com.deathrayresearch.forrester.model.graph.AutoLayout;
 import com.deathrayresearch.forrester.model.graph.FeedbackAnalysis;
+import com.deathrayresearch.forrester.sweep.MonteCarlo;
+import com.deathrayresearch.forrester.sweep.MonteCarloResult;
+import com.deathrayresearch.forrester.sweep.Objectives;
+import com.deathrayresearch.forrester.sweep.ObjectiveFunction;
+import com.deathrayresearch.forrester.sweep.OptimizationAlgorithm;
+import com.deathrayresearch.forrester.sweep.OptimizationResult;
+import com.deathrayresearch.forrester.sweep.Optimizer;
+import com.deathrayresearch.forrester.sweep.ParameterSweep;
+import com.deathrayresearch.forrester.sweep.SamplingMethod;
+import com.deathrayresearch.forrester.sweep.SweepResult;
 
 import javafx.application.Platform;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
+import javafx.scene.control.CheckMenuItem;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.SeparatorMenuItem;
 import javafx.scene.control.SplitPane;
+import javafx.scene.control.Tab;
+import javafx.scene.control.TabPane;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyCodeCombination;
 import javafx.scene.input.KeyCombination;
@@ -40,11 +64,18 @@ import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
+import org.apache.commons.math3.distribution.NormalDistribution;
+import org.apache.commons.math3.distribution.UniformRealDistribution;
+
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.function.DoubleFunction;
+import java.util.function.Function;
 
 /**
  * An independent editor window for a single Forrester model.
@@ -60,10 +91,15 @@ public class ModelWindow {
     private StatusBar statusBar;
     private BreadcrumbBar breadcrumbBar;
     private PropertiesPanel propertiesPanel;
+    private ActivityLogPanel activityLogPanel;
+    private DashboardPanel dashboardPanel;
+    private TabPane rightTabPane;
+    private BorderPane root;
     private Path currentFile;
     private final UndoManager undoManager = new UndoManager();
     private MenuItem undoItem;
     private MenuItem redoItem;
+    private ModelEditListener logListener;
 
     private final ModelDefinitionSerializer serializer = new ModelDefinitionSerializer();
 
@@ -106,6 +142,15 @@ public class ModelWindow {
         });
         canvas.setOnNavigationChanged(this::updateBreadcrumb);
 
+        // Activity log panel (hidden by default)
+        activityLogPanel = new ActivityLogPanel();
+        activityLogPanel.setVisible(false);
+        activityLogPanel.setManaged(false);
+        logListener = activityLogPanel.createListener();
+
+        // Dashboard panel
+        dashboardPanel = new DashboardPanel();
+
         newModel();
 
         Pane canvasPane = new Pane(canvas);
@@ -115,14 +160,21 @@ public class ModelWindow {
 
         propertiesPanel = new PropertiesPanel();
 
-        SplitPane splitPane = new SplitPane(canvasPane, propertiesPanel);
+        // Right-side TabPane with Properties and Dashboard tabs
+        rightTabPane = new TabPane();
+        rightTabPane.setTabClosingPolicy(TabPane.TabClosingPolicy.UNAVAILABLE);
+        Tab propertiesTab = new Tab("Properties", propertiesPanel);
+        Tab dashboardTab = new Tab("Dashboard", dashboardPanel);
+        rightTabPane.getTabs().addAll(propertiesTab, dashboardTab);
+
+        SplitPane splitPane = new SplitPane(canvasPane, rightTabPane);
         splitPane.setDividerPositions(0.75);
-        SplitPane.setResizableWithParent(propertiesPanel, false);
+        SplitPane.setResizableWithParent(rightTabPane, false);
 
         MenuBar menuBar = createMenuBar();
         VBox topContainer = new VBox(menuBar, toolBar, breadcrumbBar);
 
-        BorderPane root = new BorderPane();
+        root = new BorderPane();
         root.setTop(topContainer);
         root.setCenter(splitPane);
         root.setBottom(statusBar);
@@ -204,6 +256,25 @@ public class ModelWindow {
 
         editMenu.getItems().addAll(undoItem, redoItem, new SeparatorMenuItem(), selectAllItem);
 
+        // View menu
+        Menu viewMenu = new Menu("View");
+
+        CheckMenuItem activityLogItem = new CheckMenuItem("Activity Log");
+        activityLogItem.setAccelerator(new KeyCodeCombination(KeyCode.L, KeyCombination.SHORTCUT_DOWN));
+        activityLogItem.setOnAction(e -> {
+            boolean show = activityLogItem.isSelected();
+            activityLogPanel.setVisible(show);
+            activityLogPanel.setManaged(show);
+            if (show) {
+                root.setLeft(activityLogPanel);
+            } else {
+                root.setLeft(null);
+            }
+        });
+
+        viewMenu.getItems().add(activityLogItem);
+
+        // Simulate menu
         Menu simulateMenu = new Menu("Simulate");
 
         MenuItem settingsItem = new MenuItem("Simulation Settings...");
@@ -217,7 +288,18 @@ public class ModelWindow {
         validateItem.setAccelerator(new KeyCodeCombination(KeyCode.B, KeyCombination.SHORTCUT_DOWN));
         validateItem.setOnAction(e -> validateModel());
 
-        simulateMenu.getItems().addAll(settingsItem, runItem, new SeparatorMenuItem(), validateItem);
+        MenuItem sweepItem = new MenuItem("Parameter Sweep...");
+        sweepItem.setOnAction(e -> runParameterSweep());
+
+        MenuItem monteCarloItem = new MenuItem("Monte Carlo...");
+        monteCarloItem.setOnAction(e -> runMonteCarlo());
+
+        MenuItem optimizeItem = new MenuItem("Optimize...");
+        optimizeItem.setOnAction(e -> runOptimization());
+
+        simulateMenu.getItems().addAll(settingsItem, runItem,
+                new SeparatorMenuItem(), validateItem,
+                new SeparatorMenuItem(), sweepItem, monteCarloItem, optimizeItem);
 
         Menu helpMenu = new Menu("Help");
 
@@ -243,7 +325,7 @@ public class ModelWindow {
                 new SeparatorMenuItem(), shortcutsItem,
                 new SeparatorMenuItem(), aboutItem);
 
-        return new MenuBar(fileMenu, editMenu, simulateMenu, helpMenu);
+        return new MenuBar(fileMenu, editMenu, viewMenu, simulateMenu, helpMenu);
     }
 
     private void newModel() {
@@ -253,6 +335,7 @@ public class ModelWindow {
         ViewDef emptyView = new ViewDef("Main", List.of(), List.of(), List.of());
 
         editor = new ModelEditor();
+        editor.addListener(logListener);
         editor.loadFrom(empty);
         canvas.clearNavigation();
         canvas.setModel(editor, emptyView);
@@ -274,6 +357,7 @@ public class ModelWindow {
         try {
             ModelDefinition def = serializer.fromFile(file.toPath());
             editor = new ModelEditor();
+            editor.addListener(logListener);
             editor.loadFrom(def);
 
             ViewDef view;
@@ -288,6 +372,7 @@ public class ModelWindow {
             undoManager.clear();
             currentFile = file.toPath();
             updateTitle();
+            fireLogEvent(l -> l.onModelOpened(file.getName()));
         } catch (IOException ex) {
             showError("Open Error", "Failed to open file: " + ex.getMessage());
         }
@@ -326,6 +411,7 @@ public class ModelWindow {
             ModelDefinition def = canvas.toModelDefinition();
             serializer.toFile(def, path);
             updateTitle();
+            fireLogEvent(l -> l.onModelSaved(path.getFileName().toString()));
         } catch (IOException ex) {
             showError("Save Error", "Failed to save file: " + ex.getMessage());
         }
@@ -338,20 +424,30 @@ public class ModelWindow {
         result.ifPresent(settings -> editor.setSimulationSettings(settings));
     }
 
-    private void runSimulation() {
+    private SimulationSettings ensureSettings() {
         SimulationSettings settings = editor.getSimulationSettings();
         if (settings == null) {
             SimulationSettingsDialog dialog = new SimulationSettingsDialog(null);
             Optional<SimulationSettings> result = dialog.showAndWait();
             if (result.isEmpty()) {
-                return;
+                return null;
             }
             settings = result.get();
             editor.setSimulationSettings(settings);
         }
+        return settings;
+    }
+
+    private void runSimulation() {
+        SimulationSettings settings = ensureSettings();
+        if (settings == null) {
+            return;
+        }
 
         ModelDefinition def = canvas.toModelDefinition();
         SimulationSettings finalSettings = settings;
+
+        statusBar.showProgress("Simulating...");
 
         javafx.concurrent.Task<SimulationRunner.SimulationResult> task =
                 new javafx.concurrent.Task<>() {
@@ -363,11 +459,14 @@ public class ModelWindow {
         };
 
         task.setOnSucceeded(e -> {
-            SimulationResultsDialog resultsDialog = new SimulationResultsDialog(task.getValue());
-            resultsDialog.show();
+            statusBar.clearProgress();
+            dashboardPanel.showSimulationResult(task.getValue());
+            switchToDashboard();
+            fireLogEvent(ModelEditListener::onSimulationRun);
         });
 
         task.setOnFailed(e -> {
+            statusBar.clearProgress();
             Throwable ex = task.getException();
             showError("Simulation Error", ex != null ? ex.getMessage() : null);
         });
@@ -375,6 +474,250 @@ public class ModelWindow {
         Thread thread = new Thread(task, "simulation-runner");
         thread.setDaemon(true);
         thread.start();
+    }
+
+    private void runParameterSweep() {
+        SimulationSettings settings = ensureSettings();
+        if (settings == null) {
+            return;
+        }
+
+        ModelEditor activeEditor = canvas.getEditor();
+        List<String> constantNames = activeEditor.getConstants().stream()
+                .map(ConstantDef::name).toList();
+        List<String> trackableNames = new ArrayList<>();
+        activeEditor.getStocks().forEach(s -> trackableNames.add(s.name()));
+        activeEditor.getFlows().forEach(f -> trackableNames.add(f.name()));
+        activeEditor.getAuxiliaries().forEach(a -> trackableNames.add(a.name()));
+
+        if (constantNames.isEmpty()) {
+            showError("Parameter Sweep", "Model has no constants to sweep.");
+            return;
+        }
+
+        ParameterSweepDialog dialog = new ParameterSweepDialog(constantNames, trackableNames);
+        Optional<ParameterSweepDialog.Config> configOpt = dialog.showAndWait();
+        if (configOpt.isEmpty()) {
+            return;
+        }
+
+        ParameterSweepDialog.Config config = configOpt.get();
+        ModelDefinition def = canvas.toModelDefinition();
+        SimulationSettings finalSettings = settings;
+
+        statusBar.showProgress("Running sweep...");
+
+        javafx.concurrent.Task<SweepResult> task = new javafx.concurrent.Task<>() {
+            @Override
+            protected SweepResult call() {
+                TimeUnit timeStep = ModelDefinitionFactory.resolveTimeStep(finalSettings);
+                Quantity duration = ModelDefinitionFactory.resolveDuration(finalSettings);
+                DoubleFunction<Model> factory = ModelDefinitionFactory.createSingleParamFactory(
+                        def, finalSettings, config.parameterName());
+
+                return ParameterSweep.builder()
+                        .parameterName(config.parameterName())
+                        .parameterValues(ParameterSweep.linspace(
+                                config.start(), config.end(), config.step()))
+                        .modelFactory(factory)
+                        .timeStep(timeStep)
+                        .duration(duration)
+                        .build()
+                        .execute();
+            }
+        };
+
+        task.setOnSucceeded(e -> {
+            statusBar.clearProgress();
+            dashboardPanel.showSweepResult(task.getValue(), config.parameterName());
+            switchToDashboard();
+            fireLogEvent(l -> l.onAnalysisRun("Parameter Sweep",
+                    config.parameterName() + " [" + config.start() + ".." + config.end() + "]"));
+        });
+
+        task.setOnFailed(e -> {
+            statusBar.clearProgress();
+            Throwable ex = task.getException();
+            showError("Sweep Error", ex != null ? ex.getMessage() : null);
+        });
+
+        Thread thread = new Thread(task, "parameter-sweep");
+        thread.setDaemon(true);
+        thread.start();
+    }
+
+    private void runMonteCarlo() {
+        SimulationSettings settings = ensureSettings();
+        if (settings == null) {
+            return;
+        }
+
+        ModelEditor activeEditor = canvas.getEditor();
+        List<String> constantNames = activeEditor.getConstants().stream()
+                .map(ConstantDef::name).toList();
+
+        if (constantNames.isEmpty()) {
+            showError("Monte Carlo", "Model has no constants to vary.");
+            return;
+        }
+
+        MonteCarloDialog dialog = new MonteCarloDialog(constantNames);
+        Optional<MonteCarloDialog.Config> configOpt = dialog.showAndWait();
+        if (configOpt.isEmpty()) {
+            return;
+        }
+
+        MonteCarloDialog.Config config = configOpt.get();
+        ModelDefinition def = canvas.toModelDefinition();
+        SimulationSettings finalSettings = settings;
+
+        statusBar.showProgress("Running Monte Carlo (" + config.iterations() + " iterations)...");
+
+        javafx.concurrent.Task<MonteCarloResult> task = new javafx.concurrent.Task<>() {
+            @Override
+            protected MonteCarloResult call() {
+                TimeUnit timeStep = ModelDefinitionFactory.resolveTimeStep(finalSettings);
+                Quantity duration = ModelDefinitionFactory.resolveDuration(finalSettings);
+                Function<Map<String, Double>, Model> factory =
+                        ModelDefinitionFactory.createFactory(def, finalSettings);
+
+                MonteCarlo.Builder builder = MonteCarlo.builder()
+                        .modelFactory(factory)
+                        .iterations(config.iterations())
+                        .sampling("RANDOM".equals(config.samplingMethod())
+                                ? SamplingMethod.RANDOM : SamplingMethod.LATIN_HYPERCUBE)
+                        .seed(config.seed())
+                        .timeStep(timeStep)
+                        .duration(duration);
+
+                for (MonteCarloDialog.ParameterConfig p : config.parameters()) {
+                    if (p.distribution() == MonteCarloDialog.DistributionType.NORMAL) {
+                        builder.parameter(p.name(), new NormalDistribution(p.param1(), p.param2()));
+                    } else {
+                        builder.parameter(p.name(), new UniformRealDistribution(p.param1(), p.param2()));
+                    }
+                }
+
+                return builder.build().execute();
+            }
+        };
+
+        task.setOnSucceeded(e -> {
+            statusBar.clearProgress();
+            dashboardPanel.showMonteCarloResult(task.getValue());
+            switchToDashboard();
+            fireLogEvent(l -> l.onAnalysisRun("Monte Carlo",
+                    config.iterations() + " iterations, " + config.parameters().size() + " params"));
+        });
+
+        task.setOnFailed(e -> {
+            statusBar.clearProgress();
+            Throwable ex = task.getException();
+            showError("Monte Carlo Error", ex != null ? ex.getMessage() : null);
+        });
+
+        Thread thread = new Thread(task, "monte-carlo");
+        thread.setDaemon(true);
+        thread.start();
+    }
+
+    private void runOptimization() {
+        SimulationSettings settings = ensureSettings();
+        if (settings == null) {
+            return;
+        }
+
+        ModelEditor activeEditor = canvas.getEditor();
+        List<String> constantNames = activeEditor.getConstants().stream()
+                .map(ConstantDef::name).toList();
+        List<String> stockNames = activeEditor.getStocks().stream()
+                .map(StockDef::name).toList();
+
+        if (constantNames.isEmpty()) {
+            showError("Optimize", "Model has no constants to optimize.");
+            return;
+        }
+        if (stockNames.isEmpty()) {
+            showError("Optimize", "Model has no stocks for objective evaluation.");
+            return;
+        }
+
+        OptimizerDialog dialog = new OptimizerDialog(constantNames, stockNames);
+        Optional<OptimizerDialog.Config> configOpt = dialog.showAndWait();
+        if (configOpt.isEmpty()) {
+            return;
+        }
+
+        OptimizerDialog.Config config = configOpt.get();
+        ModelDefinition def = canvas.toModelDefinition();
+        SimulationSettings finalSettings = settings;
+
+        statusBar.showProgress("Optimizing (" + config.maxEvaluations() + " max evals)...");
+
+        javafx.concurrent.Task<OptimizationResult> task = new javafx.concurrent.Task<>() {
+            @Override
+            protected OptimizationResult call() {
+                TimeUnit timeStep = ModelDefinitionFactory.resolveTimeStep(finalSettings);
+                Quantity duration = ModelDefinitionFactory.resolveDuration(finalSettings);
+                Function<Map<String, Double>, Model> factory =
+                        ModelDefinitionFactory.createFactory(def, finalSettings);
+
+                ObjectiveFunction objective = switch (config.objectiveType()) {
+                    case MINIMIZE -> Objectives.minimize(config.targetVariable());
+                    case MAXIMIZE -> Objectives.maximize(config.targetVariable());
+                    case TARGET -> Objectives.target(config.targetVariable(), config.targetValue());
+                    case MINIMIZE_PEAK -> Objectives.minimizePeak(config.targetVariable());
+                };
+
+                OptimizationAlgorithm algorithm = switch (config.algorithm()) {
+                    case "BOBYQA" -> OptimizationAlgorithm.BOBYQA;
+                    case "CMAES" -> OptimizationAlgorithm.CMAES;
+                    default -> OptimizationAlgorithm.NELDER_MEAD;
+                };
+
+                Optimizer.Builder builder = Optimizer.builder()
+                        .modelFactory(factory)
+                        .objective(objective)
+                        .algorithm(algorithm)
+                        .maxEvaluations(config.maxEvaluations())
+                        .timeStep(timeStep)
+                        .duration(duration);
+
+                for (OptimizerDialog.ParamConfig p : config.parameters()) {
+                    if (Double.isNaN(p.initialGuess())) {
+                        builder.parameter(p.name(), p.lower(), p.upper());
+                    } else {
+                        builder.parameter(p.name(), p.lower(), p.upper(), p.initialGuess());
+                    }
+                }
+
+                return builder.build().execute();
+            }
+        };
+
+        task.setOnSucceeded(e -> {
+            statusBar.clearProgress();
+            dashboardPanel.showOptimizationResult(task.getValue());
+            switchToDashboard();
+            fireLogEvent(l -> l.onAnalysisRun("Optimization",
+                    config.algorithm() + ", " + config.parameters().size() + " params"));
+        });
+
+        task.setOnFailed(e -> {
+            statusBar.clearProgress();
+            Throwable ex = task.getException();
+            showError("Optimization Error", ex != null ? ex.getMessage() : null);
+        });
+
+        Thread thread = new Thread(task, "optimizer");
+        thread.setDaemon(true);
+        thread.start();
+    }
+
+    private void switchToDashboard() {
+        if (rightTabPane != null && rightTabPane.getTabs().size() > 1) {
+            rightTabPane.getSelectionModel().select(1);
+        }
     }
 
     private void validateModel() {
@@ -392,6 +735,7 @@ public class ModelWindow {
             statusBar.updateValidation(result.errorCount(), result.warningCount());
             ValidationDialog dialog = new ValidationDialog(result, canvas::selectElement);
             dialog.show();
+            fireLogEvent(l -> l.onValidation(result.errorCount(), result.warningCount()));
         });
 
         task.setOnFailed(e -> {
@@ -402,6 +746,12 @@ public class ModelWindow {
         Thread thread = new Thread(task, "model-validator");
         thread.setDaemon(true);
         thread.start();
+    }
+
+    private void fireLogEvent(java.util.function.Consumer<ModelEditListener> event) {
+        if (logListener != null) {
+            event.accept(logListener);
+        }
     }
 
     private void showError(String title, String message) {

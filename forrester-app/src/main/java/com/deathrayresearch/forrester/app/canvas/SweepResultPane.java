@@ -1,0 +1,152 @@
+package com.deathrayresearch.forrester.app.canvas;
+
+import com.deathrayresearch.forrester.sweep.RunResult;
+import com.deathrayresearch.forrester.sweep.SweepResult;
+
+import javafx.collections.FXCollections;
+import javafx.geometry.Insets;
+import javafx.scene.chart.LineChart;
+import javafx.scene.chart.NumberAxis;
+import javafx.scene.chart.XYChart;
+import javafx.scene.control.CheckBox;
+import javafx.scene.control.ComboBox;
+import javafx.scene.control.Label;
+import javafx.scene.control.ScrollPane;
+import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
+
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * Displays parameter sweep results as a line chart with one series per
+ * parameter value. Includes a ComboBox to select which stock/variable
+ * to plot and a checkbox sidebar for toggling series visibility.
+ */
+public class SweepResultPane extends BorderPane {
+
+    private static final String[] SERIES_COLORS = {
+        "#1f77b4", "#ff7f0e", "#2ca02c", "#d62728", "#9467bd",
+        "#8c564b", "#e377c2", "#7f7f7f", "#bcbd22", "#17becf"
+    };
+
+    private final SweepResult result;
+    private final String paramName;
+
+    public SweepResultPane(SweepResult result, String paramName) {
+        this.result = result;
+        this.paramName = paramName;
+
+        List<String> trackableNames = new ArrayList<>();
+        trackableNames.addAll(result.getStockNames());
+        trackableNames.addAll(result.getVariableNames());
+
+        ComboBox<String> varCombo = new ComboBox<>(FXCollections.observableArrayList(trackableNames));
+        if (!trackableNames.isEmpty()) {
+            varCombo.setValue(trackableNames.get(0));
+        }
+
+        HBox topBar = new HBox(8, new Label("Variable:"), varCombo);
+        topBar.setPadding(new Insets(8));
+        setTop(topBar);
+
+        varCombo.valueProperty().addListener((obs, old, val) -> {
+            if (val != null) {
+                buildChart(val);
+            }
+        });
+
+        if (!trackableNames.isEmpty()) {
+            buildChart(trackableNames.get(0));
+        }
+    }
+
+    private void buildChart(String variableName) {
+        NumberAxis xAxis = new NumberAxis();
+        xAxis.setLabel("Step");
+
+        NumberAxis yAxis = new NumberAxis();
+        yAxis.setLabel(variableName);
+
+        LineChart<Number, Number> chart = new LineChart<>(xAxis, yAxis);
+        chart.setCreateSymbols(false);
+        chart.setAnimated(false);
+        chart.setLegendVisible(false);
+
+        List<XYChart.Series<Number, Number>> allSeries = new ArrayList<>();
+        boolean isStock = result.getStockNames().contains(variableName);
+        int colIndex = isStock
+                ? result.getStockNames().indexOf(variableName)
+                : result.getVariableNames().indexOf(variableName);
+
+        for (int r = 0; r < result.getRunCount(); r++) {
+            RunResult run = result.getResult(r);
+            double paramValue = run.getParameterValue();
+
+            XYChart.Series<Number, Number> series = new XYChart.Series<>();
+            series.setName(paramName + " = " + formatNumber(paramValue));
+
+            for (int s = 0; s < run.getStepCount(); s++) {
+                double value = isStock
+                        ? run.getStockValuesAtStep(s).get(colIndex)
+                        : run.getVariableValuesAtStep(s).get(colIndex);
+                series.getData().add(new XYChart.Data<>(run.getStep(s), value));
+            }
+            allSeries.add(series);
+        }
+
+        chart.getData().addAll(allSeries);
+        applyColors(allSeries);
+
+        VBox sidebar = new VBox(6);
+        sidebar.setPadding(new Insets(10));
+
+        for (int i = 0; i < allSeries.size(); i++) {
+            XYChart.Series<Number, Number> series = allSeries.get(i);
+            String color = SERIES_COLORS[i % SERIES_COLORS.length];
+
+            CheckBox cb = new CheckBox(series.getName());
+            cb.setSelected(true);
+            cb.setStyle("-fx-text-fill: " + color + ";");
+            cb.selectedProperty().addListener((obs, wasSelected, isSelected) -> {
+                series.getNode().setVisible(isSelected);
+                series.getData().forEach(d -> {
+                    if (d.getNode() != null) {
+                        d.getNode().setVisible(isSelected);
+                    }
+                });
+            });
+            sidebar.getChildren().add(cb);
+        }
+
+        ScrollPane sidebarScroll = new ScrollPane(sidebar);
+        sidebarScroll.setFitToWidth(true);
+        sidebarScroll.setPrefWidth(180);
+
+        setCenter(chart);
+        setRight(sidebarScroll);
+    }
+
+    private void applyColors(List<XYChart.Series<Number, Number>> allSeries) {
+        for (int i = 0; i < allSeries.size(); i++) {
+            String color = SERIES_COLORS[i % SERIES_COLORS.length];
+            XYChart.Series<Number, Number> series = allSeries.get(i);
+            series.nodeProperty().addListener((obs, oldNode, newNode) -> {
+                if (newNode != null) {
+                    newNode.setStyle("-fx-stroke: " + color + ";");
+                }
+            });
+            if (series.getNode() != null) {
+                series.getNode().setStyle("-fx-stroke: " + color + ";");
+            }
+        }
+    }
+
+    private static String formatNumber(double value) {
+        if (value == Math.floor(value) && Double.isFinite(value)) {
+            return String.valueOf((long) value);
+        }
+        return String.format("%.4f", value);
+    }
+}

@@ -1,0 +1,107 @@
+package com.deathrayresearch.forrester.app.canvas;
+
+import com.deathrayresearch.forrester.measure.Quantity;
+import com.deathrayresearch.forrester.measure.TimeUnit;
+import com.deathrayresearch.forrester.measure.UnitRegistry;
+import com.deathrayresearch.forrester.model.Model;
+import com.deathrayresearch.forrester.model.compile.CompiledModel;
+import com.deathrayresearch.forrester.model.compile.ModelCompiler;
+import com.deathrayresearch.forrester.model.def.ConstantDef;
+import com.deathrayresearch.forrester.model.def.ModelDefinition;
+import com.deathrayresearch.forrester.model.def.SimulationSettings;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.function.DoubleFunction;
+import java.util.function.Function;
+
+/**
+ * Bridges {@link ModelDefinition} to the engine's analysis APIs by creating
+ * model factory functions that compile fresh models with overridden constants.
+ */
+public final class ModelDefinitionFactory {
+
+    private ModelDefinitionFactory() {
+    }
+
+    /**
+     * Creates a factory function that accepts a map of constant name to value,
+     * applies overrides to the definition, compiles, and returns the executable model.
+     */
+    public static Function<Map<String, Double>, Model> createFactory(
+            ModelDefinition def, SimulationSettings settings) {
+        return paramMap -> {
+            ModelDefinition overridden = applyConstantOverrides(def, paramMap);
+            ModelDefinition withSettings = embedSettings(overridden, settings);
+            ModelCompiler compiler = new ModelCompiler();
+            CompiledModel compiled = compiler.compile(withSettings);
+            return compiled.getModel();
+        };
+    }
+
+    /**
+     * Creates a single-parameter factory for use with {@link com.deathrayresearch.forrester.sweep.ParameterSweep}.
+     */
+    public static DoubleFunction<Model> createSingleParamFactory(
+            ModelDefinition def, SimulationSettings settings, String paramName) {
+        return value -> {
+            ModelDefinition overridden = applyConstantOverrides(def, Map.of(paramName, value));
+            ModelDefinition withSettings = embedSettings(overridden, settings);
+            ModelCompiler compiler = new ModelCompiler();
+            CompiledModel compiled = compiler.compile(withSettings);
+            return compiled.getModel();
+        };
+    }
+
+    /**
+     * Resolves the time step unit from simulation settings.
+     */
+    public static TimeUnit resolveTimeStep(SimulationSettings settings) {
+        UnitRegistry registry = new UnitRegistry();
+        return registry.resolveTimeUnit(settings.timeStep());
+    }
+
+    /**
+     * Resolves the simulation duration as a {@link Quantity}.
+     */
+    public static Quantity resolveDuration(SimulationSettings settings) {
+        UnitRegistry registry = new UnitRegistry();
+        TimeUnit durationUnit = registry.resolveTimeUnit(settings.durationUnit());
+        return new Quantity(settings.duration(), durationUnit);
+    }
+
+    /**
+     * Creates a new ModelDefinition with modified constant values.
+     */
+    public static ModelDefinition applyConstantOverrides(
+            ModelDefinition def, Map<String, Double> overrides) {
+        if (overrides.isEmpty()) {
+            return def;
+        }
+        List<ConstantDef> updatedConstants = new ArrayList<>();
+        for (ConstantDef c : def.constants()) {
+            if (overrides.containsKey(c.name())) {
+                updatedConstants.add(new ConstantDef(c.name(), c.comment(),
+                        overrides.get(c.name()), c.unit()));
+            } else {
+                updatedConstants.add(c);
+            }
+        }
+        return new ModelDefinition(
+                def.name(), def.comment(), def.moduleInterface(),
+                def.stocks(), def.flows(), def.auxiliaries(), updatedConstants,
+                def.lookupTables(), def.modules(), def.subscripts(), def.views(),
+                def.defaultSimulation()
+        );
+    }
+
+    private static ModelDefinition embedSettings(ModelDefinition def, SimulationSettings settings) {
+        return new ModelDefinition(
+                def.name(), def.comment(), def.moduleInterface(),
+                def.stocks(), def.flows(), def.auxiliaries(), def.constants(),
+                def.lookupTables(), def.modules(), def.subscripts(), def.views(),
+                settings
+        );
+    }
+}

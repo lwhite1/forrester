@@ -1,7 +1,9 @@
 package com.deathrayresearch.forrester.app.canvas;
 
+import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.scene.control.Label;
+import javafx.scene.control.ProgressIndicator;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
@@ -16,6 +18,8 @@ public class StatusBar extends HBox {
     private final Label elementsLabel = new Label();
     private final Label loopLabel = new Label();
     private final Label validationLabel = new Label();
+    private final Label progressLabel = new Label();
+    private final ProgressIndicator progressIndicator = new ProgressIndicator();
     private final Label zoomLabel = new Label();
 
     public StatusBar() {
@@ -32,6 +36,12 @@ public class StatusBar extends HBox {
         validationLabel.setStyle(Styles.STATUS_LABEL);
         validationLabel.setVisible(false);
         validationLabel.setManaged(false);
+        progressLabel.setStyle(Styles.STATUS_LABEL);
+        progressLabel.setVisible(false);
+        progressLabel.setManaged(false);
+        progressIndicator.setMaxSize(14, 14);
+        progressIndicator.setVisible(false);
+        progressIndicator.setManaged(false);
         zoomLabel.setStyle(Styles.STATUS_LABEL);
 
         Region spacer1 = new Region();
@@ -53,8 +63,14 @@ public class StatusBar extends HBox {
         validationSep.visibleProperty().bind(validationLabel.visibleProperty());
         validationSep.managedProperty().bind(validationLabel.managedProperty());
 
+        Label progressSep = new Label("  |  ");
+        progressSep.setStyle(Styles.STATUS_LABEL);
+        progressSep.visibleProperty().bind(progressLabel.visibleProperty());
+        progressSep.managedProperty().bind(progressLabel.managedProperty());
+
         getChildren().addAll(toolLabel, sep1, selectionLabel,
                 loopSep, loopLabel, validationSep, validationLabel,
+                progressSep, progressIndicator, progressLabel,
                 spacer1, elementsLabel, spacer2, sep2, zoomLabel);
 
         updateTool(CanvasToolBar.Tool.SELECT);
@@ -141,5 +157,34 @@ public class StatusBar extends HBox {
 
     public void updateZoom(double scale) {
         zoomLabel.setText(Math.round(scale * 100) + "%");
+    }
+
+    public void showProgress(String label) {
+        Runnable action = () -> {
+            progressLabel.setText(label);
+            progressLabel.setVisible(true);
+            progressLabel.setManaged(true);
+            progressIndicator.setVisible(true);
+            progressIndicator.setManaged(true);
+        };
+        if (Platform.isFxApplicationThread()) {
+            action.run();
+        } else {
+            Platform.runLater(action);
+        }
+    }
+
+    public void clearProgress() {
+        Runnable action = () -> {
+            progressLabel.setVisible(false);
+            progressLabel.setManaged(false);
+            progressIndicator.setVisible(false);
+            progressIndicator.setManaged(false);
+        };
+        if (Platform.isFxApplicationThread()) {
+            action.run();
+        } else {
+            Platform.runLater(action);
+        }
     }
 }

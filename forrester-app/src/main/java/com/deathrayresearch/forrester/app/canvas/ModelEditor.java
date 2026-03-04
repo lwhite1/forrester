@@ -38,6 +38,7 @@ public class ModelEditor {
     private final List<ModuleInstanceDef> modules = new ArrayList<>();
     private final List<LookupTableDef> lookupTables = new ArrayList<>();
     private final Set<String> nameIndex = new HashSet<>();
+    private final List<ModelEditListener> listeners = new ArrayList<>();
     private SimulationSettings simulationSettings;
     private int nextStockId = 1;
     private int nextFlowId = 1;
@@ -45,6 +46,46 @@ public class ModelEditor {
     private int nextConstantId = 1;
     private int nextModuleId = 1;
     private int nextLookupId = 1;
+
+    public void addListener(ModelEditListener listener) {
+        if (listener != null) {
+            listeners.add(listener);
+        }
+    }
+
+    public void removeListener(ModelEditListener listener) {
+        listeners.remove(listener);
+    }
+
+    private void fireElementAdded(String name, String typeName) {
+        for (ModelEditListener l : listeners) {
+            l.onElementAdded(name, typeName);
+        }
+    }
+
+    private void fireElementRemoved(String name) {
+        for (ModelEditListener l : listeners) {
+            l.onElementRemoved(name);
+        }
+    }
+
+    private void fireElementRenamed(String oldName, String newName) {
+        for (ModelEditListener l : listeners) {
+            l.onElementRenamed(oldName, newName);
+        }
+    }
+
+    private void fireEquationChanged(String elementName) {
+        for (ModelEditListener l : listeners) {
+            l.onEquationChanged(elementName);
+        }
+    }
+
+    private void fireConstantChanged(String name) {
+        for (ModelEditListener l : listeners) {
+            l.onConstantChanged(name);
+        }
+    }
 
     /**
      * Loads all elements from an immutable {@link ModelDefinition} into mutable lists,
@@ -109,6 +150,7 @@ public class ModelEditor {
         String name = "Stock " + nextStockId++;
         stocks.add(new StockDef(name, 0, "units"));
         nameIndex.add(name);
+        fireElementAdded(name, "Stock");
         return name;
     }
 
@@ -130,6 +172,7 @@ public class ModelEditor {
         String name = "Flow " + nextFlowId++;
         flows.add(new FlowDef(name, "0", "Day", source, sink));
         nameIndex.add(name);
+        fireElementAdded(name, "Flow");
         return name;
     }
 
@@ -141,6 +184,7 @@ public class ModelEditor {
         String name = "Aux " + nextAuxId++;
         auxiliaries.add(new AuxDef(name, "0", "units"));
         nameIndex.add(name);
+        fireElementAdded(name, "Auxiliary");
         return name;
     }
 
@@ -152,6 +196,7 @@ public class ModelEditor {
         String name = "Constant " + nextConstantId++;
         constants.add(new ConstantDef(name, 0, "units"));
         nameIndex.add(name);
+        fireElementAdded(name, "Constant");
         return name;
     }
 
@@ -227,6 +272,7 @@ public class ModelEditor {
                 List.of(), List.of(), List.of(), List.of(), null);
         modules.add(new ModuleInstanceDef(name, emptyDef, Map.of(), Map.of()));
         nameIndex.add(name);
+        fireElementAdded(name, "Module");
         return name;
     }
 
@@ -239,6 +285,7 @@ public class ModelEditor {
         lookupTables.add(new LookupTableDef(name,
                 new double[]{0.0, 1.0}, new double[]{0.0, 1.0}, "LINEAR"));
         nameIndex.add(name);
+        fireElementAdded(name, "Lookup");
         return name;
     }
 
@@ -318,6 +365,8 @@ public class ModelEditor {
         // Clean equation references: replace deleted element's token with "0"
         String deletedToken = name.replace(' ', '_');
         updateEquationReferences(deletedToken, "0");
+
+        fireElementRemoved(name);
     }
 
     /**
@@ -379,6 +428,7 @@ public class ModelEditor {
         String newToken = newName.replace(' ', '_');
         updateEquationReferences(oldToken, newToken);
 
+        fireElementRenamed(oldName, newName);
         return true;
     }
 
@@ -429,8 +479,12 @@ public class ModelEditor {
      * @return true if the constant was found and updated
      */
     public boolean setConstantValue(String name, double value) {
-        return updateInList(constants, name, ConstantDef::name,
+        boolean updated = updateInList(constants, name, ConstantDef::name,
                 c -> new ConstantDef(name, c.comment(), value, c.unit()));
+        if (updated) {
+            fireConstantChanged(name);
+        }
+        return updated;
     }
 
     /**
@@ -442,9 +496,13 @@ public class ModelEditor {
         if (equation == null || equation.isBlank()) {
             return false;
         }
-        return updateInList(flows, name, FlowDef::name,
+        boolean updated = updateInList(flows, name, FlowDef::name,
                 f -> new FlowDef(f.name(), f.comment(), equation,
                         f.timeUnit(), f.source(), f.sink()));
+        if (updated) {
+            fireEquationChanged(name);
+        }
+        return updated;
     }
 
     /**
@@ -456,8 +514,12 @@ public class ModelEditor {
         if (equation == null || equation.isBlank()) {
             return false;
         }
-        return updateInList(auxiliaries, name, AuxDef::name,
+        boolean updated = updateInList(auxiliaries, name, AuxDef::name,
                 a -> new AuxDef(a.name(), a.comment(), equation, a.unit()));
+        if (updated) {
+            fireEquationChanged(name);
+        }
+        return updated;
     }
 
     /**
