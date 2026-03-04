@@ -1,0 +1,82 @@
+{
+  "name" : "Exponential Growth",
+  "comment" : "Population growing with constant birth and death rates",
+  "stocks" : [ {
+    "name" : "Population",
+    "initialValue" : 100.0,
+    "unit" : "Person"
+  } ],
+  "flows" : [ {
+    "name" : "Births",
+    "equation" : "Population * Birth_Rate",
+    "timeUnit" : "Day",
+    "sink" : "Population"
+  }, {
+    "name" : "Deaths",
+    "equation" : "Population * Death_Rate",
+    "timeUnit" : "Day",
+    "source" : "Population"
+  } ],
+  "constants" : [ {
+    "name" : "Birth_Rate",
+    "value" : 0.04,
+    "unit" : "Dimensionless unit"
+  }, {
+    "name" : "Death_Rate",
+    "value" : 0.03,
+    "unit" : "Dimensionless unit"
+  } ],
+  "views" : [ {
+    "name" : "Auto Layout",
+    "elements" : [ {
+      "name" : "Population",
+      "type" : "stock",
+      "x" : 100.0,
+      "y" : 200.0
+    }, {
+      "name" : "Births",
+      "type" : "flow",
+      "x" : 175.0,
+      "y" : 200.0
+    }, {
+      "name" : "Deaths",
+      "type" : "flow",
+      "x" : 325.0,
+      "y" : 200.0
+    }, {
+      "name" : "Birth_Rate",
+      "type" : "constant",
+      "x" : 100.0,
+      "y" : 350.0
+    }, {
+      "name" : "Death_Rate",
+      "type" : "constant",
+      "x" : 250.0,
+      "y" : 350.0
+    } ],
+    "connectors" : [ {
+      "from" : "Population",
+      "to" : "Births"
+    }, {
+      "from" : "Population",
+      "to" : "Deaths"
+    }, {
+      "from" : "Birth_Rate",
+      "to" : "Births"
+    }, {
+      "from" : "Births",
+      "to" : "Population"
+    }, {
+      "from" : "Death_Rate",
+      "to" : "Deaths"
+    }, {
+      "from" : "Deaths",
+      "to" : "Population"
+    } ]
+  } ],
+  "defaultSimulation" : {
+    "timeStep" : "Day",
+    "duration" : 365.0,
+    "durationUnit" : "Day"
+  }
+}

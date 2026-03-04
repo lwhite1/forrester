@@ -1,0 +1,66 @@
+{
+  "name" : "Goal Seeking",
+  "comment" : "Inventory adjusts toward a goal via negative feedback",
+  "stocks" : [ {
+    "name" : "Inventory",
+    "initialValue" : 100.0,
+    "unit" : "Unit"
+  } ],
+  "flows" : [ {
+    "name" : "Production",
+    "equation" : "(Goal - Inventory) / Adjustment_Time",
+    "timeUnit" : "Day",
+    "sink" : "Inventory"
+  } ],
+  "constants" : [ {
+    "name" : "Goal",
+    "value" : 860.0,
+    "unit" : "Unit"
+  }, {
+    "name" : "Adjustment_Time",
+    "value" : 8.0,
+    "unit" : "Day"
+  } ],
+  "views" : [ {
+    "name" : "Auto Layout",
+    "elements" : [ {
+      "name" : "Inventory",
+      "type" : "stock",
+      "x" : 100.0,
+      "y" : 200.0
+    }, {
+      "name" : "Production",
+      "type" : "flow",
+      "x" : 175.0,
+      "y" : 200.0
+    }, {
+      "name" : "Goal",
+      "type" : "constant",
+      "x" : 100.0,
+      "y" : 350.0
+    }, {
+      "name" : "Adjustment_Time",
+      "type" : "constant",
+      "x" : 250.0,
+      "y" : 350.0
+    } ],
+    "connectors" : [ {
+      "from" : "Goal",
+      "to" : "Production"
+    }, {
+      "from" : "Inventory",
+      "to" : "Production"
+    }, {
+      "from" : "Adjustment_Time",
+      "to" : "Production"
+    }, {
+      "from" : "Production",
+      "to" : "Inventory"
+    } ]
+  } ],
+  "defaultSimulation" : {
+    "timeStep" : "Day",
+    "duration" : 84.0,
+    "durationUnit" : "Day"
+  }
+}

@@ -1,0 +1,79 @@
+{
+  "name" : "Coffee Cooling",
+  "comment" : "Coffee temperature decays toward room temperature",
+  "stocks" : [ {
+    "name" : "Coffee_Temperature",
+    "initialValue" : 100.0,
+    "unit" : "Celsius"
+  } ],
+  "flows" : [ {
+    "name" : "Cooling",
+    "equation" : "Discrepancy * Cooling_Rate",
+    "timeUnit" : "Minute",
+    "source" : "Coffee_Temperature"
+  } ],
+  "auxiliaries" : [ {
+    "name" : "Discrepancy",
+    "equation" : "Coffee_Temperature - Room_Temperature",
+    "unit" : "Celsius"
+  } ],
+  "constants" : [ {
+    "name" : "Room_Temperature",
+    "value" : 18.0,
+    "unit" : "Celsius"
+  }, {
+    "name" : "Cooling_Rate",
+    "value" : 0.1,
+    "unit" : "Dimensionless unit"
+  } ],
+  "views" : [ {
+    "name" : "Auto Layout",
+    "elements" : [ {
+      "name" : "Coffee_Temperature",
+      "type" : "stock",
+      "x" : 100.0,
+      "y" : 200.0
+    }, {
+      "name" : "Cooling",
+      "type" : "flow",
+      "x" : 175.0,
+      "y" : 200.0
+    }, {
+      "name" : "Discrepancy",
+      "type" : "aux",
+      "x" : 100.0,
+      "y" : 50.0
+    }, {
+      "name" : "Room_Temperature",
+      "type" : "constant",
+      "x" : 100.0,
+      "y" : 350.0
+    }, {
+      "name" : "Cooling_Rate",
+      "type" : "constant",
+      "x" : 250.0,
+      "y" : 350.0
+    } ],
+    "connectors" : [ {
+      "from" : "Discrepancy",
+      "to" : "Cooling"
+    }, {
+      "from" : "Cooling_Rate",
+      "to" : "Cooling"
+    }, {
+      "from" : "Cooling",
+      "to" : "Coffee_Temperature"
+    }, {
+      "from" : "Coffee_Temperature",
+      "to" : "Discrepancy"
+    }, {
+      "from" : "Room_Temperature",
+      "to" : "Discrepancy"
+    } ]
+  } ],
+  "defaultSimulation" : {
+    "timeStep" : "Minute",
+    "duration" : 8.0,
+    "durationUnit" : "Minute"
+  }
+}

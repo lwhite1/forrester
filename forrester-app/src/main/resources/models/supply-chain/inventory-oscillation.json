@@ -1,0 +1,213 @@
+{
+  "name" : "Inventory Oscillation",
+  "comment" : "Car dealership inventory with perception and delivery delays",
+  "stocks" : [ {
+    "name" : "Cars_on_Lot",
+    "initialValue" : 200.0,
+    "unit" : "Car"
+  }, {
+    "name" : "Perceived_Sales",
+    "initialValue" : 20.0,
+    "unit" : "Car"
+  } ],
+  "flows" : [ {
+    "name" : "Sales",
+    "equation" : "MIN(Cars_on_Lot, Customer_Demand)",
+    "timeUnit" : "Day",
+    "source" : "Cars_on_Lot"
+  }, {
+    "name" : "Perception_Adjustment",
+    "equation" : "(Sales - Perceived_Sales) / Perception_Delay",
+    "timeUnit" : "Day",
+    "sink" : "Perceived_Sales"
+  }, {
+    "name" : "Deliveries",
+    "equation" : "DELAY3(Orders_to_Factory, Delivery_Delay)",
+    "timeUnit" : "Day",
+    "sink" : "Cars_on_Lot"
+  } ],
+  "auxiliaries" : [ {
+    "name" : "Customer_Demand",
+    "equation" : "IF(TIME > 25, Step_Demand, Base_Demand)",
+    "unit" : "Car"
+  }, {
+    "name" : "Desired_Inventory",
+    "equation" : "Perceived_Sales * Desired_Inventory_Multiplier",
+    "unit" : "Car"
+  }, {
+    "name" : "Inventory_Gap",
+    "equation" : "Desired_Inventory - Cars_on_Lot",
+    "unit" : "Car"
+  }, {
+    "name" : "Orders_to_Factory",
+    "equation" : "MAX(Perceived_Sales + Inventory_Gap / Response_Delay, 0)",
+    "unit" : "Car"
+  } ],
+  "constants" : [ {
+    "name" : "Base_Demand",
+    "value" : 20.0,
+    "unit" : "Car per Day"
+  }, {
+    "name" : "Step_Demand",
+    "value" : 22.0,
+    "unit" : "Car per Day"
+  }, {
+    "name" : "Perception_Delay",
+    "value" : 5.0,
+    "unit" : "Day"
+  }, {
+    "name" : "Response_Delay",
+    "value" : 3.0,
+    "unit" : "Day"
+  }, {
+    "name" : "Delivery_Delay",
+    "value" : 5.0,
+    "unit" : "Day"
+  }, {
+    "name" : "Desired_Inventory_Multiplier",
+    "value" : 10.0,
+    "unit" : "Dimensionless unit"
+  } ],
+  "views" : [ {
+    "name" : "Auto Layout",
+    "elements" : [ {
+      "name" : "Cars_on_Lot",
+      "type" : "stock",
+      "x" : 100.0,
+      "y" : 200.0
+    }, {
+      "name" : "Perceived_Sales",
+      "type" : "stock",
+      "x" : 250.0,
+      "y" : 200.0
+    }, {
+      "name" : "Sales",
+      "type" : "flow",
+      "x" : 175.0,
+      "y" : 200.0
+    }, {
+      "name" : "Perception_Adjustment",
+      "type" : "flow",
+      "x" : 325.0,
+      "y" : 200.0
+    }, {
+      "name" : "Deliveries",
+      "type" : "flow",
+      "x" : 475.0,
+      "y" : 200.0
+    }, {
+      "name" : "Customer_Demand",
+      "type" : "aux",
+      "x" : 100.0,
+      "y" : 50.0
+    }, {
+      "name" : "Desired_Inventory",
+      "type" : "aux",
+      "x" : 250.0,
+      "y" : 50.0
+    }, {
+      "name" : "Inventory_Gap",
+      "type" : "aux",
+      "x" : 400.0,
+      "y" : 50.0
+    }, {
+      "name" : "Orders_to_Factory",
+      "type" : "aux",
+      "x" : 550.0,
+      "y" : 50.0
+    }, {
+      "name" : "Base_Demand",
+      "type" : "constant",
+      "x" : 100.0,
+      "y" : 350.0
+    }, {
+      "name" : "Step_Demand",
+      "type" : "constant",
+      "x" : 250.0,
+      "y" : 350.0
+    }, {
+      "name" : "Perception_Delay",
+      "type" : "constant",
+      "x" : 400.0,
+      "y" : 350.0
+    }, {
+      "name" : "Response_Delay",
+      "type" : "constant",
+      "x" : 550.0,
+      "y" : 350.0
+    }, {
+      "name" : "Delivery_Delay",
+      "type" : "constant",
+      "x" : 700.0,
+      "y" : 350.0
+    }, {
+      "name" : "Desired_Inventory_Multiplier",
+      "type" : "constant",
+      "x" : 850.0,
+      "y" : 350.0
+    } ],
+    "connectors" : [ {
+      "from" : "Cars_on_Lot",
+      "to" : "Sales"
+    }, {
+      "from" : "Cars_on_Lot",
+      "to" : "Inventory_Gap"
+    }, {
+      "from" : "Customer_Demand",
+      "to" : "Sales"
+    }, {
+      "from" : "Sales",
+      "to" : "Cars_on_Lot"
+    }, {
+      "from" : "Sales",
+      "to" : "Perception_Adjustment"
+    }, {
+      "from" : "Perceived_Sales",
+      "to" : "Perception_Adjustment"
+    }, {
+      "from" : "Perceived_Sales",
+      "to" : "Desired_Inventory"
+    }, {
+      "from" : "Perceived_Sales",
+      "to" : "Orders_to_Factory"
+    }, {
+      "from" : "Perception_Delay",
+      "to" : "Perception_Adjustment"
+    }, {
+      "from" : "Perception_Adjustment",
+      "to" : "Perceived_Sales"
+    }, {
+      "from" : "Orders_to_Factory",
+      "to" : "Deliveries"
+    }, {
+      "from" : "Delivery_Delay",
+      "to" : "Deliveries"
+    }, {
+      "from" : "Deliveries",
+      "to" : "Cars_on_Lot"
+    }, {
+      "from" : "Step_Demand",
+      "to" : "Customer_Demand"
+    }, {
+      "from" : "Base_Demand",
+      "to" : "Customer_Demand"
+    }, {
+      "from" : "Desired_Inventory_Multiplier",
+      "to" : "Desired_Inventory"
+    }, {
+      "from" : "Desired_Inventory",
+      "to" : "Inventory_Gap"
+    }, {
+      "from" : "Inventory_Gap",
+      "to" : "Orders_to_Factory"
+    }, {
+      "from" : "Response_Delay",
+      "to" : "Orders_to_Factory"
+    } ]
+  } ],
+  "defaultSimulation" : {
+    "timeStep" : "Day",
+    "duration" : 100.0,
+    "durationUnit" : "Day"
+  }
+}

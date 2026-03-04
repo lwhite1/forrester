@@ -1,0 +1,79 @@
+{
+  "name" : "Bathtub",
+  "comment" : "Water drains at a fixed rate; inflow begins after 5 minutes",
+  "stocks" : [ {
+    "name" : "Water_in_Tub",
+    "initialValue" : 50.0,
+    "unit" : "Gallon"
+  } ],
+  "flows" : [ {
+    "name" : "Outflow",
+    "equation" : "MIN(Outflow_Rate, Water_in_Tub)",
+    "timeUnit" : "Minute",
+    "source" : "Water_in_Tub"
+  }, {
+    "name" : "Inflow",
+    "equation" : "STEP(Inflow_Rate, 5)",
+    "timeUnit" : "Minute",
+    "sink" : "Water_in_Tub"
+  } ],
+  "constants" : [ {
+    "name" : "Outflow_Rate",
+    "value" : 5.0,
+    "unit" : "Gallon per Minute"
+  }, {
+    "name" : "Inflow_Rate",
+    "value" : 5.0,
+    "unit" : "Gallon per Minute"
+  } ],
+  "views" : [ {
+    "name" : "Auto Layout",
+    "elements" : [ {
+      "name" : "Water_in_Tub",
+      "type" : "stock",
+      "x" : 100.0,
+      "y" : 200.0
+    }, {
+      "name" : "Outflow",
+      "type" : "flow",
+      "x" : 175.0,
+      "y" : 200.0
+    }, {
+      "name" : "Inflow",
+      "type" : "flow",
+      "x" : 325.0,
+      "y" : 200.0
+    }, {
+      "name" : "Outflow_Rate",
+      "type" : "constant",
+      "x" : 100.0,
+      "y" : 350.0
+    }, {
+      "name" : "Inflow_Rate",
+      "type" : "constant",
+      "x" : 250.0,
+      "y" : 350.0
+    } ],
+    "connectors" : [ {
+      "from" : "Outflow_Rate",
+      "to" : "Outflow"
+    }, {
+      "from" : "Water_in_Tub",
+      "to" : "Outflow"
+    }, {
+      "from" : "Outflow",
+      "to" : "Water_in_Tub"
+    }, {
+      "from" : "Inflow_Rate",
+      "to" : "Inflow"
+    }, {
+      "from" : "Inflow",
+      "to" : "Water_in_Tub"
+    } ]
+  } ],
+  "defaultSimulation" : {
+    "timeStep" : "Minute",
+    "duration" : 10.0,
+    "durationUnit" : "Minute"
+  }
+}

@@ -1,0 +1,66 @@
+{
+  "name" : "S-Shaped Growth",
+  "comment" : "Logistic population growth limited by carrying capacity",
+  "stocks" : [ {
+    "name" : "Population",
+    "initialValue" : 10.0,
+    "unit" : "Person"
+  } ],
+  "flows" : [ {
+    "name" : "Births",
+    "equation" : "Population * Max_Birth_Rate * (1 - Population / Carrying_Capacity)",
+    "timeUnit" : "Day",
+    "sink" : "Population"
+  } ],
+  "constants" : [ {
+    "name" : "Max_Birth_Rate",
+    "value" : 0.04,
+    "unit" : "Dimensionless unit"
+  }, {
+    "name" : "Carrying_Capacity",
+    "value" : 1000.0,
+    "unit" : "Person"
+  } ],
+  "views" : [ {
+    "name" : "Auto Layout",
+    "elements" : [ {
+      "name" : "Population",
+      "type" : "stock",
+      "x" : 100.0,
+      "y" : 200.0
+    }, {
+      "name" : "Births",
+      "type" : "flow",
+      "x" : 175.0,
+      "y" : 200.0
+    }, {
+      "name" : "Max_Birth_Rate",
+      "type" : "constant",
+      "x" : 100.0,
+      "y" : 350.0
+    }, {
+      "name" : "Carrying_Capacity",
+      "type" : "constant",
+      "x" : 250.0,
+      "y" : 350.0
+    } ],
+    "connectors" : [ {
+      "from" : "Population",
+      "to" : "Births"
+    }, {
+      "from" : "Max_Birth_Rate",
+      "to" : "Births"
+    }, {
+      "from" : "Carrying_Capacity",
+      "to" : "Births"
+    }, {
+      "from" : "Births",
+      "to" : "Population"
+    } ]
+  } ],
+  "defaultSimulation" : {
+    "timeStep" : "Day",
+    "duration" : 224.0,
+    "durationUnit" : "Day"
+  }
+}

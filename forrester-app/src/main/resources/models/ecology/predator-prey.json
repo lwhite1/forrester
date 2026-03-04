@@ -1,0 +1,156 @@
+{
+  "name" : "Predator Prey",
+  "comment" : "Lotka-Volterra model of rabbits and coyotes",
+  "stocks" : [ {
+    "name" : "Rabbits",
+    "initialValue" : 100.0,
+    "unit" : "Animal"
+  }, {
+    "name" : "Coyotes",
+    "initialValue" : 10.0,
+    "unit" : "Animal"
+  } ],
+  "flows" : [ {
+    "name" : "Prey_Births",
+    "equation" : "Prey_Birth_Rate * Rabbits",
+    "timeUnit" : "Year",
+    "sink" : "Rabbits"
+  }, {
+    "name" : "Prey_Deaths",
+    "equation" : "Predation_Rate * Rabbits * Coyotes",
+    "timeUnit" : "Year",
+    "source" : "Rabbits"
+  }, {
+    "name" : "Predator_Births",
+    "equation" : "Predator_Efficiency * Predation_Rate * Rabbits * Coyotes",
+    "timeUnit" : "Year",
+    "sink" : "Coyotes"
+  }, {
+    "name" : "Predator_Deaths",
+    "equation" : "Predator_Death_Rate * Coyotes",
+    "timeUnit" : "Year",
+    "source" : "Coyotes"
+  } ],
+  "constants" : [ {
+    "name" : "Prey_Birth_Rate",
+    "value" : 1.0,
+    "unit" : "Dimensionless unit"
+  }, {
+    "name" : "Predation_Rate",
+    "value" : 0.01,
+    "unit" : "Dimensionless unit"
+  }, {
+    "name" : "Predator_Efficiency",
+    "value" : 0.5,
+    "unit" : "Dimensionless unit"
+  }, {
+    "name" : "Predator_Death_Rate",
+    "value" : 0.8,
+    "unit" : "Dimensionless unit"
+  } ],
+  "views" : [ {
+    "name" : "Auto Layout",
+    "elements" : [ {
+      "name" : "Rabbits",
+      "type" : "stock",
+      "x" : 100.0,
+      "y" : 200.0
+    }, {
+      "name" : "Coyotes",
+      "type" : "stock",
+      "x" : 250.0,
+      "y" : 200.0
+    }, {
+      "name" : "Prey_Births",
+      "type" : "flow",
+      "x" : 175.0,
+      "y" : 200.0
+    }, {
+      "name" : "Prey_Deaths",
+      "type" : "flow",
+      "x" : 325.0,
+      "y" : 200.0
+    }, {
+      "name" : "Predator_Births",
+      "type" : "flow",
+      "x" : 475.0,
+      "y" : 200.0
+    }, {
+      "name" : "Predator_Deaths",
+      "type" : "flow",
+      "x" : 625.0,
+      "y" : 200.0
+    }, {
+      "name" : "Prey_Birth_Rate",
+      "type" : "constant",
+      "x" : 100.0,
+      "y" : 350.0
+    }, {
+      "name" : "Predation_Rate",
+      "type" : "constant",
+      "x" : 250.0,
+      "y" : 350.0
+    }, {
+      "name" : "Predator_Efficiency",
+      "type" : "constant",
+      "x" : 400.0,
+      "y" : 350.0
+    }, {
+      "name" : "Predator_Death_Rate",
+      "type" : "constant",
+      "x" : 550.0,
+      "y" : 350.0
+    } ],
+    "connectors" : [ {
+      "from" : "Prey_Birth_Rate",
+      "to" : "Prey_Births"
+    }, {
+      "from" : "Rabbits",
+      "to" : "Prey_Births"
+    }, {
+      "from" : "Rabbits",
+      "to" : "Prey_Deaths"
+    }, {
+      "from" : "Rabbits",
+      "to" : "Predator_Births"
+    }, {
+      "from" : "Prey_Births",
+      "to" : "Rabbits"
+    }, {
+      "from" : "Predation_Rate",
+      "to" : "Prey_Deaths"
+    }, {
+      "from" : "Predation_Rate",
+      "to" : "Predator_Births"
+    }, {
+      "from" : "Coyotes",
+      "to" : "Prey_Deaths"
+    }, {
+      "from" : "Coyotes",
+      "to" : "Predator_Births"
+    }, {
+      "from" : "Coyotes",
+      "to" : "Predator_Deaths"
+    }, {
+      "from" : "Prey_Deaths",
+      "to" : "Rabbits"
+    }, {
+      "from" : "Predator_Efficiency",
+      "to" : "Predator_Births"
+    }, {
+      "from" : "Predator_Births",
+      "to" : "Coyotes"
+    }, {
+      "from" : "Predator_Death_Rate",
+      "to" : "Predator_Deaths"
+    }, {
+      "from" : "Predator_Deaths",
+      "to" : "Coyotes"
+    } ]
+  } ],
+  "defaultSimulation" : {
+    "timeStep" : "Day",
+    "duration" : 7300.0,
+    "durationUnit" : "Day"
+  }
+}
