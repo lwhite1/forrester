@@ -6,6 +6,10 @@ A single-window application for building, simulating, and analyzing system dynam
 
 The initial implementation is a JavaFX fat client talking to an LLM API over HTTP. The architecture assumes an eventual web port (likely TypeScript + Canvas/SVG) and keeps rendering logic and business logic separated accordingly. The application also supports a no-AI mode (section 16) where all modeling, simulation, and analysis features work without an LLM connection, ensuring the tool remains fully functional for users who cannot afford or do not need AI integration.
 
+> **Extension: Multi-model windows and module tabs.** This spec describes a single-window application.
+> The [Multi-Model and Module Tab Design](Multi-Model%20and%20Module%20Tab%20Design.md) extends this
+> architecture with separate windows for multiple models and tabs for module navigation within a model.
+
 ### Design principles
 
 1. **The model is the source of truth for interface state.** No user-declared modes. The interface reads the model and reacts.
