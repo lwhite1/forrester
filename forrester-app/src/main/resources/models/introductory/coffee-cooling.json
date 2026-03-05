@@ -26,51 +26,7 @@
     "value" : 0.1,
     "unit" : "Dimensionless unit"
   } ],
-  "views" : [ {
-    "name" : "Auto Layout",
-    "elements" : [ {
-      "name" : "Coffee_Temperature",
-      "type" : "stock",
-      "x" : 170.0,
-      "y" : 220.0
-    }, {
-      "name" : "Cooling",
-      "type" : "flow",
-      "x" : 395.0,
-      "y" : 220.0
-    }, {
-      "name" : "Discrepancy",
-      "type" : "aux",
-      "x" : 310.0,
-      "y" : 80.0
-    }, {
-      "name" : "Room_Temperature",
-      "type" : "constant",
-      "x" : 195.0,
-      "y" : 380.0
-    }, {
-      "name" : "Cooling_Rate",
-      "type" : "constant",
-      "x" : 315.0,
-      "y" : 380.0
-    } ],
-    "connectors" : [ {
-      "from" : "Discrepancy",
-      "to" : "Cooling"
-    }, {
-      "from" : "Cooling_Rate",
-      "to" : "Cooling"
-    }, {
-      "from" : "Cooling",
-      "to" : "Coffee_Temperature"
-    }, {
-      "from" : "Coffee_Temperature",
-      "to" : "Discrepancy"
-    }, {
-      "from" : "Room_Temperature",
-      "to" : "Discrepancy"
-    } ]
-  } ],
+  "views" : [ ],
   "defaultSimulation" : {
     "timeStep" : "Minute",
     "duration" : 8.0,

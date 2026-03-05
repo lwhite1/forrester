@@ -26,54 +26,7 @@
     "value" : 0.03,
     "unit" : "Dimensionless unit"
   } ],
-  "views" : [ {
-    "name" : "Auto Layout",
-    "elements" : [ {
-      "name" : "Population",
-      "type" : "stock",
-      "x" : 330.0,
-      "y" : 220.0
-    }, {
-      "name" : "Births",
-      "type" : "flow",
-      "x" : 225.0,
-      "y" : 220.0
-    }, {
-      "name" : "Deaths",
-      "type" : "flow",
-      "x" : 435.0,
-      "y" : 220.0
-    }, {
-      "name" : "Birth_Rate",
-      "type" : "constant",
-      "x" : 145.0,
-      "y" : 380.0
-    }, {
-      "name" : "Death_Rate",
-      "type" : "constant",
-      "x" : 355.0,
-      "y" : 380.0
-    } ],
-    "connectors" : [ {
-      "from" : "Population",
-      "to" : "Births"
-    }, {
-      "from" : "Population",
-      "to" : "Deaths"
-    }, {
-      "from" : "Birth_Rate",
-      "to" : "Births"
-    }, {
-      "from" : "Births",
-      "to" : "Population"
-    }, {
-      "from" : "Death_Rate",
-      "to" : "Deaths"
-    }, {
-      "from" : "Deaths",
-      "to" : "Population"
-    } ]
-  } ],
+  "views" : [ ],
   "defaultSimulation" : {
     "timeStep" : "Day",
     "duration" : 365.0,

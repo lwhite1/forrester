@@ -21,43 +21,7 @@
     "value" : 8.0,
     "unit" : "Day"
   } ],
-  "views" : [ {
-    "name" : "Auto Layout",
-    "elements" : [ {
-      "name" : "Inventory",
-      "type" : "stock",
-      "x" : 330.0,
-      "y" : 220.0
-    }, {
-      "name" : "Production",
-      "type" : "flow",
-      "x" : 225.0,
-      "y" : 220.0
-    }, {
-      "name" : "Goal",
-      "type" : "constant",
-      "x" : 145.0,
-      "y" : 380.0
-    }, {
-      "name" : "Adjustment_Time",
-      "type" : "constant",
-      "x" : 255.0,
-      "y" : 380.0
-    } ],
-    "connectors" : [ {
-      "from" : "Goal",
-      "to" : "Production"
-    }, {
-      "from" : "Inventory",
-      "to" : "Production"
-    }, {
-      "from" : "Adjustment_Time",
-      "to" : "Production"
-    }, {
-      "from" : "Production",
-      "to" : "Inventory"
-    } ]
-  } ],
+  "views" : [ ],
   "defaultSimulation" : {
     "timeStep" : "Day",
     "duration" : 84.0,
