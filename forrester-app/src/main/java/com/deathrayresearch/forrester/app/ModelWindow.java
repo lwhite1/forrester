@@ -383,7 +383,9 @@ public class ModelWindow {
         editor.loadFrom(def);
 
         ViewDef view;
-        if (!def.views().isEmpty()) {
+        // TODO: remove FORCE_RELAYOUT once layout quality is validated
+        boolean FORCE_RELAYOUT = true;
+        if (!FORCE_RELAYOUT && !def.views().isEmpty()) {
             view = def.views().getFirst();
         } else if (def.stocks().isEmpty() && def.flows().isEmpty()
                 && def.auxiliaries().isEmpty() && def.constants().isEmpty()) {
