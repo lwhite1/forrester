@@ -446,6 +446,8 @@ public class ModelWindow {
             updateTitle();
         } catch (IOException ex) {
             showError("Open Error", "Failed to open file: " + ex.getMessage());
+        } catch (RuntimeException ex) {
+            showError("Open Error", "Failed to parse file: " + ex.getMessage());
         }
     }
 
@@ -558,6 +560,8 @@ public class ModelWindow {
             }
         } catch (IOException ex) {
             showError("Save Error", "Failed to save file: " + ex.getMessage());
+        } catch (RuntimeException ex) {
+            showError("Save Error", "Failed to export file: " + ex.getMessage());
         }
     }
 
@@ -1059,6 +1063,7 @@ public class ModelWindow {
 
     void setCurrentFile(Path path) {
         this.currentFile = path;
+        updateTitle();
     }
 
     ModelEditor getEditor() {
