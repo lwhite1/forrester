@@ -91,6 +91,21 @@
       }
     },
     {
+      "id": "nutrient-cycle",
+      "name": "Nutrient Cycle",
+      "description": "Nitrogen cycling through soil, plants, and litter in a closed loop",
+      "category": "ecology",
+      "difficulty": "introductory",
+      "path": "ecology/nutrient-cycle.json",
+      "tags": ["cycle", "closed-loop", "conservation"],
+      "elements": {
+        "stocks": 3,
+        "flows": 3,
+        "auxiliaries": 0,
+        "constants": 3
+      }
+    },
+    {
       "id": "s-shaped-growth",
       "name": "S-Shaped Growth",
       "description": "Logistic population growth limited by carrying capacity",
