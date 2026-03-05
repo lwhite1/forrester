@@ -188,4 +188,75 @@ public class DependencyGraph {
     public Map<String, Set<String>> adjacencyMap() {
         return Collections.unmodifiableMap(adjacency);
     }
+
+    /**
+     * Finds all strongly connected components of size >= 2 using Tarjan's algorithm.
+     * Returns a list of SCCs, where each SCC is a set of node names.
+     */
+    public List<Set<String>> findSCCs() {
+        int[] index = {0};
+        Map<String, Integer> nodeIndex = new LinkedHashMap<>();
+        Map<String, Integer> lowlink = new LinkedHashMap<>();
+        Set<String> onStack = new LinkedHashSet<>();
+        Deque<String> stack = new ArrayDeque<>();
+        List<Set<String>> result = new ArrayList<>();
+
+        for (String node : allNodes) {
+            if (!nodeIndex.containsKey(node)) {
+                tarjanStrongconnect(node, index, nodeIndex, lowlink, onStack, stack, result);
+            }
+        }
+
+        List<Set<String>> nonTrivial = new ArrayList<>();
+        for (Set<String> scc : result) {
+            if (scc.size() >= 2) {
+                nonTrivial.add(scc);
+            }
+        }
+        return nonTrivial;
+    }
+
+    /**
+     * Returns the set of all nodes that belong to any SCC of size >= 2.
+     */
+    public Set<String> findSccMembers() {
+        Set<String> members = new LinkedHashSet<>();
+        for (Set<String> scc : findSCCs()) {
+            members.addAll(scc);
+        }
+        return members;
+    }
+
+    private void tarjanStrongconnect(String v, int[] index,
+            Map<String, Integer> nodeIndex, Map<String, Integer> lowlink,
+            Set<String> onStack, Deque<String> stack, List<Set<String>> result) {
+        nodeIndex.put(v, index[0]);
+        lowlink.put(v, index[0]);
+        index[0]++;
+        stack.push(v);
+        onStack.add(v);
+
+        for (String w : adjacency.getOrDefault(v, Collections.emptySet())) {
+            if (!allNodes.contains(w)) {
+                continue;
+            }
+            if (!nodeIndex.containsKey(w)) {
+                tarjanStrongconnect(w, index, nodeIndex, lowlink, onStack, stack, result);
+                lowlink.put(v, Math.min(lowlink.get(v), lowlink.get(w)));
+            } else if (onStack.contains(w)) {
+                lowlink.put(v, Math.min(lowlink.get(v), nodeIndex.get(w)));
+            }
+        }
+
+        if (lowlink.get(v).equals(nodeIndex.get(v))) {
+            Set<String> scc = new LinkedHashSet<>();
+            String w;
+            do {
+                w = stack.pop();
+                onStack.remove(w);
+                scc.add(w);
+            } while (!w.equals(v));
+            result.add(scc);
+        }
+    }
 }

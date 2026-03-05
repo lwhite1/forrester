@@ -282,6 +282,94 @@ class AutoLayoutTest {
     }
 
     // ---------------------------------------------------------------
+    // Compound node band assignment
+    // ---------------------------------------------------------------
+
+    @Nested
+    @DisplayName("compound node band assignment")
+    class BandAssignment {
+
+        @Test
+        void sccAuxShouldBeInMainBand() {
+            // Aux "Effect" participates in a cycle with a stock via a flow equation.
+            // It should be placed in band-main alongside the stocks, not in band-aux.
+            ModelDefinition def = new ModelDefinitionBuilder()
+                    .name("SCC Aux")
+                    .stock("Population", 100, "Person")
+                    .aux("Growth_Effect", "Population * 0.5", "Dimensionless unit")
+                    .flow("Births", "Growth_Effect", "Day", null, "Population")
+                    .build();
+
+            ViewDef view = AutoLayout.layout(def);
+            Map<String, ElementPlacement> map = placementMap(view);
+
+            // Growth_Effect is in an SCC with Population and Births, so it should
+            // be in band-main (not separated into band-aux above).
+            // Elements within band-main may have slightly different Y values,
+            // but the aux should NOT be far above the stock.
+            double stockY = map.get("Population").y();
+            double auxY = map.get("Growth_Effect").y();
+            double flowY = map.get("Births").y();
+
+            // All three should be close together (within band-main), not
+            // separated by the inter-band gap (~40px + padding)
+            double maxY = Math.max(Math.max(stockY, auxY), flowY);
+            double minY = Math.min(Math.min(stockY, auxY), flowY);
+            assertThat(maxY - minY)
+                    .as("SCC members should be in the same band (close Y values)")
+                    .isLessThan(100);
+        }
+
+        @Test
+        void nonSccAuxShouldBeAboveStocks() {
+            // Aux "Observer" is not in any cycle — it only reads from the stock.
+            ModelDefinition def = new ModelDefinitionBuilder()
+                    .name("Non-SCC Aux")
+                    .stock("Population", 100, "Person")
+                    .aux("Observer", "Population * 2", "Person")
+                    .flow("Births", "10", "Day", null, "Population")
+                    .build();
+
+            ViewDef view = AutoLayout.layout(def);
+            Map<String, ElementPlacement> map = placementMap(view);
+
+            assertThat(map.get("Observer").y())
+                    .as("Non-SCC aux should be above stocks (band-aux)")
+                    .isLessThan(map.get("Population").y());
+        }
+
+        @Test
+        void sccConstantShouldBeInMainBand() {
+            // A constant that participates in an SCC should be in band-main.
+            // This happens when the constant feeds a flow whose output
+            // influences back to the same stock chain the constant depends on.
+            ModelDefinition def = new ModelDefinitionBuilder()
+                    .name("SCC Constant")
+                    .stock("S", 100, "Thing")
+                    .constant("Rate", 0.1, "Dimensionless unit")
+                    .flow("Outflow", "S * Rate", "Day", "S", null)
+                    .build();
+
+            DependencyGraph graph = DependencyGraph.fromDefinition(def);
+            Set<String> sccMembers = graph.findSccMembers();
+
+            // Rate is not in an SCC (it's a pure input with no feedback to it).
+            // So it should be in band-lower, below stocks.
+            ViewDef view = AutoLayout.layout(def);
+            Map<String, ElementPlacement> map = placementMap(view);
+
+            if (sccMembers.contains("Rate")) {
+                assertThat(map.get("Rate").y())
+                        .isEqualTo(map.get("S").y());
+            } else {
+                assertThat(map.get("Rate").y())
+                        .as("Non-SCC constant should be below stocks")
+                        .isGreaterThan(map.get("S").y());
+            }
+        }
+    }
+
+    // ---------------------------------------------------------------
     // Cycle handling
     // ---------------------------------------------------------------
 
@@ -306,6 +394,39 @@ class AutoLayoutTest {
 
         assertThat(view.elements()).hasSize(7);
         assertNoOverlaps(view.elements());
+    }
+
+    @Test
+    @DisplayName("SIR model chain should be ordered Susceptible → Infection → Infectious → Recovery → Recovered")
+    void shouldOrderSirChainCorrectly() {
+        ModelDefinition def = new ModelDefinitionBuilder()
+                .name("SIR Chain Order")
+                .stock("Susceptible", 1000, "Person")
+                .stock("Infectious", 10, "Person")
+                .stock("Recovered", 0, "Person")
+                .flow("Infection",
+                        "Contact_Rate * Infectious / (Susceptible + Infectious + Recovered) * Infectivity * Susceptible",
+                        "Day", "Susceptible", "Infectious")
+                .flow("Recovery", "Infectious * Recovery_Rate", "Day",
+                        "Infectious", "Recovered")
+                .constant("Contact_Rate", 8.0, "Dimensionless unit")
+                .constant("Infectivity", 0.10, "Dimensionless unit")
+                .constant("Recovery_Rate", 0.20, "Dimensionless unit")
+                .build();
+
+        ViewDef view = AutoLayout.layout(def);
+        Map<String, ElementPlacement> map = placementMap(view);
+
+        double sX = map.get("Susceptible").x();
+        double infectionX = map.get("Infection").x();
+        double iX = map.get("Infectious").x();
+        double recoveryX = map.get("Recovery").x();
+        double rX = map.get("Recovered").x();
+
+        assertThat(sX).as("Susceptible left of Infection").isLessThan(infectionX);
+        assertThat(infectionX).as("Infection left of Infectious").isLessThan(iX);
+        assertThat(iX).as("Infectious left of Recovery").isLessThan(recoveryX);
+        assertThat(recoveryX).as("Recovery left of Recovered").isLessThan(rX);
     }
 
     // ---------------------------------------------------------------

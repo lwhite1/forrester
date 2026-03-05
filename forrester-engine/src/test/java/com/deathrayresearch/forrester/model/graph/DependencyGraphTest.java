@@ -170,6 +170,55 @@ class DependencyGraphTest {
     }
 
     @Test
+    void shouldFindSccInFeedbackLoop() {
+        ModelDefinition def = new ModelDefinitionBuilder()
+                .name("Feedback")
+                .stock("Population", 100, "Person")
+                .flow("Births", "Population * 0.04", "Day", null, "Population")
+                .build();
+
+        DependencyGraph graph = DependencyGraph.fromDefinition(def);
+        Set<String> sccMembers = graph.findSccMembers();
+
+        // Population → Births (formula dep) and Births → Population (flow sink) form an SCC
+        assertThat(sccMembers).contains("Population", "Births");
+    }
+
+    @Test
+    void shouldNotFindSccInAcyclicModel() {
+        ModelDefinition def = new ModelDefinitionBuilder()
+                .name("Acyclic")
+                .constant("Rate", 5, "Thing")
+                .stock("S", 0, "Thing")
+                .flow("F", "Rate", "Day", null, "S")
+                .build();
+
+        DependencyGraph graph = DependencyGraph.fromDefinition(def);
+        Set<String> sccMembers = graph.findSccMembers();
+
+        assertThat(sccMembers).isEmpty();
+    }
+
+    @Test
+    void shouldFindMultipleSCCs() {
+        // Two independent feedback loops
+        ModelDefinition def = new ModelDefinitionBuilder()
+                .name("Two Loops")
+                .stock("A", 100, "Thing")
+                .flow("FlowA", "A * 0.1", "Day", null, "A")
+                .stock("B", 50, "Thing")
+                .flow("FlowB", "B * 0.2", "Day", null, "B")
+                .build();
+
+        DependencyGraph graph = DependencyGraph.fromDefinition(def);
+        List<Set<String>> sccs = graph.findSCCs();
+
+        assertThat(sccs).hasSize(2);
+        Set<String> allMembers = graph.findSccMembers();
+        assertThat(allMembers).containsExactlyInAnyOrder("A", "FlowA", "B", "FlowB");
+    }
+
+    @Test
     void shouldHandleEmptyModel() {
         ModelDefinition def = new ModelDefinitionBuilder()
                 .name("Empty")
