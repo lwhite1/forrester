@@ -427,10 +427,11 @@ public class ModelWindow {
         chooser.setTitle("Open Model");
         chooser.getExtensionFilters().addAll(
                 new FileChooser.ExtensionFilter(
-                        "All Supported Models (*.json, *.mdl, *.xmile)", "*.json", "*.mdl", "*.xmile"),
+                        "All Supported Models", "*.json", "*.mdl", "*.xmile", "*.stmx", "*.itmx"),
                 new FileChooser.ExtensionFilter("Forrester Model (*.json)", "*.json"),
                 new FileChooser.ExtensionFilter("Vensim Model (*.mdl)", "*.mdl"),
-                new FileChooser.ExtensionFilter("XMILE Model (*.xmile)", "*.xmile"));
+                new FileChooser.ExtensionFilter("XMILE Model (*.xmile, *.stmx, *.itmx)",
+                        "*.xmile", "*.stmx", "*.itmx"));
         LastDirectoryStore.applyOpenDirectory(chooser);
         File file = chooser.showOpenDialog(stage);
         if (file == null) {
@@ -445,7 +446,7 @@ public class ModelWindow {
             ModelDefinition def;
             switch (ext) {
                 case ".mdl" -> def = importModel(new VensimImporter(), file.toPath(), name);
-                case ".xmile" -> def = importModel(new XmileImporter(), file.toPath(), name);
+                case ".xmile", ".stmx", ".itmx" -> def = importModel(new XmileImporter(), file.toPath(), name);
                 default -> def = serializer.fromFile(file.toPath());
             }
 
@@ -536,7 +537,8 @@ public class ModelWindow {
         chooser.getExtensionFilters().addAll(
                 new FileChooser.ExtensionFilter("Forrester Model (*.json)", "*.json"),
                 new FileChooser.ExtensionFilter("Vensim Model (*.mdl)", "*.mdl"),
-                new FileChooser.ExtensionFilter("XMILE Model (*.xmile)", "*.xmile"));
+                new FileChooser.ExtensionFilter("XMILE Model (*.xmile, *.stmx, *.itmx)",
+                        "*.xmile", "*.stmx", "*.itmx"));
         if (currentFile != null) {
             if (currentFile.getParent() != null) {
                 chooser.setInitialDirectory(currentFile.getParent().toFile());
@@ -561,7 +563,7 @@ public class ModelWindow {
                     VensimExporter.toFile(def, file.toPath());
                     fireLogEvent(l -> l.onModelSaved(name));
                 }
-                case ".xmile" -> {
+                case ".xmile", ".stmx", ".itmx" -> {
                     XmileExporter.toFile(def, file.toPath());
                     fireLogEvent(l -> l.onModelSaved(name));
                 }
