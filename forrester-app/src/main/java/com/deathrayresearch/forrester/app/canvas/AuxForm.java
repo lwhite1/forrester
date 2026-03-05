@@ -88,7 +88,7 @@ class AuxForm implements ElementForm {
         if (aux == null || Objects.equals(comment, aux.comment())) {
             return;
         }
-        ctx.canvas.applyAuxComment(ctx.elementName, comment);
+        ctx.canvas.applyMutation(() -> ctx.editor.setAuxComment(ctx.elementName, comment));
     }
 
     private void commitEquation(TextField field) {
@@ -104,7 +104,7 @@ class AuxForm implements ElementForm {
         if (aux != null && equation.equals(aux.equation())) {
             return;
         }
-        ctx.canvas.applyAuxEquation(ctx.elementName, equation);
+        ctx.canvas.applyMutation(() -> ctx.editor.setAuxEquation(ctx.elementName, equation));
     }
 
     private void commitUnit(ComboBox<String> box) {
@@ -113,6 +113,6 @@ class AuxForm implements ElementForm {
         if (aux != null && unit.equals(aux.unit())) {
             return;
         }
-        ctx.canvas.applyAuxUnit(ctx.elementName, unit);
+        ctx.canvas.applyMutation(() -> ctx.editor.setAuxUnit(ctx.elementName, unit));
     }
 }

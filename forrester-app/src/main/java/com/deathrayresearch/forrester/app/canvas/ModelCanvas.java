@@ -342,97 +342,13 @@ public class ModelCanvas extends Canvas {
         redraw();
     }
 
-    // --- High-level mutation methods for PropertiesPanel ---
-    // Each wraps saveUndoState → editor.setXxx → regenerateAndRedraw,
-    // encapsulating the mutation protocol so callers don't need to know it.
-
-    public void applyStockInitialValue(String name, double value) {
+    /**
+     * Applies a model mutation with undo support: saves undo state, runs the
+     * mutation, then regenerates connectors and redraws.
+     */
+    public void applyMutation(Runnable mutation) {
         saveUndoState();
-        editor.setStockInitialValue(name, value);
-        regenerateAndRedraw();
-    }
-
-    public void applyStockUnit(String name, String unit) {
-        saveUndoState();
-        editor.setStockUnit(name, unit);
-        regenerateAndRedraw();
-    }
-
-    public void applyStockNegativeValuePolicy(String name, String policy) {
-        saveUndoState();
-        editor.setStockNegativeValuePolicy(name, policy);
-        regenerateAndRedraw();
-    }
-
-    public void applyFlowEquation(String name, String equation) {
-        saveUndoState();
-        editor.setFlowEquation(name, equation);
-        regenerateAndRedraw();
-    }
-
-    public void applyFlowTimeUnit(String name, String timeUnit) {
-        saveUndoState();
-        editor.setFlowTimeUnit(name, timeUnit);
-        regenerateAndRedraw();
-    }
-
-    public void applyAuxEquation(String name, String equation) {
-        saveUndoState();
-        editor.setAuxEquation(name, equation);
-        regenerateAndRedraw();
-    }
-
-    public void applyAuxUnit(String name, String unit) {
-        saveUndoState();
-        editor.setAuxUnit(name, unit);
-        regenerateAndRedraw();
-    }
-
-    public void applyConstantValue(String name, double value) {
-        saveUndoState();
-        editor.setConstantValue(name, value);
-        regenerateAndRedraw();
-    }
-
-    public void applyConstantUnit(String name, String unit) {
-        saveUndoState();
-        editor.setConstantUnit(name, unit);
-        regenerateAndRedraw();
-    }
-
-    public void applyLookupTable(String name, LookupTableDef updated) {
-        saveUndoState();
-        editor.setLookupTable(name, updated);
-        regenerateAndRedraw();
-    }
-
-    public void applyStockComment(String name, String comment) {
-        saveUndoState();
-        editor.setStockComment(name, comment);
-        regenerateAndRedraw();
-    }
-
-    public void applyFlowComment(String name, String comment) {
-        saveUndoState();
-        editor.setFlowComment(name, comment);
-        regenerateAndRedraw();
-    }
-
-    public void applyAuxComment(String name, String comment) {
-        saveUndoState();
-        editor.setAuxComment(name, comment);
-        regenerateAndRedraw();
-    }
-
-    public void applyConstantComment(String name, String comment) {
-        saveUndoState();
-        editor.setConstantComment(name, comment);
-        regenerateAndRedraw();
-    }
-
-    public void applyLookupComment(String name, String comment) {
-        saveUndoState();
-        editor.setLookupComment(name, comment);
+        mutation.run();
         regenerateAndRedraw();
     }
 

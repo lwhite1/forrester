@@ -101,7 +101,7 @@ class StockForm implements ElementForm {
             if (stock == null || stock.initialValue() == value) {
                 return;
             }
-            ctx.canvas.applyStockInitialValue(ctx.elementName, value);
+            ctx.canvas.applyMutation(() -> ctx.editor.setStockInitialValue(ctx.elementName, value));
         } catch (NumberFormatException ignored) {
             StockDef stock = ctx.editor.getStockByName(ctx.elementName);
             if (stock != null) {
@@ -116,7 +116,7 @@ class StockForm implements ElementForm {
         if (stock != null && unit.equals(stock.unit())) {
             return;
         }
-        ctx.canvas.applyStockUnit(ctx.elementName, unit);
+        ctx.canvas.applyMutation(() -> ctx.editor.setStockUnit(ctx.elementName, unit));
     }
 
     private void commitPolicy() {
@@ -127,7 +127,7 @@ class StockForm implements ElementForm {
                 stock.negativeValuePolicy() != null ? stock.negativeValuePolicy() : "CLAMP_TO_ZERO")) {
             return;
         }
-        ctx.canvas.applyStockNegativeValuePolicy(ctx.elementName, policyValue);
+        ctx.canvas.applyMutation(() -> ctx.editor.setStockNegativeValuePolicy(ctx.elementName, policyValue));
     }
 
     private void commitComment(TextArea area) {
@@ -137,7 +137,7 @@ class StockForm implements ElementForm {
         if (stock == null || Objects.equals(comment, stock.comment())) {
             return;
         }
-        ctx.canvas.applyStockComment(ctx.elementName, comment);
+        ctx.canvas.applyMutation(() -> ctx.editor.setStockComment(ctx.elementName, comment));
     }
 
     /**

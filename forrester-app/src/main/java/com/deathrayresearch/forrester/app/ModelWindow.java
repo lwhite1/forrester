@@ -1,5 +1,6 @@
 package com.deathrayresearch.forrester.app;
 
+import com.deathrayresearch.forrester.app.canvas.AnalysisRunner;
 import com.deathrayresearch.forrester.app.canvas.ActivityLogPanel;
 import com.deathrayresearch.forrester.app.canvas.BreadcrumbBar;
 import com.deathrayresearch.forrester.app.canvas.CanvasToolBar;
@@ -128,6 +129,7 @@ public class ModelWindow {
     private MenuItem undoItem;
     private MenuItem redoItem;
     private ModelEditListener logListener;
+    private AnalysisRunner analysisRunner;
 
     private final ModelDefinitionSerializer serializer = new ModelDefinitionSerializer();
 
@@ -143,6 +145,7 @@ public class ModelWindow {
         canvas.setUndoManager(undoManager);
 
         statusBar = new StatusBar();
+        analysisRunner = new AnalysisRunner(statusBar, this::showError);
 
         CanvasToolBar toolBar = new CanvasToolBar();
         toolBar.setOnToolChanged(tool -> {
@@ -616,33 +619,14 @@ public class ModelWindow {
         ModelDefinition def = canvas.toModelDefinition();
         SimulationSettings finalSettings = settings;
 
-        statusBar.showProgress("Simulating...");
-
-        javafx.concurrent.Task<SimulationRunner.SimulationResult> task =
-                new javafx.concurrent.Task<>() {
-            @Override
-            protected SimulationRunner.SimulationResult call() {
-                SimulationRunner runner = new SimulationRunner();
-                return runner.run(def, finalSettings);
-            }
-        };
-
-        task.setOnSucceeded(e -> {
-            statusBar.clearProgress();
-            dashboardPanel.showSimulationResult(task.getValue());
-            switchToDashboard();
-            fireLogEvent(ModelEditListener::onSimulationRun);
-        });
-
-        task.setOnFailed(e -> {
-            statusBar.clearProgress();
-            Throwable ex = task.getException();
-            showError("Simulation Error", ex != null ? ex.getMessage() : null);
-        });
-
-        Thread thread = new Thread(task, "simulation-runner");
-        thread.setDaemon(true);
-        thread.start();
+        analysisRunner.run("Simulating...",
+                () -> new SimulationRunner().run(def, finalSettings),
+                result -> {
+                    dashboardPanel.showSimulationResult(result);
+                    switchToDashboard();
+                    fireLogEvent(ModelEditListener::onSimulationRun);
+                },
+                "Simulation Error");
     }
 
     private void runParameterSweep() {
@@ -674,45 +658,30 @@ public class ModelWindow {
         ModelDefinition def = canvas.toModelDefinition();
         SimulationSettings finalSettings = settings;
 
-        statusBar.showProgress("Running sweep...");
+        analysisRunner.run("Running sweep...",
+                () -> {
+                    TimeUnit timeStep = ModelDefinitionFactory.resolveTimeStep(finalSettings);
+                    Quantity duration = ModelDefinitionFactory.resolveDuration(finalSettings);
+                    DoubleFunction<Model> factory = ModelDefinitionFactory.createSingleParamFactory(
+                            def, finalSettings, config.parameterName());
 
-        javafx.concurrent.Task<SweepResult> task = new javafx.concurrent.Task<>() {
-            @Override
-            protected SweepResult call() {
-                TimeUnit timeStep = ModelDefinitionFactory.resolveTimeStep(finalSettings);
-                Quantity duration = ModelDefinitionFactory.resolveDuration(finalSettings);
-                DoubleFunction<Model> factory = ModelDefinitionFactory.createSingleParamFactory(
-                        def, finalSettings, config.parameterName());
-
-                return ParameterSweep.builder()
-                        .parameterName(config.parameterName())
-                        .parameterValues(ParameterSweep.linspace(
-                                config.start(), config.end(), config.step()))
-                        .modelFactory(factory)
-                        .timeStep(timeStep)
-                        .duration(duration)
-                        .build()
-                        .execute();
-            }
-        };
-
-        task.setOnSucceeded(e -> {
-            statusBar.clearProgress();
-            dashboardPanel.showSweepResult(task.getValue(), config.parameterName());
-            switchToDashboard();
-            fireLogEvent(l -> l.onAnalysisRun("Parameter Sweep",
-                    config.parameterName() + " [" + config.start() + ".." + config.end() + "]"));
-        });
-
-        task.setOnFailed(e -> {
-            statusBar.clearProgress();
-            Throwable ex = task.getException();
-            showError("Sweep Error", ex != null ? ex.getMessage() : null);
-        });
-
-        Thread thread = new Thread(task, "parameter-sweep");
-        thread.setDaemon(true);
-        thread.start();
+                    return ParameterSweep.builder()
+                            .parameterName(config.parameterName())
+                            .parameterValues(ParameterSweep.linspace(
+                                    config.start(), config.end(), config.step()))
+                            .modelFactory(factory)
+                            .timeStep(timeStep)
+                            .duration(duration)
+                            .build()
+                            .execute();
+                },
+                result -> {
+                    dashboardPanel.showSweepResult(result, config.parameterName());
+                    switchToDashboard();
+                    fireLogEvent(l -> l.onAnalysisRun("Parameter Sweep",
+                            config.parameterName() + " [" + config.start() + ".." + config.end() + "]"));
+                },
+                "Sweep Error");
     }
 
     private void runMultiParameterSweep() {
@@ -740,50 +709,35 @@ public class ModelWindow {
         ModelDefinition def = canvas.toModelDefinition();
         SimulationSettings finalSettings = settings;
 
-        statusBar.showProgress("Running multi-parameter sweep...");
+        analysisRunner.run("Running multi-parameter sweep...",
+                () -> {
+                    TimeUnit timeStep = ModelDefinitionFactory.resolveTimeStep(finalSettings);
+                    Quantity duration = ModelDefinitionFactory.resolveDuration(finalSettings);
+                    Function<Map<String, Double>, Model> factory =
+                            ModelDefinitionFactory.createFactory(def, finalSettings);
 
-        javafx.concurrent.Task<MultiSweepResult> task = new javafx.concurrent.Task<>() {
-            @Override
-            protected MultiSweepResult call() {
-                TimeUnit timeStep = ModelDefinitionFactory.resolveTimeStep(finalSettings);
-                Quantity duration = ModelDefinitionFactory.resolveDuration(finalSettings);
-                Function<Map<String, Double>, Model> factory =
-                        ModelDefinitionFactory.createFactory(def, finalSettings);
+                    MultiParameterSweep.Builder builder = MultiParameterSweep.builder()
+                            .modelFactory(factory)
+                            .timeStep(timeStep)
+                            .duration(duration);
 
-                MultiParameterSweep.Builder builder = MultiParameterSweep.builder()
-                        .modelFactory(factory)
-                        .timeStep(timeStep)
-                        .duration(duration);
+                    for (MultiParameterSweepDialog.ParamConfig p : config.parameters()) {
+                        builder.parameter(p.name(),
+                                ParameterSweep.linspace(p.start(), p.end(), p.step()));
+                    }
 
-                for (MultiParameterSweepDialog.ParamConfig p : config.parameters()) {
-                    builder.parameter(p.name(),
-                            ParameterSweep.linspace(p.start(), p.end(), p.step()));
-                }
-
-                return builder.build().execute();
-            }
-        };
-
-        task.setOnSucceeded(e -> {
-            statusBar.clearProgress();
-            dashboardPanel.showMultiSweepResult(task.getValue());
-            switchToDashboard();
-            String paramSummary = config.parameters().stream()
-                    .map(MultiParameterSweepDialog.ParamConfig::name)
-                    .reduce((a, b) -> a + ", " + b)
-                    .orElse("");
-            fireLogEvent(l -> l.onAnalysisRun("Multi-Parameter Sweep", paramSummary));
-        });
-
-        task.setOnFailed(e -> {
-            statusBar.clearProgress();
-            Throwable ex = task.getException();
-            showError("Multi-Sweep Error", ex != null ? ex.getMessage() : null);
-        });
-
-        Thread thread = new Thread(task, "multi-parameter-sweep");
-        thread.setDaemon(true);
-        thread.start();
+                    return builder.build().execute();
+                },
+                result -> {
+                    dashboardPanel.showMultiSweepResult(result);
+                    switchToDashboard();
+                    String paramSummary = config.parameters().stream()
+                            .map(MultiParameterSweepDialog.ParamConfig::name)
+                            .reduce((a, b) -> a + ", " + b)
+                            .orElse("");
+                    fireLogEvent(l -> l.onAnalysisRun("Multi-Parameter Sweep", paramSummary));
+                },
+                "Multi-Sweep Error");
     }
 
     private void runMonteCarlo() {
@@ -811,54 +765,40 @@ public class ModelWindow {
         ModelDefinition def = canvas.toModelDefinition();
         SimulationSettings finalSettings = settings;
 
-        statusBar.showProgress("Running Monte Carlo (" + config.iterations() + " iterations)...");
+        analysisRunner.run(
+                "Running Monte Carlo (" + config.iterations() + " iterations)...",
+                () -> {
+                    TimeUnit timeStep = ModelDefinitionFactory.resolveTimeStep(finalSettings);
+                    Quantity duration = ModelDefinitionFactory.resolveDuration(finalSettings);
+                    Function<Map<String, Double>, Model> factory =
+                            ModelDefinitionFactory.createFactory(def, finalSettings);
 
-        javafx.concurrent.Task<MonteCarloResult> task = new javafx.concurrent.Task<>() {
-            @Override
-            protected MonteCarloResult call() {
-                TimeUnit timeStep = ModelDefinitionFactory.resolveTimeStep(finalSettings);
-                Quantity duration = ModelDefinitionFactory.resolveDuration(finalSettings);
-                Function<Map<String, Double>, Model> factory =
-                        ModelDefinitionFactory.createFactory(def, finalSettings);
+                    MonteCarlo.Builder builder = MonteCarlo.builder()
+                            .modelFactory(factory)
+                            .iterations(config.iterations())
+                            .sampling("RANDOM".equals(config.samplingMethod())
+                                    ? SamplingMethod.RANDOM : SamplingMethod.LATIN_HYPERCUBE)
+                            .seed(config.seed())
+                            .timeStep(timeStep)
+                            .duration(duration);
 
-                MonteCarlo.Builder builder = MonteCarlo.builder()
-                        .modelFactory(factory)
-                        .iterations(config.iterations())
-                        .sampling("RANDOM".equals(config.samplingMethod())
-                                ? SamplingMethod.RANDOM : SamplingMethod.LATIN_HYPERCUBE)
-                        .seed(config.seed())
-                        .timeStep(timeStep)
-                        .duration(duration);
-
-                for (MonteCarloDialog.ParameterConfig p : config.parameters()) {
-                    if (p.distribution() == MonteCarloDialog.DistributionType.NORMAL) {
-                        builder.parameter(p.name(), new NormalDistribution(p.param1(), p.param2()));
-                    } else {
-                        builder.parameter(p.name(), new UniformRealDistribution(p.param1(), p.param2()));
+                    for (MonteCarloDialog.ParameterConfig p : config.parameters()) {
+                        if (p.distribution() == MonteCarloDialog.DistributionType.NORMAL) {
+                            builder.parameter(p.name(), new NormalDistribution(p.param1(), p.param2()));
+                        } else {
+                            builder.parameter(p.name(), new UniformRealDistribution(p.param1(), p.param2()));
+                        }
                     }
-                }
 
-                return builder.build().execute();
-            }
-        };
-
-        task.setOnSucceeded(e -> {
-            statusBar.clearProgress();
-            dashboardPanel.showMonteCarloResult(task.getValue());
-            switchToDashboard();
-            fireLogEvent(l -> l.onAnalysisRun("Monte Carlo",
-                    config.iterations() + " iterations, " + config.parameters().size() + " params"));
-        });
-
-        task.setOnFailed(e -> {
-            statusBar.clearProgress();
-            Throwable ex = task.getException();
-            showError("Monte Carlo Error", ex != null ? ex.getMessage() : null);
-        });
-
-        Thread thread = new Thread(task, "monte-carlo");
-        thread.setDaemon(true);
-        thread.start();
+                    return builder.build().execute();
+                },
+                result -> {
+                    dashboardPanel.showMonteCarloResult(result);
+                    switchToDashboard();
+                    fireLogEvent(l -> l.onAnalysisRun("Monte Carlo",
+                            config.iterations() + " iterations, " + config.parameters().size() + " params"));
+                },
+                "Monte Carlo Error");
     }
 
     private void runOptimization() {
@@ -892,66 +832,52 @@ public class ModelWindow {
         ModelDefinition def = canvas.toModelDefinition();
         SimulationSettings finalSettings = settings;
 
-        statusBar.showProgress("Optimizing (" + config.maxEvaluations() + " max evals)...");
+        analysisRunner.run(
+                "Optimizing (" + config.maxEvaluations() + " max evals)...",
+                () -> {
+                    TimeUnit timeStep = ModelDefinitionFactory.resolveTimeStep(finalSettings);
+                    Quantity duration = ModelDefinitionFactory.resolveDuration(finalSettings);
+                    Function<Map<String, Double>, Model> factory =
+                            ModelDefinitionFactory.createFactory(def, finalSettings);
 
-        javafx.concurrent.Task<OptimizationResult> task = new javafx.concurrent.Task<>() {
-            @Override
-            protected OptimizationResult call() {
-                TimeUnit timeStep = ModelDefinitionFactory.resolveTimeStep(finalSettings);
-                Quantity duration = ModelDefinitionFactory.resolveDuration(finalSettings);
-                Function<Map<String, Double>, Model> factory =
-                        ModelDefinitionFactory.createFactory(def, finalSettings);
+                    ObjectiveFunction objective = switch (config.objectiveType()) {
+                        case MINIMIZE -> Objectives.minimize(config.targetVariable());
+                        case MAXIMIZE -> Objectives.maximize(config.targetVariable());
+                        case TARGET -> Objectives.target(config.targetVariable(), config.targetValue());
+                        case MINIMIZE_PEAK -> Objectives.minimizePeak(config.targetVariable());
+                    };
 
-                ObjectiveFunction objective = switch (config.objectiveType()) {
-                    case MINIMIZE -> Objectives.minimize(config.targetVariable());
-                    case MAXIMIZE -> Objectives.maximize(config.targetVariable());
-                    case TARGET -> Objectives.target(config.targetVariable(), config.targetValue());
-                    case MINIMIZE_PEAK -> Objectives.minimizePeak(config.targetVariable());
-                };
+                    OptimizationAlgorithm algorithm = switch (config.algorithm()) {
+                        case "BOBYQA" -> OptimizationAlgorithm.BOBYQA;
+                        case "CMAES" -> OptimizationAlgorithm.CMAES;
+                        default -> OptimizationAlgorithm.NELDER_MEAD;
+                    };
 
-                OptimizationAlgorithm algorithm = switch (config.algorithm()) {
-                    case "BOBYQA" -> OptimizationAlgorithm.BOBYQA;
-                    case "CMAES" -> OptimizationAlgorithm.CMAES;
-                    default -> OptimizationAlgorithm.NELDER_MEAD;
-                };
+                    Optimizer.Builder builder = Optimizer.builder()
+                            .modelFactory(factory)
+                            .objective(objective)
+                            .algorithm(algorithm)
+                            .maxEvaluations(config.maxEvaluations())
+                            .timeStep(timeStep)
+                            .duration(duration);
 
-                Optimizer.Builder builder = Optimizer.builder()
-                        .modelFactory(factory)
-                        .objective(objective)
-                        .algorithm(algorithm)
-                        .maxEvaluations(config.maxEvaluations())
-                        .timeStep(timeStep)
-                        .duration(duration);
-
-                for (OptimizerDialog.ParamConfig p : config.parameters()) {
-                    if (Double.isNaN(p.initialGuess())) {
-                        builder.parameter(p.name(), p.lower(), p.upper());
-                    } else {
-                        builder.parameter(p.name(), p.lower(), p.upper(), p.initialGuess());
+                    for (OptimizerDialog.ParamConfig p : config.parameters()) {
+                        if (Double.isNaN(p.initialGuess())) {
+                            builder.parameter(p.name(), p.lower(), p.upper());
+                        } else {
+                            builder.parameter(p.name(), p.lower(), p.upper(), p.initialGuess());
+                        }
                     }
-                }
 
-                return builder.build().execute();
-            }
-        };
-
-        task.setOnSucceeded(e -> {
-            statusBar.clearProgress();
-            dashboardPanel.showOptimizationResult(task.getValue());
-            switchToDashboard();
-            fireLogEvent(l -> l.onAnalysisRun("Optimization",
-                    config.algorithm() + ", " + config.parameters().size() + " params"));
-        });
-
-        task.setOnFailed(e -> {
-            statusBar.clearProgress();
-            Throwable ex = task.getException();
-            showError("Optimization Error", ex != null ? ex.getMessage() : null);
-        });
-
-        Thread thread = new Thread(task, "optimizer");
-        thread.setDaemon(true);
-        thread.start();
+                    return builder.build().execute();
+                },
+                result -> {
+                    dashboardPanel.showOptimizationResult(result);
+                    switchToDashboard();
+                    fireLogEvent(l -> l.onAnalysisRun("Optimization",
+                            config.algorithm() + ", " + config.parameters().size() + " params"));
+                },
+                "Optimization Error");
     }
 
     private void switchToDashboard() {
@@ -963,29 +889,15 @@ public class ModelWindow {
     private void validateModel() {
         ModelDefinition def = canvas.toModelDefinition();
 
-        javafx.concurrent.Task<ValidationResult> task = new javafx.concurrent.Task<>() {
-            @Override
-            protected ValidationResult call() {
-                return ModelValidator.validate(def);
-            }
-        };
-
-        task.setOnSucceeded(e -> {
-            ValidationResult result = task.getValue();
-            statusBar.updateValidation(result.errorCount(), result.warningCount());
-            ValidationDialog dialog = new ValidationDialog(result, canvas::selectElement);
-            dialog.show();
-            fireLogEvent(l -> l.onValidation(result.errorCount(), result.warningCount()));
-        });
-
-        task.setOnFailed(e -> {
-            Throwable ex = task.getException();
-            showError("Validation Error", ex != null ? ex.getMessage() : null);
-        });
-
-        Thread thread = new Thread(task, "model-validator");
-        thread.setDaemon(true);
-        thread.start();
+        analysisRunner.run(
+                () -> ModelValidator.validate(def),
+                result -> {
+                    statusBar.updateValidation(result.errorCount(), result.warningCount());
+                    ValidationDialog dialog = new ValidationDialog(result, canvas::selectElement);
+                    dialog.show();
+                    fireLogEvent(l -> l.onValidation(result.errorCount(), result.warningCount()));
+                },
+                "Validation Error");
     }
 
     private void fireLogEvent(java.util.function.Consumer<ModelEditListener> event) {
@@ -1147,6 +1059,9 @@ public class ModelWindow {
     public void close() {
         if (editor != null && logListener != null) {
             editor.removeListener(logListener);
+        }
+        if (analysisRunner != null) {
+            analysisRunner.shutdown();
         }
         stage.close();
     }

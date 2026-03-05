@@ -83,7 +83,7 @@ class ConstantForm implements ElementForm {
         if (constant == null || Objects.equals(comment, constant.comment())) {
             return;
         }
-        ctx.canvas.applyConstantComment(ctx.elementName, comment);
+        ctx.canvas.applyMutation(() -> ctx.editor.setConstantComment(ctx.elementName, comment));
     }
 
     private void commitValue(TextField field) {
@@ -93,7 +93,7 @@ class ConstantForm implements ElementForm {
             if (constant == null || constant.value() == value) {
                 return;
             }
-            ctx.canvas.applyConstantValue(ctx.elementName, value);
+            ctx.canvas.applyMutation(() -> ctx.editor.setConstantValue(ctx.elementName, value));
         } catch (NumberFormatException ignored) {
             ConstantDef constant = ctx.editor.getConstantByName(ctx.elementName);
             if (constant != null) {
@@ -108,6 +108,6 @@ class ConstantForm implements ElementForm {
         if (constant != null && unit.equals(constant.unit())) {
             return;
         }
-        ctx.canvas.applyConstantUnit(ctx.elementName, unit);
+        ctx.canvas.applyMutation(() -> ctx.editor.setConstantUnit(ctx.elementName, unit));
     }
 }

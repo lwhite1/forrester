@@ -101,7 +101,7 @@ class FlowForm implements ElementForm {
         if (flow == null || Objects.equals(comment, flow.comment())) {
             return;
         }
-        ctx.canvas.applyFlowComment(ctx.elementName, comment);
+        ctx.canvas.applyMutation(() -> ctx.editor.setFlowComment(ctx.elementName, comment));
     }
 
     private void commitEquation(TextField field) {
@@ -117,7 +117,7 @@ class FlowForm implements ElementForm {
         if (flow != null && equation.equals(flow.equation())) {
             return;
         }
-        ctx.canvas.applyFlowEquation(ctx.elementName, equation);
+        ctx.canvas.applyMutation(() -> ctx.editor.setFlowEquation(ctx.elementName, equation));
     }
 
     private void commitTimeUnit(ComboBox<String> box) {
@@ -133,6 +133,6 @@ class FlowForm implements ElementForm {
         if (flow != null && timeUnit.equals(flow.timeUnit())) {
             return;
         }
-        ctx.canvas.applyFlowTimeUnit(ctx.elementName, timeUnit);
+        ctx.canvas.applyMutation(() -> ctx.editor.setFlowTimeUnit(ctx.elementName, timeUnit));
     }
 }
