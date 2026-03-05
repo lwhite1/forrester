@@ -1,5 +1,7 @@
 package com.deathrayresearch.forrester.app.canvas;
 
+import com.deathrayresearch.forrester.model.def.ElementType;
+
 /**
  * Shared geometry utilities for flow and connection rendering/hit-testing.
  * Centralizes coordinate calculations used by both CanvasRenderer and
@@ -35,8 +37,32 @@ public final class FlowGeometry {
     }
 
     /**
+     * Clips a line from the center of a rhombus toward a target point,
+     * returning the intersection with the rhombus border.
+     * The rhombus boundary satisfies {@code |x/hw| + |y/hh| = 1}.
+     */
+    public static Point2D clipToRhombus(double cx, double cy, double hw, double hh,
+                                         double targetX, double targetY) {
+        double dx = targetX - cx;
+        double dy = targetY - cy;
+        if (dx == 0 && dy == 0) {
+            return new Point2D(cx, cy);
+        }
+
+        double absDx = Math.abs(dx);
+        double absDy = Math.abs(dy);
+        double denom = (hw > 0 ? absDx / hw : 0) + (hh > 0 ? absDy / hh : 0);
+        if (denom < 1e-9) {
+            return new Point2D(cx, cy);
+        }
+
+        double scale = 1.0 / denom;
+        return new Point2D(cx + dx * scale, cy + dy * scale);
+    }
+
+    /**
      * Computes the clipped endpoint where a connection line exits an element's border.
-     * Looks up the element's position and effective size, then clips toward the target.
+     * Uses rhombus clipping for flow diamonds and rectangular clipping for all other elements.
      */
     public static Point2D clipToElement(CanvasState state, String elementName,
                                          double targetX, double targetY) {
@@ -44,6 +70,11 @@ public final class FlowGeometry {
         double cy = state.getY(elementName);
         double halfW = LayoutMetrics.effectiveWidth(state, elementName) / 2;
         double halfH = LayoutMetrics.effectiveHeight(state, elementName) / 2;
+
+        ElementType type = state.getType(elementName);
+        if (type == ElementType.FLOW) {
+            return clipToRhombus(cx, cy, halfW, halfH, targetX, targetY);
+        }
         return clipToBorder(cx, cy, halfW, halfH, targetX, targetY);
     }
 }

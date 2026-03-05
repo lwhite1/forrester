@@ -66,16 +66,27 @@ public final class ConnectionRenderer {
             }
         }
 
-        // Source → diamond segment
+        // Source → diamond segment (no arrowhead — draw full length)
         gc.setStroke(ColorPalette.MATERIAL_FLOW);
         gc.setLineWidth(LayoutMetrics.MATERIAL_FLOW_WIDTH);
         gc.setLineDashes();
         gc.strokeLine(pipeSourceX, pipeSourceY, midX, midY);
 
-        // Diamond → sink segment
-        gc.strokeLine(midX, midY, pipeSinkX, pipeSinkY);
+        // Diamond → sink segment: stop line at arrowhead base
+        double sinkDx = pipeSinkX - midX;
+        double sinkDy = pipeSinkY - midY;
+        double sinkDist = Math.sqrt(sinkDx * sinkDx + sinkDy * sinkDy);
+        double lineEndX = pipeSinkX;
+        double lineEndY = pipeSinkY;
+        if (sinkDist > LayoutMetrics.ARROWHEAD_LENGTH) {
+            double ux = sinkDx / sinkDist;
+            double uy = sinkDy / sinkDist;
+            lineEndX = pipeSinkX - ux * LayoutMetrics.ARROWHEAD_LENGTH;
+            lineEndY = pipeSinkY - uy * LayoutMetrics.ARROWHEAD_LENGTH;
+        }
+        gc.strokeLine(midX, midY, lineEndX, lineEndY);
 
-        // Arrowhead at clipped sink end
+        // Arrowhead fills the gap from lineEnd to pipeSink
         drawArrowhead(gc, midX, midY, pipeSinkX, pipeSinkY,
                 LayoutMetrics.ARROWHEAD_LENGTH, LayoutMetrics.ARROWHEAD_WIDTH,
                 ColorPalette.MATERIAL_FLOW);
@@ -87,10 +98,23 @@ public final class ConnectionRenderer {
     public static void drawInfoLink(GraphicsContext gc,
                                     double fromX, double fromY,
                                     double toX, double toY) {
+        // Stop line at arrowhead base so it doesn't extend behind the arrowhead
+        double dx = toX - fromX;
+        double dy = toY - fromY;
+        double dist = Math.sqrt(dx * dx + dy * dy);
+        double lineToX = toX;
+        double lineToY = toY;
+        if (dist > LayoutMetrics.INFO_ARROWHEAD_LENGTH) {
+            double ux = dx / dist;
+            double uy = dy / dist;
+            lineToX = toX - ux * LayoutMetrics.INFO_ARROWHEAD_LENGTH;
+            lineToY = toY - uy * LayoutMetrics.INFO_ARROWHEAD_LENGTH;
+        }
+
         gc.setStroke(ColorPalette.INFO_LINK);
         gc.setLineWidth(LayoutMetrics.INFO_LINK_WIDTH);
         gc.setLineDashes(LayoutMetrics.INFO_LINK_DASH_LENGTH, LayoutMetrics.INFO_LINK_DASH_GAP);
-        gc.strokeLine(fromX, fromY, toX, toY);
+        gc.strokeLine(fromX, fromY, lineToX, lineToY);
         gc.setLineDashes();
 
         drawArrowhead(gc, fromX, fromY, toX, toY,

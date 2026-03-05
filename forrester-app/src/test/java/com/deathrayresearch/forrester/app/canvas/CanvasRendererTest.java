@@ -65,4 +65,57 @@ class CanvasRendererTest {
             assertThat(result.y()).isCloseTo(100, within(0.001));
         }
     }
+
+    @Nested
+    @DisplayName("clipToRhombus")
+    class ClipToRhombus {
+
+        @Test
+        void shouldClipToRightVertex() {
+            // Target directly to the right: scale = 1 / (|15|/15 + 0/15) = 1
+            FlowGeometry.Point2D result = FlowGeometry.clipToRhombus(100, 100, 15, 15, 200, 100);
+
+            assertThat(result.x()).isCloseTo(115, within(0.001));
+            assertThat(result.y()).isCloseTo(100, within(0.001));
+        }
+
+        @Test
+        void shouldClipToTopVertex() {
+            FlowGeometry.Point2D result = FlowGeometry.clipToRhombus(100, 100, 15, 15, 100, 0);
+
+            assertThat(result.x()).isCloseTo(100, within(0.001));
+            assertThat(result.y()).isCloseTo(85, within(0.001));
+        }
+
+        @Test
+        void shouldClipDiagonalToRhombusEdge() {
+            // 45-degree target: scale = 1 / (1/15 + 1/15) = 15/2 = 7.5
+            // Clipped point = (100 + 7.5, 100 + 7.5) = (107.5, 107.5)
+            FlowGeometry.Point2D result = FlowGeometry.clipToRhombus(100, 100, 15, 15, 200, 200);
+
+            assertThat(result.x()).isCloseTo(107.5, within(0.001));
+            assertThat(result.y()).isCloseTo(107.5, within(0.001));
+        }
+
+        @Test
+        void shouldDifferFromRectangularClipOnDiagonal() {
+            // For a 30x30 diamond, rectangular clip at 45 degrees gives (115, 115)
+            // Rhombus clip at 45 degrees gives (107.5, 107.5) — closer to center
+            FlowGeometry.Point2D rect = FlowGeometry.clipToBorder(100, 100, 15, 15, 200, 200);
+            FlowGeometry.Point2D rhombus = FlowGeometry.clipToRhombus(100, 100, 15, 15, 200, 200);
+
+            // Rhombus point should be strictly closer to center
+            double rectDist = Math.sqrt(Math.pow(rect.x() - 100, 2) + Math.pow(rect.y() - 100, 2));
+            double rhombusDist = Math.sqrt(Math.pow(rhombus.x() - 100, 2) + Math.pow(rhombus.y() - 100, 2));
+            assertThat(rhombusDist).isLessThan(rectDist);
+        }
+
+        @Test
+        void shouldReturnCenterWhenTargetIsCenter() {
+            FlowGeometry.Point2D result = FlowGeometry.clipToRhombus(100, 100, 15, 15, 100, 100);
+
+            assertThat(result.x()).isCloseTo(100, within(0.001));
+            assertThat(result.y()).isCloseTo(100, within(0.001));
+        }
+    }
 }

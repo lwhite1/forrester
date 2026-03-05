@@ -173,21 +173,32 @@ public final class SvgExporter {
                 writeCloud(w, sinkX, sinkY);
             }
 
-            // Source → diamond
+            // Source → diamond (no arrowhead — full length)
             w.printf(Locale.US,
                     "  <line x1=\"%.2f\" y1=\"%.2f\" x2=\"%.2f\" y2=\"%.2f\" " +
                     "stroke=\"%s\" stroke-width=\"%.1f\"/>%n",
                     sourceX, sourceY, midX, midY,
                     svgColor(ColorPalette.MATERIAL_FLOW), LayoutMetrics.MATERIAL_FLOW_WIDTH);
 
-            // Diamond → sink
+            // Diamond → sink: stop line at arrowhead base
+            double sinkDx = sinkX - midX;
+            double sinkDy = sinkY - midY;
+            double sinkDist = Math.sqrt(sinkDx * sinkDx + sinkDy * sinkDy);
+            double lineEndX = sinkX;
+            double lineEndY = sinkY;
+            if (sinkDist > LayoutMetrics.ARROWHEAD_LENGTH) {
+                double ux = sinkDx / sinkDist;
+                double uy = sinkDy / sinkDist;
+                lineEndX = sinkX - ux * LayoutMetrics.ARROWHEAD_LENGTH;
+                lineEndY = sinkY - uy * LayoutMetrics.ARROWHEAD_LENGTH;
+            }
             w.printf(Locale.US,
                     "  <line x1=\"%.2f\" y1=\"%.2f\" x2=\"%.2f\" y2=\"%.2f\" " +
                     "stroke=\"%s\" stroke-width=\"%.1f\"/>%n",
-                    midX, midY, sinkX, sinkY,
+                    midX, midY, lineEndX, lineEndY,
                     svgColor(ColorPalette.MATERIAL_FLOW), LayoutMetrics.MATERIAL_FLOW_WIDTH);
 
-            // Arrowhead at sink
+            // Arrowhead fills gap from lineEnd to sink
             writeArrowhead(w, midX, midY, sinkX, sinkY,
                     LayoutMetrics.ARROWHEAD_LENGTH, LayoutMetrics.ARROWHEAD_WIDTH,
                     ColorPalette.MATERIAL_FLOW);
@@ -211,11 +222,24 @@ public final class SvgExporter {
             FlowGeometry.Point2D cf = FlowGeometry.clipToElement(state, route.from(), toX, toY);
             FlowGeometry.Point2D ct = FlowGeometry.clipToElement(state, route.to(), fromX, fromY);
 
+            // Stop line at arrowhead base
+            double ldx = ct.x() - cf.x();
+            double ldy = ct.y() - cf.y();
+            double ldist = Math.sqrt(ldx * ldx + ldy * ldy);
+            double ltx = ct.x();
+            double lty = ct.y();
+            if (ldist > LayoutMetrics.INFO_ARROWHEAD_LENGTH) {
+                double lux = ldx / ldist;
+                double luy = ldy / ldist;
+                ltx = ct.x() - lux * LayoutMetrics.INFO_ARROWHEAD_LENGTH;
+                lty = ct.y() - luy * LayoutMetrics.INFO_ARROWHEAD_LENGTH;
+            }
+
             w.printf(Locale.US,
                     "  <line x1=\"%.2f\" y1=\"%.2f\" x2=\"%.2f\" y2=\"%.2f\" " +
                     "stroke=\"%s\" stroke-opacity=\"%.2f\" stroke-width=\"%.1f\" " +
                     "stroke-dasharray=\"%.0f %.0f\"/>%n",
-                    cf.x(), cf.y(), ct.x(), ct.y(),
+                    cf.x(), cf.y(), ltx, lty,
                     svgColor(ColorPalette.INFO_LINK), svgOpacity(ColorPalette.INFO_LINK),
                     LayoutMetrics.INFO_LINK_WIDTH,
                     LayoutMetrics.INFO_LINK_DASH_LENGTH, LayoutMetrics.INFO_LINK_DASH_GAP);

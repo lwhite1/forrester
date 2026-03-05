@@ -150,11 +150,10 @@ public final class AutoLayout {
     }
 
     /**
-     * Resolves overlaps within each Y band by nudging elements rightward.
-     * Elements are kept in their assigned band to avoid cross-band overlaps.
+     * Resolves overlaps within each Y band by redistributing elements symmetrically
+     * around their centroid, preserving order and maintaining a minimum gap.
      */
     private static void resolveOverlaps(List<ElementPlacement> placements) {
-        // Group indices by Y band
         Map<Double, List<Integer>> byY = new LinkedHashMap<>();
         for (int i = 0; i < placements.size(); i++) {
             byY.computeIfAbsent(placements.get(i).y(), k -> new ArrayList<>()).add(i);
@@ -165,23 +164,47 @@ public final class AutoLayout {
             if (indices.size() <= 1) {
                 continue;
             }
-            // Sort by X within the band
             indices.sort((a, b) -> Double.compare(placements.get(a).x(), placements.get(b).x()));
 
+            // Check if any overlaps exist
+            boolean hasOverlap = false;
             for (int i = 1; i < indices.size(); i++) {
                 ElementPlacement prev = placements.get(indices.get(i - 1));
                 ElementPlacement curr = placements.get(indices.get(i));
-                ElementSizes sp = ElementSizes.forType(prev.type());
-                ElementSizes sc = ElementSizes.forType(curr.type());
-
-                double prevRight = prev.x() + sp.width() / 2.0;
-                double currLeft = curr.x() - sc.width() / 2.0;
-
+                double prevRight = prev.x() + ElementSizes.forType(prev.type()).width() / 2.0;
+                double currLeft = curr.x() - ElementSizes.forType(curr.type()).width() / 2.0;
                 if (currLeft < prevRight + minGap) {
-                    double newX = prevRight + minGap + sc.width() / 2.0;
-                    placements.set(indices.get(i),
-                            new ElementPlacement(curr.name(), curr.type(), newX, curr.y()));
+                    hasOverlap = true;
+                    break;
                 }
+            }
+
+            if (!hasOverlap) {
+                continue;
+            }
+
+            // Compute centroid of current X positions
+            double centroid = 0;
+            for (int idx : indices) {
+                centroid += placements.get(idx).x();
+            }
+            centroid /= indices.size();
+
+            // Compute total span needed: sum of widths + gaps between elements
+            double totalSpan = 0;
+            for (int idx : indices) {
+                totalSpan += ElementSizes.forType(placements.get(idx).type()).width();
+            }
+            totalSpan += minGap * (indices.size() - 1);
+
+            // Place elements left-to-right starting from centroid - totalSpan/2
+            double cursor = centroid - totalSpan / 2.0;
+            for (int idx : indices) {
+                ElementPlacement ep = placements.get(idx);
+                double w = ElementSizes.forType(ep.type()).width();
+                double newX = cursor + w / 2.0;
+                placements.set(idx, new ElementPlacement(ep.name(), ep.type(), newX, ep.y()));
+                cursor += w + minGap;
             }
         }
     }
