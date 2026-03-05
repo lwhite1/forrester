@@ -20,7 +20,12 @@ import com.deathrayresearch.forrester.app.canvas.SimulationSettingsDialog;
 import com.deathrayresearch.forrester.app.canvas.StatusBar;
 import com.deathrayresearch.forrester.app.canvas.UndoManager;
 import com.deathrayresearch.forrester.app.canvas.ValidationDialog;
+import com.deathrayresearch.forrester.io.ImportResult;
 import com.deathrayresearch.forrester.io.json.ModelDefinitionSerializer;
+import com.deathrayresearch.forrester.io.vensim.VensimExporter;
+import com.deathrayresearch.forrester.io.vensim.VensimImporter;
+import com.deathrayresearch.forrester.io.xmile.XmileExporter;
+import com.deathrayresearch.forrester.io.xmile.XmileImporter;
 import com.deathrayresearch.forrester.measure.Quantity;
 import com.deathrayresearch.forrester.measure.TimeUnit;
 import com.deathrayresearch.forrester.model.Model;
@@ -363,59 +368,82 @@ public class ModelWindow {
         ModelDefinition empty = new ModelDefinitionBuilder()
                 .name("Untitled")
                 .build();
-        ViewDef emptyView = new ViewDef("Main", List.of(), List.of(), List.of());
+        loadDefinition(empty, null);
+        currentFile = null;
+        updateTitle();
+    }
 
+    void loadDefinition(ModelDefinition def, String displayName) {
         if (editor != null) {
             editor.removeListener(logListener);
         }
         editor = new ModelEditor();
         editor.addListener(logListener);
-        editor.loadFrom(empty);
+        editor.loadFrom(def);
+
+        ViewDef view;
+        if (!def.views().isEmpty()) {
+            view = def.views().getFirst();
+        } else if (def.stocks().isEmpty() && def.flows().isEmpty()
+                && def.auxiliaries().isEmpty() && def.constants().isEmpty()) {
+            view = new ViewDef("Main", List.of(), List.of(), List.of());
+        } else {
+            view = AutoLayout.layout(def);
+        }
+
         canvas.clearNavigation();
-        canvas.setModel(editor, emptyView);
+        canvas.setModel(editor, view);
         undoManager.clear();
-        currentFile = null;
         if (dashboardPanel != null) {
             dashboardPanel.clear();
         }
-        updateTitle();
+        if (displayName != null) {
+            fireLogEvent(l -> l.onModelOpened(displayName));
+        }
     }
 
     private void openFile() {
         FileChooser chooser = new FileChooser();
-        chooser.setTitle("Open Forrester Model");
-        chooser.getExtensionFilters().add(
-                new FileChooser.ExtensionFilter("Forrester Model (*.json)", "*.json"));
+        chooser.setTitle("Open Model");
+        chooser.getExtensionFilters().addAll(
+                new FileChooser.ExtensionFilter(
+                        "All Supported Models (*.json, *.mdl, *.xmile)", "*.json", "*.mdl", "*.xmile"),
+                new FileChooser.ExtensionFilter("Forrester Model (*.json)", "*.json"),
+                new FileChooser.ExtensionFilter("Vensim Model (*.mdl)", "*.mdl"),
+                new FileChooser.ExtensionFilter("XMILE Model (*.xmile)", "*.xmile"));
         File file = chooser.showOpenDialog(stage);
         if (file == null) {
             return;
         }
 
+        String name = file.getName();
+        String ext = name.contains(".") ? name.substring(name.lastIndexOf('.')).toLowerCase() : "";
+
         try {
-            ModelDefinition def = serializer.fromFile(file.toPath());
-            if (editor != null) {
-                editor.removeListener(logListener);
+            ModelDefinition def;
+            switch (ext) {
+                case ".mdl" -> {
+                    ImportResult result = new VensimImporter().importModel(file.toPath());
+                    def = result.definition();
+                    if (!result.isClean()) {
+                        showImportWarnings(name, result.warnings());
+                    }
+                }
+                case ".xmile" -> {
+                    ImportResult result = new XmileImporter().importModel(file.toPath());
+                    def = result.definition();
+                    if (!result.isClean()) {
+                        showImportWarnings(name, result.warnings());
+                    }
+                }
+                default -> def = serializer.fromFile(file.toPath());
             }
-            editor = new ModelEditor();
-            editor.addListener(logListener);
-            editor.loadFrom(def);
 
-            ViewDef view;
-            if (!def.views().isEmpty()) {
-                view = def.views().getFirst();
-            } else {
-                view = AutoLayout.layout(def);
-            }
+            loadDefinition(def, name);
 
-            canvas.clearNavigation();
-            canvas.setModel(editor, view);
-            undoManager.clear();
-            currentFile = file.toPath();
-            if (dashboardPanel != null) {
-                dashboardPanel.clear();
-            }
+            // For native JSON files, track the file for Save; for imports, force Save As
+            currentFile = ".json".equals(ext) ? file.toPath() : null;
             updateTitle();
-            fireLogEvent(l -> l.onModelOpened(file.getName()));
         } catch (IOException ex) {
             showError("Open Error", "Failed to open file: " + ex.getMessage());
         }
@@ -474,29 +502,9 @@ public class ModelWindow {
             String json = new String(in.readAllBytes(), StandardCharsets.UTF_8);
             ModelDefinition def = serializer.fromJson(json);
 
-            if (editor != null) {
-                editor.removeListener(logListener);
-            }
-            editor = new ModelEditor();
-            editor.addListener(logListener);
-            editor.loadFrom(def);
-
-            ViewDef view;
-            if (!def.views().isEmpty()) {
-                view = def.views().getFirst();
-            } else {
-                view = AutoLayout.layout(def);
-            }
-
-            canvas.clearNavigation();
-            canvas.setModel(editor, view);
-            undoManager.clear();
+            loadDefinition(def, name);
             currentFile = null;
-            if (dashboardPanel != null) {
-                dashboardPanel.clear();
-            }
             updateTitle();
-            fireLogEvent(l -> l.onModelOpened(name));
         } catch (Exception ex) {
             showError("Open Example", "Failed to load example: " + ex.getMessage());
         }
@@ -512,9 +520,11 @@ public class ModelWindow {
 
     private void saveAs() {
         FileChooser chooser = new FileChooser();
-        chooser.setTitle("Save Forrester Model");
-        chooser.getExtensionFilters().add(
-                new FileChooser.ExtensionFilter("Forrester Model (*.json)", "*.json"));
+        chooser.setTitle("Save Model");
+        chooser.getExtensionFilters().addAll(
+                new FileChooser.ExtensionFilter("Forrester Model (*.json)", "*.json"),
+                new FileChooser.ExtensionFilter("Vensim Model (*.mdl)", "*.mdl"),
+                new FileChooser.ExtensionFilter("XMILE Model (*.xmile)", "*.xmile"));
         if (currentFile != null) {
             if (currentFile.getParent() != null) {
                 chooser.setInitialDirectory(currentFile.getParent().toFile());
@@ -526,8 +536,29 @@ public class ModelWindow {
             return;
         }
 
-        currentFile = file.toPath();
-        saveToFile(currentFile);
+        String name = file.getName();
+        String ext = name.contains(".") ? name.substring(name.lastIndexOf('.')).toLowerCase() : "";
+
+        try {
+            ModelDefinition def = canvas.toModelDefinition();
+            switch (ext) {
+                case ".mdl" -> {
+                    VensimExporter.toFile(def, file.toPath());
+                    fireLogEvent(l -> l.onModelSaved(name));
+                }
+                case ".xmile" -> {
+                    XmileExporter.toFile(def, file.toPath());
+                    fireLogEvent(l -> l.onModelSaved(name));
+                }
+                default -> {
+                    currentFile = file.toPath();
+                    saveToFile(currentFile);
+                    return;
+                }
+            }
+        } catch (IOException ex) {
+            showError("Save Error", "Failed to save file: " + ex.getMessage());
+        }
     }
 
     private void saveToFile(Path path) {
@@ -957,6 +988,14 @@ public class ModelWindow {
         alert.showAndWait();
     }
 
+    void showImportWarnings(String fileName, List<String> warnings) {
+        Alert alert = new Alert(Alert.AlertType.WARNING);
+        alert.setTitle("Import Warnings");
+        alert.setHeaderText("Warnings while importing " + fileName);
+        alert.setContentText(String.join("\n", warnings));
+        alert.showAndWait();
+    }
+
     private void updateStatusBar() {
         if (statusBar == null) {
             return;
@@ -1012,6 +1051,22 @@ public class ModelWindow {
         }
         updateTitle();
         updateStatusBar();
+    }
+
+    Path getCurrentFile() {
+        return currentFile;
+    }
+
+    void setCurrentFile(Path path) {
+        this.currentFile = path;
+    }
+
+    ModelEditor getEditor() {
+        return editor;
+    }
+
+    ModelCanvas getCanvas() {
+        return canvas;
     }
 
     /**
