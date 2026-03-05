@@ -55,8 +55,12 @@ import com.deathrayresearch.forrester.sweep.SweepResult;
 
 import javafx.application.Platform;
 import javafx.scene.Scene;
+import javafx.geometry.Insets;
 import javafx.scene.control.Alert;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.CheckMenuItem;
+import javafx.scene.control.Dialog;
+import javafx.scene.control.Label;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
@@ -64,14 +68,18 @@ import javafx.scene.control.SeparatorMenuItem;
 import javafx.scene.control.SplitPane;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
+import javafx.scene.control.TextArea;
+import javafx.scene.control.TextField;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyCodeCombination;
 import javafx.scene.input.KeyCombination;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+import javafx.util.Pair;
 
 import org.apache.commons.math3.distribution.NormalDistribution;
 import org.apache.commons.math3.distribution.UniformRealDistribution;
@@ -244,7 +252,8 @@ public class ModelWindow {
         exportItem.setAccelerator(new KeyCodeCombination(KeyCode.E, KeyCombination.SHORTCUT_DOWN));
         exportItem.setOnAction(e -> DiagramExporter.exportDiagram(
                 canvas.getCanvasState(), canvas.getEditor(),
-                canvas.getConnectors(), canvas.getActiveLoopAnalysis(), stage));
+                canvas.getConnectors(), canvas.getActiveLoopAnalysis(), stage,
+                editor != null ? editor.getModelName() : null));
 
         MenuItem closeItem = new MenuItem("Close");
         closeItem.setAccelerator(new KeyCodeCombination(KeyCode.W, KeyCombination.SHORTCUT_DOWN));
@@ -287,7 +296,11 @@ public class ModelWindow {
             canvas.requestFocus();
         });
 
-        editMenu.getItems().addAll(undoItem, redoItem, new SeparatorMenuItem(), selectAllItem);
+        MenuItem modelInfoItem = new MenuItem("Model Info\u2026");
+        modelInfoItem.setOnAction(e -> showModelInfoDialog());
+
+        editMenu.getItems().addAll(undoItem, redoItem, new SeparatorMenuItem(), selectAllItem,
+                new SeparatorMenuItem(), modelInfoItem);
 
         // View menu
         Menu viewMenu = new Menu("View");
@@ -400,6 +413,7 @@ public class ModelWindow {
         if (dashboardPanel != null) {
             dashboardPanel.clear();
         }
+        updateTitle();
         if (displayName != null) {
             fireLogEvent(l -> l.onModelOpened(displayName));
         }
@@ -1044,14 +1058,62 @@ public class ModelWindow {
         }
     }
 
+    private void showModelInfoDialog() {
+        Dialog<Pair<String, String>> dialog = new Dialog<>();
+        dialog.setTitle("Model Info");
+        dialog.setHeaderText(null);
+        dialog.initOwner(stage);
+
+        dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
+
+        GridPane grid = new GridPane();
+        grid.setHgap(10);
+        grid.setVgap(10);
+        grid.setPadding(new Insets(10));
+
+        TextField nameField = new TextField(editor.getModelName());
+        nameField.setPrefColumnCount(30);
+        TextArea commentArea = new TextArea(
+                editor.getModelComment() != null ? editor.getModelComment() : "");
+        commentArea.setPrefRowCount(4);
+        commentArea.setPrefColumnCount(30);
+
+        grid.add(new Label("Name:"), 0, 0);
+        grid.add(nameField, 1, 0);
+        grid.add(new Label("Comment:"), 0, 1);
+        grid.add(commentArea, 1, 1);
+
+        dialog.getDialogPane().setContent(grid);
+        Platform.runLater(nameField::requestFocus);
+
+        dialog.setResultConverter(button -> {
+            if (button == ButtonType.OK) {
+                return new Pair<>(nameField.getText().trim(), commentArea.getText().trim());
+            }
+            return null;
+        });
+
+        dialog.showAndWait().ifPresent(result -> {
+            String newName = result.getKey().isEmpty() ? "Untitled" : result.getKey();
+            editor.setModelName(newName);
+            editor.setModelComment(result.getValue());
+            updateTitle();
+        });
+    }
+
     private void updateTitle() {
-        String fileName = currentFile != null
-                ? currentFile.getFileName().toString()
-                : "Untitled";
+        String name;
+        if (editor != null && !"Untitled".equals(editor.getModelName())) {
+            name = editor.getModelName();
+        } else if (currentFile != null) {
+            name = currentFile.getFileName().toString();
+        } else {
+            name = "Untitled";
+        }
         String moduleSuffix = canvas.isInsideModule()
                 ? " [" + canvas.getCurrentModuleName() + "]"
                 : "";
-        stage.setTitle("Forrester \u2014 " + fileName + moduleSuffix);
+        stage.setTitle("Forrester \u2014 " + name + moduleSuffix);
     }
 
     private void updateBreadcrumb() {

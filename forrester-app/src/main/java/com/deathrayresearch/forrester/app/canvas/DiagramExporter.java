@@ -44,7 +44,8 @@ public final class DiagramExporter {
     public static void exportDiagram(CanvasState canvasState, ModelEditor editor,
                                      List<ConnectorRoute> connectors,
                                      FeedbackAnalysis loopAnalysis,
-                                     Window ownerWindow) {
+                                     Window ownerWindow,
+                                     String modelName) {
         if (canvasState.getDrawOrder().isEmpty()) {
             Alert info = new Alert(Alert.AlertType.INFORMATION);
             info.setTitle("Export Diagram");
@@ -64,7 +65,11 @@ public final class DiagramExporter {
                 new FileChooser.ExtensionFilter("PNG Image (*.png)", "*.png"),
                 new FileChooser.ExtensionFilter("JPEG Image (*.jpg, *.jpeg)", "*.jpg", "*.jpeg"),
                 new FileChooser.ExtensionFilter("SVG Image (*.svg)", "*.svg"));
-        chooser.setInitialFileName("diagram.png");
+        String baseName = (modelName != null && !modelName.isBlank()
+                && !"Untitled".equals(modelName))
+                ? modelName.replaceAll("[^a-zA-Z0-9_\\-]", "_")
+                : "diagram";
+        chooser.setInitialFileName(baseName + ".png");
         LastDirectoryStore.applyExportDirectory(chooser);
 
         File file = chooser.showSaveDialog(ownerWindow);

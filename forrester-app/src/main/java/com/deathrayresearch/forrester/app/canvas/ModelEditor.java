@@ -31,6 +31,7 @@ import java.util.function.UnaryOperator;
 public class ModelEditor {
 
     private String modelName = "Untitled";
+    private String modelComment = "";
     private final List<StockDef> stocks = new ArrayList<>();
     private final List<FlowDef> flows = new ArrayList<>();
     private final List<AuxDef> auxiliaries = new ArrayList<>();
@@ -93,6 +94,7 @@ public class ModelEditor {
      */
     public void loadFrom(ModelDefinition definition) {
         modelName = definition.name();
+        modelComment = definition.comment() != null ? definition.comment() : "";
         stocks.clear();
         flows.clear();
         auxiliaries.clear();
@@ -812,6 +814,20 @@ public class ModelEditor {
         return modelName;
     }
 
+    public void setModelName(String name) {
+        if (name != null && !name.isBlank()) {
+            modelName = name;
+        }
+    }
+
+    public String getModelComment() {
+        return modelComment;
+    }
+
+    public void setModelComment(String comment) {
+        modelComment = comment != null ? comment : "";
+    }
+
     public List<StockDef> getStocks() {
         return Collections.unmodifiableList(stocks);
     }
@@ -944,7 +960,7 @@ public class ModelEditor {
     public ModelDefinition toModelDefinition(ViewDef view) {
         return new ModelDefinition(
                 modelName,
-                null,
+                modelComment.isBlank() ? null : modelComment,
                 null,
                 List.copyOf(stocks),
                 List.copyOf(flows),
