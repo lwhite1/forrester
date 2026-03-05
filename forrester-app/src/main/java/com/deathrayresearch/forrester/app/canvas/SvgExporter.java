@@ -39,6 +39,9 @@ public final class SvgExporter {
                               List<ConnectorRoute> connectors,
                               FeedbackAnalysis loopAnalysis,
                               File file) throws IOException {
+        if (canvasState.getDrawOrder().isEmpty()) {
+            return;
+        }
         ExportBounds.Bounds bounds = ExportBounds.compute(canvasState, editor);
         double minX = bounds.minX();
         double minY = bounds.minY();

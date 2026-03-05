@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -178,7 +179,7 @@ public class MonteCarloResult {
             writer.flush();
             logger.info("Wrote percentile CSV to {}", filePath);
         } catch (IOException e) {
-            throw new RuntimeException("Failed to write percentile CSV: " + filePath, e);
+            throw new UncheckedIOException("Failed to write percentile CSV: " + filePath, e);
         }
     }
 
@@ -205,7 +206,8 @@ public class MonteCarloResult {
     private void ensureParentDir(String filePath) {
         File parent = Paths.get(filePath).toFile().getParentFile();
         if (parent != null && !parent.mkdirs() && !parent.isDirectory()) {
-            throw new RuntimeException("Failed to create directory: " + parent.getAbsolutePath());
+            throw new UncheckedIOException(new IOException(
+                    "Failed to create directory: " + parent.getAbsolutePath()));
         }
     }
 }

@@ -170,8 +170,8 @@ class ModelWindowImportExportFxTest {
     // --- Title and State ---
 
     @Test
-    @DisplayName("After import with null currentFile, title shows Untitled")
-    void shouldShowUntitledAfterImport(FxRobot robot) throws IOException {
+    @DisplayName("After import, title shows model name from definition")
+    void shouldShowModelNameAfterImport(FxRobot robot) throws IOException {
         ImportResult result = new VensimImporter()
                 .importModel(resourcePath("vensim/teacup.mdl"));
 
@@ -181,7 +181,7 @@ class ModelWindowImportExportFxTest {
         });
         WaitForAsyncUtils.waitForFxEvents();
 
-        assertThat(stage.getTitle()).contains("Untitled");
+        assertThat(stage.getTitle()).contains("teacup");
     }
 
     @Test

@@ -3,6 +3,8 @@ package com.deathrayresearch.forrester.app.canvas;
 import com.deathrayresearch.forrester.sweep.ParameterSweep;
 
 import javafx.beans.binding.Bindings;
+import javafx.beans.property.IntegerProperty;
+import javafx.beans.property.SimpleIntegerProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -42,6 +44,7 @@ public class MultiParameterSweepDialog extends Dialog<MultiParameterSweepDialog.
     private static final int WARN_COMBINATIONS = 1_000;
 
     private final ObservableList<ParameterRow> parameterRows = FXCollections.observableArrayList();
+    private final IntegerProperty fieldChangeCounter = new SimpleIntegerProperty(0);
     private final Label combinationCountLabel;
 
     public MultiParameterSweepDialog(List<String> constantNames) {
@@ -92,7 +95,7 @@ public class MultiParameterSweepDialog extends Dialog<MultiParameterSweepDialog.
 
         getDialogPane().lookupButton(okButton).disableProperty().bind(
                 Bindings.createBooleanBinding(() -> getValidParams().size() < 2,
-                        parameterRows)
+                        parameterRows, fieldChangeCounter)
         );
 
         Button okNode = (Button) getDialogPane().lookupButton(okButton);
@@ -142,6 +145,7 @@ public class MultiParameterSweepDialog extends Dialog<MultiParameterSweepDialog.
     }
 
     private void updateCombinationCount() {
+        fieldChangeCounter.set(fieldChangeCounter.get() + 1);
         List<ParamConfig> validParams = getValidParams();
         long combos = computeCombinations(validParams);
         combinationCountLabel.setText(combos + " combinations");

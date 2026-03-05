@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
+import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -65,7 +66,7 @@ public final class SweepCsvWriter {
             writer.flush();
             logger.info("Wrote time series CSV to {}", filePath);
         } catch (IOException e) {
-            throw new RuntimeException("Failed to write time series CSV: " + filePath, e);
+            throw new UncheckedIOException("Failed to write time series CSV: " + filePath, e);
         }
     }
 
@@ -104,7 +105,7 @@ public final class SweepCsvWriter {
             writer.flush();
             logger.info("Wrote summary CSV to {}", filePath);
         } catch (IOException e) {
-            throw new RuntimeException("Failed to write summary CSV: " + filePath, e);
+            throw new UncheckedIOException("Failed to write summary CSV: " + filePath, e);
         }
     }
 
@@ -151,7 +152,7 @@ public final class SweepCsvWriter {
             writer.flush();
             logger.info("Wrote multi-sweep time series CSV to {}", filePath);
         } catch (IOException e) {
-            throw new RuntimeException("Failed to write time series CSV: " + filePath, e);
+            throw new UncheckedIOException("Failed to write time series CSV: " + filePath, e);
         }
     }
 
@@ -194,14 +195,15 @@ public final class SweepCsvWriter {
             writer.flush();
             logger.info("Wrote multi-sweep summary CSV to {}", filePath);
         } catch (IOException e) {
-            throw new RuntimeException("Failed to write summary CSV: " + filePath, e);
+            throw new UncheckedIOException("Failed to write summary CSV: " + filePath, e);
         }
     }
 
     private static void ensureParentDir(String filePath) {
         File parent = Paths.get(filePath).toFile().getParentFile();
         if (parent != null && !parent.mkdirs() && !parent.isDirectory()) {
-            throw new RuntimeException("Failed to create directory: " + parent.getAbsolutePath());
+            throw new UncheckedIOException(new IOException(
+                    "Failed to create directory: " + parent.getAbsolutePath()));
         }
     }
 }

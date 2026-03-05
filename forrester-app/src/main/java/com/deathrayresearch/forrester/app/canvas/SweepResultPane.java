@@ -106,7 +106,7 @@ public class SweepResultPane extends BorderPane {
 
         for (int i = 0; i < allSeries.size(); i++) {
             XYChart.Series<Number, Number> series = allSeries.get(i);
-            String color = ChartUtils.SERIES_COLORS[i % ChartUtils.SERIES_COLORS.length];
+            String color = ChartUtils.SERIES_COLORS.get(i % ChartUtils.SERIES_COLORS.size());
 
             CheckBox cb = new CheckBox(series.getName());
             cb.setSelected(true);
@@ -154,7 +154,7 @@ public class SweepResultPane extends BorderPane {
             LastDirectoryStore.recordExportDirectory(file);
             try {
                 result.writeTimeSeriesCsv(file.getAbsolutePath());
-            } catch (RuntimeException e) {
+            } catch (java.io.UncheckedIOException e) {
                 new Alert(Alert.AlertType.ERROR,
                         "Failed to export CSV: " + e.getMessage()).showAndWait();
             }
@@ -174,7 +174,7 @@ public class SweepResultPane extends BorderPane {
             LastDirectoryStore.recordExportDirectory(file);
             try {
                 result.writeSummaryCsv(file.getAbsolutePath());
-            } catch (RuntimeException e) {
+            } catch (java.io.UncheckedIOException e) {
                 new Alert(Alert.AlertType.ERROR,
                         "Failed to export CSV: " + e.getMessage()).showAndWait();
             }

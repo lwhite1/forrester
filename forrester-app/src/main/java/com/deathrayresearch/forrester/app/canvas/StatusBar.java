@@ -147,10 +147,10 @@ public class StatusBar extends HBox {
         validationLabel.setManaged(true);
         if (errorCount > 0) {
             validationLabel.setText(errorCount + " errors, " + warningCount + " warnings");
-            validationLabel.setStyle(Styles.STATUS_LABEL + "-fx-text-fill: #d62728;");
+            validationLabel.setStyle("-fx-font-size: 11px; -fx-text-fill: #d62728;");
         } else if (warningCount > 0) {
             validationLabel.setText(warningCount + " warnings");
-            validationLabel.setStyle(Styles.STATUS_LABEL + "-fx-text-fill: #ff7f0e;");
+            validationLabel.setStyle("-fx-font-size: 11px; -fx-text-fill: #ff7f0e;");
         } else {
             validationLabel.setText("No issues");
             validationLabel.setStyle(Styles.STATUS_LABEL);

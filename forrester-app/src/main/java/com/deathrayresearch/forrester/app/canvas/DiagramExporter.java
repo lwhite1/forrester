@@ -79,7 +79,7 @@ public final class DiagramExporter {
         LastDirectoryStore.recordExportDirectory(file);
 
         // SVG export: delegate to SvgExporter (no selection clearing needed)
-        String fileName = file.getName().toLowerCase();
+        String fileName = file.getName().toLowerCase(java.util.Locale.ROOT);
         if (fileName.endsWith(".svg")) {
             try {
                 SvgExporter.export(canvasState, editor, connectors, loopAnalysis, file);
@@ -138,7 +138,20 @@ public final class DiagramExporter {
             }
 
             // Write image file
-            ImageIO.write(SwingFXUtils.fromFXImage(image, null), format, file);
+            java.awt.image.BufferedImage fxImage = SwingFXUtils.fromFXImage(image, null);
+            if ("jpg".equals(format)) {
+                // JPEG does not support transparency — composite onto white background
+                java.awt.image.BufferedImage rgbImage = new java.awt.image.BufferedImage(
+                        fxImage.getWidth(), fxImage.getHeight(),
+                        java.awt.image.BufferedImage.TYPE_INT_RGB);
+                java.awt.Graphics2D g = rgbImage.createGraphics();
+                g.setColor(java.awt.Color.WHITE);
+                g.fillRect(0, 0, rgbImage.getWidth(), rgbImage.getHeight());
+                g.drawImage(fxImage, 0, 0, null);
+                g.dispose();
+                fxImage = rgbImage;
+            }
+            ImageIO.write(fxImage, format, file);
         } catch (IOException e) {
             Alert alert = new Alert(Alert.AlertType.ERROR);
             alert.setTitle("Export Error");

@@ -117,7 +117,7 @@ public class SimulationResultPane extends BorderPane {
 
         for (int i = 0; i < allSeries.size(); i++) {
             XYChart.Series<Number, Number> series = allSeries.get(i);
-            String color = ChartUtils.SERIES_COLORS[i % ChartUtils.SERIES_COLORS.length];
+            String color = ChartUtils.SERIES_COLORS.get(i % ChartUtils.SERIES_COLORS.size());
 
             CheckBox cb = new CheckBox(series.getName());
             cb.setSelected(true);

@@ -87,7 +87,7 @@ public class MonteCarloResultPane extends BorderPane {
             try {
                 result.writePercentileCsv(file.getAbsolutePath(), currentVariable,
                         2.5, 25, 50, 75, 97.5);
-            } catch (RuntimeException e) {
+            } catch (java.io.UncheckedIOException e) {
                 new Alert(Alert.AlertType.ERROR,
                         "Failed to export CSV: " + e.getMessage()).showAndWait();
             }

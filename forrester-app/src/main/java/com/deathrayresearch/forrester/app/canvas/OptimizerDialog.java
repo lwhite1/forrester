@@ -1,6 +1,8 @@
 package com.deathrayresearch.forrester.app.canvas;
 
 import javafx.beans.binding.Bindings;
+import javafx.beans.property.IntegerProperty;
+import javafx.beans.property.SimpleIntegerProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
@@ -45,6 +47,7 @@ public class OptimizerDialog extends Dialog<OptimizerDialog.Config> {
     }
 
     private final ObservableList<ParamRow> paramRows = FXCollections.observableArrayList();
+    private final IntegerProperty fieldChangeCounter = new SimpleIntegerProperty(0);
     private final ComboBox<ObjectiveType> objectiveCombo;
     private final ComboBox<String> targetVarCombo;
     private final TextField targetValueField;
@@ -136,7 +139,8 @@ public class OptimizerDialog extends Dialog<OptimizerDialog.Config> {
         getDialogPane().lookupButton(okButton).disableProperty().bind(
                 Bindings.createBooleanBinding(this::isInvalid,
                         maxEvalsField.textProperty(), targetValueField.textProperty(),
-                        objectiveCombo.valueProperty(), targetVarCombo.valueProperty())
+                        objectiveCombo.valueProperty(), targetVarCombo.valueProperty(),
+                        paramRows, fieldChangeCounter)
         );
 
         Button okNode = (Button) getDialogPane().lookupButton(okButton);
@@ -178,6 +182,9 @@ public class OptimizerDialog extends Dialog<OptimizerDialog.Config> {
         if (targetVarCombo.getValue() == null) {
             return true;
         }
+        if (paramRows.stream().noneMatch(ParamRow::isValid)) {
+            return true;
+        }
         try {
             int maxEvals = Integer.parseInt(maxEvalsField.getText().trim());
             if (maxEvals < 1) {
@@ -216,6 +223,13 @@ public class OptimizerDialog extends Dialog<OptimizerDialog.Config> {
             guessField = new TextField("");
             guessField.setPrefWidth(60);
             guessField.setPromptText("Guess");
+
+            lowerField.textProperty().addListener((obs, o, n) ->
+                    fieldChangeCounter.set(fieldChangeCounter.get() + 1));
+            upperField.textProperty().addListener((obs, o, n) ->
+                    fieldChangeCounter.set(fieldChangeCounter.get() + 1));
+            guessField.textProperty().addListener((obs, o, n) ->
+                    fieldChangeCounter.set(fieldChangeCounter.get() + 1));
 
             pane = new HBox(6);
             pane.setPadding(new Insets(2));
