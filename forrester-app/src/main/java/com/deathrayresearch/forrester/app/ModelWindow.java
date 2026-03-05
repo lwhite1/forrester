@@ -21,6 +21,7 @@ import com.deathrayresearch.forrester.app.canvas.StatusBar;
 import com.deathrayresearch.forrester.app.canvas.UndoManager;
 import com.deathrayresearch.forrester.app.canvas.ValidationDialog;
 import com.deathrayresearch.forrester.io.ImportResult;
+import com.deathrayresearch.forrester.io.ModelImporter;
 import com.deathrayresearch.forrester.io.json.ModelDefinitionSerializer;
 import com.deathrayresearch.forrester.io.vensim.VensimExporter;
 import com.deathrayresearch.forrester.io.vensim.VensimImporter;
@@ -422,20 +423,8 @@ public class ModelWindow {
         try {
             ModelDefinition def;
             switch (ext) {
-                case ".mdl" -> {
-                    ImportResult result = new VensimImporter().importModel(file.toPath());
-                    def = result.definition();
-                    if (!result.isClean()) {
-                        showImportWarnings(name, result.warnings());
-                    }
-                }
-                case ".xmile" -> {
-                    ImportResult result = new XmileImporter().importModel(file.toPath());
-                    def = result.definition();
-                    if (!result.isClean()) {
-                        showImportWarnings(name, result.warnings());
-                    }
-                }
+                case ".mdl" -> def = importModel(new VensimImporter(), file.toPath(), name);
+                case ".xmile" -> def = importModel(new XmileImporter(), file.toPath(), name);
                 default -> def = serializer.fromFile(file.toPath());
             }
 
@@ -998,6 +987,15 @@ public class ModelWindow {
         alert.setHeaderText("Warnings while importing " + fileName);
         alert.setContentText(String.join("\n", warnings));
         alert.showAndWait();
+    }
+
+    private ModelDefinition importModel(ModelImporter importer, Path path, String displayName)
+            throws IOException {
+        ImportResult result = importer.importModel(path);
+        if (!result.isClean()) {
+            showImportWarnings(displayName, result.warnings());
+        }
+        return result.definition();
     }
 
     private void updateStatusBar() {
