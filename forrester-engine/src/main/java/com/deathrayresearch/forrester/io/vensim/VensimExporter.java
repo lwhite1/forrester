@@ -60,14 +60,19 @@ public final class VensimExporter {
         // Collect lookup names referenced by auxiliaries (embedded as WITH LOOKUP)
         Set<String> embeddedLookupNames = collectEmbeddedLookupNames(def);
 
+        // Collect synthetic _net_flow names whose equations will be inlined into INTEG
+        Set<String> inlinedFlowNames = collectInlinedFlowNames(def);
+
         // Write stocks
         for (StockDef stock : def.stocks()) {
-            sb.append(buildStockBlock(stock, def));
+            sb.append(buildStockBlock(stock, def, inlinedFlowNames));
         }
 
-        // Write flows
+        // Write flows (skip those inlined into INTEG)
         for (FlowDef flow : def.flows()) {
-            sb.append(buildFlowBlock(flow));
+            if (!inlinedFlowNames.contains(flow.name())) {
+                sb.append(buildFlowBlock(flow));
+            }
         }
 
         // Write auxiliaries
@@ -108,41 +113,50 @@ public final class VensimExporter {
         Files.writeString(path, mdl, StandardCharsets.UTF_8);
     }
 
-    private static String buildStockBlock(StockDef stock, ModelDefinition def) {
+    private static String buildStockBlock(StockDef stock, ModelDefinition def,
+                                          Set<String> inlinedFlowNames) {
         String vensimName = denormalizeName(stock.name());
 
         // Find inflows and outflows from flow definitions
-        List<String> inflows = new ArrayList<>();
-        List<String> outflows = new ArrayList<>();
+        List<FlowDef> inflowDefs = new ArrayList<>();
+        List<FlowDef> outflowDefs = new ArrayList<>();
         for (FlowDef flow : def.flows()) {
             if (stock.name().equals(flow.sink())) {
-                inflows.add(denormalizeName(flow.name()));
+                inflowDefs.add(flow);
             }
             if (stock.name().equals(flow.source())) {
-                outflows.add(denormalizeName(flow.name()));
+                outflowDefs.add(flow);
             }
         }
 
-        // Build rate expression
+        // Build rate expression — inline synthetic _net_flow equations directly
         String rateExpr;
-        if (inflows.isEmpty() && outflows.isEmpty()) {
+        if (inflowDefs.isEmpty() && outflowDefs.isEmpty()) {
             rateExpr = "0";
         } else {
-            StringJoiner joiner = new StringJoiner("");
-            for (int i = 0; i < inflows.size(); i++) {
+            StringBuilder rateSb = new StringBuilder();
+            for (int i = 0; i < inflowDefs.size(); i++) {
+                FlowDef flow = inflowDefs.get(i);
+                String term = inlinedFlowNames.contains(flow.name())
+                        ? toVensimExpr(flow.equation())
+                        : denormalizeName(flow.name());
                 if (i > 0) {
-                    joiner.add(" + ");
+                    rateSb.append(" + ");
                 }
-                joiner.add(inflows.get(i));
+                rateSb.append(term);
             }
-            for (int i = 0; i < outflows.size(); i++) {
-                if (inflows.isEmpty() && i == 0) {
-                    joiner.add("-" + outflows.get(i));
+            for (int i = 0; i < outflowDefs.size(); i++) {
+                FlowDef flow = outflowDefs.get(i);
+                String term = inlinedFlowNames.contains(flow.name())
+                        ? toVensimExpr(flow.equation())
+                        : denormalizeName(flow.name());
+                if (inflowDefs.isEmpty() && i == 0) {
+                    rateSb.append("-").append(term);
                 } else {
-                    joiner.add(" - " + outflows.get(i));
+                    rateSb.append(" - ").append(term);
                 }
             }
-            rateExpr = joiner.toString();
+            rateExpr = rateSb.toString();
         }
 
         String equation = "INTEG (\n\t" + rateExpr + ",\n\t\t"
@@ -398,6 +412,37 @@ public final class VensimExporter {
         }
         // Tildes and pipes are structural in .mdl — escape them if present in comments/units
         return text.replace("~", "\\~").replace("|", "\\|");
+    }
+
+    /**
+     * Identifies synthetic _net_flow flows created by VensimImporter that should
+     * be inlined back into INTEG calls rather than emitted as separate equation blocks.
+     *
+     * <p>A flow is considered synthetic if its name follows the {@code {stock}_net_flow}
+     * pattern and it is the sole flow connected to that stock as an inflow with no
+     * outflows (matching how VensimImporter creates a single net-flow per stock).
+     */
+    private static Set<String> collectInlinedFlowNames(ModelDefinition def) {
+        Set<String> stockNames = new HashSet<>();
+        for (StockDef stock : def.stocks()) {
+            stockNames.add(stock.name());
+        }
+
+        Set<String> inlined = new HashSet<>();
+        for (FlowDef flow : def.flows()) {
+            if (!flow.name().endsWith("_net_flow")) {
+                continue;
+            }
+            // Check if this matches the pattern: sink is a stock, source is null,
+            // and the stock name is a prefix of the flow name
+            String candidateStock = flow.name().substring(0,
+                    flow.name().length() - "_net_flow".length());
+            if (flow.sink() != null && flow.sink().equals(candidateStock)
+                    && flow.source() == null && stockNames.contains(candidateStock)) {
+                inlined.add(flow.name());
+            }
+        }
+        return inlined;
     }
 
     private static Set<String> collectEmbeddedLookupNames(ModelDefinition def) {
