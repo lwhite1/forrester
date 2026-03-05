@@ -1,5 +1,6 @@
 package com.deathrayresearch.forrester.app.canvas;
 
+import com.deathrayresearch.forrester.app.LastDirectoryStore;
 import com.deathrayresearch.forrester.model.def.ConnectorRoute;
 import com.deathrayresearch.forrester.model.graph.FeedbackAnalysis;
 
@@ -64,11 +65,13 @@ public final class DiagramExporter {
                 new FileChooser.ExtensionFilter("JPEG Image (*.jpg, *.jpeg)", "*.jpg", "*.jpeg"),
                 new FileChooser.ExtensionFilter("SVG Image (*.svg)", "*.svg"));
         chooser.setInitialFileName("diagram.png");
+        LastDirectoryStore.applyExportDirectory(chooser);
 
         File file = chooser.showSaveDialog(ownerWindow);
         if (file == null) {
             return;
         }
+        LastDirectoryStore.recordExportDirectory(file);
 
         // SVG export: delegate to SvgExporter (no selection clearing needed)
         String fileName = file.getName().toLowerCase();

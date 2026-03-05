@@ -1,5 +1,7 @@
 package com.deathrayresearch.forrester.app.canvas;
 
+import com.deathrayresearch.forrester.app.LastDirectoryStore;
+
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.embed.swing.SwingFXUtils;
@@ -158,9 +160,11 @@ public class SimulationResultPane extends BorderPane {
         fileChooser.getExtensionFilters().add(
                 new FileChooser.ExtensionFilter("CSV Files", "*.csv"));
         fileChooser.setInitialFileName("simulation.csv");
+        LastDirectoryStore.applyExportDirectory(fileChooser);
 
         File file = fileChooser.showSaveDialog(getScene() != null ? getScene().getWindow() : null);
         if (file != null) {
+            LastDirectoryStore.recordExportDirectory(file);
             try (CSVWriter writer = new CSVWriter(new OutputStreamWriter(
                     Files.newOutputStream(file.toPath()), StandardCharsets.UTF_8))) {
                 List<String> columns = simulationResult.columnNames();
@@ -189,9 +193,11 @@ public class SimulationResultPane extends BorderPane {
         fileChooser.getExtensionFilters().add(
                 new FileChooser.ExtensionFilter("PNG Image", "*.png"));
         fileChooser.setInitialFileName("simulation_chart.png");
+        LastDirectoryStore.applyExportDirectory(fileChooser);
 
         File file = fileChooser.showSaveDialog(getScene() != null ? getScene().getWindow() : null);
         if (file != null) {
+            LastDirectoryStore.recordExportDirectory(file);
             WritableImage image = chart.snapshot(new SnapshotParameters(), null);
             try {
                 ImageIO.write(SwingFXUtils.fromFXImage(image, null), "png", file);

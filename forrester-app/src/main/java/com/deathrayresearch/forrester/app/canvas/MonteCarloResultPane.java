@@ -11,6 +11,8 @@ import javafx.scene.control.Label;
 import javafx.scene.control.MenuItem;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
+import com.deathrayresearch.forrester.app.LastDirectoryStore;
+
 import javafx.stage.FileChooser;
 
 import java.io.File;
@@ -77,9 +79,11 @@ public class MonteCarloResultPane extends BorderPane {
         fileChooser.getExtensionFilters().add(
                 new FileChooser.ExtensionFilter("CSV Files", "*.csv"));
         fileChooser.setInitialFileName("montecarlo_percentiles.csv");
+        LastDirectoryStore.applyExportDirectory(fileChooser);
 
         File file = fileChooser.showSaveDialog(getScene() != null ? getScene().getWindow() : null);
         if (file != null) {
+            LastDirectoryStore.recordExportDirectory(file);
             try {
                 result.writePercentileCsv(file.getAbsolutePath(), currentVariable,
                         2.5, 25, 50, 75, 97.5);

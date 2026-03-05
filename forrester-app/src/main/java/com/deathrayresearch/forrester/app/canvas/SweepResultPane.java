@@ -18,6 +18,8 @@ import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
+import com.deathrayresearch.forrester.app.LastDirectoryStore;
+
 import javafx.stage.FileChooser;
 
 import java.io.File;
@@ -145,9 +147,11 @@ public class SweepResultPane extends BorderPane {
         fileChooser.getExtensionFilters().add(
                 new FileChooser.ExtensionFilter("CSV Files", "*.csv"));
         fileChooser.setInitialFileName("sweep_timeseries.csv");
+        LastDirectoryStore.applyExportDirectory(fileChooser);
 
         File file = fileChooser.showSaveDialog(getScene() != null ? getScene().getWindow() : null);
         if (file != null) {
+            LastDirectoryStore.recordExportDirectory(file);
             try {
                 result.writeTimeSeriesCsv(file.getAbsolutePath());
             } catch (RuntimeException e) {
@@ -163,9 +167,11 @@ public class SweepResultPane extends BorderPane {
         fileChooser.getExtensionFilters().add(
                 new FileChooser.ExtensionFilter("CSV Files", "*.csv"));
         fileChooser.setInitialFileName("sweep_summary.csv");
+        LastDirectoryStore.applyExportDirectory(fileChooser);
 
         File file = fileChooser.showSaveDialog(getScene() != null ? getScene().getWindow() : null);
         if (file != null) {
+            LastDirectoryStore.recordExportDirectory(file);
             try {
                 result.writeSummaryCsv(file.getAbsolutePath());
             } catch (RuntimeException e) {

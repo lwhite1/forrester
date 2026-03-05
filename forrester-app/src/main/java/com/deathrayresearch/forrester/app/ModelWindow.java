@@ -414,10 +414,12 @@ public class ModelWindow {
                 new FileChooser.ExtensionFilter("Forrester Model (*.json)", "*.json"),
                 new FileChooser.ExtensionFilter("Vensim Model (*.mdl)", "*.mdl"),
                 new FileChooser.ExtensionFilter("XMILE Model (*.xmile)", "*.xmile"));
+        LastDirectoryStore.applyOpenDirectory(chooser);
         File file = chooser.showOpenDialog(stage);
         if (file == null) {
             return;
         }
+        LastDirectoryStore.recordOpenDirectory(file);
 
         String name = file.getName();
         String ext = name.contains(".") ? name.substring(name.lastIndexOf('.')).toLowerCase() : "";
@@ -523,11 +525,14 @@ public class ModelWindow {
                 chooser.setInitialDirectory(currentFile.getParent().toFile());
             }
             chooser.setInitialFileName(currentFile.getFileName().toString());
+        } else {
+            LastDirectoryStore.applySaveDirectory(chooser);
         }
         File file = chooser.showSaveDialog(stage);
         if (file == null) {
             return;
         }
+        LastDirectoryStore.recordSaveDirectory(file);
 
         String name = file.getName();
         String ext = name.contains(".") ? name.substring(name.lastIndexOf('.')).toLowerCase() : "";
