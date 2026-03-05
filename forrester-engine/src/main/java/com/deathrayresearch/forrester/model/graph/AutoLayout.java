@@ -324,11 +324,24 @@ public final class AutoLayout {
      * flow pipes run horizontally. For transfer flows (source + sink),
      * uses the Y of whichever stock is closest in the X direction.
      */
+    private static final double BACK_FLOW_Y_OFFSET = 120;
+
     private static void alignFlowsWithStocks(List<ElementPlacement> placements,
                                               ModelDefinition def) {
         Map<String, ElementPlacement> map = new HashMap<>();
         for (ElementPlacement p : placements) {
             map.put(p.name(), p);
+        }
+
+        // Find the maximum Y across all stocks for back-flow positioning
+        double maxStockY = Double.NEGATIVE_INFINITY;
+        for (ElementPlacement p : placements) {
+            if (p.type() == ElementType.STOCK) {
+                maxStockY = Math.max(maxStockY, p.y());
+            }
+        }
+        if (maxStockY == Double.NEGATIVE_INFINITY) {
+            maxStockY = 200;
         }
 
         for (int i = 0; i < placements.size(); i++) {
@@ -352,21 +365,28 @@ public final class AutoLayout {
             ElementPlacement source = flowDef.source() != null ? map.get(flowDef.source()) : null;
             ElementPlacement sink = flowDef.sink() != null ? map.get(flowDef.sink()) : null;
 
-            double targetY;
-            if (source != null && sink != null) {
-                // Transfer flow: align with the closer stock
-                double distToSource = Math.abs(fp.x() - source.x());
-                double distToSink = Math.abs(fp.x() - sink.x());
-                targetY = distToSource <= distToSink ? source.y() : sink.y();
-            } else if (source != null) {
-                targetY = source.y();
-            } else if (sink != null) {
-                targetY = sink.y();
+            if (source != null && sink != null && sink.x() < source.x()) {
+                // Back-flow: sink is to the left of source — place below the chain,
+                // centered between source and sink for a visual loop
+                double backX = (source.x() + sink.x()) / 2;
+                double backY = maxStockY + BACK_FLOW_Y_OFFSET;
+                placements.set(i, new ElementPlacement(fp.name(), fp.type(), backX, backY));
             } else {
-                continue;
+                double targetY;
+                if (source != null && sink != null) {
+                    // Transfer flow: align with the closer stock
+                    double distToSource = Math.abs(fp.x() - source.x());
+                    double distToSink = Math.abs(fp.x() - sink.x());
+                    targetY = distToSource <= distToSink ? source.y() : sink.y();
+                } else if (source != null) {
+                    targetY = source.y();
+                } else if (sink != null) {
+                    targetY = sink.y();
+                } else {
+                    continue;
+                }
+                placements.set(i, new ElementPlacement(fp.name(), fp.type(), fp.x(), targetY));
             }
-
-            placements.set(i, new ElementPlacement(fp.name(), fp.type(), fp.x(), targetY));
         }
     }
 
