@@ -12,12 +12,15 @@ import com.deathrayresearch.forrester.model.def.StockDef;
 import com.deathrayresearch.forrester.model.def.ViewDef;
 import com.deathrayresearch.forrester.model.graph.ConnectorGenerator;
 
+import javafx.application.Platform;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.UnaryOperator;
@@ -27,6 +30,10 @@ import java.util.function.UnaryOperator;
  * {@link ModelDefinition}. Supports adding and removing elements while preserving
  * the engine's immutability contract — an immutable snapshot can be rebuilt on demand
  * via {@link #toModelDefinition()}.
+ *
+ * <p>Thread confinement: all mutable state must be accessed on the JavaFX Application
+ * Thread. The only safe cross-thread operation is {@link #toModelDefinition()}, which
+ * builds an immutable snapshot for background analysis tasks.</p>
  */
 public class ModelEditor {
 
@@ -39,7 +46,7 @@ public class ModelEditor {
     private final List<ModuleInstanceDef> modules = new ArrayList<>();
     private final List<LookupTableDef> lookupTables = new ArrayList<>();
     private final Set<String> nameIndex = new HashSet<>();
-    private final List<ModelEditListener> listeners = new ArrayList<>();
+    private final List<ModelEditListener> listeners = new CopyOnWriteArrayList<>();
     private SimulationSettings simulationSettings;
     private int nextStockId = 1;
     private int nextFlowId = 1;
@@ -56,6 +63,14 @@ public class ModelEditor {
 
     public void removeListener(ModelEditListener listener) {
         listeners.remove(listener);
+    }
+
+    private static final boolean HEADLESS_TEST =
+            Boolean.getBoolean("testfx.headless");
+
+    private static void checkFxThread() {
+        assert HEADLESS_TEST || Platform.isFxApplicationThread()
+                : "ModelEditor must be accessed on the JavaFX Application Thread";
     }
 
     private void fireElementAdded(String name, String typeName) {
@@ -93,6 +108,7 @@ public class ModelEditor {
      * clearing any previous state.
      */
     public void loadFrom(ModelDefinition definition) {
+        checkFxThread();
         modelName = definition.name();
         modelComment = definition.comment() != null ? definition.comment() : "";
         stocks.clear();
@@ -149,6 +165,7 @@ public class ModelEditor {
      * @return the name of the created stock
      */
     public String addStock() {
+        checkFxThread();
         String name = "Stock " + nextStockId++;
         stocks.add(new StockDef(name, 0, "units"));
         nameIndex.add(name);
@@ -161,6 +178,7 @@ public class ModelEditor {
      * @return the name of the created flow
      */
     public String addFlow() {
+        checkFxThread();
         return addFlow(null, null);
     }
 
@@ -171,6 +189,7 @@ public class ModelEditor {
      * @return the name of the created flow
      */
     public String addFlow(String source, String sink) {
+        checkFxThread();
         String name = "Flow " + nextFlowId++;
         flows.add(new FlowDef(name, "0", "Day", source, sink));
         nameIndex.add(name);
@@ -183,6 +202,7 @@ public class ModelEditor {
      * @return the name of the created auxiliary
      */
     public String addAux() {
+        checkFxThread();
         String name = "Aux " + nextAuxId++;
         auxiliaries.add(new AuxDef(name, "0", "units"));
         nameIndex.add(name);
@@ -195,6 +215,7 @@ public class ModelEditor {
      * @return the name of the created constant
      */
     public String addConstant() {
+        checkFxThread();
         String name = "Constant " + nextConstantId++;
         constants.add(new ConstantDef(name, 0, "units"));
         nameIndex.add(name);
@@ -207,6 +228,7 @@ public class ModelEditor {
      * @return the name of the created stock
      */
     public String addStockFrom(StockDef template) {
+        checkFxThread();
         String name = "Stock " + nextStockId++;
         stocks.add(new StockDef(name, template.comment(), template.initialValue(),
                 template.unit(), template.negativeValuePolicy()));
@@ -220,6 +242,7 @@ public class ModelEditor {
      * @return the name of the created flow
      */
     public String addFlowFrom(FlowDef template, String source, String sink) {
+        checkFxThread();
         String name = "Flow " + nextFlowId++;
         flows.add(new FlowDef(name, template.comment(), template.equation(),
                 template.timeUnit(), source, sink));
@@ -233,6 +256,7 @@ public class ModelEditor {
      * @return the name of the created auxiliary
      */
     public String addAuxFrom(AuxDef template, String equation) {
+        checkFxThread();
         String name = "Aux " + nextAuxId++;
         auxiliaries.add(new AuxDef(name, template.comment(), equation, template.unit()));
         nameIndex.add(name);
@@ -244,6 +268,7 @@ public class ModelEditor {
      * @return the name of the created constant
      */
     public String addConstantFrom(ConstantDef template) {
+        checkFxThread();
         String name = "Constant " + nextConstantId++;
         constants.add(new ConstantDef(name, template.comment(), template.value(), template.unit()));
         nameIndex.add(name);
@@ -255,6 +280,7 @@ public class ModelEditor {
      * @return the instance name of the created module
      */
     public String addModuleFrom(ModuleInstanceDef template) {
+        checkFxThread();
         String name = "Module " + nextModuleId++;
         modules.add(new ModuleInstanceDef(name, template.definition(),
                 template.inputBindings(), template.outputBindings()));
@@ -267,6 +293,7 @@ public class ModelEditor {
      * @return the instance name of the created module
      */
     public String addModule() {
+        checkFxThread();
         String name = "Module " + nextModuleId++;
         ModelDefinition emptyDef = new ModelDefinition(
                 name, null, null,
@@ -283,6 +310,7 @@ public class ModelEditor {
      * @return the name of the created lookup table
      */
     public String addLookup() {
+        checkFxThread();
         String name = "Lookup " + nextLookupId++;
         lookupTables.add(new LookupTableDef(name,
                 new double[]{0.0, 1.0}, new double[]{0.0, 1.0}, "LINEAR"));
@@ -296,6 +324,7 @@ public class ModelEditor {
      * @return the name of the created lookup table
      */
     public String addLookupFrom(LookupTableDef template) {
+        checkFxThread();
         String name = "Lookup " + nextLookupId++;
         lookupTables.add(new LookupTableDef(name, template.comment(),
                 template.xValues(), template.yValues(), template.interpolation()));
@@ -315,6 +344,7 @@ public class ModelEditor {
      * @return true if the lookup table was found and updated
      */
     public boolean setLookupTable(String name, LookupTableDef updated) {
+        checkFxThread();
         for (int i = 0; i < lookupTables.size(); i++) {
             if (lookupTables.get(i).name().equals(name)) {
                 lookupTables.set(i, updated);
@@ -330,6 +360,7 @@ public class ModelEditor {
      * that connection nullified (becomes a cloud).
      */
     public void removeElement(String name) {
+        checkFxThread();
         nameIndex.remove(name);
         boolean wasStock = stocks.removeIf(s -> s.name().equals(name));
 
@@ -379,6 +410,7 @@ public class ModelEditor {
      * @return true if the element was found and renamed
      */
     public boolean renameElement(String oldName, String newName) {
+        checkFxThread();
         if (oldName == null || newName == null || oldName.equals(newName)) {
             return false;
         }
@@ -444,6 +476,7 @@ public class ModelEditor {
      */
     public boolean reconnectFlow(String flowName, FlowEndpointCalculator.FlowEnd end,
                                  String stockName) {
+        checkFxThread();
         // Validate: if a stock name is given, it must actually exist
         if (stockName != null && !hasElement(stockName)) {
             return false;
@@ -481,6 +514,7 @@ public class ModelEditor {
      * @return true if the constant was found and updated
      */
     public boolean setConstantValue(String name, double value) {
+        checkFxThread();
         boolean updated = updateInList(constants, name, ConstantDef::name,
                 c -> new ConstantDef(name, c.comment(), value, c.unit()));
         if (updated) {
@@ -495,6 +529,7 @@ public class ModelEditor {
      * @return true if the flow was found and updated
      */
     public boolean setFlowEquation(String name, String equation) {
+        checkFxThread();
         if (equation == null || equation.isBlank()) {
             return false;
         }
@@ -513,6 +548,7 @@ public class ModelEditor {
      * @return true if the auxiliary was found and updated
      */
     public boolean setAuxEquation(String name, String equation) {
+        checkFxThread();
         if (equation == null || equation.isBlank()) {
             return false;
         }
@@ -530,6 +566,7 @@ public class ModelEditor {
      * @return true if the stock was found and updated
      */
     public boolean setStockInitialValue(String name, double value) {
+        checkFxThread();
         return updateInList(stocks, name, StockDef::name,
                 s -> new StockDef(name, s.comment(), value,
                         s.unit(), s.negativeValuePolicy()));
@@ -541,6 +578,7 @@ public class ModelEditor {
      * @return true if the stock was found and updated
      */
     public boolean setStockUnit(String name, String unit) {
+        checkFxThread();
         if (unit == null) {
             return false;
         }
@@ -555,6 +593,7 @@ public class ModelEditor {
      * @return true if the stock was found and updated
      */
     public boolean setStockNegativeValuePolicy(String name, String policy) {
+        checkFxThread();
         return updateInList(stocks, name, StockDef::name,
                 s -> new StockDef(name, s.comment(), s.initialValue(),
                         s.unit(), policy));
@@ -566,6 +605,7 @@ public class ModelEditor {
      * @return true if the flow was found and updated
      */
     public boolean setFlowTimeUnit(String name, String timeUnit) {
+        checkFxThread();
         if (timeUnit == null || timeUnit.isBlank()) {
             return false;
         }
@@ -580,6 +620,7 @@ public class ModelEditor {
      * @return true if the auxiliary was found and updated
      */
     public boolean setAuxUnit(String name, String unit) {
+        checkFxThread();
         if (unit == null) {
             return false;
         }
@@ -593,6 +634,7 @@ public class ModelEditor {
      * @return true if the constant was found and updated
      */
     public boolean setConstantUnit(String name, String unit) {
+        checkFxThread();
         if (unit == null) {
             return false;
         }
@@ -606,6 +648,7 @@ public class ModelEditor {
      * @return true if the stock was found and updated
      */
     public boolean setStockComment(String name, String comment) {
+        checkFxThread();
         return updateInList(stocks, name, StockDef::name,
                 s -> new StockDef(name, comment, s.initialValue(),
                         s.unit(), s.negativeValuePolicy()));
@@ -617,6 +660,7 @@ public class ModelEditor {
      * @return true if the flow was found and updated
      */
     public boolean setFlowComment(String name, String comment) {
+        checkFxThread();
         return updateInList(flows, name, FlowDef::name,
                 f -> new FlowDef(f.name(), comment, f.equation(),
                         f.timeUnit(), f.source(), f.sink()));
@@ -628,6 +672,7 @@ public class ModelEditor {
      * @return true if the auxiliary was found and updated
      */
     public boolean setAuxComment(String name, String comment) {
+        checkFxThread();
         return updateInList(auxiliaries, name, AuxDef::name,
                 a -> new AuxDef(a.name(), comment, a.equation(), a.unit()));
     }
@@ -638,6 +683,7 @@ public class ModelEditor {
      * @return true if the constant was found and updated
      */
     public boolean setConstantComment(String name, String comment) {
+        checkFxThread();
         return updateInList(constants, name, ConstantDef::name,
                 c -> new ConstantDef(name, comment, c.value(), c.unit()));
     }
@@ -648,6 +694,7 @@ public class ModelEditor {
      * @return true if the lookup table was found and updated
      */
     public boolean setLookupComment(String name, String comment) {
+        checkFxThread();
         return updateInList(lookupTables, name, LookupTableDef::name,
                 lt -> new LookupTableDef(name, comment,
                         lt.xValues(), lt.yValues(), lt.interpolation()));
@@ -807,6 +854,7 @@ public class ModelEditor {
     }
 
     public void setSimulationSettings(SimulationSettings simulationSettings) {
+        checkFxThread();
         this.simulationSettings = simulationSettings;
     }
 
@@ -815,6 +863,7 @@ public class ModelEditor {
     }
 
     public void setModelName(String name) {
+        checkFxThread();
         if (name != null && !name.isBlank()) {
             modelName = name;
         }
@@ -825,6 +874,7 @@ public class ModelEditor {
     }
 
     public void setModelComment(String comment) {
+        checkFxThread();
         modelComment = comment != null ? comment : "";
     }
 
@@ -912,6 +962,7 @@ public class ModelEditor {
      * the instance name and bindings.
      */
     public void updateModuleDefinition(int index, ModelDefinition newDef) {
+        checkFxThread();
         if (index < 0 || index >= modules.size()) {
             return;
         }
@@ -929,6 +980,7 @@ public class ModelEditor {
     public boolean updateModuleBindings(String name,
                                          Map<String, String> inputBindings,
                                          Map<String, String> outputBindings) {
+        checkFxThread();
         for (int i = 0; i < modules.size(); i++) {
             if (modules.get(i).instanceName().equals(name)) {
                 ModuleInstanceDef m = modules.get(i);
@@ -982,6 +1034,7 @@ public class ModelEditor {
      * @return true if a reference was found and removed
      */
     public boolean removeConnectionReference(String fromName, String toName) {
+        checkFxThread();
         String fromToken = fromName.replace(' ', '_');
         return updateEquationByName(toName, eq -> replaceToken(eq, fromToken, "0"));
     }
@@ -993,6 +1046,7 @@ public class ModelEditor {
      * @return true if the equation was updated
      */
     public boolean rerouteConnectionSource(String oldFrom, String newFrom, String to) {
+        checkFxThread();
         String oldToken = oldFrom.replace(' ', '_');
         String newToken = newFrom.replace(' ', '_');
         return updateEquationByName(to, eq -> replaceToken(eq, oldToken, newToken));
@@ -1005,6 +1059,7 @@ public class ModelEditor {
      * @return true if the reroute was performed
      */
     public boolean rerouteConnectionTarget(String from, String oldTo, String newTo) {
+        checkFxThread();
         String fromToken = from.replace(' ', '_');
 
         // Remove reference from old target
