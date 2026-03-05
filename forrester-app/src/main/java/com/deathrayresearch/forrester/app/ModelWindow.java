@@ -16,6 +16,7 @@ import com.deathrayresearch.forrester.app.canvas.MultiParameterSweepDialog;
 import com.deathrayresearch.forrester.app.canvas.OptimizerDialog;
 import com.deathrayresearch.forrester.app.canvas.ParameterSweepDialog;
 import com.deathrayresearch.forrester.app.canvas.PropertiesPanel;
+import com.deathrayresearch.forrester.app.canvas.SdConceptsDialog;
 import com.deathrayresearch.forrester.app.canvas.SimulationRunner;
 import com.deathrayresearch.forrester.app.canvas.SimulationSettingsDialog;
 import com.deathrayresearch.forrester.app.canvas.StatusBar;
@@ -360,7 +361,10 @@ public class ModelWindow {
         gettingStartedItem.setDisable(true);
 
         MenuItem sdConceptsItem = new MenuItem("SD Concepts");
-        sdConceptsItem.setDisable(true);
+        sdConceptsItem.setOnAction(e -> {
+            SdConceptsDialog dialog = new SdConceptsDialog();
+            dialog.show();
+        });
 
         MenuItem shortcutsItem = new MenuItem("Keyboard Shortcuts");
         shortcutsItem.setDisable(true);
