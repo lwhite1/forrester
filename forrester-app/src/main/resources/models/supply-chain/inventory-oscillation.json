@@ -69,81 +69,81 @@
     "unit" : "Dimensionless unit"
   } ],
   "views" : [ {
-    "name" : "Auto Layout",
+    "name" : "Main",
     "elements" : [ {
-      "name" : "Cars_on_Lot",
-      "type" : "stock",
-      "x" : 100.0,
+      "name" : "Deliveries",
+      "type" : "flow",
+      "x" : 150.0,
       "y" : 200.0
     }, {
-      "name" : "Perceived_Sales",
+      "name" : "Cars_on_Lot",
       "type" : "stock",
-      "x" : 250.0,
+      "x" : 300.0,
       "y" : 200.0
     }, {
       "name" : "Sales",
       "type" : "flow",
-      "x" : 175.0,
+      "x" : 450.0,
       "y" : 200.0
     }, {
       "name" : "Perception_Adjustment",
       "type" : "flow",
-      "x" : 325.0,
+      "x" : 600.0,
       "y" : 200.0
     }, {
-      "name" : "Deliveries",
-      "type" : "flow",
-      "x" : 475.0,
+      "name" : "Perceived_Sales",
+      "type" : "stock",
+      "x" : 750.0,
       "y" : 200.0
     }, {
       "name" : "Customer_Demand",
       "type" : "aux",
-      "x" : 100.0,
+      "x" : 450.0,
       "y" : 50.0
     }, {
       "name" : "Desired_Inventory",
       "type" : "aux",
-      "x" : 250.0,
+      "x" : 600.0,
       "y" : 50.0
     }, {
       "name" : "Inventory_Gap",
       "type" : "aux",
-      "x" : 400.0,
+      "x" : 750.0,
       "y" : 50.0
     }, {
       "name" : "Orders_to_Factory",
       "type" : "aux",
-      "x" : 550.0,
+      "x" : 150.0,
       "y" : 50.0
     }, {
       "name" : "Base_Demand",
       "type" : "constant",
-      "x" : 100.0,
+      "x" : 150.0,
       "y" : 350.0
     }, {
       "name" : "Step_Demand",
       "type" : "constant",
-      "x" : 250.0,
+      "x" : 300.0,
       "y" : 350.0
     }, {
       "name" : "Perception_Delay",
       "type" : "constant",
-      "x" : 400.0,
+      "x" : 600.0,
       "y" : 350.0
     }, {
       "name" : "Response_Delay",
       "type" : "constant",
-      "x" : 550.0,
+      "x" : 750.0,
       "y" : 350.0
     }, {
       "name" : "Delivery_Delay",
       "type" : "constant",
-      "x" : 700.0,
+      "x" : 450.0,
       "y" : 350.0
     }, {
       "name" : "Desired_Inventory_Multiplier",
       "type" : "constant",
-      "x" : 850.0,
+      "x" : 900.0,
       "y" : 350.0
     } ],
     "connectors" : [ {

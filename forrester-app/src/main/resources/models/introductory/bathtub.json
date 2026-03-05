@@ -27,31 +27,31 @@
     "unit" : "Gallon per Minute"
   } ],
   "views" : [ {
-    "name" : "Auto Layout",
+    "name" : "Main",
     "elements" : [ {
+      "name" : "Inflow",
+      "type" : "flow",
+      "x" : 250.0,
+      "y" : 200.0
+    }, {
       "name" : "Water_in_Tub",
       "type" : "stock",
-      "x" : 100.0,
+      "x" : 400.0,
       "y" : 200.0
     }, {
       "name" : "Outflow",
       "type" : "flow",
-      "x" : 175.0,
+      "x" : 550.0,
       "y" : 200.0
-    }, {
-      "name" : "Inflow",
-      "type" : "flow",
-      "x" : 325.0,
-      "y" : 200.0
-    }, {
-      "name" : "Outflow_Rate",
-      "type" : "constant",
-      "x" : 100.0,
-      "y" : 350.0
     }, {
       "name" : "Inflow_Rate",
       "type" : "constant",
       "x" : 250.0,
+      "y" : 350.0
+    }, {
+      "name" : "Outflow_Rate",
+      "type" : "constant",
+      "x" : 550.0,
       "y" : 350.0
     } ],
     "connectors" : [ {

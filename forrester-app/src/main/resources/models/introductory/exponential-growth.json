@@ -27,31 +27,31 @@
     "unit" : "Dimensionless unit"
   } ],
   "views" : [ {
-    "name" : "Auto Layout",
+    "name" : "Main",
     "elements" : [ {
-      "name" : "Population",
-      "type" : "stock",
-      "x" : 100.0,
-      "y" : 200.0
-    }, {
       "name" : "Births",
       "type" : "flow",
-      "x" : 175.0,
+      "x" : 250.0,
+      "y" : 200.0
+    }, {
+      "name" : "Population",
+      "type" : "stock",
+      "x" : 400.0,
       "y" : 200.0
     }, {
       "name" : "Deaths",
       "type" : "flow",
-      "x" : 325.0,
+      "x" : 550.0,
       "y" : 200.0
     }, {
       "name" : "Birth_Rate",
       "type" : "constant",
-      "x" : 100.0,
+      "x" : 250.0,
       "y" : 350.0
     }, {
       "name" : "Death_Rate",
       "type" : "constant",
-      "x" : 250.0,
+      "x" : 550.0,
       "y" : 350.0
     } ],
     "connectors" : [ {
