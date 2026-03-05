@@ -144,14 +144,10 @@ public final class FlowEndpointCalculator {
         if (oppositeStock != null && canvasState.hasElement(oppositeStock)) {
             double oppX = canvasState.getX(oppositeStock);
             double oppY = canvasState.getY(oppositeStock);
-            // Direction from opposite stock toward diamond
+            // Direction from opposite stock toward diamond — already points away
+            // from the connected stock, which is correct for both source and sink clouds
             dx = midX - oppX;
             dy = midY - oppY;
-            // For sink, negate to point away from the source side
-            if (!isSource) {
-                dx = -dx;
-                dy = -dy;
-            }
         } else {
             // No opposite stock: default left for source, right for sink
             dx = isSource ? -LayoutMetrics.CLOUD_OFFSET : LayoutMetrics.CLOUD_OFFSET;

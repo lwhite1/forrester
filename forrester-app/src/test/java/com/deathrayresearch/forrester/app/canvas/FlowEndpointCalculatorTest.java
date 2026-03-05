@@ -75,6 +75,22 @@ class FlowEndpointCalculatorTest {
         }
 
         @Test
+        void shouldReturnPositionForDisconnectedSinkWithSource() {
+            editor.addStock(); // Stock 1
+            String flow = editor.addFlow("Stock 1", null);
+            canvasState.addElement("Stock 1", ElementType.STOCK, 400, 200);
+            canvasState.addElement(flow, ElementType.FLOW, 550, 200);
+
+            FlowGeometry.Point2D pos = FlowEndpointCalculator.cloudPosition(
+                    FlowEndpointCalculator.FlowEnd.SINK,
+                    editor.getFlows().get(0), canvasState);
+
+            assertThat(pos).isNotNull();
+            // Should be offset from diamond center away from source direction
+            assertThat(pos.x()).isGreaterThan(550); // right of diamond (away from source at 400)
+        }
+
+        @Test
         void shouldReturnPositionForDisconnectedSourceNoSink() {
             String flow = editor.addFlow(null, null);
             canvasState.addElement(flow, ElementType.FLOW, 250, 200);
