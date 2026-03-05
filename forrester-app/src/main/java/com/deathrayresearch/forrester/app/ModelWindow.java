@@ -16,6 +16,7 @@ import com.deathrayresearch.forrester.app.canvas.MultiParameterSweepDialog;
 import com.deathrayresearch.forrester.app.canvas.OptimizerDialog;
 import com.deathrayresearch.forrester.app.canvas.ParameterSweepDialog;
 import com.deathrayresearch.forrester.app.canvas.PropertiesPanel;
+import com.deathrayresearch.forrester.app.canvas.KeyboardShortcutsDialog;
 import com.deathrayresearch.forrester.app.canvas.SdConceptsDialog;
 import com.deathrayresearch.forrester.app.canvas.SimulationRunner;
 import com.deathrayresearch.forrester.app.canvas.SimulationSettingsDialog;
@@ -367,7 +368,10 @@ public class ModelWindow {
         });
 
         MenuItem shortcutsItem = new MenuItem("Keyboard Shortcuts");
-        shortcutsItem.setDisable(true);
+        shortcutsItem.setOnAction(e -> {
+            KeyboardShortcutsDialog dialog = new KeyboardShortcutsDialog();
+            dialog.show();
+        });
 
         MenuItem aboutItem = new MenuItem("About Forrester");
         aboutItem.setOnAction(e -> {
