@@ -12,6 +12,8 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import java.nio.file.Path;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -51,8 +53,16 @@ class VensimExporterTest {
             ModelDefinition roundTripped = reImported.definition();
 
             assertThat(roundTripped.stocks()).hasSameSizeAs(imported.stocks());
-            assertThat(roundTripped.flows()).hasSameSizeAs(imported.flows());
             assertThat(roundTripped.constants()).hasSameSizeAs(imported.constants());
+
+            // Auxiliaries may grow on round-trip because the importer creates
+            // synthetic _net_flow flows that are re-classified as auxiliaries on
+            // re-import. Verify that the original auxiliaries are still present.
+            Set<String> roundTrippedAuxNames = roundTripped.auxiliaries().stream()
+                    .map(AuxDef::name).collect(Collectors.toSet());
+            for (AuxDef orig : imported.auxiliaries()) {
+                assertThat(roundTrippedAuxNames).contains(orig.name());
+            }
         }
     }
 

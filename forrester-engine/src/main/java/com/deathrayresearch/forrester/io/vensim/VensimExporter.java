@@ -378,7 +378,8 @@ public final class VensimExporter {
                  "ABS", "EXP", "LN", "LOG", "SQRT", "SIN", "COS", "TAN",
                  "LOOKUP", "WITH", "XIDZ", "ZIDZ", "PULSE", "STEP",
                  "MODULO", "POWER", "QUANTUM", "INTEGER",
-                 "AND", "OR", "NOT", "Time" -> true;
+                 "SMOOTH3", "SMOOTHI", "SMOOTH3I", "DELAY1", "DELAY1I", "RAMP",
+                 "AND", "OR", "NOT", "TIME" -> true;
             default -> false;
         };
     }
