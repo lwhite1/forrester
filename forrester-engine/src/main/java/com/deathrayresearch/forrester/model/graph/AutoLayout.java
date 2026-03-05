@@ -114,12 +114,8 @@ public final class AutoLayout {
             x += X_SPACING;
         }
 
-        // Place constants below
-        x = X_START;
-        for (ConstantDef c : def.constants()) {
-            placements.add(new ElementPlacement(c.name(), ElementType.CONSTANT, x, Y_CONSTANT));
-            x += X_SPACING;
-        }
+        // Place constants below their associated flows/elements
+        placeConstantsBelowDependents(def, placements);
 
         // Place lookup tables at bottom
         x = X_START;
@@ -182,6 +178,53 @@ public final class AutoLayout {
             if (visited.add(f.sink())) {
                 walkChain(f.sink(), transferOutflows, visited, order);
             }
+        }
+    }
+
+    /**
+     * Places each constant below the flow or element it feeds into,
+     * using the dependency graph to determine associations.
+     * Falls back to sequential placement for constants with no placed dependents.
+     */
+    private static void placeConstantsBelowDependents(ModelDefinition def,
+                                                       List<ElementPlacement> placements) {
+        DependencyGraph graph = DependencyGraph.fromDefinition(def);
+
+        // Build a lookup of already-placed element positions
+        Map<String, Double> placedX = new LinkedHashMap<>();
+        for (ElementPlacement p : placements) {
+            placedX.put(p.name(), p.x());
+        }
+
+        // Track which x positions are already taken by constants to avoid overlap
+        Set<Long> usedConstantX = new HashSet<>();
+        double fallbackX = X_START;
+
+        for (ConstantDef c : def.constants()) {
+            Double targetX = null;
+
+            // Find the first placed dependent (flow, aux, or stock this constant feeds)
+            for (String dep : graph.dependentsOf(c.name())) {
+                if (placedX.containsKey(dep)) {
+                    targetX = placedX.get(dep);
+                    break;
+                }
+            }
+
+            double x;
+            if (targetX != null) {
+                x = targetX;
+            } else {
+                x = fallbackX;
+            }
+
+            // Nudge right if another constant already occupies this x
+            while (!usedConstantX.add(Math.round(x))) {
+                x += X_SPACING;
+            }
+
+            placements.add(new ElementPlacement(c.name(), ElementType.CONSTANT, x, Y_CONSTANT));
+            fallbackX += X_SPACING;
         }
     }
 }

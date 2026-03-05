@@ -40,17 +40,43 @@ public final class ConnectionRenderer {
             drawCloud(gc, sinkX, sinkY);
         }
 
+        // Clip pipe endpoints to cloud borders so the pipe stops at the
+        // cloud edge rather than running through to its center
+        double pipeSourceX = sourceX;
+        double pipeSourceY = sourceY;
+        if (sourceIsCloud) {
+            double dx = midX - sourceX;
+            double dy = midY - sourceY;
+            double dist = Math.sqrt(dx * dx + dy * dy);
+            if (dist > 1) {
+                pipeSourceX = sourceX + dx / dist * LayoutMetrics.CLOUD_RADIUS;
+                pipeSourceY = sourceY + dy / dist * LayoutMetrics.CLOUD_RADIUS;
+            }
+        }
+
+        double pipeSinkX = sinkX;
+        double pipeSinkY = sinkY;
+        if (sinkIsCloud) {
+            double dx = midX - sinkX;
+            double dy = midY - sinkY;
+            double dist = Math.sqrt(dx * dx + dy * dy);
+            if (dist > 1) {
+                pipeSinkX = sinkX + dx / dist * LayoutMetrics.CLOUD_RADIUS;
+                pipeSinkY = sinkY + dy / dist * LayoutMetrics.CLOUD_RADIUS;
+            }
+        }
+
         // Source → diamond segment
         gc.setStroke(ColorPalette.MATERIAL_FLOW);
         gc.setLineWidth(LayoutMetrics.MATERIAL_FLOW_WIDTH);
         gc.setLineDashes();
-        gc.strokeLine(sourceX, sourceY, midX, midY);
+        gc.strokeLine(pipeSourceX, pipeSourceY, midX, midY);
 
         // Diamond → sink segment
-        gc.strokeLine(midX, midY, sinkX, sinkY);
+        gc.strokeLine(midX, midY, pipeSinkX, pipeSinkY);
 
-        // Arrowhead at sink end
-        drawArrowhead(gc, midX, midY, sinkX, sinkY,
+        // Arrowhead at clipped sink end
+        drawArrowhead(gc, midX, midY, pipeSinkX, pipeSinkY,
                 LayoutMetrics.ARROWHEAD_LENGTH, LayoutMetrics.ARROWHEAD_WIDTH,
                 ColorPalette.MATERIAL_FLOW);
     }

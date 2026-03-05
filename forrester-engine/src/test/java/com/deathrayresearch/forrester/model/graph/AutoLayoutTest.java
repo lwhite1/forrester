@@ -309,4 +309,194 @@ class AutoLayoutTest {
                 .findFirst().orElseThrow();
         assertThat(lookupPlacement.type()).isEqualTo(ElementType.LOOKUP);
     }
+
+    /**
+     * Tests that verify exact (x, y) coordinates for all elements.
+     * Layout constants: X_START=100, X_SPACING=150, Y_FLOW=200, Y_STOCK=200,
+     * Y_AUX=50, Y_CONSTANT=350.
+     */
+    @Nested
+    @DisplayName("exact coordinate verification")
+    class ExactCoordinates {
+
+        private Map<String, ElementPlacement> placementMap(ViewDef view) {
+            return view.elements().stream()
+                    .collect(Collectors.toMap(ElementPlacement::name, p -> p));
+        }
+
+        private void assertPosition(Map<String, ElementPlacement> map,
+                                     String name, double expectedX, double expectedY) {
+            ElementPlacement p = map.get(name);
+            assertThat(p).as("Element '%s' should be placed", name).isNotNull();
+            assertThat(p.x()).as("x of '%s'", name).isEqualTo(expectedX);
+            assertThat(p.y()).as("y of '%s'", name).isEqualTo(expectedY);
+        }
+
+        @Test
+        @DisplayName("Exponential Growth: Births(100) → Population(250) → Deaths(400)")
+        void shouldLayoutExponentialGrowthWithExactPositions() {
+            // Births → Population → Deaths, with Birth_Rate and Death_Rate
+            ModelDefinition def = new ModelDefinitionBuilder()
+                    .name("Exponential Growth")
+                    .stock("Population", 100, "Person")
+                    .flow("Births", "Population * Birth_Rate", "Day", null, "Population")
+                    .flow("Deaths", "Population * Death_Rate", "Day", "Population", null)
+                    .constant("Birth_Rate", 0.04, "Dimensionless unit")
+                    .constant("Death_Rate", 0.03, "Dimensionless unit")
+                    .build();
+
+            ViewDef view = AutoLayout.layout(def);
+            Map<String, ElementPlacement> map = placementMap(view);
+
+            // Flows and stock at y=200
+            assertPosition(map, "Births", 100, 200);
+            assertPosition(map, "Population", 250, 200);
+            assertPosition(map, "Deaths", 400, 200);
+
+            // Constants at y=350, positioned below the flow they feed
+            assertPosition(map, "Birth_Rate", 100, 350);
+            assertPosition(map, "Death_Rate", 400, 350);
+        }
+
+        @Test
+        @DisplayName("Bathtub: Inflow(100) → Water(250) → Outflow(400)")
+        void shouldLayoutBathtubWithExactPositions() {
+            ModelDefinition def = new ModelDefinitionBuilder()
+                    .name("Bathtub")
+                    .stock("Water_in_Tub", 50, "Gallon")
+                    .flow("Inflow", "STEP(Inflow_Rate, 5)", "Minute", null, "Water_in_Tub")
+                    .flow("Outflow", "MIN(Outflow_Rate, Water_in_Tub)", "Minute", "Water_in_Tub", null)
+                    .constant("Outflow_Rate", 5, "Gallon per Minute")
+                    .constant("Inflow_Rate", 5, "Gallon per Minute")
+                    .build();
+
+            ViewDef view = AutoLayout.layout(def);
+            Map<String, ElementPlacement> map = placementMap(view);
+
+            // Flows and stock at y=200
+            assertPosition(map, "Inflow", 100, 200);
+            assertPosition(map, "Water_in_Tub", 250, 200);
+            assertPosition(map, "Outflow", 400, 200);
+
+            // Constants below their associated flows
+            assertPosition(map, "Outflow_Rate", 400, 350);
+            assertPosition(map, "Inflow_Rate", 100, 350);
+        }
+
+        @Test
+        @DisplayName("SIR chain: S(100) → Inf(250) → I(400) → Rec(550) → R(700)")
+        void shouldLayoutSirWithExactPositions() {
+            ModelDefinition def = new ModelDefinitionBuilder()
+                    .name("SIR")
+                    .stock("Susceptible", 990, "Person")
+                    .stock("Infectious", 10, "Person")
+                    .stock("Recovered", 0, "Person")
+                    .flow("Infection", "Susceptible * Contact_Rate", "Day",
+                            "Susceptible", "Infectious")
+                    .flow("Recovery", "Infectious * Recovery_Rate", "Day",
+                            "Infectious", "Recovered")
+                    .constant("Contact_Rate", 0.3, "Dimensionless unit")
+                    .constant("Recovery_Rate", 0.1, "Dimensionless unit")
+                    .build();
+
+            ViewDef view = AutoLayout.layout(def);
+            Map<String, ElementPlacement> map = placementMap(view);
+
+            // Chain: Susceptible → Infection → Infectious → Recovery → Recovered
+            assertPosition(map, "Susceptible", 100, 200);
+            assertPosition(map, "Infection", 250, 200);
+            assertPosition(map, "Infectious", 400, 200);
+            assertPosition(map, "Recovery", 550, 200);
+            assertPosition(map, "Recovered", 700, 200);
+
+            // Constants below their associated flows
+            assertPosition(map, "Contact_Rate", 250, 350);
+            assertPosition(map, "Recovery_Rate", 550, 350);
+        }
+
+        @Test
+        @DisplayName("Goal Seeking: Production(100) → Inventory(250), constants below")
+        void shouldLayoutGoalSeekingWithExactPositions() {
+            ModelDefinition def = new ModelDefinitionBuilder()
+                    .name("Goal Seeking")
+                    .stock("Inventory", 100, "Unit")
+                    .flow("Production", "(Goal - Inventory) / Adjustment_Time", "Day",
+                            null, "Inventory")
+                    .constant("Goal", 860, "Unit")
+                    .constant("Adjustment_Time", 8, "Day")
+                    .build();
+
+            ViewDef view = AutoLayout.layout(def);
+            Map<String, ElementPlacement> map = placementMap(view);
+
+            assertPosition(map, "Production", 100, 200);
+            assertPosition(map, "Inventory", 250, 200);
+
+            // Both constants feed Production, so first gets x=100, second nudges to x=250
+            assertPosition(map, "Goal", 100, 350);
+            assertPosition(map, "Adjustment_Time", 250, 350);
+        }
+
+        @Test
+        @DisplayName("All elements on same y-row share the same y coordinate")
+        void shouldPlaceFlowsAndStocksAtSameY() {
+            ModelDefinition def = new ModelDefinitionBuilder()
+                    .name("Same Y")
+                    .stock("S1", 100, "Thing")
+                    .stock("S2", 50, "Thing")
+                    .flow("F1", "S1 * 0.1", "Day", null, "S1")
+                    .flow("F2", "S1 * 0.05", "Day", "S1", "S2")
+                    .flow("F3", "S2 * 0.1", "Day", "S2", null)
+                    .build();
+
+            ViewDef view = AutoLayout.layout(def);
+            Map<String, ElementPlacement> map = placementMap(view);
+
+            // All flows and stocks at y=200
+            for (ElementPlacement p : view.elements()) {
+                if (p.type() == ElementType.FLOW || p.type() == ElementType.STOCK) {
+                    assertThat(p.y()).as("y of '%s'", p.name()).isEqualTo(200);
+                }
+            }
+        }
+
+        @Test
+        @DisplayName("X spacing between adjacent elements is exactly 150")
+        void shouldUseConsistentSpacing() {
+            ModelDefinition def = new ModelDefinitionBuilder()
+                    .name("Spacing")
+                    .stock("Population", 100, "Person")
+                    .flow("Births", "Population * 0.04", "Day", null, "Population")
+                    .flow("Deaths", "Population * 0.03", "Day", "Population", null)
+                    .build();
+
+            ViewDef view = AutoLayout.layout(def);
+            Map<String, ElementPlacement> map = placementMap(view);
+
+            double birthsX = map.get("Births").x();
+            double popX = map.get("Population").x();
+            double deathsX = map.get("Deaths").x();
+
+            assertThat(popX - birthsX).as("Spacing Births→Population").isEqualTo(150);
+            assertThat(deathsX - popX).as("Spacing Population→Deaths").isEqualTo(150);
+        }
+
+        @Test
+        @DisplayName("Constants with no placed dependents fall back to sequential x")
+        void shouldFallBackToSequentialForUnassociatedConstants() {
+            ModelDefinition def = new ModelDefinitionBuilder()
+                    .name("Unassociated")
+                    .stock("S", 100, "Thing")
+                    .flow("F", "S * 0.1", "Day", "S", null)
+                    .constant("Orphan", 42, "Thing")
+                    .build();
+
+            ViewDef view = AutoLayout.layout(def);
+            Map<String, ElementPlacement> map = placementMap(view);
+
+            // Orphan constant has no dependents referencing it — falls back to x=100
+            assertThat(map.get("Orphan").y()).isEqualTo(350);
+            assertThat(map.get("Orphan").x()).isEqualTo(100);
+        }
+    }
 }

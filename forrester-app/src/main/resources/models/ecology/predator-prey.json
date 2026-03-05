@@ -88,17 +88,17 @@
     }, {
       "name" : "Predation_Rate",
       "type" : "constant",
-      "x" : 250.0,
+      "x" : 400.0,
       "y" : 350.0
     }, {
       "name" : "Predator_Efficiency",
       "type" : "constant",
-      "x" : 400.0,
+      "x" : 550.0,
       "y" : 350.0
     }, {
       "name" : "Predator_Death_Rate",
       "type" : "constant",
-      "x" : 550.0,
+      "x" : 850.0,
       "y" : 350.0
     } ],
     "connectors" : [ {
