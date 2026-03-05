@@ -11,12 +11,14 @@ import com.deathrayresearch.forrester.model.graph.FeedbackAnalysis;
 
 import javafx.scene.Cursor;
 import javafx.scene.canvas.Canvas;
+import javafx.scene.control.Tooltip;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.ScrollEvent;
 import javafx.scene.layout.Pane;
+import javafx.util.Duration;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -82,6 +84,9 @@ public class ModelCanvas extends Canvas {
     // Feedback loop highlighting
     private boolean loopHighlightActive;
     private FeedbackAnalysis loopAnalysis;
+
+    // Element tooltip
+    private final Tooltip elementTooltip = createElementTooltip();
 
     public ModelCanvas(Clipboard clipboard) {
         this.copyPaste = new CopyPasteController(clipboard);
@@ -848,9 +853,76 @@ public class ModelCanvas extends Canvas {
             hoveredElement = hit;
             hoveredConnection = connHit;
             redraw();
+            updateElementTooltip(hit, event);
         }
 
         updateCursor();
+    }
+
+    private static Tooltip createElementTooltip() {
+        Tooltip tip = new Tooltip();
+        tip.setWrapText(true);
+        tip.setMaxWidth(350);
+        tip.setShowDelay(Duration.millis(400));
+        tip.setHideDelay(Duration.millis(200));
+        return tip;
+    }
+
+    private void updateElementTooltip(String elementName, MouseEvent event) {
+        if (elementName == null || editor == null) {
+            Tooltip.uninstall(this, elementTooltip);
+            elementTooltip.hide();
+            return;
+        }
+
+        ElementType type = canvasState.getType(elementName);
+        if (type == null) {
+            Tooltip.uninstall(this, elementTooltip);
+            elementTooltip.hide();
+            return;
+        }
+
+        String text = buildTooltipText(elementName, type);
+        if (text == null) {
+            Tooltip.uninstall(this, elementTooltip);
+            elementTooltip.hide();
+            return;
+        }
+
+        elementTooltip.setText(text);
+        Tooltip.install(this, elementTooltip);
+    }
+
+    private String buildTooltipText(String name, ElementType type) {
+        StringBuilder sb = new StringBuilder(name);
+        switch (type) {
+            case FLOW -> {
+                String eq = editor.getFlowEquation(name);
+                if (ElementRenderer.isDisplayableEquation(eq)) {
+                    sb.append("\n= ").append(eq);
+                }
+            }
+            case AUX -> {
+                String eq = editor.getAuxEquation(name);
+                if (ElementRenderer.isDisplayableEquation(eq)) {
+                    sb.append("\n= ").append(eq);
+                }
+            }
+            case CONSTANT -> {
+                var cd = editor.getConstantByName(name);
+                if (cd != null) {
+                    sb.append("\n= ").append(ElementRenderer.formatValue(cd.value()));
+                }
+            }
+            case STOCK -> {
+                String unit = editor.getStockUnit(name);
+                if (unit != null && !unit.isBlank()) {
+                    sb.append("\nUnit: ").append(unit);
+                }
+            }
+            default -> { }
+        }
+        return sb.toString();
     }
 
     private void handleMousePressed(MouseEvent event) {

@@ -333,11 +333,12 @@ public final class SvgExporter {
                 x, y, width, height, r,
                 svgColor(ColorPalette.STOCK_BORDER), LayoutMetrics.STOCK_BORDER_WIDTH);
 
-        // Name centered
+        // Name centered (truncated to fit)
+        String stockLabel = ElementRenderer.truncate(name, LayoutMetrics.STOCK_NAME_FONT, width - 12);
         w.printf(Locale.US,
                 "  <text x=\"%.2f\" y=\"%.2f\" text-anchor=\"middle\" dominant-baseline=\"central\" " +
                 "font-family=\"sans-serif\" font-size=\"13\" font-weight=\"bold\" fill=\"%s\">%s</text>%n",
-                cx, cy, svgColor(ColorPalette.TEXT), escapeXml(name));
+                cx, cy, svgColor(ColorPalette.TEXT), escapeXml(stockLabel));
 
         // Unit badge
         if (unit != null && !unit.isBlank()) {
@@ -363,21 +364,14 @@ public final class SvgExporter {
                 "  <polygon points=\"%s\" fill=\"none\" stroke=\"%s\" stroke-width=\"1.5\"/>%n",
                 points, svgColor(ColorPalette.AUX_BORDER));
 
-        // Name below diamond
+        // Name below diamond (truncated)
+        String flowLabel = ElementRenderer.truncate(name, LayoutMetrics.FLOW_NAME_FONT,
+                LayoutMetrics.FLOW_LABEL_MAX_WIDTH);
         w.printf(Locale.US,
                 "  <text x=\"%.2f\" y=\"%.2f\" text-anchor=\"middle\" dominant-baseline=\"hanging\" " +
                 "font-family=\"sans-serif\" font-size=\"11\" fill=\"%s\">%s</text>%n",
                 cx, cy + half + LayoutMetrics.FLOW_NAME_GAP,
-                svgColor(ColorPalette.TEXT), escapeXml(name));
-
-        // Equation below name
-        if (ElementRenderer.isDisplayableEquation(equation)) {
-            w.printf(Locale.US,
-                    "  <text x=\"%.2f\" y=\"%.2f\" text-anchor=\"middle\" dominant-baseline=\"hanging\" " +
-                    "font-family=\"sans-serif\" font-size=\"9\" fill=\"%s\">%s</text>%n",
-                    cx, cy + half + LayoutMetrics.FLOW_EQUATION_GAP,
-                    svgColor(ColorPalette.TEXT_SECONDARY), escapeXml(equation));
-        }
+                svgColor(ColorPalette.TEXT), escapeXml(flowLabel));
     }
 
     private static void writeAux(PrintWriter w, String name, String equation,
@@ -405,21 +399,12 @@ public final class SvgExporter {
                 "font-family=\"sans-serif\" font-size=\"9\" fill=\"%s\">fx</text>%n",
                 x + 5, y + 3, svgColor(ColorPalette.TEXT_SECONDARY));
 
-        // Name centered
+        // Name centered (truncated to fit)
+        String auxLabel = ElementRenderer.truncate(name, LayoutMetrics.AUX_NAME_FONT, width - 20);
         w.printf(Locale.US,
                 "  <text x=\"%.2f\" y=\"%.2f\" text-anchor=\"middle\" dominant-baseline=\"central\" " +
                 "font-family=\"sans-serif\" font-size=\"12\" fill=\"%s\">%s</text>%n",
-                cx, cy + LayoutMetrics.LABEL_NAME_OFFSET,
-                svgColor(ColorPalette.TEXT), escapeXml(name));
-
-        // Equation
-        if (ElementRenderer.isDisplayableEquation(equation)) {
-            w.printf(Locale.US,
-                    "  <text x=\"%.2f\" y=\"%.2f\" text-anchor=\"middle\" dominant-baseline=\"central\" " +
-                    "font-family=\"sans-serif\" font-size=\"9\" fill=\"%s\">%s</text>%n",
-                    cx, cy + LayoutMetrics.LABEL_SUBLABEL_OFFSET,
-                    svgColor(ColorPalette.TEXT_SECONDARY), escapeXml(equation));
-        }
+                cx, cy, svgColor(ColorPalette.TEXT), escapeXml(auxLabel));
     }
 
     private static void writeConstant(PrintWriter w, String name, double value,
@@ -449,12 +434,13 @@ public final class SvgExporter {
                 "font-family=\"sans-serif\" font-size=\"9\" fill=\"%s\">pin</text>%n",
                 x + 4, y + 3, svgColor(ColorPalette.TEXT_SECONDARY));
 
-        // Name centered
+        // Name centered (truncated to fit)
+        String constLabel = ElementRenderer.truncate(name, LayoutMetrics.CONSTANT_NAME_FONT, width - 16);
         w.printf(Locale.US,
                 "  <text x=\"%.2f\" y=\"%.2f\" text-anchor=\"middle\" dominant-baseline=\"central\" " +
                 "font-family=\"sans-serif\" font-size=\"11\" fill=\"%s\">%s</text>%n",
                 cx, cy + LayoutMetrics.LABEL_NAME_OFFSET,
-                svgColor(ColorPalette.TEXT), escapeXml(name));
+                svgColor(ColorPalette.TEXT), escapeXml(constLabel));
 
         // Value
         w.printf(Locale.US,
@@ -489,11 +475,12 @@ public final class SvgExporter {
                 "font-family=\"sans-serif\" font-size=\"9\" fill=\"%s\">mod</text>%n",
                 x + 5, y + 3, svgColor(ColorPalette.TEXT_SECONDARY));
 
-        // Name centered
+        // Name centered (truncated to fit)
+        String modLabel = ElementRenderer.truncate(name, LayoutMetrics.MODULE_NAME_FONT, width - 12);
         w.printf(Locale.US,
                 "  <text x=\"%.2f\" y=\"%.2f\" text-anchor=\"middle\" dominant-baseline=\"central\" " +
                 "font-family=\"sans-serif\" font-size=\"13\" font-weight=\"bold\" fill=\"%s\">%s</text>%n",
-                cx, cy, svgColor(ColorPalette.TEXT), escapeXml(name));
+                cx, cy, svgColor(ColorPalette.TEXT), escapeXml(modLabel));
     }
 
     private static void writeLookup(PrintWriter w, String name, int dataPoints,
@@ -522,12 +509,13 @@ public final class SvgExporter {
                 "font-family=\"sans-serif\" font-size=\"9\" fill=\"%s\">tbl</text>%n",
                 x + 4, y + 3, svgColor(ColorPalette.TEXT_SECONDARY));
 
-        // Name centered
+        // Name centered (truncated to fit)
+        String lookupLabel = ElementRenderer.truncate(name, LayoutMetrics.LOOKUP_NAME_FONT, width - 16);
         w.printf(Locale.US,
                 "  <text x=\"%.2f\" y=\"%.2f\" text-anchor=\"middle\" dominant-baseline=\"central\" " +
                 "font-family=\"sans-serif\" font-size=\"11\" fill=\"%s\">%s</text>%n",
                 cx, cy + LayoutMetrics.LABEL_NAME_OFFSET,
-                svgColor(ColorPalette.TEXT), escapeXml(name));
+                svgColor(ColorPalette.TEXT), escapeXml(lookupLabel));
 
         // Data point count
         w.printf(Locale.US,

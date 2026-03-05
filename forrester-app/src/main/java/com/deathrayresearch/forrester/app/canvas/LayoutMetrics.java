@@ -50,6 +50,8 @@ public final class LayoutMetrics {
     public static final double FLOW_INDICATOR_SIZE = 30;
     public static final double FLOW_HIT_HALF_WIDTH = 55;
     public static final double FLOW_HIT_HALF_HEIGHT = 35;
+    /** Maximum pixel width for flow name labels before truncation. */
+    public static final double FLOW_LABEL_MAX_WIDTH = 100;
 
     // Material flow line
     public static final double MATERIAL_FLOW_WIDTH = 4;

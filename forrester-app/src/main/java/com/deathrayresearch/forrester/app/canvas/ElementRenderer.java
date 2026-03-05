@@ -2,6 +2,8 @@ package com.deathrayresearch.forrester.app.canvas;
 
 import javafx.geometry.VPos;
 import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.text.Font;
+import javafx.scene.text.Text;
 import javafx.scene.text.TextAlignment;
 
 /**
@@ -30,12 +32,13 @@ public final class ElementRenderer {
         gc.setLineDashes();
         gc.strokeRoundRect(x, y, width, height, r, r);
 
-        // Name centered
+        // Name centered (truncated to fit)
         gc.setFill(ColorPalette.TEXT);
         gc.setFont(LayoutMetrics.STOCK_NAME_FONT);
         gc.setTextAlign(TextAlignment.CENTER);
         gc.setTextBaseline(VPos.CENTER);
-        gc.fillText(name, x + width / 2, y + height / 2);
+        gc.fillText(truncate(name, LayoutMetrics.STOCK_NAME_FONT, width - 12),
+                x + width / 2, y + height / 2);
 
         // Unit badge bottom-right
         if (unit != null && !unit.isBlank()) {
@@ -73,21 +76,13 @@ public final class ElementRenderer {
         gc.setLineDashes();
         gc.strokePolygon(xPoints, yPoints, 4);
 
-        // Name below the diamond
+        // Name below the diamond (truncated to reasonable width)
         gc.setFill(ColorPalette.TEXT);
         gc.setFont(LayoutMetrics.FLOW_NAME_FONT);
         gc.setTextAlign(TextAlignment.CENTER);
         gc.setTextBaseline(VPos.TOP);
-        gc.fillText(name, cx, cy + half + LayoutMetrics.FLOW_NAME_GAP);
-
-        // Equation below the name (suppress default "0")
-        if (isDisplayableEquation(equation)) {
-            gc.setFill(ColorPalette.TEXT_SECONDARY);
-            gc.setFont(LayoutMetrics.BADGE_FONT);
-            gc.setTextAlign(TextAlignment.CENTER);
-            gc.setTextBaseline(VPos.TOP);
-            gc.fillText(equation, cx, cy + half + LayoutMetrics.FLOW_EQUATION_GAP);
-        }
+        gc.fillText(truncate(name, LayoutMetrics.FLOW_NAME_FONT, LayoutMetrics.FLOW_LABEL_MAX_WIDTH),
+                cx, cy + half + LayoutMetrics.FLOW_NAME_GAP);
     }
 
     /**
@@ -117,21 +112,13 @@ public final class ElementRenderer {
         gc.setTextBaseline(VPos.TOP);
         gc.fillText("fx", x + 5, y + 3);
 
-        // Name centered, slightly above middle
+        // Name centered (truncated to fit)
         gc.setFill(ColorPalette.TEXT);
         gc.setFont(LayoutMetrics.AUX_NAME_FONT);
         gc.setTextAlign(TextAlignment.CENTER);
         gc.setTextBaseline(VPos.CENTER);
-        gc.fillText(name, x + width / 2, y + height / 2 + LayoutMetrics.LABEL_NAME_OFFSET);
-
-        // Equation below name (suppress default "0")
-        if (isDisplayableEquation(equation)) {
-            gc.setFill(ColorPalette.TEXT_SECONDARY);
-            gc.setFont(LayoutMetrics.BADGE_FONT);
-            gc.setTextAlign(TextAlignment.CENTER);
-            gc.setTextBaseline(VPos.CENTER);
-            gc.fillText(equation, x + width / 2, y + height / 2 + LayoutMetrics.LABEL_SUBLABEL_OFFSET);
-        }
+        gc.fillText(truncate(name, LayoutMetrics.AUX_NAME_FONT, width - 20),
+                x + width / 2, y + height / 2);
     }
 
     /**
@@ -159,12 +146,13 @@ public final class ElementRenderer {
         gc.setTextBaseline(VPos.TOP);
         gc.fillText("pin", x + 4, y + 3);
 
-        // Name centered, slightly above middle
+        // Name centered, slightly above middle (truncated to fit)
         gc.setFill(ColorPalette.TEXT);
         gc.setFont(LayoutMetrics.CONSTANT_NAME_FONT);
         gc.setTextAlign(TextAlignment.CENTER);
         gc.setTextBaseline(VPos.CENTER);
-        gc.fillText(name, x + width / 2, y + height / 2 + LayoutMetrics.LABEL_NAME_OFFSET);
+        gc.fillText(truncate(name, LayoutMetrics.CONSTANT_NAME_FONT, width - 16),
+                x + width / 2, y + height / 2 + LayoutMetrics.LABEL_NAME_OFFSET);
 
         // Value below name
         gc.setFill(ColorPalette.TEXT_SECONDARY);
@@ -198,12 +186,13 @@ public final class ElementRenderer {
         gc.setTextBaseline(VPos.TOP);
         gc.fillText("mod", x + 5, y + 3);
 
-        // Name centered
+        // Name centered (truncated to fit)
         gc.setFill(ColorPalette.TEXT);
         gc.setFont(LayoutMetrics.MODULE_NAME_FONT);
         gc.setTextAlign(TextAlignment.CENTER);
         gc.setTextBaseline(VPos.CENTER);
-        gc.fillText(name, x + width / 2, y + height / 2);
+        gc.fillText(truncate(name, LayoutMetrics.MODULE_NAME_FONT, width - 12),
+                x + width / 2, y + height / 2);
     }
 
     /**
@@ -232,12 +221,13 @@ public final class ElementRenderer {
         gc.setTextBaseline(VPos.TOP);
         gc.fillText("tbl", x + 4, y + 3);
 
-        // Name centered, slightly above middle
+        // Name centered, slightly above middle (truncated to fit)
         gc.setFill(ColorPalette.TEXT);
         gc.setFont(LayoutMetrics.LOOKUP_NAME_FONT);
         gc.setTextAlign(TextAlignment.CENTER);
         gc.setTextBaseline(VPos.CENTER);
-        gc.fillText(name, x + width / 2, y + height / 2 + LayoutMetrics.LABEL_NAME_OFFSET);
+        gc.fillText(truncate(name, LayoutMetrics.LOOKUP_NAME_FONT, width - 16),
+                x + width / 2, y + height / 2 + LayoutMetrics.LABEL_NAME_OFFSET);
 
         // Data point count below name
         gc.setFill(ColorPalette.TEXT_SECONDARY);
@@ -264,5 +254,26 @@ public final class ElementRenderer {
             return String.valueOf((long) value);
         }
         return String.valueOf(value);
+    }
+
+    /**
+     * Truncates a name to fit within the given pixel width, appending "..." if needed.
+     * Uses a shared {@link Text} node for measurement.
+     */
+    static String truncate(String name, Font font, double maxWidth) {
+        Text text = new Text(name);
+        text.setFont(font);
+        if (text.getLayoutBounds().getWidth() <= maxWidth) {
+            return name;
+        }
+        String ellipsis = "\u2026";
+        for (int end = name.length() - 1; end > 0; end--) {
+            String candidate = name.substring(0, end) + ellipsis;
+            text.setText(candidate);
+            if (text.getLayoutBounds().getWidth() <= maxWidth) {
+                return candidate;
+            }
+        }
+        return ellipsis;
     }
 }
