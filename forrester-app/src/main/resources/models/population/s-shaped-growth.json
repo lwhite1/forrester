@@ -24,25 +24,25 @@
   "views" : [ {
     "name" : "Auto Layout",
     "elements" : [ {
-      "name" : "Births",
-      "type" : "flow",
-      "x" : 100.0,
-      "y" : 200.0
-    }, {
       "name" : "Population",
       "type" : "stock",
-      "x" : 250.0,
-      "y" : 200.0
+      "x" : 330.0,
+      "y" : 220.0
+    }, {
+      "name" : "Births",
+      "type" : "flow",
+      "x" : 225.0,
+      "y" : 220.0
     }, {
       "name" : "Max_Birth_Rate",
       "type" : "constant",
-      "x" : 100.0,
-      "y" : 350.0
+      "x" : 145.0,
+      "y" : 380.0
     }, {
       "name" : "Carrying_Capacity",
       "type" : "constant",
-      "x" : 250.0,
-      "y" : 350.0
+      "x" : 255.0,
+      "y" : 380.0
     } ],
     "connectors" : [ {
       "from" : "Population",

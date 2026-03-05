@@ -31,6 +31,7 @@
         <slf4j.version>2.0.16</slf4j.version>
         <testfx.version>4.0.17</testfx.version>
         <monocle.version>21.0.2</monocle.version>
+        <elk.version>0.9.1</elk.version>
     </properties>
 
     <dependencyManagement>
@@ -112,6 +113,23 @@
                 <groupId>ch.qos.logback</groupId>
                 <artifactId>logback-classic</artifactId>
                 <version>${logback.version}</version>
+            </dependency>
+
+            <!-- ELK (Eclipse Layout Kernel) -->
+            <dependency>
+                <groupId>org.eclipse.elk</groupId>
+                <artifactId>org.eclipse.elk.core</artifactId>
+                <version>${elk.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.elk</groupId>
+                <artifactId>org.eclipse.elk.graph</artifactId>
+                <version>${elk.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.elk</groupId>
+                <artifactId>org.eclipse.elk.alg.layered</artifactId>
+                <version>${elk.version}</version>
             </dependency>
 
             <!-- Test -->

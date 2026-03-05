@@ -51,55 +51,55 @@
   "views" : [ {
     "name" : "Auto Layout",
     "elements" : [ {
-      "name" : "Prey_Births",
-      "type" : "flow",
-      "x" : 100.0,
-      "y" : 200.0
-    }, {
       "name" : "Rabbits",
       "type" : "stock",
-      "x" : 250.0,
-      "y" : 200.0
-    }, {
-      "name" : "Prey_Deaths",
-      "type" : "flow",
-      "x" : 400.0,
-      "y" : 200.0
-    }, {
-      "name" : "Predator_Births",
-      "type" : "flow",
-      "x" : 550.0,
-      "y" : 200.0
+      "x" : 330.0,
+      "y" : 220.0
     }, {
       "name" : "Coyotes",
       "type" : "stock",
-      "x" : 700.0,
-      "y" : 200.0
+      "x" : 550.0,
+      "y" : 220.0
+    }, {
+      "name" : "Prey_Births",
+      "type" : "flow",
+      "x" : 225.0,
+      "y" : 220.0
+    }, {
+      "name" : "Prey_Deaths",
+      "type" : "flow",
+      "x" : 655.0,
+      "y" : 220.0
+    }, {
+      "name" : "Predator_Births",
+      "type" : "flow",
+      "x" : 445.0,
+      "y" : 220.0
     }, {
       "name" : "Predator_Deaths",
       "type" : "flow",
-      "x" : 850.0,
-      "y" : 200.0
+      "x" : 705.0,
+      "y" : 220.0
     }, {
       "name" : "Prey_Birth_Rate",
       "type" : "constant",
-      "x" : 100.0,
-      "y" : 350.0
+      "x" : 145.0,
+      "y" : 380.0
     }, {
       "name" : "Predation_Rate",
       "type" : "constant",
-      "x" : 400.0,
-      "y" : 350.0
+      "x" : 355.0,
+      "y" : 380.0
     }, {
       "name" : "Predator_Efficiency",
       "type" : "constant",
-      "x" : 550.0,
-      "y" : 350.0
+      "x" : 465.0,
+      "y" : 380.0
     }, {
       "name" : "Predator_Death_Rate",
       "type" : "constant",
-      "x" : 850.0,
-      "y" : 350.0
+      "x" : 575.0,
+      "y" : 380.0
     } ],
     "connectors" : [ {
       "from" : "Prey_Birth_Rate",

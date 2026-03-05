@@ -45,43 +45,43 @@
     "elements" : [ {
       "name" : "Susceptible",
       "type" : "stock",
-      "x" : 100.0,
-      "y" : 200.0
-    }, {
-      "name" : "Infection",
-      "type" : "flow",
-      "x" : 250.0,
-      "y" : 200.0
+      "x" : 330.0,
+      "y" : 220.0
     }, {
       "name" : "Infectious",
       "type" : "stock",
-      "x" : 400.0,
-      "y" : 200.0
-    }, {
-      "name" : "Recovery",
-      "type" : "flow",
-      "x" : 550.0,
-      "y" : 200.0
+      "x" : 700.0,
+      "y" : 220.0
     }, {
       "name" : "Recovered",
       "type" : "stock",
-      "x" : 700.0,
-      "y" : 200.0
+      "x" : 490.0,
+      "y" : 220.0
+    }, {
+      "name" : "Infection",
+      "type" : "flow",
+      "x" : 595.0,
+      "y" : 220.0
+    }, {
+      "name" : "Recovery",
+      "type" : "flow",
+      "x" : 225.0,
+      "y" : 220.0
     }, {
       "name" : "Contact_Rate",
       "type" : "constant",
-      "x" : 250.0,
-      "y" : 350.0
+      "x" : 355.0,
+      "y" : 380.0
     }, {
       "name" : "Infectivity",
       "type" : "constant",
-      "x" : 400.0,
-      "y" : 350.0
+      "x" : 465.0,
+      "y" : 380.0
     }, {
       "name" : "Recovery_Rate",
       "type" : "constant",
-      "x" : 550.0,
-      "y" : 350.0
+      "x" : 145.0,
+      "y" : 380.0
     } ],
     "connectors" : [ {
       "from" : "Contact_Rate",

@@ -71,80 +71,80 @@
   "views" : [ {
     "name" : "Auto Layout",
     "elements" : [ {
-      "name" : "Deliveries",
-      "type" : "flow",
-      "x" : 100.0,
-      "y" : 200.0
-    }, {
       "name" : "Cars_on_Lot",
       "type" : "stock",
-      "x" : 250.0,
-      "y" : 200.0
-    }, {
-      "name" : "Sales",
-      "type" : "flow",
-      "x" : 400.0,
-      "y" : 200.0
-    }, {
-      "name" : "Perception_Adjustment",
-      "type" : "flow",
-      "x" : 550.0,
-      "y" : 200.0
+      "x" : 350.0,
+      "y" : 220.0
     }, {
       "name" : "Perceived_Sales",
       "type" : "stock",
-      "x" : 700.0,
-      "y" : 200.0
+      "x" : 170.0,
+      "y" : 220.0
+    }, {
+      "name" : "Sales",
+      "type" : "flow",
+      "x" : 478.3333333333333,
+      "y" : 220.0
+    }, {
+      "name" : "Perception_Adjustment",
+      "type" : "flow",
+      "x" : 585.0,
+      "y" : 220.0
+    }, {
+      "name" : "Deliveries",
+      "type" : "flow",
+      "x" : 715.0,
+      "y" : 220.0
     }, {
       "name" : "Customer_Demand",
       "type" : "aux",
-      "x" : 100.0,
-      "y" : 50.0
+      "x" : 343.33333333333337,
+      "y" : 80.0
     }, {
       "name" : "Desired_Inventory",
       "type" : "aux",
-      "x" : 250.0,
-      "y" : 50.0
+      "x" : 463.33333333333337,
+      "y" : 80.0
     }, {
       "name" : "Inventory_Gap",
       "type" : "aux",
-      "x" : 400.0,
-      "y" : 50.0
+      "x" : 583.3333333333334,
+      "y" : 80.0
     }, {
       "name" : "Orders_to_Factory",
       "type" : "aux",
-      "x" : 550.0,
-      "y" : 50.0
+      "x" : 703.3333333333334,
+      "y" : 80.0
     }, {
       "name" : "Base_Demand",
       "type" : "constant",
-      "x" : 100.0,
-      "y" : 350.0
+      "x" : 195.0,
+      "y" : 380.0
     }, {
       "name" : "Step_Demand",
       "type" : "constant",
-      "x" : 250.0,
-      "y" : 350.0
+      "x" : 305.0,
+      "y" : 380.0
     }, {
       "name" : "Perception_Delay",
       "type" : "constant",
-      "x" : 550.0,
-      "y" : 350.0
+      "x" : 525.0,
+      "y" : 380.0
     }, {
       "name" : "Response_Delay",
       "type" : "constant",
-      "x" : 700.0,
-      "y" : 350.0
+      "x" : 635.0,
+      "y" : 380.0
     }, {
       "name" : "Delivery_Delay",
       "type" : "constant",
-      "x" : 400.0,
-      "y" : 350.0
+      "x" : 745.0,
+      "y" : 380.0
     }, {
       "name" : "Desired_Inventory_Multiplier",
       "type" : "constant",
-      "x" : 850.0,
-      "y" : 350.0
+      "x" : 415.0,
+      "y" : 380.0
     } ],
     "connectors" : [ {
       "from" : "Cars_on_Lot",

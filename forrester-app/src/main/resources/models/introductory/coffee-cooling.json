@@ -31,28 +31,28 @@
     "elements" : [ {
       "name" : "Coffee_Temperature",
       "type" : "stock",
-      "x" : 100.0,
-      "y" : 200.0
+      "x" : 170.0,
+      "y" : 220.0
     }, {
       "name" : "Cooling",
       "type" : "flow",
-      "x" : 250.0,
-      "y" : 200.0
+      "x" : 395.0,
+      "y" : 220.0
     }, {
       "name" : "Discrepancy",
       "type" : "aux",
-      "x" : 100.0,
-      "y" : 50.0
+      "x" : 310.0,
+      "y" : 80.0
     }, {
       "name" : "Room_Temperature",
       "type" : "constant",
-      "x" : 100.0,
-      "y" : 350.0
+      "x" : 195.0,
+      "y" : 380.0
     }, {
       "name" : "Cooling_Rate",
       "type" : "constant",
-      "x" : 250.0,
-      "y" : 350.0
+      "x" : 315.0,
+      "y" : 380.0
     } ],
     "connectors" : [ {
       "from" : "Discrepancy",

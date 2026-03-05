@@ -10,7 +10,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -20,6 +19,15 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @DisplayName("AutoLayout")
 class AutoLayoutTest {
+
+    private static Map<String, ElementPlacement> placementMap(ViewDef view) {
+        return view.elements().stream()
+                .collect(Collectors.toMap(ElementPlacement::name, p -> p));
+    }
+
+    // ---------------------------------------------------------------
+    // Basic placement and type assignment
+    // ---------------------------------------------------------------
 
     @Test
     void shouldPlaceAllElements() {
@@ -41,12 +49,7 @@ class AutoLayoutTest {
                 .map(ElementPlacement::name)
                 .collect(Collectors.toSet());
 
-        assertThat(placedNames.contains("S1")).as("S1 should be placed").isTrue();
-        assertThat(placedNames.contains("S2")).as("S2 should be placed").isTrue();
-        assertThat(placedNames.contains("F1")).as("F1 should be placed").isTrue();
-        assertThat(placedNames.contains("A1")).as("A1 should be placed").isTrue();
-        assertThat(placedNames.contains("C1")).as("C1 should be placed").isTrue();
-        assertThat(view.elements().size()).isEqualTo(5);
+        assertThat(placedNames).containsExactlyInAnyOrder("S1", "S2", "F1", "A1", "C1");
     }
 
     @Test
@@ -60,73 +63,25 @@ class AutoLayoutTest {
                 .build();
 
         ViewDef view = AutoLayout.layout(def);
+        Map<String, ElementPlacement> map = placementMap(view);
 
-        for (ElementPlacement p : view.elements()) {
-            if (p.name().equals("S")) {
-                assertThat(p.type()).isEqualTo(ElementType.STOCK);
-            } else if (p.name().equals("F")) {
-                assertThat(p.type()).isEqualTo(ElementType.FLOW);
-            } else if (p.name().equals("A")) {
-                assertThat(p.type()).isEqualTo(ElementType.AUX);
-            } else if (p.name().equals("C")) {
-                assertThat(p.type()).isEqualTo(ElementType.CONSTANT);
-            }
-        }
+        assertThat(map.get("S").type()).isEqualTo(ElementType.STOCK);
+        assertThat(map.get("F").type()).isEqualTo(ElementType.FLOW);
+        assertThat(map.get("A").type()).isEqualTo(ElementType.AUX);
+        assertThat(map.get("C").type()).isEqualTo(ElementType.CONSTANT);
     }
 
     @Test
-    void shouldNotOverlapElements() {
+    void shouldHandleEmptyModel() {
         ModelDefinition def = new ModelDefinitionBuilder()
-                .name("Overlap Test")
-                .stock("S1", 100, "Thing")
-                .stock("S2", 50, "Thing")
-                .stock("S3", 25, "Thing")
-                .constant("C1", 1, "Thing")
-                .constant("C2", 2, "Thing")
-                .aux("A1", "S1", "Thing")
-                .aux("A2", "S2", "Thing")
+                .name("Empty")
                 .build();
 
         ViewDef view = AutoLayout.layout(def);
 
-        List<ElementPlacement> elements = view.elements();
-        // Check that no two elements share the same (x, y) position
-        Set<String> positions = new HashSet<>();
-        for (ElementPlacement p : elements) {
-            String pos = p.x() + "," + p.y();
-            assertThat(positions.add(pos))
-                    .as("Elements should not overlap: duplicate position " + pos + " for " + p.name()).isTrue();
-        }
-    }
-
-    @Test
-    void shouldLayerElementsByType() {
-        ModelDefinition def = new ModelDefinitionBuilder()
-                .name("Layers")
-                .stock("S", 100, "Thing")
-                .flow("F", "S", "Day", "S", null)
-                .aux("A", "S", "Thing")
-                .constant("C", 1, "Thing")
-                .build();
-
-        ViewDef view = AutoLayout.layout(def);
-
-        double stockY = -1, flowY = -1, auxY = -1, constantY = -1;
-        for (ElementPlacement p : view.elements()) {
-            if (p.name().equals("S")) {
-                stockY = p.y();
-            } else if (p.name().equals("F")) {
-                flowY = p.y();
-            } else if (p.name().equals("A")) {
-                auxY = p.y();
-            } else if (p.name().equals("C")) {
-                constantY = p.y();
-            }
-        }
-
-        // Auxiliaries should be above stocks, constants below
-        assertThat(auxY < stockY).as("Auxiliaries should be above stocks (lower y)").isTrue();
-        assertThat(constantY > stockY).as("Constants should be below stocks (higher y)").isTrue();
+        assertThat(view).isNotNull();
+        assertThat(view.elements()).isEmpty();
+        assertThat(view.connectors()).isEmpty();
     }
 
     @Test
@@ -140,34 +95,80 @@ class AutoLayoutTest {
 
         ViewDef view = AutoLayout.layout(def);
 
-        assertThat(view.connectors().isEmpty()).as("Should generate connectors from dependencies").isFalse();
+        assertThat(view.connectors()).isNotEmpty();
     }
 
     @Test
-    void shouldHandleEmptyModel() {
+    void shouldPlaceLookupTables() {
         ModelDefinition def = new ModelDefinitionBuilder()
-                .name("Empty")
+                .name("WithLookup")
+                .stock("S", 100, "Thing")
+                .lookupTable("Effect", new double[]{0, 50, 100}, new double[]{0, 0.5, 1}, "LINEAR")
                 .build();
 
         ViewDef view = AutoLayout.layout(def);
+        Map<String, ElementPlacement> map = placementMap(view);
 
-        assertThat(view).isNotNull();
-        assertThat(view.elements().isEmpty()).isTrue();
-        assertThat(view.connectors().isEmpty()).isTrue();
+        assertThat(map).containsKey("Effect");
+        assertThat(map.get("Effect").type()).isEqualTo(ElementType.LOOKUP);
     }
+
+    // ---------------------------------------------------------------
+    // No overlapping bounding boxes
+    // ---------------------------------------------------------------
+
+    @Test
+    void shouldNotOverlapBoundingBoxes() {
+        ModelDefinition def = new ModelDefinitionBuilder()
+                .name("Overlap Test")
+                .stock("S1", 100, "Thing")
+                .stock("S2", 50, "Thing")
+                .stock("S3", 25, "Thing")
+                .constant("C1", 1, "Thing")
+                .constant("C2", 2, "Thing")
+                .aux("A1", "S1", "Thing")
+                .aux("A2", "S2", "Thing")
+                .build();
+
+        ViewDef view = AutoLayout.layout(def);
+        assertNoOverlaps(view.elements());
+    }
+
+    // ---------------------------------------------------------------
+    // Layering: aux above stocks, constants below
+    // ---------------------------------------------------------------
+
+    @Test
+    void shouldLayerElementsByType() {
+        ModelDefinition def = new ModelDefinitionBuilder()
+                .name("Layers")
+                .stock("S", 100, "Thing")
+                .flow("F", "S", "Day", "S", null)
+                .aux("A", "S", "Thing")
+                .constant("C", 1, "Thing")
+                .build();
+
+        ViewDef view = AutoLayout.layout(def);
+        Map<String, ElementPlacement> map = placementMap(view);
+
+        double stockY = map.get("S").y();
+        double auxY = map.get("A").y();
+        double constantY = map.get("C").y();
+
+        assertThat(auxY).as("Auxiliaries should be above stocks (lower y)").isLessThan(stockY);
+        assertThat(constantY).as("Constants should be below stocks (higher y)").isGreaterThan(stockY);
+    }
+
+    // ---------------------------------------------------------------
+    // Flow positioning relative to stocks
+    // ---------------------------------------------------------------
 
     @Nested
     @DisplayName("source/sink-aware flow positioning")
     class FlowPositioning {
 
-        private Map<String, ElementPlacement> placementMap(ViewDef view) {
-            return view.elements().stream()
-                    .collect(Collectors.toMap(ElementPlacement::name, p -> p));
-        }
-
         @Test
         void shouldPlaceInflowLeftOfStock() {
-            // Births (inflow) → Population
             ModelDefinition def = new ModelDefinitionBuilder()
                     .name("Inflow Test")
                     .stock("Population", 100, "Person")
@@ -184,7 +185,6 @@ class AutoLayoutTest {
 
         @Test
         void shouldPlaceOutflowRightOfStock() {
-            // Population → Deaths (outflow)
             ModelDefinition def = new ModelDefinitionBuilder()
                     .name("Outflow Test")
                     .stock("Population", 100, "Person")
@@ -201,7 +201,6 @@ class AutoLayoutTest {
 
         @Test
         void shouldPlaceInflowLeftAndOutflowRight() {
-            // Births → Population → Deaths
             ModelDefinition def = new ModelDefinitionBuilder()
                     .name("Both Flows")
                     .stock("Population", 100, "Person")
@@ -218,7 +217,6 @@ class AutoLayoutTest {
 
         @Test
         void shouldPlaceTransferFlowBetweenStocks() {
-            // S1 → Transfer → S2
             ModelDefinition def = new ModelDefinitionBuilder()
                     .name("Transfer Test")
                     .stock("S1", 100, "Thing")
@@ -237,7 +235,6 @@ class AutoLayoutTest {
 
         @Test
         void shouldLayoutSirChainCorrectly() {
-            // Susceptible → Infection → Infectious → Recovery → Recovered
             ModelDefinition def = new ModelDefinitionBuilder()
                     .name("SIR")
                     .stock("Susceptible", 990, "Person")
@@ -264,7 +261,6 @@ class AutoLayoutTest {
 
         @Test
         void shouldLayoutParallelChainsCorrectly() {
-            // Prey_Births → Rabbits → Prey_Deaths, Pred_Births → Coyotes → Pred_Deaths
             ModelDefinition def = new ModelDefinitionBuilder()
                     .name("Predator Prey")
                     .stock("Rabbits", 100, "Animal")
@@ -278,225 +274,137 @@ class AutoLayoutTest {
             ViewDef view = AutoLayout.layout(def);
             Map<String, ElementPlacement> map = placementMap(view);
 
-            // First chain
             assertThat(map.get("Prey_Births").x()).isLessThan(map.get("Rabbits").x());
             assertThat(map.get("Prey_Deaths").x()).isGreaterThan(map.get("Rabbits").x());
-
-            // Second chain
             assertThat(map.get("Pred_Births").x()).isLessThan(map.get("Coyotes").x());
             assertThat(map.get("Pred_Deaths").x()).isGreaterThan(map.get("Coyotes").x());
         }
     }
 
+    // ---------------------------------------------------------------
+    // Cycle handling
+    // ---------------------------------------------------------------
+
     @Test
-    void shouldPlaceLookupTables() {
+    @DisplayName("SIR model with feedback loops does not crash")
+    void shouldHandleCycles() {
         ModelDefinition def = new ModelDefinitionBuilder()
-                .name("WithLookup")
-                .stock("S", 100, "Thing")
-                .lookupTable("Effect", new double[]{0, 50, 100}, new double[]{0, 0.5, 1}, "LINEAR")
+                .name("SIR with feedback")
+                .stock("Susceptible", 1000, "Person")
+                .stock("Infectious", 10, "Person")
+                .stock("Recovered", 0, "Person")
+                .flow("Infection",
+                        "Contact_Rate * Infectious / (Susceptible + Infectious + Recovered) * Susceptible",
+                        "Day", "Susceptible", "Infectious")
+                .flow("Recovery", "Infectious * Recovery_Rate", "Day",
+                        "Infectious", "Recovered")
+                .constant("Contact_Rate", 8.0, "Dimensionless unit")
+                .constant("Recovery_Rate", 0.20, "Dimensionless unit")
                 .build();
 
         ViewDef view = AutoLayout.layout(def);
 
-        Set<String> placedNames = view.elements().stream()
-                .map(ElementPlacement::name)
-                .collect(Collectors.toSet());
-
-        assertThat(placedNames.contains("Effect")).as("Lookup table should be placed").isTrue();
-
-        ElementPlacement lookupPlacement = view.elements().stream()
-                .filter(p -> p.name().equals("Effect"))
-                .findFirst().orElseThrow();
-        assertThat(lookupPlacement.type()).isEqualTo(ElementType.LOOKUP);
+        assertThat(view.elements()).hasSize(7);
+        assertNoOverlaps(view.elements());
     }
 
+    // ---------------------------------------------------------------
+    // Determinism
+    // ---------------------------------------------------------------
+
+    @Test
+    @DisplayName("Same input produces same output")
+    void shouldBeDeterministic() {
+        ModelDefinition def = new ModelDefinitionBuilder()
+                .name("Determinism")
+                .stock("Population", 100, "Person")
+                .flow("Births", "Population * Birth_Rate", "Day", null, "Population")
+                .flow("Deaths", "Population * Death_Rate", "Day", "Population", null)
+                .constant("Birth_Rate", 0.04, "Dimensionless unit")
+                .constant("Death_Rate", 0.03, "Dimensionless unit")
+                .build();
+
+        ViewDef view1 = AutoLayout.layout(def);
+        ViewDef view2 = AutoLayout.layout(def);
+
+        Map<String, ElementPlacement> map1 = placementMap(view1);
+        Map<String, ElementPlacement> map2 = placementMap(view2);
+
+        for (String name : map1.keySet()) {
+            assertThat(map2.get(name).x()).as("x of '%s'", name).isEqualTo(map1.get(name).x());
+            assertThat(map2.get(name).y()).as("y of '%s'", name).isEqualTo(map1.get(name).y());
+        }
+    }
+
+    // ---------------------------------------------------------------
+    // Complex model: inventory oscillation (9 elements)
+    // ---------------------------------------------------------------
+
+    @Test
+    @DisplayName("Inventory oscillation model with 9+ elements lays out correctly")
+    void shouldLayoutComplexModel() {
+        ModelDefinition def = new ModelDefinitionBuilder()
+                .name("Inventory Oscillation")
+                .stock("Cars_on_Lot", 200, "Car")
+                .stock("Perceived_Sales", 20, "Car")
+                .aux("Customer_Demand", "IF(TIME > 25, Step_Demand, Base_Demand)", "Car")
+                .aux("Desired_Inventory", "Perceived_Sales * Desired_Inventory_Multiplier", "Car")
+                .aux("Inventory_Gap", "Desired_Inventory - Cars_on_Lot", "Car")
+                .aux("Orders_to_Factory",
+                        "MAX(Perceived_Sales + Inventory_Gap / Response_Delay, 0)", "Car")
+                .flow("Sales", "MIN(Cars_on_Lot, Customer_Demand)", "Day",
+                        "Cars_on_Lot", null)
+                .flow("Perception_Adjustment",
+                        "(Sales - Perceived_Sales) / Perception_Delay", "Day",
+                        null, "Perceived_Sales")
+                .flow("Deliveries", "DELAY3(Orders_to_Factory, Delivery_Delay)", "Day",
+                        null, "Cars_on_Lot")
+                .constant("Base_Demand", 20, "Car per Day")
+                .constant("Step_Demand", 22, "Car per Day")
+                .constant("Perception_Delay", 5, "Day")
+                .constant("Response_Delay", 3, "Day")
+                .constant("Delivery_Delay", 5, "Day")
+                .constant("Desired_Inventory_Multiplier", 10, "Dimensionless unit")
+                .build();
+
+        ViewDef view = AutoLayout.layout(def);
+
+        assertThat(view.elements()).hasSize(15);
+        assertNoOverlaps(view.elements());
+    }
+
+    // ---------------------------------------------------------------
+    // Helpers
+    // ---------------------------------------------------------------
+
     /**
-     * Tests that verify exact (x, y) coordinates for all elements.
-     * Layout constants: X_START=100, X_SPACING=150, Y_FLOW=200, Y_STOCK=200,
-     * Y_AUX=50, Y_CONSTANT=350.
+     * Asserts that no two element bounding boxes overlap,
+     * using actual element sizes from {@link ElementSizes}.
      */
-    @Nested
-    @DisplayName("exact coordinate verification")
-    class ExactCoordinates {
+    private static void assertNoOverlaps(List<ElementPlacement> elements) {
+        for (int i = 0; i < elements.size(); i++) {
+            ElementPlacement a = elements.get(i);
+            ElementSizes sa = ElementSizes.forType(a.type());
+            double aLeft = a.x() - sa.width() / 2.0;
+            double aRight = a.x() + sa.width() / 2.0;
+            double aTop = a.y() - sa.height() / 2.0;
+            double aBottom = a.y() + sa.height() / 2.0;
 
-        private Map<String, ElementPlacement> placementMap(ViewDef view) {
-            return view.elements().stream()
-                    .collect(Collectors.toMap(ElementPlacement::name, p -> p));
-        }
+            for (int j = i + 1; j < elements.size(); j++) {
+                ElementPlacement b = elements.get(j);
+                ElementSizes sb = ElementSizes.forType(b.type());
+                double bLeft = b.x() - sb.width() / 2.0;
+                double bRight = b.x() + sb.width() / 2.0;
+                double bTop = b.y() - sb.height() / 2.0;
+                double bBottom = b.y() + sb.height() / 2.0;
 
-        private void assertPosition(Map<String, ElementPlacement> map,
-                                     String name, double expectedX, double expectedY) {
-            ElementPlacement p = map.get(name);
-            assertThat(p).as("Element '%s' should be placed", name).isNotNull();
-            assertThat(p.x()).as("x of '%s'", name).isEqualTo(expectedX);
-            assertThat(p.y()).as("y of '%s'", name).isEqualTo(expectedY);
-        }
+                boolean overlaps = aLeft < bRight && aRight > bLeft
+                        && aTop < bBottom && aBottom > bTop;
 
-        @Test
-        @DisplayName("Exponential Growth: Births(100) → Population(250) → Deaths(400)")
-        void shouldLayoutExponentialGrowthWithExactPositions() {
-            // Births → Population → Deaths, with Birth_Rate and Death_Rate
-            ModelDefinition def = new ModelDefinitionBuilder()
-                    .name("Exponential Growth")
-                    .stock("Population", 100, "Person")
-                    .flow("Births", "Population * Birth_Rate", "Day", null, "Population")
-                    .flow("Deaths", "Population * Death_Rate", "Day", "Population", null)
-                    .constant("Birth_Rate", 0.04, "Dimensionless unit")
-                    .constant("Death_Rate", 0.03, "Dimensionless unit")
-                    .build();
-
-            ViewDef view = AutoLayout.layout(def);
-            Map<String, ElementPlacement> map = placementMap(view);
-
-            // Flows and stock at y=200
-            assertPosition(map, "Births", 100, 200);
-            assertPosition(map, "Population", 250, 200);
-            assertPosition(map, "Deaths", 400, 200);
-
-            // Constants at y=350, positioned below the flow they feed
-            assertPosition(map, "Birth_Rate", 100, 350);
-            assertPosition(map, "Death_Rate", 400, 350);
-        }
-
-        @Test
-        @DisplayName("Bathtub: Inflow(100) → Water(250) → Outflow(400)")
-        void shouldLayoutBathtubWithExactPositions() {
-            ModelDefinition def = new ModelDefinitionBuilder()
-                    .name("Bathtub")
-                    .stock("Water_in_Tub", 50, "Gallon")
-                    .flow("Inflow", "STEP(Inflow_Rate, 5)", "Minute", null, "Water_in_Tub")
-                    .flow("Outflow", "MIN(Outflow_Rate, Water_in_Tub)", "Minute", "Water_in_Tub", null)
-                    .constant("Outflow_Rate", 5, "Gallon per Minute")
-                    .constant("Inflow_Rate", 5, "Gallon per Minute")
-                    .build();
-
-            ViewDef view = AutoLayout.layout(def);
-            Map<String, ElementPlacement> map = placementMap(view);
-
-            // Flows and stock at y=200
-            assertPosition(map, "Inflow", 100, 200);
-            assertPosition(map, "Water_in_Tub", 250, 200);
-            assertPosition(map, "Outflow", 400, 200);
-
-            // Constants below their associated flows
-            assertPosition(map, "Outflow_Rate", 400, 350);
-            assertPosition(map, "Inflow_Rate", 100, 350);
-        }
-
-        @Test
-        @DisplayName("SIR chain: S(100) → Inf(250) → I(400) → Rec(550) → R(700)")
-        void shouldLayoutSirWithExactPositions() {
-            ModelDefinition def = new ModelDefinitionBuilder()
-                    .name("SIR")
-                    .stock("Susceptible", 990, "Person")
-                    .stock("Infectious", 10, "Person")
-                    .stock("Recovered", 0, "Person")
-                    .flow("Infection", "Susceptible * Contact_Rate", "Day",
-                            "Susceptible", "Infectious")
-                    .flow("Recovery", "Infectious * Recovery_Rate", "Day",
-                            "Infectious", "Recovered")
-                    .constant("Contact_Rate", 0.3, "Dimensionless unit")
-                    .constant("Recovery_Rate", 0.1, "Dimensionless unit")
-                    .build();
-
-            ViewDef view = AutoLayout.layout(def);
-            Map<String, ElementPlacement> map = placementMap(view);
-
-            // Chain: Susceptible → Infection → Infectious → Recovery → Recovered
-            assertPosition(map, "Susceptible", 100, 200);
-            assertPosition(map, "Infection", 250, 200);
-            assertPosition(map, "Infectious", 400, 200);
-            assertPosition(map, "Recovery", 550, 200);
-            assertPosition(map, "Recovered", 700, 200);
-
-            // Constants below their associated flows
-            assertPosition(map, "Contact_Rate", 250, 350);
-            assertPosition(map, "Recovery_Rate", 550, 350);
-        }
-
-        @Test
-        @DisplayName("Goal Seeking: Production(100) → Inventory(250), constants below")
-        void shouldLayoutGoalSeekingWithExactPositions() {
-            ModelDefinition def = new ModelDefinitionBuilder()
-                    .name("Goal Seeking")
-                    .stock("Inventory", 100, "Unit")
-                    .flow("Production", "(Goal - Inventory) / Adjustment_Time", "Day",
-                            null, "Inventory")
-                    .constant("Goal", 860, "Unit")
-                    .constant("Adjustment_Time", 8, "Day")
-                    .build();
-
-            ViewDef view = AutoLayout.layout(def);
-            Map<String, ElementPlacement> map = placementMap(view);
-
-            assertPosition(map, "Production", 100, 200);
-            assertPosition(map, "Inventory", 250, 200);
-
-            // Both constants feed Production, so first gets x=100, second nudges to x=250
-            assertPosition(map, "Goal", 100, 350);
-            assertPosition(map, "Adjustment_Time", 250, 350);
-        }
-
-        @Test
-        @DisplayName("All elements on same y-row share the same y coordinate")
-        void shouldPlaceFlowsAndStocksAtSameY() {
-            ModelDefinition def = new ModelDefinitionBuilder()
-                    .name("Same Y")
-                    .stock("S1", 100, "Thing")
-                    .stock("S2", 50, "Thing")
-                    .flow("F1", "S1 * 0.1", "Day", null, "S1")
-                    .flow("F2", "S1 * 0.05", "Day", "S1", "S2")
-                    .flow("F3", "S2 * 0.1", "Day", "S2", null)
-                    .build();
-
-            ViewDef view = AutoLayout.layout(def);
-            Map<String, ElementPlacement> map = placementMap(view);
-
-            // All flows and stocks at y=200
-            for (ElementPlacement p : view.elements()) {
-                if (p.type() == ElementType.FLOW || p.type() == ElementType.STOCK) {
-                    assertThat(p.y()).as("y of '%s'", p.name()).isEqualTo(200);
-                }
+                assertThat(overlaps)
+                        .as("Elements '%s' and '%s' should not overlap", a.name(), b.name())
+                        .isFalse();
             }
-        }
-
-        @Test
-        @DisplayName("X spacing between adjacent elements is exactly 150")
-        void shouldUseConsistentSpacing() {
-            ModelDefinition def = new ModelDefinitionBuilder()
-                    .name("Spacing")
-                    .stock("Population", 100, "Person")
-                    .flow("Births", "Population * 0.04", "Day", null, "Population")
-                    .flow("Deaths", "Population * 0.03", "Day", "Population", null)
-                    .build();
-
-            ViewDef view = AutoLayout.layout(def);
-            Map<String, ElementPlacement> map = placementMap(view);
-
-            double birthsX = map.get("Births").x();
-            double popX = map.get("Population").x();
-            double deathsX = map.get("Deaths").x();
-
-            assertThat(popX - birthsX).as("Spacing Births→Population").isEqualTo(150);
-            assertThat(deathsX - popX).as("Spacing Population→Deaths").isEqualTo(150);
-        }
-
-        @Test
-        @DisplayName("Constants with no placed dependents fall back to sequential x")
-        void shouldFallBackToSequentialForUnassociatedConstants() {
-            ModelDefinition def = new ModelDefinitionBuilder()
-                    .name("Unassociated")
-                    .stock("S", 100, "Thing")
-                    .flow("F", "S * 0.1", "Day", "S", null)
-                    .constant("Orphan", 42, "Thing")
-                    .build();
-
-            ViewDef view = AutoLayout.layout(def);
-            Map<String, ElementPlacement> map = placementMap(view);
-
-            // Orphan constant has no dependents referencing it — falls back to x=100
-            assertThat(map.get("Orphan").y()).isEqualTo(350);
-            assertThat(map.get("Orphan").x()).isEqualTo(100);
         }
     }
 }
