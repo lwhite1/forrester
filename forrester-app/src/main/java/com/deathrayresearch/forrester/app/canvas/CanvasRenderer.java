@@ -126,8 +126,7 @@ public class CanvasRenderer {
                             cx - w / 2, cy - h / 2, w, h);
                 }
                 case FLOW -> {
-                    String flowEq = editor.getFlowEquation(name);
-                    ElementRenderer.drawFlow(gc, name, flowEq,
+                    ElementRenderer.drawFlow(gc, name,
                             cx - LayoutMetrics.FLOW_INDICATOR_SIZE / 2,
                             cy - LayoutMetrics.FLOW_INDICATOR_SIZE / 2,
                             LayoutMetrics.FLOW_INDICATOR_SIZE, LayoutMetrics.FLOW_INDICATOR_SIZE);
@@ -135,8 +134,7 @@ public class CanvasRenderer {
                 case AUX -> {
                     double w = LayoutMetrics.effectiveWidth(canvasState, name);
                     double h = LayoutMetrics.effectiveHeight(canvasState, name);
-                    String auxEq = editor.getAuxEquation(name);
-                    ElementRenderer.drawAux(gc, name, auxEq,
+                    ElementRenderer.drawAux(gc, name,
                             cx - w / 2, cy - h / 2, w, h);
                 }
                 case CONSTANT -> {

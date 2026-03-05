@@ -53,13 +53,12 @@ public final class ElementRenderer {
     /**
      * Draws a flow process indicator: small rounded diamond with name label and equation.
      *
-     * @param equation the equation string (null or "0" suppresses display)
      * @param x        top-left X
      * @param y        top-left Y
      * @param width    bounding box width
      * @param height   bounding box height
      */
-    public static void drawFlow(GraphicsContext gc, String name, String equation,
+    public static void drawFlow(GraphicsContext gc, String name,
                                 double x, double y, double width, double height) {
         double cx = x + width / 2;
         double cy = y + height / 2;
@@ -87,11 +86,8 @@ public final class ElementRenderer {
 
     /**
      * Draws an auxiliary variable: medium rounded rectangle with "fx" badge, centered name,
-     * and equation.
-     *
-     * @param equation the equation string (null or "0" suppresses display)
      */
-    public static void drawAux(GraphicsContext gc, String name, String equation,
+    public static void drawAux(GraphicsContext gc, String name,
                                double x, double y, double width, double height) {
         double r = LayoutMetrics.AUX_CORNER_RADIUS;
 
