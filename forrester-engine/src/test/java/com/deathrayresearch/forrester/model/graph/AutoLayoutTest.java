@@ -7,10 +7,12 @@ import com.deathrayresearch.forrester.model.def.ModelDefinitionBuilder;
 import com.deathrayresearch.forrester.model.def.ViewDef;
 
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -152,6 +154,138 @@ class AutoLayoutTest {
         assertThat(view).isNotNull();
         assertThat(view.elements().isEmpty()).isTrue();
         assertThat(view.connectors().isEmpty()).isTrue();
+    }
+
+    @Nested
+    @DisplayName("source/sink-aware flow positioning")
+    class FlowPositioning {
+
+        private Map<String, ElementPlacement> placementMap(ViewDef view) {
+            return view.elements().stream()
+                    .collect(Collectors.toMap(ElementPlacement::name, p -> p));
+        }
+
+        @Test
+        void shouldPlaceInflowLeftOfStock() {
+            // Births (inflow) → Population
+            ModelDefinition def = new ModelDefinitionBuilder()
+                    .name("Inflow Test")
+                    .stock("Population", 100, "Person")
+                    .flow("Births", "Population * 0.04", "Day", null, "Population")
+                    .build();
+
+            ViewDef view = AutoLayout.layout(def);
+            Map<String, ElementPlacement> map = placementMap(view);
+
+            assertThat(map.get("Births").x())
+                    .as("Inflow should be left of its sink stock")
+                    .isLessThan(map.get("Population").x());
+        }
+
+        @Test
+        void shouldPlaceOutflowRightOfStock() {
+            // Population → Deaths (outflow)
+            ModelDefinition def = new ModelDefinitionBuilder()
+                    .name("Outflow Test")
+                    .stock("Population", 100, "Person")
+                    .flow("Deaths", "Population * 0.03", "Day", "Population", null)
+                    .build();
+
+            ViewDef view = AutoLayout.layout(def);
+            Map<String, ElementPlacement> map = placementMap(view);
+
+            assertThat(map.get("Deaths").x())
+                    .as("Outflow should be right of its source stock")
+                    .isGreaterThan(map.get("Population").x());
+        }
+
+        @Test
+        void shouldPlaceInflowLeftAndOutflowRight() {
+            // Births → Population → Deaths
+            ModelDefinition def = new ModelDefinitionBuilder()
+                    .name("Both Flows")
+                    .stock("Population", 100, "Person")
+                    .flow("Births", "Population * 0.04", "Day", null, "Population")
+                    .flow("Deaths", "Population * 0.03", "Day", "Population", null)
+                    .build();
+
+            ViewDef view = AutoLayout.layout(def);
+            Map<String, ElementPlacement> map = placementMap(view);
+
+            assertThat(map.get("Births").x()).isLessThan(map.get("Population").x());
+            assertThat(map.get("Deaths").x()).isGreaterThan(map.get("Population").x());
+        }
+
+        @Test
+        void shouldPlaceTransferFlowBetweenStocks() {
+            // S1 → Transfer → S2
+            ModelDefinition def = new ModelDefinitionBuilder()
+                    .name("Transfer Test")
+                    .stock("S1", 100, "Thing")
+                    .stock("S2", 50, "Thing")
+                    .flow("Transfer", "S1 * 0.1", "Day", "S1", "S2")
+                    .build();
+
+            ViewDef view = AutoLayout.layout(def);
+            Map<String, ElementPlacement> map = placementMap(view);
+
+            assertThat(map.get("Transfer").x())
+                    .as("Transfer flow should be between source and sink stocks")
+                    .isGreaterThan(map.get("S1").x())
+                    .isLessThan(map.get("S2").x());
+        }
+
+        @Test
+        void shouldLayoutSirChainCorrectly() {
+            // Susceptible → Infection → Infectious → Recovery → Recovered
+            ModelDefinition def = new ModelDefinitionBuilder()
+                    .name("SIR")
+                    .stock("Susceptible", 990, "Person")
+                    .stock("Infectious", 10, "Person")
+                    .stock("Recovered", 0, "Person")
+                    .flow("Infection", "Susceptible * 0.3", "Day", "Susceptible", "Infectious")
+                    .flow("Recovery", "Infectious * 0.1", "Day", "Infectious", "Recovered")
+                    .build();
+
+            ViewDef view = AutoLayout.layout(def);
+            Map<String, ElementPlacement> map = placementMap(view);
+
+            double sx = map.get("Susceptible").x();
+            double ix = map.get("Infection").x();
+            double infx = map.get("Infectious").x();
+            double rx = map.get("Recovery").x();
+            double recx = map.get("Recovered").x();
+
+            assertThat(sx).isLessThan(ix);
+            assertThat(ix).isLessThan(infx);
+            assertThat(infx).isLessThan(rx);
+            assertThat(rx).isLessThan(recx);
+        }
+
+        @Test
+        void shouldLayoutParallelChainsCorrectly() {
+            // Prey_Births → Rabbits → Prey_Deaths, Pred_Births → Coyotes → Pred_Deaths
+            ModelDefinition def = new ModelDefinitionBuilder()
+                    .name("Predator Prey")
+                    .stock("Rabbits", 100, "Animal")
+                    .stock("Coyotes", 10, "Animal")
+                    .flow("Prey_Births", "Rabbits", "Day", null, "Rabbits")
+                    .flow("Prey_Deaths", "Rabbits * Coyotes", "Day", "Rabbits", null)
+                    .flow("Pred_Births", "Coyotes", "Day", null, "Coyotes")
+                    .flow("Pred_Deaths", "Coyotes", "Day", "Coyotes", null)
+                    .build();
+
+            ViewDef view = AutoLayout.layout(def);
+            Map<String, ElementPlacement> map = placementMap(view);
+
+            // First chain
+            assertThat(map.get("Prey_Births").x()).isLessThan(map.get("Rabbits").x());
+            assertThat(map.get("Prey_Deaths").x()).isGreaterThan(map.get("Rabbits").x());
+
+            // Second chain
+            assertThat(map.get("Pred_Births").x()).isLessThan(map.get("Coyotes").x());
+            assertThat(map.get("Pred_Deaths").x()).isGreaterThan(map.get("Coyotes").x());
+        }
     }
 
     @Test

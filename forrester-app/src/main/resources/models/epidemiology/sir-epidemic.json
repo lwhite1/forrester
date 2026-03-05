@@ -48,24 +48,24 @@
       "x" : 100.0,
       "y" : 200.0
     }, {
-      "name" : "Infectious",
-      "type" : "stock",
+      "name" : "Infection",
+      "type" : "flow",
       "x" : 250.0,
       "y" : 200.0
     }, {
-      "name" : "Recovered",
+      "name" : "Infectious",
       "type" : "stock",
       "x" : 400.0,
       "y" : 200.0
     }, {
-      "name" : "Infection",
-      "type" : "flow",
-      "x" : 175.0,
-      "y" : 200.0
-    }, {
       "name" : "Recovery",
       "type" : "flow",
-      "x" : 325.0,
+      "x" : 550.0,
+      "y" : 200.0
+    }, {
+      "name" : "Recovered",
+      "type" : "stock",
+      "x" : 700.0,
       "y" : 200.0
     }, {
       "name" : "Contact_Rate",

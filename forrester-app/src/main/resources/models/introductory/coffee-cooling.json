@@ -36,7 +36,7 @@
     }, {
       "name" : "Cooling",
       "type" : "flow",
-      "x" : 175.0,
+      "x" : 250.0,
       "y" : 200.0
     }, {
       "name" : "Discrepancy",
