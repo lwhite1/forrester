@@ -12,14 +12,14 @@
 - **Dimensions:** 140w x 80h (resizable, min 80w x 45h). Default dimensions are used during the initial layout run; subsequent user resizes are handled manually and do not trigger re-layout.
 - **Border:** 3px solid `#2C3E50`
 - **Fill:** White
-- **Label:** Centered name in bold 13pt; unit badge in 9pt at bottom-right
+- **Label:** Centered name in bold 13pt, truncated with ellipsis (`…`) if it exceeds (width - 12)px; unit badge in 9pt at bottom-right
 
 ### Flow (Rate / Valve)
 
 - **Shape:** Diamond (rotated square, i.e. a rhombus). Bounding box is 30 x 30.
 - **Border:** 1.5px solid `#7F8C8D`
 - **Fill:** White
-- **Label:** Name 4px below the diamond bounding box in 11pt; equation 18px below that in 9pt gray (hidden if zero or null). Label bounds are checked for collision -- see Section 4.
+- **Label:** Name 4px below the diamond bounding box in 11pt, truncated with ellipsis if it exceeds 100px. Equations are not displayed on the canvas; they are shown in a tooltip on hover (see Section 4).
 
 ### Auxiliary Variable
 
@@ -28,7 +28,7 @@
 - **Border:** 1.5px solid `#7F8C8D`
 - **Fill:** White
 - **Badge:** "fx" in 9pt gray at top-left
-- **Label:** Centered name in 12pt (offset -6px from center); equation in 9pt gray (offset +8px)
+- **Label:** Centered name in 12pt (offset -6px from center), truncated with ellipsis if it exceeds (width - 20)px. Equations are not displayed on the canvas.
 
 ### Constant
 
@@ -37,7 +37,7 @@
 - **Border:** 1px dashed `#BDC3C7` (6px dash, 4px gap)
 - **Fill:** White
 - **Badge:** "pin" in 9pt gray at top-left
-- **Label:** Centered name in 11pt (offset -6px); value in 9pt gray (offset +8px)
+- **Label:** Centered name in 11pt (offset -6px), truncated with ellipsis if it exceeds (width - 16)px. Values are not displayed on the canvas.
 
 ### Lookup Table
 
@@ -46,7 +46,7 @@
 - **Border:** 1.5px dot-dash `#7F8C8D` (8/3/2/3 pattern)
 - **Fill:** White
 - **Badge:** "tbl" in 9pt gray at top-left
-- **Label:** Centered name in 11pt (offset -6px); data point count in 9pt gray (offset +8px)
+- **Label:** Centered name in 11pt (offset -6px), truncated with ellipsis if it exceeds (width - 16)px. Data point count is not displayed on the canvas.
 
 ### Module
 
@@ -55,7 +55,7 @@
 - **Border:** 2px solid `#2C3E50`
 - **Fill:** White
 - **Badge:** "mod" in 9pt gray at top-left
-- **Label:** Centered name in bold 13pt
+- **Label:** Centered name in bold 13pt, truncated with ellipsis if it exceeds (width - 12)px
 
 ---
 
@@ -95,96 +95,70 @@ Clouds represent material flowing in from or out to the boundary of the model.
 
 - If the opposite endpoint is connected to a stock, place the cloud 80px from the diamond in the direction away from that stock.
 - If neither endpoint is connected, source clouds default to 80px left of the diamond and sink clouds 80px right.
-- **Collision fallback:** After computing the candidate position, test it against all element bounding boxes. If it overlaps (within 20px of any element edge), try offsets of 80px, 120px, 160px, and 200px along the same direction, choosing the first that is clear. If none are clear, try both perpendicular directions (positive and negative cross-axis): compute the clearance to the nearest element for each, and choose the direction with greater clearance. If clearance is equal, prefer upward (negative Y). Retry the offset sequence in the chosen perpendicular direction.
 
 ---
 
 ## 3. Layout Rules
 
-### Overview: Full Delegation to ELK
+### Overview: Flat Graph with ELK
 
-Layout is fully delegated to the Eclipse Layout Kernel (ELK) layered (Sugiyama) algorithm. **Layout is a one-shot operation.** It runs once at diagram creation or model import, on the complete graph, with all nodes and edges present. It does not run again in response to user edits such as resizing elements or adding connections -- those are accommodated by the user repositioning elements manually. Connector paths (pipes and info links) are recomputed dynamically as elements move, but node positions are not.
+Layout is delegated to the Eclipse Layout Kernel (ELK) 0.9.1 layered (Sugiyama) algorithm. **Layout is a one-shot operation.** It runs once at diagram creation or model import, on the complete graph, with all nodes and edges present. It does not run again in response to user edits such as resizing elements or adding connections — those are accommodated by the user repositioning elements manually. Connector paths (pipes and info links) are recomputed dynamically as elements move, but node positions are not.
 
-ELK must be given the complete graph in a single invocation. Do not run it incrementally or on subgraphs. The quality of the initial layout is the only layout the user will see without manual intervention, so the full constraint and cycle-handling protocol described below must be applied on that single run.
+ELK is run with **Direction: RIGHT** (left-to-right) on a **single flat graph** — all element types (stocks, flows, auxiliaries, constants, lookup tables, modules) are placed in one graph, and their positions are determined entirely by their topological relationships. There are no compound nodes or vertical bands segregating elements by type.
 
-ELK is run with **Direction: RIGHT** (left-to-right). Layers correspond to horizontal positions; layer assignment determines horizontal ordering.
+### Layout Pipeline
 
-### SD Band Convention
+The layout pipeline runs these steps in order:
 
-System dynamics convention places auxiliaries above the stock-flow chain and constants, lookup tables, and modules below it. With `Direction: RIGHT`, ELK's `layerConstraint: FIRST/LAST` controls the *main axis* (horizontal position), not the cross-axis (vertical position). Vertical banding therefore cannot be expressed with `layerConstraint` alone and requires a **compound node (hierarchical) approach.**
+1. **Build the flat ELK graph** with all elements as nodes and all edges (material + info link).
+2. **Compute material flow chain order** via BFS to establish initial X positions for INTERACTIVE cycle breaking.
+3. **Assign non-chain node positions** (constants, auxiliaries, etc.) one step before their earliest consumer in the chain — may produce negative values.
+4. **Identify back-edges** within SCCs by comparing chain order (higher → lower = back-edge).
+5. **Run ELK** with INTERACTIVE cycle breaking, which respects the pre-marked feedback edges.
+6. **Convert coordinates** from ELK's top-left to center coordinates.
+7. **Align flows with stocks** (post-processing) so flow pipes run horizontally.
+8. **Detect and reposition back-flows** (sink.x < source.x) below the main chain.
+9. **Resolve overlaps** by nudging overlapping element pairs apart.
 
-The graph passed to ELK contains three top-level compound nodes -- fixed, invisible containers that ELK stacks vertically:
+### Material Flow Chain Order (Step 2)
 
-| Compound node | Contents | Vertical position |
-|---|---|---|
-| `band-aux` | All auxiliaries not in any SCC | Top |
-| `band-main` | All stocks, flows, and SCC members of any type | Middle |
-| `band-lower` | All constants, lookup tables, and modules not in any SCC | Bottom |
+Before invoking ELK, a BFS computes a left-to-right ordering for all elements reachable via material flow edges (source stock → flow → sink stock). Source nodes (those with no incoming material edges) seed the BFS. If no source exists (pure cycle), the first stock in definition order is used. Each node's order is `max(predecessors) + 1`.
 
-ELK lays out the contents of each compound node internally using `Direction: RIGHT`, producing the left-to-right material chain within `band-main` and left-to-right ordering of peripheral nodes within the other bands. The compound nodes themselves are arranged vertically by setting `elk.direction = DOWN` on the root and giving each compound node a fixed sequence via `elk.layered.layerConstraint` at the root level.
+This order is set as the initial X position (`order * 200px`) on each ELK node. With `CycleBreakingStrategy.INTERACTIVE`, ELK respects these positions and preserves the natural left-to-right stock-flow ordering without independently reversing edges.
 
-**Cycle detection must run before ELK is invoked** (see Section 3.3). Any node that belongs to an SCC of size >= 2 is placed in `band-main` regardless of its element type. This ensures cycle-participant auxiliaries and constants are laid out topologically alongside the stocks and flows they interact with, rather than being visually separated into a band where their connections would cross.
+### Non-Chain Node Positioning (Step 3)
 
-ELK computes all pixel positions from actual element dimensions and spacing parameters. No hardcoded Y values are used.
-
-**Cross-band edges:** Info links that connect nodes in different compound bands (e.g. an auxiliary in `band-aux` to a stock in `band-main`) are *not* routed by ELK. ELK's hierarchical edge routing for cross-compound edges can produce paths that follow compound node borders rather than taking direct routes, which looks unnatural for dependency arrows. Instead, cross-band edges are excluded from the ELK graph entirely. All info links -- both within and across bands -- are rendered as direct center-to-center lines with border clipping (Section 8), computed dynamically from current element positions. Only material-flow edges (which are always within `band-main`) and within-band info links are passed to ELK for the purpose of node placement and ordering.
+Elements not in the material flow chain (constants, auxiliaries, lookup tables that don't appear as flow sources or sinks) are assigned a chain order of `minConsumerOrder - 1`, where `minConsumerOrder` is the lowest chain order among the node's dependents (nodes that reference it in their equations). This may produce negative values, which is intentional — it places inputs to the left of their consumers. Nodes with no consumers default to order 0.
 
 ### Feedback Cycle Handling
 
-Feedback loops are the defining feature of stock and flow models. Every positive or negative feedback loop contains at least one directed cycle in the dependency graph. ELK's Sugiyama algorithm cannot accept cycles; it must break them before layer assignment. If this is not controlled explicitly, ELK may reverse material-flow edges, causing inflows to appear on the wrong side of their stocks. Cycle breaking is purely an internal algorithmic step -- no cycle is broken in the rendered diagram.
+#### Port Constraints on Stocks (All Stocks)
 
-**Step 1 -- Detect SCCs before invoking ELK.**
+Every stock node has `PortConstraints.FIXED_SIDE` with two ports:
+- **WEST port:** All inflow material-flow edges attach here (left face).
+- **EAST port:** All outflow material-flow edges attach here (right face).
 
-Run Tarjan's algorithm (or Kosaraju's) on the full dependency graph to identify all strongly connected components of size >= 2. Each SCC represents one or more interacting feedback loops. Tag every node and edge that belongs to any SCC. Place all SCC member nodes into `band-main` (see SD Band Convention above) regardless of their element type.
+This applies unconditionally to all stocks, not only those in cycles. It ensures inflows always enter from the left and outflows exit from the right.
 
-**Step 2 -- Apply port constraints to stock nodes.**
+#### Back-Edge Identification (Step 4)
 
-Set `elk.portConstraints = FIXED_SIDE` on every stock node. Assign ports as follows:
+Back-edges are identified within SCCs using the material flow chain order computed in Step 2. For each SCC (found via `DependencyGraph.findSCCs()`), any edge where the source has a higher chain order than the target is marked as a back-edge (`feedbackEdge: true` in ELK). This is simpler and more reliable than DFS-based back-edge detection, which can misidentify forward material-flow edges as back-edges.
 
-- All inflow material-flow edges attach to the stock's **WEST** port (left face).
-- All outflow material-flow edges attach to the stock's **EAST** port (right face).
-- Info links are not port-constrained; they attach to whichever side ELK determines is best.
+#### Post-Layout Flow-Stock Alignment (Step 7)
 
-This applies to all stocks unconditionally, not only those in cycles. With port sides fixed, ELK will route any back-edge that must arrive at a stock so that it approaches from the left face, matching the SD convention that inflows enter from the left regardless of where the upstream node sits in the diagram.
+After ELK assigns positions, each flow's Y coordinate is adjusted to match its connected stock(s):
+- **Transfer flows** (source + sink): align with the closer stock by X distance.
+- **Source-only or sink-only flows**: align with the connected stock.
 
-**Note on multi-outflow stocks:** When a stock has multiple outflows, all outflow edges exit through the EAST port. ELK may stack them vertically on the east face, which can produce edge crossings if the target stocks are vertically spread. If prototyping reveals unacceptable crossings in multi-outflow scenarios, relax the constraint to `FIXED_ORDER` (which preserves the left/right convention but allows ELK to choose port ordering within a side) or remove port constraints from stocks that have three or more material-flow connections.
+This ensures flow pipes run horizontally through the flow diamond.
 
-**Step 3 -- Identify and mark back-edges.**
+#### Back-Flow Repositioning (Step 8)
 
-Within each SCC, perform a depth-first search rooted at the stock with the highest degree (or the node with the highest out-degree if no stock is present). Any edge that points from a descendant back to an ancestor in the DFS tree is a back-edge. Mark these edges with the ELK property `feedbackEdge: true` before building the ELK graph.
+Flows where the sink stock is to the left of the source stock (sink.x < source.x) are "back-flows" — they represent material cycling back. These are repositioned:
+- **X:** midpoint between source and sink stocks
+- **Y:** `maxStockY + 120px` (below the main stock chain)
 
-Prefer info-link back-edges over material-flow back-edges. If the DFS designates a material-flow edge as the back-edge and a non-material alternative exists in the cycle, choose the non-material edge instead.
-
-**Pure material-flow cycles:** Some feedback loops consist entirely of material-flow edges with no info links (e.g. Stock A -> Flow -> Stock B -> Flow -> Stock A). In this case no non-material alternative exists. Designate the **inflow** edge (flow -> sink stock) of the edge that closes the cycle as the back-edge. With WEST port constraints on the sink stock, ELK routes the reversed edge so that it still approaches the stock's left face. The visual result is a backward-routed pipe that loops from the upstream flow back around to the sink stock's left side, which reads naturally as "material flowing back into the stock."
-
-This choice should be validated during prototyping. If the visual result is unsatisfactory for specific model topologies, the alternative is to reverse the outflow edge (stock -> flow) instead and verify that the EAST port routing produces an acceptable result. The prototype should test both options on representative cycle models (e.g. predator-prey, SIR with reinfection) before committing to one.
-
-**Step 4 -- Configure ELK cycle breaking.**
-
-Set `elk.layered.cycleBreaking.strategy = INTERACTIVE`. In this mode ELK respects the pre-marked `feedbackEdge` flags and does not independently reverse any unmarked edge. This guarantees that all non-designated material-flow edges retain their natural direction.
-
-**Step 5 -- Post-layout back-edge rendering.**
-
-ELK assigns back-edges reversed waypoints (running opposite to the logical edge direction). When drawing these edges, reverse the waypoint order so the arrowhead appears at the correct original target. Back-edges that are info links should be drawn as curved or routed dashed lines; avoid straight diagonal lines that cross the interior of the diagram.
-
-**Step 6 -- Feedback loop overlay.**
-
-After layout, compute the convex hull of all nodes participating in each SCC.
-
-*Polarity:* Each dependency edge may carry a `linkPolarity` annotation (value: `+1`, `-1`, or `0`/absent). When available, this is set by the equation engine from the sign of the partial derivative of the target's equation with respect to the source, evaluated at initial conditions. Link polarity is determined as follows:
-
-- **Arithmetic dependencies:** For equations involving addition, subtraction, multiplication, and division, the sign of the partial derivative can be computed by symbolic differentiation of the expression AST. This covers the majority of SD model equations.
-- **Lookup table dependencies:** Lookup tables are piecewise-linear; the local slope at the initial-condition input value determines the sign. If the input falls on a breakpoint where the slope changes sign, or if the table is non-monotonic, set polarity to `0` (unknown).
-- **Conditional and discontinuous dependencies:** `IF`/`MIN`/`MAX` and similar discontinuous functions cannot have a well-defined partial derivative at all input values. Set polarity to `0` (unknown) for these.
-- **Manual override:** Users may set or override `linkPolarity` on any edge. Manual annotations take precedence over computed values.
-
-Loop polarity is the product of the `linkPolarity` values of all edges in the cycle: a product of `+1` indicates a reinforcing loop (positive feedback); `-1` indicates a balancing loop (negative feedback). If any edge in the loop has polarity `0` or is unset, the loop polarity is shown as "?" (unknown).
-
-Link polarity computation is a separate feature from layout. The layout algorithm does not depend on polarity values. If the equation engine does not yet support symbolic differentiation, all edges default to polarity `0` (unknown) and all loops display "?" -- the layout, overlay geometry, and per-SCC coloring still function correctly.
-
-*Hull rendering:* Each SCC is assigned a color from the loop palette (see Section 6). Draw each hull as a filled polygon with outline. Where the diagram contains multiple SCCs, use distinct colors from the palette to visually distinguish them. No special polygon-clipping logic is needed for overlapping hulls -- if two hulls overlap spatially, simply draw them in palette order; the low fill alpha (0.08) ensures that double-blending is barely perceptible.
-
-*Label:* Place the loop polarity label ("+", "-", or "?") at the centroid of the hull.
+This creates a visual loop where the back-flow drops below the main chain and connects back to the upstream stock.
 
 ### Horizontal Ordering
 
@@ -197,16 +171,9 @@ Two types of graph edges drive ELK's crossing minimisation and layer assignment:
 
 The high-priority material edges ensure the stock-flow chain dominates ordering: inflows appear to the left of their sink stock, outflows to the right of their source stock, and transfer flows between their source and sink stocks.
 
-### Overlap Resolution
+### Overlap Resolution (Step 9)
 
-ELK's spacing rules should prevent within-layer overlaps when given correct element dimensions. If overlaps are detected after the layout run -- for example because label extents exceed element bounds -- resolve them as follows before finalising positions:
-
-1. Group elements by their ELK-assigned layer.
-2. Sort each group by position along the cross-axis.
-3. Scan in order. Record any element whose leading edge is within 20px of the previous element's trailing edge.
-4. Redistribute the group symmetrically around its centroid, preserving order and maintaining the 20px minimum gap. Do not cascade elements in one direction only.
-
-This resolver runs once, immediately after the ELK layout pass, as part of the initial layout pipeline. It does not run again after user edits.
+After all post-processing, a pairwise overlap resolver runs up to 3 passes. For each overlapping pair (bounding boxes within 20px), elements are nudged apart symmetrically along the axis with less overlap. This prevents post-layout adjustments (flow alignment, back-flow repositioning) from creating new overlaps.
 
 ### Spacing Parameters
 
@@ -226,18 +193,41 @@ cx = x + width / 2
 cy = y + height / 2
 ```
 
-This conversion must happen in a single clearly identified function. Any code that mixes top-left and center conventions without converting will produce elements offset by half their size.
-
 ---
 
-## 4. Label Collision
+## 4. Label Display and Tooltips
 
-Label collision resolution runs once, immediately after ELK layout and coordinate conversion, as the final step of the initial layout pipeline.
+### Label Truncation
 
-1. For each element, compute the bounding box of all its labels including sub-labels (equation lines, badge text). Labels placed outside the element shape (e.g. flow names below the diamond) extend the bounding box beyond the element.
-2. Test each label bounding box against the bounding boxes of all nearby elements and their labels (limit to elements within 200px to avoid O(n^2) cost on large diagrams).
-3. If a collision is detected, nudge the label 8px in the direction that increases separation and repeat (max 3 iterations). If unresolvable, suppress the secondary label (equation or value), set the `labelCollapsed: true` flag on the element's `ElementPlacement` record, and store the full secondary label text in `collapsedLabelText` on the same record. The renderer reads `labelCollapsed` to decide whether to draw the secondary label; on hover, it renders `collapsedLabelText` in a tooltip. Neither flag triggers re-layout.
-4. Flow name labels (placed below the diamond) are nudged vertically first, then horizontally if the vertical nudge causes a new collision.
+All element names are truncated with an ellipsis character (`…`) when they exceed the available space. Truncation is font-aware — it uses a JavaFX `Text` node to measure the pixel width of the candidate string at the element's font size, and removes characters from the end until the truncated string plus ellipsis fits within the maximum width.
+
+Maximum label widths per element type:
+
+| Element | Max width | Font |
+|---|---|---|
+| Stock | element width - 12px | Bold 13pt |
+| Auxiliary | element width - 20px | Normal 12pt |
+| Constant | element width - 16px | Normal 11pt |
+| Lookup | element width - 16px | Normal 11pt |
+| Module | element width - 12px | Bold 13pt |
+| Flow | 100px (fixed) | Normal 11pt |
+
+### Equations and Values Hidden
+
+Equations, constant values, and lookup data point counts are **not displayed** on the canvas. This prevents label overlap and visual clutter, especially on small elements and in dense diagrams.
+
+### Hover Tooltips
+
+When the mouse hovers over an element, a tooltip appears after 200ms (hides after 8s) showing:
+- **Full element name** (untruncated)
+- **Equation, value, or description** depending on element type:
+  - Flows/Auxiliaries: equation string
+  - Constants: numeric value with unit
+  - Stocks: initial value with unit
+  - Lookup tables: data point count
+  - Modules: module type name
+
+Tooltips are styled with 12pt font.
 
 ---
 
@@ -246,8 +236,8 @@ Label collision resolution runs once, immediately after ELK layout and coordinat
 - **Formula references:** If element A's formula references element B, an edge is created from B -> A (B influences A).
 - **Flow-stock connections:** Flows have edges to their source and sink stocks (representing material movement).
 - **Material edge exclusion:** When building info link edges for ELK, any dependency edge that duplicates a stock-flow material connection (in either direction) is excluded, to avoid conflicting layout hints.
-- **Cycle membership:** After SCC detection (Section 3), every edge that belongs to a cycle is tagged with its SCC identifier. This tag is used during rendering to determine loop participation for the feedback loop overlay.
-- **Link polarity:** Every dependency edge may carry a `linkPolarity` annotation with value `+1`, `-1`, or `0` (unknown/unset). See Section 3, Step 6 for how polarity is determined and used. The annotation defaults to `0` when the equation engine cannot compute it. Users may override the annotation manually. Loop polarity (Section 3, Step 6) is derived from this annotation; it is not computed independently.
+- **Cycle membership:** After SCC detection, every edge that belongs to a cycle is tagged with its SCC identifier. This tag is used during rendering to determine loop participation for the feedback loop overlay.
+- **Link polarity:** Every dependency edge may carry a `linkPolarity` annotation with value `+1`, `-1`, or `0` (unknown/unset). Loop polarity is the product of all edge polarities in the cycle: `+1` = reinforcing, `-1` = balancing, any `0` = unknown ("?"). The annotation defaults to `0` when the equation engine cannot compute it. Users may override the annotation manually.
 
 ---
 
@@ -266,18 +256,17 @@ Label collision resolution runs once, immediately after ELK layout and coordinat
 | Same-direction flow | `#4A90D9` | 1.0 | Flow connection indicator (blue) |
 | Opposite-direction flow | `#D97B4A` | 1.0 | Flow connection indicator (orange) |
 
-### Loop Color Palette
+### Feedback Loop Colors
 
-Each SCC is assigned a distinct color from the following ordered palette. Colors are assigned in SCC detection order (depth-first discovery order from Tarjan's algorithm). The palette cycles if the number of SCCs exceeds six.
+The current implementation uses a single color for all feedback loop highlighting:
 
-| Loop index | Highlight (0.8a) | Edge (0.6a) | Fill (0.08a) |
-|---|---|---|---|
-| 1 | `#E74C3C` | `#E74C3C` | `#E74C3C` |
-| 2 | `#8E44AD` | `#8E44AD` | `#8E44AD` |
-| 3 | `#2980B9` | `#2980B9` | `#2980B9` |
-| 4 | `#27AE60` | `#27AE60` | `#27AE60` |
-| 5 | `#D35400` | `#D35400` | `#D35400` |
-| 6 | `#16A085` | `#16A085` | `#16A085` |
+| Role | Color | Alpha |
+|---|---|---|
+| Loop participant highlight | `#E74C3C` | 0.8 |
+| Loop edge highlight | `#E74C3C` | 0.6 |
+| Loop fill | `#E74C3C` | 0.08 |
+
+**Future:** Per-SCC coloring with a 6-color palette (see Section 9).
 
 ---
 
@@ -286,7 +275,7 @@ Each SCC is assigned a distinct color from the following ordered palette. Colors
 1. Canvas background (`#F8F9FA`)
 2. Material flow pipes (with clouds and arrowheads)
 3. Info link dashed lines (with arrowheads)
-4. Feedback loop edges (if active)
+4. Feedback loop edge highlights (if active)
 5. All elements (stocks, flows, auxiliaries, constants, modules, lookups)
 6. Feedback loop participant highlights (if active)
 7. Connection highlights (selected or hovered)
@@ -301,7 +290,7 @@ Each SCC is assigned a distinct color from the following ordered palette. Colors
 
 ## 8. Arrowhead Geometry and Line Termination
 
-This section defines both the arrowhead shape and where the line body must end when an arrowhead is present. A common error is to clip the line at the element border and then draw the arrowhead on top -- this causes the line body to extend beneath the arrowhead, making the arrowhead appear to float inside the element. The correct approach terminates the line body at the arrowhead base, not at the element border.
+This section defines both the arrowhead shape and where the line body must end when an arrowhead is present. The correct approach terminates the line body at the arrowhead base, not at the element border.
 
 ### Arrowhead Dimensions
 
@@ -314,18 +303,18 @@ This section defines both the arrowhead shape and where the line body must end w
 
 Apply this sequence at every line end that carries an arrowhead (the target end). The source end of info links and the non-arrowhead ends of pipes are clipped normally without this adjustment.
 
-1. Compute the border intersection point **P** by clipping the line from source center to target element center against the target element's border. Use rectangular clipping for stocks, auxiliaries, constants, lookup tables, and modules. Use rhombus clipping for flow diamonds (Section 8). **P** is where the line would touch the element border with no arrowhead.
+1. Compute the border intersection point **P** by clipping the line from source center to target element center against the target element's border. Use rectangular clipping for stocks, auxiliaries, constants, lookup tables, and modules. Use rhombus clipping for flow diamonds (Section 9). **P** is where the line would touch the element border with no arrowhead.
 2. Place the **arrowhead tip at P**. Do not move it inward.
 3. Compute the unit direction vector **D** pointing from source toward P.
-4. **The line body ends at L = P - D x arrowheadLength.** This is the arrowhead base center. Draw the line from its source to **L**. It must not continue past **L** toward **P**. No part of the line body is drawn between **L** and **P**.
+4. **The line body ends at L = P - D × arrowheadLength.** This is the arrowhead base center. Draw the line from its source to **L**. It must not continue past **L** toward **P**.
 5. Compute the perpendicular vector **Q = (-Dy, Dx)** (D rotated 90 degrees).
-6. Draw the filled arrowhead triangle with vertices: tip **P**, left base **L + Q x (width/2)**, right base **L - Q x (width/2)**.
+6. Draw the filled arrowhead triangle with vertices: tip **P**, left base **L + Q × (width/2)**, right base **L - Q × (width/2)**.
 
 **Summary:** line ends at L; arrowhead occupies the gap L -> P; arrowhead tip P touches the element border.
 
 ### Source End (No Arrowhead)
 
-At the source end of info links, clip the line to the source element border using the appropriate formula (Section 8). No arrowhead-length adjustment is applied.
+At the source end of info links, clip the line to the source element border using the appropriate formula (Section 9). No arrowhead-length adjustment is applied.
 
 ---
 
@@ -335,19 +324,19 @@ At the source end of info links, clip the line to the source element border usin
 
 1. Compute direction vector `(dx, dy)` from element center to the external point.
 2. Compute `scale = min(halfWidth / |dx|, halfHeight / |dy|)`, guarding against `dx = 0` or `dy = 0`.
-3. Clipped point = `center + (dx, dy) x scale`.
+3. Clipped point = `center + (dx, dy) × scale`.
 
 ### Rhombus Clipping (Flow Diamond)
 
-The flow diamond is a rhombus with half-diagonals `hw = 15` and `hh = 15` (half of the 30 x 30 bounding box). The rhombus boundary satisfies `|x/hw| + |y/hh| = 1`. For a ray from center in direction `(dx, dy)`:
+The flow diamond is a rhombus with half-diagonals `hw = 15` and `hh = 15` (half of the 30 × 30 bounding box). The rhombus boundary satisfies `|x/hw| + |y/hh| = 1`. For a ray from center in direction `(dx, dy)`:
 
 ```
 scale = 1 / (|dx| / hw + |dy| / hh)
 ```
 
-Clipped point = `(cx + dx x scale, cy + dy x scale)`.
+Clipped point = `(cx + dx × scale, cy + dy × scale)`.
 
-Guard against `dx = 0` and `dy = 0` as with rectangular clipping. This formula must be used in place of rectangular clipping whenever the connected element is a flow diamond -- including material flow pipes and info links targeting or departing from a flow.
+Guard against `dx = 0` and `dy = 0` as with rectangular clipping. This formula must be used in place of rectangular clipping whenever the connected element is a flow diamond — including material flow pipes and info links targeting or departing from a flow.
 
 ---
 
@@ -372,3 +361,33 @@ All fonts use the "System" family (platform default sans-serif).
 | Constant name | 11pt | Normal |
 | Lookup name | 11pt | Normal |
 | All badges and secondary labels | 9pt | Normal |
+
+---
+
+## 12. Feedback Loop Analysis
+
+### Detection Algorithm
+
+Feedback loop detection operates at the stock-to-stock level:
+
+1. **Build a stock-to-stock causal graph:** An edge from stock X to stock Y exists when a flow that affects Y (as source or sink) has an equation that depends on X (directly or transitively through auxiliaries), and X ≠ Y. Transitive resolution follows auxiliary equation chains but stops at stocks.
+2. **Find SCCs of size ≥ 2** using Tarjan's algorithm. Each SCC represents one or more interacting feedback loops between distinct stocks. Single-stock growth/drain loops are not flagged.
+3. **Identify participating flows:** A flow participates in a loop if it creates a causal edge between two different stocks in the same SCC.
+
+### Rendering
+
+When loop highlighting is active (toggled via a menu item), participants are highlighted:
+- **Element highlights:** A colored glow/outline (2.5px, `#E74C3C` at 0.8 alpha) with subtle fill (0.08 alpha) is drawn around each participating element. Flow diamonds get a diamond-shaped highlight; all others get a rectangular highlight with 6px padding.
+- **Edge highlights:** A thicker colored line (2.5px, `#E74C3C` at 0.6 alpha) is drawn behind each info link and material flow edge that connects loop participants.
+
+---
+
+## 13. Not Yet Implemented
+
+The following items from the original spec are not yet implemented:
+
+- **Compound node (band) layout:** The spec originally called for three compound nodes (`band-aux`, `band-main`, `band-lower`) to segregate element types vertically. The current implementation uses a single flat graph where topology drives positioning. This produces better results for small-to-medium models but may need revisiting for very large models.
+- **Per-SCC loop colors:** The spec defined a 6-color palette for distinguishing multiple SCCs. Currently all loops use a single red color. The `FeedbackAnalysis` already returns `loopGroups` (per-SCC groupings), so the renderer could be extended to assign distinct colors.
+- **Convex hull loop overlay:** The spec called for drawing convex hulls around SCC participants with loop polarity labels at the centroid. Currently, individual element highlights are drawn instead.
+- **Label collision resolution:** The spec defined a post-layout label nudging pass. Currently, equations/values are hidden entirely and names are truncated, which prevents most collisions. A nudging pass could be added for flow name labels that extend below their diamonds.
+- **Cloud collision fallback:** The spec defined a multi-step fallback sequence for placing clouds that collide with elements (try 80/120/160/200px, then perpendicular directions). Currently clouds are placed at a fixed 80px offset.
