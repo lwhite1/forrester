@@ -126,6 +126,9 @@ public class ModelWindow {
     private ActivityLogPanel activityLogPanel;
     private DashboardPanel dashboardPanel;
     private TabPane rightTabPane;
+    private Tab dashboardTab;
+    private Stage dashboardStage;
+    private MenuItem popOutDashboardItem;
     private BorderPane root;
     private Path currentFile;
     private final UndoManager undoManager = new UndoManager();
@@ -199,7 +202,7 @@ public class ModelWindow {
         rightTabPane.setTabClosingPolicy(TabPane.TabClosingPolicy.UNAVAILABLE);
         Tab propertiesTab = new Tab("Properties", propertiesPanel);
         propertiesTab.setId("propertiesTab");
-        Tab dashboardTab = new Tab("Dashboard", dashboardPanel);
+        dashboardTab = new Tab("Dashboard", dashboardPanel);
         dashboardTab.setId("dashboardTab");
         rightTabPane.getTabs().addAll(propertiesTab, dashboardTab);
 
@@ -324,7 +327,19 @@ public class ModelWindow {
             }
         });
 
-        viewMenu.getItems().add(activityLogItem);
+        popOutDashboardItem = new MenuItem("Pop Out Dashboard");
+        popOutDashboardItem.setId("menuPopOutDashboard");
+        popOutDashboardItem.setAccelerator(new KeyCodeCombination(KeyCode.D,
+                KeyCombination.SHORTCUT_DOWN, KeyCombination.SHIFT_DOWN));
+        popOutDashboardItem.setOnAction(e -> {
+            if (dashboardStage == null) {
+                popOutDashboard();
+            } else {
+                dockDashboard();
+            }
+        });
+
+        viewMenu.getItems().addAll(activityLogItem, popOutDashboardItem);
 
         // Simulate menu
         Menu simulateMenu = new Menu("Simulate");
@@ -894,9 +909,63 @@ public class ModelWindow {
     }
 
     private void switchToDashboard() {
-        if (rightTabPane != null && rightTabPane.getTabs().size() > 1) {
-            rightTabPane.getSelectionModel().select(1);
+        if (dashboardStage != null) {
+            dashboardStage.toFront();
+            dashboardStage.requestFocus();
+        } else if (rightTabPane != null && rightTabPane.getTabs().contains(dashboardTab)) {
+            rightTabPane.getSelectionModel().select(dashboardTab);
         }
+    }
+
+    private void popOutDashboard() {
+        if (dashboardStage != null) {
+            return;
+        }
+        // Remove dashboard tab from the right pane
+        rightTabPane.getTabs().remove(dashboardTab);
+
+        // Create a new stage with the dashboard panel
+        dashboardStage = new Stage();
+        dashboardStage.setTitle("Dashboard \u2014 " + (editor != null ? editor.getModelName() : "Forrester"));
+        dashboardStage.initOwner(stage);
+
+        BorderPane dashRoot = new BorderPane(dashboardPanel);
+        Scene dashScene = new Scene(dashRoot, 600, 500);
+        dashboardStage.setScene(dashScene);
+
+        // Dock back when the dashboard window is closed via its own close button
+        dashboardStage.setOnHidden(e -> {
+            if (dashboardStage != null) {
+                dockDashboard();
+            }
+        });
+
+        dashboardStage.show();
+        popOutDashboardItem.setText("Dock Dashboard");
+    }
+
+    private void dockDashboard() {
+        if (dashboardStage == null) {
+            return;
+        }
+        Stage stageToClose = dashboardStage;
+        dashboardStage = null;
+
+        // Remove dashboard from the pop-out scene
+        BorderPane dashRoot = (BorderPane) stageToClose.getScene().getRoot();
+        dashRoot.setCenter(null);
+
+        // Re-add the dashboard tab to the right pane
+        dashboardTab.setContent(dashboardPanel);
+        if (!rightTabPane.getTabs().contains(dashboardTab)) {
+            rightTabPane.getTabs().add(dashboardTab);
+        }
+
+        // Close the pop-out window (clear handler first to prevent recursion)
+        stageToClose.setOnHidden(null);
+        stageToClose.close();
+
+        popOutDashboardItem.setText("Pop Out Dashboard");
     }
 
     private void validateModel() {
@@ -1041,6 +1110,9 @@ public class ModelWindow {
                 ? " [" + canvas.getCurrentModuleName() + "]"
                 : "";
         stage.setTitle("Forrester \u2014 " + name + moduleSuffix);
+        if (dashboardStage != null) {
+            dashboardStage.setTitle("Dashboard \u2014 " + name);
+        }
     }
 
     private void updateBreadcrumb() {
@@ -1077,6 +1149,11 @@ public class ModelWindow {
         }
         if (analysisRunner != null) {
             analysisRunner.shutdown();
+        }
+        if (dashboardStage != null) {
+            dashboardStage.setOnHidden(null);
+            dashboardStage.close();
+            dashboardStage = null;
         }
         stage.close();
     }
