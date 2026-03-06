@@ -60,6 +60,7 @@ import com.deathrayresearch.forrester.sweep.SamplingMethod;
 import com.deathrayresearch.forrester.sweep.SweepResult;
 
 import javafx.application.Platform;
+import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.geometry.Insets;
 import javafx.scene.control.Alert;
@@ -238,6 +239,19 @@ public class ModelWindow {
         });
 
         updateTitle();
+
+        // When the window gains focus (e.g. switching from another window),
+        // give focus to the canvas so keyboard shortcuts (Ctrl+V, etc.) work
+        // immediately without requiring a click first.
+        stage.focusedProperty().addListener((obs, wasFocused, isFocused) -> {
+            if (isFocused) {
+                Node focused = scene.getFocusOwner();
+                if (focused == null || focused == root
+                        || !(focused instanceof javafx.scene.control.TextInputControl)) {
+                    canvas.requestFocus();
+                }
+            }
+        });
 
         canvas.requestFocus();
     }
