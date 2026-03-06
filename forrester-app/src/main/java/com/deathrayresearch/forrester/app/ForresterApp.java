@@ -4,6 +4,7 @@ import com.deathrayresearch.forrester.app.canvas.Clipboard;
 
 import javafx.application.Application;
 import javafx.stage.Stage;
+import javafx.stage.Window;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,7 +30,17 @@ public class ForresterApp extends Application {
     private void openWindow(Stage stage) {
         ModelWindow window = new ModelWindow(stage, this, clipboard);
         openWindows.add(window);
-        stage.setOnHidden(e -> openWindows.remove(window));
+        stage.setOnHidden(e -> {
+            openWindows.remove(window);
+            if (openWindows.isEmpty()) {
+                // Close any remaining windows (help dialogs, etc.)
+                List.copyOf(Window.getWindows()).forEach(w -> {
+                    if (w instanceof Stage s) {
+                        s.close();
+                    }
+                });
+            }
+        });
         stage.show();
     }
 
