@@ -590,24 +590,7 @@ public final class SvgExporter {
 
     private static void writeCldVariable(PrintWriter w, String name,
                                           double cx, double cy, double width, double height) {
-        double x = cx - width / 2;
-        double y = cy - height / 2;
-        double r = LayoutMetrics.CLD_VAR_CORNER_RADIUS;
-
-        // Fill
-        w.printf(Locale.US,
-                "  <rect x=\"%.2f\" y=\"%.2f\" width=\"%.2f\" height=\"%.2f\" rx=\"%.1f\" " +
-                "fill=\"%s\"/>%n",
-                x, y, width, height, r, svgColor(ColorPalette.STOCK_FILL));
-
-        // Border
-        w.printf(Locale.US,
-                "  <rect x=\"%.2f\" y=\"%.2f\" width=\"%.2f\" height=\"%.2f\" rx=\"%.1f\" " +
-                "fill=\"none\" stroke=\"%s\" stroke-width=\"%.1f\"/>%n",
-                x, y, width, height, r,
-                svgColor(ColorPalette.CLD_VAR_BORDER), LayoutMetrics.CLD_VAR_BORDER_WIDTH);
-
-        // Name centered (truncated to fit)
+        // Plain text only — no rectangle, matching standard CLD notation
         String label = ElementRenderer.truncate(name, LayoutMetrics.AUX_NAME_FONT, width - 12);
         w.printf(Locale.US,
                 "  <text x=\"%.2f\" y=\"%.2f\" text-anchor=\"middle\" dominant-baseline=\"central\" " +

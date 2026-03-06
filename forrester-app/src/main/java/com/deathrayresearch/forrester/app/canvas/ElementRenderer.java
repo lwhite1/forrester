@@ -235,24 +235,10 @@ public final class ElementRenderer {
     }
 
     /**
-     * Draws a CLD variable: thin-bordered rounded rectangle with centered name.
-     * Visually lighter than S&amp;F elements — no badge, no equation, no value.
+     * Draws a CLD variable as plain text (no rectangle), matching standard CLD notation.
      */
     public static void drawCldVariable(GraphicsContext gc, String name,
                                        double x, double y, double width, double height) {
-        double r = LayoutMetrics.CLD_VAR_CORNER_RADIUS;
-
-        // Fill
-        gc.setFill(ColorPalette.STOCK_FILL);
-        gc.fillRoundRect(x, y, width, height, r, r);
-
-        // Border
-        gc.setStroke(ColorPalette.CLD_VAR_BORDER);
-        gc.setLineWidth(LayoutMetrics.CLD_VAR_BORDER_WIDTH);
-        gc.setLineDashes();
-        gc.strokeRoundRect(x, y, width, height, r, r);
-
-        // Name centered
         gc.setFill(ColorPalette.TEXT);
         gc.setFont(LayoutMetrics.AUX_NAME_FONT);
         gc.setTextAlign(TextAlignment.CENTER);
