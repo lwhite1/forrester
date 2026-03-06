@@ -1,5 +1,6 @@
 package com.deathrayresearch.forrester.model.def;
 
+import com.deathrayresearch.forrester.model.def.CausalLinkDef.Polarity;
 import com.deathrayresearch.forrester.model.def.ValidationIssue.Severity;
 
 import org.junit.jupiter.api.DisplayName;
@@ -259,6 +260,119 @@ class ModelValidatorTest {
 
             assertThat(result.issues()).noneMatch(i ->
                     i.message().contains("not referenced"));
+        }
+    }
+
+    @Nested
+    @DisplayName("CLD validation")
+    class CldValidation {
+
+        @Test
+        void shouldWarnForOrphanedCldVariable() {
+            ModelDefinition def = new ModelDefinitionBuilder()
+                    .name("Orphan")
+                    .cldVariable("Lonely")
+                    .build();
+
+            ValidationResult result = ModelValidator.validate(def);
+
+            assertThat(result.issues()).anyMatch(i ->
+                    i.severity() == Severity.WARNING
+                            && "Lonely".equals(i.elementName())
+                            && i.message().contains("not connected"));
+        }
+
+        @Test
+        void shouldNotWarnForConnectedCldVariable() {
+            ModelDefinition def = new ModelDefinitionBuilder()
+                    .name("Connected")
+                    .cldVariable("A")
+                    .cldVariable("B")
+                    .causalLink("A", "B", Polarity.POSITIVE)
+                    .build();
+
+            ValidationResult result = ModelValidator.validate(def);
+
+            assertThat(result.issues()).noneMatch(i ->
+                    i.message().contains("not connected"));
+        }
+
+        @Test
+        void shouldErrorForCausalLinkToNonExistentTarget() {
+            ModelDefinition def = new ModelDefinitionBuilder()
+                    .name("BadLink")
+                    .cldVariable("A")
+                    .causalLink("A", "Missing", Polarity.POSITIVE)
+                    .build();
+
+            ValidationResult result = ModelValidator.validate(def);
+
+            assertThat(result.issues()).anyMatch(i ->
+                    i.severity() == Severity.ERROR
+                            && i.message().contains("non-existent target")
+                            && i.message().contains("Missing"));
+        }
+
+        @Test
+        void shouldErrorForCausalLinkFromNonExistentSource() {
+            ModelDefinition def = new ModelDefinitionBuilder()
+                    .name("BadLink")
+                    .cldVariable("B")
+                    .causalLink("Missing", "B", Polarity.NEGATIVE)
+                    .build();
+
+            ValidationResult result = ModelValidator.validate(def);
+
+            assertThat(result.issues()).anyMatch(i ->
+                    i.severity() == Severity.ERROR
+                            && i.message().contains("non-existent source")
+                            && i.message().contains("Missing"));
+        }
+
+        @Test
+        void shouldWarnForUnknownPolarity() {
+            ModelDefinition def = new ModelDefinitionBuilder()
+                    .name("Unknown")
+                    .cldVariable("X")
+                    .cldVariable("Y")
+                    .causalLink("X", "Y", Polarity.UNKNOWN)
+                    .build();
+
+            ValidationResult result = ModelValidator.validate(def);
+
+            assertThat(result.issues()).anyMatch(i ->
+                    i.severity() == Severity.WARNING
+                            && i.message().contains("unknown polarity"));
+        }
+
+        @Test
+        void shouldNotWarnForKnownPolarity() {
+            ModelDefinition def = new ModelDefinitionBuilder()
+                    .name("Known")
+                    .cldVariable("X")
+                    .cldVariable("Y")
+                    .causalLink("X", "Y", Polarity.POSITIVE)
+                    .build();
+
+            ValidationResult result = ModelValidator.validate(def);
+
+            assertThat(result.issues()).noneMatch(i ->
+                    i.message().contains("unknown polarity"));
+        }
+
+        @Test
+        void shouldAcceptCausalLinkBetweenSfElements() {
+            ModelDefinition def = new ModelDefinitionBuilder()
+                    .name("SF Link")
+                    .stock("S", 100, "Person")
+                    .aux("A", "S * 2", "Person")
+                    .causalLink("S", "A", Polarity.POSITIVE)
+                    .build();
+
+            ValidationResult result = ModelValidator.validate(def);
+
+            assertThat(result.issues()).noneMatch(i ->
+                    i.message().contains("non-existent"));
         }
     }
 }

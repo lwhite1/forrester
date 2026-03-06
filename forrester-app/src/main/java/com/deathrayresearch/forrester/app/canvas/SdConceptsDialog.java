@@ -26,6 +26,7 @@ public class SdConceptsDialog extends Stage {
                 createTab("Flows", flowsText()),
                 createTab("Auxiliaries", auxiliariesText()),
                 createTab("Feedback Loops", feedbackText()),
+                createTab("Causal Loops", causalLoopsText()),
                 createTab("Simulation", simulationText())
         );
 
@@ -166,6 +167,54 @@ public class SdConceptsDialog extends Stage {
                 plain(" in feedback loops cause oscillations. The longer the delay, "
                         + "the more severe the oscillation. Many real-world problems (boom-bust cycles, "
                         + "overcorrection) result from delayed feedback.")
+        );
+    }
+
+    private TextFlow causalLoopsText() {
+        return new TextFlow(
+                bold("Causal Loop Diagrams (CLDs)"),
+                plain(" are a qualitative modeling tool used to map the feedback structure "
+                        + "of a system before building a full stock-and-flow model.\n\n"),
+                bold("CLD Variables"),
+                plain(" represent system concepts or quantities. Unlike stocks and auxiliaries, "
+                        + "CLD variables have no equations or units — they capture the conceptual "
+                        + "structure of a system at a high level.\n\n"),
+                bold("Causal Links"),
+                plain(" (solid arrows) connect variables to show cause-and-effect relationships. "
+                        + "Each link has a "),
+                bold("polarity"),
+                plain(" that indicates the direction of influence:\n\n"),
+                plain("  - "),
+                bold("+"),
+                plain(" (positive): A change in the cause produces a change in the effect "
+                        + "in the same direction. More A leads to more B (all else equal).\n"),
+                plain("  - "),
+                bold("-"),
+                plain(" (negative): A change in the cause produces a change in the effect "
+                        + "in the opposite direction. More A leads to less B (all else equal).\n"),
+                plain("  - "),
+                bold("?"),
+                plain(" (unknown): The direction of influence is not yet determined.\n\n"),
+                bold("Loop Classification:\n\n"),
+                plain("A closed chain of causal links forms a feedback loop. Loops are classified by "
+                        + "counting the number of negative links in the cycle:\n\n"),
+                plain("  - "),
+                bold("R (Reinforcing):"),
+                plain(" An even number of negative links (including zero). "
+                        + "The loop amplifies change — growth or collapse.\n"),
+                plain("  - "),
+                bold("B (Balancing):"),
+                plain(" An odd number of negative links. "
+                        + "The loop counteracts change — goal-seeking behavior.\n"),
+                plain("  - "),
+                bold("? (Indeterminate):"),
+                plain(" The loop contains links with unknown polarity, "
+                        + "so classification is not possible.\n\n"),
+                bold("From CLD to Stock-and-Flow:\n\n"),
+                plain("CLD variables can be classified (right-click -> Classify as) into stock-and-flow "
+                        + "elements (Stock, Flow, Auxiliary, or Constant) as the model is refined "
+                        + "from qualitative to quantitative. This preserves the variable's name and "
+                        + "position while converting it into an element that can hold equations and units.")
         );
     }
 
