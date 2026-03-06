@@ -666,8 +666,9 @@ public final class SvgExporter {
                 double ux = dx / dist;
                 double uy = dy / dist;
                 double alongOffset = Math.min(20, dist * 0.4);
-                double labelX = ct.x() - ux * alongOffset + (-uy) * 12;
-                double labelY = ct.y() - uy * alongOffset + ux * 12;
+                double perpOffset = Math.min(12, Math.max(8, dist * 0.3));
+                double labelX = ct.x() - ux * alongOffset + (-uy) * perpOffset;
+                double labelY = ct.y() - uy * alongOffset + ux * perpOffset;
 
                 w.printf(Locale.US,
                         "  <text x=\"%.2f\" y=\"%.2f\" text-anchor=\"middle\" " +

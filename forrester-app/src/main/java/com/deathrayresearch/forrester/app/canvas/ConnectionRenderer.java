@@ -164,12 +164,13 @@ public final class ConnectionRenderer {
             String label = polarity.symbol();
 
             // Position label offset perpendicular to the line, near the target end.
-            // Scale the along-line offset to avoid overshooting on short links.
+            // Scale both offsets to avoid overshooting on short links.
             double ux = dx / dist;
             double uy = dy / dist;
             double alongOffset = Math.min(20, dist * 0.4);
-            double labelX = toX - ux * alongOffset + (-uy) * 12;
-            double labelY = toY - uy * alongOffset + ux * 12;
+            double perpOffset = Math.min(12, Math.max(8, dist * 0.3));
+            double labelX = toX - ux * alongOffset + (-uy) * perpOffset;
+            double labelY = toY - uy * alongOffset + ux * perpOffset;
 
             gc.setFill(labelColor);
             gc.setFont(LayoutMetrics.CAUSAL_POLARITY_FONT);
