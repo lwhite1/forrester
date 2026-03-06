@@ -1,6 +1,7 @@
 package com.deathrayresearch.forrester.model.graph;
 
 import com.deathrayresearch.forrester.model.def.AuxDef;
+import com.deathrayresearch.forrester.model.def.CldVariableDef;
 import com.deathrayresearch.forrester.model.def.ConnectorRoute;
 import com.deathrayresearch.forrester.model.def.ConstantDef;
 import com.deathrayresearch.forrester.model.def.ElementPlacement;
@@ -88,6 +89,9 @@ public final class ViewValidator {
         }
         for (ModuleInstanceDef m : def.modules()) {
             names.add(m.instanceName());
+        }
+        for (CldVariableDef v : def.cldVariables()) {
+            names.add(v.name());
         }
         return names;
     }

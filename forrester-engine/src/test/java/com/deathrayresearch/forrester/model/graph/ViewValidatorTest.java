@@ -1,5 +1,6 @@
 package com.deathrayresearch.forrester.model.graph;
 
+import com.deathrayresearch.forrester.model.def.CausalLinkDef.Polarity;
 import com.deathrayresearch.forrester.model.def.ConnectorRoute;
 import com.deathrayresearch.forrester.model.def.ElementPlacement;
 import com.deathrayresearch.forrester.model.def.ElementType;
@@ -154,6 +155,27 @@ class ViewValidatorTest {
         List<String> errors = ViewValidator.validate(view, def);
         assertThat(errors).hasSize(1);
         assertThat(errors.get(0)).contains("NonExistentFlow");
+    }
+
+    @Test
+    void shouldPassViewContainingCldVariables() {
+        ModelDefinition def = new ModelDefinitionBuilder()
+                .name("CLD")
+                .cldVariable("Growth")
+                .cldVariable("Decline")
+                .causalLink("Growth", "Decline", Polarity.NEGATIVE)
+                .build();
+
+        ViewDef view = new ViewDef("CLD View",
+                List.of(
+                        new ElementPlacement("Growth", ElementType.CLD_VARIABLE, 100, 200),
+                        new ElementPlacement("Decline", ElementType.CLD_VARIABLE, 300, 200)
+                ),
+                List.of(),
+                List.of());
+
+        List<String> errors = ViewValidator.validate(view, def);
+        assertThat(errors).as("View with CLD variables should have no errors").isEmpty();
     }
 
     @Test
