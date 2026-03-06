@@ -348,13 +348,20 @@ public final class VensimExporter {
 
     /**
      * Denormalizes a Forrester identifier back to Vensim name format.
-     * Replaces underscores with spaces.
+     * Replaces underscores with spaces, and strips a leading underscore
+     * that was added as a digit-prefix escape (e.g. {@code _2nd_Batch → 2nd Batch}).
      */
     static String denormalizeName(String forresterName) {
         if (forresterName == null || forresterName.isBlank()) {
             return "";
         }
-        return forresterName.strip().replace('_', ' ');
+        String stripped = forresterName.strip();
+        String result = stripped.replace('_', ' ');
+        if (stripped.length() >= 2 && stripped.charAt(0) == '_'
+                && Character.isDigit(stripped.charAt(1))) {
+            result = result.stripLeading();
+        }
+        return result;
     }
 
     /**
@@ -382,7 +389,12 @@ public final class VensimExporter {
                 if (isKnownFunction(token)) {
                     result.append(token);
                 } else {
-                    result.append(token.replace('_', ' '));
+                    String denormed = token.replace('_', ' ');
+                    if (token.length() >= 2 && token.charAt(0) == '_'
+                            && Character.isDigit(token.charAt(1))) {
+                        denormed = denormed.stripLeading();
+                    }
+                    result.append(denormed);
                 }
             } else {
                 result.append(c);

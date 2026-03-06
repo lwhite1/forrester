@@ -201,6 +201,12 @@ class VensimExporterTest {
             assertThat(VensimExporter.toVensimExpr("TIME + 1"))
                     .isEqualTo("Time + 1");
         }
+
+        @Test
+        void shouldDenormalizeDigitPrefixedNamesInExpressions() {
+            assertThat(VensimExporter.toVensimExpr("_2nd_Batch * 2"))
+                    .isEqualTo("2nd Batch * 2");
+        }
     }
 
     @Nested
@@ -223,6 +229,18 @@ class VensimExporterTest {
         void shouldHandleNullAndBlank() {
             assertThat(VensimExporter.denormalizeName(null)).isEmpty();
             assertThat(VensimExporter.denormalizeName("  ")).isEmpty();
+        }
+
+        @Test
+        void shouldStripLeadingUnderscoreFromDigitPrefixedNames() {
+            assertThat(VensimExporter.denormalizeName("_2nd_Batch"))
+                    .isEqualTo("2nd Batch");
+        }
+
+        @Test
+        void shouldPreserveLeadingUnderscoreForNonDigitNames() {
+            assertThat(VensimExporter.denormalizeName("_internal"))
+                    .isEqualTo(" internal");
         }
     }
 
