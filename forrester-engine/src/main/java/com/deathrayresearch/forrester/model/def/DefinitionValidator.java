@@ -58,6 +58,11 @@ public final class DefinitionValidator {
                 errors.add("Duplicate element name: " + module.instanceName());
             }
         }
+        for (CldVariableDef v : def.cldVariables()) {
+            if (!allNames.add(v.name())) {
+                errors.add("Duplicate element name: " + v.name());
+            }
+        }
 
         // Build set of stock names for flow source/sink validation
         Set<String> stockNames = new HashSet<>();
@@ -145,6 +150,18 @@ public final class DefinitionValidator {
             if (hasCircularReference(module.definition(), new HashSet<>(rootPath))) {
                 errors.add("Circular module reference detected involving module: "
                         + module.instanceName());
+            }
+        }
+
+        // Validate causal links for self-loops and duplicates
+        Set<String> seenLinks = new HashSet<>();
+        for (CausalLinkDef link : def.causalLinks()) {
+            if (link.from().equals(link.to())) {
+                errors.add("Causal link from '" + link.from() + "' to itself is not allowed");
+            }
+            String key = link.from() + " -> " + link.to();
+            if (!seenLinks.add(key)) {
+                errors.add("Duplicate causal link: " + key);
             }
         }
 

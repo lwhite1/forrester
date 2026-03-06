@@ -1,6 +1,9 @@
 package com.deathrayresearch.forrester.model.def;
 
+import com.deathrayresearch.forrester.model.def.CausalLinkDef.Polarity;
+
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -170,6 +173,59 @@ class DefinitionValidatorTest {
                 .build();
         List<String> errors = DefinitionValidator.validate(def);
         assertThat(errors).anyMatch(e -> e.contains("invalid equation"));
+    }
+
+    @Nested
+    @DisplayName("CLD validation")
+    class CldValidation {
+
+        @Test
+        void shouldDetectDuplicateNameBetweenCldVariableAndStock() {
+            ModelDefinition def = new ModelDefinitionBuilder()
+                    .name("Dup")
+                    .stock("Population", 100, "Person")
+                    .cldVariable("Population")
+                    .build();
+            List<String> errors = DefinitionValidator.validate(def);
+            assertThat(errors).anyMatch(e -> e.contains("Duplicate"));
+        }
+
+        @Test
+        void shouldDetectSelfLoopCausalLink() {
+            ModelDefinition def = new ModelDefinitionBuilder()
+                    .name("Self")
+                    .cldVariable("A")
+                    .causalLink("A", "A", Polarity.POSITIVE)
+                    .build();
+            List<String> errors = DefinitionValidator.validate(def);
+            assertThat(errors).anyMatch(e -> e.contains("to itself"));
+        }
+
+        @Test
+        void shouldDetectDuplicateCausalLink() {
+            ModelDefinition def = new ModelDefinitionBuilder()
+                    .name("Dup Link")
+                    .cldVariable("A")
+                    .cldVariable("B")
+                    .causalLink("A", "B", Polarity.POSITIVE)
+                    .causalLink("A", "B", Polarity.NEGATIVE)
+                    .build();
+            List<String> errors = DefinitionValidator.validate(def);
+            assertThat(errors).anyMatch(e -> e.contains("Duplicate causal link"));
+        }
+
+        @Test
+        void shouldAllowBidirectionalCausalLinks() {
+            ModelDefinition def = new ModelDefinitionBuilder()
+                    .name("Bidir")
+                    .cldVariable("A")
+                    .cldVariable("B")
+                    .causalLink("A", "B", Polarity.POSITIVE)
+                    .causalLink("B", "A", Polarity.NEGATIVE)
+                    .build();
+            List<String> errors = DefinitionValidator.validate(def);
+            assertThat(errors).noneMatch(e -> e.contains("Duplicate causal link"));
+        }
     }
 
     private ModelDefinition buildSIR() {

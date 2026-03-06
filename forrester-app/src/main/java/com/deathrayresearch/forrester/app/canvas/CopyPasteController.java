@@ -1,6 +1,7 @@
 package com.deathrayresearch.forrester.app.canvas;
 
 import com.deathrayresearch.forrester.model.def.AuxDef;
+import com.deathrayresearch.forrester.model.def.CausalLinkDef;
 import com.deathrayresearch.forrester.model.def.CldVariableDef;
 import com.deathrayresearch.forrester.model.def.ConstantDef;
 import com.deathrayresearch.forrester.model.def.ElementType;
@@ -171,6 +172,15 @@ final class CopyPasteController {
                         editor.updateModuleBindings(newName, newInputs, newOutputs);
                     }
                 }
+            }
+        }
+
+        // Third pass: recreate causal links between pasted CLD variables
+        for (CausalLinkDef link : clipboard.getCausalLinks()) {
+            String newFrom = nameMapping.get(link.from());
+            String newTo = nameMapping.get(link.to());
+            if (newFrom != null && newTo != null) {
+                editor.addCausalLink(newFrom, newTo, link.polarity());
             }
         }
 

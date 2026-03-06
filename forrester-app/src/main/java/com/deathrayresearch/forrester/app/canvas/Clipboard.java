@@ -1,6 +1,7 @@
 package com.deathrayresearch.forrester.app.canvas;
 
 import com.deathrayresearch.forrester.model.def.AuxDef;
+import com.deathrayresearch.forrester.model.def.CausalLinkDef;
 import com.deathrayresearch.forrester.model.def.CldVariableDef;
 import com.deathrayresearch.forrester.model.def.ConstantDef;
 import com.deathrayresearch.forrester.model.def.ElementType;
@@ -32,13 +33,16 @@ public class Clipboard {
     ) {}
 
     private final List<Entry> entries = new ArrayList<>();
+    private final List<CausalLinkDef> causalLinks = new ArrayList<>();
 
     /**
      * Captures the selected elements into the clipboard.
      * Positions are stored relative to the centroid of the selection.
+     * Also captures causal links where both endpoints are in the selection.
      */
     public void capture(CanvasState state, ModelEditor editor, Set<String> names) {
         entries.clear();
+        causalLinks.clear();
 
         if (names.isEmpty()) {
             return;
@@ -88,6 +92,13 @@ public class Clipboard {
                 entries.add(new Entry(name, type, rx, ry, cw, ch, def));
             }
         }
+
+        // Capture causal links where both endpoints are in the selection
+        for (CausalLinkDef link : editor.getCausalLinks()) {
+            if (names.contains(link.from()) && names.contains(link.to())) {
+                causalLinks.add(link);
+            }
+        }
     }
 
     public boolean isEmpty() {
@@ -96,5 +107,9 @@ public class Clipboard {
 
     public List<Entry> getEntries() {
         return Collections.unmodifiableList(entries);
+    }
+
+    public List<CausalLinkDef> getCausalLinks() {
+        return Collections.unmodifiableList(causalLinks);
     }
 }

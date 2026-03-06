@@ -567,35 +567,45 @@ public class CanvasRenderer {
      */
     private void drawConnectionHighlight(GraphicsContext gc, List<ConnectorRoute> connectors,
                                          ConnectionId connectionId, boolean isHover) {
+        // Try info links first
         for (ConnectorRoute route : connectors) {
             if (route.from().equals(connectionId.from())
                     && route.to().equals(connectionId.to())) {
-                if (!canvasState.hasElement(route.from())
-                        || !canvasState.hasElement(route.to())) {
-                    return;
-                }
-
-                double fromX = canvasState.getX(route.from());
-                double fromY = canvasState.getY(route.from());
-                double toX = canvasState.getX(route.to());
-                double toY = canvasState.getY(route.to());
-
-                FlowGeometry.Point2D clippedFrom = FlowGeometry.clipToElement(
-                        canvasState, route.from(), toX, toY);
-                FlowGeometry.Point2D clippedTo = FlowGeometry.clipToElement(
-                        canvasState, route.to(), fromX, fromY);
-
-                if (isHover) {
-                    SelectionRenderer.drawConnectionHover(gc,
-                            clippedFrom.x(), clippedFrom.y(),
-                            clippedTo.x(), clippedTo.y());
-                } else {
-                    SelectionRenderer.drawConnectionSelection(gc,
-                            clippedFrom.x(), clippedFrom.y(),
-                            clippedTo.x(), clippedTo.y());
-                }
+                drawClippedHighlight(gc, connectionId.from(), connectionId.to(), isHover);
                 return;
             }
+        }
+        // Fall back to causal links
+        if (canvasState.hasElement(connectionId.from())
+                && canvasState.hasElement(connectionId.to())) {
+            drawClippedHighlight(gc, connectionId.from(), connectionId.to(), isHover);
+        }
+    }
+
+    private void drawClippedHighlight(GraphicsContext gc, String fromName, String toName,
+                                      boolean isHover) {
+        if (!canvasState.hasElement(fromName) || !canvasState.hasElement(toName)) {
+            return;
+        }
+
+        double fromX = canvasState.getX(fromName);
+        double fromY = canvasState.getY(fromName);
+        double toX = canvasState.getX(toName);
+        double toY = canvasState.getY(toName);
+
+        FlowGeometry.Point2D clippedFrom = FlowGeometry.clipToElement(
+                canvasState, fromName, toX, toY);
+        FlowGeometry.Point2D clippedTo = FlowGeometry.clipToElement(
+                canvasState, toName, fromX, fromY);
+
+        if (isHover) {
+            SelectionRenderer.drawConnectionHover(gc,
+                    clippedFrom.x(), clippedFrom.y(),
+                    clippedTo.x(), clippedTo.y());
+        } else {
+            SelectionRenderer.drawConnectionSelection(gc,
+                    clippedFrom.x(), clippedFrom.y(),
+                    clippedTo.x(), clippedTo.y());
         }
     }
 
