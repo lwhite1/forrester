@@ -7,6 +7,7 @@ import com.deathrayresearch.forrester.app.canvas.CanvasToolBar;
 import com.deathrayresearch.forrester.app.canvas.Clipboard;
 import com.deathrayresearch.forrester.app.canvas.DashboardPanel;
 import com.deathrayresearch.forrester.app.canvas.DiagramExporter;
+import com.deathrayresearch.forrester.app.canvas.ExpressionLanguageDialog;
 import com.deathrayresearch.forrester.app.canvas.ModelCanvas;
 import com.deathrayresearch.forrester.app.canvas.ModelDefinitionFactory;
 import com.deathrayresearch.forrester.app.canvas.ModelEditListener;
@@ -367,6 +368,12 @@ public class ModelWindow {
             dialog.show();
         });
 
+        MenuItem exprLangItem = new MenuItem("Expression Language");
+        exprLangItem.setOnAction(e -> {
+            ExpressionLanguageDialog dialog = new ExpressionLanguageDialog();
+            dialog.show();
+        });
+
         MenuItem shortcutsItem = new MenuItem("Keyboard Shortcuts");
         shortcutsItem.setOnAction(e -> {
             KeyboardShortcutsDialog dialog = new KeyboardShortcutsDialog();
@@ -382,7 +389,7 @@ public class ModelWindow {
             about.showAndWait();
         });
 
-        helpMenu.getItems().addAll(gettingStartedItem, sdConceptsItem,
+        helpMenu.getItems().addAll(gettingStartedItem, sdConceptsItem, exprLangItem,
                 new SeparatorMenuItem(), shortcutsItem,
                 new SeparatorMenuItem(), aboutItem);
 
