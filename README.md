@@ -37,6 +37,17 @@ System Dynamics models are built from four fundamental elements:
 
 These elements are connected into feedback loops that drive system behavior over time.
 
+### Causal Loop Diagrams (CLDs)
+
+In addition to stock-and-flow models, Forrester supports **Causal Loop Diagrams** — the qualitative diagramming technique used in early-stage system dynamics modeling. CLDs let you sketch causal structure before formalizing into stocks and flows.
+
+- **CLD Variables** — qualitative concepts with a name and optional description, but no equation or unit. They represent causal factors that have not yet been formalized into S&F elements.
+- **Causal Links** — directed connections between variables carrying a polarity: positive (+), negative (−), or unknown (?). A positive link means the source and target move in the same direction; a negative link means they move in opposite directions.
+- **Automatic Loop Detection** — the engine finds all elementary feedback cycles in the causal link graph and classifies each as reinforcing (R), balancing (B), or indeterminate (?), based on the count of negative-polarity links in the cycle.
+- **Classification (Morphing)** — CLD variables can be classified into stock-and-flow element types (stock, flow, auxiliary, constant) via right-click context menu. Classification replaces the CLD variable with the corresponding S&F element, preserving name and position. Causal links are converted to info links.
+
+CLDs and S&F elements share a single canvas and a single `ModelDefinition`. A model can contain both CLD variables and formalized S&F elements simultaneously, supporting the conceptualization-to-formalization workflow.
+
 ## Architecture
 
 ### Package Structure
@@ -50,9 +61,11 @@ com.deathrayresearch.forrester
 │   │                            #   IndexedValue)
 │   ├── flows/                   # Rate conversion utilities
 │   ├── expr/                    # Sealed Expr AST, recursive-descent parser, stringifier, dependency extractor
-│   ├── def/                     # Immutable definition records (ModelDefinition, StockDef, FlowDef, etc.)
+│   ├── def/                     # Immutable definition records (ModelDefinition, StockDef, FlowDef,
+│   │                            #   CldVariableDef, CausalLinkDef, etc.)
 │   ├── compile/                 # Two-pass ModelCompiler: definition → runnable Model
-│   └── graph/                   # Dependency graph, connector generation, auto-layout, view validation
+│   └── graph/                   # Dependency graph, connector generation, auto-layout, view validation,
+│                                #   CLD feedback loop detection and classification
 ├── measure/                     # Dimensional analysis, unit system, and UnitRegistry
 ├── event/                       # Event-driven communication
 ├── sweep/                       # Parameter sweep, Monte Carlo, optimization, and CSV output
@@ -427,7 +440,7 @@ ModelDefinition parent = new ModelDefinitionBuilder()
 
 | Record | Purpose |
 |---|---|
-| `ModelDefinition` | Top-level container: stocks, flows, auxiliaries, constants, lookup tables, modules, subscripts, views, simulation settings |
+| `ModelDefinition` | Top-level container: stocks, flows, auxiliaries, constants, lookup tables, modules, subscripts, CLD variables, causal links, views, simulation settings |
 | `StockDef` | Accumulator with initial value, unit, and optional negative-value policy |
 | `FlowDef` | Rate with equation string, time unit, and optional source/sink stock names |
 | `AuxDef` | Auxiliary variable with equation string and unit |
@@ -435,11 +448,55 @@ ModelDefinition parent = new ModelDefinitionBuilder()
 | `LookupTableDef` | Table function with x/y arrays and interpolation mode (`LINEAR` or `SPLINE`) |
 | `SubscriptDef` | Dimension label set |
 | `ModuleInstanceDef` | Nested module with input/output port bindings |
+| `CldVariableDef` | Qualitative CLD variable with name and optional comment |
+| `CausalLinkDef` | Causal link with source, target, polarity, and optional comment |
 | `ModuleInterface` / `PortDef` | Public interface and port declarations for reusable modules |
 | `SimulationSettings` | Default time step, duration, and duration unit |
 | `ViewDef` / `ElementPlacement` / `ConnectorRoute` / `FlowRoute` | Graphical view layout data |
 | `ModelDefinitionBuilder` | Fluent builder for constructing `ModelDefinition` instances |
 | `DefinitionValidator` | Structural validation returning a list of error messages |
+
+### Causal Loop Diagrams (`model/def/` and `model/graph/`)
+
+CLD support is built into the definition layer and the graph analysis layer, enabling qualitative causal modeling alongside quantitative stock-and-flow simulation.
+
+**Build a CLD with the fluent builder:**
+
+```java
+ModelDefinition def = new ModelDefinitionBuilder()
+    .name("Climate CLD")
+    .cldVariable("CO2 Emissions")
+    .cldVariable("Temperature", "Global average surface temperature")
+    .cldVariable("Ice Coverage")
+    .cldVariable("Albedo")
+    .causalLink("CO2 Emissions", "Temperature", CausalLinkDef.Polarity.POSITIVE)
+    .causalLink("Temperature", "Ice Coverage", CausalLinkDef.Polarity.NEGATIVE)
+    .causalLink("Ice Coverage", "Albedo", CausalLinkDef.Polarity.POSITIVE)
+    .causalLink("Albedo", "Temperature", CausalLinkDef.Polarity.NEGATIVE)
+    .build();
+```
+
+**Analyze feedback loops:**
+
+```java
+FeedbackAnalysis analysis = FeedbackAnalysis.analyze(def);
+for (FeedbackAnalysis.CausalLoop loop : analysis.causalLoops()) {
+    System.out.println(loop.label() + " (" + loop.type() + "): " + loop.members());
+}
+// e.g. "R1 (REINFORCING): [Temperature, Ice Coverage, Albedo]"
+```
+
+**Classify CLD variables into S&F elements** (in the visual editor):
+
+Right-click a CLD variable → "Classify as..." → Stock / Flow / Auxiliary / Constant. The CLD variable is replaced with the corresponding S&F element, preserving name and canvas position. Connected causal links are converted to info links.
+
+| Record | Purpose |
+|---|---|
+| `CldVariableDef` | Qualitative variable: name and optional comment, no equation |
+| `CausalLinkDef` | Directed causal link with polarity (`POSITIVE`, `NEGATIVE`, `UNKNOWN`) and optional comment |
+| `CausalLinkDef.Polarity` | Enum with symbol display (`+`, `-`, `?`) and `fromSymbol()` parsing |
+| `FeedbackAnalysis` | Detects elementary cycles in the causal link graph; classifies as `REINFORCING`, `BALANCING`, or `INDETERMINATE` |
+| `FeedbackAnalysis.CausalLoop` | A detected loop: ordered member list, label (e.g., "R1", "B2"), and type |
 
 ### Expression AST (`model/expr/` package)
 
@@ -548,6 +605,12 @@ ModelDefinition fromFile = serializer.fromFile(Paths.get("sir_model.json"));
   ],
   "constants": [
     { "name": "contact_rate", "value": 0.005, "unit": "1/Day" }
+  ],
+  "cldVariables": [
+    { "name": "Public Concern", "comment": "Level of public awareness" }
+  ],
+  "causalLinks": [
+    { "from": "Infected", "to": "Public Concern", "polarity": "POSITIVE" }
   ],
   "defaultSimulation": { "timeStep": "Day", "duration": 100.0, "durationUnit": "Day" }
 }
@@ -732,7 +795,7 @@ The `forrester-app` module provides a JavaFX canvas-based visual editor for crea
 
 **Core interactions:**
 
-- **Element creation** — toolbar or keyboard shortcuts (1–6) to place stocks, flows, auxiliaries, constants, and modules on the canvas
+- **Element creation** — toolbar or keyboard shortcuts (1–6) to place stocks, flows, auxiliaries, constants, and modules; shortcuts 8–9 to place CLD variables and draw causal links
 - **Flow connections** — two-click protocol: click source (stock or cloud), rubber-band follows cursor with stock hover highlight, click sink to create flow at midpoint
 - **Inline editing** — double-click any element to rename; constants chain name→value editing; flows and auxiliaries chain name→equation editing. Rename propagates to flow references and equation tokens
 - **Flow reattachment** — drag cloud endpoints onto stocks to reconnect, or drag connected endpoints off stocks to disconnect to cloud
@@ -751,7 +814,7 @@ The `forrester-app` module provides a JavaFX canvas-based visual editor for crea
 - **Context-sensitive help** — F1 shows documentation for the current tool or selected element type
 - **Activity log** — timestamped event log for model creation, file operations, simulation runs, analysis executions, and validation checks
 
-**Visual language:** The editor renders the Layered Flow Diagram notation with distinct shapes for each element type (rounded-rectangle stocks, diamond flow indicators, rounded-rectangle auxiliaries, dashed-border constants, thick-bordered module containers with "mod" badge), material flow arrows routed through diamond indicators, dashed info link connectors, and cloud symbols for disconnected flow endpoints.
+**Visual language:** The editor renders the Layered Flow Diagram notation with distinct shapes for each element type (rounded-rectangle stocks, diamond flow indicators, rounded-rectangle auxiliaries, dashed-border constants, thick-bordered module containers with "mod" badge, thin-bordered CLD variables), material flow arrows routed through diamond indicators, dashed info link connectors, cloud symbols for disconnected flow endpoints, and curved causal links with color-coded polarity labels (green "+", red "−", gray "?"). Detected CLD feedback loops are labeled with R/B designators.
 
 | Class | Purpose |
 |---|---|
@@ -762,6 +825,7 @@ The `forrester-app` module provides a JavaFX canvas-based visual editor for crea
 | `CanvasRenderer` | Rendering coordinator (connections, elements, overlays) |
 | `CanvasState` | Mutable positions, types, draw order, selection |
 | `FlowCreationController` | Two-click flow creation state machine |
+| `CausalLinkCreationController` | Two-click causal link creation state machine |
 | `FlowEndpointCalculator` | Cloud positions and endpoint hit testing |
 | `PropertiesPanel` | Right-side panel for viewing/editing element properties |
 | `DashboardPanel` | Tabbed result display for simulation, sweep, Monte Carlo, optimization |
@@ -1108,6 +1172,7 @@ New to system dynamics? These resources provide a solid introduction to the meth
 
 The project is at version 1.0-SNAPSHOT and is under active development. Recent work has focused on:
 
+- Adding Causal Loop Diagram (CLD) support — qualitative causal modeling with CLD variables, causal links with polarity (+/−/?), automatic feedback loop detection and R/B classification, canvas rendering with curved links and polarity labels, toolbar tools (keys 8–9) for placing CLD variables and drawing causal links, polarity cycling, right-click "Classify as..." morphing to convert CLD variables into stock-and-flow elements, JSON round-trip serialization, and integration with the existing `FeedbackAnalysis` graph analysis
 - Adding GUI analysis integration (Phase 2) — Simulate menu with dedicated dialogs for parameter sweep, multi-parameter sweep, Monte Carlo, and optimization; tabbed dashboard panel displaying results with interactive charts and right-click CSV export; multi-window editing with independent state and cross-window copy/paste; 8 bundled example models across 5 categories; context-sensitive help (F1); activity log with timestamped events. All analysis runs execute on background threads
 - Adding a JavaFX canvas-based visual editor (`forrester-app` module) — interactive stock-and-flow diagram editor with element creation via toolbar or keyboard shortcuts (including module/submodel placement), two-click flow connection protocol with rubber-band preview, inline name/value/equation editing with rename propagation, flow endpoint reattachment, element resize via corner handles, hover highlighting for discoverability, a properties panel with context toolbar for editing element attributes, rubber-band marquee selection, pan/zoom navigation, 100-level snapshot-based undo/redo, JSON file persistence with view layout, integrated simulation with background execution and sortable results table, context-sensitive cursor feedback, equation autocomplete for element names and built-in functions, lookup table editing with inline chart preview and interpolation mode selection, feedback loop highlighting, and a status bar showing tool/selection/element counts/zoom. Models can be built, edited, saved, and simulated entirely through the GUI
 - Adding XMILE import and export (`io/xmile/` package) — bidirectional model exchange with Stella/iThink and other XMILE-compatible tools via the OASIS standard XML format. `XmileImporter` reads XMILE files to `ModelDefinition`; `XmileExporter` writes any `ModelDefinition` to valid XMILE 1.0 XML. Supports stocks, flows, auxiliaries, constants, lookup tables (standalone and embedded `<gf>`), simulation settings, view data, and bidirectional expression translation. Audited and hardened with 65 tests including round-trip compile+simulate and export→re-import verification

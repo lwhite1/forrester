@@ -12,7 +12,7 @@ There are six free system dynamics tools worth comparing against. Each occupies 
 | **Simantics SD** | Windows (Eclipse) | Open source (EPL) | Research, large hierarchical models | No optimization, Windows-only |
 | **Minsky** | Windows, Mac, Linux | Open source (GPL) | Economics, monetary modeling | No Monte Carlo, no sweeps, no arrays |
 | **SageModeler** | Web browser | Open source | K-12 and introductory education | No equations, no simulation control |
-| **Forrester** | Windows, Mac, Linux (JVM) | Open source | Programmers, researchers, educators | No CLDs, requires JVM |
+| **Forrester** | Windows, Mac, Linux (JVM) | Open source | Programmers, researchers, educators | Requires JVM |
 
 ## Head-to-Head Feature Comparison
 
@@ -26,9 +26,9 @@ There are six free system dynamics tools worth comparing against. Each occupies 
 | Lookup tables (graphical functions) | Yes | Limited | Yes | Yes | No | Yes (inline chart preview, spline/linear) |
 | Modules / subsystems | No | No | No (paid only) | Yes | No | Yes (nested, with port bindings) |
 | Subscripts / arrays | No | No | No (paid only) | Yes | No | Yes (multi-dimensional, with broadcasting) |
-| Causal loop diagrams | Yes | Yes | Yes | Yes | No | No |
+| Causal loop diagrams | Yes | Yes | Yes | Yes | No | Yes (with loop detection, classification, morphing to S&F) |
 
-**Assessment.** Forrester matches or exceeds every free tool on structural modeling. Subscripts and modules are absent from most free tools — Stella has them but only in the paid Architect tier ($509+). Stella Online's free tier is severely constrained at 3 stocks maximum, which rules out any real modeling work. Forrester's lookup table editor includes an inline chart preview with linear and spline interpolation modes, matching the graphical editors in Vensim PLE and Stella.
+**Assessment.** Forrester matches or exceeds every free tool on structural modeling. Subscripts and modules are absent from most free tools — Stella has them but only in the paid Architect tier ($509+). Stella Online's free tier is severely constrained at 3 stocks maximum, which rules out any real modeling work. Forrester's lookup table editor includes an inline chart preview with linear and spline interpolation modes, matching the graphical editors in Vensim PLE and Stella. Forrester's CLD support includes automatic feedback loop detection with R/B classification and variable classification (morphing) into S&F elements — features that go beyond what Insight Maker and SageModeler offer for CLDs.
 
 ### Simulation and Analysis
 
@@ -56,7 +56,7 @@ There are six free system dynamics tools worth comparing against. Each occupies 
 | Connection hover/selection | No | No | No | No | No | Yes |
 | Feedback loop highlighting | No | No | No | No | No | Yes |
 | Diagram export (PNG/JPEG/SVG) | Yes (copy) | Screenshot | No (paid only) | ? | Yes | Yes (PNG, JPEG, SVG at 2x) |
-| Keyboard shortcuts for element creation | Limited | No | No | No | No | Yes (1-6 keys) |
+| Keyboard shortcuts for element creation | Limited | No | No | No | No | Yes (1–9 keys, including CLD tools) |
 | Properties panel | Limited | Yes | Yes | Yes | No | Yes (with context toolbar) |
 | Equation autocomplete | No | No | No | No | No | Yes (element names + built-in functions) |
 | Bundled example models | Many | Yes | Yes | Limited | Limited | Yes (8 categorized models) |
@@ -113,11 +113,9 @@ Honest assessment of current gaps:
 
 2. **Community and ecosystem.** Vensim has thousands of published models, textbooks written around it, university courses that assume it, and a large user forum. Forrester has none of this. A student Googling "how to build an SIR model" will find Vensim tutorials, not Forrester ones. Ecosystem matters more than features for adoption.
 
-3. **Causal loop diagrams.** Vensim PLE, Insight Maker, and Simantics all support CLDs as a first-class diagram type. Forrester has stock-and-flow only. CLDs are the entry point for most SD education — students draw CLDs before they learn stocks and flows. Missing CLDs means missing the first step of most SD courses.
+3. **Web access.** Insight Maker and Stella Online run in a browser with zero installation. Forrester requires a JVM. For casual users, students on locked-down lab machines, or workshop participants, "open a URL" beats "install Java and download a JAR." Web access removes the adoption barrier entirely.
 
-4. **Web access.** Insight Maker and Stella Online run in a browser with zero installation. Forrester requires a JVM. For casual users, students on locked-down lab machines, or workshop participants, "open a URL" beats "install Java and download a JAR." Web access removes the adoption barrier entirely.
-
-5. **Documentation and learning materials.** Vensim has a comprehensive manual, tutorials, and a user guide. Insight Maker has interactive web tutorials. Forrester has code demos but no guided learning path, no tutorial sequence, no user manual for the visual editor.
+4. **Documentation and learning materials.** Vensim has a comprehensive manual, tutorials, and a user guide. Insight Maker has interactive web tutorials. Forrester has code demos but no guided learning path, no tutorial sequence, no user manual for the visual editor.
 
 ## What Would Make Forrester a Worthwhile Free Entry
 
@@ -153,9 +151,8 @@ The question isn't "can Forrester replace Vensim?" — it can't, and shouldn't t
 **Why Forrester wins.** Students get the full analysis stack for free. The visual editor handles model building. Parameter sweeps, Monte Carlo, and optimization are available from both the GUI (simulation dialog) and code (for assignments that require scripting).
 
 **What's needed to get there.**
-- **Causal loop diagrams.** This is the blocker. Most SD courses start with CLDs before moving to stock-and-flow. Without CLDs, Forrester can't be the primary tool for a standard SD course. Adding CLD support would open the educational market.
-- **Tutorial sequence.** A structured learning path: "Lesson 1: Your first stock-and-flow model. Lesson 2: Feedback loops. Lesson 3: Delays. Lesson 4: Sensitivity analysis." Tied to the visual editor, not the code API.
-- **More example models.** The bundled library has 8 models covering introductory, ecology, epidemiology, population, and supply chain categories. Expanding to 15-20 with additional categories (project management, business strategy, economics) and more advanced models within existing categories would strengthen the educational offering.
+- **Tutorial sequence.** A structured learning path: "Lesson 1: Your first causal loop diagram. Lesson 2: Classifying CLD variables into stocks and flows. Lesson 3: Feedback loops. Lesson 4: Delays. Lesson 5: Sensitivity analysis." Tied to the visual editor, not the code API. CLD support is now in place — the gap is guided learning content.
+- **More example models.** The bundled library has 8 models covering introductory, ecology, epidemiology, population, and supply chain categories. Expanding to 15-20 with additional categories (project management, business strategy, economics) and more advanced models within existing categories would strengthen the educational offering. Adding CLD-based example models that demonstrate the qualitative-to-quantitative workflow would be particularly valuable.
 
 ### Opportunity 4: The interoperability bridge
 
@@ -174,15 +171,14 @@ What to build next, ranked by impact on making Forrester a worthwhile free entry
 
 | Priority | Item | Effort | Impact | Target audience |
 |---|---|---|---|---|
-| 1 | Causal loop diagram support | Large | High | Educators, students |
-| 2 | Publish to Maven Central | Small | Medium | Programmers, researchers |
-| 3 | Tutorial sequence for visual editor | Medium | High | Students, new users |
-| 4 | "From Vensim PLE" migration guide | Small | Medium | Vensim PLE users hitting limits |
-| 5 | Expand example model library to 15-20 | Medium | Medium | Educators, students |
-| 6 | CLI conversion tool (mdl/xmile) | Small | Medium | Interoperability users |
-| 7 | Web version (or web export of models) | Large | High | Casual users, workshops |
+| 1 | Publish to Maven Central | Small | Medium | Programmers, researchers |
+| 2 | Tutorial sequence for visual editor (including CLD workflow) | Medium | High | Students, new users |
+| 3 | "From Vensim PLE" migration guide | Small | Medium | Vensim PLE users hitting limits |
+| 4 | Expand example model library to 15-20 (including CLD examples) | Medium | Medium | Educators, students |
+| 5 | CLI conversion tool (mdl/xmile) | Small | Medium | Interoperability users |
+| 6 | Web version (or web export of models) | Large | High | Casual users, workshops |
 
-**Completed since last review:** Lookup table editor with chart preview (was #1), Monte Carlo / sweep / multi-sweep / optimization integration in GUI with tabbed dashboard (was #10), sample model library with 8 bundled models (was #6 — partially complete), CSV export from all result panes, multi-window editing with cross-window copy/paste, equation autocomplete, context-sensitive help, activity log.
+**Completed since last review:** Causal loop diagram support with automatic loop detection, R/B classification, variable classification/morphing, and canvas rendering (was #1). Lookup table editor with chart preview. Monte Carlo / sweep / multi-sweep / optimization integration in GUI with tabbed dashboard. Sample model library with 8 bundled models. CSV export from all result panes, multi-window editing with cross-window copy/paste, equation autocomplete, context-sensitive help, activity log.
 
 ## The Honest Summary
 
@@ -190,6 +186,6 @@ Forrester's engine is already stronger than any free SD tool. It has analysis fe
 
 The visual editor has matured significantly: lookup table editing with chart preview, equation autocomplete, analysis integration (Monte Carlo, sweeps, multi-parameter sweeps, optimization) with a tabbed dashboard, 8 bundled example models, multi-window editing with cross-window copy/paste, context-sensitive help, activity logging, and CSV export from all result panes. Combined with unique features (connection interaction, loop highlighting, element resizing, multi-format export), the editor is now a functional standalone modeling environment — younger than Vensim PLE's 30-year-old interface, but with capabilities that Vensim PLE doesn't offer.
 
-The remaining gaps are primarily ecosystem gaps: documentation, tutorials, community, discoverability, and causal loop diagrams (the entry point for SD education). A tool nobody knows about can't compete, no matter how good its features are. The single highest-leverage action is probably not writing more code — it's writing a "Why Forrester?" page and a 10-minute quickstart tutorial, and putting them where SD students will find them.
+With the addition of causal loop diagrams — including automatic loop detection, R/B classification, and variable classification into S&F elements — Forrester now covers the full SD modeling workflow from qualitative conceptualization to quantitative simulation. The remaining gaps are primarily ecosystem gaps: documentation, tutorials, community, and discoverability. A tool nobody knows about can't compete, no matter how good its features are. The single highest-leverage action is probably not writing more code — it's writing a "Why Forrester?" page and a 10-minute quickstart tutorial, and putting them where SD students will find them.
 
 For the code-first researcher audience, Forrester is already the best free option. It just doesn't know it yet — and neither do they.

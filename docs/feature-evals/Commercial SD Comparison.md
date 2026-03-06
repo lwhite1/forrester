@@ -30,12 +30,12 @@ This document compares Forrester against the major commercial SD tools: Vensim P
 | Lookup tables | Yes (graphical editor) | Yes (graphical editor) | Yes | Yes | Yes (inline chart preview) |
 | Modules / subsystems | Yes (Pro+) | Yes (Architect) | Yes | Yes | Yes (nested, port bindings) |
 | Subscripts / arrays | Yes (Pro+) | Yes (Architect) | Yes | Yes | Yes (multi-dimensional, broadcasting) |
-| Causal loop diagrams | Yes | Yes | Yes | Yes | No |
+| Causal loop diagrams | Yes | Yes | Yes | Yes | Yes (with loop detection, R/B classification, morphing to S&F) |
 | Agent-based modeling | No | No | Yes | No | No |
 | Discrete-event simulation | No | No | Yes | No | No |
 | Unit / dimensional analysis | Yes | Yes | Limited | Yes | Yes (8 dimensions, 40 units) |
 
-**Assessment.** On pure SD modeling, Forrester matches the commercial tools feature-for-feature on structural capabilities. The gaps are causal loop diagrams (which all commercial tools support) and hybrid modeling methods (AnyLogic's unique multi-method strength). Forrester's subscript system with Analytica-style broadcasting is competitive with Vensim's and Stella's array implementations.
+**Assessment.** On pure SD modeling, Forrester matches the commercial tools feature-for-feature on structural capabilities, including causal loop diagrams with automatic loop detection and R/B classification — a feature that goes beyond simple CLD drawing by providing analytical value. The only structural gap is hybrid modeling methods (AnyLogic's unique multi-method strength). Forrester's CLD-to-S&F classification workflow (right-click → "Classify as..." to morph qualitative variables into stocks, flows, auxiliaries, or constants) supports the conceptualization-to-formalization transition that SD methodology prescribes. Forrester's subscript system with Analytica-style broadcasting is competitive with Vensim's and Stella's array implementations.
 
 ### Analysis & Simulation
 
@@ -99,7 +99,7 @@ This document compares Forrester against the major commercial SD tools: Vensim P
 
 5. **Professional support.** Commercial licenses include technical support, training, and consulting services. Forrester has community support only.
 
-6. **Causal loop diagrams.** All major commercial tools support CLDs. Forrester does not. CLDs are the starting point for most SD engagements — both in consulting and in education.
+6. **Causal loop diagram maturity.** All major commercial tools have had CLDs for decades with polished interaction. Forrester's CLD support is newer — it includes automatic loop detection and classification that commercial tools don't always offer, but the interaction polish may lag behind tools with years of CLD-specific refinement.
 
 ## Where Forrester Competes or Wins
 
@@ -113,14 +113,14 @@ This document compares Forrester against the major commercial SD tools: Vensim P
 
 5. **Open source.** The codebase is inspectable, modifiable, and embeddable. A researcher can extend the engine, add custom integration methods, or embed simulations in a larger Java application. Commercial tools are black boxes.
 
-6. **Modern editor features.** Equation autocomplete, feedback loop highlighting, connection hover/selection, high-resolution multi-format diagram export — features that even $1,995 Vensim DSS doesn't offer.
+6. **Modern editor features.** Equation autocomplete, feedback loop highlighting, connection hover/selection, high-resolution multi-format diagram export, and CLD-to-S&F classification morphing — features that even $1,995 Vensim DSS doesn't offer. Automatic CLD loop detection with R/B classification provides analytical value beyond simple diagram drawing.
 
 ## Positioning Summary
 
 | Audience | Best commercial choice | Forrester competitive? | Notes |
 |---|---|---|---|
 | Graduate researcher | Vensim Professional ($1,195) | Yes — strong alternative | Same analysis features, free, adds code API |
-| SD course instructor | Stella Professional ($2,999) or Vensim PLE Plus ($169) | Yes, except for CLDs | Full analysis stack for free; CLD gap limits primary adoption |
+| SD course instructor | Stella Professional ($2,999) or Vensim PLE Plus ($169) | Yes — strong alternative | Full analysis stack + CLDs with loop detection for free; supports the standard CLD-first pedagogical workflow |
 | Enterprise consultant | Stella Architect ($3,999) or Vensim DSS ($1,995) | Partial | Lacks interface design and web publishing |
 | Multi-method modeler | AnyLogic ($12,390+) | No | AnyLogic's hybrid SD+ABM+DES is unique |
 | Budget-constrained team | Powersim ($325) or Vensim PLE Plus ($169) | Yes — strong alternative | More analysis features than either at $0 |

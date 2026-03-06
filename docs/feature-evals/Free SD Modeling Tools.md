@@ -57,19 +57,19 @@ More commonly, R users code SD models manually as ODE systems and solve them wit
 
 ### Where Forrester fits
 
-Forrester has two faces: a desktop application with a visual stock-and-flow canvas, and a Java engine that can be used as a library (JAR dependency) for programmatic simulation. This gives it broader coverage than tools that are purely visual or purely scripted.
+Forrester has two faces: a desktop application with a visual canvas supporting both causal loop diagrams and stock-and-flow models, and a Java engine that can be used as a library (JAR dependency) for programmatic simulation. CLD variables can be classified into S&F elements directly on the canvas, supporting the qualitative-to-quantitative workflow. This gives it broader coverage than tools that are purely visual or purely scripted.
 
 | Capability | PySD (Python) | readsdr/deSolve (R) | Forrester App | Forrester Engine (JAR) |
 |---|---|---|---|---|
 | Visual model building | No | No | Yes | No |
 | Import Vensim (.mdl) | Yes | No | Yes | Yes |
 | Import/Export XMILE | Yes (import) | Yes (import) | Yes | Yes |
-| Interactive stock-flow canvas | No | No | Yes | No |
+| Interactive CLD + stock-flow canvas | No | No | Yes | No |
 | Batch/programmatic analysis | Excellent | Good | No | Yes (requires JAR dependency) |
 | Data science integration | Excellent | Excellent | No | Via JVM data tools |
 | Accessible to non-programmers | No | No | Yes | No |
 
-The scripting libraries excel at programmatic analysis of existing models — parameter estimation, optimization, and integration with data science workflows. Forrester's desktop app fills the gap they explicitly leave open: providing a visual, interactive environment where users can build, explore, and simulate models without writing code. Its engine, when used as a JAR dependency, can also serve the programmatic use case for JVM-based workflows.
+The scripting libraries excel at programmatic analysis of existing models — parameter estimation, optimization, and integration with data science workflows. Forrester's desktop app fills the gap they explicitly leave open: providing a visual, interactive environment where users can build, explore, and simulate models without writing code — starting from causal loop diagrams and progressing to stock-and-flow simulation. Its engine, when used as a JAR dependency, can also serve the programmatic use case for JVM-based workflows.
 
 ## Sources
 
