@@ -17,7 +17,7 @@ public record ModuleInstanceDef(
         ModelDefinition definition,
         Map<String, String> inputBindings,
         Map<String, String> outputBindings
-) {
+) implements ElementDef {
 
     public ModuleInstanceDef {
         if (instanceName == null || instanceName.isBlank()) {

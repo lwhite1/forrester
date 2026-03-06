@@ -13,7 +13,7 @@ public record AuxDef(
         String comment,
         String equation,
         String unit
-) {
+) implements ElementDef {
 
     public AuxDef {
         if (name == null || name.isBlank()) {

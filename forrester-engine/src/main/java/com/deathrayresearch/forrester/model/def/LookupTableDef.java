@@ -18,7 +18,7 @@ public record LookupTableDef(
         double[] xValues,
         double[] yValues,
         String interpolation
-) {
+) implements ElementDef {
 
     public LookupTableDef {
         if (name == null || name.isBlank()) {

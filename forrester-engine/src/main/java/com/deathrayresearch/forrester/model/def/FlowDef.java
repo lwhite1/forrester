@@ -17,7 +17,7 @@ public record FlowDef(
         String timeUnit,
         String source,
         String sink
-) {
+) implements ElementDef {
 
     public FlowDef {
         if (name == null || name.isBlank()) {

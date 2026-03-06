@@ -87,27 +87,22 @@ final class CopyPasteController {
 
         // First pass: create elements and build name mapping
         for (Clipboard.Entry entry : clipboard.getEntries()) {
-            String newName;
-            switch (entry.type()) {
-                case STOCK -> newName = editor.addStockFrom((StockDef) entry.elementDef());
-                case FLOW -> {
-                    FlowDef flowDef = (FlowDef) entry.elementDef();
-                    newName = editor.addFlowFrom(flowDef, null, null);
-                }
+            String newName = switch (entry.type()) {
+                case STOCK -> editor.addStockFrom((StockDef) entry.elementDef());
+                case FLOW -> editor.addFlowFrom((FlowDef) entry.elementDef(), null, null);
                 case AUX -> {
                     AuxDef auxDef = (AuxDef) entry.elementDef();
-                    newName = editor.addAuxFrom(auxDef, auxDef.equation());
+                    yield editor.addAuxFrom(auxDef, auxDef.equation());
                 }
-                case CONSTANT -> newName = editor.addConstantFrom(
+                case CONSTANT -> editor.addConstantFrom(
                         (ConstantDef) entry.elementDef());
-                case MODULE -> newName = editor.addModuleFrom(
+                case MODULE -> editor.addModuleFrom(
                         (ModuleInstanceDef) entry.elementDef());
-                case LOOKUP -> newName = editor.addLookupFrom(
+                case LOOKUP -> editor.addLookupFrom(
                         (LookupTableDef) entry.elementDef());
-                case CLD_VARIABLE -> newName = editor.addCldVariableFrom(
+                case CLD_VARIABLE -> editor.addCldVariableFrom(
                         (CldVariableDef) entry.elementDef());
-                default -> { continue; }
-            }
+            };
 
             nameMapping.put(entry.originalName(), newName);
             pastedNames.add(newName);

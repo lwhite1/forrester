@@ -15,7 +15,7 @@ public record StockDef(
         double initialValue,
         String unit,
         String negativeValuePolicy
-) {
+) implements ElementDef {
 
     public StockDef {
         if (name == null || name.isBlank()) {

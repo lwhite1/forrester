@@ -1,14 +1,8 @@
 package com.deathrayresearch.forrester.app.canvas;
 
-import com.deathrayresearch.forrester.model.def.AuxDef;
 import com.deathrayresearch.forrester.model.def.CausalLinkDef;
-import com.deathrayresearch.forrester.model.def.CldVariableDef;
-import com.deathrayresearch.forrester.model.def.ConstantDef;
+import com.deathrayresearch.forrester.model.def.ElementDef;
 import com.deathrayresearch.forrester.model.def.ElementType;
-import com.deathrayresearch.forrester.model.def.FlowDef;
-import com.deathrayresearch.forrester.model.def.LookupTableDef;
-import com.deathrayresearch.forrester.model.def.ModuleInstanceDef;
-import com.deathrayresearch.forrester.model.def.StockDef;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -29,7 +23,7 @@ public class Clipboard {
             double relativeY,
             double customWidth,
             double customHeight,
-            Object elementDef
+            ElementDef elementDef
     ) {}
 
     private final List<Entry> entries = new ArrayList<>();
@@ -78,7 +72,7 @@ public class Clipboard {
             double cw = state.hasCustomSize(name) ? state.getWidth(name) : 0;
             double ch = state.hasCustomSize(name) ? state.getHeight(name) : 0;
 
-            Object def = switch (type) {
+            ElementDef def = switch (type) {
                 case STOCK -> editor.getStockByName(name);
                 case FLOW -> editor.getFlowByName(name);
                 case AUX -> editor.getAuxByName(name);

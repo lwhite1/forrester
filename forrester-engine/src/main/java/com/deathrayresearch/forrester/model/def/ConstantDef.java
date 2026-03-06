@@ -13,7 +13,7 @@ public record ConstantDef(
         String comment,
         double value,
         String unit
-) {
+) implements ElementDef {
 
     public ConstantDef {
         if (name == null || name.isBlank()) {

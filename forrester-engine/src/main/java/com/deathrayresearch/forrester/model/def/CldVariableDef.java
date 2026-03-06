@@ -11,7 +11,7 @@ package com.deathrayresearch.forrester.model.def;
 public record CldVariableDef(
         String name,
         String comment
-) {
+) implements ElementDef {
 
     public CldVariableDef {
         if (name == null || name.isBlank()) {
