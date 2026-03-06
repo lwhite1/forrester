@@ -1,6 +1,8 @@
 package com.deathrayresearch.forrester.model.graph;
 
 import com.deathrayresearch.forrester.model.def.AuxDef;
+import com.deathrayresearch.forrester.model.def.CausalLinkDef;
+import com.deathrayresearch.forrester.model.def.CldVariableDef;
 import com.deathrayresearch.forrester.model.def.ConnectorRoute;
 import com.deathrayresearch.forrester.model.def.ConstantDef;
 import com.deathrayresearch.forrester.model.def.ElementPlacement;
@@ -65,7 +67,7 @@ public final class AutoLayout {
     public static ViewDef layout(ModelDefinition def) {
         if (def.stocks().isEmpty() && def.flows().isEmpty() && def.auxiliaries().isEmpty()
                 && def.constants().isEmpty() && def.lookupTables().isEmpty()
-                && def.modules().isEmpty()) {
+                && def.modules().isEmpty() && def.cldVariables().isEmpty()) {
             return new ViewDef("Auto Layout", List.of(),
                     ConnectorGenerator.generate(def), List.of());
         }
@@ -112,6 +114,10 @@ public final class AutoLayout {
         }
         for (ModuleInstanceDef m : def.modules()) {
             addNode(factory, root, nodeMap, typeMap, m.instanceName(), ElementType.MODULE,
+                    westPorts, eastPorts);
+        }
+        for (CldVariableDef v : def.cldVariables()) {
+            addNode(factory, root, nodeMap, typeMap, v.name(), ElementType.CLD_VARIABLE,
                     westPorts, eastPorts);
         }
 
@@ -185,6 +191,16 @@ public final class AutoLayout {
             elkEdge.setProperty(CoreOptions.PRIORITY, INFO_LINK_PRIORITY);
             if (backEdgeKeys.contains(key)) {
                 elkEdge.setProperty(LayeredOptions.FEEDBACK_EDGES, true);
+            }
+        }
+
+        // Add causal link edges
+        for (CausalLinkDef link : def.causalLinks()) {
+            ElkNode sourceNode = nodeMap.get(link.from());
+            ElkNode targetNode = nodeMap.get(link.to());
+            if (sourceNode != null && targetNode != null) {
+                ElkEdge elkEdge = createEdge(factory, root, sourceNode, targetNode);
+                elkEdge.setProperty(CoreOptions.PRIORITY, INFO_LINK_PRIORITY);
             }
         }
 

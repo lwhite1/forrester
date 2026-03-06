@@ -82,7 +82,7 @@ public class StatusBar extends HBox {
 
         updateTool(CanvasToolBar.Tool.SELECT);
         updateSelection(0);
-        updateElements(0, 0, 0, 0, 0);
+        updateElements(0, 0, 0, 0, 0, 0, 0);
         updateZoom(1.0);
     }
 
@@ -95,6 +95,8 @@ public class StatusBar extends HBox {
             case PLACE_CONSTANT -> "Place Constant";
             case PLACE_MODULE -> "Place Module";
             case PLACE_LOOKUP -> "Place Lookup";
+            case PLACE_CLD_VARIABLE -> "Place CLD Variable";
+            case PLACE_CAUSAL_LINK -> "Draw Causal Link";
         };
         toolLabel.setText(name);
     }
@@ -109,8 +111,9 @@ public class StatusBar extends HBox {
         }
     }
 
-    public void updateElements(int stocks, int flows, int auxiliaries, int constants, int modules) {
-        int total = stocks + flows + auxiliaries + constants + modules;
+    public void updateElements(int stocks, int flows, int auxiliaries, int constants,
+                               int modules, int cldVars, int causalLinks) {
+        int total = stocks + flows + auxiliaries + constants + modules + cldVars;
         if (total == 0) {
             elementsLabel.setText("Empty model");
         } else {
@@ -119,6 +122,12 @@ public class StatusBar extends HBox {
                     + auxiliaries + " aux, " + constants + " const";
             if (modules > 0) {
                 text += ", " + modules + " mod";
+            }
+            if (cldVars > 0) {
+                text += ", " + cldVars + " cld";
+            }
+            if (causalLinks > 0) {
+                text += ", " + causalLinks + " links";
             }
             text += ")";
             elementsLabel.setText(text);

@@ -1,11 +1,13 @@
 package com.deathrayresearch.forrester.app.canvas;
 
+import com.deathrayresearch.forrester.model.def.CausalLinkDef;
 import com.deathrayresearch.forrester.model.def.ConnectorRoute;
 import com.deathrayresearch.forrester.model.def.ConstantDef;
 import com.deathrayresearch.forrester.model.def.ElementType;
 import com.deathrayresearch.forrester.model.def.FlowDef;
 import com.deathrayresearch.forrester.model.def.LookupTableDef;
 import com.deathrayresearch.forrester.model.graph.FeedbackAnalysis;
+import com.deathrayresearch.forrester.model.graph.FeedbackAnalysis.CausalLoop;
 
 import javafx.scene.paint.Color;
 
@@ -65,6 +67,9 @@ public final class SvgExporter {
             // 3. Info links
             writeInfoLinks(w, canvasState, connectors);
 
+            // 3b. Causal links
+            writeCausalLinks(w, canvasState, editor);
+
             // 4. Loop edge highlights
             if (loopAnalysis != null) {
                 writeLoopEdges(w, canvasState, connectors, editor, loopAnalysis);
@@ -98,6 +103,9 @@ public final class SvgExporter {
                                 LayoutMetrics.effectiveHeight(canvasState, name));
                     }
                     case MODULE -> writeModule(w, name, cx, cy,
+                            LayoutMetrics.effectiveWidth(canvasState, name),
+                            LayoutMetrics.effectiveHeight(canvasState, name));
+                    case CLD_VARIABLE -> writeCldVariable(w, name, cx, cy,
                             LayoutMetrics.effectiveWidth(canvasState, name),
                             LayoutMetrics.effectiveHeight(canvasState, name));
                     case LOOKUP -> {
@@ -313,6 +321,58 @@ public final class SvgExporter {
                         svgColor(ColorPalette.LOOP_EDGE), svgOpacity(ColorPalette.LOOP_EDGE));
             }
         }
+
+        // Causal link loop edges
+        for (CausalLinkDef link : editor.getCausalLinks()) {
+            if (!state.hasElement(link.from()) || !state.hasElement(link.to())) {
+                continue;
+            }
+            if (!loopAnalysis.isLoopEdge(link.from(), link.to())) {
+                continue;
+            }
+
+            double fromX = state.getX(link.from());
+            double fromY = state.getY(link.from());
+            double toX = state.getX(link.to());
+            double toY = state.getY(link.to());
+
+            FlowGeometry.Point2D cf = FlowGeometry.clipToElement(state, link.from(), toX, toY);
+            FlowGeometry.Point2D ct = FlowGeometry.clipToElement(state, link.to(), fromX, fromY);
+
+            w.printf(Locale.US,
+                    "  <line x1=\"%.2f\" y1=\"%.2f\" x2=\"%.2f\" y2=\"%.2f\" " +
+                    "stroke=\"%s\" stroke-opacity=\"%.2f\" stroke-width=\"2.5\"/>%n",
+                    cf.x(), cf.y(), ct.x(), ct.y(),
+                    svgColor(ColorPalette.LOOP_EDGE), svgOpacity(ColorPalette.LOOP_EDGE));
+        }
+
+        // Loop type labels
+        for (CausalLoop loop : loopAnalysis.causalLoops()) {
+            double sumX = 0;
+            double sumY = 0;
+            int count = 0;
+            for (String name : loop.path()) {
+                if (state.hasElement(name)) {
+                    sumX += state.getX(name);
+                    sumY += state.getY(name);
+                    count++;
+                }
+            }
+            if (count > 0) {
+                double cx = sumX / count;
+                double cy = sumY / count;
+                Color color = switch (loop.type()) {
+                    case REINFORCING -> ColorPalette.LOOP_REINFORCING;
+                    case BALANCING -> ColorPalette.LOOP_BALANCING;
+                    case INDETERMINATE -> ColorPalette.LOOP_INDETERMINATE;
+                };
+                w.printf(Locale.US,
+                        "  <text x=\"%.2f\" y=\"%.2f\" text-anchor=\"middle\" " +
+                        "dominant-baseline=\"central\" font-weight=\"bold\" font-size=\"14\" " +
+                        "fill=\"%s\">%s</text>%n",
+                        cx, cy, svgColor(color), escapeXml(loop.label()));
+            }
+        }
     }
 
     // --- Elements ---
@@ -526,6 +586,98 @@ public final class SvgExporter {
                 "font-family=\"sans-serif\" font-size=\"9\" fill=\"%s\">%s</text>%n",
                 cx, cy + LayoutMetrics.LABEL_SUBLABEL_OFFSET,
                 svgColor(ColorPalette.TEXT_SECONDARY), dataPoints + " pts");
+    }
+
+    private static void writeCldVariable(PrintWriter w, String name,
+                                          double cx, double cy, double width, double height) {
+        double x = cx - width / 2;
+        double y = cy - height / 2;
+        double r = LayoutMetrics.CLD_VAR_CORNER_RADIUS;
+
+        // Fill
+        w.printf(Locale.US,
+                "  <rect x=\"%.2f\" y=\"%.2f\" width=\"%.2f\" height=\"%.2f\" rx=\"%.1f\" " +
+                "fill=\"%s\"/>%n",
+                x, y, width, height, r, svgColor(ColorPalette.STOCK_FILL));
+
+        // Border
+        w.printf(Locale.US,
+                "  <rect x=\"%.2f\" y=\"%.2f\" width=\"%.2f\" height=\"%.2f\" rx=\"%.1f\" " +
+                "fill=\"none\" stroke=\"%s\" stroke-width=\"%.1f\"/>%n",
+                x, y, width, height, r,
+                svgColor(ColorPalette.CLD_VAR_BORDER), LayoutMetrics.CLD_VAR_BORDER_WIDTH);
+
+        // Name centered (truncated to fit)
+        String label = ElementRenderer.truncate(name, LayoutMetrics.AUX_NAME_FONT, width - 12);
+        w.printf(Locale.US,
+                "  <text x=\"%.2f\" y=\"%.2f\" text-anchor=\"middle\" dominant-baseline=\"central\" " +
+                "font-family=\"sans-serif\" font-size=\"12\" fill=\"%s\">%s</text>%n",
+                cx, cy, svgColor(ColorPalette.TEXT), escapeXml(label));
+    }
+
+    // --- Causal links ---
+
+    private static void writeCausalLinks(PrintWriter w, CanvasState state, ModelEditor editor) {
+        for (CausalLinkDef link : editor.getCausalLinks()) {
+            if (!state.hasElement(link.from()) || !state.hasElement(link.to())) {
+                continue;
+            }
+
+            double fromX = state.getX(link.from());
+            double fromY = state.getY(link.from());
+            double toX = state.getX(link.to());
+            double toY = state.getY(link.to());
+
+            FlowGeometry.Point2D cf = FlowGeometry.clipToElement(state, link.from(), toX, toY);
+            FlowGeometry.Point2D ct = FlowGeometry.clipToElement(state, link.to(), fromX, fromY);
+
+            // Stop line at arrowhead base
+            double dx = ct.x() - cf.x();
+            double dy = ct.y() - cf.y();
+            double dist = Math.sqrt(dx * dx + dy * dy);
+            double ltx = ct.x();
+            double lty = ct.y();
+            if (dist > LayoutMetrics.CAUSAL_ARROWHEAD_LENGTH) {
+                double ux = dx / dist;
+                double uy = dy / dist;
+                ltx = ct.x() - ux * LayoutMetrics.CAUSAL_ARROWHEAD_LENGTH;
+                lty = ct.y() - uy * LayoutMetrics.CAUSAL_ARROWHEAD_LENGTH;
+            }
+
+            // Line
+            w.printf(Locale.US,
+                    "  <line x1=\"%.2f\" y1=\"%.2f\" x2=\"%.2f\" y2=\"%.2f\" " +
+                    "stroke=\"%s\" stroke-width=\"%.1f\"/>%n",
+                    cf.x(), cf.y(), ltx, lty,
+                    svgColor(ColorPalette.CAUSAL_LINK), LayoutMetrics.CAUSAL_LINK_WIDTH);
+
+            // Arrowhead
+            writeArrowhead(w, cf.x(), cf.y(), ct.x(), ct.y(),
+                    LayoutMetrics.CAUSAL_ARROWHEAD_LENGTH, LayoutMetrics.CAUSAL_ARROWHEAD_WIDTH,
+                    ColorPalette.CAUSAL_LINK);
+
+            // Polarity label near arrowhead
+            if (dist > 1) {
+                Color labelColor = switch (link.polarity()) {
+                    case POSITIVE -> ColorPalette.CAUSAL_POSITIVE;
+                    case NEGATIVE -> ColorPalette.CAUSAL_NEGATIVE;
+                    case UNKNOWN -> ColorPalette.CAUSAL_UNKNOWN;
+                };
+                double ux = dx / dist;
+                double uy = dy / dist;
+                double alongOffset = Math.min(20, dist * 0.4);
+                double perpOffset = Math.min(12, Math.max(8, dist * 0.3));
+                double labelX = ct.x() - ux * alongOffset + (-uy) * perpOffset;
+                double labelY = ct.y() - uy * alongOffset + ux * perpOffset;
+
+                w.printf(Locale.US,
+                        "  <text x=\"%.2f\" y=\"%.2f\" text-anchor=\"middle\" " +
+                        "dominant-baseline=\"central\" font-weight=\"bold\" font-size=\"12\" " +
+                        "fill=\"%s\">%s</text>%n",
+                        labelX, labelY, svgColor(labelColor),
+                        escapeXml(link.polarity().symbol()));
+            }
+        }
     }
 
     // --- Loop highlights ---

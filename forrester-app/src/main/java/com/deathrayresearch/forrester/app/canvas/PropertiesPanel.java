@@ -250,6 +250,7 @@ public class PropertiesPanel extends VBox {
             case AUX -> new AuxForm(ctx);
             case CONSTANT -> new ConstantForm(ctx);
             case LOOKUP -> new LookupForm(ctx);
+            case CLD_VARIABLE -> new CldVariableForm(ctx);
             default -> null;
         };
     }
@@ -302,7 +303,8 @@ public class PropertiesPanel extends VBox {
 
     private static boolean isCacheableType(ElementType type) {
         return type == ElementType.STOCK || type == ElementType.FLOW
-                || type == ElementType.AUX || type == ElementType.CONSTANT;
+                || type == ElementType.AUX || type == ElementType.CONSTANT
+                || type == ElementType.CLD_VARIABLE;
     }
 
     private static Button createToolbarButton(String text) {

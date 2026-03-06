@@ -64,6 +64,11 @@ public final class ModelValidator {
         // 5. Unused elements
         checkUnusedElements(def, issues);
 
+        // 6. CLD checks
+        checkOrphanedCldVariables(def, issues);
+        checkCausalLinkEndpoints(def, issues);
+        checkUnknownPolarity(def, issues);
+
         return new ValidationResult(issues);
     }
 
@@ -241,6 +246,67 @@ public final class ModelValidator {
             if (!isReferenced(table.name(), referencedNames)) {
                 issues.add(new ValidationIssue(Severity.WARNING, table.name(),
                         "Lookup table '" + table.name() + "' is not referenced by any equation"));
+            }
+        }
+    }
+
+    private static void checkOrphanedCldVariables(ModelDefinition def,
+            List<ValidationIssue> issues) {
+        Set<String> linkedNames = new HashSet<>();
+        for (CausalLinkDef link : def.causalLinks()) {
+            linkedNames.add(link.from());
+            linkedNames.add(link.to());
+        }
+        for (CldVariableDef v : def.cldVariables()) {
+            if (!linkedNames.contains(v.name())) {
+                issues.add(new ValidationIssue(Severity.WARNING, v.name(),
+                        "CLD variable '" + v.name()
+                                + "' is not connected by any causal link"));
+            }
+        }
+    }
+
+    private static void checkCausalLinkEndpoints(ModelDefinition def,
+            List<ValidationIssue> issues) {
+        Set<String> allNames = new HashSet<>();
+        for (StockDef s : def.stocks()) {
+            allNames.add(s.name());
+        }
+        for (FlowDef f : def.flows()) {
+            allNames.add(f.name());
+        }
+        for (AuxDef a : def.auxiliaries()) {
+            allNames.add(a.name());
+        }
+        for (ConstantDef c : def.constants()) {
+            allNames.add(c.name());
+        }
+        for (CldVariableDef v : def.cldVariables()) {
+            allNames.add(v.name());
+        }
+        for (LookupTableDef t : def.lookupTables()) {
+            allNames.add(t.name());
+        }
+
+        for (CausalLinkDef link : def.causalLinks()) {
+            if (!allNames.contains(link.from())) {
+                issues.add(new ValidationIssue(Severity.ERROR, null,
+                        "Causal link references non-existent source '" + link.from() + "'"));
+            }
+            if (!allNames.contains(link.to())) {
+                issues.add(new ValidationIssue(Severity.ERROR, null,
+                        "Causal link references non-existent target '" + link.to() + "'"));
+            }
+        }
+    }
+
+    private static void checkUnknownPolarity(ModelDefinition def,
+            List<ValidationIssue> issues) {
+        for (CausalLinkDef link : def.causalLinks()) {
+            if (link.polarity() == CausalLinkDef.Polarity.UNKNOWN) {
+                issues.add(new ValidationIssue(Severity.WARNING, link.from(),
+                        "Causal link from '" + link.from() + "' to '" + link.to()
+                                + "' has unknown polarity"));
             }
         }
     }

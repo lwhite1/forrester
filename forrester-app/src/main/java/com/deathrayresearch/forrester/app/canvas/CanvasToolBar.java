@@ -26,7 +26,9 @@ public class CanvasToolBar extends ToolBar {
         PLACE_AUX,
         PLACE_CONSTANT,
         PLACE_MODULE,
-        PLACE_LOOKUP
+        PLACE_LOOKUP,
+        PLACE_CLD_VARIABLE,
+        PLACE_CAUSAL_LINK
     }
 
     private final ToggleGroup group = new ToggleGroup();
@@ -61,6 +63,12 @@ public class CanvasToolBar extends ToolBar {
         ToggleButton lookupButton = makeButton("Lookup", Tool.PLACE_LOOKUP);
         lookupButton.setId("toolLookup");
         lookupButton.setTooltip(new Tooltip("Add a lookup table \u2014 a graphical function"));
+        ToggleButton cldVarButton = makeButton("CLD Var", Tool.PLACE_CLD_VARIABLE);
+        cldVarButton.setId("toolCldVar");
+        cldVarButton.setTooltip(new Tooltip("Add a CLD variable \u2014 a qualitative causal factor"));
+        ToggleButton causalLinkButton = makeButton("Causal Link", Tool.PLACE_CAUSAL_LINK);
+        causalLinkButton.setId("toolCausalLink");
+        causalLinkButton.setTooltip(new Tooltip("Draw a causal link between variables"));
 
         selectButton.setSelected(true);
 
@@ -85,6 +93,7 @@ public class CanvasToolBar extends ToolBar {
 
         getItems().addAll(selectButton, new Separator(),
                 stockButton, flowButton, auxButton, constantButton, moduleButton, lookupButton,
+                new Separator(), cldVarButton, causalLinkButton,
                 new Separator(), loopsButton, new Separator(), validateButton);
     }
 

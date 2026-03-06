@@ -1,5 +1,6 @@
 package com.deathrayresearch.forrester.app.canvas;
 
+import com.deathrayresearch.forrester.model.def.CausalLinkDef;
 import com.deathrayresearch.forrester.model.def.ConnectorRoute;
 import com.deathrayresearch.forrester.model.def.ElementType;
 
@@ -63,6 +64,42 @@ public final class HitTester {
             ConnectorRoute route = connectors.get(i);
             String fromName = route.from();
             String toName = route.to();
+
+            if (!state.hasElement(fromName) || !state.hasElement(toName)) {
+                continue;
+            }
+
+            double fromX = state.getX(fromName);
+            double fromY = state.getY(fromName);
+            double toX = state.getX(toName);
+            double toY = state.getY(toName);
+
+            FlowGeometry.Point2D clippedFrom = FlowGeometry.clipToElement(state, fromName, toX, toY);
+            FlowGeometry.Point2D clippedTo = FlowGeometry.clipToElement(state, toName, fromX, fromY);
+
+            double dist = pointToSegmentDistance(worldX, worldY,
+                    clippedFrom.x(), clippedFrom.y(), clippedTo.x(), clippedTo.y());
+
+            if (dist <= CONNECTION_HIT_TOLERANCE) {
+                return new ConnectionId(fromName, toName);
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Returns the ConnectionId of the causal link at the given world coordinates,
+     * or null if no causal link is hit. Tests in reverse order (last-drawn first).
+     * Clips endpoints to element borders before computing distance.
+     */
+    public static ConnectionId hitTestCausalLink(CanvasState state,
+                                                  List<CausalLinkDef> causalLinks,
+                                                  double worldX, double worldY) {
+        for (int i = causalLinks.size() - 1; i >= 0; i--) {
+            CausalLinkDef link = causalLinks.get(i);
+            String fromName = link.from();
+            String toName = link.to();
 
             if (!state.hasElement(fromName) || !state.hasElement(toName)) {
                 continue;

@@ -489,9 +489,16 @@ public class ModelDefinitionSerializer {
         if (root.has("causalLinks")) {
             for (JsonNode n : root.get("causalLinks")) {
                 String polarityStr = textOrNull(n, "polarity");
-                CausalLinkDef.Polarity polarity = polarityStr != null
-                        ? CausalLinkDef.Polarity.valueOf(polarityStr)
-                        : CausalLinkDef.Polarity.UNKNOWN;
+                CausalLinkDef.Polarity polarity;
+                if (polarityStr == null) {
+                    polarity = CausalLinkDef.Polarity.UNKNOWN;
+                } else {
+                    try {
+                        polarity = CausalLinkDef.Polarity.valueOf(polarityStr);
+                    } catch (IllegalArgumentException e) {
+                        polarity = CausalLinkDef.Polarity.UNKNOWN;
+                    }
+                }
                 causalLinks.add(new CausalLinkDef(
                         requiredText(n, "from"),
                         requiredText(n, "to"),

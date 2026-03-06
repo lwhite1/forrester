@@ -9,8 +9,13 @@ import com.deathrayresearch.forrester.model.def.ViewDef;
 import com.deathrayresearch.forrester.model.graph.AutoLayout;
 import com.deathrayresearch.forrester.model.graph.FeedbackAnalysis;
 
+import com.deathrayresearch.forrester.model.def.CausalLinkDef;
+
 import javafx.scene.Cursor;
 import javafx.scene.canvas.Canvas;
+import javafx.scene.control.ContextMenu;
+import javafx.scene.control.Menu;
+import javafx.scene.control.MenuItem;
 import javafx.scene.control.Tooltip;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
@@ -54,6 +59,7 @@ public class ModelCanvas extends Canvas {
     private final ResizeController resizeController = new ResizeController();
     private final ReattachController reattachController = new ReattachController();
     private final FlowCreationController flowCreation = new FlowCreationController();
+    private final CausalLinkCreationController causalLinkCreation = new CausalLinkCreationController();
     private final CopyPasteController copyPaste;
     private final ConnectionRerouteController rerouteController = new ConnectionRerouteController();
     private final InlineEditController inlineEdit = new InlineEditController();
@@ -80,6 +86,9 @@ public class ModelCanvas extends Canvas {
     private String hoveredElement;
     private ConnectionId hoveredConnection;
     private ConnectionId selectedConnection;
+    /** True when selectedConnection/hoveredConnection refers to a causal link rather than info link. */
+    private boolean selectedIsCausalLink;
+    private boolean hoveredIsCausalLink;
 
     // Feedback loop highlighting
     private boolean loopHighlightActive;
@@ -403,6 +412,9 @@ public class ModelCanvas extends Canvas {
         if (flowCreation.isPending()) {
             flowCreation.cancel();
         }
+        if (causalLinkCreation.isPending()) {
+            causalLinkCreation.cancel();
+        }
         this.activeTool = tool;
         updateCursor();
     }
@@ -444,6 +456,7 @@ public class ModelCanvas extends Canvas {
     private void redraw() {
         renderer.render(getGraphicsContext2D(), getWidth(), getHeight(),
                 editor, connectors, flowCreation.getState(),
+                causalLinkCreation.getState(),
                 reattachController.toRenderState(),
                 rerouteRenderState(),
                 marqueeController.toRenderState(),
@@ -487,6 +500,10 @@ public class ModelCanvas extends Canvas {
             case PLACE_LOOKUP -> {
                 name = editor.addLookup();
                 type = ElementType.LOOKUP;
+            }
+            case PLACE_CLD_VARIABLE -> {
+                name = editor.addCldVariable();
+                type = ElementType.CLD_VARIABLE;
             }
             default -> {
                 return;
@@ -571,7 +588,7 @@ public class ModelCanvas extends Canvas {
     }
 
     /**
-     * Deletes the currently selected info link connection by removing the equation reference.
+     * Deletes the currently selected connection (info link or causal link).
      */
     private void deleteSelectedConnection() {
         if (editor == null || selectedConnection == null) {
@@ -579,9 +596,14 @@ public class ModelCanvas extends Canvas {
         }
 
         saveUndoState();
-        editor.removeConnectionReference(selectedConnection.from(), selectedConnection.to());
+        if (selectedIsCausalLink) {
+            editor.removeCausalLink(selectedConnection.from(), selectedConnection.to());
+        } else {
+            editor.removeConnectionReference(selectedConnection.from(), selectedConnection.to());
+            connectors = editor.generateConnectors();
+        }
         selectedConnection = null;
-        connectors = editor.generateConnectors();
+        selectedIsCausalLink = false;
         invalidateLoopAnalysis();
         redraw();
         updateCursor();
@@ -603,6 +625,24 @@ public class ModelCanvas extends Canvas {
             invalidateLoopAnalysis();
             canvasState.clearSelection();
             canvasState.select(result.flowName());
+        }
+        redraw();
+    }
+
+    // --- Two-click causal link creation ---
+
+    /**
+     * Handles a click during PLACE_CAUSAL_LINK mode by delegating to the CausalLinkCreationController.
+     */
+    private void handleCausalLinkClick(double worldX, double worldY) {
+        if (causalLinkCreation.isPending()) {
+            saveUndoState();
+        }
+        CausalLinkCreationController.LinkResult result = causalLinkCreation.handleClick(
+                worldX, worldY, canvasState, editor);
+        if (result.isCreated()) {
+            connectors = editor.generateConnectors();
+            invalidateLoopAnalysis();
         }
         redraw();
     }
@@ -752,6 +792,14 @@ public class ModelCanvas extends Canvas {
             event.consume();
         }
 
+        if (causalLinkCreation.isPending()) {
+            causalLinkCreation.updateRubberBand(
+                    viewport.toWorldX(event.getX()),
+                    viewport.toWorldY(event.getY()));
+            redraw();
+            event.consume();
+        }
+
         // Update hover highlight
         double worldX = viewport.toWorldX(event.getX());
         double worldY = viewport.toWorldY(event.getY());
@@ -759,8 +807,14 @@ public class ModelCanvas extends Canvas {
 
         // Connection hover: only when no element is hovered
         ConnectionId connHit = null;
+        boolean connIsCausal = false;
         if (hit == null) {
             connHit = HitTester.hitTestInfoLink(canvasState, connectors, worldX, worldY);
+            if (connHit == null && editor != null) {
+                connHit = HitTester.hitTestCausalLink(canvasState,
+                        editor.getCausalLinks(), worldX, worldY);
+                connIsCausal = connHit != null;
+            }
         }
 
         boolean changed = !Objects.equals(hit, hoveredElement)
@@ -768,6 +822,7 @@ public class ModelCanvas extends Canvas {
         if (changed) {
             hoveredElement = hit;
             hoveredConnection = connHit;
+            hoveredIsCausalLink = connIsCausal;
             redraw();
             updateElementTooltip(hit, event);
         }
@@ -935,6 +990,14 @@ public class ModelCanvas extends Canvas {
                 return;
             }
 
+            // PLACE_CAUSAL_LINK: two-click protocol
+            if (activeTool == CanvasToolBar.Tool.PLACE_CAUSAL_LINK) {
+                handleCausalLinkClick(worldX, worldY);
+                updateCursor();
+                event.consume();
+                return;
+            }
+
             // Placement mode: other PLACE_* tools — click on empty space to create
             if (activeTool != CanvasToolBar.Tool.SELECT) {
                 String hit = HitTester.hitTest(canvasState, worldX, worldY);
@@ -962,16 +1025,24 @@ public class ModelCanvas extends Canvas {
                 // Start drag for all selected elements
                 dragController.start(hit, event.getX(), event.getY(), canvasState);
             } else {
-                // No element hit — check for connection click
+                // No element hit — check for connection click (info links then causal links)
                 ConnectionId connHit = HitTester.hitTestInfoLink(
                         canvasState, connectors, worldX, worldY);
+                boolean isCausal = false;
+                if (connHit == null) {
+                    connHit = HitTester.hitTestCausalLink(canvasState,
+                            editor.getCausalLinks(), worldX, worldY);
+                    isCausal = connHit != null;
+                }
                 if (connHit != null) {
                     // Connection click: select connection, clear element selection
                     selectedConnection = connHit;
+                    selectedIsCausalLink = isCausal;
                     canvasState.clearSelection();
                 } else {
                     // Empty space: clear connection selection, start marquee
                     selectedConnection = null;
+                    selectedIsCausalLink = false;
                     marqueeController.start(worldX, worldY, canvasState, event.isShiftDown());
                 }
             }
@@ -1099,18 +1170,35 @@ public class ModelCanvas extends Canvas {
             return;
         }
 
-        // Right-click release without drag: show context menu on module
+        // Right-click release without drag: show context menu on module, CLD variable, or causal link
         if (panning && !panMoved && event.getButton() == MouseButton.SECONDARY) {
             double worldX = viewport.toWorldX(event.getX());
             double worldY = viewport.toWorldY(event.getY());
             String hit = HitTester.hitTest(canvasState, worldX, worldY);
-            if (hit != null && canvasState.getType(hit) == ElementType.MODULE) {
-                panning = false;
-                panMoved = false;
-                showElementContextMenu(hit, event.getScreenX(), event.getScreenY());
-                updateCursor();
-                event.consume();
-                return;
+            if (hit != null) {
+                ElementType hitType = canvasState.getType(hit);
+                if (hitType == ElementType.MODULE || hitType == ElementType.CLD_VARIABLE) {
+                    panning = false;
+                    panMoved = false;
+                    showElementContextMenu(hit, event.getScreenX(), event.getScreenY());
+                    updateCursor();
+                    event.consume();
+                    return;
+                }
+            }
+            // Check for causal link right-click
+            if (hit == null && editor != null) {
+                ConnectionId causalHit = HitTester.hitTestCausalLink(canvasState,
+                        editor.getCausalLinks(), worldX, worldY);
+                if (causalHit != null) {
+                    panning = false;
+                    panMoved = false;
+                    showCausalLinkContextMenu(causalHit,
+                            event.getScreenX(), event.getScreenY());
+                    updateCursor();
+                    event.consume();
+                    return;
+                }
             }
         }
 
@@ -1213,6 +1301,8 @@ public class ModelCanvas extends Canvas {
                 case DIGIT5 -> { switchTool(CanvasToolBar.Tool.PLACE_CONSTANT); event.consume(); }
                 case DIGIT6 -> { switchTool(CanvasToolBar.Tool.PLACE_MODULE); event.consume(); }
                 case DIGIT7 -> { switchTool(CanvasToolBar.Tool.PLACE_LOOKUP); event.consume(); }
+                case DIGIT8 -> { switchTool(CanvasToolBar.Tool.PLACE_CLD_VARIABLE); event.consume(); }
+                case DIGIT9 -> { switchTool(CanvasToolBar.Tool.PLACE_CAUSAL_LINK); event.consume(); }
                 default -> { }
             }
         }
@@ -1237,6 +1327,9 @@ public class ModelCanvas extends Canvas {
             redraw();
         } else if (flowCreation.isPending()) {
             flowCreation.cancel();
+            redraw();
+        } else if (causalLinkCreation.isPending()) {
+            causalLinkCreation.cancel();
             redraw();
         } else if (activeTool != CanvasToolBar.Tool.SELECT) {
             if (toolBar != null) {
@@ -1389,7 +1482,55 @@ public class ModelCanvas extends Canvas {
 
     private void showElementContextMenu(String elementName, double screenX, double screenY) {
         navController.showContextMenu(this, elementName, canvasState, screenX, screenY,
-                this::drillInto, this::openBindingsDialog, this::startInlineEdit);
+                this::drillInto, this::openBindingsDialog, this::startInlineEdit,
+                this::classifyCldVariable);
+    }
+
+    private void classifyCldVariable(String name, ElementType targetType) {
+        if (editor == null) {
+            return;
+        }
+        saveUndoState();
+        if (editor.classifyCldVariable(name, targetType)) {
+            canvasState.setType(name, targetType);
+            connectors = editor.generateConnectors();
+            invalidateLoopAnalysis();
+            redraw();
+            fireStatusChanged();
+        }
+    }
+
+    private void showCausalLinkContextMenu(ConnectionId link,
+                                              double screenX, double screenY) {
+        ContextMenu menu = new ContextMenu();
+
+        // Polarity submenu
+        Menu polarityMenu = new Menu("Set Polarity");
+        for (CausalLinkDef.Polarity p : CausalLinkDef.Polarity.values()) {
+            MenuItem item = new MenuItem(p.symbol() + " (" + p.name().toLowerCase() + ")");
+            item.setOnAction(e -> {
+                saveUndoState();
+                editor.setCausalLinkPolarity(link.from(), link.to(), p);
+                invalidateLoopAnalysis();
+                redraw();
+            });
+            polarityMenu.getItems().add(item);
+        }
+        menu.getItems().add(polarityMenu);
+
+        // Delete
+        MenuItem deleteItem = new MenuItem("Delete");
+        deleteItem.setOnAction(e -> {
+            saveUndoState();
+            editor.removeCausalLink(link.from(), link.to());
+            selectedConnection = null;
+            selectedIsCausalLink = false;
+            invalidateLoopAnalysis();
+            redraw();
+        });
+        menu.getItems().add(deleteItem);
+
+        menu.show(this, screenX, screenY);
     }
 
     private void openBindingsDialog(String moduleName) {

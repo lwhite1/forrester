@@ -121,6 +121,15 @@ public class CanvasState {
     }
 
     /**
+     * Changes the type of an existing element (e.g. during CLD variable classification).
+     */
+    public void setType(String name, ElementType type) {
+        if (types.containsKey(name)) {
+            types.put(name, type);
+        }
+    }
+
+    /**
      * Returns all element names in draw order.
      */
     public List<String> getDrawOrder() {

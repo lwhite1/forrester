@@ -40,6 +40,18 @@ public final class LayoutMetrics {
     public static final double LOOKUP_CORNER_RADIUS = 4;
     public static final Font LOOKUP_NAME_FONT = Font.font("System", FontWeight.NORMAL, 11);
 
+    // CLD variable dimensions
+    public static final double CLD_VAR_WIDTH = 110;
+    public static final double CLD_VAR_HEIGHT = 50;
+    public static final double CLD_VAR_BORDER_WIDTH = 1;
+    public static final double CLD_VAR_CORNER_RADIUS = 6;
+
+    // Causal link
+    public static final double CAUSAL_LINK_WIDTH = 1.5;
+    public static final double CAUSAL_ARROWHEAD_LENGTH = 10;
+    public static final double CAUSAL_ARROWHEAD_WIDTH = 7;
+    public static final Font CAUSAL_POLARITY_FONT = Font.font("System", FontWeight.BOLD, 12);
+
     // Module dimensions
     public static final double MODULE_WIDTH = 120;
     public static final double MODULE_HEIGHT = 70;
@@ -103,6 +115,7 @@ public final class LayoutMetrics {
             case MODULE -> MODULE_WIDTH;
             case LOOKUP -> LOOKUP_WIDTH;
             case FLOW -> FLOW_INDICATOR_SIZE;
+            case CLD_VARIABLE -> CLD_VAR_WIDTH;
             default -> AUX_WIDTH;
         };
     }
@@ -118,6 +131,7 @@ public final class LayoutMetrics {
             case MODULE -> MODULE_HEIGHT;
             case LOOKUP -> LOOKUP_HEIGHT;
             case FLOW -> FLOW_INDICATOR_SIZE;
+            case CLD_VARIABLE -> CLD_VAR_HEIGHT;
             default -> AUX_HEIGHT;
         };
     }
@@ -156,6 +170,7 @@ public final class LayoutMetrics {
             case CONSTANT -> 50;
             case MODULE -> 70;
             case LOOKUP -> 60;
+            case CLD_VARIABLE -> 60;
             default -> 50;
         };
     }
@@ -170,6 +185,7 @@ public final class LayoutMetrics {
             case CONSTANT -> 30;
             case MODULE -> 45;
             case LOOKUP -> 35;
+            case CLD_VARIABLE -> 35;
             default -> 30;
         };
     }

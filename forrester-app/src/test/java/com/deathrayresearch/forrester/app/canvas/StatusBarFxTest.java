@@ -90,7 +90,7 @@ class StatusBarFxTest {
     @Test
     @DisplayName("Updating elements shows element summary")
     void updateElements(FxRobot robot) {
-        Platform.runLater(() -> statusBar.updateElements(2, 3, 1, 4, 0));
+        Platform.runLater(() -> statusBar.updateElements(2, 3, 1, 4, 0, 0, 0));
         WaitForAsyncUtils.waitForFxEvents();
 
         Label elementsLabel = robot.lookup("#statusElements").queryAs(Label.class);

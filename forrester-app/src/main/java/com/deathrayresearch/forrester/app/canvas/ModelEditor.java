@@ -5,6 +5,7 @@ import com.deathrayresearch.forrester.model.def.CausalLinkDef;
 import com.deathrayresearch.forrester.model.def.CldVariableDef;
 import com.deathrayresearch.forrester.model.def.ConnectorRoute;
 import com.deathrayresearch.forrester.model.def.ConstantDef;
+import com.deathrayresearch.forrester.model.def.ElementType;
 import com.deathrayresearch.forrester.model.def.FlowDef;
 import com.deathrayresearch.forrester.model.def.LookupTableDef;
 import com.deathrayresearch.forrester.model.def.ModelDefinition;
@@ -1071,6 +1072,15 @@ public class ModelEditor {
         return Collections.unmodifiableList(cldVariables);
     }
 
+    public CldVariableDef getCldVariableByName(String name) {
+        for (CldVariableDef v : cldVariables) {
+            if (v.name().equals(name)) {
+                return v;
+            }
+        }
+        return null;
+    }
+
     /**
      * Adds a causal link between two elements.
      * @return true if both endpoints exist and the link was added
@@ -1079,6 +1089,11 @@ public class ModelEditor {
         checkFxThread();
         if (!hasElement(from) || !hasElement(to)) {
             return false;
+        }
+        for (CausalLinkDef existing : causalLinks) {
+            if (existing.from().equals(from) && existing.to().equals(to)) {
+                return false;
+            }
         }
         causalLinks.add(new CausalLinkDef(from, to, polarity));
         return true;
@@ -1111,6 +1126,48 @@ public class ModelEditor {
 
     public List<CausalLinkDef> getCausalLinks() {
         return Collections.unmodifiableList(causalLinks);
+    }
+
+    /**
+     * Classifies a CLD variable by converting it into a stock-and-flow element type.
+     * The CLD variable is removed and replaced with the target element type at the
+     * same name. Causal links involving the classified variable are removed (info links
+     * will auto-generate from equation dependencies once equations are added).
+     *
+     * @param name       the CLD variable name
+     * @param targetType the target element type (STOCK, FLOW, AUX, or CONSTANT)
+     * @return true if the variable was found and classified
+     */
+    public boolean classifyCldVariable(String name, ElementType targetType) {
+        checkFxThread();
+
+        CldVariableDef variable = getCldVariableByName(name);
+        if (variable == null) {
+            return false;
+        }
+
+        // Remove the CLD variable
+        cldVariables.removeIf(v -> v.name().equals(name));
+
+        // Create the target S&F element with the same name
+        switch (targetType) {
+            case STOCK -> stocks.add(new StockDef(name, variable.comment(), 0, "units", null));
+            case FLOW -> flows.add(new FlowDef(name, variable.comment(), "0", "Day", null, null));
+            case AUX -> auxiliaries.add(new AuxDef(name, variable.comment(), "0", "units"));
+            case CONSTANT -> constants.add(new ConstantDef(name, variable.comment(), 0, "units"));
+            default -> {
+                // Unsupported target type — put the variable back
+                cldVariables.add(variable);
+                return false;
+            }
+        }
+
+        // Remove causal links that reference this variable
+        causalLinks.removeIf(link -> link.from().equals(name) || link.to().equals(name));
+
+        fireElementRemoved(name);
+        fireElementAdded(name, targetType.name());
+        return true;
     }
 
     /**

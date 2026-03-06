@@ -5,11 +5,13 @@ import com.deathrayresearch.forrester.model.def.ModuleInstanceDef;
 
 import javafx.scene.canvas.Canvas;
 import javafx.scene.control.ContextMenu;
+import javafx.scene.control.Menu;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.SeparatorMenuItem;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 /**
@@ -74,23 +76,39 @@ final class ModuleNavigationController {
     }
 
     /**
-     * Shows a context menu for the given module element at the specified screen coordinates.
+     * Shows a context menu for the given element at the specified screen coordinates.
+     * Supports MODULE elements (drill-in, bindings, rename) and CLD_VARIABLE elements
+     * (classify as stock/flow/aux/constant, rename).
      */
     void showContextMenu(Canvas canvas, String elementName, CanvasState canvasState,
                          double screenX, double screenY,
                          Consumer<String> drillAction,
                          Consumer<String> bindingsAction,
-                         Consumer<String> renameAction) {
+                         Consumer<String> renameAction,
+                         BiConsumer<String, ElementType> classifyAction) {
         if (contextMenu != null) {
             contextMenu.hide();
         }
 
         ElementType type = canvasState.getType(elementName);
-        if (type != ElementType.MODULE) {
+
+        if (type == ElementType.MODULE) {
+            contextMenu = buildModuleContextMenu(elementName, drillAction,
+                    bindingsAction, renameAction);
+        } else if (type == ElementType.CLD_VARIABLE) {
+            contextMenu = buildCldVariableContextMenu(elementName, renameAction,
+                    classifyAction);
+        } else {
             return;
         }
 
-        contextMenu = new ContextMenu();
+        contextMenu.show(canvas, screenX, screenY);
+    }
+
+    private ContextMenu buildModuleContextMenu(String elementName,
+            Consumer<String> drillAction, Consumer<String> bindingsAction,
+            Consumer<String> renameAction) {
+        ContextMenu menu = new ContextMenu();
 
         MenuItem drillItem = new MenuItem("Drill Into");
         drillItem.setOnAction(e -> drillAction.accept(elementName));
@@ -101,9 +119,37 @@ final class ModuleNavigationController {
         MenuItem renameItem = new MenuItem("Rename");
         renameItem.setOnAction(e -> renameAction.accept(elementName));
 
-        contextMenu.getItems().addAll(drillItem, bindingsItem,
+        menu.getItems().addAll(drillItem, bindingsItem,
                 new SeparatorMenuItem(), renameItem);
-        contextMenu.show(canvas, screenX, screenY);
+        return menu;
+    }
+
+    private ContextMenu buildCldVariableContextMenu(String elementName,
+            Consumer<String> renameAction,
+            BiConsumer<String, ElementType> classifyAction) {
+        ContextMenu menu = new ContextMenu();
+
+        Menu classifyMenu = new Menu("Classify as...");
+
+        MenuItem asStock = new MenuItem("Stock");
+        asStock.setOnAction(e -> classifyAction.accept(elementName, ElementType.STOCK));
+
+        MenuItem asFlow = new MenuItem("Flow");
+        asFlow.setOnAction(e -> classifyAction.accept(elementName, ElementType.FLOW));
+
+        MenuItem asAux = new MenuItem("Auxiliary");
+        asAux.setOnAction(e -> classifyAction.accept(elementName, ElementType.AUX));
+
+        MenuItem asConstant = new MenuItem("Constant");
+        asConstant.setOnAction(e -> classifyAction.accept(elementName, ElementType.CONSTANT));
+
+        classifyMenu.getItems().addAll(asStock, asFlow, asAux, asConstant);
+
+        MenuItem renameItem = new MenuItem("Rename");
+        renameItem.setOnAction(e -> renameAction.accept(elementName));
+
+        menu.getItems().addAll(classifyMenu, new SeparatorMenuItem(), renameItem);
+        return menu;
     }
 
     /**

@@ -457,6 +457,107 @@ class AutoLayoutTest {
     }
 
     // ---------------------------------------------------------------
+    // CLD variable and causal link layout
+    // ---------------------------------------------------------------
+
+    @Nested
+    @DisplayName("CLD layout")
+    class CldLayout {
+
+        @Test
+        void shouldPlaceCldVariables() {
+            ModelDefinition def = new ModelDefinitionBuilder()
+                    .name("CLD")
+                    .cldVariable("Population")
+                    .cldVariable("Birth Rate")
+                    .causalLink("Population", "Birth Rate",
+                            com.deathrayresearch.forrester.model.def.CausalLinkDef.Polarity.POSITIVE)
+                    .causalLink("Birth Rate", "Population",
+                            com.deathrayresearch.forrester.model.def.CausalLinkDef.Polarity.POSITIVE)
+                    .build();
+
+            ViewDef view = AutoLayout.layout(def);
+
+            Set<String> placedNames = view.elements().stream()
+                    .map(ElementPlacement::name)
+                    .collect(Collectors.toSet());
+
+            assertThat(placedNames).containsExactlyInAnyOrder("Population", "Birth Rate");
+        }
+
+        @Test
+        void shouldAssignCldVariableType() {
+            ModelDefinition def = new ModelDefinitionBuilder()
+                    .name("CLD Type")
+                    .cldVariable("X")
+                    .cldVariable("Y")
+                    .causalLink("X", "Y",
+                            com.deathrayresearch.forrester.model.def.CausalLinkDef.Polarity.POSITIVE)
+                    .build();
+
+            ViewDef view = AutoLayout.layout(def);
+            Map<String, ElementPlacement> map = placementMap(view);
+
+            assertThat(map.get("X").type()).isEqualTo(ElementType.CLD_VARIABLE);
+            assertThat(map.get("Y").type()).isEqualTo(ElementType.CLD_VARIABLE);
+        }
+
+        @Test
+        void shouldNotOverlapCldVariables() {
+            ModelDefinition def = new ModelDefinitionBuilder()
+                    .name("CLD No Overlap")
+                    .cldVariable("A")
+                    .cldVariable("B")
+                    .cldVariable("C")
+                    .cldVariable("D")
+                    .causalLink("A", "B",
+                            com.deathrayresearch.forrester.model.def.CausalLinkDef.Polarity.POSITIVE)
+                    .causalLink("B", "C",
+                            com.deathrayresearch.forrester.model.def.CausalLinkDef.Polarity.NEGATIVE)
+                    .causalLink("C", "D",
+                            com.deathrayresearch.forrester.model.def.CausalLinkDef.Polarity.POSITIVE)
+                    .causalLink("D", "A",
+                            com.deathrayresearch.forrester.model.def.CausalLinkDef.Polarity.NEGATIVE)
+                    .build();
+
+            ViewDef view = AutoLayout.layout(def);
+            assertNoOverlaps(view.elements());
+        }
+
+        @Test
+        void shouldHandleMixedSfAndCldElements() {
+            ModelDefinition def = new ModelDefinitionBuilder()
+                    .name("Mixed")
+                    .stock("S", 100, "Thing")
+                    .flow("F", "S * 0.1", "Day", "S", null)
+                    .cldVariable("Market Pressure")
+                    .cldVariable("Demand")
+                    .causalLink("Market Pressure", "Demand",
+                            com.deathrayresearch.forrester.model.def.CausalLinkDef.Polarity.POSITIVE)
+                    .build();
+
+            ViewDef view = AutoLayout.layout(def);
+            Map<String, ElementPlacement> map = placementMap(view);
+
+            assertThat(map).containsKeys("S", "F", "Market Pressure", "Demand");
+            assertNoOverlaps(view.elements());
+        }
+
+        @Test
+        void shouldHandleCldOnlyModel() {
+            ModelDefinition def = new ModelDefinitionBuilder()
+                    .name("CLD Only")
+                    .cldVariable("X")
+                    .build();
+
+            ViewDef view = AutoLayout.layout(def);
+
+            assertThat(view.elements()).hasSize(1);
+            assertThat(view.elements().getFirst().type()).isEqualTo(ElementType.CLD_VARIABLE);
+        }
+    }
+
+    // ---------------------------------------------------------------
     // Helpers
     // ---------------------------------------------------------------
 

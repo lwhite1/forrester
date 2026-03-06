@@ -1,7 +1,10 @@
 package com.deathrayresearch.forrester.app.canvas;
 
+import com.deathrayresearch.forrester.model.def.CausalLinkDef;
+
 import javafx.geometry.VPos;
 import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.paint.Color;
 import javafx.scene.text.TextAlignment;
 
 /**
@@ -120,6 +123,61 @@ public final class ConnectionRenderer {
         drawArrowhead(gc, fromX, fromY, toX, toY,
                 LayoutMetrics.INFO_ARROWHEAD_LENGTH, LayoutMetrics.INFO_ARROWHEAD_WIDTH,
                 ColorPalette.INFO_LINK);
+    }
+
+    /**
+     * Draws a causal link: solid line with arrowhead and polarity label.
+     */
+    public static void drawCausalLink(GraphicsContext gc,
+                                      double fromX, double fromY,
+                                      double toX, double toY,
+                                      CausalLinkDef.Polarity polarity) {
+        // Stop line at arrowhead base
+        double dx = toX - fromX;
+        double dy = toY - fromY;
+        double dist = Math.sqrt(dx * dx + dy * dy);
+        double lineToX = toX;
+        double lineToY = toY;
+        if (dist > LayoutMetrics.CAUSAL_ARROWHEAD_LENGTH) {
+            double ux = dx / dist;
+            double uy = dy / dist;
+            lineToX = toX - ux * LayoutMetrics.CAUSAL_ARROWHEAD_LENGTH;
+            lineToY = toY - uy * LayoutMetrics.CAUSAL_ARROWHEAD_LENGTH;
+        }
+
+        gc.setStroke(ColorPalette.CAUSAL_LINK);
+        gc.setLineWidth(LayoutMetrics.CAUSAL_LINK_WIDTH);
+        gc.setLineDashes();
+        gc.strokeLine(fromX, fromY, lineToX, lineToY);
+
+        drawArrowhead(gc, fromX, fromY, toX, toY,
+                LayoutMetrics.CAUSAL_ARROWHEAD_LENGTH, LayoutMetrics.CAUSAL_ARROWHEAD_WIDTH,
+                ColorPalette.CAUSAL_LINK);
+
+        // Polarity label near the arrowhead
+        if (dist > 1) {
+            Color labelColor = switch (polarity) {
+                case POSITIVE -> ColorPalette.CAUSAL_POSITIVE;
+                case NEGATIVE -> ColorPalette.CAUSAL_NEGATIVE;
+                case UNKNOWN -> ColorPalette.CAUSAL_UNKNOWN;
+            };
+            String label = polarity.symbol();
+
+            // Position label offset perpendicular to the line, near the target end.
+            // Scale both offsets to avoid overshooting on short links.
+            double ux = dx / dist;
+            double uy = dy / dist;
+            double alongOffset = Math.min(20, dist * 0.4);
+            double perpOffset = Math.min(12, Math.max(8, dist * 0.3));
+            double labelX = toX - ux * alongOffset + (-uy) * perpOffset;
+            double labelY = toY - uy * alongOffset + ux * perpOffset;
+
+            gc.setFill(labelColor);
+            gc.setFont(LayoutMetrics.CAUSAL_POLARITY_FONT);
+            gc.setTextAlign(TextAlignment.CENTER);
+            gc.setTextBaseline(VPos.CENTER);
+            gc.fillText(label, labelX, labelY);
+        }
     }
 
     /**

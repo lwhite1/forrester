@@ -254,6 +254,25 @@ class ModelDefinitionSerializerTest {
         assertThat(roundTripped.causalLinks()).hasSize(1);
     }
 
+    @Test
+    void shouldDefaultInvalidPolarityToUnknown() {
+        String json = """
+                {
+                  "name": "Bad Polarity",
+                  "cldVariables": [
+                    { "name": "A" },
+                    { "name": "B" }
+                  ],
+                  "causalLinks": [
+                    { "from": "A", "to": "B", "polarity": "STRONG" }
+                  ]
+                }
+                """;
+        ModelDefinition def = serializer.fromJson(json);
+        assertThat(def.causalLinks()).hasSize(1);
+        assertThat(def.causalLinks().get(0).polarity()).isEqualTo(CausalLinkDef.Polarity.UNKNOWN);
+    }
+
     private ModelDefinition buildSIR() {
         return new ModelDefinitionBuilder()
                 .name("SIR Model")
