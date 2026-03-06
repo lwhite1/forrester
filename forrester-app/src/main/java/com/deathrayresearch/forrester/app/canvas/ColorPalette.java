@@ -23,6 +23,13 @@ public final class ColorPalette {
     public static final Color TEXT_SECONDARY = Color.web("#7F8C8D");
     public static final Color CLOUD = Color.web("#BDC3C7");
 
+    // CLD (Causal Loop Diagram) colors
+    public static final Color CLD_VAR_BORDER = Color.web("#7F8C8D");
+    public static final Color CAUSAL_LINK = Color.web("#2C3E50");
+    public static final Color CAUSAL_POSITIVE = Color.web("#27AE60");
+    public static final Color CAUSAL_NEGATIVE = Color.web("#E74C3C");
+    public static final Color CAUSAL_UNKNOWN = Color.web("#BDC3C7");
+
     public static final Color HOVER = Color.web("#4A90D9", 0.4);
 
     public static final Color LOOP_HIGHLIGHT = Color.web("#E74C3C", 0.8);

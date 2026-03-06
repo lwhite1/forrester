@@ -958,7 +958,9 @@ public class ModelWindow {
                 activeEditor.getFlows().size(),
                 activeEditor.getAuxiliaries().size(),
                 activeEditor.getConstants().size(),
-                activeEditor.getModules().size());
+                activeEditor.getModules().size(),
+                activeEditor.getCldVariables().size(),
+                activeEditor.getCausalLinks().size());
         statusBar.updateZoom(canvas.getZoomScale());
 
         UndoManager activeUndo = canvas.getUndoManager();

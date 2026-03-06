@@ -117,6 +117,7 @@ public final class DiagramExporter {
             exportRenderer.render(gc, canvasWidth, canvasHeight,
                     editor, connectors,
                     FlowCreationController.State.IDLE,
+                    CausalLinkCreationController.State.IDLE,
                     CanvasRenderer.ReattachState.IDLE,
                     CanvasRenderer.RerouteState.IDLE,
                     CanvasRenderer.MarqueeState.IDLE,

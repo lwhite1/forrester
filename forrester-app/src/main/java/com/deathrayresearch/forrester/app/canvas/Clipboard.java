@@ -1,6 +1,7 @@
 package com.deathrayresearch.forrester.app.canvas;
 
 import com.deathrayresearch.forrester.model.def.AuxDef;
+import com.deathrayresearch.forrester.model.def.CldVariableDef;
 import com.deathrayresearch.forrester.model.def.ConstantDef;
 import com.deathrayresearch.forrester.model.def.ElementType;
 import com.deathrayresearch.forrester.model.def.FlowDef;
@@ -80,7 +81,7 @@ public class Clipboard {
                 case CONSTANT -> editor.getConstantByName(name);
                 case MODULE -> editor.getModuleByName(name);
                 case LOOKUP -> editor.getLookupTableByName(name);
-                default -> null;
+                case CLD_VARIABLE -> editor.getCldVariableByName(name);
             };
 
             if (def != null) {

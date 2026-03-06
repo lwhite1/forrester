@@ -1,6 +1,7 @@
 package com.deathrayresearch.forrester.app.canvas;
 
 import com.deathrayresearch.forrester.model.def.AuxDef;
+import com.deathrayresearch.forrester.model.def.CldVariableDef;
 import com.deathrayresearch.forrester.model.def.ConstantDef;
 import com.deathrayresearch.forrester.model.def.ElementType;
 import com.deathrayresearch.forrester.model.def.FlowDef;
@@ -102,6 +103,8 @@ final class CopyPasteController {
                         (ModuleInstanceDef) entry.elementDef());
                 case LOOKUP -> newName = editor.addLookupFrom(
                         (LookupTableDef) entry.elementDef());
+                case CLD_VARIABLE -> newName = editor.addCldVariableFrom(
+                        (CldVariableDef) entry.elementDef());
                 default -> { continue; }
             }
 

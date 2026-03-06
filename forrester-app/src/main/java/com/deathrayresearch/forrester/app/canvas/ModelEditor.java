@@ -1071,6 +1071,15 @@ public class ModelEditor {
         return Collections.unmodifiableList(cldVariables);
     }
 
+    public CldVariableDef getCldVariableByName(String name) {
+        for (CldVariableDef v : cldVariables) {
+            if (v.name().equals(name)) {
+                return v;
+            }
+        }
+        return null;
+    }
+
     /**
      * Adds a causal link between two elements.
      * @return true if both endpoints exist and the link was added
@@ -1079,6 +1088,11 @@ public class ModelEditor {
         checkFxThread();
         if (!hasElement(from) || !hasElement(to)) {
             return false;
+        }
+        for (CausalLinkDef existing : causalLinks) {
+            if (existing.from().equals(from) && existing.to().equals(to)) {
+                return false;
+            }
         }
         causalLinks.add(new CausalLinkDef(from, to, polarity));
         return true;

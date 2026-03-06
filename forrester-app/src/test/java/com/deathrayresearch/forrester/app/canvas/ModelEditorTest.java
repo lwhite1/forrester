@@ -1831,5 +1831,37 @@ class ModelEditorTest {
             assertThat(result).isTrue();
             assertThat(editor.getCausalLinks()).hasSize(1);
         }
+
+        @Test
+        void shouldRejectDuplicateCausalLink() {
+            editor.addCldVariable(); // Variable 1
+            editor.addCldVariable(); // Variable 2
+
+            boolean first = editor.addCausalLink("Variable 1", "Variable 2",
+                    CausalLinkDef.Polarity.POSITIVE);
+            boolean second = editor.addCausalLink("Variable 1", "Variable 2",
+                    CausalLinkDef.Polarity.NEGATIVE);
+
+            assertThat(first).isTrue();
+            assertThat(second).isFalse();
+            assertThat(editor.getCausalLinks()).hasSize(1);
+            assertThat(editor.getCausalLinks().getFirst().polarity())
+                    .isEqualTo(CausalLinkDef.Polarity.POSITIVE);
+        }
+
+        @Test
+        void shouldAllowReverseLinkBetweenSameVariables() {
+            editor.addCldVariable(); // Variable 1
+            editor.addCldVariable(); // Variable 2
+
+            boolean forward = editor.addCausalLink("Variable 1", "Variable 2",
+                    CausalLinkDef.Polarity.POSITIVE);
+            boolean reverse = editor.addCausalLink("Variable 2", "Variable 1",
+                    CausalLinkDef.Polarity.NEGATIVE);
+
+            assertThat(forward).isTrue();
+            assertThat(reverse).isTrue();
+            assertThat(editor.getCausalLinks()).hasSize(2);
+        }
     }
 }

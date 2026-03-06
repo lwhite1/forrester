@@ -1,5 +1,6 @@
 package com.deathrayresearch.forrester.app.canvas;
 
+import com.deathrayresearch.forrester.model.def.CausalLinkDef;
 import com.deathrayresearch.forrester.model.def.ConnectorRoute;
 import com.deathrayresearch.forrester.model.def.ConstantDef;
 import com.deathrayresearch.forrester.model.def.ElementType;
@@ -78,6 +79,7 @@ public class CanvasRenderer {
     public void render(GraphicsContext gc, double width, double height,
                        ModelEditor editor, List<ConnectorRoute> connectors,
                        FlowCreationController.State flowState,
+                       CausalLinkCreationController.State causalLinkState,
                        ReattachState reattachState,
                        RerouteState rerouteState,
                        MarqueeState marqueeState,
@@ -101,6 +103,7 @@ public class CanvasRenderer {
         // 1. Draw connections first (behind elements)
         drawMaterialFlows(gc, editor);
         drawInfoLinks(gc, connectors);
+        drawCausalLinks(gc, editor);
 
         // 1b. Draw loop edge highlights (above normal connections, behind elements)
         if (loopAnalysis != null) {
@@ -158,6 +161,12 @@ public class CanvasRenderer {
                     ElementRenderer.drawLookup(gc, name, pts,
                             cx - w / 2, cy - h / 2, w, h);
                 }
+                case CLD_VARIABLE -> {
+                    double w = LayoutMetrics.effectiveWidth(canvasState, name);
+                    double h = LayoutMetrics.effectiveHeight(canvasState, name);
+                    ElementRenderer.drawCldVariable(gc, name,
+                            cx - w / 2, cy - h / 2, w, h);
+                }
                 default -> { }
             }
         }
@@ -193,6 +202,11 @@ public class CanvasRenderer {
         // 4. Draw rubber-band line during pending flow creation
         if (flowState.pending()) {
             drawFlowRubberBand(gc, flowState);
+        }
+
+        // 4b. Draw rubber-band line during pending causal link creation
+        if (causalLinkState.pending()) {
+            drawCausalLinkRubberBand(gc, causalLinkState);
         }
 
         // 5. Draw reattachment rubber-band
@@ -295,6 +309,33 @@ public class CanvasRenderer {
     }
 
     /**
+     * Draws causal links between CLD variables (and potentially S&F elements).
+     */
+    private void drawCausalLinks(GraphicsContext gc, ModelEditor editor) {
+        for (CausalLinkDef link : editor.getCausalLinks()) {
+            String fromName = link.from();
+            String toName = link.to();
+
+            if (!canvasState.hasElement(fromName) || !canvasState.hasElement(toName)) {
+                continue;
+            }
+
+            double fromX = canvasState.getX(fromName);
+            double fromY = canvasState.getY(fromName);
+            double toX = canvasState.getX(toName);
+            double toY = canvasState.getY(toName);
+
+            FlowGeometry.Point2D clippedFrom = FlowGeometry.clipToElement(
+                    canvasState, fromName, toX, toY);
+            FlowGeometry.Point2D clippedTo = FlowGeometry.clipToElement(
+                    canvasState, toName, fromX, fromY);
+
+            ConnectionRenderer.drawCausalLink(gc, clippedFrom.x(), clippedFrom.y(),
+                    clippedTo.x(), clippedTo.y(), link.polarity());
+        }
+    }
+
+    /**
      * Draws highlighted edges for info links and material flows that are part of feedback loops.
      */
     private void drawLoopEdges(GraphicsContext gc, List<ConnectorRoute> connectors,
@@ -370,6 +411,25 @@ public class CanvasRenderer {
                 state.rubberBandEndX(), state.rubberBandEndY(), canvasState);
         if (hoverStock != null) {
             drawStockHoverHighlight(gc, hoverStock);
+        }
+    }
+
+    /**
+     * Draws a rubber-band line for causal link creation.
+     */
+    private void drawCausalLinkRubberBand(GraphicsContext gc,
+                                          CausalLinkCreationController.State state) {
+        gc.setStroke(RUBBER_BAND_COLOR);
+        gc.setLineWidth(2);
+        gc.setLineDashes(RUBBER_BAND_DASH, RUBBER_BAND_GAP);
+        gc.strokeLine(state.sourceX(), state.sourceY(),
+                state.rubberBandEndX(), state.rubberBandEndY());
+        gc.setLineDashes();
+
+        String hitElement = HitTester.hitTest(canvasState,
+                state.rubberBandEndX(), state.rubberBandEndY());
+        if (hitElement != null && !hitElement.equals(state.source())) {
+            drawElementHoverHighlight(gc, hitElement);
         }
     }
 

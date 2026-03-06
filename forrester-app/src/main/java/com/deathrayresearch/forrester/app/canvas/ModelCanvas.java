@@ -54,6 +54,7 @@ public class ModelCanvas extends Canvas {
     private final ResizeController resizeController = new ResizeController();
     private final ReattachController reattachController = new ReattachController();
     private final FlowCreationController flowCreation = new FlowCreationController();
+    private final CausalLinkCreationController causalLinkCreation = new CausalLinkCreationController();
     private final CopyPasteController copyPaste;
     private final ConnectionRerouteController rerouteController = new ConnectionRerouteController();
     private final InlineEditController inlineEdit = new InlineEditController();
@@ -403,6 +404,9 @@ public class ModelCanvas extends Canvas {
         if (flowCreation.isPending()) {
             flowCreation.cancel();
         }
+        if (causalLinkCreation.isPending()) {
+            causalLinkCreation.cancel();
+        }
         this.activeTool = tool;
         updateCursor();
     }
@@ -444,6 +448,7 @@ public class ModelCanvas extends Canvas {
     private void redraw() {
         renderer.render(getGraphicsContext2D(), getWidth(), getHeight(),
                 editor, connectors, flowCreation.getState(),
+                causalLinkCreation.getState(),
                 reattachController.toRenderState(),
                 rerouteRenderState(),
                 marqueeController.toRenderState(),
@@ -487,6 +492,10 @@ public class ModelCanvas extends Canvas {
             case PLACE_LOOKUP -> {
                 name = editor.addLookup();
                 type = ElementType.LOOKUP;
+            }
+            case PLACE_CLD_VARIABLE -> {
+                name = editor.addCldVariable();
+                type = ElementType.CLD_VARIABLE;
             }
             default -> {
                 return;
@@ -603,6 +612,24 @@ public class ModelCanvas extends Canvas {
             invalidateLoopAnalysis();
             canvasState.clearSelection();
             canvasState.select(result.flowName());
+        }
+        redraw();
+    }
+
+    // --- Two-click causal link creation ---
+
+    /**
+     * Handles a click during PLACE_CAUSAL_LINK mode by delegating to the CausalLinkCreationController.
+     */
+    private void handleCausalLinkClick(double worldX, double worldY) {
+        if (causalLinkCreation.isPending()) {
+            saveUndoState();
+        }
+        CausalLinkCreationController.LinkResult result = causalLinkCreation.handleClick(
+                worldX, worldY, canvasState, editor);
+        if (result.isCreated()) {
+            connectors = editor.generateConnectors();
+            invalidateLoopAnalysis();
         }
         redraw();
     }
@@ -746,6 +773,14 @@ public class ModelCanvas extends Canvas {
 
         if (flowCreation.isPending()) {
             flowCreation.updateRubberBand(
+                    viewport.toWorldX(event.getX()),
+                    viewport.toWorldY(event.getY()));
+            redraw();
+            event.consume();
+        }
+
+        if (causalLinkCreation.isPending()) {
+            causalLinkCreation.updateRubberBand(
                     viewport.toWorldX(event.getX()),
                     viewport.toWorldY(event.getY()));
             redraw();
@@ -930,6 +965,14 @@ public class ModelCanvas extends Canvas {
             // PLACE_FLOW: two-click protocol
             if (activeTool == CanvasToolBar.Tool.PLACE_FLOW) {
                 handleFlowClick(worldX, worldY);
+                updateCursor();
+                event.consume();
+                return;
+            }
+
+            // PLACE_CAUSAL_LINK: two-click protocol
+            if (activeTool == CanvasToolBar.Tool.PLACE_CAUSAL_LINK) {
+                handleCausalLinkClick(worldX, worldY);
                 updateCursor();
                 event.consume();
                 return;
@@ -1213,6 +1256,8 @@ public class ModelCanvas extends Canvas {
                 case DIGIT5 -> { switchTool(CanvasToolBar.Tool.PLACE_CONSTANT); event.consume(); }
                 case DIGIT6 -> { switchTool(CanvasToolBar.Tool.PLACE_MODULE); event.consume(); }
                 case DIGIT7 -> { switchTool(CanvasToolBar.Tool.PLACE_LOOKUP); event.consume(); }
+                case DIGIT8 -> { switchTool(CanvasToolBar.Tool.PLACE_CLD_VARIABLE); event.consume(); }
+                case DIGIT9 -> { switchTool(CanvasToolBar.Tool.PLACE_CAUSAL_LINK); event.consume(); }
                 default -> { }
             }
         }
@@ -1237,6 +1282,9 @@ public class ModelCanvas extends Canvas {
             redraw();
         } else if (flowCreation.isPending()) {
             flowCreation.cancel();
+            redraw();
+        } else if (causalLinkCreation.isPending()) {
+            causalLinkCreation.cancel();
             redraw();
         } else if (activeTool != CanvasToolBar.Tool.SELECT) {
             if (toolBar != null) {
