@@ -368,7 +368,7 @@ class CanvasStateTest {
 
             ViewDef result = state.toViewDef();
 
-            assertThat(result.name()).isEqualTo("Main");
+            assertThat(result.name()).isEqualTo("test");
             assertThat(result.elements()).hasSize(3);
 
             ElementPlacement s = result.elements().get(0);
@@ -400,6 +400,27 @@ class CanvasStateTest {
 
             assertThat(result.elements().get(0).x()).isCloseTo(500, within(0.001));
             assertThat(result.elements().get(0).y()).isCloseTo(600, within(0.001));
+        }
+
+        @Test
+        void shouldPreserveViewName() {
+            ViewDef original = new ViewDef("Custom View", List.of(
+                    new ElementPlacement("S", ElementType.STOCK, 100, 200)
+            ), List.of(), List.of());
+            state.loadFrom(original);
+
+            ViewDef result = state.toViewDef();
+
+            assertThat(result.name()).isEqualTo("Custom View");
+        }
+
+        @Test
+        void shouldDefaultToMainWhenNoViewLoaded() {
+            state.addElement("S", ElementType.STOCK, 100, 200);
+
+            ViewDef result = state.toViewDef();
+
+            assertThat(result.name()).isEqualTo("Main");
         }
 
         @Test

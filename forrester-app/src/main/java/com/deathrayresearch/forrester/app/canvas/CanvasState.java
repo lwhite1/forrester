@@ -29,11 +29,14 @@ public class CanvasState {
      */
     public record Size(double width, double height) {}
 
+    private static final String DEFAULT_VIEW_NAME = "Main";
+
     private final Map<String, Position> positions = new LinkedHashMap<>();
     private final Map<String, Size> sizes = new LinkedHashMap<>();
     private final Map<String, ElementType> types = new LinkedHashMap<>();
     private final Set<String> selection = new LinkedHashSet<>();
     private final List<String> drawOrder = new ArrayList<>();
+    private String viewName = DEFAULT_VIEW_NAME;
 
     /**
      * Loads element positions and types from a ViewDef, clearing any previous state.
@@ -44,6 +47,7 @@ public class CanvasState {
         sizes.clear();
         selection.clear();
         drawOrder.clear();
+        viewName = view.name();
 
         for (ElementPlacement ep : view.elements()) {
             positions.put(ep.name(), new Position(ep.x(), ep.y()));
@@ -269,7 +273,7 @@ public class CanvasState {
                 placements.add(new ElementPlacement(name, types.get(name), pos.x(), pos.y()));
             }
         }
-        return new ViewDef("Main", placements, List.of(), List.of());
+        return new ViewDef(viewName, placements, List.of(), List.of());
     }
 
     /**
