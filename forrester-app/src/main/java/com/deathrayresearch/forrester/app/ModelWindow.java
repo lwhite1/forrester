@@ -5,6 +5,7 @@ import com.deathrayresearch.forrester.app.canvas.ActivityLogPanel;
 import com.deathrayresearch.forrester.app.canvas.BreadcrumbBar;
 import com.deathrayresearch.forrester.app.canvas.CanvasToolBar;
 import com.deathrayresearch.forrester.app.canvas.Clipboard;
+import com.deathrayresearch.forrester.app.canvas.CommandPalette;
 import com.deathrayresearch.forrester.app.canvas.DashboardPanel;
 import com.deathrayresearch.forrester.app.canvas.DiagramExporter;
 import com.deathrayresearch.forrester.app.canvas.ExpressionLanguageDialog;
@@ -35,6 +36,7 @@ import com.deathrayresearch.forrester.measure.Quantity;
 import com.deathrayresearch.forrester.measure.TimeUnit;
 import com.deathrayresearch.forrester.model.Model;
 import com.deathrayresearch.forrester.model.def.ConstantDef;
+import com.deathrayresearch.forrester.model.def.ElementType;
 import com.deathrayresearch.forrester.model.def.ModelDefinition;
 import com.deathrayresearch.forrester.model.def.ModelDefinitionBuilder;
 import com.deathrayresearch.forrester.model.def.ModelValidator;
@@ -76,6 +78,7 @@ import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyCodeCombination;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.input.KeyCombination;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
@@ -137,6 +140,7 @@ public class ModelWindow {
     private ModelEditListener logListener;
     private ModelEditListener staleListener;
     private AnalysisRunner analysisRunner;
+    private CommandPalette commandPalette;
 
     private final ModelDefinitionSerializer serializer = new ModelDefinitionSerializer();
 
@@ -224,6 +228,15 @@ public class ModelWindow {
 
         Scene scene = new Scene(root, 1200, 800);
         stage.setScene(scene);
+
+        commandPalette = new CommandPalette(this::buildCommands);
+        scene.addEventFilter(KeyEvent.KEY_PRESSED, event -> {
+            if (event.isShortcutDown() && event.getCode() == KeyCode.K) {
+                commandPalette.show(stage);
+                event.consume();
+            }
+        });
+
         updateTitle();
 
         canvas.requestFocus();
@@ -1172,6 +1185,100 @@ public class ModelWindow {
 
     ModelCanvas getCanvas() {
         return canvas;
+    }
+
+    private List<CommandPalette.Command> buildCommands() {
+        List<CommandPalette.Command> commands = new ArrayList<>();
+
+        // Build tools
+        commands.add(cmd("Add Stock", "Build",
+                () -> switchToolAndFocus(CanvasToolBar.Tool.PLACE_STOCK)));
+        commands.add(cmd("Add Flow", "Build",
+                () -> switchToolAndFocus(CanvasToolBar.Tool.PLACE_FLOW)));
+        commands.add(cmd("Add Auxiliary", "Build",
+                () -> switchToolAndFocus(CanvasToolBar.Tool.PLACE_AUX)));
+        commands.add(cmd("Add Constant", "Build",
+                () -> switchToolAndFocus(CanvasToolBar.Tool.PLACE_CONSTANT)));
+        commands.add(cmd("Add Module", "Build",
+                () -> switchToolAndFocus(CanvasToolBar.Tool.PLACE_MODULE)));
+        commands.add(cmd("Add Lookup Table", "Build",
+                () -> switchToolAndFocus(CanvasToolBar.Tool.PLACE_LOOKUP)));
+        commands.add(cmd("Add CLD Variable", "Build",
+                () -> switchToolAndFocus(CanvasToolBar.Tool.PLACE_CLD_VARIABLE)));
+        commands.add(cmd("Draw Causal Link", "Build",
+                () -> switchToolAndFocus(CanvasToolBar.Tool.PLACE_CAUSAL_LINK)));
+        commands.add(cmd("Select Tool", "Build",
+                () -> switchToolAndFocus(CanvasToolBar.Tool.SELECT)));
+
+        // Simulate
+        commands.add(cmd("Run Simulation", "Simulate", this::runSimulation));
+        commands.add(cmd("Validate Model", "Simulate", this::validateModel));
+        commands.add(cmd("Simulation Settings", "Simulate", this::openSimulationSettings));
+        commands.add(cmd("Parameter Sweep", "Simulate", this::runParameterSweep));
+        commands.add(cmd("Multi-Parameter Sweep", "Simulate", this::runMultiParameterSweep));
+        commands.add(cmd("Monte Carlo", "Simulate", this::runMonteCarlo));
+        commands.add(cmd("Optimize", "Simulate", this::runOptimization));
+
+        // Edit
+        commands.add(cmd("Undo", "Edit", () -> {
+            canvas.performUndo();
+            canvas.requestFocus();
+        }));
+        commands.add(cmd("Redo", "Edit", () -> {
+            canvas.performRedo();
+            canvas.requestFocus();
+        }));
+        commands.add(cmd("Select All", "Edit", () -> {
+            canvas.selectAll();
+            canvas.requestFocus();
+        }));
+
+        // File
+        commands.add(cmd("New Model", "File", this::newModel));
+        commands.add(cmd("New Window", "File", () -> app.openNewWindow()));
+        commands.add(cmd("Open Model", "File", this::openFile));
+        commands.add(cmd("Save", "File", this::save));
+        commands.add(cmd("Save As", "File", this::saveAs));
+        commands.add(cmd("Export Diagram", "File", () -> DiagramExporter.exportDiagram(
+                canvas.getCanvasState(), canvas.getEditor(),
+                canvas.getConnectors(), canvas.getActiveLoopAnalysis(), stage,
+                editor != null ? editor.getModelName() : null)));
+
+        // Dynamic: model element names for navigation
+        for (String name : canvas.getCanvasState().getDrawOrder()) {
+            ElementType type = canvas.getCanvasState().getType(name);
+            String category = formatElementType(type);
+            commands.add(cmd(name, category, () -> {
+                canvas.selectElement(name);
+                canvas.requestFocus();
+            }));
+        }
+
+        return commands;
+    }
+
+    private void switchToolAndFocus(CanvasToolBar.Tool tool) {
+        canvas.switchTool(tool);
+        canvas.requestFocus();
+    }
+
+    private static CommandPalette.Command cmd(String name, String category, Runnable action) {
+        return new CommandPalette.Command(name, category, action);
+    }
+
+    private static String formatElementType(ElementType type) {
+        if (type == null) {
+            return "Element";
+        }
+        return switch (type) {
+            case STOCK -> "Stock";
+            case FLOW -> "Flow";
+            case AUX -> "Auxiliary";
+            case CONSTANT -> "Constant";
+            case MODULE -> "Module";
+            case LOOKUP -> "Lookup Table";
+            case CLD_VARIABLE -> "CLD Variable";
+        };
     }
 
     /**

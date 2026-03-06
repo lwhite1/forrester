@@ -48,6 +48,7 @@ public class KeyboardShortcutsDialog extends Stage {
                         "8", "Place CLD variable",
                         "9", "Draw causal link"),
                 section("View & Navigation",
+                        "Ctrl+K", "Command palette",
                         "Ctrl+ +", "Zoom in",
                         "Ctrl+ -", "Zoom out",
                         "Ctrl+0", "Reset zoom",

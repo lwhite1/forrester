@@ -1364,7 +1364,7 @@ public class ModelCanvas extends Canvas {
         updateCursor();
     }
 
-    private void switchTool(CanvasToolBar.Tool tool) {
+    public void switchTool(CanvasToolBar.Tool tool) {
         if (toolBar != null) {
             toolBar.selectTool(tool);
         } else {
