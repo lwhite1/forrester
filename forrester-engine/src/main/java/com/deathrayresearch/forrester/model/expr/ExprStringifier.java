@@ -85,7 +85,11 @@ public final class ExprStringifier {
                 }
             }
         }
-        // Reserved words that would be parsed as function calls
+        // Reserved words that would be parsed as keywords or function calls
+        String lower = name.toLowerCase();
+        if (lower.equals("and") || lower.equals("or") || lower.equals("not")) {
+            return true;
+        }
         return name.equals("IF") || name.equals("TIME") || name.equals("DT");
     }
 

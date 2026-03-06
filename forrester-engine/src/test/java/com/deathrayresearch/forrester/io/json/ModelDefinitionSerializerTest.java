@@ -1,5 +1,7 @@
 package com.deathrayresearch.forrester.io.json;
 
+import com.deathrayresearch.forrester.model.def.CausalLinkDef;
+import com.deathrayresearch.forrester.model.def.CldVariableDef;
 import com.deathrayresearch.forrester.model.def.ConnectorRoute;
 import com.deathrayresearch.forrester.model.def.ElementPlacement;
 import com.deathrayresearch.forrester.model.def.ElementType;
@@ -180,6 +182,76 @@ class ModelDefinitionSerializerTest {
         assertThat(roundTripped.stocks().get(0).comment()).isNull();
         assertThat(roundTripped.flows()).isNullOrEmpty();
         assertThat(roundTripped.auxiliaries()).isNullOrEmpty();
+    }
+
+    @Test
+    void shouldRoundTripCldVariables() {
+        ModelDefinition def = new ModelDefinitionBuilder()
+                .name("CLD Test")
+                .cldVariable("Workload", "Hours per week")
+                .cldVariable("Burnout")
+                .causalLink("Workload", "Burnout", CausalLinkDef.Polarity.POSITIVE)
+                .causalLink("Burnout", "Workload", CausalLinkDef.Polarity.NEGATIVE)
+                .build();
+
+        ModelDefinition roundTripped = serializer.fromJson(serializer.toJson(def));
+
+        assertThat(roundTripped.cldVariables()).hasSize(2);
+        assertThat(roundTripped.cldVariables().get(0).name()).isEqualTo("Workload");
+        assertThat(roundTripped.cldVariables().get(0).comment()).isEqualTo("Hours per week");
+        assertThat(roundTripped.cldVariables().get(1).name()).isEqualTo("Burnout");
+        assertThat(roundTripped.cldVariables().get(1).comment()).isNull();
+
+        assertThat(roundTripped.causalLinks()).hasSize(2);
+        assertThat(roundTripped.causalLinks().get(0).from()).isEqualTo("Workload");
+        assertThat(roundTripped.causalLinks().get(0).to()).isEqualTo("Burnout");
+        assertThat(roundTripped.causalLinks().get(0).polarity()).isEqualTo(CausalLinkDef.Polarity.POSITIVE);
+        assertThat(roundTripped.causalLinks().get(1).polarity()).isEqualTo(CausalLinkDef.Polarity.NEGATIVE);
+    }
+
+    @Test
+    void shouldDeserializeModelWithoutCldFields() {
+        // Old JSON without cldVariables or causalLinks should deserialize with empty lists
+        String json = """
+                {
+                  "name": "Legacy",
+                  "stocks": [
+                    { "name": "S", "initialValue": 10, "unit": "u" }
+                  ]
+                }
+                """;
+        ModelDefinition def = serializer.fromJson(json);
+        assertThat(def.cldVariables()).isEmpty();
+        assertThat(def.causalLinks()).isEmpty();
+    }
+
+    @Test
+    void shouldRoundTripCausalLinkWithComment() {
+        ModelDefinition def = new ModelDefinitionBuilder()
+                .name("Test")
+                .cldVariable("A")
+                .cldVariable("B")
+                .causalLink(new CausalLinkDef("A", "B",
+                        CausalLinkDef.Polarity.POSITIVE, "after a delay"))
+                .build();
+
+        ModelDefinition roundTripped = serializer.fromJson(serializer.toJson(def));
+        assertThat(roundTripped.causalLinks().get(0).comment()).isEqualTo("after a delay");
+    }
+
+    @Test
+    void shouldRoundTripMixedSfAndCldModel() {
+        ModelDefinition def = new ModelDefinitionBuilder()
+                .name("Mixed")
+                .stock("Population", 1000, "Person")
+                .cldVariable("Quality of Life")
+                .causalLink("Population", "Quality of Life", CausalLinkDef.Polarity.NEGATIVE)
+                .build();
+
+        ModelDefinition roundTripped = serializer.fromJson(serializer.toJson(def));
+        assertThat(roundTripped.stocks()).hasSize(1);
+        assertThat(roundTripped.cldVariables()).hasSize(1);
+        assertThat(roundTripped.causalLinks()).hasSize(1);
     }
 
     private ModelDefinition buildSIR() {

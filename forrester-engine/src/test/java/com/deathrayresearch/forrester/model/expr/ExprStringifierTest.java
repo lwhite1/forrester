@@ -81,7 +81,7 @@ class ExprStringifierTest {
     @Test
     void shouldStringifyNot() {
         assertThat(ExprStringifier.stringify(
-                new Expr.UnaryOp(UnaryOperator.NOT, new Expr.Ref("flag")))).isEqualTo("!flag");
+                new Expr.UnaryOp(UnaryOperator.NOT, new Expr.Ref("flag")))).isEqualTo("not flag");
     }
 
     @Test
@@ -108,22 +108,22 @@ class ExprStringifierTest {
 
     @Test
     void shouldStringifyPowerRightAssociative() {
-        // a ^ (b ^ c) -> "a ^ b ^ c" (right-associative, no parens)
+        // a ** (b ** c) -> "a ** b ** c" (right-associative, no parens)
         Expr expr = new Expr.BinaryOp(
                 new Expr.Ref("a"),
                 BinaryOperator.POW,
                 new Expr.BinaryOp(new Expr.Ref("b"), BinaryOperator.POW, new Expr.Ref("c")));
-        assertThat(ExprStringifier.stringify(expr)).isEqualTo("a ^ b ^ c");
+        assertThat(ExprStringifier.stringify(expr)).isEqualTo("a ** b ** c");
     }
 
     @Test
     void shouldAddParensForLeftAssociativePower() {
-        // (a ^ b) ^ c -> must emit "(a ^ b) ^ c" (not "a ^ b ^ c" which re-parses as a ^ (b ^ c))
+        // (a ** b) ** c -> must emit "(a ** b) ** c" (not "a ** b ** c" which re-parses as a ** (b ** c))
         Expr expr = new Expr.BinaryOp(
                 new Expr.BinaryOp(new Expr.Ref("a"), BinaryOperator.POW, new Expr.Ref("b")),
                 BinaryOperator.POW,
                 new Expr.Ref("c"));
-        assertThat(ExprStringifier.stringify(expr)).isEqualTo("(a ^ b) ^ c");
+        assertThat(ExprStringifier.stringify(expr)).isEqualTo("(a ** b) ** c");
     }
 
     @Test

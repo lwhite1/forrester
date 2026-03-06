@@ -74,7 +74,7 @@ class ExprCompilerTest {
 
     @Test
     void shouldCompilePower() {
-        Formula formula = compiler.compile("2 ^ 10");
+        Formula formula = compiler.compile("2 ** 10");
         assertThat(formula.getCurrentValue()).isEqualTo(1024.0);
     }
 
@@ -92,28 +92,28 @@ class ExprCompilerTest {
 
     @Test
     void shouldCompileLogicalAnd() {
-        Formula trueAnd = compiler.compile("1 && 1");
+        Formula trueAnd = compiler.compile("1 and 1");
         assertThat(trueAnd.getCurrentValue()).isEqualTo(1.0);
 
-        Formula falseAnd = compiler.compile("1 && 0");
+        Formula falseAnd = compiler.compile("1 and 0");
         assertThat(falseAnd.getCurrentValue()).isEqualTo(0.0);
     }
 
     @Test
     void shouldCompileLogicalOr() {
-        Formula trueOr = compiler.compile("0 || 1");
+        Formula trueOr = compiler.compile("0 or 1");
         assertThat(trueOr.getCurrentValue()).isEqualTo(1.0);
 
-        Formula falseOr = compiler.compile("0 || 0");
+        Formula falseOr = compiler.compile("0 or 0");
         assertThat(falseOr.getCurrentValue()).isEqualTo(0.0);
     }
 
     @Test
     void shouldCompileNot() {
-        Formula notTrue = compiler.compile("!1");
+        Formula notTrue = compiler.compile("not 1");
         assertThat(notTrue.getCurrentValue()).isEqualTo(0.0);
 
-        Formula notFalse = compiler.compile("!0");
+        Formula notFalse = compiler.compile("not 0");
         assertThat(notFalse.getCurrentValue()).isEqualTo(1.0);
     }
 

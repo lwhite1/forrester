@@ -28,19 +28,19 @@ class XmileExprTranslatorTest {
         @Test
         void shouldTranslateAndKeyword() {
             var result = XmileExprTranslator.toForrester("x > 0 AND y > 0");
-            assertThat(result.expression()).isEqualTo("x > 0 && y > 0");
+            assertThat(result.expression()).isEqualTo("x > 0 and y > 0");
         }
 
         @Test
         void shouldTranslateOrKeyword() {
             var result = XmileExprTranslator.toForrester("x > 0 OR y > 0");
-            assertThat(result.expression()).isEqualTo("x > 0 || y > 0");
+            assertThat(result.expression()).isEqualTo("x > 0 or y > 0");
         }
 
         @Test
         void shouldTranslateNotKeyword() {
             var result = XmileExprTranslator.toForrester("NOT x > 0");
-            assertThat(result.expression()).startsWith("!");
+            assertThat(result.expression()).startsWith("not");
             assertThat(result.expression()).contains("x > 0");
         }
 
@@ -126,7 +126,7 @@ class XmileExprTranslatorTest {
             var result = XmileExprTranslator.toForrester(
                     "IF_THEN_ELSE(x = 5 AND y <> 3, Time, 0)");
             assertThat(result.expression()).isEqualTo(
-                    "IF(x == 5 && y != 3, TIME, 0)");
+                    "IF(x == 5 and y != 3, TIME, 0)");
         }
     }
 
@@ -142,20 +142,20 @@ class XmileExprTranslatorTest {
 
         @Test
         void shouldTranslateAndOperator() {
-            String result = XmileExprTranslator.toXmile("x > 0 && y > 0");
-            assertThat(result).isEqualTo("x > 0  AND  y > 0");
+            String result = XmileExprTranslator.toXmile("x > 0 and y > 0");
+            assertThat(result).isEqualTo("x > 0 AND y > 0");
         }
 
         @Test
         void shouldTranslateOrOperator() {
-            String result = XmileExprTranslator.toXmile("x > 0 || y > 0");
-            assertThat(result).isEqualTo("x > 0  OR  y > 0");
+            String result = XmileExprTranslator.toXmile("x > 0 or y > 0");
+            assertThat(result).isEqualTo("x > 0 OR y > 0");
         }
 
         @Test
         void shouldTranslateNotOperator() {
-            String result = XmileExprTranslator.toXmile("!(x > 0)");
-            assertThat(result).isEqualTo("NOT (x > 0)");
+            String result = XmileExprTranslator.toXmile("not(x > 0)");
+            assertThat(result).isEqualTo("NOT(x > 0)");
         }
 
         @Test
@@ -188,9 +188,8 @@ class XmileExprTranslatorTest {
 
         @Test
         void shouldNotTranslateNotEqualsToNotXmile() {
-            // != should become <>, not NOT=
+            // != should become <>, the "not" inside "!=" should not be affected
             String result = XmileExprTranslator.toXmile("x != 5");
-            assertThat(result).doesNotContain("NOT");
             assertThat(result).contains("<>");
         }
     }

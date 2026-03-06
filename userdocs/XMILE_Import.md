@@ -50,11 +50,12 @@ This document describes what Forrester supports when importing XMILE files (IEEE
 
 | XMILE | Forrester |
 |-------|-----------|
-| `AND` | `&&` |
-| `OR` | `\|\|` |
-| `NOT` | `!` |
+| `AND` | `and` |
+| `OR` | `or` |
+| `NOT` | `not` |
 | `<>` | `!=` |
 | `=` (comparison) | `==` |
+| `^` | `**` |
 | `Time` | `TIME` |
 
 **Function conversions:**

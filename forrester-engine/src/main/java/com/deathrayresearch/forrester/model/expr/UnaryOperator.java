@@ -6,7 +6,7 @@ package com.deathrayresearch.forrester.model.expr;
 public enum UnaryOperator {
 
     NEGATE("-"),
-    NOT("!");
+    NOT("not ");
 
     private final String symbol;
 

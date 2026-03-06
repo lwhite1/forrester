@@ -39,7 +39,7 @@ Numeric literals support integers, decimals, and scientific notation:
 | `*` | Multiplication | `Rate * Population` |
 | `/` | Division | `Total / Count` |
 | `%` | Modulo (remainder) | `Step % 7` |
-| `^` | Exponentiation | `2 ^ 10` |
+| `**` | Exponentiation | `2 ** 10` |
 | `-` (unary) | Negation | `-Rate` |
 
 Division by zero returns 0 (safe division).
@@ -61,24 +61,24 @@ Equality uses epsilon comparison (tolerance of 1e-10) to handle floating-point p
 
 ### Logical
 
-Logical operators treat `0` as false and any non-zero value as true.
+Logical operators treat `0` as false and any non-zero value as true. Keywords are case-insensitive.
 
 | Operator | Description | Example |
 |----------|-------------|---------|
-| `&&` | And | `A > 0 && B > 0` |
-| `\|\|` | Or | `Shortage \|\| Emergency` |
-| `!` | Not | `!Active` |
+| `and` | And | `A > 0 and B > 0` |
+| `or` | Or | `Shortage or Emergency` |
+| `not` | Not | `not Active` |
 
 ### Operator Precedence
 
 From highest to lowest binding:
 
-1. `^` (exponentiation, right-associative)
+1. `**` (exponentiation, right-associative)
 2. `*`, `/`, `%` (multiplicative)
 3. `+`, `-` (additive)
 4. `==`, `!=`, `<`, `<=`, `>`, `>=` (comparison)
-5. `&&` (logical and)
-6. `||` (logical or)
+5. `and` (logical and)
+6. `or` (logical or)
 
 Use parentheses to override precedence: `(A + B) * C`
 
@@ -309,13 +309,13 @@ For reference, the formal grammar of the expression language:
 
 ```
 expr       = or_expr
-or_expr    = and_expr ( "||" and_expr )*
-and_expr   = comparison ( "&&" comparison )*
+or_expr    = and_expr ( "or" and_expr )*
+and_expr   = comparison ( "and" comparison )*
 comparison = addition ( ("==" | "!=" | "<" | "<=" | ">" | ">=") addition )?
 addition   = mult ( ("+" | "-") mult )*
 mult       = power ( ("*" | "/" | "%") power )*
-power      = unary ( "^" power )?
-unary      = ("-" | "!") unary | call
+power      = unary ( "**" power )?
+unary      = ("-" | "not") unary | call
 call       = primary ( "(" arglist? ")" )?
 primary    = NUMBER | IDENTIFIER | QUOTED_ID | "(" expr ")"
            | "IF" "(" expr "," expr "," expr ")"

@@ -1,6 +1,8 @@
 package com.deathrayresearch.forrester.app.canvas;
 
 import com.deathrayresearch.forrester.model.def.AuxDef;
+import com.deathrayresearch.forrester.model.def.CausalLinkDef;
+import com.deathrayresearch.forrester.model.def.CldVariableDef;
 import com.deathrayresearch.forrester.model.def.ConnectorRoute;
 import com.deathrayresearch.forrester.model.def.ConstantDef;
 import com.deathrayresearch.forrester.model.def.FlowDef;
@@ -45,6 +47,8 @@ public class ModelEditor {
     private final List<ConstantDef> constants = new ArrayList<>();
     private final List<ModuleInstanceDef> modules = new ArrayList<>();
     private final List<LookupTableDef> lookupTables = new ArrayList<>();
+    private final List<CldVariableDef> cldVariables = new ArrayList<>();
+    private final List<CausalLinkDef> causalLinks = new ArrayList<>();
     private final Set<String> nameIndex = new HashSet<>();
     private final List<ModelEditListener> listeners = new CopyOnWriteArrayList<>();
     private SimulationSettings simulationSettings;
@@ -54,6 +58,7 @@ public class ModelEditor {
     private int nextConstantId = 1;
     private int nextModuleId = 1;
     private int nextLookupId = 1;
+    private int nextCldVariableId = 1;
 
     public void addListener(ModelEditListener listener) {
         if (listener != null) {
@@ -117,6 +122,8 @@ public class ModelEditor {
         constants.clear();
         modules.clear();
         lookupTables.clear();
+        cldVariables.clear();
+        causalLinks.clear();
         nameIndex.clear();
 
         stocks.addAll(definition.stocks());
@@ -125,6 +132,8 @@ public class ModelEditor {
         constants.addAll(definition.constants());
         modules.addAll(definition.modules());
         lookupTables.addAll(definition.lookupTables());
+        cldVariables.addAll(definition.cldVariables());
+        causalLinks.addAll(definition.causalLinks());
         simulationSettings = definition.defaultSimulation();
 
         stocks.forEach(s -> nameIndex.add(s.name()));
@@ -133,6 +142,7 @@ public class ModelEditor {
         constants.forEach(c -> nameIndex.add(c.name()));
         modules.forEach(m -> nameIndex.add(m.instanceName()));
         lookupTables.forEach(lt -> nameIndex.add(lt.name()));
+        cldVariables.forEach(v -> nameIndex.add(v.name()));
 
         // Set per-type counters past any existing numeric suffix
         nextStockId = maxIdFrom(stocks.stream().map(StockDef::name), "Stock ");
@@ -141,6 +151,7 @@ public class ModelEditor {
         nextConstantId = maxIdFrom(constants.stream().map(ConstantDef::name), "Constant ");
         nextModuleId = maxIdFrom(modules.stream().map(ModuleInstanceDef::instanceName), "Module ");
         nextLookupId = maxIdFrom(lookupTables.stream().map(LookupTableDef::name), "Lookup ");
+        nextCldVariableId = maxIdFrom(cldVariables.stream().map(CldVariableDef::name), "Variable ");
     }
 
     private static int maxIdFrom(java.util.stream.Stream<String> names, String prefix) {
@@ -390,10 +401,15 @@ public class ModelEditor {
                 // aux removed — fall through to clean equations
             } else if (!constants.removeIf(c -> c.name().equals(name))) {
                 if (!lookupTables.removeIf(lt -> lt.name().equals(name))) {
-                    modules.removeIf(m -> m.instanceName().equals(name));
+                    if (!modules.removeIf(m -> m.instanceName().equals(name))) {
+                        cldVariables.removeIf(v -> v.name().equals(name));
+                    }
                 }
             }
         }
+
+        // Remove causal links referencing the deleted element
+        causalLinks.removeIf(link -> link.from().equals(name) || link.to().equals(name));
 
         // Clean equation references: replace deleted element's token with "0"
         String deletedToken = name.replace(' ', '_');
@@ -435,7 +451,9 @@ public class ModelEditor {
                         m.inputBindings(), m.outputBindings()))
                 || renameInList(lookupTables, oldName, newName, LookupTableDef::name,
                 (lt, n) -> new LookupTableDef(n, lt.comment(),
-                        lt.xValues(), lt.yValues(), lt.interpolation()));
+                        lt.xValues(), lt.yValues(), lt.interpolation()))
+                || renameInList(cldVariables, oldName, newName, CldVariableDef::name,
+                (v, n) -> new CldVariableDef(n, v.comment()));
 
         if (!found) {
             return false;
@@ -443,6 +461,20 @@ public class ModelEditor {
 
         nameIndex.remove(oldName);
         nameIndex.add(newName);
+
+        // Update causal link references
+        for (int i = 0; i < causalLinks.size(); i++) {
+            CausalLinkDef link = causalLinks.get(i);
+            boolean fromMatch = oldName.equals(link.from());
+            boolean toMatch = oldName.equals(link.to());
+            if (fromMatch || toMatch) {
+                causalLinks.set(i, new CausalLinkDef(
+                        fromMatch ? newName : link.from(),
+                        toMatch ? newName : link.to(),
+                        link.polarity(),
+                        link.comment()));
+            }
+        }
 
         // Update flow source/sink references
         for (int i = 0; i < flows.size(); i++) {
@@ -997,6 +1029,90 @@ public class ModelEditor {
         return Collections.unmodifiableList(lookupTables);
     }
 
+    // === CLD Variables and Causal Links ===
+
+    /**
+     * Adds a new CLD variable with an auto-generated name.
+     * @return the name of the created variable
+     */
+    public String addCldVariable() {
+        checkFxThread();
+        String name = "Variable " + nextCldVariableId++;
+        cldVariables.add(new CldVariableDef(name));
+        nameIndex.add(name);
+        fireElementAdded(name, "CLD Variable");
+        return name;
+    }
+
+    /**
+     * Adds a CLD variable copied from a template.
+     * @return the name of the created variable
+     */
+    public String addCldVariableFrom(CldVariableDef template) {
+        checkFxThread();
+        String name = "Variable " + nextCldVariableId++;
+        cldVariables.add(new CldVariableDef(name, template.comment()));
+        nameIndex.add(name);
+        fireElementAdded(name, "CLD Variable");
+        return name;
+    }
+
+    /**
+     * Sets the comment on a CLD variable.
+     * @return true if the variable was found and updated
+     */
+    public boolean setCldVariableComment(String name, String comment) {
+        checkFxThread();
+        return updateInList(cldVariables, name, CldVariableDef::name,
+                v -> new CldVariableDef(name, comment));
+    }
+
+    public List<CldVariableDef> getCldVariables() {
+        return Collections.unmodifiableList(cldVariables);
+    }
+
+    /**
+     * Adds a causal link between two elements.
+     * @return true if both endpoints exist and the link was added
+     */
+    public boolean addCausalLink(String from, String to, CausalLinkDef.Polarity polarity) {
+        checkFxThread();
+        if (!hasElement(from) || !hasElement(to)) {
+            return false;
+        }
+        causalLinks.add(new CausalLinkDef(from, to, polarity));
+        return true;
+    }
+
+    /**
+     * Removes a causal link between two elements.
+     * @return true if the link was found and removed
+     */
+    public boolean removeCausalLink(String from, String to) {
+        checkFxThread();
+        return causalLinks.removeIf(link -> link.from().equals(from) && link.to().equals(to));
+    }
+
+    /**
+     * Sets the polarity of an existing causal link.
+     * @return true if the link was found and updated
+     */
+    public boolean setCausalLinkPolarity(String from, String to, CausalLinkDef.Polarity polarity) {
+        checkFxThread();
+        for (int i = 0; i < causalLinks.size(); i++) {
+            CausalLinkDef link = causalLinks.get(i);
+            if (link.from().equals(from) && link.to().equals(to)) {
+                causalLinks.set(i, new CausalLinkDef(from, to, polarity, link.comment()));
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public List<CausalLinkDef> getCausalLinks() {
+        return Collections.unmodifiableList(causalLinks);
+    }
+
     /**
      * Rebuilds an immutable {@link ModelDefinition} snapshot from the current editor state.
      */
@@ -1021,6 +1137,8 @@ public class ModelEditor {
                 List.copyOf(lookupTables),
                 List.copyOf(modules),
                 List.of(),
+                List.copyOf(cldVariables),
+                List.copyOf(causalLinks),
                 view != null ? List.of(view) : List.of(),
                 simulationSettings
         );

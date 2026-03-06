@@ -179,15 +179,15 @@ class VensimExporterTest {
 
         @Test
         void shouldTranslateLogicalOperators() {
-            assertThat(VensimExporter.toVensimExpr("a && b"))
+            assertThat(VensimExporter.toVensimExpr("a and b"))
                     .contains(":AND:");
-            assertThat(VensimExporter.toVensimExpr("a || b"))
+            assertThat(VensimExporter.toVensimExpr("a or b"))
                     .contains(":OR:");
         }
 
         @Test
         void shouldTranslateNotOperator() {
-            assertThat(VensimExporter.toVensimExpr("!(x > 0)"))
+            assertThat(VensimExporter.toVensimExpr("not(x > 0)"))
                     .contains(":NOT:");
         }
 

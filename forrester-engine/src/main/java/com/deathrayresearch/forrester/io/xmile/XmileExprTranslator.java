@@ -30,14 +30,17 @@ public final class XmileExprTranslator {
             "(?i)\\bSMTH3\\s*\\(");
     private static final Pattern SMTH1_PATTERN = Pattern.compile(
             "(?i)\\bSMTH1\\s*\\(");
+    private static final Pattern CARET_PATTERN = Pattern.compile("\\^");
     private static final Pattern TIME_XMILE_PATTERN = Pattern.compile(
             "(?i)\\bTime\\b");
 
     // --- Forrester → XMILE patterns ---
     private static final Pattern IF_FUNC_PATTERN = Pattern.compile(
             "(?i)\\bIF\\s*\\(");
-    private static final Pattern AND_OP_PATTERN = Pattern.compile("&&");
-    private static final Pattern OR_OP_PATTERN = Pattern.compile("\\|\\|");
+    private static final Pattern AND_OP_PATTERN = Pattern.compile("\\band\\b");
+    private static final Pattern OR_OP_PATTERN = Pattern.compile("\\bor\\b");
+    private static final Pattern NOT_OP_PATTERN = Pattern.compile("\\bnot\\b");
+    private static final Pattern DOUBLE_STAR_PATTERN = Pattern.compile("\\*\\*");
     private static final Pattern DOUBLE_EQ_PATTERN = Pattern.compile("==");
     private static final Pattern NOT_EQ_PATTERN = Pattern.compile("!=");
     private static final Pattern TIME_FORRESTER_PATTERN = Pattern.compile(
@@ -75,12 +78,15 @@ public final class XmileExprTranslator {
         // 1. IF_THEN_ELSE(...) or IF THEN ELSE(...) → IF(...)
         expr = IF_THEN_ELSE_PATTERN.matcher(expr).replaceAll("IF(");
 
-        // 2. Logical operators: AND → &&, OR → ||, NOT → !
-        expr = AND_KEYWORD_PATTERN.matcher(expr).replaceAll("&&");
-        expr = OR_KEYWORD_PATTERN.matcher(expr).replaceAll("||");
+        // 2. Logical operators: AND → and, OR → or, NOT → not
+        expr = AND_KEYWORD_PATTERN.matcher(expr).replaceAll("and");
+        expr = OR_KEYWORD_PATTERN.matcher(expr).replaceAll("or");
         expr = translateNotKeyword(expr);
 
-        // 3. Comparison operators: <> → !=, = → == (single = only)
+        // 3. ^ → ** (XMILE uses ^ for power, Forrester uses **)
+        expr = CARET_PATTERN.matcher(expr).replaceAll("**");
+
+        // 4. Comparison operators: <> → !=, = → == (single = only)
         expr = INEQUALITY_PATTERN.matcher(expr).replaceAll("!=");
         expr = EQUALITY_SINGLE_PATTERN.matcher(expr).replaceAll("==");
 
@@ -116,12 +122,15 @@ public final class XmileExprTranslator {
         // 1. IF(...) → IF_THEN_ELSE(...)
         expr = IF_FUNC_PATTERN.matcher(expr).replaceAll("IF_THEN_ELSE(");
 
-        // 2. Logical operators: && → AND, || → OR, ! → NOT
-        expr = AND_OP_PATTERN.matcher(expr).replaceAll(" AND ");
-        expr = OR_OP_PATTERN.matcher(expr).replaceAll(" OR ");
-        expr = translateNotOperator(expr);
+        // 2. Logical operators: and → AND, or → OR, not → NOT
+        expr = AND_OP_PATTERN.matcher(expr).replaceAll("AND");
+        expr = OR_OP_PATTERN.matcher(expr).replaceAll("OR");
+        expr = NOT_OP_PATTERN.matcher(expr).replaceAll("NOT");
 
-        // 3. Comparison operators: == → =, != → <>
+        // 3. ** → ^ (Forrester uses ** for power, XMILE uses ^)
+        expr = DOUBLE_STAR_PATTERN.matcher(expr).replaceAll("^");
+
+        // 4. Comparison operators: == → =, != → <>
         expr = NOT_EQ_PATTERN.matcher(expr).replaceAll("<>");
         expr = DOUBLE_EQ_PATTERN.matcher(expr).replaceAll("=");
 
@@ -132,33 +141,17 @@ public final class XmileExprTranslator {
     }
 
     /**
-     * Translates the XMILE NOT keyword to Forrester ! operator.
-     * NOT is followed by its operand — we wrap it appropriately.
+     * Translates the XMILE NOT keyword to Forrester "not" keyword.
+     * NOT is followed by its operand.
      */
     private static String translateNotKeyword(String expr) {
         Matcher m = NOT_KEYWORD_PATTERN.matcher(expr);
         StringBuilder sb = new StringBuilder();
         while (m.find()) {
-            // Check we're not inside another word (word boundary already handled by \b)
-            m.appendReplacement(sb, "!");
+            m.appendReplacement(sb, "not");
         }
         m.appendTail(sb);
         return sb.toString();
     }
 
-    /**
-     * Translates the Forrester ! operator to XMILE NOT keyword.
-     * We replace standalone ! (not part of !=) with NOT.
-     */
-    private static String translateNotOperator(String expr) {
-        StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < expr.length(); i++) {
-            if (expr.charAt(i) == '!' && (i + 1 >= expr.length() || expr.charAt(i + 1) != '=')) {
-                sb.append("NOT ");
-            } else {
-                sb.append(expr.charAt(i));
-            }
-        }
-        return sb.toString();
-    }
 }

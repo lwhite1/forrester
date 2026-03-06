@@ -127,7 +127,7 @@ class ExprParserTest {
 
         @Test
         void shouldParsePower() {
-            Expr result = ExprParser.parse("a ^ b");
+            Expr result = ExprParser.parse("a ** b");
             assertThat(result).isEqualTo(
                     new Expr.BinaryOp(new Expr.Ref("a"), BinaryOperator.POW, new Expr.Ref("b")));
         }
@@ -150,14 +150,14 @@ class ExprParserTest {
 
         @Test
         void shouldParseLogicalOr() {
-            Expr result = ExprParser.parse("a || b");
+            Expr result = ExprParser.parse("a or b");
             assertThat(result).isEqualTo(
                     new Expr.BinaryOp(new Expr.Ref("a"), BinaryOperator.OR, new Expr.Ref("b")));
         }
 
         @Test
         void shouldParseLogicalAnd() {
-            Expr result = ExprParser.parse("a && b");
+            Expr result = ExprParser.parse("a and b");
             assertThat(result).isEqualTo(
                     new Expr.BinaryOp(new Expr.Ref("a"), BinaryOperator.AND, new Expr.Ref("b")));
         }
@@ -189,8 +189,8 @@ class ExprParserTest {
 
         @Test
         void shouldRespectPowerRightAssociativity() {
-            // a ^ b ^ c  should parse as  a ^ (b ^ c)
-            Expr result = ExprParser.parse("a ^ b ^ c");
+            // a ** b ** c  should parse as  a ** (b ** c)
+            Expr result = ExprParser.parse("a ** b ** c");
             Expr.BinaryOp top = (Expr.BinaryOp) result;
             assertThat(top.operator()).isEqualTo(BinaryOperator.POW);
             assertThat(top.left()).isEqualTo(new Expr.Ref("a"));
@@ -213,9 +213,9 @@ class ExprParserTest {
 
         @Test
         void shouldHandleComplexPrecedence() {
-            // a || b && c == d + e * f
-            // Should parse as: a || (b && ((c == (d + (e * f)))))
-            Expr result = ExprParser.parse("a || b && c == d + e * f");
+            // a or b and c == d + e * f
+            // Should parse as: a or (b and ((c == (d + (e * f)))))
+            Expr result = ExprParser.parse("a or b and c == d + e * f");
             Expr.BinaryOp top = (Expr.BinaryOp) result;
             assertThat(top.operator()).isEqualTo(BinaryOperator.OR);
         }
@@ -233,7 +233,7 @@ class ExprParserTest {
 
         @Test
         void shouldParseNot() {
-            Expr result = ExprParser.parse("!flag");
+            Expr result = ExprParser.parse("not flag");
             assertThat(result).isEqualTo(new Expr.UnaryOp(UnaryOperator.NOT, new Expr.Ref("flag")));
         }
 
@@ -353,7 +353,7 @@ class ExprParserTest {
 
         @Test
         void shouldParseExpressionWithMixedOps() {
-            Expr result = ExprParser.parse("a + b * c - d / e ^ f");
+            Expr result = ExprParser.parse("a + b * c - d / e ** f");
             assertThat(result).isNotNull();
         }
     }
@@ -465,13 +465,13 @@ class ExprParserTest {
 
         @Test
         void shouldRoundTripPower() {
-            assertRoundTrips("a ^ b ^ c");
+            assertRoundTrips("a ** b ** c");
         }
 
         @Test
         void shouldRoundTripLeftAssociativePower() {
-            // (a ^ b) ^ c must preserve parens through round-trip
-            assertRoundTrips("(a ^ b) ^ c");
+            // (a ** b) ** c must preserve parens through round-trip
+            assertRoundTrips("(a ** b) ** c");
         }
     }
 

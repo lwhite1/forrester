@@ -19,6 +19,8 @@ public class ModelDefinitionBuilder {
     private final List<LookupTableDef> lookupTables = new ArrayList<>();
     private final List<ModuleInstanceDef> modules = new ArrayList<>();
     private final List<SubscriptDef> subscripts = new ArrayList<>();
+    private final List<CldVariableDef> cldVariables = new ArrayList<>();
+    private final List<CausalLinkDef> causalLinks = new ArrayList<>();
     private final List<ViewDef> views = new ArrayList<>();
     private SimulationSettings defaultSimulation;
 
@@ -112,6 +114,31 @@ public class ModelDefinitionBuilder {
         return this;
     }
 
+    public ModelDefinitionBuilder cldVariable(String name) {
+        cldVariables.add(new CldVariableDef(name));
+        return this;
+    }
+
+    public ModelDefinitionBuilder cldVariable(String name, String comment) {
+        cldVariables.add(new CldVariableDef(name, comment));
+        return this;
+    }
+
+    public ModelDefinitionBuilder cldVariable(CldVariableDef def) {
+        cldVariables.add(def);
+        return this;
+    }
+
+    public ModelDefinitionBuilder causalLink(String from, String to, CausalLinkDef.Polarity polarity) {
+        causalLinks.add(new CausalLinkDef(from, to, polarity));
+        return this;
+    }
+
+    public ModelDefinitionBuilder causalLink(CausalLinkDef def) {
+        causalLinks.add(def);
+        return this;
+    }
+
     public ModelDefinitionBuilder view(ViewDef viewDef) {
         views.add(viewDef);
         return this;
@@ -127,6 +154,7 @@ public class ModelDefinitionBuilder {
         return new ModelDefinition(
                 name, comment, moduleInterface,
                 stocks, flows, auxiliaries, constants, lookupTables,
-                modules, subscripts, views, defaultSimulation);
+                modules, subscripts, cldVariables, causalLinks,
+                views, defaultSimulation);
     }
 }

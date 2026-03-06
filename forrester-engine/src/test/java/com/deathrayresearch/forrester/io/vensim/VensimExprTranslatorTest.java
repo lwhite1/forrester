@@ -88,28 +88,28 @@ class VensimExprTranslatorTest {
         @Test
         void shouldTranslateAnd() {
             var result = VensimExprTranslator.translate("x > 0 :AND: y > 0", "var", EMPTY_NAMES);
-            assertThat(result.expression()).isEqualTo("x > 0 && y > 0");
+            assertThat(result.expression()).isEqualTo("x > 0  and  y > 0");
         }
 
         @Test
         void shouldTranslateOr() {
             var result = VensimExprTranslator.translate("x > 0 :OR: y > 0", "var", EMPTY_NAMES);
-            assertThat(result.expression()).isEqualTo("x > 0 || y > 0");
+            assertThat(result.expression()).isEqualTo("x > 0  or  y > 0");
         }
 
         @Test
         void shouldTranslateNot() {
             var result = VensimExprTranslator.translate(":NOT: x > 0", "var", EMPTY_NAMES);
-            assertThat(result.expression()).isEqualTo("!(x > 0)");
+            assertThat(result.expression()).isEqualTo("not(x > 0)");
         }
 
         @Test
         void shouldTranslateNotWithAndBoundary() {
             var result = VensimExprTranslator.translate(
-                    ":NOT: x > 0 && y < 10", "var", EMPTY_NAMES);
-            // :NOT: captures up to the && boundary
-            assertThat(result.expression()).startsWith("!(x > 0)");
-            assertThat(result.expression()).contains("&&");
+                    ":NOT: x > 0 :AND: y < 10", "var", EMPTY_NAMES);
+            // :NOT: captures up to the and boundary
+            assertThat(result.expression()).startsWith("not(x > 0)");
+            assertThat(result.expression()).contains("and");
             assertThat(result.expression()).contains("y < 10");
         }
     }
@@ -322,7 +322,7 @@ class VensimExprTranslatorTest {
             assertThat(result.expression()).contains("IF(");
             assertThat(result.expression()).contains("Contact_Rate");
             assertThat(result.expression()).contains("Total_Population");
-            assertThat(result.expression()).contains("&&");
+            assertThat(result.expression()).contains("and");
         }
     }
 }

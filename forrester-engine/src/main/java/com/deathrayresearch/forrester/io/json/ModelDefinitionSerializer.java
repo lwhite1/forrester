@@ -1,6 +1,8 @@
 package com.deathrayresearch.forrester.io.json;
 
 import com.deathrayresearch.forrester.model.def.AuxDef;
+import com.deathrayresearch.forrester.model.def.CausalLinkDef;
+import com.deathrayresearch.forrester.model.def.CldVariableDef;
 import com.deathrayresearch.forrester.model.def.ConnectorRoute;
 import com.deathrayresearch.forrester.model.def.ConstantDef;
 import com.deathrayresearch.forrester.model.def.ElementPlacement;
@@ -120,6 +122,12 @@ public class ModelDefinitionSerializer {
         }
         if (!def.subscripts().isEmpty()) {
             root.set("subscripts", serializeSubscripts(def.subscripts()));
+        }
+        if (!def.cldVariables().isEmpty()) {
+            root.set("cldVariables", serializeCldVariables(def.cldVariables()));
+        }
+        if (!def.causalLinks().isEmpty()) {
+            root.set("causalLinks", serializeCausalLinks(def.causalLinks()));
         }
         if (!def.views().isEmpty()) {
             root.set("views", serializeViews(def.views()));
@@ -337,6 +345,34 @@ public class ModelDefinitionSerializer {
         return node;
     }
 
+    private ArrayNode serializeCldVariables(List<CldVariableDef> vars) {
+        ArrayNode arr = mapper.createArrayNode();
+        for (CldVariableDef v : vars) {
+            ObjectNode node = mapper.createObjectNode();
+            node.put("name", v.name());
+            if (v.comment() != null) {
+                node.put("comment", v.comment());
+            }
+            arr.add(node);
+        }
+        return arr;
+    }
+
+    private ArrayNode serializeCausalLinks(List<CausalLinkDef> links) {
+        ArrayNode arr = mapper.createArrayNode();
+        for (CausalLinkDef link : links) {
+            ObjectNode node = mapper.createObjectNode();
+            node.put("from", link.from());
+            node.put("to", link.to());
+            node.put("polarity", link.polarity().name());
+            if (link.comment() != null) {
+                node.put("comment", link.comment());
+            }
+            arr.add(node);
+        }
+        return arr;
+    }
+
     // === Deserialization ===
 
     private ModelDefinition fromJsonNode(JsonNode root) {
@@ -440,6 +476,30 @@ public class ModelDefinitionSerializer {
             }
         }
 
+        List<CldVariableDef> cldVariables = new ArrayList<>();
+        if (root.has("cldVariables")) {
+            for (JsonNode n : root.get("cldVariables")) {
+                cldVariables.add(new CldVariableDef(
+                        requiredText(n, "name"),
+                        textOrNull(n, "comment")));
+            }
+        }
+
+        List<CausalLinkDef> causalLinks = new ArrayList<>();
+        if (root.has("causalLinks")) {
+            for (JsonNode n : root.get("causalLinks")) {
+                String polarityStr = textOrNull(n, "polarity");
+                CausalLinkDef.Polarity polarity = polarityStr != null
+                        ? CausalLinkDef.Polarity.valueOf(polarityStr)
+                        : CausalLinkDef.Polarity.UNKNOWN;
+                causalLinks.add(new CausalLinkDef(
+                        requiredText(n, "from"),
+                        requiredText(n, "to"),
+                        polarity,
+                        textOrNull(n, "comment")));
+            }
+        }
+
         List<ViewDef> views = new ArrayList<>();
         if (root.has("views")) {
             for (JsonNode n : root.get("views")) {
@@ -458,7 +518,8 @@ public class ModelDefinitionSerializer {
 
         return new ModelDefinition(name, comment, moduleInterface,
                 stocks, flows, auxiliaries, constants, lookupTables,
-                modules, subscripts, views, defaultSimulation);
+                modules, subscripts, cldVariables, causalLinks,
+                views, defaultSimulation);
     }
 
     private ViewDef deserializeView(JsonNode n) {

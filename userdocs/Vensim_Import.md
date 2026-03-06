@@ -34,9 +34,9 @@ All settings from the `.Control` group are extracted (case-insensitive):
 
 | Vensim | Forrester |
 |--------|-----------|
-| `:AND:` | `&&` |
-| `:OR:` | `\|\|` |
-| `:NOT:` | `!` (parenthesized) |
+| `:AND:` | `and` |
+| `:OR:` | `or` |
+| `:NOT:` | `not` (parenthesized) |
 
 **Function translation:**
 
