@@ -112,4 +112,47 @@ public final class FeedbackLoopRenderer {
         gc.setLineDashes();
         gc.strokeLine(fromX, fromY, toX, toY);
     }
+
+    /**
+     * Draws a curved loop edge highlight for causal links (quadratic Bézier).
+     */
+    public static void drawLoopEdgeCurved(GraphicsContext gc,
+                                           double fromX, double fromY,
+                                           double cpX, double cpY,
+                                           double toX, double toY) {
+        gc.setStroke(ColorPalette.LOOP_EDGE);
+        gc.setLineWidth(EDGE_LINE_WIDTH);
+        gc.setLineDashes();
+
+        gc.beginPath();
+        gc.moveTo(fromX, fromY);
+        int segments = 30;
+        for (int i = 1; i <= segments; i++) {
+            double t = (double) i / segments;
+            double[] pt = CausalLinkGeometry.evaluate(fromX, fromY, cpX, cpY, toX, toY, t);
+            gc.lineTo(pt[0], pt[1]);
+        }
+        gc.stroke();
+    }
+
+    /**
+     * Draws a cubic Bézier loop edge highlight for self-loop causal links.
+     */
+    public static void drawLoopEdgeCubic(GraphicsContext gc, double[] loopPts) {
+        gc.setStroke(ColorPalette.LOOP_EDGE);
+        gc.setLineWidth(EDGE_LINE_WIDTH);
+        gc.setLineDashes();
+
+        gc.beginPath();
+        gc.moveTo(loopPts[0], loopPts[1]);
+        int segments = 30;
+        for (int i = 1; i <= segments; i++) {
+            double t = (double) i / segments;
+            double[] pt = CausalLinkGeometry.evaluateCubic(
+                    loopPts[0], loopPts[1], loopPts[2], loopPts[3],
+                    loopPts[4], loopPts[5], loopPts[6], loopPts[7], t);
+            gc.lineTo(pt[0], pt[1]);
+        }
+        gc.stroke();
+    }
 }

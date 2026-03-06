@@ -76,6 +76,48 @@ public final class SelectionRenderer {
     }
 
     /**
+     * Draws a curved hover highlight for a causal link (quadratic Bézier).
+     */
+    public static void drawConnectionHoverCurved(GraphicsContext gc,
+                                                  double fromX, double fromY,
+                                                  double cpX, double cpY,
+                                                  double toX, double toY) {
+        gc.setStroke(ColorPalette.HOVER);
+        gc.setLineWidth(3.0);
+        gc.setLineDashes();
+        strokeQuadCurve(gc, fromX, fromY, cpX, cpY, toX, toY);
+    }
+
+    /**
+     * Draws a curved selection highlight for a causal link (quadratic Bézier).
+     */
+    public static void drawConnectionSelectionCurved(GraphicsContext gc,
+                                                      double fromX, double fromY,
+                                                      double cpX, double cpY,
+                                                      double toX, double toY) {
+        gc.setStroke(SELECTION_COLOR);
+        gc.setLineWidth(3.0);
+        gc.setLineDashes(SELECTION_DASH_LENGTH, SELECTION_DASH_GAP);
+        strokeQuadCurve(gc, fromX, fromY, cpX, cpY, toX, toY);
+        gc.setLineDashes();
+    }
+
+    private static void strokeQuadCurve(GraphicsContext gc,
+                                         double fromX, double fromY,
+                                         double cpX, double cpY,
+                                         double toX, double toY) {
+        gc.beginPath();
+        gc.moveTo(fromX, fromY);
+        int segments = 30;
+        for (int i = 1; i <= segments; i++) {
+            double t = (double) i / segments;
+            double[] pt = CausalLinkGeometry.evaluate(fromX, fromY, cpX, cpY, toX, toY, t);
+            gc.lineTo(pt[0], pt[1]);
+        }
+        gc.stroke();
+    }
+
+    /**
      * Draws a hover indicator around the named element.
      * Uses a solid outline (no dashes, no handles) to distinguish from selection.
      */

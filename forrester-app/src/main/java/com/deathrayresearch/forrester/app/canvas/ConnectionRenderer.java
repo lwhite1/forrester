@@ -126,58 +126,155 @@ public final class ConnectionRenderer {
     }
 
     /**
-     * Draws a causal link: solid line with arrowhead and polarity label.
+     * Draws a causal link as a quadratic Bézier curve with arrowhead and polarity label.
      */
     public static void drawCausalLink(GraphicsContext gc,
                                       double fromX, double fromY,
                                       double toX, double toY,
+                                      CausalLinkGeometry.ControlPoint cp,
                                       CausalLinkDef.Polarity polarity) {
-        // Stop line at arrowhead base
-        double dx = toX - fromX;
-        double dy = toY - fromY;
-        double dist = Math.sqrt(dx * dx + dy * dy);
-        double lineToX = toX;
-        double lineToY = toY;
-        if (dist > LayoutMetrics.CAUSAL_ARROWHEAD_LENGTH) {
-            double ux = dx / dist;
-            double uy = dy / dist;
-            lineToX = toX - ux * LayoutMetrics.CAUSAL_ARROWHEAD_LENGTH;
-            lineToY = toY - uy * LayoutMetrics.CAUSAL_ARROWHEAD_LENGTH;
-        }
+        // Compute arrowhead placement along the curve
+        double[] ah = CausalLinkGeometry.arrowheadPoint(fromX, fromY, cp.x(), cp.y(),
+                toX, toY, LayoutMetrics.CAUSAL_ARROWHEAD_LENGTH);
+        double tipX = ah[0];
+        double tipY = ah[1];
+        double tanX = ah[2];
+        double tanY = ah[3];
+        double stopT = ah[4];
 
+        // Draw the curved line, stopping at the arrowhead base
         gc.setStroke(ColorPalette.CAUSAL_LINK);
         gc.setLineWidth(LayoutMetrics.CAUSAL_LINK_WIDTH);
         gc.setLineDashes();
-        gc.strokeLine(fromX, fromY, lineToX, lineToY);
 
-        drawArrowhead(gc, fromX, fromY, toX, toY,
+        gc.beginPath();
+        gc.moveTo(fromX, fromY);
+        // Approximate stop point: evaluate curve at stopT and use that as the quadratic target
+        double[] stopPt = CausalLinkGeometry.evaluate(fromX, fromY, cp.x(), cp.y(), toX, toY, stopT);
+        // Draw the curve using sampled line segments for precision
+        int segments = 30;
+        for (int i = 1; i <= segments; i++) {
+            double t = stopT * i / segments;
+            double[] pt = CausalLinkGeometry.evaluate(fromX, fromY, cp.x(), cp.y(), toX, toY, t);
+            gc.lineTo(pt[0], pt[1]);
+        }
+        gc.stroke();
+
+        // Arrowhead oriented along the curve tangent at the tip
+        drawArrowheadFromTangent(gc, tipX, tipY, tanX, tanY,
                 LayoutMetrics.CAUSAL_ARROWHEAD_LENGTH, LayoutMetrics.CAUSAL_ARROWHEAD_WIDTH,
                 ColorPalette.CAUSAL_LINK);
 
-        // Polarity label near the arrowhead
+        // Polarity label near the arrowhead, offset perpendicular to the curve tangent
+        double dx = toX - fromX;
+        double dy = toY - fromY;
+        double dist = Math.sqrt(dx * dx + dy * dy);
         if (dist > 1) {
             Color labelColor = switch (polarity) {
                 case POSITIVE -> ColorPalette.CAUSAL_POSITIVE;
                 case NEGATIVE -> ColorPalette.CAUSAL_NEGATIVE;
                 case UNKNOWN -> ColorPalette.CAUSAL_UNKNOWN;
             };
-            String label = polarity.symbol();
 
-            // Position label offset perpendicular to the line, near the target end.
-            // Scale both offsets to avoid overshooting on short links.
-            double ux = dx / dist;
-            double uy = dy / dist;
-            double alongOffset = Math.min(20, dist * 0.4);
-            double perpOffset = Math.min(12, Math.max(8, dist * 0.3));
-            double labelX = toX - ux * alongOffset + (-uy) * perpOffset;
-            double labelY = toY - uy * alongOffset + ux * perpOffset;
+            // Place label at t ≈ 0.8 on the curve, offset perpendicular to the tangent
+            double labelT = 0.8;
+            double[] labelPt = CausalLinkGeometry.evaluate(fromX, fromY, cp.x(), cp.y(), toX, toY, labelT);
+            double[] labelTan = CausalLinkGeometry.tangent(fromX, fromY, cp.x(), cp.y(), toX, toY, labelT);
+            double tanDist = Math.sqrt(labelTan[0] * labelTan[0] + labelTan[1] * labelTan[1]);
+            if (tanDist > 0) {
+                double perpX = -labelTan[1] / tanDist;
+                double perpY = labelTan[0] / tanDist;
+                double perpOffset = 12;
+                double labelX = labelPt[0] + perpX * perpOffset;
+                double labelY = labelPt[1] + perpY * perpOffset;
 
-            gc.setFill(labelColor);
-            gc.setFont(LayoutMetrics.CAUSAL_POLARITY_FONT);
-            gc.setTextAlign(TextAlignment.CENTER);
-            gc.setTextBaseline(VPos.CENTER);
-            gc.fillText(label, labelX, labelY);
+                gc.setFill(labelColor);
+                gc.setFont(LayoutMetrics.CAUSAL_POLARITY_FONT);
+                gc.setTextAlign(TextAlignment.CENTER);
+                gc.setTextBaseline(VPos.CENTER);
+                gc.fillText(polarity.symbol(), labelX, labelY);
+            }
         }
+    }
+
+    /**
+     * Draws a self-loop causal link as a cubic Bézier curve.
+     */
+    public static void drawCausalLinkSelfLoop(GraphicsContext gc,
+                                               double[] loopPts,
+                                               CausalLinkDef.Polarity polarity) {
+        double startX = loopPts[0], startY = loopPts[1];
+        double cp1X = loopPts[2], cp1Y = loopPts[3];
+        double cp2X = loopPts[4], cp2Y = loopPts[5];
+        double endX = loopPts[6], endY = loopPts[7];
+
+        // Draw curve
+        gc.setStroke(ColorPalette.CAUSAL_LINK);
+        gc.setLineWidth(LayoutMetrics.CAUSAL_LINK_WIDTH);
+        gc.setLineDashes();
+
+        int segments = 30;
+        gc.beginPath();
+        gc.moveTo(startX, startY);
+        // Stop a bit before the end for the arrowhead
+        double stopT = 0.9;
+        for (int i = 1; i <= segments; i++) {
+            double t = stopT * i / segments;
+            double[] pt = CausalLinkGeometry.evaluateCubic(
+                    startX, startY, cp1X, cp1Y, cp2X, cp2Y, endX, endY, t);
+            gc.lineTo(pt[0], pt[1]);
+        }
+        gc.stroke();
+
+        // Arrowhead at the end
+        double[] tan = CausalLinkGeometry.tangentCubic(
+                startX, startY, cp1X, cp1Y, cp2X, cp2Y, endX, endY, 1.0);
+        drawArrowheadFromTangent(gc, endX, endY, tan[0], tan[1],
+                LayoutMetrics.CAUSAL_ARROWHEAD_LENGTH, LayoutMetrics.CAUSAL_ARROWHEAD_WIDTH,
+                ColorPalette.CAUSAL_LINK);
+
+        // Polarity label at the top of the loop
+        double[] midPt = CausalLinkGeometry.evaluateCubic(
+                startX, startY, cp1X, cp1Y, cp2X, cp2Y, endX, endY, 0.5);
+        Color labelColor = switch (polarity) {
+            case POSITIVE -> ColorPalette.CAUSAL_POSITIVE;
+            case NEGATIVE -> ColorPalette.CAUSAL_NEGATIVE;
+            case UNKNOWN -> ColorPalette.CAUSAL_UNKNOWN;
+        };
+        gc.setFill(labelColor);
+        gc.setFont(LayoutMetrics.CAUSAL_POLARITY_FONT);
+        gc.setTextAlign(TextAlignment.CENTER);
+        gc.setTextBaseline(VPos.CENTER);
+        gc.fillText(polarity.symbol(), midPt[0], midPt[1] - 10);
+    }
+
+    /**
+     * Draws a filled arrowhead at (tipX,tipY) oriented along the given tangent vector.
+     */
+    private static void drawArrowheadFromTangent(GraphicsContext gc,
+                                                  double tipX, double tipY,
+                                                  double tanX, double tanY,
+                                                  double length, double width,
+                                                  javafx.scene.paint.Color color) {
+        double dist = Math.sqrt(tanX * tanX + tanY * tanY);
+        if (dist < 1e-9) {
+            return;
+        }
+
+        double ux = tanX / dist;
+        double uy = tanY / dist;
+
+        double baseX = tipX - ux * length;
+        double baseY = tipY - uy * length;
+
+        double perpX = -uy * width / 2;
+        double perpY = ux * width / 2;
+
+        double[] xPoints = {tipX, baseX + perpX, baseX - perpX};
+        double[] yPoints = {tipY, baseY + perpY, baseY - perpY};
+
+        gc.setFill(color);
+        gc.fillPolygon(xPoints, yPoints, 3);
     }
 
     /**

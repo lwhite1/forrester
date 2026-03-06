@@ -91,7 +91,7 @@ public final class HitTester {
     /**
      * Returns the ConnectionId of the causal link at the given world coordinates,
      * or null if no causal link is hit. Tests in reverse order (last-drawn first).
-     * Clips endpoints to element borders before computing distance.
+     * Uses curved (quadratic Bézier) distance for hit-testing.
      */
     public static ConnectionId hitTestCausalLink(CanvasState state,
                                                   List<CausalLinkDef> causalLinks,
@@ -107,14 +107,33 @@ public final class HitTester {
 
             double fromX = state.getX(fromName);
             double fromY = state.getY(fromName);
-            double toX = state.getX(toName);
-            double toY = state.getY(toName);
 
-            FlowGeometry.Point2D clippedFrom = FlowGeometry.clipToElement(state, fromName, toX, toY);
-            FlowGeometry.Point2D clippedTo = FlowGeometry.clipToElement(state, toName, fromX, fromY);
+            double dist;
 
-            double dist = pointToSegmentDistance(worldX, worldY,
-                    clippedFrom.x(), clippedFrom.y(), clippedTo.x(), clippedTo.y());
+            if (fromName.equals(toName)) {
+                // Self-loop: hit-test against cubic Bézier
+                double halfW = LayoutMetrics.effectiveWidth(state, fromName) / 2;
+                double halfH = LayoutMetrics.effectiveHeight(state, fromName) / 2;
+                double[] lp = CausalLinkGeometry.selfLoopPoints(fromX, fromY, halfW, halfH);
+                dist = CausalLinkGeometry.pointToCubicDistance(worldX, worldY,
+                        lp[0], lp[1], lp[2], lp[3], lp[4], lp[5], lp[6], lp[7]);
+            } else {
+                double toX = state.getX(toName);
+                double toY = state.getY(toName);
+
+                CausalLinkGeometry.ControlPoint cp = CausalLinkGeometry.controlPoint(
+                        fromX, fromY, toX, toY, fromName, toName, causalLinks);
+
+                FlowGeometry.Point2D clippedFrom = FlowGeometry.clipToElement(
+                        state, fromName, cp.x(), cp.y());
+                FlowGeometry.Point2D clippedTo = FlowGeometry.clipToElement(
+                        state, toName, cp.x(), cp.y());
+
+                dist = CausalLinkGeometry.pointToCurveDistance(worldX, worldY,
+                        clippedFrom.x(), clippedFrom.y(),
+                        cp.x(), cp.y(),
+                        clippedTo.x(), clippedTo.y());
+            }
 
             if (dist <= CONNECTION_HIT_TOLERANCE) {
                 return new ConnectionId(fromName, toName);

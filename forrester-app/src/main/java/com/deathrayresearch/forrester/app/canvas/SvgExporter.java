@@ -601,66 +601,124 @@ public final class SvgExporter {
     // --- Causal links ---
 
     private static void writeCausalLinks(PrintWriter w, CanvasState state, ModelEditor editor) {
-        for (CausalLinkDef link : editor.getCausalLinks()) {
+        List<CausalLinkDef> allLinks = editor.getCausalLinks();
+
+        for (CausalLinkDef link : allLinks) {
             if (!state.hasElement(link.from()) || !state.hasElement(link.to())) {
                 continue;
             }
 
             double fromX = state.getX(link.from());
             double fromY = state.getY(link.from());
+
+            // Self-loop
+            if (link.from().equals(link.to())) {
+                double halfW = LayoutMetrics.effectiveWidth(state, link.from()) / 2;
+                double halfH = LayoutMetrics.effectiveHeight(state, link.from()) / 2;
+                double[] lp = CausalLinkGeometry.selfLoopPoints(fromX, fromY, halfW, halfH);
+
+                // Cubic Bézier path
+                w.printf(Locale.US,
+                        "  <path d=\"M %.2f %.2f C %.2f %.2f, %.2f %.2f, %.2f %.2f\" " +
+                        "fill=\"none\" stroke=\"%s\" stroke-width=\"%.1f\"/>%n",
+                        lp[0], lp[1], lp[2], lp[3], lp[4], lp[5], lp[6], lp[7],
+                        svgColor(ColorPalette.CAUSAL_LINK), LayoutMetrics.CAUSAL_LINK_WIDTH);
+
+                // Arrowhead at end
+                double[] tan = CausalLinkGeometry.tangentCubic(
+                        lp[0], lp[1], lp[2], lp[3], lp[4], lp[5], lp[6], lp[7], 1.0);
+                writeArrowheadFromTangent(w, lp[6], lp[7], tan[0], tan[1],
+                        LayoutMetrics.CAUSAL_ARROWHEAD_LENGTH, LayoutMetrics.CAUSAL_ARROWHEAD_WIDTH,
+                        ColorPalette.CAUSAL_LINK);
+
+                // Polarity label at top of loop
+                double[] midPt = CausalLinkGeometry.evaluateCubic(
+                        lp[0], lp[1], lp[2], lp[3], lp[4], lp[5], lp[6], lp[7], 0.5);
+                writePolarityLabel(w, link.polarity(), midPt[0], midPt[1] - 10);
+                continue;
+            }
+
             double toX = state.getX(link.to());
             double toY = state.getY(link.to());
 
-            FlowGeometry.Point2D cf = FlowGeometry.clipToElement(state, link.from(), toX, toY);
-            FlowGeometry.Point2D ct = FlowGeometry.clipToElement(state, link.to(), fromX, fromY);
+            CausalLinkGeometry.ControlPoint cp = CausalLinkGeometry.controlPoint(
+                    fromX, fromY, toX, toY, link.from(), link.to(), allLinks);
 
-            // Stop line at arrowhead base
-            double dx = ct.x() - cf.x();
-            double dy = ct.y() - cf.y();
-            double dist = Math.sqrt(dx * dx + dy * dy);
-            double ltx = ct.x();
-            double lty = ct.y();
-            if (dist > LayoutMetrics.CAUSAL_ARROWHEAD_LENGTH) {
-                double ux = dx / dist;
-                double uy = dy / dist;
-                ltx = ct.x() - ux * LayoutMetrics.CAUSAL_ARROWHEAD_LENGTH;
-                lty = ct.y() - uy * LayoutMetrics.CAUSAL_ARROWHEAD_LENGTH;
-            }
+            FlowGeometry.Point2D cf = FlowGeometry.clipToElement(state, link.from(), cp.x(), cp.y());
+            FlowGeometry.Point2D ct = FlowGeometry.clipToElement(state, link.to(), cp.x(), cp.y());
 
-            // Line
+            // Quadratic Bézier path
             w.printf(Locale.US,
-                    "  <line x1=\"%.2f\" y1=\"%.2f\" x2=\"%.2f\" y2=\"%.2f\" " +
-                    "stroke=\"%s\" stroke-width=\"%.1f\"/>%n",
-                    cf.x(), cf.y(), ltx, lty,
+                    "  <path d=\"M %.2f %.2f Q %.2f %.2f, %.2f %.2f\" " +
+                    "fill=\"none\" stroke=\"%s\" stroke-width=\"%.1f\"/>%n",
+                    cf.x(), cf.y(), cp.x(), cp.y(), ct.x(), ct.y(),
                     svgColor(ColorPalette.CAUSAL_LINK), LayoutMetrics.CAUSAL_LINK_WIDTH);
 
-            // Arrowhead
-            writeArrowhead(w, cf.x(), cf.y(), ct.x(), ct.y(),
+            // Arrowhead oriented along curve tangent at endpoint
+            double[] tan = CausalLinkGeometry.tangent(
+                    cf.x(), cf.y(), cp.x(), cp.y(), ct.x(), ct.y(), 1.0);
+            writeArrowheadFromTangent(w, ct.x(), ct.y(), tan[0], tan[1],
                     LayoutMetrics.CAUSAL_ARROWHEAD_LENGTH, LayoutMetrics.CAUSAL_ARROWHEAD_WIDTH,
                     ColorPalette.CAUSAL_LINK);
 
-            // Polarity label near arrowhead
+            // Polarity label at t=0.8 on the curve, offset perpendicular
+            double dx = ct.x() - cf.x();
+            double dy = ct.y() - cf.y();
+            double dist = Math.sqrt(dx * dx + dy * dy);
             if (dist > 1) {
-                Color labelColor = switch (link.polarity()) {
-                    case POSITIVE -> ColorPalette.CAUSAL_POSITIVE;
-                    case NEGATIVE -> ColorPalette.CAUSAL_NEGATIVE;
-                    case UNKNOWN -> ColorPalette.CAUSAL_UNKNOWN;
-                };
-                double ux = dx / dist;
-                double uy = dy / dist;
-                double alongOffset = Math.min(20, dist * 0.4);
-                double perpOffset = Math.min(12, Math.max(8, dist * 0.3));
-                double labelX = ct.x() - ux * alongOffset + (-uy) * perpOffset;
-                double labelY = ct.y() - uy * alongOffset + ux * perpOffset;
-
-                w.printf(Locale.US,
-                        "  <text x=\"%.2f\" y=\"%.2f\" text-anchor=\"middle\" " +
-                        "dominant-baseline=\"central\" font-weight=\"bold\" font-size=\"12\" " +
-                        "fill=\"%s\">%s</text>%n",
-                        labelX, labelY, svgColor(labelColor),
-                        escapeXml(link.polarity().symbol()));
+                double[] labelPt = CausalLinkGeometry.evaluate(
+                        cf.x(), cf.y(), cp.x(), cp.y(), ct.x(), ct.y(), 0.8);
+                double[] labelTan = CausalLinkGeometry.tangent(
+                        cf.x(), cf.y(), cp.x(), cp.y(), ct.x(), ct.y(), 0.8);
+                double tanDist = Math.sqrt(labelTan[0] * labelTan[0] + labelTan[1] * labelTan[1]);
+                if (tanDist > 0) {
+                    double perpX = -labelTan[1] / tanDist;
+                    double perpY = labelTan[0] / tanDist;
+                    double perpOffset = 12;
+                    writePolarityLabel(w, link.polarity(),
+                            labelPt[0] + perpX * perpOffset,
+                            labelPt[1] + perpY * perpOffset);
+                }
             }
         }
+    }
+
+    private static void writePolarityLabel(PrintWriter w, CausalLinkDef.Polarity polarity,
+                                            double x, double y) {
+        Color labelColor = switch (polarity) {
+            case POSITIVE -> ColorPalette.CAUSAL_POSITIVE;
+            case NEGATIVE -> ColorPalette.CAUSAL_NEGATIVE;
+            case UNKNOWN -> ColorPalette.CAUSAL_UNKNOWN;
+        };
+        w.printf(Locale.US,
+                "  <text x=\"%.2f\" y=\"%.2f\" text-anchor=\"middle\" " +
+                "dominant-baseline=\"central\" font-weight=\"bold\" font-size=\"12\" " +
+                "fill=\"%s\">%s</text>%n",
+                x, y, svgColor(labelColor), escapeXml(polarity.symbol()));
+    }
+
+    private static void writeArrowheadFromTangent(PrintWriter w,
+                                                   double tipX, double tipY,
+                                                   double tanX, double tanY,
+                                                   double length, double width,
+                                                   Color color) {
+        double dist = Math.sqrt(tanX * tanX + tanY * tanY);
+        if (dist < 1e-9) {
+            return;
+        }
+        double ux = tanX / dist;
+        double uy = tanY / dist;
+        double baseX = tipX - ux * length;
+        double baseY = tipY - uy * length;
+        double perpX = -uy * width / 2;
+        double perpY = ux * width / 2;
+
+        w.printf(Locale.US,
+                "  <polygon points=\"%.2f,%.2f %.2f,%.2f %.2f,%.2f\" fill=\"%s\"/>%n",
+                tipX, tipY,
+                baseX + perpX, baseY + perpY,
+                baseX - perpX, baseY - perpY,
+                svgColor(color));
     }
 
     // --- Loop highlights ---

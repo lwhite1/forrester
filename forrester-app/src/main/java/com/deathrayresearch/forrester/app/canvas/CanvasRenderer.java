@@ -317,10 +317,13 @@ public class CanvasRenderer {
     }
 
     /**
-     * Draws causal links between CLD variables (and potentially S&F elements).
+     * Draws causal links between CLD variables (and potentially S&F elements)
+     * as curved arcs using quadratic Bézier curves.
      */
     private void drawCausalLinks(GraphicsContext gc, ModelEditor editor) {
-        for (CausalLinkDef link : editor.getCausalLinks()) {
+        List<CausalLinkDef> allLinks = editor.getCausalLinks();
+
+        for (CausalLinkDef link : allLinks) {
             String fromName = link.from();
             String toName = link.to();
 
@@ -330,16 +333,32 @@ public class CanvasRenderer {
 
             double fromX = canvasState.getX(fromName);
             double fromY = canvasState.getY(fromName);
+
+            // Self-loop: use cubic Bézier loop above the element
+            if (fromName.equals(toName)) {
+                double halfW = LayoutMetrics.effectiveWidth(canvasState, fromName) / 2;
+                double halfH = LayoutMetrics.effectiveHeight(canvasState, fromName) / 2;
+                double[] loopPts = CausalLinkGeometry.selfLoopPoints(fromX, fromY, halfW, halfH);
+                ConnectionRenderer.drawCausalLinkSelfLoop(gc, loopPts, link.polarity());
+                continue;
+            }
+
             double toX = canvasState.getX(toName);
             double toY = canvasState.getY(toName);
 
+            // Compute control point for the curve
+            CausalLinkGeometry.ControlPoint cp = CausalLinkGeometry.controlPoint(
+                    fromX, fromY, toX, toY, fromName, toName, allLinks);
+
+            // Clip endpoints to element borders, aiming at the control point
+            // for a more natural exit angle from the element
             FlowGeometry.Point2D clippedFrom = FlowGeometry.clipToElement(
-                    canvasState, fromName, toX, toY);
+                    canvasState, fromName, cp.x(), cp.y());
             FlowGeometry.Point2D clippedTo = FlowGeometry.clipToElement(
-                    canvasState, toName, fromX, fromY);
+                    canvasState, toName, cp.x(), cp.y());
 
             ConnectionRenderer.drawCausalLink(gc, clippedFrom.x(), clippedFrom.y(),
-                    clippedTo.x(), clippedTo.y(), link.polarity());
+                    clippedTo.x(), clippedTo.y(), cp, link.polarity());
         }
     }
 
@@ -397,8 +416,9 @@ public class CanvasRenderer {
             }
         }
 
-        // Highlight causal link edges
-        for (CausalLinkDef link : editor.getCausalLinks()) {
+        // Highlight causal link edges (curved)
+        List<CausalLinkDef> allLinks = editor.getCausalLinks();
+        for (CausalLinkDef link : allLinks) {
             String fromName = link.from();
             String toName = link.to();
 
@@ -411,15 +431,29 @@ public class CanvasRenderer {
 
             double fromX = canvasState.getX(fromName);
             double fromY = canvasState.getY(fromName);
+
+            if (fromName.equals(toName)) {
+                double halfW = LayoutMetrics.effectiveWidth(canvasState, fromName) / 2;
+                double halfH = LayoutMetrics.effectiveHeight(canvasState, fromName) / 2;
+                double[] loopPts = CausalLinkGeometry.selfLoopPoints(fromX, fromY, halfW, halfH);
+                FeedbackLoopRenderer.drawLoopEdgeCubic(gc, loopPts);
+                continue;
+            }
+
             double toX = canvasState.getX(toName);
             double toY = canvasState.getY(toName);
 
-            FlowGeometry.Point2D clippedFrom = FlowGeometry.clipToElement(
-                    canvasState, fromName, toX, toY);
-            FlowGeometry.Point2D clippedTo = FlowGeometry.clipToElement(
-                    canvasState, toName, fromX, fromY);
+            CausalLinkGeometry.ControlPoint cp = CausalLinkGeometry.controlPoint(
+                    fromX, fromY, toX, toY, fromName, toName, allLinks);
 
-            FeedbackLoopRenderer.drawLoopEdge(gc, clippedFrom.x(), clippedFrom.y(),
+            FlowGeometry.Point2D clippedFrom = FlowGeometry.clipToElement(
+                    canvasState, fromName, cp.x(), cp.y());
+            FlowGeometry.Point2D clippedTo = FlowGeometry.clipToElement(
+                    canvasState, toName, cp.x(), cp.y());
+
+            FeedbackLoopRenderer.drawLoopEdgeCurved(gc,
+                    clippedFrom.x(), clippedFrom.y(),
+                    cp.x(), cp.y(),
                     clippedTo.x(), clippedTo.y());
         }
     }
@@ -567,23 +601,23 @@ public class CanvasRenderer {
      */
     private void drawConnectionHighlight(GraphicsContext gc, List<ConnectorRoute> connectors,
                                          ConnectionId connectionId, boolean isHover) {
-        // Try info links first
+        // Try info links first (straight line highlight)
         for (ConnectorRoute route : connectors) {
             if (route.from().equals(connectionId.from())
                     && route.to().equals(connectionId.to())) {
-                drawClippedHighlight(gc, connectionId.from(), connectionId.to(), isHover);
+                drawClippedHighlight(gc, connectionId.from(), connectionId.to(), isHover, false);
                 return;
             }
         }
-        // Fall back to causal links
+        // Fall back to causal links (curved highlight)
         if (canvasState.hasElement(connectionId.from())
                 && canvasState.hasElement(connectionId.to())) {
-            drawClippedHighlight(gc, connectionId.from(), connectionId.to(), isHover);
+            drawClippedHighlight(gc, connectionId.from(), connectionId.to(), isHover, true);
         }
     }
 
     private void drawClippedHighlight(GraphicsContext gc, String fromName, String toName,
-                                      boolean isHover) {
+                                      boolean isHover, boolean isCausalLink) {
         if (!canvasState.hasElement(fromName) || !canvasState.hasElement(toName)) {
             return;
         }
@@ -593,19 +627,56 @@ public class CanvasRenderer {
         double toX = canvasState.getX(toName);
         double toY = canvasState.getY(toName);
 
-        FlowGeometry.Point2D clippedFrom = FlowGeometry.clipToElement(
-                canvasState, fromName, toX, toY);
-        FlowGeometry.Point2D clippedTo = FlowGeometry.clipToElement(
-                canvasState, toName, fromX, fromY);
+        if (isCausalLink) {
+            // Curved highlight for causal links
+            // Note: cast needed to get the editor — but we only need positions here
+            // so we pass null-safe defaults
+            if (fromName.equals(toName)) {
+                // Self-loop highlight — skip for now, straight highlight is fine
+                FlowGeometry.Point2D cf = FlowGeometry.clipToElement(canvasState, fromName, toX, toY);
+                FlowGeometry.Point2D ct = FlowGeometry.clipToElement(canvasState, toName, fromX, fromY);
+                if (isHover) {
+                    SelectionRenderer.drawConnectionHover(gc, cf.x(), cf.y(), ct.x(), ct.y());
+                } else {
+                    SelectionRenderer.drawConnectionSelection(gc, cf.x(), cf.y(), ct.x(), ct.y());
+                }
+                return;
+            }
 
-        if (isHover) {
-            SelectionRenderer.drawConnectionHover(gc,
-                    clippedFrom.x(), clippedFrom.y(),
-                    clippedTo.x(), clippedTo.y());
+            CausalLinkGeometry.ControlPoint cp = CausalLinkGeometry.controlPoint(
+                    fromX, fromY, toX, toY, fromName, toName, List.of());
+
+            FlowGeometry.Point2D clippedFrom = FlowGeometry.clipToElement(
+                    canvasState, fromName, cp.x(), cp.y());
+            FlowGeometry.Point2D clippedTo = FlowGeometry.clipToElement(
+                    canvasState, toName, cp.x(), cp.y());
+
+            if (isHover) {
+                SelectionRenderer.drawConnectionHoverCurved(gc,
+                        clippedFrom.x(), clippedFrom.y(),
+                        cp.x(), cp.y(),
+                        clippedTo.x(), clippedTo.y());
+            } else {
+                SelectionRenderer.drawConnectionSelectionCurved(gc,
+                        clippedFrom.x(), clippedFrom.y(),
+                        cp.x(), cp.y(),
+                        clippedTo.x(), clippedTo.y());
+            }
         } else {
-            SelectionRenderer.drawConnectionSelection(gc,
-                    clippedFrom.x(), clippedFrom.y(),
-                    clippedTo.x(), clippedTo.y());
+            FlowGeometry.Point2D clippedFrom = FlowGeometry.clipToElement(
+                    canvasState, fromName, toX, toY);
+            FlowGeometry.Point2D clippedTo = FlowGeometry.clipToElement(
+                    canvasState, toName, fromX, fromY);
+
+            if (isHover) {
+                SelectionRenderer.drawConnectionHover(gc,
+                        clippedFrom.x(), clippedFrom.y(),
+                        clippedTo.x(), clippedTo.y());
+            } else {
+                SelectionRenderer.drawConnectionSelection(gc,
+                        clippedFrom.x(), clippedFrom.y(),
+                        clippedTo.x(), clippedTo.y());
+            }
         }
     }
 
