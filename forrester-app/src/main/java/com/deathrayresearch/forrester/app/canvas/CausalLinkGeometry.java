@@ -58,9 +58,17 @@ public final class CausalLinkGeometry {
             return new ControlPoint(midX, midY);
         }
 
-        // Perpendicular unit vector (rotated 90° counter-clockwise)
-        double perpX = -dy / dist;
-        double perpY = dx / dist;
+        // Use a canonical perpendicular direction based on the lexicographically
+        // smaller name, so that A→B and B→A compute the same perpendicular axis.
+        // This prevents the double-negation bug where swapping from/to negates
+        // both the perpendicular and the direction, causing them to cancel out.
+        boolean canonical = fromName.compareTo(toName) < 0;
+        double cdx = canonical ? dx : -dx;
+        double cdy = canonical ? dy : -dy;
+
+        // Perpendicular unit vector (rotated 90° counter-clockwise from canonical direction)
+        double perpX = -cdy / dist;
+        double perpY = cdx / dist;
 
         // Scale bulge with distance — enough curve to be visible but not excessive
         double bulge = Math.min(DEFAULT_BULGE, dist * 0.25);
