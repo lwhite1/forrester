@@ -351,6 +351,121 @@ class ExprCompilerTest {
     }
 
     @Nested
+    @DisplayName("Trig, rounding, and math functions")
+    class MathFunctions {
+
+        @Test
+        void shouldCompileSIN() {
+            Formula formula = compiler.compile("SIN(0)");
+            assertThat(formula.getCurrentValue()).isCloseTo(0.0, within(1e-10));
+        }
+
+        @Test
+        void shouldCompileCOS() {
+            Formula formula = compiler.compile("COS(0)");
+            assertThat(formula.getCurrentValue()).isCloseTo(1.0, within(1e-10));
+        }
+
+        @Test
+        void shouldCompileTAN() {
+            Formula formula = compiler.compile("TAN(0)");
+            assertThat(formula.getCurrentValue()).isCloseTo(0.0, within(1e-10));
+        }
+
+        @Test
+        void shouldCompileLOG() {
+            Formula formula = compiler.compile("LOG(100)");
+            assertThat(formula.getCurrentValue()).isCloseTo(2.0, within(1e-10));
+        }
+
+        @Test
+        void shouldCompileINT() {
+            Formula formula = compiler.compile("INT(3.7)");
+            assertThat(formula.getCurrentValue()).isEqualTo(3.0);
+
+            Formula negFormula = compiler.compile("INT(-3.7)");
+            assertThat(negFormula.getCurrentValue()).isEqualTo(-3.0);
+        }
+
+        @Test
+        void shouldCompileROUND() {
+            Formula formula = compiler.compile("ROUND(3.7)");
+            assertThat(formula.getCurrentValue()).isEqualTo(4.0);
+
+            Formula downFormula = compiler.compile("ROUND(3.2)");
+            assertThat(downFormula.getCurrentValue()).isEqualTo(3.0);
+        }
+
+        @Test
+        void shouldCompileMODULO() {
+            Formula formula = compiler.compile("MODULO(7, 3)");
+            assertThat(formula.getCurrentValue()).isCloseTo(1.0, within(1e-10));
+        }
+
+        @Test
+        void shouldCompileMODULOByZero() {
+            Formula formula = compiler.compile("MODULO(7, 0)");
+            assertThat(formula.getCurrentValue()).isEqualTo(0.0);
+        }
+
+        @Test
+        void shouldCompilePOWER() {
+            Formula formula = compiler.compile("POWER(2, 10)");
+            assertThat(formula.getCurrentValue()).isEqualTo(1024.0);
+        }
+    }
+
+    @Nested
+    @DisplayName("PULSE function")
+    class PulseTests {
+
+        @Test
+        void shouldFireSinglePulse() {
+            Formula formula = compiler.compile("PULSE(100, 5)");
+            // Before pulse time
+            step[0] = 3;
+            assertThat(formula.getCurrentValue()).isEqualTo(0.0);
+            // At pulse time
+            step[0] = 5;
+            assertThat(formula.getCurrentValue()).isEqualTo(100.0);
+            // After pulse time
+            step[0] = 6;
+            assertThat(formula.getCurrentValue()).isEqualTo(0.0);
+        }
+
+        @Test
+        void shouldFireRepeatingPulse() {
+            Formula formula = compiler.compile("PULSE(50, 2, 3)");
+            // At first pulse
+            step[0] = 2;
+            assertThat(formula.getCurrentValue()).isEqualTo(50.0);
+            // Between pulses
+            step[0] = 3;
+            assertThat(formula.getCurrentValue()).isEqualTo(0.0);
+            // At second pulse (2 + 3 = 5)
+            step[0] = 5;
+            assertThat(formula.getCurrentValue()).isEqualTo(50.0);
+            // At third pulse (2 + 6 = 8)
+            step[0] = 8;
+            assertThat(formula.getCurrentValue()).isEqualTo(50.0);
+        }
+    }
+
+    @Nested
+    @DisplayName("RANDOM_NORMAL function")
+    class RandomNormalTests {
+
+        @Test
+        void shouldReturnValueWithinBounds() {
+            Formula formula = compiler.compile("RANDOM_NORMAL(0, 100, 50, 10)");
+            for (int i = 0; i < 100; i++) {
+                double val = formula.getCurrentValue();
+                assertThat(val).isBetween(0.0, 100.0);
+            }
+        }
+    }
+
+    @Nested
     @DisplayName("3-arg RAMP and LOOKUP")
     class RampAndLookup {
 

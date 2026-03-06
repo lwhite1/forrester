@@ -42,7 +42,7 @@ public final class VensimExprTranslator {
     private static final Pattern TIME_VAR_PATTERN = Pattern.compile(
             "(?i)\\bTime\\b");
     private static final Set<String> UNSUPPORTED_FUNCTIONS = Set.of(
-            "PULSE", "PULSE TRAIN", "INTEGER", "GAME", "DELAY FIXED", "DELAY N",
+            "PULSE", "PULSE TRAIN", "GAME", "DELAY FIXED", "DELAY N",
             "FORECAST", "TREND", "NPV", "GET XLS DATA", "GET DIRECT DATA",
             "GET DIRECT CONSTANTS", "TABBED ARRAY", "SAMPLE IF TRUE",
             "VECTOR SELECT", "VECTOR ELM MAP", "VECTOR SORT ORDER",

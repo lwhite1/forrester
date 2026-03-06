@@ -3,6 +3,7 @@ package com.deathrayresearch.forrester.model.compile;
 import com.deathrayresearch.forrester.model.Delay3;
 import com.deathrayresearch.forrester.model.Formula;
 import com.deathrayresearch.forrester.model.LookupTable;
+import com.deathrayresearch.forrester.model.Pulse;
 import com.deathrayresearch.forrester.model.Ramp;
 import com.deathrayresearch.forrester.model.Smooth;
 import com.deathrayresearch.forrester.model.Step;
@@ -136,6 +137,52 @@ public class ExprCompiler {
                 DoubleSupplier a = compileExpr(args.get(0));
                 yield () -> Math.exp(a.getAsDouble());
             }
+            case "LOG" -> {
+                requireArgs(name, args, 1);
+                DoubleSupplier a = compileExpr(args.get(0));
+                yield () -> Math.log10(a.getAsDouble());
+            }
+            case "SIN" -> {
+                requireArgs(name, args, 1);
+                DoubleSupplier a = compileExpr(args.get(0));
+                yield () -> Math.sin(a.getAsDouble());
+            }
+            case "COS" -> {
+                requireArgs(name, args, 1);
+                DoubleSupplier a = compileExpr(args.get(0));
+                yield () -> Math.cos(a.getAsDouble());
+            }
+            case "TAN" -> {
+                requireArgs(name, args, 1);
+                DoubleSupplier a = compileExpr(args.get(0));
+                yield () -> Math.tan(a.getAsDouble());
+            }
+            case "INT" -> {
+                requireArgs(name, args, 1);
+                DoubleSupplier a = compileExpr(args.get(0));
+                yield () -> (double) (long) a.getAsDouble();
+            }
+            case "ROUND" -> {
+                requireArgs(name, args, 1);
+                DoubleSupplier a = compileExpr(args.get(0));
+                yield () -> Math.round(a.getAsDouble());
+            }
+            case "MODULO" -> {
+                requireArgs(name, args, 2);
+                DoubleSupplier a = compileExpr(args.get(0));
+                DoubleSupplier b = compileExpr(args.get(1));
+                yield () -> {
+                    double divisor = b.getAsDouble();
+                    if (divisor == 0) return 0.0;
+                    return a.getAsDouble() % divisor;
+                };
+            }
+            case "POWER" -> {
+                requireArgs(name, args, 2);
+                DoubleSupplier a = compileExpr(args.get(0));
+                DoubleSupplier b = compileExpr(args.get(1));
+                yield () -> Math.pow(a.getAsDouble(), b.getAsDouble());
+            }
             case "MIN" -> {
                 requireArgs(name, args, 2);
                 DoubleSupplier a = compileExpr(args.get(0));
@@ -183,6 +230,8 @@ public class ExprCompiler {
             case "DELAY3" -> compileDelay3(args);
             case "STEP" -> compileStep(args);
             case "RAMP" -> compileRamp(args);
+            case "PULSE" -> compilePulse(args);
+            case "RANDOM_NORMAL" -> compileRandomNormal(args);
             case "LOOKUP" -> compileLookup(args);
             default -> throw new CompilationException(
                     "Unknown function: " + name, name);
@@ -249,6 +298,37 @@ public class ExprCompiler {
             ramp = Ramp.of(slope, (int) Math.round(start), context.getCurrentStep());
         }
         return ramp::getCurrentValue;
+    }
+
+    private DoubleSupplier compilePulse(List<Expr> args) {
+        if (args.size() < 2 || args.size() > 3) {
+            throw new CompilationException(
+                    "PULSE requires 2-3 arguments, got " + args.size(), "PULSE");
+        }
+        double magnitude = evaluateConstant(args.get(0), "PULSE magnitude");
+        double start = evaluateConstant(args.get(1), "PULSE startTime");
+        Pulse pulse;
+        if (args.size() == 3) {
+            double interval = evaluateConstant(args.get(2), "PULSE interval");
+            pulse = Pulse.of(magnitude, (int) Math.round(start),
+                    (int) Math.round(interval), context.getCurrentStep());
+        } else {
+            pulse = Pulse.of(magnitude, (int) Math.round(start), context.getCurrentStep());
+        }
+        return pulse::getCurrentValue;
+    }
+
+    private DoubleSupplier compileRandomNormal(List<Expr> args) {
+        requireArgs("RANDOM_NORMAL", args, 4);
+        DoubleSupplier minVal = compileExpr(args.get(0));
+        DoubleSupplier maxVal = compileExpr(args.get(1));
+        DoubleSupplier mean = compileExpr(args.get(2));
+        DoubleSupplier stddev = compileExpr(args.get(3));
+        java.util.Random rng = new java.util.Random();
+        return () -> {
+            double raw = mean.getAsDouble() + stddev.getAsDouble() * rng.nextGaussian();
+            return Math.max(minVal.getAsDouble(), Math.min(maxVal.getAsDouble(), raw));
+        };
     }
 
     private DoubleSupplier compileLookup(List<Expr> args) {
