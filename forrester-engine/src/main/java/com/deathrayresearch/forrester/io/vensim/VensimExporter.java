@@ -165,7 +165,11 @@ public final class VensimExporter {
                 + formatDouble(stock.initialValue()) + ")";
         String units = stock.unit() != null ? stock.unit() : "";
         String comment = stock.comment() != null ? stock.comment() : "";
-        return buildBlock(vensimName, "=", equation, units, comment);
+        // Stocks use "= INTEG" on the same line (no newline after "=")
+        return vensimName + "= " + equation + "\n"
+                + "\t~\t" + escapeForVensim(units) + "\n"
+                + "\t~\t" + escapeForVensim(comment) + "\n"
+                + "\t|\n\n";
     }
 
     private static String buildFlowBlock(FlowDef flow) {
@@ -260,16 +264,22 @@ public final class VensimExporter {
         String durationUnit = sim != null ? sim.durationUnit() : "Day";
 
         // INITIAL TIME
-        sb.append(buildBlock("INITIAL TIME", "=", "0", durationUnit, "The initial time for the simulation."));
+        sb.append(buildControlBlock("INITIAL TIME", "0", durationUnit,
+                "The initial time for the simulation."));
 
         // FINAL TIME
-        sb.append(buildBlock("FINAL TIME", "=", formatDouble(duration), durationUnit, "The final time for the simulation."));
+        sb.append(buildControlBlock("FINAL TIME", formatDouble(duration), durationUnit,
+                "The final time for the simulation."));
 
         // TIME STEP
-        sb.append(buildBlock("TIME STEP", "=", "1", durationUnit, "The time step for the simulation."));
+        sb.append(buildControlBlock("TIME STEP", "1", durationUnit,
+                "The time step for the simulation."));
 
-        // SAVEPER
-        sb.append(buildBlock("SAVEPER", "=", "\n        TIME STEP", durationUnit, "The frequency with which output is stored."));
+        // SAVEPER — value on next line with 8-space indent (Vensim convention)
+        sb.append("SAVEPER  =\n        TIME STEP\n"
+                + "\t~\t" + escapeForVensim(durationUnit) + "\n"
+                + "\t~\t" + escapeForVensim("The frequency with which output is stored.") + "\n"
+                + "\t|\n\n");
 
         return sb.toString();
     }
@@ -280,6 +290,17 @@ public final class VensimExporter {
     private static String buildBlock(String name, String operator, String equation,
                                       String units, String comment) {
         return name + operator + "\n\t" + equation + "\n"
+                + "\t~\t" + escapeForVensim(units) + "\n"
+                + "\t~\t" + escapeForVensim(comment) + "\n"
+                + "\t|\n\n";
+    }
+
+    /**
+     * Formats a control variable block on a single line: {@code NAME  = value}.
+     */
+    private static String buildControlBlock(String name, String value, String units,
+                                             String comment) {
+        return name + "  = " + value + "\n"
                 + "\t~\t" + escapeForVensim(units) + "\n"
                 + "\t~\t" + escapeForVensim(comment) + "\n"
                 + "\t|\n\n";

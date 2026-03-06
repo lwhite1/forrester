@@ -73,8 +73,8 @@ class VensimExporterTest {
 
             String mdl = VensimExporter.toVensim(def);
 
-            assertThat(mdl).contains("Tank=");
-            assertThat(mdl).contains("INTEG");
+            assertThat(mdl).contains("Tank= INTEG");
+            assertThat(mdl).doesNotContain("Tank=\n\tINTEG");
             // Should contain both inflows and outflow in the rate expression
             assertThat(mdl).contains("fill rate");
             assertThat(mdl).contains("refill rate");
@@ -112,11 +112,8 @@ class VensimExporterTest {
 
             String mdl = VensimExporter.toVensim(def);
 
-            assertThat(mdl).contains("growth rate=");
-            assertThat(mdl).contains("0.05");
+            assertThat(mdl).contains("growth rate=\n\t0.05");
             assertThat(mdl).contains("1/Day");
-            // Should not use := operator
-            assertThat(mdl).doesNotContain("growth rate:=");
         }
     }
 
@@ -249,6 +246,52 @@ class VensimExporterTest {
             assertThat(mdl).contains("TIME STEP");
             assertThat(mdl).contains("SAVEPER");
             assertThat(mdl).contains("\\---/// Sketch");
+        }
+    }
+
+    @Nested
+    @DisplayName("Vensim formatting conventions")
+    class FormattingConventions {
+
+        @Test
+        void shouldPutIntegOnSameLineAsEquals() {
+            ModelDefinition def = new ModelDefinitionBuilder()
+                    .name("Test")
+                    .defaultSimulation("Day", 100, "Day")
+                    .stock("Population", 1000.0, "People")
+                    .build();
+
+            String mdl = VensimExporter.toVensim(def);
+
+            assertThat(mdl).contains("Population= INTEG (");
+        }
+
+        @Test
+        void shouldFormatControlVariablesOnSingleLine() {
+            ModelDefinition def = new ModelDefinitionBuilder()
+                    .name("Test")
+                    .defaultSimulation("Day", 200, "Day")
+                    .build();
+
+            String mdl = VensimExporter.toVensim(def);
+
+            assertThat(mdl).contains("INITIAL TIME  = 0");
+            assertThat(mdl).contains("FINAL TIME  = 200");
+            assertThat(mdl).contains("TIME STEP  = 1");
+        }
+
+        @Test
+        void shouldFormatSaveperWithoutExtraBlankLine() {
+            ModelDefinition def = new ModelDefinitionBuilder()
+                    .name("Test")
+                    .defaultSimulation("Day", 100, "Day")
+                    .build();
+
+            String mdl = VensimExporter.toVensim(def);
+
+            assertThat(mdl).contains("SAVEPER  =\n        TIME STEP\n");
+            // Should NOT have a double newline between = and TIME STEP
+            assertThat(mdl).doesNotContain("SAVEPER  =\n\t\n");
         }
     }
 
