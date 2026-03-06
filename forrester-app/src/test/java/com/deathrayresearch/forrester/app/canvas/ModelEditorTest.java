@@ -3,6 +3,7 @@ package com.deathrayresearch.forrester.app.canvas;
 import com.deathrayresearch.forrester.model.def.AuxDef;
 import com.deathrayresearch.forrester.model.def.CausalLinkDef;
 import com.deathrayresearch.forrester.model.def.CldVariableDef;
+import com.deathrayresearch.forrester.model.def.ConstantDef;
 import com.deathrayresearch.forrester.model.def.ElementPlacement;
 import com.deathrayresearch.forrester.model.def.ElementType;
 import com.deathrayresearch.forrester.model.def.FlowDef;
@@ -11,6 +12,7 @@ import com.deathrayresearch.forrester.model.def.ModelDefinition;
 import com.deathrayresearch.forrester.model.def.ModelDefinitionBuilder;
 import com.deathrayresearch.forrester.model.def.ModuleInstanceDef;
 import com.deathrayresearch.forrester.model.def.SimulationSettings;
+import com.deathrayresearch.forrester.model.def.StockDef;
 import com.deathrayresearch.forrester.model.def.ViewDef;
 
 import java.util.List;
@@ -1862,6 +1864,134 @@ class ModelEditorTest {
             assertThat(forward).isTrue();
             assertThat(reverse).isTrue();
             assertThat(editor.getCausalLinks()).hasSize(2);
+        }
+    }
+
+    @Nested
+    @DisplayName("classifyCldVariable")
+    class ClassifyCldVariable {
+
+        @Test
+        void shouldClassifyAsStock() {
+            editor.addCldVariable(); // Variable 1
+
+            boolean result = editor.classifyCldVariable("Variable 1", ElementType.STOCK);
+
+            assertThat(result).isTrue();
+            assertThat(editor.getCldVariables()).isEmpty();
+            assertThat(editor.getStocks()).hasSize(1);
+            StockDef stock = editor.getStocks().getFirst();
+            assertThat(stock.name()).isEqualTo("Variable 1");
+            assertThat(stock.initialValue()).isEqualTo(0);
+        }
+
+        @Test
+        void shouldClassifyAsFlow() {
+            editor.addCldVariable(); // Variable 1
+
+            boolean result = editor.classifyCldVariable("Variable 1", ElementType.FLOW);
+
+            assertThat(result).isTrue();
+            assertThat(editor.getCldVariables()).isEmpty();
+            assertThat(editor.getFlows()).hasSize(1);
+            FlowDef flow = editor.getFlows().getFirst();
+            assertThat(flow.name()).isEqualTo("Variable 1");
+        }
+
+        @Test
+        void shouldClassifyAsAux() {
+            editor.addCldVariable(); // Variable 1
+
+            boolean result = editor.classifyCldVariable("Variable 1", ElementType.AUX);
+
+            assertThat(result).isTrue();
+            assertThat(editor.getCldVariables()).isEmpty();
+            assertThat(editor.getAuxiliaries()).hasSize(1);
+            AuxDef aux = editor.getAuxiliaries().getFirst();
+            assertThat(aux.name()).isEqualTo("Variable 1");
+        }
+
+        @Test
+        void shouldClassifyAsConstant() {
+            editor.addCldVariable(); // Variable 1
+
+            boolean result = editor.classifyCldVariable("Variable 1", ElementType.CONSTANT);
+
+            assertThat(result).isTrue();
+            assertThat(editor.getCldVariables()).isEmpty();
+            assertThat(editor.getConstants()).hasSize(1);
+            ConstantDef constant = editor.getConstants().getFirst();
+            assertThat(constant.name()).isEqualTo("Variable 1");
+        }
+
+        @Test
+        void shouldPreserveComment() {
+            editor.addCldVariable(); // Variable 1
+            editor.setCldVariableComment("Variable 1", "Important variable");
+
+            editor.classifyCldVariable("Variable 1", ElementType.STOCK);
+
+            StockDef stock = editor.getStocks().getFirst();
+            assertThat(stock.comment()).isEqualTo("Important variable");
+        }
+
+        @Test
+        void shouldRemoveCausalLinksInvolvingClassifiedVariable() {
+            editor.addCldVariable(); // Variable 1
+            editor.addCldVariable(); // Variable 2
+            editor.addCldVariable(); // Variable 3
+            editor.addCausalLink("Variable 1", "Variable 2",
+                    CausalLinkDef.Polarity.POSITIVE);
+            editor.addCausalLink("Variable 3", "Variable 1",
+                    CausalLinkDef.Polarity.NEGATIVE);
+            editor.addCausalLink("Variable 2", "Variable 3",
+                    CausalLinkDef.Polarity.POSITIVE);
+
+            editor.classifyCldVariable("Variable 1", ElementType.STOCK);
+
+            // Links involving Variable 1 should be removed
+            assertThat(editor.getCausalLinks()).hasSize(1);
+            assertThat(editor.getCausalLinks().getFirst().from()).isEqualTo("Variable 2");
+            assertThat(editor.getCausalLinks().getFirst().to()).isEqualTo("Variable 3");
+        }
+
+        @Test
+        void shouldReturnFalseForNonExistentVariable() {
+            boolean result = editor.classifyCldVariable("NoSuchVar", ElementType.STOCK);
+
+            assertThat(result).isFalse();
+        }
+
+        @Test
+        void shouldReturnFalseForUnsupportedTargetType() {
+            editor.addCldVariable(); // Variable 1
+
+            boolean result = editor.classifyCldVariable("Variable 1", ElementType.MODULE);
+
+            assertThat(result).isFalse();
+            // Variable should still be a CLD variable
+            assertThat(editor.getCldVariables()).hasSize(1);
+        }
+
+        @Test
+        void shouldPreserveNameInNameIndex() {
+            editor.addCldVariable(); // Variable 1
+
+            editor.classifyCldVariable("Variable 1", ElementType.STOCK);
+
+            // Name should still be registered (as a stock now)
+            assertThat(editor.hasElement("Variable 1")).isTrue();
+        }
+
+        @Test
+        void shouldPreserveOtherCldVariables() {
+            editor.addCldVariable(); // Variable 1
+            editor.addCldVariable(); // Variable 2
+
+            editor.classifyCldVariable("Variable 1", ElementType.AUX);
+
+            assertThat(editor.getCldVariables()).hasSize(1);
+            assertThat(editor.getCldVariables().getFirst().name()).isEqualTo("Variable 2");
         }
     }
 }

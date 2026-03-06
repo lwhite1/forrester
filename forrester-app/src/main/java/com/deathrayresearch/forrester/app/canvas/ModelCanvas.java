@@ -1142,18 +1142,21 @@ public class ModelCanvas extends Canvas {
             return;
         }
 
-        // Right-click release without drag: show context menu on module
+        // Right-click release without drag: show context menu on module or CLD variable
         if (panning && !panMoved && event.getButton() == MouseButton.SECONDARY) {
             double worldX = viewport.toWorldX(event.getX());
             double worldY = viewport.toWorldY(event.getY());
             String hit = HitTester.hitTest(canvasState, worldX, worldY);
-            if (hit != null && canvasState.getType(hit) == ElementType.MODULE) {
-                panning = false;
-                panMoved = false;
-                showElementContextMenu(hit, event.getScreenX(), event.getScreenY());
-                updateCursor();
-                event.consume();
-                return;
+            if (hit != null) {
+                ElementType hitType = canvasState.getType(hit);
+                if (hitType == ElementType.MODULE || hitType == ElementType.CLD_VARIABLE) {
+                    panning = false;
+                    panMoved = false;
+                    showElementContextMenu(hit, event.getScreenX(), event.getScreenY());
+                    updateCursor();
+                    event.consume();
+                    return;
+                }
             }
         }
 
@@ -1437,7 +1440,22 @@ public class ModelCanvas extends Canvas {
 
     private void showElementContextMenu(String elementName, double screenX, double screenY) {
         navController.showContextMenu(this, elementName, canvasState, screenX, screenY,
-                this::drillInto, this::openBindingsDialog, this::startInlineEdit);
+                this::drillInto, this::openBindingsDialog, this::startInlineEdit,
+                this::classifyCldVariable);
+    }
+
+    private void classifyCldVariable(String name, ElementType targetType) {
+        if (editor == null) {
+            return;
+        }
+        saveUndoState();
+        if (editor.classifyCldVariable(name, targetType)) {
+            canvasState.setType(name, targetType);
+            connectors = editor.generateConnectors();
+            invalidateLoopAnalysis();
+            redraw();
+            fireStatusChanged();
+        }
     }
 
     private void openBindingsDialog(String moduleName) {
