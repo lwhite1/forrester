@@ -183,6 +183,56 @@ PULSE(100, 5)       -- 100 at step 5, 0 everywhere else
 PULSE(100, 5, 10)   -- 100 at steps 5, 15, 25, ...
 ```
 
+### DELAY_FIXED — Fixed Pipeline Delay
+
+```
+DELAY_FIXED(input, delay_time, initial_value)
+```
+
+Returns the input value from exactly `delay_time` timesteps ago. Unlike DELAY3 (which smooths the output through three stages), DELAY_FIXED produces a pure time-shifted copy — a step change in input appears as a step change in output after the delay. Returns `initial_value` until the delay has elapsed.
+
+```
+DELAY_FIXED(Orders, 5, 0)   -- output equals Orders from 5 steps ago; 0 before step 5
+```
+
+### TREND — Fractional Rate of Change
+
+```
+TREND(input, averaging_time, initial_trend)
+```
+
+Estimates the fractional rate of change of the input using exponential smoothing. Returns the growth rate per timestep (e.g., 0.05 means 5% growth per step). Useful for detecting whether a quantity is growing or declining.
+
+```
+TREND(Revenue, 12, 0)   -- estimate revenue growth rate over 12-step window
+```
+
+### FORECAST — Linear Extrapolation
+
+```
+FORECAST(input, averaging_time, horizon, initial_trend)
+```
+
+Estimates where the input will be after `horizon` timesteps, based on its current trend. Uses exponential smoothing to detect the trend, then extrapolates linearly.
+
+```
+FORECAST(Demand, 10, 5, 0)   -- predict demand 5 steps ahead using 10-step trend
+```
+
+### NPV — Net Present Value
+
+```
+NPV(stream, discount_rate)
+NPV(stream, discount_rate, factor)
+```
+
+Accumulates the discounted present value of a stream of payments. The discount rate is the fractional rate per timestep. The optional factor is a multiplier applied to each payment before discounting (default 1).
+
+```
+NPV(Cash_Flow, 0.05)       -- accumulate PV at 5% discount per step
+NPV(Cash_Flow, 0.05, 0.5)  -- same, but each payment weighted by 0.5
+```
+
 ### LOOKUP — Table Lookup
 
 ```

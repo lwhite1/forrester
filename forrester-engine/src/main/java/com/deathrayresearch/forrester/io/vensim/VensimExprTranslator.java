@@ -39,11 +39,13 @@ public final class VensimExprTranslator {
             "(?i)DELAY1\\s*\\(");
     private static final Pattern DELAY1I_PATTERN = Pattern.compile(
             "(?i)DELAY1I\\s*\\(");
+    private static final Pattern DELAY_FIXED_PATTERN = Pattern.compile(
+            "(?i)DELAY\\s+FIXED\\s*\\(");
     private static final Pattern TIME_VAR_PATTERN = Pattern.compile(
             "(?i)\\bTime\\b");
     private static final Set<String> UNSUPPORTED_FUNCTIONS = Set.of(
-            "PULSE", "PULSE TRAIN", "GAME", "DELAY FIXED", "DELAY N",
-            "FORECAST", "TREND", "NPV", "GET XLS DATA", "GET DIRECT DATA",
+            "PULSE", "PULSE TRAIN", "GAME", "DELAY N",
+            "GET XLS DATA", "GET DIRECT DATA",
             "GET DIRECT CONSTANTS", "TABBED ARRAY", "SAMPLE IF TRUE",
             "VECTOR SELECT", "VECTOR ELM MAP", "VECTOR SORT ORDER",
             "ALLOCATE AVAILABLE", "FIND ZERO");
@@ -142,10 +144,13 @@ public final class VensimExprTranslator {
             warnings.add("DELAY1I approximated as DELAY3 (first-order + initial value semantics differ)");
         }
 
-        // 8. Time → TIME (the built-in variable)
+        // 8. DELAY FIXED → DELAY_FIXED
+        expr = DELAY_FIXED_PATTERN.matcher(expr).replaceAll("DELAY_FIXED(");
+
+        // 9. Time → TIME (the built-in variable)
         expr = TIME_VAR_PATTERN.matcher(expr).replaceAll("TIME");
 
-        // 9. Check for unsupported functions
+        // 10. Check for unsupported functions
         checkUnsupportedFunctions(expr, warnings);
 
         return new TranslationResult(expr, lookups, warnings);

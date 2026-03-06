@@ -390,10 +390,12 @@ public final class VensimExporter {
         return switch (upper) {
             case "IF", "THEN", "ELSE", "INTEG", "SMOOTH", "DELAY3", "MIN", "MAX",
                  "ABS", "EXP", "LN", "LOG", "SQRT", "SIN", "COS", "TAN",
+                 "INT", "ROUND", "SUM", "MEAN",
                  "LOOKUP", "WITH", "XIDZ", "ZIDZ", "PULSE", "STEP",
-                 "MODULO", "POWER", "QUANTUM", "INTEGER",
+                 "MODULO", "POWER", "QUANTUM",
                  "SMOOTH3", "SMOOTHI", "SMOOTH3I", "DELAY1", "DELAY1I", "RAMP",
-                 "AND", "OR", "NOT", "TIME" -> true;
+                 "DELAY_FIXED", "TREND", "FORECAST", "NPV", "RANDOM_NORMAL",
+                 "AND", "OR", "NOT", "TIME", "DT" -> true;
             default -> false;
         };
     }

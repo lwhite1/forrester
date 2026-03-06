@@ -1,0 +1,104 @@
+package com.deathrayresearch.forrester.model;
+
+import com.google.common.base.Preconditions;
+
+import com.deathrayresearch.forrester.model.compile.Resettable;
+
+import java.util.function.DoubleSupplier;
+import java.util.function.IntSupplier;
+
+/**
+ * Net present value accumulator that implements {@link Formula}, providing the standard
+ * SD NPV builtin.
+ *
+ * <p>NPV accumulates the discounted present value of a stream of payments. At each
+ * timestep, the current payment is discounted back to the initial time:
+ *
+ * <pre>
+ *     npv += stream / (1 + discount_rate) ^ (step - init_step)
+ * </pre>
+ *
+ * <p>The discount rate is the fractional rate per timestep (e.g., 0.05 for 5% per step).
+ * An optional factor multiplier is applied to each payment before discounting.
+ *
+ * <pre>{@code
+ * Npv npv = Npv.of(() -> cashFlow.getValue(), 0.05, 1, sim::getCurrentStep);
+ * }</pre>
+ */
+public class Npv implements Formula, Resettable {
+
+    private final DoubleSupplier stream;
+    private final double discountRate;
+    private final double factor;
+    private final IntSupplier currentStep;
+
+    private double accumulated;
+    private int initStep;
+    private boolean initialized;
+    private int lastStep = -1;
+
+    private Npv(DoubleSupplier stream, double discountRate, double factor,
+                IntSupplier currentStep) {
+        Preconditions.checkNotNull(stream, "stream supplier must not be null");
+        Preconditions.checkNotNull(currentStep, "currentStep supplier must not be null");
+        this.stream = stream;
+        this.discountRate = discountRate;
+        this.factor = factor;
+        this.currentStep = currentStep;
+    }
+
+    /**
+     * Creates an NPV formula with a factor of 1.
+     *
+     * @param stream       supplies the current payment value
+     * @param discountRate the discount rate per timestep
+     * @param currentStep  supplies the current simulation timestep
+     * @return a new Npv formula
+     */
+    public static Npv of(DoubleSupplier stream, double discountRate,
+                         IntSupplier currentStep) {
+        return new Npv(stream, discountRate, 1.0, currentStep);
+    }
+
+    /**
+     * Creates an NPV formula with a custom factor multiplier.
+     *
+     * @param stream       supplies the current payment value
+     * @param discountRate the discount rate per timestep
+     * @param factor       multiplier applied to each payment
+     * @param currentStep  supplies the current simulation timestep
+     * @return a new Npv formula
+     */
+    public static Npv of(DoubleSupplier stream, double discountRate, double factor,
+                         IntSupplier currentStep) {
+        return new Npv(stream, discountRate, factor, currentStep);
+    }
+
+    @Override
+    public void reset() {
+        accumulated = 0;
+        initStep = 0;
+        initialized = false;
+        lastStep = -1;
+    }
+
+    @Override
+    public double getCurrentValue() {
+        int step = currentStep.getAsInt();
+        if (!initialized) {
+            initStep = step;
+            accumulated = stream.getAsDouble() * factor;
+            initialized = true;
+            lastStep = step;
+        } else if (step > lastStep) {
+            int delta = step - lastStep;
+            for (int d = 0; d < delta; d++) {
+                int elapsed = lastStep + d + 1 - initStep;
+                double discount = Math.pow(1 + discountRate, elapsed);
+                accumulated += stream.getAsDouble() * factor / discount;
+            }
+            lastStep = step;
+        }
+        return accumulated;
+    }
+}
