@@ -6,6 +6,7 @@ import com.deathrayresearch.forrester.model.def.ConstantDef;
 import com.deathrayresearch.forrester.model.def.ElementType;
 import com.deathrayresearch.forrester.model.def.FlowDef;
 import com.deathrayresearch.forrester.model.graph.FeedbackAnalysis;
+import com.deathrayresearch.forrester.model.graph.FeedbackAnalysis.CausalLoop;
 
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
@@ -177,6 +178,13 @@ public class CanvasRenderer {
                 if (canvasState.hasElement(name)) {
                     FeedbackLoopRenderer.drawLoopHighlight(gc, canvasState, name);
                 }
+            }
+        }
+
+        // 2b2. Draw causal loop type labels (R1, B1, etc.) at loop centroids
+        if (loopAnalysis != null) {
+            for (CausalLoop loop : loopAnalysis.causalLoops()) {
+                drawCausalLoopLabel(gc, loop);
             }
         }
 
@@ -388,6 +396,32 @@ public class CanvasRenderer {
                 FeedbackLoopRenderer.drawLoopEdge(gc, midX, midY, edge.x(), edge.y());
             }
         }
+
+        // Highlight causal link edges
+        for (CausalLinkDef link : editor.getCausalLinks()) {
+            String fromName = link.from();
+            String toName = link.to();
+
+            if (!canvasState.hasElement(fromName) || !canvasState.hasElement(toName)) {
+                continue;
+            }
+            if (!loopAnalysis.isLoopEdge(fromName, toName)) {
+                continue;
+            }
+
+            double fromX = canvasState.getX(fromName);
+            double fromY = canvasState.getY(fromName);
+            double toX = canvasState.getX(toName);
+            double toY = canvasState.getY(toName);
+
+            FlowGeometry.Point2D clippedFrom = FlowGeometry.clipToElement(
+                    canvasState, fromName, toX, toY);
+            FlowGeometry.Point2D clippedTo = FlowGeometry.clipToElement(
+                    canvasState, toName, fromX, fromY);
+
+            FeedbackLoopRenderer.drawLoopEdge(gc, clippedFrom.x(), clippedFrom.y(),
+                    clippedTo.x(), clippedTo.y());
+        }
     }
 
     /**
@@ -470,6 +504,30 @@ public class CanvasRenderer {
         if (hitElement != null) {
             drawElementHoverHighlight(gc, hitElement);
         }
+    }
+
+    /**
+     * Draws a loop type label (e.g. "R1", "B2") at the centroid of the loop's variables.
+     */
+    private void drawCausalLoopLabel(GraphicsContext gc, CausalLoop loop) {
+        double sumX = 0;
+        double sumY = 0;
+        int count = 0;
+
+        for (String name : loop.path()) {
+            if (canvasState.hasElement(name)) {
+                sumX += canvasState.getX(name);
+                sumY += canvasState.getY(name);
+                count++;
+            }
+        }
+
+        if (count == 0) {
+            return;
+        }
+
+        FeedbackLoopRenderer.drawLoopLabel(gc, loop.label(), loop.type(),
+                sumX / count, sumY / count);
     }
 
     /**

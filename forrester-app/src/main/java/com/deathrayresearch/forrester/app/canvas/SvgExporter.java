@@ -1,11 +1,13 @@
 package com.deathrayresearch.forrester.app.canvas;
 
+import com.deathrayresearch.forrester.model.def.CausalLinkDef;
 import com.deathrayresearch.forrester.model.def.ConnectorRoute;
 import com.deathrayresearch.forrester.model.def.ConstantDef;
 import com.deathrayresearch.forrester.model.def.ElementType;
 import com.deathrayresearch.forrester.model.def.FlowDef;
 import com.deathrayresearch.forrester.model.def.LookupTableDef;
 import com.deathrayresearch.forrester.model.graph.FeedbackAnalysis;
+import com.deathrayresearch.forrester.model.graph.FeedbackAnalysis.CausalLoop;
 
 import javafx.scene.paint.Color;
 
@@ -311,6 +313,58 @@ public final class SvgExporter {
                         "stroke=\"%s\" stroke-opacity=\"%.2f\" stroke-width=\"2.5\"/>%n",
                         midX, midY, edge.x(), edge.y(),
                         svgColor(ColorPalette.LOOP_EDGE), svgOpacity(ColorPalette.LOOP_EDGE));
+            }
+        }
+
+        // Causal link loop edges
+        for (CausalLinkDef link : editor.getCausalLinks()) {
+            if (!state.hasElement(link.from()) || !state.hasElement(link.to())) {
+                continue;
+            }
+            if (!loopAnalysis.isLoopEdge(link.from(), link.to())) {
+                continue;
+            }
+
+            double fromX = state.getX(link.from());
+            double fromY = state.getY(link.from());
+            double toX = state.getX(link.to());
+            double toY = state.getY(link.to());
+
+            FlowGeometry.Point2D cf = FlowGeometry.clipToElement(state, link.from(), toX, toY);
+            FlowGeometry.Point2D ct = FlowGeometry.clipToElement(state, link.to(), fromX, fromY);
+
+            w.printf(Locale.US,
+                    "  <line x1=\"%.2f\" y1=\"%.2f\" x2=\"%.2f\" y2=\"%.2f\" " +
+                    "stroke=\"%s\" stroke-opacity=\"%.2f\" stroke-width=\"2.5\"/>%n",
+                    cf.x(), cf.y(), ct.x(), ct.y(),
+                    svgColor(ColorPalette.LOOP_EDGE), svgOpacity(ColorPalette.LOOP_EDGE));
+        }
+
+        // Loop type labels
+        for (CausalLoop loop : loopAnalysis.causalLoops()) {
+            double sumX = 0;
+            double sumY = 0;
+            int count = 0;
+            for (String name : loop.path()) {
+                if (state.hasElement(name)) {
+                    sumX += state.getX(name);
+                    sumY += state.getY(name);
+                    count++;
+                }
+            }
+            if (count > 0) {
+                double cx = sumX / count;
+                double cy = sumY / count;
+                Color color = switch (loop.type()) {
+                    case REINFORCING -> ColorPalette.LOOP_REINFORCING;
+                    case BALANCING -> ColorPalette.LOOP_BALANCING;
+                    case INDETERMINATE -> ColorPalette.LOOP_INDETERMINATE;
+                };
+                w.printf(Locale.US,
+                        "  <text x=\"%.2f\" y=\"%.2f\" text-anchor=\"middle\" " +
+                        "dominant-baseline=\"central\" font-weight=\"bold\" font-size=\"14\" " +
+                        "fill=\"%s\">%s</text>%n",
+                        cx, cy, svgColor(color), escapeXml(loop.label()));
             }
         }
     }

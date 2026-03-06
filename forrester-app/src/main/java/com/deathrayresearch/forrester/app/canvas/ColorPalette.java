@@ -35,4 +35,9 @@ public final class ColorPalette {
     public static final Color LOOP_HIGHLIGHT = Color.web("#E74C3C", 0.8);
     public static final Color LOOP_EDGE = Color.web("#E74C3C", 0.6);
     public static final Color LOOP_FILL = Color.web("#E74C3C", 0.08);
+
+    // Loop classification label colors
+    public static final Color LOOP_REINFORCING = Color.web("#27AE60");
+    public static final Color LOOP_BALANCING = Color.web("#E74C3C");
+    public static final Color LOOP_INDETERMINATE = Color.web("#95A5A6");
 }
