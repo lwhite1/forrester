@@ -1,12 +1,16 @@
 package com.deathrayresearch.forrester.model.compile;
 
 import com.deathrayresearch.forrester.model.Delay3;
+import com.deathrayresearch.forrester.model.DelayFixed;
+import com.deathrayresearch.forrester.model.Forecast;
 import com.deathrayresearch.forrester.model.Formula;
 import com.deathrayresearch.forrester.model.LookupTable;
+import com.deathrayresearch.forrester.model.Npv;
 import com.deathrayresearch.forrester.model.Pulse;
 import com.deathrayresearch.forrester.model.Ramp;
 import com.deathrayresearch.forrester.model.Smooth;
 import com.deathrayresearch.forrester.model.Step;
+import com.deathrayresearch.forrester.model.Trend;
 import com.deathrayresearch.forrester.model.expr.BinaryOperator;
 import com.deathrayresearch.forrester.model.expr.Expr;
 import com.deathrayresearch.forrester.model.expr.ExprParser;
@@ -231,6 +235,10 @@ public class ExprCompiler {
             case "STEP" -> compileStep(args);
             case "RAMP" -> compileRamp(args);
             case "PULSE" -> compilePulse(args);
+            case "DELAY_FIXED" -> compileDelayFixed(args);
+            case "TREND" -> compileTrend(args);
+            case "FORECAST" -> compileForecast(args);
+            case "NPV" -> compileNpv(args);
             case "RANDOM_NORMAL" -> compileRandomNormal(args);
             case "LOOKUP" -> compileLookup(args);
             default -> throw new CompilationException(
@@ -316,6 +324,57 @@ public class ExprCompiler {
             pulse = Pulse.of(magnitude, (int) Math.round(start), context.getCurrentStep());
         }
         return pulse::getCurrentValue;
+    }
+
+    private DoubleSupplier compileDelayFixed(List<Expr> args) {
+        requireArgs("DELAY_FIXED", args, 3);
+        DoubleSupplier input = compileExpr(args.get(0));
+        double delayTime = evaluateConstant(args.get(1), "DELAY_FIXED delayTime");
+        double initial = evaluateConstant(args.get(2), "DELAY_FIXED initialValue");
+        DelayFixed delayFixed = DelayFixed.of(input, (int) Math.round(delayTime),
+                initial, context.getCurrentStep());
+        resettables.add(delayFixed);
+        return delayFixed::getCurrentValue;
+    }
+
+    private DoubleSupplier compileTrend(List<Expr> args) {
+        requireArgs("TREND", args, 3);
+        DoubleSupplier input = compileExpr(args.get(0));
+        double averagingTime = evaluateConstant(args.get(1), "TREND averagingTime");
+        double initialTrend = evaluateConstant(args.get(2), "TREND initialTrend");
+        Trend trend = Trend.of(input, averagingTime, initialTrend, context.getCurrentStep());
+        resettables.add(trend);
+        return trend::getCurrentValue;
+    }
+
+    private DoubleSupplier compileForecast(List<Expr> args) {
+        requireArgs("FORECAST", args, 4);
+        DoubleSupplier input = compileExpr(args.get(0));
+        double averagingTime = evaluateConstant(args.get(1), "FORECAST averagingTime");
+        double horizon = evaluateConstant(args.get(2), "FORECAST horizon");
+        double initialTrend = evaluateConstant(args.get(3), "FORECAST initialTrend");
+        Forecast forecast = Forecast.of(input, averagingTime, horizon, initialTrend,
+                context.getCurrentStep());
+        resettables.add(forecast);
+        return forecast::getCurrentValue;
+    }
+
+    private DoubleSupplier compileNpv(List<Expr> args) {
+        if (args.size() < 2 || args.size() > 3) {
+            throw new CompilationException(
+                    "NPV requires 2-3 arguments, got " + args.size(), "NPV");
+        }
+        DoubleSupplier stream = compileExpr(args.get(0));
+        double discountRate = evaluateConstant(args.get(1), "NPV discountRate");
+        Npv npv;
+        if (args.size() == 3) {
+            double factor = evaluateConstant(args.get(2), "NPV factor");
+            npv = Npv.of(stream, discountRate, factor, context.getCurrentStep());
+        } else {
+            npv = Npv.of(stream, discountRate, context.getCurrentStep());
+        }
+        resettables.add(npv);
+        return npv::getCurrentValue;
     }
 
     private DoubleSupplier compileRandomNormal(List<Expr> args) {

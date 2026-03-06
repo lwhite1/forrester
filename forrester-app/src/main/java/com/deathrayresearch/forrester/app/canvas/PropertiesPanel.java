@@ -322,6 +322,7 @@ public class PropertiesPanel extends VBox {
             case CONSTANT -> "Constant";
             case MODULE -> "Module";
             case LOOKUP -> "Lookup Table";
+            case CLD_VARIABLE -> "CLD Variable";
         };
     }
 }

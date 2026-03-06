@@ -39,7 +39,7 @@ Numeric literals support integers, decimals, and scientific notation:
 | `*` | Multiplication | `Rate * Population` |
 | `/` | Division | `Total / Count` |
 | `%` | Modulo (remainder) | `Step % 7` |
-| `^` | Exponentiation | `2 ^ 10` |
+| `**` | Exponentiation | `2 ** 10` |
 | `-` (unary) | Negation | `-Rate` |
 
 Division by zero returns 0 (safe division).
@@ -61,24 +61,24 @@ Equality uses epsilon comparison (tolerance of 1e-10) to handle floating-point p
 
 ### Logical
 
-Logical operators treat `0` as false and any non-zero value as true.
+Logical operators treat `0` as false and any non-zero value as true. Keywords are case-insensitive.
 
 | Operator | Description | Example |
 |----------|-------------|---------|
-| `&&` | And | `A > 0 && B > 0` |
-| `\|\|` | Or | `Shortage \|\| Emergency` |
-| `!` | Not | `!Active` |
+| `and` | And | `A > 0 and B > 0` |
+| `or` | Or | `Shortage or Emergency` |
+| `not` | Not | `not Active` |
 
 ### Operator Precedence
 
 From highest to lowest binding:
 
-1. `^` (exponentiation, right-associative)
+1. `**` (exponentiation, right-associative)
 2. `*`, `/`, `%` (multiplicative)
 3. `+`, `-` (additive)
 4. `==`, `!=`, `<`, `<=`, `>`, `>=` (comparison)
-5. `&&` (logical and)
-6. `||` (logical or)
+5. `and` (logical and)
+6. `or` (logical or)
 
 Use parentheses to override precedence: `(A + B) * C`
 
@@ -183,6 +183,56 @@ PULSE(100, 5)       -- 100 at step 5, 0 everywhere else
 PULSE(100, 5, 10)   -- 100 at steps 5, 15, 25, ...
 ```
 
+### DELAY_FIXED — Fixed Pipeline Delay
+
+```
+DELAY_FIXED(input, delay_time, initial_value)
+```
+
+Returns the input value from exactly `delay_time` timesteps ago. Unlike DELAY3 (which smooths the output through three stages), DELAY_FIXED produces a pure time-shifted copy — a step change in input appears as a step change in output after the delay. Returns `initial_value` until the delay has elapsed.
+
+```
+DELAY_FIXED(Orders, 5, 0)   -- output equals Orders from 5 steps ago; 0 before step 5
+```
+
+### TREND — Fractional Rate of Change
+
+```
+TREND(input, averaging_time, initial_trend)
+```
+
+Estimates the fractional rate of change of the input using exponential smoothing. Returns the growth rate per timestep (e.g., 0.05 means 5% growth per step). Useful for detecting whether a quantity is growing or declining.
+
+```
+TREND(Revenue, 12, 0)   -- estimate revenue growth rate over 12-step window
+```
+
+### FORECAST — Linear Extrapolation
+
+```
+FORECAST(input, averaging_time, horizon, initial_trend)
+```
+
+Estimates where the input will be after `horizon` timesteps, based on its current trend. Uses exponential smoothing to detect the trend, then extrapolates linearly.
+
+```
+FORECAST(Demand, 10, 5, 0)   -- predict demand 5 steps ahead using 10-step trend
+```
+
+### NPV — Net Present Value
+
+```
+NPV(stream, discount_rate)
+NPV(stream, discount_rate, factor)
+```
+
+Accumulates the discounted present value of a stream of payments. The discount rate is the fractional rate per timestep. The optional factor is a multiplier applied to each payment before discounting (default 1).
+
+```
+NPV(Cash_Flow, 0.05)       -- accumulate PV at 5% discount per step
+NPV(Cash_Flow, 0.05, 0.5)  -- same, but each payment weighted by 0.5
+```
+
 ### LOOKUP — Table Lookup
 
 ```
@@ -259,13 +309,13 @@ For reference, the formal grammar of the expression language:
 
 ```
 expr       = or_expr
-or_expr    = and_expr ( "||" and_expr )*
-and_expr   = comparison ( "&&" comparison )*
+or_expr    = and_expr ( "or" and_expr )*
+and_expr   = comparison ( "and" comparison )*
 comparison = addition ( ("==" | "!=" | "<" | "<=" | ">" | ">=") addition )?
 addition   = mult ( ("+" | "-") mult )*
 mult       = power ( ("*" | "/" | "%") power )*
-power      = unary ( "^" power )?
-unary      = ("-" | "!") unary | call
+power      = unary ( "**" power )?
+unary      = ("-" | "not") unary | call
 call       = primary ( "(" arglist? ")" )?
 primary    = NUMBER | IDENTIFIER | QUOTED_ID | "(" expr ")"
            | "IF" "(" expr "," expr "," expr ")"

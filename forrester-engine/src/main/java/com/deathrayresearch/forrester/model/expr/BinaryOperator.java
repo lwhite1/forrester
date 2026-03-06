@@ -20,15 +20,15 @@ public enum BinaryOperator {
     MUL("*", 2),
     DIV("/", 2),
     MOD("%", 2),
-    POW("^", 3),
+    POW("**", 3),
     EQ("==", 0),
     NE("!=", 0),
     LT("<", 0),
     LE("<=", 0),
     GT(">", 0),
     GE(">=", 0),
-    AND("&&", -1),
-    OR("||", -2);
+    AND("and", -1),
+    OR("or", -2);
 
     private final String symbol;
     private final int precedence;

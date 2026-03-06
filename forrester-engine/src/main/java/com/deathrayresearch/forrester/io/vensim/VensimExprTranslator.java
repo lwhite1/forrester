@@ -39,11 +39,14 @@ public final class VensimExprTranslator {
             "(?i)DELAY1\\s*\\(");
     private static final Pattern DELAY1I_PATTERN = Pattern.compile(
             "(?i)DELAY1I\\s*\\(");
+    private static final Pattern DELAY_FIXED_PATTERN = Pattern.compile(
+            "(?i)DELAY\\s+FIXED\\s*\\(");
+    private static final Pattern CARET_PATTERN = Pattern.compile("\\^");
     private static final Pattern TIME_VAR_PATTERN = Pattern.compile(
             "(?i)\\bTime\\b");
     private static final Set<String> UNSUPPORTED_FUNCTIONS = Set.of(
-            "PULSE", "PULSE TRAIN", "GAME", "DELAY FIXED", "DELAY N",
-            "FORECAST", "TREND", "NPV", "GET XLS DATA", "GET DIRECT DATA",
+            "PULSE", "PULSE TRAIN", "GAME", "DELAY N",
+            "GET XLS DATA", "GET DIRECT DATA",
             "GET DIRECT CONSTANTS", "TABBED ARRAY", "SAMPLE IF TRUE",
             "VECTOR SELECT", "VECTOR ELM MAP", "VECTOR SORT ORDER",
             "ALLOCATE AVAILABLE", "FIND ZERO");
@@ -106,11 +109,11 @@ public final class VensimExprTranslator {
         expr = IF_THEN_ELSE_PATTERN.matcher(expr).replaceAll("IF(");
 
         // 4. Logical operators
-        expr = AND_PATTERN.matcher(expr).replaceAll("&&");
-        expr = OR_PATTERN.matcher(expr).replaceAll("||");
+        expr = AND_PATTERN.matcher(expr).replaceAll(" and ");
+        expr = OR_PATTERN.matcher(expr).replaceAll(" or ");
         // :NOT: in Vensim has lower precedence than comparisons, so :NOT: x > 0 means
-        // NOT(x > 0). We translate to !(...) by wrapping the remaining expression up to
-        // the next logical operator or closing paren. For simple cases, we insert !(
+        // NOT(x > 0). We translate to not(...) by wrapping the remaining expression up to
+        // the next logical operator or closing paren. For simple cases, we insert not(
         // and find the end of the operand.
         expr = translateNot(expr);
 
@@ -142,10 +145,16 @@ public final class VensimExprTranslator {
             warnings.add("DELAY1I approximated as DELAY3 (first-order + initial value semantics differ)");
         }
 
-        // 8. Time → TIME (the built-in variable)
+        // 8. DELAY FIXED → DELAY_FIXED
+        expr = DELAY_FIXED_PATTERN.matcher(expr).replaceAll("DELAY_FIXED(");
+
+        // 9. ^ → ** (Vensim uses ^ for power, Forrester uses **)
+        expr = CARET_PATTERN.matcher(expr).replaceAll("**");
+
+        // 10. Time → TIME (the built-in variable)
         expr = TIME_VAR_PATTERN.matcher(expr).replaceAll("TIME");
 
-        // 9. Check for unsupported functions
+        // 11. Check for unsupported functions
         checkUnsupportedFunctions(expr, warnings);
 
         return new TranslationResult(expr, lookups, warnings);
@@ -281,8 +290,8 @@ public final class VensimExprTranslator {
 
     private static String translateNot(String expr) {
         // :NOT: in Vensim has lower precedence than comparisons.
-        // We wrap the operand (up to the next :AND:, :OR:, comma, or closing paren at depth 0)
-        // in parentheses: :NOT: x > 0 → !(x > 0)
+        // We wrap the operand (up to the next logical operator, comma, or closing paren at depth 0)
+        // in parentheses: :NOT: x > 0 → not(x > 0)
         Matcher m = NOT_PATTERN.matcher(expr);
         while (m.find()) {
             int notStart = m.start();
@@ -303,16 +312,17 @@ public final class VensimExprTranslator {
                 } else if (depth == 0 && c == ',') {
                     end = i;
                     break;
-                } else if (depth == 0 && i + 4 < expr.length()) {
-                    String ahead = expr.substring(i, Math.min(i + 5, expr.length()));
-                    if (ahead.matches("(?i)&&.*") || ahead.matches("(?i)\\|\\|.*")) {
+                } else if (depth == 0 && i + 3 <= expr.length()) {
+                    String ahead = expr.substring(i, Math.min(i + 4, expr.length()));
+                    if (ahead.matches("(?i)and[^a-zA-Z0-9_].*") || ahead.matches("(?i)and$")
+                            || ahead.matches("(?i)or[^a-zA-Z0-9_].*") || ahead.matches("(?i)or$")) {
                         end = i;
                         break;
                     }
                 }
             }
             String operand = expr.substring(operandStart, end).strip();
-            String replacement = "!(" + operand + ")";
+            String replacement = "not(" + operand + ")";
             expr = expr.substring(0, notStart) + replacement + expr.substring(end);
             m = NOT_PATTERN.matcher(expr);
         }

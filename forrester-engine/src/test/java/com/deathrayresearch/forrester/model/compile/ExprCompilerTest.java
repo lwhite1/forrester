@@ -74,7 +74,7 @@ class ExprCompilerTest {
 
     @Test
     void shouldCompilePower() {
-        Formula formula = compiler.compile("2 ^ 10");
+        Formula formula = compiler.compile("2 ** 10");
         assertThat(formula.getCurrentValue()).isEqualTo(1024.0);
     }
 
@@ -92,28 +92,28 @@ class ExprCompilerTest {
 
     @Test
     void shouldCompileLogicalAnd() {
-        Formula trueAnd = compiler.compile("1 && 1");
+        Formula trueAnd = compiler.compile("1 and 1");
         assertThat(trueAnd.getCurrentValue()).isEqualTo(1.0);
 
-        Formula falseAnd = compiler.compile("1 && 0");
+        Formula falseAnd = compiler.compile("1 and 0");
         assertThat(falseAnd.getCurrentValue()).isEqualTo(0.0);
     }
 
     @Test
     void shouldCompileLogicalOr() {
-        Formula trueOr = compiler.compile("0 || 1");
+        Formula trueOr = compiler.compile("0 or 1");
         assertThat(trueOr.getCurrentValue()).isEqualTo(1.0);
 
-        Formula falseOr = compiler.compile("0 || 0");
+        Formula falseOr = compiler.compile("0 or 0");
         assertThat(falseOr.getCurrentValue()).isEqualTo(0.0);
     }
 
     @Test
     void shouldCompileNot() {
-        Formula notTrue = compiler.compile("!1");
+        Formula notTrue = compiler.compile("not 1");
         assertThat(notTrue.getCurrentValue()).isEqualTo(0.0);
 
-        Formula notFalse = compiler.compile("!0");
+        Formula notFalse = compiler.compile("not 0");
         assertThat(notFalse.getCurrentValue()).isEqualTo(1.0);
     }
 
@@ -462,6 +462,109 @@ class ExprCompilerTest {
                 double val = formula.getCurrentValue();
                 assertThat(val).isBetween(0.0, 100.0);
             }
+        }
+    }
+
+    @Nested
+    @DisplayName("DELAY_FIXED function")
+    class DelayFixedTests {
+
+        @Test
+        void shouldReturnInitialValueBeforeDelayElapses() {
+            Formula formula = compiler.compile("DELAY_FIXED(Population, 3, 0)");
+            // At step 0, delay hasn't elapsed yet — should return initial value 0
+            assertThat(formula.getCurrentValue()).isEqualTo(0.0);
+        }
+
+        @Test
+        void shouldReturnDelayedInputAfterDelay() {
+            // Population = 1000 (constant), delay = 2 steps, initial = 0
+            Formula formula = compiler.compile("DELAY_FIXED(Population, 2, 0)");
+            // Step 0: initialize, returns initial (0)
+            step[0] = 0;
+            assertThat(formula.getCurrentValue()).isEqualTo(0.0);
+            // Step 1: buffer has [1000, 0], reads oldest = 0
+            step[0] = 1;
+            assertThat(formula.getCurrentValue()).isEqualTo(0.0);
+            // Step 2: buffer has [1000, 1000], reads oldest = 1000
+            step[0] = 2;
+            assertThat(formula.getCurrentValue()).isEqualTo(1000.0);
+        }
+    }
+
+    @Nested
+    @DisplayName("TREND function")
+    class TrendTests {
+
+        @Test
+        void shouldReturnInitialTrend() {
+            Formula formula = compiler.compile("TREND(Population, 5, 0.1)");
+            // At step 0, should return the initial trend
+            assertThat(formula.getCurrentValue()).isCloseTo(0.1, within(1e-10));
+        }
+
+        @Test
+        void shouldReturnZeroTrendForConstantInput() {
+            // With constant input and zero initial trend, trend should stay near zero
+            Formula formula = compiler.compile("TREND(Population, 5, 0)");
+            step[0] = 0;
+            formula.getCurrentValue();
+            // After several steps with constant input, trend should remain ~0
+            for (int i = 1; i <= 20; i++) {
+                step[0] = i;
+            }
+            assertThat(formula.getCurrentValue()).isCloseTo(0.0, within(1e-6));
+        }
+    }
+
+    @Nested
+    @DisplayName("FORECAST function")
+    class ForecastTests {
+
+        @Test
+        void shouldReturnCurrentValueWithZeroTrend() {
+            // With zero initial trend and constant input, forecast should equal input
+            Formula formula = compiler.compile("FORECAST(Population, 5, 10, 0)");
+            step[0] = 0;
+            assertThat(formula.getCurrentValue()).isCloseTo(1000.0, within(1.0));
+        }
+
+        @Test
+        void shouldExtrapolateWithPositiveTrend() {
+            // With 10% initial trend and horizon of 5, forecast = 1000 * (1 + 0.1 * 5) = 1500
+            Formula formula = compiler.compile("FORECAST(Population, 5, 5, 0.1)");
+            step[0] = 0;
+            assertThat(formula.getCurrentValue()).isCloseTo(1500.0, within(1.0));
+        }
+    }
+
+    @Nested
+    @DisplayName("NPV function")
+    class NpvTests {
+
+        @Test
+        void shouldAccumulateDiscountedValues() {
+            // Constant stream of 100, 10% discount rate
+            context.addConstant("Payment", new Constant("Payment", ItemUnits.THING, 100));
+            Formula formula = compiler.compile("NPV(Payment, 0.10)");
+            // Step 0: NPV = 100 (undiscounted first payment)
+            step[0] = 0;
+            assertThat(formula.getCurrentValue()).isCloseTo(100.0, within(0.01));
+            // Step 1: NPV = 100 + 100/1.1 = 190.91
+            step[0] = 1;
+            assertThat(formula.getCurrentValue()).isCloseTo(190.91, within(0.01));
+            // Step 2: NPV = 190.91 + 100/1.21 = 273.55
+            step[0] = 2;
+            assertThat(formula.getCurrentValue()).isCloseTo(273.55, within(0.01));
+        }
+
+        @Test
+        void shouldApplyFactor() {
+            context.addConstant("Payment", new Constant("Payment", ItemUnits.THING, 100));
+            Formula formula = compiler.compile("NPV(Payment, 0.10, 2)");
+            // Step 0: NPV = 100 * 2 = 200
+            step[0] = 0;
+            assertThat(formula.getCurrentValue()).isCloseTo(200.0, within(0.01));
         }
     }
 

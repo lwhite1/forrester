@@ -13,7 +13,8 @@ public enum ElementType {
     AUX("aux"),
     CONSTANT("constant"),
     MODULE("module"),
-    LOOKUP("lookup");
+    LOOKUP("lookup"),
+    CLD_VARIABLE("cld_variable");
 
     private final String label;
 

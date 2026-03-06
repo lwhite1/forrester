@@ -36,8 +36,10 @@ import java.util.regex.Pattern;
 public final class VensimExporter {
 
     private static final Pattern IF_FUNC_PATTERN = Pattern.compile("(?i)\\bIF\\s*\\(");
-    private static final Pattern AND_OP_PATTERN = Pattern.compile("&&");
-    private static final Pattern OR_OP_PATTERN = Pattern.compile("\\|\\|");
+    private static final Pattern AND_OP_PATTERN = Pattern.compile("\\band\\b");
+    private static final Pattern OR_OP_PATTERN = Pattern.compile("\\bor\\b");
+    private static final Pattern NOT_OP_PATTERN = Pattern.compile("\\bnot\\b");
+    private static final Pattern DOUBLE_STAR_PATTERN = Pattern.compile("\\*\\*");
     private static final Pattern DOUBLE_EQ_PATTERN = Pattern.compile("==");
     private static final Pattern NOT_EQ_PATTERN = Pattern.compile("!=");
     private static final Pattern TIME_PATTERN = Pattern.compile("\\bTIME\\b");
@@ -296,16 +298,19 @@ public final class VensimExporter {
         // IF(...) → IF THEN ELSE(...)
         expr = IF_FUNC_PATTERN.matcher(expr).replaceAll("IF THEN ELSE(");
 
-        // && → :AND:
+        // and → :AND:
         expr = AND_OP_PATTERN.matcher(expr).replaceAll(":AND:");
 
-        // || → :OR:
+        // or → :OR:
         expr = OR_OP_PATTERN.matcher(expr).replaceAll(":OR:");
 
-        // !( → :NOT:(  — translate standalone ! (not part of !=) to :NOT:
-        expr = translateNotOperator(expr);
+        // not → :NOT:
+        expr = NOT_OP_PATTERN.matcher(expr).replaceAll(":NOT:");
 
-        // != → <>  (must be done after ! translation)
+        // ** → ^ (Forrester uses ** for power, Vensim uses ^)
+        expr = DOUBLE_STAR_PATTERN.matcher(expr).replaceAll("^");
+
+        // != → <>
         expr = NOT_EQ_PATTERN.matcher(expr).replaceAll("<>");
 
         // == → =
@@ -318,22 +323,6 @@ public final class VensimExporter {
         expr = denormalizeNamesInExpr(expr);
 
         return expr;
-    }
-
-    /**
-     * Translates the Forrester ! operator to Vensim :NOT: operator.
-     * Handles standalone ! (not part of !=).
-     */
-    private static String translateNotOperator(String expr) {
-        StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < expr.length(); i++) {
-            if (expr.charAt(i) == '!' && (i + 1 >= expr.length() || expr.charAt(i + 1) != '=')) {
-                sb.append(":NOT:");
-            } else {
-                sb.append(expr.charAt(i));
-            }
-        }
-        return sb.toString();
     }
 
     /**
@@ -390,10 +379,12 @@ public final class VensimExporter {
         return switch (upper) {
             case "IF", "THEN", "ELSE", "INTEG", "SMOOTH", "DELAY3", "MIN", "MAX",
                  "ABS", "EXP", "LN", "LOG", "SQRT", "SIN", "COS", "TAN",
+                 "INT", "ROUND", "SUM", "MEAN",
                  "LOOKUP", "WITH", "XIDZ", "ZIDZ", "PULSE", "STEP",
-                 "MODULO", "POWER", "QUANTUM", "INTEGER",
+                 "MODULO", "POWER", "QUANTUM",
                  "SMOOTH3", "SMOOTHI", "SMOOTH3I", "DELAY1", "DELAY1I", "RAMP",
-                 "AND", "OR", "NOT", "TIME" -> true;
+                 "DELAY_FIXED", "TREND", "FORECAST", "NPV", "RANDOM_NORMAL",
+                 "AND", "OR", "NOT", "TIME", "DT" -> true;
             default -> false;
         };
     }

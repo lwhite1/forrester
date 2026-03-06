@@ -1,6 +1,8 @@
 package com.deathrayresearch.forrester.app.canvas;
 
 import com.deathrayresearch.forrester.model.def.AuxDef;
+import com.deathrayresearch.forrester.model.def.CausalLinkDef;
+import com.deathrayresearch.forrester.model.def.CldVariableDef;
 import com.deathrayresearch.forrester.model.def.ElementPlacement;
 import com.deathrayresearch.forrester.model.def.ElementType;
 import com.deathrayresearch.forrester.model.def.FlowDef;
@@ -1634,6 +1636,200 @@ class ModelEditorTest {
             assertThat(recovery).isNotNull();
             assertThat(recovery.source()).isEqualTo("Infectious");
             assertThat(recovery.sink()).isEqualTo("Recovered");
+        }
+    }
+
+    @Nested
+    @DisplayName("CLD Variables")
+    class CldVariables {
+
+        @Test
+        void shouldAddCldVariable() {
+            String name = editor.addCldVariable();
+            assertThat(name).isEqualTo("Variable 1");
+            assertThat(editor.getCldVariables()).hasSize(1);
+            assertThat(editor.hasElement("Variable 1")).isTrue();
+        }
+
+        @Test
+        void shouldAutoIncrementCldVariableNames() {
+            editor.addCldVariable();
+            String second = editor.addCldVariable();
+            assertThat(second).isEqualTo("Variable 2");
+        }
+
+        @Test
+        void shouldRemoveCldVariable() {
+            editor.addCldVariable();
+            editor.removeElement("Variable 1");
+            assertThat(editor.getCldVariables()).isEmpty();
+            assertThat(editor.hasElement("Variable 1")).isFalse();
+        }
+
+        @Test
+        void shouldRenameCldVariable() {
+            editor.addCldVariable();
+            boolean result = editor.renameElement("Variable 1", "Workload");
+            assertThat(result).isTrue();
+            assertThat(editor.getCldVariables().get(0).name()).isEqualTo("Workload");
+            assertThat(editor.hasElement("Workload")).isTrue();
+            assertThat(editor.hasElement("Variable 1")).isFalse();
+        }
+
+        @Test
+        void shouldSetCldVariableComment() {
+            editor.addCldVariable();
+            boolean result = editor.setCldVariableComment("Variable 1", "A description");
+            assertThat(result).isTrue();
+            assertThat(editor.getCldVariables().get(0).comment()).isEqualTo("A description");
+        }
+
+        @Test
+        void shouldLoadCldVariablesFromDefinition() {
+            ModelDefinition def = new ModelDefinitionBuilder()
+                    .name("CLD")
+                    .cldVariable("Stress", "Work stress")
+                    .cldVariable("Performance")
+                    .causalLink("Stress", "Performance", CausalLinkDef.Polarity.NEGATIVE)
+                    .build();
+
+            editor.loadFrom(def);
+
+            assertThat(editor.getCldVariables()).hasSize(2);
+            assertThat(editor.getCausalLinks()).hasSize(1);
+            assertThat(editor.hasElement("Stress")).isTrue();
+            assertThat(editor.hasElement("Performance")).isTrue();
+        }
+
+        @Test
+        void shouldIncludeCldDataInSnapshot() {
+            editor.addCldVariable(); // Variable 1
+            editor.addCldVariable(); // Variable 2
+            editor.addCausalLink("Variable 1", "Variable 2", CausalLinkDef.Polarity.POSITIVE);
+
+            ModelDefinition snapshot = editor.toModelDefinition();
+            assertThat(snapshot.cldVariables()).hasSize(2);
+            assertThat(snapshot.causalLinks()).hasSize(1);
+            assertThat(snapshot.causalLinks().get(0).polarity())
+                    .isEqualTo(CausalLinkDef.Polarity.POSITIVE);
+        }
+
+        @Test
+        void shouldClearCldDataOnReload() {
+            editor.addCldVariable();
+            editor.addCausalLink("Variable 1", "Variable 1", CausalLinkDef.Polarity.POSITIVE);
+
+            editor.loadFrom(new ModelDefinitionBuilder().name("Empty").build());
+            assertThat(editor.getCldVariables()).isEmpty();
+            assertThat(editor.getCausalLinks()).isEmpty();
+        }
+
+        @Test
+        void shouldContinueCounterAfterLoad() {
+            ModelDefinition def = new ModelDefinitionBuilder()
+                    .name("CLD")
+                    .cldVariable("Variable 5")
+                    .build();
+            editor.loadFrom(def);
+
+            String next = editor.addCldVariable();
+            assertThat(next).isEqualTo("Variable 6");
+        }
+    }
+
+    @Nested
+    @DisplayName("Causal Links")
+    class CausalLinks {
+
+        @Test
+        void shouldAddCausalLink() {
+            editor.addCldVariable(); // Variable 1
+            editor.addCldVariable(); // Variable 2
+
+            boolean result = editor.addCausalLink("Variable 1", "Variable 2",
+                    CausalLinkDef.Polarity.POSITIVE);
+
+            assertThat(result).isTrue();
+            assertThat(editor.getCausalLinks()).hasSize(1);
+        }
+
+        @Test
+        void shouldRejectCausalLinkWithMissingEndpoint() {
+            editor.addCldVariable(); // Variable 1
+
+            boolean result = editor.addCausalLink("Variable 1", "Nonexistent",
+                    CausalLinkDef.Polarity.POSITIVE);
+
+            assertThat(result).isFalse();
+            assertThat(editor.getCausalLinks()).isEmpty();
+        }
+
+        @Test
+        void shouldRemoveCausalLink() {
+            editor.addCldVariable();
+            editor.addCldVariable();
+            editor.addCausalLink("Variable 1", "Variable 2", CausalLinkDef.Polarity.POSITIVE);
+
+            boolean result = editor.removeCausalLink("Variable 1", "Variable 2");
+
+            assertThat(result).isTrue();
+            assertThat(editor.getCausalLinks()).isEmpty();
+        }
+
+        @Test
+        void shouldSetCausalLinkPolarity() {
+            editor.addCldVariable();
+            editor.addCldVariable();
+            editor.addCausalLink("Variable 1", "Variable 2", CausalLinkDef.Polarity.UNKNOWN);
+
+            boolean result = editor.setCausalLinkPolarity("Variable 1", "Variable 2",
+                    CausalLinkDef.Polarity.NEGATIVE);
+
+            assertThat(result).isTrue();
+            assertThat(editor.getCausalLinks().get(0).polarity())
+                    .isEqualTo(CausalLinkDef.Polarity.NEGATIVE);
+        }
+
+        @Test
+        void shouldRemoveCausalLinksWhenVariableDeleted() {
+            editor.addCldVariable(); // Variable 1
+            editor.addCldVariable(); // Variable 2
+            editor.addCldVariable(); // Variable 3
+            editor.addCausalLink("Variable 1", "Variable 2", CausalLinkDef.Polarity.POSITIVE);
+            editor.addCausalLink("Variable 2", "Variable 3", CausalLinkDef.Polarity.NEGATIVE);
+            editor.addCausalLink("Variable 3", "Variable 1", CausalLinkDef.Polarity.POSITIVE);
+
+            editor.removeElement("Variable 2");
+
+            // Only the link from 3->1 should survive
+            assertThat(editor.getCausalLinks()).hasSize(1);
+            assertThat(editor.getCausalLinks().get(0).from()).isEqualTo("Variable 3");
+            assertThat(editor.getCausalLinks().get(0).to()).isEqualTo("Variable 1");
+        }
+
+        @Test
+        void shouldUpdateCausalLinksWhenVariableRenamed() {
+            editor.addCldVariable(); // Variable 1
+            editor.addCldVariable(); // Variable 2
+            editor.addCausalLink("Variable 1", "Variable 2", CausalLinkDef.Polarity.POSITIVE);
+
+            editor.renameElement("Variable 1", "Workload");
+
+            CausalLinkDef link = editor.getCausalLinks().get(0);
+            assertThat(link.from()).isEqualTo("Workload");
+            assertThat(link.to()).isEqualTo("Variable 2");
+        }
+
+        @Test
+        void shouldAllowCausalLinkBetweenCldAndSfElements() {
+            editor.addCldVariable(); // Variable 1
+            editor.addStock();       // Stock 1
+
+            boolean result = editor.addCausalLink("Variable 1", "Stock 1",
+                    CausalLinkDef.Polarity.POSITIVE);
+
+            assertThat(result).isTrue();
+            assertThat(editor.getCausalLinks()).hasSize(1);
         }
     }
 }

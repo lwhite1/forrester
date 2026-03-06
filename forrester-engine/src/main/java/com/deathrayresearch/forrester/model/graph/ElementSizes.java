@@ -30,6 +30,7 @@ public record ElementSizes(
             case CONSTANT -> CONSTANT;
             case LOOKUP -> LOOKUP;
             case MODULE -> MODULE;
+            case CLD_VARIABLE -> AUX;
         };
     }
 }

@@ -50,11 +50,12 @@ This document describes what Forrester supports when importing XMILE files (IEEE
 
 | XMILE | Forrester |
 |-------|-----------|
-| `AND` | `&&` |
-| `OR` | `\|\|` |
-| `NOT` | `!` |
+| `AND` | `and` |
+| `OR` | `or` |
+| `NOT` | `not` |
 | `<>` | `!=` |
 | `=` (comparison) | `==` |
+| `^` | `**` |
 | `Time` | `TIME` |
 
 **Function conversions:**
@@ -132,10 +133,10 @@ Translation is bidirectional -- `XmileExprTranslator` also converts Forrester ex
 
 The following XMILE functions may or may not work -- they have no explicit handling or tests:
 
-`TREND`, `FORECAST`, `SAMPLE`, `STDDEV`, `VARIANCE`, `RANDOM`, `LOOKUP2D`, `UNRESTRICTED`, `ALLOCATE`
+`SAMPLE`, `STDDEV`, `VARIANCE`, `RANDOM`, `LOOKUP2D`, `UNRESTRICTED`, `ALLOCATE`
 
 The following pass through and are supported by the Forrester expression compiler:
-`PULSE`, `RAMP`, `STEP`, `MEAN`, `RANDOM_NORMAL`, `SIN`, `COS`, `TAN`, `LOG`, `INT`, `ROUND`, `MODULO`, `POWER`
+`PULSE`, `RAMP`, `STEP`, `MEAN`, `RANDOM_NORMAL`, `SIN`, `COS`, `TAN`, `LOG`, `INT`, `ROUND`, `MODULO`, `POWER`, `DELAY_FIXED`, `TREND`, `FORECAST`, `NPV`
 
 ### Other Missing Features
 

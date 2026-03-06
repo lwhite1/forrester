@@ -9,13 +9,13 @@ import java.util.List;
  * <p>Grammar:
  * <pre>
  * expr       = or_expr
- * or_expr    = and_expr ( "||" and_expr )*
- * and_expr   = comparison ( "&&" comparison )*
- * comparison = addition ( ("==" | "!=" | "<" | "<=" | ">" | ">=") addition )?
+ * or_expr    = and_expr ( "or" and_expr )*
+ * and_expr   = comparison ( "and" comparison )*
+ * comparison = addition ( ("==" | "!=" | "&lt;" | "&lt;=" | "&gt;" | "&gt;=") addition )?
  * addition   = mult ( ("+" | "-") mult )*
  * mult       = power ( ("*" | "/" | "%") power )*
- * power      = unary ( "^" power )?          // right-associative
- * unary      = ("-" | "!") unary | call
+ * power      = unary ( "**" power )?          // right-associative
+ * unary      = ("-" | "not") unary | call
  * call       = primary ( "(" arglist? ")" )?
  * primary    = NUMBER | IDENTIFIER | QUOTED_ID | "(" expr ")"
  *            | "IF" "(" expr "," expr "," expr ")"
@@ -83,7 +83,7 @@ public class ExprParser {
 
     private Expr parseOr() {
         Expr left = parseAnd();
-        while (match("||")) {
+        while (matchKeyword("or")) {
             Expr right = parseAnd();
             left = new Expr.BinaryOp(left, BinaryOperator.OR, right);
         }
@@ -92,7 +92,7 @@ public class ExprParser {
 
     private Expr parseAnd() {
         Expr left = parseComparison();
-        while (match("&&")) {
+        while (matchKeyword("and")) {
             Expr right = parseComparison();
             left = new Expr.BinaryOp(left, BinaryOperator.AND, right);
         }
@@ -150,7 +150,7 @@ public class ExprParser {
     private Expr parseMultiplication() {
         Expr left = parsePower();
         while (true) {
-            if (match("*")) {
+            if (matchSingleStar()) {
                 Expr right = parsePower();
                 left = new Expr.BinaryOp(left, BinaryOperator.MUL, right);
             } else if (match("/")) {
@@ -168,7 +168,7 @@ public class ExprParser {
 
     private Expr parsePower() {
         Expr base = parseUnary();
-        if (match("^")) {
+        if (match("**")) {
             Expr exponent = parsePower(); // right-associative recursion
             return new Expr.BinaryOp(base, BinaryOperator.POW, exponent);
         }
@@ -176,7 +176,7 @@ public class ExprParser {
     }
 
     private Expr parseUnary() {
-        if (matchChar('!')) {
+        if (matchKeyword("not")) {
             depth++;
             if (depth > MAX_DEPTH) {
                 throw new ParseException("Expression nesting too deep (max " + MAX_DEPTH + ")",
@@ -344,7 +344,7 @@ public class ExprParser {
             // For operators like "<", make sure we don't match "<=" when looking for "<"
             if (expected.length() == 1) {
                 char ch = expected.charAt(0);
-                if ((ch == '<' || ch == '>' || ch == '!') && pos + 1 < input.length()
+                if ((ch == '<' || ch == '>') && pos + 1 < input.length()
                         && input.charAt(pos + 1) == '=') {
                     return false;
                 }
@@ -353,6 +353,42 @@ public class ExprParser {
             return true;
         }
         return false;
+    }
+
+    /**
+     * Matches a single '*' that is NOT part of '**' (exponentiation).
+     */
+    private boolean matchSingleStar() {
+        skipWhitespace();
+        if (pos < input.length() && input.charAt(pos) == '*') {
+            if (pos + 1 < input.length() && input.charAt(pos + 1) == '*') {
+                return false; // this is '**', not '*'
+            }
+            pos++;
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Matches a keyword (like "and", "or", "not") followed by a non-identifier character.
+     * Case-insensitive. This prevents matching "and" inside "android".
+     */
+    private boolean matchKeyword(String keyword) {
+        skipWhitespace();
+        int end = pos + keyword.length();
+        if (end > input.length()) {
+            return false;
+        }
+        if (!input.substring(pos, end).equalsIgnoreCase(keyword)) {
+            return false;
+        }
+        // Must not be followed by an identifier character
+        if (end < input.length() && isIdentifierPart(input.charAt(end))) {
+            return false;
+        }
+        pos = end;
+        return true;
     }
 
     /**

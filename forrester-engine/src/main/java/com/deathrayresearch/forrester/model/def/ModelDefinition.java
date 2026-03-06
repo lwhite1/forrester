@@ -17,6 +17,8 @@ import java.util.List;
  * @param lookupTables the lookup table definitions
  * @param modules the module instance definitions (for nested/composite models)
  * @param subscripts the subscript definitions
+ * @param cldVariables the causal loop diagram variable definitions
+ * @param causalLinks the causal link definitions (CLD connections with polarity)
  * @param views the graphical view definitions
  * @param defaultSimulation optional default simulation settings
  */
@@ -31,9 +33,26 @@ public record ModelDefinition(
         List<LookupTableDef> lookupTables,
         List<ModuleInstanceDef> modules,
         List<SubscriptDef> subscripts,
+        List<CldVariableDef> cldVariables,
+        List<CausalLinkDef> causalLinks,
         List<ViewDef> views,
         SimulationSettings defaultSimulation
 ) {
+
+    /**
+     * Backward-compatible constructor without CLD fields.
+     */
+    public ModelDefinition(
+            String name, String comment, ModuleInterface moduleInterface,
+            List<StockDef> stocks, List<FlowDef> flows,
+            List<AuxDef> auxiliaries, List<ConstantDef> constants,
+            List<LookupTableDef> lookupTables, List<ModuleInstanceDef> modules,
+            List<SubscriptDef> subscripts,
+            List<ViewDef> views, SimulationSettings defaultSimulation) {
+        this(name, comment, moduleInterface, stocks, flows, auxiliaries, constants,
+                lookupTables, modules, subscripts, List.of(), List.of(),
+                views, defaultSimulation);
+    }
 
     public ModelDefinition {
         if (name == null || name.isBlank()) {
@@ -46,6 +65,8 @@ public record ModelDefinition(
         lookupTables = lookupTables == null ? List.of() : List.copyOf(lookupTables);
         modules = modules == null ? List.of() : List.copyOf(modules);
         subscripts = subscripts == null ? List.of() : List.copyOf(subscripts);
+        cldVariables = cldVariables == null ? List.of() : List.copyOf(cldVariables);
+        causalLinks = causalLinks == null ? List.of() : List.copyOf(causalLinks);
         views = views == null ? List.of() : List.copyOf(views);
     }
 }

@@ -34,9 +34,9 @@ All settings from the `.Control` group are extracted (case-insensitive):
 
 | Vensim | Forrester |
 |--------|-----------|
-| `:AND:` | `&&` |
-| `:OR:` | `\|\|` |
-| `:NOT:` | `!` (parenthesized) |
+| `:AND:` | `and` |
+| `:OR:` | `or` |
+| `:NOT:` | `not` (parenthesized) |
 
 **Function translation:**
 
@@ -49,7 +49,13 @@ All settings from the `.Control` group are extracted (case-insensitive):
 | `Time` | `TIME` | |
 
 **Pass-through functions** (no translation needed):
-`INTEG`, `SMOOTH`, `DELAY3`, `MIN`, `MAX`, `ABS`, `EXP`, `LN`, `LOG`, `SQRT`, `SIN`, `COS`, `TAN`, `INT`, `ROUND`, `MODULO`, `POWER`, `QUANTUM`, `RAMP`, `STEP`, `PULSE`
+`INTEG`, `SMOOTH`, `DELAY3`, `MIN`, `MAX`, `ABS`, `EXP`, `LN`, `LOG`, `SQRT`, `SIN`, `COS`, `TAN`, `INT`, `ROUND`, `MODULO`, `POWER`, `QUANTUM`, `RAMP`, `STEP`, `PULSE`, `TREND`, `FORECAST`, `NPV`
+
+**Translated functions:**
+
+| Vensim | Forrester | Notes |
+|--------|-----------|-------|
+| `DELAY FIXED(input, time, init)` | `DELAY_FIXED(input, time, init)` | Space to underscore |
 
 ### Approximated Functions
 
@@ -99,7 +105,7 @@ These functions are translated with a warning because the semantics differ:
 
 The following functions are recognized in equations but not supported. They remain in the equation text unchanged and a warning is issued:
 
-`PULSE TRAIN`, `GAME`, `DELAY FIXED`, `DELAY N`, `FORECAST`, `TREND`, `NPV`, `GET XLS DATA`, `GET DIRECT DATA`, `GET DIRECT CONSTANTS`, `TABBED ARRAY`, `SAMPLE IF TRUE`, `VECTOR SELECT`, `VECTOR ELM MAP`, `VECTOR SORT ORDER`, `ALLOCATE AVAILABLE`, `FIND ZERO`
+`PULSE TRAIN`, `GAME`, `DELAY N`, `GET XLS DATA`, `GET DIRECT DATA`, `GET DIRECT CONSTANTS`, `TABBED ARRAY`, `SAMPLE IF TRUE`, `VECTOR SELECT`, `VECTOR ELM MAP`, `VECTOR SORT ORDER`, `ALLOCATE AVAILABLE`, `FIND ZERO`
 
 Note: Vensim's `PULSE(start, width)` has different semantics from Forrester's `PULSE(magnitude, start)`. Vensim PULSE returns `1/TIME_STEP` for a duration; Forrester's returns a magnitude for one timestep. Models using Vensim PULSE will need manual adjustment after import.
 
@@ -215,6 +221,8 @@ All import errors are non-fatal. The importer collects warnings in `ImportResult
 | Macros | Skipped |
 | Data variables | Skipped (with warning) |
 | Game variables | Skipped |
-| PULSE TRAIN, FORECAST, TREND, etc. | Warned, left in equation |
+| DELAY FIXED | Full (translated to DELAY_FIXED) |
+| TREND, FORECAST, NPV | Full (pass-through) |
+| PULSE TRAIN, GAME, DELAY N, etc. | Warned, left in equation |
 | Subscripted variable access | Untested |
 | Module/component hierarchy | Not supported |
