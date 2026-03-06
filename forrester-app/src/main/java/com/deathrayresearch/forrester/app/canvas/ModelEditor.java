@@ -241,7 +241,10 @@ public class ModelEditor {
      */
     public String addStockFrom(StockDef template) {
         checkFxThread();
-        String name = "Stock " + nextStockId++;
+        String name = resolveUniqueName(template.name(), "Stock ", nextStockId);
+        if (name.startsWith("Stock ")) {
+            nextStockId = parseIdSuffix(name, "Stock ") + 1;
+        }
         stocks.add(new StockDef(name, template.comment(), template.initialValue(),
                 template.unit(), template.negativeValuePolicy()));
         nameIndex.add(name);
@@ -255,7 +258,10 @@ public class ModelEditor {
      */
     public String addFlowFrom(FlowDef template, String source, String sink) {
         checkFxThread();
-        String name = "Flow " + nextFlowId++;
+        String name = resolveUniqueName(template.name(), "Flow ", nextFlowId);
+        if (name.startsWith("Flow ")) {
+            nextFlowId = parseIdSuffix(name, "Flow ") + 1;
+        }
         flows.add(new FlowDef(name, template.comment(), template.equation(),
                 template.timeUnit(), source, sink));
         nameIndex.add(name);
@@ -269,7 +275,10 @@ public class ModelEditor {
      */
     public String addAuxFrom(AuxDef template, String equation) {
         checkFxThread();
-        String name = "Aux " + nextAuxId++;
+        String name = resolveUniqueName(template.name(), "Aux ", nextAuxId);
+        if (name.startsWith("Aux ")) {
+            nextAuxId = parseIdSuffix(name, "Aux ") + 1;
+        }
         auxiliaries.add(new AuxDef(name, template.comment(), equation, template.unit()));
         nameIndex.add(name);
         return name;
@@ -281,7 +290,10 @@ public class ModelEditor {
      */
     public String addConstantFrom(ConstantDef template) {
         checkFxThread();
-        String name = "Constant " + nextConstantId++;
+        String name = resolveUniqueName(template.name(), "Constant ", nextConstantId);
+        if (name.startsWith("Constant ")) {
+            nextConstantId = parseIdSuffix(name, "Constant ") + 1;
+        }
         constants.add(new ConstantDef(name, template.comment(), template.value(), template.unit()));
         nameIndex.add(name);
         return name;
@@ -293,7 +305,10 @@ public class ModelEditor {
      */
     public String addModuleFrom(ModuleInstanceDef template) {
         checkFxThread();
-        String name = "Module " + nextModuleId++;
+        String name = resolveUniqueName(template.instanceName(), "Module ", nextModuleId);
+        if (name.startsWith("Module ")) {
+            nextModuleId = parseIdSuffix(name, "Module ") + 1;
+        }
         modules.add(new ModuleInstanceDef(name, template.definition(),
                 template.inputBindings(), template.outputBindings()));
         nameIndex.add(name);
@@ -337,7 +352,10 @@ public class ModelEditor {
      */
     public String addLookupFrom(LookupTableDef template) {
         checkFxThread();
-        String name = "Lookup " + nextLookupId++;
+        String name = resolveUniqueName(template.name(), "Lookup ", nextLookupId);
+        if (name.startsWith("Lookup ")) {
+            nextLookupId = parseIdSuffix(name, "Lookup ") + 1;
+        }
         lookupTables.add(new LookupTableDef(name, template.comment(),
                 template.xValues(), template.yValues(), template.interpolation()));
         nameIndex.add(name);
@@ -866,6 +884,35 @@ public class ModelEditor {
     }
 
     /**
+     * Returns the original name if it is not already taken; otherwise falls back
+     * to auto-generated names using the given prefix and starting id.
+     */
+    String resolveUniqueName(String originalName, String prefix, int startId) {
+        if (originalName != null && !originalName.isBlank() && !nameIndex.contains(originalName)) {
+            return originalName;
+        }
+        int id = startId;
+        String candidate = prefix + id;
+        while (nameIndex.contains(candidate)) {
+            id++;
+            candidate = prefix + id;
+        }
+        return candidate;
+    }
+
+    /**
+     * Parses the numeric suffix from an auto-generated name (e.g. "Stock 3" → 3).
+     * Returns 0 if the suffix is not a valid integer.
+     */
+    static int parseIdSuffix(String name, String prefix) {
+        try {
+            return Integer.parseInt(name.substring(prefix.length()));
+        } catch (NumberFormatException | IndexOutOfBoundsException e) {
+            return 0;
+        }
+    }
+
+    /**
      * Returns true if the given name is valid for an element identifier.
      * A valid name is non-blank and contains only letters, digits, spaces, and underscores.
      */
@@ -1051,7 +1098,10 @@ public class ModelEditor {
      */
     public String addCldVariableFrom(CldVariableDef template) {
         checkFxThread();
-        String name = "Variable " + nextCldVariableId++;
+        String name = resolveUniqueName(template.name(), "Variable ", nextCldVariableId);
+        if (name.startsWith("Variable ")) {
+            nextCldVariableId = parseIdSuffix(name, "Variable ") + 1;
+        }
         cldVariables.add(new CldVariableDef(name, template.comment()));
         nameIndex.add(name);
         fireElementAdded(name, "CLD Variable");

@@ -400,6 +400,93 @@ class CopyPasteControllerTest {
     }
 
     @Nested
+    @DisplayName("cross-model paste preserves names and relationships")
+    class CrossModelPaste {
+
+        @Test
+        void shouldPreserveOriginalNamesWhenPastingIntoEmptyModel() {
+            ModelDefinition def = new ModelDefinitionBuilder()
+                    .name("Source Model")
+                    .stock("Population", 100, "people")
+                    .constant("Growth Rate", 0.05, "1/year")
+                    .build();
+            editor.loadFrom(def);
+            canvasState.addElement("Population", ElementType.STOCK, 100, 100);
+            canvasState.addElement("Growth Rate", ElementType.CONSTANT, 200, 200);
+            canvasState.select("Population");
+            canvasState.addToSelection("Growth Rate");
+
+            controller.copy(canvasState, editor);
+
+            ModelEditor targetEditor = new ModelEditor();
+            CanvasState targetCanvas = new CanvasState();
+            List<String> pasted = controller.paste(targetCanvas, targetEditor);
+
+            assertThat(pasted).containsExactlyInAnyOrder("Population", "Growth Rate");
+            assertThat(targetEditor.getStockByName("Population").initialValue()).isEqualTo(100);
+            assertThat(targetEditor.getConstantByName("Growth Rate").value()).isEqualTo(0.05);
+        }
+
+        @Test
+        void shouldPreserveFlowConnectionsWhenPastingIntoEmptyModel() {
+            ModelDefinition def = new ModelDefinitionBuilder()
+                    .name("Source Model")
+                    .stock("Source", 100, null)
+                    .stock("Sink", 0, null)
+                    .flow("Transfer", "Source * 0.1", "day", "Source", "Sink")
+                    .build();
+            editor.loadFrom(def);
+            canvasState.addElement("Source", ElementType.STOCK, 100, 100);
+            canvasState.addElement("Sink", ElementType.STOCK, 300, 100);
+            canvasState.addElement("Transfer", ElementType.FLOW, 200, 100);
+            canvasState.select("Source");
+            canvasState.addToSelection("Sink");
+            canvasState.addToSelection("Transfer");
+
+            controller.copy(canvasState, editor);
+
+            ModelEditor targetEditor = new ModelEditor();
+            CanvasState targetCanvas = new CanvasState();
+            List<String> pasted = controller.paste(targetCanvas, targetEditor);
+
+            assertThat(pasted).containsExactlyInAnyOrder("Source", "Sink", "Transfer");
+
+            FlowDef pastedFlow = targetEditor.getFlowByName("Transfer");
+            assertThat(pastedFlow.source()).isEqualTo("Source");
+            assertThat(pastedFlow.sink()).isEqualTo("Sink");
+            assertThat(pastedFlow.equation()).isEqualTo("Source * 0.1");
+        }
+
+        @Test
+        void shouldFallBackToGeneratedNameOnConflict() {
+            ModelDefinition def = new ModelDefinitionBuilder()
+                    .name("Test")
+                    .stock("Population", 100, null)
+                    .build();
+            editor.loadFrom(def);
+            canvasState.addElement("Population", ElementType.STOCK, 100, 100);
+            canvasState.select("Population");
+
+            controller.copy(canvasState, editor);
+
+            // Target already has "Population"
+            ModelEditor targetEditor = new ModelEditor();
+            ModelDefinition targetDef = new ModelDefinitionBuilder()
+                    .name("Target")
+                    .stock("Population", 50, null)
+                    .build();
+            targetEditor.loadFrom(targetDef);
+            CanvasState targetCanvas = new CanvasState();
+            targetCanvas.addElement("Population", ElementType.STOCK, 100, 100);
+            List<String> pasted = controller.paste(targetCanvas, targetEditor);
+
+            assertThat(pasted).hasSize(1);
+            assertThat(pasted.get(0)).isNotEqualTo("Population");
+            assertThat(targetEditor.getStockByName(pasted.get(0)).initialValue()).isEqualTo(100);
+        }
+    }
+
+    @Nested
     @DisplayName("remapEquationTokens")
     class RemapEquationTokens {
 
