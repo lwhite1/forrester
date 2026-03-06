@@ -272,8 +272,9 @@ final class CopyPasteController {
             }
 
             // Check if the element exists in the target editor
-            String elementName = token.replace('_', ' ');
-            if (editor.hasElement(elementName)) {
+            // Try the token as-is first (handles names with underscores like Outflow_Rate),
+            // then try with underscores replaced by spaces (the common convention).
+            if (editor.hasElement(token) || editor.hasElement(token.replace('_', ' '))) {
                 result.append(token);
             } else {
                 result.append("0");

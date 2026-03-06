@@ -218,6 +218,19 @@ class CopyPasteControllerTest {
         }
 
         @Test
+        void shouldPreserveReferencesToElementsWithUnderscores() {
+            ModelDefinition def = new ModelDefinitionBuilder()
+                    .name("Test")
+                    .constant("Outflow_Rate", 5.0, null)
+                    .build();
+            editor.loadFrom(def);
+
+            String result = CopyPasteController.clearDanglingReferences(
+                    "Outflow_Rate", editor);
+            assertThat(result).isEqualTo("Outflow_Rate");
+        }
+
+        @Test
         void shouldHandleElementNamesWithSpaces() {
             ModelDefinition def = new ModelDefinitionBuilder()
                     .name("Test")
@@ -455,6 +468,84 @@ class CopyPasteControllerTest {
             assertThat(pastedFlow.source()).isEqualTo("Source");
             assertThat(pastedFlow.sink()).isEqualTo("Sink");
             assertThat(pastedFlow.equation()).isEqualTo("Source * 0.1");
+        }
+
+        @Test
+        void shouldPreserveBathtubModelConnectionsAcrossModels() {
+            // Reproduces the bathtub model scenario: constants with underscored names
+            ModelDefinition def = new ModelDefinitionBuilder()
+                    .name("Bathtub")
+                    .stock("Water_in_Tub", 50, "Gallon")
+                    .flow("Outflow", "MIN(Outflow_Rate, Water_in_Tub)", "Minute",
+                            "Water_in_Tub", null)
+                    .flow("Inflow", "STEP(Inflow_Rate, 5)", "Minute",
+                            null, "Water_in_Tub")
+                    .constant("Outflow_Rate", 5.0, "Gallon per Minute")
+                    .constant("Inflow_Rate", 5.0, "Gallon per Minute")
+                    .build();
+            editor.loadFrom(def);
+            canvasState.addElement("Water_in_Tub", ElementType.STOCK, 200, 200);
+            canvasState.addElement("Outflow", ElementType.FLOW, 350, 200);
+            canvasState.addElement("Inflow", ElementType.FLOW, 50, 200);
+            canvasState.addElement("Outflow_Rate", ElementType.CONSTANT, 350, 350);
+            canvasState.addElement("Inflow_Rate", ElementType.CONSTANT, 50, 350);
+            canvasState.select("Water_in_Tub");
+            canvasState.addToSelection("Outflow");
+            canvasState.addToSelection("Inflow");
+            canvasState.addToSelection("Outflow_Rate");
+            canvasState.addToSelection("Inflow_Rate");
+
+            controller.copy(canvasState, editor);
+
+            ModelEditor targetEditor = new ModelEditor();
+            CanvasState targetCanvas = new CanvasState();
+            List<String> pasted = controller.paste(targetCanvas, targetEditor);
+
+            assertThat(pasted).containsExactlyInAnyOrder(
+                    "Water_in_Tub", "Outflow", "Inflow", "Outflow_Rate", "Inflow_Rate");
+
+            // Verify equations preserved — constant references not replaced with 0
+            FlowDef outflow = targetEditor.getFlowByName("Outflow");
+            assertThat(outflow.equation()).isEqualTo("MIN(Outflow_Rate, Water_in_Tub)");
+            assertThat(outflow.source()).isEqualTo("Water_in_Tub");
+
+            FlowDef inflow = targetEditor.getFlowByName("Inflow");
+            assertThat(inflow.equation()).isEqualTo("STEP(Inflow_Rate, 5)");
+            assertThat(inflow.sink()).isEqualTo("Water_in_Tub");
+        }
+
+        @Test
+        void shouldPreserveConstantToFlowEquationReference() {
+            ModelDefinition def = new ModelDefinitionBuilder()
+                    .name("Source Model")
+                    .stock("Population", 100, null)
+                    .constant("Rate", 0.05, null)
+                    .flow("Growth", "Population * Rate", "day", "Population", null)
+                    .build();
+            editor.loadFrom(def);
+            canvasState.addElement("Population", ElementType.STOCK, 100, 100);
+            canvasState.addElement("Rate", ElementType.CONSTANT, 200, 200);
+            canvasState.addElement("Growth", ElementType.FLOW, 150, 150);
+            canvasState.select("Population");
+            canvasState.addToSelection("Rate");
+            canvasState.addToSelection("Growth");
+
+            controller.copy(canvasState, editor);
+
+            ModelEditor targetEditor = new ModelEditor();
+            CanvasState targetCanvas = new CanvasState();
+            List<String> pasted = controller.paste(targetCanvas, targetEditor);
+
+            assertThat(pasted).containsExactlyInAnyOrder("Population", "Rate", "Growth");
+
+            FlowDef pastedFlow = targetEditor.getFlowByName("Growth");
+            assertThat(pastedFlow).isNotNull();
+            assertThat(pastedFlow.equation()).isEqualTo("Population * Rate");
+            assertThat(pastedFlow.source()).isEqualTo("Population");
+
+            // Verify the constant exists so connectors would be generated
+            assertThat(targetEditor.getConstantByName("Rate")).isNotNull();
+            assertThat(targetEditor.hasElement("Rate")).isTrue();
         }
 
         @Test
