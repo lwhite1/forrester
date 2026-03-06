@@ -1,11 +1,13 @@
 package com.deathrayresearch.forrester.app.canvas;
 
+import com.deathrayresearch.forrester.model.def.CausalLinkDef;
 import com.deathrayresearch.forrester.model.def.ElementType;
 import com.deathrayresearch.forrester.model.def.ModuleInstanceDef;
 
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.Separator;
@@ -157,11 +159,104 @@ public class PropertiesPanel extends VBox {
 
         propertyGrid.getChildren().clear();
         int row = 0;
-        ctx.addReadOnlyRow(row++, "Type", "Info Link");
+
+        boolean isCausalLink = ctx.canvas != null && ctx.canvas.isSelectedConnectionCausalLink();
+
+        ctx.addReadOnlyRow(row++, "Type", isCausalLink ? "Causal Link" : "Info Link");
         ctx.addReadOnlyRow(row++, "From", connection.from());
         ctx.addReadOnlyRow(row++, "To", connection.to());
 
+        if (isCausalLink && ctx.editor != null) {
+            CausalLinkDef link = findCausalLink(connection);
+            if (link != null) {
+                // Polarity combo box
+                ComboBox<String> polarityBox = new ComboBox<>();
+                polarityBox.setId("propPolarity");
+                polarityBox.getItems().addAll("+ (positive)", "- (negative)", "? (unknown)");
+                polarityBox.setValue(polarityDisplayText(link.polarity()));
+                polarityBox.setMaxWidth(Double.MAX_VALUE);
+                GridPane.setHgrow(polarityBox, Priority.ALWAYS);
+                polarityBox.setOnAction(e -> {
+                    if (!ctx.updatingFields) {
+                        CausalLinkDef.Polarity newPolarity = polarityFromDisplay(polarityBox.getValue());
+                        ctx.canvas.applyMutation(() ->
+                                ctx.editor.setCausalLinkPolarity(
+                                        connection.from(), connection.to(), newPolarity));
+                    }
+                });
+                ctx.addFieldRow(row++, "Polarity", polarityBox,
+                        "The direction of causal influence");
+
+                // English explanation label
+                Label explanation = new Label(buildExplanation(connection, link.polarity()));
+                explanation.setId("propExplanation");
+                explanation.setWrapText(true);
+                explanation.setStyle(Styles.SMALL_TEXT + " -fx-text-fill: #555;");
+                explanation.setMaxWidth(Double.MAX_VALUE);
+                propertyGrid.add(explanation, 0, row, 2, 1);
+
+                // Update explanation when polarity changes
+                polarityBox.setOnAction(e -> {
+                    if (!ctx.updatingFields) {
+                        CausalLinkDef.Polarity newPolarity = polarityFromDisplay(polarityBox.getValue());
+                        ctx.canvas.applyMutation(() ->
+                                ctx.editor.setCausalLinkPolarity(
+                                        connection.from(), connection.to(), newPolarity));
+                        explanation.setText(buildExplanation(connection, newPolarity));
+                    }
+                });
+            }
+        }
+
         getChildren().addAll(contextToolbar, separator, scrollPane);
+    }
+
+    private CausalLinkDef findCausalLink(ConnectionId connection) {
+        for (CausalLinkDef link : ctx.editor.getCausalLinks()) {
+            if (link.from().equals(connection.from()) && link.to().equals(connection.to())) {
+                return link;
+            }
+        }
+        return null;
+    }
+
+    private static String polarityDisplayText(CausalLinkDef.Polarity polarity) {
+        return switch (polarity) {
+            case POSITIVE -> "+ (positive)";
+            case NEGATIVE -> "- (negative)";
+            case UNKNOWN -> "? (unknown)";
+        };
+    }
+
+    private static CausalLinkDef.Polarity polarityFromDisplay(String display) {
+        if (display == null) {
+            return CausalLinkDef.Polarity.UNKNOWN;
+        }
+        if (display.startsWith("+")) {
+            return CausalLinkDef.Polarity.POSITIVE;
+        }
+        if (display.startsWith("-")) {
+            return CausalLinkDef.Polarity.NEGATIVE;
+        }
+        return CausalLinkDef.Polarity.UNKNOWN;
+    }
+
+    private static String buildExplanation(ConnectionId connection, CausalLinkDef.Polarity polarity) {
+        String from = connection.from();
+        String to = connection.to();
+        return switch (polarity) {
+            case POSITIVE -> String.format(
+                    "When the value of %s increases, the value of %s tends to increase. " +
+                    "When the value of %s decreases, the value of %s tends to decrease.",
+                    from, to, from, to);
+            case NEGATIVE -> String.format(
+                    "When the value of %s increases, the value of %s tends to decrease. " +
+                    "When the value of %s decreases, the value of %s tends to increase.",
+                    from, to, from, to);
+            case UNKNOWN -> String.format(
+                    "The causal relationship between %s and %s has not been specified.",
+                    from, to);
+        };
     }
 
     private void showSingleElement(String name, ElementType type) {

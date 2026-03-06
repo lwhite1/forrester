@@ -50,6 +50,9 @@ public class CanvasState {
             types.put(ep.name(), ep.type());
             if (ep.hasCustomSize()) {
                 sizes.put(ep.name(), new Size(ep.width(), ep.height()));
+            } else if (ep.type() == ElementType.CLD_VARIABLE) {
+                double w = LayoutMetrics.cldVarWidthForName(ep.name());
+                sizes.put(ep.name(), new Size(w, LayoutMetrics.CLD_VAR_HEIGHT));
             }
             drawOrder.add(ep.name());
         }

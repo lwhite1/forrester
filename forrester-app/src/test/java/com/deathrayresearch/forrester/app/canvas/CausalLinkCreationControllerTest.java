@@ -95,14 +95,16 @@ class CausalLinkCreationControllerTest {
     class Validation {
 
         @Test
-        void shouldRejectSelfLoop() {
+        void shouldAllowSelfLoop() {
             controller.handleClick(100, 200, canvasState, editor);
             CausalLinkCreationController.LinkResult result =
                     controller.handleClick(100, 200, canvasState, editor);
 
-            assertThat(result.isRejected()).isTrue();
-            assertThat(result.rejectionReason()).contains("self-loop");
+            assertThat(result.isCreated()).isTrue();
             assertThat(controller.isPending()).isFalse();
+            assertThat(editor.getCausalLinks()).hasSize(1);
+            assertThat(editor.getCausalLinks().getFirst().from()).isEqualTo("Variable 1");
+            assertThat(editor.getCausalLinks().getFirst().to()).isEqualTo("Variable 1");
         }
 
         @Test

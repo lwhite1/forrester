@@ -315,6 +315,13 @@ public class ModelCanvas extends Canvas {
     }
 
     /**
+     * Returns true if the currently selected connection is a causal link.
+     */
+    public boolean isSelectedConnectionCausalLink() {
+        return selectedIsCausalLink;
+    }
+
+    /**
      * Returns the type of the named element on the canvas.
      */
     public ElementType getSelectedElementType(String name) {
@@ -511,6 +518,10 @@ public class ModelCanvas extends Canvas {
         }
 
         canvasState.addElement(name, type, worldX, worldY);
+        if (type == ElementType.CLD_VARIABLE) {
+            double w = LayoutMetrics.cldVarWidthForName(name);
+            canvasState.setSize(name, w, LayoutMetrics.CLD_VAR_HEIGHT);
+        }
         connectors = editor.generateConnectors();
         invalidateLoopAnalysis();
         canvasState.clearSelection();
@@ -704,6 +715,10 @@ public class ModelCanvas extends Canvas {
             return;
         }
         canvasState.renameElement(oldName, newName);
+        if (canvasState.getType(newName) == ElementType.CLD_VARIABLE) {
+            double w = LayoutMetrics.cldVarWidthForName(newName);
+            canvasState.setSize(newName, w, LayoutMetrics.CLD_VAR_HEIGHT);
+        }
         connectors = editor.generateConnectors();
         invalidateLoopAnalysis();
         redraw();

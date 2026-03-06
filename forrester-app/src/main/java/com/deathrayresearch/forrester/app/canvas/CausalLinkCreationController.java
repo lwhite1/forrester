@@ -82,11 +82,6 @@ public class CausalLinkCreationController {
                 return LinkResult.rejected("Click on a variable to complete the causal link");
             }
 
-            if (targetHit.equals(pendingSource)) {
-                cancel();
-                return LinkResult.rejected("Cannot create a self-loop");
-            }
-
             // Check for duplicate link
             for (CausalLinkDef existing : editor.getCausalLinks()) {
                 if (existing.from().equals(pendingSource) && existing.to().equals(targetHit)) {

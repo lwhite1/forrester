@@ -4,6 +4,7 @@ import com.deathrayresearch.forrester.model.def.ElementType;
 
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
+import javafx.scene.text.Text;
 
 /**
  * Element dimensions, spacing, and font metrics for the Layered Flow Diagram.
@@ -42,9 +43,11 @@ public final class LayoutMetrics {
 
     // CLD variable dimensions
     public static final double CLD_VAR_WIDTH = 110;
-    public static final double CLD_VAR_HEIGHT = 50;
+    public static final double CLD_VAR_HEIGHT = 30;
     public static final double CLD_VAR_BORDER_WIDTH = 1;
     public static final double CLD_VAR_CORNER_RADIUS = 6;
+    /** Horizontal padding around text for CLD variable auto-sizing. */
+    public static final double CLD_VAR_TEXT_PADDING = 16;
 
     // Causal link
     public static final double CAUSAL_LINK_WIDTH = 1.5;
@@ -185,8 +188,19 @@ public final class LayoutMetrics {
             case CONSTANT -> 30;
             case MODULE -> 45;
             case LOOKUP -> 35;
-            case CLD_VARIABLE -> 35;
+            case CLD_VARIABLE -> 25;
             default -> 30;
         };
+    }
+
+    /**
+     * Computes the width for a CLD variable based on its text label.
+     * Returns the measured text width plus padding, clamped to the minimum.
+     */
+    public static double cldVarWidthForName(String name) {
+        Text text = new Text(name);
+        text.setFont(AUX_NAME_FONT);
+        double textWidth = text.getLayoutBounds().getWidth();
+        return Math.max(minWidthFor(ElementType.CLD_VARIABLE), textWidth + CLD_VAR_TEXT_PADDING);
     }
 }
