@@ -101,11 +101,12 @@ public class ParameterSweepDialog extends Dialog<ParameterSweepDialog.Config> {
             double start = Double.parseDouble(startField.getText().trim());
             double end = Double.parseDouble(endField.getText().trim());
             double step = Double.parseDouble(stepField.getText().trim());
-            if (start >= end || step <= 0 || !Double.isFinite(start)
+            if (start > end || step <= 0 || !Double.isFinite(start)
                     || !Double.isFinite(end) || !Double.isFinite(step)) {
                 return true;
             }
-            long pointCount = (long) Math.ceil((end - start) / step) + 1;
+            long pointCount = start == end ? 1
+                    : (long) Math.ceil((end - start) / step) + 1;
             return pointCount > 10_000;
         } catch (NumberFormatException e) {
             return true;

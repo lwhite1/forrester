@@ -64,7 +64,7 @@ class ParameterSweepDialogFxTest {
     }
 
     @Test
-    @DisplayName("OK disabled when start >= end")
+    @DisplayName("OK disabled when start > end")
     void okDisabledWhenStartGtEnd(FxRobot robot) {
         showDialog(List.of("alpha"), List.of("Pop"));
 
@@ -78,6 +78,22 @@ class ParameterSweepDialogFxTest {
         WaitForAsyncUtils.waitForFxEvents();
 
         assertThat(okButton().isDisabled()).isTrue();
+    }
+
+    @Test
+    @DisplayName("OK enabled when start equals end (single-point sweep)")
+    void okEnabledWhenStartEqualsEnd(FxRobot robot) {
+        showDialog(List.of("alpha"), List.of("Pop"));
+
+        Set<TextField> fields = robot.lookup(".text-field").queryAllAs(TextField.class);
+        // Set end to 0 so start == end == 0
+        TextField endField = fields.stream()
+                .filter(f -> "10".equals(f.getText()))
+                .findFirst().orElseThrow();
+        robot.clickOn(endField).eraseText(2).write("0");
+        WaitForAsyncUtils.waitForFxEvents();
+
+        assertThat(okButton().isDisabled()).isFalse();
     }
 
     @Test
