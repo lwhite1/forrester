@@ -135,6 +135,7 @@ public class ModelWindow {
     private MenuItem undoItem;
     private MenuItem redoItem;
     private ModelEditListener logListener;
+    private ModelEditListener staleListener;
     private AnalysisRunner analysisRunner;
 
     private final ModelDefinitionSerializer serializer = new ModelDefinitionSerializer();
@@ -186,6 +187,8 @@ public class ModelWindow {
 
         // Dashboard panel
         dashboardPanel = new DashboardPanel();
+        dashboardPanel.setRerunAction(this::runSimulation);
+        staleListener = createStaleListener();
 
         newModel();
 
@@ -423,9 +426,11 @@ public class ModelWindow {
     void loadDefinition(ModelDefinition def, String displayName) {
         if (editor != null) {
             editor.removeListener(logListener);
+            editor.removeListener(staleListener);
         }
         editor = new ModelEditor();
         editor.addListener(logListener);
+        editor.addListener(staleListener);
         editor.loadFrom(def);
 
         ViewDef view;
@@ -988,6 +993,35 @@ public class ModelWindow {
         }
     }
 
+    private ModelEditListener createStaleListener() {
+        return new ModelEditListener() {
+            @Override
+            public void onElementAdded(String name, String typeName) {
+                dashboardPanel.markStale();
+            }
+
+            @Override
+            public void onElementRemoved(String name) {
+                dashboardPanel.markStale();
+            }
+
+            @Override
+            public void onElementRenamed(String oldName, String newName) {
+                dashboardPanel.markStale();
+            }
+
+            @Override
+            public void onEquationChanged(String elementName) {
+                dashboardPanel.markStale();
+            }
+
+            @Override
+            public void onConstantChanged(String name) {
+                dashboardPanel.markStale();
+            }
+        };
+    }
+
     private void showError(String title, String message) {
         Alert alert = new Alert(Alert.AlertType.ERROR);
         alert.setTitle(title);
@@ -1144,8 +1178,13 @@ public class ModelWindow {
      * Closes this window. The ForresterApp will be notified via the stage's onHidden handler.
      */
     public void close() {
-        if (editor != null && logListener != null) {
-            editor.removeListener(logListener);
+        if (editor != null) {
+            if (logListener != null) {
+                editor.removeListener(logListener);
+            }
+            if (staleListener != null) {
+                editor.removeListener(staleListener);
+            }
         }
         if (analysisRunner != null) {
             analysisRunner.shutdown();
