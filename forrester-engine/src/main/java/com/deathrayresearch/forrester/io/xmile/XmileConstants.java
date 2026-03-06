@@ -72,9 +72,25 @@ public final class XmileConstants {
     public static final String PTS = "pts";
     public static final String PT = "pt";
 
+    // --- Graphical function attributes ---
+    public static final String ATTR_TYPE = "type";
+
+    // --- Stock attributes (unsupported special types) ---
+    public static final String ATTR_CONVEYOR = "conveyor";
+    public static final String ATTR_QUEUE = "queue";
+    public static final String ATTR_OVEN = "oven";
+
+    // --- Variable children (unsupported but warned) ---
+    public static final String RANGE = "range";
+
+    // --- Module elements ---
+    public static final String MODULE = "module";
+    public static final String CONNECT = "connect";
+    public static final String ATTR_TO = "to";
+    public static final String ATTR_FROM = "from";
+
     // --- Unsupported elements (emit warnings) ---
     public static final String GROUP = "group";
-    public static final String MODULE = "module";
     public static final String MACRO = "macro";
     public static final String EVENT_POSTER = "event_poster";
 }

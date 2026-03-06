@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xmile xmlns="http://docs.oasis-open.org/xmile/ns/XMILE/v1.0" version="1.0">
+  <header>
+    <name>Modular SIR</name>
+    <vendor>Test</vendor>
+    <product>Test</product>
+  </header>
+  <sim_specs time_units="day">
+    <start>0</start>
+    <stop>100</stop>
+    <dt>1</dt>
+  </sim_specs>
+
+  <!-- Named model: defines the disease transmission module -->
+  <model name="Disease">
+    <variables>
+      <stock name="Infected">
+        <eqn>1</eqn>
+        <inflow>new_infections</inflow>
+        <outflow>recoveries</outflow>
+        <units>People</units>
+      </stock>
+      <stock name="Recovered">
+        <eqn>0</eqn>
+        <inflow>recoveries</inflow>
+        <units>People</units>
+      </stock>
+      <flow name="new_infections">
+        <eqn>susceptible_pop * Infected * infection_rate / total_pop</eqn>
+        <units>People/Day</units>
+      </flow>
+      <flow name="recoveries">
+        <eqn>Infected / recovery_time</eqn>
+        <units>People/Day</units>
+      </flow>
+      <aux name="infection_rate">
+        <eqn>0.3</eqn>
+        <units>1/Day</units>
+      </aux>
+      <aux name="recovery_time">
+        <eqn>5</eqn>
+        <units>Day</units>
+      </aux>
+      <aux name="current_infected">
+        <eqn>Infected</eqn>
+        <units>People</units>
+      </aux>
+    </variables>
+  </model>
+
+  <!-- Main (unnamed) model -->
+  <model>
+    <variables>
+      <stock name="Susceptible">
+        <eqn>9999</eqn>
+        <outflow>becoming_infected</outflow>
+        <units>People</units>
+      </stock>
+      <flow name="becoming_infected">
+        <eqn>disease_infected * 0.3 * Susceptible / 10000</eqn>
+        <units>People/Day</units>
+      </flow>
+      <aux name="Total_Population">
+        <eqn>10000</eqn>
+        <units>People</units>
+      </aux>
+      <module name="Disease">
+        <connect to="susceptible_pop" from="Susceptible"/>
+        <connect to="total_pop" from="Total_Population"/>
+        <connect to=".disease_infected" from="current_infected"/>
+      </module>
+    </variables>
+    <views>
+      <view name="Main">
+        <stock name="Susceptible" x="100" y="200"/>
+        <aux name="Total_Population" x="200" y="100"/>
+      </view>
+    </views>
+  </model>
+</xmile>

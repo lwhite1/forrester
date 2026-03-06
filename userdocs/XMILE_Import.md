@@ -13,6 +13,7 @@ This document describes what Forrester supports when importing XMILE files (IEEE
 | Auxiliaries | `<aux>` | Numeric and expression-based equations, units |
 | Constants | `<aux>` with numeric equation | Imported as Forrester constants |
 | Lookup Tables | `<gf>` (graphical function) | Standalone or embedded in flow/aux definitions |
+| Modules | `<module>` | Instance name, `<connect>` input/output bindings |
 
 **Stock behavior:**
 - `<non_negative>` tag recognized and mapped to `CLAMP_TO_ZERO` policy
@@ -21,6 +22,23 @@ This document describes what Forrester supports when importing XMILE files (IEEE
 - Explicit `<xpts>` / `<ypts>` data
 - Implicit x-values generated from `xscale` min/max attributes
 - LINEAR interpolation (hardcoded)
+
+### Modules and Multi-Model Files
+
+XMILE files can contain multiple `<model>` elements. Named models define reusable module types; the unnamed (or first) model is the main model.
+
+**How modules are imported:**
+- Each named `<model name="X">` is parsed into a standalone `ModelDefinition`
+- `<module name="X">` elements in the main model reference the named model
+- `<connect to="inner_var" from="outer_var"/>` creates an input binding
+- `<connect to=".outer_alias" from="inner_var"/>` (dot prefix on `to`) creates an output binding
+- Module instances compile into isolated execution contexts with parent-scope fallback for input bindings
+
+**Limitations:**
+- The module instance name must match a named `<model>` element exactly
+- Modules without a matching named model are skipped with a warning
+- Nested modules (modules within modules) are supported recursively
+- Module views are not imported (only the main model's views are used)
 
 ### Simulation Settings (`<sim_specs>`)
 
@@ -80,54 +98,60 @@ Translation is bidirectional -- `XmileExprTranslator` also converts Forrester ex
 
 | Element | XML Tag | Warning Message |
 |---------|---------|----------------|
-| Modules/submodels | `<module>` | "Unsupported XMILE element `<module>` 'name' skipped" |
 | Groups | `<group>` | "Unsupported XMILE element `<group>` 'name' skipped" |
 | Macros | `<macro>` | "Unsupported XMILE element `<macro>` 'name' skipped" |
 | Event posters | `<event_poster>` | "Unsupported XMILE element `<event_poster>` 'name' skipped" |
 
-### Stock Types Not Recognized
+### Stock Types (Warned)
 
-| Type | Status |
-|------|--------|
-| Conveyor stocks (`conveyor` attribute) | Ignored |
-| Queue stocks (`queue` attribute) | Ignored |
-| Oven stocks (`oven` attribute) | Ignored |
-| Only `non_negative` is recognized | |
+Special stock types are imported as standard stocks with a warning:
 
-### Flow Types Not Recognized
+| Type | Warning Message |
+|------|----------------|
+| Conveyor stocks (`conveyor="true"`) | "Stock 'X' is a conveyor stock (not supported, treated as standard stock)" |
+| Queue stocks (`queue="true"`) | "Stock 'X' is a queue stock (not supported, treated as standard stock)" |
+| Oven stocks (`oven="true"`) | "Stock 'X' is an oven stock (not supported, treated as standard stock)" |
 
-| Type | Status |
-|------|--------|
-| Uniflow vs. biflow distinction | All treated as unidirectional |
+### Flow Types (Warned)
+
+| Type | Warning Message |
+|------|----------------|
+| Biflows (no `<non_negative>`) | "Flow 'X' is a biflow (may allow negative values; Forrester treats all flows as unidirectional)" |
 | Leak flows | Not recognized as special |
 | Material flow direction | Not preserved |
 
-### Lookup Table Interpolation Modes
+### Lookup Table Interpolation Modes (Warned)
 
-- Only **LINEAR** interpolation is used (hardcoded)
-- CUBIC, STEP, and other XMILE interpolation modes are **silently ignored**
-- No warning issued if the source file specifies a non-LINEAR mode
+- Only **LINEAR** (continuous) interpolation is used
+- Non-continuous interpolation modes (`extrapolate`, `discrete`) trigger a warning:
+  > "Graphical function 'X' uses interpolation type 'extrapolate' (only LINEAR/continuous is supported)"
+
+### Variable Attributes (Warned)
+
+| Attribute | Warning Message |
+|-----------|----------------|
+| `<range>` specifications | "Range specification on stock/flow/auxiliary 'X' ignored" |
+| Scale/unit conversions | Not applied (no warning) |
+| Display attributes (color, font, size, line style) | Discarded (no warning) |
+| `<doc>` documentation elements | Parsed but not comprehensively preserved |
+
+### Functions (Warned)
+
+The following XMILE functions are left in the equation text unchanged with a warning:
+
+| Function | Warning Message |
+|----------|----------------|
+| `SAFEDIV(a, b, x)` | "SAFEDIV function not supported (left in equation as-is)" |
+| `INIT(variable)` | "INIT function not supported (left in equation as-is)" |
+| `PREVIOUS(stock, time)` | "PREVIOUS function not supported (left in equation as-is)" |
+| `HISTORY(variable, time)` | "HISTORY function not supported (left in equation as-is)" |
 
 ### Arrayed Variables / Subscripts
 
-- No support for `<subscript>` or `<subscripts>` tags
+- No support for `<subscript>`, `<subscripts>`, or `<dimensions>` tags
 - Arrayed stocks, flows, and auxiliaries cannot be imported
-- The engine has `SubscriptDef` infrastructure but the XMILE importer does not use it
-
-### Variable Attributes
-
-| Attribute | Status |
-|-----------|--------|
-| `<range>` specifications | Ignored |
-| Scale/unit conversions | Not applied |
-| Display attributes (color, font, size, line style) | Discarded |
-| `<doc>` documentation elements | Parsed but not comprehensively preserved |
-
-### Model Hierarchy
-
-- Only the top-level `<model>` is parsed
-- Nested models (models within models) are ignored
-- No support for module instances or model composition
+- Subscript indexing in equations (e.g. `Population[North]`) is not parsed
+- The engine has runtime array infrastructure (`ArrayedStock`, `MultiArrayedStock`, `IndexedValue`) but the definition→compilation bridge for subscripts does not exist yet
 
 ### Built-in Functions Not Tested
 
@@ -205,10 +229,16 @@ All import errors are non-fatal. The importer returns `ImportResult` containing 
 
 | Category | Example |
 |----------|---------|
-| Unsupported elements | "Unsupported XMILE element `<module>` 'name' skipped" |
+| Unsupported elements | "Unsupported XMILE element `<group>` 'name' skipped" |
+| Unknown module references | "Module 'X' references unknown model definition, skipped" |
+| Unsupported stock types | "Stock 'X' is a conveyor stock (not supported, treated as standard stock)" |
+| Biflow detection | "Flow 'X' is a biflow (may allow negative values; ...)" |
 | Non-literal initial values | "Non-literal initial value for stock 'X': 'expr', defaulting to 0.0" |
 | Missing equations | "Flow 'X' has no equation, defaulting to 0" |
 | Invalid graphical functions | "Could not parse graphical function data for 'X'" |
+| Non-linear interpolation | "Graphical function 'X' uses interpolation type 'Y' (only LINEAR/continuous is supported)" |
+| Range specifications | "Range specification on stock 'X' ignored" |
+| Unsupported functions | "SAFEDIV function not supported (left in equation as-is)" |
 | dt not 1.0 | "dt = 0.25 (Forrester uses fixed step; value preserved as metadata only)" |
 | Invalid time range | "stop (0) <= start (10), defaulting duration to 100" |
 | Function approximations | "SMTH3 approximated as SMOOTH" |
@@ -232,6 +262,8 @@ All import errors are non-fatal. The importer returns `ImportResult` containing 
 - View element placements (x/y coordinates)
 - Connector definitions
 - Flow graphical routes
+- Module instances with input/output bindings
+- Named model definitions (for module types)
 
 ### Lost or Modified
 
@@ -241,8 +273,7 @@ All import errors are non-fatal. The importer returns `ImportResult` containing 
 - Display attributes (color, font, size)
 - SMTH3/SMTH1 functions (permanently converted to SMOOTH)
 - Non-LINEAR interpolation modes on lookup tables
-- Module, group, macro, and event poster definitions
-- Nested model hierarchy
+- Group, macro, and event poster definitions
 
 ---
 
@@ -251,6 +282,7 @@ All import errors are non-fatal. The importer returns `ImportResult` containing 
 ### Example Models
 - **teacup.xmile** -- Newton's cooling law: 1 stock, 1 flow, 2 constants, basic view
 - **sir.xmile** -- SIR epidemiological model: 3 stocks, 2 flows, 3 constants, 1 auxiliary, views with connectors
+- **modular_sir.xmile** -- Modular SIR: main model with Susceptible stock, Disease module with Infected/Recovered stocks, input/output bindings
 
 ### Tested Scenarios
 - Stock import with inflows/outflows and non_negative
@@ -262,6 +294,17 @@ All import errors are non-fatal. The importer returns `ImportResult` containing 
 - View parsing with element placement, connectors, and flow routes
 - Round-trip: import, export, reimport
 - Full pipeline: import, compile, simulate
+- Conveyor/queue/oven stock type warnings
+- Biflow vs. uniflow detection warnings
+- Range specification warnings on stocks, flows, and auxiliaries
+- Non-linear interpolation mode warnings on graphical functions
+- Unsupported function warnings (SAFEDIV, INIT, PREVIOUS, HISTORY)
+- Module import with input bindings
+- Module import with output bindings
+- Unknown module reference warning
+- Modular SIR model (multi-model file with module instance)
+- Module compile-and-simulate (import → compile → run)
+- Module export → import round-trip
 
 ---
 
@@ -279,13 +322,15 @@ All import errors are non-fatal. The importer returns `ImportResult` containing 
 | Simulation specs | Full (dt metadata only) |
 | Expression translation | Full (bidirectional) |
 | SMTH3 / SMTH1 | Approximated as SMOOTH (with warnings) |
-| Modules / submodels | Skipped with warning |
+| Modules / submodels | Full (input/output bindings, nested modules) |
+| Multiple models | Full (named models as module types) |
 | Groups | Skipped with warning |
 | Macros | Skipped with warning |
 | Event posters | Skipped with warning |
 | Subscripts / arrays | Not supported |
-| Conveyor / queue / oven stocks | Not supported |
-| Biflow / leak flows | Not supported |
-| Non-LINEAR interpolation | Not supported (silently ignored) |
+| Conveyor / queue / oven stocks | Warned, treated as standard stock |
+| Biflow / leak flows | Warned, treated as unidirectional |
+| Non-LINEAR interpolation | Warned, uses LINEAR |
+| Range specifications | Warned, ignored |
+| SAFEDIV / INIT / PREVIOUS / HISTORY | Warned, left in equation |
 | Display attributes | Not supported |
-| Model hierarchy | Not supported |

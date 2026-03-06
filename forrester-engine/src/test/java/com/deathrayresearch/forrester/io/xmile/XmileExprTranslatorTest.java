@@ -122,6 +122,31 @@ class XmileExprTranslatorTest {
         }
 
         @Test
+        void shouldWarnAboutSafediv() {
+            var result = XmileExprTranslator.toForrester("SAFEDIV(a, b, 0)");
+            assertThat(result.warnings()).anyMatch(w -> w.contains("SAFEDIV"));
+            assertThat(result.expression()).isEqualTo("SAFEDIV(a, b, 0)");
+        }
+
+        @Test
+        void shouldWarnAboutInit() {
+            var result = XmileExprTranslator.toForrester("INIT(Population)");
+            assertThat(result.warnings()).anyMatch(w -> w.contains("INIT"));
+        }
+
+        @Test
+        void shouldWarnAboutPrevious() {
+            var result = XmileExprTranslator.toForrester("PREVIOUS(Stock, 0)");
+            assertThat(result.warnings()).anyMatch(w -> w.contains("PREVIOUS"));
+        }
+
+        @Test
+        void shouldWarnAboutHistory() {
+            var result = XmileExprTranslator.toForrester("HISTORY(Stock, TIME - 5)");
+            assertThat(result.warnings()).anyMatch(w -> w.contains("HISTORY"));
+        }
+
+        @Test
         void shouldHandleCombinedExpression() {
             var result = XmileExprTranslator.toForrester(
                     "IF_THEN_ELSE(x = 5 AND y <> 3, Time, 0)");

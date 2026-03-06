@@ -34,6 +34,16 @@ public final class XmileExprTranslator {
     private static final Pattern TIME_XMILE_PATTERN = Pattern.compile(
             "(?i)\\bTime\\b");
 
+    // --- Unsupported XMILE function patterns (warn) ---
+    private static final Pattern SAFEDIV_PATTERN = Pattern.compile(
+            "(?i)\\bSAFEDIV\\s*\\(");
+    private static final Pattern INIT_FUNC_PATTERN = Pattern.compile(
+            "(?i)\\bINIT\\s*\\(");
+    private static final Pattern PREVIOUS_PATTERN = Pattern.compile(
+            "(?i)\\bPREVIOUS\\s*\\(");
+    private static final Pattern HISTORY_PATTERN = Pattern.compile(
+            "(?i)\\bHISTORY\\s*\\(");
+
     // --- Forrester → XMILE patterns ---
     private static final Pattern IF_FUNC_PATTERN = Pattern.compile(
             "(?i)\\bIF\\s*\\(");
@@ -102,6 +112,20 @@ public final class XmileExprTranslator {
 
         // 5. Time → TIME (the built-in variable)
         expr = TIME_XMILE_PATTERN.matcher(expr).replaceAll("TIME");
+
+        // 6. Warn about unsupported XMILE functions (left in equation text)
+        if (SAFEDIV_PATTERN.matcher(expr).find()) {
+            warnings.add("SAFEDIV function not supported (left in equation as-is)");
+        }
+        if (INIT_FUNC_PATTERN.matcher(expr).find()) {
+            warnings.add("INIT function not supported (left in equation as-is)");
+        }
+        if (PREVIOUS_PATTERN.matcher(expr).find()) {
+            warnings.add("PREVIOUS function not supported (left in equation as-is)");
+        }
+        if (HISTORY_PATTERN.matcher(expr).find()) {
+            warnings.add("HISTORY function not supported (left in equation as-is)");
+        }
 
         return new TranslationResult(expr, warnings);
     }

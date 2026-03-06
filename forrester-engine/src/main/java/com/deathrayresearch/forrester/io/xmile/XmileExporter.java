@@ -5,6 +5,7 @@ import com.deathrayresearch.forrester.model.def.ConstantDef;
 import com.deathrayresearch.forrester.model.def.FlowDef;
 import com.deathrayresearch.forrester.model.def.LookupTableDef;
 import com.deathrayresearch.forrester.model.def.ModelDefinition;
+import com.deathrayresearch.forrester.model.def.ModuleInstanceDef;
 import com.deathrayresearch.forrester.model.def.SimulationSettings;
 import com.deathrayresearch.forrester.model.def.StockDef;
 
@@ -27,7 +28,9 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Set;
 import java.util.StringJoiner;
 
@@ -93,45 +96,16 @@ public final class XmileExporter {
         // <sim_specs>
         writeSimSpecs(doc, root, def);
 
-        // <model>
+        // Write named <model> elements for module definitions (before the main model)
+        Set<String> writtenModels = new LinkedHashSet<>();
+        writeModuleModels(doc, root, def, writtenModels);
+
+        // Main <model>
         Element modelElem = doc.createElementNS(
                 XmileConstants.NAMESPACE_URI, XmileConstants.MODEL);
         root.appendChild(modelElem);
 
-        // <variables>
-        Element variablesElem = doc.createElementNS(
-                XmileConstants.NAMESPACE_URI, XmileConstants.VARIABLES);
-        modelElem.appendChild(variablesElem);
-
-        // Collect lookup table names that are referenced by aux/flow (embedded gf)
-        Set<String> embeddedLookupNames = collectEmbeddedLookupNames(def);
-
-        // Write stocks
-        for (StockDef stock : def.stocks()) {
-            writeStock(doc, variablesElem, stock, def);
-        }
-
-        // Write flows
-        for (FlowDef flow : def.flows()) {
-            writeFlow(doc, variablesElem, flow, def, embeddedLookupNames);
-        }
-
-        // Write auxiliaries
-        for (AuxDef aux : def.auxiliaries()) {
-            writeAux(doc, variablesElem, aux, def, embeddedLookupNames);
-        }
-
-        // Write constants as <aux> with numeric eqn
-        for (ConstantDef constant : def.constants()) {
-            writeConstant(doc, variablesElem, constant);
-        }
-
-        // Write standalone lookup tables as <aux> with <gf>
-        for (LookupTableDef lookup : def.lookupTables()) {
-            if (!embeddedLookupNames.contains(lookup.name())) {
-                writeLookupAsAux(doc, variablesElem, lookup);
-            }
-        }
+        writeVariables(doc, modelElem, def);
 
         // <views>
         if (!def.views().isEmpty()) {
@@ -188,6 +162,88 @@ public final class XmileExporter {
                 XmileConstants.NAMESPACE_URI, XmileConstants.DT);
         dt.setTextContent("1");
         simSpecs.appendChild(dt);
+    }
+
+    private static void writeVariables(Document doc, Element modelElem, ModelDefinition def) {
+        Element variablesElem = doc.createElementNS(
+                XmileConstants.NAMESPACE_URI, XmileConstants.VARIABLES);
+        modelElem.appendChild(variablesElem);
+
+        Set<String> embeddedLookupNames = collectEmbeddedLookupNames(def);
+
+        for (StockDef stock : def.stocks()) {
+            writeStock(doc, variablesElem, stock, def);
+        }
+        for (FlowDef flow : def.flows()) {
+            writeFlow(doc, variablesElem, flow, def, embeddedLookupNames);
+        }
+        for (AuxDef aux : def.auxiliaries()) {
+            writeAux(doc, variablesElem, aux, def, embeddedLookupNames);
+        }
+        for (ConstantDef constant : def.constants()) {
+            writeConstant(doc, variablesElem, constant);
+        }
+        for (LookupTableDef lookup : def.lookupTables()) {
+            if (!embeddedLookupNames.contains(lookup.name())) {
+                writeLookupAsAux(doc, variablesElem, lookup);
+            }
+        }
+        for (ModuleInstanceDef module : def.modules()) {
+            writeModule(doc, variablesElem, module);
+        }
+    }
+
+    /**
+     * Writes named {@code <model>} elements for all module definitions,
+     * recursively handling nested modules.
+     */
+    private static void writeModuleModels(Document doc, Element root,
+                                           ModelDefinition def,
+                                           Set<String> writtenModels) {
+        for (ModuleInstanceDef mod : def.modules()) {
+            String modelName = mod.definition().name();
+            if (writtenModels.contains(modelName)) {
+                continue;
+            }
+            writtenModels.add(modelName);
+
+            // Recurse first so nested module definitions appear before their parents
+            writeModuleModels(doc, root, mod.definition(), writtenModels);
+
+            Element modelElem = doc.createElementNS(
+                    XmileConstants.NAMESPACE_URI, XmileConstants.MODEL);
+            modelElem.setAttribute(XmileConstants.ATTR_NAME, modelName);
+            root.appendChild(modelElem);
+
+            writeVariables(doc, modelElem, mod.definition());
+        }
+    }
+
+    private static void writeModule(Document doc, Element variablesElem,
+                                     ModuleInstanceDef module) {
+        Element elem = doc.createElementNS(
+                XmileConstants.NAMESPACE_URI, XmileConstants.MODULE);
+        elem.setAttribute(XmileConstants.ATTR_NAME, module.instanceName());
+
+        // Input bindings: <connect to="inner_port" from="outer_var"/>
+        for (Map.Entry<String, String> entry : module.inputBindings().entrySet()) {
+            Element connect = doc.createElementNS(
+                    XmileConstants.NAMESPACE_URI, XmileConstants.CONNECT);
+            connect.setAttribute(XmileConstants.ATTR_TO, entry.getKey());
+            connect.setAttribute(XmileConstants.ATTR_FROM, entry.getValue());
+            elem.appendChild(connect);
+        }
+
+        // Output bindings: <connect to=".outer_alias" from="inner_var"/>
+        for (Map.Entry<String, String> entry : module.outputBindings().entrySet()) {
+            Element connect = doc.createElementNS(
+                    XmileConstants.NAMESPACE_URI, XmileConstants.CONNECT);
+            connect.setAttribute(XmileConstants.ATTR_TO, "." + entry.getValue());
+            connect.setAttribute(XmileConstants.ATTR_FROM, entry.getKey());
+            elem.appendChild(connect);
+        }
+
+        variablesElem.appendChild(elem);
     }
 
     private static void writeStock(Document doc, Element variablesElem,

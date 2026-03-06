@@ -6,7 +6,9 @@ import com.deathrayresearch.forrester.model.def.AuxDef;
 import com.deathrayresearch.forrester.model.def.ConstantDef;
 import com.deathrayresearch.forrester.model.def.FlowDef;
 import com.deathrayresearch.forrester.model.def.LookupTableDef;
+import com.deathrayresearch.forrester.model.def.ModelDefinition;
 import com.deathrayresearch.forrester.model.def.ModelDefinitionBuilder;
+import com.deathrayresearch.forrester.model.def.ModuleInstanceDef;
 import com.deathrayresearch.forrester.model.def.StockDef;
 import com.deathrayresearch.forrester.model.def.ViewDef;
 
@@ -57,7 +59,7 @@ public class XmileImporter implements ModelImporter {
     private static final Pattern NUMERIC_PATTERN = Pattern.compile(
             "^[+-]?(\\d+\\.?\\d*|\\.\\d+)([eE][+-]?\\d+)?$");
     private static final Set<String> UNSUPPORTED_ELEMENTS = Set.of(
-            XmileConstants.GROUP, XmileConstants.MODULE, XmileConstants.MACRO,
+            XmileConstants.GROUP, XmileConstants.MACRO,
             XmileConstants.EVENT_POSTER);
 
     @Override
@@ -118,97 +120,41 @@ public class XmileImporter implements ModelImporter {
                     + " (Forrester uses fixed step; value preserved as metadata only)");
         }
 
+        // Collect all <model> elements — named ones are module types
+        Map<String, Element> namedModels = new HashMap<>();
+        Element mainModelElem = null;
+        List<Element> modelElems = getChildElements(root, XmileConstants.MODEL);
+        for (Element me : modelElems) {
+            String mName = me.getAttribute(XmileConstants.ATTR_NAME);
+            if (mName != null && !mName.isBlank()) {
+                namedModels.put(mName, me);
+            } else if (mainModelElem == null) {
+                mainModelElem = me;
+            }
+        }
+        // If no unnamed model, use the first one
+        if (mainModelElem == null && !modelElems.isEmpty()) {
+            mainModelElem = modelElems.getFirst();
+        }
+
+        // Parse named models into definitions (for module references)
+        Map<String, ModelDefinition> moduleDefinitions = new HashMap<>();
+        for (Map.Entry<String, Element> entry : namedModels.entrySet()) {
+            ModelDefinition moduleDef = parseModelElement(
+                    entry.getValue(), entry.getKey(), timeUnit, moduleDefinitions, warnings);
+            moduleDefinitions.put(entry.getKey(), moduleDef);
+        }
+
         ModelDefinitionBuilder builder = new ModelDefinitionBuilder()
                 .name(modelName)
                 .defaultSimulation(timeUnit, duration, timeUnit);
 
-        // Find <model> element
-        Element modelElem = getFirstChild(root, XmileConstants.MODEL);
-        if (modelElem == null) {
+        if (mainModelElem == null) {
             return new ImportResult(builder.build(), warnings);
         }
 
-        // Find <variables> element
-        Element variablesElem = getFirstChild(modelElem, XmileConstants.VARIABLES);
-        if (variablesElem == null) {
-            return new ImportResult(builder.build(), warnings);
-        }
-
-        // Pass 1: Build maps of stock inflows/outflows and collect names
-        Map<String, List<String>> stockInflows = new HashMap<>();
-        Map<String, List<String>> stockOutflows = new HashMap<>();
-        Set<String> stockNames = new HashSet<>();
-        Set<String> flowNames = new HashSet<>();
-        Set<String> lookupNames = new HashSet<>();
-
-        // Parse stocks first to collect inflow/outflow declarations
-        for (Element stockElem : getChildElements(variablesElem, XmileConstants.STOCK)) {
-            String name = stockElem.getAttribute(XmileConstants.ATTR_NAME);
-            if (name == null || name.isBlank()) {
-                continue;
-            }
-            stockNames.add(name);
-
-            List<String> inflows = getChildTexts(stockElem, XmileConstants.INFLOW);
-            List<String> outflows = getChildTexts(stockElem, XmileConstants.OUTFLOW);
-            stockInflows.put(name, inflows);
-            stockOutflows.put(name, outflows);
-        }
-
-        // Pass 2: Build model elements
-        // Process stocks
-        for (Element stockElem : getChildElements(variablesElem, XmileConstants.STOCK)) {
-            String name = stockElem.getAttribute(XmileConstants.ATTR_NAME);
-            if (name == null || name.isBlank()) {
-                continue;
-            }
-            try {
-                buildStock(stockElem, name, builder, warnings);
-            } catch (IllegalArgumentException e) {
-                warnings.add("Error processing stock '" + name + "': " + e.getMessage());
-            }
-        }
-
-        // Process flows
-        for (Element flowElem : getChildElements(variablesElem, XmileConstants.FLOW)) {
-            String name = flowElem.getAttribute(XmileConstants.ATTR_NAME);
-            if (name == null || name.isBlank()) {
-                continue;
-            }
-            flowNames.add(name);
-            try {
-                buildFlow(flowElem, name, timeUnit, stockInflows, stockOutflows,
-                        builder, lookupNames, warnings);
-            } catch (IllegalArgumentException e) {
-                warnings.add("Error processing flow '" + name + "': " + e.getMessage());
-            }
-        }
-
-        // Process auxiliaries
-        for (Element auxElem : getChildElements(variablesElem, XmileConstants.AUX)) {
-            String name = auxElem.getAttribute(XmileConstants.ATTR_NAME);
-            if (name == null || name.isBlank()) {
-                continue;
-            }
-            try {
-                buildAux(auxElem, name, builder, lookupNames, warnings);
-            } catch (IllegalArgumentException e) {
-                warnings.add("Error processing aux '" + name + "': " + e.getMessage());
-            }
-        }
-
-        // Check for unsupported elements
-        checkUnsupportedElements(variablesElem, warnings);
-
-        // Parse views
-        Element viewsElem = getFirstChild(modelElem, XmileConstants.VIEWS);
-        if (viewsElem != null) {
-            List<ViewDef> views = XmileViewParser.parse(
-                    viewsElem, stockNames, flowNames, lookupNames, warnings);
-            for (ViewDef view : views) {
-                builder.view(view);
-            }
-        }
+        // Parse the main model
+        populateBuilder(mainModelElem, builder, timeUnit, moduleDefinitions, warnings);
 
         return new ImportResult(builder.build(), warnings);
     }
@@ -233,6 +179,22 @@ public class XmileImporter implements ModelImporter {
         String negPolicy = null;
         if (hasChild(stockElem, XmileConstants.NON_NEGATIVE)) {
             negPolicy = "CLAMP_TO_ZERO";
+        }
+
+        // Warn about unsupported stock types
+        if ("true".equalsIgnoreCase(stockElem.getAttribute(XmileConstants.ATTR_CONVEYOR))) {
+            warnings.add("Stock '" + name + "' is a conveyor stock (not supported, treated as standard stock)");
+        }
+        if ("true".equalsIgnoreCase(stockElem.getAttribute(XmileConstants.ATTR_QUEUE))) {
+            warnings.add("Stock '" + name + "' is a queue stock (not supported, treated as standard stock)");
+        }
+        if ("true".equalsIgnoreCase(stockElem.getAttribute(XmileConstants.ATTR_OVEN))) {
+            warnings.add("Stock '" + name + "' is an oven stock (not supported, treated as standard stock)");
+        }
+
+        // Warn about range specifications
+        if (hasChild(stockElem, XmileConstants.RANGE)) {
+            warnings.add("Range specification on stock '" + name + "' ignored");
         }
 
         builder.stock(new StockDef(name, comment, initialValue, unit, negPolicy));
@@ -277,6 +239,17 @@ public class XmileImporter implements ModelImporter {
             buildGf(gfElem, name + "_lookup", builder, lookupNames, warnings);
         }
 
+        // Warn about biflow (XMILE default is biflow; non_negative makes it uniflow)
+        if (!hasChild(flowElem, XmileConstants.NON_NEGATIVE)) {
+            warnings.add("Flow '" + name
+                    + "' is a biflow (may allow negative values; Forrester treats all flows as unidirectional)");
+        }
+
+        // Warn about range specifications
+        if (hasChild(flowElem, XmileConstants.RANGE)) {
+            warnings.add("Range specification on flow '" + name + "' ignored");
+        }
+
         String unit = getChildText(flowElem, XmileConstants.UNITS);
         String doc = getChildText(flowElem, XmileConstants.DOC);
         String comment = (doc != null && !doc.isBlank()) ? doc : name;
@@ -291,6 +264,11 @@ public class XmileImporter implements ModelImporter {
         String unit = getChildText(auxElem, XmileConstants.UNITS);
         String doc = getChildText(auxElem, XmileConstants.DOC);
         String comment = (doc != null && !doc.isBlank()) ? doc : name;
+
+        // Warn about range specifications
+        if (hasChild(auxElem, XmileConstants.RANGE)) {
+            warnings.add("Range specification on auxiliary '" + name + "' ignored");
+        }
 
         // Check for embedded graphical function
         Element gfElem = getFirstChild(auxElem, XmileConstants.GF);
@@ -340,6 +318,14 @@ public class XmileImporter implements ModelImporter {
             return;
         }
 
+        // Warn about non-LINEAR interpolation modes
+        String interpType = gfElem.getAttribute(XmileConstants.ATTR_TYPE);
+        if (interpType != null && !interpType.isBlank()
+                && !"continuous".equalsIgnoreCase(interpType)) {
+            warnings.add("Graphical function '" + lookupName + "' uses interpolation type '"
+                    + interpType + "' (only LINEAR/continuous is supported)");
+        }
+
         double[] xValues = null;
         double[] yValues = null;
 
@@ -376,6 +362,154 @@ public class XmileImporter implements ModelImporter {
         } catch (IllegalArgumentException e) {
             warnings.add("Could not create lookup '" + lookupName + "': " + e.getMessage());
         }
+    }
+
+    /**
+     * Parses a {@code <model>} element into a {@link ModelDefinition}.
+     * Used for named models that serve as module types.
+     */
+    private ModelDefinition parseModelElement(Element modelElem, String name, String timeUnit,
+                                               Map<String, ModelDefinition> moduleDefinitions,
+                                               List<String> warnings) {
+        ModelDefinitionBuilder builder = new ModelDefinitionBuilder().name(name);
+        populateBuilder(modelElem, builder, timeUnit, moduleDefinitions, warnings);
+        return builder.build();
+    }
+
+    /**
+     * Populates a builder from a {@code <model>} element's variables and views.
+     */
+    private void populateBuilder(Element modelElem, ModelDefinitionBuilder builder,
+                                  String timeUnit,
+                                  Map<String, ModelDefinition> moduleDefinitions,
+                                  List<String> warnings) {
+        Element variablesElem = getFirstChild(modelElem, XmileConstants.VARIABLES);
+        if (variablesElem == null) {
+            return;
+        }
+
+        // Pass 1: Build maps of stock inflows/outflows and collect names
+        Map<String, List<String>> stockInflows = new HashMap<>();
+        Map<String, List<String>> stockOutflows = new HashMap<>();
+        Set<String> stockNames = new HashSet<>();
+        Set<String> flowNames = new HashSet<>();
+        Set<String> lookupNames = new HashSet<>();
+
+        for (Element stockElem : getChildElements(variablesElem, XmileConstants.STOCK)) {
+            String name = stockElem.getAttribute(XmileConstants.ATTR_NAME);
+            if (name == null || name.isBlank()) {
+                continue;
+            }
+            stockNames.add(name);
+            stockInflows.put(name, getChildTexts(stockElem, XmileConstants.INFLOW));
+            stockOutflows.put(name, getChildTexts(stockElem, XmileConstants.OUTFLOW));
+        }
+
+        // Pass 2: Build model elements
+        for (Element stockElem : getChildElements(variablesElem, XmileConstants.STOCK)) {
+            String name = stockElem.getAttribute(XmileConstants.ATTR_NAME);
+            if (name == null || name.isBlank()) {
+                continue;
+            }
+            try {
+                buildStock(stockElem, name, builder, warnings);
+            } catch (IllegalArgumentException e) {
+                warnings.add("Error processing stock '" + name + "': " + e.getMessage());
+            }
+        }
+
+        for (Element flowElem : getChildElements(variablesElem, XmileConstants.FLOW)) {
+            String name = flowElem.getAttribute(XmileConstants.ATTR_NAME);
+            if (name == null || name.isBlank()) {
+                continue;
+            }
+            flowNames.add(name);
+            try {
+                buildFlow(flowElem, name, timeUnit, stockInflows, stockOutflows,
+                        builder, lookupNames, warnings);
+            } catch (IllegalArgumentException e) {
+                warnings.add("Error processing flow '" + name + "': " + e.getMessage());
+            }
+        }
+
+        for (Element auxElem : getChildElements(variablesElem, XmileConstants.AUX)) {
+            String name = auxElem.getAttribute(XmileConstants.ATTR_NAME);
+            if (name == null || name.isBlank()) {
+                continue;
+            }
+            try {
+                buildAux(auxElem, name, builder, lookupNames, warnings);
+            } catch (IllegalArgumentException e) {
+                warnings.add("Error processing aux '" + name + "': " + e.getMessage());
+            }
+        }
+
+        // Process module instances
+        for (Element moduleElem : getChildElements(variablesElem, XmileConstants.MODULE)) {
+            String name = moduleElem.getAttribute(XmileConstants.ATTR_NAME);
+            if (name == null || name.isBlank()) {
+                continue;
+            }
+            try {
+                buildModule(moduleElem, name, builder, moduleDefinitions, warnings);
+            } catch (IllegalArgumentException e) {
+                warnings.add("Error processing module '" + name + "': " + e.getMessage());
+            }
+        }
+
+        checkUnsupportedElements(variablesElem, warnings);
+
+        // Parse views
+        Element viewsElem = getFirstChild(modelElem, XmileConstants.VIEWS);
+        if (viewsElem != null) {
+            List<ViewDef> views = XmileViewParser.parse(
+                    viewsElem, stockNames, flowNames, lookupNames, warnings);
+            for (ViewDef view : views) {
+                builder.view(view);
+            }
+        }
+    }
+
+    private void buildModule(Element moduleElem, String instanceName,
+                              ModelDefinitionBuilder builder,
+                              Map<String, ModelDefinition> moduleDefinitions,
+                              List<String> warnings) {
+        // The module name typically matches a named <model> element
+        ModelDefinition moduleDef = moduleDefinitions.get(instanceName);
+        if (moduleDef == null) {
+            // Some XMILE files use a different instance name than the model name.
+            // Try to find by looking for a model name that matches.
+            // If not found, warn and skip.
+            warnings.add("Module '" + instanceName
+                    + "' references unknown model definition, skipped");
+            return;
+        }
+
+        // Parse <connect> elements
+        Map<String, String> inputBindings = new HashMap<>();
+        Map<String, String> outputBindings = new HashMap<>();
+
+        for (Element connectElem : getChildElements(moduleElem, XmileConstants.CONNECT)) {
+            String to = connectElem.getAttribute(XmileConstants.ATTR_TO);
+            String from = connectElem.getAttribute(XmileConstants.ATTR_FROM);
+            if (to == null || to.isBlank() || from == null || from.isBlank()) {
+                continue;
+            }
+
+            // In XMILE, a dot prefix on "to" means it's an output binding:
+            //   <connect to=".outer_alias" from="inner_var"/>  → output
+            //   <connect to="inner_var" from="outer_var"/>     → input
+            if (to.startsWith(".")) {
+                // Output: inner variable "from" is exposed as "to" (without dot) in parent
+                outputBindings.put(from, to.substring(1));
+            } else {
+                // Input: parent expression "from" feeds into inner port "to"
+                inputBindings.put(to, from);
+            }
+        }
+
+        builder.module(new ModuleInstanceDef(instanceName, moduleDef,
+                inputBindings, outputBindings));
     }
 
     private void checkUnsupportedElements(Element variablesElem, List<String> warnings) {

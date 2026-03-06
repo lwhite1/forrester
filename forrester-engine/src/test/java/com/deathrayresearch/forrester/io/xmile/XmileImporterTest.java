@@ -10,6 +10,7 @@ import com.deathrayresearch.forrester.model.def.ConstantDef;
 import com.deathrayresearch.forrester.model.def.FlowDef;
 import com.deathrayresearch.forrester.model.def.LookupTableDef;
 import com.deathrayresearch.forrester.model.def.ModelDefinition;
+import com.deathrayresearch.forrester.model.def.ModuleInstanceDef;
 import com.deathrayresearch.forrester.model.def.StockDef;
 
 import org.junit.jupiter.api.DisplayName;
@@ -414,6 +415,197 @@ class XmileImporterTest {
     }
 
     @Nested
+    @DisplayName("Unsupported element warnings")
+    class UnsupportedElementWarnings {
+
+        @Test
+        void shouldWarnAboutConveyorStock() {
+            String xmile = """
+                    <?xml version="1.0" encoding="UTF-8"?>
+                    <xmile xmlns="http://docs.oasis-open.org/xmile/ns/XMILE/v1.0" version="1.0">
+                      <header><name>Test</name></header>
+                      <sim_specs time_units="day"><start>0</start><stop>10</stop><dt>1</dt></sim_specs>
+                      <model><variables>
+                        <stock name="Pipeline" conveyor="true">
+                          <eqn>0</eqn>
+                        </stock>
+                      </variables></model>
+                    </xmile>
+                    """;
+
+            ImportResult result = importer.importModel(xmile, "Test");
+            assertThat(result.warnings()).anyMatch(w -> w.contains("conveyor"));
+            assertThat(result.definition().stocks()).hasSize(1);
+        }
+
+        @Test
+        void shouldWarnAboutQueueStock() {
+            String xmile = """
+                    <?xml version="1.0" encoding="UTF-8"?>
+                    <xmile xmlns="http://docs.oasis-open.org/xmile/ns/XMILE/v1.0" version="1.0">
+                      <header><name>Test</name></header>
+                      <sim_specs time_units="day"><start>0</start><stop>10</stop><dt>1</dt></sim_specs>
+                      <model><variables>
+                        <stock name="WaitList" queue="true">
+                          <eqn>0</eqn>
+                        </stock>
+                      </variables></model>
+                    </xmile>
+                    """;
+
+            ImportResult result = importer.importModel(xmile, "Test");
+            assertThat(result.warnings()).anyMatch(w -> w.contains("queue"));
+        }
+
+        @Test
+        void shouldWarnAboutOvenStock() {
+            String xmile = """
+                    <?xml version="1.0" encoding="UTF-8"?>
+                    <xmile xmlns="http://docs.oasis-open.org/xmile/ns/XMILE/v1.0" version="1.0">
+                      <header><name>Test</name></header>
+                      <sim_specs time_units="day"><start>0</start><stop>10</stop><dt>1</dt></sim_specs>
+                      <model><variables>
+                        <stock name="Batch" oven="true">
+                          <eqn>0</eqn>
+                        </stock>
+                      </variables></model>
+                    </xmile>
+                    """;
+
+            ImportResult result = importer.importModel(xmile, "Test");
+            assertThat(result.warnings()).anyMatch(w -> w.contains("oven"));
+        }
+
+        @Test
+        void shouldWarnAboutRangeOnStock() {
+            String xmile = """
+                    <?xml version="1.0" encoding="UTF-8"?>
+                    <xmile xmlns="http://docs.oasis-open.org/xmile/ns/XMILE/v1.0" version="1.0">
+                      <header><name>Test</name></header>
+                      <sim_specs time_units="day"><start>0</start><stop>10</stop><dt>1</dt></sim_specs>
+                      <model><variables>
+                        <stock name="Level">
+                          <eqn>50</eqn>
+                          <range min="0" max="100"/>
+                        </stock>
+                      </variables></model>
+                    </xmile>
+                    """;
+
+            ImportResult result = importer.importModel(xmile, "Test");
+            assertThat(result.warnings()).anyMatch(w -> w.contains("Range") && w.contains("Level"));
+        }
+
+        @Test
+        void shouldWarnAboutRangeOnAux() {
+            String xmile = """
+                    <?xml version="1.0" encoding="UTF-8"?>
+                    <xmile xmlns="http://docs.oasis-open.org/xmile/ns/XMILE/v1.0" version="1.0">
+                      <header><name>Test</name></header>
+                      <sim_specs time_units="day"><start>0</start><stop>10</stop><dt>1</dt></sim_specs>
+                      <model><variables>
+                        <aux name="rate">
+                          <eqn>a + b</eqn>
+                          <range min="0" max="1"/>
+                        </aux>
+                      </variables></model>
+                    </xmile>
+                    """;
+
+            ImportResult result = importer.importModel(xmile, "Test");
+            assertThat(result.warnings()).anyMatch(w -> w.contains("Range") && w.contains("rate"));
+        }
+
+        @Test
+        void shouldWarnAboutBiflow() {
+            String xmile = """
+                    <?xml version="1.0" encoding="UTF-8"?>
+                    <xmile xmlns="http://docs.oasis-open.org/xmile/ns/XMILE/v1.0" version="1.0">
+                      <header><name>Test</name></header>
+                      <sim_specs time_units="day"><start>0</start><stop>10</stop><dt>1</dt></sim_specs>
+                      <model><variables>
+                        <stock name="Tank"><eqn>100</eqn><outflow>drain</outflow></stock>
+                        <flow name="drain">
+                          <eqn>5</eqn>
+                        </flow>
+                      </variables></model>
+                    </xmile>
+                    """;
+
+            ImportResult result = importer.importModel(xmile, "Test");
+            assertThat(result.warnings()).anyMatch(w -> w.contains("biflow"));
+        }
+
+        @Test
+        void shouldNotWarnAboutUniflow() {
+            String xmile = """
+                    <?xml version="1.0" encoding="UTF-8"?>
+                    <xmile xmlns="http://docs.oasis-open.org/xmile/ns/XMILE/v1.0" version="1.0">
+                      <header><name>Test</name></header>
+                      <sim_specs time_units="day"><start>0</start><stop>10</stop><dt>1</dt></sim_specs>
+                      <model><variables>
+                        <stock name="Tank"><eqn>100</eqn><outflow>drain</outflow></stock>
+                        <flow name="drain">
+                          <eqn>5</eqn>
+                          <non_negative/>
+                        </flow>
+                      </variables></model>
+                    </xmile>
+                    """;
+
+            ImportResult result = importer.importModel(xmile, "Test");
+            assertThat(result.warnings()).noneMatch(w -> w.contains("biflow"));
+        }
+
+        @Test
+        void shouldWarnAboutNonLinearInterpolation() {
+            String xmile = """
+                    <?xml version="1.0" encoding="UTF-8"?>
+                    <xmile xmlns="http://docs.oasis-open.org/xmile/ns/XMILE/v1.0" version="1.0">
+                      <header><name>Test</name></header>
+                      <sim_specs time_units="day"><start>0</start><stop>10</stop><dt>1</dt></sim_specs>
+                      <model><variables>
+                        <aux name="effect">
+                          <eqn>x</eqn>
+                          <gf type="extrapolate">
+                            <xpts>0,1,2,3,4</xpts>
+                            <ypts>0,0.5,1.0,0.5,0</ypts>
+                          </gf>
+                        </aux>
+                      </variables></model>
+                    </xmile>
+                    """;
+
+            ImportResult result = importer.importModel(xmile, "Test");
+            assertThat(result.warnings()).anyMatch(
+                    w -> w.contains("interpolation") && w.contains("extrapolate"));
+        }
+
+        @Test
+        void shouldNotWarnAboutContinuousInterpolation() {
+            String xmile = """
+                    <?xml version="1.0" encoding="UTF-8"?>
+                    <xmile xmlns="http://docs.oasis-open.org/xmile/ns/XMILE/v1.0" version="1.0">
+                      <header><name>Test</name></header>
+                      <sim_specs time_units="day"><start>0</start><stop>10</stop><dt>1</dt></sim_specs>
+                      <model><variables>
+                        <aux name="effect">
+                          <eqn>x</eqn>
+                          <gf type="continuous">
+                            <xpts>0,1,2,3,4</xpts>
+                            <ypts>0,0.5,1.0,0.5,0</ypts>
+                          </gf>
+                        </aux>
+                      </variables></model>
+                    </xmile>
+                    """;
+
+            ImportResult result = importer.importModel(xmile, "Test");
+            assertThat(result.warnings()).noneMatch(w -> w.contains("interpolation"));
+        }
+    }
+
+    @Nested
     @DisplayName("Expression translation in import")
     class ExpressionTranslation {
 
@@ -436,6 +628,166 @@ class XmileImporterTest {
             ImportResult result = importer.importModel(xmile, "Test");
             FlowDef flow = result.definition().flows().get(0);
             assertThat(flow.equation()).isEqualTo("IF(S > 50, 10, 0)");
+        }
+    }
+
+    @Nested
+    @DisplayName("Module import")
+    class ModuleImport {
+
+        @Test
+        void shouldImportModuleWithInputBindings() {
+            String xmile = """
+                    <?xml version="1.0" encoding="UTF-8"?>
+                    <xmile xmlns="http://docs.oasis-open.org/xmile/ns/XMILE/v1.0" version="1.0">
+                      <header><name>Test</name></header>
+                      <sim_specs time_units="day"><start>0</start><stop>10</stop><dt>1</dt></sim_specs>
+                      <model name="Inner">
+                        <variables>
+                          <stock name="Tank"><eqn>0</eqn><inflow>fill</inflow></stock>
+                          <flow name="fill"><eqn>rate_input</eqn></flow>
+                        </variables>
+                      </model>
+                      <model>
+                        <variables>
+                          <aux name="MyRate"><eqn>5</eqn></aux>
+                          <module name="Inner">
+                            <connect to="rate_input" from="MyRate"/>
+                          </module>
+                        </variables>
+                      </model>
+                    </xmile>
+                    """;
+
+            ImportResult result = importer.importModel(xmile, "Test");
+            ModelDefinition def = result.definition();
+
+            assertThat(def.modules()).hasSize(1);
+            ModuleInstanceDef mod = def.modules().get(0);
+            assertThat(mod.instanceName()).isEqualTo("Inner");
+            assertThat(mod.inputBindings()).containsEntry("rate_input", "MyRate");
+            assertThat(mod.definition().stocks()).hasSize(1);
+            assertThat(mod.definition().flows()).hasSize(1);
+        }
+
+        @Test
+        void shouldImportModuleWithOutputBindings() {
+            String xmile = """
+                    <?xml version="1.0" encoding="UTF-8"?>
+                    <xmile xmlns="http://docs.oasis-open.org/xmile/ns/XMILE/v1.0" version="1.0">
+                      <header><name>Test</name></header>
+                      <sim_specs time_units="day"><start>0</start><stop>10</stop><dt>1</dt></sim_specs>
+                      <model name="Producer">
+                        <variables>
+                          <stock name="Value"><eqn>42</eqn></stock>
+                          <aux name="output"><eqn>Value * 2</eqn></aux>
+                        </variables>
+                      </model>
+                      <model>
+                        <variables>
+                          <module name="Producer">
+                            <connect to=".produced_value" from="output"/>
+                          </module>
+                        </variables>
+                      </model>
+                    </xmile>
+                    """;
+
+            ImportResult result = importer.importModel(xmile, "Test");
+            ModelDefinition def = result.definition();
+
+            assertThat(def.modules()).hasSize(1);
+            ModuleInstanceDef mod = def.modules().get(0);
+            assertThat(mod.outputBindings()).containsEntry("output", "produced_value");
+        }
+
+        @Test
+        void shouldWarnOnUnknownModuleReference() {
+            String xmile = """
+                    <?xml version="1.0" encoding="UTF-8"?>
+                    <xmile xmlns="http://docs.oasis-open.org/xmile/ns/XMILE/v1.0" version="1.0">
+                      <header><name>Test</name></header>
+                      <sim_specs time_units="day"><start>0</start><stop>10</stop><dt>1</dt></sim_specs>
+                      <model>
+                        <variables>
+                          <module name="NonExistent">
+                            <connect to="x" from="y"/>
+                          </module>
+                        </variables>
+                      </model>
+                    </xmile>
+                    """;
+
+            ImportResult result = importer.importModel(xmile, "Test");
+            assertThat(result.warnings()).anyMatch(
+                    w -> w.contains("NonExistent") && w.contains("unknown model"));
+            assertThat(result.definition().modules()).isEmpty();
+        }
+
+        @Test
+        void shouldImportModularSirModel() throws IOException {
+            Path path = Path.of("src/test/resources/xmile/modular_sir.xmile");
+            ImportResult result = importer.importModel(path);
+            ModelDefinition def = result.definition();
+
+            assertThat(def.name()).isEqualTo("Modular SIR");
+
+            // Main model has 1 stock (Susceptible), 1 flow, 1 constant
+            assertThat(def.stocks()).hasSize(1);
+            assertThat(def.stocks().get(0).name()).isEqualTo("Susceptible");
+
+            // 1 module instance
+            assertThat(def.modules()).hasSize(1);
+            ModuleInstanceDef mod = def.modules().get(0);
+            assertThat(mod.instanceName()).isEqualTo("Disease");
+
+            // Module has 2 input bindings
+            assertThat(mod.inputBindings()).containsEntry("susceptible_pop", "Susceptible");
+            assertThat(mod.inputBindings()).containsEntry("total_pop", "Total_Population");
+
+            // Module has 1 output binding
+            assertThat(mod.outputBindings()).containsEntry("current_infected", "disease_infected");
+
+            // Inner definition has 2 stocks, 2 flows, 2 constants, 1 aux
+            ModelDefinition inner = mod.definition();
+            assertThat(inner.stocks()).hasSize(2);
+            assertThat(inner.flows()).hasSize(2);
+        }
+
+        @Test
+        void shouldCompileAndSimulateModularModel() {
+            String xmile = """
+                    <?xml version="1.0" encoding="UTF-8"?>
+                    <xmile xmlns="http://docs.oasis-open.org/xmile/ns/XMILE/v1.0" version="1.0">
+                      <header><name>Test</name></header>
+                      <sim_specs time_units="day"><start>0</start><stop>10</stop><dt>1</dt></sim_specs>
+                      <model name="Drainer">
+                        <variables>
+                          <stock name="Tank"><eqn>100</eqn><outflow>drain</outflow><units>Thing</units></stock>
+                          <flow name="drain"><eqn>Tank * drain_pct</eqn><units>Thing/Day</units></flow>
+                        </variables>
+                      </model>
+                      <model>
+                        <variables>
+                          <aux name="Rate"><eqn>0.1</eqn><units>1/Day</units></aux>
+                          <module name="Drainer">
+                            <connect to="drain_pct" from="Rate"/>
+                          </module>
+                        </variables>
+                      </model>
+                    </xmile>
+                    """;
+
+            ImportResult result = importer.importModel(xmile, "Test");
+            CompiledModel compiled = new ModelCompiler().compile(result.definition());
+            Simulation sim = compiled.createSimulation();
+            sim.execute();
+
+            Stock tank = compiled.getModel().getStocks().stream()
+                    .filter(s -> s.getName().equals("Tank"))
+                    .findFirst().orElseThrow();
+            assertThat(tank.getValue()).as("Tank should have drained").isLessThan(100);
+            assertThat(tank.getValue()).as("Tank should not be fully drained").isGreaterThan(30);
         }
     }
 

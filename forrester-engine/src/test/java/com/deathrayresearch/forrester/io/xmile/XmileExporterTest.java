@@ -7,12 +7,14 @@ import com.deathrayresearch.forrester.model.def.FlowDef;
 import com.deathrayresearch.forrester.model.def.LookupTableDef;
 import com.deathrayresearch.forrester.model.def.ModelDefinition;
 import com.deathrayresearch.forrester.model.def.ModelDefinitionBuilder;
+import com.deathrayresearch.forrester.model.def.ModuleInstanceDef;
 import com.deathrayresearch.forrester.model.def.StockDef;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -200,6 +202,63 @@ class XmileExporterTest {
 
             assertThat(imported.flows()).hasSize(2);
             assertThat(imported.constants()).hasSize(3);
+        }
+    }
+
+    @Nested
+    @DisplayName("Module export")
+    class ModuleExport {
+
+        @Test
+        void shouldExportModuleAsNamedModel() {
+            ModelDefinition inner = new ModelDefinitionBuilder()
+                    .name("InnerModule")
+                    .stock("Tank", 100, "Thing")
+                    .flow(new FlowDef("drain", "Tank * rate", "Day", "Tank", null))
+                    .build();
+
+            ModelDefinition outer = new ModelDefinitionBuilder()
+                    .name("Outer")
+                    .defaultSimulation("Day", 10, "Day")
+                    .constant("MyRate", 0.1, "1/Day")
+                    .module(new ModuleInstanceDef("InnerModule", inner,
+                            Map.of("rate", "MyRate"),
+                            Map.of("drain", "drain_output")))
+                    .build();
+
+            String xml = XmileExporter.toXmile(outer);
+            assertThat(xml).contains("name=\"InnerModule\"");
+            assertThat(xml).contains("<module");
+            assertThat(xml).contains("<connect");
+        }
+
+        @Test
+        void shouldRoundTripModule() {
+            ModelDefinition inner = new ModelDefinitionBuilder()
+                    .name("Counter")
+                    .stock("Count", 0, "Thing")
+                    .flow(new FlowDef("inc", "step_size", "Day", null, "Count"))
+                    .build();
+
+            ModelDefinition original = new ModelDefinitionBuilder()
+                    .name("Host")
+                    .defaultSimulation("Day", 10, "Day")
+                    .constant("Size", 5, "Thing")
+                    .module(new ModuleInstanceDef("Counter", inner,
+                            Map.of("step_size", "Size"),
+                            Map.of()))
+                    .build();
+
+            String xml = XmileExporter.toXmile(original);
+            ImportResult result = new XmileImporter().importModel(xml, "Host");
+            ModelDefinition imported = result.definition();
+
+            assertThat(imported.modules()).hasSize(1);
+            ModuleInstanceDef mod = imported.modules().get(0);
+            assertThat(mod.instanceName()).isEqualTo("Counter");
+            assertThat(mod.inputBindings()).containsEntry("step_size", "Size");
+            assertThat(mod.definition().stocks()).hasSize(1);
+            assertThat(mod.definition().stocks().get(0).name()).isEqualTo("Count");
         }
     }
 
