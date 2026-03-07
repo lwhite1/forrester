@@ -462,13 +462,14 @@ public class ModelCanvas extends Canvas {
      */
     private void redraw() {
         renderer.render(getGraphicsContext2D(), getWidth(), getHeight(),
-                editor, connectors, flowCreation.getState(),
-                causalLinkCreation.getState(),
-                reattachController.toRenderState(),
-                rerouteRenderState(),
-                marqueeController.toRenderState(),
-                loopHighlightActive ? loopAnalysis : null, hoveredElement,
-                hoveredConnection, selectedConnection);
+                new CanvasRenderer.RenderContext(
+                        editor, connectors, flowCreation.getState(),
+                        causalLinkCreation.getState(),
+                        reattachController.toRenderState(),
+                        rerouteRenderState(),
+                        marqueeController.toRenderState(),
+                        loopHighlightActive ? loopAnalysis : null, hoveredElement,
+                        hoveredConnection, selectedConnection));
         fireStatusChanged();
     }
 

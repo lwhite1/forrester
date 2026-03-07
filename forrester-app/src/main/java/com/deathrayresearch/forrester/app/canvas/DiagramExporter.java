@@ -115,16 +115,14 @@ public final class DiagramExporter {
             // Render with idle interactive states
             CanvasRenderer exportRenderer = new CanvasRenderer(canvasState, exportViewport);
             exportRenderer.render(gc, canvasWidth, canvasHeight,
-                    editor, connectors,
-                    FlowCreationController.State.IDLE,
-                    CausalLinkCreationController.State.IDLE,
-                    CanvasRenderer.ReattachState.IDLE,
-                    CanvasRenderer.RerouteState.IDLE,
-                    CanvasRenderer.MarqueeState.IDLE,
-                    loopAnalysis,
-                    null,   // hoveredElement
-                    null,   // hoveredConnection
-                    null);  // selectedConnection
+                    new CanvasRenderer.RenderContext(
+                            editor, connectors,
+                            FlowCreationController.State.IDLE,
+                            CausalLinkCreationController.State.IDLE,
+                            CanvasRenderer.ReattachState.IDLE,
+                            CanvasRenderer.RerouteState.IDLE,
+                            CanvasRenderer.MarqueeState.IDLE,
+                            loopAnalysis, null, null, null));
 
             // Snapshot to image
             SnapshotParameters params = new SnapshotParameters();

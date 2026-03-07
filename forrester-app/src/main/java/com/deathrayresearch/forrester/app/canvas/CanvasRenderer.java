@@ -63,6 +63,23 @@ public class CanvasRenderer {
         static final ReattachState IDLE = new ReattachState(false, 0, 0, 0, 0);
     }
 
+    /**
+     * Groups the per-frame interactive state passed to {@link #render}.
+     */
+    public record RenderContext(
+            ModelEditor editor,
+            List<ConnectorRoute> connectors,
+            FlowCreationController.State flowState,
+            CausalLinkCreationController.State causalLinkState,
+            ReattachState reattachState,
+            RerouteState rerouteState,
+            MarqueeState marqueeState,
+            FeedbackAnalysis loopAnalysis,
+            String hoveredElement,
+            ConnectionId hoveredConnection,
+            ConnectionId selectedConnection
+    ) {}
+
     private final CanvasState canvasState;
     private final Viewport viewport;
 
@@ -73,25 +90,24 @@ public class CanvasRenderer {
 
     /**
      * Renders the full canvas: background, connections, elements, selection, and overlays.
-     *
-     * @param loopAnalysis optional feedback analysis; when non-null, loop participants
-     *                     and edges are highlighted with the loop color
      */
-    public void render(GraphicsContext gc, double width, double height,
-                       ModelEditor editor, List<ConnectorRoute> connectors,
-                       FlowCreationController.State flowState,
-                       CausalLinkCreationController.State causalLinkState,
-                       ReattachState reattachState,
-                       RerouteState rerouteState,
-                       MarqueeState marqueeState,
-                       FeedbackAnalysis loopAnalysis,
-                       String hoveredElement,
-                       ConnectionId hoveredConnection,
-                       ConnectionId selectedConnection) {
+    public void render(GraphicsContext gc, double width, double height, RenderContext ctx) {
         // Background in screen space
         gc.clearRect(0, 0, width, height);
         gc.setFill(ColorPalette.BACKGROUND);
         gc.fillRect(0, 0, width, height);
+
+        ModelEditor editor = ctx.editor();
+        List<ConnectorRoute> connectors = ctx.connectors();
+        FlowCreationController.State flowState = ctx.flowState();
+        CausalLinkCreationController.State causalLinkState = ctx.causalLinkState();
+        ReattachState reattachState = ctx.reattachState();
+        RerouteState rerouteState = ctx.rerouteState();
+        MarqueeState marqueeState = ctx.marqueeState();
+        FeedbackAnalysis loopAnalysis = ctx.loopAnalysis();
+        String hoveredElement = ctx.hoveredElement();
+        ConnectionId hoveredConnection = ctx.hoveredConnection();
+        ConnectionId selectedConnection = ctx.selectedConnection();
 
         if (editor == null) {
             return;
