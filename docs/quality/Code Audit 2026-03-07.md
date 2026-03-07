@@ -11,7 +11,7 @@ Full code audit of the Forrester System Dynamics modeling platform covering all 
 | forrester-demos | ~15 | ~2,500 | ~5 |
 | forrester-ui | 5 | ~400 | 0 |
 
-**Build status:** All 540 tests pass (2 skipped). Clean compile. SpotBugs static analysis configured.
+**Build status:** All 540 tests pass (2 skipped). Clean compile. SpotBugs passes clean.
 
 ---
 
@@ -106,7 +106,7 @@ These were already tracked before this audit:
 - Thread confinement documented and asserted in ModelEditor
 
 **Weaknesses:**
-- ~~No static analysis tools configured~~ — SpotBugs now configured
+- SpotBugs configured but no Checkstyle or ErrorProne yet
 - Guava EventBus is a silent failure point — should be replaced with explicit listener list
 - Several god classes remain: ModelWindow (1412 lines), ModelCanvas (1592 lines)
 - History storage is inefficient (boxed Doubles in ArrayLists)
@@ -161,12 +161,8 @@ These were already tracked before this audit:
 
 ## Recommendations for Ongoing Quality
 
-1. **~~Add static analysis~~** *(done)* — SpotBugs configured in Maven build with `spotbugs-exclude.xml` for known false positives. Runs via `mvn compile spotbugs:check`.
+1. **Adopt mutation testing:** PIT or similar would identify the weak assertions flagged in the test audit (assertions that pass regardless of behavior).
 
-2. **~~Add a CI pipeline~~** *(done)* — GitHub Actions workflow (`.github/workflows/ci.yml`) runs `mvn verify` and `spotbugs:check` on every push and PR to master.
+2. **Track code coverage:** JaCoCo report would quantify the forrester-ui gap (0%) and identify other blind spots.
 
-3. **Adopt mutation testing:** PIT or similar would identify the weak assertions flagged in the test audit (assertions that pass regardless of behavior).
-
-4. **Track code coverage:** JaCoCo report would quantify the forrester-ui gap (0%) and identify other blind spots.
-
-5. **Consider replacing Guava EventBus:** It's deprecated-in-spirit (Guava team recommends alternatives). A simple typed listener interface is safer and more debuggable.
+3. **Consider replacing Guava EventBus:** It's deprecated-in-spirit (Guava team recommends alternatives). A simple typed listener interface is safer and more debuggable.
