@@ -2,7 +2,10 @@ package com.deathrayresearch.forrester.io.vensim;
 
 import com.deathrayresearch.forrester.io.ImportResult;
 import com.deathrayresearch.forrester.model.def.AuxDef;
+import com.deathrayresearch.forrester.model.def.CausalLinkDef;
+import com.deathrayresearch.forrester.model.def.CldVariableDef;
 import com.deathrayresearch.forrester.model.def.ConstantDef;
+import com.deathrayresearch.forrester.model.def.ElementType;
 import com.deathrayresearch.forrester.model.def.FlowDef;
 import com.deathrayresearch.forrester.model.def.LookupTableDef;
 import com.deathrayresearch.forrester.model.def.ModelDefinition;
@@ -651,6 +654,234 @@ class VensimImporterTest {
             ImportResult result = importer.importModel(mdl, "Test");
             assertThat(result.warnings()).anyMatch(w -> w.contains("FINAL TIME"));
             assertThat(result.definition().defaultSimulation().duration()).isEqualTo(100.0);
+        }
+    }
+
+    @Nested
+    @DisplayName("CLD (Causal Loop Diagram) import")
+    class CldImport {
+
+        @Test
+        void shouldDetectCldWhenNoStocks() {
+            String mdl = """
+                    Population= 0
+                    \t~\t
+                    \t~\tThe total population
+                    \t|
+
+                    Birth Rate= 0
+                    \t~\t
+                    \t~\tRate of births
+                    \t|
+
+                    INITIAL TIME = 0
+                    \t~\tYear
+                    \t~\t
+                    \t|
+
+                    FINAL TIME = 100
+                    \t~\tYear
+                    \t~\t
+                    \t|
+
+                    TIME STEP = 1
+                    \t~\tYear
+                    \t~\t
+                    \t|
+
+                    \\---///
+                    *View
+                    10,1,Population,200,200
+                    10,2,Birth Rate,100,100
+                    1,3,2,1
+                    """;
+
+            ImportResult result = importer.importModel(mdl, "Test");
+            ModelDefinition def = result.definition();
+
+            // No stocks, flows, auxiliaries, or constants in CLD mode
+            assertThat(def.stocks()).isEmpty();
+            assertThat(def.flows()).isEmpty();
+            assertThat(def.auxiliaries()).isEmpty();
+            assertThat(def.constants()).isEmpty();
+
+            // Should have CLD variables
+            assertThat(def.cldVariables()).hasSize(2);
+            Set<String> names = def.cldVariables().stream()
+                    .map(CldVariableDef::name)
+                    .collect(Collectors.toSet());
+            assertThat(names).containsExactlyInAnyOrder("Population", "Birth_Rate");
+        }
+
+        @Test
+        void shouldExtractCausalLinksFromSketch() {
+            String mdl = """
+                    A= 0
+                    \t~\t
+                    \t~\t
+                    \t|
+
+                    B= 0
+                    \t~\t
+                    \t~\t
+                    \t|
+
+                    C= 0
+                    \t~\t
+                    \t~\t
+                    \t|
+
+                    INITIAL TIME = 0
+                    \t~\tYear
+                    \t~\t
+                    \t|
+
+                    FINAL TIME = 100
+                    \t~\tYear
+                    \t~\t
+                    \t|
+
+                    TIME STEP = 1
+                    \t~\tYear
+                    \t~\t
+                    \t|
+
+                    \\---///
+                    *View
+                    10,1,A,100,100
+                    10,2,B,200,100
+                    10,3,C,300,100
+                    1,4,1,2
+                    1,5,2,3
+                    """;
+
+            ImportResult result = importer.importModel(mdl, "Test");
+            ModelDefinition def = result.definition();
+
+            assertThat(def.cldVariables()).hasSize(3);
+            assertThat(def.causalLinks()).hasSize(2);
+
+            CausalLinkDef link1 = def.causalLinks().get(0);
+            assertThat(link1.from()).isEqualTo("A");
+            assertThat(link1.to()).isEqualTo("B");
+            assertThat(link1.polarity()).isEqualTo(CausalLinkDef.Polarity.UNKNOWN);
+
+            CausalLinkDef link2 = def.causalLinks().get(1);
+            assertThat(link2.from()).isEqualTo("B");
+            assertThat(link2.to()).isEqualTo("C");
+        }
+
+        @Test
+        void shouldClassifySketchElementsAsCldVariable() {
+            String mdl = """
+                    X= 0
+                    \t~\t
+                    \t~\t
+                    \t|
+
+                    Y= 0
+                    \t~\t
+                    \t~\t
+                    \t|
+
+                    INITIAL TIME = 0
+                    \t~\tYear
+                    \t~\t
+                    \t|
+
+                    FINAL TIME = 100
+                    \t~\tYear
+                    \t~\t
+                    \t|
+
+                    TIME STEP = 1
+                    \t~\tYear
+                    \t~\t
+                    \t|
+
+                    \\---///
+                    *View
+                    10,1,X,100,100
+                    10,2,Y,200,100
+                    """;
+
+            ImportResult result = importer.importModel(mdl, "Test");
+            ModelDefinition def = result.definition();
+
+            assertThat(def.views()).hasSize(1);
+            assertThat(def.views().getFirst().elements()).hasSize(2);
+            assertThat(def.views().getFirst().elements().get(0).type())
+                    .isEqualTo(ElementType.CLD_VARIABLE);
+            assertThat(def.views().getFirst().elements().get(1).type())
+                    .isEqualTo(ElementType.CLD_VARIABLE);
+        }
+
+        @Test
+        void shouldImportSimpleCldFile() throws IOException {
+            Path path = Path.of("src/test/resources/vensim/simple-cld.mdl");
+            ImportResult result = importer.importModel(path);
+            ModelDefinition def = result.definition();
+
+            assertThat(def.name()).isEqualTo("simple-cld");
+
+            // 4 CLD variables
+            assertThat(def.cldVariables()).hasSize(4);
+            Set<String> names = def.cldVariables().stream()
+                    .map(CldVariableDef::name)
+                    .collect(Collectors.toSet());
+            assertThat(names).containsExactlyInAnyOrder(
+                    "Population", "Birth_Rate", "Death_Rate", "Resources");
+
+            // No stocks, flows, auxiliaries, or constants
+            assertThat(def.stocks()).isEmpty();
+            assertThat(def.flows()).isEmpty();
+            assertThat(def.auxiliaries()).isEmpty();
+            assertThat(def.constants()).isEmpty();
+
+            // 4 causal links from sketch connectors
+            assertThat(def.causalLinks()).hasSize(4);
+
+            // Sketch should have a view with CLD_VARIABLE elements
+            assertThat(def.views()).hasSize(1);
+            assertThat(def.views().getFirst().name()).isEqualTo("CLD View");
+        }
+
+        @Test
+        void shouldNotDetectCldWhenStocksExist() {
+            String mdl = """
+                    Stock = INTEG(rate, 100)
+                    \t~\tUnits
+                    \t~\t
+                    \t|
+
+                    rate = 10
+                    \t~\tUnits/Year
+                    \t~\t
+                    \t|
+
+                    INITIAL TIME = 0
+                    \t~\tYear
+                    \t~\t
+                    \t|
+
+                    FINAL TIME = 100
+                    \t~\tYear
+                    \t~\t
+                    \t|
+
+                    TIME STEP = 1
+                    \t~\tYear
+                    \t~\t
+                    \t|
+                    """;
+
+            ImportResult result = importer.importModel(mdl, "Test");
+            ModelDefinition def = result.definition();
+
+            // Should NOT be treated as CLD
+            assertThat(def.stocks()).hasSize(1);
+            assertThat(def.cldVariables()).isEmpty();
+            assertThat(def.causalLinks()).isEmpty();
         }
     }
 

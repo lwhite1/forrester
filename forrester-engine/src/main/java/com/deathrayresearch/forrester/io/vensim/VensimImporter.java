@@ -3,6 +3,9 @@ package com.deathrayresearch.forrester.io.vensim;
 import com.deathrayresearch.forrester.io.ImportResult;
 import com.deathrayresearch.forrester.io.ModelImporter;
 import com.deathrayresearch.forrester.model.def.AuxDef;
+import com.deathrayresearch.forrester.model.def.CausalLinkDef;
+import com.deathrayresearch.forrester.model.def.CldVariableDef;
+import com.deathrayresearch.forrester.model.def.ConnectorRoute;
 import com.deathrayresearch.forrester.model.def.ConstantDef;
 import com.deathrayresearch.forrester.model.def.FlowDef;
 import com.deathrayresearch.forrester.model.def.LookupTableDef;
@@ -116,6 +119,7 @@ public class VensimImporter implements ModelImporter {
         Set<String> stockNames = new HashSet<>();
         Set<String> flowNames = new HashSet<>();
         Set<String> lookupNames = new HashSet<>();
+        Set<String> cldVariableNames = new HashSet<>();
         Set<String> allNormalizedNames = new HashSet<>();
 
         // First sub-pass: identify stocks so we know which flows connect to them
@@ -143,6 +147,13 @@ public class VensimImporter implements ModelImporter {
             }
         }
 
+        // Detect CLD mode: no stocks AND no flow valves in sketch section.
+        // A pure CLD has only type-10 elements and type-1 connectors, no type-11 flow valves.
+        boolean hasFlowValves = parsed.sketchLines().stream()
+                .anyMatch(line -> line.strip().startsWith("11,"));
+        boolean isCld = stockNames.isEmpty() && !hasFlowValves
+                && !parsed.sketchLines().isEmpty();
+
         // Second sub-pass: build definitions
         Set<String> sketchFlowNames = new HashSet<>();
         for (MdlEquation eq : parsed.equations()) {
@@ -155,24 +166,42 @@ public class VensimImporter implements ModelImporter {
                 warnings.add("Duplicate normalized name '" + normalized
                         + "' (from '" + name + "')");
             }
-            String unit = cleanUnits(eq.units());
             String comment = eq.comment().isBlank() ? name : eq.comment();
 
-            try {
-                classifyAndBuild(eq, normalized, unit, comment, builder,
-                        vensimNames, stockNames, flowNames, lookupNames,
-                        sketchFlowNames, timeUnit, warnings);
-            } catch (IllegalArgumentException e) {
-                warnings.add("Error processing '" + name + "': " + e.getMessage());
+            if (isCld) {
+                try {
+                    classifyAndBuildCld(eq, normalized, comment, builder,
+                            cldVariableNames, warnings);
+                } catch (IllegalArgumentException e) {
+                    warnings.add("Error processing '" + name + "': " + e.getMessage());
+                }
+            } else {
+                String unit = cleanUnits(eq.units());
+                try {
+                    classifyAndBuild(eq, normalized, unit, comment, builder,
+                            vensimNames, stockNames, flowNames, lookupNames,
+                            sketchFlowNames, timeUnit, warnings);
+                } catch (IllegalArgumentException e) {
+                    warnings.add("Error processing '" + name + "': " + e.getMessage());
+                }
             }
         }
 
         // Parse sketch section (use original sketch flow names, not auto-generated _net_flow names)
         if (!parsed.sketchLines().isEmpty()) {
             List<ViewDef> views = SketchParser.parse(
-                    parsed.sketchLines(), stockNames, sketchFlowNames, lookupNames);
+                    parsed.sketchLines(), stockNames, sketchFlowNames, lookupNames,
+                    cldVariableNames);
             for (ViewDef view : views) {
                 builder.view(view);
+                // In CLD mode, convert sketch connectors to causal links
+                if (isCld) {
+                    for (ConnectorRoute connector : view.connectors()) {
+                        builder.causalLink(new CausalLinkDef(
+                                connector.from(), connector.to(),
+                                CausalLinkDef.Polarity.UNKNOWN));
+                    }
+                }
             }
         }
 
@@ -260,6 +289,30 @@ public class VensimImporter implements ModelImporter {
         addExtractedLookups(tr, builder, lookupNames, warnings);
         builder.aux(new AuxDef(normalized, comment, tr.expression(), unit));
         warnings.addAll(tr.warnings());
+    }
+
+    private void classifyAndBuildCld(MdlEquation eq, String normalized, String comment,
+                                      ModelDefinitionBuilder builder,
+                                      Set<String> cldVariableNames,
+                                      List<String> warnings) {
+        String operator = eq.operator();
+
+        // Skip subscript definitions and data variables in CLD mode
+        if (operator.equals(":")) {
+            return;
+        }
+        if (operator.equals(":=")) {
+            warnings.add("Data variable '" + eq.name() + "' skipped (not supported)");
+            return;
+        }
+        if (operator.equals("()")) {
+            // Lookup tables don't map to CLD variables
+            warnings.add("Lookup table '" + eq.name() + "' skipped in CLD mode");
+            return;
+        }
+
+        builder.cldVariable(new CldVariableDef(normalized, comment));
+        cldVariableNames.add(normalized);
     }
 
     private void buildStock(MdlEquation eq, String normalized, String expression,

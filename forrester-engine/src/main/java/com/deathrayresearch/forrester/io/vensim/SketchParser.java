@@ -40,6 +40,22 @@ public final class SketchParser {
      */
     public static List<ViewDef> parse(List<String> sketchLines, Set<String> stockNames,
                                        Set<String> flowNames, Set<String> lookupNames) {
+        return parse(sketchLines, stockNames, flowNames, lookupNames, Set.of());
+    }
+
+    /**
+     * Parses sketch lines into a list of view definitions with CLD variable support.
+     *
+     * @param sketchLines the raw sketch lines from the .mdl file
+     * @param stockNames the set of known stock names (normalized) for type classification
+     * @param flowNames the set of known flow names (normalized) for type classification
+     * @param lookupNames the set of known lookup table names (normalized) for type classification
+     * @param cldVariableNames the set of CLD variable names (normalized) for type classification
+     * @return a list of view definitions
+     */
+    public static List<ViewDef> parse(List<String> sketchLines, Set<String> stockNames,
+                                       Set<String> flowNames, Set<String> lookupNames,
+                                       Set<String> cldVariableNames) {
         List<ViewDef> views = new ArrayList<>();
 
         String currentViewName = null;
@@ -85,7 +101,7 @@ public final class SketchParser {
 
             switch (lineType) {
                 case 10 -> parseElementLine(parts, elements, idToName,
-                        stockNames, flowNames, lookupNames);
+                        stockNames, flowNames, lookupNames, cldVariableNames);
                 case 11 -> parseFlowValveLine(parts, elements, flowRoutes, idToName);
                 case 12 -> {
                     // Cloud (source/sink boundary) — skip
@@ -108,7 +124,8 @@ public final class SketchParser {
     private static void parseElementLine(String[] parts, List<ElementPlacement> elements,
                                           Map<String, String> idToName,
                                           Set<String> stockNames, Set<String> flowNames,
-                                          Set<String> lookupNames) {
+                                          Set<String> lookupNames,
+                                          Set<String> cldVariableNames) {
         // Format: 10,id,name,x,y,...
         if (parts.length < 5) {
             return;
@@ -130,7 +147,8 @@ public final class SketchParser {
         }
 
         idToName.put(id, name);
-        ElementType type = classifyElementType(name, stockNames, flowNames, lookupNames);
+        ElementType type = classifyElementType(name, stockNames, flowNames, lookupNames,
+                cldVariableNames);
         elements.add(new ElementPlacement(name, type, x, y));
     }
 
@@ -183,7 +201,8 @@ public final class SketchParser {
 
     private static ElementType classifyElementType(String name, Set<String> stockNames,
                                                     Set<String> flowNames,
-                                                    Set<String> lookupNames) {
+                                                    Set<String> lookupNames,
+                                                    Set<String> cldVariableNames) {
         if (stockNames.contains(name)) {
             return ElementType.STOCK;
         }
@@ -192,6 +211,9 @@ public final class SketchParser {
         }
         if (lookupNames.contains(name)) {
             return ElementType.LOOKUP;
+        }
+        if (cldVariableNames.contains(name)) {
+            return ElementType.CLD_VARIABLE;
         }
         return ElementType.AUX;
     }
