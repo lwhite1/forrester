@@ -102,8 +102,8 @@ public class OptimizationResultPane extends BorderPane {
 
             for (int s = 0; s < bestRun.getStepCount(); s++) {
                 double value = isStock
-                        ? bestRun.getStockValuesAtStep(s).get(colIndex)
-                        : bestRun.getVariableValuesAtStep(s).get(colIndex);
+                        ? bestRun.getStockValuesAtStep(s)[colIndex]
+                        : bestRun.getVariableValuesAtStep(s)[colIndex];
                 series.getData().add(new XYChart.Data<>(bestRun.getStep(s), value));
             }
             chart.getData().add(series);

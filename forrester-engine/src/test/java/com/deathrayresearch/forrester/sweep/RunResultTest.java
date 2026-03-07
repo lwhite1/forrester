@@ -60,9 +60,9 @@ class RunResultTest {
         sim.execute();
 
         // Step 0: tank=100, step 1: tank=90, step 2: tank=80
-        assertEquals(100.0, result.getStockValuesAtStep(0).get(0), 0.01);
-        assertEquals(90.0, result.getStockValuesAtStep(1).get(0), 0.01);
-        assertEquals(80.0, result.getStockValuesAtStep(2).get(0), 0.01);
+        assertEquals(100.0, result.getStockValuesAtStep(0)[0], 0.01);
+        assertEquals(90.0, result.getStockValuesAtStep(1)[0], 0.01);
+        assertEquals(80.0, result.getStockValuesAtStep(2)[0], 0.01);
     }
 
     @Test

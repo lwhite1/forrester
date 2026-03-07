@@ -6,6 +6,7 @@ import com.deathrayresearch.forrester.event.SimulationStartEvent;
 import com.deathrayresearch.forrester.event.TimeStepEvent;
 import com.deathrayresearch.forrester.model.Model;
 
+import com.carrotsearch.hppc.IntArrayList;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -26,9 +27,9 @@ public class RunResult implements EventHandler {
     private List<String> stockNames = Collections.emptyList();
     private List<String> variableNames = Collections.emptyList();
 
-    private final List<Integer> steps = new ArrayList<>();
-    private final List<List<Double>> stockSnapshots = new ArrayList<>();
-    private final List<List<Double>> variableSnapshots = new ArrayList<>();
+    private final IntArrayList steps = new IntArrayList();
+    private final List<double[]> stockSnapshots = new ArrayList<>();
+    private final List<double[]> variableSnapshots = new ArrayList<>();
 
     /**
      * Creates a new run result for the given parameter value.
@@ -63,8 +64,8 @@ public class RunResult implements EventHandler {
     public void handleTimeStepEvent(TimeStepEvent event) {
         Model model = event.getModel();
         steps.add(event.getStep());
-        stockSnapshots.add(new ArrayList<>(model.getStockValues()));
-        variableSnapshots.add(new ArrayList<>(model.getVariableValues()));
+        stockSnapshots.add(toDoubleArray(model.getStockValues()));
+        variableSnapshots.add(toDoubleArray(model.getVariableValues()));
     }
 
     @Override
@@ -130,24 +131,23 @@ public class RunResult implements EventHandler {
     }
 
     /**
-     * Returns the stock values captured at the given step index.
+     * Returns the stock values captured at the given step index as a primitive array.
      *
      * @param index the zero-based index into the recorded steps
-     * @return an unmodifiable list of stock values, in the same order as {@link #getStockNames()}
+     * @return a double array of stock values, in the same order as {@link #getStockNames()}
      */
-    public List<Double> getStockValuesAtStep(int index) {
-        return Collections.unmodifiableList(stockSnapshots.get(index));
+    public double[] getStockValuesAtStep(int index) {
+        return stockSnapshots.get(index);
     }
 
     /**
-     * Returns the variable values captured at the given step index.
+     * Returns the variable values captured at the given step index as a primitive array.
      *
      * @param index the zero-based index into the recorded steps
-     * @return an unmodifiable list of variable values, in the same order as
-     *         {@link #getVariableNames()}
+     * @return a double array of variable values, in the same order as {@link #getVariableNames()}
      */
-    public List<Double> getVariableValuesAtStep(int index) {
-        return Collections.unmodifiableList(variableSnapshots.get(index));
+    public double[] getVariableValuesAtStep(int index) {
+        return variableSnapshots.get(index);
     }
 
     /**
@@ -164,7 +164,7 @@ public class RunResult implements EventHandler {
         if (stockSnapshots.isEmpty()) {
             throw new IllegalStateException("No steps have been recorded yet");
         }
-        return stockSnapshots.get(stockSnapshots.size() - 1).get(stockIndex);
+        return stockSnapshots.getLast()[stockIndex];
     }
 
     /**
@@ -180,7 +180,7 @@ public class RunResult implements EventHandler {
         }
         double[] series = new double[stockSnapshots.size()];
         for (int i = 0; i < stockSnapshots.size(); i++) {
-            series[i] = stockSnapshots.get(i).get(stockIndex);
+            series[i] = stockSnapshots.get(i)[stockIndex];
         }
         return series;
     }
@@ -197,12 +197,20 @@ public class RunResult implements EventHandler {
             throw new IllegalArgumentException("Unknown stock: " + stockName);
         }
         double max = Double.NEGATIVE_INFINITY;
-        for (List<Double> snapshot : stockSnapshots) {
-            double val = snapshot.get(stockIndex);
+        for (double[] snapshot : stockSnapshots) {
+            double val = snapshot[stockIndex];
             if (val > max) {
                 max = val;
             }
         }
         return max;
+    }
+
+    private static double[] toDoubleArray(List<Double> values) {
+        double[] arr = new double[values.size()];
+        for (int i = 0; i < arr.length; i++) {
+            arr[i] = values.get(i);
+        }
+        return arr;
     }
 }

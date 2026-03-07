@@ -4,8 +4,8 @@ import com.deathrayresearch.forrester.measure.Quantity;
 import com.deathrayresearch.forrester.measure.TimeUnit;
 import com.deathrayresearch.forrester.model.flows.RateConverter;
 
-import java.util.ArrayList;
-import java.util.List;
+import com.carrotsearch.hppc.DoubleArrayList;
+
 import java.util.function.Supplier;
 
 /**
@@ -15,7 +15,7 @@ public abstract class Flow extends Element {
 
     private final TimeUnit timeUnit;
 
-    private final List<Double> history = new ArrayList<>();
+    private final DoubleArrayList history = new DoubleArrayList();
     private Stock source;
     private Stock sink;
 

@@ -98,9 +98,9 @@ public class MonteCarloResult {
             for (RunResult run : results) {
                 double value;
                 if (isStock) {
-                    value = run.getStockValuesAtStep(step).get(columnIndex);
+                    value = run.getStockValuesAtStep(step)[columnIndex];
                 } else {
-                    value = run.getVariableValuesAtStep(step).get(columnIndex);
+                    value = run.getVariableValuesAtStep(step)[columnIndex];
                 }
                 stats.addValue(value);
             }
@@ -128,9 +128,9 @@ public class MonteCarloResult {
             for (RunResult run : results) {
                 double value;
                 if (isStock) {
-                    value = run.getStockValuesAtStep(step).get(columnIndex);
+                    value = run.getStockValuesAtStep(step)[columnIndex];
                 } else {
-                    value = run.getVariableValuesAtStep(step).get(columnIndex);
+                    value = run.getVariableValuesAtStep(step)[columnIndex];
                 }
                 sum += value;
             }

@@ -21,7 +21,7 @@ Full code audit of the Forrester System Dynamics modeling platform covering all 
 |----------|------|-------|-------|
 | Critical | 0 | 1 | 1 |
 | High | 5 | 4 | 9 |
-| Medium | 10 | 0 | 10 |
+| Medium | 8 | 2 | 10 |
 | Low | — | — | 6 |
 
 All open issues have been filed as GitHub issues and assigned to milestone **R1**.
@@ -44,7 +44,6 @@ All open issues have been filed as GitHub issues and assigned to milestone **R1*
 
 | # | Title | Module | Impact |
 |---|-------|--------|--------|
-| 126 | Unbounded history accumulation (boxed Double lists) | engine | OOM on large/long simulations |
 | 127 | clearHistory() misses cloud-to-cloud flows | engine | Stale data across re-runs |
 | 129 | ModelDefinitionBuilder allows duplicate element names | engine | Silent overwrites in compilation |
 | 130 | No file size limit on XMILE/Vensim import | engine | Memory exhaustion on large files |
@@ -54,7 +53,6 @@ All open issues have been filed as GitHub issues and assigned to milestone **R1*
 | 138 | Equation rename fragile (string replacement) | app | Stale references |
 | 139 | No duplicate name validation in builder | engine | Silent compilation errors |
 | 141 | No import file size limit | engine | DoS via large files |
-| 142 | Unbounded history in Variable/Flow | engine | Memory pressure |
 | 143 | clearHistory misses unconnected flows | engine | Stale history |
 | 144 | ModelWindow decomposition needed | app | Maintainability |
 | 145 | forrester-ui module has zero tests | ui | Untested code, CI blocking |
@@ -128,13 +126,11 @@ These were already tracked before this audit:
 
 ### P3 — Improve Over Time (quality/maintainability)
 
-10. **#126/#142 — History memory efficiency.** Switch to primitive double[] pre-allocated to totalSteps.
+10. **#131/#138 — AST-based rename.** Parse → walk → replace → stringify.
 
-11. **#131/#138 — AST-based rename.** Parse → walk → replace → stringify.
+11. **#132/#144 — ModelWindow decomposition.** Extract MenuBarBuilder, FileController.
 
-12. **#132/#144 — ModelWindow decomposition.** Extract MenuBarBuilder, FileController.
-
-13. **#145 — forrester-ui tests.** Add test directory, basic tests, headless mode.
+12. **#145 — forrester-ui tests.** Add test directory, basic tests, headless mode.
 
 ---
 

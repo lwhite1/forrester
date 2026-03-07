@@ -91,8 +91,8 @@ public class SweepResultPane extends BorderPane {
 
             for (int s = 0; s < run.getStepCount(); s++) {
                 double value = isStock
-                        ? run.getStockValuesAtStep(s).get(colIndex)
-                        : run.getVariableValuesAtStep(s).get(colIndex);
+                        ? run.getStockValuesAtStep(s)[colIndex]
+                        : run.getVariableValuesAtStep(s)[colIndex];
                 series.getData().add(new XYChart.Data<>(run.getStep(s), value));
             }
             allSeries.add(series);

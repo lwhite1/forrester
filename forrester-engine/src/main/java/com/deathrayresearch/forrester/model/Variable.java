@@ -1,10 +1,8 @@
 package com.deathrayresearch.forrester.model;
 
+import com.carrotsearch.hppc.DoubleArrayList;
 import com.deathrayresearch.forrester.measure.Unit;
 import com.google.common.base.Preconditions;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  *  A variable is an object that returns its current value at any time as determined by the Formula.
@@ -14,7 +12,7 @@ public class Variable extends Element {
     private final Formula formula;
     private final Unit unit;
 
-    private final List<Double> history = new ArrayList<>();
+    private final DoubleArrayList history = new DoubleArrayList();
 
     /**
      * Creates a new variable with the given name, unit, and formula.

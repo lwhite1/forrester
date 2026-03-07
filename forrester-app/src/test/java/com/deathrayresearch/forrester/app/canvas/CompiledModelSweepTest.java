@@ -135,7 +135,7 @@ class CompiledModelSweepTest {
 
         // STEP(10, 5) means inflow=0 for steps 0-4, inflow=10 for steps 5+
         // With no outflow, stock should be 50 at steps 0-4
-        double valueAtStep4 = run.getStockValuesAtStep(4).getFirst();
+        double valueAtStep4 = run.getStockValuesAtStep(4)[0];
         assertThat(valueAtStep4)
                 .as("Stock should be 50 before STEP fires at step 5")
                 .isEqualTo(50.0);
