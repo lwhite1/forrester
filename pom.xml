@@ -14,6 +14,7 @@
         <module>forrester-ui</module>
         <module>forrester-demos</module>
         <module>forrester-app</module>
+        <module>forrester-tools</module>
     </modules>
 
     <properties>

@@ -1,0 +1,170 @@
+package com.deathrayresearch.forrester.tools.importer;
+
+import com.deathrayresearch.forrester.model.ModelMetadata;
+
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
+
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+
+class ImportPipelineTest {
+
+    @TempDir
+    Path tempDir;
+
+    @Test
+    void shouldImportXmileModel() throws IOException {
+        Path xmileFile = Path.of("../forrester-engine/src/test/resources/xmile/sir.xmile")
+                .toAbsolutePath().normalize();
+
+        if (!Files.exists(xmileFile)) {
+            return; // skip if test fixture not available
+        }
+
+        ModelMetadata metadata = ModelMetadata.builder()
+                .source("Kermack & McKendrick SIR model (1927)")
+                .license("CC-BY-SA-4.0")
+                .build();
+
+        PipelineConfig config = new PipelineConfig(
+                xmileFile, metadata, "epidemiology", "SirXmileDemo",
+                tempDir, false, false);
+
+        ImportPipeline pipeline = new ImportPipeline();
+        PipelineResult result = pipeline.execute(config);
+
+        assertThat(result.definition()).isNotNull();
+        assertThat(result.generatedSource()).contains("public class SirXmileDemo");
+        assertThat(result.generatedSource()).contains("package com.deathrayresearch.forrester.demo.epidemiology");
+        assertThat(result.outputFile()).isNotNull();
+        assertThat(Files.exists(result.outputFile())).isTrue();
+    }
+
+    @Test
+    void shouldImportVensimModel() throws IOException {
+        Path mdlFile = Path.of("../forrester-engine/src/test/resources/vensim/sir.mdl")
+                .toAbsolutePath().normalize();
+
+        if (!Files.exists(mdlFile)) {
+            return;
+        }
+
+        ModelMetadata metadata = ModelMetadata.builder()
+                .license("CC-BY-SA-4.0")
+                .build();
+
+        PipelineConfig config = new PipelineConfig(
+                mdlFile, metadata, null, "SirVensimDemo",
+                tempDir, false, false);
+
+        ImportPipeline pipeline = new ImportPipeline();
+        PipelineResult result = pipeline.execute(config);
+
+        assertThat(result.definition()).isNotNull();
+        assertThat(result.generatedSource()).contains("public class SirVensimDemo");
+        assertThat(result.generatedSource()).contains("package com.deathrayresearch.forrester.demo;");
+    }
+
+    @Test
+    void shouldSupportDryRun() throws IOException {
+        Path xmileFile = Path.of("../forrester-engine/src/test/resources/xmile/sir.xmile")
+                .toAbsolutePath().normalize();
+
+        if (!Files.exists(xmileFile)) {
+            return;
+        }
+
+        ModelMetadata metadata = ModelMetadata.builder()
+                .license("CC-BY-SA-4.0")
+                .build();
+
+        PipelineConfig config = new PipelineConfig(
+                xmileFile, metadata, null, "SirDryRunDemo",
+                tempDir, true, false);
+
+        PipelineResult result = new ImportPipeline().execute(config);
+
+        assertThat(result.generatedSource()).isNotEmpty();
+        assertThat(result.outputFile()).isNull();
+    }
+
+    @Test
+    void shouldRefuseOverwriteByDefault() throws IOException {
+        Path xmileFile = Path.of("../forrester-engine/src/test/resources/xmile/sir.xmile")
+                .toAbsolutePath().normalize();
+
+        if (!Files.exists(xmileFile)) {
+            return;
+        }
+
+        ModelMetadata metadata = ModelMetadata.builder().license("CC-BY-SA-4.0").build();
+
+        PipelineConfig config = new PipelineConfig(
+                xmileFile, metadata, null, "SirOverwriteDemo",
+                tempDir, false, false);
+
+        ImportPipeline pipeline = new ImportPipeline();
+        pipeline.execute(config);
+
+        // Second run should fail
+        assertThatThrownBy(() -> pipeline.execute(config))
+                .isInstanceOf(IOException.class)
+                .hasMessageContaining("already exists");
+    }
+
+    @Test
+    void shouldAllowOverwriteWhenFlagSet() throws IOException {
+        Path xmileFile = Path.of("../forrester-engine/src/test/resources/xmile/sir.xmile")
+                .toAbsolutePath().normalize();
+
+        if (!Files.exists(xmileFile)) {
+            return;
+        }
+
+        ModelMetadata metadata = ModelMetadata.builder().license("CC-BY-SA-4.0").build();
+
+        PipelineConfig firstConfig = new PipelineConfig(
+                xmileFile, metadata, null, "SirOverwriteOkDemo",
+                tempDir, false, false);
+
+        ImportPipeline pipeline = new ImportPipeline();
+        pipeline.execute(firstConfig);
+
+        PipelineConfig overwriteConfig = new PipelineConfig(
+                xmileFile, metadata, null, "SirOverwriteOkDemo",
+                tempDir, false, true);
+
+        PipelineResult result = pipeline.execute(overwriteConfig);
+        assertThat(result.outputFile()).isNotNull();
+    }
+
+    @Test
+    void shouldRejectUnsupportedExtension() {
+        ModelMetadata metadata = ModelMetadata.builder().license("CC-BY-SA-4.0").build();
+
+        PipelineConfig config = new PipelineConfig(
+                Path.of("model.txt"), metadata, null, "TestDemo",
+                tempDir, false, false);
+
+        assertThatThrownBy(() -> new ImportPipeline().execute(config))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("Unsupported file extension");
+    }
+
+    @Test
+    void shouldResolvePackageNameWithCategory() {
+        assertThat(ImportPipeline.resolvePackageName("epidemiology"))
+                .isEqualTo("com.deathrayresearch.forrester.demo.epidemiology");
+    }
+
+    @Test
+    void shouldResolvePackageNameWithoutCategory() {
+        assertThat(ImportPipeline.resolvePackageName(null))
+                .isEqualTo("com.deathrayresearch.forrester.demo");
+    }
+}
