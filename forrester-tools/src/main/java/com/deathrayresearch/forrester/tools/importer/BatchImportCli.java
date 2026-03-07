@@ -104,8 +104,10 @@ public class BatchImportCli {
                 // Execute pipeline
                 PipelineResult result = pipeline.execute(config);
 
-                if (result.hasTrialCompileErrors()) {
-                    log.warn("  Trial compile had errors (output still written)");
+                if (!result.isClean()) {
+                    System.err.println();
+                    System.err.println("--- " + entry.className() + " ---");
+                    result.printReport(System.err);
                 }
 
                 if (parsed.dryRun) {

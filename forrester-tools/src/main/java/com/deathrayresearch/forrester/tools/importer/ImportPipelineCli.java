@@ -68,17 +68,9 @@ public class ImportPipelineCli {
             System.out.println(result.generatedSource());
         }
 
-        // Summary
         System.err.println();
         System.err.println("=== Import Summary ===");
-        System.err.println("Model:              " + result.definition().name());
-        System.err.println("Import warnings:    " + result.importWarnings().size());
-        System.err.println("Validation errors:  " + result.validationErrors().size());
-        System.err.println("Trial compile:      "
-                + (result.hasTrialCompileErrors() ? "FAILED" : "OK"));
-        if (result.outputFile() != null) {
-            System.err.println("Output:             " + result.outputFile());
-        }
+        result.printReport(System.err);
 
         return 0;
     }

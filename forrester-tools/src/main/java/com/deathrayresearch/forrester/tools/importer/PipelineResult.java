@@ -2,6 +2,7 @@ package com.deathrayresearch.forrester.tools.importer;
 
 import com.deathrayresearch.forrester.model.def.ModelDefinition;
 
+import java.io.PrintStream;
 import java.nio.file.Path;
 import java.util.List;
 
@@ -30,5 +31,41 @@ public record PipelineResult(
 
     public boolean hasTrialCompileErrors() {
         return !trialCompileErrors.isEmpty();
+    }
+
+    public boolean isClean() {
+        return importWarnings.isEmpty() && validationErrors.isEmpty()
+                && trialCompileErrors.isEmpty();
+    }
+
+    /**
+     * Prints a human-readable import report to the given stream.
+     * Shows counts and individual messages for any warnings or errors.
+     */
+    public void printReport(PrintStream out) {
+        out.println("Model:            " + definition.name());
+        if (outputFile != null) {
+            out.println("Output:           " + outputFile);
+        }
+
+        printSection(out, "Import warnings", importWarnings);
+        printSection(out, "Validation errors", validationErrors);
+
+        if (trialCompileErrors.isEmpty()) {
+            out.println("Trial compile:    OK");
+        } else {
+            printSection(out, "Trial compile errors", trialCompileErrors);
+        }
+    }
+
+    private static void printSection(PrintStream out, String label, List<String> items) {
+        if (items.isEmpty()) {
+            out.println(label + ":  0");
+        } else {
+            out.println(label + ":  " + items.size());
+            for (String item : items) {
+                out.println("  - " + item);
+            }
+        }
     }
 }
