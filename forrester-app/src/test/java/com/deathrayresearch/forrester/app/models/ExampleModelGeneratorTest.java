@@ -12,6 +12,11 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -169,46 +174,31 @@ class ExampleModelGeneratorTest {
         Path resourcesDir = Path.of("src/main/resources/models");
         Files.createDirectories(resourcesDir);
 
-        StringBuilder sb = new StringBuilder();
-        sb.append("{\n  \"models\": [\n");
+        ObjectMapper mapper = new ObjectMapper().enable(SerializationFeature.INDENT_OUTPUT);
+        ObjectNode root = mapper.createObjectNode();
+        ArrayNode modelsArray = root.putArray("models");
 
-        List<ModelEntry> entries = allModels().toList();
-        for (int i = 0; i < entries.size(); i++) {
-            ModelEntry entry = entries.get(i);
+        allModels().forEach(entry -> {
             ModelDefinition def = entry.definition();
-            sb.append("    {\n");
-            sb.append("      \"id\": \"").append(entry.id()).append("\",\n");
-            sb.append("      \"name\": \"").append(def.name()).append("\",\n");
-            sb.append("      \"description\": \"").append(entry.description()).append("\",\n");
-            sb.append("      \"category\": \"").append(entry.category()).append("\",\n");
-            sb.append("      \"difficulty\": \"").append(entry.difficulty()).append("\",\n");
-            sb.append("      \"path\": \"").append(entry.category()).append("/")
-                    .append(entry.id()).append(".json\",\n");
-            sb.append("      \"tags\": [");
-            List<String> tags = entry.tags();
-            for (int t = 0; t < tags.size(); t++) {
-                sb.append("\"").append(tags.get(t)).append("\"");
-                if (t < tags.size() - 1) {
-                    sb.append(", ");
-                }
-            }
-            sb.append("],\n");
-            sb.append("      \"elements\": {\n");
-            sb.append("        \"stocks\": ").append(def.stocks().size()).append(",\n");
-            sb.append("        \"flows\": ").append(def.flows().size()).append(",\n");
-            sb.append("        \"auxiliaries\": ").append(def.auxiliaries().size()).append(",\n");
-            sb.append("        \"constants\": ").append(def.constants().size()).append("\n");
-            sb.append("      }\n");
-            sb.append("    }");
-            if (i < entries.size() - 1) {
-                sb.append(",");
-            }
-            sb.append("\n");
-        }
+            ObjectNode model = modelsArray.addObject();
+            model.put("id", entry.id());
+            model.put("name", def.name());
+            model.put("description", entry.description());
+            model.put("category", entry.category());
+            model.put("difficulty", entry.difficulty());
+            model.put("path", entry.category() + "/" + entry.id() + ".json");
 
-        sb.append("  ]\n}\n");
+            ArrayNode tagsArray = model.putArray("tags");
+            entry.tags().forEach(tagsArray::add);
 
-        Files.writeString(resourcesDir.resolve("catalog.json"), sb.toString());
+            ObjectNode elements = model.putObject("elements");
+            elements.put("stocks", def.stocks().size());
+            elements.put("flows", def.flows().size());
+            elements.put("auxiliaries", def.auxiliaries().size());
+            elements.put("constants", def.constants().size());
+        });
+
+        mapper.writeValue(resourcesDir.resolve("catalog.json").toFile(), root);
     }
 
     // -------------------------------------------------------------------
