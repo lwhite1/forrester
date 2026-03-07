@@ -109,6 +109,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Supplier;
 
 /**
  * An independent editor window for a single Forrester model.
@@ -141,6 +142,10 @@ public class ModelWindow {
     private ModelEditListener staleListener;
     private AnalysisRunner analysisRunner;
     private CommandPalette commandPalette;
+    private Stage quickstartWindow;
+    private Stage sdConceptsWindow;
+    private Stage exprLangWindow;
+    private Stage shortcutsWindow;
 
     private final ModelDefinitionSerializer serializer = new ModelDefinitionSerializer();
 
@@ -439,26 +444,22 @@ public class ModelWindow {
 
         MenuItem gettingStartedItem = new MenuItem("Getting Started\u2026");
         gettingStartedItem.setOnAction(e -> {
-            QuickstartDialog dialog = new QuickstartDialog();
-            dialog.show();
+            quickstartWindow = showHelpWindow(quickstartWindow, QuickstartDialog::new);
         });
 
         MenuItem sdConceptsItem = new MenuItem("SD Concepts");
         sdConceptsItem.setOnAction(e -> {
-            SdConceptsDialog dialog = new SdConceptsDialog();
-            dialog.show();
+            sdConceptsWindow = showHelpWindow(sdConceptsWindow, SdConceptsDialog::new);
         });
 
         MenuItem exprLangItem = new MenuItem("Expression Language");
         exprLangItem.setOnAction(e -> {
-            ExpressionLanguageDialog dialog = new ExpressionLanguageDialog();
-            dialog.show();
+            exprLangWindow = showHelpWindow(exprLangWindow, ExpressionLanguageDialog::new);
         });
 
         MenuItem shortcutsItem = new MenuItem("Keyboard Shortcuts");
         shortcutsItem.setOnAction(e -> {
-            KeyboardShortcutsDialog dialog = new KeyboardShortcutsDialog();
-            dialog.show();
+            shortcutsWindow = showHelpWindow(shortcutsWindow, KeyboardShortcutsDialog::new);
         });
 
         MenuItem aboutItem = new MenuItem("About Forrester");
@@ -1090,6 +1091,22 @@ public class ModelWindow {
                 dashboardPanel.markStale();
             }
         };
+    }
+
+    /**
+     * Shows a singleton help window. If already open, brings it to front.
+     * If closed, creates a new one. Sets owner so it stays above the main window.
+     */
+    private Stage showHelpWindow(Stage existing, Supplier<? extends Stage> factory) {
+        if (existing != null && existing.isShowing()) {
+            existing.toFront();
+            existing.requestFocus();
+            return existing;
+        }
+        Stage window = factory.get();
+        window.initOwner(stage);
+        window.show();
+        return window;
     }
 
     private void showError(String title, String message) {
