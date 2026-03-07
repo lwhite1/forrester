@@ -1,5 +1,7 @@
 package com.deathrayresearch.forrester.model.def;
 
+import com.deathrayresearch.forrester.model.ModelMetadata;
+
 import java.util.List;
 
 /**
@@ -21,6 +23,7 @@ import java.util.List;
  * @param causalLinks the causal link definitions (CLD connections with polarity)
  * @param views the graphical view definitions
  * @param defaultSimulation optional default simulation settings
+ * @param metadata optional attribution and licensing metadata
  */
 public record ModelDefinition(
         String name,
@@ -36,11 +39,28 @@ public record ModelDefinition(
         List<CldVariableDef> cldVariables,
         List<CausalLinkDef> causalLinks,
         List<ViewDef> views,
-        SimulationSettings defaultSimulation
+        SimulationSettings defaultSimulation,
+        ModelMetadata metadata
 ) {
 
     /**
-     * Backward-compatible constructor without CLD fields.
+     * Backward-compatible constructor without metadata.
+     */
+    public ModelDefinition(
+            String name, String comment, ModuleInterface moduleInterface,
+            List<StockDef> stocks, List<FlowDef> flows,
+            List<AuxDef> auxiliaries, List<ConstantDef> constants,
+            List<LookupTableDef> lookupTables, List<ModuleInstanceDef> modules,
+            List<SubscriptDef> subscripts,
+            List<CldVariableDef> cldVariables, List<CausalLinkDef> causalLinks,
+            List<ViewDef> views, SimulationSettings defaultSimulation) {
+        this(name, comment, moduleInterface, stocks, flows, auxiliaries, constants,
+                lookupTables, modules, subscripts, cldVariables, causalLinks,
+                views, defaultSimulation, null);
+    }
+
+    /**
+     * Backward-compatible constructor without CLD fields or metadata.
      */
     public ModelDefinition(
             String name, String comment, ModuleInterface moduleInterface,
@@ -51,7 +71,7 @@ public record ModelDefinition(
             List<ViewDef> views, SimulationSettings defaultSimulation) {
         this(name, comment, moduleInterface, stocks, flows, auxiliaries, constants,
                 lookupTables, modules, subscripts, List.of(), List.of(),
-                views, defaultSimulation);
+                views, defaultSimulation, null);
     }
 
     public ModelDefinition {

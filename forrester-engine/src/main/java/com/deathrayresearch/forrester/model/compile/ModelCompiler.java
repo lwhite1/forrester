@@ -80,6 +80,9 @@ public class ModelCompiler {
         ModelDefinition expandedDef = SubscriptExpander.expand(def);
 
         Model model = new Model(expandedDef.name());
+        if (def.metadata() != null) {
+            model.setMetadata(def.metadata());
+        }
         List<Resettable> resettables = new ArrayList<>();
         int[] stepHolder = {0};
         double[] dtHolder = {1.0};

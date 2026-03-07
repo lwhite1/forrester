@@ -7,6 +7,7 @@ import com.deathrayresearch.forrester.io.xmile.XmileImporter;
 import com.deathrayresearch.forrester.model.compile.CompiledModel;
 import com.deathrayresearch.forrester.model.compile.ModelCompiler;
 import com.deathrayresearch.forrester.model.def.DefinitionValidator;
+import com.deathrayresearch.forrester.model.ModelMetadata;
 import com.deathrayresearch.forrester.model.def.ModelDefinition;
 import com.deathrayresearch.forrester.io.json.ModelDefinitionSerializer;
 
@@ -76,7 +77,14 @@ public class ImportPipeline {
             outputExtension = ".java";
         } else {
             log.info("Generating JSON model definition");
-            source = new ModelDefinitionSerializer().toJson(definition);
+            // Attach metadata to the definition for JSON output
+            ModelDefinition defWithMeta = new ModelDefinition(
+                    definition.name(), definition.comment(), definition.moduleInterface(),
+                    definition.stocks(), definition.flows(), definition.auxiliaries(),
+                    definition.constants(), definition.lookupTables(), definition.modules(),
+                    definition.subscripts(), definition.cldVariables(), definition.causalLinks(),
+                    definition.views(), definition.defaultSimulation(), config.metadata());
+            source = new ModelDefinitionSerializer().toJson(defWithMeta);
             outputExtension = ".json";
         }
 

@@ -1,5 +1,6 @@
 package com.deathrayresearch.forrester.io.json;
 
+import com.deathrayresearch.forrester.model.ModelMetadata;
 import com.deathrayresearch.forrester.model.def.AuxDef;
 import com.deathrayresearch.forrester.model.def.CausalLinkDef;
 import com.deathrayresearch.forrester.model.def.CldVariableDef;
@@ -154,6 +155,9 @@ public class ModelDefinitionSerializer {
         }
         if (def.defaultSimulation() != null) {
             root.set("defaultSimulation", serializeSimSettings(def.defaultSimulation()));
+        }
+        if (def.metadata() != null) {
+            root.set("metadata", serializeMetadata(def.metadata()));
         }
         return root;
     }
@@ -346,6 +350,23 @@ public class ModelDefinitionSerializer {
         node.put("timeStep", settings.timeStep());
         node.put("duration", settings.duration());
         node.put("durationUnit", settings.durationUnit());
+        return node;
+    }
+
+    private ObjectNode serializeMetadata(ModelMetadata meta) {
+        ObjectNode node = mapper.createObjectNode();
+        if (meta.author() != null) {
+            node.put("author", meta.author());
+        }
+        if (meta.source() != null) {
+            node.put("source", meta.source());
+        }
+        if (meta.license() != null) {
+            node.put("license", meta.license());
+        }
+        if (meta.url() != null) {
+            node.put("url", meta.url());
+        }
         return node;
     }
 
@@ -561,10 +582,21 @@ public class ModelDefinitionSerializer {
                     requiredText(s, "durationUnit"));
         }
 
+        ModelMetadata metadata = null;
+        if (root.has("metadata")) {
+            JsonNode m = root.get("metadata");
+            metadata = ModelMetadata.builder()
+                    .author(textOrNull(m, "author"))
+                    .source(textOrNull(m, "source"))
+                    .license(textOrNull(m, "license"))
+                    .url(textOrNull(m, "url"))
+                    .build();
+        }
+
         return new ModelDefinition(name, comment, moduleInterface,
                 stocks, flows, auxiliaries, constants, lookupTables,
                 modules, subscripts, cldVariables, causalLinks,
-                views, defaultSimulation);
+                views, defaultSimulation, metadata);
     }
 
     private ViewDef deserializeView(JsonNode n) {
