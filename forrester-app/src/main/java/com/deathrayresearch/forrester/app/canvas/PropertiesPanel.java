@@ -176,14 +176,6 @@ public class PropertiesPanel extends VBox {
                 polarityBox.setValue(polarityDisplayText(link.polarity()));
                 polarityBox.setMaxWidth(Double.MAX_VALUE);
                 GridPane.setHgrow(polarityBox, Priority.ALWAYS);
-                polarityBox.setOnAction(e -> {
-                    if (!ctx.updatingFields) {
-                        CausalLinkDef.Polarity newPolarity = polarityFromDisplay(polarityBox.getValue());
-                        ctx.canvas.applyMutation(() ->
-                                ctx.editor.setCausalLinkPolarity(
-                                        connection.from(), connection.to(), newPolarity));
-                    }
-                });
                 ctx.addFieldRow(row++, "Polarity", polarityBox,
                         "The direction of causal influence");
 
@@ -195,7 +187,6 @@ public class PropertiesPanel extends VBox {
                 explanation.setMaxWidth(Double.MAX_VALUE);
                 propertyGrid.add(explanation, 0, row, 2, 1);
 
-                // Update explanation when polarity changes
                 polarityBox.setOnAction(e -> {
                     if (!ctx.updatingFields) {
                         CausalLinkDef.Polarity newPolarity = polarityFromDisplay(polarityBox.getValue());

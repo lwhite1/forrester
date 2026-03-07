@@ -15,6 +15,9 @@ import com.deathrayresearch.forrester.model.expr.BinaryOperator;
 import com.deathrayresearch.forrester.model.expr.Expr;
 import com.deathrayresearch.forrester.model.expr.ExprParser;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -26,6 +29,8 @@ import java.util.function.DoubleSupplier;
  * {@link CompilationContext} for name resolution.
  */
 public class ExprCompiler {
+
+    private static final Logger logger = LoggerFactory.getLogger(ExprCompiler.class);
 
     private final CompilationContext context;
     private final List<Resettable> resettables;
@@ -93,18 +98,27 @@ public class ExprCompiler {
             case DIV -> () -> {
                 double divisor = right.getAsDouble();
                 if (divisor == 0) {
-                    return 0.0;
+                    logger.warn("Division by zero");
+                    return Double.NaN;
                 }
                 return left.getAsDouble() / divisor;
             };
             case MOD -> () -> {
                 double divisor = right.getAsDouble();
                 if (divisor == 0) {
-                    return 0.0;
+                    logger.warn("Modulo by zero");
+                    return Double.NaN;
                 }
                 return left.getAsDouble() % divisor;
             };
-            case POW -> () -> Math.pow(left.getAsDouble(), right.getAsDouble());
+            case POW -> () -> {
+                double result = Math.pow(left.getAsDouble(), right.getAsDouble());
+                if (Double.isNaN(result) || Double.isInfinite(result)) {
+                    logger.warn("Power produced non-finite result");
+                    return Double.NaN;
+                }
+                return result;
+            };
             case EQ -> () -> Math.abs(left.getAsDouble() - right.getAsDouble()) < 1e-10 ? 1.0 : 0.0;
             case NE -> () -> Math.abs(left.getAsDouble() - right.getAsDouble()) >= 1e-10 ? 1.0 : 0.0;
             case LT -> () -> left.getAsDouble() < right.getAsDouble() ? 1.0 : 0.0;
@@ -145,22 +159,50 @@ public class ExprCompiler {
             case "SQRT" -> {
                 requireArgs(name, args, 1);
                 DoubleSupplier a = compileExpr(args.get(0));
-                yield () -> Math.sqrt(a.getAsDouble());
+                yield () -> {
+                    double v = a.getAsDouble();
+                    if (v < 0) {
+                        logger.warn("SQRT of negative value: {}", v);
+                        return Double.NaN;
+                    }
+                    return Math.sqrt(v);
+                };
             }
             case "LN" -> {
                 requireArgs(name, args, 1);
                 DoubleSupplier a = compileExpr(args.get(0));
-                yield () -> Math.log(a.getAsDouble());
+                yield () -> {
+                    double v = a.getAsDouble();
+                    if (v <= 0) {
+                        logger.warn("LN of non-positive value: {}", v);
+                        return Double.NaN;
+                    }
+                    return Math.log(v);
+                };
             }
             case "EXP" -> {
                 requireArgs(name, args, 1);
                 DoubleSupplier a = compileExpr(args.get(0));
-                yield () -> Math.exp(a.getAsDouble());
+                yield () -> {
+                    double result = Math.exp(a.getAsDouble());
+                    if (Double.isInfinite(result)) {
+                        logger.warn("EXP overflow");
+                        return Double.NaN;
+                    }
+                    return result;
+                };
             }
             case "LOG" -> {
                 requireArgs(name, args, 1);
                 DoubleSupplier a = compileExpr(args.get(0));
-                yield () -> Math.log10(a.getAsDouble());
+                yield () -> {
+                    double v = a.getAsDouble();
+                    if (v <= 0) {
+                        logger.warn("LOG of non-positive value: {}", v);
+                        return Double.NaN;
+                    }
+                    return Math.log10(v);
+                };
             }
             case "SIN" -> {
                 requireArgs(name, args, 1);
@@ -193,7 +235,10 @@ public class ExprCompiler {
                 DoubleSupplier b = compileExpr(args.get(1));
                 yield () -> {
                     double divisor = b.getAsDouble();
-                    if (divisor == 0) return 0.0;
+                    if (divisor == 0) {
+                        logger.warn("MODULO by zero");
+                        return Double.NaN;
+                    }
                     return a.getAsDouble() % divisor;
                 };
             }
@@ -201,7 +246,14 @@ public class ExprCompiler {
                 requireArgs(name, args, 2);
                 DoubleSupplier a = compileExpr(args.get(0));
                 DoubleSupplier b = compileExpr(args.get(1));
-                yield () -> Math.pow(a.getAsDouble(), b.getAsDouble());
+                yield () -> {
+                    double result = Math.pow(a.getAsDouble(), b.getAsDouble());
+                    if (Double.isNaN(result) || Double.isInfinite(result)) {
+                        logger.warn("POWER produced non-finite result");
+                        return Double.NaN;
+                    }
+                    return result;
+                };
             }
             case "MIN" -> {
                 requireArgs(name, args, 2);
@@ -399,7 +451,9 @@ public class ExprCompiler {
         DoubleSupplier maxVal = compileExpr(args.get(1));
         DoubleSupplier mean = compileExpr(args.get(2));
         DoubleSupplier stddev = compileExpr(args.get(3));
-        java.util.Random rng = new java.util.Random();
+        long seed = System.nanoTime();
+        java.util.Random rng = new java.util.Random(seed);
+        resettables.add(() -> rng.setSeed(seed));
         return () -> {
             double raw = mean.getAsDouble() + stddev.getAsDouble() * rng.nextGaussian();
             return Math.max(minVal.getAsDouble(), Math.min(maxVal.getAsDouble(), raw));

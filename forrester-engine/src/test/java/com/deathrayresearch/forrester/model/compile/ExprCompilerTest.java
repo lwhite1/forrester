@@ -327,13 +327,13 @@ class ExprCompilerTest {
         @Test
         void shouldReturnZeroForDivisionByZero() {
             Formula formula = compiler.compile("Population / 0");
-            assertThat(formula.getCurrentValue()).isEqualTo(0.0);
+            assertThat(formula.getCurrentValue()).isNaN();
         }
 
         @Test
         void shouldReturnZeroForModuloByZero() {
             Formula formula = compiler.compile("Population % 0");
-            assertThat(formula.getCurrentValue()).isEqualTo(0.0);
+            assertThat(formula.getCurrentValue()).isNaN();
         }
     }
 
@@ -405,7 +405,7 @@ class ExprCompilerTest {
         @Test
         void shouldCompileMODULOByZero() {
             Formula formula = compiler.compile("MODULO(7, 0)");
-            assertThat(formula.getCurrentValue()).isEqualTo(0.0);
+            assertThat(formula.getCurrentValue()).isNaN();
         }
 
         @Test

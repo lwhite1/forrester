@@ -72,13 +72,15 @@ public class ModelCompiler {
         List<Resettable> resettables = new ArrayList<>();
         int[] stepHolder = {0};
         double[] dtHolder = {1.0};
+        TimeUnit[] simTimeUnitHolder = new TimeUnit[1];
 
         CompilationContext context = new CompilationContext(
-                unitRegistry, () -> stepHolder[0], null, dtHolder);
+                unitRegistry, () -> stepHolder[0], null, dtHolder, simTimeUnitHolder);
 
         compileInto(def, model, context, resettables, stepHolder);
 
-        return new CompiledModel(model, resettables, def, stepHolder, dtHolder, unitRegistry);
+        return new CompiledModel(model, resettables, def, stepHolder, dtHolder,
+                simTimeUnitHolder, unitRegistry);
     }
 
     /**

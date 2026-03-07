@@ -1,5 +1,6 @@
 package com.deathrayresearch.forrester.model.compile;
 
+import com.deathrayresearch.forrester.measure.TimeUnit;
 import com.deathrayresearch.forrester.measure.UnitRegistry;
 import com.deathrayresearch.forrester.model.Constant;
 import com.deathrayresearch.forrester.model.Flow;
@@ -34,6 +35,7 @@ public class CompilationContext {
     private final UnitRegistry unitRegistry;
     private final IntSupplier currentStep;
     private final double[] dtHolder;
+    private final TimeUnit[] simTimeUnitHolder;
 
     /**
      * Creates a root compilation context with no parent and a default DT of 1.0.
@@ -42,7 +44,7 @@ public class CompilationContext {
      * @param currentStep  supplies the current simulation timestep
      */
     public CompilationContext(UnitRegistry unitRegistry, IntSupplier currentStep) {
-        this(unitRegistry, currentStep, null, new double[]{1.0});
+        this(unitRegistry, currentStep, null, new double[]{1.0}, new TimeUnit[1]);
     }
 
     /**
@@ -55,7 +57,8 @@ public class CompilationContext {
     public CompilationContext(UnitRegistry unitRegistry, IntSupplier currentStep,
                               CompilationContext parent) {
         this(unitRegistry, currentStep, parent,
-                parent != null ? parent.dtHolder : new double[]{1.0});
+                parent != null ? parent.dtHolder : new double[]{1.0},
+                parent != null ? parent.simTimeUnitHolder : new TimeUnit[1]);
     }
 
     /**
@@ -68,10 +71,18 @@ public class CompilationContext {
      */
     public CompilationContext(UnitRegistry unitRegistry, IntSupplier currentStep,
                               CompilationContext parent, double[] dtHolder) {
+        this(unitRegistry, currentStep, parent, dtHolder,
+                parent != null ? parent.simTimeUnitHolder : new TimeUnit[1]);
+    }
+
+    public CompilationContext(UnitRegistry unitRegistry, IntSupplier currentStep,
+                              CompilationContext parent, double[] dtHolder,
+                              TimeUnit[] simTimeUnitHolder) {
         this.unitRegistry = unitRegistry;
         this.currentStep = currentStep;
         this.parent = parent;
         this.dtHolder = dtHolder;
+        this.simTimeUnitHolder = simTimeUnitHolder;
     }
 
     /**
@@ -213,7 +224,9 @@ public class CompilationContext {
         }
         Flow flow = flows.get(name);
         if (flow != null) {
-            return OptionalDouble.of(flow.flowPerTimeUnit(flow.getTimeUnit()).getValue());
+            TimeUnit resolveUnit = simTimeUnitHolder[0] != null
+                    ? simTimeUnitHolder[0] : flow.getTimeUnit();
+            return OptionalDouble.of(flow.flowPerTimeUnit(resolveUnit).getValue());
         }
         return OptionalDouble.empty();
     }
@@ -345,5 +358,13 @@ public class CompilationContext {
      */
     public double[] getDtHolder() {
         return dtHolder;
+    }
+
+    /**
+     * Returns the mutable single-element array holding the simulation time unit.
+     * Used to resolve flow values in the correct time unit during simulation.
+     */
+    public TimeUnit[] getSimTimeUnitHolder() {
+        return simTimeUnitHolder;
     }
 }

@@ -20,23 +20,11 @@ Full code audit of the Forrester System Dynamics modeling platform covering all 
 | Severity | Open | Fixed | Total |
 |----------|------|-------|-------|
 | Critical | 0 | 1 | 1 |
-| High | 5 | 4 | 9 |
+| High | 0 | 9 | 9 |
 | Medium | 8 | 2 | 10 |
 | Low | — | — | 6 |
 
 All open issues have been filed as GitHub issues and assigned to milestone **R1**.
-
----
-
-## High Issues
-
-| # | Title | Module | Impact |
-|---|-------|--------|--------|
-| 124 | RANDOM_NORMAL not resettable | engine | Non-reproducible simulation results |
-| 134 | Division by zero silently returns 0 | engine | Masks modeling errors |
-| 135 | Math.pow, LN, SQRT produce NaN/Infinity with no guard | engine | Crashes or silent corruption |
-| 136 | PropertiesPanel duplicate polarity change handler | app | Duplicate undo entries, double mutations |
-| 146 | Flow value resolved in wrong time unit in expressions | engine | Wrong results when flow/sim time units differ |
 
 ---
 
@@ -92,27 +80,12 @@ These were already tracked before this audit:
 
 **Weaknesses:**
 - SpotBugs configured but no Checkstyle or ErrorProne yet
-- Guava EventBus is a silent failure point — should be replaced with explicit listener list
 - Several god classes remain: ModelWindow (1412 lines), ModelCanvas (1592 lines)
-- History storage is inefficient (boxed Doubles in ArrayLists)
-- No dirty tracking for unsaved changes
 - Engine API allows construction of invalid models (no validation in builder/compiler)
 
 ---
 
 ## Prioritized Fix Recommendations
-
-### P1 — Fix Soon (correctness issues)
-
-1. **#134 — Division by zero.** Add configurable behavior (log warning + return 0, or return NaN).
-
-2. **#135 — NaN/Infinity guards.** Add domain checks to SQRT, LN, EXP, POWER.
-
-3. **#124 — RANDOM_NORMAL resettable.** Wrap Random in a Resettable, register it.
-
-4. **#146 — Flow time unit in expressions.** Resolve flow values in simulation time unit.
-
-5. **#136 — Duplicate polarity handler.** Merge the two setOnAction calls.
 
 ### P2 — Fix This Release (robustness)
 
@@ -139,5 +112,3 @@ These were already tracked before this audit:
 1. **Adopt mutation testing:** PIT or similar would identify the weak assertions flagged in the test audit (assertions that pass regardless of behavior).
 
 2. **Track code coverage:** JaCoCo report would quantify the forrester-ui gap (0%) and identify other blind spots.
-
-3. **Consider replacing Guava EventBus:** It's deprecated-in-spirit (Guava team recommends alternatives). A simple typed listener interface is safer and more debuggable.

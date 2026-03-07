@@ -25,6 +25,7 @@ public class CompiledModel {
     private final ModelDefinition source;
     private final int[] stepHolder;
     private final double[] dtHolder;
+    private final TimeUnit[] simTimeUnitHolder;
     private final UnitRegistry unitRegistry;
     private final Map<Stock, Double> initialStockValues;
 
@@ -36,15 +37,18 @@ public class CompiledModel {
      * @param source      the original model definition
      * @param stepHolder  a single-element array tracking the current simulation step
      * @param dtHolder    a single-element array holding the DT value
+     * @param simTimeUnitHolder a single-element array holding the simulation time unit
      * @param unitRegistry the unit registry used during compilation
      */
     public CompiledModel(Model model, List<Resettable> resettables, ModelDefinition source,
-                         int[] stepHolder, double[] dtHolder, UnitRegistry unitRegistry) {
+                         int[] stepHolder, double[] dtHolder, TimeUnit[] simTimeUnitHolder,
+                         UnitRegistry unitRegistry) {
         this.model = model;
         this.resettables = List.copyOf(resettables);
         this.source = source;
         this.stepHolder = stepHolder;
         this.dtHolder = dtHolder;
+        this.simTimeUnitHolder = simTimeUnitHolder;
         this.unitRegistry = unitRegistry;
         this.initialStockValues = new LinkedHashMap<>();
         for (Stock stock : model.getStocks()) {
@@ -95,6 +99,7 @@ public class CompiledModel {
      * Installs an event handler that keeps the compiled model's step counter in sync.
      */
     public Simulation createSimulation(TimeUnit timeStep, double duration, TimeUnit durationUnit) {
+        simTimeUnitHolder[0] = timeStep;
         Simulation sim = new Simulation(model, timeStep, durationUnit, duration);
         installStepSync(sim);
         return sim;
@@ -105,6 +110,7 @@ public class CompiledModel {
      * Installs an event handler that keeps the compiled model's step counter in sync.
      */
     public Simulation createSimulation(TimeUnit timeStep, Quantity duration) {
+        simTimeUnitHolder[0] = timeStep;
         Simulation sim = new Simulation(model, timeStep, duration);
         installStepSync(sim);
         return sim;
@@ -122,6 +128,7 @@ public class CompiledModel {
         }
         TimeUnit timeStep = unitRegistry.resolveTimeUnit(settings.timeStep());
         TimeUnit durationUnit = unitRegistry.resolveTimeUnit(settings.durationUnit());
+        simTimeUnitHolder[0] = timeStep;
         Simulation sim = new Simulation(model, timeStep, new Quantity(settings.duration(), durationUnit));
         installStepSync(sim);
         return sim;
