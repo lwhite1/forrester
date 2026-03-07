@@ -14,6 +14,7 @@ import com.deathrayresearch.forrester.model.Stock;
 import com.deathrayresearch.forrester.model.Variable;
 import com.deathrayresearch.forrester.model.def.AuxDef;
 import com.deathrayresearch.forrester.model.def.ConstantDef;
+import com.deathrayresearch.forrester.model.def.DefinitionValidator;
 import com.deathrayresearch.forrester.model.def.FlowDef;
 import com.deathrayresearch.forrester.model.def.LookupTableDef;
 import com.deathrayresearch.forrester.model.def.ModelDefinition;
@@ -68,6 +69,13 @@ public class ModelCompiler {
      * @throws CompilationException if any element references cannot be resolved
      */
     public CompiledModel compile(ModelDefinition def) {
+        List<String> errors = DefinitionValidator.validateStructure(def);
+        if (!errors.isEmpty()) {
+            throw new CompilationException(
+                    "Model validation failed: " + String.join("; ", errors),
+                    def.name() != null ? def.name() : "");
+        }
+
         Model model = new Model(def.name());
         List<Resettable> resettables = new ArrayList<>();
         int[] stepHolder = {0};

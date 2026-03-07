@@ -58,12 +58,18 @@ public class XmileImporter implements ModelImporter {
 
     private static final Pattern NUMERIC_PATTERN = Pattern.compile(
             "^[+-]?(\\d+\\.?\\d*|\\.\\d+)([eE][+-]?\\d+)?$");
+    private static final long MAX_FILE_SIZE = 10 * 1024 * 1024; // 10 MB
     private static final Set<String> UNSUPPORTED_ELEMENTS = Set.of(
             XmileConstants.GROUP, XmileConstants.MACRO,
             XmileConstants.EVENT_POSTER);
 
     @Override
     public ImportResult importModel(Path path) throws IOException {
+        long size = Files.size(path);
+        if (size > MAX_FILE_SIZE) {
+            throw new IOException("File exceeds maximum allowed size of "
+                    + (MAX_FILE_SIZE / (1024 * 1024)) + " MB: " + path);
+        }
         String content = Files.readString(path, StandardCharsets.UTF_8);
         Path fileName = path.getFileName();
         String modelName = fileName != null ? fileName.toString() : path.toString();

@@ -352,7 +352,7 @@ class ModelCompilerTest {
 
             assertThatThrownBy(() -> compiler.compile(def))
                     .isInstanceOf(CompilationException.class)
-                    .hasMessageContaining("unknown source");
+                    .hasMessageContaining("non-existent source stock");
         }
 
         @Test
@@ -366,7 +366,7 @@ class ModelCompilerTest {
 
             assertThatThrownBy(() -> compiler.compile(def))
                     .isInstanceOf(CompilationException.class)
-                    .hasMessageContaining("unknown sink");
+                    .hasMessageContaining("non-existent sink stock");
         }
 
         @Test

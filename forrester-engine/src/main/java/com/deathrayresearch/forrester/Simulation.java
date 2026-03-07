@@ -203,13 +203,8 @@ public class Simulation {
      * Call this before re-running a simulation to avoid stale history data.
      */
     public void clearHistory() {
-        for (Stock stock : model.getStocks()) {
-            for (Flow flow : stock.getInflows()) {
-                flow.clearHistory();
-            }
-            for (Flow flow : stock.getOutflows()) {
-                flow.clearHistory();
-            }
+        for (Flow flow : model.getFlows()) {
+            flow.clearHistory();
         }
         for (Variable variable : model.getVariables()) {
             variable.clearHistory();

@@ -173,6 +173,17 @@ public final class DefinitionValidator {
         return errors;
     }
 
+    /**
+     * Validates a model definition for structural correctness, excluding view validation.
+     * Use this for compilation where views are non-functional and may reference
+     * import-generated names that differ from model element names.
+     */
+    public static List<String> validateStructure(ModelDefinition def) {
+        List<String> all = validate(def);
+        all.removeIf(e -> e.startsWith("View "));
+        return all;
+    }
+
     private static final Set<String> BUILTIN_NAMES = Set.of(
             "TIME", "DT", "Pi", "PI", "E");
 

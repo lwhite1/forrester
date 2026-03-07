@@ -42,7 +42,7 @@ public final class ViewValidator {
 
         // Validate element placements
         for (ElementPlacement placement : view.elements()) {
-            if (!elementNames.contains(placement.name())) {
+            if (!matchesName(elementNames, placement.name())) {
                 errors.add("View '" + view.name() + "' places non-existent element: "
                         + placement.name());
             }
@@ -50,11 +50,11 @@ public final class ViewValidator {
 
         // Validate connector endpoints
         for (ConnectorRoute connector : view.connectors()) {
-            if (!elementNames.contains(connector.from())) {
+            if (!matchesName(elementNames, connector.from())) {
                 errors.add("View '" + view.name() + "' connector references non-existent element: "
                         + connector.from());
             }
-            if (!elementNames.contains(connector.to())) {
+            if (!matchesName(elementNames, connector.to())) {
                 errors.add("View '" + view.name() + "' connector references non-existent element: "
                         + connector.to());
             }
@@ -66,13 +66,26 @@ public final class ViewValidator {
             flowNames.add(f.name());
         }
         for (FlowRoute flowRoute : view.flowRoutes()) {
-            if (!flowNames.contains(flowRoute.flowName())) {
+            if (!matchesName(flowNames, flowRoute.flowName())) {
                 errors.add("View '" + view.name() + "' flow route references non-existent flow: "
                         + flowRoute.flowName());
             }
         }
 
         return errors;
+    }
+
+    private static boolean matchesName(Set<String> names, String name) {
+        if (names.contains(name)) {
+            return true;
+        }
+        if (name.contains("_")) {
+            return names.contains(name.replace('_', ' '));
+        }
+        if (name.contains(" ")) {
+            return names.contains(name.replace(' ', '_'));
+        }
+        return false;
     }
 
     private static Set<String> collectElementNames(ModelDefinition def) {

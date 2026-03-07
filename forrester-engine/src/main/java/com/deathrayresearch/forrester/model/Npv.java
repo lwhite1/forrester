@@ -12,10 +12,12 @@ import java.util.function.IntSupplier;
  * SD NPV builtin.
  *
  * <p>NPV accumulates the discounted present value of a stream of payments. At each
- * timestep, the current payment is discounted back to the initial time:
+ * timestep, the current payment is discounted using an incrementally accumulated
+ * discount factor to avoid overflow on long simulations:
  *
  * <pre>
- *     npv += stream / (1 + discount_rate) ^ (step - init_step)
+ *     discount *= (1 + discount_rate)
+ *     npv += stream / discount
  * </pre>
  *
  * <p>The discount rate is the fractional rate per timestep (e.g., 0.05 for 5% per step).
@@ -33,7 +35,7 @@ public class Npv implements Formula, Resettable {
     private final IntSupplier currentStep;
 
     private double accumulated;
-    private int initStep;
+    private double cumulativeDiscount;
     private boolean initialized;
     private int lastStep = -1;
 
@@ -80,7 +82,7 @@ public class Npv implements Formula, Resettable {
     @Override
     public void reset() {
         accumulated = 0;
-        initStep = 0;
+        cumulativeDiscount = 1.0;
         initialized = false;
         lastStep = -1;
     }
@@ -95,16 +97,16 @@ public class Npv implements Formula, Resettable {
     public double getCurrentValue() {
         int step = currentStep.getAsInt();
         if (!initialized) {
-            initStep = step;
+            cumulativeDiscount = 1.0;
             accumulated = stream.getAsDouble() * factor;
             initialized = true;
             lastStep = step;
         } else if (step > lastStep) {
             int delta = step - lastStep;
+            double discountMultiplier = 1 + discountRate;
             for (int d = 0; d < delta; d++) {
-                int elapsed = lastStep + d + 1 - initStep;
-                double discount = Math.pow(1 + discountRate, elapsed);
-                accumulated += stream.getAsDouble() * factor / discount;
+                cumulativeDiscount *= discountMultiplier;
+                accumulated += stream.getAsDouble() * factor / cumulativeDiscount;
             }
             lastStep = step;
         }

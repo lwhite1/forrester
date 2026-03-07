@@ -50,9 +50,15 @@ public class VensimImporter implements ModelImporter {
     private static final Set<String> SYSTEM_VAR_KEYS = Set.of(
             "INITIAL TIME", "FINAL TIME", "TIME STEP", "SAVEPER");
     private static final Set<String> CONTROL_GROUPS = Set.of(".Control");
+    private static final long MAX_FILE_SIZE = 10 * 1024 * 1024; // 10 MB
 
     @Override
     public ImportResult importModel(Path path) throws IOException {
+        long size = Files.size(path);
+        if (size > MAX_FILE_SIZE) {
+            throw new IOException("File exceeds maximum allowed size of "
+                    + (MAX_FILE_SIZE / (1024 * 1024)) + " MB: " + path);
+        }
         String content = Files.readString(path, StandardCharsets.UTF_8);
         Path fileName = path.getFileName();
         String modelName = fileName != null ? fileName.toString() : path.toString();
