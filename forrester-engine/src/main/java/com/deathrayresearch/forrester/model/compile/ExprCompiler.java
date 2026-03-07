@@ -309,8 +309,15 @@ public class ExprCompiler {
             case "NPV" -> compileNpv(args);
             case "RANDOM_NORMAL" -> compileRandomNormal(args);
             case "LOOKUP" -> compileLookup(args);
-            default -> throw new CompilationException(
-                    "Unknown function: " + name, name);
+            default -> {
+                // Check if the function name is a lookup table (Vensim allows table(input) syntax)
+                if (args.size() == 1 && context.resolveLookupTable(name).isPresent()) {
+                    List<Expr> lookupArgs = List.of(new Expr.Ref(name), args.get(0));
+                    yield compileLookup(lookupArgs);
+                }
+                throw new CompilationException(
+                        "Unknown function: " + name, name);
+            }
         };
     }
 

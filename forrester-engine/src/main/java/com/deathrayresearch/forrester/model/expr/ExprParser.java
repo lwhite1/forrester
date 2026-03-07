@@ -15,7 +15,7 @@ import java.util.List;
  * addition   = mult ( ("+" | "-") mult )*
  * mult       = power ( ("*" | "/" | "%") power )*
  * power      = unary ( "**" power )?          // right-associative
- * unary      = ("-" | "not") unary | call
+ * unary      = ("-" | "+" | "not") unary | call
  * call       = primary ( "(" arglist? ")" )?
  * primary    = NUMBER | IDENTIFIER | QUOTED_ID | "(" expr ")"
  *            | "IF" "(" expr "," expr "," expr ")"
@@ -195,6 +195,10 @@ public class ExprParser {
             Expr operand = parseUnary();
             depth--;
             return new Expr.UnaryOp(UnaryOperator.NEGATE, operand);
+        }
+        if (matchPlus()) {
+            // Unary plus is a no-op — just parse the operand
+            return parseUnary();
         }
         return parsePrimary();
     }
@@ -408,6 +412,18 @@ public class ExprParser {
         }
         pos = end;
         return true;
+    }
+
+    /**
+     * Matches a unary '+' (no-op sign). Only called from parseUnary.
+     */
+    private boolean matchPlus() {
+        skipWhitespace();
+        if (pos < input.length() && input.charAt(pos) == '+') {
+            pos++;
+            return true;
+        }
+        return false;
     }
 
     /**

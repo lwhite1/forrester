@@ -404,13 +404,15 @@ public final class VensimExprTranslator {
 
     static double[][] parseLookupPoints(String data) {
         // Lookup data format: [(xmin,ymin)-(xmax,ymax)],(x1,y1),(x2,y2),...
+        // or ([(xmin,ymin)-(xmax,ymax)],(x1,y1),(x2,y2),...)  (WITH LOOKUP wrapping)
         // or just (x1,y1),(x2,y2),...
         String cleaned = data.strip();
 
         // Strip Vensim range annotation: [(xmin,ymin)-(xmax,ymax)]
+        // May be preceded by an outer paren from WITH LOOKUP context
         // This is a display range hint, not a data point
         Pattern rangePattern = Pattern.compile(
-                "^\\s*\\[\\s*\\([^)]*\\)\\s*-\\s*\\([^)]*\\)\\s*\\]\\s*,?");
+                "^\\s*\\(?\\s*\\[\\s*\\([^)]*\\)\\s*-\\s*\\([^)]*\\)\\s*\\]\\s*,?");
         Matcher rangeMatcher = rangePattern.matcher(cleaned);
         if (rangeMatcher.find()) {
             cleaned = cleaned.substring(rangeMatcher.end()).strip();

@@ -252,6 +252,23 @@ class ExprParserTest {
             Expr result = ExprParser.parse("-(a + b)");
             assertThat(result).isInstanceOf(Expr.UnaryOp.class);
         }
+
+        @Test
+        void shouldParseUnaryPlus() {
+            Expr result = ExprParser.parse("+x");
+            assertThat(result).isEqualTo(new Expr.Ref("x"));
+        }
+
+        @Test
+        void shouldParseUnaryPlusBeforeSubtraction() {
+            // Common in Vensim net flow equations: +inflow-outflow
+            Expr result = ExprParser.parse("+a-b");
+            assertThat(result).isInstanceOf(Expr.BinaryOp.class);
+            Expr.BinaryOp bin = (Expr.BinaryOp) result;
+            assertThat(bin.operator()).isEqualTo(BinaryOperator.SUB);
+            assertThat(bin.left()).isEqualTo(new Expr.Ref("a"));
+            assertThat(bin.right()).isEqualTo(new Expr.Ref("b"));
+        }
     }
 
     @Nested

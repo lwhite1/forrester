@@ -132,6 +132,11 @@
     "unit" : "1/Year"
   } ],
   "lookupTables" : [ {
+    "name" : "effect_lookup",
+    "xValues" : [ -10.0, -7.5, -5.0, -2.5, 0.0, 2.5, 5.0, 7.5, 10.0, 100.0 ],
+    "yValues" : [ -0.9, -0.5, -0.25, -0.1, 0.0, 0.075, 0.15, 0.21, 0.25, 0.25 ],
+    "interpolation" : "LINEAR"
+  }, {
     "name" : "change_in_tuna_perception_lookup",
     "comment" : "change in tuna perception lookup",
     "xValues" : [ 0.0, 0.25, 0.5, 0.75, 1.0 ],
