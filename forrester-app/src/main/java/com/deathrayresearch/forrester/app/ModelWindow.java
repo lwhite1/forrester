@@ -301,7 +301,11 @@ public class ModelWindow {
 
         Menu examplesMenu = buildExamplesMenu();
 
+        MenuItem modelInfoItem = new MenuItem("Model Info\u2026");
+        modelInfoItem.setOnAction(e -> showModelInfoDialog());
+
         fileMenu.getItems().addAll(newWindowItem, newItem, openItem, examplesMenu,
+                new SeparatorMenuItem(), modelInfoItem,
                 new SeparatorMenuItem(), saveItem, saveAsItem, exportItem,
                 new SeparatorMenuItem(), closeItem, exitItem);
 
@@ -326,6 +330,27 @@ public class ModelWindow {
         });
         redoItem.setDisable(true);
 
+        MenuItem cutItem = new MenuItem("Cut");
+        cutItem.setAccelerator(new KeyCodeCombination(KeyCode.X, KeyCombination.SHORTCUT_DOWN));
+        cutItem.setOnAction(e -> {
+            canvas.cutSelection();
+            canvas.requestFocus();
+        });
+
+        MenuItem copyItem = new MenuItem("Copy");
+        copyItem.setAccelerator(new KeyCodeCombination(KeyCode.C, KeyCombination.SHORTCUT_DOWN));
+        copyItem.setOnAction(e -> {
+            canvas.copySelection();
+            canvas.requestFocus();
+        });
+
+        MenuItem pasteItem = new MenuItem("Paste");
+        pasteItem.setAccelerator(new KeyCodeCombination(KeyCode.V, KeyCombination.SHORTCUT_DOWN));
+        pasteItem.setOnAction(e -> {
+            canvas.pasteClipboard();
+            canvas.requestFocus();
+        });
+
         MenuItem selectAllItem = new MenuItem("Select All");
         selectAllItem.setAccelerator(new KeyCodeCombination(KeyCode.A, KeyCombination.SHORTCUT_DOWN));
         selectAllItem.setOnAction(e -> {
@@ -333,11 +358,8 @@ public class ModelWindow {
             canvas.requestFocus();
         });
 
-        MenuItem modelInfoItem = new MenuItem("Model Info\u2026");
-        modelInfoItem.setOnAction(e -> showModelInfoDialog());
-
-        editMenu.getItems().addAll(undoItem, redoItem, new SeparatorMenuItem(), selectAllItem,
-                new SeparatorMenuItem(), modelInfoItem);
+        editMenu.getItems().addAll(undoItem, redoItem, new SeparatorMenuItem(),
+                cutItem, copyItem, pasteItem, new SeparatorMenuItem(), selectAllItem);
 
         // View menu
         Menu viewMenu = new Menu("View");
@@ -367,7 +389,12 @@ public class ModelWindow {
             }
         });
 
-        viewMenu.getItems().addAll(activityLogItem, popOutDashboardItem);
+        MenuItem commandPaletteItem = new MenuItem("Command Palette\u2026");
+        commandPaletteItem.setAccelerator(new KeyCodeCombination(KeyCode.K, KeyCombination.SHORTCUT_DOWN));
+        commandPaletteItem.setOnAction(e -> commandPalette.show(stage));
+
+        viewMenu.getItems().addAll(commandPaletteItem, new SeparatorMenuItem(),
+                activityLogItem, popOutDashboardItem);
 
         // Simulate menu
         Menu simulateMenu = new Menu("Simulate");

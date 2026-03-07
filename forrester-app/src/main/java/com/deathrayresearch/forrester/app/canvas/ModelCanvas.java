@@ -556,7 +556,7 @@ public class ModelCanvas extends Canvas {
     /**
      * Copies the current selection to the clipboard.
      */
-    private void copySelection() {
+    public void copySelection() {
         if (editor == null) {
             return;
         }
@@ -566,7 +566,7 @@ public class ModelCanvas extends Canvas {
     /**
      * Cuts the current selection: copies to clipboard, then deletes.
      */
-    private void cutSelection() {
+    public void cutSelection() {
         if (editor == null || canvasState.getSelection().isEmpty()) {
             return;
         }
@@ -577,7 +577,7 @@ public class ModelCanvas extends Canvas {
     /**
      * Pastes clipboard contents, creating new elements offset from the originals.
      */
-    private void pasteClipboard() {
+    public void pasteClipboard() {
         if (editor == null || !copyPaste.hasContent()) {
             return;
         }
