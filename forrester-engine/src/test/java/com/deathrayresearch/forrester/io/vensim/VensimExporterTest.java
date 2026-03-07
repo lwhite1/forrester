@@ -2,6 +2,8 @@ package com.deathrayresearch.forrester.io.vensim;
 
 import com.deathrayresearch.forrester.io.ImportResult;
 import com.deathrayresearch.forrester.model.def.AuxDef;
+import com.deathrayresearch.forrester.model.def.CausalLinkDef;
+import com.deathrayresearch.forrester.model.def.CldVariableDef;
 import com.deathrayresearch.forrester.model.def.FlowDef;
 import com.deathrayresearch.forrester.model.def.LookupTableDef;
 import com.deathrayresearch.forrester.model.def.ModelDefinition;
@@ -310,6 +312,49 @@ class VensimExporterTest {
             assertThat(mdl).contains("SAVEPER  =\n        TIME STEP\n");
             // Should NOT have a double newline between = and TIME STEP
             assertThat(mdl).doesNotContain("SAVEPER  =\n\t\n");
+        }
+    }
+
+    @Nested
+    @DisplayName("CLD variable export")
+    class CldVariables {
+
+        @Test
+        void shouldExportCldVariablesWithPlaceholderEquation() {
+            ModelDefinition def = new ModelDefinitionBuilder()
+                    .name("Test")
+                    .defaultSimulation("Year", 100, "Year")
+                    .cldVariable("Population", "The total population")
+                    .cldVariable("Birth_Rate", "Rate of births")
+                    .build();
+
+            String mdl = VensimExporter.toVensim(def);
+
+            assertThat(mdl).contains("Population=\n\t0");
+            assertThat(mdl).contains("Birth Rate=\n\t0");
+            assertThat(mdl).contains("The total population");
+            assertThat(mdl).contains("Rate of births");
+        }
+
+        @Test
+        void shouldRoundTripCldModel() {
+            ModelDefinition def = new ModelDefinitionBuilder()
+                    .name("CLD")
+                    .defaultSimulation("Year", 100, "Year")
+                    .cldVariable("Population", "The total population")
+                    .cldVariable("Birth_Rate", "Rate of births")
+                    .cldVariable("Death_Rate", "Rate of deaths")
+                    .build();
+
+            String mdl = VensimExporter.toVensim(def);
+
+            // Re-import — the sketch terminator line makes the importer detect CLD mode,
+            // so the variables round-trip back as CLD variables
+            VensimImporter importer = new VensimImporter();
+            ImportResult result = importer.importModel(mdl, "CLD");
+
+            assertThat(result.definition().cldVariables()).hasSize(3);
+            assertThat(result.definition().constants()).isEmpty();
         }
     }
 

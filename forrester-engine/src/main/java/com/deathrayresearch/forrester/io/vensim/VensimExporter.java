@@ -1,6 +1,8 @@
 package com.deathrayresearch.forrester.io.vensim;
 
 import com.deathrayresearch.forrester.model.def.AuxDef;
+import com.deathrayresearch.forrester.model.def.CausalLinkDef;
+import com.deathrayresearch.forrester.model.def.CldVariableDef;
 import com.deathrayresearch.forrester.model.def.ConstantDef;
 import com.deathrayresearch.forrester.model.def.FlowDef;
 import com.deathrayresearch.forrester.model.def.LookupTableDef;
@@ -92,6 +94,11 @@ public final class VensimExporter {
             if (!embeddedLookupNames.contains(lookup.name())) {
                 sb.append(buildLookupBlock(lookup));
             }
+        }
+
+        // Write CLD variables
+        for (CldVariableDef cldVar : def.cldVariables()) {
+            sb.append(buildCldVariableBlock(cldVar));
         }
 
         // Write control section
@@ -215,6 +222,12 @@ public final class VensimExporter {
         String units = constant.unit() != null ? constant.unit() : "";
         String comment = constant.comment() != null ? constant.comment() : "";
         return buildBlock(vensimName, "=", equation, units, comment);
+    }
+
+    private static String buildCldVariableBlock(CldVariableDef cldVar) {
+        String vensimName = denormalizeName(cldVar.name());
+        String comment = cldVar.comment() != null ? cldVar.comment() : "";
+        return buildBlock(vensimName, "=", "0", "", comment);
     }
 
     private static String buildLookupBlock(LookupTableDef lookup) {
