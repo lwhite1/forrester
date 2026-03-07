@@ -24,6 +24,7 @@ import com.deathrayresearch.forrester.app.canvas.SdConceptsDialog;
 import com.deathrayresearch.forrester.app.canvas.SimulationRunner;
 import com.deathrayresearch.forrester.app.canvas.SimulationSettingsDialog;
 import com.deathrayresearch.forrester.app.canvas.StatusBar;
+import com.deathrayresearch.forrester.app.canvas.UndoHistoryPopup;
 import com.deathrayresearch.forrester.app.canvas.UndoManager;
 import com.deathrayresearch.forrester.app.canvas.ValidationDialog;
 import com.deathrayresearch.forrester.io.ImportResult;
@@ -343,6 +344,10 @@ public class ModelWindow {
         });
         redoItem.setDisable(true);
 
+        MenuItem undoHistoryItem = new MenuItem("Undo History\u2026");
+        undoHistoryItem.setId("menuUndoHistory");
+        undoHistoryItem.setOnAction(e -> showUndoHistoryPopup());
+
         MenuItem cutItem = new MenuItem("Cut");
         cutItem.setAccelerator(new KeyCodeCombination(KeyCode.X, KeyCombination.SHORTCUT_DOWN));
         cutItem.setOnAction(e -> {
@@ -371,7 +376,8 @@ public class ModelWindow {
             canvas.requestFocus();
         });
 
-        editMenu.getItems().addAll(undoItem, redoItem, new SeparatorMenuItem(),
+        editMenu.getItems().addAll(undoItem, redoItem, undoHistoryItem,
+                new SeparatorMenuItem(),
                 cutItem, copyItem, pasteItem, new SeparatorMenuItem(), selectAllItem);
 
         // View menu
@@ -1109,6 +1115,21 @@ public class ModelWindow {
         return window;
     }
 
+    private void showUndoHistoryPopup() {
+        UndoManager activeUndo = canvas.getUndoManager();
+        if (activeUndo == null || !activeUndo.canUndo()) {
+            return;
+        }
+        List<String> labels = activeUndo.undoLabels();
+        UndoHistoryPopup popup = new UndoHistoryPopup(labels, depth -> {
+            canvas.performUndoTo(depth);
+            canvas.requestFocus();
+            updateStatusBar();
+        });
+        // Show below the menu bar area
+        popup.showBelow(stage, stage.getX() + 60, stage.getY() + 80);
+    }
+
     private void showError(String title, String message) {
         Alert alert = new Alert(Alert.AlertType.ERROR);
         alert.setTitle(title);
@@ -1302,6 +1323,7 @@ public class ModelWindow {
             canvas.performRedo();
             canvas.requestFocus();
         }));
+        commands.add(cmd("Undo History", "Edit", this::showUndoHistoryPopup));
         commands.add(cmd("Select All", "Edit", () -> {
             canvas.selectAll();
             canvas.requestFocus();

@@ -257,8 +257,15 @@ public class ModelCanvas extends Canvas {
      * Saves the current state to the undo stack before a mutation.
      */
     private void saveUndoState() {
+        saveUndoState("Edit");
+    }
+
+    /**
+     * Saves the current state to the undo stack with a descriptive label.
+     */
+    private void saveUndoState(String label) {
         if (undoManager != null && editor != null) {
-            undoManager.pushUndo(captureSnapshot());
+            undoManager.pushUndo(captureSnapshot(), label);
         }
     }
 
@@ -280,7 +287,7 @@ public class ModelCanvas extends Canvas {
         if (undoManager == null || editor == null) {
             return;
         }
-        UndoManager.Snapshot previous = undoManager.undo(captureSnapshot());
+        UndoManager.Snapshot previous = undoManager.undo(captureSnapshot(), "Current");
         if (previous != null) {
             restoreSnapshot(previous);
         }
@@ -293,9 +300,24 @@ public class ModelCanvas extends Canvas {
         if (undoManager == null || editor == null) {
             return;
         }
-        UndoManager.Snapshot next = undoManager.redo(captureSnapshot());
+        UndoManager.Snapshot next = undoManager.redo(captureSnapshot(), "Current");
         if (next != null) {
             restoreSnapshot(next);
+        }
+    }
+
+    /**
+     * Undoes multiple steps, jumping to the entry at the given depth in the undo stack.
+     *
+     * @param depth zero-based index (0 = most recent entry)
+     */
+    public void performUndoTo(int depth) {
+        if (undoManager == null || editor == null) {
+            return;
+        }
+        UndoManager.Snapshot target = undoManager.undoTo(captureSnapshot(), depth);
+        if (target != null) {
+            restoreSnapshot(target);
         }
     }
 
@@ -369,7 +391,7 @@ public class ModelCanvas extends Canvas {
      * mutation, then regenerates connectors and redraws.
      */
     public void applyMutation(Runnable mutation) {
-        saveUndoState();
+        saveUndoState("Edit property");
         mutation.run();
         regenerateAndRedraw();
     }
@@ -489,7 +511,7 @@ public class ModelCanvas extends Canvas {
             return;
         }
 
-        saveUndoState();
+        saveUndoState("Add element");
 
         String name;
         ElementType type;
@@ -545,7 +567,7 @@ public class ModelCanvas extends Canvas {
             return;
         }
 
-        saveUndoState();
+        saveUndoState("Delete");
 
         List<String> toDelete = new ArrayList<>(canvasState.getSelection());
         for (String name : toDelete) {
@@ -589,7 +611,7 @@ public class ModelCanvas extends Canvas {
             return Set.of();
         }
 
-        saveUndoState();
+        saveUndoState("Paste");
 
         CopyPasteController.PasteResult result = copyPaste.paste(canvasState, editor);
         if (result.pastedNames().isEmpty()) {
@@ -620,7 +642,7 @@ public class ModelCanvas extends Canvas {
             return;
         }
 
-        saveUndoState();
+        saveUndoState("Delete connection");
         if (selectedIsCausalLink) {
             editor.removeCausalLink(selectedConnection.from(), selectedConnection.to());
         } else {
@@ -641,7 +663,7 @@ public class ModelCanvas extends Canvas {
      */
     private void handleFlowClick(double worldX, double worldY) {
         if (flowCreation.isPending()) {
-            saveUndoState();
+            saveUndoState("Add flow");
         }
         FlowCreationController.FlowResult result = flowCreation.handleClick(
                 worldX, worldY, canvasState, editor);
@@ -661,7 +683,7 @@ public class ModelCanvas extends Canvas {
      */
     private void handleCausalLinkClick(double worldX, double worldY) {
         if (causalLinkCreation.isPending()) {
-            saveUndoState();
+            saveUndoState("Add causal link");
         }
         CausalLinkCreationController.LinkResult result = causalLinkCreation.handleClick(
                 worldX, worldY, canvasState, editor);
@@ -683,21 +705,21 @@ public class ModelCanvas extends Canvas {
 
                 @Override
                 public void saveAndSetConstantValue(String name, double value) {
-                    saveUndoState();
+                    saveUndoState("Edit constant");
                     editor.setConstantValue(name, value);
                     redraw();
                 }
 
                 @Override
                 public void saveAndSetFlowEquation(String name, String equation) {
-                    saveUndoState();
+                    saveUndoState("Edit equation");
                     editor.setFlowEquation(name, equation);
                     regenerateAndRedraw();
                 }
 
                 @Override
                 public void saveAndSetAuxEquation(String name, String equation) {
-                    saveUndoState();
+                    saveUndoState("Edit equation");
                     editor.setAuxEquation(name, equation);
                     regenerateAndRedraw();
                 }
@@ -724,7 +746,7 @@ public class ModelCanvas extends Canvas {
         if (oldName.equals(newName) || editor.hasElement(newName)) {
             return;
         }
-        saveUndoState();
+        saveUndoState("Rename");
         if (!editor.renameElement(oldName, newName)) {
             return;
         }
@@ -1117,7 +1139,7 @@ public class ModelCanvas extends Canvas {
             resizeController.drag(
                     viewport.toWorldX(event.getX()),
                     viewport.toWorldY(event.getY()),
-                    canvasState, this::saveUndoState);
+                    canvasState, () -> saveUndoState("Resize"));
             redraw();
             event.consume();
             return;
@@ -1137,7 +1159,7 @@ public class ModelCanvas extends Canvas {
 
         if (dragController.isDragging()) {
             dragController.drag(event.getX(), event.getY(),
-                    canvasState, viewport, this::saveUndoState);
+                    canvasState, viewport, () -> saveUndoState("Move"));
             redraw();
             event.consume();
         }
@@ -1166,7 +1188,7 @@ public class ModelCanvas extends Canvas {
                 reattachController.complete(
                         viewport.toWorldX(event.getX()),
                         viewport.toWorldY(event.getY()),
-                        canvasState, editor, this::saveUndoState);
+                        canvasState, editor, () -> saveUndoState("Reconnect flow"));
                 connectors = editor.generateConnectors();
                 invalidateLoopAnalysis();
             }
@@ -1180,7 +1202,7 @@ public class ModelCanvas extends Canvas {
             boolean rerouted = rerouteController.complete(
                     viewport.toWorldX(event.getX()),
                     viewport.toWorldY(event.getY()),
-                    canvasState, editor, this::saveUndoState);
+                    canvasState, editor, () -> saveUndoState("Reroute connection"));
             if (rerouted) {
                 selectedConnection = null;
                 connectors = editor.generateConnectors();
@@ -1463,7 +1485,7 @@ public class ModelCanvas extends Canvas {
         this.editor = frame.editor();
         this.undoManager = frame.undoManager();
 
-        saveUndoState();
+        saveUndoState("Edit module");
         editor.updateModuleDefinition(frame.moduleIndex(), childDef);
 
         canvasState.loadFrom(frame.viewSnapshot());
@@ -1519,7 +1541,7 @@ public class ModelCanvas extends Canvas {
         if (editor == null) {
             return;
         }
-        saveUndoState();
+        saveUndoState("Classify variable");
         if (editor.classifyCldVariable(name, targetType)) {
             canvasState.setType(name, targetType);
             connectors = editor.generateConnectors();
@@ -1538,7 +1560,7 @@ public class ModelCanvas extends Canvas {
         for (CausalLinkDef.Polarity p : CausalLinkDef.Polarity.values()) {
             MenuItem item = new MenuItem(p.symbol() + " (" + p.name().toLowerCase() + ")");
             item.setOnAction(e -> {
-                saveUndoState();
+                saveUndoState("Set polarity");
                 editor.setCausalLinkPolarity(link.from(), link.to(), p);
                 invalidateLoopAnalysis();
                 redraw();
@@ -1550,7 +1572,7 @@ public class ModelCanvas extends Canvas {
         // Delete
         MenuItem deleteItem = new MenuItem("Delete");
         deleteItem.setOnAction(e -> {
-            saveUndoState();
+            saveUndoState("Delete causal link");
             editor.removeCausalLink(link.from(), link.to());
             selectedConnection = null;
             selectedIsCausalLink = false;
@@ -1564,7 +1586,7 @@ public class ModelCanvas extends Canvas {
 
     private void openBindingsDialog(String moduleName) {
         navController.openBindingsDialog(moduleName, editor,
-                this::saveUndoState, this::fireStatusChanged);
+                () -> saveUndoState("Edit bindings"), this::fireStatusChanged);
     }
 
 }

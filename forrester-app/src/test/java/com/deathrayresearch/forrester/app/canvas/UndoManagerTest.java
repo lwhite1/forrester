@@ -31,6 +31,11 @@ class UndoManagerTest {
         return new UndoManager.Snapshot(model, view);
     }
 
+    private static void assertSnapshotName(UndoManager.Snapshot snapshot, String expectedName) {
+        assertThat(snapshot).isNotNull();
+        assertThat(snapshot.model().name()).isEqualTo(expectedName);
+    }
+
     @Nested
     @DisplayName("pushUndo")
     class PushUndo {
@@ -56,14 +61,13 @@ class UndoManagerTest {
 
         @Test
         void shouldEnforceMaximumCapacity() {
-            UndoManager.Snapshot first = snapshot("First");
-            manager.pushUndo(first);
+            manager.pushUndo(snapshot("First"));
             for (int i = 1; i < UndoManager.MAX_UNDO; i++) {
                 manager.pushUndo(snapshot("S" + i));
             }
             assertThat(manager.canUndo()).isTrue();
 
-            // Push one more — should evict the oldest (first)
+            // Push one more — should evict the oldest (First)
             manager.pushUndo(snapshot("overflow"));
 
             // Drain all undo entries
@@ -75,7 +79,7 @@ class UndoManagerTest {
             }
             assertThat(count).isEqualTo(UndoManager.MAX_UNDO);
             // The oldest entry should be "S1", not "First" (evicted)
-            assertThat(current.model().name()).isEqualTo("S1");
+            assertSnapshotName(current, "S1");
         }
     }
 
@@ -85,24 +89,22 @@ class UndoManagerTest {
 
         @Test
         void shouldReturnPreviousSnapshot() {
-            UndoManager.Snapshot s1 = snapshot("S1");
-            manager.pushUndo(s1);
+            manager.pushUndo(snapshot("S1"));
 
             UndoManager.Snapshot result = manager.undo(snapshot("Current"));
 
-            assertThat(result).isSameAs(s1);
+            assertSnapshotName(result, "S1");
         }
 
         @Test
         void shouldPushCurrentToRedoStack() {
             manager.pushUndo(snapshot("S1"));
-            UndoManager.Snapshot current = snapshot("Current");
 
-            manager.undo(current);
+            manager.undo(snapshot("Current"));
 
             assertThat(manager.canRedo()).isTrue();
             UndoManager.Snapshot redone = manager.redo(snapshot("Dummy"));
-            assertThat(redone).isSameAs(current);
+            assertSnapshotName(redone, "Current");
         }
 
         @Test
@@ -127,12 +129,11 @@ class UndoManagerTest {
         @Test
         void shouldReturnNextSnapshot() {
             manager.pushUndo(snapshot("S1"));
-            UndoManager.Snapshot current = snapshot("Current");
-            manager.undo(current);
+            manager.undo(snapshot("Current"));
 
             UndoManager.Snapshot result = manager.redo(snapshot("AfterUndo"));
 
-            assertThat(result).isSameAs(current);
+            assertSnapshotName(result, "Current");
         }
 
         @Test
@@ -140,8 +141,7 @@ class UndoManagerTest {
             manager.pushUndo(snapshot("S1"));
             manager.undo(snapshot("Current"));
 
-            UndoManager.Snapshot afterUndo = snapshot("AfterUndo");
-            manager.redo(afterUndo);
+            manager.redo(snapshot("AfterUndo"));
 
             assertThat(manager.canUndo()).isTrue();
         }
@@ -184,36 +184,32 @@ class UndoManagerTest {
 
         @Test
         void shouldSupportMultipleUndoAndRedo() {
-            UndoManager.Snapshot s1 = snapshot("S1");
-            UndoManager.Snapshot s2 = snapshot("S2");
-            UndoManager.Snapshot s3 = snapshot("S3");
-
-            manager.pushUndo(s1);
-            manager.pushUndo(s2);
-            manager.pushUndo(s3);
+            manager.pushUndo(snapshot("S1"));
+            manager.pushUndo(snapshot("S2"));
+            manager.pushUndo(snapshot("S3"));
 
             // Undo three times: S3, S2, S1
             UndoManager.Snapshot current = snapshot("S4");
             UndoManager.Snapshot r1 = manager.undo(current);
-            assertThat(r1).isSameAs(s3);
+            assertSnapshotName(r1, "S3");
 
             UndoManager.Snapshot r2 = manager.undo(r1);
-            assertThat(r2).isSameAs(s2);
+            assertSnapshotName(r2, "S2");
 
             UndoManager.Snapshot r3 = manager.undo(r2);
-            assertThat(r3).isSameAs(s1);
+            assertSnapshotName(r3, "S1");
 
             assertThat(manager.canUndo()).isFalse();
 
             // Redo three times
             UndoManager.Snapshot f1 = manager.redo(r3);
-            assertThat(f1).isSameAs(s2);
+            assertSnapshotName(f1, "S2");
 
             UndoManager.Snapshot f2 = manager.redo(f1);
-            assertThat(f2).isSameAs(s3);
+            assertSnapshotName(f2, "S3");
 
             UndoManager.Snapshot f3 = manager.redo(f2);
-            assertThat(f3.model().name()).isEqualTo("S4");
+            assertSnapshotName(f3, "S4");
 
             assertThat(manager.canRedo()).isFalse();
         }
@@ -232,6 +228,117 @@ class UndoManagerTest {
 
             // Only S2 and S4 should be on undo stack now
             assertThat(manager.canUndo()).isTrue();
+        }
+    }
+
+    @Nested
+    @DisplayName("labels")
+    class Labels {
+
+        @Test
+        void shouldTrackUndoLabels() {
+            manager.pushUndo(snapshot("S1"), "Add stock");
+            manager.pushUndo(snapshot("S2"), "Move element");
+            manager.pushUndo(snapshot("S3"), "Delete");
+
+            List<String> labels = manager.undoLabels();
+
+            assertThat(labels).containsExactly("Delete", "Move element", "Add stock");
+        }
+
+        @Test
+        void shouldTrackRedoLabels() {
+            manager.pushUndo(snapshot("S1"), "Add stock");
+            manager.pushUndo(snapshot("S2"), "Move element");
+
+            manager.undo(snapshot("S3"), "Current");
+            manager.undo(snapshot("S4"), "Current");
+
+            List<String> labels = manager.redoLabels();
+            assertThat(labels).hasSize(2);
+        }
+
+        @Test
+        void shouldReturnEmptyLabelsWhenStackIsEmpty() {
+            assertThat(manager.undoLabels()).isEmpty();
+            assertThat(manager.redoLabels()).isEmpty();
+        }
+    }
+
+    @Nested
+    @DisplayName("undoTo")
+    class UndoTo {
+
+        @Test
+        void shouldJumpToDepth() {
+            manager.pushUndo(snapshot("S1"), "Add stock");
+            manager.pushUndo(snapshot("S2"), "Move");
+            manager.pushUndo(snapshot("S3"), "Delete");
+
+            UndoManager.Snapshot result = manager.undoTo(snapshot("Current"), 2);
+
+            assertSnapshotName(result, "S1");
+            assertThat(manager.canUndo()).isFalse();
+            // All intermediate entries + current should be on redo stack
+            assertThat(manager.canRedo()).isTrue();
+        }
+
+        @Test
+        void shouldJumpToMostRecent() {
+            manager.pushUndo(snapshot("S1"), "Add stock");
+            manager.pushUndo(snapshot("S2"), "Move");
+
+            UndoManager.Snapshot result = manager.undoTo(snapshot("Current"), 0);
+
+            assertSnapshotName(result, "S2");
+        }
+
+        @Test
+        void shouldReturnNullForInvalidDepth() {
+            manager.pushUndo(snapshot("S1"), "Add stock");
+
+            assertThat(manager.undoTo(snapshot("Current"), -1)).isNull();
+            assertThat(manager.undoTo(snapshot("Current"), 1)).isNull();
+        }
+    }
+
+    @Nested
+    @DisplayName("compression")
+    class Compression {
+
+        @Test
+        void shouldPreserveModelDataThroughCompression() {
+            ModelDefinition model = new ModelDefinitionBuilder()
+                    .name("TestModel")
+                    .stock("Population", 1000, "people")
+                    .constant("GrowthRate", 0.05, "dimensionless")
+                    .build();
+            ViewDef view = new ViewDef("Main", List.of(), List.of(), List.of());
+            UndoManager.Snapshot original = new UndoManager.Snapshot(model, view);
+
+            manager.pushUndo(original, "Add elements");
+
+            UndoManager.Snapshot restored = manager.undo(snapshot("Current"));
+
+            assertThat(restored.model().name()).isEqualTo("TestModel");
+            assertThat(restored.model().stocks()).hasSize(1);
+            assertThat(restored.model().stocks().getFirst().name()).isEqualTo("Population");
+            assertThat(restored.model().constants()).hasSize(1);
+            assertThat(restored.model().constants().getFirst().name()).isEqualTo("GrowthRate");
+            assertThat(restored.view()).isNotNull();
+            assertThat(restored.view().name()).isEqualTo("Main");
+        }
+
+        @Test
+        void shouldReportCorrectDepth() {
+            manager.pushUndo(snapshot("S1"));
+            manager.pushUndo(snapshot("S2"));
+            manager.pushUndo(snapshot("S3"));
+
+            assertThat(manager.undoDepth()).isEqualTo(3);
+
+            manager.undo(snapshot("Current"));
+            assertThat(manager.undoDepth()).isEqualTo(2);
         }
     }
 }
