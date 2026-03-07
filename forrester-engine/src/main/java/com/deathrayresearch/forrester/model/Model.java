@@ -18,6 +18,7 @@ public class Model extends Element {
     private final Map<String, Variable> variables = new LinkedHashMap<>();
     private final List<Module> modules = new ArrayList<>();
     private final List<Constant> constants = new ArrayList<>();
+    private ModelMetadata metadata;
 
     /**
      * Creates a new model with the given name.
@@ -26,6 +27,22 @@ public class Model extends Element {
      */
     public Model(String name) {
         super(name);
+    }
+
+    /**
+     * Returns the attribution and licensing metadata for this model, or {@code null} if none has been set.
+     */
+    public ModelMetadata getMetadata() {
+        return metadata;
+    }
+
+    /**
+     * Sets attribution and licensing metadata for this model.
+     *
+     * @param metadata the metadata to associate with this model
+     */
+    public void setMetadata(ModelMetadata metadata) {
+        this.metadata = metadata;
     }
 
     /**

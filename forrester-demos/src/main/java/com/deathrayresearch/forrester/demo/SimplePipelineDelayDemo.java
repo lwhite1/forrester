@@ -5,6 +5,7 @@ import com.deathrayresearch.forrester.measure.Quantity;
 import com.deathrayresearch.forrester.model.Flow;
 import com.deathrayresearch.forrester.model.Flows;
 import com.deathrayresearch.forrester.model.Model;
+import com.deathrayresearch.forrester.model.ModelMetadata;
 import com.deathrayresearch.forrester.model.Stock;
 import com.deathrayresearch.forrester.ui.StockLevelChartViewer;
 
@@ -32,6 +33,9 @@ public class SimplePipelineDelayDemo {
 
     public void run(double initialWip, double arrivalRate, int delayDays, double durationWeeks) {
         Model model = new Model("Simple Pipeline Delay");
+        model.setMetadata(ModelMetadata.builder()
+                .license("CC-BY-SA-4.0")
+                .build());
         Simulation run = new Simulation(model, DAY, WEEK, durationWeeks);
 
         Stock wip = new Stock("WIP", initialWip, THING);

@@ -7,6 +7,7 @@ import com.deathrayresearch.forrester.measure.units.item.ItemUnit;
 import com.deathrayresearch.forrester.measure.units.time.TimeUnits;
 import com.deathrayresearch.forrester.model.Flow;
 import com.deathrayresearch.forrester.model.Model;
+import com.deathrayresearch.forrester.model.ModelMetadata;
 import com.deathrayresearch.forrester.model.Stock;
 import com.deathrayresearch.forrester.ui.StockLevelChartViewer;
 
@@ -51,6 +52,9 @@ public class AgileSoftwareDevelopmentDemo {
 
     public Model getModel() {
         Model model = new Model("Agile software development");
+        model.setMetadata(ModelMetadata.builder()
+                .license("CC-BY-SA-4.0")
+                .build());
 
         Stock productBacklog = new Stock("product backlog", projectSize, WORK);
         Stock releaseBacklog = new Stock("release backlog", releaseSize, WORK);

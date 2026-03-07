@@ -8,6 +8,7 @@ import com.deathrayresearch.forrester.model.ArrayedFlow;
 import com.deathrayresearch.forrester.model.ArrayedStock;
 import com.deathrayresearch.forrester.model.Flow;
 import com.deathrayresearch.forrester.model.Model;
+import com.deathrayresearch.forrester.model.ModelMetadata;
 import com.deathrayresearch.forrester.model.Subscript;
 import com.deathrayresearch.forrester.ui.StockLevelChartViewer;
 
@@ -45,6 +46,10 @@ public class MultiRegionSirDemo {
                     double[] initialRecovered, double contactRate, double infectivity,
                     double recoveryProportion, double migrationRate, double durationWeeks) {
         Model model = new Model("Multi-Region SIR Model");
+        model.setMetadata(ModelMetadata.builder()
+                .source("Kermack & McKendrick SIR model (1927)")
+                .license("CC-BY-SA-4.0")
+                .build());
 
         Subscript region = new Subscript("Region", "North", "South", "East");
 

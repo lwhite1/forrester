@@ -6,6 +6,7 @@ import com.deathrayresearch.forrester.measure.units.time.Times;
 import com.deathrayresearch.forrester.model.Flow;
 import com.deathrayresearch.forrester.model.Flows;
 import com.deathrayresearch.forrester.model.Model;
+import com.deathrayresearch.forrester.model.ModelMetadata;
 import com.deathrayresearch.forrester.model.Stock;
 import com.deathrayresearch.forrester.ui.StockLevelChartViewer;
 
@@ -31,6 +32,9 @@ public class ExponentialDecayDemo {
 
     public void run(double initialPopulation, double deathRate, double durationWeeks) {
         Model model = new Model("Population with exponential decay");
+        model.setMetadata(ModelMetadata.builder()
+                .license("CC-BY-SA-4.0")
+                .build());
 
         Stock population = new Stock("Population", initialPopulation, PEOPLE);
 

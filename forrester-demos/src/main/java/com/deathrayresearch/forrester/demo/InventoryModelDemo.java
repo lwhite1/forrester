@@ -5,6 +5,7 @@ import com.deathrayresearch.forrester.measure.Quantity;
 import com.deathrayresearch.forrester.measure.Unit;
 import com.deathrayresearch.forrester.model.Flow;
 import com.deathrayresearch.forrester.model.Model;
+import com.deathrayresearch.forrester.model.ModelMetadata;
 import com.deathrayresearch.forrester.model.Stock;
 import com.deathrayresearch.forrester.model.Variable;
 import com.deathrayresearch.forrester.ui.StockLevelChartViewer;
@@ -48,6 +49,10 @@ public class InventoryModelDemo {
                     double desiredInventoryMultiplier, double durationDays) {
 
         Model model = new Model("Inventory Model");
+        model.setMetadata(ModelMetadata.builder()
+                .source("Thinking in Systems, Donella Meadows (2008)")
+                .license("CC-BY-SA-4.0")
+                .build());
         Simulation run = new Simulation(model, DAY, DAY, durationDays);
 
         Stock carsOnLot = new Stock("Cars on Lot", initialCarsOnLot, CARS);

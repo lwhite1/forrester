@@ -6,6 +6,7 @@ import com.deathrayresearch.forrester.measure.units.time.TimeUnits;
 import com.deathrayresearch.forrester.model.Flow;
 import com.deathrayresearch.forrester.model.Flows;
 import com.deathrayresearch.forrester.model.Model;
+import com.deathrayresearch.forrester.model.ModelMetadata;
 import com.deathrayresearch.forrester.model.Stock;
 import com.deathrayresearch.forrester.ui.StockLevelChartViewer;
 
@@ -35,6 +36,9 @@ public class ExponentialGrowthDemo {
     public void run(double initialPopulation, double birthRate, double deathRate,
                     double durationWeeks) {
         Model model = new Model("Population with unconstrained growth");
+        model.setMetadata(ModelMetadata.builder()
+                .license("CC-BY-SA-4.0")
+                .build());
 
         Stock population = new Stock("population", initialPopulation, PEOPLE);
 

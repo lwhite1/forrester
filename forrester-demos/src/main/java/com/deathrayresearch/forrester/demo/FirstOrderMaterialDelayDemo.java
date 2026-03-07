@@ -5,6 +5,7 @@ import com.deathrayresearch.forrester.measure.units.time.TimeUnits;
 import com.deathrayresearch.forrester.measure.units.time.Times;
 import com.deathrayresearch.forrester.model.Flow;
 import com.deathrayresearch.forrester.model.Model;
+import com.deathrayresearch.forrester.model.ModelMetadata;
 import com.deathrayresearch.forrester.model.Stock;
 import com.deathrayresearch.forrester.ui.StockLevelChartViewer;
 
@@ -30,6 +31,9 @@ public class FirstOrderMaterialDelayDemo {
 
     public void run(double initialCustomers, double averageDelayDays, double durationWeeks) {
         Model model = new Model("First order material delay");
+        model.setMetadata(ModelMetadata.builder()
+                .license("CC-BY-SA-4.0")
+                .build());
 
         Stock potentialCustomers = new Stock("Potential Customers", initialCustomers, PEOPLE);
 

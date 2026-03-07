@@ -5,6 +5,7 @@ import com.deathrayresearch.forrester.io.CsvSubscriber;
 import com.deathrayresearch.forrester.measure.Quantity;
 import com.deathrayresearch.forrester.model.Flow;
 import com.deathrayresearch.forrester.model.Model;
+import com.deathrayresearch.forrester.model.ModelMetadata;
 import com.deathrayresearch.forrester.model.Stock;
 import com.deathrayresearch.forrester.ui.StockLevelChartViewer;
 
@@ -37,6 +38,9 @@ public class TubDemo {
     public void run(double initialWater, double outflowRate, double inflowRate,
                     int inflowDelayMinutes, double durationMinutes) {
         Model model = new Model("Tub model");
+        model.setMetadata(ModelMetadata.builder()
+                .license("CC-BY-SA-4.0")
+                .build());
         Simulation run = new Simulation(model, MINUTE, MINUTE, durationMinutes);
 
         Stock tub = new Stock("Water in Tub", initialWater, GALLON_US);

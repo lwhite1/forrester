@@ -4,6 +4,7 @@ import com.deathrayresearch.forrester.Simulation;
 import com.deathrayresearch.forrester.measure.Quantity;
 import com.deathrayresearch.forrester.model.Flow;
 import com.deathrayresearch.forrester.model.Model;
+import com.deathrayresearch.forrester.model.ModelMetadata;
 import com.deathrayresearch.forrester.model.Stock;
 import com.deathrayresearch.forrester.model.Variable;
 import com.deathrayresearch.forrester.ui.FlowChartViewer;
@@ -33,6 +34,10 @@ public class CoffeeCoolingDemo {
     public void run(double initialTemperature, double roomTemperature, double coolingRate,
                     double durationMinutes) {
         Model model = new Model("Coffee Cooling");
+        model.setMetadata(ModelMetadata.builder()
+                .source("Newton's law of cooling")
+                .license("CC-BY-SA-4.0")
+                .build());
 
         Stock coffeeTemperature = new Stock("Coffee Temperature", initialTemperature, CELSIUS);
 

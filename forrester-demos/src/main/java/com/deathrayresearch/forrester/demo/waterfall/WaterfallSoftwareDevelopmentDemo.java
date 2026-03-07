@@ -4,6 +4,7 @@ import com.deathrayresearch.forrester.Simulation;
 import com.deathrayresearch.forrester.measure.Quantity;
 import com.deathrayresearch.forrester.measure.units.time.TimeUnits;
 import com.deathrayresearch.forrester.model.Model;
+import com.deathrayresearch.forrester.model.ModelMetadata;
 import com.deathrayresearch.forrester.ui.StockLevelChartViewer;
 
 /**
@@ -119,6 +120,10 @@ public class WaterfallSoftwareDevelopmentDemo {
                 integrationCoefficient);
 
         Model model = new Model("Waterfall");
+        model.setMetadata(ModelMetadata.builder()
+                .source("Abdel-Hamid & Madnick, Software Project Dynamics (1991)")
+                .license("CC-BY-SA-4.0")
+                .build());
         model.addModule(workforce.getModule());
         model.addModule(staffAllocation.getModule());
         model.addModule(softwareProduction.getModule());

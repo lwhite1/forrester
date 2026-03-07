@@ -6,6 +6,7 @@ import com.deathrayresearch.forrester.measure.Quantity;
 import com.deathrayresearch.forrester.measure.units.time.Times;
 import com.deathrayresearch.forrester.model.Flow;
 import com.deathrayresearch.forrester.model.Model;
+import com.deathrayresearch.forrester.model.ModelMetadata;
 import com.deathrayresearch.forrester.model.MultiArrayedStock;
 import com.deathrayresearch.forrester.model.Stock;
 import com.deathrayresearch.forrester.model.Subscript;
@@ -54,6 +55,9 @@ public class PopulationRegionAgeDemo {
     public void run(double[] initialPopulations, double agingRate, double birthRate,
                     double deathRate, double migrationRate, double durationYears) {
         Model model = new Model("Population Region-Age Model");
+        model.setMetadata(ModelMetadata.builder()
+                .license("CC-BY-SA-4.0")
+                .build());
 
         Subscript region = new Subscript("Region", "North", "South", "East");
         Subscript ageGroup = new Subscript("AgeGroup", "Young", "Adult", "Elder");

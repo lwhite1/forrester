@@ -6,6 +6,7 @@ import com.deathrayresearch.forrester.measure.units.item.ItemUnits;
 import com.deathrayresearch.forrester.model.Flow;
 import com.deathrayresearch.forrester.model.Flows;
 import com.deathrayresearch.forrester.model.Model;
+import com.deathrayresearch.forrester.model.ModelMetadata;
 import com.deathrayresearch.forrester.model.Stock;
 import com.deathrayresearch.forrester.model.Variable;
 import com.deathrayresearch.forrester.ui.StockLevelChartViewer;
@@ -43,6 +44,9 @@ public class FlowTimeDemo {
                     double newOrdersPerDay, double hoursPerDay, double tatAdjustmentTimeHours,
                     double durationWeeks) {
         Model tatModel = new Model("TAT Model");
+        tatModel.setMetadata(ModelMetadata.builder()
+                .license("CC-BY-SA-4.0")
+                .build());
 
         Stock wip = new Stock("WIP", initialWip, TEST);
         Stock tat = new Stock("TAT", tatGoalHours, HOUR);

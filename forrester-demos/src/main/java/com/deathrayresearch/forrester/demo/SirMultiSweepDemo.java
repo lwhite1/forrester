@@ -4,6 +4,7 @@ import com.deathrayresearch.forrester.measure.Quantity;
 import com.deathrayresearch.forrester.measure.units.time.Times;
 import com.deathrayresearch.forrester.model.Flow;
 import com.deathrayresearch.forrester.model.Model;
+import com.deathrayresearch.forrester.model.ModelMetadata;
 import com.deathrayresearch.forrester.model.Stock;
 import com.deathrayresearch.forrester.sweep.MultiParameterSweep;
 import com.deathrayresearch.forrester.sweep.MultiSweepResult;
@@ -69,6 +70,10 @@ public class SirMultiSweepDemo {
                                 double initialSusceptible, double initialInfectious,
                                 double initialRecovered, double recoveryProportion) {
         Model model = new Model("SIR Multi-Sweep");
+        model.setMetadata(ModelMetadata.builder()
+                .source("Kermack & McKendrick SIR model (1927)")
+                .license("CC-BY-SA-4.0")
+                .build());
 
         Stock susceptible = new Stock("Susceptible", initialSusceptible, PEOPLE);
         Stock infectious = new Stock("Infectious", initialInfectious, PEOPLE);

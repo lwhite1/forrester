@@ -7,6 +7,7 @@ import com.deathrayresearch.forrester.measure.units.item.ItemUnit;
 import com.deathrayresearch.forrester.measure.units.time.TimeUnits;
 import com.deathrayresearch.forrester.model.Flow;
 import com.deathrayresearch.forrester.model.Model;
+import com.deathrayresearch.forrester.model.ModelMetadata;
 import com.deathrayresearch.forrester.model.Stock;
 import com.deathrayresearch.forrester.ui.StockLevelChartViewer;
 
@@ -37,6 +38,9 @@ public class NegativeFeedbackDemo {
     public void run(double initialInventory, double goalInventory, double adjustmentTimeDays,
                     double durationWeeks) {
         Model model = new Model("Negative feedback with goal");
+        model.setMetadata(ModelMetadata.builder()
+                .license("CC-BY-SA-4.0")
+                .build());
 
         Stock inventoryOnHand = new Stock("Inventory on-hand", initialInventory, INVENTORY);
 

@@ -6,6 +6,7 @@ import com.deathrayresearch.forrester.measure.units.time.Times;
 import com.deathrayresearch.forrester.model.Flow;
 import com.deathrayresearch.forrester.model.Flows;
 import com.deathrayresearch.forrester.model.Model;
+import com.deathrayresearch.forrester.model.ModelMetadata;
 import com.deathrayresearch.forrester.model.Stock;
 import com.deathrayresearch.forrester.model.Variable;
 import com.deathrayresearch.forrester.ui.StockLevelChartViewer;
@@ -40,6 +41,9 @@ public class SalesMixDemo {
                     double hardwareSalesPerCustomer, double serviceSalesPerCustomerPerMonth,
                     double durationYears) {
         Model model = new Model("Hardware/software sales mix");
+        model.setMetadata(ModelMetadata.builder()
+                .license("CC-BY-SA-4.0")
+                .build());
 
         Stock customers = new Stock("customers", initialCustomers, PEOPLE);
 

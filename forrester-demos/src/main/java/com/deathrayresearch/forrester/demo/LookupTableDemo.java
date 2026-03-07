@@ -5,6 +5,7 @@ import com.deathrayresearch.forrester.measure.Quantity;
 import com.deathrayresearch.forrester.model.Flow;
 import com.deathrayresearch.forrester.model.LookupTable;
 import com.deathrayresearch.forrester.model.Model;
+import com.deathrayresearch.forrester.model.ModelMetadata;
 import com.deathrayresearch.forrester.model.Stock;
 import com.deathrayresearch.forrester.model.Variable;
 import com.deathrayresearch.forrester.ui.StockLevelChartViewer;
@@ -37,6 +38,9 @@ public class LookupTableDemo {
     public void run(double initialPopulation, double carryingCapacity, double birthRate,
                     double durationWeeks) {
         Model model = new Model("Population Growth with Crowding Lookup");
+        model.setMetadata(ModelMetadata.builder()
+                .license("CC-BY-SA-4.0")
+                .build());
 
         Stock population = new Stock("Population", initialPopulation, PEOPLE);
 

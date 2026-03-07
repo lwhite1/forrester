@@ -4,6 +4,7 @@ import com.deathrayresearch.forrester.Simulation;
 import com.deathrayresearch.forrester.model.Flow;
 import com.deathrayresearch.forrester.model.Flows;
 import com.deathrayresearch.forrester.model.Model;
+import com.deathrayresearch.forrester.model.ModelMetadata;
 import com.deathrayresearch.forrester.model.Stock;
 import com.deathrayresearch.forrester.ui.StockLevelChartViewer;
 
@@ -34,6 +35,9 @@ public class SShapedPopulationGrowthDemo {
     public void run(double initialPopulation, double carryingCapacity,
                     double maxFractionalBirthRate, double durationWeeks) {
         Model model = new Model("Population with S-Shaped Growth");
+        model.setMetadata(ModelMetadata.builder()
+                .license("CC-BY-SA-4.0")
+                .build());
 
         Stock population = new Stock("population", initialPopulation, PEOPLE);
 
