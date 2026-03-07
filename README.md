@@ -100,8 +100,10 @@ The visual editor also provides 8 bundled example models via File → Open Examp
 
 | Document | Contents |
 |---|---|
+| [Quickstart Tutorial](userdocs/Quickstart.md) | Build your first model in 10 minutes — a hands-on walkthrough using Newton's law of cooling |
 | [Visual Editor Guide](docs/Visual%20Editor%20Guide.md) | GUI features, tools, keyboard shortcuts, simulation, analysis dialogs |
 | [Programmable Engine](docs/Programmable%20Engine.md) | Code API: lambda-based models, definitions, compiler, expressions, sweep/Monte Carlo/optimization |
+| [Expression Language](userdocs/Expression_Language.md) | Equation syntax, operators, and built-in functions reference |
 | [Vensim Import](docs/Vensim%20Import.md) | Vensim `.mdl` import: supported constructs, limitations, usage |
 | [XMILE Import & Export](docs/XMILE%20Import%20Export.md) | XMILE import/export: supported constructs, limitations, usage |
 
