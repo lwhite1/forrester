@@ -19,6 +19,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -122,7 +123,9 @@ public class VensimImporter implements ModelImporter {
         Set<String> cldVariableNames = new HashSet<>();
         Set<String> allNormalizedNames = new HashSet<>();
 
-        // First sub-pass: identify stocks so we know which flows connect to them
+        // First sub-pass: identify stocks, lookups, and collect constant values
+        // so that INTEG initial values like "Initial number of muskrats" can be resolved
+        Map<String, Double> constantValues = new HashMap<>();
         for (MdlEquation eq : parsed.equations()) {
             String name = eq.name().strip();
             if (name.isEmpty() || isSystemVar(name)) {
@@ -144,6 +147,15 @@ public class VensimImporter implements ModelImporter {
             }
             if (eq.operator().equals(":=")) {
                 continue;
+            }
+            // Collect numeric constants for initial value resolution
+            if (isNumericLiteral(eq.expression())) {
+                constantValues.put(normalized, Double.parseDouble(eq.expression().strip()));
+                // Also map the original multi-word name (normalized with underscores)
+                String altNormalized = name.replace(" ", "_");
+                if (!altNormalized.equals(normalized)) {
+                    constantValues.put(altNormalized, Double.parseDouble(eq.expression().strip()));
+                }
             }
         }
 
@@ -180,7 +192,7 @@ public class VensimImporter implements ModelImporter {
                 try {
                     classifyAndBuild(eq, normalized, unit, comment, builder,
                             vensimNames, stockNames, flowNames, lookupNames,
-                            sketchFlowNames, timeUnit, warnings);
+                            sketchFlowNames, constantValues, timeUnit, warnings);
                 } catch (IllegalArgumentException e) {
                     warnings.add("Error processing '" + name + "': " + e.getMessage());
                 }
@@ -213,6 +225,7 @@ public class VensimImporter implements ModelImporter {
                                    Set<String> vensimNames, Set<String> stockNames,
                                    Set<String> flowNames, Set<String> lookupNames,
                                    Set<String> sketchFlowNames,
+                                   Map<String, Double> constantValues,
                                    String timeUnit, List<String> warnings) {
         String operator = eq.operator();
         String expression = eq.expression();
@@ -246,7 +259,8 @@ public class VensimImporter implements ModelImporter {
         // Stock (INTEG function)
         if (INTEG_PATTERN.matcher(expression).find()) {
             buildStock(eq, normalized, expression, unit, comment, builder,
-                    vensimNames, flowNames, lookupNames, sketchFlowNames, timeUnit, warnings);
+                    vensimNames, flowNames, lookupNames, sketchFlowNames,
+                    constantValues, timeUnit, warnings);
             return;
         }
 
@@ -319,6 +333,7 @@ public class VensimImporter implements ModelImporter {
                              String unit, String comment, ModelDefinitionBuilder builder,
                              Set<String> vensimNames, Set<String> flowNames,
                              Set<String> lookupNames, Set<String> sketchFlowNames,
+                             Map<String, Double> constantValues,
                              String timeUnit, List<String> warnings) {
         // Parse INTEG(rate_expr, initial_value)
         Matcher m = INTEG_PATTERN.matcher(expression);
@@ -347,7 +362,7 @@ public class VensimImporter implements ModelImporter {
         }
 
         // Parse initial value
-        double initialValue = parseInitialValue(initExpr, warnings, eq.name());
+        double initialValue = parseInitialValue(initExpr, constantValues, warnings, eq.name());
 
         // Create stock
         builder.stock(new StockDef(normalized, comment, initialValue, unit, null));
@@ -402,10 +417,17 @@ public class VensimImporter implements ModelImporter {
         }
     }
 
-    private double parseInitialValue(String initExpr, List<String> warnings, String varName) {
+    private double parseInitialValue(String initExpr, Map<String, Double> constantValues,
+                                      List<String> warnings, String varName) {
         String trimmed = initExpr.strip();
         if (isNumericLiteral(trimmed)) {
             return Double.parseDouble(trimmed);
+        }
+        // Try resolving as a reference to a known constant
+        String normalized = VensimExprTranslator.normalizeName(trimmed);
+        Double value = constantValues.get(normalized);
+        if (value != null) {
+            return value;
         }
         warnings.add("Non-literal initial value for '" + varName + "': '" + trimmed
                 + "', defaulting to 0.0");
