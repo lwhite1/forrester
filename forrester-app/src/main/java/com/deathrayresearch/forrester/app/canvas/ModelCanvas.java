@@ -29,6 +29,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import java.util.function.Consumer;
 
 /**
  * Canvas component that renders a model using the Layered Flow Diagram visual language.
@@ -81,6 +82,7 @@ public class ModelCanvas extends Canvas {
 
     // Status change callback
     private Runnable onStatusChanged;
+    private Consumer<Set<String>> onPasteWarning;
 
     // Hover highlighting
     private String hoveredElement;
@@ -171,6 +173,10 @@ public class ModelCanvas extends Canvas {
      */
     public void setOnStatusChanged(Runnable callback) {
         this.onStatusChanged = callback;
+    }
+
+    public void setOnPasteWarning(Consumer<Set<String>> callback) {
+        this.onPasteWarning = callback;
     }
 
     private void fireStatusChanged() {
@@ -576,27 +582,34 @@ public class ModelCanvas extends Canvas {
 
     /**
      * Pastes clipboard contents, creating new elements offset from the originals.
+     * Returns the set of reference names that were replaced with 0 (empty if none).
      */
-    public void pasteClipboard() {
+    public Set<String> pasteClipboard() {
         if (editor == null || !copyPaste.hasContent()) {
-            return;
+            return Set.of();
         }
 
         saveUndoState();
 
-        List<String> pastedNames = copyPaste.paste(canvasState, editor);
-        if (pastedNames.isEmpty()) {
-            return;
+        CopyPasteController.PasteResult result = copyPaste.paste(canvasState, editor);
+        if (result.pastedNames().isEmpty()) {
+            return Set.of();
         }
 
         canvasState.clearSelection();
-        for (String name : pastedNames) {
+        for (String name : result.pastedNames()) {
             canvasState.addToSelection(name);
         }
 
         connectors = editor.generateConnectors();
         invalidateLoopAnalysis();
         redraw();
+
+        Set<String> replaced = result.replacedReferences();
+        if (!replaced.isEmpty() && onPasteWarning != null) {
+            onPasteWarning.accept(replaced);
+        }
+        return replaced;
     }
 
     /**

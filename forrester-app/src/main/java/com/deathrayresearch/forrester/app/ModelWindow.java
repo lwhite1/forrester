@@ -18,6 +18,7 @@ import com.deathrayresearch.forrester.app.canvas.MultiParameterSweepDialog;
 import com.deathrayresearch.forrester.app.canvas.OptimizerDialog;
 import com.deathrayresearch.forrester.app.canvas.ParameterSweepDialog;
 import com.deathrayresearch.forrester.app.canvas.PropertiesPanel;
+import com.deathrayresearch.forrester.app.canvas.QuickstartDialog;
 import com.deathrayresearch.forrester.app.canvas.KeyboardShortcutsDialog;
 import com.deathrayresearch.forrester.app.canvas.SdConceptsDialog;
 import com.deathrayresearch.forrester.app.canvas.SimulationRunner;
@@ -173,6 +174,13 @@ public class ModelWindow {
             if (propertiesPanel != null) {
                 propertiesPanel.updateSelection(canvas, canvas.getEditor());
             }
+        });
+        canvas.setOnPasteWarning(replaced -> {
+            String names = String.join(", ", replaced);
+            activityLogPanel.log("warning",
+                    "Paste: " + replaced.size() + " reference"
+                    + (replaced.size() == 1 ? "" : "s")
+                    + " replaced with 0 (" + names + ")");
         });
 
         breadcrumbBar = new BreadcrumbBar();
@@ -429,8 +437,11 @@ public class ModelWindow {
 
         Menu helpMenu = new Menu("Help");
 
-        MenuItem gettingStartedItem = new MenuItem("Getting Started");
-        gettingStartedItem.setDisable(true);
+        MenuItem gettingStartedItem = new MenuItem("Getting Started\u2026");
+        gettingStartedItem.setOnAction(e -> {
+            QuickstartDialog dialog = new QuickstartDialog();
+            dialog.show();
+        });
 
         MenuItem sdConceptsItem = new MenuItem("SD Concepts");
         sdConceptsItem.setOnAction(e -> {
@@ -1289,6 +1300,16 @@ public class ModelWindow {
                 canvas.getCanvasState(), canvas.getEditor(),
                 canvas.getConnectors(), canvas.getActiveLoopAnalysis(), stage,
                 editor != null ? editor.getModelName() : null)));
+
+        // Help
+        commands.add(cmd("Getting Started", "Help",
+                () -> new QuickstartDialog().show()));
+        commands.add(cmd("SD Concepts", "Help",
+                () -> new SdConceptsDialog().show()));
+        commands.add(cmd("Expression Language", "Help",
+                () -> new ExpressionLanguageDialog().show()));
+        commands.add(cmd("Keyboard Shortcuts", "Help",
+                () -> new KeyboardShortcutsDialog().show()));
 
         // Dynamic: model element names for navigation
         for (String name : canvas.getCanvasState().getDrawOrder()) {

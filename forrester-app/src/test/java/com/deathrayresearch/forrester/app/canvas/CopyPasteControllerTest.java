@@ -48,7 +48,8 @@ class CopyPasteControllerTest {
             controller.copy(canvasState, editor);
             assertThat(controller.hasContent()).isTrue();
 
-            List<String> pasted = controller.paste(canvasState, editor);
+            CopyPasteController.PasteResult pasteResult = controller.paste(canvasState, editor);
+            List<String> pasted = pasteResult.pastedNames();
 
             assertThat(pasted).hasSize(1);
             String newName = pasted.get(0);
@@ -68,7 +69,8 @@ class CopyPasteControllerTest {
             canvasState.select("Rate");
 
             controller.copy(canvasState, editor);
-            List<String> pasted = controller.paste(canvasState, editor);
+            CopyPasteController.PasteResult pasteResult = controller.paste(canvasState, editor);
+            List<String> pasted = pasteResult.pastedNames();
 
             assertThat(pasted).hasSize(1);
             assertThat(editor.getConstantByName(pasted.get(0)).value()).isEqualTo(0.5);
@@ -88,7 +90,8 @@ class CopyPasteControllerTest {
             canvasState.addToSelection("C1");
 
             controller.copy(canvasState, editor);
-            List<String> pasted = controller.paste(canvasState, editor);
+            CopyPasteController.PasteResult pasteResult = controller.paste(canvasState, editor);
+            List<String> pasted = pasteResult.pastedNames();
 
             assertThat(pasted).hasSize(2);
         }
@@ -110,7 +113,8 @@ class CopyPasteControllerTest {
             canvasState.addToSelection("Transfer");
 
             controller.copy(canvasState, editor);
-            List<String> pasted = controller.paste(canvasState, editor);
+            CopyPasteController.PasteResult pasteResult = controller.paste(canvasState, editor);
+            List<String> pasted = pasteResult.pastedNames();
 
             assertThat(pasted).hasSize(3);
 
@@ -131,7 +135,8 @@ class CopyPasteControllerTest {
 
         @Test
         void shouldNotPasteWhenClipboardEmpty() {
-            List<String> pasted = controller.paste(canvasState, editor);
+            CopyPasteController.PasteResult pasteResult = controller.paste(canvasState, editor);
+            List<String> pasted = pasteResult.pastedNames();
             assertThat(pasted).isEmpty();
         }
 
@@ -149,8 +154,8 @@ class CopyPasteControllerTest {
 
             controller.copy(canvasState, editor);
 
-            List<String> paste1 = controller.paste(canvasState, editor);
-            List<String> paste2 = controller.paste(canvasState, editor);
+            List<String> paste1 = controller.paste(canvasState, editor).pastedNames();
+            List<String> paste2 = controller.paste(canvasState, editor).pastedNames();
 
             assertThat(paste1).hasSize(1);
             assertThat(paste2).hasSize(1);
@@ -166,7 +171,7 @@ class CopyPasteControllerTest {
         void shouldReplaceMissingElementWithZero() {
             // editor has no elements — all references are dangling
             String result = CopyPasteController.clearDanglingReferences(
-                    "Growth_Rate * Population", editor);
+                    "Growth_Rate * Population", editor).equation();
             assertThat(result).isEqualTo("0 * 0");
         }
 
@@ -179,28 +184,28 @@ class CopyPasteControllerTest {
             editor.loadFrom(def);
 
             String result = CopyPasteController.clearDanglingReferences(
-                    "Population * Growth_Rate", editor);
+                    "Population * Growth_Rate", editor).equation();
             assertThat(result).isEqualTo("Population * 0");
         }
 
         @Test
         void shouldPreserveNumericLiterals() {
             String result = CopyPasteController.clearDanglingReferences(
-                    "100 + 3.14 + 1e10", editor);
+                    "100 + 3.14 + 1e10", editor).equation();
             assertThat(result).isEqualTo("100 + 3.14 + 1e10");
         }
 
         @Test
         void shouldPreserveKeywords() {
             String result = CopyPasteController.clearDanglingReferences(
-                    "TIME + DT", editor);
+                    "TIME + DT", editor).equation();
             assertThat(result).isEqualTo("TIME + DT");
         }
 
         @Test
         void shouldPreserveFunctionCalls() {
             String result = CopyPasteController.clearDanglingReferences(
-                    "MAX(Missing, 0)", editor);
+                    "MAX(Missing, 0)", editor).equation();
             assertThat(result).isEqualTo("MAX(0, 0)");
         }
 
@@ -213,7 +218,7 @@ class CopyPasteControllerTest {
             editor.loadFrom(def);
 
             String result = CopyPasteController.clearDanglingReferences(
-                    "IF(Population > 0, Population, Missing)", editor);
+                    "IF(Population > 0, Population, Missing)", editor).equation();
             assertThat(result).isEqualTo("IF(Population > 0, Population, 0)");
         }
 
@@ -226,7 +231,7 @@ class CopyPasteControllerTest {
             editor.loadFrom(def);
 
             String result = CopyPasteController.clearDanglingReferences(
-                    "Outflow_Rate", editor);
+                    "Outflow_Rate", editor).equation();
             assertThat(result).isEqualTo("Outflow_Rate");
         }
 
@@ -239,8 +244,30 @@ class CopyPasteControllerTest {
             editor.loadFrom(def);
 
             String result = CopyPasteController.clearDanglingReferences(
-                    "Birth_Rate * Missing_Stock", editor);
+                    "Birth_Rate * Missing_Stock", editor).equation();
             assertThat(result).isEqualTo("Birth_Rate * 0");
+        }
+
+        @Test
+        void shouldReportReplacedReferences() {
+            var cr = CopyPasteController.clearDanglingReferences(
+                    "Growth_Rate * Contact_Rate", editor);
+            assertThat(cr.equation()).isEqualTo("0 * 0");
+            assertThat(cr.replaced()).containsExactlyInAnyOrder("Growth Rate", "Contact Rate");
+        }
+
+        @Test
+        void shouldHandleBacktickQuotedIdentifiers() {
+            ModelDefinition def = new ModelDefinitionBuilder()
+                    .name("Test")
+                    .stock("Population", 100, null)
+                    .build();
+            editor.loadFrom(def);
+
+            var cr = CopyPasteController.clearDanglingReferences(
+                    "`Population` * `Growth Rate`", editor);
+            assertThat(cr.equation()).isEqualTo("`Population` * 0");
+            assertThat(cr.replaced()).containsExactly("Growth Rate");
         }
     }
 
@@ -269,7 +296,7 @@ class CopyPasteControllerTest {
             // Paste into a fresh editor with no pre-existing elements
             ModelEditor targetEditor = new ModelEditor();
             CanvasState targetCanvas = new CanvasState();
-            List<String> pasted = controller.paste(targetCanvas, targetEditor);
+            List<String> pasted = controller.paste(targetCanvas, targetEditor).pastedNames();
 
             assertThat(pasted).hasSize(1);
             String pastedFlowName = pasted.get(0);
@@ -300,7 +327,7 @@ class CopyPasteControllerTest {
             // Paste into a fresh editor
             ModelEditor targetEditor = new ModelEditor();
             CanvasState targetCanvas = new CanvasState();
-            List<String> pasted = controller.paste(targetCanvas, targetEditor);
+            List<String> pasted = controller.paste(targetCanvas, targetEditor).pastedNames();
 
             assertThat(pasted).hasSize(2);
             String pastedFlowName = pasted.stream()
@@ -353,7 +380,8 @@ class CopyPasteControllerTest {
             controller.copy(canvasState, editor);
 
             // Paste into the same editor
-            List<String> pasted = controller.paste(canvasState, editor);
+            CopyPasteController.PasteResult pasteResult = controller.paste(canvasState, editor);
+            List<String> pasted = pasteResult.pastedNames();
             assertThat(pasted).hasSize(2);
 
             String pastedModuleName = pasted.stream()
@@ -403,12 +431,101 @@ class CopyPasteControllerTest {
             // Paste into a fresh editor
             ModelEditor targetEditor = new ModelEditor();
             CanvasState targetCanvas = new CanvasState();
-            List<String> pasted = controller.paste(targetCanvas, targetEditor);
+            List<String> pasted = controller.paste(targetCanvas, targetEditor).pastedNames();
 
             assertThat(pasted).hasSize(1);
             ModuleInstanceDef pastedModule = targetEditor.getModuleByName(pasted.get(0));
-            // "Rate" doesn't exist in target — should be replaced with 0
+            // "Rate" doesn't exist in target — input should be replaced with 0
             assertThat(pastedModule.inputBindings().get("input_port")).isEqualTo("0");
+        }
+
+        @Test
+        void shouldRemoveDanglingOutputBindingsInsteadOfReplacingWithZero() {
+            ModelDefinition innerDef = new ModelDefinitionBuilder()
+                    .name("Inner")
+                    .stock("X", 0, null)
+                    .build();
+
+            ModelDefinition def = new ModelDefinitionBuilder()
+                    .name("Test")
+                    .constant("Rate", 0.5, null)
+                    .module("Mod1", innerDef,
+                            Map.of("input_port", "Rate"),
+                            Map.of("output_port", "Rate"))
+                    .build();
+            editor.loadFrom(def);
+            canvasState.addElement("Rate", ElementType.CONSTANT, 100, 100);
+            canvasState.addElement("Mod1", ElementType.MODULE, 200, 200);
+
+            // Copy only the module (not the constant it references)
+            canvasState.select("Mod1");
+            controller.copy(canvasState, editor);
+
+            ModelEditor targetEditor = new ModelEditor();
+            CanvasState targetCanvas = new CanvasState();
+            List<String> pasted = controller.paste(targetCanvas, targetEditor).pastedNames();
+
+            ModuleInstanceDef pastedModule = targetEditor.getModuleByName(pasted.get(0));
+            // Output binding should be removed, not "0"
+            assertThat(pastedModule.outputBindings()).doesNotContainKey("output_port");
+            // Input binding still gets "0" (valid as expression)
+            assertThat(pastedModule.inputBindings().get("input_port")).isEqualTo("0");
+        }
+    }
+
+    @Nested
+    @DisplayName("paste result reports replaced references")
+    class PasteResultReporting {
+
+        @Test
+        void shouldReportReplacedReferencesInPasteResult() {
+            ModelDefinition def = new ModelDefinitionBuilder()
+                    .name("Test")
+                    .stock("Population", 100, null)
+                    .constant("Growth Rate", 0.05, null)
+                    .flow("Births", "Population * Growth_Rate", "day", "Population", null)
+                    .build();
+            editor.loadFrom(def);
+            canvasState.addElement("Population", ElementType.STOCK, 100, 100);
+            canvasState.addElement("Growth Rate", ElementType.CONSTANT, 200, 100);
+            canvasState.addElement("Births", ElementType.FLOW, 150, 100);
+
+            // Copy only the flow
+            canvasState.select("Births");
+            controller.copy(canvasState, editor);
+
+            ModelEditor targetEditor = new ModelEditor();
+            CanvasState targetCanvas = new CanvasState();
+            CopyPasteController.PasteResult result = controller.paste(targetCanvas, targetEditor);
+
+            assertThat(result.pastedNames()).hasSize(1);
+            assertThat(result.replacedReferences()).containsExactlyInAnyOrder(
+                    "Population", "Growth Rate");
+        }
+
+        @Test
+        void shouldReturnEmptyReplacedWhenAllReferencesExist() {
+            ModelDefinition def = new ModelDefinitionBuilder()
+                    .name("Test")
+                    .stock("Population", 100, null)
+                    .constant("Rate", 0.05, null)
+                    .flow("Growth", "Population * Rate", "day", "Population", null)
+                    .build();
+            editor.loadFrom(def);
+            canvasState.addElement("Population", ElementType.STOCK, 100, 100);
+            canvasState.addElement("Rate", ElementType.CONSTANT, 200, 100);
+            canvasState.addElement("Growth", ElementType.FLOW, 150, 100);
+
+            canvasState.select("Population");
+            canvasState.addToSelection("Rate");
+            canvasState.addToSelection("Growth");
+            controller.copy(canvasState, editor);
+
+            ModelEditor targetEditor = new ModelEditor();
+            CanvasState targetCanvas = new CanvasState();
+            CopyPasteController.PasteResult result = controller.paste(targetCanvas, targetEditor);
+
+            assertThat(result.replacedReferences()).isEmpty();
         }
     }
 
@@ -433,7 +550,7 @@ class CopyPasteControllerTest {
 
             ModelEditor targetEditor = new ModelEditor();
             CanvasState targetCanvas = new CanvasState();
-            List<String> pasted = controller.paste(targetCanvas, targetEditor);
+            List<String> pasted = controller.paste(targetCanvas, targetEditor).pastedNames();
 
             assertThat(pasted).containsExactlyInAnyOrder("Population", "Growth Rate");
             assertThat(targetEditor.getStockByName("Population").initialValue()).isEqualTo(100);
@@ -460,7 +577,7 @@ class CopyPasteControllerTest {
 
             ModelEditor targetEditor = new ModelEditor();
             CanvasState targetCanvas = new CanvasState();
-            List<String> pasted = controller.paste(targetCanvas, targetEditor);
+            List<String> pasted = controller.paste(targetCanvas, targetEditor).pastedNames();
 
             assertThat(pasted).containsExactlyInAnyOrder("Source", "Sink", "Transfer");
 
@@ -499,7 +616,7 @@ class CopyPasteControllerTest {
 
             ModelEditor targetEditor = new ModelEditor();
             CanvasState targetCanvas = new CanvasState();
-            List<String> pasted = controller.paste(targetCanvas, targetEditor);
+            List<String> pasted = controller.paste(targetCanvas, targetEditor).pastedNames();
 
             assertThat(pasted).containsExactlyInAnyOrder(
                     "Water_in_Tub", "Outflow", "Inflow", "Outflow_Rate", "Inflow_Rate");
@@ -534,7 +651,7 @@ class CopyPasteControllerTest {
 
             ModelEditor targetEditor = new ModelEditor();
             CanvasState targetCanvas = new CanvasState();
-            List<String> pasted = controller.paste(targetCanvas, targetEditor);
+            List<String> pasted = controller.paste(targetCanvas, targetEditor).pastedNames();
 
             assertThat(pasted).containsExactlyInAnyOrder("Population", "Rate", "Growth");
 
@@ -569,7 +686,7 @@ class CopyPasteControllerTest {
             targetEditor.loadFrom(targetDef);
             CanvasState targetCanvas = new CanvasState();
             targetCanvas.addElement("Population", ElementType.STOCK, 100, 100);
-            List<String> pasted = controller.paste(targetCanvas, targetEditor);
+            List<String> pasted = controller.paste(targetCanvas, targetEditor).pastedNames();
 
             assertThat(pasted).hasSize(1);
             assertThat(pasted.get(0)).isNotEqualTo("Population");
@@ -604,6 +721,22 @@ class CopyPasteControllerTest {
             String result = CopyPasteController.remapEquationTokens(
                     "A + B + C", mapping);
             assertThat(result).isEqualTo("X + B + C");
+        }
+
+        @Test
+        void shouldRemapBacktickQuotedIdentifiers() {
+            Map<String, String> mapping = Map.of("Tasks Remaining", "Open Items");
+            String result = CopyPasteController.remapEquationTokens(
+                    "`Tasks Remaining` * Rate", mapping);
+            assertThat(result).isEqualTo("`Open Items` * Rate");
+        }
+
+        @Test
+        void shouldLeaveUnmappedBacktickTokensUntouched() {
+            Map<String, String> mapping = Map.of("A", "X");
+            String result = CopyPasteController.remapEquationTokens(
+                    "`Unknown Name` + A", mapping);
+            assertThat(result).isEqualTo("`Unknown Name` + X");
         }
     }
 }
