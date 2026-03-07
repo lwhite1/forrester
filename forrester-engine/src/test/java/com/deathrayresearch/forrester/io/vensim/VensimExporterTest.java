@@ -9,6 +9,8 @@ import com.deathrayresearch.forrester.model.def.LookupTableDef;
 import com.deathrayresearch.forrester.model.def.ModelDefinition;
 import com.deathrayresearch.forrester.model.def.ModelDefinitionBuilder;
 
+import java.util.List;
+
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -46,7 +48,7 @@ class VensimExporterTest {
             assertThat(mdl).contains("INITIAL TIME");
             assertThat(mdl).contains("TIME STEP");
             assertThat(mdl).contains("SAVEPER");
-            assertThat(mdl).contains("\\---/// Sketch");
+            assertThat(mdl).contains("\\---///");
 
             // Re-import the exported content and verify structures preserved
             ImportResult reImported = importer.importModel(mdl, "sir");
@@ -265,7 +267,7 @@ class VensimExporterTest {
             assertThat(mdl).contains("INITIAL TIME");
             assertThat(mdl).contains("TIME STEP");
             assertThat(mdl).contains("SAVEPER");
-            assertThat(mdl).contains("\\---/// Sketch");
+            assertThat(mdl).contains("\\---///");
         }
     }
 
@@ -338,23 +340,115 @@ class VensimExporterTest {
 
         @Test
         void shouldRoundTripCldModel() {
+            // Build a CLD with a view so the sketch section has element placements,
+            // allowing the importer to detect CLD mode on re-import
             ModelDefinition def = new ModelDefinitionBuilder()
                     .name("CLD")
                     .defaultSimulation("Year", 100, "Year")
                     .cldVariable("Population", "The total population")
                     .cldVariable("Birth_Rate", "Rate of births")
                     .cldVariable("Death_Rate", "Rate of deaths")
+                    .causalLink("Birth_Rate", "Population", CausalLinkDef.Polarity.POSITIVE)
+                    .view(new com.deathrayresearch.forrester.model.def.ViewDef("CLD",
+                            List.of(
+                                    new com.deathrayresearch.forrester.model.def.ElementPlacement(
+                                            "Population", com.deathrayresearch.forrester.model.def.ElementType.CLD_VARIABLE, 200, 200),
+                                    new com.deathrayresearch.forrester.model.def.ElementPlacement(
+                                            "Birth_Rate", com.deathrayresearch.forrester.model.def.ElementType.CLD_VARIABLE, 100, 100),
+                                    new com.deathrayresearch.forrester.model.def.ElementPlacement(
+                                            "Death_Rate", com.deathrayresearch.forrester.model.def.ElementType.CLD_VARIABLE, 300, 100)),
+                            List.of(new com.deathrayresearch.forrester.model.def.ConnectorRoute("Birth_Rate", "Population")),
+                            List.of()))
                     .build();
 
             String mdl = VensimExporter.toVensim(def);
 
-            // Re-import — the sketch terminator line makes the importer detect CLD mode,
-            // so the variables round-trip back as CLD variables
+            // Verify sketch section has element placements and connector
+            assertThat(mdl).contains("*CLD");
+            assertThat(mdl).contains("10,1,Population,200,200");
+            assertThat(mdl).contains("10,2,Birth Rate,100,100");
+            assertThat(mdl).contains("1,4,2,1");
+
+            // Re-import — sketch with no flow valves + no stocks → CLD mode
             VensimImporter importer = new VensimImporter();
             ImportResult result = importer.importModel(mdl, "CLD");
 
             assertThat(result.definition().cldVariables()).hasSize(3);
+            assertThat(result.definition().causalLinks()).hasSize(1);
             assertThat(result.definition().constants()).isEmpty();
+        }
+    }
+
+    @Nested
+    @DisplayName("Sketch export")
+    class SketchExport {
+
+        @Test
+        void shouldExportViewElementsAndConnectors() {
+            ModelDefinition def = new ModelDefinitionBuilder()
+                    .name("Test")
+                    .defaultSimulation("Day", 100, "Day")
+                    .stock("Tank", 50.0, "Gallons")
+                    .constant("rate", 10.0, "Gallons/Day")
+                    .view(new com.deathrayresearch.forrester.model.def.ViewDef("Main",
+                            List.of(
+                                    new com.deathrayresearch.forrester.model.def.ElementPlacement(
+                                            "Tank", com.deathrayresearch.forrester.model.def.ElementType.STOCK, 200, 150),
+                                    new com.deathrayresearch.forrester.model.def.ElementPlacement(
+                                            "rate", com.deathrayresearch.forrester.model.def.ElementType.CONSTANT, 100, 300)),
+                            List.of(new com.deathrayresearch.forrester.model.def.ConnectorRoute("rate", "Tank")),
+                            List.of()))
+                    .build();
+
+            String mdl = VensimExporter.toVensim(def);
+
+            assertThat(mdl).contains("*Main");
+            assertThat(mdl).contains("10,1,Tank,200,150");
+            assertThat(mdl).contains("10,2,rate,100,300");
+            assertThat(mdl).contains("1,3,2,1");
+        }
+
+        @Test
+        void shouldRoundTripSketchPositions() {
+            Path sirPath = Path.of("src/test/resources/vensim/sir.mdl");
+            VensimImporter importer = new VensimImporter();
+            ImportResult importResult;
+            try {
+                importResult = importer.importModel(sirPath);
+            } catch (Exception e) {
+                throw new RuntimeException("Failed to import sir.mdl", e);
+            }
+
+            String mdl = VensimExporter.toVensim(importResult.definition());
+
+            // Re-import and verify sketch data survives
+            ImportResult reImported = importer.importModel(mdl, "sir");
+            assertThat(reImported.definition().views()).isNotEmpty();
+            assertThat(reImported.definition().views().getFirst().elements()).isNotEmpty();
+            assertThat(reImported.definition().views().getFirst().connectors()).isNotEmpty();
+        }
+
+        @Test
+        void shouldWriteFlowValvesAsType11() {
+            ModelDefinition def = new ModelDefinitionBuilder()
+                    .name("Test")
+                    .defaultSimulation("Day", 100, "Day")
+                    .stock("Tank", 50.0, "Gallons")
+                    .flow(new FlowDef("fill", "10", "Day", null, "Tank"))
+                    .view(new com.deathrayresearch.forrester.model.def.ViewDef("Main",
+                            List.of(
+                                    new com.deathrayresearch.forrester.model.def.ElementPlacement(
+                                            "Tank", com.deathrayresearch.forrester.model.def.ElementType.STOCK, 200, 150),
+                                    new com.deathrayresearch.forrester.model.def.ElementPlacement(
+                                            "fill", com.deathrayresearch.forrester.model.def.ElementType.FLOW, 100, 150)),
+                            List.of(),
+                            List.of()))
+                    .build();
+
+            String mdl = VensimExporter.toVensim(def);
+
+            assertThat(mdl).contains("10,1,Tank,200,150");
+            assertThat(mdl).contains("11,2,fill,100,150");
         }
     }
 

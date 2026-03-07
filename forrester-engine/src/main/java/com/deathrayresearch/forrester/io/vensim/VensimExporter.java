@@ -3,20 +3,27 @@ package com.deathrayresearch.forrester.io.vensim;
 import com.deathrayresearch.forrester.model.def.AuxDef;
 import com.deathrayresearch.forrester.model.def.CausalLinkDef;
 import com.deathrayresearch.forrester.model.def.CldVariableDef;
+import com.deathrayresearch.forrester.model.def.ConnectorRoute;
 import com.deathrayresearch.forrester.model.def.ConstantDef;
+import com.deathrayresearch.forrester.model.def.ElementPlacement;
+import com.deathrayresearch.forrester.model.def.ElementType;
 import com.deathrayresearch.forrester.model.def.FlowDef;
+import com.deathrayresearch.forrester.model.def.FlowRoute;
 import com.deathrayresearch.forrester.model.def.LookupTableDef;
 import com.deathrayresearch.forrester.model.def.ModelDefinition;
 import com.deathrayresearch.forrester.model.def.SimulationSettings;
 import com.deathrayresearch.forrester.model.def.StockDef;
+import com.deathrayresearch.forrester.model.def.ViewDef;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.StringJoiner;
 import java.util.regex.Matcher;
@@ -104,8 +111,11 @@ public final class VensimExporter {
         // Write control section
         sb.append(buildControlSection(def));
 
-        // Sketch terminator
-        sb.append("\\---/// Sketch\n");
+        // Sketch section
+        sb.append("\\---///\n");
+        for (ViewDef view : def.views()) {
+            sb.append(buildSketchView(view));
+        }
 
         return sb.toString();
     }
@@ -295,6 +305,52 @@ public final class VensimExporter {
                 + "\t|\n\n");
 
         return sb.toString();
+    }
+
+    private static String buildSketchView(ViewDef view) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("*").append(view.name()).append("\n");
+
+        int nextId = 1;
+        Map<String, Integer> nameToId = new HashMap<>();
+
+        // Collect flow names from flow routes for type-11 classification
+        Set<String> flowRouteNames = new HashSet<>();
+        for (FlowRoute fr : view.flowRoutes()) {
+            flowRouteNames.add(fr.flowName());
+        }
+
+        // Write element lines (type 10 for non-flow, type 11 for flow valves)
+        for (ElementPlacement ep : view.elements()) {
+            int id = nextId++;
+            nameToId.put(ep.name(), id);
+
+            int lineType = (ep.type() == ElementType.FLOW) ? 11 : 10;
+            String vensimName = denormalizeName(ep.name());
+            sb.append(lineType).append(",").append(id).append(",")
+                    .append(vensimName).append(",")
+                    .append(formatCoord(ep.x())).append(",")
+                    .append(formatCoord(ep.y())).append("\n");
+        }
+
+        // Write connector lines (type 1)
+        for (ConnectorRoute cr : view.connectors()) {
+            int id = nextId++;
+            String fromRef = String.valueOf(nameToId.getOrDefault(cr.from(), 0));
+            String toRef = String.valueOf(nameToId.getOrDefault(cr.to(), 0));
+            sb.append("1,").append(id).append(",")
+                    .append(fromRef).append(",")
+                    .append(toRef).append("\n");
+        }
+
+        return sb.toString();
+    }
+
+    private static String formatCoord(double value) {
+        if (value == Math.floor(value) && !Double.isInfinite(value)) {
+            return String.valueOf((int) value);
+        }
+        return String.valueOf(Math.round(value));
     }
 
     /**
