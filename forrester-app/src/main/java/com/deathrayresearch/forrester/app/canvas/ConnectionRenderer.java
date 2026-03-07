@@ -149,8 +149,6 @@ public final class ConnectionRenderer {
 
         gc.beginPath();
         gc.moveTo(fromX, fromY);
-        // Approximate stop point: evaluate curve at stopT and use that as the quadratic target
-        double[] stopPt = CausalLinkGeometry.evaluate(fromX, fromY, cp.x(), cp.y(), toX, toY, stopT);
         // Draw the curve using sampled line segments for precision
         int segments = 30;
         for (int i = 1; i <= segments; i++) {

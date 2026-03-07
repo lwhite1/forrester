@@ -65,7 +65,8 @@ public class XmileImporter implements ModelImporter {
     @Override
     public ImportResult importModel(Path path) throws IOException {
         String content = Files.readString(path, StandardCharsets.UTF_8);
-        String modelName = path.getFileName().toString();
+        Path fileName = path.getFileName();
+        String modelName = fileName != null ? fileName.toString() : path.toString();
         int dotPos = modelName.lastIndexOf('.');
         if (dotPos > 0) {
             modelName = modelName.substring(0, dotPos);
@@ -250,7 +251,7 @@ public class XmileImporter implements ModelImporter {
             warnings.add("Range specification on flow '" + name + "' ignored");
         }
 
-        String unit = getChildText(flowElem, XmileConstants.UNITS);
+        // unit is available via getChildText(flowElem, XmileConstants.UNITS) but not yet used
         String doc = getChildText(flowElem, XmileConstants.DOC);
         String comment = (doc != null && !doc.isBlank()) ? doc : name;
 
@@ -518,7 +519,7 @@ public class XmileImporter implements ModelImporter {
             for (Element elem : elems) {
                 String name = elem.getAttribute(XmileConstants.ATTR_NAME);
                 warnings.add("Unsupported XMILE element <" + tag + "> '"
-                        + (name != null ? name : "") + "' skipped");
+                        + (name.isEmpty() ? "" : name) + "' skipped");
             }
         }
     }

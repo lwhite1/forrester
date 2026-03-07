@@ -651,10 +651,14 @@ public class ModelWindow {
                 new FileChooser.ExtensionFilter("XMILE Model (*.xmile, *.stmx, *.itmx)",
                         "*.xmile", "*.stmx", "*.itmx"));
         if (currentFile != null) {
-            if (currentFile.getParent() != null) {
-                chooser.setInitialDirectory(currentFile.getParent().toFile());
+            Path parentDir = currentFile.getParent();
+            if (parentDir != null) {
+                chooser.setInitialDirectory(parentDir.toFile());
             }
-            chooser.setInitialFileName(currentFile.getFileName().toString());
+            Path fn = currentFile.getFileName();
+            if (fn != null) {
+                chooser.setInitialFileName(fn.toString());
+            }
         } else {
             LastDirectoryStore.applySaveDirectory(chooser);
         }
@@ -1244,7 +1248,8 @@ public class ModelWindow {
         if (editor != null && !"Untitled".equals(editor.getModelName())) {
             name = editor.getModelName();
         } else if (currentFile != null) {
-            name = currentFile.getFileName().toString();
+            Path fn = currentFile.getFileName();
+            name = fn != null ? fn.toString() : currentFile.toString();
         } else {
             name = "Untitled";
         }

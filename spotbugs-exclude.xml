@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<FindBugsFilter>
+    <!--
+        EI_EXPOSE_REP / EI_EXPOSE_REP2: mutable field exposure.
+        This project uses records and internal-API classes (CompilationContext,
+        CompiledModel, ExprCompiler, etc.) that intentionally share mutable state
+        between cooperating classes within the same package. Suppressing globally
+        because the cost of defensive copying outweighs the risk in this codebase.
+    -->
+    <Match>
+        <Bug pattern="EI_EXPOSE_REP,EI_EXPOSE_REP2,EI_EXPOSE_STATIC_REP2"/>
+    </Match>
+
+    <!--
+        CT_CONSTRUCTOR_THROW: constructor throws exception.
+        Preconditions checks in constructors (Stock, Subscript, SubscriptRange, etc.)
+        are intentional fail-fast validation. These classes are not subclassed by
+        untrusted code, so finalizer attacks are not a concern.
+    -->
+    <Match>
+        <Bug pattern="CT_CONSTRUCTOR_THROW"/>
+    </Match>
+
+    <!-- Suppress serialization warnings — this is not a serialization-based project -->
+    <Match>
+        <Bug pattern="SE_BAD_FIELD,SE_NO_SERIALVERSIONID,SE_COMPARATOR_SHOULD_BE_SERIALIZABLE"/>
+    </Match>
+
+    <!-- Demo classes are example code, not production -->
+    <Match>
+        <Package name="~com\.deathrayresearch\.forrester\.demo\..*"/>
+        <Bug pattern="URF_UNREAD_FIELD"/>
+    </Match>
+
+    <!--
+        IC_SUPERCLASS_USES_SUBCLASS_DURING_INITIALIZATION: Dimension interface
+        uses static fields referencing subclass instances (Time.INSTANCE, etc.).
+        This is an intentional enum-like constant pattern; the subclasses do not
+        reference Dimension during their own static initialization, so there is
+        no circular dependency risk.
+    -->
+    <Match>
+        <Class name="com.deathrayresearch.forrester.measure.Dimension"/>
+        <Bug pattern="IC_SUPERCLASS_USES_SUBCLASS_DURING_INITIALIZATION"/>
+    </Match>
+</FindBugsFilter>

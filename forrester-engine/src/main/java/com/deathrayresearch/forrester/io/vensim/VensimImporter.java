@@ -54,7 +54,8 @@ public class VensimImporter implements ModelImporter {
     @Override
     public ImportResult importModel(Path path) throws IOException {
         String content = Files.readString(path, StandardCharsets.UTF_8);
-        String modelName = path.getFileName().toString();
+        Path fileName = path.getFileName();
+        String modelName = fileName != null ? fileName.toString() : path.toString();
         int dotPos = modelName.lastIndexOf('.');
         if (dotPos > 0) {
             modelName = modelName.substring(0, dotPos);
@@ -109,7 +110,6 @@ public class VensimImporter implements ModelImporter {
         Set<String> stockNames = new HashSet<>();
         Set<String> flowNames = new HashSet<>();
         Set<String> lookupNames = new HashSet<>();
-        Set<String> constantNames = new HashSet<>();
         Set<String> allNormalizedNames = new HashSet<>();
 
         // First sub-pass: identify stocks so we know which flows connect to them
@@ -134,9 +134,6 @@ public class VensimImporter implements ModelImporter {
             }
             if (eq.operator().equals(":=")) {
                 continue;
-            }
-            if (eq.operator().equals("==") || isNumericLiteral(eq.expression())) {
-                constantNames.add(normalized);
             }
         }
 

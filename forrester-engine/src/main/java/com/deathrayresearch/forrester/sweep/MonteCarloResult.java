@@ -156,7 +156,7 @@ public class MonteCarloResult {
             seriesData[p] = getPercentileSeries(name, percentiles[p]);
         }
 
-        try (CSVWriter writer = new CSVWriter(new FileWriter(filePath))) {
+        try (CSVWriter writer = new CSVWriter(new FileWriter(filePath, java.nio.charset.StandardCharsets.UTF_8))) {
             // Header
             List<String> header = new ArrayList<>();
             header.add("Step");

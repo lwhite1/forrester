@@ -88,9 +88,8 @@ public class ModelCanvas extends Canvas {
     private String hoveredElement;
     private ConnectionId hoveredConnection;
     private ConnectionId selectedConnection;
-    /** True when selectedConnection/hoveredConnection refers to a causal link rather than info link. */
+    /** True when selectedConnection refers to a causal link rather than info link. */
     private boolean selectedIsCausalLink;
-    private boolean hoveredIsCausalLink;
 
     // Feedback loop highlighting
     private boolean loopHighlightActive;
@@ -251,13 +250,6 @@ public class ModelCanvas extends Canvas {
         return new UndoManager.Snapshot(
                 editor.toModelDefinition(canvasState.toViewDef()),
                 canvasState.toViewDef());
-    }
-
-    /**
-     * Saves the current state to the undo stack before a mutation.
-     */
-    private void saveUndoState() {
-        saveUndoState("Edit");
     }
 
     /**
@@ -858,13 +850,11 @@ public class ModelCanvas extends Canvas {
 
         // Connection hover: only when no element is hovered
         ConnectionId connHit = null;
-        boolean connIsCausal = false;
         if (hit == null) {
             connHit = HitTester.hitTestInfoLink(canvasState, connectors, worldX, worldY);
             if (connHit == null && editor != null) {
                 connHit = HitTester.hitTestCausalLink(canvasState,
                         editor.getCausalLinks(), worldX, worldY);
-                connIsCausal = connHit != null;
             }
         }
 
@@ -873,7 +863,6 @@ public class ModelCanvas extends Canvas {
         if (changed) {
             hoveredElement = hit;
             hoveredConnection = connHit;
-            hoveredIsCausalLink = connIsCausal;
             redraw();
             updateElementTooltip(hit, event);
         }
@@ -905,12 +894,6 @@ public class ModelCanvas extends Canvas {
         }
 
         String text = buildTooltipText(elementName, type);
-        if (text == null) {
-            Tooltip.uninstall(this, elementTooltip);
-            elementTooltip.hide();
-            return;
-        }
-
         elementTooltip.setText(text);
         Tooltip.install(this, elementTooltip);
     }
