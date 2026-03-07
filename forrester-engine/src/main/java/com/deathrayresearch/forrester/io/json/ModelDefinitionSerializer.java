@@ -171,6 +171,11 @@ public class ModelDefinitionSerializer {
             if (s.negativeValuePolicy() != null) {
                 node.put("negativeValuePolicy", s.negativeValuePolicy());
             }
+            if (!s.subscripts().isEmpty()) {
+                ArrayNode subs = mapper.createArrayNode();
+                s.subscripts().forEach(subs::add);
+                node.set("subscripts", subs);
+            }
             arr.add(node);
         }
         return arr;
@@ -192,6 +197,11 @@ public class ModelDefinitionSerializer {
             if (f.sink() != null) {
                 node.put("sink", f.sink());
             }
+            if (!f.subscripts().isEmpty()) {
+                ArrayNode subs = mapper.createArrayNode();
+                f.subscripts().forEach(subs::add);
+                node.set("subscripts", subs);
+            }
             arr.add(node);
         }
         return arr;
@@ -207,6 +217,11 @@ public class ModelDefinitionSerializer {
             }
             node.put("equation", a.equation());
             node.put("unit", a.unit());
+            if (!a.subscripts().isEmpty()) {
+                ArrayNode subs = mapper.createArrayNode();
+                a.subscripts().forEach(subs::add);
+                node.set("subscripts", subs);
+            }
             arr.add(node);
         }
         return arr;
@@ -420,7 +435,8 @@ public class ModelDefinitionSerializer {
                         textOrNull(n, "comment"),
                         requiredDouble(n, "initialValue"),
                         requiredText(n, "unit"),
-                        textOrNull(n, "negativeValuePolicy")));
+                        textOrNull(n, "negativeValuePolicy"),
+                        readStringList(n, "subscripts")));
             }
         }
 
@@ -433,7 +449,8 @@ public class ModelDefinitionSerializer {
                         requiredText(n, "equation"),
                         requiredText(n, "timeUnit"),
                         textOrNull(n, "source"),
-                        textOrNull(n, "sink")));
+                        textOrNull(n, "sink"),
+                        readStringList(n, "subscripts")));
             }
         }
 
@@ -444,7 +461,8 @@ public class ModelDefinitionSerializer {
                         requiredText(n, "name"),
                         textOrNull(n, "comment"),
                         requiredText(n, "equation"),
-                        requiredText(n, "unit")));
+                        requiredText(n, "unit"),
+                        readStringList(n, "subscripts")));
             }
         }
 
@@ -660,6 +678,18 @@ public class ModelDefinitionSerializer {
             points.add(jsonToDoubleArray(p));
         }
         return points;
+    }
+
+    private List<String> readStringList(JsonNode node, String field) {
+        if (!node.has(field)) {
+            return List.of();
+        }
+        JsonNode arr = node.get(field);
+        List<String> result = new ArrayList<>();
+        for (JsonNode item : arr) {
+            result.add(item.asText());
+        }
+        return result;
     }
 
     private String textOrNull(JsonNode node, String field) {

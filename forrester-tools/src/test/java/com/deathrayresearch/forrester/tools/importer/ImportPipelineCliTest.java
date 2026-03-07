@@ -19,7 +19,8 @@ class ImportPipelineCliTest {
                 "--output-dir", "/tmp/src",
                 "--metadata-file", "meta.json",
                 "--dry-run",
-                "--overwrite"
+                "--overwrite",
+                "--json-only"
         };
 
         ImportPipelineCli.CliArgs parsed = ImportPipelineCli.parseArgs(args);
@@ -35,6 +36,13 @@ class ImportPipelineCliTest {
         assertThat(parsed.metadataFile).isEqualTo("meta.json");
         assertThat(parsed.dryRun).isTrue();
         assertThat(parsed.overwrite).isTrue();
+        assertThat(parsed.jsonOnly).isTrue();
+    }
+
+    @Test
+    void shouldDefaultJsonOnlyToFalse() {
+        ImportPipelineCli.CliArgs parsed = ImportPipelineCli.parseArgs(new String[]{});
+        assertThat(parsed.jsonOnly).isFalse();
     }
 
     @Test

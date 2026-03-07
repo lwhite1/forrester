@@ -483,4 +483,84 @@ class ModelCompilerTest {
                     .hasMessageContaining("Unknown NegativeValuePolicy");
         }
     }
+
+    @Nested
+    @DisplayName("Subscript expansion")
+    class SubscriptExpansionTests {
+
+        @Test
+        void shouldCompileSubscriptedModel() {
+            ModelDefinition def = new ModelDefinitionBuilder()
+                    .name("Regional Population")
+                    .subscript("Region", java.util.List.of("North", "South"))
+                    .stock("Population", 100, "Person", java.util.List.of("Region"))
+                    .constant("Growth_Rate", 0.01, "Dimensionless unit")
+                    .flow("Births", "Population * Growth_Rate", "Day",
+                            null, "Population", java.util.List.of("Region"))
+                    .defaultSimulation("Day", 10, "Day")
+                    .build();
+
+            CompiledModel compiled = compiler.compile(def);
+            Simulation sim = compiled.createSimulation();
+            sim.execute();
+
+            Stock north = findStock(compiled.getModel(), "Population[North]");
+            Stock south = findStock(compiled.getModel(), "Population[South]");
+
+            // Both should grow from 100 at 1% per day for 10 days
+            assertThat(north.getValue()).isBetween(109.0, 112.0);
+            assertThat(south.getValue()).isBetween(109.0, 112.0);
+            // They should have the same value (symmetric model)
+            assertThat(north.getValue()).isCloseTo(south.getValue(), within(0.001));
+        }
+
+        @Test
+        void shouldCompileSubscriptedDrainModel() {
+            ModelDefinition def = new ModelDefinitionBuilder()
+                    .name("Regional Drain")
+                    .subscript("Region", java.util.List.of("East", "West"))
+                    .stock("Tank", 100, "Thing", java.util.List.of("Region"))
+                    .flow("Drain", "Tank * 0.1", "Day",
+                            "Tank", null, java.util.List.of("Region"))
+                    .defaultSimulation("Day", 5, "Day")
+                    .build();
+
+            CompiledModel compiled = compiler.compile(def);
+            Simulation sim = compiled.createSimulation();
+            sim.execute();
+
+            Stock east = findStock(compiled.getModel(), "Tank[East]");
+            Stock west = findStock(compiled.getModel(), "Tank[West]");
+
+            assertThat(east.getValue()).isLessThan(100);
+            assertThat(west.getValue()).isLessThan(100);
+            assertThat(east.getValue()).isCloseTo(west.getValue(), within(0.001));
+        }
+
+        @Test
+        void shouldCompileMixedSubscriptedAndScalarElements() {
+            ModelDefinition def = new ModelDefinitionBuilder()
+                    .name("Mixed")
+                    .subscript("Region", java.util.List.of("A", "B"))
+                    .stock("Pop", 50, "Person", java.util.List.of("Region"))
+                    .stock("Total", 0, "Person")
+                    .constant("rate", 0.1, "Dimensionless unit")
+                    .flow("growth", "Pop * rate", "Day",
+                            null, "Pop", java.util.List.of("Region"))
+                    .defaultSimulation("Day", 5, "Day")
+                    .build();
+
+            CompiledModel compiled = compiler.compile(def);
+            Simulation sim = compiled.createSimulation();
+            sim.execute();
+
+            Stock popA = findStock(compiled.getModel(), "Pop[A]");
+            Stock popB = findStock(compiled.getModel(), "Pop[B]");
+            Stock total = findStock(compiled.getModel(), "Total");
+
+            assertThat(popA.getValue()).isGreaterThan(50);
+            assertThat(popB.getValue()).isGreaterThan(50);
+            assertThat(total.getValue()).isCloseTo(0.0, within(0.001));
+        }
+    }
 }

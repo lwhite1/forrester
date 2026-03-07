@@ -292,6 +292,25 @@ public class ExprParser {
         }
         String name = input.substring(start, pos);
 
+        // Subscript bracket notation: Name[Label]
+        if (pos < input.length() && input.charAt(pos) == '[') {
+            int bracketStart = pos;
+            pos++; // skip '['
+            int labelStart = pos;
+            while (pos < input.length() && input.charAt(pos) != ']') {
+                pos++;
+            }
+            if (pos >= input.length()) {
+                throw new ParseException("Unterminated subscript bracket", bracketStart + trimOffset);
+            }
+            String label = input.substring(labelStart, pos);
+            pos++; // skip ']'
+            if (label.isEmpty()) {
+                throw new ParseException("Empty subscript label", bracketStart + trimOffset);
+            }
+            name = name + "[" + label + "]";
+        }
+
         skipWhitespace();
 
         // IF is special: IF(condition, then, else)

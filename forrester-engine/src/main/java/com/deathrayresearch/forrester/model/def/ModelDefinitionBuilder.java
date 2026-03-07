@@ -89,6 +89,21 @@ public class ModelDefinitionBuilder {
     }
 
     /**
+     * Adds a subscripted stock that will be expanded into scalar elements during compilation.
+     *
+     * @param name         the stock name
+     * @param initialValue the initial numeric value
+     * @param unit         the unit name
+     * @param subscripts   the subscript dimension names this stock is over
+     * @return this builder
+     */
+    public ModelDefinitionBuilder stock(String name, double initialValue, String unit,
+                                        List<String> subscripts) {
+        stocks.add(new StockDef(name, null, initialValue, unit, null, subscripts));
+        return this;
+    }
+
+    /**
      * Adds a pre-built stock definition.
      *
      * @param stockDef the stock definition to add
@@ -116,6 +131,23 @@ public class ModelDefinitionBuilder {
     }
 
     /**
+     * Adds a subscripted flow that will be expanded into scalar elements during compilation.
+     *
+     * @param name       the flow name
+     * @param equation   the formula expression string
+     * @param timeUnit   the time unit name
+     * @param source     the source stock name, or null
+     * @param sink       the sink stock name, or null
+     * @param subscripts the subscript dimension names
+     * @return this builder
+     */
+    public ModelDefinitionBuilder flow(String name, String equation, String timeUnit,
+                                       String source, String sink, List<String> subscripts) {
+        flows.add(new FlowDef(name, null, equation, timeUnit, source, sink, subscripts));
+        return this;
+    }
+
+    /**
      * Adds a pre-built flow definition.
      *
      * @param flowDef the flow definition to add
@@ -136,6 +168,21 @@ public class ModelDefinitionBuilder {
      */
     public ModelDefinitionBuilder aux(String name, String equation, String unit) {
         auxiliaries.add(new AuxDef(name, equation, unit));
+        return this;
+    }
+
+    /**
+     * Adds a subscripted auxiliary that will be expanded into scalar elements during compilation.
+     *
+     * @param name       the auxiliary name
+     * @param equation   the formula expression string
+     * @param unit       the unit name
+     * @param subscripts the subscript dimension names
+     * @return this builder
+     */
+    public ModelDefinitionBuilder aux(String name, String equation, String unit,
+                                      List<String> subscripts) {
+        auxiliaries.add(new AuxDef(name, null, equation, unit, subscripts));
         return this;
     }
 

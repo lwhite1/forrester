@@ -8,6 +8,7 @@ import com.deathrayresearch.forrester.model.compile.CompiledModel;
 import com.deathrayresearch.forrester.model.compile.ModelCompiler;
 import com.deathrayresearch.forrester.model.def.DefinitionValidator;
 import com.deathrayresearch.forrester.model.def.ModelDefinition;
+import com.deathrayresearch.forrester.io.json.ModelDefinitionSerializer;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -62,20 +63,34 @@ public class ImportPipeline {
             trialCompileErrors.forEach(e -> log.warn("  - {}", e));
         }
 
-        // Stage 4: Generate Java source
-        log.info("Generating Java class: {}", config.className());
-        String packageName = resolvePackageName(config.category());
-        String source = new DemoClassGenerator().generate(
-                definition, config.metadata(), config.className(), packageName,
-                config.sourceFile().getFileName().toString(),
-                importWarnings, validationErrors);
+        // Stage 4: Generate output (Java source or JSON)
+        String source;
+        String outputExtension;
+        if (config.generateCode()) {
+            log.info("Generating Java class: {}", config.className());
+            String packageName = resolvePackageName(config.category());
+            source = new DemoClassGenerator().generate(
+                    definition, config.metadata(), config.className(), packageName,
+                    config.sourceFile().getFileName().toString(),
+                    importWarnings, validationErrors);
+            outputExtension = ".java";
+        } else {
+            log.info("Generating JSON model definition");
+            source = new ModelDefinitionSerializer().toJson(definition);
+            outputExtension = ".json";
+        }
 
         // Stage 5: Write
         Path outputFile = null;
         if (config.dryRun()) {
             log.info("Dry run — skipping file write");
         } else {
-            outputFile = resolveOutputPath(config.outputDir(), packageName, config.className());
+            if (config.generateCode()) {
+                String packageName = resolvePackageName(config.category());
+                outputFile = resolveOutputPath(config.outputDir(), packageName, config.className());
+            } else {
+                outputFile = config.outputDir().resolve(config.className() + outputExtension);
+            }
             if (Files.exists(outputFile) && !config.overwrite()) {
                 throw new IOException("Output file already exists (use --overwrite to replace): " + outputFile);
             }

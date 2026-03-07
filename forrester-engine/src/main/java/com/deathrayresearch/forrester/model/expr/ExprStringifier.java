@@ -73,6 +73,14 @@ public final class ExprStringifier {
         if (name.isEmpty()) {
             return true;
         }
+        // Check for subscript bracket notation: Name[Label]
+        // These are valid identifiers in the parser and don't need quoting
+        int bracketIdx = name.indexOf('[');
+        if (bracketIdx > 0 && name.endsWith("]")) {
+            String baseName = name.substring(0, bracketIdx);
+            String label = name.substring(bracketIdx + 1, name.length() - 1);
+            return needsQuoting(baseName) || label.isEmpty();
+        }
         for (int i = 0; i < name.length(); i++) {
             char c = name.charAt(i);
             if (i == 0) {

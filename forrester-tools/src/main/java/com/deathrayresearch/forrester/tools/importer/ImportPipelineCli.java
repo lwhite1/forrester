@@ -58,7 +58,8 @@ public class ImportPipelineCli {
                 parsed.className,
                 Path.of(parsed.outputDir),
                 parsed.dryRun,
-                parsed.overwrite);
+                parsed.overwrite,
+                !parsed.jsonOnly);
 
         ImportPipeline pipeline = new ImportPipeline();
         PipelineResult result = pipeline.execute(config);
@@ -157,6 +158,7 @@ public class ImportPipelineCli {
                 case "--metadata-file" -> parsed.metadataFile = args[++i];
                 case "--dry-run" -> parsed.dryRun = true;
                 case "--overwrite" -> parsed.overwrite = true;
+                case "--json-only" -> parsed.jsonOnly = true;
                 case "--help", "-h" -> {
                     printUsage();
                     System.exit(0);
@@ -189,6 +191,7 @@ public class ImportPipelineCli {
                 Output:
                   --category <name>       Target sub-package (e.g. "epidemiology")
                   --output-dir <path>     Root source directory (default: forrester-demos/src/main/java)
+                  --json-only             Write model definition as JSON instead of generating Java code
                   --dry-run               Print generated source without writing to disk
                   --overwrite             Overwrite existing generated class
                 """);
@@ -206,5 +209,6 @@ public class ImportPipelineCli {
         String outputDir = "forrester-demos/src/main/java";
         boolean dryRun;
         boolean overwrite;
+        boolean jsonOnly;
     }
 }

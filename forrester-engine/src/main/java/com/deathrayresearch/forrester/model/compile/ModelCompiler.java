@@ -76,7 +76,10 @@ public class ModelCompiler {
                     def.name() != null ? def.name() : "");
         }
 
-        Model model = new Model(def.name());
+        // Pre-expand subscripted elements into scalar elements
+        ModelDefinition expandedDef = SubscriptExpander.expand(def);
+
+        Model model = new Model(expandedDef.name());
         List<Resettable> resettables = new ArrayList<>();
         int[] stepHolder = {0};
         double[] dtHolder = {1.0};
@@ -85,7 +88,7 @@ public class ModelCompiler {
         CompilationContext context = new CompilationContext(
                 unitRegistry, () -> stepHolder[0], null, dtHolder, simTimeUnitHolder);
 
-        compileInto(def, model, context, resettables, stepHolder);
+        compileInto(expandedDef, model, context, resettables, stepHolder);
 
         return new CompiledModel(model, resettables, def, stepHolder, dtHolder,
                 simTimeUnitHolder, unitRegistry);

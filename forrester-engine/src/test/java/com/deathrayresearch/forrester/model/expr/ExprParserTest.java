@@ -476,6 +476,50 @@ class ExprParserTest {
     }
 
     @Nested
+    @DisplayName("Subscript bracket notation")
+    class SubscriptBrackets {
+
+        @Test
+        void shouldParseSimpleBracketRef() {
+            Expr result = ExprParser.parse("Population[North]");
+            assertThat(result).isInstanceOf(Expr.Ref.class);
+            assertThat(((Expr.Ref) result).name()).isEqualTo("Population[North]");
+        }
+
+        @Test
+        void shouldParseBracketRefInExpression() {
+            Expr result = ExprParser.parse("Population[North] * rate");
+            assertThat(result).isInstanceOf(Expr.BinaryOp.class);
+            Expr.BinaryOp bin = (Expr.BinaryOp) result;
+            assertThat(((Expr.Ref) bin.left()).name()).isEqualTo("Population[North]");
+            assertThat(((Expr.Ref) bin.right()).name()).isEqualTo("rate");
+        }
+
+        @Test
+        void shouldParseMultipleBracketRefs() {
+            Expr result = ExprParser.parse("Pop[A] + Pop[B]");
+            assertThat(result).isInstanceOf(Expr.BinaryOp.class);
+            Expr.BinaryOp bin = (Expr.BinaryOp) result;
+            assertThat(((Expr.Ref) bin.left()).name()).isEqualTo("Pop[A]");
+            assertThat(((Expr.Ref) bin.right()).name()).isEqualTo("Pop[B]");
+        }
+
+        @Test
+        void shouldThrowOnUnterminatedBracket() {
+            assertThatThrownBy(() -> ExprParser.parse("Pop[North"))
+                    .isInstanceOf(ParseException.class)
+                    .hasMessageContaining("Unterminated");
+        }
+
+        @Test
+        void shouldThrowOnEmptyBracketLabel() {
+            assertThatThrownBy(() -> ExprParser.parse("Pop[]"))
+                    .isInstanceOf(ParseException.class)
+                    .hasMessageContaining("Empty subscript");
+        }
+    }
+
+    @Nested
     @DisplayName("Depth limits")
     class DepthLimits {
 
