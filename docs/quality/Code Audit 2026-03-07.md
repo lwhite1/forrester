@@ -21,7 +21,7 @@ Full code audit of the Forrester System Dynamics modeling platform covering all 
 |----------|------|-------|-------|
 | Critical | 0 | 1 | 1 |
 | High | 0 | 9 | 9 |
-| Medium | 3 | 7 | 10 |
+| Medium | 2 | 8 | 10 |
 | Low | — | — | 6 |
 
 All open issues have been filed as GitHub issues and assigned to milestone **R1**.
@@ -33,7 +33,6 @@ All open issues have been filed as GitHub issues and assigned to milestone **R1*
 | # | Title | Module | Impact |
 |---|-------|--------|--------|
 | 131 | Equation rename uses string replacement, not AST | app | Stale refs with backtick-quoted names |
-| 132 | ModelWindow god class (1400+ lines) | app | Maintainability/testability |
 | 145 | forrester-ui module has zero tests | ui | Untested code, CI blocking |
 
 ---
@@ -71,7 +70,7 @@ These were already tracked before this audit:
 
 **Weaknesses:**
 - SpotBugs configured but no Checkstyle or ErrorProne yet
-- Several god classes remain: ModelWindow (1412 lines), ModelCanvas (1592 lines)
+- ModelCanvas remains a large class (1592 lines)
 
 ---
 
@@ -81,9 +80,7 @@ These were already tracked before this audit:
 
 1. **#131 — AST-based rename.** Parse → walk → replace → stringify.
 
-2. **#132 — ModelWindow decomposition.** Extract MenuBarBuilder, FileController.
-
-3. **#145 — forrester-ui tests.** Add test directory, basic tests, headless mode.
+2. **#145 — forrester-ui tests.** Add test directory, basic tests, headless mode.
 
 ---
 
