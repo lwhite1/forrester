@@ -85,7 +85,7 @@ public class OptimizerDialog extends Dialog<OptimizerDialog.Config> {
 
         targetVarCombo = new ComboBox<>(FXCollections.observableArrayList(stockNames));
         if (!stockNames.isEmpty()) {
-            targetVarCombo.setValue(stockNames.get(0));
+            targetVarCombo.setValue(stockNames.getFirst());
         }
 
         targetValueLabel = new Label("Target Value:");
@@ -210,7 +210,7 @@ public class OptimizerDialog extends Dialog<OptimizerDialog.Config> {
         ParamRow(List<String> constantNames, VBox container) {
             nameCombo = new ComboBox<>(FXCollections.observableArrayList(constantNames));
             if (!constantNames.isEmpty()) {
-                nameCombo.setValue(constantNames.get(0));
+                nameCombo.setValue(constantNames.getFirst());
             }
             nameCombo.setPrefWidth(130);
 

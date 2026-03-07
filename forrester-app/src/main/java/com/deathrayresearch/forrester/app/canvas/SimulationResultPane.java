@@ -87,7 +87,7 @@ public class SimulationResultPane extends BorderPane {
         List<double[]> rows = result.rows();
 
         NumberAxis xAxis = new NumberAxis();
-        xAxis.setLabel(columns.isEmpty() ? "Step" : columns.get(0));
+        xAxis.setLabel(columns.isEmpty() ? "Step" : columns.getFirst());
 
         NumberAxis yAxis = new NumberAxis();
         yAxis.setLabel("Value");

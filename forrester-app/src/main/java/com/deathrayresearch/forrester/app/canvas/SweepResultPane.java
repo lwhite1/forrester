@@ -46,7 +46,7 @@ public class SweepResultPane extends BorderPane {
 
         ComboBox<String> varCombo = new ComboBox<>(FXCollections.observableArrayList(trackableNames));
         if (!trackableNames.isEmpty()) {
-            varCombo.setValue(trackableNames.get(0));
+            varCombo.setValue(trackableNames.getFirst());
         }
 
         HBox topBar = new HBox(8, new Label("Variable:"), varCombo);
@@ -60,7 +60,7 @@ public class SweepResultPane extends BorderPane {
         });
 
         if (!trackableNames.isEmpty()) {
-            buildChart(trackableNames.get(0));
+            buildChart(trackableNames.getFirst());
         }
     }
 

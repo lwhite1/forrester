@@ -1450,7 +1450,7 @@ public class ModelCanvas extends Canvas {
 
         ViewDef moduleView;
         if (!module.definition().views().isEmpty()) {
-            moduleView = module.definition().views().get(0);
+            moduleView = module.definition().views().getFirst();
         } else {
             moduleView = AutoLayout.layout(module.definition());
         }
@@ -1518,7 +1518,7 @@ public class ModelCanvas extends Canvas {
 
     public List<String> getNavigationPath() {
         String rootName = navController.isInsideModule()
-                ? navController.frames().get(0).editor().getModelName()
+                ? navController.frames().getFirst().editor().getModelName()
                 : editor.getModelName();
         return navController.getPath(rootName);
     }

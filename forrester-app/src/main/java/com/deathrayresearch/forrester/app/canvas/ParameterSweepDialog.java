@@ -45,10 +45,10 @@ public class ParameterSweepDialog extends Dialog<ParameterSweepDialog.Config> {
         trackCombo = new ComboBox<>(FXCollections.observableArrayList(trackableNames));
 
         if (!constantNames.isEmpty()) {
-            parameterCombo.setValue(constantNames.get(0));
+            parameterCombo.setValue(constantNames.getFirst());
         }
         if (!trackableNames.isEmpty()) {
-            trackCombo.setValue(trackableNames.get(0));
+            trackCombo.setValue(trackableNames.getFirst());
         }
 
         GridPane grid = new GridPane();

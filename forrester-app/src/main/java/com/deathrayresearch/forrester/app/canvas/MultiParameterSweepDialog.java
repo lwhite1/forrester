@@ -187,7 +187,7 @@ public class MultiParameterSweepDialog extends Dialog<MultiParameterSweepDialog.
             if (defaultName != null) {
                 nameCombo.setValue(defaultName);
             } else if (!constantNames.isEmpty()) {
-                nameCombo.setValue(constantNames.get(0));
+                nameCombo.setValue(constantNames.getFirst());
             }
             nameCombo.setPrefWidth(130);
             nameCombo.setId("multiSweepParamName" + rowIndex);

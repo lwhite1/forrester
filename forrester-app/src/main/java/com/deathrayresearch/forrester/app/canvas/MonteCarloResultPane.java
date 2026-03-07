@@ -50,7 +50,7 @@ public class MonteCarloResultPane extends BorderPane {
         });
 
         if (!allNames.isEmpty()) {
-            varCombo.setValue(allNames.get(0));
+            varCombo.setValue(allNames.getFirst());
         }
 
         ContextMenu contextMenu = new ContextMenu();

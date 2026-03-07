@@ -164,7 +164,7 @@ public class MonteCarloDialog extends Dialog<MonteCarloDialog.Config> {
         ParameterRow(List<String> constantNames, VBox container) {
             nameCombo = new ComboBox<>(FXCollections.observableArrayList(constantNames));
             if (!constantNames.isEmpty()) {
-                nameCombo.setValue(constantNames.get(0));
+                nameCombo.setValue(constantNames.getFirst());
             }
             nameCombo.setPrefWidth(130);
 
