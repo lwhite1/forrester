@@ -29,7 +29,7 @@
   "views" : [ ],
   "defaultSimulation" : {
     "timeStep" : "Minute",
-    "duration" : 8.0,
+    "duration" : 45.0,
     "durationUnit" : "Minute"
   }
 }
