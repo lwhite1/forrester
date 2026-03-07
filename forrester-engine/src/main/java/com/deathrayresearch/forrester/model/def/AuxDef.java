@@ -24,6 +24,13 @@ public record AuxDef(
         }
     }
 
+    /**
+     * Convenience constructor that creates an auxiliary definition without a comment.
+     *
+     * @param name     the variable name
+     * @param equation the formula expression string
+     * @param unit     the unit name
+     */
     public AuxDef(String name, String equation, String unit) {
         this(name, null, equation, unit);
     }

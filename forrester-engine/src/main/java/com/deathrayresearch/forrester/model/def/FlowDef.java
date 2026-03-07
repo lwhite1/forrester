@@ -31,6 +31,15 @@ public record FlowDef(
         }
     }
 
+    /**
+     * Convenience constructor that creates a flow definition without a comment.
+     *
+     * @param name     the flow name
+     * @param equation the formula expression string
+     * @param timeUnit the time unit name for the flow rate
+     * @param source   the source stock name, or {@code null} for an external source
+     * @param sink     the sink stock name, or {@code null} for an external sink
+     */
     public FlowDef(String name, String equation, String timeUnit, String source, String sink) {
         this(name, null, equation, timeUnit, source, sink);
     }

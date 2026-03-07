@@ -11,6 +11,7 @@ public enum Time implements Dimension {
 
     INSTANCE;
 
+    /** {@inheritDoc} Returns {@link TimeUnits#SECOND}. */
     @Override
     public Unit getBaseUnit() {
         return TimeUnits.SECOND;

@@ -65,6 +65,12 @@ public class Pulse implements Formula {
         return new Pulse(magnitude, startStep, interval, currentStep);
     }
 
+    /**
+     * Returns the pulse magnitude if the current timestep is a pulse timestep, or zero otherwise.
+     * For repeating pulses, fires at the start step and every {@code interval} steps thereafter.
+     *
+     * @return the magnitude during a pulse, or zero
+     */
     @Override
     public double getCurrentValue() {
         int step = currentStep.getAsInt();

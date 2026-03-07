@@ -80,6 +80,14 @@ public record LookupTableDef(
         return yValues.clone();
     }
 
+    /**
+     * Convenience constructor that creates a lookup table definition without a comment.
+     *
+     * @param name          the table name
+     * @param xValues       the x-axis data points (must be strictly increasing)
+     * @param yValues       the y-axis data points (same length as xValues)
+     * @param interpolation the interpolation method: {@code "LINEAR"} or {@code "SPLINE"}
+     */
     public LookupTableDef(String name, double[] xValues, double[] yValues, String interpolation) {
         this(name, null, xValues, yValues, interpolation);
     }

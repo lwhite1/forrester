@@ -36,6 +36,12 @@ public record ConnectorRoute(
         }
     }
 
+    /**
+     * Creates a straight connector with no intermediate control points.
+     *
+     * @param from the source element name
+     * @param to   the target element name
+     */
     public ConnectorRoute(String from, String to) {
         this(from, to, List.of());
     }

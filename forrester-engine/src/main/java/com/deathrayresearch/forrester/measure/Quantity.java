@@ -18,6 +18,13 @@ public final class Quantity {
     private final double value;
     private final Unit unit;
 
+    /**
+     * Creates a new quantity with the given numeric value and unit.
+     *
+     * @param value the numeric value of the quantity
+     * @param unit  the unit of measure (must not be {@code null})
+     * @throws IllegalArgumentException if {@code unit} is {@code null}
+     */
     public Quantity(double value, Unit unit) {
         if (unit == null) {
             throw new IllegalArgumentException("unit must not be null");
@@ -26,10 +33,20 @@ public final class Quantity {
         this.unit = unit;
     }
 
+    /**
+     * Returns the numeric value of this quantity, expressed in its current unit.
+     *
+     * @return the numeric value
+     */
     public double getValue() {
         return value;
     }
 
+    /**
+     * Returns the unit of measure for this quantity.
+     *
+     * @return the unit
+     */
     public Unit getUnit() {
         return unit;
     }
@@ -98,6 +115,10 @@ public final class Quantity {
         return getUnit().fromBaseUnits(result);
     }
 
+    /**
+     * Returns a human-readable string of this quantity in the form {@code "value unitName(s)"},
+     * for example {@code "2.5 Meter(s)"}.
+     */
     @Override
     public String toString() {
         return value +
@@ -179,6 +200,11 @@ public final class Quantity {
         return Double.compare(inBaseUnits().getValue(), other.inBaseUnits().getValue()) == 0;
     }
 
+    /**
+     * Returns the dimension of this quantity, derived from its unit.
+     *
+     * @return the dimension (e.g., TIME, MASS, LENGTH)
+     */
     public Dimension getDimension() {
         return getUnit().getDimension();
     }
@@ -206,6 +232,11 @@ public final class Quantity {
         return Double.compare(quantity.inBaseUnits().getValue(), inBaseUnits().getValue()) == 0;
     }
 
+    /**
+     * Returns a hash code consistent with {@link #equals(Object)}. Quantities are hashed by
+     * their base-unit value and dimension. For units that do not support base-unit conversion
+     * (e.g., Fahrenheit), the raw value and unit are used instead.
+     */
     @Override
     public int hashCode() {
         try {

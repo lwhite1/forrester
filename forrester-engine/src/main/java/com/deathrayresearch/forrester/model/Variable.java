@@ -38,10 +38,16 @@ public class Variable extends Element {
         return formula.getCurrentValue();
     }
 
+    /**
+     * Returns the unit of measure for this variable's value.
+     */
     public Unit getUnit() {
         return unit;
     }
 
+    /**
+     * Returns the formula that computes this variable's value each timestep.
+     */
     public Formula getFormula() {
         return formula;
     }

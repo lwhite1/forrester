@@ -28,16 +28,19 @@ public enum VolumeUnits implements Unit {
         this.ratioToBaseUnit = ratioToBaseUnit;
     }
 
+    /** {@inheritDoc} */
     @Override
     public String getName() {
         return name;
     }
 
+    /** {@inheritDoc} Returns {@link Dimension#VOLUME}. */
     @Override
     public Dimension getDimension() {
         return Dimension.VOLUME;
     }
 
+    /** {@inheritDoc} */
     @Override
     public double ratioToBaseUnit() {
         return ratioToBaseUnit;

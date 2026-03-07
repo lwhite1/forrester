@@ -25,16 +25,19 @@ public enum MassUnits implements Unit {
         this.ratioToBaseUnit = ratioToBaseUnit;
     }
 
+    /** {@inheritDoc} */
     @Override
     public String getName() {
         return name;
     }
 
+    /** {@inheritDoc} Returns {@link Dimension#MASS}. */
     @Override
     public Dimension getDimension() {
         return Dimension.MASS;
     }
 
+    /** {@inheritDoc} */
     @Override
     public double ratioToBaseUnit() {
         return ratioToBaseUnit;

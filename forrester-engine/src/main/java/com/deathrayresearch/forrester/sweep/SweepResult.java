@@ -23,18 +23,39 @@ public class SweepResult {
         this.results = results;
     }
 
+    /**
+     * Returns the name of the swept parameter.
+     *
+     * @return the parameter name
+     */
     public String getParameterName() {
         return parameterName;
     }
 
+    /**
+     * Returns the number of simulation runs (one per parameter value).
+     *
+     * @return the run count
+     */
     public int getRunCount() {
         return results.size();
     }
 
+    /**
+     * Returns the run result at the given index.
+     *
+     * @param index the zero-based index
+     * @return the run result for the corresponding parameter value
+     */
     public RunResult getResult(int index) {
         return results.get(index);
     }
 
+    /**
+     * Returns all run results.
+     *
+     * @return an unmodifiable list of run results, one per parameter value
+     */
     public List<RunResult> getResults() {
         return Collections.unmodifiableList(results);
     }

@@ -42,6 +42,9 @@ public class Constant extends Element {
         return (int) Math.max(Integer.MIN_VALUE, Math.min(Integer.MAX_VALUE, rounded));
     }
 
+    /**
+     * Returns the unit of measure for this constant.
+     */
     public Unit getUnit() {
         return unit;
     }

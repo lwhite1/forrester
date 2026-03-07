@@ -25,6 +25,13 @@ public record ConstantDef(
         }
     }
 
+    /**
+     * Convenience constructor that creates a constant definition without a comment.
+     *
+     * @param name  the constant name
+     * @param value the numeric value
+     * @param unit  the unit name
+     */
     public ConstantDef(String name, double value, String unit) {
         this(name, null, value, unit);
     }

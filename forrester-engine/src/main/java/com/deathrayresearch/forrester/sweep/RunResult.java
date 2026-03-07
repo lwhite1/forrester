@@ -75,6 +75,12 @@ public class RunResult implements EventHandler {
         // no-op
     }
 
+    /**
+     * Returns the single parameter value for this run, or the first parameter value
+     * if this run was created with a multi-parameter map.
+     *
+     * @return the parameter value
+     */
     public double getParameterValue() {
         return parameterValue;
     }
@@ -89,26 +95,60 @@ public class RunResult implements EventHandler {
         return Collections.unmodifiableMap(parameterMap);
     }
 
+    /**
+     * Returns the names of the stocks recorded during this run.
+     *
+     * @return an unmodifiable list of stock names
+     */
     public List<String> getStockNames() {
         return Collections.unmodifiableList(stockNames);
     }
 
+    /**
+     * Returns the names of the variables recorded during this run.
+     *
+     * @return an unmodifiable list of variable names
+     */
     public List<String> getVariableNames() {
         return Collections.unmodifiableList(variableNames);
     }
 
+    /**
+     * Returns the number of time steps recorded during this run.
+     *
+     * @return the step count
+     */
     public int getStepCount() {
         return steps.size();
     }
 
+    /**
+     * Returns the step number at the given index in the recording sequence.
+     *
+     * @param index the zero-based index into the recorded steps
+     * @return the step number
+     */
     public int getStep(int index) {
         return steps.get(index);
     }
 
+    /**
+     * Returns the stock values captured at the given step index.
+     *
+     * @param index the zero-based index into the recorded steps
+     * @return an unmodifiable list of stock values, in the same order as {@link #getStockNames()}
+     */
     public List<Double> getStockValuesAtStep(int index) {
         return Collections.unmodifiableList(stockSnapshots.get(index));
     }
 
+    /**
+     * Returns the variable values captured at the given step index.
+     *
+     * @param index the zero-based index into the recorded steps
+     * @return an unmodifiable list of variable values, in the same order as
+     *         {@link #getVariableNames()}
+     */
     public List<Double> getVariableValuesAtStep(int index) {
         return Collections.unmodifiableList(variableSnapshots.get(index));
     }

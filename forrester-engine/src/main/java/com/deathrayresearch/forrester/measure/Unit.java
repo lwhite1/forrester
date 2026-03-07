@@ -7,10 +7,26 @@ package com.deathrayresearch.forrester.measure;
  */
 public interface Unit {
 
+    /**
+     * Returns the human-readable name of this unit (e.g., "Meter", "Kilogram", "Day").
+     *
+     * @return the unit name
+     */
     String getName();
 
+    /**
+     * Returns the dimension this unit belongs to (e.g., TIME, MASS, LENGTH).
+     *
+     * @return the dimension
+     */
     Dimension getDimension();
 
+    /**
+     * Returns the multiplicative factor that converts one of this unit to the dimension's base unit.
+     * For example, if the base unit is meters and this unit is kilometers, the ratio is 1000.0.
+     *
+     * @return the ratio of this unit to the base unit
+     */
     double ratioToBaseUnit();
 
     /**

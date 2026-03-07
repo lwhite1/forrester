@@ -30,6 +30,13 @@ public class ExprCompiler {
     private final CompilationContext context;
     private final List<Resettable> resettables;
 
+    /**
+     * Creates an expression compiler that resolves names against the given context
+     * and registers stateful formulas in the resettables list.
+     *
+     * @param context     the compilation context for name resolution
+     * @param resettables the list where stateful formulas (e.g., SMOOTH, DELAY3) are registered
+     */
     public ExprCompiler(CompilationContext context, List<Resettable> resettables) {
         this.context = context;
         this.resettables = resettables;
@@ -37,6 +44,11 @@ public class ExprCompiler {
 
     /**
      * Compiles an expression string into a Formula.
+     *
+     * @param equation the expression string to parse and compile
+     * @return a Formula that evaluates the expression at runtime
+     * @throws CompilationException if the expression references unknown names or functions
+     * @throws ParseException if the expression string is syntactically invalid
      */
     public Formula compile(String equation) {
         Expr expr = ExprParser.parse(equation);
@@ -45,7 +57,11 @@ public class ExprCompiler {
     }
 
     /**
-     * Compiles an Expr AST node into a DoubleSupplier.
+     * Compiles an Expr AST node into a DoubleSupplier that evaluates it at runtime.
+     *
+     * @param expr the expression AST node to compile
+     * @return a supplier that evaluates the expression each time it is called
+     * @throws CompilationException if the expression references unknown names or functions
      */
     public DoubleSupplier compileExpr(Expr expr) {
         if (expr instanceof Expr.Literal lit) {

@@ -110,6 +110,13 @@ public class Delay3 implements Formula, Resettable {
         lastStep = -1;
     }
 
+    /**
+     * Computes and returns the delayed output value for the current timestep.
+     * On the first call, initializes the three delay stages. On subsequent calls,
+     * advances the stages using Euler integration for each elapsed timestep.
+     *
+     * @return the output rate from the third delay stage
+     */
     @Override
     public double getCurrentValue() {
         int step = currentStep.getAsInt();

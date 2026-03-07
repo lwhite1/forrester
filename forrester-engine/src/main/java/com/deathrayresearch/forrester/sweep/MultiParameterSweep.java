@@ -43,15 +43,17 @@ public class MultiParameterSweep {
         this.duration = builder.duration;
     }
 
+    /** Maximum number of parameter combinations allowed before the sweep refuses to execute. */
+    private static final int MAX_COMBINATIONS = 1_000_000;
+
     /**
      * Executes the sweep: computes the Cartesian product of all parameter arrays, builds
      * a fresh model for each combination, runs the simulation, and collects the results.
      *
      * @return a {@link MultiSweepResult} containing one {@link RunResult} per combination
+     * @throws IllegalStateException if the Cartesian product exceeds {@value MAX_COMBINATIONS}
+     *         combinations
      */
-    /** Maximum number of parameter combinations allowed before the sweep refuses to execute. */
-    private static final int MAX_COMBINATIONS = 1_000_000;
-
     public MultiSweepResult execute() {
         List<String> paramNames = new ArrayList<>(parameters.keySet());
         List<double[]> paramArrays = new ArrayList<>(parameters.values());

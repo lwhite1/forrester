@@ -19,16 +19,19 @@ public enum ItemUnits implements Unit {
         this.ratioToBaseUnit = ratioToBaseUnit;
     }
 
+    /** {@inheritDoc} */
     @Override
     public String getName() {
         return name;
     }
 
+    /** {@inheritDoc} Returns {@link Dimension#ITEM}. */
     @Override
     public Dimension getDimension() {
         return Dimension.ITEM;
     }
 
+    /** {@inheritDoc} */
     @Override
     public double ratioToBaseUnit() {
         return ratioToBaseUnit;

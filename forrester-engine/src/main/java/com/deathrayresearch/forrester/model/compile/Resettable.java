@@ -6,5 +6,8 @@ package com.deathrayresearch.forrester.model.compile;
 @FunctionalInterface
 public interface Resettable {
 
+    /**
+     * Resets this component to its initial state so the model can be re-simulated.
+     */
     void reset();
 }

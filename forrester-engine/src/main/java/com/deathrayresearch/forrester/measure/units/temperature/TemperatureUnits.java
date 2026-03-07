@@ -23,21 +23,41 @@ public enum TemperatureUnits implements Unit {
                     + "Use a single temperature unit per model.");
         }
 
+        /**
+         * Always throws because Fahrenheit-to-Celsius conversion requires an offset.
+         *
+         * @throws UnsupportedOperationException always
+         */
         @Override
         public Quantity toBaseUnits(Quantity quantity) {
             throw conversionError();
         }
 
+        /**
+         * Always throws because Fahrenheit-to-Celsius conversion requires an offset.
+         *
+         * @throws UnsupportedOperationException always
+         */
         @Override
         public double toBaseUnits(double amount) {
             throw conversionError();
         }
 
+        /**
+         * Always throws because Celsius-to-Fahrenheit conversion requires an offset.
+         *
+         * @throws UnsupportedOperationException always
+         */
         @Override
         public Quantity fromBaseUnits(Quantity inBaseUnits) {
             throw conversionError();
         }
 
+        /**
+         * Always throws because Celsius-to-Fahrenheit conversion requires an offset.
+         *
+         * @throws UnsupportedOperationException always
+         */
         @Override
         public double fromBaseUnits(double inBaseUnits) {
             throw conversionError();
@@ -52,16 +72,19 @@ public enum TemperatureUnits implements Unit {
         this.ratioToBaseUnit = ratioToBaseUnit;
     }
 
+    /** {@inheritDoc} */
     @Override
     public String getName() {
         return name;
     }
 
+    /** {@inheritDoc} Returns {@link Dimension#TEMPERATURE}. */
     @Override
     public Dimension getDimension() {
         return Dimension.TEMPERATURE;
     }
 
+    /** {@inheritDoc} */
     @Override
     public double ratioToBaseUnit() {
         return ratioToBaseUnit;

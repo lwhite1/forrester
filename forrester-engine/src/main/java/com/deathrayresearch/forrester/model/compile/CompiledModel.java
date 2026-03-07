@@ -30,6 +30,16 @@ public class CompiledModel {
     private final UnitRegistry unitRegistry;
     private final Map<Stock, Double> initialStockValues;
 
+    /**
+     * Creates a compiled model wrapping the runnable model and its compilation artifacts.
+     *
+     * @param model       the compiled runnable model
+     * @param resettables stateful formulas that need resetting between simulation runs
+     * @param source      the original model definition
+     * @param stepHolder  a single-element array tracking the current simulation step
+     * @param dtHolder    a single-element array holding the DT value
+     * @param unitRegistry the unit registry used during compilation
+     */
     public CompiledModel(Model model, List<Resettable> resettables, ModelDefinition source,
                          int[] stepHolder, double[] dtHolder, UnitRegistry unitRegistry) {
         this.model = model;
@@ -44,14 +54,23 @@ public class CompiledModel {
         }
     }
 
+    /**
+     * Returns the compiled runnable model.
+     */
     public Model getModel() {
         return model;
     }
 
+    /**
+     * Returns the list of stateful formulas that are reset between simulation runs.
+     */
     public List<Resettable> getResettables() {
         return resettables;
     }
 
+    /**
+     * Returns the original model definition from which this compiled model was produced.
+     */
     public ModelDefinition getSource() {
         return source;
     }

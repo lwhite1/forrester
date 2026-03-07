@@ -61,6 +61,9 @@ public class DelayFixed implements Formula, Resettable {
         return new DelayFixed(input, delaySteps, initialValue, currentStep);
     }
 
+    /**
+     * Resets this DelayFixed to its uninitialized state so it can be reused across simulation runs.
+     */
     @Override
     public void reset() {
         buffer = null;
@@ -69,6 +72,12 @@ public class DelayFixed implements Formula, Resettable {
         lastStep = -1;
     }
 
+    /**
+     * Returns the input value from exactly {@code delaySteps} timesteps ago.
+     * Before the delay has elapsed, returns the initial value.
+     *
+     * @return the delayed value for the current timestep
+     */
     @Override
     public double getCurrentValue() {
         int step = currentStep.getAsInt();

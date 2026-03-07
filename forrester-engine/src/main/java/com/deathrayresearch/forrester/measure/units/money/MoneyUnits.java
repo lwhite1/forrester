@@ -18,16 +18,19 @@ public enum MoneyUnits implements Unit {
         this.ratioToBaseUnit = ratioToBaseUnit;
     }
 
+    /** {@inheritDoc} */
     @Override
     public String getName() {
         return name;
     }
 
+    /** {@inheritDoc} Returns {@link Dimension#MONEY}. */
     @Override
     public Dimension getDimension() {
         return Dimension.MONEY;
     }
 
+    /** {@inheritDoc} */
     @Override
     public double ratioToBaseUnit() {
         return ratioToBaseUnit;

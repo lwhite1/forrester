@@ -64,6 +64,9 @@ public class Trend implements Formula, Resettable {
         return new Trend(input, averagingTime, initialTrend, currentStep);
     }
 
+    /**
+     * Resets this Trend to its uninitialized state so it can be reused across simulation runs.
+     */
     @Override
     public void reset() {
         averageInput = 0;
@@ -72,6 +75,13 @@ public class Trend implements Formula, Resettable {
         lastStep = -1;
     }
 
+    /**
+     * Returns the estimated fractional rate of change of the input for the current timestep.
+     * On the first call, initializes the average so that the initial trend is correct.
+     * On subsequent calls, updates the exponentially smoothed average and derives the trend.
+     *
+     * @return the fractional growth rate per timestep (e.g., 0.05 for 5% growth)
+     */
     @Override
     public double getCurrentValue() {
         int step = currentStep.getAsInt();

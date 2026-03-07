@@ -35,16 +35,37 @@ public class CompilationContext {
     private final IntSupplier currentStep;
     private final double[] dtHolder;
 
+    /**
+     * Creates a root compilation context with no parent and a default DT of 1.0.
+     *
+     * @param unitRegistry the unit registry for resolving unit names
+     * @param currentStep  supplies the current simulation timestep
+     */
     public CompilationContext(UnitRegistry unitRegistry, IntSupplier currentStep) {
         this(unitRegistry, currentStep, null, new double[]{1.0});
     }
 
+    /**
+     * Creates a child compilation context that inherits the parent's DT holder.
+     *
+     * @param unitRegistry the unit registry for resolving unit names
+     * @param currentStep  supplies the current simulation timestep
+     * @param parent       the parent context for scoped name resolution, or {@code null}
+     */
     public CompilationContext(UnitRegistry unitRegistry, IntSupplier currentStep,
                               CompilationContext parent) {
         this(unitRegistry, currentStep, parent,
                 parent != null ? parent.dtHolder : new double[]{1.0});
     }
 
+    /**
+     * Creates a compilation context with an explicit parent and DT holder.
+     *
+     * @param unitRegistry the unit registry for resolving unit names
+     * @param currentStep  supplies the current simulation timestep
+     * @param parent       the parent context for scoped name resolution, or {@code null}
+     * @param dtHolder     a single-element array holding the current DT value
+     */
     public CompilationContext(UnitRegistry unitRegistry, IntSupplier currentStep,
                               CompilationContext parent, double[] dtHolder) {
         this.unitRegistry = unitRegistry;
@@ -53,27 +74,64 @@ public class CompilationContext {
         this.dtHolder = dtHolder;
     }
 
+    /**
+     * Registers a stock in this context.
+     *
+     * @param name  the stock name used for resolution
+     * @param stock the stock instance
+     */
     public void addStock(String name, Stock stock) {
         stocks.put(name, stock);
     }
 
+    /**
+     * Registers a flow in this context.
+     *
+     * @param name the flow name used for resolution
+     * @param flow the flow instance
+     */
     public void addFlow(String name, Flow flow) {
         flows.put(name, flow);
     }
 
+    /**
+     * Registers a variable in this context.
+     *
+     * @param name     the variable name used for resolution
+     * @param variable the variable instance
+     */
     public void addVariable(String name, Variable variable) {
         variables.put(name, variable);
     }
 
+    /**
+     * Registers a constant in this context.
+     *
+     * @param name     the constant name used for resolution
+     * @param constant the constant instance
+     */
     public void addConstant(String name, Constant constant) {
         constants.put(name, constant);
     }
 
+    /**
+     * Registers a lookup table and its mutable input holder in this context.
+     *
+     * @param name        the table name used for resolution
+     * @param table       the lookup table instance
+     * @param inputHolder a single-element array used to pass input values to the table
+     */
     public void addLookupTable(String name, LookupTable table, double[] inputHolder) {
         lookupTables.put(name, table);
         lookupInputHolders.put(name, inputHolder);
     }
 
+    /**
+     * Registers a lookup table definition so fresh instances can be created on demand.
+     *
+     * @param name the table name
+     * @param def  the table definition containing x/y data and interpolation mode
+     */
     public void addLookupTableDef(String name, LookupTableDef def) {
         lookupTableDefs.put(name, def);
     }
@@ -182,6 +240,13 @@ public class CompilationContext {
         return OptionalDouble.empty();
     }
 
+    /**
+     * Resolves a shared lookup table by name, trying underscore-to-space fallback
+     * and parent context if not found locally.
+     *
+     * @param name the table name to look up
+     * @return the lookup table, or empty if not found
+     */
     public Optional<LookupTable> resolveLookupTable(String name) {
         LookupTable table = lookupTables.get(name);
         if (table != null) {
@@ -200,22 +265,41 @@ public class CompilationContext {
         return Optional.empty();
     }
 
+    /**
+     * Returns an unmodifiable map of stocks registered in this context (local only).
+     */
     public Map<String, Stock> getStocks() {
         return Collections.unmodifiableMap(stocks);
     }
 
+    /**
+     * Returns an unmodifiable map of flows registered in this context (local only).
+     */
     public Map<String, Flow> getFlows() {
         return Collections.unmodifiableMap(flows);
     }
 
+    /**
+     * Returns an unmodifiable map of variables registered in this context (local only).
+     */
     public Map<String, Variable> getVariables() {
         return Collections.unmodifiableMap(variables);
     }
 
+    /**
+     * Returns an unmodifiable map of constants registered in this context (local only).
+     */
     public Map<String, Constant> getConstants() {
         return Collections.unmodifiableMap(constants);
     }
 
+    /**
+     * Resolves the mutable input holder for a lookup table by name.
+     * Tries underscore-to-space fallback and parent context if not found locally.
+     *
+     * @param name the table name
+     * @return the single-element input holder array, or empty if not found
+     */
     public Optional<double[]> resolveLookupInputHolder(String name) {
         double[] holder = lookupInputHolders.get(name);
         if (holder != null) {
@@ -234,18 +318,31 @@ public class CompilationContext {
         return Optional.empty();
     }
 
+    /**
+     * Returns the unit registry used for resolving unit names during compilation.
+     */
     public UnitRegistry getUnitRegistry() {
         return unitRegistry;
     }
 
+    /**
+     * Returns the supplier for the current simulation timestep.
+     */
     public IntSupplier getCurrentStep() {
         return currentStep;
     }
 
+    /**
+     * Returns the current DT (integration time step) value.
+     */
     public double getDt() {
         return dtHolder[0];
     }
 
+    /**
+     * Returns the mutable single-element array holding the DT value.
+     * Used to share the DT value across compiled formulas.
+     */
     public double[] getDtHolder() {
         return dtHolder;
     }

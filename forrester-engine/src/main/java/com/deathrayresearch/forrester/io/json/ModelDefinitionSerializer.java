@@ -46,6 +46,9 @@ public class ModelDefinitionSerializer {
 
     private final ObjectMapper mapper;
 
+    /**
+     * Creates a new serializer with pretty-printing enabled.
+     */
     public ModelDefinitionSerializer() {
         mapper = new ObjectMapper();
         mapper.enable(SerializationFeature.INDENT_OUTPUT);
@@ -53,6 +56,10 @@ public class ModelDefinitionSerializer {
 
     /**
      * Serializes a model definition to a JSON string.
+     *
+     * @param def the model definition to serialize
+     * @return the JSON string representation
+     * @throws IllegalArgumentException if serialization fails
      */
     public String toJson(ModelDefinition def) {
         try {
@@ -65,6 +72,10 @@ public class ModelDefinitionSerializer {
 
     /**
      * Deserializes a model definition from a JSON string.
+     *
+     * @param json the JSON string to deserialize
+     * @return the model definition
+     * @throws IllegalArgumentException if the JSON is malformed or missing required fields
      */
     public ModelDefinition fromJson(String json) {
         try {
@@ -77,6 +88,10 @@ public class ModelDefinitionSerializer {
 
     /**
      * Writes a model definition to a JSON file.
+     *
+     * @param def  the model definition to write
+     * @param path the output file path
+     * @throws IOException if the file cannot be written
      */
     public void toFile(ModelDefinition def, Path path) throws IOException {
         String json = toJson(def);
@@ -85,6 +100,11 @@ public class ModelDefinitionSerializer {
 
     /**
      * Reads a model definition from a JSON file.
+     *
+     * @param path the path to the JSON file
+     * @return the deserialized model definition
+     * @throws IOException if the file cannot be read
+     * @throws IllegalArgumentException if the JSON is malformed or missing required fields
      */
     public ModelDefinition fromFile(Path path) throws IOException {
         String json = Files.readString(path);

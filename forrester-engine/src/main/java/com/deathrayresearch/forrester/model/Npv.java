@@ -74,6 +74,9 @@ public class Npv implements Formula, Resettable {
         return new Npv(stream, discountRate, factor, currentStep);
     }
 
+    /**
+     * Resets this Npv to its uninitialized state so it can be reused across simulation runs.
+     */
     @Override
     public void reset() {
         accumulated = 0;
@@ -82,6 +85,12 @@ public class Npv implements Formula, Resettable {
         lastStep = -1;
     }
 
+    /**
+     * Returns the accumulated net present value through the current timestep.
+     * Each new payment is discounted back to the initial timestep and added to the total.
+     *
+     * @return the cumulative discounted value
+     */
     @Override
     public double getCurrentValue() {
         int step = currentStep.getAsInt();

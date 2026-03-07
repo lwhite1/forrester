@@ -29,7 +29,12 @@ public final class ViewValidator {
 
     /**
      * Validates the given view definition against the model definition.
-     * Returns a list of error messages; an empty list means the view is valid.
+     * Checks that all element placements, connector endpoints, and flow route references
+     * correspond to elements that exist in the model.
+     *
+     * @param view the view definition to validate
+     * @param def  the model definition to validate against
+     * @return a list of error messages; an empty list means the view is valid
      */
     public static List<String> validate(ViewDef view, ModelDefinition def) {
         List<String> errors = new ArrayList<>();

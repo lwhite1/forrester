@@ -65,6 +65,9 @@ public record FeedbackAnalysis(
             this.label = label;
         }
 
+        /**
+         * Returns the single-character label for this loop type ({@code "R"}, {@code "B"}, or {@code "?"}).
+         */
         public String label() {
             return label;
         }
@@ -109,6 +112,9 @@ public record FeedbackAnalysis(
      *   <li>Enumerate elementary cycles within each SCC.</li>
      *   <li>Classify each cycle by its polarity product.</li>
      * </ol>
+     *
+     * @param def the model definition to analyze
+     * @return a FeedbackAnalysis containing loop participants, groups, edges, and classified causal loops
      */
     public static FeedbackAnalysis analyze(ModelDefinition def) {
         // ---- Stock-and-Flow analysis ----
@@ -157,6 +163,9 @@ public record FeedbackAnalysis(
 
     /**
      * Returns true if the named element participates in at least one feedback loop.
+     *
+     * @param elementName the element name to check
+     * @return {@code true} if the element is part of a feedback loop
      */
     public boolean isInLoop(String elementName) {
         return loopParticipants.contains(elementName);
@@ -164,6 +173,10 @@ public record FeedbackAnalysis(
 
     /**
      * Returns true if the edge from &rarr; to is part of a feedback loop.
+     *
+     * @param from the source element name
+     * @param to   the target element name
+     * @return {@code true} if this directed edge participates in a feedback loop
      */
     public boolean isLoopEdge(String from, String to) {
         return loopEdges.contains(new Edge(from, to));

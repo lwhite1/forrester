@@ -38,6 +38,9 @@ public class DependencyGraph {
     /**
      * Builds a dependency graph from a model definition by parsing all equations
      * and extracting references.
+     *
+     * @param def the model definition to analyze
+     * @return a dependency graph with edges from influencing elements to dependent elements
      */
     public static DependencyGraph fromDefinition(ModelDefinition def) {
         Map<String, Set<String>> adj = new LinkedHashMap<>();
@@ -94,6 +97,9 @@ public class DependencyGraph {
 
     /**
      * Returns the set of elements that the given element depends on (influences it).
+     *
+     * @param name the element name
+     * @return the set of element names that influence the given element
      */
     public Set<String> dependenciesOf(String name) {
         Set<String> deps = new LinkedHashSet<>();
@@ -107,6 +113,9 @@ public class DependencyGraph {
 
     /**
      * Returns the set of elements that the given element influences (depends on it).
+     *
+     * @param name the element name
+     * @return the set of element names that depend on the given element
      */
     public Set<String> dependentsOf(String name) {
         Set<String> deps = adjacency.get(name);

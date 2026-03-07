@@ -21,6 +21,9 @@ public record ElementSizes(
 
     /**
      * Returns the default size for a given element type.
+     *
+     * @param type the element type
+     * @return the default width and height for that type
      */
     public static ElementSizes forType(ElementType type) {
         return switch (type) {

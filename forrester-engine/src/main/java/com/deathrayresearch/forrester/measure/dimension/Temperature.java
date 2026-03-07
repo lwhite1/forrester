@@ -15,11 +15,18 @@ public enum Temperature implements Dimension {
 
     INSTANCE;
 
+    /** {@inheritDoc} Returns {@link TemperatureUnits#CELSIUS}. */
     @Override
     public Unit getBaseUnit() {
         return TemperatureUnits.CELSIUS;
     }
 
+    /**
+     * Always throws {@link UnsupportedOperationException} because temperature conversion
+     * requires an affine transformation that the ratio-based converter cannot express.
+     *
+     * @throws UnsupportedOperationException always
+     */
     @Override
     public Converter getConverter() {
         throw new UnsupportedOperationException("There is no converter (yet) for temperatures");

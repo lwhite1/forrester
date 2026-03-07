@@ -38,10 +38,16 @@ public enum BinaryOperator {
         this.precedence = precedence;
     }
 
+    /**
+     * Returns the infix symbol for this operator (e.g., {@code "+"}, {@code "*"}, {@code "and"}).
+     */
     public String symbol() {
         return symbol;
     }
 
+    /**
+     * Returns the precedence level. Higher values bind tighter.
+     */
     public int precedence() {
         return precedence;
     }

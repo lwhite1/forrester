@@ -21,6 +21,9 @@ public final class ConnectorGenerator {
      * Generates connector routes from the dependency graph of the given model definition.
      * Each edge in the dependency graph becomes a connector arrow.
      * Duplicate connectors are eliminated.
+     *
+     * @param def the model definition whose dependencies are to be visualized
+     * @return a deduplicated list of connector routes
      */
     public static List<ConnectorRoute> generate(ModelDefinition def) {
         DependencyGraph graph = DependencyGraph.fromDefinition(def);

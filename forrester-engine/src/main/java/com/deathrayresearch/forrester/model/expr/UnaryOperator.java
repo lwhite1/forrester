@@ -14,6 +14,9 @@ public enum UnaryOperator {
         this.symbol = symbol;
     }
 
+    /**
+     * Returns the prefix symbol for this operator (e.g., {@code "-"}, {@code "not "}).
+     */
     public String symbol() {
         return symbol;
     }

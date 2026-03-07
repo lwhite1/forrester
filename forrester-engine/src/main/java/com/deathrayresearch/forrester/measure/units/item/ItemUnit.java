@@ -32,25 +32,36 @@ public class ItemUnit implements Unit {
 
     private final String name;
 
+    /**
+     * Creates a new item unit with the given name.
+     *
+     * @param name the display name for this unit (e.g., "Widget", "Patient")
+     */
     public ItemUnit(String name) {
         this.name = name;
     }
 
+    /** {@inheritDoc} */
     @Override
     public String getName() {
         return name;
     }
 
+    /** {@inheritDoc} Returns {@link Dimension#ITEM}. */
     @Override
     public Dimension getDimension() {
         return Dimension.ITEM;
     }
 
+    /** {@inheritDoc} Always returns {@code 1.0} since item units have no conversion hierarchy. */
     @Override
     public double ratioToBaseUnit() {
         return 1.0;
     }
 
+    /**
+     * Two {@code ItemUnit} instances are equal if they have the same name.
+     */
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -59,11 +70,13 @@ public class ItemUnit implements Unit {
         return name.equals(itemUnit.name);
     }
 
+    /** Returns a hash code based on this unit's name. */
     @Override
     public int hashCode() {
         return name.hashCode();
     }
 
+    /** Returns the unit name. */
     @Override
     public String toString() {
         return name;

@@ -19,6 +19,11 @@ public record CldVariableDef(
         }
     }
 
+    /**
+     * Creates a CLD variable definition without a comment.
+     *
+     * @param name the variable name
+     */
     public CldVariableDef(String name) {
         this(name, null);
     }

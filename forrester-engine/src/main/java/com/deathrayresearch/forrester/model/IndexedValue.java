@@ -251,18 +251,39 @@ public final class IndexedValue {
 
     // --- Scalar convenience overloads ---
 
+    /**
+     * Adds a scalar value to every element.
+     *
+     * @param scalar the value to add
+     */
     public IndexedValue add(double scalar) {
         return add(scalar(scalar));
     }
 
+    /**
+     * Subtracts a scalar value from every element.
+     *
+     * @param scalar the value to subtract
+     */
     public IndexedValue subtract(double scalar) {
         return subtract(scalar(scalar));
     }
 
+    /**
+     * Multiplies every element by a scalar value.
+     *
+     * @param scalar the multiplier
+     */
     public IndexedValue multiply(double scalar) {
         return multiply(scalar(scalar));
     }
 
+    /**
+     * Divides every element by a scalar value.
+     *
+     * @param scalar the divisor
+     * @throws ArithmeticException if the scalar is zero
+     */
     public IndexedValue divide(double scalar) {
         return divide(scalar(scalar));
     }

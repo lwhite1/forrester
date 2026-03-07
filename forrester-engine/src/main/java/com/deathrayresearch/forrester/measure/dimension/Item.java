@@ -11,6 +11,7 @@ public enum Item implements Dimension {
 
     INSTANCE;
 
+    /** {@inheritDoc} Returns {@link ItemUnits#THING}. */
     @Override
     public Unit getBaseUnit() {
         return ItemUnits.THING;

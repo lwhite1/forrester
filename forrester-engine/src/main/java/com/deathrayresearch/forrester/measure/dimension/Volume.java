@@ -11,6 +11,7 @@ public enum Volume implements Dimension {
 
     INSTANCE;
 
+    /** {@inheritDoc} Returns {@link VolumeUnits#LITER}. */
     @Override
     public Unit getBaseUnit() {
         return VolumeUnits.LITER;

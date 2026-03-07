@@ -11,6 +11,7 @@ public enum Length implements Dimension {
 
     INSTANCE;
 
+    /** {@inheritDoc} Returns {@link LengthUnits#METER}. */
     @Override
     public Unit getBaseUnit() {
         return LengthUnits.METER;

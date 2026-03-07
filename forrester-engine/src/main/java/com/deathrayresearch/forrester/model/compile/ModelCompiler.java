@@ -44,16 +44,28 @@ public class ModelCompiler {
 
     private final UnitRegistry unitRegistry;
 
+    /**
+     * Creates a model compiler with a default {@link UnitRegistry}.
+     */
     public ModelCompiler() {
         this(new UnitRegistry());
     }
 
+    /**
+     * Creates a model compiler with the given unit registry.
+     *
+     * @param unitRegistry the unit registry for resolving unit names in definitions
+     */
     public ModelCompiler(UnitRegistry unitRegistry) {
         this.unitRegistry = unitRegistry;
     }
 
     /**
      * Compiles a model definition into a runnable compiled model.
+     *
+     * @param def the model definition to compile
+     * @return a compiled model ready for simulation
+     * @throws CompilationException if any element references cannot be resolved
      */
     public CompiledModel compile(ModelDefinition def) {
         Model model = new Model(def.name());

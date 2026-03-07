@@ -65,6 +65,12 @@ public class Ramp implements Formula {
         return new Ramp(slope, startStep, endStep, currentStep);
     }
 
+    /**
+     * Returns zero before the start step, then increases linearly at the configured slope.
+     * For bounded ramps, the value holds constant after the end step.
+     *
+     * @return the ramp value for the current timestep
+     */
     @Override
     public double getCurrentValue() {
         int step = currentStep.getAsInt();

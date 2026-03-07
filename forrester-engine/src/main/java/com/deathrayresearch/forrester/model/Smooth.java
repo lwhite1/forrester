@@ -94,6 +94,14 @@ public class Smooth implements Formula, Resettable {
         lastStep = -1;
     }
 
+    /**
+     * Returns the exponentially smoothed value for the current timestep.
+     * On the first call, initializes from the input or explicit initial value.
+     * On subsequent calls, adjusts toward the input by {@code (input - smoothed) / smoothingTime}
+     * for each elapsed timestep.
+     *
+     * @return the smoothed value
+     */
     @Override
     public double getCurrentValue() {
         int step = currentStep.getAsInt();

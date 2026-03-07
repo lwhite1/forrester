@@ -113,10 +113,16 @@ public class ArrayedVariable {
         return IndexedValue.of(subscript, vals);
     }
 
+    /**
+     * Returns the base name shared by all underlying variables.
+     */
     public String getBaseName() {
         return baseName;
     }
 
+    /**
+     * Returns the subscript dimension used by this arrayed variable.
+     */
     public Subscript getSubscript() {
         return subscript;
     }

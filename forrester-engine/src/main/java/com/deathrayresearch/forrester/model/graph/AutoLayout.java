@@ -63,6 +63,11 @@ public final class AutoLayout {
 
     /**
      * Generates a {@link ViewDef} with all elements placed using ELK's layered algorithm.
+     * The layout preserves natural material-flow direction (left to right) and aligns
+     * flows vertically with their connected stocks.
+     *
+     * @param def the model definition whose elements are to be laid out
+     * @return a view definition with element placements and connector routes
      */
     public static ViewDef layout(ModelDefinition def) {
         if (def.stocks().isEmpty() && def.flows().isEmpty() && def.auxiliaries().isEmpty()

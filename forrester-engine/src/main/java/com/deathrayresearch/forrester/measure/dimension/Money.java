@@ -11,6 +11,7 @@ public enum Money implements Dimension {
 
     INSTANCE;
 
+    /** {@inheritDoc} Returns {@link MoneyUnits#USD}. */
     @Override
     public Unit getBaseUnit() {
         return MoneyUnits.USD;

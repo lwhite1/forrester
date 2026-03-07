@@ -227,14 +227,23 @@ public class ArrayedStock {
         return IndexedValue.of(subscript, vals);
     }
 
+    /**
+     * Returns the subscript dimension used by this arrayed stock.
+     */
     public Subscript getSubscript() {
         return subscript;
     }
 
+    /**
+     * Returns the base name shared by all underlying stocks.
+     */
     public String getBaseName() {
         return baseName;
     }
 
+    /**
+     * Returns the unit of measure for elements of this arrayed stock.
+     */
     public Unit getUnit() {
         return unit;
     }

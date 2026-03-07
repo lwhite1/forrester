@@ -19,6 +19,12 @@ public record PortDef(
         }
     }
 
+    /**
+     * Creates a port definition without a comment.
+     *
+     * @param name the port name
+     * @param unit the unit name
+     */
     public PortDef(String name, String unit) {
         this(name, unit, null);
     }

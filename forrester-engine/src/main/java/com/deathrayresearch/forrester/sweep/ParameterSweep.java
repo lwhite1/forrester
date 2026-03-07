@@ -125,16 +125,35 @@ public class ParameterSweep {
         private Builder() {
         }
 
+        /**
+         * Sets the name of the parameter being swept.
+         *
+         * @param parameterName the parameter name
+         * @return this builder
+         */
         public Builder parameterName(String parameterName) {
             this.parameterName = parameterName;
             return this;
         }
 
+        /**
+         * Sets the array of values to sweep over. Use {@link ParameterSweep#linspace}
+         * to generate evenly spaced values.
+         *
+         * @param parameterValues the parameter values to test
+         * @return this builder
+         */
         public Builder parameterValues(double[] parameterValues) {
             this.parameterValues = parameterValues;
             return this;
         }
 
+        /**
+         * Sets the factory function that builds a fresh model for each parameter value.
+         *
+         * @param modelFactory a function that receives the parameter value and returns a new model
+         * @return this builder
+         */
         public Builder modelFactory(DoubleFunction<Model> modelFactory) {
             this.modelFactory = modelFactory;
             return this;
@@ -153,11 +172,23 @@ public class ParameterSweep {
             return this;
         }
 
+        /**
+         * Sets the simulation time step.
+         *
+         * @param timeStep the time unit for each step
+         * @return this builder
+         */
         public Builder timeStep(TimeUnit timeStep) {
             this.timeStep = timeStep;
             return this;
         }
 
+        /**
+         * Sets the simulation duration.
+         *
+         * @param duration the total simulation time
+         * @return this builder
+         */
         public Builder duration(Quantity duration) {
             this.duration = duration;
             return this;

@@ -318,14 +318,23 @@ public class MultiArrayedStock {
         return IndexedValue.of(range, vals);
     }
 
+    /**
+     * Returns the multi-dimensional subscript range used by this arrayed stock.
+     */
     public SubscriptRange getRange() {
         return range;
     }
 
+    /**
+     * Returns the base name shared by all underlying stocks.
+     */
     public String getBaseName() {
         return baseName;
     }
 
+    /**
+     * Returns the unit of measure for elements of this arrayed stock.
+     */
     public Unit getUnit() {
         return unit;
     }

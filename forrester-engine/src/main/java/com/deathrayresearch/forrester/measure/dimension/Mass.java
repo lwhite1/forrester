@@ -11,6 +11,7 @@ public enum Mass implements Dimension {
 
     INSTANCE;
 
+    /** {@inheritDoc} Returns {@link MassUnits#KILOGRAM}. */
     @Override
     public Unit getBaseUnit() {
         return MassUnits.KILOGRAM;

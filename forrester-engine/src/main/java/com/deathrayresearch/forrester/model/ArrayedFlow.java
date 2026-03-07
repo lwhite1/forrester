@@ -95,10 +95,16 @@ public class ArrayedFlow {
         return flows.length;
     }
 
+    /**
+     * Returns the base name shared by all underlying flows.
+     */
     public String getBaseName() {
         return baseName;
     }
 
+    /**
+     * Returns the subscript dimension used by this arrayed flow.
+     */
     public Subscript getSubscript() {
         return subscript;
     }

@@ -183,14 +183,23 @@ public class MultiArrayedVariable {
         return IndexedValue.of(range, vals);
     }
 
+    /**
+     * Returns the base name shared by all underlying variables.
+     */
     public String getBaseName() {
         return baseName;
     }
 
+    /**
+     * Returns the unit of measure for elements of this arrayed variable.
+     */
     public Unit getUnit() {
         return unit;
     }
 
+    /**
+     * Returns the multi-dimensional subscript range used by this arrayed variable.
+     */
     public SubscriptRange getRange() {
         return range;
     }

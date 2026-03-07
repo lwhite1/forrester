@@ -28,10 +28,22 @@ public record CausalLinkDef(
             this.symbol = symbol;
         }
 
+        /**
+         * Returns the display symbol for this polarity ({@code "+"}, {@code "-"}, or {@code "?"}).
+         *
+         * @return the polarity symbol
+         */
         public String symbol() {
             return symbol;
         }
 
+        /**
+         * Parses a symbol string into a {@code Polarity} value.
+         * Returns {@link #UNKNOWN} for {@code null} or unrecognized symbols.
+         *
+         * @param symbol the symbol to parse ({@code "+"}, {@code "-"}, or anything else)
+         * @return the corresponding polarity
+         */
         public static Polarity fromSymbol(String symbol) {
             if (symbol == null) {
                 return UNKNOWN;
@@ -56,10 +68,23 @@ public record CausalLinkDef(
         }
     }
 
+    /**
+     * Creates a causal link without a comment.
+     *
+     * @param from     the source variable name
+     * @param to       the target variable name
+     * @param polarity the direction of influence
+     */
     public CausalLinkDef(String from, String to, Polarity polarity) {
         this(from, to, polarity, null);
     }
 
+    /**
+     * Creates a causal link with {@link Polarity#UNKNOWN} polarity and no comment.
+     *
+     * @param from the source variable name
+     * @param to   the target variable name
+     */
     public CausalLinkDef(String from, String to) {
         this(from, to, Polarity.UNKNOWN, null);
     }

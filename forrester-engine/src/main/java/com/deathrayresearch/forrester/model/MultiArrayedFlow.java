@@ -119,10 +119,16 @@ public class MultiArrayedFlow {
         return flows.length;
     }
 
+    /**
+     * Returns the base name shared by all underlying flows.
+     */
     public String getBaseName() {
         return baseName;
     }
 
+    /**
+     * Returns the multi-dimensional subscript range used by this arrayed flow.
+     */
     public SubscriptRange getRange() {
         return range;
     }

@@ -45,6 +45,11 @@ public class Step implements Formula {
         return new Step(height, stepTime, currentStep);
     }
 
+    /**
+     * Returns zero before the step time, and the configured height at and after the step time.
+     *
+     * @return the step value for the current timestep
+     */
     @Override
     public double getCurrentValue() {
         return currentStep.getAsInt() >= stepTime ? height : 0;

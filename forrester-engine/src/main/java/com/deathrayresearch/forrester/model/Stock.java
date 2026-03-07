@@ -90,18 +90,35 @@ public class Stock extends Element {
         return new Quantity(value, unit);
     }
 
+    /**
+     * Returns the unit of measure for the quantity stored in this stock.
+     */
     public Unit getUnit() {
         return unit;
     }
 
+    /**
+     * Sets the current value of this stock, applying the configured
+     * {@link NegativeValuePolicy} if the value is negative.
+     *
+     * @param value the new value
+     * @throws IllegalArgumentException if the value is NaN, Infinite, or negative when the
+     *                                  policy is {@link NegativeValuePolicy#THROW}
+     */
     public void setValue(double value) {
         this.value = applyPolicy(value);
     }
 
+    /**
+     * Returns the current numeric value of this stock.
+     */
     public double getValue() {
         return value;
     }
 
+    /**
+     * Returns the policy that governs how this stock handles negative values.
+     */
     public NegativeValuePolicy getNegativeValuePolicy() {
         return negativeValuePolicy;
     }

@@ -66,6 +66,9 @@ public class Forecast implements Formula, Resettable {
         return new Forecast(input, averagingTime, horizon, initialTrend, currentStep);
     }
 
+    /**
+     * Resets this Forecast to its uninitialized state so it can be reused across simulation runs.
+     */
     @Override
     public void reset() {
         averageInput = 0;
@@ -74,6 +77,12 @@ public class Forecast implements Formula, Resettable {
         lastStep = -1;
     }
 
+    /**
+     * Computes and returns the forecasted value for the current timestep.
+     * Extrapolates linearly from the smoothed trend estimate.
+     *
+     * @return the forecasted value {@code input * (1 + trend * horizon)}
+     */
     @Override
     public double getCurrentValue() {
         int step = currentStep.getAsInt();

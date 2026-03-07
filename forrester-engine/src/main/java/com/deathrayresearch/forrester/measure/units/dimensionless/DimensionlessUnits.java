@@ -19,16 +19,19 @@ public enum DimensionlessUnits implements Unit {
         this.ratioToBaseUnit = ratioToBaseUnit;
     }
 
+    /** {@inheritDoc} */
     @Override
     public String getName() {
         return name;
     }
 
+    /** {@inheritDoc} Returns {@link Dimensionless#INSTANCE}. */
     @Override
     public Dimension getDimension() {
         return Dimensionless.INSTANCE;
     }
 
+    /** {@inheritDoc} */
     @Override
     public double ratioToBaseUnit() {
         return ratioToBaseUnit;

@@ -27,6 +27,13 @@ public record StockDef(
         }
     }
 
+    /**
+     * Convenience constructor that creates a stock with no comment and the default negative value policy.
+     *
+     * @param name         the stock name
+     * @param initialValue the initial numeric value
+     * @param unit         the unit name
+     */
     public StockDef(String name, double initialValue, String unit) {
         this(name, null, initialValue, unit, null);
     }

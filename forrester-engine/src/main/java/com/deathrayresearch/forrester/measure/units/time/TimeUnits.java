@@ -36,21 +36,30 @@ public enum TimeUnits implements TimeUnit {
         this.chronoUnit = chronoUnit;
     }
 
+    /** {@inheritDoc} */
     @Override
     public String getName() {
         return name;
     }
 
+    /** {@inheritDoc} Returns {@link Dimension#TIME}. */
     @Override
     public Dimension getDimension() {
         return Dimension.TIME;
     }
 
+    /** {@inheritDoc} */
     @Override
     public double ratioToBaseUnit() {
         return ratioToBaseUnit;
     }
 
+    /**
+     * Returns the {@link ChronoUnit} that corresponds to this time unit, useful for
+     * interoperating with the {@code java.time} API.
+     *
+     * @return the corresponding {@link ChronoUnit}
+     */
     public ChronoUnit getChronoUnit() {
         return chronoUnit;
     }
