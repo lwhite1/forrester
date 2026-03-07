@@ -114,6 +114,7 @@ The visual editor also provides 8 bundled example models via File → Open Examp
 - [MIT OCW: Introduction to System Dynamics](https://ocw.mit.edu/courses/15-871-introduction-to-system-dynamics-fall-2013/)
 - [MIT OCW: System Dynamics Self Study](https://ocw.mit.edu/courses/15-988-system-dynamics-self-study-fall-1998-spring-1999/)
 - [System Dynamics Society: Introduction](https://systemdynamics.org/introduction-to-system-dynamics-modeling/)
+- [Small System Dynamics Models for Big Issues](https://simulation.tudelft.nl/SD/index.html) by Erik Pruyt (TU Delft, 2013) — free e-book covering real-world SD modeling with many worked examples
 
 ## License
 
