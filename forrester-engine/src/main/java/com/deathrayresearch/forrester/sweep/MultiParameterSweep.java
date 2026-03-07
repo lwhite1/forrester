@@ -4,6 +4,7 @@ import com.deathrayresearch.forrester.Simulation;
 import com.deathrayresearch.forrester.measure.Quantity;
 import com.deathrayresearch.forrester.measure.TimeUnit;
 import com.deathrayresearch.forrester.model.Model;
+import com.deathrayresearch.forrester.model.compile.CompiledModel;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -30,12 +31,14 @@ public class MultiParameterSweep {
 
     private final Map<String, double[]> parameters;
     private final Function<Map<String, Double>, Model> modelFactory;
+    private final Function<Map<String, Double>, CompiledModel> compiledModelFactory;
     private final TimeUnit timeStep;
     private final Quantity duration;
 
     private MultiParameterSweep(Builder builder) {
         this.parameters = builder.parameters;
         this.modelFactory = builder.modelFactory;
+        this.compiledModelFactory = builder.compiledModelFactory;
         this.timeStep = builder.timeStep;
         this.duration = builder.duration;
     }
@@ -68,10 +71,16 @@ public class MultiParameterSweep {
         List<RunResult> results = new ArrayList<>();
 
         for (Map<String, Double> paramMap : combinations) {
-            Model model = modelFactory.apply(paramMap);
+            Simulation simulation;
+            if (compiledModelFactory != null) {
+                CompiledModel compiled = compiledModelFactory.apply(paramMap);
+                simulation = compiled.createSimulation(timeStep, duration);
+            } else {
+                Model model = modelFactory.apply(paramMap);
+                simulation = new Simulation(model, timeStep, duration);
+            }
             RunResult runResult = new RunResult(paramMap);
 
-            Simulation simulation = new Simulation(model, timeStep, duration);
             simulation.addEventHandler(runResult);
             simulation.execute();
 
@@ -122,6 +131,7 @@ public class MultiParameterSweep {
 
         private final Map<String, double[]> parameters = new LinkedHashMap<>();
         private Function<Map<String, Double>, Model> modelFactory;
+        private Function<Map<String, Double>, CompiledModel> compiledModelFactory;
         private TimeUnit timeStep;
         private Quantity duration;
 
@@ -142,12 +152,27 @@ public class MultiParameterSweep {
 
         /**
          * Sets the factory function that builds a fresh model from a parameter vector.
+         * Use this for programmatic models that don't need compiled-model step synchronization.
          *
          * @param modelFactory a function that receives a map of parameter name to value
          * @return this builder
          */
         public Builder modelFactory(Function<Map<String, Double>, Model> modelFactory) {
             this.modelFactory = modelFactory;
+            return this;
+        }
+
+        /**
+         * Sets the factory function that builds a fresh compiled model from a parameter vector.
+         * Compiled models use {@link CompiledModel#createSimulation} to install step synchronization,
+         * which is required for time-dependent functions (STEP, RAMP, PULSE, SMOOTH, TIME, DT).
+         *
+         * @param compiledModelFactory a function that receives a map of parameter name to value
+         * @return this builder
+         */
+        public Builder compiledModelFactory(
+                Function<Map<String, Double>, CompiledModel> compiledModelFactory) {
+            this.compiledModelFactory = compiledModelFactory;
             return this;
         }
 
@@ -189,8 +214,9 @@ public class MultiParameterSweep {
                             "Parameter '" + entry.getKey() + "' must have at least one value");
                 }
             }
-            if (modelFactory == null) {
-                throw new IllegalStateException("modelFactory is required");
+            if (modelFactory == null && compiledModelFactory == null) {
+                throw new IllegalStateException(
+                        "Either modelFactory or compiledModelFactory is required");
             }
             if (timeStep == null) {
                 throw new IllegalStateException("timeStep is required");

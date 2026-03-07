@@ -3,7 +3,6 @@ package com.deathrayresearch.forrester.app.canvas;
 import com.deathrayresearch.forrester.measure.Quantity;
 import com.deathrayresearch.forrester.measure.TimeUnit;
 import com.deathrayresearch.forrester.measure.UnitRegistry;
-import com.deathrayresearch.forrester.model.Model;
 import com.deathrayresearch.forrester.model.compile.CompiledModel;
 import com.deathrayresearch.forrester.model.compile.ModelCompiler;
 import com.deathrayresearch.forrester.model.def.ConstantDef;
@@ -13,7 +12,6 @@ import com.deathrayresearch.forrester.model.def.SimulationSettings;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.function.DoubleFunction;
 import java.util.function.Function;
 
 /**
@@ -27,30 +25,32 @@ public final class ModelDefinitionFactory {
 
     /**
      * Creates a factory function that accepts a map of constant name to value,
-     * applies overrides to the definition, compiles, and returns the executable model.
+     * applies overrides to the definition, compiles, and returns the compiled model.
+     * Returning {@link CompiledModel} (rather than bare {@link Model}) ensures that
+     * sweep classes can create simulations with proper step synchronization,
+     * which is required for time-dependent functions (STEP, RAMP, PULSE, etc.).
      */
-    public static Function<Map<String, Double>, Model> createFactory(
+    public static Function<Map<String, Double>, CompiledModel> createFactory(
             ModelDefinition def, SimulationSettings settings) {
         return paramMap -> {
             ModelDefinition overridden = applyConstantOverrides(def, paramMap);
             ModelDefinition withSettings = embedSettings(overridden, settings);
             ModelCompiler compiler = new ModelCompiler();
-            CompiledModel compiled = compiler.compile(withSettings);
-            return compiled.getModel();
+            return compiler.compile(withSettings);
         };
     }
 
     /**
      * Creates a single-parameter factory for use with {@link com.deathrayresearch.forrester.sweep.ParameterSweep}.
+     * Returns {@link CompiledModel} to ensure proper step synchronization.
      */
-    public static DoubleFunction<Model> createSingleParamFactory(
+    public static java.util.function.DoubleFunction<CompiledModel> createSingleParamFactory(
             ModelDefinition def, SimulationSettings settings, String paramName) {
         return value -> {
             ModelDefinition overridden = applyConstantOverrides(def, Map.of(paramName, value));
             ModelDefinition withSettings = embedSettings(overridden, settings);
             ModelCompiler compiler = new ModelCompiler();
-            CompiledModel compiled = compiler.compile(withSettings);
-            return compiled.getModel();
+            return compiler.compile(withSettings);
         };
     }
 

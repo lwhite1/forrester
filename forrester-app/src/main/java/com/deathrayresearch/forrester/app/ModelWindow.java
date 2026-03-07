@@ -108,8 +108,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.function.DoubleFunction;
-import java.util.function.Function;
 
 /**
  * An independent editor window for a single Forrester model.
@@ -505,7 +503,17 @@ public class ModelWindow {
             switch (ext) {
                 case ".mdl" -> def = importModel(new VensimImporter(), file.toPath(), name);
                 case ".xmile", ".stmx", ".itmx" -> def = importModel(new XmileImporter(), file.toPath(), name);
-                default -> def = serializer.fromFile(file.toPath());
+                case ".json" -> def = serializer.fromFile(file.toPath());
+                default -> {
+                    if (ext.isEmpty()) {
+                        showError("Open Error",
+                                "Cannot determine file format (no file extension).");
+                    } else {
+                        showError("Open Error",
+                                "Unsupported file format: " + ext);
+                    }
+                    return;
+                }
             }
 
             loadDefinition(def, name);
@@ -722,14 +730,14 @@ public class ModelWindow {
                 () -> {
                     TimeUnit timeStep = ModelDefinitionFactory.resolveTimeStep(finalSettings);
                     Quantity duration = ModelDefinitionFactory.resolveDuration(finalSettings);
-                    DoubleFunction<Model> factory = ModelDefinitionFactory.createSingleParamFactory(
-                            def, finalSettings, config.parameterName());
 
                     return ParameterSweep.builder()
                             .parameterName(config.parameterName())
                             .parameterValues(ParameterSweep.linspace(
                                     config.start(), config.end(), config.step()))
-                            .modelFactory(factory)
+                            .compiledModelFactory(
+                                    ModelDefinitionFactory.createSingleParamFactory(
+                                            def, finalSettings, config.parameterName()))
                             .timeStep(timeStep)
                             .duration(duration)
                             .build()
@@ -773,11 +781,10 @@ public class ModelWindow {
                 () -> {
                     TimeUnit timeStep = ModelDefinitionFactory.resolveTimeStep(finalSettings);
                     Quantity duration = ModelDefinitionFactory.resolveDuration(finalSettings);
-                    Function<Map<String, Double>, Model> factory =
-                            ModelDefinitionFactory.createFactory(def, finalSettings);
 
                     MultiParameterSweep.Builder builder = MultiParameterSweep.builder()
-                            .modelFactory(factory)
+                            .compiledModelFactory(
+                                    ModelDefinitionFactory.createFactory(def, finalSettings))
                             .timeStep(timeStep)
                             .duration(duration);
 
@@ -830,11 +837,10 @@ public class ModelWindow {
                 () -> {
                     TimeUnit timeStep = ModelDefinitionFactory.resolveTimeStep(finalSettings);
                     Quantity duration = ModelDefinitionFactory.resolveDuration(finalSettings);
-                    Function<Map<String, Double>, Model> factory =
-                            ModelDefinitionFactory.createFactory(def, finalSettings);
 
                     MonteCarlo.Builder builder = MonteCarlo.builder()
-                            .modelFactory(factory)
+                            .compiledModelFactory(
+                                    ModelDefinitionFactory.createFactory(def, finalSettings))
                             .iterations(config.iterations())
                             .sampling("RANDOM".equals(config.samplingMethod())
                                     ? SamplingMethod.RANDOM : SamplingMethod.LATIN_HYPERCUBE)
@@ -897,8 +903,6 @@ public class ModelWindow {
                 () -> {
                     TimeUnit timeStep = ModelDefinitionFactory.resolveTimeStep(finalSettings);
                     Quantity duration = ModelDefinitionFactory.resolveDuration(finalSettings);
-                    Function<Map<String, Double>, Model> factory =
-                            ModelDefinitionFactory.createFactory(def, finalSettings);
 
                     ObjectiveFunction objective = switch (config.objectiveType()) {
                         case MINIMIZE -> Objectives.minimize(config.targetVariable());
@@ -914,7 +918,8 @@ public class ModelWindow {
                     };
 
                     Optimizer.Builder builder = Optimizer.builder()
-                            .modelFactory(factory)
+                            .compiledModelFactory(
+                                    ModelDefinitionFactory.createFactory(def, finalSettings))
                             .objective(objective)
                             .algorithm(algorithm)
                             .maxEvaluations(config.maxEvaluations())

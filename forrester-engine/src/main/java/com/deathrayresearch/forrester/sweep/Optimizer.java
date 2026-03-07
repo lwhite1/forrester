@@ -4,6 +4,7 @@ import com.deathrayresearch.forrester.Simulation;
 import com.deathrayresearch.forrester.measure.Quantity;
 import com.deathrayresearch.forrester.measure.TimeUnit;
 import com.deathrayresearch.forrester.model.Model;
+import com.deathrayresearch.forrester.model.compile.CompiledModel;
 
 import org.apache.commons.math3.analysis.MultivariateFunction;
 import org.apache.commons.math3.optim.InitialGuess;
@@ -48,6 +49,7 @@ public class Optimizer {
 
     private final List<OptimizationParameter> parameters;
     private final Function<Map<String, Double>, Model> modelFactory;
+    private final Function<Map<String, Double>, CompiledModel> compiledModelFactory;
     private final ObjectiveFunction objective;
     private final OptimizationAlgorithm algorithm;
     private final int maxEvaluations;
@@ -58,6 +60,7 @@ public class Optimizer {
     private Optimizer(Builder builder) {
         this.parameters = builder.parameters;
         this.modelFactory = builder.modelFactory;
+        this.compiledModelFactory = builder.compiledModelFactory;
         this.objective = builder.objective;
         this.algorithm = builder.algorithm;
         this.maxEvaluations = builder.maxEvaluations;
@@ -91,10 +94,16 @@ public class Optimizer {
                 paramMap.put(parameters.get(i).name(), v);
             }
 
-            Model model = modelFactory.apply(paramMap);
+            Simulation simulation;
+            if (compiledModelFactory != null) {
+                CompiledModel compiled = compiledModelFactory.apply(paramMap);
+                simulation = compiled.createSimulation(timeStep, duration);
+            } else {
+                Model model = modelFactory.apply(paramMap);
+                simulation = new Simulation(model, timeStep, duration);
+            }
             RunResult runResult = new RunResult(paramMap);
 
-            Simulation simulation = new Simulation(model, timeStep, duration);
             simulation.addEventHandler(runResult);
             simulation.execute();
 
@@ -218,6 +227,7 @@ public class Optimizer {
 
         private final List<OptimizationParameter> parameters = new ArrayList<>();
         private Function<Map<String, Double>, Model> modelFactory;
+        private Function<Map<String, Double>, CompiledModel> compiledModelFactory;
         private ObjectiveFunction objective;
         private OptimizationAlgorithm algorithm = OptimizationAlgorithm.NELDER_MEAD;
         private int maxEvaluations = 1000;
@@ -263,6 +273,20 @@ public class Optimizer {
          */
         public Builder modelFactory(Function<Map<String, Double>, Model> modelFactory) {
             this.modelFactory = modelFactory;
+            return this;
+        }
+
+        /**
+         * Sets the factory function that builds a fresh compiled model from a parameter map.
+         * Compiled models use {@link CompiledModel#createSimulation} to install step synchronization,
+         * which is required for time-dependent functions (STEP, RAMP, PULSE, SMOOTH, TIME, DT).
+         *
+         * @param compiledModelFactory a function that receives a map of parameter name to value
+         * @return this builder
+         */
+        public Builder compiledModelFactory(
+                Function<Map<String, Double>, CompiledModel> compiledModelFactory) {
+            this.compiledModelFactory = compiledModelFactory;
             return this;
         }
 
@@ -342,8 +366,9 @@ public class Optimizer {
             if (parameters.isEmpty()) {
                 throw new IllegalStateException("At least one parameter is required");
             }
-            if (modelFactory == null) {
-                throw new IllegalStateException("modelFactory is required");
+            if (modelFactory == null && compiledModelFactory == null) {
+                throw new IllegalStateException(
+                        "Either modelFactory or compiledModelFactory is required");
             }
             if (objective == null) {
                 throw new IllegalStateException("objective is required");

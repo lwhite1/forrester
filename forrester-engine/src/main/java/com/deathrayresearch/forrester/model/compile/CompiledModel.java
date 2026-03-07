@@ -84,6 +84,16 @@ public class CompiledModel {
     }
 
     /**
+     * Creates a simulation from the compiled model with the given time step and duration.
+     * Installs an event handler that keeps the compiled model's step counter in sync.
+     */
+    public Simulation createSimulation(TimeUnit timeStep, Quantity duration) {
+        Simulation sim = new Simulation(model, timeStep, duration);
+        installStepSync(sim);
+        return sim;
+    }
+
+    /**
      * Creates a simulation using the default simulation settings from the source definition.
      *
      * @throws IllegalStateException if no default simulation settings are defined

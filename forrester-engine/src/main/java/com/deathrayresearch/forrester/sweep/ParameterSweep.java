@@ -4,6 +4,7 @@ import com.deathrayresearch.forrester.Simulation;
 import com.deathrayresearch.forrester.measure.Quantity;
 import com.deathrayresearch.forrester.measure.TimeUnit;
 import com.deathrayresearch.forrester.model.Model;
+import com.deathrayresearch.forrester.model.compile.CompiledModel;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,6 +32,7 @@ public class ParameterSweep {
     private final String parameterName;
     private final double[] parameterValues;
     private final DoubleFunction<Model> modelFactory;
+    private final DoubleFunction<CompiledModel> compiledModelFactory;
     private final TimeUnit timeStep;
     private final Quantity duration;
 
@@ -38,6 +40,7 @@ public class ParameterSweep {
         this.parameterName = builder.parameterName;
         this.parameterValues = builder.parameterValues;
         this.modelFactory = builder.modelFactory;
+        this.compiledModelFactory = builder.compiledModelFactory;
         this.timeStep = builder.timeStep;
         this.duration = builder.duration;
     }
@@ -52,10 +55,16 @@ public class ParameterSweep {
         List<RunResult> results = new ArrayList<>();
 
         for (double value : parameterValues) {
-            Model model = modelFactory.apply(value);
+            Simulation simulation;
+            if (compiledModelFactory != null) {
+                CompiledModel compiled = compiledModelFactory.apply(value);
+                simulation = compiled.createSimulation(timeStep, duration);
+            } else {
+                Model model = modelFactory.apply(value);
+                simulation = new Simulation(model, timeStep, duration);
+            }
             RunResult runResult = new RunResult(Map.of(parameterName, value));
 
-            Simulation simulation = new Simulation(model, timeStep, duration);
             simulation.addEventHandler(runResult);
             simulation.execute();
 
@@ -109,6 +118,7 @@ public class ParameterSweep {
         private String parameterName;
         private double[] parameterValues;
         private DoubleFunction<Model> modelFactory;
+        private DoubleFunction<CompiledModel> compiledModelFactory;
         private TimeUnit timeStep;
         private Quantity duration;
 
@@ -127,6 +137,19 @@ public class ParameterSweep {
 
         public Builder modelFactory(DoubleFunction<Model> modelFactory) {
             this.modelFactory = modelFactory;
+            return this;
+        }
+
+        /**
+         * Sets the factory function that builds a fresh compiled model for each parameter value.
+         * Compiled models use {@link CompiledModel#createSimulation} to install step synchronization,
+         * which is required for time-dependent functions (STEP, RAMP, PULSE, SMOOTH, TIME, DT).
+         *
+         * @param compiledModelFactory a function that receives the parameter value
+         * @return this builder
+         */
+        public Builder compiledModelFactory(DoubleFunction<CompiledModel> compiledModelFactory) {
+            this.compiledModelFactory = compiledModelFactory;
             return this;
         }
 
@@ -153,8 +176,9 @@ public class ParameterSweep {
             if (parameterValues == null || parameterValues.length == 0) {
                 throw new IllegalStateException("parameterValues is required and must not be empty");
             }
-            if (modelFactory == null) {
-                throw new IllegalStateException("modelFactory is required");
+            if (modelFactory == null && compiledModelFactory == null) {
+                throw new IllegalStateException(
+                        "Either modelFactory or compiledModelFactory is required");
             }
             if (timeStep == null) {
                 throw new IllegalStateException("timeStep is required");
