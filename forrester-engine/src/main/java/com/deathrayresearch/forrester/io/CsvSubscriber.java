@@ -5,7 +5,7 @@ import com.deathrayresearch.forrester.event.SimulationEndEvent;
 import com.deathrayresearch.forrester.event.SimulationStartEvent;
 import com.deathrayresearch.forrester.event.TimeStepEvent;
 import com.deathrayresearch.forrester.model.Model;
-import com.google.common.eventbus.Subscribe;
+
 import com.opencsv.CSVWriter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -58,7 +58,7 @@ public class CsvSubscriber implements EventHandler, Closeable {
      * Writes a data row for the current time step, including step number, timestamp,
      * stock values, and variable values.
      */
-    @Subscribe
+    @Override
     public void handleTimeStepEvent(TimeStepEvent event) {
         Model model = event.getModel();
 
@@ -82,7 +82,6 @@ public class CsvSubscriber implements EventHandler, Closeable {
      * Writes the CSV header row with column names derived from the model's stocks and variables.
      */
     @Override
-    @Subscribe
     public void handleSimulationStartEvent(SimulationStartEvent event) {
         logger.info("Starting simulation: " + event.getModel().getName());
 
@@ -102,7 +101,6 @@ public class CsvSubscriber implements EventHandler, Closeable {
      * Flushes and closes the CSV writer when the simulation ends.
      */
     @Override
-    @Subscribe
     public void handleSimulationEndEvent(SimulationEndEvent event) {
         close();
         logger.info("Ending simulation");

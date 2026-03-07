@@ -12,11 +12,10 @@ import com.deathrayresearch.forrester.model.Flow;
 import com.deathrayresearch.forrester.model.Variable;
 import com.deathrayresearch.forrester.measure.Dimension;
 import com.google.common.base.Preconditions;
-import com.google.common.eventbus.EventBus;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.util.LinkedHashSet;
+import java.util.ArrayList;
 import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
@@ -53,9 +52,7 @@ public class Simulation {
 
     private Duration elapsedTime = Duration.ZERO;
 
-    private final Set<EventHandler> eventHandlers = new LinkedHashSet<>();
-
-    private final EventBus eventBus;
+    private final List<EventHandler> eventHandlers = new ArrayList<>();
 
     public Simulation(Model model, TimeUnit timeStep, Quantity duration) {
         this(model, timeStep, duration, LocalDateTime.now());
@@ -79,21 +76,14 @@ public class Simulation {
         this.duration = duration;
         this.startTime = startTime;
         this.currentDateTime = startTime;
-        this.eventBus = new EventBus();
     }
 
     public void addEventHandler(EventHandler handler) {
-        eventBus.register(handler);
         eventHandlers.add(handler);
     }
 
     public void removeEventHandler(EventHandler handler) {
-        eventBus.unregister(handler);
         eventHandlers.remove(handler);
-    }
-
-    public EventBus getEventBus() {
-        return eventBus;
     }
 
     public void execute() {
@@ -103,7 +93,7 @@ public class Simulation {
         elapsedTime = Duration.ZERO;
         clearHistory();
 
-        eventBus.post(new SimulationStartEvent(this));
+        fireStartEvent(new SimulationStartEvent(this));
 
         double durationInBaseUnits = duration.getUnit().ratioToBaseUnit();
         long totalSteps = Math.round(
@@ -113,14 +103,32 @@ public class Simulation {
             while (currentStep <= totalSteps) {
                 Map<Flow, Quantity> flowMap = new IdentityHashMap<>();
 
-                eventBus.post(new TimeStepEvent(currentDateTime, model, currentStep, timeStep));
+                fireTimeStepEvent(new TimeStepEvent(currentDateTime, model, currentStep, timeStep));
                 recordVariableValues();
                 updateStocks(flowMap, model.getStocks());
                 addStep(currentDateTime);
                 currentStep++;
             }
         } finally {
-            eventBus.post(new SimulationEndEvent(model));
+            fireEndEvent(new SimulationEndEvent(model));
+        }
+    }
+
+    private void fireStartEvent(SimulationStartEvent event) {
+        for (EventHandler handler : eventHandlers) {
+            handler.handleSimulationStartEvent(event);
+        }
+    }
+
+    private void fireTimeStepEvent(TimeStepEvent event) {
+        for (EventHandler handler : eventHandlers) {
+            handler.handleTimeStepEvent(event);
+        }
+    }
+
+    private void fireEndEvent(SimulationEndEvent event) {
+        for (EventHandler handler : eventHandlers) {
+            handler.handleSimulationEndEvent(event);
         }
     }
 

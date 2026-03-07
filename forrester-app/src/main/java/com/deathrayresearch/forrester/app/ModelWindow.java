@@ -136,11 +136,13 @@ public class ModelWindow {
     private MenuItem popOutDashboardItem;
     private BorderPane root;
     private Path currentFile;
+    private boolean dirty;
     private final UndoManager undoManager = new UndoManager();
     private MenuItem undoItem;
     private MenuItem redoItem;
     private ModelEditListener logListener;
     private ModelEditListener staleListener;
+    private ModelEditListener dirtyListener;
     private AnalysisRunner analysisRunner;
     private CommandPalette commandPalette;
     private Stage quickstartWindow;
@@ -206,6 +208,7 @@ public class ModelWindow {
         dashboardPanel = new DashboardPanel();
         dashboardPanel.setRerunAction(this::runSimulation);
         staleListener = createStaleListener();
+        dirtyListener = createDirtyListener();
 
         newModel();
 
@@ -485,6 +488,9 @@ public class ModelWindow {
     }
 
     private void newModel() {
+        if (!confirmDiscardChanges()) {
+            return;
+        }
         ModelDefinition empty = new ModelDefinitionBuilder()
                 .name("Untitled")
                 .build();
@@ -497,10 +503,12 @@ public class ModelWindow {
         if (editor != null) {
             editor.removeListener(logListener);
             editor.removeListener(staleListener);
+            editor.removeListener(dirtyListener);
         }
         editor = new ModelEditor();
         editor.addListener(logListener);
         editor.addListener(staleListener);
+        editor.addListener(dirtyListener);
         editor.loadFrom(def);
 
         ViewDef view;
@@ -514,6 +522,7 @@ public class ModelWindow {
         canvas.clearNavigation();
         canvas.setModel(editor, view);
         undoManager.clear();
+        dirty = false;
         if (dashboardPanel != null) {
             dashboardPanel.clear();
         }
@@ -524,6 +533,9 @@ public class ModelWindow {
     }
 
     private void openFile() {
+        if (!confirmDiscardChanges()) {
+            return;
+        }
         FileChooser chooser = new FileChooser();
         chooser.setTitle("Open Model");
         chooser.getExtensionFilters().addAll(
@@ -699,6 +711,7 @@ public class ModelWindow {
         try {
             ModelDefinition def = canvas.toModelDefinition();
             serializer.toFile(def, path);
+            dirty = false;
             updateTitle();
             fireLogEvent(l -> l.onModelSaved(path.getFileName().toString()));
         } catch (IOException ex) {
@@ -1103,6 +1116,60 @@ public class ModelWindow {
         };
     }
 
+    private void markDirty() {
+        if (!dirty) {
+            dirty = true;
+            updateTitle();
+        }
+    }
+
+    private ModelEditListener createDirtyListener() {
+        return new ModelEditListener() {
+            @Override
+            public void onElementAdded(String name, String typeName) {
+                markDirty();
+            }
+
+            @Override
+            public void onElementRemoved(String name) {
+                markDirty();
+            }
+
+            @Override
+            public void onElementRenamed(String oldName, String newName) {
+                markDirty();
+            }
+
+            @Override
+            public void onEquationChanged(String elementName) {
+                markDirty();
+            }
+
+            @Override
+            public void onConstantChanged(String name) {
+                markDirty();
+            }
+        };
+    }
+
+    /**
+     * If the model has unsaved changes, shows a confirmation dialog.
+     * Returns true if it is safe to proceed (no changes, or user chose to discard).
+     */
+    private boolean confirmDiscardChanges() {
+        if (!dirty) {
+            return true;
+        }
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+        alert.setTitle("Unsaved Changes");
+        alert.setHeaderText("You have unsaved changes.");
+        alert.setContentText("Do you want to discard your changes?");
+        alert.getButtonTypes().setAll(ButtonType.OK, ButtonType.CANCEL);
+        alert.initOwner(stage);
+        Optional<ButtonType> result = alert.showAndWait();
+        return result.isPresent() && result.get() == ButtonType.OK;
+    }
+
     /**
      * Shows a singleton help window. If already open, brings it to front.
      * If closed, creates a new one. Sets owner so it stays above the main window.
@@ -1253,10 +1320,11 @@ public class ModelWindow {
         } else {
             name = "Untitled";
         }
+        String dirtySuffix = dirty ? " \u2022" : "";
         String moduleSuffix = canvas.isInsideModule()
                 ? " [" + canvas.getCurrentModuleName() + "]"
                 : "";
-        stage.setTitle("Forrester \u2014 " + name + moduleSuffix);
+        stage.setTitle("Forrester \u2014 " + name + dirtySuffix + moduleSuffix);
         if (dashboardStage != null) {
             dashboardStage.setTitle("Dashboard \u2014 " + name);
         }
@@ -1396,6 +1464,9 @@ public class ModelWindow {
      * Closes this window. The ForresterApp will be notified via the stage's onHidden handler.
      */
     public void close() {
+        if (!confirmDiscardChanges()) {
+            return;
+        }
         if (editor != null) {
             if (logListener != null) {
                 editor.removeListener(logListener);

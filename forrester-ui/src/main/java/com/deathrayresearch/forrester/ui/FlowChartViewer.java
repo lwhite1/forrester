@@ -5,7 +5,7 @@ import com.deathrayresearch.forrester.event.SimulationEndEvent;
 import com.deathrayresearch.forrester.event.SimulationStartEvent;
 import com.deathrayresearch.forrester.event.TimeStepEvent;
 import com.deathrayresearch.forrester.model.Flow;
-import com.google.common.eventbus.Subscribe;
+
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -23,7 +23,6 @@ public class FlowChartViewer implements EventHandler {
     }
 
     @Override
-    @Subscribe
     public void handleTimeStepEvent(TimeStepEvent event) {
         ArrayList<Double> flowValues = new ArrayList<>();
         for (Flow flow : flows) {
@@ -36,14 +35,12 @@ public class FlowChartViewer implements EventHandler {
     }
 
     @Override
-    @Subscribe
     public void handleSimulationStartEvent(SimulationStartEvent event) {
         ChartViewerApplication.setSimulation(event.getSimulation());
         ChartViewerApplication.addFlowSeries(Arrays.stream(flows).map(Flow::getName).collect(Collectors.toList()));
     }
 
     @Override
-    @Subscribe
     public void handleSimulationEndEvent(SimulationEndEvent event) {
         ChartViewerApplication.launch(ChartViewerApplication.class);
     }

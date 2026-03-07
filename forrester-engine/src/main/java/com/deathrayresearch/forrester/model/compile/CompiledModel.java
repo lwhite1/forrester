@@ -10,8 +10,6 @@ import com.deathrayresearch.forrester.model.Model;
 import com.deathrayresearch.forrester.model.Stock;
 import com.deathrayresearch.forrester.model.def.ModelDefinition;
 import com.deathrayresearch.forrester.model.def.SimulationSettings;
-import com.google.common.eventbus.Subscribe;
-
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -158,8 +156,8 @@ public class CompiledModel {
             this.sim = sim;
         }
 
-        @Subscribe
-        public void onTimeStep(TimeStepEvent event) {
+        @Override
+        public void handleTimeStepEvent(TimeStepEvent event) {
             stepHolder[0] = sim.getCurrentStep();
         }
     }

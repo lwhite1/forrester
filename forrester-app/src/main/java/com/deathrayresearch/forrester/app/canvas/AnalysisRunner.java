@@ -14,7 +14,7 @@ import java.util.function.Consumer;
  */
 public class AnalysisRunner {
 
-    private final ExecutorService executor = Executors.newCachedThreadPool(r -> {
+    private final ExecutorService executor = Executors.newSingleThreadExecutor(r -> {
         Thread t = new Thread(r, "analysis-runner");
         t.setDaemon(true);
         return t;

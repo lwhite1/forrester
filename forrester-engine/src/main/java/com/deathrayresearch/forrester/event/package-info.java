@@ -1,7 +1,7 @@
 /**
  * Simulation lifecycle events and the listener interface for observing them.
  *
- * <p>The simulation engine fires three event types via a Guava {@code EventBus}:
+ * <p>The simulation engine fires three event types:
  * <ol>
  *   <li>{@link com.deathrayresearch.forrester.event.SimulationStartEvent} — once, before any
  *       time steps are computed. Use this to initialize output writers, open files, or record

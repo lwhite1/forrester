@@ -12,7 +12,6 @@ import com.deathrayresearch.forrester.model.NegativeValuePolicy;
 import com.deathrayresearch.forrester.model.Smooth;
 import com.deathrayresearch.forrester.model.Stock;
 import com.deathrayresearch.forrester.model.Variable;
-import com.google.common.eventbus.Subscribe;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
@@ -114,17 +113,14 @@ public class RegressionTest {
         Simulation sim = new Simulation(model, MINUTE, MINUTE, 5);
         List<String> events = new ArrayList<>();
         sim.addEventHandler(new EventHandler() {
-            @Subscribe
             @Override
             public void handleTimeStepEvent(TimeStepEvent event) {}
 
-            @Subscribe
             @Override
             public void handleSimulationStartEvent(SimulationStartEvent event) {
                 events.add("start");
             }
 
-            @Subscribe
             @Override
             public void handleSimulationEndEvent(SimulationEndEvent event) {
                 events.add("end");

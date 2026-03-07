@@ -17,24 +17,14 @@ Full code audit of the Forrester System Dynamics modeling platform covering all 
 
 ## Summary of Findings
 
-| Severity | New Issues | Existing (Open) | Total |
-|----------|-----------|-----------------|-------|
-| Critical | 1 | 0 | 1 |
-| High | 8 | 1 | 9 |
-| Medium | 10 | 14 | 24 |
-| Low | — | 6 | 6 |
+| Severity | Open | Fixed | Total |
+|----------|------|-------|-------|
+| Critical | 0 | 1 | 1 |
+| High | 5 | 4 | 9 |
+| Medium | 10 | 0 | 10 |
+| Low | — | — | 6 |
 
-All critical, high, and medium issues have been filed as GitHub issues and assigned to milestone **R1**.
-
----
-
-## Critical Issues
-
-| # | Title | Module | Impact |
-|---|-------|--------|--------|
-| 123 | Concurrent analysis runs can corrupt shared model state | app | Race conditions produce silently wrong simulation results |
-
-The `AnalysisRunner` uses an unbounded thread pool with no task cancellation. Concurrent simulation/sweep/Monte Carlo runs share the same `CompiledModel` mutable state (stepHolder, stock values, Resettable formulas), leading to data corruption.
+All open issues have been filed as GitHub issues and assigned to milestone **R1**.
 
 ---
 
@@ -43,12 +33,9 @@ The `AnalysisRunner` uses an unbounded thread pool with no task cancellation. Co
 | # | Title | Module | Impact |
 |---|-------|--------|--------|
 | 124 | RANDOM_NORMAL not resettable | engine | Non-reproducible simulation results |
-| 125 | Guava EventBus silently swallows event handler exceptions | engine | Silent data corruption if StepSyncHandler fails |
-| 128 | No unsaved changes warning before New/Open/Close | app | Data loss risk for users |
 | 134 | Division by zero silently returns 0 | engine | Masks modeling errors |
 | 135 | Math.pow, LN, SQRT produce NaN/Infinity with no guard | engine | Crashes or silent corruption |
 | 136 | PropertiesPanel duplicate polarity change handler | app | Duplicate undo entries, double mutations |
-| 140 | No unsaved changes warning | app | User data loss |
 | 146 | Flow value resolved in wrong time unit in expressions | engine | Wrong results when flow/sim time units differ |
 
 ---
@@ -117,45 +104,37 @@ These were already tracked before this audit:
 
 ## Prioritized Fix Recommendations
 
-### P0 — Fix Before Release (blocks R1 quality bar)
-
-1. **#123 — Concurrent analysis corruption.** Replace `newCachedThreadPool` with single-thread executor or add task cancellation. Estimated: 1-2 hours.
-
-2. **#128/#140 — Unsaved changes warning.** Add dirty flag to ModelEditor, confirmation dialog on New/Open/Close. Estimated: 2-3 hours.
-
-3. **#125 — EventBus exception swallowing.** Replace Guava EventBus with a simple listener loop that propagates exceptions. Estimated: 1-2 hours.
-
 ### P1 — Fix Soon (correctness issues)
 
-4. **#134 — Division by zero.** Add configurable behavior (log warning + return 0, or return NaN). Estimated: 1 hour.
+1. **#134 — Division by zero.** Add configurable behavior (log warning + return 0, or return NaN).
 
-5. **#135 — NaN/Infinity guards.** Add domain checks to SQRT, LN, EXP, POWER. Estimated: 2 hours.
+2. **#135 — NaN/Infinity guards.** Add domain checks to SQRT, LN, EXP, POWER.
 
-6. **#124 — RANDOM_NORMAL resettable.** Wrap Random in a Resettable, register it. Estimated: 30 min.
+3. **#124 — RANDOM_NORMAL resettable.** Wrap Random in a Resettable, register it.
 
-7. **#146 — Flow time unit in expressions.** Resolve flow values in simulation time unit. Estimated: 1 hour.
+4. **#146 — Flow time unit in expressions.** Resolve flow values in simulation time unit.
 
-8. **#136 — Duplicate polarity handler.** Merge the two setOnAction calls. Estimated: 15 min.
+5. **#136 — Duplicate polarity handler.** Merge the two setOnAction calls.
 
 ### P2 — Fix This Release (robustness)
 
-9. **#127/#143 — clearHistory misses flows.** One-line fix: iterate model.getFlows() directly. Estimated: 15 min.
+6. **#127/#143 — clearHistory misses flows.** One-line fix: iterate model.getFlows() directly.
 
-10. **#129/#139 — Duplicate name validation.** Add duplicate check in ModelCompiler.compile(). Estimated: 1 hour.
+7. **#129/#139 — Duplicate name validation.** Add duplicate check in ModelCompiler.compile().
 
-11. **#130/#141 — Import file size limit.** Add size check before Files.readString(). Estimated: 30 min.
+8. **#130/#141 — Import file size limit.** Add size check before Files.readString().
 
-12. **#137 — NPV overflow.** Use incremental discounting. Estimated: 1 hour.
+9. **#137 — NPV overflow.** Use incremental discounting.
 
 ### P3 — Improve Over Time (quality/maintainability)
 
-13. **#126/#142 — History memory efficiency.** Switch to primitive double[] pre-allocated to totalSteps. Estimated: 2-3 hours.
+10. **#126/#142 — History memory efficiency.** Switch to primitive double[] pre-allocated to totalSteps.
 
-14. **#131/#138 — AST-based rename.** Parse → walk → replace → stringify. Estimated: 3-4 hours.
+11. **#131/#138 — AST-based rename.** Parse → walk → replace → stringify.
 
-15. **#132/#144 — ModelWindow decomposition.** Extract MenuBarBuilder, FileController. Estimated: 4-6 hours.
+12. **#132/#144 — ModelWindow decomposition.** Extract MenuBarBuilder, FileController.
 
-16. **#145 — forrester-ui tests.** Add test directory, basic tests, headless mode. Estimated: 3-4 hours.
+13. **#145 — forrester-ui tests.** Add test directory, basic tests, headless mode.
 
 ---
 

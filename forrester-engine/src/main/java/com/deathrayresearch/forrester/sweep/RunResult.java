@@ -5,7 +5,7 @@ import com.deathrayresearch.forrester.event.SimulationEndEvent;
 import com.deathrayresearch.forrester.event.SimulationStartEvent;
 import com.deathrayresearch.forrester.event.TimeStepEvent;
 import com.deathrayresearch.forrester.model.Model;
-import com.google.common.eventbus.Subscribe;
+
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -53,7 +53,6 @@ public class RunResult implements EventHandler {
     }
 
     @Override
-    @Subscribe
     public void handleSimulationStartEvent(SimulationStartEvent event) {
         Model model = event.getModel();
         stockNames = new ArrayList<>(model.getStockNames());
@@ -61,7 +60,6 @@ public class RunResult implements EventHandler {
     }
 
     @Override
-    @Subscribe
     public void handleTimeStepEvent(TimeStepEvent event) {
         Model model = event.getModel();
         steps.add(event.getStep());
@@ -70,7 +68,6 @@ public class RunResult implements EventHandler {
     }
 
     @Override
-    @Subscribe
     public void handleSimulationEndEvent(SimulationEndEvent event) {
         // no-op
     }
