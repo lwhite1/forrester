@@ -91,6 +91,22 @@ public final class VensimExprTranslator {
      */
     public static TranslationResult translate(String vensimExpr, String varName,
                                                Set<String> knownNames) {
+        return translate(vensimExpr, varName, knownNames, Set.of());
+    }
+
+    /**
+     * Translates a Vensim expression to Forrester syntax.
+     *
+     * @param vensimExpr the Vensim expression string
+     * @param varName the name of the variable this expression belongs to (used for lookup naming)
+     * @param knownNames the set of all known multi-word variable names (in original Vensim form)
+     * @param lookupNames the set of known lookup table names (normalized); function calls matching
+     *                    these are rewritten to LOOKUP(name, input) syntax
+     * @return the translation result
+     */
+    public static TranslationResult translate(String vensimExpr, String varName,
+                                               Set<String> knownNames,
+                                               Set<String> lookupNames) {
         if (vensimExpr == null || vensimExpr.isBlank()) {
             return new TranslationResult(vensimExpr, List.of(), List.of());
         }
@@ -154,7 +170,10 @@ public final class VensimExprTranslator {
         // 10. Time → TIME (the built-in variable)
         expr = TIME_VAR_PATTERN.matcher(expr).replaceAll("TIME");
 
-        // 11. Check for unsupported functions
+        // 11. Rewrite lookupName(arg) → LOOKUP(lookupName, arg)
+        expr = rewriteLookupCalls(expr, lookupNames);
+
+        // 12. Check for unsupported functions
         checkUnsupportedFunctions(expr, warnings);
 
         return new TranslationResult(expr, lookups, warnings);
@@ -366,6 +385,34 @@ public final class VensimExprTranslator {
             }
         }
         return -1;
+    }
+
+    /**
+     * Rewrites function calls that match known lookup table names into explicit
+     * LOOKUP(name, input) syntax. In Vensim, standalone lookup tables can be
+     * invoked with function-call syntax: {@code tableName(input)}.
+     */
+    private static String rewriteLookupCalls(String expr, Set<String> lookupNames) {
+        if (lookupNames == null || lookupNames.isEmpty()) {
+            return expr;
+        }
+        for (String name : lookupNames) {
+            // Match name followed by '(' (with optional whitespace)
+            Pattern p = Pattern.compile("\\b(" + Pattern.quote(name) + ")\\s*\\(");
+            Matcher m = p.matcher(expr);
+            if (m.find()) {
+                int funcStart = m.start();
+                int argsStart = m.end();
+                int closeParen = findMatchingParen(expr, argsStart - 1);
+                if (closeParen > 0) {
+                    String arg = expr.substring(argsStart, closeParen).strip();
+                    String replacement = "LOOKUP(" + name + ", " + arg + ")";
+                    expr = expr.substring(0, funcStart) + replacement
+                            + expr.substring(closeParen + 1);
+                }
+            }
+        }
+        return expr;
     }
 
     private static int findTopLevelComma(String content) {

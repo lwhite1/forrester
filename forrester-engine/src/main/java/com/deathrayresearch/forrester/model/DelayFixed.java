@@ -27,7 +27,7 @@ public class DelayFixed implements Formula, Resettable {
 
     private final DoubleSupplier input;
     private final int delaySteps;
-    private final double initialValue;
+    private final DoubleSupplier initialValueSupplier;
     private final IntSupplier currentStep;
 
     private double[] buffer;
@@ -35,15 +35,17 @@ public class DelayFixed implements Formula, Resettable {
     private boolean initialized;
     private int lastStep = -1;
 
-    private DelayFixed(DoubleSupplier input, int delaySteps, double initialValue,
+    private DelayFixed(DoubleSupplier input, int delaySteps, DoubleSupplier initialValueSupplier,
                        IntSupplier currentStep) {
         Preconditions.checkNotNull(input, "input supplier must not be null");
+        Preconditions.checkNotNull(initialValueSupplier,
+                "initialValue supplier must not be null");
         Preconditions.checkNotNull(currentStep, "currentStep supplier must not be null");
         Preconditions.checkArgument(delaySteps > 0,
                 "delaySteps must be positive, but got %s", delaySteps);
         this.input = input;
         this.delaySteps = delaySteps;
-        this.initialValue = initialValue;
+        this.initialValueSupplier = initialValueSupplier;
         this.currentStep = currentStep;
     }
 
@@ -58,7 +60,23 @@ public class DelayFixed implements Formula, Resettable {
      */
     public static DelayFixed of(DoubleSupplier input, int delaySteps, double initialValue,
                                 IntSupplier currentStep) {
-        return new DelayFixed(input, delaySteps, initialValue, currentStep);
+        return new DelayFixed(input, delaySteps, () -> initialValue, currentStep);
+    }
+
+    /**
+     * Creates a DELAY_FIXED formula with a dynamic initial value.
+     * The initial value expression is evaluated once when the delay is first used.
+     *
+     * @param input                supplies the current input value
+     * @param delaySteps           the fixed delay in simulation timesteps
+     * @param initialValueSupplier supplies the initial value (evaluated once at step 0)
+     * @param currentStep          supplies the current simulation timestep
+     * @return a new DelayFixed formula
+     */
+    public static DelayFixed of(DoubleSupplier input, int delaySteps,
+                                DoubleSupplier initialValueSupplier,
+                                IntSupplier currentStep) {
+        return new DelayFixed(input, delaySteps, initialValueSupplier, currentStep);
     }
 
     /**
@@ -83,7 +101,7 @@ public class DelayFixed implements Formula, Resettable {
         int step = currentStep.getAsInt();
         if (!initialized) {
             buffer = new double[delaySteps];
-            java.util.Arrays.fill(buffer, initialValue);
+            java.util.Arrays.fill(buffer, initialValueSupplier.getAsDouble());
             writeIndex = 0;
             initialized = true;
             lastStep = step;

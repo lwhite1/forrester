@@ -405,7 +405,7 @@ public class ExprCompiler {
         requireArgs("DELAY_FIXED", args, 3);
         DoubleSupplier input = compileExpr(args.get(0));
         double delayTime = evaluateConstant(args.get(1), "DELAY_FIXED delayTime");
-        double initial = evaluateConstant(args.get(2), "DELAY_FIXED initialValue");
+        DoubleSupplier initial = compileExpr(args.get(2));
         DelayFixed delayFixed = DelayFixed.of(input, (int) Math.round(delayTime),
                 initial, context.getCurrentStep());
         resettables.add(delayFixed);

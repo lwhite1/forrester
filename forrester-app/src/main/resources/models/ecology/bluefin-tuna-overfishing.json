@@ -52,7 +52,7 @@
   }, {
     "name" : "most_recent_perception_concerning_tuna_fishery",
     "comment" : "most recent perception concerning tuna fishery",
-    "equation" : "change_in_tuna_perception_lookup(ratio_of_biomass_to_unfished_biomass)",
+    "equation" : "LOOKUP(change_in_tuna_perception_lookup, ratio_of_biomass_to_unfished_biomass)",
     "unit" : "Dmnl"
   }, {
     "name" : "natural_deaths",

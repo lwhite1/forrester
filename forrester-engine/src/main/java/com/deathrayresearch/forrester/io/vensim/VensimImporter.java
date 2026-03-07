@@ -246,7 +246,7 @@ public class VensimImporter implements ModelImporter {
         // Stock (INTEG function)
         if (INTEG_PATTERN.matcher(expression).find()) {
             buildStock(eq, normalized, expression, unit, comment, builder,
-                    vensimNames, flowNames, sketchFlowNames, timeUnit, warnings);
+                    vensimNames, flowNames, lookupNames, sketchFlowNames, timeUnit, warnings);
             return;
         }
 
@@ -258,7 +258,7 @@ public class VensimImporter implements ModelImporter {
             } else {
                 // Non-numeric unchangeable — treat as auxiliary
                 VensimExprTranslator.TranslationResult tr =
-                        VensimExprTranslator.translate(expression, normalized, vensimNames);
+                        VensimExprTranslator.translate(expression, normalized, vensimNames, lookupNames);
                 addExtractedLookups(tr, builder, lookupNames, warnings);
                 builder.aux(new AuxDef(normalized, comment, tr.expression(), unit));
                 warnings.addAll(tr.warnings());
@@ -276,7 +276,7 @@ public class VensimImporter implements ModelImporter {
         // Check if expression contains WITH LOOKUP
         if (expression.toUpperCase(Locale.ROOT).contains("WITH LOOKUP")) {
             VensimExprTranslator.TranslationResult tr =
-                    VensimExprTranslator.translate(expression, normalized, vensimNames);
+                    VensimExprTranslator.translate(expression, normalized, vensimNames, lookupNames);
             addExtractedLookups(tr, builder, lookupNames, warnings);
             builder.aux(new AuxDef(normalized, comment, tr.expression(), unit));
             warnings.addAll(tr.warnings());
@@ -285,7 +285,7 @@ public class VensimImporter implements ModelImporter {
 
         // Default: auxiliary variable
         VensimExprTranslator.TranslationResult tr =
-                VensimExprTranslator.translate(expression, normalized, vensimNames);
+                VensimExprTranslator.translate(expression, normalized, vensimNames, lookupNames);
         addExtractedLookups(tr, builder, lookupNames, warnings);
         builder.aux(new AuxDef(normalized, comment, tr.expression(), unit));
         warnings.addAll(tr.warnings());
@@ -318,7 +318,7 @@ public class VensimImporter implements ModelImporter {
     private void buildStock(MdlEquation eq, String normalized, String expression,
                              String unit, String comment, ModelDefinitionBuilder builder,
                              Set<String> vensimNames, Set<String> flowNames,
-                             Set<String> sketchFlowNames,
+                             Set<String> lookupNames, Set<String> sketchFlowNames,
                              String timeUnit, List<String> warnings) {
         // Parse INTEG(rate_expr, initial_value)
         Matcher m = INTEG_PATTERN.matcher(expression);
@@ -355,7 +355,7 @@ public class VensimImporter implements ModelImporter {
         // Create flow for the net rate
         String flowName = normalized + "_net_flow";
         VensimExprTranslator.TranslationResult tr =
-                VensimExprTranslator.translate(rateExpr, normalized, vensimNames);
+                VensimExprTranslator.translate(rateExpr, normalized, vensimNames, lookupNames);
         warnings.addAll(tr.warnings());
 
         builder.flow(new FlowDef(flowName, "Net flow for " + eq.name(),
