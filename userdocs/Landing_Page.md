@@ -1,32 +1,46 @@
 # Forrester — System Dynamics Modeling for Everyone
 
-Build feedback models visually. Simulate them instantly. Analyze them seriously — with parameter sweeps, Monte Carlo, and optimization. All free, no signup, no license keys.
+Forrester is a free, open-source System Dynamics tool for building models that reveal how complex systems behave over time — and why they so often surprise us.
 
-Forrester is an open-source System Dynamics tool that gives you the modeling and analysis power of professional SD software without the professional price tag.
+If you've ever struggled with unintended consequences, policy resistance, or the gap between short-term fixes and long-term outcomes, System Dynamics gives you a way to see the whole system at once. Forrester gives you the tools to do it.
 
----
-
-## Build models the way you think about systems
-
-Start with a **causal loop diagram** — sketch out the feedback structure of your system with variables and polarity-labeled links. Forrester automatically detects your feedback loops and classifies them as reinforcing or balancing.
-
-When you're ready to simulate, right-click any variable and classify it as a stock, flow, auxiliary, or constant. It transforms in place — no switching tools, no redrawing.
-
-Or jump straight into **stock-and-flow modeling**: place elements with keyboard shortcuts or the toolbar, connect flows with two clicks, and write equations with autocomplete that suggests variable names and built-in functions as you type.
+**Free. No license keys. No feature tiers. No signup.**
 
 ---
 
-## Analyze without limits
+## Sketch your system's causal structure
 
-Run analysis directly from the Simulate menu. Results appear in an interactive dashboard with charts and CSV export.
+Start where every SD practitioner starts: with a **causal loop diagram**. Map out the variables in your system and draw the connections between them. Forrester automatically detects your feedback loops and classifies them as reinforcing or balancing — so you can see the engines of growth, the sources of resistance, and the leverage points where intervention matters most.
 
-**Parameter sweep** — pick any constant, set a range, and see a family of simulation curves side by side. Answer "what if?" questions in seconds instead of running one scenario at a time.
+When you're ready to make it quantitative, right-click any variable and classify it as a stock, flow, auxiliary, or constant. It transforms in place on the same canvas — no switching tools, no redrawing your diagram.
 
-**Multi-parameter sweep** — vary two or more parameters simultaneously. Every combination runs as an independent simulation. See how parameters interact.
+---
 
-**Monte Carlo** — assign probability distributions to your uncertain parameters and run hundreds or thousands of trials. See percentile envelopes that show the range of possible outcomes. Answer questions like "what's the probability this project finishes on time?"
+## Build and simulate stock-and-flow models
 
-**Optimization** — fit your model to observed data, or find the parameter values that minimize cost, maximize throughput, or hit a target. Three algorithms (Nelder-Mead, BOBYQA, CMA-ES) search the parameter space for you.
+Place stocks, flows, auxiliaries, constants, and lookup tables on a visual canvas. Write equations with autocomplete that suggests variable names and built-in functions as you type. Press Ctrl+R to simulate and see the results immediately in an interactive chart.
+
+Break large models into reusable **modules** with input/output ports. Add **subscripts** to expand elements across dimensions (regions, age groups, product lines) without duplicating your diagram.
+
+---
+
+## Test scenarios and quantify uncertainty
+
+System Dynamics is most valuable when you use it to ask "what if?" — and Forrester makes that easy.
+
+**Parameter sweeps** let you vary any assumption across a range and see how the system responds. Instead of running one scenario at a time, you see a family of curves that reveals sensitivity and thresholds at a glance.
+
+**Monte Carlo analysis** goes further: assign probability distributions to your uncertain assumptions and run thousands of trials. The result is an envelope of possible futures — not a single prediction, but a realistic picture of the range of outcomes your system can produce. This is how you answer questions like "what's the probability this intervention succeeds?" or "how bad could things get?"
+
+**Optimization** finds the best answer automatically. Define what "better" means — minimize cost, hit a target, fit observed data — and let the optimizer search for the parameter values that achieve it. This is how you calibrate models against reality and identify the highest-leverage interventions.
+
+---
+
+## Import your existing models
+
+Already working in Vensim or Stella? **File > Open** reads Vensim `.mdl` and XMILE files directly. Your model structure, equations, and diagram layout come through intact.
+
+See the [Vensim PLE migration guide](From_Vensim_PLE.md) for details.
 
 ---
 
@@ -36,7 +50,6 @@ Run analysis directly from the Simulate menu. Results appear in an interactive d
 |---|:---:|:---:|:---:|:---:|
 | **Cost** | Free | $249/yr | $1,200/yr | **Free** |
 | Stocks, flows, auxiliaries | Yes | Yes | Yes | Yes |
-| Lookup tables | Yes | Yes | Yes | Yes |
 | Causal loop diagrams | Separate tool | Separate tool | Separate tool | **Integrated** |
 | Subscripts / arrays | No | Yes | Yes | Yes |
 | Parameter sweeps | No | Yes | Yes | Yes |
@@ -45,62 +58,15 @@ Run analysis directly from the Simulate menu. Results appear in an interactive d
 | Hierarchical modules | No | Yes | Yes | Yes |
 | Vensim .mdl import | N/A | No | N/A | Yes |
 | XMILE import/export | No | Native | Limited | Yes |
-| SVG diagram export | No | No | No | **Yes** |
 | Programmable API | No | No | No | **Yes** |
-
-Forrester gives you the analysis capabilities of Vensim Pro and the modeling features of Stella — plus a programmable engine and integrated CLD support — at no cost.
-
----
-
-## Everything you need in the editor
-
-- **Equation autocomplete** — element names and built-in functions suggested as you type
-- **Inline editing** — double-click any element to rename it or edit its equation directly on the canvas
-- **Lookup table editor** — edit data points and see a live chart preview with linear or cubic spline interpolation
-- **Validation** — Ctrl+B checks for undefined equations, disconnected flows, algebraic loops, and unused elements
-- **Feedback loop highlighting** — toggle to see which elements participate in feedback cycles, with reinforcing/balancing classification
-- **100-level undo** with action labels and a visual history panel
-- **Copy/paste** across windows with automatic name remapping and equation adjustment
-- **Pan and zoom** — scroll wheel, keyboard shortcuts, or Space+drag
-- **Diagram export** — PNG, JPEG, or SVG at 2x resolution
-- **8 bundled example models** covering epidemiology, ecology, population dynamics, and supply chains
-
----
-
-## Import your existing models
-
-Already have models in Vensim or Stella? **File > Open** reads `.mdl` and XMILE files directly. Your stocks, flows, equations, lookup tables, simulation settings, and diagram layout come through intact. Any constructs that need attention are flagged in the activity log — nothing fails silently.
-
-See the [Vensim PLE migration guide](From_Vensim_PLE.md) for a detailed walkthrough.
 
 ---
 
 ## Also a programmable engine
 
-The same engine that powers the visual editor is available as a Java library. Define models in code, run headless simulations, sweep parameters programmatically, or embed System Dynamics in a larger application.
+The same engine that powers the visual editor is available as a Java library. Define models in code, run headless simulations, sweep parameters programmatically, or embed System Dynamics in a larger application. Models built in code and models built in the editor use the same format — save from one, open in the other.
 
-```java
-ModelDefinition def = new ModelDefinitionBuilder()
-    .name("SIR Epidemic")
-    .stock("Susceptible", 990, "Person")
-    .stock("Infectious", 10, "Person")
-    .stock("Recovered", 0, "Person")
-    .flow("Infection",
-          "Susceptible * Infectious / (Susceptible + Infectious + Recovered)"
-          + " * contact_rate * infectivity",
-          "Day", "Susceptible", "Infectious")
-    .flow("Recovery", "Infectious * recovery_rate",
-          "Day", "Infectious", "Recovered")
-    .constant("contact_rate", 8.0, "1/Day")
-    .constant("infectivity", 0.10, "Dimensionless")
-    .constant("recovery_rate", 0.05, "1/Day")
-    .build();
-
-CompiledModel compiled = new ModelCompiler().compile(def);
-compiled.createSimulation().execute();
-```
-
-Models built in code and models built in the visual editor use the same format. Save from code, open in the editor. Build in the editor, load from code.
+See the [Programmable Engine](../docs/Programmable%20Engine.md) documentation.
 
 ---
 
@@ -113,6 +79,6 @@ mvn clean package -DskipTests
 java -jar forrester-app/target/forrester-app-*.jar
 ```
 
-Open the editor, go to **File > Open Example**, and pick a model. Press **Ctrl+R** to run it. Or start from scratch — the [quickstart tutorial](Quickstart.md) walks you through building your first model in 10 minutes.
+Go to **File > Open Example** and pick a model. Press **Ctrl+R** to run it. Or start from scratch — the [quickstart tutorial](Quickstart.md) walks you through building your first model in 10 minutes.
 
 **Requires Java 21+.**
