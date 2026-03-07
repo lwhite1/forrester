@@ -1,19 +1,5 @@
 {
   "models" : [ {
-    "id" : "exponential-growth",
-    "name" : "Exponential Growth",
-    "description" : "Population growing with constant birth and death rates",
-    "category" : "introductory",
-    "difficulty" : "introductory",
-    "path" : "introductory/exponential-growth.json",
-    "tags" : [ "positive-feedback", "exponential" ],
-    "elements" : {
-      "stocks" : 1,
-      "flows" : 2,
-      "auxiliaries" : 0,
-      "constants" : 2
-    }
-  }, {
     "id" : "bathtub",
     "name" : "Bathtub",
     "description" : "Water drains at a fixed rate; inflow begins after a delay",
@@ -21,6 +7,76 @@
     "difficulty" : "introductory",
     "path" : "introductory/bathtub.json",
     "tags" : [ "stock-and-flow", "step-function" ],
+    "elements" : {
+      "stocks" : 1,
+      "flows" : 2,
+      "auxiliaries" : 0,
+      "constants" : 2
+    }
+  }, {
+    "id" : "bluefin-tuna-overfishing",
+    "name" : "Bluefin Tuna Overfishing",
+    "description" : "Northern Bluefin Tuna overfishing with fleet adjustment dynamics",
+    "category" : "ecology",
+    "difficulty" : "advanced",
+    "path" : "ecology/bluefin-tuna-overfishing.json",
+    "tags" : [ "overshoot", "collapse", "fisheries", "lookup-table" ],
+    "elements" : {
+      "stocks" : 2,
+      "flows" : 2,
+      "auxiliaries" : 13,
+      "constants" : 8
+    }
+  }, {
+    "id" : "cocaine-flow",
+    "name" : "Cocaine Flow",
+    "description" : "Drug flow with import, use, and confiscation rates",
+    "category" : "policy",
+    "difficulty" : "introductory",
+    "path" : "policy/cocaine-flow.json",
+    "tags" : [ "stock-and-flow", "negative-feedback" ],
+    "elements" : {
+      "stocks" : 1,
+      "flows" : 1,
+      "auxiliaries" : 1,
+      "constants" : 3
+    }
+  }, {
+    "id" : "coffee-cooling",
+    "name" : "Coffee Cooling",
+    "description" : "Coffee temperature decays toward room temperature",
+    "category" : "introductory",
+    "difficulty" : "introductory",
+    "path" : "introductory/coffee-cooling.json",
+    "tags" : [ "negative-feedback", "exponential-decay" ],
+    "elements" : {
+      "stocks" : 1,
+      "flows" : 1,
+      "auxiliaries" : 1,
+      "constants" : 2
+    }
+  }, {
+    "id" : "ecological-overshoot",
+    "name" : "Ecological Overshoot",
+    "description" : "Consumer population overshoots and collapses a renewable resource",
+    "category" : "ecology",
+    "difficulty" : "intermediate",
+    "path" : "ecology/ecological-overshoot.json",
+    "tags" : [ "overshoot", "collapse", "resource-depletion" ],
+    "elements" : {
+      "stocks" : 2,
+      "flows" : 2,
+      "auxiliaries" : 6,
+      "constants" : 9
+    }
+  }, {
+    "id" : "exponential-growth",
+    "name" : "Exponential Growth",
+    "description" : "Population growing with constant birth and death rates",
+    "category" : "introductory",
+    "difficulty" : "introductory",
+    "path" : "introductory/exponential-growth.json",
+    "tags" : [ "positive-feedback", "exponential" ],
     "elements" : {
       "stocks" : 1,
       "flows" : 2,
@@ -42,32 +98,46 @@
       "constants" : 2
     }
   }, {
-    "id" : "coffee-cooling",
-    "name" : "Coffee Cooling",
-    "description" : "Coffee temperature decays toward room temperature",
-    "category" : "introductory",
-    "difficulty" : "introductory",
-    "path" : "introductory/coffee-cooling.json",
-    "tags" : [ "negative-feedback", "exponential-decay" ],
+    "id" : "inventory-oscillation",
+    "name" : "Inventory Oscillation",
+    "description" : "Car dealership inventory with perception and delivery delays",
+    "category" : "supply-chain",
+    "difficulty" : "advanced",
+    "path" : "supply-chain/inventory-oscillation.json",
+    "tags" : [ "delay", "oscillation", "supply-chain" ],
+    "elements" : {
+      "stocks" : 2,
+      "flows" : 3,
+      "auxiliaries" : 4,
+      "constants" : 6
+    }
+  }, {
+    "id" : "kaibab-deer",
+    "name" : "Kaibab Deer",
+    "description" : "Deer population limited by predation with density-dependent kill rate",
+    "category" : "ecology",
+    "difficulty" : "intermediate",
+    "path" : "ecology/kaibab-deer.json",
+    "tags" : [ "predator-prey", "lookup-table", "ecology" ],
     "elements" : {
       "stocks" : 1,
       "flows" : 1,
-      "auxiliaries" : 1,
-      "constants" : 2
+      "auxiliaries" : 4,
+      "constants" : 4
     }
   }, {
-    "id" : "sir-epidemic",
-    "name" : "SIR Epidemic",
-    "description" : "Classic Susceptible-Infectious-Recovered compartmental model",
-    "category" : "epidemiology",
-    "difficulty" : "intermediate",
-    "path" : "epidemiology/sir-epidemic.json",
-    "tags" : [ "feedback", "nonlinear" ],
+    "id" : "muskrat-plague",
+    "name" : "Muskrat Plague",
+    "description" : "Muskrat population dynamics with trapping and licensing",
+    "category" : "ecology",
+    "difficulty" : "introductory",
+    "path" : "ecology/muskrat-plague.json",
+    "tags" : [ "population", "harvest", "negative-feedback" ],
     "elements" : {
-      "stocks" : 3,
-      "flows" : 2,
-      "auxiliaries" : 0,
-      "constants" : 3
+      "stocks" : 1,
+      "flows" : 1,
+      "auxiliaries" : 3,
+      "constants" : 5
     }
   }, {
     "id" : "predator-prey",
@@ -98,18 +168,18 @@
       "constants" : 2
     }
   }, {
-    "id" : "inventory-oscillation",
-    "name" : "Inventory Oscillation",
-    "description" : "Car dealership inventory with perception and delivery delays",
-    "category" : "supply-chain",
-    "difficulty" : "advanced",
-    "path" : "supply-chain/inventory-oscillation.json",
-    "tags" : [ "delay", "oscillation", "supply-chain" ],
+    "id" : "sir-epidemic",
+    "name" : "SIR Epidemic",
+    "description" : "Classic Susceptible-Infectious-Recovered compartmental model",
+    "category" : "epidemiology",
+    "difficulty" : "intermediate",
+    "path" : "epidemiology/sir-epidemic.json",
+    "tags" : [ "feedback", "nonlinear" ],
     "elements" : {
-      "stocks" : 2,
-      "flows" : 3,
-      "auxiliaries" : 4,
-      "constants" : 6
+      "stocks" : 3,
+      "flows" : 2,
+      "auxiliaries" : 0,
+      "constants" : 3
     }
   } ]
 }
