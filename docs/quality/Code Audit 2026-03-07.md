@@ -79,9 +79,9 @@ These were already tracked before this audit:
 
 ### P3 — Improve Over Time (quality/maintainability)
 
-1. **#131/#138 — AST-based rename.** Parse → walk → replace → stringify.
+1. **#131 — AST-based rename.** Parse → walk → replace → stringify.
 
-2. **#132/#144 — ModelWindow decomposition.** Extract MenuBarBuilder, FileController.
+2. **#132 — ModelWindow decomposition.** Extract MenuBarBuilder, FileController.
 
 3. **#145 — forrester-ui tests.** Add test directory, basic tests, headless mode.
 
