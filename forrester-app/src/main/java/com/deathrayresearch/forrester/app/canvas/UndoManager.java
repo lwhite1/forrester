@@ -13,6 +13,7 @@ import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Deque;
 import java.util.List;
+import java.util.Optional;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
@@ -73,20 +74,20 @@ public class UndoManager {
      *
      * @param current the current state to preserve for redo
      * @param label   label for the redo entry (describes what was just undone)
-     * @return the previous snapshot to restore, or null if nothing to undo
+     * @return the previous snapshot to restore, or empty if nothing to undo
      */
-    public Snapshot undo(Snapshot current, String label) {
+    public Optional<Snapshot> undo(Snapshot current, String label) {
         if (undoStack.isEmpty()) {
-            return null;
+            return Optional.empty();
         }
         redoStack.push(compress(current, label));
-        return decompress(undoStack.pop());
+        return Optional.of(decompress(undoStack.pop()));
     }
 
     /**
      * Undoes one step with a default label.
      */
-    public Snapshot undo(Snapshot current) {
+    public Optional<Snapshot> undo(Snapshot current) {
         return undo(current, "Undo");
     }
 
@@ -96,20 +97,20 @@ public class UndoManager {
      *
      * @param current the current state to preserve for undo
      * @param label   label for the undo entry
-     * @return the next snapshot to restore, or null if nothing to redo
+     * @return the next snapshot to restore, or empty if nothing to redo
      */
-    public Snapshot redo(Snapshot current, String label) {
+    public Optional<Snapshot> redo(Snapshot current, String label) {
         if (redoStack.isEmpty()) {
-            return null;
+            return Optional.empty();
         }
         undoStack.push(compress(current, label));
-        return decompress(redoStack.pop());
+        return Optional.of(decompress(redoStack.pop()));
     }
 
     /**
      * Redoes one step with a default label.
      */
-    public Snapshot redo(Snapshot current) {
+    public Optional<Snapshot> redo(Snapshot current) {
         return redo(current, "Redo");
     }
 
@@ -119,18 +120,18 @@ public class UndoManager {
      *
      * @param current the current state to preserve for redo
      * @param depth   the zero-based index into the undo stack to jump to
-     * @return the snapshot at the target depth, or null if depth is out of range
+     * @return the snapshot at the target depth, or empty if depth is out of range
      */
-    public Snapshot undoTo(Snapshot current, int depth) {
+    public Optional<Snapshot> undoTo(Snapshot current, int depth) {
         if (depth < 0 || depth >= undoStack.size()) {
-            return null;
+            return Optional.empty();
         }
         // Push current to redo, then move entries from undo to redo
         redoStack.push(compress(current, "Current"));
         for (int i = 0; i < depth; i++) {
             redoStack.push(undoStack.pop());
         }
-        return decompress(undoStack.pop());
+        return Optional.of(decompress(undoStack.pop()));
     }
 
     /**

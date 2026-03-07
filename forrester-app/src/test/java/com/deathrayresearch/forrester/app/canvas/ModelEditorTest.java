@@ -1198,15 +1198,14 @@ class ModelEditorTest {
         void shouldReturnModuleWhenFound() {
             editor.addModule(); // Module 1
 
-            ModuleInstanceDef result = editor.getModuleByName("Module 1");
+            ModuleInstanceDef result = editor.getModuleByName("Module 1").orElseThrow();
 
-            assertThat(result).isNotNull();
             assertThat(result.instanceName()).isEqualTo("Module 1");
         }
 
         @Test
-        void shouldReturnNullWhenNotFound() {
-            assertThat(editor.getModuleByName("Ghost")).isNull();
+        void shouldReturnEmptyWhenNotFound() {
+            assertThat(editor.getModuleByName("Ghost")).isEmpty();
         }
     }
 
@@ -1245,7 +1244,7 @@ class ModelEditorTest {
             boolean removed = editor.removeConnectionReference("Rate", "Calc");
 
             assertThat(removed).isTrue();
-            AuxDef aux = editor.getAuxByName("Calc");
+            AuxDef aux = editor.getAuxByName("Calc").orElseThrow();
             assertThat(aux.equation()).doesNotContain("Rate");
             assertThat(aux.equation()).contains("0");
         }
@@ -1263,7 +1262,7 @@ class ModelEditorTest {
             boolean removed = editor.removeConnectionReference("Growth Rate", "Growth");
 
             assertThat(removed).isTrue();
-            FlowDef flow = editor.getFlowByName("Growth");
+            FlowDef flow = editor.getFlowByName("Growth").orElseThrow();
             assertThat(flow.equation()).doesNotContain("Growth_Rate");
         }
 
@@ -1309,9 +1308,9 @@ class ModelEditorTest {
             String newName = editor.addStockFrom(editor.getStocks().get(0));
 
             assertThat(newName).isNotEqualTo("Original");
-            assertThat(editor.getStockByName(newName)).isNotNull();
-            assertThat(editor.getStockByName(newName).initialValue()).isEqualTo(42);
-            assertThat(editor.getStockByName(newName).unit()).isEqualTo("widgets");
+            assertThat(editor.getStockByName(newName)).isPresent();
+            assertThat(editor.getStockByName(newName).orElseThrow().initialValue()).isEqualTo(42);
+            assertThat(editor.getStockByName(newName).orElseThrow().unit()).isEqualTo("widgets");
         }
 
         @Test
@@ -1328,8 +1327,7 @@ class ModelEditorTest {
                     editor.getFlows().get(0), null, null);
 
             assertThat(newName).isNotEqualTo("Transfer");
-            FlowDef newFlow = editor.getFlowByName(newName);
-            assertThat(newFlow).isNotNull();
+            FlowDef newFlow = editor.getFlowByName(newName).orElseThrow();
             assertThat(newFlow.source()).isNull();
             assertThat(newFlow.sink()).isNull();
             assertThat(newFlow.equation()).isEqualTo("S1 * 0.1");
@@ -1347,8 +1345,7 @@ class ModelEditorTest {
                     editor.getAuxiliaries().get(0), "X / Y");
 
             assertThat(newName).isNotEqualTo("Ratio");
-            AuxDef newAux = editor.getAuxByName(newName);
-            assertThat(newAux).isNotNull();
+            AuxDef newAux = editor.getAuxByName(newName).orElseThrow();
             assertThat(newAux.equation()).isEqualTo("X / Y");
             assertThat(newAux.unit()).isEqualTo("fraction");
         }
@@ -1364,9 +1361,9 @@ class ModelEditorTest {
             String newName = editor.addConstantFrom(editor.getConstants().get(0));
 
             assertThat(newName).isNotEqualTo("Pi");
-            assertThat(editor.getConstantByName(newName)).isNotNull();
-            assertThat(editor.getConstantByName(newName).value()).isEqualTo(3.14159);
-            assertThat(editor.getConstantByName(newName).unit()).isEqualTo("ratio");
+            assertThat(editor.getConstantByName(newName)).isPresent();
+            assertThat(editor.getConstantByName(newName).orElseThrow().value()).isEqualTo(3.14159);
+            assertThat(editor.getConstantByName(newName).orElseThrow().unit()).isEqualTo("ratio");
         }
 
         @Test
@@ -1389,8 +1386,7 @@ class ModelEditorTest {
 
             assertThat(name).startsWith("Lookup ");
             assertThat(editor.getLookupTables()).hasSize(1);
-            LookupTableDef lt = editor.getLookupTableByName(name);
-            assertThat(lt).isNotNull();
+            LookupTableDef lt = editor.getLookupTableByName(name).orElseThrow();
             assertThat(lt.xValues()).containsExactly(0.0, 1.0);
             assertThat(lt.yValues()).containsExactly(0.0, 1.0);
             assertThat(lt.interpolation()).isEqualTo("LINEAR");
@@ -1408,8 +1404,7 @@ class ModelEditorTest {
             String newName = editor.addLookupFrom(editor.getLookupTables().get(0));
 
             assertThat(newName).isNotEqualTo("Table");
-            LookupTableDef copy = editor.getLookupTableByName(newName);
-            assertThat(copy).isNotNull();
+            LookupTableDef copy = editor.getLookupTableByName(newName).orElseThrow();
             assertThat(copy.xValues()).containsExactly(0, 5, 10);
             assertThat(copy.yValues()).containsExactly(1, 3, 9);
             assertThat(copy.interpolation()).isEqualTo("SPLINE");
@@ -1420,15 +1415,14 @@ class ModelEditorTest {
             editor.addLookup();
             String name = editor.getLookupTables().get(0).name();
 
-            LookupTableDef lt = editor.getLookupTableByName(name);
+            LookupTableDef lt = editor.getLookupTableByName(name).orElseThrow();
 
-            assertThat(lt).isNotNull();
             assertThat(lt.name()).isEqualTo(name);
         }
 
         @Test
-        void shouldReturnNullForMissingLookup() {
-            assertThat(editor.getLookupTableByName("Ghost")).isNull();
+        void shouldReturnEmptyForMissingLookup() {
+            assertThat(editor.getLookupTableByName("Ghost")).isEmpty();
         }
 
         @Test
@@ -1440,7 +1434,7 @@ class ModelEditorTest {
             boolean result = editor.setLookupTable(name, updated);
 
             assertThat(result).isTrue();
-            LookupTableDef lt = editor.getLookupTableByName(name);
+            LookupTableDef lt = editor.getLookupTableByName(name).orElseThrow();
             assertThat(lt.xValues()).containsExactly(0, 10, 20);
             assertThat(lt.yValues()).containsExactly(5, 15, 25);
             assertThat(lt.interpolation()).isEqualTo("SPLINE");
@@ -1469,9 +1463,8 @@ class ModelEditorTest {
             boolean renamed = editor.renameElement("OldTable", "NewTable");
 
             assertThat(renamed).isTrue();
-            assertThat(editor.getLookupTableByName("OldTable")).isNull();
-            LookupTableDef lt = editor.getLookupTableByName("NewTable");
-            assertThat(lt).isNotNull();
+            assertThat(editor.getLookupTableByName("OldTable")).isEmpty();
+            LookupTableDef lt = editor.getLookupTableByName("NewTable").orElseThrow();
             assertThat(lt.xValues()).containsExactly(0, 1, 2);
             assertThat(lt.yValues()).containsExactly(10, 20, 30);
         }
@@ -1569,13 +1562,11 @@ class ModelEditorTest {
 
             editor.loadFrom(def);
 
-            FlowDef infection = editor.getFlowByName("Infection");
-            assertThat(infection).isNotNull();
+            FlowDef infection = editor.getFlowByName("Infection").orElseThrow();
             assertThat(infection.source()).isEqualTo("Susceptible");
             assertThat(infection.sink()).isEqualTo("Infectious");
 
-            FlowDef recovery = editor.getFlowByName("Recovery");
-            assertThat(recovery).isNotNull();
+            FlowDef recovery = editor.getFlowByName("Recovery").orElseThrow();
             assertThat(recovery.source()).isEqualTo("Infectious");
             assertThat(recovery.sink()).isEqualTo("Recovered");
         }
@@ -1600,13 +1591,11 @@ class ModelEditorTest {
             ModelEditor restored = new ModelEditor();
             restored.loadFrom(snapshot);
 
-            FlowDef infection = restored.getFlowByName("Infection");
-            assertThat(infection).isNotNull();
+            FlowDef infection = restored.getFlowByName("Infection").orElseThrow();
             assertThat(infection.source()).isEqualTo("Susceptible");
             assertThat(infection.sink()).isEqualTo("Infectious");
 
-            FlowDef recovery = restored.getFlowByName("Recovery");
-            assertThat(recovery).isNotNull();
+            FlowDef recovery = restored.getFlowByName("Recovery").orElseThrow();
             assertThat(recovery.source()).isEqualTo("Infectious");
             assertThat(recovery.sink()).isEqualTo("Recovered");
         }
@@ -1629,13 +1618,11 @@ class ModelEditorTest {
             ModelDefinition deserialized = serializer.fromJson(json);
             editor.loadFrom(deserialized);
 
-            FlowDef infection = editor.getFlowByName("Infection");
-            assertThat(infection).isNotNull();
+            FlowDef infection = editor.getFlowByName("Infection").orElseThrow();
             assertThat(infection.source()).isEqualTo("Susceptible");
             assertThat(infection.sink()).isEqualTo("Infectious");
 
-            FlowDef recovery = editor.getFlowByName("Recovery");
-            assertThat(recovery).isNotNull();
+            FlowDef recovery = editor.getFlowByName("Recovery").orElseThrow();
             assertThat(recovery.source()).isEqualTo("Infectious");
             assertThat(recovery.sink()).isEqualTo("Recovered");
         }

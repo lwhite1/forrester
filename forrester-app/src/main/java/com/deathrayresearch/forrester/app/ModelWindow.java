@@ -811,7 +811,7 @@ public class ModelWindow {
 
         // Dynamic: model element names for navigation
         for (String name : canvas.getCanvasState().getDrawOrder()) {
-            ElementType type = canvas.getCanvasState().getType(name);
+            ElementType type = canvas.getCanvasState().getType(name).orElse(null);
             String category = formatElementType(type);
             commands.add(cmd(name, category, () -> {
                 canvas.selectElement(name);

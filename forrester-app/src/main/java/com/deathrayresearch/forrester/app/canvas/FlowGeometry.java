@@ -71,7 +71,7 @@ public final class FlowGeometry {
         double halfW = LayoutMetrics.effectiveWidth(state, elementName) / 2;
         double halfH = LayoutMetrics.effectiveHeight(state, elementName) / 2;
 
-        ElementType type = state.getType(elementName);
+        ElementType type = state.getType(elementName).orElse(null);
         if (type == ElementType.FLOW) {
             return clipToRhombus(cx, cy, halfW, halfH, targetX, targetY);
         }

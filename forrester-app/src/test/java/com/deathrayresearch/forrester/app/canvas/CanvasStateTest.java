@@ -53,9 +53,9 @@ class CanvasStateTest {
 
             state.loadFrom(view);
 
-            assertThat(state.getType("S")).isEqualTo(ElementType.STOCK);
-            assertThat(state.getType("rate")).isEqualTo(ElementType.FLOW);
-            assertThat(state.getType("k")).isEqualTo(ElementType.CONSTANT);
+            assertThat(state.getType("S")).hasValue(ElementType.STOCK);
+            assertThat(state.getType("rate")).hasValue(ElementType.FLOW);
+            assertThat(state.getType("k")).hasValue(ElementType.CONSTANT);
         }
 
         @Test
@@ -250,7 +250,7 @@ class CanvasStateTest {
             assertThat(state.hasElement("NewStock")).isTrue();
             assertThat(state.getX("NewStock")).isCloseTo(300, within(0.001));
             assertThat(state.getY("NewStock")).isCloseTo(400, within(0.001));
-            assertThat(state.getType("NewStock")).isEqualTo(ElementType.STOCK);
+            assertThat(state.getType("NewStock")).hasValue(ElementType.STOCK);
         }
 
         @Test
@@ -266,7 +266,7 @@ class CanvasStateTest {
             state.addElement("X", ElementType.STOCK, 10, 20);
             state.addElement("X", ElementType.AUX, 50, 60);
 
-            assertThat(state.getType("X")).isEqualTo(ElementType.AUX);
+            assertThat(state.getType("X")).hasValue(ElementType.AUX);
             assertThat(state.getX("X")).isCloseTo(50, within(0.001));
             // Should not duplicate in draw order
             assertThat(state.getDrawOrder()).containsExactly("X");
@@ -301,8 +301,8 @@ class CanvasStateTest {
         void shouldRenameType() {
             state.renameElement("A", "Alpha");
 
-            assertThat(state.getType("A")).isNull();
-            assertThat(state.getType("Alpha")).isEqualTo(ElementType.STOCK);
+            assertThat(state.getType("A")).isEmpty();
+            assertThat(state.getType("Alpha")).hasValue(ElementType.STOCK);
         }
 
         @Test
@@ -347,8 +347,8 @@ class CanvasStateTest {
             // Both elements preserved unchanged
             assertThat(state.hasElement("A")).isTrue();
             assertThat(state.hasElement("B")).isTrue();
-            assertThat(state.getType("A")).isEqualTo(ElementType.STOCK);
-            assertThat(state.getType("B")).isEqualTo(ElementType.FLOW);
+            assertThat(state.getType("A")).hasValue(ElementType.STOCK);
+            assertThat(state.getType("B")).hasValue(ElementType.FLOW);
             assertThat(state.getDrawOrder()).containsExactly("A", "B", "C");
         }
     }
@@ -476,7 +476,7 @@ class CanvasStateTest {
         void shouldRemoveFromTypes() {
             state.removeElement("B");
 
-            assertThat(state.getType("B")).isNull();
+            assertThat(state.getType("B")).isEmpty();
         }
 
         @Test

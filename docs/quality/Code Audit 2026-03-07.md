@@ -44,7 +44,6 @@ These were already tracked before this audit:
 | # | Title | Severity |
 |---|-------|----------|
 | 5 | Autocomplete: Enter key does not select highlighted item | High |
-| 70 | ModelEditor methods return null instead of Optional | Medium |
 | 67 | Extract renderer-agnostic geometry (SvgExporter duplication) | Medium |
 | 68 | Extract shared ParameterRowComponent from dialogs | Medium |
 | 69 | Extract shared chart/export utilities from result panes | Medium |

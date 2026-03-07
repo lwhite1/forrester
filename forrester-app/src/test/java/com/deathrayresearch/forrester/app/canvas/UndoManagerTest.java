@@ -5,6 +5,7 @@ import com.deathrayresearch.forrester.model.def.ModelDefinitionBuilder;
 import com.deathrayresearch.forrester.model.def.ViewDef;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -74,7 +75,7 @@ class UndoManagerTest {
             int count = 0;
             UndoManager.Snapshot current = snapshot("drain");
             while (manager.canUndo()) {
-                current = manager.undo(current);
+                current = manager.undo(current).orElseThrow();
                 count++;
             }
             assertThat(count).isEqualTo(UndoManager.MAX_UNDO);
@@ -91,7 +92,7 @@ class UndoManagerTest {
         void shouldReturnPreviousSnapshot() {
             manager.pushUndo(snapshot("S1"));
 
-            UndoManager.Snapshot result = manager.undo(snapshot("Current"));
+            UndoManager.Snapshot result = manager.undo(snapshot("Current")).orElseThrow();
 
             assertSnapshotName(result, "S1");
         }
@@ -103,15 +104,15 @@ class UndoManagerTest {
             manager.undo(snapshot("Current"));
 
             assertThat(manager.canRedo()).isTrue();
-            UndoManager.Snapshot redone = manager.redo(snapshot("Dummy"));
+            UndoManager.Snapshot redone = manager.redo(snapshot("Dummy")).orElseThrow();
             assertSnapshotName(redone, "Current");
         }
 
         @Test
-        void shouldReturnNullWhenEmpty() {
-            UndoManager.Snapshot result = manager.undo(snapshot("Current"));
+        void shouldReturnEmptyWhenEmpty() {
+            Optional<UndoManager.Snapshot> result = manager.undo(snapshot("Current"));
 
-            assertThat(result).isNull();
+            assertThat(result).isEmpty();
         }
 
         @Test
@@ -131,7 +132,7 @@ class UndoManagerTest {
             manager.pushUndo(snapshot("S1"));
             manager.undo(snapshot("Current"));
 
-            UndoManager.Snapshot result = manager.redo(snapshot("AfterUndo"));
+            UndoManager.Snapshot result = manager.redo(snapshot("AfterUndo")).orElseThrow();
 
             assertSnapshotName(result, "Current");
         }
@@ -147,10 +148,10 @@ class UndoManagerTest {
         }
 
         @Test
-        void shouldReturnNullWhenEmpty() {
-            UndoManager.Snapshot result = manager.redo(snapshot("Current"));
+        void shouldReturnEmptyWhenEmpty() {
+            Optional<UndoManager.Snapshot> result = manager.redo(snapshot("Current"));
 
-            assertThat(result).isNull();
+            assertThat(result).isEmpty();
         }
 
         @Test
@@ -190,25 +191,25 @@ class UndoManagerTest {
 
             // Undo three times: S3, S2, S1
             UndoManager.Snapshot current = snapshot("S4");
-            UndoManager.Snapshot r1 = manager.undo(current);
+            UndoManager.Snapshot r1 = manager.undo(current).orElseThrow();
             assertSnapshotName(r1, "S3");
 
-            UndoManager.Snapshot r2 = manager.undo(r1);
+            UndoManager.Snapshot r2 = manager.undo(r1).orElseThrow();
             assertSnapshotName(r2, "S2");
 
-            UndoManager.Snapshot r3 = manager.undo(r2);
+            UndoManager.Snapshot r3 = manager.undo(r2).orElseThrow();
             assertSnapshotName(r3, "S1");
 
             assertThat(manager.canUndo()).isFalse();
 
             // Redo three times
-            UndoManager.Snapshot f1 = manager.redo(r3);
+            UndoManager.Snapshot f1 = manager.redo(r3).orElseThrow();
             assertSnapshotName(f1, "S2");
 
-            UndoManager.Snapshot f2 = manager.redo(f1);
+            UndoManager.Snapshot f2 = manager.redo(f1).orElseThrow();
             assertSnapshotName(f2, "S3");
 
-            UndoManager.Snapshot f3 = manager.redo(f2);
+            UndoManager.Snapshot f3 = manager.redo(f2).orElseThrow();
             assertSnapshotName(f3, "S4");
 
             assertThat(manager.canRedo()).isFalse();
@@ -275,7 +276,7 @@ class UndoManagerTest {
             manager.pushUndo(snapshot("S2"), "Move");
             manager.pushUndo(snapshot("S3"), "Delete");
 
-            UndoManager.Snapshot result = manager.undoTo(snapshot("Current"), 2);
+            UndoManager.Snapshot result = manager.undoTo(snapshot("Current"), 2).orElseThrow();
 
             assertSnapshotName(result, "S1");
             assertThat(manager.canUndo()).isFalse();
@@ -288,17 +289,17 @@ class UndoManagerTest {
             manager.pushUndo(snapshot("S1"), "Add stock");
             manager.pushUndo(snapshot("S2"), "Move");
 
-            UndoManager.Snapshot result = manager.undoTo(snapshot("Current"), 0);
+            UndoManager.Snapshot result = manager.undoTo(snapshot("Current"), 0).orElseThrow();
 
             assertSnapshotName(result, "S2");
         }
 
         @Test
-        void shouldReturnNullForInvalidDepth() {
+        void shouldReturnEmptyForInvalidDepth() {
             manager.pushUndo(snapshot("S1"), "Add stock");
 
-            assertThat(manager.undoTo(snapshot("Current"), -1)).isNull();
-            assertThat(manager.undoTo(snapshot("Current"), 1)).isNull();
+            assertThat(manager.undoTo(snapshot("Current"), -1)).isEmpty();
+            assertThat(manager.undoTo(snapshot("Current"), 1)).isEmpty();
         }
     }
 
@@ -318,7 +319,7 @@ class UndoManagerTest {
 
             manager.pushUndo(original, "Add elements");
 
-            UndoManager.Snapshot restored = manager.undo(snapshot("Current"));
+            UndoManager.Snapshot restored = manager.undo(snapshot("Current")).orElseThrow();
 
             assertThat(restored.model().name()).isEqualTo("TestModel");
             assertThat(restored.model().stocks()).hasSize(1);

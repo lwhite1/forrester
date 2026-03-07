@@ -10,6 +10,7 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Priority;
 
 import java.util.Objects;
+import java.util.Optional;
 
 /**
  * Property form for flow elements. Builds editable fields for name,
@@ -32,11 +33,12 @@ class FlowForm implements ElementForm {
 
     @Override
     public int build(int startRow) {
-        FlowDef flow = ctx.editor.getFlowByName(ctx.elementName);
-        if (flow == null) {
+        Optional<FlowDef> flowOpt = ctx.editor.getFlowByName(ctx.elementName);
+        if (flowOpt.isEmpty()) {
             ctx.addReadOnlyRow(startRow++, "Name", ctx.elementName);
             return startRow;
         }
+        FlowDef flow = flowOpt.get();
 
         int row = startRow;
         nameField = ctx.createNameField();
@@ -77,10 +79,11 @@ class FlowForm implements ElementForm {
 
     @Override
     public void updateValues() {
-        FlowDef flow = ctx.editor.getFlowByName(ctx.elementName);
-        if (flow == null || nameField == null) {
+        Optional<FlowDef> flowOpt = ctx.editor.getFlowByName(ctx.elementName);
+        if (flowOpt.isEmpty() || nameField == null) {
             return;
         }
+        FlowDef flow = flowOpt.get();
         nameField.setText(ctx.elementName);
         equationField.setText(flow.equation());
         timeUnitBox.setValue(flow.timeUnit() != null ? flow.timeUnit() : "");
@@ -97,8 +100,8 @@ class FlowForm implements ElementForm {
     private void commitComment(TextArea area) {
         String text = area.getText().trim();
         String comment = text.isEmpty() ? null : text;
-        FlowDef flow = ctx.editor.getFlowByName(ctx.elementName);
-        if (flow == null || Objects.equals(comment, flow.comment())) {
+        Optional<FlowDef> flowOpt = ctx.editor.getFlowByName(ctx.elementName);
+        if (flowOpt.isEmpty() || Objects.equals(comment, flowOpt.get().comment())) {
             return;
         }
         ctx.canvas.applyMutation(() -> ctx.editor.setFlowComment(ctx.elementName, comment));
@@ -107,14 +110,12 @@ class FlowForm implements ElementForm {
     private void commitEquation(TextField field) {
         String equation = field.getText().trim();
         if (equation.isEmpty()) {
-            FlowDef flow = ctx.editor.getFlowByName(ctx.elementName);
-            if (flow != null) {
-                field.setText(flow.equation());
-            }
+            ctx.editor.getFlowByName(ctx.elementName)
+                    .ifPresent(flow -> field.setText(flow.equation()));
             return;
         }
-        FlowDef flow = ctx.editor.getFlowByName(ctx.elementName);
-        if (flow != null && equation.equals(flow.equation())) {
+        Optional<FlowDef> flowOpt = ctx.editor.getFlowByName(ctx.elementName);
+        if (flowOpt.isPresent() && equation.equals(flowOpt.get().equation())) {
             return;
         }
         ctx.canvas.applyMutation(() -> ctx.editor.setFlowEquation(ctx.elementName, equation));
@@ -123,14 +124,12 @@ class FlowForm implements ElementForm {
     private void commitTimeUnit(ComboBox<String> box) {
         String timeUnit = box.getValue() != null ? box.getValue().trim() : "";
         if (timeUnit.isEmpty()) {
-            FlowDef flow = ctx.editor.getFlowByName(ctx.elementName);
-            if (flow != null) {
-                box.setValue(flow.timeUnit());
-            }
+            ctx.editor.getFlowByName(ctx.elementName)
+                    .ifPresent(flow -> box.setValue(flow.timeUnit()));
             return;
         }
-        FlowDef flow = ctx.editor.getFlowByName(ctx.elementName);
-        if (flow != null && timeUnit.equals(flow.timeUnit())) {
+        Optional<FlowDef> flowOpt = ctx.editor.getFlowByName(ctx.elementName);
+        if (flowOpt.isPresent() && timeUnit.equals(flowOpt.get().timeUnit())) {
             return;
         }
         ctx.canvas.applyMutation(() -> ctx.editor.setFlowTimeUnit(ctx.elementName, timeUnit));

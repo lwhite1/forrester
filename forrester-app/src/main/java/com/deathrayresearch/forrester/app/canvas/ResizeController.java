@@ -64,7 +64,7 @@ final class ResizeController {
             undoSaved = true;
         }
 
-        ElementType type = state.getType(target);
+        ElementType type = state.getType(target).orElse(null);
         double minW = LayoutMetrics.minWidthFor(type);
         double minH = LayoutMetrics.minHeightFor(type);
         double pad = SelectionRenderer.SELECTION_PADDING;

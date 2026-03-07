@@ -28,6 +28,7 @@ import javafx.util.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Consumer;
 
@@ -279,10 +280,7 @@ public class ModelCanvas extends Canvas {
         if (undoManager == null || editor == null) {
             return;
         }
-        UndoManager.Snapshot previous = undoManager.undo(captureSnapshot(), "Current");
-        if (previous != null) {
-            restoreSnapshot(previous);
-        }
+        undoManager.undo(captureSnapshot(), "Current").ifPresent(this::restoreSnapshot);
     }
 
     /**
@@ -292,10 +290,7 @@ public class ModelCanvas extends Canvas {
         if (undoManager == null || editor == null) {
             return;
         }
-        UndoManager.Snapshot next = undoManager.redo(captureSnapshot(), "Current");
-        if (next != null) {
-            restoreSnapshot(next);
-        }
+        undoManager.redo(captureSnapshot(), "Current").ifPresent(this::restoreSnapshot);
     }
 
     /**
@@ -307,10 +302,7 @@ public class ModelCanvas extends Canvas {
         if (undoManager == null || editor == null) {
             return;
         }
-        UndoManager.Snapshot target = undoManager.undoTo(captureSnapshot(), depth);
-        if (target != null) {
-            restoreSnapshot(target);
-        }
+        undoManager.undoTo(captureSnapshot(), depth).ifPresent(this::restoreSnapshot);
     }
 
     /**
@@ -345,7 +337,7 @@ public class ModelCanvas extends Canvas {
      * Returns the type of the named element on the canvas.
      */
     public ElementType getSelectedElementType(String name) {
-        return canvasState.getType(name);
+        return canvasState.getType(name).orElse(null);
     }
 
     /**
@@ -743,7 +735,7 @@ public class ModelCanvas extends Canvas {
             return;
         }
         canvasState.renameElement(oldName, newName);
-        if (canvasState.getType(newName) == ElementType.CLD_VARIABLE) {
+        if (canvasState.getType(newName).orElse(null) == ElementType.CLD_VARIABLE) {
             double w = LayoutMetrics.cldVarWidthForName(newName);
             canvasState.setSize(newName, w, LayoutMetrics.CLD_VAR_HEIGHT);
         }
@@ -886,12 +878,13 @@ public class ModelCanvas extends Canvas {
             return;
         }
 
-        ElementType type = canvasState.getType(elementName);
-        if (type == null) {
+        Optional<ElementType> typeOpt = canvasState.getType(elementName);
+        if (typeOpt.isEmpty()) {
             Tooltip.uninstall(this, elementTooltip);
             elementTooltip.hide();
             return;
         }
+        ElementType type = typeOpt.get();
 
         String text = buildTooltipText(elementName, type);
         elementTooltip.setText(text);
@@ -901,30 +894,17 @@ public class ModelCanvas extends Canvas {
     private String buildTooltipText(String name, ElementType type) {
         StringBuilder sb = new StringBuilder(name);
         switch (type) {
-            case FLOW -> {
-                String eq = editor.getFlowEquation(name);
-                if (ElementRenderer.isDisplayableEquation(eq)) {
-                    sb.append("\n= ").append(eq);
-                }
-            }
-            case AUX -> {
-                String eq = editor.getAuxEquation(name);
-                if (ElementRenderer.isDisplayableEquation(eq)) {
-                    sb.append("\n= ").append(eq);
-                }
-            }
-            case CONSTANT -> {
-                var cd = editor.getConstantByName(name);
-                if (cd != null) {
-                    sb.append("\n= ").append(ElementRenderer.formatValue(cd.value()));
-                }
-            }
-            case STOCK -> {
-                String unit = editor.getStockUnit(name);
-                if (unit != null && !unit.isBlank()) {
-                    sb.append("\nUnit: ").append(unit);
-                }
-            }
+            case FLOW -> editor.getFlowEquation(name)
+                    .filter(ElementRenderer::isDisplayableEquation)
+                    .ifPresent(eq -> sb.append("\n= ").append(eq));
+            case AUX -> editor.getAuxEquation(name)
+                    .filter(ElementRenderer::isDisplayableEquation)
+                    .ifPresent(eq -> sb.append("\n= ").append(eq));
+            case CONSTANT -> editor.getConstantByName(name)
+                    .ifPresent(cd -> sb.append("\n= ").append(ElementRenderer.formatValue(cd.value())));
+            case STOCK -> editor.getStockUnit(name)
+                    .filter(unit -> !unit.isBlank())
+                    .ifPresent(unit -> sb.append("\nUnit: ").append(unit));
             default -> { }
         }
         return sb.toString();
@@ -963,8 +943,7 @@ public class ModelCanvas extends Canvas {
                     && !flowCreation.isPending()) {
                 String hit = HitTester.hitTest(canvasState, worldX, worldY);
                 if (hit != null) {
-                    ElementType hitType = canvasState.getType(hit);
-                    if (hitType == ElementType.MODULE) {
+                    if (canvasState.getType(hit).orElse(null) == ElementType.MODULE) {
                         drillInto(hit);
                     } else {
                         startInlineEdit(hit);
@@ -1210,7 +1189,7 @@ public class ModelCanvas extends Canvas {
             double worldY = viewport.toWorldY(event.getY());
             String hit = HitTester.hitTest(canvasState, worldX, worldY);
             if (hit != null) {
-                ElementType hitType = canvasState.getType(hit);
+                ElementType hitType = canvasState.getType(hit).orElse(null);
                 if (hitType == ElementType.MODULE || hitType == ElementType.CLD_VARIABLE) {
                     panning = false;
                     panMoved = false;
@@ -1417,10 +1396,11 @@ public class ModelCanvas extends Canvas {
         if (editor == null) {
             return;
         }
-        ModuleInstanceDef module = editor.getModuleByName(moduleName);
-        if (module == null) {
+        Optional<ModuleInstanceDef> moduleOpt = editor.getModuleByName(moduleName);
+        if (moduleOpt.isEmpty()) {
             return;
         }
+        ModuleInstanceDef module = moduleOpt.get();
         int moduleIndex = editor.getModuleIndex(moduleName);
 
         navController.push(new NavigationStack.Frame(

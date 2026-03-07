@@ -147,8 +147,7 @@ public final class LayoutMetrics {
         if (state.hasCustomSize(name)) {
             return state.getWidth(name);
         }
-        ElementType type = state.getType(name);
-        return type != null ? widthFor(type) : AUX_WIDTH;
+        return state.getType(name).map(LayoutMetrics::widthFor).orElse(AUX_WIDTH);
     }
 
     /**
@@ -159,8 +158,7 @@ public final class LayoutMetrics {
         if (state.hasCustomSize(name)) {
             return state.getHeight(name);
         }
-        ElementType type = state.getType(name);
-        return type != null ? heightFor(type) : AUX_HEIGHT;
+        return state.getType(name).map(LayoutMetrics::heightFor).orElse(AUX_HEIGHT);
     }
 
     /**

@@ -30,7 +30,7 @@ public final class FeedbackLoopRenderer {
      * Uses a solid border in the loop highlight color with a subtle fill.
      */
     public static void drawLoopHighlight(GraphicsContext gc, CanvasState state, String name) {
-        ElementType type = state.getType(name);
+        ElementType type = state.getType(name).orElse(null);
         double cx = state.getX(name);
         double cy = state.getY(name);
 

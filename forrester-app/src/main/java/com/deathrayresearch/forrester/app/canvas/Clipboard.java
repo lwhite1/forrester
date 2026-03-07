@@ -7,6 +7,7 @@ import com.deathrayresearch.forrester.model.def.ElementType;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 /**
@@ -62,29 +63,28 @@ public class Clipboard {
         double centroidY = sumY / count;
 
         for (String name : names) {
-            ElementType type = state.getType(name);
-            if (type == null) {
+            Optional<ElementType> typeOpt = state.getType(name);
+            if (typeOpt.isEmpty()) {
                 continue;
             }
+            ElementType type = typeOpt.get();
 
             double rx = state.getX(name) - centroidX;
             double ry = state.getY(name) - centroidY;
             double cw = state.hasCustomSize(name) ? state.getWidth(name) : 0;
             double ch = state.hasCustomSize(name) ? state.getHeight(name) : 0;
 
-            ElementDef def = switch (type) {
+            Optional<? extends ElementDef> defOpt = switch (type) {
                 case STOCK -> editor.getStockByName(name);
                 case FLOW -> editor.getFlowByName(name);
                 case AUX -> editor.getAuxByName(name);
                 case CONSTANT -> editor.getConstantByName(name);
                 case MODULE -> editor.getModuleByName(name);
                 case LOOKUP -> editor.getLookupTableByName(name);
-                case CLD_VARIABLE -> editor.getCldVariableByName(name);
+                case CLD_VARIABLE -> Optional.ofNullable(editor.getCldVariableByName(name));
             };
 
-            if (def != null) {
-                entries.add(new Entry(name, type, rx, ry, cw, ch, def));
-            }
+            defOpt.ifPresent(def -> entries.add(new Entry(name, type, rx, ry, cw, ch, def)));
         }
 
         // Capture causal links where both endpoints are in the selection

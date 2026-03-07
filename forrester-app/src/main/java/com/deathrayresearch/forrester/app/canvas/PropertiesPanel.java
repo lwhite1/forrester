@@ -19,6 +19,7 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 /**
@@ -342,11 +343,12 @@ public class PropertiesPanel extends VBox {
     }
 
     private int buildModuleForm(int row) {
-        ModuleInstanceDef module = ctx.editor.getModuleByName(ctx.elementName);
-        if (module == null) {
+        Optional<ModuleInstanceDef> moduleOpt = ctx.editor.getModuleByName(ctx.elementName);
+        if (moduleOpt.isEmpty()) {
             ctx.addReadOnlyRow(row++, "Name", ctx.elementName);
             return row;
         }
+        ModuleInstanceDef module = moduleOpt.get();
 
         TextField nameField = ctx.createNameField();
         ctx.addFieldRow(row++, "Instance Name", nameField);

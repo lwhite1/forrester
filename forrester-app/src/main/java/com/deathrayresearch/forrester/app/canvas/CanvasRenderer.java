@@ -129,7 +129,7 @@ public class CanvasRenderer {
 
         // 2. Draw elements on top
         for (String name : canvasState.getDrawOrder()) {
-            ElementType type = canvasState.getType(name);
+            ElementType type = canvasState.getType(name).orElse(null);
             double cx = canvasState.getX(name);
             double cy = canvasState.getY(name);
 
@@ -141,7 +141,7 @@ public class CanvasRenderer {
                 case STOCK -> {
                     double w = LayoutMetrics.effectiveWidth(canvasState, name);
                     double h = LayoutMetrics.effectiveHeight(canvasState, name);
-                    String unit = editor.getStockUnit(name);
+                    String unit = editor.getStockUnit(name).orElse(null);
                     ElementRenderer.drawStock(gc, name, unit,
                             cx - w / 2, cy - h / 2, w, h);
                 }
@@ -160,8 +160,8 @@ public class CanvasRenderer {
                 case CONSTANT -> {
                     double w = LayoutMetrics.effectiveWidth(canvasState, name);
                     double h = LayoutMetrics.effectiveHeight(canvasState, name);
-                    ConstantDef cd = editor.getConstantByName(name);
-                    double value = cd != null ? cd.value() : 0;
+                    double value = editor.getConstantByName(name)
+                            .map(ConstantDef::value).orElse(0.0);
                     ElementRenderer.drawConstant(gc, name, value,
                             cx - w / 2, cy - h / 2, w, h);
                 }
@@ -173,8 +173,8 @@ public class CanvasRenderer {
                 case LOOKUP -> {
                     double w = LayoutMetrics.effectiveWidth(canvasState, name);
                     double h = LayoutMetrics.effectiveHeight(canvasState, name);
-                    var lt = editor.getLookupTableByName(name);
-                    int pts = lt != null ? lt.xValues().length : 0;
+                    int pts = editor.getLookupTableByName(name)
+                            .map(lt -> lt.xValues().length).orElse(0);
                     ElementRenderer.drawLookup(gc, name, pts,
                             cx - w / 2, cy - h / 2, w, h);
                 }

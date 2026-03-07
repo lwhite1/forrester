@@ -77,7 +77,7 @@ class FlowCreationControllerTest {
             String name = result.flowName();
             assertThat(controller.isPending()).isFalse();
             assertThat(canvasState.hasElement(name)).isTrue();
-            assertThat(canvasState.getType(name)).isEqualTo(ElementType.FLOW);
+            assertThat(canvasState.getType(name)).hasValue(ElementType.FLOW);
             // Midpoint between (100,200) and (400,200)
             assertThat(canvasState.getX(name)).isEqualTo(250);
             assertThat(canvasState.getY(name)).isEqualTo(200);

@@ -36,7 +36,7 @@ final class ExportBounds {
             double halfH = LayoutMetrics.effectiveHeight(canvasState, name) / 2;
 
             // For flows, include the label area below the diamond
-            if (canvasState.getType(name) == ElementType.FLOW) {
+            if (canvasState.getType(name).orElse(null) == ElementType.FLOW) {
                 halfH = LayoutMetrics.FLOW_INDICATOR_SIZE / 2
                         + LayoutMetrics.FLOW_EQUATION_GAP + 12;
             }

@@ -26,7 +26,7 @@ public final class HitTester {
 
         for (int i = drawOrder.size() - 1; i >= 0; i--) {
             String name = drawOrder.get(i);
-            ElementType type = state.getType(name);
+            ElementType type = state.getType(name).orElse(null);
             double cx = state.getX(name);
             double cy = state.getY(name);
 

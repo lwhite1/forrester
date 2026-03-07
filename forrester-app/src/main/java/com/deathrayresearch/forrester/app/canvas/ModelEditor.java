@@ -22,6 +22,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.BiFunction;
@@ -363,9 +364,9 @@ public class ModelEditor {
     }
 
     /**
-     * Returns the lookup table with the given name, or null if not found.
+     * Returns the lookup table with the given name.
      */
-    public LookupTableDef getLookupTableByName(String name) {
+    public Optional<LookupTableDef> getLookupTableByName(String name) {
         return findByName(lookupTables, name, LookupTableDef::name);
     }
 
@@ -774,15 +775,15 @@ public class ModelEditor {
     }
 
     /**
-     * Returns the first element in the list whose name matches, or null if not found.
+     * Returns the first element in the list whose name matches.
      */
-    private <T> T findByName(List<T> list, String name, Function<T, String> nameGetter) {
+    private <T> Optional<T> findByName(List<T> list, String name, Function<T, String> nameGetter) {
         for (T item : list) {
             if (nameGetter.apply(item).equals(name)) {
-                return item;
+                return Optional.of(item);
             }
         }
-        return null;
+        return Optional.empty();
     }
 
     /**
@@ -974,44 +975,41 @@ public class ModelEditor {
         return Collections.unmodifiableList(constants);
     }
 
-    public ConstantDef getConstantByName(String name) {
+    public Optional<ConstantDef> getConstantByName(String name) {
         return findByName(constants, name, ConstantDef::name);
     }
 
     /**
-     * Returns the stock with the given name, or null if not found.
+     * Returns the stock with the given name.
      */
-    public StockDef getStockByName(String name) {
+    public Optional<StockDef> getStockByName(String name) {
         return findByName(stocks, name, StockDef::name);
     }
 
     /**
-     * Returns the flow with the given name, or null if not found.
+     * Returns the flow with the given name.
      */
-    public FlowDef getFlowByName(String name) {
+    public Optional<FlowDef> getFlowByName(String name) {
         return findByName(flows, name, FlowDef::name);
     }
 
     /**
-     * Returns the auxiliary with the given name, or null if not found.
+     * Returns the auxiliary with the given name.
      */
-    public AuxDef getAuxByName(String name) {
+    public Optional<AuxDef> getAuxByName(String name) {
         return findByName(auxiliaries, name, AuxDef::name);
     }
 
-    public String getStockUnit(String name) {
-        StockDef s = findByName(stocks, name, StockDef::name);
-        return s != null ? s.unit() : null;
+    public Optional<String> getStockUnit(String name) {
+        return findByName(stocks, name, StockDef::name).map(StockDef::unit);
     }
 
-    public String getFlowEquation(String name) {
-        FlowDef f = findByName(flows, name, FlowDef::name);
-        return f != null ? f.equation() : null;
+    public Optional<String> getFlowEquation(String name) {
+        return findByName(flows, name, FlowDef::name).map(FlowDef::equation);
     }
 
-    public String getAuxEquation(String name) {
-        AuxDef a = findByName(auxiliaries, name, AuxDef::name);
-        return a != null ? a.equation() : null;
+    public Optional<String> getAuxEquation(String name) {
+        return findByName(auxiliaries, name, AuxDef::name).map(AuxDef::equation);
     }
 
     public List<ModuleInstanceDef> getModules() {
@@ -1019,9 +1017,9 @@ public class ModelEditor {
     }
 
     /**
-     * Returns the module instance with the given name, or null if not found.
+     * Returns the module instance with the given name.
      */
-    public ModuleInstanceDef getModuleByName(String name) {
+    public Optional<ModuleInstanceDef> getModuleByName(String name) {
         return findByName(modules, name, ModuleInstanceDef::instanceName);
     }
 

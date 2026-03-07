@@ -145,28 +145,25 @@ final class CopyPasteController {
                             FlowEndpointCalculator.FlowEnd.SINK, newSink);
                 }
 
-                String eq = editor.getFlowEquation(newName);
-                if (eq != null) {
+                editor.getFlowEquation(newName).ifPresent(eq -> {
                     String updated = remapEquationTokens(eq, nameMapping);
                     ClearResult cr = clearDanglingReferences(updated, editor);
                     allReplaced.addAll(cr.replaced());
                     if (!cr.equation().equals(eq)) {
                         editor.setFlowEquation(newName, cr.equation());
                     }
-                }
+                });
             } else if (entry.type() == ElementType.AUX) {
-                String eq = editor.getAuxEquation(newName);
-                if (eq != null) {
+                editor.getAuxEquation(newName).ifPresent(eq -> {
                     String updated = remapEquationTokens(eq, nameMapping);
                     ClearResult cr = clearDanglingReferences(updated, editor);
                     allReplaced.addAll(cr.replaced());
                     if (!cr.equation().equals(eq)) {
                         editor.setAuxEquation(newName, cr.equation());
                     }
-                }
+                });
             } else if (entry.type() == ElementType.MODULE) {
-                ModuleInstanceDef module = editor.getModuleByName(newName);
-                if (module != null) {
+                editor.getModuleByName(newName).ifPresent(module -> {
                     Map<String, String> newInputs =
                             remapInputBindings(module.inputBindings(), nameMapping, editor);
                     Map<String, String> newOutputs =
@@ -175,7 +172,7 @@ final class CopyPasteController {
                             || !newOutputs.equals(module.outputBindings())) {
                         editor.updateModuleBindings(newName, newInputs, newOutputs);
                     }
-                }
+                });
             }
         }
 

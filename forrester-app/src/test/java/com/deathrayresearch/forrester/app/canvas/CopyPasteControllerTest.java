@@ -54,8 +54,8 @@ class CopyPasteControllerTest {
             assertThat(pasted).hasSize(1);
             String newName = pasted.get(0);
             assertThat(newName).isNotEqualTo("Population");
-            assertThat(editor.getStockByName(newName)).isNotNull();
-            assertThat(editor.getStockByName(newName).initialValue()).isEqualTo(100);
+            assertThat(editor.getStockByName(newName)).isPresent();
+            assertThat(editor.getStockByName(newName).orElseThrow().initialValue()).isEqualTo(100);
         }
 
         @Test
@@ -73,7 +73,7 @@ class CopyPasteControllerTest {
             List<String> pasted = pasteResult.pastedNames();
 
             assertThat(pasted).hasSize(1);
-            assertThat(editor.getConstantByName(pasted.get(0)).value()).isEqualTo(0.5);
+            assertThat(editor.getConstantByName(pasted.get(0)).orElseThrow().value()).isEqualTo(0.5);
         }
 
         @Test
@@ -120,12 +120,12 @@ class CopyPasteControllerTest {
 
             // Find the pasted flow
             String pastedFlowName = pasted.stream()
-                    .filter(n -> editor.getFlowByName(n) != null)
+                    .filter(n -> editor.getFlowByName(n).isPresent())
                     .findFirst()
                     .orElse(null);
             assertThat(pastedFlowName).isNotNull();
 
-            FlowDef pastedFlow = editor.getFlowByName(pastedFlowName);
+            FlowDef pastedFlow = editor.getFlowByName(pastedFlowName).orElseThrow();
             // Source and sink should be reconnected to the pasted stocks
             assertThat(pastedFlow.source()).isNotNull();
             assertThat(pastedFlow.sink()).isNotNull();
@@ -300,7 +300,7 @@ class CopyPasteControllerTest {
 
             assertThat(pasted).hasSize(1);
             String pastedFlowName = pasted.get(0);
-            FlowDef pastedFlow = targetEditor.getFlowByName(pastedFlowName);
+            FlowDef pastedFlow = targetEditor.getFlowByName(pastedFlowName).orElseThrow();
             // Both Population and Growth_Rate don't exist in target, replaced with 0
             assertThat(pastedFlow.equation()).isEqualTo("0 * 0");
         }
@@ -331,18 +331,18 @@ class CopyPasteControllerTest {
 
             assertThat(pasted).hasSize(2);
             String pastedFlowName = pasted.stream()
-                    .filter(n -> targetEditor.getFlowByName(n) != null)
+                    .filter(n -> targetEditor.getFlowByName(n).isPresent())
                     .findFirst()
                     .orElse(null);
             assertThat(pastedFlowName).isNotNull();
 
-            FlowDef pastedFlow = targetEditor.getFlowByName(pastedFlowName);
+            FlowDef pastedFlow = targetEditor.getFlowByName(pastedFlowName).orElseThrow();
             // The pasted stock reference should be remapped; Growth_Rate replaced with 0
             assertThat(pastedFlow.equation()).doesNotContain("Growth_Rate");
             assertThat(pastedFlow.equation()).contains("0");
             // The pasted stock's new name should appear in the equation
             String pastedStockName = pasted.stream()
-                    .filter(n -> targetEditor.getStockByName(n) != null)
+                    .filter(n -> targetEditor.getStockByName(n).isPresent())
                     .findFirst()
                     .orElse(null);
             assertThat(pastedFlow.equation())
@@ -385,19 +385,19 @@ class CopyPasteControllerTest {
             assertThat(pasted).hasSize(2);
 
             String pastedModuleName = pasted.stream()
-                    .filter(n -> editor.getModuleByName(n) != null)
+                    .filter(n -> editor.getModuleByName(n).isPresent())
                     .findFirst()
                     .orElse(null);
             assertThat(pastedModuleName).isNotNull();
 
             String pastedConstName = pasted.stream()
-                    .filter(n -> editor.getConstantByName(n) != null
+                    .filter(n -> editor.getConstantByName(n).isPresent()
                             && !n.equals("Rate"))
                     .findFirst()
                     .orElse(null);
             assertThat(pastedConstName).isNotNull();
 
-            ModuleInstanceDef pastedModule = editor.getModuleByName(pastedModuleName);
+            ModuleInstanceDef pastedModule = editor.getModuleByName(pastedModuleName).orElseThrow();
             // Input binding should reference the pasted constant, not original "Rate"
             assertThat(pastedModule.inputBindings().get("input_port"))
                     .isEqualTo(pastedConstName.replace(' ', '_'));
@@ -434,7 +434,7 @@ class CopyPasteControllerTest {
             List<String> pasted = controller.paste(targetCanvas, targetEditor).pastedNames();
 
             assertThat(pasted).hasSize(1);
-            ModuleInstanceDef pastedModule = targetEditor.getModuleByName(pasted.get(0));
+            ModuleInstanceDef pastedModule = targetEditor.getModuleByName(pasted.get(0)).orElseThrow();
             // "Rate" doesn't exist in target — input should be replaced with 0
             assertThat(pastedModule.inputBindings().get("input_port")).isEqualTo("0");
         }
@@ -465,7 +465,7 @@ class CopyPasteControllerTest {
             CanvasState targetCanvas = new CanvasState();
             List<String> pasted = controller.paste(targetCanvas, targetEditor).pastedNames();
 
-            ModuleInstanceDef pastedModule = targetEditor.getModuleByName(pasted.get(0));
+            ModuleInstanceDef pastedModule = targetEditor.getModuleByName(pasted.get(0)).orElseThrow();
             // Output binding should be removed, not "0"
             assertThat(pastedModule.outputBindings()).doesNotContainKey("output_port");
             // Input binding still gets "0" (valid as expression)
@@ -553,8 +553,8 @@ class CopyPasteControllerTest {
             List<String> pasted = controller.paste(targetCanvas, targetEditor).pastedNames();
 
             assertThat(pasted).containsExactlyInAnyOrder("Population", "Growth Rate");
-            assertThat(targetEditor.getStockByName("Population").initialValue()).isEqualTo(100);
-            assertThat(targetEditor.getConstantByName("Growth Rate").value()).isEqualTo(0.05);
+            assertThat(targetEditor.getStockByName("Population").orElseThrow().initialValue()).isEqualTo(100);
+            assertThat(targetEditor.getConstantByName("Growth Rate").orElseThrow().value()).isEqualTo(0.05);
         }
 
         @Test
@@ -581,7 +581,7 @@ class CopyPasteControllerTest {
 
             assertThat(pasted).containsExactlyInAnyOrder("Source", "Sink", "Transfer");
 
-            FlowDef pastedFlow = targetEditor.getFlowByName("Transfer");
+            FlowDef pastedFlow = targetEditor.getFlowByName("Transfer").orElseThrow();
             assertThat(pastedFlow.source()).isEqualTo("Source");
             assertThat(pastedFlow.sink()).isEqualTo("Sink");
             assertThat(pastedFlow.equation()).isEqualTo("Source * 0.1");
@@ -622,11 +622,11 @@ class CopyPasteControllerTest {
                     "Water_in_Tub", "Outflow", "Inflow", "Outflow_Rate", "Inflow_Rate");
 
             // Verify equations preserved — constant references not replaced with 0
-            FlowDef outflow = targetEditor.getFlowByName("Outflow");
+            FlowDef outflow = targetEditor.getFlowByName("Outflow").orElseThrow();
             assertThat(outflow.equation()).isEqualTo("MIN(Outflow_Rate, Water_in_Tub)");
             assertThat(outflow.source()).isEqualTo("Water_in_Tub");
 
-            FlowDef inflow = targetEditor.getFlowByName("Inflow");
+            FlowDef inflow = targetEditor.getFlowByName("Inflow").orElseThrow();
             assertThat(inflow.equation()).isEqualTo("STEP(Inflow_Rate, 5)");
             assertThat(inflow.sink()).isEqualTo("Water_in_Tub");
         }
@@ -655,13 +655,12 @@ class CopyPasteControllerTest {
 
             assertThat(pasted).containsExactlyInAnyOrder("Population", "Rate", "Growth");
 
-            FlowDef pastedFlow = targetEditor.getFlowByName("Growth");
-            assertThat(pastedFlow).isNotNull();
+            FlowDef pastedFlow = targetEditor.getFlowByName("Growth").orElseThrow();
             assertThat(pastedFlow.equation()).isEqualTo("Population * Rate");
             assertThat(pastedFlow.source()).isEqualTo("Population");
 
             // Verify the constant exists so connectors would be generated
-            assertThat(targetEditor.getConstantByName("Rate")).isNotNull();
+            assertThat(targetEditor.getConstantByName("Rate")).isPresent();
             assertThat(targetEditor.hasElement("Rate")).isTrue();
         }
 
@@ -690,7 +689,7 @@ class CopyPasteControllerTest {
 
             assertThat(pasted).hasSize(1);
             assertThat(pasted.get(0)).isNotEqualTo("Population");
-            assertThat(targetEditor.getStockByName(pasted.get(0)).initialValue()).isEqualTo(100);
+            assertThat(targetEditor.getStockByName(pasted.get(0)).orElseThrow().initialValue()).isEqualTo(100);
         }
     }
 

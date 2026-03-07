@@ -10,6 +10,7 @@ import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 /**
@@ -121,10 +122,10 @@ public class CanvasState {
     }
 
     /**
-     * Returns the type of the named element, or null if not found.
+     * Returns the type of the named element.
      */
-    public ElementType getType(String name) {
-        return types.get(name);
+    public Optional<ElementType> getType(String name) {
+        return Optional.ofNullable(types.get(name));
     }
 
     /**

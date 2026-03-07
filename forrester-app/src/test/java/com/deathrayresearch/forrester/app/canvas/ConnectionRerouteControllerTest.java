@@ -162,7 +162,7 @@ class ConnectionRerouteControllerTest {
             assertThat(result).isTrue();
             assertThat(undoSaved[0]).isTrue();
             // Target's equation should now reference NewSource instead of Source
-            assertThat(editor.getAuxByName("Target").equation()).isEqualTo("NewSource");
+            assertThat(editor.getAuxByName("Target").orElseThrow().equation()).isEqualTo("NewSource");
             assertThat(controller.isActive()).isFalse();
         }
 

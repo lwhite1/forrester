@@ -90,7 +90,7 @@ final class ModuleNavigationController {
             contextMenu.hide();
         }
 
-        ElementType type = canvasState.getType(elementName);
+        ElementType type = canvasState.getType(elementName).orElse(null);
 
         if (type == ElementType.MODULE) {
             contextMenu = buildModuleContextMenu(elementName, drillAction,
@@ -157,12 +157,12 @@ final class ModuleNavigationController {
      */
     void openBindingsDialog(String moduleName, ModelEditor editor,
                             Runnable saveUndo, Runnable fireStatus) {
-        ModuleInstanceDef module = editor.getModuleByName(moduleName);
-        if (module == null) {
+        Optional<ModuleInstanceDef> moduleOpt = editor.getModuleByName(moduleName);
+        if (moduleOpt.isEmpty()) {
             return;
         }
 
-        BindingConfigDialog dialog = new BindingConfigDialog(module);
+        BindingConfigDialog dialog = new BindingConfigDialog(moduleOpt.get());
         Optional<BindingConfigDialog.BindingResult> result = dialog.showAndWait();
         result.ifPresent(bindings -> {
             saveUndo.run();

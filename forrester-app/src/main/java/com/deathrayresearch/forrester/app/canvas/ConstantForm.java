@@ -9,6 +9,7 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Priority;
 
 import java.util.Objects;
+import java.util.Optional;
 
 /**
  * Property form for constant elements. Builds editable fields
@@ -29,11 +30,12 @@ class ConstantForm implements ElementForm {
 
     @Override
     public int build(int startRow) {
-        ConstantDef constant = ctx.editor.getConstantByName(ctx.elementName);
-        if (constant == null) {
+        Optional<ConstantDef> constantOpt = ctx.editor.getConstantByName(ctx.elementName);
+        if (constantOpt.isEmpty()) {
             ctx.addReadOnlyRow(startRow++, "Name", ctx.elementName);
             return startRow;
         }
+        ConstantDef constant = constantOpt.get();
 
         int row = startRow;
         nameField = ctx.createNameField();
@@ -66,10 +68,11 @@ class ConstantForm implements ElementForm {
 
     @Override
     public void updateValues() {
-        ConstantDef constant = ctx.editor.getConstantByName(ctx.elementName);
-        if (constant == null || nameField == null) {
+        Optional<ConstantDef> constantOpt = ctx.editor.getConstantByName(ctx.elementName);
+        if (constantOpt.isEmpty() || nameField == null) {
             return;
         }
+        ConstantDef constant = constantOpt.get();
         nameField.setText(ctx.elementName);
         valueField.setText(ElementRenderer.formatValue(constant.value()));
         unitBox.setValue(constant.unit() != null ? constant.unit() : "");
@@ -79,8 +82,8 @@ class ConstantForm implements ElementForm {
     private void commitComment(TextArea area) {
         String text = area.getText().trim();
         String comment = text.isEmpty() ? null : text;
-        ConstantDef constant = ctx.editor.getConstantByName(ctx.elementName);
-        if (constant == null || Objects.equals(comment, constant.comment())) {
+        Optional<ConstantDef> constantOpt = ctx.editor.getConstantByName(ctx.elementName);
+        if (constantOpt.isEmpty() || Objects.equals(comment, constantOpt.get().comment())) {
             return;
         }
         ctx.canvas.applyMutation(() -> ctx.editor.setConstantComment(ctx.elementName, comment));
@@ -89,23 +92,21 @@ class ConstantForm implements ElementForm {
     private void commitValue(TextField field) {
         try {
             double value = Double.parseDouble(field.getText().trim());
-            ConstantDef constant = ctx.editor.getConstantByName(ctx.elementName);
-            if (constant == null || constant.value() == value) {
+            Optional<ConstantDef> constantOpt = ctx.editor.getConstantByName(ctx.elementName);
+            if (constantOpt.isEmpty() || constantOpt.get().value() == value) {
                 return;
             }
             ctx.canvas.applyMutation(() -> ctx.editor.setConstantValue(ctx.elementName, value));
         } catch (NumberFormatException ignored) {
-            ConstantDef constant = ctx.editor.getConstantByName(ctx.elementName);
-            if (constant != null) {
-                field.setText(ElementRenderer.formatValue(constant.value()));
-            }
+            ctx.editor.getConstantByName(ctx.elementName)
+                    .ifPresent(constant -> field.setText(ElementRenderer.formatValue(constant.value())));
         }
     }
 
     private void commitUnit(ComboBox<String> box) {
         String unit = box.getValue() != null ? box.getValue().trim() : "";
-        ConstantDef constant = ctx.editor.getConstantByName(ctx.elementName);
-        if (constant != null && unit.equals(constant.unit())) {
+        Optional<ConstantDef> constantOpt = ctx.editor.getConstantByName(ctx.elementName);
+        if (constantOpt.isPresent() && unit.equals(constantOpt.get().unit())) {
             return;
         }
         ctx.canvas.applyMutation(() -> ctx.editor.setConstantUnit(ctx.elementName, unit));

@@ -9,6 +9,7 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Priority;
 
 import java.util.Objects;
+import java.util.Optional;
 
 /**
  * Property form for auxiliary variable elements. Builds editable fields
@@ -29,11 +30,12 @@ class AuxForm implements ElementForm {
 
     @Override
     public int build(int startRow) {
-        AuxDef aux = ctx.editor.getAuxByName(ctx.elementName);
-        if (aux == null) {
+        Optional<AuxDef> auxOpt = ctx.editor.getAuxByName(ctx.elementName);
+        if (auxOpt.isEmpty()) {
             ctx.addReadOnlyRow(startRow++, "Name", ctx.elementName);
             return startRow;
         }
+        AuxDef aux = auxOpt.get();
 
         int row = startRow;
         nameField = ctx.createNameField();
@@ -66,10 +68,11 @@ class AuxForm implements ElementForm {
 
     @Override
     public void updateValues() {
-        AuxDef aux = ctx.editor.getAuxByName(ctx.elementName);
-        if (aux == null || nameField == null) {
+        Optional<AuxDef> auxOpt = ctx.editor.getAuxByName(ctx.elementName);
+        if (auxOpt.isEmpty() || nameField == null) {
             return;
         }
+        AuxDef aux = auxOpt.get();
         nameField.setText(ctx.elementName);
         equationField.setText(aux.equation());
         unitBox.setValue(aux.unit() != null ? aux.unit() : "");
@@ -84,8 +87,8 @@ class AuxForm implements ElementForm {
     private void commitComment(TextArea area) {
         String text = area.getText().trim();
         String comment = text.isEmpty() ? null : text;
-        AuxDef aux = ctx.editor.getAuxByName(ctx.elementName);
-        if (aux == null || Objects.equals(comment, aux.comment())) {
+        Optional<AuxDef> auxOpt = ctx.editor.getAuxByName(ctx.elementName);
+        if (auxOpt.isEmpty() || Objects.equals(comment, auxOpt.get().comment())) {
             return;
         }
         ctx.canvas.applyMutation(() -> ctx.editor.setAuxComment(ctx.elementName, comment));
@@ -94,14 +97,12 @@ class AuxForm implements ElementForm {
     private void commitEquation(TextField field) {
         String equation = field.getText().trim();
         if (equation.isEmpty()) {
-            AuxDef aux = ctx.editor.getAuxByName(ctx.elementName);
-            if (aux != null) {
-                field.setText(aux.equation());
-            }
+            ctx.editor.getAuxByName(ctx.elementName)
+                    .ifPresent(aux -> field.setText(aux.equation()));
             return;
         }
-        AuxDef aux = ctx.editor.getAuxByName(ctx.elementName);
-        if (aux != null && equation.equals(aux.equation())) {
+        Optional<AuxDef> auxOpt = ctx.editor.getAuxByName(ctx.elementName);
+        if (auxOpt.isPresent() && equation.equals(auxOpt.get().equation())) {
             return;
         }
         ctx.canvas.applyMutation(() -> ctx.editor.setAuxEquation(ctx.elementName, equation));
@@ -109,8 +110,8 @@ class AuxForm implements ElementForm {
 
     private void commitUnit(ComboBox<String> box) {
         String unit = box.getValue() != null ? box.getValue().trim() : "";
-        AuxDef aux = ctx.editor.getAuxByName(ctx.elementName);
-        if (aux != null && unit.equals(aux.unit())) {
+        Optional<AuxDef> auxOpt = ctx.editor.getAuxByName(ctx.elementName);
+        if (auxOpt.isPresent() && unit.equals(auxOpt.get().unit())) {
             return;
         }
         ctx.canvas.applyMutation(() -> ctx.editor.setAuxUnit(ctx.elementName, unit));

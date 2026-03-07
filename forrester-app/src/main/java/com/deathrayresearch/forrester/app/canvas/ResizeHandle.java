@@ -2,6 +2,8 @@ package com.deathrayresearch.forrester.app.canvas;
 
 import com.deathrayresearch.forrester.model.def.ElementType;
 
+import java.util.Optional;
+
 /**
  * Corner resize handles for selected elements on the canvas.
  */
@@ -25,8 +27,8 @@ public enum ResizeHandle {
      */
     public static HandleHit hitTest(CanvasState state, double worldX, double worldY) {
         for (String name : state.getSelection()) {
-            ElementType type = state.getType(name);
-            if (type == null || type == ElementType.FLOW) {
+            Optional<ElementType> typeOpt = state.getType(name);
+            if (typeOpt.isEmpty() || typeOpt.get() == ElementType.FLOW) {
                 continue;
             }
 

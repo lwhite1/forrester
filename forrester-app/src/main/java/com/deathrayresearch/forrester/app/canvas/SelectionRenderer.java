@@ -27,7 +27,7 @@ public final class SelectionRenderer {
      * Uses a dashed rectangle for stock/aux/constant and a dashed diamond for flow.
      */
     public static void drawSelectionIndicator(GraphicsContext gc, CanvasState state, String name) {
-        ElementType type = state.getType(name);
+        ElementType type = state.getType(name).orElse(null);
         double cx = state.getX(name);
         double cy = state.getY(name);
 
@@ -122,7 +122,7 @@ public final class SelectionRenderer {
      * Uses a solid outline (no dashes, no handles) to distinguish from selection.
      */
     public static void drawHoverIndicator(GraphicsContext gc, CanvasState state, String name) {
-        ElementType type = state.getType(name);
+        ElementType type = state.getType(name).orElse(null);
         double cx = state.getX(name);
         double cy = state.getY(name);
 

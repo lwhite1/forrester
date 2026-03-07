@@ -1,7 +1,6 @@
 package com.deathrayresearch.forrester.app.canvas;
 
 import com.deathrayresearch.forrester.model.def.AuxDef;
-import com.deathrayresearch.forrester.model.def.ConstantDef;
 import com.deathrayresearch.forrester.model.def.ElementType;
 import com.deathrayresearch.forrester.model.def.FlowDef;
 
@@ -46,7 +45,7 @@ final class InlineEditController {
             return;
         }
 
-        ElementType type = canvasState.getType(elementName);
+        ElementType type = canvasState.getType(elementName).orElse(null);
         if (type == null) {
             return;
         }
@@ -102,8 +101,8 @@ final class InlineEditController {
                                         double screenX, double screenY,
                                         double fieldWidth, double scale,
                                         Callbacks callbacks) {
-        ConstantDef cd = editor.getConstantByName(constantName);
-        String currentValue = cd != null ? ElementRenderer.formatValue(cd.value()) : "0";
+        String currentValue = editor.getConstantByName(constantName)
+                .map(cd -> ElementRenderer.formatValue(cd.value())).orElse("0");
 
         double valueScreenY = screenY + 16 * scale;
 
@@ -123,8 +122,8 @@ final class InlineEditController {
     private void startFlowEquationEdit(String flowName, ModelEditor editor,
                                        double screenX, double screenY, double scale,
                                        Callbacks callbacks) {
-        FlowDef fd = editor.getFlowByName(flowName);
-        String currentEquation = fd != null ? fd.equation() : "0";
+        String currentEquation = editor.getFlowByName(flowName)
+                .map(FlowDef::equation).orElse("0");
 
         double eqScreenY = screenY
                 + LayoutMetrics.FLOW_EQUATION_EDITOR_OFFSET * scale;
@@ -143,8 +142,8 @@ final class InlineEditController {
     private void startAuxEquationEdit(String auxName, ModelEditor editor,
                                       double screenX, double screenY, double scale,
                                       Callbacks callbacks) {
-        AuxDef ad = editor.getAuxByName(auxName);
-        String currentEquation = ad != null ? ad.equation() : "0";
+        String currentEquation = editor.getAuxByName(auxName)
+                .map(AuxDef::equation).orElse("0");
 
         double eqScreenY = screenY
                 + LayoutMetrics.LABEL_SUBLABEL_OFFSET * scale;

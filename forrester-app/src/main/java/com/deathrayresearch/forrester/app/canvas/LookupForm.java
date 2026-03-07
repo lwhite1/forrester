@@ -17,6 +17,7 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 
 import java.util.Objects;
+import java.util.Optional;
 
 /**
  * Property form for lookup table elements. Builds editable fields for name,
@@ -34,11 +35,12 @@ class LookupForm implements ElementForm {
 
     @Override
     public int build(int startRow) {
-        LookupTableDef lookup = ctx.editor.getLookupTableByName(ctx.elementName);
-        if (lookup == null) {
+        Optional<LookupTableDef> lookupOpt = ctx.editor.getLookupTableByName(ctx.elementName);
+        if (lookupOpt.isEmpty()) {
             ctx.addReadOnlyRow(startRow++, "Name", ctx.elementName);
             return startRow;
         }
+        LookupTableDef lookup = lookupOpt.get();
 
         int row = startRow;
         TextField nameField = ctx.createNameField();
@@ -54,14 +56,15 @@ class LookupForm implements ElementForm {
         interpBox.setOnAction(e -> {
             if (!ctx.updatingFields) {
                 String newInterp = interpBox.getValue();
-                LookupTableDef lt = ctx.editor.getLookupTableByName(ctx.elementName);
-                if (lt != null && !Objects.equals(newInterp, lt.interpolation())) {
-                    LookupTableDef updated = new LookupTableDef(
-                            ctx.elementName, lt.comment(),
-                            lt.xValues(), lt.yValues(), newInterp);
-                    ctx.canvas.applyMutation(() -> ctx.editor.setLookupTable(ctx.elementName, updated));
-                    replaceChart(lt.xValues(), lt.yValues(), newInterp);
-                }
+                ctx.editor.getLookupTableByName(ctx.elementName).ifPresent(lt -> {
+                    if (!Objects.equals(newInterp, lt.interpolation())) {
+                        LookupTableDef updated = new LookupTableDef(
+                                ctx.elementName, lt.comment(),
+                                lt.xValues(), lt.yValues(), newInterp);
+                        ctx.canvas.applyMutation(() -> ctx.editor.setLookupTable(ctx.elementName, updated));
+                        replaceChart(lt.xValues(), lt.yValues(), newInterp);
+                    }
+                });
             }
         });
         ctx.addFieldRow(row++, "Interpolation", interpBox,
@@ -202,18 +205,19 @@ class LookupForm implements ElementForm {
     private void commitComment(TextArea area) {
         String text = area.getText().trim();
         String comment = text.isEmpty() ? null : text;
-        LookupTableDef lt = ctx.editor.getLookupTableByName(ctx.elementName);
-        if (lt == null || Objects.equals(comment, lt.comment())) {
+        Optional<LookupTableDef> ltOpt = ctx.editor.getLookupTableByName(ctx.elementName);
+        if (ltOpt.isEmpty() || Objects.equals(comment, ltOpt.get().comment())) {
             return;
         }
         ctx.canvas.applyMutation(() -> ctx.editor.setLookupComment(ctx.elementName, comment));
     }
 
     private void commitDataPoint(TextField xField, TextField yField, int index) {
-        LookupTableDef lt = ctx.editor.getLookupTableByName(ctx.elementName);
-        if (lt == null) {
+        Optional<LookupTableDef> ltOpt = ctx.editor.getLookupTableByName(ctx.elementName);
+        if (ltOpt.isEmpty()) {
             return;
         }
+        LookupTableDef lt = ltOpt.get();
         try {
             double newX = Double.parseDouble(xField.getText().trim());
             double newY = Double.parseDouble(yField.getText().trim());
@@ -245,10 +249,11 @@ class LookupForm implements ElementForm {
     }
 
     private void addRow() {
-        LookupTableDef lt = ctx.editor.getLookupTableByName(ctx.elementName);
-        if (lt == null) {
+        Optional<LookupTableDef> ltOpt = ctx.editor.getLookupTableByName(ctx.elementName);
+        if (ltOpt.isEmpty()) {
             return;
         }
+        LookupTableDef lt = ltOpt.get();
         double[] oldX = lt.xValues();
         double[] oldY = lt.yValues();
         double[] newX = new double[oldX.length + 1];
@@ -263,10 +268,11 @@ class LookupForm implements ElementForm {
     }
 
     private void removeRow() {
-        LookupTableDef lt = ctx.editor.getLookupTableByName(ctx.elementName);
-        if (lt == null || lt.xValues().length <= 2) {
+        Optional<LookupTableDef> ltOpt = ctx.editor.getLookupTableByName(ctx.elementName);
+        if (ltOpt.isEmpty() || ltOpt.get().xValues().length <= 2) {
             return;
         }
+        LookupTableDef lt = ltOpt.get();
         double[] oldX = lt.xValues();
         double[] oldY = lt.yValues();
         double[] newX = new double[oldX.length - 1];

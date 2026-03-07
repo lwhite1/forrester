@@ -77,7 +77,7 @@ public final class SvgExporter {
 
             // 5. Elements
             for (String name : canvasState.getDrawOrder()) {
-                ElementType type = canvasState.getType(name);
+                ElementType type = canvasState.getType(name).orElse(null);
                 if (type == null) {
                     continue;
                 }
@@ -85,19 +85,19 @@ public final class SvgExporter {
                 double cy = canvasState.getY(name);
 
                 switch (type) {
-                    case STOCK -> writeStock(w, name, editor.getStockUnit(name), cx, cy,
+                    case STOCK -> writeStock(w, name, editor.getStockUnit(name).orElse(null), cx, cy,
                             LayoutMetrics.effectiveWidth(canvasState, name),
                             LayoutMetrics.effectiveHeight(canvasState, name));
                     case FLOW -> {
-                        String eq = editor.getFlowEquation(name);
+                        String eq = editor.getFlowEquation(name).orElse(null);
                         writeFlow(w, name, eq, cx, cy);
                     }
-                    case AUX -> writeAux(w, name, editor.getAuxEquation(name), cx, cy,
+                    case AUX -> writeAux(w, name, editor.getAuxEquation(name).orElse(null), cx, cy,
                             LayoutMetrics.effectiveWidth(canvasState, name),
                             LayoutMetrics.effectiveHeight(canvasState, name));
                     case CONSTANT -> {
-                        ConstantDef cd = editor.getConstantByName(name);
-                        double value = cd != null ? cd.value() : 0;
+                        double value = editor.getConstantByName(name)
+                                .map(ConstantDef::value).orElse(0.0);
                         writeConstant(w, name, value, cx, cy,
                                 LayoutMetrics.effectiveWidth(canvasState, name),
                                 LayoutMetrics.effectiveHeight(canvasState, name));
@@ -109,8 +109,8 @@ public final class SvgExporter {
                             LayoutMetrics.effectiveWidth(canvasState, name),
                             LayoutMetrics.effectiveHeight(canvasState, name));
                     case LOOKUP -> {
-                        LookupTableDef lt = editor.getLookupTableByName(name);
-                        int pts = lt != null ? lt.xValues().length : 0;
+                        int pts = editor.getLookupTableByName(name)
+                                .map(lt -> lt.xValues().length).orElse(0);
                         writeLookup(w, name, pts, cx, cy,
                                 LayoutMetrics.effectiveWidth(canvasState, name),
                                 LayoutMetrics.effectiveHeight(canvasState, name));
@@ -724,7 +724,7 @@ public final class SvgExporter {
     // --- Loop highlights ---
 
     private static void writeLoopHighlight(PrintWriter w, CanvasState state, String name) {
-        ElementType type = state.getType(name);
+        ElementType type = state.getType(name).orElse(null);
         double cx = state.getX(name);
         double cy = state.getY(name);
 

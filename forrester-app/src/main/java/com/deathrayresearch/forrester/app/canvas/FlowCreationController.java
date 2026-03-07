@@ -162,7 +162,7 @@ public class FlowCreationController {
      */
     static String hitTestStockOnly(double worldX, double worldY, CanvasState canvasState) {
         String hit = HitTester.hitTest(canvasState, worldX, worldY);
-        if (hit != null && canvasState.getType(hit) == ElementType.STOCK) {
+        if (hit != null && canvasState.getType(hit).orElse(null) == ElementType.STOCK) {
             return hit;
         }
         return null;
