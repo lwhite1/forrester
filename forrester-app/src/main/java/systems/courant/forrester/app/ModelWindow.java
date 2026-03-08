@@ -111,6 +111,7 @@ public class ModelWindow {
 
     private SplitPane editorSplitPane;
     private VBox topContainer;
+    private CanvasToolBar toolBar;
     private boolean editorShown;
     private final List<MenuItem> editorOnlyItems = new ArrayList<>();
 
@@ -151,7 +152,7 @@ public class ModelWindow {
 
         dashboardPanel.setRerunAction(simulationController::runSimulation);
 
-        CanvasToolBar toolBar = new CanvasToolBar();
+        toolBar = new CanvasToolBar();
         toolBar.setOnToolChanged(tool -> {
             canvas.setActiveTool(tool);
             statusBar.updateTool(tool);
@@ -244,7 +245,9 @@ public class ModelWindow {
             canvas.requestFocus();
         });
 
-        root.setTop(new VBox(menuBar));
+        toolBar.setVisible(false);
+        toolBar.setManaged(false);
+        root.setTop(topContainer);
         root.setCenter(startScreen);
         root.setBottom(statusBar);
 
@@ -293,7 +296,8 @@ public class ModelWindow {
             return;
         }
         editorShown = true;
-        root.setTop(topContainer);
+        toolBar.setVisible(true);
+        toolBar.setManaged(true);
         root.setCenter(editorSplitPane);
         for (MenuItem item : editorOnlyItems) {
             item.setDisable(false);
