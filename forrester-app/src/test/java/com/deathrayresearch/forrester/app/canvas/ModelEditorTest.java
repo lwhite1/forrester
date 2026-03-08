@@ -706,6 +706,41 @@ class ModelEditorTest {
             assertThat(ModelEditor.isValidName("a+b")).isFalse();
             assertThat(ModelEditor.isValidName("x/y")).isFalse();
         }
+
+        @Test
+        void shouldRejectReservedWords() {
+            assertThat(ModelEditor.isValidName("TIME")).isFalse();
+            assertThat(ModelEditor.isValidName("time")).isFalse();
+            assertThat(ModelEditor.isValidName("DT")).isFalse();
+            assertThat(ModelEditor.isValidName("dt")).isFalse();
+            assertThat(ModelEditor.isValidName("Pi")).isFalse();
+            assertThat(ModelEditor.isValidName("E")).isFalse();
+            assertThat(ModelEditor.isValidName("IF")).isFalse();
+            assertThat(ModelEditor.isValidName("AND")).isFalse();
+            assertThat(ModelEditor.isValidName("or")).isFalse();
+            assertThat(ModelEditor.isValidName("Not")).isFalse();
+            assertThat(ModelEditor.isValidName("THEN")).isFalse();
+            assertThat(ModelEditor.isValidName("ELSE")).isFalse();
+        }
+
+        @Test
+        void shouldAcceptNamesContainingReservedWords() {
+            assertThat(ModelEditor.isValidName("Time Delay")).isTrue();
+            assertThat(ModelEditor.isValidName("IF Rate")).isTrue();
+            assertThat(ModelEditor.isValidName("Elapsed Time")).isTrue();
+        }
+
+        @Test
+        void shouldRejectNameExceedingMaxLength() {
+            String longName = "A".repeat(ModelEditor.MAX_NAME_LENGTH + 1);
+            assertThat(ModelEditor.isValidName(longName)).isFalse();
+        }
+
+        @Test
+        void shouldAcceptNameAtMaxLength() {
+            String maxName = "A".repeat(ModelEditor.MAX_NAME_LENGTH);
+            assertThat(ModelEditor.isValidName(maxName)).isTrue();
+        }
     }
 
     @Nested

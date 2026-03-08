@@ -1,5 +1,6 @@
 package com.deathrayresearch.forrester.app.canvas;
 
+import com.deathrayresearch.forrester.model.ModelMetadata;
 import com.deathrayresearch.forrester.model.def.AuxDef;
 import com.deathrayresearch.forrester.model.def.CausalLinkDef;
 import com.deathrayresearch.forrester.model.def.CldVariableDef;
@@ -43,6 +44,7 @@ public class ModelEditor {
 
     private String modelName = "Untitled";
     private String modelComment = "";
+    private ModelMetadata metadata;
     private final List<StockDef> stocks = new ArrayList<>();
     private final List<FlowDef> flows = new ArrayList<>();
     private final List<AuxDef> auxiliaries = new ArrayList<>();
@@ -137,6 +139,7 @@ public class ModelEditor {
         cldVariables.addAll(definition.cldVariables());
         causalLinks.addAll(definition.causalLinks());
         simulationSettings = definition.defaultSimulation();
+        metadata = definition.metadata();
 
         stocks.forEach(s -> nameIndex.add(s.name()));
         flows.forEach(f -> nameIndex.add(f.name()));
@@ -913,12 +916,27 @@ public class ModelEditor {
         }
     }
 
+    static final int MAX_NAME_LENGTH = 128;
+
+    private static final Set<String> RESERVED_NAMES = Set.of(
+            "TIME", "DT", "Pi", "PI", "E",
+            "AND", "OR", "NOT",
+            "IF", "THEN", "ELSE");
+
     /**
      * Returns true if the given name is valid for an element identifier.
-     * A valid name is non-blank and contains only letters, digits, spaces, and underscores.
+     * A valid name is non-blank, at most {@value MAX_NAME_LENGTH} characters,
+     * contains only letters, digits, spaces, and underscores, and is not a
+     * reserved word.
      */
     public static boolean isValidName(String name) {
         if (name == null || name.isBlank()) {
+            return false;
+        }
+        if (name.length() > MAX_NAME_LENGTH) {
+            return false;
+        }
+        if (RESERVED_NAMES.contains(name.toUpperCase(java.util.Locale.ROOT))) {
             return false;
         }
         for (int i = 0; i < name.length(); i++) {
@@ -957,6 +975,15 @@ public class ModelEditor {
     public void setModelComment(String comment) {
         checkFxThread();
         modelComment = comment != null ? comment : "";
+    }
+
+    public ModelMetadata getMetadata() {
+        return metadata;
+    }
+
+    public void setMetadata(ModelMetadata metadata) {
+        checkFxThread();
+        this.metadata = metadata;
     }
 
     public List<StockDef> getStocks() {
@@ -1245,7 +1272,8 @@ public class ModelEditor {
                 List.copyOf(cldVariables),
                 List.copyOf(causalLinks),
                 view != null ? List.of(view) : List.of(),
-                simulationSettings
+                simulationSettings,
+                metadata
         );
     }
 
