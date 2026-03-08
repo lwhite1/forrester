@@ -86,8 +86,10 @@ public class SubscriptExpander {
                                 s.name() + "[" + label + "]",
                                 s.comment(),
                                 s.initialValue(),
+                                s.initialExpression(),
                                 s.unit(),
-                                s.negativeValuePolicy()));
+                                s.negativeValuePolicy(),
+                                List.of()));
                     }
                 }
             }

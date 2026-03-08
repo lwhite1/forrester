@@ -48,16 +48,16 @@ incorrect results with no error indication.
 **Fix:** Log a warning with the stock name, expression, and exception message. Consider adding it
 to the `CompilationContext.warnings()` list so the UI can surface it.
 
-### C2. Immutable `List.of()` used for resettable collections in simulation builtins
-**File:** `forrester-engine/.../model/builtin/DelayFixed.java`, `Smooth.java`, `Delay3.java`
+### C2. Immutable `List.of()` passed as resettables list in initial-expression compilation
+**File:** `forrester-engine/.../model/compile/ModelCompiler.java:260`
 **Issue:** [#164](https://github.com/ljwhite/forrester/issues/164)
 
-Several builtin functions initialize internal buffer collections using `List.of()`, which returns
-an immutable list. When the simulation engine calls `reset()`, these collections throw
-`UnsupportedOperationException`, crashing the simulation. This affects any model using DELAY FIXED,
-SMOOTH, or DELAY3 functions when re-run without recompiling.
+`resolveInitialExpressions()` passes `List.of()` (immutable) to `ExprCompiler` as the resettables
+list. If a stock's initial expression contains a stateful function (SMOOTH, DELAY3, etc.), the
+compiler tries to add to the immutable list, throwing `UnsupportedOperationException`. This crash
+was masked by the empty catch block (C1).
 
-**Fix:** Use `new ArrayList<>()` for mutable internal state.
+**Fix:** Pass `new ArrayList<>()` instead of `List.of()`. (Fixed together with C1.)
 
 ### C3. SubscriptExpander drops `initialExpression` field from StockDef
 **File:** `forrester-engine/.../model/compile/SubscriptExpander.java`

@@ -23,6 +23,9 @@ import systems.courant.forrester.model.def.PortDef;
 import systems.courant.forrester.model.def.StockDef;
 import systems.courant.forrester.model.expr.ExprParser;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -42,6 +45,8 @@ import java.util.function.DoubleSupplier;
  * after all elements are registered.
  */
 public class ModelCompiler {
+
+    private static final Logger log = LoggerFactory.getLogger(ModelCompiler.class);
 
     private final UnitRegistry unitRegistry;
 
@@ -257,7 +262,7 @@ public class ModelCompiler {
                 continue;
             }
             try {
-                ExprCompiler exprCompiler = new ExprCompiler(context, List.of());
+                ExprCompiler exprCompiler = new ExprCompiler(context, new ArrayList<>());
                 DoubleSupplier supplier = exprCompiler.compileExpr(
                         ExprParser.parse(sDef.initialExpression()));
                 double initVal = supplier.getAsDouble();
@@ -266,7 +271,9 @@ public class ModelCompiler {
                     stock.setValue(initVal);
                 }
             } catch (Exception e) {
-                // Fall back to numeric initialValue if expression can't be evaluated
+                log.warn("Stock '{}': failed to evaluate initialExpression '{}', "
+                                + "falling back to numeric initialValue ({}). Reason: {}",
+                        sDef.name(), sDef.initialExpression(), sDef.initialValue(), e.toString());
             }
         }
     }
