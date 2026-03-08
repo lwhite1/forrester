@@ -78,8 +78,10 @@ public class ModelEditor {
             Boolean.getBoolean("testfx.headless");
 
     private static void checkFxThread() {
-        assert HEADLESS_TEST || Platform.isFxApplicationThread()
-                : "ModelEditor must be accessed on the JavaFX Application Thread";
+        if (!HEADLESS_TEST && !Platform.isFxApplicationThread()) {
+            throw new IllegalStateException(
+                    "ModelEditor must be accessed on the JavaFX Application Thread");
+        }
     }
 
     private void fireElementAdded(String name, String typeName) {
