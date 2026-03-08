@@ -229,4 +229,61 @@ public class SimulationTest {
             assertThat(sim.getCurrentStep()).isEqualTo(6);
         }
     }
+
+    @Nested
+    @DisplayName("Non-finite value detection")
+    class NonFiniteDetection {
+
+        @Test
+        void shouldKeepPreviousValueWhenDeltaIsNaN() {
+            Model model = new Model("NaN Test");
+            Stock stock = new Stock("Leaky", 100, THING);
+
+            // Flow that produces NaN (0.0 / 0.0)
+            Flow nanFlow = Flow.create("Bad", MINUTE, () -> new Quantity(0.0 / 0.0, THING));
+            stock.addInflow(nanFlow);
+            model.addStock(stock);
+
+            Simulation sim = new Simulation(model, MINUTE, MINUTE, 3);
+            sim.execute();
+
+            // Stock keeps its previous value instead of crashing
+            assertThat(stock.getValue()).isEqualTo(100.0);
+        }
+
+        @Test
+        void shouldKeepPreviousValueWhenDeltaCausesInfinity() {
+            Model model = new Model("Infinity Test");
+            Stock stock = new Stock("Exploding", Double.MAX_VALUE / 2, THING);
+
+            Flow infFlow = Flow.create("Huge", MINUTE,
+                    () -> new Quantity(Double.MAX_VALUE, THING));
+            stock.addInflow(infFlow);
+            model.addStock(stock);
+
+            Simulation sim = new Simulation(model, MINUTE, MINUTE, 3);
+            sim.execute();
+
+            // Stock keeps last valid value — doesn't crash or become Infinity
+            assertThat(Double.isFinite(stock.getValue())).isTrue();
+            assertThat(stock.getValue()).isEqualTo(Double.MAX_VALUE / 2);
+        }
+
+        @Test
+        void shouldNotRepeatWarningForSameStock() {
+            Model model = new Model("Repeated NaN");
+            Stock stock = new Stock("Bad", 50, THING);
+
+            Flow nanFlow = Flow.create("NaN", MINUTE, () -> new Quantity(Double.NaN, THING));
+            stock.addInflow(nanFlow);
+            model.addStock(stock);
+
+            // Run for many steps — warning should only fire once per stock
+            Simulation sim = new Simulation(model, MINUTE, MINUTE, 100);
+            sim.execute();
+
+            // Stock retains initial value throughout
+            assertThat(stock.getValue()).isEqualTo(50.0);
+        }
+    }
 }

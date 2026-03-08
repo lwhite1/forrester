@@ -72,6 +72,8 @@ public class Simulation {
 
     private final List<EventHandler> eventHandlers = new ArrayList<>();
 
+    private final Set<String> warnedNonFiniteStocks = new java.util.HashSet<>();
+
     public Simulation(Model model, TimeUnit timeStep, Quantity duration) {
         this(model, timeStep, duration, LocalDateTime.now());
     }
@@ -121,6 +123,7 @@ public class Simulation {
         currentStep = 0;
         currentDateTime = startTime;
         elapsedTime = Duration.ZERO;
+        warnedNonFiniteStocks.clear();
         clearHistory();
 
         fireStartEvent(new SimulationStartEvent(this));
@@ -203,7 +206,18 @@ public class Simulation {
 
         // Phase 2: Apply all deltas simultaneously.
         for (Stock stock : stocks) {
-            stock.setValue(stock.getQuantity().getValue() + deltas.get(stock));
+            double oldValue = stock.getQuantity().getValue();
+            double newValue = oldValue + deltas.get(stock);
+            if (!Double.isFinite(newValue)) {
+                if (warnedNonFiniteStocks.add(stock.getName())) {
+                    log.warn("Stock '{}' became {} at step {} (previous value: {}, delta: {})"
+                                    + " — keeping previous value",
+                            stock.getName(), newValue, currentStep, oldValue, deltas.get(stock));
+                }
+                // Keep the previous value instead of crashing
+                continue;
+            }
+            stock.setValue(newValue);
         }
     }
 
