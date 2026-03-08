@@ -793,6 +793,7 @@ public class ModelCanvas extends Canvas {
         ModelDefinition childDef = editor.toModelDefinition(canvasState.toViewDef());
         NavigationStack.Frame frame = navController.pop();
 
+        this.undoManager.close();
         this.editor = frame.editor();
         this.undoManager = frame.undoManager();
 
