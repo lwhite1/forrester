@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Cursor;
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.FlowPane;
@@ -20,7 +21,10 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.function.BiConsumer;
 
 /**
@@ -31,10 +35,18 @@ final class StartScreen extends VBox {
 
     private static final Logger log = LoggerFactory.getLogger(StartScreen.class);
 
+    private static final String ALL = "All";
+    private static final String DOMAIN_GENERAL = "general";
+
     private Runnable onNewModel;
     private Runnable onOpenFile;
     private Runnable onGettingStarted;
     private BiConsumer<String, String> onOpenExample;
+
+    private List<ExampleEntry> allExamples = List.of();
+    private FlowPane exampleGrid;
+    private String activeDifficulty = ALL;
+    private final Set<String> activeDomains = new HashSet<>();
 
     StartScreen() {
         setAlignment(Pos.TOP_CENTER);
@@ -156,17 +168,111 @@ final class StartScreen extends VBox {
         VBox headerBox = new VBox(4, sectionTitle, sectionSubtitle);
         headerBox.setAlignment(Pos.CENTER);
 
-        FlowPane grid = new FlowPane(12, 12);
-        grid.setAlignment(Pos.CENTER);
-        grid.setMaxWidth(720);
+        allExamples = loadExampleCatalog();
 
-        List<ExampleEntry> examples = loadExampleCatalog();
-        for (ExampleEntry example : examples) {
-            grid.getChildren().add(buildExampleCard(example));
+        Region filterBar = buildFilterBar();
+
+        exampleGrid = new FlowPane(12, 12);
+        exampleGrid.setAlignment(Pos.CENTER);
+        exampleGrid.setMaxWidth(720);
+
+        applyFilters();
+
+        section.getChildren().addAll(headerBox, filterBar, exampleGrid);
+        return section;
+    }
+
+    private Region buildFilterBar() {
+        HBox bar = new HBox(16);
+        bar.setAlignment(Pos.CENTER);
+        bar.setMaxWidth(720);
+        bar.setPadding(new Insets(4, 0, 4, 0));
+
+        // Difficulty dropdown
+        ComboBox<String> difficultyBox = new ComboBox<>();
+        difficultyBox.setId("filterDifficulty");
+        difficultyBox.getItems().addAll(ALL, "Introductory", "Intermediate", "Advanced");
+        difficultyBox.setValue(ALL);
+        difficultyBox.setStyle("-fx-font-size: 12px;");
+        difficultyBox.setOnAction(e -> {
+            String selected = difficultyBox.getValue();
+            activeDifficulty = ALL.equals(selected) ? ALL : selected.toLowerCase();
+            applyFilters();
+        });
+
+        Label diffLabel = new Label("Difficulty:");
+        diffLabel.setStyle("-fx-font-size: 12px; -fx-text-fill: #2C3E50; -fx-font-weight: bold;");
+
+        HBox diffBox = new HBox(6, diffLabel, difficultyBox);
+        diffBox.setAlignment(Pos.CENTER_LEFT);
+
+        // Domain toggle chips
+        Set<String> domains = new TreeSet<>();
+        for (ExampleEntry ex : allExamples) {
+            domains.add(toDomain(ex.category));
         }
 
-        section.getChildren().addAll(headerBox, grid);
-        return section;
+        Label domainLabel = new Label("Domain:");
+        domainLabel.setStyle("-fx-font-size: 12px; -fx-text-fill: #2C3E50; -fx-font-weight: bold;");
+
+        FlowPane chips = new FlowPane(6, 6);
+        chips.setAlignment(Pos.CENTER_LEFT);
+        chips.setId("filterDomainChips");
+
+        for (String domain : domains) {
+            Label chip = buildDomainChip(domain);
+            chips.getChildren().add(chip);
+        }
+
+        HBox domainBox = new HBox(6, domainLabel, chips);
+        domainBox.setAlignment(Pos.CENTER_LEFT);
+        HBox.setHgrow(domainBox, Priority.ALWAYS);
+
+        bar.getChildren().addAll(diffBox, domainBox);
+        return bar;
+    }
+
+    private Label buildDomainChip(String domain) {
+        Label chip = new Label(capitalize(domain));
+        chip.setId("domainChip-" + domain);
+        chip.setCursor(Cursor.HAND);
+        chip.setPadding(new Insets(4, 10, 4, 10));
+        String inactiveStyle = "-fx-background-color: #EEF0F3; -fx-background-radius: 12;"
+                + " -fx-font-size: 11px; -fx-text-fill: #5A6A7A;";
+        String activeStyle = "-fx-background-color: #4A90D9; -fx-background-radius: 12;"
+                + " -fx-font-size: 11px; -fx-text-fill: white; -fx-font-weight: bold;";
+        chip.setStyle(inactiveStyle);
+        chip.setOnMouseClicked(e -> {
+            if (activeDomains.contains(domain)) {
+                activeDomains.remove(domain);
+                chip.setStyle(inactiveStyle);
+            } else {
+                activeDomains.add(domain);
+                chip.setStyle(activeStyle);
+            }
+            applyFilters();
+        });
+        return chip;
+    }
+
+    private void applyFilters() {
+        exampleGrid.getChildren().clear();
+        for (ExampleEntry example : allExamples) {
+            boolean matchesDifficulty = ALL.equals(activeDifficulty)
+                    || example.difficulty.equals(activeDifficulty);
+            boolean matchesDomain = activeDomains.isEmpty()
+                    || activeDomains.contains(toDomain(example.category));
+            if (matchesDifficulty && matchesDomain) {
+                exampleGrid.getChildren().add(buildExampleCard(example));
+            }
+        }
+    }
+
+    private static String toDomain(String category) {
+        if ("introductory".equals(category)) {
+            return DOMAIN_GENERAL;
+        }
+        return category;
     }
 
     private Region buildExampleCard(ExampleEntry example) {
