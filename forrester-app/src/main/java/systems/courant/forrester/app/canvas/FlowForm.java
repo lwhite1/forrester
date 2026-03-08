@@ -51,6 +51,7 @@ class FlowForm implements ElementForm {
         ctx.addFieldRow(row++, "Equation", ctx.wrapWithHelpButton(equationField),
                 "The rate equation determining how fast material flows.\n"
                 + "Use element names, operators (+, -, *, /), and functions.");
+        ctx.attachEquationValidation(equationField, row++);
 
         timeUnitBox = ctx.createTimeUnitComboBox(flow.timeUnit());
         ctx.addComboCommitHandlers(timeUnitBox, this::commitTimeUnit);

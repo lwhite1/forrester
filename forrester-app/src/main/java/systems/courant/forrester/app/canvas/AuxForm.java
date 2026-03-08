@@ -47,6 +47,7 @@ class AuxForm implements ElementForm {
         EquationAutoComplete.attach(equationField, ctx.editor, ctx.elementName);
         ctx.addFieldRow(row++, "Equation", ctx.wrapWithHelpButton(equationField),
                 "A formula computed each time step from other model elements");
+        ctx.attachEquationValidation(equationField, row++);
 
         unitBox = ctx.createUnitComboBox(aux.unit());
         ctx.addComboCommitHandlers(unitBox, this::commitUnit);

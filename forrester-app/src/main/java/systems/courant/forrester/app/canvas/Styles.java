@@ -36,6 +36,12 @@ public final class Styles {
     public static final String HELP_ICON =
             "-fx-text-fill: #8899AA; -fx-font-size: 10px; -fx-cursor: hand;";
 
+    // --- Equation validation ---
+    public static final String EQUATION_ERROR_BORDER =
+            "-fx-border-color: #E74C3C; -fx-border-width: 1.5;";
+    public static final String EQUATION_ERROR_LABEL =
+            "-fx-text-fill: #E74C3C; -fx-font-size: 10px; -fx-wrap-text: true;";
+
     // --- Binding config dialog ---
     public static final String SECTION_HEADER =
             "-fx-font-weight: bold; -fx-font-size: 13px;";

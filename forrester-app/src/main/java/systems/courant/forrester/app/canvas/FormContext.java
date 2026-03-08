@@ -1,5 +1,6 @@
 package systems.courant.forrester.app.canvas;
 
+import javafx.animation.PauseTransition;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
@@ -203,6 +204,71 @@ class FormContext {
                 handler.accept(box);
             }
         });
+    }
+
+    /**
+     * Attaches real-time equation validation to a text field. Validates on blur
+     * and after a short debounce while typing. Shows a red border and error label
+     * below the equation row when errors are found.
+     *
+     * @param field   the equation text field
+     * @param row     the grid row where the equation field sits
+     * @return the error label (for cleanup if needed)
+     */
+    Label attachEquationValidation(TextField field, int row) {
+        Label errorLabel = new Label();
+        errorLabel.setStyle(Styles.EQUATION_ERROR_LABEL);
+        errorLabel.setWrapText(true);
+        errorLabel.setMaxWidth(Double.MAX_VALUE);
+        errorLabel.setVisible(false);
+        errorLabel.setManaged(false);
+        GridPane.setHgrow(errorLabel, Priority.ALWAYS);
+        grid.add(errorLabel, 1, row);
+
+        PauseTransition debounce = new PauseTransition(Duration.millis(400));
+        debounce.setOnFinished(e -> validateEquation(field, errorLabel));
+
+        field.textProperty().addListener((obs, oldVal, newVal) -> {
+            if (!updatingFields) {
+                debounce.playFromStart();
+            }
+        });
+
+        field.focusedProperty().addListener((obs, wasFocused, isFocused) -> {
+            if (!isFocused && !updatingFields) {
+                debounce.stop();
+                validateEquation(field, errorLabel);
+            }
+        });
+
+        // Initial validation
+        validateEquation(field, errorLabel);
+
+        return errorLabel;
+    }
+
+    private void validateEquation(TextField field, Label errorLabel) {
+        String text = field.getText().trim();
+        if (text.isEmpty()) {
+            clearEquationError(field, errorLabel);
+            return;
+        }
+        EquationValidator.Result result =
+                EquationValidator.validate(text, editor, elementName);
+        if (result.valid()) {
+            clearEquationError(field, errorLabel);
+        } else {
+            field.setStyle(Styles.EQUATION_ERROR_BORDER);
+            errorLabel.setText(result.message());
+            errorLabel.setVisible(true);
+            errorLabel.setManaged(true);
+        }
+    }
+
+    private void clearEquationError(TextField field, Label errorLabel) {
+        field.setStyle("");
+        errorLabel.setVisible(false);
+        errorLabel.setManaged(false);
     }
 
     private void commitRename(TextField nameField) {
