@@ -338,7 +338,7 @@ public class PropertiesPanel extends VBox {
             case CONSTANT -> new ConstantForm(ctx);
             case LOOKUP -> new LookupForm(ctx);
             case CLD_VARIABLE -> new CldVariableForm(ctx);
-            default -> null;
+            case MODULE -> null;
         };
     }
 

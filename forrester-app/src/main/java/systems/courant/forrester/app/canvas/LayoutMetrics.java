@@ -119,7 +119,6 @@ public final class LayoutMetrics {
             case LOOKUP -> LOOKUP_WIDTH;
             case FLOW -> FLOW_INDICATOR_SIZE;
             case CLD_VARIABLE -> CLD_VAR_WIDTH;
-            default -> AUX_WIDTH;
         };
     }
 
@@ -135,7 +134,6 @@ public final class LayoutMetrics {
             case LOOKUP -> LOOKUP_HEIGHT;
             case FLOW -> FLOW_INDICATOR_SIZE;
             case CLD_VARIABLE -> CLD_VAR_HEIGHT;
-            default -> AUX_HEIGHT;
         };
     }
 
@@ -172,7 +170,7 @@ public final class LayoutMetrics {
             case MODULE -> 70;
             case LOOKUP -> 60;
             case CLD_VARIABLE -> 60;
-            default -> 50;
+            case FLOW -> 50;
         };
     }
 
@@ -187,7 +185,7 @@ public final class LayoutMetrics {
             case MODULE -> 45;
             case LOOKUP -> 35;
             case CLD_VARIABLE -> 25;
-            default -> 30;
+            case FLOW -> 30;
         };
     }
 

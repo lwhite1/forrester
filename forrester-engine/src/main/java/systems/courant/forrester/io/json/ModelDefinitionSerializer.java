@@ -26,6 +26,9 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -43,6 +46,7 @@ import java.util.Map;
  */
 public class ModelDefinitionSerializer {
 
+    private static final Logger log = LoggerFactory.getLogger(ModelDefinitionSerializer.class);
     private static final int MAX_MODULE_DEPTH = 50;
 
     private final ObjectMapper mapper;
@@ -559,6 +563,7 @@ public class ModelDefinitionSerializer {
                     try {
                         polarity = CausalLinkDef.Polarity.valueOf(polarityStr);
                     } catch (IllegalArgumentException e) {
+                        log.warn("Unknown causal link polarity '{}', defaulting to UNKNOWN", polarityStr);
                         polarity = CausalLinkDef.Polarity.UNKNOWN;
                     }
                 }
