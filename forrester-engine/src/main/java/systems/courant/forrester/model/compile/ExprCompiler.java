@@ -95,30 +95,48 @@ public class ExprCompiler {
             case ADD -> () -> left.getAsDouble() + right.getAsDouble();
             case SUB -> () -> left.getAsDouble() - right.getAsDouble();
             case MUL -> () -> left.getAsDouble() * right.getAsDouble();
-            case DIV -> () -> {
-                double divisor = right.getAsDouble();
-                if (divisor == 0) {
-                    logger.warn("Division by zero");
-                    return Double.NaN;
-                }
-                return left.getAsDouble() / divisor;
-            };
-            case MOD -> () -> {
-                double divisor = right.getAsDouble();
-                if (divisor == 0) {
-                    logger.warn("Modulo by zero");
-                    return Double.NaN;
-                }
-                return left.getAsDouble() % divisor;
-            };
-            case POW -> () -> {
-                double result = Math.pow(left.getAsDouble(), right.getAsDouble());
-                if (Double.isNaN(result) || Double.isInfinite(result)) {
-                    logger.warn("Power produced non-finite result");
-                    return Double.NaN;
-                }
-                return result;
-            };
+            case DIV -> {
+                boolean[] warned = {false};
+                yield () -> {
+                    double divisor = right.getAsDouble();
+                    if (divisor == 0) {
+                        if (!warned[0]) {
+                            logger.warn("Division by zero");
+                            warned[0] = true;
+                        }
+                        return Double.NaN;
+                    }
+                    return left.getAsDouble() / divisor;
+                };
+            }
+            case MOD -> {
+                boolean[] warned = {false};
+                yield () -> {
+                    double divisor = right.getAsDouble();
+                    if (divisor == 0) {
+                        if (!warned[0]) {
+                            logger.warn("Modulo by zero");
+                            warned[0] = true;
+                        }
+                        return Double.NaN;
+                    }
+                    return left.getAsDouble() % divisor;
+                };
+            }
+            case POW -> {
+                boolean[] warned = {false};
+                yield () -> {
+                    double result = Math.pow(left.getAsDouble(), right.getAsDouble());
+                    if (Double.isNaN(result) || Double.isInfinite(result)) {
+                        if (!warned[0]) {
+                            logger.warn("Power produced non-finite result");
+                            warned[0] = true;
+                        }
+                        return Double.NaN;
+                    }
+                    return result;
+                };
+            }
             case EQ -> () -> Math.abs(left.getAsDouble() - right.getAsDouble()) < 1e-10 ? 1.0 : 0.0;
             case NE -> () -> Math.abs(left.getAsDouble() - right.getAsDouble()) >= 1e-10 ? 1.0 : 0.0;
             case LT -> () -> left.getAsDouble() < right.getAsDouble() ? 1.0 : 0.0;
@@ -159,10 +177,14 @@ public class ExprCompiler {
             case "SQRT" -> {
                 requireArgs(name, args, 1);
                 DoubleSupplier a = compileExpr(args.get(0));
+                boolean[] warned = {false};
                 yield () -> {
                     double v = a.getAsDouble();
                     if (v < 0) {
-                        logger.warn("SQRT of negative value: {}", v);
+                        if (!warned[0]) {
+                            logger.warn("SQRT of negative value: {}", v);
+                            warned[0] = true;
+                        }
                         return Double.NaN;
                     }
                     return Math.sqrt(v);
@@ -171,10 +193,14 @@ public class ExprCompiler {
             case "LN" -> {
                 requireArgs(name, args, 1);
                 DoubleSupplier a = compileExpr(args.get(0));
+                boolean[] warned = {false};
                 yield () -> {
                     double v = a.getAsDouble();
                     if (v <= 0) {
-                        logger.warn("LN of non-positive value: {}", v);
+                        if (!warned[0]) {
+                            logger.warn("LN of non-positive value: {}", v);
+                            warned[0] = true;
+                        }
                         return Double.NaN;
                     }
                     return Math.log(v);
@@ -183,10 +209,14 @@ public class ExprCompiler {
             case "EXP" -> {
                 requireArgs(name, args, 1);
                 DoubleSupplier a = compileExpr(args.get(0));
+                boolean[] warned = {false};
                 yield () -> {
                     double result = Math.exp(a.getAsDouble());
                     if (Double.isInfinite(result)) {
-                        logger.warn("EXP overflow");
+                        if (!warned[0]) {
+                            logger.warn("EXP overflow");
+                            warned[0] = true;
+                        }
                         return Double.NaN;
                     }
                     return result;
@@ -196,11 +226,15 @@ public class ExprCompiler {
                 if (args.size() == 2) {
                     DoubleSupplier a = compileExpr(args.get(0));
                     DoubleSupplier base = compileExpr(args.get(1));
+                    boolean[] warned = {false};
                     yield () -> {
                         double v = a.getAsDouble();
                         double b = base.getAsDouble();
                         if (v <= 0 || b <= 0 || b == 1) {
-                            logger.warn("LOG with invalid arguments: value={}, base={}", v, b);
+                            if (!warned[0]) {
+                                logger.warn("LOG with invalid arguments: value={}, base={}", v, b);
+                                warned[0] = true;
+                            }
                             return Double.NaN;
                         }
                         return Math.log(v) / Math.log(b);
@@ -208,10 +242,14 @@ public class ExprCompiler {
                 }
                 requireArgs(name, args, 1);
                 DoubleSupplier a = compileExpr(args.get(0));
+                boolean[] warned = {false};
                 yield () -> {
                     double v = a.getAsDouble();
                     if (v <= 0) {
-                        logger.warn("LOG of non-positive value: {}", v);
+                        if (!warned[0]) {
+                            logger.warn("LOG of non-positive value: {}", v);
+                            warned[0] = true;
+                        }
                         return Double.NaN;
                     }
                     return Math.log10(v);
@@ -249,10 +287,14 @@ public class ExprCompiler {
                 requireArgs(name, args, 2);
                 DoubleSupplier a = compileExpr(args.get(0));
                 DoubleSupplier b = compileExpr(args.get(1));
+                boolean[] warned = {false};
                 yield () -> {
                     double divisor = b.getAsDouble();
                     if (divisor == 0) {
-                        logger.warn("MODULO by zero");
+                        if (!warned[0]) {
+                            logger.warn("MODULO by zero");
+                            warned[0] = true;
+                        }
                         return Double.NaN;
                     }
                     return a.getAsDouble() % divisor;
@@ -262,10 +304,14 @@ public class ExprCompiler {
                 requireArgs(name, args, 2);
                 DoubleSupplier a = compileExpr(args.get(0));
                 DoubleSupplier b = compileExpr(args.get(1));
+                boolean[] warned = {false};
                 yield () -> {
                     double result = Math.pow(a.getAsDouble(), b.getAsDouble());
                     if (Double.isNaN(result) || Double.isInfinite(result)) {
-                        logger.warn("POWER produced non-finite result");
+                        if (!warned[0]) {
+                            logger.warn("POWER produced non-finite result");
+                            warned[0] = true;
+                        }
                         return Double.NaN;
                     }
                     return result;
