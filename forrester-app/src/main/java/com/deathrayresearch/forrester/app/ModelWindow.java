@@ -19,6 +19,7 @@ import com.deathrayresearch.forrester.app.canvas.SdConceptsDialog;
 import com.deathrayresearch.forrester.app.canvas.StatusBar;
 import com.deathrayresearch.forrester.app.canvas.UndoHistoryPopup;
 import com.deathrayresearch.forrester.app.canvas.UndoManager;
+import com.deathrayresearch.forrester.model.ModelMetadata;
 import com.deathrayresearch.forrester.model.def.ElementType;
 import com.deathrayresearch.forrester.model.def.ModelDefinition;
 import com.deathrayresearch.forrester.model.def.ViewDef;
@@ -472,7 +473,12 @@ public class ModelWindow {
         ViewDef view;
         if (def.stocks().isEmpty() && def.flows().isEmpty()
                 && def.auxiliaries().isEmpty() && def.constants().isEmpty()) {
-            view = new ViewDef("Main", List.of(), List.of(), List.of());
+            // CLD or empty model — use embedded view if available
+            if (!def.views().isEmpty() && !def.cldVariables().isEmpty()) {
+                view = def.views().getFirst();
+            } else {
+                view = new ViewDef("Main", List.of(), List.of(), List.of());
+            }
         } else {
             view = AutoLayout.layout(def);
         }
@@ -655,7 +661,7 @@ public class ModelWindow {
     }
 
     private void showModelInfoDialog() {
-        Dialog<Pair<String, String>> dialog = new Dialog<>();
+        Dialog<ButtonType> dialog = new Dialog<>();
         dialog.setTitle("Model Info");
         dialog.setHeaderText(null);
         dialog.initOwner(stage);
@@ -674,27 +680,62 @@ public class ModelWindow {
         commentArea.setPrefRowCount(4);
         commentArea.setPrefColumnCount(30);
 
-        grid.add(new Label("Name:"), 0, 0);
-        grid.add(nameField, 1, 0);
-        grid.add(new Label("Comment:"), 0, 1);
-        grid.add(commentArea, 1, 1);
+        ModelMetadata meta = editor.getMetadata();
+        TextField authorField = new TextField(meta != null ? nullToEmpty(meta.author()) : "");
+        authorField.setPrefColumnCount(30);
+        TextField sourceField = new TextField(meta != null ? nullToEmpty(meta.source()) : "");
+        sourceField.setPrefColumnCount(30);
+        TextField licenseField = new TextField(meta != null ? nullToEmpty(meta.license()) : "");
+        licenseField.setPrefColumnCount(30);
+        TextField urlField = new TextField(meta != null ? nullToEmpty(meta.url()) : "");
+        urlField.setPrefColumnCount(30);
+
+        int row = 0;
+        grid.add(new Label("Name:"), 0, row);
+        grid.add(nameField, 1, row++);
+        grid.add(new Label("Comment:"), 0, row);
+        grid.add(commentArea, 1, row++);
+        grid.add(new Label("Author:"), 0, row);
+        grid.add(authorField, 1, row++);
+        grid.add(new Label("Source:"), 0, row);
+        grid.add(sourceField, 1, row++);
+        grid.add(new Label("License:"), 0, row);
+        grid.add(licenseField, 1, row++);
+        grid.add(new Label("URL:"), 0, row);
+        grid.add(urlField, 1, row);
 
         dialog.getDialogPane().setContent(grid);
         Platform.runLater(nameField::requestFocus);
 
-        dialog.setResultConverter(button -> {
-            if (button == ButtonType.OK) {
-                return new Pair<>(nameField.getText().trim(), commentArea.getText().trim());
-            }
-            return null;
-        });
+        dialog.showAndWait()
+                .filter(button -> button == ButtonType.OK)
+                .ifPresent(button -> {
+                    String newName = nameField.getText().trim();
+                    editor.setModelName(newName.isEmpty() ? "Untitled" : newName);
+                    editor.setModelComment(commentArea.getText().trim());
 
-        dialog.showAndWait().ifPresent(result -> {
-            String newName = result.getKey().isEmpty() ? "Untitled" : result.getKey();
-            editor.setModelName(newName);
-            editor.setModelComment(result.getValue());
-            updateTitle();
-        });
+                    String author = emptyToNull(authorField.getText());
+                    String source = emptyToNull(sourceField.getText());
+                    String license = emptyToNull(licenseField.getText());
+                    String url = emptyToNull(urlField.getText());
+                    if (author != null || source != null || license != null || url != null) {
+                        editor.setMetadata(ModelMetadata.builder()
+                                .author(author).source(source)
+                                .license(license).url(url)
+                                .build());
+                    } else {
+                        editor.setMetadata(null);
+                    }
+                    updateTitle();
+                });
+    }
+
+    private static String nullToEmpty(String s) {
+        return s == null ? "" : s;
+    }
+
+    private static String emptyToNull(String s) {
+        return s == null || s.trim().isEmpty() ? null : s.trim();
     }
 
     private void updateTitle() {
