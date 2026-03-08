@@ -44,6 +44,7 @@ public class DemoClassGenerator {
                            List<String> importWarnings, List<String> validationErrors) {
         StringBuilder sb = new StringBuilder(4096);
 
+        emitLicenseHeader(sb, metadata);
         emitPackage(sb, packageName);
         emitImports(sb, definition);
         emitClassJavadoc(sb, sourceFileName, metadata, importWarnings, validationErrors);
@@ -53,6 +54,21 @@ public class DemoClassGenerator {
         emitClassClose(sb);
 
         return sb.toString();
+    }
+
+    private void emitLicenseHeader(StringBuilder sb, ModelMetadata metadata) {
+        String license = metadata.license();
+        if (license != null && license.contains("NC")) {
+            sb.append("/*\n");
+            sb.append(" * Copyright (c) original author(s). See model metadata for attribution.\n");
+            sb.append(" * Licensed under CC-BY-NC-SA-4.0. See THIRD-PARTY-LICENSES for details.\n");
+            sb.append(" */\n");
+        } else {
+            sb.append("/*\n");
+            sb.append(" * Copyright (c) 2026 Courant Systems\n");
+            sb.append(" * Licensed under CC-BY-SA-4.0. See LICENSE in this module for details.\n");
+            sb.append(" */\n");
+        }
     }
 
     private void emitPackage(StringBuilder sb, String packageName) {

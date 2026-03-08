@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) 2026 Courant Systems
+ * Licensed under CC-BY-SA-4.0. See LICENSE in this module for details.
+ */
+
 package systems.courant.forrester.demo;
 
 import systems.courant.forrester.Simulation;
