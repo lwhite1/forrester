@@ -4,7 +4,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>com.deathrayresearch</groupId>
+    <groupId>systems.courant</groupId>
     <artifactId>dynamics</artifactId>
     <version>1.0-SNAPSHOT</version>
     <packaging>pom</packaging>
@@ -42,17 +42,17 @@
         <dependencies>
             <!-- Project modules -->
             <dependency>
-                <groupId>com.deathrayresearch</groupId>
+                <groupId>systems.courant</groupId>
                 <artifactId>forrester-engine</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>com.deathrayresearch</groupId>
+                <groupId>systems.courant</groupId>
                 <artifactId>forrester-ui</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>com.deathrayresearch</groupId>
+                <groupId>systems.courant</groupId>
                 <artifactId>forrester-app</artifactId>
                 <version>${project.version}</version>
             </dependency>

@@ -37,7 +37,7 @@ CLDs and S&F elements share a single canvas and model definition.
 
 - **Language:** Java 21+
 - **Build system:** Maven
-- **Artifact:** `com.deathrayresearch:dynamics:1.0-SNAPSHOT`
+- **Artifact:** `systems.courant:dynamics:1.0-SNAPSHOT`
 
 ```bash
 mvn clean compile    # Build
@@ -59,7 +59,7 @@ mvn package -DskipTests  # Package JAR
 ## Architecture
 
 ```
-com.deathrayresearch.forrester
+systems.courant.forrester
 ├── Simulation.java              # Core simulation engine
 ├── model/                       # Model elements (Stock, Flow, Variable, Constant, Module, Subscript, etc.)
 │   ├── expr/                    # Sealed Expr AST, parser, stringifier, dependency extractor

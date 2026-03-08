@@ -28,7 +28,7 @@
 
     <!-- Demo classes are example code, not production -->
     <Match>
-        <Package name="~com\.deathrayresearch\.forrester\.demo\..*"/>
+        <Package name="~systems\.courant\.forrester\.demo\..*"/>
         <Bug pattern="URF_UNREAD_FIELD"/>
     </Match>
 
@@ -40,7 +40,7 @@
         no circular dependency risk.
     -->
     <Match>
-        <Class name="com.deathrayresearch.forrester.measure.Dimension"/>
+        <Class name="systems.courant.forrester.measure.Dimension"/>
         <Bug pattern="IC_SUPERCLASS_USES_SUBCLASS_DURING_INITIALIZATION"/>
     </Match>
 </FindBugsFilter>
