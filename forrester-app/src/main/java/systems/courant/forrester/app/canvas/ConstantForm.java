@@ -100,6 +100,7 @@ class ConstantForm implements ElementForm {
         } catch (NumberFormatException ignored) {
             ctx.editor.getConstantByName(ctx.elementName)
                     .ifPresent(constant -> field.setText(ElementRenderer.formatValue(constant.value())));
+            ctx.flashInvalidInput(field);
         }
     }
 

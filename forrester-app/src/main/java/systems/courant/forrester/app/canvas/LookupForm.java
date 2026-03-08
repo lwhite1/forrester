@@ -248,6 +248,8 @@ class LookupForm implements ElementForm {
         } catch (NumberFormatException ignored) {
             xField.setText(ElementRenderer.formatValue(lt.xValues()[index]));
             yField.setText(ElementRenderer.formatValue(lt.yValues()[index]));
+            ctx.flashInvalidInput(xField);
+            ctx.flashInvalidInput(yField);
         }
     }
 

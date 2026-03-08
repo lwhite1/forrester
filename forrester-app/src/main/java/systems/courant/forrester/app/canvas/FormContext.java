@@ -271,6 +271,25 @@ class FormContext {
         errorLabel.setManaged(false);
     }
 
+    /**
+     * Briefly highlights a text field with a red border and tooltip to indicate
+     * that the entered value was invalid and has been reverted. The border fades
+     * after 2 seconds.
+     */
+    void flashInvalidInput(TextField field) {
+        String original = field.getStyle();
+        field.setStyle(Styles.EQUATION_ERROR_BORDER);
+        Tooltip tip = new Tooltip("Invalid number \u2014 reverted to previous value");
+        tip.setShowDelay(Duration.ZERO);
+        Tooltip.install(field, tip);
+        PauseTransition fade = new PauseTransition(Duration.seconds(2));
+        fade.setOnFinished(e -> {
+            field.setStyle(original);
+            Tooltip.uninstall(field, tip);
+        });
+        fade.play();
+    }
+
     private void commitRename(TextField nameField) {
         String oldName = elementName;
         String newName = nameField.getText().trim();
