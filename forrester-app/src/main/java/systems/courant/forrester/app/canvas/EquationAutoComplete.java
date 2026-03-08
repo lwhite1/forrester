@@ -454,6 +454,7 @@ public final class EquationAutoComplete {
                 case ESCAPE -> {
                     if (popupVisible) {
                         hidePopup();
+                        hideHint();
                         event.consume();
                     }
                 }
@@ -539,6 +540,7 @@ public final class EquationAutoComplete {
 
             popup = new Popup();
             popup.setAutoHide(true);
+            popup.setHideOnEscape(false);
             popup.getContent().add(listView);
         }
 
