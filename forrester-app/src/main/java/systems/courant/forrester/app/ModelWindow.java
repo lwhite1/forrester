@@ -620,6 +620,7 @@ public class ModelWindow {
         }
 
         canvas.clearNavigation();
+        canvas.clearSparklines();
         canvas.setModel(editor, view);
         undoManager.clear();
         fileController.setDirty(false);
@@ -694,29 +695,34 @@ public class ModelWindow {
 
     private ModelEditListener createStaleListener() {
         return new ModelEditListener() {
+            private void markStale() {
+                dashboardPanel.markStale();
+                canvas.markSparklinesStale();
+            }
+
             @Override
             public void onElementAdded(String name, String typeName) {
-                dashboardPanel.markStale();
+                markStale();
             }
 
             @Override
             public void onElementRemoved(String name) {
-                dashboardPanel.markStale();
+                markStale();
             }
 
             @Override
             public void onElementRenamed(String oldName, String newName) {
-                dashboardPanel.markStale();
+                markStale();
             }
 
             @Override
             public void onEquationChanged(String elementName) {
-                dashboardPanel.markStale();
+                markStale();
             }
 
             @Override
             public void onConstantChanged(String name) {
-                dashboardPanel.markStale();
+                markStale();
             }
         };
     }

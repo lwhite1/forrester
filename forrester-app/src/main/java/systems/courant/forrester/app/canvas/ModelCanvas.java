@@ -91,6 +91,9 @@ public class ModelCanvas extends Canvas {
     // Validation issue indicators (element name → highest severity)
     private Map<String, Severity> elementIssues = Map.of();
 
+    // Sparkline data from last simulation run
+    private CanvasRenderer.SparklineData sparklineData;
+
     // Inline edit callbacks
     private final InlineEditController.Callbacks inlineCallbacks =
             new InlineEditController.Callbacks() {
@@ -282,6 +285,59 @@ public class ModelCanvas extends Canvas {
         } else {
             setActiveLoopIndex((activeLoopIndex - 1 + count) % count);
         }
+    }
+
+    // --- Sparklines ---
+
+    /**
+     * Sets the sparkline data extracted from a simulation result.
+     * Called by the simulation controller after a successful run.
+     */
+    public void setSparklineData(CanvasRenderer.SparklineData data) {
+        this.sparklineData = data;
+        redraw();
+    }
+
+    /**
+     * Marks sparkline data as stale (model changed since last simulation).
+     */
+    public void markSparklinesStale() {
+        if (sparklineData != null && !sparklineData.stale()) {
+            sparklineData = new CanvasRenderer.SparklineData(
+                    sparklineData.stockSeries(), true);
+            redraw();
+        }
+    }
+
+    /**
+     * Clears sparkline data (e.g. when loading a new model).
+     */
+    public void clearSparklines() {
+        sparklineData = null;
+    }
+
+    /**
+     * Extracts stock time series from a simulation result into a sparkline-ready map.
+     */
+    public static Map<String, double[]> extractStockSeries(
+            SimulationRunner.SimulationResult result) {
+        List<String> columns = result.columnNames();
+        List<double[]> rows = result.rows();
+        Map<String, double[]> series = new java.util.LinkedHashMap<>();
+
+        for (int col = 1; col < columns.size(); col++) {
+            String name = columns.get(col);
+            // Only extract stocks — they come first after "Step" in the column order.
+            // We check by seeing if the unit map contains the name (all stocks are in units).
+            // But simpler: just extract all columns; the renderer only draws for elements
+            // that exist in canvasState with STOCK type (checked externally).
+            double[] values = new double[rows.size()];
+            for (int row = 0; row < rows.size(); row++) {
+                values[row] = rows.get(row)[col];
+            }
+            series.put(name, values);
+        }
+        return series;
     }
 
     private void recomputeLoopAnalysis() {
@@ -723,6 +779,7 @@ public class ModelCanvas extends Canvas {
                         marqueeController.toRenderState(),
                         getActiveLoopAnalysis(),
                         elementIssues,
+                        sparklineData,
                         inputDispatcher.getHoveredElement(),
                         inputDispatcher.getHoveredConnection(),
                         selectedConnection));

@@ -68,6 +68,15 @@ public class CanvasRenderer {
     /**
      * Groups the per-frame interactive state passed to {@link #render}.
      */
+    /**
+     * Pre-extracted sparkline data for stock elements.
+     *
+     * @param stockSeries map of stock name to time-series values
+     * @param stale       true if the simulation results are stale (model changed since last run)
+     */
+    public record SparklineData(Map<String, double[]> stockSeries, boolean stale) {
+    }
+
     public record RenderContext(
             ModelEditor editor,
             List<ConnectorRoute> connectors,
@@ -78,6 +87,7 @@ public class CanvasRenderer {
             MarqueeState marqueeState,
             FeedbackAnalysis loopAnalysis,
             Map<String, ValidationIssue.Severity> elementIssues,
+            SparklineData sparklineData,
             String hoveredElement,
             ConnectionId hoveredConnection,
             ConnectionId selectedConnection
@@ -190,6 +200,12 @@ public class CanvasRenderer {
                 }
                 default -> { }
             }
+        }
+
+        // 2-spark. Draw sparklines inside stock elements (above fill, below overlays)
+        if (ctx.sparklineData() != null) {
+            SparklineRenderer.drawAll(gc, canvasState,
+                    ctx.sparklineData().stockSeries(), ctx.sparklineData().stale());
         }
 
         // 2a. Draw error/warning indicators on elements with validation issues

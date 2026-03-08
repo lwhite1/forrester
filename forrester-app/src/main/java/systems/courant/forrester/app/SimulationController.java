@@ -90,6 +90,8 @@ final class SimulationController {
                 () -> new SimulationRunner().run(def, finalSettings),
                 result -> {
                     dashboardPanel.showSimulationResult(result);
+                    canvas.setSparklineData(new systems.courant.forrester.app.canvas.CanvasRenderer.SparklineData(
+                            ModelCanvas.extractStockSeries(result), false));
                     switchToDashboard.run();
                     fireLogEvent.accept(ModelEditListener::onSimulationRun);
                 },
