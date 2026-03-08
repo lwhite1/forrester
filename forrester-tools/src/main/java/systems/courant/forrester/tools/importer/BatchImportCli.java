@@ -127,7 +127,10 @@ public class BatchImportCli {
                 if (tempFile != null) {
                     try {
                         Files.deleteIfExists(tempFile);
-                        Files.deleteIfExists(tempFile.getParent());
+                        Path tempParent = tempFile.getParent();
+                        if (tempParent != null) {
+                            Files.deleteIfExists(tempParent);
+                        }
                     } catch (IOException e) {
                         log.warn("  Could not delete temp file: {}", tempFile);
                     }

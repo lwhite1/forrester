@@ -70,9 +70,10 @@ public class ImportPipeline {
         if (config.generateCode()) {
             log.info("Generating Java class: {}", config.className());
             String packageName = resolvePackageName(config.category());
+            Path srcFileName = config.sourceFile().getFileName();
             source = new DemoClassGenerator().generate(
                     definition, config.metadata(), config.className(), packageName,
-                    config.sourceFile().getFileName().toString(),
+                    srcFileName != null ? srcFileName.toString() : config.sourceFile().toString(),
                     importWarnings, validationErrors);
             outputExtension = ".java";
         } else {
@@ -102,7 +103,10 @@ public class ImportPipeline {
             if (Files.exists(outputFile) && !config.overwrite()) {
                 throw new IOException("Output file already exists (use --overwrite to replace): " + outputFile);
             }
-            Files.createDirectories(outputFile.getParent());
+            Path parentDir = outputFile.getParent();
+            if (parentDir != null) {
+                Files.createDirectories(parentDir);
+            }
             Files.writeString(outputFile, source, StandardCharsets.UTF_8);
             log.info("Wrote {}", outputFile);
         }
@@ -113,7 +117,11 @@ public class ImportPipeline {
     }
 
     private ImportResult importModel(Path sourceFile) throws IOException {
-        String fileName = sourceFile.getFileName().toString().toLowerCase();
+        Path fileNamePath = sourceFile.getFileName();
+        if (fileNamePath == null) {
+            throw new IllegalArgumentException("Source file path has no file name: " + sourceFile);
+        }
+        String fileName = fileNamePath.toString().toLowerCase();
         int dotIndex = fileName.lastIndexOf('.');
         if (dotIndex < 0) {
             throw new IllegalArgumentException(

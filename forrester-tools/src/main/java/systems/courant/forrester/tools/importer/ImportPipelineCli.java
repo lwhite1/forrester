@@ -131,7 +131,7 @@ public class ImportPipelineCli {
         if (System.console() != null) {
             return System.console().readLine();
         }
-        Scanner scanner = new Scanner(System.in);
+        Scanner scanner = new Scanner(System.in, java.nio.charset.StandardCharsets.UTF_8);
         return scanner.hasNextLine() ? scanner.nextLine() : null;
     }
 
