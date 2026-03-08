@@ -10,6 +10,7 @@ import com.deathrayresearch.forrester.app.canvas.MonteCarloDialog;
 import com.deathrayresearch.forrester.app.canvas.MultiParameterSweepDialog;
 import com.deathrayresearch.forrester.app.canvas.OptimizerDialog;
 import com.deathrayresearch.forrester.app.canvas.ParameterSweepDialog;
+import com.deathrayresearch.forrester.app.canvas.SensitivityPane;
 import com.deathrayresearch.forrester.app.canvas.SimulationRunner;
 import com.deathrayresearch.forrester.app.canvas.SimulationSettingsDialog;
 import com.deathrayresearch.forrester.app.canvas.StatusBar;
@@ -29,6 +30,7 @@ import com.deathrayresearch.forrester.sweep.Optimizer;
 import com.deathrayresearch.forrester.sweep.MultiParameterSweep;
 import com.deathrayresearch.forrester.sweep.ParameterSweep;
 import com.deathrayresearch.forrester.sweep.SamplingMethod;
+import com.deathrayresearch.forrester.sweep.SensitivitySummary;
 
 import org.apache.commons.math3.distribution.NormalDistribution;
 import org.apache.commons.math3.distribution.UniformRealDistribution;
@@ -142,6 +144,7 @@ final class SimulationController {
                 },
                 result -> {
                     dashboardPanel.showSweepResult(result, config.parameterName());
+                    showSweepSensitivity(result, config.trackVariable());
                     switchToDashboard.run();
                     fireLogEvent.accept(l -> l.onAnalysisRun("Parameter Sweep",
                             config.parameterName() + " [" + config.start() + ".." + config.end() + "]"));
@@ -194,6 +197,7 @@ final class SimulationController {
                 },
                 result -> {
                     dashboardPanel.showMultiSweepResult(result);
+                    showMultiSweepSensitivity(result);
                     switchToDashboard.run();
                     String paramSummary = config.parameters().stream()
                             .map(MultiParameterSweepDialog.ParamConfig::name)
@@ -257,6 +261,7 @@ final class SimulationController {
                 },
                 result -> {
                     dashboardPanel.showMonteCarloResult(result);
+                    showMonteCarloSensitivity(result);
                     switchToDashboard.run();
                     fireLogEvent.accept(l -> l.onAnalysisRun("Monte Carlo",
                             config.iterations() + " iterations, " + config.parameters().size() + " params"));
@@ -354,6 +359,53 @@ final class SimulationController {
                     fireLogEvent.accept(l -> l.onValidation(result.errorCount(), result.warningCount()));
                 },
                 "Validation Error");
+    }
+
+    private void showSweepSensitivity(
+            com.deathrayresearch.forrester.sweep.SweepResult sweepResult,
+            String initialVariable) {
+        List<String> trackable = collectTrackableNames(sweepResult.getStockNames(),
+                sweepResult.getVariableNames());
+        String initial = initialVariable != null && trackable.contains(initialVariable)
+                ? initialVariable : (trackable.isEmpty() ? null : trackable.getFirst());
+        if (initial == null) {
+            return;
+        }
+        SensitivityPane pane = new SensitivityPane(trackable,
+                (target, unused) -> SensitivitySummary.fromSweep(sweepResult, target), initial);
+        dashboardPanel.showSensitivity(pane);
+    }
+
+    private void showMultiSweepSensitivity(
+            com.deathrayresearch.forrester.sweep.MultiSweepResult multiResult) {
+        List<String> trackable = collectTrackableNames(multiResult.getStockNames(),
+                multiResult.getVariableNames());
+        if (trackable.isEmpty()) {
+            return;
+        }
+        SensitivityPane pane = new SensitivityPane(trackable,
+                (target, unused) -> SensitivitySummary.fromMultiSweep(multiResult, target),
+                trackable.getFirst());
+        dashboardPanel.showSensitivity(pane);
+    }
+
+    private void showMonteCarloSensitivity(
+            com.deathrayresearch.forrester.sweep.MonteCarloResult mcResult) {
+        List<String> trackable = collectTrackableNames(mcResult.getStockNames(),
+                mcResult.getVariableNames());
+        if (trackable.isEmpty()) {
+            return;
+        }
+        SensitivityPane pane = new SensitivityPane(trackable,
+                (target, unused) -> SensitivitySummary.fromMonteCarlo(mcResult, target),
+                trackable.getFirst());
+        dashboardPanel.showSensitivity(pane);
+    }
+
+    private static List<String> collectTrackableNames(List<String> stocks, List<String> variables) {
+        List<String> names = new ArrayList<>(stocks);
+        names.addAll(variables);
+        return names;
     }
 
     private SimulationSettings ensureSettings() {

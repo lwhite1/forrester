@@ -41,6 +41,7 @@ public class DashboardPanel extends VBox {
     private Tab monteCarloTab;
     private Tab optimizationTab;
     private Tab multiSweepTab;
+    private Tab sensitivityTab;
     private boolean stale;
     private Runnable rerunAction;
 
@@ -131,6 +132,12 @@ public class DashboardPanel extends VBox {
         resultTabs.getSelectionModel().select(multiSweepTab);
     }
 
+    public void showSensitivity(SensitivityPane pane) {
+        clearStale();
+        sensitivityTab = ensureTab(sensitivityTab, "Sensitivity", pane);
+        resultTabs.getSelectionModel().select(sensitivityTab);
+    }
+
     /**
      * Marks results as stale by showing an amber banner and border.
      * Only has an effect when result tabs are currently visible.
@@ -190,6 +197,8 @@ public class DashboardPanel extends VBox {
                 optimizationTab = null;
             } else if (tab == multiSweepTab) {
                 multiSweepTab = null;
+            } else if (tab == sensitivityTab) {
+                sensitivityTab = null;
             }
             if (resultTabs.getTabs().isEmpty()) {
                 hideTabs();
@@ -213,6 +222,7 @@ public class DashboardPanel extends VBox {
         monteCarloTab = null;
         optimizationTab = null;
         multiSweepTab = null;
+        sensitivityTab = null;
         hideTabs();
     }
 
