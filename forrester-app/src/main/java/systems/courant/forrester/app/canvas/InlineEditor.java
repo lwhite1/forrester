@@ -84,6 +84,7 @@ public class InlineEditor {
      */
     public void close() {
         if (textField != null) {
+            EquationAutoComplete.detach(textField);
             overlayPane.getChildren().remove(textField);
             textField = null;
             onCommit = null;
