@@ -27,6 +27,9 @@ import java.util.Set;
  */
 public class DependencyGraph {
 
+    /** Maximum recursion depth for graph traversal, matching ExprParser.MAX_DEPTH. */
+    private static final int MAX_DEPTH = 200;
+
     private final Map<String, Set<String>> adjacency; // from → {to}
     private final Set<String> allNodes;
 
@@ -212,7 +215,7 @@ public class DependencyGraph {
 
         for (String node : allNodes) {
             if (!nodeIndex.containsKey(node)) {
-                tarjanStrongconnect(node, index, nodeIndex, lowlink, onStack, stack, result);
+                tarjanStrongconnect(node, index, nodeIndex, lowlink, onStack, stack, result, 0);
             }
         }
 
@@ -238,7 +241,10 @@ public class DependencyGraph {
 
     private void tarjanStrongconnect(String v, int[] index,
             Map<String, Integer> nodeIndex, Map<String, Integer> lowlink,
-            Set<String> onStack, Deque<String> stack, List<Set<String>> result) {
+            Set<String> onStack, Deque<String> stack, List<Set<String>> result, int depth) {
+        if (depth > MAX_DEPTH) {
+            return;
+        }
         nodeIndex.put(v, index[0]);
         lowlink.put(v, index[0]);
         index[0]++;
@@ -250,7 +256,7 @@ public class DependencyGraph {
                 continue;
             }
             if (!nodeIndex.containsKey(w)) {
-                tarjanStrongconnect(w, index, nodeIndex, lowlink, onStack, stack, result);
+                tarjanStrongconnect(w, index, nodeIndex, lowlink, onStack, stack, result, depth + 1);
                 lowlink.put(v, Math.min(lowlink.get(v), lowlink.get(w)));
             } else if (onStack.contains(w)) {
                 lowlink.put(v, Math.min(lowlink.get(v), nodeIndex.get(w)));
