@@ -1,11 +1,15 @@
 package systems.courant.forrester.model.graph;
 
+import systems.courant.forrester.model.def.CausalLinkDef;
 import systems.courant.forrester.model.def.ModelDefinition;
 import systems.courant.forrester.model.def.ModelDefinitionBuilder;
+import systems.courant.forrester.model.graph.FeedbackAnalysis.LoopInfo;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -246,6 +250,127 @@ class FeedbackAnalysisTest {
             // Material flow edges: flow → stocks
             assertThat(analysis.isLoopEdge("Predation", "Prey")).isTrue();
             assertThat(analysis.isLoopEdge("Predation", "Predators")).isTrue();
+        }
+    }
+
+    @Nested
+    @DisplayName("loop info and filtering")
+    class LoopInfoAndFiltering {
+
+        @Test
+        void shouldReturnLoopInfoForSfGroup() {
+            ModelDefinition def = new ModelDefinitionBuilder()
+                    .name("Predator-Prey")
+                    .stock("Prey", 100, "Animal")
+                    .stock("Predators", 20, "Animal")
+                    .flow("Predation", "Prey * Predators * 0.01", "Day",
+                            "Prey", "Predators")
+                    .build();
+
+            FeedbackAnalysis analysis = FeedbackAnalysis.analyze(def);
+
+            assertThat(analysis.loopCount()).isEqualTo(1);
+
+            Optional<LoopInfo> info = analysis.loopInfo(0);
+            assertThat(info).isPresent();
+            assertThat(info.get().label()).isEqualTo("Loop 1");
+            assertThat(info.get().type()).isNull();
+            assertThat(info.get().narrative()).isNotEmpty();
+        }
+
+        @Test
+        void shouldReturnEmptyForOutOfRangeIndex() {
+            ModelDefinition def = new ModelDefinitionBuilder()
+                    .name("Empty")
+                    .build();
+
+            FeedbackAnalysis analysis = FeedbackAnalysis.analyze(def);
+
+            assertThat(analysis.loopInfo(0)).isEmpty();
+            assertThat(analysis.loopInfo(-1)).isEmpty();
+        }
+
+        @Test
+        void shouldFilterSfGroupToSingleLoop() {
+            ModelDefinition def = new ModelDefinitionBuilder()
+                    .name("Two Loops")
+                    .stock("A", 100, "Thing")
+                    .stock("B", 50, "Thing")
+                    .stock("C", 200, "Thing")
+                    .stock("D", 30, "Thing")
+                    .flow("F1", "A * B * 0.01", "Day", "A", "B")
+                    .flow("F2", "C * D * 0.02", "Day", "C", "D")
+                    .build();
+
+            FeedbackAnalysis analysis = FeedbackAnalysis.analyze(def);
+            assertThat(analysis.loopCount()).isEqualTo(2);
+
+            FeedbackAnalysis filtered = analysis.filterToLoop(0);
+            assertThat(filtered.loopCount()).isEqualTo(1);
+            assertThat(filtered.loopGroups()).hasSize(1);
+            // Filtered analysis should contain only the first group's elements
+            assertThat(filtered.loopParticipants()).isSubsetOf(analysis.loopParticipants());
+        }
+
+        @Test
+        void shouldFilterCldLoopToSingleLoop() {
+            ModelDefinition def = new ModelDefinitionBuilder()
+                    .name("CLD")
+                    .cldVariable("X")
+                    .cldVariable("Y")
+                    .cldVariable("Z")
+                    .causalLink("X", "Y", CausalLinkDef.Polarity.POSITIVE)
+                    .causalLink("Y", "Z", CausalLinkDef.Polarity.POSITIVE)
+                    .causalLink("Z", "X", CausalLinkDef.Polarity.NEGATIVE)
+                    .build();
+
+            FeedbackAnalysis analysis = FeedbackAnalysis.analyze(def);
+            assertThat(analysis.causalLoops()).isNotEmpty();
+
+            int totalLoops = analysis.loopCount();
+            FeedbackAnalysis filtered = analysis.filterToLoop(totalLoops - 1);
+            assertThat(filtered.loopCount()).isEqualTo(1);
+            assertThat(filtered.causalLoops()).hasSize(1);
+        }
+
+        @Test
+        void shouldReturnFullAnalysisForInvalidIndex() {
+            ModelDefinition def = new ModelDefinitionBuilder()
+                    .name("Predator-Prey")
+                    .stock("Prey", 100, "Animal")
+                    .stock("Predators", 20, "Animal")
+                    .flow("Predation", "Prey * Predators * 0.01", "Day",
+                            "Prey", "Predators")
+                    .build();
+
+            FeedbackAnalysis analysis = FeedbackAnalysis.analyze(def);
+            FeedbackAnalysis filtered = analysis.filterToLoop(-1);
+            assertThat(filtered).isSameAs(analysis);
+
+            FeedbackAnalysis filtered2 = analysis.filterToLoop(999);
+            assertThat(filtered2).isSameAs(analysis);
+        }
+
+        @Test
+        void shouldReturnCldLoopInfoWithType() {
+            ModelDefinition def = new ModelDefinitionBuilder()
+                    .name("CLD")
+                    .cldVariable("X")
+                    .cldVariable("Y")
+                    .causalLink("X", "Y", CausalLinkDef.Polarity.POSITIVE)
+                    .causalLink("Y", "X", CausalLinkDef.Polarity.POSITIVE)
+                    .build();
+
+            FeedbackAnalysis analysis = FeedbackAnalysis.analyze(def);
+            assertThat(analysis.causalLoops()).isNotEmpty();
+
+            // CLD loops come after SF groups (0 SF groups here)
+            Optional<LoopInfo> info = analysis.loopInfo(0);
+            assertThat(info).isPresent();
+            assertThat(info.get().type()).isEqualTo(FeedbackAnalysis.LoopType.REINFORCING);
+            assertThat(info.get().label()).startsWith("R");
+            assertThat(info.get().narrative()).contains("X");
+            assertThat(info.get().narrative()).contains("Y");
         }
     }
 }

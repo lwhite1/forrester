@@ -20,6 +20,7 @@ import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 /**
@@ -162,6 +163,94 @@ public record FeedbackAnalysis(
      */
     public int loopCount() {
         return loopGroups.size() + causalLoops.size();
+    }
+
+    /**
+     * Summary information about a single feedback loop, usable for both
+     * stock-and-flow SCC groups and CLD elementary cycles.
+     *
+     * @param label     display label (e.g. "R1", "B2", "Loop 1")
+     * @param type      loop classification (null for S&amp;F groups which lack polarity info)
+     * @param path      ordered element names forming the loop (empty for S&amp;F groups)
+     * @param narrative human-readable description (e.g. "Population → Births → Population")
+     */
+    public record LoopInfo(String label, LoopType type, List<String> path, String narrative) {
+    }
+
+    /**
+     * Returns summary information for the loop at the given index.
+     * Indices {@code 0..loopGroups.size()-1} refer to stock-and-flow SCC groups;
+     * indices {@code loopGroups.size()..loopCount()-1} refer to CLD causal loops.
+     *
+     * @param index zero-based loop index
+     * @return loop info, or empty if index is out of range
+     */
+    public Optional<LoopInfo> loopInfo(int index) {
+        if (index < 0 || index >= loopCount()) {
+            return Optional.empty();
+        }
+        if (index < loopGroups.size()) {
+            Set<String> group = loopGroups.get(index);
+            String label = "Loop " + (index + 1);
+            String narrative = String.join(" \u2192 ", group);
+            return Optional.of(new LoopInfo(label, null,
+                    List.copyOf(group), narrative));
+        }
+        int cldIndex = index - loopGroups.size();
+        CausalLoop loop = causalLoops.get(cldIndex);
+        List<String> path = loop.path();
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < path.size(); i++) {
+            if (i > 0) {
+                sb.append(" \u2192 ");
+            }
+            sb.append(path.get(i));
+        }
+        sb.append(" \u2192 ").append(path.getFirst());
+        return Optional.of(new LoopInfo(loop.label(), loop.type(),
+                path, sb.toString()));
+    }
+
+    /**
+     * Creates a filtered {@code FeedbackAnalysis} containing only the single loop
+     * at the given index. Returns the full analysis if index is out of range.
+     *
+     * @param index zero-based loop index
+     * @return filtered analysis for a single loop
+     */
+    public FeedbackAnalysis filterToLoop(int index) {
+        if (index < 0 || index >= loopCount()) {
+            return this;
+        }
+
+        if (index < loopGroups.size()) {
+            Set<String> group = loopGroups.get(index);
+            Set<Edge> filteredEdges = new LinkedHashSet<>();
+            for (Edge e : loopEdges) {
+                if (group.contains(e.from()) && group.contains(e.to())) {
+                    filteredEdges.add(e);
+                }
+            }
+            return new FeedbackAnalysis(
+                    Collections.unmodifiableSet(new LinkedHashSet<>(group)),
+                    List.of(group),
+                    Collections.unmodifiableSet(filteredEdges),
+                    Collections.emptyList());
+        }
+
+        int cldIndex = index - loopGroups.size();
+        CausalLoop loop = causalLoops.get(cldIndex);
+        Set<String> participants = new LinkedHashSet<>(loop.path());
+        Set<Edge> edges = new LinkedHashSet<>();
+        List<String> path = loop.path();
+        for (int i = 0; i < path.size(); i++) {
+            edges.add(new Edge(path.get(i), path.get((i + 1) % path.size())));
+        }
+        return new FeedbackAnalysis(
+                Collections.unmodifiableSet(participants),
+                Collections.emptyList(),
+                Collections.unmodifiableSet(edges),
+                List.of(loop));
     }
 
     /**

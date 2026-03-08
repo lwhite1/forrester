@@ -558,6 +558,18 @@ final class InputDispatcher {
                 case DIGIT7 -> { canvas.switchTool(CanvasToolBar.Tool.PLACE_LOOKUP); event.consume(); }
                 case DIGIT8 -> { canvas.switchTool(CanvasToolBar.Tool.PLACE_CLD_VARIABLE); event.consume(); }
                 case DIGIT9 -> { canvas.switchTool(CanvasToolBar.Tool.PLACE_CAUSAL_LINK); event.consume(); }
+                case OPEN_BRACKET -> {
+                    if (canvas.isLoopHighlightActive()) {
+                        canvas.stepLoopBack();
+                        event.consume();
+                    }
+                }
+                case CLOSE_BRACKET -> {
+                    if (canvas.isLoopHighlightActive()) {
+                        canvas.stepLoopForward();
+                        event.consume();
+                    }
+                }
                 default -> { }
             }
         }

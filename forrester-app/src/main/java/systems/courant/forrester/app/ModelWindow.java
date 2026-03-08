@@ -6,6 +6,7 @@ import systems.courant.forrester.app.canvas.BreadcrumbBar;
 import systems.courant.forrester.app.canvas.CanvasToolBar;
 import systems.courant.forrester.app.canvas.Clipboard;
 import systems.courant.forrester.app.canvas.CommandPalette;
+import systems.courant.forrester.app.canvas.LoopNavigatorBar;
 import systems.courant.forrester.app.canvas.DashboardPanel;
 import systems.courant.forrester.app.canvas.DiagramExporter;
 import systems.courant.forrester.app.canvas.ExpressionLanguageDialog;
@@ -112,6 +113,7 @@ public class ModelWindow {
     private SplitPane editorSplitPane;
     private VBox topContainer;
     private CanvasToolBar toolBar;
+    private LoopNavigatorBar loopNavigatorBar;
     private boolean editorShown;
     private final List<MenuItem> editorOnlyItems = new ArrayList<>();
 
@@ -157,14 +159,38 @@ public class ModelWindow {
             canvas.setActiveTool(tool);
             statusBar.updateTool(tool);
         });
+        loopNavigatorBar = new LoopNavigatorBar();
+        loopNavigatorBar.setVisible(false);
+        loopNavigatorBar.setManaged(false);
+        loopNavigatorBar.setOnPrev(() -> {
+            canvas.stepLoopBack();
+            updateLoopNavigator();
+            canvas.requestFocus();
+        });
+        loopNavigatorBar.setOnNext(() -> {
+            canvas.stepLoopForward();
+            updateLoopNavigator();
+            canvas.requestFocus();
+        });
+        loopNavigatorBar.setOnShowAll(() -> {
+            canvas.setActiveLoopIndex(-1);
+            updateLoopNavigator();
+            canvas.requestFocus();
+        });
         toolBar.setOnLoopToggleChanged(active -> {
             canvas.setLoopHighlightActive(active);
+            loopNavigatorBar.setVisible(active);
+            loopNavigatorBar.setManaged(active);
             updateLoopStatus();
+            updateLoopNavigator();
         });
         toolBar.setOnValidateClicked(simulationController::validateModel);
         canvas.setToolBar(toolBar);
         canvas.setOnStatusChanged(() -> {
             updateStatusBar();
+            if (canvas.isLoopHighlightActive()) {
+                updateLoopNavigator();
+            }
             if (propertiesPanel != null) {
                 propertiesPanel.updateSelection(canvas, canvas.getEditor());
             }
@@ -219,7 +245,7 @@ public class ModelWindow {
         SplitPane.setResizableWithParent(rightTabPane, false);
 
         MenuBar menuBar = createMenuBar();
-        topContainer = new VBox(menuBar, toolBar, breadcrumbBar);
+        topContainer = new VBox(menuBar, toolBar, loopNavigatorBar, breadcrumbBar);
 
         root = new BorderPane();
         root.setId("modelWindowRoot");
@@ -771,6 +797,13 @@ public class ModelWindow {
         } else {
             statusBar.clearLoops();
         }
+    }
+
+    private void updateLoopNavigator() {
+        if (loopNavigatorBar == null) {
+            return;
+        }
+        loopNavigatorBar.update(canvas.getLoopAnalysis(), canvas.getActiveLoopIndex());
     }
 
     private void showModelInfoDialog() {
