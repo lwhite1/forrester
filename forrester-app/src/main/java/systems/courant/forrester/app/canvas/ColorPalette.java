@@ -32,6 +32,12 @@ public final class ColorPalette {
 
     public static final Color HOVER = Color.web("#4A90D9", 0.4);
 
+    // Validation error/warning indicators on canvas elements
+    public static final Color ERROR_BORDER = Color.web("#E74C3C", 0.8);
+    public static final Color ERROR_FILL = Color.web("#E74C3C", 0.06);
+    public static final Color WARNING_BORDER = Color.web("#F39C12", 0.8);
+    public static final Color WARNING_FILL = Color.web("#F39C12", 0.06);
+
     public static final Color LOOP_HIGHLIGHT = Color.web("#E74C3C", 0.8);
     public static final Color LOOP_EDGE = Color.web("#E74C3C", 0.6);
     public static final Color LOOP_FILL = Color.web("#E74C3C", 0.08);

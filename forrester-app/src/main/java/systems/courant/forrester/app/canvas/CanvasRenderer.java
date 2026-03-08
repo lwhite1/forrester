@@ -5,6 +5,7 @@ import systems.courant.forrester.model.def.ConnectorRoute;
 import systems.courant.forrester.model.def.ConstantDef;
 import systems.courant.forrester.model.def.ElementType;
 import systems.courant.forrester.model.def.FlowDef;
+import systems.courant.forrester.model.def.ValidationIssue;
 import systems.courant.forrester.model.graph.FeedbackAnalysis;
 import systems.courant.forrester.model.graph.FeedbackAnalysis.CausalLoop;
 
@@ -12,6 +13,7 @@ import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * Rendering coordinator for the model canvas.
@@ -75,6 +77,7 @@ public class CanvasRenderer {
             RerouteState rerouteState,
             MarqueeState marqueeState,
             FeedbackAnalysis loopAnalysis,
+            Map<String, ValidationIssue.Severity> elementIssues,
             String hoveredElement,
             ConnectionId hoveredConnection,
             ConnectionId selectedConnection
@@ -105,6 +108,7 @@ public class CanvasRenderer {
         RerouteState rerouteState = ctx.rerouteState();
         MarqueeState marqueeState = ctx.marqueeState();
         FeedbackAnalysis loopAnalysis = ctx.loopAnalysis();
+        Map<String, ValidationIssue.Severity> elementIssues = ctx.elementIssues();
         String hoveredElement = ctx.hoveredElement();
         ConnectionId hoveredConnection = ctx.hoveredConnection();
         ConnectionId selectedConnection = ctx.selectedConnection();
@@ -185,6 +189,16 @@ public class CanvasRenderer {
                             cx - w / 2, cy - h / 2, w, h);
                 }
                 default -> { }
+            }
+        }
+
+        // 2a2. Draw error/warning indicators on elements with validation issues
+        if (elementIssues != null) {
+            for (Map.Entry<String, ValidationIssue.Severity> entry : elementIssues.entrySet()) {
+                if (canvasState.hasElement(entry.getKey())) {
+                    ErrorIndicatorRenderer.drawIndicator(
+                            gc, canvasState, entry.getKey(), entry.getValue());
+                }
             }
         }
 

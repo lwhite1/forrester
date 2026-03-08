@@ -4,7 +4,11 @@ import systems.courant.forrester.model.def.CausalLinkDef;
 import systems.courant.forrester.model.def.ConnectorRoute;
 import systems.courant.forrester.model.def.ElementType;
 import systems.courant.forrester.model.def.ModelDefinition;
+import systems.courant.forrester.model.def.ModelValidator;
 import systems.courant.forrester.model.def.ModuleInstanceDef;
+import systems.courant.forrester.model.def.ValidationIssue;
+import systems.courant.forrester.model.def.ValidationIssue.Severity;
+import systems.courant.forrester.model.def.ValidationResult;
 import systems.courant.forrester.model.def.ViewDef;
 import systems.courant.forrester.model.graph.AutoLayout;
 import systems.courant.forrester.model.graph.FeedbackAnalysis;
@@ -18,7 +22,9 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Pane;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Consumer;
@@ -79,6 +85,9 @@ public class ModelCanvas extends Canvas {
     // Feedback loop highlighting
     private boolean loopHighlightActive;
     private FeedbackAnalysis loopAnalysis;
+
+    // Validation issue indicators (element name → highest severity)
+    private Map<String, Severity> elementIssues = Map.of();
 
     // Inline edit callbacks
     private final InlineEditController.Callbacks inlineCallbacks =
@@ -151,6 +160,7 @@ public class ModelCanvas extends Canvas {
         canvasState.loadFrom(view);
         this.connectors = editor.generateConnectors();
         invalidateLoopAnalysis();
+        recomputeValidation();
         redraw();
     }
 
@@ -232,6 +242,26 @@ public class ModelCanvas extends Canvas {
         }
     }
 
+    // --- Validation indicators ---
+
+    private void recomputeValidation() {
+        if (editor == null) {
+            elementIssues = Map.of();
+            return;
+        }
+        ValidationResult result = ModelValidator.validate(
+                editor.toModelDefinition(canvasState.toViewDef()));
+        Map<String, Severity> issues = new LinkedHashMap<>();
+        for (ValidationIssue issue : result.issues()) {
+            if (issue.elementName() != null) {
+                issues.merge(issue.elementName(), issue.severity(),
+                        (existing, incoming) ->
+                                existing == Severity.ERROR ? existing : incoming);
+            }
+        }
+        elementIssues = issues;
+    }
+
     // --- Undo/redo ---
 
     public void setUndoManager(UndoManager undoManager) {
@@ -259,6 +289,7 @@ public class ModelCanvas extends Canvas {
         canvasState.loadFrom(snapshot.view());
         connectors = editor.generateConnectors();
         invalidateLoopAnalysis();
+        recomputeValidation();
         redraw();
     }
 
@@ -523,12 +554,13 @@ public class ModelCanvas extends Canvas {
     private void regenerateAndRedraw() {
         connectors = editor.generateConnectors();
         invalidateLoopAnalysis();
+        recomputeValidation();
         redraw();
     }
 
     public void applyMutation(Runnable mutation) {
         mutation.run();
-        regenerateAndRedraw();
+        regenerateAndRedraw(); // includes recomputeValidation()
     }
 
     private CanvasRenderer.RerouteState rerouteRenderState() {
@@ -611,6 +643,7 @@ public class ModelCanvas extends Canvas {
                         rerouteRenderState(),
                         marqueeController.toRenderState(),
                         loopHighlightActive ? loopAnalysis : null,
+                        elementIssues,
                         inputDispatcher.getHoveredElement(),
                         inputDispatcher.getHoveredConnection(),
                         selectedConnection));
@@ -699,6 +732,7 @@ public class ModelCanvas extends Canvas {
 
         connectors = editor.generateConnectors();
         invalidateLoopAnalysis();
+        recomputeValidation();
         redraw();
 
         navController.fireNavigationChanged();
