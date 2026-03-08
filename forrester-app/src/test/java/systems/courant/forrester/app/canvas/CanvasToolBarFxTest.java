@@ -23,7 +23,7 @@ class CanvasToolBarFxTest {
     @Start
     void start(Stage stage) {
         toolBar = new CanvasToolBar();
-        stage.setScene(new Scene(new StackPane(toolBar), 800, 100));
+        stage.setScene(new Scene(new StackPane(toolBar), 1400, 100));
         stage.show();
     }
 
