@@ -108,6 +108,7 @@ class StockForm implements ElementForm {
         } catch (NumberFormatException ignored) {
             ctx.editor.getStockByName(ctx.elementName)
                     .ifPresent(stock -> field.setText(ElementRenderer.formatValue(stock.initialValue())));
+            ctx.flashInvalidInput(field);
         }
     }
 
