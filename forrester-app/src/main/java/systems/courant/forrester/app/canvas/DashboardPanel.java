@@ -16,6 +16,10 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
 /**
  * Dashboard panel that displays results from simulation, parameter sweep,
  * Monte Carlo, and optimization runs. Results are shown in separate tabs,
@@ -44,6 +48,10 @@ public class DashboardPanel extends VBox {
     private Tab sensitivityTab;
     private boolean stale;
     private Runnable rerunAction;
+
+    /** Previous simulation results for ghost overlay comparison. Most recent last. */
+    private final List<SimulationRunner.SimulationResult> runHistory = new ArrayList<>();
+    private static final int MAX_HISTORY = 5;
 
     public DashboardPanel() {
         Label placeholderLabel = new Label("Run a simulation to see results.");
@@ -99,9 +107,16 @@ public class DashboardPanel extends VBox {
 
     public void showSimulationResult(SimulationRunner.SimulationResult result) {
         clearStale();
-        SimulationResultPane pane = new SimulationResultPane(result);
+        List<SimulationRunner.SimulationResult> ghosts = List.copyOf(runHistory);
+        SimulationResultPane pane = new SimulationResultPane(result, ghosts, this::clearRunHistory);
         simulationTab = ensureTab(simulationTab, "Simulation", pane);
         resultTabs.getSelectionModel().select(simulationTab);
+
+        // Add the current result to history for next run's ghost overlay
+        runHistory.add(result);
+        if (runHistory.size() > MAX_HISTORY) {
+            runHistory.removeFirst();
+        }
     }
 
     public void showSweepResult(SweepResult result, String paramName) {
@@ -208,10 +223,22 @@ public class DashboardPanel extends VBox {
         return tab;
     }
 
+    void clearRunHistory() {
+        runHistory.clear();
+    }
+
+    /**
+     * Returns the number of previous simulation runs stored for ghost overlays.
+     */
+    int getRunHistorySize() {
+        return runHistory.size();
+    }
+
     /**
      * Removes all result tabs and shows the placeholder. Called when a new model is loaded.
      */
     public void clear() {
+        runHistory.clear();
         stale = false;
         staleBanner.setVisible(false);
         staleBanner.setManaged(false);

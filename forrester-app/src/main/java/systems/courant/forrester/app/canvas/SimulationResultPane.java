@@ -11,10 +11,13 @@ import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
 import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ContextMenu;
+import javafx.scene.control.Label;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.ScrollPane;
+import javafx.scene.control.Separator;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.control.TableColumn;
@@ -38,19 +41,24 @@ import javax.imageio.ImageIO;
 
 /**
  * Embeddable pane displaying simulation results as a chart and table.
+ * Supports ghost overlays from previous simulation runs.
  */
 public class SimulationResultPane extends BorderPane {
+
+    private static final double GHOST_OPACITY = 0.25;
 
     private LineChart<Number, Number> chart;
     private SimulationRunner.SimulationResult simulationResult;
 
-    public SimulationResultPane(SimulationRunner.SimulationResult result) {
+    public SimulationResultPane(SimulationRunner.SimulationResult result,
+                                List<SimulationRunner.SimulationResult> ghostRuns,
+                                Runnable clearHistory) {
         this.simulationResult = result;
         TabPane tabPane = new TabPane();
         tabPane.setTabClosingPolicy(TabPane.TabClosingPolicy.UNAVAILABLE);
 
         Tab tableTab = new Tab("Table", buildTable(result));
-        Tab chartTab = new Tab("Chart", buildChartPane(result));
+        Tab chartTab = new Tab("Chart", buildChartPane(result, ghostRuns, clearHistory));
         tabPane.getTabs().addAll(tableTab, chartTab);
 
         setCenter(tabPane);
@@ -82,7 +90,9 @@ public class SimulationResultPane extends BorderPane {
         return table;
     }
 
-    private BorderPane buildChartPane(SimulationRunner.SimulationResult result) {
+    private BorderPane buildChartPane(SimulationRunner.SimulationResult result,
+                                      List<SimulationRunner.SimulationResult> ghostRuns,
+                                      Runnable clearHistory) {
         List<String> columns = result.columnNames();
         List<double[]> rows = result.rows();
 
@@ -97,7 +107,41 @@ public class SimulationResultPane extends BorderPane {
         chart.setAnimated(false);
         chart.setLegendVisible(false);
 
-        List<XYChart.Series<Number, Number>> allSeries = new ArrayList<>();
+        // --- Ghost series from previous runs ---
+        List<XYChart.Series<Number, Number>> ghostSeries = new ArrayList<>();
+        for (int g = 0; g < ghostRuns.size(); g++) {
+            SimulationRunner.SimulationResult ghost = ghostRuns.get(g);
+            List<String> ghostColumns = ghost.columnNames();
+            List<double[]> ghostRows = ghost.rows();
+            for (int c = 1; c < ghostColumns.size(); c++) {
+                XYChart.Series<Number, Number> series = new XYChart.Series<>();
+                series.setName(ghostColumns.get(c) + " (run " + (g + 1) + ")");
+                for (double[] row : ghostRows) {
+                    if (c < row.length) {
+                        series.getData().add(new XYChart.Data<>(row[0], row[c]));
+                    }
+                }
+                ghostSeries.add(series);
+            }
+        }
+
+        // Add ghost series first so they render behind current
+        chart.getData().addAll(ghostSeries);
+
+        // Style ghost series with low opacity
+        for (XYChart.Series<Number, Number> series : ghostSeries) {
+            series.nodeProperty().addListener((obs, oldNode, newNode) -> {
+                if (newNode != null) {
+                    newNode.setStyle("-fx-stroke: #888888; -fx-opacity: " + GHOST_OPACITY + ";");
+                }
+            });
+            if (series.getNode() != null) {
+                series.getNode().setStyle("-fx-stroke: #888888; -fx-opacity: " + GHOST_OPACITY + ";");
+            }
+        }
+
+        // --- Current run series ---
+        List<XYChart.Series<Number, Number>> currentSeries = new ArrayList<>();
         for (int c = 1; c < columns.size(); c++) {
             XYChart.Series<Number, Number> series = new XYChart.Series<>();
             series.setName(columns.get(c));
@@ -106,17 +150,19 @@ public class SimulationResultPane extends BorderPane {
                     series.getData().add(new XYChart.Data<>(row[0], row[c]));
                 }
             }
-            allSeries.add(series);
+            currentSeries.add(series);
         }
 
-        chart.getData().addAll(allSeries);
-        ChartUtils.applySeriesColors(allSeries);
+        chart.getData().addAll(currentSeries);
+        ChartUtils.applySeriesColors(currentSeries);
 
+        // --- Sidebar ---
         VBox sidebar = new VBox(6);
         sidebar.setPadding(new Insets(10));
 
-        for (int i = 0; i < allSeries.size(); i++) {
-            XYChart.Series<Number, Number> series = allSeries.get(i);
+        // Current run visibility toggles
+        for (int i = 0; i < currentSeries.size(); i++) {
+            XYChart.Series<Number, Number> series = currentSeries.get(i);
             String color = ChartUtils.SERIES_COLORS.get(i % ChartUtils.SERIES_COLORS.size());
 
             CheckBox cb = new CheckBox(series.getName());
@@ -133,6 +179,56 @@ public class SimulationResultPane extends BorderPane {
                 });
             });
             sidebar.getChildren().add(cb);
+        }
+
+        // Ghost controls (only if there are ghost runs)
+        if (!ghostRuns.isEmpty()) {
+            sidebar.getChildren().add(new Separator());
+
+            Label ghostLabel = new Label(ghostRuns.size() == 1
+                    ? "1 previous run"
+                    : ghostRuns.size() + " previous runs");
+            ghostLabel.setStyle("-fx-font-size: 11px; -fx-text-fill: #888;");
+            sidebar.getChildren().add(ghostLabel);
+
+            CheckBox showGhosts = new CheckBox("Show previous");
+            showGhosts.setSelected(true);
+            showGhosts.setStyle("-fx-font-size: 11px; -fx-text-fill: #888;");
+            showGhosts.selectedProperty().addListener((obs, wasSelected, isSelected) -> {
+                for (XYChart.Series<Number, Number> series : ghostSeries) {
+                    if (series.getNode() != null) {
+                        series.getNode().setVisible(isSelected);
+                    }
+                    series.getData().forEach(d -> {
+                        if (d.getNode() != null) {
+                            d.getNode().setVisible(isSelected);
+                        }
+                    });
+                }
+            });
+            sidebar.getChildren().add(showGhosts);
+
+            Button clearButton = new Button("Clear History");
+            clearButton.setStyle("-fx-font-size: 11px;");
+            clearButton.setOnAction(e -> {
+                clearHistory.run();
+                // Remove ghost series from chart
+                chart.getData().removeAll(ghostSeries);
+                ghostSeries.clear();
+                // Remove ghost controls from sidebar
+                // Find and remove everything after the separator
+                int sepIndex = -1;
+                for (int i = 0; i < sidebar.getChildren().size(); i++) {
+                    if (sidebar.getChildren().get(i) instanceof Separator) {
+                        sepIndex = i;
+                        break;
+                    }
+                }
+                if (sepIndex >= 0) {
+                    sidebar.getChildren().remove(sepIndex, sidebar.getChildren().size());
+                }
+            });
+            sidebar.getChildren().add(clearButton);
         }
 
         ScrollPane sidebarScroll = new ScrollPane(sidebar);
