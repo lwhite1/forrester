@@ -553,15 +553,13 @@ public class XmileImporter implements ModelImporter {
     }
 
     static Element getFirstChild(Element parent, String tagName) {
-        // Try namespace-aware first
-        NodeList nodes = parent.getElementsByTagNameNS(
-                XmileConstants.NAMESPACE_URI, tagName);
-        if (nodes.getLength() == 0) {
-            nodes = parent.getElementsByTagName(tagName);
-        }
-        for (int i = 0; i < nodes.getLength(); i++) {
-            if (nodes.item(i) instanceof Element elem) {
-                return elem;
+        NodeList children = parent.getChildNodes();
+        for (int i = 0; i < children.getLength(); i++) {
+            if (children.item(i) instanceof Element elem) {
+                if (tagName.equals(elem.getLocalName())
+                        || tagName.equals(elem.getTagName())) {
+                    return elem;
+                }
             }
         }
         return null;
@@ -577,16 +575,15 @@ public class XmileImporter implements ModelImporter {
 
     private static List<String> getChildTexts(Element parent, String tagName) {
         List<String> texts = new ArrayList<>();
-        NodeList nodes = parent.getElementsByTagNameNS(
-                XmileConstants.NAMESPACE_URI, tagName);
-        if (nodes.getLength() == 0) {
-            nodes = parent.getElementsByTagName(tagName);
-        }
-        for (int i = 0; i < nodes.getLength(); i++) {
-            if (nodes.item(i) instanceof Element elem) {
-                String text = elem.getTextContent().strip();
-                if (!text.isBlank()) {
-                    texts.add(text);
+        NodeList children = parent.getChildNodes();
+        for (int i = 0; i < children.getLength(); i++) {
+            if (children.item(i) instanceof Element elem) {
+                if (tagName.equals(elem.getLocalName())
+                        || tagName.equals(elem.getTagName())) {
+                    String text = elem.getTextContent().strip();
+                    if (!text.isBlank()) {
+                        texts.add(text);
+                    }
                 }
             }
         }

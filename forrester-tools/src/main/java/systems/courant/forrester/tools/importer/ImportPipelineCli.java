@@ -139,15 +139,15 @@ public class ImportPipelineCli {
         CliArgs parsed = new CliArgs();
         for (int i = 0; i < args.length; i++) {
             switch (args[i]) {
-                case "--file" -> parsed.file = args[++i];
-                case "--class-name" -> parsed.className = args[++i];
-                case "--category" -> parsed.category = args[++i];
-                case "--author" -> parsed.author = args[++i];
-                case "--source" -> parsed.source = args[++i];
-                case "--license" -> parsed.license = args[++i];
-                case "--url" -> parsed.url = args[++i];
-                case "--output-dir" -> parsed.outputDir = args[++i];
-                case "--metadata-file" -> parsed.metadataFile = args[++i];
+                case "--file" -> parsed.file = requireValue(args, i++);
+                case "--class-name" -> parsed.className = requireValue(args, i++);
+                case "--category" -> parsed.category = requireValue(args, i++);
+                case "--author" -> parsed.author = requireValue(args, i++);
+                case "--source" -> parsed.source = requireValue(args, i++);
+                case "--license" -> parsed.license = requireValue(args, i++);
+                case "--url" -> parsed.url = requireValue(args, i++);
+                case "--output-dir" -> parsed.outputDir = requireValue(args, i++);
+                case "--metadata-file" -> parsed.metadataFile = requireValue(args, i++);
                 case "--dry-run" -> parsed.dryRun = true;
                 case "--overwrite" -> parsed.overwrite = true;
                 case "--json-only" -> parsed.jsonOnly = true;
@@ -163,6 +163,16 @@ public class ImportPipelineCli {
             }
         }
         return parsed;
+    }
+
+    private static String requireValue(String[] args, int flagIndex) {
+        int valueIndex = flagIndex + 1;
+        if (valueIndex >= args.length) {
+            System.err.println("Missing value for " + args[flagIndex]);
+            printUsage();
+            System.exit(1);
+        }
+        return args[valueIndex];
     }
 
     private static void printUsage() {

@@ -80,7 +80,7 @@ Full code audit of the Forrester System Dynamics modeling platform covering all 
 | Severity | Total Found (All Time) | Open | Closed Since Last Audit |
 |----------|----------------------|------|------------------------|
 | Critical | 3 prior + 4 new = 7 | 0 | 4 (C4, C5, C6, C7) |
-| High | 10 prior + 4 new = 14 | 4 | — |
+| High | 10 prior + 4 new = 14 | 0 | 4 (H11, H12, H13, H14) |
 | Medium | 16 prior + 4 new = 20 | 12 | 8 (M1, M2, M3, M6, M9, M10, M11, M12) |
 | Low | 12 + 3 new = 15 | 14 | 1 (L3) |
 
@@ -92,47 +92,9 @@ Full code audit of the Forrester System Dynamics modeling platform covering all 
 
 ---
 
-## High Issues — 4 New, 10 Previously Fixed
+## High Issues — ALL FIXED
 
-### H1–H10: Previously fixed
-[#156](https://github.com/Courant-Systems/shrewd/issues/156),
-[#157](https://github.com/Courant-Systems/shrewd/issues/157),
-[#158](https://github.com/Courant-Systems/shrewd/issues/158),
-[#159](https://github.com/Courant-Systems/shrewd/issues/159),
-[#160](https://github.com/Courant-Systems/shrewd/issues/160),
-[#165](https://github.com/Courant-Systems/shrewd/issues/165),
-[#167](https://github.com/Courant-Systems/shrewd/issues/167),
-[#168](https://github.com/Courant-Systems/shrewd/issues/168),
-[#170](https://github.com/Courant-Systems/shrewd/issues/170),
-[#172](https://github.com/Courant-Systems/shrewd/issues/172) — all closed.
-
-### H11. ExprCompiler division-by-zero warning floods logs with no throttling *(new)*
-**File:** `forrester-engine/.../model/compile/ExprCompiler.java:99-103`
-**Issue:** [#183](https://github.com/Courant-Systems/shrewd/issues/183)
-
-DIV/MOD/SQRT/LN/POWER lambdas log warnings on every timestep. A 10,000-step simulation
-with persistent zero divisor produces 10,000 identical log lines, degrading performance.
-
-### H12. XmileImporter.getFirstChild searches entire subtree instead of direct children *(new)*
-**File:** `forrester-engine/.../io/xmile/XmileImporter.java:555-568`
-**Issue:** [#184](https://github.com/Courant-Systems/shrewd/issues/184)
-
-`getElementsByTagNameNS` searches the full DOM subtree. For XMILE files with nested models
-containing same-named elements, this can return wrong elements from deeper nesting levels.
-
-### H13. ImportPipelineCli crashes on missing flag values (AIOOBE) *(new)*
-**File:** `forrester-tools/.../ImportPipelineCli.java:142-153`
-**Issue:** [#185](https://github.com/Courant-Systems/shrewd/issues/185)
-
-`args[++i]` without bounds check for 8 value-taking flags. `BatchImportCli` handles this
-properly but `ImportPipelineCli` does not.
-
-### H14. ModelDefinitionSerializer.fromFile has no file size limit — potential OOM *(new)*
-**File:** `forrester-engine/.../io/json/ModelDefinitionSerializer.java:114`
-**Issue:** [#186](https://github.com/Courant-Systems/shrewd/issues/186)
-
-`Files.readString(path)` with no size check. Both Vensim and XMILE importers have
-`MAX_FILE_SIZE` (10 MB) but JSON deserializer does not.
+*Previously fixed: H1 (#156), H2 (#157), H3 (#158), H4 (#159), H5 (#160), H6 (#165), H7 (#167), H8 (#168), H9 (#170), H10 (#172), H11 (#183), H12 (#184), H13 (#185), H14 (#186) — all closed.*
 
 ---
 
@@ -347,7 +309,7 @@ SpotBugs: **0 bugs** (effort=Max, threshold=Medium).
 | Tests passing | 1,732 | 1,732 | — |
 | SpotBugs findings | 0 | 0 | — |
 | Open critical issues | 0 | 0 | +4 found, +4 fixed (C4–C7) |
-| Open high issues | 0 | 4 | +4 new (H11–H14) |
+| Open high issues | 0 | 0 | +4 found, +4 fixed (H11–H14) |
 | Open medium issues | 16 | 12 | +4 new, -8 closed |
 | Open low issues | 12 | 15 | +3 new |
 | Engine instruction coverage | — | 87.3% | baseline |
@@ -357,18 +319,14 @@ SpotBugs: **0 bugs** (effort=Max, threshold=Medium).
 
 ## Recommendations
 
-### Short-term (high + medium — R1 milestone)
+### Short-term (medium — R1 milestone)
 
-1. **Throttle ExprCompiler diagnostic logging** — per-timestep warning floods (#183)
-2. **Fix XmileImporter.getFirstChild** subtree search — wrong elements returned (#184)
-3. **Bounds-check ImportPipelineCli flag parsing** — AIOOBE on missing values (#185)
-4. **Add file size limit to ModelDefinitionSerializer** — OOM on large files (#186)
-5. Fix misnamed `logger.xml` → `logback.xml` and clean up boilerplate (#187)
-6. Fix `String.format` locale issues in chart rendering (#188)
-7. Validate URI scheme in `BatchImportCli.downloadToTemp` (#189)
-8. Move `UndoManager` serialization off FX thread (#190)
-9. Improve app module test coverage for non-UI logic classes (#177)
-10. Add unit tests for ModelReport (#178)
+1. Fix misnamed `logger.xml` → `logback.xml` and clean up boilerplate (#187)
+2. Fix `String.format` locale issues in chart rendering (#188)
+3. Validate URI scheme in `BatchImportCli.downloadToTemp` (#189)
+4. Move `UndoManager` serialization off FX thread (#190)
+5. Improve app module test coverage for non-UI logic classes (#177)
+6. Add unit tests for ModelReport (#178)
 
 ### Medium-term (R2)
 

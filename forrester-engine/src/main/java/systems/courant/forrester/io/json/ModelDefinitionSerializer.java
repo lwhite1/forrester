@@ -111,7 +111,14 @@ public class ModelDefinitionSerializer {
      * @throws IOException if the file cannot be read
      * @throws IllegalArgumentException if the JSON is malformed or missing required fields
      */
+    private static final long MAX_FILE_SIZE = 10 * 1024 * 1024; // 10 MB
+
     public ModelDefinition fromFile(Path path) throws IOException {
+        long size = Files.size(path);
+        if (size > MAX_FILE_SIZE) {
+            throw new IOException("JSON file exceeds "
+                    + (MAX_FILE_SIZE / (1024 * 1024)) + " MB: " + path);
+        }
         String json = Files.readString(path);
         return fromJson(json);
     }
