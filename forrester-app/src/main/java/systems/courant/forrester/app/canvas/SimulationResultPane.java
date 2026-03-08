@@ -36,6 +36,9 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.imageio.ImageIO;
 
@@ -100,7 +103,7 @@ public class SimulationResultPane extends BorderPane {
         xAxis.setLabel(columns.isEmpty() ? "Step" : columns.getFirst());
 
         NumberAxis yAxis = new NumberAxis();
-        yAxis.setLabel("Value");
+        yAxis.setLabel(resolveYAxisLabel(columns, result.units()));
 
         chart = new LineChart<>(xAxis, yAxis);
         chart.setCreateSymbols(false);
@@ -278,6 +281,25 @@ public class SimulationResultPane extends BorderPane {
                         "Failed to export CSV: " + e.getMessage()).showAndWait();
             }
         }
+    }
+
+    /**
+     * If all plotted variables share the same non-empty unit, returns "Value (unit)".
+     * Otherwise returns "Value".
+     */
+    private static String resolveYAxisLabel(List<String> columns, Map<String, String> units) {
+        if (units.isEmpty() || columns.size() <= 1) {
+            return "Value";
+        }
+        Set<String> distinctUnits = columns.stream()
+                .skip(1) // skip "Step"
+                .map(name -> units.getOrDefault(name, ""))
+                .filter(u -> !u.isEmpty())
+                .collect(Collectors.toSet());
+        if (distinctUnits.size() == 1) {
+            return "Value (" + distinctUnits.iterator().next() + ")";
+        }
+        return "Value";
     }
 
     private void saveChartAsPng() {

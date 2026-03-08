@@ -14,7 +14,9 @@ import systems.courant.forrester.model.def.SimulationSettings;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Compiles a {@link ModelDefinition}, runs a simulation with the given settings,
@@ -26,11 +28,23 @@ public class SimulationRunner {
      * Immutable result of a simulation run containing column names and row data.
      * Row arrays are defensively copied to ensure true immutability.
      */
-    public record SimulationResult(List<String> columnNames, List<double[]> rows) {
+    /**
+     * @param columnNames ordered column names (Step, stocks, variables)
+     * @param rows        time-series data, one array per step
+     * @param units       element name to unit string (empty string if no unit)
+     */
+    public record SimulationResult(List<String> columnNames, List<double[]> rows,
+                                   Map<String, String> units) {
 
         public SimulationResult {
             columnNames = List.copyOf(columnNames);
             rows = rows.stream().map(double[]::clone).toList();
+            units = Map.copyOf(units);
+        }
+
+        /** Backwards-compatible constructor for tests and callers that don't have units. */
+        public SimulationResult(List<String> columnNames, List<double[]> rows) {
+            this(columnNames, rows, Map.of());
         }
     }
 
@@ -61,7 +75,8 @@ public class SimulationRunner {
         sim.addEventHandler(handler);
         sim.execute();
 
-        return new SimulationResult(handler.getColumnNames(), handler.getRows());
+        return new SimulationResult(handler.getColumnNames(), handler.getRows(),
+                handler.getUnits());
     }
 
     /**
@@ -72,6 +87,7 @@ public class SimulationRunner {
 
         private final List<String> columnNames = new ArrayList<>();
         private final List<double[]> rows = new ArrayList<>();
+        private final Map<String, String> units = new LinkedHashMap<>();
 
         @Override
         public void handleSimulationStartEvent(SimulationStartEvent event) {
@@ -79,10 +95,14 @@ public class SimulationRunner {
             columnNames.add("Step");
             for (Stock stock : model.getStocks()) {
                 columnNames.add(stock.getName());
+                units.put(stock.getName(),
+                        stock.getUnit() != null ? stock.getUnit().getName() : "");
             }
             Collection<Variable> variables = model.getVariables();
             for (Variable variable : variables) {
                 columnNames.add(variable.getName());
+                units.put(variable.getName(),
+                        variable.getUnit() != null ? variable.getUnit().getName() : "");
             }
         }
 
@@ -112,6 +132,10 @@ public class SimulationRunner {
 
         List<double[]> getRows() {
             return rows;
+        }
+
+        Map<String, String> getUnits() {
+            return units;
         }
     }
 }
