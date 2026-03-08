@@ -52,7 +52,7 @@ public class AnalysisRunner {
                 Platform.runLater(() -> {
                     statusBar.clearProgress();
                     errorHandler.accept(errorTitle,
-                            e.getMessage() != null ? e.getMessage() : null);
+                            e.getMessage() != null ? e.getMessage() : e.toString());
                 });
             }
         });
@@ -68,7 +68,7 @@ public class AnalysisRunner {
                 Platform.runLater(() -> onSuccess.accept(result));
             } catch (Exception e) {
                 Platform.runLater(() -> errorHandler.accept(errorTitle,
-                        e.getMessage() != null ? e.getMessage() : null));
+                        e.getMessage() != null ? e.getMessage() : e.toString()));
             }
         });
     }

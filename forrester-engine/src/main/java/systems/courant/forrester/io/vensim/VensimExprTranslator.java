@@ -434,7 +434,7 @@ public final class VensimExprTranslator {
             // Match name followed by '(' (with optional whitespace)
             Pattern p = Pattern.compile("\\b(" + Pattern.quote(name) + ")\\s*\\(");
             Matcher m = p.matcher(expr);
-            if (m.find()) {
+            while (m.find()) {
                 int funcStart = m.start();
                 int argsStart = m.end();
                 int closeParen = findMatchingParen(expr, argsStart - 1);
@@ -443,6 +443,10 @@ public final class VensimExprTranslator {
                     String replacement = "LOOKUP(" + name + ", " + arg + ")";
                     expr = expr.substring(0, funcStart) + replacement
                             + expr.substring(closeParen + 1);
+                    // Re-create matcher on the modified string, starting after the replacement
+                    m = p.matcher(expr);
+                } else {
+                    break;
                 }
             }
         }

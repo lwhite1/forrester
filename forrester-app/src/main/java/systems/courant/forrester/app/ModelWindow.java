@@ -210,6 +210,13 @@ public class ModelWindow {
 
         Scene scene = new Scene(root, 1200, 800);
         stage.setScene(scene);
+        stage.setOnCloseRequest(event -> {
+            if (!fileController.confirmDiscardChanges()) {
+                event.consume();
+                return;
+            }
+            close();
+        });
 
         commandPalette = new CommandPalette(this::buildCommands);
         scene.addEventFilter(KeyEvent.KEY_PRESSED, event -> {

@@ -82,6 +82,9 @@ public final class XmileExporter {
             throws ParserConfigurationException {
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
         factory.setNamespaceAware(true);
+        factory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
+        factory.setFeature("http://xml.org/sax/features/external-general-entities", false);
+        factory.setFeature("http://xml.org/sax/features/external-parameter-entities", false);
         DocumentBuilder builder = factory.newDocumentBuilder();
         Document doc = builder.newDocument();
 
@@ -531,6 +534,8 @@ public final class XmileExporter {
 
     private static String serialize(Document doc) throws TransformerException {
         TransformerFactory tf = TransformerFactory.newInstance();
+        tf.setAttribute(javax.xml.XMLConstants.ACCESS_EXTERNAL_DTD, "");
+        tf.setAttribute(javax.xml.XMLConstants.ACCESS_EXTERNAL_STYLESHEET, "");
         Transformer transformer = tf.newTransformer();
         transformer.setOutputProperty(OutputKeys.INDENT, "yes");
         transformer.setOutputProperty(OutputKeys.ENCODING, "UTF-8");

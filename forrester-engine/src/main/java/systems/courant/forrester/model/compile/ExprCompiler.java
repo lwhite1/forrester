@@ -235,7 +235,10 @@ public class ExprCompiler {
             case "INT" -> {
                 requireArgs(name, args, 1);
                 DoubleSupplier a = compileExpr(args.get(0));
-                yield () -> (double) (long) a.getAsDouble();
+                yield () -> {
+                    double v = a.getAsDouble();
+                    return v >= 0 ? Math.floor(v) : Math.ceil(v);
+                };
             }
             case "ROUND" -> {
                 requireArgs(name, args, 1);

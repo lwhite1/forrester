@@ -317,7 +317,7 @@ final class FileController {
             loadDefinition.accept(def, name);
             currentFile = null;
             updateTitle.run();
-        } catch (Exception ex) {
+        } catch (IOException ex) {
             showError.accept("Failed to load example: " + ex.getMessage());
         }
     }

@@ -48,7 +48,8 @@ public class SimulationRunner {
         ModelDefinition defWithSettings = new ModelDefinition(
                 def.name(), def.comment(), def.moduleInterface(),
                 def.stocks(), def.flows(), def.auxiliaries(), def.constants(),
-                def.lookupTables(), def.modules(), def.subscripts(), def.views(),
+                def.lookupTables(), def.modules(), def.subscripts(),
+                def.cldVariables(), def.causalLinks(), def.views(),
                 settings
         );
 

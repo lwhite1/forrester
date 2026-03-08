@@ -8,7 +8,6 @@ import systems.courant.forrester.model.def.ConstantDef;
 import systems.courant.forrester.model.def.ElementPlacement;
 import systems.courant.forrester.model.def.ElementType;
 import systems.courant.forrester.model.def.FlowDef;
-import systems.courant.forrester.model.def.FlowRoute;
 import systems.courant.forrester.model.def.LookupTableDef;
 import systems.courant.forrester.model.def.ModelDefinition;
 import systems.courant.forrester.model.def.SimulationSettings;
@@ -313,12 +312,6 @@ public final class VensimExporter {
 
         int nextId = 1;
         Map<String, Integer> nameToId = new HashMap<>();
-
-        // Collect flow names from flow routes for type-11 classification
-        Set<String> flowRouteNames = new HashSet<>();
-        for (FlowRoute fr : view.flowRoutes()) {
-            flowRouteNames.add(fr.flowName());
-        }
 
         // Write element lines (type 10 for non-flow, type 11 for flow valves)
         for (ElementPlacement ep : view.elements()) {

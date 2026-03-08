@@ -232,8 +232,22 @@ public class BatchImportCli {
         CliArgs parsed = new CliArgs();
         for (int i = 0; i < args.length; i++) {
             switch (args[i]) {
-                case "--manifest" -> parsed.manifestFile = args[++i];
-                case "--output-dir" -> parsed.outputDir = args[++i];
+                case "--manifest" -> {
+                    if (i + 1 >= args.length) {
+                        System.err.println("--manifest requires a value");
+                        printUsage();
+                        System.exit(1);
+                    }
+                    parsed.manifestFile = args[++i];
+                }
+                case "--output-dir" -> {
+                    if (i + 1 >= args.length) {
+                        System.err.println("--output-dir requires a value");
+                        printUsage();
+                        System.exit(1);
+                    }
+                    parsed.outputDir = args[++i];
+                }
                 case "--json-only" -> parsed.jsonOnly = true;
                 case "--dry-run" -> parsed.dryRun = true;
                 case "--overwrite" -> parsed.overwrite = true;
