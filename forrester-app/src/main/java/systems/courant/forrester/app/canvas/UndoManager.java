@@ -30,7 +30,7 @@ import java.util.concurrent.Executors;
  * <p>Pushing a new undo state clears the redo stack. The undo stack
  * is capped at {@value MAX_UNDO} entries.
  */
-public class UndoManager {
+public class UndoManager implements AutoCloseable {
 
     static final int MAX_UNDO = 100;
 
@@ -206,6 +206,15 @@ public class UndoManager {
     public void clear() {
         undoStack.clear();
         redoStack.clear();
+    }
+
+    /**
+     * Shuts down the background compressor thread. Call when this manager
+     * is no longer needed (e.g., when navigating out of a module).
+     */
+    @Override
+    public void close() {
+        compressor.shutdownNow();
     }
 
     private UndoEntry compressAsync(Snapshot snapshot, String label) {
