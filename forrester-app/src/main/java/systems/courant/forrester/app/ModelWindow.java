@@ -550,7 +550,8 @@ public class ModelWindow {
             Alert about = new Alert(Alert.AlertType.INFORMATION);
             about.setTitle("About Forrester");
             about.setHeaderText("Forrester");
-            about.setContentText("A visual System Dynamics modeling environment.\nVersion 0.1");
+            about.setContentText("A visual System Dynamics modeling environment.\nVersion "
+                    + AppVersion.get());
             about.showAndWait();
         });
 
