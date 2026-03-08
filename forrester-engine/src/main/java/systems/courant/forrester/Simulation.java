@@ -13,6 +13,9 @@ import systems.courant.forrester.model.Variable;
 import systems.courant.forrester.measure.Dimension;
 import com.google.common.base.Preconditions;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -38,6 +41,19 @@ import java.util.Set;
  */
 public class Simulation {
 
+    private static final Logger log = LoggerFactory.getLogger(Simulation.class);
+
+    /**
+     * Maximum number of simulation steps allowed. Protects against unreasonable
+     * duration/timeStep combinations that would effectively hang the simulation.
+     */
+    static final long MAX_STEPS = 10_000_000L;
+
+    /**
+     * Default wall-clock timeout for a single simulation run (60 seconds).
+     */
+    private static final long DEFAULT_TIMEOUT_MS = 60_000L;
+
     private final Model model;
 
     private final Quantity duration;
@@ -45,6 +61,8 @@ public class Simulation {
     private final TimeUnit timeStep;
 
     private final LocalDateTime startTime;
+
+    private long timeoutMs = DEFAULT_TIMEOUT_MS;
 
     private int currentStep = 0;
 
@@ -86,6 +104,18 @@ public class Simulation {
         eventHandlers.remove(handler);
     }
 
+    /**
+     * Sets the wall-clock timeout for this simulation. If the simulation loop
+     * exceeds this duration, it throws {@link SimulationTimeoutException}.
+     * Set to 0 to disable the timeout.
+     *
+     * @param timeoutMs timeout in milliseconds (default 60,000)
+     */
+    public void setTimeoutMs(long timeoutMs) {
+        Preconditions.checkArgument(timeoutMs >= 0, "timeoutMs must be non-negative");
+        this.timeoutMs = timeoutMs;
+    }
+
     public void execute() {
         // Reset state so the simulation can be re-run
         currentStep = 0;
@@ -99,8 +129,35 @@ public class Simulation {
         long totalSteps = Math.round(
                 (duration.getValue() * durationInBaseUnits) / timeStep.ratioToBaseUnit());
 
+        if (totalSteps > MAX_STEPS) {
+            throw new IllegalArgumentException(
+                    "Simulation requires " + totalSteps + " steps (max " + MAX_STEPS
+                            + "). Increase the time step or reduce the duration.");
+        }
+        if (totalSteps < 0) {
+            throw new IllegalArgumentException(
+                    "Simulation step count overflowed (computed " + totalSteps
+                            + "). Check duration and time step values.");
+        }
+
+        long deadlineMs = timeoutMs > 0 ? System.currentTimeMillis() + timeoutMs : Long.MAX_VALUE;
+
         try {
             while (currentStep <= totalSteps) {
+                if (Thread.interrupted()) {
+                    log.info("Simulation cancelled at step {}/{}", currentStep, totalSteps);
+                    throw new SimulationCancelledException(
+                            "Simulation cancelled at step " + currentStep);
+                }
+
+                if (currentStep % 10_000 == 0 && System.currentTimeMillis() > deadlineMs) {
+                    log.warn("Simulation timed out after {}ms at step {}/{}",
+                            timeoutMs, currentStep, totalSteps);
+                    throw new SimulationTimeoutException(
+                            "Simulation timed out after " + (timeoutMs / 1000)
+                                    + " seconds at step " + currentStep + "/" + totalSteps);
+                }
+
                 Map<Flow, Quantity> flowMap = new IdentityHashMap<>();
 
                 fireTimeStepEvent(new TimeStepEvent(currentDateTime, model, currentStep, timeStep));

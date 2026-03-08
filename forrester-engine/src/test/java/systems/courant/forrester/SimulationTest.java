@@ -1,16 +1,23 @@
 package systems.courant.forrester;
 
 import systems.courant.forrester.measure.Quantity;
+import systems.courant.forrester.measure.TimeUnit;
 import systems.courant.forrester.model.Flow;
 import systems.courant.forrester.model.Model;
 import systems.courant.forrester.model.Module;
 import systems.courant.forrester.model.Stock;
 import systems.courant.forrester.model.Variable;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
+import static systems.courant.forrester.measure.Units.DAY;
 import static systems.courant.forrester.measure.Units.GALLON_US;
 import static systems.courant.forrester.measure.Units.MINUTE;
+import static systems.courant.forrester.measure.Units.SECOND;
 import static systems.courant.forrester.measure.Units.THING;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -145,5 +152,81 @@ public class SimulationTest {
         sim.execute();
 
         assertTrue(sim.getElapsedTime().toMinutes() > 0);
+    }
+
+    @Nested
+    @DisplayName("Safety guards")
+    class SafetyGuards {
+
+        @Test
+        void shouldRejectExcessiveStepCount() {
+            Model model = new Model("Too Many Steps");
+            // 1 billion seconds with 1-second time step = 1 billion steps > MAX_STEPS
+            Simulation sim = new Simulation(model, SECOND,
+                    new Quantity(1_000_000_000, DAY));
+
+            assertThatThrownBy(sim::execute)
+                    .isInstanceOf(IllegalArgumentException.class)
+                    .hasMessageContaining("max " + Simulation.MAX_STEPS);
+        }
+
+        @Test
+        void shouldAllowReasonableStepCount() {
+            Model model = new Model("Reasonable");
+            // 100 minutes with 1-minute step = 101 steps — well within limits
+            Simulation sim = new Simulation(model, MINUTE, MINUTE, 100);
+            sim.execute();
+
+            assertThat(sim.getCurrentStep()).isEqualTo(101);
+        }
+
+        @Test
+        void shouldRespectThreadInterruption() {
+            Model model = new Model("Cancel Test");
+            Simulation sim = new Simulation(model, MINUTE, MINUTE, 1000);
+
+            // Interrupt the current thread before execute
+            Thread.currentThread().interrupt();
+
+            assertThatThrownBy(sim::execute)
+                    .isInstanceOf(SimulationCancelledException.class)
+                    .hasMessageContaining("cancelled");
+
+            // Clear interrupted status for other tests
+            Thread.interrupted();
+        }
+
+        @Test
+        void shouldTimeoutOnLongSimulation() {
+            Model model = new Model("Timeout Test");
+            Stock stock = new Stock("S", 100, THING);
+            // Slow formula that burns CPU
+            Flow flow = Flow.create("F", MINUTE, () -> {
+                double x = 0;
+                for (int i = 0; i < 100_000; i++) {
+                    x += Math.sin(i);
+                }
+                return new Quantity(x * 0 + 1, THING);
+            });
+            stock.addOutflow(flow);
+            model.addStock(stock);
+
+            Simulation sim = new Simulation(model, MINUTE, MINUTE, 5_000_000);
+            sim.setTimeoutMs(100); // 100ms timeout
+
+            assertThatThrownBy(sim::execute)
+                    .isInstanceOf(SimulationTimeoutException.class)
+                    .hasMessageContaining("timed out");
+        }
+
+        @Test
+        void shouldAllowDisablingTimeout() {
+            Model model = new Model("No Timeout");
+            Simulation sim = new Simulation(model, MINUTE, MINUTE, 5);
+            sim.setTimeoutMs(0); // disabled
+            sim.execute();
+
+            assertThat(sim.getCurrentStep()).isEqualTo(6);
+        }
     }
 }
