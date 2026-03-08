@@ -11,6 +11,9 @@ import java.util.Map;
 /**
  * Computes a ranked sensitivity summary from sweep or Monte Carlo results,
  * identifying which parameters have the greatest impact on a target variable.
+ *
+ * <p>Impact is expressed as <em>proportion of variance explained</em> (0 to 1),
+ * so values are always bounded and sum to approximately 1.0 across all parameters.
  */
 public final class SensitivitySummary {
 
@@ -20,12 +23,12 @@ public final class SensitivitySummary {
     /**
      * A single parameter's impact on a target variable.
      *
-     * @param parameterName the parameter that was varied
+     * @param parameterName  the parameter that was varied
      * @param targetVariable the output variable being measured
-     * @param minOutput the minimum output value observed across runs
-     * @param maxOutput the maximum output value observed across runs
-     * @param baselineOutput the output value at the midpoint or mean parameter value
-     * @param impactFraction the relative impact as a fraction of the baseline (0.40 = ±40%)
+     * @param minOutput      the minimum output value observed across runs
+     * @param maxOutput      the maximum output value observed across runs
+     * @param baselineOutput the mean output value across runs
+     * @param impactFraction proportion of output variance explained by this parameter (0 to 1)
      */
     public record ParameterImpact(
             String parameterName,
@@ -37,17 +40,17 @@ public final class SensitivitySummary {
 
         @Override
         public int compareTo(ParameterImpact other) {
-            return Double.compare(Math.abs(other.impactFraction), Math.abs(this.impactFraction));
+            return Double.compare(other.impactFraction, this.impactFraction);
         }
     }
 
     /**
-     * Computes sensitivity from a single-parameter sweep by measuring the output range
-     * of the target variable across all parameter values.
+     * Computes sensitivity from a single-parameter sweep. Since only one parameter
+     * is varied, it explains 100% of the output variance by definition.
      *
-     * @param result the sweep result
+     * @param result         the sweep result
      * @param targetVariable the stock or variable name to measure
-     * @return a list with a single {@link ParameterImpact} entry
+     * @return a list with a single {@link ParameterImpact} entry (impact = 1.0)
      */
     public static List<ParameterImpact> fromSweep(SweepResult result, String targetVariable) {
         if (result.getRunCount() == 0) {
@@ -57,17 +60,18 @@ public final class SensitivitySummary {
         double[] finalValues = extractFinalValues(result.getResults(), targetVariable);
         double[] minMax = minMax(finalValues);
         double baseline = mean(finalValues);
-        double impact = computeImpactFraction(minMax[0], minMax[1], baseline);
 
         return List.of(new ParameterImpact(
-                result.getParameterName(), targetVariable, minMax[0], minMax[1], baseline, impact));
+                result.getParameterName(), targetVariable,
+                minMax[0], minMax[1], baseline, 1.0));
     }
 
     /**
-     * Computes sensitivity from a multi-parameter sweep using one-at-a-time analysis.
-     * For each parameter, holds others at their median values and measures the output range.
+     * Computes sensitivity from a multi-parameter sweep using variance decomposition.
+     * For each parameter, holds others at their median values and measures the output
+     * variance. Results are normalized so impact fractions sum to 1.0.
      *
-     * @param result the multi-sweep result
+     * @param result         the multi-sweep result
      * @param targetVariable the stock or variable name to measure
      * @return a sorted list of {@link ParameterImpact} entries, most impactful first
      */
@@ -79,7 +83,7 @@ public final class SensitivitySummary {
         List<String> paramNames = result.getParameterNames();
         List<RunResult> runs = result.getResults();
 
-        // Collect unique values for each parameter
+        // Collect unique sorted values for each parameter
         List<List<Double>> paramValueSets = new ArrayList<>();
         for (String name : paramNames) {
             List<Double> values = new ArrayList<>();
@@ -100,21 +104,19 @@ public final class SensitivitySummary {
             medians[i] = vals.get(vals.size() / 2);
         }
 
-        List<ParameterImpact> impacts = new ArrayList<>();
-
+        // For each parameter, compute variance of output when only it varies
+        double[] variances = new double[paramNames.size()];
+        double[][] paramFinalValues = new double[paramNames.size()][];
         for (int p = 0; p < paramNames.size(); p++) {
-            String paramName = paramNames.get(p);
             int paramIndex = p;
 
-            // Filter runs where all OTHER parameters are at their median
             List<RunResult> filtered = new ArrayList<>();
             for (RunResult run : runs) {
                 Map<String, Double> map = run.getParameterMap();
                 boolean othersAtMedian = true;
                 for (int j = 0; j < paramNames.size(); j++) {
                     if (j != paramIndex) {
-                        double val = map.get(paramNames.get(j));
-                        if (Double.compare(val, medians[j]) != 0) {
+                        if (Double.compare(map.get(paramNames.get(j)), medians[j]) != 0) {
                             othersAtMedian = false;
                             break;
                         }
@@ -126,14 +128,31 @@ public final class SensitivitySummary {
             }
 
             if (filtered.isEmpty()) {
+                variances[p] = 0;
+                paramFinalValues[p] = new double[0];
                 continue;
             }
 
-            double[] finalValues = extractFinalValues(filtered, targetVariable);
-            double[] minMax = minMax(finalValues);
-            double baseline = mean(finalValues);
-            double impact = computeImpactFraction(minMax[0], minMax[1], baseline);
-            impacts.add(new ParameterImpact(paramName, targetVariable, minMax[0], minMax[1], baseline, impact));
+            paramFinalValues[p] = extractFinalValues(filtered, targetVariable);
+            variances[p] = variance(paramFinalValues[p]);
+        }
+
+        // Normalize variances to sum to 1.0
+        double totalVariance = 0;
+        for (double v : variances) {
+            totalVariance += v;
+        }
+
+        List<ParameterImpact> impacts = new ArrayList<>();
+        for (int p = 0; p < paramNames.size(); p++) {
+            double fraction = totalVariance > 0 ? variances[p] / totalVariance : 0.0;
+            double[] vals = paramFinalValues[p];
+            double[] minMax = vals.length > 0 ? minMax(vals) : new double[]{0, 0};
+            double baseline = vals.length > 0 ? mean(vals) : 0;
+
+            impacts.add(new ParameterImpact(
+                    paramNames.get(p), targetVariable,
+                    minMax[0], minMax[1], baseline, fraction));
         }
 
         Collections.sort(impacts);
@@ -141,11 +160,11 @@ public final class SensitivitySummary {
     }
 
     /**
-     * Computes sensitivity from Monte Carlo results using Spearman rank correlation
-     * between each input parameter and the final value of the target variable.
-     * The absolute correlation coefficient is used as the impact fraction.
+     * Computes sensitivity from Monte Carlo results using squared Spearman rank
+     * correlation (ρ²) between each input parameter and the final value of the
+     * target variable. Results are normalized so impact fractions sum to 1.0.
      *
-     * @param result the Monte Carlo result
+     * @param result         the Monte Carlo result
      * @param targetVariable the stock or variable name to measure
      * @return a sorted list of {@link ParameterImpact} entries, most impactful first
      */
@@ -155,7 +174,6 @@ public final class SensitivitySummary {
             return Collections.emptyList();
         }
 
-        // All runs should have the same parameter names
         Map<String, Double> firstMap = runs.getFirst().getParameterMap();
         if (firstMap.isEmpty()) {
             return Collections.emptyList();
@@ -163,27 +181,35 @@ public final class SensitivitySummary {
 
         List<String> paramNames = new ArrayList<>(firstMap.keySet());
         double[] finalValues = extractFinalValues(runs, targetVariable);
+        double[] minMax = minMax(finalValues);
+        double baseline = mean(finalValues);
         int n = runs.size();
 
         SpearmansCorrelation spearman = new SpearmansCorrelation();
-        List<ParameterImpact> impacts = new ArrayList<>();
+        double[] rhoSquared = new double[paramNames.size()];
 
-        for (String paramName : paramNames) {
+        for (int p = 0; p < paramNames.size(); p++) {
             double[] paramValues = new double[n];
             for (int i = 0; i < n; i++) {
-                paramValues[i] = runs.get(i).getParameterMap().get(paramName);
+                paramValues[i] = runs.get(i).getParameterMap().get(paramNames.get(p));
             }
 
-            double correlation = spearman.correlation(paramValues, finalValues);
-            if (Double.isNaN(correlation)) {
-                correlation = 0.0;
-            }
+            double rho = spearman.correlation(paramValues, finalValues);
+            rhoSquared[p] = Double.isNaN(rho) ? 0.0 : rho * rho;
+        }
 
-            double[] minMax = minMax(finalValues);
-            double baseline = mean(finalValues);
+        // Normalize ρ² values to sum to 1.0
+        double totalRhoSq = 0;
+        for (double rs : rhoSquared) {
+            totalRhoSq += rs;
+        }
 
+        List<ParameterImpact> impacts = new ArrayList<>();
+        for (int p = 0; p < paramNames.size(); p++) {
+            double fraction = totalRhoSq > 0 ? rhoSquared[p] / totalRhoSq : 0.0;
             impacts.add(new ParameterImpact(
-                    paramName, targetVariable, minMax[0], minMax[1], baseline, correlation));
+                    paramNames.get(p), targetVariable,
+                    minMax[0], minMax[1], baseline, fraction));
         }
 
         Collections.sort(impacts);
@@ -192,13 +218,19 @@ public final class SensitivitySummary {
 
     /**
      * Generates a plain-language sensitivity summary from a ranked list of impacts.
-     *
-     * @param impacts the ranked parameter impacts
-     * @return a human-readable summary string
      */
     public static String toPlainLanguage(List<ParameterImpact> impacts) {
         if (impacts.isEmpty()) {
             return "No sensitivity data available.";
+        }
+
+        if (impacts.size() == 1) {
+            ParameterImpact only = impacts.getFirst();
+            return String.format(Locale.US, "%s varies from %s to %s across the sweep of %s.",
+                    only.targetVariable(),
+                    formatValue(only.minOutput()),
+                    formatValue(only.maxOutput()),
+                    only.parameterName());
         }
 
         ParameterImpact first = impacts.getFirst();
@@ -207,19 +239,19 @@ public final class SensitivitySummary {
                 .append(" is most sensitive to ")
                 .append(first.parameterName())
                 .append(" (")
-                .append(formatImpact(first.impactFraction()))
-                .append(")");
+                .append(formatPercent(first.impactFraction()))
+                .append(" of variance)");
 
         for (int i = 1; i < impacts.size(); i++) {
             ParameterImpact impact = impacts.get(i);
             if (i == impacts.size() - 1 && impacts.size() > 2) {
                 sb.append(", and ");
-            } else if (i > 0) {
+            } else {
                 sb.append(", followed by ");
             }
             sb.append(impact.parameterName())
                     .append(" (")
-                    .append(formatImpact(impact.impactFraction()))
+                    .append(formatPercent(impact.impactFraction()))
                     .append(")");
         }
 
@@ -253,18 +285,6 @@ public final class SensitivitySummary {
         return values;
     }
 
-    private static double computeImpactFraction(double min, double max, double meanBaseline) {
-        double range = max - min;
-        if (range == 0) {
-            return 0.0;
-        }
-        if (meanBaseline == 0) {
-            // Output crosses zero — use range relative to itself as a marker
-            return 1.0;
-        }
-        return range / (2.0 * Math.abs(meanBaseline));
-    }
-
     private static double[] minMax(double[] values) {
         double min = Double.MAX_VALUE;
         double max = -Double.MAX_VALUE;
@@ -283,13 +303,32 @@ public final class SensitivitySummary {
         return sum / values.length;
     }
 
-    private static String formatImpact(double fraction) {
-        // For Monte Carlo, fraction is a correlation coefficient (-1 to 1)
-        // For sweeps, it's a ± percentage
-        double pct = Math.abs(fraction) * 100.0;
-        if (pct >= 1.0) {
-            return String.format(Locale.US, "\u00B1%.0f%%", pct);
+    private static double variance(double[] values) {
+        double m = mean(values);
+        double sumSq = 0;
+        for (double v : values) {
+            double diff = v - m;
+            sumSq += diff * diff;
         }
-        return String.format(Locale.US, "\u00B1%.1f%%", pct);
+        return sumSq / values.length;
+    }
+
+    private static String formatPercent(double fraction) {
+        double pct = fraction * 100.0;
+        if (pct >= 1.0) {
+            return String.format(Locale.US, "%.0f%%", pct);
+        }
+        if (pct >= 0.1) {
+            return String.format(Locale.US, "%.1f%%", pct);
+        }
+        return "<0.1%";
+    }
+
+    private static String formatValue(double value) {
+        if (value == Math.floor(value) && Double.isFinite(value)
+                && Math.abs(value) <= Long.MAX_VALUE) {
+            return String.valueOf((long) value);
+        }
+        return String.format(Locale.US, "%.2f", value);
     }
 }

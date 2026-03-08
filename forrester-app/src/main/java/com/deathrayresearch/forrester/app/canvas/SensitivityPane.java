@@ -5,7 +5,6 @@ import com.deathrayresearch.forrester.sweep.SensitivitySummary.ParameterImpact;
 
 import javafx.collections.FXCollections;
 import javafx.geometry.Insets;
-import javafx.geometry.Side;
 import javafx.scene.chart.BarChart;
 import javafx.scene.chart.CategoryAxis;
 import javafx.scene.chart.NumberAxis;
@@ -82,57 +81,44 @@ public class SensitivityPane extends BorderPane {
     }
 
     private BarChart<Number, String> buildTornadoChart(List<ParameterImpact> impacts) {
-        NumberAxis xAxis = new NumberAxis();
-        xAxis.setLabel("Impact (%)");
+        NumberAxis xAxis = new NumberAxis(0, 100, 10);
+        xAxis.setLabel("Variance explained (%)");
 
         CategoryAxis yAxis = new CategoryAxis();
         yAxis.setLabel("Parameter");
 
         BarChart<Number, String> chart = new BarChart<>(xAxis, yAxis);
-        chart.setTitle("Sensitivity — Tornado Chart");
-        chart.setLegendSide(Side.BOTTOM);
+        chart.setTitle("Sensitivity — Variance Decomposition");
+        chart.setLegendVisible(false);
         chart.setAnimated(false);
         chart.setCategoryGap(4);
         chart.setBarGap(1);
 
-        XYChart.Series<Number, String> negativeSeries = new XYChart.Series<>();
-        negativeSeries.setName("Decrease");
-        XYChart.Series<Number, String> positiveSeries = new XYChart.Series<>();
-        positiveSeries.setName("Increase");
+        XYChart.Series<Number, String> series = new XYChart.Series<>();
 
         // Impacts are already sorted descending by magnitude.
         // Add in reverse so the most impactful parameter is at the top of the chart.
         List<String> categoryOrder = new ArrayList<>();
         for (int i = impacts.size() - 1; i >= 0; i--) {
             ParameterImpact impact = impacts.get(i);
-            double pct = Math.abs(impact.impactFraction()) * 100.0;
-            String label = impact.parameterName();
+            double pct = impact.impactFraction() * 100.0;
+            String label = String.format(Locale.US, "%s (%.0f%%)",
+                    impact.parameterName(), pct);
             categoryOrder.add(label);
-
-            negativeSeries.getData().add(new XYChart.Data<>(-pct, label));
-            positiveSeries.getData().add(new XYChart.Data<>(pct, label));
+            series.getData().add(new XYChart.Data<>(pct, label));
         }
 
         yAxis.setCategories(FXCollections.observableArrayList(categoryOrder));
-
-        chart.getData().add(negativeSeries);
-        chart.getData().add(positiveSeries);
-
+        chart.getData().add(series);
         chart.setPrefHeight(Math.max(200, impacts.size() * 40 + 80));
 
-        // Apply colors after rendering
-        chart.lookupAll(".default-color0.chart-bar").forEach(node ->
-                node.setStyle("-fx-bar-fill: " + NEGATIVE_COLOR + ";"));
-        chart.lookupAll(".default-color1.chart-bar").forEach(node ->
-                node.setStyle("-fx-bar-fill: " + POSITIVE_COLOR + ";"));
-
-        // Re-apply on layout to catch late CSS
-        chart.needsLayoutProperty().addListener((obs, old, val) -> {
-            chart.lookupAll(".default-color0.chart-bar").forEach(node ->
-                    node.setStyle("-fx-bar-fill: " + NEGATIVE_COLOR + ";"));
-            chart.lookupAll(".default-color1.chart-bar").forEach(node ->
-                    node.setStyle("-fx-bar-fill: " + POSITIVE_COLOR + ";"));
-        });
+        // Apply bar color after rendering
+        String barColor = "#4393c3";
+        chart.lookupAll(".chart-bar").forEach(node ->
+                node.setStyle("-fx-bar-fill: " + barColor + ";"));
+        chart.needsLayoutProperty().addListener((obs, old, val) ->
+                chart.lookupAll(".chart-bar").forEach(node ->
+                        node.setStyle("-fx-bar-fill: " + barColor + ";")));
 
         return chart;
     }

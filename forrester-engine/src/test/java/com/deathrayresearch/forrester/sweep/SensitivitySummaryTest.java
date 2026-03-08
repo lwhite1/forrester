@@ -37,8 +37,8 @@ class SensitivitySummaryTest {
         assertEquals(1, impacts.size());
         assertEquals("Contact Rate", impacts.getFirst().parameterName());
         assertEquals("Infectious", impacts.getFirst().targetVariable());
-        assertTrue(impacts.getFirst().impactFraction() > 0,
-                "Contact rate should have positive impact on Infectious");
+        assertEquals(1.0, impacts.getFirst().impactFraction(),
+                "Single-parameter sweep should always be 100%");
     }
 
     @Test
@@ -57,10 +57,21 @@ class SensitivitySummaryTest {
                 SensitivitySummary.fromMultiSweep(result, "Infectious");
 
         assertEquals(2, impacts.size());
-        // First entry should have larger impact
-        assertTrue(Math.abs(impacts.get(0).impactFraction())
-                        >= Math.abs(impacts.get(1).impactFraction()),
+
+        // Fractions should be sorted descending
+        assertTrue(impacts.get(0).impactFraction() >= impacts.get(1).impactFraction(),
                 "Impacts should be sorted by magnitude descending");
+
+        // Each fraction should be between 0 and 1
+        for (var impact : impacts) {
+            assertTrue(impact.impactFraction() >= 0 && impact.impactFraction() <= 1.0,
+                    impact.parameterName() + " fraction should be 0-1 but was "
+                            + impact.impactFraction());
+        }
+
+        // Fractions should sum to approximately 1.0
+        double sum = impacts.stream().mapToDouble(SensitivitySummary.ParameterImpact::impactFraction).sum();
+        assertEquals(1.0, sum, 0.001, "Fractions should sum to 1.0");
     }
 
     @Test
@@ -79,9 +90,30 @@ class SensitivitySummaryTest {
         String summary = SensitivitySummary.toPlainLanguage(impacts);
 
         assertFalse(summary.isEmpty());
-        assertTrue(summary.contains("Contact Rate"));
-        assertTrue(summary.contains("Infectious"));
-        assertTrue(summary.contains("\u00B1")); // ± character
+        assertTrue(summary.contains("Contact Rate"), "Should mention parameter name");
+        assertTrue(summary.contains("Infectious"), "Should mention target variable");
+    }
+
+    @Test
+    void shouldProduceMultiSweepPlainLanguage() {
+        MultiSweepResult result = MultiParameterSweep.builder()
+                .parameter("Contact Rate", new double[]{2.0, 8.0, 14.0})
+                .parameter("Recovery Rate", new double[]{0.1, 0.2, 0.3})
+                .modelFactory(params -> buildSirModelTwoParams(
+                        params.get("Contact Rate"), params.get("Recovery Rate")))
+                .timeStep(DAY)
+                .duration(weeks(8))
+                .build()
+                .execute();
+
+        List<SensitivitySummary.ParameterImpact> impacts =
+                SensitivitySummary.fromMultiSweep(result, "Infectious");
+        String summary = SensitivitySummary.toPlainLanguage(impacts);
+
+        assertTrue(summary.contains("of variance"),
+                "Multi-param summary should mention 'of variance': " + summary);
+        assertTrue(summary.contains("%"),
+                "Should contain percentage: " + summary);
     }
 
     @Test
