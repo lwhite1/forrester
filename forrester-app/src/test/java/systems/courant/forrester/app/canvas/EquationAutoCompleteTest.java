@@ -170,6 +170,120 @@ class EquationAutoCompleteTest {
     }
 
     @Nested
+    @DisplayName("detectFunctionContext")
+    class DetectFunctionContext {
+
+        @Test
+        void shouldDetectFirstParamRightAfterOpenParen() {
+            // STEP(|
+            var ctx = EquationAutoComplete.detectFunctionContext("STEP(", 5);
+            assertThat(ctx).isNotNull();
+            assertThat(ctx.functionName()).isEqualTo("STEP");
+            assertThat(ctx.paramIndex()).isEqualTo(0);
+        }
+
+        @Test
+        void shouldDetectFirstParamWhileTyping() {
+            // STEP(10|
+            var ctx = EquationAutoComplete.detectFunctionContext("STEP(10", 7);
+            assertThat(ctx).isNotNull();
+            assertThat(ctx.functionName()).isEqualTo("STEP");
+            assertThat(ctx.paramIndex()).isEqualTo(0);
+        }
+
+        @Test
+        void shouldDetectSecondParamAfterComma() {
+            // STEP(10, |
+            var ctx = EquationAutoComplete.detectFunctionContext("STEP(10, ", 9);
+            assertThat(ctx).isNotNull();
+            assertThat(ctx.functionName()).isEqualTo("STEP");
+            assertThat(ctx.paramIndex()).isEqualTo(1);
+        }
+
+        @Test
+        void shouldDetectSecondParamWhileTyping() {
+            // STEP(10, 5|
+            var ctx = EquationAutoComplete.detectFunctionContext("STEP(10, 5", 10);
+            assertThat(ctx).isNotNull();
+            assertThat(ctx.functionName()).isEqualTo("STEP");
+            assertThat(ctx.paramIndex()).isEqualTo(1);
+        }
+
+        @Test
+        void shouldHandleNestedFunctionCalls() {
+            // SMOOTH(STEP(10, 5), |
+            var ctx = EquationAutoComplete.detectFunctionContext("SMOOTH(STEP(10, 5), ", 20);
+            assertThat(ctx).isNotNull();
+            assertThat(ctx.functionName()).isEqualTo("SMOOTH");
+            assertThat(ctx.paramIndex()).isEqualTo(1);
+        }
+
+        @Test
+        void shouldDetectInnerFunctionContext() {
+            // SMOOTH(STEP(10, |), 4)
+            var ctx = EquationAutoComplete.detectFunctionContext("SMOOTH(STEP(10, ), 4)", 16);
+            assertThat(ctx).isNotNull();
+            assertThat(ctx.functionName()).isEqualTo("STEP");
+            assertThat(ctx.paramIndex()).isEqualTo(1);
+        }
+
+        @Test
+        void shouldReturnNullOutsideParens() {
+            var ctx = EquationAutoComplete.detectFunctionContext("Population * ", 13);
+            assertThat(ctx).isNull();
+        }
+
+        @Test
+        void shouldReturnNullForUnknownFunction() {
+            // FOOBAR(|
+            var ctx = EquationAutoComplete.detectFunctionContext("FOOBAR(", 7);
+            assertThat(ctx).isNull();
+        }
+
+        @Test
+        void shouldReturnNullForBareParens() {
+            // (10 + |
+            var ctx = EquationAutoComplete.detectFunctionContext("(10 + ", 6);
+            assertThat(ctx).isNull();
+        }
+
+        @Test
+        void shouldReturnNullForNullText() {
+            assertThat(EquationAutoComplete.detectFunctionContext(null, 0)).isNull();
+        }
+
+        @Test
+        void shouldReturnNullForEmptyText() {
+            assertThat(EquationAutoComplete.detectFunctionContext("", 0)).isNull();
+        }
+
+        @Test
+        void shouldHandleCaseInsensitiveFunctionName() {
+            // smooth(x, |
+            var ctx = EquationAutoComplete.detectFunctionContext("smooth(x, ", 10);
+            assertThat(ctx).isNotNull();
+            assertThat(ctx.functionName()).isEqualTo("SMOOTH");
+            assertThat(ctx.paramIndex()).isEqualTo(1);
+        }
+
+        @Test
+        void shouldHandleThreeArgFunction() {
+            // DELAY_FIXED(input, 3, |
+            var ctx = EquationAutoComplete.detectFunctionContext("DELAY_FIXED(input, 3, ", 22);
+            assertThat(ctx).isNotNull();
+            assertThat(ctx.functionName()).isEqualTo("DELAY_FIXED");
+            assertThat(ctx.paramIndex()).isEqualTo(2);
+        }
+
+        @Test
+        void shouldReturnNullAfterClosingParen() {
+            // STEP(10, 5)|
+            var ctx = EquationAutoComplete.detectFunctionContext("STEP(10, 5)", 11);
+            assertThat(ctx).isNull();
+        }
+    }
+
+    @Nested
     @DisplayName("isBuiltInFunction")
     class IsBuiltInFunction {
 

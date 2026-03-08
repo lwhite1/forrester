@@ -16,6 +16,10 @@ import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
+import javafx.scene.text.Font;
+import javafx.scene.text.FontWeight;
+import javafx.scene.text.Text;
+import javafx.scene.text.TextFlow;
 import javafx.stage.Popup;
 
 import org.slf4j.Logger;
@@ -56,6 +60,14 @@ public final class EquationAutoComplete {
     // ── Token record ────────────────────────────────────────────────────
 
     record Token(String prefix, int start, int end) { }
+
+    /**
+     * Describes the function call context at the caret position.
+     *
+     * @param functionName the uppercase name of the enclosing function
+     * @param paramIndex   the zero-based index of the parameter the caret is in
+     */
+    record FunctionCallContext(String functionName, int paramIndex) { }
 
     // ── Public API ──────────────────────────────────────────────────────
 
@@ -108,6 +120,7 @@ public final class EquationAutoComplete {
         Object obj = field.getProperties().remove(PROP_STATE);
         if (obj instanceof State state) {
             state.hidePopup();
+            state.hideHint();
             field.removeEventFilter(KeyEvent.KEY_PRESSED, state.keyFilter);
             field.textProperty().removeListener(state.textListener);
             field.caretPositionProperty().removeListener(state.caretListener);
@@ -149,6 +162,53 @@ public final class EquationAutoComplete {
             return null;
         }
         return new Token(text.substring(start, end), start, end);
+    }
+
+    // ── Function call context detection (package-private for testing) ───
+
+    /**
+     * Determines if the caret is inside a function call's parentheses.
+     * Scans backward from caret, counting parentheses depth and commas
+     * to find the enclosing function name and current parameter index.
+     *
+     * @return the function call context, or null if the caret is not inside a function call
+     */
+    static FunctionCallContext detectFunctionContext(String text, int caret) {
+        if (text == null || caret <= 0 || caret > text.length()) {
+            return null;
+        }
+
+        int depth = 0;
+        int commas = 0;
+
+        for (int i = caret - 1; i >= 0; i--) {
+            char c = text.charAt(i);
+            if (c == ')') {
+                depth++;
+            } else if (c == '(') {
+                if (depth > 0) {
+                    depth--;
+                } else {
+                    // Found the matching open paren — extract function name before it
+                    int nameEnd = i;
+                    int nameStart = i;
+                    while (nameStart > 0 && isIdentChar(text.charAt(nameStart - 1))) {
+                        nameStart--;
+                    }
+                    if (nameStart == nameEnd) {
+                        return null; // bare parentheses, no function name
+                    }
+                    String funcName = text.substring(nameStart, nameEnd).toUpperCase();
+                    if (FunctionDocRegistry.get(funcName).isPresent()) {
+                        return new FunctionCallContext(funcName, commas);
+                    }
+                    return null; // not a known function
+                }
+            } else if (c == ',' && depth == 0) {
+                commas++;
+            }
+        }
+        return null; // no enclosing open paren found
     }
 
     // ── Suggestion gathering (package-private for testing) ──────────────
@@ -335,6 +395,10 @@ public final class EquationAutoComplete {
         List<AutoCompleteSuggestion> allSuggestions;
         Token currentToken;
 
+        Popup hintPopup;
+        VBox hintContent;
+        FunctionCallContext lastHintContext;
+
         final EventHandler<KeyEvent> keyFilter;
         final ChangeListener<String> textListener;
         final ChangeListener<Number> caretListener;
@@ -351,6 +415,7 @@ public final class EquationAutoComplete {
             focusListener = (obs, wasFocused, isFocused) -> {
                 if (!isFocused) {
                     hidePopup();
+                    hideHint();
                 }
             };
         }
@@ -397,6 +462,8 @@ public final class EquationAutoComplete {
         }
 
         private void updatePopup() {
+            updateHint();
+
             Token token = extractToken(field.getText(), field.getCaretPosition());
             currentToken = token;
 
@@ -495,6 +562,115 @@ public final class EquationAutoComplete {
         void hidePopup() {
             if (popup != null && popup.isShowing()) {
                 popup.hide();
+            }
+        }
+
+        // ── Parameter hint ──────────────────────────────────────────
+
+        private void updateHint() {
+            FunctionCallContext ctx = detectFunctionContext(
+                    field.getText(), field.getCaretPosition());
+
+            if (ctx == null) {
+                hideHint();
+                lastHintContext = null;
+                return;
+            }
+
+            // Don't rebuild if context hasn't changed
+            if (ctx.equals(lastHintContext) && hintPopup != null && hintPopup.isShowing()) {
+                return;
+            }
+            lastHintContext = ctx;
+
+            Optional<FunctionDoc> docOpt = FunctionDocRegistry.get(ctx.functionName());
+            if (docOpt.isEmpty() || docOpt.get().parameters().isEmpty()) {
+                hideHint();
+                return;
+            }
+            FunctionDoc doc = docOpt.get();
+
+            ensureHintPopup();
+            hintContent.getChildren().clear();
+
+            // Signature line with current parameter bolded
+            TextFlow sigLine = buildSignatureLine(doc, ctx.paramIndex());
+            hintContent.getChildren().add(sigLine);
+
+            // Current parameter description
+            if (ctx.paramIndex() < doc.parameters().size()) {
+                FunctionDoc.ParamDoc param = doc.parameters().get(ctx.paramIndex());
+                Label descLabel = new Label(param.name() + " \u2014 " + param.description());
+                descLabel.setStyle("-fx-font-size: 11; -fx-text-fill: #555;");
+                descLabel.setWrapText(true);
+                descLabel.setMaxWidth(POPUP_WIDTH - 16);
+                hintContent.getChildren().add(descLabel);
+            }
+
+            if (!hintPopup.isShowing()) {
+                Bounds screenBounds = field.localToScreen(field.getBoundsInLocal());
+                if (screenBounds != null) {
+                    // Show above the field
+                    double hintHeight = doc.parameters().isEmpty() ? 24 : 44;
+                    hintPopup.show(field, screenBounds.getMinX(),
+                            screenBounds.getMinY() - hintHeight);
+                }
+            }
+        }
+
+        private TextFlow buildSignatureLine(FunctionDoc doc, int activeParam) {
+            TextFlow flow = new TextFlow();
+            Font normal = Font.font("System", FontWeight.NORMAL, 12);
+            Font bold = Font.font("System", FontWeight.BOLD, 12);
+
+            // Function name
+            Text nameText = new Text(doc.name() + "(");
+            nameText.setFont(normal);
+            flow.getChildren().add(nameText);
+
+            List<FunctionDoc.ParamDoc> params = doc.parameters();
+            for (int i = 0; i < params.size(); i++) {
+                if (i > 0) {
+                    Text comma = new Text(", ");
+                    comma.setFont(normal);
+                    flow.getChildren().add(comma);
+                }
+                Text paramText = new Text(params.get(i).name());
+                paramText.setFont(i == activeParam ? bold : normal);
+                if (i == activeParam) {
+                    paramText.setStyle("-fx-fill: #2563eb;");
+                }
+                flow.getChildren().add(paramText);
+            }
+
+            Text closeParen = new Text(")");
+            closeParen.setFont(normal);
+            flow.getChildren().add(closeParen);
+
+            return flow;
+        }
+
+        private void ensureHintPopup() {
+            if (hintPopup != null) {
+                return;
+            }
+            hintContent = new VBox(2);
+            hintContent.setPadding(new Insets(4, 8, 4, 8));
+            hintContent.setStyle("-fx-background-color: #fffde7; "
+                    + "-fx-border-color: #e0e0e0; -fx-border-radius: 3; "
+                    + "-fx-background-radius: 3; -fx-effect: dropshadow(gaussian, "
+                    + "rgba(0,0,0,0.15), 4, 0, 0, 1);");
+            hintContent.setMaxWidth(POPUP_WIDTH);
+
+            hintPopup = new Popup();
+            hintPopup.setAutoHide(false);
+            hintPopup.setAutoFix(true);
+            hintPopup.getContent().add(hintContent);
+        }
+
+        void hideHint() {
+            if (hintPopup != null && hintPopup.isShowing()) {
+                hintPopup.hide();
             }
         }
     }
