@@ -184,6 +184,12 @@ public class ModelWindow {
         canvas.setOverlayPane(canvasPane);
 
         propertiesPanel = new PropertiesPanel();
+        propertiesPanel.setOnOpenExpressionHelp(() -> {
+            exprLangWindow = showHelpWindow(exprLangWindow, ExpressionLanguageDialog::new);
+            if (exprLangWindow instanceof ExpressionLanguageDialog eld) {
+                eld.focusSdFunctions();
+            }
+        });
 
         // Right-side TabPane with Properties and Dashboard tabs
         rightTabPane = new TabPane();

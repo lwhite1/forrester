@@ -85,6 +85,14 @@ public class PropertiesPanel extends VBox {
     }
 
     /**
+     * Sets a callback that opens the Expression Language help dialog.
+     * Called by ModelWindow after construction.
+     */
+    public void setOnOpenExpressionHelp(Runnable callback) {
+        ctx.onOpenExpressionHelp = callback;
+    }
+
+    /**
      * Updates the panel to reflect the current selection on the canvas.
      * Called by ForresterApp whenever the canvas status changes.
      * Wrapped in updatingFields guard to prevent spurious focus-loss commits.

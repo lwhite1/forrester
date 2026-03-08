@@ -2,6 +2,7 @@ package systems.courant.forrester.app.canvas;
 
 import javafx.geometry.Pos;
 import javafx.scene.Node;
+import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
@@ -28,6 +29,7 @@ class FormContext {
     String elementName;
     boolean updatingFields;
     Runnable onFormRebuildRequested;
+    Runnable onOpenExpressionHelp;
 
     void requestFormRebuild() {
         if (onFormRebuildRequested != null) {
@@ -52,6 +54,32 @@ class FormContext {
             }
         });
         return nameField;
+    }
+
+    /**
+     * Wraps an equation TextField in an HBox with a "?" help button that opens
+     * the Expression Language dialog.
+     */
+    Node wrapWithHelpButton(TextField equationField) {
+        if (onOpenExpressionHelp == null) {
+            return equationField;
+        }
+        Button helpBtn = new Button("?");
+        helpBtn.setId("equationHelpButton");
+        helpBtn.setMinWidth(24);
+        helpBtn.setMaxWidth(24);
+        helpBtn.setMinHeight(24);
+        helpBtn.setMaxHeight(24);
+        helpBtn.setFocusTraversable(false);
+        helpBtn.setStyle("-fx-font-size: 11; -fx-padding: 0;");
+        Tooltip.install(helpBtn, new Tooltip("Open function reference"));
+        helpBtn.setOnAction(e -> onOpenExpressionHelp.run());
+
+        HBox box = new HBox(4, equationField, helpBtn);
+        box.setAlignment(Pos.CENTER_LEFT);
+        HBox.setHgrow(equationField, Priority.ALWAYS);
+        GridPane.setHgrow(box, Priority.ALWAYS);
+        return box;
     }
 
     void addFieldRow(int row, String labelText, Node field) {

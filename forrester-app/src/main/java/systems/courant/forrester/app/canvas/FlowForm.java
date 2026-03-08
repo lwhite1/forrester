@@ -48,7 +48,7 @@ class FlowForm implements ElementForm {
         equationField = ctx.createTextField(flow.equation());
         ctx.addCommitHandlers(equationField, this::commitEquation);
         EquationAutoComplete.attach(equationField, ctx.editor, ctx.elementName);
-        ctx.addFieldRow(row++, "Equation", equationField,
+        ctx.addFieldRow(row++, "Equation", ctx.wrapWithHelpButton(equationField),
                 "The rate equation determining how fast material flows.\n"
                 + "Use element names, operators (+, -, *, /), and functions.");
 

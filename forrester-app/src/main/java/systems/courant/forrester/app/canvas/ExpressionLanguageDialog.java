@@ -1,11 +1,16 @@
 package systems.courant.forrester.app.canvas;
 
+import systems.courant.forrester.model.compile.FunctionDoc;
+import systems.courant.forrester.model.compile.FunctionDocRegistry;
+
 import javafx.geometry.Insets;
+import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
+import javafx.scene.control.TitledPane;
 import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
@@ -13,28 +18,48 @@ import javafx.scene.text.Text;
 import javafx.scene.text.TextFlow;
 import javafx.stage.Stage;
 
+import java.util.List;
+
 /**
  * A help dialog explaining the Forrester expression language used in equations.
  */
 public class ExpressionLanguageDialog extends Stage {
 
+    private static final String SD_TAB_TITLE = "SD Functions";
+    private static final String MATH_TAB_TITLE = "Math Functions";
+
+    private final TabPane tabs;
+
     public ExpressionLanguageDialog() {
         setTitle("Expression Language Reference");
 
-        TabPane tabs = new TabPane();
+        tabs = new TabPane();
         tabs.setTabClosingPolicy(TabPane.TabClosingPolicy.UNAVAILABLE);
 
         tabs.getTabs().addAll(
                 createTextTab("Basics", basicsContent()),
                 createGridTab("Operators", operatorsContent()),
-                createGridTab("Math Functions", mathFunctionsContent()),
-                createTextTab("SD Functions", sdFunctionsContent()),
+                createFunctionTab(MATH_TAB_TITLE, FunctionDocRegistry.byCategory("Math")),
+                createFunctionTab(SD_TAB_TITLE, FunctionDocRegistry.byCategory("SD")),
                 createTextTab("Patterns", patternsContent()),
                 createTextTab("Grammar", grammarContent())
         );
 
         Scene scene = new Scene(tabs, 680, 560);
         setScene(scene);
+    }
+
+    /**
+     * Selects the SD Functions tab and brings the window to front.
+     */
+    public void focusSdFunctions() {
+        for (Tab tab : tabs.getTabs()) {
+            if (SD_TAB_TITLE.equals(tab.getText())) {
+                tabs.getSelectionModel().select(tab);
+                break;
+            }
+        }
+        toFront();
     }
 
     private Tab createTextTab(String title, TextFlow content) {
@@ -55,6 +80,85 @@ public class ExpressionLanguageDialog extends Stage {
         scroll.setFitToWidth(true);
 
         return new Tab(title, scroll);
+    }
+
+    private Tab createFunctionTab(String title, List<FunctionDoc> functions) {
+        VBox container = new VBox(2);
+        container.setPadding(new Insets(8));
+
+        for (FunctionDoc doc : functions) {
+            TitledPane pane = new TitledPane(doc.signature() + "  —  " + doc.oneLiner(),
+                    buildFunctionDetail(doc));
+            pane.setExpanded(false);
+            pane.setAnimated(false);
+            container.getChildren().add(pane);
+        }
+
+        ScrollPane scroll = new ScrollPane(container);
+        scroll.setFitToWidth(true);
+
+        return new Tab(title, scroll);
+    }
+
+    private Node buildFunctionDetail(FunctionDoc doc) {
+        VBox detail = new VBox(8);
+        detail.setPadding(new Insets(8, 12, 12, 12));
+
+        // Parameters section
+        if (!doc.parameters().isEmpty()) {
+            Label paramHeader = new Label("Parameters");
+            paramHeader.setStyle("-fx-font-weight: bold; -fx-font-size: 12;");
+            GridPane paramGrid = new GridPane();
+            paramGrid.setHgap(12);
+            paramGrid.setVgap(4);
+            paramGrid.setPadding(new Insets(2, 0, 0, 8));
+
+            ColumnConstraints nameCol = new ColumnConstraints();
+            nameCol.setMinWidth(120);
+            ColumnConstraints descCol = new ColumnConstraints();
+            descCol.setMinWidth(300);
+            paramGrid.getColumnConstraints().addAll(nameCol, descCol);
+
+            for (int i = 0; i < doc.parameters().size(); i++) {
+                FunctionDoc.ParamDoc p = doc.parameters().get(i);
+                Label nameLabel = new Label(p.name());
+                nameLabel.setStyle("-fx-font-family: monospace; -fx-font-weight: bold;");
+                Label descLabel = new Label(p.description());
+                descLabel.setWrapText(true);
+                paramGrid.add(nameLabel, 0, i);
+                paramGrid.add(descLabel, 1, i);
+            }
+            detail.getChildren().addAll(paramHeader, paramGrid);
+        }
+
+        // Behavior section
+        Label behaviorHeader = new Label("Behavior");
+        behaviorHeader.setStyle("-fx-font-weight: bold; -fx-font-size: 12;");
+        Label behaviorText = new Label(doc.behavior());
+        behaviorText.setWrapText(true);
+        behaviorText.setPadding(new Insets(0, 0, 0, 8));
+        detail.getChildren().addAll(behaviorHeader, behaviorText);
+
+        // Example section
+        Label exampleHeader = new Label("Example");
+        exampleHeader.setStyle("-fx-font-weight: bold; -fx-font-size: 12;");
+        Label exampleText = new Label(doc.example());
+        exampleText.setStyle("-fx-font-family: monospace;");
+        exampleText.setWrapText(true);
+        exampleText.setPadding(new Insets(0, 0, 0, 8));
+        detail.getChildren().addAll(exampleHeader, exampleText);
+
+        // Related functions section
+        if (!doc.related().isEmpty()) {
+            Label relatedHeader = new Label("Related");
+            relatedHeader.setStyle("-fx-font-weight: bold; -fx-font-size: 12;");
+            Label relatedText = new Label(String.join(", ", doc.related()));
+            relatedText.setStyle("-fx-font-family: monospace;");
+            relatedText.setPadding(new Insets(0, 0, 0, 8));
+            detail.getChildren().addAll(relatedHeader, relatedText);
+        }
+
+        return detail;
     }
 
     private TextFlow basicsContent() {
@@ -116,66 +220,6 @@ public class ExpressionLanguageDialog extends Stage {
                         "== != < <= > >=", "Comparison",
                         "and", "Logical and",
                         "or", "Logical or")
-        );
-    }
-
-    private VBox mathFunctionsContent() {
-        return new VBox(16,
-                section("Single-argument",
-                        "ABS(x)", "Absolute value",
-                        "SQRT(x)", "Square root",
-                        "EXP(x)", "e raised to the power x",
-                        "LN(x)", "Natural logarithm (base e)",
-                        "LOG(x)", "Common logarithm (base 10)",
-                        "SIN(x)", "Sine (radians)",
-                        "COS(x)", "Cosine (radians)",
-                        "TAN(x)", "Tangent (radians)",
-                        "INT(x)", "Truncate to integer (toward zero)",
-                        "ROUND(x)", "Round to nearest integer"),
-                section("Two-argument",
-                        "MIN(a, b)", "Smaller of two values",
-                        "MAX(a, b)", "Larger of two values",
-                        "MODULO(a, b)", "Remainder of a / b (0 if b is 0)",
-                        "POWER(a, b)", "a raised to the power b"),
-                section("Variable-argument",
-                        "SUM(a, b, ...)", "Sum of all arguments",
-                        "MEAN(a, b, ...)", "Arithmetic mean of all arguments")
-        );
-    }
-
-    private TextFlow sdFunctionsContent() {
-        return new TextFlow(
-                bold("SMOOTH(input, time)\n"),
-                bold("SMOOTH(input, time, initial)\n"),
-                plain("First-order exponential smoothing. If no initial value given, "
-                        + "uses first input value.\n\n"),
-                bold("DELAY3(input, delay_time)\n"),
-                bold("DELAY3(input, delay_time, initial)\n"),
-                plain("Third-order material delay with smooth S-shaped response.\n\n"),
-                bold("DELAY_FIXED(input, delay_time, initial)\n"),
-                plain("Fixed pipeline delay. Returns the input from exactly delay_time "
-                        + "steps ago.\n\n"),
-                bold("STEP(height, step_time)\n"),
-                plain("Returns 0 before step_time, then height.\n\n"),
-                bold("RAMP(slope, start_time)\n"),
-                bold("RAMP(slope, start_time, end_time)\n"),
-                plain("Returns 0 before start_time, then increases linearly at slope per step. "
-                        + "Holds constant after end_time if specified.\n\n"),
-                bold("PULSE(magnitude, start_time)\n"),
-                bold("PULSE(magnitude, start_time, interval)\n"),
-                plain("Returns magnitude for one step at start_time, then 0. "
-                        + "Repeats every interval if specified.\n\n"),
-                bold("TREND(input, averaging_time, initial_trend)\n"),
-                plain("Estimates fractional rate of change using exponential smoothing.\n\n"),
-                bold("FORECAST(input, averaging_time, horizon, initial_trend)\n"),
-                plain("Linear extrapolation: predicts where input will be after horizon steps.\n\n"),
-                bold("NPV(stream, discount_rate)\n"),
-                bold("NPV(stream, discount_rate, factor)\n"),
-                plain("Accumulates discounted present value of a payment stream.\n\n"),
-                bold("LOOKUP(table_name, input_value)\n"),
-                plain("Interpolates the named lookup table at input_value.\n\n"),
-                bold("RANDOM_NORMAL(min, max, mean, std_dev)\n"),
-                plain("Random value from a normal distribution, clamped to [min, max].")
         );
     }
 
