@@ -1,13 +1,21 @@
 package systems.courant.forrester.app.canvas;
 
+import systems.courant.forrester.model.compile.FunctionDoc;
+import systems.courant.forrester.model.compile.FunctionDocRegistry;
+
 import javafx.beans.value.ChangeListener;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Bounds;
+import javafx.geometry.Insets;
+import javafx.scene.control.Label;
+import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TextField;
-import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.VBox;
 import javafx.stage.Popup;
 
 import org.slf4j.Logger;
@@ -16,11 +24,13 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 /**
  * Attaches autocomplete behaviour to equation TextFields.
- * Suggests element names and built-in function names as the user types.
+ * Suggests element names (with type badges) and built-in function names
+ * (with signatures and descriptions) as the user types.
  *
  * <p>Usage: call {@link #attach} after creating the TextField and
  * {@link #detach} before discarding it.</p>
@@ -31,12 +41,11 @@ public final class EquationAutoComplete {
     private static final String PROP_ORIGINAL_ACTION = "EquationAutoComplete.originalAction";
 
     private static final int MAX_VISIBLE_ROWS = 8;
+    private static final double ROW_HEIGHT = 40;
+    private static final double POPUP_WIDTH = 360;
     private static final int MIN_PREFIX_LENGTH = 1;
 
-    static final List<String> BUILT_IN_FUNCTIONS = List.of(
-            "TIME", "DT", "IF", "ABS", "SQRT", "LN", "EXP",
-            "MIN", "MAX", "SUM", "MEAN", "SMOOTH", "DELAY3",
-            "STEP", "RAMP", "LOOKUP");
+    static final List<String> BUILT_IN_FUNCTIONS = FunctionDocRegistry.allNames();
 
     private static final Set<String> FUNCTION_SET = Set.copyOf(BUILT_IN_FUNCTIONS);
 
@@ -75,12 +84,12 @@ public final class EquationAutoComplete {
         field.getProperties().put(PROP_ORIGINAL_ACTION, originalAction);
         field.setOnAction(e -> {
             boolean popupShowing = state.popup != null && state.popup.isShowing();
-            String selected = (state.listView != null)
+            AutoCompleteSuggestion selected = (state.listView != null)
                     ? state.listView.getSelectionModel().getSelectedItem() : null;
             log.debug("onAction: popupShowing={}, selected={}, text={}",
-                    popupShowing, selected, field.getText());
+                    popupShowing, selected != null ? selected.name() : null, field.getText());
             if (popupShowing && selected != null) {
-                log.debug("onAction: inserting suggestion '{}'", selected);
+                log.debug("onAction: inserting suggestion '{}'", selected.name());
                 state.insertSuggestion(selected);
             } else if (originalAction != null) {
                 log.debug("onAction: delegating to original handler");
@@ -144,31 +153,47 @@ public final class EquationAutoComplete {
 
     // ── Suggestion gathering (package-private for testing) ──────────────
 
+    /**
+     * Returns plain name strings for backward-compatible tests.
+     */
     static List<String> getSuggestions(ModelEditor editor, String excludeName) {
+        return getRichSuggestions(editor, excludeName).stream()
+                .map(AutoCompleteSuggestion::name)
+                .toList();
+    }
+
+    static List<AutoCompleteSuggestion> getRichSuggestions(ModelEditor editor, String excludeName) {
         String excludeUnderscore = excludeName != null
                 ? excludeName.replace(' ', '_') : null;
 
-        List<String> elements = new ArrayList<>();
-        addNames(elements, editor.getStocks(), s -> s.name());
-        addNames(elements, editor.getFlows(), f -> f.name());
-        addNames(elements, editor.getAuxiliaries(), a -> a.name());
-        addNames(elements, editor.getConstants(), c -> c.name());
-        addNames(elements, editor.getLookupTables(), l -> l.name());
-        addNames(elements, editor.getModules(), m -> m.instanceName());
+        List<AutoCompleteSuggestion> result = new ArrayList<>();
 
-        elements.replaceAll(name -> name.replace(' ', '_'));
-        if (excludeUnderscore != null) {
-            elements.remove(excludeUnderscore);
+        addElementSuggestions(result, editor.getStocks(), s -> s.name(),
+                AutoCompleteSuggestion.Kind.STOCK, excludeUnderscore);
+        addElementSuggestions(result, editor.getFlows(), f -> f.name(),
+                AutoCompleteSuggestion.Kind.FLOW, excludeUnderscore);
+        addElementSuggestions(result, editor.getAuxiliaries(), a -> a.name(),
+                AutoCompleteSuggestion.Kind.AUX, excludeUnderscore);
+        addElementSuggestions(result, editor.getConstants(), c -> c.name(),
+                AutoCompleteSuggestion.Kind.CONSTANT, excludeUnderscore);
+        addElementSuggestions(result, editor.getLookupTables(), l -> l.name(),
+                AutoCompleteSuggestion.Kind.LOOKUP, excludeUnderscore);
+        addElementSuggestions(result, editor.getModules(), m -> m.instanceName(),
+                AutoCompleteSuggestion.Kind.MODULE, excludeUnderscore);
+
+        result.sort(Comparator.comparing(AutoCompleteSuggestion::name));
+
+        // Add functions after elements
+        for (String funcName : BUILT_IN_FUNCTIONS) {
+            Optional<FunctionDoc> doc = FunctionDocRegistry.get(funcName);
+            String displayName = doc.map(FunctionDoc::signature).orElse(funcName);
+            String description = doc.map(FunctionDoc::oneLiner).orElse("");
+            result.add(new AutoCompleteSuggestion(
+                    funcName, displayName, description,
+                    AutoCompleteSuggestion.Kind.FUNCTION, true));
         }
-        elements.sort(Comparator.naturalOrder());
 
-        List<String> functions = new ArrayList<>(BUILT_IN_FUNCTIONS);
-        functions.sort(Comparator.naturalOrder());
-
-        List<String> all = new ArrayList<>(elements.size() + functions.size());
-        all.addAll(elements);
-        all.addAll(functions);
-        return all;
+        return result;
     }
 
     // ── Filtering (package-private for testing) ─────────────────────────
@@ -187,21 +212,115 @@ public final class EquationAutoComplete {
         return result;
     }
 
+    static List<AutoCompleteSuggestion> filterRichSuggestions(
+            List<AutoCompleteSuggestion> all, String prefix) {
+        if (prefix == null || prefix.isEmpty()) {
+            return List.of();
+        }
+        String lower = prefix.toLowerCase();
+        List<AutoCompleteSuggestion> result = new ArrayList<>();
+        for (AutoCompleteSuggestion s : all) {
+            if (s.name().toLowerCase().startsWith(lower)) {
+                result.add(s);
+            }
+        }
+        return result;
+    }
+
     // ── Helpers ─────────────────────────────────────────────────────────
 
     private static boolean isIdentChar(char c) {
         return Character.isLetterOrDigit(c) || c == '_';
     }
 
-    private static <T> void addNames(List<String> dest, List<T> items,
-                                     java.util.function.Function<T, String> nameExtractor) {
+    private static <T> void addElementSuggestions(
+            List<AutoCompleteSuggestion> dest, List<T> items,
+            java.util.function.Function<T, String> nameExtractor,
+            AutoCompleteSuggestion.Kind kind, String excludeUnderscore) {
         for (T item : items) {
-            dest.add(nameExtractor.apply(item));
+            String name = nameExtractor.apply(item).replace(' ', '_');
+            if (name.equals(excludeUnderscore)) {
+                continue;
+            }
+            String kindLabel = switch (kind) {
+                case STOCK -> "Stock";
+                case FLOW -> "Flow";
+                case AUX -> "Auxiliary";
+                case CONSTANT -> "Constant";
+                case LOOKUP -> "Lookup Table";
+                case MODULE -> "Module";
+                case FUNCTION -> "Function";
+            };
+            dest.add(new AutoCompleteSuggestion(name, name, kindLabel, kind, false));
         }
     }
 
     static boolean isBuiltInFunction(String name) {
         return FUNCTION_SET.contains(name);
+    }
+
+    // ── Custom cell for rich rendering ──────────────────────────────────
+
+    private static class SuggestionCell extends ListCell<AutoCompleteSuggestion> {
+
+        private final HBox root = new HBox(6);
+        private final Label badge = new Label();
+        private final VBox textBox = new VBox(1);
+        private final Label primaryLabel = new Label();
+        private final Label secondaryLabel = new Label();
+
+        SuggestionCell() {
+            root.setPadding(new Insets(2, 6, 2, 6));
+
+            badge.setMinWidth(22);
+            badge.setMaxWidth(22);
+            badge.setStyle("-fx-font-size: 10; -fx-font-weight: bold; "
+                    + "-fx-alignment: center; -fx-text-fill: #666;");
+
+            primaryLabel.setStyle("-fx-font-size: 12; -fx-font-weight: bold;");
+            primaryLabel.setMaxWidth(Double.MAX_VALUE);
+            HBox.setHgrow(textBox, Priority.ALWAYS);
+
+            secondaryLabel.setStyle("-fx-font-size: 10; -fx-text-fill: #888;");
+            secondaryLabel.setMaxWidth(Double.MAX_VALUE);
+
+            textBox.getChildren().addAll(primaryLabel, secondaryLabel);
+            root.getChildren().addAll(badge, textBox);
+        }
+
+        @Override
+        protected void updateItem(AutoCompleteSuggestion item, boolean empty) {
+            super.updateItem(item, empty);
+            if (empty || item == null) {
+                setGraphic(null);
+                setText(null);
+                return;
+            }
+
+            badge.setText(item.kind().badge());
+            badge.setStyle(badgeStyle(item.kind()));
+            primaryLabel.setText(item.displayName());
+            secondaryLabel.setText(item.description());
+            secondaryLabel.setVisible(!item.description().isEmpty());
+            secondaryLabel.setManaged(!item.description().isEmpty());
+
+            setGraphic(root);
+            setText(null);
+        }
+
+        private static String badgeStyle(AutoCompleteSuggestion.Kind kind) {
+            String color = switch (kind) {
+                case STOCK -> "#2563eb";
+                case FLOW -> "#dc2626";
+                case AUX -> "#059669";
+                case CONSTANT -> "#7c3aed";
+                case LOOKUP -> "#d97706";
+                case MODULE -> "#0891b2";
+                case FUNCTION -> "#6b7280";
+            };
+            return "-fx-font-size: 10; -fx-font-weight: bold; "
+                    + "-fx-alignment: center; -fx-text-fill: " + color + ";";
+        }
     }
 
     // ── Inner state per attachment ──────────────────────────────────────
@@ -212,8 +331,8 @@ public final class EquationAutoComplete {
         final String excludeName;
 
         Popup popup;
-        ListView<String> listView;
-        List<String> allSuggestions;
+        ListView<AutoCompleteSuggestion> listView;
+        List<AutoCompleteSuggestion> allSuggestions;
         Token currentToken;
 
         final EventHandler<KeyEvent> keyFilter;
@@ -287,10 +406,11 @@ public final class EquationAutoComplete {
             }
 
             if (allSuggestions == null) {
-                allSuggestions = getSuggestions(editor, excludeName);
+                allSuggestions = getRichSuggestions(editor, excludeName);
             }
 
-            List<String> filtered = filterSuggestions(allSuggestions, token.prefix());
+            List<AutoCompleteSuggestion> filtered = filterRichSuggestions(
+                    allSuggestions, token.prefix());
             if (filtered.isEmpty()) {
                 hidePopup();
                 return;
@@ -301,7 +421,8 @@ public final class EquationAutoComplete {
             listView.getSelectionModel().selectFirst();
             log.debug("updatePopup: {} suggestions for prefix '{}', first={}",
                     filtered.size(), token.prefix(),
-                    listView.getSelectionModel().getSelectedItem());
+                    listView.getSelectionModel().getSelectedItem() != null
+                            ? listView.getSelectionModel().getSelectedItem().name() : null);
 
             if (!popup.isShowing()) {
                 Bounds screenBounds = field.localToScreen(field.getBoundsInLocal());
@@ -317,8 +438,10 @@ public final class EquationAutoComplete {
                 return;
             }
             listView = new ListView<>();
-            listView.setPrefHeight(MAX_VISIBLE_ROWS * 24 + 2);
-            listView.setPrefWidth(field.getWidth());
+            listView.setCellFactory(lv -> new SuggestionCell());
+            listView.setFixedCellSize(ROW_HEIGHT);
+            listView.setPrefHeight(MAX_VISIBLE_ROWS * ROW_HEIGHT + 2);
+            listView.setPrefWidth(POPUP_WIDTH);
             listView.setFocusTraversable(false);
             listView.setOnMouseClicked(event -> {
                 if (event.getClickCount() == 1
@@ -330,9 +453,10 @@ public final class EquationAutoComplete {
             listView.setOnKeyPressed(event -> {
                 switch (event.getCode()) {
                     case ENTER -> {
-                        String selected = listView.getSelectionModel().getSelectedItem();
+                        AutoCompleteSuggestion selected =
+                                listView.getSelectionModel().getSelectedItem();
                         if (selected != null) {
-                            log.debug("listView keyHandler: ENTER selected={}", selected);
+                            log.debug("listView keyHandler: ENTER selected={}", selected.name());
                             insertSuggestion(selected);
                         }
                         event.consume();
@@ -351,13 +475,13 @@ public final class EquationAutoComplete {
             popup.getContent().add(listView);
         }
 
-        private void insertSuggestion(String suggestion) {
+        private void insertSuggestion(AutoCompleteSuggestion suggestion) {
             if (currentToken == null) {
                 return;
             }
             String text = field.getText();
-            String insertion = isBuiltInFunction(suggestion)
-                    ? suggestion + "(" : suggestion;
+            String insertion = suggestion.isFunction()
+                    ? suggestion.name() + "(" : suggestion.name();
             String newText = text.substring(0, currentToken.start())
                     + insertion
                     + text.substring(currentToken.end());
