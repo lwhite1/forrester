@@ -1,0 +1,690 @@
+{
+  "name" : "Deradicalization",
+  "stocks" : [ {
+    "name" : "extremists",
+    "comment" : "extremists",
+    "initialValue" : 0.0,
+    "unit" : "citizens"
+  }, {
+    "name" : "convinced_citizens",
+    "comment" : "convinced citizens",
+    "initialValue" : 100000.0,
+    "unit" : "citizens"
+  }, {
+    "name" : "activists",
+    "comment" : "activists",
+    "initialValue" : 1000.0,
+    "unit" : "citizens"
+  }, {
+    "name" : "unconvinced_citizens",
+    "comment" : "unconvinced citizens",
+    "initialValue" : 1.29E7,
+    "unit" : "citizens"
+  }, {
+    "name" : "animal_distress",
+    "comment" : "animal distress",
+    "initialValue" : 100.0,
+    "unit" : "Dmnl"
+  } ],
+  "flows" : [ {
+    "name" : "extremists_net_flow",
+    "comment" : "Net flow for extremists",
+    "equation" : "activists_2_extremists",
+    "timeUnit" : "Year",
+    "sink" : "extremists"
+  }, {
+    "name" : "convinced_citizens_net_flow",
+    "comment" : "Net flow for convinced citizens",
+    "equation" : "persuasion-convinced_2_activist",
+    "timeUnit" : "Year",
+    "sink" : "convinced_citizens"
+  }, {
+    "name" : "activists_net_flow",
+    "comment" : "Net flow for activists",
+    "equation" : "convinced_2_activist-activists_2_extremists",
+    "timeUnit" : "Year",
+    "sink" : "activists"
+  }, {
+    "name" : "unconvinced_citizens_net_flow",
+    "comment" : "Net flow for unconvinced citizens",
+    "equation" : "-persuasion",
+    "timeUnit" : "Year",
+    "sink" : "unconvinced_citizens"
+  }, {
+    "name" : "animal_distress_net_flow",
+    "comment" : "Net flow for animal distress",
+    "equation" : "net_increase_of_animal_distress",
+    "timeUnit" : "Year",
+    "sink" : "animal_distress"
+  } ],
+  "auxiliaries" : [ {
+    "name" : "visibility_of_the_problem",
+    "comment" : "visibility of the problem",
+    "equation" : "problem_symptoms*radical_action_level*commitment_of_radical_individuals_to_radical_action",
+    "unit" : "Dmnl"
+  }, {
+    "name" : "frustration_of_convinced_citizens",
+    "comment" : "OLD: min(MAX(frustration due to marginalization*frustration due to  inertia*average degree of conviction of convinced citizens*percived  magnitude of the problem,0),1)",
+    "equation" : "min(MAX((frustration_due_to_marginalization+frustration_due_to_inertia)*perceived_animal_distress ,0),1)",
+    "unit" : "Dmnl"
+  }, {
+    "name" : "nonradical_action_level",
+    "comment" : "OLD: (1-frustration of convinced citizens)*\"total readiness to take  non-radical action\"*(homegrown activists+convinced citizens)/total  population",
+    "equation" : "frustration_of_convinced_citizens",
+    "unit" : "Dmnl"
+  }, {
+    "name" : "fraction_of_convinced_citizens",
+    "comment" : "fraction of convinced citizens",
+    "equation" : "(convinced_citizens+activists+extremists)/(convinced_citizens+activists+extremists+unconvinced_citizens +citizens_that_cannot_be_convinced)",
+    "unit" : "Dmnl"
+  }, {
+    "name" : "radical_action_level",
+    "comment" : "EXPRESSED IN TOTALLY FRUSTRATED CITIZENS TAKING RADICAL ACTION",
+    "equation" : "frustration_of_convinced_citizens*extremists*fraction_of_convinced_citizens",
+    "unit" : "citizens"
+  }, {
+    "name" : "activists_2_extremists",
+    "comment" : "activists 2 extremists",
+    "equation" : "(potential_number_of_extremists-extremists)/average_time_to_change_states",
+    "unit" : "citizens/Year"
+  }, {
+    "name" : "persuasion",
+    "comment" : "min(dedicated contact rate of convinced citizens*fraction of convinced  citizens*unconvinced citizens*\"persuasiveness of non-radical actions\"  *visibility of the problem/\"strength of incompatible  self-interest\"/average time to change states,unconvinced citizens/average  time to change states)",
+    "equation" : "min(contact_rate_of_convinced_citizens*fraction_of_convinced_citizens*unconvinced_citizens *persuasiveness_of_nonradical_actions *visibility_of_the_problem/strength_of_incompatible_selfinterest /average_time_to_change_states,unconvinced_citizens/average_time_to_change_states)",
+    "unit" : "citizens/Year"
+  }, {
+    "name" : "convinced_2_activist",
+    "comment" : "convinced 2 activist",
+    "equation" : "(potential_number_of_activitsts-activists)/average_time_to_change_states",
+    "unit" : "citizens/Year"
+  }, {
+    "name" : "contact_rate_of_convinced_citizens",
+    "comment" : "DIFFERENT FORMULATION",
+    "equation" : "min(normal_contact_rate_of_convinced_citizens*nonradical_action_level,3650)",
+    "unit" : "contacts/(citizen)"
+  }, {
+    "name" : "potential_number_of_extremists",
+    "comment" : "potential number of extremists",
+    "equation" : "potential_fraction_of_extremists*activists*frustration_of_convinced_citizens*frustration_due_to_marginalization",
+    "unit" : "citizens"
+  }, {
+    "name" : "potential_number_of_activitsts",
+    "comment" : "potential number of activitsts",
+    "equation" : "potential_fraction_of_activists*convinced_citizens*frustration_of_convinced_citizens",
+    "unit" : "citizens"
+  }, {
+    "name" : "frustration_due_to_inertia",
+    "comment" : "frustration due to inertia",
+    "equation" : "DELAY_FIXED( (maximum_attainable_rate_of_decrease_through_societal_change-rate_of_decrease_through_societal_change )/maximum_attainable_rate_of_decrease_through_societal_change, 1, (maximum_attainable_rate_of_decrease_through_societal_change -rate_of_decrease_through_societal_change)/maximum_attainable_rate_of_decrease_through_societal_change )",
+    "unit" : "Dmnl"
+  }, {
+    "name" : "frustration_due_to_marginalization",
+    "comment" : "frustration due to marginalization",
+    "equation" : "LOOKUP(frustration_due_to_marginalization_lookup, fraction_of_convinced_citizens)",
+    "unit" : "Dmnl"
+  }, {
+    "name" : "net_increase_of_animal_distress",
+    "comment" : "net increase of animal distress",
+    "equation" : "animal_distress*(exogenous_rate_of_increase_of_animal_distress-rate_of_decrease_through_societal_change )",
+    "unit" : "1/Year"
+  }, {
+    "name" : "perceived_animal_distress",
+    "comment" : "perceived animal distress",
+    "equation" : "SMOOTH( animal_distress/societal_acceptation_threshold_with_regard_to_animal_distress ,1)",
+    "unit" : "Dmnl"
+  }, {
+    "name" : "problem_symptoms",
+    "comment" : "problem symptoms",
+    "equation" : "MAX(animal_distress-societal_acceptation_threshold_with_regard_to_animal_distress,0) /societal_acceptation_threshold_with_regard_to_animal_distress",
+    "unit" : "Dmnl"
+  }, {
+    "name" : "societal_acceptation_threshold_with_regard_to_animal_distress",
+    "comment" : "60",
+    "equation" : "LOOKUP(societal_acceptation_threshold_with_regard_to_animal_distress_lookup, TIME)",
+    "unit" : "Dmnl"
+  }, {
+    "name" : "rate_of_decrease_through_societal_change",
+    "comment" : "rate of decrease through societal change",
+    "equation" : "fraction_of_convinced_citizens*maximum_attainable_rate_of_decrease_through_societal_change",
+    "unit" : "1/Year"
+  } ],
+  "constants" : [ {
+    "name" : "TIME_STEP",
+    "value" : 0.125,
+    "unit" : "Year"
+  }, {
+    "name" : "INITIAL_TIME",
+    "value" : 1980.0,
+    "unit" : "Year"
+  }, {
+    "name" : "FINAL_TIME",
+    "value" : 2080.0,
+    "unit" : "Year"
+  }, {
+    "name" : "commitment_of_radical_individuals_to_radical_action",
+    "comment" : "commitment of radical individuals to radical action",
+    "value" : 1.0,
+    "unit" : "1/citizens"
+  }, {
+    "name" : "potential_fraction_of_extremists",
+    "comment" : "potential fraction of extremists",
+    "value" : 0.1,
+    "unit" : "Dmnl"
+  }, {
+    "name" : "average_time_to_change_states",
+    "comment" : "average time to change states",
+    "value" : 10.0,
+    "unit" : "Year"
+  }, {
+    "name" : "ini_extremists",
+    "comment" : "ini extremists",
+    "value" : 0.0,
+    "unit" : "citizens"
+  }, {
+    "name" : "ini_activists",
+    "comment" : "ini activists",
+    "value" : 1000.0,
+    "unit" : "citizens"
+  }, {
+    "name" : "potential_fraction_of_activists",
+    "comment" : "potential fraction of activists",
+    "value" : 0.1,
+    "unit" : "Dmnl"
+  }, {
+    "name" : "persuasiveness_of_nonradical_actions",
+    "comment" : "OLD: \"non-radical action level\"*normal persuasiveness",
+    "value" : 0.01,
+    "unit" : "citizens/contacts"
+  }, {
+    "name" : "citizens_that_cannot_be_convinced",
+    "comment" : "citizens that cannot be convinced",
+    "value" : 3000000.0,
+    "unit" : "citizens"
+  }, {
+    "name" : "ini_convinced",
+    "comment" : "ini convinced",
+    "value" : 100000.0,
+    "unit" : "citizens"
+  }, {
+    "name" : "ini_unconvinced",
+    "comment" : "ini unconvinced",
+    "value" : 1.29E7,
+    "unit" : "citizens"
+  }, {
+    "name" : "initial_value_of_underlying_phenomenon",
+    "comment" : "initial value of underlying phenomenon",
+    "value" : 100.0,
+    "unit" : "Dmnl"
+  }, {
+    "name" : "exogenous_rate_of_increase_of_animal_distress",
+    "comment" : "exogenous rate of increase of animal distress",
+    "value" : 0.0,
+    "unit" : "1/Year"
+  }, {
+    "name" : "maximum_attainable_rate_of_decrease_through_societal_change",
+    "comment" : "maximum attainable rate of decrease through societal change",
+    "value" : 0.05,
+    "unit" : "1/Year"
+  }, {
+    "name" : "normal_contact_rate_of_convinced_citizens",
+    "comment" : "normal contact rate of convinced citizens",
+    "value" : 1000.0,
+    "unit" : "contacts/citizen"
+  }, {
+    "name" : "strength_of_incompatible_selfinterest",
+    "comment" : "\"strength of incompatible self-interest\"",
+    "value" : 10.0,
+    "unit" : "Dmnl"
+  } ],
+  "lookupTables" : [ {
+    "name" : "frustration_due_to_marginalization_lookup",
+    "xValues" : [ 0.0, 0.025, 0.103976, 0.25, 0.5, 1.0 ],
+    "yValues" : [ 1.0, 0.5, 0.20614, 0.04, 0.0, 0.0 ],
+    "interpolation" : "LINEAR"
+  }, {
+    "name" : "societal_acceptation_threshold_with_regard_to_animal_distress_lookup",
+    "xValues" : [ 1980.0, 2020.0, 2080.0 ],
+    "yValues" : [ 100.0, 50.0, 20.0 ],
+    "interpolation" : "LINEAR"
+  } ],
+  "views" : [ {
+    "name" : "View 1",
+    "elements" : [ {
+      "name" : "animal_distress",
+      "type" : "stock",
+      "x" : 625.0,
+      "y" : 290.0
+    }, {
+      "name" : "_48",
+      "type" : "flow",
+      "x" : 771.0,
+      "y" : 292.0
+    }, {
+      "name" : "net_increase_of_animal_distress",
+      "type" : "aux",
+      "x" : 771.0,
+      "y" : 319.0
+    }, {
+      "name" : "societal_acceptation_threshold_with_regard_to_animal_distress",
+      "type" : "aux",
+      "x" : 617.0,
+      "y" : 178.0
+    }, {
+      "name" : "problem_symptoms",
+      "type" : "aux",
+      "x" : 964.0,
+      "y" : 173.0
+    }, {
+      "name" : "perceived_animal_distress",
+      "type" : "aux",
+      "x" : 483.0,
+      "y" : 517.0
+    }, {
+      "name" : "frustration_of_convinced_citizens",
+      "type" : "aux",
+      "x" : 843.0,
+      "y" : 881.0
+    }, {
+      "name" : "frustration_due_to_marginalization",
+      "type" : "aux",
+      "x" : 824.0,
+      "y" : 603.0
+    }, {
+      "name" : "frustration_due_to_inertia",
+      "type" : "aux",
+      "x" : 693.0,
+      "y" : 626.0
+    }, {
+      "name" : "convinced_citizens",
+      "type" : "stock",
+      "x" : 1351.0,
+      "y" : 403.0
+    }, {
+      "name" : "unconvinced_citizens",
+      "type" : "stock",
+      "x" : 1551.0,
+      "y" : 405.0
+    }, {
+      "name" : "_428",
+      "type" : "flow",
+      "x" : 1451.0,
+      "y" : 404.0
+    }, {
+      "name" : "persuasion",
+      "type" : "aux",
+      "x" : 1451.0,
+      "y" : 423.0
+    }, {
+      "name" : "citizens_that_cannot_be_convinced",
+      "type" : "aux",
+      "x" : 1655.0,
+      "y" : 401.0
+    }, {
+      "name" : "initial_value_of_underlying_phenomenon",
+      "type" : "aux",
+      "x" : 627.0,
+      "y" : 241.0
+    }, {
+      "name" : "ini_convinced",
+      "type" : "aux",
+      "x" : 1337.0,
+      "y" : 441.0
+    }, {
+      "name" : "ini_unconvinced",
+      "type" : "aux",
+      "x" : 1551.0,
+      "y" : 443.0
+    }, {
+      "name" : "fraction_of_convinced_citizens",
+      "type" : "aux",
+      "x" : 1054.0,
+      "y" : 231.0
+    }, {
+      "name" : "contact_rate_of_convinced_citizens",
+      "type" : "aux",
+      "x" : 1497.0,
+      "y" : 621.0
+    }, {
+      "name" : "persuasiveness_of_nonradical_actions",
+      "type" : "aux",
+      "x" : 1581.0,
+      "y" : 553.0
+    }, {
+      "name" : "strength_of_incompatible_selfinterest",
+      "type" : "aux",
+      "x" : 1369.0,
+      "y" : 598.0
+    }, {
+      "name" : "rate_of_decrease_through_societal_change",
+      "type" : "aux",
+      "x" : 775.0,
+      "y" : 413.0
+    }, {
+      "name" : "maximum_attainable_rate_of_decrease_through_societal_change",
+      "type" : "aux",
+      "x" : 600.0,
+      "y" : 490.0
+    }, {
+      "name" : "exogenous_rate_of_increase_of_animal_distress",
+      "type" : "aux",
+      "x" : 878.0,
+      "y" : 234.0
+    }, {
+      "name" : "normal_contact_rate_of_convinced_citizens",
+      "type" : "aux",
+      "x" : 1500.0,
+      "y" : 724.0
+    }, {
+      "name" : "radical_action_level",
+      "type" : "aux",
+      "x" : 1746.0,
+      "y" : 546.0
+    }, {
+      "name" : "nonradical_action_level",
+      "type" : "aux",
+      "x" : 1336.0,
+      "y" : 727.0
+    }, {
+      "name" : "visibility_of_the_problem",
+      "type" : "aux",
+      "x" : 1450.0,
+      "y" : 214.0
+    }, {
+      "name" : "activists",
+      "type" : "stock",
+      "x" : 1168.0,
+      "y" : 401.0
+    }, {
+      "name" : "extremists",
+      "type" : "stock",
+      "x" : 1011.0,
+      "y" : 399.0
+    }, {
+      "name" : "_140",
+      "type" : "flow",
+      "x" : 1260.0,
+      "y" : 399.0
+    }, {
+      "name" : "convinced_2_activist",
+      "type" : "aux",
+      "x" : 1260.0,
+      "y" : 426.0
+    }, {
+      "name" : "_588",
+      "type" : "flow",
+      "x" : 1089.0,
+      "y" : 400.0
+    }, {
+      "name" : "activists_2_extremists",
+      "type" : "aux",
+      "x" : 1089.0,
+      "y" : 427.0
+    }, {
+      "name" : "ini_activists",
+      "type" : "aux",
+      "x" : 1164.0,
+      "y" : 441.0
+    }, {
+      "name" : "ini_extremists",
+      "type" : "aux",
+      "x" : 1002.0,
+      "y" : 441.0
+    }, {
+      "name" : "average_time_to_change_states",
+      "type" : "aux",
+      "x" : 1612.0,
+      "y" : 504.0
+    }, {
+      "name" : "potential_fraction_of_activists",
+      "type" : "aux",
+      "x" : 1275.0,
+      "y" : 657.0
+    }, {
+      "name" : "potential_fraction_of_extremists",
+      "type" : "aux",
+      "x" : 1099.0,
+      "y" : 668.0
+    }, {
+      "name" : "potential_number_of_activitsts",
+      "type" : "aux",
+      "x" : 1269.0,
+      "y" : 575.0
+    }, {
+      "name" : "potential_number_of_extremists",
+      "type" : "aux",
+      "x" : 1098.0,
+      "y" : 575.0
+    }, {
+      "name" : "extremists",
+      "type" : "stock",
+      "x" : 1721.0,
+      "y" : 740.0
+    }, {
+      "name" : "Time",
+      "type" : "aux",
+      "x" : 513.0,
+      "y" : 226.0
+    }, {
+      "name" : "fraction_of_convinced_citizens",
+      "type" : "aux",
+      "x" : 1642.0,
+      "y" : 785.0
+    }, {
+      "name" : "commitment_of_radical_individuals_to_radical_action",
+      "type" : "aux",
+      "x" : 1631.0,
+      "y" : 208.0
+    } ],
+    "connectors" : [ {
+      "from" : "5",
+      "to" : "animal_distress"
+    }, {
+      "from" : "5",
+      "to" : "2"
+    }, {
+      "from" : "societal_acceptation_threshold_with_regard_to_animal_distress",
+      "to" : "problem_symptoms"
+    }, {
+      "from" : "animal_distress",
+      "to" : "problem_symptoms"
+    }, {
+      "from" : "societal_acceptation_threshold_with_regard_to_animal_distress",
+      "to" : "perceived_animal_distress"
+    }, {
+      "from" : "animal_distress",
+      "to" : "perceived_animal_distress"
+    }, {
+      "from" : "perceived_animal_distress",
+      "to" : "frustration_of_convinced_citizens"
+    }, {
+      "from" : "frustration_due_to_marginalization",
+      "to" : "frustration_of_convinced_citizens"
+    }, {
+      "from" : "frustration_due_to_inertia",
+      "to" : "frustration_of_convinced_citizens"
+    }, {
+      "from" : "24",
+      "to" : "convinced_citizens"
+    }, {
+      "from" : "24",
+      "to" : "unconvinced_citizens"
+    }, {
+      "from" : "convinced_citizens",
+      "to" : "fraction_of_convinced_citizens"
+    }, {
+      "from" : "fraction_of_convinced_citizens",
+      "to" : "_428"
+    }, {
+      "from" : "contact_rate_of_convinced_citizens",
+      "to" : "persuasion"
+    }, {
+      "from" : "persuasiveness_of_nonradical_actions",
+      "to" : "persuasion"
+    }, {
+      "from" : "strength_of_incompatible_selfinterest",
+      "to" : "persuasion"
+    }, {
+      "from" : "fraction_of_convinced_citizens",
+      "to" : "rate_of_decrease_through_societal_change"
+    }, {
+      "from" : "maximum_attainable_rate_of_decrease_through_societal_change",
+      "to" : "rate_of_decrease_through_societal_change"
+    }, {
+      "from" : "rate_of_decrease_through_societal_change",
+      "to" : "net_increase_of_animal_distress"
+    }, {
+      "from" : "animal_distress",
+      "to" : "_48"
+    }, {
+      "from" : "exogenous_rate_of_increase_of_animal_distress",
+      "to" : "_48"
+    }, {
+      "from" : "maximum_attainable_rate_of_decrease_through_societal_change",
+      "to" : "frustration_due_to_inertia"
+    }, {
+      "from" : "rate_of_decrease_through_societal_change",
+      "to" : "frustration_due_to_inertia"
+    }, {
+      "from" : "normal_contact_rate_of_convinced_citizens",
+      "to" : "contact_rate_of_convinced_citizens"
+    }, {
+      "from" : "frustration_of_convinced_citizens",
+      "to" : "radical_action_level"
+    }, {
+      "from" : "unconvinced_citizens",
+      "to" : "_428"
+    }, {
+      "from" : "frustration_of_convinced_citizens",
+      "to" : "nonradical_action_level"
+    }, {
+      "from" : "initial_value_of_underlying_phenomenon",
+      "to" : "animal_distress"
+    }, {
+      "from" : "ini_unconvinced",
+      "to" : "unconvinced_citizens"
+    }, {
+      "from" : "problem_symptoms",
+      "to" : "visibility_of_the_problem"
+    }, {
+      "from" : "fraction_of_convinced_citizens",
+      "to" : "frustration_due_to_marginalization"
+    }, {
+      "from" : "visibility_of_the_problem",
+      "to" : "_428"
+    }, {
+      "from" : "activists",
+      "to" : "fraction_of_convinced_citizens"
+    }, {
+      "from" : "extremists",
+      "to" : "fraction_of_convinced_citizens"
+    }, {
+      "from" : "68",
+      "to" : "activists"
+    }, {
+      "from" : "68",
+      "to" : "convinced_citizens"
+    }, {
+      "from" : "72",
+      "to" : "extremists"
+    }, {
+      "from" : "72",
+      "to" : "activists"
+    }, {
+      "from" : "ini_convinced",
+      "to" : "convinced_citizens"
+    }, {
+      "from" : "ini_activists",
+      "to" : "activists"
+    }, {
+      "from" : "ini_extremists",
+      "to" : "extremists"
+    }, {
+      "from" : "nonradical_action_level",
+      "to" : "contact_rate_of_convinced_citizens"
+    }, {
+      "from" : "average_time_to_change_states",
+      "to" : "persuasion"
+    }, {
+      "from" : "potential_number_of_activitsts",
+      "to" : "convinced_2_activist"
+    }, {
+      "from" : "activists",
+      "to" : "_140"
+    }, {
+      "from" : "average_time_to_change_states",
+      "to" : "_140"
+    }, {
+      "from" : "average_time_to_change_states",
+      "to" : "_588"
+    }, {
+      "from" : "potential_number_of_extremists",
+      "to" : "activists_2_extremists"
+    }, {
+      "from" : "convinced_citizens",
+      "to" : "potential_number_of_activitsts"
+    }, {
+      "from" : "activists",
+      "to" : "potential_number_of_extremists"
+    }, {
+      "from" : "extremists",
+      "to" : "_588"
+    }, {
+      "from" : "potential_fraction_of_activists",
+      "to" : "potential_number_of_activitsts"
+    }, {
+      "from" : "potential_fraction_of_extremists",
+      "to" : "potential_number_of_extremists"
+    }, {
+      "from" : "frustration_of_convinced_citizens",
+      "to" : "potential_number_of_activitsts"
+    }, {
+      "from" : "frustration_of_convinced_citizens",
+      "to" : "potential_number_of_extremists"
+    }, {
+      "from" : "frustration_due_to_marginalization",
+      "to" : "potential_number_of_extremists"
+    }, {
+      "from" : "extremists",
+      "to" : "radical_action_level"
+    }, {
+      "from" : "Time",
+      "to" : "societal_acceptation_threshold_with_regard_to_animal_distress"
+    }, {
+      "from" : "radical_action_level",
+      "to" : "visibility_of_the_problem"
+    }, {
+      "from" : "unconvinced_citizens",
+      "to" : "fraction_of_convinced_citizens"
+    }, {
+      "from" : "citizens_that_cannot_be_convinced",
+      "to" : "fraction_of_convinced_citizens"
+    }, {
+      "from" : "fraction_of_convinced_citizens",
+      "to" : "radical_action_level"
+    }, {
+      "from" : "commitment_of_radical_individuals_to_radical_action",
+      "to" : "visibility_of_the_problem"
+    } ],
+    "flowRoutes" : [ {
+      "flowName" : "_48",
+      "points" : [ [ 771.0, 292.0 ] ]
+    }, {
+      "flowName" : "_428",
+      "points" : [ [ 1451.0, 404.0 ] ]
+    }, {
+      "flowName" : "_140",
+      "points" : [ [ 1260.0, 399.0 ] ]
+    }, {
+      "flowName" : "_588",
+      "points" : [ [ 1089.0, 400.0 ] ]
+    } ]
+  } ],
+  "defaultSimulation" : {
+    "timeStep" : "Year",
+    "duration" : 100.0,
+    "durationUnit" : "Year"
+  },
+  "metadata" : {
+    "license" : "unknown"
+  }
+}

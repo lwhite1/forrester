@@ -106,9 +106,10 @@ class VensimImporterTest {
                     """;
 
             ImportResult result = importer.importModel(mdl, "Test");
-            assertThat(result.definition().constants()).hasSize(1);
-            ConstantDef c = result.definition().constants().get(0);
-            assertThat(c.name()).isEqualTo("alpha");
+            assertThat(result.definition().constants()).hasSize(1 + 3); // +3 built-in constants
+            ConstantDef c = result.definition().constants().stream()
+                    .filter(cd -> cd.name().equals("alpha"))
+                    .findFirst().orElseThrow();
             assertThat(c.value()).isEqualTo(0.5);
         }
 
@@ -137,8 +138,9 @@ class VensimImporterTest {
                     """;
 
             ImportResult result = importer.importModel(mdl, "Test");
-            assertThat(result.definition().constants()).hasSize(1);
-            assertThat(result.definition().constants().get(0).name()).isEqualTo("Pi");
+            assertThat(result.definition().constants()).hasSize(1 + 3); // +3 built-in constants
+            assertThat(result.definition().constants().stream()
+                    .map(ConstantDef::name)).contains("Pi");
         }
 
         @Test
@@ -208,7 +210,7 @@ class VensimImporterTest {
 
             ImportResult result = importer.importModel(mdl, "Test");
             assertThat(result.warnings()).anyMatch(w -> w.contains("Data variable"));
-            assertThat(result.definition().constants()).isEmpty();
+            assertThat(result.definition().constants()).hasSize(3); // only built-in constants
             assertThat(result.definition().auxiliaries()).isEmpty();
         }
 
@@ -382,13 +384,14 @@ class VensimImporterTest {
             assertThat(stock.name()).isEqualTo("Teacup_Temperature");
             assertThat(stock.initialValue()).isEqualTo(180.0);
 
-            // 2 constants: Room Temperature, Characteristic Time
-            assertThat(def.constants()).hasSize(2);
+            // 2 user constants + 3 built-in constants (TIME_STEP, INITIAL_TIME, FINAL_TIME)
+            assertThat(def.constants()).hasSize(2 + 3);
             Set<String> constantNames = def.constants().stream()
                     .map(ConstantDef::name)
                     .collect(Collectors.toSet());
-            assertThat(constantNames).containsExactlyInAnyOrder(
-                    "Room_Temperature", "Characteristic_Time");
+            assertThat(constantNames).contains(
+                    "Room_Temperature", "Characteristic_Time",
+                    "TIME_STEP", "INITIAL_TIME", "FINAL_TIME");
 
             // 1 auxiliary: Heat Loss to Room
             assertThat(def.auxiliaries()).hasSize(1);
@@ -424,13 +427,14 @@ class VensimImporterTest {
             assertThat(stockNames).containsExactlyInAnyOrder(
                     "Susceptible", "Infected", "Recovered");
 
-            // 3 constants: Contact Rate, Recovery Time, Total Population
-            assertThat(def.constants()).hasSize(3);
+            // 3 user constants + 3 built-in constants (TIME_STEP, INITIAL_TIME, FINAL_TIME)
+            assertThat(def.constants()).hasSize(3 + 3);
             Set<String> constantNames = def.constants().stream()
                     .map(ConstantDef::name)
                     .collect(Collectors.toSet());
-            assertThat(constantNames).containsExactlyInAnyOrder(
-                    "Contact_Rate", "Recovery_Time", "Total_Population");
+            assertThat(constantNames).contains(
+                    "Contact_Rate", "Recovery_Time", "Total_Population",
+                    "TIME_STEP", "INITIAL_TIME", "FINAL_TIME");
 
             // 2 auxiliaries: Infection Rate, Recovery Rate
             assertThat(def.auxiliaries()).hasSize(2);
@@ -512,9 +516,10 @@ class VensimImporterTest {
                     """;
 
             ImportResult result = importer.importModel(mdl, "Test");
-            assertThat(result.definition().constants()).hasSize(1);
-            ConstantDef c = result.definition().constants().get(0);
-            assertThat(c.name()).isEqualTo("alpha");
+            assertThat(result.definition().constants()).hasSize(1 + 3); // +3 built-in constants
+            ConstantDef c = result.definition().constants().stream()
+                    .filter(cd -> cd.name().equals("alpha"))
+                    .findFirst().orElseThrow();
             assertThat(c.value()).isEqualTo(0.5);
         }
 
@@ -543,8 +548,11 @@ class VensimImporterTest {
                     """;
 
             ImportResult result = importer.importModel(mdl, "Test");
-            assertThat(result.definition().constants()).hasSize(1);
-            assertThat(result.definition().constants().get(0).value()).isEqualTo(-0.5);
+            assertThat(result.definition().constants()).hasSize(1 + 3); // +3 built-in constants
+            ConstantDef c = result.definition().constants().stream()
+                    .filter(cd -> cd.name().equals("alpha"))
+                    .findFirst().orElseThrow();
+            assertThat(c.value()).isEqualTo(-0.5);
         }
     }
 
@@ -577,9 +585,12 @@ class VensimImporterTest {
                     """;
 
             ImportResult result = importer.importModel(mdl, "Test");
-            // System vars should not appear as model elements
-            assertThat(result.definition().constants()).hasSize(1);
-            assertThat(result.definition().constants().get(0).name()).isEqualTo("x");
+            // System vars should not appear as user model elements, but 3 built-in constants are injected
+            assertThat(result.definition().constants()).hasSize(1 + 3); // +3 built-in constants
+            assertThat(result.definition().constants().stream()
+                    .map(ConstantDef::name)
+                    .filter(n -> !Set.of("TIME_STEP", "INITIAL_TIME", "FINAL_TIME").contains(n))
+                    .toList()).containsExactly("x");
             assertThat(result.definition().defaultSimulation().duration()).isEqualTo(10.0);
         }
     }
@@ -699,11 +710,11 @@ class VensimImporterTest {
             ImportResult result = importer.importModel(mdl, "Test");
             ModelDefinition def = result.definition();
 
-            // No stocks, flows, auxiliaries, or constants in CLD mode
+            // No stocks, flows, or auxiliaries in CLD mode; only built-in constants
             assertThat(def.stocks()).isEmpty();
             assertThat(def.flows()).isEmpty();
             assertThat(def.auxiliaries()).isEmpty();
-            assertThat(def.constants()).isEmpty();
+            assertThat(def.constants()).hasSize(3); // only built-in constants
 
             // Should have CLD variables
             assertThat(def.cldVariables()).hasSize(2);
@@ -832,11 +843,11 @@ class VensimImporterTest {
             assertThat(names).containsExactlyInAnyOrder(
                     "Population", "Birth_Rate", "Death_Rate", "Resources");
 
-            // No stocks, flows, auxiliaries, or constants
+            // No stocks, flows, or auxiliaries; only built-in constants
             assertThat(def.stocks()).isEmpty();
             assertThat(def.flows()).isEmpty();
             assertThat(def.auxiliaries()).isEmpty();
-            assertThat(def.constants()).isEmpty();
+            assertThat(def.constants()).hasSize(3); // only built-in constants
 
             // 4 causal links from sketch connectors
             assertThat(def.causalLinks()).hasSize(4);

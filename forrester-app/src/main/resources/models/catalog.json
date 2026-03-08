@@ -42,6 +42,20 @@
       "constants" : 8
     }
   }, {
+    "id" : "cholera",
+    "name" : "Cholera Zimbabwe",
+    "description" : "Cholera epidemic dynamics with water contamination and DELAY3I feedback",
+    "category" : "epidemiology",
+    "difficulty" : "advanced",
+    "path" : "epidemiology/cholera.json",
+    "tags" : [ "epidemiology", "delay", "water-contamination" ],
+    "elements" : {
+      "stocks" : 7,
+      "flows" : 7,
+      "auxiliaries" : 18,
+      "constants" : 7
+    }
+  }, {
     "id" : "cocaine-flow",
     "name" : "Cocaine Flow",
     "description" : "Drug flow with import, use, and confiscation rates",
@@ -84,6 +98,20 @@
       "constants" : 0
     }
   }, {
+    "id" : "deradicalization",
+    "name" : "Deradicalization",
+    "description" : "Radicalization and deradicalization dynamics with policy interventions",
+    "category" : "policy",
+    "difficulty" : "advanced",
+    "path" : "policy/deradicalization.json",
+    "tags" : [ "policy", "radicalization", "social-dynamics" ],
+    "elements" : {
+      "stocks" : 5,
+      "flows" : 5,
+      "auxiliaries" : 18,
+      "constants" : 18
+    }
+  }, {
     "id" : "debt-crisis",
     "name" : "Debt Crisis",
     "description" : "Sovereign debt dynamics with investment, credit, and deterioration feedback",
@@ -98,6 +126,20 @@
       "constants" : 10
     }
   }, {
+    "id" : "energy-transition",
+    "name" : "Energy Transition Management",
+    "description" : "Energy transition dynamics with technology adoption, fossil fuel decline, and policy",
+    "category" : "technology",
+    "difficulty" : "advanced",
+    "path" : "technology/energy-transition.json",
+    "tags" : [ "energy", "technology", "transition", "policy" ],
+    "elements" : {
+      "stocks" : 12,
+      "flows" : 12,
+      "auxiliaries" : 38,
+      "constants" : 24
+    }
+  }, {
     "id" : "ecological-overshoot",
     "name" : "Ecological Overshoot",
     "description" : "Consumer population overshoots and collapses a renewable resource",
@@ -110,6 +152,20 @@
       "flows" : 2,
       "auxiliaries" : 6,
       "constants" : 9
+    }
+  }, {
+    "id" : "evs-lithium-scarcity",
+    "name" : "EVs and Lithium Scarcity",
+    "description" : "Electric vehicle adoption constrained by lithium supply and recycling dynamics",
+    "category" : "technology",
+    "difficulty" : "advanced",
+    "path" : "technology/evs-lithium-scarcity.json",
+    "tags" : [ "technology", "electric-vehicles", "resource-scarcity", "recycling" ],
+    "elements" : {
+      "stocks" : 7,
+      "flows" : 7,
+      "auxiliaries" : 14,
+      "constants" : 17
     }
   }, {
     "id" : "exponential-growth",
@@ -140,6 +196,20 @@
       "constants" : 22
     }
   }, {
+    "id" : "flu-two-regions",
+    "name" : "Flu Two Regions",
+    "description" : "Two-region flu epidemic with IF THEN ELSE cross-infection dynamics",
+    "category" : "epidemiology",
+    "difficulty" : "advanced",
+    "path" : "epidemiology/flu-two-regions.json",
+    "tags" : [ "epidemiology", "SIR", "multi-region", "conditional" ],
+    "elements" : {
+      "stocks" : 8,
+      "flows" : 8,
+      "auxiliaries" : 14,
+      "constants" : 19
+    }
+  }, {
     "id" : "feral-pigs",
     "name" : "Feral Pigs",
     "description" : "Feral pig population controlled by trapping with stochastic catch rate",
@@ -154,6 +224,20 @@
       "constants" : 4
     }
   }, {
+    "id" : "globalization",
+    "name" : "Globalization",
+    "description" : "Globalization dynamics with trade, migration, and cultural feedback loops",
+    "category" : "economics",
+    "difficulty" : "advanced",
+    "path" : "economics/globalization.json",
+    "tags" : [ "economics", "globalization", "trade", "feedback" ],
+    "elements" : {
+      "stocks" : 4,
+      "flows" : 4,
+      "auxiliaries" : 36,
+      "constants" : 29
+    }
+  }, {
     "id" : "goal-seeking",
     "name" : "Goal Seeking",
     "description" : "Inventory adjusts toward a goal via negative feedback",
@@ -166,6 +250,34 @@
       "flows" : 1,
       "auxiliaries" : 0,
       "constants" : 2
+    }
+  }, {
+    "id" : "higher-education-stimuli",
+    "name" : "Higher Education Stimuli",
+    "description" : "Higher education enrollment dynamics with policy stimuli and PULSE TRAIN",
+    "category" : "demographics",
+    "difficulty" : "advanced",
+    "path" : "demographics/higher-education-stimuli.json",
+    "tags" : [ "demographics", "education", "policy", "pulse-train" ],
+    "elements" : {
+      "stocks" : 4,
+      "flows" : 4,
+      "auxiliaries" : 30,
+      "constants" : 13
+    }
+  }, {
+    "id" : "housing-market-crisis",
+    "name" : "Housing Market Crisis",
+    "description" : "Housing market boom-bust dynamics with construction delays and price feedback",
+    "category" : "economics",
+    "difficulty" : "advanced",
+    "path" : "economics/housing-market-crisis.json",
+    "tags" : [ "economics", "housing", "boom-bust", "delay" ],
+    "elements" : {
+      "stocks" : 4,
+      "flows" : 4,
+      "auxiliaries" : 21,
+      "constants" : 11
     }
   }, {
     "id" : "inventory-oscillation",
@@ -194,6 +306,20 @@
       "flows" : 1,
       "auxiliaries" : 4,
       "constants" : 4
+    }
+  }, {
+    "id" : "new-towns",
+    "name" : "New Towns Planning",
+    "description" : "New town planning with population, housing, and infrastructure dynamics",
+    "category" : "demographics",
+    "difficulty" : "advanced",
+    "path" : "demographics/new-towns.json",
+    "tags" : [ "demographics", "urban-planning", "housing" ],
+    "elements" : {
+      "stocks" : 3,
+      "flows" : 3,
+      "auxiliaries" : 25,
+      "constants" : 19
     }
   }, {
     "id" : "managing-faculty",
@@ -250,6 +376,20 @@
       "flows" : 4,
       "auxiliaries" : 10,
       "constants" : 1
+    }
+  }, {
+    "id" : "project-management",
+    "name" : "Project Management",
+    "description" : "Software project management with rework, schedule pressure, and quality feedback",
+    "category" : "management",
+    "difficulty" : "advanced",
+    "path" : "management/project-management.json",
+    "tags" : [ "management", "project", "rework", "feedback" ],
+    "elements" : {
+      "stocks" : 5,
+      "flows" : 5,
+      "auxiliaries" : 20,
+      "constants" : 9
     }
   }, {
     "id" : "predator-prey",

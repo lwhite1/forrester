@@ -242,9 +242,9 @@ class VensimExprTranslatorTest {
     class UnsupportedFunctions {
 
         @Test
-        void shouldWarnOnPulse() {
+        void shouldNotWarnOnPulseSinceItIsNowSupported() {
             var result = VensimExprTranslator.translate("PULSE(10, 5)", "var", EMPTY_NAMES);
-            assertThat(result.warnings()).anyMatch(w -> w.contains("PULSE"));
+            assertThat(result.warnings()).noneMatch(w -> w.contains("PULSE"));
         }
 
         @Test

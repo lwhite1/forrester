@@ -116,6 +116,11 @@ public class VensimImporter implements ModelImporter {
                 .name(modelName)
                 .defaultSimulation(timeUnit, duration, timeUnit);
 
+        // Inject Vensim built-in simulation constants so expressions can reference them
+        builder.constant(new ConstantDef("TIME_STEP", null, timeStepValue, timeUnit));
+        builder.constant(new ConstantDef("INITIAL_TIME", null, initialTime, timeUnit));
+        builder.constant(new ConstantDef("FINAL_TIME", null, finalTime, timeUnit));
+
         // Pass 2: Classify and build model elements
         Set<String> stockNames = new HashSet<>();
         Set<String> flowNames = new HashSet<>();
@@ -126,6 +131,9 @@ public class VensimImporter implements ModelImporter {
         // First sub-pass: identify stocks, lookups, and collect constant values
         // so that INTEG initial values like "Initial number of muskrats" can be resolved
         Map<String, Double> constantValues = new HashMap<>();
+        constantValues.put("TIME_STEP", timeStepValue);
+        constantValues.put("INITIAL_TIME", initialTime);
+        constantValues.put("FINAL_TIME", finalTime);
         for (MdlEquation eq : parsed.equations()) {
             String name = eq.name().strip();
             if (name.isEmpty() || isSystemVar(name)) {

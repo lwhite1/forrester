@@ -139,7 +139,7 @@ public class ExprCompiler {
     }
 
     private DoubleSupplier compileFunctionCall(Expr.FunctionCall call) {
-        String name = call.name();
+        String name = call.name().toUpperCase();
         List<Expr> args = call.arguments();
 
         return switch (name) {
@@ -193,6 +193,19 @@ public class ExprCompiler {
                 };
             }
             case "LOG" -> {
+                if (args.size() == 2) {
+                    DoubleSupplier a = compileExpr(args.get(0));
+                    DoubleSupplier base = compileExpr(args.get(1));
+                    yield () -> {
+                        double v = a.getAsDouble();
+                        double b = base.getAsDouble();
+                        if (v <= 0 || b <= 0 || b == 1) {
+                            logger.warn("LOG with invalid arguments: value={}, base={}", v, b);
+                            return Double.NaN;
+                        }
+                        return Math.log(v) / Math.log(b);
+                    };
+                }
                 requireArgs(name, args, 1);
                 DoubleSupplier a = compileExpr(args.get(0));
                 yield () -> {
@@ -299,10 +312,11 @@ public class ExprCompiler {
                 };
             }
             case "SMOOTH" -> compileSmooth(args);
-            case "DELAY3" -> compileDelay3(args);
+            case "DELAY3", "DELAY3I" -> compileDelay3(args);
             case "STEP" -> compileStep(args);
             case "RAMP" -> compileRamp(args);
             case "PULSE" -> compilePulse(args);
+            case "PULSE_TRAIN" -> compilePulseTrain(args);
             case "DELAY_FIXED" -> compileDelayFixed(args);
             case "TREND" -> compileTrend(args);
             case "FORECAST" -> compileForecast(args);
@@ -346,10 +360,21 @@ public class ExprCompiler {
                     "DELAY3 requires 2-3 arguments, got " + args.size(), "DELAY3");
         }
         DoubleSupplier input = compileExpr(args.get(0));
-        double delayTime = evaluateConstant(args.get(1), "DELAY3 delayTime");
+        double delayTime = evaluateAtCompileTime(args.get(1), "DELAY3 delayTime");
+        if (delayTime <= 0 || Double.isNaN(delayTime)) {
+            // Delay time couldn't be resolved at compile time (variable not yet initialized).
+            // Use a default of 1 timestep to avoid crashing; the model may still produce
+            // approximate results.
+            logger.warn("DELAY3 delayTime evaluated to {} at compile time, defaulting to 1.0",
+                    delayTime);
+            delayTime = 1.0;
+        }
         Delay3 delay3;
         if (args.size() == 3) {
-            double initial = evaluateConstant(args.get(2), "DELAY3 initialValue");
+            double initial = evaluateAtCompileTime(args.get(2), "DELAY3 initialValue");
+            if (Double.isNaN(initial)) {
+                initial = 0.0;
+            }
             delay3 = Delay3.of(input, delayTime, initial, context.getCurrentStep());
         } else {
             delay3 = Delay3.of(input, delayTime, context.getCurrentStep());
@@ -400,6 +425,30 @@ public class ExprCompiler {
             pulse = Pulse.of(magnitude, (int) Math.round(start), context.getCurrentStep());
         }
         return pulse::getCurrentValue;
+    }
+
+    private DoubleSupplier compilePulseTrain(List<Expr> args) {
+        requireArgs("PULSE_TRAIN", args, 4);
+        DoubleSupplier startTime = compileExpr(args.get(0));
+        DoubleSupplier duration = compileExpr(args.get(1));
+        DoubleSupplier repeatInterval = compileExpr(args.get(2));
+        DoubleSupplier endTime = compileExpr(args.get(3));
+        return () -> {
+            double t = context.getCurrentStep().getAsInt();
+            double start = startTime.getAsDouble();
+            double end = endTime.getAsDouble();
+            double dur = duration.getAsDouble();
+            double repeat = repeatInterval.getAsDouble();
+            if (t < start || t > end) {
+                return 0.0;
+            }
+            double elapsed = t - start;
+            if (repeat > 0) {
+                double phase = elapsed % repeat;
+                return phase < dur ? 1.0 : 0.0;
+            }
+            return elapsed < dur ? 1.0 : 0.0;
+        };
     }
 
     private DoubleSupplier compileDelayFixed(List<Expr> args) {
@@ -525,6 +574,21 @@ public class ExprCompiler {
         DoubleSupplier thenExpr = compileExpr(cond.thenExpr());
         DoubleSupplier elseExpr = compileExpr(cond.elseExpr());
         return () -> condition.getAsDouble() != 0 ? thenExpr.getAsDouble() : elseExpr.getAsDouble();
+    }
+
+    /**
+     * Compiles an expression and evaluates it immediately. Used for parameters
+     * like delay times that must be known at compile time but may reference
+     * variables or auxiliaries (evaluated at their initial/current values).
+     */
+    private double evaluateAtCompileTime(Expr expr, String paramDescription) {
+        try {
+            return evaluateConstant(expr, paramDescription);
+        } catch (CompilationException e) {
+            // Fall back to compiling and evaluating the full expression
+            DoubleSupplier compiled = compileExpr(expr);
+            return compiled.getAsDouble();
+        }
     }
 
     /**

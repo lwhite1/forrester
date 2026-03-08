@@ -1,0 +1,872 @@
+{
+  "name" : "HigherEducation",
+  "stocks" : [ {
+    "name" : "financien",
+    "comment" : "financien",
+    "initialValue" : 0.0,
+    "unit" : "euro"
+  }, {
+    "name" : "MSc_studenten",
+    "comment" : "MSc studenten",
+    "initialValue" : 0.0,
+    "unit" : "student"
+  }, {
+    "name" : "docenten",
+    "comment" : "docenten",
+    "initialValue" : 5.0,
+    "unit" : ""
+  }, {
+    "name" : "BSc_studenten",
+    "comment" : "BSc studenten",
+    "initialValue" : 0.0,
+    "unit" : "student"
+  } ],
+  "flows" : [ {
+    "name" : "financien_net_flow",
+    "comment" : "Net flow for financien",
+    "equation" : "instroom_onderwijsgelden-uitstroom_van_onderwijsgelden",
+    "timeUnit" : "Year",
+    "sink" : "financien"
+  }, {
+    "name" : "MSc_studenten_net_flow",
+    "comment" : "Net flow for MSc studenten",
+    "equation" : "instroom_MSc_studenten-afvallers_MSc-uitstroom_MSc_studenten",
+    "timeUnit" : "Year",
+    "sink" : "MSc_studenten"
+  }, {
+    "name" : "docenten_net_flow",
+    "comment" : "Net flow for docenten",
+    "equation" : "netto_werving_van_docenten",
+    "timeUnit" : "Year",
+    "sink" : "docenten"
+  }, {
+    "name" : "BSc_studenten_net_flow",
+    "comment" : "Net flow for BSc studenten",
+    "equation" : "instroom_BSc_studenten-afvallers_BSc-uitstroom_BSc_studenten",
+    "timeUnit" : "Year",
+    "sink" : "BSc_studenten"
+  } ],
+  "auxiliaries" : [ {
+    "name" : "uitstroom_van_onderwijsgelden",
+    "comment" : "uitstroom van onderwijsgelden",
+    "equation" : "fractie_langstudeerder*totaal_aantal_studenten*boete_per_langstudeerder+docenten*gemiddelde_kost_per_docent",
+    "unit" : ""
+  }, {
+    "name" : "instroom_BSc_studenten",
+    "comment" : "OP DIT MOMENT KWALITEIT NOG NIET TOEGEVOEGD",
+    "equation" : "jaarlijkse_BSc_instroom*kwaliteit",
+    "unit" : ""
+  }, {
+    "name" : "instroom_MSc_studenten",
+    "comment" : "instroom MSc studenten",
+    "equation" : "(jaarlijkse_MSc_instroom+fractie_van_BSc_naar_MSc*uitstroom_BSc_studenten)*kwaliteit",
+    "unit" : ""
+  }, {
+    "name" : "fractie_afvallers_MSc",
+    "comment" : "fractie afvallers MSc",
+    "equation" : "MIN(MAX((0.1+0.1)/kwaliteit,0),1)",
+    "unit" : ""
+  }, {
+    "name" : "fractie_afvallers_BSc",
+    "comment" : "fractie afvallers BSc",
+    "equation" : "MAX(MIN((0.3+0.1+0.05)/kwaliteit,1),0)",
+    "unit" : ""
+  }, {
+    "name" : "boete_per_langstudeerder",
+    "comment" : "boete per langstudeerder",
+    "equation" : "IF(TIME>2011,hoogte_boete_per_langstudeerder,0)",
+    "unit" : ""
+  }, {
+    "name" : "aantal_docenturen_per_student",
+    "comment" : "aantal docenturen per student",
+    "equation" : "SMOOTH(1000*docenten/MAX(totaal_aantal_studenten,1),1)",
+    "unit" : ""
+  }, {
+    "name" : "afvallers_MSc",
+    "comment" : "AFVALLERS JAARLIJKS LATEN AFVALLEN EN TESTEN",
+    "equation" : "MSc_uitstroom_na_vaste_en_bijkomende_vertraging*fractie_afvallers_MSc",
+    "unit" : ""
+  }, {
+    "name" : "jaarlijkse_MSc_instroom",
+    "comment" : "jaarlijkse MSc instroom",
+    "equation" : "evolutie_van_de_nieuwe_MSc_instromers/TIME_STEP*instroommoment_MSc",
+    "unit" : ""
+  }, {
+    "name" : "bijkomende_jaarlijkse_vertraging_BSc",
+    "comment" : "bijkomende jaarlijkse vertraging BSc",
+    "equation" : "0.5/kwaliteit",
+    "unit" : ""
+  }, {
+    "name" : "bijkomende_jaarlijkse_vertraging_MSc",
+    "comment" : "bijkomende jaarlijkse vertraging MSc",
+    "equation" : "0.5/kwaliteit",
+    "unit" : ""
+  }, {
+    "name" : "BSc_uitstroom_na_vaste_en_bijkomende_vertraging",
+    "comment" : "BSc uitstroom na vaste en bijkomende vertraging",
+    "equation" : "DELAY3(BSc_uitstroom_indien_enkel_vaste_vertraging_door_minimale_studieduur, minimale_BSc_studieduur *bijkomende_jaarlijkse_vertraging_BSc, 0)",
+    "unit" : ""
+  }, {
+    "name" : "MSc_uitstroom_na_vaste_en_bijkomende_vertraging",
+    "comment" : "MSc uitstroom na vaste en bijkomende vertraging",
+    "equation" : "DELAY3(MSc_uitstroom_indien_enkel_vaste_vertraging_door_minimale_studieduur, bijkomende_jaarlijkse_vertraging_MSc *minimale_MSc_studieduur, 0)",
+    "unit" : ""
+  }, {
+    "name" : "netto_werving_van_docenten",
+    "comment" : "netto werving van docenten",
+    "equation" : "(maximaal_aantal_docenten-docenten)/wervingstijd",
+    "unit" : ""
+  }, {
+    "name" : "instroom_onderwijsgelden",
+    "comment" : "instroom onderwijsgelden",
+    "equation" : "subsidie_per_BSc_instromer*instroom_BSc_studenten+subsidie_per_BSc_afstudeerder*uitstroom_BSc_studenten + subsidie_per_MSc_instromer*instroom_MSc_studenten+subsidie_per_MSc_afstudeerder* uitstroom_MSc_studenten + jaarlijkse_lump_sum_en_andere_gelden",
+    "unit" : ""
+  }, {
+    "name" : "evolutie_van_de_nieuwe_MSc_instromers",
+    "comment" : "evolutie van de nieuwe MSc instromers",
+    "equation" : "LOOKUP(evolutie_van_de_nieuwe_MSc_instromers_lookup, TIME)",
+    "unit" : ""
+  }, {
+    "name" : "instroommoment_MSc",
+    "comment" : "instroommoment MSc",
+    "equation" : "PULSE_TRAIN(1990,TIME_STEP,1,2030)",
+    "unit" : ""
+  }, {
+    "name" : "fractie_langstudeerder",
+    "comment" : "fractie langstudeerder",
+    "equation" : "LOOKUP(fractie_langstudeerder_lookup, kwaliteit)",
+    "unit" : ""
+  }, {
+    "name" : "fractie_van_BSc_naar_MSc",
+    "comment" : "fractie van BSc naar MSc",
+    "equation" : "IF(TIME<2008,1,0.8)",
+    "unit" : ""
+  }, {
+    "name" : "uitstroom_MSc_studenten",
+    "comment" : "uitstroom MSc studenten",
+    "equation" : "MSc_uitstroom_na_vaste_en_bijkomende_vertraging*(1-fractie_afvallers_MSc)",
+    "unit" : "student/Year"
+  }, {
+    "name" : "MSc_uitstroom_indien_enkel_vaste_vertraging_door_minimale_studieduur",
+    "comment" : "MSc uitstroom indien enkel vaste vertraging door minimale studieduur",
+    "equation" : "DELAY_FIXED(\n\tinstroom_MSc_studenten, minimale_MSc_studieduur, 0)",
+    "unit" : ""
+  }, {
+    "name" : "totaal_aantal_studenten",
+    "comment" : "totaal aantal studenten",
+    "equation" : "BSc_studenten+MSc_studenten",
+    "unit" : ""
+  }, {
+    "name" : "kwaliteit",
+    "comment" : "kwaliteit",
+    "equation" : "LOOKUP(kwaliteit_lookup, aantal_docenturen_per_student)",
+    "unit" : ""
+  }, {
+    "name" : "maximaal_aantal_docenten",
+    "comment" : "SMOOTH3( financien/gemiddelde kost docent,1)",
+    "equation" : "financien/gemiddelde_kost_per_docent",
+    "unit" : ""
+  }, {
+    "name" : "afvallers_BSc",
+    "comment" : "AFVALLERS JAARLIJKS LATEN AFVALLEN EN TESTEN",
+    "equation" : "BSc_uitstroom_na_vaste_en_bijkomende_vertraging*fractie_afvallers_BSc",
+    "unit" : ""
+  }, {
+    "name" : "evolutie_van_de_nieuwe_BSc_instromers",
+    "comment" : "evolutie van de nieuwe BSc instromers",
+    "equation" : "LOOKUP(evolutie_van_de_nieuwe_BSc_instromers_lookup, TIME)",
+    "unit" : ""
+  }, {
+    "name" : "BSc_instroommoment",
+    "comment" : "BSc instroommoment",
+    "equation" : "PULSE_TRAIN(1990,TIME_STEP,1,2030)",
+    "unit" : ""
+  }, {
+    "name" : "jaarlijkse_BSc_instroom",
+    "comment" : "jaarlijkse BSc instroom",
+    "equation" : "evolutie_van_de_nieuwe_BSc_instromers/TIME_STEP*BSc_instroommoment",
+    "unit" : ""
+  }, {
+    "name" : "uitstroom_BSc_studenten",
+    "comment" : "uitstroom BSc studenten",
+    "equation" : "BSc_uitstroom_na_vaste_en_bijkomende_vertraging*(1-fractie_afvallers_BSc)",
+    "unit" : "student/Year"
+  }, {
+    "name" : "BSc_uitstroom_indien_enkel_vaste_vertraging_door_minimale_studieduur",
+    "comment" : "BSc uitstroom indien enkel vaste vertraging door minimale studieduur",
+    "equation" : "DELAY_FIXED(\n\tinstroom_BSc_studenten, minimale_BSc_studieduur, 0)",
+    "unit" : ""
+  } ],
+  "constants" : [ {
+    "name" : "TIME_STEP",
+    "value" : 0.015625,
+    "unit" : "Year"
+  }, {
+    "name" : "INITIAL_TIME",
+    "value" : 1990.0,
+    "unit" : "Year"
+  }, {
+    "name" : "FINAL_TIME",
+    "value" : 2030.0,
+    "unit" : "Year"
+  }, {
+    "name" : "hoogte_boete_per_langstudeerder",
+    "comment" : "hoogte boete per langstudeerder",
+    "value" : 3000.0,
+    "unit" : ""
+  }, {
+    "name" : "jaarlijkse_lump_sum_en_andere_gelden",
+    "comment" : "jaarlijkse lump sum en andere gelden",
+    "value" : 1000000.0,
+    "unit" : ""
+  }, {
+    "name" : "subsidie_per_BSc_afstudeerder",
+    "comment" : "subsidie per BSc afstudeerder",
+    "value" : 5000.0,
+    "unit" : "euro/student"
+  }, {
+    "name" : "subsidie_per_BSc_instromer",
+    "comment" : "subsidie per BSc instromer",
+    "value" : 15000.0,
+    "unit" : "euro/student"
+  }, {
+    "name" : "subsidie_per_MSc_afstudeerder",
+    "comment" : "subsidie per MSc afstudeerder",
+    "value" : 5000.0,
+    "unit" : "euro/student"
+  }, {
+    "name" : "subsidie_per_MSc_instromer",
+    "comment" : "subsidie per MSc instromer",
+    "value" : 5000.0,
+    "unit" : ""
+  }, {
+    "name" : "gemiddelde_kost_per_docent",
+    "comment" : "gemiddelde kost per docent",
+    "value" : 100000.0,
+    "unit" : "euro/docent/Year"
+  }, {
+    "name" : "minimale_MSc_studieduur",
+    "comment" : "minimale MSc studieduur",
+    "value" : 2.0,
+    "unit" : "Year"
+  }, {
+    "name" : "wervingstijd",
+    "comment" : "wervingstijd",
+    "value" : 2.0,
+    "unit" : "Year"
+  }, {
+    "name" : "minimale_BSc_studieduur",
+    "comment" : "minimale BSc studieduur",
+    "value" : 3.0,
+    "unit" : "Year"
+  } ],
+  "lookupTables" : [ {
+    "name" : "evolutie_van_de_nieuwe_MSc_instromers_lookup",
+    "xValues" : [ 1990.0, 1995.0, 2000.0, 2008.0, 2010.0, 2015.0, 2020.0, 2030.0 ],
+    "yValues" : [ 0.0, 0.0, 0.0, 2.0, 5.0, 15.0, 20.0, 20.0 ],
+    "interpolation" : "LINEAR"
+  }, {
+    "name" : "fractie_langstudeerder_lookup",
+    "xValues" : [ 0.0, 0.25, 0.5, 0.75, 1.0 ],
+    "yValues" : [ 0.9, 0.85, 0.66, 0.4, 0.25 ],
+    "interpolation" : "LINEAR"
+  }, {
+    "name" : "kwaliteit_lookup",
+    "xValues" : [ 0.0, 50.0, 100.0, 150.0, 200.0 ],
+    "yValues" : [ 0.1, 0.6, 0.9, 1.0, 1.0 ],
+    "interpolation" : "LINEAR"
+  }, {
+    "name" : "evolutie_van_de_nieuwe_BSc_instromers_lookup",
+    "xValues" : [ 1990.0, 1995.0, 2000.0, 2008.0, 2010.0, 2015.0, 2020.0, 2030.0 ],
+    "yValues" : [ 20.0, 90.0, 120.0, 130.0, 200.0, 200.0, 200.0, 200.0 ],
+    "interpolation" : "LINEAR"
+  } ],
+  "views" : [ {
+    "name" : "View 1",
+    "elements" : [ {
+      "name" : "BSc_instroommoment",
+      "type" : "aux",
+      "x" : 99.0,
+      "y" : 660.0
+    }, {
+      "name" : "TIME_STEP",
+      "type" : "aux",
+      "x" : 105.0,
+      "y" : 568.0
+    }, {
+      "name" : "evolutie_van_de_nieuwe_BSc_instromers",
+      "type" : "aux",
+      "x" : 234.0,
+      "y" : 670.0
+    }, {
+      "name" : "Time",
+      "type" : "aux",
+      "x" : 234.0,
+      "y" : 726.0
+    }, {
+      "name" : "jaarlijkse_BSc_instroom",
+      "type" : "aux",
+      "x" : 235.0,
+      "y" : 604.0
+    }, {
+      "name" : "BSc_studenten",
+      "type" : "stock",
+      "x" : 363.0,
+      "y" : 503.0
+    }, {
+      "name" : "_48",
+      "type" : "flow",
+      "x" : 231.0,
+      "y" : 500.0
+    }, {
+      "name" : "instroom_BSc_studenten",
+      "type" : "aux",
+      "x" : 231.0,
+      "y" : 527.0
+    }, {
+      "name" : "BSc_uitstroom_indien_enkel_vaste_vertraging_door_minimale_studieduur",
+      "type" : "aux",
+      "x" : 265.0,
+      "y" : 345.0
+    }, {
+      "name" : "BSc_uitstroom_na_vaste_en_bijkomende_vertraging",
+      "type" : "aux",
+      "x" : 519.0,
+      "y" : 347.0
+    }, {
+      "name" : "_636",
+      "type" : "flow",
+      "x" : 525.0,
+      "y" : 498.0
+    }, {
+      "name" : "uitstroom_BSc_studenten",
+      "type" : "aux",
+      "x" : 525.0,
+      "y" : 525.0
+    }, {
+      "name" : "_48",
+      "type" : "flow",
+      "x" : 340.0,
+      "y" : 442.0
+    }, {
+      "name" : "afvallers_BSc",
+      "type" : "aux",
+      "x" : 390.0,
+      "y" : 442.0
+    }, {
+      "name" : "fractie_afvallers_BSc",
+      "type" : "aux",
+      "x" : 470.0,
+      "y" : 445.0
+    }, {
+      "name" : "minimale_BSc_studieduur",
+      "type" : "aux",
+      "x" : 381.0,
+      "y" : 280.0
+    }, {
+      "name" : "MSc_studenten",
+      "type" : "stock",
+      "x" : 1086.0,
+      "y" : 500.0
+    }, {
+      "name" : "_48",
+      "type" : "flow",
+      "x" : 959.0,
+      "y" : 498.0
+    }, {
+      "name" : "instroom_MSc_studenten",
+      "type" : "aux",
+      "x" : 959.0,
+      "y" : 525.0
+    }, {
+      "name" : "MSc_uitstroom_indien_enkel_vaste_vertraging_door_minimale_studieduur",
+      "type" : "aux",
+      "x" : 1003.0,
+      "y" : 361.0
+    }, {
+      "name" : "MSc_uitstroom_na_vaste_en_bijkomende_vertraging",
+      "type" : "aux",
+      "x" : 1248.0,
+      "y" : 362.0
+    }, {
+      "name" : "_540",
+      "type" : "flow",
+      "x" : 1248.0,
+      "y" : 495.0
+    }, {
+      "name" : "uitstroom_MSc_studenten",
+      "type" : "aux",
+      "x" : 1248.0,
+      "y" : 522.0
+    }, {
+      "name" : "_48",
+      "type" : "flow",
+      "x" : 1063.0,
+      "y" : 439.0
+    }, {
+      "name" : "afvallers_MSc",
+      "type" : "aux",
+      "x" : 1098.0,
+      "y" : 439.0
+    }, {
+      "name" : "fractie_afvallers_MSc",
+      "type" : "aux",
+      "x" : 1201.0,
+      "y" : 444.0
+    }, {
+      "name" : "minimale_MSc_studieduur",
+      "type" : "aux",
+      "x" : 1108.0,
+      "y" : 292.0
+    }, {
+      "name" : "fractie_van_BSc_naar_MSc",
+      "type" : "aux",
+      "x" : 788.0,
+      "y" : 402.0
+    }, {
+      "name" : "instroommoment_MSc",
+      "type" : "aux",
+      "x" : 824.0,
+      "y" : 664.0
+    }, {
+      "name" : "TIME_STEP",
+      "type" : "aux",
+      "x" : 785.0,
+      "y" : 593.0
+    }, {
+      "name" : "evolutie_van_de_nieuwe_MSc_instromers",
+      "type" : "aux",
+      "x" : 957.0,
+      "y" : 659.0
+    }, {
+      "name" : "Time",
+      "type" : "aux",
+      "x" : 957.0,
+      "y" : 715.0
+    }, {
+      "name" : "jaarlijkse_MSc_instroom",
+      "type" : "aux",
+      "x" : 958.0,
+      "y" : 593.0
+    }, {
+      "name" : "Time",
+      "type" : "aux",
+      "x" : 692.0,
+      "y" : 363.0
+    }, {
+      "name" : "docenten",
+      "type" : "stock",
+      "x" : 545.0,
+      "y" : 1128.0
+    }, {
+      "name" : "financien",
+      "type" : "stock",
+      "x" : 700.0,
+      "y" : 912.0
+    }, {
+      "name" : "_48",
+      "type" : "flow",
+      "x" : 867.0,
+      "y" : 918.0
+    }, {
+      "name" : "instroom_onderwijsgelden",
+      "type" : "aux",
+      "x" : 867.0,
+      "y" : 945.0
+    }, {
+      "name" : "_48",
+      "type" : "flow",
+      "x" : 559.0,
+      "y" : 915.0
+    }, {
+      "name" : "uitstroom_van_onderwijsgelden",
+      "type" : "aux",
+      "x" : 559.0,
+      "y" : 942.0
+    }, {
+      "name" : "jaarlijkse_lump_sum_en_andere_gelden",
+      "type" : "aux",
+      "x" : 909.0,
+      "y" : 999.0
+    }, {
+      "name" : "subsidie_per_MSc_afstudeerder",
+      "type" : "aux",
+      "x" : 864.0,
+      "y" : 785.0
+    }, {
+      "name" : "subsidie_per_BSc_afstudeerder",
+      "type" : "aux",
+      "x" : 748.0,
+      "y" : 822.0
+    }, {
+      "name" : "maximaal_aantal_docenten",
+      "type" : "aux",
+      "x" : 653.0,
+      "y" : 1055.0
+    }, {
+      "name" : "gemiddelde_kost_per_docent",
+      "type" : "aux",
+      "x" : 460.0,
+      "y" : 1037.0
+    }, {
+      "name" : "kwaliteit",
+      "type" : "aux",
+      "x" : 145.0,
+      "y" : 1004.0
+    }, {
+      "name" : "bijkomende_jaarlijkse_vertraging_BSc",
+      "type" : "aux",
+      "x" : 525.0,
+      "y" : 284.0
+    }, {
+      "name" : "bijkomende_jaarlijkse_vertraging_MSc",
+      "type" : "aux",
+      "x" : 1247.0,
+      "y" : 286.0
+    }, {
+      "name" : "subsidie_per_BSc_instromer",
+      "type" : "aux",
+      "x" : 637.0,
+      "y" : 832.0
+    }, {
+      "name" : "subsidie_per_MSc_instromer",
+      "type" : "aux",
+      "x" : 917.0,
+      "y" : 834.0
+    }, {
+      "name" : "boete_per_langstudeerder",
+      "type" : "aux",
+      "x" : 854.0,
+      "y" : 1065.0
+    }, {
+      "name" : "_48",
+      "type" : "flow",
+      "x" : 643.0,
+      "y" : 1130.0
+    }, {
+      "name" : "netto_werving_van_docenten",
+      "type" : "aux",
+      "x" : 643.0,
+      "y" : 1157.0
+    }, {
+      "name" : "wervingstijd",
+      "type" : "aux",
+      "x" : 644.0,
+      "y" : 1194.0
+    }, {
+      "name" : "aantal_docenturen_per_student",
+      "type" : "aux",
+      "x" : 298.0,
+      "y" : 1016.0
+    }, {
+      "name" : "fractie_langstudeerder",
+      "type" : "aux",
+      "x" : 406.0,
+      "y" : 836.0
+    }, {
+      "name" : "Time",
+      "type" : "aux",
+      "x" : 1011.0,
+      "y" : 1090.0
+    }, {
+      "name" : "totaal_aantal_studenten",
+      "type" : "aux",
+      "x" : 574.0,
+      "y" : 701.0
+    }, {
+      "name" : "hoogte_boete_per_langstudeerder",
+      "type" : "aux",
+      "x" : 882.0,
+      "y" : 1136.0
+    } ],
+    "connectors" : [ {
+      "from" : "TIME_STEP",
+      "to" : "BSc_instroommoment"
+    }, {
+      "from" : "Time",
+      "to" : "evolutie_van_de_nieuwe_BSc_instromers"
+    }, {
+      "from" : "BSc_instroommoment",
+      "to" : "jaarlijkse_BSc_instroom"
+    }, {
+      "from" : "evolutie_van_de_nieuwe_BSc_instromers",
+      "to" : "jaarlijkse_BSc_instroom"
+    }, {
+      "from" : "TIME_STEP",
+      "to" : "jaarlijkse_BSc_instroom"
+    }, {
+      "from" : "15",
+      "to" : "BSc_studenten"
+    }, {
+      "from" : "15",
+      "to" : "12"
+    }, {
+      "from" : "20",
+      "to" : "BSc_studenten"
+    }, {
+      "from" : "_48",
+      "to" : "BSc_uitstroom_indien_enkel_vaste_vertraging_door_minimale_studieduur"
+    }, {
+      "from" : "BSc_uitstroom_indien_enkel_vaste_vertraging_door_minimale_studieduur",
+      "to" : "BSc_uitstroom_na_vaste_en_bijkomende_vertraging"
+    }, {
+      "from" : "BSc_uitstroom_na_vaste_en_bijkomende_vertraging",
+      "to" : "_636"
+    }, {
+      "from" : "28",
+      "to" : "25"
+    }, {
+      "from" : "28",
+      "to" : "BSc_studenten"
+    }, {
+      "from" : "BSc_uitstroom_na_vaste_en_bijkomende_vertraging",
+      "to" : "afvallers_BSc"
+    }, {
+      "from" : "fractie_afvallers_BSc",
+      "to" : "afvallers_BSc"
+    }, {
+      "from" : "fractie_afvallers_BSc",
+      "to" : "_636"
+    }, {
+      "from" : "jaarlijkse_BSc_instroom",
+      "to" : "instroom_BSc_studenten"
+    }, {
+      "from" : "minimale_BSc_studieduur",
+      "to" : "BSc_uitstroom_indien_enkel_vaste_vertraging_door_minimale_studieduur"
+    }, {
+      "from" : "41",
+      "to" : "MSc_studenten"
+    }, {
+      "from" : "41",
+      "to" : "38"
+    }, {
+      "from" : "46",
+      "to" : "MSc_studenten"
+    }, {
+      "from" : "_48",
+      "to" : "MSc_uitstroom_indien_enkel_vaste_vertraging_door_minimale_studieduur"
+    }, {
+      "from" : "MSc_uitstroom_indien_enkel_vaste_vertraging_door_minimale_studieduur",
+      "to" : "MSc_uitstroom_na_vaste_en_bijkomende_vertraging"
+    }, {
+      "from" : "MSc_uitstroom_na_vaste_en_bijkomende_vertraging",
+      "to" : "_540"
+    }, {
+      "from" : "54",
+      "to" : "51"
+    }, {
+      "from" : "54",
+      "to" : "MSc_studenten"
+    }, {
+      "from" : "MSc_uitstroom_na_vaste_en_bijkomende_vertraging",
+      "to" : "afvallers_MSc"
+    }, {
+      "from" : "fractie_afvallers_MSc",
+      "to" : "afvallers_MSc"
+    }, {
+      "from" : "fractie_afvallers_MSc",
+      "to" : "_540"
+    }, {
+      "from" : "minimale_MSc_studieduur",
+      "to" : "MSc_uitstroom_indien_enkel_vaste_vertraging_door_minimale_studieduur"
+    }, {
+      "from" : "TIME_STEP",
+      "to" : "instroommoment_MSc"
+    }, {
+      "from" : "Time",
+      "to" : "evolutie_van_de_nieuwe_MSc_instromers"
+    }, {
+      "from" : "instroommoment_MSc",
+      "to" : "jaarlijkse_MSc_instroom"
+    }, {
+      "from" : "evolutie_van_de_nieuwe_MSc_instromers",
+      "to" : "jaarlijkse_MSc_instroom"
+    }, {
+      "from" : "TIME_STEP",
+      "to" : "jaarlijkse_MSc_instroom"
+    }, {
+      "from" : "jaarlijkse_MSc_instroom",
+      "to" : "instroom_MSc_studenten"
+    }, {
+      "from" : "uitstroom_BSc_studenten",
+      "to" : "instroom_MSc_studenten"
+    }, {
+      "from" : "fractie_van_BSc_naar_MSc",
+      "to" : "_48"
+    }, {
+      "from" : "78",
+      "to" : "fractie_van_BSc_naar_MSc"
+    }, {
+      "from" : "84",
+      "to" : "financien"
+    }, {
+      "from" : "84",
+      "to" : "81"
+    }, {
+      "from" : "89",
+      "to" : "86"
+    }, {
+      "from" : "89",
+      "to" : "financien"
+    }, {
+      "from" : "uitstroom_BSc_studenten",
+      "to" : "_48"
+    }, {
+      "from" : "subsidie_per_BSc_afstudeerder",
+      "to" : "_48"
+    }, {
+      "from" : "uitstroom_MSc_studenten",
+      "to" : "_48"
+    }, {
+      "from" : "subsidie_per_MSc_afstudeerder",
+      "to" : "_48"
+    }, {
+      "from" : "jaarlijkse_lump_sum_en_andere_gelden",
+      "to" : "instroom_onderwijsgelden"
+    }, {
+      "from" : "minimale_BSc_studieduur",
+      "to" : "BSc_uitstroom_na_vaste_en_bijkomende_vertraging"
+    }, {
+      "from" : "bijkomende_jaarlijkse_vertraging_BSc",
+      "to" : "BSc_uitstroom_na_vaste_en_bijkomende_vertraging"
+    }, {
+      "from" : "bijkomende_jaarlijkse_vertraging_MSc",
+      "to" : "MSc_uitstroom_na_vaste_en_bijkomende_vertraging"
+    }, {
+      "from" : "minimale_MSc_studieduur",
+      "to" : "MSc_uitstroom_na_vaste_en_bijkomende_vertraging"
+    }, {
+      "from" : "kwaliteit",
+      "to" : "bijkomende_jaarlijkse_vertraging_BSc"
+    }, {
+      "from" : "kwaliteit",
+      "to" : "bijkomende_jaarlijkse_vertraging_MSc"
+    }, {
+      "from" : "instroom_BSc_studenten",
+      "to" : "_48"
+    }, {
+      "from" : "instroom_MSc_studenten",
+      "to" : "_48"
+    }, {
+      "from" : "subsidie_per_MSc_instromer",
+      "to" : "_48"
+    }, {
+      "from" : "subsidie_per_BSc_instromer",
+      "to" : "_48"
+    }, {
+      "from" : "boete_per_langstudeerder",
+      "to" : "uitstroom_van_onderwijsgelden"
+    }, {
+      "from" : "financien",
+      "to" : "maximaal_aantal_docenten"
+    }, {
+      "from" : "gemiddelde_kost_per_docent",
+      "to" : "maximaal_aantal_docenten"
+    }, {
+      "from" : "123",
+      "to" : "docenten"
+    }, {
+      "from" : "123",
+      "to" : "120"
+    }, {
+      "from" : "maximaal_aantal_docenten",
+      "to" : "_48"
+    }, {
+      "from" : "docenten",
+      "to" : "_48"
+    }, {
+      "from" : "wervingstijd",
+      "to" : "netto_werving_van_docenten"
+    }, {
+      "from" : "docenten",
+      "to" : "uitstroom_van_onderwijsgelden"
+    }, {
+      "from" : "gemiddelde_kost_per_docent",
+      "to" : "uitstroom_van_onderwijsgelden"
+    }, {
+      "from" : "docenten",
+      "to" : "aantal_docenturen_per_student"
+    }, {
+      "from" : "MSc_studenten",
+      "to" : "141"
+    }, {
+      "from" : "BSc_studenten",
+      "to" : "141"
+    }, {
+      "from" : "aantal_docenturen_per_student",
+      "to" : "kwaliteit"
+    }, {
+      "from" : "kwaliteit",
+      "to" : "fractie_langstudeerder"
+    }, {
+      "from" : "fractie_langstudeerder",
+      "to" : "_48"
+    }, {
+      "from" : "Time",
+      "to" : "boete_per_langstudeerder"
+    }, {
+      "from" : "totaal_aantal_studenten",
+      "to" : "aantal_docenturen_per_student"
+    }, {
+      "from" : "totaal_aantal_studenten",
+      "to" : "_48"
+    }, {
+      "from" : "_636",
+      "to" : "144"
+    }, {
+      "from" : "_540",
+      "to" : "146"
+    }, {
+      "from" : "hoogte_boete_per_langstudeerder",
+      "to" : "boete_per_langstudeerder"
+    }, {
+      "from" : "kwaliteit",
+      "to" : "instroom_BSc_studenten"
+    }, {
+      "from" : "kwaliteit",
+      "to" : "instroom_MSc_studenten"
+    }, {
+      "from" : "kwaliteit",
+      "to" : "fractie_afvallers_BSc"
+    }, {
+      "from" : "kwaliteit",
+      "to" : "fractie_afvallers_MSc"
+    } ],
+    "flowRoutes" : [ {
+      "flowName" : "_48",
+      "points" : [ [ 231.0, 500.0 ] ]
+    }, {
+      "flowName" : "_636",
+      "points" : [ [ 525.0, 498.0 ] ]
+    }, {
+      "flowName" : "_48",
+      "points" : [ [ 340.0, 442.0 ] ]
+    }, {
+      "flowName" : "_48",
+      "points" : [ [ 959.0, 498.0 ] ]
+    }, {
+      "flowName" : "_540",
+      "points" : [ [ 1248.0, 495.0 ] ]
+    }, {
+      "flowName" : "_48",
+      "points" : [ [ 1063.0, 439.0 ] ]
+    }, {
+      "flowName" : "_48",
+      "points" : [ [ 867.0, 918.0 ] ]
+    }, {
+      "flowName" : "_48",
+      "points" : [ [ 559.0, 915.0 ] ]
+    }, {
+      "flowName" : "_48",
+      "points" : [ [ 643.0, 1130.0 ] ]
+    } ]
+  } ],
+  "defaultSimulation" : {
+    "timeStep" : "Year",
+    "duration" : 40.0,
+    "durationUnit" : "Year"
+  },
+  "metadata" : {
+    "license" : "unknown"
+  }
+}

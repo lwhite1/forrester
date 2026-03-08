@@ -45,11 +45,13 @@ public final class VensimExprTranslator {
             "(?i)GAME\\s*\\(");
     private static final Pattern RANDOM_UNIFORM_PATTERN = Pattern.compile(
             "(?i)RANDOM\\s+UNIFORM\\s*\\(");
+    private static final Pattern PULSE_TRAIN_PATTERN = Pattern.compile(
+            "(?i)PULSE\\s+TRAIN\\s*\\(");
     private static final Pattern CARET_PATTERN = Pattern.compile("\\^");
     private static final Pattern TIME_VAR_PATTERN = Pattern.compile(
             "(?i)\\bTime\\b");
     private static final Set<String> UNSUPPORTED_FUNCTIONS = Set.of(
-            "PULSE", "PULSE TRAIN", "DELAY N",
+            "DELAY N",
             "GET XLS DATA", "GET DIRECT DATA",
             "GET DIRECT CONSTANTS", "TABBED ARRAY", "SAMPLE IF TRUE",
             "VECTOR SELECT", "VECTOR ELM MAP", "VECTOR SORT ORDER",
@@ -119,6 +121,9 @@ public final class VensimExprTranslator {
         List<ExtractedLookup> lookups = new ArrayList<>();
         String expr = vensimExpr.strip();
 
+        // 0. Replace quoted variable names: "name with (special) chars" → name_with_special_chars
+        expr = translateQuotedNames(expr);
+
         // 1. Handle WITH LOOKUP first (before name replacement)
         expr = translateWithLookup(expr, varName, lookups, warnings);
 
@@ -174,6 +179,9 @@ public final class VensimExprTranslator {
         // 8b. RANDOM UNIFORM → RANDOM_UNIFORM
         expr = RANDOM_UNIFORM_PATTERN.matcher(expr).replaceAll("RANDOM_UNIFORM(");
 
+        // 8c. PULSE TRAIN → PULSE_TRAIN
+        expr = PULSE_TRAIN_PATTERN.matcher(expr).replaceAll("PULSE_TRAIN(");
+
         // 9. ^ → ** (Vensim uses ^ for power, Forrester uses **)
         expr = CARET_PATTERN.matcher(expr).replaceAll("**");
 
@@ -214,6 +222,22 @@ public final class VensimExprTranslator {
             name = "_" + name;
         }
         return name;
+    }
+
+    /**
+     * Replaces quoted variable references in Vensim expressions with normalized names.
+     * Vensim uses quotes for names containing special characters: "electric vehicles (EV)".
+     */
+    private static String translateQuotedNames(String expr) {
+        Pattern quoted = Pattern.compile("\"([^\"]+)\"");
+        Matcher m = quoted.matcher(expr);
+        StringBuilder sb = new StringBuilder();
+        while (m.find()) {
+            String name = m.group(1);
+            m.appendReplacement(sb, normalizeName(name));
+        }
+        m.appendTail(sb);
+        return sb.toString();
     }
 
     private static String translateWithLookup(String expr, String varName,
