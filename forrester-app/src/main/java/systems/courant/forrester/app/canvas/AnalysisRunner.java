@@ -2,6 +2,9 @@ package systems.courant.forrester.app.canvas;
 
 import javafx.application.Platform;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -13,6 +16,8 @@ import java.util.function.Consumer;
  * on a shared background thread pool and delivers results on the JavaFX thread.
  */
 public class AnalysisRunner {
+
+    private static final Logger log = LoggerFactory.getLogger(AnalysisRunner.class);
 
     private final ExecutorService executor = Executors.newSingleThreadExecutor(r -> {
         Thread t = new Thread(r, "analysis-runner");
@@ -48,7 +53,8 @@ public class AnalysisRunner {
                     statusBar.clearProgress();
                     onSuccess.accept(result);
                 });
-            } catch (Exception e) {
+            } catch (Exception e) { // Callable.call() declares checked Exception
+                log.error("{}: {}", errorTitle, e.toString(), e);
                 Platform.runLater(() -> {
                     statusBar.clearProgress();
                     errorHandler.accept(errorTitle,
@@ -66,7 +72,8 @@ public class AnalysisRunner {
             try {
                 T result = task.call();
                 Platform.runLater(() -> onSuccess.accept(result));
-            } catch (Exception e) {
+            } catch (Exception e) { // Callable.call() declares checked Exception
+                log.error("{}: {}", errorTitle, e.toString(), e);
                 Platform.runLater(() -> errorHandler.accept(errorTitle,
                         e.getMessage() != null ? e.getMessage() : e.toString()));
             }

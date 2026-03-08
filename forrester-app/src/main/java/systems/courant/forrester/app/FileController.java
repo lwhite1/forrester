@@ -168,7 +168,7 @@ final class FileController {
                 categoryMenu.getItems().add(item);
             }
             menu.getItems().addAll(categoryMenus.values());
-        } catch (Exception ex) {
+        } catch (IOException ex) {
             log.warn("Failed to load examples catalog", ex);
             MenuItem empty = new MenuItem("(no examples found)");
             empty.setDisable(true);
