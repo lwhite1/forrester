@@ -13,6 +13,7 @@ import javafx.scene.canvas.Canvas;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuItem;
+import javafx.scene.control.SeparatorMenuItem;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Pane;
 
@@ -745,6 +746,45 @@ public class ModelCanvas extends Canvas {
         }
     }
 
+    /**
+     * Shows a context menu for a general element (stock, flow, auxiliary, constant, lookup).
+     * Module and CLD variable elements are handled by {@link #showElementContextMenu}.
+     */
+    void showGeneralElementContextMenu(String elementName,
+                                       double screenX, double screenY) {
+        ContextMenu menu = new ContextMenu();
+
+        MenuItem editItem = new MenuItem("Edit");
+        editItem.setOnAction(e -> startInlineEdit(elementName));
+
+        MenuItem deleteItem = new MenuItem("Delete");
+        deleteItem.setOnAction(e -> {
+            canvasState.clearSelection();
+            canvasState.select(elementName);
+            deleteSelectedElements();
+            fireStatusChanged();
+        });
+
+        MenuItem cutItem = new MenuItem("Cut");
+        cutItem.setOnAction(e -> {
+            canvasState.clearSelection();
+            canvasState.select(elementName);
+            cutSelection();
+            fireStatusChanged();
+        });
+
+        MenuItem copyItem = new MenuItem("Copy");
+        copyItem.setOnAction(e -> {
+            canvasState.clearSelection();
+            canvasState.select(elementName);
+            copySelection();
+        });
+
+        menu.getItems().addAll(editItem, new SeparatorMenuItem(),
+                cutItem, copyItem, new SeparatorMenuItem(), deleteItem);
+        menu.show(this, screenX, screenY);
+    }
+
     void showCausalLinkContextMenu(ConnectionId link,
                                    double screenX, double screenY) {
         ContextMenu menu = new ContextMenu();
@@ -772,6 +812,95 @@ public class ModelCanvas extends Canvas {
             redraw();
         });
         menu.getItems().add(deleteItem);
+
+        menu.show(this, screenX, screenY);
+    }
+
+    /**
+     * Shows a context menu for an info link (dependency connection between elements).
+     */
+    void showInfoLinkContextMenu(ConnectionId link,
+                                 double screenX, double screenY) {
+        ContextMenu menu = new ContextMenu();
+
+        MenuItem deleteItem = new MenuItem("Delete");
+        deleteItem.setOnAction(e -> {
+            if (selectionController.deleteConnection(
+                    link, false, editor,
+                    () -> saveUndoState("Delete connection"))) {
+                connectors = editor.generateConnectors();
+                clearSelectedConnection();
+                redraw();
+                inputDispatcher.updateCursor(this);
+            }
+        });
+        menu.getItems().add(deleteItem);
+
+        menu.show(this, screenX, screenY);
+    }
+
+    /**
+     * Shows a context menu on empty canvas space.
+     */
+    void showCanvasContextMenu(double worldX, double worldY,
+                               double screenX, double screenY) {
+        ContextMenu menu = new ContextMenu();
+
+        MenuItem pasteItem = new MenuItem("Paste");
+        pasteItem.setOnAction(e -> pasteClipboard());
+        pasteItem.setDisable(!selectionController.canPaste());
+
+        menu.getItems().add(pasteItem);
+        menu.getItems().add(new SeparatorMenuItem());
+
+        MenuItem addStock = new MenuItem("Add Stock");
+        addStock.setOnAction(e -> {
+            String name = selectionController.createElementAt(
+                    worldX, worldY, CanvasToolBar.Tool.PLACE_STOCK, editor, canvasState,
+                    () -> saveUndoState("Add element"));
+            if (name != null) {
+                regenerateConnectors();
+                redraw();
+                fireStatusChanged();
+            }
+        });
+
+        MenuItem addFlow = new MenuItem("Add Flow");
+        addFlow.setOnAction(e -> switchTool(CanvasToolBar.Tool.PLACE_FLOW));
+
+        MenuItem addAux = new MenuItem("Add Auxiliary");
+        addAux.setOnAction(e -> {
+            String name = selectionController.createElementAt(
+                    worldX, worldY, CanvasToolBar.Tool.PLACE_AUX, editor, canvasState,
+                    () -> saveUndoState("Add element"));
+            if (name != null) {
+                regenerateConnectors();
+                redraw();
+                fireStatusChanged();
+            }
+        });
+
+        MenuItem addConstant = new MenuItem("Add Constant");
+        addConstant.setOnAction(e -> {
+            String name = selectionController.createElementAt(
+                    worldX, worldY, CanvasToolBar.Tool.PLACE_CONSTANT, editor, canvasState,
+                    () -> saveUndoState("Add element"));
+            if (name != null) {
+                regenerateConnectors();
+                redraw();
+                fireStatusChanged();
+            }
+        });
+
+        menu.getItems().addAll(addStock, addFlow, addAux, addConstant);
+        menu.getItems().add(new SeparatorMenuItem());
+
+        MenuItem selectAllItem = new MenuItem("Select All");
+        selectAllItem.setOnAction(e -> {
+            selectAll();
+            fireStatusChanged();
+        });
+        menu.getItems().add(selectAllItem);
 
         menu.show(this, screenX, screenY);
     }

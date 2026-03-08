@@ -31,9 +31,32 @@ class ModelWindowFxTest {
         app.start(stage);
     }
 
+    /**
+     * Transition past the start screen into the editor by clicking "New Model".
+     */
+    private void enterEditor(FxRobot robot) {
+        robot.clickOn("#startNewModel");
+        WaitForAsyncUtils.waitForFxEvents();
+    }
+
     @Test
-    @DisplayName("Window title contains 'Forrester'")
+    @DisplayName("Window title is 'Forrester' on start screen")
+    void windowTitleOnStartScreen(FxRobot robot) {
+        assertThat(stage.getTitle()).isEqualTo("Forrester");
+    }
+
+    @Test
+    @DisplayName("Start screen shows New Model, Open Model, and Getting Started cards")
+    void startScreenCardsPresent(FxRobot robot) {
+        assertThat(robot.lookup("#startNewModel").tryQuery()).isPresent();
+        assertThat(robot.lookup("#startOpenModel").tryQuery()).isPresent();
+        assertThat(robot.lookup("#startGettingStarted").tryQuery()).isPresent();
+    }
+
+    @Test
+    @DisplayName("Window title contains 'Forrester' after entering editor")
     void windowTitleContainsForrester(FxRobot robot) {
+        enterEditor(robot);
         assertThat(stage.getTitle()).contains("Forrester");
     }
 
@@ -47,6 +70,7 @@ class ModelWindowFxTest {
     @Test
     @DisplayName("Toolbar is present with all tool buttons")
     void toolbarPresent(FxRobot robot) {
+        enterEditor(robot);
         assertThat(robot.lookup("#toolSelect").tryQuery()).isPresent();
         assertThat(robot.lookup("#toolStock").tryQuery()).isPresent();
         assertThat(robot.lookup("#toolFlow").tryQuery()).isPresent();
@@ -61,6 +85,7 @@ class ModelWindowFxTest {
     @Test
     @DisplayName("Status bar is present with default state")
     void statusBarPresent(FxRobot robot) {
+        enterEditor(robot);
         assertThat(robot.lookup("#statusBar").tryQuery()).isPresent();
 
         Label toolLabel = robot.lookup("#statusTool").queryAs(Label.class);
@@ -73,6 +98,7 @@ class ModelWindowFxTest {
     @Test
     @DisplayName("Properties panel shows placeholder when nothing selected")
     void propertiesPanelPlaceholder(FxRobot robot) {
+        enterEditor(robot);
         Label placeholder = robot.lookup("#propertiesPlaceholder").queryAs(Label.class);
         assertThat(placeholder.getText()).isEqualTo("No selection");
     }
@@ -80,6 +106,7 @@ class ModelWindowFxTest {
     @Test
     @DisplayName("Right tab pane has Properties and Dashboard tabs")
     void rightTabPaneTabs(FxRobot robot) {
+        enterEditor(robot);
         TabPane tabPane = robot.lookup("#rightTabPane").queryAs(TabPane.class);
         assertThat(tabPane.getTabs()).hasSize(2);
         assertThat(tabPane.getTabs().get(0).getText()).isEqualTo("Properties");
@@ -89,6 +116,7 @@ class ModelWindowFxTest {
     @Test
     @DisplayName("Clicking a tool button changes the status bar tool label")
     void toolSelectionUpdatesStatusBar(FxRobot robot) {
+        enterEditor(robot);
         robot.clickOn("#toolStock");
         WaitForAsyncUtils.waitForFxEvents();
 
@@ -111,6 +139,7 @@ class ModelWindowFxTest {
     @Test
     @DisplayName("File > New resets the model to Untitled")
     void fileNewResetsModel(FxRobot robot) {
+        enterEditor(robot);
         // First change something — select stock tool
         robot.clickOn("#toolStock");
         WaitForAsyncUtils.waitForFxEvents();
@@ -128,6 +157,7 @@ class ModelWindowFxTest {
     @Test
     @DisplayName("Breadcrumb bar is hidden at root level")
     void breadcrumbHiddenAtRoot(FxRobot robot) {
+        enterEditor(robot);
         assertThat(robot.lookup("#breadcrumbBar").queryAs(javafx.scene.Node.class).isVisible())
                 .isFalse();
     }

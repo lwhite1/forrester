@@ -305,7 +305,7 @@ final class FileController {
         updateTitle.run();
     }
 
-    private void openExample(String name, String resourcePath) {
+    void openExample(String name, String resourcePath) {
         try (InputStream in = getClass().getResourceAsStream("/models/" + resourcePath)) {
             if (in == null) {
                 showError.accept("Example resource not found: " + resourcePath);

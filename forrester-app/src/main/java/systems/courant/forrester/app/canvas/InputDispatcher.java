@@ -459,32 +459,51 @@ final class InputDispatcher {
                                             MouseEvent event, ModelCanvas canvas) {
         CanvasState canvasState = canvas.canvasState();
         ModelEditor editor = canvas.getEditor();
+        double sx = event.getScreenX();
+        double sy = event.getScreenY();
 
+        panning = false;
+        panMoved = false;
+
+        // 1. Element hit
         String hit = HitTester.hitTest(canvasState, worldX, worldY);
         if (hit != null) {
             ElementType hitType = canvasState.getType(hit).orElse(null);
             if (hitType == ElementType.MODULE || hitType == ElementType.CLD_VARIABLE) {
-                panning = false;
-                panMoved = false;
-                canvas.showElementContextMenu(hit, event.getScreenX(), event.getScreenY());
-                updateCursor(canvas);
-                return true;
+                canvas.showElementContextMenu(hit, sx, sy);
+            } else {
+                canvas.showGeneralElementContextMenu(hit, sx, sy);
             }
+            updateCursor(canvas);
+            return true;
         }
-        // Check for causal link right-click
-        if (hit == null && editor != null) {
-            ConnectionId causalHit = HitTester.hitTestCausalLink(canvasState,
-                    editor.getCausalLinks(), worldX, worldY);
-            if (causalHit != null) {
-                panning = false;
-                panMoved = false;
-                canvas.showCausalLinkContextMenu(causalHit,
-                        event.getScreenX(), event.getScreenY());
-                updateCursor(canvas);
-                return true;
-            }
+
+        if (editor == null) {
+            return false;
         }
-        return false;
+
+        // 2. Causal link hit
+        ConnectionId causalHit = HitTester.hitTestCausalLink(canvasState,
+                editor.getCausalLinks(), worldX, worldY);
+        if (causalHit != null) {
+            canvas.showCausalLinkContextMenu(causalHit, sx, sy);
+            updateCursor(canvas);
+            return true;
+        }
+
+        // 3. Info link hit
+        ConnectionId infoHit = HitTester.hitTestInfoLink(canvasState,
+                canvas.getConnectors(), worldX, worldY);
+        if (infoHit != null) {
+            canvas.showInfoLinkContextMenu(infoHit, sx, sy);
+            updateCursor(canvas);
+            return true;
+        }
+
+        // 4. Empty canvas
+        canvas.showCanvasContextMenu(worldX, worldY, sx, sy);
+        updateCursor(canvas);
+        return true;
     }
 
     // --- Key events ---

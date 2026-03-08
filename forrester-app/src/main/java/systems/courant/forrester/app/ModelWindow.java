@@ -109,6 +109,11 @@ public class ModelWindow {
     private SimulationController simulationController;
     private ModelEditListener dirtyListener;
 
+    private SplitPane editorSplitPane;
+    private VBox topContainer;
+    private boolean editorShown;
+    private final List<MenuItem> editorOnlyItems = new ArrayList<>();
+
     public ModelWindow(Stage stage, ForresterApp app, Clipboard clipboard) {
         this.stage = stage;
         this.app = app;
@@ -178,8 +183,6 @@ public class ModelWindow {
         });
         canvas.setOnNavigationChanged(this::updateBreadcrumb);
 
-        fileController.newModel();
-
         Pane canvasPane = new Pane(canvas);
         canvas.widthProperty().bind(canvasPane.widthProperty());
         canvas.heightProperty().bind(canvasPane.heightProperty());
@@ -206,17 +209,43 @@ public class ModelWindow {
         dashboardTab.setId("dashboardTab");
         rightTabPane.getTabs().addAll(propertiesTab, dashboardTab);
 
-        SplitPane splitPane = new SplitPane(canvasPane, rightTabPane);
-        splitPane.setDividerPositions(0.75);
+        editorSplitPane = new SplitPane(canvasPane, rightTabPane);
+        editorSplitPane.setDividerPositions(0.75);
         SplitPane.setResizableWithParent(rightTabPane, false);
 
         MenuBar menuBar = createMenuBar();
-        VBox topContainer = new VBox(menuBar, toolBar, breadcrumbBar);
+        topContainer = new VBox(menuBar, toolBar, breadcrumbBar);
 
         root = new BorderPane();
         root.setId("modelWindowRoot");
-        root.setTop(topContainer);
-        root.setCenter(splitPane);
+
+        // Show start screen instead of blank editor
+        StartScreen startScreen = new StartScreen();
+        startScreen.setOnNewModel(() -> {
+            showEditor();
+            fileController.newModel();
+            canvas.requestFocus();
+        });
+        startScreen.setOnOpenFile(() -> {
+            showEditor();
+            fileController.openFile();
+            // If user cancelled the file chooser, still show the editor
+            canvas.requestFocus();
+        });
+        startScreen.setOnGettingStarted(() -> {
+            showEditor();
+            fileController.newModel();
+            quickstartWindow = showHelpWindow(quickstartWindow, QuickstartDialog::new);
+            canvas.requestFocus();
+        });
+        startScreen.setOnOpenExample((name, path) -> {
+            showEditor();
+            fileController.openExample(name, path);
+            canvas.requestFocus();
+        });
+
+        root.setTop(new VBox(menuBar));
+        root.setCenter(startScreen);
         root.setBottom(statusBar);
 
         Scene scene = new Scene(root, 1200, 800);
@@ -255,6 +284,22 @@ public class ModelWindow {
         canvas.requestFocus();
     }
 
+    /**
+     * Transitions from the start screen to the full editor layout.
+     * Safe to call multiple times; subsequent calls are no-ops.
+     */
+    private void showEditor() {
+        if (editorShown) {
+            return;
+        }
+        editorShown = true;
+        root.setTop(topContainer);
+        root.setCenter(editorSplitPane);
+        for (MenuItem item : editorOnlyItems) {
+            item.setDisable(false);
+        }
+    }
+
     private MenuBar createMenuBar() {
         Menu fileMenu = new Menu("File");
 
@@ -267,12 +312,18 @@ public class ModelWindow {
         MenuItem newItem = new MenuItem("New");
         newItem.setId("menuNew");
         newItem.setAccelerator(new KeyCodeCombination(KeyCode.N, KeyCombination.SHORTCUT_DOWN));
-        newItem.setOnAction(e -> fileController.newModel());
+        newItem.setOnAction(e -> {
+            showEditor();
+            fileController.newModel();
+        });
 
         MenuItem openItem = new MenuItem("Open...");
         openItem.setId("menuOpen");
         openItem.setAccelerator(new KeyCodeCombination(KeyCode.O, KeyCombination.SHORTCUT_DOWN));
-        openItem.setOnAction(e -> fileController.openFile());
+        openItem.setOnAction(e -> {
+            showEditor();
+            fileController.openFile();
+        });
 
         MenuItem saveItem = new MenuItem("Save");
         saveItem.setId("menuSave");
@@ -304,6 +355,13 @@ public class ModelWindow {
 
         MenuItem modelInfoItem = new MenuItem("Model Info\u2026");
         modelInfoItem.setOnAction(e -> showModelInfoDialog());
+
+        // Disable file items that require an open model
+        saveItem.setDisable(true);
+        saveAsItem.setDisable(true);
+        exportItem.setDisable(true);
+        modelInfoItem.setDisable(true);
+        editorOnlyItems.addAll(List.of(saveItem, saveAsItem, exportItem, modelInfoItem));
 
         fileMenu.getItems().addAll(newWindowItem, newItem, openItem, examplesMenu,
                 new SeparatorMenuItem(), modelInfoItem,
@@ -366,6 +424,8 @@ public class ModelWindow {
         editMenu.getItems().addAll(undoItem, redoItem, undoHistoryItem,
                 new SeparatorMenuItem(),
                 cutItem, copyItem, pasteItem, new SeparatorMenuItem(), selectAllItem);
+        editMenu.setDisable(true);
+        editorOnlyItems.add(editMenu);
 
         // View menu
         Menu viewMenu = new Menu("View");
@@ -419,6 +479,8 @@ public class ModelWindow {
         viewMenu.getItems().addAll(commandPaletteItem, new SeparatorMenuItem(),
                 zoomToFitItem, resetZoomItem, new SeparatorMenuItem(),
                 activityLogItem, popOutDashboardItem);
+        viewMenu.setDisable(true);
+        editorOnlyItems.add(viewMenu);
 
         // Simulate menu
         Menu simulateMenu = new Menu("Simulate");
@@ -450,6 +512,8 @@ public class ModelWindow {
         simulateMenu.getItems().addAll(settingsItem, runItem,
                 new SeparatorMenuItem(), validateItem,
                 new SeparatorMenuItem(), sweepItem, multiSweepItem, monteCarloItem, optimizeItem);
+        simulateMenu.setDisable(true);
+        editorOnlyItems.add(simulateMenu);
 
         Menu helpMenu = new Menu("Help");
 
@@ -490,6 +554,7 @@ public class ModelWindow {
     }
 
     void loadDefinition(ModelDefinition def, String displayName) {
+        showEditor();
         if (editor != null) {
             editor.removeListener(logListener);
             editor.removeListener(staleListener);
@@ -778,6 +843,10 @@ public class ModelWindow {
     }
 
     private void updateTitle() {
+        if (!editorShown) {
+            stage.setTitle("Forrester");
+            return;
+        }
         String name;
         if (editor != null && !"Untitled".equals(editor.getModelName())) {
             name = editor.getModelName();

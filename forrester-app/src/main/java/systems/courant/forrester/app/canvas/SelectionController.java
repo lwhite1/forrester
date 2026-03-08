@@ -94,6 +94,10 @@ final class SelectionController {
         }
     }
 
+    boolean canPaste() {
+        return copyPaste.hasContent();
+    }
+
     /**
      * Copies the current selection to the clipboard.
      */
