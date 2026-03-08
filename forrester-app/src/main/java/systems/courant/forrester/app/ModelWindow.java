@@ -19,6 +19,7 @@ import systems.courant.forrester.app.canvas.SdConceptsDialog;
 import systems.courant.forrester.app.canvas.StatusBar;
 import systems.courant.forrester.app.canvas.UndoHistoryPopup;
 import systems.courant.forrester.app.canvas.UndoManager;
+import systems.courant.forrester.app.canvas.ZoomOverlay;
 import systems.courant.forrester.model.ModelMetadata;
 import systems.courant.forrester.model.def.ElementType;
 import systems.courant.forrester.model.def.ModelDefinition;
@@ -98,6 +99,7 @@ public class ModelWindow {
     private ModelEditListener staleListener;
     private AnalysisRunner analysisRunner;
     private CommandPalette commandPalette;
+    private ZoomOverlay zoomOverlay;
     private Stage quickstartWindow;
     private Stage sdConceptsWindow;
     private Stage exprLangWindow;
@@ -182,6 +184,9 @@ public class ModelWindow {
         canvas.widthProperty().bind(canvasPane.widthProperty());
         canvas.heightProperty().bind(canvasPane.heightProperty());
         canvas.setOverlayPane(canvasPane);
+
+        zoomOverlay = new ZoomOverlay(canvas);
+        zoomOverlay.anchorTo(canvasPane);
 
         propertiesPanel = new PropertiesPanel();
         propertiesPanel.setOnOpenExpressionHelp(() -> {
@@ -394,7 +399,25 @@ public class ModelWindow {
         commandPaletteItem.setAccelerator(new KeyCodeCombination(KeyCode.K, KeyCombination.SHORTCUT_DOWN));
         commandPaletteItem.setOnAction(e -> commandPalette.show(stage));
 
+        MenuItem zoomToFitItem = new MenuItem("Zoom to Fit");
+        zoomToFitItem.setId("menuZoomToFit");
+        zoomToFitItem.setAccelerator(new KeyCodeCombination(KeyCode.F,
+                KeyCombination.SHORTCUT_DOWN, KeyCombination.SHIFT_DOWN));
+        zoomToFitItem.setOnAction(e -> {
+            canvas.zoomToFit();
+            canvas.requestFocus();
+        });
+
+        MenuItem resetZoomItem = new MenuItem("Reset Zoom");
+        resetZoomItem.setId("menuResetZoom");
+        resetZoomItem.setAccelerator(new KeyCodeCombination(KeyCode.DIGIT0, KeyCombination.SHORTCUT_DOWN));
+        resetZoomItem.setOnAction(e -> {
+            canvas.resetZoom();
+            canvas.requestFocus();
+        });
+
         viewMenu.getItems().addAll(commandPaletteItem, new SeparatorMenuItem(),
+                zoomToFitItem, resetZoomItem, new SeparatorMenuItem(),
                 activityLogItem, popOutDashboardItem);
 
         // Simulate menu
@@ -650,6 +673,9 @@ public class ModelWindow {
                 activeEditor.getCldVariables().size(),
                 activeEditor.getCausalLinks().size());
         statusBar.updateZoom(canvas.getZoomScale());
+        if (zoomOverlay != null) {
+            zoomOverlay.updateZoom(canvas.getZoomScale());
+        }
 
         UndoManager activeUndo = canvas.getUndoManager();
         if (undoItem != null) {
@@ -826,6 +852,24 @@ public class ModelWindow {
         commands.add(cmd("Multi-Parameter Sweep", "Simulate", simulationController::runMultiParameterSweep));
         commands.add(cmd("Monte Carlo", "Simulate", simulationController::runMonteCarlo));
         commands.add(cmd("Optimize", "Simulate", simulationController::runOptimization));
+
+        // View
+        commands.add(cmd("Zoom to Fit", "View", () -> {
+            canvas.zoomToFit();
+            canvas.requestFocus();
+        }));
+        commands.add(cmd("Reset Zoom", "View", () -> {
+            canvas.resetZoom();
+            canvas.requestFocus();
+        }));
+        commands.add(cmd("Zoom In", "View", () -> {
+            canvas.zoomIn();
+            canvas.requestFocus();
+        }));
+        commands.add(cmd("Zoom Out", "View", () -> {
+            canvas.zoomOut();
+            canvas.requestFocus();
+        }));
 
         // Edit
         commands.add(cmd("Undo", "Edit", () -> {

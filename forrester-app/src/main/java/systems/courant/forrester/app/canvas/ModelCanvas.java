@@ -128,7 +128,10 @@ public class ModelCanvas extends Canvas {
         widthProperty().addListener(observable -> redraw());
         heightProperty().addListener(observable -> redraw());
 
-        setOnScroll(event -> inputDispatcher.handleScroll(event, viewport, this::redraw));
+        setOnScroll(event -> inputDispatcher.handleScroll(event, viewport, () -> {
+            redraw();
+            fireStatusChanged();
+        }));
         setOnMousePressed(event -> inputDispatcher.handleMousePressed(event, this));
         setOnMouseDragged(event -> inputDispatcher.handleMouseDragged(event, this));
         setOnMouseReleased(event -> inputDispatcher.handleMouseReleased(event, this));
@@ -460,22 +463,58 @@ public class ModelCanvas extends Canvas {
         }
     }
 
-    void zoomIn() {
+    public void zoomIn() {
         viewport.zoomAt(getWidth() / 2, getHeight() / 2, ZOOM_FACTOR);
         redraw();
         inputDispatcher.updateCursor(this);
+        fireStatusChanged();
     }
 
-    void zoomOut() {
+    public void zoomOut() {
         viewport.zoomAt(getWidth() / 2, getHeight() / 2, 1.0 / ZOOM_FACTOR);
         redraw();
         inputDispatcher.updateCursor(this);
+        fireStatusChanged();
     }
 
-    void resetZoom() {
+    public void resetZoom() {
         viewport.reset();
         redraw();
         inputDispatcher.updateCursor(this);
+        fireStatusChanged();
+    }
+
+    /**
+     * Zooms and pans so that all model elements fit within the visible canvas
+     * with a small margin. Does not zoom beyond 1.0 (100%) for small models.
+     */
+    public void zoomToFit() {
+        if (editor == null || canvasState.getDrawOrder().isEmpty()) {
+            resetZoom();
+            return;
+        }
+
+        ExportBounds.Bounds bounds = ExportBounds.compute(canvasState, editor);
+        double canvasW = getWidth();
+        double canvasH = getHeight();
+
+        if (canvasW <= 0 || canvasH <= 0 || bounds.width() <= 0 || bounds.height() <= 0) {
+            return;
+        }
+
+        double fitScale = Math.min(canvasW / bounds.width(), canvasH / bounds.height());
+        fitScale = Math.min(fitScale, 1.0); // don't magnify beyond 100%
+
+        double worldCenterX = bounds.minX() + bounds.width() / 2;
+        double worldCenterY = bounds.minY() + bounds.height() / 2;
+
+        double translateX = canvasW / 2 - worldCenterX * fitScale;
+        double translateY = canvasH / 2 - worldCenterY * fitScale;
+
+        viewport.restoreState(translateX, translateY, fitScale);
+        redraw();
+        inputDispatcher.updateCursor(this);
+        fireStatusChanged();
     }
 
     // --- Rendering ---
