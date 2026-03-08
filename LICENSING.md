@@ -48,3 +48,10 @@ the license of the underlying model content, not the engine.
 | Engine, UI, app, tools   | AGPL-3.0         | `LICENSE`                   |
 | Original demo models     | CC-BY-SA-4.0     | `forrester-demos/LICENSE`   |
 | TU Delft / Pruyt models  | CC-BY-NC-SA-4.0  | `THIRD-PARTY-LICENSES`      |
+
+## Viewing Model Metadata
+
+Each model stores its license, author, source, and URL in its
+`ModelMetadata`. To view or edit this information in the application,
+open **File > Model Data**. The dialog shows all metadata fields
+for the currently loaded model.
