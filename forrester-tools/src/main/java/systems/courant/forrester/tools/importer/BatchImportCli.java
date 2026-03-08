@@ -195,6 +195,10 @@ public class BatchImportCli {
 
     static Path downloadToTemp(String url) throws IOException {
         URI uri = URI.create(url);
+        String scheme = uri.getScheme();
+        if (scheme == null || !(scheme.equalsIgnoreCase("http") || scheme.equalsIgnoreCase("https"))) {
+            throw new IOException("Only http and https URLs are allowed, got: " + url);
+        }
         String fileName = uri.getPath().substring(uri.getPath().lastIndexOf('/') + 1);
         if (fileName.isBlank()) {
             fileName = "model.mdl";
