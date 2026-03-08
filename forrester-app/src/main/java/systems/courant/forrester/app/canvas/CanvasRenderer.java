@@ -192,7 +192,7 @@ public class CanvasRenderer {
             }
         }
 
-        // 2a2. Draw error/warning indicators on elements with validation issues
+        // 2a. Draw error/warning indicators on elements with validation issues
         if (elementIssues != null) {
             for (Map.Entry<String, ValidationIssue.Severity> entry : elementIssues.entrySet()) {
                 if (canvasState.hasElement(entry.getKey())) {

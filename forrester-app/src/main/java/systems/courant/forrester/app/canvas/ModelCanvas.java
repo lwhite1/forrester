@@ -101,6 +101,7 @@ public class ModelCanvas extends Canvas {
                 public void saveAndSetConstantValue(String name, double value) {
                     saveUndoState("Edit constant");
                     editor.setConstantValue(name, value);
+                    recomputeValidation();
                     redraw();
                 }
 
@@ -159,8 +160,7 @@ public class ModelCanvas extends Canvas {
         this.editor = editor;
         canvasState.loadFrom(view);
         this.connectors = editor.generateConnectors();
-        invalidateLoopAnalysis();
-        recomputeValidation();
+        invalidateAnalysis();
         redraw();
     }
 
@@ -244,6 +244,10 @@ public class ModelCanvas extends Canvas {
 
     // --- Validation indicators ---
 
+    /**
+     * Recomputes validation issues for all elements in the model.
+     * Called from {@link #invalidateAnalysis()} on every structural mutation.
+     */
     private void recomputeValidation() {
         if (editor == null) {
             elementIssues = Map.of();
@@ -260,6 +264,15 @@ public class ModelCanvas extends Canvas {
             }
         }
         elementIssues = issues;
+    }
+
+    /**
+     * Invalidates all cached analysis (loop highlighting, validation indicators).
+     * Must be called after any structural model mutation.
+     */
+    private void invalidateAnalysis() {
+        invalidateLoopAnalysis();
+        recomputeValidation();
     }
 
     // --- Undo/redo ---
@@ -288,8 +301,7 @@ public class ModelCanvas extends Canvas {
         editor.loadFrom(snapshot.model());
         canvasState.loadFrom(snapshot.view());
         connectors = editor.generateConnectors();
-        invalidateLoopAnalysis();
-        recomputeValidation();
+        invalidateAnalysis();
         redraw();
     }
 
@@ -412,7 +424,7 @@ public class ModelCanvas extends Canvas {
 
     void regenerateConnectors() {
         connectors = editor.generateConnectors();
-        invalidateLoopAnalysis();
+        invalidateAnalysis();
     }
 
     void setSelectedConnection(ConnectionId connection, boolean isCausal) {
@@ -434,7 +446,7 @@ public class ModelCanvas extends Canvas {
                     connectors = editor.generateConnectors();
                 }
                 clearSelectedConnection();
-                invalidateLoopAnalysis();
+                invalidateAnalysis();
                 redraw();
                 inputDispatcher.updateCursor(this);
             }
@@ -553,8 +565,7 @@ public class ModelCanvas extends Canvas {
 
     private void regenerateAndRedraw() {
         connectors = editor.generateConnectors();
-        invalidateLoopAnalysis();
-        recomputeValidation();
+        invalidateAnalysis();
         redraw();
     }
 
@@ -731,8 +742,7 @@ public class ModelCanvas extends Canvas {
         }
 
         connectors = editor.generateConnectors();
-        invalidateLoopAnalysis();
-        recomputeValidation();
+        invalidateAnalysis();
         redraw();
 
         navController.fireNavigationChanged();
@@ -829,7 +839,7 @@ public class ModelCanvas extends Canvas {
             item.setOnAction(e -> {
                 saveUndoState("Set polarity");
                 editor.setCausalLinkPolarity(link.from(), link.to(), p);
-                invalidateLoopAnalysis();
+                invalidateAnalysis();
                 redraw();
             });
             polarityMenu.getItems().add(item);
@@ -842,7 +852,7 @@ public class ModelCanvas extends Canvas {
             editor.removeCausalLink(link.from(), link.to());
             selectedConnection = null;
             selectedIsCausalLink = false;
-            invalidateLoopAnalysis();
+            invalidateAnalysis();
             redraw();
         });
         menu.getItems().add(deleteItem);
