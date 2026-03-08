@@ -14,11 +14,18 @@ import java.util.ArrayList;
 import java.util.Deque;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
  * Snapshot-based undo/redo manager. Stores LZ4-compressed JSON snapshots
  * on two stacks to reduce memory usage for large models. Each entry carries
  * an action label for display in the undo history panel.
+ *
+ * <p>Serialization and compression run on a background thread to avoid
+ * blocking the FX thread during drag operations. The snapshot (immutable
+ * model state) is captured on the FX thread before being handed off.
  *
  * <p>Pushing a new undo state clears the redo stack. The undo stack
  * is capped at {@value MAX_UNDO} entries.
@@ -37,15 +44,28 @@ public class UndoManager {
     public record Snapshot(ModelDefinition model, ViewDef view) {}
 
     /**
-     * A compressed undo entry: LZ4-compressed JSON bytes plus a human-readable label.
-     * Stores the original (uncompressed) length for decompression.
+     * LZ4-compressed JSON bytes. Stores the original (uncompressed) length
+     * for decompression.
      */
-    record CompressedEntry(byte[] data, int originalLength, String label) {}
+    record CompressedData(byte[] data, int originalLength) {}
+
+    /**
+     * An undo/redo entry whose compression may still be in progress.
+     * The label is available immediately; the compressed data arrives
+     * via a future that completes on a background thread.
+     */
+    record UndoEntry(CompletableFuture<CompressedData> future, String label) {}
 
     private static final ModelDefinitionSerializer SERIALIZER = new ModelDefinitionSerializer();
 
-    private final Deque<CompressedEntry> undoStack = new ArrayDeque<>();
-    private final Deque<CompressedEntry> redoStack = new ArrayDeque<>();
+    private final Deque<UndoEntry> undoStack = new ArrayDeque<>();
+    private final Deque<UndoEntry> redoStack = new ArrayDeque<>();
+    private final ExecutorService compressor =
+            Executors.newSingleThreadExecutor(r -> {
+                Thread t = new Thread(r, "undo-compressor");
+                t.setDaemon(true);
+                return t;
+            });
 
     /**
      * Saves the current state before a mutation. Clears the redo stack and
@@ -55,7 +75,7 @@ public class UndoManager {
      * @param label   a human-readable description of the action about to be performed
      */
     public void pushUndo(Snapshot current, String label) {
-        undoStack.push(compress(current, label));
+        undoStack.push(compressAsync(current, label));
         redoStack.clear();
         if (undoStack.size() > MAX_UNDO) {
             undoStack.removeLast();
@@ -83,7 +103,7 @@ public class UndoManager {
         if (undoStack.isEmpty()) {
             return Optional.empty();
         }
-        redoStack.push(compress(current, label));
+        redoStack.push(compressAsync(current, label));
         return Optional.of(decompress(undoStack.pop()));
     }
 
@@ -106,7 +126,7 @@ public class UndoManager {
         if (redoStack.isEmpty()) {
             return Optional.empty();
         }
-        undoStack.push(compress(current, label));
+        undoStack.push(compressAsync(current, label));
         return Optional.of(decompress(redoStack.pop()));
     }
 
@@ -130,7 +150,7 @@ public class UndoManager {
             return Optional.empty();
         }
         // Push current to redo, then move entries from undo to redo
-        redoStack.push(compress(current, "Current"));
+        redoStack.push(compressAsync(current, "Current"));
         for (int i = 0; i < depth; i++) {
             redoStack.push(undoStack.pop());
         }
@@ -163,7 +183,7 @@ public class UndoManager {
      */
     public List<String> undoLabels() {
         List<String> labels = new ArrayList<>(undoStack.size());
-        for (CompressedEntry entry : undoStack) {
+        for (UndoEntry entry : undoStack) {
             labels.add(entry.label());
         }
         return labels;
@@ -174,7 +194,7 @@ public class UndoManager {
      */
     public List<String> redoLabels() {
         List<String> labels = new ArrayList<>(redoStack.size());
-        for (CompressedEntry entry : redoStack) {
+        for (UndoEntry entry : redoStack) {
             labels.add(entry.label());
         }
         return labels;
@@ -188,7 +208,7 @@ public class UndoManager {
         redoStack.clear();
     }
 
-    private static CompressedEntry compress(Snapshot snapshot, String label) {
+    private UndoEntry compressAsync(Snapshot snapshot, String label) {
         ModelDefinition model = snapshot.model();
         // Ensure the view is embedded in the model for serialization
         if (snapshot.view() != null && model.views().isEmpty()) {
@@ -199,15 +219,20 @@ public class UndoManager {
                     model.subscripts(), model.cldVariables(), model.causalLinks(),
                     List.of(snapshot.view()), model.defaultSimulation());
         }
-        String json = SERIALIZER.toJson(model);
-        byte[] raw = json.getBytes(StandardCharsets.UTF_8);
-        byte[] compressed = COMPRESSOR.compress(raw);
-        return new CompressedEntry(compressed, raw.length, label);
+        ModelDefinition finalModel = model;
+        CompletableFuture<CompressedData> future = CompletableFuture.supplyAsync(() -> {
+            String json = SERIALIZER.toJson(finalModel);
+            byte[] raw = json.getBytes(StandardCharsets.UTF_8);
+            byte[] compressed = COMPRESSOR.compress(raw);
+            return new CompressedData(compressed, raw.length);
+        }, compressor);
+        return new UndoEntry(future, label);
     }
 
-    private static Snapshot decompress(CompressedEntry entry) {
-        byte[] raw = new byte[entry.originalLength()];
-        DECOMPRESSOR.decompress(entry.data(), 0, raw, 0, entry.originalLength());
+    private static Snapshot decompress(UndoEntry entry) {
+        CompressedData data = entry.future().join();
+        byte[] raw = new byte[data.originalLength()];
+        DECOMPRESSOR.decompress(data.data(), 0, raw, 0, data.originalLength());
         String json = new String(raw, StandardCharsets.UTF_8);
         ModelDefinition model = SERIALIZER.fromJson(json);
         // The view is stored inside the model's views list
