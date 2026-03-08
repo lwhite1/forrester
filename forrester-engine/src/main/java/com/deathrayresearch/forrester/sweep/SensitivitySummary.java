@@ -55,18 +55,12 @@ public final class SensitivitySummary {
         }
 
         double[] finalValues = extractFinalValues(result.getResults(), targetVariable);
-        double min = Double.MAX_VALUE;
-        double max = -Double.MAX_VALUE;
-        for (double v : finalValues) {
-            if (v < min) { min = v; }
-            if (v > max) { max = v; }
-        }
-
-        double baseline = finalValues[finalValues.length / 2];
-        double impact = computeImpactFraction(min, max, baseline);
+        double[] minMax = minMax(finalValues);
+        double baseline = mean(finalValues);
+        double impact = computeImpactFraction(minMax[0], minMax[1], baseline);
 
         return List.of(new ParameterImpact(
-                result.getParameterName(), targetVariable, min, max, baseline, impact));
+                result.getParameterName(), targetVariable, minMax[0], minMax[1], baseline, impact));
     }
 
     /**
@@ -136,16 +130,10 @@ public final class SensitivitySummary {
             }
 
             double[] finalValues = extractFinalValues(filtered, targetVariable);
-            double min = Double.MAX_VALUE;
-            double max = -Double.MAX_VALUE;
-            for (double v : finalValues) {
-                if (v < min) { min = v; }
-                if (v > max) { max = v; }
-            }
-
-            double baseline = finalValues[finalValues.length / 2];
-            double impact = computeImpactFraction(min, max, baseline);
-            impacts.add(new ParameterImpact(paramName, targetVariable, min, max, baseline, impact));
+            double[] minMax = minMax(finalValues);
+            double baseline = mean(finalValues);
+            double impact = computeImpactFraction(minMax[0], minMax[1], baseline);
+            impacts.add(new ParameterImpact(paramName, targetVariable, minMax[0], minMax[1], baseline, impact));
         }
 
         Collections.sort(impacts);
@@ -191,16 +179,11 @@ public final class SensitivitySummary {
                 correlation = 0.0;
             }
 
-            double min = Double.MAX_VALUE;
-            double max = -Double.MAX_VALUE;
-            for (double v : finalValues) {
-                if (v < min) { min = v; }
-                if (v > max) { max = v; }
-            }
-            double baseline = finalValues[n / 2];
+            double[] minMax = minMax(finalValues);
+            double baseline = mean(finalValues);
 
             impacts.add(new ParameterImpact(
-                    paramName, targetVariable, min, max, baseline, correlation));
+                    paramName, targetVariable, minMax[0], minMax[1], baseline, correlation));
         }
 
         Collections.sort(impacts);
@@ -270,11 +253,34 @@ public final class SensitivitySummary {
         return values;
     }
 
-    private static double computeImpactFraction(double min, double max, double baseline) {
-        if (baseline == 0) {
-            return (max - min) == 0 ? 0.0 : Double.MAX_VALUE;
+    private static double computeImpactFraction(double min, double max, double meanBaseline) {
+        double range = max - min;
+        if (range == 0) {
+            return 0.0;
         }
-        return (max - min) / (2.0 * Math.abs(baseline));
+        if (meanBaseline == 0) {
+            // Output crosses zero — use range relative to itself as a marker
+            return 1.0;
+        }
+        return range / (2.0 * Math.abs(meanBaseline));
+    }
+
+    private static double[] minMax(double[] values) {
+        double min = Double.MAX_VALUE;
+        double max = -Double.MAX_VALUE;
+        for (double v : values) {
+            if (v < min) { min = v; }
+            if (v > max) { max = v; }
+        }
+        return new double[]{min, max};
+    }
+
+    private static double mean(double[] values) {
+        double sum = 0;
+        for (double v : values) {
+            sum += v;
+        }
+        return sum / values.length;
     }
 
     private static String formatImpact(double fraction) {
