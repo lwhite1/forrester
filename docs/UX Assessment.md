@@ -43,11 +43,11 @@ The SD education literature (Sterman 2000, Sweeney & Sterman 2000, Cronin et al.
 
 **The problem:** People are poor at mentally simulating dynamic systems. They expect linear behavior from nonlinear systems, underestimate delays, and fail to anticipate oscillation. Sterman's "beer game" demonstrated this comprehensively.
 
-**Current state:** The simulation and dashboard are well-structured. Run results display as time-series line charts. Sweep and Monte Carlo analyses are available.
+**Current state:** The simulation and dashboard are well-structured. Run results display as time-series line charts. Sweep and Monte Carlo analyses are available. Ghost overlays from previous runs are shown behind the current chart, with controls to toggle and clear history.
 
 **Gaps:**
 
-- **No "what changed?" affordance.** After modifying a parameter and re-running, users must mentally compare the new chart with their memory of the old one. Run comparison / ghost overlays (R1 milestone item #3) would directly address this. This is arguably the single highest-impact UX feature for learning.
+- ~~**No "what changed?" affordance.**~~ **IMPLEMENTED.** Ghost overlays from up to 5 previous runs are rendered behind the current series at 25% opacity. Sidebar controls let users toggle visibility and clear history.
 - **No behavior-mode annotations.** The dashboard shows raw curves but never labels them. Exponential growth, goal-seeking, oscillation, S-shaped growth, and overshoot-and-collapse are the canonical behavior modes in SD. Annotating or at least naming the observed pattern would scaffold learning.
 - **Stale results banner is good but passive.** The amber "stale" indicator is the right idea. Consider making it more active: "You changed Growth Rate from 0.05 to 0.08. Re-run to see the effect?" This connects the structural change to the behavioral question.
 
@@ -55,7 +55,7 @@ The SD education literature (Sterman 2000, Sweeney & Sterman 2000, Cronin et al.
 
 **The problem:** Translating a conceptual understanding ("births depend on population") into a correct equation ("Births = Population * Birth_Rate") is a major stumbling block. Unit consistency adds another layer of difficulty.
 
-**Current state:** The properties panel provides type-specific forms. Equation fields have autocomplete with element names and built-in functions. An expression language reference is available in Help.
+**Current state:** The properties panel provides type-specific forms. Equation fields have autocomplete with element names and built-in functions. An expression language reference is available in Help. Real-time syntax and reference validation on equation fields catches errors as users type.
 
 **Gaps:**
 
@@ -63,6 +63,8 @@ The SD education literature (Sterman 2000, Sweeney & Sterman 2000, Cronin et al.
 - **No equation templates.** Common SD patterns (exponential decay: `Stock * fractional_rate`, goal-seeking: `(Goal - Stock) / Adjustment_Time`, logistic growth: `Stock * Rate * (1 - Stock/Capacity)`) could be offered as templates when creating elements, reducing the blank-page problem.
 - **Autocomplete doesn't show units.** When the popup suggests "Population", it should show "(People)" next to it. This helps users check dimensional consistency as they write.
 - **No "explain this equation" affordance.** Even a read-back like "Births equals Population times Birth_Rate" in natural language would help users verify their intent.
+
+**Recently addressed:** Real-time equation validation with syntax checking and "did you mean?" suggestions for unresolved references (P6).
 
 ### 1.5 Boundary Adequacy (Medium)
 
@@ -79,15 +81,13 @@ The SD education literature (Sterman 2000, Sweeney & Sterman 2000, Cronin et al.
 
 ## Part 2: General UX/UI Issues
 
-### 2.1 First-Run Experience (Critical)
+### 2.1 First-Run Experience (Critical) — IMPLEMENTED
 
-**Current state:** The app opens to a blank canvas. The Quickstart dialog exists in Help but is not shown automatically.
+**Current state:** The app opens to a start screen with three action cards (New Model, Open Model, Getting Started) and a scrollable grid of example models sorted by difficulty. Edit/View/Simulate menus are disabled until a model is open.
 
-**Issues:**
+**Remaining gaps:**
 
-- A blank canvas is the worst possible first impression for a modeling tool. Users don't know what to do, what the shapes mean, or how to start.
-- The R1 milestone identifies a session start screen (item #6). This should be the highest-priority UX item. Even a simple "Start with an example" / "New blank model" choice with a 3-sentence description of the workflow would dramatically reduce bounce rate.
-- The Quickstart tutorial's 6 tabs are good content, but they are text-heavy. Progressive disclosure on the canvas itself (ghost elements saying "Click here to place your first stock") would be more effective.
+- Progressive disclosure on the canvas itself (ghost elements saying "Click here to place your first stock") would further improve onboarding beyond the start screen.
 
 ### 2.2 Discoverability (High)
 
@@ -97,17 +97,17 @@ The SD education literature (Sterman 2000, Sweeney & Sterman 2000, Cronin et al.
 
 - **Toolbar buttons lack labels.** Icons alone require learning. Even short labels ("Stock", "Flow", "Aux") below or beside the icons would help. This is standard in tools like Figma, which use icon+label for primary tools.
 - **The command palette is excellent but hidden.** There is no visual hint that Ctrl+K exists. A search icon or text field in the toolbar ("Search commands...") would surface it.
-- **Right-click context menus are missing entirely.** This is a significant gap. Users universally expect right-click to offer contextual actions (Edit, Delete, Copy, Change Type, Add Connection From Here). The absence forces users to discover keyboard shortcuts or menu items for operations that should be one click away.
+- ~~**Right-click context menus are missing entirely.**~~ **IMPLEMENTED.** Context menus on elements (Edit, Cut, Copy, Delete), info links (Delete), and empty canvas (Paste, Add Stock/Flow/Aux/Constant, Select All).
 - **No visible indication of keyboard shortcuts on toolbar buttons.** The tooltips mention shortcuts, but tooltips require hover-and-wait. Showing "S", "2", "3" etc. as small badges on toolbar buttons would aid learning.
 
-### 2.3 Properties Panel (Medium-High)
+### 2.3 Properties Panel (Medium-High) — PARTIALLY ADDRESSED
 
-**Current state:** Right sidebar shows type-specific forms. Fields update the model on change.
+**Current state:** Right sidebar shows type-specific forms. Fields update the model on change. Form fields have inline help icons with tooltip descriptions. When nothing is selected, the panel now shows a model summary with editable name/description, element counts, simulation settings, and quick-action buttons.
 
 **Issues:**
 
-- **"No selection" placeholder wastes 25% of the screen.** When nothing is selected — which is the default state — the entire right panel shows only "No selection." This space could show model-level information: element count, simulation settings summary, validation status, or a mini model overview.
-- **Form fields lack inline help.** "Initial Value" for a stock — what format? Can it reference other elements? Is it an expression or just a number? Small help icons (?) with tooltips would reduce trial-and-error.
+- ~~**"No selection" placeholder wastes 25% of the screen.**~~ **IMPLEMENTED.** The panel now shows a model summary with editable name, description, element counts by type, simulation settings, and quick-action buttons (Run, Validate, Settings).
+- ~~**Form fields lack inline help.**~~ **IMPLEMENTED.** Help icons with descriptive tooltips on each form field.
 - **The Comment field is at the bottom of every form.** In SD, documentation of assumptions is critical to model quality. The comment field's position at the bottom signals "optional afterthought." Consider giving it more prominence, or at least showing a visual indicator when an element has a comment.
 
 ### 2.4 Visual Hierarchy and Information Density (Medium)
@@ -129,7 +129,7 @@ The SD education literature (Sterman 2000, Sweeney & Sterman 2000, Cronin et al.
 
 - **Chart-to-model connection is weak.** Clicking a variable name in the chart legend should select and highlight the corresponding element on the canvas. Currently the canvas and dashboard are disconnected views.
 - **No variable selection for what to plot.** The simulation appears to plot everything. Users need to choose which variables to display, especially in larger models. Checkboxes exist for toggling visibility but the initial state matters.
-- **No axis labeling with units.** Charts show variable names but not their units. "Population (People)" vs. just "Population" matters for dimensional reasoning.
+- ~~**No axis labeling with units.**~~ **IMPLEMENTED.** Y-axis shows "Value (unit)" when all plotted variables share the same unit.
 - **Fan charts for Monte Carlo are well-designed.** The confidence band visualization is clear and uses appropriate opacity layering. This is a strength.
 
 ### 2.6 Error Handling and Recovery (Medium)
@@ -138,7 +138,7 @@ The SD education literature (Sterman 2000, Sweeney & Sterman 2000, Cronin et al.
 
 **Issues:**
 
-- **Validation is manual (Ctrl+B).** Errors are not surfaced until the user explicitly validates or tries to simulate. Real-time or on-blur validation of equations — even just syntax checking — would catch errors earlier and reduce frustration.
+- ~~**Validation is manual (Ctrl+B).**~~ **PARTIALLY ADDRESSED.** Equation fields now validate in real-time on keystroke (400ms debounce) and on blur, showing syntax errors and unresolved references with "did you mean?" suggestions. Full model validation (Ctrl+B) is still available for structural checks.
 - **Error messages are structural, not instructional.** "Missing equation for flow Births" tells you *what's* wrong but not *how* to fix it. "Flow 'Births' needs an equation. Double-click to edit, or open the Properties panel." would be actionable.
 - **No inline error indicators on the canvas.** Errors appear only in the validation dialog and status bar. A red border or warning icon directly on the offending element would provide immediate spatial context.
 
@@ -178,20 +178,20 @@ These are things the application does well that should not be lost in future cha
 
 Ranked by impact on user success, considering both general UX and SD-specific cognition:
 
-| Priority | Recommendation | Addresses |
-|----------|---------------|-----------|
-| 1 | **Session start screen** with example launcher and "new model" wizard | First-run experience, onboarding |
-| 2 | **Right-click context menus** on elements, connections, and canvas | Discoverability, standard UX expectation |
-| 3 | **Run comparison / ghost overlays** on dashboard charts | Mental simulation errors, parameter exploration |
-| 4 | **Inline error/warning indicators** on canvas elements (amber/red borders) | Equation formulation, error recovery |
-| 5 | **Loop-by-loop stepping** in feedback highlighting mode | Feedback loop identification |
-| 6 | **Real-time equation syntax checking** on blur/keystroke | Equation formulation, error recovery |
-| 7 | **Sparklines on stocks** showing simulation trajectory | Stock-flow confusion, behavior preview |
-| 8 | **Unit display in autocomplete** and chart axes | Dimensional reasoning |
-| 9 | **Labels on toolbar buttons** (not just icons) | Discoverability for novices |
-| 10 | **Repurpose empty properties panel** to show model summary | Information density, orientation |
+| Priority | Recommendation | Addresses | Status |
+|----------|---------------|-----------|--------|
+| 1 | **Session start screen** with example launcher and "new model" wizard | First-run experience, onboarding | **Done** |
+| 2 | **Right-click context menus** on elements, connections, and canvas | Discoverability, standard UX expectation | **Done** |
+| 3 | **Run comparison / ghost overlays** on dashboard charts | Mental simulation errors, parameter exploration | **Done** |
+| 4 | **Inline error/warning indicators** on canvas elements (amber/red borders) | Equation formulation, error recovery | Open |
+| 5 | **Loop-by-loop stepping** in feedback highlighting mode | Feedback loop identification | Open |
+| 6 | **Real-time equation syntax checking** on blur/keystroke | Equation formulation, error recovery | **Done** |
+| 7 | **Sparklines on stocks** showing simulation trajectory | Stock-flow confusion, behavior preview | Open |
+| 8 | **Unit display in autocomplete** and chart axes | Dimensional reasoning | **Partial** (chart axes done) |
+| 9 | **Labels on toolbar buttons** (not just icons) | Discoverability for novices | Open |
+| 10 | **Repurpose empty properties panel** to show model summary | Information density, orientation | **Done** |
 
-Items 1, 3, 4, 7 are already in the R1 milestone. Items 2, 5, 6, 8, 9, 10 are new recommendations.
+6 of 10 recommendations are fully or partially implemented. Remaining open items: P4 (canvas indicators), P5 (loop stepping), P7 (sparklines), P8 (autocomplete units), P9 (toolbar labels).
 
 ---
 
