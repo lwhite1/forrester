@@ -1,33 +1,23 @@
 package systems.courant.forrester.app.canvas;
 
+import systems.courant.forrester.model.def.CausalLinkDef;
 import systems.courant.forrester.model.def.ConnectorRoute;
 import systems.courant.forrester.model.def.ElementType;
-import systems.courant.forrester.model.def.LookupTableDef;
 import systems.courant.forrester.model.def.ModelDefinition;
 import systems.courant.forrester.model.def.ModuleInstanceDef;
 import systems.courant.forrester.model.def.ViewDef;
 import systems.courant.forrester.model.graph.AutoLayout;
 import systems.courant.forrester.model.graph.FeedbackAnalysis;
 
-import systems.courant.forrester.model.def.CausalLinkDef;
-
-import javafx.scene.Cursor;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuItem;
-import javafx.scene.control.Tooltip;
-import javafx.scene.input.KeyCode;
-import javafx.scene.input.KeyEvent;
-import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.input.ScrollEvent;
 import javafx.scene.layout.Pane;
-import javafx.util.Duration;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Consumer;
@@ -37,12 +27,14 @@ import java.util.function.Consumer;
  * Supports pan (Space+drag, middle/right drag), zoom (scroll wheel),
  * click-to-select, drag-to-move, element creation (toolbar placement mode),
  * two-click flow connection, inline name/value editing, and element deletion.
+ *
+ * <p>Delegates input handling to {@link InputDispatcher}, selection/mutation
+ * operations to {@link SelectionController}, and tooltips to
+ * {@link TooltipController}.
  */
 public class ModelCanvas extends Canvas {
 
     private static final double ZOOM_FACTOR = 1.1;
-    /** Minimum drag distance squared (screen pixels) to commit a reattach. */
-    private static final double MIN_REATTACH_DRAG_SQ = 5 * 5;
 
     private ModelEditor editor;
     private List<ConnectorRoute> connectors = List.of();
@@ -67,16 +59,10 @@ public class ModelCanvas extends Canvas {
     private final InlineEditController inlineEdit = new InlineEditController();
     private final ModuleNavigationController navController = new ModuleNavigationController();
 
-    // Pan state
-    private boolean panning;
-    private boolean panMoved;
-    private boolean spaceDown;
-    private double dragStartX;
-    private double dragStartY;
-
-    // Mouse position tracking for cursor updates
-    private double lastMouseX;
-    private double lastMouseY;
+    // Extracted controllers
+    private final SelectionController selectionController;
+    private final InputDispatcher inputDispatcher;
+    private final TooltipController tooltipController = new TooltipController();
 
     // Undo/redo
     private UndoManager undoManager;
@@ -85,601 +71,15 @@ public class ModelCanvas extends Canvas {
     private Runnable onStatusChanged;
     private Consumer<Set<String>> onPasteWarning;
 
-    // Hover highlighting
-    private String hoveredElement;
-    private ConnectionId hoveredConnection;
+    // Connection selection
     private ConnectionId selectedConnection;
-    /** True when selectedConnection refers to a causal link rather than info link. */
     private boolean selectedIsCausalLink;
 
     // Feedback loop highlighting
     private boolean loopHighlightActive;
     private FeedbackAnalysis loopAnalysis;
 
-    // Element tooltip
-    private final Tooltip elementTooltip = createElementTooltip();
-
-    public ModelCanvas(Clipboard clipboard) {
-        this.copyPaste = new CopyPasteController(clipboard);
-        setFocusTraversable(true);
-
-        widthProperty().addListener(observable -> redraw());
-        heightProperty().addListener(observable -> redraw());
-
-        setOnScroll(this::handleScroll);
-        setOnMousePressed(this::handleMousePressed);
-        setOnMouseDragged(this::handleMouseDragged);
-        setOnMouseReleased(this::handleMouseReleased);
-        setOnMouseMoved(this::handleMouseMoved);
-        setOnKeyPressed(this::handleKeyPressed);
-        setOnKeyReleased(this::handleKeyReleased);
-    }
-
-    /**
-     * Sets the model editor and loads canvas state from a layout view, triggering a redraw.
-     */
-    public void setModel(ModelEditor editor, ViewDef view) {
-        this.editor = editor;
-        canvasState.loadFrom(view);
-        this.connectors = editor.generateConnectors();
-        invalidateLoopAnalysis();
-        redraw();
-    }
-
-    /**
-     * Returns the current canvas layout as a {@link ViewDef} for serialization.
-     */
-    public ViewDef toViewDef() {
-        return canvasState.toViewDef();
-    }
-
-    /**
-     * Returns the model editor.
-     */
-    public ModelEditor getEditor() {
-        return editor;
-    }
-
-    /**
-     * Builds an immutable {@link ModelDefinition} snapshot including the current canvas layout.
-     * When inside a module, walks the navigation stack to reconstruct the full root definition.
-     */
-    public ModelDefinition toModelDefinition() {
-        if (!navController.isInsideModule()) {
-            return editor.toModelDefinition(canvasState.toViewDef());
-        }
-
-        // Build current level's definition with its view
-        ModelDefinition childDef = editor.toModelDefinition(canvasState.toViewDef());
-
-        // Walk the stack from top (most recent parent) to bottom (root),
-        // writing each child into its parent
-        List<NavigationStack.Frame> frames = new ArrayList<>(navController.frames());
-        // frames() returns bottom-to-top; we need to process top-to-bottom
-        for (int i = frames.size() - 1; i >= 0; i--) {
-            NavigationStack.Frame frame = frames.get(i);
-            ModelEditor parentEditor = new ModelEditor();
-            parentEditor.loadFrom(frame.editor().toModelDefinition(frame.viewSnapshot()));
-            parentEditor.updateModuleDefinition(frame.moduleIndex(), childDef);
-            childDef = parentEditor.toModelDefinition(frame.viewSnapshot());
-        }
-
-        return childDef;
-    }
-
-    /**
-     * Sets a callback to be invoked whenever the canvas status changes
-     * (selection, tool, zoom, or element count changes).
-     */
-    public void setOnStatusChanged(Runnable callback) {
-        this.onStatusChanged = callback;
-    }
-
-    public void setOnPasteWarning(Consumer<Set<String>> callback) {
-        this.onPasteWarning = callback;
-    }
-
-    private void fireStatusChanged() {
-        if (onStatusChanged != null) {
-            onStatusChanged.run();
-        }
-    }
-
-    /**
-     * Toggles feedback loop highlighting. When activated, computes a
-     * {@link FeedbackAnalysis} from the current model and stores the result.
-     * When deactivated, clears the cached analysis.
-     */
-    public void setLoopHighlightActive(boolean active) {
-        this.loopHighlightActive = active;
-        if (active && editor != null) {
-            recomputeLoopAnalysis();
-        } else {
-            this.loopAnalysis = null;
-        }
-        redraw();
-    }
-
-    public boolean isLoopHighlightActive() {
-        return loopHighlightActive;
-    }
-
-    /**
-     * Returns the current loop analysis, or null if loop highlighting is not active.
-     */
-    public FeedbackAnalysis getLoopAnalysis() {
-        return loopAnalysis;
-    }
-
-    private void recomputeLoopAnalysis() {
-        if (editor == null) {
-            loopAnalysis = null;
-            return;
-        }
-        loopAnalysis = FeedbackAnalysis.analyze(
-                editor.toModelDefinition(canvasState.toViewDef()));
-    }
-
-    /**
-     * Invalidates the cached loop analysis so it is recomputed on the next redraw
-     * (if loop highlighting is active).
-     */
-    private void invalidateLoopAnalysis() {
-        if (loopHighlightActive && editor != null) {
-            recomputeLoopAnalysis();
-        }
-    }
-
-    /**
-     * Sets the undo manager used for undo/redo operations.
-     */
-    public void setUndoManager(UndoManager undoManager) {
-        this.undoManager = undoManager;
-    }
-
-    /**
-     * Returns the undo manager, or null if not set.
-     */
-    public UndoManager getUndoManager() {
-        return undoManager;
-    }
-
-    /**
-     * Captures the current model and view state as an immutable snapshot.
-     */
-    private UndoManager.Snapshot captureSnapshot() {
-        return new UndoManager.Snapshot(
-                editor.toModelDefinition(canvasState.toViewDef()),
-                canvasState.toViewDef());
-    }
-
-    /**
-     * Saves the current state to the undo stack with a descriptive label.
-     */
-    private void saveUndoState(String label) {
-        if (undoManager != null && editor != null) {
-            undoManager.pushUndo(captureSnapshot(), label);
-        }
-    }
-
-    /**
-     * Restores a snapshot by reloading both the model editor and canvas state.
-     */
-    private void restoreSnapshot(UndoManager.Snapshot snapshot) {
-        editor.loadFrom(snapshot.model());
-        canvasState.loadFrom(snapshot.view());
-        connectors = editor.generateConnectors();
-        invalidateLoopAnalysis();
-        redraw();
-    }
-
-    /**
-     * Undoes the last operation, restoring the previous state.
-     */
-    public void performUndo() {
-        if (undoManager == null || editor == null) {
-            return;
-        }
-        undoManager.undo(captureSnapshot(), "Current").ifPresent(this::restoreSnapshot);
-    }
-
-    /**
-     * Redoes the last undone operation, restoring the next state.
-     */
-    public void performRedo() {
-        if (undoManager == null || editor == null) {
-            return;
-        }
-        undoManager.redo(captureSnapshot(), "Current").ifPresent(this::restoreSnapshot);
-    }
-
-    /**
-     * Undoes multiple steps, jumping to the entry at the given depth in the undo stack.
-     *
-     * @param depth zero-based index (0 = most recent entry)
-     */
-    public void performUndoTo(int depth) {
-        if (undoManager == null || editor == null) {
-            return;
-        }
-        undoManager.undoTo(captureSnapshot(), depth).ifPresent(this::restoreSnapshot);
-    }
-
-    /**
-     * Returns the current selection count.
-     */
-    public int getSelectionCount() {
-        return canvasState.getSelection().size();
-    }
-
-    /**
-     * Returns the names of all currently selected elements.
-     */
-    public Set<String> getSelectedElementNames() {
-        return canvasState.getSelection();
-    }
-
-    /**
-     * Returns the currently selected connection, or null if no connection is selected.
-     */
-    public ConnectionId getSelectedConnection() {
-        return selectedConnection;
-    }
-
-    /**
-     * Returns true if the currently selected connection is a causal link.
-     */
-    public boolean isSelectedConnectionCausalLink() {
-        return selectedIsCausalLink;
-    }
-
-    /**
-     * Returns the type of the named element on the canvas.
-     */
-    public ElementType getSelectedElementType(String name) {
-        return canvasState.getType(name).orElse(null);
-    }
-
-    /**
-     * Public wrapper for deleting all currently selected elements.
-     */
-    public void deleteSelectedElements() {
-        deleteSelected();
-    }
-
-    /**
-     * Renames an element with undo support.
-     */
-    public void renameElement(String oldName, String newName) {
-        applyRename(oldName, newName);
-    }
-
-    /**
-     * Opens the bindings configuration dialog for the named module (public accessor).
-     */
-    public void triggerBindingConfig(String moduleName) {
-        openBindingsDialog(moduleName);
-    }
-
-    /**
-     * Regenerates connectors from the current model state and redraws.
-     */
-    private void regenerateAndRedraw() {
-        connectors = editor.generateConnectors();
-        invalidateLoopAnalysis();
-        redraw();
-    }
-
-    /**
-     * Applies a model mutation with undo support: saves undo state, runs the
-     * mutation, then regenerates connectors and redraws.
-     */
-    public void applyMutation(Runnable mutation) {
-        saveUndoState("Edit property");
-        mutation.run();
-        regenerateAndRedraw();
-    }
-
-    /**
-     * Builds the render state for connection rerouting.
-     */
-    private CanvasRenderer.RerouteState rerouteRenderState() {
-        if (!rerouteController.isActive() || !rerouteController.isDragStarted()) {
-            return CanvasRenderer.RerouteState.IDLE;
-        }
-        return new CanvasRenderer.RerouteState(
-                true,
-                rerouteController.getAnchorX(),
-                rerouteController.getAnchorY(),
-                rerouteController.getRubberBandX(),
-                rerouteController.getRubberBandY());
-    }
-
-    /**
-     * Returns the canvas state for export or external rendering.
-     */
-    public CanvasState getCanvasState() {
-        return canvasState;
-    }
-
-    /**
-     * Returns the current connector routes.
-     */
-    public List<ConnectorRoute> getConnectors() {
-        return connectors;
-    }
-
-    /**
-     * Returns the active loop analysis if loop highlighting is on, otherwise null.
-     */
-    public FeedbackAnalysis getActiveLoopAnalysis() {
-        return loopHighlightActive ? loopAnalysis : null;
-    }
-
-    /**
-     * Returns the current zoom scale.
-     */
-    public double getZoomScale() {
-        return viewport.getScale();
-    }
-
-    /**
-     * Sets the active tool (called by toolbar callback).
-     * Cancels any pending flow if the tool changes.
-     */
-    public void setActiveTool(CanvasToolBar.Tool tool) {
-        if (flowCreation.isPending()) {
-            flowCreation.cancel();
-        }
-        if (causalLinkCreation.isPending()) {
-            causalLinkCreation.cancel();
-        }
-        this.activeTool = tool;
-        updateCursor();
-    }
-
-    /**
-     * Sets a reference to the toolbar so the canvas can reset it on Escape.
-     */
-    public void setToolBar(CanvasToolBar toolBar) {
-        this.toolBar = toolBar;
-    }
-
-    /**
-     * Sets the parent pane for inline editor overlays and creates the InlineEditor.
-     * Must be called after the canvas is added to the pane.
-     */
-    public void setOverlayPane(Pane overlayPane) {
-        inlineEdit.setOverlayPane(overlayPane);
-    }
-
-    @Override
-    public boolean isResizable() {
-        return true;
-    }
-
-    @Override
-    public double prefWidth(double height) {
-        return getWidth();
-    }
-
-    @Override
-    public double prefHeight(double width) {
-        return getHeight();
-    }
-
-    /**
-     * Redraws the entire canvas by delegating to the CanvasRenderer,
-     * then notifies the status bar of any changes.
-     */
-    private void redraw() {
-        renderer.render(getGraphicsContext2D(), getWidth(), getHeight(),
-                new CanvasRenderer.RenderContext(
-                        editor, connectors, flowCreation.getState(),
-                        causalLinkCreation.getState(),
-                        reattachController.toRenderState(),
-                        rerouteRenderState(),
-                        marqueeController.toRenderState(),
-                        loopHighlightActive ? loopAnalysis : null, hoveredElement,
-                        hoveredConnection, selectedConnection));
-        fireStatusChanged();
-    }
-
-    /**
-     * Creates a new element at the given world coordinates based on the active tool.
-     * Adds to both the model editor and canvas state, then regenerates connectors.
-     * PLACE_FLOW is handled separately by {@link #handleFlowClick}.
-     */
-    private void createElementAt(double worldX, double worldY) {
-        if (editor == null) {
-            return;
-        }
-
-        saveUndoState("Add element");
-
-        String name;
-        ElementType type;
-
-        switch (activeTool) {
-            case PLACE_STOCK -> {
-                name = editor.addStock();
-                type = ElementType.STOCK;
-            }
-            case PLACE_AUX -> {
-                name = editor.addAux();
-                type = ElementType.AUX;
-            }
-            case PLACE_CONSTANT -> {
-                name = editor.addConstant();
-                type = ElementType.CONSTANT;
-            }
-            case PLACE_MODULE -> {
-                name = editor.addModule();
-                type = ElementType.MODULE;
-            }
-            case PLACE_LOOKUP -> {
-                name = editor.addLookup();
-                type = ElementType.LOOKUP;
-            }
-            case PLACE_CLD_VARIABLE -> {
-                name = editor.addCldVariable();
-                type = ElementType.CLD_VARIABLE;
-            }
-            default -> {
-                return;
-            }
-        }
-
-        canvasState.addElement(name, type, worldX, worldY);
-        if (type == ElementType.CLD_VARIABLE) {
-            double w = LayoutMetrics.cldVarWidthForName(name);
-            canvasState.setSize(name, w, LayoutMetrics.CLD_VAR_HEIGHT);
-        }
-        connectors = editor.generateConnectors();
-        invalidateLoopAnalysis();
-        canvasState.clearSelection();
-        canvasState.select(name);
-        redraw();
-    }
-
-    /**
-     * Deletes all currently selected elements from the model and canvas.
-     * Regenerates connectors after removal.
-     */
-    private void deleteSelected() {
-        if (editor == null || canvasState.getSelection().isEmpty()) {
-            return;
-        }
-
-        saveUndoState("Delete");
-
-        List<String> toDelete = new ArrayList<>(canvasState.getSelection());
-        for (String name : toDelete) {
-            editor.removeElement(name);
-            canvasState.removeElement(name);
-        }
-
-        connectors = editor.generateConnectors();
-        invalidateLoopAnalysis();
-        redraw();
-        updateCursor();
-    }
-
-    /**
-     * Copies the current selection to the clipboard.
-     */
-    public void copySelection() {
-        if (editor == null) {
-            return;
-        }
-        copyPaste.copy(canvasState, editor);
-    }
-
-    /**
-     * Cuts the current selection: copies to clipboard, then deletes.
-     */
-    public void cutSelection() {
-        if (editor == null || canvasState.getSelection().isEmpty()) {
-            return;
-        }
-        copyPaste.copy(canvasState, editor);
-        deleteSelected();
-    }
-
-    /**
-     * Pastes clipboard contents, creating new elements offset from the originals.
-     * Returns the set of reference names that were replaced with 0 (empty if none).
-     */
-    public Set<String> pasteClipboard() {
-        if (editor == null || !copyPaste.hasContent()) {
-            return Set.of();
-        }
-
-        saveUndoState("Paste");
-
-        CopyPasteController.PasteResult result = copyPaste.paste(canvasState, editor);
-        if (result.pastedNames().isEmpty()) {
-            return Set.of();
-        }
-
-        canvasState.clearSelection();
-        for (String name : result.pastedNames()) {
-            canvasState.addToSelection(name);
-        }
-
-        connectors = editor.generateConnectors();
-        invalidateLoopAnalysis();
-        redraw();
-
-        Set<String> replaced = result.replacedReferences();
-        if (!replaced.isEmpty() && onPasteWarning != null) {
-            onPasteWarning.accept(replaced);
-        }
-        return replaced;
-    }
-
-    /**
-     * Deletes the currently selected connection (info link or causal link).
-     */
-    private void deleteSelectedConnection() {
-        if (editor == null || selectedConnection == null) {
-            return;
-        }
-
-        saveUndoState("Delete connection");
-        if (selectedIsCausalLink) {
-            editor.removeCausalLink(selectedConnection.from(), selectedConnection.to());
-        } else {
-            editor.removeConnectionReference(selectedConnection.from(), selectedConnection.to());
-            connectors = editor.generateConnectors();
-        }
-        selectedConnection = null;
-        selectedIsCausalLink = false;
-        invalidateLoopAnalysis();
-        redraw();
-        updateCursor();
-    }
-
-    // --- Two-click flow creation ---
-
-    /**
-     * Handles a click during PLACE_FLOW mode by delegating to the FlowCreationController.
-     */
-    private void handleFlowClick(double worldX, double worldY) {
-        if (flowCreation.isPending()) {
-            saveUndoState("Add flow");
-        }
-        FlowCreationController.FlowResult result = flowCreation.handleClick(
-                worldX, worldY, canvasState, editor);
-        if (result.isCreated()) {
-            connectors = editor.generateConnectors();
-            invalidateLoopAnalysis();
-            canvasState.clearSelection();
-            canvasState.select(result.flowName());
-        }
-        redraw();
-    }
-
-    // --- Two-click causal link creation ---
-
-    /**
-     * Handles a click during PLACE_CAUSAL_LINK mode by delegating to the CausalLinkCreationController.
-     */
-    private void handleCausalLinkClick(double worldX, double worldY) {
-        if (causalLinkCreation.isPending()) {
-            saveUndoState("Add causal link");
-        }
-        CausalLinkCreationController.LinkResult result = causalLinkCreation.handleClick(
-                worldX, worldY, canvasState, editor);
-        if (result.isCreated()) {
-            connectors = editor.generateConnectors();
-            invalidateLoopAnalysis();
-        }
-        redraw();
-    }
-
-    // --- Inline editing ---
-
+    // Inline edit callbacks
     private final InlineEditController.Callbacks inlineCallbacks =
             new InlineEditController.Callbacks() {
                 @Override
@@ -711,655 +111,429 @@ public class ModelCanvas extends Canvas {
                 @Override
                 public void postEdit() {
                     requestFocus();
-                    updateCursor();
+                    inputDispatcher.updateCursor(ModelCanvas.this);
                 }
             };
 
-    /**
-     * Starts inline editing for the given element on double-click.
-     */
-    private void startInlineEdit(String elementName) {
-        inlineEdit.startEdit(elementName, canvasState, editor, viewport, inlineCallbacks);
+    public ModelCanvas(Clipboard clipboard) {
+        this.copyPaste = new CopyPasteController(clipboard);
+        this.selectionController = new SelectionController(copyPaste);
+        this.inputDispatcher = new InputDispatcher(
+                dragController, marqueeController, resizeController,
+                reattachController, flowCreation, causalLinkCreation,
+                rerouteController, inlineEdit);
+
+        setFocusTraversable(true);
+
+        widthProperty().addListener(observable -> redraw());
+        heightProperty().addListener(observable -> redraw());
+
+        setOnScroll(event -> inputDispatcher.handleScroll(event, viewport, this::redraw));
+        setOnMousePressed(event -> inputDispatcher.handleMousePressed(event, this));
+        setOnMouseDragged(event -> inputDispatcher.handleMouseDragged(event, this));
+        setOnMouseReleased(event -> inputDispatcher.handleMouseReleased(event, this));
+        setOnMouseMoved(event -> inputDispatcher.handleMouseMoved(event, this));
+        setOnKeyPressed(event -> inputDispatcher.handleKeyPressed(event, this));
+        setOnKeyReleased(event -> {
+            inputDispatcher.handleKeyReleased(event);
+            inputDispatcher.updateCursor(this);
+        });
     }
 
-    /**
-     * Applies a rename to both the model editor and canvas state,
-     * then regenerates connectors and redraws.
-     */
-    private void applyRename(String oldName, String newName) {
-        if (oldName.equals(newName) || editor.hasElement(newName)) {
+    // --- Model lifecycle ---
+
+    public void setModel(ModelEditor editor, ViewDef view) {
+        this.editor = editor;
+        canvasState.loadFrom(view);
+        this.connectors = editor.generateConnectors();
+        invalidateLoopAnalysis();
+        redraw();
+    }
+
+    public ViewDef toViewDef() {
+        return canvasState.toViewDef();
+    }
+
+    public ModelEditor getEditor() {
+        return editor;
+    }
+
+    public ModelDefinition toModelDefinition() {
+        if (!navController.isInsideModule()) {
+            return editor.toModelDefinition(canvasState.toViewDef());
+        }
+
+        ModelDefinition childDef = editor.toModelDefinition(canvasState.toViewDef());
+
+        List<NavigationStack.Frame> frames = new ArrayList<>(navController.frames());
+        for (int i = frames.size() - 1; i >= 0; i--) {
+            NavigationStack.Frame frame = frames.get(i);
+            ModelEditor parentEditor = new ModelEditor();
+            parentEditor.loadFrom(frame.editor().toModelDefinition(frame.viewSnapshot()));
+            parentEditor.updateModuleDefinition(frame.moduleIndex(), childDef);
+            childDef = parentEditor.toModelDefinition(frame.viewSnapshot());
+        }
+
+        return childDef;
+    }
+
+    // --- Callbacks ---
+
+    public void setOnStatusChanged(Runnable callback) {
+        this.onStatusChanged = callback;
+    }
+
+    public void setOnPasteWarning(Consumer<Set<String>> callback) {
+        this.onPasteWarning = callback;
+    }
+
+    private void fireStatusChanged() {
+        if (onStatusChanged != null) {
+            onStatusChanged.run();
+        }
+    }
+
+    // --- Loop analysis ---
+
+    public void setLoopHighlightActive(boolean active) {
+        this.loopHighlightActive = active;
+        if (active && editor != null) {
+            recomputeLoopAnalysis();
+        } else {
+            this.loopAnalysis = null;
+        }
+        redraw();
+    }
+
+    public boolean isLoopHighlightActive() {
+        return loopHighlightActive;
+    }
+
+    public FeedbackAnalysis getLoopAnalysis() {
+        return loopAnalysis;
+    }
+
+    private void recomputeLoopAnalysis() {
+        if (editor == null) {
+            loopAnalysis = null;
             return;
         }
-        saveUndoState("Rename");
-        if (!editor.renameElement(oldName, newName)) {
-            return;
+        loopAnalysis = FeedbackAnalysis.analyze(
+                editor.toModelDefinition(canvasState.toViewDef()));
+    }
+
+    private void invalidateLoopAnalysis() {
+        if (loopHighlightActive && editor != null) {
+            recomputeLoopAnalysis();
         }
-        canvasState.renameElement(oldName, newName);
-        if (canvasState.getType(newName).orElse(null) == ElementType.CLD_VARIABLE) {
-            double w = LayoutMetrics.cldVarWidthForName(newName);
-            canvasState.setSize(newName, w, LayoutMetrics.CLD_VAR_HEIGHT);
+    }
+
+    // --- Undo/redo ---
+
+    public void setUndoManager(UndoManager undoManager) {
+        this.undoManager = undoManager;
+    }
+
+    public UndoManager getUndoManager() {
+        return undoManager;
+    }
+
+    private UndoManager.Snapshot captureSnapshot() {
+        return new UndoManager.Snapshot(
+                editor.toModelDefinition(canvasState.toViewDef()),
+                canvasState.toViewDef());
+    }
+
+    void saveUndoState(String label) {
+        if (undoManager != null) {
+            undoManager.pushUndo(captureSnapshot(), label);
         }
+    }
+
+    private void restoreSnapshot(UndoManager.Snapshot snapshot) {
+        editor.loadFrom(snapshot.model());
+        canvasState.loadFrom(snapshot.view());
         connectors = editor.generateConnectors();
         invalidateLoopAnalysis();
         redraw();
     }
 
-    // --- Reattachment, marquee, resize, drag: delegated to controllers ---
-
-    // --- Cursor ---
-
-    /**
-     * Updates the cursor shape based on the current interaction state.
-     */
-    private void updateCursor() {
-        if (inlineEdit.isActive()) {
+    public void performUndo() {
+        if (undoManager == null) {
             return;
         }
-
-        Cursor cursor;
-
-        if (resizeController.isActive()) {
-            cursor = ResizeController.cursorFor(resizeController.getHandle());
-        } else if (reattachController.isActive() || rerouteController.isActive()
-                || panning || dragController.isDragging()) {
-            cursor = Cursor.CLOSED_HAND;
-        } else if (marqueeController.isActive()) {
-            cursor = Cursor.CROSSHAIR;
-        } else if (spaceDown) {
-            cursor = Cursor.MOVE;
-        } else if (flowCreation.isPending() || activeTool != CanvasToolBar.Tool.SELECT) {
-            cursor = Cursor.CROSSHAIR;
-        } else if (editor != null) {
-            double worldX = viewport.toWorldX(lastMouseX);
-            double worldY = viewport.toWorldY(lastMouseY);
-
-            // Check resize handles first (when hovering over selected elements)
-            ResizeHandle.HandleHit handleHit = ResizeHandle.hitTest(canvasState, worldX, worldY);
-            if (handleHit != null) {
-                cursor = ResizeController.cursorFor(handleHit.handle());
-            } else {
-                FlowEndpointCalculator.CloudHit cloudHit =
-                        FlowEndpointCalculator.hitTestClouds(worldX, worldY, canvasState, editor);
-                if (cloudHit == null) {
-                    cloudHit = FlowEndpointCalculator.hitTestConnectedEndpoints(
-                            worldX, worldY, canvasState, editor);
-                }
-
-                if (cloudHit != null) {
-                    cursor = Cursor.HAND;
-                } else {
-                    String hit = HitTester.hitTest(canvasState, worldX, worldY);
-                    if (hit != null) {
-                        cursor = Cursor.OPEN_HAND;
-                    } else if (hoveredConnection != null) {
-                        cursor = Cursor.HAND;
-                    } else {
-                        cursor = Cursor.DEFAULT;
-                    }
-                }
-            }
-        } else {
-            cursor = Cursor.DEFAULT;
-        }
-
-        setCursor(cursor);
+        undoManager.undo(captureSnapshot()).ifPresent(this::restoreSnapshot);
     }
 
-    // --- Event handlers ---
+    public void performRedo() {
+        if (undoManager == null) {
+            return;
+        }
+        undoManager.redo(captureSnapshot()).ifPresent(this::restoreSnapshot);
+    }
 
-    private void handleScroll(ScrollEvent event) {
-        double factor = event.getDeltaY() > 0 ? ZOOM_FACTOR : 1.0 / ZOOM_FACTOR;
-        viewport.zoomAt(event.getX(), event.getY(), factor);
+    public void performUndoTo(int depth) {
+        if (undoManager == null) {
+            return;
+        }
+        undoManager.undoTo(captureSnapshot(), depth).ifPresent(this::restoreSnapshot);
+    }
+
+    // --- Selection state (public API) ---
+
+    public int getSelectionCount() {
+        return canvasState.getSelection().size();
+    }
+
+    public Set<String> getSelectedElementNames() {
+        return canvasState.getSelection();
+    }
+
+    public ConnectionId getSelectedConnection() {
+        return selectedConnection;
+    }
+
+    public boolean isSelectedConnectionCausalLink() {
+        return selectedIsCausalLink;
+    }
+
+    public ElementType getSelectedElementType(String name) {
+        return canvasState.getType(name).orElse(null);
+    }
+
+    // --- Selection operations (public API, delegate to SelectionController) ---
+
+    public void deleteSelectedElements() {
+        selectionController.deleteSelected(editor, canvasState, () -> saveUndoState("Delete"));
+        regenerateConnectors();
         redraw();
-        updateCursor();
-        event.consume();
+        inputDispatcher.updateCursor(this);
     }
 
-    private void handleMouseMoved(MouseEvent event) {
-        lastMouseX = event.getX();
-        lastMouseY = event.getY();
-
-        if (flowCreation.isPending()) {
-            flowCreation.updateRubberBand(
-                    viewport.toWorldX(event.getX()),
-                    viewport.toWorldY(event.getY()));
-            redraw();
-            event.consume();
-        }
-
-        if (causalLinkCreation.isPending()) {
-            causalLinkCreation.updateRubberBand(
-                    viewport.toWorldX(event.getX()),
-                    viewport.toWorldY(event.getY()));
-            redraw();
-            event.consume();
-        }
-
-        // Update hover highlight
-        double worldX = viewport.toWorldX(event.getX());
-        double worldY = viewport.toWorldY(event.getY());
-        String hit = HitTester.hitTest(canvasState, worldX, worldY);
-
-        // Connection hover: only when no element is hovered
-        ConnectionId connHit = null;
-        if (hit == null) {
-            connHit = HitTester.hitTestInfoLink(canvasState, connectors, worldX, worldY);
-            if (connHit == null && editor != null) {
-                connHit = HitTester.hitTestCausalLink(canvasState,
-                        editor.getCausalLinks(), worldX, worldY);
-            }
-        }
-
-        boolean changed = !Objects.equals(hit, hoveredElement)
-                || !Objects.equals(connHit, hoveredConnection);
-        if (changed) {
-            hoveredElement = hit;
-            hoveredConnection = connHit;
-            redraw();
-            updateElementTooltip(hit, event);
-        }
-
-        updateCursor();
+    public void renameElement(String oldName, String newName) {
+        applyRename(oldName, newName);
     }
 
-    private static Tooltip createElementTooltip() {
-        Tooltip tip = new Tooltip();
-        tip.setWrapText(true);
-        tip.setMaxWidth(350);
-        tip.setShowDelay(Duration.millis(400));
-        tip.setHideDelay(Duration.millis(200));
-        return tip;
+    public void triggerBindingConfig(String moduleName) {
+        openBindingsDialog(moduleName);
     }
 
-    private void updateElementTooltip(String elementName, MouseEvent event) {
-        if (elementName == null || editor == null) {
-            Tooltip.uninstall(this, elementTooltip);
-            elementTooltip.hide();
-            return;
-        }
-
-        Optional<ElementType> typeOpt = canvasState.getType(elementName);
-        if (typeOpt.isEmpty()) {
-            Tooltip.uninstall(this, elementTooltip);
-            elementTooltip.hide();
-            return;
-        }
-        ElementType type = typeOpt.get();
-
-        String text = buildTooltipText(elementName, type);
-        elementTooltip.setText(text);
-        Tooltip.install(this, elementTooltip);
-    }
-
-    private String buildTooltipText(String name, ElementType type) {
-        StringBuilder sb = new StringBuilder(name);
-        switch (type) {
-            case FLOW -> editor.getFlowEquation(name)
-                    .filter(ElementRenderer::isDisplayableEquation)
-                    .ifPresent(eq -> sb.append("\n= ").append(eq));
-            case AUX -> editor.getAuxEquation(name)
-                    .filter(ElementRenderer::isDisplayableEquation)
-                    .ifPresent(eq -> sb.append("\n= ").append(eq));
-            case CONSTANT -> editor.getConstantByName(name)
-                    .ifPresent(cd -> sb.append("\n= ").append(ElementRenderer.formatValue(cd.value())));
-            case STOCK -> editor.getStockUnit(name)
-                    .filter(unit -> !unit.isBlank())
-                    .ifPresent(unit -> sb.append("\nUnit: ").append(unit));
-            default -> { }
-        }
-        return sb.toString();
-    }
-
-    private void handleMousePressed(MouseEvent event) {
-        // Guard: ignore mouse clicks while inline editor is active
-        if (inlineEdit.isActive()) {
-            return;
-        }
-
-        requestFocus();
-        lastMouseX = event.getX();
-        lastMouseY = event.getY();
-        dragStartX = event.getX();
-        dragStartY = event.getY();
-
-        // Pan: middle-drag, right-drag, or Space+left-drag
-        if (event.getButton() == MouseButton.MIDDLE
-                || event.getButton() == MouseButton.SECONDARY
-                || (event.getButton() == MouseButton.PRIMARY && spaceDown)) {
-            panning = true;
-            panMoved = false;
-            updateCursor();
-            event.consume();
-            return;
-        }
-
-        if (event.getButton() == MouseButton.PRIMARY) {
-            double worldX = viewport.toWorldX(event.getX());
-            double worldY = viewport.toWorldY(event.getY());
-
-            // Double-click: drill into module or start inline editing
-            if (event.getClickCount() == 2
-                    && activeTool == CanvasToolBar.Tool.SELECT
-                    && !flowCreation.isPending()) {
-                String hit = HitTester.hitTest(canvasState, worldX, worldY);
-                if (hit != null) {
-                    if (canvasState.getType(hit).orElse(null) == ElementType.MODULE) {
-                        drillInto(hit);
-                    } else {
-                        startInlineEdit(hit);
-                    }
-                    event.consume();
-                    return;
-                }
-            }
-
-            // Flow endpoint reattachment: check cloud + connected endpoints (SELECT mode only)
-            if (activeTool == CanvasToolBar.Tool.SELECT && !flowCreation.isPending()) {
-                FlowEndpointCalculator.CloudHit cloudHit =
-                        FlowEndpointCalculator.hitTestClouds(worldX, worldY, canvasState, editor);
-                if (cloudHit == null) {
-                    cloudHit = FlowEndpointCalculator.hitTestConnectedEndpoints(
-                            worldX, worldY, canvasState, editor);
-                }
-                if (cloudHit != null) {
-                    reattachController.start(cloudHit, canvasState);
-                    redraw();
-                    updateCursor();
-                    event.consume();
-                    return;
-                }
-            }
-
-            // Resize handle check: takes priority over move drag
-            if (activeTool == CanvasToolBar.Tool.SELECT && !flowCreation.isPending()) {
-                ResizeHandle.HandleHit handleHit = ResizeHandle.hitTest(canvasState, worldX, worldY);
-                if (handleHit != null) {
-                    resizeController.start(handleHit, canvasState);
-                    updateCursor();
-                    event.consume();
-                    return;
-                }
-            }
-
-            // Connection reroute: clicking near an endpoint of the selected connection
-            if (activeTool == CanvasToolBar.Tool.SELECT && !flowCreation.isPending()
-                    && selectedConnection != null) {
-                ConnectionRerouteController.RerouteHit rerouteHit =
-                        ConnectionRerouteController.hitTestEndpoint(
-                                selectedConnection, canvasState, connectors, worldX, worldY);
-                if (rerouteHit != null) {
-                    rerouteController.prepare(rerouteHit);
-                    updateCursor();
-                    event.consume();
-                    return;
-                }
-            }
-
-            // PLACE_FLOW: two-click protocol
-            if (activeTool == CanvasToolBar.Tool.PLACE_FLOW) {
-                handleFlowClick(worldX, worldY);
-                updateCursor();
-                event.consume();
-                return;
-            }
-
-            // PLACE_CAUSAL_LINK: two-click protocol
-            if (activeTool == CanvasToolBar.Tool.PLACE_CAUSAL_LINK) {
-                handleCausalLinkClick(worldX, worldY);
-                updateCursor();
-                event.consume();
-                return;
-            }
-
-            // Placement mode: other PLACE_* tools — click on empty space to create
-            if (activeTool != CanvasToolBar.Tool.SELECT) {
-                String hit = HitTester.hitTest(canvasState, worldX, worldY);
-                if (hit == null) {
-                    createElementAt(worldX, worldY);
-                    updateCursor();
-                    event.consume();
-                    return;
-                }
-            }
-
-            // Select mode
-            String hit = HitTester.hitTest(canvasState, worldX, worldY);
-
-            if (hit != null) {
-                // Element click: clear connection selection
-                selectedConnection = null;
-
-                if (event.isShiftDown()) {
-                    canvasState.toggleSelection(hit);
-                } else if (!canvasState.isSelected(hit)) {
-                    canvasState.select(hit);
-                }
-
-                // Start drag for all selected elements
-                dragController.start(hit, event.getX(), event.getY(), canvasState);
-            } else {
-                // No element hit — check for connection click (info links then causal links)
-                ConnectionId connHit = HitTester.hitTestInfoLink(
-                        canvasState, connectors, worldX, worldY);
-                boolean isCausal = false;
-                if (connHit == null) {
-                    connHit = HitTester.hitTestCausalLink(canvasState,
-                            editor.getCausalLinks(), worldX, worldY);
-                    isCausal = connHit != null;
-                }
-                if (connHit != null) {
-                    // Connection click: select connection, clear element selection
-                    selectedConnection = connHit;
-                    selectedIsCausalLink = isCausal;
-                    canvasState.clearSelection();
-                } else {
-                    // Empty space: clear connection selection, start marquee
-                    selectedConnection = null;
-                    selectedIsCausalLink = false;
-                    marqueeController.start(worldX, worldY, canvasState, event.isShiftDown());
-                }
-            }
-
-            redraw();
-            updateCursor();
-            event.consume();
-        }
-    }
-
-    private void handleMouseDragged(MouseEvent event) {
-        hoveredElement = null;
-        hoveredConnection = null;
-
-        if (marqueeController.isActive()) {
-            marqueeController.drag(
-                    viewport.toWorldX(event.getX()),
-                    viewport.toWorldY(event.getY()), canvasState);
-            redraw();
-            event.consume();
-            return;
-        }
-
-        if (reattachController.isActive()) {
-            reattachController.drag(
-                    viewport.toWorldX(event.getX()),
-                    viewport.toWorldY(event.getY()));
-            redraw();
-            event.consume();
-            return;
-        }
-
-        if (rerouteController.isActive()) {
-            rerouteController.drag(
-                    viewport.toWorldX(event.getX()),
-                    viewport.toWorldY(event.getY()));
-            redraw();
-            event.consume();
-            return;
-        }
-
-        if (resizeController.isActive()) {
-            resizeController.drag(
-                    viewport.toWorldX(event.getX()),
-                    viewport.toWorldY(event.getY()),
-                    canvasState, () -> saveUndoState("Resize"));
-            redraw();
-            event.consume();
-            return;
-        }
-
-        if (panning) {
-            panMoved = true;
-            double screenDx = event.getX() - dragStartX;
-            double screenDy = event.getY() - dragStartY;
-            viewport.pan(screenDx, screenDy);
-            dragStartX = event.getX();
-            dragStartY = event.getY();
-            redraw();
-            event.consume();
-            return;
-        }
-
-        if (dragController.isDragging()) {
-            dragController.drag(event.getX(), event.getY(),
-                    canvasState, viewport, () -> saveUndoState("Move"));
-            redraw();
-            event.consume();
-        }
-    }
-
-    private void handleMouseReleased(MouseEvent event) {
-        if (marqueeController.isActive()) {
-            marqueeController.end();
-            redraw();
-            updateCursor();
-            event.consume();
-            return;
-        }
-
-        if (reattachController.isActive()) {
-            double dx = event.getX() - dragStartX;
-            double dy = event.getY() - dragStartY;
-            if (dx * dx + dy * dy < MIN_REATTACH_DRAG_SQ) {
-                // Click (no meaningful drag): cancel and select the flow instead
-                String flow = reattachController.flowName();
-                reattachController.cancel();
-                if (flow != null) {
-                    canvasState.select(flow);
-                }
-            } else {
-                reattachController.complete(
-                        viewport.toWorldX(event.getX()),
-                        viewport.toWorldY(event.getY()),
-                        canvasState, editor, () -> saveUndoState("Reconnect flow"));
-                connectors = editor.generateConnectors();
-                invalidateLoopAnalysis();
-            }
-            redraw();
-            updateCursor();
-            event.consume();
-            return;
-        }
-
-        if (rerouteController.isActive()) {
-            boolean rerouted = rerouteController.complete(
-                    viewport.toWorldX(event.getX()),
-                    viewport.toWorldY(event.getY()),
-                    canvasState, editor, () -> saveUndoState("Reroute connection"));
-            if (rerouted) {
-                selectedConnection = null;
-                connectors = editor.generateConnectors();
-                invalidateLoopAnalysis();
-            }
-            redraw();
-            updateCursor();
-            event.consume();
-            return;
-        }
-
-        if (resizeController.isActive()) {
-            resizeController.end();
-            updateCursor();
-            event.consume();
-            return;
-        }
-
-        // Right-click release without drag: show context menu on module, CLD variable, or causal link
-        if (panning && !panMoved && event.getButton() == MouseButton.SECONDARY) {
-            double worldX = viewport.toWorldX(event.getX());
-            double worldY = viewport.toWorldY(event.getY());
-            String hit = HitTester.hitTest(canvasState, worldX, worldY);
-            if (hit != null) {
-                ElementType hitType = canvasState.getType(hit).orElse(null);
-                if (hitType == ElementType.MODULE || hitType == ElementType.CLD_VARIABLE) {
-                    panning = false;
-                    panMoved = false;
-                    showElementContextMenu(hit, event.getScreenX(), event.getScreenY());
-                    updateCursor();
-                    event.consume();
-                    return;
-                }
-            }
-            // Check for causal link right-click
-            if (hit == null && editor != null) {
-                ConnectionId causalHit = HitTester.hitTestCausalLink(canvasState,
-                        editor.getCausalLinks(), worldX, worldY);
-                if (causalHit != null) {
-                    panning = false;
-                    panMoved = false;
-                    showCausalLinkContextMenu(causalHit,
-                            event.getScreenX(), event.getScreenY());
-                    updateCursor();
-                    event.consume();
-                    return;
-                }
-            }
-        }
-
-        dragController.end();
-        panning = false;
-        panMoved = false;
-        updateCursor();
-        event.consume();
-    }
-
-    /**
-     * Selects all elements on the canvas.
-     */
     public void selectAll() {
         canvasState.selectAll();
         redraw();
     }
 
-    /**
-     * Selects a single element by name, clearing the current selection,
-     * and pans the viewport to center the element on screen.
-     * Used by the validation dialog to highlight a specific element.
-     */
     public void selectElement(String name) {
-        canvasState.clearSelection();
-        canvasState.select(name);
-
-        // Pan viewport to center the element on screen
-        double worldX = canvasState.getX(name);
-        double worldY = canvasState.getY(name);
-        if (!Double.isNaN(worldX) && !Double.isNaN(worldY)) {
-            double canvasCenterX = getWidth() / 2.0;
-            double canvasCenterY = getHeight() / 2.0;
-            double scale = viewport.getScale();
-            viewport.restoreState(
-                    canvasCenterX - worldX * scale,
-                    canvasCenterY - worldY * scale,
-                    scale);
-        }
-
+        selectionController.selectAndCenter(name, canvasState, viewport, getWidth(), getHeight());
         redraw();
     }
 
-    private void handleKeyPressed(KeyEvent event) {
-        // Guard: ignore key events while inline editor is active
-        if (inlineEdit.isActive()) {
-            return;
-        }
+    public void copySelection() {
+        selectionController.copy(editor, canvasState);
+    }
 
-        if (event.getCode() == KeyCode.ESCAPE) {
-            handleEscape();
-            event.consume();
-        } else if (event.getCode() == KeyCode.SPACE) {
-            spaceDown = true;
-            updateCursor();
-            event.consume();
-        } else if (event.getCode() == KeyCode.DELETE || event.getCode() == KeyCode.BACK_SPACE) {
-            if (selectedConnection != null && canvasState.getSelection().isEmpty()) {
-                deleteSelectedConnection();
-            } else {
-                deleteSelected();
+    public void cutSelection() {
+        selectionController.cut(editor, canvasState, () -> saveUndoState("Delete"));
+        regenerateConnectors();
+        redraw();
+        inputDispatcher.updateCursor(this);
+    }
+
+    public Set<String> pasteClipboard() {
+        Set<String> replaced = selectionController.paste(
+                editor, canvasState, () -> saveUndoState("Paste"));
+        if (replaced == null) {
+            return Set.of();
+        }
+        regenerateConnectors();
+        redraw();
+        if (!replaced.isEmpty() && onPasteWarning != null) {
+            onPasteWarning.accept(replaced);
+        }
+        return replaced;
+    }
+
+    // --- Package-private methods for InputDispatcher ---
+
+    CanvasState canvasState() {
+        return canvasState;
+    }
+
+    Viewport viewport() {
+        return viewport;
+    }
+
+    CanvasToolBar.Tool getActiveTool() {
+        return activeTool;
+    }
+
+    public List<ConnectorRoute> getConnectors() {
+        return connectors;
+    }
+
+    void requestRedraw() {
+        redraw();
+    }
+
+    void regenerateConnectors() {
+        connectors = editor.generateConnectors();
+        invalidateLoopAnalysis();
+    }
+
+    void setSelectedConnection(ConnectionId connection, boolean isCausal) {
+        this.selectedConnection = connection;
+        this.selectedIsCausalLink = isCausal;
+    }
+
+    void clearSelectedConnection() {
+        this.selectedConnection = null;
+        this.selectedIsCausalLink = false;
+    }
+
+    void deleteSelectedOrConnection() {
+        if (selectedConnection != null && canvasState.getSelection().isEmpty()) {
+            if (selectionController.deleteConnection(
+                    selectedConnection, selectedIsCausalLink, editor,
+                    () -> saveUndoState("Delete connection"))) {
+                if (!selectedIsCausalLink) {
+                    connectors = editor.generateConnectors();
+                }
+                clearSelectedConnection();
+                invalidateLoopAnalysis();
+                redraw();
+                inputDispatcher.updateCursor(this);
             }
-            event.consume();
-        } else if (event.isShortcutDown() && event.getCode() == KeyCode.A) {
-            selectAll();
-            event.consume();
-        } else if (event.isShortcutDown() && event.getCode() == KeyCode.C) {
-            copySelection();
-            event.consume();
-        } else if (event.isShortcutDown() && event.getCode() == KeyCode.X) {
-            cutSelection();
-            event.consume();
-        } else if (event.isShortcutDown() && event.getCode() == KeyCode.V) {
-            pasteClipboard();
-            event.consume();
-        } else if (event.isShortcutDown()
-                && (event.getCode() == KeyCode.PLUS || event.getCode() == KeyCode.EQUALS
-                        || event.getCode() == KeyCode.ADD)) {
-            viewport.zoomAt(getWidth() / 2, getHeight() / 2, ZOOM_FACTOR);
-            redraw();
-            updateCursor();
-            event.consume();
-        } else if (event.isShortcutDown()
-                && (event.getCode() == KeyCode.MINUS || event.getCode() == KeyCode.SUBTRACT)) {
-            viewport.zoomAt(getWidth() / 2, getHeight() / 2, 1.0 / ZOOM_FACTOR);
-            redraw();
-            updateCursor();
-            event.consume();
-        } else if (event.isShortcutDown() && event.getCode() == KeyCode.DIGIT0) {
-            viewport.reset();
-            redraw();
-            updateCursor();
-            event.consume();
-        } else if (!event.isShortcutDown() && !event.isShiftDown() && !event.isAltDown()) {
-            switch (event.getCode()) {
-                case DIGIT1 -> { switchTool(CanvasToolBar.Tool.SELECT); event.consume(); }
-                case DIGIT2 -> { switchTool(CanvasToolBar.Tool.PLACE_STOCK); event.consume(); }
-                case DIGIT3 -> { switchTool(CanvasToolBar.Tool.PLACE_FLOW); event.consume(); }
-                case DIGIT4 -> { switchTool(CanvasToolBar.Tool.PLACE_AUX); event.consume(); }
-                case DIGIT5 -> { switchTool(CanvasToolBar.Tool.PLACE_CONSTANT); event.consume(); }
-                case DIGIT6 -> { switchTool(CanvasToolBar.Tool.PLACE_MODULE); event.consume(); }
-                case DIGIT7 -> { switchTool(CanvasToolBar.Tool.PLACE_LOOKUP); event.consume(); }
-                case DIGIT8 -> { switchTool(CanvasToolBar.Tool.PLACE_CLD_VARIABLE); event.consume(); }
-                case DIGIT9 -> { switchTool(CanvasToolBar.Tool.PLACE_CAUSAL_LINK); event.consume(); }
-                default -> { }
-            }
+        } else {
+            deleteSelectedElements();
         }
     }
 
-    /**
-     * Handles Escape key with priority chain: cancel reattachment, cancel pending flow,
-     * reset tool to Select, clear selection.
-     */
-    private void handleEscape() {
-        if (resizeController.isActive()) {
-            resizeController.cancel(this::performUndo);
-            redraw();
-        } else if (marqueeController.isActive()) {
-            marqueeController.cancel(canvasState);
-            redraw();
-        } else if (reattachController.isActive()) {
-            reattachController.cancel();
-            redraw();
-        } else if (rerouteController.isActive()) {
-            rerouteController.cancel();
-            redraw();
-        } else if (flowCreation.isPending()) {
-            flowCreation.cancel();
-            redraw();
-        } else if (causalLinkCreation.isPending()) {
-            causalLinkCreation.cancel();
-            redraw();
-        } else if (activeTool != CanvasToolBar.Tool.SELECT) {
-            if (toolBar != null) {
-                toolBar.resetToSelect();
-            } else {
-                activeTool = CanvasToolBar.Tool.SELECT;
-            }
-        } else if (selectedConnection != null) {
-            selectedConnection = null;
-            redraw();
-        } else if (!canvasState.getSelection().isEmpty()) {
-            canvasState.clearSelection();
-            redraw();
-        } else if (navController.isInsideModule()) {
-            navigateBack();
+    void handleFlowClick(double worldX, double worldY) {
+        if (flowCreation.isPending()) {
+            saveUndoState("Add flow");
         }
-        updateCursor();
+        FlowCreationController.FlowResult result = flowCreation.handleClick(
+                worldX, worldY, canvasState, editor);
+        if (result.isCreated()) {
+            regenerateConnectors();
+            canvasState.clearSelection();
+            canvasState.select(result.flowName());
+        }
+        redraw();
+    }
+
+    void handleCausalLinkClick(double worldX, double worldY) {
+        if (causalLinkCreation.isPending()) {
+            saveUndoState("Add causal link");
+        }
+        CausalLinkCreationController.LinkResult result = causalLinkCreation.handleClick(
+                worldX, worldY, canvasState, editor);
+        if (result.isCreated()) {
+            regenerateConnectors();
+        }
+        redraw();
+    }
+
+    void createElementAt(double worldX, double worldY) {
+        String name = selectionController.createElementAt(
+                worldX, worldY, activeTool, editor, canvasState,
+                () -> saveUndoState("Add element"));
+        if (name != null) {
+            regenerateConnectors();
+            redraw();
+        }
+    }
+
+    void startInlineEdit(String elementName) {
+        inlineEdit.startEdit(elementName, canvasState, editor, viewport, inlineCallbacks);
+    }
+
+    void updateTooltip(String elementName, MouseEvent event) {
+        tooltipController.update(elementName, event, this, canvasState, editor);
+    }
+
+    void resetToolToSelect() {
+        if (toolBar != null) {
+            toolBar.resetToSelect();
+        } else {
+            activeTool = CanvasToolBar.Tool.SELECT;
+        }
+    }
+
+    void zoomIn() {
+        viewport.zoomAt(getWidth() / 2, getHeight() / 2, ZOOM_FACTOR);
+        redraw();
+        inputDispatcher.updateCursor(this);
+    }
+
+    void zoomOut() {
+        viewport.zoomAt(getWidth() / 2, getHeight() / 2, 1.0 / ZOOM_FACTOR);
+        redraw();
+        inputDispatcher.updateCursor(this);
+    }
+
+    void resetZoom() {
+        viewport.reset();
+        redraw();
+        inputDispatcher.updateCursor(this);
+    }
+
+    // --- Rendering ---
+
+    private void regenerateAndRedraw() {
+        connectors = editor.generateConnectors();
+        invalidateLoopAnalysis();
+        redraw();
+    }
+
+    public void applyMutation(Runnable mutation) {
+        mutation.run();
+        regenerateAndRedraw();
+    }
+
+    private CanvasRenderer.RerouteState rerouteRenderState() {
+        if (!rerouteController.isActive()) {
+            return CanvasRenderer.RerouteState.IDLE;
+        }
+        return new CanvasRenderer.RerouteState(
+                true,
+                rerouteController.getAnchorX(),
+                rerouteController.getAnchorY(),
+                rerouteController.getRubberBandX(),
+                rerouteController.getRubberBandY());
+    }
+
+    public CanvasState getCanvasState() {
+        return canvasState;
+    }
+
+    public FeedbackAnalysis getActiveLoopAnalysis() {
+        return loopHighlightActive ? loopAnalysis : null;
+    }
+
+    public double getZoomScale() {
+        return viewport.getScale();
+    }
+
+    // --- Tool state ---
+
+    public void setActiveTool(CanvasToolBar.Tool tool) {
+        if (flowCreation.isPending()) {
+            flowCreation.cancel();
+        }
+        if (causalLinkCreation.isPending()) {
+            causalLinkCreation.cancel();
+        }
+        this.activeTool = tool;
+        inputDispatcher.updateCursor(this);
+    }
+
+    public void setToolBar(CanvasToolBar toolBar) {
+        this.toolBar = toolBar;
+    }
+
+    public void setOverlayPane(Pane overlayPane) {
+        inlineEdit.setOverlayPane(overlayPane);
     }
 
     public void switchTool(CanvasToolBar.Tool tool) {
@@ -1371,27 +545,53 @@ public class ModelCanvas extends Canvas {
         fireStatusChanged();
     }
 
-    private void handleKeyReleased(KeyEvent event) {
-        if (event.getCode() == KeyCode.SPACE) {
-            spaceDown = false;
-            updateCursor();
-            event.consume();
+    @Override
+    public boolean isResizable() {
+        return true;
+    }
+
+    @Override
+    public double prefWidth(double height) {
+        return getWidth();
+    }
+
+    @Override
+    public double prefHeight(double width) {
+        return getHeight();
+    }
+
+    // --- Rendering ---
+
+    private void redraw() {
+        renderer.render(getGraphicsContext2D(), getWidth(), getHeight(),
+                new CanvasRenderer.RenderContext(
+                        editor, connectors, flowCreation.getState(),
+                        causalLinkCreation.getState(),
+                        reattachController.toRenderState(),
+                        rerouteRenderState(),
+                        marqueeController.toRenderState(),
+                        loopHighlightActive ? loopAnalysis : null,
+                        inputDispatcher.getHoveredElement(),
+                        inputDispatcher.getHoveredConnection(),
+                        selectedConnection));
+        fireStatusChanged();
+    }
+
+    // --- Rename ---
+
+    private void applyRename(String oldName, String newName) {
+        if (selectionController.applyRename(oldName, newName, editor, canvasState,
+                () -> saveUndoState("Rename"))) {
+            regenerateAndRedraw();
         }
     }
 
     // --- Module navigation ---
 
-    /**
-     * Sets a callback invoked whenever the navigation state changes.
-     */
     public void setOnNavigationChanged(Runnable callback) {
         navController.setOnNavigationChanged(callback);
     }
 
-    /**
-     * Drills into the named module, pushing the current level onto the navigation stack
-     * and loading the module's inner definition for editing.
-     */
     public void drillInto(String moduleName) {
         if (editor == null) {
             return;
@@ -1433,10 +633,6 @@ public class ModelCanvas extends Canvas {
         fireStatusChanged();
     }
 
-    /**
-     * Navigates back to the parent level, writing the current level's definition
-     * back into the parent's module.
-     */
     public void navigateBack() {
         if (!navController.isInsideModule()) {
             return;
@@ -1494,31 +690,26 @@ public class ModelCanvas extends Canvas {
         navController.clear();
     }
 
-    private void showElementContextMenu(String elementName, double screenX, double screenY) {
+    // --- Context menus ---
+
+    void showElementContextMenu(String elementName, double screenX, double screenY) {
         navController.showContextMenu(this, elementName, canvasState, screenX, screenY,
                 this::drillInto, this::openBindingsDialog, this::startInlineEdit,
                 this::classifyCldVariable);
     }
 
     private void classifyCldVariable(String name, ElementType targetType) {
-        if (editor == null) {
-            return;
-        }
-        saveUndoState("Classify variable");
-        if (editor.classifyCldVariable(name, targetType)) {
-            canvasState.setType(name, targetType);
-            connectors = editor.generateConnectors();
-            invalidateLoopAnalysis();
-            redraw();
+        if (selectionController.classifyCldVariable(name, targetType, editor, canvasState,
+                () -> saveUndoState("Classify variable"))) {
+            regenerateAndRedraw();
             fireStatusChanged();
         }
     }
 
-    private void showCausalLinkContextMenu(ConnectionId link,
-                                              double screenX, double screenY) {
+    void showCausalLinkContextMenu(ConnectionId link,
+                                   double screenX, double screenY) {
         ContextMenu menu = new ContextMenu();
 
-        // Polarity submenu
         Menu polarityMenu = new Menu("Set Polarity");
         for (CausalLinkDef.Polarity p : CausalLinkDef.Polarity.values()) {
             MenuItem item = new MenuItem(p.symbol() + " (" + p.name().toLowerCase() + ")");
@@ -1532,7 +723,6 @@ public class ModelCanvas extends Canvas {
         }
         menu.getItems().add(polarityMenu);
 
-        // Delete
         MenuItem deleteItem = new MenuItem("Delete");
         deleteItem.setOnAction(e -> {
             saveUndoState("Delete causal link");
@@ -1551,5 +741,4 @@ public class ModelCanvas extends Canvas {
         navController.openBindingsDialog(moduleName, editor,
                 () -> saveUndoState("Edit bindings"), this::fireStatusChanged);
     }
-
 }
