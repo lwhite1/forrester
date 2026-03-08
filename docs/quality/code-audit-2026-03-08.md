@@ -85,11 +85,11 @@ Full audit of the Forrester System Dynamics modeling platform covering all five 
 | Severity | Total (All Time) | Currently Open | Fixed/Closed |
 |----------|-----------------|----------------|--------------|
 | Critical | 7 | 0 | 7 |
-| High | 14 | 0 | 14 |
-| Medium | 20 | 12 | 8 |
+| High | 17 | 3 | 14 |
+| Medium | 23 | 15 | 8 |
 | Low | 15 | 14 | 1 |
 
-**All critical and high issues have been resolved.** The remaining work is medium-priority quality improvements and test coverage.
+**All critical issues resolved.** 3 high-severity issues remain (found by deep code review): a missing recursion depth guard, a data corruption bug, and a path traversal vulnerability.
 
 ---
 
@@ -105,7 +105,7 @@ Key fixes this audit cycle:
 
 ---
 
-## High Issues — ALL FIXED
+## High Issues — 3 Open, 14 Fixed
 
 H1–H10 (#155–#172), H11 (#183), H12 (#184), H13 (#185), H14 (#186) — all closed.
 
@@ -114,6 +114,21 @@ Key fixes this audit cycle:
 - **H12**: XmileImporter getFirstChild/getChildTexts search direct children only
 - **H13**: ImportPipelineCli requireValue() bounds check
 - **H14**: ModelDefinitionSerializer 10 MB file size limit
+
+### H15. DependencyGraph Tarjan SCC has no recursion depth guard
+**Issue:** [#218](https://github.com/Courant-Systems/shrewd/issues/218) (open, R1)
+
+`DependencyGraph.tarjanStrongconnect()` recurses without a depth limit. A pathological graph can cause `StackOverflowError`. `FeedbackAnalysis` already has `MAX_DEPTH=200` — `DependencyGraph` needs the same.
+
+### H16. LookupForm mutates array before validation — data corruption
+**Issue:** [#219](https://github.com/Courant-Systems/shrewd/issues/219) (open, R1)
+
+`commitDataPoint()` writes new x/y values into the backing arrays, then validates monotonicity. If validation fails, the arrays are already corrupted. Fix: validate before mutation, or save/restore on failure.
+
+### H17. BatchImportCli path traversal via unsanitized URL filename
+**Issue:** [#222](https://github.com/Courant-Systems/shrewd/issues/222) (open, R1)
+
+`downloadToTemp()` extracts a filename from a URL path and passes it unsanitized to `tempDir.resolve()`. A malicious manifest URL containing `../` can write files outside the temp directory.
 
 ---
 
@@ -161,6 +176,21 @@ Key fixes this audit cycle:
 ### M20. UndoManager serializes full model on FX thread
 **Issue:** [#190](https://github.com/Courant-Systems/shrewd/issues/190) (open, R1)
 
+### M21. ExportBounds.compute() returns invalid bounds for empty models
+**Issue:** [#220](https://github.com/Courant-Systems/shrewd/issues/220) (open, R1)
+
+When a model has no elements, min/max accumulators stay at their sentinel values, producing `Bounds` with `-Infinity` dimensions. Exporters will fail or produce invalid output.
+
+### M22. FanChart uses unsynchronized static fields for cross-thread state passing
+**Issue:** [#221](https://github.com/Courant-Systems/shrewd/issues/221) (open, R1)
+
+`pendingResult` and `pendingVariableName` are written in `show()` and read in `start()` on different threads without `volatile` or synchronization. JMM does not guarantee visibility.
+
+### M23. UndoManager compressor ExecutorService never shut down — thread leak
+**Issue:** [#223](https://github.com/Courant-Systems/shrewd/issues/223) (open, R1)
+
+Each `UndoManager` creates a single-threaded executor that is never shut down. Module navigation via `drillInto()` replaces the `UndoManager` without cleanup, leaking a thread per navigation.
+
 ---
 
 ## Low Issues — 14 Open, 1 Closed
@@ -199,12 +229,12 @@ SpotBugs: **0 bugs** (effort=Max, threshold=Medium).
 |----------|--------|
 | XXE protection | XML import and export both hardened (DocumentBuilderFactory + TransformerFactory) |
 | Expression parser depth | Limited to MAX_DEPTH=200, prevents stack overflow |
-| Graph traversal depth | Limited to MAX_DEPTH=200 in Tarjan SCC and dfsCycles |
+| Graph traversal depth | FeedbackAnalysis: MAX_DEPTH=200. **DependencyGraph: NO depth guard** (#218) |
 | Unsafe deserialization | None — no ObjectInputStream, no Serializable |
 | Reflection abuse | None — no setAccessible, getDeclaredField |
 | SQL injection | N/A — no database usage |
 | Command injection | None — no Runtime.exec, ProcessBuilder |
-| File path traversal | File operations use user-selected FileChooser dialogs |
+| File path traversal | UI: FileChooser dialogs. **CLI: BatchImportCli lacks filename sanitization** (#222) |
 | File size limits | All importers enforce 10 MB cap (Vensim, XMILE, JSON) |
 | Simulation safety | Timeout (60s), MAX_STEPS (10M), NaN detection, cancellation support |
 | Empty catch blocks | None in production code |
@@ -213,7 +243,7 @@ SpotBugs: **0 bugs** (effort=Max, threshold=Medium).
 
 **Resource management:** All I/O uses try-with-resources or Files API. CsvSubscriber implements Closeable. Exporters use Files.writeString(). SweepCsvWriter uses try-with-resources throughout.
 
-**Thread safety:** FX thread confinement enforced via checkFxThread() on all ModelEditor mutations. CopyOnWriteArrayList for listeners. AnalysisRunner uses Platform.runLater() for marshaling. No unguarded shared mutable state found.
+**Thread safety:** FX thread confinement enforced via checkFxThread() on all ModelEditor mutations. CopyOnWriteArrayList for listeners. AnalysisRunner uses Platform.runLater() for marshaling. **FanChart has unsynchronized static fields** (#221). **UndoManager leaks executor threads** (#223).
 
 ---
 
@@ -261,32 +291,11 @@ SpotBugs: **0 bugs** (effort=Max, threshold=Medium).
 
 | Milestone | Count |
 |-----------|-------|
-| R1 | 19 open issues |
-| R2 | 16 open issues |
-| Unassigned | 16 open issues |
+| R1 | 30 open issues |
+| R2 | 27 open issues |
+| Unassigned | 0 |
 
-### Unassigned Issues Needing Triage
-
-These open issues have no milestone assigned:
-
-| # | Title | Recommended |
-|---|-------|-------------|
-| 4 | Keyboard-driven connection creation | R2 |
-| 29 | Example model tests lack behavioral assertions | R2 |
-| 200 | ObjectMapper lacks security hardening | R2 |
-| 201 | EquationAutoComplete.detach() not called from most forms | R1 |
-| 202 | Hardcoded dialog sizes | R2 |
-| 203 | Canvas redraws twice on resize | R2 |
-| 204 | Connector regeneration expensive | R2 |
-| 205 | Help windows can hide behind main window | R2 |
-| 206 | ESC doesn't dismiss autocomplete | R1 |
-| 207 | Silent parsing failures in forms | R1 |
-| 208 | Sweep/Monte Carlo dialogs disable OK with no explanation | R1 |
-| 210 | CI missing quality gates | R2 |
-| 211 | Checkstyle not project-wide | R2 |
-| 212 | No .editorconfig | R2 |
-| 213 | ValidationDialog extends Stage | R2 |
-| 214 | End-to-end integration tests missing | R1 |
+All open issues have been triaged to a milestone.
 
 ---
 
@@ -301,8 +310,8 @@ These open issues have no milestone assigned:
 | Tests passing | 1,732 | 1,830 | +98 |
 | SpotBugs findings | 0 | 0 | — |
 | Open critical issues | 4 | 0 | -4 (all fixed) |
-| Open high issues | 4 | 0 | -4 (all fixed) |
-| Open medium issues | 12 | 12 | — |
+| Open high issues | 4 | 3 | -1 |
+| Open medium issues | 12 | 15 | +3 |
 | Open low issues | 14 | 14 | — |
 | Engine instruction coverage | 87.3% | 87.5% | +0.2% |
 | App instruction coverage | 37.5% | 39.3% | +1.8% |
@@ -313,16 +322,22 @@ These open issues have no milestone assigned:
 
 ### Short-term (R1)
 
-1. Fix equation rename via AST (#131)
-2. Add forrester-ui tests (#145)
-3. Convert `return null` to Optional in io/ package (#163)
-4. Add unit tests for ModelReport (#178)
-5. Fix BatchImportCli URI validation (#189)
-6. Move UndoManager serialization off FX thread (#190)
-7. Fix ESC to dismiss autocomplete (#206)
-8. Fix silent parsing failures in forms (#207)
-9. Add end-to-end integration tests (#214)
-10. Fix EquationAutoComplete.detach() in all forms (#201)
+1. **Add depth guard to DependencyGraph Tarjan SCC (#218)** — high severity, stack overflow risk
+2. **Fix LookupForm mutation-before-validation (#219)** — high severity, data corruption
+3. **Sanitize URL filenames in BatchImportCli (#222)** — high severity, path traversal
+4. Fix ExportBounds crash on empty model (#220)
+5. Add `volatile` to FanChart static fields (#221)
+6. Shut down UndoManager compressor executor (#223)
+7. Fix equation rename via AST (#131)
+8. Add forrester-ui tests (#145)
+9. Convert `return null` to Optional in io/ package (#163)
+10. Add unit tests for ModelReport (#178)
+11. Fix BatchImportCli URI validation (#189)
+12. Move UndoManager serialization off FX thread (#190)
+13. Fix ESC to dismiss autocomplete (#206)
+14. Fix silent parsing failures in forms (#207)
+15. Add end-to-end integration tests (#214)
+16. Fix EquationAutoComplete.detach() in all forms (#201)
 
 ### Medium-term (R2)
 
