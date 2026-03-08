@@ -25,3 +25,11 @@ jobs:
 
       - name: SpotBugs analysis
         run: mvn compile spotbugs:check -B -q
+
+      - name: Upload coverage reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-reports
+          path: '**/target/site/jacoco/'
+          retention-days: 14
