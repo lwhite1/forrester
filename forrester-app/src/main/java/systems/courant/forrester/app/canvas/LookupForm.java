@@ -229,18 +229,21 @@ class LookupForm implements ElementForm {
             if (xs[index] == newX && ys[index] == newY) {
                 return;
             }
-            xs[index] = newX;
-            ys[index] = newY;
+            // Work on copies so original arrays stay intact if validation fails
+            double[] newXs = xs.clone();
+            double[] newYs = ys.clone();
+            newXs[index] = newX;
+            newYs[index] = newY;
             // Validate: x values must be strictly increasing
-            for (int i = 1; i < xs.length; i++) {
-                if (xs[i] <= xs[i - 1]) {
-                    xField.setText(ElementRenderer.formatValue(lt.xValues()[index]));
-                    yField.setText(ElementRenderer.formatValue(lt.yValues()[index]));
+            for (int i = 1; i < newXs.length; i++) {
+                if (newXs[i] <= newXs[i - 1]) {
+                    xField.setText(ElementRenderer.formatValue(xs[index]));
+                    yField.setText(ElementRenderer.formatValue(ys[index]));
                     return;
                 }
             }
             LookupTableDef updated = new LookupTableDef(
-                    ctx.elementName, lt.comment(), xs, ys, lt.interpolation());
+                    ctx.elementName, lt.comment(), newXs, newYs, lt.interpolation());
             ctx.canvas.applyMutation(() -> ctx.editor.setLookupTable(ctx.elementName, updated));
         } catch (NumberFormatException ignored) {
             xField.setText(ElementRenderer.formatValue(lt.xValues()[index]));
