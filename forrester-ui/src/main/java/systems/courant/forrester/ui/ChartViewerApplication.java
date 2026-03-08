@@ -13,6 +13,7 @@ import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
 import javafx.scene.chart.XYChart.Series;
+import javafx.scene.control.Alert;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Label;
@@ -238,7 +239,10 @@ public class ChartViewerApplication extends Application {
         try {
             ImageIO.write(bImage, "png", outputFile);
         } catch (IOException e) {
-            throw new RuntimeException("Failed to save chart image: " + outputFile, e);
+            Alert alert = new Alert(Alert.AlertType.ERROR,
+                    "Failed to save chart image: " + e.getMessage());
+            alert.setHeaderText("Save Error");
+            alert.showAndWait();
         }
     }
 }
