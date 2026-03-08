@@ -23,8 +23,8 @@ import javafx.stage.Stage;
  */
 public class FanChart extends Application {
 
-    private static MonteCarloResult pendingResult;
-    private static String pendingVariableName;
+    private static volatile MonteCarloResult pendingResult;
+    private static volatile String pendingVariableName;
 
     private static final double WIDTH = 900;
     private static final double HEIGHT = 600;
