@@ -67,6 +67,19 @@ public class ParameterSweepDialog extends Dialog<ParameterSweepDialog.Config> {
         grid.add(new Label("Track:"), 0, 4);
         grid.add(trackCombo, 1, 4);
 
+        Label validationLabel = new Label();
+        validationLabel.setStyle("-fx-text-fill: #cc3333; -fx-font-size: 11;");
+        validationLabel.setWrapText(true);
+        validationLabel.setMaxWidth(Double.MAX_VALUE);
+        validationLabel.setId("sweepValidationLabel");
+        validationLabel.textProperty().bind(
+                Bindings.createStringBinding(this::getValidationMessage,
+                        startField.textProperty(), endField.textProperty(),
+                        stepField.textProperty(),
+                        parameterCombo.valueProperty(), trackCombo.valueProperty())
+        );
+        grid.add(validationLabel, 0, 5, 2, 1);
+
         getDialogPane().setContent(grid);
 
         ButtonType okButton = new ButtonType("OK", ButtonBar.ButtonData.OK_DONE);
@@ -94,22 +107,37 @@ public class ParameterSweepDialog extends Dialog<ParameterSweepDialog.Config> {
     }
 
     private boolean isInvalid() {
-        if (parameterCombo.getValue() == null || trackCombo.getValue() == null) {
-            return true;
+        return !getValidationMessage().isEmpty();
+    }
+
+    private String getValidationMessage() {
+        if (parameterCombo.getValue() == null) {
+            return "Select a parameter to sweep.";
+        }
+        if (trackCombo.getValue() == null) {
+            return "Select a variable to track.";
         }
         try {
             double start = Double.parseDouble(startField.getText().trim());
             double end = Double.parseDouble(endField.getText().trim());
             double step = Double.parseDouble(stepField.getText().trim());
-            if (start > end || step <= 0 || !Double.isFinite(start)
-                    || !Double.isFinite(end) || !Double.isFinite(step)) {
-                return true;
+            if (!Double.isFinite(start) || !Double.isFinite(end) || !Double.isFinite(step)) {
+                return "Start, end, and step must be finite numbers.";
+            }
+            if (start > end) {
+                return "Start must be less than or equal to end.";
+            }
+            if (step <= 0) {
+                return "Step must be greater than zero.";
             }
             long pointCount = start == end ? 1
                     : (long) Math.ceil((end - start) / step) + 1;
-            return pointCount > 10_000;
+            if (pointCount > 10_000) {
+                return "Too many points (" + pointCount + "). Maximum is 10,000.";
+            }
+            return "";
         } catch (NumberFormatException e) {
-            return true;
+            return "Start, end, and step must be valid numbers.";
         }
     }
 }

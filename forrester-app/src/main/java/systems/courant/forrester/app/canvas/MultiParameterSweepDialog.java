@@ -85,7 +85,17 @@ public class MultiParameterSweepDialog extends Dialog<MultiParameterSweepDialog.
         Label paramsLabel = new Label("Parameters");
         paramsLabel.setStyle(Styles.SECTION_HEADER);
 
-        VBox content = new VBox(10, paramsLabel, paramScroll);
+        Label validationLabel = new Label();
+        validationLabel.setStyle("-fx-text-fill: #cc3333; -fx-font-size: 11;");
+        validationLabel.setWrapText(true);
+        validationLabel.setMaxWidth(Double.MAX_VALUE);
+        validationLabel.setId("multiSweepValidationLabel");
+        validationLabel.textProperty().bind(
+                Bindings.createStringBinding(this::getValidationMessage,
+                        parameterRows, fieldChangeCounter)
+        );
+
+        VBox content = new VBox(10, paramsLabel, paramScroll, validationLabel);
         content.setPadding(new Insets(10));
         getDialogPane().setContent(content);
         getDialogPane().setPrefWidth(560);
@@ -94,7 +104,7 @@ public class MultiParameterSweepDialog extends Dialog<MultiParameterSweepDialog.
         getDialogPane().getButtonTypes().addAll(okButton, ButtonType.CANCEL);
 
         getDialogPane().lookupButton(okButton).disableProperty().bind(
-                Bindings.createBooleanBinding(() -> getValidParams().size() < 2,
+                Bindings.createBooleanBinding(() -> !getValidationMessage().isEmpty(),
                         parameterRows, fieldChangeCounter)
         );
 
@@ -132,6 +142,25 @@ public class MultiParameterSweepDialog extends Dialog<MultiParameterSweepDialog.
             }
             return null;
         });
+    }
+
+    private String getValidationMessage() {
+        List<ParamConfig> validParams = getValidParams();
+        if (validParams.size() < 2) {
+            int valid = validParams.size();
+            return "At least 2 valid parameter rows required (currently " + valid + ").";
+        }
+        Set<String> names = new HashSet<>();
+        for (ParamConfig p : validParams) {
+            if (!names.add(p.name())) {
+                return "Duplicate parameter: " + p.name() + ". Each must be unique.";
+            }
+        }
+        long combos = computeCombinations(validParams);
+        if (combos > MAX_COMBINATIONS) {
+            return "Too many combinations (" + combos + "). Maximum is " + MAX_COMBINATIONS + ".";
+        }
+        return "";
     }
 
     private List<ParamConfig> getValidParams() {

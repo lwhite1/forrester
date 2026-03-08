@@ -1,6 +1,8 @@
 package systems.courant.forrester.app.canvas;
 
 import javafx.beans.binding.Bindings;
+import javafx.beans.property.IntegerProperty;
+import javafx.beans.property.SimpleIntegerProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
@@ -44,6 +46,7 @@ public class MonteCarloDialog extends Dialog<MonteCarloDialog.Config> {
     }
 
     private final ObservableList<ParameterRow> parameterRows = FXCollections.observableArrayList();
+    private final IntegerProperty fieldChangeCounter = new SimpleIntegerProperty(0);
     private final List<String> constantNames;
     private final TextField iterationsField;
     private final ComboBox<String> samplingCombo;
@@ -96,7 +99,18 @@ public class MonteCarloDialog extends Dialog<MonteCarloDialog.Config> {
         Label paramsLabel = new Label("Parameters");
         paramsLabel.setStyle(Styles.SECTION_HEADER);
 
-        VBox content = new VBox(10, paramsLabel, paramScroll, settingsGrid);
+        Label validationLabel = new Label();
+        validationLabel.setStyle("-fx-text-fill: #cc3333; -fx-font-size: 11;");
+        validationLabel.setWrapText(true);
+        validationLabel.setMaxWidth(Double.MAX_VALUE);
+        validationLabel.setId("mcValidationLabel");
+        validationLabel.textProperty().bind(
+                Bindings.createStringBinding(this::getValidationMessage,
+                        iterationsField.textProperty(), seedField.textProperty(),
+                        parameterRows, fieldChangeCounter)
+        );
+
+        VBox content = new VBox(10, paramsLabel, paramScroll, settingsGrid, validationLabel);
         content.setPadding(new Insets(10));
         getDialogPane().setContent(content);
         getDialogPane().setPrefWidth(500);
@@ -107,7 +121,7 @@ public class MonteCarloDialog extends Dialog<MonteCarloDialog.Config> {
         getDialogPane().lookupButton(okButton).disableProperty().bind(
                 Bindings.createBooleanBinding(this::isInvalid,
                         iterationsField.textProperty(), seedField.textProperty(),
-                        parameterRows)
+                        parameterRows, fieldChangeCounter)
         );
 
         Button okNode = (Button) getDialogPane().lookupButton(okButton);
@@ -140,16 +154,27 @@ public class MonteCarloDialog extends Dialog<MonteCarloDialog.Config> {
     }
 
     private boolean isInvalid() {
+        return !getValidationMessage().isEmpty();
+    }
+
+    private String getValidationMessage() {
         try {
             int iter = Integer.parseInt(iterationsField.getText().trim());
-            Long.parseLong(seedField.getText().trim());
             if (iter < 1) {
-                return true;
+                return "Iterations must be at least 1.";
             }
         } catch (NumberFormatException e) {
-            return true;
+            return "Iterations must be a valid integer.";
         }
-        return parameterRows.stream().noneMatch(ParameterRow::isValid);
+        try {
+            Long.parseLong(seedField.getText().trim());
+        } catch (NumberFormatException e) {
+            return "Seed must be a valid integer.";
+        }
+        if (parameterRows.stream().noneMatch(ParameterRow::isValid)) {
+            return "At least one parameter row must have valid values.";
+        }
+        return "";
     }
 
     private class ParameterRow {
@@ -179,7 +204,14 @@ public class MonteCarloDialog extends Dialog<MonteCarloDialog.Config> {
             param2Field = new TextField("1");
             param2Field.setPrefWidth(60);
 
-            distCombo.valueProperty().addListener((obs, old, val) -> updateLabels(val));
+            distCombo.valueProperty().addListener((obs, old, val) -> {
+                updateLabels(val);
+                fieldChangeCounter.set(fieldChangeCounter.get() + 1);
+            });
+            param1Field.textProperty().addListener((obs, o, n) ->
+                    fieldChangeCounter.set(fieldChangeCounter.get() + 1));
+            param2Field.textProperty().addListener((obs, o, n) ->
+                    fieldChangeCounter.set(fieldChangeCounter.get() + 1));
 
             pane = new HBox(6);
             pane.setPadding(new Insets(2));
