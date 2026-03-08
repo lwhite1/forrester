@@ -117,6 +117,36 @@ class SensitivitySummaryTest {
     }
 
     @Test
+    void multiSweepFractionsShouldBeBoundedWhenOutputNearZero() {
+        // Regression: coffee cooling model where Discrepancy final value is near zero
+        // at the midpoint. The old range/baseline formula produced 3644% or infinity.
+        MultiSweepResult result = MultiParameterSweep.builder()
+                .parameter("Contact Rate", new double[]{2.0, 8.0, 14.0})
+                .parameter("Recovery Rate", new double[]{0.05, 0.2, 0.5})
+                .modelFactory(params -> buildSirModelTwoParams(
+                        params.get("Contact Rate"), params.get("Recovery Rate")))
+                .timeStep(DAY)
+                .duration(weeks(12))
+                .build()
+                .execute();
+
+        // Target a variable whose final value is near zero for some param combinations
+        // (Infectious tends toward zero as epidemic burns out)
+        List<SensitivitySummary.ParameterImpact> impacts =
+                SensitivitySummary.fromMultiSweep(result, "Infectious");
+
+        for (var impact : impacts) {
+            assertTrue(impact.impactFraction() >= 0.0 && impact.impactFraction() <= 1.0,
+                    "Fraction must be 0-1 even when outputs are near zero, got "
+                            + impact.impactFraction() + " for " + impact.parameterName());
+        }
+
+        double sum = impacts.stream()
+                .mapToDouble(SensitivitySummary.ParameterImpact::impactFraction).sum();
+        assertEquals(1.0, sum, 0.001, "Fractions must sum to 1.0");
+    }
+
+    @Test
     void shouldReturnEmptyListForEmptyResult() {
         SweepResult empty = new SweepResult("X", List.of());
         List<SensitivitySummary.ParameterImpact> impacts =
