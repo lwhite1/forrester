@@ -114,7 +114,13 @@ public class ImportPipeline {
 
     private ImportResult importModel(Path sourceFile) throws IOException {
         String fileName = sourceFile.getFileName().toString().toLowerCase();
-        String ext = fileName.substring(fileName.lastIndexOf('.'));
+        int dotIndex = fileName.lastIndexOf('.');
+        if (dotIndex < 0) {
+            throw new IllegalArgumentException(
+                    "File has no extension: " + sourceFile.getFileName()
+                    + ". Expected one of: .xmile, .stmx, .xml, .mdl");
+        }
+        String ext = fileName.substring(dotIndex);
 
         ModelImporter importer;
         if (XMILE_EXTENSIONS.contains(ext)) {

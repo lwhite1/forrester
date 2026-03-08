@@ -200,11 +200,10 @@ public class BatchImportCli {
         Path tempDir = Files.createTempDirectory("forrester-download-");
         Path tempFile = tempDir.resolve(fileName);
 
-        try {
-            HttpClient client = HttpClient.newBuilder()
-                    .followRedirects(HttpClient.Redirect.NORMAL)
-                    .connectTimeout(DOWNLOAD_TIMEOUT)
-                    .build();
+        try (HttpClient client = HttpClient.newBuilder()
+                .followRedirects(HttpClient.Redirect.NORMAL)
+                .connectTimeout(DOWNLOAD_TIMEOUT)
+                .build()) {
             HttpRequest request = HttpRequest.newBuilder()
                     .uri(uri)
                     .timeout(DOWNLOAD_TIMEOUT)

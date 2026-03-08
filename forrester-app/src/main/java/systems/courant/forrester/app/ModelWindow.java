@@ -847,15 +847,15 @@ public class ModelWindow {
                 canvas.getConnectors(), canvas.getActiveLoopAnalysis(), stage,
                 editor != null ? editor.getModelName() : null)));
 
-        // Help
+        // Help (reuse tracked windows, same as menu items)
         commands.add(cmd("Getting Started", "Help",
-                () -> new QuickstartDialog().show()));
+                () -> quickstartWindow = showHelpWindow(quickstartWindow, QuickstartDialog::new)));
         commands.add(cmd("SD Concepts", "Help",
-                () -> new SdConceptsDialog().show()));
+                () -> sdConceptsWindow = showHelpWindow(sdConceptsWindow, SdConceptsDialog::new)));
         commands.add(cmd("Expression Language", "Help",
-                () -> new ExpressionLanguageDialog().show()));
+                () -> exprLangWindow = showHelpWindow(exprLangWindow, ExpressionLanguageDialog::new)));
         commands.add(cmd("Keyboard Shortcuts", "Help",
-                () -> new KeyboardShortcutsDialog().show()));
+                () -> shortcutsWindow = showHelpWindow(shortcutsWindow, KeyboardShortcutsDialog::new)));
 
         // Dynamic: model element names for navigation
         for (String name : canvas.getCanvasState().getDrawOrder()) {
