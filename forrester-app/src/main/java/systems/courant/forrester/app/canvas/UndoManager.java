@@ -4,21 +4,19 @@ import systems.courant.forrester.io.json.ModelDefinitionSerializer;
 import systems.courant.forrester.model.def.ModelDefinition;
 import systems.courant.forrester.model.def.ViewDef;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.UncheckedIOException;
+import net.jpountz.lz4.LZ4Compressor;
+import net.jpountz.lz4.LZ4Factory;
+import net.jpountz.lz4.LZ4FastDecompressor;
+
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Deque;
 import java.util.List;
 import java.util.Optional;
-import java.util.zip.GZIPInputStream;
-import java.util.zip.GZIPOutputStream;
 
 /**
- * Snapshot-based undo/redo manager. Stores GZIP-compressed JSON snapshots
+ * Snapshot-based undo/redo manager. Stores LZ4-compressed JSON snapshots
  * on two stacks to reduce memory usage for large models. Each entry carries
  * an action label for display in the undo history panel.
  *
@@ -29,15 +27,20 @@ public class UndoManager {
 
     static final int MAX_UNDO = 100;
 
+    private static final LZ4Factory LZ4 = LZ4Factory.fastestInstance();
+    private static final LZ4Compressor COMPRESSOR = LZ4.fastCompressor();
+    private static final LZ4FastDecompressor DECOMPRESSOR = LZ4.fastDecompressor();
+
     /**
      * Immutable snapshot of both model data and canvas layout.
      */
     public record Snapshot(ModelDefinition model, ViewDef view) {}
 
     /**
-     * A compressed undo entry: GZIP-compressed JSON bytes plus a human-readable label.
+     * A compressed undo entry: LZ4-compressed JSON bytes plus a human-readable label.
+     * Stores the original (uncompressed) length for decompression.
      */
-    record CompressedEntry(byte[] data, String label) {}
+    record CompressedEntry(byte[] data, int originalLength, String label) {}
 
     private static final ModelDefinitionSerializer SERIALIZER = new ModelDefinitionSerializer();
 
@@ -197,41 +200,18 @@ public class UndoManager {
                     List.of(snapshot.view()), model.defaultSimulation());
         }
         String json = SERIALIZER.toJson(model);
-        byte[] compressed = gzipCompress(json.getBytes(StandardCharsets.UTF_8));
-        return new CompressedEntry(compressed, label);
+        byte[] raw = json.getBytes(StandardCharsets.UTF_8);
+        byte[] compressed = COMPRESSOR.compress(raw);
+        return new CompressedEntry(compressed, raw.length, label);
     }
 
     private static Snapshot decompress(CompressedEntry entry) {
-        byte[] raw = gzipDecompress(entry.data());
+        byte[] raw = new byte[entry.originalLength()];
+        DECOMPRESSOR.decompress(entry.data(), 0, raw, 0, entry.originalLength());
         String json = new String(raw, StandardCharsets.UTF_8);
         ModelDefinition model = SERIALIZER.fromJson(json);
         // The view is stored inside the model's views list
         ViewDef view = model.views().isEmpty() ? null : model.views().getFirst();
         return new Snapshot(model, view);
-    }
-
-    private static byte[] gzipCompress(byte[] data) {
-        ByteArrayOutputStream bos = new ByteArrayOutputStream(data.length / 4);
-        try (GZIPOutputStream gzip = new GZIPOutputStream(bos)) {
-            gzip.write(data);
-        } catch (IOException e) {
-            throw new UncheckedIOException("Failed to compress undo snapshot", e);
-        }
-        return bos.toByteArray();
-    }
-
-    private static byte[] gzipDecompress(byte[] compressed) {
-        ByteArrayOutputStream bos = new ByteArrayOutputStream(compressed.length * 4);
-        try (GZIPInputStream gzip = new GZIPInputStream(
-                new ByteArrayInputStream(compressed))) {
-            byte[] buf = new byte[4096];
-            int n;
-            while ((n = gzip.read(buf)) >= 0) {
-                bos.write(buf, 0, n);
-            }
-        } catch (IOException e) {
-            throw new UncheckedIOException("Failed to decompress undo snapshot", e);
-        }
-        return bos.toByteArray();
     }
 }

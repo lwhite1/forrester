@@ -37,6 +37,7 @@
         <spotbugs.version>4.8.6</spotbugs.version>
         <spotbugs-maven.version>4.8.6.6</spotbugs-maven.version>
         <jacoco.version>0.8.12</jacoco.version>
+        <lz4.version>1.8.0</lz4.version>
     </properties>
 
     <dependencyManagement>
@@ -106,6 +107,13 @@
                 <groupId>com.fasterxml.jackson.core</groupId>
                 <artifactId>jackson-databind</artifactId>
                 <version>${jackson.version}</version>
+            </dependency>
+
+            <!-- Compression -->
+            <dependency>
+                <groupId>org.lz4</groupId>
+                <artifactId>lz4-java</artifactId>
+                <version>${lz4.version}</version>
             </dependency>
 
             <!-- Logging -->
