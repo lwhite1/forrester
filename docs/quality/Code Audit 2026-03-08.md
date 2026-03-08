@@ -23,9 +23,9 @@ Full code audit of the Forrester System Dynamics modeling platform covering all 
 
 | Severity | New Issues | Pre-Existing Issues | Total Open |
 |----------|-----------|-------------------|------------|
-| Critical | 1 | 0 | 1 |
-| High | 4 | 1 | 5 |
-| Medium | 8 | 5 | 13 |
+| Critical | 3 | 0 | 3 |
+| High | 9 | 1 | 10 |
+| Medium | 12 | 5 | 17 |
 | Low | 4 | 8 | 12 |
 
 ---
@@ -34,7 +34,7 @@ Full code audit of the Forrester System Dynamics modeling platform covering all 
 
 ### C1. ModelCompiler silently swallows exceptions during stock initial-value resolution
 **File:** `forrester-engine/.../model/compile/ModelCompiler.java:268`
-**SpotBugs:** DE_MIGHT_IGNORE
+**SpotBugs:** DE_MIGHT_IGNORE | **Issue:** [#155](https://github.com/ljwhite/forrester/issues/155)
 
 The `resolveInitialExpressions()` method catches `Exception` with an empty body and a comment
 "Fall back to numeric initialValue." This means:
@@ -48,12 +48,34 @@ incorrect results with no error indication.
 **Fix:** Log a warning with the stock name, expression, and exception message. Consider adding it
 to the `CompilationContext.warnings()` list so the UI can surface it.
 
+### C2. Immutable `List.of()` used for resettable collections in simulation builtins
+**File:** `forrester-engine/.../model/builtin/DelayFixed.java`, `Smooth.java`, `Delay3.java`
+**Issue:** [#164](https://github.com/ljwhite/forrester/issues/164)
+
+Several builtin functions initialize internal buffer collections using `List.of()`, which returns
+an immutable list. When the simulation engine calls `reset()`, these collections throw
+`UnsupportedOperationException`, crashing the simulation. This affects any model using DELAY FIXED,
+SMOOTH, or DELAY3 functions when re-run without recompiling.
+
+**Fix:** Use `new ArrayList<>()` for mutable internal state.
+
+### C3. SubscriptExpander drops `initialExpression` field from StockDef
+**File:** `forrester-engine/.../model/compile/SubscriptExpander.java`
+**Issue:** [#166](https://github.com/ljwhite/forrester/issues/166)
+
+When expanding subscripted stocks, the expander constructs new `StockDef` records but does not
+propagate the `initialExpression` field, defaulting it to `null`. This silently discards
+expression-based initial values for arrayed stocks, causing them to initialize to 0.
+
+**Fix:** Copy `initialExpression` when constructing expanded StockDef records.
+
 ---
 
 ## High Issues
 
 ### H1. AnalysisRunner passes null to error handler when exception has no message
 **File:** `forrester-app/.../canvas/AnalysisRunner.java:55`
+**Issue:** [#156](https://github.com/ljwhite/forrester/issues/156)
 
 ```java
 errorHandler.accept(errorTitle,
@@ -69,7 +91,7 @@ indication of what went wrong.
 
 ### H2. VensimExporter builds a useless `flowRouteNames` HashSet
 **File:** `forrester-engine/.../io/vensim/VensimExporter.java:318`
-**SpotBugs:** UC_USELESS_OBJECT
+**SpotBugs:** UC_USELESS_OBJECT | **Issue:** [#157](https://github.com/ljwhite/forrester/issues/157)
 
 A `HashSet<String>` is populated in `buildSketchView()` but never read. This is either dead code
 from an incomplete implementation, or a bug where the set was meant to be used for type-11
@@ -82,6 +104,7 @@ export may produce incorrect element type codes.
 
 ### H3. XmileExporter does not set XXE protections on DocumentBuilderFactory
 **File:** `forrester-engine/.../io/xmile/XmileExporter.java:83`
+**Issue:** [#158](https://github.com/ljwhite/forrester/issues/158)
 
 The importer (`XmileImporter`) correctly disables external entities, but the exporter creates a
 `DocumentBuilderFactory` without setting security features. While the exporter builds documents
@@ -92,6 +115,7 @@ vector if the code is ever refactored to also parse.
 
 ### H4. XmileExporter TransformerFactory is not hardened
 **File:** `forrester-engine/.../io/xmile/XmileExporter.java:533`
+**Issue:** [#159](https://github.com/ljwhite/forrester/issues/159)
 
 `TransformerFactory.newInstance()` is used without setting `ACCESS_EXTERNAL_DTD` and
 `ACCESS_EXTERNAL_STYLESHEET` attributes. OWASP recommends:
@@ -104,6 +128,7 @@ tf.setAttribute(XMLConstants.ACCESS_EXTERNAL_STYLESHEET, "");
 
 ### H5. FileController catches broad Exception in openExample and saveToFile
 **File:** `forrester-app/.../app/FileController.java:171,320`
+**Issue:** [#160](https://github.com/ljwhite/forrester/issues/160)
 
 Catching `Exception` masks unexpected failures (ClassCastException, IllegalStateException) that
 indicate programming errors. These should propagate or at minimum be logged at ERROR level.
@@ -112,12 +137,63 @@ Currently they're displayed as user-facing messages, which may not be actionable
 **Fix:** Catch `IOException | JsonProcessingException` specifically, and let runtime exceptions
 propagate.
 
+### H6. Window close bypasses unsaved-changes check
+**File:** `forrester-app/.../app/ModelWindow.java`
+**Issue:** [#165](https://github.com/ljwhite/forrester/issues/165)
+
+Closing a model window via the OS close button does not check for unsaved changes. Users can
+lose work without any confirmation prompt.
+
+**Fix:** Add a `setOnCloseRequest` handler that checks the dirty flag and shows a save/discard/cancel
+dialog.
+
+### H7. INT function truncates large doubles silently
+**File:** `forrester-engine/.../model/builtin/IntFunction.java`
+**Issue:** [#167](https://github.com/ljwhite/forrester/issues/167)
+
+The `INT()` builtin casts `double` to `int` directly. For values exceeding `Integer.MAX_VALUE`,
+this silently produces incorrect results due to integer overflow.
+
+**Fix:** Use `Math.floor()` and keep the result as `double`, matching Vensim semantics.
+
+### H8. Lookup rewrite only replaces first occurrence in equation
+**File:** `forrester-engine/.../model/compile/ModelCompiler.java`
+**Issue:** [#168](https://github.com/ljwhite/forrester/issues/168)
+
+When the compiler rewrites lookup references in equations, it uses `String.replaceFirst()` instead
+of `String.replace()`. If a lookup name appears multiple times in the same equation, only the first
+occurrence is rewritten, producing a compilation error on subsequent occurrences.
+
+**Fix:** Use `String.replace()` for all occurrences.
+
+### H9. SimulationRunner drops CLD variables during model export
+**File:** `forrester-app/.../canvas/SimulationRunner.java`
+**Issue:** [#170](https://github.com/ljwhite/forrester/issues/170)
+
+When building a `ModelDefinition` for simulation, CLD variables that haven't been classified
+to a concrete type are silently dropped. If a user has a mixed CLD/SD model and runs a simulation,
+unclassified CLD variables and their connections disappear from the exported definition.
+
+**Fix:** Either skip CLD variables explicitly with a warning, or prevent simulation when
+unclassified CLD variables exist.
+
+### H10. CLI arguments crash with ArrayIndexOutOfBoundsException
+**File:** `forrester-tools/.../cli/BatchImportCli.java`
+**Issue:** [#172](https://github.com/ljwhite/forrester/issues/172)
+
+The CLI tool accesses `args[0]` and `args[1]` without bounds checking. Running the tool with
+no arguments or only one argument produces an unhelpful `ArrayIndexOutOfBoundsException` instead
+of a usage message.
+
+**Fix:** Check `args.length` and print usage information.
+
 ---
 
 ## Medium Issues
 
 ### M1. ModelEditor has 78 public methods and 1,365 lines
 **File:** `forrester-app/.../canvas/ModelEditor.java`
+**Issue:** [#161](https://github.com/ljwhite/forrester/issues/161)
 
 This is the largest file in the app module. It combines element CRUD, equation management,
 module operations, connector generation, validation, and model definition export. The public
@@ -135,6 +211,7 @@ thread continues to allow edits. There's no defensive copy or synchronization.
 **Impact:** Concurrent modification during simulation could corrupt model state.
 
 ### M3. Broad `catch (Exception)` in 5 locations across production code
+**Issue:** [#162](https://github.com/ljwhite/forrester/issues/162)
 **Files:**
 - `ModelCompiler.java:268` (Critical — see C1)
 - `AnalysisRunner.java:51,69`
@@ -155,6 +232,7 @@ matches "Birth_Rate").
 5 source files, 545 lines, no test directory at all.
 
 ### M6. forrester-tools and forrester-demos have zero tests
+**Issue:** [#163](https://github.com/ljwhite/forrester/issues/163)
 
 The tools module includes HTTP download logic (BatchImportCli) and Vensim model translation.
 The demos module has 26 model definitions. Neither has any tests.
@@ -173,6 +251,37 @@ Per project guidelines, prefer `Optional` for methods that may return absent val
 
 Adding new fields requires updating all 3 constructors plus every call site that uses the
 backward-compatible constructors. A builder or `toBuilder()` pattern would reduce churn.
+
+### M9. Command palette can orphan help windows
+**File:** `forrester-app/.../app/CommandPalette.java`
+**Issue:** [#169](https://github.com/ljwhite/forrester/issues/169)
+
+The command palette's "Help" action opens a new window but does not track it. If invoked
+multiple times, orphan windows accumulate with no way to close them from the main UI.
+
+### M10. ModelEditor lacks FX thread assertion
+**File:** `forrester-app/.../canvas/ModelEditor.java`
+**Issue:** [#171](https://github.com/ljwhite/forrester/issues/171)
+
+ModelEditor mutates model state but does not assert that it's being called from the FX
+Application Thread. Combined with M2 (no synchronization), background thread access could
+corrupt state silently. Adding `Platform.isFxApplicationThread()` assertions to public
+mutation methods would catch misuse early.
+
+### M11. ImportPipeline crashes on extensionless filenames
+**File:** `forrester-tools/.../cli/ImportPipeline.java`
+**Issue:** [#173](https://github.com/ljwhite/forrester/issues/173)
+
+The import pipeline calls `filename.substring(0, filename.lastIndexOf('.'))` without checking
+that the filename contains a dot. Extensionless files cause `StringIndexOutOfBoundsException`.
+
+**Fix:** Check for the presence of a dot before calling `substring`.
+
+### M12. HttpClient resource leak in BatchImportCli
+**File:** `forrester-tools/.../cli/BatchImportCli.java`
+
+The `HttpClient` is created but never closed. For long-running batch imports, this leaks
+connections. Should be wrapped in try-with-resources.
 
 ---
 
@@ -271,9 +380,9 @@ FeedbackLoopRenderer, and SelectionRenderer.
 | SpotBugs findings | 0 | 2 | New bugs introduced |
 | ModelCanvas lines | 1,592 | 744 | −53% (refactored) |
 | JaCoCo coverage | N/A | Active | Added this session |
-| Open critical issues | 0 | 1 | New: C1 |
-| Open high issues | 0 | 5 | New: H1-H5 |
-| Open medium issues | 2 | 13 | New: M1-M8 |
+| Open critical issues | 0 | 3 | New: C1-C3 |
+| Open high issues | 0 | 10 | New: H1-H10 |
+| Open medium issues | 2 | 17 | New: M1-M12 |
 
 ---
 
@@ -283,15 +392,22 @@ FeedbackLoopRenderer, and SelectionRenderer.
 
 1. **Fix C1** — Log the swallowed exception in ModelCompiler (1-line fix that prevents silent
    simulation errors)
-2. **Fix H1** — Use `e.toString()` fallback in AnalysisRunner error handler
-3. **Fix H2** — Investigate and fix/remove the dead `flowRouteNames` set
-4. **Fix H3/H4** — Add XXE protections to XmileExporter
+2. **Fix C2** — Replace `List.of()` with mutable lists in builtin reset paths
+3. **Fix C3** — Propagate `initialExpression` in SubscriptExpander
+4. **Fix H1** — Use `e.toString()` fallback in AnalysisRunner error handler
+5. **Fix H2** — Investigate and fix/remove the dead `flowRouteNames` set
+6. **Fix H3/H4** — Add XXE protections to XmileExporter
+7. **Fix H7** — Use `Math.floor()` in INT function to avoid integer overflow
+8. **Fix H8** — Use `String.replace()` for lookup rewrites
 
 ### Short-term (R1 milestone)
 
-5. Add basic tests for forrester-tools and forrester-demos modules
-6. Replace broad `catch (Exception)` with specific types
-7. Refactor ModelEditor to reduce public API surface
+9. **Fix H6** — Add unsaved-changes check on window close
+10. **Fix H9** — Handle unclassified CLD variables in simulation export
+11. **Fix H10** — Add argument validation to CLI tools
+12. Add basic tests for forrester-tools and forrester-demos modules
+13. Replace broad `catch (Exception)` with specific types
+14. Refactor ModelEditor to reduce public API surface
 
 ### Ongoing
 
