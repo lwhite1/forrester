@@ -1,6 +1,7 @@
 package com.deathrayresearch.forrester.app.canvas;
 
 import javafx.beans.value.ChangeListener;
+import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Bounds;
 import javafx.scene.control.ListView;
@@ -8,6 +9,9 @@ import javafx.scene.control.TextField;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.stage.Popup;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -24,6 +28,7 @@ import java.util.Set;
 public final class EquationAutoComplete {
 
     private static final String PROP_STATE = "EquationAutoComplete.state";
+    private static final String PROP_ORIGINAL_ACTION = "EquationAutoComplete.originalAction";
 
     private static final int MAX_VISIBLE_ROWS = 8;
     private static final int MIN_PREFIX_LENGTH = 1;
@@ -34,6 +39,8 @@ public final class EquationAutoComplete {
             "STEP", "RAMP", "LOOKUP");
 
     private static final Set<String> FUNCTION_SET = Set.copyOf(BUILT_IN_FUNCTIONS);
+
+    private static final Logger log = LoggerFactory.getLogger(EquationAutoComplete.class);
 
     private EquationAutoComplete() { }
 
@@ -58,6 +65,28 @@ public final class EquationAutoComplete {
         field.textProperty().addListener(state.textListener);
         field.caretPositionProperty().addListener(state.caretListener);
         field.focusedProperty().addListener(state.focusListener);
+
+        // Wrap the existing onAction handler. When Enter fires ActionEvent, check if
+        // the popup is showing with a selected item — if so, insert the suggestion
+        // instead of committing the field. This is more reliable than intercepting
+        // KEY_PRESSED in an event filter, because ActionEvent always fires after
+        // TextField processes Enter internally.
+        EventHandler<ActionEvent> originalAction = field.getOnAction();
+        field.getProperties().put(PROP_ORIGINAL_ACTION, originalAction);
+        field.setOnAction(e -> {
+            boolean popupShowing = state.popup != null && state.popup.isShowing();
+            String selected = (state.listView != null)
+                    ? state.listView.getSelectionModel().getSelectedItem() : null;
+            log.debug("onAction: popupShowing={}, selected={}, text={}",
+                    popupShowing, selected, field.getText());
+            if (popupShowing && selected != null) {
+                log.debug("onAction: inserting suggestion '{}'", selected);
+                state.insertSuggestion(selected);
+            } else if (originalAction != null) {
+                log.debug("onAction: delegating to original handler");
+                originalAction.handle(e);
+            }
+        });
     }
 
     /**
@@ -75,6 +104,25 @@ public final class EquationAutoComplete {
             field.caretPositionProperty().removeListener(state.caretListener);
             field.focusedProperty().removeListener(state.focusListener);
         }
+        // Restore the original onAction handler (only if we previously saved one)
+        Object original = field.getProperties().remove(PROP_ORIGINAL_ACTION);
+        if (original instanceof EventHandler<?> handler) {
+            @SuppressWarnings("unchecked")
+            EventHandler<ActionEvent> actionHandler = (EventHandler<ActionEvent>) handler;
+            field.setOnAction(actionHandler);
+        }
+    }
+
+    /**
+     * Returns true if the autocomplete popup is currently showing for the given field.
+     * Used by commit handlers to avoid committing while the user is selecting a suggestion.
+     */
+    static boolean isPopupShowing(TextField field) {
+        if (field == null) {
+            return false;
+        }
+        Object obj = field.getProperties().get(PROP_STATE);
+        return obj instanceof State state && state.popup != null && state.popup.isShowing();
     }
 
     // ── Token extraction (package-private for testing) ──────────────────
@@ -190,6 +238,7 @@ public final class EquationAutoComplete {
 
         private void handleKey(KeyEvent event) {
             boolean popupVisible = popup != null && popup.isShowing();
+            log.debug("handleKey: {} popupVisible={}", event.getCode(), popupVisible);
 
             switch (event.getCode()) {
                 case DOWN -> {
@@ -212,7 +261,7 @@ public final class EquationAutoComplete {
                         event.consume();
                     }
                 }
-                case ENTER, TAB -> {
+                case TAB -> {
                     if (popupVisible && listView.getSelectionModel().getSelectedItem() != null) {
                         insertSuggestion(listView.getSelectionModel().getSelectedItem());
                         event.consume();
@@ -250,6 +299,9 @@ public final class EquationAutoComplete {
             ensurePopup();
             listView.getItems().setAll(filtered);
             listView.getSelectionModel().selectFirst();
+            log.debug("updatePopup: {} suggestions for prefix '{}', first={}",
+                    filtered.size(), token.prefix(),
+                    listView.getSelectionModel().getSelectedItem());
 
             if (!popup.isShowing()) {
                 Bounds screenBounds = field.localToScreen(field.getBoundsInLocal());
@@ -267,10 +319,30 @@ public final class EquationAutoComplete {
             listView = new ListView<>();
             listView.setPrefHeight(MAX_VISIBLE_ROWS * 24 + 2);
             listView.setPrefWidth(field.getWidth());
+            listView.setFocusTraversable(false);
             listView.setOnMouseClicked(event -> {
                 if (event.getClickCount() == 1
                         && listView.getSelectionModel().getSelectedItem() != null) {
                     insertSuggestion(listView.getSelectionModel().getSelectedItem());
+                }
+            });
+            // Safety net: if the ListView somehow gets focus, handle Enter/Escape here
+            listView.setOnKeyPressed(event -> {
+                switch (event.getCode()) {
+                    case ENTER -> {
+                        String selected = listView.getSelectionModel().getSelectedItem();
+                        if (selected != null) {
+                            log.debug("listView keyHandler: ENTER selected={}", selected);
+                            insertSuggestion(selected);
+                        }
+                        event.consume();
+                    }
+                    case ESCAPE -> {
+                        hidePopup();
+                        field.requestFocus();
+                        event.consume();
+                    }
+                    default -> { }
                 }
             });
 
