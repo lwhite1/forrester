@@ -362,10 +362,16 @@ public class VensimImporter implements ModelImporter {
         }
 
         // Parse initial value
-        double initialValue = parseInitialValue(initExpr, constantValues, warnings, eq.name());
+        InitialValueResult initResult = parseInitialValue(
+                initExpr, constantValues, vensimNames, lookupNames, warnings, eq.name());
 
         // Create stock
-        builder.stock(new StockDef(normalized, comment, initialValue, unit, null));
+        if (initResult.expression != null) {
+            builder.stock(new StockDef(normalized, comment, 0.0, initResult.expression,
+                    unit, null, null));
+        } else {
+            builder.stock(new StockDef(normalized, comment, initResult.value, unit, null));
+        }
 
         // Create flow for the net rate
         String flowName = normalized + "_net_flow";
@@ -395,8 +401,44 @@ public class VensimImporter implements ModelImporter {
             return;
         }
 
+        points = deduplicateLookupPoints(points, normalized, warnings);
         builder.lookupTable(new LookupTableDef(normalized, comment,
                 points[0], points[1], "LINEAR"));
+    }
+
+    /**
+     * Removes consecutive duplicate x-values from lookup table data,
+     * keeping the last y-value for each x.
+     */
+    private static double[][] deduplicateLookupPoints(double[][] points,
+                                                       String name,
+                                                       List<String> warnings) {
+        double[] xs = points[0];
+        double[] ys = points[1];
+        List<Double> newXs = new ArrayList<>();
+        List<Double> newYs = new ArrayList<>();
+        newXs.add(xs[0]);
+        newYs.add(ys[0]);
+        int dupes = 0;
+        for (int i = 1; i < xs.length; i++) {
+            if (xs[i] == xs[i - 1]) {
+                // Replace last y with this one (keep last value for duplicate x)
+                newYs.set(newYs.size() - 1, ys[i]);
+                dupes++;
+            } else {
+                newXs.add(xs[i]);
+                newYs.add(ys[i]);
+            }
+        }
+        if (dupes > 0) {
+            warnings.add("Lookup '" + name + "': removed " + dupes
+                    + " duplicate x-value(s)");
+            return new double[][]{
+                    newXs.stream().mapToDouble(Double::doubleValue).toArray(),
+                    newYs.stream().mapToDouble(Double::doubleValue).toArray()
+            };
+        }
+        return points;
     }
 
     private void addExtractedLookups(VensimExprTranslator.TranslationResult tr,
@@ -408,8 +450,11 @@ public class VensimImporter implements ModelImporter {
                 continue;
             }
             try {
+                double[][] pts = deduplicateLookupPoints(
+                        new double[][]{lookup.xValues(), lookup.yValues()},
+                        lookup.name(), warnings);
                 builder.lookupTable(new LookupTableDef(lookup.name(), null,
-                        lookup.xValues(), lookup.yValues(), "LINEAR"));
+                        pts[0], pts[1], "LINEAR"));
                 lookupNames.add(lookup.name());
             } catch (IllegalArgumentException e) {
                 warnings.add("Could not create lookup '" + lookup.name() + "': " + e.getMessage());
@@ -417,21 +462,36 @@ public class VensimImporter implements ModelImporter {
         }
     }
 
-    private double parseInitialValue(String initExpr, Map<String, Double> constantValues,
-                                      List<String> warnings, String varName) {
+    private record InitialValueResult(double value, String expression) {
+        static InitialValueResult ofValue(double v) {
+            return new InitialValueResult(v, null);
+        }
+        static InitialValueResult ofExpression(String expr) {
+            return new InitialValueResult(0.0, expr);
+        }
+    }
+
+    private InitialValueResult parseInitialValue(String initExpr,
+                                                  Map<String, Double> constantValues,
+                                                  Set<String> vensimNames,
+                                                  Set<String> lookupNames,
+                                                  List<String> warnings,
+                                                  String varName) {
         String trimmed = initExpr.strip();
         if (isNumericLiteral(trimmed)) {
-            return Double.parseDouble(trimmed);
+            return InitialValueResult.ofValue(Double.parseDouble(trimmed));
         }
         // Try resolving as a reference to a known constant
         String normalized = VensimExprTranslator.normalizeName(trimmed);
         Double value = constantValues.get(normalized);
         if (value != null) {
-            return value;
+            return InitialValueResult.ofValue(value);
         }
-        warnings.add("Non-literal initial value for '" + varName + "': '" + trimmed
-                + "', defaulting to 0.0");
-        return 0.0;
+        // Fall back to treating as an expression (compiled at model build time)
+        VensimExprTranslator.TranslationResult tr =
+                VensimExprTranslator.translate(trimmed, varName + "_init", vensimNames, lookupNames);
+        warnings.addAll(tr.warnings());
+        return InitialValueResult.ofExpression(tr.expression());
     }
 
     private static boolean isNumericLiteral(String expr) {

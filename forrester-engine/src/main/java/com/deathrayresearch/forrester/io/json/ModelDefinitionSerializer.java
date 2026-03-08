@@ -171,6 +171,9 @@ public class ModelDefinitionSerializer {
                 node.put("comment", s.comment());
             }
             node.put("initialValue", s.initialValue());
+            if (s.initialExpression() != null) {
+                node.put("initialExpression", s.initialExpression());
+            }
             node.put("unit", s.unit());
             if (s.negativeValuePolicy() != null) {
                 node.put("negativeValuePolicy", s.negativeValuePolicy());
@@ -455,6 +458,7 @@ public class ModelDefinitionSerializer {
                         requiredText(n, "name"),
                         textOrNull(n, "comment"),
                         requiredDouble(n, "initialValue"),
+                        textOrNull(n, "initialExpression"),
                         requiredText(n, "unit"),
                         textOrNull(n, "negativeValuePolicy"),
                         readStringList(n, "subscripts")));

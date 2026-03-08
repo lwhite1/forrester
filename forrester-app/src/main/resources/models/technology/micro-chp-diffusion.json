@@ -1,0 +1,180 @@
+{
+  "name" : "MicroCHP",
+  "stocks" : [ {
+    "name" : "clients",
+    "comment" : "clients",
+    "initialValue" : 100.0,
+    "unit" : "person"
+  }, {
+    "name" : "potential_clients",
+    "comment" : "potential clients",
+    "initialValue" : 1.6E7,
+    "unit" : "persoon"
+  } ],
+  "flows" : [ {
+    "name" : "clients_net_flow",
+    "comment" : "Net flow for clients",
+    "equation" : "new_clients",
+    "timeUnit" : "Month",
+    "sink" : "clients"
+  }, {
+    "name" : "potential_clients_net_flow",
+    "comment" : "Net flow for potential clients",
+    "equation" : "- new_clients",
+    "timeUnit" : "Month",
+    "sink" : "potential_clients"
+  } ],
+  "auxiliaries" : [ {
+    "name" : "_99_per_cent",
+    "comment" : "\"99 per cent\"",
+    "equation" : "0.99*total_market",
+    "unit" : "person"
+  }, {
+    "name" : "new_clients",
+    "comment" : "new clients",
+    "equation" : "contacts_of_potential_clients_with_clients*convincing_degree",
+    "unit" : "person/Month"
+  }, {
+    "name" : "contacts_of_potential_clients_with_clients",
+    "comment" : "contacts of potential clients with clients",
+    "equation" : "contacts_with_clients*potential_client_concentration",
+    "unit" : "contact/Month"
+  }, {
+    "name" : "contacts_with_clients",
+    "comment" : "contacts with clients",
+    "equation" : "clients*social_contacts_per_person_per_month",
+    "unit" : "contact/Month"
+  }, {
+    "name" : "potential_client_concentration",
+    "comment" : "potential client concentration",
+    "equation" : "potential_clients/total_market",
+    "unit" : "dmnl"
+  }, {
+    "name" : "total_market",
+    "comment" : "total market",
+    "equation" : "clients+potential_clients",
+    "unit" : "person"
+  } ],
+  "constants" : [ {
+    "name" : "convincing_degree",
+    "comment" : "convincing degree",
+    "value" : 0.01,
+    "unit" : "person/contact"
+  }, {
+    "name" : "social_contacts_per_person_per_month",
+    "comment" : "social contacts per person per month",
+    "value" : 50.0,
+    "unit" : "contact/person/Month"
+  } ],
+  "views" : [ {
+    "name" : "View 1",
+    "elements" : [ {
+      "name" : "clients",
+      "type" : "stock",
+      "x" : 373.0,
+      "y" : 191.0
+    }, {
+      "name" : "potential_clients",
+      "type" : "stock",
+      "x" : 144.0,
+      "y" : 191.0
+    }, {
+      "name" : "contacts_of_potential_clients_with_clients",
+      "type" : "aux",
+      "x" : 234.0,
+      "y" : 68.0
+    }, {
+      "name" : "_268",
+      "type" : "flow",
+      "x" : 234.0,
+      "y" : 190.0
+    }, {
+      "name" : "new_clients",
+      "type" : "aux",
+      "x" : 234.0,
+      "y" : 207.0
+    }, {
+      "name" : "convincing_degree",
+      "type" : "aux",
+      "x" : 178.0,
+      "y" : 132.0
+    }, {
+      "name" : "contacts_with_clients",
+      "type" : "aux",
+      "x" : 373.0,
+      "y" : 89.0
+    }, {
+      "name" : "potential_client_concentration",
+      "type" : "aux",
+      "x" : 86.0,
+      "y" : 95.0
+    }, {
+      "name" : "total_market",
+      "type" : "aux",
+      "x" : 196.0,
+      "y" : 247.0
+    }, {
+      "name" : "social_contacts_per_person_per_month",
+      "type" : "aux",
+      "x" : 312.0,
+      "y" : 142.0
+    }, {
+      "name" : "_99_per_cent",
+      "type" : "aux",
+      "x" : 83.0,
+      "y" : 242.0
+    } ],
+    "connectors" : [ {
+      "from" : "social_contacts_per_person_per_month",
+      "to" : "contacts_with_clients"
+    }, {
+      "from" : "clients",
+      "to" : "contacts_with_clients"
+    }, {
+      "from" : "potential_client_concentration",
+      "to" : "contacts_of_potential_clients_with_clients"
+    }, {
+      "from" : "potential_clients",
+      "to" : "potential_client_concentration"
+    }, {
+      "from" : "contacts_with_clients",
+      "to" : "contacts_of_potential_clients_with_clients"
+    }, {
+      "from" : "_268",
+      "to" : "potential_clients"
+    }, {
+      "from" : "_268",
+      "to" : "clients"
+    }, {
+      "from" : "potential_clients",
+      "to" : "total_market"
+    }, {
+      "from" : "clients",
+      "to" : "total_market"
+    }, {
+      "from" : "total_market",
+      "to" : "potential_client_concentration"
+    }, {
+      "from" : "contacts_of_potential_clients_with_clients",
+      "to" : "_268"
+    }, {
+      "from" : "convincing_degree",
+      "to" : "_268"
+    }, {
+      "from" : "total_market",
+      "to" : "_99_per_cent"
+    } ],
+    "flowRoutes" : [ {
+      "flowName" : "_268",
+      "points" : [ [ 234.0, 190.0 ] ]
+    } ]
+  } ],
+  "defaultSimulation" : {
+    "timeStep" : "Month",
+    "duration" : 100.0,
+    "durationUnit" : "Month"
+  },
+  "metadata" : {
+    "license" : "CC-BY-NC-SA-4.0"
+  }
+}

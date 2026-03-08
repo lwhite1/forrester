@@ -1,0 +1,208 @@
+{
+  "name" : "FeralPigs",
+  "stocks" : [ {
+    "name" : "feral_pigs",
+    "comment" : "feral pigs",
+    "initialValue" : 20000.0,
+    "unit" : "pig"
+  } ],
+  "flows" : [ {
+    "name" : "feral_pigs_net_flow",
+    "comment" : "Net flow for feral pigs",
+    "equation" : "births-pigs_removed",
+    "timeUnit" : "Year",
+    "sink" : "feral_pigs"
+  } ],
+  "auxiliaries" : [ {
+    "name" : "births",
+    "comment" : "births",
+    "equation" : "piglets",
+    "unit" : "pig/year"
+  }, {
+    "name" : "catch_per_trap",
+    "comment" : "catch per trap",
+    "equation" : "RANDOM_UNIFORM(0.15, 0.17, 0.1)",
+    "unit" : "1/trap"
+  }, {
+    "name" : "feral_pig_traps",
+    "comment" : "feral pig traps",
+    "equation" : "traps_per_license*licences_granted_per_year",
+    "unit" : "trap/year"
+  }, {
+    "name" : "litter",
+    "comment" : "litter",
+    "equation" : "sows*litter_per_sow",
+    "unit" : "litter/year"
+  }, {
+    "name" : "piglets",
+    "comment" : "piglets",
+    "equation" : "litter*piglet_per_litter",
+    "unit" : "pig/year"
+  }, {
+    "name" : "pigs_removed",
+    "comment" : "pigs removed",
+    "equation" : "feral_pigs*catch_per_trap*feral_pig_traps",
+    "unit" : "pig/year"
+  }, {
+    "name" : "sows",
+    "comment" : "sows",
+    "equation" : "feral_pigs/2",
+    "unit" : "pig"
+  } ],
+  "constants" : [ {
+    "name" : "licences_granted_per_year",
+    "comment" : "licences granted per year",
+    "value" : 10.0,
+    "unit" : "license/year"
+  }, {
+    "name" : "litter_per_sow",
+    "comment" : "litter per sow",
+    "value" : 4.0,
+    "unit" : "litter/pig/year"
+  }, {
+    "name" : "piglet_per_litter",
+    "comment" : "piglet per litter",
+    "value" : 8.0,
+    "unit" : "pig/litter"
+  }, {
+    "name" : "traps_per_license",
+    "comment" : "traps per license",
+    "value" : 10.0,
+    "unit" : "trap/license"
+  } ],
+  "views" : [ {
+    "name" : "View 1",
+    "elements" : [ {
+      "name" : "feral_pigs",
+      "type" : "stock",
+      "x" : 466.0,
+      "y" : 218.0
+    }, {
+      "name" : "_48",
+      "type" : "flow",
+      "x" : 606.0,
+      "y" : 208.0
+    }, {
+      "name" : "pigs_removed",
+      "type" : "aux",
+      "x" : 606.0,
+      "y" : 224.0
+    }, {
+      "name" : "_48",
+      "type" : "flow",
+      "x" : 348.0,
+      "y" : 209.0
+    }, {
+      "name" : "births",
+      "type" : "aux",
+      "x" : 348.0,
+      "y" : 225.0
+    }, {
+      "name" : "sows",
+      "type" : "aux",
+      "x" : 460.0,
+      "y" : 115.0
+    }, {
+      "name" : "litter",
+      "type" : "aux",
+      "x" : 346.0,
+      "y" : 82.0
+    }, {
+      "name" : "piglets",
+      "type" : "aux",
+      "x" : 270.0,
+      "y" : 141.0
+    }, {
+      "name" : "litter_per_sow",
+      "type" : "aux",
+      "x" : 466.0,
+      "y" : 41.0
+    }, {
+      "name" : "piglet_per_litter",
+      "type" : "aux",
+      "x" : 225.0,
+      "y" : 78.0
+    }, {
+      "name" : "licences_granted_per_year",
+      "type" : "aux",
+      "x" : 675.0,
+      "y" : 419.0
+    }, {
+      "name" : "feral_pig_traps",
+      "type" : "aux",
+      "x" : 574.0,
+      "y" : 335.0
+    }, {
+      "name" : "traps_per_license",
+      "type" : "aux",
+      "x" : 532.0,
+      "y" : 410.0
+    }, {
+      "name" : "catch_per_trap",
+      "type" : "aux",
+      "x" : 667.0,
+      "y" : 292.0
+    } ],
+    "connectors" : [ {
+      "from" : "5",
+      "to" : "2"
+    }, {
+      "from" : "5",
+      "to" : "feral_pigs"
+    }, {
+      "from" : "10",
+      "to" : "feral_pigs"
+    }, {
+      "from" : "10",
+      "to" : "7"
+    }, {
+      "from" : "feral_pigs",
+      "to" : "sows"
+    }, {
+      "from" : "sows",
+      "to" : "litter"
+    }, {
+      "from" : "litter",
+      "to" : "piglets"
+    }, {
+      "from" : "piglets",
+      "to" : "_48"
+    }, {
+      "from" : "piglet_per_litter",
+      "to" : "piglets"
+    }, {
+      "from" : "litter_per_sow",
+      "to" : "litter"
+    }, {
+      "from" : "traps_per_license",
+      "to" : "feral_pig_traps"
+    }, {
+      "from" : "licences_granted_per_year",
+      "to" : "feral_pig_traps"
+    }, {
+      "from" : "catch_per_trap",
+      "to" : "pigs_removed"
+    }, {
+      "from" : "feral_pigs",
+      "to" : "pigs_removed"
+    }, {
+      "from" : "feral_pig_traps",
+      "to" : "pigs_removed"
+    } ],
+    "flowRoutes" : [ {
+      "flowName" : "_48",
+      "points" : [ [ 606.0, 208.0 ] ]
+    }, {
+      "flowName" : "_48",
+      "points" : [ [ 348.0, 209.0 ] ]
+    } ]
+  } ],
+  "defaultSimulation" : {
+    "timeStep" : "Year",
+    "duration" : 10.0,
+    "durationUnit" : "Year"
+  },
+  "metadata" : {
+    "license" : "CC-BY-NC-SA-4.0"
+  }
+}

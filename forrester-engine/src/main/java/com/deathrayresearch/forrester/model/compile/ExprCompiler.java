@@ -308,6 +308,7 @@ public class ExprCompiler {
             case "FORECAST" -> compileForecast(args);
             case "NPV" -> compileNpv(args);
             case "RANDOM_NORMAL" -> compileRandomNormal(args);
+            case "RANDOM_UNIFORM" -> compileRandomUniform(args);
             case "LOOKUP" -> compileLookup(args);
             default -> {
                 // Check if the function name is a lookup table (Vensim allows table(input) syntax)
@@ -464,6 +465,21 @@ public class ExprCompiler {
         return () -> {
             double raw = mean.getAsDouble() + stddev.getAsDouble() * rng.nextGaussian();
             return Math.max(minVal.getAsDouble(), Math.min(maxVal.getAsDouble(), raw));
+        };
+    }
+
+    private DoubleSupplier compileRandomUniform(List<Expr> args) {
+        requireArgs("RANDOM_UNIFORM", args, 3);
+        DoubleSupplier minVal = compileExpr(args.get(0));
+        DoubleSupplier maxVal = compileExpr(args.get(1));
+        // Third arg is seed — Vensim uses it for reproducibility, we use nanoTime
+        long seed = System.nanoTime();
+        java.util.Random rng = new java.util.Random(seed);
+        resettables.add(() -> rng.setSeed(seed));
+        return () -> {
+            double lo = minVal.getAsDouble();
+            double hi = maxVal.getAsDouble();
+            return lo + (hi - lo) * rng.nextDouble();
         };
     }
 

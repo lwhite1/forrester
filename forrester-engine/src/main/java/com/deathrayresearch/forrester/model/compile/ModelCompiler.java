@@ -110,12 +110,14 @@ public class ModelCompiler {
             context.addConstant(cDef.name(), constant);
         }
 
-        // Stocks
+        // Stocks — create all first, then evaluate initial expressions
+        // (expressions may reference other stocks)
         for (StockDef sDef : def.stocks()) {
-            Stock stock = createStock(sDef);
+            Stock stock = createStock(sDef, context);
             model.addStock(stock);
             context.addStock(sDef.name(), stock);
         }
+        resolveInitialExpressions(def.stocks(), context);
 
         buildLookupTables(def, context);
 
@@ -177,12 +179,13 @@ public class ModelCompiler {
             moduleContext.addVariable(portName, bindingVar);
         }
 
-        // Stocks
+        // Stocks — create all first, then evaluate initial expressions
         for (StockDef sDef : innerDef.stocks()) {
-            Stock stock = createStock(sDef);
+            Stock stock = createStock(sDef, moduleContext);
             module.addStock(stock);
             moduleContext.addStock(sDef.name(), stock);
         }
+        resolveInitialExpressions(innerDef.stocks(), moduleContext);
 
         buildLookupTables(innerDef, moduleContext);
 
@@ -237,10 +240,35 @@ public class ModelCompiler {
         return new Constant(cDef.name(), unit, cDef.value());
     }
 
-    private Stock createStock(StockDef sDef) {
+    private Stock createStock(StockDef sDef, CompilationContext context) {
         Unit unit = unitRegistry.resolve(sDef.unit());
         NegativeValuePolicy policy = resolvePolicy(sDef.negativeValuePolicy());
         return new Stock(sDef.name(), sDef.initialValue(), unit, policy);
+    }
+
+    /**
+     * Evaluates initial expressions for stocks that have them.
+     * Called after all stocks are created and registered in the context,
+     * so expressions can reference other stocks.
+     */
+    private void resolveInitialExpressions(List<StockDef> stocks, CompilationContext context) {
+        for (StockDef sDef : stocks) {
+            if (sDef.initialExpression() == null) {
+                continue;
+            }
+            try {
+                ExprCompiler exprCompiler = new ExprCompiler(context, List.of());
+                DoubleSupplier supplier = exprCompiler.compileExpr(
+                        ExprParser.parse(sDef.initialExpression()));
+                double initVal = supplier.getAsDouble();
+                Stock stock = context.getStocks().get(sDef.name());
+                if (stock != null) {
+                    stock.setValue(initVal);
+                }
+            } catch (Exception e) {
+                // Fall back to numeric initialValue if expression can't be evaluated
+            }
+        }
     }
 
     private void buildLookupTables(ModelDefinition def, CompilationContext context) {

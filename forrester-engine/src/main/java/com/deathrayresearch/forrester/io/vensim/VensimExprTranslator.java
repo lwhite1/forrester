@@ -41,11 +41,15 @@ public final class VensimExprTranslator {
             "(?i)DELAY1I\\s*\\(");
     private static final Pattern DELAY_FIXED_PATTERN = Pattern.compile(
             "(?i)DELAY\\s+FIXED\\s*\\(");
+    private static final Pattern GAME_PATTERN = Pattern.compile(
+            "(?i)GAME\\s*\\(");
+    private static final Pattern RANDOM_UNIFORM_PATTERN = Pattern.compile(
+            "(?i)RANDOM\\s+UNIFORM\\s*\\(");
     private static final Pattern CARET_PATTERN = Pattern.compile("\\^");
     private static final Pattern TIME_VAR_PATTERN = Pattern.compile(
             "(?i)\\bTime\\b");
     private static final Set<String> UNSUPPORTED_FUNCTIONS = Set.of(
-            "PULSE", "PULSE TRAIN", "GAME", "DELAY N",
+            "PULSE", "PULSE TRAIN", "DELAY N",
             "GET XLS DATA", "GET DIRECT DATA",
             "GET DIRECT CONSTANTS", "TABBED ARRAY", "SAMPLE IF TRUE",
             "VECTOR SELECT", "VECTOR ELM MAP", "VECTOR SORT ORDER",
@@ -163,6 +167,12 @@ public final class VensimExprTranslator {
 
         // 8. DELAY FIXED → DELAY_FIXED
         expr = DELAY_FIXED_PATTERN.matcher(expr).replaceAll("DELAY_FIXED(");
+
+        // 8a. GAME(expr) → expr (pass-through; GAME is Vensim's interactive override)
+        expr = translateGame(expr);
+
+        // 8b. RANDOM UNIFORM → RANDOM_UNIFORM
+        expr = RANDOM_UNIFORM_PATTERN.matcher(expr).replaceAll("RANDOM_UNIFORM(");
 
         // 9. ^ → ** (Vensim uses ^ for power, Forrester uses **)
         expr = CARET_PATTERN.matcher(expr).replaceAll("**");
@@ -499,6 +509,27 @@ public final class VensimExprTranslator {
             yValues[i] = points.get(i)[1];
         }
         return new double[][]{xValues, yValues};
+    }
+
+    /**
+     * Strips GAME(expr) wrappers, replacing with just the inner expression.
+     * In Vensim, GAME() allows interactive override during game mode;
+     * during normal simulation it simply returns its argument.
+     */
+    private static String translateGame(String expr) {
+        Matcher m = GAME_PATTERN.matcher(expr);
+        while (m.find()) {
+            int openParen = m.end() - 1;
+            int closeParen = findMatchingParen(expr, openParen);
+            if (closeParen > 0) {
+                String inner = expr.substring(openParen + 1, closeParen).strip();
+                expr = expr.substring(0, m.start()) + inner + expr.substring(closeParen + 1);
+                m = GAME_PATTERN.matcher(expr);
+            } else {
+                break;
+            }
+        }
+        return expr;
     }
 
     private static void checkUnsupportedFunctions(String expr, List<String> warnings) {

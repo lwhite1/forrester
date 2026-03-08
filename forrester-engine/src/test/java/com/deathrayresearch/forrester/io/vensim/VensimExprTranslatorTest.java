@@ -248,9 +248,10 @@ class VensimExprTranslatorTest {
         }
 
         @Test
-        void shouldWarnOnGame() {
+        void shouldStripGameWrapper() {
             var result = VensimExprTranslator.translate("GAME(x)", "var", EMPTY_NAMES);
-            assertThat(result.warnings()).anyMatch(w -> w.contains("GAME"));
+            assertThat(result.expression()).isEqualTo("x");
+            assertThat(result.warnings()).noneMatch(w -> w.contains("GAME"));
         }
 
         @Test

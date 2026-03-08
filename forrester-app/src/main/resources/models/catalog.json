@@ -1,5 +1,19 @@
 {
   "models" : [ {
+    "id" : "aging-chain",
+    "name" : "Aging Chain",
+    "description" : "Three-stock aging chain with birth, aging, and death flows",
+    "category" : "demographics",
+    "difficulty" : "intermediate",
+    "path" : "demographics/aging-chain.json",
+    "tags" : [ "aging", "demographics", "chain" ],
+    "elements" : {
+      "stocks" : 3,
+      "flows" : 3,
+      "auxiliaries" : 11,
+      "constants" : 7
+    }
+  }, {
     "id" : "bathtub",
     "name" : "Bathtub",
     "description" : "Water drains at a fixed rate; inflow begins after a delay",
@@ -56,6 +70,34 @@
       "constants" : 2
     }
   }, {
+    "id" : "competition-faculty",
+    "name" : "Competition Faculty",
+    "description" : "Causal loop diagram of competition dynamics in faculty hiring",
+    "category" : "management",
+    "difficulty" : "introductory",
+    "path" : "management/competition-faculty.json",
+    "tags" : [ "causal-loop", "competition" ],
+    "elements" : {
+      "stocks" : 0,
+      "flows" : 0,
+      "auxiliaries" : 0,
+      "constants" : 0
+    }
+  }, {
+    "id" : "debt-crisis",
+    "name" : "Debt Crisis",
+    "description" : "Sovereign debt dynamics with investment, credit, and deterioration feedback",
+    "category" : "economics",
+    "difficulty" : "advanced",
+    "path" : "economics/debt-crisis.json",
+    "tags" : [ "economics", "debt", "feedback", "lookup-table" ],
+    "elements" : {
+      "stocks" : 4,
+      "flows" : 4,
+      "auxiliaries" : 18,
+      "constants" : 10
+    }
+  }, {
     "id" : "ecological-overshoot",
     "name" : "Ecological Overshoot",
     "description" : "Consumer population overshoots and collapses a renewable resource",
@@ -82,6 +124,34 @@
       "flows" : 2,
       "auxiliaries" : 0,
       "constants" : 2
+    }
+  }, {
+    "id" : "family-planning",
+    "name" : "Family Planning Benefits",
+    "description" : "Unintended benefits of family planning on population age structure",
+    "category" : "demographics",
+    "difficulty" : "advanced",
+    "path" : "demographics/family-planning.json",
+    "tags" : [ "demographics", "population", "policy" ],
+    "elements" : {
+      "stocks" : 5,
+      "flows" : 5,
+      "auxiliaries" : 13,
+      "constants" : 22
+    }
+  }, {
+    "id" : "feral-pigs",
+    "name" : "Feral Pigs",
+    "description" : "Feral pig population controlled by trapping with stochastic catch rate",
+    "category" : "ecology",
+    "difficulty" : "intermediate",
+    "path" : "ecology/feral-pigs.json",
+    "tags" : [ "ecology", "population", "stochastic", "harvest" ],
+    "elements" : {
+      "stocks" : 1,
+      "flows" : 1,
+      "auxiliaries" : 7,
+      "constants" : 4
     }
   }, {
     "id" : "goal-seeking",
@@ -126,6 +196,34 @@
       "constants" : 4
     }
   }, {
+    "id" : "managing-faculty",
+    "name" : "Managing Faculty",
+    "description" : "Faculty workforce management with hiring, tenure, and retirement",
+    "category" : "management",
+    "difficulty" : "intermediate",
+    "path" : "management/managing-faculty.json",
+    "tags" : [ "management", "workforce", "aging-chain" ],
+    "elements" : {
+      "stocks" : 2,
+      "flows" : 2,
+      "auxiliaries" : 8,
+      "constants" : 7
+    }
+  }, {
+    "id" : "micro-chp-diffusion",
+    "name" : "Micro-CHP Diffusion",
+    "description" : "Technology adoption and diffusion of micro combined heat and power",
+    "category" : "technology",
+    "difficulty" : "intermediate",
+    "path" : "technology/micro-chp-diffusion.json",
+    "tags" : [ "technology", "diffusion", "adoption", "s-curve" ],
+    "elements" : {
+      "stocks" : 2,
+      "flows" : 2,
+      "auxiliaries" : 6,
+      "constants" : 2
+    }
+  }, {
     "id" : "muskrat-plague",
     "name" : "Muskrat Plague",
     "description" : "Muskrat population dynamics with trapping and licensing",
@@ -140,6 +238,20 @@
       "constants" : 5
     }
   }, {
+    "id" : "pneumonic-plague",
+    "name" : "Pneumonic Plague",
+    "description" : "SEIR-style pneumonic plague model with fatality and recovery dynamics",
+    "category" : "epidemiology",
+    "difficulty" : "intermediate",
+    "path" : "epidemiology/pneumonic-plague.json",
+    "tags" : [ "epidemiology", "SIR", "lookup-table" ],
+    "elements" : {
+      "stocks" : 4,
+      "flows" : 4,
+      "auxiliaries" : 10,
+      "constants" : 1
+    }
+  }, {
     "id" : "predator-prey",
     "name" : "Predator Prey",
     "description" : "Lotka-Volterra model of predator-prey oscillation",
@@ -152,6 +264,20 @@
       "flows" : 4,
       "auxiliaries" : 0,
       "constants" : 4
+    }
+  }, {
+    "id" : "real-estate-boom",
+    "name" : "Real Estate Boom and Bust",
+    "description" : "Real estate market dynamics with construction, immigration, and price feedback",
+    "category" : "economics",
+    "difficulty" : "advanced",
+    "path" : "economics/real-estate-boom.json",
+    "tags" : [ "economics", "real-estate", "boom-bust", "feedback" ],
+    "elements" : {
+      "stocks" : 4,
+      "flows" : 4,
+      "auxiliaries" : 18,
+      "constants" : 11
     }
   }, {
     "id" : "s-shaped-growth",
@@ -180,6 +306,20 @@
       "flows" : 2,
       "auxiliaries" : 0,
       "constants" : 3
+    }
+  }, {
+    "id" : "supply-chain-bullwhip",
+    "name" : "Supply Chain Bullwhip",
+    "description" : "Supply chain with workforce adjustment and the bullwhip effect",
+    "category" : "supply-chain",
+    "difficulty" : "intermediate",
+    "path" : "supply-chain/supply-chain-bullwhip.json",
+    "tags" : [ "supply-chain", "bullwhip", "delay" ],
+    "elements" : {
+      "stocks" : 2,
+      "flows" : 2,
+      "auxiliaries" : 7,
+      "constants" : 4
     }
   } ]
 }
