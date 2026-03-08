@@ -24,6 +24,10 @@ final class ExportBounds {
      * Includes flow label areas below diamond indicators.
      */
     static Bounds compute(CanvasState canvasState, ModelEditor editor) {
+        if (canvasState.getDrawOrder().isEmpty() && editor.getFlows().isEmpty()) {
+            return new Bounds(0, 0, 2 * PADDING, 2 * PADDING);
+        }
+
         double minX = Double.MAX_VALUE;
         double minY = Double.MAX_VALUE;
         double maxX = -Double.MAX_VALUE;
