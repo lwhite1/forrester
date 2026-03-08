@@ -908,6 +908,9 @@ public class ModelWindow {
             if (staleListener != null) {
                 editor.removeListener(staleListener);
             }
+            if (dirtyListener != null) {
+                editor.removeListener(dirtyListener);
+            }
         }
         if (analysisRunner != null) {
             analysisRunner.shutdown();

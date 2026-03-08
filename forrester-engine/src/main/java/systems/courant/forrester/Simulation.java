@@ -133,19 +133,25 @@ public class Simulation {
     }
 
     private void updateStocks(Map<Flow, Quantity> flowMap, List<Stock> stocks) {
+        // Phase 1: Compute all flow rates and net deltas using pre-step stock values.
+        // This ensures standard Euler integration where all stocks see the same
+        // time-step snapshot, regardless of processing order.
+        Map<Stock, Double> deltas = new IdentityHashMap<>();
         for (Stock stock : stocks) {
-            handleFlows(true, flowMap, stock, stock.getInflows());
-            handleFlows(false, flowMap, stock, stock.getOutflows());
+            double delta = 0.0;
+            delta += computeFlowDelta(true, flowMap, stock.getInflows());
+            delta += computeFlowDelta(false, flowMap, stock.getOutflows());
+            deltas.put(stock, delta);
+        }
+
+        // Phase 2: Apply all deltas simultaneously.
+        for (Stock stock : stocks) {
+            stock.setValue(stock.getQuantity().getValue() + deltas.get(stock));
         }
     }
 
-    private void recordVariableValues() {
-        for (Variable variable : model.getVariables()) {
-            variable.recordValue();
-        }
-    }
-
-    private void handleFlows(boolean isInflow, Map<Flow, Quantity> flows, Stock stock, Set<Flow> flowSet) {
+    private double computeFlowDelta(boolean isInflow, Map<Flow, Quantity> flows, Set<Flow> flowSet) {
+        double delta = 0.0;
         for (Flow flow : flowSet) {
             Quantity q;
             if (flows.containsKey(flow)) {
@@ -155,15 +161,14 @@ public class Simulation {
                 flows.put(flow, q);
                 flow.recordValue(q);
             }
+            delta += isInflow ? q.getValue() : -q.getValue();
+        }
+        return delta;
+    }
 
-            Quantity qCurrent = stock.getQuantity();
-            if (isInflow) {
-                qCurrent = qCurrent.add(q);
-            } else {
-                qCurrent = qCurrent.subtract(q);
-            }
-
-            stock.setValue(qCurrent.getValue());
+    private void recordVariableValues() {
+        for (Variable variable : model.getVariables()) {
+            variable.recordValue();
         }
     }
 

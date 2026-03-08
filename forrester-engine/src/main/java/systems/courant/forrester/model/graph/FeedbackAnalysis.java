@@ -91,6 +91,9 @@ public record FeedbackAnalysis(
     /** Maximum number of elementary cycles to enumerate per analysis. */
     private static final int MAX_CYCLES = 100;
 
+    /** Maximum recursion depth for graph traversal, matching ExprParser.MAX_DEPTH. */
+    private static final int MAX_DEPTH = 200;
+
     /**
      * Analyzes a model definition to find feedback loops in both the
      * stock-and-flow structure and the causal link graph.
@@ -453,7 +456,7 @@ public record FeedbackAnalysis(
             path.add(start);
             Set<String> visited = new HashSet<>();
             visited.add(start);
-            dfsCycles(start, start, path, visited, allowedNodes, graph, cycles);
+            dfsCycles(start, start, path, visited, allowedNodes, graph, cycles, 0);
         }
         return cycles;
     }
@@ -461,8 +464,8 @@ public record FeedbackAnalysis(
     private static void dfsCycles(String current, String start,
             List<String> path, Set<String> visited,
             Set<String> allowedNodes, Map<String, Set<String>> graph,
-            List<List<String>> cycles) {
-        if (cycles.size() >= MAX_CYCLES) {
+            List<List<String>> cycles, int depth) {
+        if (cycles.size() >= MAX_CYCLES || depth > MAX_DEPTH) {
             return;
         }
         for (String next : graph.getOrDefault(current, Collections.emptySet())) {
@@ -476,7 +479,7 @@ public record FeedbackAnalysis(
             if (!visited.contains(next)) {
                 visited.add(next);
                 path.add(next);
-                dfsCycles(next, start, path, visited, allowedNodes, graph, cycles);
+                dfsCycles(next, start, path, visited, allowedNodes, graph, cycles, depth + 1);
                 path.removeLast();
                 visited.remove(next);
             }
@@ -561,7 +564,7 @@ public record FeedbackAnalysis(
         for (String node : nodes) {
             if (!nodeIndex.containsKey(node)) {
                 strongconnect(node, graph, index, nodeIndex, lowlink,
-                        onStack, stack, result);
+                        onStack, stack, result, 0);
             }
         }
         return result;
@@ -570,7 +573,10 @@ public record FeedbackAnalysis(
     private static void strongconnect(String v, Map<String, Set<String>> graph,
             int[] index, Map<String, Integer> nodeIndex,
             Map<String, Integer> lowlink, Set<String> onStack,
-            Deque<String> stack, List<Set<String>> result) {
+            Deque<String> stack, List<Set<String>> result, int depth) {
+        if (depth > MAX_DEPTH) {
+            return;
+        }
         nodeIndex.put(v, index[0]);
         lowlink.put(v, index[0]);
         index[0]++;
@@ -580,7 +586,7 @@ public record FeedbackAnalysis(
         for (String w : graph.getOrDefault(v, Collections.emptySet())) {
             if (!nodeIndex.containsKey(w)) {
                 strongconnect(w, graph, index, nodeIndex, lowlink,
-                        onStack, stack, result);
+                        onStack, stack, result, depth + 1);
                 lowlink.put(v, Math.min(lowlink.get(v), lowlink.get(w)));
             } else if (onStack.contains(w)) {
                 lowlink.put(v, Math.min(lowlink.get(v), nodeIndex.get(w)));
