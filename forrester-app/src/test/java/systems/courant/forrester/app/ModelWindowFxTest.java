@@ -3,6 +3,7 @@ package systems.courant.forrester.app;
 import systems.courant.forrester.app.canvas.Clipboard;
 
 import javafx.scene.control.Label;
+import javafx.scene.control.TextField;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.TabPane;
 import javafx.scene.layout.BorderPane;
@@ -96,11 +97,13 @@ class ModelWindowFxTest {
     }
 
     @Test
-    @DisplayName("Properties panel shows placeholder when nothing selected")
-    void propertiesPanelPlaceholder(FxRobot robot) {
+    @DisplayName("Properties panel shows model summary when nothing selected")
+    void propertiesPanelModelSummary(FxRobot robot) {
         enterEditor(robot);
-        Label placeholder = robot.lookup("#propertiesPlaceholder").queryAs(Label.class);
-        assertThat(placeholder.getText()).isEqualTo("No selection");
+        TextField nameField = robot.lookup("#modelNameField").queryAs(TextField.class);
+        assertThat(nameField).isNotNull();
+        Label counts = robot.lookup("#modelElementCounts").queryAs(Label.class);
+        assertThat(counts.getText()).isEqualTo("No elements yet");
     }
 
     @Test

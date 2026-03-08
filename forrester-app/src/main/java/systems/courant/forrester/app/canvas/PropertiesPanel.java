@@ -3,6 +3,7 @@ package systems.courant.forrester.app.canvas;
 import systems.courant.forrester.model.def.CausalLinkDef;
 import systems.courant.forrester.model.def.ElementType;
 import systems.courant.forrester.model.def.ModuleInstanceDef;
+import systems.courant.forrester.model.def.SimulationSettings;
 
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -11,6 +12,7 @@ import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.Separator;
+import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
@@ -18,7 +20,10 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
@@ -44,6 +49,9 @@ public class PropertiesPanel extends VBox {
 
     private ElementForm currentForm;
     private ElementType cachedFormType;
+    private Runnable onRunSimulation;
+    private Runnable onValidateModel;
+    private Runnable onOpenSettings;
 
     public PropertiesPanel() {
         setId("propertiesPanel");
@@ -93,6 +101,16 @@ public class PropertiesPanel extends VBox {
     }
 
     /**
+     * Sets callbacks for the quick-action buttons shown in the model summary.
+     */
+    public void setModelSummaryActions(Runnable runSimulation, Runnable validateModel,
+                                       Runnable openSettings) {
+        this.onRunSimulation = runSimulation;
+        this.onValidateModel = validateModel;
+        this.onOpenSettings = openSettings;
+    }
+
+    /**
      * Updates the panel to reflect the current selection on the canvas.
      * Called by ForresterApp whenever the canvas status changes.
      * Wrapped in updatingFields guard to prevent spurious focus-loss commits.
@@ -115,7 +133,7 @@ public class PropertiesPanel extends VBox {
                 if (conn != null) {
                     showConnectionProperties(conn);
                 } else {
-                    showPlaceholder();
+                    showModelSummary(editor);
                 }
             } else if (selection.size() == 1) {
                 String name = selection.iterator().next();
@@ -138,6 +156,149 @@ public class PropertiesPanel extends VBox {
         disposeCurrentForm();
         getChildren().clear();
         getChildren().add(placeholderLabel);
+    }
+
+    private void showModelSummary(ModelEditor editor) {
+        disposeCurrentForm();
+        getChildren().clear();
+
+        propertyGrid.getChildren().clear();
+        contextToolbar.getChildren().clear();
+        int row = 0;
+
+        // Model name (editable)
+        TextField nameField = ctx.createTextField(
+                editor.getModelName() != null ? editor.getModelName() : "Untitled");
+        nameField.setId("modelNameField");
+        ctx.addFieldRow(row++, "Model", nameField);
+        nameField.setOnAction(e -> commitModelName(nameField, editor));
+        nameField.focusedProperty().addListener((obs, wasFocused, isFocused) -> {
+            if (!isFocused && !ctx.updatingFields) {
+                commitModelName(nameField, editor);
+            }
+        });
+
+        // Description (editable)
+        TextArea descArea = new TextArea(
+                editor.getModelComment() != null ? editor.getModelComment() : "");
+        descArea.setId("modelDescField");
+        descArea.setPrefRowCount(2);
+        descArea.setWrapText(true);
+        descArea.setMaxWidth(Double.MAX_VALUE);
+        descArea.setPromptText("Model description...");
+        GridPane.setHgrow(descArea, Priority.ALWAYS);
+        ctx.addFieldRow(row++, "Description", descArea);
+        descArea.focusedProperty().addListener((obs, wasFocused, isFocused) -> {
+            if (!isFocused && !ctx.updatingFields) {
+                commitModelComment(descArea, editor);
+            }
+        });
+
+        // Separator before element counts
+        propertyGrid.add(new Separator(), 0, row, 2, 1);
+        row++;
+
+        // Element counts
+        String counts = buildElementCounts(editor);
+        Label countsLabel = new Label(counts);
+        countsLabel.setId("modelElementCounts");
+        countsLabel.setWrapText(true);
+        countsLabel.setStyle(Styles.SMALL_TEXT);
+        propertyGrid.add(countsLabel, 0, row, 2, 1);
+        row++;
+
+        // Simulation settings summary
+        SimulationSettings settings = editor.getSimulationSettings();
+        if (settings != null) {
+            String settingsText = String.format("Duration: %.0f %s, dt = 1 %s",
+                    settings.duration(), settings.durationUnit(), settings.timeStep());
+            ctx.addReadOnlyRow(row++, "Simulation", settingsText);
+        }
+
+        // Separator before quick actions
+        propertyGrid.add(new Separator(), 0, row, 2, 1);
+        row++;
+
+        // Quick action buttons
+        HBox actions = new HBox(6);
+        actions.setAlignment(Pos.CENTER_LEFT);
+
+        if (onRunSimulation != null) {
+            Button runBtn = new Button("Run");
+            runBtn.setId("summaryRunBtn");
+            runBtn.setStyle(Styles.SMALL_TEXT);
+            runBtn.setOnAction(e -> onRunSimulation.run());
+            actions.getChildren().add(runBtn);
+        }
+        if (onValidateModel != null) {
+            Button validateBtn = new Button("Validate");
+            validateBtn.setId("summaryValidateBtn");
+            validateBtn.setStyle(Styles.SMALL_TEXT);
+            validateBtn.setOnAction(e -> onValidateModel.run());
+            actions.getChildren().add(validateBtn);
+        }
+        if (onOpenSettings != null) {
+            Button settingsBtn = new Button("Settings");
+            settingsBtn.setId("summarySettingsBtn");
+            settingsBtn.setStyle(Styles.SMALL_TEXT);
+            settingsBtn.setOnAction(e -> onOpenSettings.run());
+            actions.getChildren().add(settingsBtn);
+        }
+
+        if (!actions.getChildren().isEmpty()) {
+            propertyGrid.add(actions, 0, row, 2, 1);
+        }
+
+        getChildren().addAll(scrollPane);
+    }
+
+    private void commitModelName(TextField nameField, ModelEditor editor) {
+        String newName = nameField.getText().trim();
+        if (!newName.isEmpty() && !newName.equals(editor.getModelName())) {
+            editor.setModelName(newName);
+        }
+    }
+
+    private void commitModelComment(TextArea descArea, ModelEditor editor) {
+        String text = descArea.getText().trim();
+        String comment = text.isEmpty() ? null : text;
+        if (!Objects.equals(comment, editor.getModelComment())) {
+            editor.setModelComment(comment != null ? comment : "");
+        }
+    }
+
+    private static String buildElementCounts(ModelEditor editor) {
+        List<String> parts = new ArrayList<>();
+        int stocks = editor.getStocks().size();
+        int flows = editor.getFlows().size();
+        int auxes = editor.getAuxiliaries().size();
+        int constants = editor.getConstants().size();
+        int lookups = editor.getLookupTables().size();
+        int modules = editor.getModules().size();
+
+        if (stocks > 0) {
+            parts.add(stocks + (stocks == 1 ? " stock" : " stocks"));
+        }
+        if (flows > 0) {
+            parts.add(flows + (flows == 1 ? " flow" : " flows"));
+        }
+        if (auxes > 0) {
+            parts.add(auxes + (auxes == 1 ? " auxiliary" : " auxiliaries"));
+        }
+        if (constants > 0) {
+            parts.add(constants + (constants == 1 ? " constant" : " constants"));
+        }
+        if (lookups > 0) {
+            parts.add(lookups + (lookups == 1 ? " lookup table" : " lookup tables"));
+        }
+        if (modules > 0) {
+            parts.add(modules + (modules == 1 ? " module" : " modules"));
+        }
+
+        if (parts.isEmpty()) {
+            return "No elements yet";
+        }
+        return String.join(", ", parts);
     }
 
     private void showMultiSelection(int count) {

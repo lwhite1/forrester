@@ -199,6 +199,10 @@ public class ModelWindow {
                 eld.focusSdFunctions();
             }
         });
+        propertiesPanel.setModelSummaryActions(
+                simulationController::runSimulation,
+                simulationController::validateModel,
+                simulationController::openSimulationSettings);
 
         // Right-side TabPane with Properties and Dashboard tabs
         rightTabPane = new TabPane();
