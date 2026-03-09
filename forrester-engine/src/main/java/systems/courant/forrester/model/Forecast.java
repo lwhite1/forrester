@@ -97,8 +97,8 @@ public class Forecast implements Formula, Resettable {
             lastStep = step;
         } else if (step > lastStep) {
             int delta = step - lastStep;
+            lastInputVal = input.getAsDouble();
             for (int d = 0; d < delta; d++) {
-                lastInputVal = input.getAsDouble();
                 averageInput += (lastInputVal - averageInput) / averagingTime;
                 if (averageInput != 0) {
                     trend = (lastInputVal - averageInput) / (averageInput * averagingTime);

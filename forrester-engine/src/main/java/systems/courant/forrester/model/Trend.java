@@ -97,8 +97,8 @@ public class Trend implements Formula, Resettable {
             lastStep = step;
         } else if (step > lastStep) {
             int delta = step - lastStep;
+            double inputVal = input.getAsDouble();
             for (int d = 0; d < delta; d++) {
-                double inputVal = input.getAsDouble();
                 averageInput += (inputVal - averageInput) / averagingTime;
                 if (averageInput != 0) {
                     trend = (inputVal - averageInput) / (averageInput * averagingTime);

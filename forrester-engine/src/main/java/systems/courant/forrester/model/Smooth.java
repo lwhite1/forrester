@@ -111,8 +111,9 @@ public class Smooth implements Formula, Resettable {
             lastStep = step;
         } else if (step > lastStep) {
             int delta = step - lastStep;
+            double inputVal = input.getAsDouble();
             for (int i = 0; i < delta; i++) {
-                smoothed += (input.getAsDouble() - smoothed) / smoothingTime;
+                smoothed += (inputVal - smoothed) / smoothingTime;
             }
             lastStep = step;
         }

@@ -45,6 +45,22 @@ class ForecastTest {
     }
 
     @Test
+    void shouldReadInputOncePerStepInCatchUpLoop() {
+        int[] step = {0};
+        int[] readCount = {0};
+        Forecast forecast = Forecast.of(() -> { readCount[0]++; return 100; }, 5, 3, 0, () -> step[0]);
+
+        forecast.getCurrentValue(); // initialize (1 read)
+        readCount[0] = 0;
+
+        // Jump by 5 steps — input should only be read once, not 5 times
+        step[0] = 5;
+        forecast.getCurrentValue();
+        assertEquals(1, readCount[0],
+                "Input should be read exactly once per step advance, not once per delta iteration");
+    }
+
+    @Test
     void shouldUpdateOnNewStep() {
         int[] step = {0};
         double[] input = {100};

@@ -132,6 +132,7 @@ public class Delay3 implements Formula, Resettable {
         } else if (step > lastStep) {
             double stageTime = delayTime / 3.0;
             int delta = step - lastStep;
+            double inputVal = input.getAsDouble();
             for (int d = 0; d < delta; d++) {
                 // Compute outflow rates from current stage levels
                 double rate1 = stage1 / stageTime;
@@ -139,7 +140,7 @@ public class Delay3 implements Formula, Resettable {
                 double rate3 = stage3 / stageTime;
 
                 // Update stage levels (Euler integration, dt = 1 timestep)
-                stage1 += input.getAsDouble() - rate1;
+                stage1 += inputVal - rate1;
                 stage2 += rate1 - rate2;
                 stage3 += rate2 - rate3;
 
