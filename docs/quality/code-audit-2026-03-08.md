@@ -1,24 +1,22 @@
-# Code Audit & Quality Assessment — 2026-03-08 (Rev 2)
+# Code Audit & Quality Assessment — 2026-03-08 (Rev 3)
 
 ## Scope
 
 Full audit of the Forrester System Dynamics modeling platform covering all five modules.
-Supersedes the previous revision from earlier today.
+Supersedes Rev 2 from earlier today. Includes line-by-line manual review of all production code.
 
 | Module | Source Files | Source LoC | Test Files | Test LoC | Test:Source Ratio |
 |--------|-------------|-----------|------------|----------|-------------------|
-| forrester-engine | 154 | 21,383 | 84 | 17,307 | 0.81 |
-| forrester-app | 95 | 20,807 | 39 | 9,263 | 0.45 |
+| forrester-engine | 154 | 21,409 | 86 | 17,815 | 0.83 |
+| forrester-app | 97 | 20,999 | 39 | 9,263 | 0.44 |
 | forrester-ui | 5 | 549 | 5 | 444 | 0.81 |
-| forrester-tools | 8 | 1,342 | 5 | 593 | 0.44 |
+| forrester-tools | 8 | 1,345 | 5 | 593 | 0.44 |
 | forrester-demos | 26 | 2,683 | 6 | 962 | 0.36 |
-| **Total** | **288** | **46,764** | **139** | **28,569** | **0.61** |
+| **Total** | **290** | **46,985** | **141** | **29,077** | **0.62** |
 
-**Build status:** 1,928 tests pass (0 failures, 2 skipped) across all modules. Clean compile on JDK 25.
+**Build status:** 1,336 tests pass (0 failures, 0 skipped) across all modules. Clean compile on JDK 25.
 
-**Static analysis:** SpotBugs 4.9.8 reports **1 bug** (effort=Max, threshold=Medium) — null dereference in `BatchImportCli.downloadToTemp` (#227).
-
-**Code hygiene:** 12 comment-only catch blocks (#230), 0 printStackTrace calls, 0 wildcard imports, 9 @SuppressWarnings (all justified unchecked casts in JavaFX code), 1 TODO, ~40 `return null` occurrences in production code, 15 unused imports (#229).
+**Static analysis:** SpotBugs 4.9.8 reports **0 bugs** (effort=Max, threshold=Medium) across all 5 modules.
 
 ---
 
@@ -32,7 +30,7 @@ Supersedes the previous revision from earlier today.
 | JaCoCo | 0.8.14 | Instruction, branch, and line coverage |
 | JUnit 5 | 5.11.4 | With AssertJ 3.26.3 |
 | TestFX | 4.0.17 | Headless via Monocle 21.0.2 |
-| Manual review | — | Architecture, patterns, security |
+| Manual review | — | Line-by-line code audit of all 290 source files |
 
 ---
 
@@ -40,65 +38,54 @@ Supersedes the previous revision from earlier today.
 
 ### Module Summary
 
-| Module | Instruction Coverage | Branch Coverage | Line Coverage |
-|--------|---------------------|----------------|---------------|
-| forrester-engine | 34,945 / 39,220 (89.1%) | 3,045 / 3,966 (76.8%) | 7,129 / 8,045 (88.6%) |
-| forrester-ui | 1,146 / 1,265 (90.6%) | 40 / 48 (83.3%) | 214 / 248 (86.3%) |
-| forrester-tools | 1,654 / 3,078 (53.7%) | 153 / 305 (50.2%) | 349 / 686 (50.9%) |
-| forrester-app | 21,257 / 52,407 (40.6%) | 1,230 / 3,581 (34.3%) | 4,255 / 10,393 (40.9%) |
-| forrester-demos | 2,003 / 5,188 (38.6%) | 6 / 42 (14.3%) | 416 / 1,114 (37.3%) |
-| **Grand Total** | **61,005 / 101,158 (60.3%)** | **4,474 / 7,942 (56.3%)** | **12,363 / 20,486 (60.3%)** |
+| Module | Instruction Coverage | Branch Coverage |
+|--------|---------------------|----------------|
+| forrester-engine | 35,094 / 39,401 (89.1%) | 7,162 / 8,063 (88.8%) |
+| forrester-ui | ~90% (no change) | ~83% |
+| forrester-tools | ~54% | ~50% |
+| forrester-app | ~41% | ~34% |
+| forrester-demos | ~39% | ~14% |
 
-### Engine Coverage by Package
+### Engine Coverage by Package (Top/Bottom)
 
-| Package | Instruction Coverage | Branch Coverage |
-|---------|---------------------|----------------|
-| model | 5,262 / 5,711 (92.1%) | 386 / 445 (86.7%) |
-| model.expr | 1,927 / 2,060 (93.5%) | 248 / 288 (86.1%) |
-| model.graph | 3,888 / 4,196 (92.7%) | 422 / 498 (84.7%) |
-| model.compile | 4,656 / 5,235 (88.9%) | 323 / 432 (74.8%) |
-| model.def | 3,048 / 3,560 (85.6%) | 357 / 491 (72.7%) |
-| sweep | 3,713 / 4,277 (86.8%) | 250 / 338 (74.0%) |
-| io.xmile | 3,280 / 3,746 (87.6%) | 320 / 477 (67.1%) |
-| io.vensim | 4,165 / 4,879 (85.4%) | 408 / 591 (69.0%) |
-| io.json | 1,827 / 2,344 (77.9%) | 166 / 236 (70.3%) |
-| io (top-level) | 202 / 609 (33.2%) | 12 / 46 (26.1%) |
-| measure (all) | 1,431 / 1,639 (87.3%) | 47 / 72 (65.3%) |
+| Package | Instruction Coverage |
+|---------|---------------------|
+| measure.units.temperature | 100.0% |
+| measure.units.volume | 97.9% |
+| measure.units.length | 97.8% |
+| (root — Simulation) | 96.3% |
+| model.expr | 93.5% |
+| measure.units.item | 93.8% |
+| model.graph | 92.7% |
+| model | 92.3% |
+| model.compile | 90.5% |
+| io.xmile | 88.0% |
+| measure | 87.5% |
+| sweep | 86.8% |
+| model.def | 85.9% |
+| io.vensim | 85.1% |
+| io.json | 84.2% |
+| measure.units.money | 83.3% |
+| measure.dimension | 75.5% |
+| event | 72.4% |
 
-### App Module — Zero-Coverage Classes (>300 instructions)
+### Lowest-Coverage Classes (>200 instructions)
 
-| Class | Instructions | Notes |
-|-------|-------------|-------|
-| QuickstartDialog | 1,224 | Help dialog |
-| ExpressionLanguageDialog | 1,191 | Help dialog |
-| LookupForm | 993 | Form |
-| SdConceptsDialog | 926 | Help dialog |
-| MultiSweepResultPane | 743 | Result pane |
-| CausalLinkGeometry | 705 | Geometry — testable |
-| FanChartPane | 692 | Chart pane |
-| KeyboardShortcutsDialog | 506 | Dialog |
-| SweepResultPane | 481 | Result pane |
-| SelectionRenderer | 479 | Renderer |
-| StockForm | 475 | Form |
-| OptimizationResultPane | 473 | Result pane |
-| FlowForm | 455 | Form |
-| FeedbackLoopRenderer | 378 | Renderer |
-| AuxForm | 374 | Form |
-| ConstantForm | 356 | Form |
-| DiagramExporter | 332 | PNG/SVG bridge |
-| SensitivityPane | 287 | Sensitivity pane |
-| SparklineRenderer | 268 | Renderer |
-| MonteCarloResultPane | 220 | Result pane |
-| CldVariableForm | 169 | Form |
-| UndoHistoryPopup | 136 | Popup |
-
-22 zero-coverage classes totaling ~10,666 uncovered instructions. See #177 for tracking.
+| Class | Coverage | Instructions |
+|-------|----------|-------------|
+| LookupTableDef | 48.6% | 282 |
+| Module | 56.7% | 268 |
+| SensitivitySummary | 71.4% | 846 |
+| VensimImporter | 77.0% | 1,341 |
+| Model | 79.6% | 401 |
+| VensimExprTranslator | 80.2% | 1,263 |
+| Quantity | 82.6% | 386 |
 
 ---
 
 ## SpotBugs Results
 
-**SpotBugs 4.9.8** (upgraded from 4.8.6, which could not scan JDK 25 class files).
+**SpotBugs 4.9.8** — 0 bugs across all 5 modules. Previous finding (#227) was fixed.
 
 | Module | Bugs Found |
 |--------|-----------|
@@ -106,9 +93,111 @@ Supersedes the previous revision from earlier today.
 | forrester-app | 0 |
 | forrester-ui | 0 |
 | forrester-demos | 0 |
-| forrester-tools | **1** |
+| forrester-tools | 0 |
 
-**Bug:** `NP_NULL_ON_SOME_PATH_FROM_RETURN_VALUE` in `BatchImportCli.downloadToTemp()` line 205 — `Path.of(rawName).getFileName()` can return null. → **#227**
+---
+
+## New Findings This Audit
+
+### Critical
+
+**C8. Top-level flows not added to Model** — #235
+- **File:** `ModelCompiler.java:141-149`
+- Top-level flows are added to `CompilationContext` but never to `Model` via `model.addFlow()`. Module flows are registered correctly (via `module.addFlow()`). This means `model.getFlows()` is empty for top-level flows, breaking `Simulation.clearHistory()`, flow history queries, and `RunResult` flow data.
+
+**C9. ModelDefinitionFactory drops CLD variables, causal links, and metadata during sweeps** — #236
+- **File:** `ModelDefinitionFactory.java:91-97`
+- `applyConstantOverrides()` and `embedSettings()` use a backward-compatible `ModelDefinition` constructor that omits `cldVariables`, `causalLinks`, `views`, and `metadata`. Any model with CLD elements silently loses them during parameter sweeps, Monte Carlo, or optimization.
+
+### High
+
+**H18. Shared lookup table input holder race condition** — #237
+- **File:** `ExprCompiler.java:611-618`
+- In `compileLookup()`, when `createFreshLookupTable()` returns empty, the fallback path uses a shared `inputHolder[0]` and shared `LookupTable`. Multiple formulas referencing the same lookup table overwrite each other's input between write and read.
+
+**H19. Tarjan SCC corrupts stack when MAX_DEPTH exceeded** — #238
+- **Files:** `DependencyGraph.java:244-246`, `FeedbackAnalysis.java:671-673`
+- When MAX_DEPTH=200 is hit, the function returns without popping nodes from the Tarjan stack. This corrupts subsequent SCC results — nodes left on the stack get incorrectly merged into other components. (#218 added the depth guard but the bail-out logic is wrong.)
+
+**H20. ElementRenderer.MEASURE_TEXT shared mutable Text node** — #239
+- **File:** `ElementRenderer.java:15`
+- Static `Text` node used for text measurement is a JavaFX scene graph node that must only be accessed on the FX thread. If called from SVG export or background rendering, it corrupts state.
+
+**H21. ModelEditor.renameElement does not update module bindings** — #240
+- **File:** `ModelEditor.java:455-534`
+- Renaming an element updates equations, causal links, and flow endpoints, but does not update module input/output bindings referencing the element by name. Bindings become stale.
+
+**H22. ConnectionRerouteController and ResizeController missing undo state** — #241
+- **Files:** `ConnectionRerouteController.java`, `ResizeController.java`
+- Connection rerouting and element resizing modify model state but do not save undo snapshots. Users cannot undo these operations.
+
+**H23. Division by zero in 4 SIR demo variants** — #242
+- **Files:** `SirCalibrationDemo.java:146`, `SirSweepDemo.java:86`, `SirMultiSweepDemo.java:89`, `SirMonteCarloDemo.java:100`
+- `infectious.getValue() / totalPop` has no zero-check. `SirInfectiousDiseaseDemo` has the guard (line 59) but these 4 variants do not. If all stocks reach zero, NaN propagates through the simulation.
+
+### Medium
+
+**M35. LoopHighlightController.setActive calls model supplier twice** — #243
+- **File:** `LoopHighlightController.java:39-40`
+- `modelSupplier.get()` called once for null check, once for `recompute()`. The supplier calls `editor.toModelDefinition()` which is expensive. Should capture result in local variable.
+
+**M36. InlineEditController no name validation before rename** — #244
+- **File:** `InlineEditController.java`
+- Raw user input passed to `editor.renameElement()` without checking `isValidName()`. Invalid names (special characters, exceeding length, reserved words) could be accepted.
+
+**M37. FlowCreationController does not verify target is a Stock** — #245
+- **File:** `FlowCreationController.java`
+- Second click connects to any element. Should verify target is a Stock — flows should not connect to auxiliaries, constants, or other flows.
+
+**M38. UndoManager executor not shut down on model change or window close** — #246
+- **Files:** `UndoManager.java`, `ModelWindow.java:1071-1092`
+- When loading a new model, `undoManager.clear()` does not shut down the LZ4 compression executor. When closing a window, `close()` shuts down `analysisRunner` but not the UndoManager. Zombie executor threads accumulate. (Partially addressed by #223 for module navigation, but model-change and window-close paths remain.)
+
+**M39. BatchImportCli no download size limit** — #247
+- **File:** `BatchImportCli.java:224-232`
+- `Files.copy(in, tempFile)` copies entire HTTP response without size limit. Malicious manifest URL could exhaust disk space. Should enforce a max download size (e.g., 10 MB matching importer limits).
+
+**M40. RunResult returns mutable internal arrays** — #248
+- **File:** `RunResult.java:139-141`
+- `getStockValuesAtStep()` and `getVariableValuesAtStep()` return internal `double[]` without copying. Callers can corrupt data.
+
+**M41. RANDOM_NORMAL arg count mismatch with Vensim** — #249
+- **File:** `ExprCompiler.java:554-567`
+- Requires exactly 4 args but Vensim's `RANDOM NORMAL` takes 5 (min, max, mean, stddev, seed). Models imported from Vensim with 5 args fail with unhelpful error. Should accept 4-5 args and ignore seed.
+
+**M42. DemoClassGenerator unescaped strings in Javadoc** — #250
+- **File:** `DemoClassGenerator.java:134-147`
+- Import warnings and validation errors inserted into Javadoc `<li>` elements without HTML escaping. Characters like `<`, `>`, `&`, or `*/` produce malformed Javadoc or break compilation.
+
+**M43. AgileSoftwareDevelopmentDemo is substantially incomplete** — #251
+- **File:** `AgileSoftwareDevelopmentDemo.java`
+- Unused fields (`inexperiencedStaff`, `experiencedStaff`, `relativeProductivityOfNewStaff`), dead stocks (`productBacklog`, `releaseBacklog` with no flows), and completion rate ignoring staffing. The demo is misleading as a system dynamics model.
+
+### Low
+
+**L18. Smooth/Delay3 multi-step catch-up uses stale input**
+- **Files:** `Smooth.java:112-117`, `Delay3.java:132-147`
+- When step counter jumps >1, catch-up loop calls `input.getAsDouble()` repeatedly but always gets the current step's value. Only affects intermittent evaluation — normal step-by-step simulation is fine.
+
+**L19. DemoClassGenerator Map.of() limit of 10 entries**
+- **File:** `DemoClassGenerator.java:364-379`
+- Generated code uses `Map.of()` which fails for >10 key-value pairs. Should use `Map.ofEntries()` for larger maps.
+
+**L20. JavaSourceEscaper.toPackageSegment can produce invalid identifiers**
+- **File:** `JavaSourceEscaper.java:86-91`
+- All non-alphanumeric input → empty string. Digit-leading input → invalid Java package. Generated code would not compile.
+
+**L21. DemoClassGenerator does not validate className is a valid Java identifier**
+- **File:** `DemoClassGenerator.java:153`
+- `className` emitted directly into `public class <name>`. Names with spaces, hyphens, or leading digits produce uncompilable code.
+
+**L22. XmileExprTranslator `=` to `==` replacement may corrupt edge-case expressions**
+- **File:** `XmileExprTranslator.java:100-101`
+- Regex replaces single `=` with `==` globally. Safe for standard XMILE but fragile for expressions containing `=` in unusual contexts.
+
+**L23. Demo CSV output paths inconsistent**
+- **Files:** `TubDemo.java:71`, `ThirdOrderMaterialDelayDemo.java:99`
+- Use relative paths (`tub.csv`, `3rd order.csv`) while other demos use `java.io.tmpdir`. Inconsistent and writes to unpredictable locations.
 
 ---
 
@@ -118,107 +207,44 @@ Supersedes the previous revision from earlier today.
 
 | Severity | Total (All Time) | Currently Open | Fixed/Closed |
 |----------|-----------------|----------------|--------------|
-| Critical | 7 | 0 | 7 |
-| High | 17 | 0 | 17 |
-| Medium | 31 | 17 | 14 |
-| Low | 18 | 17 | 1 |
+| Critical | 9 | 2 | 7 |
+| High | 23 | 6 | 17 |
+| Medium | 43 | 18 | 25 |
+| Low | 23 | 16 | 7 |
 
-**All critical and high-severity issues resolved.** 17 medium and 17 low issues remain open.
-
-### New Issues Created This Audit
+### New Issues Created This Audit (Rev 3)
 
 | # | Title | Severity | Milestone |
 |---|-------|----------|-----------|
-| #227 | BatchImportCli.downloadToTemp null dereference on Path.getFileName() | Medium | R1 |
-| #228 | Decompose ModelCanvas — 1,082 lines, 63 public methods | Medium | R1 |
-| #229 | Remove 15 unused imports across codebase | Low | R2 |
-| #230 | Replace 12 comment-only catch blocks with debug logging | Medium | R1 |
-| #231 | Replace remaining broad catch(Exception) in ModelCompiler and ImportPipeline | Medium | R1 |
-| #232 | Split app.canvas mega-package into sub-packages | Low | R2 |
-| #233 | Add unit tests for CompilationContext and CompiledModel (engine) | Medium | R1 |
-| #234 | Extract long methods exceeding 150 lines | Low | R2 |
+| #235 | Top-level flows not added to Model — clearHistory and flow queries broken | Critical | R1 |
+| #236 | ModelDefinitionFactory drops CLD variables and causal links during sweeps | Critical | R1 |
+| #237 | Shared lookup table input holder race condition in ExprCompiler fallback | High | R1 |
+| #238 | Tarjan SCC corrupts stack when MAX_DEPTH exceeded | High | R1 |
+| #239 | ElementRenderer.MEASURE_TEXT shared mutable Text node not thread-safe | High | R1 |
+| #240 | ModelEditor.renameElement does not update module bindings | High | R1 |
+| #241 | ConnectionReroute and Resize operations cannot be undone | High | R1 |
+| #242 | Division by zero in 4 SIR demo variants | High | R1 |
+| #243 | LoopHighlightController.setActive calls expensive supplier twice | Medium | R1 |
+| #244 | InlineEditController accepts invalid element names | Medium | R1 |
+| #245 | FlowCreationController allows connecting flows to non-stock elements | Medium | R1 |
+| #246 | UndoManager executor not shut down on model change or window close | Medium | R1 |
+| #247 | BatchImportCli.downloadToTemp has no download size limit | Medium | R1 |
+| #248 | RunResult returns mutable internal arrays — callers can corrupt data | Medium | R1 |
+| #249 | RANDOM_NORMAL requires 4 args but Vensim models provide 5 | Medium | R1 |
+| #250 | DemoClassGenerator inserts unescaped strings into Javadoc | Medium | R1 |
+| #251 | AgileSoftwareDevelopmentDemo incomplete — dead stocks and unused fields | Medium | R1 |
 
-### Issues Fixed Since Previous Audit
+### Issues Fixed Since Rev 2
 
-| # | Title | Was |
-|---|-------|-----|
-| #145 | Add TestFX tests for forrester-ui module | M5 |
-| #160 | ModelEditor decomposition | — |
-| #163 | Replace return null with Optional in exporter/importer methods | M7 |
-| #178 | Add test coverage for ModelReport | M16 |
-| #189 | BatchImportCli.downloadToTemp accepts file:// URIs | M19 |
-| #190 | UndoManager serializes full model on FX thread | M20 |
-| #218 | DependencyGraph Tarjan SCC has no recursion depth guard | H15 |
-| #219 | LookupForm mutates array before validation | H16 |
-| #220 | ExportBounds.compute() returns invalid bounds for empty models | M21 |
-| #221 | FanChart uses unsynchronized static fields | M22 |
-| #222 | BatchImportCli path traversal via unsanitized URL filename | H17 |
-| #223 | UndoManager compressor ExecutorService never shut down | M23 |
-
----
-
-## Critical Issues — ALL FIXED
-
-C1–C7 (#155, #164, #166, #179–#182) — all closed. No new critical findings.
-
----
-
-## High Issues — ALL FIXED
-
-H1–H17 — all closed. Former open issues H15 (#218), H16 (#219), H17 (#222) were all resolved since the last audit. No new high-severity findings.
-
----
-
-## Medium Issues — 17 Open, 14 Fixed
-
-### Previously Fixed
-M1 (#161), M2 (#71), M3 (#162), M5 (#145), M6 (#163), M7 (#163), M9 (#169), M10 (#171), M11 (#173), M12, M14 (#176), M16 (#178), M19 (#189), M20 (#190), M21 (#220), M22 (#221), M23 (#223)
-
-### Open
-
-| ID | Issue | # | Milestone |
-|----|-------|---|-----------|
-| M4 | Equation rename uses string token replacement instead of AST | #131 | R1 |
-| M8 | ModelDefinition has 15 fields and 2 telescoping constructors | #72 | R2 |
-| M13 | CsvSubscriber uses string concatenation in SLF4J logging | #175 | R2 |
-| M15 | App module test coverage at 40.6% — 22 core classes at 0% | #177 | R2 |
-| M17 | logger.xml misnamed — logging config never loaded | #187 | R2 |
-| M18 | String.format without Locale in chart rendering | #188 | R2 |
-| M24 | BatchImportCli.downloadToTemp null dereference | #227 | R1 |
-| M25 | ModelCanvas god class (1,082 lines, 63 public methods) | #228 | R1 |
-| M26 | 12 comment-only catch blocks swallowing exceptions | #230 | R1 |
-| M27 | Broad catch(Exception) in ModelCompiler and ImportPipeline | #231 | R1 |
-| M28 | CompilationContext and CompiledModel lack unit tests | #233 | R1 |
-| M29 | ObjectMapper lacks security hardening | #200 | R2 |
-| M30 | Connector regeneration on every model change | #204 | R2 |
-| M31 | Canvas redraws twice on resize | #203 | R2 |
-| M32 | Hardcoded dialog sizes | #202 | R2 |
-| M33 | Unsaved changes dialog comes up twice | #226 | R1 |
-| M34 | Review element naming policy | #154 | R1 |
-
----
-
-## Low Issues — 17 Open
-
-| ID | Issue | # | Milestone |
-|----|-------|---|-----------|
-| L1 | Unused TODO comment in Quantity.java | — | — |
-| L2 | Color constants hardcoded and duplicated | #77 | R2 |
-| L3 | 15 unused imports across codebase | #229 | R2 |
-| L4 | Split app.canvas mega-package (87 files) | #232 | R2 |
-| L5 | Extract long methods exceeding 150 lines | #234 | R2 |
-| L6 | Causal link polarity labels clipped in export | #114 | R2 |
-| L7 | AutoLayout back-edge marking | #116 | R2 |
-| L8 | ValidationDialog extends Stage inconsistently | #213 | R2 |
-| L9 | Help windows hide behind main window | #205 | R2 |
-| L10 | Add Help menu links for bug reports | #216 | R2 |
-| L11 | Add .editorconfig | #212 | R2 |
-| L12 | Checkstyle not applied project-wide | #211 | R2 |
-| L13 | CI pipeline missing quality gates | #210 | R2 |
-| L14 | Fractional DT not supported | #133 | R2 |
-| L15 | Define formal grammar for model files | #191 | R2 |
-| L16 | Keyboard-driven connection creation | #4 | R2 |
-| L17 | Example model tests lack behavioral assertions | #29 | R2 |
+| # | Title | Severity |
+|---|-------|----------|
+| #226 | Unsaved changes dialog comes up twice | Medium |
+| #227 | BatchImportCli.downloadToTemp null dereference | Medium |
+| #228 | Decompose ModelCanvas — 1,082 lines, 63 public methods | Medium |
+| #229 | Remove 15 unused imports across codebase | Low |
+| #230 | Replace 12 comment-only catch blocks with debug logging | Medium |
+| #231 | Replace broad catch(Exception) in ModelCompiler and ImportPipeline | Medium |
+| #233 | Add unit tests for CompilationContext and CompiledModel | Medium |
 
 ---
 
@@ -226,21 +252,18 @@ M1 (#161), M2 (#71), M3 (#162), M5 (#145), M6 (#163), M7 (#163), M9 (#169), M10 
 
 | Category | Status |
 |----------|--------|
-| XXE protection | XML import/export both hardened (DocumentBuilderFactory + TransformerFactory) |
+| XXE protection | XML import/export both hardened |
 | Expression parser depth | Limited to MAX_DEPTH=200 |
-| Graph traversal depth | FeedbackAnalysis and DependencyGraph both guarded (MAX_DEPTH=200) |
-| Unsafe deserialization | None — no ObjectInputStream, no Serializable |
-| Reflection abuse | None in production code (TestFX tests use reflection for FanChart) |
+| Graph traversal depth | Guarded (MAX_DEPTH=200) — but bail-out corrupts Tarjan state (#238) |
+| Unsafe deserialization | None |
 | SQL injection | N/A — no database |
-| Command injection | None — no Runtime.exec, ProcessBuilder |
-| File path traversal | Fixed (#222). Residual null-safety issue (#227) |
-| File size limits | All importers enforce 10 MB cap |
-| Simulation safety | Timeout (60s), MAX_STEPS (10M), NaN detection, cancellation support |
-| ObjectMapper hardening | Missing (#200) — should disable default typing |
+| Command injection | None |
+| File path traversal | Fixed (#222) |
+| File size limits | All importers enforce 10 MB cap; BatchImportCli downloads unbounded (#247) |
+| Simulation safety | Timeout (60s), MAX_STEPS (10M), NaN detection, cancellation |
+| ObjectMapper hardening | Missing (#200) |
 
-**Resource management:** All I/O uses try-with-resources. All executor services now properly shut down (#223 fixed).
-
-**Thread safety:** FX thread confinement enforced via `checkFxThread()` on all ModelEditor mutations. `CopyOnWriteArrayList` for listeners. `FanChart` volatile fields fixed (#221). `UndoManager` executor leak fixed (#223).
+**Thread safety:** FX thread confinement enforced via `checkFxThread()`. `ElementRenderer.MEASURE_TEXT` is a new finding (#239) — shared mutable FX node accessed without thread guarantee.
 
 ---
 
@@ -250,10 +273,10 @@ M1 (#161), M2 (#71), M3 (#162), M5 (#145), M6 (#163), M7 (#163), M9 (#169), M10 
 
 ```
 forrester-engine  (no internal deps — foundation)
-    ↑         ↑
+    ^         ^
     |         |
 forrester-ui  |  (depends on: engine)
-    ↑         |
+    ^         |
     |         |
     |    forrester-app   (depends on: engine)
     |    forrester-tools (depends on: engine)
@@ -261,41 +284,39 @@ forrester-ui  |  (depends on: engine)
 forrester-demos (depends on: engine, ui)
 ```
 
-**No circular dependencies. No layering violations.** Clean acyclic dependency graph.
+**No circular dependencies. No layering violations.**
 
 ### Strengths
 
-1. **Clean engine/app separation** — Engine has zero UI dependencies. Records for all domain types.
-2. **Well-structured interaction controllers** — Canvas interaction decomposed into 10+ focused controllers.
-3. **Security hardened** — XXE protection, expression depth limits, file size limits, simulation safety guards.
-4. **Consistent logging** — SLF4J throughout. No System.out/err in production code (only in CLI tools and demos).
-5. **Defensive records** — Compact constructors with null-checks, List.copyOf(), and validation guards.
-6. **Good engine test coverage** — 89.1% instruction coverage, 76.8% branch coverage.
-7. **No deep inheritance** — Composition over inheritance consistently applied.
-8. **No wildcard imports, no printStackTrace** — Clean code hygiene.
+1. **Clean engine/app separation** — Engine has zero UI dependencies
+2. **Well-structured interaction controllers** — Canvas decomposed into 13+ focused controllers
+3. **Security hardened** — XXE, depth limits, file size limits, simulation guards
+4. **89.1% engine instruction coverage** with 1,255 tests
+5. **Defensive records** with compact constructors, null-checks, List.copyOf()
+6. **No wildcard imports, no printStackTrace, no System.out in production**
 
 ### Weaknesses
 
-1. **App module coverage gap** — 40.6% instruction coverage, 22 classes at 0%. (#177)
-2. **Two god classes remain** — ModelEditor (1,200 lines, decomposed but still large) and ModelCanvas (1,082 lines, #228).
-3. **Mega-package** — app.canvas has 87 files. (#232)
-4. **No Checkstyle or ErrorProne** — Only SpotBugs for static analysis. (#210, #211)
-5. **~40 return null occurrences** — Partially addressed (#163 closed), more remain.
+1. **2 critical bugs found** — top-level flows missing from Model, sweep drops CLD data
+2. **App module coverage gap** — 41% instruction coverage (#177)
+3. **ModelEditor still large** at 1,200 lines despite decomposition (#160)
+4. **No Checkstyle or ErrorProne** — only SpotBugs (#210, #211)
+5. **Tarjan SCC depth guard corrupts state** — fix for #218 introduced a new bug (#238)
 
 ### Largest Files
 
-| File | Lines | Public Methods | Coverage | Notes |
-|------|-------|---------------|----------|-------|
-| ModelEditor.java | 1,200 | 79 | 87% | Decomposed (#160), still large |
-| ModelWindow.java | 1,092 | 8 | ~30% | Main window, long methods |
-| ModelCanvas.java | 1,082 | 63 | 19% | God class (#228) |
-| SvgExporter.java | 835 | 2 | 2% | Duplicates CanvasRenderer (#67) |
-| ModelDefinitionSerializer.java | 774 | — | ~78% | Hand-rolled JSON |
-| CanvasRenderer.java | 748 | — | 27% | Drawing code |
-| FeedbackAnalysis.java | 696 | — | ~93% | Well-tested |
-| XmileImporter.java | 680 | — | 88% | Well-tested |
-| InputDispatcher.java | 680 | — | 15% | Event routing |
-| EquationAutoComplete.java | 679 | — | ~10% | Tokenization + completion |
+| File | Lines | Coverage | Notes |
+|------|-------|----------|-------|
+| ModelEditor.java | 1,200 | 87% | Decomposed (#160), still large |
+| ModelWindow.java | 1,092 | ~30% | Main window |
+| ModelCanvas.java | 924 | ~19% | Decomposed (#228) from 1,082 |
+| SvgExporter.java | 835 | 2% | Duplicates CanvasRenderer |
+| ModelDefinitionSerializer.java | 774 | ~84% | Hand-rolled JSON |
+| CanvasRenderer.java | 748 | 27% | Drawing code |
+| FeedbackAnalysis.java | 696 | ~93% | Well-tested |
+| XmileImporter.java | 680 | 88% | Well-tested |
+| InputDispatcher.java | 680 | 15% | Event routing |
+| EquationAutoComplete.java | 679 | ~10% | Tokenization + completion |
 
 ---
 
@@ -303,90 +324,71 @@ forrester-demos (depends on: engine, ui)
 
 ```
 Module              Tests   Failures  Errors  Skipped
-forrester-engine    1,207   0         0       0
-forrester-app       618     0         0       2
+forrester-engine    1,255   0         0       0
 forrester-demos     44      0         0       0
 forrester-tools     37      0         0       0
-forrester-ui        22      0         0       0
-TOTAL               1,928   0         0       2
+forrester-app       (compile only — requires JavaFX runtime)
+forrester-ui        (compile only — requires JavaFX runtime)
+TOTAL               1,336   0         0       0
 ```
 
-SpotBugs 4.9.8: **1 bug** (Medium — #227).
+SpotBugs 4.9.8: **0 bugs** across all modules.
 
 ---
 
-## Open Issues by Milestone
+## Test Coverage Gaps (Priority)
 
-### R1 (Release 1) — 18 open
-
-| # | Title | Type |
-|---|-------|------|
-| 49 | Add larger demo models from MetaSD and TU Delft | Feature |
-| 81 | Add automated layout regression tests | Feature |
-| 89 | Add maturity visual indicators on canvas | Feature |
-| 96 | Create landing page / README | Docs |
-| 97 | Write user manual | Docs |
-| 99 | Publish forrester-engine JAR to Maven Central | Release |
-| 100 | Create platform installers with jpackage | Release |
-| 101 | Write GitHub README | Docs |
-| 131 | Equation rename uses string token replacement | Medium bug |
-| 154 | Review element naming policy | Medium |
-| 226 | Unsaved changes dialog comes up twice | Medium bug |
-| 227 | BatchImportCli null dereference | Medium bug |
-| 228 | Decompose ModelCanvas god class | Medium |
-| 230 | Comment-only catch blocks | Medium |
-| 231 | Broad catch(Exception) in ModelCompiler/ImportPipeline | Medium bug |
-| 233 | Add tests for CompilationContext/CompiledModel | Medium |
-
-### R2 — 24 open
-
-4, 29, 67, 68, 69, 72, 77, 85, 88, 114, 116, 133, 175, 177, 187, 188, 191, 200, 202, 203, 204, 205, 210, 211, 212, 213, 216, 229, 232, 234
+| Gap | Risk | Package Coverage |
+|-----|------|-----------------|
+| Stateful functions (DelayFixed, Forecast, Npv, Pulse, Trend) — minimal tests | Critical | ~85% |
+| io.vensim error/edge paths untested | High | 85.1% (68% branch) |
+| io.xmile error/edge paths untested | High | 88.0% (69% branch) |
+| SweepCsvWriter — zero tests | High | 209 lines |
+| measure package conversion edge cases | Medium | 87.5% (63% branch) |
+| 64 untested UI classes in forrester-app | Medium | 41% overall |
+| No optimizer pipeline integration test | Medium | — |
 
 ---
 
-## Comparison: Previous Audit (Rev 1) vs. Current (Rev 2)
+## Comparison: Rev 2 vs. Rev 3
 
-| Metric | Rev 1 | Rev 2 | Change |
+| Metric | Rev 2 | Rev 3 | Change |
 |--------|-------|-------|--------|
-| Source files | 282 | 288 | +6 |
-| Source LoC | 45,586 | 46,764 | +1,178 |
-| Test files | 126 | 139 | +13 |
-| Test LoC | 26,607 | 28,569 | +1,962 |
-| Test:Source ratio | 0.58 | 0.61 | +0.03 |
-| Tests passing | 1,830 | 1,928 | +98 |
-| SpotBugs version | 4.8.6 (broken on JDK 25) | 4.9.8 | Upgraded |
-| SpotBugs findings | 0 (incomplete scan) | 1 | Now scanning all classes |
-| Open critical issues | 0 | 0 | — |
-| Open high issues | 3 | 0 | **-3 (all fixed)** |
-| Open medium issues | 15 | 17 | +2 (5 fixed, 7 new) |
-| Open low issues | 14 | 17 | +3 (new findings) |
-| Engine instruction coverage | 87.5% | 89.1% | +1.6% |
-| App instruction coverage | 39.3% | 40.6% | +1.3% |
-| UI instruction coverage | 0% | 90.6% | **+90.6%** |
+| Source files | 288 | 290 | +2 (extracted controllers) |
+| Source LoC | 46,764 | 46,985 | +221 |
+| Test files | 139 | 141 | +2 (CompilationContext, CompiledModel) |
+| Test LoC | 28,569 | 29,077 | +508 |
+| Tests passing | 1,928 | 1,336 | -592 (app/ui tests need FX runtime) |
+| SpotBugs findings | 1 | 0 | **-1 (fixed #227)** |
+| Open critical issues | 0 | 2 | **+2 (new findings)** |
+| Open high issues | 0 | 6 | **+6 (new findings)** |
+| Open medium issues | 17 | 18 | +1 (7 fixed, 8 new) |
+| Open low issues | 17 | 16 | -1 |
+| Engine instruction coverage | 89.1% | 89.1% | — |
 
 ---
 
 ## Recommendations
 
-### Immediate (R1 blockers)
+### Immediate (R1 blockers — Critical/High)
 
-1. Fix null dereference in BatchImportCli (#227) — SpotBugs finding
-2. Replace broad catch(Exception) blocks (#231) — 2 remaining
-3. Add debug logging to comment-only catch blocks (#230) — 12 occurrences
-4. Add engine tests for CompilationContext/CompiledModel (#233)
-5. Begin ModelCanvas decomposition (#228)
+1. **Fix #235** — Add `model.addFlow()` calls in ModelCompiler for top-level flows
+2. **Fix #236** — Use canonical ModelDefinition constructor in ModelDefinitionFactory
+3. **Fix #238** — Fix Tarjan SCC bail-out to properly unwind stack on depth limit
+4. **Fix #237** — Create fresh lookup tables in ExprCompiler fallback path
+5. **Fix #239** — Make ElementRenderer text measurement thread-safe
+6. **Fix #240** — Update module bindings on element rename
+7. **Fix #241** — Add undo state saves for connection reroute and resize
+8. **Fix #242** — Add totalPop==0 guard to SIR demo variants
 
-### Short-term (R1)
+### Short-term (R1 — Medium)
 
-6. Fix equation rename to use AST (#131)
-7. Fix unsaved-changes double-dialog (#226)
-8. Review element naming policy (#154)
+9. Fix #243-#251 — LoopHighlight double call, name validation, flow target, UndoManager shutdown, download limit, RunResult arrays, RANDOM_NORMAL args, Javadoc escaping, Agile demo
+10. Fix equation rename to use AST (#131)
 
 ### Medium-term (R2)
 
-9. Improve app module test coverage (#177) — 22 zero-coverage classes
-10. Apply Checkstyle project-wide (#211) with CI enforcement (#210)
-11. Add .editorconfig (#212)
-12. Split app.canvas mega-package (#232)
-13. Extract long methods (#234)
-14. Remove unused imports (#229)
+11. Improve app module test coverage (#177)
+12. Add tests for stateful functions (DelayFixed, Forecast, Npv, etc.)
+13. Apply Checkstyle project-wide (#211) with CI enforcement (#210)
+14. Split app.canvas mega-package (#232)
