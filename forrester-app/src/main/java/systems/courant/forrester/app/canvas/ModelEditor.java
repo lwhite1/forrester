@@ -519,6 +519,30 @@ public class ModelEditor {
             }
         }
 
+        // Update module input/output bindings that reference the old name
+        for (int i = 0; i < modules.size(); i++) {
+            ModuleInstanceDef m = modules.get(i);
+            boolean changed = false;
+            Map<String, String> newInputs = new java.util.LinkedHashMap<>(m.inputBindings());
+            for (Map.Entry<String, String> entry : newInputs.entrySet()) {
+                if (oldName.equals(entry.getValue())) {
+                    entry.setValue(newName);
+                    changed = true;
+                }
+            }
+            Map<String, String> newOutputs = new java.util.LinkedHashMap<>(m.outputBindings());
+            for (Map.Entry<String, String> entry : newOutputs.entrySet()) {
+                if (oldName.equals(entry.getValue())) {
+                    entry.setValue(newName);
+                    changed = true;
+                }
+            }
+            if (changed) {
+                modules.set(i, new ModuleInstanceDef(
+                        m.instanceName(), m.definition(), newInputs, newOutputs));
+            }
+        }
+
         // Update equation references (underscore convention)
         String oldToken = oldName.replace(' ', '_');
         String newToken = newName.replace(' ', '_');
