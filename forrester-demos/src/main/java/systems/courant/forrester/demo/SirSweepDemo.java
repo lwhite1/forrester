@@ -83,6 +83,9 @@ public class SirSweepDemo {
         Flow infectionRate = Flow.create("Infected", DAY, () -> {
             double totalPop = susceptible.getValue() + infectious.getValue()
                     + recovered.getValue();
+            if (totalPop == 0) {
+                return new Quantity(0, PEOPLE);
+            }
             double infectiousFraction = infectious.getValue() / totalPop;
             double infectedCount = contactRate * infectiousFraction * infectivity
                     * susceptible.getValue();
