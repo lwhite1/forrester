@@ -34,6 +34,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.regex.Pattern;
 
@@ -94,9 +95,9 @@ public class XmileImporter implements ModelImporter {
         Element root = doc.getDocumentElement();
 
         // Extract model name from header
-        String headerName = getHeaderName(root);
-        if (headerName != null && !headerName.isBlank()) {
-            modelName = headerName;
+        Optional<String> headerName = getHeaderName(root);
+        if (headerName.isPresent() && !headerName.get().isBlank()) {
+            modelName = headerName.get();
         }
 
         // Extract simulation settings
@@ -104,8 +105,9 @@ public class XmileImporter implements ModelImporter {
         double start = 0;
         double stop = 100;
         double dt = 1;
-        Element simSpecs = getFirstChild(root, XmileConstants.SIM_SPECS);
-        if (simSpecs != null) {
+        Optional<Element> simSpecsOpt = getFirstChild(root, XmileConstants.SIM_SPECS);
+        if (simSpecsOpt.isPresent()) {
+            Element simSpecs = simSpecsOpt.get();
             String tu = simSpecs.getAttribute(XmileConstants.ATTR_TIME_UNITS);
             if (tu != null && !tu.isBlank()) {
                 timeUnit = capitalizeFirst(tu);
@@ -168,7 +170,7 @@ public class XmileImporter implements ModelImporter {
 
     private void buildStock(Element stockElem, String name,
                              ModelDefinitionBuilder builder, List<String> warnings) {
-        String eqnText = getChildText(stockElem, XmileConstants.EQN);
+        String eqnText = getChildText(stockElem, XmileConstants.EQN).orElse(null);
         double initialValue = 0;
         if (eqnText != null && !eqnText.isBlank()) {
             if (isNumericLiteral(eqnText)) {
@@ -179,9 +181,9 @@ public class XmileImporter implements ModelImporter {
             }
         }
 
-        String unit = getChildText(stockElem, XmileConstants.UNITS);
-        String doc = getChildText(stockElem, XmileConstants.DOC);
-        String comment = (doc != null && !doc.isBlank()) ? doc : name;
+        String unit = getChildText(stockElem, XmileConstants.UNITS).orElse(null);
+        String comment = getChildText(stockElem, XmileConstants.DOC)
+                .filter(d -> !d.isBlank()).orElse(name);
 
         String negPolicy = null;
         if (hasChild(stockElem, XmileConstants.NON_NEGATIVE)) {
@@ -212,7 +214,7 @@ public class XmileImporter implements ModelImporter {
                             Map<String, List<String>> stockOutflows,
                             ModelDefinitionBuilder builder,
                             Set<String> lookupNames, List<String> warnings) {
-        String eqnText = getChildText(flowElem, XmileConstants.EQN);
+        String eqnText = getChildText(flowElem, XmileConstants.EQN).orElse(null);
         if (eqnText == null || eqnText.isBlank()) {
             eqnText = "0";
             warnings.add("Flow '" + name + "' has no equation, defaulting to 0");
@@ -241,10 +243,8 @@ public class XmileImporter implements ModelImporter {
         }
 
         // Check for embedded graphical function
-        Element gfElem = getFirstChild(flowElem, XmileConstants.GF);
-        if (gfElem != null) {
-            buildGf(gfElem, name + "_lookup", builder, lookupNames, warnings);
-        }
+        getFirstChild(flowElem, XmileConstants.GF)
+                .ifPresent(gfElem -> buildGf(gfElem, name + "_lookup", builder, lookupNames, warnings));
 
         // Warn about biflow (XMILE default is biflow; non_negative makes it uniflow)
         if (!hasChild(flowElem, XmileConstants.NON_NEGATIVE)) {
@@ -258,8 +258,8 @@ public class XmileImporter implements ModelImporter {
         }
 
         // unit is available via getChildText(flowElem, XmileConstants.UNITS) but not yet used
-        String doc = getChildText(flowElem, XmileConstants.DOC);
-        String comment = (doc != null && !doc.isBlank()) ? doc : name;
+        String comment = getChildText(flowElem, XmileConstants.DOC)
+                .filter(d -> !d.isBlank()).orElse(name);
 
         builder.flow(new FlowDef(name, comment, equation, timeUnit, source, sink));
     }
@@ -267,10 +267,10 @@ public class XmileImporter implements ModelImporter {
     private void buildAux(Element auxElem, String name,
                            ModelDefinitionBuilder builder,
                            Set<String> lookupNames, List<String> warnings) {
-        String eqnText = getChildText(auxElem, XmileConstants.EQN);
-        String unit = getChildText(auxElem, XmileConstants.UNITS);
-        String doc = getChildText(auxElem, XmileConstants.DOC);
-        String comment = (doc != null && !doc.isBlank()) ? doc : name;
+        String eqnText = getChildText(auxElem, XmileConstants.EQN).orElse(null);
+        String unit = getChildText(auxElem, XmileConstants.UNITS).orElse(null);
+        String comment = getChildText(auxElem, XmileConstants.DOC)
+                .filter(d -> !d.isBlank()).orElse(name);
 
         // Warn about range specifications
         if (hasChild(auxElem, XmileConstants.RANGE)) {
@@ -278,8 +278,9 @@ public class XmileImporter implements ModelImporter {
         }
 
         // Check for embedded graphical function
-        Element gfElem = getFirstChild(auxElem, XmileConstants.GF);
-        if (gfElem != null) {
+        Optional<Element> gfElemOpt = getFirstChild(auxElem, XmileConstants.GF);
+        if (gfElemOpt.isPresent()) {
+            Element gfElem = gfElemOpt.get();
             String lookupTableName = name + "_lookup";
             buildGf(gfElem, lookupTableName, builder, lookupNames, warnings);
 
@@ -337,20 +338,20 @@ public class XmileImporter implements ModelImporter {
         double[] yValues = null;
 
         // Try explicit xpts/ypts first
-        String xptsText = getChildText(gfElem, XmileConstants.XPTS);
-        String yptsText = getChildText(gfElem, XmileConstants.YPTS);
+        String xptsText = getChildText(gfElem, XmileConstants.XPTS).orElse(null);
+        String yptsText = getChildText(gfElem, XmileConstants.YPTS).orElse(null);
 
         if (yptsText != null && !yptsText.isBlank()) {
-            yValues = parseCommaSeparated(yptsText);
+            yValues = parseCommaSeparated(yptsText).orElse(null);
 
             if (xptsText != null && !xptsText.isBlank()) {
-                xValues = parseCommaSeparated(xptsText);
+                xValues = parseCommaSeparated(xptsText).orElse(null);
             } else {
                 // Generate x values from xscale min/max
-                Element xscale = getFirstChild(gfElem, XmileConstants.XSCALE);
-                if (xscale != null && yValues != null) {
-                    double xmin = parseDoubleAttr(xscale, XmileConstants.ATTR_MIN, 0);
-                    double xmax = parseDoubleAttr(xscale, XmileConstants.ATTR_MAX, 1);
+                Optional<Element> xscaleOpt = getFirstChild(gfElem, XmileConstants.XSCALE);
+                if (xscaleOpt.isPresent() && yValues != null) {
+                    double xmin = parseDoubleAttr(xscaleOpt.get(), XmileConstants.ATTR_MIN, 0);
+                    double xmax = parseDoubleAttr(xscaleOpt.get(), XmileConstants.ATTR_MAX, 1);
                     xValues = linspace(xmin, xmax, yValues.length);
                 }
             }
@@ -390,10 +391,11 @@ public class XmileImporter implements ModelImporter {
                                   String timeUnit,
                                   Map<String, ModelDefinition> moduleDefinitions,
                                   List<String> warnings) {
-        Element variablesElem = getFirstChild(modelElem, XmileConstants.VARIABLES);
-        if (variablesElem == null) {
+        Optional<Element> variablesOpt = getFirstChild(modelElem, XmileConstants.VARIABLES);
+        if (variablesOpt.isEmpty()) {
             return;
         }
+        Element variablesElem = variablesOpt.get();
 
         // Pass 1: Build maps of stock inflows/outflows and collect names
         Map<String, List<String>> stockInflows = new HashMap<>();
@@ -467,14 +469,13 @@ public class XmileImporter implements ModelImporter {
         checkUnsupportedElements(variablesElem, warnings);
 
         // Parse views
-        Element viewsElem = getFirstChild(modelElem, XmileConstants.VIEWS);
-        if (viewsElem != null) {
+        getFirstChild(modelElem, XmileConstants.VIEWS).ifPresent(viewsElem -> {
             List<ViewDef> views = XmileViewParser.parse(
                     viewsElem, stockNames, flowNames, lookupNames, warnings);
             for (ViewDef view : views) {
                 builder.view(view);
             }
-        }
+        });
     }
 
     private void buildModule(Element moduleElem, String instanceName,
@@ -544,33 +545,27 @@ public class XmileImporter implements ModelImporter {
         return db.parse(new InputSource(new StringReader(content)));
     }
 
-    private static String getHeaderName(Element root) {
-        Element header = getFirstChild(root, XmileConstants.HEADER);
-        if (header == null) {
-            return null;
-        }
-        return getChildText(header, XmileConstants.NAME);
+    private static Optional<String> getHeaderName(Element root) {
+        return getFirstChild(root, XmileConstants.HEADER)
+                .flatMap(header -> getChildText(header, XmileConstants.NAME));
     }
 
-    static Element getFirstChild(Element parent, String tagName) {
+    static Optional<Element> getFirstChild(Element parent, String tagName) {
         NodeList children = parent.getChildNodes();
         for (int i = 0; i < children.getLength(); i++) {
             if (children.item(i) instanceof Element elem) {
                 if (tagName.equals(elem.getLocalName())
                         || tagName.equals(elem.getTagName())) {
-                    return elem;
+                    return Optional.of(elem);
                 }
             }
         }
-        return null;
+        return Optional.empty();
     }
 
-    static String getChildText(Element parent, String tagName) {
-        Element child = getFirstChild(parent, tagName);
-        if (child != null) {
-            return child.getTextContent().strip();
-        }
-        return null;
+    static Optional<String> getChildText(Element parent, String tagName) {
+        return getFirstChild(parent, tagName)
+                .map(child -> child.getTextContent().strip());
     }
 
     private static List<String> getChildTexts(Element parent, String tagName) {
@@ -609,19 +604,20 @@ public class XmileImporter implements ModelImporter {
     }
 
     private static double getChildDouble(Element parent, String tagName, double defaultValue) {
-        String text = getChildText(parent, tagName);
-        if (text != null && !text.isBlank()) {
-            try {
-                return Double.parseDouble(text.strip());
-            } catch (NumberFormatException e) {
-                // fall through
-            }
-        }
-        return defaultValue;
+        return getChildText(parent, tagName)
+                .filter(text -> !text.isBlank())
+                .map(text -> {
+                    try {
+                        return Double.parseDouble(text.strip());
+                    } catch (NumberFormatException e) {
+                        return null;
+                    }
+                })
+                .orElse(defaultValue);
     }
 
     private static boolean hasChild(Element parent, String tagName) {
-        return getFirstChild(parent, tagName) != null;
+        return getFirstChild(parent, tagName).isPresent();
     }
 
     private static double parseDoubleAttr(Element elem, String attrName, double defaultValue) {
@@ -640,9 +636,9 @@ public class XmileImporter implements ModelImporter {
         return expr != null && NUMERIC_PATTERN.matcher(expr.strip()).matches();
     }
 
-    static double[] parseCommaSeparated(String text) {
+    static Optional<double[]> parseCommaSeparated(String text) {
         if (text == null || text.isBlank()) {
-            return null;
+            return Optional.empty();
         }
         String[] parts = text.split("[,;\\s]+");
         List<Double> values = new ArrayList<>();
@@ -657,9 +653,9 @@ public class XmileImporter implements ModelImporter {
             }
         }
         if (values.isEmpty()) {
-            return null;
+            return Optional.empty();
         }
-        return values.stream().mapToDouble(Double::doubleValue).toArray();
+        return Optional.of(values.stream().mapToDouble(Double::doubleValue).toArray());
     }
 
     static double[] linspace(double min, double max, int count) {

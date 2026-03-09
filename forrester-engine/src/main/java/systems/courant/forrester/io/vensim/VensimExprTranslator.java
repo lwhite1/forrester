@@ -3,6 +3,7 @@ package systems.courant.forrester.io.vensim;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -271,11 +272,12 @@ public final class VensimExprTranslator {
         String lookupData = argsContent.substring(splitComma + 1).strip();
 
         // Parse lookup data points
-        double[][] points = parseLookupPoints(lookupData);
-        if (points == null || points[0].length < 2) {
+        Optional<double[][]> pointsOpt = parseLookupPoints(lookupData);
+        if (pointsOpt.isEmpty() || pointsOpt.get()[0].length < 2) {
             warnings.add("Could not parse lookup data points in WITH LOOKUP");
             return expr;
         }
+        double[][] points = pointsOpt.get();
 
         String lookupName = normalizeName(varName) + "_lookup";
         lookups.add(new ExtractedLookup(lookupName, points[0], points[1]));
@@ -487,7 +489,7 @@ public final class VensimExprTranslator {
         return args;
     }
 
-    static double[][] parseLookupPoints(String data) {
+    static Optional<double[][]> parseLookupPoints(String data) {
         // Lookup data format: [(xmin,ymin)-(xmax,ymax)],(x1,y1),(x2,y2),...
         // or ([(xmin,ymin)-(xmax,ymax)],(x1,y1),(x2,y2),...)  (WITH LOOKUP wrapping)
         // or just (x1,y1),(x2,y2),...
@@ -527,7 +529,7 @@ public final class VensimExprTranslator {
         }
 
         if (points.size() < 2) {
-            return null;
+            return Optional.empty();
         }
 
         double[] xValues = new double[points.size()];
@@ -536,7 +538,7 @@ public final class VensimExprTranslator {
             xValues[i] = points.get(i)[0];
             yValues[i] = points.get(i)[1];
         }
-        return new double[][]{xValues, yValues};
+        return Optional.of(new double[][]{xValues, yValues});
     }
 
     /**

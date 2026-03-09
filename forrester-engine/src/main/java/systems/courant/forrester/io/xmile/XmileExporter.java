@@ -31,6 +31,7 @@ import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.StringJoiner;
 
@@ -327,19 +328,18 @@ public final class XmileExporter {
         elem.setAttribute(XmileConstants.ATTR_NAME, aux.name());
 
         // Check if this aux references a lookup — if so, embed the gf
-        String lookupName = extractLookupReference(aux.equation());
-        if (lookupName != null) {
-            LookupTableDef lookup = findLookup(def, lookupName);
-            if (lookup != null) {
+        Optional<String> lookupNameOpt = extractLookupReference(aux.equation());
+        if (lookupNameOpt.isPresent()) {
+            Optional<LookupTableDef> lookupOpt = findLookup(def, lookupNameOpt.get());
+            if (lookupOpt.isPresent()) {
                 // Extract the input expression from LOOKUP(name, input)
-                String inputExpr = extractLookupInput(aux.equation());
-                if (inputExpr != null) {
+                extractLookupInput(aux.equation()).ifPresent(inputExpr -> {
                     Element eqn = doc.createElementNS(
                             XmileConstants.NAMESPACE_URI, XmileConstants.EQN);
                     eqn.setTextContent(XmileExprTranslator.toXmile(inputExpr));
                     elem.appendChild(eqn);
-                }
-                writeGf(doc, elem, lookup);
+                });
+                writeGf(doc, elem, lookupOpt.get());
                 variablesElem.appendChild(elem);
                 return;
             }
@@ -439,10 +439,7 @@ public final class XmileExporter {
     private static Set<String> collectEmbeddedLookupNames(ModelDefinition def) {
         Set<String> names = new HashSet<>();
         for (AuxDef aux : def.auxiliaries()) {
-            String lookupName = extractLookupReference(aux.equation());
-            if (lookupName != null) {
-                names.add(lookupName);
-            }
+            extractLookupReference(aux.equation()).ifPresent(names::add);
         }
         return names;
     }
@@ -450,43 +447,43 @@ public final class XmileExporter {
     /**
      * Extracts the lookup table name from a LOOKUP(name, input) expression.
      */
-    static String extractLookupReference(String equation) {
+    static Optional<String> extractLookupReference(String equation) {
         if (equation == null) {
-            return null;
+            return Optional.empty();
         }
         String trimmed = equation.strip();
         if (!trimmed.toUpperCase().startsWith("LOOKUP(")) {
-            return null;
+            return Optional.empty();
         }
         int openParen = trimmed.indexOf('(');
         int comma = findTopLevelComma(trimmed, openParen + 1);
         if (comma < 0) {
-            return null;
+            return Optional.empty();
         }
-        return trimmed.substring(openParen + 1, comma).strip();
+        return Optional.of(trimmed.substring(openParen + 1, comma).strip());
     }
 
     /**
      * Extracts the input expression from a LOOKUP(name, input) expression.
      */
-    static String extractLookupInput(String equation) {
+    static Optional<String> extractLookupInput(String equation) {
         if (equation == null) {
-            return null;
+            return Optional.empty();
         }
         String trimmed = equation.strip();
         if (!trimmed.toUpperCase().startsWith("LOOKUP(")) {
-            return null;
+            return Optional.empty();
         }
         int openParen = trimmed.indexOf('(');
         int comma = findTopLevelComma(trimmed, openParen + 1);
         if (comma < 0) {
-            return null;
+            return Optional.empty();
         }
         int closeParen = trimmed.lastIndexOf(')');
         if (closeParen <= comma) {
-            return null;
+            return Optional.empty();
         }
-        return trimmed.substring(comma + 1, closeParen).strip();
+        return Optional.of(trimmed.substring(comma + 1, closeParen).strip());
     }
 
     private static int findTopLevelComma(String content, int startPos) {
@@ -507,13 +504,13 @@ public final class XmileExporter {
         return -1;
     }
 
-    private static LookupTableDef findLookup(ModelDefinition def, String name) {
+    private static Optional<LookupTableDef> findLookup(ModelDefinition def, String name) {
         for (LookupTableDef lt : def.lookupTables()) {
             if (lt.name().equals(name)) {
-                return lt;
+                return Optional.of(lt);
             }
         }
-        return null;
+        return Optional.empty();
     }
 
     private static String joinDoubles(double[] values) {

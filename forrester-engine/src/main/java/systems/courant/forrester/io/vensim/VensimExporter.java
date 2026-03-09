@@ -23,6 +23,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.StringJoiner;
 import java.util.regex.Matcher;
@@ -201,14 +202,14 @@ public final class VensimExporter {
         String vensimName = denormalizeName(aux.name());
 
         // Check if this aux references a lookup — convert to WITH LOOKUP
-        String lookupName = extractLookupReference(aux.equation());
-        if (lookupName != null) {
-            LookupTableDef lookup = findLookup(def, lookupName);
-            if (lookup != null) {
-                String inputExpr = extractLookupInput(aux.equation());
-                if (inputExpr != null) {
-                    String vensimInput = toVensimExpr(inputExpr);
-                    String lookupData = formatLookupData(lookup);
+        Optional<String> lookupNameOpt = extractLookupReference(aux.equation());
+        if (lookupNameOpt.isPresent()) {
+            Optional<LookupTableDef> lookupOpt = findLookup(def, lookupNameOpt.get());
+            if (lookupOpt.isPresent()) {
+                Optional<String> inputExprOpt = extractLookupInput(aux.equation());
+                if (inputExprOpt.isPresent()) {
+                    String vensimInput = toVensimExpr(inputExprOpt.get());
+                    String lookupData = formatLookupData(lookupOpt.get());
                     String equation = "WITH LOOKUP (\n\t" + vensimInput
                             + ",\n\t\t(" + lookupData + "))";
                     String units = aux.unit() != null ? aux.unit() : "";
@@ -534,10 +535,7 @@ public final class VensimExporter {
     private static Set<String> collectEmbeddedLookupNames(ModelDefinition def) {
         Set<String> names = new HashSet<>();
         for (AuxDef aux : def.auxiliaries()) {
-            String lookupName = extractLookupReference(aux.equation());
-            if (lookupName != null) {
-                names.add(lookupName);
-            }
+            extractLookupReference(aux.equation()).ifPresent(names::add);
         }
         return names;
     }
@@ -545,44 +543,44 @@ public final class VensimExporter {
     /**
      * Extracts the lookup table name from a LOOKUP(name, input) expression.
      */
-    static String extractLookupReference(String equation) {
+    static Optional<String> extractLookupReference(String equation) {
         if (equation == null) {
-            return null;
+            return Optional.empty();
         }
         Matcher m = LOOKUP_REF_PATTERN.matcher(equation.strip());
         if (!m.find()) {
-            return null;
+            return Optional.empty();
         }
         int openParen = equation.strip().indexOf('(');
         int comma = findTopLevelComma(equation.strip(), openParen + 1);
         if (comma < 0) {
-            return null;
+            return Optional.empty();
         }
-        return equation.strip().substring(openParen + 1, comma).strip();
+        return Optional.of(equation.strip().substring(openParen + 1, comma).strip());
     }
 
     /**
      * Extracts the input expression from a LOOKUP(name, input) expression.
      */
-    static String extractLookupInput(String equation) {
+    static Optional<String> extractLookupInput(String equation) {
         if (equation == null) {
-            return null;
+            return Optional.empty();
         }
         String trimmed = equation.strip();
         Matcher m = LOOKUP_REF_PATTERN.matcher(trimmed);
         if (!m.find()) {
-            return null;
+            return Optional.empty();
         }
         int openParen = trimmed.indexOf('(');
         int comma = findTopLevelComma(trimmed, openParen + 1);
         if (comma < 0) {
-            return null;
+            return Optional.empty();
         }
         int closeParen = trimmed.lastIndexOf(')');
         if (closeParen <= comma) {
-            return null;
+            return Optional.empty();
         }
-        return trimmed.substring(comma + 1, closeParen).strip();
+        return Optional.of(trimmed.substring(comma + 1, closeParen).strip());
     }
 
     private static String formatLookupData(LookupTableDef lookup) {
@@ -607,13 +605,13 @@ public final class VensimExporter {
         return range + "," + pairs;
     }
 
-    private static LookupTableDef findLookup(ModelDefinition def, String name) {
+    private static Optional<LookupTableDef> findLookup(ModelDefinition def, String name) {
         for (LookupTableDef lt : def.lookupTables()) {
             if (lt.name().equals(name)) {
-                return lt;
+                return Optional.of(lt);
             }
         }
-        return null;
+        return Optional.empty();
     }
 
     private static int findTopLevelComma(String content, int startPos) {

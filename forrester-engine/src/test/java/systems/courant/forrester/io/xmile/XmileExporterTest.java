@@ -268,20 +268,20 @@ class XmileExporterTest {
 
         @Test
         void shouldExtractLookupReference() {
-            String ref = XmileExporter.extractLookupReference("LOOKUP(my_table, x + 1)");
-            assertThat(ref).isEqualTo("my_table");
+            assertThat(XmileExporter.extractLookupReference("LOOKUP(my_table, x + 1)"))
+                    .hasValue("my_table");
         }
 
         @Test
         void shouldExtractLookupInput() {
-            String input = XmileExporter.extractLookupInput("LOOKUP(my_table, x + 1)");
-            assertThat(input).isEqualTo("x + 1");
+            assertThat(XmileExporter.extractLookupInput("LOOKUP(my_table, x + 1)"))
+                    .hasValue("x + 1");
         }
 
         @Test
-        void shouldReturnNullForNonLookup() {
-            assertThat(XmileExporter.extractLookupReference("a + b")).isNull();
-            assertThat(XmileExporter.extractLookupInput("a + b")).isNull();
+        void shouldReturnEmptyForNonLookup() {
+            assertThat(XmileExporter.extractLookupReference("a + b")).isEmpty();
+            assertThat(XmileExporter.extractLookupInput("a + b")).isEmpty();
         }
     }
 }
