@@ -11,6 +11,7 @@ import org.w3c.dom.NodeList;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 /**
@@ -131,8 +132,8 @@ public final class XmileViewParser {
             if (!(nodes.item(i) instanceof Element elem)) {
                 continue;
             }
-            String from = getChildText(elem, XmileConstants.FROM);
-            String to = getChildText(elem, XmileConstants.TO);
+            String from = getChildText(elem, XmileConstants.FROM).orElse(null);
+            String to = getChildText(elem, XmileConstants.TO).orElse(null);
             if (from == null || from.isBlank() || to == null || to.isBlank()) {
                 continue;
             }
@@ -215,15 +216,15 @@ public final class XmileViewParser {
         return ElementType.AUX;
     }
 
-    private static String getChildText(Element parent, String tagName) {
+    private static Optional<String> getChildText(Element parent, String tagName) {
         NodeList nodes = parent.getElementsByTagNameNS(
                 XmileConstants.NAMESPACE_URI, tagName);
         if (nodes.getLength() == 0) {
             nodes = parent.getElementsByTagName(tagName);
         }
         if (nodes.getLength() > 0 && nodes.item(0) instanceof Element child) {
-            return child.getTextContent().strip();
+            return Optional.of(child.getTextContent().strip());
         }
-        return null;
+        return Optional.empty();
     }
 }

@@ -403,11 +403,12 @@ public class VensimImporter implements ModelImporter {
             return;
         }
 
-        double[][] points = VensimExprTranslator.parseLookupPoints(expression);
-        if (points == null || points[0].length < 2) {
+        java.util.Optional<double[][]> pointsOpt = VensimExprTranslator.parseLookupPoints(expression);
+        if (pointsOpt.isEmpty() || pointsOpt.get()[0].length < 2) {
             warnings.add("Could not parse lookup data for '" + normalized + "'");
             return;
         }
+        double[][] points = pointsOpt.get();
 
         points = deduplicateLookupPoints(points, normalized, warnings);
         builder.lookupTable(new LookupTableDef(normalized, comment,
