@@ -1,6 +1,5 @@
 package systems.courant.forrester.app.canvas;
 
-import systems.courant.forrester.model.def.CausalLinkDef;
 import systems.courant.forrester.model.def.ConnectorRoute;
 import systems.courant.forrester.model.def.ElementType;
 import systems.courant.forrester.model.def.ModelDefinition;
@@ -14,10 +13,6 @@ import systems.courant.forrester.model.graph.AutoLayout;
 import systems.courant.forrester.model.graph.FeedbackAnalysis;
 
 import javafx.scene.canvas.Canvas;
-import javafx.scene.control.ContextMenu;
-import javafx.scene.control.Menu;
-import javafx.scene.control.MenuItem;
-import javafx.scene.control.SeparatorMenuItem;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Pane;
 
@@ -70,6 +65,7 @@ public class ModelCanvas extends Canvas {
     private final SelectionController selectionController;
     private final InputDispatcher inputDispatcher;
     private final TooltipController tooltipController = new TooltipController();
+    private final CanvasContextMenuController contextMenuController;
 
     // Undo/redo
     private UndoManager undoManager;
@@ -83,13 +79,13 @@ public class ModelCanvas extends Canvas {
     private boolean selectedIsCausalLink;
 
     // Feedback loop highlighting
-    private boolean loopHighlightActive;
-    private FeedbackAnalysis loopAnalysis;
-    /** Active loop index for step-through mode. -1 = show all loops. */
-    private int activeLoopIndex = -1;
+    private final LoopHighlightController loopController = new LoopHighlightController();
 
     // Validation issue indicators (element name → highest severity)
     private Map<String, Severity> elementIssues = Map.of();
+
+    // Sparkline data from last simulation run
+    private CanvasRenderer.SparklineData sparklineData;
 
     // Inline edit callbacks
     private final InlineEditController.Callbacks inlineCallbacks =
@@ -128,9 +124,49 @@ public class ModelCanvas extends Canvas {
                 }
             };
 
+    private final CanvasContextMenuController.Callbacks contextMenuCallbacks =
+            new CanvasContextMenuController.Callbacks() {
+                @Override public void startInlineEdit(String name) { ModelCanvas.this.startInlineEdit(name); }
+                @Override public void deleteSelectedElements() { ModelCanvas.this.deleteSelectedElements(); }
+                @Override public void cutSelection() { ModelCanvas.this.cutSelection(); }
+                @Override public void copySelection() { ModelCanvas.this.copySelection(); }
+                @Override public void pasteClipboard() { ModelCanvas.this.pasteClipboard(); }
+                @Override public void selectAll() { ModelCanvas.this.selectAll(); }
+                @Override public void switchTool(CanvasToolBar.Tool tool) { ModelCanvas.this.switchTool(tool); }
+                @Override public void saveUndoState(String label) { ModelCanvas.this.saveUndoState(label); }
+                @Override public void regenerateConnectors() { ModelCanvas.this.regenerateConnectors(); }
+                @Override public void redraw() { ModelCanvas.this.redraw(); }
+                @Override public void fireStatusChanged() { ModelCanvas.this.fireStatusChanged(); }
+                @Override public void clearSelectedConnection() { ModelCanvas.this.clearSelectedConnection(); }
+                @Override public void updateCursor() { inputDispatcher.updateCursor(ModelCanvas.this); }
+                @Override public String createElementAt(double wx, double wy, CanvasToolBar.Tool tool) {
+                    String name = selectionController.createElementAt(
+                            wx, wy, tool, editor, canvasState,
+                            () -> ModelCanvas.this.saveUndoState("Add element"));
+                    if (name != null) {
+                        ModelCanvas.this.regenerateConnectors();
+                        ModelCanvas.this.redraw();
+                    }
+                    return name;
+                }
+                @Override public boolean deleteConnection(ConnectionId conn, boolean isCausal) {
+                    return selectionController.deleteConnection(conn, isCausal, editor,
+                            () -> ModelCanvas.this.saveUndoState("Delete connection"));
+                }
+                @Override public boolean canPaste() { return selectionController.canPaste(); }
+                @Override public void classifyCldVariable(String name, ElementType type) {
+                    ModelCanvas.this.classifyCldVariable(name, type);
+                }
+                @Override public void drillInto(String moduleName) { ModelCanvas.this.drillInto(moduleName); }
+                @Override public void openBindingsDialog(String moduleName) {
+                    ModelCanvas.this.openBindingsDialog(moduleName);
+                }
+            };
+
     public ModelCanvas(Clipboard clipboard) {
         this.copyPaste = new CopyPasteController(clipboard);
         this.selectionController = new SelectionController(copyPaste);
+        this.contextMenuController = new CanvasContextMenuController(navController);
         this.inputDispatcher = new InputDispatcher(
                 dragController, marqueeController, resizeController,
                 reattachController, flowCreation, causalLinkCreation,
@@ -209,99 +245,103 @@ public class ModelCanvas extends Canvas {
         }
     }
 
-    // --- Loop analysis ---
+    // --- Loop analysis (delegated to LoopHighlightController) ---
 
     public void setLoopHighlightActive(boolean active) {
-        this.loopHighlightActive = active;
-        this.activeLoopIndex = -1;
-        if (active && editor != null) {
-            recomputeLoopAnalysis();
-        } else {
-            this.loopAnalysis = null;
-        }
+        loopController.setActive(active,
+                () -> editor != null ? editor.toModelDefinition(canvasState.toViewDef()) : null);
         redraw();
     }
 
     public boolean isLoopHighlightActive() {
-        return loopHighlightActive;
+        return loopController.isActive();
     }
 
     public FeedbackAnalysis getLoopAnalysis() {
-        return loopAnalysis;
+        return loopController.getAnalysis();
     }
 
-    /**
-     * Returns the active loop index for step-through mode.
-     * -1 means all loops are shown.
-     */
     public int getActiveLoopIndex() {
-        return activeLoopIndex;
+        return loopController.getActiveIndex();
     }
 
-    /**
-     * Sets the active loop index. -1 = show all loops.
-     */
     public void setActiveLoopIndex(int index) {
-        if (loopAnalysis == null) {
-            return;
+        if (loopController.setActiveIndex(index)) {
+            redraw();
+            fireStatusChanged();
         }
-        int count = loopAnalysis.loopCount();
-        if (index < -1 || index >= count) {
-            index = -1;
-        }
-        this.activeLoopIndex = index;
-        redraw();
-        fireStatusChanged();
     }
 
-    /**
-     * Steps to the next loop, wrapping around. If showing all, goes to first loop.
-     */
     public void stepLoopForward() {
-        if (loopAnalysis == null || loopAnalysis.loopCount() == 0) {
-            return;
+        if (loopController.stepForward()) {
+            redraw();
+            fireStatusChanged();
         }
-        int count = loopAnalysis.loopCount();
-        if (activeLoopIndex < 0) {
-            setActiveLoopIndex(0);
-        } else {
-            setActiveLoopIndex((activeLoopIndex + 1) % count);
+    }
+
+    public void stepLoopBack() {
+        if (loopController.stepBack()) {
+            redraw();
+            fireStatusChanged();
+        }
+    }
+
+    // --- Sparklines ---
+
+    /**
+     * Sets the sparkline data extracted from a simulation result.
+     * Called by the simulation controller after a successful run.
+     */
+    public void setSparklineData(CanvasRenderer.SparklineData data) {
+        this.sparklineData = data;
+        redraw();
+    }
+
+    /**
+     * Marks sparkline data as stale (model changed since last simulation).
+     */
+    public void markSparklinesStale() {
+        if (sparklineData != null && !sparklineData.stale()) {
+            sparklineData = new CanvasRenderer.SparklineData(
+                    sparklineData.stockSeries(), true);
+            redraw();
         }
     }
 
     /**
-     * Steps to the previous loop, wrapping around. If showing all, goes to last loop.
+     * Clears sparkline data (e.g. when loading a new model).
      */
-    public void stepLoopBack() {
-        if (loopAnalysis == null || loopAnalysis.loopCount() == 0) {
-            return;
-        }
-        int count = loopAnalysis.loopCount();
-        if (activeLoopIndex < 0) {
-            setActiveLoopIndex(count - 1);
-        } else {
-            setActiveLoopIndex((activeLoopIndex - 1 + count) % count);
-        }
+    public void clearSparklines() {
+        sparklineData = null;
     }
 
-    private void recomputeLoopAnalysis() {
-        if (editor == null) {
-            loopAnalysis = null;
-            activeLoopIndex = -1;
-            return;
+    /**
+     * Extracts stock time series from a simulation result into a sparkline-ready map.
+     */
+    public static Map<String, double[]> extractStockSeries(
+            SimulationRunner.SimulationResult result) {
+        List<String> columns = result.columnNames();
+        List<double[]> rows = result.rows();
+        Map<String, double[]> series = new java.util.LinkedHashMap<>();
+
+        for (int col = 1; col < columns.size(); col++) {
+            String name = columns.get(col);
+            // Only extract stocks — they come first after "Step" in the column order.
+            // We check by seeing if the unit map contains the name (all stocks are in units).
+            // But simpler: just extract all columns; the renderer only draws for elements
+            // that exist in canvasState with STOCK type (checked externally).
+            double[] values = new double[rows.size()];
+            for (int row = 0; row < rows.size(); row++) {
+                values[row] = rows.get(row)[col];
+            }
+            series.put(name, values);
         }
-        loopAnalysis = FeedbackAnalysis.analyze(
-                editor.toModelDefinition(canvasState.toViewDef()));
-        // Clamp index if loops were removed
-        if (activeLoopIndex >= loopAnalysis.loopCount()) {
-            activeLoopIndex = -1;
-        }
+        return series;
     }
 
     private void invalidateLoopAnalysis() {
-        if (loopHighlightActive && editor != null) {
-            recomputeLoopAnalysis();
-        }
+        loopController.invalidate(
+                editor != null ? editor.toModelDefinition(canvasState.toViewDef()) : null);
     }
 
     // --- Validation indicators ---
@@ -653,13 +693,7 @@ public class ModelCanvas extends Canvas {
     }
 
     public FeedbackAnalysis getActiveLoopAnalysis() {
-        if (!loopHighlightActive || loopAnalysis == null) {
-            return null;
-        }
-        if (activeLoopIndex >= 0) {
-            return loopAnalysis.filterToLoop(activeLoopIndex);
-        }
-        return loopAnalysis;
+        return loopController.getActiveAnalysis();
     }
 
     public double getZoomScale() {
@@ -723,6 +757,7 @@ public class ModelCanvas extends Canvas {
                         marqueeController.toRenderState(),
                         getActiveLoopAnalysis(),
                         elementIssues,
+                        sparklineData,
                         inputDispatcher.getHoveredElement(),
                         inputDispatcher.getHoveredConnection(),
                         selectedConnection));
@@ -843,12 +878,35 @@ public class ModelCanvas extends Canvas {
         navController.clear();
     }
 
-    // --- Context menus ---
+    // --- Context menus (delegated to CanvasContextMenuController) ---
 
     void showElementContextMenu(String elementName, double screenX, double screenY) {
-        navController.showContextMenu(this, elementName, canvasState, screenX, screenY,
-                this::drillInto, this::openBindingsDialog, this::startInlineEdit,
-                this::classifyCldVariable);
+        contextMenuController.showElementContextMenu(
+                this, elementName, canvasState, screenX, screenY, contextMenuCallbacks);
+    }
+
+    void showGeneralElementContextMenu(String elementName,
+                                       double screenX, double screenY) {
+        contextMenuController.showGeneralElementContextMenu(
+                this, elementName, canvasState, screenX, screenY, contextMenuCallbacks);
+    }
+
+    void showCausalLinkContextMenu(ConnectionId link,
+                                   double screenX, double screenY) {
+        contextMenuController.showCausalLinkContextMenu(
+                this, link, editor, screenX, screenY, contextMenuCallbacks);
+    }
+
+    void showInfoLinkContextMenu(ConnectionId link,
+                                 double screenX, double screenY) {
+        contextMenuController.showInfoLinkContextMenu(
+                this, link, screenX, screenY, contextMenuCallbacks);
+    }
+
+    void showCanvasContextMenu(double worldX, double worldY,
+                               double screenX, double screenY) {
+        contextMenuController.showCanvasContextMenu(
+                this, worldX, worldY, screenX, screenY, contextMenuCallbacks);
     }
 
     private void classifyCldVariable(String name, ElementType targetType) {
@@ -857,165 +915,6 @@ public class ModelCanvas extends Canvas {
             regenerateAndRedraw();
             fireStatusChanged();
         }
-    }
-
-    /**
-     * Shows a context menu for a general element (stock, flow, auxiliary, constant, lookup).
-     * Module and CLD variable elements are handled by {@link #showElementContextMenu}.
-     */
-    void showGeneralElementContextMenu(String elementName,
-                                       double screenX, double screenY) {
-        ContextMenu menu = new ContextMenu();
-
-        MenuItem editItem = new MenuItem("Edit");
-        editItem.setOnAction(e -> startInlineEdit(elementName));
-
-        MenuItem deleteItem = new MenuItem("Delete");
-        deleteItem.setOnAction(e -> {
-            canvasState.clearSelection();
-            canvasState.select(elementName);
-            deleteSelectedElements();
-            fireStatusChanged();
-        });
-
-        MenuItem cutItem = new MenuItem("Cut");
-        cutItem.setOnAction(e -> {
-            canvasState.clearSelection();
-            canvasState.select(elementName);
-            cutSelection();
-            fireStatusChanged();
-        });
-
-        MenuItem copyItem = new MenuItem("Copy");
-        copyItem.setOnAction(e -> {
-            canvasState.clearSelection();
-            canvasState.select(elementName);
-            copySelection();
-        });
-
-        menu.getItems().addAll(editItem, new SeparatorMenuItem(),
-                cutItem, copyItem, new SeparatorMenuItem(), deleteItem);
-        menu.show(this, screenX, screenY);
-    }
-
-    void showCausalLinkContextMenu(ConnectionId link,
-                                   double screenX, double screenY) {
-        ContextMenu menu = new ContextMenu();
-
-        Menu polarityMenu = new Menu("Set Polarity");
-        for (CausalLinkDef.Polarity p : CausalLinkDef.Polarity.values()) {
-            MenuItem item = new MenuItem(p.symbol() + " (" + p.name().toLowerCase() + ")");
-            item.setOnAction(e -> {
-                saveUndoState("Set polarity");
-                editor.setCausalLinkPolarity(link.from(), link.to(), p);
-                invalidateAnalysis();
-                redraw();
-            });
-            polarityMenu.getItems().add(item);
-        }
-        menu.getItems().add(polarityMenu);
-
-        MenuItem deleteItem = new MenuItem("Delete");
-        deleteItem.setOnAction(e -> {
-            saveUndoState("Delete causal link");
-            editor.removeCausalLink(link.from(), link.to());
-            selectedConnection = null;
-            selectedIsCausalLink = false;
-            invalidateAnalysis();
-            redraw();
-        });
-        menu.getItems().add(deleteItem);
-
-        menu.show(this, screenX, screenY);
-    }
-
-    /**
-     * Shows a context menu for an info link (dependency connection between elements).
-     */
-    void showInfoLinkContextMenu(ConnectionId link,
-                                 double screenX, double screenY) {
-        ContextMenu menu = new ContextMenu();
-
-        MenuItem deleteItem = new MenuItem("Delete");
-        deleteItem.setOnAction(e -> {
-            if (selectionController.deleteConnection(
-                    link, false, editor,
-                    () -> saveUndoState("Delete connection"))) {
-                connectors = editor.generateConnectors();
-                clearSelectedConnection();
-                redraw();
-                inputDispatcher.updateCursor(this);
-            }
-        });
-        menu.getItems().add(deleteItem);
-
-        menu.show(this, screenX, screenY);
-    }
-
-    /**
-     * Shows a context menu on empty canvas space.
-     */
-    void showCanvasContextMenu(double worldX, double worldY,
-                               double screenX, double screenY) {
-        ContextMenu menu = new ContextMenu();
-
-        MenuItem pasteItem = new MenuItem("Paste");
-        pasteItem.setOnAction(e -> pasteClipboard());
-        pasteItem.setDisable(!selectionController.canPaste());
-
-        menu.getItems().add(pasteItem);
-        menu.getItems().add(new SeparatorMenuItem());
-
-        MenuItem addStock = new MenuItem("Add Stock");
-        addStock.setOnAction(e -> {
-            String name = selectionController.createElementAt(
-                    worldX, worldY, CanvasToolBar.Tool.PLACE_STOCK, editor, canvasState,
-                    () -> saveUndoState("Add element"));
-            if (name != null) {
-                regenerateConnectors();
-                redraw();
-                fireStatusChanged();
-            }
-        });
-
-        MenuItem addFlow = new MenuItem("Add Flow");
-        addFlow.setOnAction(e -> switchTool(CanvasToolBar.Tool.PLACE_FLOW));
-
-        MenuItem addAux = new MenuItem("Add Auxiliary");
-        addAux.setOnAction(e -> {
-            String name = selectionController.createElementAt(
-                    worldX, worldY, CanvasToolBar.Tool.PLACE_AUX, editor, canvasState,
-                    () -> saveUndoState("Add element"));
-            if (name != null) {
-                regenerateConnectors();
-                redraw();
-                fireStatusChanged();
-            }
-        });
-
-        MenuItem addConstant = new MenuItem("Add Constant");
-        addConstant.setOnAction(e -> {
-            String name = selectionController.createElementAt(
-                    worldX, worldY, CanvasToolBar.Tool.PLACE_CONSTANT, editor, canvasState,
-                    () -> saveUndoState("Add element"));
-            if (name != null) {
-                regenerateConnectors();
-                redraw();
-                fireStatusChanged();
-            }
-        });
-
-        menu.getItems().addAll(addStock, addFlow, addAux, addConstant);
-        menu.getItems().add(new SeparatorMenuItem());
-
-        MenuItem selectAllItem = new MenuItem("Select All");
-        selectAllItem.setOnAction(e -> {
-            selectAll();
-            fireStatusChanged();
-        });
-        menu.getItems().add(selectAllItem);
-
-        menu.show(this, screenX, screenY);
     }
 
     private void openBindingsDialog(String moduleName) {

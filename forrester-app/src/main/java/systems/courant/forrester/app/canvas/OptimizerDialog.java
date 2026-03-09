@@ -128,7 +128,19 @@ public class OptimizerDialog extends Dialog<OptimizerDialog.Config> {
         Label paramsLabel = new Label("Parameters");
         paramsLabel.setStyle(Styles.SECTION_HEADER);
 
-        VBox content = new VBox(10, paramsLabel, paramScroll, settingsGrid);
+        Label validationLabel = new Label();
+        validationLabel.setStyle("-fx-text-fill: #cc3333; -fx-font-size: 11;");
+        validationLabel.setWrapText(true);
+        validationLabel.setMaxWidth(Double.MAX_VALUE);
+        validationLabel.setId("optimizerValidationLabel");
+        validationLabel.textProperty().bind(
+                Bindings.createStringBinding(this::getValidationMessage,
+                        maxEvalsField.textProperty(), targetValueField.textProperty(),
+                        objectiveCombo.valueProperty(), targetVarCombo.valueProperty(),
+                        paramRows, fieldChangeCounter)
+        );
+
+        VBox content = new VBox(10, paramsLabel, paramScroll, settingsGrid, validationLabel);
         content.setPadding(new Insets(10));
         getDialogPane().setContent(content);
         getDialogPane().setPrefWidth(550);
@@ -179,25 +191,35 @@ public class OptimizerDialog extends Dialog<OptimizerDialog.Config> {
     }
 
     private boolean isInvalid() {
+        return !getValidationMessage().isEmpty();
+    }
+
+    private String getValidationMessage() {
         if (targetVarCombo.getValue() == null) {
-            return true;
+            return "Select a target variable.";
         }
         if (paramRows.stream().noneMatch(ParamRow::isValid)) {
-            return true;
+            return "At least one parameter row must have valid bounds.";
         }
         try {
             int maxEvals = Integer.parseInt(maxEvalsField.getText().trim());
             if (maxEvals < 1) {
-                return true;
+                return "Max evaluations must be at least 1.";
             }
-            if (objectiveCombo.getValue() == ObjectiveType.TARGET) {
-                double val = Double.parseDouble(targetValueField.getText().trim());
-                return !Double.isFinite(val);
-            }
-            return false;
         } catch (NumberFormatException e) {
-            return true;
+            return "Max evaluations must be a valid integer.";
         }
+        if (objectiveCombo.getValue() == ObjectiveType.TARGET) {
+            try {
+                double val = Double.parseDouble(targetValueField.getText().trim());
+                if (!Double.isFinite(val)) {
+                    return "Target value must be a finite number.";
+                }
+            } catch (NumberFormatException e) {
+                return "Target value must be a valid number.";
+            }
+        }
+        return "";
     }
 
     private class ParamRow {

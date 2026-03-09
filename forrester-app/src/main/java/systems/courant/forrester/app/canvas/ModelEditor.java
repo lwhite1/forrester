@@ -33,6 +33,10 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.UnaryOperator;
 
+import static systems.courant.forrester.app.canvas.ElementNameValidator.parseIdSuffix;
+import static systems.courant.forrester.app.canvas.ElementNameValidator.resolveUniqueName;
+import static systems.courant.forrester.app.canvas.EquationReferenceManager.replaceToken;
+
 /**
  * Mutable model editing layer that sits between the UI and the engine's immutable
  * {@link ModelDefinition}. Supports adding and removing elements while preserving
@@ -60,6 +64,8 @@ public class ModelEditor {
     private final List<CausalLinkDef> causalLinks = new ArrayList<>();
     private final Set<String> nameIndex = new HashSet<>();
     private final List<ModelEditListener> listeners = new CopyOnWriteArrayList<>();
+    private final EquationReferenceManager equationRefManager =
+            new EquationReferenceManager(flows, auxiliaries);
     private SimulationSettings simulationSettings;
     private int nextStockId = 1;
     private int nextFlowId = 1;
@@ -252,7 +258,7 @@ public class ModelEditor {
      */
     public String addStockFrom(StockDef template) {
         checkFxThread();
-        String name = resolveUniqueName(template.name(), "Stock ", nextStockId);
+        String name = resolveUniqueName(template.name(), "Stock ", nextStockId, nameIndex);
         if (name.startsWith("Stock ")) {
             nextStockId = parseIdSuffix(name, "Stock ") + 1;
         }
@@ -269,7 +275,7 @@ public class ModelEditor {
      */
     public String addFlowFrom(FlowDef template, String source, String sink) {
         checkFxThread();
-        String name = resolveUniqueName(template.name(), "Flow ", nextFlowId);
+        String name = resolveUniqueName(template.name(), "Flow ", nextFlowId, nameIndex);
         if (name.startsWith("Flow ")) {
             nextFlowId = parseIdSuffix(name, "Flow ") + 1;
         }
@@ -286,7 +292,7 @@ public class ModelEditor {
      */
     public String addAuxFrom(AuxDef template, String equation) {
         checkFxThread();
-        String name = resolveUniqueName(template.name(), "Aux ", nextAuxId);
+        String name = resolveUniqueName(template.name(), "Aux ", nextAuxId, nameIndex);
         if (name.startsWith("Aux ")) {
             nextAuxId = parseIdSuffix(name, "Aux ") + 1;
         }
@@ -301,7 +307,7 @@ public class ModelEditor {
      */
     public String addConstantFrom(ConstantDef template) {
         checkFxThread();
-        String name = resolveUniqueName(template.name(), "Constant ", nextConstantId);
+        String name = resolveUniqueName(template.name(), "Constant ", nextConstantId, nameIndex);
         if (name.startsWith("Constant ")) {
             nextConstantId = parseIdSuffix(name, "Constant ") + 1;
         }
@@ -316,7 +322,7 @@ public class ModelEditor {
      */
     public String addModuleFrom(ModuleInstanceDef template) {
         checkFxThread();
-        String name = resolveUniqueName(template.instanceName(), "Module ", nextModuleId);
+        String name = resolveUniqueName(template.instanceName(), "Module ", nextModuleId, nameIndex);
         if (name.startsWith("Module ")) {
             nextModuleId = parseIdSuffix(name, "Module ") + 1;
         }
@@ -363,7 +369,7 @@ public class ModelEditor {
      */
     public String addLookupFrom(LookupTableDef template) {
         checkFxThread();
-        String name = resolveUniqueName(template.name(), "Lookup ", nextLookupId);
+        String name = resolveUniqueName(template.name(), "Lookup ", nextLookupId, nameIndex);
         if (name.startsWith("Lookup ")) {
             nextLookupId = parseIdSuffix(name, "Lookup ") + 1;
         }
@@ -443,7 +449,7 @@ public class ModelEditor {
 
         // Clean equation references: replace deleted element's token with "0"
         String deletedToken = name.replace(' ', '_');
-        updateEquationReferences(deletedToken, "0");
+        equationRefManager.updateEquationReferences(deletedToken, "0");
 
         fireElementRemoved(name);
     }
@@ -546,7 +552,7 @@ public class ModelEditor {
         // Update equation references (underscore convention)
         String oldToken = oldName.replace(' ', '_');
         String newToken = newName.replace(' ', '_');
-        updateEquationReferences(oldToken, newToken);
+        equationRefManager.updateEquationReferences(oldToken, newToken);
 
         fireElementRenamed(oldName, newName);
         return true;
@@ -820,95 +826,7 @@ public class ModelEditor {
         return Optional.empty();
     }
 
-    /**
-     * Finds the flow or auxiliary with the given name and applies a transform to its equation.
-     * Returns true if the equation was actually changed.
-     */
-    private boolean updateEquationByName(String targetName, UnaryOperator<String> transform) {
-        for (int i = 0; i < flows.size(); i++) {
-            FlowDef f = flows.get(i);
-            if (f.name().equals(targetName)) {
-                String updated = transform.apply(f.equation());
-                if (!updated.equals(f.equation())) {
-                    flows.set(i, new FlowDef(f.name(), f.comment(), updated,
-                            f.timeUnit(), f.source(), f.sink()));
-                    return true;
-                }
-                return false;
-            }
-        }
-        for (int i = 0; i < auxiliaries.size(); i++) {
-            AuxDef a = auxiliaries.get(i);
-            if (a.name().equals(targetName)) {
-                String updated = transform.apply(a.equation());
-                if (!updated.equals(a.equation())) {
-                    auxiliaries.set(i, new AuxDef(a.name(), a.comment(), updated, a.unit()));
-                    return true;
-                }
-                return false;
-            }
-        }
-        return false;
-    }
-
-    private void updateEquationReferences(String oldToken, String newToken) {
-        if (oldToken.equals(newToken)) {
-            return;
-        }
-        for (int i = 0; i < flows.size(); i++) {
-            FlowDef f = flows.get(i);
-            String updated = replaceToken(f.equation(), oldToken, newToken);
-            if (!updated.equals(f.equation())) {
-                flows.set(i, new FlowDef(f.name(), f.comment(), updated,
-                        f.timeUnit(), f.source(), f.sink()));
-            }
-        }
-        for (int i = 0; i < auxiliaries.size(); i++) {
-            AuxDef a = auxiliaries.get(i);
-            String updated = replaceToken(a.equation(), oldToken, newToken);
-            if (!updated.equals(a.equation())) {
-                auxiliaries.set(i, new AuxDef(a.name(), a.comment(), updated, a.unit()));
-            }
-        }
-    }
-
-    /**
-     * Word-boundary-aware token replacement in an equation string.
-     * Tokens in equations use underscores for spaces (e.g. Contact_Rate).
-     */
-    static String replaceToken(String equation, String oldToken, String newToken) {
-        StringBuilder result = new StringBuilder();
-        int len = equation.length();
-        int tokenLen = oldToken.length();
-        int i = 0;
-
-        while (i < len) {
-            int idx = equation.indexOf(oldToken, i);
-            if (idx < 0) {
-                result.append(equation, i, len);
-                break;
-            }
-
-            // Check word boundaries
-            boolean startOk = idx == 0 || !isTokenChar(equation.charAt(idx - 1));
-            boolean endOk = idx + tokenLen >= len || !isTokenChar(equation.charAt(idx + tokenLen));
-
-            if (startOk && endOk) {
-                result.append(equation, i, idx);
-                result.append(newToken);
-                i = idx + tokenLen;
-            } else {
-                result.append(equation, i, idx + 1);
-                i = idx + 1;
-            }
-        }
-
-        return result.toString();
-    }
-
-    static boolean isTokenChar(char c) {
-        return Character.isLetterOrDigit(c) || c == '_';
-    }
+    // Equation reference management delegated to EquationReferenceManager
 
     /**
      * Returns true if any element (stock, flow, aux, constant, or module) has the given name.
@@ -918,65 +836,14 @@ public class ModelEditor {
         return nameIndex.contains(name);
     }
 
-    /**
-     * Returns the original name if it is not already taken; otherwise falls back
-     * to auto-generated names using the given prefix and starting id.
-     */
-    String resolveUniqueName(String originalName, String prefix, int startId) {
-        if (originalName != null && !originalName.isBlank() && !nameIndex.contains(originalName)) {
-            return originalName;
-        }
-        int id = startId;
-        String candidate = prefix + id;
-        while (nameIndex.contains(candidate)) {
-            id++;
-            candidate = prefix + id;
-        }
-        return candidate;
-    }
-
-    /**
-     * Parses the numeric suffix from an auto-generated name (e.g. "Stock 3" → 3).
-     * Returns 0 if the suffix is not a valid integer.
-     */
-    static int parseIdSuffix(String name, String prefix) {
-        try {
-            return Integer.parseInt(name.substring(prefix.length()));
-        } catch (NumberFormatException | IndexOutOfBoundsException e) {
-            return 0;
-        }
-    }
-
-    static final int MAX_NAME_LENGTH = 128;
-
-    private static final Set<String> RESERVED_NAMES = Set.of(
-            "TIME", "DT", "Pi", "PI", "E",
-            "AND", "OR", "NOT",
-            "IF", "THEN", "ELSE");
+    static final int MAX_NAME_LENGTH = ElementNameValidator.MAX_NAME_LENGTH;
 
     /**
      * Returns true if the given name is valid for an element identifier.
-     * A valid name is non-blank, at most {@value MAX_NAME_LENGTH} characters,
-     * contains only letters, digits, spaces, and underscores, and is not a
-     * reserved word.
+     * Delegates to {@link ElementNameValidator#isValidName(String)}.
      */
     public static boolean isValidName(String name) {
-        if (name == null || name.isBlank()) {
-            return false;
-        }
-        if (name.length() > MAX_NAME_LENGTH) {
-            return false;
-        }
-        if (RESERVED_NAMES.contains(name.toUpperCase(java.util.Locale.ROOT))) {
-            return false;
-        }
-        for (int i = 0; i < name.length(); i++) {
-            char c = name.charAt(i);
-            if (!Character.isLetterOrDigit(c) && c != ' ' && c != '_') {
-                return false;
-            }
-        }
-        return true;
+        return ElementNameValidator.isValidName(name);
     }
 
     public SimulationSettings getSimulationSettings() {
@@ -1154,7 +1021,7 @@ public class ModelEditor {
      */
     public String addCldVariableFrom(CldVariableDef template) {
         checkFxThread();
-        String name = resolveUniqueName(template.name(), "Variable ", nextCldVariableId);
+        String name = resolveUniqueName(template.name(), "Variable ", nextCldVariableId, nameIndex);
         if (name.startsWith("Variable ")) {
             nextCldVariableId = parseIdSuffix(name, "Variable ") + 1;
         }
@@ -1318,7 +1185,8 @@ public class ModelEditor {
     public boolean removeConnectionReference(String fromName, String toName) {
         checkFxThread();
         String fromToken = fromName.replace(' ', '_');
-        return updateEquationByName(toName, eq -> replaceToken(eq, fromToken, "0"));
+        return equationRefManager.updateEquationByName(toName,
+                eq -> replaceToken(eq, fromToken, "0"));
     }
 
     /**
@@ -1331,7 +1199,8 @@ public class ModelEditor {
         checkFxThread();
         String oldToken = oldFrom.replace(' ', '_');
         String newToken = newFrom.replace(' ', '_');
-        return updateEquationByName(to, eq -> replaceToken(eq, oldToken, newToken));
+        return equationRefManager.updateEquationByName(to,
+                eq -> replaceToken(eq, oldToken, newToken));
     }
 
     /**
@@ -1348,43 +1217,7 @@ public class ModelEditor {
         removeConnectionReference(from, oldTo);
 
         // Add reference to new target's equation
-        return addConnectionReference(newTo, fromToken);
-    }
-
-    /**
-     * Adds a reference token to the named element's equation.
-     * If the equation is exactly "0", replaces it with the token.
-     * Otherwise appends " * token" to the equation.
-     */
-    private boolean addConnectionReference(String elementName, String token) {
-        for (int i = 0; i < flows.size(); i++) {
-            FlowDef f = flows.get(i);
-            if (f.name().equals(elementName)) {
-                String eq = f.equation();
-                if (eq.contains(token)) {
-                    return true; // Already references this token
-                }
-                String updated = "0".equals(eq.trim()) ? token : eq + " * " + token;
-                flows.set(i, new FlowDef(f.name(), f.comment(), updated,
-                        f.timeUnit(), f.source(), f.sink()));
-                return true;
-            }
-        }
-
-        for (int i = 0; i < auxiliaries.size(); i++) {
-            AuxDef a = auxiliaries.get(i);
-            if (a.name().equals(elementName)) {
-                String eq = a.equation();
-                if (eq.contains(token)) {
-                    return true; // Already references this token
-                }
-                String updated = "0".equals(eq.trim()) ? token : eq + " * " + token;
-                auxiliaries.set(i, new AuxDef(a.name(), a.comment(), updated, a.unit()));
-                return true;
-            }
-        }
-
-        return false; // Target is not a flow or auxiliary
+        return equationRefManager.addConnectionReference(newTo, fromToken);
     }
 
     /**

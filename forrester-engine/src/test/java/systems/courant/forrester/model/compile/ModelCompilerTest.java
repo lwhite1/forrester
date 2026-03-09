@@ -466,6 +466,77 @@ class ModelCompilerTest {
     }
 
     @Nested
+    @DisplayName("Top-level flows registered in Model (issue #235)")
+    class TopLevelFlowRegistration {
+
+        @Test
+        void shouldRegisterTopLevelFlowsInModel() {
+            ModelDefinition def = new ModelDefinitionBuilder()
+                    .name("Flow Registration")
+                    .stock("Tank", 100, "Thing")
+                    .flow("Drain", "Tank * 0.1", "Day", "Tank", null)
+                    .flow("Fill", "5", "Day", null, "Tank")
+                    .defaultSimulation("Day", 1, "Day")
+                    .build();
+
+            CompiledModel compiled = compiler.compile(def);
+            Model model = compiled.getModel();
+
+            assertThat(model.getFlows())
+                    .as("Top-level flows should be registered in model")
+                    .hasSize(2);
+            assertThat(model.getFlows())
+                    .extracting(f -> f.getName())
+                    .containsExactlyInAnyOrder("Drain", "Fill");
+        }
+
+        @Test
+        void shouldClearFlowHistoryOnReSimulate() {
+            ModelDefinition def = new ModelDefinitionBuilder()
+                    .name("History Clear")
+                    .stock("S", 100, "Thing")
+                    .flow("F", "S * 0.1", "Day", "S", null)
+                    .defaultSimulation("Day", 5, "Day")
+                    .build();
+
+            CompiledModel compiled = compiler.compile(def);
+            Simulation sim1 = compiled.createSimulation();
+            sim1.execute();
+
+            // Flow should have recorded history from the first run
+            systems.courant.forrester.model.Flow flow = compiled.getModel().getFlows().stream()
+                    .filter(f -> f.getName().equals("F"))
+                    .findFirst()
+                    .orElseThrow();
+            assertThat(flow.getHistoryAtTimeStep(0)).isGreaterThan(0);
+
+            // Re-simulate — clearHistory is called at simulation start
+            compiled.reset();
+            Simulation sim2 = compiled.createSimulation();
+            sim2.execute();
+
+            // History should reflect the second run, not accumulate from first
+            Stock s = findStock(compiled.getModel(), "S");
+            assertThat(s.getValue()).isLessThan(100);
+        }
+
+        @Test
+        void shouldIncludeFlowsFromSingleFlowModel() {
+            ModelDefinition def = new ModelDefinitionBuilder()
+                    .name("Single Flow")
+                    .stock("S", 50, "Thing")
+                    .flow("OnlyFlow", "10", "Day", null, "S")
+                    .defaultSimulation("Day", 3, "Day")
+                    .build();
+
+            CompiledModel compiled = compiler.compile(def);
+            assertThat(compiled.getModel().getFlows()).hasSize(1);
+            assertThat(compiled.getModel().getFlows().get(0).getName())
+                    .isEqualTo("OnlyFlow");
+        }
+    }
+
+    @Nested
     @DisplayName("NegativeValuePolicy")
     class NegativeValuePolicyTests {
 

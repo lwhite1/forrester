@@ -378,7 +378,11 @@ public class ModelWindow {
 
         MenuItem closeItem = new MenuItem("Close");
         closeItem.setAccelerator(new KeyCodeCombination(KeyCode.W, KeyCombination.SHORTCUT_DOWN));
-        closeItem.setOnAction(e -> close());
+        closeItem.setOnAction(e -> {
+            if (fileController.confirmDiscardChanges()) {
+                close();
+            }
+        });
 
         MenuItem exitItem = new MenuItem("Exit");
         exitItem.setOnAction(e -> Platform.exit());
@@ -618,6 +622,7 @@ public class ModelWindow {
         }
 
         canvas.clearNavigation();
+        canvas.clearSparklines();
         canvas.setModel(editor, view);
         undoManager.clear();
         fileController.setDirty(false);
@@ -692,29 +697,34 @@ public class ModelWindow {
 
     private ModelEditListener createStaleListener() {
         return new ModelEditListener() {
+            private void markStale() {
+                dashboardPanel.markStale();
+                canvas.markSparklinesStale();
+            }
+
             @Override
             public void onElementAdded(String name, String typeName) {
-                dashboardPanel.markStale();
+                markStale();
             }
 
             @Override
             public void onElementRemoved(String name) {
-                dashboardPanel.markStale();
+                markStale();
             }
 
             @Override
             public void onElementRenamed(String oldName, String newName) {
-                dashboardPanel.markStale();
+                markStale();
             }
 
             @Override
             public void onEquationChanged(String elementName) {
-                dashboardPanel.markStale();
+                markStale();
             }
 
             @Override
             public void onConstantChanged(String name) {
-                dashboardPanel.markStale();
+                markStale();
             }
         };
     }
@@ -1054,12 +1064,11 @@ public class ModelWindow {
     }
 
     /**
-     * Closes this window. The ForresterApp will be notified via the stage's onHidden handler.
+     * Closes this window unconditionally. Callers must check for unsaved changes
+     * via {@link FileController#confirmDiscardChanges()} before calling this method.
+     * The ForresterApp will be notified via the stage's onHidden handler.
      */
     public void close() {
-        if (!fileController.confirmDiscardChanges()) {
-            return;
-        }
         if (editor != null) {
             if (logListener != null) {
                 editor.removeListener(logListener);

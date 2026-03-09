@@ -22,6 +22,7 @@ import systems.courant.forrester.model.def.ModuleInstanceDef;
 import systems.courant.forrester.model.def.PortDef;
 import systems.courant.forrester.model.def.StockDef;
 import systems.courant.forrester.model.expr.ExprParser;
+import systems.courant.forrester.model.expr.ParseException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -143,6 +144,7 @@ public class ModelCompiler {
             DoubleSupplier[] holder = {() -> 0};
             flowHolders.add(holder);
             Flow flow = createFlow(fDef, holder, context);
+            model.addFlow(flow);
             context.addFlow(fDef.name(), flow);
             wireFlowSourceSink(fDef, flow, context, "");
         }
@@ -270,7 +272,7 @@ public class ModelCompiler {
                 if (stock != null) {
                     stock.setValue(initVal);
                 }
-            } catch (Exception e) {
+            } catch (ParseException | CompilationException | ArithmeticException e) {
                 log.warn("Stock '{}': failed to evaluate initialExpression '{}', "
                                 + "falling back to numeric initialValue ({}). Reason: {}",
                         sDef.name(), sDef.initialExpression(), sDef.initialValue(), e.toString());
