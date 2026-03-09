@@ -1,7 +1,6 @@
 package systems.courant.forrester.app.canvas;
 
 import systems.courant.forrester.model.graph.FeedbackAnalysis;
-import systems.courant.forrester.model.graph.FeedbackAnalysis.LoopInfo;
 import systems.courant.forrester.model.graph.FeedbackAnalysis.LoopType;
 
 import javafx.geometry.Insets;

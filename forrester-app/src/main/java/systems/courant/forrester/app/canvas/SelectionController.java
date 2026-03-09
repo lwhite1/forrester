@@ -1,12 +1,10 @@
 package systems.courant.forrester.app.canvas;
 
-import systems.courant.forrester.model.def.ConnectorRoute;
 import systems.courant.forrester.model.def.ElementType;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
-import java.util.function.Consumer;
 
 /**
  * Handles element selection, creation, deletion, copy/cut/paste operations.

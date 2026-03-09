@@ -2,7 +2,6 @@ package systems.courant.forrester.app;
 
 import systems.courant.forrester.app.canvas.ModelCanvas;
 import systems.courant.forrester.app.canvas.ModelEditListener;
-import systems.courant.forrester.app.canvas.ModelEditor;
 import systems.courant.forrester.io.ImportResult;
 import systems.courant.forrester.io.ModelImporter;
 import systems.courant.forrester.io.json.ModelDefinitionSerializer;
