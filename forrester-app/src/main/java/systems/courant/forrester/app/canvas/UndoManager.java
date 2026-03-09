@@ -52,9 +52,24 @@ public class UndoManager implements AutoCloseable {
     /**
      * An undo/redo entry whose compression may still be in progress.
      * The label is available immediately; the compressed data arrives
-     * via a future that completes on a background thread.
+     * via a future that completes on a background thread. The raw snapshot
+     * is kept until compression completes to avoid blocking the FX thread.
      */
-    record UndoEntry(CompletableFuture<CompressedData> future, String label) {}
+    static final class UndoEntry {
+        private final CompletableFuture<CompressedData> future;
+        private final String label;
+        private volatile Snapshot rawSnapshot;
+
+        UndoEntry(CompletableFuture<CompressedData> future, String label, Snapshot rawSnapshot) {
+            this.future = future;
+            this.label = label;
+            this.rawSnapshot = rawSnapshot;
+            future.thenRun(() -> this.rawSnapshot = null);
+        }
+
+        CompletableFuture<CompressedData> future() { return future; }
+        String label() { return label; }
+    }
 
     private static final ModelDefinitionSerializer SERIALIZER = new ModelDefinitionSerializer();
 
@@ -235,14 +250,20 @@ public class UndoManager implements AutoCloseable {
             byte[] compressed = COMPRESSOR.compress(raw);
             return new CompressedData(compressed, raw.length);
         }, compressor);
-        return new UndoEntry(future, label);
+        return new UndoEntry(future, label, snapshot);
     }
 
     private static Snapshot decompress(UndoEntry entry) {
+        // Return the raw snapshot if compression hasn't completed yet,
+        // avoiding blocking the FX Application Thread
+        Snapshot raw = entry.rawSnapshot;
+        if (raw != null) {
+            return raw;
+        }
         CompressedData data = entry.future().join();
-        byte[] raw = new byte[data.originalLength()];
-        DECOMPRESSOR.decompress(data.data(), 0, raw, 0, data.originalLength());
-        String json = new String(raw, StandardCharsets.UTF_8);
+        byte[] rawBytes = new byte[data.originalLength()];
+        DECOMPRESSOR.decompress(data.data(), 0, rawBytes, 0, data.originalLength());
+        String json = new String(rawBytes, StandardCharsets.UTF_8);
         ModelDefinition model = SERIALIZER.fromJson(json);
         // The view is stored inside the model's views list
         ViewDef view = model.views().isEmpty() ? null : model.views().getFirst();

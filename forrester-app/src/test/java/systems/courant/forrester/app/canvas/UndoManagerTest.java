@@ -331,6 +331,17 @@ class UndoManagerTest {
         }
 
         @Test
+        void shouldNotBlockWhenCompressionIsPending() {
+            // Push and immediately undo — compression may still be in progress
+            // The undo should return the raw snapshot without blocking
+            manager.pushUndo(snapshot("S1"), "Add stock");
+
+            UndoManager.Snapshot result = manager.undo(snapshot("Current")).orElseThrow();
+
+            assertThat(result.model().name()).isEqualTo("S1");
+        }
+
+        @Test
         void shouldReportCorrectDepth() {
             manager.pushUndo(snapshot("S1"));
             manager.pushUndo(snapshot("S2"));
