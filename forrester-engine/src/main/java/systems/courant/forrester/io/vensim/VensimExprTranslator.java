@@ -1,5 +1,8 @@
 package systems.courant.forrester.io.vensim;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -15,6 +18,8 @@ import java.util.regex.Pattern;
  * function name mapping, logical operator conversion, and lookup extraction.
  */
 public final class VensimExprTranslator {
+
+    private static final Logger log = LoggerFactory.getLogger(VensimExprTranslator.class);
 
     private static final Pattern IF_THEN_ELSE_PATTERN = Pattern.compile(
             "(?i)IF\\s+THEN\\s+ELSE\\s*\\(");
@@ -523,8 +528,8 @@ public final class VensimExprTranslator {
                 double x = Double.parseDouble(m.group(1));
                 double y = Double.parseDouble(m.group(2));
                 points.add(new double[]{x, y});
-            } catch (NumberFormatException e) {
-                // Skip malformed pairs
+            } catch (NumberFormatException ex) {
+                log.debug("Skip malformed lookup pair: ({}, {})", m.group(1), m.group(2), ex);
             }
         }
 

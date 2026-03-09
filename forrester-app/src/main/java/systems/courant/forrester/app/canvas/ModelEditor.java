@@ -18,6 +18,9 @@ import systems.courant.forrester.model.graph.ConnectorGenerator;
 
 import javafx.application.Platform;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -41,6 +44,8 @@ import java.util.function.UnaryOperator;
  * builds an immutable snapshot for background analysis tasks.</p>
  */
 public class ModelEditor {
+
+    private static final Logger log = LoggerFactory.getLogger(ModelEditor.class);
 
     private String modelName = "Untitled";
     private String modelComment = "";
@@ -170,8 +175,8 @@ public class ModelEditor {
                     if (num > max[0]) {
                         max[0] = num;
                     }
-                } catch (NumberFormatException ignored) {
-                    // Not an auto-named element
+                } catch (NumberFormatException ex) {
+                    log.trace("Not an auto-named element: '{}'", name, ex);
                 }
             }
         });

@@ -11,6 +11,9 @@ import systems.courant.forrester.model.expr.ExprDependencies;
 import systems.courant.forrester.model.expr.ExprParser;
 import systems.courant.forrester.model.expr.ParseException;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -42,6 +45,8 @@ public record FeedbackAnalysis(
         Set<Edge> loopEdges,
         List<CausalLoop> causalLoops
 ) {
+
+    private static final Logger log = LoggerFactory.getLogger(FeedbackAnalysis.class);
 
     /**
      * A directed edge between two elements.
@@ -612,8 +617,8 @@ public record FeedbackAnalysis(
                     Set<String> auxRefs = ExprDependencies.extract(
                             ExprParser.parse(auxEquations.get(resolved)));
                     queue.addAll(auxRefs);
-                } catch (ParseException e) {
-                    // skip unparseable auxiliaries
+                } catch (ParseException ex) {
+                    log.debug("Skip unparseable auxiliary '{}': {}", resolved, ex.getMessage(), ex);
                 }
             }
         }

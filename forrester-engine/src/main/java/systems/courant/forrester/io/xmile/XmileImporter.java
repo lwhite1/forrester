@@ -12,6 +12,8 @@ import systems.courant.forrester.model.def.ModuleInstanceDef;
 import systems.courant.forrester.model.def.StockDef;
 import systems.courant.forrester.model.def.ViewDef;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -56,6 +58,8 @@ import java.util.regex.Pattern;
  * }</pre>
  */
 public class XmileImporter implements ModelImporter {
+
+    private static final Logger log = LoggerFactory.getLogger(XmileImporter.class);
 
     private static final Pattern NUMERIC_PATTERN = Pattern.compile(
             "^[+-]?(\\d+\\.?\\d*|\\.\\d+)([eE][+-]?\\d+)?$");
@@ -609,7 +613,8 @@ public class XmileImporter implements ModelImporter {
                 .map(text -> {
                     try {
                         return Double.parseDouble(text.strip());
-                    } catch (NumberFormatException e) {
+                    } catch (NumberFormatException ex) {
+                        log.trace("Fall through non-numeric text '{}': {}", text.strip(), ex.getMessage(), ex);
                         return null;
                     }
                 })
@@ -625,8 +630,8 @@ public class XmileImporter implements ModelImporter {
         if (val != null && !val.isBlank()) {
             try {
                 return Double.parseDouble(val);
-            } catch (NumberFormatException e) {
-                // fall through
+            } catch (NumberFormatException ex) {
+                log.debug("Fall through non-numeric attribute '{}': '{}'", attrName, val, ex);
             }
         }
         return defaultValue;
@@ -647,8 +652,8 @@ public class XmileImporter implements ModelImporter {
             if (!trimmed.isEmpty()) {
                 try {
                     values.add(Double.parseDouble(trimmed));
-                } catch (NumberFormatException e) {
-                    // skip malformed
+                } catch (NumberFormatException ex) {
+                    log.debug("Skip malformed numeric value: '{}'", trimmed, ex);
                 }
             }
         }
