@@ -73,16 +73,20 @@ public class ChartViewerApplication extends Application {
         List<Series<String, Number>> localSeries;
         String localTitle;
         String localXAxisLabel;
+        double localWidth;
+        double localHeight;
         synchronized (LOCK) {
             localSeries = new ArrayList<>(series);
             localTitle = title;
             localXAxisLabel = xAxisLabel;
+            localWidth = width;
+            localHeight = height;
         }
 
         stage.setTitle(localTitle);
 
         BorderPane root = new BorderPane();
-        scene = new Scene(root, width, height);
+        scene = new Scene(root, localWidth, localHeight);
 
         lineChart = createLineChart("", localXAxisLabel);
         lineChart.getData().addAll(localSeries);
