@@ -1,7 +1,6 @@
 package systems.courant.forrester.io.vensim;
 
 import systems.courant.forrester.model.def.AuxDef;
-import systems.courant.forrester.model.def.CausalLinkDef;
 import systems.courant.forrester.model.def.CldVariableDef;
 import systems.courant.forrester.model.def.ConnectorRoute;
 import systems.courant.forrester.model.def.ConstantDef;

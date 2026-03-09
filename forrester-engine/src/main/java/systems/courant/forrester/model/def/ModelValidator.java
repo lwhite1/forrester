@@ -7,6 +7,9 @@ import systems.courant.forrester.model.expr.ExprParser;
 import systems.courant.forrester.model.expr.ParseException;
 import systems.courant.forrester.model.graph.DependencyGraph;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Deque;
@@ -33,6 +36,8 @@ import java.util.regex.Pattern;
  * </ol>
  */
 public final class ModelValidator {
+
+    private static final Logger log = LoggerFactory.getLogger(ModelValidator.class);
 
     private static final Pattern ELEMENT_NAME_PATTERN = Pattern.compile("'([^']+)'");
 
@@ -315,8 +320,8 @@ public final class ModelValidator {
         try {
             Expr expr = ExprParser.parse(equation);
             refs.addAll(ExprDependencies.extract(expr));
-        } catch (ParseException ignored) {
-            // Invalid equations are already reported by DefinitionValidator
+        } catch (ParseException ex) {
+            log.debug("Invalid equation already reported by DefinitionValidator: '{}'", equation, ex);
         }
     }
 

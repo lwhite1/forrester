@@ -6,6 +6,9 @@ import systems.courant.forrester.model.expr.ExprParser;
 import systems.courant.forrester.model.expr.ParseException;
 import systems.courant.forrester.model.graph.ViewValidator;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -16,6 +19,8 @@ import java.util.Set;
  * Returns a list of error messages; an empty list means the definition is valid.
  */
 public final class DefinitionValidator {
+
+    private static final Logger log = LoggerFactory.getLogger(DefinitionValidator.class);
 
     private DefinitionValidator() {
     }
@@ -202,8 +207,8 @@ public final class DefinitionValidator {
                                 + "' references unknown element: " + ref);
                     }
                 }
-            } catch (ParseException ignored) {
-                // Already reported as a parse error above
+            } catch (ParseException ex) {
+                log.debug("Already reported parse error in flow '{}': {}", flow.name(), ex.getMessage(), ex);
             }
         }
         for (AuxDef aux : def.auxiliaries()) {
@@ -218,8 +223,8 @@ public final class DefinitionValidator {
                                 + "' references unknown element: " + ref);
                     }
                 }
-            } catch (ParseException ignored) {
-                // Already reported as a parse error above
+            } catch (ParseException ex) {
+                log.debug("Already reported parse error in auxiliary '{}': {}", aux.name(), ex.getMessage(), ex);
             }
         }
     }

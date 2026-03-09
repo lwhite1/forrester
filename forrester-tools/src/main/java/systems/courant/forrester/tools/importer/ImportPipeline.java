@@ -7,7 +7,6 @@ import systems.courant.forrester.io.xmile.XmileImporter;
 import systems.courant.forrester.model.compile.CompiledModel;
 import systems.courant.forrester.model.compile.ModelCompiler;
 import systems.courant.forrester.model.def.DefinitionValidator;
-import systems.courant.forrester.model.ModelMetadata;
 import systems.courant.forrester.model.def.ModelDefinition;
 import systems.courant.forrester.io.json.ModelDefinitionSerializer;
 

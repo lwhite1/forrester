@@ -5,7 +5,6 @@ import systems.courant.forrester.model.def.ConnectorRoute;
 import systems.courant.forrester.model.def.ConstantDef;
 import systems.courant.forrester.model.def.ElementType;
 import systems.courant.forrester.model.def.FlowDef;
-import systems.courant.forrester.model.def.LookupTableDef;
 import systems.courant.forrester.model.graph.FeedbackAnalysis;
 import systems.courant.forrester.model.graph.FeedbackAnalysis.CausalLoop;
 

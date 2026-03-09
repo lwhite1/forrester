@@ -6,6 +6,9 @@ import systems.courant.forrester.model.def.FlowDef;
 
 import javafx.scene.layout.Pane;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.function.Consumer;
 
 /**
@@ -14,6 +17,8 @@ import java.util.function.Consumer;
  * name-then-value for constants, name-then-equation for flows and auxiliaries.
  */
 final class InlineEditController {
+
+    private static final Logger log = LoggerFactory.getLogger(InlineEditController.class);
 
     /**
      * Callbacks for communicating edit results back to the canvas.
@@ -111,8 +116,8 @@ final class InlineEditController {
                 try {
                     double value = Double.parseDouble(valueText);
                     callbacks.saveAndSetConstantValue(constantName, value);
-                } catch (NumberFormatException ignored) {
-                    // Invalid number — ignore
+                } catch (NumberFormatException ex) {
+                    log.debug("Invalid number for constant '{}': '{}'", constantName, valueText, ex);
                 }
             }
             callbacks.postEdit();

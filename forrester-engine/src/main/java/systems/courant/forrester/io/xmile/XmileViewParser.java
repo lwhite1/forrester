@@ -6,6 +6,8 @@ import systems.courant.forrester.model.def.ElementType;
 import systems.courant.forrester.model.def.FlowRoute;
 import systems.courant.forrester.model.def.ViewDef;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
@@ -21,6 +23,8 @@ import java.util.Set;
  * connectors (dependency arrows), and flow graphical routes.
  */
 public final class XmileViewParser {
+
+    private static final Logger log = LoggerFactory.getLogger(XmileViewParser.class);
 
     private XmileViewParser() {
     }
@@ -115,8 +119,8 @@ public final class XmileViewParser {
                     type = resolveAuxType(name, stockNames, flowNames, lookupNames);
                 }
                 elements.add(new ElementPlacement(name, type, x, y));
-            } catch (NumberFormatException e) {
-                // skip malformed coordinates
+            } catch (NumberFormatException ex) {
+                log.debug("Skip malformed coordinates for element '{}': x='{}', y='{}'", name, xStr, yStr, ex);
             }
         }
     }
@@ -193,8 +197,8 @@ public final class XmileViewParser {
                     try {
                         points.add(new double[]{
                                 Double.parseDouble(xStr), Double.parseDouble(yStr)});
-                    } catch (NumberFormatException e) {
-                        // skip malformed
+                    } catch (NumberFormatException ex) {
+                        log.debug("Skip malformed control point: x='{}', y='{}'", xStr, yStr, ex);
                     }
                 }
             }
