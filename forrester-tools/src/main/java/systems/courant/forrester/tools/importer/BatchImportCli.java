@@ -201,10 +201,12 @@ public class BatchImportCli {
         }
         String rawName = uri.getPath().substring(uri.getPath().lastIndexOf('/') + 1);
         // Sanitize: extract leaf name only to prevent path traversal (e.g. "../")
-        String fileName = rawName.isBlank() ? "model.mdl"
-                : Path.of(rawName).getFileName().toString();
-        if (fileName.isBlank()) {
-            fileName = "model.mdl";
+        String fileName = "model.mdl";
+        if (!rawName.isBlank()) {
+            Path leaf = Path.of(rawName).getFileName();
+            if (leaf != null && !leaf.toString().isBlank()) {
+                fileName = leaf.toString();
+            }
         }
 
         Path tempDir = Files.createTempDirectory("forrester-download-");
