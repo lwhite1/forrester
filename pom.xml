@@ -34,8 +34,8 @@
         <testfx.version>4.0.17</testfx.version>
         <monocle.version>21.0.2</monocle.version>
         <elk.version>0.9.1</elk.version>
-        <spotbugs.version>4.8.6</spotbugs.version>
-        <spotbugs-maven.version>4.8.6.6</spotbugs-maven.version>
+        <spotbugs.version>4.9.8</spotbugs.version>
+        <spotbugs-maven.version>4.9.8.2</spotbugs-maven.version>
         <jacoco.version>0.8.14</jacoco.version>
         <lz4.version>1.8.0</lz4.version>
     </properties>

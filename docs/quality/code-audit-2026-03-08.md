@@ -1,35 +1,53 @@
-# Code Audit & Quality Assessment — 2026-03-08
+# Code Audit & Quality Assessment — 2026-03-08 (Rev 2)
 
 ## Scope
 
 Full audit of the Forrester System Dynamics modeling platform covering all five modules.
+Supersedes the previous revision from earlier today.
 
 | Module | Source Files | Source LoC | Test Files | Test LoC | Test:Source Ratio |
 |--------|-------------|-----------|------------|----------|-------------------|
-| forrester-engine | 154 | 21,293 | 78 | 16,134 | 0.76 |
-| forrester-app | 89 | 19,722 | 37 | 8,918 | 0.45 |
+| forrester-engine | 154 | 21,383 | 84 | 17,307 | 0.81 |
+| forrester-app | 95 | 20,807 | 39 | 9,263 | 0.45 |
+| forrester-ui | 5 | 549 | 5 | 444 | 0.81 |
+| forrester-tools | 8 | 1,342 | 5 | 593 | 0.44 |
 | forrester-demos | 26 | 2,683 | 6 | 962 | 0.36 |
-| forrester-tools | 8 | 1,339 | 5 | 593 | 0.44 |
-| forrester-ui | 5 | 549 | 0 | 0 | 0.00 |
-| **Total** | **282** | **45,586** | **126** | **26,607** | **0.58** |
+| **Total** | **288** | **46,764** | **139** | **28,569** | **0.61** |
 
-**Build status:** 1,830 tests pass (0 failures, 2 skipped) across all modules. Clean compile.
+**Build status:** 1,928 tests pass (0 failures, 2 skipped) across all modules. Clean compile on JDK 25.
 
-**Static analysis:** SpotBugs reports **0 bugs** (effort=Max, threshold=Medium).
+**Static analysis:** SpotBugs 4.9.8 reports **1 bug** (effort=Max, threshold=Medium) — null dereference in `BatchImportCli.downloadToTemp` (#227).
 
-**Code hygiene:** 0 empty catch blocks, 0 printStackTrace calls, 0 wildcard imports, 1 @SuppressWarnings (justified), 1 TODO, 61 `return null` occurrences in production code.
+**Code hygiene:** 12 comment-only catch blocks (#230), 0 printStackTrace calls, 0 wildcard imports, 9 @SuppressWarnings (all justified unchecked casts in JavaFX code), 1 TODO, ~40 `return null` occurrences in production code, 15 unused imports (#229).
+
+---
+
+## Tools Used
+
+| Tool | Version | Configuration |
+|------|---------|--------------|
+| JDK | 25.0.2 | `--release 25` |
+| Maven | 3.8.3 | Parent POM multi-module |
+| SpotBugs | 4.9.8 (plugin 4.9.8.2) | effort=Max, threshold=Medium |
+| JaCoCo | 0.8.14 | Instruction, branch, and line coverage |
+| JUnit 5 | 5.11.4 | With AssertJ 3.26.3 |
+| TestFX | 4.0.17 | Headless via Monocle 21.0.2 |
+| Manual review | — | Architecture, patterns, security |
 
 ---
 
 ## JaCoCo Coverage Report
 
+### Module Summary
+
 | Module | Instruction Coverage | Branch Coverage | Line Coverage |
 |--------|---------------------|----------------|---------------|
-| forrester-engine | 34,007 / 38,852 (87.5%) | 2,984 / 3,964 (75.3%) | 6,957 / 8,001 (87.0%) |
-| forrester-app | 19,583 / 49,848 (39.3%) | 1,144 / 3,347 (34.2%) | 3,904 / 9,820 (39.8%) |
-| forrester-tools | 1,654 / 3,066 (53.9%) | 153 / 303 (50.5%) | 349 / 684 (51.0%) |
+| forrester-engine | 34,945 / 39,220 (89.1%) | 3,045 / 3,966 (76.8%) | 7,129 / 8,045 (88.6%) |
+| forrester-ui | 1,146 / 1,265 (90.6%) | 40 / 48 (83.3%) | 214 / 248 (86.3%) |
+| forrester-tools | 1,654 / 3,078 (53.7%) | 153 / 305 (50.2%) | 349 / 686 (50.9%) |
+| forrester-app | 21,257 / 52,407 (40.6%) | 1,230 / 3,581 (34.3%) | 4,255 / 10,393 (40.9%) |
 | forrester-demos | 2,003 / 5,188 (38.6%) | 6 / 42 (14.3%) | 416 / 1,114 (37.3%) |
-| forrester-ui | — | — | — |
+| **Grand Total** | **61,005 / 101,158 (60.3%)** | **4,474 / 7,942 (56.3%)** | **12,363 / 20,486 (60.3%)** |
 
 ### Engine Coverage by Package
 
@@ -47,179 +65,160 @@ Full audit of the Forrester System Dynamics modeling platform covering all five 
 | io (top-level) | 202 / 609 (33.2%) | 12 / 46 (26.1%) |
 | measure (all) | 1,431 / 1,639 (87.3%) | 47 / 72 (65.3%) |
 
-### App Module — Low Coverage Classes (>300 instructions, <50% covered)
+### App Module — Zero-Coverage Classes (>300 instructions)
 
-| Class | Coverage | Notes |
-|-------|----------|-------|
-| QuickstartDialog | 0 / 1,224 (0%) | Help dialog |
-| ExpressionLanguageDialog | 0 / 1,191 (0%) | Help dialog |
-| SdConceptsDialog | 0 / 926 (0%) | Help dialog |
-| LookupForm | 0 / 979 (0%) | Form |
-| MultiSweepResultPane | 0 / 743 (0%) | Result pane |
-| CausalLinkGeometry | 0 / 705 (0%) | Geometry — testable |
-| FanChartPane | 0 / 692 (0%) | Chart pane |
-| KeyboardShortcutsDialog | 0 / 506 (0%) | Dialog |
-| SweepResultPane | 0 / 481 (0%) | Result pane |
-| SelectionRenderer | 0 / 479 (0%) | Renderer |
-| OptimizationResultPane | 0 / 473 (0%) | Result pane |
-| StockForm | 0 / 471 (0%) | Form |
-| FlowForm | 0 / 455 (0%) | Form |
-| FeedbackLoopRenderer | 0 / 378 (0%) | Renderer |
-| AuxForm | 0 / 374 (0%) | Form |
-| ConstantForm | 0 / 352 (0%) | Form |
-| DiagramExporter | 0 / 330 (0%) | PNG/SVG bridge |
-| SvgExporter | 56 / 3,271 (2%) | SVG rendering |
-| SimulationController | 24 / 948 (3%) | Simulation orchestration |
-| InputDispatcher | 222 / 1,445 (15%) | Event routing |
-| ModelCanvas | 365 / 1,909 (19%) | Main canvas |
-| FileController | 183 / 825 (22%) | File I/O |
-| CanvasRenderer | 488 / 1,797 (27%) | Drawing |
-| FormContext | 192 / 692 (28%) | Form state |
-| PropertiesPanel | 604 / 1,652 (37%) | Properties sidebar |
-| ConnectionRenderer | 403 / 878 (46%) | Connection drawing |
+| Class | Instructions | Notes |
+|-------|-------------|-------|
+| QuickstartDialog | 1,224 | Help dialog |
+| ExpressionLanguageDialog | 1,191 | Help dialog |
+| LookupForm | 993 | Form |
+| SdConceptsDialog | 926 | Help dialog |
+| MultiSweepResultPane | 743 | Result pane |
+| CausalLinkGeometry | 705 | Geometry — testable |
+| FanChartPane | 692 | Chart pane |
+| KeyboardShortcutsDialog | 506 | Dialog |
+| SweepResultPane | 481 | Result pane |
+| SelectionRenderer | 479 | Renderer |
+| StockForm | 475 | Form |
+| OptimizationResultPane | 473 | Result pane |
+| FlowForm | 455 | Form |
+| FeedbackLoopRenderer | 378 | Renderer |
+| AuxForm | 374 | Form |
+| ConstantForm | 356 | Form |
+| DiagramExporter | 332 | PNG/SVG bridge |
+| SensitivityPane | 287 | Sensitivity pane |
+| SparklineRenderer | 268 | Renderer |
+| MonteCarloResultPane | 220 | Result pane |
+| CldVariableForm | 169 | Form |
+| UndoHistoryPopup | 136 | Popup |
+
+22 zero-coverage classes totaling ~10,666 uncovered instructions. See #177 for tracking.
 
 ---
 
-## Summary of Findings
+## SpotBugs Results
+
+**SpotBugs 4.9.8** (upgraded from 4.8.6, which could not scan JDK 25 class files).
+
+| Module | Bugs Found |
+|--------|-----------|
+| forrester-engine | 0 |
+| forrester-app | 0 |
+| forrester-ui | 0 |
+| forrester-demos | 0 |
+| forrester-tools | **1** |
+
+**Bug:** `NP_NULL_ON_SOME_PATH_FROM_RETURN_VALUE` in `BatchImportCli.downloadToTemp()` line 205 — `Path.of(rawName).getFileName()` can return null. → **#227**
+
+---
+
+## Summary of All Findings
+
+### By Severity
 
 | Severity | Total (All Time) | Currently Open | Fixed/Closed |
 |----------|-----------------|----------------|--------------|
 | Critical | 7 | 0 | 7 |
-| High | 17 | 3 | 14 |
-| Medium | 23 | 15 | 8 |
-| Low | 15 | 14 | 1 |
+| High | 17 | 0 | 17 |
+| Medium | 31 | 17 | 14 |
+| Low | 18 | 17 | 1 |
 
-**All critical issues resolved.** 3 high-severity issues remain (found by deep code review): a missing recursion depth guard, a data corruption bug, and a path traversal vulnerability.
+**All critical and high-severity issues resolved.** 17 medium and 17 low issues remain open.
+
+### New Issues Created This Audit
+
+| # | Title | Severity | Milestone |
+|---|-------|----------|-----------|
+| #227 | BatchImportCli.downloadToTemp null dereference on Path.getFileName() | Medium | R1 |
+| #228 | Decompose ModelCanvas — 1,082 lines, 63 public methods | Medium | R1 |
+| #229 | Remove 15 unused imports across codebase | Low | R2 |
+| #230 | Replace 12 comment-only catch blocks with debug logging | Medium | R1 |
+| #231 | Replace remaining broad catch(Exception) in ModelCompiler and ImportPipeline | Medium | R1 |
+| #232 | Split app.canvas mega-package into sub-packages | Low | R2 |
+| #233 | Add unit tests for CompilationContext and CompiledModel (engine) | Medium | R1 |
+| #234 | Extract long methods exceeding 150 lines | Low | R2 |
+
+### Issues Fixed Since Previous Audit
+
+| # | Title | Was |
+|---|-------|-----|
+| #145 | Add TestFX tests for forrester-ui module | M5 |
+| #160 | ModelEditor decomposition | — |
+| #163 | Replace return null with Optional in exporter/importer methods | M7 |
+| #178 | Add test coverage for ModelReport | M16 |
+| #189 | BatchImportCli.downloadToTemp accepts file:// URIs | M19 |
+| #190 | UndoManager serializes full model on FX thread | M20 |
+| #218 | DependencyGraph Tarjan SCC has no recursion depth guard | H15 |
+| #219 | LookupForm mutates array before validation | H16 |
+| #220 | ExportBounds.compute() returns invalid bounds for empty models | M21 |
+| #221 | FanChart uses unsynchronized static fields | M22 |
+| #222 | BatchImportCli path traversal via unsanitized URL filename | H17 |
+| #223 | UndoManager compressor ExecutorService never shut down | M23 |
 
 ---
 
 ## Critical Issues — ALL FIXED
 
-C1 (#155), C2 (#164), C3 (#166), C4 (#179), C5 (#180), C6 (#181), C7 (#182) — all closed.
-
-Key fixes this audit cycle:
-- **C4**: Added MAX_DEPTH=200 recursion guard to Tarjan SCC and dfsCycles
-- **C5**: Two-phase Euler integration — stocks see pre-step values
-- **C6**: dirtyListener removed on ModelWindow.close()
-- **C7**: AnalysisRunner.shutdown() awaits termination
+C1–C7 (#155, #164, #166, #179–#182) — all closed. No new critical findings.
 
 ---
 
-## High Issues — 3 Open, 14 Fixed
+## High Issues — ALL FIXED
 
-H1–H10 (#155–#172), H11 (#183), H12 (#184), H13 (#185), H14 (#186) — all closed.
-
-Key fixes this audit cycle:
-- **H11**: ExprCompiler warn-once flag for math warnings
-- **H12**: XmileImporter getFirstChild/getChildTexts search direct children only
-- **H13**: ImportPipelineCli requireValue() bounds check
-- **H14**: ModelDefinitionSerializer 10 MB file size limit
-
-### H15. DependencyGraph Tarjan SCC has no recursion depth guard
-**Issue:** [#218](https://github.com/Courant-Systems/shrewd/issues/218) (open, R1)
-
-`DependencyGraph.tarjanStrongconnect()` recurses without a depth limit. A pathological graph can cause `StackOverflowError`. `FeedbackAnalysis` already has `MAX_DEPTH=200` — `DependencyGraph` needs the same.
-
-### H16. LookupForm mutates array before validation — data corruption
-**Issue:** [#219](https://github.com/Courant-Systems/shrewd/issues/219) (open, R1)
-
-`commitDataPoint()` writes new x/y values into the backing arrays, then validates monotonicity. If validation fails, the arrays are already corrupted. Fix: validate before mutation, or save/restore on failure.
-
-### H17. BatchImportCli path traversal via unsanitized URL filename
-**Issue:** [#222](https://github.com/Courant-Systems/shrewd/issues/222) (open, R1)
-
-`downloadToTemp()` extracts a filename from a URL path and passes it unsanitized to `tempDir.resolve()`. A malicious manifest URL containing `../` can write files outside the temp directory.
+H1–H17 — all closed. Former open issues H15 (#218), H16 (#219), H17 (#222) were all resolved since the last audit. No new high-severity findings.
 
 ---
 
-## Medium Issues — 12 Open, 8 Closed
+## Medium Issues — 17 Open, 14 Fixed
 
-*Previously fixed: M1 (#161), M2 (#71), M3 (#162), M6 (#163), M9 (#169), M10 (#171), M11 (#173), M12 — all closed.*
+### Previously Fixed
+M1 (#161), M2 (#71), M3 (#162), M5 (#145), M6 (#163), M7 (#163), M9 (#169), M10 (#171), M11 (#173), M12, M14 (#176), M16 (#178), M19 (#189), M20 (#190), M21 (#220), M22 (#221), M23 (#223)
 
-### M4. Equation rename uses string token replacement instead of AST
-**Issue:** [#131](https://github.com/Courant-Systems/shrewd/issues/131) (open, R1)
+### Open
 
-### M5. forrester-ui module has zero tests
-**Issue:** [#145](https://github.com/Courant-Systems/shrewd/issues/145) (open, R1)
-
-### M7. `return null` used extensively in exporters/importers instead of Optional
-**Issue:** [#163](https://github.com/Courant-Systems/shrewd/issues/163) (open, R1)
-
-61 occurrences of `return null` across production code.
-
-### M8. ModelDefinition has 15 fields and 2 telescoping constructors
-**Issue:** [#72](https://github.com/Courant-Systems/shrewd/issues/72) (open, R2)
-
-### M13. CsvSubscriber uses string concatenation in SLF4J logging
-**Issue:** [#175](https://github.com/Courant-Systems/shrewd/issues/175) (open, R2)
-
-### M14. ChartViewerApplication.saveToFile throws RuntimeException — FIXED
-**Issue:** [#176](https://github.com/Courant-Systems/shrewd/issues/176) (closed)
-
-### M15. App module test coverage at 39.3% — many core classes at 0%
-**Issue:** [#177](https://github.com/Courant-Systems/shrewd/issues/177) (open, R2)
-
-26 classes with >300 instructions have <50% coverage.
-
-### M16. ModelReport (engine) has 0% test coverage
-**Issue:** [#178](https://github.com/Courant-Systems/shrewd/issues/178) (open, R1)
-
-### M17. logger.xml misnamed — logging config never loaded
-**Issue:** [#187](https://github.com/Courant-Systems/shrewd/issues/187) (open, R2)
-
-### M18. String.format without Locale in chart rendering
-**Issue:** [#188](https://github.com/Courant-Systems/shrewd/issues/188) (open, R2)
-
-### M19. BatchImportCli.downloadToTemp accepts file:// URIs
-**Issue:** [#189](https://github.com/Courant-Systems/shrewd/issues/189) (open, R1)
-
-### M20. UndoManager serializes full model on FX thread
-**Issue:** [#190](https://github.com/Courant-Systems/shrewd/issues/190) (open, R1)
-
-### M21. ExportBounds.compute() returns invalid bounds for empty models
-**Issue:** [#220](https://github.com/Courant-Systems/shrewd/issues/220) (open, R1)
-
-When a model has no elements, min/max accumulators stay at their sentinel values, producing `Bounds` with `-Infinity` dimensions. Exporters will fail or produce invalid output.
-
-### M22. FanChart uses unsynchronized static fields for cross-thread state passing
-**Issue:** [#221](https://github.com/Courant-Systems/shrewd/issues/221) (open, R1)
-
-`pendingResult` and `pendingVariableName` are written in `show()` and read in `start()` on different threads without `volatile` or synchronization. JMM does not guarantee visibility.
-
-### M23. UndoManager compressor ExecutorService never shut down — thread leak
-**Issue:** [#223](https://github.com/Courant-Systems/shrewd/issues/223) (open, R1)
-
-Each `UndoManager` creates a single-threaded executor that is never shut down. Module navigation via `drillInto()` replaces the `UndoManager` without cleanup, leaking a thread per navigation.
+| ID | Issue | # | Milestone |
+|----|-------|---|-----------|
+| M4 | Equation rename uses string token replacement instead of AST | #131 | R1 |
+| M8 | ModelDefinition has 15 fields and 2 telescoping constructors | #72 | R2 |
+| M13 | CsvSubscriber uses string concatenation in SLF4J logging | #175 | R2 |
+| M15 | App module test coverage at 40.6% — 22 core classes at 0% | #177 | R2 |
+| M17 | logger.xml misnamed — logging config never loaded | #187 | R2 |
+| M18 | String.format without Locale in chart rendering | #188 | R2 |
+| M24 | BatchImportCli.downloadToTemp null dereference | #227 | R1 |
+| M25 | ModelCanvas god class (1,082 lines, 63 public methods) | #228 | R1 |
+| M26 | 12 comment-only catch blocks swallowing exceptions | #230 | R1 |
+| M27 | Broad catch(Exception) in ModelCompiler and ImportPipeline | #231 | R1 |
+| M28 | CompilationContext and CompiledModel lack unit tests | #233 | R1 |
+| M29 | ObjectMapper lacks security hardening | #200 | R2 |
+| M30 | Connector regeneration on every model change | #204 | R2 |
+| M31 | Canvas redraws twice on resize | #203 | R2 |
+| M32 | Hardcoded dialog sizes | #202 | R2 |
+| M33 | Unsaved changes dialog comes up twice | #226 | R1 |
+| M34 | Review element naming policy | #154 | R1 |
 
 ---
 
-## Low Issues — 14 Open, 1 Closed
+## Low Issues — 17 Open
 
-### L1. `System.out::println` in Javadoc examples
-### L2. Unused TODO comment in Quantity.java:185
-### L3. Default branches in exhaustive enum switches (issue #78 — closed)
-### L4. Color constants hardcoded and duplicated (#77)
-### L5. SirCalibrationDemo uses System.out extensively
-### L6. CsvSubscriber wraps IOException in generic RuntimeException
-### L7. ModelReport creates new HashSet per recursive call
-
-Plus 7 pre-existing low-severity issues tracked in GitHub.
-
----
-
-## Test Results
-
-```
-Module              Tests   Failures  Errors  Skipped
-forrester-engine    1,171   0         0       0
-forrester-app       578     0         0       2
-forrester-demos     44      0         0       0
-forrester-tools     37      0         0       0
-forrester-ui        0       —         —       —
-TOTAL               1,830   0         0       2
-```
-
-SpotBugs: **0 bugs** (effort=Max, threshold=Medium).
+| ID | Issue | # | Milestone |
+|----|-------|---|-----------|
+| L1 | Unused TODO comment in Quantity.java | — | — |
+| L2 | Color constants hardcoded and duplicated | #77 | R2 |
+| L3 | 15 unused imports across codebase | #229 | R2 |
+| L4 | Split app.canvas mega-package (87 files) | #232 | R2 |
+| L5 | Extract long methods exceeding 150 lines | #234 | R2 |
+| L6 | Causal link polarity labels clipped in export | #114 | R2 |
+| L7 | AutoLayout back-edge marking | #116 | R2 |
+| L8 | ValidationDialog extends Stage inconsistently | #213 | R2 |
+| L9 | Help windows hide behind main window | #205 | R2 |
+| L10 | Add Help menu links for bug reports | #216 | R2 |
+| L11 | Add .editorconfig | #212 | R2 |
+| L12 | Checkstyle not applied project-wide | #211 | R2 |
+| L13 | CI pipeline missing quality gates | #210 | R2 |
+| L14 | Fractional DT not supported | #133 | R2 |
+| L15 | Define formal grammar for model files | #191 | R2 |
+| L16 | Keyboard-driven connection creation | #4 | R2 |
+| L17 | Example model tests lack behavioral assertions | #29 | R2 |
 
 ---
 
@@ -227,130 +226,167 @@ SpotBugs: **0 bugs** (effort=Max, threshold=Medium).
 
 | Category | Status |
 |----------|--------|
-| XXE protection | XML import and export both hardened (DocumentBuilderFactory + TransformerFactory) |
-| Expression parser depth | Limited to MAX_DEPTH=200, prevents stack overflow |
-| Graph traversal depth | FeedbackAnalysis: MAX_DEPTH=200. **DependencyGraph: NO depth guard** (#218) |
+| XXE protection | XML import/export both hardened (DocumentBuilderFactory + TransformerFactory) |
+| Expression parser depth | Limited to MAX_DEPTH=200 |
+| Graph traversal depth | FeedbackAnalysis and DependencyGraph both guarded (MAX_DEPTH=200) |
 | Unsafe deserialization | None — no ObjectInputStream, no Serializable |
-| Reflection abuse | None — no setAccessible, getDeclaredField |
-| SQL injection | N/A — no database usage |
+| Reflection abuse | None in production code (TestFX tests use reflection for FanChart) |
+| SQL injection | N/A — no database |
 | Command injection | None — no Runtime.exec, ProcessBuilder |
-| File path traversal | UI: FileChooser dialogs. **CLI: BatchImportCli lacks filename sanitization** (#222) |
-| File size limits | All importers enforce 10 MB cap (Vensim, XMILE, JSON) |
+| File path traversal | Fixed (#222). Residual null-safety issue (#227) |
+| File size limits | All importers enforce 10 MB cap |
 | Simulation safety | Timeout (60s), MAX_STEPS (10M), NaN detection, cancellation support |
-| Empty catch blocks | None in production code |
-| printStackTrace calls | None in production code |
-| Wildcard imports | None |
+| ObjectMapper hardening | Missing (#200) — should disable default typing |
 
-**Resource management:** All I/O uses try-with-resources or Files API. CsvSubscriber implements Closeable. Exporters use Files.writeString(). SweepCsvWriter uses try-with-resources throughout.
+**Resource management:** All I/O uses try-with-resources. All executor services now properly shut down (#223 fixed).
 
-**Thread safety:** FX thread confinement enforced via checkFxThread() on all ModelEditor mutations. CopyOnWriteArrayList for listeners. AnalysisRunner uses Platform.runLater() for marshaling. **FanChart has unsynchronized static fields** (#221). **UndoManager leaks executor threads** (#223).
+**Thread safety:** FX thread confinement enforced via `checkFxThread()` on all ModelEditor mutations. `CopyOnWriteArrayList` for listeners. `FanChart` volatile fields fixed (#221). `UndoManager` executor leak fixed (#223).
 
 ---
 
 ## Architecture Assessment
 
+### Module Dependency Graph
+
+```
+forrester-engine  (no internal deps — foundation)
+    ↑         ↑
+    |         |
+forrester-ui  |  (depends on: engine)
+    ↑         |
+    |         |
+    |    forrester-app   (depends on: engine)
+    |    forrester-tools (depends on: engine)
+    |
+forrester-demos (depends on: engine, ui)
+```
+
+**No circular dependencies. No layering violations.** Clean acyclic dependency graph.
+
 ### Strengths
 
-1. **Clean engine/app separation** — Engine has zero UI dependencies. Records used for all domain types.
+1. **Clean engine/app separation** — Engine has zero UI dependencies. Records for all domain types.
 2. **Well-structured interaction controllers** — Canvas interaction decomposed into 10+ focused controllers.
 3. **Security hardened** — XXE protection, expression depth limits, file size limits, simulation safety guards.
-4. **Consistent logging** — SLF4J throughout. No System.out/err or printStackTrace in production code.
+4. **Consistent logging** — SLF4J throughout. No System.out/err in production code (only in CLI tools and demos).
 5. **Defensive records** — Compact constructors with null-checks, List.copyOf(), and validation guards.
-6. **Background threading** — Computation via AnalysisRunner with proper FX thread marshaling and assertions.
-7. **Code hygiene** — No wildcard imports, 1 @SuppressWarnings, 1 TODO, no empty catch blocks.
-8. **Two-phase Euler integration** — Stocks updated simultaneously from pre-step values (correct).
-9. **Simulation safety** — Timeout, step limit, NaN detection, cancellation via Thread.interrupt().
+6. **Good engine test coverage** — 89.1% instruction coverage, 76.8% branch coverage.
+7. **No deep inheritance** — Composition over inheritance consistently applied.
+8. **No wildcard imports, no printStackTrace** — Clean code hygiene.
 
 ### Weaknesses
 
-1. **Test coverage gaps** — App module at 39.3%, 26 classes with <50% coverage. UI module has no tests.
-2. **ModelEditor god class** — 1,367+ lines, 78+ public members. FX thread confinement works but class is too large.
-3. **No Checkstyle or ErrorProne** — Only SpotBugs for static analysis.
-4. **`return null` pattern** — 61 occurrences in production code, concentrated in importers/exporters.
+1. **App module coverage gap** — 40.6% instruction coverage, 22 classes at 0%. (#177)
+2. **Two god classes remain** — ModelEditor (1,200 lines, decomposed but still large) and ModelCanvas (1,082 lines, #228).
+3. **Mega-package** — app.canvas has 87 files. (#232)
+4. **No Checkstyle or ErrorProne** — Only SpotBugs for static analysis. (#210, #211)
+5. **~40 return null occurrences** — Partially addressed (#163 closed), more remain.
 
 ### Largest Files
 
-| File | Lines | Notes |
-|------|-------|-------|
-| ModelEditor.java | ~1,367 | 78 public members, god-class |
-| ModelWindow.java | ~930 | Main window wiring |
-| SvgExporter.java | ~835 | Rendering, partly duplicates CanvasRenderer |
-| ModelDefinitionSerializer.java | ~774 | Hand-rolled JSON |
-| ModelCanvas.java | ~783 | Recently refactored |
-| CanvasRenderer.java | ~718 | Drawing code |
-| XmileImporter.java | ~687 | XML parsing, well-tested (87.6%) |
-| EquationAutoComplete.java | ~677 | Tokenization + completion + popup |
-| InputDispatcher.java | ~649 | Event routing, 15% coverage |
-| ExprCompiler.java | ~628 | Expression compilation, well-tested (88.9%) |
+| File | Lines | Public Methods | Coverage | Notes |
+|------|-------|---------------|----------|-------|
+| ModelEditor.java | 1,200 | 79 | 87% | Decomposed (#160), still large |
+| ModelWindow.java | 1,092 | 8 | ~30% | Main window, long methods |
+| ModelCanvas.java | 1,082 | 63 | 19% | God class (#228) |
+| SvgExporter.java | 835 | 2 | 2% | Duplicates CanvasRenderer (#67) |
+| ModelDefinitionSerializer.java | 774 | — | ~78% | Hand-rolled JSON |
+| CanvasRenderer.java | 748 | — | 27% | Drawing code |
+| FeedbackAnalysis.java | 696 | — | ~93% | Well-tested |
+| XmileImporter.java | 680 | — | 88% | Well-tested |
+| InputDispatcher.java | 680 | — | 15% | Event routing |
+| EquationAutoComplete.java | 679 | — | ~10% | Tokenization + completion |
 
 ---
 
-## Open Issues Summary
+## Test Results
 
-### By Milestone
+```
+Module              Tests   Failures  Errors  Skipped
+forrester-engine    1,207   0         0       0
+forrester-app       618     0         0       2
+forrester-demos     44      0         0       0
+forrester-tools     37      0         0       0
+forrester-ui        22      0         0       0
+TOTAL               1,928   0         0       2
+```
 
-| Milestone | Count |
-|-----------|-------|
-| R1 | 30 open issues |
-| R2 | 27 open issues |
-| Unassigned | 0 |
-
-All open issues have been triaged to a milestone.
+SpotBugs 4.9.8: **1 bug** (Medium — #227).
 
 ---
 
-## Comparison: Previous Audit vs. Current
+## Open Issues by Milestone
 
-| Metric | Previous (start of session) | Current | Change |
-|--------|---------------------------|---------|--------|
-| Source files | 277 | 282 | +5 |
-| Source LoC | 44,029 | 45,586 | +1,557 |
-| Test LoC | 25,828 | 26,607 | +779 |
-| Test:Source ratio | 0.59 | 0.58 | -0.01 |
-| Tests passing | 1,732 | 1,830 | +98 |
-| SpotBugs findings | 0 | 0 | — |
-| Open critical issues | 4 | 0 | -4 (all fixed) |
-| Open high issues | 4 | 3 | -1 |
-| Open medium issues | 12 | 15 | +3 |
-| Open low issues | 14 | 14 | — |
-| Engine instruction coverage | 87.3% | 87.5% | +0.2% |
-| App instruction coverage | 37.5% | 39.3% | +1.8% |
+### R1 (Release 1) — 18 open
+
+| # | Title | Type |
+|---|-------|------|
+| 49 | Add larger demo models from MetaSD and TU Delft | Feature |
+| 81 | Add automated layout regression tests | Feature |
+| 89 | Add maturity visual indicators on canvas | Feature |
+| 96 | Create landing page / README | Docs |
+| 97 | Write user manual | Docs |
+| 99 | Publish forrester-engine JAR to Maven Central | Release |
+| 100 | Create platform installers with jpackage | Release |
+| 101 | Write GitHub README | Docs |
+| 131 | Equation rename uses string token replacement | Medium bug |
+| 154 | Review element naming policy | Medium |
+| 226 | Unsaved changes dialog comes up twice | Medium bug |
+| 227 | BatchImportCli null dereference | Medium bug |
+| 228 | Decompose ModelCanvas god class | Medium |
+| 230 | Comment-only catch blocks | Medium |
+| 231 | Broad catch(Exception) in ModelCompiler/ImportPipeline | Medium bug |
+| 233 | Add tests for CompilationContext/CompiledModel | Medium |
+
+### R2 — 24 open
+
+4, 29, 67, 68, 69, 72, 77, 85, 88, 114, 116, 133, 175, 177, 187, 188, 191, 200, 202, 203, 204, 205, 210, 211, 212, 213, 216, 229, 232, 234
+
+---
+
+## Comparison: Previous Audit (Rev 1) vs. Current (Rev 2)
+
+| Metric | Rev 1 | Rev 2 | Change |
+|--------|-------|-------|--------|
+| Source files | 282 | 288 | +6 |
+| Source LoC | 45,586 | 46,764 | +1,178 |
+| Test files | 126 | 139 | +13 |
+| Test LoC | 26,607 | 28,569 | +1,962 |
+| Test:Source ratio | 0.58 | 0.61 | +0.03 |
+| Tests passing | 1,830 | 1,928 | +98 |
+| SpotBugs version | 4.8.6 (broken on JDK 25) | 4.9.8 | Upgraded |
+| SpotBugs findings | 0 (incomplete scan) | 1 | Now scanning all classes |
+| Open critical issues | 0 | 0 | — |
+| Open high issues | 3 | 0 | **-3 (all fixed)** |
+| Open medium issues | 15 | 17 | +2 (5 fixed, 7 new) |
+| Open low issues | 14 | 17 | +3 (new findings) |
+| Engine instruction coverage | 87.5% | 89.1% | +1.6% |
+| App instruction coverage | 39.3% | 40.6% | +1.3% |
+| UI instruction coverage | 0% | 90.6% | **+90.6%** |
 
 ---
 
 ## Recommendations
 
+### Immediate (R1 blockers)
+
+1. Fix null dereference in BatchImportCli (#227) — SpotBugs finding
+2. Replace broad catch(Exception) blocks (#231) — 2 remaining
+3. Add debug logging to comment-only catch blocks (#230) — 12 occurrences
+4. Add engine tests for CompilationContext/CompiledModel (#233)
+5. Begin ModelCanvas decomposition (#228)
+
 ### Short-term (R1)
 
-1. **Add depth guard to DependencyGraph Tarjan SCC (#218)** — high severity, stack overflow risk
-2. **Fix LookupForm mutation-before-validation (#219)** — high severity, data corruption
-3. **Sanitize URL filenames in BatchImportCli (#222)** — high severity, path traversal
-4. Fix ExportBounds crash on empty model (#220)
-5. Add `volatile` to FanChart static fields (#221)
-6. Shut down UndoManager compressor executor (#223)
-7. Fix equation rename via AST (#131)
-8. Add forrester-ui tests (#145)
-9. Convert `return null` to Optional in io/ package (#163)
-10. Add unit tests for ModelReport (#178)
-11. Fix BatchImportCli URI validation (#189)
-12. Move UndoManager serialization off FX thread (#190)
-13. Fix ESC to dismiss autocomplete (#206)
-14. Fix silent parsing failures in forms (#207)
-15. Add end-to-end integration tests (#214)
-16. Fix EquationAutoComplete.detach() in all forms (#201)
+6. Fix equation rename to use AST (#131)
+7. Fix unsaved-changes double-dialog (#226)
+8. Review element naming policy (#154)
 
 ### Medium-term (R2)
 
-11. Fix misnamed logger.xml (#187)
-12. Fix String.format locale issues (#188)
-13. Improve app module test coverage (#177)
-14. Add Checkstyle/ErrorProne to build pipeline (#210, #211)
-15. Add .editorconfig (#212)
-16. ModelDefinition builder pattern (#72)
-17. Reduce SvgExporter/CanvasRenderer duplication (#67)
-
-### Ongoing
-
-18. Monitor SpotBugs on every commit (enforced in CI)
-19. Maintain zero-tolerance for empty catch blocks and printStackTrace
-20. Track JaCoCo coverage per release
+9. Improve app module test coverage (#177) — 22 zero-coverage classes
+10. Apply Checkstyle project-wide (#211) with CI enforcement (#210)
+11. Add .editorconfig (#212)
+12. Split app.canvas mega-package (#232)
+13. Extract long methods (#234)
+14. Remove unused imports (#229)
