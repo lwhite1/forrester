@@ -38,8 +38,6 @@ import static systems.courant.forrester.measure.Units.DAY;
  */
 public class Workforce {
 
-    private static final DimensionlessUnits DIMENSIONLESS_UNIT = DimensionlessUnits.DIMENSIONLESS;
-
     private final Module module;
     private final Variable totalWorkforce;
     private final Variable fractionExperienced;
@@ -64,7 +62,7 @@ public class Workforce {
                 newlyHiredWorkforce.getQuantity().getValue()
                         + experiencedWorkforce.getQuantity().getValue());
 
-        workforceFte = new Variable("Full Time Equivalent workforce", DIMENSIONLESS_UNIT, () ->
+        workforceFte = new Variable("Full Time Equivalent workforce", DimensionlessUnits.DIMENSIONLESS, () ->
                 averageDailyManPowerPerStaff.getValue() * totalWorkforce.getValue());
 
         Variable fullTimeEquivalentExperiencedWorkforce = new Variable(
@@ -92,18 +90,18 @@ public class Workforce {
                 workforceLevelSought.getValue() - totalWorkforce.getValue());
 
         Constant trainersPerNewHire =
-                new Constant("Trainers per New Hire", DIMENSIONLESS_UNIT, trainersPerNewHireValue);
+                new Constant("Trainers per New Hire", DimensionlessUnits.DIMENSIONLESS, trainersPerNewHireValue);
 
         dailyTrainingOverhead = new Variable("Daily overhead for training", ItemUnits.PEOPLE, () ->
                 trainersPerNewHire.getValue() * newlyHiredWorkforce.getQuantity().getValue());
 
-        communicationOverhead = new Variable("Communication overhead", DIMENSIONLESS_UNIT, () -> {
+        communicationOverhead = new Variable("Communication overhead", DimensionlessUnits.DIMENSIONLESS, () -> {
             double teamSize = totalWorkforce.getValue();
             return teamSize * (teamSize - 1) * communicationOverheadPerPair;
         });
 
         fractionExperienced = new Variable("Fraction of Workforce with Experience",
-                DIMENSIONLESS_UNIT, () -> {
+                DimensionlessUnits.DIMENSIONLESS, () -> {
                     double total = totalWorkforce.getValue();
                     if (total <= 0) {
                         return 0.0;
