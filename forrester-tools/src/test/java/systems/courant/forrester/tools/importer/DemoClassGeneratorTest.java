@@ -11,7 +11,9 @@ import systems.courant.forrester.model.def.StockDef;
 
 import org.junit.jupiter.api.Test;
 
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -128,6 +130,38 @@ class DemoClassGeneratorTest {
         assertThat(source).contains("new AuxDef(");
         assertThat(source).contains("\"growth_rate\"");
         assertThat(source).contains("\"Pop * 0.03\"");
+    }
+
+    @Test
+    void shouldUseMapOfEntriesForMoreThan10Bindings() {
+        // Build a module with 12 input bindings
+        Map<String, String> inputs = new LinkedHashMap<>();
+        for (int i = 1; i <= 12; i++) {
+            inputs.put("port" + i, "value" + i);
+        }
+
+        ModelDefinition innerDef = new ModelDefinitionBuilder()
+                .name("Inner")
+                .stock("X", 0, "unit")
+                .defaultSimulation("Day", 10.0, "Day")
+                .build();
+
+        ModelDefinition def = new ModelDefinitionBuilder()
+                .name("Test")
+                .module("myModule", innerDef, inputs, Map.of())
+                .defaultSimulation("Day", 10.0, "Day")
+                .build();
+
+        ModelMetadata metadata = ModelMetadata.builder().license("CC-BY-SA-4.0").build();
+
+        String source = generator.generate(def, metadata, "TestDemo",
+                "systems.courant.forrester.demo", "test.xmile",
+                List.of(), List.of());
+
+        // Should use Map.ofEntries instead of Map.of for >10 entries
+        assertThat(source).contains("Map.ofEntries(");
+        assertThat(source).contains("Map.entry(");
+        assertThat(source).doesNotContain("Map.of(\"port");
     }
 
     @Test

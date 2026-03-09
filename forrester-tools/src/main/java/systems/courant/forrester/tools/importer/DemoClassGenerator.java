@@ -364,7 +364,7 @@ public class DemoClassGenerator {
     private void emitMapLiteral(StringBuilder sb, Map<String, String> map, String indent) {
         if (map.isEmpty()) {
             sb.append(indent).append("Map.of()");
-        } else {
+        } else if (map.size() <= 10) {
             sb.append(indent).append("Map.of(");
             boolean first = true;
             for (var entry : map.entrySet()) {
@@ -373,6 +373,19 @@ public class DemoClassGenerator {
                 }
                 sb.append(escapeString(entry.getKey())).append(", ")
                         .append(escapeString(entry.getValue()));
+                first = false;
+            }
+            sb.append(')');
+        } else {
+            sb.append(indent).append("Map.ofEntries(\n");
+            boolean first = true;
+            for (var entry : map.entrySet()) {
+                if (!first) {
+                    sb.append(",\n");
+                }
+                sb.append(indent).append("    Map.entry(")
+                        .append(escapeString(entry.getKey())).append(", ")
+                        .append(escapeString(entry.getValue())).append(')');
                 first = false;
             }
             sb.append(')');
