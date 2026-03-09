@@ -35,6 +35,7 @@ public class Forecast implements Formula, Resettable {
 
     private double averageInput;
     private double trend;
+    private double lastInputVal;
     private boolean initialized;
     private int lastStep = -1;
 
@@ -73,6 +74,7 @@ public class Forecast implements Formula, Resettable {
     public void reset() {
         averageInput = 0;
         trend = 0;
+        lastInputVal = 0;
         initialized = false;
         lastStep = -1;
     }
@@ -86,26 +88,26 @@ public class Forecast implements Formula, Resettable {
     @Override
     public double getCurrentValue() {
         int step = currentStep.getAsInt();
-        double inputVal = input.getAsDouble();
         if (!initialized) {
+            lastInputVal = input.getAsDouble();
             double denom = 1 + initialTrend * averagingTime;
-            averageInput = denom != 0 ? inputVal / denom : inputVal;
+            averageInput = denom != 0 ? lastInputVal / denom : lastInputVal;
             trend = initialTrend;
             initialized = true;
             lastStep = step;
         } else if (step > lastStep) {
             int delta = step - lastStep;
             for (int d = 0; d < delta; d++) {
-                inputVal = input.getAsDouble();
-                averageInput += (inputVal - averageInput) / averagingTime;
+                lastInputVal = input.getAsDouble();
+                averageInput += (lastInputVal - averageInput) / averagingTime;
                 if (averageInput != 0) {
-                    trend = (inputVal - averageInput) / (averageInput * averagingTime);
+                    trend = (lastInputVal - averageInput) / (averageInput * averagingTime);
                 } else {
                     trend = 0;
                 }
             }
             lastStep = step;
         }
-        return inputVal * (1 + trend * horizon);
+        return lastInputVal * (1 + trend * horizon);
     }
 }
