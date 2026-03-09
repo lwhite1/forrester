@@ -12,8 +12,6 @@ import javafx.scene.text.TextAlignment;
  */
 public final class ElementRenderer {
 
-    private static final Text MEASURE_TEXT = new Text();
-
     private ElementRenderer() {
     }
 
@@ -272,16 +270,16 @@ public final class ElementRenderer {
      * Uses a shared {@link Text} node for measurement.
      */
     static String truncate(String name, Font font, double maxWidth) {
-        MEASURE_TEXT.setText(name);
-        MEASURE_TEXT.setFont(font);
-        if (MEASURE_TEXT.getLayoutBounds().getWidth() <= maxWidth) {
+        Text measureText = new Text(name);
+        measureText.setFont(font);
+        if (measureText.getLayoutBounds().getWidth() <= maxWidth) {
             return name;
         }
         String ellipsis = "\u2026";
         for (int end = name.length() - 1; end > 0; end--) {
             String candidate = name.substring(0, end) + ellipsis;
-            MEASURE_TEXT.setText(candidate);
-            if (MEASURE_TEXT.getLayoutBounds().getWidth() <= maxWidth) {
+            measureText.setText(candidate);
+            if (measureText.getLayoutBounds().getWidth() <= maxWidth) {
                 return candidate;
             }
         }
