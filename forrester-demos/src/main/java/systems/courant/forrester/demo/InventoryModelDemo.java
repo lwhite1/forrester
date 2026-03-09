@@ -7,7 +7,6 @@ package systems.courant.forrester.demo;
 
 import systems.courant.forrester.Simulation;
 import systems.courant.forrester.measure.Quantity;
-import systems.courant.forrester.measure.Unit;
 import systems.courant.forrester.model.Flow;
 import systems.courant.forrester.model.Model;
 import systems.courant.forrester.model.ModelMetadata;
@@ -27,8 +26,6 @@ import static systems.courant.forrester.measure.Units.THING;
  * settling, demonstrating how delays in feedback loops amplify fluctuations.
  */
 public class InventoryModelDemo {
-
-    private static final Unit CARS = THING;
 
     public static void main(String[] args) {
         double initialCarsOnLot = 200;
@@ -60,31 +57,31 @@ public class InventoryModelDemo {
                 .build());
         Simulation run = new Simulation(model, DAY, DAY, durationDays);
 
-        Stock carsOnLot = new Stock("Cars on Lot", initialCarsOnLot, CARS);
+        Stock carsOnLot = new Stock("Cars on Lot", initialCarsOnLot, THING);
 
-        Variable demand = new Variable("Customer Demand", CARS,
+        Variable demand = new Variable("Customer Demand", THING,
                 () -> run.getCurrentStep() <= demandStepChangeDay ? baseDemand : stepDemand);
 
         Flow sales = Flow.create("Sales", DAY, () ->
-                new Quantity(Math.min(carsOnLot.getValue(), demand.getValue()), CARS));
+                new Quantity(Math.min(carsOnLot.getValue(), demand.getValue()), THING));
 
-        Stock perceivedSales = new Stock("Perceived Sales", initialPerceivedSales, CARS);
+        Stock perceivedSales = new Stock("Perceived Sales", initialPerceivedSales, THING);
 
         Flow perceptionAdjustment = Flow.create("Perception Adjustment", DAY, () -> {
             double adjustment = (sales.flowPerTimeUnit(DAY).getValue() - perceivedSales.getValue())
                     / perceptionDelay;
-            return new Quantity(adjustment, CARS);
+            return new Quantity(adjustment, THING);
         });
 
         perceivedSales.addInflow(perceptionAdjustment);
 
-        Variable desiredInventory = new Variable("Desired Inventory", CARS,
+        Variable desiredInventory = new Variable("Desired Inventory", THING,
                 () -> perceivedSales.getValue() * desiredInventoryMultiplier);
 
-        Variable inventoryGap = new Variable("Gap between desired and actual inventory", CARS,
+        Variable inventoryGap = new Variable("Gap between desired and actual inventory", THING,
                 () -> desiredInventory.getValue() - carsOnLot.getValue());
 
-        Variable ordersToFactory = new Variable("Orders to Factory", CARS,
+        Variable ordersToFactory = new Variable("Orders to Factory", THING,
                 () -> Math.max(perceivedSales.getValue()
                         + inventoryGap.getValue() / responseDelay, 0));
 
@@ -92,10 +89,10 @@ public class InventoryModelDemo {
 
         Flow deliveries = Flow.create("Deliveries", DAY, () -> {
             if (run.getCurrentStep() <= totalDelay) {
-                return new Quantity(initialPerceivedSales, CARS);
+                return new Quantity(initialPerceivedSales, THING);
             }
             int priorStep = run.getCurrentStep() - totalDelay;
-            return new Quantity(ordersToFactory.getHistoryAtTimeStep(priorStep), CARS);
+            return new Quantity(ordersToFactory.getHistoryAtTimeStep(priorStep), THING);
         });
 
         carsOnLot.addInflow(deliveries);

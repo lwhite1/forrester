@@ -56,7 +56,6 @@ public class SoftwareProduction {
 
     private static final Unit TASKS = new ItemUnit("Task");
     private static final Unit TASKS_PER_PERSON_DAY = new ItemUnit("Tasks per person day");
-    private static final DimensionlessUnits DIMENSIONLESS = DimensionlessUnits.DIMENSIONLESS;
 
     private final Module module;
 
@@ -81,7 +80,7 @@ public class SoftwareProduction {
         // --- Variables ---
 
         // Completion fraction: how far along the project is (used to drive discovery and integration)
-        Variable completionFraction = new Variable("Completion Fraction", DIMENSIONLESS, () -> {
+        Variable completionFraction = new Variable("Completion Fraction", DimensionlessUnits.DIMENSIONLESS, () -> {
             double completed = tasksCompleted.getValue();
             double undiscovered = undiscoveredRework.getValue();
             double total = completed + undiscovered;
@@ -94,7 +93,7 @@ public class SoftwareProduction {
         // FCC: affected by experience mix
         // Lookup: fractionExperienced 0.0 → multiplier 0.6, 1.0 → multiplier 1.2 (linear)
         Variable fractionCorrectAndComplete = new Variable("Fraction Correct and Complete",
-                DIMENSIONLESS, () -> {
+                DimensionlessUnits.DIMENSIONLESS, () -> {
                     double fe = fractionExperienced.getValue();
                     double experienceMultiplier = 0.6 + 0.6 * fe; // 0.6 at fe=0, 1.2 at fe=1
                     return Math.min(baseFCC * experienceMultiplier, 1.0);
@@ -102,7 +101,7 @@ public class SoftwareProduction {
 
         // Rework discovery fraction: interpolates from base to testing as completion rises
         Variable reworkDiscoveryFraction = new Variable("Rework Discovery Fraction",
-                DIMENSIONLESS, () -> {
+                DimensionlessUnits.DIMENSIONLESS, () -> {
                     double cf = completionFraction.getValue();
                     return baseReworkDiscoveryFraction
                             + (testingReworkDiscoveryFraction - baseReworkDiscoveryFraction) * cf;
@@ -110,7 +109,7 @@ public class SoftwareProduction {
 
         // Integration effort multiplier: makes rework more expensive late in the project
         Variable integrationEffortMultiplier = new Variable("Integration Effort Multiplier",
-                DIMENSIONLESS, () -> {
+                DimensionlessUnits.DIMENSIONLESS, () -> {
                     double cf = completionFraction.getValue();
                     return 1.0 + integrationCoefficient * cf * cf;
                 });

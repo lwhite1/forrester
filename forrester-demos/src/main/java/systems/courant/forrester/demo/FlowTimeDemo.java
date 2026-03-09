@@ -30,8 +30,6 @@ import static systems.courant.forrester.measure.Units.WEEK;
  */
 public class FlowTimeDemo {
 
-    private static final ItemUnits TEST = ItemUnits.THING;
-
     public static void main(String[] args) {
         double initialWip = 1000;
         double tatGoalHours = 336;
@@ -53,7 +51,7 @@ public class FlowTimeDemo {
                 .license("CC-BY-SA-4.0")
                 .build());
 
-        Stock wip = new Stock("WIP", initialWip, TEST);
+        Stock wip = new Stock("WIP", initialWip, ItemUnits.THING);
         Stock tat = new Stock("TAT", tatGoalHours, HOUR);
 
         Variable discrepancy = new Variable("Discrepancy", HOUR,
@@ -67,7 +65,7 @@ public class FlowTimeDemo {
             int demandDelay = Math.toIntExact(Math.round(tat.getValue()));
             int stepToGet = sim.getCurrentStep() - demandDelay;
             double demandPlusDelay = demand.getHistoryAtTimeStep(stepToGet);
-            return new Quantity(Math.min(capacity, demandPlusDelay), TEST);
+            return new Quantity(Math.min(capacity, demandPlusDelay), ItemUnits.THING);
         });
 
         Flow tatAdjustment = Flow.create("TAT Adjustment", HOUR, () -> {

@@ -32,7 +32,6 @@ import systems.courant.forrester.model.Variable;
 public class StaffAllocation {
 
     private static final Unit PERSON_DAYS_PER_DAY = new ItemUnit("Person days per day");
-    private static final DimensionlessUnits DIMENSIONLESS_UNIT = DimensionlessUnits.DIMENSIONLESS;
 
     private final Module module;
     private final Variable dailyResourcesForProduction;
@@ -51,7 +50,7 @@ public class StaffAllocation {
                 () -> totalWorkforce.getValue() * averageDailyManPowerPerStaff.getValue());
 
         Constant plannedFractionOfStaffForQA =
-                new Constant("Planned fraction of resources for QA", DIMENSIONLESS_UNIT,
+                new Constant("Planned fraction of resources for QA", DimensionlessUnits.DIMENSIONLESS,
                         plannedFractionForQA);
 
         Variable dailyResourcesAvailable =
@@ -62,11 +61,11 @@ public class StaffAllocation {
                                 - communicationOverhead.getValue()));
 
         Variable actualFractionOfStaffForQA =
-                new Variable("Actual fraction of resources for QA", DIMENSIONLESS_UNIT,
+                new Variable("Actual fraction of resources for QA", DimensionlessUnits.DIMENSIONLESS,
                         plannedFractionOfStaffForQA::getValue);
 
         Constant lossFromOverhead =
-                new Constant("Loss from overhead", DIMENSIONLESS_UNIT, overheadLoss);
+                new Constant("Loss from overhead", DimensionlessUnits.DIMENSIONLESS, overheadLoss);
 
         dailyResourcesForQA = new Variable("Daily resources performing QA",
                 PERSON_DAYS_PER_DAY,

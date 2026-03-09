@@ -36,11 +36,7 @@ public class AgileSoftwareDevelopmentDemo {
     double projectSize = 100_000;  // tasks
     double releaseSize = 25_000;
     double sprintSize = 2_500;
-    double inexperiencedStaff = 10;
-    double experiencedStaff = 10;
-
     double nominalProductivityPerPersonWeek = 200; // tasks
-    double relativeProductivityOfNewStaff = .20;
 
     double nominalFractionCorrectAndComplete = .80;
 

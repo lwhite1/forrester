@@ -27,8 +27,6 @@ import static systems.courant.forrester.measure.Units.WEEK;
  */
 public class ExponentialGrowthDemo {
 
-    private static final ItemUnits PEOPLE = ItemUnits.PEOPLE;
-
     public static void main(String[] args) {
         double initialPopulation = 100;
         double birthRate = 0.04;       // fraction per day
@@ -45,7 +43,7 @@ public class ExponentialGrowthDemo {
                 .license("CC-BY-SA-4.0")
                 .build());
 
-        Stock population = new Stock("population", initialPopulation, PEOPLE);
+        Stock population = new Stock("population", initialPopulation, ItemUnits.PEOPLE);
 
         Flow births = Flows.exponentialGrowth("Births", DAY, population, birthRate);
         Flow deaths = Flows.exponentialGrowth("Deaths", DAY, population, deathRate);
