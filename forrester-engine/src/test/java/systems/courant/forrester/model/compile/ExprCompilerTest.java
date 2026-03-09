@@ -463,6 +463,29 @@ class ExprCompilerTest {
                 assertThat(val).isBetween(0.0, 100.0);
             }
         }
+
+        @Test
+        void shouldAcceptFiveArgVensimForm() {
+            Formula formula = compiler.compile("RANDOM_NORMAL(0, 100, 50, 10, 42)");
+            for (int i = 0; i < 100; i++) {
+                double val = formula.getCurrentValue();
+                assertThat(val).isBetween(0.0, 100.0);
+            }
+        }
+
+        @Test
+        void shouldRejectThreeArgs() {
+            assertThatThrownBy(() -> compiler.compile("RANDOM_NORMAL(0, 100, 50)"))
+                    .isInstanceOf(CompilationException.class)
+                    .hasMessageContaining("4-5 arguments");
+        }
+
+        @Test
+        void shouldRejectSixArgs() {
+            assertThatThrownBy(() -> compiler.compile("RANDOM_NORMAL(0, 100, 50, 10, 42, 99)"))
+                    .isInstanceOf(CompilationException.class)
+                    .hasMessageContaining("4-5 arguments");
+        }
     }
 
     @Nested

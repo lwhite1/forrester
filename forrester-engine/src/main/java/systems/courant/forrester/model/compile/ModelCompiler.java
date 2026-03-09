@@ -144,6 +144,7 @@ public class ModelCompiler {
             DoubleSupplier[] holder = {() -> 0};
             flowHolders.add(holder);
             Flow flow = createFlow(fDef, holder, context);
+            model.addFlow(flow);
             context.addFlow(fDef.name(), flow);
             wireFlowSourceSink(fDef, flow, context, "");
         }

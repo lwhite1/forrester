@@ -91,8 +91,9 @@ public final class ModelDefinitionFactory {
         return new ModelDefinition(
                 def.name(), def.comment(), def.moduleInterface(),
                 def.stocks(), def.flows(), def.auxiliaries(), updatedConstants,
-                def.lookupTables(), def.modules(), def.subscripts(), def.views(),
-                def.defaultSimulation()
+                def.lookupTables(), def.modules(), def.subscripts(),
+                def.cldVariables(), def.causalLinks(), def.views(),
+                def.defaultSimulation(), def.metadata()
         );
     }
 
@@ -100,8 +101,9 @@ public final class ModelDefinitionFactory {
         return new ModelDefinition(
                 def.name(), def.comment(), def.moduleInterface(),
                 def.stocks(), def.flows(), def.auxiliaries(), def.constants(),
-                def.lookupTables(), def.modules(), def.subscripts(), def.views(),
-                settings
+                def.lookupTables(), def.modules(), def.subscripts(),
+                def.cldVariables(), def.causalLinks(), def.views(),
+                settings, def.metadata()
         );
     }
 }

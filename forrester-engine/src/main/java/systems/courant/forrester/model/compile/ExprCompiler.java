@@ -552,7 +552,11 @@ public class ExprCompiler {
     }
 
     private DoubleSupplier compileRandomNormal(List<Expr> args) {
-        requireArgs("RANDOM_NORMAL", args, 4);
+        if (args.size() < 4 || args.size() > 5) {
+            throw new CompilationException(
+                    "RANDOM_NORMAL requires 4-5 arguments, got " + args.size(),
+                    "RANDOM_NORMAL");
+        }
         DoubleSupplier minVal = compileExpr(args.get(0));
         DoubleSupplier maxVal = compileExpr(args.get(1));
         DoubleSupplier mean = compileExpr(args.get(2));
