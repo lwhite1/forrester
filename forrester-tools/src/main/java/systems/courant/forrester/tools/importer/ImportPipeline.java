@@ -151,7 +151,9 @@ public class ImportPipeline {
             if (definition.defaultSimulation() != null) {
                 compiled.createSimulation();
             }
-        } catch (Exception e) {
+        } catch (systems.courant.forrester.model.compile.CompilationException
+                 | systems.courant.forrester.model.expr.ParseException
+                 | IllegalStateException e) {
             errors.add(e.getClass().getSimpleName() + ": " + e.getMessage());
         }
         return errors;
