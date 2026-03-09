@@ -43,6 +43,8 @@ public class Npv implements Formula, Resettable {
                 IntSupplier currentStep) {
         Preconditions.checkNotNull(stream, "stream supplier must not be null");
         Preconditions.checkNotNull(currentStep, "currentStep supplier must not be null");
+        Preconditions.checkArgument(discountRate > -1.0,
+                "discountRate must be greater than -1.0, but got %s", discountRate);
         this.stream = stream;
         this.discountRate = discountRate;
         this.factor = factor;
