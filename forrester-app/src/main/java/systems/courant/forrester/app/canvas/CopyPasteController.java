@@ -250,7 +250,7 @@ final class CopyPasteController {
         for (Map.Entry<String, String> mapping : nameMapping.entrySet()) {
             String oldToken = mapping.getKey().replace(' ', '_');
             String newToken = mapping.getValue().replace(' ', '_');
-            result = ModelEditor.replaceToken(result, oldToken, newToken);
+            result = EquationReferenceManager.replaceToken(result, oldToken, newToken);
         }
         // Second pass: remap backtick-quoted identifiers
         result = remapBacktickTokens(result, nameMapping);
@@ -333,7 +333,7 @@ final class CopyPasteController {
                 continue;
             }
 
-            if (!ModelEditor.isTokenChar(c)) {
+            if (!EquationReferenceManager.isTokenChar(c)) {
                 result.append(c);
                 i++;
                 continue;
@@ -341,7 +341,7 @@ final class CopyPasteController {
 
             // Extract the full token
             int start = i;
-            while (i < len && ModelEditor.isTokenChar(equation.charAt(i))) {
+            while (i < len && EquationReferenceManager.isTokenChar(equation.charAt(i))) {
                 i++;
             }
             String token = equation.substring(start, i);

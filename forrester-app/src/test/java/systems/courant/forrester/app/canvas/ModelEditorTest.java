@@ -1548,32 +1548,32 @@ class ModelEditorTest {
 
         @Test
         void shouldReplaceWholeTokenOnly() {
-            String result = ModelEditor.replaceToken("A + AB + A_B", "A", "X");
+            String result = EquationReferenceManager.replaceToken("A + AB + A_B", "A", "X");
             assertThat(result).isEqualTo("X + AB + A_B");
         }
 
         @Test
         void shouldReplaceMultipleOccurrences() {
-            String result = ModelEditor.replaceToken("A + A * A", "A", "B");
+            String result = EquationReferenceManager.replaceToken("A + A * A", "A", "B");
             assertThat(result).isEqualTo("B + B * B");
         }
 
         @Test
         void shouldHandleUnderscoreTokens() {
-            String result = ModelEditor.replaceToken(
+            String result = EquationReferenceManager.replaceToken(
                     "Contact_Rate * Pop", "Contact_Rate", "New_Rate");
             assertThat(result).isEqualTo("New_Rate * Pop");
         }
 
         @Test
         void shouldNotReplacePartialMatch() {
-            String result = ModelEditor.replaceToken("Population", "Pop", "People");
+            String result = EquationReferenceManager.replaceToken("Population", "Pop", "People");
             assertThat(result).isEqualTo("Population");
         }
 
         @Test
         void shouldHandleEmptyEquation() {
-            String result = ModelEditor.replaceToken("", "A", "B");
+            String result = EquationReferenceManager.replaceToken("", "A", "B");
             assertThat(result).isEmpty();
         }
     }
