@@ -121,12 +121,12 @@ All fixes include regression tests. Tests pass clean on JDK 25.
 
 ### By Severity
 
-| Severity | Total (All Time) | Currently Open | Fixed/Closed |
-|----------|-----------------|----------------|--------------|
-| Critical | 9 | 0 | 9 |
-| High | 29 | 5 | 24 |
-| Medium | 49 | 24 | 25 |
-| Low | 23 | 16 | 7 |
+| Severity | Total (All Time) | Currently Open | Fixed (pending merge PR #275) | Closed |
+|----------|-----------------|----------------|-------------------------------|--------|
+| Critical | 9 | 0 | 0 | 9 |
+| High | 29 | 6 (+ 10 fixed in PR #275) | 10 | 13 |
+| Medium | 49 | 24 | 0 | 25 |
+| Low | 23 | 16 | 0 | 7 |
 
 ### Issues Created This Round (Rev 4)
 
@@ -144,7 +144,7 @@ All fixes include regression tests. Tests pass clean on JDK 25.
 | #273 | DemoClassGenerator drops nested modules | High |
 | #274 | ImportPipeline.resolvePackageName invalid for non-alpha | Medium |
 
-### Issues Fixed This Round
+### Issues Fixed This Round (in PR #275, pending merge — still open on GitHub)
 
 | # | Title | Severity |
 |---|-------|----------|
@@ -216,7 +216,7 @@ forrester-demos (depends on: engine, ui)
 
 ### Weaknesses
 
-1. **5 high-priority bugs remain** — mostly in code generation (DemoClassGenerator) and subscript expansion
+1. **16 high-priority bugs open** — 10 are fixed in PR #275 (pending merge), 6 genuinely open (#241, #264, #268, #271, #272, #273)
 2. **24 medium-priority issues open** — spanning all modules
 3. **ModelEditor still large** at 1,200 lines despite decomposition (#160)
 4. **No Checkstyle or ErrorProne** — only SpotBugs (#210, #211)
@@ -233,7 +233,7 @@ forrester-demos (depends on: engine, ui)
 | SpotBugs version | 4.8.6 (crashing) | 4.9.8 (working) | **Fixed** |
 | SpotBugs findings | N/A | 0 | — |
 | Open critical issues | 2 | 0 | **-2 (all fixed)** |
-| Open high issues | 6 | 5 | -1 (10 fixed, 5 new) |
+| Open high issues | 6 | 16 (10 fixed in PR #275, 6 new) | +10 |
 | Open medium issues | 18 | 24 | +6 |
 | CI status | Failing (JDK mismatch) | Fixed (JDK 25) | **Fixed** |
 
