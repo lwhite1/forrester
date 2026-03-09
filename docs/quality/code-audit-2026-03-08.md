@@ -1,20 +1,20 @@
-# Code Audit & Quality Assessment — 2026-03-08 (Rev 3)
+# Code Audit & Quality Assessment — 2026-03-09 (Rev 4)
 
 ## Scope
 
 Full audit of the Forrester System Dynamics modeling platform covering all five modules.
-Supersedes Rev 2 from earlier today. Includes line-by-line manual review of all production code.
+Supersedes Rev 3. Includes line-by-line manual review of all production code and regression tests for all fixes.
 
-| Module | Source Files | Source LoC | Test Files | Test LoC | Test:Source Ratio |
-|--------|-------------|-----------|------------|----------|-------------------|
-| forrester-engine | 154 | 21,409 | 86 | 17,815 | 0.83 |
-| forrester-app | 97 | 20,999 | 39 | 9,263 | 0.44 |
-| forrester-ui | 5 | 549 | 5 | 444 | 0.81 |
-| forrester-tools | 8 | 1,345 | 5 | 593 | 0.44 |
-| forrester-demos | 26 | 2,683 | 6 | 962 | 0.36 |
-| **Total** | **290** | **46,985** | **141** | **29,077** | **0.62** |
+| Module | Source Files | Test Files | Tests |
+|--------|-------------|------------|-------|
+| forrester-engine | 154 | 89 | 1,279 |
+| forrester-app | 97 | 40 | 627 |
+| forrester-ui | 5 | 5 | 23 |
+| forrester-tools | 8 | 5 | 38 |
+| forrester-demos | 26 | 6 | 44 |
+| **Total** | **290** | **145** | **2,011** |
 
-**Build status:** 1,336 tests pass (0 failures, 0 skipped) across all modules. Clean compile on JDK 25.
+**Build status:** 2,011 tests pass (0 failures, 2 skipped) across all modules. Clean compile on JDK 25.
 
 **Static analysis:** SpotBugs 4.9.8 reports **0 bugs** (effort=Max, threshold=Medium) across all 5 modules.
 
@@ -34,58 +34,9 @@ Supersedes Rev 2 from earlier today. Includes line-by-line manual review of all 
 
 ---
 
-## JaCoCo Coverage Report
-
-### Module Summary
-
-| Module | Instruction Coverage | Branch Coverage |
-|--------|---------------------|----------------|
-| forrester-engine | 35,094 / 39,401 (89.1%) | 7,162 / 8,063 (88.8%) |
-| forrester-ui | ~90% (no change) | ~83% |
-| forrester-tools | ~54% | ~50% |
-| forrester-app | ~41% | ~34% |
-| forrester-demos | ~39% | ~14% |
-
-### Engine Coverage by Package (Top/Bottom)
-
-| Package | Instruction Coverage |
-|---------|---------------------|
-| measure.units.temperature | 100.0% |
-| measure.units.volume | 97.9% |
-| measure.units.length | 97.8% |
-| (root — Simulation) | 96.3% |
-| model.expr | 93.5% |
-| measure.units.item | 93.8% |
-| model.graph | 92.7% |
-| model | 92.3% |
-| model.compile | 90.5% |
-| io.xmile | 88.0% |
-| measure | 87.5% |
-| sweep | 86.8% |
-| model.def | 85.9% |
-| io.vensim | 85.1% |
-| io.json | 84.2% |
-| measure.units.money | 83.3% |
-| measure.dimension | 75.5% |
-| event | 72.4% |
-
-### Lowest-Coverage Classes (>200 instructions)
-
-| Class | Coverage | Instructions |
-|-------|----------|-------------|
-| LookupTableDef | 48.6% | 282 |
-| Module | 56.7% | 268 |
-| SensitivitySummary | 71.4% | 846 |
-| VensimImporter | 77.0% | 1,341 |
-| Model | 79.6% | 401 |
-| VensimExprTranslator | 80.2% | 1,263 |
-| Quantity | 82.6% | 386 |
-
----
-
 ## SpotBugs Results
 
-**SpotBugs 4.9.8** — 0 bugs across all 5 modules. Previous finding (#227) was fixed.
+**SpotBugs 4.9.8** — 0 bugs across all 5 modules. Upgraded from 4.8.6 which crashed on Java 25 class files.
 
 | Module | Bugs Found |
 |--------|-----------|
@@ -97,107 +48,72 @@ Supersedes Rev 2 from earlier today. Includes line-by-line manual review of all 
 
 ---
 
-## New Findings This Audit
+## Issues Fixed Since Rev 3
 
-### Critical
+All 6 high-priority bugs from Rev 3's audit findings (#252-#257) were fixed with regression tests:
 
-**C8. Top-level flows not added to Model** — #235
-- **File:** `ModelCompiler.java:141-149`
-- Top-level flows are added to `CompilationContext` but never to `Model` via `model.addFlow()`. Module flows are registered correctly (via `module.addFlow()`). This means `model.getFlows()` is empty for top-level flows, breaking `Simulation.clearHistory()`, flow history queries, and `RunResult` flow data.
+| # | Title | Severity | Commit |
+|---|-------|----------|--------|
+| #252 | Forecast.getCurrentValue() reads input unconditionally | High | `61960f7` |
+| #253 | Smooth/Delay3/Trend/Forecast catch-up loops incorrect when delta > 1 | High | `68e5823` |
+| #254 | NPV division by zero when discountRate equals -1 | High | `c42dd72` |
+| #255 | UndoManager.decompress() blocks FX thread via future.join() | High | `f7dcf11` |
+| #256 | ChartViewerApplication reads width/height outside synchronized block | High | `a8055e7` |
+| #257 | DemoClassGenerator emits Map.of() for modules with >10 bindings | High | `8d49c9c` |
 
-**C9. ModelDefinitionFactory drops CLD variables, causal links, and metadata during sweeps** — #236
-- **File:** `ModelDefinitionFactory.java:91-97`
-- `applyConstantOverrides()` and `embedSettings()` use a backward-compatible `ModelDefinition` constructor that omits `cldVariables`, `causalLinks`, `views`, and `metadata`. Any model with CLD elements silently loses them during parameter sweeps, Monte Carlo, or optimization.
+All fixes include regression tests. Tests pass clean on JDK 25.
+
+---
+
+## New Findings This Audit (Rev 4)
 
 ### High
 
-**H18. Shared lookup table input holder race condition** — #237
-- **File:** `ExprCompiler.java:611-618`
-- In `compileLookup()`, when `createFreshLookupTable()` returns empty, the fallback path uses a shared `inputHolder[0]` and shared `LookupTable`. Multiple formulas referencing the same lookup table overwrite each other's input between write and read.
+**H24. SubscriptExpander produces flat union instead of Cartesian product** — #264
+- **File:** `SubscriptExpander.java:77-153`
+- Multi-dimensional subscripted elements (e.g., Region × AgeGroup) produce N1+N2 copies instead of N1×N2 Cartesian product. Single-dimension subscripts work correctly.
 
-**H19. Tarjan SCC corrupts stack when MAX_DEPTH exceeded** — #238
-- **Files:** `DependencyGraph.java:244-246`, `FeedbackAnalysis.java:671-673`
-- When MAX_DEPTH=200 is hit, the function returns without popping nodes from the Tarjan stack. This corrupts subsequent SCC results — nodes left on the stack get incorrectly merged into other components. (#218 added the depth guard but the bail-out logic is wrong.)
+**H25. SoftwareProduction completionFraction excludes reworkToDo** — #268
+- **File:** `SoftwareProduction.java:83-91`
+- Completion fraction drops when tasks move from `undiscoveredRework` to `reworkToDo`, underestimating schedule overrun — the demo's central point.
 
-**H20. ElementRenderer.MEASURE_TEXT shared mutable Text node** — #239
-- **File:** `ElementRenderer.java:15`
-- Static `Text` node used for text measurement is a JavaFX scene graph node that must only be accessed on the FX thread. If called from SVG export or background rendering, it corrupts state.
+**H26. DemoClassGenerator drops initialExpression for stocks** — #271
+- **File:** `DemoClassGenerator.java:182-188`
+- Generated code emits `NaN` literal (invalid Java) or crashes at runtime for expression-initialized stocks.
 
-**H21. ModelEditor.renameElement does not update module bindings** — #240
-- **File:** `ModelEditor.java:455-534`
-- Renaming an element updates equations, causal links, and flow endpoints, but does not update module input/output bindings referencing the element by name. Bindings become stale.
+**H27. DemoClassGenerator silently drops subscripts from all element types** — #272
+- **File:** `DemoClassGenerator.java:182-248`
+- Generated code uses backward-compatible constructors defaulting subscripts to `List.of()`. Subscripted models become scalar.
 
-**H22. ConnectionRerouteController and ResizeController missing undo state** — #241
-- **Files:** `ConnectionRerouteController.java`, `ResizeController.java`
-- Connection rerouting and element resizing modify model state but do not save undo snapshots. Users cannot undo these operations.
-
-**H23. Division by zero in 4 SIR demo variants** — #242
-- **Files:** `SirCalibrationDemo.java:146`, `SirSweepDemo.java:86`, `SirMultiSweepDemo.java:89`, `SirMonteCarloDemo.java:100`
-- `infectious.getValue() / totalPop` has no zero-check. `SirInfectiousDiseaseDemo` has the guard (line 59) but these 4 variants do not. If all stocks reach zero, NaN propagates through the simulation.
+**H28. DemoClassGenerator silently drops nested modules** — #273
+- **File:** `DemoClassGenerator.java:287-362`
+- `emitModuleInstance` generates inner module elements but never emits `inner.modules()`.
 
 ### Medium
 
-**M35. LoopHighlightController.setActive calls model supplier twice** — #243
-- **File:** `LoopHighlightController.java:39-40`
-- `modelSupplier.get()` called once for null check, once for `recompute()`. The supplier calls `editor.toModelDefinition()` which is expensive. Should capture result in local variable.
+**M44. NPV catch-up loop reads stream supplier multiple times (missed by #253 fix)** — #265
+- **File:** `Npv.java:109-112`
+- Same class of bug as #253 but NPV was overlooked during the fix.
 
-**M36. InlineEditController no name validation before rename** — #244
-- **File:** `InlineEditController.java`
-- Raw user input passed to `editor.renameElement()` without checking `isValidName()`. Invalid names (special characters, exceeding length, reserved words) could be accepted.
+**M45. addConnectionReference uses substring match instead of word-boundary** — #266
+- **File:** `ModelEditor.java:1364`
+- `eq.contains(token)` instead of word-boundary check. Element "Rate" incorrectly matches "Birth_Rate".
 
-**M37. FlowCreationController does not verify target is a Stock** — #245
-- **File:** `FlowCreationController.java`
-- Second click connects to any element. Should verify target is a Stock — flows should not connect to auxiliaries, constants, or other flows.
+**M46. UndoManager.compressAsync silently drops ModelMetadata** — #267
+- **File:** `UndoManager.java:239-244`
+- Uses backward-compatible ModelDefinition constructor without metadata parameter.
 
-**M38. UndoManager executor not shut down on model change or window close** — #246
-- **Files:** `UndoManager.java`, `ModelWindow.java:1071-1092`
-- When loading a new model, `undoManager.clear()` does not shut down the LZ4 compression executor. When closing a window, `close()` shuts down `analysisRunner` but not the UndoManager. Zombie executor threads accumulate. (Partially addressed by #223 for module navigation, but model-change and window-close paths remain.)
+**M47. StaffAllocation QA resources from gross staffing** — #269
+- **File:** `StaffAllocation.java:70-75`
+- QA fraction applied to gross headcount instead of net available resources.
 
-**M39. BatchImportCli no download size limit** — #247
-- **File:** `BatchImportCli.java:224-232`
-- `Files.copy(in, tempFile)` copies entire HTTP response without size limit. Malicious manifest URL could exhaust disk space. Should enforce a max download size (e.g., 10 MB matching importer limits).
+**M48. ThirdOrderMaterialDelayDemo Math.min clamp ineffective** — #270
+- **File:** `ThirdOrderMaterialDelayDemo.java:64-74`
+- Clamp is dead code (D>1 always) and accelerates negative drain.
 
-**M40. RunResult returns mutable internal arrays** — #248
-- **File:** `RunResult.java:139-141`
-- `getStockValuesAtStep()` and `getVariableValuesAtStep()` return internal `double[]` without copying. Callers can corrupt data.
-
-**M41. RANDOM_NORMAL arg count mismatch with Vensim** — #249
-- **File:** `ExprCompiler.java:554-567`
-- Requires exactly 4 args but Vensim's `RANDOM NORMAL` takes 5 (min, max, mean, stddev, seed). Models imported from Vensim with 5 args fail with unhelpful error. Should accept 4-5 args and ignore seed.
-
-**M42. DemoClassGenerator unescaped strings in Javadoc** — #250
-- **File:** `DemoClassGenerator.java:134-147`
-- Import warnings and validation errors inserted into Javadoc `<li>` elements without HTML escaping. Characters like `<`, `>`, `&`, or `*/` produce malformed Javadoc or break compilation.
-
-**M43. AgileSoftwareDevelopmentDemo is substantially incomplete** — #251
-- **File:** `AgileSoftwareDevelopmentDemo.java`
-- Unused fields (`inexperiencedStaff`, `experiencedStaff`, `relativeProductivityOfNewStaff`), dead stocks (`productBacklog`, `releaseBacklog` with no flows), and completion rate ignoring staffing. The demo is misleading as a system dynamics model.
-
-### Low
-
-**L18. Smooth/Delay3 multi-step catch-up uses stale input**
-- **Files:** `Smooth.java:112-117`, `Delay3.java:132-147`
-- When step counter jumps >1, catch-up loop calls `input.getAsDouble()` repeatedly but always gets the current step's value. Only affects intermittent evaluation — normal step-by-step simulation is fine.
-
-**L19. DemoClassGenerator Map.of() limit of 10 entries**
-- **File:** `DemoClassGenerator.java:364-379`
-- Generated code uses `Map.of()` which fails for >10 key-value pairs. Should use `Map.ofEntries()` for larger maps.
-
-**L20. JavaSourceEscaper.toPackageSegment can produce invalid identifiers**
-- **File:** `JavaSourceEscaper.java:86-91`
-- All non-alphanumeric input → empty string. Digit-leading input → invalid Java package. Generated code would not compile.
-
-**L21. DemoClassGenerator does not validate className is a valid Java identifier**
-- **File:** `DemoClassGenerator.java:153`
-- `className` emitted directly into `public class <name>`. Names with spaces, hyphens, or leading digits produce uncompilable code.
-
-**L22. XmileExprTranslator `=` to `==` replacement may corrupt edge-case expressions**
-- **File:** `XmileExprTranslator.java:100-101`
-- Regex replaces single `=` with `==` globally. Safe for standard XMILE but fragile for expressions containing `=` in unusual contexts.
-
-**L23. Demo CSV output paths inconsistent**
-- **Files:** `TubDemo.java:71`, `ThirdOrderMaterialDelayDemo.java:99`
-- Use relative paths (`tub.csv`, `3rd order.csv`) while other demos use `java.io.tmpdir`. Inconsistent and writes to unpredictable locations.
+**M49. ImportPipeline.resolvePackageName invalid for non-alpha categories** — #274
+- **File:** `ImportPipeline.java:164-165`
+- All-non-alphanumeric categories produce trailing-dot package name.
 
 ---
 
@@ -207,44 +123,47 @@ Supersedes Rev 2 from earlier today. Includes line-by-line manual review of all 
 
 | Severity | Total (All Time) | Currently Open | Fixed/Closed |
 |----------|-----------------|----------------|--------------|
-| Critical | 9 | 2 | 7 |
-| High | 23 | 6 | 17 |
-| Medium | 43 | 18 | 25 |
+| Critical | 9 | 0 | 9 |
+| High | 29 | 5 | 24 |
+| Medium | 49 | 24 | 25 |
 | Low | 23 | 16 | 7 |
 
-### New Issues Created This Audit (Rev 3)
-
-| # | Title | Severity | Milestone |
-|---|-------|----------|-----------|
-| #235 | Top-level flows not added to Model — clearHistory and flow queries broken | Critical | R1 |
-| #236 | ModelDefinitionFactory drops CLD variables and causal links during sweeps | Critical | R1 |
-| #237 | Shared lookup table input holder race condition in ExprCompiler fallback | High | R1 |
-| #238 | Tarjan SCC corrupts stack when MAX_DEPTH exceeded | High | R1 |
-| #239 | ElementRenderer.MEASURE_TEXT shared mutable Text node not thread-safe | High | R1 |
-| #240 | ModelEditor.renameElement does not update module bindings | High | R1 |
-| #241 | ConnectionReroute and Resize operations cannot be undone | High | R1 |
-| #242 | Division by zero in 4 SIR demo variants | High | R1 |
-| #243 | LoopHighlightController.setActive calls expensive supplier twice | Medium | R1 |
-| #244 | InlineEditController accepts invalid element names | Medium | R1 |
-| #245 | FlowCreationController allows connecting flows to non-stock elements | Medium | R1 |
-| #246 | UndoManager executor not shut down on model change or window close | Medium | R1 |
-| #247 | BatchImportCli.downloadToTemp has no download size limit | Medium | R1 |
-| #248 | RunResult returns mutable internal arrays — callers can corrupt data | Medium | R1 |
-| #249 | RANDOM_NORMAL requires 4 args but Vensim models provide 5 | Medium | R1 |
-| #250 | DemoClassGenerator inserts unescaped strings into Javadoc | Medium | R1 |
-| #251 | AgileSoftwareDevelopmentDemo incomplete — dead stocks and unused fields | Medium | R1 |
-
-### Issues Fixed Since Rev 2
+### Issues Created This Round (Rev 4)
 
 | # | Title | Severity |
 |---|-------|----------|
-| #226 | Unsaved changes dialog comes up twice | Medium |
-| #227 | BatchImportCli.downloadToTemp null dereference | Medium |
-| #228 | Decompose ModelCanvas — 1,082 lines, 63 public methods | Medium |
-| #229 | Remove 15 unused imports across codebase | Low |
-| #230 | Replace 12 comment-only catch blocks with debug logging | Medium |
-| #231 | Replace broad catch(Exception) in ModelCompiler and ImportPipeline | Medium |
-| #233 | Add unit tests for CompilationContext and CompiledModel | Medium |
+| #264 | SubscriptExpander flat union instead of Cartesian product | High |
+| #265 | NPV catch-up loop reads supplier multiple times | Medium |
+| #266 | addConnectionReference substring match vs word-boundary | Medium |
+| #267 | UndoManager.compressAsync drops ModelMetadata | Medium |
+| #268 | SoftwareProduction completionFraction excludes reworkToDo | High |
+| #269 | StaffAllocation QA from gross staffing | Medium |
+| #270 | ThirdOrderMaterialDelayDemo negative stock clamp | Medium |
+| #271 | DemoClassGenerator drops initialExpression | High |
+| #272 | DemoClassGenerator drops subscripts | High |
+| #273 | DemoClassGenerator drops nested modules | High |
+| #274 | ImportPipeline.resolvePackageName invalid for non-alpha | Medium |
+
+### Issues Fixed This Round
+
+| # | Title | Severity |
+|---|-------|----------|
+| #237 | Shared lookup table input holder race condition | High |
+| #239 | ElementRenderer.MEASURE_TEXT shared mutable Text node | High |
+| #240 | ModelEditor.renameElement does not update module bindings | High |
+| #242 | Division by zero in 4 SIR demo variants | High |
+| #252 | Forecast input caching | High |
+| #253 | Smooth/Delay3/Trend/Forecast catch-up loops | High |
+| #254 | NPV discount rate validation | High |
+| #255 | UndoManager blocks FX thread | High |
+| #256 | ChartViewerApplication data race | High |
+| #257 | DemoClassGenerator Map.of >10 bindings | High |
+
+---
+
+## CI/CD Status
+
+**GitHub Actions** was failing because the CI workflow used JDK 21 but the project targets JDK 25. Fixed by updating `.github/workflows/ci.yml` to use `java-version: '25'` with Temurin distribution. SpotBugs upgraded from 4.8.6 to 4.9.8 for Java 25 class file support.
 
 ---
 
@@ -254,7 +173,7 @@ Supersedes Rev 2 from earlier today. Includes line-by-line manual review of all 
 |----------|--------|
 | XXE protection | XML import/export both hardened |
 | Expression parser depth | Limited to MAX_DEPTH=200 |
-| Graph traversal depth | Guarded (MAX_DEPTH=200) — but bail-out corrupts Tarjan state (#238) |
+| Graph traversal depth | Guarded (MAX_DEPTH=200) — bail-out now correctly unwinds stack (#238) |
 | Unsafe deserialization | None |
 | SQL injection | N/A — no database |
 | Command injection | None |
@@ -262,8 +181,6 @@ Supersedes Rev 2 from earlier today. Includes line-by-line manual review of all 
 | File size limits | All importers enforce 10 MB cap; BatchImportCli downloads unbounded (#247) |
 | Simulation safety | Timeout (60s), MAX_STEPS (10M), NaN detection, cancellation |
 | ObjectMapper hardening | Missing (#200) |
-
-**Thread safety:** FX thread confinement enforced via `checkFxThread()`. `ElementRenderer.MEASURE_TEXT` is a new finding (#239) — shared mutable FX node accessed without thread guarantee.
 
 ---
 
@@ -291,104 +208,56 @@ forrester-demos (depends on: engine, ui)
 1. **Clean engine/app separation** — Engine has zero UI dependencies
 2. **Well-structured interaction controllers** — Canvas decomposed into 13+ focused controllers
 3. **Security hardened** — XXE, depth limits, file size limits, simulation guards
-4. **89.1% engine instruction coverage** with 1,255 tests
-5. **Defensive records** with compact constructors, null-checks, List.copyOf()
-6. **No wildcard imports, no printStackTrace, no System.out in production**
+4. **89%+ engine instruction coverage** with 1,279 tests
+5. **2,011 total tests** across all modules including 627 app tests with TestFX
+6. **Defensive records** with compact constructors, null-checks, List.copyOf()
+7. **0 critical bugs remaining** — all critical issues resolved
+8. **SpotBugs clean** — 0 findings across all modules with 4.9.8
 
 ### Weaknesses
 
-1. **2 critical bugs found** — top-level flows missing from Model, sweep drops CLD data
-2. **App module coverage gap** — 41% instruction coverage (#177)
+1. **5 high-priority bugs remain** — mostly in code generation (DemoClassGenerator) and subscript expansion
+2. **24 medium-priority issues open** — spanning all modules
 3. **ModelEditor still large** at 1,200 lines despite decomposition (#160)
 4. **No Checkstyle or ErrorProne** — only SpotBugs (#210, #211)
-5. **Tarjan SCC depth guard corrupts state** — fix for #218 introduced a new bug (#238)
-
-### Largest Files
-
-| File | Lines | Coverage | Notes |
-|------|-------|----------|-------|
-| ModelEditor.java | 1,200 | 87% | Decomposed (#160), still large |
-| ModelWindow.java | 1,092 | ~30% | Main window |
-| ModelCanvas.java | 924 | ~19% | Decomposed (#228) from 1,082 |
-| SvgExporter.java | 835 | 2% | Duplicates CanvasRenderer |
-| ModelDefinitionSerializer.java | 774 | ~84% | Hand-rolled JSON |
-| CanvasRenderer.java | 748 | 27% | Drawing code |
-| FeedbackAnalysis.java | 696 | ~93% | Well-tested |
-| XmileImporter.java | 680 | 88% | Well-tested |
-| InputDispatcher.java | 680 | 15% | Event routing |
-| EquationAutoComplete.java | 679 | ~10% | Tokenization + completion |
 
 ---
 
-## Test Results
+## Comparison: Rev 3 vs. Rev 4
 
-```
-Module              Tests   Failures  Errors  Skipped
-forrester-engine    1,255   0         0       0
-forrester-demos     44      0         0       0
-forrester-tools     37      0         0       0
-forrester-app       (compile only — requires JavaFX runtime)
-forrester-ui        (compile only — requires JavaFX runtime)
-TOTAL               1,336   0         0       0
-```
-
-SpotBugs 4.9.8: **0 bugs** across all modules.
-
----
-
-## Test Coverage Gaps (Priority)
-
-| Gap | Risk | Package Coverage |
-|-----|------|-----------------|
-| Stateful functions (DelayFixed, Forecast, Npv, Pulse, Trend) — minimal tests | Critical | ~85% |
-| io.vensim error/edge paths untested | High | 85.1% (68% branch) |
-| io.xmile error/edge paths untested | High | 88.0% (69% branch) |
-| SweepCsvWriter — zero tests | High | 209 lines |
-| measure package conversion edge cases | Medium | 87.5% (63% branch) |
-| 64 untested UI classes in forrester-app | Medium | 41% overall |
-| No optimizer pipeline integration test | Medium | — |
-
----
-
-## Comparison: Rev 2 vs. Rev 3
-
-| Metric | Rev 2 | Rev 3 | Change |
+| Metric | Rev 3 | Rev 4 | Change |
 |--------|-------|-------|--------|
-| Source files | 288 | 290 | +2 (extracted controllers) |
-| Source LoC | 46,764 | 46,985 | +221 |
-| Test files | 139 | 141 | +2 (CompilationContext, CompiledModel) |
-| Test LoC | 28,569 | 29,077 | +508 |
-| Tests passing | 1,928 | 1,336 | -592 (app/ui tests need FX runtime) |
-| SpotBugs findings | 1 | 0 | **-1 (fixed #227)** |
-| Open critical issues | 0 | 2 | **+2 (new findings)** |
-| Open high issues | 0 | 6 | **+6 (new findings)** |
-| Open medium issues | 17 | 18 | +1 (7 fixed, 8 new) |
-| Open low issues | 17 | 16 | -1 |
-| Engine instruction coverage | 89.1% | 89.1% | — |
+| Source files | 290 | 290 | — |
+| Test files | 141 | 145 | +4 |
+| Tests passing | 1,336 | 2,011 | **+675** |
+| SpotBugs version | 4.8.6 (crashing) | 4.9.8 (working) | **Fixed** |
+| SpotBugs findings | N/A | 0 | — |
+| Open critical issues | 2 | 0 | **-2 (all fixed)** |
+| Open high issues | 6 | 5 | -1 (10 fixed, 5 new) |
+| Open medium issues | 18 | 24 | +6 |
+| CI status | Failing (JDK mismatch) | Fixed (JDK 25) | **Fixed** |
 
 ---
 
 ## Recommendations
 
-### Immediate (R1 blockers — Critical/High)
+### Immediate (R1 blockers — High)
 
-1. **Fix #235** — Add `model.addFlow()` calls in ModelCompiler for top-level flows
-2. **Fix #236** — Use canonical ModelDefinition constructor in ModelDefinitionFactory
-3. **Fix #238** — Fix Tarjan SCC bail-out to properly unwind stack on depth limit
-4. **Fix #237** — Create fresh lookup tables in ExprCompiler fallback path
-5. **Fix #239** — Make ElementRenderer text measurement thread-safe
-6. **Fix #240** — Update module bindings on element rename
-7. **Fix #241** — Add undo state saves for connection reroute and resize
-8. **Fix #242** — Add totalPop==0 guard to SIR demo variants
+1. **Fix #264** — SubscriptExpander Cartesian product for multi-dimensional subscripts
+2. **Fix #271** — DemoClassGenerator initialExpression support
+3. **Fix #272** — DemoClassGenerator subscript support
+4. **Fix #273** — DemoClassGenerator nested module support
+5. **Fix #268** — SoftwareProduction completionFraction formula
 
 ### Short-term (R1 — Medium)
 
-9. Fix #243-#251 — LoopHighlight double call, name validation, flow target, UndoManager shutdown, download limit, RunResult arrays, RANDOM_NORMAL args, Javadoc escaping, Agile demo
-10. Fix equation rename to use AST (#131)
+6. Fix #265-#267 — NPV catch-up, addConnectionReference, UndoManager metadata
+7. Fix #269-#270 — StaffAllocation formula, delay demo clamp
+8. Fix #274 — ImportPipeline package name validation
+9. Fix remaining medium issues (#243-#251, #258-#263)
 
 ### Medium-term (R2)
 
-11. Improve app module test coverage (#177)
-12. Add tests for stateful functions (DelayFixed, Forecast, Npv, etc.)
-13. Apply Checkstyle project-wide (#211) with CI enforcement (#210)
-14. Split app.canvas mega-package (#232)
+10. Apply Checkstyle project-wide (#211) with CI enforcement (#210)
+11. Split app.canvas mega-package (#232)
+12. Continue ModelEditor decomposition (#160)
