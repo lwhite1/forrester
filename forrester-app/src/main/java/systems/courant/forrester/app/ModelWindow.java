@@ -378,7 +378,11 @@ public class ModelWindow {
 
         MenuItem closeItem = new MenuItem("Close");
         closeItem.setAccelerator(new KeyCodeCombination(KeyCode.W, KeyCombination.SHORTCUT_DOWN));
-        closeItem.setOnAction(e -> close());
+        closeItem.setOnAction(e -> {
+            if (fileController.confirmDiscardChanges()) {
+                close();
+            }
+        });
 
         MenuItem exitItem = new MenuItem("Exit");
         exitItem.setOnAction(e -> Platform.exit());
@@ -1060,12 +1064,11 @@ public class ModelWindow {
     }
 
     /**
-     * Closes this window. The ForresterApp will be notified via the stage's onHidden handler.
+     * Closes this window unconditionally. Callers must check for unsaved changes
+     * via {@link FileController#confirmDiscardChanges()} before calling this method.
+     * The ForresterApp will be notified via the stage's onHidden handler.
      */
     public void close() {
-        if (!fileController.confirmDiscardChanges()) {
-            return;
-        }
         if (editor != null) {
             if (logListener != null) {
                 editor.removeListener(logListener);
