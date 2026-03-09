@@ -669,6 +669,11 @@ public record FeedbackAnalysis(
             Map<String, Integer> lowlink, Set<String> onStack,
             Deque<String> stack, List<Set<String>> result, int depth) {
         if (depth > MAX_DEPTH) {
+            // Register node so callers can safely read index/lowlink,
+            // but don't push onto stack or recurse — treat as a dead end.
+            nodeIndex.put(v, index[0]);
+            lowlink.put(v, index[0]);
+            index[0]++;
             return;
         }
         nodeIndex.put(v, index[0]);

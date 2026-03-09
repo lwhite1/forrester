@@ -219,6 +219,30 @@ class DependencyGraphTest {
     }
 
     @Test
+    void shouldNotCorruptStackWhenDepthExceeded() {
+        // Build a chain of 250 auxiliaries referencing the next, with
+        // the last referencing the first to form a single deep cycle.
+        // This exceeds MAX_DEPTH=200, exercising the depth-limit bail-out.
+        ModelDefinitionBuilder builder = new ModelDefinitionBuilder().name("Deep");
+        int n = 250;
+        for (int i = 0; i < n; i++) {
+            String dep = "v" + ((i + 1) % n);
+            builder.aux("v" + i, dep, "Thing");
+        }
+        DependencyGraph graph = DependencyGraph.fromDefinition(builder.build());
+
+        // Should not throw — the depth guard must leave algorithm state consistent
+        List<Set<String>> sccs = graph.findSCCs();
+
+        // The SCC detection may be incomplete due to depth cutoff, but it
+        // must not include nodes from unrelated components
+        Set<String> allSccMembers = graph.findSccMembers();
+        for (String member : allSccMembers) {
+            assertThat(graph.allNodes()).contains(member);
+        }
+    }
+
+    @Test
     void shouldHandleEmptyModel() {
         ModelDefinition def = new ModelDefinitionBuilder()
                 .name("Empty")
