@@ -79,10 +79,7 @@ public class ModelCanvas extends Canvas {
     private boolean selectedIsCausalLink;
 
     // Feedback loop highlighting
-    private boolean loopHighlightActive;
-    private FeedbackAnalysis loopAnalysis;
-    /** Active loop index for step-through mode. -1 = show all loops. */
-    private int activeLoopIndex = -1;
+    private final LoopHighlightController loopController = new LoopHighlightController();
 
     // Validation issue indicators (element name → highest severity)
     private Map<String, Severity> elementIssues = Map.of();
@@ -248,78 +245,44 @@ public class ModelCanvas extends Canvas {
         }
     }
 
-    // --- Loop analysis ---
+    // --- Loop analysis (delegated to LoopHighlightController) ---
 
     public void setLoopHighlightActive(boolean active) {
-        this.loopHighlightActive = active;
-        this.activeLoopIndex = -1;
-        if (active && editor != null) {
-            recomputeLoopAnalysis();
-        } else {
-            this.loopAnalysis = null;
-        }
+        loopController.setActive(active,
+                () -> editor != null ? editor.toModelDefinition(canvasState.toViewDef()) : null);
         redraw();
     }
 
     public boolean isLoopHighlightActive() {
-        return loopHighlightActive;
+        return loopController.isActive();
     }
 
     public FeedbackAnalysis getLoopAnalysis() {
-        return loopAnalysis;
+        return loopController.getAnalysis();
     }
 
-    /**
-     * Returns the active loop index for step-through mode.
-     * -1 means all loops are shown.
-     */
     public int getActiveLoopIndex() {
-        return activeLoopIndex;
+        return loopController.getActiveIndex();
     }
 
-    /**
-     * Sets the active loop index. -1 = show all loops.
-     */
     public void setActiveLoopIndex(int index) {
-        if (loopAnalysis == null) {
-            return;
+        if (loopController.setActiveIndex(index)) {
+            redraw();
+            fireStatusChanged();
         }
-        int count = loopAnalysis.loopCount();
-        if (index < -1 || index >= count) {
-            index = -1;
-        }
-        this.activeLoopIndex = index;
-        redraw();
-        fireStatusChanged();
     }
 
-    /**
-     * Steps to the next loop, wrapping around. If showing all, goes to first loop.
-     */
     public void stepLoopForward() {
-        if (loopAnalysis == null || loopAnalysis.loopCount() == 0) {
-            return;
-        }
-        int count = loopAnalysis.loopCount();
-        if (activeLoopIndex < 0) {
-            setActiveLoopIndex(0);
-        } else {
-            setActiveLoopIndex((activeLoopIndex + 1) % count);
+        if (loopController.stepForward()) {
+            redraw();
+            fireStatusChanged();
         }
     }
 
-    /**
-     * Steps to the previous loop, wrapping around. If showing all, goes to last loop.
-     */
     public void stepLoopBack() {
-        if (loopAnalysis == null || loopAnalysis.loopCount() == 0) {
-            return;
-        }
-        int count = loopAnalysis.loopCount();
-        if (activeLoopIndex < 0) {
-            setActiveLoopIndex(count - 1);
-        } else {
-            setActiveLoopIndex((activeLoopIndex - 1 + count) % count);
+        if (loopController.stepBack()) {
+            redraw();
+            fireStatusChanged();
         }
     }
 
@@ -376,24 +339,9 @@ public class ModelCanvas extends Canvas {
         return series;
     }
 
-    private void recomputeLoopAnalysis() {
-        if (editor == null) {
-            loopAnalysis = null;
-            activeLoopIndex = -1;
-            return;
-        }
-        loopAnalysis = FeedbackAnalysis.analyze(
-                editor.toModelDefinition(canvasState.toViewDef()));
-        // Clamp index if loops were removed
-        if (activeLoopIndex >= loopAnalysis.loopCount()) {
-            activeLoopIndex = -1;
-        }
-    }
-
     private void invalidateLoopAnalysis() {
-        if (loopHighlightActive && editor != null) {
-            recomputeLoopAnalysis();
-        }
+        loopController.invalidate(
+                editor != null ? editor.toModelDefinition(canvasState.toViewDef()) : null);
     }
 
     // --- Validation indicators ---
@@ -745,13 +693,7 @@ public class ModelCanvas extends Canvas {
     }
 
     public FeedbackAnalysis getActiveLoopAnalysis() {
-        if (!loopHighlightActive || loopAnalysis == null) {
-            return null;
-        }
-        if (activeLoopIndex >= 0) {
-            return loopAnalysis.filterToLoop(activeLoopIndex);
-        }
-        return loopAnalysis;
+        return loopController.getActiveAnalysis();
     }
 
     public double getZoomScale() {
