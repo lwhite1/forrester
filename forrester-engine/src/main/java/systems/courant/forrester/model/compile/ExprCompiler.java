@@ -607,15 +607,10 @@ public class ExprCompiler {
         if (freshTable.isPresent()) {
             return freshTable.get()::getCurrentValue;
         }
-        // Fallback: use shared holder (for tables registered without a def)
-        double[] inputHolder = context.resolveLookupInputHolder(resolvedName)
-                .orElseThrow(() -> new CompilationException(
-                        "No input holder found for lookup table: " + tableName, tableName));
-        LookupTable finalTable = existing.get();
-        return () -> {
-            inputHolder[0] = input.getAsDouble();
-            return finalTable.getCurrentValue();
-        };
+        // Fallback: create a per-reference copy to prevent cross-formula interference
+        // when multiple formulas reference the same lookup table (tables registered without a def)
+        LookupTable isolatedTable = existing.get().withInput(input);
+        return isolatedTable::getCurrentValue;
     }
 
     private DoubleSupplier compileConditional(Expr.Conditional cond) {

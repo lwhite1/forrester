@@ -68,6 +68,25 @@ public class LookupTable implements Formula {
         this.yAtXMax = yValues[yValues.length - 1];
     }
 
+    private LookupTable(UnivariateFunction interpolation, DoubleSupplier inputSupplier,
+                        double xMin, double xMax, double yAtXMin, double yAtXMax) {
+        this.interpolation = interpolation;
+        this.inputSupplier = inputSupplier;
+        this.xMin = xMin;
+        this.xMax = xMax;
+        this.yAtXMin = yAtXMin;
+        this.yAtXMax = yAtXMax;
+    }
+
+    /**
+     * Returns a new LookupTable that shares this table's interpolation function
+     * but uses a different input supplier. This prevents cross-formula interference
+     * when multiple formulas reference the same lookup table.
+     */
+    public LookupTable withInput(DoubleSupplier newInputSupplier) {
+        return new LookupTable(interpolation, newInputSupplier, xMin, xMax, yAtXMin, yAtXMax);
+    }
+
     /**
      * Creates a lookup table using linear interpolation between data points.
      *
