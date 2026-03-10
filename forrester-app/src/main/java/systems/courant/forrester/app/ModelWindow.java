@@ -540,8 +540,16 @@ public class ModelWindow {
         validationIssuesItem.setDisable(true);
         validationIssuesItem.setOnAction(e -> showValidationDialog());
 
+        CheckMenuItem hideAuxItem = new CheckMenuItem("Hide Auxiliaries");
+        hideAuxItem.setId("menuHideAuxiliaries");
+        hideAuxItem.setOnAction(e -> {
+            canvas.setHideAuxiliaries(hideAuxItem.isSelected());
+            canvas.requestFocus();
+        });
+
         viewMenu.getItems().addAll(commandPaletteItem, new SeparatorMenuItem(),
                 zoomToFitItem, resetZoomItem, new SeparatorMenuItem(),
+                hideAuxItem, new SeparatorMenuItem(),
                 validationIssuesItem, new SeparatorMenuItem(),
                 activityLogItem, popOutDashboardItem);
         viewMenu.setDisable(true);
@@ -845,8 +853,7 @@ public class ModelWindow {
         if (result.isClean()) {
             return;
         }
-        ValidationDialog dialog = new ValidationDialog(result, canvas::selectElement);
-        dialog.show();
+        ValidationDialog.showOrUpdate(result, canvas::selectElement);
     }
 
     private void showModelInfoDialog() {

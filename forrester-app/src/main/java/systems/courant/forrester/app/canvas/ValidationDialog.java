@@ -25,13 +25,54 @@ import java.util.function.Consumer;
 /**
  * A separate window that displays model validation results in a table.
  * Clicking a row with an element name invokes a callback to select it on the canvas.
+ *
+ * <p>Only one validation dialog may be open at a time. Use {@link #showOrUpdate} to
+ * create a new dialog or refresh and bring an existing one to the front.
  */
 public class ValidationDialog extends Stage {
 
+    private static ValidationDialog openInstance;
+
+    private final TableView<ValidationIssue> table;
+    private final Label summaryLabel;
+    private final Button copyButton;
+    private ValidationResult currentResult;
+
+    /**
+     * Shows a validation dialog with the given result. If a dialog is already open,
+     * refreshes its contents and brings it to the front instead of creating a new one.
+     *
+     * @param result          the validation result to display
+     * @param onSelectElement callback invoked when a row is clicked
+     */
+    public static void showOrUpdate(ValidationResult result, Consumer<String> onSelectElement) {
+        if (openInstance != null && openInstance.isShowing()) {
+            openInstance.updateResult(result);
+            openInstance.toFront();
+            openInstance.requestFocus();
+            return;
+        }
+        ValidationDialog dialog = new ValidationDialog(result, onSelectElement);
+        openInstance = dialog;
+        dialog.show();
+    }
+
+    /**
+     * Returns the currently open validation dialog, or {@code null} if none is showing.
+     * Visible for testing.
+     */
+    static ValidationDialog getOpenInstance() {
+        if (openInstance != null && !openInstance.isShowing()) {
+            openInstance = null;
+        }
+        return openInstance;
+    }
+
     public ValidationDialog(ValidationResult result, Consumer<String> onSelectElement) {
         setTitle("Model Validation");
+        this.currentResult = result;
 
-        TableView<ValidationIssue> table = new TableView<>();
+        table = new TableView<>();
         table.setPlaceholder(new Label("No issues found. Model is clean."));
 
         TableColumn<ValidationIssue, String> severityCol = new TableColumn<>("Severity");
@@ -65,18 +106,13 @@ public class ValidationDialog extends Stage {
         });
 
         // Summary label
-        Label summaryLabel = new Label();
+        summaryLabel = new Label();
         summaryLabel.setPadding(new Insets(6, 8, 6, 8));
-        if (result.isClean()) {
-            summaryLabel.setText("No issues found");
-        } else {
-            summaryLabel.setText(result.errorCount() + " errors, "
-                    + result.warningCount() + " warnings");
-        }
+        updateSummaryLabel(result);
 
-        Button copyButton = new Button("Copy to Clipboard");
+        copyButton = new Button("Copy to Clipboard");
         copyButton.setOnAction(e -> {
-            String text = formatAsText(result);
+            String text = formatAsText(currentResult);
             ClipboardContent content = new ClipboardContent();
             content.putString(text);
             Clipboard.getSystemClipboard().setContent(content);
@@ -95,6 +131,33 @@ public class ValidationDialog extends Stage {
 
         Scene scene = new Scene(root, 700, 400);
         setScene(scene);
+
+        setOnHidden(e -> {
+            if (openInstance == this) {
+                openInstance = null;
+            }
+        });
+    }
+
+    /**
+     * Replaces the displayed validation result with a new one.
+     *
+     * @param result the new validation result
+     */
+    public void updateResult(ValidationResult result) {
+        this.currentResult = result;
+        table.setItems(FXCollections.observableArrayList(result.issues()));
+        updateSummaryLabel(result);
+        copyButton.setText("Copy to Clipboard");
+    }
+
+    private void updateSummaryLabel(ValidationResult result) {
+        if (result.isClean()) {
+            summaryLabel.setText("No issues found");
+        } else {
+            summaryLabel.setText(result.errorCount() + " errors, "
+                    + result.warningCount() + " warnings");
+        }
     }
 
     private static String formatAsText(ValidationResult result) {

@@ -353,8 +353,7 @@ final class SimulationController {
                 () -> ModelValidator.validate(def),
                 result -> {
                     statusBar.updateValidation(result.errorCount(), result.warningCount());
-                    ValidationDialog dialog = new ValidationDialog(result, canvas::selectElement);
-                    dialog.show();
+                    ValidationDialog.showOrUpdate(result, canvas::selectElement);
                     fireLogEvent.accept(l -> l.onValidation(result.errorCount(), result.warningCount()));
                 },
                 "Validation Error");
