@@ -23,6 +23,7 @@ public class ModelDefinitionBuilder {
     private final List<CldVariableDef> cldVariables = new ArrayList<>();
     private final List<CausalLinkDef> causalLinks = new ArrayList<>();
     private final List<ViewDef> views = new ArrayList<>();
+    private final List<ReferenceDataset> referenceDatasets = new ArrayList<>();
     private SimulationSettings defaultSimulation;
     private ModelMetadata metadata;
 
@@ -422,6 +423,23 @@ public class ModelDefinitionBuilder {
     public ModelDefinitionBuilder auxiliaries(List<AuxDef> defs) { auxiliaries.addAll(defs); return this; }
 
     /**
+     * Adds a reference dataset for model validation.
+     *
+     * @param dataset the reference dataset to add
+     * @return this builder
+     */
+    public ModelDefinitionBuilder referenceDataset(ReferenceDataset dataset) {
+        referenceDatasets.add(dataset);
+        return this;
+    }
+
+    /** Adds all reference datasets from the given list. */
+    public ModelDefinitionBuilder referenceDatasets(List<ReferenceDataset> defs) { referenceDatasets.addAll(defs); return this; }
+
+    /** Clears all reference datasets. */
+    public ModelDefinitionBuilder clearReferenceDatasets() { referenceDatasets.clear(); return this; }
+
+    /**
      * Builds and returns an immutable {@link ModelDefinition} from the accumulated state.
      * The model name must have been set via {@link #name(String)} before calling this method.
      *
@@ -442,6 +460,6 @@ public class ModelDefinitionBuilder {
                 name, comment, moduleInterface,
                 stocks, flows, auxiliaries, lookupTables,
                 modules, subscripts, cldVariables, causalLinks,
-                views, defaultSimulation, metadata);
+                views, defaultSimulation, metadata, referenceDatasets);
     }
 }

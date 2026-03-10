@@ -1,6 +1,7 @@
 package systems.courant.forrester.app.canvas;
 
 import systems.courant.forrester.model.def.FlowDef;
+import systems.courant.forrester.model.def.ReferenceDataset;
 import systems.courant.forrester.model.graph.LoopDominanceAnalysis;
 import systems.courant.forrester.sweep.MonteCarloResult;
 import systems.courant.forrester.sweep.MultiSweepResult;
@@ -54,6 +55,7 @@ public class DashboardPanel extends VBox {
     private boolean stale;
     private Runnable rerunAction;
     private Consumer<String> onVariableClicked;
+    private Consumer<ReferenceDataset> onReferenceDataImported;
 
     /** Previous simulation runs for ghost overlay comparison. Most recent last. */
     private final List<GhostRun> runHistory = new ArrayList<>();
@@ -121,23 +123,39 @@ public class DashboardPanel extends VBox {
         this.onVariableClicked = callback;
     }
 
+    /**
+     * Sets a callback invoked when reference data is imported via the chart.
+     * The callback receives the imported dataset so it can be persisted with the model.
+     */
+    public void setOnReferenceDataImported(Consumer<ReferenceDataset> callback) {
+        this.onReferenceDataImported = callback;
+    }
+
     public void showSimulationResult(SimulationRunner.SimulationResult result) {
-        showSimulationResult(result, Map.of(), List.of());
+        showSimulationResult(result, Map.of(), List.of(), List.of());
     }
 
     public void showSimulationResult(SimulationRunner.SimulationResult result,
                                      Map<String, Double> parameters) {
-        showSimulationResult(result, parameters, List.of());
+        showSimulationResult(result, parameters, List.of(), List.of());
     }
 
     public void showSimulationResult(SimulationRunner.SimulationResult result,
                                      Map<String, Double> parameters,
                                      List<FlowDef> flows) {
+        showSimulationResult(result, parameters, flows, List.of());
+    }
+
+    public void showSimulationResult(SimulationRunner.SimulationResult result,
+                                     Map<String, Double> parameters,
+                                     List<FlowDef> flows,
+                                     List<ReferenceDataset> referenceDatasets) {
         clearStale();
         List<GhostRun> ghosts = List.copyOf(runHistory);
         SimulationResultPane pane = new SimulationResultPane(result, flows, ghosts,
-                this::clearRunHistory);
+                this::clearRunHistory, referenceDatasets);
         pane.setOnVariableClicked(onVariableClicked);
+        pane.setOnReferenceDataImported(onReferenceDataImported);
         simulationTab = ensureTab(simulationTab, "Simulation", pane);
         resultTabs.getSelectionModel().select(simulationTab);
 

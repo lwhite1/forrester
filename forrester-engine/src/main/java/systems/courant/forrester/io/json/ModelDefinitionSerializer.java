@@ -14,6 +14,7 @@ import systems.courant.forrester.model.def.LookupTableDef;
 import systems.courant.forrester.model.def.ModelDefinition;
 import systems.courant.forrester.model.def.ModuleInstanceDef;
 import systems.courant.forrester.model.def.ModuleInterface;
+import systems.courant.forrester.model.def.ReferenceDataset;
 import systems.courant.forrester.model.def.PortDef;
 import systems.courant.forrester.model.def.SimulationSettings;
 import systems.courant.forrester.model.def.StockDef;
@@ -167,6 +168,9 @@ public class ModelDefinitionSerializer {
         }
         if (def.metadata() != null) {
             root.set("metadata", serializeMetadata(def.metadata()));
+        }
+        if (!def.referenceDatasets().isEmpty()) {
+            root.set("referenceDatasets", serializeReferenceDatasets(def.referenceDatasets()));
         }
         return root;
     }
@@ -430,6 +434,22 @@ public class ModelDefinitionSerializer {
         return arr;
     }
 
+    private ArrayNode serializeReferenceDatasets(List<ReferenceDataset> datasets) {
+        ArrayNode arr = mapper.createArrayNode();
+        for (ReferenceDataset ds : datasets) {
+            ObjectNode node = mapper.createObjectNode();
+            node.put("name", ds.name());
+            node.set("timeValues", doubleArrayToJson(ds.timeValues()));
+            ObjectNode cols = mapper.createObjectNode();
+            for (Map.Entry<String, double[]> entry : ds.columns().entrySet()) {
+                cols.set(entry.getKey(), doubleArrayToJson(entry.getValue()));
+            }
+            node.set("columns", cols);
+            arr.add(node);
+        }
+        return arr;
+    }
+
     // === Deserialization ===
 
     private ModelDefinition fromJsonNode(JsonNode root) {
@@ -600,16 +620,41 @@ public class ModelDefinitionSerializer {
                     .build();
         }
 
+        List<ReferenceDataset> referenceDatasets = new ArrayList<>();
+        if (root.has("referenceDatasets")) {
+            for (JsonNode n : root.get("referenceDatasets")) {
+                String dsName = requiredText(n, "name");
+                double[] timeValues = jsonToDoubleArray(requiredNode(n, "timeValues"));
+                JsonNode colsNode = requiredNode(n, "columns");
+                Map<String, double[]> columns = new java.util.LinkedHashMap<>();
+                Iterator<Map.Entry<String, JsonNode>> fields = colsNode.fields();
+                while (fields.hasNext()) {
+                    Map.Entry<String, JsonNode> entry = fields.next();
+                    columns.put(entry.getKey(), jsonToDoubleArray(entry.getValue()));
+                }
+                referenceDatasets.add(new ReferenceDataset(dsName, timeValues, columns));
+            }
+        }
+
         if (!migratedConstants.isEmpty()) {
-            return ModelDefinition.withMigratedConstants(name, comment, moduleInterface,
+            ModelDefinition migrated = ModelDefinition.withMigratedConstants(
+                    name, comment, moduleInterface,
                     stocks, flows, auxiliaries, migratedConstants, lookupTables,
                     modules, subscripts, cldVariables, causalLinks,
                     views, defaultSimulation, metadata);
+            if (referenceDatasets.isEmpty()) {
+                return migrated;
+            }
+            // Re-wrap with reference datasets
+            return migrated.toBuilder()
+                    .clearReferenceDatasets()
+                    .referenceDatasets(referenceDatasets)
+                    .build();
         }
         return new ModelDefinition(name, comment, moduleInterface,
                 stocks, flows, auxiliaries, lookupTables,
                 modules, subscripts, cldVariables, causalLinks,
-                views, defaultSimulation, metadata);
+                views, defaultSimulation, metadata, referenceDatasets);
     }
 
     private ViewDef deserializeView(JsonNode n) {

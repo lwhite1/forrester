@@ -158,6 +158,10 @@ public class ModelWindow {
             canvas.selectElement(name);
             canvas.requestFocus();
         });
+        dashboardPanel.setOnReferenceDataImported(dataset -> {
+            canvas.getEditor().addReferenceDataset(dataset);
+            simulationController.runSimulation();
+        });
 
         toolBar = new CanvasToolBar();
         toolBar.setOnToolChanged(tool -> {
