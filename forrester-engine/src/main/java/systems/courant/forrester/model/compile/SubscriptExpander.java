@@ -74,23 +74,18 @@ public class SubscriptExpander {
             if (s.subscripts().isEmpty()) {
                 expandedStocks.add(s);
             } else {
-                for (String dimName : s.subscripts()) {
-                    List<String> labels = dimensionLabels.get(dimName);
-                    if (labels == null) {
-                        throw new CompilationException(
-                                "Stock '" + s.name() + "' references unknown subscript: " + dimName,
-                                s.name());
-                    }
-                    for (String label : labels) {
-                        expandedStocks.add(new StockDef(
-                                s.name() + "[" + label + "]",
-                                s.comment(),
-                                s.initialValue(),
-                                s.initialExpression(),
-                                s.unit(),
-                                s.negativeValuePolicy(),
-                                List.of()));
-                    }
+                List<List<String>> labelLists = resolveLabels(
+                        s.subscripts(), dimensionLabels, "Stock", s.name());
+                for (List<String> combo : cartesianProduct(labelLists)) {
+                    String suffix = joinLabels(combo);
+                    expandedStocks.add(new StockDef(
+                            s.name() + "[" + suffix + "]",
+                            s.comment(),
+                            s.initialValue(),
+                            s.initialExpression(),
+                            s.unit(),
+                            s.negativeValuePolicy(),
+                            List.of()));
                 }
             }
         }
@@ -101,30 +96,25 @@ public class SubscriptExpander {
             if (f.subscripts().isEmpty()) {
                 expandedFlows.add(f);
             } else {
-                for (String dimName : f.subscripts()) {
-                    List<String> labels = dimensionLabels.get(dimName);
-                    if (labels == null) {
-                        throw new CompilationException(
-                                "Flow '" + f.name() + "' references unknown subscript: " + dimName,
-                                f.name());
-                    }
-                    for (String label : labels) {
-                        String expandedEq = rewriteEquation(
-                                f.equation(), label, subscriptedNames, namePattern);
-                        String expandedSource = expandReference(
-                                f.source(), label, subscriptedNames);
-                        String expandedSink = expandReference(
-                                f.sink(), label, subscriptedNames);
-                        expandedFlows.add(new FlowDef(
-                                f.name() + "[" + label + "]",
-                                f.comment(),
-                                expandedEq,
-                                f.timeUnit(),
-                                f.materialUnit(),
-                                expandedSource,
-                                expandedSink,
-                                List.of()));
-                    }
+                List<List<String>> labelLists = resolveLabels(
+                        f.subscripts(), dimensionLabels, "Flow", f.name());
+                for (List<String> combo : cartesianProduct(labelLists)) {
+                    String suffix = joinLabels(combo);
+                    String expandedEq = rewriteEquation(
+                            f.equation(), suffix, subscriptedNames, namePattern);
+                    String expandedSource = expandReference(
+                            f.source(), suffix, subscriptedNames);
+                    String expandedSink = expandReference(
+                            f.sink(), suffix, subscriptedNames);
+                    expandedFlows.add(new FlowDef(
+                            f.name() + "[" + suffix + "]",
+                            f.comment(),
+                            expandedEq,
+                            f.timeUnit(),
+                            f.materialUnit(),
+                            expandedSource,
+                            expandedSink,
+                            List.of()));
                 }
             }
         }
@@ -135,22 +125,17 @@ public class SubscriptExpander {
             if (a.subscripts().isEmpty()) {
                 expandedAuxes.add(a);
             } else {
-                for (String dimName : a.subscripts()) {
-                    List<String> labels = dimensionLabels.get(dimName);
-                    if (labels == null) {
-                        throw new CompilationException(
-                                "Auxiliary '" + a.name() + "' references unknown subscript: " + dimName,
-                                a.name());
-                    }
-                    for (String label : labels) {
-                        String expandedEq = rewriteEquation(
-                                a.equation(), label, subscriptedNames, namePattern);
-                        expandedAuxes.add(new AuxDef(
-                                a.name() + "[" + label + "]",
-                                a.comment(),
-                                expandedEq,
-                                a.unit()));
-                    }
+                List<List<String>> labelLists = resolveLabels(
+                        a.subscripts(), dimensionLabels, "Auxiliary", a.name());
+                for (List<String> combo : cartesianProduct(labelLists)) {
+                    String suffix = joinLabels(combo);
+                    String expandedEq = rewriteEquation(
+                            a.equation(), suffix, subscriptedNames, namePattern);
+                    expandedAuxes.add(new AuxDef(
+                            a.name() + "[" + suffix + "]",
+                            a.comment(),
+                            expandedEq,
+                            a.unit()));
                 }
             }
         }
@@ -201,6 +186,51 @@ public class SubscriptExpander {
             return ref + "[" + label + "]";
         }
         return ref;
+    }
+
+    /**
+     * Resolves the label lists for each subscript dimension of an element.
+     */
+    private static List<List<String>> resolveLabels(List<String> subscripts,
+                                                    Map<String, List<String>> dimensionLabels,
+                                                    String elementType, String elementName) {
+        List<List<String>> labelLists = new ArrayList<>();
+        for (String dimName : subscripts) {
+            List<String> labels = dimensionLabels.get(dimName);
+            if (labels == null) {
+                throw new CompilationException(
+                        elementType + " '" + elementName + "' references unknown subscript: " + dimName,
+                        elementName);
+            }
+            labelLists.add(labels);
+        }
+        return labelLists;
+    }
+
+    /**
+     * Computes the Cartesian product of the given label lists.
+     * For example, given [["A","B"], ["X","Y"]], returns
+     * [["A","X"], ["A","Y"], ["B","X"], ["B","Y"]].
+     */
+    static List<List<String>> cartesianProduct(List<List<String>> labelLists) {
+        List<List<String>> result = new ArrayList<>();
+        result.add(List.of());
+        for (List<String> labels : labelLists) {
+            List<List<String>> next = new ArrayList<>();
+            for (List<String> partial : result) {
+                for (String label : labels) {
+                    List<String> extended = new ArrayList<>(partial);
+                    extended.add(label);
+                    next.add(extended);
+                }
+            }
+            result = next;
+        }
+        return result;
+    }
+
+    private static String joinLabels(List<String> combo) {
+        return String.join(",", combo);
     }
 
     /**

@@ -139,6 +139,108 @@ class SubscriptExpanderTest {
         }
     }
 
+    @Nested
+    @DisplayName("Multi-dimensional expansion")
+    class MultiDimensionalExpansion {
+
+        @Test
+        void shouldExpandTwoDimensionalStockAsCartesianProduct() {
+            ModelDefinition def = new ModelDefinitionBuilder()
+                    .name("2D")
+                    .subscript("Region", List.of("North", "South", "East"))
+                    .subscript("Age", List.of("Young", "Old"))
+                    .stock("Pop", 100, "Person", List.of("Region", "Age"))
+                    .build();
+
+            ModelDefinition expanded = SubscriptExpander.expand(def);
+
+            assertThat(expanded.stocks()).hasSize(6); // 3 × 2 = 6
+            assertThat(expanded.stocks().stream().map(StockDef::name))
+                    .containsExactly(
+                            "Pop[North,Young]", "Pop[North,Old]",
+                            "Pop[South,Young]", "Pop[South,Old]",
+                            "Pop[East,Young]", "Pop[East,Old]");
+        }
+
+        @Test
+        void shouldExpandTwoDimensionalFlowWithEquationRewriting() {
+            ModelDefinition def = new ModelDefinitionBuilder()
+                    .name("2D Flow")
+                    .subscript("Region", List.of("A", "B"))
+                    .subscript("Age", List.of("X", "Y"))
+                    .stock("Pop", 100, "Person", List.of("Region", "Age"))
+                    .flow("births", "Pop * 0.02", "Year", null, "Pop",
+                            List.of("Region", "Age"))
+                    .build();
+
+            ModelDefinition expanded = SubscriptExpander.expand(def);
+
+            assertThat(expanded.flows()).hasSize(4); // 2 × 2 = 4
+            assertThat(expanded.flows().stream().map(FlowDef::name))
+                    .containsExactly("births[A,X]", "births[A,Y]",
+                            "births[B,X]", "births[B,Y]");
+            assertThat(expanded.flows().get(0).equation()).isEqualTo("Pop[A,X] * 0.02");
+            assertThat(expanded.flows().get(0).sink()).isEqualTo("Pop[A,X]");
+            assertThat(expanded.flows().get(3).equation()).isEqualTo("Pop[B,Y] * 0.02");
+        }
+
+        @Test
+        void shouldExpandTwoDimensionalAuxiliary() {
+            ModelDefinition def = new ModelDefinitionBuilder()
+                    .name("2D Aux")
+                    .subscript("Region", List.of("A", "B"))
+                    .subscript("Age", List.of("X", "Y"))
+                    .stock("Pop", 100, "Person", List.of("Region", "Age"))
+                    .aux("density", "Pop * 2", "Person", List.of("Region", "Age"))
+                    .build();
+
+            ModelDefinition expanded = SubscriptExpander.expand(def);
+
+            assertThat(expanded.auxiliaries()).hasSize(4); // 2 × 2 = 4
+            assertThat(expanded.auxiliaries().get(0).name()).isEqualTo("density[A,X]");
+            assertThat(expanded.auxiliaries().get(0).equation()).isEqualTo("Pop[A,X] * 2");
+        }
+
+        @Test
+        void shouldExpandThreeDimensions() {
+            ModelDefinition def = new ModelDefinitionBuilder()
+                    .name("3D")
+                    .subscript("A", List.of("a1", "a2"))
+                    .subscript("B", List.of("b1", "b2"))
+                    .subscript("C", List.of("c1", "c2"))
+                    .stock("S", 0, "Thing", List.of("A", "B", "C"))
+                    .build();
+
+            ModelDefinition expanded = SubscriptExpander.expand(def);
+
+            assertThat(expanded.stocks()).hasSize(8); // 2 × 2 × 2 = 8
+            assertThat(expanded.stocks().stream().map(StockDef::name))
+                    .contains("S[a1,b1,c1]", "S[a2,b2,c2]");
+        }
+    }
+
+    @Nested
+    @DisplayName("Cartesian product helper")
+    class CartesianProductHelper {
+
+        @Test
+        void shouldReturnSingleLabelsForOneDimension() {
+            List<List<String>> result = SubscriptExpander.cartesianProduct(
+                    List.of(List.of("A", "B", "C")));
+            assertThat(result).hasSize(3);
+            assertThat(result.get(0)).containsExactly("A");
+        }
+
+        @Test
+        void shouldComputeProductForTwoDimensions() {
+            List<List<String>> result = SubscriptExpander.cartesianProduct(
+                    List.of(List.of("X", "Y"), List.of("1", "2", "3")));
+            assertThat(result).hasSize(6);
+            assertThat(result.get(0)).containsExactly("X", "1");
+            assertThat(result.get(5)).containsExactly("Y", "3");
+        }
+    }
+
     @Test
     void shouldThrowOnUnknownSubscriptDimension() {
         ModelDefinition def = new ModelDefinitionBuilder()
