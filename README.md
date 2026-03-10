@@ -1,13 +1,117 @@
-# Forrester - System Dynamics Modeling Tool
+# Forrester — System Dynamics Modeling Tool
 
-## Overview
+Forrester is an open-source System Dynamics simulation engine and visual modeling environment for Java. It provides two ways to build and run models:
 
-Forrester is a Java System Dynamics simulation engine and visual modeling tool. It provides two ways to build models:
+- **Visual Editor** — a JavaFX canvas-based GUI for interactively building stock-and-flow diagrams and causal loop diagrams
+- **Programmable Engine** — a code-first Java API for defining, compiling, and running models programmatically
 
-- **Visual Editor** — a JavaFX canvas-based GUI for interactively building stock-and-flow diagrams and causal loop diagrams. See [Visual Editor Guide](docs/Visual%20Editor%20Guide.md).
-- **Programmable Engine** — a code-first Java API for defining, compiling, and running models programmatically. See [Programmable Engine](docs/Programmable%20Engine.md).
+The engine supports creating training simulations, games, scenario testing, and planning models across domains including ecology, epidemiology, project management, software development, business strategy, economics, demographics, and supply chain management.
 
-The engine supports creating training simulations, games, scenario testing, and planning models across domains including ecology, project management, software development, business strategy, operations, medicine, and international relations.
+## Feature Highlights
+
+- **Stock-and-flow modeling** — stocks, flows, variables, constants, lookup tables, and subscripts/arrays
+- **Causal loop diagrams** — CLD variables, signed causal links (+/−), automatic loop detection with reinforcing (R) / balancing (B) classification
+- **Equation editor** — multi-line editor with syntax highlighting, function autocomplete, and inline canvas editing
+- **Simulation analysis** — parameter sweep, multi-parameter sweep, Monte Carlo sampling, and optimization (BOBYQA, CMA-ES, Nelder-Mead)
+- **Scenario comparison** — run multiple simulations with different parameters and overlay results as color-differentiated ghost runs
+- **Feedback loop analysis** — automatic detection and highlighting of feedback loops in stock-and-flow diagrams
+- **Model validation** — structural validation with error/warning indicators on canvas elements
+- **Delay detection** — visual "D" badges on elements containing delay functions (SMOOTH, DELAY3, DELAY_FIXED)
+- **Canvas features** — sparklines in stocks, resizable elements, undo/redo, zoom, diagram export (PNG/JPG)
+- **Import/export** — Vensim `.mdl` import, XMILE import/export, native JSON persistence
+- **35 bundled example models** spanning epidemiology, ecology, economics, demographics, supply chain, technology adoption, and more
+
+## Screenshots
+
+<!-- TODO: Add screenshots of the visual editor, simulation results, and causal loop diagrams -->
+
+## Installation
+
+### Requirements
+
+- **Java 25** or later
+- **Maven 3.x** (to build from source)
+
+### Build from Source
+
+```bash
+git clone https://github.com/Courant-Systems/shrewd.git
+cd shrewd
+mvn clean package -DskipTests
+```
+
+### Run the Visual Editor
+
+```bash
+java -jar forrester-app/target/forrester-app-*.jar
+```
+
+Open an example model via **File → Open Example** to explore the 35 bundled models.
+
+## Quick Start
+
+### Visual Editor
+
+1. Launch the application
+2. **File → Open Example → Introductory → Exponential Growth** to open a simple model
+3. Click **Simulate → Run Simulation** to run it
+4. Modify parameter values by double-clicking constants on the canvas
+5. Re-run to compare results as ghost runs
+
+See the [Quickstart Tutorial](userdocs/Quickstart.md) for a 10-minute hands-on walkthrough building a coffee cooling model.
+
+### Programmable Engine
+
+Build and run an SIR epidemic model in pure Java:
+
+```java
+Model model = new Model("SIR Epidemic");
+
+Stock susceptible = new Stock("Susceptible", 1000, PEOPLE);
+Stock infectious  = new Stock("Infectious", 10, PEOPLE);
+Stock recovered   = new Stock("Recovered", 0, PEOPLE);
+
+Flow infection = Flow.create("Infection", DAY, () -> {
+    double totalPop = susceptible.getValue() + infectious.getValue()
+            + recovered.getValue();
+    double infectiousFraction = infectious.getValue() / totalPop;
+    return new Quantity(
+            8.0 * infectiousFraction * 0.1 * susceptible.getValue(), PEOPLE);
+});
+
+Flow recovery = Flow.create("Recovery", DAY, () ->
+        new Quantity(infectious.getValue() * 0.2, PEOPLE));
+
+susceptible.addOutflow(infection);
+infectious.addInflow(infection);
+infectious.addOutflow(recovery);
+recovered.addInflow(recovery);
+
+model.addStock(susceptible);
+model.addStock(infectious);
+model.addStock(recovered);
+
+Simulation sim = new Simulation(model, DAY, Times.weeks(8));
+sim.addEventHandler(new StockLevelChartViewer());
+sim.execute();
+```
+
+Or define models as data and compile them:
+
+```java
+ModelDefinition def = new ModelDefinitionBuilder()
+    .name("Population Model")
+    .stock("Population", 1000, "Person")
+    .flow("Births", "Population * birth_rate", "Year", null, "Population")
+    .constant("birth_rate", 0.03, "1/Year")
+    .defaultSimulation("Day", 365, "Day")
+    .build();
+
+CompiledModel compiled = new ModelCompiler().compile(def);
+compiled.createSimulation().execute();
+```
+
+See [Programmable Engine](docs/Programmable%20Engine.md) for the full API reference. The 23 runnable demos in `forrester-demos` cover exponential growth, delays, feedback, epidemiology, predator-prey, inventory management, and software development models.
 
 ## Core Concepts
 
@@ -33,59 +137,58 @@ Forrester also supports **Causal Loop Diagrams (CLDs)** — the qualitative diag
 
 CLDs and S&F elements share a single canvas and model definition.
 
-## Build & Configuration
-
-- **Language:** Java 21+
-- **Build system:** Maven
-- **Artifact:** `systems.courant:dynamics:1.0-SNAPSHOT`
-
-```bash
-mvn clean compile    # Build
-mvn test             # Run tests
-mvn package -DskipTests  # Package JAR
-```
-
-### Key Dependencies
-
-| Dependency | Purpose |
-|---|---|
-| JUnit 5 | Testing |
-| Google Guava | Event bus, collections |
-| Apache Commons Math | Mathematical functions, optimization |
-| OpenCSV | CSV output |
-| Logback | Logging |
-| OpenJFX 21 | Visual editor and chart visualization |
-
 ## Architecture
 
 ```
 systems.courant.forrester
-├── Simulation.java              # Core simulation engine
-├── model/                       # Model elements (Stock, Flow, Variable, Constant, Module, Subscript, etc.)
+├── Simulation.java              # Core simulation engine (Euler integration)
+├── model/                       # Model elements (Stock, Flow, Variable, Constant, etc.)
 │   ├── expr/                    # Sealed Expr AST, parser, stringifier, dependency extractor
 │   ├── def/                     # Immutable definition records (ModelDefinition, StockDef, etc.)
 │   ├── compile/                 # Two-pass ModelCompiler: definition → runnable Model
 │   └── graph/                   # Dependency graph, auto-layout, CLD loop detection
 ├── measure/                     # Dimensional analysis and unit system
-├── event/                       # Event-driven communication
+├── event/                       # Event-driven communication (SimulationStart/TimeStep/End)
 ├── sweep/                       # Parameter sweep, Monte Carlo, optimization, CSV output
 ├── io/                          # JSON serialization, Vensim import, XMILE import/export
-├── ui/                          # JavaFX chart visualization
+├── ui/                          # JavaFX chart visualization components
 └── app/                         # JavaFX visual editor (forrester-app module)
     └── canvas/                  # Canvas rendering, interaction, editing, simulation
 ```
+
+### Modules
+
+| Module | Purpose |
+|---|---|
+| **forrester-engine** | Core simulation engine, model definitions, expressions, compilation, sweeps, I/O |
+| **forrester-ui** | JavaFX chart visualization components |
+| **forrester-demos** | 23 runnable example programs with source code |
+| **forrester-app** | Visual editor application |
+| **forrester-tools** | Model analysis and transformation utilities |
+
+### Key Dependencies
+
+| Dependency | Version | Purpose |
+|---|---|---|
+| OpenJFX | 25.0.1 | Visual editor and chart visualization |
+| JUnit 5 | 5.11.4 | Testing |
+| Google Guava | 33.4.0 | Event bus, collections |
+| Apache Commons Math | 3.6.1 | Mathematical functions, optimization |
+| Jackson | 2.17.0 | JSON serialization |
+| OpenCSV | 5.9 | CSV output |
+| SLF4J + Logback | 2.0.16 / 1.5.16 | Logging |
 
 ## Model Import & Export
 
 Forrester can exchange models with other System Dynamics tools:
 
-- **Vensim `.mdl` import** — reads Vensim model files including stocks, flows, auxiliaries, constants, lookup tables, subscripts, sketch data, and simulation settings. See [Vensim Import](docs/Vensim%20Import.md) for supported constructs and limitations.
-- **XMILE import & export** — bidirectional exchange with Stella/iThink via the OASIS standard XML format. See [XMILE Import & Export](docs/XMILE%20Import%20Export.md) for supported constructs and limitations.
-- **JSON** — native round-trip persistence format used by the visual editor. See the [Programmable Engine](docs/Programmable%20Engine.md#json-serialization) docs for the JSON API.
+- **Vensim `.mdl` import** — reads Vensim model files including stocks, flows, auxiliaries, constants, lookup tables, subscripts, sketch data, and simulation settings. See [Vensim Import](docs/Vensim%20Import.md).
+- **XMILE import & export** — bidirectional exchange with Stella/iThink via the OASIS standard XML format. See [XMILE Import & Export](docs/XMILE%20Import%20Export.md).
+- **JSON** — native round-trip persistence format. See [Programmable Engine](docs/Programmable%20Engine.md#json-serialization).
 
 ## Example Models
 
-The demo package contains example models with `main()` entry points:
+### Programmable Engine Demos
 
 | Category | Models |
 |---|---|
@@ -94,19 +197,21 @@ The demo package contains example models with `main()` entry points:
 | **Feedback & Interaction** | SIR epidemic (+ sweep, multi-sweep, Monte Carlo, calibration variants), multi-region SIR with subscripts, population by region × age, predator-prey, inventory with delays, sales mix |
 | **Software Development** | Agile project with rework dynamics, waterfall project with composable modules |
 
-The visual editor also provides 8 bundled example models via File → Open Example.
+### Visual Editor Bundled Models
+
+35 models across 11 categories accessible via **File → Open Example**: introductory, demographics, ecology, economics, epidemiology, management, policy, population, supply chain, technology, and more.
 
 ## Documentation
 
 | Document | Contents |
 |---|---|
-| [Quickstart Tutorial](userdocs/Quickstart.md) | Build your first model in 10 minutes — a hands-on walkthrough using Newton's law of cooling |
-| [Visual Editor Guide](docs/Visual%20Editor%20Guide.md) | GUI features, tools, keyboard shortcuts, simulation, analysis dialogs |
+| [Quickstart Tutorial](userdocs/Quickstart.md) | Build your first model in 10 minutes |
+| [Visual Editor Guide](docs/Visual%20Editor%20Guide.md) | GUI features, tools, keyboard shortcuts, simulation, analysis |
 | [Programmable Engine](docs/Programmable%20Engine.md) | Code API: lambda-based models, definitions, compiler, expressions, sweep/Monte Carlo/optimization |
 | [Expression Language](userdocs/Expression_Language.md) | Equation syntax, operators, and built-in functions reference |
-| [From Vensim PLE](userdocs/From_Vensim_PLE.md) | Migration guide for Vensim PLE users: import workflow, what translates, what to check, and what you gain |
-| [Vensim Import](docs/Vensim%20Import.md) | Vensim `.mdl` import: supported constructs, limitations, usage |
-| [XMILE Import & Export](docs/XMILE%20Import%20Export.md) | XMILE import/export: supported constructs, limitations, usage |
+| [From Vensim PLE](userdocs/From_Vensim_PLE.md) | Migration guide for Vensim PLE users |
+| [Vensim Import](docs/Vensim%20Import.md) | Vensim `.mdl` import: supported constructs and limitations |
+| [XMILE Import & Export](docs/XMILE%20Import%20Export.md) | XMILE import/export: supported constructs and limitations |
 
 ## Learning System Dynamics
 
