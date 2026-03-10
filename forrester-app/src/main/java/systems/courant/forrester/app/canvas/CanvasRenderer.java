@@ -90,7 +90,8 @@ public class CanvasRenderer {
             SparklineData sparklineData,
             String hoveredElement,
             ConnectionId hoveredConnection,
-            ConnectionId selectedConnection
+            ConnectionId selectedConnection,
+            boolean hideAuxiliaries
     ) {}
 
     private final CanvasState canvasState;
@@ -99,6 +100,14 @@ public class CanvasRenderer {
     public CanvasRenderer(CanvasState canvasState, Viewport viewport) {
         this.canvasState = canvasState;
         this.viewport = viewport;
+    }
+
+    /**
+     * Returns true if the named element is an auxiliary that should be hidden.
+     */
+    private boolean isHiddenAux(String name, boolean hideAuxiliaries) {
+        return hideAuxiliaries
+                && canvasState.getType(name).orElse(null) == ElementType.AUX;
     }
 
     /**
@@ -122,6 +131,7 @@ public class CanvasRenderer {
         String hoveredElement = ctx.hoveredElement();
         ConnectionId hoveredConnection = ctx.hoveredConnection();
         ConnectionId selectedConnection = ctx.selectedConnection();
+        boolean hideAux = ctx.hideAuxiliaries();
 
         if (editor == null) {
             return;
@@ -133,12 +143,12 @@ public class CanvasRenderer {
 
         // 1. Draw connections first (behind elements)
         drawMaterialFlows(gc, editor);
-        drawInfoLinks(gc, connectors);
-        drawCausalLinks(gc, editor);
+        drawInfoLinks(gc, connectors, hideAux);
+        drawCausalLinks(gc, editor, hideAux);
 
         // 1b. Draw loop edge highlights (above normal connections, behind elements)
         if (loopAnalysis != null) {
-            drawLoopEdges(gc, connectors, editor, loopAnalysis);
+            drawLoopEdges(gc, connectors, editor, loopAnalysis, hideAux);
         }
 
         // 2. Draw elements on top
@@ -148,6 +158,10 @@ public class CanvasRenderer {
             double cy = canvasState.getY(name);
 
             if (type == null) {
+                continue;
+            }
+
+            if (hideAux && type == ElementType.AUX) {
                 continue;
             }
 
@@ -206,7 +220,8 @@ public class CanvasRenderer {
         // 2a. Draw error/warning indicators on elements with validation issues
         if (elementIssues != null) {
             for (Map.Entry<String, ValidationIssue.Severity> entry : elementIssues.entrySet()) {
-                if (canvasState.hasElement(entry.getKey())) {
+                if (canvasState.hasElement(entry.getKey())
+                        && !isHiddenAux(entry.getKey(), hideAux)) {
                     ErrorIndicatorRenderer.drawIndicator(
                             gc, canvasState, entry.getKey(), entry.getValue());
                 }
@@ -216,7 +231,7 @@ public class CanvasRenderer {
         // 2b. Draw loop participant highlights around elements in loops
         if (loopAnalysis != null) {
             for (String name : loopAnalysis.loopParticipants()) {
-                if (canvasState.hasElement(name)) {
+                if (canvasState.hasElement(name) && !isHiddenAux(name, hideAux)) {
                     FeedbackLoopRenderer.drawLoopHighlight(gc, canvasState, name);
                 }
             }
@@ -242,13 +257,16 @@ public class CanvasRenderer {
         }
 
         // 2d. Draw hover indicator (above loops, below selection)
-        if (hoveredElement != null && !canvasState.getSelection().contains(hoveredElement)) {
+        if (hoveredElement != null && !canvasState.getSelection().contains(hoveredElement)
+                && !isHiddenAux(hoveredElement, hideAux)) {
             SelectionRenderer.drawHoverIndicator(gc, canvasState, hoveredElement);
         }
 
         // 3. Draw selection indicators on top of everything
         for (String name : canvasState.getSelection()) {
-            SelectionRenderer.drawSelectionIndicator(gc, canvasState, name);
+            if (!isHiddenAux(name, hideAux)) {
+                SelectionRenderer.drawSelectionIndicator(gc, canvasState, name);
+            }
         }
 
         // 4. Draw rubber-band line during pending flow creation
@@ -336,12 +354,16 @@ public class CanvasRenderer {
     /**
      * Draws info link dashed arrows based on cached connector routes.
      */
-    private void drawInfoLinks(GraphicsContext gc, List<ConnectorRoute> connectors) {
+    private void drawInfoLinks(GraphicsContext gc, List<ConnectorRoute> connectors,
+                               boolean hideAux) {
         for (ConnectorRoute route : connectors) {
             String fromName = route.from();
             String toName = route.to();
 
             if (!canvasState.hasElement(fromName) || !canvasState.hasElement(toName)) {
+                continue;
+            }
+            if (isHiddenAux(fromName, hideAux) || isHiddenAux(toName, hideAux)) {
                 continue;
             }
 
@@ -364,7 +386,7 @@ public class CanvasRenderer {
      * Draws causal links between CLD variables (and potentially S&F elements)
      * as curved arcs using quadratic Bézier curves.
      */
-    private void drawCausalLinks(GraphicsContext gc, ModelEditor editor) {
+    private void drawCausalLinks(GraphicsContext gc, ModelEditor editor, boolean hideAux) {
         List<CausalLinkDef> allLinks = editor.getCausalLinks();
 
         for (CausalLinkDef link : allLinks) {
@@ -372,6 +394,9 @@ public class CanvasRenderer {
             String toName = link.to();
 
             if (!canvasState.hasElement(fromName) || !canvasState.hasElement(toName)) {
+                continue;
+            }
+            if (isHiddenAux(fromName, hideAux) || isHiddenAux(toName, hideAux)) {
                 continue;
             }
 
@@ -410,13 +435,17 @@ public class CanvasRenderer {
      * Draws highlighted edges for info links and material flows that are part of feedback loops.
      */
     private void drawLoopEdges(GraphicsContext gc, List<ConnectorRoute> connectors,
-                               ModelEditor editor, FeedbackAnalysis loopAnalysis) {
+                               ModelEditor editor, FeedbackAnalysis loopAnalysis,
+                               boolean hideAux) {
         // Highlight info link edges
         for (ConnectorRoute route : connectors) {
             String fromName = route.from();
             String toName = route.to();
 
             if (!canvasState.hasElement(fromName) || !canvasState.hasElement(toName)) {
+                continue;
+            }
+            if (isHiddenAux(fromName, hideAux) || isHiddenAux(toName, hideAux)) {
                 continue;
             }
             if (!loopAnalysis.isLoopEdge(fromName, toName)) {
@@ -467,6 +496,9 @@ public class CanvasRenderer {
             String toName = link.to();
 
             if (!canvasState.hasElement(fromName) || !canvasState.hasElement(toName)) {
+                continue;
+            }
+            if (isHiddenAux(fromName, hideAux) || isHiddenAux(toName, hideAux)) {
                 continue;
             }
             if (!loopAnalysis.isLoopEdge(fromName, toName)) {

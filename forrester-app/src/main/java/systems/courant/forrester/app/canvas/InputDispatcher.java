@@ -116,15 +116,17 @@ final class InputDispatcher {
         // Update hover highlight
         double worldX = viewport.toWorldX(event.getX());
         double worldY = viewport.toWorldY(event.getY());
-        String hit = HitTester.hitTest(canvasState, worldX, worldY);
+        boolean hideAux = canvas.isHideAuxiliaries();
+        String hit = HitTester.hitTest(canvasState, worldX, worldY, hideAux);
 
         // Connection hover: only when no element is hovered
         ConnectionId connHit = null;
         if (hit == null) {
-            connHit = HitTester.hitTestInfoLink(canvasState, canvas.getConnectors(), worldX, worldY);
+            connHit = HitTester.hitTestInfoLink(canvasState, canvas.getConnectors(),
+                    worldX, worldY, hideAux);
             if (connHit == null && canvas.getEditor() != null) {
                 connHit = HitTester.hitTestCausalLink(canvasState,
-                        canvas.getEditor().getCausalLinks(), worldX, worldY);
+                        canvas.getEditor().getCausalLinks(), worldX, worldY, hideAux);
             }
         }
 
@@ -182,6 +184,7 @@ final class InputDispatcher {
         CanvasState canvasState = canvas.canvasState();
         ModelEditor editor = canvas.getEditor();
         CanvasToolBar.Tool activeTool = canvas.getActiveTool();
+        boolean hideAux = canvas.isHideAuxiliaries();
 
         double worldX = viewport.toWorldX(event.getX());
         double worldY = viewport.toWorldY(event.getY());
@@ -190,7 +193,7 @@ final class InputDispatcher {
         if (event.getClickCount() == 2
                 && activeTool == CanvasToolBar.Tool.SELECT
                 && !flowCreation.isPending()) {
-            String hit = HitTester.hitTest(canvasState, worldX, worldY);
+            String hit = HitTester.hitTest(canvasState, worldX, worldY, hideAux);
             if (hit != null) {
                 if (canvasState.getType(hit).orElse(null) == ElementType.MODULE) {
                     canvas.drillInto(hit);
@@ -264,7 +267,7 @@ final class InputDispatcher {
 
         // Placement mode: other PLACE_* tools — click on empty space to create
         if (activeTool != CanvasToolBar.Tool.SELECT) {
-            String hit = HitTester.hitTest(canvasState, worldX, worldY);
+            String hit = HitTester.hitTest(canvasState, worldX, worldY, hideAux);
             if (hit == null) {
                 canvas.createElementAt(worldX, worldY);
                 updateCursor(canvas);
@@ -281,8 +284,9 @@ final class InputDispatcher {
                                    MouseEvent event, ModelCanvas canvas) {
         CanvasState canvasState = canvas.canvasState();
         ModelEditor editor = canvas.getEditor();
+        boolean hideAux = canvas.isHideAuxiliaries();
 
-        String hit = HitTester.hitTest(canvasState, worldX, worldY);
+        String hit = HitTester.hitTest(canvasState, worldX, worldY, hideAux);
 
         if (hit != null) {
             // Element click: clear connection selection
@@ -299,11 +303,11 @@ final class InputDispatcher {
         } else {
             // No element hit — check for connection click (info links then causal links)
             ConnectionId connHit = HitTester.hitTestInfoLink(
-                    canvasState, canvas.getConnectors(), worldX, worldY);
+                    canvasState, canvas.getConnectors(), worldX, worldY, hideAux);
             boolean isCausal = false;
             if (connHit == null) {
                 connHit = HitTester.hitTestCausalLink(canvasState,
-                        editor.getCausalLinks(), worldX, worldY);
+                        editor.getCausalLinks(), worldX, worldY, hideAux);
                 isCausal = connHit != null;
             }
             if (connHit != null) {
@@ -476,6 +480,7 @@ final class InputDispatcher {
                                             MouseEvent event, ModelCanvas canvas) {
         CanvasState canvasState = canvas.canvasState();
         ModelEditor editor = canvas.getEditor();
+        boolean hideAux = canvas.isHideAuxiliaries();
         double sx = event.getScreenX();
         double sy = event.getScreenY();
 
@@ -483,7 +488,7 @@ final class InputDispatcher {
         panMoved = false;
 
         // 1. Element hit
-        String hit = HitTester.hitTest(canvasState, worldX, worldY);
+        String hit = HitTester.hitTest(canvasState, worldX, worldY, hideAux);
         if (hit != null) {
             ElementType hitType = canvasState.getType(hit).orElse(null);
             if (hitType == ElementType.MODULE || hitType == ElementType.CLD_VARIABLE) {
@@ -501,7 +506,7 @@ final class InputDispatcher {
 
         // 2. Causal link hit
         ConnectionId causalHit = HitTester.hitTestCausalLink(canvasState,
-                editor.getCausalLinks(), worldX, worldY);
+                editor.getCausalLinks(), worldX, worldY, hideAux);
         if (causalHit != null) {
             canvas.showCausalLinkContextMenu(causalHit, sx, sy);
             updateCursor(canvas);
@@ -510,7 +515,7 @@ final class InputDispatcher {
 
         // 3. Info link hit
         ConnectionId infoHit = HitTester.hitTestInfoLink(canvasState,
-                canvas.getConnectors(), worldX, worldY);
+                canvas.getConnectors(), worldX, worldY, hideAux);
         if (infoHit != null) {
             canvas.showInfoLinkContextMenu(infoHit, sx, sy);
             updateCursor(canvas);
@@ -656,7 +661,7 @@ final class InputDispatcher {
         } else if (flowCreation.isPending() || activeTool != CanvasToolBar.Tool.SELECT) {
             cursor = Cursor.CROSSHAIR;
         } else if (editor != null) {
-            cursor = computeSelectCursor(viewport, canvasState, editor);
+            cursor = computeSelectCursor(viewport, canvasState, editor, canvas.isHideAuxiliaries());
         } else {
             cursor = Cursor.DEFAULT;
         }
@@ -665,7 +670,7 @@ final class InputDispatcher {
     }
 
     private Cursor computeSelectCursor(Viewport viewport, CanvasState canvasState,
-                                       ModelEditor editor) {
+                                       ModelEditor editor, boolean hideAux) {
         double worldX = viewport.toWorldX(lastMouseX);
         double worldY = viewport.toWorldY(lastMouseY);
 
@@ -685,7 +690,7 @@ final class InputDispatcher {
             return Cursor.HAND;
         }
 
-        String hit = HitTester.hitTest(canvasState, worldX, worldY);
+        String hit = HitTester.hitTest(canvasState, worldX, worldY, hideAux);
         if (hit != null) {
             return Cursor.OPEN_HAND;
         } else if (hoveredConnection != null) {

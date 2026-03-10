@@ -96,6 +96,9 @@ public class ModelCanvas extends Canvas {
     // Sparkline data from last simulation run
     private CanvasRenderer.SparklineData sparklineData;
 
+    // View mode: hide auxiliary variables
+    private boolean hideAuxiliaries;
+
     // Inline edit callbacks
     private final InlineEditController.Callbacks inlineCallbacks =
             new InlineEditController.Callbacks() {
@@ -372,6 +375,19 @@ public class ModelCanvas extends Canvas {
             series.put(name, values);
         }
         return series;
+    }
+
+    // --- Hide auxiliaries view mode ---
+
+    public boolean isHideAuxiliaries() {
+        return hideAuxiliaries;
+    }
+
+    public void setHideAuxiliaries(boolean hide) {
+        if (this.hideAuxiliaries != hide) {
+            this.hideAuxiliaries = hide;
+            redraw();
+        }
     }
 
     private void invalidateLoopAnalysis() {
@@ -829,7 +845,8 @@ public class ModelCanvas extends Canvas {
                         sparklineData,
                         inputDispatcher.getHoveredElement(),
                         inputDispatcher.getHoveredConnection(),
-                        selectedConnection));
+                        selectedConnection,
+                        hideAuxiliaries));
         fireStatusChanged();
     }
 

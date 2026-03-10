@@ -176,4 +176,54 @@ class HitTesterTest {
             assertThat(HitTester.hitTest(state, 100, 100)).isNull();
         }
     }
+
+    @Nested
+    @DisplayName("hideAuxiliaries filtering")
+    class HideAuxiliaries {
+
+        @BeforeEach
+        void loadMixedElements() {
+            ViewDef view = new ViewDef("test", List.of(
+                    new ElementPlacement("Population", ElementType.STOCK, 200, 200),
+                    new ElementPlacement("rate", ElementType.AUX, 300, 200),
+                    new ElementPlacement("inflow", ElementType.FLOW, 100, 200)
+            ), List.of(), List.of());
+            state.loadFrom(view);
+        }
+
+        @Test
+        void shouldHitAuxWhenNotHidden() {
+            assertThat(HitTester.hitTest(state, 300, 200, false)).isEqualTo("rate");
+        }
+
+        @Test
+        void shouldSkipAuxWhenHidden() {
+            assertThat(HitTester.hitTest(state, 300, 200, true)).isNull();
+        }
+
+        @Test
+        void shouldStillHitStockWhenAuxHidden() {
+            assertThat(HitTester.hitTest(state, 200, 200, true)).isEqualTo("Population");
+        }
+
+        @Test
+        void shouldStillHitFlowWhenAuxHidden() {
+            assertThat(HitTester.hitTest(state, 100, 200, true)).isEqualTo("inflow");
+        }
+
+        @Test
+        void shouldHitStockBehindHiddenAux() {
+            // Place an AUX on top of a stock — when hidden, stock is hittable
+            ViewDef view = new ViewDef("test", List.of(
+                    new ElementPlacement("S", ElementType.STOCK, 200, 200),
+                    new ElementPlacement("A", ElementType.AUX, 200, 200)
+            ), List.of(), List.of());
+            state.loadFrom(view);
+
+            // Without hiding: aux is on top
+            assertThat(HitTester.hitTest(state, 200, 200, false)).isEqualTo("A");
+            // With hiding: aux skipped, stock is hit
+            assertThat(HitTester.hitTest(state, 200, 200, true)).isEqualTo("S");
+        }
+    }
 }
