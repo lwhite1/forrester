@@ -10,6 +10,7 @@ import systems.courant.forrester.model.def.FlowDef;
 import systems.courant.forrester.model.def.LookupTableDef;
 import systems.courant.forrester.model.def.ModelDefinition;
 import systems.courant.forrester.model.def.ModuleInstanceDef;
+import systems.courant.forrester.model.def.ReferenceDataset;
 import systems.courant.forrester.model.def.SimulationSettings;
 import systems.courant.forrester.model.def.StockDef;
 import systems.courant.forrester.model.def.ViewDef;
@@ -60,6 +61,7 @@ public class ModelEditor {
     private final List<LookupTableDef> lookupTables = new ArrayList<>();
     private final List<CldVariableDef> cldVariables = new ArrayList<>();
     private final List<CausalLinkDef> causalLinks = new ArrayList<>();
+    private final List<ReferenceDataset> referenceDatasets = new ArrayList<>();
     private final Set<String> nameIndex = new HashSet<>();
     private final List<ModelEditListener> listeners = new CopyOnWriteArrayList<>();
     private final EquationReferenceManager equationRefManager =
@@ -131,6 +133,7 @@ public class ModelEditor {
         lookupTables.clear();
         cldVariables.clear();
         causalLinks.clear();
+        referenceDatasets.clear();
         nameIndex.clear();
 
         stocks.addAll(definition.stocks());
@@ -140,6 +143,7 @@ public class ModelEditor {
         lookupTables.addAll(definition.lookupTables());
         cldVariables.addAll(definition.cldVariables());
         causalLinks.addAll(definition.causalLinks());
+        referenceDatasets.addAll(definition.referenceDatasets());
         simulationSettings = definition.defaultSimulation();
         metadata = definition.metadata();
 
@@ -1129,8 +1133,24 @@ public class ModelEditor {
                 List.copyOf(causalLinks),
                 view != null ? List.of(view) : List.of(),
                 simulationSettings,
-                metadata
+                metadata,
+                List.copyOf(referenceDatasets)
         );
+    }
+
+    /**
+     * Adds a reference dataset for model validation overlay.
+     */
+    public void addReferenceDataset(ReferenceDataset dataset) {
+        checkFxThread();
+        referenceDatasets.add(dataset);
+    }
+
+    /**
+     * Returns an unmodifiable view of the reference datasets.
+     */
+    public List<ReferenceDataset> getReferenceDatasets() {
+        return Collections.unmodifiableList(referenceDatasets);
     }
 
     /**

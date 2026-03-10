@@ -1,7 +1,9 @@
 package systems.courant.forrester.app.canvas;
 
 import systems.courant.forrester.app.LastDirectoryStore;
+import systems.courant.forrester.io.ReferenceDataCsvReader;
 import systems.courant.forrester.model.def.FlowDef;
+import systems.courant.forrester.model.def.ReferenceDataset;
 
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
@@ -49,6 +51,9 @@ import java.util.Set;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import javax.imageio.ImageIO;
 
 /**
@@ -61,19 +66,37 @@ import javax.imageio.ImageIO;
  */
 public class SimulationResultPane extends BorderPane {
 
+    private static final Logger log = LoggerFactory.getLogger(SimulationResultPane.class);
     private static final String DASHED_STROKE = "-fx-stroke-dash-array: 8 4;";
+    private static final String REFERENCE_STROKE = "-fx-stroke-dash-array: 3 3;";
+    /** Muted/darker versions of series colors for reference data overlay. */
+    private static final List<String> REFERENCE_COLORS = List.of(
+            "#0d3b66", "#b35900", "#1a661a", "#8b1a1a", "#5c3d7a",
+            "#5a3520", "#993d71", "#4d4d4d", "#7a7a0f", "#0d7a82"
+    );
 
     private LineChart<Number, Number> chart;
     private SimulationRunner.SimulationResult simulationResult;
     private final List<FlowDef> flows;
+    private final List<ReferenceDataset> referenceDatasets;
     private Consumer<String> onVariableClicked;
+    private Consumer<ReferenceDataset> onReferenceDataImported;
 
     public SimulationResultPane(SimulationRunner.SimulationResult result,
                                 List<FlowDef> flows,
                                 List<GhostRun> ghostRuns,
                                 Runnable clearHistory) {
+        this(result, flows, ghostRuns, clearHistory, List.of());
+    }
+
+    public SimulationResultPane(SimulationRunner.SimulationResult result,
+                                List<FlowDef> flows,
+                                List<GhostRun> ghostRuns,
+                                Runnable clearHistory,
+                                List<ReferenceDataset> referenceDatasets) {
         this.simulationResult = result;
         this.flows = flows != null ? flows : List.of();
+        this.referenceDatasets = referenceDatasets != null ? referenceDatasets : List.of();
         TabPane tabPane = new TabPane();
         tabPane.setTabClosingPolicy(TabPane.TabClosingPolicy.UNAVAILABLE);
 
@@ -90,6 +113,14 @@ public class SimulationResultPane extends BorderPane {
      */
     public void setOnVariableClicked(Consumer<String> callback) {
         this.onVariableClicked = callback;
+    }
+
+    /**
+     * Sets a callback invoked when reference data is imported via the chart context menu.
+     * The callback receives the imported dataset so it can be persisted with the model.
+     */
+    public void setOnReferenceDataImported(Consumer<ReferenceDataset> callback) {
+        this.onReferenceDataImported = callback;
     }
 
     private TableView<double[]> buildTable(SimulationRunner.SimulationResult result) {
@@ -285,6 +316,43 @@ public class SimulationResultPane extends BorderPane {
             }
         }
 
+        // --- Reference data overlay ---
+        List<XYChart.Series<Number, Number>> allRefSeries = new ArrayList<>();
+        if (!referenceDatasets.isEmpty()) {
+            int refColorIdx = 0;
+            for (ReferenceDataset refData : referenceDatasets) {
+                for (String varName : refData.variableNames()) {
+                    XYChart.Series<Number, Number> refSeries = new XYChart.Series<>();
+                    refSeries.setName(varName + " (observed)");
+                    double[] timeVals = refData.timeValues();
+                    double[] dataVals = refData.columns().get(varName);
+                    for (int i = 0; i < timeVals.length; i++) {
+                        if (!Double.isNaN(dataVals[i])) {
+                            refSeries.getData().add(new XYChart.Data<>(timeVals[i], dataVals[i]));
+                        }
+                    }
+                    allRefSeries.add(refSeries);
+                    refColorIdx++;
+                }
+            }
+            chart.getData().addAll(allRefSeries);
+
+            // Style reference series: dotted lines in muted colors
+            for (int i = 0; i < allRefSeries.size(); i++) {
+                XYChart.Series<Number, Number> refSeries = allRefSeries.get(i);
+                String refColor = REFERENCE_COLORS.get(i % REFERENCE_COLORS.size());
+                String refStyle = "-fx-stroke: " + refColor + "; " + REFERENCE_STROKE;
+                refSeries.nodeProperty().addListener((obs, oldNode, newNode) -> {
+                    if (newNode != null) {
+                        newNode.setStyle(refStyle);
+                    }
+                });
+                if (refSeries.getNode() != null) {
+                    refSeries.getNode().setStyle(refStyle);
+                }
+            }
+        }
+
         // Net flow toggle
         if (!netFlowSeries.isEmpty()) {
             sidebar.getChildren().add(new Separator());
@@ -400,6 +468,33 @@ public class SimulationResultPane extends BorderPane {
             sidebar.getChildren().add(clearButton);
         }
 
+        // Reference data sidebar section
+        if (!allRefSeries.isEmpty()) {
+            sidebar.getChildren().add(new Separator());
+            Label refHeader = new Label("Reference Data");
+            refHeader.setId("referenceDataHeader");
+            refHeader.setStyle("-fx-font-size: 11px; -fx-font-weight: bold; -fx-text-fill: #555;");
+            sidebar.getChildren().add(refHeader);
+
+            for (int i = 0; i < allRefSeries.size(); i++) {
+                XYChart.Series<Number, Number> refSeries = allRefSeries.get(i);
+                String refColor = REFERENCE_COLORS.get(i % REFERENCE_COLORS.size());
+
+                CheckBox refCb = new CheckBox();
+                refCb.setSelected(true);
+                refCb.selectedProperty().addListener((obs, wasSelected, isSelected) -> {
+                    setSeriesVisible(refSeries, isSelected);
+                });
+
+                Label refLabel = new Label(refSeries.getName());
+                refLabel.setStyle("-fx-text-fill: " + refColor + "; -fx-font-size: 11px;");
+
+                HBox refRow = new HBox(4, refCb, refLabel);
+                refRow.setAlignment(Pos.CENTER_LEFT);
+                sidebar.getChildren().add(refRow);
+            }
+        }
+
         ScrollPane sidebarScroll = new ScrollPane(sidebar);
         sidebarScroll.setFitToWidth(true);
         sidebarScroll.setPrefWidth(200);
@@ -409,7 +504,10 @@ public class SimulationResultPane extends BorderPane {
         saveItem.setOnAction(e -> saveChartAsPng());
         MenuItem exportCsvItem = new MenuItem("Export CSV...");
         exportCsvItem.setOnAction(e -> exportCsv());
-        contextMenu.getItems().addAll(saveItem, exportCsvItem);
+        MenuItem importRefItem = new MenuItem("Import Reference Data...");
+        importRefItem.setId("importReferenceDataMenuItem");
+        importRefItem.setOnAction(e -> importReferenceData());
+        contextMenu.getItems().addAll(saveItem, exportCsvItem, importRefItem);
         chart.setOnContextMenuRequested(e ->
                 contextMenu.show(chart, e.getScreenX(), e.getScreenY()));
 
@@ -557,6 +655,31 @@ public class SimulationResultPane extends BorderPane {
                 d.getNode().setVisible(visible);
             }
         });
+    }
+
+    private void importReferenceData() {
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Import Reference Data");
+        fileChooser.getExtensionFilters().add(
+                new FileChooser.ExtensionFilter("CSV Files", "*.csv"));
+        LastDirectoryStore.applyOpenDirectory(fileChooser);
+
+        File file = fileChooser.showOpenDialog(getScene() != null ? getScene().getWindow() : null);
+        if (file == null) {
+            return;
+        }
+        LastDirectoryStore.recordOpenDirectory(file);
+        try {
+            String name = file.getName().replaceFirst("\\.[^.]+$", "");
+            ReferenceDataset dataset = ReferenceDataCsvReader.read(file.toPath(), name);
+            if (onReferenceDataImported != null) {
+                onReferenceDataImported.accept(dataset);
+            }
+        } catch (IOException e) {
+            log.warn("Failed to import reference data from {}: {}", file, e.getMessage());
+            new Alert(Alert.AlertType.ERROR,
+                    "Failed to import reference data: " + e.getMessage()).showAndWait();
+        }
     }
 
     private void exportCsv() {

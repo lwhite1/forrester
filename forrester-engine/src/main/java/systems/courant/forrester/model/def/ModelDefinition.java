@@ -25,6 +25,7 @@ import java.util.List;
  * @param views the graphical view definitions
  * @param defaultSimulation optional default simulation settings
  * @param metadata optional attribution and licensing metadata
+ * @param referenceDatasets observed/expected time-series datasets for model validation
  */
 public record ModelDefinition(
         String name,
@@ -40,8 +41,26 @@ public record ModelDefinition(
         List<CausalLinkDef> causalLinks,
         List<ViewDef> views,
         SimulationSettings defaultSimulation,
-        ModelMetadata metadata
+        ModelMetadata metadata,
+        List<ReferenceDataset> referenceDatasets
 ) {
+
+    /**
+     * Backward-compatible constructor without reference datasets.
+     */
+    public ModelDefinition(
+            String name, String comment, ModuleInterface moduleInterface,
+            List<StockDef> stocks, List<FlowDef> flows,
+            List<AuxDef> auxiliaries,
+            List<LookupTableDef> lookupTables, List<ModuleInstanceDef> modules,
+            List<SubscriptDef> subscripts,
+            List<CldVariableDef> cldVariables, List<CausalLinkDef> causalLinks,
+            List<ViewDef> views, SimulationSettings defaultSimulation,
+            ModelMetadata metadata) {
+        this(name, comment, moduleInterface, stocks, flows, auxiliaries,
+                lookupTables, modules, subscripts, cldVariables, causalLinks,
+                views, defaultSimulation, metadata, List.of());
+    }
 
     /**
      * Backward-compatible constructor without metadata.
@@ -56,7 +75,7 @@ public record ModelDefinition(
             List<ViewDef> views, SimulationSettings defaultSimulation) {
         this(name, comment, moduleInterface, stocks, flows, auxiliaries,
                 lookupTables, modules, subscripts, cldVariables, causalLinks,
-                views, defaultSimulation, null);
+                views, defaultSimulation, null, List.of());
     }
 
     /**
@@ -71,7 +90,7 @@ public record ModelDefinition(
             List<ViewDef> views, SimulationSettings defaultSimulation) {
         this(name, comment, moduleInterface, stocks, flows, auxiliaries,
                 lookupTables, modules, subscripts, List.of(), List.of(),
-                views, defaultSimulation, null);
+                views, defaultSimulation, null, List.of());
     }
 
     public ModelDefinition {
@@ -87,6 +106,7 @@ public record ModelDefinition(
         cldVariables = cldVariables == null ? List.of() : List.copyOf(cldVariables);
         causalLinks = causalLinks == null ? List.of() : List.copyOf(causalLinks);
         views = views == null ? List.of() : List.copyOf(views);
+        referenceDatasets = referenceDatasets == null ? List.of() : List.copyOf(referenceDatasets);
     }
 
     /**
@@ -109,6 +129,7 @@ public record ModelDefinition(
         cldVariables.forEach(b::cldVariable);
         causalLinks.forEach(b::causalLink);
         views.forEach(b::view);
+        referenceDatasets.forEach(b::referenceDataset);
         return b;
     }
 
