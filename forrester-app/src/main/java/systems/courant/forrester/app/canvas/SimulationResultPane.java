@@ -1,6 +1,7 @@
 package systems.courant.forrester.app.canvas;
 
 import systems.courant.forrester.app.LastDirectoryStore;
+import systems.courant.forrester.model.def.FlowDef;
 
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
@@ -41,6 +42,7 @@ import java.io.OutputStreamWriter;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -63,12 +65,15 @@ public class SimulationResultPane extends BorderPane {
 
     private LineChart<Number, Number> chart;
     private SimulationRunner.SimulationResult simulationResult;
+    private final List<FlowDef> flows;
     private Consumer<String> onVariableClicked;
 
     public SimulationResultPane(SimulationRunner.SimulationResult result,
+                                List<FlowDef> flows,
                                 List<GhostRun> ghostRuns,
                                 Runnable clearHistory) {
         this.simulationResult = result;
+        this.flows = flows != null ? flows : List.of();
         TabPane tabPane = new TabPane();
         tabPane.setTabClosingPolicy(TabPane.TabClosingPolicy.UNAVAILABLE);
 
@@ -207,6 +212,34 @@ public class SimulationResultPane extends BorderPane {
             }
         }
 
+        // --- Net flow series for each stock ---
+        Map<String, double[]> netFlows = computeNetFlows(columns, rows, flows, stockNames);
+        List<XYChart.Series<Number, Number>> netFlowSeries = new ArrayList<>();
+        Map<XYChart.Series<Number, Number>, Integer> netFlowColorIndex = new LinkedHashMap<>();
+        for (int i = 0; i < currentSeries.size(); i++) {
+            String seriesName = currentSeries.get(i).getName();
+            double[] netValues = netFlows.get(seriesName);
+            if (netValues != null) {
+                XYChart.Series<Number, Number> nfSeries = new XYChart.Series<>();
+                nfSeries.setName(seriesName + " (net flow)");
+                for (int r = 0; r < rows.size(); r++) {
+                    nfSeries.getData().add(new XYChart.Data<>(rows.get(r)[0], netValues[r]));
+                }
+                netFlowSeries.add(nfSeries);
+                netFlowColorIndex.put(nfSeries, i);
+            }
+        }
+
+        if (!netFlowSeries.isEmpty()) {
+            chart.getData().addAll(netFlowSeries);
+            for (XYChart.Series<Number, Number> nf : netFlowSeries) {
+                int ci = netFlowColorIndex.get(nf);
+                String nfColor = ChartUtils.SERIES_COLORS.get(ci % ChartUtils.SERIES_COLORS.size());
+                applyNetFlowStyle(nf, nfColor);
+                setSeriesVisible(nf, false);
+            }
+        }
+
         // --- Sidebar ---
         VBox sidebar = new VBox(6);
         sidebar.setPadding(new Insets(10));
@@ -250,6 +283,21 @@ public class SimulationResultPane extends BorderPane {
                 addSeriesRow(sidebar, currentSeries.get(i), i,
                         behaviorModes.get(i), seriesCheckBoxes);
             }
+        }
+
+        // Net flow toggle
+        if (!netFlowSeries.isEmpty()) {
+            sidebar.getChildren().add(new Separator());
+            CheckBox showNetFlows = new CheckBox("Show net flows");
+            showNetFlows.setId("showNetFlows");
+            showNetFlows.setSelected(false);
+            showNetFlows.setStyle("-fx-font-size: 11px;");
+            showNetFlows.selectedProperty().addListener((obs, wasSelected, isSelected) -> {
+                for (XYChart.Series<Number, Number> nf : netFlowSeries) {
+                    setSeriesVisible(nf, isSelected);
+                }
+            });
+            sidebar.getChildren().add(showNetFlows);
         }
 
         // Ghost controls (only if there are ghost runs)
@@ -427,6 +475,88 @@ public class SimulationResultPane extends BorderPane {
         if (series.getNode() != null) {
             series.getNode().setStyle(DASHED_STROKE);
         }
+    }
+
+    /**
+     * Computes net flow values for each stock from simulation data and flow definitions.
+     * Net flow into stock S = sum(flows where sink==S) - sum(flows where source==S).
+     *
+     * @return map from stock name to net flow time series (one value per row)
+     */
+    static Map<String, double[]> computeNetFlows(List<String> columns, List<double[]> rows,
+                                                  List<FlowDef> flows, Set<String> stockNames) {
+        Map<String, double[]> result = new LinkedHashMap<>();
+        if (flows == null || flows.isEmpty() || stockNames.isEmpty()) {
+            return result;
+        }
+
+        Map<String, Integer> colIndex = new LinkedHashMap<>();
+        for (int i = 0; i < columns.size(); i++) {
+            colIndex.put(columns.get(i), i);
+        }
+
+        for (String stockName : stockNames) {
+            List<Integer> inflowIndices = new ArrayList<>();
+            List<Integer> outflowIndices = new ArrayList<>();
+            for (FlowDef flow : flows) {
+                Integer idx = colIndex.get(flow.name());
+                if (idx == null) {
+                    continue;
+                }
+                if (stockName.equals(flow.sink())) {
+                    inflowIndices.add(idx);
+                }
+                if (stockName.equals(flow.source())) {
+                    outflowIndices.add(idx);
+                }
+            }
+
+            if (inflowIndices.isEmpty() && outflowIndices.isEmpty()) {
+                continue;
+            }
+
+            double[] netValues = new double[rows.size()];
+            for (int r = 0; r < rows.size(); r++) {
+                double[] row = rows.get(r);
+                double net = 0;
+                for (int idx : inflowIndices) {
+                    if (idx < row.length) {
+                        net += row[idx];
+                    }
+                }
+                for (int idx : outflowIndices) {
+                    if (idx < row.length) {
+                        net -= row[idx];
+                    }
+                }
+                netValues[r] = net;
+            }
+            result.put(stockName, netValues);
+        }
+        return result;
+    }
+
+    private static void applyNetFlowStyle(XYChart.Series<Number, Number> series, String color) {
+        String style = "-fx-stroke: " + color + "; " + DASHED_STROKE + " -fx-opacity: 0.7;";
+        series.nodeProperty().addListener((obs, oldNode, newNode) -> {
+            if (newNode != null) {
+                newNode.setStyle(style);
+            }
+        });
+        if (series.getNode() != null) {
+            series.getNode().setStyle(style);
+        }
+    }
+
+    private static void setSeriesVisible(XYChart.Series<Number, Number> series, boolean visible) {
+        if (series.getNode() != null) {
+            series.getNode().setVisible(visible);
+        }
+        series.getData().forEach(d -> {
+            if (d.getNode() != null) {
+                d.getNode().setVisible(visible);
+            }
+        });
     }
 
     private void exportCsv() {

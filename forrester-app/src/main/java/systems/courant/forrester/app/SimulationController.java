@@ -98,7 +98,7 @@ final class SimulationController {
         analysisRunner.run("Simulating...",
                 () -> new SimulationRunner().run(def, finalSettings),
                 result -> {
-                    dashboardPanel.showSimulationResult(result, paramSnapshot);
+                    dashboardPanel.showSimulationResult(result, paramSnapshot, def.flows());
                     canvas.setSparklineData(new systems.courant.forrester.app.canvas.CanvasRenderer.SparklineData(
                             ModelCanvas.extractStockSeries(result), false));
                     computeLoopDominance(result);

@@ -1,5 +1,6 @@
 package systems.courant.forrester.app.canvas;
 
+import systems.courant.forrester.model.def.FlowDef;
 import systems.courant.forrester.model.graph.LoopDominanceAnalysis;
 import systems.courant.forrester.sweep.MonteCarloResult;
 import systems.courant.forrester.sweep.MultiSweepResult;
@@ -120,14 +121,21 @@ public class DashboardPanel extends VBox {
     }
 
     public void showSimulationResult(SimulationRunner.SimulationResult result) {
-        showSimulationResult(result, Map.of());
+        showSimulationResult(result, Map.of(), List.of());
     }
 
     public void showSimulationResult(SimulationRunner.SimulationResult result,
                                      Map<String, Double> parameters) {
+        showSimulationResult(result, parameters, List.of());
+    }
+
+    public void showSimulationResult(SimulationRunner.SimulationResult result,
+                                     Map<String, Double> parameters,
+                                     List<FlowDef> flows) {
         clearStale();
         List<GhostRun> ghosts = List.copyOf(runHistory);
-        SimulationResultPane pane = new SimulationResultPane(result, ghosts, this::clearRunHistory);
+        SimulationResultPane pane = new SimulationResultPane(result, flows, ghosts,
+                this::clearRunHistory);
         pane.setOnVariableClicked(onVariableClicked);
         simulationTab = ensureTab(simulationTab, "Simulation", pane);
         resultTabs.getSelectionModel().select(simulationTab);
