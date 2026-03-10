@@ -3,7 +3,7 @@
   "comment": "Coffee temperature decays toward room temperature",
   "stocks": [
     {
-      "name": "Coffee_Temperature",
+      "name": "Coffee Temperature",
       "initialValue": 100.0,
       "unit": "Celsius"
     }
@@ -13,7 +13,7 @@
       "name": "Cooling",
       "equation": "Discrepancy * Cooling_Rate",
       "timeUnit": "Minute",
-      "source": "Coffee_Temperature"
+      "source": "Coffee Temperature"
     }
   ],
   "auxiliaries": [
@@ -23,12 +23,12 @@
       "unit": "Celsius"
     },
     {
-      "name": "Room_Temperature",
+      "name": "Room Temperature",
       "equation": "18",
       "unit": "Celsius"
     },
     {
-      "name": "Cooling_Rate",
+      "name": "Cooling Rate",
       "equation": "0.1",
       "unit": "Dimensionless unit"
     }

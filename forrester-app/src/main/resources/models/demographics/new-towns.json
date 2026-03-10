@@ -22,21 +22,21 @@
   ],
   "flows": [
     {
-      "name": "bevolking_net_flow",
+      "name": "bevolking net flow",
       "comment": "Net flow for bevolking",
       "equation": "immigratie+geboortes-emigratie-sterftes",
       "timeUnit": "Year",
       "sink": "bevolking"
     },
     {
-      "name": "bedrijven_net_flow",
+      "name": "bedrijven net flow",
       "comment": "Net flow for bedrijven",
       "equation": "constructie_van_bedrijfsgebouwen-afbraak_van_bedrijfsgebouwen",
       "timeUnit": "Year",
       "sink": "bedrijven"
     },
     {
-      "name": "huizen_net_flow",
+      "name": "huizen net flow",
       "comment": "Net flow for huizen",
       "equation": "constructie_van_huizen-afbraak_van_huizen",
       "timeUnit": "Year",
@@ -57,13 +57,13 @@
       "unit": "people/year"
     },
     {
-      "name": "slummultiplicator_voor_migratie",
+      "name": "slummultiplicator voor migratie",
       "comment": "slummultiplicator voor migratie",
       "equation": "LOOKUP(slummultiplicator_voor_migratie_lookup, leegstandsgraad_van_huizen)",
       "unit": ""
     },
     {
-      "name": "afbraak_van_huizen",
+      "name": "afbraak van huizen",
       "comment": "afbraak van huizen",
       "equation": "afbraakgraad_van_huizen*huizen+extra_afbraakgraad*huizen*switch_leegstandseffect",
       "unit": "structure/year"
@@ -75,19 +75,19 @@
       "unit": "fraction"
     },
     {
-      "name": "leegstandsgraad_van_huizen",
+      "name": "leegstandsgraad van huizen",
       "comment": "leegstandsgraad van huizen",
       "equation": "MIN(MAX((1-verhouding_huishoudens_tot_huizen),0),1)",
       "unit": ""
     },
     {
-      "name": "effect_schaarste_landgebruik_op_intensiviteit_bedrijfsgebouwen",
+      "name": "effect schaarste landgebruik op intensiviteit bedrijfsgebouwen",
       "comment": "effect schaarste landgebruik op intensiviteit bedrijfsgebouwen",
       "equation": "LOOKUP(effect_schaarste_landgebruik_op_intensiviteit_bedrijfsgebouwen_lookup, landgebruik)",
       "unit": ""
     },
     {
-      "name": "extra_afbraakgraad",
+      "name": "extra afbraakgraad",
       "comment": "extra afbraakgraad",
       "equation": "LOOKUP(extra_afbraakgraad_lookup, leegstandsgraad_van_huizen)",
       "unit": ""
@@ -99,7 +99,7 @@
       "unit": "job"
     },
     {
-      "name": "verhouding_huishoudens_tot_huizen",
+      "name": "verhouding huishoudens tot huizen",
       "comment": "verhouding huishoudens tot huizen",
       "equation": "huishoudens/huizen",
       "unit": "family/structure"
@@ -129,55 +129,55 @@
       "unit": ""
     },
     {
-      "name": "constructie_van_huizen",
+      "name": "constructie van huizen",
       "comment": "constructie van huizen",
       "equation": "constructiegraad_van_huizen*landbeschikbaarheids_multiplicator_voor_huizen*huizenschaarste_multiplicator *huizen",
       "unit": "structure/year"
     },
     {
-      "name": "constructie_van_bedrijfsgebouwen",
+      "name": "constructie van bedrijfsgebouwen",
       "comment": "constructie van bedrijfsgebouwen",
       "equation": "constructiegraad_van_bedrijfsgebouwen*landbeschikbaarheids_multiplicator_voor_bedrijfsgebouwen *beroepsbevolkings_multiplicator_voor_bedrijven*bedrijven",
       "unit": "structure/year"
     },
     {
-      "name": "jobbeschikbaarheids_multiplicator_voor_immigratie",
+      "name": "jobbeschikbaarheids multiplicator voor immigratie",
       "comment": "jobbeschikbaarheids multiplicator voor immigratie",
       "equation": "LOOKUP(jobbeschikbaarheids_multiplicator_voor_immigratie_lookup, beroepsbevolking_tot_jobs_ratio)",
       "unit": "fraction"
     },
     {
-      "name": "huizenbeschikbaarheids_multiplicator_voor_immigratie",
+      "name": "huizenbeschikbaarheids multiplicator voor immigratie",
       "comment": "huizenbeschikbaarheids multiplicator voor immigratie",
       "equation": "LOOKUP(huizenbeschikbaarheids_multiplicator_voor_immigratie_lookup, verhouding_huishoudens_tot_huizen)",
       "unit": "fraction"
     },
     {
-      "name": "afbraak_van_bedrijfsgebouwen",
+      "name": "afbraak van bedrijfsgebouwen",
       "comment": "afbraak van bedrijfsgebouwen",
       "equation": "afbraakgraad_van_bedrijfsgebouwen*bedrijven",
       "unit": "structure/year"
     },
     {
-      "name": "beroepsbevolkings_multiplicator_voor_bedrijven",
+      "name": "beroepsbevolkings multiplicator voor bedrijven",
       "comment": "beroepsbevolkings multiplicator voor bedrijven",
       "equation": "LOOKUP(beroepsbevolkings_multiplicator_voor_bedrijven_lookup, beroepsbevolking_tot_jobs_ratio)",
       "unit": "fraction"
     },
     {
-      "name": "landbeschikbaarheids_multiplicator_voor_bedrijfsgebouwen",
+      "name": "landbeschikbaarheids multiplicator voor bedrijfsgebouwen",
       "comment": "landbeschikbaarheids multiplicator voor bedrijfsgebouwen",
       "equation": "LOOKUP(landbeschikbaarheids_multiplicator_voor_bedrijfsgebouwen_lookup, landgebruik)",
       "unit": "fraction"
     },
     {
-      "name": "huizenschaarste_multiplicator",
+      "name": "huizenschaarste multiplicator",
       "comment": "huizenschaarste multiplicator",
       "equation": "LOOKUP(huizenschaarste_multiplicator_lookup, verhouding_huishoudens_tot_huizen)",
       "unit": "fraction"
     },
     {
-      "name": "landbeschikbaarheids_multiplicator_voor_huizen",
+      "name": "landbeschikbaarheids multiplicator voor huizen",
       "comment": "landbeschikbaarheids multiplicator voor huizen",
       "equation": "LOOKUP(landbeschikbaarheids_multiplicator_voor_huizen_lookup, landgebruik)",
       "unit": "fraction"
@@ -189,56 +189,56 @@
       "unit": "people"
     },
     {
-      "name": "beroepsbevolking_tot_jobs_ratio",
+      "name": "beroepsbevolking tot jobs ratio",
       "comment": "beroepsbevolking tot jobs ratio",
       "equation": "beroepsbevolking/jobs",
       "unit": "people/job"
     },
     {
-      "name": "TIME_STEP",
+      "name": "TIME STEP",
       "equation": "0.03125",
       "unit": "Year"
     },
     {
-      "name": "INITIAL_TIME",
+      "name": "INITIAL TIME",
       "equation": "0",
       "unit": "Year"
     },
     {
-      "name": "FINAL_TIME",
+      "name": "FINAL TIME",
       "equation": "200",
       "unit": "Year"
     },
     {
-      "name": "switch_jobs",
+      "name": "switch jobs",
       "equation": "1",
       "comment": "switch jobs"
     },
     {
-      "name": "grondgebruik_per_bedrijf",
+      "name": "grondgebruik per bedrijf",
       "equation": "0.1",
       "comment": "grondgebruik per bedrijf",
       "unit": "ha/structure"
     },
     {
-      "name": "totale_grondoppervlakte",
+      "name": "totale grondoppervlakte",
       "equation": "5000",
       "comment": "totale grondoppervlakte",
       "unit": "ha"
     },
     {
-      "name": "switch_leegstandseffect",
+      "name": "switch leegstandseffect",
       "equation": "1",
       "comment": "switch leegstandseffect"
     },
     {
-      "name": "constructiegraad_van_bedrijfsgebouwen",
+      "name": "constructiegraad van bedrijfsgebouwen",
       "equation": "0.07",
       "comment": "constructiegraad van bedrijfsgebouwen",
       "unit": "fraction/year"
     },
     {
-      "name": "afbraakgraad_van_bedrijfsgebouwen",
+      "name": "afbraakgraad van bedrijfsgebouwen",
       "equation": "0.025",
       "comment": "afbraakgraad van bedrijfsgebouwen",
       "unit": "fraction/year"
@@ -256,31 +256,31 @@
       "unit": "fraction/year"
     },
     {
-      "name": "constructiegraad_van_huizen",
+      "name": "constructiegraad van huizen",
       "equation": "0.07",
       "comment": "constructiegraad van huizen",
       "unit": "fraction/year"
     },
     {
-      "name": "afbraakgraad_van_huizen",
+      "name": "afbraakgraad van huizen",
       "equation": "0.015",
       "comment": "afbraakgraad van huizen",
       "unit": "fraction/year"
     },
     {
-      "name": "gemiddelde_grootte_van_huishoudens",
+      "name": "gemiddelde grootte van huishoudens",
       "equation": "4",
       "comment": "gemiddelde grootte van huishoudens",
       "unit": "people/family"
     },
     {
-      "name": "normale_immigratiegraad",
+      "name": "normale immigratiegraad",
       "equation": "0.1",
       "comment": "normale immigratiegraad",
       "unit": "fraction/year"
     },
     {
-      "name": "initieel_aantal_jobs_per_bedrijfsgebouw",
+      "name": "initieel aantal jobs per bedrijfsgebouw",
       "equation": "18",
       "comment": "initieel aantal jobs per bedrijfsgebouw",
       "unit": "job/structure"
@@ -292,13 +292,13 @@
       "unit": "fraction"
     },
     {
-      "name": "grondgebruik_per_huis",
+      "name": "grondgebruik per huis",
       "equation": "0.05",
       "comment": "grondgebruik per huis",
       "unit": "ha/structure"
     },
     {
-      "name": "normale_emigratiegraad",
+      "name": "normale emigratiegraad",
       "equation": "0.07",
       "comment": "normale emigratiegraad",
       "unit": "fraction/year"
@@ -306,7 +306,7 @@
   ],
   "lookupTables": [
     {
-      "name": "slummultiplicator_voor_migratie_lookup",
+      "name": "slummultiplicator voor migratie lookup",
       "xValues": [
         0.0,
         0.2,
@@ -324,7 +324,7 @@
       "interpolation": "LINEAR"
     },
     {
-      "name": "effect_schaarste_landgebruik_op_intensiviteit_bedrijfsgebouwen_lookup",
+      "name": "effect schaarste landgebruik op intensiviteit bedrijfsgebouwen lookup",
       "xValues": [
         0.0,
         0.5,
@@ -340,7 +340,7 @@
       "interpolation": "LINEAR"
     },
     {
-      "name": "extra_afbraakgraad_lookup",
+      "name": "extra afbraakgraad lookup",
       "xValues": [
         0.0,
         0.1,
@@ -356,7 +356,7 @@
       "interpolation": "LINEAR"
     },
     {
-      "name": "jobbeschikbaarheids_multiplicator_voor_immigratie_lookup",
+      "name": "jobbeschikbaarheids multiplicator voor immigratie lookup",
       "xValues": [
         0.0,
         0.5,
@@ -374,7 +374,7 @@
       "interpolation": "LINEAR"
     },
     {
-      "name": "huizenbeschikbaarheids_multiplicator_voor_immigratie_lookup",
+      "name": "huizenbeschikbaarheids multiplicator voor immigratie lookup",
       "xValues": [
         0.0,
         0.5,
@@ -392,7 +392,7 @@
       "interpolation": "LINEAR"
     },
     {
-      "name": "beroepsbevolkings_multiplicator_voor_bedrijven_lookup",
+      "name": "beroepsbevolkings multiplicator voor bedrijven lookup",
       "xValues": [
         0.0,
         0.5,
@@ -410,7 +410,7 @@
       "interpolation": "LINEAR"
     },
     {
-      "name": "landbeschikbaarheids_multiplicator_voor_bedrijfsgebouwen_lookup",
+      "name": "landbeschikbaarheids multiplicator voor bedrijfsgebouwen lookup",
       "xValues": [
         0.0,
         0.5,
@@ -424,7 +424,7 @@
       "interpolation": "LINEAR"
     },
     {
-      "name": "huizenschaarste_multiplicator_lookup",
+      "name": "huizenschaarste multiplicator lookup",
       "xValues": [
         0.0,
         0.5,
@@ -442,7 +442,7 @@
       "interpolation": "LINEAR"
     },
     {
-      "name": "landbeschikbaarheids_multiplicator_voor_huizen_lookup",
+      "name": "landbeschikbaarheids multiplicator voor huizen lookup",
       "xValues": [
         0.0,
         0.25,
@@ -489,13 +489,13 @@
           "y": 350.0
         },
         {
-          "name": "landbeschikbaarheids_multiplicator_voor_bedrijfsgebouwen",
+          "name": "landbeschikbaarheids multiplicator voor bedrijfsgebouwen",
           "type": "aux",
           "x": 381.0,
           "y": 82.0
         },
         {
-          "name": "landbeschikbaarheids_multiplicator_voor_huizen",
+          "name": "landbeschikbaarheids multiplicator voor huizen",
           "type": "aux",
           "x": 233.0,
           "y": 463.0
@@ -513,73 +513,73 @@
           "y": 424.0
         },
         {
-          "name": "beroepsbevolking_tot_jobs_ratio",
+          "name": "beroepsbevolking tot jobs ratio",
           "type": "aux",
           "x": 929.0,
           "y": 257.0
         },
         {
-          "name": "verhouding_huishoudens_tot_huizen",
+          "name": "verhouding huishoudens tot huizen",
           "type": "aux",
           "x": 572.0,
           "y": 710.0
         },
         {
-          "name": "huizenschaarste_multiplicator",
+          "name": "huizenschaarste multiplicator",
           "type": "aux",
           "x": 285.0,
           "y": 755.0
         },
         {
-          "name": "huizenbeschikbaarheids_multiplicator_voor_immigratie",
+          "name": "huizenbeschikbaarheids multiplicator voor immigratie",
           "type": "aux",
           "x": 1032.0,
           "y": 833.0
         },
         {
-          "name": "jobbeschikbaarheids_multiplicator_voor_immigratie",
+          "name": "jobbeschikbaarheids multiplicator voor immigratie",
           "type": "aux",
           "x": 1102.0,
           "y": 381.0
         },
         {
-          "name": "beroepsbevolkings_multiplicator_voor_bedrijven",
+          "name": "beroepsbevolkings multiplicator voor bedrijven",
           "type": "aux",
           "x": 747.0,
           "y": 94.0
         },
         {
-          "name": "constructiegraad_van_huizen",
+          "name": "constructiegraad van huizen",
           "type": "aux",
           "x": 144.0,
           "y": 687.0
         },
         {
-          "name": "normale_immigratiegraad",
+          "name": "normale immigratiegraad",
           "type": "aux",
           "x": 1267.0,
           "y": 577.0
         },
         {
-          "name": "normale_emigratiegraad",
+          "name": "normale emigratiegraad",
           "type": "aux",
           "x": 778.0,
           "y": 660.0
         },
         {
-          "name": "afbraakgraad_van_huizen",
+          "name": "afbraakgraad van huizen",
           "type": "aux",
           "x": 328.0,
           "y": 700.0
         },
         {
-          "name": "initieel_aantal_jobs_per_bedrijfsgebouw",
+          "name": "initieel aantal jobs per bedrijfsgebouw",
           "type": "aux",
           "x": 757.0,
           "y": 403.0
         },
         {
-          "name": "afbraakgraad_van_bedrijfsgebouwen",
+          "name": "afbraakgraad van bedrijfsgebouwen",
           "type": "aux",
           "x": 759.0,
           "y": 253.0
@@ -591,7 +591,7 @@
           "y": 471.0
         },
         {
-          "name": "constructiegraad_van_bedrijfsgebouwen",
+          "name": "constructiegraad van bedrijfsgebouwen",
           "type": "aux",
           "x": 445.0,
           "y": 251.0
@@ -609,19 +609,19 @@
           "y": 738.0
         },
         {
-          "name": "grondgebruik_per_bedrijf",
+          "name": "grondgebruik per bedrijf",
           "type": "aux",
           "x": 239.0,
           "y": 131.0
         },
         {
-          "name": "grondgebruik_per_huis",
+          "name": "grondgebruik per huis",
           "type": "aux",
           "x": 467.0,
           "y": 458.0
         },
         {
-          "name": "gemiddelde_grootte_van_huishoudens",
+          "name": "gemiddelde grootte van huishoudens",
           "type": "aux",
           "x": 590.0,
           "y": 525.0
@@ -633,7 +633,7 @@
           "y": 165.0
         },
         {
-          "name": "constructie_van_bedrijfsgebouwen",
+          "name": "constructie van bedrijfsgebouwen",
           "type": "aux",
           "x": 494.0,
           "y": 194.0
@@ -645,7 +645,7 @@
           "y": 166.0
         },
         {
-          "name": "afbraak_van_bedrijfsgebouwen",
+          "name": "afbraak van bedrijfsgebouwen",
           "type": "aux",
           "x": 721.0,
           "y": 195.0
@@ -657,7 +657,7 @@
           "y": 598.0
         },
         {
-          "name": "constructie_van_huizen",
+          "name": "constructie van huizen",
           "type": "aux",
           "x": 206.0,
           "y": 627.0
@@ -669,7 +669,7 @@
           "y": 594.0
         },
         {
-          "name": "afbraak_van_huizen",
+          "name": "afbraak van huizen",
           "type": "aux",
           "x": 444.0,
           "y": 623.0
@@ -723,13 +723,13 @@
           "y": 626.0
         },
         {
-          "name": "leegstandsgraad_van_huizen",
+          "name": "leegstandsgraad van huizen",
           "type": "aux",
           "x": 583.0,
           "y": 816.0
         },
         {
-          "name": "extra_afbraakgraad",
+          "name": "extra afbraakgraad",
           "type": "aux",
           "x": 458.0,
           "y": 808.0
@@ -747,31 +747,31 @@
           "y": 689.0
         },
         {
-          "name": "switch_leegstandseffect",
+          "name": "switch leegstandseffect",
           "type": "aux",
           "x": 308.0,
           "y": 903.0
         },
         {
-          "name": "effect_schaarste_landgebruik_op_intensiviteit_bedrijfsgebouwen",
+          "name": "effect schaarste landgebruik op intensiviteit bedrijfsgebouwen",
           "type": "aux",
           "x": 510.0,
           "y": 332.0
         },
         {
-          "name": "totale_grondoppervlakte",
+          "name": "totale grondoppervlakte",
           "type": "aux",
           "x": 157.0,
           "y": 346.0
         },
         {
-          "name": "switch_jobs",
+          "name": "switch jobs",
           "type": "aux",
           "x": 609.0,
           "y": 363.0
         },
         {
-          "name": "slummultiplicator_voor_migratie",
+          "name": "slummultiplicator voor migratie",
           "type": "aux",
           "x": 904.0,
           "y": 930.0
@@ -796,11 +796,11 @@
         },
         {
           "from": "landgebruik",
-          "to": "landbeschikbaarheids_multiplicator_voor_bedrijfsgebouwen"
+          "to": "landbeschikbaarheids multiplicator voor bedrijfsgebouwen"
         },
         {
           "from": "landgebruik",
-          "to": "landbeschikbaarheids_multiplicator_voor_huizen"
+          "to": "landbeschikbaarheids multiplicator voor huizen"
         },
         {
           "from": "huizen",
@@ -820,50 +820,50 @@
         },
         {
           "from": "jobs",
-          "to": "beroepsbevolking_tot_jobs_ratio"
+          "to": "beroepsbevolking tot jobs ratio"
         },
         {
           "from": "beroepsbevolking",
-          "to": "beroepsbevolking_tot_jobs_ratio"
+          "to": "beroepsbevolking tot jobs ratio"
         },
         {
           "from": "huizen",
-          "to": "verhouding_huishoudens_tot_huizen"
+          "to": "verhouding huishoudens tot huizen"
         },
         {
-          "from": "huizenschaarste_multiplicator",
+          "from": "huizenschaarste multiplicator",
           "to": "72"
         },
         {
-          "from": "verhouding_huishoudens_tot_huizen",
-          "to": "huizenschaarste_multiplicator"
+          "from": "verhouding huishoudens tot huizen",
+          "to": "huizenschaarste multiplicator"
         },
         {
-          "from": "verhouding_huishoudens_tot_huizen",
-          "to": "huizenbeschikbaarheids_multiplicator_voor_immigratie"
+          "from": "verhouding huishoudens tot huizen",
+          "to": "huizenbeschikbaarheids multiplicator voor immigratie"
         },
         {
-          "from": "beroepsbevolking_tot_jobs_ratio",
-          "to": "jobbeschikbaarheids_multiplicator_voor_immigratie"
+          "from": "beroepsbevolking tot jobs ratio",
+          "to": "jobbeschikbaarheids multiplicator voor immigratie"
         },
         {
-          "from": "beroepsbevolking_tot_jobs_ratio",
-          "to": "beroepsbevolkings_multiplicator_voor_bedrijven"
+          "from": "beroepsbevolking tot jobs ratio",
+          "to": "beroepsbevolkings multiplicator voor bedrijven"
         },
         {
-          "from": "constructiegraad_van_huizen",
+          "from": "constructiegraad van huizen",
           "to": "72"
         },
         {
-          "from": "afbraakgraad_van_huizen",
+          "from": "afbraakgraad van huizen",
           "to": "77"
         },
         {
-          "from": "initieel_aantal_jobs_per_bedrijfsgebouw",
+          "from": "initieel aantal jobs per bedrijfsgebouw",
           "to": "jobs"
         },
         {
-          "from": "afbraakgraad_van_bedrijfsgebouwen",
+          "from": "afbraakgraad van bedrijfsgebouwen",
           "to": "67"
         },
         {
@@ -871,7 +871,7 @@
           "to": "beroepsbevolking"
         },
         {
-          "from": "constructiegraad_van_bedrijfsgebouwen",
+          "from": "constructiegraad van bedrijfsgebouwen",
           "to": "60"
         },
         {
@@ -883,11 +883,11 @@
           "to": "116"
         },
         {
-          "from": "grondgebruik_per_huis",
+          "from": "grondgebruik per huis",
           "to": "landgebruik"
         },
         {
-          "from": "grondgebruik_per_bedrijf",
+          "from": "grondgebruik per bedrijf",
           "to": "landgebruik"
         },
         {
@@ -899,11 +899,11 @@
           "to": "56"
         },
         {
-          "from": "landbeschikbaarheids_multiplicator_voor_bedrijfsgebouwen",
+          "from": "landbeschikbaarheids multiplicator voor bedrijfsgebouwen",
           "to": "_48"
         },
         {
-          "from": "beroepsbevolkings_multiplicator_voor_bedrijven",
+          "from": "beroepsbevolkings multiplicator voor bedrijven",
           "to": "_48"
         },
         {
@@ -939,7 +939,7 @@
           "to": "80"
         },
         {
-          "from": "landbeschikbaarheids_multiplicator_voor_huizen",
+          "from": "landbeschikbaarheids multiplicator voor huizen",
           "to": "_48"
         },
         {
@@ -951,7 +951,7 @@
           "to": "bevolking"
         },
         {
-          "from": "normale_emigratiegraad",
+          "from": "normale emigratiegraad",
           "to": "emigratie"
         },
         {
@@ -967,15 +967,15 @@
           "to": "79"
         },
         {
-          "from": "jobbeschikbaarheids_multiplicator_voor_immigratie",
+          "from": "jobbeschikbaarheids multiplicator voor immigratie",
           "to": "_140"
         },
         {
-          "from": "normale_immigratiegraad",
+          "from": "normale immigratiegraad",
           "to": "immigratie"
         },
         {
-          "from": "huizenbeschikbaarheids_multiplicator_voor_immigratie",
+          "from": "huizenbeschikbaarheids multiplicator voor immigratie",
           "to": "immigratie"
         },
         {
@@ -987,11 +987,11 @@
           "to": "_140"
         },
         {
-          "from": "beroepsbevolking_tot_jobs_ratio",
+          "from": "beroepsbevolking tot jobs ratio",
           "to": "werkloosheidsgraad"
         },
         {
-          "from": "gemiddelde_grootte_van_huishoudens",
+          "from": "gemiddelde grootte van huishoudens",
           "to": "huishoudens"
         },
         {
@@ -999,20 +999,20 @@
           "to": "huishoudens"
         },
         {
-          "from": "verhouding_huishoudens_tot_huizen",
-          "to": "leegstandsgraad_van_huizen"
+          "from": "verhouding huishoudens tot huizen",
+          "to": "leegstandsgraad van huizen"
         },
         {
           "from": "huishoudens",
-          "to": "verhouding_huishoudens_tot_huizen"
+          "to": "verhouding huishoudens tot huizen"
         },
         {
-          "from": "leegstandsgraad_van_huizen",
+          "from": "leegstandsgraad van huizen",
           "to": "110"
         },
         {
-          "from": "extra_afbraakgraad",
-          "to": "afbraak_van_huizen"
+          "from": "extra afbraakgraad",
+          "to": "afbraak van huizen"
         },
         {
           "from": "115",
@@ -1027,39 +1027,39 @@
           "to": "sterftes"
         },
         {
-          "from": "switch_leegstandseffect",
-          "to": "afbraak_van_huizen"
+          "from": "switch leegstandseffect",
+          "to": "afbraak van huizen"
         },
         {
           "from": "landgebruik",
-          "to": "effect_schaarste_landgebruik_op_intensiviteit_bedrijfsgebouwen"
+          "to": "effect schaarste landgebruik op intensiviteit bedrijfsgebouwen"
         },
         {
-          "from": "effect_schaarste_landgebruik_op_intensiviteit_bedrijfsgebouwen",
+          "from": "effect schaarste landgebruik op intensiviteit bedrijfsgebouwen",
           "to": "jobs"
         },
         {
-          "from": "totale_grondoppervlakte",
+          "from": "totale grondoppervlakte",
           "to": "landgebruik"
         },
         {
-          "from": "switch_jobs",
+          "from": "switch jobs",
           "to": "jobs"
         },
         {
-          "from": "leegstandsgraad_van_huizen",
-          "to": "slummultiplicator_voor_migratie"
+          "from": "leegstandsgraad van huizen",
+          "to": "slummultiplicator voor migratie"
         },
         {
-          "from": "slummultiplicator_voor_migratie",
+          "from": "slummultiplicator voor migratie",
           "to": "immigratie"
         },
         {
-          "from": "switch_leegstandseffect",
+          "from": "switch leegstandseffect",
           "to": "immigratie"
         },
         {
-          "from": "slummultiplicator_voor_migratie",
+          "from": "slummultiplicator voor migratie",
           "to": "emigratie"
         }
       ],
@@ -1148,6 +1148,9 @@
     "durationUnit": "Year"
   },
   "metadata": {
-    "license": "unknown"
+    "license": "CC-BY-NC-SA-4.0",
+    "author": "Dr. Erik Pruyt",
+    "source": "Pruyt, E., 2013. Small System Dynamics Models for Big Issues: Triple Jump towards Real-World Complexity. TU Delft Library. ISBN 978-94-6186-195-5",
+    "url": "https://simulation.tudelft.nl/SD/"
   }
 }

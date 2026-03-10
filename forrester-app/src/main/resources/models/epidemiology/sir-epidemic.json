@@ -42,7 +42,7 @@
   },
   "auxiliaries": [
     {
-      "name": "Contact_Rate",
+      "name": "Contact Rate",
       "equation": "8",
       "unit": "Dimensionless unit"
     },
@@ -52,7 +52,7 @@
       "unit": "Dimensionless unit"
     },
     {
-      "name": "Recovery_Rate",
+      "name": "Recovery Rate",
       "equation": "0.2",
       "unit": "Dimensionless unit"
     }

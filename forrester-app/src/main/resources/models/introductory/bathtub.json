@@ -3,7 +3,7 @@
   "comment": "Water drains at a fixed rate; inflow begins after 5 minutes",
   "stocks": [
     {
-      "name": "Water_in_Tub",
+      "name": "Water in Tub",
       "initialValue": 50.0,
       "unit": "Gallon"
     }
@@ -13,13 +13,13 @@
       "name": "Outflow",
       "equation": "MIN(Outflow_Rate, Water_in_Tub)",
       "timeUnit": "Minute",
-      "source": "Water_in_Tub"
+      "source": "Water in Tub"
     },
     {
       "name": "Inflow",
       "equation": "STEP(Inflow_Rate, 5)",
       "timeUnit": "Minute",
-      "sink": "Water_in_Tub"
+      "sink": "Water in Tub"
     }
   ],
   "views": [],
@@ -30,12 +30,12 @@
   },
   "auxiliaries": [
     {
-      "name": "Outflow_Rate",
+      "name": "Outflow Rate",
       "equation": "5",
       "unit": "Gallon per Minute"
     },
     {
-      "name": "Inflow_Rate",
+      "name": "Inflow Rate",
       "equation": "5",
       "unit": "Gallon per Minute"
     }

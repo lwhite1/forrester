@@ -2,13 +2,13 @@
   "name": "Globalization",
   "stocks": [
     {
-      "name": "production_capacity",
+      "name": "production capacity",
       "comment": "production capacity",
       "initialValue": 1.0,
       "unit": "1"
     },
     {
-      "name": "production_capacity_0",
+      "name": "production capacity 0",
       "comment": "production capacity 0",
       "initialValue": 0.1,
       "unit": "1"
@@ -20,7 +20,7 @@
       "unit": "1"
     },
     {
-      "name": "standards_0",
+      "name": "standards 0",
       "comment": "standards 0",
       "initialValue": 0.1,
       "unit": "1"
@@ -28,49 +28,49 @@
   ],
   "flows": [
     {
-      "name": "production_capacity_net_flow",
+      "name": "production capacity net flow",
       "comment": "Net flow for production capacity",
       "equation": "investment-depreciation",
       "timeUnit": "Year",
-      "sink": "production_capacity"
+      "sink": "production capacity"
     },
     {
-      "name": "production_capacity_0_net_flow",
+      "name": "production capacity 0 net flow",
       "comment": "Net flow for production capacity 0",
       "equation": "investment_0-depreciation_0",
       "timeUnit": "Year",
-      "sink": "production_capacity_0"
+      "sink": "production capacity 0"
     },
     {
-      "name": "standards_net_flow",
+      "name": "standards net flow",
       "comment": "Net flow for standards",
       "equation": "progress-deterioration",
       "timeUnit": "Year",
       "sink": "standards"
     },
     {
-      "name": "standards_0_net_flow",
+      "name": "standards 0 net flow",
       "comment": "Net flow for standards 0",
       "equation": "progress_0-deterioration_0",
       "timeUnit": "Year",
-      "sink": "standards_0"
+      "sink": "standards 0"
     }
   ],
   "auxiliaries": [
     {
-      "name": "progress_function",
+      "name": "progress function",
       "comment": "progress function",
       "equation": "IF(TIME<10, 2, PROGRESS_FACTOR)",
       "unit": "1"
     },
     {
-      "name": "progress_function_0",
+      "name": "progress function 0",
       "comment": "progress function 0",
       "equation": "IF(TIME<10, 1, PROGRESS_FACTOR_0)",
       "unit": "1"
     },
     {
-      "name": "investment_function_0",
+      "name": "investment function 0",
       "comment": "investment function 0",
       "equation": "IF(TIME<10, 0.2, INVESTMENT_FACTOR_0)",
       "unit": "1"
@@ -82,31 +82,31 @@
       "unit": "1/Year"
     },
     {
-      "name": "investment_0",
+      "name": "investment 0",
       "comment": "investment 0",
       "equation": "IF(surplus_0<0,INVESTMENT_RATE_0*production_capacity_0*investment_function_0 , 0)",
       "unit": "1/Year"
     },
     {
-      "name": "inland_price",
+      "name": "inland price",
       "comment": "inland price",
       "equation": "product_price_0*(1-subsidy_0+customs)",
       "unit": "$"
     },
     {
-      "name": "inland_price_0",
+      "name": "inland price 0",
       "comment": "inland price 0",
       "equation": "product_price*(1-subsidy+customs_0)",
       "unit": "$"
     },
     {
-      "name": "progress_investment",
+      "name": "progress investment",
       "comment": "progress investment",
       "equation": "progress_function*investment",
       "unit": "1/Year"
     },
     {
-      "name": "progress_investment_0",
+      "name": "progress investment 0",
       "comment": "progress investment 0",
       "equation": "progress_function_0*investment_0",
       "unit": "1/Year"
@@ -118,13 +118,13 @@
       "unit": "1"
     },
     {
-      "name": "subsidy_0",
+      "name": "subsidy 0",
       "comment": "subsidy 0",
       "equation": "IF(TIME<10, 0, EXPORT_SUBSIDY_0)",
       "unit": "1"
     },
     {
-      "name": "investment_function",
+      "name": "investment function",
       "comment": "investment function",
       "equation": "IF(TIME<10, 2, INVESTMENT_FACTOR)",
       "unit": "1"
@@ -136,7 +136,7 @@
       "unit": "1"
     },
     {
-      "name": "customs_0",
+      "name": "customs 0",
       "comment": "customs 0",
       "equation": "IF(TIME<10, 0, CUSTOMS_DUTY_0)",
       "unit": "1"
@@ -148,7 +148,7 @@
       "unit": "1/Year"
     },
     {
-      "name": "progress_0",
+      "name": "progress 0",
       "comment": "progress 0",
       "equation": "progress_investment_0*standards_0*(1-product_price_0/REFERENCE_PRICE_0)",
       "unit": "1/Year"
@@ -160,7 +160,7 @@
       "unit": "1/Year"
     },
     {
-      "name": "price_ratio_domestic_vs_imported_product",
+      "name": "price ratio domestic vs imported product",
       "comment": "price ratio domestic vs imported product",
       "equation": "product_price/inland_price",
       "unit": "1"
@@ -172,31 +172,31 @@
       "unit": "1/Year"
     },
     {
-      "name": "supply_0",
+      "name": "supply 0",
       "comment": "supply 0",
       "equation": "PRODUCTION_RATE_0*production_capacity_0",
       "unit": "1/Year"
     },
     {
-      "name": "production_costs",
+      "name": "production costs",
       "comment": "production costs",
       "equation": "STANDARD_FACTOR*standards",
       "unit": "$"
     },
     {
-      "name": "production_costs_0",
+      "name": "production costs 0",
       "comment": "production costs 0",
       "equation": "STANDARD_FACTOR_0*standards_0",
       "unit": "$"
     },
     {
-      "name": "purchase_decision",
+      "name": "purchase decision",
       "comment": "purchase decision",
       "equation": "LOOKUP(purchase_decision_lookup, price_ratio_domestic_vs_imported_product)",
       "unit": "1"
     },
     {
-      "name": "purchase_decision_0",
+      "name": "purchase decision 0",
       "comment": "purchase decision 0",
       "equation": "LOOKUP(purchase_decision_0_lookup, price_ratio_domestic_vs_imported_product_0)",
       "unit": "1"
@@ -208,37 +208,37 @@
       "unit": "1/Year"
     },
     {
-      "name": "demand_0",
+      "name": "demand 0",
       "comment": "demand 0",
       "equation": "purchase_decision_0*MARKET_VOLUME_0+(1-purchase_decision)*MARKET_VOLUME",
       "unit": "1/Year"
     },
     {
-      "name": "price_ratio_domestic_vs_imported_product_0",
+      "name": "price ratio domestic vs imported product 0",
       "comment": "price ratio domestic vs imported product 0",
       "equation": "product_price_0/inland_price_0",
       "unit": "1"
     },
     {
-      "name": "product_costs",
+      "name": "product costs",
       "comment": "product costs",
       "equation": "RESOURCE_COSTS+production_costs",
       "unit": "$"
     },
     {
-      "name": "product_costs_0",
+      "name": "product costs 0",
       "comment": "product costs 0",
       "equation": "RESOURCE_COSTS_0+production_costs_0",
       "unit": "$"
     },
     {
-      "name": "product_price",
+      "name": "product price",
       "comment": "product price",
       "equation": "(1+TAX_RATE)*product_costs",
       "unit": "$"
     },
     {
-      "name": "product_price_0",
+      "name": "product price 0",
       "comment": "product price 0",
       "equation": "(1+TAX_RATE_0)*product_costs_0",
       "unit": "$"
@@ -250,13 +250,13 @@
       "unit": "1/Year"
     },
     {
-      "name": "deterioration_0",
+      "name": "deterioration 0",
       "comment": "deterioration 0",
       "equation": "DETERIORATION_RATE_0*standards_0",
       "unit": "1/Year"
     },
     {
-      "name": "surplus_0",
+      "name": "surplus 0",
       "comment": "surplus 0",
       "equation": "supply_0-demand_0",
       "unit": "1/Year"
@@ -268,178 +268,178 @@
       "unit": "1/Year"
     },
     {
-      "name": "depreciation_0",
+      "name": "depreciation 0",
       "comment": "depreciation 0",
       "equation": "DEPRECIATION_RATE_0*production_capacity_0",
       "unit": "1/Year"
     },
     {
-      "name": "TIME_STEP",
+      "name": "TIME STEP",
       "equation": "0.0625",
       "unit": "Year"
     },
     {
-      "name": "INITIAL_TIME",
+      "name": "INITIAL TIME",
       "equation": "0",
       "unit": "Year"
     },
     {
-      "name": "FINAL_TIME",
+      "name": "FINAL TIME",
       "equation": "50",
       "unit": "Year"
     },
     {
-      "name": "CUSTOMS_DUTY_0",
+      "name": "CUSTOMS DUTY 0",
       "equation": "0",
       "comment": "CUSTOMS DUTY 0",
       "unit": "1"
     },
     {
-      "name": "INVESTMENT_FACTOR_0",
+      "name": "INVESTMENT FACTOR 0",
       "equation": "2",
       "comment": "INVESTMENT FACTOR 0",
       "unit": "1"
     },
     {
-      "name": "EXPORT_SUBSIDY",
+      "name": "EXPORT SUBSIDY",
       "equation": "0",
       "comment": "EXPORT SUBSIDY",
       "unit": "1"
     },
     {
-      "name": "PROGRESS_FACTOR",
+      "name": "PROGRESS FACTOR",
       "equation": "2",
       "comment": "PROGRESS FACTOR",
       "unit": "1"
     },
     {
-      "name": "PROGRESS_FACTOR_0",
+      "name": "PROGRESS FACTOR 0",
       "equation": "2",
       "comment": "PROGRESS FACTOR 0",
       "unit": "1"
     },
     {
-      "name": "CUSTOMS_DUTY",
+      "name": "CUSTOMS DUTY",
       "equation": "0",
       "comment": "CUSTOMS DUTY",
       "unit": "1"
     },
     {
-      "name": "REFERENCE_PRICE_0",
+      "name": "REFERENCE PRICE 0",
       "equation": "5",
       "comment": "REFERENCE PRICE 0",
       "unit": "$"
     },
     {
-      "name": "INVESTMENT_RATE",
+      "name": "INVESTMENT RATE",
       "equation": "0.1",
       "comment": "INVESTMENT RATE",
       "unit": "1/Year"
     },
     {
-      "name": "INVESTMENT_RATE_0",
+      "name": "INVESTMENT RATE 0",
       "equation": "0.1",
       "comment": "INVESTMENT RATE 0",
       "unit": "1/Year"
     },
     {
-      "name": "REFERENCE_PRICE",
+      "name": "REFERENCE PRICE",
       "equation": "5",
       "comment": "REFERENCE PRICE",
       "unit": "$"
     },
     {
-      "name": "EXPORT_SUBSIDY_0",
+      "name": "EXPORT SUBSIDY 0",
       "equation": "0",
       "comment": "EXPORT SUBSIDY 0",
       "unit": "1"
     },
     {
-      "name": "INVESTMENT_FACTOR",
+      "name": "INVESTMENT FACTOR",
       "equation": "2",
       "comment": "INVESTMENT FACTOR",
       "unit": "1"
     },
     {
-      "name": "MARKET_VOLUME",
+      "name": "MARKET VOLUME",
       "equation": "1",
       "comment": "MARKET VOLUME",
       "unit": "1/Year"
     },
     {
-      "name": "MARKET_VOLUME_0",
+      "name": "MARKET VOLUME 0",
       "equation": "1",
       "comment": "MARKET VOLUME 0",
       "unit": "1/Year"
     },
     {
-      "name": "PRODUCTION_RATE",
+      "name": "PRODUCTION RATE",
       "equation": "1",
       "comment": "PRODUCTION RATE",
       "unit": "1/Year"
     },
     {
-      "name": "PRODUCTION_RATE_0",
+      "name": "PRODUCTION RATE 0",
       "equation": "1",
       "comment": "PRODUCTION RATE 0",
       "unit": "1/Year"
     },
     {
-      "name": "RESOURCE_COSTS",
+      "name": "RESOURCE COSTS",
       "equation": "1",
       "comment": "RESOURCE COSTS",
       "unit": "$"
     },
     {
-      "name": "RESOURCE_COSTS_0",
+      "name": "RESOURCE COSTS 0",
       "equation": "1",
       "comment": "RESOURCE COSTS 0",
       "unit": "$"
     },
     {
-      "name": "DETERIORATION_RATE",
+      "name": "DETERIORATION RATE",
       "equation": "0.05",
       "comment": "DETERIORATION RATE",
       "unit": "1/Year"
     },
     {
-      "name": "DETERIORATION_RATE_0",
+      "name": "DETERIORATION RATE 0",
       "equation": "0.05",
       "comment": "DETERIORATION RATE 0",
       "unit": "1/Year"
     },
     {
-      "name": "STANDARD_FACTOR",
+      "name": "STANDARD FACTOR",
       "equation": "1",
       "comment": "STANDARD FACTOR",
       "unit": "$"
     },
     {
-      "name": "STANDARD_FACTOR_0",
+      "name": "STANDARD FACTOR 0",
       "equation": "1",
       "comment": "STANDARD FACTOR 0",
       "unit": "$"
     },
     {
-      "name": "TAX_RATE",
+      "name": "TAX RATE",
       "equation": "0.2",
       "comment": "TAX RATE",
       "unit": "1"
     },
     {
-      "name": "TAX_RATE_0",
+      "name": "TAX RATE 0",
       "equation": "0.2",
       "comment": "TAX RATE 0",
       "unit": "1"
     },
     {
-      "name": "DEPRECIATION_RATE",
+      "name": "DEPRECIATION RATE",
       "equation": "0.05",
       "comment": "DEPRECIATION RATE",
       "unit": "1/Year"
     },
     {
-      "name": "DEPRECIATION_RATE_0",
+      "name": "DEPRECIATION RATE 0",
       "equation": "0.05",
       "comment": "DEPRECIATION RATE 0",
       "unit": "1/Year"
@@ -447,7 +447,7 @@
   ],
   "lookupTables": [
     {
-      "name": "purchase_decision_lookup",
+      "name": "purchase decision lookup",
       "xValues": [
         0.0,
         0.5,
@@ -467,7 +467,7 @@
       "interpolation": "LINEAR"
     },
     {
-      "name": "purchase_decision_0_lookup",
+      "name": "purchase decision 0 lookup",
       "xValues": [
         0.0,
         0.5,
@@ -492,7 +492,7 @@
       "name": "View 1",
       "elements": [
         {
-          "name": "production_capacity",
+          "name": "production capacity",
           "type": "stock",
           "x": 205.0,
           "y": 129.0
@@ -552,19 +552,19 @@
           "y": 144.0
         },
         {
-          "name": "INVESTMENT_FACTOR",
+          "name": "INVESTMENT FACTOR",
           "type": "aux",
           "x": 67.0,
           "y": 270.0
         },
         {
-          "name": "DEPRECIATION_RATE",
+          "name": "DEPRECIATION RATE",
           "type": "aux",
           "x": 249.0,
           "y": 83.0
         },
         {
-          "name": "DETERIORATION_RATE",
+          "name": "DETERIORATION RATE",
           "type": "aux",
           "x": 618.0,
           "y": 84.0
@@ -582,7 +582,7 @@
           "y": 315.0
         },
         {
-          "name": "MARKET_VOLUME",
+          "name": "MARKET VOLUME",
           "type": "aux",
           "x": 58.0,
           "y": 424.0
@@ -594,91 +594,91 @@
           "y": 424.0
         },
         {
-          "name": "PRODUCTION_RATE",
+          "name": "PRODUCTION RATE",
           "type": "aux",
           "x": 69.0,
           "y": 320.0
         },
         {
-          "name": "progress_investment",
+          "name": "progress investment",
           "type": "aux",
           "x": 339.0,
           "y": 287.0
         },
         {
-          "name": "PROGRESS_FACTOR",
+          "name": "PROGRESS FACTOR",
           "type": "aux",
           "x": 64.0,
           "y": 363.0
         },
         {
-          "name": "purchase_decision",
+          "name": "purchase decision",
           "type": "aux",
           "x": 328.0,
           "y": 424.0
         },
         {
-          "name": "production_costs",
+          "name": "production costs",
           "type": "aux",
           "x": 500.0,
           "y": 216.0
         },
         {
-          "name": "product_costs",
+          "name": "product costs",
           "type": "aux",
           "x": 501.0,
           "y": 288.0
         },
         {
-          "name": "STANDARD_FACTOR",
+          "name": "STANDARD FACTOR",
           "type": "aux",
           "x": 637.0,
           "y": 215.0
         },
         {
-          "name": "RESOURCE_COSTS",
+          "name": "RESOURCE COSTS",
           "type": "aux",
           "x": 632.0,
           "y": 254.0
         },
         {
-          "name": "product_price",
+          "name": "product price",
           "type": "aux",
           "x": 369.0,
           "y": 362.0
         },
         {
-          "name": "TAX_RATE",
+          "name": "TAX RATE",
           "type": "aux",
           "x": 639.0,
           "y": 290.0
         },
         {
-          "name": "price_ratio_domestic_vs_imported_product",
+          "name": "price ratio domestic vs imported product",
           "type": "aux",
           "x": 475.0,
           "y": 423.0
         },
         {
-          "name": "inland_price",
+          "name": "inland price",
           "type": "aux",
           "x": 643.0,
           "y": 424.0
         },
         {
-          "name": "CUSTOMS_DUTY",
+          "name": "CUSTOMS DUTY",
           "type": "aux",
           "x": 634.0,
           "y": 385.0
         },
         {
-          "name": "production_capacity_0",
+          "name": "production capacity 0",
           "type": "stock",
           "x": 211.0,
           "y": 591.0
         },
         {
-          "name": "standards_0",
+          "name": "standards 0",
           "type": "stock",
           "x": 508.0,
           "y": 592.0
@@ -690,7 +690,7 @@
           "y": 588.0
         },
         {
-          "name": "investment_0",
+          "name": "investment 0",
           "type": "aux",
           "x": 118.0,
           "y": 604.0
@@ -702,169 +702,169 @@
           "y": 591.0
         },
         {
-          "name": "depreciation_0",
+          "name": "depreciation 0",
           "type": "aux",
           "x": 306.0,
           "y": 607.0
         },
         {
-          "name": "INVESTMENT_FACTOR_0",
+          "name": "INVESTMENT FACTOR 0",
           "type": "aux",
           "x": 72.0,
           "y": 740.0
         },
         {
-          "name": "DEPRECIATION_RATE_0",
+          "name": "DEPRECIATION RATE 0",
           "type": "aux",
           "x": 258.0,
           "y": 541.0
         },
         {
-          "name": "DETERIORATION_RATE_0",
+          "name": "DETERIORATION RATE 0",
           "type": "aux",
           "x": 623.0,
           "y": 544.0
         },
         {
-          "name": "supply_0",
+          "name": "supply 0",
           "type": "aux",
           "x": 213.0,
           "y": 665.0
         },
         {
-          "name": "surplus_0",
+          "name": "surplus 0",
           "type": "aux",
           "x": 212.0,
           "y": 775.0
         },
         {
-          "name": "MARKET_VOLUME_0",
+          "name": "MARKET VOLUME 0",
           "type": "aux",
           "x": 66.0,
           "y": 901.0
         },
         {
-          "name": "demand_0",
+          "name": "demand 0",
           "type": "aux",
           "x": 197.0,
           "y": 901.0
         },
         {
-          "name": "PRODUCTION_RATE_0",
+          "name": "PRODUCTION RATE 0",
           "type": "aux",
           "x": 72.0,
           "y": 791.0
         },
         {
-          "name": "progress_investment_0",
+          "name": "progress investment 0",
           "type": "aux",
           "x": 328.0,
           "y": 747.0
         },
         {
-          "name": "PROGRESS_FACTOR_0",
+          "name": "PROGRESS FACTOR 0",
           "type": "aux",
           "x": 70.0,
           "y": 828.0
         },
         {
-          "name": "purchase_decision_0",
+          "name": "purchase decision 0",
           "type": "aux",
           "x": 319.0,
           "y": 900.0
         },
         {
-          "name": "production_costs_0",
+          "name": "production costs 0",
           "type": "aux",
           "x": 507.0,
           "y": 670.0
         },
         {
-          "name": "product_costs_0",
+          "name": "product costs 0",
           "type": "aux",
           "x": 508.0,
           "y": 749.0
         },
         {
-          "name": "STANDARD_FACTOR_0",
+          "name": "STANDARD FACTOR 0",
           "type": "aux",
           "x": 633.0,
           "y": 668.0
         },
         {
-          "name": "RESOURCE_COSTS_0",
+          "name": "RESOURCE COSTS 0",
           "type": "aux",
           "x": 632.0,
           "y": 711.0
         },
         {
-          "name": "product_price_0",
+          "name": "product price 0",
           "type": "aux",
           "x": 376.0,
           "y": 830.0
         },
         {
-          "name": "TAX_RATE_0",
+          "name": "TAX RATE 0",
           "type": "aux",
           "x": 633.0,
           "y": 751.0
         },
         {
-          "name": "EXPORT_SUBSIDY_0",
+          "name": "EXPORT SUBSIDY 0",
           "type": "aux",
           "x": 634.0,
           "y": 788.0
         },
         {
-          "name": "price_ratio_domestic_vs_imported_product_0",
+          "name": "price ratio domestic vs imported product 0",
           "type": "aux",
           "x": 471.0,
           "y": 900.0
         },
         {
-          "name": "inland_price_0",
+          "name": "inland price 0",
           "type": "aux",
           "x": 640.0,
           "y": 900.0
         },
         {
-          "name": "CUSTOMS_DUTY_0",
+          "name": "CUSTOMS DUTY 0",
           "type": "aux",
           "x": 636.0,
           "y": 850.0
         },
         {
-          "name": "MARKET_VOLUME_0",
+          "name": "MARKET VOLUME 0",
           "type": "aux",
           "x": 67.0,
           "y": 475.0
         },
         {
-          "name": "purchase_decision_0",
+          "name": "purchase decision 0",
           "type": "aux",
           "x": 273.0,
           "y": 477.0
         },
         {
-          "name": "product_price_0",
+          "name": "product price 0",
           "type": "aux",
           "x": 428.0,
           "y": 477.0
         },
         {
-          "name": "MARKET_VOLUME",
+          "name": "MARKET VOLUME",
           "type": "aux",
           "x": 69.0,
           "y": 952.0
         },
         {
-          "name": "purchase_decision",
+          "name": "purchase decision",
           "type": "aux",
           "x": 285.0,
           "y": 953.0
         },
         {
-          "name": "product_price",
+          "name": "product price",
           "type": "aux",
           "x": 441.0,
           "y": 951.0
@@ -876,7 +876,7 @@
           "y": 589.0
         },
         {
-          "name": "deterioration_0",
+          "name": "deterioration 0",
           "type": "aux",
           "x": 605.0,
           "y": 605.0
@@ -888,7 +888,7 @@
           "y": 589.0
         },
         {
-          "name": "progress_0",
+          "name": "progress 0",
           "type": "aux",
           "x": 412.0,
           "y": 605.0
@@ -906,7 +906,7 @@
           "y": 861.0
         },
         {
-          "name": "EXPORT_SUBSIDY",
+          "name": "EXPORT SUBSIDY",
           "type": "aux",
           "x": 639.0,
           "y": 335.0
@@ -918,25 +918,25 @@
           "y": 764.0
         },
         {
-          "name": "INVESTMENT_RATE",
+          "name": "INVESTMENT RATE",
           "type": "aux",
           "x": 68.0,
           "y": 84.0
         },
         {
-          "name": "REFERENCE_PRICE",
+          "name": "REFERENCE PRICE",
           "type": "aux",
           "x": 395.0,
           "y": 83.0
         },
         {
-          "name": "INVESTMENT_RATE_0",
+          "name": "INVESTMENT RATE 0",
           "type": "aux",
           "x": 69.0,
           "y": 540.0
         },
         {
-          "name": "REFERENCE_PRICE_0",
+          "name": "REFERENCE PRICE 0",
           "type": "aux",
           "x": 393.0,
           "y": 542.0
@@ -954,19 +954,19 @@
           "y": 356.0
         },
         {
-          "name": "subsidy_0",
+          "name": "subsidy 0",
           "type": "aux",
           "x": 469.0,
           "y": 823.0
         },
         {
-          "name": "customs_0",
+          "name": "customs 0",
           "type": "aux",
           "x": 557.0,
           "y": 822.0
         },
         {
-          "name": "subsidy_0",
+          "name": "subsidy 0",
           "type": "aux",
           "x": 627.0,
           "y": 485.0
@@ -984,25 +984,25 @@
           "y": 299.0
         },
         {
-          "name": "investment_function",
+          "name": "investment function",
           "type": "aux",
           "x": 65.0,
           "y": 193.0
         },
         {
-          "name": "investment_function_0",
+          "name": "investment function 0",
           "type": "aux",
           "x": 67.0,
           "y": 658.0
         },
         {
-          "name": "progress_function_0",
+          "name": "progress function 0",
           "type": "aux",
           "x": 275.0,
           "y": 830.0
         },
         {
-          "name": "progress_function",
+          "name": "progress function",
           "type": "aux",
           "x": 281.0,
           "y": 364.0
@@ -1011,7 +1011,7 @@
       "connectors": [
         {
           "from": "6",
-          "to": "production_capacity"
+          "to": "production capacity"
         },
         {
           "from": "6",
@@ -1023,7 +1023,7 @@
         },
         {
           "from": "11",
-          "to": "production_capacity"
+          "to": "production capacity"
         },
         {
           "from": "16",
@@ -1042,11 +1042,11 @@
           "to": "standards"
         },
         {
-          "from": "production_capacity",
+          "from": "production capacity",
           "to": "investment"
         },
         {
-          "from": "production_capacity",
+          "from": "production capacity",
           "to": "depreciation"
         },
         {
@@ -1058,11 +1058,11 @@
           "to": "deterioration"
         },
         {
-          "from": "DEPRECIATION_RATE",
+          "from": "DEPRECIATION RATE",
           "to": "depreciation"
         },
         {
-          "from": "production_capacity",
+          "from": "production capacity",
           "to": "supply"
         },
         {
@@ -1079,71 +1079,71 @@
         },
         {
           "from": "investment",
-          "to": "progress_investment"
+          "to": "progress investment"
         },
         {
-          "from": "PRODUCTION_RATE",
+          "from": "PRODUCTION RATE",
           "to": "supply"
         },
         {
-          "from": "MARKET_VOLUME",
+          "from": "MARKET VOLUME",
           "to": "demand"
         },
         {
-          "from": "purchase_decision",
+          "from": "purchase decision",
           "to": "demand"
         },
         {
-          "from": "price_ratio_domestic_vs_imported_product",
-          "to": "purchase_decision"
+          "from": "price ratio domestic vs imported product",
+          "to": "purchase decision"
         },
         {
-          "from": "inland_price",
-          "to": "price_ratio_domestic_vs_imported_product"
+          "from": "inland price",
+          "to": "price ratio domestic vs imported product"
         },
         {
-          "from": "product_price",
-          "to": "price_ratio_domestic_vs_imported_product"
+          "from": "product price",
+          "to": "price ratio domestic vs imported product"
         },
         {
-          "from": "TAX_RATE",
-          "to": "product_price"
+          "from": "TAX RATE",
+          "to": "product price"
         },
         {
-          "from": "product_price",
+          "from": "product price",
           "to": "progress"
         },
         {
-          "from": "progress_investment",
+          "from": "progress investment",
           "to": "progress"
         },
         {
           "from": "standards",
-          "to": "production_costs"
+          "to": "production costs"
         },
         {
-          "from": "STANDARD_FACTOR",
-          "to": "production_costs"
+          "from": "STANDARD FACTOR",
+          "to": "production costs"
         },
         {
-          "from": "production_costs",
-          "to": "product_costs"
+          "from": "production costs",
+          "to": "product costs"
         },
         {
-          "from": "RESOURCE_COSTS",
-          "to": "product_costs"
+          "from": "RESOURCE COSTS",
+          "to": "product costs"
         },
         {
-          "from": "product_costs",
-          "to": "product_price"
+          "from": "product costs",
+          "to": "product price"
         },
         {
-          "from": "DETERIORATION_RATE",
+          "from": "DETERIORATION RATE",
           "to": "deterioration"
         },
         {
           "from": "73",
-          "to": "production_capacity_0"
+          "to": "production capacity 0"
         },
         {
           "from": "73",
@@ -1155,87 +1155,87 @@
         },
         {
           "from": "78",
-          "to": "production_capacity_0"
+          "to": "production capacity 0"
         },
         {
-          "from": "production_capacity_0",
-          "to": "investment_0"
+          "from": "production capacity 0",
+          "to": "investment 0"
         },
         {
-          "from": "production_capacity_0",
-          "to": "depreciation_0"
+          "from": "production capacity 0",
+          "to": "depreciation 0"
         },
         {
-          "from": "DEPRECIATION_RATE_0",
-          "to": "depreciation_0"
+          "from": "DEPRECIATION RATE 0",
+          "to": "depreciation 0"
         },
         {
-          "from": "production_capacity_0",
-          "to": "supply_0"
+          "from": "production capacity 0",
+          "to": "supply 0"
         },
         {
-          "from": "supply_0",
-          "to": "surplus_0"
+          "from": "supply 0",
+          "to": "surplus 0"
         },
         {
-          "from": "demand_0",
-          "to": "surplus_0"
+          "from": "demand 0",
+          "to": "surplus 0"
         },
         {
-          "from": "surplus_0",
-          "to": "investment_0"
+          "from": "surplus 0",
+          "to": "investment 0"
         },
         {
-          "from": "investment_0",
-          "to": "progress_investment_0"
+          "from": "investment 0",
+          "to": "progress investment 0"
         },
         {
-          "from": "PRODUCTION_RATE_0",
-          "to": "supply_0"
+          "from": "PRODUCTION RATE 0",
+          "to": "supply 0"
         },
         {
-          "from": "MARKET_VOLUME_0",
-          "to": "demand_0"
+          "from": "MARKET VOLUME 0",
+          "to": "demand 0"
         },
         {
-          "from": "purchase_decision_0",
-          "to": "demand_0"
+          "from": "purchase decision 0",
+          "to": "demand 0"
         },
         {
-          "from": "price_ratio_domestic_vs_imported_product_0",
-          "to": "purchase_decision_0"
+          "from": "price ratio domestic vs imported product 0",
+          "to": "purchase decision 0"
         },
         {
-          "from": "inland_price_0",
-          "to": "price_ratio_domestic_vs_imported_product_0"
+          "from": "inland price 0",
+          "to": "price ratio domestic vs imported product 0"
         },
         {
-          "from": "product_price_0",
-          "to": "price_ratio_domestic_vs_imported_product_0"
+          "from": "product price 0",
+          "to": "price ratio domestic vs imported product 0"
         },
         {
-          "from": "TAX_RATE_0",
-          "to": "product_price_0"
+          "from": "TAX RATE 0",
+          "to": "product price 0"
         },
         {
-          "from": "standards_0",
-          "to": "production_costs_0"
+          "from": "standards 0",
+          "to": "production costs 0"
         },
         {
-          "from": "STANDARD_FACTOR_0",
-          "to": "production_costs_0"
+          "from": "STANDARD FACTOR 0",
+          "to": "production costs 0"
         },
         {
-          "from": "production_costs_0",
-          "to": "product_costs_0"
+          "from": "production costs 0",
+          "to": "product costs 0"
         },
         {
-          "from": "RESOURCE_COSTS_0",
-          "to": "product_costs_0"
+          "from": "RESOURCE COSTS 0",
+          "to": "product costs 0"
         },
         {
-          "from": "product_costs_0",
-          "to": "product_price_0"
+          "from": "product costs 0",
+          "to": "product price 0"
         },
         {
           "from": "130",
@@ -1243,75 +1243,75 @@
         },
         {
           "from": "130",
-          "to": "standards_0"
+          "to": "standards 0"
         },
         {
-          "from": "DETERIORATION_RATE_0",
-          "to": "deterioration_0"
+          "from": "DETERIORATION RATE 0",
+          "to": "deterioration 0"
         },
         {
-          "from": "standards_0",
-          "to": "deterioration_0"
+          "from": "standards 0",
+          "to": "deterioration 0"
         },
         {
           "from": "137",
-          "to": "standards_0"
+          "to": "standards 0"
         },
         {
           "from": "137",
           "to": "134"
         },
         {
-          "from": "progress_investment_0",
-          "to": "progress_0"
+          "from": "progress investment 0",
+          "to": "progress 0"
         },
         {
-          "from": "product_price_0",
-          "to": "progress_0"
+          "from": "product price 0",
+          "to": "progress 0"
         },
         {
-          "from": "standards_0",
-          "to": "progress_0"
+          "from": "standards 0",
+          "to": "progress 0"
         },
         {
-          "from": "MARKET_VOLUME_0",
+          "from": "MARKET VOLUME 0",
           "to": "demand"
         },
         {
-          "from": "purchase_decision_0",
+          "from": "purchase decision 0",
           "to": "demand"
         },
         {
-          "from": "product_price_0",
-          "to": "inland_price"
+          "from": "product price 0",
+          "to": "inland price"
         },
         {
-          "from": "MARKET_VOLUME",
-          "to": "demand_0"
+          "from": "MARKET VOLUME",
+          "to": "demand 0"
         },
         {
-          "from": "purchase_decision",
-          "to": "demand_0"
+          "from": "purchase decision",
+          "to": "demand 0"
         },
         {
-          "from": "product_price",
-          "to": "inland_price_0"
+          "from": "product price",
+          "to": "inland price 0"
         },
         {
-          "from": "INVESTMENT_RATE",
+          "from": "INVESTMENT RATE",
           "to": "investment"
         },
         {
-          "from": "REFERENCE_PRICE",
+          "from": "REFERENCE PRICE",
           "to": "progress"
         },
         {
-          "from": "INVESTMENT_RATE_0",
-          "to": "investment_0"
+          "from": "INVESTMENT RATE 0",
+          "to": "investment 0"
         },
         {
-          "from": "REFERENCE_PRICE_0",
-          "to": "progress_0"
+          "from": "REFERENCE PRICE 0",
+          "to": "progress 0"
         },
         {
           "from": "Time",
@@ -1322,92 +1322,92 @@
           "to": "customs"
         },
         {
-          "from": "EXPORT_SUBSIDY",
+          "from": "EXPORT SUBSIDY",
           "to": "subsidy"
         },
         {
-          "from": "CUSTOMS_DUTY",
+          "from": "CUSTOMS DUTY",
           "to": "customs"
         },
         {
           "from": "customs",
-          "to": "inland_price"
+          "to": "inland price"
         },
         {
-          "from": "EXPORT_SUBSIDY_0",
-          "to": "subsidy_0"
-        },
-        {
-          "from": "Time",
-          "to": "subsidy_0"
+          "from": "EXPORT SUBSIDY 0",
+          "to": "subsidy 0"
         },
         {
           "from": "Time",
-          "to": "customs_0"
+          "to": "subsidy 0"
         },
         {
-          "from": "CUSTOMS_DUTY_0",
-          "to": "customs_0"
+          "from": "Time",
+          "to": "customs 0"
         },
         {
-          "from": "customs_0",
-          "to": "inland_price_0"
+          "from": "CUSTOMS DUTY 0",
+          "to": "customs 0"
         },
         {
-          "from": "subsidy_0",
-          "to": "inland_price"
+          "from": "customs 0",
+          "to": "inland price 0"
+        },
+        {
+          "from": "subsidy 0",
+          "to": "inland price"
         },
         {
           "from": "subsidy",
-          "to": "inland_price_0"
+          "to": "inland price 0"
         },
         {
-          "from": "investment_function",
+          "from": "investment function",
           "to": "investment"
         },
         {
-          "from": "INVESTMENT_FACTOR",
-          "to": "investment_function"
+          "from": "INVESTMENT FACTOR",
+          "to": "investment function"
         },
         {
           "from": "Time",
-          "to": "investment_function"
+          "to": "investment function"
         },
         {
-          "from": "investment_function_0",
-          "to": "investment_0"
-        },
-        {
-          "from": "Time",
-          "to": "investment_function_0"
-        },
-        {
-          "from": "INVESTMENT_FACTOR_0",
-          "to": "investment_function_0"
+          "from": "investment function 0",
+          "to": "investment 0"
         },
         {
           "from": "Time",
-          "to": "progress_function_0"
+          "to": "investment function 0"
         },
         {
-          "from": "progress_function_0",
-          "to": "progress_investment_0"
-        },
-        {
-          "from": "PROGRESS_FACTOR_0",
-          "to": "progress_function_0"
-        },
-        {
-          "from": "progress_function",
-          "to": "progress_investment"
-        },
-        {
-          "from": "PROGRESS_FACTOR",
-          "to": "progress_function"
+          "from": "INVESTMENT FACTOR 0",
+          "to": "investment function 0"
         },
         {
           "from": "Time",
-          "to": "progress_function"
+          "to": "progress function 0"
+        },
+        {
+          "from": "progress function 0",
+          "to": "progress investment 0"
+        },
+        {
+          "from": "PROGRESS FACTOR 0",
+          "to": "progress function 0"
+        },
+        {
+          "from": "progress function",
+          "to": "progress investment"
+        },
+        {
+          "from": "PROGRESS FACTOR",
+          "to": "progress function"
+        },
+        {
+          "from": "Time",
+          "to": "progress function"
         }
       ],
       "flowRoutes": [
@@ -1492,6 +1492,9 @@
     "durationUnit": "Year"
   },
   "metadata": {
-    "license": "unknown"
+    "license": "CC-BY-NC-SA-4.0",
+    "author": "Dr. Erik Pruyt",
+    "source": "Pruyt, E., 2013. Small System Dynamics Models for Big Issues: Triple Jump towards Real-World Complexity. TU Delft Library. ISBN 978-94-6186-195-5",
+    "url": "https://simulation.tudelft.nl/SD/"
   }
 }

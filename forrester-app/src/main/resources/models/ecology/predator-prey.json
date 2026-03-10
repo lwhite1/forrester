@@ -15,25 +15,25 @@
   ],
   "flows": [
     {
-      "name": "Prey_Births",
+      "name": "Prey Births",
       "equation": "Prey_Birth_Rate * Rabbits",
       "timeUnit": "Year",
       "sink": "Rabbits"
     },
     {
-      "name": "Prey_Deaths",
+      "name": "Prey Deaths",
       "equation": "Predation_Rate * Rabbits * Coyotes",
       "timeUnit": "Year",
       "source": "Rabbits"
     },
     {
-      "name": "Predator_Births",
+      "name": "Predator Births",
       "equation": "Predator_Efficiency * Predation_Rate * Rabbits * Coyotes",
       "timeUnit": "Year",
       "sink": "Coyotes"
     },
     {
-      "name": "Predator_Deaths",
+      "name": "Predator Deaths",
       "equation": "Predator_Death_Rate * Coyotes",
       "timeUnit": "Year",
       "source": "Coyotes"
@@ -47,22 +47,22 @@
   },
   "auxiliaries": [
     {
-      "name": "Prey_Birth_Rate",
+      "name": "Prey Birth Rate",
       "equation": "1",
       "unit": "Dimensionless unit"
     },
     {
-      "name": "Predation_Rate",
+      "name": "Predation Rate",
       "equation": "0.01",
       "unit": "Dimensionless unit"
     },
     {
-      "name": "Predator_Efficiency",
+      "name": "Predator Efficiency",
       "equation": "0.5",
       "unit": "Dimensionless unit"
     },
     {
-      "name": "Predator_Death_Rate",
+      "name": "Predator Death Rate",
       "equation": "0.8",
       "unit": "Dimensionless unit"
     }

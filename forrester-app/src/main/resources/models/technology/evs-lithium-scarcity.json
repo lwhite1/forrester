@@ -2,43 +2,43 @@
   "name": "EVsLithium",
   "stocks": [
     {
-      "name": "conventional_vehicles",
+      "name": "conventional vehicles",
       "comment": "conventional vehicles",
       "initialValue": 100000000.0,
       "unit": "auto"
     },
     {
-      "name": "electric_vehicles_EV",
+      "name": "electric vehicles EV",
       "comment": "\"electric vehicles (EV)\"",
       "initialValue": 1000.0,
       "unit": "auto"
     },
     {
-      "name": "processing_of_lithium_in_products",
+      "name": "processing of lithium in products",
       "comment": "processing of lithium in products",
       "initialValue": 22.0,
       "unit": "ktonLi"
     },
     {
-      "name": "annual_ICT_lithium_demand",
+      "name": "annual ICT lithium demand",
       "comment": "annual ICT lithium demand",
       "initialValue": 20.0,
       "unit": "ktonLi/year"
     },
     {
-      "name": "lithium_in_products",
+      "name": "lithium in products",
       "comment": "lithium in products",
       "initialValue": 100.0,
       "unit": "ktonLi"
     },
     {
-      "name": "lithium_in_recycling",
+      "name": "lithium in recycling",
       "comment": "lithium in recycling",
       "initialValue": 0.0,
       "unit": "ktonLi"
     },
     {
-      "name": "unexploited_lithium_reserves",
+      "name": "unexploited lithium reserves",
       "comment": "unexploited lithium reserves",
       "initialValue": 13000.0,
       "unit": "ktonLi"
@@ -46,235 +46,235 @@
   ],
   "flows": [
     {
-      "name": "conventional_vehicles_net_flow",
+      "name": "conventional vehicles net flow",
       "comment": "Net flow for conventional vehicles",
       "equation": "-electrification_European_vehicle_fleet",
       "timeUnit": "Year",
-      "sink": "conventional_vehicles"
+      "sink": "conventional vehicles"
     },
     {
-      "name": "electric_vehicles_EV_net_flow",
+      "name": "electric vehicles EV net flow",
       "comment": "Net flow for \"electric vehicles (EV)\"",
       "equation": "+electrification_European_vehicle_fleet",
       "timeUnit": "Year",
-      "sink": "electric_vehicles_EV"
+      "sink": "electric vehicles EV"
     },
     {
-      "name": "processing_of_lithium_in_products_net_flow",
+      "name": "processing of lithium in products net flow",
       "comment": "Net flow for processing of lithium in products",
       "equation": "+lithium_exploitation-lithium_products_brought_into_use+lithium_from_recycling_to_reprocessing",
       "timeUnit": "Year",
-      "sink": "processing_of_lithium_in_products"
+      "sink": "processing of lithium in products"
     },
     {
-      "name": "annual_ICT_lithium_demand_net_flow",
+      "name": "annual ICT lithium demand net flow",
       "comment": "Net flow for annual ICT lithium demand",
       "equation": "net_increase_annual_ICT_lithium_demand",
       "timeUnit": "Year",
-      "sink": "annual_ICT_lithium_demand"
+      "sink": "annual ICT lithium demand"
     },
     {
-      "name": "lithium_in_products_net_flow",
+      "name": "lithium in products net flow",
       "comment": "Net flow for lithium in products",
       "equation": "lithium_products_brought_into_use-loss_of_nonrecyled_lithium-recovery_lithium_through_recycling",
       "timeUnit": "Year",
-      "sink": "lithium_in_products"
+      "sink": "lithium in products"
     },
     {
-      "name": "lithium_in_recycling_net_flow",
+      "name": "lithium in recycling net flow",
       "comment": "Net flow for lithium in recycling",
       "equation": "recovery_lithium_through_recycling-lithium_from_recycling_to_reprocessing",
       "timeUnit": "Year",
-      "sink": "lithium_in_recycling"
+      "sink": "lithium in recycling"
     },
     {
-      "name": "unexploited_lithium_reserves_net_flow",
+      "name": "unexploited lithium reserves net flow",
       "comment": "Net flow for unexploited lithium reserves",
       "equation": "-lithium_exploitation",
       "timeUnit": "Year",
-      "sink": "unexploited_lithium_reserves"
+      "sink": "unexploited lithium reserves"
     }
   ],
   "auxiliaries": [
     {
-      "name": "EV_batteries_needed",
+      "name": "EV batteries needed",
       "comment": "EV batteries needed",
       "equation": "electrification_European_vehicle_fleet*battery_per_vehicle+electric_vehicles_EV/ average_lifetime_EV_batteries*batteries_per_vehicle",
       "unit": "accu/year"
     },
     {
-      "name": "lithium_exploitation",
+      "name": "lithium exploitation",
       "comment": "lithium exploitation",
       "equation": "MAX(MIN(total_demand_lithium_to_be_exploited-lithium_in_recycling/average_recycling_time ,unexploited_lithium_reserves/exploitation_time),0)",
       "unit": "ktonLi/year"
     },
     {
-      "name": "lithium_from_recycling_to_reprocessing",
+      "name": "lithium from recycling to reprocessing",
       "comment": "lithium from recycling to reprocessing",
       "equation": "lithium_in_recycling/average_recycling_time",
       "unit": "ktonLi/year"
     },
     {
-      "name": "lithium_products_brought_into_use",
+      "name": "lithium products brought into use",
       "comment": "lithium products brought into use",
       "equation": "processing_of_lithium_in_products/processing_and_introduction_time",
       "unit": "ktonLi/year"
     },
     {
-      "name": "approximated_fraction_of_lithium_use_in_EV_batteries_over_the_total_amount_of_lithium_in_use",
+      "name": "approximated fraction of lithium use in EV batteries over the total amount of lithium in use",
       "comment": "approximated fraction of lithium use in EV batteries over the total amount of lithium in use",
       "equation": "lithium_needed_for_EV_batteries/total_demand_lithium_to_be_exploited",
       "unit": "Dmnl"
     },
     {
-      "name": "lithium_needed_for_EV_batteries",
+      "name": "lithium needed for EV batteries",
       "comment": "lithium needed for EV batteries",
       "equation": "lithium_per_EV_battery*EV_batteries_needed",
       "unit": "ktonLi/year"
     },
     {
-      "name": "average_lifetime_products_containing_lithium",
+      "name": "average lifetime products containing lithium",
       "comment": "average lifetime products containing lithium",
       "equation": "average_use_time_of_ICT_products_containing_lithium*(1-approximated_fraction_of_lithium_use_in_EV_batteries_over_the_total_amount_of_lithium_in_use )+average_lifetime_EV_batteries_during_and_after_use_in_EV*approximated_fraction_of_lithium_use_in_EV_batteries_over_the_total_amount_of_lithium_in_use",
       "unit": "year"
     },
     {
-      "name": "electrification_European_vehicle_fleet",
+      "name": "electrification European vehicle fleet",
       "comment": "electrification European vehicle fleet",
       "equation": "intensive_advertisement*conventional_vehicles/average_lifetime_conventional_vehicles *electric_vehicles_EV/totale_European_vehicle_fleet",
       "unit": "auto/year"
     },
     {
-      "name": "total_demand_lithium_to_be_exploited",
+      "name": "total demand lithium to be exploited",
       "comment": "total demand lithium to be exploited",
       "equation": "lithium_needed_for_EV_batteries+annual_ICT_lithium_demand",
       "unit": "ktonLi/year"
     },
     {
-      "name": "net_increase_annual_ICT_lithium_demand",
+      "name": "net increase annual ICT lithium demand",
       "comment": "net increase annual ICT lithium demand",
       "equation": "annual_ICT_lithium_demand*growth_rate_lithium_demand_ICT_sector",
       "unit": "ktonLi/year/year"
     },
     {
-      "name": "intensive_advertisement",
+      "name": "intensive advertisement",
       "comment": "intensive advertisement",
       "equation": "10-STEP(9,2017)",
       "unit": "Dmnl"
     },
     {
-      "name": "totale_European_vehicle_fleet",
+      "name": "totale European vehicle fleet",
       "comment": "totale European vehicle fleet",
       "equation": "conventional_vehicles+electric_vehicles_EV",
       "unit": "auto"
     },
     {
-      "name": "recovery_lithium_through_recycling",
+      "name": "recovery lithium through recycling",
       "comment": "recovery lithium through recycling",
       "equation": "lithium_in_products/average_lifetime_products_containing_lithium * effective_recycling_fraction_lithium",
       "unit": "ktonLi/year"
     },
     {
-      "name": "loss_of_nonrecyled_lithium",
+      "name": "loss of nonrecyled lithium",
       "comment": "\"loss of non-recyled lithium\"",
       "equation": "lithium_in_products/average_lifetime_products_containing_lithium * (1-effective_recycling_fraction_lithium )",
       "unit": "ktonLi/year"
     },
     {
-      "name": "TIME_STEP",
+      "name": "TIME STEP",
       "equation": "0.015625",
       "unit": "Year"
     },
     {
-      "name": "INITIAL_TIME",
+      "name": "INITIAL TIME",
       "equation": "2009",
       "unit": "Year"
     },
     {
-      "name": "FINAL_TIME",
+      "name": "FINAL TIME",
       "equation": "2100",
       "unit": "Year"
     },
     {
-      "name": "battery_per_vehicle",
+      "name": "battery per vehicle",
       "equation": "1",
       "comment": "battery per vehicle",
       "unit": "accu/auto"
     },
     {
-      "name": "average_recycling_time",
+      "name": "average recycling time",
       "equation": "0.25",
       "comment": "average recycling time",
       "unit": "year"
     },
     {
-      "name": "processing_and_introduction_time",
+      "name": "processing and introduction time",
       "equation": "1",
       "comment": "processing and introduction time",
       "unit": "year"
     },
     {
-      "name": "exploitation_time",
+      "name": "exploitation time",
       "equation": "0.0825",
       "comment": "exploitation time",
       "unit": "year"
     },
     {
-      "name": "batteries_per_vehicle",
+      "name": "batteries per vehicle",
       "equation": "1",
       "comment": "batteries per vehicle",
       "unit": "accu/auto"
     },
     {
-      "name": "average_lifetime_EV_batteries_during_and_after_use_in_EV",
+      "name": "average lifetime EV batteries during and after use in EV",
       "equation": "10",
       "comment": "\"average lifetime EV batteries (during and after use in EV)\"",
       "unit": "year"
     },
     {
-      "name": "average_use_time_of_ICT_products_containing_lithium",
+      "name": "average use time of ICT products containing lithium",
       "equation": "5",
       "comment": "average use time of ICT products containing lithium",
       "unit": "year"
     },
     {
-      "name": "average_lifetime_conventional_vehicles",
+      "name": "average lifetime conventional vehicles",
       "equation": "9",
       "comment": "average lifetime conventional vehicles",
       "unit": "year"
     },
     {
-      "name": "average_lifetime_EV_batteries",
+      "name": "average lifetime EV batteries",
       "equation": "3",
       "comment": "average lifetime EV batteries",
       "unit": "year"
     },
     {
-      "name": "lithium_per_EV_battery",
+      "name": "lithium per EV battery",
       "equation": "2e-05",
       "comment": "lithium per EV battery",
       "unit": "ktonLi/accu"
     },
     {
-      "name": "growth_rate_lithium_demand_ICT_sector",
+      "name": "growth rate lithium demand ICT sector",
       "equation": "0",
       "comment": "growth rate lithium demand ICT sector",
       "unit": "1/year"
     },
     {
-      "name": "initial_value_lithium_in_products",
+      "name": "initial value lithium in products",
       "equation": "100",
       "comment": "initial value lithium in products",
       "unit": "ktonLi"
     },
     {
-      "name": "initially_unexploited_lithium_reserves",
+      "name": "initially unexploited lithium reserves",
       "equation": "13000",
       "comment": "initially unexploited lithium reserves",
       "unit": "ktonLi"
     },
     {
-      "name": "effective_recycling_fraction_lithium",
+      "name": "effective recycling fraction lithium",
       "equation": "0.2",
       "comment": "effective recycling fraction lithium",
       "unit": "Dmnl"
@@ -285,19 +285,19 @@
       "name": "Lithium",
       "elements": [
         {
-          "name": "unexploited_lithium_reserves",
+          "name": "unexploited lithium reserves",
           "type": "stock",
           "x": 365.0,
           "y": 210.0
         },
         {
-          "name": "initially_unexploited_lithium_reserves",
+          "name": "initially unexploited lithium reserves",
           "type": "aux",
           "x": 363.0,
           "y": 94.0
         },
         {
-          "name": "lithium_in_products",
+          "name": "lithium in products",
           "type": "stock",
           "x": 771.0,
           "y": 211.0
@@ -309,13 +309,13 @@
           "y": 228.0
         },
         {
-          "name": "lithium_exploitation",
+          "name": "lithium exploitation",
           "type": "aux",
           "x": 457.0,
           "y": 247.0
         },
         {
-          "name": "initial_value_lithium_in_products",
+          "name": "initial value lithium in products",
           "type": "aux",
           "x": 621.0,
           "y": 106.0
@@ -327,25 +327,25 @@
           "y": 84.0
         },
         {
-          "name": "loss_of_nonrecyled_lithium",
+          "name": "loss of nonrecyled lithium",
           "type": "aux",
           "x": 814.0,
           "y": 84.0
         },
         {
-          "name": "average_lifetime_products_containing_lithium",
+          "name": "average lifetime products containing lithium",
           "type": "aux",
           "x": 958.0,
           "y": 361.0
         },
         {
-          "name": "effective_recycling_fraction_lithium",
+          "name": "effective recycling fraction lithium",
           "type": "aux",
           "x": 859.0,
           "y": 150.0
         },
         {
-          "name": "lithium_in_recycling",
+          "name": "lithium in recycling",
           "type": "stock",
           "x": 852.0,
           "y": 305.0
@@ -357,7 +357,7 @@
           "y": 215.0
         },
         {
-          "name": "recovery_lithium_through_recycling",
+          "name": "recovery lithium through recycling",
           "type": "aux",
           "x": 917.0,
           "y": 215.0
@@ -369,13 +369,13 @@
           "y": 292.0
         },
         {
-          "name": "lithium_from_recycling_to_reprocessing",
+          "name": "lithium from recycling to reprocessing",
           "type": "aux",
           "x": 746.0,
           "y": 319.0
         },
         {
-          "name": "processing_of_lithium_in_products",
+          "name": "processing of lithium in products",
           "type": "stock",
           "x": 545.0,
           "y": 214.0
@@ -387,49 +387,49 @@
           "y": 217.0
         },
         {
-          "name": "lithium_products_brought_into_use",
+          "name": "lithium products brought into use",
           "type": "aux",
           "x": 663.0,
           "y": 244.0
         },
         {
-          "name": "EV_batteries_needed",
+          "name": "EV batteries needed",
           "type": "aux",
           "x": 375.0,
           "y": 465.0
         },
         {
-          "name": "average_lifetime_EV_batteries",
+          "name": "average lifetime EV batteries",
           "type": "aux",
           "x": 335.0,
           "y": 551.0
         },
         {
-          "name": "lithium_per_EV_battery",
+          "name": "lithium per EV battery",
           "type": "aux",
           "x": 547.0,
           "y": 523.0
         },
         {
-          "name": "batteries_per_vehicle",
+          "name": "batteries per vehicle",
           "type": "aux",
           "x": 435.0,
           "y": 521.0
         },
         {
-          "name": "lithium_needed_for_EV_batteries",
+          "name": "lithium needed for EV batteries",
           "type": "aux",
           "x": 521.0,
           "y": 448.0
         },
         {
-          "name": "total_demand_lithium_to_be_exploited",
+          "name": "total demand lithium to be exploited",
           "type": "aux",
           "x": 387.0,
           "y": 328.0
         },
         {
-          "name": "annual_ICT_lithium_demand",
+          "name": "annual ICT lithium demand",
           "type": "stock",
           "x": 153.0,
           "y": 261.0
@@ -441,49 +441,49 @@
           "y": 166.0
         },
         {
-          "name": "net_increase_annual_ICT_lithium_demand",
+          "name": "net increase annual ICT lithium demand",
           "type": "aux",
           "x": 120.0,
           "y": 166.0
         },
         {
-          "name": "growth_rate_lithium_demand_ICT_sector",
+          "name": "growth rate lithium demand ICT sector",
           "type": "aux",
           "x": 128.0,
           "y": 89.0
         },
         {
-          "name": "average_lifetime_EV_batteries_during_and_after_use_in_EV",
+          "name": "average lifetime EV batteries during and after use in EV",
           "type": "aux",
           "x": 798.0,
           "y": 514.0
         },
         {
-          "name": "approximated_fraction_of_lithium_use_in_EV_batteries_over_the_total_amount_of_lithium_in_use",
+          "name": "approximated fraction of lithium use in EV batteries over the total amount of lithium in use",
           "type": "aux",
           "x": 766.0,
           "y": 448.0
         },
         {
-          "name": "average_use_time_of_ICT_products_containing_lithium",
+          "name": "average use time of ICT products containing lithium",
           "type": "aux",
           "x": 989.0,
           "y": 518.0
         },
         {
-          "name": "electric_vehicles_EV",
+          "name": "electric vehicles EV",
           "type": "stock",
           "x": 311.0,
           "y": 395.0
         },
         {
-          "name": "conventional_vehicles",
+          "name": "conventional vehicles",
           "type": "stock",
           "x": 63.0,
           "y": 396.0
         },
         {
-          "name": "average_lifetime_conventional_vehicles",
+          "name": "average lifetime conventional vehicles",
           "type": "aux",
           "x": 113.0,
           "y": 494.0
@@ -495,43 +495,43 @@
           "y": 396.0
         },
         {
-          "name": "electrification_European_vehicle_fleet",
+          "name": "electrification European vehicle fleet",
           "type": "aux",
           "x": 183.0,
           "y": 423.0
         },
         {
-          "name": "totale_European_vehicle_fleet",
+          "name": "totale European vehicle fleet",
           "type": "aux",
           "x": 183.0,
           "y": 334.0
         },
         {
-          "name": "intensive_advertisement",
+          "name": "intensive advertisement",
           "type": "aux",
           "x": 50.0,
           "y": 446.0
         },
         {
-          "name": "processing_and_introduction_time",
+          "name": "processing and introduction time",
           "type": "aux",
           "x": 567.0,
           "y": 151.0
         },
         {
-          "name": "exploitation_time",
+          "name": "exploitation time",
           "type": "aux",
           "x": 438.0,
           "y": 138.0
         },
         {
-          "name": "average_recycling_time",
+          "name": "average recycling time",
           "type": "aux",
           "x": 583.0,
           "y": 345.0
         },
         {
-          "name": "battery_per_vehicle",
+          "name": "battery per vehicle",
           "type": "aux",
           "x": 253.0,
           "y": 500.0
@@ -539,8 +539,8 @@
       ],
       "connectors": [
         {
-          "from": "initially_unexploited_lithium_reserves",
-          "to": "unexploited_lithium_reserves"
+          "from": "initially unexploited lithium reserves",
+          "to": "unexploited lithium reserves"
         },
         {
           "from": "7",
@@ -548,15 +548,15 @@
         },
         {
           "from": "7",
-          "to": "unexploited_lithium_reserves"
+          "to": "unexploited lithium reserves"
         },
         {
-          "from": "unexploited_lithium_reserves",
+          "from": "unexploited lithium reserves",
           "to": "_780"
         },
         {
-          "from": "initial_value_lithium_in_products",
-          "to": "lithium_in_products"
+          "from": "initial value lithium in products",
+          "to": "lithium in products"
         },
         {
           "from": "15",
@@ -564,195 +564,195 @@
         },
         {
           "from": "15",
-          "to": "lithium_in_products"
+          "to": "lithium in products"
         },
         {
-          "from": "lithium_in_products",
-          "to": "loss_of_nonrecyled_lithium"
-        },
-        {
-          "from": "23",
-          "to": "lithium_in_recycling"
+          "from": "lithium in products",
+          "to": "loss of nonrecyled lithium"
         },
         {
           "from": "23",
-          "to": "lithium_in_products"
+          "to": "lithium in recycling"
+        },
+        {
+          "from": "23",
+          "to": "lithium in products"
         },
         {
           "from": "26",
-          "to": "lithium_in_recycling"
+          "to": "lithium in recycling"
         },
         {
-          "from": "lithium_in_products",
+          "from": "lithium in products",
           "to": "_156"
         },
         {
-          "from": "lithium_in_recycling",
+          "from": "lithium in recycling",
           "to": "_812"
         },
         {
           "from": "33",
-          "to": "lithium_in_products"
+          "to": "lithium in products"
         },
         {
           "from": "33",
-          "to": "processing_of_lithium_in_products"
+          "to": "processing of lithium in products"
         },
         {
-          "from": "processing_of_lithium_in_products",
+          "from": "processing of lithium in products",
           "to": "_284"
         },
         {
-          "from": "average_lifetime_products_containing_lithium",
-          "to": "recovery_lithium_through_recycling"
+          "from": "average lifetime products containing lithium",
+          "to": "recovery lithium through recycling"
         },
         {
-          "from": "average_lifetime_products_containing_lithium",
-          "to": "loss_of_nonrecyled_lithium"
+          "from": "average lifetime products containing lithium",
+          "to": "loss of nonrecyled lithium"
         },
         {
-          "from": "effective_recycling_fraction_lithium",
-          "to": "loss_of_nonrecyled_lithium"
+          "from": "effective recycling fraction lithium",
+          "to": "loss of nonrecyled lithium"
         },
         {
-          "from": "effective_recycling_fraction_lithium",
-          "to": "recovery_lithium_through_recycling"
+          "from": "effective recycling fraction lithium",
+          "to": "recovery lithium through recycling"
         },
         {
           "from": "_812",
-          "to": "processing_of_lithium_in_products"
+          "to": "processing of lithium in products"
         },
         {
           "from": "69",
-          "to": "EV_batteries_needed"
+          "to": "EV batteries needed"
         },
         {
-          "from": "lithium_per_EV_battery",
-          "to": "lithium_needed_for_EV_batteries"
+          "from": "lithium per EV battery",
+          "to": "lithium needed for EV batteries"
         },
         {
           "from": "53",
-          "to": "annual_ICT_lithium_demand"
+          "to": "annual ICT lithium demand"
         },
         {
           "from": "53",
           "to": "50"
         },
         {
-          "from": "annual_ICT_lithium_demand",
+          "from": "annual ICT lithium demand",
           "to": "_48"
         },
         {
-          "from": "growth_rate_lithium_demand_ICT_sector",
-          "to": "net_increase_annual_ICT_lithium_demand"
+          "from": "growth rate lithium demand ICT sector",
+          "to": "net increase annual ICT lithium demand"
         },
         {
-          "from": "lithium_needed_for_EV_batteries",
-          "to": "total_demand_lithium_to_be_exploited"
+          "from": "lithium needed for EV batteries",
+          "to": "total demand lithium to be exploited"
         },
         {
-          "from": "total_demand_lithium_to_be_exploited",
-          "to": "lithium_exploitation"
+          "from": "total demand lithium to be exploited",
+          "to": "lithium exploitation"
         },
         {
-          "from": "lithium_in_recycling",
-          "to": "lithium_exploitation"
+          "from": "lithium in recycling",
+          "to": "lithium exploitation"
         },
         {
-          "from": "average_use_time_of_ICT_products_containing_lithium",
-          "to": "average_lifetime_products_containing_lithium"
+          "from": "average use time of ICT products containing lithium",
+          "to": "average lifetime products containing lithium"
         },
         {
-          "from": "approximated_fraction_of_lithium_use_in_EV_batteries_over_the_total_amount_of_lithium_in_use",
-          "to": "average_lifetime_products_containing_lithium"
+          "from": "approximated fraction of lithium use in EV batteries over the total amount of lithium in use",
+          "to": "average lifetime products containing lithium"
         },
         {
-          "from": "average_lifetime_EV_batteries_during_and_after_use_in_EV",
-          "to": "average_lifetime_products_containing_lithium"
+          "from": "average lifetime EV batteries during and after use in EV",
+          "to": "average lifetime products containing lithium"
         },
         {
-          "from": "lithium_needed_for_EV_batteries",
-          "to": "approximated_fraction_of_lithium_use_in_EV_batteries_over_the_total_amount_of_lithium_in_use"
+          "from": "lithium needed for EV batteries",
+          "to": "approximated fraction of lithium use in EV batteries over the total amount of lithium in use"
         },
         {
-          "from": "total_demand_lithium_to_be_exploited",
-          "to": "approximated_fraction_of_lithium_use_in_EV_batteries_over_the_total_amount_of_lithium_in_use"
-        },
-        {
-          "from": "74",
-          "to": "electric_vehicles_EV"
+          "from": "total demand lithium to be exploited",
+          "to": "approximated fraction of lithium use in EV batteries over the total amount of lithium in use"
         },
         {
           "from": "74",
-          "to": "conventional_vehicles"
+          "to": "electric vehicles EV"
         },
         {
-          "from": "conventional_vehicles",
+          "from": "74",
+          "to": "conventional vehicles"
+        },
+        {
+          "from": "conventional vehicles",
           "to": "_684"
         },
         {
-          "from": "electric_vehicles_EV",
+          "from": "electric vehicles EV",
           "to": "_684"
         },
         {
-          "from": "conventional_vehicles",
-          "to": "totale_European_vehicle_fleet"
+          "from": "conventional vehicles",
+          "to": "totale European vehicle fleet"
         },
         {
-          "from": "electric_vehicles_EV",
-          "to": "totale_European_vehicle_fleet"
+          "from": "electric vehicles EV",
+          "to": "totale European vehicle fleet"
         },
         {
-          "from": "average_lifetime_conventional_vehicles",
-          "to": "electrification_European_vehicle_fleet"
+          "from": "average lifetime conventional vehicles",
+          "to": "electrification European vehicle fleet"
         },
         {
-          "from": "intensive_advertisement",
-          "to": "electrification_European_vehicle_fleet"
+          "from": "intensive advertisement",
+          "to": "electrification European vehicle fleet"
         },
         {
-          "from": "processing_and_introduction_time",
+          "from": "processing and introduction time",
           "to": "_284"
         },
         {
-          "from": "exploitation_time",
+          "from": "exploitation time",
           "to": "_780"
         },
         {
-          "from": "average_recycling_time",
-          "to": "lithium_from_recycling_to_reprocessing"
+          "from": "average recycling time",
+          "to": "lithium from recycling to reprocessing"
         },
         {
-          "from": "annual_ICT_lithium_demand",
-          "to": "total_demand_lithium_to_be_exploited"
+          "from": "annual ICT lithium demand",
+          "to": "total demand lithium to be exploited"
         },
         {
-          "from": "average_lifetime_EV_batteries",
-          "to": "EV_batteries_needed"
+          "from": "average lifetime EV batteries",
+          "to": "EV batteries needed"
         },
         {
-          "from": "EV_batteries_needed",
-          "to": "lithium_needed_for_EV_batteries"
+          "from": "EV batteries needed",
+          "to": "lithium needed for EV batteries"
         },
         {
-          "from": "batteries_per_vehicle",
-          "to": "EV_batteries_needed"
+          "from": "batteries per vehicle",
+          "to": "EV batteries needed"
         },
         {
-          "from": "totale_European_vehicle_fleet",
+          "from": "totale European vehicle fleet",
           "to": "_684"
         },
         {
-          "from": "electrification_European_vehicle_fleet",
-          "to": "EV_batteries_needed"
+          "from": "electrification European vehicle fleet",
+          "to": "EV batteries needed"
         },
         {
-          "from": "battery_per_vehicle",
-          "to": "EV_batteries_needed"
+          "from": "battery per vehicle",
+          "to": "EV batteries needed"
         },
         {
-          "from": "average_recycling_time",
-          "to": "lithium_exploitation"
+          "from": "average recycling time",
+          "to": "lithium exploitation"
         }
       ],
       "flowRoutes": [
@@ -831,6 +831,9 @@
     "durationUnit": "Year"
   },
   "metadata": {
-    "license": "unknown"
+    "license": "CC-BY-NC-SA-4.0",
+    "author": "Dr. Erik Pruyt",
+    "source": "Pruyt, E., 2013. Small System Dynamics Models for Big Issues: Triple Jump towards Real-World Complexity. TU Delft Library. ISBN 978-94-6186-195-5",
+    "url": "https://simulation.tudelft.nl/SD/"
   }
 }

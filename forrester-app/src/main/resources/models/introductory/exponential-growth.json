@@ -30,12 +30,12 @@
   },
   "auxiliaries": [
     {
-      "name": "Birth_Rate",
+      "name": "Birth Rate",
       "equation": "0.04",
       "unit": "Dimensionless unit"
     },
     {
-      "name": "Death_Rate",
+      "name": "Death Rate",
       "equation": "0.03",
       "unit": "Dimensionless unit"
     }

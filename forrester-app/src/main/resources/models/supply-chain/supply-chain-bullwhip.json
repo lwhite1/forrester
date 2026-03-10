@@ -17,14 +17,14 @@
   ],
   "flows": [
     {
-      "name": "Inventory_net_flow",
+      "name": "Inventory net flow",
       "comment": "Net flow for Inventory",
       "equation": "production-sales",
       "timeUnit": "Month",
       "sink": "Inventory"
     },
     {
-      "name": "Workforce_net_flow",
+      "name": "Workforce net flow",
       "comment": "Net flow for Workforce",
       "equation": "net_hire_rate",
       "timeUnit": "Month",
@@ -33,25 +33,25 @@
   ],
   "auxiliaries": [
     {
-      "name": "target_inventory",
+      "name": "target inventory",
       "comment": "target inventory",
       "equation": "sales * inventory_coverage",
       "unit": "Widget"
     },
     {
-      "name": "target_production",
+      "name": "target production",
       "comment": "target production",
       "equation": "sales + inventory_correction",
       "unit": "Widget/Month"
     },
     {
-      "name": "inventory_correction",
+      "name": "inventory correction",
       "comment": "inventory correction",
       "equation": "(target_inventory - Inventory)/\n                time_to_correct_inventory",
       "unit": "Widget/Month"
     },
     {
-      "name": "net_hire_rate",
+      "name": "net hire rate",
       "comment": "net hire rate",
       "equation": "(target_workforce-Workforce)/time_to_adjust_workforce",
       "unit": "Person/Month"
@@ -69,19 +69,19 @@
       "unit": "Widget/Month"
     },
     {
-      "name": "target_workforce",
+      "name": "target workforce",
       "comment": "target workforce",
       "equation": "target_production/productivity",
       "unit": "Person"
     },
     {
-      "name": "inventory_coverage",
+      "name": "inventory coverage",
       "equation": "3",
       "comment": "inventory coverage",
       "unit": "Month"
     },
     {
-      "name": "time_to_correct_inventory",
+      "name": "time to correct inventory",
       "equation": "2",
       "comment": "time to correct inventory",
       "unit": "Month"
@@ -93,7 +93,7 @@
       "unit": "Widget/Month/Person"
     },
     {
-      "name": "time_to_adjust_workforce",
+      "name": "time to adjust workforce",
       "equation": "10",
       "comment": "time to adjust workforce",
       "unit": "Month"
@@ -152,49 +152,49 @@
           "y": 230.0
         },
         {
-          "name": "net_hire_rate",
+          "name": "net hire rate",
           "type": "aux",
           "x": 215.0,
           "y": 247.0
         },
         {
-          "name": "target_workforce",
+          "name": "target workforce",
           "type": "aux",
           "x": 319.0,
           "y": 279.0
         },
         {
-          "name": "time_to_adjust_workforce",
+          "name": "time to adjust workforce",
           "type": "aux",
           "x": 185.0,
           "y": 296.0
         },
         {
-          "name": "target_production",
+          "name": "target production",
           "type": "aux",
           "x": 383.0,
           "y": 229.0
         },
         {
-          "name": "target_inventory",
+          "name": "target inventory",
           "type": "aux",
           "x": 423.0,
           "y": 173.0
         },
         {
-          "name": "inventory_coverage",
+          "name": "inventory coverage",
           "type": "aux",
           "x": 408.0,
           "y": 126.0
         },
         {
-          "name": "inventory_correction",
+          "name": "inventory correction",
           "type": "aux",
           "x": 517.0,
           "y": 200.0
         },
         {
-          "name": "time_to_correct_inventory",
+          "name": "time to correct inventory",
           "type": "aux",
           "x": 505.0,
           "y": 255.0
@@ -231,58 +231,58 @@
         },
         {
           "from": "Workforce",
-          "to": "net_hire_rate"
+          "to": "net hire rate"
         },
         {
-          "from": "time_to_adjust_workforce",
-          "to": "net_hire_rate"
+          "from": "time to adjust workforce",
+          "to": "net hire rate"
         },
         {
           "from": "sales",
-          "to": "target_production"
+          "to": "target production"
         },
         {
-          "from": "target_production",
-          "to": "target_workforce"
+          "from": "target production",
+          "to": "target workforce"
         },
         {
           "from": "productivity",
-          "to": "target_workforce"
+          "to": "target workforce"
         },
         {
           "from": "productivity",
           "to": "production"
         },
         {
-          "from": "target_workforce",
-          "to": "net_hire_rate"
+          "from": "target workforce",
+          "to": "net hire rate"
         },
         {
           "from": "sales",
-          "to": "target_inventory"
+          "to": "target inventory"
         },
         {
-          "from": "inventory_correction",
-          "to": "target_production"
+          "from": "inventory correction",
+          "to": "target production"
         },
         {
-          "from": "time_to_correct_inventory",
-          "to": "inventory_correction"
+          "from": "time to correct inventory",
+          "to": "inventory correction"
         },
         {
-          "from": "target_inventory",
-          "to": "inventory_correction"
+          "from": "target inventory",
+          "to": "inventory correction"
         },
         {
-          "from": "inventory_coverage",
-          "to": "target_inventory"
+          "from": "inventory coverage",
+          "to": "target inventory"
         },
         {
           "from": "Inventory",
-          "to": "inventory_correction"
+          "to": "inventory correction"
         },
         {
-          "from": "target_workforce",
+          "from": "target workforce",
           "to": "Workforce"
         }
       ],
@@ -323,6 +323,9 @@
     "durationUnit": "Month"
   },
   "metadata": {
-    "license": "CC-BY-NC-SA-4.0"
+    "license": "CC-BY-NC-SA-4.0",
+    "author": "Dr. Erik Pruyt",
+    "source": "Pruyt, E., 2013. Small System Dynamics Models for Big Issues: Triple Jump towards Real-World Complexity. TU Delft Library. ISBN 978-94-6186-195-5",
+    "url": "https://simulation.tudelft.nl/SD/"
   }
 }

@@ -3,12 +3,12 @@
   "comment": "Car dealership inventory with perception and delivery delays",
   "stocks": [
     {
-      "name": "Cars_on_Lot",
+      "name": "Cars on Lot",
       "initialValue": 200.0,
       "unit": "Car"
     },
     {
-      "name": "Perceived_Sales",
+      "name": "Perceived Sales",
       "initialValue": 20.0,
       "unit": "Car"
     }
@@ -18,69 +18,69 @@
       "name": "Sales",
       "equation": "MIN(Cars_on_Lot, Customer_Demand)",
       "timeUnit": "Day",
-      "source": "Cars_on_Lot"
+      "source": "Cars on Lot"
     },
     {
-      "name": "Perception_Adjustment",
+      "name": "Perception Adjustment",
       "equation": "(Sales - Perceived_Sales) / Perception_Delay",
       "timeUnit": "Day",
-      "sink": "Perceived_Sales"
+      "sink": "Perceived Sales"
     },
     {
       "name": "Deliveries",
       "equation": "DELAY3(Orders_to_Factory, Delivery_Delay)",
       "timeUnit": "Day",
-      "sink": "Cars_on_Lot"
+      "sink": "Cars on Lot"
     }
   ],
   "auxiliaries": [
     {
-      "name": "Customer_Demand",
+      "name": "Customer Demand",
       "equation": "IF(TIME > 25, Step_Demand, Base_Demand)",
       "unit": "Car"
     },
     {
-      "name": "Desired_Inventory",
+      "name": "Desired Inventory",
       "equation": "Perceived_Sales * Desired_Inventory_Multiplier",
       "unit": "Car"
     },
     {
-      "name": "Inventory_Gap",
+      "name": "Inventory Gap",
       "equation": "Desired_Inventory - Cars_on_Lot",
       "unit": "Car"
     },
     {
-      "name": "Orders_to_Factory",
+      "name": "Orders to Factory",
       "equation": "MAX(Perceived_Sales + Inventory_Gap / Response_Delay, 0)",
       "unit": "Car"
     },
     {
-      "name": "Base_Demand",
+      "name": "Base Demand",
       "equation": "20",
       "unit": "Car per Day"
     },
     {
-      "name": "Step_Demand",
+      "name": "Step Demand",
       "equation": "22",
       "unit": "Car per Day"
     },
     {
-      "name": "Perception_Delay",
+      "name": "Perception Delay",
       "equation": "5",
       "unit": "Day"
     },
     {
-      "name": "Response_Delay",
+      "name": "Response Delay",
       "equation": "3",
       "unit": "Day"
     },
     {
-      "name": "Delivery_Delay",
+      "name": "Delivery Delay",
       "equation": "5",
       "unit": "Day"
     },
     {
-      "name": "Desired_Inventory_Multiplier",
+      "name": "Desired Inventory Multiplier",
       "equation": "10",
       "unit": "Dimensionless unit"
     }
@@ -90,5 +90,11 @@
     "timeStep": "Day",
     "duration": 100.0,
     "durationUnit": "Day"
+  },
+  "metadata": {
+    "author": "Dr. Erik Pruyt",
+    "source": "Pruyt, E., 2013. Small System Dynamics Models for Big Issues: Triple Jump towards Real-World Complexity. TU Delft Library. ISBN 978-94-6186-195-5",
+    "license": "CC-BY-NC-SA-4.0",
+    "url": "https://simulation.tudelft.nl/SD/"
   }
 }

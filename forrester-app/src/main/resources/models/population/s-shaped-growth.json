@@ -24,12 +24,12 @@
   },
   "auxiliaries": [
     {
-      "name": "Max_Birth_Rate",
+      "name": "Max Birth Rate",
       "equation": "0.04",
       "unit": "Dimensionless unit"
     },
     {
-      "name": "Carrying_Capacity",
+      "name": "Carrying Capacity",
       "equation": "1000",
       "unit": "Person"
     }

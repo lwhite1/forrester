@@ -2,7 +2,7 @@
   "name": "1804_Kaibab1",
   "stocks": [
     {
-      "name": "Deer_Population",
+      "name": "Deer Population",
       "comment": "Initial amount of deers is 5,000 and remains constant.",
       "initialValue": 5000.0,
       "unit": "Deer"
@@ -10,46 +10,46 @@
   ],
   "flows": [
     {
-      "name": "Deer_Population_net_flow",
+      "name": "Deer Population net flow",
       "comment": "Net flow for Deer Population",
       "equation": "+Deer_Net_Growth_Rate-Deer_Predation_Rate",
       "timeUnit": "Year",
-      "sink": "Deer_Population"
+      "sink": "Deer Population"
     }
   ],
   "auxiliaries": [
     {
-      "name": "Deer_Killed_per_Predator",
+      "name": "Deer Killed per Predator",
       "comment": "When density is equal to 0, the deer killed are 0. Point (0.0). When the  Deer Density is equal to the Initial Deer Density each predator hunts 2  deer each year. Point (1,2).",
       "equation": "LOOKUP(Deer_Killed_per_Predator_lookup, Deer_Density/Initial_Deer_Density)",
       "unit": "Deer/(year*lion)"
     },
     {
-      "name": "Deer_Predation_Rate",
+      "name": "Deer Predation Rate",
       "comment": "Deer Predation Rate",
       "equation": "Deer_Killed_per_Predator*Predator_Population",
       "unit": "Deer/year"
     },
     {
-      "name": "Deer_Density",
+      "name": "Deer Density",
       "comment": "This is the amount of acres per deer",
       "equation": "Area/Deer_Population",
       "unit": "acre/Deer"
     },
     {
-      "name": "Deer_Net_Growth_Rate",
+      "name": "Deer Net Growth Rate",
       "comment": "Deer Net Growth Rate",
       "equation": "Deer_Population*Growth_Rate_Factor",
       "unit": "Deer/year"
     },
     {
-      "name": "Initial_Deer_Density",
+      "name": "Initial Deer Density",
       "equation": "200",
       "comment": "1,000,000 acres / 5,000 deer",
       "unit": "acre/Deer"
     },
     {
-      "name": "Growth_Rate_Factor",
+      "name": "Growth Rate Factor",
       "equation": "0.2",
       "comment": "Here we work with the net growth rate of the deer population. This means  birth minus deceases. If every female had a fawn, the rate will be 0.50%  But there are female too old and too young to have fawns, so we reduce  this amount to the 0.30%. Now we need to consider the life expectancy, may  be 10 years. This is - 0.10% due to deceases. So we assume the Net Growth  Rate Factor equal to 0.2",
       "unit": "1/year"
@@ -61,7 +61,7 @@
       "unit": "acre"
     },
     {
-      "name": "Predator_Population",
+      "name": "Predator Population",
       "equation": "500",
       "comment": "We assume that Net Growth Rate was 1000 deer, so Deer Predation Rate must  be also 1000 deer. In Table 1 we define that with a density of 0.005  deer/acre are killed 2 deer/predator, so we have  1000 (deer) /2  (deer/predator) = 500 predators",
       "unit": "lion"
@@ -69,7 +69,7 @@
   ],
   "lookupTables": [
     {
-      "name": "Deer_Killed_per_Predator_lookup",
+      "name": "Deer Killed per Predator lookup",
       "xValues": [
         0.0,
         1.0,
@@ -92,7 +92,7 @@
       "name": "View 1",
       "elements": [
         {
-          "name": "Deer_Population",
+          "name": "Deer Population",
           "type": "stock",
           "x": 287.0,
           "y": 97.0
@@ -104,7 +104,7 @@
           "y": 92.0
         },
         {
-          "name": "Deer_Net_Growth_Rate",
+          "name": "Deer Net Growth Rate",
           "type": "aux",
           "x": 132.0,
           "y": 111.0
@@ -116,25 +116,25 @@
           "y": 94.0
         },
         {
-          "name": "Deer_Predation_Rate",
+          "name": "Deer Predation Rate",
           "type": "aux",
           "x": 410.0,
           "y": 113.0
         },
         {
-          "name": "Growth_Rate_Factor",
+          "name": "Growth Rate Factor",
           "type": "aux",
           "x": 86.0,
           "y": 228.0
         },
         {
-          "name": "Deer_Density",
+          "name": "Deer Density",
           "type": "aux",
           "x": 299.0,
           "y": 198.0
         },
         {
-          "name": "Predator_Population",
+          "name": "Predator Population",
           "type": "aux",
           "x": 535.0,
           "y": 150.0
@@ -146,13 +146,13 @@
           "y": 256.0
         },
         {
-          "name": "Deer_Killed_per_Predator",
+          "name": "Deer Killed per Predator",
           "type": "aux",
           "x": 440.0,
           "y": 195.0
         },
         {
-          "name": "Initial_Deer_Density",
+          "name": "Initial Deer Density",
           "type": "aux",
           "x": 557.0,
           "y": 244.0
@@ -161,7 +161,7 @@
       "connectors": [
         {
           "from": "5",
-          "to": "Deer_Population"
+          "to": "Deer Population"
         },
         {
           "from": "5",
@@ -173,39 +173,39 @@
         },
         {
           "from": "10",
-          "to": "Deer_Population"
+          "to": "Deer Population"
         },
         {
-          "from": "Deer_Population",
-          "to": "Deer_Net_Growth_Rate"
+          "from": "Deer Population",
+          "to": "Deer Net Growth Rate"
         },
         {
-          "from": "Deer_Population",
-          "to": "Deer_Density"
+          "from": "Deer Population",
+          "to": "Deer Density"
         },
         {
-          "from": "Predator_Population",
-          "to": "Deer_Predation_Rate"
+          "from": "Predator Population",
+          "to": "Deer Predation Rate"
         },
         {
           "from": "Area",
-          "to": "Deer_Density"
+          "to": "Deer Density"
         },
         {
-          "from": "Growth_Rate_Factor",
-          "to": "Deer_Net_Growth_Rate"
+          "from": "Growth Rate Factor",
+          "to": "Deer Net Growth Rate"
         },
         {
-          "from": "Deer_Density",
-          "to": "Deer_Killed_per_Predator"
+          "from": "Deer Density",
+          "to": "Deer Killed per Predator"
         },
         {
-          "from": "Deer_Killed_per_Predator",
-          "to": "Deer_Predation_Rate"
+          "from": "Deer Killed per Predator",
+          "to": "Deer Predation Rate"
         },
         {
-          "from": "Initial_Deer_Density",
-          "to": "Deer_Killed_per_Predator"
+          "from": "Initial Deer Density",
+          "to": "Deer Killed per Predator"
         }
       ],
       "flowRoutes": [

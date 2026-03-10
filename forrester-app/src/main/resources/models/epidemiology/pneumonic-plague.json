@@ -2,26 +2,26 @@
   "name": "PneumonicPlague",
   "stocks": [
     {
-      "name": "susceptible_population",
+      "name": "susceptible population",
       "comment": "susceptible population",
       "initialValue": 0.0,
       "initialExpression": "initial_total_population-infected_population",
       "unit": "persons"
     },
     {
-      "name": "infected_population",
+      "name": "infected population",
       "comment": "infected population",
       "initialValue": 1.0,
       "unit": "persons"
     },
     {
-      "name": "recovering_population",
+      "name": "recovering population",
       "comment": "recovering population",
       "initialValue": 0.0,
       "unit": "persons"
     },
     {
-      "name": "deceased_population",
+      "name": "deceased population",
       "comment": "deceased population",
       "initialValue": 0.0,
       "unit": "persons"
@@ -29,32 +29,32 @@
   ],
   "flows": [
     {
-      "name": "susceptible_population_net_flow",
+      "name": "susceptible population net flow",
       "comment": "Net flow for susceptible population",
       "equation": "-infection",
       "timeUnit": "Week",
-      "sink": "susceptible_population"
+      "sink": "susceptible population"
     },
     {
-      "name": "infected_population_net_flow",
+      "name": "infected population net flow",
       "comment": "Net flow for infected population",
       "equation": "infection-recovery-deaths",
       "timeUnit": "Week",
-      "sink": "infected_population"
+      "sink": "infected population"
     },
     {
-      "name": "recovering_population_net_flow",
+      "name": "recovering population net flow",
       "comment": "Net flow for recovering population",
       "equation": "recovery",
       "timeUnit": "Week",
-      "sink": "recovering_population"
+      "sink": "recovering population"
     },
     {
-      "name": "deceased_population_net_flow",
+      "name": "deceased population net flow",
       "comment": "Net flow for deceased population",
       "equation": "deaths",
       "timeUnit": "Week",
-      "sink": "deceased_population"
+      "sink": "deceased population"
     }
   ],
   "auxiliaries": [
@@ -65,25 +65,25 @@
       "unit": "persons/Week"
     },
     {
-      "name": "infected_fraction",
+      "name": "infected fraction",
       "comment": "infected fraction",
       "equation": "infected_population/total_population",
       "unit": "Dmnl"
     },
     {
-      "name": "total_population",
+      "name": "total population",
       "comment": "total population",
       "equation": "infected_population+recovering_population+susceptible_population",
       "unit": "persons"
     },
     {
-      "name": "contact_rate",
+      "name": "contact rate",
       "comment": "contact rate",
       "equation": "20",
       "unit": "persons/persons/Week"
     },
     {
-      "name": "antibiotics_coverage_of_the_population",
+      "name": "antibiotics coverage of the population",
       "comment": "LOOKUP (TIME ([(0,0)-(10,10)],(0,0),(1,0.5),(2,1),(3,1),(6,1) )  )",
       "equation": "0",
       "unit": "Dmnl"
@@ -95,13 +95,13 @@
       "unit": "persons/Week"
     },
     {
-      "name": "recovery_time",
+      "name": "recovery time",
       "comment": "recovery time",
       "equation": "0.33",
       "unit": "Week"
     },
     {
-      "name": "infection_ratio",
+      "name": "infection ratio",
       "comment": "infection ratio",
       "equation": "0.75",
       "unit": "persons/persons"
@@ -113,13 +113,13 @@
       "unit": "persons/Week"
     },
     {
-      "name": "fatality_ratio",
+      "name": "fatality ratio",
       "comment": "fatality ratio",
       "equation": "LOOKUP(fatality_ratio_lookup, antibiotics_coverage_of_the_population)",
       "unit": "Dmnl"
     },
     {
-      "name": "initial_total_population",
+      "name": "initial total population",
       "equation": "10000",
       "comment": "initial total population",
       "unit": "persons"
@@ -127,7 +127,7 @@
   ],
   "lookupTables": [
     {
-      "name": "fatality_ratio_lookup",
+      "name": "fatality ratio lookup",
       "xValues": [
         0.0,
         1.0
@@ -144,25 +144,25 @@
       "name": "View 1",
       "elements": [
         {
-          "name": "susceptible_population",
+          "name": "susceptible population",
           "type": "stock",
           "x": 77.0,
           "y": 208.0
         },
         {
-          "name": "infected_population",
+          "name": "infected population",
           "type": "stock",
           "x": 241.0,
           "y": 204.0
         },
         {
-          "name": "recovering_population",
+          "name": "recovering population",
           "type": "stock",
           "x": 480.0,
           "y": 206.0
         },
         {
-          "name": "deceased_population",
+          "name": "deceased population",
           "type": "stock",
           "x": 242.0,
           "y": 345.0
@@ -204,49 +204,49 @@
           "y": 286.0
         },
         {
-          "name": "total_population",
+          "name": "total population",
           "type": "aux",
           "x": 240.0,
           "y": 78.0
         },
         {
-          "name": "contact_rate",
+          "name": "contact rate",
           "type": "aux",
           "x": 88.0,
           "y": 291.0
         },
         {
-          "name": "infection_ratio",
+          "name": "infection ratio",
           "type": "aux",
           "x": 176.0,
           "y": 292.0
         },
         {
-          "name": "fatality_ratio",
+          "name": "fatality ratio",
           "type": "aux",
           "x": 395.0,
           "y": 285.0
         },
         {
-          "name": "antibiotics_coverage_of_the_population",
+          "name": "antibiotics coverage of the population",
           "type": "aux",
           "x": 395.0,
           "y": 343.0
         },
         {
-          "name": "recovery_time",
+          "name": "recovery time",
           "type": "aux",
           "x": 333.0,
           "y": 252.0
         },
         {
-          "name": "initial_total_population",
+          "name": "initial total population",
           "type": "aux",
           "x": 62.0,
           "y": 255.0
         },
         {
-          "name": "infected_fraction",
+          "name": "infected fraction",
           "type": "aux",
           "x": 189.0,
           "y": 134.0
@@ -255,98 +255,98 @@
       "connectors": [
         {
           "from": "7",
-          "to": "infected_population"
+          "to": "infected population"
         },
         {
           "from": "7",
-          "to": "susceptible_population"
+          "to": "susceptible population"
         },
         {
           "from": "11",
-          "to": "recovering_population"
+          "to": "recovering population"
         },
         {
           "from": "11",
-          "to": "infected_population"
+          "to": "infected population"
         },
         {
           "from": "15",
-          "to": "deceased_population"
+          "to": "deceased population"
         },
         {
           "from": "15",
-          "to": "infected_population"
+          "to": "infected population"
         },
         {
-          "from": "susceptible_population",
+          "from": "susceptible population",
           "to": "_444"
         },
         {
-          "from": "infected_population",
+          "from": "infected population",
           "to": "40"
         },
         {
-          "from": "infected_population",
+          "from": "infected population",
           "to": "_140"
         },
         {
-          "from": "infected_population",
+          "from": "infected population",
           "to": "deaths"
         },
         {
-          "from": "infected_population",
-          "to": "susceptible_population"
+          "from": "infected population",
+          "to": "susceptible population"
         },
         {
-          "from": "contact_rate",
+          "from": "contact rate",
           "to": "infection"
         },
         {
-          "from": "infection_ratio",
+          "from": "infection ratio",
           "to": "infection"
         },
         {
-          "from": "fatality_ratio",
+          "from": "fatality ratio",
           "to": "recovery"
         },
         {
-          "from": "fatality_ratio",
+          "from": "fatality ratio",
           "to": "deaths"
         },
         {
-          "from": "antibiotics_coverage_of_the_population",
-          "to": "fatality_ratio"
+          "from": "antibiotics coverage of the population",
+          "to": "fatality ratio"
         },
         {
-          "from": "recovery_time",
+          "from": "recovery time",
           "to": "recovery"
         },
         {
-          "from": "recovery_time",
+          "from": "recovery time",
           "to": "deaths"
         },
         {
-          "from": "susceptible_population",
-          "to": "total_population"
+          "from": "susceptible population",
+          "to": "total population"
         },
         {
-          "from": "infected_population",
-          "to": "total_population"
+          "from": "infected population",
+          "to": "total population"
         },
         {
-          "from": "recovering_population",
-          "to": "total_population"
+          "from": "recovering population",
+          "to": "total population"
         },
         {
-          "from": "initial_total_population",
-          "to": "susceptible_population"
+          "from": "initial total population",
+          "to": "susceptible population"
         },
         {
-          "from": "total_population",
-          "to": "infected_fraction"
+          "from": "total population",
+          "to": "infected fraction"
         },
         {
-          "from": "infected_fraction",
+          "from": "infected fraction",
           "to": "_444"
         }
       ],
@@ -387,6 +387,9 @@
     "durationUnit": "Week"
   },
   "metadata": {
-    "license": "CC-BY-NC-SA-4.0"
+    "license": "CC-BY-NC-SA-4.0",
+    "author": "Dr. Erik Pruyt",
+    "source": "Pruyt, E., 2013. Small System Dynamics Models for Big Issues: Triple Jump towards Real-World Complexity. TU Delft Library. ISBN 978-94-6186-195-5",
+    "url": "https://simulation.tudelft.nl/SD/"
   }
 }
