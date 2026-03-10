@@ -92,7 +92,10 @@ public final class ModelValidator {
         for (FlowDef flow : def.flows()) {
             if (flow.source() == null && flow.sink() == null) {
                 issues.add(new ValidationIssue(Severity.WARNING, flow.name(),
-                        "Flow '" + flow.name() + "' is disconnected (no source or sink stock)"));
+                        "Flow '" + flow.name()
+                                + "' is disconnected (no source or sink stock)."
+                                + " Connect it to a stock by dragging from a stock to this flow,"
+                                + " or from this flow to a stock."));
             }
         }
     }
@@ -101,13 +104,15 @@ public final class ModelValidator {
         for (StockDef stock : def.stocks()) {
             if (stock.unit() == null || stock.unit().isBlank()) {
                 issues.add(new ValidationIssue(Severity.WARNING, stock.name(),
-                        "Stock '" + stock.name() + "' has no unit specified"));
+                        "Stock '" + stock.name() + "' has no unit specified."
+                                + " Select the stock and set its unit in the Properties panel."));
             }
         }
         for (AuxDef aux : def.auxiliaries()) {
             if (aux.unit() == null || aux.unit().isBlank()) {
                 issues.add(new ValidationIssue(Severity.WARNING, aux.name(),
-                        "Auxiliary '" + aux.name() + "' has no unit specified"));
+                        "Auxiliary '" + aux.name() + "' has no unit specified."
+                                + " Select it and set the unit in the Properties panel."));
             }
         }
     }
@@ -191,7 +196,9 @@ public final class ModelValidator {
                 for (String member : component) {
                     issues.add(new ValidationIssue(Severity.WARNING, member,
                             "Algebraic loop detected: {" + members
-                                    + "} — circular dependency without a stock to break the loop"));
+                                    + "} — circular dependency without a stock to break the loop."
+                                    + " Add a stock to break the cycle,"
+                                    + " or restructure the equations to remove the circular reference."));
                 }
             }
         }
@@ -237,14 +244,19 @@ public final class ModelValidator {
         for (AuxDef aux : def.auxiliaries()) {
             if (aux.isLiteral() && !isReferenced(aux.name(), referencedNames)) {
                 issues.add(new ValidationIssue(Severity.WARNING, aux.name(),
-                        "Parameter '" + aux.name() + "' is not referenced by any equation"));
+                        "Parameter '" + aux.name()
+                                + "' is not referenced by any equation."
+                                + " Use it in a flow or auxiliary equation, or remove it if unneeded."));
             }
         }
         // Check lookup tables
         for (LookupTableDef table : def.lookupTables()) {
             if (!isReferenced(table.name(), referencedNames)) {
                 issues.add(new ValidationIssue(Severity.WARNING, table.name(),
-                        "Lookup table '" + table.name() + "' is not referenced by any equation"));
+                        "Lookup table '" + table.name()
+                                + "' is not referenced by any equation."
+                                + " Reference it in an equation using its name,"
+                                + " or remove it if unneeded."));
             }
         }
     }
@@ -260,7 +272,9 @@ public final class ModelValidator {
             if (!linkedNames.contains(v.name())) {
                 issues.add(new ValidationIssue(Severity.WARNING, v.name(),
                         "CLD variable '" + v.name()
-                                + "' is not connected by any causal link"));
+                                + "' is not connected by any causal link."
+                                + " Draw a causal link to or from it,"
+                                + " or remove it if unneeded."));
             }
         }
     }
@@ -287,11 +301,13 @@ public final class ModelValidator {
         for (CausalLinkDef link : def.causalLinks()) {
             if (!allNames.contains(link.from())) {
                 issues.add(new ValidationIssue(Severity.ERROR, null,
-                        "Causal link references non-existent source '" + link.from() + "'"));
+                        "Causal link references non-existent source '" + link.from()
+                                + "'. The element may have been renamed or deleted."));
             }
             if (!allNames.contains(link.to())) {
                 issues.add(new ValidationIssue(Severity.ERROR, null,
-                        "Causal link references non-existent target '" + link.to() + "'"));
+                        "Causal link references non-existent target '" + link.to()
+                                + "'. The element may have been renamed or deleted."));
             }
         }
     }
@@ -302,7 +318,9 @@ public final class ModelValidator {
             if (link.polarity() == CausalLinkDef.Polarity.UNKNOWN) {
                 issues.add(new ValidationIssue(Severity.WARNING, link.from(),
                         "Causal link from '" + link.from() + "' to '" + link.to()
-                                + "' has unknown polarity"));
+                                + "' has unknown polarity."
+                                + " Set it to '+' (reinforcing) or '−' (balancing)"
+                                + " by selecting the link and editing its polarity."));
             }
         }
     }

@@ -15,6 +15,7 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ContextMenu;
+import javafx.scene.control.Hyperlink;
 import javafx.scene.control.Label;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.ScrollPane;
@@ -25,6 +26,7 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.image.WritableImage;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 
@@ -174,6 +176,21 @@ public class SimulationResultPane extends BorderPane {
         VBox sidebar = new VBox(6);
         sidebar.setPadding(new Insets(10));
 
+        // Select All / None controls
+        List<CheckBox> seriesCheckBoxes = new ArrayList<>();
+
+        Hyperlink selectAll = new Hyperlink("All");
+        selectAll.setStyle("-fx-font-size: 11px;");
+        selectAll.setOnAction(e -> seriesCheckBoxes.forEach(cb -> cb.setSelected(true)));
+
+        Hyperlink selectNone = new Hyperlink("None");
+        selectNone.setStyle("-fx-font-size: 11px;");
+        selectNone.setOnAction(e -> seriesCheckBoxes.forEach(cb -> cb.setSelected(false)));
+
+        HBox selectionBar = new HBox(4, new Label("Show:"), selectAll, selectNone);
+        selectionBar.setAlignment(Pos.CENTER_LEFT);
+        sidebar.getChildren().add(selectionBar);
+
         // Current run visibility toggles with clickable labels
         for (int i = 0; i < currentSeries.size(); i++) {
             XYChart.Series<Number, Number> series = currentSeries.get(i);
@@ -191,6 +208,7 @@ public class SimulationResultPane extends BorderPane {
                     }
                 });
             });
+            seriesCheckBoxes.add(cb);
 
             Label nameLabel = new Label(series.getName());
             nameLabel.setId("seriesLabel-" + series.getName());
@@ -201,7 +219,7 @@ public class SimulationResultPane extends BorderPane {
                 }
             });
 
-            javafx.scene.layout.HBox row = new javafx.scene.layout.HBox(4, cb, nameLabel);
+            HBox row = new HBox(4, cb, nameLabel);
             row.setAlignment(Pos.CENTER_LEFT);
             sidebar.getChildren().add(row);
         }

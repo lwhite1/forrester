@@ -35,32 +35,38 @@ public final class DefinitionValidator {
         // Collect all element names and check for duplicates
         for (StockDef stock : def.stocks()) {
             if (!allNames.add(stock.name())) {
-                errors.add("Duplicate element name: " + stock.name());
+                errors.add("Duplicate element name: '" + stock.name()
+                        + "'. Rename one of the elements to make names unique.");
             }
         }
         for (FlowDef flow : def.flows()) {
             if (!allNames.add(flow.name())) {
-                errors.add("Duplicate element name: " + flow.name());
+                errors.add("Duplicate element name: '" + flow.name()
+                        + "'. Rename one of the elements to make names unique.");
             }
         }
         for (AuxDef aux : def.auxiliaries()) {
             if (!allNames.add(aux.name())) {
-                errors.add("Duplicate element name: " + aux.name());
+                errors.add("Duplicate element name: '" + aux.name()
+                        + "'. Rename one of the elements to make names unique.");
             }
         }
         for (LookupTableDef table : def.lookupTables()) {
             if (!allNames.add(table.name())) {
-                errors.add("Duplicate element name: " + table.name());
+                errors.add("Duplicate element name: '" + table.name()
+                        + "'. Rename one of the elements to make names unique.");
             }
         }
         for (ModuleInstanceDef module : def.modules()) {
             if (!allNames.add(module.instanceName())) {
-                errors.add("Duplicate element name: " + module.instanceName());
+                errors.add("Duplicate element name: '" + module.instanceName()
+                        + "'. Rename one of the elements to make names unique.");
             }
         }
         for (CldVariableDef v : def.cldVariables()) {
             if (!allNames.add(v.name())) {
-                errors.add("Duplicate element name: " + v.name());
+                errors.add("Duplicate element name: '" + v.name()
+                        + "'. Rename one of the elements to make names unique.");
             }
         }
 
@@ -73,12 +79,12 @@ public final class DefinitionValidator {
         // Validate flow source/sink references
         for (FlowDef flow : def.flows()) {
             if (flow.source() != null && !stockNames.contains(flow.source())) {
-                errors.add("Flow '" + flow.name() + "' references non-existent source stock: "
-                        + flow.source());
+                errors.add("Flow '" + flow.name() + "' references non-existent source stock: '"
+                        + flow.source() + "'. The stock may have been renamed or deleted.");
             }
             if (flow.sink() != null && !stockNames.contains(flow.sink())) {
-                errors.add("Flow '" + flow.name() + "' references non-existent sink stock: "
-                        + flow.sink());
+                errors.add("Flow '" + flow.name() + "' references non-existent sink stock: '"
+                        + flow.sink() + "'. The stock may have been renamed or deleted.");
             }
         }
 
@@ -87,7 +93,8 @@ public final class DefinitionValidator {
             try {
                 ExprParser.parse(flow.equation());
             } catch (ParseException e) {
-                errors.add("Flow '" + flow.name() + "' has invalid equation: " + e.getMessage());
+                errors.add("Flow '" + flow.name() + "' has invalid equation: " + e.getMessage()
+                        + ". Double-click the flow to edit its equation.");
             }
         }
 
@@ -97,7 +104,8 @@ public final class DefinitionValidator {
                 ExprParser.parse(aux.equation());
             } catch (ParseException e) {
                 errors.add("Auxiliary '" + aux.name() + "' has invalid equation: "
-                        + e.getMessage());
+                        + e.getMessage()
+                        + ". Double-click the auxiliary to edit its equation.");
             }
         }
 
@@ -120,7 +128,8 @@ public final class DefinitionValidator {
                 for (String bindingPort : module.inputBindings().keySet()) {
                     if (!inputPortNames.contains(bindingPort)) {
                         errors.add("Module '" + module.instanceName()
-                                + "' binds non-existent input port: " + bindingPort);
+                                + "' binds non-existent input port: '" + bindingPort
+                                + "'. Check the module definition for valid port names.");
                     }
                 }
                 Set<String> outputPortNames = new HashSet<>();
@@ -130,14 +139,16 @@ public final class DefinitionValidator {
                 for (String bindingPort : module.outputBindings().keySet()) {
                     if (!outputPortNames.contains(bindingPort)) {
                         errors.add("Module '" + module.instanceName()
-                                + "' binds non-existent output port: " + bindingPort);
+                                + "' binds non-existent output port: '" + bindingPort
+                                + "'. Check the module definition for valid port names.");
                     }
                 }
                 // Check that all required input ports are bound
                 for (String inputPort : inputPortNames) {
                     if (!module.inputBindings().containsKey(inputPort)) {
                         errors.add("Module '" + module.instanceName()
-                                + "' is missing binding for required input port: " + inputPort);
+                                + "' is missing binding for required input port: '" + inputPort
+                                + "'. Bind it to an element in the parent model.");
                     }
                 }
             }
@@ -148,8 +159,9 @@ public final class DefinitionValidator {
         rootPath.add(def.name());
         for (ModuleInstanceDef module : def.modules()) {
             if (hasCircularReference(module.definition(), new HashSet<>(rootPath))) {
-                errors.add("Circular module reference detected involving module: "
-                        + module.instanceName());
+                errors.add("Circular module reference detected involving module: '"
+                        + module.instanceName()
+                        + "'. A module cannot contain itself, directly or indirectly.");
             }
         }
 
@@ -157,11 +169,13 @@ public final class DefinitionValidator {
         Set<String> seenLinks = new HashSet<>();
         for (CausalLinkDef link : def.causalLinks()) {
             if (link.from().equals(link.to())) {
-                errors.add("Causal link from '" + link.from() + "' to itself is not allowed");
+                errors.add("Causal link from '" + link.from()
+                        + "' to itself is not allowed. Remove the self-loop.");
             }
             String key = link.from() + " -> " + link.to();
             if (!seenLinks.add(key)) {
-                errors.add("Duplicate causal link: " + key);
+                errors.add("Duplicate causal link: " + key
+                        + ". Remove the extra link.");
             }
         }
 
@@ -199,7 +213,8 @@ public final class DefinitionValidator {
                     if (!knownNames.contains(ref) && !knownNames.contains(resolved)
                             && !BUILTIN_NAMES.contains(ref)) {
                         errors.add("Flow '" + flow.name()
-                                + "' references unknown element: " + ref);
+                                + "' references unknown element: '" + ref
+                                + "'. Check the spelling or add the missing element to the model.");
                     }
                 }
             } catch (ParseException ex) {
@@ -215,7 +230,8 @@ public final class DefinitionValidator {
                     if (!knownNames.contains(ref) && !knownNames.contains(resolved)
                             && !BUILTIN_NAMES.contains(ref)) {
                         errors.add("Auxiliary '" + aux.name()
-                                + "' references unknown element: " + ref);
+                                + "' references unknown element: '" + ref
+                                + "'. Check the spelling or add the missing element to the model.");
                     }
                 }
             } catch (ParseException ex) {
