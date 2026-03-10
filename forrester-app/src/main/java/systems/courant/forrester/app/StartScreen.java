@@ -9,6 +9,7 @@ import javafx.scene.Cursor;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
+import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
@@ -53,7 +54,12 @@ final class StartScreen extends VBox {
         setStyle("-fx-background-color: #F5F6F8;");
         setPadding(new Insets(0));
 
-        ScrollPane scroll = new ScrollPane(buildContent());
+        VBox content = buildContent();
+        BorderPane wrapper = new BorderPane(content);
+        wrapper.setStyle("-fx-background-color: #F5F6F8;");
+        BorderPane.setAlignment(content, Pos.TOP_CENTER);
+
+        ScrollPane scroll = new ScrollPane(wrapper);
         scroll.setFitToWidth(true);
         scroll.setStyle("-fx-background: #F5F6F8; -fx-background-color: #F5F6F8;");
         scroll.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
@@ -128,8 +134,9 @@ final class StartScreen extends VBox {
         VBox card = new VBox(6);
         card.setAlignment(Pos.CENTER);
         card.setPadding(new Insets(24, 20, 24, 20));
-        card.setPrefWidth(220);
-        card.setMaxWidth(220);
+        card.setPrefWidth(200);
+        card.setMaxWidth(240);
+        HBox.setHgrow(card, Priority.ALWAYS);
         card.setCursor(Cursor.HAND);
 
         String baseStyle = "-fx-background-color: white; -fx-background-radius: 8;"
