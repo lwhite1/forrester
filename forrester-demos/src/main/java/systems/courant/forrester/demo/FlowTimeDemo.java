@@ -62,15 +62,16 @@ public class FlowTimeDemo {
         Flow demand = Flows.linearGrowth("New Orders", DAY, wip, newOrdersPerDay);
 
         Flow throughput = Flow.create("Delivered Reports", DAY, () -> {
-            int demandDelay = Math.toIntExact(Math.round(tat.getValue()));
+            int demandDelay = Math.max(0, (int) Math.round(tat.getValue()));
             int stepToGet = (int) sim.getCurrentStep() - demandDelay;
             double demandPlusDelay = demand.getHistoryAtTimeStep(stepToGet);
             return new Quantity(Math.min(capacity, demandPlusDelay), ItemUnits.THING);
         });
 
         Flow tatAdjustment = Flow.create("TAT Adjustment", HOUR, () -> {
+            double currentTAT = Math.max(0, tat.getValue());
             double actualTAT = (wip.getValue() / capacity) * hoursPerDay;
-            return new Quantity((actualTAT - tat.getValue()) / tatAdjustmentTimeHours, HOUR);
+            return new Quantity((actualTAT - currentTAT) / tatAdjustmentTimeHours, HOUR);
         });
 
         wip.addInflow(demand);
