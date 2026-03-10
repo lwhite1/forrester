@@ -10,6 +10,7 @@ import systems.courant.forrester.model.def.FlowDef;
 import systems.courant.forrester.model.def.LookupTableDef;
 import systems.courant.forrester.model.def.ModelDefinition;
 import systems.courant.forrester.model.def.ModuleInstanceDef;
+import systems.courant.forrester.model.def.ModuleInterface;
 import systems.courant.forrester.model.def.ReferenceDataset;
 import systems.courant.forrester.model.def.SimulationSettings;
 import systems.courant.forrester.model.def.StockDef;
@@ -935,6 +936,31 @@ public class ModelEditor {
         modules.set(index, new ModuleInstanceDef(
                 existing.instanceName(), newDef,
                 existing.inputBindings(), existing.outputBindings()));
+    }
+
+    /**
+     * Updates the module interface (port definitions) of the module with the given name.
+     * Existing bindings for ports that still exist are preserved; bindings for
+     * removed ports are dropped.
+     *
+     * @return true if the module was found and updated
+     */
+    public boolean updateModuleInterface(String name, ModuleInterface newInterface) {
+        checkFxThread();
+        for (int i = 0; i < modules.size(); i++) {
+            if (modules.get(i).instanceName().equals(name)) {
+                ModuleInstanceDef m = modules.get(i);
+                ModelDefinition oldDef = m.definition();
+                ModelDefinition newDef = oldDef.toBuilder()
+                        .moduleInterface(newInterface)
+                        .build();
+                modules.set(i, new ModuleInstanceDef(
+                        m.instanceName(), newDef,
+                        m.inputBindings(), m.outputBindings()));
+                return true;
+            }
+        }
+        return false;
     }
 
     /**

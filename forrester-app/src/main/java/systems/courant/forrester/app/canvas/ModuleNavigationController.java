@@ -2,6 +2,7 @@ package systems.courant.forrester.app.canvas;
 
 import systems.courant.forrester.model.def.ElementType;
 import systems.courant.forrester.model.def.ModuleInstanceDef;
+import systems.courant.forrester.model.def.ModuleInterface;
 
 import javafx.scene.canvas.Canvas;
 import javafx.scene.control.ContextMenu;
@@ -83,6 +84,7 @@ final class ModuleNavigationController {
     void showContextMenu(Canvas canvas, String elementName, CanvasState canvasState,
                          double screenX, double screenY,
                          Consumer<String> drillAction,
+                         Consumer<String> definePortsAction,
                          Consumer<String> bindingsAction,
                          Consumer<String> renameAction,
                          BiConsumer<String, ElementType> classifyAction) {
@@ -94,7 +96,7 @@ final class ModuleNavigationController {
 
         if (type == ElementType.MODULE) {
             contextMenu = buildModuleContextMenu(elementName, drillAction,
-                    bindingsAction, renameAction);
+                    definePortsAction, bindingsAction, renameAction);
         } else if (type == ElementType.CLD_VARIABLE) {
             contextMenu = buildCldVariableContextMenu(elementName, renameAction,
                     classifyAction);
@@ -106,12 +108,15 @@ final class ModuleNavigationController {
     }
 
     private ContextMenu buildModuleContextMenu(String elementName,
-            Consumer<String> drillAction, Consumer<String> bindingsAction,
-            Consumer<String> renameAction) {
+            Consumer<String> drillAction, Consumer<String> definePortsAction,
+            Consumer<String> bindingsAction, Consumer<String> renameAction) {
         ContextMenu menu = new ContextMenu();
 
         MenuItem drillItem = new MenuItem("Drill Into");
         drillItem.setOnAction(e -> drillAction.accept(elementName));
+
+        MenuItem definePortsItem = new MenuItem("Define Ports...");
+        definePortsItem.setOnAction(e -> definePortsAction.accept(elementName));
 
         MenuItem bindingsItem = new MenuItem("Configure Bindings...");
         bindingsItem.setOnAction(e -> bindingsAction.accept(elementName));
@@ -119,7 +124,7 @@ final class ModuleNavigationController {
         MenuItem renameItem = new MenuItem("Rename");
         renameItem.setOnAction(e -> renameAction.accept(elementName));
 
-        menu.getItems().addAll(drillItem, bindingsItem,
+        menu.getItems().addAll(drillItem, definePortsItem, bindingsItem,
                 new SeparatorMenuItem(), renameItem);
         return menu;
     }
@@ -147,6 +152,26 @@ final class ModuleNavigationController {
 
         menu.getItems().addAll(classifyMenu, new SeparatorMenuItem(), renameItem);
         return menu;
+    }
+
+    /**
+     * Opens the port definition dialog for the named module.
+     */
+    void openDefinePortsDialog(String moduleName, ModelEditor editor,
+                                Runnable saveUndo, Runnable fireStatus) {
+        Optional<ModuleInstanceDef> moduleOpt = editor.getModuleByName(moduleName);
+        if (moduleOpt.isEmpty()) {
+            return;
+        }
+
+        ModuleInterface existing = moduleOpt.get().definition().moduleInterface();
+        DefinePortsDialog dialog = new DefinePortsDialog(moduleName, existing);
+        Optional<ModuleInterface> result = dialog.showAndWait();
+        result.ifPresent(newInterface -> {
+            saveUndo.run();
+            editor.updateModuleInterface(moduleName, newInterface);
+            fireStatus.run();
+        });
     }
 
     /**
