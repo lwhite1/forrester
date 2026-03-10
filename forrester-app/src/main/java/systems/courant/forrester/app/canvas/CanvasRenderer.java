@@ -93,7 +93,8 @@ public class CanvasRenderer {
             ConnectionId hoveredConnection,
             ConnectionId selectedConnection,
             boolean hideAuxiliaries,
-            boolean showDelayBadges
+            boolean showDelayBadges,
+            boolean hideInfoLinks
     ) {}
 
     private final CanvasState canvasState;
@@ -146,7 +147,9 @@ public class CanvasRenderer {
 
         // 1. Draw connections first (behind elements)
         drawMaterialFlows(gc, editor);
-        drawInfoLinks(gc, connectors, hideAux);
+        if (!ctx.hideInfoLinks()) {
+            drawInfoLinks(gc, connectors, hideAux);
+        }
         drawCausalLinks(gc, editor, hideAux);
 
         // 1b. Draw loop edge highlights (above normal connections, behind elements)

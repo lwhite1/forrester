@@ -558,9 +558,16 @@ public class ModelWindow {
             canvas.requestFocus();
         });
 
+        CheckMenuItem hideInfoLinksItem = new CheckMenuItem("Hide Info Links");
+        hideInfoLinksItem.setId("menuHideInfoLinks");
+        hideInfoLinksItem.setOnAction(e -> {
+            canvas.setHideInfoLinks(hideInfoLinksItem.isSelected());
+            canvas.requestFocus();
+        });
+
         viewMenu.getItems().addAll(commandPaletteItem, new SeparatorMenuItem(),
                 zoomToFitItem, resetZoomItem, new SeparatorMenuItem(),
-                hideAuxItem, showDelayItem, new SeparatorMenuItem(),
+                hideAuxItem, hideInfoLinksItem, showDelayItem, new SeparatorMenuItem(),
                 validationIssuesItem, new SeparatorMenuItem(),
                 activityLogItem, popOutDashboardItem);
         viewMenu.setDisable(true);
