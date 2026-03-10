@@ -6,6 +6,7 @@ import systems.courant.forrester.model.def.ConnectorRoute;
 import systems.courant.forrester.model.def.ElementType;
 import systems.courant.forrester.model.def.FlowDef;
 import systems.courant.forrester.model.def.ValidationIssue;
+import systems.courant.forrester.model.expr.DelayDetector;
 import systems.courant.forrester.model.graph.FeedbackAnalysis;
 import systems.courant.forrester.model.graph.FeedbackAnalysis.CausalLoop;
 
@@ -91,7 +92,8 @@ public class CanvasRenderer {
             String hoveredElement,
             ConnectionId hoveredConnection,
             ConnectionId selectedConnection,
-            boolean hideAuxiliaries
+            boolean hideAuxiliaries,
+            boolean showDelayBadges
     ) {}
 
     private final CanvasState canvasState;
@@ -132,6 +134,7 @@ public class CanvasRenderer {
         ConnectionId hoveredConnection = ctx.hoveredConnection();
         ConnectionId selectedConnection = ctx.selectedConnection();
         boolean hideAux = ctx.hideAuxiliaries();
+        boolean showDelay = ctx.showDelayBadges();
 
         if (editor == null) {
             return;
@@ -174,7 +177,10 @@ public class CanvasRenderer {
                             cx - w / 2, cy - h / 2, w, h);
                 }
                 case FLOW -> {
-                    ElementRenderer.drawFlow(gc, name,
+                    boolean hasDelay = showDelay
+                            && editor.getFlowEquation(name)
+                                    .map(DelayDetector::equationContainsDelay).orElse(false);
+                    ElementRenderer.drawFlow(gc, name, hasDelay,
                             cx - LayoutMetrics.FLOW_INDICATOR_SIZE / 2,
                             cy - LayoutMetrics.FLOW_INDICATOR_SIZE / 2,
                             LayoutMetrics.FLOW_INDICATOR_SIZE, LayoutMetrics.FLOW_INDICATOR_SIZE);
@@ -185,7 +191,9 @@ public class CanvasRenderer {
                     boolean isLiteral = editor.getAuxByName(name)
                             .map(AuxDef::isLiteral).orElse(false);
                     String equation = editor.getAuxEquation(name).orElse(null);
-                    ElementRenderer.drawAux(gc, name, isLiteral, equation,
+                    boolean hasDelay = showDelay
+                            && DelayDetector.equationContainsDelay(equation);
+                    ElementRenderer.drawAux(gc, name, isLiteral, equation, hasDelay,
                             cx - w / 2, cy - h / 2, w, h);
                 }
                 case MODULE -> {

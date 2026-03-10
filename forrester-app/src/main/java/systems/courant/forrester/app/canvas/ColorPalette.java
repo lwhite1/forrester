@@ -47,4 +47,7 @@ public final class ColorPalette {
     public static final Color LOOP_REINFORCING = Color.web("#27AE60");
     public static final Color LOOP_BALANCING = Color.web("#E74C3C");
     public static final Color LOOP_INDETERMINATE = Color.web("#95A5A6");
+
+    // Delay indicator badge
+    public static final Color DELAY_BADGE = Color.web("#8E44AD");
 }

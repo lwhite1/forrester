@@ -18,6 +18,8 @@ public final class ElementRenderer {
     static final String BADGE_LOOKUP = "Table";
     /** Badge label for module instances. */
     static final String BADGE_MODULE = "Module";
+    /** Badge label for elements containing delay functions. */
+    static final String BADGE_DELAY = "D";
 
     private ElementRenderer() {
     }
@@ -65,7 +67,7 @@ public final class ElementRenderer {
      * @param width    bounding box width
      * @param height   bounding box height
      */
-    public static void drawFlow(GraphicsContext gc, String name,
+    public static void drawFlow(GraphicsContext gc, String name, boolean hasDelay,
                                 double x, double y, double width, double height) {
         double cx = x + width / 2;
         double cy = y + height / 2;
@@ -89,6 +91,15 @@ public final class ElementRenderer {
         gc.setTextBaseline(VPos.TOP);
         gc.fillText(truncate(name, LayoutMetrics.FLOW_NAME_FONT, LayoutMetrics.FLOW_LABEL_MAX_WIDTH),
                 cx, cy + half + LayoutMetrics.FLOW_NAME_GAP);
+
+        // Delay badge top-right of diamond
+        if (hasDelay) {
+            gc.setFill(ColorPalette.DELAY_BADGE);
+            gc.setFont(LayoutMetrics.BADGE_FONT);
+            gc.setTextAlign(TextAlignment.LEFT);
+            gc.setTextBaseline(VPos.BOTTOM);
+            gc.fillText(BADGE_DELAY, cx + half + 2, cy - half + 4);
+        }
     }
 
     /**
@@ -98,8 +109,10 @@ public final class ElementRenderer {
      *
      * @param isLiteral true if the auxiliary's equation is a numeric literal
      * @param equation  the equation string (used to display value for literals)
+     * @param hasDelay  true if the equation contains a delay function
      */
     public static void drawAux(GraphicsContext gc, String name, boolean isLiteral, String equation,
+                               boolean hasDelay,
                                double x, double y, double width, double height) {
         double r = LayoutMetrics.AUX_CORNER_RADIUS;
 
@@ -144,6 +157,15 @@ public final class ElementRenderer {
         gc.setTextBaseline(VPos.CENTER);
         gc.fillText(truncate(name, LayoutMetrics.AUX_NAME_FONT, width - 20),
                 x + width / 2, y + height / 2);
+
+        // Delay badge top-right
+        if (hasDelay) {
+            gc.setFill(ColorPalette.DELAY_BADGE);
+            gc.setFont(LayoutMetrics.BADGE_FONT);
+            gc.setTextAlign(TextAlignment.RIGHT);
+            gc.setTextBaseline(VPos.TOP);
+            gc.fillText(BADGE_DELAY, x + width - 5, y + 3);
+        }
     }
 
     /**
