@@ -133,16 +133,12 @@ public class VensimImporter implements ModelImporter {
         constantValues.put("TIME_STEP", timeStepValue);
         constantValues.put("INITIAL_TIME", initialTime);
         constantValues.put("FINAL_TIME", finalTime);
-        // Map from equation-form name to display-form name (preserving spaces)
-        Map<String, String> eqToDisplay = new HashMap<>();
         for (MdlEquation eq : parsed.equations()) {
             String name = eq.name().strip();
             if (name.isEmpty() || isSystemVar(name)) {
                 continue;
             }
             String eqName = VensimExprTranslator.normalizeName(name);
-            String displayName = VensimExprTranslator.normalizeDisplayName(name);
-            eqToDisplay.put(eqName, displayName);
 
             if (eq.operator().equals(":")) {
                 // Subscript definition
