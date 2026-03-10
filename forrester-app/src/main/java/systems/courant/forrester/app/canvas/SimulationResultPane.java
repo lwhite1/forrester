@@ -49,10 +49,15 @@ import javax.imageio.ImageIO;
 /**
  * Embeddable pane displaying simulation results as a chart and table.
  * Supports ghost overlays from previous simulation runs.
+ *
+ * <p>Stocks (levels) are rendered with solid lines and variables (auxiliaries)
+ * with dashed lines. The sidebar groups series under "Stocks" and "Variables"
+ * section headers when both types are present.
  */
 public class SimulationResultPane extends BorderPane {
 
     private static final double GHOST_OPACITY = 0.25;
+    private static final String DASHED_STROKE = "-fx-stroke-dash-array: 8 4;";
 
     private LineChart<Number, Number> chart;
     private SimulationRunner.SimulationResult simulationResult;
@@ -111,6 +116,7 @@ public class SimulationResultPane extends BorderPane {
                                       Runnable clearHistory) {
         List<String> columns = result.columnNames();
         List<double[]> rows = result.rows();
+        Set<String> stockNames = result.stockNames();
 
         NumberAxis xAxis = new NumberAxis();
         xAxis.setLabel(columns.isEmpty() ? "Step" : columns.getFirst());
@@ -159,9 +165,11 @@ public class SimulationResultPane extends BorderPane {
         // --- Current run series ---
         List<XYChart.Series<Number, Number>> currentSeries = new ArrayList<>();
         List<String> behaviorModes = new ArrayList<>();
+        List<Boolean> isStock = new ArrayList<>();
         for (int c = 1; c < columns.size(); c++) {
             XYChart.Series<Number, Number> series = new XYChart.Series<>();
-            series.setName(columns.get(c));
+            String name = columns.get(c);
+            series.setName(name);
             double[] colValues = new double[rows.size()];
             for (int r = 0; r < rows.size(); r++) {
                 double[] row = rows.get(r);
@@ -172,10 +180,20 @@ public class SimulationResultPane extends BorderPane {
             }
             currentSeries.add(series);
             behaviorModes.add(BehaviorModeClassifier.classify(colValues));
+            isStock.add(stockNames.contains(name));
         }
 
         chart.getData().addAll(currentSeries);
         ChartUtils.applySeriesColors(currentSeries);
+
+        // Apply dashed stroke to non-stock (variable/auxiliary) series
+        if (!stockNames.isEmpty()) {
+            for (int i = 0; i < currentSeries.size(); i++) {
+                if (!isStock.get(i)) {
+                    applyDashedStyle(currentSeries.get(i));
+                }
+            }
+        }
 
         // --- Sidebar ---
         VBox sidebar = new VBox(6);
@@ -196,45 +214,29 @@ public class SimulationResultPane extends BorderPane {
         selectionBar.setAlignment(Pos.CENTER_LEFT);
         sidebar.getChildren().add(selectionBar);
 
-        // Current run visibility toggles with clickable labels
-        for (int i = 0; i < currentSeries.size(); i++) {
-            XYChart.Series<Number, Number> series = currentSeries.get(i);
-            String color = ChartUtils.SERIES_COLORS.get(i % ChartUtils.SERIES_COLORS.size());
+        // Group series by stock vs variable when stock names are available
+        boolean hasGrouping = !stockNames.isEmpty()
+                && currentSeries.stream().anyMatch(s -> !stockNames.contains(s.getName()));
 
-            CheckBox cb = new CheckBox();
-            cb.setSelected(true);
-            cb.selectedProperty().addListener((obs, wasSelected, isSelected) -> {
-                if (series.getNode() != null) {
-                    series.getNode().setVisible(isSelected);
+        if (hasGrouping) {
+            addSectionHeader(sidebar, "Stocks");
+            for (int i = 0; i < currentSeries.size(); i++) {
+                if (isStock.get(i)) {
+                    addSeriesRow(sidebar, currentSeries.get(i), i,
+                            behaviorModes.get(i), seriesCheckBoxes);
                 }
-                series.getData().forEach(d -> {
-                    if (d.getNode() != null) {
-                        d.getNode().setVisible(isSelected);
-                    }
-                });
-            });
-            seriesCheckBoxes.add(cb);
-
-            Label nameLabel = new Label(series.getName());
-            nameLabel.setId("seriesLabel-" + series.getName());
-            nameLabel.setStyle("-fx-text-fill: " + color + "; -fx-cursor: hand;");
-            nameLabel.setOnMouseClicked(e -> {
-                if (onVariableClicked != null) {
-                    onVariableClicked.accept(series.getName());
+            }
+            addSectionHeader(sidebar, "Variables");
+            for (int i = 0; i < currentSeries.size(); i++) {
+                if (!isStock.get(i)) {
+                    addSeriesRow(sidebar, currentSeries.get(i), i,
+                            behaviorModes.get(i), seriesCheckBoxes);
                 }
-            });
-
-            HBox row = new HBox(4, cb, nameLabel);
-            row.setAlignment(Pos.CENTER_LEFT);
-
-            String mode = behaviorModes.get(i);
-            if (!mode.isEmpty()) {
-                Label modeLabel = new Label(mode);
-                modeLabel.setStyle("-fx-font-size: 10px; -fx-text-fill: #888;");
-                modeLabel.setPadding(new Insets(0, 0, 0, 22));
-                sidebar.getChildren().addAll(row, modeLabel);
-            } else {
-                sidebar.getChildren().add(row);
+            }
+        } else {
+            for (int i = 0; i < currentSeries.size(); i++) {
+                addSeriesRow(sidebar, currentSeries.get(i), i,
+                        behaviorModes.get(i), seriesCheckBoxes);
             }
         }
 
@@ -269,11 +271,8 @@ public class SimulationResultPane extends BorderPane {
             clearButton.setStyle("-fx-font-size: 11px;");
             clearButton.setOnAction(e -> {
                 clearHistory.run();
-                // Remove ghost series from chart
                 chart.getData().removeAll(ghostSeries);
                 ghostSeries.clear();
-                // Remove ghost controls from sidebar
-                // Find and remove everything after the separator
                 int sepIndex = -1;
                 for (int i = 0; i < sidebar.getChildren().size(); i++) {
                     if (sidebar.getChildren().get(i) instanceof Separator) {
@@ -305,6 +304,64 @@ public class SimulationResultPane extends BorderPane {
         pane.setCenter(chart);
         pane.setRight(sidebarScroll);
         return pane;
+    }
+
+    private void addSectionHeader(VBox sidebar, String title) {
+        Label header = new Label(title);
+        header.setStyle(Styles.FIELD_LABEL + " -fx-text-fill: #555; -fx-padding: 4 0 2 0;");
+        sidebar.getChildren().add(header);
+    }
+
+    private void addSeriesRow(VBox sidebar, XYChart.Series<Number, Number> series,
+                              int colorIndex, String behaviorMode,
+                              List<CheckBox> seriesCheckBoxes) {
+        String color = ChartUtils.SERIES_COLORS.get(colorIndex % ChartUtils.SERIES_COLORS.size());
+
+        CheckBox cb = new CheckBox();
+        cb.setSelected(true);
+        cb.selectedProperty().addListener((obs, wasSelected, isSelected) -> {
+            if (series.getNode() != null) {
+                series.getNode().setVisible(isSelected);
+            }
+            series.getData().forEach(d -> {
+                if (d.getNode() != null) {
+                    d.getNode().setVisible(isSelected);
+                }
+            });
+        });
+        seriesCheckBoxes.add(cb);
+
+        Label nameLabel = new Label(series.getName());
+        nameLabel.setId("seriesLabel-" + series.getName());
+        nameLabel.setStyle("-fx-text-fill: " + color + "; -fx-cursor: hand;");
+        nameLabel.setOnMouseClicked(e -> {
+            if (onVariableClicked != null) {
+                onVariableClicked.accept(series.getName());
+            }
+        });
+
+        HBox row = new HBox(4, cb, nameLabel);
+        row.setAlignment(Pos.CENTER_LEFT);
+
+        if (!behaviorMode.isEmpty()) {
+            Label modeLabel = new Label(behaviorMode);
+            modeLabel.setStyle("-fx-font-size: 10px; -fx-text-fill: #888;");
+            modeLabel.setPadding(new Insets(0, 0, 0, 22));
+            sidebar.getChildren().addAll(row, modeLabel);
+        } else {
+            sidebar.getChildren().add(row);
+        }
+    }
+
+    private static void applyDashedStyle(XYChart.Series<Number, Number> series) {
+        series.nodeProperty().addListener((obs, oldNode, newNode) -> {
+            if (newNode != null) {
+                newNode.setStyle(DASHED_STROKE);
+            }
+        });
+        if (series.getNode() != null) {
+            series.getNode().setStyle(DASHED_STROKE);
+        }
     }
 
     private void exportCsv() {
