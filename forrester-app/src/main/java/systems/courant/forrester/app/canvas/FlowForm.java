@@ -22,6 +22,7 @@ class FlowForm implements ElementForm {
 
     private TextField nameField;
     private TextField equationField;
+    private ComboBox<String> materialUnitBox;
     private ComboBox<String> timeUnitBox;
     private Label sourceLabel;
     private Label sinkLabel;
@@ -63,6 +64,12 @@ class FlowForm implements ElementForm {
                 + "Use element names, operators (+, -, *, /), and functions.");
         ctx.attachEquationValidation(equationField, row++);
 
+        materialUnitBox = ctx.createUnitComboBox(flow.materialUnit());
+        ctx.addComboCommitHandlers(materialUnitBox, this::commitMaterialUnit);
+        ctx.addFieldRow(row++, "Material Unit", materialUnitBox,
+                "The material being transferred (e.g., Person, USD).\n"
+                + "Combined with Time Unit to form the rate (e.g., Person per Day).");
+
         timeUnitBox = ctx.createTimeUnitComboBox(flow.timeUnit());
         ctx.addComboCommitHandlers(timeUnitBox, this::commitTimeUnit);
         ctx.addFieldRow(row++, "Time Unit", timeUnitBox,
@@ -87,6 +94,7 @@ class FlowForm implements ElementForm {
         FlowDef flow = flowOpt.get();
         nameField.setText(ctx.elementName);
         equationField.setText(flow.equation());
+        materialUnitBox.setValue(flow.materialUnit() != null ? flow.materialUnit() : "");
         timeUnitBox.setValue(flow.timeUnit() != null ? flow.timeUnit() : "");
         sourceLabel.setText(flow.source() != null ? flow.source() : "(cloud)");
         sinkLabel.setText(flow.sink() != null ? flow.sink() : "(cloud)");
@@ -120,6 +128,17 @@ class FlowForm implements ElementForm {
             return;
         }
         ctx.canvas.applyMutation(() -> ctx.editor.setFlowEquation(ctx.elementName, equation));
+    }
+
+    private void commitMaterialUnit(ComboBox<String> box) {
+        String materialUnit = box.getValue() != null ? box.getValue().trim() : "";
+        String resolved = materialUnit.isEmpty() ? null : materialUnit;
+        Optional<FlowDef> flowOpt = ctx.editor.getFlowByName(ctx.elementName);
+        if (flowOpt.isPresent() && Objects.equals(resolved, flowOpt.get().materialUnit())) {
+            return;
+        }
+        ctx.canvas.applyMutation(
+                () -> ctx.editor.setFlowMaterialUnit(ctx.elementName, resolved));
     }
 
     private void commitTimeUnit(ComboBox<String> box) {

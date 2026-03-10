@@ -42,6 +42,14 @@ public final class Styles {
     public static final String EQUATION_ERROR_LABEL =
             "-fx-text-fill: #E74C3C; -fx-font-size: 10px; -fx-wrap-text: true;";
 
+    // --- Dimensional analysis ---
+    public static final String DIMENSION_LABEL =
+            "-fx-text-fill: #6C757D; -fx-font-size: 10px;";
+    public static final String DIMENSION_MATCH =
+            "-fx-text-fill: #27AE60; -fx-font-size: 10px;";
+    public static final String DIMENSION_MISMATCH =
+            "-fx-text-fill: #E67E22; -fx-font-size: 10px;";
+
     // --- Binding config dialog ---
     public static final String SECTION_HEADER =
             "-fx-font-weight: bold; -fx-font-size: 13px;";

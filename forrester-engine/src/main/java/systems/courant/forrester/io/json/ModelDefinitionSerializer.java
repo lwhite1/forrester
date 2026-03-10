@@ -207,6 +207,9 @@ public class ModelDefinitionSerializer {
             }
             node.put("equation", f.equation());
             node.put("timeUnit", f.timeUnit());
+            if (f.materialUnit() != null) {
+                node.put("materialUnit", f.materialUnit());
+            }
             if (f.source() != null) {
                 node.put("source", f.source());
             }
@@ -468,6 +471,7 @@ public class ModelDefinitionSerializer {
                         textOrNull(n, "comment"),
                         requiredText(n, "equation"),
                         requiredText(n, "timeUnit"),
+                        textOrNull(n, "materialUnit"),
                         textOrNull(n, "source"),
                         textOrNull(n, "sink"),
                         readStringList(n, "subscripts")));

@@ -74,6 +74,51 @@ class ModelDefinitionSerializerTest {
     }
 
     @Test
+    void shouldPreserveFlowMaterialUnit() {
+        ModelDefinition def = new ModelDefinitionBuilder()
+                .name("Test")
+                .stock("Pop", 100, "Person")
+                .flow("Births", "Pop * 0.1", "Day", "Person", null, "Pop")
+                .build();
+
+        String json = serializer.toJson(def);
+        assertThat(json).contains("materialUnit");
+        assertThat(json).contains("Person");
+
+        ModelDefinition roundTripped = serializer.fromJson(json);
+        assertThat(roundTripped.flows().get(0).materialUnit()).isEqualTo("Person");
+    }
+
+    @Test
+    void shouldHandleNullMaterialUnit() {
+        ModelDefinition def = new ModelDefinitionBuilder()
+                .name("Test")
+                .flow("F", "10", "Day", null, null)
+                .build();
+
+        ModelDefinition roundTripped = serializer.fromJson(serializer.toJson(def));
+        assertThat(roundTripped.flows().get(0).materialUnit()).isNull();
+    }
+
+    @Test
+    void shouldDeserializeOldJsonWithoutMaterialUnit() {
+        // Simulate old-format JSON that doesn't have materialUnit field
+        String oldJson = """
+                {
+                  "name": "Legacy",
+                  "flows": [{
+                    "name": "F",
+                    "equation": "10",
+                    "timeUnit": "Day"
+                  }]
+                }
+                """;
+        ModelDefinition def = serializer.fromJson(oldJson);
+        assertThat(def.flows().get(0).materialUnit()).isNull();
+        assertThat(def.flows().get(0).name()).isEqualTo("F");
+    }
+
+    @Test
     void shouldHandleNullSourceAndSink() {
         ModelDefinition def = new ModelDefinitionBuilder()
                 .name("Test")

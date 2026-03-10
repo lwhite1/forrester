@@ -2,6 +2,7 @@ package systems.courant.forrester.model;
 
 import systems.courant.forrester.measure.Quantity;
 import systems.courant.forrester.measure.TimeUnit;
+import systems.courant.forrester.measure.Unit;
 import systems.courant.forrester.model.flows.RateConverter;
 
 import com.carrotsearch.hppc.DoubleArrayList;
@@ -14,6 +15,7 @@ import java.util.function.Supplier;
 public abstract class Flow extends Element {
 
     private final TimeUnit timeUnit;
+    private final Unit materialUnit;
 
     private final DoubleArrayList history = new DoubleArrayList();
     private Stock source;
@@ -26,8 +28,20 @@ public abstract class Flow extends Element {
      * @param unit the time unit in which this flow's rate is expressed
      */
     public Flow(String name, TimeUnit unit) {
+        this(name, unit, null);
+    }
+
+    /**
+     * Creates a new flow with the given name, native time unit, and material unit.
+     *
+     * @param name         the flow name
+     * @param unit         the time unit in which this flow's rate is expressed
+     * @param materialUnit the material unit (e.g. Person), or null if unspecified
+     */
+    public Flow(String name, TimeUnit unit, Unit materialUnit) {
         super(name);
         this.timeUnit = unit;
+        this.materialUnit = materialUnit;
     }
 
     /**
@@ -40,7 +54,21 @@ public abstract class Flow extends Element {
      * @return a new flow that delegates to the given formula
      */
     public static Flow create(String name, TimeUnit timeUnit, Supplier<Quantity> formula) {
-        return new Flow(name, timeUnit) {
+        return create(name, timeUnit, null, formula);
+    }
+
+    /**
+     * Creates a flow from a lambda with an explicit material unit.
+     *
+     * @param name         the flow name
+     * @param timeUnit     the time unit in which this flow's rate is expressed
+     * @param materialUnit the material unit, or null to leave unspecified
+     * @param formula      a supplier that computes the quantity per time unit on each evaluation
+     * @return a new flow that delegates to the given formula
+     */
+    public static Flow create(String name, TimeUnit timeUnit, Unit materialUnit,
+                               Supplier<Quantity> formula) {
+        return new Flow(name, timeUnit, materialUnit) {
             @Override
             protected Quantity quantityPerTimeUnit() {
                 return formula.get();
@@ -53,6 +81,14 @@ public abstract class Flow extends Element {
      */
     public TimeUnit getTimeUnit() {
         return timeUnit;
+    }
+
+    /**
+     * Returns the material unit for this flow (e.g. Person, USD), or {@code null}
+     * if no explicit material unit was set.
+     */
+    public Unit getMaterialUnit() {
+        return materialUnit;
     }
 
     @Override

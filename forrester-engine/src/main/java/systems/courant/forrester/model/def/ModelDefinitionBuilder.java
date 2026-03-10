@@ -133,6 +133,24 @@ public class ModelDefinitionBuilder {
     }
 
     /**
+     * Adds a flow with an explicit material unit.
+     *
+     * @param name         the flow name
+     * @param equation     the formula expression string
+     * @param timeUnit     the time unit name for the flow rate
+     * @param materialUnit the material unit name (e.g. "Person"), or null to infer from stock
+     * @param source       the source stock name, or {@code null} for an external source
+     * @param sink         the sink stock name, or {@code null} for an external sink
+     * @return this builder
+     */
+    public ModelDefinitionBuilder flow(String name, String equation, String timeUnit,
+                                       String materialUnit, String source, String sink) {
+        flows.add(new FlowDef(name, null, equation, timeUnit, materialUnit,
+                source, sink, List.of()));
+        return this;
+    }
+
+    /**
      * Adds a subscripted flow that will be expanded into scalar elements during compilation.
      *
      * @param name       the flow name

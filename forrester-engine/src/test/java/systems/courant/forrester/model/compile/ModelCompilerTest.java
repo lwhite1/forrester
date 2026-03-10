@@ -634,4 +634,51 @@ class ModelCompilerTest {
             assertThat(total.getValue()).isCloseTo(0.0, within(0.001));
         }
     }
+
+    @Nested
+    @DisplayName("Material unit")
+    class MaterialUnit {
+
+        @Test
+        void shouldUseExplicitMaterialUnitWhenProvided() {
+            ModelDefinition def = new ModelDefinitionBuilder()
+                    .name("Explicit Material Unit")
+                    .stock("Population", 100, "Person")
+                    .flow("Births", "Population * 0.01", "Day", "Person",
+                            null, "Population")
+                    .defaultSimulation("Day", 10, "Day")
+                    .build();
+
+            CompiledModel compiled = compiler.compile(def);
+            Simulation sim = compiled.createSimulation();
+            sim.execute();
+
+            Stock pop = findStock(compiled.getModel(), "Population");
+            assertThat(pop.getValue()).isGreaterThan(100);
+
+            // Verify the flow has the correct material unit
+            systems.courant.forrester.model.Flow flow = compiled.getModel().getFlows()
+                    .stream().filter(f -> f.getName().equals("Births")).findFirst().orElseThrow();
+            assertThat(flow.getMaterialUnit()).isNotNull();
+            assertThat(flow.getMaterialUnit().getName()).isEqualTo("Person");
+        }
+
+        @Test
+        void shouldFallBackToStockUnitWhenMaterialUnitIsNull() {
+            ModelDefinition def = new ModelDefinitionBuilder()
+                    .name("Inferred Material Unit")
+                    .stock("Tank", 100, "Liter")
+                    .flow("Drain", "Tank * 0.1", "Day", "Tank", null)
+                    .defaultSimulation("Day", 10, "Day")
+                    .build();
+
+            CompiledModel compiled = compiler.compile(def);
+
+            // Flow should have Liter as material unit (inferred from stock)
+            systems.courant.forrester.model.Flow flow = compiled.getModel().getFlows()
+                    .stream().filter(f -> f.getName().equals("Drain")).findFirst().orElseThrow();
+            assertThat(flow.getMaterialUnit()).isNotNull();
+            assertThat(flow.getMaterialUnit().getName()).isEqualTo("Liter");
+        }
+    }
 }

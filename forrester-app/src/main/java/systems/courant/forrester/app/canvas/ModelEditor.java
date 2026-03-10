@@ -207,7 +207,8 @@ public class ModelEditor {
     public String addFlow(String source, String sink) {
         checkFxThread();
         String name = "Flow " + nextFlowId++;
-        flows.add(new FlowDef(name, "0", "Day", source, sink));
+        String materialUnit = inferMaterialUnit(source, sink);
+        flows.add(new FlowDef(name, null, "0", "Day", materialUnit, source, sink, List.of()));
         nameIndex.add(name);
         fireElementAdded(name, "Flow");
         return name;
@@ -253,8 +254,10 @@ public class ModelEditor {
         if (name.startsWith("Flow ")) {
             nextFlowId = parseIdSuffix(name, "Flow ") + 1;
         }
+        String matUnit = template.materialUnit() != null
+                ? template.materialUnit() : inferMaterialUnit(source, sink);
         flows.add(new FlowDef(name, template.comment(), template.equation(),
-                template.timeUnit(), source, sink));
+                template.timeUnit(), matUnit, source, sink, List.of()));
         nameIndex.add(name);
         return name;
     }
@@ -382,8 +385,10 @@ public class ModelEditor {
                             f.comment(),
                             f.equation(),
                             f.timeUnit(),
+                            f.materialUnit(),
                             sourceMatch ? null : f.source(),
-                            sinkMatch ? null : f.sink()
+                            sinkMatch ? null : f.sink(),
+                            f.subscripts()
                     ));
                 }
             }
@@ -436,7 +441,7 @@ public class ModelEditor {
                         s.unit(), s.negativeValuePolicy()))
                 || renameInList(flows, oldName, newName, FlowDef::name,
                 (f, n) -> new FlowDef(n, f.comment(), f.equation(),
-                        f.timeUnit(), f.source(), f.sink()))
+                        f.timeUnit(), f.materialUnit(), f.source(), f.sink(), f.subscripts()))
                 || renameInList(auxiliaries, oldName, newName, AuxDef::name,
                 (a, n) -> new AuxDef(n, a.comment(), a.equation(), a.unit()))
                 || renameInList(modules, oldName, newName, ModuleInstanceDef::instanceName,
@@ -477,8 +482,10 @@ public class ModelEditor {
             if (sourceMatch || sinkMatch) {
                 flows.set(i, new FlowDef(
                         f.name(), f.comment(), f.equation(), f.timeUnit(),
+                        f.materialUnit(),
                         sourceMatch ? newName : f.source(),
-                        sinkMatch ? newName : f.sink()));
+                        sinkMatch ? newName : f.sink(),
+                        f.subscripts()));
             }
         }
 
@@ -546,10 +553,10 @@ public class ModelEditor {
 
                 if (end == FlowEndpointCalculator.FlowEnd.SOURCE) {
                     flows.set(i, new FlowDef(f.name(), f.comment(), f.equation(),
-                            f.timeUnit(), stockName, f.sink()));
+                            f.timeUnit(), f.materialUnit(), stockName, f.sink(), f.subscripts()));
                 } else {
                     flows.set(i, new FlowDef(f.name(), f.comment(), f.equation(),
-                            f.timeUnit(), f.source(), stockName));
+                            f.timeUnit(), f.materialUnit(), f.source(), stockName, f.subscripts()));
                 }
                 return true;
             }
@@ -569,7 +576,7 @@ public class ModelEditor {
         }
         boolean updated = updateInList(flows, name, FlowDef::name,
                 f -> new FlowDef(f.name(), f.comment(), equation,
-                        f.timeUnit(), f.source(), f.sink()));
+                        f.timeUnit(), f.materialUnit(), f.source(), f.sink(), f.subscripts()));
         if (updated) {
             fireEquationChanged(name);
         }
@@ -645,7 +652,19 @@ public class ModelEditor {
         }
         return updateInList(flows, name, FlowDef::name,
                 f -> new FlowDef(f.name(), f.comment(), f.equation(),
-                        timeUnit, f.source(), f.sink()));
+                        timeUnit, f.materialUnit(), f.source(), f.sink(), f.subscripts()));
+    }
+
+    /**
+     * Sets the material unit of a flow.
+     *
+     * @return true if the flow was found and updated
+     */
+    public boolean setFlowMaterialUnit(String name, String materialUnit) {
+        checkFxThread();
+        return updateInList(flows, name, FlowDef::name,
+                f -> new FlowDef(f.name(), f.comment(), f.equation(),
+                        f.timeUnit(), materialUnit, f.source(), f.sink(), f.subscripts()));
     }
 
     /**
@@ -683,7 +702,7 @@ public class ModelEditor {
         checkFxThread();
         return updateInList(flows, name, FlowDef::name,
                 f -> new FlowDef(f.name(), comment, f.equation(),
-                        f.timeUnit(), f.source(), f.sink()));
+                        f.timeUnit(), f.materialUnit(), f.source(), f.sink(), f.subscripts()));
     }
 
     /**
@@ -741,6 +760,26 @@ public class ModelEditor {
             }
         }
         return Optional.empty();
+    }
+
+    /**
+     * Infers a material unit from the connected stock(s). Checks sink first, then source.
+     * Returns null if neither endpoint is a known stock.
+     */
+    private String inferMaterialUnit(String source, String sink) {
+        if (sink != null) {
+            Optional<StockDef> sinkStock = getStockByName(sink);
+            if (sinkStock.isPresent()) {
+                return sinkStock.get().unit();
+            }
+        }
+        if (source != null) {
+            Optional<StockDef> sourceStock = getStockByName(source);
+            if (sourceStock.isPresent()) {
+                return sourceStock.get().unit();
+            }
+        }
+        return null;
     }
 
     // Equation reference management delegated to EquationReferenceManager

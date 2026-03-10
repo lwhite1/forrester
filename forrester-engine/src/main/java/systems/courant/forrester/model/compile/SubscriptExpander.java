@@ -120,8 +120,10 @@ public class SubscriptExpander {
                                 f.comment(),
                                 expandedEq,
                                 f.timeUnit(),
+                                f.materialUnit(),
                                 expandedSource,
-                                expandedSink));
+                                expandedSink,
+                                List.of()));
                     }
                 }
             }

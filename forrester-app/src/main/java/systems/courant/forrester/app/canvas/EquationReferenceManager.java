@@ -36,7 +36,7 @@ final class EquationReferenceManager {
             String updated = replaceToken(f.equation(), oldToken, newToken);
             if (!updated.equals(f.equation())) {
                 flows.set(i, new FlowDef(f.name(), f.comment(), updated,
-                        f.timeUnit(), f.source(), f.sink()));
+                        f.timeUnit(), f.materialUnit(), f.source(), f.sink(), f.subscripts()));
             }
         }
         for (int i = 0; i < auxiliaries.size(); i++) {
@@ -94,7 +94,7 @@ final class EquationReferenceManager {
                 }
                 String updated = "0".equals(eq.trim()) ? token : eq + " * " + token;
                 flows.set(i, new FlowDef(f.name(), f.comment(), updated,
-                        f.timeUnit(), f.source(), f.sink()));
+                        f.timeUnit(), f.materialUnit(), f.source(), f.sink(), f.subscripts()));
                 return true;
             }
         }

@@ -289,8 +289,10 @@ public class ModelCompiler {
     private Flow createFlow(FlowDef fDef, DoubleSupplier[] holder,
                             CompilationContext context) {
         TimeUnit timeUnit = unitRegistry.resolveTimeUnit(fDef.timeUnit());
-        Unit flowUnit = resolveFlowUnit(fDef, context);
-        return Flow.create(fDef.name(), timeUnit,
+        Unit flowUnit = fDef.materialUnit() != null
+                ? unitRegistry.resolve(fDef.materialUnit())
+                : resolveFlowUnit(fDef, context);
+        return Flow.create(fDef.name(), timeUnit, flowUnit,
                 () -> new Quantity(holder[0].getAsDouble(), flowUnit));
     }
 
