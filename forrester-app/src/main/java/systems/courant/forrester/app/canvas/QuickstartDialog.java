@@ -58,11 +58,11 @@ public class QuickstartDialog extends Stage {
                 bold("Flow"),
                 plain(" \u2014 a rate that changes a stock (cooling)\n"),
                 plain("  \u2022 "),
-                bold("Auxiliary"),
+                bold("Variable"),
                 plain(" \u2014 a computed value (the temperature gap)\n"),
                 plain("  \u2022 "),
                 bold("Parameter"),
-                plain(" \u2014 an auxiliary with a fixed value (room temperature, cooling rate)\n\n"),
+                plain(" \u2014 a variable with a fixed value (room temperature, cooling rate)\n\n"),
                 plain("The model uses Newton's law of cooling: the hotter the coffee relative to "
                         + "the room, the faster it cools. As the coffee approaches room temperature, "
                         + "cooling slows down. This is "),
@@ -86,10 +86,10 @@ public class QuickstartDialog extends Stage {
                 mono("100"),
                 plain(" (degrees Celsius).\n\n"),
 
-                bold("Place two Auxiliaries as parameters\n\n"),
+                bold("Place two Variables as parameters\n\n"),
                 plain("Press "),
                 mono("4"),
-                plain(" to switch to the Auxiliary tool.\n\n"),
+                plain(" to switch to the Variable tool.\n\n"),
                 plain("Click the canvas to the right of the stock. Name it "),
                 mono("Room Temperature"),
                 plain(", value "),
@@ -103,7 +103,7 @@ public class QuickstartDialog extends Stage {
                 plain("The cooling rate means the coffee loses 10% of the temperature "
                         + "difference each minute.\n\n"),
 
-                bold("Place an Auxiliary\n\n"),
+                bold("Place a Variable\n\n"),
                 plain("Press "),
                 mono("4"),
                 plain(". Click between the stock and the constants. Name it "),
@@ -114,7 +114,7 @@ public class QuickstartDialog extends Stage {
                 plain("The autocomplete dropdown suggests names as you type \u2014 press "),
                 mono("Tab"),
                 plain(" to accept.\n\n"),
-                plain("This auxiliary continuously recalculates: when the coffee is 100\u00b0C, "
+                plain("This variable continuously recalculates: when the coffee is 100\u00b0C, "
                         + "the discrepancy is 82\u00b0C. As the coffee cools, it shrinks toward zero.")
         );
     }
@@ -149,7 +149,7 @@ public class QuickstartDialog extends Stage {
                 plain("Your model:\n"),
                 plain("  \u2022 Stock: Coffee Temperature (100)\n"),
                 plain("  \u2022 Flow: Cooling = Discrepancy \u00d7 Cooling_Rate\n"),
-                plain("  \u2022 Auxiliary: Discrepancy = Coffee_Temperature \u2212 Room_Temperature\n"),
+                plain("  \u2022 Variable: Discrepancy = Coffee_Temperature \u2212 Room_Temperature\n"),
                 plain("  \u2022 Parameters: Room Temperature (18), Cooling Rate (0.10)")
         );
     }
@@ -245,11 +245,11 @@ public class QuickstartDialog extends Stage {
                 bold("Flow"),
                 plain(" \u2014 changes a stock each time step (Cooling)\n"),
                 plain("  \u2022 "),
-                bold("Auxiliary"),
+                bold("Variable"),
                 plain(" \u2014 computes a derived value (Discrepancy)\n"),
                 plain("  \u2022 "),
                 bold("Parameter"),
-                plain(" \u2014 an auxiliary with a fixed value (Room Temperature, Cooling Rate)\n"),
+                plain(" \u2014 a variable with a fixed value (Room Temperature, Cooling Rate)\n"),
                 plain("  \u2022 "),
                 bold("Negative feedback"),
                 plain(" \u2014 the system self-corrects toward equilibrium\n\n"),

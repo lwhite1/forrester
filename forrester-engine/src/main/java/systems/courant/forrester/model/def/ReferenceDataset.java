@@ -41,7 +41,7 @@ public record ReferenceDataset(String name, double[] timeValues, Map<String, dou
             }
             copy.put(entry.getKey(), entry.getValue().clone());
         }
-        columns = Map.copyOf(copy);
+        columns = java.util.Collections.unmodifiableMap(copy);
     }
 
     /**

@@ -91,7 +91,7 @@ public class StatusBar extends HBox {
             case SELECT -> "Select";
             case PLACE_STOCK -> "Place Stock";
             case PLACE_FLOW -> "Place Flow";
-            case PLACE_AUX -> "Place Auxiliary";
+            case PLACE_AUX -> "Place Variable";
             case PLACE_MODULE -> "Place Module";
             case PLACE_LOOKUP -> "Place Lookup";
             case PLACE_CLD_VARIABLE -> "Place CLD Variable";

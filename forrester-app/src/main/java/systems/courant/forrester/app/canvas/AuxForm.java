@@ -40,7 +40,7 @@ class AuxForm implements ElementForm {
         int row = startRow;
         nameField = ctx.createNameField();
         ctx.addFieldRow(row++, "Name", nameField,
-                "The name used to reference this auxiliary in equations");
+                "The name used to reference this variable in equations");
 
         commentArea = new TextArea(aux.comment() != null ? aux.comment() : "");
         commentArea.setId("propComment");

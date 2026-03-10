@@ -154,11 +154,11 @@ Vensim macros (`:MACRO:` blocks) are skipped entirely. If your model uses macros
 |---|---|---|
 | Add stock | Click Stock tool, click canvas | Press 2 (or toolbar), click canvas |
 | Add flow | Click Rate tool, drag | Press 3, click source, click sink |
-| Add auxiliary | Click Variable tool | Press 4, click canvas |
-| Add constant | (use auxiliary with number) | Press 5, click canvas |
+| Add variable | Click Variable tool | Press 4, click canvas |
+| Add constant | (use variable with number) | Press 5, click canvas |
 | Connect | Draw arrow | Equations auto-connect when you reference a variable |
 
-Forrester distinguishes constants from auxiliaries. In Vensim PLE, a constant is just an auxiliary with a number. In Forrester, constants are a first-class element type — they appear differently on the diagram and can be targeted by parameter sweeps.
+Forrester distinguishes constants from variables. In Vensim PLE, a constant is just a variable with a number (called an "auxiliary" in Vensim terminology). In Forrester, constants are a first-class element type — they appear differently on the diagram and can be targeted by parameter sweeps.
 
 ---
 
@@ -214,7 +214,7 @@ Sketch out your system's feedback structure before formalizing:
 - Press **8** to place CLD variables
 - Press **9** to draw causal links with polarity (+, -, ?)
 - Forrester automatically detects feedback loops and classifies them as reinforcing (R) or balancing (B)
-- When you're ready, right-click a CLD variable and classify it as a stock, flow, auxiliary, or constant
+- When you're ready, right-click a CLD variable and classify it as a stock, flow, variable, or constant
 
 In Vensim, CLDs are a separate tool (Vensim CLD). In Forrester, CLDs and stock-and-flow diagrams share the same canvas.
 

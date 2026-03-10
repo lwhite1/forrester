@@ -164,10 +164,10 @@ public class ExpressionLanguageDialog extends Stage {
     private TextFlow basicsContent() {
         return new TextFlow(
                 bold("Expressions"),
-                plain(" are mathematical formulas used in flow equations, auxiliary equations, "
+                plain(" are mathematical formulas used in flow equations, variable equations, "
                         + "and lookup table inputs.\n\n"),
                 bold("Variable references\n\n"),
-                plain("Use the name of any stock, flow, constant, auxiliary, or lookup table:\n\n"),
+                plain("Use the name of any stock, flow, constant, variable, or lookup table:\n\n"),
                 mono("  Birth_Rate * Population\n\n"),
                 plain("Spaces in element names are converted to underscores. "
                         + "You can also use backtick-quoted names:\n\n"),

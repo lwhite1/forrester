@@ -64,11 +64,11 @@ Set the value to `0.10`. This means the coffee loses 10% of the temperature diff
 
 ---
 
-## 4. Add an Auxiliary variable
+## 4. Add a Variable
 
-An **auxiliary** (or converter) computes a value from other elements. We'll use it to calculate the temperature gap between the coffee and the room.
+A **variable** (called an auxiliary or converter in the SD literature) computes a value from other elements. We'll use it to calculate the temperature gap between the coffee and the room.
 
-Press **4** to switch to the Auxiliary tool. Click between the stock and the constants. Name it:
+Press **4** to switch to the Variable tool. Click between the stock and the constants. Name it:
 
 ```
 Discrepancy
@@ -82,7 +82,7 @@ Coffee_Temperature - Room_Temperature
 
 > **Note:** In equations, spaces in element names become underscores. The autocomplete dropdown will suggest matching names as you type — press **Tab** or click to accept a suggestion.
 
-This auxiliary will continuously recalculate as the coffee temperature changes. When the coffee is at 100°C, the discrepancy is 82°C. As the coffee cools toward 18°C, the discrepancy shrinks toward zero.
+This variable will continuously recalculate as the coffee temperature changes. When the coffee is at 100°C, the discrepancy is 82°C. As the coffee cools toward 18°C, the discrepancy shrinks toward zero.
 
 ---
 
@@ -117,7 +117,7 @@ Your model should now have:
 
 - **Stock:** Coffee Temperature (initial value 100)
 - **Flow:** Cooling (equation: `Discrepancy * Cooling_Rate`), draining from Coffee Temperature
-- **Auxiliary:** Discrepancy (equation: `Coffee_Temperature - Room_Temperature`)
+- **Variable:** Discrepancy (equation: `Coffee_Temperature - Room_Temperature`)
 - **Constants:** Room Temperature (18), Cooling Rate (0.10)
 
 You can drag elements around to arrange them neatly. Use **1** to switch back to the Select tool, then click and drag.
@@ -190,7 +190,7 @@ Press **Ctrl+S**. Choose a location and filename. The model is saved as JSON —
 |---|---|---|
 | **Stock** | Accumulates a quantity over time | Coffee Temperature |
 | **Flow** | Changes a stock's value each time step | Cooling |
-| **Auxiliary** | Computes a derived value | Discrepancy |
+| **Variable** | Computes a derived value | Discrepancy |
 | **Constant** | Holds a fixed parameter | Room Temperature, Cooling Rate |
 | **Negative feedback** | The system self-corrects toward a goal | Cooling slows as temp approaches room temp |
 

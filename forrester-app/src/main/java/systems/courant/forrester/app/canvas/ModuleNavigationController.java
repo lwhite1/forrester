@@ -137,7 +137,7 @@ final class ModuleNavigationController {
         MenuItem asFlow = new MenuItem("Flow");
         asFlow.setOnAction(e -> classifyAction.accept(elementName, ElementType.FLOW));
 
-        MenuItem asAux = new MenuItem("Auxiliary");
+        MenuItem asAux = new MenuItem("Variable");
         asAux.setOnAction(e -> classifyAction.accept(elementName, ElementType.AUX));
 
         classifyMenu.getItems().addAll(asStock, asFlow, asAux);

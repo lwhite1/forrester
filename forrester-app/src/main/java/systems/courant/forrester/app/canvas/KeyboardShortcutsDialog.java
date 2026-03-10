@@ -41,7 +41,7 @@ public class KeyboardShortcutsDialog extends Stage {
                         "1", "Select tool",
                         "2", "Place stock",
                         "3", "Place flow",
-                        "4", "Place auxiliary",
+                        "4", "Place variable",
                         "5", "Place module",
                         "6", "Place lookup table",
                         "7", "Place CLD variable",

@@ -67,9 +67,9 @@ public class CanvasToolBar extends ToolBar {
         ToggleButton flowButton = makeButton("Flow", Tool.PLACE_FLOW);
         flowButton.setId("toolFlow");
         flowButton.setTooltip(new Tooltip("Add a flow \u2014 a rate that moves material between stocks"));
-        ToggleButton auxButton = makeButton("Auxiliary", Tool.PLACE_AUX);
+        ToggleButton auxButton = makeButton("Variable", Tool.PLACE_AUX);
         auxButton.setId("toolAux");
-        auxButton.setTooltip(new Tooltip("Add an auxiliary \u2014 a computed intermediate variable"));
+        auxButton.setTooltip(new Tooltip("Add a variable \u2014 a computed intermediate value"));
         ToggleButton moduleButton = makeButton("Module", Tool.PLACE_MODULE);
         moduleButton.setId("toolModule");
         moduleButton.setTooltip(new Tooltip("Add a module \u2014 a reusable sub-model"));

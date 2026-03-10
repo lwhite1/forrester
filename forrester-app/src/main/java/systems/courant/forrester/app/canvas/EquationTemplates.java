@@ -36,7 +36,7 @@ final class EquationTemplates {
                         "Stock / Average_Lifetime")
         );
 
-        Menu auxPatterns = new Menu("Auxiliary patterns");
+        Menu auxPatterns = new Menu("Variable patterns");
         auxPatterns.getItems().addAll(
                 templateItem(equationField, "Ratio",
                         "Numerator / Denominator"),

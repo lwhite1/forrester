@@ -12,13 +12,13 @@ If you've ever struggled with unintended consequences, policy resistance, or the
 
 Start where every SD practitioner starts: with a **causal loop diagram**. Map out the variables in your system and draw the connections between them. Forrester automatically detects your feedback loops and classifies them as reinforcing or balancing — so you can see the engines of growth, the sources of resistance, and the leverage points where intervention matters most.
 
-When you're ready to make it quantitative, right-click any variable and classify it as a stock, flow, auxiliary, or constant. It transforms in place on the same canvas — no switching tools, no redrawing your diagram.
+When you're ready to make it quantitative, right-click any variable and classify it as a stock, flow, variable, or constant. It transforms in place on the same canvas — no switching tools, no redrawing your diagram.
 
 ---
 
 ## Build and simulate stock-and-flow models
 
-Place stocks, flows, auxiliaries, constants, and lookup tables on a visual canvas. Write equations with autocomplete that suggests variable names and built-in functions as you type. Press Ctrl+R to simulate and see the results immediately in an interactive chart.
+Place stocks, flows, variables, constants, and lookup tables on a visual canvas. Write equations with autocomplete that suggests variable names and built-in functions as you type. Press Ctrl+R to simulate and see the results immediately in an interactive chart.
 
 Break large models into reusable **modules** with input/output ports. Add **subscripts** to expand elements across dimensions (regions, age groups, product lines) without duplicating your diagram.
 
@@ -49,7 +49,7 @@ See the [Vensim PLE migration guide](From_Vensim_PLE.md) for details.
 |  | Vensim PLE | Stella | Vensim Pro | **Forrester** |
 |---|:---:|:---:|:---:|:---:|
 | **Cost** | Free | $249/yr | $1,200/yr | **Free** |
-| Stocks, flows, auxiliaries | Yes | Yes | Yes | Yes |
+| Stocks, flows, variables | Yes | Yes | Yes | Yes |
 | Causal loop diagrams | Separate tool | Separate tool | Separate tool | **Integrated** |
 | Subscripts / arrays | No | Yes | Yes | Yes |
 | Parameter sweeps | No | Yes | Yes | Yes |

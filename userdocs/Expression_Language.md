@@ -1,10 +1,10 @@
 # Forrester Expression Language Reference
 
-This document describes the expression language used in flow equations, auxiliary equations, and lookup table inputs.
+This document describes the expression language used in flow equations, variable equations, and lookup table inputs.
 
 ## Basics
 
-Expressions are written as standard mathematical formulas. Variable names reference other elements in the model (stocks, constants, auxiliaries, flows, lookup tables).
+Expressions are written as standard mathematical formulas. Variable names reference other elements in the model (stocks, constants, variables, flows, lookup tables).
 
 ```
 Birth_Rate * Population

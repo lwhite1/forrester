@@ -185,7 +185,7 @@ final class CanvasContextMenuController {
         MenuItem addFlow = new MenuItem("Add Flow");
         addFlow.setOnAction(e -> callbacks.switchTool(CanvasToolBar.Tool.PLACE_FLOW));
 
-        MenuItem addAux = new MenuItem("Add Auxiliary");
+        MenuItem addAux = new MenuItem("Add Variable");
         addAux.setOnAction(e -> {
             String name = callbacks.createElementAt(worldX, worldY,
                     CanvasToolBar.Tool.PLACE_AUX);

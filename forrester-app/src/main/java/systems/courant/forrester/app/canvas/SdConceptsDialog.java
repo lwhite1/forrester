@@ -24,7 +24,7 @@ public class SdConceptsDialog extends Stage {
                 createTab("Overview", overviewText()),
                 createTab("Stocks", stocksText()),
                 createTab("Flows", flowsText()),
-                createTab("Auxiliaries", auxiliariesText()),
+                createTab("Variables", auxiliariesText()),
                 createTab("Feedback Loops", feedbackText()),
                 createTab("Causal Loops", causalLoopsText()),
                 createTab("Simulation", simulationText())
@@ -65,7 +65,7 @@ public class SdConceptsDialog extends Stage {
                 plain("  - Policy resistance often results from unrecognized feedback structures\n\n"),
                 bold("Stock and flow diagrams"),
                 plain(" are the primary notation. They show the physical and information "
-                        + "structure of a system as a network of stocks, flows, and auxiliaries "
+                        + "structure of a system as a network of stocks, flows, and variables "
                         + "connected by material pipes and information links.")
         );
     }
@@ -115,7 +115,7 @@ public class SdConceptsDialog extends Stage {
                         + "an outflow to a cloud means it leaves the model.\n\n"),
                 bold("Flow equations"),
                 plain(" define how fast material moves. They typically depend on stocks, "
-                        + "auxiliaries, and constants. For example, a death rate flow might be:\n\n"),
+                        + "variables, and constants. For example, a death rate flow might be:\n\n"),
                 plain("  deaths = population * mortality_rate\n\n"),
                 plain("The diamond symbol on the diagram represents the flow valve, "
                         + "which controls the rate. The thick pipe shows the path material travels.")
@@ -124,15 +124,16 @@ public class SdConceptsDialog extends Stage {
 
     private TextFlow auxiliariesText() {
         return new TextFlow(
-                bold("Auxiliaries"),
-                plain(" (also called converters) are intermediate variables that compute values "
-                        + "used by flows or other auxiliaries. They have no memory of their own; "
+                bold("Variables"),
+                plain(" (called auxiliaries or converters in the SD literature) are intermediate "
+                        + "values that compute results "
+                        + "used by flows or other variables. They have no memory of their own; "
                         + "they are purely algebraic functions of other variables.\n\n"),
                 bold("Parameters"),
-                plain(" are auxiliaries whose equation is a single numeric value. They do not "
+                plain(" are variables whose equation is a single numeric value. They do not "
                         + "change during a simulation run and represent assumptions or policy levers. "
                         + "The sweep, Monte Carlo, and optimization tools automatically detect "
-                        + "literal-valued auxiliaries as tunable parameters.\n\n"),
+                        + "literal-valued variables as tunable parameters.\n\n"),
                 bold("Lookup tables"),
                 plain(" define nonlinear relationships as a set of (input, output) data points. "
                         + "The simulation engine interpolates between points. Lookup tables are "
@@ -178,7 +179,7 @@ public class SdConceptsDialog extends Stage {
                 plain(" are a qualitative modeling tool used to map the feedback structure "
                         + "of a system before building a full stock-and-flow model.\n\n"),
                 bold("CLD Variables"),
-                plain(" represent system concepts or quantities. Unlike stocks and auxiliaries, "
+                plain(" represent system concepts or quantities. Unlike stocks and variables, "
                         + "CLD variables have no equations or units — they capture the conceptual "
                         + "structure of a system at a high level.\n\n"),
                 bold("Causal Links"),
@@ -214,7 +215,7 @@ public class SdConceptsDialog extends Stage {
                         + "so classification is not possible.\n\n"),
                 bold("From CLD to Stock-and-Flow:\n\n"),
                 plain("CLD variables can be classified (right-click -> Classify as) into stock-and-flow "
-                        + "elements (Stock, Flow, or Auxiliary) as the model is refined "
+                        + "elements (Stock, Flow, or Variable) as the model is refined "
                         + "from qualitative to quantitative. This preserves the variable's name and "
                         + "position while converting it into an element that can hold equations and units.")
         );

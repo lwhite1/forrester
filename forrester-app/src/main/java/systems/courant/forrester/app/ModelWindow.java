@@ -544,7 +544,7 @@ public class ModelWindow {
         validationIssuesItem.setDisable(true);
         validationIssuesItem.setOnAction(e -> showValidationDialog());
 
-        CheckMenuItem hideAuxItem = new CheckMenuItem("Hide Auxiliaries");
+        CheckMenuItem hideAuxItem = new CheckMenuItem("Hide Variables");
         hideAuxItem.setId("menuHideAuxiliaries");
         hideAuxItem.setOnAction(e -> {
             canvas.setHideAuxiliaries(hideAuxItem.isSelected());
@@ -1008,7 +1008,7 @@ public class ModelWindow {
                 () -> switchToolAndFocus(CanvasToolBar.Tool.PLACE_STOCK)));
         commands.add(cmd("Add Flow", "Build",
                 () -> switchToolAndFocus(CanvasToolBar.Tool.PLACE_FLOW)));
-        commands.add(cmd("Add Auxiliary", "Build",
+        commands.add(cmd("Add Variable", "Build",
                 () -> switchToolAndFocus(CanvasToolBar.Tool.PLACE_AUX)));
         commands.add(cmd("Add Module", "Build",
                 () -> switchToolAndFocus(CanvasToolBar.Tool.PLACE_MODULE)));
@@ -1114,7 +1114,7 @@ public class ModelWindow {
         return switch (type) {
             case STOCK -> "Stock";
             case FLOW -> "Flow";
-            case AUX -> "Auxiliary";
+            case AUX -> "Variable";
             case MODULE -> "Module";
             case LOOKUP -> "Lookup Table";
             case CLD_VARIABLE -> "CLD Variable";

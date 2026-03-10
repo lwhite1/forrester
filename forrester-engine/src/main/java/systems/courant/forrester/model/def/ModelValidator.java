@@ -120,7 +120,7 @@ public final class ModelValidator {
         for (AuxDef aux : def.auxiliaries()) {
             if (aux.unit() == null || aux.unit().isBlank()) {
                 issues.add(new ValidationIssue(Severity.WARNING, aux.name(),
-                        "Auxiliary '" + aux.name() + "' has no unit specified."
+                        "Variable '" + aux.name() + "' has no unit specified."
                                 + " Select it and set the unit in the Properties panel."));
             }
         }

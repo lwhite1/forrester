@@ -227,7 +227,7 @@ public class ModelEditor {
         String name = "Aux " + nextAuxId++;
         auxiliaries.add(new AuxDef(name, "0", "units"));
         nameIndex.add(name);
-        fireElementAdded(name, "Auxiliary");
+        fireElementAdded(name, "Variable");
         return name;
     }
 

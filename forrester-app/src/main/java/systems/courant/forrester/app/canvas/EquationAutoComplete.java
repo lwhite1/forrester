@@ -329,7 +329,7 @@ public final class EquationAutoComplete {
             String kindLabel = switch (kind) {
                 case STOCK -> "Stock";
                 case FLOW -> "Flow";
-                case AUX -> "Auxiliary";
+                case AUX -> "Variable";
                 case LOOKUP -> "Lookup Table";
                 case MODULE -> "Module";
                 case FUNCTION -> "Function";

@@ -103,9 +103,9 @@ public final class DefinitionValidator {
             try {
                 ExprParser.parse(aux.equation());
             } catch (ParseException e) {
-                errors.add("Auxiliary '" + aux.name() + "' has invalid equation: "
+                errors.add("Variable '" + aux.name() + "' has invalid equation: "
                         + e.getMessage()
-                        + ". Double-click the auxiliary to edit its equation.");
+                        + ". Double-click the variable to edit its equation.");
             }
         }
 
@@ -229,7 +229,7 @@ public final class DefinitionValidator {
                     String resolved = ref.replace('_', ' ');
                     if (!knownNames.contains(ref) && !knownNames.contains(resolved)
                             && !BUILTIN_NAMES.contains(ref)) {
-                        errors.add("Auxiliary '" + aux.name()
+                        errors.add("Variable '" + aux.name()
                                 + "' references unknown element: '" + ref
                                 + "'. Check the spelling or add the missing element to the model.");
                     }

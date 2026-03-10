@@ -282,7 +282,7 @@ public class PropertiesPanel extends VBox {
             parts.add(flows + (flows == 1 ? " flow" : " flows"));
         }
         if (auxes > 0) {
-            parts.add(auxes + (auxes == 1 ? " auxiliary" : " auxiliaries"));
+            parts.add(auxes + (auxes == 1 ? " variable" : " variables"));
         }
         if (lookups > 0) {
             parts.add(lookups + (lookups == 1 ? " lookup table" : " lookup tables"));
@@ -572,7 +572,7 @@ public class PropertiesPanel extends VBox {
         return switch (type) {
             case STOCK -> "Stock";
             case FLOW -> "Flow";
-            case AUX -> "Auxiliary";
+            case AUX -> "Variable";
             case MODULE -> "Module";
             case LOOKUP -> "Lookup Table";
             case CLD_VARIABLE -> "CLD Variable";
