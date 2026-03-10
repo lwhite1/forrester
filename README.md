@@ -1,6 +1,6 @@
 # Forrester — System Dynamics Modeling Tool
 
-Forrester is an open-source System Dynamics simulation engine and visual modeling environment for Java. It provides two ways to build and run models:
+Forrester is an open-source [System Dynamics](userdocs/Key%20Reasons%20for%20Using%20System%20Dynamics.md) simulation engine and visual modeling environment for Java. It provides two ways to build and run models:
 
 - **Visual Editor** — a JavaFX canvas-based GUI for interactively building stock-and-flow diagrams and causal loop diagrams
 - **Programmable Engine** — a code-first Java API for defining, compiling, and running models programmatically
@@ -115,16 +115,15 @@ See [Programmable Engine](docs/Programmable%20Engine.md) for the full API refere
 
 ## Core Concepts
 
-System Dynamics models are built from these elements:
+System Dynamics models represent a system as a network of stocks, flows, and feedback loops. Stocks capture the state of the system — things like population, inventory, or debt. Flows represent the processes that change stocks over time — births, shipments, or interest payments. Variables and constants parameterize the relationships between them. These elements are connected into feedback loops — circular causal chains where effects feed back to influence their own causes — which drive the dynamic behavior of the system.
+
+### Stock-and-Flow Diagrams
 
 - **Stocks** — accumulations representing system state (e.g., population, inventory)
 - **Flows** — rates of change that add to or drain from stocks
-- **Variables** — calculated quantities derived from formulas
-- **Constants** — fixed exogenous parameter values
+- **Variables** — calculated quantities derived from formulas, including fixed constants that serve as model parameters
 - **Lookup Tables** — piecewise interpolation curves for nonlinear effects
 - **Subscripts / Arrays** — dimensions that expand elements into parallel instances (e.g., by region or cohort)
-
-These are connected into feedback loops that drive system behavior over time.
 
 ### Causal Loop Diagrams
 
@@ -139,44 +138,15 @@ CLDs and S&F elements share a single canvas and model definition.
 
 ## Architecture
 
-```
-systems.courant.forrester
-├── Simulation.java              # Core simulation engine (Euler integration)
-├── model/                       # Model elements (Stock, Flow, Variable, Constant, etc.)
-│   ├── expr/                    # Sealed Expr AST, parser, stringifier, dependency extractor
-│   ├── def/                     # Immutable definition records (ModelDefinition, StockDef, etc.)
-│   ├── compile/                 # Two-pass ModelCompiler: definition → runnable Model
-│   └── graph/                   # Dependency graph, auto-layout, CLD loop detection
-├── measure/                     # Dimensional analysis and unit system
-├── event/                       # Event-driven communication (SimulationStart/TimeStep/End)
-├── sweep/                       # Parameter sweep, Monte Carlo, optimization, CSV output
-├── io/                          # JSON serialization, Vensim import, XMILE import/export
-├── ui/                          # JavaFX chart visualization components
-└── app/                         # JavaFX visual editor (forrester-app module)
-    └── canvas/                  # Canvas rendering, interaction, editing, simulation
-```
-
 ### Modules
 
 | Module | Purpose |
 |---|---|
-| **forrester-engine** | Core simulation engine, model definitions, expressions, compilation, sweeps, I/O |
+| **forrester-engine** | Core simulation engine, model definitions, expression AST and parser, two-pass compiler, dependency graphs, dimensional analysis, parameter sweeps, Monte Carlo, optimization, JSON/Vensim/XMILE I/O |
 | **forrester-ui** | JavaFX chart visualization components |
 | **forrester-demos** | 23 runnable example programs with source code |
-| **forrester-app** | Visual editor application |
+| **forrester-app** | Visual editor application with canvas-based GUI, inline editing, simulation, and analysis |
 | **forrester-tools** | Model analysis and transformation utilities |
-
-### Key Dependencies
-
-| Dependency | Version | Purpose |
-|---|---|---|
-| OpenJFX | 25.0.1 | Visual editor and chart visualization |
-| JUnit 5 | 5.11.4 | Testing |
-| Google Guava | 33.4.0 | Event bus, collections |
-| Apache Commons Math | 3.6.1 | Mathematical functions, optimization |
-| Jackson | 2.17.0 | JSON serialization |
-| OpenCSV | 5.9 | CSV output |
-| SLF4J + Logback | 2.0.16 / 1.5.16 | Logging |
 
 ## Model Import & Export
 
@@ -215,6 +185,7 @@ Forrester can exchange models with other System Dynamics tools:
 
 ## Learning System Dynamics
 
+- [Why System Dynamics?](userdocs/Key%20Reasons%20for%20Using%20System%20Dynamics.md) — when and why to use this approach
 - [Thinking in Systems: A Primer](https://www.chelseagreen.com/product/thinking-in-systems/) by Donella Meadows
 - [MIT OCW: Introduction to System Dynamics](https://ocw.mit.edu/courses/15-871-introduction-to-system-dynamics-fall-2013/)
 - [MIT OCW: System Dynamics Self Study](https://ocw.mit.edu/courses/15-988-system-dynamics-self-study-fall-1998-spring-1999/)
@@ -223,4 +194,8 @@ Forrester can exchange models with other System Dynamics tools:
 
 ## License
 
-This project is licensed under the [GNU Affero General Public License v3.0](LICENSE).
+This project is licensed under the [GNU Affero General Public License v3.0](LICENSE). Demo models and imported third-party models carry separate Creative Commons licenses. See [LICENSING.md](LICENSING.md) for the full breakdown of how source code, original models, and third-party models are licensed.
+
+## Support
+
+See [Support](userdocs/Support.md) for how to get help, report bugs, and request features.
