@@ -547,9 +547,16 @@ public class ModelWindow {
             canvas.requestFocus();
         });
 
+        CheckMenuItem showDelayItem = new CheckMenuItem("Show Delay Indicators");
+        showDelayItem.setId("menuShowDelayIndicators");
+        showDelayItem.setOnAction(e -> {
+            canvas.setShowDelayBadges(showDelayItem.isSelected());
+            canvas.requestFocus();
+        });
+
         viewMenu.getItems().addAll(commandPaletteItem, new SeparatorMenuItem(),
                 zoomToFitItem, resetZoomItem, new SeparatorMenuItem(),
-                hideAuxItem, new SeparatorMenuItem(),
+                hideAuxItem, showDelayItem, new SeparatorMenuItem(),
                 validationIssuesItem, new SeparatorMenuItem(),
                 activityLogItem, popOutDashboardItem);
         viewMenu.setDisable(true);

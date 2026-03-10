@@ -99,6 +99,9 @@ public class ModelCanvas extends Canvas {
     // View mode: hide auxiliary variables
     private boolean hideAuxiliaries;
 
+    // View mode: show delay indicator badges
+    private boolean showDelayBadges;
+
     // Inline edit callbacks
     private final InlineEditController.Callbacks inlineCallbacks =
             new InlineEditController.Callbacks() {
@@ -386,6 +389,19 @@ public class ModelCanvas extends Canvas {
     public void setHideAuxiliaries(boolean hide) {
         if (this.hideAuxiliaries != hide) {
             this.hideAuxiliaries = hide;
+            redraw();
+        }
+    }
+
+    // --- Show delay badges view mode ---
+
+    public boolean isShowDelayBadges() {
+        return showDelayBadges;
+    }
+
+    public void setShowDelayBadges(boolean show) {
+        if (this.showDelayBadges != show) {
+            this.showDelayBadges = show;
             redraw();
         }
     }
@@ -846,7 +862,8 @@ public class ModelCanvas extends Canvas {
                         inputDispatcher.getHoveredElement(),
                         inputDispatcher.getHoveredConnection(),
                         selectedConnection,
-                        hideAuxiliaries));
+                        hideAuxiliaries,
+                        showDelayBadges));
         fireStatusChanged();
     }
 
