@@ -16,6 +16,14 @@ final class ChartUtils {
 
     static final java.util.List<String> SERIES_COLORS = java.util.List.of(SERIES_COLORS_ARRAY);
 
+    /** Muted colors for ghost run overlays, one per retained run (max 5). */
+    static final java.util.List<String> GHOST_COLORS = java.util.List.of(
+            "#4A90D9", "#2E7D32", "#E65100", "#7B1FA2", "#C62828"
+    );
+
+    /** Opacity applied to ghost run chart series. */
+    static final double GHOST_OPACITY = 0.30;
+
     private ChartUtils() {
     }
 

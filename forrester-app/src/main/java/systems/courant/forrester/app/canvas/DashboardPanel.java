@@ -19,6 +19,7 @@ import javafx.scene.layout.VBox;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Consumer;
 
 /**
@@ -52,9 +53,10 @@ public class DashboardPanel extends VBox {
     private Runnable rerunAction;
     private Consumer<String> onVariableClicked;
 
-    /** Previous simulation results for ghost overlay comparison. Most recent last. */
-    private final List<SimulationRunner.SimulationResult> runHistory = new ArrayList<>();
+    /** Previous simulation runs for ghost overlay comparison. Most recent last. */
+    private final List<GhostRun> runHistory = new ArrayList<>();
     private static final int MAX_HISTORY = 5;
+    private int runCounter;
 
     public DashboardPanel() {
         Label placeholderLabel = new Label("Run a simulation to see results.");
@@ -118,15 +120,26 @@ public class DashboardPanel extends VBox {
     }
 
     public void showSimulationResult(SimulationRunner.SimulationResult result) {
+        showSimulationResult(result, Map.of());
+    }
+
+    public void showSimulationResult(SimulationRunner.SimulationResult result,
+                                     Map<String, Double> parameters) {
         clearStale();
-        List<SimulationRunner.SimulationResult> ghosts = List.copyOf(runHistory);
+        List<GhostRun> ghosts = List.copyOf(runHistory);
         SimulationResultPane pane = new SimulationResultPane(result, ghosts, this::clearRunHistory);
         pane.setOnVariableClicked(onVariableClicked);
         simulationTab = ensureTab(simulationTab, "Simulation", pane);
         resultTabs.getSelectionModel().select(simulationTab);
 
-        // Add the current result to history for next run's ghost overlay
-        runHistory.add(result);
+        // Build ghost entry for next run's overlay
+        runCounter++;
+        Map<String, Double> previousParams = runHistory.isEmpty()
+                ? Map.of()
+                : runHistory.getLast().parameters();
+        String name = GhostRun.generateName(runCounter, parameters, previousParams);
+        int colorIndex = (runCounter - 1) % ChartUtils.GHOST_COLORS.size();
+        runHistory.add(new GhostRun(result, name, colorIndex, parameters));
         if (runHistory.size() > MAX_HISTORY) {
             runHistory.removeFirst();
         }
@@ -261,6 +274,7 @@ public class DashboardPanel extends VBox {
      */
     public void clear() {
         runHistory.clear();
+        runCounter = 0;
         stale = false;
         staleBanner.setVisible(false);
         staleBanner.setManaged(false);

@@ -24,9 +24,12 @@ import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
+import javafx.scene.control.TextField;
+import javafx.scene.control.Tooltip;
 import javafx.scene.image.WritableImage;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 
@@ -56,7 +59,6 @@ import javax.imageio.ImageIO;
  */
 public class SimulationResultPane extends BorderPane {
 
-    private static final double GHOST_OPACITY = 0.25;
     private static final String DASHED_STROKE = "-fx-stroke-dash-array: 8 4;";
 
     private LineChart<Number, Number> chart;
@@ -64,7 +66,7 @@ public class SimulationResultPane extends BorderPane {
     private Consumer<String> onVariableClicked;
 
     public SimulationResultPane(SimulationRunner.SimulationResult result,
-                                List<SimulationRunner.SimulationResult> ghostRuns,
+                                List<GhostRun> ghostRuns,
                                 Runnable clearHistory) {
         this.simulationResult = result;
         TabPane tabPane = new TabPane();
@@ -112,7 +114,7 @@ public class SimulationResultPane extends BorderPane {
     }
 
     private BorderPane buildChartPane(SimulationRunner.SimulationResult result,
-                                      List<SimulationRunner.SimulationResult> ghostRuns,
+                                      List<GhostRun> ghostRuns,
                                       Runnable clearHistory) {
         List<String> columns = result.columnNames();
         List<double[]> rows = result.rows();
@@ -129,38 +131,48 @@ public class SimulationResultPane extends BorderPane {
         chart.setAnimated(false);
         chart.setLegendVisible(false);
 
-        // --- Ghost series from previous runs ---
-        List<XYChart.Series<Number, Number>> ghostSeries = new ArrayList<>();
+        // --- Ghost series from previous runs (one group per ghost) ---
+        List<List<XYChart.Series<Number, Number>>> ghostSeriesGroups = new ArrayList<>();
+        List<XYChart.Series<Number, Number>> allGhostSeries = new ArrayList<>();
         for (int g = 0; g < ghostRuns.size(); g++) {
-            SimulationRunner.SimulationResult ghost = ghostRuns.get(g);
-            List<String> ghostColumns = ghost.columnNames();
-            List<double[]> ghostRows = ghost.rows();
+            GhostRun ghost = ghostRuns.get(g);
+            SimulationRunner.SimulationResult ghostResult = ghost.result();
+            List<String> ghostColumns = ghostResult.columnNames();
+            List<double[]> ghostRows = ghostResult.rows();
+            String ghostColor = ChartUtils.GHOST_COLORS.get(
+                    ghost.colorIndex() % ChartUtils.GHOST_COLORS.size());
+            String tooltipText = ghost.tooltipText();
+
+            List<XYChart.Series<Number, Number>> groupSeries = new ArrayList<>();
             for (int c = 1; c < ghostColumns.size(); c++) {
                 XYChart.Series<Number, Number> series = new XYChart.Series<>();
-                series.setName(ghostColumns.get(c) + " (run " + (g + 1) + ")");
+                series.setName(ghostColumns.get(c) + " (" + ghost.name() + ")");
                 for (double[] row : ghostRows) {
                     if (c < row.length) {
                         series.getData().add(new XYChart.Data<>(row[0], row[c]));
                     }
                 }
-                ghostSeries.add(series);
+                // Style with ghost's assigned color
+                String style = "-fx-stroke: " + ghostColor + "; -fx-opacity: "
+                        + ChartUtils.GHOST_OPACITY + ";";
+                series.nodeProperty().addListener((obs, oldNode, newNode) -> {
+                    if (newNode != null) {
+                        newNode.setStyle(style);
+                        Tooltip.install(newNode, new Tooltip(tooltipText));
+                    }
+                });
+                if (series.getNode() != null) {
+                    series.getNode().setStyle(style);
+                    Tooltip.install(series.getNode(), new Tooltip(tooltipText));
+                }
+                groupSeries.add(series);
             }
+            ghostSeriesGroups.add(groupSeries);
+            allGhostSeries.addAll(groupSeries);
         }
 
         // Add ghost series first so they render behind current
-        chart.getData().addAll(ghostSeries);
-
-        // Style ghost series with low opacity
-        for (XYChart.Series<Number, Number> series : ghostSeries) {
-            series.nodeProperty().addListener((obs, oldNode, newNode) -> {
-                if (newNode != null) {
-                    newNode.setStyle("-fx-stroke: #888888; -fx-opacity: " + GHOST_OPACITY + ";");
-                }
-            });
-            if (series.getNode() != null) {
-                series.getNode().setStyle("-fx-stroke: #888888; -fx-opacity: " + GHOST_OPACITY + ";");
-            }
-        }
+        chart.getData().addAll(allGhostSeries);
 
         // --- Current run series ---
         List<XYChart.Series<Number, Number>> currentSeries = new ArrayList<>();
@@ -244,35 +256,88 @@ public class SimulationResultPane extends BorderPane {
         if (!ghostRuns.isEmpty()) {
             sidebar.getChildren().add(new Separator());
 
-            Label ghostLabel = new Label(ghostRuns.size() == 1
-                    ? "1 previous run"
-                    : ghostRuns.size() + " previous runs");
-            ghostLabel.setStyle("-fx-font-size: 11px; -fx-text-fill: #888;");
-            sidebar.getChildren().add(ghostLabel);
+            Label ghostHeader = new Label("Previous Runs");
+            ghostHeader.setStyle("-fx-font-size: 11px; -fx-font-weight: bold; -fx-text-fill: #555;");
+            sidebar.getChildren().add(ghostHeader);
 
-            CheckBox showGhosts = new CheckBox("Show previous");
-            showGhosts.setSelected(true);
-            showGhosts.setStyle("-fx-font-size: 11px; -fx-text-fill: #888;");
-            showGhosts.selectedProperty().addListener((obs, wasSelected, isSelected) -> {
-                for (XYChart.Series<Number, Number> series : ghostSeries) {
-                    if (series.getNode() != null) {
-                        series.getNode().setVisible(isSelected);
+            // Per-ghost entries: color swatch, editable name, visibility toggle
+            for (int g = 0; g < ghostRuns.size(); g++) {
+                GhostRun ghost = ghostRuns.get(g);
+                List<XYChart.Series<Number, Number>> groupSeries = ghostSeriesGroups.get(g);
+                String ghostColor = ChartUtils.GHOST_COLORS.get(
+                        ghost.colorIndex() % ChartUtils.GHOST_COLORS.size());
+
+                // Color swatch
+                Region swatch = new Region();
+                swatch.setMinSize(12, 12);
+                swatch.setMaxSize(12, 12);
+                swatch.setStyle("-fx-background-color: " + ghostColor
+                        + "; -fx-background-radius: 2;");
+
+                // Editable name label (click to edit)
+                Label nameLabel = new Label(ghost.name());
+                nameLabel.setStyle("-fx-font-size: 11px; -fx-text-fill: " + ghostColor
+                        + "; -fx-cursor: hand;");
+                nameLabel.setMaxWidth(120);
+                nameLabel.setTooltip(new Tooltip(ghost.tooltipText()));
+
+                // Click to edit: replace label with text field
+                nameLabel.setOnMouseClicked(e -> {
+                    if (e.getClickCount() == 2) {
+                        TextField editor = new TextField(nameLabel.getText());
+                        editor.setStyle("-fx-font-size: 11px;");
+                        editor.setPrefWidth(120);
+                        HBox parentRow = (HBox) nameLabel.getParent();
+                        int labelIndex = parentRow.getChildren().indexOf(nameLabel);
+                        parentRow.getChildren().set(labelIndex, editor);
+                        editor.requestFocus();
+                        editor.selectAll();
+
+                        Runnable commit = () -> {
+                            String newName = editor.getText().trim();
+                            if (!newName.isEmpty()) {
+                                nameLabel.setText(newName);
+                            }
+                            parentRow.getChildren().set(labelIndex, nameLabel);
+                        };
+                        editor.setOnAction(ev -> commit.run());
+                        editor.focusedProperty().addListener((obs, wasFocused, isFocused) -> {
+                            if (!isFocused) {
+                                commit.run();
+                            }
+                        });
                     }
-                    series.getData().forEach(d -> {
-                        if (d.getNode() != null) {
-                            d.getNode().setVisible(isSelected);
+                });
+
+                // Visibility toggle
+                CheckBox ghostCb = new CheckBox();
+                ghostCb.setSelected(true);
+                ghostCb.selectedProperty().addListener((obs, wasSelected, isSelected) -> {
+                    for (XYChart.Series<Number, Number> series : groupSeries) {
+                        if (series.getNode() != null) {
+                            series.getNode().setVisible(isSelected);
                         }
-                    });
-                }
-            });
-            sidebar.getChildren().add(showGhosts);
+                        series.getData().forEach(d -> {
+                            if (d.getNode() != null) {
+                                d.getNode().setVisible(isSelected);
+                            }
+                        });
+                    }
+                });
+
+                HBox ghostRow = new HBox(4, ghostCb, swatch, nameLabel);
+                ghostRow.setAlignment(Pos.CENTER_LEFT);
+                sidebar.getChildren().add(ghostRow);
+            }
 
             Button clearButton = new Button("Clear History");
             clearButton.setStyle("-fx-font-size: 11px;");
             clearButton.setOnAction(e -> {
                 clearHistory.run();
-                chart.getData().removeAll(ghostSeries);
-                ghostSeries.clear();
+                chart.getData().removeAll(allGhostSeries);
+                allGhostSeries.clear();
+                ghostSeriesGroups.clear();
+                // Remove everything after the separator
                 int sepIndex = -1;
                 for (int i = 0; i < sidebar.getChildren().size(); i++) {
                     if (sidebar.getChildren().get(i) instanceof Separator) {
@@ -289,7 +354,7 @@ public class SimulationResultPane extends BorderPane {
 
         ScrollPane sidebarScroll = new ScrollPane(sidebar);
         sidebarScroll.setFitToWidth(true);
-        sidebarScroll.setPrefWidth(180);
+        sidebarScroll.setPrefWidth(200);
 
         ContextMenu contextMenu = new ContextMenu();
         MenuItem saveItem = new MenuItem("Save as PNG...");
