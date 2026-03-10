@@ -50,6 +50,7 @@ public class DashboardPanel extends VBox {
     private Tab multiSweepTab;
     private Tab sensitivityTab;
     private Tab dominanceTab;
+    private Tab phasePlotTab;
     private boolean stale;
     private Runnable rerunAction;
     private Consumer<String> onVariableClicked;
@@ -139,6 +140,14 @@ public class DashboardPanel extends VBox {
         pane.setOnVariableClicked(onVariableClicked);
         simulationTab = ensureTab(simulationTab, "Simulation", pane);
         resultTabs.getSelectionModel().select(simulationTab);
+
+        // Phase plot tab (available when 2+ variables exist)
+        List<String> varNames = PhasePlotPane.getVariableNames(result);
+        if (varNames.size() >= 2) {
+            PhasePlotPane phasePlot = new PhasePlotPane(result, ghosts);
+            phasePlotTab = ensureTab(phasePlotTab, "Phase Plot", phasePlot);
+            resultTabs.getSelectionModel().select(simulationTab);
+        }
 
         // Build ghost entry for next run's overlay
         runCounter++;
@@ -257,6 +266,8 @@ public class DashboardPanel extends VBox {
                 multiSweepTab = null;
             } else if (tab == sensitivityTab) {
                 sensitivityTab = null;
+            } else if (tab == phasePlotTab) {
+                phasePlotTab = null;
             }
             if (resultTabs.getTabs().isEmpty()) {
                 hideTabs();
@@ -294,6 +305,7 @@ public class DashboardPanel extends VBox {
         optimizationTab = null;
         multiSweepTab = null;
         sensitivityTab = null;
+        phasePlotTab = null;
         hideTabs();
     }
 
