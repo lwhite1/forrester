@@ -9,6 +9,7 @@ import systems.courant.forrester.model.def.LookupTableDef;
 import systems.courant.forrester.model.def.ModelDefinition;
 import systems.courant.forrester.model.def.ModelDefinitionBuilder;
 import systems.courant.forrester.model.def.ModuleInterface;
+import systems.courant.forrester.model.def.ReferenceDataset;
 import systems.courant.forrester.model.def.PortDef;
 import systems.courant.forrester.model.def.ViewDef;
 import org.junit.jupiter.api.DisplayName;
@@ -316,6 +317,45 @@ class ModelDefinitionSerializerTest {
         ModelDefinition def = serializer.fromJson(json);
         assertThat(def.causalLinks()).hasSize(1);
         assertThat(def.causalLinks().get(0).polarity()).isEqualTo(CausalLinkDef.Polarity.UNKNOWN);
+    }
+
+    @Test
+    void shouldRoundTripReferenceDatasets() {
+        ReferenceDataset refData = new ReferenceDataset(
+                "Historical",
+                new double[]{0, 1, 2, 3},
+                Map.of("Population", new double[]{100, 110, 115, 118},
+                        "Revenue", new double[]{50, 55, 60, 63})
+        );
+        ModelDefinition def = new ModelDefinitionBuilder()
+                .name("With Reference")
+                .stock("Population", 100, "Person")
+                .referenceDataset(refData)
+                .build();
+
+        String json = serializer.toJson(def);
+        assertThat(json).contains("referenceDatasets");
+        assertThat(json).contains("Historical");
+
+        ModelDefinition roundTripped = serializer.fromJson(json);
+        assertThat(roundTripped.referenceDatasets()).hasSize(1);
+        ReferenceDataset rt = roundTripped.referenceDatasets().getFirst();
+        assertThat(rt.name()).isEqualTo("Historical");
+        assertThat(rt.timeValues()).containsExactly(0, 1, 2, 3);
+        assertThat(rt.columns().get("Population")).containsExactly(100, 110, 115, 118);
+        assertThat(rt.columns().get("Revenue")).containsExactly(50, 55, 60, 63);
+    }
+
+    @Test
+    void shouldDeserializeModelWithoutReferenceDatasets() {
+        String json = """
+                {
+                  "name": "Old Model",
+                  "stocks": [{ "name": "S", "initialValue": 100, "unit": "x" }]
+                }
+                """;
+        ModelDefinition def = serializer.fromJson(json);
+        assertThat(def.referenceDatasets()).isEmpty();
     }
 
     private ModelDefinition buildSIR() {
