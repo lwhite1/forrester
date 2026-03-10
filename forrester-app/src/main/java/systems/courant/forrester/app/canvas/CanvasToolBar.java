@@ -134,7 +134,7 @@ public class CanvasToolBar extends ToolBar {
         });
 
         getItems().addAll(selectButton, new Separator(),
-                stockButton, flowButton, auxButton, moduleButton, lookupButton,
+                stockButton, flowButton, auxButton, lookupButton, moduleButton,
                 new Separator(), cldVarButton, causalLinkButton,
                 new Separator(), loopsButton, new Separator(), validateButton,
                 spacer, searchHint);
