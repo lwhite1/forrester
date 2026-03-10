@@ -158,15 +158,20 @@ public class SimulationResultPane extends BorderPane {
 
         // --- Current run series ---
         List<XYChart.Series<Number, Number>> currentSeries = new ArrayList<>();
+        List<String> behaviorModes = new ArrayList<>();
         for (int c = 1; c < columns.size(); c++) {
             XYChart.Series<Number, Number> series = new XYChart.Series<>();
             series.setName(columns.get(c));
-            for (double[] row : rows) {
+            double[] colValues = new double[rows.size()];
+            for (int r = 0; r < rows.size(); r++) {
+                double[] row = rows.get(r);
                 if (c < row.length) {
                     series.getData().add(new XYChart.Data<>(row[0], row[c]));
+                    colValues[r] = row[c];
                 }
             }
             currentSeries.add(series);
+            behaviorModes.add(BehaviorModeClassifier.classify(colValues));
         }
 
         chart.getData().addAll(currentSeries);
@@ -221,7 +226,16 @@ public class SimulationResultPane extends BorderPane {
 
             HBox row = new HBox(4, cb, nameLabel);
             row.setAlignment(Pos.CENTER_LEFT);
-            sidebar.getChildren().add(row);
+
+            String mode = behaviorModes.get(i);
+            if (!mode.isEmpty()) {
+                Label modeLabel = new Label(mode);
+                modeLabel.setStyle("-fx-font-size: 10px; -fx-text-fill: #888;");
+                modeLabel.setPadding(new Insets(0, 0, 0, 22));
+                sidebar.getChildren().addAll(row, modeLabel);
+            } else {
+                sidebar.getChildren().add(row);
+            }
         }
 
         // Ghost controls (only if there are ghost runs)

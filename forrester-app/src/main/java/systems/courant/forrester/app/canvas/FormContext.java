@@ -1,10 +1,19 @@
 package systems.courant.forrester.app.canvas;
 
+import systems.courant.forrester.measure.CompositeUnit;
+import systems.courant.forrester.measure.DimensionalAnalyzer;
+import systems.courant.forrester.measure.UnitRegistry;
+import systems.courant.forrester.model.expr.Expr;
+import systems.courant.forrester.model.expr.ExprParser;
+import systems.courant.forrester.model.expr.ParseException;
+
 import javafx.animation.PauseTransition;
 import javafx.geometry.Pos;
+import javafx.geometry.Side;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
+import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
@@ -76,7 +85,20 @@ class FormContext {
         Tooltip.install(helpBtn, new Tooltip("Open function reference"));
         helpBtn.setOnAction(e -> onOpenExpressionHelp.run());
 
-        HBox box = new HBox(4, equationField, helpBtn);
+        Button templateBtn = new Button("\u2261");
+        templateBtn.setId("equationTemplateButton");
+        templateBtn.setMinWidth(24);
+        templateBtn.setMaxWidth(24);
+        templateBtn.setMinHeight(24);
+        templateBtn.setMaxHeight(24);
+        templateBtn.setFocusTraversable(false);
+        templateBtn.setStyle("-fx-font-size: 11; -fx-padding: 0;");
+        Tooltip.install(templateBtn, new Tooltip("Insert equation template"));
+        ContextMenu templateMenu = EquationTemplates.createMenu(equationField);
+        templateBtn.setOnAction(e ->
+                templateMenu.show(templateBtn, Side.BOTTOM, 0, 0));
+
+        HBox box = new HBox(4, equationField, templateBtn, helpBtn);
         box.setAlignment(Pos.CENTER_LEFT);
         HBox.setHgrow(equationField, Priority.ALWAYS);
         GridPane.setHgrow(box, Priority.ALWAYS);
@@ -208,9 +230,9 @@ class FormContext {
     }
 
     /**
-     * Attaches real-time equation validation to a text field. Validates on blur
-     * and after a short debounce while typing. Shows a red border and error label
-     * below the equation row when errors are found.
+     * Attaches real-time equation validation and dimensional analysis to a text field.
+     * Shows a red border and error label for syntax/reference errors, and an inferred
+     * unit label for dimensional analysis feedback.
      *
      * @param field   the equation text field
      * @param row     the grid row where the equation field sits
@@ -226,8 +248,18 @@ class FormContext {
         GridPane.setHgrow(errorLabel, Priority.ALWAYS);
         grid.add(errorLabel, 1, row);
 
+        Label dimensionLabel = new Label();
+        dimensionLabel.setStyle(Styles.DIMENSION_LABEL);
+        dimensionLabel.setWrapText(true);
+        dimensionLabel.setMaxWidth(Double.MAX_VALUE);
+        dimensionLabel.setVisible(false);
+        dimensionLabel.setManaged(false);
+        GridPane.setHgrow(dimensionLabel, Priority.ALWAYS);
+        // Dimension label goes in same row — we'll toggle visibility with error label
+        grid.add(dimensionLabel, 1, row);
+
         PauseTransition debounce = new PauseTransition(Duration.millis(400));
-        debounce.setOnFinished(e -> validateEquation(field, errorLabel));
+        debounce.setOnFinished(e -> validateEquation(field, errorLabel, dimensionLabel));
 
         field.textProperty().addListener((obs, oldVal, newVal) -> {
             if (!updatingFields) {
@@ -238,38 +270,128 @@ class FormContext {
         field.focusedProperty().addListener((obs, wasFocused, isFocused) -> {
             if (!isFocused && !updatingFields) {
                 debounce.stop();
-                validateEquation(field, errorLabel);
+                validateEquation(field, errorLabel, dimensionLabel);
             }
         });
 
         // Initial validation
-        validateEquation(field, errorLabel);
+        validateEquation(field, errorLabel, dimensionLabel);
 
         return errorLabel;
     }
 
-    private void validateEquation(TextField field, Label errorLabel) {
+    private void validateEquation(TextField field, Label errorLabel, Label dimensionLabel) {
         String text = field.getText().trim();
         if (text.isEmpty()) {
             clearEquationError(field, errorLabel);
+            hideDimensionLabel(dimensionLabel);
             return;
         }
         EquationValidator.Result result =
                 EquationValidator.validate(text, editor, elementName);
         if (result.valid()) {
             clearEquationError(field, errorLabel);
+            runDimensionalAnalysis(text, dimensionLabel);
         } else {
             field.setStyle(Styles.EQUATION_ERROR_BORDER);
             errorLabel.setText(result.message());
             errorLabel.setVisible(true);
             errorLabel.setManaged(true);
+            hideDimensionLabel(dimensionLabel);
         }
+    }
+
+    private void runDimensionalAnalysis(String equationText, Label dimensionLabel) {
+        try {
+            Expr expr = ExprParser.parse(equationText);
+            UnitRegistry registry = new UnitRegistry();
+            EditorUnitContext unitContext = new EditorUnitContext(editor, registry);
+            DimensionalAnalyzer analyzer = new DimensionalAnalyzer(unitContext);
+            DimensionalAnalyzer.AnalysisResult analysis = analyzer.analyze(expr);
+
+            if (analysis.inferredUnit() == null) {
+                hideDimensionLabel(dimensionLabel);
+                return;
+            }
+
+            // Build display text
+            String inferredDisplay = analysis.inferredUnit().displayString();
+            CompositeUnit expected = getExpectedUnit(registry);
+
+            if (!analysis.isConsistent()) {
+                // Show first warning
+                String warning = analysis.warnings().getFirst().message();
+                dimensionLabel.setText("Warning: " + warning);
+                dimensionLabel.setStyle(Styles.DIMENSION_MISMATCH);
+            } else if (expected != null && !expected.isCompatibleWith(analysis.inferredUnit())) {
+                dimensionLabel.setText("Equation yields " + inferredDisplay
+                        + ", expected " + expected.displayString());
+                dimensionLabel.setStyle(Styles.DIMENSION_MISMATCH);
+            } else {
+                dimensionLabel.setText("= " + inferredDisplay);
+                dimensionLabel.setStyle(expected != null ? Styles.DIMENSION_MATCH
+                        : Styles.DIMENSION_LABEL);
+            }
+            dimensionLabel.setVisible(true);
+            dimensionLabel.setManaged(true);
+        } catch (ParseException e) {
+            hideDimensionLabel(dimensionLabel);
+        }
+    }
+
+    /**
+     * Returns the expected composite unit for the current element, or null if unknown.
+     */
+    private CompositeUnit getExpectedUnit(UnitRegistry registry) {
+        // For flows: expected is material / time
+        var flowOpt = editor.getFlowByName(elementName);
+        if (flowOpt.isPresent()) {
+            var flow = flowOpt.get();
+            systems.courant.forrester.measure.Unit materialUnit = null;
+            if (flow.materialUnit() != null && !flow.materialUnit().isBlank()) {
+                materialUnit = registry.resolve(flow.materialUnit());
+            } else if (flow.sink() != null) {
+                var sink = editor.getStockByName(flow.sink());
+                if (sink.isPresent() && sink.get().unit() != null
+                        && !sink.get().unit().isBlank()) {
+                    materialUnit = registry.resolve(sink.get().unit());
+                }
+            } else if (flow.source() != null) {
+                var source = editor.getStockByName(flow.source());
+                if (source.isPresent() && source.get().unit() != null
+                        && !source.get().unit().isBlank()) {
+                    materialUnit = registry.resolve(source.get().unit());
+                }
+            }
+            try {
+                var timeUnit = registry.resolveTimeUnit(flow.timeUnit());
+                return CompositeUnit.ofRate(materialUnit, timeUnit);
+            } catch (IllegalArgumentException e) {
+                return null;
+            }
+        }
+
+        // For auxiliaries: expected is the declared unit
+        var auxOpt = editor.getAuxByName(elementName);
+        if (auxOpt.isPresent()) {
+            String unitName = auxOpt.get().unit();
+            if (unitName != null && !unitName.isBlank()) {
+                return CompositeUnit.of(registry.resolve(unitName));
+            }
+        }
+
+        return null;
     }
 
     private void clearEquationError(TextField field, Label errorLabel) {
         field.setStyle("");
         errorLabel.setVisible(false);
         errorLabel.setManaged(false);
+    }
+
+    private void hideDimensionLabel(Label dimensionLabel) {
+        dimensionLabel.setVisible(false);
+        dimensionLabel.setManaged(false);
     }
 
     /**
