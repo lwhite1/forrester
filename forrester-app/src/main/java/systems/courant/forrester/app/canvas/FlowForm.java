@@ -21,7 +21,7 @@ class FlowForm implements ElementForm {
     private final FormContext ctx;
 
     private TextField nameField;
-    private TextField equationField;
+    private EquationField equationField;
     private ComboBox<String> materialUnitBox;
     private ComboBox<String> timeUnitBox;
     private Label sourceLabel;
@@ -56,8 +56,8 @@ class FlowForm implements ElementForm {
         ctx.addFieldRow(row++, "Description", commentArea,
                 "Documentation for this element");
 
-        equationField = ctx.createTextField(flow.equation());
-        ctx.addCommitHandlers(equationField, this::commitEquation);
+        equationField = ctx.createEquationField(flow.equation());
+        ctx.addEquationCommitHandlers(equationField, this::commitEquation);
         EquationAutoComplete.attach(equationField, ctx.editor, ctx.elementName);
         ctx.addFieldRow(row++, "Equation", ctx.wrapWithHelpButton(equationField),
                 "The rate equation determining how fast material flows.\n"
@@ -116,7 +116,7 @@ class FlowForm implements ElementForm {
         ctx.canvas.applyMutation(() -> ctx.editor.setFlowComment(ctx.elementName, comment));
     }
 
-    private void commitEquation(TextField field) {
+    private void commitEquation(EquationField field) {
         String equation = field.getText().trim();
         if (equation.isEmpty()) {
             ctx.editor.getFlowByName(ctx.elementName)

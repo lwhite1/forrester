@@ -54,6 +54,17 @@ class FormContext {
         return field;
     }
 
+    /**
+     * Creates a multi-line equation editor with syntax highlighting.
+     */
+    EquationField createEquationField(String text) {
+        CodeAreaEquationField field = new CodeAreaEquationField(text);
+        Node node = field.node();
+        node.setStyle(node.getStyle() + "; -fx-max-width: infinity;");
+        GridPane.setHgrow(node, Priority.ALWAYS);
+        return field;
+    }
+
     TextField createNameField() {
         TextField nameField = createTextField(elementName);
         nameField.setId("nameField");
@@ -67,12 +78,12 @@ class FormContext {
     }
 
     /**
-     * Wraps an equation TextField in an HBox with a "?" help button that opens
-     * the Expression Language dialog.
+     * Wraps an equation field in an HBox with a "?" help button that opens
+     * the Expression Language dialog and a template button.
      */
-    Node wrapWithHelpButton(TextField equationField) {
+    Node wrapWithHelpButton(EquationField equationField) {
         if (onOpenExpressionHelp == null) {
-            return equationField;
+            return equationField.node();
         }
         Button helpBtn = new Button("?");
         helpBtn.setId("equationHelpButton");
@@ -98,9 +109,10 @@ class FormContext {
         templateBtn.setOnAction(e ->
                 templateMenu.show(templateBtn, Side.BOTTOM, 0, 0));
 
-        HBox box = new HBox(4, equationField, templateBtn, helpBtn);
+        Node fieldNode = equationField.node();
+        HBox box = new HBox(4, fieldNode, templateBtn, helpBtn);
         box.setAlignment(Pos.CENTER_LEFT);
-        HBox.setHgrow(equationField, Priority.ALWAYS);
+        HBox.setHgrow(fieldNode, Priority.ALWAYS);
         GridPane.setHgrow(box, Priority.ALWAYS);
         return box;
     }
@@ -161,6 +173,18 @@ class FormContext {
     }
 
     void addCommitHandlers(TextField field, Consumer<TextField> handler) {
+        field.setOnAction(e -> handler.accept(field));
+        field.focusedProperty().addListener((obs, wasFocused, isFocused) -> {
+            if (!isFocused && !updatingFields) {
+                handler.accept(field);
+            }
+        });
+    }
+
+    /**
+     * Adds commit handlers to an {@link EquationField}. Enter commits; focus loss commits.
+     */
+    void addEquationCommitHandlers(EquationField field, Consumer<EquationField> handler) {
         field.setOnAction(e -> handler.accept(field));
         field.focusedProperty().addListener((obs, wasFocused, isFocused) -> {
             if (!isFocused && !updatingFields) {
@@ -230,15 +254,15 @@ class FormContext {
     }
 
     /**
-     * Attaches real-time equation validation and dimensional analysis to a text field.
+     * Attaches real-time equation validation and dimensional analysis to an equation field.
      * Shows a red border and error label for syntax/reference errors, and an inferred
      * unit label for dimensional analysis feedback.
      *
-     * @param field   the equation text field
+     * @param field   the equation field
      * @param row     the grid row where the equation field sits
      * @return the error label (for cleanup if needed)
      */
-    Label attachEquationValidation(TextField field, int row) {
+    Label attachEquationValidation(EquationField field, int row) {
         Label errorLabel = new Label();
         errorLabel.setStyle(Styles.EQUATION_ERROR_LABEL);
         errorLabel.setWrapText(true);
@@ -261,7 +285,7 @@ class FormContext {
         PauseTransition debounce = new PauseTransition(Duration.millis(400));
         debounce.setOnFinished(e -> validateEquation(field, errorLabel, dimensionLabel));
 
-        field.textProperty().addListener((obs, oldVal, newVal) -> {
+        field.textObservable().addListener((obs, oldVal, newVal) -> {
             if (!updatingFields) {
                 debounce.playFromStart();
             }
@@ -280,7 +304,7 @@ class FormContext {
         return errorLabel;
     }
 
-    private void validateEquation(TextField field, Label errorLabel, Label dimensionLabel) {
+    private void validateEquation(EquationField field, Label errorLabel, Label dimensionLabel) {
         String text = field.getText().trim();
         if (text.isEmpty()) {
             clearEquationError(field, errorLabel);
@@ -293,7 +317,7 @@ class FormContext {
             clearEquationError(field, errorLabel);
             runDimensionalAnalysis(text, dimensionLabel);
         } else {
-            field.setStyle(Styles.EQUATION_ERROR_BORDER);
+            field.setFieldStyle(Styles.EQUATION_ERROR_BORDER);
             errorLabel.setText(result.message());
             errorLabel.setVisible(true);
             errorLabel.setManaged(true);
@@ -383,8 +407,8 @@ class FormContext {
         return null;
     }
 
-    private void clearEquationError(TextField field, Label errorLabel) {
-        field.setStyle("");
+    private void clearEquationError(EquationField field, Label errorLabel) {
+        field.setFieldStyle("");
         errorLabel.setVisible(false);
         errorLabel.setManaged(false);
     }

@@ -38,6 +38,7 @@
         <spotbugs-maven.version>4.9.8.2</spotbugs-maven.version>
         <jacoco.version>0.8.14</jacoco.version>
         <lz4.version>1.8.0</lz4.version>
+        <richtextfx.version>0.11.7</richtextfx.version>
     </properties>
 
     <dependencyManagement>
@@ -102,6 +103,13 @@
                 <groupId>com.fasterxml.jackson.core</groupId>
                 <artifactId>jackson-databind</artifactId>
                 <version>${jackson.version}</version>
+            </dependency>
+
+            <!-- Rich text editing -->
+            <dependency>
+                <groupId>org.fxmisc.richtext</groupId>
+                <artifactId>richtextfx</artifactId>
+                <version>${richtextfx.version}</version>
             </dependency>
 
             <!-- Compression -->

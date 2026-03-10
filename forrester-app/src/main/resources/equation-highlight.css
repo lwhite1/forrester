@@ -1,0 +1,23 @@
+/* Syntax highlighting styles for equation CodeArea (RichTextFX) */
+
+.keyword {
+    -fx-fill: #8250DF;
+    -fx-font-weight: bold;
+}
+
+.number {
+    -fx-fill: #0A3069;
+}
+
+.operator {
+    -fx-fill: #CF222E;
+}
+
+.paren {
+    -fx-fill: #953800;
+    -fx-font-weight: bold;
+}
+
+.comma {
+    -fx-fill: #57606A;
+}

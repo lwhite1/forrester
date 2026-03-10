@@ -8,6 +8,7 @@ import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Bounds;
 import javafx.geometry.Insets;
+import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
@@ -32,11 +33,11 @@ import java.util.Optional;
 import java.util.Set;
 
 /**
- * Attaches autocomplete behaviour to equation TextFields.
+ * Attaches autocomplete behaviour to equation fields.
  * Suggests element names (with type badges) and built-in function names
  * (with signatures and descriptions) as the user types.
  *
- * <p>Usage: call {@link #attach} after creating the TextField and
+ * <p>Usage: call {@link #attach} after creating the field and
  * {@link #detach} before discarding it.</p>
  */
 public final class EquationAutoComplete {
@@ -72,28 +73,27 @@ public final class EquationAutoComplete {
     // ── Public API ──────────────────────────────────────────────────────
 
     /**
-     * Attaches autocomplete to the given TextField.
+     * Attaches autocomplete to the given {@link EquationField}.
      *
-     * @param field       the equation TextField
+     * @param field       the equation field
      * @param editor      the model editor providing element names
      * @param excludeName the name of the element being edited (excluded from suggestions)
      */
-    static void attach(TextField field, ModelEditor editor, String excludeName) {
+    static void attach(EquationField field, ModelEditor editor, String excludeName) {
         detach(field);
+        Node node = field.node();
         State state = new State(field, editor, excludeName);
-        field.getProperties().put(PROP_STATE, state);
-        field.addEventFilter(KeyEvent.KEY_PRESSED, state.keyFilter);
-        field.textProperty().addListener(state.textListener);
-        field.caretPositionProperty().addListener(state.caretListener);
+        node.getProperties().put(PROP_STATE, state);
+        node.addEventFilter(KeyEvent.KEY_PRESSED, state.keyFilter);
+        field.textObservable().addListener(state.textListener);
+        field.caretPositionObservable().addListener(state.caretListener);
         field.focusedProperty().addListener(state.focusListener);
 
-        // Wrap the existing onAction handler. When Enter fires ActionEvent, check if
+        // Wrap the existing onAction handler. When Enter fires, check if
         // the popup is showing with a selected item — if so, insert the suggestion
-        // instead of committing the field. This is more reliable than intercepting
-        // KEY_PRESSED in an event filter, because ActionEvent always fires after
-        // TextField processes Enter internally.
+        // instead of committing the field.
         EventHandler<ActionEvent> originalAction = field.getOnAction();
-        field.getProperties().put(PROP_ORIGINAL_ACTION, originalAction);
+        node.getProperties().put(PROP_ORIGINAL_ACTION, originalAction);
         field.setOnAction(e -> {
             boolean popupShowing = state.popup != null && state.popup.isShowing();
             AutoCompleteSuggestion selected = (state.listView != null)
@@ -111,23 +111,24 @@ public final class EquationAutoComplete {
     }
 
     /**
-     * Detaches autocomplete from the given TextField, cleaning up listeners and popup.
+     * Detaches autocomplete from the given {@link EquationField}, cleaning up listeners and popup.
      */
-    static void detach(TextField field) {
+    static void detach(EquationField field) {
         if (field == null) {
             return;
         }
-        Object obj = field.getProperties().remove(PROP_STATE);
+        Node node = field.node();
+        Object obj = node.getProperties().remove(PROP_STATE);
         if (obj instanceof State state) {
             state.hidePopup();
             state.hideHint();
-            field.removeEventFilter(KeyEvent.KEY_PRESSED, state.keyFilter);
-            field.textProperty().removeListener(state.textListener);
-            field.caretPositionProperty().removeListener(state.caretListener);
+            node.removeEventFilter(KeyEvent.KEY_PRESSED, state.keyFilter);
+            field.textObservable().removeListener(state.textListener);
+            field.caretPositionObservable().removeListener(state.caretListener);
             field.focusedProperty().removeListener(state.focusListener);
         }
         // Restore the original onAction handler (only if we previously saved one)
-        Object original = field.getProperties().remove(PROP_ORIGINAL_ACTION);
+        Object original = node.getProperties().remove(PROP_ORIGINAL_ACTION);
         if (original instanceof EventHandler<?> handler) {
             @SuppressWarnings("unchecked")
             EventHandler<ActionEvent> actionHandler = (EventHandler<ActionEvent>) handler;
@@ -137,14 +138,39 @@ public final class EquationAutoComplete {
 
     /**
      * Returns true if the autocomplete popup is currently showing for the given field.
-     * Used by commit handlers to avoid committing while the user is selecting a suggestion.
      */
-    static boolean isPopupShowing(TextField field) {
+    static boolean isPopupShowing(EquationField field) {
         if (field == null) {
             return false;
         }
-        Object obj = field.getProperties().get(PROP_STATE);
+        Object obj = field.node().getProperties().get(PROP_STATE);
         return obj instanceof State state && state.popup != null && state.popup.isShowing();
+    }
+
+    // ── TextField convenience overloads (for InlineEditor compatibility) ─
+
+    /**
+     * Attaches autocomplete to a plain {@link TextField}.
+     * Convenience overload that wraps the field in a {@link TextFieldEquationField}.
+     */
+    static void attach(TextField tf, ModelEditor editor, String excludeName) {
+        attach(new TextFieldEquationField(tf), editor, excludeName);
+    }
+
+    /** Detaches autocomplete from a plain {@link TextField}. */
+    static void detach(TextField tf) {
+        if (tf == null) {
+            return;
+        }
+        detach(new TextFieldEquationField(tf));
+    }
+
+    /** Returns true if the autocomplete popup is showing for the given {@link TextField}. */
+    static boolean isPopupShowing(TextField tf) {
+        if (tf == null) {
+            return false;
+        }
+        return isPopupShowing(new TextFieldEquationField(tf));
     }
 
     // ── Token extraction (package-private for testing) ──────────────────
@@ -382,7 +408,7 @@ public final class EquationAutoComplete {
     // ── Inner state per attachment ──────────────────────────────────────
 
     private static final class State {
-        final TextField field;
+        final EquationField field;
         final ModelEditor editor;
         final String excludeName;
 
@@ -400,7 +426,7 @@ public final class EquationAutoComplete {
         final ChangeListener<Number> caretListener;
         final ChangeListener<Boolean> focusListener;
 
-        State(TextField field, ModelEditor editor, String excludeName) {
+        State(EquationField field, ModelEditor editor, String excludeName) {
             this.field = field;
             this.editor = editor;
             this.excludeName = excludeName;
@@ -489,9 +515,10 @@ public final class EquationAutoComplete {
                             ? listView.getSelectionModel().getSelectedItem().name() : null);
 
             if (!popup.isShowing()) {
-                Bounds screenBounds = field.localToScreen(field.getBoundsInLocal());
+                Node node = field.node();
+                Bounds screenBounds = node.localToScreen(node.getBoundsInLocal());
                 if (screenBounds != null) {
-                    popup.show(field, screenBounds.getMinX(),
+                    popup.show(node, screenBounds.getMinX(),
                             screenBounds.getMaxY());
                 }
             }
@@ -606,11 +633,12 @@ public final class EquationAutoComplete {
             }
 
             if (!hintPopup.isShowing()) {
-                Bounds screenBounds = field.localToScreen(field.getBoundsInLocal());
+                Node node = field.node();
+                Bounds screenBounds = node.localToScreen(node.getBoundsInLocal());
                 if (screenBounds != null) {
                     // Show above the field
                     double hintHeight = doc.parameters().isEmpty() ? 24 : 44;
-                    hintPopup.show(field, screenBounds.getMinX(),
+                    hintPopup.show(node, screenBounds.getMinX(),
                             screenBounds.getMinY() - hintHeight);
                 }
             }

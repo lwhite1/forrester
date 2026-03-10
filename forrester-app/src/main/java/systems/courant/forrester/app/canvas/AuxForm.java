@@ -20,7 +20,7 @@ class AuxForm implements ElementForm {
     private final FormContext ctx;
 
     private TextField nameField;
-    private TextField equationField;
+    private EquationField equationField;
     private ComboBox<String> unitBox;
     private TextArea commentArea;
 
@@ -52,8 +52,8 @@ class AuxForm implements ElementForm {
         ctx.addFieldRow(row++, "Description", commentArea,
                 "Documentation for this element");
 
-        equationField = ctx.createTextField(aux.equation());
-        ctx.addCommitHandlers(equationField, this::commitEquation);
+        equationField = ctx.createEquationField(aux.equation());
+        ctx.addEquationCommitHandlers(equationField, this::commitEquation);
         EquationAutoComplete.attach(equationField, ctx.editor, ctx.elementName);
         ctx.addFieldRow(row++, "Equation", ctx.wrapWithHelpButton(equationField),
                 "A formula computed each time step from other model elements");
@@ -95,7 +95,7 @@ class AuxForm implements ElementForm {
         ctx.canvas.applyMutation(() -> ctx.editor.setAuxComment(ctx.elementName, comment));
     }
 
-    private void commitEquation(TextField field) {
+    private void commitEquation(EquationField field) {
         String equation = field.getText().trim();
         if (equation.isEmpty()) {
             ctx.editor.getAuxByName(ctx.elementName)

@@ -3,7 +3,6 @@ package systems.courant.forrester.app.canvas;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuItem;
-import javafx.scene.control.TextField;
 
 /**
  * Provides equation template snippets for common system dynamics patterns.
@@ -16,9 +15,9 @@ final class EquationTemplates {
 
     /**
      * Creates a context menu of equation templates. Selecting a template inserts
-     * the snippet into the given text field, replacing any existing content.
+     * the snippet into the given equation field, replacing any existing content.
      */
-    static ContextMenu createMenu(TextField equationField) {
+    static ContextMenu createMenu(EquationField equationField) {
         ContextMenu menu = new ContextMenu();
 
         Menu flowPatterns = new Menu("Flow patterns");
@@ -69,7 +68,7 @@ final class EquationTemplates {
         return menu;
     }
 
-    private static MenuItem templateItem(TextField equationField, String label, String template) {
+    private static MenuItem templateItem(EquationField equationField, String label, String template) {
         MenuItem item = new MenuItem(label + "  \u2192  " + template);
         item.setOnAction(e -> {
             equationField.setText(template);
