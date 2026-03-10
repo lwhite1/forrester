@@ -37,7 +37,9 @@ import org.apache.commons.math3.distribution.NormalDistribution;
 import org.apache.commons.math3.distribution.UniformRealDistribution;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.function.Consumer;
 
@@ -87,10 +89,16 @@ final class SimulationController {
         ModelDefinition def = canvas.toModelDefinition();
         SimulationSettings finalSettings = settings;
 
+        // Snapshot parameter values for ghost run labeling
+        Map<String, Double> paramSnapshot = new LinkedHashMap<>();
+        for (var param : def.parameters()) {
+            paramSnapshot.put(param.name(), param.literalValue());
+        }
+
         analysisRunner.run("Simulating...",
                 () -> new SimulationRunner().run(def, finalSettings),
                 result -> {
-                    dashboardPanel.showSimulationResult(result);
+                    dashboardPanel.showSimulationResult(result, paramSnapshot);
                     canvas.setSparklineData(new systems.courant.forrester.app.canvas.CanvasRenderer.SparklineData(
                             ModelCanvas.extractStockSeries(result), false));
                     computeLoopDominance(result);
