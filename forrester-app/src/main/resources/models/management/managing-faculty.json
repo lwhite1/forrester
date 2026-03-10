@@ -1,0 +1,406 @@
+{
+  "name": "ManagingFaculty",
+  "stocks": [
+    {
+      "name": "money",
+      "comment": "money",
+      "initialValue": 500000.0,
+      "unit": "euro"
+    },
+    {
+      "name": "professors",
+      "comment": "professors",
+      "initialValue": 25.0,
+      "unit": "person"
+    }
+  ],
+  "flows": [
+    {
+      "name": "money_net_flow",
+      "comment": "Net flow for money",
+      "equation": "+subsidy_and_earnings_from_papers-money_spent_on_salaries",
+      "timeUnit": "Month",
+      "sink": "money"
+    },
+    {
+      "name": "professors_net_flow",
+      "comment": "Net flow for professors",
+      "equation": "+new_professors_hired-professors_leaving",
+      "timeUnit": "Month",
+      "sink": "professors"
+    }
+  ],
+  "auxiliaries": [
+    {
+      "name": "desired_number_of_professors",
+      "comment": "desired number of professors",
+      "equation": "money / average_professor_salary /budgetcoverage",
+      "unit": "people"
+    },
+    {
+      "name": "earnings_from_papers",
+      "comment": "earnings from papers",
+      "equation": "earnings_per_published_paper * number_of_papers_published",
+      "unit": "euro/Month"
+    },
+    {
+      "name": "money_spent_on_salaries",
+      "comment": "money spent on salaries",
+      "equation": "professors * average_professor_salary",
+      "unit": "euro/Month"
+    },
+    {
+      "name": "new_professors_hired",
+      "comment": "new professors hired",
+      "equation": "MAX((desired_number_of_professors - professors) / average_hiring_time,0 )",
+      "unit": "person/Month"
+    },
+    {
+      "name": "number_of_papers_published",
+      "comment": "number of papers published",
+      "equation": "number_of_papers_per_professor * professors",
+      "unit": "paper/Month"
+    },
+    {
+      "name": "subsidy_and_earnings_from_papers",
+      "comment": "subsidy and earnings from papers",
+      "equation": "teaching_fee + earnings_from_papers",
+      "unit": "euro/Month"
+    },
+    {
+      "name": "professors_leaving",
+      "comment": "professors leaving",
+      "equation": "professors*percentage_of_leavers",
+      "unit": "person/Month"
+    },
+    {
+      "name": "percentage_of_leavers",
+      "comment": "percentage of leavers",
+      "equation": "0.1/12",
+      "unit": "1/Month"
+    },
+    {
+      "name": "budgetcoverage",
+      "equation": "1",
+      "comment": "budgetcoverage",
+      "unit": "Month"
+    },
+    {
+      "name": "teaching_fee",
+      "equation": "150000",
+      "comment": "teaching fee",
+      "unit": "euro/Month"
+    },
+    {
+      "name": "average_hiring_time",
+      "equation": "12",
+      "comment": "average hiring time",
+      "unit": "Month"
+    },
+    {
+      "name": "average_professor_salary",
+      "equation": "3500",
+      "comment": "average professor salary",
+      "unit": "euro/person/Month"
+    },
+    {
+      "name": "earnings_per_published_paper",
+      "equation": "4000",
+      "comment": "earnings per published paper",
+      "unit": "euro/paper"
+    },
+    {
+      "name": "initially_available_money",
+      "equation": "500000",
+      "comment": "initially available money",
+      "unit": "euro"
+    },
+    {
+      "name": "number_of_papers_per_professor",
+      "equation": "0.5",
+      "comment": "number of papers per professor",
+      "unit": "paper/person/Month"
+    }
+  ],
+  "views": [
+    {
+      "name": "View 1",
+      "elements": [
+        {
+          "name": "professors",
+          "type": "stock",
+          "x": 368.0,
+          "y": 112.0
+        },
+        {
+          "name": "_48",
+          "type": "flow",
+          "x": 262.0,
+          "y": 118.0
+        },
+        {
+          "name": "new_professors_hired",
+          "type": "aux",
+          "x": 262.0,
+          "y": 137.0
+        },
+        {
+          "name": "_48",
+          "type": "flow",
+          "x": 471.0,
+          "y": 112.0
+        },
+        {
+          "name": "professors_leaving",
+          "type": "aux",
+          "x": 471.0,
+          "y": 131.0
+        },
+        {
+          "name": "percentage_of_leavers",
+          "type": "aux",
+          "x": 600.0,
+          "y": 136.0
+        },
+        {
+          "name": "money",
+          "type": "stock",
+          "x": 345.0,
+          "y": 334.0
+        },
+        {
+          "name": "_48",
+          "type": "flow",
+          "x": 223.0,
+          "y": 337.0
+        },
+        {
+          "name": "money_spent_on_salaries",
+          "type": "aux",
+          "x": 223.0,
+          "y": 356.0
+        },
+        {
+          "name": "_48",
+          "type": "flow",
+          "x": 460.0,
+          "y": 338.0
+        },
+        {
+          "name": "subsidy_and_earnings_from_papers",
+          "type": "aux",
+          "x": 460.0,
+          "y": 357.0
+        },
+        {
+          "name": "teaching_fee",
+          "type": "aux",
+          "x": 485.0,
+          "y": 409.0
+        },
+        {
+          "name": "number_of_papers_per_professor",
+          "type": "aux",
+          "x": 636.0,
+          "y": 198.0
+        },
+        {
+          "name": "number_of_papers_published",
+          "type": "aux",
+          "x": 482.0,
+          "y": 192.0
+        },
+        {
+          "name": "earnings_per_published_paper",
+          "type": "aux",
+          "x": 639.0,
+          "y": 272.0
+        },
+        {
+          "name": "earnings_from_papers",
+          "type": "aux",
+          "x": 492.0,
+          "y": 274.0
+        },
+        {
+          "name": "desired_number_of_professors",
+          "type": "aux",
+          "x": 82.0,
+          "y": 158.0
+        },
+        {
+          "name": "average_professor_salary",
+          "type": "aux",
+          "x": 154.0,
+          "y": 246.0
+        },
+        {
+          "name": "average_hiring_time",
+          "type": "aux",
+          "x": 269.0,
+          "y": 192.0
+        },
+        {
+          "name": "initially_available_money",
+          "type": "aux",
+          "x": 342.0,
+          "y": 408.0
+        },
+        {
+          "name": "budgetcoverage",
+          "type": "aux",
+          "x": 77.0,
+          "y": 49.0
+        }
+      ],
+      "connectors": [
+        {
+          "from": "5",
+          "to": "professors"
+        },
+        {
+          "from": "5",
+          "to": "2"
+        },
+        {
+          "from": "10",
+          "to": "7"
+        },
+        {
+          "from": "10",
+          "to": "professors"
+        },
+        {
+          "from": "professors",
+          "to": "_48"
+        },
+        {
+          "from": "percentage_of_leavers",
+          "to": "professors_leaving"
+        },
+        {
+          "from": "19",
+          "to": "16"
+        },
+        {
+          "from": "19",
+          "to": "money"
+        },
+        {
+          "from": "24",
+          "to": "money"
+        },
+        {
+          "from": "24",
+          "to": "21"
+        },
+        {
+          "from": "teaching_fee",
+          "to": "subsidy_and_earnings_from_papers"
+        },
+        {
+          "from": "professors",
+          "to": "number_of_papers_published"
+        },
+        {
+          "from": "number_of_papers_per_professor",
+          "to": "number_of_papers_published"
+        },
+        {
+          "from": "number_of_papers_published",
+          "to": "earnings_from_papers"
+        },
+        {
+          "from": "earnings_per_published_paper",
+          "to": "earnings_from_papers"
+        },
+        {
+          "from": "earnings_from_papers",
+          "to": "_48"
+        },
+        {
+          "from": "average_professor_salary",
+          "to": "desired_number_of_professors"
+        },
+        {
+          "from": "desired_number_of_professors",
+          "to": "new_professors_hired"
+        },
+        {
+          "from": "professors",
+          "to": "_48"
+        },
+        {
+          "from": "average_hiring_time",
+          "to": "new_professors_hired"
+        },
+        {
+          "from": "money",
+          "to": "desired_number_of_professors"
+        },
+        {
+          "from": "average_professor_salary",
+          "to": "_48"
+        },
+        {
+          "from": "professors",
+          "to": "_48"
+        },
+        {
+          "from": "budgetcoverage",
+          "to": "desired_number_of_professors"
+        },
+        {
+          "from": "initially_available_money",
+          "to": "money"
+        }
+      ],
+      "flowRoutes": [
+        {
+          "flowName": "_48",
+          "points": [
+            [
+              262.0,
+              118.0
+            ]
+          ]
+        },
+        {
+          "flowName": "_48",
+          "points": [
+            [
+              471.0,
+              112.0
+            ]
+          ]
+        },
+        {
+          "flowName": "_48",
+          "points": [
+            [
+              223.0,
+              337.0
+            ]
+          ]
+        },
+        {
+          "flowName": "_48",
+          "points": [
+            [
+              460.0,
+              338.0
+            ]
+          ]
+        }
+      ]
+    }
+  ],
+  "defaultSimulation": {
+    "timeStep": "Month",
+    "duration": 200.0,
+    "durationUnit": "Month"
+  },
+  "metadata": {
+    "license": "CC-BY-NC-SA-4.0"
+  }
+}

@@ -1,0 +1,152 @@
+{
+  "name" : "CompetitionFaculty",
+  "cldVariables" : [ {
+    "name" : "budget_section_A",
+    "comment" : "budget section A"
+  }, {
+    "name" : "budget_section_B",
+    "comment" : "budget section B"
+  }, {
+    "name" : "fraction_of_total_budget_to_section_A",
+    "comment" : "fraction of total budget to section A"
+  }, {
+    "name" : "scientific_papers_section_A",
+    "comment" : "scientific papers section A"
+  }, {
+    "name" : "scientific_papers_section_B",
+    "comment" : "scientific papers section B"
+  }, {
+    "name" : "scientific_personnel_section_A",
+    "comment" : "scientific personnel section A"
+  }, {
+    "name" : "scientific_personnel_section_B",
+    "comment" : "scientific personnel section B"
+  }, {
+    "name" : "total_TPM_budget",
+    "comment" : "total TPM budget"
+  } ],
+  "causalLinks" : [ {
+    "from" : "scientific_papers_section_A",
+    "to" : "fraction_of_total_budget_to_section_A",
+    "polarity" : "UNKNOWN"
+  }, {
+    "from" : "scientific_papers_section_B",
+    "to" : "fraction_of_total_budget_to_section_A",
+    "polarity" : "UNKNOWN"
+  }, {
+    "from" : "scientific_personnel_section_A",
+    "to" : "scientific_papers_section_A",
+    "polarity" : "UNKNOWN"
+  }, {
+    "from" : "scientific_personnel_section_B",
+    "to" : "scientific_papers_section_B",
+    "polarity" : "UNKNOWN"
+  }, {
+    "from" : "fraction_of_total_budget_to_section_A",
+    "to" : "budget_section_B",
+    "polarity" : "UNKNOWN"
+  }, {
+    "from" : "fraction_of_total_budget_to_section_A",
+    "to" : "budget_section_A",
+    "polarity" : "UNKNOWN"
+  }, {
+    "from" : "budget_section_A",
+    "to" : "scientific_personnel_section_A",
+    "polarity" : "UNKNOWN"
+  }, {
+    "from" : "total_TPM_budget",
+    "to" : "budget_section_A",
+    "polarity" : "UNKNOWN"
+  }, {
+    "from" : "total_TPM_budget",
+    "to" : "budget_section_B",
+    "polarity" : "UNKNOWN"
+  }, {
+    "from" : "budget_section_B",
+    "to" : "scientific_personnel_section_B",
+    "polarity" : "UNKNOWN"
+  } ],
+  "views" : [ {
+    "name" : "View 1",
+    "elements" : [ {
+      "name" : "scientific_papers_section_A",
+      "type" : "cld_variable",
+      "x" : 253.0,
+      "y" : 207.0
+    }, {
+      "name" : "scientific_papers_section_B",
+      "type" : "cld_variable",
+      "x" : 446.0,
+      "y" : 206.0
+    }, {
+      "name" : "fraction_of_total_budget_to_section_A",
+      "type" : "cld_variable",
+      "x" : 350.0,
+      "y" : 294.0
+    }, {
+      "name" : "scientific_personnel_section_A",
+      "type" : "cld_variable",
+      "x" : 159.0,
+      "y" : 283.0
+    }, {
+      "name" : "scientific_personnel_section_B",
+      "type" : "cld_variable",
+      "x" : 546.0,
+      "y" : 287.0
+    }, {
+      "name" : "budget_section_A",
+      "type" : "cld_variable",
+      "x" : 258.0,
+      "y" : 372.0
+    }, {
+      "name" : "budget_section_B",
+      "type" : "cld_variable",
+      "x" : 451.0,
+      "y" : 374.0
+    }, {
+      "name" : "total_TPM_budget",
+      "type" : "cld_variable",
+      "x" : 361.0,
+      "y" : 424.0
+    } ],
+    "connectors" : [ {
+      "from" : "scientific_papers_section_A",
+      "to" : "fraction_of_total_budget_to_section_A"
+    }, {
+      "from" : "scientific_papers_section_B",
+      "to" : "fraction_of_total_budget_to_section_A"
+    }, {
+      "from" : "scientific_personnel_section_A",
+      "to" : "scientific_papers_section_A"
+    }, {
+      "from" : "scientific_personnel_section_B",
+      "to" : "scientific_papers_section_B"
+    }, {
+      "from" : "fraction_of_total_budget_to_section_A",
+      "to" : "budget_section_B"
+    }, {
+      "from" : "fraction_of_total_budget_to_section_A",
+      "to" : "budget_section_A"
+    }, {
+      "from" : "budget_section_A",
+      "to" : "scientific_personnel_section_A"
+    }, {
+      "from" : "total_TPM_budget",
+      "to" : "budget_section_A"
+    }, {
+      "from" : "total_TPM_budget",
+      "to" : "budget_section_B"
+    }, {
+      "from" : "budget_section_B",
+      "to" : "scientific_personnel_section_B"
+    } ]
+  } ],
+  "defaultSimulation" : {
+    "timeStep" : "Month",
+    "duration" : 100.0,
+    "durationUnit" : "Month"
+  },
+  "metadata" : {
+    "license" : "CC-BY-NC-SA-4.0"
+  }
+}

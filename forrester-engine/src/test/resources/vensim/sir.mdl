@@ -1,0 +1,95 @@
+{UTF-8}
+Susceptible= INTEG (
+	-Infection Rate,
+		1000)
+	~	People
+	~	The susceptible population.
+	|
+
+Infected= INTEG (
+	Infection Rate - Recovery Rate,
+		1)
+	~	People
+	~	The infected population.
+	|
+
+Recovered= INTEG (
+	Recovery Rate,
+		0)
+	~	People
+	~	The recovered population.
+	|
+
+Infection Rate=
+	Susceptible * Infected * Contact Rate / Total Population
+	~	People/Day
+	~	The rate of new infections.
+	|
+
+Recovery Rate=
+	Infected / Recovery Time
+	~	People/Day
+	~	The rate of recovery.
+	|
+
+Contact Rate=
+	0.3
+	~	1/Day
+	~	The rate of contact between susceptible and infected individuals.
+	|
+
+Recovery Time=
+	14
+	~	Day
+	~	The average time to recover from infection.
+	|
+
+Total Population=
+	1001
+	~	People
+	~	The total population size.
+	|
+
+********************************************************
+	.Control
+********************************************************~
+		Simulation Control Parameters.
+	|
+
+INITIAL TIME  = 0
+	~	Day
+	~	The initial time for the simulation.
+	|
+
+FINAL TIME  = 200
+	~	Day
+	~	The final time for the simulation.
+	|
+
+TIME STEP  = 0.25
+	~	Day
+	~	The time step for the simulation.
+	|
+
+SAVEPER  =
+        TIME STEP
+	~	Day
+	~	The frequency with which output is stored.
+	|
+
+\---///
+*SIR Model
+10,1,Susceptible,100,200
+10,2,Infected,300,200
+10,3,Recovered,500,200
+10,4,Contact Rate,200,400
+10,5,Recovery Time,400,400
+10,6,Total Population,300,400
+11,7,Infection Rate,200,200
+11,8,Recovery Rate,400,200
+1,9,1,7
+1,10,2,7
+1,11,4,7
+1,12,6,7
+1,13,2,8
+1,14,5,8

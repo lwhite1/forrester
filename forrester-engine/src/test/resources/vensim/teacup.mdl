@@ -1,0 +1,62 @@
+{UTF-8}
+Teacup Temperature= INTEG (
+	-Heat Loss to Room,
+		180)
+	~	Degrees
+	~	The temperature of the teacup.
+	|
+
+Heat Loss to Room=
+	(Teacup Temperature - Room Temperature) / Characteristic Time
+	~	Degrees/Minute
+	~	The rate of heat loss from the teacup to the room.
+	|
+
+Room Temperature=
+	70
+	~	Degrees
+	~	The ambient room temperature.
+	|
+
+Characteristic Time=
+	10
+	~	Minutes
+	~	The time constant for heat loss.
+	|
+
+********************************************************
+	.Control
+********************************************************~
+		Simulation Control Parameters.
+	|
+
+INITIAL TIME  = 0
+	~	Minute
+	~	The initial time for the simulation.
+	|
+
+FINAL TIME  = 30
+	~	Minute
+	~	The final time for the simulation.
+	|
+
+TIME STEP  = 0.125
+	~	Minute
+	~	The time step for the simulation.
+	|
+
+SAVEPER  =
+        TIME STEP
+	~	Minute
+	~	The frequency with which output is stored.
+	|
+
+\---///
+*Teacup Model
+10,1,Teacup Temperature,200,150
+10,2,Room Temperature,400,300
+10,3,Characteristic Time,100,300
+11,4,Heat Loss to Room,300,150
+1,5,1,4
+1,6,2,4
+1,7,3,4

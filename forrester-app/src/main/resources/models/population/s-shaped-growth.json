@@ -1,0 +1,37 @@
+{
+  "name": "S-Shaped Growth",
+  "comment": "Logistic population growth limited by carrying capacity",
+  "stocks": [
+    {
+      "name": "Population",
+      "initialValue": 10.0,
+      "unit": "Person"
+    }
+  ],
+  "flows": [
+    {
+      "name": "Births",
+      "equation": "Population * Max_Birth_Rate * (1 - Population / Carrying_Capacity)",
+      "timeUnit": "Day",
+      "sink": "Population"
+    }
+  ],
+  "views": [],
+  "defaultSimulation": {
+    "timeStep": "Day",
+    "duration": 224.0,
+    "durationUnit": "Day"
+  },
+  "auxiliaries": [
+    {
+      "name": "Max_Birth_Rate",
+      "equation": "0.04",
+      "unit": "Dimensionless unit"
+    },
+    {
+      "name": "Carrying_Capacity",
+      "equation": "1000",
+      "unit": "Person"
+    }
+  ]
+}

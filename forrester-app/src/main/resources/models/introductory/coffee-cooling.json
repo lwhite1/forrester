@@ -1,0 +1,42 @@
+{
+  "name": "Coffee Cooling",
+  "comment": "Coffee temperature decays toward room temperature",
+  "stocks": [
+    {
+      "name": "Coffee_Temperature",
+      "initialValue": 100.0,
+      "unit": "Celsius"
+    }
+  ],
+  "flows": [
+    {
+      "name": "Cooling",
+      "equation": "Discrepancy * Cooling_Rate",
+      "timeUnit": "Minute",
+      "source": "Coffee_Temperature"
+    }
+  ],
+  "auxiliaries": [
+    {
+      "name": "Discrepancy",
+      "equation": "Coffee_Temperature - Room_Temperature",
+      "unit": "Celsius"
+    },
+    {
+      "name": "Room_Temperature",
+      "equation": "18",
+      "unit": "Celsius"
+    },
+    {
+      "name": "Cooling_Rate",
+      "equation": "0.1",
+      "unit": "Dimensionless unit"
+    }
+  ],
+  "views": [],
+  "defaultSimulation": {
+    "timeStep": "Minute",
+    "duration": 45.0,
+    "durationUnit": "Minute"
+  }
+}

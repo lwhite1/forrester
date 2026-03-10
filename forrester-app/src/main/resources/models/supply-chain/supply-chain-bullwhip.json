@@ -1,0 +1,328 @@
+{
+  "name": "SupplyChain",
+  "stocks": [
+    {
+      "name": "Inventory",
+      "comment": "Inventory",
+      "initialValue": 300.0,
+      "unit": "Widget"
+    },
+    {
+      "name": "Workforce",
+      "comment": "Workforce",
+      "initialValue": 0.0,
+      "initialExpression": "target_workforce",
+      "unit": "Person"
+    }
+  ],
+  "flows": [
+    {
+      "name": "Inventory_net_flow",
+      "comment": "Net flow for Inventory",
+      "equation": "production-sales",
+      "timeUnit": "Month",
+      "sink": "Inventory"
+    },
+    {
+      "name": "Workforce_net_flow",
+      "comment": "Net flow for Workforce",
+      "equation": "net_hire_rate",
+      "timeUnit": "Month",
+      "sink": "Workforce"
+    }
+  ],
+  "auxiliaries": [
+    {
+      "name": "target_inventory",
+      "comment": "target inventory",
+      "equation": "sales * inventory_coverage",
+      "unit": "Widget"
+    },
+    {
+      "name": "target_production",
+      "comment": "target production",
+      "equation": "sales + inventory_correction",
+      "unit": "Widget/Month"
+    },
+    {
+      "name": "inventory_correction",
+      "comment": "inventory correction",
+      "equation": "(target_inventory - Inventory)/\n                time_to_correct_inventory",
+      "unit": "Widget/Month"
+    },
+    {
+      "name": "net_hire_rate",
+      "comment": "net hire rate",
+      "equation": "(target_workforce-Workforce)/time_to_adjust_workforce",
+      "unit": "Person/Month"
+    },
+    {
+      "name": "production",
+      "comment": "production",
+      "equation": "Workforce*productivity",
+      "unit": "Widget/Month"
+    },
+    {
+      "name": "sales",
+      "comment": "sales",
+      "equation": "100+STEP(50,20)",
+      "unit": "Widget/Month"
+    },
+    {
+      "name": "target_workforce",
+      "comment": "target workforce",
+      "equation": "target_production/productivity",
+      "unit": "Person"
+    },
+    {
+      "name": "inventory_coverage",
+      "equation": "3",
+      "comment": "inventory coverage",
+      "unit": "Month"
+    },
+    {
+      "name": "time_to_correct_inventory",
+      "equation": "2",
+      "comment": "time to correct inventory",
+      "unit": "Month"
+    },
+    {
+      "name": "productivity",
+      "equation": "1",
+      "comment": "productivity",
+      "unit": "Widget/Month/Person"
+    },
+    {
+      "name": "time_to_adjust_workforce",
+      "equation": "10",
+      "comment": "time to adjust workforce",
+      "unit": "Month"
+    }
+  ],
+  "views": [
+    {
+      "name": "1",
+      "elements": [
+        {
+          "name": "Workforce",
+          "type": "stock",
+          "x": 112.0,
+          "y": 231.0
+        },
+        {
+          "name": "Inventory",
+          "type": "stock",
+          "x": 228.0,
+          "y": 102.0
+        },
+        {
+          "name": "productivity",
+          "type": "aux",
+          "x": 259.0,
+          "y": 181.0
+        },
+        {
+          "name": "_48",
+          "type": "flow",
+          "x": 321.0,
+          "y": 100.0
+        },
+        {
+          "name": "sales",
+          "type": "aux",
+          "x": 321.0,
+          "y": 117.0
+        },
+        {
+          "name": "_172",
+          "type": "flow",
+          "x": 114.0,
+          "y": 100.0
+        },
+        {
+          "name": "production",
+          "type": "aux",
+          "x": 114.0,
+          "y": 117.0
+        },
+        {
+          "name": "_284",
+          "type": "flow",
+          "x": 215.0,
+          "y": 230.0
+        },
+        {
+          "name": "net_hire_rate",
+          "type": "aux",
+          "x": 215.0,
+          "y": 247.0
+        },
+        {
+          "name": "target_workforce",
+          "type": "aux",
+          "x": 319.0,
+          "y": 279.0
+        },
+        {
+          "name": "time_to_adjust_workforce",
+          "type": "aux",
+          "x": 185.0,
+          "y": 296.0
+        },
+        {
+          "name": "target_production",
+          "type": "aux",
+          "x": 383.0,
+          "y": 229.0
+        },
+        {
+          "name": "target_inventory",
+          "type": "aux",
+          "x": 423.0,
+          "y": 173.0
+        },
+        {
+          "name": "inventory_coverage",
+          "type": "aux",
+          "x": 408.0,
+          "y": 126.0
+        },
+        {
+          "name": "inventory_correction",
+          "type": "aux",
+          "x": 517.0,
+          "y": 200.0
+        },
+        {
+          "name": "time_to_correct_inventory",
+          "type": "aux",
+          "x": 505.0,
+          "y": 255.0
+        }
+      ],
+      "connectors": [
+        {
+          "from": "_172",
+          "to": "Inventory"
+        },
+        {
+          "from": "_172",
+          "to": "4"
+        },
+        {
+          "from": "_48",
+          "to": "6"
+        },
+        {
+          "from": "_48",
+          "to": "Inventory"
+        },
+        {
+          "from": "_284",
+          "to": "2"
+        },
+        {
+          "from": "_284",
+          "to": "Workforce"
+        },
+        {
+          "from": "Workforce",
+          "to": "production"
+        },
+        {
+          "from": "Workforce",
+          "to": "net_hire_rate"
+        },
+        {
+          "from": "time_to_adjust_workforce",
+          "to": "net_hire_rate"
+        },
+        {
+          "from": "sales",
+          "to": "target_production"
+        },
+        {
+          "from": "target_production",
+          "to": "target_workforce"
+        },
+        {
+          "from": "productivity",
+          "to": "target_workforce"
+        },
+        {
+          "from": "productivity",
+          "to": "production"
+        },
+        {
+          "from": "target_workforce",
+          "to": "net_hire_rate"
+        },
+        {
+          "from": "sales",
+          "to": "target_inventory"
+        },
+        {
+          "from": "inventory_correction",
+          "to": "target_production"
+        },
+        {
+          "from": "time_to_correct_inventory",
+          "to": "inventory_correction"
+        },
+        {
+          "from": "target_inventory",
+          "to": "inventory_correction"
+        },
+        {
+          "from": "inventory_coverage",
+          "to": "target_inventory"
+        },
+        {
+          "from": "Inventory",
+          "to": "inventory_correction"
+        },
+        {
+          "from": "target_workforce",
+          "to": "Workforce"
+        }
+      ],
+      "flowRoutes": [
+        {
+          "flowName": "_48",
+          "points": [
+            [
+              321.0,
+              100.0
+            ]
+          ]
+        },
+        {
+          "flowName": "_172",
+          "points": [
+            [
+              114.0,
+              100.0
+            ]
+          ]
+        },
+        {
+          "flowName": "_284",
+          "points": [
+            [
+              215.0,
+              230.0
+            ]
+          ]
+        }
+      ]
+    }
+  ],
+  "defaultSimulation": {
+    "timeStep": "Month",
+    "duration": 100.0,
+    "durationUnit": "Month"
+  },
+  "metadata": {
+    "license": "CC-BY-NC-SA-4.0"
+  }
+}

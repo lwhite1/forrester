@@ -1,0 +1,67 @@
+{
+  "name": "Nutrient Cycle",
+  "comment": "Nitrogen cycling through soil, plants, and litter with a closed-loop material flow",
+  "stocks": [
+    {
+      "name": "Soil_Nitrogen",
+      "initialValue": 200.0,
+      "unit": "Kilogram"
+    },
+    {
+      "name": "Plant_Biomass",
+      "initialValue": 50.0,
+      "unit": "Kilogram"
+    },
+    {
+      "name": "Litter",
+      "initialValue": 30.0,
+      "unit": "Kilogram"
+    }
+  ],
+  "flows": [
+    {
+      "name": "Uptake",
+      "equation": "Uptake_Rate * Soil_Nitrogen",
+      "timeUnit": "Year",
+      "source": "Soil_Nitrogen",
+      "sink": "Plant_Biomass"
+    },
+    {
+      "name": "Senescence",
+      "equation": "Senescence_Rate * Plant_Biomass",
+      "timeUnit": "Year",
+      "source": "Plant_Biomass",
+      "sink": "Litter"
+    },
+    {
+      "name": "Decomposition",
+      "equation": "Decomposition_Rate * Litter",
+      "timeUnit": "Year",
+      "source": "Litter",
+      "sink": "Soil_Nitrogen"
+    }
+  ],
+  "views": [],
+  "defaultSimulation": {
+    "timeStep": "Day",
+    "duration": 3650.0,
+    "durationUnit": "Day"
+  },
+  "auxiliaries": [
+    {
+      "name": "Uptake_Rate",
+      "equation": "0.3",
+      "unit": "Dimensionless unit"
+    },
+    {
+      "name": "Senescence_Rate",
+      "equation": "0.5",
+      "unit": "Dimensionless unit"
+    },
+    {
+      "name": "Decomposition_Rate",
+      "equation": "0.8",
+      "unit": "Dimensionless unit"
+    }
+  ]
+}

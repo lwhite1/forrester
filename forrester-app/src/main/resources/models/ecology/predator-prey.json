@@ -1,0 +1,70 @@
+{
+  "name": "Predator Prey",
+  "comment": "Lotka-Volterra model of rabbits and coyotes",
+  "stocks": [
+    {
+      "name": "Rabbits",
+      "initialValue": 100.0,
+      "unit": "Animal"
+    },
+    {
+      "name": "Coyotes",
+      "initialValue": 10.0,
+      "unit": "Animal"
+    }
+  ],
+  "flows": [
+    {
+      "name": "Prey_Births",
+      "equation": "Prey_Birth_Rate * Rabbits",
+      "timeUnit": "Year",
+      "sink": "Rabbits"
+    },
+    {
+      "name": "Prey_Deaths",
+      "equation": "Predation_Rate * Rabbits * Coyotes",
+      "timeUnit": "Year",
+      "source": "Rabbits"
+    },
+    {
+      "name": "Predator_Births",
+      "equation": "Predator_Efficiency * Predation_Rate * Rabbits * Coyotes",
+      "timeUnit": "Year",
+      "sink": "Coyotes"
+    },
+    {
+      "name": "Predator_Deaths",
+      "equation": "Predator_Death_Rate * Coyotes",
+      "timeUnit": "Year",
+      "source": "Coyotes"
+    }
+  ],
+  "views": [],
+  "defaultSimulation": {
+    "timeStep": "Day",
+    "duration": 7300.0,
+    "durationUnit": "Day"
+  },
+  "auxiliaries": [
+    {
+      "name": "Prey_Birth_Rate",
+      "equation": "1",
+      "unit": "Dimensionless unit"
+    },
+    {
+      "name": "Predation_Rate",
+      "equation": "0.01",
+      "unit": "Dimensionless unit"
+    },
+    {
+      "name": "Predator_Efficiency",
+      "equation": "0.5",
+      "unit": "Dimensionless unit"
+    },
+    {
+      "name": "Predator_Death_Rate",
+      "equation": "0.8",
+      "unit": "Dimensionless unit"
+    }
+  ]
+}

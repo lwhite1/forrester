@@ -1,0 +1,60 @@
+{
+  "name": "SIR Epidemic",
+  "comment": "Susceptible-Infectious-Recovered compartmental model",
+  "stocks": [
+    {
+      "name": "Susceptible",
+      "initialValue": 1000.0,
+      "unit": "Person"
+    },
+    {
+      "name": "Infectious",
+      "initialValue": 10.0,
+      "unit": "Person"
+    },
+    {
+      "name": "Recovered",
+      "initialValue": 0.0,
+      "unit": "Person"
+    }
+  ],
+  "flows": [
+    {
+      "name": "Infection",
+      "equation": "Contact_Rate * Infectious / (Susceptible + Infectious + Recovered) * Infectivity * Susceptible",
+      "timeUnit": "Day",
+      "source": "Susceptible",
+      "sink": "Infectious"
+    },
+    {
+      "name": "Recovery",
+      "equation": "Infectious * Recovery_Rate",
+      "timeUnit": "Day",
+      "source": "Infectious",
+      "sink": "Recovered"
+    }
+  ],
+  "views": [],
+  "defaultSimulation": {
+    "timeStep": "Day",
+    "duration": 56.0,
+    "durationUnit": "Day"
+  },
+  "auxiliaries": [
+    {
+      "name": "Contact_Rate",
+      "equation": "8",
+      "unit": "Dimensionless unit"
+    },
+    {
+      "name": "Infectivity",
+      "equation": "0.1",
+      "unit": "Dimensionless unit"
+    },
+    {
+      "name": "Recovery_Rate",
+      "equation": "0.2",
+      "unit": "Dimensionless unit"
+    }
+  ]
+}

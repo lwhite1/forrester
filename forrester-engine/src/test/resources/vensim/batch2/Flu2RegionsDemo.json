@@ -1,0 +1,955 @@
+{
+  "name": "Flu2Regions",
+  "stocks": [
+    {
+      "name": "infected_population_region_1",
+      "comment": "infected population region 1",
+      "initialValue": 10.0,
+      "unit": "persons"
+    },
+    {
+      "name": "infected_population_region_2",
+      "comment": "infected population region 2",
+      "initialValue": 10.0,
+      "unit": "persons"
+    },
+    {
+      "name": "recovered_population_region_1",
+      "comment": "recovered population region 1",
+      "initialValue": 0.0,
+      "unit": "persons"
+    },
+    {
+      "name": "recovered_population_region_2",
+      "comment": "recovered population region 2",
+      "initialValue": 0.0,
+      "unit": "persons"
+    },
+    {
+      "name": "susceptible_population_region_1",
+      "comment": "susceptible population region 1",
+      "initialValue": 330000000.0,
+      "unit": "persons"
+    },
+    {
+      "name": "susceptible_population_region_2",
+      "comment": "susceptible population region 2",
+      "initialValue": 2000000000.0,
+      "unit": "persons"
+    },
+    {
+      "name": "immune_population_region_1",
+      "comment": "immune population region 1",
+      "initialValue": 270000000.0,
+      "unit": "persons"
+    },
+    {
+      "name": "immune_population_region_2",
+      "comment": "immune population region 2",
+      "initialValue": 1000000000.0,
+      "unit": "persons"
+    }
+  ],
+  "flows": [
+    {
+      "name": "infected_population_region_1_net_flow",
+      "comment": "Net flow for infected population region 1",
+      "equation": "infections_region_1-recoveries_region_1",
+      "timeUnit": "Month",
+      "sink": "infected_population_region_1"
+    },
+    {
+      "name": "infected_population_region_2_net_flow",
+      "comment": "Net flow for infected population region 2",
+      "equation": "infections_region_2-recoveries_region_2",
+      "timeUnit": "Month",
+      "sink": "infected_population_region_2"
+    },
+    {
+      "name": "recovered_population_region_1_net_flow",
+      "comment": "Net flow for recovered population region 1",
+      "equation": "recoveries_region_1",
+      "timeUnit": "Month",
+      "sink": "recovered_population_region_1"
+    },
+    {
+      "name": "recovered_population_region_2_net_flow",
+      "comment": "Net flow for recovered population region 2",
+      "equation": "recoveries_region_2",
+      "timeUnit": "Month",
+      "sink": "recovered_population_region_2"
+    },
+    {
+      "name": "susceptible_population_region_1_net_flow",
+      "comment": "Net flow for susceptible population region 1",
+      "equation": "-infections_region_1-susceptible_to_immune_population_flow_region_1",
+      "timeUnit": "Month",
+      "sink": "susceptible_population_region_1"
+    },
+    {
+      "name": "susceptible_population_region_2_net_flow",
+      "comment": "Net flow for susceptible population region 2",
+      "equation": "-infections_region_2-susceptible_to_immune_population_flow_region_2",
+      "timeUnit": "Month",
+      "sink": "susceptible_population_region_2"
+    },
+    {
+      "name": "immune_population_region_1_net_flow",
+      "comment": "Net flow for immune population region 1",
+      "equation": "susceptible_to_immune_population_flow_region_1",
+      "timeUnit": "Month",
+      "sink": "immune_population_region_1"
+    },
+    {
+      "name": "immune_population_region_2_net_flow",
+      "comment": "Net flow for immune population region 2",
+      "equation": "susceptible_to_immune_population_flow_region_2",
+      "timeUnit": "Month",
+      "sink": "immune_population_region_2"
+    }
+  ],
+  "auxiliaries": [
+    {
+      "name": "normal_immune_population_fraction_region_1",
+      "comment": "normal immune population fraction region 1",
+      "equation": "LOOKUP(normal_immune_population_fraction_region_1_lookup, TIME)",
+      "unit": "Dmnl"
+    },
+    {
+      "name": "recoveries_region_2",
+      "comment": "recoveries region 2",
+      "equation": "infected_population_region_2/recovering_time",
+      "unit": "persons/Month"
+    },
+    {
+      "name": "susceptible_to_immune_population_flow_region_2",
+      "comment": "susceptible to immune population flow region 2",
+      "equation": "IF((normal_immune_population_region_2-immune_population_region_2)/susceptible_to_immune_population_delay_time_region_2\n\t>0, MIN((normal_immune_population_region_2-immune_population_region_2)/susceptible_to_immune_population_delay_time_region_2 ,susceptible_population_region_2/susceptible_to_immune_population_delay_time_region_2\n\t), MIN((normal_immune_population_region_2-immune_population_region_2)/susceptible_to_immune_population_delay_time_region_2 ,immune_population_region_2/susceptible_to_immune_population_delay_time_region_2\n\t))",
+      "unit": "persons/Month"
+    },
+    {
+      "name": "normal_immune_population_fraction_region_2",
+      "comment": "normal immune population fraction region 2",
+      "equation": "LOOKUP(normal_immune_population_fraction_region_2_lookup, TIME)",
+      "unit": "Dmnl"
+    },
+    {
+      "name": "normal_immune_population_region_2",
+      "comment": "normal immune population region 2",
+      "equation": "normal_immune_population_fraction_region_2*total_population_region_2",
+      "unit": "persons"
+    },
+    {
+      "name": "recoveries_region_1",
+      "comment": "recoveries region 1",
+      "equation": "infected_population_region_1/recovering_time",
+      "unit": "persons/Month"
+    },
+    {
+      "name": "infection_fraction_region_1",
+      "comment": "infection fraction region 1",
+      "equation": "infected_population_region_1/total_population_region_1*100",
+      "unit": "percent"
+    },
+    {
+      "name": "infection_fraction_region_2",
+      "comment": "infection fraction region 2",
+      "equation": "infected_population_region_2/total_population_region_2*100",
+      "unit": "Dmnl"
+    },
+    {
+      "name": "total_population_region_1",
+      "comment": "total population region 1",
+      "equation": "infected_population_region_1+recovered_population_region_1+susceptible_population_region_1 +immune_population_region_1",
+      "unit": "persons"
+    },
+    {
+      "name": "total_population_region_2",
+      "comment": "total population region 2",
+      "equation": "infected_population_region_2+recovered_population_region_2+susceptible_population_region_2 +immune_population_region_2",
+      "unit": "persons"
+    },
+    {
+      "name": "infections_region_1",
+      "comment": "infections region 1",
+      "equation": "susceptible_population_region_1*contact_rate_region_1*infection_rate_region_1*infection_fraction_region_1 /100 + susceptible_population_region_1*interregional_contact_rate*infection_rate_region_1 *infection_fraction_region_2/100",
+      "unit": "persons/Month"
+    },
+    {
+      "name": "infections_region_2",
+      "comment": "infections region 2",
+      "equation": "susceptible_population_region_2*contact_rate_region_2*infection_rate_region_2*infection_fraction_region_2 /100 + susceptible_population_region_2*interregional_contact_rate*infection_rate_region_2 *infection_fraction_region_1/100",
+      "unit": "persons/Month"
+    },
+    {
+      "name": "susceptible_to_immune_population_flow_region_1",
+      "comment": "susceptible to immune population flow region 1",
+      "equation": "IF((normal_immune_population_region_1-immune_population_region_1)/susceptible_to_immune_population_delay_time_region_1 >0, MIN((normal_immune_population_region_1-immune_population_region_1)/susceptible_to_immune_population_delay_time_region_1 ,susceptible_population_region_1/susceptible_to_immune_population_delay_time_region_1 ), MIN((normal_immune_population_region_1-immune_population_region_1)/susceptible_to_immune_population_delay_time_region_1 ,immune_population_region_1/susceptible_to_immune_population_delay_time_region_1))",
+      "unit": "persons/Month"
+    },
+    {
+      "name": "normal_immune_population_region_1",
+      "comment": "normal immune population region 1",
+      "equation": "normal_immune_population_fraction_region_1*total_population_region_1",
+      "unit": "persons"
+    },
+    {
+      "name": "TIME_STEP",
+      "equation": "0.25",
+      "unit": "Month"
+    },
+    {
+      "name": "INITIAL_TIME",
+      "equation": "0",
+      "unit": "Month"
+    },
+    {
+      "name": "FINAL_TIME",
+      "equation": "48",
+      "unit": "Month"
+    },
+    {
+      "name": "initial_value_susceptible_population_region_2",
+      "equation": "2000000000",
+      "comment": "initial value susceptible population region 2",
+      "unit": "persons"
+    },
+    {
+      "name": "initial_value_infected_population_region_1",
+      "equation": "10",
+      "comment": "initial value infected population region 1",
+      "unit": "persons"
+    },
+    {
+      "name": "initial_value_immune_population_region_1",
+      "equation": "270000000",
+      "comment": "initial value immune population region 1",
+      "unit": "persons"
+    },
+    {
+      "name": "initial_value_immune_population_region_2",
+      "equation": "1000000000",
+      "comment": "initial value immune population region 2",
+      "unit": "persons"
+    },
+    {
+      "name": "initial_value_susceptible_population_region_1",
+      "equation": "330000000",
+      "comment": "initial value susceptible population region 1",
+      "unit": "persons"
+    },
+    {
+      "name": "initial_value_infected_population_region_2",
+      "equation": "10",
+      "comment": "initial value infected population region 2",
+      "unit": "persons"
+    },
+    {
+      "name": "initial_value_recovered_population_region_1",
+      "equation": "0",
+      "comment": "initial value recovered population region 1",
+      "unit": "persons"
+    },
+    {
+      "name": "initial_value_recovered_population_region_2",
+      "equation": "0",
+      "comment": "initial value recovered population region 2",
+      "unit": "persons"
+    },
+    {
+      "name": "interregional_contact_rate",
+      "equation": "0.1",
+      "comment": "interregional contact rate",
+      "unit": "contacts/person/Month"
+    },
+    {
+      "name": "susceptible_to_immune_population_delay_time_region_2",
+      "equation": "1",
+      "comment": "susceptible to immune population delay time region 2",
+      "unit": "Month"
+    },
+    {
+      "name": "contact_rate_region_1",
+      "equation": "50",
+      "comment": "contact rate region 1",
+      "unit": "contacts/person/Month"
+    },
+    {
+      "name": "contact_rate_region_2",
+      "equation": "100",
+      "comment": "contact rate region 2",
+      "unit": "contacts/person/Month"
+    },
+    {
+      "name": "infection_rate_region_1",
+      "equation": "0.1",
+      "comment": "infection rate region 1",
+      "unit": "persons/contacts"
+    },
+    {
+      "name": "infection_rate_region_2",
+      "equation": "0.15",
+      "comment": "infection rate region 2",
+      "unit": "persons/contacts"
+    },
+    {
+      "name": "susceptible_to_immune_population_delay_time_region_1",
+      "equation": "1",
+      "comment": "susceptible to immune population delay time region 1",
+      "unit": "Month"
+    },
+    {
+      "name": "recovering_time",
+      "equation": "0.5",
+      "comment": "recovering time",
+      "unit": "Month"
+    }
+  ],
+  "lookupTables": [
+    {
+      "name": "normal_immune_population_fraction_region_1_lookup",
+      "xValues": [
+        0.0,
+        6.0,
+        12.0,
+        18.0,
+        24.0,
+        30.0,
+        36.0,
+        42.0,
+        48.0
+      ],
+      "yValues": [
+        0.3,
+        0.7,
+        0.3,
+        0.7,
+        0.3,
+        0.7,
+        0.3,
+        0.7,
+        0.3
+      ],
+      "interpolation": "LINEAR"
+    },
+    {
+      "name": "normal_immune_population_fraction_region_2_lookup",
+      "xValues": [
+        0.0,
+        6.0,
+        12.0,
+        18.0,
+        24.0,
+        30.0,
+        36.0,
+        42.0,
+        48.0
+      ],
+      "yValues": [
+        0.3,
+        0.1,
+        0.3,
+        0.1,
+        0.3,
+        0.1,
+        0.3,
+        0.1,
+        0.3
+      ],
+      "interpolation": "LINEAR"
+    }
+  ],
+  "views": [
+    {
+      "name": "View 1",
+      "elements": [
+        {
+          "name": "susceptible_population_region_1",
+          "type": "stock",
+          "x": 225.0,
+          "y": 319.0
+        },
+        {
+          "name": "infected_population_region_1",
+          "type": "stock",
+          "x": 425.0,
+          "y": 317.0
+        },
+        {
+          "name": "recovered_population_region_1",
+          "type": "stock",
+          "x": 615.0,
+          "y": 315.0
+        },
+        {
+          "name": "_764",
+          "type": "flow",
+          "x": 322.0,
+          "y": 315.0
+        },
+        {
+          "name": "infections_region_1",
+          "type": "aux",
+          "x": 322.0,
+          "y": 334.0
+        },
+        {
+          "name": "_620",
+          "type": "flow",
+          "x": 524.0,
+          "y": 313.0
+        },
+        {
+          "name": "recoveries_region_1",
+          "type": "aux",
+          "x": 524.0,
+          "y": 332.0
+        },
+        {
+          "name": "contact_rate_region_1",
+          "type": "aux",
+          "x": 196.0,
+          "y": 378.0
+        },
+        {
+          "name": "infection_rate_region_1",
+          "type": "aux",
+          "x": 402.0,
+          "y": 390.0
+        },
+        {
+          "name": "total_population_region_1",
+          "type": "aux",
+          "x": 409.0,
+          "y": 217.0
+        },
+        {
+          "name": "recovering_time",
+          "type": "aux",
+          "x": 626.0,
+          "y": 418.0
+        },
+        {
+          "name": "susceptible_population_region_2",
+          "type": "stock",
+          "x": 223.0,
+          "y": 526.0
+        },
+        {
+          "name": "infected_population_region_2",
+          "type": "stock",
+          "x": 421.0,
+          "y": 527.0
+        },
+        {
+          "name": "recovered_population_region_2",
+          "type": "stock",
+          "x": 633.0,
+          "y": 523.0
+        },
+        {
+          "name": "_812",
+          "type": "flow",
+          "x": 315.0,
+          "y": 525.0
+        },
+        {
+          "name": "infections_region_2",
+          "type": "aux",
+          "x": 315.0,
+          "y": 544.0
+        },
+        {
+          "name": "_652",
+          "type": "flow",
+          "x": 535.0,
+          "y": 522.0
+        },
+        {
+          "name": "recoveries_region_2",
+          "type": "aux",
+          "x": 535.0,
+          "y": 541.0
+        },
+        {
+          "name": "contact_rate_region_2",
+          "type": "aux",
+          "x": 180.0,
+          "y": 452.0
+        },
+        {
+          "name": "infection_rate_region_2",
+          "type": "aux",
+          "x": 396.0,
+          "y": 462.0
+        },
+        {
+          "name": "total_population_region_2",
+          "type": "aux",
+          "x": 412.0,
+          "y": 651.0
+        },
+        {
+          "name": "infection_fraction_region_1",
+          "type": "aux",
+          "x": 342.0,
+          "y": 266.0
+        },
+        {
+          "name": "infection_fraction_region_2",
+          "type": "aux",
+          "x": 343.0,
+          "y": 600.0
+        },
+        {
+          "name": "interregional_contact_rate",
+          "type": "aux",
+          "x": 260.0,
+          "y": 426.0
+        },
+        {
+          "name": "immune_population_region_1",
+          "type": "stock",
+          "x": 222.0,
+          "y": 169.0
+        },
+        {
+          "name": "_796",
+          "type": "flow",
+          "x": 228.0,
+          "y": 247.0
+        },
+        {
+          "name": "susceptible_to_immune_population_flow_region_1",
+          "type": "aux",
+          "x": 145.0,
+          "y": 247.0
+        },
+        {
+          "name": "immune_population_region_2",
+          "type": "stock",
+          "x": 221.0,
+          "y": 695.0
+        },
+        {
+          "name": "_476",
+          "type": "flow",
+          "x": 226.0,
+          "y": 597.0
+        },
+        {
+          "name": "susceptible_to_immune_population_flow_region_2",
+          "type": "aux",
+          "x": 141.0,
+          "y": 597.0
+        },
+        {
+          "name": "normal_immune_population_fraction_region_1",
+          "type": "aux",
+          "x": 411.0,
+          "y": 116.0
+        },
+        {
+          "name": "normal_immune_population_region_1",
+          "type": "aux",
+          "x": 220.0,
+          "y": 122.0
+        },
+        {
+          "name": "susceptible_to_immune_population_delay_time_region_1",
+          "type": "aux",
+          "x": 98.0,
+          "y": 321.0
+        },
+        {
+          "name": "Time",
+          "type": "aux",
+          "x": 414.0,
+          "y": 167.0
+        },
+        {
+          "name": "normal_immune_population_fraction_region_2",
+          "type": "aux",
+          "x": 424.0,
+          "y": 746.0
+        },
+        {
+          "name": "normal_immune_population_region_2",
+          "type": "aux",
+          "x": 229.0,
+          "y": 743.0
+        },
+        {
+          "name": "susceptible_to_immune_population_delay_time_region_2",
+          "type": "aux",
+          "x": 107.0,
+          "y": 532.0
+        },
+        {
+          "name": "Time",
+          "type": "aux",
+          "x": 424.0,
+          "y": 695.0
+        },
+        {
+          "name": "initial_value_susceptible_population_region_1",
+          "type": "aux",
+          "x": 609.0,
+          "y": 107.0
+        },
+        {
+          "name": "initial_value_immune_population_region_1",
+          "type": "aux",
+          "x": 608.0,
+          "y": 154.0
+        },
+        {
+          "name": "initial_value_infected_population_region_1",
+          "type": "aux",
+          "x": 610.0,
+          "y": 200.0
+        },
+        {
+          "name": "initial_value_recovered_population_region_1",
+          "type": "aux",
+          "x": 615.0,
+          "y": 250.0
+        },
+        {
+          "name": "initial_value_susceptible_population_region_2",
+          "type": "aux",
+          "x": 621.0,
+          "y": 603.0
+        },
+        {
+          "name": "initial_value_immune_population_region_2",
+          "type": "aux",
+          "x": 620.0,
+          "y": 650.0
+        },
+        {
+          "name": "initial_value_infected_population_region_2",
+          "type": "aux",
+          "x": 622.0,
+          "y": 696.0
+        },
+        {
+          "name": "initial_value_recovered_population_region_2",
+          "type": "aux",
+          "x": 627.0,
+          "y": 746.0
+        }
+      ],
+      "connectors": [
+        {
+          "from": "6",
+          "to": "infected_population_region_1"
+        },
+        {
+          "from": "6",
+          "to": "susceptible_population_region_1"
+        },
+        {
+          "from": "10",
+          "to": "recovered_population_region_1"
+        },
+        {
+          "from": "10",
+          "to": "infected_population_region_1"
+        },
+        {
+          "from": "susceptible_population_region_1",
+          "to": "_764"
+        },
+        {
+          "from": "contact_rate_region_1",
+          "to": "infections_region_1"
+        },
+        {
+          "from": "susceptible_population_region_1",
+          "to": "total_population_region_1"
+        },
+        {
+          "from": "infected_population_region_1",
+          "to": "total_population_region_1"
+        },
+        {
+          "from": "recovered_population_region_1",
+          "to": "total_population_region_1"
+        },
+        {
+          "from": "infected_population_region_1",
+          "to": "_620"
+        },
+        {
+          "from": "recovering_time",
+          "to": "recoveries_region_1"
+        },
+        {
+          "from": "28",
+          "to": "infected_population_region_2"
+        },
+        {
+          "from": "28",
+          "to": "susceptible_population_region_2"
+        },
+        {
+          "from": "32",
+          "to": "recovered_population_region_2"
+        },
+        {
+          "from": "32",
+          "to": "infected_population_region_2"
+        },
+        {
+          "from": "susceptible_population_region_2",
+          "to": "infections_region_2"
+        },
+        {
+          "from": "infected_population_region_2",
+          "to": "50"
+        },
+        {
+          "from": "infection_rate_region_2",
+          "to": "_812"
+        },
+        {
+          "from": "contact_rate_region_2",
+          "to": "_812"
+        },
+        {
+          "from": "susceptible_population_region_2",
+          "to": "total_population_region_2"
+        },
+        {
+          "from": "infected_population_region_2",
+          "to": "total_population_region_2"
+        },
+        {
+          "from": "recovered_population_region_2",
+          "to": "total_population_region_2"
+        },
+        {
+          "from": "total_population_region_2",
+          "to": "50"
+        },
+        {
+          "from": "infected_population_region_2",
+          "to": "_652"
+        },
+        {
+          "from": "total_population_region_1",
+          "to": "infection_fraction_region_1"
+        },
+        {
+          "from": "infected_population_region_1",
+          "to": "infection_fraction_region_1"
+        },
+        {
+          "from": "infection_fraction_region_1",
+          "to": "_764"
+        },
+        {
+          "from": "infection_fraction_region_2",
+          "to": "infections_region_2"
+        },
+        {
+          "from": "interregional_contact_rate",
+          "to": "infections_region_1"
+        },
+        {
+          "from": "interregional_contact_rate",
+          "to": "_812"
+        },
+        {
+          "from": "immune_population_region_1",
+          "to": "total_population_region_1"
+        },
+        {
+          "from": "59",
+          "to": "immune_population_region_1"
+        },
+        {
+          "from": "59",
+          "to": "susceptible_population_region_1"
+        },
+        {
+          "from": "64",
+          "to": "immune_population_region_2"
+        },
+        {
+          "from": "64",
+          "to": "susceptible_population_region_2"
+        },
+        {
+          "from": "immune_population_region_2",
+          "to": "total_population_region_2"
+        },
+        {
+          "from": "infection_fraction_region_1",
+          "to": "_812"
+        },
+        {
+          "from": "infection_fraction_region_2",
+          "to": "infections_region_1"
+        },
+        {
+          "from": "immune_population_region_1",
+          "to": "susceptible_to_immune_population_flow_region_1"
+        },
+        {
+          "from": "total_population_region_1",
+          "to": "normal_immune_population_region_1"
+        },
+        {
+          "from": "normal_immune_population_fraction_region_1",
+          "to": "normal_immune_population_region_1"
+        },
+        {
+          "from": "normal_immune_population_region_1",
+          "to": "susceptible_to_immune_population_flow_region_1"
+        },
+        {
+          "from": "susceptible_to_immune_population_delay_time_region_1",
+          "to": "susceptible_to_immune_population_flow_region_1"
+        },
+        {
+          "from": "Time",
+          "to": "normal_immune_population_fraction_region_1"
+        },
+        {
+          "from": "susceptible_population_region_1",
+          "to": "susceptible_to_immune_population_flow_region_1"
+        },
+        {
+          "from": "susceptible_to_immune_population_delay_time_region_2",
+          "to": "susceptible_to_immune_population_flow_region_2"
+        },
+        {
+          "from": "susceptible_population_region_2",
+          "to": "susceptible_to_immune_population_flow_region_2"
+        },
+        {
+          "from": "immune_population_region_2",
+          "to": "susceptible_to_immune_population_flow_region_2"
+        },
+        {
+          "from": "normal_immune_population_region_2",
+          "to": "susceptible_to_immune_population_flow_region_2"
+        },
+        {
+          "from": "total_population_region_2",
+          "to": "normal_immune_population_region_2"
+        },
+        {
+          "from": "normal_immune_population_fraction_region_2",
+          "to": "normal_immune_population_region_2"
+        },
+        {
+          "from": "Time",
+          "to": "normal_immune_population_fraction_region_2"
+        },
+        {
+          "from": "infection_rate_region_1",
+          "to": "infections_region_1"
+        },
+        {
+          "from": "recovering_time",
+          "to": "_652"
+        },
+        {
+          "from": "initial_value_susceptible_population_region_1",
+          "to": "susceptible_population_region_1"
+        },
+        {
+          "from": "initial_value_immune_population_region_1",
+          "to": "immune_population_region_1"
+        },
+        {
+          "from": "initial_value_infected_population_region_1",
+          "to": "infected_population_region_1"
+        },
+        {
+          "from": "initial_value_recovered_population_region_1",
+          "to": "recovered_population_region_1"
+        },
+        {
+          "from": "initial_value_susceptible_population_region_2",
+          "to": "susceptible_population_region_2"
+        },
+        {
+          "from": "initial_value_immune_population_region_2",
+          "to": "immune_population_region_2"
+        },
+        {
+          "from": "initial_value_infected_population_region_2",
+          "to": "infected_population_region_2"
+        }
+      ],
+      "flowRoutes": [
+        {
+          "flowName": "_764",
+          "points": [
+            [
+              322.0,
+              315.0
+            ]
+          ]
+        },
+        {
+          "flowName": "_620",
+          "points": [
+            [
+              524.0,
+              313.0
+            ]
+          ]
+        },
+        {
+          "flowName": "_812",
+          "points": [
+            [
+              315.0,
+              525.0
+            ]
+          ]
+        },
+        {
+          "flowName": "_652",
+          "points": [
+            [
+              535.0,
+              522.0
+            ]
+          ]
+        },
+        {
+          "flowName": "_796",
+          "points": [
+            [
+              228.0,
+              247.0
+            ]
+          ]
+        },
+        {
+          "flowName": "_476",
+          "points": [
+            [
+              226.0,
+              597.0
+            ]
+          ]
+        }
+      ]
+    }
+  ],
+  "defaultSimulation": {
+    "timeStep": "Month",
+    "duration": 48.0,
+    "durationUnit": "Month"
+  },
+  "metadata": {
+    "license": "unknown"
+  }
+}

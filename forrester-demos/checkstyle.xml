@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<!DOCTYPE module PUBLIC
+        "-//Checkstyle//DTD Checkstyle Configuration 1.3//EN"
+        "https://checkstyle.org/dtds/configuration_1_3.dtd">
+<module name="Checker">
+    <module name="RegexpHeader">
+        <property name="header"
+                  value="^/\*\n^ \* Copyright \(c\) (2026 Courant Systems|original author\(s\)\. See model metadata for attribution\.)\n^ \* Licensed under CC-BY-(SA|NC-SA)-4\.0\. See (LICENSE in this module|THIRD-PARTY-LICENSES) for details\.\n^ \*/\n"/>
+        <property name="fileExtensions" value="java"/>
+    </module>
+</module>

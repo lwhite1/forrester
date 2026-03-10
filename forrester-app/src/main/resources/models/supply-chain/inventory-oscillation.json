@@ -1,0 +1,94 @@
+{
+  "name": "Inventory Oscillation",
+  "comment": "Car dealership inventory with perception and delivery delays",
+  "stocks": [
+    {
+      "name": "Cars_on_Lot",
+      "initialValue": 200.0,
+      "unit": "Car"
+    },
+    {
+      "name": "Perceived_Sales",
+      "initialValue": 20.0,
+      "unit": "Car"
+    }
+  ],
+  "flows": [
+    {
+      "name": "Sales",
+      "equation": "MIN(Cars_on_Lot, Customer_Demand)",
+      "timeUnit": "Day",
+      "source": "Cars_on_Lot"
+    },
+    {
+      "name": "Perception_Adjustment",
+      "equation": "(Sales - Perceived_Sales) / Perception_Delay",
+      "timeUnit": "Day",
+      "sink": "Perceived_Sales"
+    },
+    {
+      "name": "Deliveries",
+      "equation": "DELAY3(Orders_to_Factory, Delivery_Delay)",
+      "timeUnit": "Day",
+      "sink": "Cars_on_Lot"
+    }
+  ],
+  "auxiliaries": [
+    {
+      "name": "Customer_Demand",
+      "equation": "IF(TIME > 25, Step_Demand, Base_Demand)",
+      "unit": "Car"
+    },
+    {
+      "name": "Desired_Inventory",
+      "equation": "Perceived_Sales * Desired_Inventory_Multiplier",
+      "unit": "Car"
+    },
+    {
+      "name": "Inventory_Gap",
+      "equation": "Desired_Inventory - Cars_on_Lot",
+      "unit": "Car"
+    },
+    {
+      "name": "Orders_to_Factory",
+      "equation": "MAX(Perceived_Sales + Inventory_Gap / Response_Delay, 0)",
+      "unit": "Car"
+    },
+    {
+      "name": "Base_Demand",
+      "equation": "20",
+      "unit": "Car per Day"
+    },
+    {
+      "name": "Step_Demand",
+      "equation": "22",
+      "unit": "Car per Day"
+    },
+    {
+      "name": "Perception_Delay",
+      "equation": "5",
+      "unit": "Day"
+    },
+    {
+      "name": "Response_Delay",
+      "equation": "3",
+      "unit": "Day"
+    },
+    {
+      "name": "Delivery_Delay",
+      "equation": "5",
+      "unit": "Day"
+    },
+    {
+      "name": "Desired_Inventory_Multiplier",
+      "equation": "10",
+      "unit": "Dimensionless unit"
+    }
+  ],
+  "views": [],
+  "defaultSimulation": {
+    "timeStep": "Day",
+    "duration": 100.0,
+    "durationUnit": "Day"
+  }
+}

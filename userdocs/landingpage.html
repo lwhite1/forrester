@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shrewd | System Dynamics</title>
+    <style>
+        :root {
+            --vellum: #fdfcf8;
+            --charcoal: #111111;
+            --sidenote-gray: #666666;
+            --contrast-line: #333332;
+        }
+
+        body {
+            background-color: var(--vellum);
+            color: var(--charcoal);
+            font-family: "et-book", "Palatino", "Palatino Linotype", "Book Antiqua", serif;
+            line-height: 1.6;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+        }
+
+        article {
+            width: 90%;
+            max-width: 1200px;
+            padding: 5rem 2rem;
+            display: grid;
+            grid-template-columns: 2.2fr 1fr;
+            gap: 4rem;
+        }
+
+        header {
+            grid-column: 1 / span 2;
+            margin-bottom: 4rem;
+            border-bottom: 1px solid var(--contrast-line);
+        }
+
+        h1 { font-weight: 400; font-variant: small-caps; letter-spacing: 0.15em; font-size: 3.2rem; margin: 0; }
+        .subtitle { font-style: italic; font-size: 1.2rem; color: var(--sidenote-gray); margin-bottom: 1.5rem; }
+
+        main { grid-column: 1; }
+        p { font-size: 1.15rem; margin-bottom: 1.8rem; }
+        .newthought { font-variant: small-caps; letter-spacing: 0.05em; }
+
+        h3 { font-weight: 400; font-variant: small-caps; border-bottom: 0.5px solid #ddd; padding-bottom: 5px; margin-top: 3.5rem; letter-spacing: 0.1em; }
+
+        aside { grid-column: 2; font-size: 0.9rem; color: var(--sidenote-gray); border-left: 1px solid #efefef; padding-left: 2rem; }
+        .margin-box { margin-bottom: 3.5rem; }
+
+        .btn-stack { display: flex; flex-direction: column; gap: 12px; margin-top: 1.5rem; }
+        .btn { display: block; text-align: center; padding: 12px; text-decoration: none; font-variant: small-caps; letter-spacing: 0.1em; font-size: 0.9rem; border-radius: 1px; }
+        .btn-fill { background-color: var(--charcoal); color: var(--vellum); }
+        .btn-outline { border: 1px solid var(--charcoal); color: var(--charcoal); }
+
+        table { width: 100%; border-collapse: collapse; margin: 2rem 0; font-size: 0.85rem; line-height: 1.2; }
+        th { text-align: left; border-bottom: 1px solid var(--charcoal); padding: 8px; font-variant: small-caps; }
+        td { padding: 8px; border-bottom: 1px solid #eee; }
+
+        pre { background: #f4f1e9; padding: 1.5rem; overflow-x: auto; font-size: 0.9rem; border-radius: 2px; border: 1px solid #e0ddd5; }
+        code { font-family: "Courier New", Courier, monospace; }
+
+        @media (max-width: 850px) {
+            article { grid-template-columns: 1fr; }
+            aside { grid-column: 1; border-left: none; border-top: 1px solid #eee; padding: 2rem 0; }
+        }
+    </style>
+</head>
+<body>
+
+<article>
+    <header>
+        <h1>Forrester</h1>
+        <p class="subtitle">System Dynamics Modeling for Everyone &mdash; A Courant Systems Project</p>
+    </header>
+
+    <main>
+        <p><span class="newthought">Forrester is a free,</span> open-source System Dynamics tool for building models that reveal how complex systems behave over time — and why they so often surprise us.</p>
+        <p>If you've ever struggled with unintended consequences, policy resistance, or the gap between short-term fixes and long-term outcomes, System Dynamics gives you a way to see the whole system at once. Forrester gives you the tools to do it.</p>
+
+        <h3>Methodology and Interaction</h3>
+        <p><strong>Sketch your system's causal structure:</strong> Start where every SD practitioner starts: with a causal loop diagram. Forrester automatically detects your feedback loops and classifies them as reinforcing or balancing — so you can see the engines of growth and the leverage points where intervention matters most.</p>
+        <p><strong>Build and simulate stock-and-flow models:</strong> Write equations with autocomplete that suggests variable names and built-in functions as you type. Press <code>Ctrl+R</code> to simulate and see results immediately in an interactive chart. Break large models into reusable modules with input/output ports. Add subscripts to expand elements across dimensions (regions, age groups, product lines) without duplicating your diagram.</p>
+
+        <h3>Quantifying Uncertainty</h3>
+        <p>System Dynamics is most valuable when you use it to ask "what if?" Parameter sweeps reveal sensitivity and thresholds at a glance. Monte Carlo analysis assigns probability distributions to your uncertain assumptions and run thousands of trials. The result is an envelope of possible futures — not a single prediction, but a realistic picture of the range of outcomes your system can produce.</p>
+        <p><strong>Optimization finds the best answer automatically.</strong> Define what "better" means — minimize cost, hit a target, fit observed data — and let the optimizer search for the parameter values that achieve it. This is how you calibrate models against reality.</p>
+
+        <h3>Comparison of Tools</h3>
+        <table>
+            <thead>
+            <tr>
+                <th>Capability</th>
+                <th>Vensim PLE</th>
+                <th>Stella</th>
+                <th>Forrester</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr><td>Cost</td><td>Free</td><td>$249/yr</td><td><strong>Free</strong></td></tr>
+            <tr><td>Causal Loops</td><td>Separate</td><td>Separate</td><td>Integrated</td></tr>
+            <tr><td>Subscripts / Arrays</td><td>No</td><td>Yes</td><td>Yes</td></tr>
+            <tr><td>Parameter sweeps</td><td>No</td><td>Yes</td><td>Yes</td></tr>
+            <tr><td>Monte Carlo</td><td>No</td><td>Yes</td><td>Yes</td></tr>
+            <tr><td>Optimization</td><td>No</td><td>No</td><td>Yes</td></tr>
+            <tr><td>Vensim .mdl import</td><td>N/A</td><td>No</td><td>Yes</td></tr>
+            <tr><td>Programmable API</td><td>No</td><td>No</td><td>Yes</td></tr>
+            </tbody>
+        </table>
+
+        <h3>A Programmable Engine</h3>
+        <p>The same engine that powers the visual editor is available as a Java library. Define models in code, run headless simulations, sweep parameters programmatically, or embed System Dynamics in a larger application. Models built in code and models built in the editor use the same format — save from one, open in the other.</p>
+
+        <h3>Installation & Build</h3>
+        <pre><code>git clone https://github.com/lwhite1/forrester.git
+cd forrester
+mvn clean package -DskipTests
+java -jar forrester-app/target/forrester-app-*.jar</code></pre>
+        <p style="font-size: 0.9rem; font-style: italic;">Requires Java 21+.</p>
+    </main>
+
+    <aside>
+        <div class="margin-box">
+            <h4 class="newthought">Download Application</h4>
+            <p>Free. No license keys. No signup. Runs on Windows, Apple, and Linux.</p>
+            <div class="btn-stack">
+                <a href="#" class="btn btn-fill">Download for Windows</a>
+                <a href="#" class="btn btn-outline">Download for macOS</a>
+                <a href="#" class="btn btn-outline">Download for Linux</a>
+            </div>
+        </div>
+
+        <div class="margin-box">
+            <h4 class="newthought">Legacy Migration</h4>
+            <p>Already working in Vensim or Stella? Forrester reads <code>.mdl</code> and XMILE files directly. Your equations and diagram layout come through intact.</p>
+        </div>
+
+        <div class="margin-box">
+            <h4 class="newthought">Quick Start</h4>
+            <p>Go to File > Open Example and pick a model. Press <code>Ctrl+R</code> to run it. Or build your first model in 10 minutes with our quickstart tutorial.</p>
+        </div>
+    </aside>
+</article>
+
+</body>
+</html>

@@ -1,0 +1,46 @@
+Third-Party Model Licenses
+==========================
+
+This project includes imported system dynamics models from third-party
+sources. These models (both the original Vensim .mdl files and their
+derived JSON and Java representations) are distributed under their
+original licenses, separate from the project source code license (AGPL-3.0).
+
+All third-party model content resides under:
+  - forrester-app/src/main/resources/models/   (JSON definitions)
+  - forrester-demos/src/main/java/             (generated Java demo classes)
+
+Generated Java demo classes derived from third-party models carry a
+file-level license header indicating CC-BY-NC-SA-4.0.
+
+────────────────────────────────────────────────────────────────────────
+
+TU Delft / Pruyt Models
+────────────────────────
+
+Source:  Pruyt, E., 2013. "Small System Dynamics Models for Big Issues:
+         Triple Jump towards Real-World Complexity." TU Delft Library,
+         Delft, The Netherlands.
+License: Creative Commons Attribution-NonCommercial-ShareAlike 4.0
+         International (CC-BY-NC-SA-4.0)
+URL:     https://simulation.tudelft.nl/
+
+| Model                     | Category      | File                         |
+|---------------------------|---------------|------------------------------|
+| Cocaine Flow              | policy        | cocaine-flow.json            |
+| Muskrat Plague            | ecology       | muskrat-plague.json          |
+| Ecological Overshoot      | ecology       | ecological-overshoot.json    |
+| Kaibab Deer               | ecology       | kaibab-deer.json             |
+| Bluefin Tuna Overfishing  | ecology       | bluefin-tuna-overfishing.json|
+| Feral Pigs                | ecology       | feral-pigs.json              |
+| Family Planning           | demographics  | family-planning.json         |
+| Aging Chain               | demographics  | aging-chain.json             |
+| Pneumonic Plague          | epidemiology  | pneumonic-plague.json        |
+| Micro-CHP Diffusion       | technology    | micro-chp-diffusion.json     |
+| Managing Faculty          | management    | managing-faculty.json        |
+| Competition Faculty       | management    | competition-faculty.json     |
+| Debt Crisis               | economics     | debt-crisis.json             |
+| Real Estate Boom          | economics     | real-estate-boom.json        |
+| Supply Chain Bullwhip     | supply-chain  | supply-chain-bullwhip.json   |
+
+Full license text: https://creativecommons.org/licenses/by-nc-sa/4.0/legalcode

@@ -1,0 +1,595 @@
+{
+  "name": "1412_OverfishingOfNBFTunaEN",
+  "stocks": [
+    {
+      "name": "Tuna_Biomass",
+      "comment": "Tuna Biomass",
+      "initialValue": 0.0,
+      "unit": "ton"
+    },
+    {
+      "name": "Official_Number_of_Tuna_Ships",
+      "comment": "Official Number of Tuna Ships",
+      "initialValue": 15000.0,
+      "unit": "Ship"
+    }
+  ],
+  "flows": [
+    {
+      "name": "Tuna_Biomass_net_flow",
+      "comment": "Net flow for Tuna Biomass",
+      "equation": "growth_existing_tuna_biomass+tuna_recruitment-natural_deaths-tuna_catch",
+      "timeUnit": "Year",
+      "sink": "Tuna_Biomass"
+    },
+    {
+      "name": "Official_Number_of_Tuna_Ships_net_flow",
+      "comment": "Net flow for Official Number of Tuna Ships",
+      "equation": "net_increase_official_number_of_tuna_ships",
+      "timeUnit": "Year",
+      "sink": "Official_Number_of_Tuna_Ships"
+    }
+  ],
+  "auxiliaries": [
+    {
+      "name": "effect",
+      "comment": "effect",
+      "equation": "LOOKUP(effect_lookup, perceived_state_of_tuna_fishery)",
+      "unit": "Dmnl"
+    },
+    {
+      "name": "fraction_tuna_catch",
+      "comment": "fraction tuna catch",
+      "equation": "average_efficiency_tuna_ships*total_number_of_tuna_ships",
+      "unit": "1/Year"
+    },
+    {
+      "name": "perceived_state_of_tuna_fishery",
+      "comment": "perceived state of tuna fishery",
+      "equation": "SMOOTH(most_recent_perception_concerning_tuna_fishery, delay_time, initial_state_tuna_fishery )",
+      "unit": "Dmnl"
+    },
+    {
+      "name": "growth_existing_tuna_biomass",
+      "comment": "growth existing tuna biomass",
+      "equation": "Tuna_Biomass*tuna_growth_rate",
+      "unit": "ton/Year"
+    },
+    {
+      "name": "illegal_tuna_ships",
+      "comment": "illegal tuna ships",
+      "equation": "10000-STEP(10000,2010)*0",
+      "unit": "Ship"
+    },
+    {
+      "name": "most_recent_perception_concerning_tuna_fishery",
+      "comment": "most recent perception concerning tuna fishery",
+      "equation": "LOOKUP(change_in_tuna_perception_lookup, ratio_of_biomass_to_unfished_biomass)",
+      "unit": "Dmnl"
+    },
+    {
+      "name": "natural_deaths",
+      "comment": "natural deaths",
+      "equation": "Tuna_Biomass*ratio_of_biomass_to_unfished_biomass/normal_death_rate",
+      "unit": "ton/Year"
+    },
+    {
+      "name": "net_increase_official_number_of_tuna_ships",
+      "comment": "net increase official number of tuna ships",
+      "equation": "proposed_change_in_the_number_of_tuna_ships/implementation_time_delay",
+      "unit": "Ship/Year"
+    },
+    {
+      "name": "tuna_recruitment",
+      "comment": "tuna recruitment",
+      "equation": "DELAY_FIXED(\n\tTuna_Biomass*tuna_recruitment_rate,4,Tuna_Biomass*tuna_recruitment_rate)",
+      "unit": "ton/Year"
+    },
+    {
+      "name": "tuna_catch",
+      "comment": "tuna catch",
+      "equation": "Tuna_Biomass*fraction_tuna_catch",
+      "unit": "ton/Year"
+    },
+    {
+      "name": "total_number_of_tuna_ships",
+      "comment": "total number of tuna ships",
+      "equation": "illegal_tuna_ships+Official_Number_of_Tuna_Ships",
+      "unit": "Ship"
+    },
+    {
+      "name": "ratio_of_biomass_to_unfished_biomass",
+      "comment": "ratio of biomass to unfished biomass",
+      "equation": "Tuna_Biomass/unfished_biomass_1990",
+      "unit": "Dmnl"
+    },
+    {
+      "name": "proposed_change_in_the_number_of_tuna_ships",
+      "comment": "proposed change in the number of tuna ships",
+      "equation": "(effect)*Official_Number_of_Tuna_Ships",
+      "unit": "Ship"
+    },
+    {
+      "name": "average_efficiency_tuna_ships",
+      "equation": "4e-06",
+      "comment": "average efficiency tuna ships",
+      "unit": "1/Ship/Year"
+    },
+    {
+      "name": "implementation_time_delay",
+      "equation": "2",
+      "comment": "implementation time delay",
+      "unit": "Year"
+    },
+    {
+      "name": "initial_state_tuna_fishery",
+      "equation": "10",
+      "comment": "initial state tuna fishery",
+      "unit": "Dmnl"
+    },
+    {
+      "name": "normal_death_rate",
+      "equation": "20",
+      "comment": "normal death rate",
+      "unit": "Year"
+    },
+    {
+      "name": "unfished_biomass_1990",
+      "equation": "100000",
+      "comment": "unfished biomass 1990",
+      "unit": "ton"
+    },
+    {
+      "name": "tuna_recruitment_rate",
+      "equation": "0.01",
+      "comment": "tuna recruitment rate",
+      "unit": "1/Year"
+    },
+    {
+      "name": "delay_time",
+      "equation": "2",
+      "comment": "delay time",
+      "unit": "Year"
+    },
+    {
+      "name": "tuna_growth_rate",
+      "equation": "0.04",
+      "comment": "tuna growth rate",
+      "unit": "1/Year"
+    }
+  ],
+  "lookupTables": [
+    {
+      "name": "effect_lookup",
+      "xValues": [
+        -10.0,
+        -7.5,
+        -5.0,
+        -2.5,
+        0.0,
+        2.5,
+        5.0,
+        7.5,
+        10.0,
+        100.0
+      ],
+      "yValues": [
+        -0.9,
+        -0.5,
+        -0.25,
+        -0.1,
+        0.0,
+        0.075,
+        0.15,
+        0.21,
+        0.25,
+        0.25
+      ],
+      "interpolation": "LINEAR"
+    },
+    {
+      "name": "change_in_tuna_perception_lookup",
+      "comment": "change in tuna perception lookup",
+      "xValues": [
+        0.0,
+        0.25,
+        0.5,
+        0.75,
+        1.0
+      ],
+      "yValues": [
+        -10.0,
+        -2.0,
+        0.0,
+        1.5,
+        10.0
+      ],
+      "interpolation": "LINEAR"
+    }
+  ],
+  "views": [
+    {
+      "name": "View 1",
+      "elements": [
+        {
+          "name": "Tuna_Biomass",
+          "type": "stock",
+          "x": 610.0,
+          "y": 265.0
+        },
+        {
+          "name": "_48",
+          "type": "flow",
+          "x": 503.0,
+          "y": 265.0
+        },
+        {
+          "name": "tuna_recruitment",
+          "type": "aux",
+          "x": 503.0,
+          "y": 284.0
+        },
+        {
+          "name": "_48",
+          "type": "flow",
+          "x": 608.0,
+          "y": 338.0
+        },
+        {
+          "name": "growth_existing_tuna_biomass",
+          "type": "aux",
+          "x": 546.0,
+          "y": 338.0
+        },
+        {
+          "name": "_48",
+          "type": "flow",
+          "x": 605.0,
+          "y": 198.0
+        },
+        {
+          "name": "tuna_catch",
+          "type": "aux",
+          "x": 646.0,
+          "y": 198.0
+        },
+        {
+          "name": "_48",
+          "type": "flow",
+          "x": 723.0,
+          "y": 265.0
+        },
+        {
+          "name": "natural_deaths",
+          "type": "aux",
+          "x": 723.0,
+          "y": 284.0
+        },
+        {
+          "name": "tuna_growth_rate",
+          "type": "aux",
+          "x": 478.0,
+          "y": 404.0
+        },
+        {
+          "name": "tuna_recruitment_rate",
+          "type": "aux",
+          "x": 421.0,
+          "y": 206.0
+        },
+        {
+          "name": "ratio_of_biomass_to_unfished_biomass",
+          "type": "aux",
+          "x": 725.0,
+          "y": 382.0
+        },
+        {
+          "name": "normal_death_rate",
+          "type": "aux",
+          "x": 810.0,
+          "y": 335.0
+        },
+        {
+          "name": "unfished_biomass_1990",
+          "type": "aux",
+          "x": 773.0,
+          "y": 449.0
+        },
+        {
+          "name": "fraction_tuna_catch",
+          "type": "aux",
+          "x": 519.0,
+          "y": 90.0
+        },
+        {
+          "name": "total_number_of_tuna_ships",
+          "type": "aux",
+          "x": 320.0,
+          "y": 81.0
+        },
+        {
+          "name": "average_efficiency_tuna_ships",
+          "type": "aux",
+          "x": 404.0,
+          "y": 139.0
+        },
+        {
+          "name": "Official_Number_of_Tuna_Ships",
+          "type": "stock",
+          "x": 151.0,
+          "y": 163.0
+        },
+        {
+          "name": "illegal_tuna_ships",
+          "type": "aux",
+          "x": 149.0,
+          "y": 98.0
+        },
+        {
+          "name": "change_in_tuna_perception_lookup",
+          "type": "lookup",
+          "x": 745.0,
+          "y": 501.0
+        },
+        {
+          "name": "most_recent_perception_concerning_tuna_fishery",
+          "type": "aux",
+          "x": 520.0,
+          "y": 502.0
+        },
+        {
+          "name": "perceived_state_of_tuna_fishery",
+          "type": "aux",
+          "x": 284.0,
+          "y": 503.0
+        },
+        {
+          "name": "delay_time",
+          "type": "aux",
+          "x": 266.0,
+          "y": 440.0
+        },
+        {
+          "name": "initial_state_tuna_fishery",
+          "type": "aux",
+          "x": 378.0,
+          "y": 440.0
+        },
+        {
+          "name": "_48",
+          "type": "flow",
+          "x": 156.0,
+          "y": 218.0
+        },
+        {
+          "name": "net_increase_official_number_of_tuna_ships",
+          "type": "aux",
+          "x": 235.0,
+          "y": 218.0
+        },
+        {
+          "name": "proposed_change_in_the_number_of_tuna_ships",
+          "type": "aux",
+          "x": 134.0,
+          "y": 335.0
+        },
+        {
+          "name": "implementation_time_delay",
+          "type": "aux",
+          "x": 328.0,
+          "y": 326.0
+        },
+        {
+          "name": "effect",
+          "type": "aux",
+          "x": 166.0,
+          "y": 435.0
+        }
+      ],
+      "connectors": [
+        {
+          "from": "5",
+          "to": "Tuna_Biomass"
+        },
+        {
+          "from": "5",
+          "to": "2"
+        },
+        {
+          "from": "10",
+          "to": "Tuna_Biomass"
+        },
+        {
+          "from": "10",
+          "to": "7"
+        },
+        {
+          "from": "15",
+          "to": "12"
+        },
+        {
+          "from": "15",
+          "to": "Tuna_Biomass"
+        },
+        {
+          "from": "20",
+          "to": "17"
+        },
+        {
+          "from": "20",
+          "to": "Tuna_Biomass"
+        },
+        {
+          "from": "tuna_recruitment_rate",
+          "to": "_48"
+        },
+        {
+          "from": "tuna_growth_rate",
+          "to": "growth_existing_tuna_biomass"
+        },
+        {
+          "from": "Tuna_Biomass",
+          "to": "growth_existing_tuna_biomass"
+        },
+        {
+          "from": "Tuna_Biomass",
+          "to": "_48"
+        },
+        {
+          "from": "Tuna_Biomass",
+          "to": "_48"
+        },
+        {
+          "from": "Tuna_Biomass",
+          "to": "ratio_of_biomass_to_unfished_biomass"
+        },
+        {
+          "from": "ratio_of_biomass_to_unfished_biomass",
+          "to": "natural_deaths"
+        },
+        {
+          "from": "normal_death_rate",
+          "to": "natural_deaths"
+        },
+        {
+          "from": "unfished_biomass_1990",
+          "to": "ratio_of_biomass_to_unfished_biomass"
+        },
+        {
+          "from": "unfished_biomass_1990",
+          "to": "Tuna_Biomass"
+        },
+        {
+          "from": "Tuna_Biomass",
+          "to": "tuna_catch"
+        },
+        {
+          "from": "fraction_tuna_catch",
+          "to": "tuna_catch"
+        },
+        {
+          "from": "illegal_tuna_ships",
+          "to": "total_number_of_tuna_ships"
+        },
+        {
+          "from": "Official_Number_of_Tuna_Ships",
+          "to": "total_number_of_tuna_ships"
+        },
+        {
+          "from": "total_number_of_tuna_ships",
+          "to": "fraction_tuna_catch"
+        },
+        {
+          "from": "average_efficiency_tuna_ships",
+          "to": "fraction_tuna_catch"
+        },
+        {
+          "from": "ratio_of_biomass_to_unfished_biomass",
+          "to": "most_recent_perception_concerning_tuna_fishery"
+        },
+        {
+          "from": "change_in_tuna_perception_lookup",
+          "to": "most_recent_perception_concerning_tuna_fishery"
+        },
+        {
+          "from": "most_recent_perception_concerning_tuna_fishery",
+          "to": "perceived_state_of_tuna_fishery"
+        },
+        {
+          "from": "delay_time",
+          "to": "perceived_state_of_tuna_fishery"
+        },
+        {
+          "from": "initial_state_tuna_fishery",
+          "to": "perceived_state_of_tuna_fishery"
+        },
+        {
+          "from": "61",
+          "to": "Official_Number_of_Tuna_Ships"
+        },
+        {
+          "from": "61",
+          "to": "58"
+        },
+        {
+          "from": "proposed_change_in_the_number_of_tuna_ships",
+          "to": "net_increase_official_number_of_tuna_ships"
+        },
+        {
+          "from": "implementation_time_delay",
+          "to": "net_increase_official_number_of_tuna_ships"
+        },
+        {
+          "from": "perceived_state_of_tuna_fishery",
+          "to": "effect"
+        },
+        {
+          "from": "effect",
+          "to": "proposed_change_in_the_number_of_tuna_ships"
+        },
+        {
+          "from": "Official_Number_of_Tuna_Ships",
+          "to": "proposed_change_in_the_number_of_tuna_ships"
+        }
+      ],
+      "flowRoutes": [
+        {
+          "flowName": "_48",
+          "points": [
+            [
+              503.0,
+              265.0
+            ]
+          ]
+        },
+        {
+          "flowName": "_48",
+          "points": [
+            [
+              608.0,
+              338.0
+            ]
+          ]
+        },
+        {
+          "flowName": "_48",
+          "points": [
+            [
+              605.0,
+              198.0
+            ]
+          ]
+        },
+        {
+          "flowName": "_48",
+          "points": [
+            [
+              723.0,
+              265.0
+            ]
+          ]
+        },
+        {
+          "flowName": "_48",
+          "points": [
+            [
+              156.0,
+              218.0
+            ]
+          ]
+        }
+      ]
+    }
+  ],
+  "defaultSimulation": {
+    "timeStep": "Year",
+    "duration": 300.0,
+    "durationUnit": "Year"
+  },
+  "metadata": {
+    "author": "Dr. Erik Pruyt",
+    "source": "Pruyt, E., 2013. Small System Dynamics Models for Big Issues: Triple Jump towards Real-World Complexity. TU Delft Library. ISBN 978-94-6186-195-5",
+    "license": "CC-BY-NC-SA-4.0",
+    "url": "https://simulation.tudelft.nl/SD/model_files_nested/14_12"
+  }
+}

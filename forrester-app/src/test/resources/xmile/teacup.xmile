@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xmile xmlns="http://docs.oasis-open.org/xmile/ns/XMILE/v1.0" version="1.0">
+  <header>
+    <name>Teacup</name>
+    <vendor>Test</vendor>
+    <product>Test</product>
+  </header>
+  <sim_specs time_units="minute">
+    <start>0</start>
+    <stop>30</stop>
+    <dt>1</dt>
+  </sim_specs>
+  <model>
+    <variables>
+      <stock name="Teacup_Temperature">
+        <eqn>180</eqn>
+        <outflow>Heat_Loss_to_Room</outflow>
+        <units>Degrees</units>
+      </stock>
+      <flow name="Heat_Loss_to_Room">
+        <eqn>(Teacup_Temperature - Room_Temperature) / Characteristic_Time</eqn>
+        <units>Degrees/Minute</units>
+      </flow>
+      <aux name="Room_Temperature">
+        <eqn>70</eqn>
+        <units>Degrees</units>
+      </aux>
+      <aux name="Characteristic_Time">
+        <eqn>10</eqn>
+        <units>Minute</units>
+      </aux>
+    </variables>
+    <views>
+      <view name="Main">
+        <stock name="Teacup_Temperature" x="200" y="150"/>
+        <flow name="Heat_Loss_to_Room" x="350" y="150"/>
+        <aux name="Room_Temperature" x="350" y="250"/>
+        <aux name="Characteristic_Time" x="200" y="250"/>
+        <connector>
+          <from>Teacup_Temperature</from>
+          <to>Heat_Loss_to_Room</to>
+        </connector>
+        <connector>
+          <from>Room_Temperature</from>
+          <to>Heat_Loss_to_Room</to>
+        </connector>
+        <connector>
+          <from>Characteristic_Time</from>
+          <to>Heat_Loss_to_Room</to>
+        </connector>
+      </view>
+    </views>
+  </model>
+</xmile>
