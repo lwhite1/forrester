@@ -132,8 +132,9 @@ public final class SketchParser {
         }
         String id = parts[1].strip();
         String rawName = parts[2].strip();
-        String name = VensimExprTranslator.normalizeName(rawName);
-        if (name.isEmpty()) {
+        String displayName = VensimExprTranslator.normalizeDisplayName(rawName);
+        String eqName = VensimExprTranslator.normalizeName(rawName);
+        if (displayName.isEmpty()) {
             return;
         }
 
@@ -146,10 +147,10 @@ public final class SketchParser {
             return;
         }
 
-        idToName.put(id, name);
-        ElementType type = classifyElementType(name, stockNames, flowNames, lookupNames,
+        idToName.put(id, displayName);
+        ElementType type = classifyElementType(eqName, stockNames, flowNames, lookupNames,
                 cldVariableNames);
-        elements.add(new ElementPlacement(name, type, x, y));
+        elements.add(new ElementPlacement(displayName, type, x, y));
     }
 
     private static void parseFlowValveLine(String[] parts, List<ElementPlacement> elements,
@@ -161,8 +162,8 @@ public final class SketchParser {
         }
         String id = parts[1].strip();
         String rawName = parts[2].strip();
-        String name = VensimExprTranslator.normalizeName(rawName);
-        if (name.isEmpty()) {
+        String displayName = VensimExprTranslator.normalizeDisplayName(rawName);
+        if (displayName.isEmpty()) {
             return;
         }
 
@@ -175,9 +176,9 @@ public final class SketchParser {
             return;
         }
 
-        idToName.put(id, name);
-        elements.add(new ElementPlacement(name, ElementType.FLOW, x, y));
-        flowRoutes.add(new FlowRoute(name, List.of(new double[]{x, y})));
+        idToName.put(id, displayName);
+        elements.add(new ElementPlacement(displayName, ElementType.FLOW, x, y));
+        flowRoutes.add(new FlowRoute(displayName, List.of(new double[]{x, y})));
     }
 
     private static void parseConnectorLine(String[] parts, List<ConnectorRoute> connectors,

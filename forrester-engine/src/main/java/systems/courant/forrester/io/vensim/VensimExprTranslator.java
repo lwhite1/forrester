@@ -206,9 +206,10 @@ public final class VensimExprTranslator {
     /**
      * Normalizes a Vensim variable name to Forrester identifier format.
      * Converts spaces to underscores, strips quotes, and trims whitespace.
+     * Use this form for equation references (identifiers in formula text).
      *
      * @param vensimName the Vensim variable name
-     * @return the normalized name
+     * @return the normalized name with underscores instead of spaces
      */
     public static String normalizeName(String vensimName) {
         if (vensimName == null || vensimName.isBlank()) {
@@ -223,6 +224,37 @@ public final class VensimExprTranslator {
         name = name.replaceAll("\\s+", "_");
         // Remove any characters not valid in identifiers
         name = name.replaceAll("[^a-zA-Z0-9_]", "");
+        // Ensure it doesn't start with a digit
+        if (!name.isEmpty() && Character.isDigit(name.charAt(0))) {
+            name = "_" + name;
+        }
+        return name;
+    }
+
+    /**
+     * Normalizes a Vensim variable name to a human-readable display form.
+     * Preserves spaces (collapsed to single space), strips quotes and special
+     * characters. Use this form for element names displayed on the canvas,
+     * in plots, and in dashboards.
+     *
+     * @param vensimName the Vensim variable name
+     * @return the display name with spaces preserved
+     */
+    public static String normalizeDisplayName(String vensimName) {
+        if (vensimName == null || vensimName.isBlank()) {
+            return "";
+        }
+        String name = vensimName.strip();
+        // Remove surrounding quotes if present
+        if (name.startsWith("\"") && name.endsWith("\"") && name.length() > 2) {
+            name = name.substring(1, name.length() - 1);
+        }
+        // Collapse whitespace to single spaces
+        name = name.replaceAll("\\s+", " ");
+        // Remove any characters not valid in display names (allow letters, digits, spaces, underscores)
+        name = name.replaceAll("[^a-zA-Z0-9_ ]", "");
+        // Trim after removing characters
+        name = name.strip();
         // Ensure it doesn't start with a digit
         if (!name.isEmpty() && Character.isDigit(name.charAt(0))) {
             name = "_" + name;

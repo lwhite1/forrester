@@ -502,13 +502,19 @@ public final class VensimExporter {
 
         Set<String> inlined = new HashSet<>();
         for (FlowDef flow : def.flows()) {
-            if (!flow.name().endsWith("_net_flow")) {
+            // Recognize both space-form (" net flow") and legacy underscore-form ("_net_flow")
+            String candidateStock;
+            if (flow.name().endsWith(" net flow")) {
+                candidateStock = flow.name().substring(0,
+                        flow.name().length() - " net flow".length());
+            } else if (flow.name().endsWith("_net_flow")) {
+                candidateStock = flow.name().substring(0,
+                        flow.name().length() - "_net_flow".length());
+            } else {
                 continue;
             }
             // Check if this matches the pattern: sink is a stock, source is null,
             // and the stock name is a prefix of the flow name
-            String candidateStock = flow.name().substring(0,
-                    flow.name().length() - "_net_flow".length());
             if (flow.sink() != null && flow.sink().equals(candidateStock)
                     && flow.source() == null && stockNames.contains(candidateStock)) {
                 inlined.add(flow.name());

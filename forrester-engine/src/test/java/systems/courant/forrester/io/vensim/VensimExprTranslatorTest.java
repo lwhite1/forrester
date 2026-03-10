@@ -55,6 +55,65 @@ class VensimExprTranslatorTest {
     }
 
     @Nested
+    @DisplayName("Display name normalization")
+    class DisplayNameNormalization {
+
+        @Test
+        void shouldPreserveSpaces() {
+            assertThat(VensimExprTranslator.normalizeDisplayName("Contact Rate"))
+                    .isEqualTo("Contact Rate");
+        }
+
+        @Test
+        void shouldCollapseMultipleSpaces() {
+            assertThat(VensimExprTranslator.normalizeDisplayName("Contact  Rate"))
+                    .isEqualTo("Contact Rate");
+        }
+
+        @Test
+        void shouldTrimWhitespace() {
+            assertThat(VensimExprTranslator.normalizeDisplayName("  x  ")).isEqualTo("x");
+        }
+
+        @Test
+        void shouldPreserveMultipleWords() {
+            assertThat(VensimExprTranslator.normalizeDisplayName("My Long Variable Name"))
+                    .isEqualTo("My Long Variable Name");
+        }
+
+        @Test
+        void shouldRemoveSpecialCharacters() {
+            assertThat(VensimExprTranslator.normalizeDisplayName("Rate$#")).isEqualTo("Rate");
+        }
+
+        @Test
+        void shouldStripQuotes() {
+            assertThat(VensimExprTranslator.normalizeDisplayName("\"electric vehicles (EV)\""))
+                    .isEqualTo("electric vehicles EV");
+        }
+
+        @Test
+        void shouldHandleEmptyString() {
+            assertThat(VensimExprTranslator.normalizeDisplayName("")).isEmpty();
+        }
+
+        @Test
+        void shouldHandleNull() {
+            assertThat(VensimExprTranslator.normalizeDisplayName(null)).isEmpty();
+        }
+
+        @Test
+        void shouldPrefixDigitStartingName() {
+            assertThat(VensimExprTranslator.normalizeDisplayName("123abc")).isEqualTo("_123abc");
+        }
+
+        @Test
+        void shouldPreserveUnderscores() {
+            assertThat(VensimExprTranslator.normalizeDisplayName("my_var")).isEqualTo("my_var");
+        }
+    }
+
+    @Nested
     @DisplayName("IF THEN ELSE translation")
     class IfThenElse {
 

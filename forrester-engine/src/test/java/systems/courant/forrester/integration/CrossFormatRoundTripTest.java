@@ -119,7 +119,7 @@ class CrossFormatRoundTripTest {
             CompiledModel compiledVensim = compiler.compile(fromVensim);
             Simulation simVensim = compiledVensim.createSimulation();
             simVensim.execute();
-            double vensimTemp = findStock(compiledVensim, "Teacup_Temperature").getValue();
+            double vensimTemp = findStock(compiledVensim, "Teacup Temperature").getValue();
 
             // ModelDefinition → JSON → ModelDefinition
             String json = serializer.toJson(fromVensim);
@@ -138,7 +138,7 @@ class CrossFormatRoundTripTest {
             CompiledModel compiledFinal = compiler.compile(finalDef);
             Simulation simFinal = compiledFinal.createSimulation();
             simFinal.execute();
-            double finalTemp = findStock(compiledFinal, "Teacup_Temperature").getValue();
+            double finalTemp = findStock(compiledFinal, "Teacup Temperature").getValue();
 
             assertThat(finalTemp).isCloseTo(vensimTemp, within(0.1));
         }

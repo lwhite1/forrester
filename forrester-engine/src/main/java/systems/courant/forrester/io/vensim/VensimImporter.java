@@ -133,23 +133,27 @@ public class VensimImporter implements ModelImporter {
         constantValues.put("TIME_STEP", timeStepValue);
         constantValues.put("INITIAL_TIME", initialTime);
         constantValues.put("FINAL_TIME", finalTime);
+        // Map from equation-form name to display-form name (preserving spaces)
+        Map<String, String> eqToDisplay = new HashMap<>();
         for (MdlEquation eq : parsed.equations()) {
             String name = eq.name().strip();
             if (name.isEmpty() || isSystemVar(name)) {
                 continue;
             }
-            String normalized = VensimExprTranslator.normalizeName(name);
+            String eqName = VensimExprTranslator.normalizeName(name);
+            String displayName = VensimExprTranslator.normalizeDisplayName(name);
+            eqToDisplay.put(eqName, displayName);
 
             if (eq.operator().equals(":")) {
                 // Subscript definition
                 continue;
             }
             if (eq.operator().equals("()")) {
-                lookupNames.add(normalized);
+                lookupNames.add(eqName);
                 continue;
             }
             if (INTEG_PATTERN.matcher(eq.expression()).find()) {
-                stockNames.add(normalized);
+                stockNames.add(eqName);
                 continue;
             }
             if (eq.operator().equals(":=")) {
@@ -157,10 +161,10 @@ public class VensimImporter implements ModelImporter {
             }
             // Collect numeric constants for initial value resolution
             if (isNumericLiteral(eq.expression())) {
-                constantValues.put(normalized, Double.parseDouble(eq.expression().strip()));
+                constantValues.put(eqName, Double.parseDouble(eq.expression().strip()));
                 // Also map the original multi-word name (normalized with underscores)
                 String altNormalized = name.replace(" ", "_");
-                if (!altNormalized.equals(normalized)) {
+                if (!altNormalized.equals(eqName)) {
                     constantValues.put(altNormalized, Double.parseDouble(eq.expression().strip()));
                 }
             }
@@ -180,16 +184,17 @@ public class VensimImporter implements ModelImporter {
             if (name.isEmpty() || isSystemVar(name)) {
                 continue;
             }
-            String normalized = VensimExprTranslator.normalizeName(name);
-            if (!allNormalizedNames.add(normalized)) {
-                warnings.add("Duplicate normalized name '" + normalized
+            String eqName = VensimExprTranslator.normalizeName(name);
+            String displayName = VensimExprTranslator.normalizeDisplayName(name);
+            if (!allNormalizedNames.add(eqName)) {
+                warnings.add("Duplicate normalized name '" + eqName
                         + "' (from '" + name + "')");
             }
             String comment = eq.comment().isBlank() ? name : eq.comment();
 
             if (isCld) {
                 try {
-                    classifyAndBuildCld(eq, normalized, comment, builder,
+                    classifyAndBuildCld(eq, displayName, eqName, comment, builder,
                             cldVariableNames, warnings);
                 } catch (IllegalArgumentException e) {
                     warnings.add("Error processing '" + name + "': " + e.getMessage());
@@ -197,7 +202,7 @@ public class VensimImporter implements ModelImporter {
             } else {
                 String unit = cleanUnits(eq.units());
                 try {
-                    classifyAndBuild(eq, normalized, unit, comment, builder,
+                    classifyAndBuild(eq, displayName, eqName, unit, comment, builder,
                             vensimNames, stockNames, flowNames, lookupNames,
                             sketchFlowNames, constantValues, timeUnit, warnings);
                 } catch (IllegalArgumentException e) {
@@ -227,8 +232,9 @@ public class VensimImporter implements ModelImporter {
         return new ImportResult(builder.build(), warnings);
     }
 
-    private void classifyAndBuild(MdlEquation eq, String normalized, String unit,
-                                   String comment, ModelDefinitionBuilder builder,
+    private void classifyAndBuild(MdlEquation eq, String displayName, String eqName,
+                                   String unit, String comment,
+                                   ModelDefinitionBuilder builder,
                                    Set<String> vensimNames, Set<String> stockNames,
                                    Set<String> flowNames, Set<String> lookupNames,
                                    Set<String> sketchFlowNames,
@@ -242,18 +248,18 @@ public class VensimImporter implements ModelImporter {
             List<String> labels = Arrays.stream(expression.split(","))
                     .map(String::strip)
                     .filter(s -> !s.isEmpty())
-                    .map(VensimExprTranslator::normalizeName)
+                    .map(VensimExprTranslator::normalizeDisplayName)
                     .toList();
             if (!labels.isEmpty()) {
-                builder.subscript(normalized, labels);
+                builder.subscript(displayName, labels);
             }
             return;
         }
 
         // Standalone lookup table (operator "()")
         if (operator.equals("()")) {
-            buildLookupTable(normalized, expression, unit, comment, builder, warnings);
-            lookupNames.add(normalized);
+            buildLookupTable(displayName, eqName, expression, unit, comment, builder,
+                    lookupNames, warnings);
             return;
         }
 
@@ -265,7 +271,7 @@ public class VensimImporter implements ModelImporter {
 
         // Stock (INTEG function)
         if (INTEG_PATTERN.matcher(expression).find()) {
-            buildStock(eq, normalized, expression, unit, comment, builder,
+            buildStock(eq, displayName, eqName, expression, unit, comment, builder,
                     vensimNames, flowNames, lookupNames, sketchFlowNames,
                     constantValues, timeUnit, warnings);
             return;
@@ -274,14 +280,14 @@ public class VensimImporter implements ModelImporter {
         // Unchangeable constant (operator "==")
         if (operator.equals("==")) {
             if (isNumericLiteral(expression)) {
-                builder.aux(new AuxDef(normalized, comment,
+                builder.aux(new AuxDef(displayName, comment,
                         AuxDef.formatValue(Double.parseDouble(expression.strip())), unit));
             } else {
                 // Non-numeric unchangeable — treat as auxiliary
                 VensimExprTranslator.TranslationResult tr =
-                        VensimExprTranslator.translate(expression, normalized, vensimNames, lookupNames);
+                        VensimExprTranslator.translate(expression, eqName, vensimNames, lookupNames);
                 addExtractedLookups(tr, builder, lookupNames, warnings);
-                builder.aux(new AuxDef(normalized, comment, tr.expression(), unit));
+                builder.aux(new AuxDef(displayName, comment, tr.expression(), unit));
                 warnings.addAll(tr.warnings());
             }
             return;
@@ -289,7 +295,7 @@ public class VensimImporter implements ModelImporter {
 
         // Numeric literal → constant (literal-valued auxiliary)
         if (isNumericLiteral(expression)) {
-            builder.aux(new AuxDef(normalized, comment,
+            builder.aux(new AuxDef(displayName, comment,
                     AuxDef.formatValue(Double.parseDouble(expression.strip())), unit));
             return;
         }
@@ -297,23 +303,23 @@ public class VensimImporter implements ModelImporter {
         // Check if expression contains WITH LOOKUP
         if (expression.toUpperCase(Locale.ROOT).contains("WITH LOOKUP")) {
             VensimExprTranslator.TranslationResult tr =
-                    VensimExprTranslator.translate(expression, normalized, vensimNames, lookupNames);
+                    VensimExprTranslator.translate(expression, eqName, vensimNames, lookupNames);
             addExtractedLookups(tr, builder, lookupNames, warnings);
-            builder.aux(new AuxDef(normalized, comment, tr.expression(), unit));
+            builder.aux(new AuxDef(displayName, comment, tr.expression(), unit));
             warnings.addAll(tr.warnings());
             return;
         }
 
         // Default: auxiliary variable
         VensimExprTranslator.TranslationResult tr =
-                VensimExprTranslator.translate(expression, normalized, vensimNames, lookupNames);
+                VensimExprTranslator.translate(expression, eqName, vensimNames, lookupNames);
         addExtractedLookups(tr, builder, lookupNames, warnings);
-        builder.aux(new AuxDef(normalized, comment, tr.expression(), unit));
+        builder.aux(new AuxDef(displayName, comment, tr.expression(), unit));
         warnings.addAll(tr.warnings());
     }
 
-    private void classifyAndBuildCld(MdlEquation eq, String normalized, String comment,
-                                      ModelDefinitionBuilder builder,
+    private void classifyAndBuildCld(MdlEquation eq, String displayName, String eqName,
+                                      String comment, ModelDefinitionBuilder builder,
                                       Set<String> cldVariableNames,
                                       List<String> warnings) {
         String operator = eq.operator();
@@ -332,12 +338,13 @@ public class VensimImporter implements ModelImporter {
             return;
         }
 
-        builder.cldVariable(new CldVariableDef(normalized, comment));
-        cldVariableNames.add(normalized);
+        builder.cldVariable(new CldVariableDef(displayName, comment));
+        cldVariableNames.add(eqName);
     }
 
-    private void buildStock(MdlEquation eq, String normalized, String expression,
-                             String unit, String comment, ModelDefinitionBuilder builder,
+    private void buildStock(MdlEquation eq, String displayName, String eqName,
+                             String expression, String unit, String comment,
+                             ModelDefinitionBuilder builder,
                              Set<String> vensimNames, Set<String> flowNames,
                              Set<String> lookupNames, Set<String> sketchFlowNames,
                              Map<String, Double> constantValues,
@@ -372,46 +379,49 @@ public class VensimImporter implements ModelImporter {
         InitialValueResult initResult = parseInitialValue(
                 initExpr, constantValues, vensimNames, lookupNames, warnings, eq.name());
 
-        // Create stock
+        // Create stock (display name preserves spaces)
         if (initResult.expression != null) {
-            builder.stock(new StockDef(normalized, comment, 0.0, initResult.expression,
+            builder.stock(new StockDef(displayName, comment, 0.0, initResult.expression,
                     unit, null, null));
         } else {
-            builder.stock(new StockDef(normalized, comment, initResult.value, unit, null));
+            builder.stock(new StockDef(displayName, comment, initResult.value, unit, null));
         }
 
-        // Create flow for the net rate
-        String flowName = normalized + "_net_flow";
+        // Create flow for the net rate (synthetic name uses display form)
+        String flowDisplayName = displayName + " net flow";
+        String flowEqName = eqName + "_net_flow";
         VensimExprTranslator.TranslationResult tr =
-                VensimExprTranslator.translate(rateExpr, normalized, vensimNames, lookupNames);
+                VensimExprTranslator.translate(rateExpr, eqName, vensimNames, lookupNames);
         warnings.addAll(tr.warnings());
 
-        builder.flow(new FlowDef(flowName, "Net flow for " + eq.name(),
-                tr.expression(), timeUnit, null, normalized));
-        flowNames.add(flowName);
-        // Track original normalized name for sketch flow valve matching
-        sketchFlowNames.add(normalized);
-        sketchFlowNames.add(flowName);
+        builder.flow(new FlowDef(flowDisplayName, "Net flow for " + eq.name(),
+                tr.expression(), timeUnit, null, displayName));
+        flowNames.add(flowEqName);
+        // Track equation-form names for sketch flow valve matching
+        sketchFlowNames.add(eqName);
+        sketchFlowNames.add(flowEqName);
     }
 
-    private void buildLookupTable(String normalized, String expression, String unit,
-                                   String comment, ModelDefinitionBuilder builder,
-                                   List<String> warnings) {
+    private void buildLookupTable(String displayName, String eqName,
+                                   String expression, String unit, String comment,
+                                   ModelDefinitionBuilder builder,
+                                   Set<String> lookupNames, List<String> warnings) {
         if (expression.isBlank()) {
-            warnings.add("Empty lookup table data for '" + normalized + "'");
+            warnings.add("Empty lookup table data for '" + displayName + "'");
             return;
         }
 
         java.util.Optional<double[][]> pointsOpt = VensimExprTranslator.parseLookupPoints(expression);
         if (pointsOpt.isEmpty() || pointsOpt.get()[0].length < 2) {
-            warnings.add("Could not parse lookup data for '" + normalized + "'");
+            warnings.add("Could not parse lookup data for '" + displayName + "'");
             return;
         }
         double[][] points = pointsOpt.get();
 
-        points = deduplicateLookupPoints(points, normalized, warnings);
-        builder.lookupTable(new LookupTableDef(normalized, comment,
+        points = deduplicateLookupPoints(points, displayName, warnings);
+        builder.lookupTable(new LookupTableDef(displayName, comment,
                 points[0], points[1], "LINEAR"));
+        lookupNames.add(eqName);
     }
 
     /**

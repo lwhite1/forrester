@@ -76,7 +76,7 @@ class VensimImporterTest {
             // Should also create a net flow for the stock
             assertThat(def.flows()).hasSize(1);
             FlowDef flow = def.flows().get(0);
-            assertThat(flow.name()).isEqualTo("Population_net_flow");
+            assertThat(flow.name()).isEqualTo("Population net flow");
             assertThat(flow.sink()).isEqualTo("Population");
         }
 
@@ -291,7 +291,7 @@ class VensimImporterTest {
     class MultiWordNames {
 
         @Test
-        void shouldNormalizeMultiWordNamesInExpressions() {
+        void shouldPreserveSpacesInMultiWordNames() {
             String mdl = """
                     Infection Rate = Contact Rate * Infected
                     \t~\tPeople/Day
@@ -325,8 +325,10 @@ class VensimImporterTest {
                     """;
 
             ImportResult result = importer.importModel(mdl, "Test");
+            // Element names preserve spaces
             AuxDef aux = result.definition().auxiliaries().stream()
-                    .filter(a -> a.name().equals("Infection_Rate")).findFirst().orElseThrow();
+                    .filter(a -> a.name().equals("Infection Rate")).findFirst().orElseThrow();
+            // Equations use underscore form for identifiers
             assertThat(aux.equation()).isEqualTo("Contact_Rate * Infected");
         }
     }
@@ -364,7 +366,7 @@ class VensimImporterTest {
             ImportResult result = importer.importModel(mdl, "Test");
             assertThat(result.definition().lookupTables()).hasSize(1);
             LookupTableDef lt = result.definition().lookupTables().get(0);
-            assertThat(lt.name()).isEqualTo("effect_of_pressure");
+            assertThat(lt.name()).isEqualTo("effect of pressure");
             assertThat(lt.xValues().length).isGreaterThanOrEqualTo(2);
         }
     }
@@ -384,7 +386,7 @@ class VensimImporterTest {
             // 1 stock: Teacup Temperature
             assertThat(def.stocks()).hasSize(1);
             StockDef stock = def.stocks().get(0);
-            assertThat(stock.name()).isEqualTo("Teacup_Temperature");
+            assertThat(stock.name()).isEqualTo("Teacup Temperature");
             assertThat(stock.initialValue()).isEqualTo(180.0);
 
             // 2 user constants + 3 built-in constants (TIME_STEP, INITIAL_TIME, FINAL_TIME)
@@ -393,14 +395,14 @@ class VensimImporterTest {
                     .map(AuxDef::name)
                     .collect(Collectors.toSet());
             assertThat(constantNames).contains(
-                    "Room_Temperature", "Characteristic_Time",
+                    "Room Temperature", "Characteristic Time",
                     "TIME_STEP", "INITIAL_TIME", "FINAL_TIME");
 
             // All auxiliaries: 1 formula + 2 user constants + 3 built-in constants = 6
             assertThat(def.auxiliaries()).hasSize(6);
             assertThat(def.auxiliaries().stream().filter(a -> !a.isLiteral()).toList())
                     .hasSize(1)
-                    .first().extracting(AuxDef::name).isEqualTo("Heat_Loss_to_Room");
+                    .first().extracting(AuxDef::name).isEqualTo("Heat Loss to Room");
 
             // 1 flow: net flow for the stock
             assertThat(def.flows()).hasSize(1);
@@ -438,7 +440,7 @@ class VensimImporterTest {
                     .map(AuxDef::name)
                     .collect(Collectors.toSet());
             assertThat(constantNames).contains(
-                    "Contact_Rate", "Recovery_Time", "Total_Population",
+                    "Contact Rate", "Recovery Time", "Total Population",
                     "TIME_STEP", "INITIAL_TIME", "FINAL_TIME");
 
             // 2 formula auxiliaries + 6 literal-valued (constants) = 8 total
@@ -727,7 +729,7 @@ class VensimImporterTest {
             Set<String> names = def.cldVariables().stream()
                     .map(CldVariableDef::name)
                     .collect(Collectors.toSet());
-            assertThat(names).containsExactlyInAnyOrder("Population", "Birth_Rate");
+            assertThat(names).containsExactlyInAnyOrder("Population", "Birth Rate");
         }
 
         @Test
@@ -847,7 +849,7 @@ class VensimImporterTest {
                     .map(CldVariableDef::name)
                     .collect(Collectors.toSet());
             assertThat(names).containsExactlyInAnyOrder(
-                    "Population", "Birth_Rate", "Death_Rate", "Resources");
+                    "Population", "Birth Rate", "Death Rate", "Resources");
 
             // No stocks, flows, or formula auxiliaries; only built-in constants
             assertThat(def.stocks()).isEmpty();

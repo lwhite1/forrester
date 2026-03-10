@@ -69,7 +69,7 @@ class ModelWindowImportExportFxTest {
 
         ModelEditor editor = window.getEditor();
         assertThat(editor.getStocks()).hasSize(1);
-        assertThat(editor.getStocks().getFirst().name()).isEqualTo("Teacup_Temperature");
+        assertThat(editor.getStocks().getFirst().name()).isEqualTo("Teacup Temperature");
         assertThat(editor.getFlows()).hasSize(1);
         assertThat(window.getCurrentFile()).isNull();
     }
@@ -143,7 +143,7 @@ class ModelWindowImportExportFxTest {
         ImportResult reimported = new VensimImporter().importModel(mdlFile);
         assertThat(reimported.definition().stocks()).hasSize(1);
         assertThat(reimported.definition().stocks().getFirst().name())
-                .isEqualTo("Teacup_Temperature");
+                .isEqualTo("Teacup Temperature");
     }
 
     @Test
@@ -164,7 +164,7 @@ class ModelWindowImportExportFxTest {
         ImportResult reimported = new XmileImporter().importModel(xmileFile);
         assertThat(reimported.definition().stocks()).hasSize(1);
         assertThat(reimported.definition().stocks().getFirst().name())
-                .isEqualTo("Teacup_Temperature");
+                .isEqualTo("Teacup Temperature");
     }
 
     // --- Title and State ---

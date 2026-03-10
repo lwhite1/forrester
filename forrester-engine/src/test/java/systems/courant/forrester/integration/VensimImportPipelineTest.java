@@ -45,7 +45,7 @@ class VensimImportPipelineTest {
         Simulation sim = compiled.createSimulation();
         sim.execute();
 
-        Stock temp = findStock(compiled, "Teacup_Temperature");
+        Stock temp = findStock(compiled, "Teacup Temperature");
         // Teacup starts at 180°, room is 70°; should cool toward room temperature
         assertThat(temp.getValue())
                 .as("Teacup should cool toward room temperature")
@@ -103,7 +103,7 @@ class VensimImportPipelineTest {
 
         // Room Temperature should be 70 degrees
         var roomTemp = def.parameters().stream()
-                .filter(c -> c.name().equals("Room_Temperature"))
+                .filter(c -> c.name().equals("Room Temperature"))
                 .findFirst();
         assertThat(roomTemp).isPresent();
         assertThat(roomTemp.get().literalValue()).isCloseTo(70.0, within(0.001));
