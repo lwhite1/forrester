@@ -665,6 +665,19 @@ class ExprCompilerTest {
             Formula formula = compiler.compile("LOOKUP(My_Table, 50)");
             assertThat(formula.getCurrentValue()).isCloseTo(0.5, within(0.01));
         }
+
+        @Test
+        void shouldResolveMixedCaseLookupTableWithVensimSyntax() {
+            double[] inputHolder = {0};
+            LookupTable table = LookupTable.linear(
+                    new double[]{0, 50, 100},
+                    new double[]{1.0, 0.5, 0.0},
+                    () -> inputHolder[0]);
+            context.addLookupTable("Effect_of_Crowding", table, inputHolder);
+            // Vensim syntax: table(input) — should preserve original case
+            Formula formula = compiler.compile("Effect_of_Crowding(50)");
+            assertThat(formula.getCurrentValue()).isCloseTo(0.5, within(0.01));
+        }
     }
 
     @Nested

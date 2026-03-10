@@ -375,8 +375,9 @@ public class ExprCompiler {
             case "LOOKUP" -> compileLookup(args);
             default -> {
                 // Check if the function name is a lookup table (Vensim allows table(input) syntax)
-                if (args.size() == 1 && context.resolveLookupTable(name).isPresent()) {
-                    List<Expr> lookupArgs = List.of(new Expr.Ref(name), args.get(0));
+                String originalName = call.name();
+                if (args.size() == 1 && context.resolveLookupTable(originalName).isPresent()) {
+                    List<Expr> lookupArgs = List.of(new Expr.Ref(originalName), args.get(0));
                     yield compileLookup(lookupArgs);
                 }
                 throw new CompilationException(
