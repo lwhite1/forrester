@@ -129,7 +129,8 @@ class FormContext {
         icon.setStyle(Styles.HELP_ICON);
         Tooltip tip = new Tooltip(helpText);
         tip.setWrapText(true);
-        tip.setMaxWidth(300);
+        tip.setMaxWidth(360);
+        tip.setStyle("-fx-font-size: 13px;");
         tip.setShowDelay(Duration.millis(300));
         Tooltip.install(icon, tip);
         HBox box = new HBox(4, label, icon);

@@ -34,7 +34,7 @@ public final class Styles {
 
     // --- Help icons ---
     public static final String HELP_ICON =
-            "-fx-text-fill: #8899AA; -fx-font-size: 10px; -fx-cursor: hand;";
+            "-fx-text-fill: #8899AA; -fx-font-size: 13px; -fx-cursor: hand;";
 
     // --- Equation validation ---
     public static final String EQUATION_ERROR_BORDER =
