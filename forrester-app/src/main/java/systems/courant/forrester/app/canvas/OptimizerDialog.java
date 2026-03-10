@@ -129,7 +129,7 @@ public class OptimizerDialog extends Dialog<OptimizerDialog.Config> {
         paramsLabel.setStyle(Styles.SECTION_HEADER);
 
         Label validationLabel = new Label();
-        validationLabel.setStyle("-fx-text-fill: #cc3333; -fx-font-size: 11;");
+        validationLabel.setStyle(Styles.VALIDATION_ERROR);
         validationLabel.setWrapText(true);
         validationLabel.setMaxWidth(Double.MAX_VALUE);
         validationLabel.setId("optimizerValidationLabel");

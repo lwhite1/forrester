@@ -68,7 +68,7 @@ public class ParameterSweepDialog extends Dialog<ParameterSweepDialog.Config> {
         grid.add(trackCombo, 1, 4);
 
         Label validationLabel = new Label();
-        validationLabel.setStyle("-fx-text-fill: #cc3333; -fx-font-size: 11;");
+        validationLabel.setStyle(Styles.VALIDATION_ERROR);
         validationLabel.setWrapText(true);
         validationLabel.setMaxWidth(Double.MAX_VALUE);
         validationLabel.setId("sweepValidationLabel");

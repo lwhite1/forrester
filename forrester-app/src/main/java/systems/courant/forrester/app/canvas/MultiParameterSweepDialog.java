@@ -86,7 +86,7 @@ public class MultiParameterSweepDialog extends Dialog<MultiParameterSweepDialog.
         paramsLabel.setStyle(Styles.SECTION_HEADER);
 
         Label validationLabel = new Label();
-        validationLabel.setStyle("-fx-text-fill: #cc3333; -fx-font-size: 11;");
+        validationLabel.setStyle(Styles.VALIDATION_ERROR);
         validationLabel.setWrapText(true);
         validationLabel.setMaxWidth(Double.MAX_VALUE);
         validationLabel.setId("multiSweepValidationLabel");
@@ -179,9 +179,9 @@ public class MultiParameterSweepDialog extends Dialog<MultiParameterSweepDialog.
         long combos = computeCombinations(validParams);
         combinationCountLabel.setText(combos + " combinations");
         if (combos > MAX_COMBINATIONS) {
-            combinationCountLabel.setStyle("-fx-text-fill: red; -fx-font-weight: bold;");
+            combinationCountLabel.setStyle(Styles.VALIDATION_ERROR + " -fx-font-weight: bold;");
         } else if (combos > WARN_COMBINATIONS) {
-            combinationCountLabel.setStyle("-fx-text-fill: #cc7700; -fx-font-weight: bold;");
+            combinationCountLabel.setStyle(Styles.VALIDATION_WARNING);
         } else {
             combinationCountLabel.setStyle("-fx-font-weight: bold;");
         }
