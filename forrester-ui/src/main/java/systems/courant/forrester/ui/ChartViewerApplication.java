@@ -4,6 +4,7 @@ import systems.courant.forrester.Simulation;
 import systems.courant.forrester.measure.units.time.Times;
 
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.event.ActionEvent;
 import javafx.geometry.Insets;
@@ -33,6 +34,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * JavaFX Application that displays simulation results as a line chart.
@@ -44,6 +46,7 @@ import java.util.List;
 public class ChartViewerApplication extends Application {
 
     private static final Object LOCK = new Object();
+    private static final AtomicBoolean fxStarted = new AtomicBoolean(false);
 
     private static final double DEFAULT_WIDTH = 800;
     private static final double DEFAULT_HEIGHT = 600;
@@ -64,6 +67,33 @@ public class ChartViewerApplication extends Application {
     public static void reset() {
         synchronized (LOCK) {
             resetInternal();
+        }
+    }
+
+    /**
+     * Ensures the JavaFX toolkit is running, then shows the chart in a new window.
+     * Safe to call multiple times — subsequent calls reuse the existing toolkit.
+     */
+    public static void showChart() {
+        ensureFxRunning();
+        Platform.runLater(() -> {
+            ChartViewerApplication app = new ChartViewerApplication();
+            Stage stage = new Stage();
+            app.start(stage);
+        });
+    }
+
+    /**
+     * Ensures the JavaFX toolkit is initialized. Safe to call multiple times.
+     */
+    static void ensureFxRunning() {
+        if (fxStarted.compareAndSet(false, true)) {
+            try {
+                Platform.startup(() -> {});
+            } catch (IllegalStateException e) {
+                // Toolkit already initialized (e.g., by the app or TestFX)
+            }
+            Platform.setImplicitExit(false);
         }
     }
 

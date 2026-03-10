@@ -97,6 +97,30 @@ class ChartViewerApplicationTest {
     }
 
     @Test
+    @DisplayName("showChart can be called multiple times without crashing")
+    void shouldAllowMultipleShowChartCalls() {
+        ChartViewerApplication.addSeries(List.of("Stock"), List.of());
+        ChartViewerApplication.addValues(List.of(42.0), List.of(), 0);
+
+        // First call starts FX toolkit and shows a window
+        ChartViewerApplication.showChart();
+        // Second call should reuse existing toolkit — no IllegalStateException
+        ChartViewerApplication.reset();
+        ChartViewerApplication.addSeries(List.of("Stock2"), List.of());
+        ChartViewerApplication.addValues(List.of(99.0), List.of(), 0);
+        ChartViewerApplication.showChart();
+    }
+
+    @Test
+    @DisplayName("ensureFxRunning is idempotent")
+    void shouldCallEnsureFxRunningMultipleTimes() {
+        ChartViewerApplication.ensureFxRunning();
+        ChartViewerApplication.ensureFxRunning();
+        ChartViewerApplication.ensureFxRunning();
+        // No exception means the method is idempotent
+    }
+
+    @Test
     void shouldReadSizeUnderLockFromAnotherThread() throws InterruptedException {
         // Set size on this thread
         ChartViewerApplication.setSize(1024, 768);

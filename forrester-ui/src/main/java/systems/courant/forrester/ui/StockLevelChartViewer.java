@@ -28,6 +28,6 @@ public class StockLevelChartViewer implements EventHandler {
 
     @Override
     public void handleSimulationEndEvent(SimulationEndEvent event) {
-        ChartViewerApplication.launch(ChartViewerApplication.class);
+        ChartViewerApplication.showChart();
     }
 }

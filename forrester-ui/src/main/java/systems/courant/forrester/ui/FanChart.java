@@ -3,6 +3,7 @@ package systems.courant.forrester.ui;
 import systems.courant.forrester.sweep.MonteCarloResult;
 
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
@@ -55,7 +56,12 @@ public class FanChart extends Application {
     public static void show(MonteCarloResult result, String variableName) {
         pendingResult = result;
         pendingVariableName = variableName;
-        Application.launch(FanChart.class);
+        ChartViewerApplication.ensureFxRunning();
+        Platform.runLater(() -> {
+            FanChart app = new FanChart();
+            Stage stage = new Stage();
+            app.start(stage);
+        });
     }
 
     @Override
