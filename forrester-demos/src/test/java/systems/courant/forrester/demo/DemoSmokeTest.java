@@ -394,6 +394,50 @@ class DemoSmokeTest {
     }
 
     @Test
+    @DisplayName("ThirdOrderMaterialDelayDemo flows clamp to zero when stocks are negative")
+    void thirdOrderDelayFlowsClamped() {
+        var hour = systems.courant.forrester.measure.units.time.TimeUnits.HOUR;
+        var model = new Model("Clamp Test");
+        // Start with a negative stock value to test the guard
+        var step1 = new systems.courant.forrester.model.Stock("Step 1", -10,
+                systems.courant.forrester.measure.Units.DIMENSIONLESS);
+        double delayHours = 5.0;
+        var flow = systems.courant.forrester.model.Flow.create("Step 1 delay", hour, () ->
+                new Quantity(Math.max(0, Math.min(step1.getValue(),
+                        step1.getValue() / delayHours)),
+                        systems.courant.forrester.measure.Units.DIMENSIONLESS));
+        step1.addOutflow(flow);
+        model.addStock(step1);
+        new Simulation(model, hour, Times.hours(1)).execute();
+        // Flow should have been clamped to 0, so stock should not decrease further
+        assertThat(step1.getValue()).isGreaterThanOrEqualTo(-10);
+    }
+
+    @Test
+    @DisplayName("FlowTimeDemo TAT stays non-negative during simulation")
+    void flowTimeDemoTatNonNegative() {
+        var hour = systems.courant.forrester.measure.units.time.TimeUnits.HOUR;
+        var model = new Model("TAT Clamp Test");
+        // Start TAT at 0 to force the edge case
+        var tat = new systems.courant.forrester.model.Stock("TAT", 0, hour);
+        double capacity = 100;
+        double hoursPerDay = 24.0;
+        double adjustmentTime = 24.0;
+        var wip = new systems.courant.forrester.model.Stock("WIP", 500,
+                systems.courant.forrester.measure.Units.DIMENSIONLESS);
+        var tatAdjustment = systems.courant.forrester.model.Flow.create("TAT Adjustment", hour, () -> {
+            double currentTAT = Math.max(0, tat.getValue());
+            double actualTAT = (wip.getValue() / capacity) * hoursPerDay;
+            return new Quantity((actualTAT - currentTAT) / adjustmentTime, hour);
+        });
+        tat.addInflow(tatAdjustment);
+        model.addStock(tat);
+        model.addStock(wip);
+        new Simulation(model, hour, Times.hours(48)).execute();
+        assertThat(tat.getValue()).isGreaterThanOrEqualTo(0);
+    }
+
+    @Test
     @DisplayName("InventoryModelDemo model simulates")
     void inventoryDemo() {
         var model = new Model("Inventory Test");

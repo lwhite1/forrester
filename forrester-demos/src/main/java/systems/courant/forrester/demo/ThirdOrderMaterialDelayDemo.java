@@ -62,16 +62,16 @@ public class ThirdOrderMaterialDelayDemo {
                 () -> new Quantity(processDemandPerDay, THING));
 
         Flow step1Delay = Flow.create("Step 1 delay", HOUR, () ->
-                new Quantity(Math.min(step1.getValue(),
-                        step1.getValue() / step1DelayHours), THING));
+                new Quantity(Math.max(0, Math.min(step1.getValue(),
+                        step1.getValue() / step1DelayHours)), THING));
 
         Flow step2Delay = Flow.create("Step 2 delay", HOUR, () ->
-                new Quantity(Math.min(step2.getValue(),
-                        step2.getValue() / step2DelayHours), THING));
+                new Quantity(Math.max(0, Math.min(step2.getValue(),
+                        step2.getValue() / step2DelayHours)), THING));
 
         Flow step3Delay = Flow.create("Step 3 delay", HOUR, () ->
-                new Quantity(Math.min(step3.getValue(),
-                        step3.getValue() / step3DelayHours), THING));
+                new Quantity(Math.max(0, Math.min(step3.getValue(),
+                        step3.getValue() / step3DelayHours)), THING));
 
         step1.addInflow(demand);
         step1.addOutflow(step1Delay);
