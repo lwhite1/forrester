@@ -157,6 +157,22 @@ class EquationReferenceManagerTest {
             boolean changed = manager.updateEquationByName("Drain", eq -> eq);
             assertThat(changed).isFalse();
         }
+
+        @Test
+        void shouldPreserveMaterialUnitWhenTransformingFlow() {
+            flows.add(new FlowDef("Drain", "comment", "Rate * Pop", "Day",
+                    "Person", "Source", "Sink", List.of()));
+            manager.updateEquationByName("Drain", eq -> eq.replace("Rate", "0"));
+            assertThat(flows.getFirst().materialUnit()).isEqualTo("Person");
+        }
+
+        @Test
+        void shouldPreserveSubscriptsWhenTransformingFlow() {
+            flows.add(new FlowDef("Drain", "comment", "Rate * Pop", "Day",
+                    "Person", "Source", "Sink", List.of("Region", "Age")));
+            manager.updateEquationByName("Drain", eq -> eq.replace("Rate", "0"));
+            assertThat(flows.getFirst().subscripts()).containsExactly("Region", "Age");
+        }
     }
 
     @Nested

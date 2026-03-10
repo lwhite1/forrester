@@ -59,7 +59,7 @@ final class EquationReferenceManager {
                 String updated = transform.apply(f.equation());
                 if (!updated.equals(f.equation())) {
                     flows.set(i, new FlowDef(f.name(), f.comment(), updated,
-                            f.timeUnit(), f.source(), f.sink()));
+                            f.timeUnit(), f.materialUnit(), f.source(), f.sink(), f.subscripts()));
                     return true;
                 }
                 return false;
