@@ -33,6 +33,9 @@ import java.util.regex.Pattern;
  *   <li>Missing units — stocks and auxiliaries with null/blank unit</li>
  *   <li>Algebraic loops — cycle groups containing no stocks</li>
  *   <li>Unused elements — parameters and lookup tables not referenced by any equation</li>
+ *   <li>Isolated stocks — stocks with no inflows or outflows</li>
+ *   <li>Dangling connectors — connector arrows whose source is not referenced
+ *       in the target element's equation</li>
  * </ol>
  */
 public final class ModelValidator {
@@ -69,7 +72,13 @@ public final class ModelValidator {
         // 5. Unused elements
         checkUnusedElements(def, issues);
 
-        // 6. CLD checks
+        // 6. Isolated stocks
+        checkIsolatedStocks(def, issues);
+
+        // 7. Dangling connectors
+        checkDanglingConnectors(def, issues);
+
+        // 8. CLD checks
         checkOrphanedCldVariables(def, issues);
         checkCausalLinkEndpoints(def, issues);
         checkUnknownPolarity(def, issues);
@@ -257,6 +266,56 @@ public final class ModelValidator {
                                 + "' is not referenced by any equation."
                                 + " Reference it in an equation using its name,"
                                 + " or remove it if unneeded."));
+            }
+        }
+    }
+
+    private static void checkIsolatedStocks(ModelDefinition def, List<ValidationIssue> issues) {
+        for (StockDef stock : def.stocks()) {
+            boolean hasFlow = false;
+            for (FlowDef flow : def.flows()) {
+                if (stock.name().equals(flow.source()) || stock.name().equals(flow.sink())) {
+                    hasFlow = true;
+                    break;
+                }
+            }
+            if (!hasFlow) {
+                issues.add(new ValidationIssue(Severity.WARNING, stock.name(),
+                        "Stock '" + stock.name()
+                                + "' has no inflows or outflows."
+                                + " Connect a flow to this stock,"
+                                + " or remove it if unneeded."));
+            }
+        }
+    }
+
+    private static void checkDanglingConnectors(ModelDefinition def, List<ValidationIssue> issues) {
+        // Build a map of element name → equation for flows and auxiliaries
+        Map<String, String> equations = new LinkedHashMap<>();
+        for (FlowDef flow : def.flows()) {
+            equations.put(flow.name(), flow.equation());
+        }
+        for (AuxDef aux : def.auxiliaries()) {
+            equations.put(aux.name(), aux.equation());
+        }
+
+        for (ViewDef view : def.views()) {
+            for (ConnectorRoute connector : view.connectors()) {
+                String targetEquation = equations.get(connector.to());
+                if (targetEquation == null) {
+                    continue; // target is a stock or non-equation element — skip
+                }
+                Set<String> refs = new HashSet<>();
+                collectReferences(targetEquation, refs);
+                if (!isReferenced(connector.from(), refs)) {
+                    issues.add(new ValidationIssue(Severity.WARNING, connector.to(),
+                            "Connector from '" + connector.from() + "' to '"
+                                    + connector.to()
+                                    + "' does not match the equation — '"
+                                    + connector.to()
+                                    + "' does not reference '" + connector.from()
+                                    + "'. Remove the connector or update the equation."));
+                }
             }
         }
     }

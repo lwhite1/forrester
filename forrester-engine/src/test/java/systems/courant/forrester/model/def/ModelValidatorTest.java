@@ -3,6 +3,8 @@ package systems.courant.forrester.model.def;
 import systems.courant.forrester.model.def.CausalLinkDef.Polarity;
 import systems.courant.forrester.model.def.ValidationIssue.Severity;
 
+import java.util.List;
+
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -260,6 +262,131 @@ class ModelValidatorTest {
 
             assertThat(result.issues()).noneMatch(i ->
                     i.message().contains("not referenced"));
+        }
+    }
+
+    @Nested
+    @DisplayName("Isolated stocks")
+    class IsolatedStocks {
+
+        @Test
+        void shouldWarnForStockWithNoFlows() {
+            ModelDefinition def = new ModelDefinitionBuilder()
+                    .name("Isolated")
+                    .stock("Inventory", 100, "Widget")
+                    .build();
+
+            ValidationResult result = ModelValidator.validate(def);
+
+            assertThat(result.issues()).anyMatch(i ->
+                    i.severity() == Severity.WARNING
+                            && "Inventory".equals(i.elementName())
+                            && i.message().contains("no inflows or outflows"));
+        }
+
+        @Test
+        void shouldNotWarnForStockWithInflow() {
+            ModelDefinition def = new ModelDefinitionBuilder()
+                    .name("HasInflow")
+                    .stock("S", 100, "Person")
+                    .flow("births", "10", "Day", null, "S")
+                    .build();
+
+            ValidationResult result = ModelValidator.validate(def);
+
+            assertThat(result.issues()).noneMatch(i ->
+                    i.message().contains("no inflows or outflows"));
+        }
+
+        @Test
+        void shouldNotWarnForStockWithOutflow() {
+            ModelDefinition def = new ModelDefinitionBuilder()
+                    .name("HasOutflow")
+                    .stock("S", 100, "Person")
+                    .flow("deaths", "S * 0.1", "Day", "S", null)
+                    .build();
+
+            ValidationResult result = ModelValidator.validate(def);
+
+            assertThat(result.issues()).noneMatch(i ->
+                    i.message().contains("no inflows or outflows"));
+        }
+    }
+
+    @Nested
+    @DisplayName("Dangling connectors")
+    class DanglingConnectors {
+
+        @Test
+        void shouldWarnForConnectorNotMatchingEquation() {
+            ModelDefinition def = new ModelDefinitionBuilder()
+                    .name("Dangling")
+                    .stock("Population", 1000, "Person")
+                    .aux("effect", "42", "Dimensionless")
+                    .view(new ViewDef("main", List.of(),
+                            List.of(new ConnectorRoute("Population", "effect")),
+                            List.of()))
+                    .build();
+
+            ValidationResult result = ModelValidator.validate(def);
+
+            assertThat(result.issues()).anyMatch(i ->
+                    i.severity() == Severity.WARNING
+                            && "effect".equals(i.elementName())
+                            && i.message().contains("does not reference")
+                            && i.message().contains("Population"));
+        }
+
+        @Test
+        void shouldNotWarnWhenEquationReferencesSource() {
+            ModelDefinition def = new ModelDefinitionBuilder()
+                    .name("Valid")
+                    .stock("Population", 1000, "Person")
+                    .aux("effect", "Population * 0.5", "Person")
+                    .view(new ViewDef("main", List.of(),
+                            List.of(new ConnectorRoute("Population", "effect")),
+                            List.of()))
+                    .build();
+
+            ValidationResult result = ModelValidator.validate(def);
+
+            assertThat(result.issues()).noneMatch(i ->
+                    i.message().contains("does not reference"));
+        }
+
+        @Test
+        void shouldNotWarnForConnectorToStock() {
+            // Stocks don't have equations — connectors to stocks are layout-only
+            ModelDefinition def = new ModelDefinitionBuilder()
+                    .name("ToStock")
+                    .stock("S", 100, "Person")
+                    .aux("A", "10", "Person")
+                    .view(new ViewDef("main", List.of(),
+                            List.of(new ConnectorRoute("A", "S")),
+                            List.of()))
+                    .build();
+
+            ValidationResult result = ModelValidator.validate(def);
+
+            assertThat(result.issues()).noneMatch(i ->
+                    i.message().contains("does not reference"));
+        }
+
+        @Test
+        void shouldHandleUnderscoreSpaceResolution() {
+            ModelDefinition def = new ModelDefinitionBuilder()
+                    .name("Underscore")
+                    .stock("birth rate", 0.03, "1/Year")
+                    .aux("effect", "birth_rate * 2", "1/Year")
+                    .view(new ViewDef("main", List.of(),
+                            List.of(new ConnectorRoute("birth rate", "effect")),
+                            List.of()))
+                    .build();
+
+            ValidationResult result = ModelValidator.validate(def);
+
+            assertThat(result.issues()).noneMatch(i ->
+                    i.message().contains("does not reference"));
         }
     }
 
