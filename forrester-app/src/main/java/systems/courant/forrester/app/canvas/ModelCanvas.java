@@ -169,6 +169,9 @@ public class ModelCanvas extends Canvas {
                     ModelCanvas.this.classifyCldVariable(name, type);
                 }
                 @Override public void drillInto(String moduleName) { ModelCanvas.this.drillInto(moduleName); }
+                @Override public void openDefinePortsDialog(String moduleName) {
+                    ModelCanvas.this.openDefinePortsDialog(moduleName);
+                }
                 @Override public void openBindingsDialog(String moduleName) {
                     ModelCanvas.this.openBindingsDialog(moduleName);
                 }
@@ -1035,6 +1038,11 @@ public class ModelCanvas extends Canvas {
             regenerateAndRedraw();
             fireStatusChanged();
         }
+    }
+
+    private void openDefinePortsDialog(String moduleName) {
+        navController.openDefinePortsDialog(moduleName, editor,
+                () -> saveUndoState("Define " + moduleName + " ports"), this::fireStatusChanged);
     }
 
     private void openBindingsDialog(String moduleName) {

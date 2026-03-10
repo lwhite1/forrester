@@ -42,6 +42,7 @@ final class CanvasContextMenuController {
         boolean canPaste();
         void classifyCldVariable(String name, ElementType targetType);
         void drillInto(String moduleName);
+        void openDefinePortsDialog(String moduleName);
         void openBindingsDialog(String moduleName);
     }
 
@@ -59,7 +60,8 @@ final class CanvasContextMenuController {
                                 CanvasState canvasState, double screenX, double screenY,
                                 Callbacks callbacks) {
         navController.showContextMenu(canvas, elementName, canvasState, screenX, screenY,
-                callbacks::drillInto, callbacks::openBindingsDialog,
+                callbacks::drillInto, callbacks::openDefinePortsDialog,
+                callbacks::openBindingsDialog,
                 callbacks::startInlineEdit, callbacks::classifyCldVariable);
     }
 
