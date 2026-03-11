@@ -4,6 +4,7 @@ import systems.courant.shrewd.model.ModelMetadata;
 import systems.courant.shrewd.model.def.AuxDef;
 import systems.courant.shrewd.model.def.CausalLinkDef;
 import systems.courant.shrewd.model.def.CldVariableDef;
+import systems.courant.shrewd.model.def.CommentDef;
 import systems.courant.shrewd.model.def.ConnectorRoute;
 import systems.courant.shrewd.model.def.ElementType;
 import systems.courant.shrewd.model.def.FlowDef;
@@ -62,6 +63,7 @@ public class ModelEditor {
     private final List<LookupTableDef> lookupTables = new ArrayList<>();
     private final List<CldVariableDef> cldVariables = new ArrayList<>();
     private final List<CausalLinkDef> causalLinks = new ArrayList<>();
+    private final List<CommentDef> comments = new ArrayList<>();
     private final List<ReferenceDataset> referenceDatasets = new ArrayList<>();
     private final Set<String> nameIndex = new HashSet<>();
     private final List<ModelEditListener> listeners = new CopyOnWriteArrayList<>();
@@ -74,6 +76,7 @@ public class ModelEditor {
     private int nextModuleId = 1;
     private int nextLookupId = 1;
     private int nextCldVariableId = 1;
+    private int nextCommentId = 1;
 
     public void addListener(ModelEditListener listener) {
         if (listener != null) {
@@ -134,6 +137,7 @@ public class ModelEditor {
         lookupTables.clear();
         cldVariables.clear();
         causalLinks.clear();
+        comments.clear();
         referenceDatasets.clear();
         nameIndex.clear();
 
@@ -144,6 +148,7 @@ public class ModelEditor {
         lookupTables.addAll(definition.lookupTables());
         cldVariables.addAll(definition.cldVariables());
         causalLinks.addAll(definition.causalLinks());
+        comments.addAll(definition.comments());
         referenceDatasets.addAll(definition.referenceDatasets());
         simulationSettings = definition.defaultSimulation();
         metadata = definition.metadata();
@@ -154,6 +159,7 @@ public class ModelEditor {
         modules.forEach(m -> nameIndex.add(m.instanceName()));
         lookupTables.forEach(lt -> nameIndex.add(lt.name()));
         cldVariables.forEach(v -> nameIndex.add(v.name()));
+        comments.forEach(c -> nameIndex.add(c.name()));
 
         // Set per-type counters past any existing numeric suffix
         nextStockId = maxIdFrom(stocks.stream().map(StockDef::name), "Stock ");
@@ -162,6 +168,7 @@ public class ModelEditor {
         nextModuleId = maxIdFrom(modules.stream().map(ModuleInstanceDef::instanceName), "Module ");
         nextLookupId = maxIdFrom(lookupTables.stream().map(LookupTableDef::name), "Lookup ");
         nextCldVariableId = maxIdFrom(cldVariables.stream().map(CldVariableDef::name), "Variable ");
+        nextCommentId = maxIdFrom(comments.stream().map(CommentDef::name), "Comment ");
     }
 
     private static int maxIdFrom(java.util.stream.Stream<String> names, String prefix) {
@@ -407,7 +414,9 @@ public class ModelEditor {
             } else {
                 if (!lookupTables.removeIf(lt -> lt.name().equals(name))) {
                     if (!modules.removeIf(m -> m.instanceName().equals(name))) {
-                        cldVariables.removeIf(v -> v.name().equals(name));
+                        if (!cldVariables.removeIf(v -> v.name().equals(name))) {
+                            comments.removeIf(c -> c.name().equals(name));
+                        }
                     }
                 }
             }
@@ -456,7 +465,9 @@ public class ModelEditor {
                 (lt, n) -> new LookupTableDef(n, lt.comment(),
                         lt.xValues(), lt.yValues(), lt.interpolation()))
                 || renameInList(cldVariables, oldName, newName, CldVariableDef::name,
-                (v, n) -> new CldVariableDef(n, v.comment()));
+                (v, n) -> new CldVariableDef(n, v.comment()))
+                || renameInList(comments, oldName, newName, CommentDef::name,
+                (c, n) -> new CommentDef(n, c.text()));
 
         if (!found) {
             return false;
@@ -1091,6 +1102,62 @@ public class ModelEditor {
         return Collections.unmodifiableList(causalLinks);
     }
 
+    // === Comments ===
+
+    /**
+     * Adds a new comment with an auto-generated name.
+     * @return the name of the created comment
+     */
+    public String addComment() {
+        checkFxThread();
+        String name = "Comment " + nextCommentId++;
+        comments.add(new CommentDef(name, ""));
+        nameIndex.add(name);
+        fireElementAdded(name, "Comment");
+        return name;
+    }
+
+    /**
+     * Adds a comment copied from a template with an auto-generated name.
+     * @return the name of the created comment
+     */
+    public String addCommentFrom(CommentDef template) {
+        checkFxThread();
+        String name = resolveUniqueName(template.name(), "Comment ", nextCommentId, nameIndex);
+        if (name.startsWith("Comment ")) {
+            nextCommentId = parseIdSuffix(name, "Comment ") + 1;
+        }
+        comments.add(new CommentDef(name, template.text()));
+        nameIndex.add(name);
+        return name;
+    }
+
+    /**
+     * Sets the text of a comment.
+     * @return true if the comment was found and updated
+     */
+    public boolean setCommentText(String name, String text) {
+        checkFxThread();
+        return updateInList(comments, name, CommentDef::name,
+                c -> new CommentDef(name, text));
+    }
+
+    /**
+     * Returns the comment with the given name, or null if not found.
+     */
+    public CommentDef getCommentByName(String name) {
+        for (CommentDef c : comments) {
+            if (c.name().equals(name)) {
+                return c;
+            }
+        }
+        return null;
+    }
+
+    public List<CommentDef> getComments() {
+        return Collections.unmodifiableList(comments);
+    }
+
     /**
      * Classifies a CLD variable by converting it into a stock-and-flow element type.
      * The CLD variable is removed and replaced with the target element type at the
@@ -1157,6 +1224,7 @@ public class ModelEditor {
                 List.of(),
                 List.copyOf(cldVariables),
                 List.copyOf(causalLinks),
+                List.copyOf(comments),
                 view != null ? List.of(view) : List.of(),
                 simulationSettings,
                 metadata,

@@ -81,6 +81,7 @@ public class Clipboard {
                 case MODULE -> editor.getModuleByName(name);
                 case LOOKUP -> editor.getLookupTableByName(name);
                 case CLD_VARIABLE -> Optional.ofNullable(editor.getCldVariableByName(name));
+                case COMMENT -> Optional.ofNullable(editor.getCommentByName(name));
             };
 
             defOpt.ifPresent(def -> entries.add(new Entry(name, type, rx, ry, cw, ch, def)));

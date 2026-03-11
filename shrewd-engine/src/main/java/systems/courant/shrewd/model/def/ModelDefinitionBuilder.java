@@ -22,6 +22,7 @@ public class ModelDefinitionBuilder {
     private final List<SubscriptDef> subscripts = new ArrayList<>();
     private final List<CldVariableDef> cldVariables = new ArrayList<>();
     private final List<CausalLinkDef> causalLinks = new ArrayList<>();
+    private final List<CommentDef> comments = new ArrayList<>();
     private final List<ViewDef> views = new ArrayList<>();
     private final List<ReferenceDataset> referenceDatasets = new ArrayList<>();
     private SimulationSettings defaultSimulation;
@@ -355,6 +356,29 @@ public class ModelDefinitionBuilder {
     }
 
     /**
+     * Adds a free-text comment annotation with the given name and text.
+     *
+     * @param name the comment identifier
+     * @param text the annotation text
+     * @return this builder
+     */
+    public ModelDefinitionBuilder comment(String name, String text) {
+        comments.add(new CommentDef(name, text));
+        return this;
+    }
+
+    /**
+     * Adds a pre-built comment definition.
+     *
+     * @param def the comment definition to add
+     * @return this builder
+     */
+    public ModelDefinitionBuilder comment(CommentDef def) {
+        comments.add(def);
+        return this;
+    }
+
+    /**
      * Adds a graphical view definition describing element layout and connector routing.
      *
      * @param viewDef the view definition to add
@@ -460,6 +484,6 @@ public class ModelDefinitionBuilder {
                 name, comment, moduleInterface,
                 stocks, flows, auxiliaries, lookupTables,
                 modules, subscripts, cldVariables, causalLinks,
-                views, defaultSimulation, metadata, referenceDatasets);
+                comments, views, defaultSimulation, metadata, referenceDatasets);
     }
 }

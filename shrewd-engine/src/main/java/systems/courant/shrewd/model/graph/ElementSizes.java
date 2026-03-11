@@ -32,6 +32,7 @@ public record ElementSizes(
             case LOOKUP -> LOOKUP;
             case MODULE -> MODULE;
             case CLD_VARIABLE -> AUX;
+            case COMMENT -> new ElementSizes(160, 80);
         };
     }
 }

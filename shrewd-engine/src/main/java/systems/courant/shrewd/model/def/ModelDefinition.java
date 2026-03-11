@@ -22,6 +22,7 @@ import java.util.List;
  * @param subscripts the subscript definitions
  * @param cldVariables the causal loop diagram variable definitions
  * @param causalLinks the causal link definitions (CLD connections with polarity)
+ * @param comments the free-text comment annotations (non-functional canvas decorations)
  * @param views the graphical view definitions
  * @param defaultSimulation optional default simulation settings
  * @param metadata optional attribution and licensing metadata
@@ -39,6 +40,7 @@ public record ModelDefinition(
         List<SubscriptDef> subscripts,
         List<CldVariableDef> cldVariables,
         List<CausalLinkDef> causalLinks,
+        List<CommentDef> comments,
         List<ViewDef> views,
         SimulationSettings defaultSimulation,
         ModelMetadata metadata,
@@ -46,7 +48,24 @@ public record ModelDefinition(
 ) {
 
     /**
-     * Backward-compatible constructor without reference datasets.
+     * Backward-compatible constructor without comments or reference datasets.
+     */
+    public ModelDefinition(
+            String name, String comment, ModuleInterface moduleInterface,
+            List<StockDef> stocks, List<FlowDef> flows,
+            List<AuxDef> auxiliaries,
+            List<LookupTableDef> lookupTables, List<ModuleInstanceDef> modules,
+            List<SubscriptDef> subscripts,
+            List<CldVariableDef> cldVariables, List<CausalLinkDef> causalLinks,
+            List<ViewDef> views, SimulationSettings defaultSimulation,
+            ModelMetadata metadata, List<ReferenceDataset> referenceDatasets) {
+        this(name, comment, moduleInterface, stocks, flows, auxiliaries,
+                lookupTables, modules, subscripts, cldVariables, causalLinks,
+                List.of(), views, defaultSimulation, metadata, referenceDatasets);
+    }
+
+    /**
+     * Backward-compatible constructor without comments, metadata, or reference datasets.
      */
     public ModelDefinition(
             String name, String comment, ModuleInterface moduleInterface,
@@ -59,11 +78,11 @@ public record ModelDefinition(
             ModelMetadata metadata) {
         this(name, comment, moduleInterface, stocks, flows, auxiliaries,
                 lookupTables, modules, subscripts, cldVariables, causalLinks,
-                views, defaultSimulation, metadata, List.of());
+                List.of(), views, defaultSimulation, metadata, List.of());
     }
 
     /**
-     * Backward-compatible constructor without metadata.
+     * Backward-compatible constructor without comments, metadata, or CLD fields.
      */
     public ModelDefinition(
             String name, String comment, ModuleInterface moduleInterface,
@@ -75,11 +94,11 @@ public record ModelDefinition(
             List<ViewDef> views, SimulationSettings defaultSimulation) {
         this(name, comment, moduleInterface, stocks, flows, auxiliaries,
                 lookupTables, modules, subscripts, cldVariables, causalLinks,
-                views, defaultSimulation, null, List.of());
+                List.of(), views, defaultSimulation, null, List.of());
     }
 
     /**
-     * Backward-compatible constructor without CLD fields or metadata.
+     * Backward-compatible constructor without comments, CLD fields, or metadata.
      */
     public ModelDefinition(
             String name, String comment, ModuleInterface moduleInterface,
@@ -90,7 +109,7 @@ public record ModelDefinition(
             List<ViewDef> views, SimulationSettings defaultSimulation) {
         this(name, comment, moduleInterface, stocks, flows, auxiliaries,
                 lookupTables, modules, subscripts, List.of(), List.of(),
-                views, defaultSimulation, null, List.of());
+                List.of(), views, defaultSimulation, null, List.of());
     }
 
     public ModelDefinition {
@@ -105,6 +124,7 @@ public record ModelDefinition(
         subscripts = subscripts == null ? List.of() : List.copyOf(subscripts);
         cldVariables = cldVariables == null ? List.of() : List.copyOf(cldVariables);
         causalLinks = causalLinks == null ? List.of() : List.copyOf(causalLinks);
+        comments = comments == null ? List.of() : List.copyOf(comments);
         views = views == null ? List.of() : List.copyOf(views);
         referenceDatasets = referenceDatasets == null ? List.of() : List.copyOf(referenceDatasets);
     }
@@ -128,6 +148,7 @@ public record ModelDefinition(
         subscripts.forEach(s -> b.subscript(s.name(), s.labels()));
         cldVariables.forEach(b::cldVariable);
         causalLinks.forEach(b::causalLink);
+        comments.forEach(b::comment);
         views.forEach(b::view);
         referenceDatasets.forEach(b::referenceDataset);
         return b;
@@ -162,6 +183,7 @@ public record ModelDefinition(
             List<LookupTableDef> lookupTables, List<ModuleInstanceDef> modules,
             List<SubscriptDef> subscripts,
             List<CldVariableDef> cldVariables, List<CausalLinkDef> causalLinks,
+            List<CommentDef> comments,
             List<ViewDef> views, SimulationSettings defaultSimulation,
             ModelMetadata metadata) {
         List<AuxDef> merged = new ArrayList<>();
@@ -174,6 +196,6 @@ public record ModelDefinition(
         return new ModelDefinition(name, comment, moduleInterface,
                 stocks, flows, merged,
                 lookupTables, modules, subscripts, cldVariables, causalLinks,
-                views, defaultSimulation, metadata);
+                comments, views, defaultSimulation, metadata, List.of());
     }
 }

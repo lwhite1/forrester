@@ -2,6 +2,7 @@ package systems.courant.shrewd.app.canvas;
 
 import systems.courant.shrewd.model.def.AuxDef;
 import systems.courant.shrewd.model.def.CausalLinkDef;
+import systems.courant.shrewd.model.def.CommentDef;
 import systems.courant.shrewd.model.def.ConnectorRoute;
 import systems.courant.shrewd.model.def.ElementType;
 import systems.courant.shrewd.model.def.FlowDef;
@@ -241,6 +242,14 @@ public class CanvasRenderer {
                     double w = LayoutMetrics.effectiveWidth(canvasState, name);
                     double h = LayoutMetrics.effectiveHeight(canvasState, name);
                     ElementRenderer.drawCldVariable(gc, name,
+                            cx - w / 2, cy - h / 2, w, h);
+                }
+                case COMMENT -> {
+                    double w = LayoutMetrics.effectiveWidth(canvasState, name);
+                    double h = LayoutMetrics.effectiveHeight(canvasState, name);
+                    CommentDef commentDef = editor.getCommentByName(name);
+                    String text = commentDef != null ? commentDef.text() : "";
+                    ElementRenderer.drawComment(gc, text,
                             cx - w / 2, cy - h / 2, w, h);
                 }
                 default -> { }

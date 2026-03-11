@@ -3,6 +3,7 @@ package systems.courant.shrewd.app.canvas;
 import systems.courant.shrewd.model.def.AuxDef;
 import systems.courant.shrewd.model.def.CausalLinkDef;
 import systems.courant.shrewd.model.def.CldVariableDef;
+import systems.courant.shrewd.model.def.CommentDef;
 import systems.courant.shrewd.model.def.ElementType;
 import systems.courant.shrewd.model.def.FlowDef;
 import systems.courant.shrewd.model.def.LookupTableDef;
@@ -104,6 +105,8 @@ final class CopyPasteController {
                         (LookupTableDef) entry.elementDef());
                 case CLD_VARIABLE -> editor.addCldVariableFrom(
                         (CldVariableDef) entry.elementDef());
+                case COMMENT -> editor.addCommentFrom(
+                        (CommentDef) entry.elementDef());
             };
 
             nameMapping.put(entry.originalName(), newName);

@@ -37,6 +37,13 @@ public final class LayoutMetrics {
     public static final double LOOKUP_CORNER_RADIUS = 4;
     public static final Font LOOKUP_NAME_FONT = Font.font("System", FontWeight.NORMAL, 11);
 
+    // Comment dimensions
+    public static final double COMMENT_WIDTH = 160;
+    public static final double COMMENT_HEIGHT = 80;
+    public static final double COMMENT_BORDER_WIDTH = 1;
+    public static final double COMMENT_CORNER_RADIUS = 4;
+    public static final Font COMMENT_TEXT_FONT = Font.font("System", FontWeight.NORMAL, 11);
+
     // CLD variable dimensions
     public static final double CLD_VAR_WIDTH = 110;
     public static final double CLD_VAR_HEIGHT = 30;
@@ -113,6 +120,7 @@ public final class LayoutMetrics {
             case LOOKUP -> LOOKUP_WIDTH;
             case FLOW -> FLOW_INDICATOR_SIZE;
             case CLD_VARIABLE -> CLD_VAR_WIDTH;
+            case COMMENT -> COMMENT_WIDTH;
         };
     }
 
@@ -127,6 +135,7 @@ public final class LayoutMetrics {
             case LOOKUP -> LOOKUP_HEIGHT;
             case FLOW -> FLOW_INDICATOR_SIZE;
             case CLD_VARIABLE -> CLD_VAR_HEIGHT;
+            case COMMENT -> COMMENT_HEIGHT;
         };
     }
 
@@ -162,6 +171,7 @@ public final class LayoutMetrics {
             case MODULE -> 70;
             case LOOKUP -> 60;
             case CLD_VARIABLE -> 60;
+            case COMMENT -> 80;
             case FLOW -> 50;
         };
     }
@@ -176,6 +186,7 @@ public final class LayoutMetrics {
             case MODULE -> 45;
             case LOOKUP -> 35;
             case CLD_VARIABLE -> 25;
+            case COMMENT -> 40;
             case FLOW -> 30;
         };
     }

@@ -291,6 +291,35 @@ public final class ElementRenderer {
     }
 
     /**
+     * Draws a comment annotation box: light yellow fill with a subtle amber border,
+     * styled as a sticky-note. Wraps text within the bounding box.
+     */
+    public static void drawComment(GraphicsContext gc, String text,
+                                   double x, double y, double width, double height) {
+        double r = LayoutMetrics.COMMENT_CORNER_RADIUS;
+
+        // Fill — warm yellow note appearance
+        gc.setFill(ColorPalette.COMMENT_FILL);
+        gc.fillRoundRect(x, y, width, height, r, r);
+
+        // Border
+        gc.setStroke(ColorPalette.COMMENT_BORDER);
+        gc.setLineWidth(LayoutMetrics.COMMENT_BORDER_WIDTH);
+        gc.setLineDashes();
+        gc.strokeRoundRect(x, y, width, height, r, r);
+
+        // Text content (wrapped, top-left aligned)
+        if (text != null && !text.isBlank()) {
+            gc.setFill(ColorPalette.TEXT);
+            gc.setFont(LayoutMetrics.COMMENT_TEXT_FONT);
+            gc.setTextAlign(TextAlignment.LEFT);
+            gc.setTextBaseline(VPos.TOP);
+            String display = truncate(text, LayoutMetrics.COMMENT_TEXT_FONT, width - 12);
+            gc.fillText(display, x + 6, y + 6, width - 12);
+        }
+    }
+
+    /**
      * Draws a CLD variable as plain text (no rectangle), matching standard CLD notation.
      */
     public static void drawCldVariable(GraphicsContext gc, String name,

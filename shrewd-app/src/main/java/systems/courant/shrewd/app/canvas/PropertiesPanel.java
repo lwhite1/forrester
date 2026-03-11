@@ -274,6 +274,7 @@ public class PropertiesPanel extends VBox {
         int auxes = editor.getAuxiliaries().size();
         int lookups = editor.getLookupTables().size();
         int modules = editor.getModules().size();
+        int commentCount = editor.getComments().size();
 
         if (stocks > 0) {
             parts.add(stocks + (stocks == 1 ? " stock" : " stocks"));
@@ -289,6 +290,9 @@ public class PropertiesPanel extends VBox {
         }
         if (modules > 0) {
             parts.add(modules + (modules == 1 ? " module" : " modules"));
+        }
+        if (commentCount > 0) {
+            parts.add(commentCount + (commentCount == 1 ? " comment" : " comments"));
         }
 
         if (parts.isEmpty()) {
@@ -502,6 +506,7 @@ public class PropertiesPanel extends VBox {
             case AUX -> new AuxForm(ctx);
             case LOOKUP -> new LookupForm(ctx);
             case CLD_VARIABLE -> new CldVariableForm(ctx);
+            case COMMENT -> new CommentForm(ctx);
             case MODULE -> null;
         };
     }
@@ -556,7 +561,8 @@ public class PropertiesPanel extends VBox {
     private static boolean isCacheableType(ElementType type) {
         return type == ElementType.STOCK || type == ElementType.FLOW
                 || type == ElementType.AUX
-                || type == ElementType.CLD_VARIABLE;
+                || type == ElementType.CLD_VARIABLE
+                || type == ElementType.COMMENT;
     }
 
     private static Button createToolbarButton(String text) {
@@ -576,6 +582,7 @@ public class PropertiesPanel extends VBox {
             case MODULE -> "Module";
             case LOOKUP -> "Lookup Table";
             case CLD_VARIABLE -> "CLD Variable";
+            case COMMENT -> "Comment";
         };
     }
 }

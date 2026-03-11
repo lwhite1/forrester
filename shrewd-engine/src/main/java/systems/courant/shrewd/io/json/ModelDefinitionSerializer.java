@@ -4,6 +4,7 @@ import systems.courant.shrewd.model.ModelMetadata;
 import systems.courant.shrewd.model.def.AuxDef;
 import systems.courant.shrewd.model.def.CausalLinkDef;
 import systems.courant.shrewd.model.def.CldVariableDef;
+import systems.courant.shrewd.model.def.CommentDef;
 import systems.courant.shrewd.model.def.ConnectorRoute;
 
 import systems.courant.shrewd.model.def.ElementPlacement;
@@ -159,6 +160,9 @@ public class ModelDefinitionSerializer {
         }
         if (!def.causalLinks().isEmpty()) {
             root.set("causalLinks", serializeCausalLinks(def.causalLinks()));
+        }
+        if (!def.comments().isEmpty()) {
+            root.set("comments", serializeComments(def.comments()));
         }
         if (!def.views().isEmpty()) {
             root.set("views", serializeViews(def.views()));
@@ -434,6 +438,19 @@ public class ModelDefinitionSerializer {
         return arr;
     }
 
+    private ArrayNode serializeComments(List<CommentDef> comments) {
+        ArrayNode arr = mapper.createArrayNode();
+        for (CommentDef c : comments) {
+            ObjectNode node = mapper.createObjectNode();
+            node.put("name", c.name());
+            if (c.text() != null && !c.text().isEmpty()) {
+                node.put("text", c.text());
+            }
+            arr.add(node);
+        }
+        return arr;
+    }
+
     private ArrayNode serializeReferenceDatasets(List<ReferenceDataset> datasets) {
         ArrayNode arr = mapper.createArrayNode();
         for (ReferenceDataset ds : datasets) {
@@ -593,6 +610,16 @@ public class ModelDefinitionSerializer {
             }
         }
 
+        List<CommentDef> comments = new ArrayList<>();
+        if (root.has("comments")) {
+            for (JsonNode n : root.get("comments")) {
+                String text = textOrNull(n, "text");
+                comments.add(new CommentDef(
+                        requiredText(n, "name"),
+                        text != null ? text : ""));
+            }
+        }
+
         List<ViewDef> views = new ArrayList<>();
         if (root.has("views")) {
             for (JsonNode n : root.get("views")) {
@@ -640,7 +667,7 @@ public class ModelDefinitionSerializer {
             ModelDefinition migrated = ModelDefinition.withMigratedConstants(
                     name, comment, moduleInterface,
                     stocks, flows, auxiliaries, migratedConstants, lookupTables,
-                    modules, subscripts, cldVariables, causalLinks,
+                    modules, subscripts, cldVariables, causalLinks, comments,
                     views, defaultSimulation, metadata);
             if (referenceDatasets.isEmpty()) {
                 return migrated;
@@ -654,7 +681,7 @@ public class ModelDefinitionSerializer {
         return new ModelDefinition(name, comment, moduleInterface,
                 stocks, flows, auxiliaries, lookupTables,
                 modules, subscripts, cldVariables, causalLinks,
-                views, defaultSimulation, metadata, referenceDatasets);
+                comments, views, defaultSimulation, metadata, referenceDatasets);
     }
 
     private ViewDef deserializeView(JsonNode n) {

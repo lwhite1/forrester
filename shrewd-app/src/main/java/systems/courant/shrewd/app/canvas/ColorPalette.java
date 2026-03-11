@@ -53,6 +53,10 @@ public final class ColorPalette {
     public static final Color TRACE_DOWNSTREAM = Color.web("#E67E22");
     public static final Color TRACE_ORIGIN = Color.web("#8E44AD");
 
+    // Comment annotation colors
+    public static final Color COMMENT_FILL = Color.web("#FFFDE7");
+    public static final Color COMMENT_BORDER = Color.web("#F9A825", 0.6);
+
     // Delay indicator badge
     public static final Color DELAY_BADGE = Color.web("#8E44AD");
 }

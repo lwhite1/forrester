@@ -205,7 +205,16 @@ final class CanvasContextMenuController {
             }
         });
 
-        menu.getItems().addAll(addStock, addFlow, addAux);
+        MenuItem addComment = new MenuItem("Add Comment");
+        addComment.setOnAction(e -> {
+            String name = callbacks.createElementAt(worldX, worldY,
+                    CanvasToolBar.Tool.PLACE_COMMENT);
+            if (name != null) {
+                callbacks.fireStatusChanged();
+            }
+        });
+
+        menu.getItems().addAll(addStock, addFlow, addAux, new SeparatorMenuItem(), addComment);
         menu.getItems().add(new SeparatorMenuItem());
 
         MenuItem selectAllItem = new MenuItem("Select All");

@@ -347,6 +347,35 @@ class ModelDefinitionSerializerTest {
     }
 
     @Test
+    void shouldRoundTripComments() {
+        ModelDefinition def = new ModelDefinitionBuilder()
+                .name("Comment Test")
+                .comment("Comment 1", "This is a note")
+                .comment("Comment 2", "Another note")
+                .build();
+
+        ModelDefinition roundTripped = serializer.fromJson(serializer.toJson(def));
+
+        assertThat(roundTripped.comments()).hasSize(2);
+        assertThat(roundTripped.comments().get(0).name()).isEqualTo("Comment 1");
+        assertThat(roundTripped.comments().get(0).text()).isEqualTo("This is a note");
+        assertThat(roundTripped.comments().get(1).name()).isEqualTo("Comment 2");
+        assertThat(roundTripped.comments().get(1).text()).isEqualTo("Another note");
+    }
+
+    @Test
+    void shouldDeserializeModelWithoutComments() {
+        String json = """
+                {
+                  "name": "Old Model",
+                  "stocks": [{ "name": "S", "initialValue": 100, "unit": "x" }]
+                }
+                """;
+        ModelDefinition def = serializer.fromJson(json);
+        assertThat(def.comments()).isEmpty();
+    }
+
+    @Test
     void shouldDeserializeModelWithoutReferenceDatasets() {
         String json = """
                 {

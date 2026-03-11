@@ -112,6 +112,13 @@ public final class SvgExporter {
                                 LayoutMetrics.effectiveWidth(canvasState, name),
                                 LayoutMetrics.effectiveHeight(canvasState, name));
                     }
+                    case COMMENT -> {
+                        var commentDef = editor.getCommentByName(name);
+                        String text = commentDef != null ? commentDef.text() : "";
+                        writeComment(w, text, cx, cy,
+                                LayoutMetrics.effectiveWidth(canvasState, name),
+                                LayoutMetrics.effectiveHeight(canvasState, name));
+                    }
                     default -> { }
                 }
             }
@@ -575,6 +582,29 @@ public final class SvgExporter {
                 "  <text x=\"%.2f\" y=\"%.2f\" text-anchor=\"middle\" dominant-baseline=\"central\" " +
                 "font-family=\"sans-serif\" font-size=\"12\" fill=\"%s\">%s</text>%n",
                 cx, cy, svgColor(ColorPalette.TEXT), escapeXml(label));
+    }
+
+    private static void writeComment(PrintWriter w, String text,
+                                      double cx, double cy, double width, double height) {
+        double x = cx - width / 2;
+        double y = cy - height / 2;
+        double r = LayoutMetrics.COMMENT_CORNER_RADIUS;
+
+        w.printf(Locale.US,
+                "  <rect x=\"%.2f\" y=\"%.2f\" width=\"%.2f\" height=\"%.2f\" " +
+                "rx=\"%.1f\" ry=\"%.1f\" fill=\"%s\" stroke=\"%s\" stroke-width=\"%.1f\"/>%n",
+                x, y, width, height, r, r,
+                svgColor(ColorPalette.COMMENT_FILL),
+                svgColor(ColorPalette.COMMENT_BORDER),
+                LayoutMetrics.COMMENT_BORDER_WIDTH);
+
+        if (text != null && !text.isBlank()) {
+            String display = ElementRenderer.truncate(text, LayoutMetrics.COMMENT_TEXT_FONT, width - 12);
+            w.printf(Locale.US,
+                    "  <text x=\"%.2f\" y=\"%.2f\" text-anchor=\"start\" dominant-baseline=\"hanging\" " +
+                    "font-family=\"sans-serif\" font-size=\"11\" fill=\"%s\">%s</text>%n",
+                    x + 6, y + 6, svgColor(ColorPalette.TEXT), escapeXml(display));
+        }
     }
 
     // --- Causal links ---

@@ -56,6 +56,10 @@ final class SelectionController {
                 name = editor.addCldVariable();
                 type = ElementType.CLD_VARIABLE;
             }
+            case PLACE_COMMENT -> {
+                name = editor.addComment();
+                type = ElementType.COMMENT;
+            }
             default -> {
                 return null;
             }
