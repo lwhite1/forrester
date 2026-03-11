@@ -4,7 +4,7 @@ The `forrester-app` module provides a JavaFX canvas-based visual editor for crea
 
 ## Core Interactions
 
-- **Element creation** — toolbar or keyboard shortcuts (1–6) to place stocks, flows, auxiliaries, constants, modules, and lookup tables; shortcuts 8–9 to place CLD variables and draw causal links
+- **Element creation** — toolbar or keyboard shortcuts (2–6) to place stocks, flows, variables, modules, and lookup tables; shortcuts 7–8 to place CLD variables and draw causal links; shortcut 1 to return to Select tool
 - **Flow connections** — two-click protocol: click source (stock or cloud), rubber-band follows cursor with stock hover highlight, click sink to create flow at midpoint
 - **Inline editing** — double-click any element to rename; constants chain name→value editing; flows and auxiliaries chain name→equation editing. Rename propagates to flow references and equation tokens
 - **Flow reattachment** — drag cloud endpoints onto stocks to reconnect, or drag connected endpoints off stocks to disconnect to cloud
@@ -63,7 +63,7 @@ All panes support right-click CSV export.
 
 ## Additional Features
 
-- **Example models** — File → Open Example provides 8 bundled models across 5 categories
+- **Example models** — File → Open Example provides 35 bundled models across 11 categories
 - **Context-sensitive help** — F1 shows documentation for the current tool or selected element type
 - **Activity log** — timestamped event log for model creation, file operations, simulation runs, analysis executions, and validation checks
 - **Equation autocomplete** — element names and built-in functions

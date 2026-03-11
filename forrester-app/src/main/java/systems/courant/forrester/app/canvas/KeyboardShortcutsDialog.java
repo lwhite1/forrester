@@ -48,12 +48,21 @@ public class KeyboardShortcutsDialog extends Stage {
                         "8", "Draw causal link"),
                 section("View & Navigation",
                         "Ctrl+K", "Command palette",
+                        "Ctrl+Shift+F", "Zoom to fit",
                         "Ctrl+ +", "Zoom in",
                         "Ctrl+ -", "Zoom out",
                         "Ctrl+0", "Reset zoom",
                         "Scroll wheel", "Zoom in/out",
                         "Space + drag", "Pan canvas",
-                        "Ctrl+L", "Toggle activity log"),
+                        "[ / ]", "Step through feedback loops",
+                        "Ctrl+L", "Toggle activity log",
+                        "Ctrl+Shift+D", "Pop out / dock dashboard"),
+                section("Equation Editor",
+                        "Enter", "Commit equation",
+                        "Shift+Enter", "New line",
+                        "Tab", "Insert autocomplete suggestion",
+                        "Up / Down", "Navigate autocomplete suggestions",
+                        "Escape", "Dismiss autocomplete"),
                 section("Simulation",
                         "Ctrl+R", "Run simulation",
                         "Ctrl+B", "Validate model"),
@@ -69,7 +78,7 @@ public class KeyboardShortcutsDialog extends Stage {
         ScrollPane scroll = new ScrollPane(content);
         scroll.setFitToWidth(true);
 
-        Scene scene = new Scene(scroll, 480, 560);
+        Scene scene = new Scene(scroll, 480, 700);
         setScene(scene);
     }
 
