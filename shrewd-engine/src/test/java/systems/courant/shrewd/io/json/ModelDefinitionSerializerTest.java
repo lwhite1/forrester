@@ -387,6 +387,40 @@ class ModelDefinitionSerializerTest {
         assertThat(def.referenceDatasets()).isEmpty();
     }
 
+    @Test
+    @DisplayName("should round-trip subscript definitions")
+    void shouldRoundTripSubscripts() {
+        ModelDefinition original = new ModelDefinitionBuilder()
+                .name("Subscripted")
+                .subscript("Region", List.of("North", "South", "East"))
+                .subscript("Age", List.of("Young", "Old"))
+                .stock("Pop", 100, "people", List.of("Region", "Age"))
+                .build();
+
+        String json = serializer.toJson(original);
+        ModelDefinition restored = serializer.fromJson(json);
+
+        assertThat(restored.subscripts()).hasSize(2);
+        assertThat(restored.subscripts().get(0).name()).isEqualTo("Region");
+        assertThat(restored.subscripts().get(0).labels()).containsExactly("North", "South", "East");
+        assertThat(restored.subscripts().get(1).name()).isEqualTo("Age");
+        assertThat(restored.subscripts().get(1).labels()).containsExactly("Young", "Old");
+        assertThat(restored.stocks().get(0).subscripts()).containsExactly("Region", "Age");
+    }
+
+    @Test
+    @DisplayName("should deserialize model without subscripts field")
+    void shouldDeserializeModelWithoutSubscriptsField() {
+        String json = """
+                {
+                  "name": "Legacy",
+                  "stocks": [{"name": "S", "initialValue": 0, "unit": "units"}]
+                }
+                """;
+        ModelDefinition def = serializer.fromJson(json);
+        assertThat(def.subscripts()).isEmpty();
+    }
+
     private ModelDefinition buildSIR() {
         return new ModelDefinitionBuilder()
                 .name("SIR Model")
