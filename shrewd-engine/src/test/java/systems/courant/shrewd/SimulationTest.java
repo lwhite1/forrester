@@ -154,6 +154,26 @@ public class SimulationTest {
         assertTrue(sim.getElapsedTime().toMinutes() > 0);
     }
 
+    @Test
+    public void shouldUpdatePreservedModuleStocks() {
+        Model model = new Model("Preserved Module Test");
+        Module mod = new Module("M1");
+
+        Stock stock = new Stock("Inventory", 50, THING);
+        Flow outflow = Flow.create("Consume", MINUTE, () -> new Quantity(5, THING));
+        stock.addOutflow(outflow);
+
+        mod.addStock(stock);
+        mod.addFlow(outflow);
+        model.addModulePreserved(mod);
+
+        Simulation sim = new Simulation(model, MINUTE, MINUTE, 4);
+        sim.execute();
+
+        // 5 steps (0..4), each removing 5: 50 - 25 = 25
+        assertEquals(25, stock.getValue(), 0.01);
+    }
+
     @Nested
     @DisplayName("Safety guards")
     class SafetyGuards {

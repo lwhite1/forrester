@@ -58,4 +58,36 @@ public class ModuleTest {
     public void shouldReturnNullForMissingVariableViaGet() {
         assertThat(module.getVariable("nonexistent")).isEmpty();
     }
+
+    @Test
+    public void shouldRejectDirectSelfReference() {
+        assertThrows(IllegalArgumentException.class, () -> module.addSubModule(module));
+    }
+
+    @Test
+    public void shouldRejectIndirectCycle() {
+        Module a = new Module("A");
+        Module b = new Module("B");
+        Module c = new Module("C");
+        a.addSubModule(b);
+        b.addSubModule(c);
+
+        // c → a would create A→B→C→A cycle
+        assertThrows(IllegalArgumentException.class, () -> c.addSubModule(a));
+    }
+
+    @Test
+    public void shouldAllowDiamondWithoutCycle() {
+        Module a = new Module("A");
+        Module b = new Module("B");
+        Module c = new Module("C");
+        Module d = new Module("D");
+        a.addSubModule(b);
+        a.addSubModule(c);
+        b.addSubModule(d);
+        // c → d is fine (diamond shape, not a cycle)
+        c.addSubModule(d);
+
+        assertThat(c.getSubModule("D")).isPresent();
+    }
 }

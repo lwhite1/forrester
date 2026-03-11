@@ -7,6 +7,7 @@ import systems.courant.shrewd.event.TimeStepEvent;
 import systems.courant.shrewd.measure.Quantity;
 import systems.courant.shrewd.measure.TimeUnit;
 import systems.courant.shrewd.model.Model;
+import systems.courant.shrewd.model.Module;
 import systems.courant.shrewd.model.Stock;
 import systems.courant.shrewd.model.Flow;
 import systems.courant.shrewd.model.Variable;
@@ -19,6 +20,7 @@ import org.slf4j.LoggerFactory;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
@@ -165,7 +167,8 @@ public class Simulation {
 
                 fireTimeStepEvent(new TimeStepEvent(currentDateTime, model, currentStep, timeStep));
                 recordVariableValues();
-                updateStocks(flowMap, model.getStocks());
+                List<Stock> allStocks = collectAllStocks();
+                updateStocks(flowMap, allStocks);
                 addStep(currentDateTime);
                 currentStep++;
             }
@@ -189,6 +192,35 @@ public class Simulation {
     private void fireEndEvent(SimulationEndEvent event) {
         for (EventHandler handler : eventHandlers) {
             handler.handleSimulationEndEvent(event);
+        }
+    }
+
+    /**
+     * Collects stocks from the model's own stock list plus any stocks inside
+     * modules added via {@link Model#addModulePreserved}. Flattened modules
+     * already have their stocks in the model's stock list; preserved modules
+     * do not, so we walk the module tree to find them.
+     */
+    private List<Stock> collectAllStocks() {
+        List<Stock> modelStocks = model.getStocks();
+        Set<Stock> modelStockSet = Collections.newSetFromMap(new IdentityHashMap<>());
+        modelStockSet.addAll(modelStocks);
+
+        List<Stock> allStocks = new ArrayList<>(modelStocks);
+        for (Module module : model.getModules()) {
+            collectModuleStocks(module, modelStockSet, allStocks);
+        }
+        return allStocks;
+    }
+
+    private static void collectModuleStocks(Module module, Set<Stock> seen, List<Stock> out) {
+        for (Stock stock : module.getStocks()) {
+            if (seen.add(stock)) {
+                out.add(stock);
+            }
+        }
+        for (Module child : module.getSubModules().values()) {
+            collectModuleStocks(child, seen, out);
         }
     }
 
