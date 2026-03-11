@@ -1,5 +1,7 @@
 package systems.courant.shrewd.tools.importer;
 
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
@@ -107,5 +109,58 @@ class BatchImportCliTest {
         assertThatThrownBy(() -> cli.readManifest(manifest))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("JSON array");
+    }
+
+    @Nested
+    @DisplayName("parseArgs error paths (#333)")
+    class ParseArgsErrorPaths {
+
+        @Test
+        void shouldThrowOnUnknownOption() {
+            assertThatThrownBy(() -> BatchImportCli.parseArgs(
+                    new String[]{"--bogus"}))
+                    .isInstanceOf(IllegalArgumentException.class)
+                    .hasMessageContaining("Unknown option")
+                    .hasMessageContaining("--bogus");
+        }
+
+        @Test
+        void shouldThrowWhenManifestMissingValue() {
+            assertThatThrownBy(() -> BatchImportCli.parseArgs(
+                    new String[]{"--manifest"}))
+                    .isInstanceOf(IllegalArgumentException.class)
+                    .hasMessageContaining("--manifest")
+                    .hasMessageContaining("requires a value");
+        }
+
+        @Test
+        void shouldThrowWhenOutputDirMissingValue() {
+            assertThatThrownBy(() -> BatchImportCli.parseArgs(
+                    new String[]{"--output-dir"}))
+                    .isInstanceOf(IllegalArgumentException.class)
+                    .hasMessageContaining("--output-dir")
+                    .hasMessageContaining("requires a value");
+        }
+
+        @Test
+        void shouldSetHelpRequestedOnHelpFlag() {
+            BatchImportCli.CliArgs parsed = BatchImportCli.parseArgs(
+                    new String[]{"--help"});
+            assertThat(parsed.helpRequested).isTrue();
+        }
+
+        @Test
+        void shouldSetHelpRequestedOnShortFlag() {
+            BatchImportCli.CliArgs parsed = BatchImportCli.parseArgs(
+                    new String[]{"-h"});
+            assertThat(parsed.helpRequested).isTrue();
+        }
+
+        @Test
+        void shouldReturnZeroForHelpViaRun() throws IOException {
+            BatchImportCli cli = new BatchImportCli();
+            int exitCode = cli.run(new String[]{"--help"});
+            assertThat(exitCode).isZero();
+        }
     }
 }

@@ -40,6 +40,10 @@ public class BatchImportCli {
         try {
             int exitCode = new BatchImportCli().run(args);
             System.exit(exitCode);
+        } catch (IllegalArgumentException e) {
+            System.err.println(e.getMessage());
+            printUsage();
+            System.exit(1);
         } catch (Exception e) {
             System.err.println("Error: " + e.getMessage());
             System.exit(1);
@@ -48,6 +52,11 @@ public class BatchImportCli {
 
     int run(String[] args) throws IOException {
         CliArgs parsed = parseArgs(args);
+
+        if (parsed.helpRequested) {
+            printUsage();
+            return 0;
+        }
 
         if (parsed.manifestFile == null) {
             printUsage();
@@ -263,37 +272,26 @@ public class BatchImportCli {
         CliArgs parsed = new CliArgs();
         for (int i = 0; i < args.length; i++) {
             switch (args[i]) {
-                case "--manifest" -> {
-                    if (i + 1 >= args.length) {
-                        System.err.println("--manifest requires a value");
-                        printUsage();
-                        System.exit(1);
-                    }
-                    parsed.manifestFile = args[++i];
-                }
-                case "--output-dir" -> {
-                    if (i + 1 >= args.length) {
-                        System.err.println("--output-dir requires a value");
-                        printUsage();
-                        System.exit(1);
-                    }
-                    parsed.outputDir = args[++i];
-                }
+                case "--manifest" -> parsed.manifestFile = requireValue(args, i++);
+                case "--output-dir" -> parsed.outputDir = requireValue(args, i++);
                 case "--json-only" -> parsed.jsonOnly = true;
                 case "--dry-run" -> parsed.dryRun = true;
                 case "--overwrite" -> parsed.overwrite = true;
-                case "--help", "-h" -> {
-                    printUsage();
-                    System.exit(0);
-                }
-                default -> {
-                    System.err.println("Unknown option: " + args[i]);
-                    printUsage();
-                    System.exit(1);
-                }
+                case "--help", "-h" -> parsed.helpRequested = true;
+                default -> throw new IllegalArgumentException(
+                        "Unknown option: " + args[i]);
             }
         }
         return parsed;
+    }
+
+    private static String requireValue(String[] args, int flagIndex) {
+        int valueIndex = flagIndex + 1;
+        if (valueIndex >= args.length) {
+            throw new IllegalArgumentException(
+                    args[flagIndex] + " requires a value");
+        }
+        return args[valueIndex];
     }
 
     private static void printUsage() {
@@ -330,5 +328,6 @@ public class BatchImportCli {
         boolean jsonOnly;
         boolean dryRun;
         boolean overwrite;
+        boolean helpRequested;
     }
 }
