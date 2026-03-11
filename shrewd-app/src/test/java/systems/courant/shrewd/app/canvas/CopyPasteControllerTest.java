@@ -203,6 +203,27 @@ class CopyPasteControllerTest {
         }
 
         @Test
+        void shouldPreserveBuiltInConstantPI() {
+            String result = CopyPasteController.clearDanglingReferences(
+                    "2 * PI * radius", editor).equation();
+            assertThat(result).isEqualTo("2 * PI * 0");
+        }
+
+        @Test
+        void shouldPreserveBuiltInConstantE() {
+            String result = CopyPasteController.clearDanglingReferences(
+                    "E + missing", editor).equation();
+            assertThat(result).isEqualTo("E + 0");
+        }
+
+        @Test
+        void shouldPreservePIAndEInComplexExpression() {
+            String result = CopyPasteController.clearDanglingReferences(
+                    "PI * E + TIME", editor).equation();
+            assertThat(result).isEqualTo("PI * E + TIME");
+        }
+
+        @Test
         void shouldPreserveFunctionCalls() {
             String result = CopyPasteController.clearDanglingReferences(
                     "MAX(Missing, 0)", editor).equation();
