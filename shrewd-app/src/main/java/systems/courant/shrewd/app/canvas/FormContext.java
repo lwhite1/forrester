@@ -41,6 +41,9 @@ class FormContext {
     Runnable onFormRebuildRequested;
     Runnable onOpenExpressionHelp;
 
+    /** Cached registry for dimensional analysis — avoids rebuilding on every keystroke. */
+    private final UnitRegistry unitRegistry = new UnitRegistry();
+
     void requestFormRebuild() {
         if (onFormRebuildRequested != null) {
             onFormRebuildRequested.run();
@@ -328,8 +331,7 @@ class FormContext {
     private void runDimensionalAnalysis(String equationText, Label dimensionLabel) {
         try {
             Expr expr = ExprParser.parse(equationText);
-            UnitRegistry registry = new UnitRegistry();
-            EditorUnitContext unitContext = new EditorUnitContext(editor, registry);
+            EditorUnitContext unitContext = new EditorUnitContext(editor, unitRegistry);
             DimensionalAnalyzer analyzer = new DimensionalAnalyzer(unitContext);
             DimensionalAnalyzer.AnalysisResult analysis = analyzer.analyze(expr);
 
@@ -340,7 +342,7 @@ class FormContext {
 
             // Build display text
             String inferredDisplay = analysis.inferredUnit().displayString();
-            CompositeUnit expected = getExpectedUnit(registry);
+            CompositeUnit expected = getExpectedUnit(unitRegistry);
 
             if (!analysis.isConsistent()) {
                 // Show first warning

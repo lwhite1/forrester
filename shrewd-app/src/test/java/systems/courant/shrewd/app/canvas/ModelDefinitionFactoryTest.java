@@ -1,5 +1,7 @@
 package systems.courant.shrewd.app.canvas;
 
+import systems.courant.shrewd.measure.Quantity;
+import systems.courant.shrewd.measure.TimeUnit;
 import systems.courant.shrewd.model.ModelMetadata;
 import systems.courant.shrewd.model.def.CausalLinkDef;
 import systems.courant.shrewd.model.def.CldVariableDef;
@@ -11,7 +13,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import java.util.List;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -169,6 +170,34 @@ class ModelDefinitionFactoryTest {
                     def, Map.of());
 
             assertThat(result).isSameAs(def);
+        }
+    }
+
+    @Nested
+    @DisplayName("Shared UnitRegistry (#444)")
+    class SharedRegistry {
+
+        @Test
+        void shouldResolveTimeStepWithCachedRegistry() {
+            SimulationSettings settings = new SimulationSettings("Day", 10, "Day");
+            TimeUnit ts = ModelDefinitionFactory.resolveTimeStep(settings);
+            assertThat(ts.getName()).isEqualTo("Day");
+        }
+
+        @Test
+        void shouldResolveDurationWithCachedRegistry() {
+            SimulationSettings settings = new SimulationSettings("Day", 10, "Week");
+            Quantity dur = ModelDefinitionFactory.resolveDuration(settings);
+            assertThat(dur.getValue()).isEqualTo(10);
+            assertThat(dur.getUnit().getName()).isEqualTo("Week");
+        }
+
+        @Test
+        void shouldReturnConsistentResultsAcrossRepeatedCalls() {
+            SimulationSettings settings = new SimulationSettings("Minute", 100, "Hour");
+            TimeUnit first = ModelDefinitionFactory.resolveTimeStep(settings);
+            TimeUnit second = ModelDefinitionFactory.resolveTimeStep(settings);
+            assertThat(first).isSameAs(second);
         }
     }
 
