@@ -4,9 +4,11 @@ import systems.courant.forrester.model.def.ModelDefinition;
 import systems.courant.forrester.model.def.ModelDefinitionBuilder;
 
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -254,5 +256,74 @@ class DependencyGraphTest {
         assertThat(graph.allEdges()).isEmpty();
         assertThat(graph.hasCycle()).isFalse();
         assertThat(graph.topologicalSort()).isEmpty();
+    }
+
+    @Nested
+    @DisplayName("TransitiveTraversal")
+    class TransitiveTraversal {
+
+        // Model: C → A1 → A2 → F → S (with F draining S)
+        private DependencyGraph buildChainGraph() {
+            ModelDefinition def = new ModelDefinitionBuilder()
+                    .name("Chain")
+                    .constant("C", 10, "Thing")
+                    .aux("A1", "C * 2", "Thing")
+                    .aux("A2", "A1 + 1", "Thing")
+                    .stock("S", 0, "Thing")
+                    .flow("F", "A2", "Day", null, "S")
+                    .build();
+            return DependencyGraph.fromDefinition(def);
+        }
+
+        @Test
+        void shouldFindTransitiveUpstream() {
+            DependencyGraph graph = buildChainGraph();
+            Map<String, Integer> upstream = graph.transitiveUpstream("F");
+
+            assertThat(upstream).containsKey("F");
+            assertThat(upstream.get("F")).isEqualTo(0);
+            assertThat(upstream).containsKeys("A2", "A1", "C");
+            // A2 is depth 1, A1 is depth 2, C is depth 3
+            assertThat(upstream.get("A2")).isEqualTo(1);
+            assertThat(upstream.get("A1")).isEqualTo(2);
+            assertThat(upstream.get("C")).isEqualTo(3);
+        }
+
+        @Test
+        void shouldFindTransitiveDownstream() {
+            DependencyGraph graph = buildChainGraph();
+            Map<String, Integer> downstream = graph.transitiveDownstream("C");
+
+            assertThat(downstream).containsKey("C");
+            assertThat(downstream.get("C")).isEqualTo(0);
+            assertThat(downstream).containsKeys("A1", "A2", "F");
+            assertThat(downstream.get("A1")).isEqualTo(1);
+            assertThat(downstream.get("A2")).isEqualTo(2);
+            assertThat(downstream.get("F")).isEqualTo(3);
+        }
+
+        @Test
+        void shouldReturnOnlyOriginForLeafElement() {
+            DependencyGraph graph = buildChainGraph();
+            Map<String, Integer> upstream = graph.transitiveUpstream("C");
+
+            assertThat(upstream).hasSize(1);
+            assertThat(upstream).containsEntry("C", 0);
+        }
+
+        @Test
+        void shouldHandleCyclesWithoutInfiniteLoop() {
+            ModelDefinition def = new ModelDefinitionBuilder()
+                    .name("Cycle")
+                    .stock("Pop", 100, "Person")
+                    .flow("Births", "Pop * 0.04", "Day", null, "Pop")
+                    .build();
+            DependencyGraph graph = DependencyGraph.fromDefinition(def);
+
+            Map<String, Integer> upstream = graph.transitiveUpstream("Births");
+            // Should include Pop (depth 1), then Births already visited, so no infinite loop
+            assertThat(upstream).containsKeys("Births", "Pop");
+            assertThat(upstream).hasSize(2);
+        }
     }
 }

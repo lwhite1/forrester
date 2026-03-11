@@ -44,6 +44,8 @@ final class CanvasContextMenuController {
         void drillInto(String moduleName);
         void openDefinePortsDialog(String moduleName);
         void openBindingsDialog(String moduleName);
+        void traceUpstream(String elementName);
+        void traceDownstream(String elementName);
     }
 
     private final ModuleNavigationController navController;
@@ -99,7 +101,14 @@ final class CanvasContextMenuController {
             callbacks.copySelection();
         });
 
+        MenuItem traceUpItem = new MenuItem("Trace Upstream");
+        traceUpItem.setOnAction(e -> callbacks.traceUpstream(elementName));
+
+        MenuItem traceDownItem = new MenuItem("Trace Downstream");
+        traceDownItem.setOnAction(e -> callbacks.traceDownstream(elementName));
+
         menu.getItems().addAll(editItem, new SeparatorMenuItem(),
+                traceUpItem, traceDownItem, new SeparatorMenuItem(),
                 cutItem, copyItem, new SeparatorMenuItem(), deleteItem);
         menu.show(canvas, screenX, screenY);
     }
