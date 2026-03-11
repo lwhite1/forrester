@@ -2,6 +2,10 @@ package systems.courant.shrewd.model;
 
 import org.junit.jupiter.api.Test;
 
+import java.util.concurrent.atomic.AtomicInteger;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.within;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -50,5 +54,47 @@ class NpvTest {
         double first = npv.getCurrentValue();
         double second = npv.getCurrentValue();
         assertEquals(first, second, 0.0);
+    }
+
+    @Test
+    void shouldCallStreamOnlyOncePerCatchUp() {
+        int[] step = {0};
+        AtomicInteger callCount = new AtomicInteger(0);
+        Npv npv = Npv.of(() -> {
+            callCount.incrementAndGet();
+            return 100;
+        }, 0.1, () -> step[0]);
+
+        npv.getCurrentValue(); // step 0 — 1 call
+        assertThat(callCount.get()).isEqualTo(1);
+
+        step[0] = 3; // skip ahead by 3 steps
+        npv.getCurrentValue();
+        // Should call stream only once more (not 3 times)
+        assertThat(callCount.get()).isEqualTo(2);
+    }
+
+    @Test
+    void shouldProduceSameResultWhetherSteppedOrSkipped() {
+        int[] step1 = {0};
+        int[] step2 = {0};
+        Npv stepped = Npv.of(() -> 100, 0.1, () -> step1[0]);
+        Npv skipped = Npv.of(() -> 100, 0.1, () -> step2[0]);
+
+        // Step through one at a time
+        stepped.getCurrentValue(); // step 0
+        step1[0] = 1;
+        stepped.getCurrentValue();
+        step1[0] = 2;
+        stepped.getCurrentValue();
+        step1[0] = 3;
+        double steppedVal = stepped.getCurrentValue();
+
+        // Skip directly from 0 to 3
+        skipped.getCurrentValue(); // step 0
+        step2[0] = 3;
+        double skippedVal = skipped.getCurrentValue();
+
+        assertThat(skippedVal).isCloseTo(steppedVal, within(1e-9));
     }
 }

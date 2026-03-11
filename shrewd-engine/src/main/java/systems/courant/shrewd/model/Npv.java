@@ -106,9 +106,10 @@ public class Npv implements Formula, Resettable {
         } else if (step > lastStep) {
             int delta = step - lastStep;
             double discountMultiplier = 1 + discountRate;
+            double streamVal = stream.getAsDouble();
             for (int d = 0; d < delta; d++) {
                 cumulativeDiscount *= discountMultiplier;
-                accumulated += stream.getAsDouble() * factor / cumulativeDiscount;
+                accumulated += streamVal * factor / cumulativeDiscount;
             }
             lastStep = step;
         }
