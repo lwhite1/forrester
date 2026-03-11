@@ -1,4 +1,4 @@
-package systems.courant.forrester.model.expr;
+package systems.courant.shrewd.model.expr;
 
 /**
  * Unary operators supported in expression ASTs.

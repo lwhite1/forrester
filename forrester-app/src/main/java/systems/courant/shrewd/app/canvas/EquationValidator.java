@@ -1,9 +1,9 @@
-package systems.courant.forrester.app.canvas;
+package systems.courant.shrewd.app.canvas;
 
-import systems.courant.forrester.model.expr.Expr;
-import systems.courant.forrester.model.expr.ExprDependencies;
-import systems.courant.forrester.model.expr.ExprParser;
-import systems.courant.forrester.model.expr.ParseException;
+import systems.courant.shrewd.model.expr.Expr;
+import systems.courant.shrewd.model.expr.ExprDependencies;
+import systems.courant.shrewd.model.expr.ExprParser;
+import systems.courant.shrewd.model.expr.ParseException;
 
 import java.util.ArrayList;
 import java.util.HashSet;

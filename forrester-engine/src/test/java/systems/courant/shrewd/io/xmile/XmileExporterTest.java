@@ -1,13 +1,13 @@
-package systems.courant.forrester.io.xmile;
+package systems.courant.shrewd.io.xmile;
 
-import systems.courant.forrester.io.ImportResult;
-import systems.courant.forrester.model.def.AuxDef;
-import systems.courant.forrester.model.def.FlowDef;
-import systems.courant.forrester.model.def.LookupTableDef;
-import systems.courant.forrester.model.def.ModelDefinition;
-import systems.courant.forrester.model.def.ModelDefinitionBuilder;
-import systems.courant.forrester.model.def.ModuleInstanceDef;
-import systems.courant.forrester.model.def.StockDef;
+import systems.courant.shrewd.io.ImportResult;
+import systems.courant.shrewd.model.def.AuxDef;
+import systems.courant.shrewd.model.def.FlowDef;
+import systems.courant.shrewd.model.def.LookupTableDef;
+import systems.courant.shrewd.model.def.ModelDefinition;
+import systems.courant.shrewd.model.def.ModelDefinitionBuilder;
+import systems.courant.shrewd.model.def.ModuleInstanceDef;
+import systems.courant.shrewd.model.def.StockDef;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;

@@ -1,7 +1,7 @@
-package systems.courant.forrester.measure;
+package systems.courant.shrewd.measure;
 
-import systems.courant.forrester.model.expr.Expr;
-import systems.courant.forrester.model.expr.ExprParser;
+import systems.courant.shrewd.model.expr.Expr;
+import systems.courant.shrewd.model.expr.ExprParser;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;

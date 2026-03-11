@@ -1,8 +1,8 @@
-package systems.courant.forrester.model.graph;
+package systems.courant.shrewd.model.graph;
 
-import systems.courant.forrester.model.def.CausalLinkDef;
-import systems.courant.forrester.model.def.ModelDefinition;
-import systems.courant.forrester.model.def.ModelDefinitionBuilder;
+import systems.courant.shrewd.model.def.CausalLinkDef;
+import systems.courant.shrewd.model.def.ModelDefinition;
+import systems.courant.shrewd.model.def.ModelDefinitionBuilder;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;

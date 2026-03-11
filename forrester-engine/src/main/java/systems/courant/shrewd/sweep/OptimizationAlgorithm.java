@@ -1,4 +1,4 @@
-package systems.courant.forrester.sweep;
+package systems.courant.shrewd.sweep;
 
 /**
  * Derivative-free optimization algorithms available for model calibration.

@@ -1,7 +1,7 @@
-package systems.courant.forrester.model.def;
+package systems.courant.shrewd.model.def;
 
-import systems.courant.forrester.model.def.CausalLinkDef.Polarity;
-import systems.courant.forrester.model.def.ValidationIssue.Severity;
+import systems.courant.shrewd.model.def.CausalLinkDef.Polarity;
+import systems.courant.shrewd.model.def.ValidationIssue.Severity;
 
 import java.util.List;
 import java.util.Map;

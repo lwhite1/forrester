@@ -1,6 +1,6 @@
-package systems.courant.forrester.app.canvas;
+package systems.courant.shrewd.app.canvas;
 
-import systems.courant.forrester.sweep.MonteCarloResult;
+import systems.courant.shrewd.sweep.MonteCarloResult;
 
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;

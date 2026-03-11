@@ -1,8 +1,8 @@
-package systems.courant.forrester.app.canvas;
+package systems.courant.shrewd.app.canvas;
 
-import systems.courant.forrester.model.def.CausalLinkDef;
-import systems.courant.forrester.model.def.ElementDef;
-import systems.courant.forrester.model.def.ElementType;
+import systems.courant.shrewd.model.def.CausalLinkDef;
+import systems.courant.shrewd.model.def.ElementDef;
+import systems.courant.shrewd.model.def.ElementType;
 
 import java.util.ArrayList;
 import java.util.Collections;

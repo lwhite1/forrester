@@ -1,19 +1,19 @@
-package systems.courant.forrester.sweep;
+package systems.courant.shrewd.sweep;
 
-import systems.courant.forrester.measure.Quantity;
-import systems.courant.forrester.model.Flow;
-import systems.courant.forrester.model.Variable;
-import systems.courant.forrester.model.Model;
-import systems.courant.forrester.model.Stock;
+import systems.courant.shrewd.measure.Quantity;
+import systems.courant.shrewd.model.Flow;
+import systems.courant.shrewd.model.Variable;
+import systems.courant.shrewd.model.Model;
+import systems.courant.shrewd.model.Stock;
 
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
 import java.util.Map;
 
-import static systems.courant.forrester.measure.Units.DAY;
-import static systems.courant.forrester.measure.Units.PEOPLE;
-import static systems.courant.forrester.measure.units.time.Times.weeks;
+import static systems.courant.shrewd.measure.Units.DAY;
+import static systems.courant.shrewd.measure.Units.PEOPLE;
+import static systems.courant.shrewd.measure.units.time.Times.weeks;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;

@@ -1,6 +1,6 @@
-package systems.courant.forrester.app.canvas;
+package systems.courant.shrewd.app.canvas;
 
-import systems.courant.forrester.model.def.StockDef;
+import systems.courant.shrewd.model.def.StockDef;
 
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.TextArea;

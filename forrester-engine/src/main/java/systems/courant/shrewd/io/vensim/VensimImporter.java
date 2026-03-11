@@ -1,16 +1,16 @@
-package systems.courant.forrester.io.vensim;
+package systems.courant.shrewd.io.vensim;
 
-import systems.courant.forrester.io.ImportResult;
-import systems.courant.forrester.io.ModelImporter;
-import systems.courant.forrester.model.def.AuxDef;
-import systems.courant.forrester.model.def.CausalLinkDef;
-import systems.courant.forrester.model.def.CldVariableDef;
-import systems.courant.forrester.model.def.ConnectorRoute;
-import systems.courant.forrester.model.def.FlowDef;
-import systems.courant.forrester.model.def.LookupTableDef;
-import systems.courant.forrester.model.def.ModelDefinitionBuilder;
-import systems.courant.forrester.model.def.StockDef;
-import systems.courant.forrester.model.def.ViewDef;
+import systems.courant.shrewd.io.ImportResult;
+import systems.courant.shrewd.io.ModelImporter;
+import systems.courant.shrewd.model.def.AuxDef;
+import systems.courant.shrewd.model.def.CausalLinkDef;
+import systems.courant.shrewd.model.def.CldVariableDef;
+import systems.courant.shrewd.model.def.ConnectorRoute;
+import systems.courant.shrewd.model.def.FlowDef;
+import systems.courant.shrewd.model.def.LookupTableDef;
+import systems.courant.shrewd.model.def.ModelDefinitionBuilder;
+import systems.courant.shrewd.model.def.StockDef;
+import systems.courant.shrewd.model.def.ViewDef;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -29,7 +29,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * Imports Vensim .mdl model files into Forrester {@link systems.courant.forrester.model.def.ModelDefinition}.
+ * Imports Vensim .mdl model files into Forrester {@link systems.courant.shrewd.model.def.ModelDefinition}.
  *
  * <p>Supports stocks (INTEG), constants, auxiliaries, lookup tables (standalone and
  * WITH LOOKUP), subscript ranges, simulation settings, and sketch/view data.

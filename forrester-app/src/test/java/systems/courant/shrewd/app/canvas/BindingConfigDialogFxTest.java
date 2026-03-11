@@ -1,9 +1,9 @@
-package systems.courant.forrester.app.canvas;
+package systems.courant.shrewd.app.canvas;
 
-import systems.courant.forrester.model.def.ModelDefinition;
-import systems.courant.forrester.model.def.ModuleInstanceDef;
-import systems.courant.forrester.model.def.ModuleInterface;
-import systems.courant.forrester.model.def.PortDef;
+import systems.courant.shrewd.model.def.ModelDefinition;
+import systems.courant.shrewd.model.def.ModuleInstanceDef;
+import systems.courant.shrewd.model.def.ModuleInterface;
+import systems.courant.shrewd.model.def.PortDef;
 
 import javafx.application.Platform;
 import javafx.scene.Scene;

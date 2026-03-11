@@ -1,4 +1,4 @@
-package systems.courant.forrester.model.def;
+package systems.courant.shrewd.model.def;
 
 /**
  * A single validation issue found during model validation.

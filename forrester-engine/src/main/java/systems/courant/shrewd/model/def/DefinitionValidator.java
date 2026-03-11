@@ -1,10 +1,10 @@
-package systems.courant.forrester.model.def;
+package systems.courant.shrewd.model.def;
 
-import systems.courant.forrester.model.expr.Expr;
-import systems.courant.forrester.model.expr.ExprDependencies;
-import systems.courant.forrester.model.expr.ExprParser;
-import systems.courant.forrester.model.expr.ParseException;
-import systems.courant.forrester.model.graph.ViewValidator;
+import systems.courant.shrewd.model.expr.Expr;
+import systems.courant.shrewd.model.expr.ExprDependencies;
+import systems.courant.shrewd.model.expr.ExprParser;
+import systems.courant.shrewd.model.expr.ParseException;
+import systems.courant.shrewd.model.graph.ViewValidator;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

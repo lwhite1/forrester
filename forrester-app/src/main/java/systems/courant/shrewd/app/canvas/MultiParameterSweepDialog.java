@@ -1,6 +1,6 @@
-package systems.courant.forrester.app.canvas;
+package systems.courant.shrewd.app.canvas;
 
-import systems.courant.forrester.sweep.ParameterSweep;
+import systems.courant.shrewd.sweep.ParameterSweep;
 
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.IntegerProperty;

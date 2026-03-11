@@ -1,6 +1,6 @@
-package systems.courant.forrester.measure;
+package systems.courant.shrewd.measure;
 
-import systems.courant.forrester.measure.dimension.Dimensionless;
+import systems.courant.shrewd.measure.dimension.Dimensionless;
 
 import java.util.LinkedHashMap;
 import java.util.Map;

@@ -1,10 +1,143 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>$Title$</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shrewd | System Dynamics Environment</title>
+    <style>
+        :root {
+            --vellum: #fdfcf8;
+            --ink: #111111;
+            --note: #666666;
+            --border: #dddddd;
+        }
+        body {
+            background-color: var(--vellum);
+            color: var(--ink);
+            font-family: "et-book", "Palatino", "Book Antiqua", serif;
+            line-height: 1.5;
+            margin: 0;
+            padding: 4rem 2rem;
+            display: flex;
+            justify-content: center;
+        }
+        article {
+            max-width: 1300px;
+            display: grid;
+            grid-template-columns: 180px 1fr 280px; /* Monograph Grid */
+            gap: 3.5rem;
+        }
+        header { grid-column: 2; margin-bottom: 4rem; }
+        h1 { font-weight: 400; font-variant: small-caps; letter-spacing: 0.15em; font-size: 3rem; margin: 0; }
+        .subtitle { font-style: italic; font-size: 1.1rem; color: var(--note); margin-top: 0.5rem; }
+
+        /* Left Column - Metadata */
+        .meta { grid-column: 1; font-size: 0.85rem; border-right: 1px solid var(--border); padding-right: 1.5rem; }
+        .meta-label { font-variant: small-caps; font-weight: bold; display: block; margin-top: 2rem; }
+        .meta-link { display: block; color: var(--ink); text-decoration: underline; margin-top: 0.5rem; }
+
+        /* Middle Column - Technical Narrative */
+        main { grid-column: 2; }
+        p { font-size: 1.1rem; margin-bottom: 1.8rem; text-align: justify; }
+        .newthought { font-variant: small-caps; letter-spacing: 0.05em; }
+        h3 { font-weight: 400; font-variant: small-caps; border-bottom: 1px solid var(--border); padding-bottom: 5px; margin: 3rem 0 1.5rem 0; letter-spacing: 0.1em; }
+
+        /* Right Column - Sidenotes */
+        aside { grid-column: 3; font-size: 0.88rem; color: var(--note); line-height: 1.4; }
+        .sidenote { margin-bottom: 4rem; position: relative; }
+        .sidenote-num { position: absolute; left: -1.5rem; font-style: italic; }
+
+        /* Tables & Code */
+        table { width: 100%; border-collapse: collapse; margin: 2rem 0; font-size: 0.85rem; }
+        th { text-align: left; border-bottom: 1px solid var(--ink); padding: 8px; font-variant: small-caps; }
+        td { padding: 8px; border-bottom: 1px solid #eee; }
+        pre { background: #f7f5ef; padding: 1.2rem; overflow-x: auto; font-size: 0.85rem; border: 1px solid #e0ddd5; }
+        code { font-family: "Courier New", Courier, monospace; }
+
+        @media (max-width: 1000px) {
+            article { grid-template-columns: 1fr; }
+            .meta, aside { display: none; } /* Focus on text for mobile */
+            header, main { grid-column: 1; }
+        }
+    </style>
 </head>
 <body>
-$END$
+
+<article>
+    <section class="meta">
+        <span class="meta-label">Project</span>
+        <span>Courant Systems</span>
+        <span class="meta-label">Version</span>
+        <span>0.9.4-Beta</span>
+        <span class="meta-label">License</span>
+        <span>MIT (Open Source)</span>
+        <span class="meta-label">Binaries</span>
+        <a href="#" class="meta-link">Windows x64</a>
+        <a href="#" class="meta-link">macOS Arm64</a>
+        <a href="#" class="meta-link">Linux Build</a>
+    </section>
+
+    <header>
+        <h1>Shrewd</h1>
+        <p class="subtitle">An Open-Source Environment for System Dynamics Simulation</p>
+    </header>
+
+    <main>
+        <p><span class="newthought">The Shrewd Project</span> is an implementation of System Dynamics (SD) principles designed for structural transparency and numerical rigor. Unlike general-purpose data science tools, Shrewd is specialized for the modeling of stocks, flows, and the feedback loops that define non-linear behavior over time.</p>
+
+        <p>For the researcher, Shrewd provides a bridge between visual sketching and formal mathematical specification. For the student, it offers an unencumbered environment to explore the foundations of cybernetics and feedback theory without licensing constraints.</p>
+
+        <h3>Numerical Integration and Stability</h3>
+        <p>Simulation in Shrewd is handled by a high-performance solver supporting Euler and Runge-Kutta (RK4) integration methods. As model complexity increases—particularly with subscripts and multi-dimensional arrays—computational efficiency becomes paramount. Shrewd is optimized for the Java Virtual Machine, allowing for sub-millisecond execution of large-scale models.</p>
+
+        <p><strong>Causal Loop Identification:</strong> The environment automatically parses the underlying directed graph of a model to identify reinforcing and balancing feedback loops. This allows for immediate verification of the system's behavioral modes: exponential growth, goal-seeking, or oscillation.</p>
+
+        <h3>Comparison of Methodology</h3>
+        <table>
+            <thead>
+            <tr>
+                <th>Feature</th>
+                <th>Standard Academic</th>
+                <th>Professional SaaS</th>
+                <th>Shrewd</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr><td>Solver Access</td><td>Limited</td><td>Proprietary</td><td>Open (Java SDK)</td></tr>
+            <tr><td>Loop Dominance</td><td>Manual Check</td><td>Integrated</td><td>Integrated</td></tr>
+            <tr><td>Monte Carlo</td><td>No</td><td>Yes</td><td>Yes</td></tr>
+            <tr><td>Optimization</td><td>No</td><td>No</td><td>Yes (Standard)</td></tr>
+            <tr><td>File Format</td><td>Binary / Proprietary</td><td>XMILE</td><td>XMILE / .mdl</td></tr>
+            </tbody>
+        </table>
+
+        <h3>Uncertainty and Sensitivity</h3>
+        <p>Deterministic models provide a single trajectory, but they often fail to capture the sensitivity of a system to parameter variance. Shrewd integrates Monte Carlo simulation as a core primitive. By assigning probability distributions to exogenous variables, researchers can generate an envelope of outcomes, providing a more statistically robust view of policy resistance.</p>
+
+        <pre><code># Reproduce Build from Source
+git clone https://github.com/lwhite1/shrewd.git
+mvn clean install
+java -jar shrewd-app/target/shrewd-app.jar</code></pre>
+    </main>
+
+    <aside>
+        <div class="sidenote">
+            <span class="sidenote-num">1</span>
+            <strong>The "Sea-Change" Concept:</strong> In system dynamics, a sea-change refers to the moment a system undergoes a structural shift—often when one feedback loop becomes dominant over another.
+        </div>
+
+        <div class="sidenote">
+            <span class="sidenote-num">2</span>
+
+            <strong>Loop Dominance:</strong> Understanding which loop is currently driving the system's behavior is critical for identifying leverage points in policy design.
+        </div>
+
+        <div class="sidenote">
+            <span class="sidenote-num">3</span>
+            <strong>Legacy Migration:</strong> Shrewd provides native support for <code>.mdl</code> files, ensuring that decades of system dynamics research can be modernized without data loss.
+        </div>
+    </aside>
+</article>
+
 </body>
 </html>

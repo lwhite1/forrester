@@ -1,4 +1,4 @@
-package systems.courant.forrester.app.canvas;
+package systems.courant.shrewd.app.canvas;
 
 import org.fxmisc.richtext.model.StyleSpans;
 import org.junit.jupiter.api.DisplayName;

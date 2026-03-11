@@ -45,7 +45,7 @@
         no circular dependency risk.
     -->
     <Match>
-        <Class name="systems.courant.forrester.measure.Dimension"/>
+        <Class name="systems.courant.shrewd.measure.Dimension"/>
         <Bug pattern="IC_SUPERCLASS_USES_SUBCLASS_DURING_INITIALIZATION"/>
     </Match>
 </FindBugsFilter>

@@ -1,13 +1,13 @@
-package systems.courant.forrester.io.vensim;
+package systems.courant.shrewd.io.vensim;
 
-import systems.courant.forrester.io.ImportResult;
-import systems.courant.forrester.model.def.AuxDef;
-import systems.courant.forrester.model.def.CausalLinkDef;
-import systems.courant.forrester.model.def.CldVariableDef;
-import systems.courant.forrester.model.def.FlowDef;
-import systems.courant.forrester.model.def.LookupTableDef;
-import systems.courant.forrester.model.def.ModelDefinition;
-import systems.courant.forrester.model.def.ModelDefinitionBuilder;
+import systems.courant.shrewd.io.ImportResult;
+import systems.courant.shrewd.model.def.AuxDef;
+import systems.courant.shrewd.model.def.CausalLinkDef;
+import systems.courant.shrewd.model.def.CldVariableDef;
+import systems.courant.shrewd.model.def.FlowDef;
+import systems.courant.shrewd.model.def.LookupTableDef;
+import systems.courant.shrewd.model.def.ModelDefinition;
+import systems.courant.shrewd.model.def.ModelDefinitionBuilder;
 
 import java.util.List;
 
@@ -349,15 +349,15 @@ class VensimExporterTest {
                     .cldVariable("Birth_Rate", "Rate of births")
                     .cldVariable("Death_Rate", "Rate of deaths")
                     .causalLink("Birth_Rate", "Population", CausalLinkDef.Polarity.POSITIVE)
-                    .view(new systems.courant.forrester.model.def.ViewDef("CLD",
+                    .view(new systems.courant.shrewd.model.def.ViewDef("CLD",
                             List.of(
-                                    new systems.courant.forrester.model.def.ElementPlacement(
-                                            "Population", systems.courant.forrester.model.def.ElementType.CLD_VARIABLE, 200, 200),
-                                    new systems.courant.forrester.model.def.ElementPlacement(
-                                            "Birth_Rate", systems.courant.forrester.model.def.ElementType.CLD_VARIABLE, 100, 100),
-                                    new systems.courant.forrester.model.def.ElementPlacement(
-                                            "Death_Rate", systems.courant.forrester.model.def.ElementType.CLD_VARIABLE, 300, 100)),
-                            List.of(new systems.courant.forrester.model.def.ConnectorRoute("Birth_Rate", "Population")),
+                                    new systems.courant.shrewd.model.def.ElementPlacement(
+                                            "Population", systems.courant.shrewd.model.def.ElementType.CLD_VARIABLE, 200, 200),
+                                    new systems.courant.shrewd.model.def.ElementPlacement(
+                                            "Birth_Rate", systems.courant.shrewd.model.def.ElementType.CLD_VARIABLE, 100, 100),
+                                    new systems.courant.shrewd.model.def.ElementPlacement(
+                                            "Death_Rate", systems.courant.shrewd.model.def.ElementType.CLD_VARIABLE, 300, 100)),
+                            List.of(new systems.courant.shrewd.model.def.ConnectorRoute("Birth_Rate", "Population")),
                             List.of()))
                     .build();
 
@@ -390,13 +390,13 @@ class VensimExporterTest {
                     .defaultSimulation("Day", 100, "Day")
                     .stock("Tank", 50.0, "Gallons")
                     .constant("rate", 10.0, "Gallons/Day")
-                    .view(new systems.courant.forrester.model.def.ViewDef("Main",
+                    .view(new systems.courant.shrewd.model.def.ViewDef("Main",
                             List.of(
-                                    new systems.courant.forrester.model.def.ElementPlacement(
-                                            "Tank", systems.courant.forrester.model.def.ElementType.STOCK, 200, 150),
-                                    new systems.courant.forrester.model.def.ElementPlacement(
-                                            "rate", systems.courant.forrester.model.def.ElementType.AUX, 100, 300)),
-                            List.of(new systems.courant.forrester.model.def.ConnectorRoute("rate", "Tank")),
+                                    new systems.courant.shrewd.model.def.ElementPlacement(
+                                            "Tank", systems.courant.shrewd.model.def.ElementType.STOCK, 200, 150),
+                                    new systems.courant.shrewd.model.def.ElementPlacement(
+                                            "rate", systems.courant.shrewd.model.def.ElementType.AUX, 100, 300)),
+                            List.of(new systems.courant.shrewd.model.def.ConnectorRoute("rate", "Tank")),
                             List.of()))
                     .build();
 
@@ -435,12 +435,12 @@ class VensimExporterTest {
                     .defaultSimulation("Day", 100, "Day")
                     .stock("Tank", 50.0, "Gallons")
                     .flow(new FlowDef("fill", "10", "Day", null, "Tank"))
-                    .view(new systems.courant.forrester.model.def.ViewDef("Main",
+                    .view(new systems.courant.shrewd.model.def.ViewDef("Main",
                             List.of(
-                                    new systems.courant.forrester.model.def.ElementPlacement(
-                                            "Tank", systems.courant.forrester.model.def.ElementType.STOCK, 200, 150),
-                                    new systems.courant.forrester.model.def.ElementPlacement(
-                                            "fill", systems.courant.forrester.model.def.ElementType.FLOW, 100, 150)),
+                                    new systems.courant.shrewd.model.def.ElementPlacement(
+                                            "Tank", systems.courant.shrewd.model.def.ElementType.STOCK, 200, 150),
+                                    new systems.courant.shrewd.model.def.ElementPlacement(
+                                            "fill", systems.courant.shrewd.model.def.ElementType.FLOW, 100, 150)),
                             List.of(),
                             List.of()))
                     .build();

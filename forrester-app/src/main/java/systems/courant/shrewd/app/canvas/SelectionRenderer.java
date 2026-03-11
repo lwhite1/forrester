@@ -1,6 +1,6 @@
-package systems.courant.forrester.app.canvas;
+package systems.courant.shrewd.app.canvas;
 
-import systems.courant.forrester.model.def.ElementType;
+import systems.courant.shrewd.model.def.ElementType;
 
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;

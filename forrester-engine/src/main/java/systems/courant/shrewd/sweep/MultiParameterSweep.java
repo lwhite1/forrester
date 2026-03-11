@@ -1,10 +1,10 @@
-package systems.courant.forrester.sweep;
+package systems.courant.shrewd.sweep;
 
-import systems.courant.forrester.Simulation;
-import systems.courant.forrester.measure.Quantity;
-import systems.courant.forrester.measure.TimeUnit;
-import systems.courant.forrester.model.Model;
-import systems.courant.forrester.model.compile.CompiledModel;
+import systems.courant.shrewd.Simulation;
+import systems.courant.shrewd.measure.Quantity;
+import systems.courant.shrewd.measure.TimeUnit;
+import systems.courant.shrewd.model.Model;
+import systems.courant.shrewd.model.compile.CompiledModel;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;

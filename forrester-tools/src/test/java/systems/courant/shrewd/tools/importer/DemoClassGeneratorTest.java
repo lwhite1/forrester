@@ -1,12 +1,12 @@
-package systems.courant.forrester.tools.importer;
+package systems.courant.shrewd.tools.importer;
 
-import systems.courant.forrester.model.ModelMetadata;
-import systems.courant.forrester.model.def.AuxDef;
-import systems.courant.forrester.model.def.FlowDef;
-import systems.courant.forrester.model.def.LookupTableDef;
-import systems.courant.forrester.model.def.ModelDefinitionBuilder;
-import systems.courant.forrester.model.def.ModelDefinition;
-import systems.courant.forrester.model.def.StockDef;
+import systems.courant.shrewd.model.ModelMetadata;
+import systems.courant.shrewd.model.def.AuxDef;
+import systems.courant.shrewd.model.def.FlowDef;
+import systems.courant.shrewd.model.def.LookupTableDef;
+import systems.courant.shrewd.model.def.ModelDefinitionBuilder;
+import systems.courant.shrewd.model.def.ModelDefinition;
+import systems.courant.shrewd.model.def.StockDef;
 
 import org.junit.jupiter.api.Test;
 
@@ -34,10 +34,10 @@ class DemoClassGeneratorTest {
                 .build();
 
         String source = generator.generate(def, metadata, "TestDemo",
-                "systems.courant.forrester.demo", "test.xmile",
+                "systems.courant.shrewd.demo", "test.xmile",
                 List.of(), List.of());
 
-        assertThat(source).contains("package systems.courant.forrester.demo;");
+        assertThat(source).contains("package systems.courant.shrewd.demo;");
         assertThat(source).contains("public class TestDemo {");
         assertThat(source).contains(".name(\"Test\")");
         assertThat(source).contains(".defaultSimulation(\"Year\", 50.0, \"Year\")");
@@ -63,7 +63,7 @@ class DemoClassGeneratorTest {
                 .build();
 
         String source = generator.generate(def, metadata, "SirDemo",
-                "systems.courant.forrester.demo.epidemiology", "sir.xmile",
+                "systems.courant.shrewd.demo.epidemiology", "sir.xmile",
                 List.of(), List.of());
 
         assertThat(source).contains(".author(\"Kermack & McKendrick\")");
@@ -84,7 +84,7 @@ class DemoClassGeneratorTest {
         ModelMetadata metadata = ModelMetadata.builder().license("CC-BY-SA-4.0").build();
 
         String source = generator.generate(def, metadata, "TestDemo",
-                "systems.courant.forrester.demo", "test.mdl",
+                "systems.courant.shrewd.demo", "test.mdl",
                 List.of(), List.of());
 
         assertThat(source).contains("builder.constant(");
@@ -103,7 +103,7 @@ class DemoClassGeneratorTest {
         ModelMetadata metadata = ModelMetadata.builder().license("CC-BY-SA-4.0").build();
 
         String source = generator.generate(def, metadata, "TestDemo",
-                "systems.courant.forrester.demo", "test.xmile",
+                "systems.courant.shrewd.demo", "test.xmile",
                 List.of(), List.of());
 
         assertThat(source).contains("new LookupTableDef(");
@@ -123,7 +123,7 @@ class DemoClassGeneratorTest {
         ModelMetadata metadata = ModelMetadata.builder().license("CC-BY-SA-4.0").build();
 
         String source = generator.generate(def, metadata, "TestDemo",
-                "systems.courant.forrester.demo", "test.xmile",
+                "systems.courant.shrewd.demo", "test.xmile",
                 List.of(), List.of());
 
         assertThat(source).contains("new AuxDef(");
@@ -154,7 +154,7 @@ class DemoClassGeneratorTest {
         ModelMetadata metadata = ModelMetadata.builder().license("CC-BY-SA-4.0").build();
 
         String source = generator.generate(def, metadata, "TestDemo",
-                "systems.courant.forrester.demo", "test.xmile",
+                "systems.courant.shrewd.demo", "test.xmile",
                 List.of(), List.of());
 
         // Should use Map.ofEntries instead of Map.of for >10 entries
@@ -174,7 +174,7 @@ class DemoClassGeneratorTest {
         ModelMetadata metadata = ModelMetadata.builder().license("CC-BY-SA-4.0").build();
 
         String source = generator.generate(def, metadata, "TestDemo",
-                "systems.courant.forrester.demo", "test.xmile",
+                "systems.courant.shrewd.demo", "test.xmile",
                 List.of("Value <0 found in A&B"),
                 List.of("Ref to */ block"));
 
@@ -203,7 +203,7 @@ class DemoClassGeneratorTest {
         ModelMetadata metadata = ModelMetadata.builder().license("CC-BY-SA-4.0").build();
 
         String source = generator.generate(def, metadata, "TestDemo",
-                "systems.courant.forrester.demo", "test.xmile",
+                "systems.courant.shrewd.demo", "test.xmile",
                 List.of("Unsupported PULSE function"),
                 List.of("Unresolved reference: missing_var"));
 

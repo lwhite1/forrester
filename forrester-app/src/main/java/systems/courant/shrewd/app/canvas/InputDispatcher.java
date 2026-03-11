@@ -1,4 +1,4 @@
-package systems.courant.forrester.app.canvas;
+package systems.courant.shrewd.app.canvas;
 
 import javafx.scene.Cursor;
 import javafx.scene.input.KeyCode;
@@ -7,7 +7,7 @@ import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.ScrollEvent;
 
-import systems.courant.forrester.model.def.ElementType;
+import systems.courant.shrewd.model.def.ElementType;
 
 import java.util.Objects;
 import java.util.Set;

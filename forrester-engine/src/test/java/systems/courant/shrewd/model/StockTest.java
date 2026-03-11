@@ -1,11 +1,11 @@
-package systems.courant.forrester.model;
+package systems.courant.shrewd.model;
 
-import systems.courant.forrester.measure.Quantity;
-import systems.courant.forrester.measure.Unit;
+import systems.courant.shrewd.measure.Quantity;
+import systems.courant.shrewd.measure.Unit;
 import org.junit.jupiter.api.Test;
 
-import static systems.courant.forrester.measure.Units.GALLON_US;
-import static systems.courant.forrester.measure.Units.MINUTE;
+import static systems.courant.shrewd.measure.Units.GALLON_US;
+import static systems.courant.shrewd.measure.Units.MINUTE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;

@@ -1,4 +1,4 @@
-package systems.courant.forrester.measure;
+package systems.courant.shrewd.measure;
 
 /**
  * Converts quantities from their current unit, to the newUnit, assuming the conversion is legitimate (i.e.,

@@ -1,4 +1,4 @@
-package systems.courant.forrester.app.canvas;
+package systems.courant.shrewd.app.canvas;
 
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;

@@ -1,7 +1,7 @@
-package systems.courant.forrester.model.graph;
+package systems.courant.shrewd.model.graph;
 
-import systems.courant.forrester.model.def.ConnectorRoute;
-import systems.courant.forrester.model.def.ModelDefinition;
+import systems.courant.shrewd.model.def.ConnectorRoute;
+import systems.courant.shrewd.model.def.ModelDefinition;
 
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
@@ -10,7 +10,7 @@ import java.util.Set;
 
 /**
  * Generates influence connectors (arrows) from a model definition's dependency graph.
- * Used when a model has no explicit {@link systems.courant.forrester.model.def.ViewDef}.
+ * Used when a model has no explicit {@link systems.courant.shrewd.model.def.ViewDef}.
  */
 public final class ConnectorGenerator {
 

@@ -1,4 +1,4 @@
-package systems.courant.forrester.app.canvas;
+package systems.courant.shrewd.app.canvas;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

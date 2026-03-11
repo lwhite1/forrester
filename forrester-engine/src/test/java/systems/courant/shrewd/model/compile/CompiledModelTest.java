@@ -1,15 +1,15 @@
-package systems.courant.forrester.model.compile;
+package systems.courant.shrewd.model.compile;
 
-import systems.courant.forrester.Simulation;
-import systems.courant.forrester.measure.Quantity;
-import systems.courant.forrester.measure.UnitRegistry;
-import systems.courant.forrester.model.Flow;
-import systems.courant.forrester.model.Model;
-import systems.courant.forrester.model.Stock;
-import systems.courant.forrester.model.def.FlowDef;
-import systems.courant.forrester.model.def.ModelDefinition;
-import systems.courant.forrester.model.def.SimulationSettings;
-import systems.courant.forrester.model.def.StockDef;
+import systems.courant.shrewd.Simulation;
+import systems.courant.shrewd.measure.Quantity;
+import systems.courant.shrewd.measure.UnitRegistry;
+import systems.courant.shrewd.model.Flow;
+import systems.courant.shrewd.model.Model;
+import systems.courant.shrewd.model.Stock;
+import systems.courant.shrewd.model.def.FlowDef;
+import systems.courant.shrewd.model.def.ModelDefinition;
+import systems.courant.shrewd.model.def.SimulationSettings;
+import systems.courant.shrewd.model.def.StockDef;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -22,8 +22,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.Assertions.within;
-import static systems.courant.forrester.measure.Units.MINUTE;
-import static systems.courant.forrester.measure.Units.THING;
+import static systems.courant.shrewd.measure.Units.MINUTE;
+import static systems.courant.shrewd.measure.Units.THING;
 
 @DisplayName("CompiledModel")
 class CompiledModelTest {
@@ -59,7 +59,7 @@ class CompiledModelTest {
                 null);
 
         compiled = new CompiledModel(model, List.of(resetCount::incrementAndGet),
-                source, stepHolder, dtHolder, new systems.courant.forrester.measure.TimeUnit[1],
+                source, stepHolder, dtHolder, new systems.courant.shrewd.measure.TimeUnit[1],
                 new UnitRegistry());
     }
 
@@ -180,7 +180,7 @@ class CompiledModelTest {
                     List.of(), null, null);
             CompiledModel noSettingsModel = new CompiledModel(
                     model, List.of(), noDefaults, stepHolder, dtHolder,
-                    new systems.courant.forrester.measure.TimeUnit[1], new UnitRegistry());
+                    new systems.courant.shrewd.measure.TimeUnit[1], new UnitRegistry());
 
             assertThatThrownBy(noSettingsModel::createSimulation)
                     .isInstanceOf(IllegalStateException.class)

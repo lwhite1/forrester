@@ -1,4 +1,4 @@
-package systems.courant.forrester.model.def;
+package systems.courant.shrewd.model.def;
 
 /**
  * Placement of an element in a graphical view.

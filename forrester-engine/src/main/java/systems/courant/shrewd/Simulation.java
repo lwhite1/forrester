@@ -1,16 +1,16 @@
-package systems.courant.forrester;
+package systems.courant.shrewd;
 
-import systems.courant.forrester.event.EventHandler;
-import systems.courant.forrester.event.SimulationEndEvent;
-import systems.courant.forrester.event.SimulationStartEvent;
-import systems.courant.forrester.event.TimeStepEvent;
-import systems.courant.forrester.measure.Quantity;
-import systems.courant.forrester.measure.TimeUnit;
-import systems.courant.forrester.model.Model;
-import systems.courant.forrester.model.Stock;
-import systems.courant.forrester.model.Flow;
-import systems.courant.forrester.model.Variable;
-import systems.courant.forrester.measure.Dimension;
+import systems.courant.shrewd.event.EventHandler;
+import systems.courant.shrewd.event.SimulationEndEvent;
+import systems.courant.shrewd.event.SimulationStartEvent;
+import systems.courant.shrewd.event.TimeStepEvent;
+import systems.courant.shrewd.measure.Quantity;
+import systems.courant.shrewd.measure.TimeUnit;
+import systems.courant.shrewd.model.Model;
+import systems.courant.shrewd.model.Stock;
+import systems.courant.shrewd.model.Flow;
+import systems.courant.shrewd.model.Variable;
+import systems.courant.shrewd.measure.Dimension;
 import com.google.common.base.Preconditions;
 
 import org.slf4j.Logger;

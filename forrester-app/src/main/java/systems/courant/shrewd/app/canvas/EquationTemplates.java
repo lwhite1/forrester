@@ -1,4 +1,4 @@
-package systems.courant.forrester.app.canvas;
+package systems.courant.shrewd.app.canvas;
 
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Menu;

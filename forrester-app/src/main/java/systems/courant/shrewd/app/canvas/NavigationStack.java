@@ -1,6 +1,6 @@
-package systems.courant.forrester.app.canvas;
+package systems.courant.shrewd.app.canvas;
 
-import systems.courant.forrester.model.def.ViewDef;
+import systems.courant.shrewd.model.def.ViewDef;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;

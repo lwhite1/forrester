@@ -1,4 +1,4 @@
-package systems.courant.forrester.model;
+package systems.courant.shrewd.model;
 
 import com.google.common.collect.Lists;
 

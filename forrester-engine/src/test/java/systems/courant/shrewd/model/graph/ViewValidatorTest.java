@@ -1,13 +1,13 @@
-package systems.courant.forrester.model.graph;
+package systems.courant.shrewd.model.graph;
 
-import systems.courant.forrester.model.def.CausalLinkDef.Polarity;
-import systems.courant.forrester.model.def.ConnectorRoute;
-import systems.courant.forrester.model.def.ElementPlacement;
-import systems.courant.forrester.model.def.ElementType;
-import systems.courant.forrester.model.def.FlowRoute;
-import systems.courant.forrester.model.def.ModelDefinition;
-import systems.courant.forrester.model.def.ModelDefinitionBuilder;
-import systems.courant.forrester.model.def.ViewDef;
+import systems.courant.shrewd.model.def.CausalLinkDef.Polarity;
+import systems.courant.shrewd.model.def.ConnectorRoute;
+import systems.courant.shrewd.model.def.ElementPlacement;
+import systems.courant.shrewd.model.def.ElementType;
+import systems.courant.shrewd.model.def.FlowRoute;
+import systems.courant.shrewd.model.def.ModelDefinition;
+import systems.courant.shrewd.model.def.ModelDefinitionBuilder;
+import systems.courant.shrewd.model.def.ViewDef;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -190,7 +190,7 @@ class ViewValidatorTest {
                         List.of()))
                 .build();
 
-        List<String> errors = systems.courant.forrester.model.def.DefinitionValidator.validate(def);
+        List<String> errors = systems.courant.shrewd.model.def.DefinitionValidator.validate(def);
         assertThat(errors).as("DefinitionValidator should report view errors").isNotEmpty();
         assertThat(errors).anyMatch(e -> e.contains("Ghost"));
     }

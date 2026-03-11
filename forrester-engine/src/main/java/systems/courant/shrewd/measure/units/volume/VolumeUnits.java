@@ -1,7 +1,7 @@
-package systems.courant.forrester.measure.units.volume;
+package systems.courant.shrewd.measure.units.volume;
 
-import systems.courant.forrester.measure.Dimension;
-import systems.courant.forrester.measure.Unit;
+import systems.courant.shrewd.measure.Dimension;
+import systems.courant.shrewd.measure.Unit;
 
 /**
  * Standard units of volume. Each constant stores its ratio to the base unit (liters).

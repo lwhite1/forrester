@@ -1,7 +1,7 @@
-package systems.courant.forrester.app.canvas;
+package systems.courant.shrewd.app.canvas;
 
-import systems.courant.forrester.model.graph.FeedbackAnalysis;
-import systems.courant.forrester.model.graph.LoopDominanceAnalysis;
+import systems.courant.shrewd.model.graph.FeedbackAnalysis;
+import systems.courant.shrewd.model.graph.LoopDominanceAnalysis;
 
 import javafx.geometry.Insets;
 import javafx.scene.chart.AreaChart;

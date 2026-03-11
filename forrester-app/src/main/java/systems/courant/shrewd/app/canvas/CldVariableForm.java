@@ -1,6 +1,6 @@
-package systems.courant.forrester.app.canvas;
+package systems.courant.shrewd.app.canvas;
 
-import systems.courant.forrester.model.def.CldVariableDef;
+import systems.courant.shrewd.model.def.CldVariableDef;
 
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;

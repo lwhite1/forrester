@@ -1,6 +1,6 @@
-package systems.courant.forrester.io;
+package systems.courant.shrewd.io;
 
-import systems.courant.forrester.model.def.ReferenceDataset;
+import systems.courant.shrewd.model.def.ReferenceDataset;
 
 import com.opencsv.CSVReader;
 import com.opencsv.exceptions.CsvValidationException;

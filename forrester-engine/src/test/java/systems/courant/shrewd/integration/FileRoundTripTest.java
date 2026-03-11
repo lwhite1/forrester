@@ -1,17 +1,17 @@
-package systems.courant.forrester.integration;
+package systems.courant.shrewd.integration;
 
-import systems.courant.forrester.Simulation;
-import systems.courant.forrester.io.json.ModelDefinitionSerializer;
-import systems.courant.forrester.model.Stock;
-import systems.courant.forrester.model.compile.CompiledModel;
-import systems.courant.forrester.model.compile.ModelCompiler;
-import systems.courant.forrester.model.def.ConnectorRoute;
-import systems.courant.forrester.model.def.ElementPlacement;
-import systems.courant.forrester.model.def.ElementType;
-import systems.courant.forrester.model.def.FlowDef;
-import systems.courant.forrester.model.def.ModelDefinition;
-import systems.courant.forrester.model.def.ModelDefinitionBuilder;
-import systems.courant.forrester.model.def.ViewDef;
+import systems.courant.shrewd.Simulation;
+import systems.courant.shrewd.io.json.ModelDefinitionSerializer;
+import systems.courant.shrewd.model.Stock;
+import systems.courant.shrewd.model.compile.CompiledModel;
+import systems.courant.shrewd.model.compile.ModelCompiler;
+import systems.courant.shrewd.model.def.ConnectorRoute;
+import systems.courant.shrewd.model.def.ElementPlacement;
+import systems.courant.shrewd.model.def.ElementType;
+import systems.courant.shrewd.model.def.FlowDef;
+import systems.courant.shrewd.model.def.ModelDefinition;
+import systems.courant.shrewd.model.def.ModelDefinitionBuilder;
+import systems.courant.shrewd.model.def.ViewDef;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;

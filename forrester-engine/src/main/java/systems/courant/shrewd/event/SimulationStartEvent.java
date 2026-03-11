@@ -1,8 +1,8 @@
-package systems.courant.forrester.event;
+package systems.courant.shrewd.event;
 
 
-import systems.courant.forrester.Simulation;
-import systems.courant.forrester.model.Model;
+import systems.courant.shrewd.Simulation;
+import systems.courant.shrewd.model.Model;
 
 /**
  * Event fired when a simulation run begins, before any time steps are computed.

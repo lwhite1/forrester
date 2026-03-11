@@ -1,4 +1,4 @@
-package systems.courant.forrester.model.compile;
+package systems.courant.shrewd.model.compile;
 
 /**
  * Thrown when a model definition cannot be compiled into a runnable model.

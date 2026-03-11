@@ -1,14 +1,14 @@
-package systems.courant.forrester;
+package systems.courant.shrewd;
 
-import systems.courant.forrester.model.Model;
-import systems.courant.forrester.model.Module;
-import systems.courant.forrester.model.Stock;
-import systems.courant.forrester.model.Variable;
+import systems.courant.shrewd.model.Model;
+import systems.courant.shrewd.model.Module;
+import systems.courant.shrewd.model.Stock;
+import systems.courant.shrewd.model.Variable;
 import org.junit.jupiter.api.Test;
 
-import static systems.courant.forrester.measure.Units.DAY;
-import static systems.courant.forrester.measure.Units.DIMENSIONLESS;
-import static systems.courant.forrester.measure.Units.PEOPLE;
+import static systems.courant.shrewd.measure.Units.DAY;
+import static systems.courant.shrewd.measure.Units.DIMENSIONLESS;
+import static systems.courant.shrewd.measure.Units.PEOPLE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class ModuleVariableRecordingTest {

@@ -1,7 +1,7 @@
-package systems.courant.forrester.measure.units.time;
+package systems.courant.shrewd.measure.units.time;
 
-import systems.courant.forrester.measure.Quantity;
-import systems.courant.forrester.measure.TimeUnit;
+import systems.courant.shrewd.measure.Quantity;
+import systems.courant.shrewd.measure.TimeUnit;
 
 /**
  * Factory methods for creating time {@link Quantity} instances in various time units.

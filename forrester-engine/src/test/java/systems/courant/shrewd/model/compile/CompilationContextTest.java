@@ -1,13 +1,13 @@
-package systems.courant.forrester.model.compile;
+package systems.courant.shrewd.model.compile;
 
-import systems.courant.forrester.measure.TimeUnit;
-import systems.courant.forrester.measure.UnitRegistry;
-import systems.courant.forrester.model.Flow;
-import systems.courant.forrester.model.LookupTable;
-import systems.courant.forrester.model.Stock;
-import systems.courant.forrester.model.Variable;
-import systems.courant.forrester.model.def.LookupTableDef;
-import systems.courant.forrester.measure.Quantity;
+import systems.courant.shrewd.measure.TimeUnit;
+import systems.courant.shrewd.measure.UnitRegistry;
+import systems.courant.shrewd.model.Flow;
+import systems.courant.shrewd.model.LookupTable;
+import systems.courant.shrewd.model.Stock;
+import systems.courant.shrewd.model.Variable;
+import systems.courant.shrewd.model.def.LookupTableDef;
+import systems.courant.shrewd.measure.Quantity;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -17,8 +17,8 @@ import org.junit.jupiter.api.Test;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.Assertions.within;
-import static systems.courant.forrester.measure.Units.MINUTE;
-import static systems.courant.forrester.measure.Units.THING;
+import static systems.courant.shrewd.measure.Units.MINUTE;
+import static systems.courant.shrewd.measure.Units.THING;
 
 @DisplayName("CompilationContext")
 class CompilationContextTest {

@@ -1,16 +1,16 @@
-package systems.courant.forrester.model;
+package systems.courant.shrewd.model;
 
-import systems.courant.forrester.measure.Quantity;
+import systems.courant.shrewd.measure.Quantity;
 
 import org.junit.jupiter.api.Test;
 
-import static systems.courant.forrester.measure.Units.DAY;
-import static systems.courant.forrester.measure.Units.HOUR;
-import static systems.courant.forrester.measure.Units.MINUTE;
-import static systems.courant.forrester.measure.Units.SECOND;
-import static systems.courant.forrester.measure.Units.THING;
-import static systems.courant.forrester.measure.Units.WEEK;
-import static systems.courant.forrester.measure.Units.YEAR;
+import static systems.courant.shrewd.measure.Units.DAY;
+import static systems.courant.shrewd.measure.Units.HOUR;
+import static systems.courant.shrewd.measure.Units.MINUTE;
+import static systems.courant.shrewd.measure.Units.SECOND;
+import static systems.courant.shrewd.measure.Units.THING;
+import static systems.courant.shrewd.measure.Units.WEEK;
+import static systems.courant.shrewd.measure.Units.YEAR;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;

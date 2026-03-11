@@ -1,17 +1,17 @@
-package systems.courant.forrester.app.canvas;
+package systems.courant.shrewd.app.canvas;
 
-import systems.courant.forrester.model.def.ConnectorRoute;
-import systems.courant.forrester.model.def.ElementType;
-import systems.courant.forrester.model.def.ModelDefinition;
-import systems.courant.forrester.model.def.ModelValidator;
-import systems.courant.forrester.model.def.ModuleInstanceDef;
-import systems.courant.forrester.model.def.ValidationIssue;
-import systems.courant.forrester.model.def.ValidationIssue.Severity;
-import systems.courant.forrester.model.def.ValidationResult;
-import systems.courant.forrester.model.def.ViewDef;
-import systems.courant.forrester.model.graph.AutoLayout;
-import systems.courant.forrester.model.graph.CausalTraceAnalysis;
-import systems.courant.forrester.model.graph.FeedbackAnalysis;
+import systems.courant.shrewd.model.def.ConnectorRoute;
+import systems.courant.shrewd.model.def.ElementType;
+import systems.courant.shrewd.model.def.ModelDefinition;
+import systems.courant.shrewd.model.def.ModelValidator;
+import systems.courant.shrewd.model.def.ModuleInstanceDef;
+import systems.courant.shrewd.model.def.ValidationIssue;
+import systems.courant.shrewd.model.def.ValidationIssue.Severity;
+import systems.courant.shrewd.model.def.ValidationResult;
+import systems.courant.shrewd.model.def.ViewDef;
+import systems.courant.shrewd.model.graph.AutoLayout;
+import systems.courant.shrewd.model.graph.CausalTraceAnalysis;
+import systems.courant.shrewd.model.graph.FeedbackAnalysis;
 
 import javafx.scene.canvas.Canvas;
 import javafx.scene.input.MouseEvent;

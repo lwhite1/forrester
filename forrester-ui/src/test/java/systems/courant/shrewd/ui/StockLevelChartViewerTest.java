@@ -1,12 +1,12 @@
-package systems.courant.forrester.ui;
+package systems.courant.shrewd.ui;
 
-import systems.courant.forrester.Simulation;
-import systems.courant.forrester.model.Flow;
-import systems.courant.forrester.model.Model;
-import systems.courant.forrester.model.Stock;
-import systems.courant.forrester.measure.Quantity;
-import systems.courant.forrester.event.SimulationStartEvent;
-import systems.courant.forrester.event.TimeStepEvent;
+import systems.courant.shrewd.Simulation;
+import systems.courant.shrewd.model.Flow;
+import systems.courant.shrewd.model.Model;
+import systems.courant.shrewd.model.Stock;
+import systems.courant.shrewd.measure.Quantity;
+import systems.courant.shrewd.event.SimulationStartEvent;
+import systems.courant.shrewd.event.TimeStepEvent;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -17,8 +17,8 @@ import org.testfx.framework.junit5.ApplicationExtension;
 import java.time.LocalDateTime;
 
 import static org.assertj.core.api.Assertions.assertThatNoException;
-import static systems.courant.forrester.measure.Units.MINUTE;
-import static systems.courant.forrester.measure.Units.THING;
+import static systems.courant.shrewd.measure.Units.MINUTE;
+import static systems.courant.shrewd.measure.Units.THING;
 
 /**
  * Tests for StockLevelChartViewer event handling.

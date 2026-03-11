@@ -1,7 +1,7 @@
-package systems.courant.forrester.ui;
+package systems.courant.shrewd.ui;
 
-import systems.courant.forrester.Simulation;
-import systems.courant.forrester.measure.units.time.Times;
+import systems.courant.shrewd.Simulation;
+import systems.courant.shrewd.measure.units.time.Times;
 
 import javafx.application.Application;
 import javafx.application.Platform;

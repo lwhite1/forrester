@@ -1,7 +1,7 @@
-package systems.courant.forrester.app.canvas;
+package systems.courant.shrewd.app.canvas;
 
-import systems.courant.forrester.model.def.ValidationIssue;
-import systems.courant.forrester.model.def.ValidationResult;
+import systems.courant.shrewd.model.def.ValidationIssue;
+import systems.courant.shrewd.model.def.ValidationResult;
 
 import javafx.application.Platform;
 import javafx.stage.Stage;

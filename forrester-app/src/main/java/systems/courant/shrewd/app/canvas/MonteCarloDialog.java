@@ -1,4 +1,4 @@
-package systems.courant.forrester.app.canvas;
+package systems.courant.shrewd.app.canvas;
 
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.IntegerProperty;

@@ -1,4 +1,4 @@
-package systems.courant.forrester.sweep;
+package systems.courant.shrewd.sweep;
 
 /**
  * A function that evaluates a simulation run and returns a scalar objective value.

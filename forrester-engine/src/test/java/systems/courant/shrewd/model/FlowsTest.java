@@ -1,11 +1,11 @@
-package systems.courant.forrester.model;
+package systems.courant.shrewd.model;
 
-import systems.courant.forrester.measure.Quantity;
+import systems.courant.shrewd.measure.Quantity;
 
 import org.junit.jupiter.api.Test;
 
-import static systems.courant.forrester.measure.Units.DAY;
-import static systems.courant.forrester.measure.Units.THING;
+import static systems.courant.shrewd.measure.Units.DAY;
+import static systems.courant.shrewd.measure.Units.THING;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class FlowsTest {

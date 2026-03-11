@@ -1,7 +1,7 @@
-package systems.courant.forrester.measure.units.mass;
+package systems.courant.shrewd.measure.units.mass;
 
-import systems.courant.forrester.measure.Quantity;
-import systems.courant.forrester.measure.Unit;
+import systems.courant.shrewd.measure.Quantity;
+import systems.courant.shrewd.measure.Unit;
 
 /**
  * Factory methods for creating mass {@link Quantity} instances in various mass units.

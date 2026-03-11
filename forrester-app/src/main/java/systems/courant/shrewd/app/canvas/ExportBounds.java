@@ -1,7 +1,7 @@
-package systems.courant.forrester.app.canvas;
+package systems.courant.shrewd.app.canvas;
 
-import systems.courant.forrester.model.def.ElementType;
-import systems.courant.forrester.model.def.FlowDef;
+import systems.courant.shrewd.model.def.ElementType;
+import systems.courant.shrewd.model.def.FlowDef;
 
 /**
  * Computes the world-space bounding box of a diagram for export.

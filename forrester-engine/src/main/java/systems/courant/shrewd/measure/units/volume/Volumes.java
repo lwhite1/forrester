@@ -1,7 +1,7 @@
-package systems.courant.forrester.measure.units.volume;
+package systems.courant.shrewd.measure.units.volume;
 
-import systems.courant.forrester.measure.Quantity;
-import systems.courant.forrester.measure.Unit;
+import systems.courant.shrewd.measure.Quantity;
+import systems.courant.shrewd.measure.Unit;
 
 /**
  * Factory methods for creating volume {@link Quantity} instances in various volume units.

@@ -1,6 +1,6 @@
-package systems.courant.forrester.tools.importer;
+package systems.courant.shrewd.tools.importer;
 
-import systems.courant.forrester.model.ModelMetadata;
+import systems.courant.shrewd.model.ModelMetadata;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -40,7 +40,7 @@ class ImportPipelineTest {
 
         assertThat(result.definition()).isNotNull();
         assertThat(result.generatedSource()).contains("public class SirXmileDemo");
-        assertThat(result.generatedSource()).contains("package systems.courant.forrester.demo.epidemiology");
+        assertThat(result.generatedSource()).contains("package systems.courant.shrewd.demo.epidemiology");
         assertThat(result.outputFile()).isNotNull();
         assertThat(Files.exists(result.outputFile())).isTrue();
     }
@@ -67,7 +67,7 @@ class ImportPipelineTest {
 
         assertThat(result.definition()).isNotNull();
         assertThat(result.generatedSource()).contains("public class SirVensimDemo");
-        assertThat(result.generatedSource()).contains("package systems.courant.forrester.demo;");
+        assertThat(result.generatedSource()).contains("package systems.courant.shrewd.demo;");
     }
 
     @Test
@@ -159,12 +159,12 @@ class ImportPipelineTest {
     @Test
     void shouldResolvePackageNameWithCategory() {
         assertThat(ImportPipeline.resolvePackageName("epidemiology"))
-                .isEqualTo("systems.courant.forrester.demo.epidemiology");
+                .isEqualTo("systems.courant.shrewd.demo.epidemiology");
     }
 
     @Test
     void shouldResolvePackageNameWithoutCategory() {
         assertThat(ImportPipeline.resolvePackageName(null))
-                .isEqualTo("systems.courant.forrester.demo");
+                .isEqualTo("systems.courant.shrewd.demo");
     }
 }

@@ -1,4 +1,4 @@
-package systems.courant.forrester.model.compile;
+package systems.courant.shrewd.model.compile;
 
 /**
  * Interface for stateful formula components that need to be reset between simulation runs.

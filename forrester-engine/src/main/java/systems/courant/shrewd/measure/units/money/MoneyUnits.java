@@ -1,7 +1,7 @@
-package systems.courant.forrester.measure.units.money;
+package systems.courant.shrewd.measure.units.money;
 
-import systems.courant.forrester.measure.Dimension;
-import systems.courant.forrester.measure.Unit;
+import systems.courant.shrewd.measure.Dimension;
+import systems.courant.shrewd.measure.Unit;
 
 /**
  * Units of currency. Currently only US dollars are defined.

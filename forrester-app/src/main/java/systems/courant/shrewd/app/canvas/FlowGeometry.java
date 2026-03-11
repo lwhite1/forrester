@@ -1,6 +1,6 @@
-package systems.courant.forrester.app.canvas;
+package systems.courant.shrewd.app.canvas;
 
-import systems.courant.forrester.model.def.ElementType;
+import systems.courant.shrewd.model.def.ElementType;
 
 /**
  * Shared geometry utilities for flow and connection rendering/hit-testing.

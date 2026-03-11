@@ -1,14 +1,14 @@
-package systems.courant.forrester.tools.importer;
+package systems.courant.shrewd.tools.importer;
 
-import systems.courant.forrester.io.ImportResult;
-import systems.courant.forrester.io.ModelImporter;
-import systems.courant.forrester.io.vensim.VensimImporter;
-import systems.courant.forrester.io.xmile.XmileImporter;
-import systems.courant.forrester.model.compile.CompiledModel;
-import systems.courant.forrester.model.compile.ModelCompiler;
-import systems.courant.forrester.model.def.DefinitionValidator;
-import systems.courant.forrester.model.def.ModelDefinition;
-import systems.courant.forrester.io.json.ModelDefinitionSerializer;
+import systems.courant.shrewd.io.ImportResult;
+import systems.courant.shrewd.io.ModelImporter;
+import systems.courant.shrewd.io.vensim.VensimImporter;
+import systems.courant.shrewd.io.xmile.XmileImporter;
+import systems.courant.shrewd.model.compile.CompiledModel;
+import systems.courant.shrewd.model.compile.ModelCompiler;
+import systems.courant.shrewd.model.def.DefinitionValidator;
+import systems.courant.shrewd.model.def.ModelDefinition;
+import systems.courant.shrewd.io.json.ModelDefinitionSerializer;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,7 +30,7 @@ public class ImportPipeline {
 
     private static final Set<String> XMILE_EXTENSIONS = Set.of(".xmile", ".stmx", ".xml");
     private static final Set<String> VENSIM_EXTENSIONS = Set.of(".mdl");
-    private static final String BASE_PACKAGE = "systems.courant.forrester.demo";
+    private static final String BASE_PACKAGE = "systems.courant.shrewd.demo";
 
     /**
      * Executes the full import pipeline.
@@ -148,8 +148,8 @@ public class ImportPipeline {
             if (definition.defaultSimulation() != null) {
                 compiled.createSimulation();
             }
-        } catch (systems.courant.forrester.model.compile.CompilationException
-                 | systems.courant.forrester.model.expr.ParseException
+        } catch (systems.courant.shrewd.model.compile.CompilationException
+                 | systems.courant.shrewd.model.expr.ParseException
                  | IllegalStateException e) {
             errors.add(e.getClass().getSimpleName() + ": " + e.getMessage());
         }

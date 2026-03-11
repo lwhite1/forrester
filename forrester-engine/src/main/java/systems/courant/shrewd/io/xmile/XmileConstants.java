@@ -1,4 +1,4 @@
-package systems.courant.forrester.io.xmile;
+package systems.courant.shrewd.io.xmile;
 
 /**
  * Constants for the OASIS XMILE XML format.

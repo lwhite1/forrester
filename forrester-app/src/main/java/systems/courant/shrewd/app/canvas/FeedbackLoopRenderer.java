@@ -1,7 +1,7 @@
-package systems.courant.forrester.app.canvas;
+package systems.courant.shrewd.app.canvas;
 
-import systems.courant.forrester.model.def.ElementType;
-import systems.courant.forrester.model.graph.FeedbackAnalysis.LoopType;
+import systems.courant.shrewd.model.def.ElementType;
+import systems.courant.shrewd.model.graph.FeedbackAnalysis.LoopType;
 
 import javafx.geometry.VPos;
 import javafx.scene.canvas.GraphicsContext;

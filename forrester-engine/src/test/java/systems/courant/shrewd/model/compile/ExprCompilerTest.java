@@ -1,12 +1,12 @@
-package systems.courant.forrester.model.compile;
+package systems.courant.shrewd.model.compile;
 
-import systems.courant.forrester.measure.UnitRegistry;
-import systems.courant.forrester.measure.units.item.ItemUnits;
-import systems.courant.forrester.model.Formula;
-import systems.courant.forrester.model.LookupTable;
-import systems.courant.forrester.model.Stock;
-import systems.courant.forrester.model.expr.Expr;
-import systems.courant.forrester.model.expr.ExprParser;
+import systems.courant.shrewd.measure.UnitRegistry;
+import systems.courant.shrewd.measure.units.item.ItemUnits;
+import systems.courant.shrewd.model.Formula;
+import systems.courant.shrewd.model.LookupTable;
+import systems.courant.shrewd.model.Stock;
+import systems.courant.shrewd.model.expr.Expr;
+import systems.courant.shrewd.model.expr.ExprParser;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -689,11 +689,11 @@ class ExprCompilerTest {
             // SMOOTH in the else branch should stay current even when condition is true
             double[] inputHolder = {10.0};
             context.addVariable("Input",
-                    new systems.courant.forrester.model.Variable("Input",
+                    new systems.courant.shrewd.model.Variable("Input",
                             ItemUnits.PEOPLE, () -> inputHolder[0]));
             double[] switchHolder = {1.0};
             context.addVariable("Switch",
-                    new systems.courant.forrester.model.Variable("Switch",
+                    new systems.courant.shrewd.model.Variable("Switch",
                             ItemUnits.PEOPLE, () -> switchHolder[0]));
 
             // IF(Switch, 0, SMOOTH(Input, 3))

@@ -1,8 +1,8 @@
-package systems.courant.forrester.app.models;
+package systems.courant.shrewd.app.models;
 
-import systems.courant.forrester.model.def.ModelDefinition;
-import systems.courant.forrester.model.def.ModelDefinitionBuilder;
-import systems.courant.forrester.model.graph.AutoLayout;
+import systems.courant.shrewd.model.def.ModelDefinition;
+import systems.courant.shrewd.model.def.ModelDefinitionBuilder;
+import systems.courant.shrewd.model.graph.AutoLayout;
 
 import java.util.List;
 

@@ -1,13 +1,13 @@
-package systems.courant.forrester.demo.waterfall;
+package systems.courant.shrewd.demo.waterfall;
 
-import systems.courant.forrester.Simulation;
-import systems.courant.forrester.measure.Quantity;
-import systems.courant.forrester.measure.units.dimensionless.DimensionlessUnits;
-import systems.courant.forrester.measure.units.item.ItemUnits;
-import systems.courant.forrester.measure.units.time.TimeUnits;
-import systems.courant.forrester.model.Model;
-import systems.courant.forrester.model.Stock;
-import systems.courant.forrester.model.Variable;
+import systems.courant.shrewd.Simulation;
+import systems.courant.shrewd.measure.Quantity;
+import systems.courant.shrewd.measure.units.dimensionless.DimensionlessUnits;
+import systems.courant.shrewd.measure.units.item.ItemUnits;
+import systems.courant.shrewd.measure.units.time.TimeUnits;
+import systems.courant.shrewd.model.Model;
+import systems.courant.shrewd.model.Stock;
+import systems.courant.shrewd.model.Variable;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;

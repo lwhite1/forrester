@@ -1,11 +1,11 @@
-package systems.courant.forrester.app.canvas;
+package systems.courant.shrewd.app.canvas;
 
-import systems.courant.forrester.measure.CompositeUnit;
-import systems.courant.forrester.measure.DimensionalAnalyzer;
-import systems.courant.forrester.measure.UnitRegistry;
-import systems.courant.forrester.model.expr.Expr;
-import systems.courant.forrester.model.expr.ExprParser;
-import systems.courant.forrester.model.expr.ParseException;
+import systems.courant.shrewd.measure.CompositeUnit;
+import systems.courant.shrewd.measure.DimensionalAnalyzer;
+import systems.courant.shrewd.measure.UnitRegistry;
+import systems.courant.shrewd.model.expr.Expr;
+import systems.courant.shrewd.model.expr.ExprParser;
+import systems.courant.shrewd.model.expr.ParseException;
 
 import javafx.animation.PauseTransition;
 import javafx.geometry.Pos;
@@ -371,7 +371,7 @@ class FormContext {
         var flowOpt = editor.getFlowByName(elementName);
         if (flowOpt.isPresent()) {
             var flow = flowOpt.get();
-            systems.courant.forrester.measure.Unit materialUnit = null;
+            systems.courant.shrewd.measure.Unit materialUnit = null;
             if (flow.materialUnit() != null && !flow.materialUnit().isBlank()) {
                 materialUnit = registry.resolve(flow.materialUnit());
             } else if (flow.sink() != null) {

@@ -1,4 +1,4 @@
-package systems.courant.forrester.tools.importer;
+package systems.courant.shrewd.tools.importer;
 
 /**
  * Utility methods for generating syntactically correct Java source code.

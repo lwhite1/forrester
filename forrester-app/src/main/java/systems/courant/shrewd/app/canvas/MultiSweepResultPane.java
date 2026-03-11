@@ -1,7 +1,7 @@
-package systems.courant.forrester.app.canvas;
+package systems.courant.shrewd.app.canvas;
 
-import systems.courant.forrester.sweep.MultiSweepResult;
-import systems.courant.forrester.sweep.RunResult;
+import systems.courant.shrewd.sweep.MultiSweepResult;
+import systems.courant.shrewd.sweep.RunResult;
 
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
@@ -24,7 +24,7 @@ import javafx.scene.control.TableView;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
-import systems.courant.forrester.app.LastDirectoryStore;
+import systems.courant.shrewd.app.LastDirectoryStore;
 
 import javafx.stage.FileChooser;
 

@@ -4,23 +4,23 @@
  * <p>This package provides three ways to explore a model's parameter space:
  *
  * <ul>
- *   <li>{@link systems.courant.forrester.sweep.ParameterSweep} — runs a model repeatedly,
+ *   <li>{@link systems.courant.shrewd.sweep.ParameterSweep} — runs a model repeatedly,
  *       varying one parameter across evenly spaced values. Use this to understand how a single
  *       input affects outputs.</li>
- *   <li>{@link systems.courant.forrester.sweep.MonteCarlo} — runs a model many times with
+ *   <li>{@link systems.courant.shrewd.sweep.MonteCarlo} — runs a model many times with
  *       parameters drawn from probability distributions (uniform, normal, triangular, etc.).
  *       Use this for uncertainty analysis and sensitivity testing.</li>
- *   <li>{@link systems.courant.forrester.sweep.Optimizer} — finds parameter values that
+ *   <li>{@link systems.courant.shrewd.sweep.Optimizer} — finds parameter values that
  *       minimize or maximize an objective function using derivative-free algorithms
  *       (Nelder-Mead, BOBYQA, CMA-ES). Use this for calibration or policy optimization.</li>
  * </ul>
  *
  * <p>All three use a builder pattern. Each run produces a {@link
- * systems.courant.forrester.sweep.RunResult} containing the final stock, variable, and
+ * systems.courant.shrewd.sweep.RunResult} containing the final stock, variable, and
  * flow values for that parameter combination.
  *
- * @see systems.courant.forrester.sweep.ParameterSweep
- * @see systems.courant.forrester.sweep.MonteCarlo
- * @see systems.courant.forrester.sweep.Optimizer
+ * @see systems.courant.shrewd.sweep.ParameterSweep
+ * @see systems.courant.shrewd.sweep.MonteCarlo
+ * @see systems.courant.shrewd.sweep.Optimizer
  */
-package systems.courant.forrester.sweep;
+package systems.courant.shrewd.sweep;

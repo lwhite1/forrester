@@ -1,4 +1,4 @@
-package systems.courant.forrester.io;
+package systems.courant.shrewd.io;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -7,7 +7,7 @@ import java.nio.file.Path;
  * Format-agnostic interface for importing system dynamics models from external tools.
  *
  * <p>Implementations translate tool-specific file formats (e.g., Vensim .mdl, XMILE)
- * into a {@link systems.courant.forrester.model.def.ModelDefinition} wrapped in
+ * into a {@link systems.courant.shrewd.model.def.ModelDefinition} wrapped in
  * an {@link ImportResult}.
  */
 public interface ModelImporter {

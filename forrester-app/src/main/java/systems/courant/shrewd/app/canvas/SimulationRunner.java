@@ -1,16 +1,16 @@
-package systems.courant.forrester.app.canvas;
+package systems.courant.shrewd.app.canvas;
 
-import systems.courant.forrester.Simulation;
-import systems.courant.forrester.event.EventHandler;
-import systems.courant.forrester.event.SimulationStartEvent;
-import systems.courant.forrester.event.TimeStepEvent;
-import systems.courant.forrester.model.Model;
-import systems.courant.forrester.model.Stock;
-import systems.courant.forrester.model.Variable;
-import systems.courant.forrester.model.compile.CompiledModel;
-import systems.courant.forrester.model.compile.ModelCompiler;
-import systems.courant.forrester.model.def.ModelDefinition;
-import systems.courant.forrester.model.def.SimulationSettings;
+import systems.courant.shrewd.Simulation;
+import systems.courant.shrewd.event.EventHandler;
+import systems.courant.shrewd.event.SimulationStartEvent;
+import systems.courant.shrewd.event.TimeStepEvent;
+import systems.courant.shrewd.model.Model;
+import systems.courant.shrewd.model.Stock;
+import systems.courant.shrewd.model.Variable;
+import systems.courant.shrewd.model.compile.CompiledModel;
+import systems.courant.shrewd.model.compile.ModelCompiler;
+import systems.courant.shrewd.model.def.ModelDefinition;
+import systems.courant.shrewd.model.def.SimulationSettings;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -61,7 +61,7 @@ public class SimulationRunner {
     /**
      * Compiles the model definition, runs a simulation with the given settings,
      * and returns captured time-series data. Uses the compiler's internal
-     * {@link systems.courant.forrester.measure.UnitRegistry} for time unit
+     * {@link systems.courant.shrewd.measure.UnitRegistry} for time unit
      * resolution by embedding the settings in the definition before compilation.
      *
      * @param def the model definition to compile and simulate

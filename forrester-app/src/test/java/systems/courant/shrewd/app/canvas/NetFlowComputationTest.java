@@ -1,6 +1,6 @@
-package systems.courant.forrester.app.canvas;
+package systems.courant.shrewd.app.canvas;
 
-import systems.courant.forrester.model.def.FlowDef;
+import systems.courant.shrewd.model.def.FlowDef;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;

@@ -1,12 +1,12 @@
-package systems.courant.forrester.measure;
+package systems.courant.shrewd.measure;
 
-import systems.courant.forrester.measure.dimension.Item;
-import systems.courant.forrester.measure.dimension.Length;
-import systems.courant.forrester.measure.dimension.Mass;
-import systems.courant.forrester.measure.dimension.Money;
-import systems.courant.forrester.measure.dimension.Temperature;
-import systems.courant.forrester.measure.dimension.Time;
-import systems.courant.forrester.measure.dimension.Volume;
+import systems.courant.shrewd.measure.dimension.Item;
+import systems.courant.shrewd.measure.dimension.Length;
+import systems.courant.shrewd.measure.dimension.Mass;
+import systems.courant.shrewd.measure.dimension.Money;
+import systems.courant.shrewd.measure.dimension.Temperature;
+import systems.courant.shrewd.measure.dimension.Time;
+import systems.courant.shrewd.measure.dimension.Volume;
 
 /**
  * Represents a physical or conceptual dimension such as time, length, mass, or money.

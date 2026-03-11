@@ -1,6 +1,6 @@
-package systems.courant.forrester.measure;
+package systems.courant.shrewd.measure;
 
-import systems.courant.forrester.measure.units.time.TimeUnits;
+import systems.courant.shrewd.measure.units.time.TimeUnits;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;

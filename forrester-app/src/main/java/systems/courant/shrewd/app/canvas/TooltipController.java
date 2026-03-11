@@ -1,12 +1,12 @@
-package systems.courant.forrester.app.canvas;
+package systems.courant.shrewd.app.canvas;
 
 import javafx.scene.Node;
 import javafx.scene.control.Tooltip;
 import javafx.scene.input.MouseEvent;
 import javafx.util.Duration;
 
-import systems.courant.forrester.model.def.ElementType;
-import systems.courant.forrester.model.def.ValidationIssue;
+import systems.courant.shrewd.model.def.ElementType;
+import systems.courant.shrewd.model.def.ValidationIssue;
 
 import java.util.List;
 import java.util.Optional;

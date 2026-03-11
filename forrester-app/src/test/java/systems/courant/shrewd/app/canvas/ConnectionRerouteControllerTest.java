@@ -1,11 +1,11 @@
-package systems.courant.forrester.app.canvas;
+package systems.courant.shrewd.app.canvas;
 
-import systems.courant.forrester.app.canvas.ConnectionRerouteController.RerouteEnd;
-import systems.courant.forrester.app.canvas.ConnectionRerouteController.RerouteHit;
-import systems.courant.forrester.model.def.ConnectorRoute;
-import systems.courant.forrester.model.def.ElementType;
-import systems.courant.forrester.model.def.ModelDefinition;
-import systems.courant.forrester.model.def.ModelDefinitionBuilder;
+import systems.courant.shrewd.app.canvas.ConnectionRerouteController.RerouteEnd;
+import systems.courant.shrewd.app.canvas.ConnectionRerouteController.RerouteHit;
+import systems.courant.shrewd.model.def.ConnectorRoute;
+import systems.courant.shrewd.model.def.ElementType;
+import systems.courant.shrewd.model.def.ModelDefinition;
+import systems.courant.shrewd.model.def.ModelDefinitionBuilder;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;

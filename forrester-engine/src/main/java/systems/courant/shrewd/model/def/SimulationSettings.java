@@ -1,4 +1,4 @@
-package systems.courant.forrester.model.def;
+package systems.courant.shrewd.model.def;
 
 /**
  * Default simulation settings for a model definition.

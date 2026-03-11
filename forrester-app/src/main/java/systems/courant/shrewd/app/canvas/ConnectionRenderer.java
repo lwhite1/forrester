@@ -1,6 +1,6 @@
-package systems.courant.forrester.app.canvas;
+package systems.courant.shrewd.app.canvas;
 
-import systems.courant.forrester.model.def.CausalLinkDef;
+import systems.courant.shrewd.model.def.CausalLinkDef;
 
 import javafx.geometry.VPos;
 import javafx.scene.canvas.GraphicsContext;

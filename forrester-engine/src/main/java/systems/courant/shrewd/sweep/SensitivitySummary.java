@@ -1,4 +1,4 @@
-package systems.courant.forrester.sweep;
+package systems.courant.shrewd.sweep;
 
 import org.apache.commons.math3.stat.correlation.SpearmansCorrelation;
 

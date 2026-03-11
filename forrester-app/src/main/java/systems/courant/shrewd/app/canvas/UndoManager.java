@@ -1,8 +1,8 @@
-package systems.courant.forrester.app.canvas;
+package systems.courant.shrewd.app.canvas;
 
-import systems.courant.forrester.io.json.ModelDefinitionSerializer;
-import systems.courant.forrester.model.def.ModelDefinition;
-import systems.courant.forrester.model.def.ViewDef;
+import systems.courant.shrewd.io.json.ModelDefinitionSerializer;
+import systems.courant.shrewd.model.def.ModelDefinition;
+import systems.courant.shrewd.model.def.ViewDef;
 
 import net.jpountz.lz4.LZ4Compressor;
 import net.jpountz.lz4.LZ4Factory;

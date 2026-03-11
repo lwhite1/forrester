@@ -1,6 +1,6 @@
-package systems.courant.forrester.tools.importer;
+package systems.courant.shrewd.tools.importer;
 
-import systems.courant.forrester.model.def.ModelDefinition;
+import systems.courant.shrewd.model.def.ModelDefinition;
 
 import java.io.PrintStream;
 import java.nio.file.Path;

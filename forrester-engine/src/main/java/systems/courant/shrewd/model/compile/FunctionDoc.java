@@ -1,4 +1,4 @@
-package systems.courant.forrester.model.compile;
+package systems.courant.shrewd.model.compile;
 
 import java.util.List;
 

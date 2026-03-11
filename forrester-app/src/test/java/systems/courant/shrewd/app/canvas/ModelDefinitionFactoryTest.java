@@ -1,11 +1,11 @@
-package systems.courant.forrester.app.canvas;
+package systems.courant.shrewd.app.canvas;
 
-import systems.courant.forrester.model.ModelMetadata;
-import systems.courant.forrester.model.def.CausalLinkDef;
-import systems.courant.forrester.model.def.CldVariableDef;
-import systems.courant.forrester.model.def.ModelDefinition;
-import systems.courant.forrester.model.def.ModelDefinitionBuilder;
-import systems.courant.forrester.model.def.SimulationSettings;
+import systems.courant.shrewd.model.ModelMetadata;
+import systems.courant.shrewd.model.def.CausalLinkDef;
+import systems.courant.shrewd.model.def.CldVariableDef;
+import systems.courant.shrewd.model.def.ModelDefinition;
+import systems.courant.shrewd.model.def.ModelDefinitionBuilder;
+import systems.courant.shrewd.model.def.SimulationSettings;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;

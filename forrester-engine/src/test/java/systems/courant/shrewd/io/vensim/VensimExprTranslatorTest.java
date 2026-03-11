@@ -1,4 +1,4 @@
-package systems.courant.forrester.io.vensim;
+package systems.courant.shrewd.io.vensim;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;

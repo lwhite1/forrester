@@ -3,24 +3,24 @@
  * Licensed under CC-BY-SA-4.0. See LICENSE in this module for details.
  */
 
-package systems.courant.forrester.demo;
+package systems.courant.shrewd.demo;
 
-import systems.courant.forrester.measure.Quantity;
-import systems.courant.forrester.measure.units.time.Times;
-import systems.courant.forrester.model.Flow;
-import systems.courant.forrester.model.Model;
-import systems.courant.forrester.model.ModelMetadata;
-import systems.courant.forrester.model.Stock;
-import systems.courant.forrester.sweep.MonteCarlo;
-import systems.courant.forrester.sweep.MonteCarloResult;
-import systems.courant.forrester.sweep.SamplingMethod;
-import systems.courant.forrester.ui.FanChart;
+import systems.courant.shrewd.measure.Quantity;
+import systems.courant.shrewd.measure.units.time.Times;
+import systems.courant.shrewd.model.Flow;
+import systems.courant.shrewd.model.Model;
+import systems.courant.shrewd.model.ModelMetadata;
+import systems.courant.shrewd.model.Stock;
+import systems.courant.shrewd.sweep.MonteCarlo;
+import systems.courant.shrewd.sweep.MonteCarloResult;
+import systems.courant.shrewd.sweep.SamplingMethod;
+import systems.courant.shrewd.ui.FanChart;
 
 import org.apache.commons.math3.distribution.NormalDistribution;
 import org.apache.commons.math3.distribution.UniformRealDistribution;
 
-import static systems.courant.forrester.measure.Units.DAY;
-import static systems.courant.forrester.measure.Units.PEOPLE;
+import static systems.courant.shrewd.measure.Units.DAY;
+import static systems.courant.shrewd.measure.Units.PEOPLE;
 
 /**
  * Demonstrates Monte Carlo simulation on the SIR infectious disease model with two

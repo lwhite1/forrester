@@ -3,22 +3,22 @@
  * Licensed under CC-BY-SA-4.0. See LICENSE in this module for details.
  */
 
-package systems.courant.forrester.demo;
+package systems.courant.shrewd.demo;
 
-import systems.courant.forrester.Simulation;
-import systems.courant.forrester.io.CsvSubscriber;
-import systems.courant.forrester.measure.Quantity;
-import systems.courant.forrester.measure.units.time.Times;
-import systems.courant.forrester.model.ArrayedFlow;
-import systems.courant.forrester.model.ArrayedStock;
-import systems.courant.forrester.model.Flow;
-import systems.courant.forrester.model.Model;
-import systems.courant.forrester.model.ModelMetadata;
-import systems.courant.forrester.model.Subscript;
-import systems.courant.forrester.ui.StockLevelChartViewer;
+import systems.courant.shrewd.Simulation;
+import systems.courant.shrewd.io.CsvSubscriber;
+import systems.courant.shrewd.measure.Quantity;
+import systems.courant.shrewd.measure.units.time.Times;
+import systems.courant.shrewd.model.ArrayedFlow;
+import systems.courant.shrewd.model.ArrayedStock;
+import systems.courant.shrewd.model.Flow;
+import systems.courant.shrewd.model.Model;
+import systems.courant.shrewd.model.ModelMetadata;
+import systems.courant.shrewd.model.Subscript;
+import systems.courant.shrewd.ui.StockLevelChartViewer;
 
-import static systems.courant.forrester.measure.Units.DAY;
-import static systems.courant.forrester.measure.Units.PEOPLE;
+import static systems.courant.shrewd.measure.Units.DAY;
+import static systems.courant.shrewd.measure.Units.PEOPLE;
 
 /**
  * A three-region SIR (Susceptible-Infectious-Recovered) model with migration between regions.

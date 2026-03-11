@@ -1,6 +1,6 @@
-package systems.courant.forrester.model.def;
+package systems.courant.shrewd.model.def;
 
-import systems.courant.forrester.model.ModelMetadata;
+import systems.courant.shrewd.model.ModelMetadata;
 
 import java.util.ArrayList;
 import java.util.Collections;

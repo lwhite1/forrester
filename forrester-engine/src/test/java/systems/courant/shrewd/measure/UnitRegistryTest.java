@@ -1,7 +1,7 @@
-package systems.courant.forrester.measure;
+package systems.courant.shrewd.measure;
 
-import systems.courant.forrester.measure.units.item.ItemUnit;
-import systems.courant.forrester.measure.units.time.TimeUnits;
+import systems.courant.shrewd.measure.units.item.ItemUnit;
+import systems.courant.shrewd.measure.units.time.TimeUnits;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

@@ -1,9 +1,9 @@
-package systems.courant.forrester.demo.agile;
+package systems.courant.shrewd.demo.agile;
 
-import systems.courant.forrester.Simulation;
-import systems.courant.forrester.measure.units.time.TimeUnits;
-import systems.courant.forrester.model.Model;
-import systems.courant.forrester.sweep.RunResult;
+import systems.courant.shrewd.Simulation;
+import systems.courant.shrewd.measure.units.time.TimeUnits;
+import systems.courant.shrewd.model.Model;
+import systems.courant.shrewd.sweep.RunResult;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -11,7 +11,7 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static systems.courant.forrester.measure.Units.WEEK;
+import static systems.courant.shrewd.measure.Units.WEEK;
 
 @DisplayName("AgileSoftwareDevelopmentDemo")
 class AgileSoftwareDevelopmentDemoTest {

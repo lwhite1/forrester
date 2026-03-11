@@ -1,8 +1,8 @@
-package systems.courant.forrester.app.canvas;
+package systems.courant.shrewd.app.canvas;
 
-import systems.courant.forrester.model.def.ModelDefinition;
-import systems.courant.forrester.model.graph.FeedbackAnalysis;
-import systems.courant.forrester.model.graph.FeedbackAnalysis.LoopType;
+import systems.courant.shrewd.model.def.ModelDefinition;
+import systems.courant.shrewd.model.graph.FeedbackAnalysis;
+import systems.courant.shrewd.model.graph.FeedbackAnalysis.LoopType;
 
 import java.util.List;
 import java.util.function.Supplier;

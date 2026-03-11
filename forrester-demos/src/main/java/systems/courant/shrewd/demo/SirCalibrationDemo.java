@@ -3,25 +3,25 @@
  * Licensed under CC-BY-SA-4.0. See LICENSE in this module for details.
  */
 
-package systems.courant.forrester.demo;
+package systems.courant.shrewd.demo;
 
-import systems.courant.forrester.Simulation;
-import systems.courant.forrester.measure.Quantity;
-import systems.courant.forrester.measure.units.time.Times;
-import systems.courant.forrester.model.Flow;
-import systems.courant.forrester.model.Model;
-import systems.courant.forrester.model.ModelMetadata;
-import systems.courant.forrester.model.Stock;
-import systems.courant.forrester.sweep.Objectives;
-import systems.courant.forrester.sweep.OptimizationAlgorithm;
-import systems.courant.forrester.sweep.OptimizationResult;
-import systems.courant.forrester.sweep.Optimizer;
-import systems.courant.forrester.sweep.RunResult;
+import systems.courant.shrewd.Simulation;
+import systems.courant.shrewd.measure.Quantity;
+import systems.courant.shrewd.measure.units.time.Times;
+import systems.courant.shrewd.model.Flow;
+import systems.courant.shrewd.model.Model;
+import systems.courant.shrewd.model.ModelMetadata;
+import systems.courant.shrewd.model.Stock;
+import systems.courant.shrewd.sweep.Objectives;
+import systems.courant.shrewd.sweep.OptimizationAlgorithm;
+import systems.courant.shrewd.sweep.OptimizationResult;
+import systems.courant.shrewd.sweep.Optimizer;
+import systems.courant.shrewd.sweep.RunResult;
 
 import java.util.Map;
 
-import static systems.courant.forrester.measure.Units.DAY;
-import static systems.courant.forrester.measure.Units.PEOPLE;
+import static systems.courant.shrewd.measure.Units.DAY;
+import static systems.courant.shrewd.measure.Units.PEOPLE;
 
 /**
  * Twin experiment: generates synthetic observed data by running an SIR model with known

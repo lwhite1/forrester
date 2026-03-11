@@ -1,8 +1,8 @@
-package systems.courant.forrester.measure.dimension;
+package systems.courant.shrewd.measure.dimension;
 
-import systems.courant.forrester.measure.Dimension;
-import systems.courant.forrester.measure.Unit;
-import systems.courant.forrester.measure.units.money.MoneyUnits;
+import systems.courant.shrewd.measure.Dimension;
+import systems.courant.shrewd.measure.Unit;
+import systems.courant.shrewd.measure.units.money.MoneyUnits;
 
 /**
  * The money (currency) dimension. Base unit is US dollars.

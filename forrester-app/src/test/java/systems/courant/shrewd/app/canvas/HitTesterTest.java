@@ -1,8 +1,8 @@
-package systems.courant.forrester.app.canvas;
+package systems.courant.shrewd.app.canvas;
 
-import systems.courant.forrester.model.def.ElementPlacement;
-import systems.courant.forrester.model.def.ElementType;
-import systems.courant.forrester.model.def.ViewDef;
+import systems.courant.shrewd.model.def.ElementPlacement;
+import systems.courant.shrewd.model.def.ElementType;
+import systems.courant.shrewd.model.def.ViewDef;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;

@@ -1,7 +1,7 @@
-package systems.courant.forrester.app.canvas;
+package systems.courant.shrewd.app.canvas;
 
-import systems.courant.forrester.sweep.OptimizationResult;
-import systems.courant.forrester.sweep.RunResult;
+import systems.courant.shrewd.sweep.OptimizationResult;
+import systems.courant.shrewd.sweep.RunResult;
 
 import com.opencsv.CSVWriter;
 
@@ -16,7 +16,7 @@ import javafx.scene.control.MenuItem;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
-import systems.courant.forrester.app.LastDirectoryStore;
+import systems.courant.shrewd.app.LastDirectoryStore;
 
 import javafx.stage.FileChooser;
 

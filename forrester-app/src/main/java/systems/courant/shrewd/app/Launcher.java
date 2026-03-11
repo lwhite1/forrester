@@ -1,4 +1,4 @@
-package systems.courant.forrester.app;
+package systems.courant.shrewd.app;
 
 /**
  * Non-Application launcher that avoids the "JavaFX runtime components are missing" error.

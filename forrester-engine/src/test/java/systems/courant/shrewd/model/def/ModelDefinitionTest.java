@@ -1,10 +1,10 @@
-package systems.courant.forrester.model.def;
+package systems.courant.shrewd.model.def;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import systems.courant.forrester.model.ModelMetadata;
+import systems.courant.shrewd.model.ModelMetadata;
 
 import java.util.ArrayList;
 import java.util.List;

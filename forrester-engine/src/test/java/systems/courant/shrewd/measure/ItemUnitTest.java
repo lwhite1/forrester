@@ -1,7 +1,7 @@
-package systems.courant.forrester.measure;
+package systems.courant.shrewd.measure;
 
-import systems.courant.forrester.measure.units.item.ItemUnit;
-import systems.courant.forrester.measure.units.item.ItemUnits;
+import systems.courant.shrewd.measure.units.item.ItemUnit;
+import systems.courant.shrewd.measure.units.item.ItemUnits;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;

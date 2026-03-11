@@ -1,17 +1,17 @@
-package systems.courant.forrester.io.json;
+package systems.courant.shrewd.io.json;
 
-import systems.courant.forrester.model.def.CausalLinkDef;
-import systems.courant.forrester.model.def.CldVariableDef;
-import systems.courant.forrester.model.def.ConnectorRoute;
-import systems.courant.forrester.model.def.ElementPlacement;
-import systems.courant.forrester.model.def.ElementType;
-import systems.courant.forrester.model.def.LookupTableDef;
-import systems.courant.forrester.model.def.ModelDefinition;
-import systems.courant.forrester.model.def.ModelDefinitionBuilder;
-import systems.courant.forrester.model.def.ModuleInterface;
-import systems.courant.forrester.model.def.ReferenceDataset;
-import systems.courant.forrester.model.def.PortDef;
-import systems.courant.forrester.model.def.ViewDef;
+import systems.courant.shrewd.model.def.CausalLinkDef;
+import systems.courant.shrewd.model.def.CldVariableDef;
+import systems.courant.shrewd.model.def.ConnectorRoute;
+import systems.courant.shrewd.model.def.ElementPlacement;
+import systems.courant.shrewd.model.def.ElementType;
+import systems.courant.shrewd.model.def.LookupTableDef;
+import systems.courant.shrewd.model.def.ModelDefinition;
+import systems.courant.shrewd.model.def.ModelDefinitionBuilder;
+import systems.courant.shrewd.model.def.ModuleInterface;
+import systems.courant.shrewd.model.def.ReferenceDataset;
+import systems.courant.shrewd.model.def.PortDef;
+import systems.courant.shrewd.model.def.ViewDef;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

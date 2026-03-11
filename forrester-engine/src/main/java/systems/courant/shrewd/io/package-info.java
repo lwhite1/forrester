@@ -1,8 +1,8 @@
 /**
  * File-based output for simulation results.
  *
- * <p>{@link systems.courant.forrester.io.CsvSubscriber} is an
- * {@link systems.courant.forrester.event.EventHandler} that writes one CSV row per
+ * <p>{@link systems.courant.shrewd.io.CsvSubscriber} is an
+ * {@link systems.courant.shrewd.event.EventHandler} that writes one CSV row per
  * timestep, with columns for step number, timestamp, all stock values, and all variable
  * values. Register it before running a simulation to capture time-series data:
  *
@@ -12,6 +12,6 @@
  * simulation.execute();
  * }</pre>
  *
- * @see systems.courant.forrester.io.CsvSubscriber
+ * @see systems.courant.shrewd.io.CsvSubscriber
  */
-package systems.courant.forrester.io;
+package systems.courant.shrewd.io;

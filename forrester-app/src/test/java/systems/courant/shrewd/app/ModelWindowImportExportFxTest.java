@@ -1,14 +1,14 @@
-package systems.courant.forrester.app;
+package systems.courant.shrewd.app;
 
-import systems.courant.forrester.app.canvas.Clipboard;
-import systems.courant.forrester.app.canvas.ModelEditor;
-import systems.courant.forrester.io.ImportResult;
-import systems.courant.forrester.io.vensim.VensimExporter;
-import systems.courant.forrester.io.vensim.VensimImporter;
-import systems.courant.forrester.io.xmile.XmileExporter;
-import systems.courant.forrester.io.xmile.XmileImporter;
-import systems.courant.forrester.model.def.ModelDefinition;
-import systems.courant.forrester.model.def.ModelDefinitionBuilder;
+import systems.courant.shrewd.app.canvas.Clipboard;
+import systems.courant.shrewd.app.canvas.ModelEditor;
+import systems.courant.shrewd.io.ImportResult;
+import systems.courant.shrewd.io.vensim.VensimExporter;
+import systems.courant.shrewd.io.vensim.VensimImporter;
+import systems.courant.shrewd.io.xmile.XmileExporter;
+import systems.courant.shrewd.io.xmile.XmileImporter;
+import systems.courant.shrewd.model.def.ModelDefinition;
+import systems.courant.shrewd.model.def.ModelDefinitionBuilder;
 
 import javafx.application.Platform;
 import javafx.scene.control.Label;

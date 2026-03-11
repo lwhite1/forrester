@@ -1,4 +1,4 @@
-package systems.courant.forrester.measure;
+package systems.courant.shrewd.measure;
 
 /**
  * A unit of measure within a particular {@link Dimension} (e.g., meters in the length dimension).

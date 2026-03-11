@@ -1,11 +1,11 @@
-package systems.courant.forrester.app.canvas;
+package systems.courant.shrewd.app.canvas;
 
-import systems.courant.forrester.model.def.AuxDef;
-import systems.courant.forrester.model.def.FlowDef;
-import systems.courant.forrester.model.expr.ExprParser;
-import systems.courant.forrester.model.expr.ExprRenamer;
-import systems.courant.forrester.model.expr.ExprStringifier;
-import systems.courant.forrester.model.expr.Expr;
+import systems.courant.shrewd.model.def.AuxDef;
+import systems.courant.shrewd.model.def.FlowDef;
+import systems.courant.shrewd.model.expr.ExprParser;
+import systems.courant.shrewd.model.expr.ExprRenamer;
+import systems.courant.shrewd.model.expr.ExprStringifier;
+import systems.courant.shrewd.model.expr.Expr;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

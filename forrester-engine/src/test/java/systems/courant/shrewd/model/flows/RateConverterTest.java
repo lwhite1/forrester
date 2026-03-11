@@ -1,8 +1,8 @@
-package systems.courant.forrester.model.flows;
+package systems.courant.shrewd.model.flows;
 
-import systems.courant.forrester.measure.Quantity;
-import systems.courant.forrester.measure.units.length.LengthUnits;
-import systems.courant.forrester.measure.units.time.TimeUnits;
+import systems.courant.shrewd.measure.Quantity;
+import systems.courant.shrewd.measure.units.length.LengthUnits;
+import systems.courant.shrewd.measure.units.time.TimeUnits;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;

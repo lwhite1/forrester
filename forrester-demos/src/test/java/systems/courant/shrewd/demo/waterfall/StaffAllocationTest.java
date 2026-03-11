@@ -1,8 +1,8 @@
-package systems.courant.forrester.demo.waterfall;
+package systems.courant.shrewd.demo.waterfall;
 
-import systems.courant.forrester.measure.units.dimensionless.DimensionlessUnits;
-import systems.courant.forrester.measure.units.item.ItemUnits;
-import systems.courant.forrester.model.Variable;
+import systems.courant.shrewd.measure.units.dimensionless.DimensionlessUnits;
+import systems.courant.shrewd.measure.units.item.ItemUnits;
+import systems.courant.shrewd.model.Variable;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;

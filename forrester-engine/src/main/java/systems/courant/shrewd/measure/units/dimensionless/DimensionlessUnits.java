@@ -1,8 +1,8 @@
-package systems.courant.forrester.measure.units.dimensionless;
+package systems.courant.shrewd.measure.units.dimensionless;
 
-import systems.courant.forrester.measure.Dimension;
-import systems.courant.forrester.measure.Unit;
-import systems.courant.forrester.measure.dimension.Dimensionless;
+import systems.courant.shrewd.measure.Dimension;
+import systems.courant.shrewd.measure.Unit;
+import systems.courant.shrewd.measure.dimension.Dimensionless;
 
 /**
  * Units for dimensionless quantities (ratios, percentages, pure numbers).

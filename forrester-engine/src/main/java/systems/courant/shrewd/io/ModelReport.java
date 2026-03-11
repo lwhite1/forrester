@@ -1,10 +1,10 @@
-package systems.courant.forrester.io;
+package systems.courant.shrewd.io;
 
-import systems.courant.forrester.model.Flow;
-import systems.courant.forrester.model.Model;
-import systems.courant.forrester.model.Module;
-import systems.courant.forrester.model.Stock;
-import systems.courant.forrester.model.Variable;
+import systems.courant.shrewd.model.Flow;
+import systems.courant.shrewd.model.Model;
+import systems.courant.shrewd.model.Module;
+import systems.courant.shrewd.model.Stock;
+import systems.courant.shrewd.model.Variable;
 
 import java.util.HashSet;
 import java.util.Map;

@@ -1,11 +1,11 @@
-package systems.courant.forrester.integration;
+package systems.courant.shrewd.integration;
 
-import systems.courant.forrester.io.json.ModelDefinitionSerializer;
-import systems.courant.forrester.model.compile.ModelCompiler;
-import systems.courant.forrester.model.def.FlowDef;
-import systems.courant.forrester.model.def.ModelDefinition;
-import systems.courant.forrester.model.def.ModelDefinitionBuilder;
-import systems.courant.forrester.model.def.StockDef;
+import systems.courant.shrewd.io.json.ModelDefinitionSerializer;
+import systems.courant.shrewd.model.compile.ModelCompiler;
+import systems.courant.shrewd.model.def.FlowDef;
+import systems.courant.shrewd.model.def.ModelDefinition;
+import systems.courant.shrewd.model.def.ModelDefinitionBuilder;
+import systems.courant.shrewd.model.def.StockDef;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;

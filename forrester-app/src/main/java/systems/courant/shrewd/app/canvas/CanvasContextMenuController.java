@@ -1,7 +1,7 @@
-package systems.courant.forrester.app.canvas;
+package systems.courant.shrewd.app.canvas;
 
-import systems.courant.forrester.model.def.CausalLinkDef;
-import systems.courant.forrester.model.def.ElementType;
+import systems.courant.shrewd.model.def.CausalLinkDef;
+import systems.courant.shrewd.model.def.ElementType;
 
 import javafx.scene.canvas.Canvas;
 import javafx.scene.control.ContextMenu;

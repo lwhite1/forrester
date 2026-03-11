@@ -1,10 +1,10 @@
-package systems.courant.forrester.app.canvas;
+package systems.courant.shrewd.app.canvas;
 
-import systems.courant.forrester.model.def.ElementType;
-import systems.courant.forrester.model.def.FlowDef;
-import systems.courant.forrester.model.def.ModelDefinition;
-import systems.courant.forrester.model.def.ModelDefinitionBuilder;
-import systems.courant.forrester.model.def.ModuleInstanceDef;
+import systems.courant.shrewd.model.def.ElementType;
+import systems.courant.shrewd.model.def.FlowDef;
+import systems.courant.shrewd.model.def.ModelDefinition;
+import systems.courant.shrewd.model.def.ModelDefinitionBuilder;
+import systems.courant.shrewd.model.def.ModuleInstanceDef;
 
 import java.util.List;
 import java.util.Map;

@@ -1,7 +1,7 @@
-package systems.courant.forrester.measure.units.time;
+package systems.courant.shrewd.measure.units.time;
 
-import systems.courant.forrester.measure.Dimension;
-import systems.courant.forrester.measure.TimeUnit;
+import systems.courant.shrewd.measure.Dimension;
+import systems.courant.shrewd.measure.TimeUnit;
 
 import java.time.temporal.ChronoUnit;
 

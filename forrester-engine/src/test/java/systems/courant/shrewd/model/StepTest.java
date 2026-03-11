@@ -1,8 +1,8 @@
-package systems.courant.forrester.model;
+package systems.courant.shrewd.model;
 
 import org.junit.jupiter.api.Test;
 
-import static systems.courant.forrester.measure.Units.DIMENSIONLESS;
+import static systems.courant.shrewd.measure.Units.DIMENSIONLESS;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class StepTest {

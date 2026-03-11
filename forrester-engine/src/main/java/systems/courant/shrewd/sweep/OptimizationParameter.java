@@ -1,4 +1,4 @@
-package systems.courant.forrester.sweep;
+package systems.courant.shrewd.sweep;
 
 /**
  * Defines a parameter to be optimized, including its name, bounds, and optional initial guess.

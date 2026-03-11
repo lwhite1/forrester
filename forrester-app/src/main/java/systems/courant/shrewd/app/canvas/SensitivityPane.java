@@ -1,7 +1,7 @@
-package systems.courant.forrester.app.canvas;
+package systems.courant.shrewd.app.canvas;
 
-import systems.courant.forrester.sweep.SensitivitySummary;
-import systems.courant.forrester.sweep.SensitivitySummary.ParameterImpact;
+import systems.courant.shrewd.sweep.SensitivitySummary;
+import systems.courant.shrewd.sweep.SensitivitySummary.ParameterImpact;
 
 import javafx.collections.FXCollections;
 import javafx.geometry.Insets;

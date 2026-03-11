@@ -1,17 +1,17 @@
-package systems.courant.forrester.model.graph;
+package systems.courant.shrewd.model.graph;
 
-import systems.courant.forrester.model.def.AuxDef;
-import systems.courant.forrester.model.def.CausalLinkDef;
-import systems.courant.forrester.model.def.CldVariableDef;
-import systems.courant.forrester.model.def.ConnectorRoute;
-import systems.courant.forrester.model.def.ElementPlacement;
-import systems.courant.forrester.model.def.ElementType;
-import systems.courant.forrester.model.def.FlowDef;
-import systems.courant.forrester.model.def.LookupTableDef;
-import systems.courant.forrester.model.def.ModelDefinition;
-import systems.courant.forrester.model.def.ModuleInstanceDef;
-import systems.courant.forrester.model.def.StockDef;
-import systems.courant.forrester.model.def.ViewDef;
+import systems.courant.shrewd.model.def.AuxDef;
+import systems.courant.shrewd.model.def.CausalLinkDef;
+import systems.courant.shrewd.model.def.CldVariableDef;
+import systems.courant.shrewd.model.def.ConnectorRoute;
+import systems.courant.shrewd.model.def.ElementPlacement;
+import systems.courant.shrewd.model.def.ElementType;
+import systems.courant.shrewd.model.def.FlowDef;
+import systems.courant.shrewd.model.def.LookupTableDef;
+import systems.courant.shrewd.model.def.ModelDefinition;
+import systems.courant.shrewd.model.def.ModuleInstanceDef;
+import systems.courant.shrewd.model.def.StockDef;
+import systems.courant.shrewd.model.def.ViewDef;
 
 import org.eclipse.elk.alg.layered.options.CycleBreakingStrategy;
 import org.eclipse.elk.alg.layered.options.LayeredMetaDataProvider;

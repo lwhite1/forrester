@@ -1,4 +1,4 @@
-package systems.courant.forrester.model;
+package systems.courant.shrewd.model;
 
 /**
  * Controls how a {@link Stock} handles attempts to set a negative value.

@@ -1,9 +1,9 @@
-package systems.courant.forrester.model;
+package systems.courant.shrewd.model;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import static systems.courant.forrester.measure.Units.THING;
+import static systems.courant.shrewd.measure.Units.THING;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;

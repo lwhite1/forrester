@@ -1,15 +1,15 @@
-package systems.courant.forrester.model.compile;
+package systems.courant.shrewd.model.compile;
 
-import systems.courant.forrester.Simulation;
-import systems.courant.forrester.event.EventHandler;
-import systems.courant.forrester.event.TimeStepEvent;
-import systems.courant.forrester.measure.Quantity;
-import systems.courant.forrester.measure.TimeUnit;
-import systems.courant.forrester.measure.UnitRegistry;
-import systems.courant.forrester.model.Model;
-import systems.courant.forrester.model.Stock;
-import systems.courant.forrester.model.def.ModelDefinition;
-import systems.courant.forrester.model.def.SimulationSettings;
+import systems.courant.shrewd.Simulation;
+import systems.courant.shrewd.event.EventHandler;
+import systems.courant.shrewd.event.TimeStepEvent;
+import systems.courant.shrewd.measure.Quantity;
+import systems.courant.shrewd.measure.TimeUnit;
+import systems.courant.shrewd.measure.UnitRegistry;
+import systems.courant.shrewd.model.Model;
+import systems.courant.shrewd.model.Stock;
+import systems.courant.shrewd.model.def.ModelDefinition;
+import systems.courant.shrewd.model.def.SimulationSettings;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;

@@ -1,7 +1,7 @@
-package systems.courant.forrester.model;
+package systems.courant.shrewd.model;
 
 import com.carrotsearch.hppc.DoubleArrayList;
-import systems.courant.forrester.measure.Unit;
+import systems.courant.shrewd.measure.Unit;
 import com.google.common.base.Preconditions;
 
 /**

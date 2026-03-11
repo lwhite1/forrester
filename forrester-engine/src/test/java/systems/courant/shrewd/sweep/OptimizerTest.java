@@ -1,19 +1,19 @@
-package systems.courant.forrester.sweep;
+package systems.courant.shrewd.sweep;
 
-import systems.courant.forrester.measure.Quantity;
-import systems.courant.forrester.measure.units.time.Times;
-import systems.courant.forrester.model.Flow;
-import systems.courant.forrester.model.Model;
-import systems.courant.forrester.model.Stock;
+import systems.courant.shrewd.measure.Quantity;
+import systems.courant.shrewd.measure.units.time.Times;
+import systems.courant.shrewd.model.Flow;
+import systems.courant.shrewd.model.Model;
+import systems.courant.shrewd.model.Stock;
 
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import java.util.Map;
 
-import static systems.courant.forrester.measure.Units.DAY;
-import static systems.courant.forrester.measure.Units.PEOPLE;
-import static systems.courant.forrester.measure.Units.THING;
+import static systems.courant.shrewd.measure.Units.DAY;
+import static systems.courant.shrewd.measure.Units.PEOPLE;
+import static systems.courant.shrewd.measure.Units.THING;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -302,8 +302,8 @@ class OptimizerTest {
         Model model = buildGrowthModel(growthRate);
         RunResult runResult = new RunResult(Map.of("Growth Rate", growthRate));
 
-        systems.courant.forrester.Simulation simulation =
-                new systems.courant.forrester.Simulation(model, DAY, Times.weeks(2));
+        systems.courant.shrewd.Simulation simulation =
+                new systems.courant.shrewd.Simulation(model, DAY, Times.weeks(2));
         simulation.addEventHandler(runResult);
         simulation.execute();
 
@@ -315,8 +315,8 @@ class OptimizerTest {
         RunResult runResult = new RunResult(
                 Map.of("Growth Rate", growthRate, "Capacity", capacity));
 
-        systems.courant.forrester.Simulation simulation =
-                new systems.courant.forrester.Simulation(model, DAY, Times.weeks(4));
+        systems.courant.shrewd.Simulation simulation =
+                new systems.courant.shrewd.Simulation(model, DAY, Times.weeks(4));
         simulation.addEventHandler(runResult);
         simulation.execute();
 

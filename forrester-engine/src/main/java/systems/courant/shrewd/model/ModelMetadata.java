@@ -1,4 +1,4 @@
-package systems.courant.forrester.model;
+package systems.courant.shrewd.model;
 
 /**
  * Attribution and licensing metadata for a {@link Model}.

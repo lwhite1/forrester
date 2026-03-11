@@ -1,6 +1,6 @@
-package systems.courant.forrester.ui;
+package systems.courant.shrewd.ui;
 
-import systems.courant.forrester.sweep.MonteCarloResult;
+import systems.courant.shrewd.sweep.MonteCarloResult;
 
 import javafx.application.Application;
 import javafx.application.Platform;

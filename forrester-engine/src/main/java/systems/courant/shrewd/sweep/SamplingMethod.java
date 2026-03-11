@@ -1,4 +1,4 @@
-package systems.courant.forrester.sweep;
+package systems.courant.shrewd.sweep;
 
 /**
  * Sampling strategy for Monte Carlo simulation.

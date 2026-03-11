@@ -1,4 +1,4 @@
-package systems.courant.forrester.io.xmile;
+package systems.courant.shrewd.io.xmile;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;

@@ -1,6 +1,6 @@
-package systems.courant.forrester.event;
+package systems.courant.shrewd.event;
 
-import systems.courant.forrester.model.Model;
+import systems.courant.shrewd.model.Model;
 
 /**
  * Event fired when a simulation run has completed all of its time steps.

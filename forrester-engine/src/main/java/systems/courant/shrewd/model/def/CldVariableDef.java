@@ -1,4 +1,4 @@
-package systems.courant.forrester.model.def;
+package systems.courant.shrewd.model.def;
 
 /**
  * A qualitative variable in a causal loop diagram. Unlike stocks, flows, and auxiliaries,

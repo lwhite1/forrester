@@ -1,8 +1,8 @@
-package systems.courant.forrester.io;
+package systems.courant.shrewd.io;
 
-import systems.courant.forrester.demo.agile.AgileSoftwareDevelopmentDemo;
-import systems.courant.forrester.demo.waterfall.WaterfallSoftwareDevelopmentDemo;
-import systems.courant.forrester.model.Model;
+import systems.courant.shrewd.demo.agile.AgileSoftwareDevelopmentDemo;
+import systems.courant.shrewd.demo.waterfall.WaterfallSoftwareDevelopmentDemo;
+import systems.courant.shrewd.model.Model;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

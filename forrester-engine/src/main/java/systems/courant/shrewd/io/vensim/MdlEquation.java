@@ -1,4 +1,4 @@
-package systems.courant.forrester.io.vensim;
+package systems.courant.shrewd.io.vensim;
 
 /**
  * A single parsed equation block from a Vensim .mdl file.

@@ -1,4 +1,4 @@
-package systems.courant.forrester.model.def;
+package systems.courant.shrewd.model.def;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;

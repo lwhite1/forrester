@@ -1,11 +1,11 @@
-package systems.courant.forrester.app.canvas;
+package systems.courant.shrewd.app.canvas;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import systems.courant.forrester.model.def.ValidationIssue;
-import systems.courant.forrester.model.def.ValidationIssue.Severity;
+import systems.courant.shrewd.model.def.ValidationIssue;
+import systems.courant.shrewd.model.def.ValidationIssue.Severity;
 
 import java.util.List;
 

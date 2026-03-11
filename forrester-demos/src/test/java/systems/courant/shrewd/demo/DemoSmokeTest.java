@@ -1,25 +1,25 @@
-package systems.courant.forrester.demo;
+package systems.courant.shrewd.demo;
 
-import systems.courant.forrester.Simulation;
-import systems.courant.forrester.demo.agile.AgileSoftwareDevelopmentDemo;
-import systems.courant.forrester.demo.waterfall.WaterfallSoftwareDevelopmentDemo;
-import systems.courant.forrester.measure.Quantity;
-import systems.courant.forrester.measure.units.time.Times;
-import systems.courant.forrester.model.Flow;
-import systems.courant.forrester.model.Model;
-import systems.courant.forrester.model.Stock;
-import systems.courant.forrester.sweep.MonteCarlo;
-import systems.courant.forrester.sweep.MonteCarloResult;
-import systems.courant.forrester.sweep.SamplingMethod;
+import systems.courant.shrewd.Simulation;
+import systems.courant.shrewd.demo.agile.AgileSoftwareDevelopmentDemo;
+import systems.courant.shrewd.demo.waterfall.WaterfallSoftwareDevelopmentDemo;
+import systems.courant.shrewd.measure.Quantity;
+import systems.courant.shrewd.measure.units.time.Times;
+import systems.courant.shrewd.model.Flow;
+import systems.courant.shrewd.model.Model;
+import systems.courant.shrewd.model.Stock;
+import systems.courant.shrewd.sweep.MonteCarlo;
+import systems.courant.shrewd.sweep.MonteCarloResult;
+import systems.courant.shrewd.sweep.SamplingMethod;
 
 import org.apache.commons.math3.distribution.NormalDistribution;
 import org.apache.commons.math3.distribution.UniformRealDistribution;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import static systems.courant.forrester.measure.Units.DAY;
-import static systems.courant.forrester.measure.Units.PEOPLE;
-import static systems.courant.forrester.measure.Units.WEEK;
+import static systems.courant.shrewd.measure.Units.DAY;
+import static systems.courant.shrewd.measure.Units.PEOPLE;
+import static systems.courant.shrewd.measure.Units.WEEK;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
@@ -132,17 +132,17 @@ class DemoSmokeTest {
     void coffeeCoolingDemo() {
         // Model: Newton's law of cooling
         var model = new Model("Coffee Cooling Test");
-        var coffee = new systems.courant.forrester.model.Stock("Coffee Temp", 100,
-                systems.courant.forrester.measure.Units.DIMENSIONLESS);
-        var cooling = systems.courant.forrester.model.Flow.create("Cooling",
-                systems.courant.forrester.measure.Units.MINUTE, () ->
-                        new systems.courant.forrester.measure.Quantity(
+        var coffee = new systems.courant.shrewd.model.Stock("Coffee Temp", 100,
+                systems.courant.shrewd.measure.Units.DIMENSIONLESS);
+        var cooling = systems.courant.shrewd.model.Flow.create("Cooling",
+                systems.courant.shrewd.measure.Units.MINUTE, () ->
+                        new systems.courant.shrewd.measure.Quantity(
                                 0.10 * (coffee.getValue() - 18),
-                                systems.courant.forrester.measure.Units.DIMENSIONLESS));
+                                systems.courant.shrewd.measure.Units.DIMENSIONLESS));
         coffee.addOutflow(cooling);
         model.addStock(coffee);
-        new Simulation(model, systems.courant.forrester.measure.Units.MINUTE,
-                new Quantity(8, systems.courant.forrester.measure.Units.MINUTE)).execute();
+        new Simulation(model, systems.courant.shrewd.measure.Units.MINUTE,
+                new Quantity(8, systems.courant.shrewd.measure.Units.MINUTE)).execute();
         assertThat(coffee.getValue()).isLessThan(100);
     }
 
@@ -150,10 +150,10 @@ class DemoSmokeTest {
     @DisplayName("ExponentialDecayDemo model simulates")
     void exponentialDecayDemo() {
         var model = new Model("Decay Test");
-        var pop = new systems.courant.forrester.model.Stock("Population", 100,
-                systems.courant.forrester.measure.Units.PEOPLE);
-        var deaths = systems.courant.forrester.model.Flow.create("Deaths", DAY, () ->
-                new Quantity(pop.getValue() / 80.0, systems.courant.forrester.measure.Units.PEOPLE));
+        var pop = new systems.courant.shrewd.model.Stock("Population", 100,
+                systems.courant.shrewd.measure.Units.PEOPLE);
+        var deaths = systems.courant.shrewd.model.Flow.create("Deaths", DAY, () ->
+                new Quantity(pop.getValue() / 80.0, systems.courant.shrewd.measure.Units.PEOPLE));
         pop.addOutflow(deaths);
         model.addStock(pop);
         new Simulation(model, DAY, Times.weeks(4)).execute();
@@ -164,11 +164,11 @@ class DemoSmokeTest {
     @DisplayName("ExponentialGrowthDemo model simulates")
     void exponentialGrowthDemo() {
         var model = new Model("Growth Test");
-        var pop = new systems.courant.forrester.model.Stock("Population", 100,
-                systems.courant.forrester.measure.Units.PEOPLE);
-        var births = systems.courant.forrester.model.Flows.linearGrowth("Births", DAY, pop, 0.04);
-        var deaths = systems.courant.forrester.model.Flow.create("Deaths", DAY, () ->
-                new Quantity(pop.getValue() * 0.03, systems.courant.forrester.measure.Units.PEOPLE));
+        var pop = new systems.courant.shrewd.model.Stock("Population", 100,
+                systems.courant.shrewd.measure.Units.PEOPLE);
+        var births = systems.courant.shrewd.model.Flows.linearGrowth("Births", DAY, pop, 0.04);
+        var deaths = systems.courant.shrewd.model.Flow.create("Deaths", DAY, () ->
+                new Quantity(pop.getValue() * 0.03, systems.courant.shrewd.measure.Units.PEOPLE));
         pop.addInflow(births);
         pop.addOutflow(deaths);
         model.addStock(pop);
@@ -184,12 +184,12 @@ class DemoSmokeTest {
         var model = new Model("Negative Feedback Test");
         double goal = 860;
         double adjustTime = 8;
-        var inventory = new systems.courant.forrester.model.Stock("Inventory", 100,
-                systems.courant.forrester.measure.Units.DIMENSIONLESS);
-        var ordering = systems.courant.forrester.model.Flow.create("Ordering", DAY, () ->
-                new systems.courant.forrester.measure.Quantity(
+        var inventory = new systems.courant.shrewd.model.Stock("Inventory", 100,
+                systems.courant.shrewd.measure.Units.DIMENSIONLESS);
+        var ordering = systems.courant.shrewd.model.Flow.create("Ordering", DAY, () ->
+                new systems.courant.shrewd.measure.Quantity(
                         (goal - inventory.getValue()) / adjustTime,
-                        systems.courant.forrester.measure.Units.DIMENSIONLESS));
+                        systems.courant.shrewd.measure.Units.DIMENSIONLESS));
         inventory.addInflow(ordering);
         model.addStock(inventory);
         new Simulation(model, DAY, WEEK, 4).execute();
@@ -201,12 +201,12 @@ class DemoSmokeTest {
     void sShapedGrowthDemo() {
         var model = new Model("S-Shaped Test");
         double capacity = 1000;
-        var pop = new systems.courant.forrester.model.Stock("Population", 10,
-                systems.courant.forrester.measure.Units.PEOPLE);
-        var births = systems.courant.forrester.model.Flow.create("Births", DAY, () ->
-                new systems.courant.forrester.measure.Quantity(
+        var pop = new systems.courant.shrewd.model.Stock("Population", 10,
+                systems.courant.shrewd.measure.Units.PEOPLE);
+        var births = systems.courant.shrewd.model.Flow.create("Births", DAY, () ->
+                new systems.courant.shrewd.measure.Quantity(
                         0.04 * pop.getValue() * (1 - pop.getValue() / capacity),
-                        systems.courant.forrester.measure.Units.PEOPLE));
+                        systems.courant.shrewd.measure.Units.PEOPLE));
         pop.addInflow(births);
         model.addStock(pop);
         new Simulation(model, DAY, WEEK, 4).execute();
@@ -217,21 +217,21 @@ class DemoSmokeTest {
     @DisplayName("SirInfectiousDiseaseDemo model simulates")
     void sirDemo() {
         var model = new Model("SIR Test");
-        var s = new systems.courant.forrester.model.Stock("Susceptible", 1000,
-                systems.courant.forrester.measure.Units.PEOPLE);
-        var i = new systems.courant.forrester.model.Stock("Infectious", 10,
-                systems.courant.forrester.measure.Units.PEOPLE);
-        var r = new systems.courant.forrester.model.Stock("Recovered", 0,
-                systems.courant.forrester.measure.Units.PEOPLE);
-        var infect = systems.courant.forrester.model.Flow.create("Infection", DAY, () -> {
+        var s = new systems.courant.shrewd.model.Stock("Susceptible", 1000,
+                systems.courant.shrewd.measure.Units.PEOPLE);
+        var i = new systems.courant.shrewd.model.Stock("Infectious", 10,
+                systems.courant.shrewd.measure.Units.PEOPLE);
+        var r = new systems.courant.shrewd.model.Stock("Recovered", 0,
+                systems.courant.shrewd.measure.Units.PEOPLE);
+        var infect = systems.courant.shrewd.model.Flow.create("Infection", DAY, () -> {
             double total = s.getValue() + i.getValue() + r.getValue();
-            if (total == 0) return new Quantity(0, systems.courant.forrester.measure.Units.PEOPLE);
+            if (total == 0) return new Quantity(0, systems.courant.shrewd.measure.Units.PEOPLE);
             double count = 8 * (i.getValue() / total) * 0.10 * s.getValue();
             return new Quantity(Math.min(count, s.getValue()),
-                    systems.courant.forrester.measure.Units.PEOPLE);
+                    systems.courant.shrewd.measure.Units.PEOPLE);
         });
-        var recover = systems.courant.forrester.model.Flow.create("Recovery", DAY, () ->
-                new Quantity(i.getValue() * 0.20, systems.courant.forrester.measure.Units.PEOPLE));
+        var recover = systems.courant.shrewd.model.Flow.create("Recovery", DAY, () ->
+                new Quantity(i.getValue() * 0.20, systems.courant.shrewd.measure.Units.PEOPLE));
         s.addOutflow(infect);
         i.addInflow(infect);
         i.addOutflow(recover);
@@ -247,22 +247,22 @@ class DemoSmokeTest {
     @DisplayName("PredatorPreyDemo model simulates")
     void predatorPreyDemo() {
         var model = new Model("Predator-Prey Test");
-        var prey = new systems.courant.forrester.model.Stock("Prey", 100,
-                systems.courant.forrester.measure.Units.PEOPLE);
-        var predators = new systems.courant.forrester.model.Stock("Predators", 10,
-                systems.courant.forrester.measure.Units.PEOPLE);
-        var preyBirths = systems.courant.forrester.model.Flow.create("Prey Births", DAY, () ->
+        var prey = new systems.courant.shrewd.model.Stock("Prey", 100,
+                systems.courant.shrewd.measure.Units.PEOPLE);
+        var predators = new systems.courant.shrewd.model.Stock("Predators", 10,
+                systems.courant.shrewd.measure.Units.PEOPLE);
+        var preyBirths = systems.courant.shrewd.model.Flow.create("Prey Births", DAY, () ->
                 new Quantity(1.0 * prey.getValue(),
-                        systems.courant.forrester.measure.Units.PEOPLE));
-        var predation = systems.courant.forrester.model.Flow.create("Predation", DAY, () ->
+                        systems.courant.shrewd.measure.Units.PEOPLE));
+        var predation = systems.courant.shrewd.model.Flow.create("Predation", DAY, () ->
                 new Quantity(0.01 * prey.getValue() * predators.getValue(),
-                        systems.courant.forrester.measure.Units.PEOPLE));
-        var predBirths = systems.courant.forrester.model.Flow.create("Pred Births", DAY, () ->
+                        systems.courant.shrewd.measure.Units.PEOPLE));
+        var predBirths = systems.courant.shrewd.model.Flow.create("Pred Births", DAY, () ->
                 new Quantity(0.5 * 0.01 * prey.getValue() * predators.getValue(),
-                        systems.courant.forrester.measure.Units.PEOPLE));
-        var predDeaths = systems.courant.forrester.model.Flow.create("Pred Deaths", DAY, () ->
+                        systems.courant.shrewd.measure.Units.PEOPLE));
+        var predDeaths = systems.courant.shrewd.model.Flow.create("Pred Deaths", DAY, () ->
                 new Quantity(0.8 * predators.getValue(),
-                        systems.courant.forrester.measure.Units.PEOPLE));
+                        systems.courant.shrewd.measure.Units.PEOPLE));
         prey.addInflow(preyBirths);
         prey.addOutflow(predation);
         predators.addInflow(predBirths);
@@ -278,23 +278,23 @@ class DemoSmokeTest {
     @DisplayName("SalesMixDemo model simulates")
     void salesMixDemo() {
         var model = new Model("Sales Mix Test");
-        var customers = new systems.courant.forrester.model.Stock("Customers", 0,
-                systems.courant.forrester.measure.Units.PEOPLE);
-        var acq = systems.courant.forrester.model.Flows.linearGrowth("New Customers", DAY, customers, 10);
+        var customers = new systems.courant.shrewd.model.Stock("Customers", 0,
+                systems.courant.shrewd.measure.Units.PEOPLE);
+        var acq = systems.courant.shrewd.model.Flows.linearGrowth("New Customers", DAY, customers, 10);
         customers.addInflow(acq);
         model.addStock(customers);
-        var hw = new systems.courant.forrester.model.Variable("HW Sales",
-                systems.courant.forrester.measure.Units.US_DOLLAR,
+        var hw = new systems.courant.shrewd.model.Variable("HW Sales",
+                systems.courant.shrewd.measure.Units.US_DOLLAR,
                 () -> 1000 * acq.flowPerTimeUnit(WEEK).getValue());
         double weeksPerMonth = 52.0 / 12.0;
-        var svc = new systems.courant.forrester.model.Variable("Svc Sales",
-                systems.courant.forrester.measure.Units.US_DOLLAR,
+        var svc = new systems.courant.shrewd.model.Variable("Svc Sales",
+                systems.courant.shrewd.measure.Units.US_DOLLAR,
                 () -> 10 / weeksPerMonth * customers.getValue());
-        var total = new systems.courant.forrester.model.Variable("Total",
-                systems.courant.forrester.measure.Units.US_DOLLAR,
+        var total = new systems.courant.shrewd.model.Variable("Total",
+                systems.courant.shrewd.measure.Units.US_DOLLAR,
                 () -> hw.getValue() + svc.getValue());
-        var proportion = new systems.courant.forrester.model.Variable("Proportion HW",
-                systems.courant.forrester.measure.Units.DIMENSIONLESS,
+        var proportion = new systems.courant.shrewd.model.Variable("Proportion HW",
+                systems.courant.shrewd.measure.Units.DIMENSIONLESS,
                 () -> total.getValue() == 0 ? 0 : hw.getValue() / total.getValue());
         model.addVariable(hw);
         model.addVariable(svc);
@@ -307,14 +307,14 @@ class DemoSmokeTest {
     @DisplayName("TubDemo model simulates")
     void tubDemo() {
         var model = new Model("Tub Test");
-        var water = new systems.courant.forrester.model.Stock("Water", 50,
-                systems.courant.forrester.measure.Units.DIMENSIONLESS);
-        var outflow = systems.courant.forrester.model.Flows.constant("Outflow",
-                systems.courant.forrester.measure.Units.MINUTE,
-                new Quantity(5, systems.courant.forrester.measure.Units.DIMENSIONLESS));
+        var water = new systems.courant.shrewd.model.Stock("Water", 50,
+                systems.courant.shrewd.measure.Units.DIMENSIONLESS);
+        var outflow = systems.courant.shrewd.model.Flows.constant("Outflow",
+                systems.courant.shrewd.measure.Units.MINUTE,
+                new Quantity(5, systems.courant.shrewd.measure.Units.DIMENSIONLESS));
         water.addOutflow(outflow);
         model.addStock(water);
-        var minute = systems.courant.forrester.measure.Units.MINUTE;
+        var minute = systems.courant.shrewd.measure.Units.MINUTE;
         new Simulation(model, minute, new Quantity(5, minute)).execute();
         assertThat(water.getValue()).isLessThan(50);
     }
@@ -324,11 +324,11 @@ class DemoSmokeTest {
     void firstOrderDelayDemo() {
         var model = new Model("Delay Test");
         double delay = 120;
-        var current = new systems.courant.forrester.model.Stock("Current", 1000,
-                systems.courant.forrester.measure.Units.PEOPLE);
-        var lost = systems.courant.forrester.model.Flow.create("Lost", DAY, () ->
+        var current = new systems.courant.shrewd.model.Stock("Current", 1000,
+                systems.courant.shrewd.measure.Units.PEOPLE);
+        var lost = systems.courant.shrewd.model.Flow.create("Lost", DAY, () ->
                 new Quantity(current.getValue() / delay,
-                        systems.courant.forrester.measure.Units.PEOPLE));
+                        systems.courant.shrewd.measure.Units.PEOPLE));
         current.addOutflow(lost);
         model.addStock(current);
         new Simulation(model, DAY, Times.weeks(4)).execute();
@@ -339,10 +339,10 @@ class DemoSmokeTest {
     @DisplayName("SimplePipelineDelayDemo model simulates")
     void simplePipelineDelayDemo() {
         var model = new Model("Pipeline Test");
-        var wip = new systems.courant.forrester.model.Stock("WIP", 0,
-                systems.courant.forrester.measure.Units.DIMENSIONLESS);
-        var arrivals = systems.courant.forrester.model.Flows.constant("Arrivals", DAY,
-                new Quantity(5, systems.courant.forrester.measure.Units.DIMENSIONLESS));
+        var wip = new systems.courant.shrewd.model.Stock("WIP", 0,
+                systems.courant.shrewd.measure.Units.DIMENSIONLESS);
+        var arrivals = systems.courant.shrewd.model.Flows.constant("Arrivals", DAY,
+                new Quantity(5, systems.courant.shrewd.measure.Units.DIMENSIONLESS));
         wip.addInflow(arrivals);
         model.addStock(wip);
         new Simulation(model, DAY, WEEK, 2).execute();
@@ -353,12 +353,12 @@ class DemoSmokeTest {
     @DisplayName("FlowTimeDemo model simulates")
     void flowTimeDemo() {
         var model = new Model("Flow Time Test");
-        var hour = systems.courant.forrester.measure.units.time.TimeUnits.HOUR;
-        var wip = new systems.courant.forrester.model.Stock("WIP", 1000,
-                systems.courant.forrester.measure.Units.DIMENSIONLESS);
-        var completions = systems.courant.forrester.model.Flow.create("Completions", hour, () ->
+        var hour = systems.courant.shrewd.measure.units.time.TimeUnits.HOUR;
+        var wip = new systems.courant.shrewd.model.Stock("WIP", 1000,
+                systems.courant.shrewd.measure.Units.DIMENSIONLESS);
+        var completions = systems.courant.shrewd.model.Flow.create("Completions", hour, () ->
                 new Quantity(Math.min(190, wip.getValue()),
-                        systems.courant.forrester.measure.Units.DIMENSIONLESS));
+                        systems.courant.shrewd.measure.Units.DIMENSIONLESS));
         wip.addOutflow(completions);
         model.addStock(wip);
         new Simulation(model, hour, WEEK, 1).execute();
@@ -369,19 +369,19 @@ class DemoSmokeTest {
     @DisplayName("ThirdOrderMaterialDelayDemo model simulates")
     void thirdOrderDelayDemo() {
         var model = new Model("Third Order Delay Test");
-        var hour = systems.courant.forrester.measure.units.time.TimeUnits.HOUR;
-        var step1 = new systems.courant.forrester.model.Stock("Step 1", 100,
-                systems.courant.forrester.measure.Units.DIMENSIONLESS);
-        var step2 = new systems.courant.forrester.model.Stock("Step 2", 0,
-                systems.courant.forrester.measure.Units.DIMENSIONLESS);
-        var step3 = new systems.courant.forrester.model.Stock("Step 3", 0,
-                systems.courant.forrester.measure.Units.DIMENSIONLESS);
-        var flow12 = systems.courant.forrester.model.Flow.create("Step1->2", hour, () ->
+        var hour = systems.courant.shrewd.measure.units.time.TimeUnits.HOUR;
+        var step1 = new systems.courant.shrewd.model.Stock("Step 1", 100,
+                systems.courant.shrewd.measure.Units.DIMENSIONLESS);
+        var step2 = new systems.courant.shrewd.model.Stock("Step 2", 0,
+                systems.courant.shrewd.measure.Units.DIMENSIONLESS);
+        var step3 = new systems.courant.shrewd.model.Stock("Step 3", 0,
+                systems.courant.shrewd.measure.Units.DIMENSIONLESS);
+        var flow12 = systems.courant.shrewd.model.Flow.create("Step1->2", hour, () ->
                 new Quantity(step1.getValue() / 7.0,
-                        systems.courant.forrester.measure.Units.DIMENSIONLESS));
-        var flow23 = systems.courant.forrester.model.Flow.create("Step2->3", hour, () ->
+                        systems.courant.shrewd.measure.Units.DIMENSIONLESS));
+        var flow23 = systems.courant.shrewd.model.Flow.create("Step2->3", hour, () ->
                 new Quantity(step2.getValue() / 6.3,
-                        systems.courant.forrester.measure.Units.DIMENSIONLESS));
+                        systems.courant.shrewd.measure.Units.DIMENSIONLESS));
         step1.addOutflow(flow12);
         step2.addInflow(flow12);
         step2.addOutflow(flow23);
@@ -396,16 +396,16 @@ class DemoSmokeTest {
     @Test
     @DisplayName("ThirdOrderMaterialDelayDemo flows clamp to zero when stocks are negative")
     void thirdOrderDelayFlowsClamped() {
-        var hour = systems.courant.forrester.measure.units.time.TimeUnits.HOUR;
+        var hour = systems.courant.shrewd.measure.units.time.TimeUnits.HOUR;
         var model = new Model("Clamp Test");
         // Start with a negative stock value to test the guard
-        var step1 = new systems.courant.forrester.model.Stock("Step 1", -10,
-                systems.courant.forrester.measure.Units.DIMENSIONLESS);
+        var step1 = new systems.courant.shrewd.model.Stock("Step 1", -10,
+                systems.courant.shrewd.measure.Units.DIMENSIONLESS);
         double delayHours = 5.0;
-        var flow = systems.courant.forrester.model.Flow.create("Step 1 delay", hour, () ->
+        var flow = systems.courant.shrewd.model.Flow.create("Step 1 delay", hour, () ->
                 new Quantity(Math.max(0, Math.min(step1.getValue(),
                         step1.getValue() / delayHours)),
-                        systems.courant.forrester.measure.Units.DIMENSIONLESS));
+                        systems.courant.shrewd.measure.Units.DIMENSIONLESS));
         step1.addOutflow(flow);
         model.addStock(step1);
         new Simulation(model, hour, Times.hours(1)).execute();
@@ -416,16 +416,16 @@ class DemoSmokeTest {
     @Test
     @DisplayName("FlowTimeDemo TAT stays non-negative during simulation")
     void flowTimeDemoTatNonNegative() {
-        var hour = systems.courant.forrester.measure.units.time.TimeUnits.HOUR;
+        var hour = systems.courant.shrewd.measure.units.time.TimeUnits.HOUR;
         var model = new Model("TAT Clamp Test");
         // Start TAT at 0 to force the edge case
-        var tat = new systems.courant.forrester.model.Stock("TAT", 0, hour);
+        var tat = new systems.courant.shrewd.model.Stock("TAT", 0, hour);
         double capacity = 100;
         double hoursPerDay = 24.0;
         double adjustmentTime = 24.0;
-        var wip = new systems.courant.forrester.model.Stock("WIP", 500,
-                systems.courant.forrester.measure.Units.DIMENSIONLESS);
-        var tatAdjustment = systems.courant.forrester.model.Flow.create("TAT Adjustment", hour, () -> {
+        var wip = new systems.courant.shrewd.model.Stock("WIP", 500,
+                systems.courant.shrewd.measure.Units.DIMENSIONLESS);
+        var tatAdjustment = systems.courant.shrewd.model.Flow.create("TAT Adjustment", hour, () -> {
             double currentTAT = Math.max(0, tat.getValue());
             double actualTAT = (wip.getValue() / capacity) * hoursPerDay;
             return new Quantity((actualTAT - currentTAT) / adjustmentTime, hour);
@@ -441,12 +441,12 @@ class DemoSmokeTest {
     @DisplayName("InventoryModelDemo model simulates")
     void inventoryDemo() {
         var model = new Model("Inventory Test");
-        var inventory = new systems.courant.forrester.model.Stock("Cars", 200,
-                systems.courant.forrester.measure.Units.DIMENSIONLESS);
-        var sales = systems.courant.forrester.model.Flow.create("Sales", DAY, () ->
-                new Quantity(20, systems.courant.forrester.measure.Units.DIMENSIONLESS));
-        var deliveries = systems.courant.forrester.model.Flow.create("Deliveries", DAY, () ->
-                new Quantity(20, systems.courant.forrester.measure.Units.DIMENSIONLESS));
+        var inventory = new systems.courant.shrewd.model.Stock("Cars", 200,
+                systems.courant.shrewd.measure.Units.DIMENSIONLESS);
+        var sales = systems.courant.shrewd.model.Flow.create("Sales", DAY, () ->
+                new Quantity(20, systems.courant.shrewd.measure.Units.DIMENSIONLESS));
+        var deliveries = systems.courant.shrewd.model.Flow.create("Deliveries", DAY, () ->
+                new Quantity(20, systems.courant.shrewd.measure.Units.DIMENSIONLESS));
         inventory.addOutflow(sales);
         inventory.addInflow(deliveries);
         model.addStock(inventory);
@@ -460,12 +460,12 @@ class DemoSmokeTest {
     void lookupTableDemo() {
         var model = new Model("Lookup Test");
         double capacity = 1000;
-        var pop = new systems.courant.forrester.model.Stock("Population", 10,
-                systems.courant.forrester.measure.Units.PEOPLE);
+        var pop = new systems.courant.shrewd.model.Stock("Population", 10,
+                systems.courant.shrewd.measure.Units.PEOPLE);
         // Simplified: use analytical crowding instead of lookup table
-        var births = systems.courant.forrester.model.Flow.create("Births", DAY, () ->
+        var births = systems.courant.shrewd.model.Flow.create("Births", DAY, () ->
                 new Quantity(0.04 * pop.getValue() * (1 - pop.getValue() / capacity),
-                        systems.courant.forrester.measure.Units.PEOPLE));
+                        systems.courant.shrewd.measure.Units.PEOPLE));
         pop.addInflow(births);
         model.addStock(pop);
         new Simulation(model, DAY, WEEK, 4).execute();
@@ -477,20 +477,20 @@ class DemoSmokeTest {
     void multiRegionSirDemo() {
         // Simplified 2-region SIR
         var model = new Model("Multi-Region SIR Test");
-        var s1 = new systems.courant.forrester.model.Stock("S1", 990,
-                systems.courant.forrester.measure.Units.PEOPLE);
-        var i1 = new systems.courant.forrester.model.Stock("I1", 10,
-                systems.courant.forrester.measure.Units.PEOPLE);
-        var r1 = new systems.courant.forrester.model.Stock("R1", 0,
-                systems.courant.forrester.measure.Units.PEOPLE);
-        var infect1 = systems.courant.forrester.model.Flow.create("Infection1", DAY, () -> {
+        var s1 = new systems.courant.shrewd.model.Stock("S1", 990,
+                systems.courant.shrewd.measure.Units.PEOPLE);
+        var i1 = new systems.courant.shrewd.model.Stock("I1", 10,
+                systems.courant.shrewd.measure.Units.PEOPLE);
+        var r1 = new systems.courant.shrewd.model.Stock("R1", 0,
+                systems.courant.shrewd.measure.Units.PEOPLE);
+        var infect1 = systems.courant.shrewd.model.Flow.create("Infection1", DAY, () -> {
             double total = s1.getValue() + i1.getValue() + r1.getValue();
-            if (total == 0) return new Quantity(0, systems.courant.forrester.measure.Units.PEOPLE);
+            if (total == 0) return new Quantity(0, systems.courant.shrewd.measure.Units.PEOPLE);
             return new Quantity(Math.min(8 * (i1.getValue() / total) * 0.10 * s1.getValue(), s1.getValue()),
-                    systems.courant.forrester.measure.Units.PEOPLE);
+                    systems.courant.shrewd.measure.Units.PEOPLE);
         });
-        var recover1 = systems.courant.forrester.model.Flow.create("Recovery1", DAY, () ->
-                new Quantity(i1.getValue() * 0.20, systems.courant.forrester.measure.Units.PEOPLE));
+        var recover1 = systems.courant.shrewd.model.Flow.create("Recovery1", DAY, () ->
+                new Quantity(i1.getValue() * 0.20, systems.courant.shrewd.measure.Units.PEOPLE));
         s1.addOutflow(infect1);
         i1.addInflow(infect1);
         i1.addOutflow(recover1);
@@ -507,11 +507,11 @@ class DemoSmokeTest {
     void populationRegionAgeDemo() {
         // Simplified single-region single-age population
         var model = new Model("Population Test");
-        var pop = new systems.courant.forrester.model.Stock("Pop", 500,
-                systems.courant.forrester.measure.Units.PEOPLE);
-        var births = systems.courant.forrester.model.Flows.linearGrowth("Births", DAY, pop, 0.003);
-        var deaths = systems.courant.forrester.model.Flow.create("Deaths", DAY, () ->
-                new Quantity(pop.getValue() * 0.008, systems.courant.forrester.measure.Units.PEOPLE));
+        var pop = new systems.courant.shrewd.model.Stock("Pop", 500,
+                systems.courant.shrewd.measure.Units.PEOPLE);
+        var births = systems.courant.shrewd.model.Flows.linearGrowth("Births", DAY, pop, 0.003);
+        var deaths = systems.courant.shrewd.model.Flow.create("Deaths", DAY, () ->
+                new Quantity(pop.getValue() * 0.008, systems.courant.shrewd.measure.Units.PEOPLE));
         pop.addInflow(births);
         pop.addOutflow(deaths);
         model.addStock(pop);

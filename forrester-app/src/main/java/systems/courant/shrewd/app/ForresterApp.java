@@ -1,6 +1,6 @@
-package systems.courant.forrester.app;
+package systems.courant.shrewd.app;
 
-import systems.courant.forrester.app.canvas.Clipboard;
+import systems.courant.shrewd.app.canvas.Clipboard;
 
 import javafx.application.Application;
 import javafx.stage.Stage;

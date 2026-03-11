@@ -1,14 +1,14 @@
-package systems.courant.forrester.app.canvas;
+package systems.courant.shrewd.app.canvas;
 
-import systems.courant.forrester.measure.Quantity;
-import systems.courant.forrester.measure.TimeUnit;
-import systems.courant.forrester.measure.UnitRegistry;
-import systems.courant.forrester.model.compile.CompiledModel;
-import systems.courant.forrester.model.compile.ModelCompiler;
-import systems.courant.forrester.model.def.AuxDef;
-import systems.courant.forrester.model.def.ModelDefinition;
-import systems.courant.forrester.model.def.ModelDefinitionBuilder;
-import systems.courant.forrester.model.def.SimulationSettings;
+import systems.courant.shrewd.measure.Quantity;
+import systems.courant.shrewd.measure.TimeUnit;
+import systems.courant.shrewd.measure.UnitRegistry;
+import systems.courant.shrewd.model.compile.CompiledModel;
+import systems.courant.shrewd.model.compile.ModelCompiler;
+import systems.courant.shrewd.model.def.AuxDef;
+import systems.courant.shrewd.model.def.ModelDefinition;
+import systems.courant.shrewd.model.def.ModelDefinitionBuilder;
+import systems.courant.shrewd.model.def.SimulationSettings;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -42,7 +42,7 @@ public final class ModelDefinitionFactory {
     }
 
     /**
-     * Creates a single-parameter factory for use with {@link systems.courant.forrester.sweep.ParameterSweep}.
+     * Creates a single-parameter factory for use with {@link systems.courant.shrewd.sweep.ParameterSweep}.
      * Returns {@link CompiledModel} to ensure proper step synchronization.
      */
     public static java.util.function.DoubleFunction<CompiledModel> createSingleParamFactory(

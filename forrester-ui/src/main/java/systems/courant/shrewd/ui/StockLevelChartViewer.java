@@ -1,9 +1,9 @@
-package systems.courant.forrester.ui;
+package systems.courant.shrewd.ui;
 
-import systems.courant.forrester.event.EventHandler;
-import systems.courant.forrester.event.SimulationEndEvent;
-import systems.courant.forrester.event.SimulationStartEvent;
-import systems.courant.forrester.event.TimeStepEvent;
+import systems.courant.shrewd.event.EventHandler;
+import systems.courant.shrewd.event.SimulationEndEvent;
+import systems.courant.shrewd.event.SimulationStartEvent;
+import systems.courant.shrewd.event.TimeStepEvent;
 
 
 /**

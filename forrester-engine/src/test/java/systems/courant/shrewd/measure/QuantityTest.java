@@ -1,12 +1,12 @@
-package systems.courant.forrester.measure;
+package systems.courant.shrewd.measure;
 
-import systems.courant.forrester.measure.units.length.LengthUnits;
+import systems.courant.shrewd.measure.units.length.LengthUnits;
 import org.junit.jupiter.api.Test;
 
-import static systems.courant.forrester.measure.Units.GALLON_US;
-import static systems.courant.forrester.measure.Units.LITER;
-import static systems.courant.forrester.measure.Units.METER;
-import static systems.courant.forrester.measure.Units.MILE;
+import static systems.courant.shrewd.measure.Units.GALLON_US;
+import static systems.courant.shrewd.measure.Units.LITER;
+import static systems.courant.shrewd.measure.Units.METER;
+import static systems.courant.shrewd.measure.Units.MILE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;

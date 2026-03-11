@@ -1,9 +1,9 @@
-package systems.courant.forrester.model.def;
+package systems.courant.shrewd.model.def;
 
-import systems.courant.forrester.model.expr.Expr;
-import systems.courant.forrester.model.expr.ExprParser;
-import systems.courant.forrester.model.expr.ParseException;
-import systems.courant.forrester.model.expr.UnaryOperator;
+import systems.courant.shrewd.model.expr.Expr;
+import systems.courant.shrewd.model.expr.ExprParser;
+import systems.courant.shrewd.model.expr.ParseException;
+import systems.courant.shrewd.model.expr.UnaryOperator;
 
 import java.util.List;
 

@@ -1,4 +1,4 @@
-package systems.courant.forrester.app.canvas;
+package systems.courant.shrewd.app.canvas;
 
 /**
  * Heuristic classifier that detects the dominant behavior mode of a time series.

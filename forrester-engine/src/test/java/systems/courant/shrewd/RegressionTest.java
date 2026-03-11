@@ -1,27 +1,27 @@
-package systems.courant.forrester;
+package systems.courant.shrewd;
 
-import systems.courant.forrester.event.EventHandler;
-import systems.courant.forrester.event.SimulationEndEvent;
-import systems.courant.forrester.event.SimulationStartEvent;
-import systems.courant.forrester.event.TimeStepEvent;
-import systems.courant.forrester.measure.Quantity;
-import systems.courant.forrester.model.Delay3;
-import systems.courant.forrester.model.Flow;
-import systems.courant.forrester.model.Model;
-import systems.courant.forrester.model.NegativeValuePolicy;
-import systems.courant.forrester.model.Smooth;
-import systems.courant.forrester.model.Stock;
-import systems.courant.forrester.model.Variable;
+import systems.courant.shrewd.event.EventHandler;
+import systems.courant.shrewd.event.SimulationEndEvent;
+import systems.courant.shrewd.event.SimulationStartEvent;
+import systems.courant.shrewd.event.TimeStepEvent;
+import systems.courant.shrewd.measure.Quantity;
+import systems.courant.shrewd.model.Delay3;
+import systems.courant.shrewd.model.Flow;
+import systems.courant.shrewd.model.Model;
+import systems.courant.shrewd.model.NegativeValuePolicy;
+import systems.courant.shrewd.model.Smooth;
+import systems.courant.shrewd.model.Stock;
+import systems.courant.shrewd.model.Variable;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static systems.courant.forrester.measure.Units.DAY;
-import static systems.courant.forrester.measure.Units.GALLON_US;
-import static systems.courant.forrester.measure.Units.MILLISECOND;
-import static systems.courant.forrester.measure.Units.MINUTE;
-import static systems.courant.forrester.measure.Units.THING;
+import static systems.courant.shrewd.measure.Units.DAY;
+import static systems.courant.shrewd.measure.Units.GALLON_US;
+import static systems.courant.shrewd.measure.Units.MILLISECOND;
+import static systems.courant.shrewd.measure.Units.MINUTE;
+import static systems.courant.shrewd.measure.Units.THING;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -253,8 +253,8 @@ public class RegressionTest {
     @Test
     public void quantityEqualsShouldWorkAcrossUnits() {
         // 1 km = 1000 m — physical equality
-        Quantity km = new Quantity(1, systems.courant.forrester.measure.Units.KILOMETER);
-        Quantity m = new Quantity(1000, systems.courant.forrester.measure.Units.METER);
+        Quantity km = new Quantity(1, systems.courant.shrewd.measure.Units.KILOMETER);
+        Quantity m = new Quantity(1000, systems.courant.shrewd.measure.Units.METER);
         assertEquals(km, m);
         assertEquals(km.hashCode(), m.hashCode());
     }

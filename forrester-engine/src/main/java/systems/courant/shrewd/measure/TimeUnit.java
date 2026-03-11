@@ -1,4 +1,4 @@
-package systems.courant.forrester.measure;
+package systems.courant.shrewd.measure;
 
 /**
  * A {@link Unit} that specifically represents a unit of time, such as seconds, days, or years.

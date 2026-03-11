@@ -1,11 +1,11 @@
-package systems.courant.forrester.io.json;
+package systems.courant.shrewd.io.json;
 
-import systems.courant.forrester.Simulation;
-import systems.courant.forrester.model.Stock;
-import systems.courant.forrester.model.compile.CompiledModel;
-import systems.courant.forrester.model.compile.ModelCompiler;
-import systems.courant.forrester.model.def.ModelDefinition;
-import systems.courant.forrester.model.def.ModelDefinitionBuilder;
+import systems.courant.shrewd.Simulation;
+import systems.courant.shrewd.model.Stock;
+import systems.courant.shrewd.model.compile.CompiledModel;
+import systems.courant.shrewd.model.compile.ModelCompiler;
+import systems.courant.shrewd.model.def.ModelDefinition;
+import systems.courant.shrewd.model.def.ModelDefinitionBuilder;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

@@ -1,13 +1,13 @@
-package systems.courant.forrester.measure;
+package systems.courant.shrewd.measure;
 
-import systems.courant.forrester.measure.units.dimensionless.DimensionlessUnits;
-import systems.courant.forrester.measure.units.item.ItemUnits;
-import systems.courant.forrester.measure.units.length.LengthUnits;
-import systems.courant.forrester.measure.units.mass.MassUnits;
-import systems.courant.forrester.measure.units.money.MoneyUnits;
-import systems.courant.forrester.measure.units.temperature.TemperatureUnits;
-import systems.courant.forrester.measure.units.time.TimeUnits;
-import systems.courant.forrester.measure.units.volume.VolumeUnits;
+import systems.courant.shrewd.measure.units.dimensionless.DimensionlessUnits;
+import systems.courant.shrewd.measure.units.item.ItemUnits;
+import systems.courant.shrewd.measure.units.length.LengthUnits;
+import systems.courant.shrewd.measure.units.mass.MassUnits;
+import systems.courant.shrewd.measure.units.money.MoneyUnits;
+import systems.courant.shrewd.measure.units.temperature.TemperatureUnits;
+import systems.courant.shrewd.measure.units.time.TimeUnits;
+import systems.courant.shrewd.measure.units.volume.VolumeUnits;
 
 /**
  * Central registry of commonly used unit constants across all dimensions.

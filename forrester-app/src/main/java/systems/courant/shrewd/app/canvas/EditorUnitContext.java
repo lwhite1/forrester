@@ -1,10 +1,10 @@
-package systems.courant.forrester.app.canvas;
+package systems.courant.shrewd.app.canvas;
 
-import systems.courant.forrester.measure.CompositeUnit;
-import systems.courant.forrester.measure.Dimension;
-import systems.courant.forrester.measure.DimensionalAnalyzer;
-import systems.courant.forrester.measure.Unit;
-import systems.courant.forrester.measure.UnitRegistry;
+import systems.courant.shrewd.measure.CompositeUnit;
+import systems.courant.shrewd.measure.Dimension;
+import systems.courant.shrewd.measure.DimensionalAnalyzer;
+import systems.courant.shrewd.measure.Unit;
+import systems.courant.shrewd.measure.UnitRegistry;
 
 import java.util.Map;
 import java.util.Optional;
@@ -83,7 +83,7 @@ final class EditorUnitContext implements DimensionalAnalyzer.UnitContext {
      * Resolves the material unit for a flow. Uses explicit materialUnit if set,
      * otherwise infers from connected stock, falling back to dimensionless.
      */
-    private Unit resolveMaterialUnit(systems.courant.forrester.model.def.FlowDef flow) {
+    private Unit resolveMaterialUnit(systems.courant.shrewd.model.def.FlowDef flow) {
         if (flow.materialUnit() != null && !flow.materialUnit().isBlank()) {
             return registry.resolve(flow.materialUnit());
         }

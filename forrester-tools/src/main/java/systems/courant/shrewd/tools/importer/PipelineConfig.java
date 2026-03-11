@@ -1,6 +1,6 @@
-package systems.courant.forrester.tools.importer;
+package systems.courant.shrewd.tools.importer;
 
-import systems.courant.forrester.model.ModelMetadata;
+import systems.courant.shrewd.model.ModelMetadata;
 
 import java.nio.file.Path;
 

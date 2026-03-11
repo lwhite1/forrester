@@ -1,8 +1,8 @@
-package systems.courant.forrester.app.canvas;
+package systems.courant.shrewd.app.canvas;
 
-import systems.courant.forrester.model.def.ElementType;
-import systems.courant.forrester.model.def.ModuleInstanceDef;
-import systems.courant.forrester.model.def.ModuleInterface;
+import systems.courant.shrewd.model.def.ElementType;
+import systems.courant.shrewd.model.def.ModuleInstanceDef;
+import systems.courant.shrewd.model.def.ModuleInterface;
 
 import javafx.scene.canvas.Canvas;
 import javafx.scene.control.ContextMenu;

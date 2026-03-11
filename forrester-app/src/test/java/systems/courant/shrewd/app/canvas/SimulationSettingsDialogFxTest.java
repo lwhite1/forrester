@@ -1,6 +1,6 @@
-package systems.courant.forrester.app.canvas;
+package systems.courant.shrewd.app.canvas;
 
-import systems.courant.forrester.model.def.SimulationSettings;
+import systems.courant.shrewd.model.def.SimulationSettings;
 
 import javafx.application.Platform;
 import javafx.scene.Node;

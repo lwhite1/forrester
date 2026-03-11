@@ -1,14 +1,14 @@
-package systems.courant.forrester.model.graph;
+package systems.courant.shrewd.model.graph;
 
-import systems.courant.forrester.model.def.AuxDef;
-import systems.courant.forrester.model.def.CausalLinkDef;
-import systems.courant.forrester.model.def.FlowDef;
-import systems.courant.forrester.model.def.LookupTableDef;
-import systems.courant.forrester.model.def.ModelDefinition;
-import systems.courant.forrester.model.def.StockDef;
-import systems.courant.forrester.model.expr.ExprDependencies;
-import systems.courant.forrester.model.expr.ExprParser;
-import systems.courant.forrester.model.expr.ParseException;
+import systems.courant.shrewd.model.def.AuxDef;
+import systems.courant.shrewd.model.def.CausalLinkDef;
+import systems.courant.shrewd.model.def.FlowDef;
+import systems.courant.shrewd.model.def.LookupTableDef;
+import systems.courant.shrewd.model.def.ModelDefinition;
+import systems.courant.shrewd.model.def.StockDef;
+import systems.courant.shrewd.model.expr.ExprDependencies;
+import systems.courant.shrewd.model.expr.ExprParser;
+import systems.courant.shrewd.model.expr.ParseException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -1,7 +1,7 @@
-package systems.courant.forrester.model;
+package systems.courant.shrewd.model;
 
-import systems.courant.forrester.measure.Quantity;
-import systems.courant.forrester.measure.Unit;
+import systems.courant.shrewd.measure.Quantity;
+import systems.courant.shrewd.measure.Unit;
 import com.google.common.base.Preconditions;
 
 import java.util.Collections;

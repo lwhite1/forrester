@@ -1,9 +1,9 @@
-package systems.courant.forrester.measure.dimension;
+package systems.courant.shrewd.measure.dimension;
 
-import systems.courant.forrester.measure.Converter;
-import systems.courant.forrester.measure.Dimension;
-import systems.courant.forrester.measure.Unit;
-import systems.courant.forrester.measure.units.temperature.TemperatureUnits;
+import systems.courant.shrewd.measure.Converter;
+import systems.courant.shrewd.measure.Dimension;
+import systems.courant.shrewd.measure.Unit;
+import systems.courant.shrewd.measure.units.temperature.TemperatureUnits;
 
 /**
  * The temperature dimension. Base unit is Celsius.

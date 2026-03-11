@@ -1,8 +1,8 @@
-package systems.courant.forrester.model;
+package systems.courant.shrewd.model;
 
 import com.google.common.base.Preconditions;
 
-import systems.courant.forrester.model.compile.Resettable;
+import systems.courant.shrewd.model.compile.Resettable;
 
 import java.util.function.DoubleSupplier;
 import java.util.function.IntSupplier;

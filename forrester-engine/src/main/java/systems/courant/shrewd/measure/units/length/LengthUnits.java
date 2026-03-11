@@ -1,7 +1,7 @@
-package systems.courant.forrester.measure.units.length;
+package systems.courant.shrewd.measure.units.length;
 
-import systems.courant.forrester.measure.Dimension;
-import systems.courant.forrester.measure.Unit;
+import systems.courant.shrewd.measure.Dimension;
+import systems.courant.shrewd.measure.Unit;
 
 /**
  * Standard units of length. Each constant stores its ratio to the base unit (meters).

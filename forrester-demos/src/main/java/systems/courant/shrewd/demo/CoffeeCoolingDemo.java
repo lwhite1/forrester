@@ -3,19 +3,19 @@
  * Licensed under CC-BY-SA-4.0. See LICENSE in this module for details.
  */
 
-package systems.courant.forrester.demo;
+package systems.courant.shrewd.demo;
 
-import systems.courant.forrester.Simulation;
-import systems.courant.forrester.measure.Quantity;
-import systems.courant.forrester.model.Flow;
-import systems.courant.forrester.model.Model;
-import systems.courant.forrester.model.ModelMetadata;
-import systems.courant.forrester.model.Stock;
-import systems.courant.forrester.model.Variable;
-import systems.courant.forrester.ui.FlowChartViewer;
+import systems.courant.shrewd.Simulation;
+import systems.courant.shrewd.measure.Quantity;
+import systems.courant.shrewd.model.Flow;
+import systems.courant.shrewd.model.Model;
+import systems.courant.shrewd.model.ModelMetadata;
+import systems.courant.shrewd.model.Stock;
+import systems.courant.shrewd.model.Variable;
+import systems.courant.shrewd.ui.FlowChartViewer;
 
-import static systems.courant.forrester.measure.Units.CELSIUS;
-import static systems.courant.forrester.measure.Units.MINUTE;
+import static systems.courant.shrewd.measure.Units.CELSIUS;
+import static systems.courant.shrewd.measure.Units.MINUTE;
 
 /**
  * Simulates Newton's law of cooling applied to a cup of coffee.

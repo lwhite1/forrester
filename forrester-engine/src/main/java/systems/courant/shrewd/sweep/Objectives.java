@@ -1,4 +1,4 @@
-package systems.courant.forrester.sweep;
+package systems.courant.shrewd.sweep;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

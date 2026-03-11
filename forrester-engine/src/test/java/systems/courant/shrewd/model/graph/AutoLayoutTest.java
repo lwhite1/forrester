@@ -1,10 +1,10 @@
-package systems.courant.forrester.model.graph;
+package systems.courant.shrewd.model.graph;
 
-import systems.courant.forrester.model.def.ElementPlacement;
-import systems.courant.forrester.model.def.ElementType;
-import systems.courant.forrester.model.def.ModelDefinition;
-import systems.courant.forrester.model.def.ModelDefinitionBuilder;
-import systems.courant.forrester.model.def.ViewDef;
+import systems.courant.shrewd.model.def.ElementPlacement;
+import systems.courant.shrewd.model.def.ElementType;
+import systems.courant.shrewd.model.def.ModelDefinition;
+import systems.courant.shrewd.model.def.ModelDefinitionBuilder;
+import systems.courant.shrewd.model.def.ViewDef;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -471,9 +471,9 @@ class AutoLayoutTest {
                     .cldVariable("Population")
                     .cldVariable("Birth Rate")
                     .causalLink("Population", "Birth Rate",
-                            systems.courant.forrester.model.def.CausalLinkDef.Polarity.POSITIVE)
+                            systems.courant.shrewd.model.def.CausalLinkDef.Polarity.POSITIVE)
                     .causalLink("Birth Rate", "Population",
-                            systems.courant.forrester.model.def.CausalLinkDef.Polarity.POSITIVE)
+                            systems.courant.shrewd.model.def.CausalLinkDef.Polarity.POSITIVE)
                     .build();
 
             ViewDef view = AutoLayout.layout(def);
@@ -492,7 +492,7 @@ class AutoLayoutTest {
                     .cldVariable("X")
                     .cldVariable("Y")
                     .causalLink("X", "Y",
-                            systems.courant.forrester.model.def.CausalLinkDef.Polarity.POSITIVE)
+                            systems.courant.shrewd.model.def.CausalLinkDef.Polarity.POSITIVE)
                     .build();
 
             ViewDef view = AutoLayout.layout(def);
@@ -511,13 +511,13 @@ class AutoLayoutTest {
                     .cldVariable("C")
                     .cldVariable("D")
                     .causalLink("A", "B",
-                            systems.courant.forrester.model.def.CausalLinkDef.Polarity.POSITIVE)
+                            systems.courant.shrewd.model.def.CausalLinkDef.Polarity.POSITIVE)
                     .causalLink("B", "C",
-                            systems.courant.forrester.model.def.CausalLinkDef.Polarity.NEGATIVE)
+                            systems.courant.shrewd.model.def.CausalLinkDef.Polarity.NEGATIVE)
                     .causalLink("C", "D",
-                            systems.courant.forrester.model.def.CausalLinkDef.Polarity.POSITIVE)
+                            systems.courant.shrewd.model.def.CausalLinkDef.Polarity.POSITIVE)
                     .causalLink("D", "A",
-                            systems.courant.forrester.model.def.CausalLinkDef.Polarity.NEGATIVE)
+                            systems.courant.shrewd.model.def.CausalLinkDef.Polarity.NEGATIVE)
                     .build();
 
             ViewDef view = AutoLayout.layout(def);
@@ -533,7 +533,7 @@ class AutoLayoutTest {
                     .cldVariable("Market Pressure")
                     .cldVariable("Demand")
                     .causalLink("Market Pressure", "Demand",
-                            systems.courant.forrester.model.def.CausalLinkDef.Polarity.POSITIVE)
+                            systems.courant.shrewd.model.def.CausalLinkDef.Polarity.POSITIVE)
                     .build();
 
             ViewDef view = AutoLayout.layout(def);

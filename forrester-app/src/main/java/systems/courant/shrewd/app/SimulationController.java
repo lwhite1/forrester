@@ -1,37 +1,37 @@
-package systems.courant.forrester.app;
+package systems.courant.shrewd.app;
 
-import systems.courant.forrester.app.canvas.AnalysisRunner;
-import systems.courant.forrester.app.canvas.DashboardPanel;
-import systems.courant.forrester.app.canvas.ModelCanvas;
-import systems.courant.forrester.app.canvas.ModelDefinitionFactory;
-import systems.courant.forrester.app.canvas.ModelEditListener;
-import systems.courant.forrester.app.canvas.ModelEditor;
-import systems.courant.forrester.app.canvas.MonteCarloDialog;
-import systems.courant.forrester.app.canvas.MultiParameterSweepDialog;
-import systems.courant.forrester.app.canvas.OptimizerDialog;
-import systems.courant.forrester.app.canvas.ParameterSweepDialog;
-import systems.courant.forrester.app.canvas.SensitivityPane;
-import systems.courant.forrester.app.canvas.SimulationRunner;
-import systems.courant.forrester.app.canvas.SimulationSettingsDialog;
-import systems.courant.forrester.app.canvas.StatusBar;
-import systems.courant.forrester.app.canvas.ValidationDialog;
-import systems.courant.forrester.measure.Quantity;
-import systems.courant.forrester.measure.TimeUnit;
-import systems.courant.forrester.model.def.ModelDefinition;
-import systems.courant.forrester.model.def.ModelValidator;
-import systems.courant.forrester.model.def.SimulationSettings;
-import systems.courant.forrester.model.def.StockDef;
-import systems.courant.forrester.model.graph.FeedbackAnalysis;
-import systems.courant.forrester.model.graph.LoopDominanceAnalysis;
-import systems.courant.forrester.sweep.MonteCarlo;
-import systems.courant.forrester.sweep.Objectives;
-import systems.courant.forrester.sweep.ObjectiveFunction;
-import systems.courant.forrester.sweep.OptimizationAlgorithm;
-import systems.courant.forrester.sweep.Optimizer;
-import systems.courant.forrester.sweep.MultiParameterSweep;
-import systems.courant.forrester.sweep.ParameterSweep;
-import systems.courant.forrester.sweep.SamplingMethod;
-import systems.courant.forrester.sweep.SensitivitySummary;
+import systems.courant.shrewd.app.canvas.AnalysisRunner;
+import systems.courant.shrewd.app.canvas.DashboardPanel;
+import systems.courant.shrewd.app.canvas.ModelCanvas;
+import systems.courant.shrewd.app.canvas.ModelDefinitionFactory;
+import systems.courant.shrewd.app.canvas.ModelEditListener;
+import systems.courant.shrewd.app.canvas.ModelEditor;
+import systems.courant.shrewd.app.canvas.MonteCarloDialog;
+import systems.courant.shrewd.app.canvas.MultiParameterSweepDialog;
+import systems.courant.shrewd.app.canvas.OptimizerDialog;
+import systems.courant.shrewd.app.canvas.ParameterSweepDialog;
+import systems.courant.shrewd.app.canvas.SensitivityPane;
+import systems.courant.shrewd.app.canvas.SimulationRunner;
+import systems.courant.shrewd.app.canvas.SimulationSettingsDialog;
+import systems.courant.shrewd.app.canvas.StatusBar;
+import systems.courant.shrewd.app.canvas.ValidationDialog;
+import systems.courant.shrewd.measure.Quantity;
+import systems.courant.shrewd.measure.TimeUnit;
+import systems.courant.shrewd.model.def.ModelDefinition;
+import systems.courant.shrewd.model.def.ModelValidator;
+import systems.courant.shrewd.model.def.SimulationSettings;
+import systems.courant.shrewd.model.def.StockDef;
+import systems.courant.shrewd.model.graph.FeedbackAnalysis;
+import systems.courant.shrewd.model.graph.LoopDominanceAnalysis;
+import systems.courant.shrewd.sweep.MonteCarlo;
+import systems.courant.shrewd.sweep.Objectives;
+import systems.courant.shrewd.sweep.ObjectiveFunction;
+import systems.courant.shrewd.sweep.OptimizationAlgorithm;
+import systems.courant.shrewd.sweep.Optimizer;
+import systems.courant.shrewd.sweep.MultiParameterSweep;
+import systems.courant.shrewd.sweep.ParameterSweep;
+import systems.courant.shrewd.sweep.SamplingMethod;
+import systems.courant.shrewd.sweep.SensitivitySummary;
 
 import org.apache.commons.math3.distribution.NormalDistribution;
 import org.apache.commons.math3.distribution.UniformRealDistribution;
@@ -100,7 +100,7 @@ final class SimulationController {
                 result -> {
                     dashboardPanel.showSimulationResult(result, paramSnapshot, def.flows(),
                             def.referenceDatasets());
-                    canvas.setSparklineData(new systems.courant.forrester.app.canvas.CanvasRenderer.SparklineData(
+                    canvas.setSparklineData(new systems.courant.shrewd.app.canvas.CanvasRenderer.SparklineData(
                             ModelCanvas.extractStockSeries(result), false));
                     computeLoopDominance(result);
                     switchToDashboard.run();
@@ -369,7 +369,7 @@ final class SimulationController {
     }
 
     private void showMultiSweepSensitivity(
-            systems.courant.forrester.sweep.MultiSweepResult multiResult) {
+            systems.courant.shrewd.sweep.MultiSweepResult multiResult) {
         List<String> trackable = collectTrackableNames(multiResult.getStockNames(),
                 multiResult.getVariableNames());
         if (trackable.isEmpty()) {
@@ -382,7 +382,7 @@ final class SimulationController {
     }
 
     private void showMonteCarloSensitivity(
-            systems.courant.forrester.sweep.MonteCarloResult mcResult) {
+            systems.courant.shrewd.sweep.MonteCarloResult mcResult) {
         List<String> trackable = collectTrackableNames(mcResult.getStockNames(),
                 mcResult.getVariableNames());
         if (trackable.isEmpty()) {

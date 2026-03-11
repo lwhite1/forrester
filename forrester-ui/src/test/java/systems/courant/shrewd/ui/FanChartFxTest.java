@@ -1,12 +1,12 @@
-package systems.courant.forrester.ui;
+package systems.courant.shrewd.ui;
 
-import systems.courant.forrester.Simulation;
-import systems.courant.forrester.model.Flow;
-import systems.courant.forrester.model.Model;
-import systems.courant.forrester.model.Stock;
-import systems.courant.forrester.measure.Quantity;
-import systems.courant.forrester.sweep.MonteCarloResult;
-import systems.courant.forrester.sweep.RunResult;
+import systems.courant.shrewd.Simulation;
+import systems.courant.shrewd.model.Flow;
+import systems.courant.shrewd.model.Model;
+import systems.courant.shrewd.model.Stock;
+import systems.courant.shrewd.measure.Quantity;
+import systems.courant.shrewd.sweep.MonteCarloResult;
+import systems.courant.shrewd.sweep.RunResult;
 
 import javafx.scene.canvas.Canvas;
 import javafx.scene.layout.StackPane;
@@ -25,8 +25,8 @@ import java.util.List;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static systems.courant.forrester.measure.Units.MINUTE;
-import static systems.courant.forrester.measure.Units.THING;
+import static systems.courant.shrewd.measure.Units.MINUTE;
+import static systems.courant.shrewd.measure.Units.THING;
 
 @DisplayName("FanChart (TestFX)")
 @ExtendWith(ApplicationExtension.class)

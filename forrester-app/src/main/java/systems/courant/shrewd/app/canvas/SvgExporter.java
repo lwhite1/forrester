@@ -1,12 +1,12 @@
-package systems.courant.forrester.app.canvas;
+package systems.courant.shrewd.app.canvas;
 
-import systems.courant.forrester.model.def.AuxDef;
-import systems.courant.forrester.model.def.CausalLinkDef;
-import systems.courant.forrester.model.def.ConnectorRoute;
-import systems.courant.forrester.model.def.ElementType;
-import systems.courant.forrester.model.def.FlowDef;
-import systems.courant.forrester.model.graph.FeedbackAnalysis;
-import systems.courant.forrester.model.graph.FeedbackAnalysis.CausalLoop;
+import systems.courant.shrewd.model.def.AuxDef;
+import systems.courant.shrewd.model.def.CausalLinkDef;
+import systems.courant.shrewd.model.def.ConnectorRoute;
+import systems.courant.shrewd.model.def.ElementType;
+import systems.courant.shrewd.model.def.FlowDef;
+import systems.courant.shrewd.model.graph.FeedbackAnalysis;
+import systems.courant.shrewd.model.graph.FeedbackAnalysis.CausalLoop;
 
 import javafx.scene.paint.Color;
 

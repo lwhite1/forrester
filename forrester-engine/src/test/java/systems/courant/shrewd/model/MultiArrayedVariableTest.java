@@ -1,10 +1,10 @@
-package systems.courant.forrester.model;
+package systems.courant.shrewd.model;
 
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
-import static systems.courant.forrester.measure.Units.PEOPLE;
+import static systems.courant.shrewd.measure.Units.PEOPLE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 

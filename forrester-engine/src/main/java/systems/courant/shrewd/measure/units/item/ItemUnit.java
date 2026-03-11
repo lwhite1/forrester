@@ -1,7 +1,7 @@
-package systems.courant.forrester.measure.units.item;
+package systems.courant.shrewd.measure.units.item;
 
-import systems.courant.forrester.measure.Dimension;
-import systems.courant.forrester.measure.Unit;
+import systems.courant.shrewd.measure.Dimension;
+import systems.courant.shrewd.measure.Unit;
 
 /**
  * A custom item unit with a user-defined name, for domain-specific countable quantities
@@ -23,7 +23,7 @@ import systems.courant.forrester.measure.Unit;
  *         () -> new Quantity(10, WIDGETS));
  * }</pre>
  *
- * <p>All ItemUnit instances belong to {@link systems.courant.forrester.measure.Dimension#ITEM}
+ * <p>All ItemUnit instances belong to {@link systems.courant.shrewd.measure.Dimension#ITEM}
  * and have a base-unit ratio of 1.0 (there is no conversion hierarchy among item units).
  *
  * @see ItemUnits

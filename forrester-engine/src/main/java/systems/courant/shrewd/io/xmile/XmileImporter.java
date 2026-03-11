@@ -1,15 +1,15 @@
-package systems.courant.forrester.io.xmile;
+package systems.courant.shrewd.io.xmile;
 
-import systems.courant.forrester.io.ImportResult;
-import systems.courant.forrester.io.ModelImporter;
-import systems.courant.forrester.model.def.AuxDef;
-import systems.courant.forrester.model.def.FlowDef;
-import systems.courant.forrester.model.def.LookupTableDef;
-import systems.courant.forrester.model.def.ModelDefinition;
-import systems.courant.forrester.model.def.ModelDefinitionBuilder;
-import systems.courant.forrester.model.def.ModuleInstanceDef;
-import systems.courant.forrester.model.def.StockDef;
-import systems.courant.forrester.model.def.ViewDef;
+import systems.courant.shrewd.io.ImportResult;
+import systems.courant.shrewd.io.ModelImporter;
+import systems.courant.shrewd.model.def.AuxDef;
+import systems.courant.shrewd.model.def.FlowDef;
+import systems.courant.shrewd.model.def.LookupTableDef;
+import systems.courant.shrewd.model.def.ModelDefinition;
+import systems.courant.shrewd.model.def.ModelDefinitionBuilder;
+import systems.courant.shrewd.model.def.ModuleInstanceDef;
+import systems.courant.shrewd.model.def.StockDef;
+import systems.courant.shrewd.model.def.ViewDef;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,7 +41,7 @@ import java.util.regex.Pattern;
 
 /**
  * Imports XMILE format model files into Forrester
- * {@link systems.courant.forrester.model.def.ModelDefinition}.
+ * {@link systems.courant.shrewd.model.def.ModelDefinition}.
  *
  * <p>Supports stocks, flows, auxiliaries, constants, lookup tables (standalone and
  * embedded {@code <gf>}), simulation settings ({@code <sim_specs>}), and view data.

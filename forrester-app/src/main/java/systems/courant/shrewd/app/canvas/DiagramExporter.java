@@ -1,8 +1,8 @@
-package systems.courant.forrester.app.canvas;
+package systems.courant.shrewd.app.canvas;
 
-import systems.courant.forrester.app.LastDirectoryStore;
-import systems.courant.forrester.model.def.ConnectorRoute;
-import systems.courant.forrester.model.graph.FeedbackAnalysis;
+import systems.courant.shrewd.app.LastDirectoryStore;
+import systems.courant.shrewd.model.def.ConnectorRoute;
+import systems.courant.shrewd.model.graph.FeedbackAnalysis;
 
 import javafx.embed.swing.SwingFXUtils;
 import javafx.scene.SnapshotParameters;

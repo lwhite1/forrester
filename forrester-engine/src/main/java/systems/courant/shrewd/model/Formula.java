@@ -1,4 +1,4 @@
-package systems.courant.forrester.model;
+package systems.courant.shrewd.model;
 
 /**
  * A function that computes the current value of a {@link Variable} each timestep.

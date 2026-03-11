@@ -1,7 +1,7 @@
-package systems.courant.forrester.app.canvas;
+package systems.courant.shrewd.app.canvas;
 
-import systems.courant.forrester.model.def.ElementType;
-import systems.courant.forrester.model.def.ModelDefinitionBuilder;
+import systems.courant.shrewd.model.def.ElementType;
+import systems.courant.shrewd.model.def.ModelDefinitionBuilder;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

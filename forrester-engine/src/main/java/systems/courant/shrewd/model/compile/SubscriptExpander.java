@@ -1,10 +1,10 @@
-package systems.courant.forrester.model.compile;
+package systems.courant.shrewd.model.compile;
 
-import systems.courant.forrester.model.def.AuxDef;
-import systems.courant.forrester.model.def.FlowDef;
-import systems.courant.forrester.model.def.ModelDefinition;
-import systems.courant.forrester.model.def.StockDef;
-import systems.courant.forrester.model.def.SubscriptDef;
+import systems.courant.shrewd.model.def.AuxDef;
+import systems.courant.shrewd.model.def.FlowDef;
+import systems.courant.shrewd.model.def.ModelDefinition;
+import systems.courant.shrewd.model.def.StockDef;
+import systems.courant.shrewd.model.def.SubscriptDef;
 
 import java.util.ArrayList;
 import java.util.HashMap;

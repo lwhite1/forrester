@@ -1,6 +1,6 @@
-package systems.courant.forrester.measure;
+package systems.courant.shrewd.measure;
 
-import systems.courant.forrester.measure.units.temperature.TemperatureUnits;
+import systems.courant.shrewd.measure.units.temperature.TemperatureUnits;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;

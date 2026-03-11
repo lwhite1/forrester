@@ -1,6 +1,6 @@
-package systems.courant.forrester.app.canvas;
+package systems.courant.shrewd.app.canvas;
 
-import systems.courant.forrester.app.LastDirectoryStore;
+import systems.courant.shrewd.app.LastDirectoryStore;
 
 import javafx.collections.FXCollections;
 import javafx.embed.swing.SwingFXUtils;

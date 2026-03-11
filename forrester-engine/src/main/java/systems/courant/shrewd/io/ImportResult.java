@@ -1,6 +1,6 @@
-package systems.courant.forrester.io;
+package systems.courant.shrewd.io;
 
-import systems.courant.forrester.model.def.ModelDefinition;
+import systems.courant.shrewd.model.def.ModelDefinition;
 
 import java.util.List;
 

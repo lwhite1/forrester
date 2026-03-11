@@ -1,19 +1,19 @@
-package systems.courant.forrester.model.compile;
+package systems.courant.shrewd.model.compile;
 
-import systems.courant.forrester.model.Delay3;
-import systems.courant.forrester.model.DelayFixed;
-import systems.courant.forrester.model.Forecast;
-import systems.courant.forrester.model.Formula;
-import systems.courant.forrester.model.LookupTable;
-import systems.courant.forrester.model.Npv;
-import systems.courant.forrester.model.Pulse;
-import systems.courant.forrester.model.Ramp;
-import systems.courant.forrester.model.Smooth;
-import systems.courant.forrester.model.Step;
-import systems.courant.forrester.model.Trend;
-import systems.courant.forrester.model.expr.BinaryOperator;
-import systems.courant.forrester.model.expr.Expr;
-import systems.courant.forrester.model.expr.ExprParser;
+import systems.courant.shrewd.model.Delay3;
+import systems.courant.shrewd.model.DelayFixed;
+import systems.courant.shrewd.model.Forecast;
+import systems.courant.shrewd.model.Formula;
+import systems.courant.shrewd.model.LookupTable;
+import systems.courant.shrewd.model.Npv;
+import systems.courant.shrewd.model.Pulse;
+import systems.courant.shrewd.model.Ramp;
+import systems.courant.shrewd.model.Smooth;
+import systems.courant.shrewd.model.Step;
+import systems.courant.shrewd.model.Trend;
+import systems.courant.shrewd.model.expr.BinaryOperator;
+import systems.courant.shrewd.model.expr.Expr;
+import systems.courant.shrewd.model.expr.ExprParser;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -669,7 +669,7 @@ public class ExprCompiler {
                     paramDescription + ": reference '" + ref.name()
                             + "' must be a constant", ref.name());
         }
-        if (expr instanceof Expr.UnaryOp un && un.operator() == systems.courant.forrester.model.expr.UnaryOperator.NEGATE) {
+        if (expr instanceof Expr.UnaryOp un && un.operator() == systems.courant.shrewd.model.expr.UnaryOperator.NEGATE) {
             return -evaluateConstant(un.operand(), paramDescription);
         }
         if (expr instanceof Expr.BinaryOp bin) {

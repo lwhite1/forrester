@@ -1,7 +1,7 @@
-package systems.courant.forrester.app.canvas;
+package systems.courant.shrewd.app.canvas;
 
-import systems.courant.forrester.model.compile.FunctionDoc;
-import systems.courant.forrester.model.compile.FunctionDocRegistry;
+import systems.courant.shrewd.model.compile.FunctionDoc;
+import systems.courant.shrewd.model.compile.FunctionDocRegistry;
 
 import javafx.geometry.Insets;
 import javafx.scene.Node;

@@ -1,4 +1,4 @@
-package systems.courant.forrester.measure;
+package systems.courant.shrewd.measure;
 
 import com.google.common.base.Preconditions;
 

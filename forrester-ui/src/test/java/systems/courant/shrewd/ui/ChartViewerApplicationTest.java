@@ -1,4 +1,4 @@
-package systems.courant.forrester.ui;
+package systems.courant.shrewd.ui;
 
 import javafx.scene.chart.XYChart;
 

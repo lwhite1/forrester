@@ -1,7 +1,7 @@
-package systems.courant.forrester.event;
+package systems.courant.shrewd.event;
 
-import systems.courant.forrester.measure.TimeUnit;
-import systems.courant.forrester.model.Model;
+import systems.courant.shrewd.measure.TimeUnit;
+import systems.courant.shrewd.model.Model;
 
 import java.time.LocalDateTime;
 

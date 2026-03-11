@@ -1,4 +1,4 @@
-package systems.courant.forrester.app.canvas;
+package systems.courant.shrewd.app.canvas;
 
 /**
  * Interface for element-type-specific property forms in the {@link PropertiesPanel}.

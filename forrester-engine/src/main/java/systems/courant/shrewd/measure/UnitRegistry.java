@@ -1,20 +1,20 @@
-package systems.courant.forrester.measure;
+package systems.courant.shrewd.measure;
 
-import systems.courant.forrester.measure.units.dimensionless.DimensionlessUnits;
-import systems.courant.forrester.measure.units.item.ItemUnits;
-import systems.courant.forrester.measure.units.length.LengthUnits;
-import systems.courant.forrester.measure.units.mass.MassUnits;
-import systems.courant.forrester.measure.units.money.MoneyUnits;
-import systems.courant.forrester.measure.units.temperature.TemperatureUnits;
-import systems.courant.forrester.measure.units.time.TimeUnits;
-import systems.courant.forrester.measure.units.volume.VolumeUnits;
+import systems.courant.shrewd.measure.units.dimensionless.DimensionlessUnits;
+import systems.courant.shrewd.measure.units.item.ItemUnits;
+import systems.courant.shrewd.measure.units.length.LengthUnits;
+import systems.courant.shrewd.measure.units.mass.MassUnits;
+import systems.courant.shrewd.measure.units.money.MoneyUnits;
+import systems.courant.shrewd.measure.units.temperature.TemperatureUnits;
+import systems.courant.shrewd.measure.units.time.TimeUnits;
+import systems.courant.shrewd.measure.units.volume.VolumeUnits;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
  * Maps unit name strings to {@link Unit} objects. Auto-registers all built-in unit enums.
- * Custom units (e.g. {@link systems.courant.forrester.measure.units.item.ItemUnit})
+ * Custom units (e.g. {@link systems.courant.shrewd.measure.units.item.ItemUnit})
  * can be registered dynamically.
  *
  * <p>Lookup is case-sensitive with a case-insensitive fallback.
@@ -58,7 +58,7 @@ public class UnitRegistry {
     /**
      * Resolves a unit by name. Case-sensitive first, then case-insensitive fallback.
      * If the name is not found, creates and registers a new
-     * {@link systems.courant.forrester.measure.units.item.ItemUnit} with that name.
+     * {@link systems.courant.shrewd.measure.units.item.ItemUnit} with that name.
      *
      * @param name the unit name
      * @return the resolved unit
@@ -74,8 +74,8 @@ public class UnitRegistry {
                     "Unit registry exceeded " + MAX_CUSTOM_UNITS
                             + " custom units — possible unbounded auto-creation");
         }
-        systems.courant.forrester.measure.units.item.ItemUnit custom =
-                new systems.courant.forrester.measure.units.item.ItemUnit(name);
+        systems.courant.shrewd.measure.units.item.ItemUnit custom =
+                new systems.courant.shrewd.measure.units.item.ItemUnit(name);
         register(custom);
         customUnitCount++;
         return custom;

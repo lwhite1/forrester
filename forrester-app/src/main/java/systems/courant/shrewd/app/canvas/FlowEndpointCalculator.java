@@ -1,6 +1,6 @@
-package systems.courant.forrester.app.canvas;
+package systems.courant.shrewd.app.canvas;
 
-import systems.courant.forrester.model.def.FlowDef;
+import systems.courant.shrewd.model.def.FlowDef;
 
 /**
  * Computes cloud positions for disconnected flow endpoints and hit-tests them.

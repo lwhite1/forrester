@@ -1,12 +1,12 @@
-package systems.courant.forrester.model.compile;
+package systems.courant.shrewd.model.compile;
 
-import systems.courant.forrester.measure.TimeUnit;
-import systems.courant.forrester.measure.UnitRegistry;
-import systems.courant.forrester.model.Flow;
-import systems.courant.forrester.model.LookupTable;
-import systems.courant.forrester.model.Stock;
-import systems.courant.forrester.model.Variable;
-import systems.courant.forrester.model.def.LookupTableDef;
+import systems.courant.shrewd.measure.TimeUnit;
+import systems.courant.shrewd.measure.UnitRegistry;
+import systems.courant.shrewd.model.Flow;
+import systems.courant.shrewd.model.LookupTable;
+import systems.courant.shrewd.model.Stock;
+import systems.courant.shrewd.model.Variable;
+import systems.courant.shrewd.model.def.LookupTableDef;
 
 import java.util.Collections;
 import java.util.LinkedHashMap;

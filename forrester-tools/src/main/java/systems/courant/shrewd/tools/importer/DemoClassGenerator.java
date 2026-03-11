@@ -1,19 +1,19 @@
-package systems.courant.forrester.tools.importer;
+package systems.courant.shrewd.tools.importer;
 
-import systems.courant.forrester.model.ModelMetadata;
-import systems.courant.forrester.model.def.AuxDef;
-import systems.courant.forrester.model.def.FlowDef;
-import systems.courant.forrester.model.def.LookupTableDef;
-import systems.courant.forrester.model.def.ModelDefinition;
-import systems.courant.forrester.model.def.ModuleInstanceDef;
-import systems.courant.forrester.model.def.SimulationSettings;
-import systems.courant.forrester.model.def.StockDef;
+import systems.courant.shrewd.model.ModelMetadata;
+import systems.courant.shrewd.model.def.AuxDef;
+import systems.courant.shrewd.model.def.FlowDef;
+import systems.courant.shrewd.model.def.LookupTableDef;
+import systems.courant.shrewd.model.def.ModelDefinition;
+import systems.courant.shrewd.model.def.ModuleInstanceDef;
+import systems.courant.shrewd.model.def.SimulationSettings;
+import systems.courant.shrewd.model.def.StockDef;
 
 import java.util.List;
 import java.util.Map;
 
-import static systems.courant.forrester.tools.importer.JavaSourceEscaper.doubleArrayLiteral;
-import static systems.courant.forrester.tools.importer.JavaSourceEscaper.escapeString;
+import static systems.courant.shrewd.tools.importer.JavaSourceEscaper.doubleArrayLiteral;
+import static systems.courant.shrewd.tools.importer.JavaSourceEscaper.escapeString;
 
 /**
  * Generates a Java demo class from a {@link ModelDefinition} and {@link ModelMetadata}.
@@ -75,28 +75,28 @@ public class DemoClassGenerator {
     }
 
     private void emitImports(StringBuilder sb, ModelDefinition definition) {
-        sb.append("import systems.courant.forrester.Simulation;\n");
-        sb.append("import systems.courant.forrester.model.ModelMetadata;\n");
-        sb.append("import systems.courant.forrester.model.compile.CompiledModel;\n");
-        sb.append("import systems.courant.forrester.model.compile.ModelCompiler;\n");
-        sb.append("import systems.courant.forrester.model.def.ModelDefinitionBuilder;\n");
+        sb.append("import systems.courant.shrewd.Simulation;\n");
+        sb.append("import systems.courant.shrewd.model.ModelMetadata;\n");
+        sb.append("import systems.courant.shrewd.model.compile.CompiledModel;\n");
+        sb.append("import systems.courant.shrewd.model.compile.ModelCompiler;\n");
+        sb.append("import systems.courant.shrewd.model.def.ModelDefinitionBuilder;\n");
 
         if (!definition.auxiliaries().isEmpty()) {
-            sb.append("import systems.courant.forrester.model.def.AuxDef;\n");
+            sb.append("import systems.courant.shrewd.model.def.AuxDef;\n");
         }
         if (!definition.flows().isEmpty()) {
-            sb.append("import systems.courant.forrester.model.def.FlowDef;\n");
+            sb.append("import systems.courant.shrewd.model.def.FlowDef;\n");
         }
         if (!definition.lookupTables().isEmpty()) {
-            sb.append("import systems.courant.forrester.model.def.LookupTableDef;\n");
+            sb.append("import systems.courant.shrewd.model.def.LookupTableDef;\n");
         }
         if (!definition.stocks().isEmpty()) {
-            sb.append("import systems.courant.forrester.model.def.StockDef;\n");
+            sb.append("import systems.courant.shrewd.model.def.StockDef;\n");
         }
         if (!definition.modules().isEmpty()) {
-            sb.append("import systems.courant.forrester.model.def.ModelDefinition;\n");
-            sb.append("import systems.courant.forrester.model.def.ModuleInstanceDef;\n");
-            sb.append("import systems.courant.forrester.model.def.SimulationSettings;\n");
+            sb.append("import systems.courant.shrewd.model.def.ModelDefinition;\n");
+            sb.append("import systems.courant.shrewd.model.def.ModuleInstanceDef;\n");
+            sb.append("import systems.courant.shrewd.model.def.SimulationSettings;\n");
             sb.append("\n");
             sb.append("import java.util.List;\n");
             sb.append("import java.util.Map;\n");

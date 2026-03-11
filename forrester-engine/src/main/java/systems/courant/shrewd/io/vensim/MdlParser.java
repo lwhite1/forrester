@@ -1,4 +1,4 @@
-package systems.courant.forrester.io.vensim;
+package systems.courant.shrewd.io.vensim;
 
 import java.util.ArrayList;
 import java.util.List;

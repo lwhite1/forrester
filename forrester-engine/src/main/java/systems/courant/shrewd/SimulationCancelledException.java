@@ -1,4 +1,4 @@
-package systems.courant.forrester;
+package systems.courant.shrewd;
 
 /**
  * Thrown when a simulation is cancelled via thread interruption.

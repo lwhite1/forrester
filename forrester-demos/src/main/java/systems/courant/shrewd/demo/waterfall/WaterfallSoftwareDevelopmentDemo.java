@@ -3,14 +3,14 @@
  * Licensed under CC-BY-SA-4.0. See LICENSE in this module for details.
  */
 
-package systems.courant.forrester.demo.waterfall;
+package systems.courant.shrewd.demo.waterfall;
 
-import systems.courant.forrester.Simulation;
-import systems.courant.forrester.measure.Quantity;
-import systems.courant.forrester.measure.units.time.TimeUnits;
-import systems.courant.forrester.model.Model;
-import systems.courant.forrester.model.ModelMetadata;
-import systems.courant.forrester.ui.StockLevelChartViewer;
+import systems.courant.shrewd.Simulation;
+import systems.courant.shrewd.measure.Quantity;
+import systems.courant.shrewd.measure.units.time.TimeUnits;
+import systems.courant.shrewd.model.Model;
+import systems.courant.shrewd.model.ModelMetadata;
+import systems.courant.shrewd.ui.StockLevelChartViewer;
 
 /**
  * Models a waterfall software project using the Abdel-Hamid &amp; Madnick (1991) structure.

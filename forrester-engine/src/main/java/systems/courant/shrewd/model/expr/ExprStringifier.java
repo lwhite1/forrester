@@ -1,4 +1,4 @@
-package systems.courant.forrester.model.expr;
+package systems.courant.shrewd.model.expr;
 
 /**
  * Converts an {@link Expr} AST back into a readable infix string with minimal parentheses.

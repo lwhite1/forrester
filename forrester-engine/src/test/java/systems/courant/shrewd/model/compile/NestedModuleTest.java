@@ -1,12 +1,12 @@
-package systems.courant.forrester.model.compile;
+package systems.courant.shrewd.model.compile;
 
-import systems.courant.forrester.Simulation;
-import systems.courant.forrester.model.Module;
-import systems.courant.forrester.model.Stock;
-import systems.courant.forrester.model.def.ModelDefinition;
-import systems.courant.forrester.model.def.ModelDefinitionBuilder;
-import systems.courant.forrester.model.def.ModuleInterface;
-import systems.courant.forrester.model.def.PortDef;
+import systems.courant.shrewd.Simulation;
+import systems.courant.shrewd.model.Module;
+import systems.courant.shrewd.model.Stock;
+import systems.courant.shrewd.model.def.ModelDefinition;
+import systems.courant.shrewd.model.def.ModelDefinitionBuilder;
+import systems.courant.shrewd.model.def.ModuleInterface;
+import systems.courant.shrewd.model.def.PortDef;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

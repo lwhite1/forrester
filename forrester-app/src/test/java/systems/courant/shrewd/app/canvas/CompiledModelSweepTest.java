@@ -1,15 +1,15 @@
-package systems.courant.forrester.app.canvas;
+package systems.courant.shrewd.app.canvas;
 
-import systems.courant.forrester.model.compile.CompiledModel;
-import systems.courant.forrester.model.compile.ModelCompiler;
-import systems.courant.forrester.model.def.ModelDefinition;
-import systems.courant.forrester.model.def.ModelDefinitionBuilder;
-import systems.courant.forrester.model.def.SimulationSettings;
-import systems.courant.forrester.sweep.MultiParameterSweep;
-import systems.courant.forrester.sweep.MultiSweepResult;
-import systems.courant.forrester.sweep.ParameterSweep;
-import systems.courant.forrester.sweep.RunResult;
-import systems.courant.forrester.sweep.SweepResult;
+import systems.courant.shrewd.model.compile.CompiledModel;
+import systems.courant.shrewd.model.compile.ModelCompiler;
+import systems.courant.shrewd.model.def.ModelDefinition;
+import systems.courant.shrewd.model.def.ModelDefinitionBuilder;
+import systems.courant.shrewd.model.def.SimulationSettings;
+import systems.courant.shrewd.sweep.MultiParameterSweep;
+import systems.courant.shrewd.sweep.MultiSweepResult;
+import systems.courant.shrewd.sweep.ParameterSweep;
+import systems.courant.shrewd.sweep.RunResult;
+import systems.courant.shrewd.sweep.SweepResult;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

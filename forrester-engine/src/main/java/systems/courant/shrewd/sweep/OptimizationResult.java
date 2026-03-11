@@ -1,4 +1,4 @@
-package systems.courant.forrester.sweep;
+package systems.courant.shrewd.sweep;
 
 import java.util.Collections;
 import java.util.LinkedHashMap;

@@ -1,6 +1,6 @@
-package systems.courant.forrester.app.canvas;
+package systems.courant.shrewd.app.canvas;
 
-import systems.courant.forrester.model.def.LookupTableDef;
+import systems.courant.shrewd.model.def.LookupTableDef;
 
 import org.apache.commons.math3.analysis.interpolation.SplineInterpolator;
 

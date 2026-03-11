@@ -136,7 +136,7 @@
                 <artifactId>javafx-maven-plugin</artifactId>
                 <version>0.0.8</version>
                 <configuration>
-                    <mainClass>systems.courant.forrester.app.Launcher</mainClass>
+                    <mainClass>systems.courant.shrewd.app.Launcher</mainClass>
                 </configuration>
             </plugin>
         </plugins>
@@ -207,7 +207,7 @@
                             <vendor>Courant Systems</vendor>
                             <input>${project.build.directory}/jpackage-input</input>
                             <mainJar>${project.build.finalName}.jar</mainJar>
-                            <mainClass>systems.courant.forrester.app.Launcher</mainClass>
+                            <mainClass>systems.courant.shrewd.app.Launcher</mainClass>
                             <destination>${project.build.directory}/dist</destination>
                             <javaOptions>
                                 <option>-Xmx512m</option>

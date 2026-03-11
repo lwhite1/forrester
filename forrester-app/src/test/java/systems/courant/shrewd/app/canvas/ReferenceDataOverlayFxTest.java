@@ -1,6 +1,6 @@
-package systems.courant.forrester.app.canvas;
+package systems.courant.shrewd.app.canvas;
 
-import systems.courant.forrester.model.def.ReferenceDataset;
+import systems.courant.shrewd.model.def.ReferenceDataset;
 
 import javafx.application.Platform;
 import javafx.scene.Scene;

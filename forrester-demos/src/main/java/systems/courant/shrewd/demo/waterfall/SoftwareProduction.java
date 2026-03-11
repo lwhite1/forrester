@@ -3,18 +3,18 @@
  * Licensed under CC-BY-SA-4.0. See LICENSE in this module for details.
  */
 
-package systems.courant.forrester.demo.waterfall;
+package systems.courant.shrewd.demo.waterfall;
 
-import systems.courant.forrester.measure.Quantity;
-import systems.courant.forrester.measure.Unit;
-import systems.courant.forrester.measure.units.dimensionless.DimensionlessUnits;
-import systems.courant.forrester.measure.units.item.ItemUnit;
-import systems.courant.forrester.model.Flow;
-import systems.courant.forrester.model.Module;
-import systems.courant.forrester.model.Stock;
-import systems.courant.forrester.model.Variable;
+import systems.courant.shrewd.measure.Quantity;
+import systems.courant.shrewd.measure.Unit;
+import systems.courant.shrewd.measure.units.dimensionless.DimensionlessUnits;
+import systems.courant.shrewd.measure.units.item.ItemUnit;
+import systems.courant.shrewd.model.Flow;
+import systems.courant.shrewd.model.Module;
+import systems.courant.shrewd.model.Stock;
+import systems.courant.shrewd.model.Variable;
 
-import static systems.courant.forrester.measure.Units.DAY;
+import static systems.courant.shrewd.measure.Units.DAY;
 
 /**
  * Software production subsystem implementing the Abdel-Hamid &amp; Madnick (1991) rework cycle.

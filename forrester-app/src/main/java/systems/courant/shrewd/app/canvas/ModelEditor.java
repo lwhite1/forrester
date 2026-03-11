@@ -1,21 +1,21 @@
-package systems.courant.forrester.app.canvas;
+package systems.courant.shrewd.app.canvas;
 
-import systems.courant.forrester.model.ModelMetadata;
-import systems.courant.forrester.model.def.AuxDef;
-import systems.courant.forrester.model.def.CausalLinkDef;
-import systems.courant.forrester.model.def.CldVariableDef;
-import systems.courant.forrester.model.def.ConnectorRoute;
-import systems.courant.forrester.model.def.ElementType;
-import systems.courant.forrester.model.def.FlowDef;
-import systems.courant.forrester.model.def.LookupTableDef;
-import systems.courant.forrester.model.def.ModelDefinition;
-import systems.courant.forrester.model.def.ModuleInstanceDef;
-import systems.courant.forrester.model.def.ModuleInterface;
-import systems.courant.forrester.model.def.ReferenceDataset;
-import systems.courant.forrester.model.def.SimulationSettings;
-import systems.courant.forrester.model.def.StockDef;
-import systems.courant.forrester.model.def.ViewDef;
-import systems.courant.forrester.model.graph.ConnectorGenerator;
+import systems.courant.shrewd.model.ModelMetadata;
+import systems.courant.shrewd.model.def.AuxDef;
+import systems.courant.shrewd.model.def.CausalLinkDef;
+import systems.courant.shrewd.model.def.CldVariableDef;
+import systems.courant.shrewd.model.def.ConnectorRoute;
+import systems.courant.shrewd.model.def.ElementType;
+import systems.courant.shrewd.model.def.FlowDef;
+import systems.courant.shrewd.model.def.LookupTableDef;
+import systems.courant.shrewd.model.def.ModelDefinition;
+import systems.courant.shrewd.model.def.ModuleInstanceDef;
+import systems.courant.shrewd.model.def.ModuleInterface;
+import systems.courant.shrewd.model.def.ReferenceDataset;
+import systems.courant.shrewd.model.def.SimulationSettings;
+import systems.courant.shrewd.model.def.StockDef;
+import systems.courant.shrewd.model.def.ViewDef;
+import systems.courant.shrewd.model.graph.ConnectorGenerator;
 
 import javafx.application.Platform;
 
@@ -34,9 +34,9 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.UnaryOperator;
 
-import static systems.courant.forrester.app.canvas.ElementNameValidator.parseIdSuffix;
-import static systems.courant.forrester.app.canvas.ElementNameValidator.resolveUniqueName;
-import static systems.courant.forrester.app.canvas.EquationReferenceManager.replaceToken;
+import static systems.courant.shrewd.app.canvas.ElementNameValidator.parseIdSuffix;
+import static systems.courant.shrewd.app.canvas.ElementNameValidator.resolveUniqueName;
+import static systems.courant.shrewd.app.canvas.EquationReferenceManager.replaceToken;
 
 /**
  * Mutable model editing layer that sits between the UI and the engine's immutable

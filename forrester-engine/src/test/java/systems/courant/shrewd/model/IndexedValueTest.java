@@ -1,6 +1,6 @@
-package systems.courant.forrester.model;
+package systems.courant.shrewd.model;
 
-import systems.courant.forrester.measure.units.item.ItemUnits;
+import systems.courant.shrewd.measure.units.item.ItemUnits;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 

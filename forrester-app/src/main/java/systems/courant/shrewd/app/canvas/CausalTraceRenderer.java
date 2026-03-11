@@ -1,8 +1,8 @@
-package systems.courant.forrester.app.canvas;
+package systems.courant.shrewd.app.canvas;
 
-import systems.courant.forrester.model.def.ElementType;
-import systems.courant.forrester.model.graph.CausalTraceAnalysis;
-import systems.courant.forrester.model.graph.CausalTraceAnalysis.TraceDirection;
+import systems.courant.shrewd.model.def.ElementType;
+import systems.courant.shrewd.model.graph.CausalTraceAnalysis;
+import systems.courant.shrewd.model.graph.CausalTraceAnalysis.TraceDirection;
 
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;

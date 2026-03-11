@@ -1,18 +1,18 @@
-package systems.courant.forrester.model.compile;
+package systems.courant.shrewd.model.compile;
 
-import systems.courant.forrester.Simulation;
-import systems.courant.forrester.measure.Quantity;
-import systems.courant.forrester.model.Model;
-import systems.courant.forrester.model.Stock;
-import systems.courant.forrester.model.Variable;
-import systems.courant.forrester.model.def.ModelDefinition;
-import systems.courant.forrester.model.def.ModelDefinitionBuilder;
+import systems.courant.shrewd.Simulation;
+import systems.courant.shrewd.measure.Quantity;
+import systems.courant.shrewd.model.Model;
+import systems.courant.shrewd.model.Stock;
+import systems.courant.shrewd.model.Variable;
+import systems.courant.shrewd.model.def.ModelDefinition;
+import systems.courant.shrewd.model.def.ModelDefinitionBuilder;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import static systems.courant.forrester.measure.Units.DAY;
-import static systems.courant.forrester.measure.Units.PEOPLE;
+import static systems.courant.shrewd.measure.Units.DAY;
+import static systems.courant.shrewd.measure.Units.PEOPLE;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.Assertions.within;
@@ -109,14 +109,14 @@ class ModelCompilerTest {
             Stock handI = new Stock("Infectious", 10, PEOPLE);
             Stock handR = new Stock("Recovered", 0, PEOPLE);
 
-            systems.courant.forrester.model.Flow infectionRate =
-                    systems.courant.forrester.model.Flow.create("Infection", DAY, () -> {
+            systems.courant.shrewd.model.Flow infectionRate =
+                    systems.courant.shrewd.model.Flow.create("Infection", DAY, () -> {
                         double total = handS.getValue() + handI.getValue() + handR.getValue();
                         double rate = 8.0 * handI.getValue() / total * 0.10 * handS.getValue();
                         return new Quantity(rate, PEOPLE);
                     });
-            systems.courant.forrester.model.Flow recoveryRate =
-                    systems.courant.forrester.model.Flow.create("Recovery", DAY, () ->
+            systems.courant.shrewd.model.Flow recoveryRate =
+                    systems.courant.shrewd.model.Flow.create("Recovery", DAY, () ->
                             new Quantity(handI.getValue() * 0.20, PEOPLE));
 
             handS.addOutflow(infectionRate);
@@ -380,7 +380,7 @@ class ModelCompilerTest {
 
             assertThatThrownBy(() -> compiler.compile(def))
                     .isInstanceOfAny(CompilationException.class,
-                            systems.courant.forrester.model.expr.ParseException.class);
+                            systems.courant.shrewd.model.expr.ParseException.class);
         }
     }
 
@@ -504,7 +504,7 @@ class ModelCompilerTest {
             sim1.execute();
 
             // Flow should have recorded history from the first run
-            systems.courant.forrester.model.Flow flow = compiled.getModel().getFlows().stream()
+            systems.courant.shrewd.model.Flow flow = compiled.getModel().getFlows().stream()
                     .filter(f -> f.getName().equals("F"))
                     .findFirst()
                     .orElseThrow();
@@ -657,7 +657,7 @@ class ModelCompilerTest {
             assertThat(pop.getValue()).isGreaterThan(100);
 
             // Verify the flow has the correct material unit
-            systems.courant.forrester.model.Flow flow = compiled.getModel().getFlows()
+            systems.courant.shrewd.model.Flow flow = compiled.getModel().getFlows()
                     .stream().filter(f -> f.getName().equals("Births")).findFirst().orElseThrow();
             assertThat(flow.getMaterialUnit()).isNotNull();
             assertThat(flow.getMaterialUnit().getName()).isEqualTo("Person");
@@ -675,7 +675,7 @@ class ModelCompilerTest {
             CompiledModel compiled = compiler.compile(def);
 
             // Flow should have Liter as material unit (inferred from stock)
-            systems.courant.forrester.model.Flow flow = compiled.getModel().getFlows()
+            systems.courant.shrewd.model.Flow flow = compiled.getModel().getFlows()
                     .stream().filter(f -> f.getName().equals("Drain")).findFirst().orElseThrow();
             assertThat(flow.getMaterialUnit()).isNotNull();
             assertThat(flow.getMaterialUnit().getName()).isEqualTo("Liter");

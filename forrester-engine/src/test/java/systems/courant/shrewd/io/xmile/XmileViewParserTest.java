@@ -1,9 +1,9 @@
-package systems.courant.forrester.io.xmile;
+package systems.courant.shrewd.io.xmile;
 
-import systems.courant.forrester.model.def.ConnectorRoute;
-import systems.courant.forrester.model.def.ElementPlacement;
-import systems.courant.forrester.model.def.ElementType;
-import systems.courant.forrester.model.def.ViewDef;
+import systems.courant.shrewd.model.def.ConnectorRoute;
+import systems.courant.shrewd.model.def.ElementPlacement;
+import systems.courant.shrewd.model.def.ElementType;
+import systems.courant.shrewd.model.def.ViewDef;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shrewd | System Dynamics for Architects</title>
+    <style>
+        :root {
+            --vellum: #fdfcf8;
+            --charcoal: #111111;
+            --sidenote-gray: #666666;
+            --accent-oxblood: #800000; /* Subtle architectural accent */
+            --contrast-line: #111111;
+        }
+        body {
+            background-color: var(--vellum);
+            color: var(--charcoal);
+            font-family: "et-book", "Palatino", "Palatino Linotype", "Book Antiqua", serif;
+            line-height: 1.6;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+        }
+        article {
+            width: 90%;
+            max-width: 1200px;
+            padding: 5rem 2rem;
+            display: grid;
+            grid-template-columns: 2.2fr 1fr;
+            gap: 4rem;
+        }
+        header {
+            grid-column: 1 / span 2;
+            margin-bottom: 4rem;
+            border-bottom: 2px solid var(--contrast-line);
+            padding-bottom: 1rem;
+        }
+        h1 {
+            font-weight: 400;
+            font-variant: small-caps;
+            letter-spacing: 0.2em;
+            font-size: 3.8rem;
+            margin: 0;
+            line-height: 1;
+        }
+        .subtitle {
+            font-style: italic;
+            font-size: 1.3rem;
+            color: var(--charcoal);
+            margin-top: 0.5rem;
+        }
+        main { grid-column: 1; }
+        p { font-size: 1.15rem; margin-bottom: 1.8rem; text-align: justify; }
+        .newthought { font-variant: small-caps; letter-spacing: 0.05em; color: var(--charcoal); font-weight: bold; }
+
+        h3 {
+            font-weight: 400;
+            font-variant: small-caps;
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 5px;
+            margin-top: 4rem;
+            letter-spacing: 0.15em;
+            color: var(--accent-oxblood);
+        }
+
+        aside {
+            grid-column: 2;
+            font-size: 0.9rem;
+            color: var(--sidenote-gray);
+            border-left: 1px solid #efefef;
+            padding-left: 2rem;
+        }
+        .margin-box { margin-bottom: 4rem; }
+        .margin-label {
+            font-variant: small-caps;
+            color: var(--charcoal);
+            display: block;
+            margin-bottom: 0.5rem;
+            letter-spacing: 0.1em;
+            font-weight: bold;
+        }
+
+        /* Clean Typographic Links - No Buttons */
+        .action-link {
+            display: block;
+            margin-bottom: 10px;
+            color: var(--charcoal);
+            text-decoration: underline;
+            font-variant: small-caps;
+            letter-spacing: 0.05em;
+            font-size: 1.1rem;
+        }
+        .action-link:hover { color: var(--accent-oxblood); }
+
+        table { width: 100%; border-collapse: collapse; margin: 3rem 0; font-size: 0.9rem; }
+        th { text-align: left; border-bottom: 1px solid var(--charcoal); padding: 12px 8px; font-variant: small-caps; }
+        td { padding: 12px 8px; border-bottom: 1px solid #eee; }
+        .highlight { background-color: #f4f1e9; font-weight: bold; }
+
+        pre { background: #f4f1e9; padding: 1.5rem; overflow-x: auto; font-size: 0.85rem; border: 1px solid #e0ddd5; border-left: 3px solid var(--charcoal); }
+        code { font-family: "Courier New", Courier, monospace; }
+
+        @media (max-width: 850px) {
+            article { grid-template-columns: 1fr; }
+            aside { grid-column: 1; border-left: none; border-top: 1px solid #eee; padding: 2rem 0; }
+        }
+    </style>
+</head>
+<body>
+
+<article>
+    <header>
+        <h1>Shrewd</h1>
+        <p class="subtitle">High-Leverage System Dynamics &mdash; A Courant Systems Engine</p>
+    </header>
+
+    <main>
+        <p><span class="newthought">Complexity is a choice.</span> Shrewd is an open-source modeling environment designed for those who need to move past "gut feelings" and uncover the mathematical skeleton of a problem. It provides a sharp, unvarnished view of how feedback loops drive behavior.</p>
+
+        <p>While legacy tools focus on the "boxes," Shrewd focuses on the <em>dynamics</em>. It is built for the architect who knows that the most dangerous part of a system is the part they didn't model.</p>
+
+        <h3>Strategic Modeling</h3>
+        <p><strong>Immediate Feedback:</strong> Don't wait for a "run" button. Shrewd uses a real-time solver engine. As you adjust a stock or refine an inflow, the behavior curves update instantly. It turns modeling into an act of conversation with the system.</p>
+
+        <p><strong>Modular Architecture:</strong> Complex models shouldn't be monoliths. Shrewd allows you to encapsulate logic into distinct modules with strictly defined ports. This isn't just "cleaner" modeling—it's professional-grade system design that allows for rapid scaling and collaborative building.</p>
+
+        <h3>Analytical Depth</h3>
+        <p>Most decisions fail at the thresholds. Shrewd’s built-in <strong>Monte Carlo engine</strong> and <strong>automated parameter sweeps</strong> allow you to stress-test your assumptions across thousands of futures. You aren't looking for a single forecast; you are looking for the robust path that survives volatility.</p>
+
+        <p><strong>Optimization as Calibration:</strong> Shrewd includes a proprietary optimization layer that can "back-fit" your model to historical data, identifying the hidden parameter values that explain why the system behaved the way it did. It turns mystery into a solved equation.</p>
+
+        <h3>The Competitive Set</h3>
+        <table>
+            <thead>
+            <tr>
+                <th>Capability</th>
+                <th>Standard Tools</th>
+                <th class="highlight">Shrewd</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr><td>Cost</td><td>$249+ / yr</td><td class="highlight">Free / Open</td></tr>
+            <tr><td>UI Latency</td><td>High</td><td class="highlight">Zero</td></tr>
+            <tr><td>Subscripting</td><td>Limited</td><td class="highlight">Multi-Dimensional</td></tr>
+            <tr><td>Monte Carlo</td><td>Professional Tier Only</td><td class="highlight">Standard</td></tr>
+            <tr><td>Optimization</td><td>Elite Tier Only</td><td class="highlight">Standard</td></tr>
+            <tr><td>API Integration</td><td>Proprietary</td><td class="highlight">Headless Java SDK</td></tr>
+            </tbody>
+        </table>
+
+        <h3>Deployment</h3>
+        <pre><code># The Shrewd Build Pipeline
+git clone https://github.com/lwhite1/shrewd.git
+cd shrewd
+mvn clean package
+java -jar shrewd-app/target/shrewd-app.jar</code></pre>
+        <p style="font-size: 0.9rem; font-style: italic; color: var(--sidenote-gray);">Optimized for Java 21+ environments.</p>
+    </main>
+
+    <aside>
+        <div class="margin-box">
+            <span class="margin-label">Acquisition</span>
+            <p>No registration. No cloud dependency. Pure architectural freedom.</p>
+            <a href="#" class="action-link">Get for Windows</a>
+            <a href="#" class="action-link">Get for macOS</a>
+            <a href="#" class="action-link">Get for Linux</a>
+        </div>
+
+        <div class="margin-box">
+            <span class="margin-label">Causal Intelligence</span>
+            <p>Shrewd automatically maps reinforcing and balancing loops as you draw, identifying "leverage points" where small interventions create massive shifts.</p>
+        </div>
+
+        <div class="margin-box">
+            <span class="margin-label">Migration</span>
+            <p>Supports full <code>.mdl</code> and XMILE import. Move your legacy models into a modern, responsive environment without losing a single equation.</p>
+        </div>
+
+        <div

@@ -1,9 +1,9 @@
-package systems.courant.forrester.app.canvas;
+package systems.courant.shrewd.app.canvas;
 
-import systems.courant.forrester.app.LastDirectoryStore;
-import systems.courant.forrester.io.ReferenceDataCsvReader;
-import systems.courant.forrester.model.def.FlowDef;
-import systems.courant.forrester.model.def.ReferenceDataset;
+import systems.courant.shrewd.app.LastDirectoryStore;
+import systems.courant.shrewd.io.ReferenceDataCsvReader;
+import systems.courant.shrewd.model.def.FlowDef;
+import systems.courant.shrewd.model.def.ReferenceDataset;
 
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;

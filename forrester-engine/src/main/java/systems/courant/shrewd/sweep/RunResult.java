@@ -1,10 +1,10 @@
-package systems.courant.forrester.sweep;
+package systems.courant.shrewd.sweep;
 
-import systems.courant.forrester.event.EventHandler;
-import systems.courant.forrester.event.SimulationEndEvent;
-import systems.courant.forrester.event.SimulationStartEvent;
-import systems.courant.forrester.event.TimeStepEvent;
-import systems.courant.forrester.model.Model;
+import systems.courant.shrewd.event.EventHandler;
+import systems.courant.shrewd.event.SimulationEndEvent;
+import systems.courant.shrewd.event.SimulationStartEvent;
+import systems.courant.shrewd.event.TimeStepEvent;
+import systems.courant.shrewd.model.Model;
 
 import com.carrotsearch.hppc.IntArrayList;
 

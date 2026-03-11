@@ -1,14 +1,14 @@
-package systems.courant.forrester.measure.units;
+package systems.courant.shrewd.measure.units;
 
-import systems.courant.forrester.measure.Quantity;
-import systems.courant.forrester.measure.units.length.LengthUnits;
-import systems.courant.forrester.measure.units.length.Lengths;
-import systems.courant.forrester.measure.units.mass.MassUnits;
-import systems.courant.forrester.measure.units.mass.Masses;
-import systems.courant.forrester.measure.units.time.TimeUnits;
-import systems.courant.forrester.measure.units.time.Times;
-import systems.courant.forrester.measure.units.volume.VolumeUnits;
-import systems.courant.forrester.measure.units.volume.Volumes;
+import systems.courant.shrewd.measure.Quantity;
+import systems.courant.shrewd.measure.units.length.LengthUnits;
+import systems.courant.shrewd.measure.units.length.Lengths;
+import systems.courant.shrewd.measure.units.mass.MassUnits;
+import systems.courant.shrewd.measure.units.mass.Masses;
+import systems.courant.shrewd.measure.units.time.TimeUnits;
+import systems.courant.shrewd.measure.units.time.Times;
+import systems.courant.shrewd.measure.units.volume.VolumeUnits;
+import systems.courant.shrewd.measure.units.volume.Volumes;
 
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;

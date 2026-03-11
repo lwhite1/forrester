@@ -1,12 +1,12 @@
 /**
  * JavaFX chart viewers for visualizing simulation output.
  *
- * <p>Two {@link systems.courant.forrester.event.EventHandler} implementations render
+ * <p>Two {@link systems.courant.shrewd.event.EventHandler} implementations render
  * live time-series charts during simulation execution:
  * <ul>
- *   <li>{@link systems.courant.forrester.ui.StockLevelChartViewer} — plots all stock
+ *   <li>{@link systems.courant.shrewd.ui.StockLevelChartViewer} — plots all stock
  *       values over time</li>
- *   <li>{@link systems.courant.forrester.ui.FlowChartViewer} — plots all flow rates
+ *   <li>{@link systems.courant.shrewd.ui.FlowChartViewer} — plots all flow rates
  *       over time</li>
  * </ul>
  *
@@ -18,6 +18,6 @@
  * }</pre>
  *
  * <p>These viewers require a JavaFX runtime on the classpath. For headless environments
- * (CI, servers), use {@link systems.courant.forrester.io.CsvSubscriber} instead.
+ * (CI, servers), use {@link systems.courant.shrewd.io.CsvSubscriber} instead.
  */
-package systems.courant.forrester.ui;
+package systems.courant.shrewd.ui;

@@ -1,7 +1,7 @@
-package systems.courant.forrester.measure.units.length;
+package systems.courant.shrewd.measure.units.length;
 
-import systems.courant.forrester.measure.Quantity;
-import systems.courant.forrester.measure.Unit;
+import systems.courant.shrewd.measure.Quantity;
+import systems.courant.shrewd.measure.Unit;
 
 /**
  * Factory methods for creating length {@link Quantity} instances in various length units.

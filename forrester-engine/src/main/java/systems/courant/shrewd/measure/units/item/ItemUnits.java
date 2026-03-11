@@ -1,7 +1,7 @@
-package systems.courant.forrester.measure.units.item;
+package systems.courant.shrewd.measure.units.item;
 
-import systems.courant.forrester.measure.Dimension;
-import systems.courant.forrester.measure.Unit;
+import systems.courant.shrewd.measure.Dimension;
+import systems.courant.shrewd.measure.Unit;
 
 /**
  * Built-in units for countable items such as generic things and people.

@@ -1,8 +1,8 @@
-package systems.courant.forrester.measure.dimension;
+package systems.courant.shrewd.measure.dimension;
 
-import systems.courant.forrester.measure.Dimension;
-import systems.courant.forrester.measure.Unit;
-import systems.courant.forrester.measure.units.volume.VolumeUnits;
+import systems.courant.shrewd.measure.Dimension;
+import systems.courant.shrewd.measure.Unit;
+import systems.courant.shrewd.measure.units.volume.VolumeUnits;
 
 /**
  * The volume dimension. Base unit is liters.

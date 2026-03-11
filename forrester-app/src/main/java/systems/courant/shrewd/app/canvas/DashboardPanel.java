@@ -1,12 +1,12 @@
-package systems.courant.forrester.app.canvas;
+package systems.courant.shrewd.app.canvas;
 
-import systems.courant.forrester.model.def.FlowDef;
-import systems.courant.forrester.model.def.ReferenceDataset;
-import systems.courant.forrester.model.graph.LoopDominanceAnalysis;
-import systems.courant.forrester.sweep.MonteCarloResult;
-import systems.courant.forrester.sweep.MultiSweepResult;
-import systems.courant.forrester.sweep.OptimizationResult;
-import systems.courant.forrester.sweep.SweepResult;
+import systems.courant.shrewd.model.def.FlowDef;
+import systems.courant.shrewd.model.def.ReferenceDataset;
+import systems.courant.shrewd.model.graph.LoopDominanceAnalysis;
+import systems.courant.shrewd.sweep.MonteCarloResult;
+import systems.courant.shrewd.sweep.MultiSweepResult;
+import systems.courant.shrewd.sweep.OptimizationResult;
+import systems.courant.shrewd.sweep.SweepResult;
 
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;

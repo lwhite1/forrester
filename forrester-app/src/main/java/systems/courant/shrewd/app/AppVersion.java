@@ -1,4 +1,4 @@
-package systems.courant.forrester.app;
+package systems.courant.shrewd.app;
 
 import java.io.IOException;
 import java.io.InputStream;

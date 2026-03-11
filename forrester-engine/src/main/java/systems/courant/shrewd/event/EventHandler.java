@@ -1,4 +1,4 @@
-package systems.courant.forrester.event;
+package systems.courant.shrewd.event;
 
 /**
  * Listener interface for receiving simulation lifecycle events.

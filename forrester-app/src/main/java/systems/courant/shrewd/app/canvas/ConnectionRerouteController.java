@@ -1,6 +1,6 @@
-package systems.courant.forrester.app.canvas;
+package systems.courant.shrewd.app.canvas;
 
-import systems.courant.forrester.model.def.ConnectorRoute;
+import systems.courant.shrewd.model.def.ConnectorRoute;
 
 import java.util.List;
 

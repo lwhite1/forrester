@@ -1,8 +1,8 @@
-package systems.courant.forrester.measure;
+package systems.courant.shrewd.measure;
 
-import systems.courant.forrester.measure.units.item.ItemUnits;
-import systems.courant.forrester.measure.units.mass.MassUnits;
-import systems.courant.forrester.measure.units.time.TimeUnits;
+import systems.courant.shrewd.measure.units.item.ItemUnits;
+import systems.courant.shrewd.measure.units.mass.MassUnits;
+import systems.courant.shrewd.measure.units.time.TimeUnits;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -52,7 +52,7 @@ class CompositeUnitTest {
         @Test
         void shouldReturnDimensionlessForDimensionlessUnit() {
             CompositeUnit unit = CompositeUnit.of(
-                    systems.courant.forrester.measure.units.dimensionless.DimensionlessUnits.DIMENSIONLESS);
+                    systems.courant.shrewd.measure.units.dimensionless.DimensionlessUnits.DIMENSIONLESS);
             assertThat(unit.isDimensionless()).isTrue();
         }
     }
