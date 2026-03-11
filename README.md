@@ -25,7 +25,7 @@ The engine supports creating training simulations, games, scenario testing, and 
 
 ## Screenshots
 
-<!-- TODO: Add screenshots of the visual editor, simulation results, and causal loop diagrams -->
+![Shrewd visual editor showing an aging population model with simulation results](userdocs/Shrewd-screenshot.png)
 
 ## Installation
 
