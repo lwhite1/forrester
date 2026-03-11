@@ -63,6 +63,30 @@ class XmileExprTranslatorTest {
         }
 
         @Test
+        void shouldTranslateTimeInParens() {
+            var result = XmileExprTranslator.toShrewd("ABS(Time)");
+            assertThat(result.expression()).isEqualTo("ABS(TIME)");
+        }
+
+        @Test
+        void shouldNotTranslateTimeInCompoundNameWithSpaceBefore() {
+            var result = XmileExprTranslator.toShrewd("Processing Time * 2");
+            assertThat(result.expression()).isEqualTo("Processing Time * 2");
+        }
+
+        @Test
+        void shouldNotTranslateTimeInCompoundNameWithSpaceAfter() {
+            var result = XmileExprTranslator.toShrewd("Time Constant + 1");
+            assertThat(result.expression()).isEqualTo("Time Constant + 1");
+        }
+
+        @Test
+        void shouldTranslateStandaloneTimeCaseInsensitive() {
+            var result = XmileExprTranslator.toShrewd("time + 1");
+            assertThat(result.expression()).isEqualTo("TIME + 1");
+        }
+
+        @Test
         void shouldTranslateSmth3ToSmooth() {
             var result = XmileExprTranslator.toShrewd("SMTH3(input, 5)");
             assertThat(result.expression()).isEqualTo("SMOOTH(input, 5)");

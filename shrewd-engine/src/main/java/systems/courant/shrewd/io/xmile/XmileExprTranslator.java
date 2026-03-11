@@ -32,7 +32,7 @@ public final class XmileExprTranslator {
             "(?i)\\bSMTH1\\s*\\(");
     private static final Pattern CARET_PATTERN = Pattern.compile("\\^");
     private static final Pattern TIME_XMILE_PATTERN = Pattern.compile(
-            "(?i)\\bTime\\b");
+            "(?<!\\w\\s)(?i)\\bTime\\b(?!\\s\\w)");
 
     // --- Unsupported XMILE function patterns (warn) ---
     private static final Pattern SAFEDIV_PATTERN = Pattern.compile(

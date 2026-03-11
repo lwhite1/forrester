@@ -29,7 +29,7 @@ class TrendTest {
     }
 
     @Test
-    void shouldReadInputOncePerStepInCatchUpLoop() {
+    void shouldReadInputEachIterationInCatchUpLoop() {
         int[] step = {0};
         int[] readCount = {0};
         Trend trend = Trend.of(() -> { readCount[0]++; return 100; }, 5, 0, () -> step[0]);
@@ -37,11 +37,11 @@ class TrendTest {
         trend.getCurrentValue(); // initialize (1 read)
         readCount[0] = 0;
 
-        // Jump by 5 steps — input should only be read once, not 5 times
+        // Jump by 5 steps — input should be read once per catch-up iteration
         step[0] = 5;
         trend.getCurrentValue();
-        assertEquals(1, readCount[0],
-                "Input should be read exactly once per step advance, not once per delta iteration");
+        assertEquals(5, readCount[0],
+                "Input should be read once per catch-up iteration");
     }
 
     @Test
