@@ -357,6 +357,39 @@ class VensimExprTranslatorTest {
     }
 
     @Nested
+    @DisplayName("Quoted name translation (#419)")
+    class QuotedNames {
+
+        @Test
+        void shouldTranslateQuotedNameWithDollarSign() {
+            var result = VensimExprTranslator.translate(
+                    "\"Cost$Per Unit\" * 10", "var", EMPTY_NAMES);
+            assertThat(result.expression()).isEqualTo("CostPer_Unit * 10");
+        }
+
+        @Test
+        void shouldTranslateQuotedNameWithBackslash() {
+            var result = VensimExprTranslator.translate(
+                    "\"path\\to\\value\" + 1", "var", EMPTY_NAMES);
+            assertThat(result.expression()).isEqualTo("pathtovalue + 1");
+        }
+
+        @Test
+        void shouldTranslateQuotedNameWithParentheses() {
+            var result = VensimExprTranslator.translate(
+                    "\"electric vehicles (EV)\" * 2", "var", EMPTY_NAMES);
+            assertThat(result.expression()).isEqualTo("electric_vehicles_EV * 2");
+        }
+
+        @Test
+        void shouldTranslateMultipleQuotedNames() {
+            var result = VensimExprTranslator.translate(
+                    "\"Cost$Per Unit\" + \"Revenue$Per Unit\"", "var", EMPTY_NAMES);
+            assertThat(result.expression()).isEqualTo("CostPer_Unit + RevenuePer_Unit");
+        }
+    }
+
+    @Nested
     @DisplayName("Edge cases")
     class EdgeCases {
 

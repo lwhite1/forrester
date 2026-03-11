@@ -272,7 +272,7 @@ public final class VensimExprTranslator {
         StringBuilder sb = new StringBuilder();
         while (m.find()) {
             String name = m.group(1);
-            m.appendReplacement(sb, normalizeName(name));
+            m.appendReplacement(sb, Matcher.quoteReplacement(normalizeName(name)));
         }
         m.appendTail(sb);
         return sb.toString();
