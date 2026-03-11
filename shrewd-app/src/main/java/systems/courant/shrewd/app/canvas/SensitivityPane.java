@@ -51,7 +51,6 @@ public class SensitivityPane extends BorderPane {
     private final List<String> trackableNames;
     private final BiFunction<String, Void, List<ParameterImpact>> impactComputer;
     private List<ParameterImpact> currentImpacts;
-    private VBox currentContent;
 
     /**
      * Creates a sensitivity pane driven by a pre-computed impact function.
@@ -106,7 +105,6 @@ public class SensitivityPane extends BorderPane {
         content.setOnContextMenuRequested(e ->
                 contextMenu.show(content, e.getScreenX(), e.getScreenY()));
 
-        this.currentContent = content;
         setCenter(content);
     }
 
