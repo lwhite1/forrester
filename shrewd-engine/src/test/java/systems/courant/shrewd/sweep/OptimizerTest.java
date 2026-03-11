@@ -250,6 +250,31 @@ class OptimizerTest {
     }
 
     @Nested
+    class EvaluationLimitHandling {
+
+        @Test
+        void shouldReturnBestResultWhenEvaluationLimitExceeded() {
+            // maxEvaluations=1 forces TooManyEvaluationsException after minimal work
+            // Nelder-Mead needs n+1 evaluations to build the simplex, so 1 is too few
+            // but some evaluations will complete before the exception
+            OptimizationResult result = Optimizer.builder()
+                    .parameter("Growth Rate", 0.01, 0.20)
+                    .modelFactory(params -> buildGrowthModel(params.get("Growth Rate")))
+                    .objective(Objectives.minimize("Population"))
+                    .algorithm(OptimizationAlgorithm.NELDER_MEAD)
+                    .maxEvaluations(3)
+                    .timeStep(DAY)
+                    .duration(Times.weeks(1))
+                    .build()
+                    .execute();
+
+            assertNotNull(result.getBestParameters());
+            assertNotNull(result.getBestRunResult());
+            assertTrue(result.getEvaluationCount() > 0);
+        }
+    }
+
+    @Nested
     class ResultAccess {
 
         @Test

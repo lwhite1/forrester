@@ -7,6 +7,7 @@ import systems.courant.shrewd.model.Model;
 import systems.courant.shrewd.model.compile.CompiledModel;
 
 import org.apache.commons.math3.analysis.MultivariateFunction;
+import org.apache.commons.math3.exception.TooManyEvaluationsException;
 import org.apache.commons.math3.optim.InitialGuess;
 import org.apache.commons.math3.optim.MaxEval;
 import org.apache.commons.math3.optim.SimpleBounds;
@@ -17,6 +18,9 @@ import org.apache.commons.math3.optim.nonlinear.scalar.noderiv.CMAESOptimizer;
 import org.apache.commons.math3.optim.nonlinear.scalar.noderiv.NelderMeadSimplex;
 import org.apache.commons.math3.optim.nonlinear.scalar.noderiv.SimplexOptimizer;
 import org.apache.commons.math3.random.MersenneTwister;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -45,6 +49,8 @@ import java.util.function.Function;
  * }</pre>
  */
 public class Optimizer {
+
+    private static final Logger log = LoggerFactory.getLogger(Optimizer.class);
 
     private final List<OptimizationParameter> parameters;
     private final Function<Map<String, Double>, Model> modelFactory;
@@ -126,11 +132,20 @@ public class Optimizer {
             initialGuess[i] = parameters.get(i).effectiveInitialGuess();
         }
 
-        switch (algorithm) {
-            case NELDER_MEAD -> executeNelderMead(adapter, initialGuess, n);
-            case BOBYQA -> executeBobyqa(adapter, initialGuess, n);
-            case CMAES -> executeCmaes(adapter, initialGuess, n);
-            default -> throw new IllegalArgumentException("Unknown algorithm: " + algorithm);
+        try {
+            switch (algorithm) {
+                case NELDER_MEAD -> executeNelderMead(adapter, initialGuess, n);
+                case BOBYQA -> executeBobyqa(adapter, initialGuess, n);
+                case CMAES -> executeCmaes(adapter, initialGuess, n);
+                default -> throw new IllegalArgumentException("Unknown algorithm: " + algorithm);
+            }
+        } catch (TooManyEvaluationsException e) {
+            log.warn("Optimizer hit evaluation limit after {} evaluations: {}",
+                    evalCount[0], e.getMessage());
+            if (evalCount[0] == 0) {
+                throw new IllegalStateException(
+                        "Optimization failed: evaluation limit reached before any valid evaluation", e);
+            }
         }
 
         // Guard against no improvement (all evaluations returned MAX_VALUE or NaN)
