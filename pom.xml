@@ -10,11 +10,11 @@
     <packaging>pom</packaging>
 
     <modules>
-        <module>forrester-engine</module>
-        <module>forrester-ui</module>
-        <module>forrester-demos</module>
-        <module>forrester-app</module>
-        <module>forrester-tools</module>
+        <module>shrewd-engine</module>
+        <module>shrewd-ui</module>
+        <module>shrewd-demos</module>
+        <module>shrewd-app</module>
+        <module>shrewd-tools</module>
     </modules>
 
     <properties>
@@ -46,17 +46,17 @@
             <!-- Project modules -->
             <dependency>
                 <groupId>systems.courant</groupId>
-                <artifactId>forrester-engine</artifactId>
+                <artifactId>shrewd-engine</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>systems.courant</groupId>
-                <artifactId>forrester-ui</artifactId>
+                <artifactId>shrewd-ui</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>systems.courant</groupId>
-                <artifactId>forrester-app</artifactId>
+                <artifactId>shrewd-app</artifactId>
                 <version>${project.version}</version>
             </dependency>
 
