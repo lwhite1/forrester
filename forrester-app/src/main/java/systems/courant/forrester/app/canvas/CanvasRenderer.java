@@ -5,6 +5,9 @@ import systems.courant.forrester.model.def.CausalLinkDef;
 import systems.courant.forrester.model.def.ConnectorRoute;
 import systems.courant.forrester.model.def.ElementType;
 import systems.courant.forrester.model.def.FlowDef;
+import systems.courant.forrester.model.def.ModuleInstanceDef;
+import systems.courant.forrester.model.def.ModuleInterface;
+import systems.courant.forrester.model.def.PortDef;
 import systems.courant.forrester.model.def.ValidationIssue;
 import systems.courant.forrester.model.expr.DelayDetector;
 import systems.courant.forrester.model.graph.FeedbackAnalysis;
@@ -202,7 +205,20 @@ public class CanvasRenderer {
                 case MODULE -> {
                     double w = LayoutMetrics.effectiveWidth(canvasState, name);
                     double h = LayoutMetrics.effectiveHeight(canvasState, name);
-                    ElementRenderer.drawModule(gc, name, cx - w / 2, cy - h / 2, w, h);
+                    List<String> inputPorts = List.of();
+                    List<String> outputPorts = List.of();
+                    var moduleOpt = editor.getModuleByName(name);
+                    if (moduleOpt.isPresent()) {
+                        ModuleInterface iface = moduleOpt.get().definition().moduleInterface();
+                        if (iface != null) {
+                            inputPorts = iface.inputs().stream()
+                                    .map(PortDef::name).toList();
+                            outputPorts = iface.outputs().stream()
+                                    .map(PortDef::name).toList();
+                        }
+                    }
+                    ElementRenderer.drawModule(gc, name, inputPorts, outputPorts,
+                            cx - w / 2, cy - h / 2, w, h);
                 }
                 case LOOKUP -> {
                     double w = LayoutMetrics.effectiveWidth(canvasState, name);
