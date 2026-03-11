@@ -100,21 +100,22 @@ public class DelayFixed implements Formula, Resettable {
     public double getCurrentValue() {
         int step = currentStep.getAsInt();
         if (!initialized) {
-            buffer = new double[delaySteps];
+            buffer = new double[delaySteps + 1];
             java.util.Arrays.fill(buffer, initialValueSupplier.getAsDouble());
             writeIndex = 0;
             initialized = true;
-            lastStep = step;
+            lastStep = step - 1;
         }
         if (step > lastStep) {
+            double currentInput = input.getAsDouble();
             int delta = step - lastStep;
             for (int d = 0; d < delta; d++) {
-                buffer[writeIndex] = input.getAsDouble();
-                writeIndex = (writeIndex + 1) % delaySteps;
+                buffer[writeIndex] = currentInput;
+                writeIndex = (writeIndex + 1) % buffer.length;
             }
             lastStep = step;
         }
-        // The read position is the current write position (oldest value in the buffer)
+        // After write-and-advance, writeIndex points to the oldest value in the buffer
         return buffer[writeIndex];
     }
 }
