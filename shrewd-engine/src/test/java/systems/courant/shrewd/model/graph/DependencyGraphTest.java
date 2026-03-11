@@ -259,6 +259,65 @@ class DependencyGraphTest {
     }
 
     @Nested
+    @DisplayName("Where Used and Uses queries (#410)")
+    class WhereUsedAndUses {
+
+        private DependencyGraph buildSirGraph() {
+            ModelDefinition def = new ModelDefinitionBuilder()
+                    .name("SIR")
+                    .stock("Susceptible", 1000, "Person")
+                    .stock("Infectious", 10, "Person")
+                    .stock("Recovered", 0, "Person")
+                    .constant("Contact Rate", 8, "Dimensionless unit")
+                    .constant("Duration", 5, "Day")
+                    .flow("Infection",
+                            "Contact_Rate * Infectious * Susceptible / (Susceptible + Infectious + Recovered)",
+                            "Day", "Susceptible", "Infectious")
+                    .flow("Recovery", "Infectious / Duration", "Day", "Infectious", "Recovered")
+                    .build();
+            return DependencyGraph.fromDefinition(def);
+        }
+
+        @Test
+        void shouldReturnDirectDependentsForWhereUsed() {
+            DependencyGraph graph = buildSirGraph();
+            Set<String> whereUsed = graph.dependentsOf("Contact Rate");
+            assertThat(whereUsed).containsExactly("Infection");
+        }
+
+        @Test
+        void shouldReturnMultipleDependentsForSharedVariable() {
+            DependencyGraph graph = buildSirGraph();
+            Set<String> whereUsed = graph.dependentsOf("Infectious");
+            // Infectious is used in Infection equation, Recovery equation,
+            // and Infection flow feeds into Infectious (sink), Recovery drains Infectious (source)
+            assertThat(whereUsed).contains("Infection", "Recovery");
+        }
+
+        @Test
+        void shouldReturnDirectDependenciesForUses() {
+            DependencyGraph graph = buildSirGraph();
+            Set<String> uses = graph.dependenciesOf("Recovery");
+            assertThat(uses).contains("Infectious", "Duration");
+        }
+
+        @Test
+        void shouldReturnEmptyForUnusedElement() {
+            DependencyGraph graph = buildSirGraph();
+            // Duration is only used by Recovery, not by anything else as a dependent
+            Set<String> whereUsed = graph.dependentsOf("Duration");
+            assertThat(whereUsed).containsExactly("Recovery");
+        }
+
+        @Test
+        void shouldReturnEmptyDependenciesForConstant() {
+            DependencyGraph graph = buildSirGraph();
+            Set<String> uses = graph.dependenciesOf("Contact Rate");
+            assertThat(uses).isEmpty();
+        }
+    }
+
+    @Nested
     @DisplayName("TransitiveTraversal")
     class TransitiveTraversal {
 

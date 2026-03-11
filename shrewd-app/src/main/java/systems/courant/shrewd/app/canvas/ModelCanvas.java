@@ -11,6 +11,7 @@ import systems.courant.shrewd.model.def.ValidationResult;
 import systems.courant.shrewd.model.def.ViewDef;
 import systems.courant.shrewd.model.graph.AutoLayout;
 import systems.courant.shrewd.model.graph.CausalTraceAnalysis;
+import systems.courant.shrewd.model.graph.DependencyGraph;
 import systems.courant.shrewd.model.graph.FeedbackAnalysis;
 
 import javafx.scene.canvas.Canvas;
@@ -191,6 +192,12 @@ public class ModelCanvas extends Canvas {
                 }
                 @Override public void traceDownstream(String name) {
                     ModelCanvas.this.traceDownstream(name);
+                }
+                @Override public void showWhereUsed(String name) {
+                    ModelCanvas.this.showWhereUsed(name);
+                }
+                @Override public void showUses(String name) {
+                    ModelCanvas.this.showUses(name);
                 }
             };
 
@@ -604,6 +611,7 @@ public class ModelCanvas extends Canvas {
 
     public void selectElement(String name) {
         selectionController.selectAndCenter(name, canvasState, viewport, getWidth(), getHeight());
+        fireStatusChanged();
         redraw();
     }
 
@@ -1088,5 +1096,41 @@ public class ModelCanvas extends Canvas {
 
     void clearTrace() {
         traceController.clearTrace();
+    }
+
+    /**
+     * Returns the set of elements whose equations reference the named element
+     * (direct dependents — "where used").
+     */
+    Set<String> whereUsed(String elementName) {
+        DependencyGraph graph = DependencyGraph.fromDefinition(
+                editor.toModelDefinition(canvasState.toViewDef()));
+        return graph.dependentsOf(elementName);
+    }
+
+    /**
+     * Returns the set of elements that the named element's equation references
+     * (direct dependencies — "uses").
+     */
+    Set<String> uses(String elementName) {
+        DependencyGraph graph = DependencyGraph.fromDefinition(
+                editor.toModelDefinition(canvasState.toViewDef()));
+        return graph.dependenciesOf(elementName);
+    }
+
+    void showWhereUsed(String elementName) {
+        Set<String> dependents = whereUsed(elementName);
+        canvasState.clearSelection();
+        dependents.forEach(canvasState::addToSelection);
+        fireStatusChanged();
+        redraw();
+    }
+
+    void showUses(String elementName) {
+        Set<String> dependencies = uses(elementName);
+        canvasState.clearSelection();
+        dependencies.forEach(canvasState::addToSelection);
+        fireStatusChanged();
+        redraw();
     }
 }
