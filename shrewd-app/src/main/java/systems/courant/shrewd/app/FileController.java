@@ -90,7 +90,7 @@ final class FileController {
         chooser.getExtensionFilters().addAll(
                 new FileChooser.ExtensionFilter(
                         "All Supported Models", "*.json", "*.mdl", "*.xmile", "*.stmx", "*.itmx"),
-                new FileChooser.ExtensionFilter("Forrester Model (*.json)", "*.json"),
+                new FileChooser.ExtensionFilter("Shrewd Model (*.json)", "*.json"),
                 new FileChooser.ExtensionFilter("Vensim Model (*.mdl)", "*.mdl"),
                 new FileChooser.ExtensionFilter("XMILE Model (*.xmile, *.stmx, *.itmx)",
                         "*.xmile", "*.stmx", "*.itmx"));
@@ -188,7 +188,7 @@ final class FileController {
         FileChooser chooser = new FileChooser();
         chooser.setTitle("Save Model");
         chooser.getExtensionFilters().addAll(
-                new FileChooser.ExtensionFilter("Forrester Model (*.json)", "*.json"),
+                new FileChooser.ExtensionFilter("Shrewd Model (*.json)", "*.json"),
                 new FileChooser.ExtensionFilter("Vensim Model (*.mdl)", "*.mdl"),
                 new FileChooser.ExtensionFilter("XMILE Model (*.xmile, *.stmx, *.itmx)",
                         "*.xmile", "*.stmx", "*.itmx"));

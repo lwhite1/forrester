@@ -13,7 +13,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /**
- * Computes syntax highlighting {@link StyleSpans} for Forrester equation text.
+ * Computes syntax highlighting {@link StyleSpans} for Shrewd equation text.
  * Recognizes built-in function keywords, numeric literals, operators, and parentheses.
  */
 final class EquationHighlighter {

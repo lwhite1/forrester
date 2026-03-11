@@ -130,12 +130,12 @@ public final class XmileExporter {
 
         Element vendor = doc.createElementNS(
                 XmileConstants.NAMESPACE_URI, XmileConstants.VENDOR);
-        vendor.setTextContent("Forrester");
+        vendor.setTextContent("Shrewd");
         header.appendChild(vendor);
 
         Element product = doc.createElementNS(
                 XmileConstants.NAMESPACE_URI, XmileConstants.PRODUCT);
-        product.setTextContent("Forrester Library");
+        product.setTextContent("Shrewd Library");
         header.appendChild(product);
     }
 

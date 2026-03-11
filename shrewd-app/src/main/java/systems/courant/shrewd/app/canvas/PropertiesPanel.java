@@ -112,7 +112,7 @@ public class PropertiesPanel extends VBox {
 
     /**
      * Updates the panel to reflect the current selection on the canvas.
-     * Called by ForresterApp whenever the canvas status changes.
+     * Called by ShrewdApp whenever the canvas status changes.
      * Wrapped in updatingFields guard to prevent spurious focus-loss commits.
      */
     public void updateSelection(ModelCanvas canvas, ModelEditor editor) {

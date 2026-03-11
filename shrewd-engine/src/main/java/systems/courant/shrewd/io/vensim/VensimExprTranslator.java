@@ -12,7 +12,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * Translates Vensim expression syntax to Forrester expression syntax.
+ * Translates Vensim expression syntax to Shrewd expression syntax.
  *
  * <p>Performs text-level transformations including multi-word name replacement,
  * function name mapping, logical operator conversion, and lookup extraction.
@@ -66,7 +66,7 @@ public final class VensimExprTranslator {
     /**
      * Result of translating a Vensim expression.
      *
-     * @param expression the translated Forrester expression
+     * @param expression the translated Shrewd expression
      * @param lookups any lookup tables extracted from WITH LOOKUP constructs
      * @param warnings any translation warnings
      */
@@ -94,7 +94,7 @@ public final class VensimExprTranslator {
     }
 
     /**
-     * Translates a Vensim expression to Forrester syntax.
+     * Translates a Vensim expression to Shrewd syntax.
      *
      * @param vensimExpr the Vensim expression string
      * @param varName the name of the variable this expression belongs to (used for lookup naming)
@@ -107,7 +107,7 @@ public final class VensimExprTranslator {
     }
 
     /**
-     * Translates a Vensim expression to Forrester syntax.
+     * Translates a Vensim expression to Shrewd syntax.
      *
      * @param vensimExpr the Vensim expression string
      * @param varName the name of the variable this expression belongs to (used for lookup naming)
@@ -188,7 +188,7 @@ public final class VensimExprTranslator {
         // 8c. PULSE TRAIN → PULSE_TRAIN
         expr = PULSE_TRAIN_PATTERN.matcher(expr).replaceAll("PULSE_TRAIN(");
 
-        // 9. ^ → ** (Vensim uses ^ for power, Forrester uses **)
+        // 9. ^ → ** (Vensim uses ^ for power, Shrewd uses **)
         expr = CARET_PATTERN.matcher(expr).replaceAll("**");
 
         // 10. Time → TIME (the built-in variable)
@@ -204,7 +204,7 @@ public final class VensimExprTranslator {
     }
 
     /**
-     * Normalizes a Vensim variable name to Forrester identifier format.
+     * Normalizes a Vensim variable name to Shrewd identifier format.
      * Converts spaces to underscores, strips quotes, and trims whitespace.
      * Use this form for equation references (identifiers in formula text).
      *

@@ -13,7 +13,7 @@ import java.util.List;
  * Application lifecycle manager. Creates and tracks open {@link ModelWindow}s.
  * Each window is an independent model editor with its own canvas, undo stack, and file state.
  */
-public class ForresterApp extends Application {
+public class ShrewdApp extends Application {
 
     private final List<ModelWindow> openWindows = new ArrayList<>();
     private final Clipboard clipboard = new Clipboard();

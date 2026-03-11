@@ -33,7 +33,7 @@
         Suppress these for the demo package until SpotBugs supports Java 25.
     -->
     <Match>
-        <Package name="~systems\.courant\.forrester\.demo\..*"/>
+        <Package name="~systems\.courant\.shrewd\.demo\..*"/>
         <Bug pattern="URF_UNREAD_FIELD,UUF_UNUSED_FIELD,UWF_UNWRITTEN_FIELD"/>
     </Match>
 

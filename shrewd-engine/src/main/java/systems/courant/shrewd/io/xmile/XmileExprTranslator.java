@@ -6,15 +6,15 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * Bidirectional expression translator between XMILE and Forrester syntax.
+ * Bidirectional expression translator between XMILE and Shrewd syntax.
  *
- * <p>XMILE expressions use different function names and operators than Forrester.
- * This class provides {@link #toForrester(String)} and {@link #toXmile(String)}
+ * <p>XMILE expressions use different function names and operators than Shrewd.
+ * This class provides {@link #toShrewd(String)} and {@link #toXmile(String)}
  * for converting expressions in both directions.
  */
 public final class XmileExprTranslator {
 
-    // --- XMILE → Forrester patterns ---
+    // --- XMILE → Shrewd patterns ---
     private static final Pattern IF_THEN_ELSE_PATTERN = Pattern.compile(
             "(?i)IF_THEN_ELSE\\s*\\(|IF\\s+THEN\\s+ELSE\\s*\\(");
     private static final Pattern AND_KEYWORD_PATTERN = Pattern.compile(
@@ -44,7 +44,7 @@ public final class XmileExprTranslator {
     private static final Pattern HISTORY_PATTERN = Pattern.compile(
             "(?i)\\bHISTORY\\s*\\(");
 
-    // --- Forrester → XMILE patterns ---
+    // --- Shrewd → XMILE patterns ---
     private static final Pattern IF_FUNC_PATTERN = Pattern.compile(
             "(?i)\\bIF\\s*\\(");
     private static final Pattern AND_OP_PATTERN = Pattern.compile("\\band\\b");
@@ -53,7 +53,7 @@ public final class XmileExprTranslator {
     private static final Pattern DOUBLE_STAR_PATTERN = Pattern.compile("\\*\\*");
     private static final Pattern DOUBLE_EQ_PATTERN = Pattern.compile("==");
     private static final Pattern NOT_EQ_PATTERN = Pattern.compile("!=");
-    private static final Pattern TIME_FORRESTER_PATTERN = Pattern.compile(
+    private static final Pattern TIME_SHREWD_PATTERN = Pattern.compile(
             "\\bTIME\\b");
 
     /**
@@ -72,12 +72,12 @@ public final class XmileExprTranslator {
     }
 
     /**
-     * Translates an XMILE expression to Forrester syntax.
+     * Translates an XMILE expression to Shrewd syntax.
      *
      * @param xmileExpr the XMILE expression
      * @return the translation result
      */
-    public static TranslationResult toForrester(String xmileExpr) {
+    public static TranslationResult toShrewd(String xmileExpr) {
         if (xmileExpr == null || xmileExpr.isBlank()) {
             return new TranslationResult(xmileExpr, List.of());
         }
@@ -93,7 +93,7 @@ public final class XmileExprTranslator {
         expr = OR_KEYWORD_PATTERN.matcher(expr).replaceAll("or");
         expr = translateNotKeyword(expr);
 
-        // 3. ^ → ** (XMILE uses ^ for power, Forrester uses **)
+        // 3. ^ → ** (XMILE uses ^ for power, Shrewd uses **)
         expr = CARET_PATTERN.matcher(expr).replaceAll("**");
 
         // 4. Comparison operators: <> → !=, = → == (single = only)
@@ -131,17 +131,17 @@ public final class XmileExprTranslator {
     }
 
     /**
-     * Translates a Forrester expression to XMILE syntax.
+     * Translates a Shrewd expression to XMILE syntax.
      *
-     * @param forresterExpr the Forrester expression
+     * @param shrewdExpr the Shrewd expression
      * @return the translated XMILE expression
      */
-    public static String toXmile(String forresterExpr) {
-        if (forresterExpr == null || forresterExpr.isBlank()) {
-            return forresterExpr;
+    public static String toXmile(String shrewdExpr) {
+        if (shrewdExpr == null || shrewdExpr.isBlank()) {
+            return shrewdExpr;
         }
 
-        String expr = forresterExpr.strip();
+        String expr = shrewdExpr.strip();
 
         // 1. IF(...) → IF_THEN_ELSE(...)
         expr = IF_FUNC_PATTERN.matcher(expr).replaceAll("IF_THEN_ELSE(");
@@ -151,7 +151,7 @@ public final class XmileExprTranslator {
         expr = OR_OP_PATTERN.matcher(expr).replaceAll("OR");
         expr = NOT_OP_PATTERN.matcher(expr).replaceAll("NOT");
 
-        // 3. ** → ^ (Forrester uses ** for power, XMILE uses ^)
+        // 3. ** → ^ (Shrewd uses ** for power, XMILE uses ^)
         expr = DOUBLE_STAR_PATTERN.matcher(expr).replaceAll("^");
 
         // 4. Comparison operators: == → =, != → <>
@@ -159,13 +159,13 @@ public final class XmileExprTranslator {
         expr = DOUBLE_EQ_PATTERN.matcher(expr).replaceAll("=");
 
         // 4. TIME → Time
-        expr = TIME_FORRESTER_PATTERN.matcher(expr).replaceAll("Time");
+        expr = TIME_SHREWD_PATTERN.matcher(expr).replaceAll("Time");
 
         return expr;
     }
 
     /**
-     * Translates the XMILE NOT keyword to Forrester "not" keyword.
+     * Translates the XMILE NOT keyword to Shrewd "not" keyword.
      * NOT is followed by its operand.
      */
     private static String translateNotKeyword(String expr) {

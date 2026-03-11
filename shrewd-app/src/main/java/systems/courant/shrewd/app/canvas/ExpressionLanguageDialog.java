@@ -21,7 +21,7 @@ import javafx.stage.Stage;
 import java.util.List;
 
 /**
- * A help dialog explaining the Forrester expression language used in equations.
+ * A help dialog explaining the Shrewd expression language used in equations.
  */
 public class ExpressionLanguageDialog extends Stage {
 

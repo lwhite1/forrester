@@ -8,6 +8,6 @@ package systems.courant.shrewd.app;
 public class Launcher {
 
     public static void main(String[] args) {
-        ForresterApp.main(args);
+        ShrewdApp.main(args);
     }
 }

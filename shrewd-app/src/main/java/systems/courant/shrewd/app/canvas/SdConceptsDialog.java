@@ -50,7 +50,7 @@ public class SdConceptsDialog extends Stage {
         return new TextFlow(
                 bold("System Dynamics (SD)"),
                 plain(" is a methodology for understanding the behavior of complex systems over time. "
-                        + "It was developed by Jay W. Forrester at MIT in the 1950s.\n\n"),
+                        + "It was developed by Jay W. Shrewd at MIT in the 1950s.\n\n"),
                 plain("SD models capture how "),
                 bold("stocks"),
                 plain(" (accumulations) change through "),

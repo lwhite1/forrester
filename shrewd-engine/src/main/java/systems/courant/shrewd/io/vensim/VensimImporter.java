@@ -29,7 +29,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * Imports Vensim .mdl model files into Forrester {@link systems.courant.shrewd.model.def.ModelDefinition}.
+ * Imports Vensim .mdl model files into Shrewd {@link systems.courant.shrewd.model.def.ModelDefinition}.
  *
  * <p>Supports stocks (INTEG), constants, auxiliaries, lookup tables (standalone and
  * WITH LOOKUP), subscript ranges, simulation settings, and sketch/view data.
@@ -101,7 +101,7 @@ public class VensimImporter implements ModelImporter {
 
         if (timeStepValue != 1.0) {
             warnings.add("TIME STEP = " + timeStepValue
-                    + " (Forrester uses fixed step; value preserved as metadata only)");
+                    + " (Shrewd uses fixed step; value preserved as metadata only)");
         }
 
         double duration = finalTime - initialTime;

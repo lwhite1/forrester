@@ -355,14 +355,14 @@ public final class VensimExporter {
     }
 
     /**
-     * Translates a Forrester expression to Vensim syntax.
+     * Translates a Shrewd expression to Vensim syntax.
      */
-    static String toVensimExpr(String forresterExpr) {
-        if (forresterExpr == null || forresterExpr.isBlank()) {
-            return forresterExpr;
+    static String toVensimExpr(String shrewdExpr) {
+        if (shrewdExpr == null || shrewdExpr.isBlank()) {
+            return shrewdExpr;
         }
 
-        String expr = forresterExpr.strip();
+        String expr = shrewdExpr.strip();
 
         // IF(...) → IF THEN ELSE(...)
         expr = IF_FUNC_PATTERN.matcher(expr).replaceAll("IF THEN ELSE(");
@@ -376,7 +376,7 @@ public final class VensimExporter {
         // not → :NOT:
         expr = NOT_OP_PATTERN.matcher(expr).replaceAll(":NOT:");
 
-        // ** → ^ (Forrester uses ** for power, Vensim uses ^)
+        // ** → ^ (Shrewd uses ** for power, Vensim uses ^)
         expr = DOUBLE_STAR_PATTERN.matcher(expr).replaceAll("^");
 
         // != → <>
@@ -395,15 +395,15 @@ public final class VensimExporter {
     }
 
     /**
-     * Denormalizes a Forrester identifier back to Vensim name format.
+     * Denormalizes a Shrewd identifier back to Vensim name format.
      * Replaces underscores with spaces, and strips a leading underscore
      * that was added as a digit-prefix escape (e.g. {@code _2nd_Batch → 2nd Batch}).
      */
-    static String denormalizeName(String forresterName) {
-        if (forresterName == null || forresterName.isBlank()) {
+    static String denormalizeName(String shrewdName) {
+        if (shrewdName == null || shrewdName.isBlank()) {
             return "";
         }
-        String stripped = forresterName.strip();
+        String stripped = shrewdName.strip();
         String result = stripped.replace('_', ' ');
         if (stripped.length() >= 2 && stripped.charAt(0) == '_'
                 && Character.isDigit(stripped.charAt(1))) {

@@ -41,7 +41,7 @@ class ModelWindowImportExportFxTest {
     @Start
     void start(Stage stage) {
         this.stage = stage;
-        ForresterApp app = new ForresterApp();
+        ShrewdApp app = new ShrewdApp();
         window = new ModelWindow(stage, app, new Clipboard());
         stage.show();
     }

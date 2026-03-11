@@ -91,7 +91,7 @@ final class StartScreen extends VBox {
         VBox header = new VBox(8);
         header.setAlignment(Pos.CENTER);
 
-        Label title = new Label("Forrester");
+        Label title = new Label("Shrewd");
         title.setStyle("-fx-font-size: 36px; -fx-font-weight: bold; -fx-text-fill: #2C3E50;");
 
         Label subtitle = new Label("System Dynamics Modeling");

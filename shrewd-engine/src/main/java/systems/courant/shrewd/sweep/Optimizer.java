@@ -26,7 +26,7 @@ import java.util.function.Function;
 
 /**
  * Finds parameter values that minimize an objective function evaluated on simulation output.
- * Wraps Apache Commons Math derivative-free optimizers and adapts them to the Forrester
+ * Wraps Apache Commons Math derivative-free optimizers and adapts them to the Shrewd
  * simulation framework.
  *
  * <pre>{@code

@@ -28,7 +28,7 @@ class ModelWindowFxTest {
     @Start
     void start(Stage stage) {
         this.stage = stage;
-        ForresterApp app = new ForresterApp();
+        ShrewdApp app = new ShrewdApp();
         app.start(stage);
     }
 
@@ -41,9 +41,9 @@ class ModelWindowFxTest {
     }
 
     @Test
-    @DisplayName("Window title is 'Forrester' on start screen")
+    @DisplayName("Window title is 'Shrewd' on start screen")
     void windowTitleOnStartScreen(FxRobot robot) {
-        assertThat(stage.getTitle()).isEqualTo("Forrester");
+        assertThat(stage.getTitle()).isEqualTo("Shrewd");
     }
 
     @Test
@@ -55,10 +55,10 @@ class ModelWindowFxTest {
     }
 
     @Test
-    @DisplayName("Window title contains 'Forrester' after entering editor")
-    void windowTitleContainsForrester(FxRobot robot) {
+    @DisplayName("Window title contains 'Shrewd' after entering editor")
+    void windowTitleContainsShrewd(FxRobot robot) {
         enterEditor(robot);
-        assertThat(stage.getTitle()).contains("Forrester");
+        assertThat(stage.getTitle()).contains("Shrewd");
     }
 
     @Test

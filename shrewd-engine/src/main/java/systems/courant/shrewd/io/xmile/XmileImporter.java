@@ -40,7 +40,7 @@ import java.util.Set;
 import java.util.regex.Pattern;
 
 /**
- * Imports XMILE format model files into Forrester
+ * Imports XMILE format model files into Shrewd
  * {@link systems.courant.shrewd.model.def.ModelDefinition}.
  *
  * <p>Supports stocks, flows, auxiliaries, constants, lookup tables (standalone and
@@ -129,7 +129,7 @@ public class XmileImporter implements ModelImporter {
 
         if (dt != 1.0) {
             warnings.add("dt = " + dt
-                    + " (Forrester uses fixed step; value preserved as metadata only)");
+                    + " (Shrewd uses fixed step; value preserved as metadata only)");
         }
 
         // Collect all <model> elements — named ones are module types
@@ -224,7 +224,7 @@ public class XmileImporter implements ModelImporter {
         }
 
         // Translate expression
-        XmileExprTranslator.TranslationResult tr = XmileExprTranslator.toForrester(eqnText);
+        XmileExprTranslator.TranslationResult tr = XmileExprTranslator.toShrewd(eqnText);
         warnings.addAll(tr.warnings());
         String equation = tr.expression();
 
@@ -252,7 +252,7 @@ public class XmileImporter implements ModelImporter {
         // Warn about biflow (XMILE default is biflow; non_negative makes it uniflow)
         if (!hasChild(flowElem, XmileConstants.NON_NEGATIVE)) {
             warnings.add("Flow '" + name
-                    + "' is a biflow (may allow negative values; Forrester treats all flows as unidirectional)");
+                    + "' is a biflow (may allow negative values; Shrewd treats all flows as unidirectional)");
         }
 
         // Warn about range specifications
@@ -290,7 +290,7 @@ public class XmileImporter implements ModelImporter {
             // If there's also an eqn, create an aux that uses LOOKUP
             if (eqnText != null && !eqnText.isBlank()) {
                 XmileExprTranslator.TranslationResult tr =
-                        XmileExprTranslator.toForrester(eqnText);
+                        XmileExprTranslator.toShrewd(eqnText);
                 warnings.addAll(tr.warnings());
                 String lookupExpr = "LOOKUP(" + lookupTableName + ", " + tr.expression() + ")";
                 builder.aux(new AuxDef(name, comment, lookupExpr, unit));
@@ -317,7 +317,7 @@ public class XmileImporter implements ModelImporter {
         }
 
         // General auxiliary
-        XmileExprTranslator.TranslationResult tr = XmileExprTranslator.toForrester(eqnText);
+        XmileExprTranslator.TranslationResult tr = XmileExprTranslator.toShrewd(eqnText);
         warnings.addAll(tr.warnings());
         builder.aux(new AuxDef(name, comment, tr.expression(), unit));
     }

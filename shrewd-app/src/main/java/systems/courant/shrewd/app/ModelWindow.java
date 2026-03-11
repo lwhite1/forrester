@@ -68,7 +68,7 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 /**
- * An independent editor window for a single Forrester model.
+ * An independent editor window for a single Shrewd model.
  * Each window owns its own canvas, editor, undo stack, and file state.
  *
  * <p>File I/O is handled by {@link FileController} and simulation/analysis
@@ -79,7 +79,7 @@ public class ModelWindow {
     private static final Logger log = LoggerFactory.getLogger(ModelWindow.class);
 
     private final Stage stage;
-    private final ForresterApp app;
+    private final ShrewdApp app;
     private final Clipboard clipboard;
     private ModelCanvas canvas;
     private ModelEditor editor;
@@ -118,7 +118,7 @@ public class ModelWindow {
     private final List<MenuItem> editorOnlyItems = new ArrayList<>();
     private MenuItem validationIssuesItem;
 
-    public ModelWindow(Stage stage, ForresterApp app, Clipboard clipboard) {
+    public ModelWindow(Stage stage, ShrewdApp app, Clipboard clipboard) {
         this.stage = stage;
         this.app = app;
         this.clipboard = clipboard;
@@ -628,11 +628,11 @@ public class ModelWindow {
             shortcutsWindow = showHelpWindow(shortcutsWindow, KeyboardShortcutsDialog::new);
         });
 
-        MenuItem aboutItem = new MenuItem("About Forrester");
+        MenuItem aboutItem = new MenuItem("About Shrewd");
         aboutItem.setOnAction(e -> {
             Alert about = new Alert(Alert.AlertType.INFORMATION);
-            about.setTitle("About Forrester");
-            about.setHeaderText("Forrester");
+            about.setTitle("About Shrewd");
+            about.setHeaderText("Shrewd");
             about.setContentText("A visual System Dynamics modeling environment.\nVersion "
                     + AppVersion.get());
             about.showAndWait();
@@ -706,7 +706,7 @@ public class ModelWindow {
         rightTabPane.getTabs().remove(dashboardTab);
 
         dashboardStage = new Stage();
-        dashboardStage.setTitle("Dashboard \u2014 " + (editor != null ? editor.getModelName() : "Forrester"));
+        dashboardStage.setTitle("Dashboard \u2014 " + (editor != null ? editor.getModelName() : "Shrewd"));
         dashboardStage.initOwner(stage);
 
         BorderPane dashRoot = new BorderPane(dashboardPanel);
@@ -954,7 +954,7 @@ public class ModelWindow {
 
     private void updateTitle() {
         if (!editorShown) {
-            stage.setTitle("Forrester");
+            stage.setTitle("Shrewd");
             return;
         }
         String name;
@@ -970,7 +970,7 @@ public class ModelWindow {
         String moduleSuffix = canvas != null && canvas.isInsideModule()
                 ? " [" + canvas.getCurrentModuleName() + "]"
                 : "";
-        stage.setTitle("Forrester \u2014 " + name + dirtySuffix + moduleSuffix);
+        stage.setTitle("Shrewd \u2014 " + name + dirtySuffix + moduleSuffix);
         if (dashboardStage != null) {
             dashboardStage.setTitle("Dashboard \u2014 " + name);
         }
@@ -1126,10 +1126,10 @@ public class ModelWindow {
                 () -> exprLangWindow = showHelpWindow(exprLangWindow, ExpressionLanguageDialog::new)));
         commands.add(cmd("Keyboard Shortcuts", "Help",
                 () -> shortcutsWindow = showHelpWindow(shortcutsWindow, KeyboardShortcutsDialog::new)));
-        commands.add(cmd("About Forrester", "Help", () -> {
+        commands.add(cmd("About Shrewd", "Help", () -> {
             Alert about = new Alert(Alert.AlertType.INFORMATION);
-            about.setTitle("About Forrester");
-            about.setHeaderText("Forrester");
+            about.setTitle("About Shrewd");
+            about.setHeaderText("Shrewd");
             about.setContentText("A visual System Dynamics modeling environment.\nVersion "
                     + AppVersion.get());
             about.showAndWait();
@@ -1174,7 +1174,7 @@ public class ModelWindow {
     /**
      * Closes this window unconditionally. Callers must check for unsaved changes
      * via {@link FileController#confirmDiscardChanges()} before calling this method.
-     * The ForresterApp will be notified via the stage's onHidden handler.
+     * The ShrewdApp will be notified via the stage's onHidden handler.
      */
     public void close() {
         if (editor != null) {
