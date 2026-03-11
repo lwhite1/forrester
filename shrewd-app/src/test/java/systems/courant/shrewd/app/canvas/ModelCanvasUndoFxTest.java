@@ -126,4 +126,37 @@ class ModelCanvasUndoFxTest {
         assertThat(undoManager.canUndo()).isTrue();
         assertThat(undoManager.undoLabels()).containsExactly("Add causal link");
     }
+
+    @Test
+    @DisplayName("rename via renameElement should push undo entry (#331)")
+    void shouldPushUndoOnRename() {
+        loadTwoStocks();
+
+        canvas.renameElement("Stock 1", "Population");
+
+        assertThat(undoManager.canUndo()).isTrue();
+        assertThat(undoManager.undoLabels()).containsExactly("Rename Stock 1 → Population");
+    }
+
+    @Test
+    @DisplayName("rename to existing name should not push undo entry")
+    void shouldNotPushUndoOnRejectedRenameDuplicate() {
+        loadTwoStocks();
+
+        canvas.renameElement("Stock 1", "Stock 2"); // already exists → rejected
+
+        assertThat(undoManager.canUndo()).isFalse();
+        assertThat(undoManager.undoLabels()).isEmpty();
+    }
+
+    @Test
+    @DisplayName("rename to same name should not push undo entry")
+    void shouldNotPushUndoOnNoOpRename() {
+        loadTwoStocks();
+
+        canvas.renameElement("Stock 1", "Stock 1"); // no-op
+
+        assertThat(undoManager.canUndo()).isFalse();
+        assertThat(undoManager.undoLabels()).isEmpty();
+    }
 }
