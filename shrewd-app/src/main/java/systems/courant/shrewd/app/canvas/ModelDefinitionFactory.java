@@ -21,6 +21,13 @@ import java.util.function.Function;
  */
 public final class ModelDefinitionFactory {
 
+    /**
+     * Shared registry for resolving built-in unit names. Safe to share because
+     * the methods used here ({@link UnitRegistry#resolveTimeUnit}) are read-only
+     * and never auto-create custom units.
+     */
+    private static final UnitRegistry SHARED_REGISTRY = new UnitRegistry();
+
     private ModelDefinitionFactory() {
     }
 
@@ -59,16 +66,14 @@ public final class ModelDefinitionFactory {
      * Resolves the time step unit from simulation settings.
      */
     public static TimeUnit resolveTimeStep(SimulationSettings settings) {
-        UnitRegistry registry = new UnitRegistry();
-        return registry.resolveTimeUnit(settings.timeStep());
+        return SHARED_REGISTRY.resolveTimeUnit(settings.timeStep());
     }
 
     /**
      * Resolves the simulation duration as a {@link Quantity}.
      */
     public static Quantity resolveDuration(SimulationSettings settings) {
-        UnitRegistry registry = new UnitRegistry();
-        TimeUnit durationUnit = registry.resolveTimeUnit(settings.durationUnit());
+        TimeUnit durationUnit = SHARED_REGISTRY.resolveTimeUnit(settings.durationUnit());
         return new Quantity(settings.duration(), durationUnit);
     }
 
