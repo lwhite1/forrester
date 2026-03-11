@@ -6,6 +6,8 @@ import systems.courant.shrewd.model.Variable;
 import systems.courant.shrewd.model.Model;
 import systems.courant.shrewd.model.Stock;
 
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -14,6 +16,7 @@ import java.util.Map;
 import static systems.courant.shrewd.measure.Units.DAY;
 import static systems.courant.shrewd.measure.Units.PEOPLE;
 import static systems.courant.shrewd.measure.units.time.Times.weeks;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -158,6 +161,88 @@ class SensitivitySummaryTest {
     void shouldHandleEmptyImpactListInPlainLanguage() {
         String summary = SensitivitySummary.toPlainLanguage(List.of());
         assertEquals("No sensitivity data available.", summary);
+    }
+
+    @Nested
+    @DisplayName("ParameterImpact bounds validation (#313)")
+    class ImpactFractionBounds {
+
+        @Test
+        @DisplayName("should clamp negative impactFraction to 0")
+        void shouldClampNegativeFractionToZero() {
+            var impact = new SensitivitySummary.ParameterImpact(
+                    "p", "v", 0, 100, 50, -0.5);
+            assertThat(impact.impactFraction()).isEqualTo(0.0);
+        }
+
+        @Test
+        @DisplayName("should clamp impactFraction > 1 to 1")
+        void shouldClampFractionAboveOneToOne() {
+            var impact = new SensitivitySummary.ParameterImpact(
+                    "p", "v", 0, 100, 50, 1.5);
+            assertThat(impact.impactFraction()).isEqualTo(1.0);
+        }
+
+        @Test
+        @DisplayName("should preserve valid impactFraction unchanged")
+        void shouldPreserveValidFraction() {
+            var impact = new SensitivitySummary.ParameterImpact(
+                    "p", "v", 0, 100, 50, 0.42);
+            assertThat(impact.impactFraction()).isEqualTo(0.42);
+        }
+
+        @Test
+        @DisplayName("should clamp NaN to 0")
+        void shouldClampNaNToZero() {
+            var impact = new SensitivitySummary.ParameterImpact(
+                    "p", "v", 0, 100, 50, Double.NaN);
+            assertThat(impact.impactFraction()).isEqualTo(0.0);
+        }
+
+        @Test
+        @DisplayName("boundary value 0.0 is preserved")
+        void shouldPreserveZero() {
+            var impact = new SensitivitySummary.ParameterImpact(
+                    "p", "v", 0, 100, 50, 0.0);
+            assertThat(impact.impactFraction()).isEqualTo(0.0);
+        }
+
+        @Test
+        @DisplayName("boundary value 1.0 is preserved")
+        void shouldPreserveOne() {
+            var impact = new SensitivitySummary.ParameterImpact(
+                    "p", "v", 0, 100, 50, 1.0);
+            assertThat(impact.impactFraction()).isEqualTo(1.0);
+        }
+    }
+
+    @Nested
+    @DisplayName("formatPercent via toPlainLanguage (#313)")
+    class FormatPercentBounds {
+
+        @Test
+        @DisplayName("negative fraction produces 0% in summary")
+        void negativeFractionShowsZeroPercent() {
+            var first = new SensitivitySummary.ParameterImpact(
+                    "Alpha", "Output", 10, 20, 15, 0.7);
+            var second = new SensitivitySummary.ParameterImpact(
+                    "Beta", "Output", 10, 20, 15, -0.3);
+            String summary = SensitivitySummary.toPlainLanguage(List.of(first, second));
+            assertThat(summary).contains("0%");
+            assertThat(summary).doesNotContain("-%");
+        }
+
+        @Test
+        @DisplayName("fraction > 1 produces 100% in summary")
+        void overOneFractionShowsHundredPercent() {
+            var first = new SensitivitySummary.ParameterImpact(
+                    "Alpha", "Output", 10, 20, 15, 1.5);
+            var second = new SensitivitySummary.ParameterImpact(
+                    "Beta", "Output", 10, 20, 15, 0.3);
+            String summary = SensitivitySummary.toPlainLanguage(List.of(first, second));
+            assertThat(summary).contains("100%");
+            assertThat(summary).doesNotContain("150%");
+        }
     }
 
     private Model buildSirModel(double contactRate) {
