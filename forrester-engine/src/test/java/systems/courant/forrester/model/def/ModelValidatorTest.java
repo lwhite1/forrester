@@ -4,6 +4,7 @@ import systems.courant.forrester.model.def.CausalLinkDef.Polarity;
 import systems.courant.forrester.model.def.ValidationIssue.Severity;
 
 import java.util.List;
+import java.util.Map;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -500,6 +501,73 @@ class ModelValidatorTest {
 
             assertThat(result.issues()).noneMatch(i ->
                     i.message().contains("non-existent"));
+        }
+    }
+
+    @Nested
+    @DisplayName("Unconnected modules")
+    class UnconnectedModules {
+
+        @Test
+        void shouldWarnWhenModuleHasNoPortsAndNoBindings() {
+            ModelDefinition innerDef = new ModelDefinitionBuilder()
+                    .name("Inner")
+                    .stock("X", 10, "Unit")
+                    .build();
+
+            ModelDefinition def = new ModelDefinitionBuilder()
+                    .name("Parent")
+                    .module("m1", innerDef, Map.of(), Map.of())
+                    .build();
+
+            ValidationResult result = ModelValidator.validate(def);
+
+            assertThat(result.issues()).anyMatch(i ->
+                    i.severity() == Severity.WARNING
+                            && i.elementName().equals("m1")
+                            && i.message().contains("no ports defined"));
+        }
+
+        @Test
+        void shouldNotWarnWhenModuleHasPorts() {
+            ModuleInterface iface = new ModuleInterface(
+                    List.of(new PortDef("rate", "1/Day")),
+                    List.of());
+            ModelDefinition innerDef = new ModelDefinitionBuilder()
+                    .name("Inner")
+                    .moduleInterface(iface)
+                    .stock("X", 10, "Unit")
+                    .build();
+
+            ModelDefinition def = new ModelDefinitionBuilder()
+                    .name("Parent")
+                    .module("m1", innerDef, Map.of(), Map.of())
+                    .build();
+
+            ValidationResult result = ModelValidator.validate(def);
+
+            assertThat(result.issues()).noneMatch(i ->
+                    i.message().contains("no ports defined"));
+        }
+
+        @Test
+        void shouldNotWarnWhenModuleHasBindings() {
+            ModelDefinition innerDef = new ModelDefinitionBuilder()
+                    .name("Inner")
+                    .stock("X", 10, "Unit")
+                    .build();
+
+            ModelDefinition def = new ModelDefinitionBuilder()
+                    .name("Parent")
+                    .constant("Rate", 0.05, "1/Day")
+                    .module("m1", innerDef,
+                            Map.of("rate", "Rate"), Map.of())
+                    .build();
+
+            ValidationResult result = ModelValidator.validate(def);
+
+            assertThat(result.issues()).noneMatch(i ->
+                    i.message().contains("no ports defined"));
         }
     }
 }

@@ -2,9 +2,12 @@ package systems.courant.forrester.app.canvas;
 
 import javafx.geometry.VPos;
 import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextAlignment;
+
+import java.util.List;
 
 /**
  * Static methods that draw each element type onto a GraphicsContext,
@@ -169,9 +172,11 @@ public final class ElementRenderer {
     }
 
     /**
-     * Draws a module: thick-bordered rounded rectangle with "mod" badge and centered name.
+     * Draws a module: thick-bordered rounded rectangle with "Module" badge, centered name,
+     * and port indicators on the left (inputs) and right (outputs) edges.
      */
     public static void drawModule(GraphicsContext gc, String name,
+                                  List<String> inputPorts, List<String> outputPorts,
                                   double x, double y, double width, double height) {
         double r = LayoutMetrics.MODULE_CORNER_RADIUS;
 
@@ -199,6 +204,47 @@ public final class ElementRenderer {
         gc.setTextBaseline(VPos.CENTER);
         gc.fillText(truncate(name, LayoutMetrics.MODULE_NAME_FONT, width - 12),
                 x + width / 2, y + height / 2);
+
+        // Port indicators
+        drawPortIndicators(gc, inputPorts, x, y, height, true);
+        drawPortIndicators(gc, outputPorts, x + width, y, height, false);
+    }
+
+    private static final double PORT_RADIUS = 3.0;
+    private static final Color PORT_COLOR = Color.web("#5B9BD5");
+    private static final Font PORT_FONT = Font.font("System", 9);
+
+    private static void drawPortIndicators(GraphicsContext gc, List<String> ports,
+                                           double edgeX, double y, double height,
+                                           boolean isInput) {
+        if (ports == null || ports.isEmpty()) {
+            return;
+        }
+        double spacing = height / (ports.size() + 1);
+        for (int i = 0; i < ports.size(); i++) {
+            double py = y + spacing * (i + 1);
+
+            // Small circle on the edge
+            gc.setFill(PORT_COLOR);
+            gc.fillOval(edgeX - PORT_RADIUS, py - PORT_RADIUS,
+                    PORT_RADIUS * 2, PORT_RADIUS * 2);
+            gc.setStroke(Color.WHITE);
+            gc.setLineWidth(1);
+            gc.strokeOval(edgeX - PORT_RADIUS, py - PORT_RADIUS,
+                    PORT_RADIUS * 2, PORT_RADIUS * 2);
+
+            // Port name label
+            gc.setFill(ColorPalette.TEXT_SECONDARY);
+            gc.setFont(PORT_FONT);
+            gc.setTextBaseline(VPos.CENTER);
+            if (isInput) {
+                gc.setTextAlign(TextAlignment.LEFT);
+                gc.fillText(ports.get(i), edgeX + PORT_RADIUS + 3, py);
+            } else {
+                gc.setTextAlign(TextAlignment.RIGHT);
+                gc.fillText(ports.get(i), edgeX - PORT_RADIUS - 3, py);
+            }
+        }
     }
 
     /**

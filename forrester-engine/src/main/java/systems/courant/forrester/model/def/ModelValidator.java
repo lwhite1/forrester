@@ -36,6 +36,7 @@ import java.util.regex.Pattern;
  *   <li>Isolated stocks — stocks with no inflows or outflows</li>
  *   <li>Dangling connectors — connector arrows whose source is not referenced
  *       in the target element's equation</li>
+ *   <li>Unconnected modules — modules with no ports and no bindings</li>
  * </ol>
  */
 public final class ModelValidator {
@@ -78,7 +79,10 @@ public final class ModelValidator {
         // 7. Dangling connectors
         checkDanglingConnectors(def, issues);
 
-        // 8. CLD checks
+        // 8. Unconnected modules
+        checkUnconnectedModules(def, issues);
+
+        // 9. CLD checks
         checkOrphanedCldVariables(def, issues);
         checkCausalLinkEndpoints(def, issues);
         checkUnknownPolarity(def, issues);
@@ -316,6 +320,24 @@ public final class ModelValidator {
                                     + "' does not reference '" + connector.from()
                                     + "'. Remove the connector or update the equation."));
                 }
+            }
+        }
+    }
+
+    private static void checkUnconnectedModules(ModelDefinition def,
+            List<ValidationIssue> issues) {
+        for (ModuleInstanceDef module : def.modules()) {
+            ModuleInterface iface = module.definition().moduleInterface();
+            boolean hasNoPorts = iface == null
+                    || (iface.inputs().isEmpty() && iface.outputs().isEmpty());
+            boolean hasNoBindings = module.inputBindings().isEmpty()
+                    && module.outputBindings().isEmpty();
+            if (hasNoPorts && hasNoBindings) {
+                issues.add(new ValidationIssue(Severity.WARNING, module.instanceName(),
+                        "Module '" + module.instanceName()
+                                + "' has no ports defined and no bindings."
+                                + " Right-click the module and use 'Define Ports...'"
+                                + " to declare its inputs and outputs."));
             }
         }
     }
