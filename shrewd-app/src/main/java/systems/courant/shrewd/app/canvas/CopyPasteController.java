@@ -296,7 +296,7 @@ final class CopyPasteController {
         return sb.toString();
     }
 
-    private static final Set<String> EQUATION_KEYWORDS = Set.of("TIME", "DT", "IF");
+    private static final Set<String> EQUATION_KEYWORDS = Set.of("TIME", "DT", "IF", "PI", "E");
 
     /**
      * Replaces identifier tokens in the equation that do not correspond to any element
