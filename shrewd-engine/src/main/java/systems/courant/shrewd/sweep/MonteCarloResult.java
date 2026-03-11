@@ -34,7 +34,7 @@ public class MonteCarloResult {
      * @param results the list of run results, one per iteration
      */
     public MonteCarloResult(List<RunResult> results) {
-        this.results = results;
+        this.results = List.copyOf(results);
     }
 
     /**

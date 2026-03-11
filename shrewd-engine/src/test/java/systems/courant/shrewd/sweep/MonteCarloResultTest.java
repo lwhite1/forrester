@@ -124,6 +124,27 @@ class MonteCarloResultTest {
         }
     }
 
+    @Test
+    @DisplayName("constructor should defensively copy the results list (#302)")
+    void constructorShouldDefensivelyCopyResults() {
+        List<RunResult> mutableList = new ArrayList<>();
+        Model model = new Model("Test");
+        Stock s = new Stock("S", 100, THING);
+        model.addStock(s);
+        RunResult rr = new RunResult(Map.of());
+        Simulation sim = new Simulation(model, MINUTE, MINUTE, 2);
+        sim.addEventHandler(rr);
+        sim.execute();
+        mutableList.add(rr);
+
+        MonteCarloResult mcResult = new MonteCarloResult(mutableList);
+        assertThat(mcResult.getRunCount()).isEqualTo(1);
+
+        // Mutate the original list — should not affect MonteCarloResult
+        mutableList.clear();
+        assertThat(mcResult.getRunCount()).isEqualTo(1);
+    }
+
     private static MonteCarloResult buildMonteCarloResult(int runs, int steps) {
         List<RunResult> results = new ArrayList<>();
         for (int r = 0; r < runs; r++) {

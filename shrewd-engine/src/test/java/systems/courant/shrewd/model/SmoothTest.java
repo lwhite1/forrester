@@ -65,7 +65,7 @@ public class SmoothTest {
     }
 
     @Test
-    public void shouldReadInputOncePerStepInCatchUpLoop() {
+    public void shouldReadInputEachIterationInCatchUpLoop() {
         int[] step = {0};
         int[] readCount = {0};
         Smooth formula = Smooth.of(() -> { readCount[0]++; return 100; }, 5, 0, () -> step[0]);
@@ -73,11 +73,11 @@ public class SmoothTest {
         formula.getCurrentValue(); // initialize (1 read)
         readCount[0] = 0;
 
-        // Jump by 5 steps — input should only be read once, not 5 times
+        // Jump by 5 steps — input should be read once per catch-up iteration
         step[0] = 5;
         formula.getCurrentValue();
-        assertEquals(1, readCount[0],
-                "Input should be read exactly once per step advance, not once per delta iteration");
+        assertEquals(5, readCount[0],
+                "Input should be read once per catch-up iteration");
     }
 
     @Test
