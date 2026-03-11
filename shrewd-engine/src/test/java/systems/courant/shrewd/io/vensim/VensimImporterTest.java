@@ -247,6 +247,59 @@ class VensimImporterTest {
             assertThat(sub.name()).isEqualTo("Region");
             assertThat(sub.labels()).containsExactly("North", "South", "East", "West");
         }
+
+        @Test
+        void shouldNotWarnWhenSubscriptNameMatchesVariableName() {
+            String mdl = """
+                    Region : North, South, Total
+                    \t~\t
+                    \t~\t
+                    \t|
+
+                    Region = North + South
+                    \t~\tPeople
+                    \t~\t
+                    \t|
+
+                    North = 100
+                    \t~\tPeople
+                    \t~\t
+                    \t|
+
+                    South = 200
+                    \t~\tPeople
+                    \t~\t
+                    \t|
+
+                    Total = North + South
+                    \t~\tPeople
+                    \t~\t
+                    \t|
+
+                    INITIAL TIME = 0
+                    \t~\tDay
+                    \t~\t
+                    \t|
+
+                    FINAL TIME = 10
+                    \t~\tDay
+                    \t~\t
+                    \t|
+
+                    TIME STEP = 1
+                    \t~\tDay
+                    \t~\t
+                    \t|
+                    """;
+
+            ImportResult result = importer.importModel(mdl, "Test");
+            assertThat(result.definition().subscripts()).hasSize(1);
+            // The subscript range name "Region" should not produce a false duplicate warning
+            // with the variable named "Region"
+            assertThat(result.warnings().stream()
+                    .filter(w -> w.contains("Duplicate") && w.contains("Region"))
+                    .toList()).isEmpty();
+        }
     }
 
     @Nested
