@@ -142,6 +142,6 @@ public class Stock extends Element {
 
     @Override
     public String toString() {
-        return "Stock (" + getName() +"): " + getQuantity();
+        return "Stock (" + getName() + "): " + getQuantity();
     }
 }

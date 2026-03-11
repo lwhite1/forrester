@@ -95,23 +95,23 @@ public class FanChart extends Application {
         // Compute all percentile series in a single pass
         Map<Double, double[]> pctMap = result.getPercentileSeries(variableName,
                 2.5, 12.5, 25.0, 50.0, 75.0, 87.5, 97.5);
-        double[] p2_5 = pctMap.get(2.5);
-        double[] p97_5 = pctMap.get(97.5);
-        double[] p12_5 = pctMap.get(12.5);
-        double[] p87_5 = pctMap.get(87.5);
+        double[] pct2 = pctMap.get(2.5);
+        double[] pct97 = pctMap.get(97.5);
+        double[] pct12 = pctMap.get(12.5);
+        double[] pct87 = pctMap.get(87.5);
         double[] p25 = pctMap.get(25.0);
         double[] p75 = pctMap.get(75.0);
         double[] median = pctMap.get(50.0);
 
-        double[][] lowerSeries = {p2_5, p12_5, p25};
-        double[][] upperSeries = {p97_5, p87_5, p75};
+        double[][] lowerSeries = {pct2, pct12, p25};
+        double[][] upperSeries = {pct97, pct87, p75};
 
         // Compute axis ranges
         double minVal = Double.MAX_VALUE;
         double maxVal = -Double.MAX_VALUE;
         for (int i = 0; i < stepCount; i++) {
-            minVal = Math.min(minVal, p2_5[i]);
-            maxVal = Math.max(maxVal, p97_5[i]);
+            minVal = Math.min(minVal, pct2[i]);
+            maxVal = Math.max(maxVal, pct97[i]);
         }
 
         // Add 5% padding
@@ -146,7 +146,9 @@ public class FanChart extends Application {
             // Lower edge: right to left
             for (int i = 0; i < stepCount; i++) {
                 xPoints[stepCount + i] = MARGIN_LEFT + ((stepCount - 1 - i) * plotWidth / (stepCount - 1));
-                yPoints[stepCount + i] = MARGIN_TOP + plotHeight - ((lowerSeries[b][stepCount - 1 - i] - minVal) / (maxVal - minVal) * plotHeight);
+                double lowerVal = lowerSeries[b][stepCount - 1 - i];
+                yPoints[stepCount + i] = MARGIN_TOP + plotHeight
+                        - ((lowerVal - minVal) / (maxVal - minVal) * plotHeight);
             }
 
             gc.fillPolygon(xPoints, yPoints, stepCount * 2);

@@ -458,7 +458,10 @@ public class ModelDefinitionBuilder {
     }
 
     /** Adds all reference datasets from the given list. */
-    public ModelDefinitionBuilder referenceDatasets(List<ReferenceDataset> defs) { referenceDatasets.addAll(defs); return this; }
+    public ModelDefinitionBuilder referenceDatasets(List<ReferenceDataset> defs) {
+        referenceDatasets.addAll(defs);
+        return this;
+    }
 
     /** Clears all reference datasets. */
     public ModelDefinitionBuilder clearReferenceDatasets() { referenceDatasets.clear(); return this; }

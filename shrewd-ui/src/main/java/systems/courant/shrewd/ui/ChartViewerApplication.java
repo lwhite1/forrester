@@ -46,7 +46,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class ChartViewerApplication extends Application {
 
     private static final Object LOCK = new Object();
-    private static final AtomicBoolean fxStarted = new AtomicBoolean(false);
+    private static final AtomicBoolean FX_STARTED = new AtomicBoolean(false);
 
     private static final double DEFAULT_WIDTH = 800;
     private static final double DEFAULT_HEIGHT = 600;
@@ -87,7 +87,7 @@ public class ChartViewerApplication extends Application {
      * Ensures the JavaFX toolkit is initialized. Safe to call multiple times.
      */
     static void ensureFxRunning() {
-        if (fxStarted.compareAndSet(false, true)) {
+        if (FX_STARTED.compareAndSet(false, true)) {
             try {
                 Platform.startup(() -> {});
             } catch (IllegalStateException e) {

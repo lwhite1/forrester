@@ -52,6 +52,7 @@ final class ResizeController {
             case TOP_RIGHT -> { anchorX = cx - halfW; anchorY = cy + halfH; }
             case BOTTOM_LEFT -> { anchorX = cx + halfW; anchorY = cy - halfH; }
             case BOTTOM_RIGHT -> { anchorX = cx - halfW; anchorY = cy - halfH; }
+            default -> throw new IllegalArgumentException("Unknown handle: " + handle);
         }
     }
 

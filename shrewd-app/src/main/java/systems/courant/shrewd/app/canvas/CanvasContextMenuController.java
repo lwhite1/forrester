@@ -9,8 +9,6 @@ import javafx.scene.control.Menu;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.SeparatorMenuItem;
 
-import java.util.function.BiConsumer;
-import java.util.function.Consumer;
 
 /**
  * Builds and shows right-click context menus for elements, connections,

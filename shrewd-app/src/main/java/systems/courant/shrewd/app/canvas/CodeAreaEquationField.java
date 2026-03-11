@@ -12,8 +12,7 @@ import javafx.scene.input.KeyEvent;
 
 import org.fxmisc.richtext.StyleClassedTextArea;
 
-import java.util.Collection;
-import java.util.Objects;
+
 
 /**
  * Multi-line equation editor with syntax highlighting, backed by a RichTextFX

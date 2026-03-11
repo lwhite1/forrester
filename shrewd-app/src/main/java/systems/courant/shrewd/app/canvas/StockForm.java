@@ -125,8 +125,8 @@ class StockForm implements ElementForm {
         String policyValue = "Allow".equals(policyBox.getValue())
                 ? "ALLOW" : "CLAMP_TO_ZERO";
         Optional<StockDef> stockOpt = ctx.editor.getStockByName(ctx.elementName);
-        if (stockOpt.isPresent() && Objects.equals(policyValue,
-                stockOpt.get().negativeValuePolicy() != null ? stockOpt.get().negativeValuePolicy() : "CLAMP_TO_ZERO")) {
+        String currentPolicy = stockOpt.map(StockDef::negativeValuePolicy).orElse("CLAMP_TO_ZERO");
+        if (stockOpt.isPresent() && Objects.equals(policyValue, currentPolicy)) {
             return;
         }
         ctx.canvas.applyMutation(() -> ctx.editor.setStockNegativeValuePolicy(ctx.elementName, policyValue));

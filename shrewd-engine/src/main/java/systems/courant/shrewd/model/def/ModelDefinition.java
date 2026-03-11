@@ -3,7 +3,6 @@ package systems.courant.shrewd.model.def;
 import systems.courant.shrewd.model.ModelMetadata;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 /**

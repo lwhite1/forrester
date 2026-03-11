@@ -669,7 +669,8 @@ public class ExprCompiler {
                     paramDescription + ": reference '" + ref.name()
                             + "' must be a constant", ref.name());
         }
-        if (expr instanceof Expr.UnaryOp un && un.operator() == systems.courant.shrewd.model.expr.UnaryOperator.NEGATE) {
+        if (expr instanceof Expr.UnaryOp un
+                && un.operator() == systems.courant.shrewd.model.expr.UnaryOperator.NEGATE) {
             return -evaluateConstant(un.operand(), paramDescription);
         }
         if (expr instanceof Expr.BinaryOp bin) {

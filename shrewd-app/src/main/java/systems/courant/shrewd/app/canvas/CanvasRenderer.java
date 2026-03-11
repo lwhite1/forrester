@@ -6,7 +6,6 @@ import systems.courant.shrewd.model.def.CommentDef;
 import systems.courant.shrewd.model.def.ConnectorRoute;
 import systems.courant.shrewd.model.def.ElementType;
 import systems.courant.shrewd.model.def.FlowDef;
-import systems.courant.shrewd.model.def.ModuleInstanceDef;
 import systems.courant.shrewd.model.def.ModuleInterface;
 import systems.courant.shrewd.model.def.PortDef;
 import systems.courant.shrewd.model.def.ValidationIssue;

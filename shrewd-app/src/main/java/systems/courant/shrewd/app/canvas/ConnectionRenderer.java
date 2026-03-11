@@ -201,10 +201,14 @@ public final class ConnectionRenderer {
     public static void drawCausalLinkSelfLoop(GraphicsContext gc,
                                                double[] loopPts,
                                                CausalLinkDef.Polarity polarity) {
-        double startX = loopPts[0], startY = loopPts[1];
-        double cp1X = loopPts[2], cp1Y = loopPts[3];
-        double cp2X = loopPts[4], cp2Y = loopPts[5];
-        double endX = loopPts[6], endY = loopPts[7];
+        double startX = loopPts[0];
+        double startY = loopPts[1];
+        double cp1X = loopPts[2];
+        double cp1Y = loopPts[3];
+        double cp2X = loopPts[4];
+        double cp2Y = loopPts[5];
+        double endX = loopPts[6];
+        double endY = loopPts[7];
 
         // Draw curve
         gc.setStroke(ColorPalette.CAUSAL_LINK);

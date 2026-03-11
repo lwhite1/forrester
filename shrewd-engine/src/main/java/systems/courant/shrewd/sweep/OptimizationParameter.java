@@ -20,7 +20,8 @@ public record OptimizationParameter(String name, double lowerBound, double upper
         }
         if (!Double.isNaN(initialGuess) && (initialGuess < lowerBound || initialGuess > upperBound)) {
             throw new IllegalArgumentException(
-                    "initialGuess (" + initialGuess + ") must be within bounds [" + lowerBound + ", " + upperBound + "]");
+                    "initialGuess (" + initialGuess + ") must be within bounds ["
+                            + lowerBound + ", " + upperBound + "]");
         }
     }
 

@@ -1,12 +1,10 @@
 package systems.courant.shrewd.app.canvas;
 
 import systems.courant.shrewd.measure.CompositeUnit;
-import systems.courant.shrewd.measure.Dimension;
 import systems.courant.shrewd.measure.DimensionalAnalyzer;
 import systems.courant.shrewd.measure.Unit;
 import systems.courant.shrewd.measure.UnitRegistry;
 
-import java.util.Map;
 import java.util.Optional;
 
 /**

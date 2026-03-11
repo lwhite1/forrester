@@ -1,8 +1,6 @@
 package systems.courant.shrewd.measure;
 
-import systems.courant.shrewd.model.expr.BinaryOperator;
 import systems.courant.shrewd.model.expr.Expr;
-import systems.courant.shrewd.model.expr.UnaryOperator;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -130,6 +130,7 @@ public class Optimizer {
             case NELDER_MEAD -> executeNelderMead(adapter, initialGuess, n);
             case BOBYQA -> executeBobyqa(adapter, initialGuess, n);
             case CMAES -> executeCmaes(adapter, initialGuess, n);
+            default -> throw new IllegalArgumentException("Unknown algorithm: " + algorithm);
         }
 
         // Guard against no improvement (all evaluations returned MAX_VALUE or NaN)
