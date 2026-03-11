@@ -688,12 +688,10 @@ public class ModelCanvas extends Canvas {
     }
 
     void handleFlowClick(double worldX, double worldY) {
-        if (flowCreation.isPending()) {
-            saveUndoState("Add flow");
-        }
         FlowCreationController.FlowResult result = flowCreation.handleClick(
                 worldX, worldY, canvasState, editor);
         if (result.isCreated()) {
+            saveUndoState("Add flow");
             regenerateConnectors();
             canvasState.clearSelection();
             canvasState.select(result.flowName());
@@ -702,12 +700,10 @@ public class ModelCanvas extends Canvas {
     }
 
     void handleCausalLinkClick(double worldX, double worldY) {
-        if (causalLinkCreation.isPending()) {
-            saveUndoState("Add causal link");
-        }
         CausalLinkCreationController.LinkResult result = causalLinkCreation.handleClick(
                 worldX, worldY, canvasState, editor);
         if (result.isCreated()) {
+            saveUndoState("Add causal link");
             regenerateConnectors();
         }
         redraw();
