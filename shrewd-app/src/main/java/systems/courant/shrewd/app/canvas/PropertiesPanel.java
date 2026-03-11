@@ -9,12 +9,14 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
+import javafx.scene.control.Hyperlink;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.Separator;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.ColumnConstraints;
+import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
@@ -496,6 +498,12 @@ public class PropertiesPanel extends VBox {
             ctx.addReadOnlyRow(row++, "Name", name);
         }
 
+        if (type != ElementType.COMMENT && ctx.canvas != null) {
+            propertyGrid.add(new Separator(), 0, row, 2, 1);
+            row++;
+            row = buildDependencySection(row, name);
+        }
+
         getChildren().addAll(contextToolbar, separator, scrollPane);
     }
 
@@ -547,6 +555,52 @@ public class PropertiesPanel extends VBox {
         }
 
         return row;
+    }
+
+    private int buildDependencySection(int row, String elementName) {
+        Set<String> usedBy = ctx.canvas.whereUsed(elementName);
+        Set<String> uses = ctx.canvas.uses(elementName);
+
+        if (!usedBy.isEmpty()) {
+            Label label = new Label("Used by");
+            label.setStyle(Styles.FIELD_LABEL);
+            FlowPane links = buildElementLinks(usedBy);
+            propertyGrid.add(label, 0, row);
+            propertyGrid.add(links, 1, row);
+            row++;
+        } else {
+            ctx.addReadOnlyRow(row++, "Used by", "(none)");
+        }
+
+        if (!uses.isEmpty()) {
+            Label label = new Label("Uses");
+            label.setStyle(Styles.FIELD_LABEL);
+            FlowPane links = buildElementLinks(uses);
+            propertyGrid.add(label, 0, row);
+            propertyGrid.add(links, 1, row);
+            row++;
+        } else {
+            ctx.addReadOnlyRow(row++, "Uses", "(none)");
+        }
+
+        return row;
+    }
+
+    private FlowPane buildElementLinks(Set<String> elementNames) {
+        FlowPane pane = new FlowPane(4, 2);
+        pane.setPrefWrapLength(PREFERRED_WIDTH - 90);
+        for (String name : elementNames) {
+            Hyperlink link = new Hyperlink(name);
+            link.setStyle(Styles.SMALL_TEXT + " -fx-text-fill: #0066cc;");
+            link.setPadding(new Insets(0, 2, 0, 0));
+            link.setOnAction(e -> {
+                if (ctx.canvas != null) {
+                    ctx.canvas.selectElement(name);
+                }
+            });
+            pane.getChildren().add(link);
+        }
+        return pane;
     }
 
     private void disposeCurrentForm() {

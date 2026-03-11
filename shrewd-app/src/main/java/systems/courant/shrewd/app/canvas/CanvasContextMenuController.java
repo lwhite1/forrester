@@ -46,6 +46,8 @@ final class CanvasContextMenuController {
         void openBindingsDialog(String moduleName);
         void traceUpstream(String elementName);
         void traceDownstream(String elementName);
+        void showWhereUsed(String elementName);
+        void showUses(String elementName);
     }
 
     private final ModuleNavigationController navController;
@@ -107,8 +109,15 @@ final class CanvasContextMenuController {
         MenuItem traceDownItem = new MenuItem("Trace Downstream");
         traceDownItem.setOnAction(e -> callbacks.traceDownstream(elementName));
 
+        MenuItem whereUsedItem = new MenuItem("Where Used");
+        whereUsedItem.setOnAction(e -> callbacks.showWhereUsed(elementName));
+
+        MenuItem usesItem = new MenuItem("Uses");
+        usesItem.setOnAction(e -> callbacks.showUses(elementName));
+
         menu.getItems().addAll(editItem, new SeparatorMenuItem(),
-                traceUpItem, traceDownItem, new SeparatorMenuItem(),
+                traceUpItem, traceDownItem,
+                whereUsedItem, usesItem, new SeparatorMenuItem(),
                 cutItem, copyItem, new SeparatorMenuItem(), deleteItem);
         menu.show(canvas, screenX, screenY);
     }
