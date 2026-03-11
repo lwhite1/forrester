@@ -13,9 +13,11 @@ import org.junit.jupiter.api.Test;
 
 import static systems.courant.shrewd.measure.Units.DAY;
 import static systems.courant.shrewd.measure.Units.GALLON_US;
+import static systems.courant.shrewd.measure.Units.HOUR;
 import static systems.courant.shrewd.measure.Units.MINUTE;
 import static systems.courant.shrewd.measure.Units.SECOND;
 import static systems.courant.shrewd.measure.Units.THING;
+import static systems.courant.shrewd.measure.Units.WEEK;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -261,6 +263,79 @@ public class SimulationTest {
             sim.execute();
 
             assertThat(sim.getCurrentStep()).isEqualTo(6);
+        }
+    }
+
+    @Nested
+    @DisplayName("Step count precision (#428)")
+    class StepCountPrecision {
+
+        @Test
+        void shouldComputeExactStepCountForWholeNumberDivision() {
+            Model model = new Model("Exact");
+            Simulation sim = new Simulation(model, DAY, DAY, 100);
+            sim.execute();
+            // 100 days / 1 day = 100 steps, plus initial = 101
+            assertThat(sim.getCurrentStep()).isEqualTo(101);
+        }
+
+        @Test
+        void shouldComputeCorrectStepsForCrossUnitDuration() {
+            Model model = new Model("Cross Unit");
+            // 1 week = 7 days, so 7 steps
+            Simulation sim = new Simulation(model, DAY, new Quantity(1, WEEK));
+            sim.execute();
+            assertThat(sim.getCurrentStep()).isEqualTo(8); // 0..7
+        }
+
+        @Test
+        void shouldSnapToIntegerWhenFPResultIsNearlyExact() {
+            Model model = new Model("FP Edge");
+            // 10 days / 1 day = 10 steps exactly, but verify epsilon snapping works
+            // by using cross-unit: 240 hours / 24 hours (DAY) = 10 steps
+            Simulation sim = new Simulation(model, DAY,
+                    new Quantity(240, HOUR));
+            sim.execute();
+            assertThat(sim.getCurrentStep()).isEqualTo(11); // 0..10
+        }
+
+        @Test
+        void shouldHandleDurationThatIsExactMultipleOfTimeStep() {
+            Model model = new Model("Exact Multiple");
+            // 10 hours / 1 hour = 10 steps
+            Simulation sim = new Simulation(model, HOUR, new Quantity(10, HOUR));
+            sim.execute();
+            assertThat(sim.getCurrentStep()).isEqualTo(11); // 0..10
+        }
+
+        @Test
+        void shouldFloorNonIntegerStepCount() {
+            Model model = new Model("Floor");
+            // 7 days / 3 days = 2.333... → floor to 2 steps
+            Simulation sim = new Simulation(model, DAY,
+                    new Quantity(7, DAY));
+            // Using a 3-day time step
+            Simulation sim3 = new Simulation(model, new TimeUnit() {
+                @Override
+                public String getName() { return "ThreeDay"; }
+                @Override
+                public systems.courant.shrewd.measure.Dimension getDimension() {
+                    return systems.courant.shrewd.measure.Dimension.TIME;
+                }
+                @Override
+                public double ratioToBaseUnit() { return 3 * 86400; }
+            }, new Quantity(7, DAY));
+            sim3.execute();
+            assertThat(sim3.getCurrentStep()).isEqualTo(3); // 0..2
+        }
+
+        @Test
+        void shouldUseInBaseUnitsForDurationConversion() {
+            Model model = new Model("Base Units");
+            // Duration in hours, timeStep in minutes: 2 hours / 1 minute = 120 steps
+            Simulation sim = new Simulation(model, MINUTE, new Quantity(2, HOUR));
+            sim.execute();
+            assertThat(sim.getCurrentStep()).isEqualTo(121); // 0..120
         }
     }
 

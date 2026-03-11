@@ -128,9 +128,15 @@ public class Simulation {
 
         fireStartEvent(new SimulationStartEvent(this));
 
-        double durationInBaseUnits = duration.getUnit().ratioToBaseUnit();
-        long totalSteps = Math.round(
-                (duration.getValue() * durationInBaseUnits) / timeStep.ratioToBaseUnit());
+        double rawSteps = duration.inBaseUnits().getValue() / timeStep.ratioToBaseUnit();
+        // Snap to nearest integer if within epsilon (avoids FP off-by-one)
+        long totalSteps;
+        double nearest = Math.rint(rawSteps);
+        if (Math.abs(rawSteps - nearest) < 1e-9) {
+            totalSteps = (long) nearest;
+        } else {
+            totalSteps = (long) Math.floor(rawSteps);
+        }
 
         if (totalSteps > MAX_STEPS) {
             throw new IllegalArgumentException(
