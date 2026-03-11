@@ -1,5 +1,7 @@
 # Forrester — System Dynamics Modeling Tool
 
+> **Alpha-1 Release** — This system is at Alpha-1 release readiness and is not ready for production use. APIs, file formats, and features may change without notice.
+
 Forrester is an open-source [System Dynamics](userdocs/Key%20Reasons%20for%20Using%20System%20Dynamics.md) simulation engine and visual modeling environment for Java. It provides two ways to build and run models:
 
 - **Visual Editor** — a JavaFX canvas-based GUI for interactively building stock-and-flow diagrams and causal loop diagrams
