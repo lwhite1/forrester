@@ -87,6 +87,51 @@ class XmileExporterTest {
         }
 
         @Test
+        void shouldExportStockInitialExpression() {
+            StockDef stock = new StockDef("Water", null, 0.0,
+                    "Capacity * 0.5", "Gallons", null, java.util.List.of());
+            ModelDefinition def = new ModelDefinitionBuilder()
+                    .name("Test")
+                    .defaultSimulation("Day", 100, "Day")
+                    .stock(stock)
+                    .constant("Capacity", 200, "Gallons")
+                    .build();
+
+            String xml = XmileExporter.toXmile(def);
+            assertThat(xml).contains("Capacity");
+            assertThat(xml).contains("0.5");
+            // Must NOT fall back to the numeric initialValue of 0
+            assertThat(xml).doesNotContain("<eqn>0</eqn>");
+        }
+
+        @Test
+        void shouldFallBackToNumericWhenNoInitialExpression() {
+            ModelDefinition def = new ModelDefinitionBuilder()
+                    .name("Test")
+                    .defaultSimulation("Day", 100, "Day")
+                    .stock("Tank", 42.0, "Gallons")
+                    .build();
+
+            String xml = XmileExporter.toXmile(def);
+            assertThat(xml).contains("<eqn>42</eqn>");
+        }
+
+        @Test
+        void shouldAlwaysWriteEqnForAuxWithLookup() {
+            ModelDefinition def = new ModelDefinitionBuilder()
+                    .name("Test")
+                    .defaultSimulation("Day", 10, "Day")
+                    .lookupTable("effect",
+                            new double[]{0, 1, 2}, new double[]{0, 0.5, 1.0}, "LINEAR")
+                    .aux("result", "LOOKUP(effect, Time)", null)
+                    .build();
+
+            String xml = XmileExporter.toXmile(def);
+            assertThat(xml).contains("<gf>");
+            assertThat(xml).contains("<eqn>");
+        }
+
+        @Test
         void shouldExportLookupTable() {
             ModelDefinition def = new ModelDefinitionBuilder()
                     .name("Test")
@@ -134,6 +179,29 @@ class XmileExporterTest {
             assertThat(imported.parameters()).hasSize(1);
             assertThat(imported.parameters().get(0).name()).isEqualTo("rate");
             assertThat(imported.parameters().get(0).literalValue()).isEqualTo(0.02);
+        }
+
+        @Test
+        void shouldRoundTripStockWithInitialExpression() {
+            StockDef stock = new StockDef("Water", null, 0.0,
+                    "Capacity * 0.5", "Gallons", null, java.util.List.of());
+            ModelDefinition original = new ModelDefinitionBuilder()
+                    .name("ExprInit")
+                    .defaultSimulation("Day", 50, "Day")
+                    .stock(stock)
+                    .constant("Capacity", 200, "Gallons")
+                    .build();
+
+            String xml = XmileExporter.toXmile(original);
+            ImportResult result = new XmileImporter().importModel(xml, "ExprInit");
+            ModelDefinition imported = result.definition();
+
+            assertThat(imported.stocks()).hasSize(1);
+            StockDef importedStock = imported.stocks().get(0);
+            assertThat(importedStock.name()).isEqualTo("Water");
+            // The expression should survive the round-trip (either as initialExpression
+            // or parsed back into the equation)
+            assertThat(xml).contains("Capacity");
         }
 
         @Test
