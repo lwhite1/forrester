@@ -1,12 +1,12 @@
 # UI Behaviors Reference
 
-Catalog of all interactive behaviors in the Forrester canvas application.
+Catalog of all interactive behaviors in the Shrewd canvas application.
 This document serves as the source of truth for user-facing documentation and help text.
 
 ## Application Window
 
 - **Initial size:** 1200x800 pixels
-- **Title bar:** "Forrester — [filename]" or "Forrester — Untitled" when no file is loaded
+- **Title bar:** "Shrewd — [filename]" or "Shrewd — Untitled" when no file is loaded
 - **Layout:** Menu bar and toolbar at top, canvas in center, status bar at bottom
 
 ### Status Bar

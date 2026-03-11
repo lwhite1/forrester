@@ -1,8 +1,8 @@
-# AI Economics — Forrester Platform
+# AI Economics — Shrewd Platform
 
 ## 1. The Cost Structure
 
-The AI integration is the dominant operating cost of the Forrester platform. The simulation engine, file I/O, canvas rendering, and model persistence are essentially free to operate. Every dollar of marginal cost comes from LLM API calls.
+The AI integration is the dominant operating cost of the Shrewd platform. The simulation engine, file I/O, canvas rendering, and model persistence are essentially free to operate. Every dollar of marginal cost comes from LLM API calls.
 
 ### 1.1 Per-Call Token Budget
 
@@ -53,7 +53,7 @@ There are no publicly listed volume discount tiers from major LLM providers. Bot
 
 ### 2.1 Prompt Caching — Up to 90% Off Input Tokens
 
-This is the single largest cost lever for Forrester. Anthropic's prompt caching stores repeated prompt prefixes and charges cache reads at 1/10th the base input price. The write cost (first time the content enters cache) is 1.25x base price, but subsequent reads within the cache TTL (5 minutes default, 1 hour optional) are dramatically cheaper.
+This is the single largest cost lever for Shrewd. Anthropic's prompt caching stores repeated prompt prefixes and charges cache reads at 1/10th the base input price. The write cost (first time the content enters cache) is 1.25x base price, but subsequent reads within the cache TTL (5 minutes default, 1 hour optional) are dramatically cheaper.
 
 **Current pricing (per million tokens):**
 
@@ -63,7 +63,7 @@ This is the single largest cost lever for Forrester. Anthropic's prompt caching 
 | Sonnet 4.6 | $3.00 | $3.75 | $6.00 | $0.30 | 90% |
 | Haiku 4.5 | $1.00 | $1.25 | $2.00 | $0.10 | 90% |
 
-**Impact on Forrester:** The system prompt + posture block + tool-use schema are identical across turns. The model context changes slightly per turn but the bulk is repeated. For a typical 8,000-token input call, roughly 5,000–6,000 tokens are cacheable. With cache hits, the effective input cost drops from ~$0.024/call to ~$0.006/call on Sonnet — a 75% reduction on the input side.
+**Impact on Shrewd:** The system prompt + posture block + tool-use schema are identical across turns. The model context changes slightly per turn but the bulk is repeated. For a typical 8,000-token input call, roughly 5,000–6,000 tokens are cacheable. With cache hits, the effective input cost drops from ~$0.024/call to ~$0.006/call on Sonnet — a 75% reduction on the input side.
 
 The 5-minute TTL is sufficient for interactive sessions (turns usually happen within seconds to minutes). The 1-hour TTL (at 2x write cost) would cover breaks during a session but costs more on the initial write.
 
@@ -77,7 +77,7 @@ Asynchronous processing with 24-hour turnaround at half price:
 | Sonnet 4.6 | $1.50/MTok | $7.50/MTok |
 | Haiku 4.5 | $0.50/MTok | $2.50/MTok |
 
-**Impact on Forrester:** Not useful for interactive conversation (latency matters). Potentially useful for:
+**Impact on Shrewd:** Not useful for interactive conversation (latency matters). Potentially useful for:
 - **Background conversation summarization** — the rolling summary generated every 10 messages doesn't need to be instant. A 24-hour window is too long, but the batch discount signals that non-real-time workloads may get preferred pricing in future offerings.
 - **AUTONOMIST multi-step model building** — if the user is willing to wait (e.g., "build me a model of nurse turnover and I'll come back"), the entire conceptualize-formalize-simulate-interpret chain could run as a batch job. This is a UX tradeoff: faster iteration vs. lower cost.
 
@@ -130,7 +130,7 @@ Neither Anthropic nor OpenAI publishes volume discount schedules. Both offer neg
 - **OpenAI:** Enterprise plans include "invoicing and billing with volume discounts" and reserved capacity options. Also negotiated, not published.
 - **AWS Bedrock / Google Vertex AI / Azure:** Claude is available through these platforms, which have their own enterprise pricing structures, committed-use discounts, and enterprise agreements. An institutional buyer already on AWS might get better effective rates through Bedrock than through Anthropic directly.
 
-For a platform like Forrester operating as an intermediary service (Option A), the negotiation leverage depends on volume. At 1,000 daily active users averaging 50 calls each (50,000 calls/day), the monthly token volume would be substantial enough to justify a conversation with Anthropic's enterprise sales team. The discount would likely be 10–30% off published rates based on typical enterprise SaaS API agreements, though this is speculative — actual terms depend on the specific negotiation.
+For a platform like Shrewd operating as an intermediary service (Option A), the negotiation leverage depends on volume. At 1,000 daily active users averaging 50 calls each (50,000 calls/day), the monthly token volume would be substantial enough to justify a conversation with Anthropic's enterprise sales team. The discount would likely be 10–30% off published rates based on typical enterprise SaaS API agreements, though this is speculative — actual terms depend on the specific negotiation.
 
 ### 2.6 Additional Cost Reduction Strategies
 
@@ -148,7 +148,7 @@ For a platform like Forrester operating as an intermediary service (Option A), t
 
 ### 3.1 Option A: Intermediary Service (Relay to Cloud LLM)
 
-Users connect to a Forrester-operated API, which in turn calls Claude/GPT/etc. The platform owns the billing relationship with the LLM provider; users pay the platform.
+Users connect to a Shrewd-operated API, which in turn calls Claude/GPT/etc. The platform owns the billing relationship with the LLM provider; users pay the platform.
 
 **Advantages:**
 

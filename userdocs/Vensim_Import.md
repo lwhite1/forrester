@@ -1,6 +1,6 @@
 # Vensim (.mdl) Import Support
 
-This document describes what Forrester supports when importing Vensim `.mdl` files, what is unsupported, and what known limitations exist.
+This document describes what Shrewd supports when importing Vensim `.mdl` files, what is unsupported, and what known limitations exist.
 
 ## Supported Features
 
@@ -20,7 +20,7 @@ All settings from the `.Control` group are extracted (case-insensitive):
 
 - `INITIAL TIME` -- simulation start time
 - `FINAL TIME` -- simulation end time (converted to duration)
-- `TIME STEP` -- extracted but preserved as metadata only (Forrester uses fixed step dt=1)
+- `TIME STEP` -- extracted but preserved as metadata only (Shrewd uses fixed step dt=1)
 - `SAVEPER` -- recognized but not enforced
 
 ### Expression Translation
@@ -32,7 +32,7 @@ All settings from the `.Control` group are extracted (case-insensitive):
 
 **Operator translation:**
 
-| Vensim | Forrester |
+| Vensim | Shrewd |
 |--------|-----------|
 | `:AND:` | `and` |
 | `:OR:` | `or` |
@@ -40,7 +40,7 @@ All settings from the `.Control` group are extracted (case-insensitive):
 
 **Function translation:**
 
-| Vensim | Forrester | Notes |
+| Vensim | Shrewd | Notes |
 |--------|-----------|-------|
 | `IF THEN ELSE(c, t, e)` | `IF(c, t, e)` | |
 | `XIDZ(a, b, x)` | `IF((b)==0, x, (a)/(b))` | Safe division with fallback |
@@ -53,7 +53,7 @@ All settings from the `.Control` group are extracted (case-insensitive):
 
 **Translated functions:**
 
-| Vensim | Forrester | Notes |
+| Vensim | Shrewd | Notes |
 |--------|-----------|-------|
 | `DELAY FIXED(input, time, init)` | `DELAY_FIXED(input, time, init)` | Space to underscore |
 
@@ -107,7 +107,7 @@ The following functions are recognized in equations but not supported. They rema
 
 `PULSE TRAIN`, `GAME`, `DELAY N`, `GET XLS DATA`, `GET DIRECT DATA`, `GET DIRECT CONSTANTS`, `TABBED ARRAY`, `SAMPLE IF TRUE`, `VECTOR SELECT`, `VECTOR ELM MAP`, `VECTOR SORT ORDER`, `ALLOCATE AVAILABLE`, `FIND ZERO`
 
-Note: Vensim's `PULSE(start, width)` has different semantics from Forrester's `PULSE(magnitude, start)`. Vensim PULSE returns `1/TIME_STEP` for a duration; Forrester's returns a magnitude for one timestep. Models using Vensim PULSE will need manual adjustment after import.
+Note: Vensim's `PULSE(start, width)` has different semantics from Shrewd's `PULSE(magnitude, start)`. Vensim PULSE returns `1/TIME_STEP` for a duration; Shrewd's returns a magnitude for one timestep. Models using Vensim PULSE will need manual adjustment after import.
 
 ### Structural Features
 
@@ -131,7 +131,7 @@ Note: Vensim's `PULSE(start, width)` has different semantics from Forrester's `P
 ### Time Step
 
 - `TIME STEP` is extracted but **not used in simulation**
-- Forrester simulates with fixed Euler integration at dt=1 regardless of the `.mdl` setting
+- Shrewd simulates with fixed Euler integration at dt=1 regardless of the `.mdl` setting
 - Models designed for different dt values may produce different results
 
 ### Name Normalization

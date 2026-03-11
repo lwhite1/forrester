@@ -1,6 +1,6 @@
 # XMILE (.xmile / .stmx / .itmx) Import Support
 
-This document describes what Forrester supports when importing XMILE files (IEEE 1855-2016 / OASIS XMILE 1.0), what is unsupported, and what known limitations exist. The `.stmx` (Stella) and `.itmx` (iThink) extensions use the same XMILE format.
+This document describes what Shrewd supports when importing XMILE files (IEEE 1855-2016 / OASIS XMILE 1.0), what is unsupported, and what known limitations exist. The `.stmx` (Stella) and `.itmx` (iThink) extensions use the same XMILE format.
 
 ## Supported Features
 
@@ -11,7 +11,7 @@ This document describes what Forrester supports when importing XMILE files (IEEE
 | Stocks | `<stock>` | Initial values, inflow/outflow declarations, units, documentation |
 | Flows | `<flow>` | Equations, units, source/sink linkage via stock declarations |
 | Auxiliaries | `<aux>` | Numeric and expression-based equations, units |
-| Constants | `<aux>` with numeric equation | Imported as Forrester constants |
+| Constants | `<aux>` with numeric equation | Imported as Shrewd constants |
 | Lookup Tables | `<gf>` (graphical function) | Standalone or embedded in flow/aux definitions |
 | Modules | `<module>` | Instance name, `<connect>` input/output bindings |
 
@@ -47,7 +47,7 @@ XMILE files can contain multiple `<model>` elements. Named models define reusabl
 | Time units | `time_units` attribute | Capitalized (e.g. "day" becomes "Day") |
 | Start time | `<start>` | Always reset to 0 internally |
 | Stop time | `<stop>` | Converted to duration (`stop - start`) |
-| dt | `<dt>` | Extracted but **not used** -- Forrester uses fixed step dt=1 |
+| dt | `<dt>` | Extracted but **not used** -- Shrewd uses fixed step dt=1 |
 
 ### Model Metadata
 
@@ -66,7 +66,7 @@ XMILE files can contain multiple `<model>` elements. Named models define reusabl
 
 **Operator conversions:**
 
-| XMILE | Forrester |
+| XMILE | Shrewd |
 |-------|-----------|
 | `AND` | `and` |
 | `OR` | `or` |
@@ -78,7 +78,7 @@ XMILE files can contain multiple `<model>` elements. Named models define reusabl
 
 **Function conversions:**
 
-| XMILE | Forrester | Notes |
+| XMILE | Shrewd | Notes |
 |-------|-----------|-------|
 | `IF_THEN_ELSE(c, t, e)` | `IF(c, t, e)` | Also handles space-separated form |
 | `IF THEN ELSE(c, t, e)` | `IF(c, t, e)` | |
@@ -88,7 +88,7 @@ XMILE files can contain multiple `<model>` elements. Named models define reusabl
 **Pass-through functions** (no translation needed):
 `EXP`, `LN`, `ABS`, `MIN`, `MAX`, `SQRT`, `SIN`, `COS`, `TAN`, `LOG`, `ROUND`, `INT`, `MOD`, `LOOKUP`, `DELAY3`, `SMOOTH`
 
-Translation is bidirectional -- `XmileExprTranslator` also converts Forrester expressions back to XMILE for export.
+Translation is bidirectional -- `XmileExprTranslator` also converts Shrewd expressions back to XMILE for export.
 
 ---
 
@@ -116,7 +116,7 @@ Special stock types are imported as standard stocks with a warning:
 
 | Type | Warning Message |
 |------|----------------|
-| Biflows (no `<non_negative>`) | "Flow 'X' is a biflow (may allow negative values; Forrester treats all flows as unidirectional)" |
+| Biflows (no `<non_negative>`) | "Flow 'X' is a biflow (may allow negative values; Shrewd treats all flows as unidirectional)" |
 | Leak flows | Not recognized as special |
 | Material flow direction | Not preserved |
 
@@ -159,7 +159,7 @@ The following XMILE functions may or may not work -- they have no explicit handl
 
 `SAMPLE`, `STDDEV`, `VARIANCE`, `RANDOM`, `LOOKUP2D`, `UNRESTRICTED`, `ALLOCATE`
 
-The following pass through and are supported by the Forrester expression compiler:
+The following pass through and are supported by the Shrewd expression compiler:
 `PULSE`, `RAMP`, `STEP`, `MEAN`, `RANDOM_NORMAL`, `SIN`, `COS`, `TAN`, `LOG`, `INT`, `ROUND`, `MODULO`, `POWER`, `DELAY_FIXED`, `TREND`, `FORECAST`, `NPV`
 
 ### Other Missing Features
@@ -176,9 +176,9 @@ The following pass through and are supported by the Forrester expression compile
 
 ### Time Step (dt)
 
-The `<dt>` value from the XMILE file is extracted and stored as metadata but **not used in simulation**. Forrester uses fixed Euler integration with dt=1 regardless. A warning is issued if dt is not 1.0:
+The `<dt>` value from the XMILE file is extracted and stored as metadata but **not used in simulation**. Shrewd uses fixed Euler integration with dt=1 regardless. A warning is issued if dt is not 1.0:
 
-> "dt = X (Forrester uses fixed step; value preserved as metadata only)"
+> "dt = X (Shrewd uses fixed step; value preserved as metadata only)"
 
 Models designed for smaller dt values may produce numerically different results.
 
@@ -217,7 +217,7 @@ When an auxiliary has both `<gf>` and `<eqn>`:
 ### Duration Calculation
 
 - `stop <= start` defaults duration to 100 with warning
-- Start time always reset to 0 internally in Forrester
+- Start time always reset to 0 internally in Shrewd
 
 ---
 
@@ -239,7 +239,7 @@ All import errors are non-fatal. The importer returns `ImportResult` containing 
 | Non-linear interpolation | "Graphical function 'X' uses interpolation type 'Y' (only LINEAR/continuous is supported)" |
 | Range specifications | "Range specification on stock 'X' ignored" |
 | Unsupported functions | "SAFEDIV function not supported (left in equation as-is)" |
-| dt not 1.0 | "dt = 0.25 (Forrester uses fixed step; value preserved as metadata only)" |
+| dt not 1.0 | "dt = 0.25 (Shrewd uses fixed step; value preserved as metadata only)" |
 | Invalid time range | "stop (0) <= start (10), defaulting duration to 100" |
 | Function approximations | "SMTH3 approximated as SMOOTH" |
 | Element processing errors | "Error processing stock 'X': message" |

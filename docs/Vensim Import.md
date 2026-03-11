@@ -22,7 +22,7 @@ In the visual editor, use File → Open to load `.mdl` files directly.
 
 ## Supported Constructs
 
-| Vensim Construct | Forrester Element |
+| Vensim Construct | Shrewd Element |
 |---|---|
 | `INTEG(rate, init)` | `StockDef` + `FlowDef` |
 | Numeric literal | `ConstantDef` |
@@ -48,5 +48,5 @@ Unsupported constructs (macros, data variables, PULSE, DELAY FIXED, etc.) emit w
 |---|---|
 | `VensimImporter` | Main entry point implementing `ModelImporter` |
 | `MdlParser` | Low-level `.mdl` file parser (equations + sketch extraction) |
-| `VensimExprTranslator` | Expression syntax translation (Vensim → Forrester) |
+| `VensimExprTranslator` | Expression syntax translation (Vensim → Shrewd) |
 | `SketchParser` | Sketch section → `ViewDef` records |

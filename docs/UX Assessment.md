@@ -1,10 +1,10 @@
-# UX Assessment: Forrester System Dynamics Modeling Application
+# UX Assessment: Shrewd System Dynamics Modeling Application
 
 *Date: 2026-03-10 (updated post chart-to-model linking and badge labels)*
 
 ## Executive Summary
 
-Forrester is a well-architected JavaFX application with strong fundamentals: a clean visual language, good keyboard support, and a solid simulation pipeline. However, several UX gaps — some general, some specific to the cognitive demands of system dynamics — will limit adoption, particularly among the novice-to-intermediate users who are the primary audience for a free tool competing with Vensim PLE.
+Shrewd is a well-architected JavaFX application with strong fundamentals: a clean visual language, good keyboard support, and a solid simulation pipeline. However, several UX gaps — some general, some specific to the cognitive demands of system dynamics — will limit adoption, particularly among the novice-to-intermediate users who are the primary audience for a free tool competing with Vensim PLE.
 
 The assessment below is organized into three tiers: **cognitive barriers specific to SD modeling**, **general UX/UI issues**, and **strengths to preserve**.
 
@@ -18,7 +18,7 @@ The SD education literature (Sterman 2000, Sweeney & Sterman 2000, Cronin et al.
 
 **The problem:** Even graduate students routinely confuse stocks and flows. People struggle to identify which variables accumulate and which represent rates. The classic "bathtub" experiment shows that most people cannot correctly infer stock behavior from flow graphs.
 
-**Current state:** Forrester uses distinct shapes (heavy rectangle for stocks, diamond for flows) and the toolbar tooltips say "accumulator" and "rate." This is necessary but not sufficient. 
+**Current state:** Shrewd uses distinct shapes (heavy rectangle for stocks, diamond for flows) and the toolbar tooltips say "accumulator" and "rate." This is necessary but not sufficient. 
 
 **The "cloud" metaphor for external sources/sinks now has tooltips.** Hovering over a cloud shows an explanatory tooltip distinguishing sources ("Material flows into the model from outside") from sinks ("Material flows out of the model"), making the model boundary more explicit.
 

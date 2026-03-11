@@ -13,7 +13,7 @@ These are independent features that share a common motivation: system dynamics m
 
 ### Single model, single view
 
-The application today is a single-window, single-model design. All state in `ForresterApp` is singular:
+The application today is a single-window, single-model design. All state in `ShrewdApp` is singular:
 
 ```java
 private Stage stage;
@@ -33,7 +33,7 @@ This means only one level of the model hierarchy is visible at a time. To check 
 
 ### No global singletons
 
-There are no static singletons or application-scope registries on `ModelEditor`, `ModelDefinition`, or `ModelCanvas`. The single-model restriction is purely structural — instance fields in `ForresterApp`. Multiple `ModelEditor` instances can coexist (the navigation stack already does this).
+There are no static singletons or application-scope registries on `ModelEditor`, `ModelDefinition`, or `ModelCanvas`. The single-model restriction is purely structural — instance fields in `ShrewdApp`. Multiple `ModelEditor` instances can coexist (the navigation stack already does this).
 
 ---
 
@@ -45,17 +45,17 @@ Each open model gets its own top-level `Stage` with fully independent state. Thi
 
 ### Why separate windows, not tabs
 
-- **Full isolation.** Each window is a complete copy of the current `ForresterApp` architecture. No shared UI state, no re-wiring on switch, no risk of cross-model state leaking.
-- **Simplest implementation.** The existing `ForresterApp` code barely changes. The change is in *lifecycle management* (how windows are created and closed), not in the window's internal architecture.
+- **Full isolation.** Each window is a complete copy of the current `ShrewdApp` architecture. No shared UI state, no re-wiring on switch, no risk of cross-model state leaking.
+- **Simplest implementation.** The existing `ShrewdApp` code barely changes. The change is in *lifecycle management* (how windows are created and closed), not in the window's internal architecture.
 - **Natural OS-level window management.** Users can tile models side by side, move them to different monitors, or Alt-Tab between them using familiar OS conventions.
 - **Independent undo, save, simulation.** Each window has its own undo history, file path, and simulation state. No ambiguity about "which model does Ctrl+Z affect?"
 
 ### Implementation approach
 
-Factor the window construction out of `ForresterApp.start()` into a reusable method:
+Factor the window construction out of `ShrewdApp.start()` into a reusable method:
 
 ```java
-public class ForresterApp extends Application {
+public class ShrewdApp extends Application {
 
     private final List<ModelWindow> openWindows = new ArrayList<>();
 
@@ -74,7 +74,7 @@ public class ForresterApp extends Application {
 }
 ```
 
-`ModelWindow` encapsulates everything that is currently in `ForresterApp`'s instance fields — the `ModelCanvas`, `ModelEditor`, `UndoManager`, `Path currentFile`, menu bar, toolbar, status bar, and all event wiring. Each `ModelWindow` is fully self-contained.
+`ModelWindow` encapsulates everything that is currently in `ShrewdApp`'s instance fields — the `ModelCanvas`, `ModelEditor`, `UndoManager`, `Path currentFile`, menu bar, toolbar, status bar, and all event wiring. Each `ModelWindow` is fully self-contained.
 
 ### Window lifecycle
 
@@ -87,11 +87,11 @@ public class ForresterApp extends Application {
 
 | Component | Change |
 |---|---|
-| `ForresterApp` | Extract window construction into `ModelWindow` class. `ForresterApp` becomes a thin Application lifecycle manager. |
+| `ShrewdApp` | Extract window construction into `ModelWindow` class. `ShrewdApp` becomes a thin Application lifecycle manager. |
 | Menu bar | Add "New Window", "Close Window", "Window" menu with open model list. |
 | File open/save | Move into `ModelWindow`. Each window tracks its own `currentFile` and dirty state. |
-| Title bar | Each window shows its own filename: `"ModelName.forr — Forrester"` or `"Untitled — Forrester"`. |
-| Everything else | Unchanged. `ModelCanvas`, `ModelEditor`, `UndoManager`, toolbar, status bar, properties panel — all remain exactly as they are, just owned by `ModelWindow` instead of `ForresterApp`. |
+| Title bar | Each window shows its own filename: `"ModelName.forr — Shrewd"` or `"Untitled — Shrewd"`. |
+| Everything else | Unchanged. `ModelCanvas`, `ModelEditor`, `UndoManager`, toolbar, status bar, properties panel — all remain exactly as they are, just owned by `ModelWindow` instead of `ShrewdApp`. |
 
 ---
 
@@ -206,7 +206,7 @@ Option 1 is sufficient for initial implementation. Option 2 is a natural enhance
 
 ## Implementation Order
 
-1. **Separate windows for multiple models.** Extract `ModelWindow` from `ForresterApp`. Low risk, no architectural change to the canvas or editor layer.
+1. **Separate windows for multiple models.** Extract `ModelWindow` from `ShrewdApp`. Low risk, no architectural change to the canvas or editor layer.
 2. **Cross-model copy/paste.** Define the clipboard format, implement serialize/deserialize, handle name conflicts and dangling references on paste.
 3. **Read-only module tabs (Phase 1).** Replace drill-down navigation with tab creation. Read-only reference tabs for non-active modules.
 4. **Live module tabs (Phase 2).** Add change notification to `ModelEditor`, implement incremental write-back, handle structural conflicts.

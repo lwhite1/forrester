@@ -16,11 +16,11 @@ Full codebase audit of all 5 modules (~220 source files, ~126 test files), inclu
 
 | Module | Line Coverage | Branch Coverage | Notes |
 |--------|-------------|-----------------|-------|
-| forrester-engine | 88.3% | 76.2% | Strong coverage |
-| forrester-app | 41.5% | 35.4% | 46 zero-coverage classes |
-| forrester-ui | 87.0% | 83.3% | Good coverage |
-| forrester-demos | 37.4% | 16.7% | Demo code, lower priority |
-| forrester-tools | 58.5% | 53.6% | CLI tools |
+| shrewd-engine | 88.3% | 76.2% | Strong coverage |
+| shrewd-app | 41.5% | 35.4% | 46 zero-coverage classes |
+| shrewd-ui | 87.0% | 83.3% | Good coverage |
+| shrewd-demos | 37.4% | 16.7% | Demo code, lower priority |
+| shrewd-tools | 58.5% | 53.6% | CLI tools |
 
 **Weaknesses:**
 - **App module** is the primary concern at 41.5% line coverage. Major gaps in: all controller classes (Drag, Marquee, Selection, Reattach, Resize, InlineEdit, ModuleNavigation, ContextMenu), all renderer classes (Connection, Selection, FeedbackLoop, ErrorIndicator, Sparkline), all form classes (ElementForm, StockForm, AuxForm, FlowForm, LookupForm), FileController, SimulationController, PropertiesPanel, all result panes, and all dialog classes.

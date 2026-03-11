@@ -1,4 +1,4 @@
-# User Experience Analysis — Forrester System Dynamics Tool
+# User Experience Analysis — Shrewd System Dynamics Tool
 
 **Date:** 2026-03-10
 **Scope:** Full UX audit grounded in SD cognitive science literature, covering model construction, interpretation, presentation, and internal consistency.
@@ -18,7 +18,7 @@ These findings define what an SD tool *must* do well to genuinely help modelers 
 
 ---
 
-## Part II: What Forrester Does Well
+## Part II: What Shrewd Does Well
 
 ### 2.1 Progressive Refinement
 
@@ -56,7 +56,7 @@ Issues are organized by theme and rated by priority.
 
 ### Theme A: Counteracting Stock-Flow Failure
 
-The literature is emphatic: the single most important cognitive difficulty in SD is stock-flow failure. Forrester has good foundations but several opportunities.
+The literature is emphatic: the single most important cognitive difficulty in SD is stock-flow failure. Shrewd has good foundations but several opportunities.
 
 #### A1. No Net Flow Indicator (High Priority)
 
@@ -120,7 +120,7 @@ The literature is emphatic: the single most important cognitive difficulty in SD
 
 #### C3. No Extreme-Condition Testing (Medium Priority)
 
-**Problem:** Forrester and Senge's validation framework emphasizes extreme-condition tests: "Does the model behave reasonably when inputs are zero? Very large? Negative?" The tool has no built-in support for this.
+**Problem:** Shrewd and Senge's validation framework emphasizes extreme-condition tests: "Does the model behave reasonably when inputs are zero? Very large? Negative?" The tool has no built-in support for this.
 
 **Recommendation:** Add an "Extreme Conditions" option under Simulate that automatically runs the model with key parameters at 0, at 10x their baseline, and at negative values (where applicable), then flags any NaN, Infinity, or physically unreasonable results. This could be presented as a validation report alongside the existing error/warning system.
 
@@ -136,7 +136,7 @@ The literature is emphatic: the single most important cognitive difficulty in SD
 
 #### D1. No Reference Mode Comparison (High Priority)
 
-**Problem:** A core SD practice is defining a "reference mode" — the expected or historical behavior pattern — before building the model, then comparing simulation output against it. Forrester has no way to overlay reference data (observed time series) on simulation results.
+**Problem:** A core SD practice is defining a "reference mode" — the expected or historical behavior pattern — before building the model, then comparing simulation output against it. Shrewd has no way to overlay reference data (observed time series) on simulation results.
 
 **Recommendation:** Allow users to import a CSV of observed/expected data and overlay it on the simulation chart. Display it as a distinct series (e.g., dotted line, different color family) with a clear legend label ("Observed" or "Reference"). This is essential for model calibration and validation.
 
@@ -205,14 +205,14 @@ Configuration dialogs should share a consistent width.
 
 ### Theme F: Cognitive Dimensions Assessment
 
-Evaluating Forrester against Green & Petre's Cognitive Dimensions framework:
+Evaluating Shrewd against Green & Petre's Cognitive Dimensions framework:
 
 | Dimension | Rating | Notes |
 |---|---|---|
 | **Viscosity** | Good | Low knock-on viscosity: renaming auto-updates references. Equation changes propagate cleanly. Undo/redo provides safety net. |
 | **Premature Commitment** | Good | CLD-first workflow avoids forcing equations before structure is settled. Partial models can be validated. |
 | **Hidden Dependencies** | Mixed | Info links show equation dependencies visually. But there is no "where-used" or "what-uses-this" query. If a variable is referenced by 5 equations, the user must inspect each one. |
-| **Closeness of Mapping** | Excellent | Standard SD notation (rectangles=stocks, valves=flows, circles=auxiliaries). Matches Forrester/Sterman conventions exactly. |
+| **Closeness of Mapping** | Excellent | Standard SD notation (rectangles=stocks, valves=flows, circles=auxiliaries). Matches Shrewd/Sterman conventions exactly. |
 | **Abstraction** | Good | Module system supports hierarchical decomposition. Breadcrumb navigation for nested modules. |
 | **Secondary Notation** | Limited | Free-form layout, but no color-coding of elements, no user annotations, no sector boundaries. Users cannot visually organize the model beyond spatial arrangement. |
 | **Visibility** | Good | Properties panel shows equation and units for selected element. Sparklines show behavior on canvas. Status bar shows element counts and validation state. |

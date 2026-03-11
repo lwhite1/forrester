@@ -1,4 +1,4 @@
-# Forrester Expression Language Reference
+# Shrewd Expression Language Reference
 
 This document describes the expression language used in flow equations, variable equations, and lookup table inputs.
 

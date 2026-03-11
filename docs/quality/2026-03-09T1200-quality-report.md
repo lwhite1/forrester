@@ -2,7 +2,7 @@
 
 **Date:** 2026-03-09
 **Auditor:** Automated deep code review (all source files read line-by-line)
-**Scope:** All 5 modules — forrester-engine, forrester-app, forrester-tools, forrester-demos, forrester-ui
+**Scope:** All 5 modules — shrewd-engine, shrewd-app, shrewd-tools, shrewd-demos, shrewd-ui
 
 ---
 
@@ -19,22 +19,22 @@ Full codebase audit covering 135+ Java source files across all modules. The code
 
 | Module | Line Coverage | Branch Coverage | Assessment |
 |--------|-------------|----------------|------------|
-| forrester-engine | 89% | 77% | Strong |
-| forrester-ui | 86% | 83% | Strong |
-| forrester-demos | 37% | 17% | Weak |
-| forrester-app | 41% | 34% | Weak (expected for JavaFX UI) |
-| forrester-tools | 58% | 54% | Moderate |
+| shrewd-engine | 89% | 77% | Strong |
+| shrewd-ui | 86% | 83% | Strong |
+| shrewd-demos | 37% | 17% | Weak |
+| shrewd-app | 41% | 34% | Weak (expected for JavaFX UI) |
+| shrewd-tools | 58% | 54% | Moderate |
 
 **Coverage weaknesses:**
-- **forrester-demos (37%)**: Most demo classes have no dedicated tests beyond smoke tests. The SIR, SoftwareProject, and Workforce demos have complex logic that is untested in isolation.
-- **forrester-app (41%)**: Many UI controllers, dialog classes, and renderers are at 0% coverage. This is expected for JavaFX code but some logic-heavy classes (e.g., `ModelEditor`, `EquationValidator`, `UndoManager`) should have higher coverage. `ModelEditor` is partially covered; many canvas controllers are not.
-- **forrester-tools (58%)**: Integration tests skip when fixture files are absent (using early return instead of `assumeTrue`), so CI may report green while tests are silently skipped.
+- **shrewd-demos (37%)**: Most demo classes have no dedicated tests beyond smoke tests. The SIR, SoftwareProject, and Workforce demos have complex logic that is untested in isolation.
+- **shrewd-app (41%)**: Many UI controllers, dialog classes, and renderers are at 0% coverage. This is expected for JavaFX code but some logic-heavy classes (e.g., `ModelEditor`, `EquationValidator`, `UndoManager`) should have higher coverage. `ModelEditor` is partially covered; many canvas controllers are not.
+- **shrewd-tools (58%)**: Integration tests skip when fixture files are absent (using early return instead of `assumeTrue`), so CI may report green while tests are silently skipped.
 
 ---
 
 ## Findings by Module
 
-### forrester-engine (28 findings: 0 critical, 6 high, 12 medium, 10 low)
+### shrewd-engine (28 findings: 0 critical, 6 high, 12 medium, 10 low)
 
 **High:**
 | # | Issue | GitHub |
@@ -56,7 +56,7 @@ Full codebase audit covering 135+ Java source files across all modules. The code
 | 11 | Simulation currentStep is int but totalSteps is long — fragile if MAX_STEPS raised | Defensive |
 | 12 | EventHandler default no-op methods — silent failure if method name misspelled | API design |
 
-### forrester-app (22 findings: 0 critical, 3 high, 11 medium, 8 low)
+### shrewd-app (22 findings: 0 critical, 3 high, 11 medium, 8 low)
 
 **High:**
 | # | Issue | GitHub |
@@ -83,7 +83,7 @@ Full codebase audit covering 135+ Java source files across all modules. The code
 | 12 | getCldVariableByName returns null instead of Optional | [#290](https://github.com/Courant-Systems/shrewd/issues/290) |
 | 13 | Duplicated CSV export pattern across 5+ result panes | [#291](https://github.com/Courant-Systems/shrewd/issues/291) |
 
-### forrester-tools (19 findings: 0 critical, 3 high, 8 medium, 8 low)
+### shrewd-tools (19 findings: 0 critical, 3 high, 8 medium, 8 low)
 
 **High:**
 | # | Issue | GitHub |
@@ -101,7 +101,7 @@ Full codebase audit covering 135+ Java source files across all modules. The code
 | 7 | downloadToTemp does not validate URI path before substring | NPE risk |
 | 8 | PipelineResult fields lack null checks in constructor | Defensive |
 
-### forrester-demos (21 findings: 0 critical, 3 high, 10 medium, 8 low)
+### shrewd-demos (21 findings: 0 critical, 3 high, 10 medium, 8 low)
 
 **High:**
 | # | Issue | GitHub |
@@ -121,7 +121,7 @@ Full codebase audit covering 135+ Java source files across all modules. The code
 | 9 | CoffeeCoolingDemo negative flow through outflow not guarded | Edge case |
 | 10 | Hardcoded CSV filename collision between SirInfectiousDiseaseDemo and SalesMixDemo | Overwrites output |
 
-### forrester-ui (15 findings: 0 critical, 3 high, 6 medium, 6 low)
+### shrewd-ui (15 findings: 0 critical, 3 high, 6 medium, 6 low)
 
 **High:**
 | # | Issue | GitHub |

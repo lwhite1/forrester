@@ -1,10 +1,10 @@
-# Decision Analysis with Forrester
+# Decision Analysis with Shrewd
 
 ## Overview
 
 Decision Analysis (DA) is a related but distinct field from System Dynamics. The two share a concern with modeling uncertain outcomes over time, but differ in structure: SD models are feedback-driven simulations with stocks and flows, while DA models are typically decision trees, influence diagrams, or Markov cohort models evaluated by backward induction or forward simulation.
 
-This document assesses how much of Forrester's existing infrastructure can be reused for DA modeling, identifies gaps, and outlines what would need to be built.
+This document assesses how much of Shrewd's existing infrastructure can be reused for DA modeling, identifies gaps, and outlines what would need to be built.
 
 ## Markov Cohort Models: ~80% Reuse
 
@@ -12,7 +12,7 @@ Markov cohort models are the workhorse of health decision analysis and cost-effe
 
 ### Direct mapping
 
-| DA concept | Forrester equivalent | Status |
+| DA concept | Shrewd equivalent | Status |
 |---|---|---|
 | Health/decision states | `Stock` | Native |
 | Transition rates | `Flow` (outflow of source state, inflow of destination state) | Native |
@@ -51,7 +51,7 @@ sick.addOutflow(diseaseDeath);
 dead.addInflow(diseaseDeath);
 ```
 
-**Cost accumulation via accumulator stocks.** DA models attach per-cycle costs and health utilities to each state. Forrester has no built-in reward mechanism, but the idiom is natural:
+**Cost accumulation via accumulator stocks.** DA models attach per-cycle costs and health utilities to each state. Shrewd has no built-in reward mechanism, but the idiom is natural:
 
 ```java
 Stock totalCost = new Stock("Total Cost", 0, US_DOLLAR);
@@ -206,7 +206,7 @@ Fundamentally different structure. A decision tree has:
 - **Chance nodes** — branches weighted by probabilities
 - **Terminal nodes** — payoffs (cost, QALYs, utility)
 
-Evaluation is **backward induction** (fold from leaves to root), not forward simulation. Nothing in Forrester's simulation engine applies here. This would be a new `decisiontree`package with its own `Tree`, `Node`, and `TreeEvaluator` classes.
+Evaluation is **backward induction** (fold from leaves to root), not forward simulation. Nothing in Shrewd's simulation engine applies here. This would be a new `decisiontree`package with its own `Tree`, `Node`, and `TreeEvaluator` classes.
 
 However, the Monte Carlo sampling infrastructure (`MonteCarlo`, distributions, LHS) could be reused to run probabilistic decision trees.
 

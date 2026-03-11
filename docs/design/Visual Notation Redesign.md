@@ -1,6 +1,6 @@
 # Visual Notation Redesign
 
-Design reference for improved system dynamics diagram renderings in the forrester-canvas module.
+Design reference for improved system dynamics diagram renderings in the shrewd-canvas module.
 
 ## Context
 
@@ -28,7 +28,7 @@ The alternative "s" (same) and "o" (opposite) notation was proposed to be more r
 
 ### 3. Valve symbol confusion
 
-Flows are shown with a valve (bowtie) symbol inherited from Forrester's original hydraulic analogy. Problems:
+Flows are shown with a valve (bowtie) symbol inherited from Shrewd's original hydraulic analogy. Problems:
 
 - Valves are limiters, not activators — most people don't associate "valve" with "process that drives change"
 - Flows are shown as unidirectional even when they're bidirectional

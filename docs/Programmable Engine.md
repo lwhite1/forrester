@@ -1,6 +1,6 @@
 # Programmable Engine
 
-The Forrester engine provides two code-first APIs for building and running System Dynamics models.
+The Shrewd engine provides two code-first APIs for building and running System Dynamics models.
 
 ## Lambda-based API (Programmatic)
 

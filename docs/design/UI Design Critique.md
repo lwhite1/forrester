@@ -55,8 +55,8 @@ Three interface designs have been proposed for an AI-integrated system dynamics 
 **Strengths.**
 - The Omnisearch / command palette concept is proven UX (VS Code, Spotlight, Raycast). Unifying search, creation, and AI prompting in one input field reduces interface complexity. This is a concrete, implementable idea.
 - Natural language equation entry with bidirectional sync (edit the math, the description updates; edit the description, the math updates) addresses a real documentation gap. Models with stale or missing equation documentation are the norm.
-- Inline unit mismatch detection with suggested "bridge variables" is practical and builds on Forrester's existing unit system. This could be implemented today.
-- The scenario branching metaphor is intuitive for developers and maps well to the parameter sweep infrastructure already in Forrester.
+- Inline unit mismatch detection with suggested "bridge variables" is practical and builds on Shrewd's existing unit system. This could be implemented today.
+- The scenario branching metaphor is intuitive for developers and maps well to the parameter sweep infrastructure already in Shrewd.
 
 **Weaknesses.**
 - The design treats the AI as a productivity accelerator but never addresses model quality. "Create a model for a startup's cash flow with hiring and churn" will produce a generic textbook model. The hard problem in SD isn't drawing boxes faster — it's figuring out which boxes matter and which causal theories are wrong. This design makes it easier to build models without making it easier to build *good* models.

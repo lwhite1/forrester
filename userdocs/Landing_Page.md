@@ -1,8 +1,8 @@
-# Forrester — System Dynamics Modeling for Everyone
+# Shrewd — System Dynamics Modeling for Everyone
 
-Forrester is a free, open-source System Dynamics tool for building models that reveal how complex systems behave over time — and why they so often surprise us.
+Shrewd is a free, open-source System Dynamics tool for building models that reveal how complex systems behave over time — and why they so often surprise us.
 
-If you've ever struggled with unintended consequences, policy resistance, or the gap between short-term fixes and long-term outcomes, System Dynamics gives you a way to see the whole system at once. Forrester gives you the tools to do it.
+If you've ever struggled with unintended consequences, policy resistance, or the gap between short-term fixes and long-term outcomes, System Dynamics gives you a way to see the whole system at once. Shrewd gives you the tools to do it.
 
 **Free. No license keys. No feature tiers. No signup.**
 
@@ -10,7 +10,7 @@ If you've ever struggled with unintended consequences, policy resistance, or the
 
 ## Sketch your system's causal structure
 
-Start where every SD practitioner starts: with a **causal loop diagram**. Map out the variables in your system and draw the connections between them. Forrester automatically detects your feedback loops and classifies them as reinforcing or balancing — so you can see the engines of growth, the sources of resistance, and the leverage points where intervention matters most.
+Start where every SD practitioner starts: with a **causal loop diagram**. Map out the variables in your system and draw the connections between them. Shrewd automatically detects your feedback loops and classifies them as reinforcing or balancing — so you can see the engines of growth, the sources of resistance, and the leverage points where intervention matters most.
 
 When you're ready to make it quantitative, right-click any variable and classify it as a stock, flow, variable, or constant. It transforms in place on the same canvas — no switching tools, no redrawing your diagram.
 
@@ -26,7 +26,7 @@ Break large models into reusable **modules** with input/output ports. Add **subs
 
 ## Test scenarios and quantify uncertainty
 
-System Dynamics is most valuable when you use it to ask "what if?" — and Forrester makes that easy.
+System Dynamics is most valuable when you use it to ask "what if?" — and Shrewd makes that easy.
 
 **Parameter sweeps** let you vary any assumption across a range and see how the system responds. Instead of running one scenario at a time, you see a family of curves that reveals sensitivity and thresholds at a glance.
 
@@ -44,9 +44,9 @@ See the [Vensim PLE migration guide](From_Vensim_PLE.md) for details.
 
 ---
 
-## How Forrester compares
+## How Shrewd compares
 
-|  | Vensim PLE | Stella | Vensim Pro | **Forrester** |
+|  | Vensim PLE | Stella | Vensim Pro | **Shrewd** |
 |---|:---:|:---:|:---:|:---:|
 | **Cost** | Free | $249/yr | $1,200/yr | **Free** |
 | Stocks, flows, variables | Yes | Yes | Yes | Yes |
@@ -73,10 +73,10 @@ See the [Programmable Engine](../docs/Programmable%20Engine.md) documentation.
 ## Get started
 
 ```bash
-git clone https://github.com/lwhite1/forrester.git
-cd forrester
+git clone https://github.com/lwhite1/shrewd.git
+cd shrewd
 mvn clean package -DskipTests
-java -jar forrester-app/target/forrester-app-*.jar
+java -jar shrewd-app/target/shrewd-app-*.jar
 ```
 
 Go to **File > Open Example** and pick a model. Press **Ctrl+R** to run it. Or start from scratch — the [quickstart tutorial](Quickstart.md) walks you through building your first model in 10 minutes.

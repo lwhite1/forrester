@@ -2,7 +2,7 @@
 
 **Date:** 2026-03-09
 **Auditor:** Automated deep code review (all source files read line-by-line)
-**Scope:** All 5 modules — forrester-engine, forrester-app, forrester-tools, forrester-demos, forrester-ui
+**Scope:** All 5 modules — shrewd-engine, shrewd-app, shrewd-tools, shrewd-demos, shrewd-ui
 **Context:** Post constant/auxiliary unification (commit f37dd4b)
 
 ---
@@ -29,11 +29,11 @@ issues created (#72 bumped, #294–#339).
 
 | Module | Instruction Coverage | Branch Coverage | Assessment |
 |--------|---------------------|----------------|------------|
-| forrester-engine | 89% | 77% | Strong |
-| forrester-ui | 90% | 83% | Strong |
-| forrester-demos | 38% | 17% | Weak |
-| forrester-app | 41% | 35% | Weak (expected for JavaFX UI) |
-| forrester-tools | 62% | 54% | Moderate |
+| shrewd-engine | 89% | 77% | Strong |
+| shrewd-ui | 90% | 83% | Strong |
+| shrewd-demos | 38% | 17% | Weak |
+| shrewd-app | 41% | 35% | Weak (expected for JavaFX UI) |
+| shrewd-tools | 62% | 54% | Moderate |
 
 Coverage is essentially unchanged from Rev 5. The constant/auxiliary unification did not
 significantly alter coverage percentages since tests were migrated 1:1.

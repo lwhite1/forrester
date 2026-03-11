@@ -6,10 +6,10 @@ By the end, you'll have a working model that answers: *How long does it take for
 
 ---
 
-## 1. Launch Forrester and create a new model
+## 1. Launch Shrewd and create a new model
 
 ```bash
-java -jar forrester-app/target/forrester-app-*.jar
+java -jar shrewd-app/target/shrewd-app-*.jar
 ```
 
 A blank canvas opens. This is your workspace — you'll drag and drop elements here to build a visual model.

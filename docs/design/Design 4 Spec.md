@@ -108,7 +108,7 @@ The initial implementation is a JavaFX fat client talking to an LLM API over HTT
 │  │   emits change events)                          │  │
 │  └────────────────────┬───────────────────────────┘  │
 │  ┌────────────────────┴───────────────────────────┐  │
-│  │            Existing Forrester Engine             │  │
+│  │            Existing Shrewd Engine             │  │
 │  │  ModelDefinition → ModelCompiler → Simulation   │  │
 │  │  ParameterSweep, MonteCarlo, RunResult          │  │
 │  └────────────────────────────────────────────────┘  │
@@ -141,7 +141,7 @@ For the web port, the likely stack is:
 - **Canvas component:** HTML5 Canvas or SVG (SVG for smaller models, Canvas for large ones — same tradeoff as JavaFX)
 - **Conversation panel:** Standard web chat UI
 - **Behavior dashboard:** A charting library (D3, Observable Plot, or similar)
-- **Backend:** The Forrester engine running server-side on JVM, exposed via WebSocket for simulation streaming and REST for model CRUD
+- **Backend:** The Shrewd engine running server-side on JVM, exposed via WebSocket for simulation streaming and REST for model CRUD
 - **LLM integration:** Moves server-side; the client sends user messages, the server assembles prompts with model context
 
 > **Problem area: Model Façade portability.** If the Model Façade is in Java, the web client either needs a thin Java backend (fine for single-user, questionable for hosted multi-user) or the façade needs to be reimplemented in TypeScript. Keeping the façade logic minimal and well-documented reduces the porting cost.
@@ -502,7 +502,7 @@ When the user selects an element on the canvas, the conversation panel shows a s
 The conversation input supports:
 - **Natural language.** Default. The LLM interprets and may propose model changes.
 - **Command prefix.** Starting with `/` enters command mode (e.g., `/add stock "Burnout"`, `/run`, `/sweep recoveryRate 0.1 0.5 0.01`). Commands are parsed locally and execute immediately without an LLM round-trip. This is David's fast path.
-- **Equation input.** Starting with `=` enters equation mode. Typed directly as Forrester expressions, parsed by `ExprParser`, and applied to the currently selected element. Also David's path.
+- **Equation input.** Starting with `=` enters equation mode. Typed directly as Shrewd expressions, parsed by `ExprParser`, and applied to the currently selected element. Also David's path.
 
 > **Problem area: Command language design.** The command vocabulary needs to be small, memorable, and discoverable. If it's too large, it becomes its own learning curve. If it's too small, David falls back to natural language for everything and the speed advantage disappears. **Start with 10-15 commands max: add/remove/connect/disconnect/run/sweep/montecarlo/undo/redo/group/ungroup/export. Expand based on usage data.**
 
@@ -940,7 +940,7 @@ Elena has now crossed from the AI-only zone into the middle of the spectrum. She
 | Charts | D3.js, Observable Plot, or Chart.js | D3 for custom fan charts; Chart.js for standard line charts |
 | Conversation panel | React/Svelte component | Standard chat UI patterns |
 | Command palette | cmdk (React) or custom | Well-established libraries exist |
-| Backend | Spring Boot or Quarkus serving existing engine | Forrester engine stays on JVM; exposed via WebSocket + REST |
+| Backend | Spring Boot or Quarkus serving existing engine | Shrewd engine stays on JVM; exposed via WebSocket + REST |
 | LLM integration | Server-side (keeps API keys off client) | Same prompt assembly logic, moved to backend |
 | State sync | WebSocket for simulation streaming; REST for model CRUD | Real-time stock updates during simulation |
 
@@ -983,7 +983,7 @@ Complete the no-AI experience as a permanent first-class workflow, and add the a
 - Monte Carlo UI: configure distributions, iteration count, sampling method (random/LHS); fan chart and percentile envelopes in dashboard.
 - Optimization UI: configure objective function, parameter bounds, algorithm; progress and results in dashboard.
 
-These build on existing Forrester infrastructure (`ParameterSweep`, `MultiParameterSweep`, `MonteCarlo`, `MonteCarloResult`, `FanChart`, `Optimizer`). The engine work is done — this phase is GUI integration.
+These build on existing Shrewd infrastructure (`ParameterSweep`, `MultiParameterSweep`, `MonteCarlo`, `MonteCarloResult`, `FanChart`, `Optimizer`). The engine work is done — this phase is GUI integration.
 
 **Baseline question:** Can David build a model, run sensitivity analysis, calibrate against data, and export results — all from the GUI — without needing Vensim?
 

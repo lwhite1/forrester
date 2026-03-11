@@ -1,8 +1,8 @@
-# Forrester vs. Commercial System Dynamics Tools
+# Shrewd vs. Commercial System Dynamics Tools
 
 ## Overview
 
-This document compares Forrester against the major commercial SD tools: Vensim Professional/DSS, Stella Architect/Professional, AnyLogic, and Powersim Studio. Where the free competitive analysis (see `Competitive Analysis.md`) focuses on free tools, this document asks: how does Forrester compare to the tools that professional modelers actually pay for?
+This document compares Shrewd against the major commercial SD tools: Vensim Professional/DSS, Stella Architect/Professional, AnyLogic, and Powersim Studio. Where the free competitive analysis (see `Competitive Analysis.md`) focuses on free tools, this document asks: how does Shrewd compare to the tools that professional modelers actually pay for?
 
 ## Pricing Landscape
 
@@ -15,15 +15,15 @@ This document compares Forrester against the major commercial SD tools: Vensim P
 | **Stella Architect** | $3,999 perpetual; $539/2-month | $59–$699 (student–faculty) | Perpetual or subscription |
 | **AnyLogic Professional** | $12,390–$18,990/year | $3,550–$4,250/year | Subscription |
 | **Powersim Studio Professional** | ~€299 (~$325) | Academic version available | Perpetual |
-| **Forrester** | Free | Free | Open source |
+| **Shrewd** | Free | Free | Open source |
 
-**Key takeaway:** A researcher or educator choosing Forrester over Vensim Professional saves $1,195/year while gaining Monte Carlo, optimization, and multi-parameter sweeps. Compared to Stella Architect, the savings are $3,999 upfront. Against AnyLogic Professional, the difference is $12,000+/year.
+**Key takeaway:** A researcher or educator choosing Shrewd over Vensim Professional saves $1,195/year while gaining Monte Carlo, optimization, and multi-parameter sweeps. Compared to Stella Architect, the savings are $3,999 upfront. Against AnyLogic Professional, the difference is $12,000+/year.
 
 ## Feature Comparison
 
 ### Core Modeling
 
-| Capability | Vensim Pro/DSS | Stella Architect | AnyLogic | Powersim | Forrester |
+| Capability | Vensim Pro/DSS | Stella Architect | AnyLogic | Powersim | Shrewd |
 |---|---|---|---|---|---|
 | Stocks and flows | Yes | Yes | Yes | Yes | Yes |
 | Auxiliaries / converters | Yes | Yes | Yes | Yes | Yes |
@@ -35,11 +35,11 @@ This document compares Forrester against the major commercial SD tools: Vensim P
 | Discrete-event simulation | No | No | Yes | No | No |
 | Unit / dimensional analysis | Yes | Yes | Limited | Yes | Yes (8 dimensions, 40 units) |
 
-**Assessment.** On pure SD modeling, Forrester matches the commercial tools feature-for-feature on structural capabilities, including causal loop diagrams with automatic loop detection and R/B classification — a feature that goes beyond simple CLD drawing by providing analytical value. The only structural gap is hybrid modeling methods (AnyLogic's unique multi-method strength). Forrester's CLD-to-S&F classification workflow (right-click → "Classify as..." to morph qualitative variables into stocks, flows, auxiliaries, or constants) supports the conceptualization-to-formalization transition that SD methodology prescribes. Forrester's subscript system with Analytica-style broadcasting is competitive with Vensim's and Stella's array implementations.
+**Assessment.** On pure SD modeling, Shrewd matches the commercial tools feature-for-feature on structural capabilities, including causal loop diagrams with automatic loop detection and R/B classification — a feature that goes beyond simple CLD drawing by providing analytical value. The only structural gap is hybrid modeling methods (AnyLogic's unique multi-method strength). Shrewd's CLD-to-S&F classification workflow (right-click → "Classify as..." to morph qualitative variables into stocks, flows, auxiliaries, or constants) supports the conceptualization-to-formalization transition that SD methodology prescribes. Shrewd's subscript system with Analytica-style broadcasting is competitive with Vensim's and Stella's array implementations.
 
 ### Analysis & Simulation
 
-| Capability | Vensim Pro/DSS | Stella Architect | AnyLogic | Powersim | Forrester |
+| Capability | Vensim Pro/DSS | Stella Architect | AnyLogic | Powersim | Shrewd |
 |---|---|---|---|---|---|
 | Basic simulation | Yes | Yes | Yes | Yes | Yes |
 | Parameter sweeps | Yes | Yes | Yes | Yes | Yes (single + multi-parameter grid) |
@@ -51,11 +51,11 @@ This document compares Forrester against the major commercial SD tools: Vensim P
 | Database connectivity | Yes | Yes | Yes | Yes | No |
 | Real-time data input | Yes (DSS) | Yes (Architect) | Yes | Yes | No |
 
-**Assessment.** Forrester's analysis stack is competitive with Vensim Professional and Stella Professional — tools that cost $1,195–$2,999. The visual editor's Simulate menu provides dedicated dialogs for parameter sweeps, multi-parameter sweeps, Monte Carlo, and optimization, with results displayed in a tabbed dashboard. What Forrester lacks compared to the top commercial tiers: policy optimization (Vensim DSS, $1,995), database connectivity, and real-time data feeds. These are enterprise features that matter for deployed decision-support systems, not for research or education.
+**Assessment.** Shrewd's analysis stack is competitive with Vensim Professional and Stella Professional — tools that cost $1,195–$2,999. The visual editor's Simulate menu provides dedicated dialogs for parameter sweeps, multi-parameter sweeps, Monte Carlo, and optimization, with results displayed in a tabbed dashboard. What Shrewd lacks compared to the top commercial tiers: policy optimization (Vensim DSS, $1,995), database connectivity, and real-time data feeds. These are enterprise features that matter for deployed decision-support systems, not for research or education.
 
 ### Visual Editor & UX
 
-| Capability | Vensim Pro/DSS | Stella Architect | AnyLogic | Powersim | Forrester |
+| Capability | Vensim Pro/DSS | Stella Architect | AnyLogic | Powersim | Shrewd |
 |---|---|---|---|---|---|
 | Drag-and-drop model building | Yes | Yes | Yes | Yes | Yes |
 | Equation autocomplete | No | No | Yes | No | Yes |
@@ -71,11 +71,11 @@ This document compares Forrester against the major commercial SD tools: Vensim P
 | Bundled example models | Many | Many | Many | Yes | Yes (8 models, 5 categories) |
 | Context-sensitive help | Yes | Yes | Yes | Yes | Yes |
 
-**Assessment.** Stella Architect's standout feature is interface/dashboard design — building interactive front-ends for non-modeler stakeholders. AnyLogic offers 3D visualization and web publishing. These are presentation-layer features for deployed applications. For the modeling and analysis workflow itself, Forrester's editor holds up well: equation autocomplete, feedback loop highlighting, and connection interaction are features that even commercial tools often lack. The gap is in polish and maturity — 30 years of refinement shows in how smoothly Vensim and Stella handle edge cases.
+**Assessment.** Stella Architect's standout feature is interface/dashboard design — building interactive front-ends for non-modeler stakeholders. AnyLogic offers 3D visualization and web publishing. These are presentation-layer features for deployed applications. For the modeling and analysis workflow itself, Shrewd's editor holds up well: equation autocomplete, feedback loop highlighting, and connection interaction are features that even commercial tools often lack. The gap is in polish and maturity — 30 years of refinement shows in how smoothly Vensim and Stella handle edge cases.
 
 ### Interoperability & Integration
 
-| Capability | Vensim Pro/DSS | Stella Architect | AnyLogic | Powersim | Forrester |
+| Capability | Vensim Pro/DSS | Stella Architect | AnyLogic | Powersim | Shrewd |
 |---|---|---|---|---|---|
 | Native file format | .mdl / .vpmx | XMILE | .alp | .sip | JSON |
 | Vensim .mdl import | Native | No | No | No | Yes |
@@ -85,29 +85,29 @@ This document compares Forrester against the major commercial SD tools: Vensim P
 | Version control friendly | Text (.mdl) | XML (XMILE) | Binary | Binary | JSON (git-friendly) |
 | Expression AST access | No | No | No | No | Yes (public, sealed AST) |
 
-**Assessment.** Forrester is the only tool that can import from both Vensim (.mdl) and XMILE (Stella/iThink), making it the best format bridge in the SD ecosystem. The JSON serialization is more version-control friendly than any competitor's format. The public expression AST and clean Java API enable integration scenarios (CI pipelines, automated testing, embedding in larger applications) that commercial tools support only through C DLLs or COM interfaces.
+**Assessment.** Shrewd is the only tool that can import from both Vensim (.mdl) and XMILE (Stella/iThink), making it the best format bridge in the SD ecosystem. The JSON serialization is more version-control friendly than any competitor's format. The public expression AST and clean Java API enable integration scenarios (CI pipelines, automated testing, embedding in larger applications) that commercial tools support only through C DLLs or COM interfaces.
 
 ## Where Commercial Tools Still Win
 
-1. **Ecosystem maturity.** Vensim has thousands of published models, textbooks, university courses, and a large user community. Stella has isee Exchange for sharing models online. AnyLogic has an extensive model library and training program. Forrester has none of this — the 8 bundled examples are a start, but can't compete with decades of accumulated community content.
+1. **Ecosystem maturity.** Vensim has thousands of published models, textbooks, university courses, and a large user community. Stella has isee Exchange for sharing models online. AnyLogic has an extensive model library and training program. Shrewd has none of this — the 8 bundled examples are a start, but can't compete with decades of accumulated community content.
 
-2. **Interface/dashboard design.** Stella Architect and AnyLogic let modelers build interactive front-ends — sliders, buttons, custom layouts — for non-technical stakeholders to explore scenarios. Forrester has no equivalent. This matters for consulting engagements and decision-support deployments.
+2. **Interface/dashboard design.** Stella Architect and AnyLogic let modelers build interactive front-ends — sliders, buttons, custom layouts — for non-technical stakeholders to explore scenarios. Shrewd has no equivalent. This matters for consulting engagements and decision-support deployments.
 
-3. **Web publishing.** Stella Architect can publish models to the web for browser-based interaction. AnyLogic Cloud enables remote simulation. Forrester requires a JVM installation.
+3. **Web publishing.** Stella Architect can publish models to the web for browser-based interaction. AnyLogic Cloud enables remote simulation. Shrewd requires a JVM installation.
 
-4. **Enterprise integration.** Database connectivity, real-time data feeds, COM/DLL interfaces for embedding in enterprise systems. Commercial tools are designed for deployed decision-support; Forrester is designed for research and education.
+4. **Enterprise integration.** Database connectivity, real-time data feeds, COM/DLL interfaces for embedding in enterprise systems. Commercial tools are designed for deployed decision-support; Shrewd is designed for research and education.
 
-5. **Professional support.** Commercial licenses include technical support, training, and consulting services. Forrester has community support only.
+5. **Professional support.** Commercial licenses include technical support, training, and consulting services. Shrewd has community support only.
 
-6. **Causal loop diagram maturity.** All major commercial tools have had CLDs for decades with polished interaction. Forrester's CLD support is newer — it includes automatic loop detection and classification that commercial tools don't always offer, but the interaction polish may lag behind tools with years of CLD-specific refinement.
+6. **Causal loop diagram maturity.** All major commercial tools have had CLDs for decades with polished interaction. Shrewd's CLD support is newer — it includes automatic loop detection and classification that commercial tools don't always offer, but the interaction polish may lag behind tools with years of CLD-specific refinement.
 
-## Where Forrester Competes or Wins
+## Where Shrewd Competes or Wins
 
-1. **Cost.** Free vs. $1,195–$18,990/year. For students, researchers, startups, and educators in resource-constrained settings, this is decisive. A university department can deploy Forrester to 500 students at zero marginal cost.
+1. **Cost.** Free vs. $1,195–$18,990/year. For students, researchers, startups, and educators in resource-constrained settings, this is decisive. A university department can deploy Shrewd to 500 students at zero marginal cost.
 
-2. **Analysis features at the free tier.** Forrester's Monte Carlo, optimization, and multi-parameter sweeps match Vensim Professional ($1,195) and Stella Architect ($3,999). These are not stripped-down versions — they're full implementations with LHS sampling, multiple optimizer algorithms, and combinatorial grid analysis.
+2. **Analysis features at the free tier.** Shrewd's Monte Carlo, optimization, and multi-parameter sweeps match Vensim Professional ($1,195) and Stella Architect ($3,999). These are not stripped-down versions — they're full implementations with LHS sampling, multiple optimizer algorithms, and combinatorial grid analysis.
 
-3. **Code-first workflow.** No commercial SD tool offers a clean code API alongside a visual editor. Vensim has a C DLL; AnyLogic has a Java API but it's secondary to the GUI. Forrester treats code and visual modeling as equals — build in one, edit in the other, version-control both.
+3. **Code-first workflow.** No commercial SD tool offers a clean code API alongside a visual editor. Vensim has a C DLL; AnyLogic has a Java API but it's secondary to the GUI. Shrewd treats code and visual modeling as equals — build in one, edit in the other, version-control both.
 
 4. **Format interoperability.** The only tool that reads both Vensim .mdl and XMILE. A researcher can import a colleague's Vensim model, run Monte Carlo analysis that Vensim PLE doesn't support, and export results — without buying a Vensim Professional license.
 
@@ -117,7 +117,7 @@ This document compares Forrester against the major commercial SD tools: Vensim P
 
 ## Positioning Summary
 
-| Audience | Best commercial choice | Forrester competitive? | Notes |
+| Audience | Best commercial choice | Shrewd competitive? | Notes |
 |---|---|---|---|
 | Graduate researcher | Vensim Professional ($1,195) | Yes — strong alternative | Same analysis features, free, adds code API |
 | SD course instructor | Stella Professional ($2,999) or Vensim PLE Plus ($169) | Yes — strong alternative | Full analysis stack + CLDs with loop detection for free; supports the standard CLD-first pedagogical workflow |
@@ -129,6 +129,6 @@ This document compares Forrester against the major commercial SD tools: Vensim P
 
 ## Bottom Line
 
-Forrester is not trying to replace Stella Architect for consulting deployments or AnyLogic for hybrid simulation. Those tools serve enterprise needs (interface design, web publishing, multi-method modeling) that Forrester doesn't address.
+Shrewd is not trying to replace Stella Architect for consulting deployments or AnyLogic for hybrid simulation. Those tools serve enterprise needs (interface design, web publishing, multi-method modeling) that Shrewd doesn't address.
 
-Where Forrester competes directly is against Vensim Professional and Stella Professional — the $1,195–$2,999 tools that researchers and educators buy for Monte Carlo, optimization, and subscripts. Forrester offers equivalent analysis capabilities, better interoperability, and a unique code-first workflow, at zero cost. For the programmer-researcher and the budget-constrained educator, Forrester is already a credible alternative to tools that cost hundreds or thousands of dollars per year.
+Where Shrewd competes directly is against Vensim Professional and Stella Professional — the $1,195–$2,999 tools that researchers and educators buy for Monte Carlo, optimization, and subscripts. Shrewd offers equivalent analysis capabilities, better interoperability, and a unique code-first workflow, at zero cost. For the programmer-researcher and the budget-constrained educator, Shrewd is already a credible alternative to tools that cost hundreds or thousands of dollars per year.

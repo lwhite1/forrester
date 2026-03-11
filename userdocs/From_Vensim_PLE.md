@@ -1,6 +1,6 @@
-# From Vensim PLE to Forrester
+# From Vensim PLE to Shrewd
 
-You've been building System Dynamics models in Vensim PLE. You know stocks, flows, auxiliaries, and feedback loops. This guide shows you how to bring your models into Forrester and what you gain by switching.
+You've been building System Dynamics models in Vensim PLE. You know stocks, flows, auxiliaries, and feedback loops. This guide shows you how to bring your models into Shrewd and what you gain by switching.
 
 The short version: **File > Open** your `.mdl` file. Done. Your model loads with its diagram layout, equations, and simulation settings intact. But there's more to the story.
 
@@ -10,7 +10,7 @@ The short version: **File > Open** your `.mdl` file. Done. Your model loads with
 
 Vensim PLE is a learning tool. It's designed to get you started, and it does that well. But PLE locks you out of the features you need once your models grow serious:
 
-| Capability | Vensim PLE | Vensim Pro ($1,200/yr) | Forrester |
+| Capability | Vensim PLE | Vensim Pro ($1,200/yr) | Shrewd |
 |---|:---:|:---:|:---:|
 | Stocks, flows, auxiliaries | Yes | Yes | Yes |
 | Lookup tables | Yes | Yes | Yes |
@@ -25,7 +25,7 @@ Vensim PLE is a learning tool. It's designed to get you started, and it does tha
 | SVG diagram export | **No** | **No** | Yes |
 | Cost | Free | $1,200/year | Free |
 
-If you've ever wanted to sweep a parameter across a range, run a thousand Monte Carlo trials, or fit your model to observed data — and then hit PLE's paywall — Forrester gives you all of that at no cost.
+If you've ever wanted to sweep a parameter across a range, run a thousand Monte Carlo trials, or fit your model to observed data — and then hit PLE's paywall — Shrewd gives you all of that at no cost.
 
 ---
 
@@ -33,7 +33,7 @@ If you've ever wanted to sweep a parameter across a range, run a thousand Monte 
 
 ### In the visual editor
 
-1. Launch Forrester
+1. Launch Shrewd
 2. **File > Open** (or Ctrl+O)
 3. Select your `.mdl` file
 4. Your model appears on the canvas with its original layout
@@ -72,7 +72,7 @@ Most of what you've built in Vensim PLE works without changes.
 
 Your equations carry over with automatic name translation. Vensim's multi-word names become underscored identifiers:
 
-| Vensim | Forrester |
+| Vensim | Shrewd |
 |---|---|
 | `Contact Rate` | `Contact_Rate` |
 | `Total Population` | `Total_Population` |
@@ -81,7 +81,7 @@ You can also use backtick-quoted names for readability: `` `Contact Rate` ``.
 
 ### Operators and functions
 
-| Vensim | Forrester | Notes |
+| Vensim | Shrewd | Notes |
 |---|---|---|
 | `IF THEN ELSE(c, t, e)` | `IF(c, t, e)` | Same logic, shorter syntax |
 | `XIDZ(a, b, x)` | `IF(b == 0, x, a / b)` | Safe division, expanded |
@@ -111,13 +111,13 @@ The `SMOOTHI` and `DELAY1I` variants (with explicit initial values) also lose th
 
 ### PULSE semantics
 
-**This is the most important difference.** Vensim's `PULSE(start, width)` fires a pulse of magnitude `1/TIME STEP` starting at `start` for `width` time units. Forrester's `PULSE(magnitude, start)` fires a single-step pulse of the given magnitude at the start time.
+**This is the most important difference.** Vensim's `PULSE(start, width)` fires a pulse of magnitude `1/TIME STEP` starting at `start` for `width` time units. Shrewd's `PULSE(magnitude, start)` fires a single-step pulse of the given magnitude at the start time.
 
 If your model uses `PULSE`, check the equations after import and adjust manually.
 
 ### Data variables
 
-Variables defined with `:=` (Vensim's data variable syntax) are external data lookups. Forrester doesn't support external data binding, so these are skipped with a warning. You'll need to replace them — often a lookup table or constant works.
+Variables defined with `:=` (Vensim's data variable syntax) are external data lookups. Shrewd doesn't support external data binding, so these are skipped with a warning. You'll need to replace them — often a lookup table or constant works.
 
 ### Complex initial values
 
@@ -125,7 +125,7 @@ Stock initial values that are expressions rather than numbers (e.g., `INTEG(rate
 
 ### Macros
 
-Vensim macros (`:MACRO:` blocks) are skipped entirely. If your model uses macros, you'll need to inline the logic or use Forrester's module system instead.
+Vensim macros (`:MACRO:` blocks) are skipped entirely. If your model uses macros, you'll need to inline the logic or use Shrewd's module system instead.
 
 ---
 
@@ -133,7 +133,7 @@ Vensim macros (`:MACRO:` blocks) are skipped entirely. If your model uses macros
 
 ### Running a simulation
 
-| Step | Vensim PLE | Forrester |
+| Step | Vensim PLE | Shrewd |
 |---|---|---|
 | Set time horizon | Model > Settings | Simulate > Simulation Settings |
 | Run | Simulation menu or toolbar | Ctrl+R |
@@ -142,7 +142,7 @@ Vensim macros (`:MACRO:` blocks) are skipped entirely. If your model uses macros
 
 ### Editing equations
 
-| Step | Vensim PLE | Forrester |
+| Step | Vensim PLE | Shrewd |
 |---|---|---|
 | Edit | Click variable, type in panel | Double-click variable on canvas |
 | Autocomplete | No | Yes — press Tab to accept suggestions |
@@ -150,7 +150,7 @@ Vensim macros (`:MACRO:` blocks) are skipped entirely. If your model uses macros
 
 ### Building a model from scratch
 
-| Step | Vensim PLE | Forrester |
+| Step | Vensim PLE | Shrewd |
 |---|---|---|
 | Add stock | Click Stock tool, click canvas | Press 2 (or toolbar), click canvas |
 | Add flow | Click Rate tool, drag | Press 3, click source, click sink |
@@ -158,7 +158,7 @@ Vensim macros (`:MACRO:` blocks) are skipped entirely. If your model uses macros
 | Add constant | (use variable with number) | Press 5, click canvas |
 | Connect | Draw arrow | Equations auto-connect when you reference a variable |
 
-Forrester distinguishes constants from variables. In Vensim PLE, a constant is just a variable with a number (called an "auxiliary" in Vensim terminology). In Forrester, constants are a first-class element type — they appear differently on the diagram and can be targeted by parameter sweeps.
+Shrewd distinguishes constants from variables. In Vensim PLE, a constant is just a variable with a number (called an "auxiliary" in Vensim terminology). In Shrewd, constants are a first-class element type — they appear differently on the diagram and can be targeted by parameter sweeps.
 
 ---
 
@@ -203,7 +203,7 @@ Fit your model to observed data or find optimal parameter values:
 2. Choose an objective: minimize, maximize, hit a target, or fit to a time series
 3. Select which parameters to vary and set bounds
 4. Choose an algorithm (Nelder-Mead, BOBYQA, or CMA-ES)
-5. Run — Forrester finds the best parameter values
+5. Run — Shrewd finds the best parameter values
 
 This is how you calibrate a model against real data. Vensim requires the Pro license ($1,200/year) for this.
 
@@ -213,10 +213,10 @@ Sketch out your system's feedback structure before formalizing:
 
 - Press **8** to place CLD variables
 - Press **9** to draw causal links with polarity (+, -, ?)
-- Forrester automatically detects feedback loops and classifies them as reinforcing (R) or balancing (B)
+- Shrewd automatically detects feedback loops and classifies them as reinforcing (R) or balancing (B)
 - When you're ready, right-click a CLD variable and classify it as a stock, flow, variable, or constant
 
-In Vensim, CLDs are a separate tool (Vensim CLD). In Forrester, CLDs and stock-and-flow diagrams share the same canvas.
+In Vensim, CLDs are a separate tool (Vensim CLD). In Shrewd, CLDs and stock-and-flow diagrams share the same canvas.
 
 ### Modules
 
@@ -231,7 +231,7 @@ Break large models into reusable sub-models:
 
 Add dimensions to your elements without duplicating them:
 
-Define a subscript range (e.g., `Region: North, South, East`) and apply it to stocks, flows, and auxiliaries. Forrester expands them into parallel instances automatically.
+Define a subscript range (e.g., `Region: North, South, East`) and apply it to stocks, flows, and auxiliaries. Shrewd expands them into parallel instances automatically.
 
 In Vensim PLE, subscripts are locked behind the Pro paywall.
 
@@ -245,11 +245,11 @@ In Vensim PLE, subscripts are locked behind the Pro paywall.
 
 3. **Review warnings in the activity log.** The importer tells you exactly what it changed or couldn't handle.
 
-4. **Save in Forrester's native format** (.json) after import. This preserves everything including your layout, and loads faster than re-parsing `.mdl` each time.
+4. **Save in Shrewd's native format** (.json) after import. This preserves everything including your layout, and loads faster than re-parsing `.mdl` each time.
 
 5. **Try a parameter sweep immediately.** Pick any constant in your model and sweep it. Seeing a family of curves instead of a single run is the fastest way to appreciate what you've gained.
 
-6. **Use keyboard shortcuts.** Forrester is keyboard-driven: numbers 1-9 for tools, Ctrl+R to run, Ctrl+B to validate, Ctrl+Z to undo. Press Ctrl+Shift+P to open the command palette.
+6. **Use keyboard shortcuts.** Shrewd is keyboard-driven: numbers 1-9 for tools, Ctrl+R to run, Ctrl+B to validate, Ctrl+Z to undo. Press Ctrl+Shift+P to open the command palette.
 
 ---
 

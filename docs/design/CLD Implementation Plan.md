@@ -4,7 +4,7 @@
 
 CLD support addresses three gaps:
 
-1. **Market expectation.** Every competing SD tool (Vensim, Stella, Insight Maker) offers CLD. Without it, Forrester lacks the entry point that most SD practitioners use to begin modeling.
+1. **Market expectation.** Every competing SD tool (Vensim, Stella, Insight Maker) offers CLD. Without it, Shrewd lacks the entry point that most SD practitioners use to begin modeling.
 2. **Pedagogical workflow.** SD education starts with CLDs. Students sketch causal structure qualitatively before formalizing into stock-and-flow. A tool that only supports S&F forces users to start at the hard end.
 3. **Design 4 alignment.** The Design 4 spec describes "unclassified variables" rendered in "CLD style" that morph into S&F elements. CLD support makes this morphing meaningful — the starting point is a real CLD with loop analysis, not just generic boxes.
 
@@ -35,7 +35,7 @@ When the user draws CLD variables and links, the system automatically detects fe
 
 ## Data Model
 
-### New records (forrester-engine, model/def/)
+### New records (shrewd-engine, model/def/)
 
 ```java
 // A qualitative variable in a causal loop diagram

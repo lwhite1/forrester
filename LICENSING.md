@@ -6,26 +6,26 @@ separate license.
 
 ## Project Source Code — AGPL-3.0
 
-All Java source code in `forrester-engine`, `forrester-ui`, `forrester-app`,
-and `forrester-tools` is licensed under the
+All Java source code in `shrewd-engine`, `shrewd-ui`, `shrewd-app`,
+and `shrewd-tools` is licensed under the
 **GNU Affero General Public License v3.0**.
 
 See [`LICENSE`](LICENSE) in the project root.
 
 ## Demo Models & Code — CC-BY-SA-4.0
 
-Original demo models and their Java source files in `forrester-demos` are
+Original demo models and their Java source files in `shrewd-demos` are
 licensed under **Creative Commons Attribution-ShareAlike 4.0 International**.
 This covers both the model content (equations, parameters, structure) and
 the hand-written Java code that constructs them.
 
-See [`forrester-demos/LICENSE`](forrester-demos/LICENSE).
+See [`shrewd-demos/LICENSE`](shrewd-demos/LICENSE).
 
 ## Third-Party Models — CC-BY-NC-SA-4.0
 
 Imported models from TU Delft (Pruyt, 2013) are licensed under
 **Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International**.
-This applies to the JSON model definitions under `forrester-app/src/main/resources/models/`
+This applies to the JSON model definitions under `shrewd-app/src/main/resources/models/`
 and any generated Java demo classes derived from them.
 
 See [`THIRD-PARTY-LICENSES`](THIRD-PARTY-LICENSES) for the full list of
@@ -46,7 +46,7 @@ the license of the underlying model content, not the engine.
 | Component                | License          | File                        |
 |--------------------------|------------------|-----------------------------|
 | Engine, UI, app, tools   | AGPL-3.0         | `LICENSE`                   |
-| Original demo models     | CC-BY-SA-4.0     | `forrester-demos/LICENSE`   |
+| Original demo models     | CC-BY-SA-4.0     | `shrewd-demos/LICENSE`   |
 | TU Delft / Pruyt models  | CC-BY-NC-SA-4.0  | `THIRD-PARTY-LICENSES`      |
 
 ## Viewing Model Metadata

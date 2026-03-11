@@ -1,8 +1,8 @@
-# Forrester — System Dynamics Modeling Tool
+# Shrewd — System Dynamics Modeling Tool
 
 > **Alpha-1 Release** — This system is at Alpha-1 release readiness and is not ready for production use. APIs, file formats, and features may change without notice.
 
-Forrester is an open-source [System Dynamics](userdocs/Key%20Reasons%20for%20Using%20System%20Dynamics.md) simulation engine and visual modeling environment for Java. It provides two ways to build and run models:
+Shrewd is an open-source [System Dynamics](userdocs/Key%20Reasons%20for%20Using%20System%20Dynamics.md) simulation engine and visual modeling environment for Java. It provides two ways to build and run models:
 
 - **Visual Editor** — a JavaFX canvas-based GUI for interactively building stock-and-flow diagrams and causal loop diagrams
 - **Programmable Engine** — a code-first Java API for defining, compiling, and running models programmatically
@@ -45,7 +45,7 @@ mvn clean package -DskipTests
 ### Run the Visual Editor
 
 ```bash
-java -jar forrester-app/target/forrester-app-*.jar
+java -jar shrewd-app/target/shrewd-app-*.jar
 ```
 
 Open an example model via **File → Open Example** to explore the 35 bundled models.
@@ -113,7 +113,7 @@ CompiledModel compiled = new ModelCompiler().compile(def);
 compiled.createSimulation().execute();
 ```
 
-See [Programmable Engine](docs/Programmable%20Engine.md) for the full API reference. The 23 runnable demos in `forrester-demos` cover exponential growth, delays, feedback, epidemiology, predator-prey, inventory management, and software development models.
+See [Programmable Engine](docs/Programmable%20Engine.md) for the full API reference. The 23 runnable demos in `shrewd-demos` cover exponential growth, delays, feedback, epidemiology, predator-prey, inventory management, and software development models.
 
 ## Core Concepts
 
@@ -129,7 +129,7 @@ System Dynamics models represent a system as a network of stocks, flows, and fee
 
 ### Causal Loop Diagrams
 
-Forrester also supports **Causal Loop Diagrams (CLDs)** — the qualitative diagramming technique used in early-stage system dynamics modeling:
+Shrewd also supports **Causal Loop Diagrams (CLDs)** — the qualitative diagramming technique used in early-stage system dynamics modeling:
 
 - **CLD Variables** — qualitative concepts with no equation or unit
 - **Causal Links** — directed connections with polarity: positive (+), negative (−), or unknown (?)
@@ -144,15 +144,15 @@ CLDs and S&F elements share a single canvas and model definition.
 
 | Module | Purpose |
 |---|---|
-| **forrester-engine** | Core simulation engine, model definitions, expression AST and parser, two-pass compiler, dependency graphs, dimensional analysis, parameter sweeps, Monte Carlo, optimization, JSON/Vensim/XMILE I/O |
-| **forrester-ui** | JavaFX chart visualization components |
-| **forrester-demos** | 23 runnable example programs with source code |
-| **forrester-app** | Visual editor application with canvas-based GUI, inline editing, simulation, and analysis |
-| **forrester-tools** | Model analysis and transformation utilities |
+| **shrewd-engine** | Core simulation engine, model definitions, expression AST and parser, two-pass compiler, dependency graphs, dimensional analysis, parameter sweeps, Monte Carlo, optimization, JSON/Vensim/XMILE I/O |
+| **shrewd-ui** | JavaFX chart visualization components |
+| **shrewd-demos** | 23 runnable example programs with source code |
+| **shrewd-app** | Visual editor application with canvas-based GUI, inline editing, simulation, and analysis |
+| **shrewd-tools** | Model analysis and transformation utilities |
 
 ## Model Import & Export
 
-Forrester can exchange models with other System Dynamics tools:
+Shrewd can exchange models with other System Dynamics tools:
 
 - **Vensim `.mdl` import** — reads Vensim model files including stocks, flows, auxiliaries, constants, lookup tables, subscripts, sketch data, and simulation settings. See [Vensim Import](docs/Vensim%20Import.md).
 - **XMILE import & export** — bidirectional exchange with Stella/iThink via the OASIS standard XML format. See [XMILE Import & Export](docs/XMILE%20Import%20Export.md).
