@@ -33,6 +33,64 @@ class DefinitionValidatorTest {
     }
 
     @Test
+    void shouldDetectCaseInsensitiveDuplicateStockAndAux() {
+        ModelDefinition def = new ModelDefinitionBuilder()
+                .name("CaseDup")
+                .stock("Population", 100, "Person")
+                .constant("population", 0.04, "Dimensionless")
+                .build();
+        List<String> errors = DefinitionValidator.validate(def);
+        assertThat(errors).anyMatch(e -> e.contains("case-insensitive")
+                && e.contains("population") && e.contains("Population"));
+    }
+
+    @Test
+    void shouldDetectCaseInsensitiveDuplicateFlowAndAux() {
+        ModelDefinition def = new ModelDefinitionBuilder()
+                .name("CaseDup")
+                .stock("S", 100, "Person")
+                .flow("Drain", "S * Rate", "Day", "S", null)
+                .constant("drain", 0.1, "Dimensionless")
+                .build();
+        List<String> errors = DefinitionValidator.validate(def);
+        assertThat(errors).anyMatch(e -> e.contains("case-insensitive")
+                && e.contains("drain") && e.contains("Drain"));
+    }
+
+    @Test
+    void shouldDetectCaseInsensitiveDuplicateAcrossModulesAndStocks() {
+        ModelDefinition def = new ModelDefinitionBuilder()
+                .name("CaseDup")
+                .stock("Alpha", 0, "Thing")
+                .aux("ALPHA", "10", "Thing")
+                .build();
+        List<String> errors = DefinitionValidator.validate(def);
+        assertThat(errors).anyMatch(e -> e.contains("case-insensitive"));
+    }
+
+    @Test
+    void shouldStillDetectExactDuplicateNames() {
+        ModelDefinition def = new ModelDefinitionBuilder()
+                .name("Dup")
+                .stock("S", 100, "Person")
+                .constant("S", 5.0, "Person")
+                .build();
+        List<String> errors = DefinitionValidator.validate(def);
+        assertThat(errors).anyMatch(e -> e.contains("Duplicate element name: 'S'"));
+    }
+
+    @Test
+    void shouldAllowDistinctNamesWithDifferentCase() {
+        ModelDefinition def = new ModelDefinitionBuilder()
+                .name("OK")
+                .stock("Alpha", 100, "Thing")
+                .constant("Beta", 5, "Thing")
+                .build();
+        List<String> errors = DefinitionValidator.validate(def);
+        assertThat(errors).noneMatch(e -> e.contains("Duplicate"));
+    }
+
+    @Test
     void shouldDetectDanglingFlowSource() {
         ModelDefinition def = new ModelDefinitionBuilder()
                 .name("Bad")

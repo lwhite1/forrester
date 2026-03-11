@@ -10,8 +10,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -31,43 +34,27 @@ public final class DefinitionValidator {
     public static List<String> validate(ModelDefinition def) {
         List<String> errors = new ArrayList<>();
         Set<String> allNames = new HashSet<>();
+        // Case-insensitive duplicate detection: maps lowercase → first-seen original name
+        Map<String, String> lowerToOriginal = new HashMap<>();
 
-        // Collect all element names and check for duplicates
+        // Collect all element names and check for duplicates (case-insensitive)
         for (StockDef stock : def.stocks()) {
-            if (!allNames.add(stock.name())) {
-                errors.add("Duplicate element name: '" + stock.name()
-                        + "'. Rename one of the elements to make names unique.");
-            }
+            checkDuplicateName(stock.name(), allNames, lowerToOriginal, errors);
         }
         for (FlowDef flow : def.flows()) {
-            if (!allNames.add(flow.name())) {
-                errors.add("Duplicate element name: '" + flow.name()
-                        + "'. Rename one of the elements to make names unique.");
-            }
+            checkDuplicateName(flow.name(), allNames, lowerToOriginal, errors);
         }
         for (AuxDef aux : def.auxiliaries()) {
-            if (!allNames.add(aux.name())) {
-                errors.add("Duplicate element name: '" + aux.name()
-                        + "'. Rename one of the elements to make names unique.");
-            }
+            checkDuplicateName(aux.name(), allNames, lowerToOriginal, errors);
         }
         for (LookupTableDef table : def.lookupTables()) {
-            if (!allNames.add(table.name())) {
-                errors.add("Duplicate element name: '" + table.name()
-                        + "'. Rename one of the elements to make names unique.");
-            }
+            checkDuplicateName(table.name(), allNames, lowerToOriginal, errors);
         }
         for (ModuleInstanceDef module : def.modules()) {
-            if (!allNames.add(module.instanceName())) {
-                errors.add("Duplicate element name: '" + module.instanceName()
-                        + "'. Rename one of the elements to make names unique.");
-            }
+            checkDuplicateName(module.instanceName(), allNames, lowerToOriginal, errors);
         }
         for (CldVariableDef v : def.cldVariables()) {
-            if (!allNames.add(v.name())) {
-                errors.add("Duplicate element name: '" + v.name()
-                        + "'. Rename one of the elements to make names unique.");
-            }
+            checkDuplicateName(v.name(), allNames, lowerToOriginal, errors);
         }
 
         // Build set of stock names for flow source/sink validation
@@ -236,6 +223,24 @@ public final class DefinitionValidator {
                 }
             } catch (ParseException ex) {
                 log.debug("Already reported parse error in auxiliary '{}': {}", aux.name(), ex.getMessage(), ex);
+            }
+        }
+    }
+
+    private static void checkDuplicateName(String name, Set<String> allNames,
+                                              Map<String, String> lowerToOriginal,
+                                              List<String> errors) {
+        allNames.add(name);
+        String lower = name.toLowerCase(Locale.ROOT);
+        String existing = lowerToOriginal.putIfAbsent(lower, name);
+        if (existing != null) {
+            if (existing.equals(name)) {
+                errors.add("Duplicate element name: '" + name
+                        + "'. Rename one of the elements to make names unique.");
+            } else {
+                errors.add("Duplicate element name (case-insensitive): '" + name
+                        + "' conflicts with '" + existing
+                        + "'. Rename one of the elements to make names unique.");
             }
         }
     }
