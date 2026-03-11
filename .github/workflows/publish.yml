@@ -1,4 +1,4 @@
-name: Publish Packages
+name: Publish to Maven Central
 
 on:
   release:
@@ -10,7 +10,6 @@ jobs:
 
     permissions:
       contents: read
-      packages: write
 
     steps:
       - uses: actions/checkout@v4
@@ -22,10 +21,32 @@ jobs:
           distribution: 'temurin'
           cache: maven
 
+      - name: Import GPG key
+        uses: crazy-max/ghaction-import-gpg@v6
+        with:
+          gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
+          passphrase: ${{ secrets.GPG_PASSPHRASE }}
+
+      - name: Configure Maven settings
+        run: |
+          mkdir -p ~/.m2
+          cat > ~/.m2/settings.xml << 'SETTINGS'
+          <settings>
+            <servers>
+              <server>
+                <id>central</id>
+                <username>${env.CENTRAL_USERNAME}</username>
+                <password>${env.CENTRAL_PASSWORD}</password>
+              </server>
+            </servers>
+          </settings>
+          SETTINGS
+
       - name: Build and test
         run: mvn verify -B -q
 
-      - name: Publish to GitHub Packages
-        run: mvn deploy -B -q -DskipTests
+      - name: Publish to Maven Central
+        run: mvn deploy -B -q -DskipTests -Prelease
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          CENTRAL_USERNAME: ${{ secrets.CENTRAL_USERNAME }}
+          CENTRAL_PASSWORD: ${{ secrets.CENTRAL_PASSWORD }}
