@@ -14,4 +14,4 @@ target/
 .claude/
 tub.csv
 doc/temp/
-docs/private/
+devdocs/

@@ -11,7 +11,7 @@ This is a Java project. Follow these conventions and guidelines when working on 
   Create agents to do a deep analysis of the entire codebase. Run StopBugs. Run JaCoCo for coverage, 
   but don't write a coverage report, just summarize any weaknesses. 
   For every problem found, create an issue in github unless one already exists. 
-  Create a summary report in the docs/quality folder using the current date and timestamp for the file name. 
+  Create a summary report in the devdocs/quality folder using the current date and timestamp for the file name. 
   If it's slow use more agents. Don't skip any part of this process.
 
 
