@@ -12,6 +12,7 @@ import systems.courant.shrewd.model.def.ModelDefinitionBuilder;
 import systems.courant.shrewd.model.def.ModuleInstanceDef;
 import systems.courant.shrewd.model.def.SimulationSettings;
 import systems.courant.shrewd.model.def.StockDef;
+import systems.courant.shrewd.model.def.SubscriptDef;
 import systems.courant.shrewd.model.def.ViewDef;
 
 import java.util.List;
@@ -89,6 +90,42 @@ class ModelEditorTest {
             assertThat(editor.getStocks()).isEmpty();
             assertThat(editor.getAuxiliaries()).hasSize(1); // constant is now an aux
             assertThat(editor.getModelName()).isEqualTo("Second");
+        }
+
+        @Test
+        void shouldLoadSubscriptDefinitions() {
+            ModelDefinition def = new ModelDefinitionBuilder()
+                    .name("Subscripted")
+                    .subscript("Region", List.of("North", "South", "East"))
+                    .subscript("Age", List.of("Young", "Old"))
+                    .stock("Pop", 100, "people")
+                    .build();
+
+            editor.loadFrom(def);
+
+            assertThat(editor.getSubscripts()).hasSize(2);
+            assertThat(editor.getSubscripts().get(0).name()).isEqualTo("Region");
+            assertThat(editor.getSubscripts().get(0).labels()).containsExactly("North", "South", "East");
+            assertThat(editor.getSubscripts().get(1).name()).isEqualTo("Age");
+            assertThat(editor.getSubscripts().get(1).labels()).containsExactly("Young", "Old");
+        }
+
+        @Test
+        void shouldClearSubscriptsOnReload() {
+            ModelDefinition def1 = new ModelDefinitionBuilder()
+                    .name("First")
+                    .subscript("Region", List.of("North", "South"))
+                    .build();
+            editor.loadFrom(def1);
+            assertThat(editor.getSubscripts()).hasSize(1);
+
+            ModelDefinition def2 = new ModelDefinitionBuilder()
+                    .name("Second")
+                    .stock("S", 0, "u")
+                    .build();
+            editor.loadFrom(def2);
+
+            assertThat(editor.getSubscripts()).isEmpty();
         }
     }
 
@@ -647,6 +684,36 @@ class ModelEditorTest {
             ModelDefinition def = editor.toModelDefinition(null);
 
             assertThat(def.views()).isEmpty();
+        }
+
+        @Test
+        void shouldRoundTripSubscriptDefinitions() {
+            ModelDefinition original = new ModelDefinitionBuilder()
+                    .name("Subscripted")
+                    .subscript("Region", List.of("North", "South", "East"))
+                    .subscript("Age", List.of("Young", "Old"))
+                    .stock("Pop", 100, "people", List.of("Region", "Age"))
+                    .build();
+
+            editor.loadFrom(original);
+            ModelDefinition rebuilt = editor.toModelDefinition();
+
+            assertThat(rebuilt.subscripts()).hasSize(2);
+            assertThat(rebuilt.subscripts().get(0).name()).isEqualTo("Region");
+            assertThat(rebuilt.subscripts().get(0).labels()).containsExactly("North", "South", "East");
+            assertThat(rebuilt.subscripts().get(1).name()).isEqualTo("Age");
+            assertThat(rebuilt.subscripts().get(1).labels()).containsExactly("Young", "Old");
+
+            // Verify the stock's subscript references also survived
+            assertThat(rebuilt.stocks().get(0).subscripts()).containsExactly("Region", "Age");
+        }
+
+        @Test
+        void shouldPreserveEmptySubscriptsWhenNoneDefined() {
+            editor.addStock();
+            ModelDefinition def = editor.toModelDefinition();
+
+            assertThat(def.subscripts()).isEmpty();
         }
 
         @Test

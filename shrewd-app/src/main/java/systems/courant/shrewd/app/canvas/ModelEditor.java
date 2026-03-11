@@ -15,6 +15,7 @@ import systems.courant.shrewd.model.def.ModuleInterface;
 import systems.courant.shrewd.model.def.ReferenceDataset;
 import systems.courant.shrewd.model.def.SimulationSettings;
 import systems.courant.shrewd.model.def.StockDef;
+import systems.courant.shrewd.model.def.SubscriptDef;
 import systems.courant.shrewd.model.def.ViewDef;
 import systems.courant.shrewd.model.graph.ConnectorGenerator;
 
@@ -64,6 +65,7 @@ public class ModelEditor {
     private final List<CldVariableDef> cldVariables = new ArrayList<>();
     private final List<CausalLinkDef> causalLinks = new ArrayList<>();
     private final List<CommentDef> comments = new ArrayList<>();
+    private final List<SubscriptDef> subscripts = new ArrayList<>();
     private final List<ReferenceDataset> referenceDatasets = new ArrayList<>();
     private final Set<String> nameIndex = new HashSet<>();
     private final List<ModelEditListener> listeners = new CopyOnWriteArrayList<>();
@@ -138,6 +140,7 @@ public class ModelEditor {
         cldVariables.clear();
         causalLinks.clear();
         comments.clear();
+        subscripts.clear();
         referenceDatasets.clear();
         nameIndex.clear();
 
@@ -149,6 +152,7 @@ public class ModelEditor {
         cldVariables.addAll(definition.cldVariables());
         causalLinks.addAll(definition.causalLinks());
         comments.addAll(definition.comments());
+        subscripts.addAll(definition.subscripts());
         referenceDatasets.addAll(definition.referenceDatasets());
         simulationSettings = definition.defaultSimulation();
         metadata = definition.metadata();
@@ -868,6 +872,10 @@ public class ModelEditor {
         return Collections.unmodifiableList(auxiliaries);
     }
 
+    public List<SubscriptDef> getSubscripts() {
+        return Collections.unmodifiableList(subscripts);
+    }
+
     /**
      * Returns the names of literal-valued auxiliaries (tunable parameters).
      */
@@ -1221,7 +1229,7 @@ public class ModelEditor {
                 List.copyOf(auxiliaries),
                 List.copyOf(lookupTables),
                 List.copyOf(modules),
-                List.of(),
+                List.copyOf(subscripts),
                 List.copyOf(cldVariables),
                 List.copyOf(causalLinks),
                 List.copyOf(comments),
