@@ -154,8 +154,8 @@ CLDs and S&F elements share a single canvas and model definition.
 
 Shrewd can exchange models with other System Dynamics tools:
 
-- **Vensim `.mdl` import** — reads Vensim model files including stocks, flows, auxiliaries, constants, lookup tables, subscripts, sketch data, and simulation settings. See [Vensim Import](docs/Vensim%20Import.md).
-- **XMILE import & export** — bidirectional exchange with Stella/iThink via the OASIS standard XML format. See [XMILE Import & Export](docs/XMILE%20Import%20Export.md).
+- **Vensim `.mdl` import** — reads Vensim model files including stocks, flows, auxiliaries, constants, lookup tables, subscripts, sketch data, and simulation settings. See [Vensim Import](userdocs/Vensim%20Import.md).
+- **XMILE import & export** — bidirectional exchange with Stella/iThink via the OASIS standard XML format. See [XMILE Import & Export](userdocs/XMILE%20Import%20Export.md).
 - **JSON** — native round-trip persistence format. See [Programmable Engine](docs/Programmable%20Engine.md#json-serialization).
 
 ## Example Models
@@ -182,8 +182,8 @@ Shrewd can exchange models with other System Dynamics tools:
 | [Programmable Engine](docs/Programmable%20Engine.md) | Code API: lambda-based models, definitions, compiler, expressions, sweep/Monte Carlo/optimization |
 | [Expression Language](userdocs/Expression_Language.md) | Equation syntax, operators, and built-in functions reference |
 | [From Vensim PLE](userdocs/From_Vensim_PLE.md) | Migration guide for Vensim PLE users |
-| [Vensim Import](docs/Vensim%20Import.md) | Vensim `.mdl` import: supported constructs and limitations |
-| [XMILE Import & Export](docs/XMILE%20Import%20Export.md) | XMILE import/export: supported constructs and limitations |
+| [Vensim Import](userdocs/Vensim%20Import.md) | Vensim `.mdl` import: supported constructs and limitations |
+| [XMILE Import & Export](userdocs/XMILE%20Import%20Export.md) | XMILE import/export: supported constructs and limitations |
 
 ## Learning System Dynamics
 
