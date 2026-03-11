@@ -996,6 +996,14 @@ public class ModelWindow {
         return editor;
     }
 
+    boolean isDirty() {
+        return fileController.isDirty();
+    }
+
+    FileController getFileController() {
+        return fileController;
+    }
+
     ModelCanvas getCanvas() {
         return canvas;
     }

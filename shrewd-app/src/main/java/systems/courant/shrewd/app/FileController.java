@@ -209,27 +209,29 @@ final class FileController {
             return;
         }
         LastDirectoryStore.recordSaveDirectory(file);
+        saveToChosenFile(file);
+    }
 
+    /** Exports the current canvas model to the given file, choosing format by extension. */
+    void saveToChosenFile(File file) {
         String name = file.getName();
         String ext = name.contains(".") ? name.substring(name.lastIndexOf('.')).toLowerCase() : "";
 
         try {
             ModelDefinition def = canvas.toModelDefinition();
             switch (ext) {
-                case ".mdl" -> {
-                    VensimExporter.toFile(def, file.toPath());
-                    fireLogEvent.accept(l -> l.onModelSaved(name));
-                }
-                case ".xmile", ".stmx", ".itmx" -> {
-                    XmileExporter.toFile(def, file.toPath());
-                    fireLogEvent.accept(l -> l.onModelSaved(name));
-                }
+                case ".mdl" -> VensimExporter.toFile(def, file.toPath());
+                case ".xmile", ".stmx", ".itmx" -> XmileExporter.toFile(def, file.toPath());
                 default -> {
                     currentFile = file.toPath();
                     saveToFile(currentFile);
                     return;
                 }
             }
+            currentFile = file.toPath();
+            dirty = false;
+            updateTitle.run();
+            fireLogEvent.accept(l -> l.onModelSaved(name));
         } catch (IOException ex) {
             showError.accept("Failed to save file: " + ex.getMessage());
         } catch (RuntimeException ex) {
