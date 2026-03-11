@@ -6,8 +6,10 @@ import systems.courant.shrewd.event.TimeStepEvent;
 import systems.courant.shrewd.measure.Quantity;
 import systems.courant.shrewd.measure.TimeUnit;
 import systems.courant.shrewd.measure.UnitRegistry;
+import systems.courant.shrewd.model.Flow;
 import systems.courant.shrewd.model.Model;
 import systems.courant.shrewd.model.Stock;
+import systems.courant.shrewd.model.Variable;
 import systems.courant.shrewd.model.def.ModelDefinition;
 import systems.courant.shrewd.model.def.SimulationSettings;
 import java.util.LinkedHashMap;
@@ -144,6 +146,12 @@ public class CompiledModel {
         }
         for (Map.Entry<Stock, Double> entry : initialStockValues.entrySet()) {
             entry.getKey().setValue(entry.getValue());
+        }
+        for (Flow flow : model.getFlows()) {
+            flow.clearHistory();
+        }
+        for (Variable variable : model.getVariables()) {
+            variable.clearHistory();
         }
     }
 
