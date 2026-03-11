@@ -286,6 +286,55 @@ class DefinitionValidatorTest {
         }
     }
 
+    @Nested
+    @DisplayName("validateStructure vs validate")
+    class StructureVsFullValidation {
+
+        @Test
+        void validateStructureShouldExcludeViewErrors() {
+            ModelDefinition def = new ModelDefinitionBuilder()
+                    .name("Test")
+                    .stock("S", 100, "Person")
+                    .view(new ViewDef("Main",
+                            List.of(new ElementPlacement("NonExistent", ElementType.AUX,
+                                    100, 100, 0, 0)),
+                            List.of(), List.of()))
+                    .build();
+            List<String> structureErrors = DefinitionValidator.validateStructure(def);
+            assertThat(structureErrors).noneMatch(e -> e.contains("View"));
+        }
+
+        @Test
+        void validateShouldIncludeViewErrors() {
+            ModelDefinition def = new ModelDefinitionBuilder()
+                    .name("Test")
+                    .stock("S", 100, "Person")
+                    .view(new ViewDef("Main",
+                            List.of(new ElementPlacement("NonExistent", ElementType.AUX,
+                                    100, 100, 0, 0)),
+                            List.of(), List.of()))
+                    .build();
+            List<String> allErrors = DefinitionValidator.validate(def);
+            assertThat(allErrors).anyMatch(e -> e.contains("View"));
+        }
+
+        @Test
+        void validateStructureShouldStillIncludeStructuralErrors() {
+            ModelDefinition def = new ModelDefinitionBuilder()
+                    .name("Test")
+                    .stock("S", 100, "Person")
+                    .flow("F", "S +", "Day", "S", null)
+                    .view(new ViewDef("Main",
+                            List.of(new ElementPlacement("NonExistent", ElementType.AUX,
+                                    100, 100, 0, 0)),
+                            List.of(), List.of()))
+                    .build();
+            List<String> structureErrors = DefinitionValidator.validateStructure(def);
+            assertThat(structureErrors).anyMatch(e -> e.contains("invalid equation"));
+            assertThat(structureErrors).noneMatch(e -> e.contains("View"));
+        }
+    }
+
     private ModelDefinition buildSIR() {
         return new ModelDefinitionBuilder()
                 .name("SIR Model")

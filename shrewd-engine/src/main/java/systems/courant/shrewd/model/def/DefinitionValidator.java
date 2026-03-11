@@ -29,9 +29,26 @@ public final class DefinitionValidator {
     }
 
     /**
-     * Validates the given model definition and returns all errors found.
+     * Validates the given model definition and returns all errors found,
+     * including view layout errors.
      */
     public static List<String> validate(ModelDefinition def) {
+        List<String> errors = validateStructure(def);
+
+        // Validate views if present
+        for (ViewDef view : def.views()) {
+            errors.addAll(ViewValidator.validate(view, def));
+        }
+
+        return errors;
+    }
+
+    /**
+     * Validates a model definition for structural correctness, excluding view validation.
+     * Use this for compilation where views are non-functional and may reference
+     * import-generated names that differ from model element names.
+     */
+    public static List<String> validateStructure(ModelDefinition def) {
         List<String> errors = new ArrayList<>();
         Set<String> allNames = new HashSet<>();
         // Case-insensitive duplicate detection: maps lowercase → first-seen original name
@@ -166,23 +183,7 @@ public final class DefinitionValidator {
             }
         }
 
-        // Validate views if present
-        for (ViewDef view : def.views()) {
-            errors.addAll(ViewValidator.validate(view, def));
-        }
-
         return errors;
-    }
-
-    /**
-     * Validates a model definition for structural correctness, excluding view validation.
-     * Use this for compilation where views are non-functional and may reference
-     * import-generated names that differ from model element names.
-     */
-    public static List<String> validateStructure(ModelDefinition def) {
-        List<String> all = validate(def);
-        all.removeIf(e -> e.startsWith("View "));
-        return all;
     }
 
     private static final Set<String> BUILTIN_NAMES = Set.of(
