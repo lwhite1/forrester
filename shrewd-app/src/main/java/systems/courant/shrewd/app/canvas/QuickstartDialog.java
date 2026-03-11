@@ -258,14 +258,18 @@ public class QuickstartDialog extends Stage {
 
                 bold("Try next\n\n"),
                 plain("  \u2022 "),
+                bold("SIR Epidemic Tutorial"),
+                plain(" \u2014 Help \u2192 Tutorial: SIR Epidemic. Build a multi-stock "
+                        + "epidemic model with reinforcing feedback, S-shaped growth, "
+                        + "and parameter sweeps\n\n"),
+                plain("  \u2022 "),
+                bold("Supply Chain Tutorial"),
+                plain(" \u2014 Help \u2192 Tutorial: Supply Chain. Discover how delays "
+                        + "cause oscillation and the bullwhip effect\n\n"),
+                plain("  \u2022 "),
                 bold("Explore examples"),
                 plain(" \u2014 File \u2192 Open Example has models for population growth, "
                         + "epidemiology, ecology, and supply chains\n\n"),
-                plain("  \u2022 "),
-                bold("Build a positive feedback loop"),
-                plain(" \u2014 create a Population stock with a Births inflow "
-                        + "(equation: Population * Birth_Rate). Watch exponential growth "
-                        + "and compare it to the negative feedback you just built\n\n"),
                 plain("  \u2022 "),
                 bold("Sketch a causal loop diagram"),
                 plain(" \u2014 press "),

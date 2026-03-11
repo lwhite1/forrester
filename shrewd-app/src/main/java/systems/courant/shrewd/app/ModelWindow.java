@@ -15,6 +15,8 @@ import systems.courant.shrewd.app.canvas.ModelEditListener;
 import systems.courant.shrewd.app.canvas.ModelEditor;
 import systems.courant.shrewd.app.canvas.PropertiesPanel;
 import systems.courant.shrewd.app.canvas.QuickstartDialog;
+import systems.courant.shrewd.app.canvas.SirTutorialDialog;
+import systems.courant.shrewd.app.canvas.SupplyChainTutorialDialog;
 import systems.courant.shrewd.app.canvas.KeyboardShortcutsDialog;
 import systems.courant.shrewd.app.canvas.SdConceptsDialog;
 import systems.courant.shrewd.app.canvas.StatusBar;
@@ -102,6 +104,8 @@ public class ModelWindow {
     private CommandPalette commandPalette;
     private ZoomOverlay zoomOverlay;
     private Stage quickstartWindow;
+    private Stage sirTutorialWindow;
+    private Stage supplyChainTutorialWindow;
     private Stage sdConceptsWindow;
     private Stage exprLangWindow;
     private Stage shortcutsWindow;
@@ -292,6 +296,19 @@ public class ModelWindow {
             showEditor();
             fileController.newModel();
             quickstartWindow = showHelpWindow(quickstartWindow, QuickstartDialog::new);
+            canvas.requestFocus();
+        });
+        startScreen.setOnSirTutorial(() -> {
+            showEditor();
+            fileController.newModel();
+            sirTutorialWindow = showHelpWindow(sirTutorialWindow, SirTutorialDialog::new);
+            canvas.requestFocus();
+        });
+        startScreen.setOnSupplyChainTutorial(() -> {
+            showEditor();
+            fileController.newModel();
+            supplyChainTutorialWindow = showHelpWindow(supplyChainTutorialWindow,
+                    SupplyChainTutorialDialog::new);
             canvas.requestFocus();
         });
         startScreen.setOnOpenExample((name, path) -> {
@@ -613,6 +630,17 @@ public class ModelWindow {
             quickstartWindow = showHelpWindow(quickstartWindow, QuickstartDialog::new);
         });
 
+        MenuItem sirTutorialItem = new MenuItem("Tutorial: SIR Epidemic\u2026");
+        sirTutorialItem.setOnAction(e -> {
+            sirTutorialWindow = showHelpWindow(sirTutorialWindow, SirTutorialDialog::new);
+        });
+
+        MenuItem supplyChainTutorialItem = new MenuItem("Tutorial: Supply Chain\u2026");
+        supplyChainTutorialItem.setOnAction(e -> {
+            supplyChainTutorialWindow = showHelpWindow(supplyChainTutorialWindow,
+                    SupplyChainTutorialDialog::new);
+        });
+
         MenuItem sdConceptsItem = new MenuItem("SD Concepts");
         sdConceptsItem.setOnAction(e -> {
             sdConceptsWindow = showHelpWindow(sdConceptsWindow, SdConceptsDialog::new);
@@ -638,7 +666,8 @@ public class ModelWindow {
             about.showAndWait();
         });
 
-        helpMenu.getItems().addAll(gettingStartedItem, sdConceptsItem, exprLangItem,
+        helpMenu.getItems().addAll(gettingStartedItem, sirTutorialItem, supplyChainTutorialItem,
+                new SeparatorMenuItem(), sdConceptsItem, exprLangItem,
                 new SeparatorMenuItem(), shortcutsItem,
                 new SeparatorMenuItem(), aboutItem);
 
@@ -1130,6 +1159,11 @@ public class ModelWindow {
         // Help (reuse tracked windows, same as menu items)
         commands.add(cmd("Getting Started", "Help",
                 () -> quickstartWindow = showHelpWindow(quickstartWindow, QuickstartDialog::new)));
+        commands.add(cmd("Tutorial: SIR Epidemic", "Help",
+                () -> sirTutorialWindow = showHelpWindow(sirTutorialWindow, SirTutorialDialog::new)));
+        commands.add(cmd("Tutorial: Supply Chain", "Help",
+                () -> supplyChainTutorialWindow = showHelpWindow(supplyChainTutorialWindow,
+                        SupplyChainTutorialDialog::new)));
         commands.add(cmd("SD Concepts", "Help",
                 () -> sdConceptsWindow = showHelpWindow(sdConceptsWindow, SdConceptsDialog::new)));
         commands.add(cmd("Expression Language", "Help",

@@ -42,6 +42,8 @@ final class StartScreen extends VBox {
     private Runnable onNewModel;
     private Runnable onOpenFile;
     private Runnable onGettingStarted;
+    private Runnable onSirTutorial;
+    private Runnable onSupplyChainTutorial;
     private BiConsumer<String, String> onOpenExample;
 
     private List<ExampleEntry> allExamples = List.of();
@@ -124,7 +126,20 @@ final class StartScreen extends VBox {
                 () -> { if (onGettingStarted != null) onGettingStarted.run(); });
         gettingStartedCard.setId("startGettingStarted");
 
-        cards.getChildren().addAll(newModelCard, openModelCard, gettingStartedCard);
+        VBox sirTutorialCard = buildActionCard("SIR Epidemic",
+                "Reinforcing feedback and S-shaped growth",
+                "#2C3E50",
+                () -> { if (onSirTutorial != null) onSirTutorial.run(); });
+        sirTutorialCard.setId("startSirTutorial");
+
+        VBox supplyChainCard = buildActionCard("Supply Chain",
+                "Delays, oscillation, and the bullwhip effect",
+                "#2C3E50",
+                () -> { if (onSupplyChainTutorial != null) onSupplyChainTutorial.run(); });
+        supplyChainCard.setId("startSupplyChainTutorial");
+
+        cards.getChildren().addAll(newModelCard, openModelCard, gettingStartedCard,
+                sirTutorialCard, supplyChainCard);
 
         return cards;
     }
@@ -406,6 +421,14 @@ final class StartScreen extends VBox {
 
     void setOnGettingStarted(Runnable handler) {
         this.onGettingStarted = handler;
+    }
+
+    void setOnSirTutorial(Runnable handler) {
+        this.onSirTutorial = handler;
+    }
+
+    void setOnSupplyChainTutorial(Runnable handler) {
+        this.onSupplyChainTutorial = handler;
     }
 
     void setOnOpenExample(BiConsumer<String, String> handler) {
