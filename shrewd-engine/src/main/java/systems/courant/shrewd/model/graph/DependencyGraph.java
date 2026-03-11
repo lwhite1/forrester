@@ -7,6 +7,7 @@ import systems.courant.shrewd.model.def.ModelDefinition;
 import systems.courant.shrewd.model.def.StockDef;
 import systems.courant.shrewd.model.expr.ExprDependencies;
 import systems.courant.shrewd.model.expr.ExprParser;
+import systems.courant.shrewd.model.expr.ParseException;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
@@ -63,12 +64,16 @@ public class DependencyGraph {
 
         // Extract dependencies from flow equations
         for (FlowDef f : def.flows()) {
-            Set<String> deps = ExprDependencies.extract(ExprParser.parse(f.equation()));
-            for (String dep : deps) {
-                if (allNodes.contains(dep) || allNodes.contains(dep.replace('_', ' '))) {
-                    String resolvedDep = allNodes.contains(dep) ? dep : dep.replace('_', ' ');
-                    adj.computeIfAbsent(resolvedDep, k -> new LinkedHashSet<>()).add(f.name());
+            try {
+                Set<String> deps = ExprDependencies.extract(ExprParser.parse(f.equation()));
+                for (String dep : deps) {
+                    if (allNodes.contains(dep) || allNodes.contains(dep.replace('_', ' '))) {
+                        String resolvedDep = allNodes.contains(dep) ? dep : dep.replace('_', ' ');
+                        adj.computeIfAbsent(resolvedDep, k -> new LinkedHashSet<>()).add(f.name());
+                    }
                 }
+            } catch (ParseException ignored) {
+                // Skip unparseable equations — cycle detection proceeds with parseable ones
             }
             // Flow → stock connections (source and sink)
             if (f.source() != null) {
@@ -81,12 +86,16 @@ public class DependencyGraph {
 
         // Extract dependencies from auxiliary equations
         for (AuxDef a : def.auxiliaries()) {
-            Set<String> deps = ExprDependencies.extract(ExprParser.parse(a.equation()));
-            for (String dep : deps) {
-                if (allNodes.contains(dep) || allNodes.contains(dep.replace('_', ' '))) {
-                    String resolvedDep = allNodes.contains(dep) ? dep : dep.replace('_', ' ');
-                    adj.computeIfAbsent(resolvedDep, k -> new LinkedHashSet<>()).add(a.name());
+            try {
+                Set<String> deps = ExprDependencies.extract(ExprParser.parse(a.equation()));
+                for (String dep : deps) {
+                    if (allNodes.contains(dep) || allNodes.contains(dep.replace('_', ' '))) {
+                        String resolvedDep = allNodes.contains(dep) ? dep : dep.replace('_', ' ');
+                        adj.computeIfAbsent(resolvedDep, k -> new LinkedHashSet<>()).add(a.name());
+                    }
                 }
+            } catch (ParseException ignored) {
+                // Skip unparseable equations — cycle detection proceeds with parseable ones
             }
         }
 

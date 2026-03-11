@@ -131,11 +131,6 @@ public final class ModelValidator {
     }
 
     private static void checkAlgebraicLoops(ModelDefinition def, List<ValidationIssue> issues) {
-        // Only attempt graph analysis if equations are parseable
-        if (!equationsParseable(def)) {
-            return;
-        }
-
         DependencyGraph graph = DependencyGraph.fromDefinition(def);
         List<String> sorted = graph.topologicalSort();
 
@@ -215,24 +210,6 @@ public final class ModelValidator {
                 }
             }
         }
-    }
-
-    private static boolean equationsParseable(ModelDefinition def) {
-        for (FlowDef flow : def.flows()) {
-            try {
-                ExprParser.parse(flow.equation());
-            } catch (ParseException e) {
-                return false;
-            }
-        }
-        for (AuxDef aux : def.auxiliaries()) {
-            try {
-                ExprParser.parse(aux.equation());
-            } catch (ParseException e) {
-                return false;
-            }
-        }
-        return true;
     }
 
     private static void checkUnusedElements(ModelDefinition def, List<ValidationIssue> issues) {
@@ -424,6 +401,11 @@ public final class ModelValidator {
         }
         // Check underscore variant (equations use underscores for names with spaces)
         String underscored = name.replace(' ', '_');
-        return referencedNames.contains(underscored);
+        if (referencedNames.contains(underscored)) {
+            return true;
+        }
+        // Check space variant (element named with underscores, equation uses spaces)
+        String spaced = name.replace('_', ' ');
+        return referencedNames.contains(spaced);
     }
 }

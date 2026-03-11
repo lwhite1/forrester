@@ -161,14 +161,33 @@ public class Module extends Element {
     /**
      * Adds a sub-module to this module.
      *
-     * @throws IllegalArgumentException if the module is this module (self-reference)
+     * @throws IllegalArgumentException if the module is this module or contains this module
+     *                                  as a descendant (which would create a cycle)
      */
     public void addSubModule(Module module) {
         if (module == this) {
             throw new IllegalArgumentException(
                     "Cannot add module '" + module.getName() + "' as its own sub-module");
         }
+        if (containsDescendant(module, this)) {
+            throw new IllegalArgumentException(
+                    "Cannot add module '" + module.getName()
+                            + "' — it would create a cycle ('" + getName()
+                            + "' is already a descendant of '" + module.getName() + "')");
+        }
         subModules.put(module.getName(), module);
+    }
+
+    /**
+     * Checks whether {@code target} appears anywhere in the sub-module tree of {@code root}.
+     */
+    private static boolean containsDescendant(Module root, Module target) {
+        for (Module child : root.subModules.values()) {
+            if (child == target || containsDescendant(child, target)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**

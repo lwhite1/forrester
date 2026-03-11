@@ -180,6 +180,23 @@ class ModelValidatorTest {
         }
 
         @Test
+        void shouldDetectLoopEvenWhenAnotherEquationFailsToParse() {
+            // C has an unparseable equation, but A↔B loop should still be detected
+            ModelDefinition def = new ModelDefinitionBuilder()
+                    .name("PartialParse")
+                    .aux("A", "B * 2", "X")
+                    .aux("B", "A + 1", "X")
+                    .aux("C", "??? totally invalid", "X")
+                    .build();
+
+            ValidationResult result = ModelValidator.validate(def);
+
+            assertThat(result.issues()).anyMatch(i ->
+                    i.severity() == Severity.WARNING
+                            && i.message().contains("Algebraic loop"));
+        }
+
+        @Test
         void shouldNotWarnForStockFlowLoop() {
             // Stock → Flow → Stock is a normal feedback loop, not algebraic
             ModelDefinition def = new ModelDefinitionBuilder()
@@ -247,6 +264,41 @@ class ModelValidatorTest {
 
             assertThat(result.issues()).noneMatch(i ->
                     i.message().contains("not referenced"));
+        }
+
+        @Test
+        void shouldNotWarnForUnderscoreNamedConstantReferencedWithSpaces() {
+            // Element named 'birth_rate', equation uses 'birth_rate' (parser identifier),
+            // but element names may use spaces — isReferenced should check both directions
+            ModelDefinition def = new ModelDefinitionBuilder()
+                    .name("ReverseUnderscore")
+                    .stock("S", 100, "Person")
+                    .flow("F", "S * birth_rate", "Day", "S", null)
+                    .constant("birth_rate", 0.03, "1/Day")
+                    .build();
+
+            ValidationResult result = ModelValidator.validate(def);
+
+            assertThat(result.issues()).noneMatch(i ->
+                    i.message().contains("not referenced")
+                            && i.message().contains("birth_rate"));
+        }
+
+        @Test
+        void shouldNotWarnForSpaceNamedConstantReferencedWithUnderscores() {
+            // Element named 'birth rate' (spaces), equation uses 'birth_rate' (underscores)
+            ModelDefinition def = new ModelDefinitionBuilder()
+                    .name("SpaceToUnderscore")
+                    .stock("S", 100, "Person")
+                    .flow("F", "S * birth_rate", "Day", "S", null)
+                    .constant("birth rate", 0.03, "1/Day")
+                    .build();
+
+            ValidationResult result = ModelValidator.validate(def);
+
+            assertThat(result.issues()).noneMatch(i ->
+                    i.message().contains("not referenced")
+                            && i.message().contains("birth rate"));
         }
 
         @Test
