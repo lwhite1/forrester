@@ -10,6 +10,7 @@ import systems.courant.forrester.model.def.ValidationIssue.Severity;
 import systems.courant.forrester.model.def.ValidationResult;
 import systems.courant.forrester.model.def.ViewDef;
 import systems.courant.forrester.model.graph.AutoLayout;
+import systems.courant.forrester.model.graph.CausalTraceAnalysis;
 import systems.courant.forrester.model.graph.FeedbackAnalysis;
 
 import javafx.scene.canvas.Canvas;
@@ -80,6 +81,9 @@ public class ModelCanvas extends Canvas {
 
     // Feedback loop highlighting
     private final LoopHighlightController loopController = new LoopHighlightController();
+
+    // Causal tracing
+    private final CausalTraceController traceController = new CausalTraceController();
 
     // Validation issue indicators (element name → highest severity)
     private Map<String, Severity> elementIssues = Map.of();
@@ -174,6 +178,12 @@ public class ModelCanvas extends Canvas {
                 }
                 @Override public void openBindingsDialog(String moduleName) {
                     ModelCanvas.this.openBindingsDialog(moduleName);
+                }
+                @Override public void traceUpstream(String name) {
+                    ModelCanvas.this.traceUpstream(name);
+                }
+                @Override public void traceDownstream(String name) {
+                    ModelCanvas.this.traceDownstream(name);
                 }
             };
 
@@ -876,6 +886,7 @@ public class ModelCanvas extends Canvas {
                         rerouteRenderState(),
                         marqueeController.toRenderState(),
                         getActiveLoopAnalysis(),
+                        traceController.getAnalysis(),
                         elementIssues,
                         sparklineData,
                         inputDispatcher.getHoveredElement(),
@@ -1048,5 +1059,29 @@ public class ModelCanvas extends Canvas {
     private void openBindingsDialog(String moduleName) {
         navController.openBindingsDialog(moduleName, editor,
                 () -> saveUndoState("Edit " + moduleName + " bindings"), this::fireStatusChanged);
+    }
+
+    // --- Causal tracing ---
+
+    void traceUpstream(String elementName) {
+        traceController.startTrace(elementName,
+                CausalTraceAnalysis.TraceDirection.UPSTREAM,
+                editor.toModelDefinition(canvasState.toViewDef()));
+        redraw();
+    }
+
+    void traceDownstream(String elementName) {
+        traceController.startTrace(elementName,
+                CausalTraceAnalysis.TraceDirection.DOWNSTREAM,
+                editor.toModelDefinition(canvasState.toViewDef()));
+        redraw();
+    }
+
+    boolean isTraceActive() {
+        return traceController.isActive();
+    }
+
+    void clearTrace() {
+        traceController.clearTrace();
     }
 }

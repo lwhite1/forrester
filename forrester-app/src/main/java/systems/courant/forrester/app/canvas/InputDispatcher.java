@@ -603,7 +603,10 @@ final class InputDispatcher {
     }
 
     private void handleEscape(ModelCanvas canvas) {
-        if (resizeController.isActive()) {
+        if (canvas.isTraceActive()) {
+            canvas.clearTrace();
+            canvas.requestRedraw();
+        } else if (resizeController.isActive()) {
             resizeController.cancel(canvas::performUndo);
             canvas.requestRedraw();
         } else if (marqueeController.isActive()) {

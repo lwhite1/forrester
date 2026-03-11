@@ -48,6 +48,11 @@ public final class ColorPalette {
     public static final Color LOOP_BALANCING = Color.web("#E74C3C");
     public static final Color LOOP_INDETERMINATE = Color.web("#95A5A6");
 
+    // Causal trace colors
+    public static final Color TRACE_UPSTREAM = Color.web("#2980B9");
+    public static final Color TRACE_DOWNSTREAM = Color.web("#E67E22");
+    public static final Color TRACE_ORIGIN = Color.web("#8E44AD");
+
     // Delay indicator badge
     public static final Color DELAY_BADGE = Color.web("#8E44AD");
 }

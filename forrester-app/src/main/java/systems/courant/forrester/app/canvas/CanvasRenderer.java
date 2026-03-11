@@ -10,6 +10,7 @@ import systems.courant.forrester.model.def.ModuleInterface;
 import systems.courant.forrester.model.def.PortDef;
 import systems.courant.forrester.model.def.ValidationIssue;
 import systems.courant.forrester.model.expr.DelayDetector;
+import systems.courant.forrester.model.graph.CausalTraceAnalysis;
 import systems.courant.forrester.model.graph.FeedbackAnalysis;
 import systems.courant.forrester.model.graph.FeedbackAnalysis.CausalLoop;
 
@@ -90,6 +91,7 @@ public class CanvasRenderer {
             RerouteState rerouteState,
             MarqueeState marqueeState,
             FeedbackAnalysis loopAnalysis,
+            CausalTraceAnalysis traceAnalysis,
             Map<String, ValidationIssue.Severity> elementIssues,
             SparklineData sparklineData,
             String hoveredElement,
@@ -133,6 +135,7 @@ public class CanvasRenderer {
         RerouteState rerouteState = ctx.rerouteState();
         MarqueeState marqueeState = ctx.marqueeState();
         FeedbackAnalysis loopAnalysis = ctx.loopAnalysis();
+        CausalTraceAnalysis traceAnalysis = ctx.traceAnalysis();
         Map<String, ValidationIssue.Severity> elementIssues = ctx.elementIssues();
         String hoveredElement = ctx.hoveredElement();
         ConnectionId hoveredConnection = ctx.hoveredConnection();
@@ -149,15 +152,21 @@ public class CanvasRenderer {
         viewport.applyTo(gc);
 
         // 1. Draw connections first (behind elements)
+        // When hovering or tracing, dim non-related connections
         drawMaterialFlows(gc, editor);
         if (!ctx.hideInfoLinks()) {
-            drawInfoLinks(gc, connectors, hideAux);
+            drawInfoLinks(gc, connectors, hideAux, hoveredElement, traceAnalysis);
         }
-        drawCausalLinks(gc, editor, hideAux);
+        drawCausalLinks(gc, editor, hideAux, hoveredElement, traceAnalysis);
 
         // 1b. Draw loop edge highlights (above normal connections, behind elements)
         if (loopAnalysis != null) {
             drawLoopEdges(gc, connectors, editor, loopAnalysis, hideAux);
+        }
+
+        // 1c. Draw trace edge highlights
+        if (traceAnalysis != null) {
+            drawTraceEdges(gc, connectors, editor, traceAnalysis, hideAux);
         }
 
         // 2. Draw elements on top
@@ -260,6 +269,15 @@ public class CanvasRenderer {
             for (String name : loopAnalysis.loopParticipants()) {
                 if (canvasState.hasElement(name) && !isHiddenAux(name, hideAux)) {
                     FeedbackLoopRenderer.drawLoopHighlight(gc, canvasState, name);
+                }
+            }
+        }
+
+        // 2b-trace. Draw trace element highlights
+        if (traceAnalysis != null) {
+            for (String name : traceAnalysis.depthMap().keySet()) {
+                if (canvasState.hasElement(name) && !isHiddenAux(name, hideAux)) {
+                    CausalTraceRenderer.drawTraceHighlight(gc, canvasState, name, traceAnalysis);
                 }
             }
         }
@@ -380,9 +398,12 @@ public class CanvasRenderer {
 
     /**
      * Draws info link dashed arrows based on cached connector routes.
+     * When hovering an element, dims links not connected to it.
+     * When a trace is active, dims links not part of the trace.
      */
     private void drawInfoLinks(GraphicsContext gc, List<ConnectorRoute> connectors,
-                               boolean hideAux) {
+                               boolean hideAux, String hoveredElement,
+                               CausalTraceAnalysis traceAnalysis) {
         for (ConnectorRoute route : connectors) {
             String fromName = route.from();
             String toName = route.to();
@@ -404,8 +425,16 @@ public class CanvasRenderer {
             FlowGeometry.Point2D clippedTo = FlowGeometry.clipToElement(
                     canvasState, toName, fromX, fromY);
 
+            boolean dim = shouldDimConnection(fromName, toName, hoveredElement, traceAnalysis);
+            if (dim) {
+                gc.save();
+                gc.setGlobalAlpha(0.15);
+            }
             ConnectionRenderer.drawInfoLink(gc, clippedFrom.x(), clippedFrom.y(),
                     clippedTo.x(), clippedTo.y());
+            if (dim) {
+                gc.restore();
+            }
         }
     }
 
@@ -413,7 +442,8 @@ public class CanvasRenderer {
      * Draws causal links between CLD variables (and potentially S&F elements)
      * as curved arcs using quadratic Bézier curves.
      */
-    private void drawCausalLinks(GraphicsContext gc, ModelEditor editor, boolean hideAux) {
+    private void drawCausalLinks(GraphicsContext gc, ModelEditor editor, boolean hideAux,
+                                  String hoveredElement, CausalTraceAnalysis traceAnalysis) {
         List<CausalLinkDef> allLinks = editor.getCausalLinks();
 
         for (CausalLinkDef link : allLinks) {
@@ -427,6 +457,12 @@ public class CanvasRenderer {
                 continue;
             }
 
+            boolean dim = shouldDimConnection(fromName, toName, hoveredElement, traceAnalysis);
+            if (dim) {
+                gc.save();
+                gc.setGlobalAlpha(0.15);
+            }
+
             double fromX = canvasState.getX(fromName);
             double fromY = canvasState.getY(fromName);
 
@@ -436,6 +472,9 @@ public class CanvasRenderer {
                 double halfH = LayoutMetrics.effectiveHeight(canvasState, fromName) / 2;
                 double[] loopPts = CausalLinkGeometry.selfLoopPoints(fromX, fromY, halfW, halfH);
                 ConnectionRenderer.drawCausalLinkSelfLoop(gc, loopPts, link.polarity());
+                if (dim) {
+                    gc.restore();
+                }
                 continue;
             }
 
@@ -455,6 +494,156 @@ public class CanvasRenderer {
 
             ConnectionRenderer.drawCausalLink(gc, clippedFrom.x(), clippedFrom.y(),
                     clippedTo.x(), clippedTo.y(), cp, link.polarity());
+            if (dim) {
+                gc.restore();
+            }
+        }
+    }
+
+    /**
+     * Returns true if a connection should be dimmed based on hover or trace state.
+     */
+    private static boolean shouldDimConnection(String fromName, String toName,
+                                                String hoveredElement,
+                                                CausalTraceAnalysis traceAnalysis) {
+        if (traceAnalysis != null) {
+            return !traceAnalysis.isTraceEdge(fromName, toName)
+                    && !traceAnalysis.isTraceEdge(toName, fromName);
+        }
+        if (hoveredElement != null) {
+            return !fromName.equals(hoveredElement) && !toName.equals(hoveredElement);
+        }
+        return false;
+    }
+
+    /**
+     * Draws highlighted edges for trace connections with depth-based opacity.
+     */
+    private void drawTraceEdges(GraphicsContext gc, List<ConnectorRoute> connectors,
+                                 ModelEditor editor, CausalTraceAnalysis traceAnalysis,
+                                 boolean hideAux) {
+        // Highlight info link edges in the trace
+        for (ConnectorRoute route : connectors) {
+            String fromName = route.from();
+            String toName = route.to();
+
+            if (!canvasState.hasElement(fromName) || !canvasState.hasElement(toName)) {
+                continue;
+            }
+            if (isHiddenAux(fromName, hideAux) || isHiddenAux(toName, hideAux)) {
+                continue;
+            }
+            if (!traceAnalysis.isTraceEdge(fromName, toName)
+                    && !traceAnalysis.isTraceEdge(toName, fromName)) {
+                continue;
+            }
+
+            int fromDepth = traceAnalysis.depthOf(fromName);
+            int toDepth = traceAnalysis.depthOf(toName);
+            int edgeDepth = Math.min(
+                    fromDepth >= 0 ? fromDepth : Integer.MAX_VALUE,
+                    toDepth >= 0 ? toDepth : Integer.MAX_VALUE);
+            double opacity = traceAnalysis.opacityForDepth(edgeDepth);
+
+            double fromX = canvasState.getX(fromName);
+            double fromY = canvasState.getY(fromName);
+            double toX = canvasState.getX(toName);
+            double toY = canvasState.getY(toName);
+
+            FlowGeometry.Point2D clippedFrom = FlowGeometry.clipToElement(
+                    canvasState, fromName, toX, toY);
+            FlowGeometry.Point2D clippedTo = FlowGeometry.clipToElement(
+                    canvasState, toName, fromX, fromY);
+
+            CausalTraceRenderer.drawTraceEdge(gc, clippedFrom.x(), clippedFrom.y(),
+                    clippedTo.x(), clippedTo.y(), opacity, traceAnalysis.direction());
+        }
+
+        // Highlight material flow edges in the trace
+        for (FlowDef flow : editor.getFlows()) {
+            if (!canvasState.hasElement(flow.name())) {
+                continue;
+            }
+            double midX = canvasState.getX(flow.name());
+            double midY = canvasState.getY(flow.name());
+
+            if (flow.source() != null && canvasState.hasElement(flow.source())
+                    && (traceAnalysis.isTraceEdge(flow.name(), flow.source())
+                        || traceAnalysis.isTraceEdge(flow.source(), flow.name()))) {
+                int depth = Math.min(
+                        traceAnalysis.depthOf(flow.name()) >= 0
+                                ? traceAnalysis.depthOf(flow.name()) : Integer.MAX_VALUE,
+                        traceAnalysis.depthOf(flow.source()) >= 0
+                                ? traceAnalysis.depthOf(flow.source()) : Integer.MAX_VALUE);
+                double opacity = traceAnalysis.opacityForDepth(depth);
+                FlowGeometry.Point2D edge = FlowGeometry.clipToElement(
+                        canvasState, flow.source(), midX, midY);
+                CausalTraceRenderer.drawTraceEdge(gc, midX, midY, edge.x(), edge.y(),
+                        opacity, traceAnalysis.direction());
+            }
+
+            if (flow.sink() != null && canvasState.hasElement(flow.sink())
+                    && (traceAnalysis.isTraceEdge(flow.name(), flow.sink())
+                        || traceAnalysis.isTraceEdge(flow.sink(), flow.name()))) {
+                int depth = Math.min(
+                        traceAnalysis.depthOf(flow.name()) >= 0
+                                ? traceAnalysis.depthOf(flow.name()) : Integer.MAX_VALUE,
+                        traceAnalysis.depthOf(flow.sink()) >= 0
+                                ? traceAnalysis.depthOf(flow.sink()) : Integer.MAX_VALUE);
+                double opacity = traceAnalysis.opacityForDepth(depth);
+                FlowGeometry.Point2D edge = FlowGeometry.clipToElement(
+                        canvasState, flow.sink(), midX, midY);
+                CausalTraceRenderer.drawTraceEdge(gc, midX, midY, edge.x(), edge.y(),
+                        opacity, traceAnalysis.direction());
+            }
+        }
+
+        // Highlight causal link edges in the trace (curved)
+        List<CausalLinkDef> allLinks = editor.getCausalLinks();
+        for (CausalLinkDef link : allLinks) {
+            String fromName = link.from();
+            String toName = link.to();
+
+            if (!canvasState.hasElement(fromName) || !canvasState.hasElement(toName)) {
+                continue;
+            }
+            if (isHiddenAux(fromName, hideAux) || isHiddenAux(toName, hideAux)) {
+                continue;
+            }
+            if (!traceAnalysis.isTraceEdge(fromName, toName)
+                    && !traceAnalysis.isTraceEdge(toName, fromName)) {
+                continue;
+            }
+
+            int fromDepth = traceAnalysis.depthOf(fromName);
+            int toDepth = traceAnalysis.depthOf(toName);
+            int edgeDepth = Math.min(
+                    fromDepth >= 0 ? fromDepth : Integer.MAX_VALUE,
+                    toDepth >= 0 ? toDepth : Integer.MAX_VALUE);
+            double opacity = traceAnalysis.opacityForDepth(edgeDepth);
+
+            if (fromName.equals(toName)) {
+                continue; // self-loops not relevant for tracing
+            }
+
+            double fromX = canvasState.getX(fromName);
+            double fromY = canvasState.getY(fromName);
+            double toX = canvasState.getX(toName);
+            double toY = canvasState.getY(toName);
+
+            CausalLinkGeometry.ControlPoint cp = CausalLinkGeometry.controlPoint(
+                    fromX, fromY, toX, toY, fromName, toName, allLinks);
+
+            FlowGeometry.Point2D clippedFrom = FlowGeometry.clipToElement(
+                    canvasState, fromName, cp.x(), cp.y());
+            FlowGeometry.Point2D clippedTo = FlowGeometry.clipToElement(
+                    canvasState, toName, cp.x(), cp.y());
+
+            CausalTraceRenderer.drawTraceEdgeCurved(gc,
+                    clippedFrom.x(), clippedFrom.y(),
+                    cp.x(), cp.y(),
+                    clippedTo.x(), clippedTo.y(),
+                    opacity, traceAnalysis.direction());
         }
     }
 

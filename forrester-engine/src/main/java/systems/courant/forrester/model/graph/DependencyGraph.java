@@ -183,6 +183,56 @@ public class DependencyGraph {
     }
 
     /**
+     * Returns all elements transitively upstream of the given element (what influences it),
+     * organized by BFS depth. Depth 0 is the element itself.
+     *
+     * @param name the element to trace from
+     * @return map of element name to BFS depth
+     */
+    public Map<String, Integer> transitiveUpstream(String name) {
+        Map<String, Integer> depthMap = new LinkedHashMap<>();
+        depthMap.put(name, 0);
+        Deque<String> queue = new ArrayDeque<>();
+        queue.add(name);
+        while (!queue.isEmpty()) {
+            String current = queue.poll();
+            int nextDepth = depthMap.get(current) + 1;
+            for (String dep : dependenciesOf(current)) {
+                if (!depthMap.containsKey(dep)) {
+                    depthMap.put(dep, nextDepth);
+                    queue.add(dep);
+                }
+            }
+        }
+        return depthMap;
+    }
+
+    /**
+     * Returns all elements transitively downstream of the given element (what it influences),
+     * organized by BFS depth. Depth 0 is the element itself.
+     *
+     * @param name the element to trace from
+     * @return map of element name to BFS depth
+     */
+    public Map<String, Integer> transitiveDownstream(String name) {
+        Map<String, Integer> depthMap = new LinkedHashMap<>();
+        depthMap.put(name, 0);
+        Deque<String> queue = new ArrayDeque<>();
+        queue.add(name);
+        while (!queue.isEmpty()) {
+            String current = queue.poll();
+            int nextDepth = depthMap.get(current) + 1;
+            for (String dep : dependentsOf(current)) {
+                if (!depthMap.containsKey(dep)) {
+                    depthMap.put(dep, nextDepth);
+                    queue.add(dep);
+                }
+            }
+        }
+        return depthMap;
+    }
+
+    /**
      * Returns all node names in the graph.
      */
     public Set<String> allNodes() {
