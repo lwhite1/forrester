@@ -8,6 +8,8 @@ import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 
+import java.util.Map;
+
 /**
  * Embeddable pane that renders a fan chart (percentile bands) from a
  * {@link MonteCarloResult}. Adapted from the standalone {@code FanChart}
@@ -76,13 +78,15 @@ public class FanChartPane extends Pane {
             return;
         }
 
-        double[] p2_5 = result.getPercentileSeries(variableName, 2.5);
-        double[] p97_5 = result.getPercentileSeries(variableName, 97.5);
-        double[] p12_5 = result.getPercentileSeries(variableName, 12.5);
-        double[] p87_5 = result.getPercentileSeries(variableName, 87.5);
-        double[] p25 = result.getPercentileSeries(variableName, 25);
-        double[] p75 = result.getPercentileSeries(variableName, 75);
-        double[] median = result.getPercentileSeries(variableName, 50);
+        Map<Double, double[]> pctMap = result.getPercentileSeries(variableName,
+                2.5, 12.5, 25.0, 50.0, 75.0, 87.5, 97.5);
+        double[] p2_5 = pctMap.get(2.5);
+        double[] p97_5 = pctMap.get(97.5);
+        double[] p12_5 = pctMap.get(12.5);
+        double[] p87_5 = pctMap.get(87.5);
+        double[] p25 = pctMap.get(25.0);
+        double[] p75 = pctMap.get(75.0);
+        double[] median = pctMap.get(50.0);
 
         double[][] lowerSeries = {p2_5, p12_5, p25};
         double[][] upperSeries = {p97_5, p87_5, p75};

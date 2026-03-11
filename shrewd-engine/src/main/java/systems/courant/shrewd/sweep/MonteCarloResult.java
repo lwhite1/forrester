@@ -13,7 +13,9 @@ import java.io.UncheckedIOException;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Aggregates the results of a Monte Carlo simulation and computes percentile envelopes
@@ -108,6 +110,45 @@ public class MonteCarloResult {
         }
 
         return series;
+    }
+
+    /**
+     * Computes multiple percentile series in a single pass, reusing the same
+     * {@link DescriptiveStatistics} instance per timestep. This is significantly faster
+     * than calling {@link #getPercentileSeries(String, double)} multiple times.
+     *
+     * @param name        the stock or variable name
+     * @param percentiles the percentiles to compute (0-100)
+     * @return a map from percentile value to the corresponding series array
+     * @throws IllegalArgumentException if the name is not found
+     */
+    public Map<Double, double[]> getPercentileSeries(String name, double... percentiles) {
+        int stepCount = getStepCount();
+        boolean isStock = isStockName(name);
+        int columnIndex = getColumnIndex(name, isStock);
+
+        Map<Double, double[]> result = new LinkedHashMap<>();
+        for (double p : percentiles) {
+            result.put(p, new double[stepCount]);
+        }
+
+        for (int step = 0; step < stepCount; step++) {
+            DescriptiveStatistics stats = new DescriptiveStatistics();
+            for (RunResult run : results) {
+                double value;
+                if (isStock) {
+                    value = run.getStockValuesAtStep(step)[columnIndex];
+                } else {
+                    value = run.getVariableValuesAtStep(step)[columnIndex];
+                }
+                stats.addValue(value);
+            }
+            for (double p : percentiles) {
+                result.get(p)[step] = stats.getPercentile(p);
+            }
+        }
+
+        return result;
     }
 
     /**
