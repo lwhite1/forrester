@@ -171,8 +171,11 @@ public final class VensimExporter {
             rateExpr = rateSb.toString();
         }
 
+        String initialStr = (stock.initialExpression() != null && !stock.initialExpression().isBlank())
+                ? toVensimExpr(stock.initialExpression())
+                : formatDouble(stock.initialValue());
         String equation = "INTEG (\n\t" + rateExpr + ",\n\t\t"
-                + formatDouble(stock.initialValue()) + ")";
+                + initialStr + ")";
         String units = stock.unit() != null ? stock.unit() : "";
         String comment = stock.comment() != null ? stock.comment() : "";
         // Stocks use "= INTEG" on the same line (no newline after "=")

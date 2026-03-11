@@ -8,6 +8,7 @@ import systems.courant.shrewd.model.def.FlowDef;
 import systems.courant.shrewd.model.def.LookupTableDef;
 import systems.courant.shrewd.model.def.ModelDefinition;
 import systems.courant.shrewd.model.def.ModelDefinitionBuilder;
+import systems.courant.shrewd.model.def.StockDef;
 
 import java.util.List;
 
@@ -84,6 +85,38 @@ class VensimExporterTest {
             assertThat(mdl).contains("refill rate");
             assertThat(mdl).contains("drain rate");
             assertThat(mdl).contains("50");
+        }
+
+        @Test
+        void shouldExportStockWithInitialExpression() {
+            StockDef stock = new StockDef("Population", null, 0.0,
+                    "Capacity * 0.5", "People", null, List.of());
+            ModelDefinition def = new ModelDefinitionBuilder()
+                    .name("Test")
+                    .defaultSimulation("Day", 100, "Day")
+                    .stock(stock)
+                    .constant("Capacity", 1000, "People")
+                    .build();
+
+            String mdl = VensimExporter.toVensim(def);
+
+            assertThat(mdl).contains("Capacity");
+            assertThat(mdl).contains("0.5");
+            // Should NOT fall back to "0" (the numeric initialValue)
+            assertThat(mdl).doesNotContain("INTEG (\n\t0,\n\t\t0)");
+        }
+
+        @Test
+        void shouldFallBackToNumericInitialValueWhenNoExpression() {
+            ModelDefinition def = new ModelDefinitionBuilder()
+                    .name("Test")
+                    .defaultSimulation("Day", 100, "Day")
+                    .stock("Tank", 42.0, "Gallons")
+                    .build();
+
+            String mdl = VensimExporter.toVensim(def);
+
+            assertThat(mdl).contains("42");
         }
 
         @Test

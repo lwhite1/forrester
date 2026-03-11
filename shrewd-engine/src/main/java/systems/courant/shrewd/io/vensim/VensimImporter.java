@@ -182,7 +182,8 @@ public class VensimImporter implements ModelImporter {
             }
             String eqName = VensimExprTranslator.normalizeName(name);
             String displayName = VensimExprTranslator.normalizeDisplayName(name);
-            if (!allNormalizedNames.add(eqName)) {
+            // Subscript range names use a separate namespace — skip duplicate check
+            if (!eq.operator().equals(":") && !allNormalizedNames.add(eqName)) {
                 warnings.add("Duplicate normalized name '" + eqName
                         + "' (from '" + name + "')");
             }
