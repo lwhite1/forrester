@@ -13,9 +13,16 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import systems.courant.shrewd.app.LastDirectoryStore;
 
+import javafx.scene.SnapshotParameters;
+import javafx.scene.image.WritableImage;
 import javafx.stage.FileChooser;
 
+import javax.imageio.ImageIO;
+
+import javafx.embed.swing.SwingFXUtils;
+
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -54,9 +61,11 @@ public class MonteCarloResultPane extends BorderPane {
         }
 
         ContextMenu contextMenu = new ContextMenu();
+        MenuItem saveItem = new MenuItem("Save as PNG...");
+        saveItem.setOnAction(e -> saveChartAsPng());
         MenuItem exportCsv = new MenuItem("Export CSV (Percentiles)...");
         exportCsv.setOnAction(e -> exportPercentileCsv());
-        contextMenu.getItems().add(exportCsv);
+        contextMenu.getItems().addAll(saveItem, exportCsv);
         setOnContextMenuRequested(e ->
                 contextMenu.show(this, e.getScreenX(), e.getScreenY()));
     }
@@ -67,6 +76,30 @@ public class MonteCarloResultPane extends BorderPane {
             setCenter(fanChartPane);
         } else {
             fanChartPane.redraw(result, variableName);
+        }
+    }
+
+    private void saveChartAsPng() {
+        if (fanChartPane == null) {
+            return;
+        }
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Save Chart as PNG");
+        fileChooser.getExtensionFilters().add(
+                new FileChooser.ExtensionFilter("PNG Image", "*.png"));
+        fileChooser.setInitialFileName("montecarlo_chart.png");
+        LastDirectoryStore.applyExportDirectory(fileChooser);
+
+        File file = fileChooser.showSaveDialog(getScene() != null ? getScene().getWindow() : null);
+        if (file != null) {
+            LastDirectoryStore.recordExportDirectory(file);
+            WritableImage image = fanChartPane.snapshot(new SnapshotParameters(), null);
+            try {
+                ImageIO.write(SwingFXUtils.fromFXImage(image, null), "png", file);
+            } catch (IOException e) {
+                new Alert(Alert.AlertType.ERROR,
+                        "Failed to save image: " + e.getMessage()).showAndWait();
+            }
         }
     }
 

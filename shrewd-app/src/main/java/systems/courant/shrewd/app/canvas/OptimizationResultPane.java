@@ -18,7 +18,13 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
 import systems.courant.shrewd.app.LastDirectoryStore;
 
+import javafx.scene.SnapshotParameters;
+import javafx.scene.image.WritableImage;
 import javafx.stage.FileChooser;
+
+import javax.imageio.ImageIO;
+
+import javafx.embed.swing.SwingFXUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -37,6 +43,7 @@ import java.util.Map;
 public class OptimizationResultPane extends BorderPane {
 
     private final OptimizationResult result;
+    private LineChart<Number, Number> chart;
 
     public OptimizationResultPane(OptimizationResult result) {
         this.result = result;
@@ -64,12 +71,14 @@ public class OptimizationResultPane extends BorderPane {
 
         // Best-run time series chart
         RunResult bestRun = result.getBestRunResult();
-        LineChart<Number, Number> chart = buildChart(bestRun);
+        chart = buildChart(bestRun);
 
         ContextMenu contextMenu = new ContextMenu();
+        MenuItem saveItem = new MenuItem("Save as PNG...");
+        saveItem.setOnAction(e -> saveChartAsPng());
         MenuItem exportCsv = new MenuItem("Export CSV (Best Run)...");
         exportCsv.setOnAction(e -> exportBestRunCsv());
-        contextMenu.getItems().add(exportCsv);
+        contextMenu.getItems().addAll(saveItem, exportCsv);
         chart.setOnContextMenuRequested(e ->
                 contextMenu.show(chart, e.getScreenX(), e.getScreenY()));
 
@@ -112,6 +121,30 @@ public class OptimizationResultPane extends BorderPane {
         ChartUtils.applySeriesColors(chart.getData());
 
         return chart;
+    }
+
+    private void saveChartAsPng() {
+        if (chart == null) {
+            return;
+        }
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Save Chart as PNG");
+        fileChooser.getExtensionFilters().add(
+                new FileChooser.ExtensionFilter("PNG Image", "*.png"));
+        fileChooser.setInitialFileName("optimization_chart.png");
+        LastDirectoryStore.applyExportDirectory(fileChooser);
+
+        File file = fileChooser.showSaveDialog(getScene() != null ? getScene().getWindow() : null);
+        if (file != null) {
+            LastDirectoryStore.recordExportDirectory(file);
+            WritableImage image = chart.snapshot(new SnapshotParameters(), null);
+            try {
+                ImageIO.write(SwingFXUtils.fromFXImage(image, null), "png", file);
+            } catch (IOException e) {
+                new Alert(Alert.AlertType.ERROR,
+                        "Failed to save image: " + e.getMessage()).showAndWait();
+            }
+        }
     }
 
     private void exportBestRunCsv() {

@@ -1,17 +1,34 @@
 package systems.courant.shrewd.app.canvas;
 
+import com.opencsv.CSVWriter;
+
 import systems.courant.shrewd.model.graph.FeedbackAnalysis;
 import systems.courant.shrewd.model.graph.LoopDominanceAnalysis;
 
+import javafx.embed.swing.SwingFXUtils;
 import javafx.geometry.Insets;
+import javafx.scene.SnapshotParameters;
 import javafx.scene.chart.AreaChart;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
+import javafx.scene.control.Alert;
+import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Label;
+import javafx.scene.control.MenuItem;
 import javafx.scene.control.TitledPane;
+import javafx.scene.image.WritableImage;
 import javafx.scene.layout.VBox;
 import javafx.scene.layout.Priority;
+import javafx.stage.FileChooser;
+import systems.courant.shrewd.app.LastDirectoryStore;
 
+import javax.imageio.ImageIO;
+
+import java.io.File;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.util.List;
 
 /**
@@ -21,7 +38,11 @@ import java.util.List;
  */
 final class LoopDominancePane extends VBox {
 
+    private final LoopDominanceAnalysis dominance;
+    private AreaChart<Number, Number> chart;
+
     LoopDominancePane(LoopDominanceAnalysis dominance) {
+        this.dominance = dominance;
         NumberAxis xAxis = new NumberAxis();
         xAxis.setLabel("Step");
         xAxis.setAutoRanging(true);
@@ -30,7 +51,7 @@ final class LoopDominancePane extends VBox {
         yAxis.setLabel("Loop Activity");
         yAxis.setAutoRanging(true);
 
-        AreaChart<Number, Number> chart = new AreaChart<>(xAxis, yAxis);
+        chart = new AreaChart<>(xAxis, yAxis);
         chart.setTitle("Loop Dominance");
         chart.setAnimated(false);
         chart.setCreateSymbols(false);
@@ -58,6 +79,15 @@ final class LoopDominancePane extends VBox {
 
         VBox.setVgrow(chart, Priority.ALWAYS);
 
+        ContextMenu contextMenu = new ContextMenu();
+        MenuItem saveItem = new MenuItem("Save as PNG...");
+        saveItem.setOnAction(e -> saveChartAsPng());
+        MenuItem exportCsv = new MenuItem("Export CSV...");
+        exportCsv.setOnAction(e -> exportCsv());
+        contextMenu.getItems().addAll(saveItem, exportCsv);
+        chart.setOnContextMenuRequested(e ->
+                contextMenu.show(chart, e.getScreenX(), e.getScreenY()));
+
         Label helpText = new Label(
                 "This chart shows which feedback loop is driving the most change at each "
                 + "time step. The tallest area at any point indicates the dominant loop. "
@@ -74,6 +104,63 @@ final class LoopDominancePane extends VBox {
         helpPane.setPadding(new Insets(4, 0, 0, 0));
 
         getChildren().addAll(chart, helpPane);
+    }
+
+    private void saveChartAsPng() {
+        if (chart == null) {
+            return;
+        }
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Save Chart as PNG");
+        fileChooser.getExtensionFilters().add(
+                new FileChooser.ExtensionFilter("PNG Image", "*.png"));
+        fileChooser.setInitialFileName("loop_dominance_chart.png");
+        LastDirectoryStore.applyExportDirectory(fileChooser);
+
+        File file = fileChooser.showSaveDialog(getScene() != null ? getScene().getWindow() : null);
+        if (file != null) {
+            LastDirectoryStore.recordExportDirectory(file);
+            WritableImage image = chart.snapshot(new SnapshotParameters(), null);
+            try {
+                ImageIO.write(SwingFXUtils.fromFXImage(image, null), "png", file);
+            } catch (IOException e) {
+                new Alert(Alert.AlertType.ERROR,
+                        "Failed to save image: " + e.getMessage()).showAndWait();
+            }
+        }
+    }
+
+    private void exportCsv() {
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Export Loop Dominance CSV");
+        fileChooser.getExtensionFilters().add(
+                new FileChooser.ExtensionFilter("CSV Files", "*.csv"));
+        fileChooser.setInitialFileName("loop_dominance.csv");
+        LastDirectoryStore.applyExportDirectory(fileChooser);
+
+        File file = fileChooser.showSaveDialog(getScene() != null ? getScene().getWindow() : null);
+        if (file != null) {
+            LastDirectoryStore.recordExportDirectory(file);
+            try (CSVWriter writer = new CSVWriter(new OutputStreamWriter(
+                    Files.newOutputStream(file.toPath()), StandardCharsets.UTF_8))) {
+                List<String> header = new java.util.ArrayList<>();
+                header.add("Step");
+                header.addAll(dominance.loopLabels());
+                writer.writeNext(header.toArray(new String[0]));
+
+                for (int step = 0; step < dominance.stepCount(); step++) {
+                    String[] row = new String[dominance.loopCount() + 1];
+                    row[0] = String.valueOf(step);
+                    for (int loop = 0; loop < dominance.loopCount(); loop++) {
+                        row[loop + 1] = String.valueOf(dominance.score(loop, step));
+                    }
+                    writer.writeNext(row);
+                }
+            } catch (IOException e) {
+                new Alert(Alert.AlertType.ERROR,
+                        "Failed to export CSV: " + e.getMessage()).showAndWait();
+            }
+        }
     }
 
     private void applyLoopColors(AreaChart<Number, Number> chart,

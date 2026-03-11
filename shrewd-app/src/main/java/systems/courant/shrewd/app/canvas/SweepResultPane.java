@@ -20,9 +20,16 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import systems.courant.shrewd.app.LastDirectoryStore;
 
+import javafx.scene.SnapshotParameters;
+import javafx.scene.image.WritableImage;
 import javafx.stage.FileChooser;
 
+import javax.imageio.ImageIO;
+
+import javafx.embed.swing.SwingFXUtils;
+
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -35,6 +42,7 @@ public class SweepResultPane extends BorderPane {
 
     private final SweepResult result;
     private final String paramName;
+    private LineChart<Number, Number> currentChart;
 
     public SweepResultPane(SweepResult result, String paramName) {
         this.result = result;
@@ -100,6 +108,7 @@ public class SweepResultPane extends BorderPane {
 
         chart.getData().addAll(allSeries);
         ChartUtils.applySeriesColors(allSeries);
+        this.currentChart = chart;
 
         VBox sidebar = new VBox(6);
         sidebar.setPadding(new Insets(10));
@@ -129,11 +138,13 @@ public class SweepResultPane extends BorderPane {
         sidebarScroll.setPrefWidth(180);
 
         ContextMenu contextMenu = new ContextMenu();
+        MenuItem saveItem = new MenuItem("Save as PNG...");
+        saveItem.setOnAction(e -> saveChartAsPng());
         MenuItem exportTs = new MenuItem("Export CSV (Time Series)...");
         exportTs.setOnAction(e -> exportTimeSeriesCsv());
         MenuItem exportSummary = new MenuItem("Export CSV (Summary)...");
         exportSummary.setOnAction(e -> exportSummaryCsv());
-        contextMenu.getItems().addAll(exportTs, exportSummary);
+        contextMenu.getItems().addAll(saveItem, exportTs, exportSummary);
         chart.setOnContextMenuRequested(e ->
                 contextMenu.show(chart, e.getScreenX(), e.getScreenY()));
 
@@ -157,6 +168,30 @@ public class SweepResultPane extends BorderPane {
             } catch (java.io.UncheckedIOException e) {
                 new Alert(Alert.AlertType.ERROR,
                         "Failed to export CSV: " + e.getMessage()).showAndWait();
+            }
+        }
+    }
+
+    private void saveChartAsPng() {
+        if (currentChart == null) {
+            return;
+        }
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Save Chart as PNG");
+        fileChooser.getExtensionFilters().add(
+                new FileChooser.ExtensionFilter("PNG Image", "*.png"));
+        fileChooser.setInitialFileName("sweep_chart.png");
+        LastDirectoryStore.applyExportDirectory(fileChooser);
+
+        File file = fileChooser.showSaveDialog(getScene() != null ? getScene().getWindow() : null);
+        if (file != null) {
+            LastDirectoryStore.recordExportDirectory(file);
+            WritableImage image = currentChart.snapshot(new SnapshotParameters(), null);
+            try {
+                ImageIO.write(SwingFXUtils.fromFXImage(image, null), "png", file);
+            } catch (IOException e) {
+                new Alert(Alert.AlertType.ERROR,
+                        "Failed to save image: " + e.getMessage()).showAndWait();
             }
         }
     }
