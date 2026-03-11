@@ -38,6 +38,14 @@ public final class SensitivitySummary {
             double baselineOutput,
             double impactFraction) implements Comparable<ParameterImpact> {
 
+        public ParameterImpact {
+            if (Double.isNaN(impactFraction) || impactFraction < 0.0) {
+                impactFraction = 0.0;
+            } else if (impactFraction > 1.0) {
+                impactFraction = 1.0;
+            }
+        }
+
         @Override
         public int compareTo(ParameterImpact other) {
             return Double.compare(other.impactFraction, this.impactFraction);
@@ -314,6 +322,12 @@ public final class SensitivitySummary {
     }
 
     private static String formatPercent(double fraction) {
+        if (fraction <= 0.0) {
+            return "0%";
+        }
+        if (fraction >= 1.0) {
+            return "100%";
+        }
         double pct = fraction * 100.0;
         if (pct >= 1.0) {
             return String.format(Locale.US, "%.0f%%", pct);
