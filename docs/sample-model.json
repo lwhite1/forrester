@@ -1,0 +1,233 @@
+{
+  "name": "Inventory Management with Delays",
+  "comment": "Sample model demonstrating equation features: arithmetic, references, built-in functions, delays, conditionals, and lookup tables.",
+  "stocks": [
+    {
+      "name": "Inventory",
+      "comment": "Units of product in warehouse",
+      "initialValue": 400.0,
+      "unit": "Widget"
+    },
+    {
+      "name": "Supply_Line",
+      "comment": "Orders placed but not yet received",
+      "initialValue": 200.0,
+      "unit": "Widget"
+    },
+    {
+      "name": "Backlog",
+      "comment": "Unfilled customer orders",
+      "initialValue": 0.0,
+      "unit": "Widget",
+      "negativeValuePolicy": "CLAMP_TO_ZERO"
+    }
+  ],
+  "flows": [
+    {
+      "name": "production_rate",
+      "comment": "Widgets arriving from supplier after a delay",
+      "equation": "DELAY3(order_rate, production_delay)",
+      "timeUnit": "Week",
+      "sink": "Inventory",
+      "source": "Supply_Line"
+    },
+    {
+      "name": "shipment_rate",
+      "comment": "Widgets shipped to fill customer orders",
+      "equation": "MIN(desired_shipment_rate, Inventory / minimum_order_processing_time)",
+      "timeUnit": "Week",
+      "source": "Inventory"
+    },
+    {
+      "name": "order_rate",
+      "comment": "Orders placed with supplier, smoothed to avoid overreaction",
+      "equation": "MAX(0, desired_production + supply_adjustment)",
+      "timeUnit": "Week",
+      "sink": "Supply_Line"
+    },
+    {
+      "name": "incoming_orders",
+      "comment": "Customer demand arriving",
+      "equation": "customer_demand",
+      "timeUnit": "Week",
+      "sink": "Backlog"
+    },
+    {
+      "name": "order_fulfillment",
+      "comment": "Orders fulfilled from shipments",
+      "equation": "shipment_rate",
+      "timeUnit": "Week",
+      "source": "Backlog"
+    }
+  ],
+  "auxiliaries": [
+    {
+      "name": "customer_demand",
+      "comment": "Base customer demand with a step increase at week 5",
+      "equation": "base_demand + STEP(demand_shock, 5)",
+      "unit": "Widget/Week"
+    },
+    {
+      "name": "base_demand",
+      "comment": "Normal weekly demand (constant parameter)",
+      "equation": "100",
+      "unit": "Widget/Week"
+    },
+    {
+      "name": "demand_shock",
+      "comment": "Size of the demand increase at week 5",
+      "equation": "50",
+      "unit": "Widget/Week"
+    },
+    {
+      "name": "desired_inventory",
+      "comment": "Target inventory based on smoothed demand",
+      "equation": "SMOOTH(customer_demand, demand_smoothing_time) * desired_coverage",
+      "unit": "Widget"
+    },
+    {
+      "name": "desired_coverage",
+      "comment": "Weeks of demand to hold in inventory",
+      "equation": "3",
+      "unit": "Week"
+    },
+    {
+      "name": "demand_smoothing_time",
+      "comment": "Time constant for demand smoothing",
+      "equation": "4",
+      "unit": "Week"
+    },
+    {
+      "name": "inventory_gap",
+      "comment": "Difference between desired and actual inventory",
+      "equation": "desired_inventory - Inventory",
+      "unit": "Widget"
+    },
+    {
+      "name": "inventory_adjustment",
+      "comment": "Correction to close the inventory gap over the adjustment time",
+      "equation": "inventory_gap / inventory_adjustment_time",
+      "unit": "Widget/Week"
+    },
+    {
+      "name": "inventory_adjustment_time",
+      "comment": "Weeks to close the inventory gap",
+      "equation": "8",
+      "unit": "Week"
+    },
+    {
+      "name": "desired_supply_line",
+      "comment": "Target supply line equals production delay times demand",
+      "equation": "production_delay * customer_demand",
+      "unit": "Widget"
+    },
+    {
+      "name": "supply_adjustment",
+      "comment": "Correction for supply line gap plus inventory gap",
+      "equation": "inventory_adjustment + (desired_supply_line - Supply_Line) / supply_adjustment_time",
+      "unit": "Widget/Week"
+    },
+    {
+      "name": "supply_adjustment_time",
+      "comment": "Weeks to close the supply line gap",
+      "equation": "4",
+      "unit": "Week"
+    },
+    {
+      "name": "desired_production",
+      "comment": "Base production to match perceived demand",
+      "equation": "SMOOTH(customer_demand, demand_smoothing_time)",
+      "unit": "Widget/Week"
+    },
+    {
+      "name": "production_delay",
+      "comment": "Weeks between ordering and receiving product",
+      "equation": "3",
+      "unit": "Week"
+    },
+    {
+      "name": "desired_shipment_rate",
+      "comment": "Shipments needed to clear backlog plus meet current demand",
+      "equation": "Backlog / target_delivery_delay + customer_demand",
+      "unit": "Widget/Week"
+    },
+    {
+      "name": "target_delivery_delay",
+      "comment": "Target time to fulfill an order",
+      "equation": "2",
+      "unit": "Week"
+    },
+    {
+      "name": "minimum_order_processing_time",
+      "comment": "Minimum time to process and ship an order",
+      "equation": "0.5",
+      "unit": "Week"
+    },
+    {
+      "name": "inventory_ratio",
+      "comment": "Ratio of actual to desired inventory",
+      "equation": "IF(desired_inventory > 0, Inventory / desired_inventory, 1)",
+      "unit": "Dmnl"
+    },
+    {
+      "name": "effect_of_inventory_on_price",
+      "comment": "Price multiplier based on inventory ratio (from lookup table)",
+      "equation": "LOOKUP(price_effect_curve, inventory_ratio)",
+      "unit": "Dmnl"
+    }
+  ],
+  "lookupTables": [
+    {
+      "name": "price_effect_curve",
+      "comment": "Maps inventory ratio to price multiplier — low inventory drives price up",
+      "xValues": [0.0, 0.25, 0.5, 0.75, 1.0, 1.25, 1.5, 2.0],
+      "yValues": [3.0, 2.2, 1.6, 1.2, 1.0, 0.9, 0.85, 0.8],
+      "interpolation": "LINEAR"
+    }
+  ],
+  "views": [
+    {
+      "name": "View 1",
+      "elements": [
+        { "name": "Inventory", "type": "stock", "x": 400.0, "y": 200.0 },
+        { "name": "Supply_Line", "type": "stock", "x": 150.0, "y": 200.0 },
+        { "name": "Backlog", "type": "stock", "x": 650.0, "y": 200.0 },
+        { "name": "production_rate", "type": "flow", "x": 275.0, "y": 200.0 },
+        { "name": "shipment_rate", "type": "flow", "x": 525.0, "y": 200.0 },
+        { "name": "order_rate", "type": "flow", "x": 50.0, "y": 200.0 },
+        { "name": "incoming_orders", "type": "flow", "x": 750.0, "y": 200.0 },
+        { "name": "order_fulfillment", "type": "flow", "x": 650.0, "y": 120.0 },
+        { "name": "customer_demand", "type": "aux", "x": 600.0, "y": 350.0 },
+        { "name": "base_demand", "type": "aux", "x": 500.0, "y": 420.0 },
+        { "name": "demand_shock", "type": "aux", "x": 700.0, "y": 420.0 },
+        { "name": "desired_inventory", "type": "aux", "x": 300.0, "y": 350.0 },
+        { "name": "desired_coverage", "type": "aux", "x": 200.0, "y": 420.0 },
+        { "name": "demand_smoothing_time", "type": "aux", "x": 400.0, "y": 420.0 },
+        { "name": "inventory_gap", "type": "aux", "x": 350.0, "y": 80.0 },
+        { "name": "inventory_adjustment", "type": "aux", "x": 250.0, "y": 80.0 },
+        { "name": "inventory_adjustment_time", "type": "aux", "x": 150.0, "y": 80.0 },
+        { "name": "desired_supply_line", "type": "aux", "x": 100.0, "y": 350.0 },
+        { "name": "supply_adjustment", "type": "aux", "x": 100.0, "y": 120.0 },
+        { "name": "supply_adjustment_time", "type": "aux", "x": 50.0, "y": 80.0 },
+        { "name": "desired_production", "type": "aux", "x": 100.0, "y": 280.0 },
+        { "name": "production_delay", "type": "aux", "x": 200.0, "y": 280.0 },
+        { "name": "desired_shipment_rate", "type": "aux", "x": 525.0, "y": 120.0 },
+        { "name": "target_delivery_delay", "type": "aux", "x": 600.0, "y": 80.0 },
+        { "name": "minimum_order_processing_time", "type": "aux", "x": 450.0, "y": 120.0 },
+        { "name": "inventory_ratio", "type": "aux", "x": 400.0, "y": 500.0 },
+        { "name": "effect_of_inventory_on_price", "type": "aux", "x": 550.0, "y": 500.0 },
+        { "name": "price_effect_curve", "type": "lookup", "x": 700.0, "y": 500.0 }
+      ],
+      "connectors": []
+    }
+  ],
+  "defaultSimulation": {
+    "timeStep": "Week",
+    "duration": 52.0,
+    "durationUnit": "Week"
+  },
+  "metadata": {
+    "source": "Adapted from Sterman (2000) Business Dynamics, Chapter 18",
+    "license": "CC-BY-SA-4.0"
+  }
+}
