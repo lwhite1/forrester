@@ -481,11 +481,13 @@ public class ModelCanvas extends Canvas {
     }
 
     /**
-     * Invalidates all cached analysis (loop highlighting, validation indicators).
+     * Invalidates all cached analysis (loop highlighting, causal trace, validation indicators).
      * Must be called after any structural model mutation.
      */
     private void invalidateAnalysis() {
         invalidateLoopAnalysis();
+        traceController.invalidate(
+                editor != null ? editor.toModelDefinition(canvasState.toViewDef()) : null);
         recomputeValidation();
     }
 
