@@ -1048,6 +1048,35 @@ public class ModelWindow {
             canvas.zoomOut();
             canvas.requestFocus();
         }));
+        commands.add(cmd("Toggle Hide Variables", "View", () -> {
+            canvas.setHideAuxiliaries(!canvas.isHideAuxiliaries());
+            canvas.requestFocus();
+        }));
+        commands.add(cmd("Toggle Hide Info Links", "View", () -> {
+            canvas.setHideInfoLinks(!canvas.isHideInfoLinks());
+            canvas.requestFocus();
+        }));
+        commands.add(cmd("Toggle Delay Indicators", "View", () -> {
+            canvas.setShowDelayBadges(!canvas.isShowDelayBadges());
+            canvas.requestFocus();
+        }));
+        commands.add(cmd("Toggle Activity Log", "View", () -> {
+            boolean show = !activityLogPanel.isVisible();
+            activityLogPanel.setVisible(show);
+            activityLogPanel.setManaged(show);
+            if (show) {
+                root.setLeft(activityLogPanel);
+            } else {
+                root.setLeft(null);
+            }
+        }));
+        commands.add(cmd("Pop Out / Dock Dashboard", "View", () -> {
+            if (dashboardStage == null) {
+                popOutDashboard();
+            } else {
+                dockDashboard();
+            }
+        }));
 
         // Edit
         commands.add(cmd("Undo", "Edit", () -> {
@@ -1059,6 +1088,18 @@ public class ModelWindow {
             canvas.requestFocus();
         }));
         commands.add(cmd("Undo History", "Edit", this::showUndoHistoryPopup));
+        commands.add(cmd("Cut", "Edit", () -> {
+            canvas.cutSelection();
+            canvas.requestFocus();
+        }));
+        commands.add(cmd("Copy", "Edit", () -> {
+            canvas.copySelection();
+            canvas.requestFocus();
+        }));
+        commands.add(cmd("Paste", "Edit", () -> {
+            canvas.pasteClipboard();
+            canvas.requestFocus();
+        }));
         commands.add(cmd("Select All", "Edit", () -> {
             canvas.selectAll();
             canvas.requestFocus();
@@ -1074,6 +1115,7 @@ public class ModelWindow {
                 canvas.getCanvasState(), canvas.getEditor(),
                 canvas.getConnectors(), canvas.getActiveLoopAnalysis(), stage,
                 editor != null ? editor.getModelName() : null)));
+        commands.add(cmd("Model Info", "File", this::showModelInfoDialog));
 
         // Help (reuse tracked windows, same as menu items)
         commands.add(cmd("Getting Started", "Help",
@@ -1084,6 +1126,14 @@ public class ModelWindow {
                 () -> exprLangWindow = showHelpWindow(exprLangWindow, ExpressionLanguageDialog::new)));
         commands.add(cmd("Keyboard Shortcuts", "Help",
                 () -> shortcutsWindow = showHelpWindow(shortcutsWindow, KeyboardShortcutsDialog::new)));
+        commands.add(cmd("About Forrester", "Help", () -> {
+            Alert about = new Alert(Alert.AlertType.INFORMATION);
+            about.setTitle("About Forrester");
+            about.setHeaderText("Forrester");
+            about.setContentText("A visual System Dynamics modeling environment.\nVersion "
+                    + AppVersion.get());
+            about.showAndWait();
+        }));
 
         // Dynamic: model element names for navigation
         for (String name : canvas.getCanvasState().getDrawOrder()) {
