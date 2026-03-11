@@ -132,6 +132,13 @@ public class ModelCanvas extends Canvas {
                 }
 
                 @Override
+                public void saveAndSetCommentText(String name, String text) {
+                    saveUndoState("Edit " + name + " text");
+                    editor.setCommentText(name, text);
+                    regenerateAndRedraw();
+                }
+
+                @Override
                 public void postEdit() {
                     requestFocus();
                     inputDispatcher.updateCursor(ModelCanvas.this);

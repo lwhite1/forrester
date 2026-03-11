@@ -1,6 +1,7 @@
 package systems.courant.shrewd.app.canvas;
 
 import systems.courant.shrewd.model.def.AuxDef;
+import systems.courant.shrewd.model.def.CommentDef;
 import systems.courant.shrewd.model.def.ElementType;
 import systems.courant.shrewd.model.def.FlowDef;
 
@@ -27,6 +28,7 @@ final class InlineEditController {
         void applyRename(String oldName, String newName);
         void saveAndSetFlowEquation(String name, String equation);
         void saveAndSetAuxEquation(String name, String equation);
+        void saveAndSetCommentText(String name, String text);
         void postEdit();
     }
 
@@ -77,6 +79,22 @@ final class InlineEditController {
                     fieldWidth, callbacks,
                     name -> startAuxEquationEdit(name, editor,
                             screenX, screenY, scale, callbacks));
+            case COMMENT -> {
+                CommentDef comment = editor.getCommentByName(elementName);
+                String currentText = comment != null ? comment.text() : "";
+                double w = canvasState.hasCustomSize(elementName)
+                        ? canvasState.getWidth(elementName) * scale
+                        : LayoutMetrics.COMMENT_WIDTH * scale;
+                double h = canvasState.hasCustomSize(elementName)
+                        ? canvasState.getHeight(elementName) * scale
+                        : LayoutMetrics.COMMENT_HEIGHT * scale;
+                inlineEditor.openTextArea(screenX, screenY, currentText, w, h, newText -> {
+                    if (newText != null) {
+                        callbacks.saveAndSetCommentText(elementName, newText.trim());
+                    }
+                    callbacks.postEdit();
+                });
+            }
             default -> inlineEditor.open(screenX, screenY, elementName,
                     fieldWidth, newName -> {
                         if (newName != null && !newName.equals(elementName)
