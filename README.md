@@ -1,8 +1,10 @@
 # Shrewd — System Dynamics Modeling Tool
 
-> **Alpha-1 Release** — This system is at Alpha-1 release readiness and is not ready for production use. APIs, file formats, and features may change without notice.
+> **Alpha-1 Release** — This system is not ready for production use. APIs, file formats, and features may change without notice.
 
-Shrewd is an open-source [System Dynamics](userdocs/Key%20Reasons%20for%20Using%20System%20Dynamics.md) simulation engine and visual modeling environment for Java. It provides two ways to build and run models:
+The ability to reason about and make predictions on complex,dynamic systems is essential today. Shrewd is an open-source [System Dynamics](userdocs/Key%20Reasons%20for%20Using%20System%20Dynamics.md) simulation engine and visual modeling environment written in Java. It was created so that, when it's ready, everyone will have access to a professional quality system dynamics environment for free. 
+
+It provides two ways to build and run models:
 
 - **Visual Editor** — a JavaFX canvas-based GUI for interactively building stock-and-flow diagrams and causal loop diagrams
 - **Programmable Engine** — a code-first Java API for defining, compiling, and running models programmatically
