@@ -252,10 +252,14 @@ public final class XmileExporter {
                 XmileConstants.NAMESPACE_URI, XmileConstants.STOCK);
         elem.setAttribute(XmileConstants.ATTR_NAME, stock.name());
 
-        // <eqn> — initial value
+        // <eqn> — initial value (prefer expression over numeric constant)
         Element eqn = doc.createElementNS(
                 XmileConstants.NAMESPACE_URI, XmileConstants.EQN);
-        eqn.setTextContent(formatDouble(stock.initialValue()));
+        if (stock.initialExpression() != null && !stock.initialExpression().isBlank()) {
+            eqn.setTextContent(XmileExprTranslator.toXmile(stock.initialExpression()));
+        } else {
+            eqn.setTextContent(formatDouble(stock.initialValue()));
+        }
         elem.appendChild(eqn);
 
         // <inflow> and <outflow> from flows that reference this stock
@@ -329,12 +333,12 @@ public final class XmileExporter {
             Optional<LookupTableDef> lookupOpt = findLookup(def, lookupNameOpt.get());
             if (lookupOpt.isPresent()) {
                 // Extract the input expression from LOOKUP(name, input)
-                extractLookupInput(aux.equation()).ifPresent(inputExpr -> {
-                    Element eqn = doc.createElementNS(
-                            XmileConstants.NAMESPACE_URI, XmileConstants.EQN);
-                    eqn.setTextContent(XmileExprTranslator.toXmile(inputExpr));
-                    elem.appendChild(eqn);
-                });
+                String inputExpr = extractLookupInput(aux.equation())
+                        .orElse(aux.equation());
+                Element eqn = doc.createElementNS(
+                        XmileConstants.NAMESPACE_URI, XmileConstants.EQN);
+                eqn.setTextContent(XmileExprTranslator.toXmile(inputExpr));
+                elem.appendChild(eqn);
                 writeGf(doc, elem, lookupOpt.get());
                 variablesElem.appendChild(elem);
                 return;
