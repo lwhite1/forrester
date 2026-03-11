@@ -120,7 +120,9 @@ public record AuxDef(
      * trailing zeros (e.g. {@code 42.0} becomes {@code "42"}).
      */
     public static String formatValue(double value) {
-        if (value == (long) value && !Double.isInfinite(value)) {
+        if (!Double.isInfinite(value) && !Double.isNaN(value)
+                && Double.compare(value, Math.rint(value)) == 0
+                && Math.abs(value) <= Long.MAX_VALUE) {
             return Long.toString((long) value);
         }
         return Double.toString(value);

@@ -171,4 +171,37 @@ class ModelDefinitionFactoryTest {
             assertThat(result).isSameAs(def);
         }
     }
+
+    @Nested
+    @DisplayName("formatValue overflow guard (#421)")
+    class FormatValueOverflow {
+
+        @Test
+        void shouldFormatLargeDoubleWithoutOverflow() {
+            ModelDefinition def = new ModelDefinitionBuilder()
+                    .name("Overflow")
+                    .constant("BigParam", 42, "Dimensionless unit")
+                    .defaultSimulation("Day", 10, "Day")
+                    .build();
+
+            ModelDefinition overridden = ModelDefinitionFactory.applyParameterOverrides(
+                    def, Map.of("BigParam", 1e19));
+
+            assertThat(overridden.parameters().get(0).equation()).isEqualTo("1.0E19");
+        }
+
+        @Test
+        void shouldFormatIntegerValueCleanly() {
+            ModelDefinition def = new ModelDefinitionBuilder()
+                    .name("IntVal")
+                    .constant("Param", 1, "Dimensionless unit")
+                    .defaultSimulation("Day", 10, "Day")
+                    .build();
+
+            ModelDefinition overridden = ModelDefinitionFactory.applyParameterOverrides(
+                    def, Map.of("Param", 42.0));
+
+            assertThat(overridden.parameters().get(0).equation()).isEqualTo("42");
+        }
+    }
 }
