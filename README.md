@@ -113,7 +113,7 @@ CompiledModel compiled = new ModelCompiler().compile(def);
 compiled.createSimulation().execute();
 ```
 
-See [Programmable Engine](docs/Programmable%20Engine.md) for the full API reference. The 23 runnable demos in `shrewd-demos` cover exponential growth, delays, feedback, epidemiology, predator-prey, inventory management, and software development models.
+See [Programmable Engine](userdocs/Programmable%20Engine.md) for the full API reference. The 23 runnable demos in `shrewd-demos` cover exponential growth, delays, feedback, epidemiology, predator-prey, inventory management, and software development models.
 
 ## Core Concepts
 
@@ -156,7 +156,7 @@ Shrewd can exchange models with other System Dynamics tools:
 
 - **Vensim `.mdl` import** — reads Vensim model files including stocks, flows, auxiliaries, constants, lookup tables, subscripts, sketch data, and simulation settings. See [Vensim Import](userdocs/Vensim%20Import.md).
 - **XMILE import & export** — bidirectional exchange with Stella/iThink via the OASIS standard XML format. See [XMILE Import & Export](userdocs/XMILE%20Import%20Export.md).
-- **JSON** — native round-trip persistence format. See [Programmable Engine](docs/Programmable%20Engine.md#json-serialization).
+- **JSON** — native round-trip persistence format. See [Programmable Engine](userdocs/Programmable%20Engine.md#json-serialization).
 
 ## Example Models
 
@@ -178,8 +178,8 @@ Shrewd can exchange models with other System Dynamics tools:
 | Document | Contents |
 |---|---|
 | [Quickstart Tutorial](userdocs/Quickstart.md) | Build your first model in 10 minutes |
-| [Visual Editor Guide](docs/Visual%20Editor%20Guide.md) | GUI features, tools, keyboard shortcuts, simulation, analysis |
-| [Programmable Engine](docs/Programmable%20Engine.md) | Code API: lambda-based models, definitions, compiler, expressions, sweep/Monte Carlo/optimization |
+| [Visual Editor Guide](userdocs/Visual%20Editor%20Guide.md) | GUI features, tools, keyboard shortcuts, simulation, analysis |
+| [Programmable Engine](userdocs/Programmable%20Engine.md) | Code API: lambda-based models, definitions, compiler, expressions, sweep/Monte Carlo/optimization |
 | [Expression Language](userdocs/Expression_Language.md) | Equation syntax, operators, and built-in functions reference |
 | [From Vensim PLE](userdocs/From_Vensim_PLE.md) | Migration guide for Vensim PLE users |
 | [Vensim Import](userdocs/Vensim%20Import.md) | Vensim `.mdl` import: supported constructs and limitations |
