@@ -105,4 +105,32 @@ class JavaSourceEscaperTest {
             assertThat(JavaSourceEscaper.toPackageSegment(null)).isEqualTo("");
         }
     }
+
+    @Nested
+    class ToValidIdentifier {
+
+        @Test
+        void shouldPrefixDigitStartingName() {
+            assertThat(JavaSourceEscaper.toValidIdentifier("3rd Stage"))
+                    .isEqualTo("_3rdstage");
+        }
+
+        @Test
+        void shouldNotPrefixLetterStartingName() {
+            assertThat(JavaSourceEscaper.toValidIdentifier("my module"))
+                    .isEqualTo("mymodule");
+        }
+
+        @Test
+        void shouldHandleAllDigitName() {
+            assertThat(JavaSourceEscaper.toValidIdentifier("123"))
+                    .isEqualTo("_123");
+        }
+
+        @Test
+        void shouldReturnEmptyForBlank() {
+            assertThat(JavaSourceEscaper.toValidIdentifier("")).isEqualTo("");
+            assertThat(JavaSourceEscaper.toValidIdentifier(null)).isEqualTo("");
+        }
+    }
 }
