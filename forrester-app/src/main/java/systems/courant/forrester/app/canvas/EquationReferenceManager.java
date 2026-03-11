@@ -2,6 +2,13 @@ package systems.courant.forrester.app.canvas;
 
 import systems.courant.forrester.model.def.AuxDef;
 import systems.courant.forrester.model.def.FlowDef;
+import systems.courant.forrester.model.expr.ExprParser;
+import systems.courant.forrester.model.expr.ExprRenamer;
+import systems.courant.forrester.model.expr.ExprStringifier;
+import systems.courant.forrester.model.expr.Expr;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.function.UnaryOperator;
@@ -14,6 +21,8 @@ import java.util.function.UnaryOperator;
  * <p>Extracted from {@link ModelEditor} to isolate equation manipulation logic.</p>
  */
 final class EquationReferenceManager {
+
+    private static final Logger log = LoggerFactory.getLogger(EquationReferenceManager.class);
 
     private final List<FlowDef> flows;
     private final List<AuxDef> auxiliaries;
@@ -116,10 +125,33 @@ final class EquationReferenceManager {
     }
 
     /**
-     * Word-boundary-aware token replacement in an equation string.
-     * Tokens in equations use underscores for spaces (e.g. Contact_Rate).
+     * Renames references in an equation string using AST-based transformation.
+     * Parses the equation to an AST, renames matching references, and stringifies
+     * the result. Falls back to word-boundary string replacement if parsing fails.
      */
     static String replaceToken(String equation, String oldToken, String newToken) {
+        if (equation == null || equation.isBlank()) {
+            return equation;
+        }
+        try {
+            Expr ast = ExprParser.parse(equation);
+            Expr renamed = ExprRenamer.rename(ast, oldToken, newToken);
+            if (renamed == ast) {
+                return equation;
+            }
+            return ExprStringifier.stringify(renamed);
+        } catch (Exception e) {
+            log.debug("AST parse failed for equation '{}', falling back to string replacement: {}",
+                    equation, e.getMessage());
+            return replaceTokenByString(equation, oldToken, newToken);
+        }
+    }
+
+    /**
+     * Fallback word-boundary-aware string token replacement.
+     * Used when the equation cannot be parsed to an AST.
+     */
+    static String replaceTokenByString(String equation, String oldToken, String newToken) {
         StringBuilder result = new StringBuilder();
         int len = equation.length();
         int tokenLen = oldToken.length();
