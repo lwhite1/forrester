@@ -3,6 +3,9 @@ package systems.courant.shrewd.model;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import systems.courant.shrewd.measure.Quantity;
+
+import static systems.courant.shrewd.measure.Units.MINUTE;
 import static systems.courant.shrewd.measure.Units.THING;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -126,5 +129,43 @@ public class ModelTest {
 
         model.addModule(module); // should not throw
         assertThat(model.getStocks()).hasSize(1);
+    }
+
+    @Test
+    public void shouldRejectDuplicateStockName() {
+        model.addStock(new Stock("Population", 100, THING));
+
+        assertThatThrownBy(() -> model.addStock(new Stock("Population", 200, THING)))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("Population")
+                .hasMessageContaining("Duplicate stock name");
+    }
+
+    @Test
+    public void shouldRejectDuplicateFlowName() {
+        model.addFlow(Flow.create("Birth Rate", MINUTE, () -> new Quantity(10, THING)));
+
+        assertThatThrownBy(() -> model.addFlow(Flow.create("Birth Rate", MINUTE, () -> new Quantity(5, THING))))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("Birth Rate")
+                .hasMessageContaining("Duplicate flow name");
+    }
+
+    @Test
+    public void shouldRejectDuplicateVariableName() {
+        model.addVariable(new Variable("Rate", THING, () -> 0.5));
+
+        assertThatThrownBy(() -> model.addVariable(new Variable("Rate", THING, () -> 0.3)))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("Rate")
+                .hasMessageContaining("Duplicate variable name");
+    }
+
+    @Test
+    public void shouldAllowReAddingSameVariableObject() {
+        Variable v = new Variable("Rate", THING, () -> 0.5);
+        model.addVariable(v);
+        model.addVariable(v); // same object — should not throw
+        assertThat(model.getVariables()).hasSize(1);
     }
 }
