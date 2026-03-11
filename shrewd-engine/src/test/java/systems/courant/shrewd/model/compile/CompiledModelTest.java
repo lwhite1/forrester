@@ -6,6 +6,7 @@ import systems.courant.shrewd.measure.UnitRegistry;
 import systems.courant.shrewd.model.Flow;
 import systems.courant.shrewd.model.Model;
 import systems.courant.shrewd.model.Stock;
+import systems.courant.shrewd.model.Variable;
 import systems.courant.shrewd.model.def.FlowDef;
 import systems.courant.shrewd.model.def.ModelDefinition;
 import systems.courant.shrewd.model.def.SimulationSettings;
@@ -145,6 +146,34 @@ class CompiledModelTest {
             compiled.reset();
             assertThat(population.getValue()).isEqualTo(100.0);
             assertThat(resetCount.get()).isEqualTo(2);
+        }
+
+        @Test
+        void shouldClearFlowHistory() {
+            Flow growth = model.getFlows().get(0);
+            growth.recordValue(new Quantity(10, THING));
+            growth.recordValue(new Quantity(20, THING));
+            assertThat(growth.getHistoryAtTimeStep(0)).isEqualTo(10.0);
+            assertThat(growth.getHistoryAtTimeStep(1)).isEqualTo(20.0);
+
+            compiled.reset();
+
+            // After reset, history should be cleared — returns 0 for out-of-range
+            assertThat(growth.getHistoryAtTimeStep(0)).isEqualTo(0.0);
+            assertThat(growth.getHistoryAtTimeStep(1)).isEqualTo(0.0);
+        }
+
+        @Test
+        void shouldClearVariableHistory() {
+            Variable rate = new Variable("rate", THING, () -> 0.1);
+            model.addVariable(rate);
+            rate.recordValue();
+            assertThat(rate.getHistoryAtTimeStep(0)).isEqualTo(0.1);
+
+            compiled.reset();
+
+            // After reset, history should be cleared — returns 0 for out-of-range
+            assertThat(rate.getHistoryAtTimeStep(0)).isEqualTo(0.0);
         }
     }
 
