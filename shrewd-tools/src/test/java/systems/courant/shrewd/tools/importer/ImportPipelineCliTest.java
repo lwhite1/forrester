@@ -2,6 +2,9 @@ package systems.courant.shrewd.tools.importer;
 
 import org.junit.jupiter.api.Test;
 
+import java.io.ByteArrayInputStream;
+import java.nio.charset.StandardCharsets;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 class ImportPipelineCliTest {
@@ -49,5 +52,24 @@ class ImportPipelineCliTest {
     void shouldUseDefaultOutputDir() {
         ImportPipelineCli.CliArgs parsed = ImportPipelineCli.parseArgs(new String[]{});
         assertThat(parsed.outputDir).isEqualTo("shrewd-demos/src/main/java");
+    }
+
+    @Test
+    void shouldReuseScannerAcrossMultiplePromptCalls() {
+        java.io.InputStream originalIn = System.in;
+        String input = "first\nsecond\nthird\n";
+        System.setIn(new ByteArrayInputStream(input.getBytes(StandardCharsets.UTF_8)));
+        try {
+            ImportPipelineCli cli = new ImportPipelineCli();
+            String r1 = cli.prompt("Q1: ");
+            String r2 = cli.prompt("Q2: ");
+            String r3 = cli.prompt("Q3: ");
+
+            assertThat(r1).isEqualTo("first");
+            assertThat(r2).isEqualTo("second");
+            assertThat(r3).isEqualTo("third");
+        } finally {
+            System.setIn(originalIn);
+        }
     }
 }

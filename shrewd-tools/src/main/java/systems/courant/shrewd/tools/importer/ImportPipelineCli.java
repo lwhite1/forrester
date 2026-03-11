@@ -126,13 +126,18 @@ public class ImportPipelineCli {
         return (child != null && !child.isNull()) ? child.asText() : null;
     }
 
-    private static String prompt(String message) {
+    /** Lazily initialized Scanner for reading from System.in when System.console() is null. */
+    private Scanner stdinScanner;
+
+    String prompt(String message) {
         System.err.print(message);
         if (System.console() != null) {
             return System.console().readLine();
         }
-        Scanner scanner = new Scanner(System.in, java.nio.charset.StandardCharsets.UTF_8);
-        return scanner.hasNextLine() ? scanner.nextLine() : null;
+        if (stdinScanner == null) {
+            stdinScanner = new Scanner(System.in, java.nio.charset.StandardCharsets.UTF_8);
+        }
+        return stdinScanner.hasNextLine() ? stdinScanner.nextLine() : null;
     }
 
     static CliArgs parseArgs(String[] args) {
