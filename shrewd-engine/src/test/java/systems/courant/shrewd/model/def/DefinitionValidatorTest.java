@@ -286,6 +286,41 @@ class DefinitionValidatorTest {
         }
     }
 
+    @Nested
+    @DisplayName("validateStructure (#308)")
+    class ValidateStructure {
+
+        @Test
+        void shouldExcludeViewErrorsFromStructureValidation() {
+            ModelDefinition def = new ModelDefinitionBuilder()
+                    .name("ViewTest")
+                    .stock("S", 100, "Person")
+                    .view(new ViewDef("main", List.of(
+                            new ElementPlacement("NonExistent", ElementType.STOCK, 0, 0)),
+                            List.of(), List.of()))
+                    .build();
+
+            List<String> fullErrors = DefinitionValidator.validate(def);
+            List<String> structErrors = DefinitionValidator.validateStructure(def);
+
+            assertThat(fullErrors).anyMatch(e -> e.contains("non-existent element"));
+            assertThat(structErrors).noneMatch(e -> e.contains("non-existent element"));
+        }
+
+        @Test
+        void shouldStillDetectStructuralErrorsInValidateStructure() {
+            ModelDefinition def = new ModelDefinitionBuilder()
+                    .name("Bad")
+                    .stock("S", 100, "Person")
+                    .flow("F", "S +", "Day", "S", null)
+                    .build();
+
+            List<String> structErrors = DefinitionValidator.validateStructure(def);
+
+            assertThat(structErrors).anyMatch(e -> e.contains("invalid equation"));
+        }
+    }
+
     private ModelDefinition buildSIR() {
         return new ModelDefinitionBuilder()
                 .name("SIR Model")

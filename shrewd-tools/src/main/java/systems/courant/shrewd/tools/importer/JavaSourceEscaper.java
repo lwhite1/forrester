@@ -91,6 +91,21 @@ public final class JavaSourceEscaper {
     }
 
     /**
+     * Converts a name to a valid Java identifier by lowercasing, stripping
+     * non-alphanumeric characters, and prefixing with an underscore if it
+     * starts with a digit.
+     *
+     * <p>Examples: "3rd Stage" → "_3rdstage", "my module" → "mymodule"
+     */
+    public static String toValidIdentifier(String input) {
+        String base = toPackageSegment(input);
+        if (!base.isEmpty() && Character.isDigit(base.charAt(0))) {
+            return "_" + base;
+        }
+        return base;
+    }
+
+    /**
      * Returns "null" if the value is null, otherwise the escaped string literal.
      * Convenience for generating nullable constructor arguments.
      */

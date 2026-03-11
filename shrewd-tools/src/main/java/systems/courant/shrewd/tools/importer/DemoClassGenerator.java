@@ -285,7 +285,7 @@ public class DemoClassGenerator {
 
     private void emitModuleInstance(StringBuilder sb, ModuleInstanceDef module) {
         // Generate the inner module definition inline
-        String varName = JavaSourceEscaper.toPackageSegment(module.instanceName()) + "Def";
+        String varName = JavaSourceEscaper.toValidIdentifier(module.instanceName()) + "Def";
         ModelDefinition inner = module.definition();
 
         sb.append(INDENT).append("{\n");

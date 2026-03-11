@@ -29,15 +29,27 @@ public final class DefinitionValidator {
     }
 
     /**
-     * Validates the given model definition and returns all errors found.
+     * Validates the given model definition and returns all errors found,
+     * including view validation errors.
      */
     public static List<String> validate(ModelDefinition def) {
+        return validate(def, true);
+    }
+
+    /**
+     * Validates a model definition for structural correctness, excluding view validation.
+     * Use this for compilation where views are non-functional and may reference
+     * import-generated names that differ from model element names.
+     */
+    public static List<String> validateStructure(ModelDefinition def) {
+        return validate(def, false);
+    }
+
+    private static List<String> validate(ModelDefinition def, boolean includeViews) {
         List<String> errors = new ArrayList<>();
         Set<String> allNames = new HashSet<>();
-        // Case-insensitive duplicate detection: maps lowercase → first-seen original name
         Map<String, String> lowerToOriginal = new HashMap<>();
 
-        // Collect all element names and check for duplicates (case-insensitive)
         for (StockDef stock : def.stocks()) {
             checkDuplicateName(stock.name(), allNames, lowerToOriginal, errors);
         }
@@ -57,13 +69,11 @@ public final class DefinitionValidator {
             checkDuplicateName(v.name(), allNames, lowerToOriginal, errors);
         }
 
-        // Build set of stock names for flow source/sink validation
         Set<String> stockNames = new HashSet<>();
         for (StockDef stock : def.stocks()) {
             stockNames.add(stock.name());
         }
 
-        // Validate flow source/sink references
         for (FlowDef flow : def.flows()) {
             if (flow.source() != null && !stockNames.contains(flow.source())) {
                 errors.add("Flow '" + flow.name() + "' references non-existent source stock: '"
@@ -75,7 +85,6 @@ public final class DefinitionValidator {
             }
         }
 
-        // Validate flow equations parse
         for (FlowDef flow : def.flows()) {
             try {
                 ExprParser.parse(flow.equation());
@@ -85,7 +94,6 @@ public final class DefinitionValidator {
             }
         }
 
-        // Validate auxiliary equations parse
         for (AuxDef aux : def.auxiliaries()) {
             try {
                 ExprParser.parse(aux.equation());
@@ -96,15 +104,12 @@ public final class DefinitionValidator {
             }
         }
 
-        // Validate that formula references resolve to known element names
         Set<String> knownNames = new HashSet<>(allNames);
-        // Add module output port aliases as known names
         for (ModuleInstanceDef module : def.modules()) {
             knownNames.addAll(module.outputBindings().values());
         }
         validateFormulaReferences(def, knownNames, errors);
 
-        // Validate module interface bindings
         for (ModuleInstanceDef module : def.modules()) {
             ModuleInterface iface = module.definition().moduleInterface();
             if (iface != null) {
@@ -130,7 +135,6 @@ public final class DefinitionValidator {
                                 + "'. Check the module definition for valid port names.");
                     }
                 }
-                // Check that all required input ports are bound
                 for (String inputPort : inputPortNames) {
                     if (!module.inputBindings().containsKey(inputPort)) {
                         errors.add("Module '" + module.instanceName()
@@ -141,7 +145,6 @@ public final class DefinitionValidator {
             }
         }
 
-        // Check for circular module references
         Set<String> rootPath = new HashSet<>();
         rootPath.add(def.name());
         for (ModuleInstanceDef module : def.modules()) {
@@ -152,7 +155,6 @@ public final class DefinitionValidator {
             }
         }
 
-        // Validate causal links for self-loops and duplicates
         Set<String> seenLinks = new HashSet<>();
         for (CausalLinkDef link : def.causalLinks()) {
             if (link.from().equals(link.to())) {
@@ -166,23 +168,13 @@ public final class DefinitionValidator {
             }
         }
 
-        // Validate views if present
-        for (ViewDef view : def.views()) {
-            errors.addAll(ViewValidator.validate(view, def));
+        if (includeViews) {
+            for (ViewDef view : def.views()) {
+                errors.addAll(ViewValidator.validate(view, def));
+            }
         }
 
         return errors;
-    }
-
-    /**
-     * Validates a model definition for structural correctness, excluding view validation.
-     * Use this for compilation where views are non-functional and may reference
-     * import-generated names that differ from model element names.
-     */
-    public static List<String> validateStructure(ModelDefinition def) {
-        List<String> all = validate(def);
-        all.removeIf(e -> e.startsWith("View "));
-        return all;
     }
 
     private static final Set<String> BUILTIN_NAMES = Set.of(
