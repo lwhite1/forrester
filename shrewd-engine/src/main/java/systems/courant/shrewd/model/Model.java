@@ -51,8 +51,16 @@ public class Model extends Element {
 
     /**
      * Adds a stock to this model.
+     *
+     * @throws IllegalArgumentException if a stock with the same name already exists
      */
     public void addStock(Stock stock) {
+        for (Stock existing : stocks) {
+            if (existing.getName().equals(stock.getName())) {
+                throw new IllegalArgumentException(
+                        "Duplicate stock name '" + stock.getName() + "' in model '" + getName() + "'");
+            }
+        }
         stocks.add(stock);
     }
 
@@ -73,8 +81,15 @@ public class Model extends Element {
 
     /**
      * Adds a variable to this model, keyed by its name.
+     *
+     * @throws IllegalArgumentException if a variable with the same name already exists
      */
     public void addVariable(Variable variable) {
+        Variable existing = variables.get(variable.getName());
+        if (existing != null && existing != variable) {
+            throw new IllegalArgumentException(
+                    "Duplicate variable name '" + variable.getName() + "' in model '" + getName() + "'");
+        }
         variables.put(variable.getName(), variable);
     }
 
@@ -198,8 +213,16 @@ public class Model extends Element {
 
     /**
      * Adds a flow to this model's flow registry.
+     *
+     * @throws IllegalArgumentException if a flow with the same name already exists
      */
     public void addFlow(Flow flow) {
+        for (Flow existing : flows) {
+            if (existing.getName().equals(flow.getName())) {
+                throw new IllegalArgumentException(
+                        "Duplicate flow name '" + flow.getName() + "' in model '" + getName() + "'");
+            }
+        }
         flows.add(flow);
     }
 
