@@ -95,6 +95,31 @@ class ExprDependenciesTest {
     }
 
     @Test
+    void shouldNotTreatInitialAsElementReference() {
+        // INITIAL(expr) is a built-in function — should not appear in deps (#494)
+        Expr expr = ExprParser.parse("INITIAL(target)");
+        Set<String> deps = ExprDependencies.extract(expr);
+        assertThat(deps).containsExactly("target");
+        assertThat(deps).doesNotContain("INITIAL");
+    }
+
+    @Test
+    void shouldNotTreatArcsinAsElementReference() {
+        Expr expr = ExprParser.parse("ARCSIN(x)");
+        Set<String> deps = ExprDependencies.extract(expr);
+        assertThat(deps).containsExactly("x");
+        assertThat(deps).doesNotContain("ARCSIN");
+    }
+
+    @Test
+    void shouldNotTreatQuantumAsElementReference() {
+        Expr expr = ExprParser.parse("QUANTUM(x, 5)");
+        Set<String> deps = ExprDependencies.extract(expr);
+        assertThat(deps).contains("x");
+        assertThat(deps).doesNotContain("QUANTUM");
+    }
+
+    @Test
     void shouldNotAddMultiArgFunctionNamesAsDeps() {
         // Multi-arg built-in functions should NOT have their name added
         Expr expr = ExprParser.parse("MIN(x, y)");

@@ -15,12 +15,17 @@ public final class ExprDependencies {
     /** Built-in function names (uppercase) that should not be treated as model element references. */
     private static final Set<String> BUILTIN_FUNCTIONS = Set.of(
             "ABS", "SQRT", "LN", "EXP", "LOG", "SIN", "COS", "TAN",
-            "INT", "ROUND", "MODULO", "POWER", "MIN", "MAX", "SUM", "MEAN",
-            "SMOOTH", "SMOOTHI", "SMOOTH3", "SMOOTH3I", "DELAY1", "DELAY3", "DELAY_FIXED",
+            "ARCSIN", "ARCCOS", "ARCTAN", "SIGN",
+            "INT", "ROUND", "MODULO", "QUANTUM", "POWER", "MIN", "MAX",
+            "SUM", "MEAN", "VMIN", "VMAX", "PROD",
+            "INITIAL",
+            "SMOOTH", "SMOOTHI", "SMOOTH3", "SMOOTH3I",
+            "DELAY1", "DELAY1I", "DELAY3", "DELAY3I", "DELAY_FIXED",
             "STEP", "RAMP", "PULSE", "PULSE_TRAIN",
             "TREND", "FORECAST", "NPV",
             "RANDOM_NORMAL", "RANDOM_UNIFORM",
-            "LOOKUP", "IF", "TIME", "DT"
+            "XIDZ", "ZIDZ",
+            "LOOKUP", "IF", "TIME", "DT", "PI"
     );
 
     private ExprDependencies() {
