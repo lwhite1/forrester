@@ -276,6 +276,52 @@ public class ExprCompiler {
                 DoubleSupplier a = compileExpr(args.get(0));
                 yield () -> Math.tan(a.getAsDouble());
             }
+            case "ARCSIN" -> {
+                requireArgs(name, args, 1);
+                DoubleSupplier a = compileExpr(args.get(0));
+                boolean[] warned = {false};
+                yield () -> {
+                    double v = a.getAsDouble();
+                    if (v < -1 || v > 1) {
+                        if (!warned[0]) {
+                            logger.warn("ARCSIN of value outside [-1, 1]: {}", v);
+                            warned[0] = true;
+                        }
+                        return Double.NaN;
+                    }
+                    return Math.asin(v);
+                };
+            }
+            case "ARCCOS" -> {
+                requireArgs(name, args, 1);
+                DoubleSupplier a = compileExpr(args.get(0));
+                boolean[] warned = {false};
+                yield () -> {
+                    double v = a.getAsDouble();
+                    if (v < -1 || v > 1) {
+                        if (!warned[0]) {
+                            logger.warn("ARCCOS of value outside [-1, 1]: {}", v);
+                            warned[0] = true;
+                        }
+                        return Double.NaN;
+                    }
+                    return Math.acos(v);
+                };
+            }
+            case "ARCTAN" -> {
+                requireArgs(name, args, 1);
+                DoubleSupplier a = compileExpr(args.get(0));
+                yield () -> Math.atan(a.getAsDouble());
+            }
+            case "SIGN" -> {
+                requireArgs(name, args, 1);
+                DoubleSupplier a = compileExpr(args.get(0));
+                yield () -> Math.signum(a.getAsDouble());
+            }
+            case "PI" -> {
+                requireArgs(name, args, 0);
+                yield () -> Math.PI;
+            }
             case "INT" -> {
                 requireArgs(name, args, 1);
                 DoubleSupplier a = compileExpr(args.get(0));
@@ -304,6 +350,23 @@ public class ExprCompiler {
                         return Double.NaN;
                     }
                     return a.getAsDouble() % divisor;
+                };
+            }
+            case "QUANTUM" -> {
+                requireArgs(name, args, 2);
+                DoubleSupplier a = compileExpr(args.get(0));
+                DoubleSupplier b = compileExpr(args.get(1));
+                boolean[] warned = {false};
+                yield () -> {
+                    double quantum = b.getAsDouble();
+                    if (quantum == 0) {
+                        if (!warned[0]) {
+                            logger.warn("QUANTUM with zero quantum size");
+                            warned[0] = true;
+                        }
+                        return a.getAsDouble();
+                    }
+                    return Math.floor(a.getAsDouble() / quantum) * quantum;
                 };
             }
             case "POWER" -> {
@@ -364,6 +427,94 @@ public class ExprCompiler {
                         sum += s.getAsDouble();
                     }
                     return sum / count;
+                };
+            }
+            case "VMIN" -> {
+                if (args.isEmpty()) {
+                    throw new CompilationException(
+                            "VMIN requires at least 1 argument", "VMIN");
+                }
+                List<DoubleSupplier> compiled = new ArrayList<>();
+                for (Expr arg : args) {
+                    compiled.add(compileExpr(arg));
+                }
+                yield () -> {
+                    double result = compiled.get(0).getAsDouble();
+                    for (int i = 1; i < compiled.size(); i++) {
+                        result = Math.min(result, compiled.get(i).getAsDouble());
+                    }
+                    return result;
+                };
+            }
+            case "VMAX" -> {
+                if (args.isEmpty()) {
+                    throw new CompilationException(
+                            "VMAX requires at least 1 argument", "VMAX");
+                }
+                List<DoubleSupplier> compiled = new ArrayList<>();
+                for (Expr arg : args) {
+                    compiled.add(compileExpr(arg));
+                }
+                yield () -> {
+                    double result = compiled.get(0).getAsDouble();
+                    for (int i = 1; i < compiled.size(); i++) {
+                        result = Math.max(result, compiled.get(i).getAsDouble());
+                    }
+                    return result;
+                };
+            }
+            case "PROD" -> {
+                if (args.isEmpty()) {
+                    throw new CompilationException(
+                            "PROD requires at least 1 argument", "PROD");
+                }
+                List<DoubleSupplier> compiled = new ArrayList<>();
+                for (Expr arg : args) {
+                    compiled.add(compileExpr(arg));
+                }
+                yield () -> {
+                    double result = 1;
+                    for (DoubleSupplier s : compiled) {
+                        result *= s.getAsDouble();
+                    }
+                    return result;
+                };
+            }
+            case "XIDZ" -> {
+                requireArgs(name, args, 3);
+                DoubleSupplier a = compileExpr(args.get(0));
+                DoubleSupplier b = compileExpr(args.get(1));
+                DoubleSupplier x = compileExpr(args.get(2));
+                yield () -> {
+                    double divisor = b.getAsDouble();
+                    return divisor == 0 ? x.getAsDouble() : a.getAsDouble() / divisor;
+                };
+            }
+            case "ZIDZ" -> {
+                requireArgs(name, args, 2);
+                DoubleSupplier a = compileExpr(args.get(0));
+                DoubleSupplier b = compileExpr(args.get(1));
+                yield () -> {
+                    double divisor = b.getAsDouble();
+                    return divisor == 0 ? 0.0 : a.getAsDouble() / divisor;
+                };
+            }
+            case "INITIAL" -> {
+                requireArgs(name, args, 1);
+                DoubleSupplier a = compileExpr(args.get(0));
+                double[] cached = {Double.NaN};
+                boolean[] initialized = {false};
+                Resettable reset = () -> {
+                    cached[0] = Double.NaN;
+                    initialized[0] = false;
+                };
+                resettables.add(reset);
+                yield () -> {
+                    if (!initialized[0]) {
+                        cached[0] = a.getAsDouble();
+                        initialized[0] = true;
+                    }
+                    return cached[0];
                 };
             }
             case "SMOOTH" -> compileSmooth(args);

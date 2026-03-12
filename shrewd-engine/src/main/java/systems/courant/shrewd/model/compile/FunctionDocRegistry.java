@@ -93,6 +93,44 @@ public final class FunctionDocRegistry {
                 "TAN(0) → 0",
                 List.of("SIN", "COS"));
 
+        add(m, "ARCSIN", "ARCSIN(x)", "Inverse sine (arcsine)",
+                "Math",
+                List.of(p("x", "value in range [-1, 1]")),
+                "Returns the arc sine of x in radians, in the range [-π/2, π/2]. "
+                        + "Returns NaN if x is outside [-1, 1].",
+                "ARCSIN(1) → 1.5708 (π/2)",
+                List.of("ARCCOS", "ARCTAN", "SIN"));
+
+        add(m, "ARCCOS", "ARCCOS(x)", "Inverse cosine (arccosine)",
+                "Math",
+                List.of(p("x", "value in range [-1, 1]")),
+                "Returns the arc cosine of x in radians, in the range [0, π]. "
+                        + "Returns NaN if x is outside [-1, 1].",
+                "ARCCOS(0) → 1.5708 (π/2)",
+                List.of("ARCSIN", "ARCTAN", "COS"));
+
+        add(m, "ARCTAN", "ARCTAN(x)", "Inverse tangent (arctangent)",
+                "Math",
+                List.of(p("x", "numeric value")),
+                "Returns the arc tangent of x in radians, in the range [-π/2, π/2].",
+                "ARCTAN(1) → 0.7854 (π/4)",
+                List.of("ARCSIN", "ARCCOS", "TAN"));
+
+        add(m, "SIGN", "SIGN(x)", "Sign of a value",
+                "Math",
+                List.of(p("x", "numeric value")),
+                "Returns -1 if x is negative, 0 if x is zero, and 1 if x is positive.",
+                "SIGN(-5) → -1\nSIGN(0) → 0\nSIGN(3) → 1",
+                List.of("ABS"));
+
+        add(m, "PI", "PI", "The constant π",
+                "Math",
+                List.of(),
+                "Returns the mathematical constant π (3.14159265...). "
+                        + "Useful for trigonometric calculations.",
+                "PI → 3.14159...\nSIN(PI / 2) → 1",
+                List.of("SIN", "COS", "TAN"));
+
         add(m, "INT", "INT(x)", "Truncate toward zero",
                 "Math",
                 List.of(p("x", "numeric value")),
@@ -122,6 +160,14 @@ public final class FunctionDocRegistry {
                 "MAX(3, 7) → 7",
                 List.of("MIN", "ABS"));
 
+        add(m, "QUANTUM", "QUANTUM(x, quantum)", "Round down to nearest multiple",
+                "Math",
+                List.of(p("x", "numeric value"), p("quantum", "the quantum size")),
+                "Rounds x down to the nearest multiple of quantum. "
+                        + "If quantum is zero, returns x unchanged.",
+                "QUANTUM(7.5, 2) → 6\nQUANTUM(10, 3) → 9",
+                List.of("INT", "ROUND", "MODULO"));
+
         add(m, "MODULO", "MODULO(a, b)", "Remainder after division",
                 "Math",
                 List.of(p("a", "dividend"), p("b", "divisor")),
@@ -141,14 +187,65 @@ public final class FunctionDocRegistry {
                 List.of(p("a, b, ...", "one or more numeric values")),
                 "Returns the sum of all arguments.",
                 "SUM(1, 2, 3) → 6",
-                List.of("MEAN"));
+                List.of("MEAN", "PROD"));
 
         add(m, "MEAN", "MEAN(a, b, ...)", "Average of values",
                 "Math",
                 List.of(p("a, b, ...", "one or more numeric values")),
                 "Returns the arithmetic mean (average) of all arguments.",
                 "MEAN(2, 4, 6) → 4",
-                List.of("SUM"));
+                List.of("SUM", "VMIN", "VMAX"));
+
+        add(m, "VMIN", "VMIN(a, b, ...)", "Minimum of multiple values",
+                "Math",
+                List.of(p("a, b, ...", "one or more numeric values")),
+                "Returns the smallest of all arguments. Unlike MIN which takes exactly "
+                        + "two arguments, VMIN accepts any number of arguments.",
+                "VMIN(5, 2, 8, 1) → 1",
+                List.of("VMAX", "MIN"));
+
+        add(m, "VMAX", "VMAX(a, b, ...)", "Maximum of multiple values",
+                "Math",
+                List.of(p("a, b, ...", "one or more numeric values")),
+                "Returns the largest of all arguments. Unlike MAX which takes exactly "
+                        + "two arguments, VMAX accepts any number of arguments.",
+                "VMAX(5, 2, 8, 1) → 8",
+                List.of("VMIN", "MAX"));
+
+        add(m, "PROD", "PROD(a, b, ...)", "Product of values",
+                "Math",
+                List.of(p("a, b, ...", "one or more numeric values")),
+                "Returns the product of all arguments.",
+                "PROD(2, 3, 4) → 24",
+                List.of("SUM", "POWER"));
+
+        // ── Safe division ──────────────────────────────────────────────
+        add(m, "XIDZ", "XIDZ(a, b, x)", "Safe divide with fallback",
+                "Math",
+                List.of(p("a", "numerator"), p("b", "denominator"),
+                        p("x", "value to return if b is zero")),
+                "Returns a / b if b is non-zero, otherwise returns x. "
+                        + "Stands for 'X If Divide by Zero'. Useful for avoiding "
+                        + "division-by-zero errors in equations.",
+                "XIDZ(10, 2, 0) → 5\nXIDZ(10, 0, -1) → -1",
+                List.of("ZIDZ"));
+
+        add(m, "ZIDZ", "ZIDZ(a, b)", "Safe divide returning zero",
+                "Math",
+                List.of(p("a", "numerator"), p("b", "denominator")),
+                "Returns a / b if b is non-zero, otherwise returns 0. "
+                        + "Stands for 'Zero If Divide by Zero'. Equivalent to XIDZ(a, b, 0).",
+                "ZIDZ(10, 2) → 5\nZIDZ(10, 0) → 0",
+                List.of("XIDZ"));
+
+        add(m, "INITIAL", "INITIAL(expr)", "Value at initial time",
+                "SD",
+                List.of(p("expr", "expression to evaluate at time zero")),
+                "Evaluates the expression once at the initial time step and returns "
+                        + "that value for all subsequent time steps. Useful for capturing "
+                        + "starting conditions.",
+                "INITIAL(Population) → value of Population at t=0",
+                List.of("TIME"));
 
         // ── SD functions ────────────────────────────────────────────────
         add(m, "STEP", "STEP(height, step_time)", "Step function at a point in time",

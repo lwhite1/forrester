@@ -49,6 +49,8 @@ public final class VensimExprTranslator {
             "(?i)DELAY\\s+FIXED\\s*\\(");
     private static final Pattern GAME_PATTERN = Pattern.compile(
             "(?i)GAME\\s*\\(");
+    private static final Pattern RANDOM_NORMAL_PATTERN = Pattern.compile(
+            "(?i)RANDOM\\s+NORMAL\\s*\\(");
     private static final Pattern RANDOM_UNIFORM_PATTERN = Pattern.compile(
             "(?i)RANDOM\\s+UNIFORM\\s*\\(");
     private static final Pattern PULSE_TRAIN_PATTERN = Pattern.compile(
@@ -167,8 +169,9 @@ public final class VensimExprTranslator {
         // 8a. GAME(expr) → expr (pass-through; GAME is Vensim's interactive override)
         expr = translateGame(expr);
 
-        // 8b. RANDOM UNIFORM → RANDOM_UNIFORM
+        // 8b. RANDOM UNIFORM → RANDOM_UNIFORM, RANDOM NORMAL → RANDOM_NORMAL
         expr = RANDOM_UNIFORM_PATTERN.matcher(expr).replaceAll("RANDOM_UNIFORM(");
+        expr = RANDOM_NORMAL_PATTERN.matcher(expr).replaceAll("RANDOM_NORMAL(");
 
         // 8c. PULSE TRAIN → PULSE_TRAIN
         expr = PULSE_TRAIN_PATTERN.matcher(expr).replaceAll("PULSE_TRAIN(");

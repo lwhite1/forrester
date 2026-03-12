@@ -411,6 +411,46 @@ class VensimExprTranslatorTest {
     }
 
     @Nested
+    @DisplayName("Multi-word function translation")
+    class MultiWordFunctions {
+
+        @Test
+        void shouldTranslateRandomNormal() {
+            var result = VensimExprTranslator.translate(
+                    "RANDOM NORMAL(0, 100, 50, 10, 1)", "var", EMPTY_NAMES);
+            assertThat(result.expression()).isEqualTo("RANDOM_NORMAL(0, 100, 50, 10, 1)");
+        }
+
+        @Test
+        void shouldTranslateRandomNormalCaseInsensitive() {
+            var result = VensimExprTranslator.translate(
+                    "random normal(0, 1, 0.5, 0.1, 0)", "var", EMPTY_NAMES);
+            assertThat(result.expression()).isEqualTo("RANDOM_NORMAL(0, 1, 0.5, 0.1, 0)");
+        }
+
+        @Test
+        void shouldTranslateRandomUniform() {
+            var result = VensimExprTranslator.translate(
+                    "RANDOM UNIFORM(0, 1, 42)", "var", EMPTY_NAMES);
+            assertThat(result.expression()).isEqualTo("RANDOM_UNIFORM(0, 1, 42)");
+        }
+
+        @Test
+        void shouldTranslatePulseTrain() {
+            var result = VensimExprTranslator.translate(
+                    "PULSE TRAIN(0, 1, 5, 100)", "var", EMPTY_NAMES);
+            assertThat(result.expression()).isEqualTo("PULSE_TRAIN(0, 1, 5, 100)");
+        }
+
+        @Test
+        void shouldTranslateDelayFixed() {
+            var result = VensimExprTranslator.translate(
+                    "DELAY FIXED(input, 3, 0)", "var", EMPTY_NAMES);
+            assertThat(result.expression()).isEqualTo("DELAY_FIXED(input, 3, 0)");
+        }
+    }
+
+    @Nested
     @DisplayName("Edge cases")
     class EdgeCases {
 
