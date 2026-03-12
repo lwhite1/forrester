@@ -429,6 +429,78 @@ class ExprCompilerTest {
         }
 
         @Test
+        void shouldCompileARCSIN() {
+            Formula formula = compiler.compile("ARCSIN(1)");
+            assertThat(formula.getCurrentValue()).isCloseTo(Math.PI / 2, within(1e-10));
+        }
+
+        @Test
+        void shouldCompileARCSINOfZero() {
+            Formula formula = compiler.compile("ARCSIN(0)");
+            assertThat(formula.getCurrentValue()).isCloseTo(0.0, within(1e-10));
+        }
+
+        @Test
+        void shouldReturnNaNForARCSINOutOfRange() {
+            Formula formula = compiler.compile("ARCSIN(2)");
+            assertThat(formula.getCurrentValue()).isNaN();
+        }
+
+        @Test
+        void shouldCompileARCCOS() {
+            Formula formula = compiler.compile("ARCCOS(0)");
+            assertThat(formula.getCurrentValue()).isCloseTo(Math.PI / 2, within(1e-10));
+        }
+
+        @Test
+        void shouldCompileARCCOSOfOne() {
+            Formula formula = compiler.compile("ARCCOS(1)");
+            assertThat(formula.getCurrentValue()).isCloseTo(0.0, within(1e-10));
+        }
+
+        @Test
+        void shouldReturnNaNForARCCOSOutOfRange() {
+            Formula formula = compiler.compile("ARCCOS(-2)");
+            assertThat(formula.getCurrentValue()).isNaN();
+        }
+
+        @Test
+        void shouldCompileARCTAN() {
+            Formula formula = compiler.compile("ARCTAN(1)");
+            assertThat(formula.getCurrentValue()).isCloseTo(Math.PI / 4, within(1e-10));
+        }
+
+        @Test
+        void shouldCompileARCTANOfZero() {
+            Formula formula = compiler.compile("ARCTAN(0)");
+            assertThat(formula.getCurrentValue()).isCloseTo(0.0, within(1e-10));
+        }
+
+        @Test
+        void shouldCompileSIGN() {
+            Formula pos = compiler.compile("SIGN(5)");
+            assertThat(pos.getCurrentValue()).isEqualTo(1.0);
+
+            Formula neg = compiler.compile("SIGN(-3)");
+            assertThat(neg.getCurrentValue()).isEqualTo(-1.0);
+
+            Formula zero = compiler.compile("SIGN(0)");
+            assertThat(zero.getCurrentValue()).isEqualTo(0.0);
+        }
+
+        @Test
+        void shouldCompilePI() {
+            Formula formula = compiler.compile("PI");
+            assertThat(formula.getCurrentValue()).isCloseTo(Math.PI, within(1e-10));
+        }
+
+        @Test
+        void shouldUsePIInTrigExpression() {
+            Formula formula = compiler.compile("SIN(PI / 2)");
+            assertThat(formula.getCurrentValue()).isCloseTo(1.0, within(1e-10));
+        }
+
+        @Test
         void shouldCompileLOG() {
             Formula formula = compiler.compile("LOG(100)");
             assertThat(formula.getCurrentValue()).isCloseTo(2.0, within(1e-10));
@@ -465,9 +537,180 @@ class ExprCompilerTest {
         }
 
         @Test
+        void shouldCompileQUANTUM() {
+            Formula formula = compiler.compile("QUANTUM(7.5, 2)");
+            assertThat(formula.getCurrentValue()).isCloseTo(6.0, within(1e-10));
+        }
+
+        @Test
+        void shouldCompileQUANTUMExactMultiple() {
+            Formula formula = compiler.compile("QUANTUM(10, 5)");
+            assertThat(formula.getCurrentValue()).isCloseTo(10.0, within(1e-10));
+        }
+
+        @Test
+        void shouldCompileQUANTUMWithZeroQuantum() {
+            Formula formula = compiler.compile("QUANTUM(7.5, 0)");
+            assertThat(formula.getCurrentValue()).isCloseTo(7.5, within(1e-10));
+        }
+
+        @Test
+        void shouldCompileQUANTUMNegativeValue() {
+            Formula formula = compiler.compile("QUANTUM(-7.5, 2)");
+            assertThat(formula.getCurrentValue()).isCloseTo(-8.0, within(1e-10));
+        }
+
+        @Test
         void shouldCompilePOWER() {
             Formula formula = compiler.compile("POWER(2, 10)");
             assertThat(formula.getCurrentValue()).isEqualTo(1024.0);
+        }
+    }
+
+    @Nested
+    @DisplayName("Variadic functions (VMIN, VMAX, PROD)")
+    class VariadicFunctions {
+
+        @Test
+        void shouldCompileVMIN() {
+            Formula formula = compiler.compile("VMIN(5, 2, 8, 1)");
+            assertThat(formula.getCurrentValue()).isEqualTo(1.0);
+        }
+
+        @Test
+        void shouldCompileVMINWithSingleArg() {
+            Formula formula = compiler.compile("VMIN(7)");
+            assertThat(formula.getCurrentValue()).isEqualTo(7.0);
+        }
+
+        @Test
+        void shouldRejectVMINWithZeroArgs() {
+            assertThatThrownBy(() -> compiler.compile("VMIN()"))
+                    .isInstanceOf(CompilationException.class)
+                    .hasMessageContaining("at least 1 argument");
+        }
+
+        @Test
+        void shouldCompileVMAX() {
+            Formula formula = compiler.compile("VMAX(5, 2, 8, 1)");
+            assertThat(formula.getCurrentValue()).isEqualTo(8.0);
+        }
+
+        @Test
+        void shouldCompileVMAXWithSingleArg() {
+            Formula formula = compiler.compile("VMAX(3)");
+            assertThat(formula.getCurrentValue()).isEqualTo(3.0);
+        }
+
+        @Test
+        void shouldRejectVMAXWithZeroArgs() {
+            assertThatThrownBy(() -> compiler.compile("VMAX()"))
+                    .isInstanceOf(CompilationException.class)
+                    .hasMessageContaining("at least 1 argument");
+        }
+
+        @Test
+        void shouldCompilePROD() {
+            Formula formula = compiler.compile("PROD(2, 3, 4)");
+            assertThat(formula.getCurrentValue()).isEqualTo(24.0);
+        }
+
+        @Test
+        void shouldCompilePRODWithSingleArg() {
+            Formula formula = compiler.compile("PROD(5)");
+            assertThat(formula.getCurrentValue()).isEqualTo(5.0);
+        }
+
+        @Test
+        void shouldRejectPRODWithZeroArgs() {
+            assertThatThrownBy(() -> compiler.compile("PROD()"))
+                    .isInstanceOf(CompilationException.class)
+                    .hasMessageContaining("at least 1 argument");
+        }
+    }
+
+    @Nested
+    @DisplayName("Safe division functions (XIDZ, ZIDZ)")
+    class SafeDivisionFunctions {
+
+        @Test
+        void shouldCompileXIDZNormal() {
+            Formula formula = compiler.compile("XIDZ(10, 2, 0)");
+            assertThat(formula.getCurrentValue()).isCloseTo(5.0, within(1e-10));
+        }
+
+        @Test
+        void shouldCompileXIDZDivByZero() {
+            Formula formula = compiler.compile("XIDZ(10, 0, -1)");
+            assertThat(formula.getCurrentValue()).isCloseTo(-1.0, within(1e-10));
+        }
+
+        @Test
+        void shouldCompileZIDZNormal() {
+            Formula formula = compiler.compile("ZIDZ(10, 2)");
+            assertThat(formula.getCurrentValue()).isCloseTo(5.0, within(1e-10));
+        }
+
+        @Test
+        void shouldCompileZIDZDivByZero() {
+            Formula formula = compiler.compile("ZIDZ(10, 0)");
+            assertThat(formula.getCurrentValue()).isCloseTo(0.0, within(1e-10));
+        }
+
+        @Test
+        void shouldRejectXIDZWrongArgCount() {
+            assertThatThrownBy(() -> compiler.compile("XIDZ(1, 2)"))
+                    .isInstanceOf(CompilationException.class)
+                    .hasMessageContaining("3 arguments");
+        }
+
+        @Test
+        void shouldRejectZIDZWrongArgCount() {
+            assertThatThrownBy(() -> compiler.compile("ZIDZ(1)"))
+                    .isInstanceOf(CompilationException.class)
+                    .hasMessageContaining("2 arguments");
+        }
+    }
+
+    @Nested
+    @DisplayName("INITIAL function")
+    class InitialFunction {
+
+        @Test
+        void shouldCaptureInitialValue() {
+            double[] inputHolder = {100.0};
+            context.addVariable("Input",
+                    new systems.courant.shrewd.model.Variable("Input",
+                            ItemUnits.PEOPLE, () -> inputHolder[0]));
+            Formula formula = compiler.compile("INITIAL(Input)");
+
+            // First evaluation captures the value
+            assertThat(formula.getCurrentValue()).isCloseTo(100.0, within(1e-10));
+
+            // Change the input — INITIAL should still return the original value
+            inputHolder[0] = 500.0;
+            step[0] = 5;
+            assertThat(formula.getCurrentValue()).isCloseTo(100.0, within(1e-10));
+        }
+
+        @Test
+        void shouldBeResettable() {
+            double[] inputHolder = {100.0};
+            context.addVariable("Input",
+                    new systems.courant.shrewd.model.Variable("Input",
+                            ItemUnits.PEOPLE, () -> inputHolder[0]));
+            Formula formula = compiler.compile("INITIAL(Input)");
+
+            // First evaluation
+            assertThat(formula.getCurrentValue()).isCloseTo(100.0, within(1e-10));
+            assertThat(resettables).hasSize(1);
+
+            // Reset and change input
+            resettables.get(0).reset();
+            inputHolder[0] = 200.0;
+
+            // After reset, should capture new initial value
+            assertThat(formula.getCurrentValue()).isCloseTo(200.0, within(1e-10));
         }
     }
 

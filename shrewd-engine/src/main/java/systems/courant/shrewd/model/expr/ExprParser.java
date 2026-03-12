@@ -43,9 +43,9 @@ public class ExprParser {
     /**
      * Parses the given expression string into an {@link Expr} AST.
      *
-     * <p>The reserved identifiers {@code TIME} and {@code DT} are always parsed as zero-argument
-     * function calls, consistent with standard System Dynamics convention. Model elements must
-     * not use these names.
+     * <p>The reserved identifiers {@code TIME}, {@code DT}, and {@code PI} are always parsed as
+     * zero-argument function calls, consistent with standard System Dynamics convention. Model
+     * elements must not use these names.
      *
      * @throws ParseException if the input is not a valid expression
      */
@@ -351,8 +351,8 @@ public class ExprParser {
             return new Expr.FunctionCall(name, args);
         }
 
-        // Zero-arg function calls (TIME, DT)
-        if (name.equals("TIME") || name.equals("DT")) {
+        // Zero-arg function calls (TIME, DT, PI)
+        if (name.equals("TIME") || name.equals("DT") || name.equals("PI")) {
             return new Expr.FunctionCall(name, List.of());
         }
 
