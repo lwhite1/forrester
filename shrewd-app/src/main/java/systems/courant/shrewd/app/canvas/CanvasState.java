@@ -114,6 +114,14 @@ public class CanvasState {
     }
 
     /**
+     * Removes any custom size for the named element, reverting it to
+     * the default (or auto-computed) size on the next render pass.
+     */
+    public void clearSize(String name) {
+        sizes.remove(name);
+    }
+
+    /**
      * Returns true if the named element has a custom (non-default) size.
      */
     public boolean hasCustomSize(String name) {

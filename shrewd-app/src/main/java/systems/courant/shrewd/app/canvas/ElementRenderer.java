@@ -7,6 +7,7 @@ import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextAlignment;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -290,9 +291,12 @@ public final class ElementRenderer {
                 y + height / 2 + LayoutMetrics.LABEL_SUBLABEL_OFFSET);
     }
 
+    /** Padding inside the comment box (each side). */
+    static final double COMMENT_PADDING = 6;
+
     /**
      * Draws a comment annotation box: light yellow fill with a subtle amber border,
-     * styled as a sticky-note. Wraps text within the bounding box.
+     * styled as a sticky-note. Wraps text within the bounding box across multiple lines.
      */
     public static void drawComment(GraphicsContext gc, String text,
                                    double x, double y, double width, double height) {
@@ -308,14 +312,26 @@ public final class ElementRenderer {
         gc.setLineDashes();
         gc.strokeRoundRect(x, y, width, height, r, r);
 
-        // Text content (wrapped, top-left aligned)
+        // Text content (word-wrapped, top-left aligned)
         if (text != null && !text.isBlank()) {
             gc.setFill(ColorPalette.TEXT);
             gc.setFont(LayoutMetrics.COMMENT_TEXT_FONT);
             gc.setTextAlign(TextAlignment.LEFT);
             gc.setTextBaseline(VPos.TOP);
-            String display = truncate(text, LayoutMetrics.COMMENT_TEXT_FONT, width - 12);
-            gc.fillText(display, x + 6, y + 6, width - 12);
+
+            double maxLineWidth = width - COMMENT_PADDING * 2;
+            double lineHeight = measureLineHeight(LayoutMetrics.COMMENT_TEXT_FONT);
+            List<String> lines = wrapText(text, LayoutMetrics.COMMENT_TEXT_FONT, maxLineWidth);
+            int maxVisibleLines = Math.max(1, (int) ((height - COMMENT_PADDING * 2) / lineHeight));
+
+            for (int i = 0; i < Math.min(lines.size(), maxVisibleLines); i++) {
+                String line = lines.get(i);
+                // Truncate last visible line with ellipsis if more text follows
+                if (i == maxVisibleLines - 1 && lines.size() > maxVisibleLines) {
+                    line = truncate(line + "\u2026", LayoutMetrics.COMMENT_TEXT_FONT, maxLineWidth);
+                }
+                gc.fillText(line, x + COMMENT_PADDING, y + COMMENT_PADDING + i * lineHeight);
+            }
         }
     }
 
@@ -348,6 +364,91 @@ public final class ElementRenderer {
             return String.valueOf((long) value);
         }
         return String.valueOf(value);
+    }
+
+    /**
+     * Computes the bounding box size needed to display the given comment text,
+     * wrapping at the default comment width. Returns {@code {width, height}}.
+     *
+     * <p>The returned width is the wider of the longest wrapped line and the minimum
+     * comment width. The returned height fits all wrapped lines plus padding.
+     */
+    static double[] computeCommentSize(String text) {
+        if (text == null || text.isBlank()) {
+            double minW = LayoutMetrics.minWidthFor(
+                    systems.courant.shrewd.model.def.ElementType.COMMENT);
+            double minH = LayoutMetrics.minHeightFor(
+                    systems.courant.shrewd.model.def.ElementType.COMMENT);
+            return new double[]{minW, minH};
+        }
+        double maxLineWidth = LayoutMetrics.COMMENT_WIDTH - COMMENT_PADDING * 2;
+        List<String> lines = wrapText(text, LayoutMetrics.COMMENT_TEXT_FONT, maxLineWidth);
+        double lineHeight = measureLineHeight(LayoutMetrics.COMMENT_TEXT_FONT);
+
+        // Width: widest line + padding, clamped to [minWidth, COMMENT_WIDTH]
+        double maxTextWidth = 0;
+        MEASURE_TEXT.setFont(LayoutMetrics.COMMENT_TEXT_FONT);
+        for (String line : lines) {
+            MEASURE_TEXT.setText(line);
+            maxTextWidth = Math.max(maxTextWidth, MEASURE_TEXT.getLayoutBounds().getWidth());
+        }
+        double minW = LayoutMetrics.minWidthFor(
+                systems.courant.shrewd.model.def.ElementType.COMMENT);
+        double w = Math.max(minW, Math.min(maxTextWidth + COMMENT_PADDING * 2,
+                LayoutMetrics.COMMENT_WIDTH));
+
+        // Height: lines * lineHeight + padding, clamped to minHeight
+        double minH = LayoutMetrics.minHeightFor(
+                systems.courant.shrewd.model.def.ElementType.COMMENT);
+        double h = Math.max(minH, lines.size() * lineHeight + COMMENT_PADDING * 2);
+
+        return new double[]{w, h};
+    }
+
+    /**
+     * Word-wraps text into lines that fit within the given pixel width.
+     * Respects explicit newlines in the input text.
+     */
+    static List<String> wrapText(String text, Font font, double maxWidth) {
+        List<String> lines = new ArrayList<>();
+        if (text == null || text.isEmpty()) {
+            return lines;
+        }
+        MEASURE_TEXT.setFont(font);
+
+        for (String paragraph : text.split("\n", -1)) {
+            if (paragraph.isEmpty()) {
+                lines.add("");
+                continue;
+            }
+            String[] words = paragraph.split("\\s+");
+            StringBuilder current = new StringBuilder();
+            for (String word : words) {
+                if (current.isEmpty()) {
+                    current.append(word);
+                } else {
+                    String candidate = current + " " + word;
+                    MEASURE_TEXT.setText(candidate);
+                    if (MEASURE_TEXT.getLayoutBounds().getWidth() > maxWidth) {
+                        lines.add(current.toString());
+                        current = new StringBuilder(word);
+                    } else {
+                        current.append(" ").append(word);
+                    }
+                }
+            }
+            lines.add(current.toString());
+        }
+        return lines;
+    }
+
+    /**
+     * Returns the line height for the given font, measured using the shared Text node.
+     */
+    static double measureLineHeight(Font font) {
+        MEASURE_TEXT.setFont(font);
+        MEASURE_TEXT.setText("Ay");
+        return MEASURE_TEXT.getLayoutBounds().getHeight();
     }
 
     /** Reusable Text node for width measurement — only used on the FX Application Thread. */

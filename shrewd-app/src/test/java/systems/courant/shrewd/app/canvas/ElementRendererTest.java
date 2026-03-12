@@ -1,5 +1,6 @@
 package systems.courant.shrewd.app.canvas;
 
+import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 
 import org.junit.jupiter.api.DisplayName;
@@ -8,6 +9,7 @@ import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -139,6 +141,113 @@ class ElementRendererTest {
             assertThat(Modifier.isPublic(mods)).as("fireStatusChanged should not be public").isFalse();
             assertThat(Modifier.isProtected(mods)).as("fireStatusChanged should not be protected").isFalse();
             assertThat(Modifier.isPrivate(mods)).as("fireStatusChanged should not be private").isFalse();
+        }
+    }
+
+    @Nested
+    @DisplayName("wrapText (#459)")
+    class WrapText {
+
+        private final Font font = LayoutMetrics.COMMENT_TEXT_FONT;
+
+        @Test
+        void shouldReturnEmptyListForNull() {
+            List<String> lines = ElementRenderer.wrapText(null, font, 200);
+            assertThat(lines).isEmpty();
+        }
+
+        @Test
+        void shouldReturnEmptyListForEmptyString() {
+            List<String> lines = ElementRenderer.wrapText("", font, 200);
+            assertThat(lines).isEmpty();
+        }
+
+        @Test
+        void shouldReturnSingleLineForShortText() {
+            List<String> lines = ElementRenderer.wrapText("Hello", font, 200);
+            assertThat(lines).containsExactly("Hello");
+        }
+
+        @Test
+        void shouldRespectExplicitNewlines() {
+            List<String> lines = ElementRenderer.wrapText("Line1\nLine2\nLine3", font, 500);
+            assertThat(lines).containsExactly("Line1", "Line2", "Line3");
+        }
+
+        @Test
+        void shouldPreserveEmptyLinesFromNewlines() {
+            List<String> lines = ElementRenderer.wrapText("Above\n\nBelow", font, 500);
+            assertThat(lines).containsExactly("Above", "", "Below");
+        }
+
+        @Test
+        void shouldWrapLongTextToMultipleLines() {
+            // Use a very narrow width to force wrapping
+            List<String> lines = ElementRenderer.wrapText("one two three four five", font, 30);
+            assertThat(lines.size()).isGreaterThan(1);
+            // All original words should appear across the lines
+            String rejoined = String.join(" ", lines);
+            assertThat(rejoined).isEqualTo("one two three four five");
+        }
+    }
+
+    @Nested
+    @DisplayName("measureLineHeight (#459)")
+    class MeasureLineHeight {
+
+        @Test
+        void shouldReturnPositiveHeight() {
+            double height = ElementRenderer.measureLineHeight(LayoutMetrics.COMMENT_TEXT_FONT);
+            assertThat(height).isGreaterThan(0);
+        }
+
+        @Test
+        void shouldReturnConsistentResults() {
+            double h1 = ElementRenderer.measureLineHeight(LayoutMetrics.COMMENT_TEXT_FONT);
+            double h2 = ElementRenderer.measureLineHeight(LayoutMetrics.COMMENT_TEXT_FONT);
+            assertThat(h1).isEqualTo(h2);
+        }
+    }
+
+    @Nested
+    @DisplayName("computeCommentSize (#459)")
+    class ComputeCommentSize {
+
+        @Test
+        void shouldReturnMinSizeForNullText() {
+            double[] size = ElementRenderer.computeCommentSize(null);
+            assertThat(size).hasSize(2);
+            assertThat(size[0]).isGreaterThan(0);
+            assertThat(size[1]).isGreaterThan(0);
+        }
+
+        @Test
+        void shouldReturnMinSizeForBlankText() {
+            double[] size = ElementRenderer.computeCommentSize("   ");
+            assertThat(size).hasSize(2);
+            assertThat(size[0]).isGreaterThan(0);
+            assertThat(size[1]).isGreaterThan(0);
+        }
+
+        @Test
+        void shouldReturnCompactSizeForShortText() {
+            double[] size = ElementRenderer.computeCommentSize("Hi");
+            assertThat(size[0]).isLessThanOrEqualTo(LayoutMetrics.COMMENT_WIDTH);
+        }
+
+        @Test
+        void shouldGrowHeightForMultilineText() {
+            double[] shortSize = ElementRenderer.computeCommentSize("Short");
+            double[] longSize = ElementRenderer.computeCommentSize(
+                    "This is a much longer comment\nthat spans multiple lines\nand should be taller");
+            assertThat(longSize[1]).isGreaterThanOrEqualTo(shortSize[1]);
+        }
+
+        @Test
+        void shouldNotExceedCommentWidth() {
+            double[] size = ElementRenderer.computeCommentSize(
+                    "A very long comment text that goes on and on and should be clamped to max width");
+            assertThat(size[0]).isLessThanOrEqualTo(LayoutMetrics.COMMENT_WIDTH);
         }
     }
 }

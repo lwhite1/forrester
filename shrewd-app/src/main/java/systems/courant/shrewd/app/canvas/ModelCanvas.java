@@ -136,6 +136,7 @@ public class ModelCanvas extends Canvas {
                 public void saveAndSetCommentText(String name, String text) {
                     saveUndoState("Edit " + name + " text");
                     editor.setCommentText(name, text);
+                    canvasState.clearSize(name);
                     regenerateAndRedraw();
                 }
 

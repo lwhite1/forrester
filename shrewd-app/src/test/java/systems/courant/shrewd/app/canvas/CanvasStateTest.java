@@ -436,6 +436,43 @@ class CanvasStateTest {
     }
 
     @Nested
+    @DisplayName("clearSize (#459)")
+    class ClearSize {
+
+        @Test
+        void shouldRemoveCustomSize() {
+            state.addElement("C", ElementType.COMMENT, 100, 100);
+            state.setSize("C", 200, 80);
+            assertThat(state.hasCustomSize("C")).isTrue();
+
+            state.clearSize("C");
+
+            assertThat(state.hasCustomSize("C")).isFalse();
+            assertThat(state.getWidth("C")).isEqualTo(0);
+            assertThat(state.getHeight("C")).isEqualTo(0);
+        }
+
+        @Test
+        void shouldBeNoOpForElementWithoutCustomSize() {
+            state.addElement("A", ElementType.AUX, 50, 50);
+
+            state.clearSize("A");
+
+            assertThat(state.hasCustomSize("A")).isFalse();
+        }
+
+        @Test
+        void shouldNotRemoveElement() {
+            state.addElement("C", ElementType.COMMENT, 100, 100);
+            state.setSize("C", 200, 80);
+
+            state.clearSize("C");
+
+            assertThat(state.hasElement("C")).isTrue();
+        }
+    }
+
+    @Nested
     @DisplayName("removeElement")
     class RemoveElement {
 

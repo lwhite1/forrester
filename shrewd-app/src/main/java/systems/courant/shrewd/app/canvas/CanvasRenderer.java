@@ -244,10 +244,18 @@ public class CanvasRenderer {
                             cx - w / 2, cy - h / 2, w, h);
                 }
                 case COMMENT -> {
-                    double w = LayoutMetrics.effectiveWidth(canvasState, name);
-                    double h = LayoutMetrics.effectiveHeight(canvasState, name);
                     CommentDef commentDef = editor.getCommentByName(name);
                     String text = commentDef != null ? commentDef.text() : "";
+                    double w, h;
+                    if (canvasState.hasCustomSize(name)) {
+                        w = canvasState.getWidth(name);
+                        h = canvasState.getHeight(name);
+                    } else {
+                        double[] auto = ElementRenderer.computeCommentSize(text);
+                        w = auto[0];
+                        h = auto[1];
+                        canvasState.setSize(name, w, h);
+                    }
                     ElementRenderer.drawComment(gc, text,
                             cx - w / 2, cy - h / 2, w, h);
                 }
