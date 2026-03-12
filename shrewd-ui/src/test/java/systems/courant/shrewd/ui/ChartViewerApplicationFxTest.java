@@ -33,7 +33,7 @@ class ChartViewerApplicationFxTest {
         // Clear any leftover state from previous tests or simulations
         ChartViewerApplication.reset();
 
-        // Seed the static state before start()
+        // Seed the static state, then snapshot via showChart-style flow
         ChartViewerApplication.addSeries(List.of("Population"), List.of("BirthRate"));
         ChartViewerApplication.addValues(List.of(100.0), List.of(5.0), 0);
         ChartViewerApplication.addValues(List.of(105.0), List.of(5.2), 1);
@@ -41,6 +41,7 @@ class ChartViewerApplicationFxTest {
         ChartViewerApplication.setSize(600, 400);
 
         app = new ChartViewerApplication();
+        app.chartData = ChartViewerApplication.snapshot();
         app.start(stage);
     }
 
