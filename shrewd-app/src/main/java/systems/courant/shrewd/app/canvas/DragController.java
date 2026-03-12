@@ -21,6 +21,10 @@ final class DragController {
         return dragging;
     }
 
+    boolean hasMoved() {
+        return undoSaved;
+    }
+
     String getDragTarget() {
         return dragTarget;
     }

@@ -33,6 +33,8 @@ final class CodeAreaEquationField implements EquationField {
     private static final int MAX_ROWS = 5;
     private static final double LINE_HEIGHT = 20.0;
     private static final double VERTICAL_PADDING = 14.0;
+    private static final String BASE_STYLE = "-fx-font-family: monospace; -fx-font-size: 13px;";
+
 
     private final StyleClassedTextArea codeArea;
     private final SimpleStringProperty textBridge = new SimpleStringProperty("");
@@ -44,7 +46,7 @@ final class CodeAreaEquationField implements EquationField {
         codeArea = new StyleClassedTextArea();
         codeArea.setWrapText(true);
         codeArea.getStyleClass().add("equation-code-area");
-        codeArea.setStyle("-fx-font-family: monospace; -fx-font-size: 13px;");
+        codeArea.setStyle(BASE_STYLE);
 
         // Load syntax highlighting stylesheet
         String cssUrl = getClass().getResource("/equation-highlight.css").toExternalForm();
@@ -178,7 +180,11 @@ final class CodeAreaEquationField implements EquationField {
 
     @Override
     public void setFieldStyle(String style) {
-        codeArea.setStyle(style);
+        if (style == null || style.isEmpty()) {
+            codeArea.setStyle(BASE_STYLE);
+        } else {
+            codeArea.setStyle(BASE_STYLE + " " + style);
+        }
     }
 
     @Override

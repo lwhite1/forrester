@@ -148,6 +148,7 @@ final class CanvasContextMenuController {
             callbacks.clearSelectedConnection();
             callbacks.regenerateConnectors();
             callbacks.redraw();
+            callbacks.fireStatusChanged();
         });
         menu.getItems().add(deleteItem);
 

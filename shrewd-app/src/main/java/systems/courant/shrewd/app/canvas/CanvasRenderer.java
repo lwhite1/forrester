@@ -309,12 +309,13 @@ public class CanvasRenderer {
         }
 
         // 2c. Draw connection highlights (above loops, below element hover)
+        List<CausalLinkDef> allCausalLinks = editor.getCausalLinks();
         if (selectedConnection != null) {
-            drawConnectionHighlight(gc, connectors, selectedConnection, false);
+            drawConnectionHighlight(gc, connectors, allCausalLinks, selectedConnection, false);
         }
         if (hoveredConnection != null
                 && !hoveredConnection.equals(selectedConnection)) {
-            drawConnectionHighlight(gc, connectors, hoveredConnection, true);
+            drawConnectionHighlight(gc, connectors, allCausalLinks, hoveredConnection, true);
         }
 
         // 2d. Draw hover indicator (above loops, below selection)
@@ -908,24 +909,28 @@ public class CanvasRenderer {
      * Draws a hover or selection highlight for the given connection.
      */
     private void drawConnectionHighlight(GraphicsContext gc, List<ConnectorRoute> connectors,
+                                         List<CausalLinkDef> allLinks,
                                          ConnectionId connectionId, boolean isHover) {
         // Try info links first (straight line highlight)
         for (ConnectorRoute route : connectors) {
             if (route.from().equals(connectionId.from())
                     && route.to().equals(connectionId.to())) {
-                drawClippedHighlight(gc, connectionId.from(), connectionId.to(), isHover, false);
+                drawClippedHighlight(gc, connectionId.from(), connectionId.to(),
+                        isHover, false, allLinks);
                 return;
             }
         }
         // Fall back to causal links (curved highlight)
         if (canvasState.hasElement(connectionId.from())
                 && canvasState.hasElement(connectionId.to())) {
-            drawClippedHighlight(gc, connectionId.from(), connectionId.to(), isHover, true);
+            drawClippedHighlight(gc, connectionId.from(), connectionId.to(),
+                    isHover, true, allLinks);
         }
     }
 
     private void drawClippedHighlight(GraphicsContext gc, String fromName, String toName,
-                                      boolean isHover, boolean isCausalLink) {
+                                      boolean isHover, boolean isCausalLink,
+                                      List<CausalLinkDef> allLinks) {
         if (!canvasState.hasElement(fromName) || !canvasState.hasElement(toName)) {
             return;
         }
@@ -952,7 +957,7 @@ public class CanvasRenderer {
             }
 
             CausalLinkGeometry.ControlPoint cp = CausalLinkGeometry.controlPoint(
-                    fromX, fromY, toX, toY, fromName, toName, List.of());
+                    fromX, fromY, toX, toY, fromName, toName, allLinks);
 
             FlowGeometry.Point2D clippedFrom = FlowGeometry.clipToElement(
                     canvasState, fromName, cp.x(), cp.y());

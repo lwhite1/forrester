@@ -1,5 +1,7 @@
 package systems.courant.shrewd.app.canvas;
 
+import systems.courant.shrewd.model.def.ElementType;
+
 import java.util.LinkedHashSet;
 import java.util.Set;
 
@@ -11,6 +13,7 @@ import java.util.Set;
 final class MarqueeController {
 
     private boolean active;
+    private boolean hideAuxiliaries;
     private double startWorldX;
     private double startWorldY;
     private double endWorldX;
@@ -36,8 +39,10 @@ final class MarqueeController {
      * Begins a marquee selection from the given world coordinates.
      * If Shift is held, preserves the existing selection as a base.
      */
-    void start(double worldX, double worldY, CanvasState state, boolean shiftDown) {
+    void start(double worldX, double worldY, CanvasState state, boolean shiftDown,
+               boolean hideAux) {
         active = true;
+        hideAuxiliaries = hideAux;
         startWorldX = worldX;
         startWorldY = worldY;
         endWorldX = worldX;
@@ -96,6 +101,10 @@ final class MarqueeController {
             }
         }
         for (String name : state.getDrawOrder()) {
+            if (hideAuxiliaries
+                    && state.getType(name).orElse(null) == ElementType.AUX) {
+                continue;
+            }
             double cx = state.getX(name);
             double cy = state.getY(name);
             if (cx >= minX && cx <= maxX && cy >= minY && cy <= maxY) {

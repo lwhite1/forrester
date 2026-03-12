@@ -49,7 +49,7 @@ class MarqueeControllerTest {
 
         @Test
         void shouldBecomeActive() {
-            controller.start(50, 50, state, false);
+            controller.start(50, 50, state, false, false);
 
             assertThat(controller.isActive()).isTrue();
         }
@@ -58,7 +58,7 @@ class MarqueeControllerTest {
         void shouldClearSelection_whenNoShift() {
             state.select("A");
 
-            controller.start(50, 50, state, false);
+            controller.start(50, 50, state, false, false);
 
             assertThat(state.getSelection()).isEmpty();
         }
@@ -67,7 +67,7 @@ class MarqueeControllerTest {
         void shouldPreserveSelection_whenShiftDown() {
             state.select("A");
 
-            controller.start(50, 50, state, true);
+            controller.start(50, 50, state, true, false);
 
             assertThat(state.isSelected("A")).isTrue();
         }
@@ -79,7 +79,7 @@ class MarqueeControllerTest {
 
         @Test
         void shouldSelectElementsInsideRectangle() {
-            controller.start(50, 50, state, false);
+            controller.start(50, 50, state, false, false);
 
             controller.drag(250, 250, state);
 
@@ -91,7 +91,7 @@ class MarqueeControllerTest {
 
         @Test
         void shouldSelectAllElements_whenRectangleCoversAll() {
-            controller.start(0, 0, state, false);
+            controller.start(0, 0, state, false, false);
 
             controller.drag(600, 600, state);
 
@@ -100,7 +100,7 @@ class MarqueeControllerTest {
 
         @Test
         void shouldSelectNone_whenRectangleCoversNone() {
-            controller.start(400, 0, state, false);
+            controller.start(400, 0, state, false, false);
 
             controller.drag(450, 50, state);
 
@@ -110,7 +110,7 @@ class MarqueeControllerTest {
         @Test
         void shouldHandleReversedRectangle() {
             // Drag from bottom-right to top-left
-            controller.start(250, 250, state, false);
+            controller.start(250, 250, state, false, false);
 
             controller.drag(50, 50, state);
 
@@ -122,7 +122,7 @@ class MarqueeControllerTest {
         void shouldAddToInitialSelection_whenShiftDown() {
             state.select("D");
 
-            controller.start(50, 50, state, true);
+            controller.start(50, 50, state, true, false);
             controller.drag(150, 150, state);
 
             assertThat(state.isSelected("A")).isTrue();
@@ -131,7 +131,7 @@ class MarqueeControllerTest {
 
         @Test
         void shouldUpdateSelectionAsRectangleChanges() {
-            controller.start(50, 50, state, false);
+            controller.start(50, 50, state, false, false);
 
             // First drag selects A
             controller.drag(150, 150, state);
@@ -146,7 +146,7 @@ class MarqueeControllerTest {
 
         @Test
         void shouldReturnActiveRenderState() {
-            controller.start(50, 50, state, false);
+            controller.start(50, 50, state, false, false);
             controller.drag(250, 250, state);
 
             CanvasRenderer.MarqueeState renderState = controller.toRenderState();
@@ -161,7 +161,7 @@ class MarqueeControllerTest {
 
         @Test
         void shouldDeactivate() {
-            controller.start(50, 50, state, false);
+            controller.start(50, 50, state, false, false);
             controller.drag(250, 250, state);
 
             controller.end();
@@ -171,7 +171,7 @@ class MarqueeControllerTest {
 
         @Test
         void shouldPreserveSelection() {
-            controller.start(50, 50, state, false);
+            controller.start(50, 50, state, false, false);
             controller.drag(250, 250, state);
 
             controller.end();
@@ -182,7 +182,7 @@ class MarqueeControllerTest {
 
         @Test
         void shouldReturnIdleRenderState() {
-            controller.start(50, 50, state, false);
+            controller.start(50, 50, state, false, false);
             controller.drag(250, 250, state);
 
             controller.end();
@@ -197,7 +197,7 @@ class MarqueeControllerTest {
 
         @Test
         void shouldDeactivate() {
-            controller.start(50, 50, state, false);
+            controller.start(50, 50, state, false, false);
             controller.drag(250, 250, state);
 
             controller.cancel(state);
@@ -209,7 +209,7 @@ class MarqueeControllerTest {
         void shouldRestoreOriginalSelection() {
             state.select("D");
 
-            controller.start(50, 50, state, false);
+            controller.start(50, 50, state, false, false);
             controller.drag(250, 250, state);
             // Now A and B are selected, D is not
 
@@ -222,7 +222,7 @@ class MarqueeControllerTest {
 
         @Test
         void shouldClearSelection_whenOriginalWasEmpty() {
-            controller.start(50, 50, state, false);
+            controller.start(50, 50, state, false, false);
             controller.drag(250, 250, state);
 
             controller.cancel(state);
@@ -234,7 +234,7 @@ class MarqueeControllerTest {
         void shouldRestoreShiftSelection() {
             state.select("D");
 
-            controller.start(50, 50, state, true);
+            controller.start(50, 50, state, true, false);
             controller.drag(150, 150, state);
             // A and D are selected
 
@@ -243,6 +243,33 @@ class MarqueeControllerTest {
             // Should restore to just D (the initial selection)
             assertThat(state.isSelected("D")).isTrue();
             assertThat(state.isSelected("A")).isFalse();
+        }
+    }
+
+    @Nested
+    @DisplayName("hideAuxiliaries")
+    class HideAuxiliaries {
+
+        @Test
+        void shouldSkipHiddenAuxiliaries() {
+            // C and D are AUX elements; with hideAux=true they should not be selected
+            controller.start(0, 0, state, false, true);
+
+            controller.drag(600, 600, state);
+
+            assertThat(state.isSelected("A")).isTrue();
+            assertThat(state.isSelected("B")).isTrue();
+            assertThat(state.isSelected("C")).isFalse();
+            assertThat(state.isSelected("D")).isFalse();
+        }
+
+        @Test
+        void shouldIncludeAuxiliaries_whenNotHidden() {
+            controller.start(0, 0, state, false, false);
+
+            controller.drag(600, 600, state);
+
+            assertThat(state.getSelection()).containsExactlyInAnyOrder("A", "B", "C", "D");
         }
     }
 }

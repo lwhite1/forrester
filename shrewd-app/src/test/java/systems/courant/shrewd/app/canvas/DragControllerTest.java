@@ -42,6 +42,11 @@ class DragControllerTest {
         void shouldHaveNullDragTarget() {
             assertThat(controller.getDragTarget()).isNull();
         }
+
+        @Test
+        void shouldNotHaveMoved() {
+            assertThat(controller.hasMoved()).isFalse();
+        }
     }
 
     @Nested
@@ -62,6 +67,14 @@ class DragControllerTest {
             controller.start("A", 50, 60, state);
 
             assertThat(controller.getDragTarget()).isEqualTo("A");
+        }
+
+        @Test
+        void shouldNotHaveMoved() {
+            state.select("A");
+            controller.start("A", 50, 60, state);
+
+            assertThat(controller.hasMoved()).isFalse();
         }
     }
 
@@ -130,6 +143,16 @@ class DragControllerTest {
             controller.drag(100, 110, state, viewport, undoCount::incrementAndGet);
 
             assertThat(undoCount.get()).isEqualTo(1);
+        }
+
+        @Test
+        void shouldReportHasMoved() {
+            state.select("A");
+            controller.start("A", 50, 60, state);
+
+            controller.drag(70, 80, state, viewport, () -> {});
+
+            assertThat(controller.hasMoved()).isTrue();
         }
 
         @Test

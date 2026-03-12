@@ -96,6 +96,40 @@ class CodeAreaEquationFieldTest {
     }
 
     @Test
+    @DisplayName("setFieldStyle should preserve monospace font")
+    void shouldPreserveMonospaceFontInFieldStyle() {
+        Platform.runLater(() -> field.setFieldStyle("-fx-border-color: red;"));
+        WaitForAsyncUtils.waitForFxEvents();
+
+        String style = field.node().getStyle();
+        assertThat(style).contains("-fx-font-family: monospace");
+        assertThat(style).contains("-fx-font-size: 13px");
+        assertThat(style).contains("-fx-border-color: red");
+    }
+
+    @Test
+    @DisplayName("setFieldStyle with null should retain base font style")
+    void shouldRetainBaseFontStyleWhenNull() {
+        Platform.runLater(() -> field.setFieldStyle(null));
+        WaitForAsyncUtils.waitForFxEvents();
+
+        String style = field.node().getStyle();
+        assertThat(style).contains("-fx-font-family: monospace");
+        assertThat(style).contains("-fx-font-size: 13px");
+    }
+
+    @Test
+    @DisplayName("setFieldStyle with empty string should retain base font style")
+    void shouldRetainBaseFontStyleWhenEmpty() {
+        Platform.runLater(() -> field.setFieldStyle(""));
+        WaitForAsyncUtils.waitForFxEvents();
+
+        String style = field.node().getStyle();
+        assertThat(style).contains("-fx-font-family: monospace");
+        assertThat(style).contains("-fx-font-size: 13px");
+    }
+
+    @Test
     @DisplayName("node should return a non-null Node")
     void shouldReturnNode() {
         assertThat(field.node()).isNotNull();
