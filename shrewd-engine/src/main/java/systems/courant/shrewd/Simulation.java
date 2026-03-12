@@ -276,8 +276,24 @@ public class Simulation {
     }
 
     private void recordVariableValues() {
+        Set<Variable> seen = Collections.newSetFromMap(new IdentityHashMap<>());
         for (Variable variable : model.getVariables()) {
+            seen.add(variable);
             variable.recordValue();
+        }
+        for (Module module : model.getModules()) {
+            recordModuleVariableValues(module, seen);
+        }
+    }
+
+    private static void recordModuleVariableValues(Module module, Set<Variable> seen) {
+        for (Variable variable : module.getVariables()) {
+            if (seen.add(variable)) {
+                variable.recordValue();
+            }
+        }
+        for (Module child : module.getSubModules().values()) {
+            recordModuleVariableValues(child, seen);
         }
     }
 
@@ -317,11 +333,34 @@ public class Simulation {
      * Call this before re-running a simulation to avoid stale history data.
      */
     public void clearHistory() {
+        Set<Flow> seenFlows = Collections.newSetFromMap(new IdentityHashMap<>());
+        Set<Variable> seenVars = Collections.newSetFromMap(new IdentityHashMap<>());
         for (Flow flow : model.getFlows()) {
+            seenFlows.add(flow);
             flow.clearHistory();
         }
         for (Variable variable : model.getVariables()) {
+            seenVars.add(variable);
             variable.clearHistory();
+        }
+        for (Module module : model.getModules()) {
+            clearModuleHistory(module, seenFlows, seenVars);
+        }
+    }
+
+    private static void clearModuleHistory(Module module, Set<Flow> seenFlows, Set<Variable> seenVars) {
+        for (Flow flow : module.getFlows()) {
+            if (seenFlows.add(flow)) {
+                flow.clearHistory();
+            }
+        }
+        for (Variable variable : module.getVariables()) {
+            if (seenVars.add(variable)) {
+                variable.clearHistory();
+            }
+        }
+        for (Module child : module.getSubModules().values()) {
+            clearModuleHistory(child, seenFlows, seenVars);
         }
     }
 }
