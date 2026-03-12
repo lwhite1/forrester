@@ -95,7 +95,7 @@ public class Delay3Test {
     }
 
     @Test
-    public void shouldReadInputEachIterationInCatchUpLoop() {
+    public void shouldReadInputOncePerEvaluationInCatchUpLoop() {
         int[] step = {0};
         int[] readCount = {0};
         Delay3 formula = Delay3.of(() -> { readCount[0]++; return 100; }, 6, 100, () -> step[0]);
@@ -103,11 +103,11 @@ public class Delay3Test {
         formula.getCurrentValue(); // initialize
         readCount[0] = 0;
 
-        // Jump by 5 steps — input should be read once per catch-up iteration
+        // Jump by 5 steps — input should be read exactly once (not once per sub-step)
         step[0] = 5;
         formula.getCurrentValue();
-        assertEquals(5, readCount[0],
-                "Input should be read once per catch-up iteration");
+        assertEquals(1, readCount[0],
+                "Input should be read once per evaluation, not once per sub-step");
     }
 
     @Test

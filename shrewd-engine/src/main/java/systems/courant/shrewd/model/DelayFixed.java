@@ -109,10 +109,15 @@ public class DelayFixed implements Formula, Resettable {
         if (step > lastStep) {
             double currentInput = input.getAsDouble();
             int delta = step - lastStep;
-            for (int d = 0; d < delta; d++) {
-                buffer[writeIndex] = currentInput;
+            // For missed intermediate steps, repeat the last written input (zero-order hold)
+            double lastKnownInput = buffer[(writeIndex - 1 + buffer.length) % buffer.length];
+            for (int d = 0; d < delta - 1; d++) {
+                buffer[writeIndex] = lastKnownInput;
                 writeIndex = (writeIndex + 1) % buffer.length;
             }
+            // Write the current input only for the actual current step
+            buffer[writeIndex] = currentInput;
+            writeIndex = (writeIndex + 1) % buffer.length;
             lastStep = step;
         }
         // After write-and-advance, writeIndex points to the oldest value in the buffer

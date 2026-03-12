@@ -120,8 +120,8 @@ public class Smooth3 implements Formula, Resettable {
         } else if (step > lastStep) {
             double stageTime = smoothingTime / 3.0;
             int delta = step - lastStep;
+            double inputVal = input.getAsDouble();
             for (int i = 0; i < delta; i++) {
-                double inputVal = input.getAsDouble();
                 stage1 += (inputVal - stage1) / stageTime;
                 stage2 += (stage1 - stage2) / stageTime;
                 stage3 += (stage2 - stage3) / stageTime;
