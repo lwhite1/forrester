@@ -268,7 +268,9 @@ public class Simulation {
             } else {
                 q = flow.flowPerTimeUnit(timeStep);
                 flows.put(flow, q);
-                flow.recordValue(q);
+                if (Double.isFinite(q.getValue())) {
+                    flow.recordValue(q);
+                }
             }
             delta += isInflow ? q.getValue() : -q.getValue();
         }

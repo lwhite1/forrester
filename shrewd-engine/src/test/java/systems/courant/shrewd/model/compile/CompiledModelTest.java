@@ -5,6 +5,7 @@ import systems.courant.shrewd.measure.Quantity;
 import systems.courant.shrewd.measure.UnitRegistry;
 import systems.courant.shrewd.model.Flow;
 import systems.courant.shrewd.model.Model;
+import systems.courant.shrewd.model.Module;
 import systems.courant.shrewd.model.Stock;
 import systems.courant.shrewd.model.Variable;
 import systems.courant.shrewd.model.def.FlowDef;
@@ -161,6 +162,62 @@ class CompiledModelTest {
             // After reset, history should be cleared — returns 0 for out-of-range
             assertThat(growth.getHistoryAtTimeStep(0)).isEqualTo(0.0);
             assertThat(growth.getHistoryAtTimeStep(1)).isEqualTo(0.0);
+        }
+
+        @Test
+        void shouldClearFlowHistoryInModules() {
+            Module mod = new Module("M1");
+            Flow moduleFlow = Flow.create("ModuleFlow", MINUTE,
+                    () -> new Quantity(7, THING));
+            mod.addFlow(moduleFlow);
+            model.addModule(mod);
+
+            moduleFlow.recordValue(new Quantity(7, THING));
+            moduleFlow.recordValue(new Quantity(14, THING));
+            assertThat(moduleFlow.getHistoryAtTimeStep(0)).isEqualTo(7.0);
+
+            compiled.reset();
+
+            assertThat(moduleFlow.getHistoryAtTimeStep(0)).isEqualTo(0.0);
+            assertThat(moduleFlow.getHistoryAtTimeStep(1)).isEqualTo(0.0);
+        }
+
+        @Test
+        void shouldClearVariableHistoryInModules() {
+            Module mod = new Module("M1");
+            Variable moduleVar = new Variable("ModuleVar", THING, () -> 42.0);
+            mod.addVariable(moduleVar);
+            model.addModule(mod);
+
+            moduleVar.recordValue();
+            assertThat(moduleVar.getHistoryAtTimeStep(0)).isEqualTo(42.0);
+
+            compiled.reset();
+
+            assertThat(moduleVar.getHistoryAtTimeStep(0)).isEqualTo(0.0);
+        }
+
+        @Test
+        void shouldClearHistoryInNestedSubModules() {
+            Module parent = new Module("Parent");
+            Module child = new Module("Child");
+            Flow nestedFlow = Flow.create("NestedFlow", MINUTE,
+                    () -> new Quantity(3, THING));
+            Variable nestedVar = new Variable("NestedVar", THING, () -> 99.0);
+            child.addFlow(nestedFlow);
+            child.addVariable(nestedVar);
+            parent.addSubModule(child);
+            model.addModule(parent);
+
+            nestedFlow.recordValue(new Quantity(3, THING));
+            nestedVar.recordValue();
+            assertThat(nestedFlow.getHistoryAtTimeStep(0)).isEqualTo(3.0);
+            assertThat(nestedVar.getHistoryAtTimeStep(0)).isEqualTo(99.0);
+
+            compiled.reset();
+
+            assertThat(nestedFlow.getHistoryAtTimeStep(0)).isEqualTo(0.0);
+            assertThat(nestedVar.getHistoryAtTimeStep(0)).isEqualTo(0.0);
         }
 
         @Test

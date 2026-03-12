@@ -258,7 +258,14 @@ public class UndoManager implements AutoCloseable {
         if (raw != null) {
             return raw;
         }
-        CompressedData data = entry.future().join();
+        // Prefer non-blocking getNow() to avoid stalling the FX thread.
+        // If the future is not yet complete, fall back to join() which will
+        // only block briefly since rawSnapshot was already nulled (meaning
+        // compression completed or is about to complete).
+        CompressedData data = entry.future().getNow(null);
+        if (data == null) {
+            data = entry.future().join();
+        }
         byte[] rawBytes = new byte[data.originalLength()];
         DECOMPRESSOR.decompress(data.data(), 0, rawBytes, 0, data.originalLength());
         String json = new String(rawBytes, StandardCharsets.UTF_8);

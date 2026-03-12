@@ -8,13 +8,18 @@ import systems.courant.shrewd.measure.TimeUnit;
 import systems.courant.shrewd.measure.UnitRegistry;
 import systems.courant.shrewd.model.Flow;
 import systems.courant.shrewd.model.Model;
+import systems.courant.shrewd.model.Module;
 import systems.courant.shrewd.model.Stock;
 import systems.courant.shrewd.model.Variable;
 import systems.courant.shrewd.model.def.ModelDefinition;
 import systems.courant.shrewd.model.def.SimulationSettings;
+
+import java.util.Collections;
+import java.util.IdentityHashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * The result of compiling a {@link ModelDefinition}. Contains the runnable model,
@@ -148,11 +153,36 @@ public class CompiledModel {
         for (Map.Entry<Stock, Double> entry : initialStockValues.entrySet()) {
             entry.getKey().setValue(entry.getValue());
         }
+        // Clear history for top-level flows and variables, then walk modules
+        Set<Flow> seenFlows = Collections.newSetFromMap(new IdentityHashMap<>());
+        Set<Variable> seenVars = Collections.newSetFromMap(new IdentityHashMap<>());
         for (Flow flow : model.getFlows()) {
+            seenFlows.add(flow);
             flow.clearHistory();
         }
         for (Variable variable : model.getVariables()) {
+            seenVars.add(variable);
             variable.clearHistory();
+        }
+        for (Module module : model.getModules()) {
+            clearModuleHistory(module, seenFlows, seenVars);
+        }
+    }
+
+    private static void clearModuleHistory(Module module, Set<Flow> seenFlows,
+                                           Set<Variable> seenVars) {
+        for (Flow flow : module.getFlows()) {
+            if (seenFlows.add(flow)) {
+                flow.clearHistory();
+            }
+        }
+        for (Variable variable : module.getVariables()) {
+            if (seenVars.add(variable)) {
+                variable.clearHistory();
+            }
+        }
+        for (Module child : module.getSubModules().values()) {
+            clearModuleHistory(child, seenFlows, seenVars);
         }
     }
 
