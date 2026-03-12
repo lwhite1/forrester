@@ -5,25 +5,43 @@ import systems.courant.shrewd.model.def.LookupTableDef;
 import org.apache.commons.math3.analysis.interpolation.SplineInterpolator;
 
 import javafx.geometry.Insets;
+import javafx.geometry.Point2D;
+import javafx.scene.Cursor;
+import javafx.scene.Node;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
+import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Label;
+import javafx.scene.control.MenuItem;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
+import javafx.scene.control.Tooltip;
+import javafx.scene.input.MouseButton;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 
+import java.util.Arrays;
 import java.util.Objects;
 import java.util.Optional;
 
 /**
  * Property form for lookup table elements. Builds editable fields for name,
  * interpolation mode, and an inline data point table with add/remove row buttons.
+ *
+ * <p>The inline chart is interactive: data points can be dragged to new positions,
+ * clicking the chart adds a new point at that location, and right-clicking a
+ * point deletes it (minimum 2 points enforced).
  */
 class LookupForm implements ElementForm {
+
+    static final int MIN_POINTS = 2;
+    static final String POINT_STYLE = "-fx-background-color: #1f77b4; "
+            + "-fx-background-radius: 5; -fx-padding: 5;";
+    static final String POINT_DRAG_STYLE = "-fx-background-color: #ff7f0e; "
+            + "-fx-background-radius: 5; -fx-padding: 5;";
 
     private final FormContext ctx;
     private LineChart<Number, Number> chart;
@@ -128,7 +146,7 @@ class LookupForm implements ElementForm {
         ctx.grid.add(tableGrid, 0, row, 2, 1);
         row++;
 
-        // Inline chart preview
+        // Inline interactive chart
         chartRow = row;
         chart = buildChart(xs, ys, lookup.interpolation());
         ctx.grid.add(chart, 0, row, 2, 1);
@@ -178,11 +196,12 @@ class LookupForm implements ElementForm {
         newChart.setAnimated(false);
         newChart.setLegendVisible(false);
         newChart.setCreateSymbols(false);
-        newChart.setPrefHeight(160);
-        newChart.setMinHeight(120);
+        newChart.setPrefHeight(200);
+        newChart.setMinHeight(160);
         newChart.setPadding(Insets.EMPTY);
         newChart.setStyle("-fx-padding: 0;");
 
+        // Line/curve series (no symbols)
         XYChart.Series<Number, Number> lineSeries = new XYChart.Series<>();
         if ("SPLINE".equals(interpolation) && xs.length >= 3) {
             var function = new SplineInterpolator().interpolate(xs, ys);
@@ -199,7 +218,260 @@ class LookupForm implements ElementForm {
         }
         newChart.getData().add(lineSeries);
 
+        // Draggable data points series (symbols only, no line)
+        XYChart.Series<Number, Number> pointsSeries = new XYChart.Series<>();
+        for (int i = 0; i < xs.length; i++) {
+            pointsSeries.getData().add(new XYChart.Data<>(xs[i], ys[i]));
+        }
+        newChart.getData().add(pointsSeries);
+
+        // Style: hide line for points series, show symbols
+        pointsSeries.nodeProperty().addListener((obs, oldNode, newNode) -> {
+            if (newNode != null) {
+                newNode.setStyle("-fx-stroke: transparent;");
+            }
+        });
+        if (pointsSeries.getNode() != null) {
+            pointsSeries.getNode().setStyle("-fx-stroke: transparent;");
+        }
+
+        // Make each data point draggable
+        for (int i = 0; i < pointsSeries.getData().size(); i++) {
+            XYChart.Data<Number, Number> dataPoint = pointsSeries.getData().get(i);
+            final int pointIndex = i;
+            dataPoint.nodeProperty().addListener((obs, oldNode, newNode) -> {
+                if (newNode != null) {
+                    setupDraggablePoint(newNode, dataPoint, pointIndex, newChart,
+                            lineSeries, pointsSeries, interpolation);
+                }
+            });
+            if (dataPoint.getNode() != null) {
+                setupDraggablePoint(dataPoint.getNode(), dataPoint, pointIndex, newChart,
+                        lineSeries, pointsSeries, interpolation);
+            }
+        }
+
+        // Click on chart background to add a point
+        installClickToAdd(newChart);
+
         return newChart;
+    }
+
+    private void setupDraggablePoint(Node node, XYChart.Data<Number, Number> dataPoint,
+                                      int pointIndex, LineChart<Number, Number> chart,
+                                      XYChart.Series<Number, Number> lineSeries,
+                                      XYChart.Series<Number, Number> pointsSeries,
+                                      String interpolation) {
+        node.setStyle(POINT_STYLE);
+        node.setCursor(Cursor.HAND);
+
+        Tooltip tooltip = new Tooltip(formatPointTooltip(
+                dataPoint.getXValue().doubleValue(), dataPoint.getYValue().doubleValue()));
+        Tooltip.install(node, tooltip);
+
+        node.setOnMousePressed(event -> {
+            if (event.getButton() == MouseButton.PRIMARY) {
+                node.setStyle(POINT_DRAG_STYLE);
+                event.consume();
+            }
+        });
+
+        node.setOnMouseDragged(event -> {
+            if (event.getButton() != MouseButton.PRIMARY) {
+                return;
+            }
+            Node plotArea = chart.lookup(".chart-plot-background");
+            if (plotArea == null) {
+                return;
+            }
+            Point2D plotLocal = plotArea.sceneToLocal(event.getSceneX(), event.getSceneY());
+            NumberAxis xAxis = (NumberAxis) chart.getXAxis();
+            NumberAxis yAxis = (NumberAxis) chart.getYAxis();
+            double newX = xAxis.getValueForDisplay(plotLocal.getX()).doubleValue();
+            double newY = yAxis.getValueForDisplay(plotLocal.getY()).doubleValue();
+
+            // Constrain X between neighbors to maintain sorted order
+            double[] bounds = getNeighborBounds(pointIndex);
+            newX = Math.max(bounds[0], Math.min(bounds[1], newX));
+
+            dataPoint.setXValue(newX);
+            dataPoint.setYValue(newY);
+            tooltip.setText(formatPointTooltip(newX, newY));
+
+            // Update the line series in real time
+            updateLineSeries(lineSeries, pointsSeries, interpolation);
+            event.consume();
+        });
+
+        node.setOnMouseReleased(event -> {
+            if (event.getButton() != MouseButton.PRIMARY) {
+                return;
+            }
+            node.setStyle(POINT_STYLE);
+            double finalX = dataPoint.getXValue().doubleValue();
+            double finalY = dataPoint.getYValue().doubleValue();
+            commitChartDrag(pointIndex, finalX, finalY);
+            event.consume();
+        });
+
+        // Right-click to delete
+        ContextMenu deleteMenu = new ContextMenu();
+        MenuItem deleteItem = new MenuItem("Delete Point");
+        deleteItem.setOnAction(e -> deletePointByIndex(pointIndex));
+        deleteMenu.getItems().add(deleteItem);
+        node.setOnContextMenuRequested(event -> {
+            Optional<LookupTableDef> ltOpt = ctx.editor.getLookupTableByName(ctx.elementName);
+            if (ltOpt.isPresent() && ltOpt.get().xValues().length > MIN_POINTS) {
+                deleteMenu.show(node, event.getScreenX(), event.getScreenY());
+            }
+            event.consume();
+        });
+    }
+
+    private double[] getNeighborBounds(int pointIndex) {
+        Optional<LookupTableDef> ltOpt = ctx.editor.getLookupTableByName(ctx.elementName);
+        if (ltOpt.isEmpty()) {
+            return new double[]{Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY};
+        }
+        double[] xs = ltOpt.get().xValues();
+        double lower = pointIndex > 0 ? xs[pointIndex - 1] + 1e-6 : Double.NEGATIVE_INFINITY;
+        double upper = pointIndex < xs.length - 1 ? xs[pointIndex + 1] - 1e-6 : Double.POSITIVE_INFINITY;
+        return new double[]{lower, upper};
+    }
+
+    private void updateLineSeries(XYChart.Series<Number, Number> lineSeries,
+                                   XYChart.Series<Number, Number> pointsSeries,
+                                   String interpolation) {
+        int n = pointsSeries.getData().size();
+        double[] xs = new double[n];
+        double[] ys = new double[n];
+        for (int i = 0; i < n; i++) {
+            xs[i] = pointsSeries.getData().get(i).getXValue().doubleValue();
+            ys[i] = pointsSeries.getData().get(i).getYValue().doubleValue();
+        }
+
+        lineSeries.getData().clear();
+        if ("SPLINE".equals(interpolation) && n >= 3) {
+            var function = new SplineInterpolator().interpolate(xs, ys);
+            double xMin = xs[0];
+            double xMax = xs[n - 1];
+            for (int i = 0; i <= SPLINE_INTERPOLATION_POINTS; i++) {
+                double x = xMin + (xMax - xMin) * i / SPLINE_INTERPOLATION_POINTS;
+                lineSeries.getData().add(new XYChart.Data<>(x, function.value(x)));
+            }
+        } else {
+            for (int i = 0; i < n; i++) {
+                lineSeries.getData().add(new XYChart.Data<>(xs[i], ys[i]));
+            }
+        }
+    }
+
+    private void installClickToAdd(LineChart<Number, Number> chart) {
+        chart.setOnMouseClicked(event -> {
+            if (event.getButton() != MouseButton.PRIMARY || event.getClickCount() != 2) {
+                return;
+            }
+            Node plotArea = chart.lookup(".chart-plot-background");
+            if (plotArea == null) {
+                return;
+            }
+            Point2D plotLocal = plotArea.sceneToLocal(event.getSceneX(), event.getSceneY());
+            if (plotLocal.getX() < 0 || plotLocal.getY() < 0) {
+                return;
+            }
+            NumberAxis xAxis = (NumberAxis) chart.getXAxis();
+            NumberAxis yAxis = (NumberAxis) chart.getYAxis();
+            double newX = xAxis.getValueForDisplay(plotLocal.getX()).doubleValue();
+            double newY = yAxis.getValueForDisplay(plotLocal.getY()).doubleValue();
+            addPointAtPosition(newX, newY);
+            event.consume();
+        });
+    }
+
+    void addPointAtPosition(double x, double y) {
+        Optional<LookupTableDef> ltOpt = ctx.editor.getLookupTableByName(ctx.elementName);
+        if (ltOpt.isEmpty()) {
+            return;
+        }
+        LookupTableDef lt = ltOpt.get();
+        double[] oldX = lt.xValues();
+        double[] oldY = lt.yValues();
+
+        // Find insertion index to maintain sorted order
+        int insertAt = Arrays.binarySearch(oldX, x);
+        if (insertAt >= 0) {
+            // Exact X already exists — don't add duplicate
+            return;
+        }
+        insertAt = -(insertAt + 1);
+
+        double[] newX = new double[oldX.length + 1];
+        double[] newY = new double[oldY.length + 1];
+        System.arraycopy(oldX, 0, newX, 0, insertAt);
+        newX[insertAt] = x;
+        System.arraycopy(oldX, insertAt, newX, insertAt + 1, oldX.length - insertAt);
+        System.arraycopy(oldY, 0, newY, 0, insertAt);
+        newY[insertAt] = y;
+        System.arraycopy(oldY, insertAt, newY, insertAt + 1, oldY.length - insertAt);
+
+        LookupTableDef updated = new LookupTableDef(
+                ctx.elementName, lt.comment(), newX, newY, lt.interpolation());
+        ctx.canvas.applyMutation(() -> ctx.editor.setLookupTable(ctx.elementName, updated));
+    }
+
+    void deletePointByIndex(int index) {
+        Optional<LookupTableDef> ltOpt = ctx.editor.getLookupTableByName(ctx.elementName);
+        if (ltOpt.isEmpty() || ltOpt.get().xValues().length <= MIN_POINTS) {
+            return;
+        }
+        LookupTableDef lt = ltOpt.get();
+        double[] oldX = lt.xValues();
+        double[] oldY = lt.yValues();
+        if (index < 0 || index >= oldX.length) {
+            return;
+        }
+        double[] newX = new double[oldX.length - 1];
+        double[] newY = new double[oldY.length - 1];
+        System.arraycopy(oldX, 0, newX, 0, index);
+        System.arraycopy(oldX, index + 1, newX, index, oldX.length - index - 1);
+        System.arraycopy(oldY, 0, newY, 0, index);
+        System.arraycopy(oldY, index + 1, newY, index, oldY.length - index - 1);
+        LookupTableDef updated = new LookupTableDef(
+                ctx.elementName, lt.comment(), newX, newY, lt.interpolation());
+        ctx.canvas.applyMutation(() -> ctx.editor.setLookupTable(ctx.elementName, updated));
+    }
+
+    private void commitChartDrag(int index, double newX, double newY) {
+        Optional<LookupTableDef> ltOpt = ctx.editor.getLookupTableByName(ctx.elementName);
+        if (ltOpt.isEmpty()) {
+            return;
+        }
+        LookupTableDef lt = ltOpt.get();
+        double[] xs = lt.xValues();
+        double[] ys = lt.yValues();
+        if (index >= xs.length) {
+            return;
+        }
+        if (xs[index] == newX && ys[index] == newY) {
+            return;
+        }
+        double[] newXs = xs.clone();
+        double[] newYs = ys.clone();
+        newXs[index] = newX;
+        newYs[index] = newY;
+        // Validate sorted order
+        for (int i = 1; i < newXs.length; i++) {
+            if (newXs[i] <= newXs[i - 1]) {
+                return;
+            }
+        }
+        LookupTableDef updated = new LookupTableDef(
+                ctx.elementName, lt.comment(), newXs, newYs, lt.interpolation());
+        ctx.canvas.applyMutation(() -> ctx.editor.setLookupTable(ctx.elementName, updated));
+    }
+
+    static String formatPointTooltip(double x, double y) {
+        return "(" + ChartUtils.formatNumber(x) + ", " + ChartUtils.formatNumber(y) + ")";
     }
 
     private void commitComment(TextArea area) {
@@ -277,7 +549,7 @@ class LookupForm implements ElementForm {
 
     private void removeRow() {
         Optional<LookupTableDef> ltOpt = ctx.editor.getLookupTableByName(ctx.elementName);
-        if (ltOpt.isEmpty() || ltOpt.get().xValues().length <= 2) {
+        if (ltOpt.isEmpty() || ltOpt.get().xValues().length <= MIN_POINTS) {
             return;
         }
         LookupTableDef lt = ltOpt.get();
