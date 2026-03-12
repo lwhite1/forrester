@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.OptionalDouble;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.DoubleSupplier;
 
 /**
@@ -32,6 +33,9 @@ import java.util.function.DoubleSupplier;
 public class ExprCompiler {
 
     private static final Logger logger = LoggerFactory.getLogger(ExprCompiler.class);
+
+    /** Counter mixed with nanoTime to ensure unique RANDOM seeds across compilations. */
+    private static final AtomicLong SEED_COUNTER = new AtomicLong();
 
     private final CompilationContext context;
     private final List<Resettable> resettables;
@@ -610,7 +614,7 @@ public class ExprCompiler {
         DoubleSupplier maxVal = compileExpr(args.get(1));
         DoubleSupplier mean = compileExpr(args.get(2));
         DoubleSupplier stddev = compileExpr(args.get(3));
-        long seed = System.nanoTime();
+        long seed = System.nanoTime() ^ SEED_COUNTER.incrementAndGet();
         java.util.Random rng = new java.util.Random(seed);
         resettables.add(() -> rng.setSeed(seed));
         return () -> {
@@ -623,8 +627,8 @@ public class ExprCompiler {
         requireArgs("RANDOM_UNIFORM", args, 3);
         DoubleSupplier minVal = compileExpr(args.get(0));
         DoubleSupplier maxVal = compileExpr(args.get(1));
-        // Third arg is seed — Vensim uses it for reproducibility, we use nanoTime
-        long seed = System.nanoTime();
+        // Third arg is seed — Vensim uses it for reproducibility, we mix nanoTime with counter
+        long seed = System.nanoTime() ^ SEED_COUNTER.incrementAndGet();
         java.util.Random rng = new java.util.Random(seed);
         resettables.add(() -> rng.setSeed(seed));
         return () -> {

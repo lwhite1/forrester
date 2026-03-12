@@ -541,12 +541,30 @@ class ExprParserTest {
     class DepthLimits {
 
         @Test
-        void shouldRejectDeeplyNestedUnaryChain() {
+        void shouldRejectDeeplyNestedUnaryNegationChain() {
             // 250 negations should exceed the MAX_DEPTH of 200
             String expr = "-".repeat(250) + "x";
             assertThatThrownBy(() -> ExprParser.parse(expr))
                     .isInstanceOf(ParseException.class)
                     .hasMessageContaining("too deep");
+        }
+
+        @Test
+        void shouldRejectDeeplyNestedUnaryPlusChain() {
+            // 250 unary plus signs should also exceed MAX_DEPTH of 200
+            String expr = "+".repeat(250) + "x";
+            assertThatThrownBy(() -> ExprParser.parse(expr))
+                    .isInstanceOf(ParseException.class)
+                    .hasMessageContaining("too deep");
+        }
+
+        @Test
+        void shouldAllowModerateUnaryPlusChain() {
+            // A chain within the depth limit should parse successfully
+            String expr = "+".repeat(10) + "42";
+            Expr result = ExprParser.parse(expr);
+            assertThat(result).isInstanceOf(Expr.Literal.class);
+            assertThat(((Expr.Literal) result).value()).isEqualTo(42);
         }
     }
 }
