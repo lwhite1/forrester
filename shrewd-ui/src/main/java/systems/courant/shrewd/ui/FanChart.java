@@ -12,6 +12,7 @@ import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
 
+import java.util.Locale;
 import java.util.Map;
 
 /**
@@ -186,7 +187,7 @@ public class FanChart extends Application {
             double val = minVal + (maxVal - minVal) * i / yTicks;
             double y = MARGIN_TOP + plotHeight - (plotHeight * i / yTicks);
             gc.strokeLine(MARGIN_LEFT - 5, y, MARGIN_LEFT, y);
-            gc.fillText(String.format("%.0f", val), 5, y + 4);
+            gc.fillText(String.format(Locale.US, "%.0f", val), 5, y + 4);
         }
 
         // X-axis ticks (up to 10 ticks)

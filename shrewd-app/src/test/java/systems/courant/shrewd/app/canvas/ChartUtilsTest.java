@@ -1,8 +1,12 @@
 package systems.courant.shrewd.app.canvas;
 
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+
+import java.util.Locale;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -59,6 +63,47 @@ class ChartUtilsTest {
             String result = ChartUtils.formatNumber(Double.POSITIVE_INFINITY);
             // Double.isFinite returns false, so it goes through the format path
             assertThat(result).contains("Infinity");
+        }
+    }
+
+    @Nested
+    @DisplayName("formatNumber() locale independence (#188)")
+    class FormatNumberLocale {
+
+        private Locale originalLocale;
+
+        @BeforeEach
+        void saveLocale() {
+            originalLocale = Locale.getDefault();
+        }
+
+        @AfterEach
+        void restoreLocale() {
+            Locale.setDefault(originalLocale);
+        }
+
+        @Test
+        @DisplayName("Fractional values use dot separator under German locale")
+        void shouldUseDotSeparatorUnderGermanLocale() {
+            Locale.setDefault(Locale.GERMANY);
+            assertThat(ChartUtils.formatNumber(3.14159)).isEqualTo("3.1416");
+            assertThat(ChartUtils.formatNumber(0.1)).isEqualTo("0.1000");
+        }
+
+        @Test
+        @DisplayName("Fractional values use dot separator under French locale")
+        void shouldUseDotSeparatorUnderFrenchLocale() {
+            Locale.setDefault(Locale.FRANCE);
+            assertThat(ChartUtils.formatNumber(1234.5678)).isEqualTo("1234.5678");
+            assertThat(ChartUtils.formatNumber(-2.5)).isEqualTo("-2.5000");
+        }
+
+        @Test
+        @DisplayName("Integer values unaffected by locale")
+        void shouldFormatIntegersUnderNonUsLocale() {
+            Locale.setDefault(Locale.GERMANY);
+            assertThat(ChartUtils.formatNumber(42.0)).isEqualTo("42");
+            assertThat(ChartUtils.formatNumber(0.0)).isEqualTo("0");
         }
     }
 
