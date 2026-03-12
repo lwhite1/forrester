@@ -91,7 +91,7 @@ public class StatusBar extends HBox {
             case SELECT -> "Select";
             case PLACE_STOCK -> "Place Stock";
             case PLACE_FLOW -> "Place Flow";
-            case PLACE_AUX -> "Place Variable";
+            case PLACE_VARIABLE -> "Place Variable";
             case PLACE_MODULE -> "Place Module";
             case PLACE_LOOKUP -> "Place Lookup";
             case PLACE_CLD_VARIABLE -> "Place CLD Variable";
@@ -112,15 +112,15 @@ public class StatusBar extends HBox {
         }
     }
 
-    public void updateElements(int stocks, int flows, int auxiliaries, int constants,
+    public void updateElements(int stocks, int flows, int variables, int constants,
                                int modules, int cldVars, int causalLinks) {
-        int total = stocks + flows + auxiliaries + constants + modules + cldVars;
+        int total = stocks + flows + variables + constants + modules + cldVars;
         if (total == 0) {
             elementsLabel.setText("Empty model");
         } else {
             String text = total + " elements ("
                     + stocks + " stocks, " + flows + " flows, "
-                    + auxiliaries + " aux, " + constants + " const";
+                    + variables + " var, " + constants + " const";
             if (modules > 0) {
                 text += ", " + modules + " mod";
             }

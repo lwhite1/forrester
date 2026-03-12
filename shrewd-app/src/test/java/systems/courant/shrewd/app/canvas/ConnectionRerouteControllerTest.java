@@ -35,7 +35,7 @@ class ConnectionRerouteControllerTest {
         ModelDefinition def = new ModelDefinitionBuilder()
                 .name("Test")
                 .constant("Source", 1, "units")
-                .aux("Target", "Source", "units")
+                .variable("Target", "Source", "units")
                 .constant("NewSource", 2, "units")
                 .build();
         editor.loadFrom(def);
@@ -162,7 +162,7 @@ class ConnectionRerouteControllerTest {
             assertThat(result).isTrue();
             assertThat(undoSaved[0]).isTrue();
             // Target's equation should now reference NewSource instead of Source
-            assertThat(editor.getAuxByName("Target").orElseThrow().equation()).isEqualTo("NewSource");
+            assertThat(editor.getVariableByName("Target").orElseThrow().equation()).isEqualTo("NewSource");
             assertThat(controller.isActive()).isFalse();
         }
 

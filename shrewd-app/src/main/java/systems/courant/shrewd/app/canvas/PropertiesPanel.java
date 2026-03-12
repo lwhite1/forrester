@@ -35,7 +35,7 @@ import java.util.Set;
  * action buttons and a form section with editable property fields.
  *
  * <p>Per-type form building is delegated to {@link ElementForm} implementations:
- * {@link StockForm}, {@link FlowForm}, {@link AuxForm},
+ * {@link StockForm}, {@link FlowForm}, {@link VariableForm},
  * and {@link LookupForm}. Module forms are built inline (no commit handlers).</p>
  */
 public class PropertiesPanel extends VBox {
@@ -273,7 +273,7 @@ public class PropertiesPanel extends VBox {
         List<String> parts = new ArrayList<>();
         int stocks = editor.getStocks().size();
         int flows = editor.getFlows().size();
-        int auxes = editor.getAuxiliaries().size();
+        int auxes = editor.getVariables().size();
         int lookups = editor.getLookupTables().size();
         int modules = editor.getModules().size();
         int commentCount = editor.getComments().size();
@@ -511,7 +511,7 @@ public class PropertiesPanel extends VBox {
         return switch (type) {
             case STOCK -> new StockForm(ctx);
             case FLOW -> new FlowForm(ctx);
-            case AUX -> new AuxForm(ctx);
+            case AUX -> new VariableForm(ctx);
             case LOOKUP -> new LookupForm(ctx);
             case CLD_VARIABLE -> new CldVariableForm(ctx);
             case COMMENT -> new CommentForm(ctx);

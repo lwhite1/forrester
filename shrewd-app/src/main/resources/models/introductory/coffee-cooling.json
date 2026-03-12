@@ -16,7 +16,7 @@
       "source": "Coffee Temperature"
     }
   ],
-  "auxiliaries": [
+  "variables": [
     {
       "name": "Discrepancy",
       "equation": "Coffee_Temperature - Room_Temperature",

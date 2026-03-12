@@ -96,7 +96,7 @@
       "sink": "susceptible_population"
     }
   ],
-  "auxiliaries": [
+  "variables": [
     {
       "name": "recorded_cholera_cases",
       "comment": "recorded cholera cases",

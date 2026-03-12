@@ -1,6 +1,6 @@
 package systems.courant.shrewd.model.compile;
 
-import systems.courant.shrewd.model.def.AuxDef;
+import systems.courant.shrewd.model.def.VariableDef;
 import systems.courant.shrewd.model.def.FlowDef;
 import systems.courant.shrewd.model.def.ModelDefinition;
 import systems.courant.shrewd.model.def.StockDef;
@@ -55,7 +55,7 @@ public class SubscriptExpander {
                 subscriptedNames.add(f.name());
             }
         }
-        for (AuxDef a : def.auxiliaries()) {
+        for (VariableDef a : def.variables()) {
             if (!a.subscripts().isEmpty()) {
                 subscriptedNames.add(a.name());
             }
@@ -119,9 +119,9 @@ public class SubscriptExpander {
             }
         }
 
-        // Expand auxiliaries
-        List<AuxDef> expandedAuxes = new ArrayList<>();
-        for (AuxDef a : def.auxiliaries()) {
+        // Expand variables
+        List<VariableDef> expandedAuxes = new ArrayList<>();
+        for (VariableDef a : def.variables()) {
             if (a.subscripts().isEmpty()) {
                 expandedAuxes.add(a);
             } else {
@@ -131,7 +131,7 @@ public class SubscriptExpander {
                     String suffix = joinLabels(combo);
                     String expandedEq = rewriteEquation(
                             a.equation(), suffix, subscriptedNames, namePattern);
-                    expandedAuxes.add(new AuxDef(
+                    expandedAuxes.add(new VariableDef(
                             a.name() + "[" + suffix + "]",
                             a.comment(),
                             expandedEq,
@@ -141,10 +141,10 @@ public class SubscriptExpander {
         }
 
         return def.toBuilder()
-                .clearStocks().clearFlows().clearAuxiliaries()
+                .clearStocks().clearFlows().clearVariables()
                 .stocks(expandedStocks)
                 .flows(expandedFlows)
-                .auxiliaries(expandedAuxes)
+                .variables(expandedAuxes)
                 .build();
     }
 

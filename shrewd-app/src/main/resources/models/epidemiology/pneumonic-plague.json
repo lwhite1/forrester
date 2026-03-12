@@ -57,7 +57,7 @@
       "sink": "deceased population"
     }
   ],
-  "auxiliaries": [
+  "variables": [
     {
       "name": "infection",
       "comment": "infection",
@@ -84,7 +84,7 @@
     },
     {
       "name": "antibiotics coverage of the population",
-      "comment": "LOOKUP (TIME ([(0,0)-(10,10)],(0,0),(1,0.5),(2,1),(3,1),(6,1) )  )",
+      "comment": "antibiotics coverage of the population",
       "equation": "0",
       "unit": "Dmnl"
     },

@@ -16,7 +16,7 @@ public class ModelDefinitionBuilder {
     private ModuleInterface moduleInterface;
     private final List<StockDef> stocks = new ArrayList<>();
     private final List<FlowDef> flows = new ArrayList<>();
-    private final List<AuxDef> auxiliaries = new ArrayList<>();
+    private final List<VariableDef> variables = new ArrayList<>();
     private final List<LookupTableDef> lookupTables = new ArrayList<>();
     private final List<ModuleInstanceDef> modules = new ArrayList<>();
     private final List<SubscriptDef> subscripts = new ArrayList<>();
@@ -181,46 +181,46 @@ public class ModelDefinitionBuilder {
     }
 
     /**
-     * Adds an auxiliary variable with the given name, equation, and unit.
+     * Adds a variable with the given name, equation, and unit.
      *
-     * @param name     the auxiliary name
+     * @param name     the variable name
      * @param equation the formula expression string
      * @param unit     the unit name
      * @return this builder
      */
-    public ModelDefinitionBuilder aux(String name, String equation, String unit) {
-        auxiliaries.add(new AuxDef(name, equation, unit));
+    public ModelDefinitionBuilder variable(String name, String equation, String unit) {
+        variables.add(new VariableDef(name, equation, unit));
         return this;
     }
 
     /**
-     * Adds a subscripted auxiliary that will be expanded into scalar elements during compilation.
+     * Adds a subscripted variable that will be expanded into scalar elements during compilation.
      *
-     * @param name       the auxiliary name
+     * @param name       the variable name
      * @param equation   the formula expression string
      * @param unit       the unit name
      * @param subscripts the subscript dimension names
      * @return this builder
      */
-    public ModelDefinitionBuilder aux(String name, String equation, String unit,
-                                      List<String> subscripts) {
-        auxiliaries.add(new AuxDef(name, null, equation, unit, subscripts));
+    public ModelDefinitionBuilder variable(String name, String equation, String unit,
+                                           List<String> subscripts) {
+        variables.add(new VariableDef(name, null, equation, unit, subscripts));
         return this;
     }
 
     /**
-     * Adds a pre-built auxiliary definition.
+     * Adds a pre-built variable definition.
      *
-     * @param auxDef the auxiliary definition to add
+     * @param varDef the variable definition to add
      * @return this builder
      */
-    public ModelDefinitionBuilder aux(AuxDef auxDef) {
-        auxiliaries.add(auxDef);
+    public ModelDefinitionBuilder variable(VariableDef varDef) {
+        variables.add(varDef);
         return this;
     }
 
     /**
-     * Adds a literal-valued auxiliary (parameter) with the given name, value, and unit.
+     * Adds a literal-valued variable (parameter) with the given name, value, and unit.
      *
      * @param name  the parameter name
      * @param value the numeric value
@@ -228,7 +228,7 @@ public class ModelDefinitionBuilder {
      * @return this builder
      */
     public ModelDefinitionBuilder constant(String name, double value, String unit) {
-        auxiliaries.add(new AuxDef(name, null, value, unit));
+        variables.add(new VariableDef(name, null, value, unit));
         return this;
     }
 
@@ -446,8 +446,8 @@ public class ModelDefinitionBuilder {
     /** Clears all flow definitions. */
     public ModelDefinitionBuilder clearFlows() { flows.clear(); return this; }
 
-    /** Clears all auxiliary definitions. */
-    public ModelDefinitionBuilder clearAuxiliaries() { auxiliaries.clear(); return this; }
+    /** Clears all variable definitions. */
+    public ModelDefinitionBuilder clearVariables() { variables.clear(); return this; }
 
     /** Clears all view definitions. */
     public ModelDefinitionBuilder clearViews() { views.clear(); return this; }
@@ -458,8 +458,8 @@ public class ModelDefinitionBuilder {
     /** Adds all flow definitions from the given list. */
     public ModelDefinitionBuilder flows(List<FlowDef> defs) { flows.addAll(defs); return this; }
 
-    /** Adds all auxiliary definitions from the given list. */
-    public ModelDefinitionBuilder auxiliaries(List<AuxDef> defs) { auxiliaries.addAll(defs); return this; }
+    /** Adds all variable definitions from the given list. */
+    public ModelDefinitionBuilder variables(List<VariableDef> defs) { variables.addAll(defs); return this; }
 
     /**
      * Adds a reference dataset for model validation.
@@ -500,7 +500,7 @@ public class ModelDefinitionBuilder {
     public ModelDefinition build() {
         return new ModelDefinition(
                 name, comment, moduleInterface,
-                stocks, flows, auxiliaries, lookupTables,
+                stocks, flows, variables, lookupTables,
                 modules, subscripts, cldVariables, causalLinks,
                 comments, views, defaultSimulation, metadata, referenceDatasets);
     }

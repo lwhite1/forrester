@@ -69,10 +69,10 @@
       "sink": "workforce"
     }
   ],
-  "auxiliaries": [
+  "variables": [
     {
       "name": "fraction personnel for testing",
-      "comment": "gerapporteerde fractie detectie van onontdekt rework",
+      "comment": "fraction personnel for testing",
       "equation": "LOOKUP(fraction_personnel_for_testing_lookup, reported_fraction_detection_undiscovered_rework)",
       "unit": "dmnl"
     },
@@ -162,13 +162,13 @@
     },
     {
       "name": "net hiring of personnel",
-      "comment": "(gewenst personeelsbestand - personeelsbestand)/tijd om personeelsbestand  aan te passen",
+      "comment": "net hiring of personnel",
       "equation": "(desired_workforce - workforce)/time_to_adapt_workforce",
       "unit": "person/Month"
     },
     {
       "name": "perceived cumulative progress",
-      "comment": "behoorlijk afgewerkte projecttaken + MAX(0,\"gebrekkig afgewerkte  projecttaken (undiscovered rework)\")",
+      "comment": "perceived cumulative progress",
       "equation": "properly_completed_project_tasks + undiscovered_rework",
       "unit": "tasks"
     },

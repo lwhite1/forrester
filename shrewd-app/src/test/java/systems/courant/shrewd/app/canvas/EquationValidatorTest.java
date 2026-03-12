@@ -1,6 +1,6 @@
 package systems.courant.shrewd.app.canvas;
 
-import systems.courant.shrewd.model.def.AuxDef;
+import systems.courant.shrewd.model.def.VariableDef;
 import systems.courant.shrewd.model.def.FlowDef;
 import systems.courant.shrewd.model.def.ModelDefinition;
 import systems.courant.shrewd.model.def.ModelDefinitionBuilder;
@@ -132,7 +132,7 @@ class EquationValidatorTest {
                     .name("CLD Test")
                     .stock("S", 100, "u")
                     .cldVariable("Pressure")
-                    .aux("A", "Pressure * 2", "u")
+                    .variable("A", "Pressure * 2", "u")
                     .flow("F", "S * 0.1", "day", null, "S")
                     .build();
             ModelEditor cldEditor = new ModelEditor();

@@ -1,7 +1,7 @@
 package systems.courant.shrewd.app.canvas;
 
 import systems.courant.shrewd.model.ModelMetadata;
-import systems.courant.shrewd.model.def.AuxDef;
+import systems.courant.shrewd.model.def.VariableDef;
 import systems.courant.shrewd.model.def.FlowDef;
 import systems.courant.shrewd.model.def.LookupTableDef;
 import systems.courant.shrewd.model.def.ModelDefinition;
@@ -148,10 +148,10 @@ class ReportGeneratorTest {
         @Test
         @DisplayName("should escape special characters in equations")
         void shouldEscapeEquations() {
-            AuxDef aux = new AuxDef("test", null, "a < b && c > d", null, List.of());
+            VariableDef v = new VariableDef("test", null, "a < b && c > d", null, List.of());
             ModelDefinition def = new ModelDefinition(
                     "Test", null, null,
-                    List.of(), List.of(), List.of(aux), List.of(), List.of(), List.of(),
+                    List.of(), List.of(), List.of(v), List.of(), List.of(), List.of(),
                     List.of(), List.of(), List.of(), List.of(), null, null, List.of());
 
             String html = ReportGenerator.generate(def, null);
@@ -222,10 +222,10 @@ class ReportGeneratorTest {
     class VariablesSection {
 
         @Test
-        @DisplayName("should split auxiliaries into constants and variables")
+        @DisplayName("should split variables into constants and variables")
         void shouldSplitConstantsAndVariables() {
-            AuxDef constant = new AuxDef("rate", null, "0.5", "1/Day", List.of());
-            AuxDef variable = new AuxDef("effect", null, "rate * Population", null, List.of());
+            VariableDef constant = new VariableDef("rate", null, "0.5", "1/Day", List.of());
+            VariableDef variable = new VariableDef("effect", null, "rate * Population", null, List.of());
             ModelDefinition def = modelWith(List.of(), List.of(), List.of(constant, variable));
 
             String html = ReportGenerator.generate(def, null);
@@ -240,7 +240,7 @@ class ReportGeneratorTest {
         @Test
         @DisplayName("should omit constants heading when all are computed")
         void shouldOmitConstantsWhenNone() {
-            AuxDef variable = new AuxDef("effect", null, "A + B", null, List.of());
+            VariableDef variable = new VariableDef("effect", null, "A + B", null, List.of());
             ModelDefinition def = modelWith(List.of(), List.of(), List.of(variable));
 
             String html = ReportGenerator.generate(def, null);
@@ -432,9 +432,9 @@ class ReportGeneratorTest {
         FlowDef recovery = new FlowDef("Recovery", null, "Infectious * recovery_rate",
                 "Day", "People", "Infectious", "Recovered", List.of());
 
-        AuxDef infectionRate = new AuxDef("infection_rate", null, "0.3", "1/Day", List.of());
-        AuxDef recoveryRate = new AuxDef("recovery_rate", null, "0.1", "1/Day", List.of());
-        AuxDef totalPop = new AuxDef("total_population", null,
+        VariableDef infectionRate = new VariableDef("infection_rate", null, "0.3", "1/Day", List.of());
+        VariableDef recoveryRate = new VariableDef("recovery_rate", null, "0.1", "1/Day", List.of());
+        VariableDef totalPop = new VariableDef("total_population", null,
                 "Susceptible + Infectious + Recovered", "People", List.of());
 
         SimulationSettings sim = new SimulationSettings("Day", 100, "Day");
@@ -454,10 +454,10 @@ class ReportGeneratorTest {
     }
 
     private static ModelDefinition modelWith(List<StockDef> stocks, List<FlowDef> flows,
-                                             List<AuxDef> auxiliaries) {
+                                             List<VariableDef> variables) {
         return new ModelDefinition(
                 "Test", null, null,
-                stocks, flows, auxiliaries, List.of(), List.of(), List.of(),
+                stocks, flows, variables, List.of(), List.of(), List.of(),
                 List.of(), List.of(), List.of(), List.of(), null, null, List.of());
     }
 }

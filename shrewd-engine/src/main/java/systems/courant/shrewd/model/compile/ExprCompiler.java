@@ -1002,7 +1002,7 @@ public class ExprCompiler {
     /**
      * Compiles an expression and evaluates it immediately. Used for parameters
      * like delay times that must be known at compile time but may reference
-     * variables or auxiliaries (evaluated at their initial/current values).
+     * variables or variables (evaluated at their initial/current values).
      */
     private double evaluateAtCompileTime(Expr expr, String paramDescription) {
         try {

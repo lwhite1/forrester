@@ -10,7 +10,7 @@
     "elements" : {
       "stocks" : 3,
       "flows" : 3,
-      "auxiliaries" : 11,
+      "variables" : 11,
       "parameters" : 7
     }
   }, {
@@ -24,7 +24,7 @@
     "elements" : {
       "stocks" : 1,
       "flows" : 2,
-      "auxiliaries" : 0,
+      "variables" : 0,
       "parameters" : 2
     }
   }, {
@@ -38,7 +38,7 @@
     "elements" : {
       "stocks" : 2,
       "flows" : 2,
-      "auxiliaries" : 13,
+      "variables" : 13,
       "parameters" : 8
     }
   }, {
@@ -52,7 +52,7 @@
     "elements" : {
       "stocks" : 7,
       "flows" : 7,
-      "auxiliaries" : 18,
+      "variables" : 18,
       "parameters" : 7
     }
   }, {
@@ -66,7 +66,7 @@
     "elements" : {
       "stocks" : 1,
       "flows" : 1,
-      "auxiliaries" : 1,
+      "variables" : 1,
       "parameters" : 3
     }
   }, {
@@ -80,7 +80,7 @@
     "elements" : {
       "stocks" : 1,
       "flows" : 1,
-      "auxiliaries" : 1,
+      "variables" : 1,
       "parameters" : 2
     }
   }, {
@@ -94,7 +94,7 @@
     "elements" : {
       "stocks" : 0,
       "flows" : 0,
-      "auxiliaries" : 0,
+      "variables" : 0,
       "parameters" : 0
     }
   }, {
@@ -108,7 +108,7 @@
     "elements" : {
       "stocks" : 5,
       "flows" : 5,
-      "auxiliaries" : 18,
+      "variables" : 18,
       "parameters" : 18
     }
   }, {
@@ -122,7 +122,7 @@
     "elements" : {
       "stocks" : 4,
       "flows" : 4,
-      "auxiliaries" : 18,
+      "variables" : 18,
       "parameters" : 10
     }
   }, {
@@ -136,7 +136,7 @@
     "elements" : {
       "stocks" : 12,
       "flows" : 12,
-      "auxiliaries" : 38,
+      "variables" : 38,
       "parameters" : 24
     }
   }, {
@@ -150,7 +150,7 @@
     "elements" : {
       "stocks" : 2,
       "flows" : 2,
-      "auxiliaries" : 6,
+      "variables" : 6,
       "parameters" : 9
     }
   }, {
@@ -164,7 +164,7 @@
     "elements" : {
       "stocks" : 7,
       "flows" : 7,
-      "auxiliaries" : 14,
+      "variables" : 14,
       "parameters" : 17
     }
   }, {
@@ -178,7 +178,7 @@
     "elements" : {
       "stocks" : 1,
       "flows" : 2,
-      "auxiliaries" : 0,
+      "variables" : 0,
       "parameters" : 2
     }
   }, {
@@ -192,7 +192,7 @@
     "elements" : {
       "stocks" : 5,
       "flows" : 5,
-      "auxiliaries" : 13,
+      "variables" : 13,
       "parameters" : 22
     }
   }, {
@@ -206,7 +206,7 @@
     "elements" : {
       "stocks" : 8,
       "flows" : 8,
-      "auxiliaries" : 14,
+      "variables" : 14,
       "parameters" : 19
     }
   }, {
@@ -220,7 +220,7 @@
     "elements" : {
       "stocks" : 1,
       "flows" : 1,
-      "auxiliaries" : 7,
+      "variables" : 7,
       "parameters" : 4
     }
   }, {
@@ -234,7 +234,7 @@
     "elements" : {
       "stocks" : 4,
       "flows" : 4,
-      "auxiliaries" : 36,
+      "variables" : 36,
       "parameters" : 29
     }
   }, {
@@ -248,7 +248,7 @@
     "elements" : {
       "stocks" : 1,
       "flows" : 1,
-      "auxiliaries" : 0,
+      "variables" : 0,
       "parameters" : 2
     }
   }, {
@@ -262,7 +262,7 @@
     "elements" : {
       "stocks" : 4,
       "flows" : 4,
-      "auxiliaries" : 30,
+      "variables" : 30,
       "parameters" : 13
     }
   }, {
@@ -276,7 +276,7 @@
     "elements" : {
       "stocks" : 4,
       "flows" : 4,
-      "auxiliaries" : 21,
+      "variables" : 21,
       "parameters" : 11
     }
   }, {
@@ -290,7 +290,7 @@
     "elements" : {
       "stocks" : 2,
       "flows" : 3,
-      "auxiliaries" : 4,
+      "variables" : 4,
       "parameters" : 6
     }
   }, {
@@ -304,7 +304,7 @@
     "elements" : {
       "stocks" : 1,
       "flows" : 1,
-      "auxiliaries" : 4,
+      "variables" : 4,
       "parameters" : 4
     }
   }, {
@@ -318,7 +318,7 @@
     "elements" : {
       "stocks" : 3,
       "flows" : 3,
-      "auxiliaries" : 25,
+      "variables" : 25,
       "parameters" : 19
     }
   }, {
@@ -332,7 +332,7 @@
     "elements" : {
       "stocks" : 2,
       "flows" : 2,
-      "auxiliaries" : 8,
+      "variables" : 8,
       "parameters" : 7
     }
   }, {
@@ -346,7 +346,7 @@
     "elements" : {
       "stocks" : 2,
       "flows" : 2,
-      "auxiliaries" : 6,
+      "variables" : 6,
       "parameters" : 2
     }
   }, {
@@ -360,7 +360,7 @@
     "elements" : {
       "stocks" : 1,
       "flows" : 1,
-      "auxiliaries" : 3,
+      "variables" : 3,
       "parameters" : 5
     }
   }, {
@@ -374,7 +374,7 @@
     "elements" : {
       "stocks" : 4,
       "flows" : 4,
-      "auxiliaries" : 10,
+      "variables" : 10,
       "parameters" : 1
     }
   }, {
@@ -388,7 +388,7 @@
     "elements" : {
       "stocks" : 5,
       "flows" : 5,
-      "auxiliaries" : 20,
+      "variables" : 20,
       "parameters" : 9
     }
   }, {
@@ -402,7 +402,7 @@
     "elements" : {
       "stocks" : 2,
       "flows" : 4,
-      "auxiliaries" : 0,
+      "variables" : 0,
       "parameters" : 4
     }
   }, {
@@ -416,7 +416,7 @@
     "elements" : {
       "stocks" : 4,
       "flows" : 4,
-      "auxiliaries" : 18,
+      "variables" : 18,
       "parameters" : 11
     }
   }, {
@@ -430,7 +430,7 @@
     "elements" : {
       "stocks" : 1,
       "flows" : 1,
-      "auxiliaries" : 0,
+      "variables" : 0,
       "parameters" : 2
     }
   }, {
@@ -444,7 +444,7 @@
     "elements" : {
       "stocks" : 3,
       "flows" : 2,
-      "auxiliaries" : 0,
+      "variables" : 0,
       "parameters" : 3
     }
   }, {
@@ -458,7 +458,7 @@
     "elements" : {
       "stocks" : 2,
       "flows" : 2,
-      "auxiliaries" : 7,
+      "variables" : 7,
       "parameters" : 4
     }
   } ]

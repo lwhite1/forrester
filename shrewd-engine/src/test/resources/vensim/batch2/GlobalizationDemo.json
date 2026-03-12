@@ -56,7 +56,7 @@
       "sink": "standards_0"
     }
   ],
-  "auxiliaries": [
+  "variables": [
     {
       "name": "progress_function",
       "comment": "progress function",

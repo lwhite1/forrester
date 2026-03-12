@@ -33,7 +33,7 @@
       "sink": "Cars on Lot"
     }
   ],
-  "auxiliaries": [
+  "variables": [
     {
       "name": "Customer Demand",
       "equation": "IF(TIME > 25, Step_Demand, Base_Demand)",

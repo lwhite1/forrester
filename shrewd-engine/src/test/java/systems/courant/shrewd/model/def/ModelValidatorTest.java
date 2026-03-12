@@ -132,7 +132,7 @@ class ModelValidatorTest {
             ModelDefinition def = new ModelDefinitionBuilder()
                     .name("NoUnit")
                     .stock("S", 100, "Person")
-                    .aux("A", "S * 2", "  ")
+                    .variable("A", "S * 2", "  ")
                     .build();
 
             ValidationResult result = ModelValidator.validate(def);
@@ -168,8 +168,8 @@ class ModelValidatorTest {
             // A = B * 2, B = A + 1 — circular without a stock
             ModelDefinition def = new ModelDefinitionBuilder()
                     .name("Loop")
-                    .aux("A", "B * 2", "X")
-                    .aux("B", "A + 1", "X")
+                    .variable("A", "B * 2", "X")
+                    .variable("B", "A + 1", "X")
                     .build();
 
             ValidationResult result = ModelValidator.validate(def);
@@ -184,9 +184,9 @@ class ModelValidatorTest {
             // C has an unparseable equation, but A↔B loop should still be detected
             ModelDefinition def = new ModelDefinitionBuilder()
                     .name("PartialParse")
-                    .aux("A", "B * 2", "X")
-                    .aux("B", "A + 1", "X")
-                    .aux("C", "??? totally invalid", "X")
+                    .variable("A", "B * 2", "X")
+                    .variable("B", "A + 1", "X")
+                    .variable("C", "??? totally invalid", "X")
                     .build();
 
             ValidationResult result = ModelValidator.validate(def);
@@ -306,7 +306,7 @@ class ModelValidatorTest {
             ModelDefinition def = new ModelDefinitionBuilder()
                     .name("Used")
                     .stock("S", 100, "Person")
-                    .aux("Rate", "K * 2", "1/Day")
+                    .variable("Rate", "K * 2", "1/Day")
                     .flow("F", "S * Rate", "Day", "S", null)
                     .constant("K", 0.05, "1/Day")
                     .build();
@@ -375,7 +375,7 @@ class ModelValidatorTest {
             ModelDefinition def = new ModelDefinitionBuilder()
                     .name("Dangling")
                     .stock("Population", 1000, "Person")
-                    .aux("effect", "42", "Dimensionless")
+                    .variable("effect", "42", "Dimensionless")
                     .view(new ViewDef("main", List.of(),
                             List.of(new ConnectorRoute("Population", "effect")),
                             List.of()))
@@ -395,7 +395,7 @@ class ModelValidatorTest {
             ModelDefinition def = new ModelDefinitionBuilder()
                     .name("Valid")
                     .stock("Population", 1000, "Person")
-                    .aux("effect", "Population * 0.5", "Person")
+                    .variable("effect", "Population * 0.5", "Person")
                     .view(new ViewDef("main", List.of(),
                             List.of(new ConnectorRoute("Population", "effect")),
                             List.of()))
@@ -413,7 +413,7 @@ class ModelValidatorTest {
             ModelDefinition def = new ModelDefinitionBuilder()
                     .name("ToStock")
                     .stock("S", 100, "Person")
-                    .aux("A", "10", "Person")
+                    .variable("A", "10", "Person")
                     .view(new ViewDef("main", List.of(),
                             List.of(new ConnectorRoute("A", "S")),
                             List.of()))
@@ -430,7 +430,7 @@ class ModelValidatorTest {
             ModelDefinition def = new ModelDefinitionBuilder()
                     .name("Underscore")
                     .stock("birth rate", 0.03, "1/Year")
-                    .aux("effect", "birth_rate * 2", "1/Year")
+                    .variable("effect", "birth_rate * 2", "1/Year")
                     .view(new ViewDef("main", List.of(),
                             List.of(new ConnectorRoute("birth rate", "effect")),
                             List.of()))
@@ -545,7 +545,7 @@ class ModelValidatorTest {
             ModelDefinition def = new ModelDefinitionBuilder()
                     .name("SF Link")
                     .stock("S", 100, "Person")
-                    .aux("A", "S * 2", "Person")
+                    .variable("A", "S * 2", "Person")
                     .causalLink("S", "A", Polarity.POSITIVE)
                     .build();
 

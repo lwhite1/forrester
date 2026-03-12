@@ -31,7 +31,7 @@
       "sink": "Workforce"
     }
   ],
-  "auxiliaries": [
+  "variables": [
     {
       "name": "target inventory",
       "comment": "target inventory",

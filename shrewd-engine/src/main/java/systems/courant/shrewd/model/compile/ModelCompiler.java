@@ -11,7 +11,7 @@ import systems.courant.shrewd.model.Module;
 import systems.courant.shrewd.model.NegativeValuePolicy;
 import systems.courant.shrewd.model.Stock;
 import systems.courant.shrewd.model.Variable;
-import systems.courant.shrewd.model.def.AuxDef;
+import systems.courant.shrewd.model.def.VariableDef;
 import systems.courant.shrewd.model.def.DefinitionValidator;
 import systems.courant.shrewd.model.def.FlowDef;
 import systems.courant.shrewd.model.def.LookupTableDef;
@@ -82,7 +82,7 @@ public class ModelCompiler {
                     def.name() != null ? def.name() : "");
         }
 
-        // Detect algebraic loops (cycles among auxiliary variables) and warn.
+        // Detect algebraic loops (cycles among variables) and warn.
         // Cycles are handled at runtime by Variable's re-entrancy guard, which
         // returns the previous timestep's value to break the loop.
         DependencyGraph depGraph = DependencyGraph.fromDefinition(def);
@@ -130,9 +130,9 @@ public class ModelCompiler {
 
         buildLookupTables(def, context);
 
-        // Auxiliaries — use DoubleSupplier[] holders for indirection
+        // Variables — use DoubleSupplier[] holders for indirection
         List<DoubleSupplier[]> auxHolders = new ArrayList<>();
-        for (AuxDef aDef : def.auxiliaries()) {
+        for (VariableDef aDef : def.variables()) {
             if (aDef.isLiteral()) {
                 context.addLiteralConstant(aDef.name(), aDef.literalValue());
             }
@@ -196,9 +196,9 @@ public class ModelCompiler {
 
         buildLookupTables(innerDef, moduleContext);
 
-        // Auxiliaries with holder indirection
+        // Variables with holder indirection
         List<DoubleSupplier[]> auxHolders = new ArrayList<>();
-        for (AuxDef aDef : innerDef.auxiliaries()) {
+        for (VariableDef aDef : innerDef.variables()) {
             if (aDef.isLiteral()) {
                 moduleContext.addLiteralConstant(aDef.name(), aDef.literalValue());
             }
@@ -337,8 +337,8 @@ public class ModelCompiler {
                                  List<DoubleSupplier[]> auxHolders,
                                  List<DoubleSupplier[]> flowHolders) {
         ExprCompiler exprCompiler = new ExprCompiler(context, resettables);
-        for (int i = 0; i < def.auxiliaries().size(); i++) {
-            AuxDef aDef = def.auxiliaries().get(i);
+        for (int i = 0; i < def.variables().size(); i++) {
+            VariableDef aDef = def.variables().get(i);
             DoubleSupplier compiled = exprCompiler.compileExpr(
                     ExprParser.parse(aDef.equation()));
             auxHolders.get(i)[0] = compiled;

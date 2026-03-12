@@ -60,7 +60,7 @@
       "source": "Backlog"
     }
   ],
-  "auxiliaries": [
+  "variables": [
     {
       "name": "customer_demand",
       "comment": "Base customer demand with a step increase at week 5",

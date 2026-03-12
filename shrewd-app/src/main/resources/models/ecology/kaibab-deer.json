@@ -17,7 +17,7 @@
       "sink": "Deer Population"
     }
   ],
-  "auxiliaries": [
+  "variables": [
     {
       "name": "Deer Killed per Predator",
       "comment": "When density is equal to 0, the deer killed are 0. Point (0.0). When the  Deer Density is equal to the Initial Deer Density each predator hunts 2  deer each year. Point (1,2).",

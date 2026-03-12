@@ -1,6 +1,6 @@
 package systems.courant.shrewd.model.graph;
 
-import systems.courant.shrewd.model.def.AuxDef;
+import systems.courant.shrewd.model.def.VariableDef;
 import systems.courant.shrewd.model.def.CldVariableDef;
 import systems.courant.shrewd.model.def.ConnectorRoute;
 import systems.courant.shrewd.model.def.ElementPlacement;
@@ -95,7 +95,7 @@ public final class ViewValidator {
         for (FlowDef f : def.flows()) {
             names.add(f.name());
         }
-        for (AuxDef a : def.auxiliaries()) {
+        for (VariableDef a : def.variables()) {
             names.add(a.name());
         }
         for (LookupTableDef t : def.lookupTables()) {

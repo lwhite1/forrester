@@ -69,7 +69,7 @@
       "sink": "animal distress"
     }
   ],
-  "auxiliaries": [
+  "variables": [
     {
       "name": "visibility of the problem",
       "comment": "visibility of the problem",
@@ -78,13 +78,13 @@
     },
     {
       "name": "frustration of convinced citizens",
-      "comment": "OLD: min(MAX(frustration due to marginalization*frustration due to  inertia*average degree of conviction of convinced citizens*percived  magnitude of the problem,0),1)",
+      "comment": "frustration of convinced citizens",
       "equation": "min(MAX((frustration_due_to_marginalization+frustration_due_to_inertia)*perceived_animal_distress ,0),1)",
       "unit": "Dmnl"
     },
     {
       "name": "nonradical action level",
-      "comment": "OLD: (1-frustration of convinced citizens)*\"total readiness to take  non-radical action\"*(homegrown activists+convinced citizens)/total  population",
+      "comment": "nonradical action level",
       "equation": "frustration_of_convinced_citizens",
       "unit": "Dmnl"
     },
@@ -96,7 +96,7 @@
     },
     {
       "name": "radical action level",
-      "comment": "EXPRESSED IN TOTALLY FRUSTRATED CITIZENS TAKING RADICAL ACTION",
+      "comment": "radical action level",
       "equation": "frustration_of_convinced_citizens*extremists*fraction_of_convinced_citizens",
       "unit": "citizens"
     },
@@ -108,7 +108,7 @@
     },
     {
       "name": "persuasion",
-      "comment": "min(dedicated contact rate of convinced citizens*fraction of convinced  citizens*unconvinced citizens*\"persuasiveness of non-radical actions\"  *visibility of the problem/\"strength of incompatible  self-interest\"/average time to change states,unconvinced citizens/average  time to change states)",
+      "comment": "persuasion",
       "equation": "min(contact_rate_of_convinced_citizens*fraction_of_convinced_citizens*unconvinced_citizens *persuasiveness_of_nonradical_actions *visibility_of_the_problem/strength_of_incompatible_selfinterest /average_time_to_change_states,unconvinced_citizens/average_time_to_change_states)",
       "unit": "citizens/Year"
     },
@@ -120,7 +120,7 @@
     },
     {
       "name": "contact rate of convinced citizens",
-      "comment": "DIFFERENT FORMULATION",
+      "comment": "contact rate of convinced citizens",
       "equation": "min(normal_contact_rate_of_convinced_citizens*nonradical_action_level,3650)",
       "unit": "contacts/(citizen)"
     },
@@ -168,7 +168,7 @@
     },
     {
       "name": "societal acceptation threshold with regard to animal distress",
-      "comment": "60",
+      "comment": "societal acceptation threshold with regard to animal distress",
       "equation": "LOOKUP(societal_acceptation_threshold_with_regard_to_animal_distress_lookup, TIME)",
       "unit": "Dmnl"
     },
@@ -232,7 +232,7 @@
     {
       "name": "persuasiveness of nonradical actions",
       "equation": "0.01",
-      "comment": "OLD: \"non-radical action level\"*normal persuasiveness",
+      "comment": "persuasiveness of nonradical actions",
       "unit": "citizens/contacts"
     },
     {
@@ -280,7 +280,7 @@
     {
       "name": "strength of incompatible selfinterest",
       "equation": "10",
-      "comment": "\"strength of incompatible self-interest\"",
+      "comment": "strength of incompatible selfinterest",
       "unit": "Dmnl"
     }
   ],

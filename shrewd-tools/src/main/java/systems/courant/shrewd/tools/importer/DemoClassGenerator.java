@@ -1,7 +1,7 @@
 package systems.courant.shrewd.tools.importer;
 
 import systems.courant.shrewd.model.ModelMetadata;
-import systems.courant.shrewd.model.def.AuxDef;
+import systems.courant.shrewd.model.def.VariableDef;
 import systems.courant.shrewd.model.def.FlowDef;
 import systems.courant.shrewd.model.def.LookupTableDef;
 import systems.courant.shrewd.model.def.ModelDefinition;
@@ -81,8 +81,8 @@ public class DemoClassGenerator {
         sb.append("import systems.courant.shrewd.model.compile.ModelCompiler;\n");
         sb.append("import systems.courant.shrewd.model.def.ModelDefinitionBuilder;\n");
 
-        if (!definition.auxiliaries().isEmpty()) {
-            sb.append("import systems.courant.shrewd.model.def.AuxDef;\n");
+        if (!definition.variables().isEmpty()) {
+            sb.append("import systems.courant.shrewd.model.def.VariableDef;\n");
         }
         if (!definition.flows().isEmpty()) {
             sb.append("import systems.courant.shrewd.model.def.FlowDef;\n");
@@ -190,12 +190,12 @@ public class DemoClassGenerator {
             sb.append('\n');
         }
 
-        // Constants (literal-valued auxiliaries)
-        List<AuxDef> literals = definition.auxiliaries().stream()
-                .filter(AuxDef::isLiteral).toList();
+        // Constants (literal-valued variables)
+        List<VariableDef> literals = definition.variables().stream()
+                .filter(VariableDef::isLiteral).toList();
         if (!literals.isEmpty()) {
             sb.append(INDENT).append("// Constants\n");
-            for (AuxDef constant : literals) {
+            for (VariableDef constant : literals) {
                 sb.append(INDENT).append("builder.constant(")
                         .append(escapeString(constant.name())).append(", ")
                         .append(constant.literalValue()).append(", ")
@@ -220,17 +220,17 @@ public class DemoClassGenerator {
             sb.append('\n');
         }
 
-        // Auxiliaries (non-literal only; literals were emitted as constants above)
-        List<AuxDef> formulas = definition.auxiliaries().stream()
+        // Variables (non-literal only; literals were emitted as constants above)
+        List<VariableDef> formulas = definition.variables().stream()
                 .filter(a -> !a.isLiteral()).toList();
         if (!formulas.isEmpty()) {
-            sb.append(INDENT).append("// Auxiliaries\n");
-            for (AuxDef aux : formulas) {
-                sb.append(INDENT).append("builder.aux(new AuxDef(")
-                        .append(escapeString(aux.name())).append(", ")
-                        .append(escapeString(aux.comment())).append(", ")
-                        .append(escapeString(aux.equation())).append(", ")
-                        .append(escapeString(aux.unit()))
+            sb.append(INDENT).append("// Variables\n");
+            for (VariableDef v : formulas) {
+                sb.append(INDENT).append("builder.variable(new VariableDef(")
+                        .append(escapeString(v.name())).append(", ")
+                        .append(escapeString(v.comment())).append(", ")
+                        .append(escapeString(v.equation())).append(", ")
+                        .append(escapeString(v.unit()))
                         .append("));\n");
             }
             sb.append('\n');
@@ -318,7 +318,7 @@ public class DemoClassGenerator {
                     .append(escapeString(stock.negativeValuePolicy()))
                     .append("));\n");
         }
-        for (AuxDef constant : inner.auxiliaries().stream().filter(AuxDef::isLiteral).toList()) {
+        for (VariableDef constant : inner.variables().stream().filter(VariableDef::isLiteral).toList()) {
             sb.append(INDENT).append("    innerBuilder.constant(")
                     .append(escapeString(constant.name())).append(", ")
                     .append(constant.literalValue()).append(", ")
@@ -334,12 +334,12 @@ public class DemoClassGenerator {
                     .append(escapeString(table.interpolation()))
                     .append("));\n");
         }
-        for (AuxDef aux : inner.auxiliaries().stream().filter(a -> !a.isLiteral()).toList()) {
-            sb.append(INDENT).append("    innerBuilder.aux(new AuxDef(")
-                    .append(escapeString(aux.name())).append(", ")
-                    .append(escapeString(aux.comment())).append(", ")
-                    .append(escapeString(aux.equation())).append(", ")
-                    .append(escapeString(aux.unit()))
+        for (VariableDef v : inner.variables().stream().filter(a -> !a.isLiteral()).toList()) {
+            sb.append(INDENT).append("    innerBuilder.variable(new VariableDef(")
+                    .append(escapeString(v.name())).append(", ")
+                    .append(escapeString(v.comment())).append(", ")
+                    .append(escapeString(v.equation())).append(", ")
+                    .append(escapeString(v.unit()))
                     .append("));\n");
         }
         for (FlowDef flow : inner.flows()) {

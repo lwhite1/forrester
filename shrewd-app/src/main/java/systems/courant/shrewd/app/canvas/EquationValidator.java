@@ -98,7 +98,7 @@ final class EquationValidator {
         Set<String> names = new HashSet<>();
         editor.getStocks().forEach(s -> names.add(s.name()));
         editor.getFlows().forEach(f -> names.add(f.name()));
-        editor.getAuxiliaries().forEach(a -> names.add(a.name()));
+        editor.getVariables().forEach(a -> names.add(a.name()));
         editor.getLookupTables().forEach(t -> names.add(t.name()));
         editor.getModules().forEach(m -> {
             names.add(m.instanceName());

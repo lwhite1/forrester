@@ -30,7 +30,7 @@
       "sink": "professors"
     }
   ],
-  "auxiliaries": [
+  "variables": [
     {
       "name": "desired number of professors",
       "comment": "desired number of professors",

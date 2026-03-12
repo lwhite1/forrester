@@ -258,7 +258,7 @@ public final class EquationAutoComplete {
                 AutoCompleteSuggestion.Kind.STOCK, excludeUnderscore);
         addElementSuggestions(result, editor.getFlows(), f -> f.name(),
                 AutoCompleteSuggestion.Kind.FLOW, excludeUnderscore);
-        addElementSuggestions(result, editor.getAuxiliaries(), a -> a.name(),
+        addElementSuggestions(result, editor.getVariables(), a -> a.name(),
                 AutoCompleteSuggestion.Kind.AUX, excludeUnderscore);
         addElementSuggestions(result, editor.getLookupTables(), l -> l.name(),
                 AutoCompleteSuggestion.Kind.LOOKUP, excludeUnderscore);

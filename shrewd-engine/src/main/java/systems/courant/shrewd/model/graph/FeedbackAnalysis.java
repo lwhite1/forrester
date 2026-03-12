@@ -1,6 +1,6 @@
 package systems.courant.shrewd.model.graph;
 
-import systems.courant.shrewd.model.def.AuxDef;
+import systems.courant.shrewd.model.def.VariableDef;
 import systems.courant.shrewd.model.def.CausalLinkDef;
 import systems.courant.shrewd.model.def.FlowDef;
 import systems.courant.shrewd.model.def.LookupTableDef;
@@ -109,7 +109,7 @@ public record FeedbackAnalysis(
      * <ol>
      *   <li>Build a stock-to-stock causal graph: an edge from stock X to stock Y
      *       exists when a flow that affects Y has an equation that depends on X
-     *       (directly or transitively through auxiliaries), and X &ne; Y.</li>
+     *       (directly or transitively through variables), and X &ne; Y.</li>
      *   <li>Find strongly connected components (SCCs) of size &ge; 2 using
      *       Tarjan's algorithm.</li>
      *   <li>Identify participating flows and build the full participant/edge sets.</li>
@@ -423,9 +423,9 @@ public record FeedbackAnalysis(
             return Collections.emptyList();
         }
 
-        // Collect auxiliary equations for transitive resolution
+        // Collect variable equations for transitive resolution
         Map<String, String> auxEquations = new LinkedHashMap<>();
-        for (AuxDef a : def.auxiliaries()) {
+        for (VariableDef a : def.variables()) {
             auxEquations.put(a.name(), a.equation());
         }
 
@@ -536,7 +536,7 @@ public record FeedbackAnalysis(
 
         // Report each SCC as a single feedback group rather than enumerating
         // individual elementary cycles. Dense stock-to-stock graphs (common when
-        // auxiliaries like "total_population" reference all stocks) can produce
+        // variables like "total_population" reference all stocks) can produce
         // hundreds of cycles that are unhelpful for users. One group per SCC
         // provides a clearer summary of feedback structure.
         List<CausalLoop> sfGroups = new ArrayList<>();
@@ -721,7 +721,7 @@ public record FeedbackAnalysis(
 
     /**
      * Resolves an equation's references to find all stocks that transitively
-     * influence it (following auxiliary chains but stopping at stocks).
+     * influence it (following variable chains but stopping at stocks).
      */
     private static Set<String> resolveStockDeps(String equation,
             Set<String> stockNames, Map<String, String> auxEquations,
@@ -755,7 +755,7 @@ public record FeedbackAnalysis(
                             ExprParser.parse(auxEquations.get(resolved)));
                     queue.addAll(auxRefs);
                 } catch (ParseException ex) {
-                    log.debug("Skip unparseable auxiliary '{}': {}", resolved, ex.getMessage(), ex);
+                    log.debug("Skip unparseable variable '{}': {}", resolved, ex.getMessage(), ex);
                 }
             }
         }

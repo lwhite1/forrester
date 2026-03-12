@@ -95,7 +95,7 @@
       "sink": "unexploited_lithium_reserves"
     }
   ],
-  "auxiliaries": [
+  "variables": [
     {
       "name": "EV_batteries_needed",
       "comment": "EV batteries needed",

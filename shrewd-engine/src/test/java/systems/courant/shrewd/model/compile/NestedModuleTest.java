@@ -65,7 +65,7 @@ class NestedModuleTest {
                         List.of(),
                         List.of(new PortDef("output", "Thing"))))
                 .stock("Value", 50, "Thing")
-                .aux("output", "Value * 2", "Thing")
+                .variable("output", "Value * 2", "Thing")
                 .build();
 
         ModelDefinition outer = new ModelDefinitionBuilder()

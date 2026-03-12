@@ -105,10 +105,10 @@ public final class HitTester {
     /**
      * Returns the name of the element at the given world coordinates,
      * or null if no element is hit. Tests in reverse draw order.
-     * When {@code hideAuxiliaries} is true, auxiliary elements are skipped.
+     * When {@code hideVariables} is true, auxiliary elements are skipped.
      */
     public static String hitTest(CanvasState state, double worldX, double worldY,
-                                 boolean hideAuxiliaries) {
+                                 boolean hideVariables) {
         List<String> drawOrder = state.getDrawOrder();
 
         for (int i = drawOrder.size() - 1; i >= 0; i--) {
@@ -121,7 +121,7 @@ public final class HitTester {
                 continue;
             }
 
-            if (hideAuxiliaries && type == ElementType.AUX) {
+            if (hideVariables && type == ElementType.AUX) {
                 continue;
             }
 
@@ -156,13 +156,13 @@ public final class HitTester {
 
     /**
      * Returns the ConnectionId of the info link at the given world coordinates,
-     * or null if no connection is hit. When {@code hideAuxiliaries} is true,
+     * or null if no connection is hit. When {@code hideVariables} is true,
      * connections involving auxiliary elements are skipped.
      */
     public static ConnectionId hitTestInfoLink(CanvasState state,
                                                List<ConnectorRoute> connectors,
                                                double worldX, double worldY,
-                                               boolean hideAuxiliaries) {
+                                               boolean hideVariables) {
         for (int i = connectors.size() - 1; i >= 0; i--) {
             ConnectorRoute route = connectors.get(i);
             String fromName = route.from();
@@ -171,7 +171,7 @@ public final class HitTester {
             if (!state.hasElement(fromName) || !state.hasElement(toName)) {
                 continue;
             }
-            if (hideAuxiliaries
+            if (hideVariables
                     && (state.getType(fromName).orElse(null) == ElementType.AUX
                             || state.getType(toName).orElse(null) == ElementType.AUX)) {
                 continue;
@@ -209,13 +209,13 @@ public final class HitTester {
 
     /**
      * Returns the ConnectionId of the causal link at the given world coordinates,
-     * or null if no causal link is hit. When {@code hideAuxiliaries} is true,
+     * or null if no causal link is hit. When {@code hideVariables} is true,
      * links involving auxiliary elements are skipped.
      */
     public static ConnectionId hitTestCausalLink(CanvasState state,
                                                   List<CausalLinkDef> causalLinks,
                                                   double worldX, double worldY,
-                                                  boolean hideAuxiliaries) {
+                                                  boolean hideVariables) {
         for (int i = causalLinks.size() - 1; i >= 0; i--) {
             CausalLinkDef link = causalLinks.get(i);
             String fromName = link.from();
@@ -224,7 +224,7 @@ public final class HitTester {
             if (!state.hasElement(fromName) || !state.hasElement(toName)) {
                 continue;
             }
-            if (hideAuxiliaries
+            if (hideVariables
                     && (state.getType(fromName).orElse(null) == ElementType.AUX
                             || state.getType(toName).orElse(null) == ElementType.AUX)) {
                 continue;

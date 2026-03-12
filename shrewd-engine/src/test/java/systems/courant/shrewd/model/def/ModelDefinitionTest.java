@@ -64,17 +64,17 @@ class ModelDefinitionTest {
     }
 
     @Test
-    void shouldCreateLiteralAuxDef() {
-        AuxDef c = new AuxDef("Rate", null, 0.5, "Dimensionless");
+    void shouldCreateLiteralVariableDef() {
+        VariableDef c = new VariableDef("Rate", null, 0.5, "Dimensionless");
         assertThat(c.name()).isEqualTo("Rate");
         assertThat(c.literalValue()).isEqualTo(0.5);
     }
 
     @Test
-    void shouldCreateAuxDef() {
-        AuxDef aux = new AuxDef("Infection Rate", "Contact_Rate * Infectivity", "Person");
-        assertThat(aux.name()).isEqualTo("Infection Rate");
-        assertThat(aux.equation()).isEqualTo("Contact_Rate * Infectivity");
+    void shouldCreateVariableDef() {
+        VariableDef v = new VariableDef("Infection Rate", "Contact_Rate * Infectivity", "Person");
+        assertThat(v.name()).isEqualTo("Infection Rate");
+        assertThat(v.equation()).isEqualTo("Contact_Rate * Infectivity");
     }
 
     @Test
@@ -148,7 +148,7 @@ class ModelDefinitionTest {
                     "Original", "A comment", null,
                     List.of(new StockDef("Pop", 1000, "People")),
                     List.of(new FlowDef("Births", "Pop * br", "Year", null, "Pop")),
-                    List.of(new AuxDef("br", null, 0.03, "1/Year")),
+                    List.of(new VariableDef("br", null, 0.03, "1/Year")),
                     List.of(), List.of(), List.of(),
                     List.of(), List.of(), List.of(),
                     new SimulationSettings("Year", 100, "Year"),
@@ -198,15 +198,15 @@ class ModelDefinitionTest {
         }
 
         @Test
-        void shouldClearAndReplaceAuxiliaries() {
+        void shouldClearAndReplaceVariables() {
             ModelDefinition original = buildFullDefinition();
-            AuxDef newAux = new AuxDef("gamma", "0.1", "1/Year");
+            VariableDef newVar = new VariableDef("gamma", "0.1", "1/Year");
             ModelDefinition modified = original.toBuilder()
-                    .clearAuxiliaries()
-                    .aux(newAux)
+                    .clearVariables()
+                    .variable(newVar)
                     .build();
 
-            assertThat(modified.auxiliaries()).containsExactly(newAux);
+            assertThat(modified.variables()).containsExactly(newVar);
             assertThat(modified.stocks()).isEqualTo(original.stocks());
         }
 

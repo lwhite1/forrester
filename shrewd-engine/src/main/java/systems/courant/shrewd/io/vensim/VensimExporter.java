@@ -1,7 +1,7 @@
 package systems.courant.shrewd.io.vensim;
 
 import systems.courant.shrewd.io.FormatUtils;
-import systems.courant.shrewd.model.def.AuxDef;
+import systems.courant.shrewd.model.def.VariableDef;
 import systems.courant.shrewd.model.def.CldVariableDef;
 import systems.courant.shrewd.model.def.ConnectorRoute;
 import systems.courant.shrewd.model.def.ElementPlacement;
@@ -81,7 +81,7 @@ public final class VensimExporter {
         StringBuilder sb = new StringBuilder();
         sb.append("{UTF-8}\n");
 
-        // Collect lookup names referenced by auxiliaries (embedded as WITH LOOKUP)
+        // Collect lookup names referenced by variables (embedded as WITH LOOKUP)
         Set<String> embeddedLookupNames = collectEmbeddedLookupNames(def);
 
         // Collect synthetic _net_flow names whose equations will be inlined into INTEG
@@ -104,9 +104,9 @@ public final class VensimExporter {
             }
         }
 
-        // Write auxiliaries
-        for (AuxDef aux : def.auxiliaries()) {
-            sb.append(buildAuxBlock(aux, def, embeddedLookupNames));
+        // Write variables
+        for (VariableDef v : def.variables()) {
+            sb.append(buildVariableBlock(v, def, embeddedLookupNames));
         }
 
         // Write standalone lookup tables
@@ -215,34 +215,34 @@ public final class VensimExporter {
         return buildBlock(vensimName, "=", equation, units, comment);
     }
 
-    private static String buildAuxBlock(AuxDef aux, ModelDefinition def,
+    private static String buildVariableBlock(VariableDef v, ModelDefinition def,
                                          Set<String> embeddedLookupNames) {
-        String vensimName = denormalizeName(aux.name())
-                + formatSubscriptSuffix(aux.subscripts());
+        String vensimName = denormalizeName(v.name())
+                + formatSubscriptSuffix(v.subscripts());
 
-        // Check if this aux is a simple LOOKUP(name, input) — convert to WITH LOOKUP
-        Optional<String> lookupNameOpt = extractLookupReference(aux.equation());
+        // Check if this variable is a simple LOOKUP(name, input) — convert to WITH LOOKUP
+        Optional<String> lookupNameOpt = extractLookupReference(v.equation());
         if (lookupNameOpt.isPresent()) {
             Optional<LookupTableDef> lookupOpt = findLookup(def, lookupNameOpt.get());
             if (lookupOpt.isPresent()) {
-                Optional<String> inputExprOpt = extractLookupInput(aux.equation());
+                Optional<String> inputExprOpt = extractLookupInput(v.equation());
                 if (inputExprOpt.isPresent()) {
                     String vensimInput = toVensimExpr(inputExprOpt.get());
                     String lookupData = formatLookupData(lookupOpt.get());
                     String equation = "WITH LOOKUP (\n\t" + vensimInput
                             + ",\n\t\t(" + lookupData + "))";
-                    String units = aux.unit() != null ? aux.unit() : "";
-                    String comment = aux.comment() != null ? aux.comment() : "";
+                    String units = v.unit() != null ? v.unit() : "";
+                    String comment = v.comment() != null ? v.comment() : "";
                     return buildBlock(vensimName, "=", equation, units, comment);
                 }
             }
         }
 
         // Check for LOOKUP calls embedded in complex expressions
-        String equation = inlineLookupCalls(aux.equation(), def, embeddedLookupNames);
+        String equation = inlineLookupCalls(v.equation(), def, embeddedLookupNames);
         equation = toVensimExpr(equation);
-        String units = aux.unit() != null ? aux.unit() : "";
-        String comment = aux.comment() != null ? aux.comment() : "";
+        String units = v.unit() != null ? v.unit() : "";
+        String comment = v.comment() != null ? v.comment() : "";
         return buildBlock(vensimName, "=", equation, units, comment);
     }
 
@@ -761,8 +761,8 @@ public final class VensimExporter {
 
     private static Set<String> collectEmbeddedLookupNames(ModelDefinition def) {
         Set<String> names = new HashSet<>();
-        for (AuxDef aux : def.auxiliaries()) {
-            extractLookupReference(aux.equation()).ifPresent(names::add);
+        for (VariableDef v : def.variables()) {
+            extractLookupReference(v.equation()).ifPresent(names::add);
         }
         return names;
     }

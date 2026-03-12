@@ -68,7 +68,7 @@ final class CanvasContextMenuController {
     }
 
     /**
-     * Shows a context menu for a general element (stock, flow, auxiliary, constant, lookup).
+     * Shows a context menu for a general element (stock, flow, variable, constant, lookup).
      */
     void showGeneralElementContextMenu(Canvas canvas, String elementName,
                                        CanvasState canvasState, double screenX, double screenY,
@@ -204,10 +204,10 @@ final class CanvasContextMenuController {
         MenuItem addFlow = new MenuItem("Add Flow");
         addFlow.setOnAction(e -> callbacks.switchTool(CanvasToolBar.Tool.PLACE_FLOW));
 
-        MenuItem addAux = new MenuItem("Add Variable");
-        addAux.setOnAction(e -> {
+        MenuItem addVariable = new MenuItem("Add Variable");
+        addVariable.setOnAction(e -> {
             String name = callbacks.createElementAt(worldX, worldY,
-                    CanvasToolBar.Tool.PLACE_AUX);
+                    CanvasToolBar.Tool.PLACE_VARIABLE);
             if (name != null) {
                 callbacks.fireStatusChanged();
             }
@@ -222,7 +222,7 @@ final class CanvasContextMenuController {
             }
         });
 
-        menu.getItems().addAll(addStock, addFlow, addAux, new SeparatorMenuItem(), addComment);
+        menu.getItems().addAll(addStock, addFlow, addVariable, new SeparatorMenuItem(), addComment);
         menu.getItems().add(new SeparatorMenuItem());
 
         MenuItem selectAllItem = new MenuItem("Select All");

@@ -45,7 +45,7 @@
     "duration": 7300.0,
     "durationUnit": "Day"
   },
-  "auxiliaries": [
+  "variables": [
     {
       "name": "Prey Birth Rate",
       "equation": "1",

@@ -161,7 +161,7 @@
       "sink": "installed capacity T1"
     }
   ],
-  "auxiliaries": [
+  "variables": [
     {
       "name": "marginal cost new capacity previous year T3",
       "comment": "marginal cost new capacity previous year T3",
@@ -194,7 +194,7 @@
     },
     {
       "name": "desired fraction new capacity T3",
-      "comment": "MIN(1, MAX(0, 1-(desired fraction new capacity of technology 2 + desired  fraction new capacity of technology 3)))",
+      "comment": "desired fraction new capacity T3",
       "equation": "MIN(1, MAX(0, 1/marginal_cost_new_capacity_T3/(1/marginal_cost_new_capacity_T1+1/marginal_cost_new_capacity_T3 +1/marginal_cost_new_capacity_T2)))",
       "unit": "dmnl"
     },
@@ -242,7 +242,7 @@
     },
     {
       "name": "desired fraction new capacity T2",
-      "comment": "MIN(1, MAX(0, 1-(desired fraction new capacity of technology 2 + desired  fraction new capacity of technology 3)))",
+      "comment": "desired fraction new capacity T2",
       "equation": "MIN(1, MAX(0, 1/marginal_cost_new_capacity_T2/(1/marginal_cost_new_capacity_T1+1/marginal_cost_new_capacity_T2 +1/marginal_cost_new_capacity_T3)))",
       "unit": "dmnl"
     },
@@ -266,7 +266,7 @@
     },
     {
       "name": "desired fraction new capacity T1",
-      "comment": "MIN(1, MAX(0, 1-(desired fraction new capacity of technology 2 + desired  fraction new capacity of technology 3)))",
+      "comment": "desired fraction new capacity T1",
       "equation": "1-(desired_fraction_new_capacity_T2+desired_fraction_new_capacity_T3)",
       "unit": "dmnl"
     },
@@ -314,7 +314,7 @@
     },
     {
       "name": "expected new capacity to be installed",
-      "comment": "NOGAL VEREENVOUDIGD TOV REALITEIT",
+      "comment": "expected new capacity to be installed",
       "equation": "(expected_capacity_required - total_installed_capacity)/planning_period",
       "unit": "MW/YEAR"
     },

@@ -47,7 +47,7 @@ class SimulationRunnerTest {
                     .name("Test")
                     .stock("S", 100, "units")
                     .constant("Rate", 0.1, "units")
-                    .aux("Computed", "S * Rate", "units")
+                    .variable("Computed", "S * Rate", "units")
                     .build();
             SimulationSettings settings = new SimulationSettings("Day", 3, "Day");
 
@@ -97,7 +97,7 @@ class SimulationRunnerTest {
                     .name("Test")
                     .stock("S", 100, "units")
                     .constant("K", 2, "units")
-                    .aux("Double", "S * K", "units")
+                    .variable("Double", "S * K", "units")
                     .build();
             SimulationSettings settings = new SimulationSettings("Day", 1, "Day");
 

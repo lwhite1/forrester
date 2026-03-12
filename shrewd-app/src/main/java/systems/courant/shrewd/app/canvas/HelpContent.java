@@ -128,7 +128,7 @@ public final class HelpContent {
     private static TextFlow variableContent() {
         return new TextFlow(
                 bold("Variables"),
-                plain(" (auxiliaries, converters) are intermediate calculations used by flows or other "
+                plain(" (variables, converters) are intermediate calculations used by flows or other "
                         + "variables. They have no memory \u2014 they are purely algebraic functions.\n\n"),
                 bold("Parameters"),
                 plain(" are variables with a single numeric value. They represent assumptions or policy "

@@ -54,7 +54,7 @@ class SelectionControllerTest {
         @Test
         void shouldCreateAux() {
             String name = controller.createElementAt(150, 250,
-                    CanvasToolBar.Tool.PLACE_AUX, editor, canvasState,
+                    CanvasToolBar.Tool.PLACE_VARIABLE, editor, canvasState,
                     undoCount::incrementAndGet);
 
             assertThat(name).isNotNull();
@@ -151,7 +151,7 @@ class SelectionControllerTest {
             ModelDefinition def = new ModelDefinitionBuilder()
                     .name("Test")
                     .stock("Population", 100, "Person")
-                    .aux("rate", "0.1", "units")
+                    .variable("rate", "0.1", "units")
                     .build();
             editor.loadFrom(def);
             canvasState.addElement("Population", ElementType.STOCK, 100, 200);

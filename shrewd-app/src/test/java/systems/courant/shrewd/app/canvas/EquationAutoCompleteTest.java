@@ -132,7 +132,7 @@ class EquationAutoCompleteTest {
                     .name("Test")
                     .stock("Population", 1000, "people")
                     .flow("Birth Rate", "Population * 0.03", "year", null, "Population")
-                    .aux("Contact Rate", "5", "contacts/day")
+                    .variable("Contact Rate", "5", "contacts/day")
                     .constant("Growth Factor", 1.5, "dimensionless")
                     .build();
             editor.loadFrom(def);
@@ -180,7 +180,7 @@ class EquationAutoCompleteTest {
                     .stock("Population", 1000, "people")
                     .flow("Birth Rate", "Population * 0.03", "year", null, "Population")
                     .flow("Death Rate", "Population * 0.01", "year", "Population", null)
-                    .aux("Contact Rate", "5", "contacts/day")
+                    .variable("Contact Rate", "5", "contacts/day")
                     .constant("Growth Factor", 1.5, "dimensionless")
                     .build();
             editor.loadFrom(def2);

@@ -56,7 +56,7 @@
       "sink": "BSc_studenten"
     }
   ],
-  "auxiliaries": [
+  "variables": [
     {
       "name": "uitstroom_van_onderwijsgelden",
       "comment": "uitstroom van onderwijsgelden",

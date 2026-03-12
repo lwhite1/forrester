@@ -92,7 +92,7 @@ class FileRoundTripTest {
                             "Inventory", null))
                     .constant("desired_production", 50, "Widget/Month")
                     .constant("ship_rate", 0.1, "1/Month")
-                    .aux("net_flow", "desired_production - Inventory * ship_rate", "Widget/Month")
+                    .variable("net_flow", "desired_production - Inventory * ship_rate", "Widget/Month")
                     .lookupTable("effect_curve",
                             new double[]{0, 0.5, 1, 1.5, 2},
                             new double[]{0, 0.3, 1, 1.5, 1.8},
@@ -106,7 +106,7 @@ class FileRoundTripTest {
             assertThat(loaded.stocks()).hasSize(1);
             assertThat(loaded.flows()).hasSize(2);
             assertThat(loaded.parameters()).hasSize(2);
-            assertThat(loaded.auxiliaries()).hasSize(3); // 2 constants + 1 formula aux
+            assertThat(loaded.variables()).hasSize(3); // 2 constants + 1 formula aux
             assertThat(loaded.lookupTables()).hasSize(1);
             assertThat(loaded.defaultSimulation().timeStep()).isEqualTo("Month");
             assertThat(loaded.defaultSimulation().duration()).isEqualTo(120.0);

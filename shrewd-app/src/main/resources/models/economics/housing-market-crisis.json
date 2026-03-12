@@ -21,7 +21,7 @@
     },
     {
       "name": "old houses",
-      "comment": "schaarste...",
+      "comment": "old houses",
       "initialValue": 3600000.0,
       "unit": "houses"
     }
@@ -56,7 +56,7 @@
       "sink": "old houses"
     }
   ],
-  "auxiliaries": [
+  "variables": [
     {
       "name": "aging of houses",
       "comment": "aging of houses",
@@ -65,7 +65,7 @@
     },
     {
       "name": "average house prices",
-      "comment": "SMOOTH(average lending capacity per household*housing scarcity,10)",
+      "comment": "average house prices",
       "equation": "SMOOTH(average_house_spending_capacity_per_household*housing_scarcity_ratio,1)",
       "unit": "Euros"
     },
@@ -83,13 +83,13 @@
     },
     {
       "name": "construction of new houses",
-      "comment": "in planning and under construction/average planning and construction time",
+      "comment": "construction of new houses",
       "equation": "DELAY3I(in_planning_and_construction, normal_planning_and_construction_time, in_planning_and_under_construction /normal_planning_and_construction_time)",
       "unit": "houses/Year"
     },
     {
       "name": "demolition multiplicator",
-      "comment": "MAX(1,housing scarcity),3,MAX(1,housing scarcity)",
+      "comment": "demolition multiplicator",
       "equation": "DELAY_FIXED(\n\t1/housing_scarcity_ratio,1,1/housing_scarcity_ratio)",
       "unit": ""
     },
@@ -101,7 +101,7 @@
     },
     {
       "name": "expected effective workforce",
-      "comment": "2000, 2020, 2040 RC 7,5 7,5 6,6\n\t\tSE 7,5 8,1 7,9\n\t\tTM 7,5 8,1 7,6\n\t\tGE 7,5 8,7 9,0",
+      "comment": "expected effective workforce",
       "equation": "LOOKUP(expected_effective_workforce_lookup, TIME)",
       "unit": ""
     },
@@ -113,7 +113,7 @@
     },
     {
       "name": "in planning and construction",
-      "comment": "SMOOTH(profitable housing gap * (1 + MAX(profitability of new house  construction,0)),1)",
+      "comment": "in planning and construction",
       "equation": "housing_gap * profitability_multiplier",
       "unit": ""
     },
@@ -143,13 +143,13 @@
     },
     {
       "name": "profitability of new house construction",
-      "comment": "(((1+new house premium) * average house prices-total construction cost new houses)*  construction of new houses - capacity house construction sector\n\t\t*fixed costs construction sector)/ (total construction cost new houses *  construction of new houses + capacity house construction sector\n\t\t*fixed costs construction sector)",
+      "comment": "profitability of new house construction",
       "equation": "((1+new_house_premium)*average_house_prices-total_construction_cost_new_houses)/total_construction_cost_new_houses",
       "unit": "Dmnl"
     },
     {
       "name": "housing gap",
-      "comment": "IF THEN ELSE(profitability of new house construction>0,MAX(total demand  for houses-total supply of houses,0),0)",
+      "comment": "housing gap",
       "equation": "MAX(expected_households*houses_per_household-total_expected_supply_of_houses,0)",
       "unit": "houses"
     },
@@ -167,13 +167,13 @@
     },
     {
       "name": "total expected supply of houses",
-      "comment": "new houses+in planning and under construction+old houses-old  houses/average lifetime old houses                     2010: 7118344.  Bron:  http://www.z24.nl/z24geld/huizen_wonen/artikel_255353.z24/Huizenmarkt__feit en_en_cijfers.html",
+      "comment": "total expected supply of houses",
       "equation": "new_houses+in_planning_and_under_construction+old_houses-old_houses/average_lifetime_old_houses",
       "unit": "houses"
     },
     {
       "name": "expected households",
-      "comment": "Het aantal huishoudens op 1 januari 2011 bedroeg 7,47 miljoen en neemt  sterker toe dan de bevolkingsomvang. Dit wordt veroorzaakt door de sterke  toename van het aantal eenpersoonshuishoudens tot ruim 2,75 miljoen op 1  januari 2011.REF:  http://www.compendiumvoordeleefomgeving.nl/indicatoren/nl0001-Bevolkingsomv ang-en-huishoudens.html?i=15-12",
+      "comment": "expected households",
       "equation": "LOOKUP(expected_households_lookup, TIME)",
       "unit": "houses"
     },
@@ -201,7 +201,7 @@
     {
       "name": " 1985 construction cost new houses",
       "equation": "95000",
-      "comment": "\"1985 construction cost new houses\"",
+      "comment": " 1985 construction cost new houses",
       "unit": "Euros"
     },
     {

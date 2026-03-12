@@ -1,7 +1,7 @@
 package systems.courant.shrewd.app.canvas;
 
 import systems.courant.shrewd.model.ModelMetadata;
-import systems.courant.shrewd.model.def.AuxDef;
+import systems.courant.shrewd.model.def.VariableDef;
 import systems.courant.shrewd.model.def.FlowDef;
 import systems.courant.shrewd.model.def.LookupTableDef;
 import systems.courant.shrewd.model.def.ModelDefinition;
@@ -78,8 +78,8 @@ public final class ReportGenerator {
         if (sections.contains(Section.FLOWS) && !definition.flows().isEmpty()) {
             writeFlows(html, definition.flows());
         }
-        if (sections.contains(Section.VARIABLES) && !definition.auxiliaries().isEmpty()) {
-            writeVariables(html, definition.auxiliaries());
+        if (sections.contains(Section.VARIABLES) && !definition.variables().isEmpty()) {
+            writeVariables(html, definition.variables());
         }
         if (sections.contains(Section.LOOKUP_TABLES) && !definition.lookupTables().isEmpty()) {
             writeLookupTables(html, definition.lookupTables());
@@ -138,7 +138,7 @@ public final class ReportGenerator {
         }
         infoRow(html, "Stocks", String.valueOf(def.stocks().size()));
         infoRow(html, "Flows", String.valueOf(def.flows().size()));
-        infoRow(html, "Variables", String.valueOf(def.auxiliaries().size()));
+        infoRow(html, "Variables", String.valueOf(def.variables().size()));
         if (!def.lookupTables().isEmpty()) {
             infoRow(html, "Lookup Tables", String.valueOf(def.lookupTables().size()));
         }
@@ -211,10 +211,10 @@ public final class ReportGenerator {
         html.append("</section>\n\n");
     }
 
-    private static void writeVariables(StringBuilder html, List<AuxDef> auxiliaries) {
+    private static void writeVariables(StringBuilder html, List<VariableDef> variables) {
         // Split into constants (literal-valued) and computed variables
-        List<AuxDef> constants = auxiliaries.stream().filter(AuxDef::isLiteral).toList();
-        List<AuxDef> computed = auxiliaries.stream().filter(a -> !a.isLiteral()).toList();
+        List<VariableDef> constants = variables.stream().filter(VariableDef::isLiteral).toList();
+        List<VariableDef> computed = variables.stream().filter(a -> !a.isLiteral()).toList();
 
         if (!constants.isEmpty()) {
             html.append("<section>\n");
@@ -223,7 +223,7 @@ public final class ReportGenerator {
             html.append("<thead><tr><th>Name</th><th>Value</th><th>Unit</th>");
             html.append("<th>Comment</th></tr></thead>\n");
             html.append("<tbody>\n");
-            for (AuxDef a : constants) {
+            for (VariableDef a : constants) {
                 html.append("<tr>");
                 html.append("<td class=\"name\">").append(esc(a.name())).append("</td>");
                 html.append("<td class=\"code\">").append(esc(a.equation())).append("</td>");
@@ -242,7 +242,7 @@ public final class ReportGenerator {
             html.append("<thead><tr><th>Name</th><th>Equation</th><th>Unit</th>");
             html.append("<th>Comment</th></tr></thead>\n");
             html.append("<tbody>\n");
-            for (AuxDef a : computed) {
+            for (VariableDef a : computed) {
                 html.append("<tr>");
                 html.append("<td class=\"name\">").append(esc(a.name())).append("</td>");
                 html.append("<td class=\"code\">").append(esc(a.equation())).append("</td>");

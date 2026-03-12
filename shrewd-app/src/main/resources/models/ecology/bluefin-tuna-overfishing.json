@@ -30,7 +30,7 @@
       "sink": "Official Number of Tuna Ships"
     }
   ],
-  "auxiliaries": [
+  "variables": [
     {
       "name": "effect",
       "comment": "effect",

@@ -1,6 +1,6 @@
 package systems.courant.shrewd.app.canvas;
 
-import systems.courant.shrewd.model.def.AuxDef;
+import systems.courant.shrewd.model.def.VariableDef;
 import systems.courant.shrewd.model.def.FlowDef;
 import systems.courant.shrewd.model.expr.ExprParser;
 import systems.courant.shrewd.model.expr.ExprRenamer;
@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.function.UnaryOperator;
 
 /**
- * Manages equation token references across flows and auxiliaries.
+ * Manages equation token references across flows and variables.
  * Handles word-boundary-aware token replacement, bulk reference updates,
  * and info-link connection management.
  *
@@ -25,16 +25,16 @@ final class EquationReferenceManager {
     private static final Logger log = LoggerFactory.getLogger(EquationReferenceManager.class);
 
     private final List<FlowDef> flows;
-    private final List<AuxDef> auxiliaries;
+    private final List<VariableDef> variables;
 
-    EquationReferenceManager(List<FlowDef> flows, List<AuxDef> auxiliaries) {
+    EquationReferenceManager(List<FlowDef> flows, List<VariableDef> variables) {
         this.flows = flows;
-        this.auxiliaries = auxiliaries;
+        this.variables = variables;
     }
 
     /**
      * Replaces all occurrences of {@code oldToken} with {@code newToken} in every
-     * flow and auxiliary equation, respecting word boundaries.
+     * flow and variable equation, respecting word boundaries.
      */
     void updateEquationReferences(String oldToken, String newToken) {
         if (oldToken.equals(newToken)) {
@@ -48,11 +48,11 @@ final class EquationReferenceManager {
                         f.timeUnit(), f.materialUnit(), f.source(), f.sink(), f.subscripts()));
             }
         }
-        for (int i = 0; i < auxiliaries.size(); i++) {
-            AuxDef a = auxiliaries.get(i);
+        for (int i = 0; i < variables.size(); i++) {
+            VariableDef a = variables.get(i);
             String updated = replaceToken(a.equation(), oldToken, newToken);
             if (!updated.equals(a.equation())) {
-                auxiliaries.set(i, new AuxDef(a.name(), a.comment(), updated, a.unit()));
+                variables.set(i, new VariableDef(a.name(), a.comment(), updated, a.unit()));
             }
         }
     }
@@ -74,12 +74,12 @@ final class EquationReferenceManager {
                 return false;
             }
         }
-        for (int i = 0; i < auxiliaries.size(); i++) {
-            AuxDef a = auxiliaries.get(i);
+        for (int i = 0; i < variables.size(); i++) {
+            VariableDef a = variables.get(i);
             if (a.name().equals(targetName)) {
                 String updated = transform.apply(a.equation());
                 if (!updated.equals(a.equation())) {
-                    auxiliaries.set(i, new AuxDef(a.name(), a.comment(), updated, a.unit()));
+                    variables.set(i, new VariableDef(a.name(), a.comment(), updated, a.unit()));
                     return true;
                 }
                 return false;
@@ -108,15 +108,15 @@ final class EquationReferenceManager {
             }
         }
 
-        for (int i = 0; i < auxiliaries.size(); i++) {
-            AuxDef a = auxiliaries.get(i);
+        for (int i = 0; i < variables.size(); i++) {
+            VariableDef a = variables.get(i);
             if (a.name().equals(elementName)) {
                 String eq = a.equation();
                 if (eq.contains(token)) {
                     return true;
                 }
                 String updated = "0".equals(eq.trim()) ? token : eq + " * " + token;
-                auxiliaries.set(i, new AuxDef(a.name(), a.comment(), updated, a.unit()));
+                variables.set(i, new VariableDef(a.name(), a.comment(), updated, a.unit()));
                 return true;
             }
         }

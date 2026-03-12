@@ -5,7 +5,7 @@ import systems.courant.shrewd.measure.TimeUnit;
 import systems.courant.shrewd.measure.UnitRegistry;
 import systems.courant.shrewd.model.compile.CompiledModel;
 import systems.courant.shrewd.model.compile.ModelCompiler;
-import systems.courant.shrewd.model.def.AuxDef;
+import systems.courant.shrewd.model.def.VariableDef;
 import systems.courant.shrewd.model.def.ModelDefinition;
 import systems.courant.shrewd.model.def.ModelDefinitionBuilder;
 import systems.courant.shrewd.model.def.SimulationSettings;
@@ -78,7 +78,7 @@ public final class ModelDefinitionFactory {
     }
 
     /**
-     * Creates a new ModelDefinition with modified parameter (literal-valued auxiliary) values.
+     * Creates a new ModelDefinition with modified parameter (literal-valued variable) values.
      * For each auxiliary whose name is in the override map, replaces its equation with the
      * formatted value string.
      */
@@ -87,24 +87,24 @@ public final class ModelDefinitionFactory {
         if (overrides.isEmpty()) {
             return def;
         }
-        List<AuxDef> updatedAuxiliaries = new ArrayList<>();
-        for (AuxDef a : def.auxiliaries()) {
+        List<VariableDef> updatedVariables = new ArrayList<>();
+        for (VariableDef a : def.variables()) {
             if (overrides.containsKey(a.name())) {
                 double value = overrides.get(a.name());
-                updatedAuxiliaries.add(new AuxDef(a.name(), a.comment(),
+                updatedVariables.add(new VariableDef(a.name(), a.comment(),
                         formatValue(value), a.unit()));
             } else {
-                updatedAuxiliaries.add(a);
+                updatedVariables.add(a);
             }
         }
         ModelDefinitionBuilder b = def.toBuilder();
-        b.clearAuxiliaries();
-        updatedAuxiliaries.forEach(b::aux);
+        b.clearVariables();
+        updatedVariables.forEach(b::variable);
         return b.build();
     }
 
     /**
-     * Formats a double value as a string suitable for an auxiliary equation.
+     * Formats a double value as a string suitable for an variable equation.
      * Uses integer format when the value has no fractional part.
      */
     private static String formatValue(double value) {

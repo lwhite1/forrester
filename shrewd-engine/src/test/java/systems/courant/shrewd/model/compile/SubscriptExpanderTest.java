@@ -1,6 +1,6 @@
 package systems.courant.shrewd.model.compile;
 
-import systems.courant.shrewd.model.def.AuxDef;
+import systems.courant.shrewd.model.def.VariableDef;
 import systems.courant.shrewd.model.def.FlowDef;
 import systems.courant.shrewd.model.def.ModelDefinition;
 import systems.courant.shrewd.model.def.ModelDefinitionBuilder;
@@ -88,17 +88,17 @@ class SubscriptExpanderTest {
                     .subscript("Region", List.of("North", "South"))
                     .stock("Population", 100, "Person", List.of("Region"))
                     .constant("birth_rate", 0.02, "1/Year")
-                    .aux("births_per_year", "Population * birth_rate", "Person/Year", List.of("Region"))
+                    .variable("births_per_year", "Population * birth_rate", "Person/Year", List.of("Region"))
                     .build();
 
             ModelDefinition expanded = SubscriptExpander.expand(def);
 
             // 1 literal constant (birth_rate) + 2 expanded subscripted auxes
-            assertThat(expanded.auxiliaries()).hasSize(3);
-            assertThat(expanded.auxiliaries().stream().map(AuxDef::name))
+            assertThat(expanded.variables()).hasSize(3);
+            assertThat(expanded.variables().stream().map(VariableDef::name))
                     .containsExactly("birth_rate", "births_per_year[North]", "births_per_year[South]");
             // birth_rate is not subscripted, so it stays unchanged in equations
-            assertThat(expanded.auxiliaries().get(1).equation())
+            assertThat(expanded.variables().get(1).equation())
                     .isEqualTo("Population[North] * birth_rate");
         }
     }
@@ -129,7 +129,7 @@ class SubscriptExpanderTest {
                     .name("Multi Ref")
                     .subscript("Region", List.of("X", "Y"))
                     .stock("Pop", 100, "Person", List.of("Region"))
-                    .aux("density", "Pop * 2", "Person", List.of("Region"))
+                    .variable("density", "Pop * 2", "Person", List.of("Region"))
                     .flow("growth", "Pop + density", "Year", null, "Pop", List.of("Region"))
                     .build();
 
@@ -191,14 +191,14 @@ class SubscriptExpanderTest {
                     .subscript("Region", List.of("A", "B"))
                     .subscript("Age", List.of("X", "Y"))
                     .stock("Pop", 100, "Person", List.of("Region", "Age"))
-                    .aux("density", "Pop * 2", "Person", List.of("Region", "Age"))
+                    .variable("density", "Pop * 2", "Person", List.of("Region", "Age"))
                     .build();
 
             ModelDefinition expanded = SubscriptExpander.expand(def);
 
-            assertThat(expanded.auxiliaries()).hasSize(4); // 2 × 2 = 4
-            assertThat(expanded.auxiliaries().get(0).name()).isEqualTo("density[A,X]");
-            assertThat(expanded.auxiliaries().get(0).equation()).isEqualTo("Pop[A,X] * 2");
+            assertThat(expanded.variables()).hasSize(4); // 2 × 2 = 4
+            assertThat(expanded.variables().get(0).name()).isEqualTo("density[A,X]");
+            assertThat(expanded.variables().get(0).equation()).isEqualTo("Pop[A,X] * 2");
         }
 
         @Test

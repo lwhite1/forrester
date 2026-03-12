@@ -140,7 +140,7 @@ final class InputDispatcher {
         // Update hover highlight
         double worldX = viewport.toWorldX(event.getX());
         double worldY = viewport.toWorldY(event.getY());
-        boolean hideAux = canvas.isHideAuxiliaries();
+        boolean hideAux = canvas.isHideVariables();
         String hit = HitTester.hitTest(canvasState, worldX, worldY, hideAux);
 
         // Connection hover: only when no element is hovered
@@ -208,7 +208,7 @@ final class InputDispatcher {
         CanvasState canvasState = canvas.canvasState();
         ModelEditor editor = canvas.getEditor();
         CanvasToolBar.Tool activeTool = canvas.getActiveTool();
-        boolean hideAux = canvas.isHideAuxiliaries();
+        boolean hideAux = canvas.isHideVariables();
 
         double worldX = viewport.toWorldX(event.getX());
         double worldY = viewport.toWorldY(event.getY());
@@ -316,7 +316,7 @@ final class InputDispatcher {
                                    MouseEvent event, ModelCanvas canvas) {
         CanvasState canvasState = canvas.canvasState();
         ModelEditor editor = canvas.getEditor();
-        boolean hideAux = canvas.isHideAuxiliaries();
+        boolean hideAux = canvas.isHideVariables();
 
         String hit = HitTester.hitTest(canvasState, worldX, worldY, hideAux);
 
@@ -532,7 +532,7 @@ final class InputDispatcher {
                                             MouseEvent event, ModelCanvas canvas) {
         CanvasState canvasState = canvas.canvasState();
         ModelEditor editor = canvas.getEditor();
-        boolean hideAux = canvas.isHideAuxiliaries();
+        boolean hideAux = canvas.isHideVariables();
         double sx = event.getScreenX();
         double sy = event.getScreenY();
 
@@ -626,7 +626,7 @@ final class InputDispatcher {
                 case DIGIT1 -> { canvas.switchTool(CanvasToolBar.Tool.SELECT); event.consume(); }
                 case DIGIT2 -> { canvas.switchTool(CanvasToolBar.Tool.PLACE_STOCK); event.consume(); }
                 case DIGIT3 -> { canvas.switchTool(CanvasToolBar.Tool.PLACE_FLOW); event.consume(); }
-                case DIGIT4 -> { canvas.switchTool(CanvasToolBar.Tool.PLACE_AUX); event.consume(); }
+                case DIGIT4 -> { canvas.switchTool(CanvasToolBar.Tool.PLACE_VARIABLE); event.consume(); }
                 case DIGIT5 -> { canvas.switchTool(CanvasToolBar.Tool.PLACE_MODULE); event.consume(); }
                 case DIGIT6 -> { canvas.switchTool(CanvasToolBar.Tool.PLACE_LOOKUP); event.consume(); }
                 case DIGIT7 -> { canvas.switchTool(CanvasToolBar.Tool.PLACE_CLD_VARIABLE); event.consume(); }
@@ -724,7 +724,7 @@ final class InputDispatcher {
                 || activeTool != CanvasToolBar.Tool.SELECT) {
             cursor = Cursor.CROSSHAIR;
         } else if (editor != null) {
-            cursor = computeSelectCursor(viewport, canvasState, editor, canvas.isHideAuxiliaries());
+            cursor = computeSelectCursor(viewport, canvasState, editor, canvas.isHideVariables());
         } else {
             cursor = Cursor.DEFAULT;
         }

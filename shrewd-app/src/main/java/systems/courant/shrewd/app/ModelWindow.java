@@ -581,9 +581,9 @@ public class ModelWindow {
         validationIssuesItem.setOnAction(e -> showValidationDialog());
 
         CheckMenuItem hideAuxItem = new CheckMenuItem("Hide Variables");
-        hideAuxItem.setId("menuHideAuxiliaries");
+        hideAuxItem.setId("menuHideVariables");
         hideAuxItem.setOnAction(e -> {
-            canvas.setHideAuxiliaries(hideAuxItem.isSelected());
+            canvas.setHideVariables(hideAuxItem.isSelected());
             canvas.requestFocus();
         });
 
@@ -719,7 +719,7 @@ public class ModelWindow {
 
         ViewDef view;
         if (def.stocks().isEmpty() && def.flows().isEmpty()
-                && def.auxiliaries().isEmpty()) {
+                && def.variables().isEmpty()) {
             // CLD or empty model — use embedded view if available
             if (!def.views().isEmpty() && !def.cldVariables().isEmpty()) {
                 view = def.views().getFirst();
@@ -895,7 +895,7 @@ public class ModelWindow {
         statusBar.updateElements(
                 activeEditor.getStocks().size(),
                 activeEditor.getFlows().size(),
-                activeEditor.getAuxiliaries().size(),
+                activeEditor.getVariables().size(),
                 0,
                 activeEditor.getModules().size(),
                 activeEditor.getCldVariables().size(),
@@ -1086,7 +1086,7 @@ public class ModelWindow {
         commands.add(cmd("Add Flow", "Build",
                 () -> switchToolAndFocus(CanvasToolBar.Tool.PLACE_FLOW)));
         commands.add(cmd("Add Variable", "Build",
-                () -> switchToolAndFocus(CanvasToolBar.Tool.PLACE_AUX)));
+                () -> switchToolAndFocus(CanvasToolBar.Tool.PLACE_VARIABLE)));
         commands.add(cmd("Add Module", "Build",
                 () -> switchToolAndFocus(CanvasToolBar.Tool.PLACE_MODULE)));
         commands.add(cmd("Add Lookup Table", "Build",
@@ -1130,7 +1130,7 @@ public class ModelWindow {
             canvas.requestFocus();
         }));
         commands.add(cmd("Toggle Hide Variables", "View", () -> {
-            canvas.setHideAuxiliaries(!canvas.isHideAuxiliaries());
+            canvas.setHideVariables(!canvas.isHideVariables());
             canvas.requestFocus();
         }));
         commands.add(cmd("Toggle Hide Info Links", "View", () -> {

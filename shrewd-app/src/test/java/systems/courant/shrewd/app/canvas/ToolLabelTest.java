@@ -23,7 +23,7 @@ class ToolLabelTest {
     void shouldProduceReadableUndoLabels() {
         assertThat(CanvasToolBar.Tool.PLACE_STOCK.label()).isEqualTo("stock");
         assertThat(CanvasToolBar.Tool.PLACE_FLOW.label()).isEqualTo("flow");
-        assertThat(CanvasToolBar.Tool.PLACE_AUX.label()).isEqualTo("auxiliary");
+        assertThat(CanvasToolBar.Tool.PLACE_VARIABLE.label()).isEqualTo("variable");
         assertThat(CanvasToolBar.Tool.PLACE_MODULE.label()).isEqualTo("module");
         assertThat(CanvasToolBar.Tool.PLACE_LOOKUP.label()).isEqualTo("lookup");
         assertThat(CanvasToolBar.Tool.PLACE_CLD_VARIABLE.label()).isEqualTo("variable");

@@ -2,7 +2,7 @@ package systems.courant.shrewd.io.xmile;
 
 import systems.courant.shrewd.io.ImportResult;
 import systems.courant.shrewd.io.ModelImporter;
-import systems.courant.shrewd.model.def.AuxDef;
+import systems.courant.shrewd.model.def.VariableDef;
 import systems.courant.shrewd.model.def.FlowDef;
 import systems.courant.shrewd.model.def.LookupTableDef;
 import systems.courant.shrewd.model.def.ModelDefinition;
@@ -43,7 +43,7 @@ import java.util.regex.Pattern;
  * Imports XMILE format model files into Shrewd
  * {@link systems.courant.shrewd.model.def.ModelDefinition}.
  *
- * <p>Supports stocks, flows, auxiliaries, constants, lookup tables (standalone and
+ * <p>Supports stocks, flows, variables, constants, lookup tables (standalone and
  * embedded {@code <gf>}), simulation settings ({@code <sim_specs>}), and view data.
  *
  * <p>Usage:
@@ -292,39 +292,39 @@ public class XmileImporter implements ModelImporter {
             String lookupTableName = name + "_lookup";
             buildGf(gfElem, lookupTableName, builder, lookupNames, warnings);
 
-            // If there's also an eqn, create an aux that uses LOOKUP
+            // If there's also an eqn, create a variable that uses LOOKUP
             if (eqnText != null && !eqnText.isBlank()) {
                 XmileExprTranslator.TranslationResult tr =
                         XmileExprTranslator.toShrewd(eqnText);
                 warnings.addAll(tr.warnings());
                 String lookupExpr = "LOOKUP(" + lookupTableName + ", " + tr.expression() + ")";
-                builder.aux(new AuxDef(name, comment, lookupExpr, unit));
+                builder.variable(new VariableDef(name, comment, lookupExpr, unit));
             } else {
-                // gf without eqn — just the lookup table is added, create aux referencing it
-                builder.aux(new AuxDef(name, comment,
+                // gf without eqn — just the lookup table is added, create variable referencing it
+                builder.variable(new VariableDef(name, comment,
                         "LOOKUP(" + lookupTableName + ", TIME)", unit));
             }
             return;
         }
 
         if (eqnText == null || eqnText.isBlank()) {
-            // Aux with no equation — treat as constant 0
+            // Variable with no equation — treat as constant 0
             builder.constant(name, 0, unit);
-            warnings.add("Aux '" + name + "' has no equation, treated as constant 0");
+            warnings.add("Variable '" + name + "' has no equation, treated as constant 0");
             return;
         }
 
-        // Numeric literal → constant (literal-valued auxiliary)
+        // Numeric literal → constant (literal-valued variable)
         if (isNumericLiteral(eqnText)) {
-            builder.aux(new AuxDef(name, comment,
-                    AuxDef.formatValue(Double.parseDouble(eqnText.strip())), unit));
+            builder.variable(new VariableDef(name, comment,
+                    VariableDef.formatValue(Double.parseDouble(eqnText.strip())), unit));
             return;
         }
 
-        // General auxiliary
+        // General variable
         XmileExprTranslator.TranslationResult tr = XmileExprTranslator.toShrewd(eqnText);
         warnings.addAll(tr.warnings());
-        builder.aux(new AuxDef(name, comment, tr.expression(), unit));
+        builder.variable(new VariableDef(name, comment, tr.expression(), unit));
     }
 
     private void buildGf(Element gfElem, String lookupName,
@@ -457,7 +457,7 @@ public class XmileImporter implements ModelImporter {
             try {
                 buildAux(auxElem, name, builder, lookupNames, warnings);
             } catch (IllegalArgumentException e) {
-                warnings.add("Error processing aux '" + name + "': " + e.getMessage());
+                warnings.add("Error processing variable '" + name + "': " + e.getMessage());
             }
         }
 

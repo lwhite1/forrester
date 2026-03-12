@@ -1,7 +1,7 @@
 package systems.courant.shrewd.tools.importer;
 
 import systems.courant.shrewd.model.ModelMetadata;
-import systems.courant.shrewd.model.def.AuxDef;
+import systems.courant.shrewd.model.def.VariableDef;
 import systems.courant.shrewd.model.def.FlowDef;
 import systems.courant.shrewd.model.def.LookupTableDef;
 import systems.courant.shrewd.model.def.ModelDefinitionBuilder;
@@ -115,11 +115,11 @@ class DemoClassGeneratorTest {
     }
 
     @Test
-    void shouldGenerateAuxiliaries() {
+    void shouldGenerateVariables() {
         ModelDefinition def = new ModelDefinitionBuilder()
                 .name("Test")
                 .stock("Pop", 100.0, "people")
-                .aux("growth_rate", "Pop * 0.03", "people/Year")
+                .variable("growth_rate", "Pop * 0.03", "people/Year")
                 .defaultSimulation("Year", 10.0, "Year")
                 .build();
 
@@ -129,7 +129,7 @@ class DemoClassGeneratorTest {
                 "systems.courant.shrewd.demo", "test.xmile",
                 List.of(), List.of());
 
-        assertThat(source).contains("new AuxDef(");
+        assertThat(source).contains("new VariableDef(");
         assertThat(source).contains("\"growth_rate\"");
         assertThat(source).contains("\"Pop * 0.03\"");
     }
@@ -349,7 +349,7 @@ class DemoClassGeneratorTest {
 
         assertThat(source).doesNotContain("import systems.courant.shrewd.model.def.StockDef;");
         assertThat(source).doesNotContain("import systems.courant.shrewd.model.def.FlowDef;");
-        assertThat(source).doesNotContain("import systems.courant.shrewd.model.def.AuxDef;");
+        assertThat(source).doesNotContain("import systems.courant.shrewd.model.def.VariableDef;");
         assertThat(source).doesNotContain("import systems.courant.shrewd.model.def.LookupTableDef;");
     }
 

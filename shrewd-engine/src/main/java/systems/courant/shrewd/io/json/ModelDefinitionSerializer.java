@@ -1,7 +1,7 @@
 package systems.courant.shrewd.io.json;
 
 import systems.courant.shrewd.model.ModelMetadata;
-import systems.courant.shrewd.model.def.AuxDef;
+import systems.courant.shrewd.model.def.VariableDef;
 import systems.courant.shrewd.model.def.CausalLinkDef;
 import systems.courant.shrewd.model.def.CldVariableDef;
 import systems.courant.shrewd.model.def.CommentDef;
@@ -142,8 +142,8 @@ public class ModelDefinitionSerializer {
         if (!def.flows().isEmpty()) {
             root.set("flows", serializeFlows(def.flows()));
         }
-        if (!def.auxiliaries().isEmpty()) {
-            root.set("auxiliaries", serializeAuxiliaries(def.auxiliaries()));
+        if (!def.variables().isEmpty()) {
+            root.set("variables", serializeVariables(def.variables()));
         }
 
         if (!def.lookupTables().isEmpty()) {
@@ -234,9 +234,9 @@ public class ModelDefinitionSerializer {
         return arr;
     }
 
-    private ArrayNode serializeAuxiliaries(List<AuxDef> auxiliaries) {
+    private ArrayNode serializeVariables(List<VariableDef> variables) {
         ArrayNode arr = mapper.createArrayNode();
-        for (AuxDef a : auxiliaries) {
+        for (VariableDef a : variables) {
             ObjectNode node = mapper.createObjectNode();
             node.put("name", a.name());
             if (a.comment() != null) {
@@ -518,11 +518,11 @@ public class ModelDefinitionSerializer {
             }
         }
 
-        List<AuxDef> auxiliaries = new ArrayList<>();
-        if (root.has("auxiliaries")) {
-            for (JsonNode n : root.get("auxiliaries")) {
+        List<VariableDef> variables = new ArrayList<>();
+        if (root.has("variables")) {
+            for (JsonNode n : root.get("variables")) {
                 String unit = textOrNull(n, "unit");
-                auxiliaries.add(new AuxDef(
+                variables.add(new VariableDef(
                         requiredText(n, "name"),
                         textOrNull(n, "comment"),
                         requiredText(n, "equation"),
@@ -531,15 +531,15 @@ public class ModelDefinitionSerializer {
             }
         }
 
-        // Backward compatibility: migrate legacy constants into auxiliaries
-        List<AuxDef> migratedConstants = new ArrayList<>();
+        // Backward compatibility: migrate legacy constants into variables
+        List<VariableDef> migratedConstants = new ArrayList<>();
         if (root.has("constants")) {
             for (JsonNode n : root.get("constants")) {
                 double value = requiredDouble(n, "value");
-                migratedConstants.add(new AuxDef(
+                migratedConstants.add(new VariableDef(
                         requiredText(n, "name"),
                         textOrNull(n, "comment"),
-                        AuxDef.formatValue(value),
+                        VariableDef.formatValue(value),
                         requiredText(n, "unit")));
             }
         }
@@ -671,7 +671,7 @@ public class ModelDefinitionSerializer {
         if (!migratedConstants.isEmpty()) {
             ModelDefinition migrated = ModelDefinition.withMigratedConstants(
                     name, comment, moduleInterface,
-                    stocks, flows, auxiliaries, migratedConstants, lookupTables,
+                    stocks, flows, variables, migratedConstants, lookupTables,
                     modules, subscripts, cldVariables, causalLinks, comments,
                     views, defaultSimulation, metadata);
             if (referenceDatasets.isEmpty()) {
@@ -684,7 +684,7 @@ public class ModelDefinitionSerializer {
                     .build();
         }
         return new ModelDefinition(name, comment, moduleInterface,
-                stocks, flows, auxiliaries, lookupTables,
+                stocks, flows, variables, lookupTables,
                 modules, subscripts, cldVariables, causalLinks,
                 comments, views, defaultSimulation, metadata, referenceDatasets);
     }

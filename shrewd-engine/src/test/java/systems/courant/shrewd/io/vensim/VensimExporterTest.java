@@ -1,7 +1,7 @@
 package systems.courant.shrewd.io.vensim;
 
 import systems.courant.shrewd.io.ImportResult;
-import systems.courant.shrewd.model.def.AuxDef;
+import systems.courant.shrewd.model.def.VariableDef;
 import systems.courant.shrewd.model.def.CausalLinkDef;
 import systems.courant.shrewd.model.def.CldVariableDef;
 import systems.courant.shrewd.model.def.FlowDef;
@@ -57,10 +57,10 @@ class VensimExporterTest {
             ModelDefinition roundTripped = reImported.definition();
 
             assertThat(roundTripped.stocks()).hasSameSizeAs(imported.stocks());
-            // Auxiliaries may differ in count because decomposed flows (e.g. inflow/outflow)
+            // Variables may differ in count because decomposed flows (e.g. inflow/outflow)
             // become separate equation blocks on export, which re-import as additional auxs.
-            assertThat(roundTripped.auxiliaries().size())
-                    .isGreaterThanOrEqualTo(imported.auxiliaries().size());
+            assertThat(roundTripped.variables().size())
+                    .isGreaterThanOrEqualTo(imported.variables().size());
             assertThat(roundTripped.parameters()).hasSameSizeAs(imported.parameters());
         }
     }
@@ -208,7 +208,7 @@ class VensimExporterTest {
                             new double[]{0, 1, 2},
                             new double[]{0, 0.5, 1.0},
                             "LINEAR")
-                    .aux(new AuxDef("effect", "LOOKUP(my_lookup, TIME)", null))
+                    .variable(new VariableDef("effect", "LOOKUP(my_lookup, TIME)", null))
                     .build();
 
             String mdl = VensimExporter.toVensim(def);
@@ -537,7 +537,7 @@ class VensimExporterTest {
             ModelDefinition def = new ModelDefinitionBuilder()
                     .name("Test")
                     .defaultSimulation("Day", 100, "Day")
-                    .aux(new AuxDef("rate", "The infection rate per day", 0.3, "1/Day"))
+                    .variable(new VariableDef("rate", "The infection rate per day", 0.3, "1/Day"))
                     .build();
 
             String mdl = VensimExporter.toVensim(def);
@@ -599,7 +599,7 @@ class VensimExporterTest {
                     .name("Test")
                     .defaultSimulation("Day", 100, "Day")
                     .subscript("Region", List.of("North", "South"))
-                    .aux("growth_rate", "0.05", "1/Day", List.of("Region"))
+                    .variable("growth_rate", "0.05", "1/Day", List.of("Region"))
                     .build();
 
             String mdl = VensimExporter.toVensim(def);
@@ -706,7 +706,7 @@ class VensimExporterTest {
                             new double[]{0, 1, 2},
                             new double[]{0, 0.5, 1.0},
                             "LINEAR")
-                    .aux(new AuxDef("scaled_effect",
+                    .variable(new VariableDef("scaled_effect",
                             "LOOKUP(effect_table, TIME) * factor", "Dmnl"))
                     .constant("factor", 2.0, "Dmnl")
                     .build();
@@ -729,7 +729,7 @@ class VensimExporterTest {
                             new double[]{0, 1, 2},
                             new double[]{0, 0.5, 1.0},
                             "LINEAR")
-                    .aux(new AuxDef("effect", "LOOKUP(my_lookup, TIME)", null))
+                    .variable(new VariableDef("effect", "LOOKUP(my_lookup, TIME)", null))
                     .build();
 
             String mdl = VensimExporter.toVensim(def);

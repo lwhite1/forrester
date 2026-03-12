@@ -1,7 +1,7 @@
 package systems.courant.shrewd.app.canvas;
 
 import systems.courant.shrewd.model.ModelMetadata;
-import systems.courant.shrewd.model.def.AuxDef;
+import systems.courant.shrewd.model.def.VariableDef;
 import systems.courant.shrewd.model.def.CausalLinkDef;
 import systems.courant.shrewd.model.def.CldVariableDef;
 import systems.courant.shrewd.model.def.CommentDef;
@@ -59,7 +59,7 @@ public class ModelEditor {
     private ModelMetadata metadata;
     private final List<StockDef> stocks = new ArrayList<>();
     private final List<FlowDef> flows = new ArrayList<>();
-    private final List<AuxDef> auxiliaries = new ArrayList<>();
+    private final List<VariableDef> variables = new ArrayList<>();
     private final List<ModuleInstanceDef> modules = new ArrayList<>();
     private final List<LookupTableDef> lookupTables = new ArrayList<>();
     private final List<CldVariableDef> cldVariables = new ArrayList<>();
@@ -70,11 +70,11 @@ public class ModelEditor {
     private final Set<String> nameIndex = new HashSet<>();
     private final List<ModelEditListener> listeners = new CopyOnWriteArrayList<>();
     private final EquationReferenceManager equationRefManager =
-            new EquationReferenceManager(flows, auxiliaries);
+            new EquationReferenceManager(flows, variables);
     private SimulationSettings simulationSettings;
     private int nextStockId = 1;
     private int nextFlowId = 1;
-    private int nextAuxId = 1;
+    private int nextVariableId = 1;
     private int nextModuleId = 1;
     private int nextLookupId = 1;
     private int nextCldVariableId = 1;
@@ -134,7 +134,7 @@ public class ModelEditor {
         modelComment = definition.comment() != null ? definition.comment() : "";
         stocks.clear();
         flows.clear();
-        auxiliaries.clear();
+        variables.clear();
         modules.clear();
         lookupTables.clear();
         cldVariables.clear();
@@ -146,7 +146,7 @@ public class ModelEditor {
 
         stocks.addAll(definition.stocks());
         flows.addAll(definition.flows());
-        auxiliaries.addAll(definition.auxiliaries());
+        variables.addAll(definition.variables());
         modules.addAll(definition.modules());
         lookupTables.addAll(definition.lookupTables());
         cldVariables.addAll(definition.cldVariables());
@@ -159,7 +159,7 @@ public class ModelEditor {
 
         stocks.forEach(s -> nameIndex.add(s.name()));
         flows.forEach(f -> nameIndex.add(f.name()));
-        auxiliaries.forEach(a -> nameIndex.add(a.name()));
+        variables.forEach(a -> nameIndex.add(a.name()));
         modules.forEach(m -> nameIndex.add(m.instanceName()));
         lookupTables.forEach(lt -> nameIndex.add(lt.name()));
         cldVariables.forEach(v -> nameIndex.add(v.name()));
@@ -168,7 +168,7 @@ public class ModelEditor {
         // Set per-type counters past any existing numeric suffix
         nextStockId = maxIdFrom(stocks.stream().map(StockDef::name), "Stock ");
         nextFlowId = maxIdFrom(flows.stream().map(FlowDef::name), "Flow ");
-        nextAuxId = maxIdFrom(auxiliaries.stream().map(AuxDef::name), "Aux ");
+        nextVariableId = maxIdFrom(variables.stream().map(VariableDef::name), "Variable ");
         nextModuleId = maxIdFrom(modules.stream().map(ModuleInstanceDef::instanceName), "Module ");
         nextLookupId = maxIdFrom(lookupTables.stream().map(LookupTableDef::name), "Lookup ");
         nextCldVariableId = maxIdFrom(cldVariables.stream().map(CldVariableDef::name), "Variable ");
@@ -234,10 +234,10 @@ public class ModelEditor {
      * Adds a new auxiliary with an auto-generated name.
      * @return the name of the created auxiliary
      */
-    public String addAux() {
+    public String addVariable() {
         checkFxThread();
-        String name = "Aux " + nextAuxId++;
-        auxiliaries.add(new AuxDef(name, "0", "units"));
+        String name = "Variable " + nextVariableId++;
+        variables.add(new VariableDef(name, "0", "units"));
         nameIndex.add(name);
         fireElementAdded(name, "Variable");
         return name;
@@ -283,13 +283,13 @@ public class ModelEditor {
      * and the specified equation.
      * @return the name of the created auxiliary
      */
-    public String addAuxFrom(AuxDef template, String equation) {
+    public String addVariableFrom(VariableDef template, String equation) {
         checkFxThread();
-        String name = resolveUniqueName(template.name(), "Aux ", nextAuxId, nameIndex);
-        if (name.startsWith("Aux ")) {
-            nextAuxId = parseIdSuffix(name, "Aux ") + 1;
+        String name = resolveUniqueName(template.name(), "Variable ", nextVariableId, nameIndex);
+        if (name.startsWith("Variable ")) {
+            nextVariableId = parseIdSuffix(name, "Variable ") + 1;
         }
-        auxiliaries.add(new AuxDef(name, template.comment(), equation, template.unit()));
+        variables.add(new VariableDef(name, template.comment(), equation, template.unit()));
         nameIndex.add(name);
         return name;
     }
@@ -413,8 +413,8 @@ public class ModelEditor {
         if (!wasStock) {
             if (flows.removeIf(f -> f.name().equals(name))) {
                 // flow removed — fall through to clean equations
-            } else if (auxiliaries.removeIf(a -> a.name().equals(name))) {
-                // aux removed — fall through to clean equations
+            } else if (variables.removeIf(a -> a.name().equals(name))) {
+                // variable removed — fall through to clean equations
             } else {
                 if (!lookupTables.removeIf(lt -> lt.name().equals(name))) {
                     if (!modules.removeIf(m -> m.instanceName().equals(name))) {
@@ -460,8 +460,8 @@ public class ModelEditor {
                 || renameInList(flows, oldName, newName, FlowDef::name,
                 (f, n) -> new FlowDef(n, f.comment(), f.equation(),
                         f.timeUnit(), f.materialUnit(), f.source(), f.sink(), f.subscripts()))
-                || renameInList(auxiliaries, oldName, newName, AuxDef::name,
-                (a, n) -> new AuxDef(n, a.comment(), a.equation(), a.unit()))
+                || renameInList(variables, oldName, newName, VariableDef::name,
+                (a, n) -> new VariableDef(n, a.comment(), a.equation(), a.unit()))
                 || renameInList(modules, oldName, newName, ModuleInstanceDef::instanceName,
                 (m, n) -> new ModuleInstanceDef(n, m.definition(),
                         m.inputBindings(), m.outputBindings()))
@@ -604,17 +604,17 @@ public class ModelEditor {
     }
 
     /**
-     * Sets the equation of an auxiliary.
+     * Sets the equation of a variable.
      *
-     * @return true if the auxiliary was found and updated
+     * @return true if the variable was found and updated
      */
-    public boolean setAuxEquation(String name, String equation) {
+    public boolean setVariableEquation(String name, String equation) {
         checkFxThread();
         if (equation == null || equation.isBlank()) {
             return false;
         }
-        boolean updated = updateInList(auxiliaries, name, AuxDef::name,
-                a -> new AuxDef(a.name(), a.comment(), equation, a.unit()));
+        boolean updated = updateInList(variables, name, VariableDef::name,
+                a -> new VariableDef(a.name(), a.comment(), equation, a.unit()));
         if (updated) {
             fireEquationChanged(name);
         }
@@ -688,17 +688,17 @@ public class ModelEditor {
     }
 
     /**
-     * Sets the unit of an auxiliary.
+     * Sets the unit of a variable.
      *
-     * @return true if the auxiliary was found and updated
+     * @return true if the variable was found and updated
      */
-    public boolean setAuxUnit(String name, String unit) {
+    public boolean setVariableUnit(String name, String unit) {
         checkFxThread();
         if (unit == null) {
             return false;
         }
-        return updateInList(auxiliaries, name, AuxDef::name,
-                a -> new AuxDef(a.name(), a.comment(), a.equation(), unit));
+        return updateInList(variables, name, VariableDef::name,
+                a -> new VariableDef(a.name(), a.comment(), a.equation(), unit));
     }
 
     /**
@@ -726,14 +726,14 @@ public class ModelEditor {
     }
 
     /**
-     * Sets the comment of an auxiliary.
+     * Sets the comment of a variable.
      *
-     * @return true if the auxiliary was found and updated
+     * @return true if the variable was found and updated
      */
-    public boolean setAuxComment(String name, String comment) {
+    public boolean setVariableComment(String name, String comment) {
         checkFxThread();
-        return updateInList(auxiliaries, name, AuxDef::name,
-                a -> new AuxDef(a.name(), comment, a.equation(), a.unit()));
+        return updateInList(variables, name, VariableDef::name,
+                a -> new VariableDef(a.name(), comment, a.equation(), a.unit()));
     }
 
     /**
@@ -805,7 +805,7 @@ public class ModelEditor {
     // Equation reference management delegated to EquationReferenceManager
 
     /**
-     * Returns true if any element (stock, flow, aux, constant, or module) has the given name.
+     * Returns true if any element (stock, flow, variable, constant, or module) has the given name.
      * Uses an O(1) hash set lookup instead of scanning all five element lists.
      */
     public boolean hasElement(String name) {
@@ -868,8 +868,8 @@ public class ModelEditor {
         return Collections.unmodifiableList(flows);
     }
 
-    public List<AuxDef> getAuxiliaries() {
-        return Collections.unmodifiableList(auxiliaries);
+    public List<VariableDef> getVariables() {
+        return Collections.unmodifiableList(variables);
     }
 
     public List<SubscriptDef> getSubscripts() {
@@ -877,12 +877,12 @@ public class ModelEditor {
     }
 
     /**
-     * Returns the names of literal-valued auxiliaries (tunable parameters).
+     * Returns the names of literal-valued variables (tunable parameters).
      */
     public List<String> getParameterNames() {
-        return auxiliaries.stream()
-                .filter(AuxDef::isLiteral)
-                .map(AuxDef::name)
+        return variables.stream()
+                .filter(VariableDef::isLiteral)
+                .map(VariableDef::name)
                 .toList();
     }
 
@@ -901,10 +901,10 @@ public class ModelEditor {
     }
 
     /**
-     * Returns the auxiliary with the given name.
+     * Returns the variable with the given name.
      */
-    public Optional<AuxDef> getAuxByName(String name) {
-        return findByName(auxiliaries, name, AuxDef::name);
+    public Optional<VariableDef> getVariableByName(String name) {
+        return findByName(variables, name, VariableDef::name);
     }
 
     public Optional<String> getStockUnit(String name) {
@@ -915,8 +915,8 @@ public class ModelEditor {
         return findByName(flows, name, FlowDef::name).map(FlowDef::equation);
     }
 
-    public Optional<String> getAuxEquation(String name) {
-        return findByName(auxiliaries, name, AuxDef::name).map(AuxDef::equation);
+    public Optional<String> getVariableEquation(String name) {
+        return findByName(variables, name, VariableDef::name).map(VariableDef::equation);
     }
 
     public List<ModuleInstanceDef> getModules() {
@@ -1191,7 +1191,7 @@ public class ModelEditor {
         switch (targetType) {
             case STOCK -> stocks.add(new StockDef(name, variable.comment(), 0, "units", null));
             case FLOW -> flows.add(new FlowDef(name, variable.comment(), "0", "Day", null, null));
-            case AUX -> auxiliaries.add(new AuxDef(name, variable.comment(), "0", "units"));
+            case AUX -> variables.add(new VariableDef(name, variable.comment(), "0", "units"));
             default -> {
                 // Unsupported target type — put the variable back
                 cldVariables.add(variable);
@@ -1226,7 +1226,7 @@ public class ModelEditor {
                 null,
                 List.copyOf(stocks),
                 List.copyOf(flows),
-                List.copyOf(auxiliaries),
+                List.copyOf(variables),
                 List.copyOf(lookupTables),
                 List.copyOf(modules),
                 List.copyOf(subscripts),

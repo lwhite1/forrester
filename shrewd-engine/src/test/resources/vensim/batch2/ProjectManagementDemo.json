@@ -69,7 +69,7 @@
       "sink": "workforce"
     }
   ],
-  "auxiliaries": [
+  "variables": [
     {
       "name": "fraction_personnel_for_testing",
       "comment": "gerapporteerde fractie detectie van onontdekt rework",

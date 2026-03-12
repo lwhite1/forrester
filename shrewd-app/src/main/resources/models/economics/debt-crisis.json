@@ -56,7 +56,7 @@
       "sink": "interest sum"
     }
   ],
-  "auxiliaries": [
+  "variables": [
     {
       "name": "expansion",
       "comment": "expansion",
@@ -83,7 +83,7 @@
     },
     {
       "name": "investment generation",
-      "comment": "MAX((net revenue-repayment), 0)",
+      "comment": "investment generation",
       "equation": "INVESTMENT_FRACTION*MAX((net_revenue-repayment), 0)",
       "unit": "$/Year"
     },

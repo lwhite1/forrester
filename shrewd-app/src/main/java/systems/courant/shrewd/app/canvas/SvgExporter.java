@@ -1,6 +1,6 @@
 package systems.courant.shrewd.app.canvas;
 
-import systems.courant.shrewd.model.def.AuxDef;
+import systems.courant.shrewd.model.def.VariableDef;
 import systems.courant.shrewd.model.def.CausalLinkDef;
 import systems.courant.shrewd.model.def.ConnectorRoute;
 import systems.courant.shrewd.model.def.ElementType;
@@ -116,9 +116,9 @@ public final class SvgExporter {
                         writeFlow(w, name, eq, cx, cy);
                     }
                     case AUX -> {
-                        boolean isLiteral = editor.getAuxByName(name)
-                                .map(AuxDef::isLiteral).orElse(false);
-                        writeAux(w, name, editor.getAuxEquation(name).orElse(null),
+                        boolean isLiteral = editor.getVariableByName(name)
+                                .map(VariableDef::isLiteral).orElse(false);
+                        writeVariable(w, name, editor.getVariableEquation(name).orElse(null),
                                 isLiteral, cx, cy,
                                 LayoutMetrics.effectiveWidth(canvasState, name),
                                 LayoutMetrics.effectiveHeight(canvasState, name));
@@ -467,7 +467,7 @@ public final class SvgExporter {
                 svgColor(ColorPalette.TEXT), escapeXml(flowLabel));
     }
 
-    private static void writeAux(PrintWriter w, String name, String equation,
+    private static void writeVariable(PrintWriter w, String name, String equation,
                                  boolean isLiteral, double cx, double cy,
                                  double width, double height) {
         double x = cx - width / 2;

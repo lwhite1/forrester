@@ -30,7 +30,7 @@ import java.util.regex.Pattern;
  * <ol>
  *   <li>Delegates to {@link DefinitionValidator} — wraps each error as an ERROR issue</li>
  *   <li>Disconnected flows — flows where both source and sink are null</li>
- *   <li>Missing units — stocks and auxiliaries with null/blank unit</li>
+ *   <li>Missing units — stocks and variables with null/blank unit</li>
  *   <li>Algebraic loops — cycle groups containing no stocks</li>
  *   <li>Unused elements — parameters and lookup tables not referenced by any equation</li>
  *   <li>Isolated stocks — stocks with no inflows or outflows</li>
@@ -121,10 +121,10 @@ public final class ModelValidator {
                                 + " Select the stock and set its unit in the Properties panel."));
             }
         }
-        for (AuxDef aux : def.auxiliaries()) {
-            if (aux.unit() == null || aux.unit().isBlank()) {
-                issues.add(new ValidationIssue(Severity.WARNING, aux.name(),
-                        "Variable '" + aux.name() + "' has no unit specified."
+        for (VariableDef v : def.variables()) {
+            if (v.unit() == null || v.unit().isBlank()) {
+                issues.add(new ValidationIssue(Severity.WARNING, v.name(),
+                        "Variable '" + v.name() + "' has no unit specified."
                                 + " Select it and set the unit in the Properties panel."));
             }
         }
@@ -213,7 +213,7 @@ public final class ModelValidator {
     }
 
     private static void checkUnusedElements(ModelDefinition def, List<ValidationIssue> issues) {
-        // Collect all references from flow and auxiliary equations
+        // Collect all references from flow and variable equations
         Set<String> referencedNames = new HashSet<>();
 
         for (FlowDef flow : def.flows()) {
@@ -226,17 +226,17 @@ public final class ModelValidator {
                 referencedNames.add(flow.sink());
             }
         }
-        for (AuxDef aux : def.auxiliaries()) {
-            collectReferences(aux.equation(), referencedNames);
+        for (VariableDef v : def.variables()) {
+            collectReferences(v.equation(), referencedNames);
         }
 
-        // Check literal-valued auxiliaries (parameters)
-        for (AuxDef aux : def.auxiliaries()) {
-            if (aux.isLiteral() && !isReferenced(aux.name(), referencedNames)) {
-                issues.add(new ValidationIssue(Severity.WARNING, aux.name(),
-                        "Parameter '" + aux.name()
+        // Check literal-valued variables (parameters)
+        for (VariableDef v : def.variables()) {
+            if (v.isLiteral() && !isReferenced(v.name(), referencedNames)) {
+                issues.add(new ValidationIssue(Severity.WARNING, v.name(),
+                        "Parameter '" + v.name()
                                 + "' is not referenced by any equation."
-                                + " Use it in a flow or auxiliary equation, or remove it if unneeded."));
+                                + " Use it in a flow or variable equation, or remove it if unneeded."));
             }
         }
         // Check lookup tables
@@ -271,13 +271,13 @@ public final class ModelValidator {
     }
 
     private static void checkDanglingConnectors(ModelDefinition def, List<ValidationIssue> issues) {
-        // Build a map of element name → equation for flows and auxiliaries
+        // Build a map of element name → equation for flows and variables
         Map<String, String> equations = new LinkedHashMap<>();
         for (FlowDef flow : def.flows()) {
             equations.put(flow.name(), flow.equation());
         }
-        for (AuxDef aux : def.auxiliaries()) {
-            equations.put(aux.name(), aux.equation());
+        for (VariableDef v : def.variables()) {
+            equations.put(v.name(), v.equation());
         }
 
         for (ViewDef view : def.views()) {
@@ -346,7 +346,7 @@ public final class ModelValidator {
         for (FlowDef f : def.flows()) {
             allNames.add(f.name());
         }
-        for (AuxDef a : def.auxiliaries()) {
+        for (VariableDef a : def.variables()) {
             allNames.add(a.name());
         }
         for (CldVariableDef v : def.cldVariables()) {

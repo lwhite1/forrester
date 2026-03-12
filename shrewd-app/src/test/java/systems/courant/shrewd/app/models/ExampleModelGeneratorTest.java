@@ -194,7 +194,7 @@ class ExampleModelGeneratorTest {
             ObjectNode elements = model.putObject("elements");
             elements.put("stocks", def.stocks().size());
             elements.put("flows", def.flows().size());
-            elements.put("auxiliaries", def.auxiliaries().size());
+            elements.put("variables", def.variables().size());
             elements.put("parameters", def.parameterNames().size());
         });
 

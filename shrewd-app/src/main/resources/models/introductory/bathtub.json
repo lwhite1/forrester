@@ -28,7 +28,7 @@
     "duration": 10.0,
     "durationUnit": "Minute"
   },
-  "auxiliaries": [
+  "variables": [
     {
       "name": "Outflow Rate",
       "equation": "5",

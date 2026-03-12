@@ -1,7 +1,7 @@
 package systems.courant.shrewd.io.xmile;
 
 import systems.courant.shrewd.io.ImportResult;
-import systems.courant.shrewd.model.def.AuxDef;
+import systems.courant.shrewd.model.def.VariableDef;
 import systems.courant.shrewd.model.def.FlowDef;
 import systems.courant.shrewd.model.def.LookupTableDef;
 import systems.courant.shrewd.model.def.ModelDefinition;
@@ -123,7 +123,7 @@ class XmileExporterTest {
                     .defaultSimulation("Day", 10, "Day")
                     .lookupTable("effect",
                             new double[]{0, 1, 2}, new double[]{0, 0.5, 1.0}, "LINEAR")
-                    .aux("result", "LOOKUP(effect, Time)", null)
+                    .variable("result", "LOOKUP(effect, Time)", null)
                     .build();
 
             String xml = XmileExporter.toXmile(def);

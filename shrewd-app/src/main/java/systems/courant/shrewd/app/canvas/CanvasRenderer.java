@@ -1,6 +1,6 @@
 package systems.courant.shrewd.app.canvas;
 
-import systems.courant.shrewd.model.def.AuxDef;
+import systems.courant.shrewd.model.def.VariableDef;
 import systems.courant.shrewd.model.def.CausalLinkDef;
 import systems.courant.shrewd.model.def.CommentDef;
 import systems.courant.shrewd.model.def.ConnectorRoute;
@@ -98,7 +98,7 @@ public class CanvasRenderer {
             String hoveredElement,
             ConnectionId hoveredConnection,
             ConnectionId selectedConnection,
-            boolean hideAuxiliaries,
+            boolean hideVariables,
             boolean showDelayBadges,
             boolean hideInfoLinks
     ) {}
@@ -112,10 +112,10 @@ public class CanvasRenderer {
     }
 
     /**
-     * Returns true if the named element is an auxiliary that should be hidden.
+     * Returns true if the named element is a variable that should be hidden.
      */
-    private boolean isHiddenAux(String name, boolean hideAuxiliaries) {
-        return hideAuxiliaries
+    private boolean isHiddenAux(String name, boolean hideVariables) {
+        return hideVariables
                 && canvasState.getType(name).orElse(null) == ElementType.AUX;
     }
 
@@ -142,7 +142,7 @@ public class CanvasRenderer {
         String hoveredElement = ctx.hoveredElement();
         ConnectionId hoveredConnection = ctx.hoveredConnection();
         ConnectionId selectedConnection = ctx.selectedConnection();
-        boolean hideAux = ctx.hideAuxiliaries();
+        boolean hideAux = ctx.hideVariables();
         boolean showDelay = ctx.showDelayBadges();
 
         if (editor == null) {
@@ -205,9 +205,9 @@ public class CanvasRenderer {
                 case AUX -> {
                     double w = LayoutMetrics.effectiveWidth(canvasState, name);
                     double h = LayoutMetrics.effectiveHeight(canvasState, name);
-                    boolean isLiteral = editor.getAuxByName(name)
-                            .map(AuxDef::isLiteral).orElse(false);
-                    String equation = editor.getAuxEquation(name).orElse(null);
+                    boolean isLiteral = editor.getVariableByName(name)
+                            .map(VariableDef::isLiteral).orElse(false);
+                    String equation = editor.getVariableEquation(name).orElse(null);
                     boolean hasDelay = showDelay
                             && DelayDetector.equationContainsDelay(equation);
                     ElementRenderer.drawAux(gc, name, isLiteral, equation, hasDelay,

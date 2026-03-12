@@ -81,7 +81,7 @@ final class TooltipController {
             case FLOW -> editor.getFlowEquation(name)
                     .filter(ElementRenderer::isDisplayableEquation)
                     .ifPresent(eq -> sb.append("\n= ").append(eq));
-            case AUX -> editor.getAuxEquation(name)
+            case AUX -> editor.getVariableEquation(name)
                     .filter(ElementRenderer::isDisplayableEquation)
                     .ifPresent(eq -> sb.append("\n= ").append(eq));
             case STOCK -> editor.getStockUnit(name)

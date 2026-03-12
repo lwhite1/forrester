@@ -28,7 +28,7 @@
     "duration": 365.0,
     "durationUnit": "Day"
   },
-  "auxiliaries": [
+  "variables": [
     {
       "name": "Birth Rate",
       "equation": "0.04",

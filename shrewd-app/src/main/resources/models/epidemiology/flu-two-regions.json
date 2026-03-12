@@ -108,7 +108,7 @@
       "sink": "immune population region 2"
     }
   ],
-  "auxiliaries": [
+  "variables": [
     {
       "name": "normal immune population fraction region 1",
       "comment": "normal immune population fraction region 1",

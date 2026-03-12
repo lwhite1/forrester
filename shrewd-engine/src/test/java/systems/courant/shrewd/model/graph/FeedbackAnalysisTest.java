@@ -217,12 +217,12 @@ class FeedbackAnalysisTest {
         @Test
         void shouldDetectLoopThroughAuxiliary() {
             // A → G → B and B → (via aux X) → F → A
-            // Tests transitive dependency resolution through auxiliaries
+            // Tests transitive dependency resolution through variables
             ModelDefinition def = new ModelDefinitionBuilder()
                     .name("Aux Loop")
                     .stock("A", 100, "Thing")
                     .stock("B", 50, "Thing")
-                    .aux("X", "B * 2", "Thing")
+                    .variable("X", "B * 2", "Thing")
                     .flow("F", "X", "Day", "B", "A")
                     .flow("G", "A * 0.1", "Day", "A", "B")
                     .build();

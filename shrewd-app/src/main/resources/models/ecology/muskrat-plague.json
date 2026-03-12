@@ -17,7 +17,7 @@
       "sink": "Muskrat population"
     }
   ],
-  "auxiliaries": [
+  "variables": [
     {
       "name": "Muskrats caught",
       "comment": "Muskrats caught",
@@ -45,7 +45,7 @@
     {
       "name": "Number of licenses",
       "equation": "10",
-      "comment": "10",
+      "comment": "Number of licenses",
       "unit": "licenses/Year"
     },
     {

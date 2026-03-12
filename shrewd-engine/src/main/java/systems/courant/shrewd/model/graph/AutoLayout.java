@@ -1,6 +1,6 @@
 package systems.courant.shrewd.model.graph;
 
-import systems.courant.shrewd.model.def.AuxDef;
+import systems.courant.shrewd.model.def.VariableDef;
 import systems.courant.shrewd.model.def.CausalLinkDef;
 import systems.courant.shrewd.model.def.CldVariableDef;
 import systems.courant.shrewd.model.def.ConnectorRoute;
@@ -69,7 +69,7 @@ public final class AutoLayout {
      * @return a view definition with element placements and connector routes
      */
     public static ViewDef layout(ModelDefinition def) {
-        if (def.stocks().isEmpty() && def.flows().isEmpty() && def.auxiliaries().isEmpty()
+        if (def.stocks().isEmpty() && def.flows().isEmpty() && def.variables().isEmpty()
                 && def.lookupTables().isEmpty()
                 && def.modules().isEmpty() && def.cldVariables().isEmpty()) {
             return new ViewDef("Auto Layout", List.of(),
@@ -104,7 +104,7 @@ public final class AutoLayout {
             addNode(factory, root, nodeMap, typeMap, f.name(), ElementType.FLOW,
                     westPorts, eastPorts);
         }
-        for (AuxDef a : def.auxiliaries()) {
+        for (VariableDef a : def.variables()) {
             addNode(factory, root, nodeMap, typeMap, a.name(), ElementType.AUX,
                     westPorts, eastPorts);
         }
@@ -125,7 +125,7 @@ public final class AutoLayout {
         // cycle breaking preserves the natural left-to-right stock-flow ordering.
         Map<String, Integer> chainOrder = computeMaterialFlowOrder(def);
 
-        // Assign X positions to non-chain nodes (constants, auxiliaries) based on
+        // Assign X positions to non-chain nodes (constants, variables) based on
         // their consumers' chain positions — place them just before their earliest consumer.
         assignNonChainPositions(chainOrder, depGraph, nodeMap);
 
@@ -408,7 +408,7 @@ public final class AutoLayout {
 
     /**
      * Assigns chain order positions to nodes not in the material flow chain
-     * (constants, auxiliaries, lookup tables). Each non-chain node gets placed
+     * (constants, variables, lookup tables). Each non-chain node gets placed
      * one step before its earliest consumer in the chain.
      */
     private static void assignNonChainPositions(Map<String, Integer> chainOrder,

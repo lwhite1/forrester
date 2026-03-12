@@ -96,7 +96,7 @@
       "sink": "susceptible population"
     }
   ],
-  "auxiliaries": [
+  "variables": [
     {
       "name": "recorded cholera cases",
       "comment": "recorded cholera cases",
@@ -111,7 +111,7 @@
     },
     {
       "name": "level of prevention",
-      "comment": "([(0,0)-(4000,10)],(0,0.1),(130,0.1),(186,0.3),(206,0.5),(365,0.8),(3650,0. 8) )",
+      "comment": "level of prevention",
       "equation": "0.1",
       "unit": "Dmnl"
     },
@@ -141,7 +141,7 @@
     },
     {
       "name": "effect of the fraction of infected on the fraction of contaminated water",
-      "comment": "([(0,0)-(1,1)],(0,0),(0.25,0.8),(0.5,0.95),(0.75,0.98),(1,1) )\\!\\!\\!",
+      "comment": "effect of the fraction of infected on the fraction of contaminated water",
       "equation": "LOOKUP(effect_of_the_fraction_of_infected_on_the_fraction_of_contaminated_water_lookup, fraction_of_infected)",
       "unit": ""
     },
@@ -159,7 +159,7 @@
     },
     {
       "name": "average state of health services",
-      "comment": "([(0,0)-(4000,1)],(0,0.15),(130,0.15),(183,0.4),(206,0.7),(250,0.75),(300,0 .8),(3650,0.8) ) over time",
+      "comment": "average state of health services",
       "equation": "0.15",
       "unit": ""
     },
@@ -189,7 +189,7 @@
     },
     {
       "name": "condition of the sanitary infrastructure",
-      "comment": "([(0,0)-(4000,1)],(0,0.5),(183,0.55),(365,0.6),(1825,0.85),(3650,0.9) )  over time",
+      "comment": "condition of the sanitary infrastructure",
       "equation": "0.5",
       "unit": "Dmnl"
     },

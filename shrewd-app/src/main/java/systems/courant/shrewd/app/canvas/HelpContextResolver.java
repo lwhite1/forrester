@@ -170,7 +170,7 @@ public final class HelpContextResolver {
         return switch (tool) {
             case PLACE_STOCK -> HelpTopic.STOCK;
             case PLACE_FLOW -> HelpTopic.FLOW;
-            case PLACE_AUX -> HelpTopic.VARIABLE;
+            case PLACE_VARIABLE -> HelpTopic.VARIABLE;
             case PLACE_LOOKUP -> HelpTopic.LOOKUP;
             case PLACE_MODULE -> HelpTopic.MODULE;
             case PLACE_CLD_VARIABLE -> HelpTopic.CLD_VARIABLE;

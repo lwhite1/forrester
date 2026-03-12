@@ -61,8 +61,8 @@ public final class DefinitionValidator {
         for (FlowDef flow : def.flows()) {
             checkDuplicateName(flow.name(), allNames, lowerToOriginal, errors);
         }
-        for (AuxDef aux : def.auxiliaries()) {
-            checkDuplicateName(aux.name(), allNames, lowerToOriginal, errors);
+        for (VariableDef v : def.variables()) {
+            checkDuplicateName(v.name(), allNames, lowerToOriginal, errors);
         }
         for (LookupTableDef table : def.lookupTables()) {
             checkDuplicateName(table.name(), allNames, lowerToOriginal, errors);
@@ -102,12 +102,12 @@ public final class DefinitionValidator {
             }
         }
 
-        // Validate auxiliary equations parse
-        for (AuxDef aux : def.auxiliaries()) {
+        // Validate variable equations parse
+        for (VariableDef v : def.variables()) {
             try {
-                ExprParser.parse(aux.equation());
+                ExprParser.parse(v.equation());
             } catch (ParseException e) {
-                errors.add("Variable '" + aux.name() + "' has invalid equation: "
+                errors.add("Variable '" + v.name() + "' has invalid equation: "
                         + e.getMessage()
                         + ". Double-click the variable to edit its equation.");
             }
@@ -209,21 +209,21 @@ public final class DefinitionValidator {
                 log.debug("Already reported parse error in flow '{}': {}", flow.name(), ex.getMessage(), ex);
             }
         }
-        for (AuxDef aux : def.auxiliaries()) {
+        for (VariableDef v : def.variables()) {
             try {
-                Expr expr = ExprParser.parse(aux.equation());
+                Expr expr = ExprParser.parse(v.equation());
                 Set<String> refs = ExprDependencies.extract(expr);
                 for (String ref : refs) {
                     String resolved = ref.replace('_', ' ');
                     if (!knownNames.contains(ref) && !knownNames.contains(resolved)
                             && !BUILTIN_NAMES.contains(ref)) {
-                        errors.add("Variable '" + aux.name()
+                        errors.add("Variable '" + v.name()
                                 + "' references unknown element: '" + ref
                                 + "'. Check the spelling or add the missing element to the model.");
                     }
                 }
             } catch (ParseException ex) {
-                log.debug("Already reported parse error in auxiliary '{}': {}", aux.name(), ex.getMessage(), ex);
+                log.debug("Already reported parse error in variable '{}': {}", v.name(), ex.getMessage(), ex);
             }
         }
     }

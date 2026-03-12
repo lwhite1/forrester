@@ -36,7 +36,7 @@ class AutoLayoutTest {
                 .stock("S1", 100, "Thing")
                 .stock("S2", 50, "Thing")
                 .flow("F1", "S1 * 0.1", "Day", "S1", "S2")
-                .aux("A1", "S1 + S2", "Thing")
+                .variable("A1", "S1 + S2", "Thing")
                 .constant("C1", 5, "Thing")
                 .build();
 
@@ -58,7 +58,7 @@ class AutoLayoutTest {
                 .name("Types")
                 .stock("S", 100, "Thing")
                 .flow("F", "S", "Day", "S", null)
-                .aux("A", "S * 2", "Thing")
+                .variable("A", "S * 2", "Thing")
                 .constant("C", 1, "Thing")
                 .build();
 
@@ -126,8 +126,8 @@ class AutoLayoutTest {
                 .stock("S3", 25, "Thing")
                 .constant("C1", 1, "Thing")
                 .constant("C2", 2, "Thing")
-                .aux("A1", "S1", "Thing")
-                .aux("A2", "S2", "Thing")
+                .variable("A1", "S1", "Thing")
+                .variable("A2", "S2", "Thing")
                 .build();
 
         ViewDef view = AutoLayout.layout(def);
@@ -144,7 +144,7 @@ class AutoLayoutTest {
                 .name("Topology")
                 .stock("S", 100, "Thing")
                 .flow("F", "S", "Day", "S", null)
-                .aux("A", "S", "Thing")
+                .variable("A", "S", "Thing")
                 .constant("C", 1, "Thing")
                 .build();
 
@@ -287,7 +287,7 @@ class AutoLayoutTest {
             ModelDefinition def = new ModelDefinitionBuilder()
                     .name("SCC Aux")
                     .stock("Population", 100, "Person")
-                    .aux("Growth_Effect", "Population * 0.5", "Dimensionless unit")
+                    .variable("Growth_Effect", "Population * 0.5", "Dimensionless unit")
                     .flow("Births", "Growth_Effect", "Day", null, "Population")
                     .build();
 
@@ -303,7 +303,7 @@ class AutoLayoutTest {
             ModelDefinition def = new ModelDefinitionBuilder()
                     .name("Non-SCC Aux")
                     .stock("Population", 100, "Person")
-                    .aux("Observer", "Population * 2", "Person")
+                    .variable("Observer", "Population * 2", "Person")
                     .flow("Births", "10", "Day", null, "Population")
                     .build();
 
@@ -430,10 +430,10 @@ class AutoLayoutTest {
                 .name("Inventory Oscillation")
                 .stock("Cars_on_Lot", 200, "Car")
                 .stock("Perceived_Sales", 20, "Car")
-                .aux("Customer_Demand", "IF(TIME > 25, Step_Demand, Base_Demand)", "Car")
-                .aux("Desired_Inventory", "Perceived_Sales * Desired_Inventory_Multiplier", "Car")
-                .aux("Inventory_Gap", "Desired_Inventory - Cars_on_Lot", "Car")
-                .aux("Orders_to_Factory",
+                .variable("Customer_Demand", "IF(TIME > 25, Step_Demand, Base_Demand)", "Car")
+                .variable("Desired_Inventory", "Perceived_Sales * Desired_Inventory_Multiplier", "Car")
+                .variable("Inventory_Gap", "Desired_Inventory - Cars_on_Lot", "Car")
+                .variable("Orders_to_Factory",
                         "MAX(Perceived_Sales + Inventory_Gap / Response_Delay, 0)", "Car")
                 .flow("Sales", "MIN(Cars_on_Lot, Customer_Demand)", "Day",
                         "Cars_on_Lot", null)

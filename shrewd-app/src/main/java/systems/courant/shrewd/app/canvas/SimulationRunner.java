@@ -34,7 +34,7 @@ public class SimulationRunner {
      * @param columnNames ordered column names (Step, stocks, variables)
      * @param rows        time-series data, one array per step
      * @param units       element name to unit string (empty string if no unit)
-     * @param stockNames  names of columns that represent stocks (as opposed to auxiliaries)
+     * @param stockNames  names of columns that represent stocks (as opposed to variables)
      */
     public record SimulationResult(List<String> columnNames, List<double[]> rows,
                                    Map<String, String> units, Set<String> stockNames) {

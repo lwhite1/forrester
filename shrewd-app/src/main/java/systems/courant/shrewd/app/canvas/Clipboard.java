@@ -77,7 +77,7 @@ public class Clipboard {
             Optional<? extends ElementDef> defOpt = switch (type) {
                 case STOCK -> editor.getStockByName(name);
                 case FLOW -> editor.getFlowByName(name);
-                case AUX -> editor.getAuxByName(name);
+                case AUX -> editor.getVariableByName(name);
                 case MODULE -> editor.getModuleByName(name);
                 case LOOKUP -> editor.getLookupTableByName(name);
                 case CLD_VARIABLE -> Optional.ofNullable(editor.getCldVariableByName(name));

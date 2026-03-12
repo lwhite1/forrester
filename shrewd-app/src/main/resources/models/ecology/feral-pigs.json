@@ -17,7 +17,7 @@
       "sink": "feral pigs"
     }
   ],
-  "auxiliaries": [
+  "variables": [
     {
       "name": "births",
       "comment": "births",

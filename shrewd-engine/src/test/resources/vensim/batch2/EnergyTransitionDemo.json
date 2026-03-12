@@ -161,7 +161,7 @@
       "sink": "installed_capacity_T1"
     }
   ],
-  "auxiliaries": [
+  "variables": [
     {
       "name": "marginal_cost_new_capacity_previous_year_T3",
       "comment": "marginal cost new capacity previous year T3",

@@ -1,6 +1,6 @@
 package systems.courant.shrewd.app.canvas;
 
-import systems.courant.shrewd.model.def.AuxDef;
+import systems.courant.shrewd.model.def.VariableDef;
 
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.TextArea;
@@ -12,10 +12,10 @@ import java.util.Objects;
 import java.util.Optional;
 
 /**
- * Property form for auxiliary variable elements. Builds editable fields
+ * Property form for variable elements. Builds editable fields
  * for name, equation, and unit.
  */
-class AuxForm implements ElementForm {
+class VariableForm implements ElementForm {
 
     private final FormContext ctx;
 
@@ -24,25 +24,25 @@ class AuxForm implements ElementForm {
     private ComboBox<String> unitBox;
     private TextArea commentArea;
 
-    AuxForm(FormContext ctx) {
+    VariableForm(FormContext ctx) {
         this.ctx = ctx;
     }
 
     @Override
     public int build(int startRow) {
-        Optional<AuxDef> auxOpt = ctx.editor.getAuxByName(ctx.elementName);
-        if (auxOpt.isEmpty()) {
+        Optional<VariableDef> varOpt = ctx.editor.getVariableByName(ctx.elementName);
+        if (varOpt.isEmpty()) {
             ctx.addReadOnlyRow(startRow++, "Name", ctx.elementName);
             return startRow;
         }
-        AuxDef aux = auxOpt.get();
+        VariableDef v = varOpt.get();
 
         int row = startRow;
         nameField = ctx.createNameField();
         ctx.addFieldRow(row++, "Name", nameField,
                 "The name used to reference this variable in equations");
 
-        commentArea = new TextArea(aux.comment() != null ? aux.comment() : "");
+        commentArea = new TextArea(v.comment() != null ? v.comment() : "");
         commentArea.setId("propComment");
         commentArea.setPrefRowCount(2);
         commentArea.setWrapText(true);
@@ -52,14 +52,14 @@ class AuxForm implements ElementForm {
         ctx.addFieldRow(row++, "Description", commentArea,
                 "Documentation for this element");
 
-        equationField = ctx.createEquationField(aux.equation());
+        equationField = ctx.createEquationField(v.equation());
         ctx.addEquationCommitHandlers(equationField, this::commitEquation);
         EquationAutoComplete.attach(equationField, ctx.editor, ctx.elementName);
         ctx.addFieldRow(row++, "Equation", ctx.wrapWithHelpButton(equationField),
                 "A formula computed each time step from other model elements");
         ctx.attachEquationValidation(equationField, row++);
 
-        unitBox = ctx.createUnitComboBox(aux.unit());
+        unitBox = ctx.createUnitComboBox(v.unit());
         ctx.addComboCommitHandlers(unitBox, this::commitUnit);
         ctx.addFieldRow(row++, "Unit", unitBox,
                 "The unit of measurement");
@@ -69,15 +69,15 @@ class AuxForm implements ElementForm {
 
     @Override
     public void updateValues() {
-        Optional<AuxDef> auxOpt = ctx.editor.getAuxByName(ctx.elementName);
-        if (auxOpt.isEmpty() || nameField == null) {
+        Optional<VariableDef> varOpt = ctx.editor.getVariableByName(ctx.elementName);
+        if (varOpt.isEmpty() || nameField == null) {
             return;
         }
-        AuxDef aux = auxOpt.get();
+        VariableDef v = varOpt.get();
         nameField.setText(ctx.elementName);
-        equationField.setText(aux.equation());
-        unitBox.setValue(aux.unit() != null ? aux.unit() : "");
-        commentArea.setText(aux.comment() != null ? aux.comment() : "");
+        equationField.setText(v.equation());
+        unitBox.setValue(v.unit() != null ? v.unit() : "");
+        commentArea.setText(v.comment() != null ? v.comment() : "");
     }
 
     @Override
@@ -88,33 +88,33 @@ class AuxForm implements ElementForm {
     private void commitComment(TextArea area) {
         String text = area.getText().trim();
         String comment = text.isEmpty() ? null : text;
-        Optional<AuxDef> auxOpt = ctx.editor.getAuxByName(ctx.elementName);
-        if (auxOpt.isEmpty() || Objects.equals(comment, auxOpt.get().comment())) {
+        Optional<VariableDef> varOpt = ctx.editor.getVariableByName(ctx.elementName);
+        if (varOpt.isEmpty() || Objects.equals(comment, varOpt.get().comment())) {
             return;
         }
-        ctx.canvas.applyMutation(() -> ctx.editor.setAuxComment(ctx.elementName, comment));
+        ctx.canvas.applyMutation(() -> ctx.editor.setVariableComment(ctx.elementName, comment));
     }
 
     private void commitEquation(EquationField field) {
         String equation = field.getText().trim();
         if (equation.isEmpty()) {
-            ctx.editor.getAuxByName(ctx.elementName)
-                    .ifPresent(aux -> field.setText(aux.equation()));
+            ctx.editor.getVariableByName(ctx.elementName)
+                    .ifPresent(v -> field.setText(v.equation()));
             return;
         }
-        Optional<AuxDef> auxOpt = ctx.editor.getAuxByName(ctx.elementName);
-        if (auxOpt.isPresent() && equation.equals(auxOpt.get().equation())) {
+        Optional<VariableDef> varOpt = ctx.editor.getVariableByName(ctx.elementName);
+        if (varOpt.isPresent() && equation.equals(varOpt.get().equation())) {
             return;
         }
-        ctx.canvas.applyMutation(() -> ctx.editor.setAuxEquation(ctx.elementName, equation));
+        ctx.canvas.applyMutation(() -> ctx.editor.setVariableEquation(ctx.elementName, equation));
     }
 
     private void commitUnit(ComboBox<String> box) {
         String unit = box.getValue() != null ? box.getValue().trim() : "";
-        Optional<AuxDef> auxOpt = ctx.editor.getAuxByName(ctx.elementName);
-        if (auxOpt.isPresent() && unit.equals(auxOpt.get().unit())) {
+        Optional<VariableDef> varOpt = ctx.editor.getVariableByName(ctx.elementName);
+        if (varOpt.isPresent() && unit.equals(varOpt.get().unit())) {
             return;
         }
-        ctx.canvas.applyMutation(() -> ctx.editor.setAuxUnit(ctx.elementName, unit));
+        ctx.canvas.applyMutation(() -> ctx.editor.setVariableUnit(ctx.elementName, unit));
     }
 }

@@ -1,6 +1,6 @@
 package systems.courant.shrewd.app.canvas;
 
-import systems.courant.shrewd.model.def.AuxDef;
+import systems.courant.shrewd.model.def.VariableDef;
 import systems.courant.shrewd.model.def.FlowDef;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -17,14 +17,14 @@ import static org.assertj.core.api.Assertions.assertThat;
 class EquationReferenceManagerTest {
 
     private List<FlowDef> flows;
-    private List<AuxDef> auxiliaries;
+    private List<VariableDef> variables;
     private EquationReferenceManager manager;
 
     @BeforeEach
     void setUp() {
         flows = new ArrayList<>();
-        auxiliaries = new ArrayList<>();
-        manager = new EquationReferenceManager(flows, auxiliaries);
+        variables = new ArrayList<>();
+        manager = new EquationReferenceManager(flows, variables);
     }
 
     @Nested
@@ -105,9 +105,9 @@ class EquationReferenceManagerTest {
 
         @Test
         void shouldUpdateAuxEquations() {
-            auxiliaries.add(new AuxDef("Ratio", "Pop / Total", "units"));
+            variables.add(new VariableDef("Ratio", "Pop / Total", "units"));
             manager.updateEquationReferences("Total", "Grand_Total");
-            assertThat(auxiliaries.getFirst().equation()).isEqualTo("Pop / Grand_Total");
+            assertThat(variables.getFirst().equation()).isEqualTo("Pop / Grand_Total");
         }
 
         @Test
@@ -139,10 +139,10 @@ class EquationReferenceManagerTest {
 
         @Test
         void shouldTransformAuxEquation() {
-            auxiliaries.add(new AuxDef("Ratio", "Pop / Total", "units"));
+            variables.add(new VariableDef("Ratio", "Pop / Total", "units"));
             boolean changed = manager.updateEquationByName("Ratio", eq -> eq.replace("Total", "100"));
             assertThat(changed).isTrue();
-            assertThat(auxiliaries.getFirst().equation()).isEqualTo("Pop / 100");
+            assertThat(variables.getFirst().equation()).isEqualTo("Pop / 100");
         }
 
         @Test
@@ -205,10 +205,10 @@ class EquationReferenceManagerTest {
 
         @Test
         void shouldAddToAuxiliary() {
-            auxiliaries.add(new AuxDef("Ratio", "0", "units"));
+            variables.add(new VariableDef("Ratio", "0", "units"));
             boolean added = manager.addConnectionReference("Ratio", "Pop");
             assertThat(added).isTrue();
-            assertThat(auxiliaries.getFirst().equation()).isEqualTo("Pop");
+            assertThat(variables.getFirst().equation()).isEqualTo("Pop");
         }
 
         @Test

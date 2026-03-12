@@ -56,7 +56,7 @@
       "sink": "old_houses"
     }
   ],
-  "auxiliaries": [
+  "variables": [
     {
       "name": "aging_of_houses",
       "comment": "aging of houses",

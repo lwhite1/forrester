@@ -50,10 +50,10 @@ class CanvasToolBarFxTest {
     }
 
     @Test
-    @DisplayName("Clicking Auxiliary button activates PLACE_AUX tool")
+    @DisplayName("Clicking Auxiliary button activates PLACE_VARIABLE tool")
     void clickAuxButton(FxRobot robot) {
         robot.clickOn("#toolAux");
-        assertThat(toolBar.getActiveTool()).isEqualTo(CanvasToolBar.Tool.PLACE_AUX);
+        assertThat(toolBar.getActiveTool()).isEqualTo(CanvasToolBar.Tool.PLACE_VARIABLE);
     }
 
     @Test

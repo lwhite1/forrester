@@ -57,7 +57,7 @@
       "sink": "REU supply"
     }
   ],
-  "auxiliaries": [
+  "variables": [
     {
       "name": "relative attractiveness to immigrate",
       "comment": "relative attractiveness to immigrate",
@@ -66,7 +66,7 @@
     },
     {
       "name": "workforce emigration",
-      "comment": "+ MAX(exogenous emigration/avg emigration time,0)",
+      "comment": "workforce emigration",
       "equation": "MAX((immigrants-labour_demand)/avg_emigration_time,0)",
       "unit": "person/Month"
     },
@@ -108,7 +108,7 @@
     },
     {
       "name": "workforce immigration",
-      "comment": "+MIN((labour demand-immigrants)/avg emigration time,0)   relative  attractiveness to immigrate*immigrants/avg immigration time",
+      "comment": "workforce immigration",
       "equation": "MAX(relative_attractiveness_to_immigrate*immigrants/avg_immigration_time,0)",
       "unit": "person/Month"
     },
@@ -120,7 +120,7 @@
     },
     {
       "name": "labour demand",
-      "comment": "number of workers per real estate unit under construction*real estate units under  construction*normal reu construction time\n\t\t/real estate unit construction time",
+      "comment": "labour demand",
       "equation": "workers_per_REU_under_construction*REU_under_construction",
       "unit": "person"
     },
@@ -144,7 +144,7 @@
     },
     {
       "name": "REU commissioning",
-      "comment": "MIN(real estate units under construction/real estate unit construction  time,MAX(0,buffer))",
+      "comment": "REU commissioning",
       "equation": "MIN(immigrants/workers_per_REU_under_construction,REU_under_construction)/REU_construction_time",
       "unit": "real estate unit/Month"
     },
@@ -199,7 +199,7 @@
     {
       "name": "Al Maktoum exogenous investment rate",
       "equation": "0.01",
-      "comment": "-STEP(0.01,10)",
+      "comment": "Al Maktoum exogenous investment rate",
       "unit": "Dmnl"
     },
     {

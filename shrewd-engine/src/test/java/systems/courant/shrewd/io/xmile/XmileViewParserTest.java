@@ -99,9 +99,9 @@ class XmileViewParserTest {
                 .filter(e -> e.name().equals("my_lookup")).findFirst().orElseThrow();
         assertThat(lookup.type()).isEqualTo(ElementType.LOOKUP);
 
-        ElementPlacement aux = views.get(0).elements().stream()
+        ElementPlacement v = views.get(0).elements().stream()
                 .filter(e -> e.name().equals("regular_aux")).findFirst().orElseThrow();
-        assertThat(aux.type()).isEqualTo(ElementType.AUX);
+        assertThat(v.type()).isEqualTo(ElementType.AUX);
     }
 
     @Test

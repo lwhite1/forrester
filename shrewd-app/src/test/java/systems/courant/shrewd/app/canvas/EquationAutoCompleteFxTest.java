@@ -46,7 +46,7 @@ class EquationAutoCompleteFxTest {
                 .stock("Population", 1000, "people")
                 .stock("Pollution", 0, "tons")
                 .flow("Birth Rate", "Population * 0.03", "year", null, "Population")
-                .aux("Contact Rate", "5", "contacts/day")
+                .variable("Contact Rate", "5", "contacts/day")
                 .constant("Growth Factor", 1.5, "dimensionless")
                 .build());
 

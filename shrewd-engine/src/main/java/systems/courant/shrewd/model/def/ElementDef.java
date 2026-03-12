@@ -6,6 +6,6 @@ package systems.courant.shrewd.model.def;
  * or passed generically (e.g. in clipboard operations).
  */
 public sealed interface ElementDef
-        permits StockDef, FlowDef, AuxDef,
+        permits StockDef, FlowDef, VariableDef,
                 LookupTableDef, ModuleInstanceDef, CldVariableDef, CommentDef {
 }

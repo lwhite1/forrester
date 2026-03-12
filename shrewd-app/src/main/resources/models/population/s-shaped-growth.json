@@ -22,7 +22,7 @@
     "duration": 224.0,
     "durationUnit": "Day"
   },
-  "auxiliaries": [
+  "variables": [
     {
       "name": "Max Birth Rate",
       "equation": "0.04",

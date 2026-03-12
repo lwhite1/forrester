@@ -52,10 +52,10 @@ final class EditorUnitContext implements DimensionalAnalyzer.UnitContext {
                     registry.resolveTimeUnit(flow.timeUnit())));
         }
 
-        // Check auxiliaries
-        var auxOpt = editor.getAuxByName(elementName);
+        // Check variables
+        var auxOpt = editor.getVariableByName(elementName);
         if (auxOpt.isEmpty()) {
-            auxOpt = editor.getAuxByName(resolved);
+            auxOpt = editor.getVariableByName(resolved);
         }
         if (auxOpt.isPresent()) {
             String unitName = auxOpt.get().unit();

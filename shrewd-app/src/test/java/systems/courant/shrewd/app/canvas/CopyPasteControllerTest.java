@@ -73,7 +73,7 @@ class CopyPasteControllerTest {
             List<String> pasted = pasteResult.pastedNames();
 
             assertThat(pasted).hasSize(1);
-            assertThat(editor.getAuxByName(pasted.get(0)).orElseThrow().literalValue()).isEqualTo(0.5);
+            assertThat(editor.getVariableByName(pasted.get(0)).orElseThrow().literalValue()).isEqualTo(0.5);
         }
 
         @Test
@@ -412,7 +412,7 @@ class CopyPasteControllerTest {
             assertThat(pastedModuleName).isNotNull();
 
             String pastedConstName = pasted.stream()
-                    .filter(n -> editor.getAuxByName(n).isPresent()
+                    .filter(n -> editor.getVariableByName(n).isPresent()
                             && !n.equals("Rate"))
                     .findFirst()
                     .orElse(null);
@@ -575,7 +575,7 @@ class CopyPasteControllerTest {
 
             assertThat(pasted).containsExactlyInAnyOrder("Population", "Growth Rate");
             assertThat(targetEditor.getStockByName("Population").orElseThrow().initialValue()).isEqualTo(100);
-            assertThat(targetEditor.getAuxByName("Growth Rate").orElseThrow().literalValue()).isEqualTo(0.05);
+            assertThat(targetEditor.getVariableByName("Growth Rate").orElseThrow().literalValue()).isEqualTo(0.05);
         }
 
         @Test
@@ -681,7 +681,7 @@ class CopyPasteControllerTest {
             assertThat(pastedFlow.source()).isEqualTo("Population");
 
             // Verify the constant exists so connectors would be generated
-            assertThat(targetEditor.getAuxByName("Rate")).isPresent();
+            assertThat(targetEditor.getVariableByName("Rate")).isPresent();
             assertThat(targetEditor.hasElement("Rate")).isTrue();
         }
 

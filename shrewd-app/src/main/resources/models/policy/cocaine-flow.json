@@ -17,7 +17,7 @@
       "sink": "Cocaine"
     }
   ],
-  "auxiliaries": [
+  "variables": [
     {
       "name": "confiscation",
       "comment": "confiscation",

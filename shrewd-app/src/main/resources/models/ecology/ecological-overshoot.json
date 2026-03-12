@@ -30,7 +30,7 @@
       "sink": "population"
     }
   ],
-  "auxiliaries": [
+  "variables": [
     {
       "name": "deaths",
       "comment": "deaths",
@@ -39,13 +39,13 @@
     },
     {
       "name": "resource availability dependent lifetime",
-      "comment": "MAX(MIN(normal lifetime*per capita renewable resource availability,100),20)",
+      "comment": "resource availability dependent lifetime",
       "equation": "MAX(15,MIN(100,normal_lifetime*per_capita_renewable_resource_availability))",
       "unit": ""
     },
     {
       "name": "resource use",
-      "comment": "IF THEN ELSE(renewable resources/rapid resource depletion time < renewable  resource consumption per capita*population, renewable resources/rapid  resource depletion time, renewable resource consumption per  capita*population)",
+      "comment": "resource use",
       "equation": "MIN(renewable_resources/rapid_resource_depletion_time, renewable_resource_consumption_per_capita *population)",
       "unit": "resource/Year"
     },

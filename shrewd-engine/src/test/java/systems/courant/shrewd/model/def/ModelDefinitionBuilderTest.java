@@ -32,7 +32,7 @@ class ModelDefinitionBuilderTest {
         assertThat(sir.name()).isEqualTo("SIR Model");
         assertThat(sir.stocks().size()).isEqualTo(3);
         assertThat(sir.flows().size()).isEqualTo(2);
-        assertThat(sir.auxiliaries().size()).isEqualTo(3);
+        assertThat(sir.variables().size()).isEqualTo(3);
         assertThat(sir.defaultSimulation()).isNotNull();
         assertThat(sir.defaultSimulation().duration()).isEqualTo(56);
     }
@@ -45,20 +45,20 @@ class ModelDefinitionBuilderTest {
         assertThat(def.name()).isEqualTo("Empty");
         assertThat(def.stocks().isEmpty()).isTrue();
         assertThat(def.flows().isEmpty()).isTrue();
-        assertThat(def.auxiliaries().isEmpty()).isTrue();
-        assertThat(def.auxiliaries().isEmpty()).isTrue();
+        assertThat(def.variables().isEmpty()).isTrue();
+        assertThat(def.variables().isEmpty()).isTrue();
     }
 
     @Test
-    void shouldBuildModelWithAuxiliaries() {
+    void shouldBuildModelWithVariables() {
         ModelDefinition def = new ModelDefinitionBuilder()
                 .name("Aux Test")
                 .stock("Population", 1000, "Person")
-                .aux("Birth Rate", "Population * Fertility", "Person")
+                .variable("Birth Rate", "Population * Fertility", "Person")
                 .constant("Fertility", 0.03, "Dimensionless")
                 .build();
-        assertThat(def.auxiliaries().size()).isEqualTo(2);
-        assertThat(def.auxiliaries().get(0).name()).isEqualTo("Birth Rate");
+        assertThat(def.variables().size()).isEqualTo(2);
+        assertThat(def.variables().get(0).name()).isEqualTo("Birth Rate");
     }
 
     @Test

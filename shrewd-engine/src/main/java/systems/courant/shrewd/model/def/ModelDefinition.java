@@ -15,7 +15,7 @@ import java.util.List;
  * @param moduleInterface optional module interface (non-null when this definition is used as a reusable module)
  * @param stocks the stock definitions
  * @param flows the flow definitions
- * @param auxiliaries the auxiliary variable definitions (includes literal-valued parameters)
+ * @param variables the variable variable definitions (includes literal-valued parameters)
  * @param lookupTables the lookup table definitions
  * @param modules the module instance definitions (for nested/composite models)
  * @param subscripts the subscript definitions
@@ -33,7 +33,7 @@ public record ModelDefinition(
         ModuleInterface moduleInterface,
         List<StockDef> stocks,
         List<FlowDef> flows,
-        List<AuxDef> auxiliaries,
+        List<VariableDef> variables,
         List<LookupTableDef> lookupTables,
         List<ModuleInstanceDef> modules,
         List<SubscriptDef> subscripts,
@@ -52,13 +52,13 @@ public record ModelDefinition(
     public ModelDefinition(
             String name, String comment, ModuleInterface moduleInterface,
             List<StockDef> stocks, List<FlowDef> flows,
-            List<AuxDef> auxiliaries,
+            List<VariableDef> variables,
             List<LookupTableDef> lookupTables, List<ModuleInstanceDef> modules,
             List<SubscriptDef> subscripts,
             List<CldVariableDef> cldVariables, List<CausalLinkDef> causalLinks,
             List<ViewDef> views, SimulationSettings defaultSimulation,
             ModelMetadata metadata, List<ReferenceDataset> referenceDatasets) {
-        this(name, comment, moduleInterface, stocks, flows, auxiliaries,
+        this(name, comment, moduleInterface, stocks, flows, variables,
                 lookupTables, modules, subscripts, cldVariables, causalLinks,
                 List.of(), views, defaultSimulation, metadata, referenceDatasets);
     }
@@ -69,13 +69,13 @@ public record ModelDefinition(
     public ModelDefinition(
             String name, String comment, ModuleInterface moduleInterface,
             List<StockDef> stocks, List<FlowDef> flows,
-            List<AuxDef> auxiliaries,
+            List<VariableDef> variables,
             List<LookupTableDef> lookupTables, List<ModuleInstanceDef> modules,
             List<SubscriptDef> subscripts,
             List<CldVariableDef> cldVariables, List<CausalLinkDef> causalLinks,
             List<ViewDef> views, SimulationSettings defaultSimulation,
             ModelMetadata metadata) {
-        this(name, comment, moduleInterface, stocks, flows, auxiliaries,
+        this(name, comment, moduleInterface, stocks, flows, variables,
                 lookupTables, modules, subscripts, cldVariables, causalLinks,
                 List.of(), views, defaultSimulation, metadata, List.of());
     }
@@ -86,12 +86,12 @@ public record ModelDefinition(
     public ModelDefinition(
             String name, String comment, ModuleInterface moduleInterface,
             List<StockDef> stocks, List<FlowDef> flows,
-            List<AuxDef> auxiliaries,
+            List<VariableDef> variables,
             List<LookupTableDef> lookupTables, List<ModuleInstanceDef> modules,
             List<SubscriptDef> subscripts,
             List<CldVariableDef> cldVariables, List<CausalLinkDef> causalLinks,
             List<ViewDef> views, SimulationSettings defaultSimulation) {
-        this(name, comment, moduleInterface, stocks, flows, auxiliaries,
+        this(name, comment, moduleInterface, stocks, flows, variables,
                 lookupTables, modules, subscripts, cldVariables, causalLinks,
                 List.of(), views, defaultSimulation, null, List.of());
     }
@@ -102,11 +102,11 @@ public record ModelDefinition(
     public ModelDefinition(
             String name, String comment, ModuleInterface moduleInterface,
             List<StockDef> stocks, List<FlowDef> flows,
-            List<AuxDef> auxiliaries,
+            List<VariableDef> variables,
             List<LookupTableDef> lookupTables, List<ModuleInstanceDef> modules,
             List<SubscriptDef> subscripts,
             List<ViewDef> views, SimulationSettings defaultSimulation) {
-        this(name, comment, moduleInterface, stocks, flows, auxiliaries,
+        this(name, comment, moduleInterface, stocks, flows, variables,
                 lookupTables, modules, subscripts, List.of(), List.of(),
                 List.of(), views, defaultSimulation, null, List.of());
     }
@@ -117,7 +117,7 @@ public record ModelDefinition(
         }
         stocks = stocks == null ? List.of() : List.copyOf(stocks);
         flows = flows == null ? List.of() : List.copyOf(flows);
-        auxiliaries = auxiliaries == null ? List.of() : List.copyOf(auxiliaries);
+        variables = variables == null ? List.of() : List.copyOf(variables);
         lookupTables = lookupTables == null ? List.of() : List.copyOf(lookupTables);
         modules = modules == null ? List.of() : List.copyOf(modules);
         subscripts = subscripts == null ? List.of() : List.copyOf(subscripts);
@@ -141,7 +141,7 @@ public record ModelDefinition(
                 .metadata(metadata);
         stocks.forEach(b::stock);
         flows.forEach(b::flow);
-        auxiliaries.forEach(b::aux);
+        variables.forEach(b::variable);
         lookupTables.forEach(b::lookupTable);
         modules.forEach(b::module);
         subscripts.forEach(s -> b.subscript(s.name(), s.labels()));
@@ -154,40 +154,40 @@ public record ModelDefinition(
     }
 
     /**
-     * Returns the literal-valued auxiliaries (parameters) in this model.
+     * Returns the literal-valued variables (parameters) in this model.
      */
-    public List<AuxDef> parameters() {
-        return auxiliaries.stream().filter(AuxDef::isLiteral).toList();
+    public List<VariableDef> parameters() {
+        return variables.stream().filter(VariableDef::isLiteral).toList();
     }
 
     /**
-     * Returns the names of all literal-valued auxiliaries (parameters).
+     * Returns the names of all literal-valued variables (parameters).
      */
     public List<String> parameterNames() {
-        return auxiliaries.stream()
-                .filter(AuxDef::isLiteral)
-                .map(AuxDef::name)
+        return variables.stream()
+                .filter(VariableDef::isLiteral)
+                .map(VariableDef::name)
                 .toList();
     }
 
     /**
      * Migration helper: creates a ModelDefinition by merging a legacy constants list
-     * into the auxiliaries list. Used by the JSON deserializer for backward compatibility
+     * into the variables list. Used by the JSON deserializer for backward compatibility
      * with files that have a separate "constants" array.
      */
     public static ModelDefinition withMigratedConstants(
             String name, String comment, ModuleInterface moduleInterface,
             List<StockDef> stocks, List<FlowDef> flows,
-            List<AuxDef> auxiliaries, List<AuxDef> migratedConstants,
+            List<VariableDef> variables, List<VariableDef> migratedConstants,
             List<LookupTableDef> lookupTables, List<ModuleInstanceDef> modules,
             List<SubscriptDef> subscripts,
             List<CldVariableDef> cldVariables, List<CausalLinkDef> causalLinks,
             List<CommentDef> comments,
             List<ViewDef> views, SimulationSettings defaultSimulation,
             ModelMetadata metadata) {
-        List<AuxDef> merged = new ArrayList<>();
-        if (auxiliaries != null) {
-            merged.addAll(auxiliaries);
+        List<VariableDef> merged = new ArrayList<>();
+        if (variables != null) {
+            merged.addAll(variables);
         }
         if (migratedConstants != null) {
             merged.addAll(migratedConstants);

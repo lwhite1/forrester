@@ -40,8 +40,8 @@ final class SelectionController {
                 name = editor.addStock();
                 type = ElementType.STOCK;
             }
-            case PLACE_AUX -> {
-                name = editor.addAux();
+            case PLACE_VARIABLE -> {
+                name = editor.addVariable();
                 type = ElementType.AUX;
             }
             case PLACE_MODULE -> {

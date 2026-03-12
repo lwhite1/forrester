@@ -3,18 +3,18 @@ package systems.courant.shrewd.model.def;
 import java.util.List;
 
 /**
- * Definition of an auxiliary variable in a model. Auxiliaries can hold either a computed
+ * Definition of a variable variable in a model. Variables can hold either a computed
  * formula expression (e.g. {@code "Population * birth_rate"}) or a literal numeric value
- * (e.g. {@code "0.03"}). Literal-valued auxiliaries serve as tunable parameters for
+ * (e.g. {@code "0.03"}). Literal-valued variables serve as tunable parameters for
  * sweep, Monte Carlo, and optimization analyses.
  *
  * @param name the variable name
  * @param comment optional description
  * @param equation the formula expression string (may be a numeric literal)
  * @param unit the unit name
- * @param subscripts dimension names this auxiliary is subscripted over (empty for scalar)
+ * @param subscripts dimension names this variable is subscripted over (empty for scalar)
  */
-public record AuxDef(
+public record VariableDef(
         String name,
         String comment,
         String equation,
@@ -22,7 +22,7 @@ public record AuxDef(
         List<String> subscripts
 ) implements ElementDef {
 
-    public AuxDef {
+    public VariableDef {
         if (name == null || name.isBlank()) {
             throw new IllegalArgumentException("Auxiliary name must not be blank");
         }
@@ -35,32 +35,32 @@ public record AuxDef(
     /**
      * Backward-compatible constructor without subscripts.
      */
-    public AuxDef(String name, String comment, String equation, String unit) {
+    public VariableDef(String name, String comment, String equation, String unit) {
         this(name, comment, equation, unit, List.of());
     }
 
     /**
-     * Convenience constructor that creates an auxiliary definition without a comment.
+     * Convenience constructor that creates a variable definition without a comment.
      */
-    public AuxDef(String name, String equation, String unit) {
+    public VariableDef(String name, String equation, String unit) {
         this(name, null, equation, unit, List.of());
     }
 
     /**
-     * Creates a literal-valued auxiliary (parameter) from a numeric value.
+     * Creates a literal-valued variable (parameter) from a numeric value.
      *
      * @param name  the variable name
      * @param comment optional description
      * @param value the numeric value (must be finite)
      * @param unit  the unit name
      */
-    public AuxDef(String name, String comment, double value, String unit) {
+    public VariableDef(String name, String comment, double value, String unit) {
         this(name, comment, formatValue(value), unit, List.of());
     }
 
     /**
      * Returns {@code true} if this auxiliary's equation is a numeric literal
-     * (possibly negated). Literal-valued auxiliaries are treated as tunable
+     * (possibly negated). Literal-valued variables are treated as tunable
      * parameters for sweep, Monte Carlo, and optimization analyses.
      */
     public boolean isLiteral() {
@@ -73,7 +73,7 @@ public record AuxDef(
     }
 
     /**
-     * Returns the numeric value of this literal-valued auxiliary.
+     * Returns the numeric value of this literal-valued variable.
      *
      * @throws IllegalStateException if {@link #isLiteral()} returns {@code false}
      */

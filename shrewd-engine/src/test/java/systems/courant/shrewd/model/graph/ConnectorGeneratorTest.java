@@ -115,7 +115,7 @@ class ConnectorGeneratorTest {
                 .name("WithAux")
                 .stock("S", 100, "Thing")
                 .constant("C", 2, "Thing")
-                .aux("Total", "S + C", "Thing")
+                .variable("Total", "S + C", "Thing")
                 .build();
 
         List<ConnectorRoute> connectors = ConnectorGenerator.generate(def);

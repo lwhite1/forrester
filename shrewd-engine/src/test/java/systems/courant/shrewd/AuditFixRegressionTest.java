@@ -119,15 +119,15 @@ class AuditFixRegressionTest {
 
         @Test
         void shouldIsolateLookupInputsAcrossFormulas() {
-            // Two auxiliaries both reference the same lookup table with different inputs.
+            // Two variables both reference the same lookup table with different inputs.
             // Without isolation, they would share the same inputHolder and interfere.
             ModelDefinition def = new ModelDefinitionBuilder()
                     .name("Lookup Isolation")
                     .stock("A", 10, "Thing")
                     .stock("B", 90, "Thing")
                     .lookupTable("Effect", new double[]{0, 50, 100}, new double[]{0.0, 0.5, 1.0}, "LINEAR")
-                    .aux("Effect of A", "LOOKUP(Effect, A)", "Thing")
-                    .aux("Effect of B", "LOOKUP(Effect, B)", "Thing")
+                    .variable("Effect of A", "LOOKUP(Effect, A)", "Thing")
+                    .variable("Effect of B", "LOOKUP(Effect, B)", "Thing")
                     .build();
 
             ModelCompiler compiler = new ModelCompiler();
@@ -158,7 +158,7 @@ class AuditFixRegressionTest {
             ModelDefinition def = new ModelDefinitionBuilder()
                     .name("DT Test")
                     .stock("S", 100, "Thing")
-                    .aux("Step Size", "DT", "Thing")
+                    .variable("Step Size", "DT", "Thing")
                     .build();
 
             ModelCompiler compiler = new ModelCompiler();
@@ -183,7 +183,7 @@ class AuditFixRegressionTest {
                     .moduleInterface(new ModuleInterface(
                             List.of(new PortDef("x", "Thing")),
                             List.of(new PortDef("out", "Thing"))))
-                    .aux("out", "x * DT", "Thing")
+                    .variable("out", "x * DT", "Thing")
                     .build();
 
             ModelDefinition outerDef = new ModelDefinitionBuilder()
@@ -274,7 +274,7 @@ class AuditFixRegressionTest {
             ModelDefinition def = new ModelDefinitionBuilder()
                     .name("Bad Ref")
                     .stock("S", 100, "Thing")
-                    .aux("Var", "S + Missing", "Thing")
+                    .variable("Var", "S + Missing", "Thing")
                     .build();
 
             List<String> errors = DefinitionValidator.validate(def);
@@ -287,7 +287,7 @@ class AuditFixRegressionTest {
                     .name("Builtins OK")
                     .stock("S", 100, "Thing")
                     .flow("F", "S * DT", "Day", "S", null)
-                    .aux("T", "TIME", "Thing")
+                    .variable("T", "TIME", "Thing")
                     .build();
 
             List<String> errors = DefinitionValidator.validate(def);
@@ -323,7 +323,7 @@ class AuditFixRegressionTest {
                             List.of(new PortDef("rate", "Dimensionless")),
                             List.of(new PortDef("output", "Person"))))
                     .stock("Pop", 100, "Person")
-                    .aux("output", "Pop * rate", "Person")
+                    .variable("output", "Pop * rate", "Person")
                     .build();
 
             ModelDefinition outerDef = new ModelDefinitionBuilder()

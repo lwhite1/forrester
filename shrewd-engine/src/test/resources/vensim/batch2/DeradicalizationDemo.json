@@ -69,7 +69,7 @@
       "sink": "animal_distress"
     }
   ],
-  "auxiliaries": [
+  "variables": [
     {
       "name": "visibility_of_the_problem",
       "comment": "visibility of the problem",

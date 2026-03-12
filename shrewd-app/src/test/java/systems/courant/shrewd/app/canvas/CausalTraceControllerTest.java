@@ -19,7 +19,7 @@ class CausalTraceControllerTest {
         return new ModelDefinitionBuilder()
                 .name("Chain")
                 .constant("A", 10, "Thing")
-                .aux("B", "A * 2", "Thing")
+                .variable("B", "A * 2", "Thing")
                 .stock("S", 0, "Thing")
                 .flow("F", "B", "Day", null, "S")
                 .build();

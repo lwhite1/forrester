@@ -1,6 +1,6 @@
 package systems.courant.shrewd.app.canvas;
 
-import systems.courant.shrewd.model.def.AuxDef;
+import systems.courant.shrewd.model.def.VariableDef;
 import systems.courant.shrewd.model.def.CausalLinkDef;
 import systems.courant.shrewd.model.def.CldVariableDef;
 import systems.courant.shrewd.model.def.ElementPlacement;
@@ -62,7 +62,7 @@ class ModelEditorTest {
                     .name("Full")
                     .stock("S1", 0, "u")
                     .flow("F1", "0", "day", null, null)
-                    .aux("A1", "S1", "u")
+                    .variable("A1", "S1", "u")
                     .constant("C1", 5, "u")
                     .build();
 
@@ -70,7 +70,7 @@ class ModelEditorTest {
 
             assertThat(editor.getStocks()).hasSize(1);
             assertThat(editor.getFlows()).hasSize(1);
-            assertThat(editor.getAuxiliaries()).hasSize(2); // A1 + C1 (constant is now an aux)
+            assertThat(editor.getVariables()).hasSize(2); // A1 + C1 (constant is now a variable)
         }
 
         @Test
@@ -88,7 +88,7 @@ class ModelEditorTest {
             editor.loadFrom(def2);
 
             assertThat(editor.getStocks()).isEmpty();
-            assertThat(editor.getAuxiliaries()).hasSize(1); // constant is now an aux
+            assertThat(editor.getVariables()).hasSize(1); // constant is now a variable
             assertThat(editor.getModelName()).isEqualTo("Second");
         }
 
@@ -154,24 +154,24 @@ class ModelEditorTest {
         }
 
         @Test
-        void shouldAutoNameAuxiliaries() {
-            String name = editor.addAux();
+        void shouldAutoNameVariables() {
+            String name = editor.addVariable();
 
-            assertThat(name).startsWith("Aux ");
-            assertThat(editor.getAuxiliaries()).hasSize(1);
+            assertThat(name).startsWith("Variable ");
+            assertThat(editor.getVariables()).hasSize(1);
         }
 
         @Test
-        void shouldAutoNameAuxiliariesForLiteralValues() {
-            // Constants are now literal-valued auxiliaries
+        void shouldAutoNameVariablesForLiteralValues() {
+            // Constants are now literal-valued variables
             ModelDefinition def = new ModelDefinitionBuilder()
                     .name("Test")
                     .constant("Rate", 0.5, "1/day")
                     .build();
             editor.loadFrom(def);
 
-            assertThat(editor.getAuxiliaries()).hasSize(1);
-            assertThat(editor.getAuxiliaries().get(0).isLiteral()).isTrue();
+            assertThat(editor.getVariables()).hasSize(1);
+            assertThat(editor.getVariables().get(0).isLiteral()).isTrue();
         }
 
         @Test
@@ -191,10 +191,10 @@ class ModelEditorTest {
         void shouldNumberEachTypeIndependently() {
             editor.addStock();  // "Stock 1"
             String flowName = editor.addFlow();  // "Flow 1"
-            String auxName = editor.addAux();  // "Aux 1"
+            String auxName = editor.addVariable();  // "Variable 1"
 
             assertThat(flowName).isEqualTo("Flow 1");
-            assertThat(auxName).isEqualTo("Aux 1");
+            assertThat(auxName).isEqualTo("Variable 1");
         }
     }
 
@@ -224,12 +224,12 @@ class ModelEditorTest {
 
         @Test
         void shouldRemoveAux() {
-            editor.addAux();
-            String name = editor.getAuxiliaries().get(0).name();
+            editor.addVariable();
+            String name = editor.getVariables().get(0).name();
 
             editor.removeElement(name);
 
-            assertThat(editor.getAuxiliaries()).isEmpty();
+            assertThat(editor.getVariables()).isEmpty();
         }
 
         @Test
@@ -242,7 +242,7 @@ class ModelEditorTest {
 
             editor.removeElement("Rate");
 
-            assertThat(editor.getAuxiliaries()).isEmpty();
+            assertThat(editor.getVariables()).isEmpty();
         }
 
         @Test
@@ -342,14 +342,14 @@ class ModelEditorTest {
                     .name("Test")
                     .stock("S", 100, "u")
                     .constant("k", 0.5, "1/day")
-                    .aux("Rate", "S * k", "u")
+                    .variable("Rate", "S * k", "u")
                     .build();
             editor.loadFrom(def);
 
             editor.removeElement("k");
 
-            AuxDef aux = editor.getAuxiliaries().get(0);
-            assertThat(aux.equation()).isEqualTo("S * 0");
+            VariableDef v = editor.getVariables().get(0);
+            assertThat(v.equation()).isEqualTo("S * 0");
         }
 
         @Test
@@ -357,7 +357,7 @@ class ModelEditorTest {
             ModelDefinition def = new ModelDefinitionBuilder()
                     .name("Test")
                     .stock("S", 100, "u")
-                    .aux("Calc", "S * 2", "u")
+                    .variable("Calc", "S * 2", "u")
                     .flow("F", "Calc + 1", "day", "S", null)
                     .build();
             editor.loadFrom(def);
@@ -436,12 +436,12 @@ class ModelEditorTest {
 
         @Test
         void shouldRenameAux() {
-            editor.addAux();
+            editor.addVariable();
 
-            boolean result = editor.renameElement(editor.getAuxiliaries().get(0).name(), "Rate");
+            boolean result = editor.renameElement(editor.getVariables().get(0).name(), "Rate");
 
             assertThat(result).isTrue();
-            assertThat(editor.getAuxiliaries().get(0).name()).isEqualTo("Rate");
+            assertThat(editor.getVariables().get(0).name()).isEqualTo("Rate");
         }
 
         @Test
@@ -455,7 +455,7 @@ class ModelEditorTest {
             boolean result = editor.renameElement("Rate", "k");
 
             assertThat(result).isTrue();
-            assertThat(editor.getAuxByName("k")).isPresent();
+            assertThat(editor.getVariableByName("k")).isPresent();
         }
 
         @Test
@@ -530,9 +530,9 @@ class ModelEditorTest {
         @Test
         void shouldRejectRenameToExistingNameAcrossTypes() {
             editor.addStock();  // "Stock 1"
-            editor.addAux();    // "Aux 1"
+            editor.addVariable();    // "Variable 1"
 
-            boolean result = editor.renameElement("Stock 1", "Aux 1");
+            boolean result = editor.renameElement("Stock 1", "Variable 1");
 
             assertThat(result).isFalse();
             assertThat(editor.getStocks().get(0).name()).isEqualTo("Stock 1");
@@ -543,14 +543,14 @@ class ModelEditorTest {
             ModelDefinition def = new ModelDefinitionBuilder()
                     .name("Test")
                     .stock("S", 100, "people")
-                    .aux("Rate", "S * 0.1", "1/day")
+                    .variable("Rate", "S * 0.1", "1/day")
                     .flow("F", "Rate * S", "day", "S", null)
                     .build();
             editor.loadFrom(def);
 
             editor.renameElement("S", "Population");
 
-            assertThat(editor.getAuxiliaries().get(0).equation()).isEqualTo("Population * 0.1");
+            assertThat(editor.getVariables().get(0).equation()).isEqualTo("Population * 0.1");
             assertThat(editor.getFlows().get(0).equation()).isEqualTo("Rate * Population");
         }
 
@@ -559,7 +559,7 @@ class ModelEditorTest {
             ModelDefinition def = new ModelDefinitionBuilder()
                     .name("Test")
                     .stock("S", 100, "u")
-                    .aux("Calc", "S * 2", "u")
+                    .variable("Calc", "S * 2", "u")
                     .flow("F", "Calc + 1", "day", "S", null)
                     .build();
             editor.loadFrom(def);
@@ -576,7 +576,7 @@ class ModelEditorTest {
                     .stock("S", 1000, "people")
                     .constant("I", 10, "people")
                     .flow("F", "I * Infectivity", "day", "S", null)
-                    .aux("A", "I + 1", "u")
+                    .variable("A", "I + 1", "u")
                     .build();
             editor.loadFrom(def);
 
@@ -584,12 +584,12 @@ class ModelEditorTest {
 
             // "I" in "Infectivity" should NOT be replaced
             assertThat(editor.getFlows().get(0).equation()).isEqualTo("Infectious * Infectivity");
-            assertThat(editor.getAuxByName("A").orElseThrow().equation()).isEqualTo("Infectious + 1");
+            assertThat(editor.getVariableByName("A").orElseThrow().equation()).isEqualTo("Infectious + 1");
         }
     }
 
     @Nested
-    @DisplayName("setAuxEquation for literal-valued auxiliaries")
+    @DisplayName("setVariableEquation for literal-valued variables")
     class SetLiteralAuxValue {
 
         @Test
@@ -600,15 +600,15 @@ class ModelEditorTest {
                     .build();
             editor.loadFrom(def);
 
-            boolean result = editor.setAuxEquation("k", "42.5");
+            boolean result = editor.setVariableEquation("k", "42.5");
 
             assertThat(result).isTrue();
-            assertThat(editor.getAuxByName("k").orElseThrow().equation()).isEqualTo("42.5");
+            assertThat(editor.getVariableByName("k").orElseThrow().equation()).isEqualTo("42.5");
         }
 
         @Test
         void shouldReturnFalseForNonexistentAux() {
-            assertThat(editor.setAuxEquation("ghost", "1")).isFalse();
+            assertThat(editor.setVariableEquation("ghost", "1")).isFalse();
         }
 
         @Test
@@ -619,12 +619,12 @@ class ModelEditorTest {
                     .build();
             editor.loadFrom(def);
 
-            editor.setAuxEquation("k", "0.75");
+            editor.setVariableEquation("k", "0.75");
 
-            AuxDef aux = editor.getAuxByName("k").orElseThrow();
-            assertThat(aux.name()).isEqualTo("k");
-            assertThat(aux.unit()).isEqualTo("1/day");
-            assertThat(aux.literalValue()).isEqualTo(0.75);
+            VariableDef v = editor.getVariableByName("k").orElseThrow();
+            assertThat(v.name()).isEqualTo("k");
+            assertThat(v.unit()).isEqualTo("1/day");
+            assertThat(v.literalValue()).isEqualTo(0.75);
         }
     }
 
@@ -654,12 +654,12 @@ class ModelEditorTest {
         @Test
         void shouldReflectMutations() {
             editor.addStock();
-            editor.addAux();
+            editor.addVariable();
 
             ModelDefinition def = editor.toModelDefinition();
 
             assertThat(def.stocks()).hasSize(1);
-            assertThat(def.auxiliaries()).hasSize(1);
+            assertThat(def.variables()).hasSize(1);
         }
 
         @Test
@@ -884,58 +884,58 @@ class ModelEditorTest {
     }
 
     @Nested
-    @DisplayName("setAuxEquation")
+    @DisplayName("setVariableEquation")
     class SetAuxEquation {
 
         @Test
         void shouldUpdateAuxEquation() {
-            editor.addAux();
-            String name = editor.getAuxiliaries().get(0).name();
+            editor.addVariable();
+            String name = editor.getVariables().get(0).name();
 
-            boolean result = editor.setAuxEquation(name, "Stock_1 + Constant_2");
+            boolean result = editor.setVariableEquation(name, "Stock_1 + Constant_2");
 
             assertThat(result).isTrue();
-            assertThat(editor.getAuxiliaries().get(0).equation()).isEqualTo("Stock_1 + Constant_2");
+            assertThat(editor.getVariables().get(0).equation()).isEqualTo("Stock_1 + Constant_2");
         }
 
         @Test
         void shouldReturnFalseForNonexistentAux() {
-            assertThat(editor.setAuxEquation("ghost", "1")).isFalse();
+            assertThat(editor.setVariableEquation("ghost", "1")).isFalse();
         }
 
         @Test
         void shouldRejectBlankEquation() {
-            editor.addAux();
-            String name = editor.getAuxiliaries().get(0).name();
+            editor.addVariable();
+            String name = editor.getVariables().get(0).name();
 
-            assertThat(editor.setAuxEquation(name, "")).isFalse();
-            assertThat(editor.setAuxEquation(name, "   ")).isFalse();
-            assertThat(editor.getAuxiliaries().get(0).equation()).isEqualTo("0");
+            assertThat(editor.setVariableEquation(name, "")).isFalse();
+            assertThat(editor.setVariableEquation(name, "   ")).isFalse();
+            assertThat(editor.getVariables().get(0).equation()).isEqualTo("0");
         }
 
         @Test
         void shouldRejectNullEquation() {
-            editor.addAux();
-            String name = editor.getAuxiliaries().get(0).name();
+            editor.addVariable();
+            String name = editor.getVariables().get(0).name();
 
-            assertThat(editor.setAuxEquation(name, null)).isFalse();
-            assertThat(editor.getAuxiliaries().get(0).equation()).isEqualTo("0");
+            assertThat(editor.setVariableEquation(name, null)).isFalse();
+            assertThat(editor.getVariables().get(0).equation()).isEqualTo("0");
         }
 
         @Test
         void shouldPreserveOtherFields() {
             ModelDefinition def = new ModelDefinitionBuilder()
                     .name("Test")
-                    .aux("Rate", "Stock_1 * 0.1", "1/day")
+                    .variable("Rate", "Stock_1 * 0.1", "1/day")
                     .build();
             editor.loadFrom(def);
 
-            editor.setAuxEquation("Rate", "Stock_1 * 0.2");
+            editor.setVariableEquation("Rate", "Stock_1 * 0.2");
 
-            AuxDef aux = editor.getAuxiliaries().get(0);
-            assertThat(aux.name()).isEqualTo("Rate");
-            assertThat(aux.equation()).isEqualTo("Stock_1 * 0.2");
-            assertThat(aux.unit()).isEqualTo("1/day");
+            VariableDef v = editor.getVariables().get(0);
+            assertThat(v.name()).isEqualTo("Rate");
+            assertThat(v.equation()).isEqualTo("Stock_1 * 0.2");
+            assertThat(v.unit()).isEqualTo("1/day");
         }
     }
 
@@ -1353,16 +1353,16 @@ class ModelEditorTest {
             ModelDefinition def = new ModelDefinitionBuilder()
                     .name("Test")
                     .constant("Rate", 0.5, null)
-                    .aux("Calc", "Rate * 10", null)
+                    .variable("Calc", "Rate * 10", null)
                     .build();
             editor.loadFrom(def);
 
             boolean removed = editor.removeConnectionReference("Rate", "Calc");
 
             assertThat(removed).isTrue();
-            AuxDef aux = editor.getAuxByName("Calc").orElseThrow();
-            assertThat(aux.equation()).doesNotContain("Rate");
-            assertThat(aux.equation()).contains("0");
+            VariableDef v = editor.getVariableByName("Calc").orElseThrow();
+            assertThat(v.equation()).doesNotContain("Rate");
+            assertThat(v.equation()).contains("0");
         }
 
         @Test
@@ -1386,7 +1386,7 @@ class ModelEditorTest {
         void shouldReturnFalseWhenReferenceNotFound() {
             ModelDefinition def = new ModelDefinitionBuilder()
                     .name("Test")
-                    .aux("Calc", "10 + 5", null)
+                    .variable("Calc", "10 + 5", null)
                     .build();
             editor.loadFrom(def);
 
@@ -1453,15 +1453,15 @@ class ModelEditorTest {
         void shouldCopyAuxWithCustomEquation() {
             ModelDefinition def = new ModelDefinitionBuilder()
                     .name("Test")
-                    .aux("Ratio", "A / B", "fraction")
+                    .variable("Ratio", "A / B", "fraction")
                     .build();
             editor.loadFrom(def);
 
-            String newName = editor.addAuxFrom(
-                    editor.getAuxiliaries().get(0), "X / Y");
+            String newName = editor.addVariableFrom(
+                    editor.getVariables().get(0), "X / Y");
 
             assertThat(newName).isNotEqualTo("Ratio");
-            AuxDef newAux = editor.getAuxByName(newName).orElseThrow();
+            VariableDef newAux = editor.getVariableByName(newName).orElseThrow();
             assertThat(newAux.equation()).isEqualTo("X / Y");
             assertThat(newAux.unit()).isEqualTo("fraction");
         }
@@ -1474,14 +1474,14 @@ class ModelEditorTest {
                     .build();
             editor.loadFrom(def);
 
-            String newName = editor.addAuxFrom(
-                    editor.getAuxiliaries().get(0),
-                    editor.getAuxiliaries().get(0).equation());
+            String newName = editor.addVariableFrom(
+                    editor.getVariables().get(0),
+                    editor.getVariables().get(0).equation());
 
             assertThat(newName).isNotEqualTo("Pi");
-            assertThat(editor.getAuxByName(newName)).isPresent();
-            assertThat(editor.getAuxByName(newName).orElseThrow().literalValue()).isEqualTo(3.14159);
-            assertThat(editor.getAuxByName(newName).orElseThrow().unit()).isEqualTo("ratio");
+            assertThat(editor.getVariableByName(newName)).isPresent();
+            assertThat(editor.getVariableByName(newName).orElseThrow().literalValue()).isEqualTo(3.14159);
+            assertThat(editor.getVariableByName(newName).orElseThrow().unit()).isEqualTo("ratio");
         }
 
         @Test
@@ -2011,9 +2011,9 @@ class ModelEditorTest {
 
             assertThat(result).isTrue();
             assertThat(editor.getCldVariables()).isEmpty();
-            assertThat(editor.getAuxiliaries()).hasSize(1);
-            AuxDef aux = editor.getAuxiliaries().getFirst();
-            assertThat(aux.name()).isEqualTo("Variable 1");
+            assertThat(editor.getVariables()).hasSize(1);
+            VariableDef v = editor.getVariables().getFirst();
+            assertThat(v.name()).isEqualTo("Variable 1");
         }
 
         @Test
@@ -2024,9 +2024,9 @@ class ModelEditorTest {
 
             assertThat(result).isTrue();
             assertThat(editor.getCldVariables()).isEmpty();
-            assertThat(editor.getAuxiliaries()).hasSize(1);
-            AuxDef aux = editor.getAuxiliaries().getFirst();
-            assertThat(aux.name()).isEqualTo("Variable 1");
+            assertThat(editor.getVariables()).hasSize(1);
+            VariableDef v = editor.getVariables().getFirst();
+            assertThat(v.name()).isEqualTo("Variable 1");
         }
 
         @Test
@@ -2101,7 +2101,7 @@ class ModelEditorTest {
 
         @Test
         void shouldAvoidNameCollisionWithExistingElements() {
-            // Manually create an aux named "Variable 1" to simulate collision
+            // Manually create a variable named "Variable 1" to simulate collision
             ModelDefinition def = new ModelDefinitionBuilder()
                     .name("Test")
                     .constant("Variable 1", 0, "u")
@@ -2121,7 +2121,7 @@ class ModelEditorTest {
 
         @Test
         void shouldGenerateConnectorForInputBinding() {
-            editor.addAux();  // Aux 1
+            editor.addVariable();  // Aux 1
             systems.courant.shrewd.model.def.ModuleInterface iface =
                     new systems.courant.shrewd.model.def.ModuleInterface(
                             List.of(new systems.courant.shrewd.model.def.PortDef("in", "u")),
@@ -2132,17 +2132,17 @@ class ModelEditorTest {
                     List.of(), List.of(), List.of(), List.of(), null);
             editor.addModuleFrom(new ModuleInstanceDef(
                     "Module 1", moduleDef,
-                    Map.of("in", "Aux_1"), Map.of()));
+                    Map.of("in", "Variable_1"), Map.of()));
 
             var connectors = editor.generateConnectors();
 
             assertThat(connectors).anyMatch(c ->
-                    c.from().equals("Aux 1") && c.to().equals("Module 1"));
+                    c.from().equals("Variable 1") && c.to().equals("Module 1"));
         }
 
         @Test
         void shouldGenerateConnectorForOutputBinding() {
-            editor.addAux();  // Aux 1
+            editor.addVariable();  // Aux 1
             systems.courant.shrewd.model.def.ModuleInterface iface =
                     new systems.courant.shrewd.model.def.ModuleInterface(
                             List.of(),
@@ -2153,17 +2153,17 @@ class ModelEditorTest {
                     List.of(), List.of(), List.of(), List.of(), null);
             editor.addModuleFrom(new ModuleInstanceDef(
                     "Module 1", moduleDef,
-                    Map.of(), Map.of("out", "Aux 1")));
+                    Map.of(), Map.of("out", "Variable 1")));
 
             var connectors = editor.generateConnectors();
 
             assertThat(connectors).anyMatch(c ->
-                    c.from().equals("Module 1") && c.to().equals("Aux 1"));
+                    c.from().equals("Module 1") && c.to().equals("Variable 1"));
         }
 
         @Test
         void shouldNotGenerateConnectorForComplexExpression() {
-            editor.addAux();  // Aux 1
+            editor.addVariable();  // Aux 1
             systems.courant.shrewd.model.def.ModuleInterface iface =
                     new systems.courant.shrewd.model.def.ModuleInterface(
                             List.of(new systems.courant.shrewd.model.def.PortDef("in", "u")),
@@ -2174,13 +2174,13 @@ class ModelEditorTest {
                     List.of(), List.of(), List.of(), List.of(), null);
             editor.addModuleFrom(new ModuleInstanceDef(
                     "Module 1", moduleDef,
-                    Map.of("in", "Aux_1 + 10"), Map.of()));
+                    Map.of("in", "Variable_1 + 10"), Map.of()));
 
             var connectors = editor.generateConnectors();
 
             // Should not generate a direct connector for complex expressions
             assertThat(connectors).noneMatch(c ->
-                    c.from().equals("Aux 1") && c.to().equals("Module 1"));
+                    c.from().equals("Variable 1") && c.to().equals("Module 1"));
         }
     }
 }

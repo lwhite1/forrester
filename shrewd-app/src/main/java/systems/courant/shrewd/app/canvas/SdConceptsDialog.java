@@ -24,7 +24,7 @@ public class SdConceptsDialog extends Stage {
                 createTab("Overview", overviewText()),
                 createTab("Stocks", stocksText()),
                 createTab("Flows", flowsText()),
-                createTab("Variables", auxiliariesText()),
+                createTab("Variables", variablesText()),
                 createTab("Feedback Loops", feedbackText()),
                 createTab("Causal Loops", causalLoopsText()),
                 createTab("Simulation", simulationText())
@@ -122,10 +122,10 @@ public class SdConceptsDialog extends Stage {
         );
     }
 
-    private TextFlow auxiliariesText() {
+    private TextFlow variablesText() {
         return new TextFlow(
                 bold("Variables"),
-                plain(" (called auxiliaries or converters in the SD literature) are intermediate "
+                plain(" (called variables or converters in the SD literature) are intermediate "
                         + "values that compute results "
                         + "used by flows or other variables. They have no memory of their own; "
                         + "they are purely algebraic functions of other variables.\n\n"),

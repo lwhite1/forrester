@@ -1,6 +1,6 @@
 package systems.courant.shrewd.app.canvas;
 
-import systems.courant.shrewd.model.def.AuxDef;
+import systems.courant.shrewd.model.def.VariableDef;
 import systems.courant.shrewd.model.def.CommentDef;
 import systems.courant.shrewd.model.def.ElementType;
 import systems.courant.shrewd.model.def.FlowDef;
@@ -15,7 +15,7 @@ import java.util.function.Consumer;
 /**
  * Manages inline editing of element names, values, and equations on the canvas.
  * Handles the double-click edit sequences: name-only for stocks/modules,
- * name-then-value for constants, name-then-equation for flows and auxiliaries.
+ * name-then-value for constants, name-then-equation for flows and variables.
  */
 final class InlineEditController {
 
@@ -145,8 +145,8 @@ final class InlineEditController {
     private void startAuxEquationEdit(String auxName, ModelEditor editor,
                                       double screenX, double screenY, double scale,
                                       Callbacks callbacks) {
-        String currentEquation = editor.getAuxByName(auxName)
-                .map(AuxDef::equation).orElse("0");
+        String currentEquation = editor.getVariableByName(auxName)
+                .map(VariableDef::equation).orElse("0");
 
         double eqScreenY = screenY
                 + LayoutMetrics.LABEL_SUBLABEL_OFFSET * scale;

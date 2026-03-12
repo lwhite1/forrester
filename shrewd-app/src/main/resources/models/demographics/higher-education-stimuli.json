@@ -56,7 +56,7 @@
       "sink": "BSc studenten"
     }
   ],
-  "auxiliaries": [
+  "variables": [
     {
       "name": "uitstroom van onderwijsgelden",
       "comment": "uitstroom van onderwijsgelden",
@@ -65,7 +65,7 @@
     },
     {
       "name": "instroom BSc studenten",
-      "comment": "OP DIT MOMENT KWALITEIT NOG NIET TOEGEVOEGD",
+      "comment": "instroom BSc studenten",
       "equation": "jaarlijkse_BSc_instroom*kwaliteit",
       "unit": ""
     },
@@ -101,7 +101,7 @@
     },
     {
       "name": "afvallers MSc",
-      "comment": "AFVALLERS JAARLIJKS LATEN AFVALLEN EN TESTEN",
+      "comment": "afvallers MSc",
       "equation": "MSc_uitstroom_na_vaste_en_bijkomende_vertraging*fractie_afvallers_MSc",
       "unit": ""
     },
@@ -197,13 +197,13 @@
     },
     {
       "name": "maximaal aantal docenten",
-      "comment": "SMOOTH3( financien/gemiddelde kost docent,1)",
+      "comment": "maximaal aantal docenten",
       "equation": "financien/gemiddelde_kost_per_docent",
       "unit": ""
     },
     {
       "name": "afvallers BSc",
-      "comment": "AFVALLERS JAARLIJKS LATEN AFVALLEN EN TESTEN",
+      "comment": "afvallers BSc",
       "equation": "BSc_uitstroom_na_vaste_en_bijkomende_vertraging*fractie_afvallers_BSc",
       "unit": ""
     },

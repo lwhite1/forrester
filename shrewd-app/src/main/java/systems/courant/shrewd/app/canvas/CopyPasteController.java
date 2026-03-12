@@ -1,6 +1,6 @@
 package systems.courant.shrewd.app.canvas;
 
-import systems.courant.shrewd.model.def.AuxDef;
+import systems.courant.shrewd.model.def.VariableDef;
 import systems.courant.shrewd.model.def.CausalLinkDef;
 import systems.courant.shrewd.model.def.CldVariableDef;
 import systems.courant.shrewd.model.def.CommentDef;
@@ -96,8 +96,8 @@ final class CopyPasteController {
                 case STOCK -> editor.addStockFrom((StockDef) entry.elementDef());
                 case FLOW -> editor.addFlowFrom((FlowDef) entry.elementDef(), null, null);
                 case AUX -> {
-                    AuxDef auxDef = (AuxDef) entry.elementDef();
-                    yield editor.addAuxFrom(auxDef, auxDef.equation());
+                    VariableDef auxDef = (VariableDef) entry.elementDef();
+                    yield editor.addVariableFrom(auxDef, auxDef.equation());
                 }
                 case MODULE -> editor.addModuleFrom(
                         (ModuleInstanceDef) entry.elementDef());
@@ -154,12 +154,12 @@ final class CopyPasteController {
                     }
                 });
             } else if (entry.type() == ElementType.AUX) {
-                editor.getAuxEquation(newName).ifPresent(eq -> {
+                editor.getVariableEquation(newName).ifPresent(eq -> {
                     String updated = remapEquationTokens(eq, nameMapping);
                     ClearResult cr = clearDanglingReferences(updated, editor);
                     allReplaced.addAll(cr.replaced());
                     if (!cr.equation().equals(eq)) {
-                        editor.setAuxEquation(newName, cr.equation());
+                        editor.setVariableEquation(newName, cr.equation());
                     }
                 });
             } else if (entry.type() == ElementType.MODULE) {

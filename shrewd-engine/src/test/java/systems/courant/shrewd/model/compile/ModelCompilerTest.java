@@ -151,8 +151,8 @@ class ModelCompilerTest {
             ModelDefinition def = new ModelDefinitionBuilder()
                     .name("Forward Ref")
                     .stock("S", 100, "Thing")
-                    .aux("A", "S * 2", "Thing")
-                    .aux("B", "A + 10", "Thing")
+                    .variable("A", "S * 2", "Thing")
+                    .variable("B", "A + 10", "Thing")
                     .flow("F", "B", "Day", "S", null)
                     .defaultSimulation("Day", 1, "Day")
                     .build();
@@ -393,7 +393,7 @@ class ModelCompilerTest {
             ModelDefinition innerModule = new ModelDefinitionBuilder()
                     .name("Producer")
                     .stock("Value", 50, "Thing")
-                    .aux("output", "Value * 2", "Thing")
+                    .variable("output", "Value * 2", "Thing")
                     .build();
 
             ModelDefinition outer = new ModelDefinitionBuilder()

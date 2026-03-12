@@ -3,7 +3,7 @@ package systems.courant.shrewd.io.vensim;
 import systems.courant.shrewd.io.FormatUtils;
 import systems.courant.shrewd.io.ImportResult;
 import systems.courant.shrewd.io.ModelImporter;
-import systems.courant.shrewd.model.def.AuxDef;
+import systems.courant.shrewd.model.def.VariableDef;
 import systems.courant.shrewd.model.def.CausalLinkDef;
 import systems.courant.shrewd.model.def.CldVariableDef;
 import systems.courant.shrewd.model.def.ConnectorRoute;
@@ -32,7 +32,7 @@ import java.util.regex.Pattern;
 /**
  * Imports Vensim .mdl model files into Shrewd {@link systems.courant.shrewd.model.def.ModelDefinition}.
  *
- * <p>Supports stocks (INTEG), constants, auxiliaries, lookup tables (standalone and
+ * <p>Supports stocks (INTEG), constants, variables, lookup tables (standalone and
  * WITH LOOKUP), subscript ranges, simulation settings, and sketch/view data.
  *
  * <p>Usage:
@@ -356,7 +356,7 @@ public class VensimImporter implements ModelImporter {
 
         // Data variable (operator ":=") — create placeholder constant so references resolve
         if (operator.equals(":=")) {
-            builder.aux(new AuxDef(displayName, comment, "0", unit));
+            builder.variable(new VariableDef(displayName, comment, "0", unit));
             warnings.add("Data variable '" + eq.name()
                     + "' imported as constant 0 (external data source not supported)");
             return;
@@ -373,14 +373,14 @@ public class VensimImporter implements ModelImporter {
         // Unchangeable constant (operator "==")
         if (operator.equals("==")) {
             if (isNumericLiteral(expression)) {
-                builder.aux(new AuxDef(displayName, comment,
-                        AuxDef.formatValue(Double.parseDouble(expression.strip())), unit));
+                builder.variable(new VariableDef(displayName, comment,
+                        VariableDef.formatValue(Double.parseDouble(expression.strip())), unit));
             } else {
                 // Non-numeric unchangeable — treat as auxiliary
                 VensimExprTranslator.TranslationResult tr =
                         VensimExprTranslator.translate(expression, eqName, vensimNames, lookupNames);
                 addExtractedLookups(tr, builder, lookupNames, warnings);
-                builder.aux(new AuxDef(displayName, comment, tr.expression(), unit));
+                builder.variable(new VariableDef(displayName, comment, tr.expression(), unit));
                 warnings.addAll(tr.warnings());
             }
             return;
@@ -388,16 +388,16 @@ public class VensimImporter implements ModelImporter {
 
         // Bare variable name with no equation — create placeholder constant
         if (operator.isEmpty() && expression.isEmpty()) {
-            builder.aux(new AuxDef(displayName, comment, "0", unit));
+            builder.variable(new VariableDef(displayName, comment, "0", unit));
             warnings.add("Variable '" + eq.name()
                     + "' has no equation; imported as constant 0");
             return;
         }
 
-        // Numeric literal → constant (literal-valued auxiliary)
+        // Numeric literal → constant (literal-valued variable)
         if (isNumericLiteral(expression)) {
-            builder.aux(new AuxDef(displayName, comment,
-                    AuxDef.formatValue(Double.parseDouble(expression.strip())), unit));
+            builder.variable(new VariableDef(displayName, comment,
+                    VariableDef.formatValue(Double.parseDouble(expression.strip())), unit));
             return;
         }
 
@@ -406,16 +406,16 @@ public class VensimImporter implements ModelImporter {
             VensimExprTranslator.TranslationResult tr =
                     VensimExprTranslator.translate(expression, eqName, vensimNames, lookupNames);
             addExtractedLookups(tr, builder, lookupNames, warnings);
-            builder.aux(new AuxDef(displayName, comment, tr.expression(), unit));
+            builder.variable(new VariableDef(displayName, comment, tr.expression(), unit));
             warnings.addAll(tr.warnings());
             return;
         }
 
-        // Default: auxiliary variable
+        // Default: variable
         VensimExprTranslator.TranslationResult tr =
                 VensimExprTranslator.translate(expression, eqName, vensimNames, lookupNames);
         addExtractedLookups(tr, builder, lookupNames, warnings);
-        builder.aux(new AuxDef(displayName, comment, tr.expression(), unit));
+        builder.variable(new VariableDef(displayName, comment, tr.expression(), unit));
         warnings.addAll(tr.warnings());
     }
 

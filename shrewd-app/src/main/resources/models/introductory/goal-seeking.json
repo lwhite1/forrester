@@ -22,7 +22,7 @@
     "duration": 84.0,
     "durationUnit": "Day"
   },
-  "auxiliaries": [
+  "variables": [
     {
       "name": "Goal",
       "equation": "860",

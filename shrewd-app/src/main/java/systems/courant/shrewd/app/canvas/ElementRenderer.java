@@ -16,7 +16,7 @@ import java.util.List;
  */
 public final class ElementRenderer {
 
-    /** Badge label for formula-valued auxiliaries. */
+    /** Badge label for formula-valued variables. */
     static final String BADGE_FORMULA = "fx";
     /** Badge label for lookup table elements. */
     static final String BADGE_LOOKUP = "Table";
@@ -107,11 +107,11 @@ public final class ElementRenderer {
     }
 
     /**
-     * Draws an auxiliary variable: medium rounded rectangle with badge and centered name.
-     * Literal-valued auxiliaries get a dashed border and show the numeric value as badge;
-     * formula-valued auxiliaries get a solid border and show "fx" as badge.
+     * Draws a variable variable: medium rounded rectangle with badge and centered name.
+     * Literal-valued variables get a dashed border and show the numeric value as badge;
+     * formula-valued variables get a solid border and show "fx" as badge.
      *
-     * @param isLiteral true if the auxiliary's equation is a numeric literal
+     * @param isLiteral true if the variable's equation is a numeric literal
      * @param equation  the equation string (used to display value for literals)
      * @param hasDelay  true if the equation contains a delay function
      */

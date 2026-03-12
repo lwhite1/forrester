@@ -1,7 +1,7 @@
 package systems.courant.shrewd.io.xmile;
 
 import systems.courant.shrewd.io.FormatUtils;
-import systems.courant.shrewd.model.def.AuxDef;
+import systems.courant.shrewd.model.def.VariableDef;
 import systems.courant.shrewd.model.def.FlowDef;
 import systems.courant.shrewd.model.def.LookupTableDef;
 import systems.courant.shrewd.model.def.ModelDefinition;
@@ -181,8 +181,8 @@ public final class XmileExporter {
         for (FlowDef flow : def.flows()) {
             writeFlow(doc, variablesElem, flow, def, embeddedLookupNames);
         }
-        for (AuxDef aux : def.auxiliaries()) {
-            writeAux(doc, variablesElem, aux, def, embeddedLookupNames);
+        for (VariableDef v : def.variables()) {
+            writeVariable(doc, variablesElem, v, def, embeddedLookupNames);
         }
         for (LookupTableDef lookup : def.lookupTables()) {
             if (!embeddedLookupNames.contains(lookup.name())) {
@@ -321,21 +321,21 @@ public final class XmileExporter {
         variablesElem.appendChild(elem);
     }
 
-    private static void writeAux(Document doc, Element variablesElem,
-                                  AuxDef aux, ModelDefinition def,
+    private static void writeVariable(Document doc, Element variablesElem,
+                                  VariableDef v, ModelDefinition def,
                                   Set<String> embeddedLookupNames) {
         Element elem = doc.createElementNS(
                 XmileConstants.NAMESPACE_URI, XmileConstants.AUX);
-        elem.setAttribute(XmileConstants.ATTR_NAME, aux.name());
+        elem.setAttribute(XmileConstants.ATTR_NAME, v.name());
 
-        // Check if this aux references a lookup — if so, embed the gf
-        Optional<String> lookupNameOpt = extractLookupReference(aux.equation());
+        // Check if this variable references a lookup — if so, embed the gf
+        Optional<String> lookupNameOpt = extractLookupReference(v.equation());
         if (lookupNameOpt.isPresent()) {
             Optional<LookupTableDef> lookupOpt = findLookup(def, lookupNameOpt.get());
             if (lookupOpt.isPresent()) {
                 // Extract the input expression from LOOKUP(name, input)
-                String inputExpr = extractLookupInput(aux.equation())
-                        .orElse(aux.equation());
+                String inputExpr = extractLookupInput(v.equation())
+                        .orElse(v.equation());
                 Element eqn = doc.createElementNS(
                         XmileConstants.NAMESPACE_URI, XmileConstants.EQN);
                 eqn.setTextContent(XmileExprTranslator.toXmile(inputExpr));
@@ -346,17 +346,17 @@ public final class XmileExporter {
             }
         }
 
-        // Regular auxiliary
+        // Regular variable
         Element eqn = doc.createElementNS(
                 XmileConstants.NAMESPACE_URI, XmileConstants.EQN);
-        eqn.setTextContent(XmileExprTranslator.toXmile(aux.equation()));
+        eqn.setTextContent(XmileExprTranslator.toXmile(v.equation()));
         elem.appendChild(eqn);
 
         // <units>
-        if (aux.unit() != null && !aux.unit().isBlank()) {
+        if (v.unit() != null && !v.unit().isBlank()) {
             Element units = doc.createElementNS(
                     XmileConstants.NAMESPACE_URI, XmileConstants.UNITS);
-            units.setTextContent(aux.unit());
+            units.setTextContent(v.unit());
             elem.appendChild(units);
         }
 
@@ -424,8 +424,8 @@ public final class XmileExporter {
 
     private static Set<String> collectEmbeddedLookupNames(ModelDefinition def) {
         Set<String> names = new HashSet<>();
-        for (AuxDef aux : def.auxiliaries()) {
-            extractLookupReference(aux.equation()).ifPresent(names::add);
+        for (VariableDef v : def.variables()) {
+            extractLookupReference(v.equation()).ifPresent(names::add);
         }
         return names;
     }

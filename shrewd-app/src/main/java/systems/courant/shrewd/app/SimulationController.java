@@ -120,7 +120,7 @@ final class SimulationController {
         List<String> trackableNames = new ArrayList<>();
         activeEditor.getStocks().forEach(s -> trackableNames.add(s.name()));
         activeEditor.getFlows().forEach(f -> trackableNames.add(f.name()));
-        activeEditor.getAuxiliaries().forEach(a -> trackableNames.add(a.name()));
+        activeEditor.getVariables().forEach(a -> trackableNames.add(a.name()));
 
         if (parameterNames.isEmpty()) {
             showError.accept("Model has no parameters to sweep.");

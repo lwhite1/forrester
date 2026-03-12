@@ -47,7 +47,7 @@
     "duration": 3650.0,
     "durationUnit": "Day"
   },
-  "auxiliaries": [
+  "variables": [
     {
       "name": "Uptake Rate",
       "equation": "0.3",

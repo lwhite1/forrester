@@ -247,11 +247,11 @@ class MarqueeControllerTest {
     }
 
     @Nested
-    @DisplayName("hideAuxiliaries")
-    class HideAuxiliaries {
+    @DisplayName("hideVariables")
+    class HideVariables {
 
         @Test
-        void shouldSkipHiddenAuxiliaries() {
+        void shouldSkipHiddenVariables() {
             // C and D are AUX elements; with hideAux=true they should not be selected
             controller.start(0, 0, state, false, true);
 
@@ -264,7 +264,7 @@ class MarqueeControllerTest {
         }
 
         @Test
-        void shouldIncludeAuxiliaries_whenNotHidden() {
+        void shouldIncludeVariables_whenNotHidden() {
             controller.start(0, 0, state, false, false);
 
             controller.drag(600, 600, state);

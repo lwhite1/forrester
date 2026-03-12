@@ -5,7 +5,7 @@ import systems.courant.shrewd.io.ImportResult;
 import systems.courant.shrewd.model.Stock;
 import systems.courant.shrewd.model.compile.CompiledModel;
 import systems.courant.shrewd.model.compile.ModelCompiler;
-import systems.courant.shrewd.model.def.AuxDef;
+import systems.courant.shrewd.model.def.VariableDef;
 import systems.courant.shrewd.model.def.FlowDef;
 import systems.courant.shrewd.model.def.LookupTableDef;
 import systems.courant.shrewd.model.def.ModelDefinition;
@@ -133,7 +133,7 @@ class XmileImporterTest {
 
             ImportResult result = importer.importModel(xmile, "Test");
             assertThat(result.definition().parameters()).hasSize(1);
-            AuxDef c = result.definition().parameters().get(0);
+            VariableDef c = result.definition().parameters().get(0);
             assertThat(c.name()).isEqualTo("rate");
             assertThat(c.literalValue()).isEqualTo(0.05);
         }
@@ -154,10 +154,10 @@ class XmileImporterTest {
                     """;
 
             ImportResult result = importer.importModel(xmile, "Test");
-            assertThat(result.definition().auxiliaries()).hasSize(1);
-            AuxDef aux = result.definition().auxiliaries().get(0);
-            assertThat(aux.name()).isEqualTo("rate");
-            assertThat(aux.equation()).isEqualTo("a + b");
+            assertThat(result.definition().variables()).hasSize(1);
+            VariableDef v = result.definition().variables().get(0);
+            assertThat(v.name()).isEqualTo("rate");
+            assertThat(v.equation()).isEqualTo("a + b");
         }
 
         @Test
@@ -189,9 +189,9 @@ class XmileImporterTest {
             assertThat(lt.yValues()[0]).isEqualTo(1.0);
             assertThat(lt.yValues()[5]).isEqualTo(0.0);
 
-            // Should also create an aux that references the lookup
-            assertThat(result.definition().auxiliaries()).hasSize(1);
-            assertThat(result.definition().auxiliaries().get(0).equation())
+            // Should also create a variable that references the lookup
+            assertThat(result.definition().variables()).hasSize(1);
+            assertThat(result.definition().variables().get(0).equation())
                     .contains("LOOKUP(effect_lookup");
         }
 
@@ -373,7 +373,7 @@ class XmileImporterTest {
             // 2 constants: Room_Temperature, Characteristic_Time
             assertThat(def.parameters()).hasSize(2);
             Set<String> constantNames = def.parameters().stream()
-                    .map(AuxDef::name)
+                    .map(VariableDef::name)
                     .collect(Collectors.toSet());
             assertThat(constantNames).containsExactlyInAnyOrder(
                     "Room_Temperature", "Characteristic_Time");
@@ -419,16 +419,16 @@ class XmileImporterTest {
             // 3 constants
             assertThat(def.parameters()).hasSize(3);
             Set<String> constantNames = def.parameters().stream()
-                    .map(AuxDef::name)
+                    .map(VariableDef::name)
                     .collect(Collectors.toSet());
             assertThat(constantNames).containsExactlyInAnyOrder(
                     "Contact_Rate", "Recovery_Time", "Total_Population");
 
-            // 1 formula auxiliary: Infection_Rate (3 constants are also in auxiliaries)
-            assertThat(def.auxiliaries()).hasSize(4);
-            assertThat(def.auxiliaries().stream().filter(a -> !a.isLiteral()).toList())
+            // 1 formula variable: Infection_Rate (3 constants are also in variables)
+            assertThat(def.variables()).hasSize(4);
+            assertThat(def.variables().stream().filter(a -> !a.isLiteral()).toList())
                     .hasSize(1)
-                    .extracting(AuxDef::name)
+                    .extracting(VariableDef::name)
                     .containsExactly("Infection_Rate");
 
             // 2 flows
@@ -807,7 +807,7 @@ class XmileImporterTest {
             // Module has 1 output binding
             assertThat(mod.outputBindings()).containsEntry("current_infected", "disease_infected");
 
-            // Inner definition has 2 stocks, 2 flows, 2 constants, 1 aux
+            // Inner definition has 2 stocks, 2 flows, 2 constants, 1 variable
             ModelDefinition inner = mod.definition();
             assertThat(inner.stocks()).hasSize(2);
             assertThat(inner.flows()).hasSize(2);

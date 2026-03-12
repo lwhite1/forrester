@@ -13,7 +13,7 @@ import java.util.Set;
 final class MarqueeController {
 
     private boolean active;
-    private boolean hideAuxiliaries;
+    private boolean hideVariables;
     private double startWorldX;
     private double startWorldY;
     private double endWorldX;
@@ -42,7 +42,7 @@ final class MarqueeController {
     void start(double worldX, double worldY, CanvasState state, boolean shiftDown,
                boolean hideAux) {
         active = true;
-        hideAuxiliaries = hideAux;
+        hideVariables = hideAux;
         startWorldX = worldX;
         startWorldY = worldY;
         endWorldX = worldX;
@@ -101,7 +101,7 @@ final class MarqueeController {
             }
         }
         for (String name : state.getDrawOrder()) {
-            if (hideAuxiliaries
+            if (hideVariables
                     && state.getType(name).orElse(null) == ElementType.AUX) {
                 continue;
             }

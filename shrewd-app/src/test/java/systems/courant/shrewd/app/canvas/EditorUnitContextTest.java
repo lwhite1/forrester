@@ -2,7 +2,7 @@ package systems.courant.shrewd.app.canvas;
 
 import systems.courant.shrewd.measure.CompositeUnit;
 import systems.courant.shrewd.measure.UnitRegistry;
-import systems.courant.shrewd.model.def.AuxDef;
+import systems.courant.shrewd.model.def.VariableDef;
 import systems.courant.shrewd.model.def.FlowDef;
 import systems.courant.shrewd.model.def.LookupTableDef;
 import systems.courant.shrewd.model.def.ModelDefinition;
@@ -129,14 +129,14 @@ class EditorUnitContextTest {
     }
 
     @Nested
-    @DisplayName("resolveUnit for auxiliaries")
+    @DisplayName("resolveUnit for variables")
     class AuxResolution {
 
         @Test
         void shouldResolveAuxWithUnit() {
             ModelDefinition def = new ModelDefinitionBuilder()
                     .name("Test")
-                    .aux("growth rate", "0.1", "Person")
+                    .variable("growth rate", "0.1", "Person")
                     .build();
             editor.loadFrom(def);
 
@@ -150,7 +150,7 @@ class EditorUnitContextTest {
         void shouldReturnDimensionless_whenAuxHasBlankUnit() {
             ModelDefinition def = new ModelDefinitionBuilder()
                     .name("Test")
-                    .aux("ratio", "0.5", "")
+                    .variable("ratio", "0.5", "")
                     .build();
             editor.loadFrom(def);
 
@@ -164,7 +164,7 @@ class EditorUnitContextTest {
         void shouldResolveAuxByUnderscoreName() {
             ModelDefinition def = new ModelDefinitionBuilder()
                     .name("Test")
-                    .aux("contact rate", "5", "Person")
+                    .variable("contact rate", "5", "Person")
                     .build();
             editor.loadFrom(def);
 

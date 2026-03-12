@@ -1,7 +1,7 @@
 package systems.courant.shrewd.io.vensim;
 
 import systems.courant.shrewd.io.ImportResult;
-import systems.courant.shrewd.model.def.AuxDef;
+import systems.courant.shrewd.model.def.VariableDef;
 import systems.courant.shrewd.model.def.CausalLinkDef;
 import systems.courant.shrewd.model.def.CldVariableDef;
 import systems.courant.shrewd.model.def.ElementType;
@@ -106,7 +106,7 @@ class VensimImporterTest {
 
             ImportResult result = importer.importModel(mdl, "Test");
             assertThat(result.definition().parameters()).hasSize(1 + 3); // +3 built-in constants
-            AuxDef c = result.definition().parameters().stream()
+            VariableDef c = result.definition().parameters().stream()
                     .filter(cd -> cd.name().equals("alpha"))
                     .findFirst().orElseThrow();
             assertThat(c.literalValue()).isEqualTo(0.5);
@@ -139,7 +139,7 @@ class VensimImporterTest {
             ImportResult result = importer.importModel(mdl, "Test");
             assertThat(result.definition().parameters()).hasSize(1 + 3); // +3 built-in constants
             assertThat(result.definition().parameters().stream()
-                    .map(AuxDef::name)).contains("Pi");
+                    .map(VariableDef::name)).contains("Pi");
         }
 
         @Test
@@ -177,12 +177,12 @@ class VensimImporterTest {
                     """;
 
             ImportResult result = importer.importModel(mdl, "Test");
-            // 1 formula aux + 2 user constants + 3 built-in constants = 6
-            assertThat(result.definition().auxiliaries()).hasSize(6);
-            AuxDef aux = result.definition().auxiliaries().stream()
+            // 1 formula variable + 2 user constants + 3 built-in constants = 6
+            assertThat(result.definition().variables()).hasSize(6);
+            VariableDef v = result.definition().variables().stream()
                     .filter(a -> !a.isLiteral()).findFirst().orElseThrow();
-            assertThat(aux.name()).isEqualTo("rate");
-            assertThat(aux.equation()).isEqualTo("alpha * beta");
+            assertThat(v.name()).isEqualTo("rate");
+            assertThat(v.equation()).isEqualTo("alpha * beta");
         }
 
         @Test
@@ -211,10 +211,10 @@ class VensimImporterTest {
 
             ImportResult result = importer.importModel(mdl, "Test");
             assertThat(result.warnings()).anyMatch(w -> w.contains("imported as constant 0"));
-            // Data variable creates a placeholder auxiliary (value 0) plus 3 built-in constants
-            assertThat(result.definition().auxiliaries()).hasSize(4);
-            // All auxiliaries are literal (no formula auxes)
-            assertThat(result.definition().auxiliaries().stream().filter(a -> !a.isLiteral()).toList())
+            // Data variable creates a placeholder variable (value 0) plus 3 built-in constants
+            assertThat(result.definition().variables()).hasSize(4);
+            // All variables are literal (no formula auxes)
+            assertThat(result.definition().variables().stream().filter(a -> !a.isLiteral()).toList())
                     .isEmpty();
         }
 
@@ -411,10 +411,10 @@ class VensimImporterTest {
 
             ImportResult result = importer.importModel(mdl, "Test");
             // Element names preserve spaces
-            AuxDef aux = result.definition().auxiliaries().stream()
+            VariableDef v = result.definition().variables().stream()
                     .filter(a -> a.name().equals("Infection Rate")).findFirst().orElseThrow();
             // Equations use underscore form for identifiers
-            assertThat(aux.equation()).isEqualTo("Contact_Rate * Infected");
+            assertThat(v.equation()).isEqualTo("Contact_Rate * Infected");
         }
     }
 
@@ -477,17 +477,17 @@ class VensimImporterTest {
             // 2 user constants + 3 built-in constants (TIME_STEP, INITIAL_TIME, FINAL_TIME)
             assertThat(def.parameters()).hasSize(2 + 3);
             Set<String> constantNames = def.parameters().stream()
-                    .map(AuxDef::name)
+                    .map(VariableDef::name)
                     .collect(Collectors.toSet());
             assertThat(constantNames).contains(
                     "Room Temperature", "Characteristic Time",
                     "TIME_STEP", "INITIAL_TIME", "FINAL_TIME");
 
-            // All auxiliaries: 1 formula + 2 user constants + 3 built-in constants = 6
-            assertThat(def.auxiliaries()).hasSize(6);
-            assertThat(def.auxiliaries().stream().filter(a -> !a.isLiteral()).toList())
+            // All variables: 1 formula + 2 user constants + 3 built-in constants = 6
+            assertThat(def.variables()).hasSize(6);
+            assertThat(def.variables().stream().filter(a -> !a.isLiteral()).toList())
                     .hasSize(1)
-                    .first().extracting(AuxDef::name).isEqualTo("Heat Loss to Room");
+                    .first().extracting(VariableDef::name).isEqualTo("Heat Loss to Room");
 
             // 1 flow: net flow for the stock
             assertThat(def.flows()).hasSize(1);
@@ -522,15 +522,15 @@ class VensimImporterTest {
             // 3 user constants + 3 built-in constants (TIME_STEP, INITIAL_TIME, FINAL_TIME)
             assertThat(def.parameters()).hasSize(3 + 3);
             Set<String> constantNames = def.parameters().stream()
-                    .map(AuxDef::name)
+                    .map(VariableDef::name)
                     .collect(Collectors.toSet());
             assertThat(constantNames).contains(
                     "Contact Rate", "Recovery Time", "Total Population",
                     "TIME_STEP", "INITIAL_TIME", "FINAL_TIME");
 
-            // 2 formula auxiliaries + 6 literal-valued (constants) = 8 total
-            assertThat(def.auxiliaries()).hasSize(8);
-            assertThat(def.auxiliaries().stream().filter(a -> !a.isLiteral()).toList()).hasSize(2);
+            // 2 formula variables + 6 literal-valued (constants) = 8 total
+            assertThat(def.variables()).hasSize(8);
+            assertThat(def.variables().stream().filter(a -> !a.isLiteral()).toList()).hasSize(2);
 
             // 4 flows: Susceptible/Recovered each get a net flow,
             // Infected decomposes INTEG(Infection Rate - Recovery Rate) into 2 individual flows
@@ -611,7 +611,7 @@ class VensimImporterTest {
 
             ImportResult result = importer.importModel(mdl, "Test");
             assertThat(result.definition().parameters()).hasSize(1 + 3); // +3 built-in constants
-            AuxDef c = result.definition().parameters().stream()
+            VariableDef c = result.definition().parameters().stream()
                     .filter(cd -> cd.name().equals("alpha"))
                     .findFirst().orElseThrow();
             assertThat(c.literalValue()).isEqualTo(0.5);
@@ -643,7 +643,7 @@ class VensimImporterTest {
 
             ImportResult result = importer.importModel(mdl, "Test");
             assertThat(result.definition().parameters()).hasSize(1 + 3); // +3 built-in constants
-            AuxDef c = result.definition().parameters().stream()
+            VariableDef c = result.definition().parameters().stream()
                     .filter(cd -> cd.name().equals("alpha"))
                     .findFirst().orElseThrow();
             assertThat(c.literalValue()).isEqualTo(-0.5);
@@ -682,7 +682,7 @@ class VensimImporterTest {
             // System vars should not appear as user model elements, but 3 built-in constants are injected
             assertThat(result.definition().parameters()).hasSize(1 + 3); // +3 built-in constants
             assertThat(result.definition().parameters().stream()
-                    .map(AuxDef::name)
+                    .map(VariableDef::name)
                     .filter(n -> !Set.of("TIME_STEP", "INITIAL_TIME", "FINAL_TIME").contains(n))
                     .toList()).containsExactly("x");
             assertThat(result.definition().defaultSimulation().duration()).isEqualTo(10.0);
@@ -804,10 +804,10 @@ class VensimImporterTest {
             ImportResult result = importer.importModel(mdl, "Test");
             ModelDefinition def = result.definition();
 
-            // No stocks, flows, or formula auxiliaries in CLD mode; only built-in constants
+            // No stocks, flows, or formula variables in CLD mode; only built-in constants
             assertThat(def.stocks()).isEmpty();
             assertThat(def.flows()).isEmpty();
-            assertThat(def.auxiliaries().stream().filter(a -> !a.isLiteral()).toList()).isEmpty();
+            assertThat(def.variables().stream().filter(a -> !a.isLiteral()).toList()).isEmpty();
             assertThat(def.parameters()).hasSize(3); // only built-in constants
 
             // Should have CLD variables
@@ -937,10 +937,10 @@ class VensimImporterTest {
             assertThat(names).containsExactlyInAnyOrder(
                     "Population", "Birth Rate", "Death Rate", "Resources");
 
-            // No stocks, flows, or formula auxiliaries; only built-in constants
+            // No stocks, flows, or formula variables; only built-in constants
             assertThat(def.stocks()).isEmpty();
             assertThat(def.flows()).isEmpty();
-            assertThat(def.auxiliaries().stream().filter(a -> !a.isLiteral()).toList()).isEmpty();
+            assertThat(def.variables().stream().filter(a -> !a.isLiteral()).toList()).isEmpty();
             assertThat(def.parameters()).hasSize(3); // only built-in constants
 
             // 4 causal links from sketch connectors
@@ -1068,11 +1068,11 @@ class VensimImporterTest {
             ModelDefinition def = result.definition();
 
             // The first variable should have a clean name, not "{UTF-8}..." prefix
-            AuxDef aux = def.auxiliaries().stream()
+            VariableDef v = def.variables().stream()
                     .filter(a -> a.name().equals("fox births"))
                     .findFirst().orElseThrow();
             // Multi-word name replacement should work in the equation
-            assertThat(aux.equation()).isEqualTo("Fox_Population * fox_birth_rate");
+            assertThat(v.equation()).isEqualTo("Fox_Population * fox_birth_rate");
         }
 
         @Test
@@ -1363,8 +1363,8 @@ class VensimImporterTest {
             ImportResult result = importer.importModel(mdl, "Test");
             ModelDefinition def = result.definition();
 
-            // Data variable should create a placeholder auxiliary
-            assertThat(def.auxiliaries().stream()
+            // Data variable should create a placeholder variable
+            assertThat(def.variables().stream()
                     .anyMatch(a -> a.name().equals("external input"))).isTrue();
 
             // Should compile without "references unknown element"
@@ -1406,8 +1406,8 @@ class VensimImporterTest {
             ImportResult result = importer.importModel(mdl, "Test");
             ModelDefinition def = result.definition();
 
-            // Bare variable should create a placeholder auxiliary
-            assertThat(def.auxiliaries().stream()
+            // Bare variable should create a placeholder variable
+            assertThat(def.variables().stream()
                     .anyMatch(a -> a.name().equals("sales"))).isTrue();
 
             // Should compile without "references unknown element: sales"
@@ -1640,17 +1640,17 @@ class VensimImporterTest {
             ModelDefinition def = result.definition();
 
             // Should expand into Population_North = 100 and Population_South = 200
-            assertThat(def.auxiliaries().stream()
+            assertThat(def.variables().stream()
                     .filter(a -> a.name().equals("Population North"))
                     .findFirst()).isPresent();
-            assertThat(def.auxiliaries().stream()
+            assertThat(def.variables().stream()
                     .filter(a -> a.name().equals("Population South"))
                     .findFirst()).isPresent();
         }
 
         @Test
         void shouldExpandSubscriptedFormula() {
-            // Subscripted auxiliary with formula referencing the dimension
+            // Subscripted variable with formula referencing the dimension
             String mdl = """
                     tub : low tub, high tub
                     \t~\t
@@ -1688,12 +1688,12 @@ class VensimImporterTest {
 
             // fill rate[tub] should be expanded into fill_rate_low_tub and fill_rate_high_tub
             // with capacity[tub] → capacity_low_tub / capacity_high_tub
-            AuxDef lowFill = def.auxiliaries().stream()
+            VariableDef lowFill = def.variables().stream()
                     .filter(a -> a.name().equals("fill rate low tub"))
                     .findFirst().orElseThrow();
             assertThat(lowFill.equation()).isEqualTo("capacity_low_tub * 0.1");
 
-            AuxDef highFill = def.auxiliaries().stream()
+            VariableDef highFill = def.variables().stream()
                     .filter(a -> a.name().equals("fill rate high tub"))
                     .findFirst().orElseThrow();
             assertThat(highFill.equation()).isEqualTo("capacity_high_tub * 0.1");
@@ -1984,11 +1984,11 @@ class VensimImporterTest {
             ModelDefinition def = result.definition();
 
             // ACTIVE INITIAL should resolve to first arg: Potential Customers + Customers
-            var aux = def.auxiliaries().stream()
+            var v = def.variables().stream()
                     .filter(a -> a.name().contains("total market"))
                     .findFirst();
-            assertThat(aux).isPresent();
-            assertThat(aux.get().equation()).isEqualTo("Potential_Customers + Customers");
+            assertThat(v).isPresent();
+            assertThat(v.get().equation()).isEqualTo("Potential_Customers + Customers");
 
             // Should compile without errors
             CompiledModel compiled = new ModelCompiler().compile(def);
@@ -2011,11 +2011,11 @@ class VensimImporterTest {
             ImportResult result = importer.importModel(mdl, "test");
             ModelDefinition def = result.definition();
 
-            var aux = def.auxiliaries().stream()
+            var v = def.variables().stream()
                     .filter(a -> a.name().contains("proactive"))
                     .findFirst();
-            assertThat(aux).isPresent();
-            assertThat(aux.get().equation()).isEqualTo("IF(avail > 0, avail, 0)");
+            assertThat(v).isPresent();
+            assertThat(v.get().equation()).isEqualTo("IF(avail > 0, avail, 0)");
         }
     }
 

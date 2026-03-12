@@ -18,8 +18,8 @@ class CausalTraceAnalysisTest {
         return new ModelDefinitionBuilder()
                 .name("Chain")
                 .constant("C", 10, "Thing")
-                .aux("A1", "C * 2", "Thing")
-                .aux("A2", "A1 + 1", "Thing")
+                .variable("A1", "C * 2", "Thing")
+                .variable("A2", "A1 + 1", "Thing")
                 .stock("S", 0, "Thing")
                 .flow("F", "A2", "Day", null, "S")
                 .build();

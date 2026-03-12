@@ -397,8 +397,8 @@ class FormContext {
             }
         }
 
-        // For auxiliaries: expected is the declared unit
-        var auxOpt = editor.getAuxByName(elementName);
+        // For variables: expected is the declared unit
+        var auxOpt = editor.getVariableByName(elementName);
         if (auxOpt.isPresent()) {
             String unitName = auxOpt.get().unit();
             if (unitName != null && !unitName.isBlank()) {

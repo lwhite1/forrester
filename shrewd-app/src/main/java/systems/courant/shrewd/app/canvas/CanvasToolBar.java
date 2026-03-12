@@ -28,7 +28,7 @@ public class CanvasToolBar extends ToolBar {
         SELECT("select"),
         PLACE_STOCK("stock"),
         PLACE_FLOW("flow"),
-        PLACE_AUX("auxiliary"),
+        PLACE_VARIABLE("variable"),
         PLACE_MODULE("module"),
         PLACE_LOOKUP("lookup"),
         PLACE_CLD_VARIABLE("variable"),
@@ -69,7 +69,7 @@ public class CanvasToolBar extends ToolBar {
         ToggleButton flowButton = makeButton("Flow", Tool.PLACE_FLOW);
         flowButton.setId("toolFlow");
         flowButton.setTooltip(new Tooltip("Add a flow \u2014 a rate that moves material between stocks"));
-        ToggleButton auxButton = makeButton("Variable", Tool.PLACE_AUX);
+        ToggleButton auxButton = makeButton("Variable", Tool.PLACE_VARIABLE);
         auxButton.setId("toolAux");
         auxButton.setTooltip(new Tooltip("Add a variable \u2014 a computed intermediate value"));
         ToggleButton moduleButton = makeButton("Module", Tool.PLACE_MODULE);

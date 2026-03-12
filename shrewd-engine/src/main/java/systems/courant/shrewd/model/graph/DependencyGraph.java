@@ -1,6 +1,6 @@
 package systems.courant.shrewd.model.graph;
 
-import systems.courant.shrewd.model.def.AuxDef;
+import systems.courant.shrewd.model.def.VariableDef;
 import systems.courant.shrewd.model.def.FlowDef;
 import systems.courant.shrewd.model.def.LookupTableDef;
 import systems.courant.shrewd.model.def.ModelDefinition;
@@ -55,7 +55,7 @@ public class DependencyGraph {
         for (FlowDef f : def.flows()) {
             allNodes.add(f.name());
         }
-        for (AuxDef a : def.auxiliaries()) {
+        for (VariableDef a : def.variables()) {
             allNodes.add(a.name());
         }
         for (LookupTableDef t : def.lookupTables()) {
@@ -84,8 +84,8 @@ public class DependencyGraph {
             }
         }
 
-        // Extract dependencies from auxiliary equations
-        for (AuxDef a : def.auxiliaries()) {
+        // Extract dependencies from variable equations
+        for (VariableDef a : def.variables()) {
             try {
                 Set<String> deps = ExprDependencies.extract(ExprParser.parse(a.equation()));
                 for (String dep : deps) {

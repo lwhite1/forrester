@@ -9,7 +9,7 @@
     },
     {
       "name": "electric vehicles EV",
-      "comment": "\"electric vehicles (EV)\"",
+      "comment": "electric vehicles EV",
       "initialValue": 1000.0,
       "unit": "auto"
     },
@@ -95,7 +95,7 @@
       "sink": "unexploited lithium reserves"
     }
   ],
-  "auxiliaries": [
+  "variables": [
     {
       "name": "EV batteries needed",
       "comment": "EV batteries needed",
@@ -176,7 +176,7 @@
     },
     {
       "name": "loss of nonrecyled lithium",
-      "comment": "\"loss of non-recyled lithium\"",
+      "comment": "loss of nonrecyled lithium",
       "equation": "lithium_in_products/average_lifetime_products_containing_lithium * (1-effective_recycling_fraction_lithium )",
       "unit": "ktonLi/year"
     },
@@ -228,7 +228,7 @@
     {
       "name": "average lifetime EV batteries during and after use in EV",
       "equation": "10",
-      "comment": "\"average lifetime EV batteries (during and after use in EV)\"",
+      "comment": "average lifetime EV batteries during and after use in EV",
       "unit": "year"
     },
     {

@@ -227,7 +227,7 @@ class ModelDefinitionSerializerTest {
         // Verify structurally that null/empty fields were omitted and round-trip correctly
         assertThat(roundTripped.stocks().get(0).comment()).isNull();
         assertThat(roundTripped.flows()).isNullOrEmpty();
-        assertThat(roundTripped.auxiliaries()).isNullOrEmpty();
+        assertThat(roundTripped.variables()).isNullOrEmpty();
     }
 
     @Test
@@ -419,6 +419,29 @@ class ModelDefinitionSerializerTest {
                 """;
         ModelDefinition def = serializer.fromJson(json);
         assertThat(def.subscripts()).isEmpty();
+    }
+
+    @Test
+    @DisplayName("should serialize variables under 'variables' JSON field and round-trip")
+    void shouldSerializeVariablesFieldName() {
+        ModelDefinition def = new ModelDefinitionBuilder()
+                .name("Variable Test")
+                .variable("Rate", "Stock_1 * 0.1", "1/Day")
+                .constant("k", 0.5, "Dimensionless unit")
+                .build();
+
+        String json = serializer.toJson(def);
+
+        // JSON must use "variables" (not the old "auxiliaries")
+        assertThat(json).contains("\"variables\"");
+        assertThat(json).doesNotContain("\"auxiliaries\"");
+
+        ModelDefinition roundTripped = serializer.fromJson(json);
+        assertThat(roundTripped.variables()).hasSize(2);
+        assertThat(roundTripped.variables().get(0).name()).isEqualTo("Rate");
+        assertThat(roundTripped.variables().get(0).equation()).isEqualTo("Stock_1 * 0.1");
+        assertThat(roundTripped.variables().get(1).name()).isEqualTo("k");
+        assertThat(roundTripped.variables().get(1).isLiteral()).isTrue();
     }
 
     private ModelDefinition buildSIR() {

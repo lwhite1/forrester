@@ -30,12 +30,12 @@ class InfoLinkCreationControllerTest {
         editor = new ModelEditor();
 
         // Add a regular variable
-        editor.addAux();  // Aux 1
-        canvasState.addElement("Aux 1", ElementType.AUX, 100, 200);
+        editor.addVariable();  // Aux 1
+        canvasState.addElement("Variable 1", ElementType.AUX, 100, 200);
 
         // Add a second variable
-        editor.addAux();  // Aux 2
-        canvasState.addElement("Aux 2", ElementType.AUX, 500, 200);
+        editor.addVariable();  // Aux 2
+        canvasState.addElement("Variable 2", ElementType.AUX, 500, 200);
 
         // Add a module with input and output ports
         ModuleInterface iface = new ModuleInterface(
@@ -87,7 +87,7 @@ class InfoLinkCreationControllerTest {
 
             // Verify binding was created
             ModuleInstanceDef module = editor.getModuleByName("Module 1").orElseThrow();
-            assertThat(module.inputBindings()).containsEntry("inPort", "Aux_1");
+            assertThat(module.inputBindings()).containsEntry("inPort", "Variable_1");
         }
     }
 
@@ -112,7 +112,7 @@ class InfoLinkCreationControllerTest {
 
             // Verify binding was created
             ModuleInstanceDef module = editor.getModuleByName("Module 1").orElseThrow();
-            assertThat(module.outputBindings()).containsEntry("outPort", "Aux 2");
+            assertThat(module.outputBindings()).containsEntry("outPort", "Variable 2");
         }
     }
 
@@ -224,7 +224,7 @@ class InfoLinkCreationControllerTest {
             controller.handleClick(100, 200, canvasState, editor);
             InfoLinkCreationController.State state = controller.getState();
             assertThat(state.pending()).isTrue();
-            assertThat(state.sourceName()).isEqualTo("Aux 1");
+            assertThat(state.sourceName()).isEqualTo("Variable 1");
             assertThat(state.sourcePort()).isNull();
         }
 

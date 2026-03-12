@@ -62,7 +62,7 @@ class DefinitionValidatorTest {
         ModelDefinition def = new ModelDefinitionBuilder()
                 .name("CaseDup")
                 .stock("Alpha", 0, "Thing")
-                .aux("ALPHA", "10", "Thing")
+                .variable("ALPHA", "10", "Thing")
                 .build();
         List<String> errors = DefinitionValidator.validate(def);
         assertThat(errors).anyMatch(e -> e.contains("case-insensitive"));
@@ -227,7 +227,7 @@ class DefinitionValidatorTest {
         ModelDefinition def = new ModelDefinitionBuilder()
                 .name("Bad")
                 .stock("S", 100, "Person")
-                .aux("Bad Aux", "S +", "Person")
+                .variable("Bad Aux", "S +", "Person")
                 .build();
         List<String> errors = DefinitionValidator.validate(def);
         assertThat(errors).anyMatch(e -> e.contains("invalid equation"));

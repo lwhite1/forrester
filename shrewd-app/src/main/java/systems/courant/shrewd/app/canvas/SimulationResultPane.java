@@ -62,7 +62,7 @@ import javax.imageio.ImageIO;
  * Embeddable pane displaying simulation results as a chart and table.
  * Supports ghost overlays from previous simulation runs.
  *
- * <p>Stocks (levels) are rendered with solid lines and variables (auxiliaries)
+ * <p>Stocks (levels) are rendered with solid lines and variables (variables)
  * with dashed lines. The sidebar groups series under "Stocks" and "Variables"
  * section headers when both types are present.
  */

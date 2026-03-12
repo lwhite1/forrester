@@ -43,7 +43,7 @@
       "sink": "huizen"
     }
   ],
-  "auxiliaries": [
+  "variables": [
     {
       "name": "emigratie",
       "comment": "emigratie",

@@ -192,7 +192,7 @@ class HelpContextResolverTest {
 
         @Test
         void shouldMapPlaceAuxToVariableTopic() {
-            assertThat(HelpContextResolver.topicForTool(CanvasToolBar.Tool.PLACE_AUX))
+            assertThat(HelpContextResolver.topicForTool(CanvasToolBar.Tool.PLACE_VARIABLE))
                     .isEqualTo(HelpTopic.VARIABLE);
         }
 

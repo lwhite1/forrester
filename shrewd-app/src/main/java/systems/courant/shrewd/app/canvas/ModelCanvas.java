@@ -102,8 +102,8 @@ public class ModelCanvas extends Canvas {
     // Sparkline data from last simulation run
     private CanvasRenderer.SparklineData sparklineData;
 
-    // View mode: hide auxiliary variables
-    private boolean hideAuxiliaries;
+    // View mode: hide variables
+    private boolean hideVariables;
 
     // View mode: show delay indicator badges
     private boolean showDelayBadges;
@@ -129,7 +129,7 @@ public class ModelCanvas extends Canvas {
                 @Override
                 public void saveAndSetAuxEquation(String name, String equation) {
                     saveUndoState("Edit " + name + " equation");
-                    editor.setAuxEquation(name, equation);
+                    editor.setVariableEquation(name, equation);
                     regenerateAndRedraw();
                 }
 
@@ -414,15 +414,15 @@ public class ModelCanvas extends Canvas {
         return series;
     }
 
-    // --- Hide auxiliaries view mode ---
+    // --- Hide variables view mode ---
 
-    public boolean isHideAuxiliaries() {
-        return hideAuxiliaries;
+    public boolean isHideVariables() {
+        return hideVariables;
     }
 
-    public void setHideAuxiliaries(boolean hide) {
-        if (this.hideAuxiliaries != hide) {
-            this.hideAuxiliaries = hide;
+    public void setHideVariables(boolean hide) {
+        if (this.hideVariables != hide) {
+            this.hideVariables = hide;
             redraw();
         }
     }
@@ -934,7 +934,7 @@ public class ModelCanvas extends Canvas {
                         inputDispatcher.getHoveredElement(),
                         inputDispatcher.getHoveredConnection(),
                         selectedConnection,
-                        hideAuxiliaries,
+                        hideVariables,
                         showDelayBadges,
                         hideInfoLinks));
     }

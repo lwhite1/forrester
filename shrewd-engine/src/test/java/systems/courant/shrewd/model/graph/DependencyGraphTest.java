@@ -73,7 +73,7 @@ class DependencyGraphTest {
                 .stock("S", 100, "Thing")
                 .constant("C", 5, "Thing")
                 .flow("F", "S * C", "Day", "S", null)
-                .aux("A", "S + C", "Thing")
+                .variable("A", "S + C", "Thing")
                 .build();
 
         DependencyGraph graph = DependencyGraph.fromDefinition(def);
@@ -106,7 +106,7 @@ class DependencyGraphTest {
         ModelDefinition def = new ModelDefinitionBuilder()
                 .name("Chain")
                 .constant("C", 10, "Thing")
-                .aux("A", "C * 2", "Thing")
+                .variable("A", "C * 2", "Thing")
                 .stock("S", 0, "Thing")
                 .flow("F", "A", "Day", null, "S")
                 .build();
@@ -155,8 +155,8 @@ class DependencyGraphTest {
                 .name("AuxDeps")
                 .stock("S", 100, "Thing")
                 .constant("C", 2, "Thing")
-                .aux("A1", "S * C", "Thing")
-                .aux("A2", "A1 + 10", "Thing")
+                .variable("A1", "S * C", "Thing")
+                .variable("A2", "A1 + 10", "Thing")
                 .build();
 
         DependencyGraph graph = DependencyGraph.fromDefinition(def);
@@ -222,14 +222,14 @@ class DependencyGraphTest {
 
     @Test
     void shouldNotCorruptStackWhenDepthExceeded() {
-        // Build a chain of 250 auxiliaries referencing the next, with
+        // Build a chain of 250 variables referencing the next, with
         // the last referencing the first to form a single deep cycle.
         // This exceeds MAX_DEPTH=200, exercising the depth-limit bail-out.
         ModelDefinitionBuilder builder = new ModelDefinitionBuilder().name("Deep");
         int n = 250;
         for (int i = 0; i < n; i++) {
             String dep = "v" + ((i + 1) % n);
-            builder.aux("v" + i, dep, "Thing");
+            builder.variable("v" + i, dep, "Thing");
         }
         DependencyGraph graph = DependencyGraph.fromDefinition(builder.build());
 
@@ -326,8 +326,8 @@ class DependencyGraphTest {
             ModelDefinition def = new ModelDefinitionBuilder()
                     .name("Chain")
                     .constant("C", 10, "Thing")
-                    .aux("A1", "C * 2", "Thing")
-                    .aux("A2", "A1 + 1", "Thing")
+                    .variable("A1", "C * 2", "Thing")
+                    .variable("A2", "A1 + 1", "Thing")
                     .stock("S", 0, "Thing")
                     .flow("F", "A2", "Day", null, "S")
                     .build();

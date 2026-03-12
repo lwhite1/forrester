@@ -19,7 +19,7 @@ import java.util.Set;
 /**
  * Parses XMILE {@code <view>} elements into {@link ViewDef} records.
  *
- * <p>Reads element placements (stocks, flows, auxiliaries with x/y coordinates),
+ * <p>Reads element placements (stocks, flows, variables with x/y coordinates),
  * connectors (dependency arrows), and flow graphical routes.
  */
 public final class XmileViewParser {

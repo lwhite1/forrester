@@ -178,8 +178,8 @@ class HitTesterTest {
     }
 
     @Nested
-    @DisplayName("hideAuxiliaries filtering")
-    class HideAuxiliaries {
+    @DisplayName("hideVariables filtering")
+    class HideVariables {
 
         @BeforeEach
         void loadMixedElements() {

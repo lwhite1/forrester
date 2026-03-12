@@ -40,7 +40,7 @@ class ModelDefinitionFactoryTest {
         // Rebuild with metadata using the canonical constructor
         return new ModelDefinition(
                 base.name(), base.comment(), base.moduleInterface(),
-                base.stocks(), base.flows(), base.auxiliaries(),
+                base.stocks(), base.flows(), base.variables(),
                 base.lookupTables(), base.modules(), base.subscripts(),
                 base.cldVariables(), base.causalLinks(), base.views(),
                 base.defaultSimulation(), metadata

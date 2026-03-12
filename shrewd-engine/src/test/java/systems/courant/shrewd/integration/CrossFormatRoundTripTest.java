@@ -166,7 +166,7 @@ class CrossFormatRoundTripTest {
 
             // The lookup data should survive (may come back as aux+lookup or standalone lookup)
             boolean hasLookup = !imported.lookupTables().isEmpty()
-                    || !imported.auxiliaries().isEmpty();
+                    || !imported.variables().isEmpty();
             assertThat(hasLookup)
                     .as("Lookup table data should survive XMILE round-trip")
                     .isTrue();
