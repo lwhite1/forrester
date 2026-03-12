@@ -65,7 +65,9 @@ public class MonteCarloResultPane extends BorderPane {
         saveItem.setOnAction(e -> saveChartAsPng());
         MenuItem exportCsv = new MenuItem("Export CSV (Percentiles)...");
         exportCsv.setOnAction(e -> exportPercentileCsv());
-        contextMenu.getItems().addAll(saveItem, exportCsv);
+        MenuItem copyItem = new MenuItem("Copy to Clipboard (Percentiles)");
+        copyItem.setOnAction(e -> ClipboardExporter.copyMonteCarloPercentiles(result, currentVariable));
+        contextMenu.getItems().addAll(saveItem, exportCsv, copyItem);
         setOnContextMenuRequested(e ->
                 contextMenu.show(this, e.getScreenX(), e.getScreenY()));
     }

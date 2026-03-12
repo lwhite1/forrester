@@ -78,7 +78,9 @@ public class OptimizationResultPane extends BorderPane {
         saveItem.setOnAction(e -> saveChartAsPng());
         MenuItem exportCsv = new MenuItem("Export CSV (Best Run)...");
         exportCsv.setOnAction(e -> exportBestRunCsv());
-        contextMenu.getItems().addAll(saveItem, exportCsv);
+        MenuItem copyItem = new MenuItem("Copy to Clipboard (Best Run)");
+        copyItem.setOnAction(e -> ClipboardExporter.copyOptimizationBestRun(result));
+        contextMenu.getItems().addAll(saveItem, exportCsv, copyItem);
         chart.setOnContextMenuRequested(e ->
                 contextMenu.show(chart, e.getScreenX(), e.getScreenY()));
 

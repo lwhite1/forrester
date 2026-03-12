@@ -144,7 +144,11 @@ public class SweepResultPane extends BorderPane {
         exportTs.setOnAction(e -> exportTimeSeriesCsv());
         MenuItem exportSummary = new MenuItem("Export CSV (Summary)...");
         exportSummary.setOnAction(e -> exportSummaryCsv());
-        contextMenu.getItems().addAll(saveItem, exportTs, exportSummary);
+        MenuItem copyTs = new MenuItem("Copy to Clipboard (Time Series)");
+        copyTs.setOnAction(e -> ClipboardExporter.copySweepTimeSeries(result));
+        MenuItem copySummary = new MenuItem("Copy to Clipboard (Summary)");
+        copySummary.setOnAction(e -> ClipboardExporter.copySweepSummary(result));
+        contextMenu.getItems().addAll(saveItem, exportTs, exportSummary, copyTs, copySummary);
         chart.setOnContextMenuRequested(e ->
                 contextMenu.show(chart, e.getScreenX(), e.getScreenY()));
 

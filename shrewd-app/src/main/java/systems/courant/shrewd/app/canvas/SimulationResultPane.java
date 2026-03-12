@@ -529,10 +529,12 @@ public class SimulationResultPane extends BorderPane {
         saveItem.setOnAction(e -> saveChartAsPng());
         MenuItem exportCsvItem = new MenuItem("Export CSV...");
         exportCsvItem.setOnAction(e -> exportCsv());
+        MenuItem copyItem = new MenuItem("Copy to Clipboard");
+        copyItem.setOnAction(e -> ClipboardExporter.copySimulationResult(simulationResult));
         MenuItem importRefItem = new MenuItem("Import Reference Data...");
         importRefItem.setId("importReferenceDataMenuItem");
         importRefItem.setOnAction(e -> importReferenceData());
-        contextMenu.getItems().addAll(saveItem, exportCsvItem, importRefItem);
+        contextMenu.getItems().addAll(saveItem, exportCsvItem, copyItem, importRefItem);
         chart.setOnContextMenuRequested(e ->
                 contextMenu.show(chart, e.getScreenX(), e.getScreenY()));
 

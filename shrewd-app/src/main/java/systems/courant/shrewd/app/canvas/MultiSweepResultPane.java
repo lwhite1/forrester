@@ -104,7 +104,9 @@ public class MultiSweepResultPane extends BorderPane {
         ContextMenu contextMenu = new ContextMenu();
         MenuItem exportSummary = new MenuItem("Export CSV (Summary)...");
         exportSummary.setOnAction(e -> exportSummaryCsv());
-        contextMenu.getItems().add(exportSummary);
+        MenuItem copySummary = new MenuItem("Copy to Clipboard (Summary)");
+        copySummary.setOnAction(e -> ClipboardExporter.copyMultiSweepSummary(result));
+        contextMenu.getItems().addAll(exportSummary, copySummary);
         table.setContextMenu(contextMenu);
 
         return table;
