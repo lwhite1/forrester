@@ -261,9 +261,11 @@ public class VensimImporter implements ModelImporter {
             return;
         }
 
-        // Data variable (operator ":=")
+        // Data variable (operator ":=") — create placeholder constant so references resolve
         if (operator.equals(":=")) {
-            warnings.add("Data variable '" + eq.name() + "' skipped (not supported)");
+            builder.aux(new AuxDef(displayName, comment, "0", unit));
+            warnings.add("Data variable '" + eq.name()
+                    + "' imported as constant 0 (external data source not supported)");
             return;
         }
 
@@ -288,6 +290,14 @@ public class VensimImporter implements ModelImporter {
                 builder.aux(new AuxDef(displayName, comment, tr.expression(), unit));
                 warnings.addAll(tr.warnings());
             }
+            return;
+        }
+
+        // Bare variable name with no equation — create placeholder constant
+        if (operator.isEmpty() && expression.isEmpty()) {
+            builder.aux(new AuxDef(displayName, comment, "0", unit));
+            warnings.add("Variable '" + eq.name()
+                    + "' has no equation; imported as constant 0");
             return;
         }
 

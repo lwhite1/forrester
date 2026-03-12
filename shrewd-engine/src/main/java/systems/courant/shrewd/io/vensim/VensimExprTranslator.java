@@ -57,6 +57,7 @@ public final class VensimExprTranslator {
             "(?i)RANDOM\\s+UNIFORM\\s*\\(");
     private static final Pattern PULSE_TRAIN_PATTERN = Pattern.compile(
             "(?i)PULSE\\s+TRAIN\\s*\\(");
+    private static final Pattern NOT_EQUAL_PATTERN = Pattern.compile("<>");
     private static final Pattern CARET_PATTERN = Pattern.compile("\\^");
     private static final Pattern TIME_VAR_PATTERN = Pattern.compile(
             "(?i)\\bTime\\b");
@@ -151,6 +152,9 @@ public final class VensimExprTranslator {
         // the next logical operator or closing paren. For simple cases, we insert not(
         // and find the end of the operand.
         expr = translateNot(expr);
+
+        // 4a. Not-equal operator: <> → !=
+        expr = NOT_EQUAL_PATTERN.matcher(expr).replaceAll("!=");
 
         // 5. XIDZ and ZIDZ
         expr = translateXidz(expr, warnings);

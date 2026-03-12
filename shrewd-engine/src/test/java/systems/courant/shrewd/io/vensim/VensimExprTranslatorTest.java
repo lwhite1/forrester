@@ -512,6 +512,38 @@ class VensimExprTranslatorTest {
     }
 
     @Nested
+    @DisplayName("Not-equal operator translation (#492)")
+    class NotEqualOperator {
+
+        @Test
+        void shouldTranslateNotEqualOperator() {
+            var result = VensimExprTranslator.translate("x <> 0", "var", EMPTY_NAMES);
+            assertThat(result.expression()).isEqualTo("x != 0");
+        }
+
+        @Test
+        void shouldTranslateNotEqualInIfThenElse() {
+            var result = VensimExprTranslator.translate(
+                    "IF THEN ELSE(adjust <> 0, 1, 0)", "var", EMPTY_NAMES);
+            assertThat(result.expression()).isEqualTo("IF(adjust != 0, 1, 0)");
+        }
+
+        @Test
+        void shouldTranslateMultipleNotEquals() {
+            var result = VensimExprTranslator.translate(
+                    "IF THEN ELSE(x <> 0 :AND: y <> 0, 1, 0)", "var", EMPTY_NAMES);
+            assertThat(result.expression()).contains("!=");
+            assertThat(result.expression()).doesNotContain("<>");
+        }
+
+        @Test
+        void shouldNotAffectLessThanOrGreaterThan() {
+            var result = VensimExprTranslator.translate("x < 0", "var", EMPTY_NAMES);
+            assertThat(result.expression()).isEqualTo("x < 0");
+        }
+    }
+
+    @Nested
     @DisplayName("Edge cases")
     class EdgeCases {
 

@@ -210,8 +210,9 @@ class VensimImporterTest {
                     """;
 
             ImportResult result = importer.importModel(mdl, "Test");
-            assertThat(result.warnings()).anyMatch(w -> w.contains("Data variable"));
-            assertThat(result.definition().parameters()).hasSize(3); // only built-in constants
+            assertThat(result.warnings()).anyMatch(w -> w.contains("imported as constant 0"));
+            // Data variable creates a placeholder auxiliary (value 0) plus 3 built-in constants
+            assertThat(result.definition().auxiliaries()).hasSize(4);
             // All auxiliaries are literal (no formula auxes)
             assertThat(result.definition().auxiliaries().stream().filter(a -> !a.isLiteral()).toList())
                     .isEmpty();
@@ -1229,6 +1230,296 @@ class VensimImporterTest {
 
             // Should compile without "references unknown element" errors
             CompiledModel compiled = new ModelCompiler().compile(result.definition());
+            assertThat(compiled).isNotNull();
+        }
+    }
+
+    @Nested
+    @DisplayName("INITIAL function reference resolution (#494)")
+    class InitialFunctionReference {
+
+        @Test
+        void shouldCompileModelWithInitialFunction() {
+            // INITIAL(expr) should be recognized as a built-in function,
+            // not flagged as "references unknown element: INITIAL"
+            String mdl = """
+                    target = 100
+                    \t~\tWidgets
+                    \t~\t
+                    \t|
+
+                    baseline = INITIAL(target)
+                    \t~\tWidgets
+                    \t~\t
+                    \t|
+
+                    INITIAL TIME = 0
+                    \t~\tDay
+                    \t~\t
+                    \t|
+
+                    FINAL TIME = 10
+                    \t~\tDay
+                    \t~\t
+                    \t|
+
+                    TIME STEP = 1
+                    \t~\tDay
+                    \t~\t
+                    \t|
+                    """;
+
+            ImportResult result = importer.importModel(mdl, "Test");
+            ModelDefinition def = result.definition();
+
+            // Should compile without "references unknown element: INITIAL"
+            CompiledModel compiled = new ModelCompiler().compile(def);
+            assertThat(compiled).isNotNull();
+        }
+
+        @Test
+        void shouldCompileModelWithInitialInStockInit() {
+            // Pattern from WFKAL.MDL: INITIAL used in stock initial value expression
+            String mdl = """
+                    desired = 50
+                    \t~\tPerson
+                    \t~\t
+                    \t|
+
+                    initial level = INITIAL(desired)
+                    \t~\tPerson
+                    \t~\t
+                    \t|
+
+                    Stock = INTEG(inflow, initial level)
+                    \t~\tPerson
+                    \t~\t
+                    \t|
+
+                    inflow = 10
+                    \t~\tPerson/Day
+                    \t~\t
+                    \t|
+
+                    INITIAL TIME = 0
+                    \t~\tDay
+                    \t~\t
+                    \t|
+
+                    FINAL TIME = 10
+                    \t~\tDay
+                    \t~\t
+                    \t|
+
+                    TIME STEP = 1
+                    \t~\tDay
+                    \t~\t
+                    \t|
+                    """;
+
+            ImportResult result = importer.importModel(mdl, "Test");
+            ModelDefinition def = result.definition();
+
+            CompiledModel compiled = new ModelCompiler().compile(def);
+            assertThat(compiled).isNotNull();
+        }
+    }
+
+    @Nested
+    @DisplayName("Data variable placeholder import (#494)")
+    class DataVariablePlaceholder {
+
+        @Test
+        void shouldCreatePlaceholderForDataVariable() {
+            // Vensim := operator marks data variables (external data source).
+            // The importer should create a constant 0 placeholder so references resolve.
+            String mdl = """
+                    external input := 0
+                    \t~\tWidgets/Day
+                    \t~\t
+                    \t|
+
+                    output = external input * 2
+                    \t~\tWidgets/Day
+                    \t~\t
+                    \t|
+
+                    INITIAL TIME = 0
+                    \t~\tDay
+                    \t~\t
+                    \t|
+
+                    FINAL TIME = 10
+                    \t~\tDay
+                    \t~\t
+                    \t|
+
+                    TIME STEP = 1
+                    \t~\tDay
+                    \t~\t
+                    \t|
+                    """;
+
+            ImportResult result = importer.importModel(mdl, "Test");
+            ModelDefinition def = result.definition();
+
+            // Data variable should create a placeholder auxiliary
+            assertThat(def.auxiliaries().stream()
+                    .anyMatch(a -> a.name().equals("external input"))).isTrue();
+
+            // Should compile without "references unknown element"
+            CompiledModel compiled = new ModelCompiler().compile(def);
+            assertThat(compiled).isNotNull();
+        }
+
+        @Test
+        void shouldCreatePlaceholderForBareNameVariable() {
+            // Some Vensim variables have no equation at all (just a name, unit, comment).
+            // Pattern from WFKAL.MDL: "sales" with no equation.
+            String mdl = """
+                    sales
+                    \t~\tWidgets/Month
+                    \t~\t
+                    \t|
+
+                    revenue = sales * 10
+                    \t~\tDollars/Month
+                    \t~\t
+                    \t|
+
+                    INITIAL TIME = 0
+                    \t~\tMonth
+                    \t~\t
+                    \t|
+
+                    FINAL TIME = 10
+                    \t~\tMonth
+                    \t~\t
+                    \t|
+
+                    TIME STEP = 1
+                    \t~\tMonth
+                    \t~\t
+                    \t|
+                    """;
+
+            ImportResult result = importer.importModel(mdl, "Test");
+            ModelDefinition def = result.definition();
+
+            // Bare variable should create a placeholder auxiliary
+            assertThat(def.auxiliaries().stream()
+                    .anyMatch(a -> a.name().equals("sales"))).isTrue();
+
+            // Should compile without "references unknown element: sales"
+            CompiledModel compiled = new ModelCompiler().compile(def);
+            assertThat(compiled).isNotNull();
+        }
+
+        @Test
+        void shouldWarnAboutDataVariableImport() {
+            String mdl = """
+                    data input := 0
+                    \t~\tDimensionless
+                    \t~\t
+                    \t|
+
+                    INITIAL TIME = 0
+                    \t~\tDay
+                    \t~\t
+                    \t|
+
+                    FINAL TIME = 10
+                    \t~\tDay
+                    \t~\t
+                    \t|
+
+                    TIME STEP = 1
+                    \t~\tDay
+                    \t~\t
+                    \t|
+                    """;
+
+            ImportResult result = importer.importModel(mdl, "Test");
+            assertThat(result.warnings()).anyMatch(w -> w.contains("imported as constant 0"));
+        }
+    }
+
+    @Nested
+    @DisplayName("Not-equal operator in equations (#492)")
+    class NotEqualOperator {
+
+        @Test
+        void shouldCompileModelWithNotEqualOperator() {
+            // Vensim uses <> for not-equal; Shrewd uses !=
+            String mdl = """
+                    trigger = IF THEN ELSE(value <> 0, 1, 0)
+                    \t~\tDimensionless
+                    \t~\t
+                    \t|
+
+                    value = 5
+                    \t~\tDimensionless
+                    \t~\t
+                    \t|
+
+                    INITIAL TIME = 0
+                    \t~\tDay
+                    \t~\t
+                    \t|
+
+                    FINAL TIME = 10
+                    \t~\tDay
+                    \t~\t
+                    \t|
+
+                    TIME STEP = 1
+                    \t~\tDay
+                    \t~\t
+                    \t|
+                    """;
+
+            ImportResult result = importer.importModel(mdl, "Test");
+            ModelDefinition def = result.definition();
+
+            // Should compile without parse errors
+            CompiledModel compiled = new ModelCompiler().compile(def);
+            assertThat(compiled).isNotNull();
+        }
+
+        @Test
+        void shouldCompileNotEqualInStockRate() {
+            // Pattern from change.mdl: <> used in INTEG rate expression
+            String mdl = """
+                    counter = INTEG(IF THEN ELSE(level <> 0, 1 / TIME STEP, 0), 0)
+                    \t~\tDimensionless
+                    \t~\t
+                    \t|
+
+                    level = 5
+                    \t~\tDimensionless
+                    \t~\t
+                    \t|
+
+                    INITIAL TIME = 0
+                    \t~\tDay
+                    \t~\t
+                    \t|
+
+                    FINAL TIME = 10
+                    \t~\tDay
+                    \t~\t
+                    \t|
+
+                    TIME STEP = 1
+                    \t~\tDay
+                    \t~\t
+                    \t|
+                    """;
+
+            ImportResult result = importer.importModel(mdl, "Test");
+            ModelDefinition def = result.definition();
+
+            CompiledModel compiled = new ModelCompiler().compile(def);
             assertThat(compiled).isNotNull();
         }
     }
