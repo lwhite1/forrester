@@ -879,12 +879,14 @@ public class ExprCompiler {
                     "FIND_ZERO second argument must be a variable reference", "FIND_ZERO");
         }
         String varName = ref.name();
-        // Register the loop variable as a literal constant so the expression can resolve it
-        context.addLiteralConstant(varName, 0.0);
+        // Register a dedicated mutable holder so the expression reads from it at runtime.
+        // Each FIND_ZERO gets its own holder — no shared mutable state.
+        double[] holder = {0.0};
+        context.addMutableHolder(varName, holder);
         DoubleSupplier expression = compileExpr(args.get(0));
         DoubleSupplier lo = compileExpr(args.get(2));
         DoubleSupplier hi = compileExpr(args.get(3));
-        FindZero findZero = FindZero.of(expression, varName, lo, hi, context);
+        FindZero findZero = FindZero.of(expression, holder, lo, hi);
         return findZero::getCurrentValue;
     }
 
