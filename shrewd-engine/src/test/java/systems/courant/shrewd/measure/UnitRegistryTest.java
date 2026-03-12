@@ -43,6 +43,20 @@ class UnitRegistryTest {
     }
 
     @Test
+    void shouldResolvePluralTimeUnits() {
+        assertThat(registry.resolveTimeUnit("Days")).isSameAs(TimeUnits.DAY);
+        assertThat(registry.resolveTimeUnit("Weeks")).isSameAs(TimeUnits.WEEK);
+        assertThat(registry.resolveTimeUnit("Months")).isSameAs(TimeUnits.MONTH);
+        assertThat(registry.resolveTimeUnit("Years")).isSameAs(TimeUnits.YEAR);
+    }
+
+    @Test
+    void shouldFindPluralTimeUnitsCaseInsensitive() {
+        assertThat(registry.find("days")).isSameAs(TimeUnits.DAY);
+        assertThat(registry.find("DAYS")).isSameAs(TimeUnits.DAY);
+    }
+
+    @Test
     void shouldFindItemUnits() {
         assertThat(registry.find("Person")).isNotNull();
         assertThat(registry.find("Thing")).isNotNull();
