@@ -10,6 +10,7 @@ import systems.courant.shrewd.app.canvas.ContextHelpDialog;
 import systems.courant.shrewd.app.canvas.LoopNavigatorBar;
 import systems.courant.shrewd.app.canvas.DashboardPanel;
 import systems.courant.shrewd.app.canvas.DiagramExporter;
+import systems.courant.shrewd.app.canvas.ReportExporter;
 import systems.courant.shrewd.app.canvas.ExpressionLanguageDialog;
 import systems.courant.shrewd.app.canvas.HelpContextResolver;
 import systems.courant.shrewd.app.canvas.HelpTopic;
@@ -429,6 +430,13 @@ public class ModelWindow {
                 canvas.getConnectors(), canvas.getActiveLoopAnalysis(), stage,
                 editor != null ? editor.getModelName() : null));
 
+        MenuItem exportReportItem = new MenuItem("Export Report...");
+        exportReportItem.setId("menuExportReport");
+        exportReportItem.setOnAction(e -> ReportExporter.exportReport(
+                canvas.getCanvasState(), canvas.getEditor(),
+                canvas.getConnectors(), canvas.getActiveLoopAnalysis(), stage,
+                editor != null ? editor.getModelName() : null));
+
         MenuItem closeItem = new MenuItem("Close");
         closeItem.setAccelerator(new KeyCodeCombination(KeyCode.W, KeyCombination.SHORTCUT_DOWN));
         closeItem.setOnAction(e -> {
@@ -449,12 +457,14 @@ public class ModelWindow {
         saveItem.setDisable(true);
         saveAsItem.setDisable(true);
         exportItem.setDisable(true);
+        exportReportItem.setDisable(true);
         modelInfoItem.setDisable(true);
-        editorOnlyItems.addAll(List.of(saveItem, saveAsItem, exportItem, modelInfoItem));
+        editorOnlyItems.addAll(List.of(saveItem, saveAsItem, exportItem, exportReportItem,
+                modelInfoItem));
 
         fileMenu.getItems().addAll(newWindowItem, newItem, openItem, examplesMenu,
                 new SeparatorMenuItem(), modelInfoItem,
-                new SeparatorMenuItem(), saveItem, saveAsItem, exportItem,
+                new SeparatorMenuItem(), saveItem, saveAsItem, exportItem, exportReportItem,
                 new SeparatorMenuItem(), closeItem, exitItem);
 
         Menu editMenu = new Menu("Edit");

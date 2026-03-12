@@ -13,6 +13,7 @@ import javafx.scene.paint.Color;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Locale;
@@ -36,6 +37,22 @@ public final class SvgExporter {
      * @param file         the output file
      * @throws IOException if writing fails
      */
+    /**
+     * Returns the diagram as an SVG string, or null if the diagram is empty.
+     */
+    public static String toSvgString(CanvasState canvasState, ModelEditor editor,
+                                     List<ConnectorRoute> connectors,
+                                     FeedbackAnalysis loopAnalysis) {
+        if (canvasState.getDrawOrder().isEmpty()) {
+            return null;
+        }
+        StringWriter sw = new StringWriter(4096);
+        try (PrintWriter w = new PrintWriter(sw)) {
+            writeSvg(w, canvasState, editor, connectors, loopAnalysis);
+        }
+        return sw.toString();
+    }
+
     public static void export(CanvasState canvasState, ModelEditor editor,
                               List<ConnectorRoute> connectors,
                               FeedbackAnalysis loopAnalysis,
@@ -43,13 +60,20 @@ public final class SvgExporter {
         if (canvasState.getDrawOrder().isEmpty()) {
             return;
         }
+        try (PrintWriter w = new PrintWriter(file, StandardCharsets.UTF_8)) {
+            writeSvg(w, canvasState, editor, connectors, loopAnalysis);
+        }
+    }
+
+    private static void writeSvg(PrintWriter w, CanvasState canvasState, ModelEditor editor,
+                                 List<ConnectorRoute> connectors,
+                                 FeedbackAnalysis loopAnalysis) {
         ExportBounds.Bounds bounds = ExportBounds.compute(canvasState, editor);
         double minX = bounds.minX();
         double minY = bounds.minY();
         double width = bounds.width();
         double height = bounds.height();
 
-        try (PrintWriter w = new PrintWriter(file, StandardCharsets.UTF_8)) {
             w.println("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
             w.printf(Locale.US,
                     "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"%.1f %.1f %.1f %.1f\" " +
@@ -132,8 +156,7 @@ public final class SvgExporter {
                 }
             }
 
-            w.println("</svg>");
-        }
+        w.println("</svg>");
     }
 
     // --- Material flows ---
