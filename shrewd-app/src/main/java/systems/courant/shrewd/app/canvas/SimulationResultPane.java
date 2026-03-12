@@ -30,9 +30,11 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.control.Tooltip;
 import javafx.scene.image.WritableImage;
+import javafx.beans.property.DoubleProperty;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Region;
+import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 
@@ -76,6 +78,7 @@ public class SimulationResultPane extends BorderPane {
     );
 
     private LineChart<Number, Number> chart;
+    private ChartTimeCursor timeCursor;
     private SimulationRunner.SimulationResult simulationResult;
     private final List<FlowDef> flows;
     private final List<ReferenceDataset> referenceDatasets;
@@ -533,10 +536,22 @@ public class SimulationResultPane extends BorderPane {
         chart.setOnContextMenuRequested(e ->
                 contextMenu.show(chart, e.getScreenX(), e.getScreenY()));
 
+        ChartTimeCursor[] cursorHolder = new ChartTimeCursor[1];
+        StackPane chartWithCursor = ChartTimeCursor.install(chart, cursorHolder);
+        timeCursor = cursorHolder[0];
+
         BorderPane pane = new BorderPane();
-        pane.setCenter(chart);
+        pane.setCenter(chartWithCursor);
         pane.setRight(sidebarScroll);
         return pane;
+    }
+
+    /**
+     * Returns the time cursor property for this chart, allowing synchronization
+     * with other charts. Value is {@code Double.NaN} when no cursor is active.
+     */
+    DoubleProperty cursorTimeStepProperty() {
+        return timeCursor != null ? timeCursor.cursorTimeStepProperty() : null;
     }
 
     private void addSectionHeader(VBox sidebar, String title) {

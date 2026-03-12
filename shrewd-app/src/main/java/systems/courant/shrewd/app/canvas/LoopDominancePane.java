@@ -17,6 +17,8 @@ import javafx.scene.control.Label;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.TitledPane;
 import javafx.scene.image.WritableImage;
+import javafx.beans.property.DoubleProperty;
+import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.layout.Priority;
 import javafx.stage.FileChooser;
@@ -40,6 +42,7 @@ final class LoopDominancePane extends VBox {
 
     private final LoopDominanceAnalysis dominance;
     private AreaChart<Number, Number> chart;
+    private ChartTimeCursor timeCursor;
 
     LoopDominancePane(LoopDominanceAnalysis dominance) {
         this.dominance = dominance;
@@ -77,7 +80,11 @@ final class LoopDominancePane extends VBox {
         // Apply loop colors
         applyLoopColors(chart, dominance);
 
-        VBox.setVgrow(chart, Priority.ALWAYS);
+        ChartTimeCursor[] cursorHolder = new ChartTimeCursor[1];
+        StackPane chartWithCursor = ChartTimeCursor.install(chart, cursorHolder);
+        timeCursor = cursorHolder[0];
+
+        VBox.setVgrow(chartWithCursor, Priority.ALWAYS);
 
         ContextMenu contextMenu = new ContextMenu();
         MenuItem saveItem = new MenuItem("Save as PNG...");
@@ -103,7 +110,15 @@ final class LoopDominancePane extends VBox {
         helpPane.setAnimated(false);
         helpPane.setPadding(new Insets(4, 0, 0, 0));
 
-        getChildren().addAll(chart, helpPane);
+        getChildren().addAll(chartWithCursor, helpPane);
+    }
+
+    /**
+     * Returns the time cursor property for this chart, allowing synchronization
+     * with other charts. Value is {@code Double.NaN} when no cursor is active.
+     */
+    DoubleProperty cursorTimeStepProperty() {
+        return timeCursor != null ? timeCursor.cursorTimeStepProperty() : null;
     }
 
     private void saveChartAsPng() {
