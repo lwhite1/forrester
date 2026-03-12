@@ -373,6 +373,7 @@ public class SimulationResultPane extends BorderPane {
             sidebar.getChildren().add(new Separator());
 
             Label ghostHeader = new Label("Previous Runs");
+            ghostHeader.setId("ghostRunsHeader");
             ghostHeader.setStyle("-fx-font-size: 11px; -fx-font-weight: bold; -fx-text-fill: #555;");
             sidebar.getChildren().add(ghostHeader);
 
@@ -453,16 +454,34 @@ public class SimulationResultPane extends BorderPane {
                 chart.getData().removeAll(allGhostSeries);
                 allGhostSeries.clear();
                 ghostSeriesGroups.clear();
-                // Remove everything after the separator
-                int sepIndex = -1;
+                // Remove the ghost section: find the "Previous Runs" header
+                // and remove from the separator before it to the end of the
+                // ghost section (the Clear History button). Other sections
+                // (net flow toggle, reference data) must be preserved.
+                int ghostHeaderIndex = -1;
                 for (int i = 0; i < sidebar.getChildren().size(); i++) {
-                    if (sidebar.getChildren().get(i) instanceof Separator) {
-                        sepIndex = i;
+                    if (sidebar.getChildren().get(i) instanceof Label label
+                            && "ghostRunsHeader".equals(label.getId())) {
+                        ghostHeaderIndex = i;
                         break;
                     }
                 }
-                if (sepIndex >= 0) {
-                    sidebar.getChildren().remove(sepIndex, sidebar.getChildren().size());
+                if (ghostHeaderIndex >= 0) {
+                    int startRemove = ghostHeaderIndex;
+                    // Include the separator before the header if present
+                    if (ghostHeaderIndex > 0
+                            && sidebar.getChildren().get(ghostHeaderIndex - 1) instanceof Separator) {
+                        startRemove = ghostHeaderIndex - 1;
+                    }
+                    // Find the Clear History button to determine the end of the ghost section
+                    int endRemove = sidebar.getChildren().size();
+                    for (int i = ghostHeaderIndex + 1; i < sidebar.getChildren().size(); i++) {
+                        if (sidebar.getChildren().get(i) instanceof Button) {
+                            endRemove = i + 1;
+                            break;
+                        }
+                    }
+                    sidebar.getChildren().remove(startRemove, endRemove);
                 }
             });
             sidebar.getChildren().add(clearButton);
