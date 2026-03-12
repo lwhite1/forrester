@@ -3,6 +3,7 @@ package systems.courant.shrewd.app.canvas;
 import systems.courant.shrewd.model.def.ModelDefinition;
 import systems.courant.shrewd.model.def.ModelDefinitionBuilder;
 
+import java.util.Arrays;
 import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -167,6 +168,44 @@ class EquationAutoCompleteTest {
                             .sorted().findFirst().orElseThrow());
             assertThat(lastElementIdx).isLessThan(firstFunctionIdx);
         }
+
+        @Test
+        void shouldReflectNewlyAddedElements() {
+            List<String> before = EquationAutoComplete.getSuggestions(editor, null);
+            assertThat(before).doesNotContain("Death_Rate");
+
+            // Reload with an additional flow to simulate model change
+            ModelDefinition def2 = new ModelDefinitionBuilder()
+                    .name("Test")
+                    .stock("Population", 1000, "people")
+                    .flow("Birth Rate", "Population * 0.03", "year", null, "Population")
+                    .flow("Death Rate", "Population * 0.01", "year", "Population", null)
+                    .aux("Contact Rate", "5", "contacts/day")
+                    .constant("Growth Factor", 1.5, "dimensionless")
+                    .build();
+            editor.loadFrom(def2);
+
+            List<String> after = EquationAutoComplete.getSuggestions(editor, null);
+            assertThat(after).contains("Death_Rate");
+        }
+
+        @Test
+        void shouldReflectRemovedElements() {
+            List<String> before = EquationAutoComplete.getSuggestions(editor, null);
+            assertThat(before).contains("Contact_Rate");
+
+            // Reload without Contact Rate
+            ModelDefinition def2 = new ModelDefinitionBuilder()
+                    .name("Test")
+                    .stock("Population", 1000, "people")
+                    .flow("Birth Rate", "Population * 0.03", "year", null, "Population")
+                    .constant("Growth Factor", 1.5, "dimensionless")
+                    .build();
+            editor.loadFrom(def2);
+
+            List<String> after = EquationAutoComplete.getSuggestions(editor, null);
+            assertThat(after).doesNotContain("Contact_Rate");
+        }
     }
 
     @Nested
@@ -280,6 +319,24 @@ class EquationAutoCompleteTest {
             // STEP(10, 5)|
             var ctx = EquationAutoComplete.detectFunctionContext("STEP(10, 5)", 11);
             assertThat(ctx).isNull();
+        }
+    }
+
+    @Nested
+    @DisplayName("No stale suggestion cache (#438)")
+    class NoStaleSuggestionCache {
+
+        @Test
+        void shouldNotHaveCachedAllSuggestionsFieldInState() {
+            // Guard against reintroducing the allSuggestions cache field
+            boolean hasCachedField = Arrays.stream(
+                            EquationAutoComplete.class.getDeclaredClasses())
+                    .filter(c -> c.getSimpleName().equals("State"))
+                    .flatMap(c -> Arrays.stream(c.getDeclaredFields()))
+                    .anyMatch(f -> f.getName().equals("allSuggestions"));
+            assertThat(hasCachedField)
+                    .as("State should not cache allSuggestions — see #438")
+                    .isFalse();
         }
     }
 

@@ -414,7 +414,6 @@ public final class EquationAutoComplete {
 
         Popup popup;
         ListView<AutoCompleteSuggestion> listView;
-        List<AutoCompleteSuggestion> allSuggestions;
         Token currentToken;
 
         Popup hintPopup;
@@ -495,12 +494,8 @@ public final class EquationAutoComplete {
                 return;
             }
 
-            if (allSuggestions == null) {
-                allSuggestions = getRichSuggestions(editor, excludeName);
-            }
-
             List<AutoCompleteSuggestion> filtered = filterRichSuggestions(
-                    allSuggestions, token.prefix());
+                    getRichSuggestions(editor, excludeName), token.prefix());
             if (filtered.isEmpty()) {
                 hidePopup();
                 return;
