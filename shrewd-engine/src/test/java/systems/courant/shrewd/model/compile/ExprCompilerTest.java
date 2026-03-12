@@ -526,6 +526,23 @@ class ExprCompilerTest {
                     .isInstanceOf(CompilationException.class)
                     .hasMessageContaining("4-5 arguments");
         }
+
+        @Test
+        void shouldProduceDifferentSequencesForDistinctFormulas() {
+            Formula formula1 = compiler.compile("RANDOM_NORMAL(0, 100, 50, 10)");
+            Formula formula2 = compiler.compile("RANDOM_NORMAL(0, 100, 50, 10)");
+
+            boolean foundDifference = false;
+            for (int i = 0; i < 20; i++) {
+                if (formula1.getCurrentValue() != formula2.getCurrentValue()) {
+                    foundDifference = true;
+                    break;
+                }
+            }
+            assertThat(foundDifference)
+                    .as("Two RANDOM_NORMAL formulas compiled separately should produce different sequences")
+                    .isTrue();
+        }
     }
 
     @Nested

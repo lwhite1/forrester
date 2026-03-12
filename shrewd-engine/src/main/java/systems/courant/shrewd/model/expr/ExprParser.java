@@ -198,7 +198,14 @@ public class ExprParser {
         }
         if (matchPlus()) {
             // Unary plus is a no-op — just parse the operand
-            return parseUnary();
+            depth++;
+            if (depth > MAX_DEPTH) {
+                throw new ParseException("Expression nesting too deep (max " + MAX_DEPTH + ")",
+                        pos + trimOffset);
+            }
+            Expr operand = parseUnary();
+            depth--;
+            return operand;
         }
         return parsePrimary();
     }
