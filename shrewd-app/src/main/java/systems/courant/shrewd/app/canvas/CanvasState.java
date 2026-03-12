@@ -11,6 +11,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.SequencedSet;
 import java.util.Set;
 
 /**
@@ -36,7 +37,7 @@ public class CanvasState {
     private final Map<String, Size> sizes = new LinkedHashMap<>();
     private final Map<String, ElementType> types = new LinkedHashMap<>();
     private final Set<String> selection = new LinkedHashSet<>();
-    private final List<String> drawOrder = new ArrayList<>();
+    private final SequencedSet<String> drawOrder = new LinkedHashSet<>();
     private String viewName = DEFAULT_VIEW_NAME;
 
     /**
@@ -149,7 +150,7 @@ public class CanvasState {
      * Returns all element names in draw order.
      */
     public List<String> getDrawOrder() {
-        return Collections.unmodifiableList(drawOrder);
+        return List.copyOf(drawOrder);
     }
 
     /**
@@ -228,9 +229,7 @@ public class CanvasState {
     public void addElement(String name, ElementType type, double x, double y) {
         positions.put(name, new Position(x, y));
         types.put(name, type);
-        if (!drawOrder.contains(name)) {
-            drawOrder.add(name);
-        }
+        drawOrder.add(name);
     }
 
     /**
@@ -254,10 +253,12 @@ public class CanvasState {
             sizes.put(newName, size);
         }
 
-        int idx = drawOrder.indexOf(oldName);
-        if (idx >= 0) {
-            drawOrder.set(idx, newName);
+        LinkedHashSet<String> reordered = new LinkedHashSet<>(drawOrder.size());
+        for (String name : drawOrder) {
+            reordered.add(name.equals(oldName) ? newName : name);
         }
+        drawOrder.clear();
+        drawOrder.addAll(reordered);
 
         if (selection.remove(oldName)) {
             selection.add(newName);
