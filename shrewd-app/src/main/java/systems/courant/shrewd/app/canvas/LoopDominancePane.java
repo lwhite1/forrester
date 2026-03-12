@@ -182,13 +182,24 @@ final class LoopDominancePane extends VBox {
 
             if (i < chart.getData().size()) {
                 XYChart.Series<Number, Number> series = chart.getData().get(i);
+                String fillStyle = "-fx-fill: " + color + "40;";
                 if (series.getNode() != null) {
-                    series.getNode().setStyle("-fx-fill: " + color + "40;");
+                    series.getNode().setStyle(fillStyle);
                 }
+                series.nodeProperty().addListener((obs, oldNode, newNode) -> {
+                    if (newNode != null) {
+                        newNode.setStyle(fillStyle);
+                    }
+                });
                 for (XYChart.Data<Number, Number> d : series.getData()) {
                     if (d.getNode() != null) {
                         d.getNode().setVisible(false);
                     }
+                    d.nodeProperty().addListener((obs, oldNode, newNode) -> {
+                        if (newNode != null) {
+                            newNode.setVisible(false);
+                        }
+                    });
                 }
             }
         }

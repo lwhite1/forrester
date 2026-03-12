@@ -5,6 +5,7 @@ import systems.courant.shrewd.model.graph.LoopDominanceAnalysis;
 
 import javafx.scene.Scene;
 import javafx.scene.chart.AreaChart;
+import javafx.scene.chart.XYChart;
 import javafx.scene.control.TitledPane;
 import javafx.stage.Stage;
 
@@ -14,6 +15,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.testfx.api.FxRobot;
 import org.testfx.framework.junit5.ApplicationExtension;
 import org.testfx.framework.junit5.Start;
+import org.testfx.util.WaitForAsyncUtils;
 
 import java.util.List;
 
@@ -61,6 +63,42 @@ class LoopDominancePaneFxTest {
     @DisplayName("Pane has two children (chart and help)")
     void paneHasTwoChildren(FxRobot robot) {
         assertThat(pane.getChildren()).hasSize(2);
+    }
+
+    @Test
+    @DisplayName("Series nodes receive loop colors after layout pass")
+    @SuppressWarnings("unchecked")
+    void seriesNodesReceiveLoopColors(FxRobot robot) {
+        WaitForAsyncUtils.waitForFxEvents();
+        AreaChart<Number, Number> chart = (AreaChart<Number, Number>)
+                robot.lookup(".chart").queryAs(AreaChart.class);
+
+        // Reinforcing loop (index 0) should get green fill with 40 alpha suffix
+        XYChart.Series<Number, Number> reinforcingSeries = chart.getData().get(0);
+        assertThat(reinforcingSeries.getNode()).isNotNull();
+        assertThat(reinforcingSeries.getNode().getStyle()).contains("#27ae60");
+
+        // Balancing loop (index 1) should get blue fill with 40 alpha suffix
+        XYChart.Series<Number, Number> balancingSeries = chart.getData().get(1);
+        assertThat(balancingSeries.getNode()).isNotNull();
+        assertThat(balancingSeries.getNode().getStyle()).contains("#3498db");
+    }
+
+    @Test
+    @DisplayName("Data point nodes are hidden after layout pass")
+    @SuppressWarnings("unchecked")
+    void dataPointNodesAreHidden(FxRobot robot) {
+        WaitForAsyncUtils.waitForFxEvents();
+        AreaChart<Number, Number> chart = (AreaChart<Number, Number>)
+                robot.lookup(".chart").queryAs(AreaChart.class);
+
+        for (XYChart.Series<Number, Number> series : chart.getData()) {
+            for (XYChart.Data<Number, Number> data : series.getData()) {
+                if (data.getNode() != null) {
+                    assertThat(data.getNode().isVisible()).isFalse();
+                }
+            }
+        }
     }
 
     private static LoopDominanceAnalysis buildTestDominance() {
