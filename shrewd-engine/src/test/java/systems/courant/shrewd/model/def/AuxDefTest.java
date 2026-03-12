@@ -5,9 +5,84 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @DisplayName("AuxDef")
 class AuxDefTest {
+
+    @Nested
+    @DisplayName("isLiteral / literalValue (#329)")
+    class LiteralDetection {
+
+        @Test
+        void shouldDetectPositiveInteger() {
+            AuxDef aux = new AuxDef("x", "42", "widgets");
+            assertThat(aux.isLiteral()).isTrue();
+            assertThat(aux.literalValue()).isEqualTo(42.0);
+        }
+
+        @Test
+        void shouldDetectNegativeNumber() {
+            AuxDef aux = new AuxDef("x", "-3.5", "widgets");
+            assertThat(aux.isLiteral()).isTrue();
+            assertThat(aux.literalValue()).isEqualTo(-3.5);
+        }
+
+        @Test
+        void shouldDetectZero() {
+            AuxDef aux = new AuxDef("x", "0", "widgets");
+            assertThat(aux.isLiteral()).isTrue();
+            assertThat(aux.literalValue()).isEqualTo(0.0);
+        }
+
+        @Test
+        void shouldDetectDecimalFraction() {
+            AuxDef aux = new AuxDef("x", "0.03", "widgets");
+            assertThat(aux.isLiteral()).isTrue();
+            assertThat(aux.literalValue()).isEqualTo(0.03);
+        }
+
+        @Test
+        void shouldDetectScientificNotation() {
+            AuxDef aux = new AuxDef("x", "1.5E3", "widgets");
+            assertThat(aux.isLiteral()).isTrue();
+            assertThat(aux.literalValue()).isEqualTo(1500.0);
+        }
+
+        @Test
+        void shouldRejectFormulaExpression() {
+            AuxDef aux = new AuxDef("x", "Population * birth_rate", "widgets");
+            assertThat(aux.isLiteral()).isFalse();
+        }
+
+        @Test
+        void shouldRejectVariableReference() {
+            AuxDef aux = new AuxDef("x", "other_var", "widgets");
+            assertThat(aux.isLiteral()).isFalse();
+        }
+
+        @Test
+        void shouldRejectFunctionCall() {
+            AuxDef aux = new AuxDef("x", "MAX(a, b)", "widgets");
+            assertThat(aux.isLiteral()).isFalse();
+        }
+
+        @Test
+        void shouldHandleWhitespace() {
+            AuxDef aux = new AuxDef("x", " 42 ", "widgets");
+            assertThat(aux.isLiteral()).isTrue();
+            assertThat(aux.literalValue()).isEqualTo(42.0);
+        }
+
+        @Test
+        void shouldThrowOnLiteralValueForNonLiteral() {
+            AuxDef aux = new AuxDef("x", "a + b", "widgets");
+            assertThatThrownBy(aux::literalValue)
+                    .isInstanceOf(IllegalStateException.class)
+                    .hasMessageContaining("not a literal");
+        }
+    }
+
 
     @Nested
     @DisplayName("formatValue (#421)")

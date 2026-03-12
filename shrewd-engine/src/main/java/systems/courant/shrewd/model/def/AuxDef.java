@@ -1,10 +1,5 @@
 package systems.courant.shrewd.model.def;
 
-import systems.courant.shrewd.model.expr.Expr;
-import systems.courant.shrewd.model.expr.ExprParser;
-import systems.courant.shrewd.model.expr.ParseException;
-import systems.courant.shrewd.model.expr.UnaryOperator;
-
 import java.util.List;
 
 /**
@@ -70,9 +65,9 @@ public record AuxDef(
      */
     public boolean isLiteral() {
         try {
-            Expr expr = ExprParser.parse(equation);
-            return isLiteralExpr(expr);
-        } catch (ParseException e) {
+            Double.parseDouble(equation.strip());
+            return true;
+        } catch (NumberFormatException e) {
             return false;
         }
     }
@@ -84,35 +79,11 @@ public record AuxDef(
      */
     public double literalValue() {
         try {
-            Expr expr = ExprParser.parse(equation);
-            return extractLiteralValue(expr);
-        } catch (ParseException e) {
+            return Double.parseDouble(equation.strip());
+        } catch (NumberFormatException e) {
             throw new IllegalStateException(
                     "Auxiliary '" + name + "' equation is not a literal: " + equation, e);
         }
-    }
-
-    private static boolean isLiteralExpr(Expr expr) {
-        if (expr instanceof Expr.Literal) {
-            return true;
-        }
-        if (expr instanceof Expr.UnaryOp un
-                && un.operator() == UnaryOperator.NEGATE) {
-            return un.operand() instanceof Expr.Literal;
-        }
-        return false;
-    }
-
-    private static double extractLiteralValue(Expr expr) {
-        if (expr instanceof Expr.Literal lit) {
-            return lit.value();
-        }
-        if (expr instanceof Expr.UnaryOp un
-                && un.operator() == UnaryOperator.NEGATE
-                && un.operand() instanceof Expr.Literal lit) {
-            return -lit.value();
-        }
-        throw new IllegalStateException("Expression is not a literal: " + expr);
     }
 
     /**
