@@ -1,0 +1,118 @@
+package systems.courant.shrewd.app;
+
+import systems.courant.shrewd.app.canvas.Clipboard;
+
+import javafx.application.Platform;
+import javafx.stage.Stage;
+
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.testfx.api.FxRobot;
+import org.testfx.framework.junit5.ApplicationExtension;
+import org.testfx.framework.junit5.Start;
+import org.testfx.util.WaitForAsyncUtils;
+
+import static org.assertj.core.api.Assertions.assertThat;
+
+@DisplayName("FileController.openExample() guards unsaved changes (#463)")
+@ExtendWith(ApplicationExtension.class)
+class FileControllerOpenExampleFxTest {
+
+    private ModelWindow window;
+    private Stage stage;
+
+    @Start
+    void start(Stage stage) {
+        this.stage = stage;
+        ShrewdApp app = new ShrewdApp();
+        window = new ModelWindow(stage, app, new Clipboard());
+        stage.show();
+    }
+
+    @Test
+    @DisplayName("openExample loads model when no unsaved changes exist")
+    void shouldLoadExampleWhenClean(FxRobot robot) {
+        assertThat(window.isDirty()).isFalse();
+
+        Platform.runLater(() ->
+                window.getFileController().openExample("Bathtub", "introductory/bathtub.json"));
+        WaitForAsyncUtils.waitForFxEvents();
+
+        assertThat(stage.getTitle()).contains("Bathtub");
+        assertThat(window.isDirty()).isFalse();
+        assertThat(window.getCurrentFile()).isNull();
+    }
+
+    @Test
+    @DisplayName("openExample shows confirmation dialog when dirty and cancelling preserves model")
+    void shouldPromptWhenDirtyAndCancelPreservesState(FxRobot robot) {
+        // Load an initial example so we have a known title
+        Platform.runLater(() ->
+                window.getFileController().openExample("Bathtub", "introductory/bathtub.json"));
+        WaitForAsyncUtils.waitForFxEvents();
+        assertThat(stage.getTitle()).contains("Bathtub");
+
+        // Mark dirty
+        Platform.runLater(() -> window.getFileController().markDirty());
+        WaitForAsyncUtils.waitForFxEvents();
+        assertThat(window.isDirty()).isTrue();
+
+        // Attempt to open another example — dialog should appear
+        Platform.runLater(() ->
+                window.getFileController().openExample("Aging Chain", "demographics/aging-chain.json"));
+        WaitForAsyncUtils.waitForFxEvents();
+
+        // Click Cancel on the confirmation dialog
+        robot.clickOn("Cancel");
+        WaitForAsyncUtils.waitForFxEvents();
+
+        // Model should NOT have changed — still showing Bathtub, still dirty
+        assertThat(stage.getTitle()).contains("Bathtub");
+        assertThat(window.isDirty()).isTrue();
+    }
+
+    @Test
+    @DisplayName("openExample proceeds when dirty and user confirms discard")
+    void shouldLoadExampleWhenDirtyAndUserConfirms(FxRobot robot) {
+        // Load an initial example
+        Platform.runLater(() ->
+                window.getFileController().openExample("Bathtub", "introductory/bathtub.json"));
+        WaitForAsyncUtils.waitForFxEvents();
+
+        // Mark dirty
+        Platform.runLater(() -> window.getFileController().markDirty());
+        WaitForAsyncUtils.waitForFxEvents();
+        assertThat(window.isDirty()).isTrue();
+
+        // Attempt to open another example — dialog should appear
+        Platform.runLater(() ->
+                window.getFileController().openExample("Aging Chain", "demographics/aging-chain.json"));
+        WaitForAsyncUtils.waitForFxEvents();
+
+        // Click OK to discard changes
+        robot.clickOn("OK");
+        WaitForAsyncUtils.waitForFxEvents();
+
+        // Model should now show the new example (title may truncate long names)
+        assertThat(stage.getTitle()).contains("Aging");
+        assertThat(window.isDirty()).isFalse();
+        assertThat(window.getCurrentFile()).isNull();
+    }
+
+    @Test
+    @DisplayName("openExample clears currentFile after loading")
+    void shouldClearCurrentFileAfterLoadingExample(FxRobot robot) {
+        // Set a fake current file path
+        Platform.runLater(() ->
+                window.getFileController().setCurrentFile(java.nio.file.Path.of("fake.json")));
+        WaitForAsyncUtils.waitForFxEvents();
+        assertThat(window.getCurrentFile()).isNotNull();
+
+        Platform.runLater(() ->
+                window.getFileController().openExample("Bathtub", "introductory/bathtub.json"));
+        WaitForAsyncUtils.waitForFxEvents();
+
+        assertThat(window.getCurrentFile()).isNull();
+    }
+}
