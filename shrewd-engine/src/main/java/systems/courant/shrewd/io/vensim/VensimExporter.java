@@ -11,6 +11,7 @@ import systems.courant.shrewd.model.def.LookupTableDef;
 import systems.courant.shrewd.model.def.ModelDefinition;
 import systems.courant.shrewd.model.def.SimulationSettings;
 import systems.courant.shrewd.model.def.StockDef;
+import systems.courant.shrewd.model.def.SubscriptDef;
 import systems.courant.shrewd.model.def.ViewDef;
 
 import org.slf4j.Logger;
@@ -58,6 +59,14 @@ public final class VensimExporter {
     private static final Pattern TIME_PATTERN = Pattern.compile("\\bTIME\\b");
     private static final Pattern LOOKUP_REF_PATTERN = Pattern.compile(
             "(?i)^LOOKUP\\s*\\(");
+    private static final Pattern EMBEDDED_LOOKUP_PATTERN = Pattern.compile(
+            "(?i)\\bLOOKUP\\s*\\(");
+    private static final Pattern DELAY_FIXED_EXPORT_PATTERN = Pattern.compile(
+            "(?i)\\bDELAY_FIXED\\s*\\(");
+    private static final Pattern RANDOM_UNIFORM_EXPORT_PATTERN = Pattern.compile(
+            "(?i)\\bRANDOM_UNIFORM\\s*\\(");
+    private static final Pattern PULSE_TRAIN_EXPORT_PATTERN = Pattern.compile(
+            "(?i)\\bPULSE_TRAIN\\s*\\(");
 
     private VensimExporter() {
     }
@@ -77,6 +86,11 @@ public final class VensimExporter {
 
         // Collect synthetic _net_flow names whose equations will be inlined into INTEG
         Set<String> inlinedFlowNames = collectInlinedFlowNames(def);
+
+        // Write subscript definitions
+        for (SubscriptDef subscript : def.subscripts()) {
+            sb.append(buildSubscriptBlock(subscript));
+        }
 
         // Write stocks
         for (StockDef stock : def.stocks()) {
@@ -133,7 +147,8 @@ public final class VensimExporter {
 
     private static String buildStockBlock(StockDef stock, ModelDefinition def,
                                           Set<String> inlinedFlowNames) {
-        String vensimName = denormalizeName(stock.name());
+        String vensimName = denormalizeName(stock.name())
+                + formatSubscriptSuffix(stock.subscripts());
 
         // Find inflows and outflows from flow definitions
         List<FlowDef> inflowDefs = new ArrayList<>();
@@ -192,7 +207,8 @@ public final class VensimExporter {
     }
 
     private static String buildFlowBlock(FlowDef flow) {
-        String vensimName = denormalizeName(flow.name());
+        String vensimName = denormalizeName(flow.name())
+                + formatSubscriptSuffix(flow.subscripts());
         String equation = toVensimExpr(flow.equation());
         String units = flow.timeUnit() != null ? flow.timeUnit() : "";
         String comment = flow.comment() != null ? flow.comment() : "";
@@ -201,9 +217,10 @@ public final class VensimExporter {
 
     private static String buildAuxBlock(AuxDef aux, ModelDefinition def,
                                          Set<String> embeddedLookupNames) {
-        String vensimName = denormalizeName(aux.name());
+        String vensimName = denormalizeName(aux.name())
+                + formatSubscriptSuffix(aux.subscripts());
 
-        // Check if this aux references a lookup — convert to WITH LOOKUP
+        // Check if this aux is a simple LOOKUP(name, input) — convert to WITH LOOKUP
         Optional<String> lookupNameOpt = extractLookupReference(aux.equation());
         if (lookupNameOpt.isPresent()) {
             Optional<LookupTableDef> lookupOpt = findLookup(def, lookupNameOpt.get());
@@ -221,8 +238,9 @@ public final class VensimExporter {
             }
         }
 
-        // Regular auxiliary
-        String equation = toVensimExpr(aux.equation());
+        // Check for LOOKUP calls embedded in complex expressions
+        String equation = inlineLookupCalls(aux.equation(), def, embeddedLookupNames);
+        equation = toVensimExpr(equation);
         String units = aux.unit() != null ? aux.unit() : "";
         String comment = aux.comment() != null ? aux.comment() : "";
         return buildBlock(vensimName, "=", equation, units, comment);
@@ -232,6 +250,32 @@ public final class VensimExporter {
         String vensimName = denormalizeName(cldVar.name());
         String comment = cldVar.comment() != null ? cldVar.comment() : "";
         return buildBlock(vensimName, "=", "0", "", comment);
+    }
+
+    private static String buildSubscriptBlock(SubscriptDef subscript) {
+        String vensimName = denormalizeName(subscript.name());
+        StringJoiner labels = new StringJoiner(", ");
+        for (String label : subscript.labels()) {
+            labels.add(denormalizeName(label));
+        }
+        return vensimName + ":\n\t" + labels + "\n"
+                + "\t~\t\n"
+                + "\t~\t\n"
+                + "\t|\n\n";
+    }
+
+    /**
+     * Formats a subscript suffix for a variable name, e.g. {@code [Region, Age]}.
+     */
+    private static String formatSubscriptSuffix(List<String> subscripts) {
+        if (subscripts == null || subscripts.isEmpty()) {
+            return "";
+        }
+        StringJoiner sj = new StringJoiner(",");
+        for (String s : subscripts) {
+            sj.add(denormalizeName(s));
+        }
+        return "[" + sj + "]";
     }
 
     private static String buildLookupBlock(LookupTableDef lookup) {
@@ -354,11 +398,12 @@ public final class VensimExporter {
         return sb.toString();
     }
 
-    private static String formatCoord(double value) {
-        if (value == Math.floor(value) && !Double.isInfinite(value)) {
-            return String.valueOf((int) value);
+    static String formatCoord(double value) {
+        if (value == Math.floor(value) && !Double.isInfinite(value)
+                && Math.abs(value) < 1e15) {
+            return String.valueOf((long) value);
         }
-        return String.valueOf(Math.round(value));
+        return String.valueOf(value);
     }
 
     /**
@@ -393,6 +438,18 @@ public final class VensimExporter {
 
         String expr = shrewdExpr.strip();
 
+        // Reverse XIDZ/ZIDZ patterns before general IF translation
+        expr = reverseXidzZidz(expr);
+
+        // DELAY_FIXED → DELAY FIXED
+        expr = DELAY_FIXED_EXPORT_PATTERN.matcher(expr).replaceAll("DELAY FIXED(");
+
+        // RANDOM_UNIFORM → RANDOM UNIFORM
+        expr = RANDOM_UNIFORM_EXPORT_PATTERN.matcher(expr).replaceAll("RANDOM UNIFORM(");
+
+        // PULSE_TRAIN → PULSE TRAIN
+        expr = PULSE_TRAIN_EXPORT_PATTERN.matcher(expr).replaceAll("PULSE TRAIN(");
+
         // IF(...) → IF THEN ELSE(...)
         expr = IF_FUNC_PATTERN.matcher(expr).replaceAll("IF THEN ELSE(");
 
@@ -421,6 +478,157 @@ public final class VensimExporter {
         expr = denormalizeNamesInExpr(expr);
 
         return expr;
+    }
+
+    /**
+     * Detects IF patterns produced by XIDZ/ZIDZ import and reverses them.
+     *
+     * <p>XIDZ(a, b, x) was imported as: {@code IF((b) == 0, x, (a) / (b))}
+     * <p>ZIDZ(a, b)    was imported as: {@code IF((b) == 0, 0, (a) / (b))}
+     */
+    static String reverseXidzZidz(String expr) {
+        // Pattern: IF((B) == 0, X, (A) / (B))
+        Pattern pattern = Pattern.compile("(?i)\\bIF\\s*\\(");
+        Matcher m = pattern.matcher(expr);
+        while (m.find()) {
+            int funcStart = m.start();
+            int openParen = m.end() - 1;
+            int closeParen = findClosingParen(expr, openParen);
+            if (closeParen < 0) {
+                break;
+            }
+            String argsContent = expr.substring(openParen + 1, closeParen);
+            List<String> args = splitTopLevelArgs(argsContent);
+            if (args.size() != 3) {
+                // Not a 3-arg IF — skip and search for next
+                m = pattern.matcher(expr);
+                if (!m.find(funcStart + 1)) {
+                    break;
+                }
+                continue;
+            }
+            String condition = args.get(0).strip();
+            String thenExpr = args.get(1).strip();
+            String elseExpr = args.get(2).strip();
+
+            // Check for (B) == 0 pattern
+            String bFromCondition = extractEqZeroOperand(condition);
+            if (bFromCondition == null) {
+                m = pattern.matcher(expr);
+                if (!m.find(funcStart + 1)) {
+                    break;
+                }
+                continue;
+            }
+
+            // Check for (A) / (B) in elseExpr, where B matches bFromCondition
+            String[] divParts = extractDivision(elseExpr, bFromCondition);
+            if (divParts == null) {
+                m = pattern.matcher(expr);
+                if (!m.find(funcStart + 1)) {
+                    break;
+                }
+                continue;
+            }
+            String a = divParts[0];
+            String b = divParts[1];
+
+            String replacement;
+            if ("0".equals(thenExpr)) {
+                // ZIDZ pattern
+                replacement = "ZIDZ(" + a + ", " + b + ")";
+            } else {
+                // XIDZ pattern
+                replacement = "XIDZ(" + a + ", " + b + ", " + thenExpr + ")";
+            }
+            expr = expr.substring(0, funcStart) + replacement + expr.substring(closeParen + 1);
+            m = pattern.matcher(expr);
+        }
+        return expr;
+    }
+
+    /**
+     * Extracts operand from a "(X) == 0" or "X == 0" pattern.
+     * Returns the operand text (without outer parens), or null if no match.
+     */
+    private static String extractEqZeroOperand(String condition) {
+        // Match patterns: (expr) == 0  or  expr == 0
+        Pattern p = Pattern.compile("^\\(?(.+?)\\)?\\s*==\\s*0$");
+        Matcher m = p.matcher(condition.strip());
+        if (m.matches()) {
+            return m.group(1).strip();
+        }
+        return null;
+    }
+
+    /**
+     * Checks if expr is "(A) / (B)" where B matches expectedB.
+     * Returns {A, B} or null.
+     */
+    private static String[] extractDivision(String expr, String expectedB) {
+        // Find the top-level "/" operator
+        int depth = 0;
+        int divPos = -1;
+        for (int i = 0; i < expr.length(); i++) {
+            char c = expr.charAt(i);
+            if (c == '(') {
+                depth++;
+            } else if (c == ')') {
+                depth--;
+            } else if (c == '/' && depth == 0) {
+                divPos = i;
+                break;
+            }
+        }
+        if (divPos < 0) {
+            return null;
+        }
+        String lhs = stripOuterParens(expr.substring(0, divPos).strip());
+        String rhs = stripOuterParens(expr.substring(divPos + 1).strip());
+        if (rhs.equals(expectedB)) {
+            return new String[]{lhs, rhs};
+        }
+        return null;
+    }
+
+    private static String stripOuterParens(String s) {
+        String trimmed = s.strip();
+        if (trimmed.startsWith("(") && trimmed.endsWith(")")) {
+            // Verify the parens are matched (not just "(...) + (...)")
+            int depth = 0;
+            for (int i = 0; i < trimmed.length() - 1; i++) {
+                char c = trimmed.charAt(i);
+                if (c == '(') {
+                    depth++;
+                } else if (c == ')') {
+                    depth--;
+                }
+                if (depth == 0) {
+                    return trimmed; // parens don't wrap the whole expression
+                }
+            }
+            return trimmed.substring(1, trimmed.length() - 1).strip();
+        }
+        return trimmed;
+    }
+
+    private static List<String> splitTopLevelArgs(String content) {
+        List<String> args = new ArrayList<>();
+        int depth = 0;
+        int start = 0;
+        for (int i = 0; i < content.length(); i++) {
+            char c = content.charAt(i);
+            if (c == '(') {
+                depth++;
+            } else if (c == ')') {
+                depth--;
+            } else if (c == ',' && depth == 0) {
+                args.add(content.substring(start, i));
+                start = i + 1;
+            }
+        }
+        args.add(content.substring(start));
+        return args;
     }
 
     /**
@@ -493,7 +701,10 @@ public final class VensimExporter {
                  "LOOKUP", "WITH", "XIDZ", "ZIDZ", "PULSE", "STEP",
                  "MODULO", "POWER", "QUANTUM",
                  "SMOOTH3", "SMOOTHI", "SMOOTH3I", "DELAY1", "DELAY1I", "RAMP",
-                 "DELAY_FIXED", "TREND", "FORECAST", "NPV", "RANDOM_NORMAL",
+                 "DELAY_FIXED", "DELAY", "FIXED",
+                 "TREND", "FORECAST", "NPV",
+                 "RANDOM_UNIFORM", "RANDOM_NORMAL", "RANDOM", "UNIFORM",
+                 "PULSE_TRAIN", "TRAIN",
                  "AND", "OR", "NOT", "TIME", "DT" -> true;
             default -> false;
         };
@@ -557,26 +768,34 @@ public final class VensimExporter {
     }
 
     /**
-     * Extracts the lookup table name from a LOOKUP(name, input) expression.
+     * Extracts the lookup table name from a simple {@code LOOKUP(name, input)} expression.
+     * Only matches when the entire expression is a single LOOKUP call (no surrounding operators).
      */
     static Optional<String> extractLookupReference(String equation) {
         if (equation == null) {
             return Optional.empty();
         }
-        Matcher m = LOOKUP_REF_PATTERN.matcher(equation.strip());
+        String trimmed = equation.strip();
+        Matcher m = LOOKUP_REF_PATTERN.matcher(trimmed);
         if (!m.find()) {
             return Optional.empty();
         }
-        int openParen = equation.strip().indexOf('(');
-        int comma = findTopLevelComma(equation.strip(), openParen + 1);
+        int openParen = trimmed.indexOf('(');
+        int closeParen = findClosingParen(trimmed, openParen);
+        if (closeParen < 0 || closeParen != trimmed.length() - 1) {
+            // Not a simple LOOKUP(...) — there's content after the closing paren
+            return Optional.empty();
+        }
+        int comma = findTopLevelComma(trimmed, openParen + 1);
         if (comma < 0) {
             return Optional.empty();
         }
-        return Optional.of(equation.strip().substring(openParen + 1, comma).strip());
+        return Optional.of(trimmed.substring(openParen + 1, comma).strip());
     }
 
     /**
-     * Extracts the input expression from a LOOKUP(name, input) expression.
+     * Extracts the input expression from a simple {@code LOOKUP(name, input)} expression.
+     * Only matches when the entire expression is a single LOOKUP call.
      */
     static Optional<String> extractLookupInput(String equation) {
         if (equation == null) {
@@ -588,12 +807,12 @@ public final class VensimExporter {
             return Optional.empty();
         }
         int openParen = trimmed.indexOf('(');
-        int comma = findTopLevelComma(trimmed, openParen + 1);
-        if (comma < 0) {
+        int closeParen = findClosingParen(trimmed, openParen);
+        if (closeParen < 0 || closeParen != trimmed.length() - 1) {
             return Optional.empty();
         }
-        int closeParen = trimmed.lastIndexOf(')');
-        if (closeParen <= comma) {
+        int comma = findTopLevelComma(trimmed, openParen + 1);
+        if (comma < 0) {
             return Optional.empty();
         }
         return Optional.of(trimmed.substring(comma + 1, closeParen).strip());
@@ -638,6 +857,68 @@ public final class VensimExporter {
             }
         }
         return Optional.empty();
+    }
+
+    /**
+     * Replaces LOOKUP(name, input) calls in a complex expression with the lookup's
+     * table-call syntax: {@code name(input)}. This allows the downstream Vensim name
+     * denormalization to produce valid .mdl output where the lookup is referenced by
+     * its standalone table name rather than through the LOOKUP() wrapper.
+     */
+    /**
+     * Replaces LOOKUP(name, input) calls in a complex expression with table-call
+     * syntax: {@code name(input)}. The standalone lookup table must still be emitted
+     * separately (unlike WITH LOOKUP which embeds the data inline).
+     */
+    private static String inlineLookupCalls(String equation, ModelDefinition def,
+                                             Set<String> embeddedLookupNames) {
+        if (equation == null) {
+            return equation;
+        }
+        String expr = equation;
+        Matcher m = EMBEDDED_LOOKUP_PATTERN.matcher(expr);
+        while (m.find()) {
+            int funcStart = m.start();
+            int openParen = m.end() - 1;
+            int closeParen = findClosingParen(expr, openParen);
+            if (closeParen < 0) {
+                break;
+            }
+            String argsContent = expr.substring(openParen + 1, closeParen);
+            int comma = findTopLevelComma(argsContent, 0);
+            if (comma < 0) {
+                break;
+            }
+            String lookupName = argsContent.substring(0, comma).strip();
+            String input = argsContent.substring(comma + 1).strip();
+            // Only inline if the lookup table exists in the model
+            Optional<LookupTableDef> lookupOpt = findLookup(def, lookupName);
+            if (lookupOpt.isPresent()) {
+                // Do NOT add to embeddedLookupNames — standalone table must still be emitted
+                String replacement = lookupName + "(" + input + ")";
+                expr = expr.substring(0, funcStart) + replacement + expr.substring(closeParen + 1);
+                m = EMBEDDED_LOOKUP_PATTERN.matcher(expr);
+            } else {
+                break;
+            }
+        }
+        return expr;
+    }
+
+    private static int findClosingParen(String content, int openParenPos) {
+        int depth = 1;
+        for (int i = openParenPos + 1; i < content.length(); i++) {
+            char c = content.charAt(i);
+            if (c == '(') {
+                depth++;
+            } else if (c == ')') {
+                depth--;
+                if (depth == 0) {
+                    return i;
+                }
+            }
+        }
+        return -1;
     }
 
     private static int findTopLevelComma(String content, int startPos) {
