@@ -360,6 +360,121 @@ public class SimulationTest {
     }
 
     @Nested
+    @DisplayName("clearHistory with modules (#460)")
+    class ClearHistoryWithModules {
+
+        @Test
+        void shouldClearFlowHistoryInPreservedModules() {
+            Model model = new Model("Preserved Module Flow History");
+            Module mod = new Module("M1");
+
+            Stock stock = new Stock("Inventory", 50, THING);
+            Flow outflow = Flow.create("Consume", MINUTE, () -> new Quantity(5, THING));
+            stock.addOutflow(outflow);
+
+            mod.addStock(stock);
+            mod.addFlow(outflow);
+            model.addModulePreserved(mod);
+
+            Simulation sim = new Simulation(model, MINUTE, MINUTE, 2);
+            sim.execute();
+
+            // Flow should have history from first run
+            assertThat(outflow.getHistoryAtTimeStep(0)).isEqualTo(5.0);
+
+            // Re-run: execute() calls clearHistory() internally
+            stock.setValue(50);
+            sim.execute();
+
+            // History should reflect second run, not accumulate from first
+            assertThat(outflow.getHistoryAtTimeStep(0)).isEqualTo(5.0);
+            assertThat(outflow.getHistoryAtTimeStep(1)).isEqualTo(5.0);
+            assertThat(outflow.getHistoryAtTimeStep(2)).isEqualTo(5.0);
+        }
+
+        @Test
+        void shouldClearVariableHistoryInPreservedModules() {
+            Model model = new Model("Preserved Module Var History");
+            Module mod = new Module("M1");
+
+            Stock stock = new Stock("Inventory", 50, THING);
+            model.addStock(stock);
+
+            Variable var = new Variable("Level", THING, stock::getValue);
+            mod.addVariable(var);
+            model.addModulePreserved(mod);
+
+            Simulation sim = new Simulation(model, MINUTE, MINUTE, 2);
+            sim.execute();
+
+            assertThat(var.getHistoryAtTimeStep(0)).isEqualTo(50.0);
+
+            // Change stock value and re-run
+            stock.setValue(99);
+            sim.execute();
+
+            // Variable history should reflect the new initial value, not stale data
+            assertThat(var.getHistoryAtTimeStep(0)).isEqualTo(99.0);
+        }
+
+        @Test
+        void shouldClearHistoryInNestedSubModules() {
+            Model model = new Model("Nested Module History");
+            Module parent = new Module("Parent");
+            Module child = new Module("Child");
+
+            Stock stock = new Stock("S", 100, THING);
+            Flow flow = Flow.create("F", MINUTE, () -> new Quantity(10, THING));
+            Variable var = new Variable("V", THING, stock::getValue);
+            stock.addOutflow(flow);
+
+            child.addStock(stock);
+            child.addFlow(flow);
+            child.addVariable(var);
+            parent.addSubModule(child);
+            model.addModulePreserved(parent);
+
+            Simulation sim = new Simulation(model, MINUTE, MINUTE, 2);
+            sim.execute();
+
+            assertThat(flow.getHistoryAtTimeStep(0)).isEqualTo(10.0);
+            assertThat(var.getHistoryAtTimeStep(0)).isEqualTo(100.0);
+
+            // Re-run
+            stock.setValue(100);
+            sim.execute();
+
+            // History should be fresh from second run
+            assertThat(flow.getHistoryAtTimeStep(0)).isEqualTo(10.0);
+            assertThat(var.getHistoryAtTimeStep(0)).isEqualTo(100.0);
+        }
+
+        @Test
+        void shouldRecordVariableHistoryInPreservedModules() {
+            Model model = new Model("Module Var Recording");
+            Module mod = new Module("M1");
+
+            Stock stock = new Stock("S", 100, THING);
+            Flow outflow = Flow.create("Out", MINUTE, () -> new Quantity(10, THING));
+            stock.addOutflow(outflow);
+            model.addStock(stock);
+
+            Variable var = new Variable("StockLevel", THING, stock::getValue);
+            mod.addVariable(var);
+            model.addModulePreserved(mod);
+
+            Simulation sim = new Simulation(model, MINUTE, MINUTE, 3);
+            sim.execute();
+
+            // Variable in preserved module should have been recorded each step
+            assertThat(var.getHistoryAtTimeStep(0)).isEqualTo(100.0);
+            assertThat(var.getHistoryAtTimeStep(1)).isEqualTo(90.0);
+            assertThat(var.getHistoryAtTimeStep(2)).isEqualTo(80.0);
+            assertThat(var.getHistoryAtTimeStep(3)).isEqualTo(70.0);
+        }
+    }
+
+    @Nested
     @DisplayName("Non-finite value detection")
     class NonFiniteDetection {
 
