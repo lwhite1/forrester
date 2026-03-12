@@ -58,6 +58,20 @@ public class ChartViewerApplication extends Application {
     private static String title = "";
     private static String xAxisLabel = "";
 
+    /**
+     * Immutable snapshot of all chart data, captured atomically under the lock
+     * so that concurrent callers cannot corrupt each other's charts.
+     */
+    record ChartData(
+            List<Series<String, Number>> series,
+            double width,
+            double height,
+            String title,
+            String xAxisLabel) {
+    }
+
+    /** Package-private for test access. */
+    ChartData chartData;
     private Scene scene;
     private LineChart<String, Number> lineChart;
 
@@ -73,14 +87,29 @@ public class ChartViewerApplication extends Application {
     /**
      * Ensures the JavaFX toolkit is running, then shows the chart in a new window.
      * Safe to call multiple times — subsequent calls reuse the existing toolkit.
+     *
+     * <p>Takes an atomic snapshot of the current static state under the lock, so
+     * concurrent callers cannot corrupt each other's chart windows.
      */
     public static void showChart() {
+        ChartData snapshot = snapshot();
         ensureFxRunning();
         Platform.runLater(() -> {
             ChartViewerApplication app = new ChartViewerApplication();
+            app.chartData = snapshot;
             Stage stage = new Stage();
             app.start(stage);
         });
+    }
+
+    /**
+     * Takes an atomic snapshot of the current static state.
+     * Package-private for test access.
+     */
+    static ChartData snapshot() {
+        synchronized (LOCK) {
+            return new ChartData(new ArrayList<>(series), width, height, title, xAxisLabel);
+        }
     }
 
     /**
@@ -122,18 +151,11 @@ public class ChartViewerApplication extends Application {
 
     @Override
     public void start(Stage stage) {
-        List<Series<String, Number>> localSeries;
-        String localTitle;
-        String localXAxisLabel;
-        double localWidth;
-        double localHeight;
-        synchronized (LOCK) {
-            localSeries = new ArrayList<>(series);
-            localTitle = title;
-            localXAxisLabel = xAxisLabel;
-            localWidth = width;
-            localHeight = height;
-        }
+        List<Series<String, Number>> localSeries = chartData.series();
+        String localTitle = chartData.title();
+        String localXAxisLabel = chartData.xAxisLabel();
+        double localWidth = chartData.width();
+        double localHeight = chartData.height();
 
         stage.setTitle(localTitle);
 
