@@ -993,4 +993,55 @@ class ExprCompilerTest {
                     .isGreaterThan(30.0);
         }
     }
+
+    @Nested
+    @DisplayName("Non-constant initial values (#514)")
+    class NonConstantInitialValues {
+
+        @Test
+        void shouldAcceptVariableReferenceAsSmoothIInitial() {
+            context.addVariable("normal_price",
+                    new systems.courant.shrewd.model.Variable("normal_price",
+                            ItemUnits.PEOPLE, () -> 50.0));
+            context.addVariable("input",
+                    new systems.courant.shrewd.model.Variable("input",
+                            ItemUnits.PEOPLE, () -> 100.0));
+
+            Formula formula = compiler.compile("SMOOTHI(input, 5, normal_price)");
+            step[0] = 0;
+            double val = formula.getCurrentValue();
+            // Initial value should be 50 (from normal_price), not 0 or error
+            assertThat(val).isCloseTo(50.0, within(0.01));
+        }
+
+        @Test
+        void shouldAcceptExpressionAsSmooth3IInitial() {
+            context.addLiteralConstant("base_val", 20.0);
+            context.addVariable("input",
+                    new systems.courant.shrewd.model.Variable("input",
+                            ItemUnits.PEOPLE, () -> 100.0));
+
+            Formula formula = compiler.compile("SMOOTH3I(input, 5, base_val + 10)");
+            step[0] = 0;
+            double val = formula.getCurrentValue();
+            // Initial value should be 30 (20 + 10)
+            assertThat(val).isCloseTo(30.0, within(0.01));
+        }
+
+        @Test
+        void shouldAcceptVariableReferenceAsSmooth3Initial() {
+            context.addVariable("init_val",
+                    new systems.courant.shrewd.model.Variable("init_val",
+                            ItemUnits.PEOPLE, () -> 75.0));
+            context.addVariable("input",
+                    new systems.courant.shrewd.model.Variable("input",
+                            ItemUnits.PEOPLE, () -> 100.0));
+
+            Formula formula = compiler.compile("SMOOTH3(input, 5, init_val)");
+            step[0] = 0;
+            double val = formula.getCurrentValue();
+            // Initial value should be 75 (from init_val)
+            assertThat(val).isCloseTo(75.0, within(0.01));
+        }
+    }
 }

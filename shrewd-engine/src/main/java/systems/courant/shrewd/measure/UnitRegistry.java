@@ -39,6 +39,19 @@ public class UnitRegistry {
         registerAll(VolumeUnits.values());
         registerAll(TemperatureUnits.values());
         registerAll(DimensionlessUnits.values());
+        registerTimeUnitAliases();
+    }
+
+    /**
+     * Registers common plural and abbreviated aliases for time units.
+     * Vensim models use both singular ("Day") and plural ("Days") forms.
+     */
+    private void registerTimeUnitAliases() {
+        for (TimeUnits tu : TimeUnits.values()) {
+            String plural = tu.getName() + "s";
+            byName.put(plural, tu);
+            byNameLower.put(plural.toLowerCase(), tu);
+        }
     }
 
     private void registerAll(Unit[] units) {

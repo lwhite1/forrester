@@ -573,7 +573,10 @@ public class ExprCompiler {
         requireArgs("SMOOTHI", args, 3);
         DoubleSupplier input = compileExpr(args.get(0));
         double smoothingTime = evaluateConstant(args.get(1), "SMOOTHI smoothingTime");
-        double initial = evaluateConstant(args.get(2), "SMOOTHI initialValue");
+        double initial = evaluateAtCompileTime(args.get(2), "SMOOTHI initialValue");
+        if (Double.isNaN(initial)) {
+            initial = 0.0;
+        }
         Smooth smooth = Smooth.of(input, smoothingTime, initial, context.getCurrentStep());
         resettables.add(smooth);
         return smooth::getCurrentValue;
@@ -588,7 +591,10 @@ public class ExprCompiler {
         double smoothingTime = evaluateConstant(args.get(1), "SMOOTH3 smoothingTime");
         Smooth3 smooth3;
         if (args.size() == 3) {
-            double initial = evaluateConstant(args.get(2), "SMOOTH3 initialValue");
+            double initial = evaluateAtCompileTime(args.get(2), "SMOOTH3 initialValue");
+            if (Double.isNaN(initial)) {
+                initial = 0.0;
+            }
             smooth3 = Smooth3.of(input, smoothingTime, initial, context.getCurrentStep());
         } else {
             smooth3 = Smooth3.of(input, smoothingTime, context.getCurrentStep());
@@ -601,7 +607,10 @@ public class ExprCompiler {
         requireArgs("SMOOTH3I", args, 3);
         DoubleSupplier input = compileExpr(args.get(0));
         double smoothingTime = evaluateConstant(args.get(1), "SMOOTH3I smoothingTime");
-        double initial = evaluateConstant(args.get(2), "SMOOTH3I initialValue");
+        double initial = evaluateAtCompileTime(args.get(2), "SMOOTH3I initialValue");
+        if (Double.isNaN(initial)) {
+            initial = 0.0;
+        }
         Smooth3 smooth3 = Smooth3.of(input, smoothingTime, initial, context.getCurrentStep());
         resettables.add(smooth3);
         return smooth3::getCurrentValue;

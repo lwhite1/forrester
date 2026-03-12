@@ -1868,6 +1868,36 @@ class VensimImporterTest {
     }
 
     @Nested
+    @DisplayName("Non-constant SMOOTHI initial value (#514)")
+    class NonConstantSmoothIInitial {
+
+        @Test
+        void shouldCompileModelWithSmoothIReferencingAux() {
+            String mdl = """
+                    smoothed = SMOOTHI(input, 5, normal price)
+                    \t~\tDollars
+                    \t~\t
+                    \t|
+
+                    input = 100
+                    \t~\tDollars
+                    \t~\t
+                    \t|
+
+                    normal price = 50
+                    \t~\tDollars
+                    \t~\t
+                    \t|
+                    """;
+            ImportResult result = importer.importModel(mdl, "test");
+            CompiledModel compiled = new ModelCompiler().compile(result.definition());
+            Simulation sim = compiled.createSimulation();
+            sim.execute();
+            assertThat(compiled).isNotNull();
+        }
+    }
+
+    @Nested
     @DisplayName("SAMPLE IF TRUE and FIND ZERO (#512)")
     class SampleIfTrueAndFindZeroImport {
 
