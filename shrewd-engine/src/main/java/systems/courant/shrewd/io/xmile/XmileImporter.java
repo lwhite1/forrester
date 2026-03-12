@@ -159,7 +159,7 @@ public class XmileImporter implements ModelImporter {
 
         ModelDefinitionBuilder builder = new ModelDefinitionBuilder()
                 .name(modelName)
-                .defaultSimulation(timeUnit, duration, timeUnit);
+                .defaultSimulation(timeUnit, duration, timeUnit, dt);
 
         if (mainModelElem == null) {
             return new ImportResult(builder.build(), warnings);
@@ -485,12 +485,21 @@ public class XmileImporter implements ModelImporter {
                               ModelDefinitionBuilder builder,
                               Map<String, ModelDefinition> moduleDefinitions,
                               List<String> warnings) {
-        // The module name typically matches a named <model> element
+        // The module instance name typically matches a named <model> element,
+        // but XMILE allows instance names to differ from model names.
         ModelDefinition moduleDef = moduleDefinitions.get(instanceName);
         if (moduleDef == null) {
-            // Some XMILE files use a different instance name than the model name.
-            // Try to find by looking for a model name that matches.
-            // If not found, warn and skip.
+            // Fallback: check if any model definition's name matches the instance name
+            // (case-insensitive, since XMILE names are case-insensitive)
+            for (Map.Entry<String, ModelDefinition> entry : moduleDefinitions.entrySet()) {
+                if (entry.getKey().equalsIgnoreCase(instanceName)
+                        || entry.getValue().name().equalsIgnoreCase(instanceName)) {
+                    moduleDef = entry.getValue();
+                    break;
+                }
+            }
+        }
+        if (moduleDef == null) {
             warnings.add("Module '" + instanceName
                     + "' references unknown model definition, skipped");
             return;

@@ -404,6 +404,21 @@ public class ModelDefinitionBuilder {
     }
 
     /**
+     * Sets the default simulation settings with a fractional time step (dt).
+     *
+     * @param timeStep     the time step unit name
+     * @param duration     the simulation duration (must be positive and finite)
+     * @param durationUnit the duration unit name
+     * @param dt           the fractional time step within the unit (e.g., 0.25)
+     * @return this builder
+     */
+    public ModelDefinitionBuilder defaultSimulation(String timeStep, double duration,
+                                                     String durationUnit, double dt) {
+        this.defaultSimulation = new SimulationSettings(timeStep, duration, durationUnit, dt);
+        return this;
+    }
+
+    /**
      * Sets the default simulation settings from a pre-built object.
      *
      * @param settings the simulation settings, or {@code null} for none

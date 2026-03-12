@@ -302,7 +302,8 @@ public final class VensimExporter {
                 "The final time for the simulation."));
 
         // TIME STEP
-        sb.append(buildControlBlock("TIME STEP", "1", durationUnit,
+        double dt = sim != null ? sim.dt() : 1;
+        sb.append(buildControlBlock("TIME STEP", formatDouble(dt), durationUnit,
                 "The time step for the simulation."));
 
         // SAVEPER — value on next line with 8-space indent (Vensim convention)

@@ -113,7 +113,7 @@ public class VensimImporter implements ModelImporter {
 
         ModelDefinitionBuilder builder = new ModelDefinitionBuilder()
                 .name(modelName)
-                .defaultSimulation(timeUnit, duration, timeUnit);
+                .defaultSimulation(timeUnit, duration, timeUnit, timeStepValue);
 
         // Inject Vensim built-in simulation constants so expressions can reference them
         builder.constant("TIME_STEP", timeStepValue, timeUnit);

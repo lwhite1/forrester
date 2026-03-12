@@ -359,6 +359,9 @@ public class ModelDefinitionSerializer {
         node.put("timeStep", settings.timeStep());
         node.put("duration", settings.duration());
         node.put("durationUnit", settings.durationUnit());
+        if (settings.dt() != 1.0) {
+            node.put("dt", settings.dt());
+        }
         return node;
     }
 
@@ -630,10 +633,12 @@ public class ModelDefinitionSerializer {
         SimulationSettings defaultSimulation = null;
         if (root.has("defaultSimulation")) {
             JsonNode s = root.get("defaultSimulation");
+            double dt = s.has("dt") ? s.get("dt").asDouble() : 1.0;
             defaultSimulation = new SimulationSettings(
                     requiredText(s, "timeStep"),
                     requiredDouble(s, "duration"),
-                    requiredText(s, "durationUnit"));
+                    requiredText(s, "durationUnit"),
+                    dt);
         }
 
         ModelMetadata metadata = null;
