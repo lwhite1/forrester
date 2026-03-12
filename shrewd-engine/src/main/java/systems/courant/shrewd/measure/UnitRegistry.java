@@ -9,8 +9,8 @@ import systems.courant.shrewd.measure.units.temperature.TemperatureUnits;
 import systems.courant.shrewd.measure.units.time.TimeUnits;
 import systems.courant.shrewd.measure.units.volume.VolumeUnits;
 
-import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Maps unit name strings to {@link Unit} objects. Auto-registers all built-in unit enums.
@@ -23,8 +23,8 @@ public class UnitRegistry {
 
     private static final int MAX_CUSTOM_UNITS = 10_000;
 
-    private final Map<String, Unit> byName = new LinkedHashMap<>();
-    private final Map<String, Unit> byNameLower = new LinkedHashMap<>();
+    private final Map<String, Unit> byName = new ConcurrentHashMap<>();
+    private final Map<String, Unit> byNameLower = new ConcurrentHashMap<>();
     private int customUnitCount;
 
     /**
@@ -68,17 +68,24 @@ public class UnitRegistry {
         if (unit != null) {
             return unit;
         }
-        // Auto-create custom ItemUnit for unknown names
-        if (customUnitCount >= MAX_CUSTOM_UNITS) {
-            throw new IllegalStateException(
-                    "Unit registry exceeded " + MAX_CUSTOM_UNITS
-                            + " custom units — possible unbounded auto-creation");
+        synchronized (this) {
+            // Double-check after acquiring lock
+            unit = find(name);
+            if (unit != null) {
+                return unit;
+            }
+            // Auto-create custom ItemUnit for unknown names
+            if (customUnitCount >= MAX_CUSTOM_UNITS) {
+                throw new IllegalStateException(
+                        "Unit registry exceeded " + MAX_CUSTOM_UNITS
+                                + " custom units — possible unbounded auto-creation");
+            }
+            systems.courant.shrewd.measure.units.item.ItemUnit custom =
+                    new systems.courant.shrewd.measure.units.item.ItemUnit(name);
+            register(custom);
+            customUnitCount++;
+            return custom;
         }
-        systems.courant.shrewd.measure.units.item.ItemUnit custom =
-                new systems.courant.shrewd.measure.units.item.ItemUnit(name);
-        register(custom);
-        customUnitCount++;
-        return custom;
     }
 
     /**
