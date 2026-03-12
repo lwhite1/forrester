@@ -271,6 +271,7 @@ public class ModelWindow {
         propertiesTab.setId("propertiesTab");
         dashboardTab = new Tab("Dashboard", dashboardPanel);
         dashboardTab.setId("dashboardTab");
+        dashboardPanel.setDashboardTab(dashboardTab);
         rightTabPane.getTabs().addAll(propertiesTab, dashboardTab);
 
         editorSplitPane = new SplitPane(canvasPane, rightTabPane);

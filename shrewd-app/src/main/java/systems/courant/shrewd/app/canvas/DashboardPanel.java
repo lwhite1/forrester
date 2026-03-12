@@ -18,6 +18,8 @@ import javafx.scene.control.TabPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
+import javafx.scene.shape.Circle;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -52,7 +54,11 @@ public class DashboardPanel extends VBox {
     private Tab sensitivityTab;
     private Tab dominanceTab;
     private Tab phasePlotTab;
+    static final double STALE_DOT_RADIUS = 4.0;
+    static final Color STALE_DOT_COLOR = Color.web("#F59E0B");
+
     private boolean stale;
+    private Tab dashboardTab;
     private Runnable rerunAction;
     private Consumer<String> onVariableClicked;
     private Consumer<ReferenceDataset> onReferenceDataImported;
@@ -104,6 +110,14 @@ public class DashboardPanel extends VBox {
         banner.setPadding(new Insets(6, 12, 6, 12));
         banner.setStyle(STALE_BANNER_STYLE);
         return banner;
+    }
+
+    /**
+     * Sets the parent dashboard tab so its label can be updated when results
+     * become stale or are refreshed.
+     */
+    public void setDashboardTab(Tab tab) {
+        this.dashboardTab = tab;
     }
 
     /**
@@ -235,6 +249,9 @@ public class DashboardPanel extends VBox {
         staleBanner.setVisible(true);
         staleBanner.setManaged(true);
         resultTabs.setStyle(STALE_BORDER_STYLE);
+        if (dashboardTab != null) {
+            dashboardTab.setGraphic(new Circle(STALE_DOT_RADIUS, STALE_DOT_COLOR));
+        }
     }
 
     /**
@@ -248,6 +265,9 @@ public class DashboardPanel extends VBox {
         staleBanner.setVisible(false);
         staleBanner.setManaged(false);
         resultTabs.setStyle("");
+        if (dashboardTab != null) {
+            dashboardTab.setGraphic(null);
+        }
     }
 
     /**
@@ -316,6 +336,9 @@ public class DashboardPanel extends VBox {
         staleBanner.setVisible(false);
         staleBanner.setManaged(false);
         resultTabs.setStyle("");
+        if (dashboardTab != null) {
+            dashboardTab.setGraphic(null);
+        }
         resultTabs.getTabs().clear();
         simulationTab = null;
         sweepTab = null;

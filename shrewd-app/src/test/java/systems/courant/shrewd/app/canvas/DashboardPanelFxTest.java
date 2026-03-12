@@ -3,9 +3,11 @@ package systems.courant.shrewd.app.canvas;
 import javafx.application.Platform;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
+import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
+import javafx.scene.shape.Circle;
 import javafx.stage.Stage;
 
 import org.junit.jupiter.api.DisplayName;
@@ -27,11 +29,20 @@ import static org.assertj.core.api.Assertions.assertThat;
 class DashboardPanelFxTest {
 
     private DashboardPanel panel;
+    private Tab dashboardTab;
 
     @Start
     void start(Stage stage) {
         panel = new DashboardPanel();
-        stage.setScene(new Scene(new StackPane(panel), 600, 400));
+        dashboardTab = new Tab("Dashboard", panel);
+        dashboardTab.setId("dashboardTab");
+        panel.setDashboardTab(dashboardTab);
+        Tab propertiesTab = new Tab("Properties");
+        propertiesTab.setId("propertiesTab");
+        TabPane outerTabs = new TabPane(propertiesTab, dashboardTab);
+        outerTabs.setTabClosingPolicy(TabPane.TabClosingPolicy.UNAVAILABLE);
+        outerTabs.getSelectionModel().select(dashboardTab);
+        stage.setScene(new Scene(new StackPane(outerTabs), 600, 400));
         stage.show();
     }
 
@@ -165,5 +176,57 @@ class DashboardPanelFxTest {
         WaitForAsyncUtils.waitForFxEvents();
 
         assertThat(clicked.get()).isEqualTo("Stock1");
+    }
+
+    @Test
+    @DisplayName("markStale adds amber dot graphic to dashboard tab")
+    void markStaleSetsTabGraphic(FxRobot robot) {
+        Platform.runLater(() -> panel.showSimulationResult(dummyResult()));
+        WaitForAsyncUtils.waitForFxEvents();
+
+        Platform.runLater(() -> panel.markStale());
+        WaitForAsyncUtils.waitForFxEvents();
+
+        assertThat(dashboardTab.getGraphic()).isInstanceOf(Circle.class);
+        Circle dot = (Circle) dashboardTab.getGraphic();
+        assertThat(dot.getRadius()).isEqualTo(DashboardPanel.STALE_DOT_RADIUS);
+        assertThat(dot.getFill()).isEqualTo(DashboardPanel.STALE_DOT_COLOR);
+    }
+
+    @Test
+    @DisplayName("clearStale removes amber dot graphic from dashboard tab")
+    void clearStaleRemovesTabGraphic(FxRobot robot) {
+        Platform.runLater(() -> panel.showSimulationResult(dummyResult()));
+        WaitForAsyncUtils.waitForFxEvents();
+        Platform.runLater(() -> panel.markStale());
+        WaitForAsyncUtils.waitForFxEvents();
+
+        Platform.runLater(() -> panel.showSimulationResult(dummyResult()));
+        WaitForAsyncUtils.waitForFxEvents();
+
+        assertThat(dashboardTab.getGraphic()).isNull();
+    }
+
+    @Test
+    @DisplayName("clear() removes amber dot graphic from dashboard tab")
+    void clearRemovesTabGraphic(FxRobot robot) {
+        Platform.runLater(() -> panel.showSimulationResult(dummyResult()));
+        WaitForAsyncUtils.waitForFxEvents();
+        Platform.runLater(() -> panel.markStale());
+        WaitForAsyncUtils.waitForFxEvents();
+
+        Platform.runLater(() -> panel.clear());
+        WaitForAsyncUtils.waitForFxEvents();
+
+        assertThat(dashboardTab.getGraphic()).isNull();
+    }
+
+    @Test
+    @DisplayName("markStale with no results does not set tab graphic")
+    void markStaleNoResultsNoTabGraphic(FxRobot robot) {
+        Platform.runLater(() -> panel.markStale());
+        WaitForAsyncUtils.waitForFxEvents();
+
+        assertThat(dashboardTab.getGraphic()).isNull();
     }
 }
