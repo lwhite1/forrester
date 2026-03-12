@@ -415,7 +415,10 @@ public class SimulationResultPane extends BorderPane {
                             if (!newName.isEmpty()) {
                                 nameLabel.setText(newName);
                             }
-                            parentRow.getChildren().set(labelIndex, nameLabel);
+                            int editorIndex = parentRow.getChildren().indexOf(editor);
+                            if (editorIndex >= 0) {
+                                parentRow.getChildren().set(editorIndex, nameLabel);
+                            }
                         };
                         editor.setOnAction(ev -> commit.run());
                         editor.focusedProperty().addListener((obs, wasFocused, isFocused) -> {
