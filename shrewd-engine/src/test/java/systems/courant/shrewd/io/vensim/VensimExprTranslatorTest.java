@@ -259,6 +259,13 @@ class VensimExprTranslatorTest {
             var result = VensimExprTranslator.translate("time + 1", "var", EMPTY_NAMES);
             assertThat(result.expression()).isEqualTo("TIME + 1");
         }
+
+        @Test
+        void shouldNotTranslateTimeWhenItIsAKnownUserVariable() {
+            Set<String> knownNames = Set.of("Time");
+            var result = VensimExprTranslator.translate("Time + 1", "var", knownNames);
+            assertThat(result.expression()).isEqualTo("Time + 1");
+        }
     }
 
     @Nested

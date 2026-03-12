@@ -1,5 +1,6 @@
 package systems.courant.shrewd.io.vensim;
 
+import systems.courant.shrewd.io.FormatUtils;
 import systems.courant.shrewd.io.ImportResult;
 import systems.courant.shrewd.io.ModelImporter;
 import systems.courant.shrewd.model.def.AuxDef;
@@ -384,19 +385,44 @@ public class VensimImporter implements ModelImporter {
             builder.stock(new StockDef(displayName, comment, initResult.value, unit, null));
         }
 
-        // Create flow for the net rate (synthetic name uses display form)
-        String flowDisplayName = displayName + " net flow";
-        String flowEqName = eqName + "_net_flow";
-        VensimExprTranslator.TranslationResult tr =
-                VensimExprTranslator.translate(rateExpr, eqName, vensimNames, lookupNames);
-        warnings.addAll(tr.warnings());
+        // Try to decompose rate expression into individual flows.
+        // In Vensim, INTEG(a + b - c, init) implies inflows a, b and outflow c.
+        List<RateTerm> terms = splitRateTerms(rateExpr);
+        if (terms != null && terms.size() > 1) {
+            for (int i = 0; i < terms.size(); i++) {
+                RateTerm term = terms.get(i);
+                VensimExprTranslator.TranslationResult tr =
+                        VensimExprTranslator.translate(term.expr, eqName, vensimNames, lookupNames);
+                warnings.addAll(tr.warnings());
+                // Use synthetic flow name to avoid conflicts with existing variables
+                String flowSuffix = term.positive ? "_inflow_" + i : "_outflow_" + i;
+                String flowDisplayName = displayName + (term.positive ? " inflow " : " outflow ") + (i + 1);
+                String flowEqName = eqName + flowSuffix;
+                if (term.positive) {
+                    builder.flow(new FlowDef(flowDisplayName, null,
+                            tr.expression(), timeUnit, null, displayName));
+                } else {
+                    builder.flow(new FlowDef(flowDisplayName, null,
+                            tr.expression(), timeUnit, displayName, null));
+                }
+                flowNames.add(flowEqName);
+                sketchFlowNames.add(flowEqName);
+            }
+            sketchFlowNames.add(eqName);
+        } else {
+            // Fall back to single net flow
+            String flowDisplayName = displayName + " net flow";
+            String flowEqName = eqName + "_net_flow";
+            VensimExprTranslator.TranslationResult tr =
+                    VensimExprTranslator.translate(rateExpr, eqName, vensimNames, lookupNames);
+            warnings.addAll(tr.warnings());
 
-        builder.flow(new FlowDef(flowDisplayName, "Net flow for " + eq.name(),
-                tr.expression(), timeUnit, null, displayName));
-        flowNames.add(flowEqName);
-        // Track equation-form names for sketch flow valve matching
-        sketchFlowNames.add(eqName);
-        sketchFlowNames.add(flowEqName);
+            builder.flow(new FlowDef(flowDisplayName, "Net flow for " + eq.name(),
+                    tr.expression(), timeUnit, null, displayName));
+            flowNames.add(flowEqName);
+            sketchFlowNames.add(eqName);
+            sketchFlowNames.add(flowEqName);
+        }
     }
 
     private void buildLookupTable(String displayName, String eqName,
@@ -570,18 +596,65 @@ public class VensimImporter implements ModelImporter {
         return s.substring(0, 1).toUpperCase(Locale.ROOT) + s.substring(1).toLowerCase(Locale.ROOT);
     }
 
-    private static int findTopLevelComma(String content) {
+    /**
+     * A single term from a rate expression, with sign information.
+     */
+    record RateTerm(String expr, boolean positive) {}
+
+    /**
+     * Attempts to split a rate expression into individual additive/subtractive terms
+     * at the top level (respecting parentheses). Returns {@code null} if the expression
+     * cannot be decomposed (e.g., a single term or contains only complex sub-expressions).
+     *
+     * <p>Example: {@code "births - deaths"} → [{@code "births", true}, {@code "deaths", false}]
+     */
+    static List<RateTerm> splitRateTerms(String rateExpr) {
+        if (rateExpr == null || rateExpr.isBlank()) {
+            return null;
+        }
+        String expr = rateExpr.strip();
+        List<RateTerm> terms = new ArrayList<>();
         int depth = 0;
-        for (int i = 0; i < content.length(); i++) {
-            char c = content.charAt(i);
+        int termStart = 0;
+        boolean positive = true;
+
+        // Handle leading minus
+        if (expr.charAt(0) == '-') {
+            positive = false;
+            termStart = 1;
+        } else if (expr.charAt(0) == '+') {
+            termStart = 1;
+        }
+
+        for (int i = termStart; i < expr.length(); i++) {
+            char c = expr.charAt(i);
             if (c == '(') {
                 depth++;
             } else if (c == ')') {
                 depth--;
-            } else if (c == ',' && depth == 0) {
-                return i;
+            } else if (depth == 0 && (c == '+' || c == '-')) {
+                String termText = expr.substring(termStart, i).strip();
+                if (!termText.isEmpty()) {
+                    terms.add(new RateTerm(termText, positive));
+                }
+                positive = (c == '+');
+                termStart = i + 1;
             }
         }
-        return -1;
+        // Add the last term
+        String lastTerm = expr.substring(termStart).strip();
+        if (!lastTerm.isEmpty()) {
+            terms.add(new RateTerm(lastTerm, positive));
+        }
+
+        // Only decompose if we found more than one term
+        if (terms.size() <= 1) {
+            return null;
+        }
+        return terms;
+    }
+
+    private static int findTopLevelComma(String content) {
+        return FormatUtils.findTopLevelComma(content);
     }
 }

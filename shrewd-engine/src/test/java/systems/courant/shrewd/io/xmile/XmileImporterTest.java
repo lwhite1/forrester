@@ -57,6 +57,32 @@ class XmileImporterTest {
         }
 
         @Test
+        void shouldParseStockWithNonLiteralInitialExpression() {
+            String xmile = """
+                    <?xml version="1.0" encoding="UTF-8"?>
+                    <xmile xmlns="http://docs.oasis-open.org/xmile/ns/XMILE/v1.0" version="1.0">
+                      <header><name>Test</name></header>
+                      <sim_specs time_units="day"><start>0</start><stop>10</stop><dt>1</dt></sim_specs>
+                      <model><variables>
+                        <stock name="Inventory">
+                          <eqn>capacity * 0.8</eqn>
+                        </stock>
+                        <aux name="capacity"><eqn>500</eqn></aux>
+                      </variables></model>
+                    </xmile>
+                    """;
+
+            ImportResult result = importer.importModel(xmile, "Test");
+            ModelDefinition def = result.definition();
+
+            assertThat(def.stocks()).hasSize(1);
+            StockDef stock = def.stocks().get(0);
+            assertThat(stock.name()).isEqualTo("Inventory");
+            assertThat(stock.initialExpression()).isEqualTo("capacity * 0.8");
+            assertThat(result.warnings()).noneMatch(w -> w.contains("Non-literal"));
+        }
+
+        @Test
         void shouldParseFlowWithEquation() {
             String xmile = """
                     <?xml version="1.0" encoding="UTF-8"?>

@@ -1,5 +1,7 @@
 package systems.courant.shrewd.io.vensim;
 
+import systems.courant.shrewd.io.FormatUtils;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -179,8 +181,10 @@ public final class VensimExprTranslator {
         // 9. ^ → ** (Vensim uses ^ for power, Shrewd uses **)
         expr = CARET_PATTERN.matcher(expr).replaceAll("**");
 
-        // 10. Time → TIME (the built-in variable)
-        expr = TIME_VAR_PATTERN.matcher(expr).replaceAll("TIME");
+        // 10. Time → TIME (the built-in variable), unless "Time" is a user-defined name
+        if (knownNames.stream().noneMatch(n -> n.equalsIgnoreCase("Time"))) {
+            expr = TIME_VAR_PATTERN.matcher(expr).replaceAll("TIME");
+        }
 
         // 11. Rewrite lookupName(arg) → LOOKUP(lookupName, arg)
         expr = rewriteLookupCalls(expr, lookupNames);
@@ -481,18 +485,7 @@ public final class VensimExprTranslator {
     }
 
     private static int findTopLevelComma(String content) {
-        int depth = 0;
-        for (int i = 0; i < content.length(); i++) {
-            char c = content.charAt(i);
-            if (c == '(') {
-                depth++;
-            } else if (c == ')') {
-                depth--;
-            } else if (c == ',' && depth == 0) {
-                return i;
-            }
-        }
-        return -1;
+        return FormatUtils.findTopLevelComma(content);
     }
 
     private static List<String> splitTopLevelArgs(String content) {
