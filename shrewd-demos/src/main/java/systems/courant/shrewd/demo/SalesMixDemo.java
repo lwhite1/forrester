@@ -73,6 +73,7 @@ public class SalesMixDemo {
         model.addStock(customers);
         model.addVariable(hardwareSales);
         model.addVariable(serviceSales);
+        model.addVariable(totalSales);
         model.addVariable(proportionHardwareSales);
 
         Simulation run = new Simulation(model, WEEK, Times.years(durationYears));

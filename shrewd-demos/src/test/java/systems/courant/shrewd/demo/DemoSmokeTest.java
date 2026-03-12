@@ -298,9 +298,12 @@ class DemoSmokeTest {
                 () -> total.getValue() == 0 ? 0 : hw.getValue() / total.getValue());
         model.addVariable(hw);
         model.addVariable(svc);
+        model.addVariable(total);
         model.addVariable(proportion);
         new Simulation(model, WEEK, Times.years(1)).execute();
         assertThat(customers.getValue()).isGreaterThan(0);
+        // Verify totalSales is tracked in model output (issue #332)
+        assertThat(model.getVariableNames()).contains("Total");
     }
 
     @Test
