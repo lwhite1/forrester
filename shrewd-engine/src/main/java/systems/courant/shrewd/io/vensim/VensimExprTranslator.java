@@ -68,6 +68,8 @@ public final class VensimExprTranslator {
             "(?i)SAMPLE\\s+IF\\s+TRUE\\s*\\(");
     private static final Pattern FIND_ZERO_PATTERN = Pattern.compile(
             "(?i)FIND\\s+ZERO\\s*\\(");
+    private static final Pattern LOOKUP_AREA_PATTERN = Pattern.compile(
+            "(?i)LOOKUP\\s+AREA\\s*\\(");
     private static final Pattern CARET_PATTERN = Pattern.compile("\\^");
     private static final Pattern TIME_VAR_PATTERN = Pattern.compile(
             "(?i)\\bTime\\b");
@@ -206,6 +208,9 @@ public final class VensimExprTranslator {
 
         // 8h. PULSE TRAIN → PULSE_TRAIN
         expr = PULSE_TRAIN_PATTERN.matcher(expr).replaceAll("PULSE_TRAIN(");
+
+        // 8i. LOOKUP AREA → LOOKUP_AREA
+        expr = LOOKUP_AREA_PATTERN.matcher(expr).replaceAll("LOOKUP_AREA(");
 
         // 9. ^ → ** (Vensim uses ^ for power, Shrewd uses **)
         expr = CARET_PATTERN.matcher(expr).replaceAll("**");

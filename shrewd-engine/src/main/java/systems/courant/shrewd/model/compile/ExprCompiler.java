@@ -537,6 +537,32 @@ public class ExprCompiler {
             case "RANDOM_UNIFORM" -> compileRandomUniform(args);
             case "SAMPLE_IF_TRUE" -> compileSampleIfTrue(args);
             case "FIND_ZERO" -> compileFindZero(args);
+            case "NOT" -> {
+                requireArgs(name, args, 1);
+                DoubleSupplier a = compileExpr(args.get(0));
+                yield () -> a.getAsDouble() == 0 ? 1.0 : 0.0;
+            }
+            case "OR" -> {
+                requireArgs(name, args, 2);
+                DoubleSupplier a = compileExpr(args.get(0));
+                DoubleSupplier b = compileExpr(args.get(1));
+                yield () -> (a.getAsDouble() != 0 || b.getAsDouble() != 0) ? 1.0 : 0.0;
+            }
+            case "AND" -> {
+                requireArgs(name, args, 2);
+                DoubleSupplier a = compileExpr(args.get(0));
+                DoubleSupplier b = compileExpr(args.get(1));
+                yield () -> (a.getAsDouble() != 0 && b.getAsDouble() != 0) ? 1.0 : 0.0;
+            }
+            case "TRUE" -> {
+                requireArgs(name, args, 0);
+                yield () -> 1.0;
+            }
+            case "FALSE" -> {
+                requireArgs(name, args, 0);
+                yield () -> 0.0;
+            }
+            case "LOOKUP_AREA" -> compileLookupArea(args);
             case "LOOKUP" -> compileLookup(args);
             default -> {
                 // Check if the function name is a lookup table (Vensim allows table(input) syntax)
@@ -892,6 +918,70 @@ public class ExprCompiler {
         // when multiple formulas reference the same lookup table (tables registered without a def)
         LookupTable isolatedTable = existing.get().withInput(input);
         return isolatedTable::getCurrentValue;
+    }
+
+    private DoubleSupplier compileLookupArea(List<Expr> args) {
+        requireArgs("LOOKUP_AREA", args, 3);
+        if (!(args.get(0) instanceof Expr.Ref ref)) {
+            throw new CompilationException(
+                    "LOOKUP_AREA first argument must be a table name reference", "LOOKUP_AREA");
+        }
+        String tableName = ref.name();
+        String resolvedName = tableName;
+        Optional<systems.courant.shrewd.model.def.LookupTableDef> defOpt =
+                context.resolveLookupTableDef(tableName);
+        if (defOpt.isEmpty() && tableName.contains("_")) {
+            resolvedName = tableName.replace('_', ' ');
+            defOpt = context.resolveLookupTableDef(resolvedName);
+        }
+        if (defOpt.isEmpty()) {
+            throw new CompilationException(
+                    "Lookup table not found: " + tableName, tableName);
+        }
+        double[] xValues = defOpt.get().xValues();
+        DoubleSupplier fromX = compileExpr(args.get(1));
+        DoubleSupplier toX = compileExpr(args.get(2));
+
+        // Use the lookup table's interpolation to compute area via trapezoidal rule
+        Optional<LookupTable> tableOpt = context.createFreshLookupTable(resolvedName, () -> 0);
+        if (tableOpt.isEmpty()) {
+            tableOpt = context.resolveLookupTable(resolvedName);
+        }
+        if (tableOpt.isEmpty()) {
+            throw new CompilationException(
+                    "Lookup table not found: " + tableName, tableName);
+        }
+        LookupTable table = tableOpt.get();
+        return () -> {
+            double x1 = fromX.getAsDouble();
+            double x2 = toX.getAsDouble();
+            if (x1 == x2) {
+                return 0.0;
+            }
+            boolean negate = x1 > x2;
+            double lo = negate ? x2 : x1;
+            double hi = negate ? x1 : x2;
+            // Trapezoidal integration using the lookup table's data points
+            double area = 0.0;
+            double prevX = lo;
+            double prevY = table.withInput(() -> lo).getCurrentValue();
+            for (double xVal : xValues) {
+                if (xVal <= lo) {
+                    continue;
+                }
+                if (xVal >= hi) {
+                    break;
+                }
+                double curY = table.withInput(() -> xVal).getCurrentValue();
+                area += (xVal - prevX) * (prevY + curY) / 2.0;
+                prevX = xVal;
+                prevY = curY;
+            }
+            // Final segment to hi
+            double hiY = table.withInput(() -> hi).getCurrentValue();
+            area += (hi - prevX) * (prevY + hiY) / 2.0;
+            return negate ? -area : area;
+        };
     }
 
     private DoubleSupplier compileConditional(Expr.Conditional cond) {
