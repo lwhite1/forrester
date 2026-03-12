@@ -10,6 +10,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -17,6 +18,7 @@ import static systems.courant.shrewd.measure.Units.DAY;
 import static systems.courant.shrewd.measure.Units.PEOPLE;
 import static systems.courant.shrewd.measure.units.time.Times.weeks;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -242,6 +244,107 @@ class SensitivitySummaryTest {
             String summary = SensitivitySummary.toPlainLanguage(List.of(first, second));
             assertThat(summary).contains("100%");
             assertThat(summary).doesNotContain("150%");
+        }
+    }
+
+    @Nested
+    @DisplayName("Truncated run bounds checks (#328)")
+    class TruncatedRunBoundsChecks {
+
+        @Test
+        void shouldHandleRunWithZeroSteps() {
+            // RunResult with no recorded steps (empty simulation)
+            RunResult emptyRun = new RunResult(5.0);
+            // emptyRun has stepCount == 0 — no events were fired
+
+            SweepResult result = new SweepResult("Param",
+                    List.of(emptyRun));
+            // Should not throw AIOOBE — returns empty list because
+            // the target variable is unknown in an uninitialized RunResult
+            assertThatThrownBy(() -> SensitivitySummary.fromSweep(result, "Missing"))
+                    .isInstanceOf(IllegalArgumentException.class)
+                    .hasMessageContaining("Unknown stock or variable");
+        }
+
+        @Test
+        void shouldHandleMixOfCompleteAndTruncatedRuns() {
+            // Build a normal run
+            Model model = buildSirModel(8.0);
+            RunResult goodRun = new RunResult(8.0);
+            systems.courant.shrewd.Simulation sim = new systems.courant.shrewd.Simulation(
+                    model, DAY, DAY, 5);
+            sim.addEventHandler(goodRun);
+            sim.execute();
+
+            // Build a truncated run (no steps recorded)
+            RunResult truncatedRun = new RunResult(2.0);
+            // Manually fire start event so it has stock names but no step data
+            truncatedRun.handleSimulationStartEvent(
+                    new systems.courant.shrewd.event.SimulationStartEvent(sim));
+
+            SweepResult result = new SweepResult("Contact Rate",
+                    List.of(goodRun, truncatedRun));
+
+            // Should not throw — truncated run produces NaN which is skipped
+            List<SensitivitySummary.ParameterImpact> impacts =
+                    SensitivitySummary.fromSweep(result, "Infectious");
+            assertThat(impacts).hasSize(1);
+            assertThat(impacts.getFirst().impactFraction()).isEqualTo(1.0);
+        }
+
+        @Test
+        void shouldHandleAllRunsTruncated() {
+            // Two runs with stock names but no step data
+            Model model = buildSirModel(8.0);
+            systems.courant.shrewd.Simulation sim = new systems.courant.shrewd.Simulation(
+                    model, DAY, DAY, 5);
+
+            RunResult r1 = new RunResult(2.0);
+            r1.handleSimulationStartEvent(
+                    new systems.courant.shrewd.event.SimulationStartEvent(sim));
+            RunResult r2 = new RunResult(8.0);
+            r2.handleSimulationStartEvent(
+                    new systems.courant.shrewd.event.SimulationStartEvent(sim));
+
+            SweepResult result = new SweepResult("Contact Rate", List.of(r1, r2));
+
+            // Should not throw — all values are NaN, min/max defaults to [0,0]
+            List<SensitivitySummary.ParameterImpact> impacts =
+                    SensitivitySummary.fromSweep(result, "Infectious");
+            assertThat(impacts).hasSize(1);
+            assertThat(impacts.getFirst().minOutput()).isEqualTo(0.0);
+            assertThat(impacts.getFirst().maxOutput()).isEqualTo(0.0);
+        }
+
+        @Test
+        void shouldHandleTruncatedRunInMonteCarloGracefully() {
+            // Build enough good runs for Spearman (needs >= 3)
+            List<RunResult> runs = new ArrayList<>();
+            for (double cr : new double[]{4.0, 6.0, 8.0, 10.0}) {
+                Model model = buildSirModel(cr);
+                RunResult run = new RunResult(Map.of("Contact Rate", cr));
+                systems.courant.shrewd.Simulation sim = new systems.courant.shrewd.Simulation(
+                        model, DAY, DAY, 5);
+                sim.addEventHandler(run);
+                sim.execute();
+                runs.add(run);
+            }
+            // Add a truncated run
+            RunResult truncated = new RunResult(Map.of("Contact Rate", 12.0));
+            Model truncModel = buildSirModel(12.0);
+            systems.courant.shrewd.Simulation truncSim = new systems.courant.shrewd.Simulation(
+                    truncModel, DAY, DAY, 5);
+            truncated.handleSimulationStartEvent(
+                    new systems.courant.shrewd.event.SimulationStartEvent(truncSim));
+            runs.add(truncated);
+
+            MonteCarloResult mcResult = new MonteCarloResult(runs);
+
+            // Should not throw AIOOBE
+            List<SensitivitySummary.ParameterImpact> impacts =
+                    SensitivitySummary.fromMonteCarlo(mcResult, "Infectious");
+            assertThat(impacts).hasSize(1);
+            assertThat(impacts.getFirst().impactFraction()).isBetween(0.0, 1.0);
         }
     }
 

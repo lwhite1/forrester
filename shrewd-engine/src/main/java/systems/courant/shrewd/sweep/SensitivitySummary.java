@@ -193,17 +193,32 @@ public final class SensitivitySummary {
         double baseline = mean(finalValues);
         int n = runs.size();
 
+        // Filter out runs with NaN final values (truncated/empty runs)
+        List<Integer> validIndices = new ArrayList<>();
+        for (int i = 0; i < n; i++) {
+            if (!Double.isNaN(finalValues[i])) {
+                validIndices.add(i);
+            }
+        }
+        double[] validFinals = new double[validIndices.size()];
+        for (int i = 0; i < validIndices.size(); i++) {
+            validFinals[i] = finalValues[validIndices.get(i)];
+        }
+
         SpearmansCorrelation spearman = new SpearmansCorrelation();
         double[] rhoSquared = new double[paramNames.size()];
 
-        for (int p = 0; p < paramNames.size(); p++) {
-            double[] paramValues = new double[n];
-            for (int i = 0; i < n; i++) {
-                paramValues[i] = runs.get(i).getParameterMap().get(paramNames.get(p));
-            }
+        if (validIndices.size() >= 3) {
+            for (int p = 0; p < paramNames.size(); p++) {
+                double[] paramValues = new double[validIndices.size()];
+                for (int i = 0; i < validIndices.size(); i++) {
+                    paramValues[i] = runs.get(validIndices.get(i))
+                            .getParameterMap().get(paramNames.get(p));
+                }
 
-            double rho = spearman.correlation(paramValues, finalValues);
-            rhoSquared[p] = Double.isNaN(rho) ? 0.0 : rho * rho;
+                double rho = spearman.correlation(paramValues, validFinals);
+                rhoSquared[p] = Double.isNaN(rho) ? 0.0 : rho * rho;
+            }
         }
 
         // Normalize ρ² values to sum to 1.0
@@ -283,11 +298,25 @@ public final class SensitivitySummary {
 
         for (int i = 0; i < runs.size(); i++) {
             RunResult run = runs.get(i);
+            if (run.getStepCount() == 0) {
+                values[i] = Double.NaN;
+                continue;
+            }
             int lastStep = run.getStepCount() - 1;
             if (isStock) {
-                values[i] = run.getStockValuesAtStep(lastStep)[colIndex];
+                double[] snapshot = run.getStockValuesAtStep(lastStep);
+                if (colIndex >= snapshot.length) {
+                    values[i] = Double.NaN;
+                } else {
+                    values[i] = snapshot[colIndex];
+                }
             } else {
-                values[i] = run.getVariableValuesAtStep(lastStep)[colIndex];
+                double[] snapshot = run.getVariableValuesAtStep(lastStep);
+                if (colIndex >= snapshot.length) {
+                    values[i] = Double.NaN;
+                } else {
+                    values[i] = snapshot[colIndex];
+                }
             }
         }
         return values;
@@ -297,28 +326,38 @@ public final class SensitivitySummary {
         double min = Double.MAX_VALUE;
         double max = -Double.MAX_VALUE;
         for (double v : values) {
+            if (Double.isNaN(v)) { continue; }
             if (v < min) { min = v; }
             if (v > max) { max = v; }
+        }
+        if (min == Double.MAX_VALUE) {
+            return new double[]{0, 0};
         }
         return new double[]{min, max};
     }
 
     private static double mean(double[] values) {
         double sum = 0;
+        int count = 0;
         for (double v : values) {
+            if (Double.isNaN(v)) { continue; }
             sum += v;
+            count++;
         }
-        return sum / values.length;
+        return count > 0 ? sum / count : 0;
     }
 
     private static double variance(double[] values) {
         double m = mean(values);
         double sumSq = 0;
+        int count = 0;
         for (double v : values) {
+            if (Double.isNaN(v)) { continue; }
             double diff = v - m;
             sumSq += diff * diff;
+            count++;
         }
-        return sumSq / values.length;
+        return count > 0 ? sumSq / count : 0;
     }
 
     private static String formatPercent(double fraction) {
