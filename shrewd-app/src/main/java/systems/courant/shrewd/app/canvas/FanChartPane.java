@@ -8,6 +8,7 @@ import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 
+import java.util.Locale;
 import java.util.Map;
 
 /**
@@ -169,7 +170,7 @@ public class FanChartPane extends Pane {
             double val = minVal + (maxVal - minVal) * i / yTicks;
             double y = MARGIN_TOP + plotHeight - (plotHeight * i / yTicks);
             gc.strokeLine(MARGIN_LEFT - 5, y, MARGIN_LEFT, y);
-            gc.fillText(String.format("%.0f", val), 5, y + 4);
+            gc.fillText(String.format(Locale.US, "%.0f", val), 5, y + 4);
         }
 
         int xTicks = Math.min(10, stepCount - 1);

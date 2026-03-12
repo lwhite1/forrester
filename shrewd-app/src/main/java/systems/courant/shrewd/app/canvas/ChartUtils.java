@@ -3,6 +3,7 @@ package systems.courant.shrewd.app.canvas;
 import javafx.scene.chart.XYChart;
 
 import java.util.List;
+import java.util.Locale;
 
 /**
  * Shared chart utilities: color palette, series coloring, and number formatting.
@@ -47,6 +48,6 @@ final class ChartUtils {
                 && Math.abs(value) <= Long.MAX_VALUE) {
             return String.valueOf((long) value);
         }
-        return String.format("%.4f", value);
+        return String.format(Locale.US, "%.4f", value);
     }
 }
