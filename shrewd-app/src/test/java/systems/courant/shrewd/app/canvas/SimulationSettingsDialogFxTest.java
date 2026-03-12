@@ -51,10 +51,12 @@ class SimulationSettingsDialogFxTest {
         ComboBox<?> timeStep = robot.lookup("#simTimeStep").queryAs(ComboBox.class);
         TextField duration = robot.lookup("#simDuration").queryAs(TextField.class);
         ComboBox<?> durationUnit = robot.lookup("#simDurationUnit").queryAs(ComboBox.class);
+        TextField dt = robot.lookup("#simDt").queryAs(TextField.class);
 
         assertThat(timeStep.getValue()).isEqualTo("Day");
         assertThat(duration.getText()).isEqualTo("100");
         assertThat(durationUnit.getValue()).isEqualTo("Day");
+        assertThat(dt.getText()).isEqualTo("1");
     }
 
     @Test
@@ -65,10 +67,21 @@ class SimulationSettingsDialogFxTest {
         ComboBox<?> timeStep = robot.lookup("#simTimeStep").queryAs(ComboBox.class);
         TextField duration = robot.lookup("#simDuration").queryAs(TextField.class);
         ComboBox<?> durationUnit = robot.lookup("#simDurationUnit").queryAs(ComboBox.class);
+        TextField dt = robot.lookup("#simDt").queryAs(TextField.class);
 
         assertThat(timeStep.getValue()).isEqualTo("Week");
         assertThat(duration.getText()).isEqualTo("52");
         assertThat(durationUnit.getValue()).isEqualTo("Week");
+        assertThat(dt.getText()).isEqualTo("1");
+    }
+
+    @Test
+    @DisplayName("Dialog populates fractional DT from existing settings")
+    void populatesFractionalDt(FxRobot robot) {
+        showDialog(new SimulationSettings("Day", 100, "Day", 0.25));
+
+        TextField dt = robot.lookup("#simDt").queryAs(TextField.class);
+        assertThat(dt.getText()).isEqualTo("0.25");
     }
 
     @Test
@@ -133,6 +146,38 @@ class SimulationSettingsDialogFxTest {
                         .filter(bt -> bt.getButtonData().isDefaultButton())
                         .findFirst().orElseThrow());
         assertThat(okButton.isDisabled()).isFalse();
+    }
+
+    @Test
+    @DisplayName("OK button is disabled when DT is empty")
+    void okDisabledWhenDtEmpty(FxRobot robot) {
+        showDialog(null);
+
+        TextField dt = robot.lookup("#simDt").queryAs(TextField.class);
+        robot.clickOn(dt).eraseText(dt.getText().length());
+        WaitForAsyncUtils.waitForFxEvents();
+
+        Node okButton = dialogPane.lookupButton(
+                dialogPane.getButtonTypes().stream()
+                        .filter(bt -> bt.getButtonData().isDefaultButton())
+                        .findFirst().orElseThrow());
+        assertThat(okButton.isDisabled()).isTrue();
+    }
+
+    @Test
+    @DisplayName("OK button is disabled when DT is negative")
+    void okDisabledWhenDtNegative(FxRobot robot) {
+        showDialog(null);
+
+        TextField dt = robot.lookup("#simDt").queryAs(TextField.class);
+        robot.clickOn(dt).eraseText(dt.getText().length()).write("-0.5");
+        WaitForAsyncUtils.waitForFxEvents();
+
+        Node okButton = dialogPane.lookupButton(
+                dialogPane.getButtonTypes().stream()
+                        .filter(bt -> bt.getButtonData().isDefaultButton())
+                        .findFirst().orElseThrow());
+        assertThat(okButton.isDisabled()).isTrue();
     }
 
     @Test

@@ -131,6 +131,7 @@ public class CompiledModel {
         TimeUnit timeStep = unitRegistry.resolveTimeUnit(settings.timeStep());
         TimeUnit durationUnit = unitRegistry.resolveTimeUnit(settings.durationUnit());
         simTimeUnitHolder[0] = timeStep;
+        setDt(settings.dt());
         Simulation sim = new Simulation(model, timeStep, new Quantity(settings.duration(), durationUnit));
         installStepSync(sim);
         return sim;
