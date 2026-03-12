@@ -62,15 +62,21 @@ public final class VensimExprTranslator {
             "(?i)MESSAGE\\s*\\(");
     private static final Pattern SIMULTANEOUS_PATTERN = Pattern.compile(
             "(?i)SIMULTANEOUS\\s*\\(");
+    private static final Pattern ACTIVE_INITIAL_PATTERN = Pattern.compile(
+            "(?i)ACTIVE\\s+INITIAL\\s*\\(");
+    private static final Pattern SAMPLE_IF_TRUE_PATTERN = Pattern.compile(
+            "(?i)SAMPLE\\s+IF\\s+TRUE\\s*\\(");
+    private static final Pattern FIND_ZERO_PATTERN = Pattern.compile(
+            "(?i)FIND\\s+ZERO\\s*\\(");
     private static final Pattern CARET_PATTERN = Pattern.compile("\\^");
     private static final Pattern TIME_VAR_PATTERN = Pattern.compile(
             "(?i)\\bTime\\b");
     private static final Set<String> UNSUPPORTED_FUNCTIONS = Set.of(
             "DELAY N",
             "GET XLS DATA", "GET DIRECT DATA",
-            "GET DIRECT CONSTANTS", "TABBED ARRAY", "SAMPLE IF TRUE",
+            "GET DIRECT CONSTANTS", "TABBED ARRAY",
             "VECTOR SELECT", "VECTOR ELM MAP", "VECTOR SORT ORDER",
-            "ALLOCATE AVAILABLE", "FIND ZERO");
+            "ALLOCATE AVAILABLE");
 
     /**
      * Result of translating a Vensim expression.
@@ -185,11 +191,20 @@ public final class VensimExprTranslator {
         // 8c. SIMULTANEOUS(args) → 0 (solver hint, no-op for Euler integration)
         expr = translateSimultaneous(expr);
 
-        // 8d. RANDOM UNIFORM → RANDOM_UNIFORM, RANDOM NORMAL → RANDOM_NORMAL
+        // 8d. ACTIVE INITIAL(expr, initial) → expr (pass-through first arg)
+        expr = translateActiveInitial(expr);
+
+        // 8e. RANDOM UNIFORM → RANDOM_UNIFORM, RANDOM NORMAL → RANDOM_NORMAL
         expr = RANDOM_UNIFORM_PATTERN.matcher(expr).replaceAll("RANDOM_UNIFORM(");
         expr = RANDOM_NORMAL_PATTERN.matcher(expr).replaceAll("RANDOM_NORMAL(");
 
-        // 8e. PULSE TRAIN → PULSE_TRAIN
+        // 8f. SAMPLE IF TRUE → SAMPLE_IF_TRUE
+        expr = SAMPLE_IF_TRUE_PATTERN.matcher(expr).replaceAll("SAMPLE_IF_TRUE(");
+
+        // 8g. FIND ZERO → FIND_ZERO
+        expr = FIND_ZERO_PATTERN.matcher(expr).replaceAll("FIND_ZERO(");
+
+        // 8h. PULSE TRAIN → PULSE_TRAIN
         expr = PULSE_TRAIN_PATTERN.matcher(expr).replaceAll("PULSE_TRAIN(");
 
         // 9. ^ → ** (Vensim uses ^ for power, Shrewd uses **)
@@ -641,6 +656,31 @@ public final class VensimExprTranslator {
                 String inner = expr.substring(openParen + 1, closeParen).strip();
                 expr = expr.substring(0, m.start()) + inner + expr.substring(closeParen + 1);
                 m = GAME_PATTERN.matcher(expr);
+            } else {
+                break;
+            }
+        }
+        return expr;
+    }
+
+    /**
+     * Strips ACTIVE INITIAL(expr, initial) wrappers, returning the first argument.
+     * In Vensim, ACTIVE INITIAL returns the first argument during normal simulation
+     * and uses the second argument only during game-mode initialization.
+     * Since Shrewd doesn't support game mode, we pass through the first argument.
+     */
+    private static String translateActiveInitial(String expr) {
+        Matcher m = ACTIVE_INITIAL_PATTERN.matcher(expr);
+        while (m.find()) {
+            int openParen = m.end() - 1;
+            int closeParen = findMatchingParen(expr, openParen);
+            if (closeParen > 0) {
+                String argsContent = expr.substring(openParen + 1, closeParen);
+                List<String> args = splitTopLevelArgs(argsContent);
+                // First argument is the active expression
+                String firstArg = args.get(0).strip();
+                expr = expr.substring(0, m.start()) + firstArg + expr.substring(closeParen + 1);
+                m = ACTIVE_INITIAL_PATTERN.matcher(expr);
             } else {
                 break;
             }

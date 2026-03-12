@@ -1866,4 +1866,205 @@ class VensimImporterTest {
             assertThat(terms.get(1).expr()).isEqualTo("c");
         }
     }
+
+    @Nested
+    @DisplayName("SAMPLE IF TRUE and FIND ZERO (#512)")
+    class SampleIfTrueAndFindZeroImport {
+
+        @Test
+        void shouldCompileModelWithSampleIfTrue() {
+            String mdl = """
+                    sensor = SAMPLE IF TRUE(switch > 0, input, 0)
+                    \t~\tUnits
+                    \t~\t
+                    \t|
+
+                    switch = 1
+                    \t~\tDimensionless
+                    \t~\t
+                    \t|
+
+                    input = 42
+                    \t~\tUnits
+                    \t~\t
+                    \t|
+                    """;
+            ImportResult result = importer.importModel(mdl, "test");
+            assertThat(result.warnings()).noneMatch(w -> w.contains("Unsupported"));
+
+            CompiledModel compiled = new ModelCompiler().compile(result.definition());
+            Simulation sim = compiled.createSimulation();
+            sim.execute();
+            assertThat(compiled).isNotNull();
+        }
+
+        @Test
+        void shouldCompileModelWithFindZero() {
+            String mdl = """
+                    root = FIND ZERO(x - 5, x, 0, 10)
+                    \t~\tUnits
+                    \t~\t
+                    \t|
+
+                    x = 0
+                    \t~\tUnits
+                    \t~\t
+                    \t|
+                    """;
+            ImportResult result = importer.importModel(mdl, "test");
+            assertThat(result.warnings()).noneMatch(w -> w.contains("Unsupported"));
+
+            CompiledModel compiled = new ModelCompiler().compile(result.definition());
+            Simulation sim = compiled.createSimulation();
+            sim.execute();
+
+            // FIND ZERO should find x=5 where x-5=0
+            var rootVar = compiled.getModel().getVariables().stream()
+                    .filter(v -> v.getName().contains("root"))
+                    .findFirst()
+                    .orElseThrow();
+            assertThat(rootVar.getValue()).isCloseTo(5.0, org.assertj.core.data.Offset.offset(0.01));
+        }
+    }
+
+    @Nested
+    @DisplayName("ACTIVE INITIAL handling (#513)")
+    class ActiveInitialImport {
+
+        @Test
+        void shouldCompileModelWithActiveInitial() {
+            String mdl = """
+                    total market= ACTIVE INITIAL(
+                    Potential Customers + Customers, Potential Customers)
+                    \t~\tPeople
+                    \t~\t
+                    \t|
+
+                    Potential Customers = 1000
+                    \t~\tPeople
+                    \t~\t
+                    \t|
+
+                    Customers = 500
+                    \t~\tPeople
+                    \t~\t
+                    \t|
+                    """;
+            ImportResult result = importer.importModel(mdl, "test");
+            ModelDefinition def = result.definition();
+
+            // ACTIVE INITIAL should resolve to first arg: Potential Customers + Customers
+            var aux = def.auxiliaries().stream()
+                    .filter(a -> a.name().contains("total market"))
+                    .findFirst();
+            assertThat(aux).isPresent();
+            assertThat(aux.get().equation()).isEqualTo("Potential_Customers + Customers");
+
+            // Should compile without errors
+            CompiledModel compiled = new ModelCompiler().compile(def);
+            assertThat(compiled).isNotNull();
+        }
+
+        @Test
+        void shouldCompileModelWithActiveInitialAndIfThenElse() {
+            String mdl = """
+                    proactive replacements = ACTIVE INITIAL(IF THEN ELSE(avail > 0, avail, 0), 0)
+                    \t~\tUnits
+                    \t~\t
+                    \t|
+
+                    avail = 50
+                    \t~\tUnits
+                    \t~\t
+                    \t|
+                    """;
+            ImportResult result = importer.importModel(mdl, "test");
+            ModelDefinition def = result.definition();
+
+            var aux = def.auxiliaries().stream()
+                    .filter(a -> a.name().contains("proactive"))
+                    .findFirst();
+            assertThat(aux).isPresent();
+            assertThat(aux.get().equation()).isEqualTo("IF(avail > 0, avail, 0)");
+        }
+    }
+
+    @Nested
+    @DisplayName("Non-monotonic lookup table handling (#511)")
+    class NonMonotonicLookup {
+
+        @Test
+        void shouldSortNonMonotonicLookupXValues() {
+            String mdl = """
+                    my table(
+                    [(0,0)-(10,10)],(0,1),(3,5),(2,3),(5,8),(4,6))
+                    \t~\t
+                    \t~\t
+                    \t|
+
+                    result = my table(Time)
+                    \t~\t
+                    \t~\t
+                    \t|
+                    """;
+            ImportResult result = importer.importModel(mdl, "test");
+            ModelDefinition def = result.definition();
+
+            assertThat(def.lookupTables()).hasSize(1);
+            LookupTableDef lookup = def.lookupTables().get(0);
+            // x-values should be sorted: 0, 2, 3, 4, 5
+            assertThat(lookup.xValues()).containsExactly(0, 2, 3, 4, 5);
+            assertThat(lookup.yValues()).containsExactly(1, 3, 5, 6, 8);
+            assertThat(result.warnings()).anyMatch(w -> w.contains("sorted non-monotonic"));
+        }
+
+        @Test
+        void shouldSortAndDeduplicateLookupXValues() {
+            String mdl = """
+                    my table(
+                    [(0,0)-(10,10)],(0,1),(5.5,7),(3,5),(5.0,6),(5.5,8))
+                    \t~\t
+                    \t~\t
+                    \t|
+
+                    result = my table(Time)
+                    \t~\t
+                    \t~\t
+                    \t|
+                    """;
+            ImportResult result = importer.importModel(mdl, "test");
+            ModelDefinition def = result.definition();
+
+            assertThat(def.lookupTables()).hasSize(1);
+            LookupTableDef lookup = def.lookupTables().get(0);
+            // Sorted: 0, 3, 5.0, 5.5, 5.5 → deduplicated: 0, 3, 5.0, 5.5
+            assertThat(lookup.xValues()).containsExactly(0, 3, 5.0, 5.5);
+            // Last y for x=5.5 is 8 (from the second 5.5 entry)
+            assertThat(lookup.yValues()).containsExactly(1, 5, 6, 8);
+            assertThat(result.warnings()).anyMatch(w -> w.contains("sorted non-monotonic")
+                    && w.contains("duplicate"));
+        }
+
+        @Test
+        void shouldCompileModelWithNonMonotonicLookup() {
+            String mdl = """
+                    my table(
+                    [(0,0)-(10,10)],(0,0),(5,10),(3,6),(10,20))
+                    \t~\t
+                    \t~\t
+                    \t|
+
+                    output = my table(Time)
+                    \t~\t
+                    \t~\t
+                    \t|
+                    """;
+            ImportResult result = importer.importModel(mdl, "test");
+            CompiledModel compiled = new ModelCompiler().compile(result.definition());
+            Simulation sim = compiled.createSimulation();
+            sim.execute();
+            // Model should compile and run without errors
+            assertThat(compiled).isNotNull();
+        }
+    }
 }

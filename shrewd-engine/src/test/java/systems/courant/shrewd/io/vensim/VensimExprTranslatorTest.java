@@ -630,6 +630,98 @@ class VensimExprTranslatorTest {
     }
 
     @Nested
+    @DisplayName("SAMPLE IF TRUE and FIND ZERO translation (#512)")
+    class SampleIfTrueAndFindZero {
+
+        @Test
+        void shouldTranslateSampleIfTrue() {
+            var result = VensimExprTranslator.translate(
+                    "SAMPLE IF TRUE(x > 0, input, 0)", "var", EMPTY_NAMES);
+            assertThat(result.expression()).isEqualTo("SAMPLE_IF_TRUE(x > 0, input, 0)");
+            assertThat(result.warnings()).noneMatch(w -> w.contains("SAMPLE IF TRUE"));
+        }
+
+        @Test
+        void shouldTranslateSampleIfTrueCaseInsensitive() {
+            var result = VensimExprTranslator.translate(
+                    "sample if true(cond, val, 0)", "var", EMPTY_NAMES);
+            assertThat(result.expression()).isEqualTo("SAMPLE_IF_TRUE(cond, val, 0)");
+        }
+
+        @Test
+        void shouldTranslateFindZero() {
+            var result = VensimExprTranslator.translate(
+                    "FIND ZERO(expr, x, 0, 100)", "var", EMPTY_NAMES);
+            assertThat(result.expression()).isEqualTo("FIND_ZERO(expr, x, 0, 100)");
+            assertThat(result.warnings()).noneMatch(w -> w.contains("FIND ZERO"));
+        }
+
+        @Test
+        void shouldTranslateFindZeroCaseInsensitive() {
+            var result = VensimExprTranslator.translate(
+                    "find zero(f, y, -10, 10)", "var", EMPTY_NAMES);
+            assertThat(result.expression()).isEqualTo("FIND_ZERO(f, y, -10, 10)");
+        }
+
+        @Test
+        void shouldNoLongerWarnForSampleIfTrue() {
+            var result = VensimExprTranslator.translate(
+                    "SAMPLE IF TRUE(x > 0, y, 0)", "var", EMPTY_NAMES);
+            assertThat(result.warnings()).noneMatch(w -> w.contains("Unsupported"));
+        }
+
+        @Test
+        void shouldNoLongerWarnForFindZero() {
+            var result = VensimExprTranslator.translate(
+                    "FIND ZERO(x - 5, x, 0, 10)", "var", EMPTY_NAMES);
+            assertThat(result.warnings()).noneMatch(w -> w.contains("Unsupported"));
+        }
+    }
+
+    @Nested
+    @DisplayName("ACTIVE INITIAL translation (#513)")
+    class ActiveInitial {
+
+        @Test
+        void shouldExtractFirstArgument() {
+            var result = VensimExprTranslator.translate(
+                    "ACTIVE INITIAL(x + y, 0)", "var", EMPTY_NAMES);
+            assertThat(result.expression()).isEqualTo("x + y");
+        }
+
+        @Test
+        void shouldBeCaseInsensitive() {
+            var result = VensimExprTranslator.translate(
+                    "active initial(x, 0)", "var", EMPTY_NAMES);
+            assertThat(result.expression()).isEqualTo("x");
+        }
+
+        @Test
+        void shouldHandleNestedFunctions() {
+            Set<String> names = Set.of("Potential Customers", "Waiting Customers");
+            var result = VensimExprTranslator.translate(
+                    "ACTIVE INITIAL(Potential Customers + Waiting Customers, Potential Customers)",
+                    "var", names);
+            assertThat(result.expression())
+                    .isEqualTo("Potential_Customers + Waiting_Customers");
+        }
+
+        @Test
+        void shouldHandleActiveInitialWithIfThenElse() {
+            var result = VensimExprTranslator.translate(
+                    "ACTIVE INITIAL(IF THEN ELSE(x > 0, x, 0), 0)", "var", EMPTY_NAMES);
+            assertThat(result.expression()).isEqualTo("IF(x > 0, x, 0)");
+        }
+
+        @Test
+        void shouldHandleActiveInitialInLargerExpression() {
+            var result = VensimExprTranslator.translate(
+                    "ACTIVE INITIAL(a * b, 0) + c", "var", EMPTY_NAMES);
+            assertThat(result.expression()).isEqualTo("a * b + c");
+        }
+    }
+
+    @Nested
     @DisplayName("Edge cases")
     class EdgeCases {
 

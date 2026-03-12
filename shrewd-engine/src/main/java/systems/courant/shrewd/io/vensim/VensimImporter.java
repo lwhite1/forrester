@@ -638,38 +638,75 @@ public class VensimImporter implements ModelImporter {
     }
 
     /**
-     * Removes consecutive duplicate x-values from lookup table data,
-     * keeping the last y-value for each x.
+     * Sorts and deduplicates lookup table x-values so they are strictly increasing.
+     * Non-monotonic x-values are sorted; duplicate x-values keep the last y-value.
      */
     private static double[][] deduplicateLookupPoints(double[][] points,
                                                        String name,
                                                        List<String> warnings) {
         double[] xs = points[0];
         double[] ys = points[1];
-        List<Double> newXs = new ArrayList<>();
-        List<Double> newYs = new ArrayList<>();
-        newXs.add(xs[0]);
-        newYs.add(ys[0]);
-        int dupes = 0;
+
+        // Check if x-values are already strictly increasing
+        boolean sorted = true;
         for (int i = 1; i < xs.length; i++) {
-            if (xs[i] == xs[i - 1]) {
-                // Replace last y with this one (keep last value for duplicate x)
-                newYs.set(newYs.size() - 1, ys[i]);
-                dupes++;
-            } else {
-                newXs.add(xs[i]);
-                newYs.add(ys[i]);
+            if (xs[i] <= xs[i - 1]) {
+                sorted = false;
+                break;
             }
         }
-        if (dupes > 0) {
+        if (sorted) {
+            return points;
+        }
+
+        // Build index array and sort by x-value (stable sort preserves original order for ties)
+        Integer[] indices = new Integer[xs.length];
+        for (int i = 0; i < indices.length; i++) {
+            indices[i] = i;
+        }
+        Arrays.sort(indices, (a, b) -> {
+            int cmp = Double.compare(xs[a], xs[b]);
+            return cmp != 0 ? cmp : Integer.compare(a, b);
+        });
+
+        double[] sortedXs = new double[xs.length];
+        double[] sortedYs = new double[ys.length];
+        for (int i = 0; i < indices.length; i++) {
+            sortedXs[i] = xs[indices[i]];
+            sortedYs[i] = ys[indices[i]];
+        }
+
+        boolean wasUnsorted = !sorted;
+
+        // Deduplicate consecutive x-values (keep last y-value)
+        List<Double> newXs = new ArrayList<>();
+        List<Double> newYs = new ArrayList<>();
+        newXs.add(sortedXs[0]);
+        newYs.add(sortedYs[0]);
+        int dupes = 0;
+        for (int i = 1; i < sortedXs.length; i++) {
+            if (sortedXs[i] == sortedXs[i - 1]) {
+                newYs.set(newYs.size() - 1, sortedYs[i]);
+                dupes++;
+            } else {
+                newXs.add(sortedXs[i]);
+                newYs.add(sortedYs[i]);
+            }
+        }
+
+        if (wasUnsorted && dupes > 0) {
+            warnings.add("Lookup '" + name + "': sorted non-monotonic x-values and removed "
+                    + dupes + " duplicate(s)");
+        } else if (wasUnsorted) {
+            warnings.add("Lookup '" + name + "': sorted non-monotonic x-values");
+        } else {
             warnings.add("Lookup '" + name + "': removed " + dupes
                     + " duplicate x-value(s)");
-            return new double[][]{
-                    newXs.stream().mapToDouble(Double::doubleValue).toArray(),
-                    newYs.stream().mapToDouble(Double::doubleValue).toArray()
-            };
         }
-        return points;
+        return new double[][]{
+                newXs.stream().mapToDouble(Double::doubleValue).toArray(),
+                newYs.stream().mapToDouble(Double::doubleValue).toArray()
+        };
     }
 
     private void addExtractedLookups(VensimExprTranslator.TranslationResult tr,
