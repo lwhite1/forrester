@@ -1,15 +1,22 @@
 package systems.courant.shrewd.demo.waterfall;
 
 import systems.courant.shrewd.Simulation;
+import systems.courant.shrewd.event.EventHandler;
+import systems.courant.shrewd.event.TimeStepEvent;
 import systems.courant.shrewd.measure.Quantity;
 import systems.courant.shrewd.measure.units.dimensionless.DimensionlessUnits;
 import systems.courant.shrewd.measure.units.item.ItemUnits;
 import systems.courant.shrewd.measure.units.time.TimeUnits;
+import systems.courant.shrewd.model.Flow;
 import systems.courant.shrewd.model.Model;
+import systems.courant.shrewd.model.Module;
 import systems.courant.shrewd.model.Stock;
 import systems.courant.shrewd.model.Variable;
 import org.junit.jupiter.api.Test;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class SoftwareProductionTest {
@@ -135,6 +142,78 @@ class SoftwareProductionTest {
                 "Most tasks should be done after a year: remaining=" + tasksRemaining.getValue());
         assertTrue(tasksCompleted.getValue() > 150,
                 "Most tasks should be correctly completed: completed=" + tasksCompleted.getValue());
+    }
+
+    @Test
+    void shouldConserveTasksInDevelopmentSplit() {
+        SoftwareProduction sp = createModule(10, 2, 0.8, 500);
+        Module mod = sp.getModule();
+
+        Model model = new Model("Conservation Test");
+        model.addModule(mod);
+
+        // Find the three development split flows
+        Flow development = findFlow(model, "Development");
+        Flow correctDev = findFlow(model, "Correct Development");
+        Flow errorInjection = findFlow(model, "Error Injection");
+
+        AtomicBoolean violated = new AtomicBoolean(false);
+        Simulation sim = new Simulation(model, TimeUnits.DAY,
+                new Quantity(100, TimeUnits.DAY));
+        sim.addEventHandler(new EventHandler() {
+            @Override
+            public void handleTimeStepEvent(TimeStepEvent event) {
+                int step = (int) event.getStep();
+                double total = development.getHistoryAtTimeStep(step);
+                double correct = correctDev.getHistoryAtTimeStep(step);
+                double errors = errorInjection.getHistoryAtTimeStep(step);
+                if (total > 0 && Math.abs((correct + errors) - total) > 1e-9) {
+                    violated.set(true);
+                }
+            }
+        });
+        sim.execute();
+
+        assertThat(violated.get()).as("Development split should conserve tasks at every step").isFalse();
+    }
+
+    @Test
+    void shouldConserveTasksInReworkSplit() {
+        SoftwareProduction sp = createModule(10, 2, 0.8, 500);
+        Module mod = sp.getModule();
+
+        Model model = new Model("Rework Conservation Test");
+        model.addModule(mod);
+
+        Flow rework = findFlow(model, "Rework");
+        Flow correctRework = findFlow(model, "Correct Rework");
+        Flow reworkErrors = findFlow(model, "Rework Errors");
+
+        AtomicBoolean violated = new AtomicBoolean(false);
+        Simulation sim = new Simulation(model, TimeUnits.DAY,
+                new Quantity(100, TimeUnits.DAY));
+        sim.addEventHandler(new EventHandler() {
+            @Override
+            public void handleTimeStepEvent(TimeStepEvent event) {
+                int step = (int) event.getStep();
+                double total = rework.getHistoryAtTimeStep(step);
+                double correct = correctRework.getHistoryAtTimeStep(step);
+                double errors = reworkErrors.getHistoryAtTimeStep(step);
+                if (total > 0 && Math.abs((correct + errors) - total) > 1e-9) {
+                    violated.set(true);
+                }
+            }
+        });
+        sim.execute();
+
+        assertThat(violated.get()).as("Rework split should conserve tasks at every step").isFalse();
+    }
+
+    private static Flow findFlow(Model model, String name) {
+        return model.getFlows().stream()
+                .filter(f -> f.getName().equals(name))
+                .findFirst()
+                .orElseThrow(() -> new IllegalStateException("Flow '" + name + "' not found"));
     }
 
     @Test
