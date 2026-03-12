@@ -58,6 +58,10 @@ public final class VensimExprTranslator {
     private static final Pattern PULSE_TRAIN_PATTERN = Pattern.compile(
             "(?i)PULSE\\s+TRAIN\\s*\\(");
     private static final Pattern NOT_EQUAL_PATTERN = Pattern.compile("<>");
+    private static final Pattern MESSAGE_PATTERN = Pattern.compile(
+            "(?i)MESSAGE\\s*\\(");
+    private static final Pattern SIMULTANEOUS_PATTERN = Pattern.compile(
+            "(?i)SIMULTANEOUS\\s*\\(");
     private static final Pattern CARET_PATTERN = Pattern.compile("\\^");
     private static final Pattern TIME_VAR_PATTERN = Pattern.compile(
             "(?i)\\bTime\\b");
@@ -175,11 +179,17 @@ public final class VensimExprTranslator {
         // 8a. GAME(expr) → expr (pass-through; GAME is Vensim's interactive override)
         expr = translateGame(expr);
 
-        // 8b. RANDOM UNIFORM → RANDOM_UNIFORM, RANDOM NORMAL → RANDOM_NORMAL
+        // 8b. MESSAGE(args) → 0 (Vensim interactive messaging, no-op in Shrewd)
+        expr = translateMessage(expr);
+
+        // 8c. SIMULTANEOUS(args) → 0 (solver hint, no-op for Euler integration)
+        expr = translateSimultaneous(expr);
+
+        // 8d. RANDOM UNIFORM → RANDOM_UNIFORM, RANDOM NORMAL → RANDOM_NORMAL
         expr = RANDOM_UNIFORM_PATTERN.matcher(expr).replaceAll("RANDOM_UNIFORM(");
         expr = RANDOM_NORMAL_PATTERN.matcher(expr).replaceAll("RANDOM_NORMAL(");
 
-        // 8c. PULSE TRAIN → PULSE_TRAIN
+        // 8e. PULSE TRAIN → PULSE_TRAIN
         expr = PULSE_TRAIN_PATTERN.matcher(expr).replaceAll("PULSE_TRAIN(");
 
         // 9. ^ → ** (Vensim uses ^ for power, Shrewd uses **)
@@ -190,10 +200,13 @@ public final class VensimExprTranslator {
             expr = TIME_VAR_PATTERN.matcher(expr).replaceAll("TIME");
         }
 
-        // 11. Rewrite lookupName(arg) → LOOKUP(lookupName, arg)
+        // 11. Translate subscript bracket notation: name[label] → name_label
+        expr = translateSubscriptBrackets(expr);
+
+        // 12. Rewrite lookupName(arg) → LOOKUP(lookupName, arg)
         expr = rewriteLookupCalls(expr, lookupNames);
 
-        // 12. Check for unsupported functions
+        // 13. Check for unsupported functions
         checkUnsupportedFunctions(expr, warnings);
 
         return new TranslationResult(expr, lookups, warnings);
@@ -594,6 +607,26 @@ public final class VensimExprTranslator {
         return Optional.of(new double[][]{xValues, yValues});
     }
 
+    private static final Pattern SUBSCRIPT_BRACKET_PATTERN = Pattern.compile(
+            "([a-zA-Z_][a-zA-Z0-9_]*)\\[([^\\]]+)\\]");
+
+    /**
+     * Translates subscript bracket notation to flattened names.
+     * Converts {@code name[label]} to {@code name_label} where the label
+     * is normalized (spaces → underscores, special chars removed).
+     */
+    private static String translateSubscriptBrackets(String expr) {
+        Matcher m = SUBSCRIPT_BRACKET_PATTERN.matcher(expr);
+        StringBuilder sb = new StringBuilder();
+        while (m.find()) {
+            String varName = m.group(1);
+            String subscript = normalizeName(m.group(2));
+            m.appendReplacement(sb, Matcher.quoteReplacement(varName + "_" + subscript));
+        }
+        m.appendTail(sb);
+        return sb.toString();
+    }
+
     /**
      * Strips GAME(expr) wrappers, replacing with just the inner expression.
      * In Vensim, GAME() allows interactive override during game mode;
@@ -608,6 +641,46 @@ public final class VensimExprTranslator {
                 String inner = expr.substring(openParen + 1, closeParen).strip();
                 expr = expr.substring(0, m.start()) + inner + expr.substring(closeParen + 1);
                 m = GAME_PATTERN.matcher(expr);
+            } else {
+                break;
+            }
+        }
+        return expr;
+    }
+
+    /**
+     * Strips MESSAGE(args) wrappers, replacing with 0.
+     * In Vensim, MESSAGE() displays an interactive message during simulation;
+     * it has no effect outside the Vensim UI.
+     */
+    private static String translateMessage(String expr) {
+        Matcher m = MESSAGE_PATTERN.matcher(expr);
+        while (m.find()) {
+            int openParen = m.end() - 1;
+            int closeParen = findMatchingParen(expr, openParen);
+            if (closeParen > 0) {
+                expr = expr.substring(0, m.start()) + "0" + expr.substring(closeParen + 1);
+                m = MESSAGE_PATTERN.matcher(expr);
+            } else {
+                break;
+            }
+        }
+        return expr;
+    }
+
+    /**
+     * Strips SIMULTANEOUS(args) wrappers, replacing with 0.
+     * In Vensim, SIMULTANEOUS() is a solver hint for simultaneous equation solving;
+     * Shrewd uses Euler integration which doesn't need this hint.
+     */
+    private static String translateSimultaneous(String expr) {
+        Matcher m = SIMULTANEOUS_PATTERN.matcher(expr);
+        while (m.find()) {
+            int openParen = m.end() - 1;
+            int closeParen = findMatchingParen(expr, openParen);
+            if (closeParen > 0) {
+                expr = expr.substring(0, m.start()) + "0" + expr.substring(closeParen + 1);
+                m = SIMULTANEOUS_PATTERN.matcher(expr);
             } else {
                 break;
             }
