@@ -9,6 +9,7 @@ import systems.courant.shrewd.model.Npv;
 import systems.courant.shrewd.model.Pulse;
 import systems.courant.shrewd.model.Ramp;
 import systems.courant.shrewd.model.Smooth;
+import systems.courant.shrewd.model.Smooth3;
 import systems.courant.shrewd.model.Step;
 import systems.courant.shrewd.model.Trend;
 import systems.courant.shrewd.model.expr.BinaryOperator;
@@ -361,6 +362,9 @@ public class ExprCompiler {
                 };
             }
             case "SMOOTH" -> compileSmooth(args);
+            case "SMOOTHI" -> compileSmoothI(args);
+            case "SMOOTH3" -> compileSmooth3(args);
+            case "SMOOTH3I" -> compileSmooth3I(args);
             case "DELAY3", "DELAY3I" -> compileDelay3(args);
             case "STEP" -> compileStep(args);
             case "RAMP" -> compileRamp(args);
@@ -402,6 +406,44 @@ public class ExprCompiler {
         }
         resettables.add(smooth);
         return smooth::getCurrentValue;
+    }
+
+    private DoubleSupplier compileSmoothI(List<Expr> args) {
+        requireArgs("SMOOTHI", args, 3);
+        DoubleSupplier input = compileExpr(args.get(0));
+        double smoothingTime = evaluateConstant(args.get(1), "SMOOTHI smoothingTime");
+        double initial = evaluateConstant(args.get(2), "SMOOTHI initialValue");
+        Smooth smooth = Smooth.of(input, smoothingTime, initial, context.getCurrentStep());
+        resettables.add(smooth);
+        return smooth::getCurrentValue;
+    }
+
+    private DoubleSupplier compileSmooth3(List<Expr> args) {
+        if (args.size() < 2 || args.size() > 3) {
+            throw new CompilationException(
+                    "SMOOTH3 requires 2-3 arguments, got " + args.size(), "SMOOTH3");
+        }
+        DoubleSupplier input = compileExpr(args.get(0));
+        double smoothingTime = evaluateConstant(args.get(1), "SMOOTH3 smoothingTime");
+        Smooth3 smooth3;
+        if (args.size() == 3) {
+            double initial = evaluateConstant(args.get(2), "SMOOTH3 initialValue");
+            smooth3 = Smooth3.of(input, smoothingTime, initial, context.getCurrentStep());
+        } else {
+            smooth3 = Smooth3.of(input, smoothingTime, context.getCurrentStep());
+        }
+        resettables.add(smooth3);
+        return smooth3::getCurrentValue;
+    }
+
+    private DoubleSupplier compileSmooth3I(List<Expr> args) {
+        requireArgs("SMOOTH3I", args, 3);
+        DoubleSupplier input = compileExpr(args.get(0));
+        double smoothingTime = evaluateConstant(args.get(1), "SMOOTH3I smoothingTime");
+        double initial = evaluateConstant(args.get(2), "SMOOTH3I initialValue");
+        Smooth3 smooth3 = Smooth3.of(input, smoothingTime, initial, context.getCurrentStep());
+        resettables.add(smooth3);
+        return smooth3::getCurrentValue;
     }
 
     private DoubleSupplier compileDelay3(List<Expr> args) {

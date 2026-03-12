@@ -100,15 +100,9 @@ public final class XmileExprTranslator {
         expr = INEQUALITY_PATTERN.matcher(expr).replaceAll("!=");
         expr = EQUALITY_SINGLE_PATTERN.matcher(expr).replaceAll("==");
 
-        // 4. SMTH3/SMTH1 → SMOOTH (with warning)
-        if (SMTH3_PATTERN.matcher(expr).find()) {
-            expr = SMTH3_PATTERN.matcher(expr).replaceAll("SMOOTH(");
-            warnings.add("SMTH3 approximated as SMOOTH");
-        }
-        if (SMTH1_PATTERN.matcher(expr).find()) {
-            expr = SMTH1_PATTERN.matcher(expr).replaceAll("SMOOTH(");
-            warnings.add("SMTH1 approximated as SMOOTH");
-        }
+        // 4. SMTH3 → SMOOTH3, SMTH1 → SMOOTH
+        expr = SMTH3_PATTERN.matcher(expr).replaceAll("SMOOTH3(");
+        expr = SMTH1_PATTERN.matcher(expr).replaceAll("SMOOTH(");
 
         // 5. Time → TIME (the built-in variable)
         expr = TIME_XMILE_PATTERN.matcher(expr).replaceAll("TIME");

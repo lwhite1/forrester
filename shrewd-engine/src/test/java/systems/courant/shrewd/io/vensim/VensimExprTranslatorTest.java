@@ -282,10 +282,24 @@ class VensimExprTranslatorTest {
     class FunctionApproximations {
 
         @Test
-        void shouldTranslateSmooth3ToSmooth() {
+        void shouldPassThroughSmooth3() {
             var result = VensimExprTranslator.translate("SMOOTH3(input, 5)", "var", EMPTY_NAMES);
-            assertThat(result.expression()).isEqualTo("SMOOTH(input, 5)");
-            assertThat(result.warnings()).anyMatch(w -> w.contains("SMOOTH3"));
+            assertThat(result.expression()).isEqualTo("SMOOTH3(input, 5)");
+            assertThat(result.warnings()).noneMatch(w -> w.contains("SMOOTH3"));
+        }
+
+        @Test
+        void shouldPassThroughSmoothI() {
+            var result = VensimExprTranslator.translate("SMOOTHI(input, 5, 0)", "var", EMPTY_NAMES);
+            assertThat(result.expression()).isEqualTo("SMOOTHI(input, 5, 0)");
+            assertThat(result.warnings()).noneMatch(w -> w.contains("SMOOTHI"));
+        }
+
+        @Test
+        void shouldPassThroughSmooth3I() {
+            var result = VensimExprTranslator.translate("SMOOTH3I(input, 5, 0)", "var", EMPTY_NAMES);
+            assertThat(result.expression()).isEqualTo("SMOOTH3I(input, 5, 0)");
+            assertThat(result.warnings()).noneMatch(w -> w.contains("SMOOTH3I"));
         }
 
         @Test
