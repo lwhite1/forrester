@@ -6,8 +6,13 @@ import systems.courant.shrewd.model.Flow;
 import systems.courant.shrewd.model.Model;
 import systems.courant.shrewd.model.Stock;
 import systems.courant.shrewd.model.Variable;
+
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.read.ListAppender;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -121,6 +126,42 @@ public class CsvSubscriberTest {
         Simulation sim2 = new Simulation(model, MINUTE, MINUTE, 1);
         sim2.addEventHandler(csv);
         sim2.execute(); // Should not throw
+    }
+
+    @Test
+    public void shouldLogModelNameUsingParameterizedMessage() throws IOException {
+        ch.qos.logback.classic.Logger csvLogger = (ch.qos.logback.classic.Logger)
+                LoggerFactory.getLogger(CsvSubscriber.class);
+        ListAppender<ILoggingEvent> appender = new ListAppender<>();
+        appender.start();
+        csvLogger.addAppender(appender);
+
+        try {
+            Model model = new Model("MyModel");
+            Stock stock = new Stock("S", 10, THING);
+            model.addStock(stock);
+
+            String csvPath = tempDir.resolve("log_test.csv").toString();
+            CsvSubscriber csv = new CsvSubscriber(csvPath);
+
+            Simulation sim = new Simulation(model, MINUTE, MINUTE, 1);
+            sim.addEventHandler(csv);
+            sim.execute();
+
+            List<ILoggingEvent> logs = appender.list;
+            ILoggingEvent startEvent = logs.stream()
+                    .filter(e -> e.getLevel() == Level.INFO)
+                    .filter(e -> e.getFormattedMessage().contains("Starting simulation"))
+                    .findFirst()
+                    .orElseThrow(() -> new AssertionError("Expected 'Starting simulation' log message"));
+
+            assertEquals("Starting simulation: {}", startEvent.getMessage(),
+                    "Log should use parameterized format, not string concatenation");
+            assertEquals("MyModel", startEvent.getArgumentArray()[0].toString());
+        } finally {
+            csvLogger.detachAppender(appender);
+            appender.stop();
+        }
     }
 
     @Test

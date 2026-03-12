@@ -89,7 +89,7 @@ public class CsvSubscriber implements EventHandler, Closeable {
         if (csvWriter == null) {
             return;
         }
-        logger.info("Starting simulation: " + event.getModel().getName());
+        logger.info("Starting simulation: {}", event.getModel().getName());
 
         Model model = event.getModel();
         List<String> stockNames = model.getStockNames();
