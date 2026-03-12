@@ -322,6 +322,7 @@ final class InputDispatcher {
         }
 
         canvas.requestRedraw();
+        canvas.fireStatusChanged();
         updateCursor(canvas);
         event.consume();
     }
@@ -407,6 +408,7 @@ final class InputDispatcher {
         if (marqueeController.isActive()) {
             marqueeController.end();
             canvas.requestRedraw();
+            canvas.fireStatusChanged();
             updateCursor(canvas);
             event.consume();
             return;
@@ -430,6 +432,7 @@ final class InputDispatcher {
                 canvas.regenerateConnectors();
             }
             canvas.requestRedraw();
+            canvas.fireStatusChanged();
             updateCursor(canvas);
             event.consume();
             return;
@@ -447,6 +450,7 @@ final class InputDispatcher {
                 canvas.regenerateConnectors();
             }
             canvas.requestRedraw();
+            canvas.fireStatusChanged();
             updateCursor(canvas);
             event.consume();
             return;
@@ -630,9 +634,11 @@ final class InputDispatcher {
         } else if (canvas.getSelectedConnection() != null) {
             canvas.clearSelectedConnection();
             canvas.requestRedraw();
+            canvas.fireStatusChanged();
         } else if (!canvas.canvasState().getSelection().isEmpty()) {
             canvas.canvasState().clearSelection();
             canvas.requestRedraw();
+            canvas.fireStatusChanged();
         } else if (canvas.isInsideModule()) {
             canvas.navigateBack();
         }

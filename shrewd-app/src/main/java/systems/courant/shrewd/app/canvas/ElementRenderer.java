@@ -350,21 +350,24 @@ public final class ElementRenderer {
         return String.valueOf(value);
     }
 
+    /** Reusable Text node for width measurement — only used on the FX Application Thread. */
+    private static final Text MEASURE_TEXT = new Text();
+
     /**
      * Truncates a name to fit within the given pixel width, appending "..." if needed.
-     * Uses a shared {@link Text} node for measurement.
+     * Uses a shared {@link Text} node for measurement to avoid per-call allocation.
      */
     static String truncate(String name, Font font, double maxWidth) {
-        Text measureText = new Text(name);
-        measureText.setFont(font);
-        if (measureText.getLayoutBounds().getWidth() <= maxWidth) {
+        MEASURE_TEXT.setFont(font);
+        MEASURE_TEXT.setText(name);
+        if (MEASURE_TEXT.getLayoutBounds().getWidth() <= maxWidth) {
             return name;
         }
         String ellipsis = "\u2026";
         for (int end = name.length() - 1; end > 0; end--) {
             String candidate = name.substring(0, end) + ellipsis;
-            measureText.setText(candidate);
-            if (measureText.getLayoutBounds().getWidth() <= maxWidth) {
+            MEASURE_TEXT.setText(candidate);
+            if (MEASURE_TEXT.getLayoutBounds().getWidth() <= maxWidth) {
                 return candidate;
             }
         }

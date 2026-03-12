@@ -168,6 +168,7 @@ public class ModelCanvas extends Canvas {
                     if (name != null) {
                         ModelCanvas.this.regenerateConnectors();
                         ModelCanvas.this.redraw();
+                        ModelCanvas.this.fireStatusChanged();
                     }
                     return name;
                 }
@@ -238,6 +239,7 @@ public class ModelCanvas extends Canvas {
         this.connectors = editor.generateConnectors();
         invalidateAnalysis();
         redraw();
+        fireStatusChanged();
     }
 
     public ViewDef toViewDef() {
@@ -295,7 +297,7 @@ public class ModelCanvas extends Canvas {
         return elementIssueDetails.getOrDefault(elementName, List.of());
     }
 
-    private void fireStatusChanged() {
+    void fireStatusChanged() {
         if (onStatusChanged != null) {
             onStatusChanged.run();
         }
@@ -541,6 +543,7 @@ public class ModelCanvas extends Canvas {
         connectors = editor.generateConnectors();
         invalidateAnalysis();
         redraw();
+        fireStatusChanged();
     }
 
     public void performUndo() {
@@ -593,6 +596,7 @@ public class ModelCanvas extends Canvas {
                 () -> saveUndoState("Delete " + describeSelection()));
         regenerateConnectors();
         redraw();
+        fireStatusChanged();
         inputDispatcher.updateCursor(this);
     }
 
@@ -607,6 +611,7 @@ public class ModelCanvas extends Canvas {
     public void selectAll() {
         canvasState.selectAll();
         redraw();
+        fireStatusChanged();
     }
 
     public void selectElement(String name) {
@@ -624,6 +629,7 @@ public class ModelCanvas extends Canvas {
                 () -> saveUndoState("Cut " + describeSelection()));
         regenerateConnectors();
         redraw();
+        fireStatusChanged();
         inputDispatcher.updateCursor(this);
     }
 
@@ -635,6 +641,7 @@ public class ModelCanvas extends Canvas {
         }
         regenerateConnectors();
         redraw();
+        fireStatusChanged();
         if (!replaced.isEmpty() && onPasteWarning != null) {
             onPasteWarning.accept(replaced);
         }
@@ -690,6 +697,7 @@ public class ModelCanvas extends Canvas {
                 clearSelectedConnection();
                 invalidateAnalysis();
                 redraw();
+                fireStatusChanged();
                 inputDispatcher.updateCursor(this);
             }
         } else {
@@ -707,6 +715,7 @@ public class ModelCanvas extends Canvas {
             canvasState.select(result.flowName());
         }
         redraw();
+        fireStatusChanged();
     }
 
     void handleCausalLinkClick(double worldX, double worldY) {
@@ -717,6 +726,7 @@ public class ModelCanvas extends Canvas {
             regenerateConnectors();
         }
         redraw();
+        fireStatusChanged();
     }
 
     void createElementAt(double worldX, double worldY) {
@@ -726,6 +736,7 @@ public class ModelCanvas extends Canvas {
         if (name != null) {
             regenerateConnectors();
             redraw();
+            fireStatusChanged();
         }
     }
 
@@ -812,6 +823,7 @@ public class ModelCanvas extends Canvas {
         connectors = editor.generateConnectors();
         invalidateAnalysis();
         redraw();
+        fireStatusChanged();
     }
 
     public void applyMutation(Runnable mutation) {
@@ -908,7 +920,6 @@ public class ModelCanvas extends Canvas {
                         hideAuxiliaries,
                         showDelayBadges,
                         hideInfoLinks));
-        fireStatusChanged();
     }
 
     // --- Rename ---
