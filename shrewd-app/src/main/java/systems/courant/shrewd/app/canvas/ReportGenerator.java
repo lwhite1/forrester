@@ -271,7 +271,8 @@ public final class ReportGenerator {
             if (x.length > 0) {
                 html.append("<td>").append(formatNumber(x[0])).append(" – ")
                         .append(formatNumber(x[x.length - 1])).append("</td>");
-                double yMin = Double.MAX_VALUE, yMax = -Double.MAX_VALUE;
+                double yMin = Double.MAX_VALUE;
+                double yMax = -Double.MAX_VALUE;
                 for (double v : y) {
                     if (v < yMin) {
                         yMin = v;

@@ -248,7 +248,8 @@ public class CanvasRenderer {
                 case COMMENT -> {
                     CommentDef commentDef = editor.getCommentByName(name);
                     String text = commentDef != null ? commentDef.text() : "";
-                    double w, h;
+                    double w;
+                    double h;
                     if (canvasState.hasCustomSize(name)) {
                         w = canvasState.getWidth(name);
                         h = canvasState.getHeight(name);
