@@ -458,6 +458,60 @@ class VensimExprTranslatorTest {
     }
 
     @Nested
+    @DisplayName("Flat CSV lookup parsing (#490)")
+    class FlatCsvLookup {
+
+        @Test
+        void shouldParseFlatCsvLookupData() {
+            // Format used by BURNOUT.MDL: x values then y values, no parentheses
+            var result = VensimExprTranslator.parseLookupPoints(
+                    "0,0.2,0.4,0.6,0.8,1,0,0.2,0.4,0.6,0.8,1");
+            assertThat(result).isPresent();
+            double[][] points = result.get();
+            assertThat(points[0]).containsExactly(0, 0.2, 0.4, 0.6, 0.8, 1);
+            assertThat(points[1]).containsExactly(0, 0.2, 0.4, 0.6, 0.8, 1);
+        }
+
+        @Test
+        void shouldParseFlatCsvWithNewlines() {
+            // As it appears in .mdl files: x values on one line, y on next
+            var result = VensimExprTranslator.parseLookupPoints(
+                    "0, 1, 2, 3, 4, 5,\n1.05, 1, 0.9, 0.7, 0.6, 0.55");
+            assertThat(result).isPresent();
+            double[][] points = result.get();
+            assertThat(points[0]).hasSize(6);
+            assertThat(points[1]).hasSize(6);
+            assertThat(points[0][0]).isEqualTo(0);
+            assertThat(points[0][5]).isEqualTo(5);
+            assertThat(points[1][0]).isEqualTo(1.05);
+            assertThat(points[1][5]).isEqualTo(0.55);
+        }
+
+        @Test
+        void shouldPreferPairFormatOverFlatCsv() {
+            // When (x,y) pairs are present, use that format
+            var result = VensimExprTranslator.parseLookupPoints(
+                    "(0,0),(1,1),(2,4)");
+            assertThat(result).isPresent();
+            double[][] points = result.get();
+            assertThat(points[0]).containsExactly(0, 1, 2);
+            assertThat(points[1]).containsExactly(0, 1, 4);
+        }
+
+        @Test
+        void shouldRejectOddNumberOfFlatCsvValues() {
+            var result = VensimExprTranslator.parseLookupPoints("0, 1, 2");
+            assertThat(result).isEmpty();
+        }
+
+        @Test
+        void shouldRejectTooFewFlatCsvValues() {
+            var result = VensimExprTranslator.parseLookupPoints("0, 1");
+            assertThat(result).isEmpty();
+        }
+    }
+
+    @Nested
     @DisplayName("Edge cases")
     class EdgeCases {
 
