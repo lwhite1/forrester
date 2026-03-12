@@ -8,6 +8,8 @@ import systems.courant.shrewd.model.def.ModelDefinitionBuilder;
 import systems.courant.shrewd.model.def.ModelDefinition;
 import systems.courant.shrewd.model.def.StockDef;
 
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import java.util.LinkedHashMap;
@@ -16,6 +18,7 @@ import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@DisplayName("DemoClassGenerator")
 class DemoClassGeneratorTest {
 
     private final DemoClassGenerator generator = new DemoClassGenerator();
@@ -221,6 +224,133 @@ class DemoClassGeneratorTest {
         assertThat(DemoClassGenerator.escapeHtml("a & b")).isEqualTo("a &amp; b");
         assertThat(DemoClassGenerator.escapeHtml("end */")).isEqualTo("end &#42;/");
         assertThat(DemoClassGenerator.escapeHtml("normal text")).isEqualTo("normal text");
+    }
+
+    @Test
+    void shouldEmitNCLicenseHeaderForNCLicense() {
+        ModelDefinition def = new ModelDefinitionBuilder()
+                .name("Test")
+                .stock("S", 100.0, "people")
+                .defaultSimulation("Day", 10.0, "Day")
+                .build();
+
+        ModelMetadata metadata = ModelMetadata.builder()
+                .license("CC-BY-NC-SA-4.0")
+                .build();
+
+        String source = generator.generate(def, metadata, "TestDemo",
+                "systems.courant.shrewd.demo", "test.xmile",
+                List.of(), List.of());
+
+        assertThat(source).contains("CC-BY-NC-SA-4.0");
+        assertThat(source).contains("THIRD-PARTY-LICENSES");
+        assertThat(source).doesNotContain("Copyright (c) 2026 Courant Systems");
+    }
+
+    @Test
+    void shouldEmitCourantLicenseHeaderForNonNCLicense() {
+        ModelDefinition def = new ModelDefinitionBuilder()
+                .name("Test")
+                .stock("S", 100.0, "people")
+                .defaultSimulation("Day", 10.0, "Day")
+                .build();
+
+        ModelMetadata metadata = ModelMetadata.builder()
+                .license("CC-BY-SA-4.0")
+                .build();
+
+        String source = generator.generate(def, metadata, "TestDemo",
+                "systems.courant.shrewd.demo", "test.xmile",
+                List.of(), List.of());
+
+        assertThat(source).contains("Copyright (c) 2026 Courant Systems");
+        assertThat(source).doesNotContain("THIRD-PARTY-LICENSES");
+    }
+
+    @Test
+    void shouldHandleNullMetadataFields() {
+        ModelDefinition def = new ModelDefinitionBuilder()
+                .name("Test")
+                .stock("S", 100.0, "people")
+                .defaultSimulation("Day", 10.0, "Day")
+                .build();
+
+        ModelMetadata metadata = ModelMetadata.builder().build();
+
+        String source = generator.generate(def, metadata, "TestDemo",
+                "systems.courant.shrewd.demo", "test.xmile",
+                List.of(), List.of());
+
+        assertThat(source).contains("public class TestDemo");
+        // null fields should not appear in Javadoc
+        assertThat(source).doesNotContain("Author:");
+        assertThat(source).doesNotContain("Source:");
+        assertThat(source).doesNotContain("License:");
+        // null fields should not appear in metadata builder
+        assertThat(source).doesNotContain(".author(");
+        assertThat(source).doesNotContain(".source(");
+        assertThat(source).doesNotContain(".license(");
+        assertThat(source).doesNotContain(".url(");
+    }
+
+    @Test
+    void shouldEmitCustomDtWhenNotOne() {
+        ModelDefinition def = new ModelDefinitionBuilder()
+                .name("Test")
+                .stock("S", 100.0, "people")
+                .defaultSimulation("Day", 100.0, "Day", 0.25)
+                .build();
+
+        ModelMetadata metadata = ModelMetadata.builder().license("CC-BY-SA-4.0").build();
+
+        String source = generator.generate(def, metadata, "TestDemo",
+                "systems.courant.shrewd.demo", "test.xmile",
+                List.of(), List.of());
+
+        assertThat(source).contains(".defaultSimulation(\"Day\", 100.0, \"Day\", 0.25)");
+    }
+
+    @Test
+    void shouldGenerateModuleWithEmptyBindings() {
+        ModelDefinition innerDef = new ModelDefinitionBuilder()
+                .name("Inner")
+                .stock("X", 0, "unit")
+                .defaultSimulation("Day", 10.0, "Day")
+                .build();
+
+        ModelDefinition def = new ModelDefinitionBuilder()
+                .name("Test")
+                .module("myModule", innerDef, Map.of(), Map.of())
+                .defaultSimulation("Day", 10.0, "Day")
+                .build();
+
+        ModelMetadata metadata = ModelMetadata.builder().license("CC-BY-SA-4.0").build();
+
+        String source = generator.generate(def, metadata, "TestDemo",
+                "systems.courant.shrewd.demo", "test.xmile",
+                List.of(), List.of());
+
+        assertThat(source).contains("Map.of()");
+        assertThat(source).contains("ModuleInstanceDef");
+    }
+
+    @Test
+    void shouldOmitImportsForEmptyElementLists() {
+        ModelDefinition def = new ModelDefinitionBuilder()
+                .name("Empty")
+                .defaultSimulation("Day", 10.0, "Day")
+                .build();
+
+        ModelMetadata metadata = ModelMetadata.builder().license("CC-BY-SA-4.0").build();
+
+        String source = generator.generate(def, metadata, "EmptyDemo",
+                "systems.courant.shrewd.demo", "test.xmile",
+                List.of(), List.of());
+
+        assertThat(source).doesNotContain("import systems.courant.shrewd.model.def.StockDef;");
+        assertThat(source).doesNotContain("import systems.courant.shrewd.model.def.FlowDef;");
+        assertThat(source).doesNotContain("import systems.courant.shrewd.model.def.AuxDef;");
+        assertThat(source).doesNotContain("import systems.courant.shrewd.model.def.LookupTableDef;");
     }
 
     @Test

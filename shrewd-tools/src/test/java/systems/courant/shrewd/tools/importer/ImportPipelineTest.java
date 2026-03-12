@@ -2,6 +2,8 @@ package systems.courant.shrewd.tools.importer;
 
 import systems.courant.shrewd.model.ModelMetadata;
 
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
@@ -12,6 +14,7 @@ import java.nio.file.Path;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+@DisplayName("ImportPipeline")
 class ImportPipelineTest {
 
     @TempDir
@@ -157,14 +160,102 @@ class ImportPipelineTest {
     }
 
     @Test
-    void shouldResolvePackageNameWithCategory() {
-        assertThat(ImportPipeline.resolvePackageName("epidemiology"))
-                .isEqualTo("systems.courant.shrewd.demo.epidemiology");
+    void shouldRejectFileWithNoExtension() {
+        ModelMetadata metadata = ModelMetadata.builder().license("CC-BY-SA-4.0").build();
+
+        PipelineConfig config = new PipelineConfig(
+                Path.of("model_without_extension"), metadata, null, "TestDemo",
+                tempDir, false, false);
+
+        assertThatThrownBy(() -> new ImportPipeline().execute(config))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("no extension");
     }
 
     @Test
-    void shouldResolvePackageNameWithoutCategory() {
-        assertThat(ImportPipeline.resolvePackageName(null))
-                .isEqualTo("systems.courant.shrewd.demo");
+    void shouldGenerateJsonWhenGenerateCodeIsFalse() throws IOException {
+        Path xmileFile = Path.of("../shrewd-engine/src/test/resources/xmile/sir.xmile")
+                .toAbsolutePath().normalize();
+
+        if (!Files.exists(xmileFile)) {
+            return;
+        }
+
+        ModelMetadata metadata = ModelMetadata.builder()
+                .license("CC-BY-SA-4.0")
+                .build();
+
+        PipelineConfig config = new PipelineConfig(
+                xmileFile, metadata, null, "SirModel",
+                tempDir, false, false, false);
+
+        PipelineResult result = new ImportPipeline().execute(config);
+
+        assertThat(result.generatedSource()).contains("\"name\"");
+        assertThat(result.outputFile()).isNotNull();
+        assertThat(result.outputFile().toString()).endsWith(".json");
+        assertThat(Files.exists(result.outputFile())).isTrue();
+    }
+
+    @Test
+    void shouldGenerateJsonDryRun() throws IOException {
+        Path xmileFile = Path.of("../shrewd-engine/src/test/resources/xmile/sir.xmile")
+                .toAbsolutePath().normalize();
+
+        if (!Files.exists(xmileFile)) {
+            return;
+        }
+
+        ModelMetadata metadata = ModelMetadata.builder()
+                .license("CC-BY-SA-4.0")
+                .build();
+
+        PipelineConfig config = new PipelineConfig(
+                xmileFile, metadata, null, "SirModel",
+                tempDir, true, false, false);
+
+        PipelineResult result = new ImportPipeline().execute(config);
+
+        assertThat(result.generatedSource()).isNotEmpty();
+        assertThat(result.outputFile()).isNull();
+    }
+
+    @Nested
+    @DisplayName("Package and path resolution")
+    class PackageAndPathResolution {
+
+        @Test
+        void shouldResolvePackageNameWithCategory() {
+            assertThat(ImportPipeline.resolvePackageName("epidemiology"))
+                    .isEqualTo("systems.courant.shrewd.demo.epidemiology");
+        }
+
+        @Test
+        void shouldResolvePackageNameWithoutCategory() {
+            assertThat(ImportPipeline.resolvePackageName(null))
+                    .isEqualTo("systems.courant.shrewd.demo");
+        }
+
+        @Test
+        void shouldResolvePackageNameWithBlankCategory() {
+            assertThat(ImportPipeline.resolvePackageName("  "))
+                    .isEqualTo("systems.courant.shrewd.demo");
+        }
+
+        @Test
+        void shouldResolveOutputPath() {
+            Path result = ImportPipeline.resolveOutputPath(
+                    Path.of("/src"), "systems.courant.shrewd.demo", "SirDemo");
+            assertThat(result.toString()).contains("systems");
+            assertThat(result.toString()).endsWith("SirDemo.java");
+        }
+
+        @Test
+        void shouldResolveOutputPathWithCategory() {
+            Path result = ImportPipeline.resolveOutputPath(
+                    Path.of("/src"), "systems.courant.shrewd.demo.epidemiology", "SirDemo");
+            assertThat(result.toString()).contains("epidemiology");
+            assertThat(result.toString()).endsWith("SirDemo.java");
+        }
     }
 }
