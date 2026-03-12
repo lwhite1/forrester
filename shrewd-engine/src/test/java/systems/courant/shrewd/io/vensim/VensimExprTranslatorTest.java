@@ -750,4 +750,30 @@ class VensimExprTranslatorTest {
             assertThat(result.expression()).contains("and");
         }
     }
+
+    @Nested
+    @DisplayName("LOOKUP AREA translation")
+    class LookupAreaTranslation {
+
+        @Test
+        void shouldTranslateLookupArea() {
+            var result = VensimExprTranslator.translate(
+                    "LOOKUP AREA(my_table, 0, 10)", "var", EMPTY_NAMES);
+            assertThat(result.expression()).isEqualTo("LOOKUP_AREA(my_table, 0, 10)");
+        }
+
+        @Test
+        void shouldTranslateLookupAreaCaseInsensitive() {
+            var result = VensimExprTranslator.translate(
+                    "lookup area(my_table, x1, x2)", "var", EMPTY_NAMES);
+            assertThat(result.expression()).isEqualTo("LOOKUP_AREA(my_table, x1, x2)");
+        }
+
+        @Test
+        void shouldTranslateLookupAreaWithExtraSpaces() {
+            var result = VensimExprTranslator.translate(
+                    "LOOKUP   AREA  (tbl, 0, 5)", "var", EMPTY_NAMES);
+            assertThat(result.expression()).isEqualTo("LOOKUP_AREA(tbl, 0, 5)");
+        }
+    }
 }

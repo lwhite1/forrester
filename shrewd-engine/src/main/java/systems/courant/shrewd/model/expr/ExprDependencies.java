@@ -26,6 +26,8 @@ public final class ExprDependencies {
             "RANDOM_NORMAL", "RANDOM_UNIFORM",
             "XIDZ", "ZIDZ",
             "SAMPLE_IF_TRUE", "FIND_ZERO",
+            "NOT", "OR", "AND", "TRUE", "FALSE",
+            "LOOKUP_AREA",
             "LOOKUP", "IF", "TIME", "DT", "PI"
     );
 

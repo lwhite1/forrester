@@ -1044,4 +1044,131 @@ class ExprCompilerTest {
             assertThat(val).isCloseTo(75.0, within(0.01));
         }
     }
+
+    @Nested
+    @DisplayName("Logical function forms (NOT, OR, AND, TRUE, FALSE)")
+    class LogicalFunctionForms {
+
+        @Test
+        void shouldCompileNotFunctionWithZero() {
+            Formula formula = compiler.compile("NOT(0)");
+            assertThat(formula.getCurrentValue()).isEqualTo(1.0);
+        }
+
+        @Test
+        void shouldCompileNotFunctionWithNonZero() {
+            Formula formula = compiler.compile("NOT(5)");
+            assertThat(formula.getCurrentValue()).isEqualTo(0.0);
+        }
+
+        @Test
+        void shouldCompileOrFunctionBothFalse() {
+            Formula formula = compiler.compile("OR(0, 0)");
+            assertThat(formula.getCurrentValue()).isEqualTo(0.0);
+        }
+
+        @Test
+        void shouldCompileOrFunctionOneTrueOneFalse() {
+            Formula formula = compiler.compile("OR(0, 1)");
+            assertThat(formula.getCurrentValue()).isEqualTo(1.0);
+        }
+
+        @Test
+        void shouldCompileAndFunctionBothTrue() {
+            Formula formula = compiler.compile("AND(1, 1)");
+            assertThat(formula.getCurrentValue()).isEqualTo(1.0);
+        }
+
+        @Test
+        void shouldCompileAndFunctionOneFalse() {
+            Formula formula = compiler.compile("AND(1, 0)");
+            assertThat(formula.getCurrentValue()).isEqualTo(0.0);
+        }
+
+        @Test
+        void shouldCompileTrueFunction() {
+            Formula formula = compiler.compile("TRUE()");
+            assertThat(formula.getCurrentValue()).isEqualTo(1.0);
+        }
+
+        @Test
+        void shouldCompileFalseFunction() {
+            Formula formula = compiler.compile("FALSE()");
+            assertThat(formula.getCurrentValue()).isEqualTo(0.0);
+        }
+    }
+
+    @Nested
+    @DisplayName("LOOKUP_AREA")
+    class LookupAreaCompilation {
+
+        @Test
+        void shouldComputeAreaUnderConstantLookup() {
+            // Lookup: y = 2.0 for all x (flat line from 0 to 10)
+            // Area from 0 to 10 = 2.0 * 10 = 20.0
+            var def = new systems.courant.shrewd.model.def.LookupTableDef(
+                    "flat_table",
+                    new double[]{0.0, 10.0},
+                    new double[]{2.0, 2.0},
+                    "LINEAR");
+            context.addLookupTableDef("flat_table", def);
+            context.addLookupTable("flat_table",
+                    LookupTable.linear(def.xValues(), def.yValues(), () -> 0),
+                    new double[1]);
+
+            Formula formula = compiler.compile("LOOKUP_AREA(flat_table, 0, 10)");
+            assertThat(formula.getCurrentValue()).isCloseTo(20.0, within(0.001));
+        }
+
+        @Test
+        void shouldComputeAreaUnderLinearRamp() {
+            // Lookup: y = x (linear from 0,0 to 10,10)
+            // Area from 0 to 10 = 0.5 * 10 * 10 = 50.0 (triangle)
+            var def = new systems.courant.shrewd.model.def.LookupTableDef(
+                    "ramp_table",
+                    new double[]{0.0, 10.0},
+                    new double[]{0.0, 10.0},
+                    "LINEAR");
+            context.addLookupTableDef("ramp_table", def);
+            context.addLookupTable("ramp_table",
+                    LookupTable.linear(def.xValues(), def.yValues(), () -> 0),
+                    new double[1]);
+
+            Formula formula = compiler.compile("LOOKUP_AREA(ramp_table, 0, 10)");
+            assertThat(formula.getCurrentValue()).isCloseTo(50.0, within(0.001));
+        }
+
+        @Test
+        void shouldReturnNegativeAreaWhenReversed() {
+            var def = new systems.courant.shrewd.model.def.LookupTableDef(
+                    "flat2",
+                    new double[]{0.0, 10.0},
+                    new double[]{2.0, 2.0},
+                    "LINEAR");
+            context.addLookupTableDef("flat2", def);
+            context.addLookupTable("flat2",
+                    LookupTable.linear(def.xValues(), def.yValues(), () -> 0),
+                    new double[1]);
+
+            Formula formula = compiler.compile("LOOKUP_AREA(flat2, 10, 0)");
+            assertThat(formula.getCurrentValue()).isCloseTo(-20.0, within(0.001));
+        }
+
+        @Test
+        void shouldComputePartialArea() {
+            // Lookup: y = x from 0 to 10. Area from 2 to 6 = trapezoid: (2+6)/2 * 4 = 16
+            var def = new systems.courant.shrewd.model.def.LookupTableDef(
+                    "ramp2",
+                    new double[]{0.0, 10.0},
+                    new double[]{0.0, 10.0},
+                    "LINEAR");
+            context.addLookupTableDef("ramp2", def);
+            context.addLookupTable("ramp2",
+                    LookupTable.linear(def.xValues(), def.yValues(), () -> 0),
+                    new double[1]);
+
+            Formula formula = compiler.compile("LOOKUP_AREA(ramp2, 2, 6)");
+            assertThat(formula.getCurrentValue()).isCloseTo(16.0, within(0.001));
+        }
+    }
 }
