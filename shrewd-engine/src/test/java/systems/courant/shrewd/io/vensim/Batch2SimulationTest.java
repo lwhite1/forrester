@@ -32,9 +32,8 @@ class Batch2SimulationTest {
             "GlobalizationDemo",
             "HigherEducationDemo",
             "HousingMarketDemo",
-            "NewTownsDemo"
-            // ProjectManagementDemo excluded: has algebraic loops (circular variable refs)
-            // that cause StackOverflow — would need simultaneous equation solver
+            "NewTownsDemo",
+            "ProjectManagementDemo"
     })
     void shouldCompileAndSimulate(String modelName) throws IOException {
         String json = loadResource("vensim/batch2/" + modelName + ".json");

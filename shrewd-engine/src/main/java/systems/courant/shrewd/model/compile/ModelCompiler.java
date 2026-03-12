@@ -21,6 +21,7 @@ import systems.courant.shrewd.model.def.PortDef;
 import systems.courant.shrewd.model.def.StockDef;
 import systems.courant.shrewd.model.expr.ExprParser;
 import systems.courant.shrewd.model.expr.ParseException;
+import systems.courant.shrewd.model.graph.DependencyGraph;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,6 +29,7 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.DoubleSupplier;
 
 /**
@@ -78,6 +80,16 @@ public class ModelCompiler {
             throw new CompilationException(
                     "Model validation failed: " + String.join("; ", errors),
                     def.name() != null ? def.name() : "");
+        }
+
+        // Detect algebraic loops (cycles among auxiliary variables) and warn.
+        // Cycles are handled at runtime by Variable's re-entrancy guard, which
+        // returns the previous timestep's value to break the loop.
+        DependencyGraph depGraph = DependencyGraph.fromDefinition(def);
+        List<Set<String>> sccs = depGraph.findSCCs();
+        for (Set<String> scc : sccs) {
+            log.warn("Algebraic loop detected (will use previous-step values to converge): {}",
+                    scc);
         }
 
         // Pre-expand subscripted elements into scalar elements

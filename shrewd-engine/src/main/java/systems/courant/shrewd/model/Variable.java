@@ -15,6 +15,19 @@ public class Variable extends Element {
     private final DoubleArrayList history = new DoubleArrayList();
 
     /**
+     * Cached value from the most recent evaluation, used as the initial guess
+     * when breaking algebraic loops via the re-entrancy guard.
+     */
+    private double cachedValue;
+
+    /**
+     * True while this variable's formula is being evaluated. A re-entrant call
+     * (caused by an algebraic loop) returns {@link #cachedValue} instead of
+     * recursing, effectively using the previous timestep's value to break the cycle.
+     */
+    private boolean evaluating;
+
+    /**
      * Creates a new variable with the given name, unit, and formula.
      *
      * @param name    the variable name
@@ -31,9 +44,23 @@ public class Variable extends Element {
 
     /**
      * Returns the current value of this variable as computed by its formula.
+     *
+     * <p>If this method is called re-entrantly (because of an algebraic loop in the
+     * dependency graph), the cached value from the previous evaluation is returned
+     * instead of recursing infinitely. This is equivalent to Vensim's approach of
+     * using the previous timestep value to break algebraic loops.
      */
     public double getValue() {
-        return formula.getCurrentValue();
+        if (evaluating) {
+            return cachedValue;
+        }
+        evaluating = true;
+        try {
+            cachedValue = formula.getCurrentValue();
+            return cachedValue;
+        } finally {
+            evaluating = false;
+        }
     }
 
     /**
@@ -70,9 +97,11 @@ public class Variable extends Element {
     }
 
     /**
-     * Clears this variable's recorded history. Useful when re-running simulations.
+     * Clears this variable's recorded history and resets the cached value.
+     * Useful when re-running simulations.
      */
     public void clearHistory() {
         history.clear();
+        cachedValue = 0;
     }
 }
