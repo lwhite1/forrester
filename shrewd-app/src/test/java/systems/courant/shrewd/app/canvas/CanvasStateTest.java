@@ -524,4 +524,90 @@ class CanvasStateTest {
             assertThat(state.hasElement("C")).isTrue();
         }
     }
+
+    @Nested
+    @DisplayName("drawOrder set semantics (#433)")
+    class DrawOrderSetSemantics {
+
+        @Test
+        void shouldNotDuplicateOnRepeatedAdd() {
+            state.addElement("X", ElementType.STOCK, 10, 20);
+            state.addElement("X", ElementType.STOCK, 30, 40);
+            state.addElement("X", ElementType.STOCK, 50, 60);
+
+            assertThat(state.getDrawOrder()).containsExactly("X");
+        }
+
+        @Test
+        void shouldPreserveInsertionOrder() {
+            state.addElement("C", ElementType.AUX, 0, 0);
+            state.addElement("A", ElementType.STOCK, 0, 0);
+            state.addElement("B", ElementType.FLOW, 0, 0);
+
+            assertThat(state.getDrawOrder()).containsExactly("C", "A", "B");
+        }
+
+        @Test
+        void shouldHandleBulkAddAndRemove() {
+            for (int i = 0; i < 100; i++) {
+                state.addElement("E" + i, ElementType.STOCK, i, i);
+            }
+            assertThat(state.getDrawOrder()).hasSize(100);
+
+            for (int i = 0; i < 50; i++) {
+                state.removeElement("E" + i);
+            }
+            assertThat(state.getDrawOrder()).hasSize(50);
+            assertThat(state.getDrawOrder().getFirst()).isEqualTo("E50");
+        }
+
+        @Test
+        void shouldHandleRemoveAndReAdd() {
+            state.addElement("A", ElementType.STOCK, 0, 0);
+            state.addElement("B", ElementType.STOCK, 0, 0);
+            state.addElement("C", ElementType.STOCK, 0, 0);
+
+            state.removeElement("B");
+            state.addElement("B", ElementType.STOCK, 0, 0);
+
+            // B should now be at the end
+            assertThat(state.getDrawOrder()).containsExactly("A", "C", "B");
+        }
+
+        @Test
+        void shouldRenamePreservingOrder() {
+            state.addElement("A", ElementType.STOCK, 0, 0);
+            state.addElement("B", ElementType.FLOW, 0, 0);
+            state.addElement("C", ElementType.AUX, 0, 0);
+
+            state.renameElement("B", "Beta");
+
+            assertThat(state.getDrawOrder()).containsExactly("A", "Beta", "C");
+        }
+
+        @Test
+        void shouldSelectAllFromDrawOrder() {
+            state.addElement("X", ElementType.STOCK, 0, 0);
+            state.addElement("Y", ElementType.STOCK, 0, 0);
+            state.addElement("Z", ElementType.STOCK, 0, 0);
+
+            state.selectAll();
+
+            assertThat(state.getSelection()).containsExactlyInAnyOrder("X", "Y", "Z");
+        }
+
+        @Test
+        void shouldRoundTripThroughViewDef() {
+            state.addElement("A", ElementType.STOCK, 10, 20);
+            state.addElement("B", ElementType.FLOW, 30, 40);
+            state.addElement("C", ElementType.AUX, 50, 60);
+
+            ViewDef viewDef = state.toViewDef();
+
+            assertThat(viewDef.elements()).hasSize(3);
+            assertThat(viewDef.elements().get(0).name()).isEqualTo("A");
+            assertThat(viewDef.elements().get(1).name()).isEqualTo("B");
+            assertThat(viewDef.elements().get(2).name()).isEqualTo("C");
+        }
+    }
 }
