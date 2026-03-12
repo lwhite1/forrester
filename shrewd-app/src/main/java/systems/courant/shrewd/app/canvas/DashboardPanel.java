@@ -18,6 +18,8 @@ import javafx.scene.control.TabPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
+import javafx.beans.property.DoubleProperty;
+import javafx.beans.value.ChangeListener;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 
@@ -60,6 +62,10 @@ public class DashboardPanel extends VBox {
     private boolean stale;
     private Tab dashboardTab;
     private Runnable rerunAction;
+    private DoubleProperty simulationCursor;
+    private DoubleProperty dominanceCursor;
+    private ChangeListener<Number> simToDomListener;
+    private ChangeListener<Number> domToSimListener;
     private Consumer<String> onVariableClicked;
     private Consumer<ReferenceDataset> onReferenceDataImported;
 
@@ -170,6 +176,9 @@ public class DashboardPanel extends VBox {
                 this::clearRunHistory, referenceDatasets);
         pane.setOnVariableClicked(onVariableClicked);
         pane.setOnReferenceDataImported(onReferenceDataImported);
+        unbindCursors();
+        simulationCursor = pane.cursorTimeStepProperty();
+        bindCursors();
         simulationTab = ensureTab(simulationTab, "Simulation", pane);
         resultTabs.getSelectionModel().select(simulationTab);
 
@@ -233,6 +242,9 @@ public class DashboardPanel extends VBox {
             return;
         }
         LoopDominancePane pane = new LoopDominancePane(dominance);
+        unbindCursors();
+        dominanceCursor = pane.cursorTimeStepProperty();
+        bindCursors();
         dominanceTab = ensureTab(dominanceTab, "Loop Dominance", pane);
         resultTabs.getSelectionModel().select(dominanceTab);
     }
@@ -330,6 +342,9 @@ public class DashboardPanel extends VBox {
      * Removes all result tabs and shows the placeholder. Called when a new model is loaded.
      */
     public void clear() {
+        unbindCursors();
+        simulationCursor = null;
+        dominanceCursor = null;
         runHistory.clear();
         runCounter = 0;
         stale = false;
@@ -348,6 +363,29 @@ public class DashboardPanel extends VBox {
         sensitivityTab = null;
         phasePlotTab = null;
         hideTabs();
+    }
+
+    private void bindCursors() {
+        if (simulationCursor == null || dominanceCursor == null) {
+            return;
+        }
+        simToDomListener = (obs, oldVal, newVal) ->
+                dominanceCursor.set(newVal.doubleValue());
+        domToSimListener = (obs, oldVal, newVal) ->
+                simulationCursor.set(newVal.doubleValue());
+        simulationCursor.addListener(simToDomListener);
+        dominanceCursor.addListener(domToSimListener);
+    }
+
+    private void unbindCursors() {
+        if (simulationCursor != null && simToDomListener != null) {
+            simulationCursor.removeListener(simToDomListener);
+        }
+        if (dominanceCursor != null && domToSimListener != null) {
+            dominanceCursor.removeListener(domToSimListener);
+        }
+        simToDomListener = null;
+        domToSimListener = null;
     }
 
     private void showTabs() {
