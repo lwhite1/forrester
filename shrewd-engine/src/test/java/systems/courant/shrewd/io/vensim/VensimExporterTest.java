@@ -9,6 +9,7 @@ import systems.courant.shrewd.model.def.LookupTableDef;
 import systems.courant.shrewd.model.def.ModelDefinition;
 import systems.courant.shrewd.model.def.ModelDefinitionBuilder;
 import systems.courant.shrewd.model.def.StockDef;
+import systems.courant.shrewd.model.def.SubscriptDef;
 
 import java.util.List;
 
@@ -539,6 +540,233 @@ class VensimExporterTest {
             String mdl = VensimExporter.toVensim(def);
 
             assertThat(mdl).contains("The infection rate per day");
+        }
+    }
+
+    @Nested
+    @DisplayName("Subscript export (#484)")
+    class SubscriptExport {
+
+        @Test
+        void shouldExportSubscriptDefinition() {
+            ModelDefinition def = new ModelDefinitionBuilder()
+                    .name("Test")
+                    .defaultSimulation("Day", 100, "Day")
+                    .subscript("Region", List.of("North", "South", "East"))
+                    .build();
+
+            String mdl = VensimExporter.toVensim(def);
+
+            assertThat(mdl).contains("Region:\n\tNorth, South, East");
+        }
+
+        @Test
+        void shouldExportSubscriptedStock() {
+            ModelDefinition def = new ModelDefinitionBuilder()
+                    .name("Test")
+                    .defaultSimulation("Day", 100, "Day")
+                    .subscript("Region", List.of("North", "South"))
+                    .stock("Population", 100.0, "People", List.of("Region"))
+                    .build();
+
+            String mdl = VensimExporter.toVensim(def);
+
+            assertThat(mdl).contains("Population[Region]= INTEG");
+        }
+
+        @Test
+        void shouldExportSubscriptedFlow() {
+            ModelDefinition def = new ModelDefinitionBuilder()
+                    .name("Test")
+                    .defaultSimulation("Day", 100, "Day")
+                    .subscript("Region", List.of("North", "South"))
+                    .flow("migration", "10", "Day", null, "Population",
+                            List.of("Region"))
+                    .stock("Population", 100.0, "People", List.of("Region"))
+                    .build();
+
+            String mdl = VensimExporter.toVensim(def);
+
+            assertThat(mdl).contains("migration[Region]=");
+        }
+
+        @Test
+        void shouldExportSubscriptedAux() {
+            ModelDefinition def = new ModelDefinitionBuilder()
+                    .name("Test")
+                    .defaultSimulation("Day", 100, "Day")
+                    .subscript("Region", List.of("North", "South"))
+                    .aux("growth_rate", "0.05", "1/Day", List.of("Region"))
+                    .build();
+
+            String mdl = VensimExporter.toVensim(def);
+
+            assertThat(mdl).contains("growth rate[Region]=");
+        }
+
+        @Test
+        void shouldExportMultiDimensionalSubscript() {
+            ModelDefinition def = new ModelDefinitionBuilder()
+                    .name("Test")
+                    .defaultSimulation("Day", 100, "Day")
+                    .subscript("Region", List.of("North", "South"))
+                    .subscript("Age_Group", List.of("Young", "Old"))
+                    .stock("Population", 100.0, "People", List.of("Region", "Age_Group"))
+                    .build();
+
+            String mdl = VensimExporter.toVensim(def);
+
+            assertThat(mdl).contains("Population[Region,Age Group]= INTEG");
+        }
+    }
+
+    @Nested
+    @DisplayName("XIDZ/ZIDZ reverse mapping (#485)")
+    class XidzZidzReverse {
+
+        @Test
+        void shouldReverseZidzPattern() {
+            // ZIDZ(a, b) was imported as: IF((b) == 0, 0, (a) / (b))
+            String expr = "IF((denominator) == 0, 0, (numerator) / (denominator))";
+            String result = VensimExporter.reverseXidzZidz(expr);
+            assertThat(result).isEqualTo("ZIDZ(numerator, denominator)");
+        }
+
+        @Test
+        void shouldReverseXidzPattern() {
+            // XIDZ(a, b, x) was imported as: IF((b) == 0, x, (a) / (b))
+            String expr = "IF((b) == 0, fallback, (a) / (b))";
+            String result = VensimExporter.reverseXidzZidz(expr);
+            assertThat(result).isEqualTo("XIDZ(a, b, fallback)");
+        }
+
+        @Test
+        void shouldNotReverseUnrelatedIfExpression() {
+            String expr = "IF(x > 0, 1, 0)";
+            String result = VensimExporter.reverseXidzZidz(expr);
+            assertThat(result).isEqualTo("IF(x > 0, 1, 0)");
+        }
+
+        @Test
+        void shouldReverseXidzInFullExpressionPipeline() {
+            String result = VensimExporter.toVensimExpr(
+                    "IF((b) == 0, 0, (a) / (b))");
+            assertThat(result).contains("ZIDZ");
+            assertThat(result).doesNotContain("IF THEN ELSE");
+        }
+    }
+
+    @Nested
+    @DisplayName("SMOOTH/DELAY reverse mapping (#486)")
+    class SmoothDelayReverse {
+
+        @Test
+        void shouldReverseDelayFixed() {
+            assertThat(VensimExporter.toVensimExpr("DELAY_FIXED(input, 5, 0)"))
+                    .isEqualTo("DELAY FIXED(input, 5, 0)");
+        }
+
+        @Test
+        void shouldReverseRandomUniform() {
+            assertThat(VensimExporter.toVensimExpr("RANDOM_UNIFORM(0, 1, seed)"))
+                    .isEqualTo("RANDOM UNIFORM(0, 1, seed)");
+        }
+
+        @Test
+        void shouldReversePulseTrain() {
+            assertThat(VensimExporter.toVensimExpr("PULSE_TRAIN(1, 2, 3, 10)"))
+                    .isEqualTo("PULSE TRAIN(1, 2, 3, 10)");
+        }
+
+        @Test
+        void shouldPreserveSmoothFunctions() {
+            // SMOOTH, SMOOTH3, SMOOTHI, SMOOTH3I use same name in both systems
+            assertThat(VensimExporter.toVensimExpr("SMOOTH(x, 3)"))
+                    .isEqualTo("SMOOTH(x, 3)");
+            assertThat(VensimExporter.toVensimExpr("SMOOTH3(x, 3)"))
+                    .isEqualTo("SMOOTH3(x, 3)");
+            assertThat(VensimExporter.toVensimExpr("DELAY1(x, 3)"))
+                    .isEqualTo("DELAY1(x, 3)");
+        }
+    }
+
+    @Nested
+    @DisplayName("WITH LOOKUP complex expressions (#487)")
+    class WithLookupComplex {
+
+        @Test
+        void shouldInlineLookupInComplexExpression() {
+            ModelDefinition def = new ModelDefinitionBuilder()
+                    .name("Test")
+                    .defaultSimulation("Day", 100, "Day")
+                    .lookupTable("effect_table",
+                            new double[]{0, 1, 2},
+                            new double[]{0, 0.5, 1.0},
+                            "LINEAR")
+                    .aux(new AuxDef("scaled_effect",
+                            "LOOKUP(effect_table, TIME) * factor", "Dmnl"))
+                    .constant("factor", 2.0, "Dmnl")
+                    .build();
+
+            String mdl = VensimExporter.toVensim(def);
+
+            // The LOOKUP call should be inlined as table-call syntax
+            assertThat(mdl).contains("effect table(Time) * factor");
+            // The lookup table should still be emitted as a standalone block
+            assertThat(mdl).contains("effect table(");
+            assertThat(mdl).contains("(0,0)");
+        }
+
+        @Test
+        void shouldStillUseWithLookupForSimpleCases() {
+            ModelDefinition def = new ModelDefinitionBuilder()
+                    .name("Test")
+                    .defaultSimulation("Day", 100, "Day")
+                    .lookupTable("my_lookup",
+                            new double[]{0, 1, 2},
+                            new double[]{0, 0.5, 1.0},
+                            "LINEAR")
+                    .aux(new AuxDef("effect", "LOOKUP(my_lookup, TIME)", null))
+                    .build();
+
+            String mdl = VensimExporter.toVensim(def);
+
+            assertThat(mdl).contains("WITH LOOKUP");
+        }
+    }
+
+    @Nested
+    @DisplayName("Coordinate precision (#488)")
+    class CoordinatePrecision {
+
+        @Test
+        void shouldPreserveFractionalCoordinates() {
+            assertThat(VensimExporter.formatCoord(200.5)).isEqualTo("200.5");
+            assertThat(VensimExporter.formatCoord(150.75)).isEqualTo("150.75");
+        }
+
+        @Test
+        void shouldFormatIntegerCoordinatesWithoutDecimal() {
+            assertThat(VensimExporter.formatCoord(200.0)).isEqualTo("200");
+            assertThat(VensimExporter.formatCoord(0.0)).isEqualTo("0");
+        }
+
+        @Test
+        void shouldPreserveFractionalCoordsInSketchExport() {
+            ModelDefinition def = new ModelDefinitionBuilder()
+                    .name("Test")
+                    .defaultSimulation("Day", 100, "Day")
+                    .stock("Tank", 50.0, "Gallons")
+                    .view(new systems.courant.shrewd.model.def.ViewDef("Main",
+                            List.of(new systems.courant.shrewd.model.def.ElementPlacement(
+                                    "Tank", systems.courant.shrewd.model.def.ElementType.STOCK,
+                                    200.5, 150.75)),
+                            List.of(), List.of()))
+                    .build();
+
+            String mdl = VensimExporter.toVensim(def);
+
+            assertThat(mdl).contains("200.5,150.75");
         }
     }
 }
