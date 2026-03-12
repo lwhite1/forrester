@@ -3,12 +3,14 @@ package systems.courant.shrewd.model.compile;
 import systems.courant.shrewd.model.Delay1;
 import systems.courant.shrewd.model.Delay3;
 import systems.courant.shrewd.model.DelayFixed;
+import systems.courant.shrewd.model.FindZero;
 import systems.courant.shrewd.model.Forecast;
 import systems.courant.shrewd.model.Formula;
 import systems.courant.shrewd.model.LookupTable;
 import systems.courant.shrewd.model.Npv;
 import systems.courant.shrewd.model.Pulse;
 import systems.courant.shrewd.model.Ramp;
+import systems.courant.shrewd.model.SampleIfTrue;
 import systems.courant.shrewd.model.Smooth;
 import systems.courant.shrewd.model.Smooth3;
 import systems.courant.shrewd.model.Step;
@@ -533,6 +535,8 @@ public class ExprCompiler {
             case "NPV" -> compileNpv(args);
             case "RANDOM_NORMAL" -> compileRandomNormal(args);
             case "RANDOM_UNIFORM" -> compileRandomUniform(args);
+            case "SAMPLE_IF_TRUE" -> compileSampleIfTrue(args);
+            case "FIND_ZERO" -> compileFindZero(args);
             case "LOOKUP" -> compileLookup(args);
             default -> {
                 // Check if the function name is a lookup table (Vensim allows table(input) syntax)
@@ -815,6 +819,38 @@ public class ExprCompiler {
             double hi = maxVal.getAsDouble();
             return lo + (hi - lo) * rng.nextDouble();
         };
+    }
+
+    private DoubleSupplier compileSampleIfTrue(List<Expr> args) {
+        requireArgs("SAMPLE_IF_TRUE", args, 3);
+        DoubleSupplier condition = compileExpr(args.get(0));
+        DoubleSupplier input = compileExpr(args.get(1));
+        double initial = evaluateAtCompileTime(args.get(2), "SAMPLE_IF_TRUE initialValue");
+        if (Double.isNaN(initial)) {
+            initial = 0.0;
+        }
+        SampleIfTrue sampler = SampleIfTrue.of(condition, input, initial,
+                context.getCurrentStep());
+        resettables.add(sampler);
+        return sampler::getCurrentValue;
+    }
+
+    private DoubleSupplier compileFindZero(List<Expr> args) {
+        requireArgs("FIND_ZERO", args, 4);
+        // First arg: expression to find the zero of
+        // Second arg: loop variable (must be a Ref)
+        if (!(args.get(1) instanceof Expr.Ref ref)) {
+            throw new CompilationException(
+                    "FIND_ZERO second argument must be a variable reference", "FIND_ZERO");
+        }
+        String varName = ref.name();
+        // Register the loop variable as a literal constant so the expression can resolve it
+        context.addLiteralConstant(varName, 0.0);
+        DoubleSupplier expression = compileExpr(args.get(0));
+        DoubleSupplier lo = compileExpr(args.get(2));
+        DoubleSupplier hi = compileExpr(args.get(3));
+        FindZero findZero = FindZero.of(expression, varName, lo, hi, context);
+        return findZero::getCurrentValue;
     }
 
     private DoubleSupplier compileLookup(List<Expr> args) {

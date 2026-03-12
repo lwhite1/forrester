@@ -25,6 +25,7 @@ public final class ExprDependencies {
             "TREND", "FORECAST", "NPV",
             "RANDOM_NORMAL", "RANDOM_UNIFORM",
             "XIDZ", "ZIDZ",
+            "SAMPLE_IF_TRUE", "FIND_ZERO",
             "LOOKUP", "IF", "TIME", "DT", "PI"
     );
 
