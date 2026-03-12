@@ -140,28 +140,58 @@ class DelayFixedTest {
         }
 
         @Test
-        @DisplayName("should fill catch-up slots with current input value")
-        void shouldFillCatchUpSlots() {
+        @DisplayName("should use last-known input for missed slots and current input for final slot")
+        void shouldUseLastKnownInputForMissedSlots() {
             int[] step = {0};
             double[] input = {0};
             DelayFixed delay = DelayFixed.of(() -> input[0], 3, 0, () -> step[0]);
 
-            // Step 0: input=0
+            // Step 0: input=0, buffer=[0,0,0,0], write 0 at 0
             delay.getCurrentValue();
 
-            // Jump to step 3 with input=50 — should fill slots 1,2,3 with 50
+            // Jump to step 3 (delta=3): input=50
+            // Missed slots (steps 1,2) filled with last-known input (0)
+            // Current step (3) gets input=50
             input[0] = 50;
             step[0] = 3;
-            delay.getCurrentValue(); // output = input(0) = 0
+            assertThat(delay.getCurrentValue()).as("step 3: oldest entry is input(0)=0").isEqualTo(0);
 
-            // Steps 4,5,6: output should be 50 (from the catch-up fill)
+            // Steps 4,5: output is the last-known fill (0) from missed steps 1,2
             input[0] = 99;
             step[0] = 4;
-            assertThat(delay.getCurrentValue()).isEqualTo(50);
+            assertThat(delay.getCurrentValue()).as("step 4: held value from missed step 1").isEqualTo(0);
             step[0] = 5;
-            assertThat(delay.getCurrentValue()).isEqualTo(50);
+            assertThat(delay.getCurrentValue()).as("step 5: held value from missed step 2").isEqualTo(0);
+
+            // Step 6: output is the input written at step 3 (50)
             step[0] = 6;
-            assertThat(delay.getCurrentValue()).isEqualTo(50);
+            assertThat(delay.getCurrentValue()).as("step 6: input from step 3").isEqualTo(50);
+        }
+
+        @Test
+        @DisplayName("should match step-by-step when delta is always 1")
+        void shouldMatchStepByStepWithNoCatchUp() {
+            int[] step = {0};
+            double[] input = {10};
+            DelayFixed delay = DelayFixed.of(() -> input[0], 2, 0, () -> step[0]);
+
+            // Step 0: write 10
+            assertThat(delay.getCurrentValue()).isEqualTo(0);
+
+            // Step 1: write 20
+            input[0] = 20;
+            step[0] = 1;
+            assertThat(delay.getCurrentValue()).isEqualTo(0);
+
+            // Step 2: output = input(0) = 10
+            input[0] = 30;
+            step[0] = 2;
+            assertThat(delay.getCurrentValue()).isEqualTo(10);
+
+            // Step 3: output = input(1) = 20
+            input[0] = 40;
+            step[0] = 3;
+            assertThat(delay.getCurrentValue()).isEqualTo(20);
         }
     }
 

@@ -85,7 +85,7 @@ class Smooth3Test {
     }
 
     @Test
-    void shouldReadInputEachIterationInCatchUpLoop() {
+    void shouldReadInputOncePerEvaluationInCatchUpLoop() {
         int[] step = {0};
         int[] readCount = {0};
         Smooth3 formula = Smooth3.of(() -> { readCount[0]++; return 100; }, 6, 0, () -> step[0]);
@@ -95,7 +95,8 @@ class Smooth3Test {
 
         step[0] = 5;
         formula.getCurrentValue();
-        assertThat(readCount[0]).as("Input should be read once per catch-up iteration").isEqualTo(5);
+        assertThat(readCount[0]).as("Input should be read once per evaluation, not once per sub-step")
+                .isEqualTo(1);
     }
 
     @Test
