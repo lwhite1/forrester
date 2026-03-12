@@ -163,7 +163,7 @@ public final class XmileExporter {
 
         Element dt = doc.createElementNS(
                 XmileConstants.NAMESPACE_URI, XmileConstants.DT);
-        dt.setTextContent("1");
+        dt.setTextContent(formatDouble(sim.dt()));
         simSpecs.appendChild(dt);
     }
 

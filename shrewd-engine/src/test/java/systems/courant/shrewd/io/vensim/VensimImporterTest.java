@@ -336,6 +336,37 @@ class VensimImporterTest {
             assertThat(sim.timeStep()).isEqualTo("Month");
             assertThat(sim.duration()).isEqualTo(120.0);
             assertThat(sim.durationUnit()).isEqualTo("Month");
+            assertThat(sim.dt()).isEqualTo(0.5);
+        }
+
+        @Test
+        void shouldPreserveDefaultDtWhenTimeStepIsOne() {
+            String mdl = """
+                    x = 1
+                    \t~\t
+                    \t~\t
+                    \t|
+
+                    INITIAL TIME = 0
+                    \t~\tDay
+                    \t~\t
+                    \t|
+
+                    FINAL TIME = 50
+                    \t~\tDay
+                    \t~\t
+                    \t|
+
+                    TIME STEP = 1
+                    \t~\tDay
+                    \t~\t
+                    \t|
+                    """;
+
+            ImportResult result = importer.importModel(mdl, "Test");
+            var sim = result.definition().defaultSimulation();
+            assertThat(sim).isNotNull();
+            assertThat(sim.dt()).isEqualTo(1.0);
         }
     }
 

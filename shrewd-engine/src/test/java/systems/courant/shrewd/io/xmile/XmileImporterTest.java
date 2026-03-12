@@ -305,6 +305,7 @@ class XmileImporterTest {
             assertThat(sim.timeStep()).isEqualTo("Month");
             assertThat(sim.duration()).isEqualTo(120.0);
             assertThat(sim.durationUnit()).isEqualTo("Month");
+            assertThat(sim.dt()).isEqualTo(0.5);
         }
 
         @Test
@@ -725,6 +726,35 @@ class XmileImporterTest {
             assertThat(result.warnings()).anyMatch(
                     w -> w.contains("NonExistent") && w.contains("unknown model"));
             assertThat(result.definition().modules()).isEmpty();
+        }
+
+        @Test
+        void shouldResolveModuleWhenInstanceNameDiffersFromModelName() {
+            String xmile = """
+                    <?xml version="1.0" encoding="UTF-8"?>
+                    <xmile xmlns="http://docs.oasis-open.org/xmile/ns/XMILE/v1.0" version="1.0">
+                      <header><name>Test</name></header>
+                      <sim_specs time_units="day"><start>0</start><stop>10</stop><dt>1</dt></sim_specs>
+                      <model name="Producer">
+                        <variables>
+                          <stock name="inventory"><eqn>100</eqn></stock>
+                        </variables>
+                      </model>
+                      <model>
+                        <variables>
+                          <module name="producer">
+                            <connect to="target" from="demand"/>
+                          </module>
+                        </variables>
+                      </model>
+                    </xmile>
+                    """;
+
+            ImportResult result = importer.importModel(xmile, "Test");
+            assertThat(result.warnings()).noneMatch(w -> w.contains("unknown model"));
+            assertThat(result.definition().modules()).hasSize(1);
+            assertThat(result.definition().modules().get(0).instanceName()).isEqualTo("producer");
+            assertThat(result.definition().modules().get(0).definition().name()).isEqualTo("Producer");
         }
 
         @Test

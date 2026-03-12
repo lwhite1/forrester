@@ -167,7 +167,11 @@ public class DemoClassGenerator {
                     .append(".defaultSimulation(")
                     .append(escapeString(sim.timeStep())).append(", ")
                     .append(sim.duration()).append(", ")
-                    .append(escapeString(sim.durationUnit())).append(")");
+                    .append(escapeString(sim.durationUnit()));
+            if (sim.dt() != 1.0) {
+                sb.append(", ").append(sim.dt());
+            }
+            sb.append(")");
         }
         sb.append(";\n\n");
 
@@ -296,7 +300,11 @@ public class DemoClassGenerator {
             sb.append("\n").append(INDENT).append("            .defaultSimulation(")
                     .append(escapeString(sim.timeStep())).append(", ")
                     .append(sim.duration()).append(", ")
-                    .append(escapeString(sim.durationUnit())).append(")");
+                    .append(escapeString(sim.durationUnit()));
+            if (sim.dt() != 1.0) {
+                sb.append(", ").append(sim.dt());
+            }
+            sb.append(")");
         }
         sb.append(";\n");
 
