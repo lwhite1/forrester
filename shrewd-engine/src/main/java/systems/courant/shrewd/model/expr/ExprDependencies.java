@@ -16,7 +16,7 @@ public final class ExprDependencies {
     private static final Set<String> BUILTIN_FUNCTIONS = Set.of(
             "ABS", "SQRT", "LN", "EXP", "LOG", "SIN", "COS", "TAN",
             "INT", "ROUND", "MODULO", "POWER", "MIN", "MAX", "SUM", "MEAN",
-            "SMOOTH", "SMOOTH3", "DELAY1", "DELAY3", "DELAY_FIXED",
+            "SMOOTH", "SMOOTHI", "SMOOTH3", "SMOOTH3I", "DELAY1", "DELAY3", "DELAY_FIXED",
             "STEP", "RAMP", "PULSE", "PULSE_TRAIN",
             "TREND", "FORECAST", "NPV",
             "RANDOM_NORMAL", "RANDOM_UNIFORM",

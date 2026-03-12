@@ -207,6 +207,37 @@ public final class FunctionDocRegistry {
                 "SMOOTH(Revenue, 4) → smooths Revenue over 4 time units",
                 List.of("DELAY3", "DELAY_FIXED"));
 
+        add(m, "SMOOTHI", "SMOOTHI(input, time, initial)", "Exponential smoothing with initial (1st order)",
+                "SD",
+                List.of(p("input", "the value to smooth"),
+                        p("time", "averaging time (smoothing period)"),
+                        p("initial", "initial output value at time zero")),
+                "First-order exponential smoothing with a caller-specified initial value. "
+                        + "Behaves like SMOOTH but starts from 'initial' instead of the first input value.",
+                "SMOOTHI(Revenue, 4, 1000) → smooths Revenue over 4 time units, starting at 1000",
+                List.of("SMOOTH", "SMOOTH3", "SMOOTH3I"));
+
+        add(m, "SMOOTH3", "SMOOTH3(input, time [, initial])", "Exponential smoothing (3rd order)",
+                "SD",
+                List.of(p("input", "the value to smooth"),
+                        p("time", "averaging time (smoothing period)"),
+                        p("initial", "(optional) initial output value; defaults to first input")),
+                "Third-order exponential smoothing. Chains three first-order smooths, each "
+                        + "with time constant time/3. Produces a more delayed, S-shaped response "
+                        + "compared to first-order SMOOTH.",
+                "SMOOTH3(Revenue, 6) → third-order smooth of Revenue over 6 time units",
+                List.of("SMOOTH", "SMOOTHI", "SMOOTH3I"));
+
+        add(m, "SMOOTH3I", "SMOOTH3I(input, time, initial)", "Exponential smoothing with initial (3rd order)",
+                "SD",
+                List.of(p("input", "the value to smooth"),
+                        p("time", "averaging time (smoothing period)"),
+                        p("initial", "initial output value at time zero")),
+                "Third-order exponential smoothing with a caller-specified initial value. "
+                        + "Combines the S-shaped response of SMOOTH3 with explicit initialization.",
+                "SMOOTH3I(Revenue, 6, 1000) → third-order smooth starting at 1000",
+                List.of("SMOOTH", "SMOOTHI", "SMOOTH3"));
+
         add(m, "DELAY3", "DELAY3(input, delay_time [, initial])", "Third-order material delay",
                 "SD",
                 List.of(p("input", "the value to delay"),

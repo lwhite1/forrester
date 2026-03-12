@@ -87,17 +87,17 @@ class XmileExprTranslatorTest {
         }
 
         @Test
-        void shouldTranslateSmth3ToSmooth() {
+        void shouldTranslateSmth3ToSmooth3() {
             var result = XmileExprTranslator.toShrewd("SMTH3(input, 5)");
-            assertThat(result.expression()).isEqualTo("SMOOTH(input, 5)");
-            assertThat(result.warnings()).anyMatch(w -> w.contains("SMTH3"));
+            assertThat(result.expression()).isEqualTo("SMOOTH3(input, 5)");
+            assertThat(result.warnings()).noneMatch(w -> w.contains("SMTH3"));
         }
 
         @Test
         void shouldTranslateSmth1ToSmooth() {
             var result = XmileExprTranslator.toShrewd("SMTH1(input, 5)");
             assertThat(result.expression()).isEqualTo("SMOOTH(input, 5)");
-            assertThat(result.warnings()).anyMatch(w -> w.contains("SMTH1"));
+            assertThat(result.warnings()).noneMatch(w -> w.contains("SMTH1"));
         }
 
         @Test

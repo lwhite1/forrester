@@ -152,19 +152,10 @@ public final class VensimExprTranslator {
         expr = translateXidz(expr, warnings);
         expr = translateZidz(expr, warnings);
 
-        // 6. SMOOTH3 → SMOOTH (with warning)
-        if (SMOOTH3_PATTERN.matcher(expr).find()) {
-            expr = SMOOTH3_PATTERN.matcher(expr).replaceAll("SMOOTH(");
-            warnings.add("SMOOTH3 approximated as SMOOTH");
-        }
-        if (SMOOTHI_PATTERN.matcher(expr).find()) {
-            expr = SMOOTHI_PATTERN.matcher(expr).replaceAll("SMOOTH(");
-            warnings.add("SMOOTHI approximated as SMOOTH (initial value semantics differ)");
-        }
-        if (SMOOTH3I_PATTERN.matcher(expr).find()) {
-            expr = SMOOTH3I_PATTERN.matcher(expr).replaceAll("SMOOTH(");
-            warnings.add("SMOOTH3I approximated as SMOOTH (third-order + initial value semantics differ)");
-        }
+        // 6. SMOOTH variants → native engine functions
+        expr = SMOOTH3I_PATTERN.matcher(expr).replaceAll("SMOOTH3I(");
+        expr = SMOOTH3_PATTERN.matcher(expr).replaceAll("SMOOTH3(");
+        expr = SMOOTHI_PATTERN.matcher(expr).replaceAll("SMOOTHI(");
 
         // 7. DELAY1 → DELAY3 (with warning)
         if (DELAY1_PATTERN.matcher(expr).find()) {
