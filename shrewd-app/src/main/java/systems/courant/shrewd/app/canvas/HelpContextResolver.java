@@ -175,6 +175,7 @@ public final class HelpContextResolver {
             case PLACE_MODULE -> HelpTopic.MODULE;
             case PLACE_CLD_VARIABLE -> HelpTopic.CLD_VARIABLE;
             case PLACE_CAUSAL_LINK -> HelpTopic.CAUSAL_LOOPS;
+            case PLACE_INFO_LINK -> HelpTopic.MODULE;
             case PLACE_COMMENT -> HelpTopic.COMMENT;
             case SELECT -> null;
         };

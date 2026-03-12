@@ -33,6 +33,7 @@ public class CanvasToolBar extends ToolBar {
         PLACE_LOOKUP("lookup"),
         PLACE_CLD_VARIABLE("variable"),
         PLACE_CAUSAL_LINK("causal link"),
+        PLACE_INFO_LINK("info link"),
         PLACE_COMMENT("comment");
 
         private final String label;
@@ -83,6 +84,9 @@ public class CanvasToolBar extends ToolBar {
         ToggleButton causalLinkButton = makeButton("Causal Link", Tool.PLACE_CAUSAL_LINK);
         causalLinkButton.setId("toolCausalLink");
         causalLinkButton.setTooltip(new Tooltip("Draw a causal link between variables"));
+        ToggleButton infoLinkButton = makeButton("Info Link", Tool.PLACE_INFO_LINK);
+        infoLinkButton.setId("toolInfoLink");
+        infoLinkButton.setTooltip(new Tooltip("Draw info link to/from module ports (0)"));
         ToggleButton commentButton = makeButton("Comment", Tool.PLACE_COMMENT);
         commentButton.setId("toolComment");
         commentButton.setTooltip(new Tooltip("Add a comment \u2014 a free-text annotation on the canvas"));
@@ -139,7 +143,7 @@ public class CanvasToolBar extends ToolBar {
 
         getItems().addAll(selectButton, new Separator(),
                 stockButton, flowButton, auxButton, lookupButton, moduleButton,
-                new Separator(), cldVarButton, causalLinkButton,
+                new Separator(), cldVarButton, causalLinkButton, infoLinkButton,
                 new Separator(), commentButton,
                 new Separator(), loopsButton, new Separator(), validateButton,
                 spacer, searchHint);

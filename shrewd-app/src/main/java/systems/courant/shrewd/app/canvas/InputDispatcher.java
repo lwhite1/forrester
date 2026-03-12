@@ -27,6 +27,7 @@ final class InputDispatcher {
     private final ReattachController reattachController;
     private final FlowCreationController flowCreation;
     private final CausalLinkCreationController causalLinkCreation;
+    private final InfoLinkCreationController infoLinkCreation;
     private final ConnectionRerouteController rerouteController;
     private final InlineEditController inlineEdit;
 
@@ -55,6 +56,7 @@ final class InputDispatcher {
                     ReattachController reattachController,
                     FlowCreationController flowCreation,
                     CausalLinkCreationController causalLinkCreation,
+                    InfoLinkCreationController infoLinkCreation,
                     ConnectionRerouteController rerouteController,
                     InlineEditController inlineEdit) {
         this.dragController = dragController;
@@ -63,6 +65,7 @@ final class InputDispatcher {
         this.reattachController = reattachController;
         this.flowCreation = flowCreation;
         this.causalLinkCreation = causalLinkCreation;
+        this.infoLinkCreation = infoLinkCreation;
         this.rerouteController = rerouteController;
         this.inlineEdit = inlineEdit;
     }
@@ -115,6 +118,23 @@ final class InputDispatcher {
                     viewport.toWorldY(event.getY()));
             canvas.requestRedraw();
             event.consume();
+        }
+
+        if (infoLinkCreation.isPending()) {
+            double wx = viewport.toWorldX(event.getX());
+            double wy = viewport.toWorldY(event.getY());
+            infoLinkCreation.updateRubberBand(wx, wy);
+            infoLinkCreation.updateHoveredPort(wx, wy, canvasState, canvas.getEditor());
+            canvas.requestRedraw();
+            event.consume();
+        }
+
+        // Update hovered port for highlight even when not pending
+        if (canvas.getActiveTool() == CanvasToolBar.Tool.PLACE_INFO_LINK
+                && !infoLinkCreation.isPending()) {
+            double wx = viewport.toWorldX(event.getX());
+            double wy = viewport.toWorldY(event.getY());
+            infoLinkCreation.updateHoveredPort(wx, wy, canvasState, canvas.getEditor());
         }
 
         // Update hover highlight
@@ -264,6 +284,14 @@ final class InputDispatcher {
         // PLACE_CAUSAL_LINK: two-click protocol
         if (activeTool == CanvasToolBar.Tool.PLACE_CAUSAL_LINK) {
             canvas.handleCausalLinkClick(worldX, worldY);
+            updateCursor(canvas);
+            event.consume();
+            return;
+        }
+
+        // PLACE_INFO_LINK: two-click protocol
+        if (activeTool == CanvasToolBar.Tool.PLACE_INFO_LINK) {
+            canvas.handleInfoLinkClick(worldX, worldY);
             updateCursor(canvas);
             event.consume();
             return;
@@ -604,6 +632,7 @@ final class InputDispatcher {
                 case DIGIT7 -> { canvas.switchTool(CanvasToolBar.Tool.PLACE_CLD_VARIABLE); event.consume(); }
                 case DIGIT8 -> { canvas.switchTool(CanvasToolBar.Tool.PLACE_CAUSAL_LINK); event.consume(); }
                 case DIGIT9 -> { canvas.switchTool(CanvasToolBar.Tool.PLACE_COMMENT); event.consume(); }
+                case DIGIT0 -> { canvas.switchTool(CanvasToolBar.Tool.PLACE_INFO_LINK); event.consume(); }
                 case OPEN_BRACKET -> {
                     if (canvas.isLoopHighlightActive()) {
                         canvas.stepLoopBack();
@@ -649,6 +678,9 @@ final class InputDispatcher {
         } else if (causalLinkCreation.isPending()) {
             causalLinkCreation.cancel();
             canvas.requestRedraw();
+        } else if (infoLinkCreation.isPending()) {
+            infoLinkCreation.cancel();
+            canvas.requestRedraw();
         } else if (canvas.getActiveTool() != CanvasToolBar.Tool.SELECT) {
             canvas.resetToolToSelect();
         } else if (canvas.getSelectedConnection() != null) {
@@ -688,7 +720,8 @@ final class InputDispatcher {
             cursor = Cursor.CROSSHAIR;
         } else if (spaceDown) {
             cursor = Cursor.MOVE;
-        } else if (flowCreation.isPending() || activeTool != CanvasToolBar.Tool.SELECT) {
+        } else if (flowCreation.isPending() || infoLinkCreation.isPending()
+                || activeTool != CanvasToolBar.Tool.SELECT) {
             cursor = Cursor.CROSSHAIR;
         } else if (editor != null) {
             cursor = computeSelectCursor(viewport, canvasState, editor, canvas.isHideAuxiliaries());

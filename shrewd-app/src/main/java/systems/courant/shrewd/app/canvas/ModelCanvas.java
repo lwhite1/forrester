@@ -58,6 +58,7 @@ public class ModelCanvas extends Canvas {
     private final ReattachController reattachController = new ReattachController();
     private final FlowCreationController flowCreation = new FlowCreationController();
     private final CausalLinkCreationController causalLinkCreation = new CausalLinkCreationController();
+    private final InfoLinkCreationController infoLinkCreation = new InfoLinkCreationController();
     private final CopyPasteController copyPaste;
     private final ConnectionRerouteController rerouteController = new ConnectionRerouteController();
     private final InlineEditController inlineEdit = new InlineEditController();
@@ -210,7 +211,7 @@ public class ModelCanvas extends Canvas {
         this.inputDispatcher = new InputDispatcher(
                 dragController, marqueeController, resizeController,
                 reattachController, flowCreation, causalLinkCreation,
-                rerouteController, inlineEdit);
+                infoLinkCreation, rerouteController, inlineEdit);
 
         setFocusTraversable(true);
 
@@ -730,6 +731,17 @@ public class ModelCanvas extends Canvas {
         fireStatusChanged();
     }
 
+    void handleInfoLinkClick(double worldX, double worldY) {
+        InfoLinkCreationController.LinkResult result = infoLinkCreation.handleClick(
+                worldX, worldY, canvasState, editor);
+        if (result.isCreated()) {
+            saveUndoState("Bind module port");
+            regenerateConnectors();
+        }
+        redraw();
+        fireStatusChanged();
+    }
+
     void createElementAt(double worldX, double worldY) {
         String name = selectionController.createElementAt(
                 worldX, worldY, activeTool, editor, canvasState,
@@ -865,6 +877,9 @@ public class ModelCanvas extends Canvas {
         if (causalLinkCreation.isPending()) {
             causalLinkCreation.cancel();
         }
+        if (infoLinkCreation.isPending()) {
+            infoLinkCreation.cancel();
+        }
         this.activeTool = tool;
         inputDispatcher.updateCursor(this);
     }
@@ -908,6 +923,7 @@ public class ModelCanvas extends Canvas {
                 new CanvasRenderer.RenderContext(
                         editor, connectors, flowCreation.getState(),
                         causalLinkCreation.getState(),
+                        infoLinkCreation.getState(),
                         reattachController.toRenderState(),
                         rerouteRenderState(),
                         marqueeController.toRenderState(),
