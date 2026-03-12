@@ -303,10 +303,17 @@ class VensimExprTranslatorTest {
         }
 
         @Test
-        void shouldTranslateDelay1ToDelay3() {
+        void shouldTranslateDelay1Natively() {
             var result = VensimExprTranslator.translate("DELAY1(input, 3)", "var", EMPTY_NAMES);
-            assertThat(result.expression()).isEqualTo("DELAY3(input, 3)");
-            assertThat(result.warnings()).anyMatch(w -> w.contains("DELAY1"));
+            assertThat(result.expression()).isEqualTo("DELAY1(input, 3)");
+            assertThat(result.warnings()).noneMatch(w -> w.contains("DELAY1"));
+        }
+
+        @Test
+        void shouldTranslateDelay1iNatively() {
+            var result = VensimExprTranslator.translate("DELAY1I(input, 3, 50)", "var", EMPTY_NAMES);
+            assertThat(result.expression()).isEqualTo("DELAY1I(input, 3, 50)");
+            assertThat(result.warnings()).noneMatch(w -> w.contains("DELAY1I"));
         }
     }
 

@@ -238,6 +238,17 @@ public final class FunctionDocRegistry {
                 "SMOOTH3I(Revenue, 6, 1000) → third-order smooth starting at 1000",
                 List.of("SMOOTH", "SMOOTHI", "SMOOTH3"));
 
+        add(m, "DELAY1", "DELAY1(input, delay_time [, initial])", "First-order material delay",
+                "SD",
+                List.of(p("input", "the value to delay"),
+                        p("delay_time", "average delay duration"),
+                        p("initial", "(optional) initial output value; defaults to first input")),
+                "Delays the input using a first-order exponential delay (single stage). "
+                        + "Produces an immediate partial response that decays exponentially. "
+                        + "The average delay equals delay_time.",
+                "DELAY1(Orders, 5) → orders delayed by ~5 time units (exponential)",
+                List.of("DELAY3", "SMOOTH", "DELAY_FIXED"));
+
         add(m, "DELAY3", "DELAY3(input, delay_time [, initial])", "Third-order material delay",
                 "SD",
                 List.of(p("input", "the value to delay"),

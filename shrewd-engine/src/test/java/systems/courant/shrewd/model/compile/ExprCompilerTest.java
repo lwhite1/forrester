@@ -172,6 +172,22 @@ class ExprCompilerTest {
     }
 
     @Test
+    void shouldCompileDELAY1() {
+        Formula formula = compiler.compile("DELAY1(100, 3)");
+        // At step 0, DELAY1 initializes with input value
+        assertThat(formula.getCurrentValue()).isCloseTo(100.0, within(1e-10));
+        assertThat(resettables).hasSize(1);
+    }
+
+    @Test
+    void shouldCompileDELAY1I() {
+        Formula formula = compiler.compile("DELAY1I(100, 3, 50)");
+        // At step 0, DELAY1I initializes with explicit initial value
+        assertThat(formula.getCurrentValue()).isCloseTo(50.0, within(1e-10));
+        assertThat(resettables).hasSize(1);
+    }
+
+    @Test
     void shouldCompileDELAY3() {
         Formula formula = compiler.compile("DELAY3(100, 3)");
         // At step 0, DELAY3 initializes with input value
