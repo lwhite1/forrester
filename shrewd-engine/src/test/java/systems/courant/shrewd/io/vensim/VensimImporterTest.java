@@ -1021,6 +1021,219 @@ class VensimImporterTest {
     }
 
     @Nested
+    @DisplayName("Double UTF-8 header handling (#491)")
+    class DoubleUtf8Header {
+
+        @Test
+        void shouldHandleDoubleUtf8Header() {
+            // Many Vensim files (e.g., RABFOX.MDL, DELIV.MDL) have two {UTF-8} headers.
+            // The second must be stripped or it corrupts the first variable name.
+            String mdl = """
+                    {UTF-8}
+                    {UTF-8}
+
+                    fox births = Fox Population * fox birth rate
+                    \t~\tFox/Year
+                    \t~\t
+                    \t|
+
+                    Fox Population = INTEG(fox births, 30)
+                    \t~\tFox
+                    \t~\t
+                    \t|
+
+                    fox birth rate = 0.25
+                    \t~\t1/Year
+                    \t~\t
+                    \t|
+
+                    INITIAL TIME = 0
+                    \t~\tYear
+                    \t~\t
+                    \t|
+
+                    FINAL TIME = 50
+                    \t~\tYear
+                    \t~\t
+                    \t|
+
+                    TIME STEP = 1
+                    \t~\tYear
+                    \t~\t
+                    \t|
+                    """;
+
+            ImportResult result = importer.importModel(mdl, "Test");
+            ModelDefinition def = result.definition();
+
+            // The first variable should have a clean name, not "{UTF-8}..." prefix
+            AuxDef aux = def.auxiliaries().stream()
+                    .filter(a -> a.name().equals("fox births"))
+                    .findFirst().orElseThrow();
+            // Multi-word name replacement should work in the equation
+            assertThat(aux.equation()).isEqualTo("Fox_Population * fox_birth_rate");
+        }
+
+        @Test
+        void shouldCompileModelWithDoubleUtf8Header() {
+            // Verifies the full pipeline works with double headers
+            String mdl = """
+                    {UTF-8}
+                    {UTF-8}
+
+                    new customers = shipments / products per customer
+                    \t~\tPerson/Week
+                    \t~\t
+                    \t|
+
+                    Customers = INTEG(new customers, 100)
+                    \t~\tPerson
+                    \t~\t
+                    \t|
+
+                    products per customer = 1
+                    \t~\tMachine/Person
+                    \t~\t
+                    \t|
+
+                    shipments = 50
+                    \t~\tMachine/Week
+                    \t~\t
+                    \t|
+
+                    INITIAL TIME = 0
+                    \t~\tWeek
+                    \t~\t
+                    \t|
+
+                    FINAL TIME = 100
+                    \t~\tWeek
+                    \t~\t
+                    \t|
+
+                    TIME STEP = 1
+                    \t~\tWeek
+                    \t~\t
+                    \t|
+                    """;
+
+            ImportResult result = importer.importModel(mdl, "Test");
+            ModelDefinition def = result.definition();
+
+            // Should compile without "Unexpected character" errors
+            CompiledModel compiled = new ModelCompiler().compile(def);
+            assertThat(compiled).isNotNull();
+
+            // Verify the flow equation uses normalized names
+            FlowDef flow = def.flows().stream()
+                    .filter(f -> f.name().contains("Customers"))
+                    .findFirst().orElseThrow();
+            assertThat(flow.equation()).isEqualTo("new_customers");
+        }
+    }
+
+    @Nested
+    @DisplayName("Flat CSV lookup tables (#490)")
+    class FlatCsvLookupImport {
+
+        @Test
+        void shouldImportFlatCsvLookupTable() {
+            // Format used by BURNOUT.MDL and WORLD.MDL
+            String mdl = """
+                    effect = effect lookup(input)
+                    \t~\tDimensionless
+                    \t~\t
+                    \t|
+
+                    effect lookup(
+                    \t0,0.2,0.4,0.6,0.8,1,
+                    \t0,0.2,0.4,0.6,0.8,1)
+                    \t~\tDimensionless
+                    \t~\t
+                    \t|
+
+                    input = 0.5
+                    \t~\tDimensionless
+                    \t~\t
+                    \t|
+
+                    INITIAL TIME = 0
+                    \t~\tDay
+                    \t~\t
+                    \t|
+
+                    FINAL TIME = 10
+                    \t~\tDay
+                    \t~\t
+                    \t|
+
+                    TIME STEP = 1
+                    \t~\tDay
+                    \t~\t
+                    \t|
+                    """;
+
+            ImportResult result = importer.importModel(mdl, "Test");
+            ModelDefinition def = result.definition();
+
+            // Lookup table should be parsed successfully
+            assertThat(def.lookupTables()).hasSize(1);
+            LookupTableDef lt = def.lookupTables().get(0);
+            assertThat(lt.name()).isEqualTo("effect lookup");
+            assertThat(lt.xValues()).hasSize(6);
+            assertThat(lt.yValues()).hasSize(6);
+
+            // No warnings about failing to parse lookup data
+            assertThat(result.warnings().stream()
+                    .filter(w -> w.contains("Could not parse lookup"))
+                    .toList()).isEmpty();
+        }
+
+        @Test
+        void shouldCompileModelWithFlatCsvLookup() {
+            String mdl = """
+                    effect = effect lookup(input)
+                    \t~\tDimensionless
+                    \t~\t
+                    \t|
+
+                    effect lookup(
+                    \t0,0.5,1,
+                    \t0,0.5,1)
+                    \t~\tDimensionless
+                    \t~\t
+                    \t|
+
+                    input = 0.5
+                    \t~\tDimensionless
+                    \t~\t
+                    \t|
+
+                    INITIAL TIME = 0
+                    \t~\tDay
+                    \t~\t
+                    \t|
+
+                    FINAL TIME = 10
+                    \t~\tDay
+                    \t~\t
+                    \t|
+
+                    TIME STEP = 1
+                    \t~\tDay
+                    \t~\t
+                    \t|
+                    """;
+
+            ImportResult result = importer.importModel(mdl, "Test");
+
+            // Should compile without "references unknown element" errors
+            CompiledModel compiled = new ModelCompiler().compile(result.definition());
+            assertThat(compiled).isNotNull();
+        }
+    }
+
+    @Nested
     @DisplayName("Rate term decomposition")
     class RateTermDecomposition {
 

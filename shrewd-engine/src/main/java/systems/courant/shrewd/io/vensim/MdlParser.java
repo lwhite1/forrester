@@ -81,9 +81,16 @@ public final class MdlParser {
         if (content.startsWith("\uFEFF")) {
             content = content.substring(1);
         }
-        // Strip {UTF-8} encoding header
-        if (content.startsWith("{UTF-8}")) {
-            content = content.substring(7);
+        // Strip {UTF-8} encoding headers — some Vensim files emit multiple
+        // (e.g., "{UTF-8}\n{UTF-8}\n"), so strip repeatedly
+        boolean changed = true;
+        while (changed) {
+            changed = false;
+            String trimmed = content.stripLeading();
+            if (trimmed.startsWith("{UTF-8}")) {
+                content = trimmed.substring(7);
+                changed = true;
+            }
         }
         return content;
     }

@@ -511,6 +511,7 @@ public final class VensimExprTranslator {
         // Lookup data format: [(xmin,ymin)-(xmax,ymax)],(x1,y1),(x2,y2),...
         // or ([(xmin,ymin)-(xmax,ymax)],(x1,y1),(x2,y2),...)  (WITH LOOKUP wrapping)
         // or just (x1,y1),(x2,y2),...
+        // or flat CSV: x1,x2,...,xN,y1,y2,...,yN (older Vensim format)
         String cleaned = data.strip();
 
         // Strip Vensim range annotation: [(xmin,ymin)-(xmax,ymax)]
@@ -532,6 +533,7 @@ public final class VensimExprTranslator {
             cleaned = cleaned.strip();
         }
 
+        // Try parenthesized pair format: (x1,y1),(x2,y2),...
         List<double[]> points = new ArrayList<>();
         Pattern pairPattern = Pattern.compile(
                 "\\(\\s*(-?[\\d.eE+\\-]+)\\s*,\\s*(-?[\\d.eE+\\-]+)\\s*\\)");
@@ -546,15 +548,44 @@ public final class VensimExprTranslator {
             }
         }
 
-        if (points.size() < 2) {
+        if (points.size() >= 2) {
+            double[] xValues = new double[points.size()];
+            double[] yValues = new double[points.size()];
+            for (int i = 0; i < points.size(); i++) {
+                xValues[i] = points.get(i)[0];
+                yValues[i] = points.get(i)[1];
+            }
+            return Optional.of(new double[][]{xValues, yValues});
+        }
+
+        // Fall back to flat CSV format: x1,x2,...,xN,y1,y2,...,yN
+        // Used by older Vensim versions (e.g., BURNOUT.MDL, WORLD.MDL)
+        return parseFlatCsvLookup(cleaned);
+    }
+
+    private static Optional<double[][]> parseFlatCsvLookup(String data) {
+        Pattern numberPattern = Pattern.compile("-?[\\d.eE+\\-]+");
+        Matcher m = numberPattern.matcher(data);
+        List<Double> values = new ArrayList<>();
+        while (m.find()) {
+            try {
+                values.add(Double.parseDouble(m.group()));
+            } catch (NumberFormatException ex) {
+                log.debug("Skip malformed flat lookup value: {}", m.group(), ex);
+            }
+        }
+
+        // Need an even number of values >= 4 (at least 2 x + 2 y)
+        if (values.size() < 4 || values.size() % 2 != 0) {
             return Optional.empty();
         }
 
-        double[] xValues = new double[points.size()];
-        double[] yValues = new double[points.size()];
-        for (int i = 0; i < points.size(); i++) {
-            xValues[i] = points.get(i)[0];
-            yValues[i] = points.get(i)[1];
+        int half = values.size() / 2;
+        double[] xValues = new double[half];
+        double[] yValues = new double[half];
+        for (int i = 0; i < half; i++) {
+            xValues[i] = values.get(i);
+            yValues[i] = values.get(half + i);
         }
         return Optional.of(new double[][]{xValues, yValues});
     }
