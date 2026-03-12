@@ -45,6 +45,10 @@ final class InputDispatcher {
     private String hoveredElement;
     private ConnectionId hoveredConnection;
 
+    // Pending narrow: when clicking an already-selected element in multi-selection,
+    // narrow to that element on mouse-up only if no drag occurred
+    private String pendingNarrowTarget;
+
     InputDispatcher(DragController dragController,
                     MarqueeController marqueeController,
                     ResizeController resizeController,
@@ -294,8 +298,15 @@ final class InputDispatcher {
 
             if (event.isShiftDown()) {
                 canvasState.toggleSelection(hit);
+                pendingNarrowTarget = null;
             } else if (!canvasState.isSelected(hit)) {
                 canvasState.select(hit);
+                pendingNarrowTarget = null;
+            } else if (canvasState.getSelection().size() > 1) {
+                // Already selected in multi-selection: defer narrowing to mouse-up
+                pendingNarrowTarget = hit;
+            } else {
+                pendingNarrowTarget = null;
             }
 
             // Start drag for all selected elements
@@ -317,7 +328,8 @@ final class InputDispatcher {
             } else {
                 // Empty space: clear connection selection, start marquee
                 canvas.clearSelectedConnection();
-                marqueeController.start(worldX, worldY, canvasState, event.isShiftDown());
+                marqueeController.start(worldX, worldY, canvasState, event.isShiftDown(),
+                        hideAux);
             }
         }
 
@@ -472,6 +484,14 @@ final class InputDispatcher {
                 return;
             }
         }
+
+        // Narrow multi-selection to single element on click-release without drag
+        if (pendingNarrowTarget != null && !dragController.hasMoved()) {
+            canvas.canvasState().select(pendingNarrowTarget);
+            canvas.requestRedraw();
+            canvas.fireStatusChanged();
+        }
+        pendingNarrowTarget = null;
 
         dragController.end();
         panning = false;
