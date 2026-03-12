@@ -26,6 +26,7 @@ public class CompilationContext {
     private final Map<String, Flow> flows = new LinkedHashMap<>();
     private final Map<String, Variable> variables = new LinkedHashMap<>();
     private final Map<String, Double> literalConstants = new LinkedHashMap<>();
+    private final Map<String, double[]> mutableHolders = new LinkedHashMap<>();
     private final Map<String, LookupTable> lookupTables = new LinkedHashMap<>();
     private final Map<String, double[]> lookupInputHolders = new LinkedHashMap<>();
     private final Map<String, LookupTableDef> lookupTableDefs = new LinkedHashMap<>();
@@ -125,6 +126,18 @@ public class CompilationContext {
     }
 
     /**
+     * Registers a mutable holder for a loop variable (e.g. FIND_ZERO).
+     * The holder is a single-element array whose value can change at runtime
+     * without mutating the shared CompilationContext state.
+     *
+     * @param name   the variable name used for resolution
+     * @param holder a single-element array holding the current value
+     */
+    public void addMutableHolder(String name, double[] holder) {
+        mutableHolders.put(name, holder);
+    }
+
+    /**
      * Registers a lookup table and its mutable input holder in this context.
      *
      * @param name        the table name used for resolution
@@ -212,6 +225,10 @@ public class CompilationContext {
         Stock stock = stocks.get(name);
         if (stock != null) {
             return OptionalDouble.of(stock.getValue());
+        }
+        double[] holder = mutableHolders.get(name);
+        if (holder != null) {
+            return OptionalDouble.of(holder[0]);
         }
         Double litVal = literalConstants.get(name);
         if (litVal != null) {
