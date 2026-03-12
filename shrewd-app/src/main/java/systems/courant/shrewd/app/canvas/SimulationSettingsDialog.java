@@ -26,6 +26,7 @@ public class SimulationSettingsDialog extends Dialog<SimulationSettings> {
     private final ComboBox<String> timeStepCombo;
     private final TextField durationField;
     private final ComboBox<String> durationUnitCombo;
+    private final TextField dtField;
 
     public SimulationSettingsDialog(SimulationSettings existing) {
         setTitle("Simulation Settings");
@@ -37,15 +38,20 @@ public class SimulationSettingsDialog extends Dialog<SimulationSettings> {
         durationField.setId("simDuration");
         durationUnitCombo = new ComboBox<>(FXCollections.observableArrayList(TIME_UNIT_OPTIONS));
         durationUnitCombo.setId("simDurationUnit");
+        dtField = new TextField();
+        dtField.setId("simDt");
+        dtField.setPromptText("e.g. 0.25");
 
         if (existing != null) {
             timeStepCombo.setValue(existing.timeStep());
             durationField.setText(formatDuration(existing.duration()));
             durationUnitCombo.setValue(existing.durationUnit());
+            dtField.setText(formatDuration(existing.dt()));
         } else {
             timeStepCombo.setValue("Day");
             durationField.setText("100");
             durationUnitCombo.setValue("Day");
+            dtField.setText("1");
         }
 
         GridPane grid = new GridPane();
@@ -59,17 +65,21 @@ public class SimulationSettingsDialog extends Dialog<SimulationSettings> {
         grid.add(durationField, 1, 1);
         grid.add(new Label("Duration Unit:"), 0, 2);
         grid.add(durationUnitCombo, 1, 2);
+        grid.add(new Label("DT:"), 0, 3);
+        grid.add(dtField, 1, 3);
 
         getDialogPane().setContent(grid);
 
         ButtonType okButton = new ButtonType("OK", ButtonBar.ButtonData.OK_DONE);
         getDialogPane().getButtonTypes().addAll(okButton, ButtonType.CANCEL);
 
-        // Validate: disable OK when duration is not a positive number
+        // Validate: disable OK when duration or DT is not a positive number
         getDialogPane().lookupButton(okButton).disableProperty().bind(
                 Bindings.createBooleanBinding(
-                        () -> !isValidDuration(durationField.getText()),
-                        durationField.textProperty()
+                        () -> !isValidPositiveNumber(durationField.getText())
+                                || !isValidPositiveNumber(dtField.getText()),
+                        durationField.textProperty(),
+                        dtField.textProperty()
                 )
         );
 
@@ -78,7 +88,8 @@ public class SimulationSettingsDialog extends Dialog<SimulationSettings> {
                 return new SimulationSettings(
                         timeStepCombo.getValue(),
                         Double.parseDouble(durationField.getText().trim()),
-                        durationUnitCombo.getValue()
+                        durationUnitCombo.getValue(),
+                        Double.parseDouble(dtField.getText().trim())
                 );
             }
             return null;
@@ -92,7 +103,7 @@ public class SimulationSettingsDialog extends Dialog<SimulationSettings> {
         return String.valueOf(value);
     }
 
-    private static boolean isValidDuration(String text) {
+    private static boolean isValidPositiveNumber(String text) {
         if (text == null || text.isBlank()) {
             return false;
         }

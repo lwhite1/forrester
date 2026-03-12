@@ -201,6 +201,32 @@ class CompiledModelTest {
         }
 
         @Test
+        void shouldApplyDtFromDefaultSettings() {
+            ModelDefinition withDt = new ModelDefinition(
+                    "TestModel", null, null,
+                    List.of(new StockDef("Population", 100, "things")),
+                    List.of(new FlowDef("Growth", "Population * 0.1", "Minute", null, "Population")),
+                    List.of(), List.of(), List.of(), List.of(), List.of(), List.of(),
+                    List.of(),
+                    new SimulationSettings("Minute", 10.0, "Minute", 0.25),
+                    null);
+            CompiledModel compiledWithDt = new CompiledModel(
+                    model, List.of(), withDt, stepHolder, dtHolder,
+                    new systems.courant.shrewd.measure.TimeUnit[1], new UnitRegistry());
+
+            compiledWithDt.createSimulation();
+            assertThat(compiledWithDt.getDt()).isEqualTo(0.25);
+            assertThat(dtHolder[0]).isEqualTo(0.25);
+        }
+
+        @Test
+        void shouldDefaultDtToOneFromDefaultSettings() {
+            // The setUp() source uses the 3-arg SimulationSettings constructor (dt defaults to 1.0)
+            compiled.createSimulation();
+            assertThat(compiled.getDt()).isEqualTo(1.0);
+        }
+
+        @Test
         void shouldThrowIfNoDefaultSettings() {
             ModelDefinition noDefaults = new ModelDefinition(
                     "NoDefaults", null, null,
