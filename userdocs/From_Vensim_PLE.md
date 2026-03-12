@@ -86,13 +86,15 @@ You can also use backtick-quoted names for readability: `` `Contact Rate` ``.
 | `XIDZ(a, b, x)` | `XIDZ(a, b, x)` | Safe division with fallback (also expanded to `IF` form) |
 | `ZIDZ(a, b)` | `ZIDZ(a, b)` | Safe division returning zero (also expanded to `IF` form) |
 | `WITH LOOKUP(input, data)` | `LOOKUP(table, input)` | Lookup table extracted separately |
-| `:AND:` / `:OR:` / `:NOT:` | `&&` / `\|\|` / `!()` | Standard operators |
+| `:AND:` / `:OR:` / `:NOT:` | `and` / `or` / `not(...)` | Keyword operators |
 | `^` (exponentiation) | `**` | Python-style |
 | `Time` | `TIME` | Uppercase |
 
 ### Functions that work identically
 
-These pass through with no changes: `MIN`, `MAX`, `ABS`, `EXP`, `LN`, `LOG`, `SQRT`, `SIN`, `COS`, `TAN`, `ARCSIN`, `ARCCOS`, `ARCTAN`, `SIGN`, `INT`, `ROUND`, `MODULO`, `QUANTUM`, `POWER`, `STEP`, `RAMP`, `PULSE`, `PULSE_TRAIN`, `SMOOTH`, `SMOOTHI`, `SMOOTH3`, `SMOOTH3I`, `DELAY1`, `DELAY1I`, `DELAY3`, `DELAY3I`, `DELAY_FIXED`, `TREND`, `FORECAST`, `NPV`, `RANDOM_NORMAL`, `RANDOM_UNIFORM`, `VMIN`, `VMAX`, `PROD`, `PI`, `INITIAL`, `LOOKUP`.
+These pass through with no changes: `MIN`, `MAX`, `ABS`, `EXP`, `LN`, `LOG`, `SQRT`, `SIN`, `COS`, `TAN`, `ARCSIN`, `ARCCOS`, `ARCTAN`, `SIGN`, `INT`, `ROUND`, `MODULO`, `QUANTUM`, `POWER`, `STEP`, `RAMP`, `PULSE`, `PULSE_TRAIN`, `SMOOTH`, `SMOOTHI`, `SMOOTH3`, `SMOOTH3I`, `DELAY1`, `DELAY1I`, `DELAY3`, `DELAY3I`, `DELAY_FIXED`, `TREND`, `FORECAST`, `NPV`, `RANDOM_NORMAL`, `RANDOM_UNIFORM`, `VMIN`, `VMAX`, `PROD`, `PI`, `INITIAL`, `LOOKUP`, `LOOKUP_AREA`, `SAMPLE_IF_TRUE`, `FIND_ZERO`, `NOT`, `OR`, `AND`, `TRUE`, `FALSE`.
+
+Multi-word Vensim functions are automatically converted: `SAMPLE IF TRUE` becomes `SAMPLE_IF_TRUE`, `FIND ZERO` becomes `FIND_ZERO`, `LOOKUP AREA` becomes `LOOKUP_AREA`, and `ACTIVE INITIAL(expr, init)` passes through the first argument.
 
 ### Simulation settings
 

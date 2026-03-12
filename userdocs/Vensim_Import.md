@@ -79,10 +79,16 @@ All settings from the `.Control` group are extracted (case-insensitive):
 | `PULSE TRAIN(start, dur, repeat, end)` | `PULSE_TRAIN(start, dur, repeat, end)` | Space to underscore |
 | `RANDOM NORMAL(min, max, mean, std, seed)` | `RANDOM_NORMAL(min, max, mean, std, seed)` | Space to underscore |
 | `RANDOM UNIFORM(min, max, seed)` | `RANDOM_UNIFORM(min, max, seed)` | Space to underscore |
+| `SAMPLE IF TRUE(cond, input, init)` | `SAMPLE_IF_TRUE(cond, input, init)` | Space to underscore |
+| `FIND ZERO(expr, var, lo, hi)` | `FIND_ZERO(expr, var, lo, hi)` | Space to underscore |
+| `LOOKUP AREA(table, x1, x2)` | `LOOKUP_AREA(table, x1, x2)` | Space to underscore |
+| `ACTIVE INITIAL(expr, init)` | `expr` | Pass-through first arg (no game mode) |
+| `MESSAGE(args)` | `0` | No-op (UI-only function) |
+| `SIMULTANEOUS(args)` | `0` | No-op (solver hint for Euler integration) |
 
 **Natively supported functions (pass-through):**
 
-`SMOOTH`, `SMOOTH3`, `SMOOTH3I`, `SMOOTHI`, `DELAY1`, `DELAY1I`, `DELAY3`, `DELAY3I`, `DELAY_FIXED`, `PULSE`, `PULSE_TRAIN`, `RANDOM_NORMAL`, `RANDOM_UNIFORM`, `MIN`, `MAX`, `ABS`, `EXP`, `LN`, `LOG`, `SQRT`, `SIN`, `COS`, `TAN`, `ARCSIN`, `ARCCOS`, `ARCTAN`, `INT`, `ROUND`, `MODULO`, `POWER`, `QUANTUM`, `SIGN`, `PI`, `VMIN`, `VMAX`, `PROD`, `RAMP`, `STEP`, `TREND`, `FORECAST`, `NPV`, `INITIAL`, `LOOKUP`
+`SMOOTH`, `SMOOTH3`, `SMOOTH3I`, `SMOOTHI`, `DELAY1`, `DELAY1I`, `DELAY3`, `DELAY3I`, `DELAY_FIXED`, `PULSE`, `PULSE_TRAIN`, `RANDOM_NORMAL`, `RANDOM_UNIFORM`, `MIN`, `MAX`, `ABS`, `EXP`, `LN`, `LOG`, `SQRT`, `SIN`, `COS`, `TAN`, `ARCSIN`, `ARCCOS`, `ARCTAN`, `INT`, `ROUND`, `MODULO`, `POWER`, `QUANTUM`, `SIGN`, `PI`, `VMIN`, `VMAX`, `PROD`, `RAMP`, `STEP`, `TREND`, `FORECAST`, `NPV`, `INITIAL`, `LOOKUP`, `LOOKUP_AREA`, `SAMPLE_IF_TRUE`, `FIND_ZERO`, `NOT`, `OR`, `AND`, `TRUE`, `FALSE`
 
 ### Sketch/View Parsing
 
@@ -122,12 +128,10 @@ The following functions are recognized but not supported. They remain in the equ
 | `GET DIRECT DATA` | Reads data from external file. |
 | `GET DIRECT CONSTANTS` | Reads constants from external file. |
 | `TABBED ARRAY` | Inline array definition. Would need full array support. |
-| `SAMPLE IF TRUE` | Conditional sampling. |
 | `VECTOR SELECT` | Vector operations. Would need array support. |
 | `VECTOR ELM MAP` | Vector element mapping. |
 | `VECTOR SORT ORDER` | Vector sorting. |
 | `ALLOCATE AVAILABLE` | Resource allocation across subscripts. |
-| `FIND ZERO` | Numerical root-finding. |
 
 ### Structural Features
 
@@ -190,10 +194,16 @@ All import errors are non-fatal. The importer collects warnings in `ImportResult
 
 ## Import Compatibility
 
-Tested against 25 models from the TU Delft repository (Pruyt, 2013):
-- **Trial compilation**: 25/25 models pass (100%)
-- **Simulation**: 24/25 models simulate successfully (96%)
-  - ProjectManagement fails due to algebraic loops (circular variable references)
+Tested against 59 Vensim sample models (`D:\Vensim\Models\Sample`):
+- **Import (parse .mdl)**: 59/59 (100%)
+- **Compile**: 45/59 (76%)
+- **Simulate**: 45/59 (76%)
+
+The 14 compile failures are caused by subscript/array models that require array expansion the importer doesn't yet support, not by missing functions.
+
+Also tested against 25 models from the TU Delft repository (Pruyt, 2013):
+- **Compilation**: 25/25 (100%)
+- **Simulation**: 24/25 (96%) — ProjectManagement fails due to algebraic loops
 
 ---
 
@@ -225,6 +235,10 @@ Tested against 25 models from the TU Delft repository (Pruyt, 2013):
 | DELAY1 / DELAY1I / DELAY3 / DELAY3I / DELAY_FIXED | Full (native) |
 | PULSE / PULSE_TRAIN | Full (native) |
 | RANDOM_NORMAL / RANDOM_UNIFORM | Full (native) |
+| SAMPLE_IF_TRUE / FIND_ZERO | Full (native) |
+| LOOKUP_AREA | Full (trapezoidal integration) |
+| ACTIVE INITIAL / GAME / MESSAGE / SIMULTANEOUS | Full (translated or no-op) |
+| NOT / OR / AND / TRUE / FALSE (function forms) | Full |
 | TREND / FORECAST / NPV | Full |
 | Sketch/views | Full (4 line types) |
 | Macros | Skipped |
