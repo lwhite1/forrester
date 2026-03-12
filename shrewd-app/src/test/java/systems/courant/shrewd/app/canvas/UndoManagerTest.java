@@ -341,6 +341,32 @@ class UndoManagerTest {
         }
 
         @Test
+        void shouldDecompressAfterCompressionCompletes() throws Exception {
+            // Push a snapshot, wait for compression to complete, then undo.
+            // This exercises the compressed data path (rawSnapshot == null)
+            // rather than the fast raw-snapshot path.
+            ModelDefinition model = new ModelDefinitionBuilder()
+                    .name("Compressed")
+                    .stock("Water", 500, "gallons")
+                    .build();
+            ViewDef view = new ViewDef("View1", List.of(), List.of(), List.of());
+            UndoManager.Snapshot original = new UndoManager.Snapshot(model, view);
+
+            manager.pushUndo(original, "Add water");
+
+            // Wait for background compression to finish
+            Thread.sleep(200);
+
+            UndoManager.Snapshot restored = manager.undo(snapshot("Current")).orElseThrow();
+
+            assertThat(restored.model().name()).isEqualTo("Compressed");
+            assertThat(restored.model().stocks()).hasSize(1);
+            assertThat(restored.model().stocks().getFirst().name()).isEqualTo("Water");
+            assertThat(restored.view()).isNotNull();
+            assertThat(restored.view().name()).isEqualTo("View1");
+        }
+
+        @Test
         void shouldReportCorrectDepth() {
             manager.pushUndo(snapshot("S1"));
             manager.pushUndo(snapshot("S2"));

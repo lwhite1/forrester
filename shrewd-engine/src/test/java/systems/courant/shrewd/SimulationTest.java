@@ -514,6 +514,60 @@ public class SimulationTest {
         }
 
         @Test
+        void shouldNotRecordNaNFlowInHistory() {
+            Model model = new Model("NaN Flow History");
+            Stock stock = new Stock("S", 100, THING);
+
+            // Flow that produces NaN — should NOT be recorded in history
+            Flow nanFlow = Flow.create("NaN", MINUTE, () -> new Quantity(Double.NaN, THING));
+            stock.addInflow(nanFlow);
+            model.addStock(stock);
+
+            Simulation sim = new Simulation(model, MINUTE, MINUTE, 3);
+            sim.execute();
+
+            // Flow history should have no entries — NaN values are skipped
+            assertThat(nanFlow.getHistoryAtTimeStep(0)).isEqualTo(0.0);
+            assertThat(nanFlow.getHistoryAtTimeStep(1)).isEqualTo(0.0);
+            assertThat(nanFlow.getHistoryAtTimeStep(2)).isEqualTo(0.0);
+        }
+
+        @Test
+        void shouldNotRecordInfinityFlowInHistory() {
+            Model model = new Model("Inf Flow History");
+            Stock stock = new Stock("S", 100, THING);
+
+            Flow infFlow = Flow.create("Inf", MINUTE,
+                    () -> new Quantity(Double.POSITIVE_INFINITY, THING));
+            stock.addInflow(infFlow);
+            model.addStock(stock);
+
+            Simulation sim = new Simulation(model, MINUTE, MINUTE, 2);
+            sim.execute();
+
+            // Infinity values should not be recorded in flow history
+            assertThat(infFlow.getHistoryAtTimeStep(0)).isEqualTo(0.0);
+            assertThat(infFlow.getHistoryAtTimeStep(1)).isEqualTo(0.0);
+        }
+
+        @Test
+        void shouldRecordFiniteFlowValuesNormally() {
+            Model model = new Model("Finite Flow History");
+            Stock stock = new Stock("S", 100, THING);
+
+            Flow flow = Flow.create("Normal", MINUTE, () -> new Quantity(5, THING));
+            stock.addOutflow(flow);
+            model.addStock(stock);
+
+            Simulation sim = new Simulation(model, MINUTE, MINUTE, 2);
+            sim.execute();
+
+            // Finite values should still be recorded
+            assertThat(flow.getHistoryAtTimeStep(0)).isEqualTo(5.0);
+            assertThat(flow.getHistoryAtTimeStep(1)).isEqualTo(5.0);
+        }
+
+        @Test
         void shouldNotRepeatWarningForSameStock() {
             Model model = new Model("Repeated NaN");
             Stock stock = new Stock("Bad", 50, THING);
