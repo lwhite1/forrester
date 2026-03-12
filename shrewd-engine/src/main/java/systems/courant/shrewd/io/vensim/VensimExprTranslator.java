@@ -157,15 +157,9 @@ public final class VensimExprTranslator {
         expr = SMOOTH3_PATTERN.matcher(expr).replaceAll("SMOOTH3(");
         expr = SMOOTHI_PATTERN.matcher(expr).replaceAll("SMOOTHI(");
 
-        // 7. DELAY1 → DELAY3 (with warning)
-        if (DELAY1_PATTERN.matcher(expr).find()) {
-            expr = DELAY1_PATTERN.matcher(expr).replaceAll("DELAY3(");
-            warnings.add("DELAY1 approximated as DELAY3");
-        }
-        if (DELAY1I_PATTERN.matcher(expr).find()) {
-            expr = DELAY1I_PATTERN.matcher(expr).replaceAll("DELAY3(");
-            warnings.add("DELAY1I approximated as DELAY3 (first-order + initial value semantics differ)");
-        }
+        // 7. DELAY1/DELAY1I → native engine functions
+        expr = DELAY1I_PATTERN.matcher(expr).replaceAll("DELAY1I(");
+        expr = DELAY1_PATTERN.matcher(expr).replaceAll("DELAY1(");
 
         // 8. DELAY FIXED → DELAY_FIXED
         expr = DELAY_FIXED_PATTERN.matcher(expr).replaceAll("DELAY_FIXED(");

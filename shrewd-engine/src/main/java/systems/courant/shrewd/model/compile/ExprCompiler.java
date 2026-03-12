@@ -1,5 +1,6 @@
 package systems.courant.shrewd.model.compile;
 
+import systems.courant.shrewd.model.Delay1;
 import systems.courant.shrewd.model.Delay3;
 import systems.courant.shrewd.model.DelayFixed;
 import systems.courant.shrewd.model.Forecast;
@@ -369,6 +370,7 @@ public class ExprCompiler {
             case "SMOOTHI" -> compileSmoothI(args);
             case "SMOOTH3" -> compileSmooth3(args);
             case "SMOOTH3I" -> compileSmooth3I(args);
+            case "DELAY1", "DELAY1I" -> compileDelay1(args);
             case "DELAY3", "DELAY3I" -> compileDelay3(args);
             case "STEP" -> compileStep(args);
             case "RAMP" -> compileRamp(args);
@@ -448,6 +450,32 @@ public class ExprCompiler {
         Smooth3 smooth3 = Smooth3.of(input, smoothingTime, initial, context.getCurrentStep());
         resettables.add(smooth3);
         return smooth3::getCurrentValue;
+    }
+
+    private DoubleSupplier compileDelay1(List<Expr> args) {
+        if (args.size() < 2 || args.size() > 3) {
+            throw new CompilationException(
+                    "DELAY1 requires 2-3 arguments, got " + args.size(), "DELAY1");
+        }
+        DoubleSupplier input = compileExpr(args.get(0));
+        double delayTime = evaluateAtCompileTime(args.get(1), "DELAY1 delayTime");
+        if (delayTime <= 0 || Double.isNaN(delayTime)) {
+            logger.warn("DELAY1 delayTime evaluated to {} at compile time, defaulting to 1.0",
+                    delayTime);
+            delayTime = 1.0;
+        }
+        Delay1 delay1;
+        if (args.size() == 3) {
+            double initial = evaluateAtCompileTime(args.get(2), "DELAY1 initialValue");
+            if (Double.isNaN(initial)) {
+                initial = 0.0;
+            }
+            delay1 = Delay1.of(input, delayTime, initial, context.getCurrentStep());
+        } else {
+            delay1 = Delay1.of(input, delayTime, context.getCurrentStep());
+        }
+        resettables.add(delay1);
+        return delay1::getCurrentValue;
     }
 
     private DoubleSupplier compileDelay3(List<Expr> args) {
