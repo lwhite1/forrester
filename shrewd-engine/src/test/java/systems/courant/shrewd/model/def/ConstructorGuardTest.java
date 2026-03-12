@@ -99,4 +99,57 @@ class ConstructorGuardTest {
                     () -> new SimulationSettings("Day", 365, "Day"));
         }
     }
+
+    @Nested
+    @DisplayName("LookupTableDef")
+    class LookupTableDefGuards {
+
+        @Test
+        void shouldRejectNaNInYValues() {
+            assertThatThrownBy(() -> new LookupTableDef("tbl",
+                    new double[]{0, 1, 2},
+                    new double[]{1.0, Double.NaN, 3.0},
+                    "LINEAR"))
+                    .isInstanceOf(IllegalArgumentException.class)
+                    .hasMessageContaining("finite");
+        }
+
+        @Test
+        void shouldRejectAllNaNYValues() {
+            assertThatThrownBy(() -> new LookupTableDef("tbl",
+                    new double[]{0, 1},
+                    new double[]{Double.NaN, Double.NaN},
+                    "LINEAR"))
+                    .isInstanceOf(IllegalArgumentException.class)
+                    .hasMessageContaining("finite");
+        }
+
+        @Test
+        void shouldRejectInfiniteInYValues() {
+            assertThatThrownBy(() -> new LookupTableDef("tbl",
+                    new double[]{0, 1},
+                    new double[]{1.0, Double.POSITIVE_INFINITY},
+                    "LINEAR"))
+                    .isInstanceOf(IllegalArgumentException.class)
+                    .hasMessageContaining("finite");
+        }
+
+        @Test
+        void shouldRejectNaNInXValues() {
+            assertThatThrownBy(() -> new LookupTableDef("tbl",
+                    new double[]{0, Double.NaN},
+                    new double[]{1.0, 2.0},
+                    "LINEAR"))
+                    .isInstanceOf(IllegalArgumentException.class)
+                    .hasMessageContaining("finite");
+        }
+
+        @Test
+        void shouldAcceptValidLookupTable() {
+            assertThatNoException().isThrownBy(() -> new LookupTableDef("tbl",
+                    new double[]{0, 1, 2},
+                    new double[]{0, 0.5, 1.0},
+                    "LINEAR"));
+        }
+    }
 }

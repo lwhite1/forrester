@@ -132,6 +132,24 @@ class XmileExporterTest {
         }
 
         @Test
+        void shouldExportCorrectYScaleForLookupTable() {
+            ModelDefinition def = new ModelDefinitionBuilder()
+                    .name("Test")
+                    .defaultSimulation("Day", 100, "Day")
+                    .lookupTable("effect",
+                            new double[]{0, 1, 2, 3},
+                            new double[]{5.0, 10.0, 3.0, 8.0},
+                            "LINEAR")
+                    .build();
+
+            String xml = XmileExporter.toXmile(def);
+            assertThat(xml).contains("<gf>");
+            // yscale min should be 3, max should be 10
+            assertThat(xml).contains("min=\"3\"");
+            assertThat(xml).contains("max=\"10\"");
+        }
+
+        @Test
         void shouldExportLookupTable() {
             ModelDefinition def = new ModelDefinitionBuilder()
                     .name("Test")

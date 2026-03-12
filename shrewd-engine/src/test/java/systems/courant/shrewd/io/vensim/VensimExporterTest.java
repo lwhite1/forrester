@@ -180,6 +180,22 @@ class VensimExporterTest {
         }
 
         @Test
+        void shouldExportCorrectYRangeForLookupTable() {
+            ModelDefinition def = new ModelDefinitionBuilder()
+                    .name("Test")
+                    .defaultSimulation("Day", 100, "Day")
+                    .lookupTable("effect curve",
+                            new double[]{0, 1, 2, 3},
+                            new double[]{5.0, 10.0, 3.0, 8.0},
+                            "LINEAR")
+                    .build();
+
+            String mdl = VensimExporter.toVensim(def);
+            // Range annotation should use ymin=3 and ymax=10
+            assertThat(mdl).contains("(0,3)-(3,10)");
+        }
+
+        @Test
         void shouldExportAuxWithLookupAsWithLookup() {
             ModelDefinition def = new ModelDefinitionBuilder()
                     .name("Test")

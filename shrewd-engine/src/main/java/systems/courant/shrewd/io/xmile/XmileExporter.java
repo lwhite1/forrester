@@ -391,8 +391,14 @@ public final class XmileExporter {
         double ymin = Double.MAX_VALUE;
         double ymax = -Double.MAX_VALUE;
         for (double y : yVals) {
-            ymin = Math.min(ymin, y);
-            ymax = Math.max(ymax, y);
+            if (!Double.isNaN(y)) {
+                ymin = Math.min(ymin, y);
+                ymax = Math.max(ymax, y);
+            }
+        }
+        if (ymin == Double.MAX_VALUE) {
+            ymin = 0;
+            ymax = 0;
         }
         Element yscale = doc.createElementNS(
                 XmileConstants.NAMESPACE_URI, XmileConstants.YSCALE);
