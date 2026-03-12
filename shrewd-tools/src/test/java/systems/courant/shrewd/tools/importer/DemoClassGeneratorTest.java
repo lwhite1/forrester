@@ -70,7 +70,7 @@ class DemoClassGeneratorTest {
         assertThat(source).contains(".source(\"SIR model (1927)\")");
         assertThat(source).contains(".license(\"CC-BY-SA-4.0\")");
         assertThat(source).contains(".url(\"https://doi.org/10.1098/rspa.1927.0118\")");
-        assertThat(source).contains("* Author: Kermack & McKendrick");
+        assertThat(source).contains("* Author: Kermack &amp; McKendrick");
     }
 
     @Test
@@ -182,6 +182,37 @@ class DemoClassGeneratorTest {
         assertThat(source).contains("Value &lt;0 found in A&amp;B");
         assertThat(source).doesNotContain("Value <0 found");
         assertThat(source).contains("Ref to &#42;/ block");
+    }
+
+    @Test
+    void shouldEscapeMetadataFieldsInJavadoc() {
+        ModelDefinition def = new ModelDefinitionBuilder()
+                .name("Test")
+                .stock("S", 100.0, "people")
+                .defaultSimulation("Day", 10.0, "Day")
+                .build();
+
+        ModelMetadata metadata = ModelMetadata.builder()
+                .author("Evil */ Author")
+                .source("Source with */closing")
+                .license("License */ break")
+                .build();
+
+        String source = generator.generate(def, metadata, "TestDemo",
+                "systems.courant.shrewd.demo", "file*/.xmile",
+                List.of(), List.of());
+
+        // Escaped versions should be present in the Javadoc
+        assertThat(source).contains("Evil &#42;/ Author");
+        assertThat(source).contains("Source with &#42;/closing");
+        assertThat(source).contains("License &#42;/ break");
+        assertThat(source).contains("file&#42;/.xmile");
+
+        // Raw values must not appear unescaped in the Javadoc header
+        assertThat(source).doesNotContain("* Author: Evil */ Author");
+        assertThat(source).doesNotContain("* Source: Source with */closing");
+        assertThat(source).doesNotContain("* License: License */ break");
+        assertThat(source).doesNotContain("* Imported from: file*/.xmile");
     }
 
     @Test
