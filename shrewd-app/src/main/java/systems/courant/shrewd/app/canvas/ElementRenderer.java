@@ -211,7 +211,8 @@ public final class ElementRenderer {
         drawPortIndicators(gc, outputPorts, x + width, y, height, false);
     }
 
-    private static final double PORT_RADIUS = 3.0;
+    /** Use {@link PortGeometry#PORT_RADIUS} for shared access. */
+    private static final double PORT_RADIUS = PortGeometry.PORT_RADIUS;
     private static final Color PORT_COLOR = Color.web("#5B9BD5");
     private static final Font PORT_FONT = Font.font("System", 9);
 
@@ -221,9 +222,8 @@ public final class ElementRenderer {
         if (ports == null || ports.isEmpty()) {
             return;
         }
-        double spacing = height / (ports.size() + 1);
         for (int i = 0; i < ports.size(); i++) {
-            double py = y + spacing * (i + 1);
+            double py = PortGeometry.portY(y, height, i, ports.size());
 
             // Small circle on the edge
             gc.setFill(PORT_COLOR);

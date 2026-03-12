@@ -1085,6 +1085,8 @@ public class ModelWindow {
                 () -> switchToolAndFocus(CanvasToolBar.Tool.PLACE_CLD_VARIABLE)));
         commands.add(cmd("Draw Causal Link", "Build",
                 () -> switchToolAndFocus(CanvasToolBar.Tool.PLACE_CAUSAL_LINK)));
+        commands.add(cmd("Draw Info Link", "Build",
+                () -> switchToolAndFocus(CanvasToolBar.Tool.PLACE_INFO_LINK)));
         commands.add(cmd("Add Comment", "Build",
                 () -> switchToolAndFocus(CanvasToolBar.Tool.PLACE_COMMENT)));
         commands.add(cmd("Select Tool", "Build",

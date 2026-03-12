@@ -87,6 +87,7 @@ public class CanvasRenderer {
             List<ConnectorRoute> connectors,
             FlowCreationController.State flowState,
             CausalLinkCreationController.State causalLinkState,
+            InfoLinkCreationController.State infoLinkState,
             ReattachState reattachState,
             RerouteState rerouteState,
             MarqueeState marqueeState,
@@ -131,6 +132,7 @@ public class CanvasRenderer {
         List<ConnectorRoute> connectors = ctx.connectors();
         FlowCreationController.State flowState = ctx.flowState();
         CausalLinkCreationController.State causalLinkState = ctx.causalLinkState();
+        InfoLinkCreationController.State infoLinkState = ctx.infoLinkState();
         ReattachState reattachState = ctx.reattachState();
         RerouteState rerouteState = ctx.rerouteState();
         MarqueeState marqueeState = ctx.marqueeState();
@@ -338,6 +340,16 @@ public class CanvasRenderer {
         // 4b. Draw rubber-band line during pending causal link creation
         if (causalLinkState.pending()) {
             drawCausalLinkRubberBand(gc, causalLinkState);
+        }
+
+        // 4c. Draw rubber-band line during pending info link creation
+        if (infoLinkState.pending()) {
+            drawInfoLinkRubberBand(gc, infoLinkState);
+        }
+
+        // 4d. Draw port hover highlight during info link tool use
+        if (infoLinkState.hoveredPort() != null) {
+            drawPortHoverHighlight(gc, infoLinkState.hoveredPort());
         }
 
         // 5. Draw reattachment rubber-band
@@ -807,6 +819,38 @@ public class CanvasRenderer {
         if (hitElement != null && !hitElement.equals(state.source())) {
             drawElementHoverHighlight(gc, hitElement);
         }
+    }
+
+    /**
+     * Draws a rubber-band line for info link creation to/from module ports.
+     */
+    private void drawInfoLinkRubberBand(GraphicsContext gc,
+                                        InfoLinkCreationController.State state) {
+        gc.setStroke(RUBBER_BAND_COLOR);
+        gc.setLineWidth(2);
+        gc.setLineDashes(RUBBER_BAND_DASH, RUBBER_BAND_GAP);
+        gc.strokeLine(state.sourceX(), state.sourceY(),
+                state.rubberBandEndX(), state.rubberBandEndY());
+        gc.setLineDashes();
+
+        // Highlight element under cursor
+        String hitElement = HitTester.hitTest(canvasState,
+                state.rubberBandEndX(), state.rubberBandEndY());
+        if (hitElement != null && !hitElement.equals(state.sourceName())) {
+            drawElementHoverHighlight(gc, hitElement);
+        }
+    }
+
+    private static final Color PORT_HOVER_COLOR = Color.web("#4A90D9", 0.35);
+    private static final double PORT_HOVER_RADIUS = 7.0;
+
+    /**
+     * Draws a translucent highlight circle around a hovered port during info link tool use.
+     */
+    private void drawPortHoverHighlight(GraphicsContext gc, HitTester.PortHit port) {
+        gc.setFill(PORT_HOVER_COLOR);
+        gc.fillOval(port.portX() - PORT_HOVER_RADIUS, port.portY() - PORT_HOVER_RADIUS,
+                PORT_HOVER_RADIUS * 2, PORT_HOVER_RADIUS * 2);
     }
 
     /**

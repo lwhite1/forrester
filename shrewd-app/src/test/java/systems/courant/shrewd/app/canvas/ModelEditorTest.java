@@ -2114,4 +2114,73 @@ class ModelEditorTest {
             assertThat(editor.hasElement(name)).isTrue();
         }
     }
+
+    @Nested
+    @DisplayName("binding connector generation")
+    class BindingConnectorGeneration {
+
+        @Test
+        void shouldGenerateConnectorForInputBinding() {
+            editor.addAux();  // Aux 1
+            systems.courant.shrewd.model.def.ModuleInterface iface =
+                    new systems.courant.shrewd.model.def.ModuleInterface(
+                            List.of(new systems.courant.shrewd.model.def.PortDef("in", "u")),
+                            List.of());
+            ModelDefinition moduleDef = new ModelDefinition(
+                    "Module 1", null, iface,
+                    List.of(), List.of(), List.of(),
+                    List.of(), List.of(), List.of(), List.of(), null);
+            editor.addModuleFrom(new ModuleInstanceDef(
+                    "Module 1", moduleDef,
+                    Map.of("in", "Aux_1"), Map.of()));
+
+            var connectors = editor.generateConnectors();
+
+            assertThat(connectors).anyMatch(c ->
+                    c.from().equals("Aux 1") && c.to().equals("Module 1"));
+        }
+
+        @Test
+        void shouldGenerateConnectorForOutputBinding() {
+            editor.addAux();  // Aux 1
+            systems.courant.shrewd.model.def.ModuleInterface iface =
+                    new systems.courant.shrewd.model.def.ModuleInterface(
+                            List.of(),
+                            List.of(new systems.courant.shrewd.model.def.PortDef("out", "u")));
+            ModelDefinition moduleDef = new ModelDefinition(
+                    "Module 1", null, iface,
+                    List.of(), List.of(), List.of(),
+                    List.of(), List.of(), List.of(), List.of(), null);
+            editor.addModuleFrom(new ModuleInstanceDef(
+                    "Module 1", moduleDef,
+                    Map.of(), Map.of("out", "Aux 1")));
+
+            var connectors = editor.generateConnectors();
+
+            assertThat(connectors).anyMatch(c ->
+                    c.from().equals("Module 1") && c.to().equals("Aux 1"));
+        }
+
+        @Test
+        void shouldNotGenerateConnectorForComplexExpression() {
+            editor.addAux();  // Aux 1
+            systems.courant.shrewd.model.def.ModuleInterface iface =
+                    new systems.courant.shrewd.model.def.ModuleInterface(
+                            List.of(new systems.courant.shrewd.model.def.PortDef("in", "u")),
+                            List.of());
+            ModelDefinition moduleDef = new ModelDefinition(
+                    "Module 1", null, iface,
+                    List.of(), List.of(), List.of(),
+                    List.of(), List.of(), List.of(), List.of(), null);
+            editor.addModuleFrom(new ModuleInstanceDef(
+                    "Module 1", moduleDef,
+                    Map.of("in", "Aux_1 + 10"), Map.of()));
+
+            var connectors = editor.generateConnectors();
+
+            // Should not generate a direct connector for complex expressions
+            assertThat(connectors).noneMatch(c ->
+                    c.from().equals("Aux 1") && c.to().equals("Module 1"));
+        }
+    }
 }

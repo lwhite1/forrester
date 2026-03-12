@@ -96,6 +96,7 @@ public class StatusBar extends HBox {
             case PLACE_LOOKUP -> "Place Lookup";
             case PLACE_CLD_VARIABLE -> "Place CLD Variable";
             case PLACE_CAUSAL_LINK -> "Draw Causal Link";
+            case PLACE_INFO_LINK -> "Draw Info Link";
             case PLACE_COMMENT -> "Place Comment";
         };
         toolLabel.setText(name);

@@ -119,6 +119,7 @@ public final class DiagramExporter {
                             editor, connectors,
                             FlowCreationController.State.IDLE,
                             CausalLinkCreationController.State.IDLE,
+                            InfoLinkCreationController.State.IDLE,
                             CanvasRenderer.ReattachState.IDLE,
                             CanvasRenderer.RerouteState.IDLE,
                             CanvasRenderer.MarqueeState.IDLE,

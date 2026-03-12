@@ -3,6 +3,9 @@ package systems.courant.shrewd.app.canvas;
 import systems.courant.shrewd.model.def.CausalLinkDef;
 import systems.courant.shrewd.model.def.ConnectorRoute;
 import systems.courant.shrewd.model.def.ElementType;
+import systems.courant.shrewd.model.def.ModuleInstanceDef;
+import systems.courant.shrewd.model.def.ModuleInterface;
+import systems.courant.shrewd.model.def.PortDef;
 
 import java.util.List;
 
@@ -14,7 +17,81 @@ public final class HitTester {
 
     private static final double CONNECTION_HIT_TOLERANCE = 6.0;
 
+    /**
+     * Result of a port hit test, identifying which module port was hit.
+     */
+    public record PortHit(
+            String moduleName,
+            String portName,
+            boolean isInput,
+            double portX,
+            double portY
+    ) {}
+
     private HitTester() {
+    }
+
+    /**
+     * Hit-tests module ports at the given world coordinates.
+     * Iterates elements in reverse draw order; for MODULE elements, tests each
+     * port circle against {@link PortGeometry#PORT_HIT_RADIUS}.
+     *
+     * @return the hit port, or null if no port was hit
+     */
+    public static PortHit hitTestPort(CanvasState state, ModelEditor editor,
+                                      double worldX, double worldY) {
+        List<String> drawOrder = state.getDrawOrder();
+
+        for (int i = drawOrder.size() - 1; i >= 0; i--) {
+            String name = drawOrder.get(i);
+            ElementType type = state.getType(name).orElse(null);
+            if (type != ElementType.MODULE) {
+                continue;
+            }
+
+            var moduleOpt = editor.getModuleByName(name);
+            if (moduleOpt.isEmpty()) {
+                continue;
+            }
+            ModuleInstanceDef module = moduleOpt.get();
+            ModuleInterface iface = module.definition().moduleInterface();
+            if (iface == null) {
+                continue;
+            }
+
+            double cx = state.getX(name);
+            double cy = state.getY(name);
+            double halfW = LayoutMetrics.effectiveWidth(state, name) / 2;
+            double halfH = LayoutMetrics.effectiveHeight(state, name) / 2;
+            double topY = cy - halfH;
+            double height = halfH * 2;
+
+            // Test input ports (left edge)
+            List<PortDef> inputs = iface.inputs();
+            for (int p = 0; p < inputs.size(); p++) {
+                double px = PortGeometry.inputPortX(cx, halfW);
+                double py = PortGeometry.portY(topY, height, p, inputs.size());
+                double dx = worldX - px;
+                double dy = worldY - py;
+                if (dx * dx + dy * dy <= PortGeometry.PORT_HIT_RADIUS * PortGeometry.PORT_HIT_RADIUS) {
+                    return new PortHit(name, inputs.get(p).name(), true, px, py);
+                }
+            }
+
+            // Test output ports (right edge)
+            List<PortDef> outputs = iface.outputs();
+            for (int p = 0; p < outputs.size(); p++) {
+                double px = PortGeometry.outputPortX(cx, halfW);
+                double py = PortGeometry.portY(topY, height, p, outputs.size());
+                double dx = worldX - px;
+                double dy = worldY - py;
+                if (dx * dx + dy * dy <= PortGeometry.PORT_HIT_RADIUS * PortGeometry.PORT_HIT_RADIUS) {
+                    return new PortHit(name, outputs.get(p).name(), false, px, py);
+                }
+            }
+        }
+
+        return null;
     }
 
     /**

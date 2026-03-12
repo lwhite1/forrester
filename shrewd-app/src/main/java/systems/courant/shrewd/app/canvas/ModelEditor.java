@@ -1301,9 +1301,61 @@ public class ModelEditor {
     }
 
     /**
-     * Generates connector routes from the current model state's dependency graph.
+     * Generates connector routes from the current model state's dependency graph,
+     * including binding-derived connectors for module input/output bindings.
      */
     public List<ConnectorRoute> generateConnectors() {
-        return ConnectorGenerator.generate(toModelDefinition());
+        List<ConnectorRoute> base = ConnectorGenerator.generate(toModelDefinition());
+        java.util.Set<String> seen = new java.util.LinkedHashSet<>();
+        for (ConnectorRoute r : base) {
+            seen.add(r.from() + " -> " + r.to());
+        }
+        List<ConnectorRoute> result = new java.util.ArrayList<>(base);
+
+        for (ModuleInstanceDef module : modules) {
+            String moduleName = module.instanceName();
+
+            // Input bindings: single-token expressions that match an existing element
+            for (Map.Entry<String, String> entry : module.inputBindings().entrySet()) {
+                String expr = entry.getValue();
+                if (expr != null && !expr.isBlank() && isSingleToken(expr)) {
+                    String elementName = expr.replace('_', ' ');
+                    if (nameIndex.contains(elementName)) {
+                        String key = elementName + " -> " + moduleName;
+                        if (seen.add(key)) {
+                            result.add(new ConnectorRoute(elementName, moduleName));
+                        }
+                    }
+                }
+            }
+
+            // Output bindings: alias names that match an existing element
+            for (Map.Entry<String, String> entry : module.outputBindings().entrySet()) {
+                String alias = entry.getValue();
+                if (alias != null && !alias.isBlank() && nameIndex.contains(alias)) {
+                    String key = moduleName + " -> " + alias;
+                    if (seen.add(key)) {
+                        result.add(new ConnectorRoute(moduleName, alias));
+                    }
+                }
+            }
+        }
+
+        return result;
+    }
+
+    /**
+     * Returns true if the expression is a single identifier token (no operators or whitespace).
+     */
+    private static boolean isSingleToken(String expr) {
+        String trimmed = expr.trim();
+        for (int i = 0; i < trimmed.length(); i++) {
+            char c = trimmed.charAt(i);
+            if (c == ' ' || c == '+' || c == '-' || c == '*' || c == '/'
+                    || c == '(' || c == ')' || c == ',') {
+                return false;
+            }
+        }
+        return !trimmed.isEmpty();
     }
 }
