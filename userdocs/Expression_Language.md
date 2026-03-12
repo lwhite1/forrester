@@ -134,6 +134,18 @@ IF(Population > Capacity, Capacity, Population)
 | `XIDZ(a, b, x)` | 3 | a / b if b ≠ 0, otherwise x ("X If Divide by Zero") |
 | `ZIDZ(a, b)` | 2 | a / b if b ≠ 0, otherwise 0 ("Zero If Divide by Zero") |
 
+## Logical Functions
+
+In addition to the `and`, `or`, and `not` operators (see Operators above), these are available as function-call forms. They are equivalent to the operator forms and exist primarily for Vensim compatibility.
+
+| Function | Arguments | Description |
+|----------|-----------|-------------|
+| `NOT(x)` | 1 | Returns 1 if x is 0, otherwise 0 |
+| `OR(a, b)` | 2 | Returns 1 if either a or b is non-zero |
+| `AND(a, b)` | 2 | Returns 1 if both a and b are non-zero |
+| `TRUE()` | 0 | Returns 1 (boolean true constant) |
+| `FALSE()` | 0 | Returns 0 (boolean false constant) |
+
 ## System Dynamics Functions
 
 ### INITIAL — Value at Initial Time
@@ -318,6 +330,30 @@ NPV(Cash_Flow, 0.05)       -- accumulate PV at 5% discount per step
 NPV(Cash_Flow, 0.05, 0.5)  -- same, but each payment weighted by 0.5
 ```
 
+### SAMPLE_IF_TRUE — Conditional Sampling
+
+```
+SAMPLE_IF_TRUE(condition, input, initial_value)
+```
+
+A zero-order hold that samples its input only when the condition is non-zero. Returns the most recently sampled value at all other times. Starts at `initial_value` before the first sample is taken.
+
+```
+SAMPLE_IF_TRUE(Trigger > 0, Sensor_Reading, 0)   -- captures Sensor_Reading when Trigger fires
+```
+
+### FIND_ZERO — Numerical Root-Finding
+
+```
+FIND_ZERO(expression, variable, lo, hi)
+```
+
+Finds the value of `variable` in the range [`lo`, `hi`] that makes `expression` equal to zero, using bisection. The `variable` must be a variable reference that appears in `expression`. Useful for equilibrium-seeking and implicit equations.
+
+```
+FIND_ZERO(Supply - Demand, Price, 0, 1000)   -- find Price where Supply equals Demand
+```
+
 ### LOOKUP — Table Lookup
 
 ```
@@ -328,6 +364,18 @@ Looks up `input_value` in the named lookup table and returns the interpolated ou
 
 ```
 LOOKUP(Effect_of_Density, Population / Area)
+```
+
+### LOOKUP_AREA — Area Under Lookup Curve
+
+```
+LOOKUP_AREA(table_name, from_x, to_x)
+```
+
+Computes the area under a lookup table's curve between `from_x` and `to_x` using trapezoidal integration. If `from_x > to_x`, the result is negated. The lookup table must be defined as a separate element in the model.
+
+```
+LOOKUP_AREA(Work_Profile, 0, 10)   -- total work scheduled from time 0 to 10
 ```
 
 ### RANDOM_NORMAL — Random Normal Distribution
