@@ -544,6 +544,92 @@ class VensimExprTranslatorTest {
     }
 
     @Nested
+    @DisplayName("Subscript bracket translation (#495)")
+    class SubscriptBrackets {
+
+        @Test
+        void shouldTranslateSimpleSubscriptBracket() {
+            var result = VensimExprTranslator.translate(
+                    "Population[North]", "var", EMPTY_NAMES);
+            assertThat(result.expression()).isEqualTo("Population_North");
+        }
+
+        @Test
+        void shouldTranslateMultipleSubscriptBrackets() {
+            var result = VensimExprTranslator.translate(
+                    "inflow[tub] + outflow[tub]", "var", EMPTY_NAMES);
+            assertThat(result.expression()).isEqualTo("inflow_tub + outflow_tub");
+        }
+
+        @Test
+        void shouldTranslateSubscriptWithSpaces() {
+            var result = VensimExprTranslator.translate(
+                    "x[low tub]", "var", EMPTY_NAMES);
+            assertThat(result.expression()).isEqualTo("x_low_tub");
+        }
+
+        @Test
+        void shouldTranslateSubscriptInComplexExpression() {
+            var result = VensimExprTranslator.translate(
+                    "rate[Region] * Population[Region] / total", "var", EMPTY_NAMES);
+            assertThat(result.expression()).isEqualTo(
+                    "rate_Region * Population_Region / total");
+        }
+
+        @Test
+        void shouldNotAffectArrayIndexInFunctions() {
+            // Built-in functions should pass through; brackets only affect identifiers
+            var result = VensimExprTranslator.translate(
+                    "MAX(x[a], y[b])", "var", EMPTY_NAMES);
+            assertThat(result.expression()).isEqualTo("MAX(x_a, y_b)");
+        }
+    }
+
+    @Nested
+    @DisplayName("MESSAGE and SIMULTANEOUS no-ops (#498)")
+    class MessageAndSimultaneous {
+
+        @Test
+        void shouldStripMessageToZero() {
+            var result = VensimExprTranslator.translate("MESSAGE(text, 1)", "var", EMPTY_NAMES);
+            assertThat(result.expression()).isEqualTo("0");
+        }
+
+        @Test
+        void shouldStripMessageInsideExpression() {
+            var result = VensimExprTranslator.translate(
+                    "x + MESSAGE(alert, y)", "var", EMPTY_NAMES);
+            assertThat(result.expression()).isEqualTo("x + 0");
+        }
+
+        @Test
+        void shouldStripSimultaneousToZero() {
+            var result = VensimExprTranslator.translate(
+                    "SIMULTANEOUS(0, 2)", "var", EMPTY_NAMES);
+            assertThat(result.expression()).isEqualTo("0");
+        }
+
+        @Test
+        void shouldStripSimultaneousInsideExpression() {
+            var result = VensimExprTranslator.translate(
+                    "IF THEN ELSE(SIMULTANEOUS(0, 1) > 0, 1, 0)", "var", EMPTY_NAMES);
+            assertThat(result.expression()).contains("IF(0 > 0, 1, 0)");
+        }
+
+        @Test
+        void shouldBeCaseInsensitiveForMessage() {
+            var result = VensimExprTranslator.translate("message(x, 0)", "var", EMPTY_NAMES);
+            assertThat(result.expression()).isEqualTo("0");
+        }
+
+        @Test
+        void shouldBeCaseInsensitiveForSimultaneous() {
+            var result = VensimExprTranslator.translate("simultaneous(1, 3)", "var", EMPTY_NAMES);
+            assertThat(result.expression()).isEqualTo("0");
+        }
+    }
+
+    @Nested
     @DisplayName("Edge cases")
     class EdgeCases {
 

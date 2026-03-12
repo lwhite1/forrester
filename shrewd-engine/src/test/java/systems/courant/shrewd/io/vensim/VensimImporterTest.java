@@ -1525,6 +1525,291 @@ class VensimImporterTest {
     }
 
     @Nested
+    @DisplayName("MESSAGE and SIMULTANEOUS no-op handling (#498)")
+    class MessageAndSimultaneousImport {
+
+        @Test
+        void shouldCompileModelWithMessageFunction() {
+            String mdl = """
+                    msg = IF THEN ELSE(x > 5, MESSAGE(alert, x), 0)
+                    \t~\tDimensionless
+                    \t~\t
+                    \t|
+
+                    x = 10
+                    \t~\tDimensionless
+                    \t~\t
+                    \t|
+
+                    INITIAL TIME = 0
+                    \t~\tDay
+                    \t~\t
+                    \t|
+
+                    FINAL TIME = 10
+                    \t~\tDay
+                    \t~\t
+                    \t|
+
+                    TIME STEP = 1
+                    \t~\tDay
+                    \t~\t
+                    \t|
+                    """;
+
+            ImportResult result = importer.importModel(mdl, "Test");
+            ModelDefinition def = result.definition();
+
+            // MESSAGE should be stripped, allowing compilation
+            CompiledModel compiled = new ModelCompiler().compile(def);
+            assertThat(compiled).isNotNull();
+        }
+
+        @Test
+        void shouldCompileModelWithSimultaneousFunction() {
+            String mdl = """
+                    solver_hint = SIMULTANEOUS(0, 2)
+                    \t~\tDimensionless
+                    \t~\t
+                    \t|
+
+                    x = 5
+                    \t~\tDimensionless
+                    \t~\t
+                    \t|
+
+                    INITIAL TIME = 0
+                    \t~\tDay
+                    \t~\t
+                    \t|
+
+                    FINAL TIME = 10
+                    \t~\tDay
+                    \t~\t
+                    \t|
+
+                    TIME STEP = 1
+                    \t~\tDay
+                    \t~\t
+                    \t|
+                    """;
+
+            ImportResult result = importer.importModel(mdl, "Test");
+            ModelDefinition def = result.definition();
+
+            CompiledModel compiled = new ModelCompiler().compile(def);
+            assertThat(compiled).isNotNull();
+        }
+    }
+
+    @Nested
+    @DisplayName("Subscript expansion (#495)")
+    class SubscriptExpansion {
+
+        @Test
+        void shouldExpandSubscriptedConstant() {
+            // Subscripted variable with comma-separated constant values
+            String mdl = """
+                    Region : North, South
+                    \t~\t
+                    \t~\t
+                    \t|
+
+                    Population[Region] = 100, 200
+                    \t~\tPeople
+                    \t~\t
+                    \t|
+
+                    INITIAL TIME = 0
+                    \t~\tDay
+                    \t~\t
+                    \t|
+
+                    FINAL TIME = 10
+                    \t~\tDay
+                    \t~\t
+                    \t|
+
+                    TIME STEP = 1
+                    \t~\tDay
+                    \t~\t
+                    \t|
+                    """;
+
+            ImportResult result = importer.importModel(mdl, "Test");
+            ModelDefinition def = result.definition();
+
+            // Should expand into Population_North = 100 and Population_South = 200
+            assertThat(def.auxiliaries().stream()
+                    .filter(a -> a.name().equals("Population North"))
+                    .findFirst()).isPresent();
+            assertThat(def.auxiliaries().stream()
+                    .filter(a -> a.name().equals("Population South"))
+                    .findFirst()).isPresent();
+        }
+
+        @Test
+        void shouldExpandSubscriptedFormula() {
+            // Subscripted auxiliary with formula referencing the dimension
+            String mdl = """
+                    tub : low tub, high tub
+                    \t~\t
+                    \t~\t
+                    \t|
+
+                    capacity[tub] = 100
+                    \t~\tLiters
+                    \t~\t
+                    \t|
+
+                    fill rate[tub] = capacity[tub] * 0.1
+                    \t~\tLiters/Day
+                    \t~\t
+                    \t|
+
+                    INITIAL TIME = 0
+                    \t~\tDay
+                    \t~\t
+                    \t|
+
+                    FINAL TIME = 10
+                    \t~\tDay
+                    \t~\t
+                    \t|
+
+                    TIME STEP = 1
+                    \t~\tDay
+                    \t~\t
+                    \t|
+                    """;
+
+            ImportResult result = importer.importModel(mdl, "Test");
+            ModelDefinition def = result.definition();
+
+            // fill rate[tub] should be expanded into fill_rate_low_tub and fill_rate_high_tub
+            // with capacity[tub] → capacity_low_tub / capacity_high_tub
+            AuxDef lowFill = def.auxiliaries().stream()
+                    .filter(a -> a.name().equals("fill rate low tub"))
+                    .findFirst().orElseThrow();
+            assertThat(lowFill.equation()).isEqualTo("capacity_low_tub * 0.1");
+
+            AuxDef highFill = def.auxiliaries().stream()
+                    .filter(a -> a.name().equals("fill rate high tub"))
+                    .findFirst().orElseThrow();
+            assertThat(highFill.equation()).isEqualTo("capacity_high_tub * 0.1");
+        }
+
+        @Test
+        void shouldCompileExpandedSubscriptModel() {
+            // End-to-end: subscripted model should compile and simulate
+            String mdl = """
+                    Region : North, South
+                    \t~\t
+                    \t~\t
+                    \t|
+
+                    initial pop[Region] = 100, 200
+                    \t~\tPeople
+                    \t~\t
+                    \t|
+
+                    growth rate[Region] = 0.05, 0.03
+                    \t~\t1/Year
+                    \t~\t
+                    \t|
+
+                    Population[Region] = INTEG(births[Region], initial pop[Region])
+                    \t~\tPeople
+                    \t~\t
+                    \t|
+
+                    births[Region] = Population[Region] * growth rate[Region]
+                    \t~\tPeople/Year
+                    \t~\t
+                    \t|
+
+                    INITIAL TIME = 0
+                    \t~\tYear
+                    \t~\t
+                    \t|
+
+                    FINAL TIME = 50
+                    \t~\tYear
+                    \t~\t
+                    \t|
+
+                    TIME STEP = 1
+                    \t~\tYear
+                    \t~\t
+                    \t|
+                    """;
+
+            ImportResult result = importer.importModel(mdl, "Test");
+            ModelDefinition def = result.definition();
+
+            // Should have 2 stocks (Population_North, Population_South)
+            assertThat(def.stocks()).hasSize(2);
+
+            // Should compile and simulate
+            CompiledModel compiled = new ModelCompiler().compile(def);
+            assertThat(compiled).isNotNull();
+
+            Simulation sim = compiled.createSimulation();
+            sim.execute();
+
+            // Both populations should have grown
+            for (Stock stock : compiled.getModel().getStocks()) {
+                assertThat(stock.getValue()).isGreaterThan(100.0);
+            }
+        }
+
+        @Test
+        void shouldExpandSubscriptedStockWithPerLabelInit() {
+            String mdl = """
+                    Color : red, blue
+                    \t~\t
+                    \t~\t
+                    \t|
+
+                    Level[Color] = INTEG(rate[Color], 10)
+                    \t~\tUnits
+                    \t~\t
+                    \t|
+
+                    rate[Color] = 1
+                    \t~\tUnits/Day
+                    \t~\t
+                    \t|
+
+                    INITIAL TIME = 0
+                    \t~\tDay
+                    \t~\t
+                    \t|
+
+                    FINAL TIME = 10
+                    \t~\tDay
+                    \t~\t
+                    \t|
+
+                    TIME STEP = 1
+                    \t~\tDay
+                    \t~\t
+                    \t|
+                    """;
+
+            ImportResult result = importer.importModel(mdl, "Test");
+            ModelDefinition def = result.definition();
+
+            assertThat(def.stocks()).hasSize(2);
+            assertThat(def.stocks().stream().map(StockDef::name))
+                    .containsExactlyInAnyOrder("Level red", "Level blue");
+
+            CompiledModel compiled = new ModelCompiler().compile(def);
+            assertThat(compiled).isNotNull();
+        }
+    }
+
+    @Nested
     @DisplayName("Rate term decomposition")
     class RateTermDecomposition {
 
