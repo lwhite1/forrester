@@ -6,10 +6,13 @@ import systems.courant.shrewd.app.canvas.BreadcrumbBar;
 import systems.courant.shrewd.app.canvas.CanvasToolBar;
 import systems.courant.shrewd.app.canvas.Clipboard;
 import systems.courant.shrewd.app.canvas.CommandPalette;
+import systems.courant.shrewd.app.canvas.ContextHelpDialog;
 import systems.courant.shrewd.app.canvas.LoopNavigatorBar;
 import systems.courant.shrewd.app.canvas.DashboardPanel;
 import systems.courant.shrewd.app.canvas.DiagramExporter;
 import systems.courant.shrewd.app.canvas.ExpressionLanguageDialog;
+import systems.courant.shrewd.app.canvas.HelpContextResolver;
+import systems.courant.shrewd.app.canvas.HelpTopic;
 import systems.courant.shrewd.app.canvas.ModelCanvas;
 import systems.courant.shrewd.app.canvas.ModelEditListener;
 import systems.courant.shrewd.app.canvas.ModelEditor;
@@ -109,6 +112,7 @@ public class ModelWindow {
     private Stage sdConceptsWindow;
     private Stage exprLangWindow;
     private Stage shortcutsWindow;
+    private ContextHelpDialog contextHelpDialog;
 
     private FileController fileController;
     private SimulationController simulationController;
@@ -337,6 +341,10 @@ public class ModelWindow {
         scene.addEventFilter(KeyEvent.KEY_PRESSED, event -> {
             if (event.isShortcutDown() && event.getCode() == KeyCode.K) {
                 commandPalette.show(stage);
+                event.consume();
+            }
+            if (event.getCode() == KeyCode.F1) {
+                showContextHelp();
                 event.consume();
             }
         });
@@ -625,6 +633,10 @@ public class ModelWindow {
 
         Menu helpMenu = new Menu("Help");
 
+        MenuItem contextHelpItem = new MenuItem("Context Help");
+        contextHelpItem.setAccelerator(new KeyCodeCombination(KeyCode.F1));
+        contextHelpItem.setOnAction(e -> showContextHelp());
+
         MenuItem gettingStartedItem = new MenuItem("Getting Started\u2026");
         gettingStartedItem.setOnAction(e -> {
             quickstartWindow = showHelpWindow(quickstartWindow, QuickstartDialog::new);
@@ -666,7 +678,9 @@ public class ModelWindow {
             about.showAndWait();
         });
 
-        helpMenu.getItems().addAll(gettingStartedItem, sirTutorialItem, supplyChainTutorialItem,
+        helpMenu.getItems().addAll(contextHelpItem,
+                new SeparatorMenuItem(),
+                gettingStartedItem, sirTutorialItem, supplyChainTutorialItem,
                 new SeparatorMenuItem(), sdConceptsItem, exprLangItem,
                 new SeparatorMenuItem(), shortcutsItem,
                 new SeparatorMenuItem(), aboutItem);
@@ -807,6 +821,21 @@ public class ModelWindow {
             }
 
         };
+    }
+
+    private void showContextHelp() {
+        int dashboardIndex = rightTabPane.getTabs().indexOf(dashboardTab);
+        Node focusOwner = stage.getScene() != null ? stage.getScene().getFocusOwner() : null;
+        HelpTopic topic = HelpContextResolver.resolve(focusOwner, canvas,
+                rightTabPane, dashboardIndex);
+        if (contextHelpDialog == null || !contextHelpDialog.isShowing()) {
+            contextHelpDialog = new ContextHelpDialog();
+            contextHelpDialog.initOwner(stage);
+        }
+        contextHelpDialog.showTopic(topic);
+        if (!contextHelpDialog.isShowing()) {
+            contextHelpDialog.show();
+        }
     }
 
     private Stage showHelpWindow(Stage existing, Supplier<? extends Stage> factory) {
@@ -1157,6 +1186,7 @@ public class ModelWindow {
         commands.add(cmd("Model Info", "File", this::showModelInfoDialog));
 
         // Help (reuse tracked windows, same as menu items)
+        commands.add(cmd("Context Help", "Help", this::showContextHelp));
         commands.add(cmd("Getting Started", "Help",
                 () -> quickstartWindow = showHelpWindow(quickstartWindow, QuickstartDialog::new)));
         commands.add(cmd("Tutorial: SIR Epidemic", "Help",
@@ -1237,6 +1267,10 @@ public class ModelWindow {
             analysisRunner.shutdown();
         }
         undoManager.close();
+        if (contextHelpDialog != null) {
+            contextHelpDialog.close();
+            contextHelpDialog = null;
+        }
         if (dashboardStage != null) {
             dashboardStage.setOnHidden(null);
             dashboardStage.close();

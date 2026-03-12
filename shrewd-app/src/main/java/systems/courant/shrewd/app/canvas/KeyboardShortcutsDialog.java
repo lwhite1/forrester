@@ -47,6 +47,8 @@ public class KeyboardShortcutsDialog extends Stage {
                         "7", "Place CLD variable",
                         "8", "Draw causal link",
                         "9", "Place comment"),
+                section("Help",
+                        "F1", "Context-sensitive help"),
                 section("View & Navigation",
                         "Ctrl+K", "Command palette",
                         "Ctrl+Shift+F", "Zoom to fit",
