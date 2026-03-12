@@ -32,15 +32,20 @@ In the visual editor, use File → Open to load `.mdl` files directly.
 | `WITH LOOKUP(input, data)` | `AuxDef` + extracted `LookupTableDef` |
 | Subscript range (`:`) | `SubscriptDef` |
 | `IF THEN ELSE` | `IF` |
-| `XIDZ` / `ZIDZ` | `IF` with division guards |
-| `SMOOTH3` / `DELAY1` | `SMOOTH` / `DELAY3` (with warning) |
+| `XIDZ` / `ZIDZ` | `IF` with division guards (also available as native `XIDZ`/`ZIDZ` functions) |
+| `SMOOTH3` / `SMOOTH3I` | `SMOOTH3` / `SMOOTH3I` (native third-order smoothing) |
+| `DELAY1` / `DELAY1I` | `DELAY1` / `DELAY1I` (native first-order delay) |
+| `SMOOTHI` | `SMOOTHI` (first-order smoothing with explicit initial) |
+| `DELAY_FIXED` | `DELAY_FIXED` (exact pipeline delay) |
+| `PULSE` / `PULSE TRAIN` | `PULSE` / `PULSE_TRAIN` |
+| `RANDOM NORMAL` / `RANDOM UNIFORM` | `RANDOM_NORMAL` / `RANDOM_UNIFORM` |
 | `:AND:` / `:OR:` / `:NOT:` | `&&` / `\|\|` / `!()` |
 | Sketch section | `ViewDef` with element placements and connectors |
 | Simulation settings | `SimulationSettings` (INITIAL TIME, FINAL TIME, TIME STEP) |
 
 ## Limitations
 
-Unsupported constructs (macros, data variables, PULSE, DELAY FIXED, etc.) emit warnings rather than failing.
+Unsupported constructs (macros, data variables, DELAY N, GET XLS DATA, etc.) emit warnings rather than failing.
 
 ## Key Classes
 

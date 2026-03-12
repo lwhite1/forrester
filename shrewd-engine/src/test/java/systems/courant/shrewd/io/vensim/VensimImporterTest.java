@@ -531,8 +531,9 @@ class VensimImporterTest {
             assertThat(def.auxiliaries()).hasSize(8);
             assertThat(def.auxiliaries().stream().filter(a -> !a.isLiteral()).toList()).hasSize(2);
 
-            // 3 flows: one per stock
-            assertThat(def.flows()).hasSize(3);
+            // 4 flows: Susceptible/Recovered each get a net flow,
+            // Infected decomposes INTEG(Infection Rate - Recovery Rate) into 2 individual flows
+            assertThat(def.flows()).hasSize(4);
 
             // Simulation settings: 200 days
             assertThat(def.defaultSimulation()).isNotNull();
@@ -1016,6 +1017,64 @@ class VensimImporterTest {
             double finalTemp = tempStock.getValue();
             assertThat(finalTemp).isLessThan(180.0);
             assertThat(finalTemp).isGreaterThan(70.0);
+        }
+    }
+
+    @Nested
+    @DisplayName("Rate term decomposition")
+    class RateTermDecomposition {
+
+        @Test
+        void shouldSplitSimpleAdditionAndSubtraction() {
+            var terms = VensimImporter.splitRateTerms("births - deaths");
+            assertThat(terms).hasSize(2);
+            assertThat(terms.get(0).expr()).isEqualTo("births");
+            assertThat(terms.get(0).positive()).isTrue();
+            assertThat(terms.get(1).expr()).isEqualTo("deaths");
+            assertThat(terms.get(1).positive()).isFalse();
+        }
+
+        @Test
+        void shouldSplitMultipleTerms() {
+            var terms = VensimImporter.splitRateTerms("a + b - c + d");
+            assertThat(terms).hasSize(4);
+            assertThat(terms.get(0).positive()).isTrue();
+            assertThat(terms.get(1).positive()).isTrue();
+            assertThat(terms.get(2).positive()).isFalse();
+            assertThat(terms.get(3).positive()).isTrue();
+        }
+
+        @Test
+        void shouldHandleLeadingMinus() {
+            var terms = VensimImporter.splitRateTerms("-a + b");
+            assertThat(terms).hasSize(2);
+            assertThat(terms.get(0).expr()).isEqualTo("a");
+            assertThat(terms.get(0).positive()).isFalse();
+            assertThat(terms.get(1).expr()).isEqualTo("b");
+            assertThat(terms.get(1).positive()).isTrue();
+        }
+
+        @Test
+        void shouldReturnNullForSingleTerm() {
+            assertThat(VensimImporter.splitRateTerms("births")).isNull();
+        }
+
+        @Test
+        void shouldReturnNullForNull() {
+            assertThat(VensimImporter.splitRateTerms(null)).isNull();
+        }
+
+        @Test
+        void shouldReturnNullForBlank() {
+            assertThat(VensimImporter.splitRateTerms("  ")).isNull();
+        }
+
+        @Test
+        void shouldNotSplitInsideParens() {
+            var terms = VensimImporter.splitRateTerms("f(a + b) - c");
+            assertThat(terms).hasSize(2);
+            assertThat(terms.get(0).expr()).isEqualTo("f(a + b)");
+            assertThat(terms.get(1).expr()).isEqualTo("c");
         }
     }
 }

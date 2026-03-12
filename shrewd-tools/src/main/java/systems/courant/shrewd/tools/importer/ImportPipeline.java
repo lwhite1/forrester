@@ -161,6 +161,9 @@ public class ImportPipeline {
             return BASE_PACKAGE;
         }
         String segment = JavaSourceEscaper.toPackageSegment(category);
+        if (segment.isEmpty()) {
+            return BASE_PACKAGE;
+        }
         return BASE_PACKAGE + "." + segment;
     }
 

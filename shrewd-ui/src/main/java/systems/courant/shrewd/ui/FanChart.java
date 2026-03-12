@@ -27,9 +27,6 @@ import java.util.Map;
  */
 public class FanChart extends Application {
 
-    private static volatile MonteCarloResult pendingResult;
-    private static volatile String pendingVariableName;
-
     private static final double WIDTH = 900;
     private static final double HEIGHT = 600;
     private static final double MARGIN_LEFT = 70;
@@ -49,19 +46,39 @@ public class FanChart extends Application {
             {25.0, 75.0, 0.35},  // 50% band — darker
     };
 
+    private final MonteCarloResult result;
+    private final String variableName;
+
+    /**
+     * Creates a FanChart for the given Monte Carlo result and variable name.
+     *
+     * @param result       the Monte Carlo result to visualize
+     * @param variableName the stock or variable name to plot
+     */
+    public FanChart(MonteCarloResult result, String variableName) {
+        this.result = result;
+        this.variableName = variableName;
+    }
+
+    /**
+     * No-arg constructor required by JavaFX {@link Application#launch}.
+     * Prefer {@link #show(MonteCarloResult, String)} for normal usage.
+     */
+    public FanChart() {
+        this.result = null;
+        this.variableName = null;
+    }
+
     /**
      * Launches the fan chart viewer for the given Monte Carlo result and variable name.
-     * This method blocks until the window is closed.
      *
      * @param result       the Monte Carlo result to visualize
      * @param variableName the stock or variable name to plot
      */
     public static void show(MonteCarloResult result, String variableName) {
-        pendingResult = result;
-        pendingVariableName = variableName;
         ChartViewerApplication.ensureFxRunning();
         Platform.runLater(() -> {
-            FanChart app = new FanChart();
+            FanChart app = new FanChart(result, variableName);
             Stage stage = new Stage();
             app.start(stage);
         });
@@ -69,8 +86,6 @@ public class FanChart extends Application {
 
     @Override
     public void start(Stage stage) {
-        MonteCarloResult result = pendingResult;
-        String variableName = pendingVariableName;
 
         stage.setTitle("Fan Chart — " + variableName);
 

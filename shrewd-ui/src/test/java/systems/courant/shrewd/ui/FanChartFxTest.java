@@ -19,7 +19,6 @@ import org.testfx.api.FxRobot;
 import org.testfx.framework.junit5.ApplicationExtension;
 import org.testfx.framework.junit5.Start;
 
-import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -33,20 +32,9 @@ import static systems.courant.shrewd.measure.Units.THING;
 class FanChartFxTest {
 
     @Start
-    void start(Stage stage) throws Exception {
+    void start(Stage stage) {
         MonteCarloResult mcResult = buildMonteCarloResult(20, 10);
-
-        // Set static fields via reflection (FanChart.show() calls Application.launch()
-        // which cannot be used in TestFX)
-        Field resultField = FanChart.class.getDeclaredField("pendingResult");
-        resultField.setAccessible(true);
-        resultField.set(null, mcResult);
-
-        Field nameField = FanChart.class.getDeclaredField("pendingVariableName");
-        nameField.setAccessible(true);
-        nameField.set(null, "Population");
-
-        FanChart fanChart = new FanChart();
+        FanChart fanChart = new FanChart(mcResult, "Population");
         fanChart.start(stage);
     }
 

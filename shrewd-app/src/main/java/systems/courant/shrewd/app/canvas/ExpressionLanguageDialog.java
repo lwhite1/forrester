@@ -236,7 +236,7 @@ public class ExpressionLanguageDialog extends Stage {
                 bold("Conditional logic\n"),
                 mono("  IF(Inventory > Reorder_Point, 0, Order_Quantity)\n\n"),
                 bold("Seasonal input\n"),
-                mono("  Base * (1 + Amplitude * SIN(2 * 3.14159 * TIME / Period))\n\n"),
+                mono("  Base * (1 + Amplitude * SIN(2 * PI * TIME / Period))\n\n"),
                 bold("Clamping to non-negative\n"),
                 mono("  MAX(0, Calculated_Rate)\n")
         );

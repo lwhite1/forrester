@@ -18,7 +18,10 @@ class FunctionDocRegistryTest {
         assertThat(names).contains(
                 "TIME", "DT", "IF",
                 "ABS", "SQRT", "LN", "EXP", "LOG", "SIN", "COS", "TAN",
-                "INT", "ROUND", "MIN", "MAX", "MODULO", "POWER", "SUM", "MEAN",
+                "ARCSIN", "ARCCOS", "ARCTAN", "SIGN", "PI",
+                "INT", "ROUND", "MIN", "MAX", "MODULO", "QUANTUM", "POWER",
+                "SUM", "MEAN", "VMIN", "VMAX", "PROD",
+                "XIDZ", "ZIDZ", "INITIAL",
                 "STEP", "RAMP", "PULSE", "PULSE_TRAIN",
                 "SMOOTH", "DELAY3", "DELAY_FIXED",
                 "TREND", "FORECAST", "NPV",

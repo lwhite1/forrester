@@ -42,7 +42,6 @@ That's it. The importer reads your stocks, flows, auxiliaries, constants, lookup
 
 If anything couldn't be imported cleanly, you'll see warnings in the activity log at the bottom of the window. Common warnings:
 
-- **Approximated functions** — `SMOOTH3` becomes `SMOOTH`, `DELAY1` becomes `DELAY3`. The behavior is similar but not identical.
 - **Skipped data variables** — Variables defined with `:=` (external data) are skipped.
 - **Expression-based initial values** — Stock initial values that aren't simple numbers default to 0. You'll need to set them manually.
 
@@ -84,8 +83,8 @@ You can also use backtick-quoted names for readability: `` `Contact Rate` ``.
 | Vensim | Shrewd | Notes |
 |---|---|---|
 | `IF THEN ELSE(c, t, e)` | `IF(c, t, e)` | Same logic, shorter syntax |
-| `XIDZ(a, b, x)` | `IF(b == 0, x, a / b)` | Safe division, expanded |
-| `ZIDZ(a, b)` | `IF(b == 0, 0, a / b)` | Safe division to zero |
+| `XIDZ(a, b, x)` | `XIDZ(a, b, x)` | Safe division with fallback (also expanded to `IF` form) |
+| `ZIDZ(a, b)` | `ZIDZ(a, b)` | Safe division returning zero (also expanded to `IF` form) |
 | `WITH LOOKUP(input, data)` | `LOOKUP(table, input)` | Lookup table extracted separately |
 | `:AND:` / `:OR:` / `:NOT:` | `&&` / `\|\|` / `!()` | Standard operators |
 | `^` (exponentiation) | `**` | Python-style |
@@ -93,7 +92,7 @@ You can also use backtick-quoted names for readability: `` `Contact Rate` ``.
 
 ### Functions that work identically
 
-These pass through with no changes: `MIN`, `MAX`, `ABS`, `EXP`, `LN`, `LOG`, `SQRT`, `SIN`, `COS`, `TAN`, `INT`, `ROUND`, `MODULO`, `STEP`, `RAMP`, `PULSE`, `SMOOTH`, `DELAY3`.
+These pass through with no changes: `MIN`, `MAX`, `ABS`, `EXP`, `LN`, `LOG`, `SQRT`, `SIN`, `COS`, `TAN`, `ARCSIN`, `ARCCOS`, `ARCTAN`, `SIGN`, `INT`, `ROUND`, `MODULO`, `QUANTUM`, `POWER`, `STEP`, `RAMP`, `PULSE`, `PULSE_TRAIN`, `SMOOTH`, `SMOOTHI`, `SMOOTH3`, `SMOOTH3I`, `DELAY1`, `DELAY3`, `DELAY_FIXED`, `TREND`, `FORECAST`, `NPV`, `RANDOM_NORMAL`, `RANDOM_UNIFORM`, `INITIAL`.
 
 ### Simulation settings
 
@@ -102,12 +101,6 @@ These pass through with no changes: `MIN`, `MAX`, `ABS`, `EXP`, `LN`, `LOG`, `SQ
 ---
 
 ## What needs attention
-
-### SMOOTH3 and DELAY1 approximations
-
-Vensim's `SMOOTH3` (third-order exponential smoothing) is approximated as `SMOOTH` (first-order). Similarly, `DELAY1` becomes `DELAY3`. The qualitative behavior is the same — smoothing and delaying — but the transient response differs. If your model is sensitive to the order of these functions, you may need to adjust.
-
-The `SMOOTHI` and `DELAY1I` variants (with explicit initial values) also lose the initial value argument.
 
 ### PULSE semantics
 
