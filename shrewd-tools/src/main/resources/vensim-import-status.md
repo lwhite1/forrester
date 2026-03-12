@@ -54,12 +54,14 @@ Functions listed as unsupported in `VensimExprTranslator.UNSUPPORTED_FUNCTIONS`.
 ## Known limitations
 
 - **Algebraic loops** — Models with circular variable references (e.g.,
-  ProjectManagement) cause StackOverflow at simulation time. Would need a
-  simultaneous equation solver or topological sort with loop-breaking.
-- **SMOOTH3 / SMOOTHI / SMOOTH3I** — approximated as first-order SMOOTH.
-  Acceptable for import but produces different dynamic behavior.
-- **DELAY1 / DELAY1I** — approximated as DELAY3. First-order vs third-order
-  delay produces different response shapes.
+  ProjectManagement) use previous-step values to converge. A warning is
+  logged when an algebraic loop is detected.
+
+### Resolved (no longer limitations)
+
+- ~~SMOOTH3 / SMOOTHI / SMOOTH3I — approximated as first-order SMOOTH.~~ Now natively supported with correct Nth-order semantics.
+- ~~DELAY1 / DELAY1I — approximated as DELAY3.~~ Now natively supported as first-order material delay.
+- ~~SMOOTH3 / DELAY1I approximation lines in batch 2 table above.~~ These are now translated 1:1 with no approximation.
 
 ## Recurring patterns
 

@@ -250,4 +250,4 @@ In Vensim PLE, subscripts are locked behind the Pro paywall.
 
 For the complete list of supported functions and operators, see the [Expression Language Reference](Expression_Language.md).
 
-For technical details on the import process, see the [Vensim Import](Vensim%20Import.md) documentation.
+For technical details on the import process, see the [Vensim Import](Vensim_Import.md) documentation.
