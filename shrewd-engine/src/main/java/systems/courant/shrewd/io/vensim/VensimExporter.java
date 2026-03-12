@@ -12,6 +12,9 @@ import systems.courant.shrewd.model.def.SimulationSettings;
 import systems.courant.shrewd.model.def.StockDef;
 import systems.courant.shrewd.model.def.ViewDef;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -41,6 +44,8 @@ import java.util.regex.Pattern;
  * }</pre>
  */
 public final class VensimExporter {
+
+    private static final Logger logger = LoggerFactory.getLogger(VensimExporter.class);
 
     private static final Pattern IF_FUNC_PATTERN = Pattern.compile("(?i)\\bIF\\s*\\(");
     private static final Pattern AND_OP_PATTERN = Pattern.compile("\\band\\b");
@@ -233,6 +238,14 @@ public final class VensimExporter {
         double[] xVals = lookup.xValues();
         double[] yVals = lookup.yValues();
 
+        if (xVals.length == 0) {
+            String comment = lookup.comment() != null ? lookup.comment() : "";
+            return vensimName + "(\n\t[(0,0)-(0,0)])\n"
+                    + "\t~\t\n"
+                    + "\t~\t" + escapeForVensim(comment) + "\n"
+                    + "\t|\n\n";
+        }
+
         // Build range annotation: [(xmin,ymin)-(xmax,ymax)]
         double ymin = Double.MAX_VALUE;
         double ymax = -Double.MAX_VALUE;
@@ -321,14 +334,19 @@ public final class VensimExporter {
                     .append(formatCoord(ep.y())).append("\n");
         }
 
-        // Write connector lines (type 1)
+        // Write connector lines (type 1) — skip connectors with unresolved endpoints
         for (ConnectorRoute cr : view.connectors()) {
+            Integer fromId = nameToId.get(cr.from());
+            Integer toId = nameToId.get(cr.to());
+            if (fromId == null || toId == null) {
+                logger.warn("Skipping connector from '{}' to '{}': endpoint not found in view",
+                        cr.from(), cr.to());
+                continue;
+            }
             int id = nextId++;
-            String fromRef = String.valueOf(nameToId.getOrDefault(cr.from(), 0));
-            String toRef = String.valueOf(nameToId.getOrDefault(cr.to(), 0));
             sb.append("1,").append(id).append(",")
-                    .append(fromRef).append(",")
-                    .append(toRef).append("\n");
+                    .append(fromId).append(",")
+                    .append(toId).append("\n");
         }
 
         return sb.toString();
@@ -586,6 +604,10 @@ public final class VensimExporter {
     private static String formatLookupData(LookupTableDef lookup) {
         double[] xVals = lookup.xValues();
         double[] yVals = lookup.yValues();
+
+        if (xVals.length == 0) {
+            return "[(0,0)-(0,0)]";
+        }
 
         double ymin = Double.MAX_VALUE;
         double ymax = -Double.MAX_VALUE;
