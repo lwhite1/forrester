@@ -13,6 +13,7 @@ import java.nio.file.Path;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 @DisplayName("ImportPipeline")
 class ImportPipelineTest {
@@ -25,9 +26,7 @@ class ImportPipelineTest {
         Path xmileFile = Path.of("../shrewd-engine/src/test/resources/xmile/sir.xmile")
                 .toAbsolutePath().normalize();
 
-        if (!Files.exists(xmileFile)) {
-            return; // skip if test fixture not available
-        }
+        assumeTrue(Files.exists(xmileFile), "XMILE test fixture not available");
 
         ModelMetadata metadata = ModelMetadata.builder()
                 .source("Kermack & McKendrick SIR model (1927)")
@@ -53,9 +52,7 @@ class ImportPipelineTest {
         Path mdlFile = Path.of("../shrewd-engine/src/test/resources/vensim/sir.mdl")
                 .toAbsolutePath().normalize();
 
-        if (!Files.exists(mdlFile)) {
-            return;
-        }
+        assumeTrue(Files.exists(mdlFile), "Vensim test fixture not available");
 
         ModelMetadata metadata = ModelMetadata.builder()
                 .license("CC-BY-SA-4.0")
@@ -78,9 +75,7 @@ class ImportPipelineTest {
         Path xmileFile = Path.of("../shrewd-engine/src/test/resources/xmile/sir.xmile")
                 .toAbsolutePath().normalize();
 
-        if (!Files.exists(xmileFile)) {
-            return;
-        }
+        assumeTrue(Files.exists(xmileFile), "XMILE test fixture not available");
 
         ModelMetadata metadata = ModelMetadata.builder()
                 .license("CC-BY-SA-4.0")
@@ -101,9 +96,7 @@ class ImportPipelineTest {
         Path xmileFile = Path.of("../shrewd-engine/src/test/resources/xmile/sir.xmile")
                 .toAbsolutePath().normalize();
 
-        if (!Files.exists(xmileFile)) {
-            return;
-        }
+        assumeTrue(Files.exists(xmileFile), "XMILE test fixture not available");
 
         ModelMetadata metadata = ModelMetadata.builder().license("CC-BY-SA-4.0").build();
 
@@ -125,9 +118,7 @@ class ImportPipelineTest {
         Path xmileFile = Path.of("../shrewd-engine/src/test/resources/xmile/sir.xmile")
                 .toAbsolutePath().normalize();
 
-        if (!Files.exists(xmileFile)) {
-            return;
-        }
+        assumeTrue(Files.exists(xmileFile), "XMILE test fixture not available");
 
         ModelMetadata metadata = ModelMetadata.builder().license("CC-BY-SA-4.0").build();
 
@@ -177,9 +168,7 @@ class ImportPipelineTest {
         Path xmileFile = Path.of("../shrewd-engine/src/test/resources/xmile/sir.xmile")
                 .toAbsolutePath().normalize();
 
-        if (!Files.exists(xmileFile)) {
-            return;
-        }
+        assumeTrue(Files.exists(xmileFile), "XMILE test fixture not available");
 
         ModelMetadata metadata = ModelMetadata.builder()
                 .license("CC-BY-SA-4.0")
@@ -202,9 +191,7 @@ class ImportPipelineTest {
         Path xmileFile = Path.of("../shrewd-engine/src/test/resources/xmile/sir.xmile")
                 .toAbsolutePath().normalize();
 
-        if (!Files.exists(xmileFile)) {
-            return;
-        }
+        assumeTrue(Files.exists(xmileFile), "XMILE test fixture not available");
 
         ModelMetadata metadata = ModelMetadata.builder()
                 .license("CC-BY-SA-4.0")
@@ -239,6 +226,13 @@ class ImportPipelineTest {
         @Test
         void shouldResolvePackageNameWithBlankCategory() {
             assertThat(ImportPipeline.resolvePackageName("  "))
+                    .isEqualTo("systems.courant.shrewd.demo");
+        }
+
+        @Test
+        void shouldFallBackToBasePackageWhenCategoryYieldsEmptySegment() {
+            // A category like "!!!" strips to empty after toPackageSegment
+            assertThat(ImportPipeline.resolvePackageName("!!!"))
                     .isEqualTo("systems.courant.shrewd.demo");
         }
 

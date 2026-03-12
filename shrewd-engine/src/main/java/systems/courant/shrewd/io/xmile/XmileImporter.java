@@ -175,12 +175,12 @@ public class XmileImporter implements ModelImporter {
                              ModelDefinitionBuilder builder, List<String> warnings) {
         String eqnText = getChildText(stockElem, XmileConstants.EQN).orElse(null);
         double initialValue = 0;
+        String initialExpression = null;
         if (eqnText != null && !eqnText.isBlank()) {
             if (isNumericLiteral(eqnText)) {
                 initialValue = Double.parseDouble(eqnText.strip());
             } else {
-                warnings.add("Non-literal initial value for stock '" + name + "': '"
-                        + eqnText + "', defaulting to 0.0");
+                initialExpression = eqnText.strip();
             }
         }
 
@@ -209,7 +209,12 @@ public class XmileImporter implements ModelImporter {
             warnings.add("Range specification on stock '" + name + "' ignored");
         }
 
-        builder.stock(new StockDef(name, comment, initialValue, unit, negPolicy));
+        if (initialExpression != null) {
+            builder.stock(new StockDef(name, comment, 0.0, initialExpression,
+                    unit, negPolicy, null));
+        } else {
+            builder.stock(new StockDef(name, comment, initialValue, unit, negPolicy));
+        }
     }
 
     private void buildFlow(Element flowElem, String name, String timeUnit,

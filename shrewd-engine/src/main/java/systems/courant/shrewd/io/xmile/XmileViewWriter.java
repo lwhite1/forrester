@@ -1,5 +1,6 @@
 package systems.courant.shrewd.io.xmile;
 
+import systems.courant.shrewd.io.FormatUtils;
 import systems.courant.shrewd.model.def.ConnectorRoute;
 import systems.courant.shrewd.model.def.ElementPlacement;
 import systems.courant.shrewd.model.def.ElementType;
@@ -135,9 +136,6 @@ public final class XmileViewWriter {
     }
 
     private static String formatDouble(double value) {
-        if (value == Math.floor(value) && !Double.isInfinite(value)) {
-            return String.valueOf((long) value);
-        }
-        return String.valueOf(value);
+        return FormatUtils.formatDouble(value);
     }
 }

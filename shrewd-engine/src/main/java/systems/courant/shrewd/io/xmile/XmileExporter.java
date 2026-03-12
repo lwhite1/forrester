@@ -1,5 +1,6 @@
 package systems.courant.shrewd.io.xmile;
 
+import systems.courant.shrewd.io.FormatUtils;
 import systems.courant.shrewd.model.def.AuxDef;
 import systems.courant.shrewd.model.def.FlowDef;
 import systems.courant.shrewd.model.def.LookupTableDef;
@@ -472,21 +473,7 @@ public final class XmileExporter {
     }
 
     private static int findTopLevelComma(String content, int startPos) {
-        int depth = 0;
-        for (int i = startPos; i < content.length(); i++) {
-            char c = content.charAt(i);
-            if (c == '(') {
-                depth++;
-            } else if (c == ')') {
-                if (depth == 0) {
-                    return -1;
-                }
-                depth--;
-            } else if (c == ',' && depth == 0) {
-                return i;
-            }
-        }
-        return -1;
+        return FormatUtils.findTopLevelComma(content, startPos);
     }
 
     private static Optional<LookupTableDef> findLookup(ModelDefinition def, String name) {
@@ -507,11 +494,7 @@ public final class XmileExporter {
     }
 
     private static String formatDouble(double value) {
-        if (value == Math.floor(value) && !Double.isInfinite(value)
-                && Math.abs(value) < 1e15) {
-            return String.valueOf((long) value);
-        }
-        return String.valueOf(value);
+        return FormatUtils.formatDouble(value);
     }
 
     private static String serialize(Document doc) throws TransformerException {

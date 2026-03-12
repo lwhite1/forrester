@@ -84,7 +84,8 @@ class ModelWindowImportExportFxTest {
 
         ModelEditor editor = window.getEditor();
         assertThat(editor.getStocks()).hasSize(3);
-        assertThat(editor.getFlows()).hasSize(3);
+        // 4 flows: Susceptible/Recovered get net flows, Infected decomposes into 2 individual flows
+        assertThat(editor.getFlows()).hasSize(4);
     }
 
     // --- XMILE Import ---
@@ -195,7 +196,7 @@ class ModelWindowImportExportFxTest {
 
         Label elementsLabel = robot.lookup("#statusElements").queryAs(Label.class);
         assertThat(elementsLabel.getText()).contains("3 stocks");
-        assertThat(elementsLabel.getText()).contains("3 flows");
+        assertThat(elementsLabel.getText()).contains("4 flows");
     }
 
     @Test
