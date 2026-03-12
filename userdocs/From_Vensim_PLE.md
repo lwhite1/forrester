@@ -92,7 +92,7 @@ You can also use backtick-quoted names for readability: `` `Contact Rate` ``.
 
 ### Functions that work identically
 
-These pass through with no changes: `MIN`, `MAX`, `ABS`, `EXP`, `LN`, `LOG`, `SQRT`, `SIN`, `COS`, `TAN`, `ARCSIN`, `ARCCOS`, `ARCTAN`, `SIGN`, `INT`, `ROUND`, `MODULO`, `QUANTUM`, `POWER`, `STEP`, `RAMP`, `PULSE`, `PULSE_TRAIN`, `SMOOTH`, `SMOOTHI`, `SMOOTH3`, `SMOOTH3I`, `DELAY1`, `DELAY3`, `DELAY_FIXED`, `TREND`, `FORECAST`, `NPV`, `RANDOM_NORMAL`, `RANDOM_UNIFORM`, `INITIAL`.
+These pass through with no changes: `MIN`, `MAX`, `ABS`, `EXP`, `LN`, `LOG`, `SQRT`, `SIN`, `COS`, `TAN`, `ARCSIN`, `ARCCOS`, `ARCTAN`, `SIGN`, `INT`, `ROUND`, `MODULO`, `QUANTUM`, `POWER`, `STEP`, `RAMP`, `PULSE`, `PULSE_TRAIN`, `SMOOTH`, `SMOOTHI`, `SMOOTH3`, `SMOOTH3I`, `DELAY1`, `DELAY1I`, `DELAY3`, `DELAY3I`, `DELAY_FIXED`, `TREND`, `FORECAST`, `NPV`, `RANDOM_NORMAL`, `RANDOM_UNIFORM`, `VMIN`, `VMAX`, `PROD`, `PI`, `INITIAL`, `LOOKUP`.
 
 ### Simulation settings
 
