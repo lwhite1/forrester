@@ -116,16 +116,39 @@ IF(Population > Capacity, Capacity, Population)
 | `SIN(x)` | 1 | Sine (x in radians) |
 | `COS(x)` | 1 | Cosine (x in radians) |
 | `TAN(x)` | 1 | Tangent (x in radians) |
+| `ARCSIN(x)` | 1 | Inverse sine; x in [-1, 1], result in radians |
+| `ARCCOS(x)` | 1 | Inverse cosine; x in [-1, 1], result in radians |
+| `ARCTAN(x)` | 1 | Inverse tangent; result in radians |
+| `SIGN(x)` | 1 | Returns -1, 0, or 1 depending on sign of x |
+| `PI` | 0 | The constant π (3.14159...) |
 | `INT(x)` | 1 | Truncate to integer (toward zero) |
 | `ROUND(x)` | 1 | Round to nearest integer |
+| `QUANTUM(x, q)` | 2 | Round x down to nearest multiple of q |
 | `MODULO(a, b)` | 2 | Remainder of a / b (returns 0 if b is 0) |
-| `POWER(a, b)` | 2 | a raised to the power b (equivalent to `a ^ b`) |
+| `POWER(a, b)` | 2 | a raised to the power b (equivalent to `a ** b`) |
 | `SUM(a, b, ...)` | 1+ | Sum of all arguments |
 | `MEAN(a, b, ...)` | 1+ | Arithmetic mean of all arguments |
+| `VMIN(a, b, ...)` | 1+ | Minimum of all arguments (variadic) |
+| `VMAX(a, b, ...)` | 1+ | Maximum of all arguments (variadic) |
+| `PROD(a, b, ...)` | 1+ | Product of all arguments |
+| `XIDZ(a, b, x)` | 3 | a / b if b ≠ 0, otherwise x ("X If Divide by Zero") |
+| `ZIDZ(a, b)` | 2 | a / b if b ≠ 0, otherwise 0 ("Zero If Divide by Zero") |
 
 ## System Dynamics Functions
 
-### SMOOTH — Exponential Smoothing
+### INITIAL — Value at Initial Time
+
+```
+INITIAL(expr)
+```
+
+Evaluates the expression once at the initial time step and returns that value for all subsequent time steps. Useful for capturing starting conditions.
+
+```
+INITIAL(Population)   -- value of Population at t=0, held constant
+```
+
+### SMOOTH — Exponential Smoothing (1st Order)
 
 ```
 SMOOTH(input, smoothing_time)
@@ -133,6 +156,56 @@ SMOOTH(input, smoothing_time, initial_value)
 ```
 
 First-order exponential smoothing. Smooths the input signal over the specified time. If no initial value is given, the first input value is used.
+
+### SMOOTHI — Exponential Smoothing with Initial (1st Order)
+
+```
+SMOOTHI(input, smoothing_time, initial_value)
+```
+
+First-order exponential smoothing with a caller-specified initial value. Behaves like SMOOTH but starts from `initial_value` instead of the first input value.
+
+```
+SMOOTHI(Revenue, 4, 1000)   -- smooths Revenue over 4 time units, starting at 1000
+```
+
+### SMOOTH3 — Exponential Smoothing (3rd Order)
+
+```
+SMOOTH3(input, smoothing_time)
+SMOOTH3(input, smoothing_time, initial_value)
+```
+
+Third-order exponential smoothing. Chains three first-order smooths, each with time constant `smoothing_time / 3`. Produces a more delayed, S-shaped response compared to first-order SMOOTH.
+
+```
+SMOOTH3(Revenue, 6)   -- third-order smooth of Revenue over 6 time units
+```
+
+### SMOOTH3I — Exponential Smoothing with Initial (3rd Order)
+
+```
+SMOOTH3I(input, smoothing_time, initial_value)
+```
+
+Third-order exponential smoothing with a caller-specified initial value. Combines the S-shaped response of SMOOTH3 with explicit initialization.
+
+```
+SMOOTH3I(Revenue, 6, 1000)   -- third-order smooth starting at 1000
+```
+
+### DELAY1 — First-Order Material Delay
+
+```
+DELAY1(input, delay_time)
+DELAY1(input, delay_time, initial_value)
+```
+
+Delays the input using a first-order exponential delay (single stage). Produces an immediate partial response that decays exponentially. The average delay equals `delay_time`. If no initial value is given, the first input value is used.
+
+```
+DELAY1(Orders, 5)   -- orders delayed by ~5 time units (exponential)
+```
 
 ### DELAY3 — Third-Order Material Delay
 
@@ -181,6 +254,18 @@ Returns `magnitude` for one timestep at `start_time`, then 0. If `interval` is s
 ```
 PULSE(100, 5)       -- 100 at step 5, 0 everywhere else
 PULSE(100, 5, 10)   -- 100 at steps 5, 15, 25, ...
+```
+
+### PULSE_TRAIN — Repeating Rectangular Pulse
+
+```
+PULSE_TRAIN(start, duration, repeat, end)
+```
+
+Returns 1 during each pulse window and 0 otherwise. Pulses start at `start`, last for `duration` time units, repeat every `repeat` time units, and stop after `end`.
+
+```
+PULSE_TRAIN(2, 1, 4, 20)   -- 1 at t=2, 0 at t=3-5, 1 at t=6, ...
 ```
 
 ### DELAY_FIXED — Fixed Pipeline Delay
@@ -257,6 +342,18 @@ Returns a random value from a normal distribution with the specified mean and st
 RANDOM_NORMAL(0, 200, 100, 20)   -- normal around 100, std dev 20, clamped to [0, 200]
 ```
 
+### RANDOM_UNIFORM — Uniform Random Distribution
+
+```
+RANDOM_UNIFORM(min, max, seed)
+```
+
+Returns a uniformly distributed random number between `min` and `max`. Each evaluation returns a new random value. The `seed` parameter is accepted for Vensim compatibility but currently uses system time.
+
+```
+RANDOM_UNIFORM(0, 1, 0)   -- uniform random in [0, 1]
+```
+
 ## Common Equation Patterns
 
 ### Exponential Growth
@@ -294,7 +391,7 @@ IF(Inventory > Reorder_Point, 0, Order_Quantity)
 ### Seasonal Input
 
 ```
-Base_Value * (1 + Amplitude * SIN(2 * 3.14159 * TIME / Period))
+Base_Value * (1 + Amplitude * SIN(2 * PI * TIME / Period))
 ```
 
 ### Clamping to Non-Negative
