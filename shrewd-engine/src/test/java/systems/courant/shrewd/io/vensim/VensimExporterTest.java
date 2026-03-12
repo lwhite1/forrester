@@ -499,6 +499,29 @@ class VensimExporterTest {
             assertThat(mdl).contains("10,1,Tank,200,150");
             assertThat(mdl).contains("11,2,fill,100,150");
         }
+
+        @Test
+        void shouldSkipConnectorsWithUnknownEndpoints() {
+            ModelDefinition def = new ModelDefinitionBuilder()
+                    .name("Test")
+                    .defaultSimulation("Day", 100, "Day")
+                    .stock("Tank", 50.0, "Gallons")
+                    .view(new systems.courant.shrewd.model.def.ViewDef("Main",
+                            List.of(
+                                    new systems.courant.shrewd.model.def.ElementPlacement(
+                                            "Tank", systems.courant.shrewd.model.def.ElementType.STOCK, 200, 150)),
+                            List.of(new systems.courant.shrewd.model.def.ConnectorRoute("missing_source", "Tank"),
+                                    new systems.courant.shrewd.model.def.ConnectorRoute("Tank", "missing_target")),
+                            List.of()))
+                    .build();
+
+            String mdl = VensimExporter.toVensim(def);
+
+            // Connectors with unknown endpoints should be omitted entirely — no ",0," IDs
+            assertThat(mdl).doesNotContain(",0,");
+            // The valid element should still be present
+            assertThat(mdl).contains("10,1,Tank,200,150");
+        }
     }
 
     @Nested
