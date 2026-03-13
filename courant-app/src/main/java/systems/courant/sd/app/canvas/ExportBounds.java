@@ -1,7 +1,10 @@
 package systems.courant.sd.app.canvas;
 
+import systems.courant.sd.model.def.CausalLinkDef;
 import systems.courant.sd.model.def.ElementType;
 import systems.courant.sd.model.def.FlowDef;
+
+import java.util.List;
 
 /**
  * Computes the world-space bounding box of a diagram for export.
@@ -10,6 +13,10 @@ import systems.courant.sd.model.def.FlowDef;
 final class ExportBounds {
 
     private static final double PADDING = 50;
+    private static final double POLARITY_LABEL_T = 0.8;
+    private static final double POLARITY_PERP_OFFSET = 12;
+    private static final double POLARITY_LABEL_RADIUS = 10;
+    private static final double SELF_LOOP_LABEL_Y_OFFSET = 10;
 
     /**
      * Padded world-space bounding box of a diagram.
@@ -70,6 +77,64 @@ final class ExportBounds {
                 minY = Math.min(minY, sinkCloud.y() - cloudR);
                 maxX = Math.max(maxX, sinkCloud.x() + cloudR);
                 maxY = Math.max(maxY, sinkCloud.y() + cloudR);
+            }
+        }
+
+        // Include causal link polarity label positions
+        List<CausalLinkDef> allLinks = editor.getCausalLinks();
+        for (CausalLinkDef link : allLinks) {
+            String fromName = link.from();
+            String toName = link.to();
+            if (!canvasState.hasElement(fromName) || !canvasState.hasElement(toName)) {
+                continue;
+            }
+
+            double fromX = canvasState.getX(fromName);
+            double fromY = canvasState.getY(fromName);
+
+            if (fromName.equals(toName)) {
+                // Self-loop: label at cubic midpoint with y offset
+                double halfW = LayoutMetrics.effectiveWidth(canvasState, fromName) / 2;
+                double halfH = LayoutMetrics.effectiveHeight(canvasState, fromName) / 2;
+                double[] loopPts = CausalLinkGeometry.selfLoopPoints(fromX, fromY, halfW, halfH);
+                double[] midPt = CausalLinkGeometry.evaluateCubic(
+                        loopPts[0], loopPts[1], loopPts[2], loopPts[3],
+                        loopPts[4], loopPts[5], loopPts[6], loopPts[7], 0.5);
+                double labelX = midPt[0];
+                double labelY = midPt[1] - SELF_LOOP_LABEL_Y_OFFSET;
+                minX = Math.min(minX, labelX - POLARITY_LABEL_RADIUS);
+                minY = Math.min(minY, labelY - POLARITY_LABEL_RADIUS);
+                maxX = Math.max(maxX, labelX + POLARITY_LABEL_RADIUS);
+                maxY = Math.max(maxY, labelY + POLARITY_LABEL_RADIUS);
+                continue;
+            }
+
+            double toX = canvasState.getX(toName);
+            double toY = canvasState.getY(toName);
+
+            double dx = toX - fromX;
+            double dy = toY - fromY;
+            double dist = Math.sqrt(dx * dx + dy * dy);
+            if (dist <= 1) {
+                continue;
+            }
+
+            CausalLinkGeometry.ControlPoint cp = CausalLinkGeometry.controlPoint(
+                    fromX, fromY, toX, toY, fromName, toName, allLinks);
+            double[] labelPt = CausalLinkGeometry.evaluate(
+                    fromX, fromY, cp.x(), cp.y(), toX, toY, POLARITY_LABEL_T);
+            double[] labelTan = CausalLinkGeometry.tangent(
+                    fromX, fromY, cp.x(), cp.y(), toX, toY, POLARITY_LABEL_T);
+            double tanDist = Math.sqrt(labelTan[0] * labelTan[0] + labelTan[1] * labelTan[1]);
+            if (tanDist > 0) {
+                double perpX = -labelTan[1] / tanDist;
+                double perpY = labelTan[0] / tanDist;
+                double labelX = labelPt[0] + perpX * POLARITY_PERP_OFFSET;
+                double labelY = labelPt[1] + perpY * POLARITY_PERP_OFFSET;
+                minX = Math.min(minX, labelX - POLARITY_LABEL_RADIUS);
+                minY = Math.min(minY, labelY - POLARITY_LABEL_RADIUS);
+                maxX = Math.max(maxX, labelX + POLARITY_LABEL_RADIUS);
+                maxY = Math.max(maxY, labelY + POLARITY_LABEL_RADIUS);
             }
         }
 
