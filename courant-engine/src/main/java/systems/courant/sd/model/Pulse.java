@@ -2,7 +2,7 @@ package systems.courant.sd.model;
 
 import com.google.common.base.Preconditions;
 
-import java.util.function.IntSupplier;
+import java.util.function.LongSupplier;
 
 /**
  * A pulse function that implements {@link Formula}, providing the standard SD PULSE builtin.
@@ -24,11 +24,11 @@ import java.util.function.IntSupplier;
 public class Pulse implements Formula {
 
     private final double magnitude;
-    private final int startStep;
-    private final int interval;
-    private final IntSupplier currentStep;
+    private final long startStep;
+    private final long interval;
+    private final LongSupplier currentStep;
 
-    private Pulse(double magnitude, int startStep, int interval, IntSupplier currentStep) {
+    private Pulse(double magnitude, long startStep, long interval, LongSupplier currentStep) {
         Preconditions.checkNotNull(currentStep, "currentStep supplier must not be null");
         Preconditions.checkArgument(startStep >= 0,
                 "startStep must be non-negative, but got %s", startStep);
@@ -48,7 +48,7 @@ public class Pulse implements Formula {
      * @param currentStep supplies the current simulation timestep
      * @return a new Pulse formula
      */
-    public static Pulse of(double magnitude, int startStep, IntSupplier currentStep) {
+    public static Pulse of(double magnitude, long startStep, LongSupplier currentStep) {
         return new Pulse(magnitude, startStep, 0, currentStep);
     }
 
@@ -61,7 +61,7 @@ public class Pulse implements Formula {
      * @param currentStep supplies the current simulation timestep
      * @return a new Pulse formula
      */
-    public static Pulse of(double magnitude, int startStep, int interval, IntSupplier currentStep) {
+    public static Pulse of(double magnitude, long startStep, long interval, LongSupplier currentStep) {
         return new Pulse(magnitude, startStep, interval, currentStep);
     }
 
@@ -73,7 +73,7 @@ public class Pulse implements Formula {
      */
     @Override
     public double getCurrentValue() {
-        int step = currentStep.getAsInt();
+        long step = currentStep.getAsLong();
         if (step < startStep) {
             return 0;
         }

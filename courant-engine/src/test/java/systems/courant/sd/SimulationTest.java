@@ -150,10 +150,12 @@ public class SimulationTest {
     @Test
     public void shouldTrackElapsedTime() {
         Model model = new Model("Time Test");
+        // 5 minutes duration with 1-minute step → 6 steps (0..5), each advancing 60 seconds
         Simulation sim = new Simulation(model, MINUTE, MINUTE, 5);
         sim.execute();
 
-        assertTrue(sim.getElapsedTime().toMinutes() > 0);
+        // 6 steps × 60 seconds = 360 seconds of simulated elapsed time
+        assertThat(sim.getElapsedTime().toSeconds()).isEqualTo(360);
     }
 
     @Test
@@ -255,24 +257,23 @@ public class SimulationTest {
         void shouldTimeoutWithinReasonableStepCount() {
             Model model = new Model("Fine Timeout");
             Stock stock = new Stock("S", 100, THING);
+            // Slow formula to ensure the timeout fires before completion
+            Flow flow = Flow.create("F", MINUTE, () -> {
+                double x = 0;
+                for (int i = 0; i < 50_000; i++) {
+                    x += Math.sin(i);
+                }
+                return new Quantity(x * 0 + 1, THING);
+            });
+            stock.addOutflow(flow);
             model.addStock(stock);
 
-            // Use a very short timeout (1ms) with a simple model — should
-            // catch within a few hundred steps, not wait for 10,000
-            Simulation sim = new Simulation(model, MINUTE, MINUTE, 1_000_000);
-            sim.setTimeoutMs(1);
+            Simulation sim = new Simulation(model, MINUTE, MINUTE, 5_000_000);
+            sim.setTimeoutMs(100);
 
-            try {
-                sim.execute();
-            } catch (SimulationTimeoutException e) {
-                // Timeout should fire well before 10,000 steps
-                assertThat(e.getMessage()).contains("timed out");
-                int step = Integer.parseInt(
-                        e.getMessage().replaceAll(".*step (\\d+)/.*", "$1"));
-                assertThat(step).isLessThan(10_000);
-                return;
-            }
-            // If it didn't time out (very fast machine), that's OK too
+            assertThatThrownBy(sim::execute)
+                    .isInstanceOf(SimulationTimeoutException.class)
+                    .hasMessageContaining("timed out");
         }
 
         @Test
@@ -582,6 +583,198 @@ public class SimulationTest {
 
             // Stock retains initial value throughout
             assertThat(stock.getValue()).isEqualTo(50.0);
+        }
+    }
+
+    @Nested
+    @DisplayName("Strict mode (#502)")
+    class StrictMode {
+
+        @Test
+        void shouldThrowOnNaNFlowValueInStrictMode() {
+            Model model = new Model("Strict NaN");
+            Stock stock = new Stock("S", 100, THING);
+            Flow nanFlow = Flow.create("BadFlow", MINUTE, () -> new Quantity(Double.NaN, THING));
+            stock.addInflow(nanFlow);
+            model.addStock(stock);
+
+            Simulation sim = new Simulation(model, MINUTE, MINUTE, 3);
+            sim.setStrictMode(true);
+
+            assertThatThrownBy(sim::execute)
+                    .isInstanceOf(NonFiniteValueException.class)
+                    .hasMessageContaining("BadFlow")
+                    .hasMessageContaining("NaN");
+        }
+
+        @Test
+        void shouldThrowOnInfinityStockInStrictMode() {
+            Model model = new Model("Strict Inf");
+            // Stock starts near max; a flow producing 1.0/0.0 = Infinity catches at flow level.
+            // Instead, use a formula that overflows at the stock level.
+            double[] divisor = {1.0};
+            Stock stock = new Stock("S", 100, THING);
+            Flow badFlow = Flow.create("Overflow", MINUTE, () -> {
+                // First call: return finite value; after stock changes, cause overflow
+                double result = stock.getValue() / divisor[0];
+                divisor[0] = 0.0; // Next call will divide by zero → Infinity
+                return new Quantity(result, THING);
+            });
+            stock.addInflow(badFlow);
+            model.addStock(stock);
+
+            Simulation sim = new Simulation(model, MINUTE, MINUTE, 5);
+            sim.setStrictMode(true);
+
+            assertThatThrownBy(sim::execute)
+                    .isInstanceOf(NonFiniteValueException.class);
+        }
+
+        @Test
+        void shouldNotThrowInNonStrictModeByDefault() {
+            Model model = new Model("Non-Strict");
+            Stock stock = new Stock("S", 100, THING);
+            Flow nanFlow = Flow.create("Bad", MINUTE, () -> new Quantity(Double.NaN, THING));
+            stock.addInflow(nanFlow);
+            model.addStock(stock);
+
+            Simulation sim = new Simulation(model, MINUTE, MINUTE, 3);
+            // strictMode defaults to false
+            sim.execute();
+            assertThat(stock.getValue()).isEqualTo(100.0);
+        }
+
+        @Test
+        void shouldReportStepInException() {
+            Model model = new Model("Step Report");
+            Stock stock = new Stock("S", 100, THING);
+            // Flow that only produces NaN at step 2
+            Flow conditionalNan = Flow.create("Conditional", MINUTE, () -> {
+                if (stock.getValue() == 100.0) {
+                    return new Quantity(0, THING); // step 0: finite
+                }
+                return new Quantity(Double.NaN, THING); // subsequent: NaN
+            });
+            stock.addOutflow(conditionalNan);
+            // Add a valid outflow to change stock from 100
+            Flow drainer = Flow.create("Drainer", MINUTE, () -> new Quantity(10, THING));
+            stock.addOutflow(drainer);
+            model.addStock(stock);
+
+            Simulation sim = new Simulation(model, MINUTE, MINUTE, 10);
+            sim.setStrictMode(true);
+
+            assertThatThrownBy(sim::execute)
+                    .isInstanceOf(NonFiniteValueException.class)
+                    .hasMessageContaining("step");
+        }
+
+        @Test
+        void shouldAllowToggleStrictMode() {
+            Simulation sim = new Simulation(new Model("Toggle"), MINUTE, MINUTE, 1);
+            assertThat(sim.isStrictMode()).isFalse();
+            sim.setStrictMode(true);
+            assertThat(sim.isStrictMode()).isTrue();
+            sim.setStrictMode(false);
+            assertThat(sim.isStrictMode()).isFalse();
+        }
+    }
+
+    @Nested
+    @DisplayName("SavePer recording interval (#508)")
+    class SavePerRecording {
+
+        private int countTimeStepEvents(Simulation sim) {
+            int[] count = {0};
+            sim.addEventHandler(new systems.courant.sd.event.EventHandler() {
+                @Override
+                public void handleSimulationStartEvent(
+                        systems.courant.sd.event.SimulationStartEvent e) { }
+                @Override
+                public void handleTimeStepEvent(
+                        systems.courant.sd.event.TimeStepEvent e) { count[0]++; }
+                @Override
+                public void handleSimulationEndEvent(
+                        systems.courant.sd.event.SimulationEndEvent e) { }
+            });
+            sim.execute();
+            return count[0];
+        }
+
+        @Test
+        void shouldRecordEveryStepByDefault() {
+            Model model = new Model("Default SavePer");
+            Simulation sim = new Simulation(model, MINUTE, MINUTE, 5);
+            // savePer=1 (default): all 6 steps (0..5) fire events
+            assertThat(countTimeStepEvents(sim)).isEqualTo(6);
+        }
+
+        @Test
+        void shouldRecordEveryNthStep() {
+            Model model = new Model("SavePer 2");
+            Simulation sim = new Simulation(model, MINUTE, MINUTE, 10);
+            sim.setSavePer(2);
+            // Steps 0,2,4,6,8,10 = 6 events
+            assertThat(countTimeStepEvents(sim)).isEqualTo(6);
+        }
+
+        @Test
+        void shouldAlwaysRecordLastStep() {
+            Model model = new Model("SavePer Last Step");
+            // 5 steps (0..5), savePer=3: steps 0,3,5 = 3 events
+            Simulation sim = new Simulation(model, MINUTE, MINUTE, 5);
+            sim.setSavePer(3);
+            assertThat(countTimeStepEvents(sim)).isEqualTo(3);
+        }
+
+        @Test
+        void shouldStillComputeAllStepsCorrectly() {
+            Model model = new Model("Computation Correctness");
+            Stock stock = new Stock("S", 100, THING);
+            Flow outflow = Flow.create("Out", MINUTE, () -> new Quantity(10, THING));
+            stock.addOutflow(outflow);
+            model.addStock(stock);
+
+            // 10 steps with savePer=5: all 11 steps compute, but only a few record
+            Simulation sim = new Simulation(model, MINUTE, MINUTE, 10);
+            sim.setSavePer(5);
+            sim.execute();
+
+            // Stock should reflect all 11 steps: 100 - 11*10 = -10 → clamped to 0
+            assertThat(stock.getValue()).isEqualTo(0.0);
+        }
+
+        @Test
+        void shouldRecordFlowOnlySavedSteps() {
+            Model model = new Model("Flow History SavePer");
+            Stock stock = new Stock("S", 100, THING);
+            Flow flow = Flow.create("F", MINUTE, () -> new Quantity(5, THING));
+            stock.addOutflow(flow);
+            model.addStock(stock);
+
+            Simulation sim = new Simulation(model, MINUTE, MINUTE, 10);
+            sim.setSavePer(5);
+            sim.execute();
+
+            // Steps 0,5,10 recorded = 3 flow history entries
+            assertThat(flow.getHistoryAtTimeStep(0)).isEqualTo(5.0);
+            assertThat(flow.getHistoryAtTimeStep(1)).isEqualTo(5.0);
+            assertThat(flow.getHistoryAtTimeStep(2)).isEqualTo(5.0);
+            // Step 3 not recorded — returns 0
+            assertThat(flow.getHistoryAtTimeStep(3)).isEqualTo(0.0);
+        }
+
+        @Test
+        void shouldRejectSavePerLessThanOne() {
+            Simulation sim = new Simulation(new Model("Bad"), MINUTE, MINUTE, 1);
+            assertThatThrownBy(() -> sim.setSavePer(0))
+                    .isInstanceOf(IllegalArgumentException.class);
+        }
+
+        @Test
+        void shouldDefaultSavePerToOne() {
+            Simulation sim = new Simulation(new Model("Default"), MINUTE, MINUTE, 1);
+            assertThat(sim.getSavePer()).isEqualTo(1);
         }
     }
 }

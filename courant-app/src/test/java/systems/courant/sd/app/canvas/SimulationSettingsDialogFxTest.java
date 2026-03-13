@@ -190,4 +190,88 @@ class SimulationSettingsDialogFxTest {
 
         assertThat(duration.getText()).isEqualTo("250");
     }
+
+    @Test
+    @DisplayName("Strict mode checkbox defaults to unchecked")
+    void strictModeDefaultsToUnchecked(FxRobot robot) {
+        showDialog(null);
+
+        javafx.scene.control.CheckBox strictMode = robot.lookup("#simStrictMode")
+                .queryAs(javafx.scene.control.CheckBox.class);
+        assertThat(strictMode.isSelected()).isFalse();
+    }
+
+    @Test
+    @DisplayName("Strict mode checkbox reflects existing settings")
+    void strictModeFromExisting(FxRobot robot) {
+        showDialog(new SimulationSettings("Day", 100, "Day", 1.0, true));
+
+        javafx.scene.control.CheckBox strictMode = robot.lookup("#simStrictMode")
+                .queryAs(javafx.scene.control.CheckBox.class);
+        assertThat(strictMode.isSelected()).isTrue();
+    }
+
+    @Test
+    @DisplayName("Strict mode checkbox can be toggled")
+    void strictModeToggle(FxRobot robot) {
+        showDialog(null);
+
+        javafx.scene.control.CheckBox strictMode = robot.lookup("#simStrictMode")
+                .queryAs(javafx.scene.control.CheckBox.class);
+        assertThat(strictMode.isSelected()).isFalse();
+
+        robot.clickOn(strictMode);
+        WaitForAsyncUtils.waitForFxEvents();
+        assertThat(strictMode.isSelected()).isTrue();
+    }
+
+    @Test
+    @DisplayName("SavePer defaults to 1")
+    void savePerDefaultsToOne(FxRobot robot) {
+        showDialog(null);
+
+        TextField savePer = robot.lookup("#simSavePer").queryAs(TextField.class);
+        assertThat(savePer.getText()).isEqualTo("1");
+    }
+
+    @Test
+    @DisplayName("SavePer reflects existing settings")
+    void savePerFromExisting(FxRobot robot) {
+        showDialog(new SimulationSettings("Day", 100, "Day", 1.0, false, 10));
+
+        TextField savePer = robot.lookup("#simSavePer").queryAs(TextField.class);
+        assertThat(savePer.getText()).isEqualTo("10");
+    }
+
+    @Test
+    @DisplayName("OK button is disabled when SavePer is zero")
+    void okDisabledWhenSavePerZero(FxRobot robot) {
+        showDialog(null);
+
+        TextField savePer = robot.lookup("#simSavePer").queryAs(TextField.class);
+        robot.clickOn(savePer).eraseText(savePer.getText().length()).write("0");
+        WaitForAsyncUtils.waitForFxEvents();
+
+        Node okButton = dialogPane.lookupButton(
+                dialogPane.getButtonTypes().stream()
+                        .filter(bt -> bt.getButtonData().isDefaultButton())
+                        .findFirst().orElseThrow());
+        assertThat(okButton.isDisabled()).isTrue();
+    }
+
+    @Test
+    @DisplayName("OK button is disabled when SavePer is not a number")
+    void okDisabledWhenSavePerNaN(FxRobot robot) {
+        showDialog(null);
+
+        TextField savePer = robot.lookup("#simSavePer").queryAs(TextField.class);
+        robot.clickOn(savePer).eraseText(savePer.getText().length()).write("abc");
+        WaitForAsyncUtils.waitForFxEvents();
+
+        Node okButton = dialogPane.lookupButton(
+                dialogPane.getButtonTypes().stream()
+                        .filter(bt -> bt.getButtonData().isDefaultButton())
+                        .findFirst().orElseThrow());
+        assertThat(okButton.isDisabled()).isTrue();
+    }
 }

@@ -30,7 +30,7 @@ public class CompiledModel {
     private final Model model;
     private final List<Resettable> resettables;
     private final ModelDefinition source;
-    private final int[] stepHolder;
+    private final long[] stepHolder;
     private final double[] dtHolder;
     private final TimeUnit[] simTimeUnitHolder;
     private final UnitRegistry unitRegistry;
@@ -48,7 +48,7 @@ public class CompiledModel {
      * @param unitRegistry the unit registry used during compilation
      */
     public CompiledModel(Model model, List<Resettable> resettables, ModelDefinition source,
-                         int[] stepHolder, double[] dtHolder, TimeUnit[] simTimeUnitHolder,
+                         long[] stepHolder, double[] dtHolder, TimeUnit[] simTimeUnitHolder,
                          UnitRegistry unitRegistry) {
         this.model = model;
         this.resettables = List.copyOf(resettables);
@@ -138,6 +138,8 @@ public class CompiledModel {
         simTimeUnitHolder[0] = timeStep;
         setDt(settings.dt());
         Simulation sim = new Simulation(model, timeStep, new Quantity(settings.duration(), durationUnit));
+        sim.setStrictMode(settings.strictMode());
+        sim.setSavePer(settings.savePer());
         installStepSync(sim);
         return sim;
     }
@@ -194,17 +196,17 @@ public class CompiledModel {
      * Event handler that synchronizes the compiled model's step counter with the simulation.
      */
     private static class StepSyncHandler implements EventHandler {
-        private final int[] stepHolder;
+        private final long[] stepHolder;
         private final Simulation sim;
 
-        StepSyncHandler(int[] stepHolder, Simulation sim) {
+        StepSyncHandler(long[] stepHolder, Simulation sim) {
             this.stepHolder = stepHolder;
             this.sim = sim;
         }
 
         @Override
         public void handleTimeStepEvent(TimeStepEvent event) {
-            stepHolder[0] = (int) sim.getCurrentStep();
+            stepHolder[0] = sim.getCurrentStep();
         }
     }
 }

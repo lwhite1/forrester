@@ -5,7 +5,7 @@ import com.google.common.base.Preconditions;
 import systems.courant.sd.model.compile.Resettable;
 
 import java.util.function.DoubleSupplier;
-import java.util.function.IntSupplier;
+import java.util.function.LongSupplier;
 
 /**
  * Implements the Vensim SAMPLE IF TRUE function.
@@ -21,14 +21,14 @@ public class SampleIfTrue implements Formula, Resettable {
     private final DoubleSupplier condition;
     private final DoubleSupplier input;
     private final double initialValue;
-    private final IntSupplier currentStep;
+    private final LongSupplier currentStep;
 
     private double heldValue;
     private boolean initialized;
-    private int lastStep = -1;
+    private long lastStep = -1;
 
     private SampleIfTrue(DoubleSupplier condition, DoubleSupplier input,
-                          double initialValue, IntSupplier currentStep) {
+                          double initialValue, LongSupplier currentStep) {
         Preconditions.checkNotNull(condition, "condition supplier must not be null");
         Preconditions.checkNotNull(input, "input supplier must not be null");
         Preconditions.checkNotNull(currentStep, "currentStep supplier must not be null");
@@ -48,7 +48,7 @@ public class SampleIfTrue implements Formula, Resettable {
      * @return a new SampleIfTrue formula
      */
     public static SampleIfTrue of(DoubleSupplier condition, DoubleSupplier input,
-                                   double initialValue, IntSupplier currentStep) {
+                                   double initialValue, LongSupplier currentStep) {
         return new SampleIfTrue(condition, input, initialValue, currentStep);
     }
 
@@ -61,7 +61,7 @@ public class SampleIfTrue implements Formula, Resettable {
 
     @Override
     public double getCurrentValue() {
-        int step = currentStep.getAsInt();
+        long step = currentStep.getAsLong();
         if (!initialized) {
             heldValue = initialValue;
             initialized = true;

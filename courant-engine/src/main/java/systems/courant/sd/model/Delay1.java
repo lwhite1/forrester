@@ -5,7 +5,7 @@ import com.google.common.base.Preconditions;
 import systems.courant.sd.model.compile.Resettable;
 
 import java.util.function.DoubleSupplier;
-import java.util.function.IntSupplier;
+import java.util.function.LongSupplier;
 
 /**
  * A first-order material delay that implements {@link Formula}, providing the standard
@@ -44,16 +44,16 @@ public class Delay1 implements Formula, Resettable {
 
     private final DoubleSupplier input;
     private final double delayTime;
-    private final IntSupplier currentStep;
+    private final LongSupplier currentStep;
     private final double explicitInitial;
     private final boolean hasExplicitInitial;
 
     private double stage;
     private double output;
     private boolean initialized;
-    private int lastStep = -1;
+    private long lastStep = -1;
 
-    private Delay1(DoubleSupplier input, double delayTime, IntSupplier currentStep,
+    private Delay1(DoubleSupplier input, double delayTime, LongSupplier currentStep,
                    double explicitInitial, boolean hasExplicitInitial) {
         Preconditions.checkNotNull(input, "input supplier must not be null");
         Preconditions.checkNotNull(currentStep, "currentStep supplier must not be null");
@@ -74,7 +74,7 @@ public class Delay1 implements Formula, Resettable {
      * @param currentStep supplies the current simulation timestep
      * @return a new Delay1 formula
      */
-    public static Delay1 of(DoubleSupplier input, double delayTime, IntSupplier currentStep) {
+    public static Delay1 of(DoubleSupplier input, double delayTime, LongSupplier currentStep) {
         return new Delay1(input, delayTime, currentStep, 0, false);
     }
 
@@ -88,7 +88,7 @@ public class Delay1 implements Formula, Resettable {
      * @return a new Delay1 formula
      */
     public static Delay1 of(DoubleSupplier input, double delayTime, double initialValue,
-                            IntSupplier currentStep) {
+                            LongSupplier currentStep) {
         return new Delay1(input, delayTime, currentStep, initialValue, true);
     }
 
@@ -113,7 +113,7 @@ public class Delay1 implements Formula, Resettable {
      */
     @Override
     public double getCurrentValue() {
-        int step = currentStep.getAsInt();
+        long step = currentStep.getAsLong();
         if (!initialized) {
             double init = hasExplicitInitial ? explicitInitial : input.getAsDouble();
             stage = init * delayTime;
@@ -121,7 +121,7 @@ public class Delay1 implements Formula, Resettable {
             initialized = true;
             lastStep = step;
         } else if (step > lastStep) {
-            int delta = step - lastStep;
+            long delta = step - lastStep;
             for (int d = 0; d < delta; d++) {
                 double inputVal = input.getAsDouble();
                 double rate = stage / delayTime;

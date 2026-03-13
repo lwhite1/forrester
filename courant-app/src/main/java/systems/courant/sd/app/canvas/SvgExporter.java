@@ -549,7 +549,8 @@ public final class SvgExporter {
         w.printf(Locale.US,
                 "  <text x=\"%.2f\" y=\"%.2f\" text-anchor=\"start\" dominant-baseline=\"hanging\" " +
                 "font-family=\"sans-serif\" font-size=\"%.0f\" fill=\"%s\">%s</text>%n",
-                x + 5, y + 3, LayoutMetrics.BADGE_FONT_SIZE, svgColor(ColorPalette.TEXT_SECONDARY), ElementRenderer.BADGE_MODULE);
+                x + 5, y + 3, LayoutMetrics.BADGE_FONT_SIZE,
+                svgColor(ColorPalette.TEXT_SECONDARY), ElementRenderer.BADGE_MODULE);
 
         // Name centered (truncated to fit)
         String modLabel = ElementRenderer.truncate(name, LayoutMetrics.MODULE_NAME_FONT, width - 12);
@@ -583,7 +584,8 @@ public final class SvgExporter {
         w.printf(Locale.US,
                 "  <text x=\"%.2f\" y=\"%.2f\" text-anchor=\"start\" dominant-baseline=\"hanging\" " +
                 "font-family=\"sans-serif\" font-size=\"%.0f\" fill=\"%s\">%s</text>%n",
-                x + 4, y + 3, LayoutMetrics.BADGE_FONT_SIZE, svgColor(ColorPalette.TEXT_SECONDARY), ElementRenderer.BADGE_LOOKUP);
+                x + 4, y + 3, LayoutMetrics.BADGE_FONT_SIZE,
+                svgColor(ColorPalette.TEXT_SECONDARY), ElementRenderer.BADGE_LOOKUP);
 
         // Name centered (truncated to fit)
         String lookupLabel = ElementRenderer.truncate(name, LayoutMetrics.LOOKUP_NAME_FONT, width - 16);
@@ -626,11 +628,13 @@ public final class SvgExporter {
                 LayoutMetrics.COMMENT_BORDER_WIDTH);
 
         if (text != null && !text.isBlank()) {
-            String display = ElementRenderer.truncate(text, LayoutMetrics.COMMENT_TEXT_FONT, width - 12);
+            String display = ElementRenderer.truncate(
+                    text, LayoutMetrics.COMMENT_TEXT_FONT, width - 12);
             w.printf(Locale.US,
                     "  <text x=\"%.2f\" y=\"%.2f\" text-anchor=\"start\" dominant-baseline=\"hanging\" " +
                     "font-family=\"sans-serif\" font-size=\"%.0f\" fill=\"%s\">%s</text>%n",
-                    x + 6, y + 6, LayoutMetrics.COMMENT_TEXT_FONT_SIZE, svgColor(ColorPalette.TEXT), escapeXml(display));
+                    x + 6, y + 6, LayoutMetrics.COMMENT_TEXT_FONT_SIZE,
+                    svgColor(ColorPalette.TEXT), escapeXml(display));
         }
     }
 
