@@ -5,7 +5,7 @@ import com.google.common.base.Preconditions;
 import systems.courant.sd.model.compile.Resettable;
 
 import java.util.function.DoubleSupplier;
-import java.util.function.IntSupplier;
+import java.util.function.LongSupplier;
 
 /**
  * A third-order material delay that implements {@link Formula}, providing the standard
@@ -46,7 +46,7 @@ public class Delay3 implements Formula, Resettable {
 
     private final DoubleSupplier input;
     private final double delayTime;
-    private final IntSupplier currentStep;
+    private final LongSupplier currentStep;
     private final double explicitInitial;
     private final boolean hasExplicitInitial;
 
@@ -55,9 +55,9 @@ public class Delay3 implements Formula, Resettable {
     private double stage3;
     private double output;
     private boolean initialized;
-    private int lastStep = -1;
+    private long lastStep = -1;
 
-    private Delay3(DoubleSupplier input, double delayTime, IntSupplier currentStep,
+    private Delay3(DoubleSupplier input, double delayTime, LongSupplier currentStep,
                    double explicitInitial, boolean hasExplicitInitial) {
         Preconditions.checkNotNull(input, "input supplier must not be null");
         Preconditions.checkNotNull(currentStep, "currentStep supplier must not be null");
@@ -78,7 +78,7 @@ public class Delay3 implements Formula, Resettable {
      * @param currentStep supplies the current simulation timestep
      * @return a new Delay3 formula
      */
-    public static Delay3 of(DoubleSupplier input, double delayTime, IntSupplier currentStep) {
+    public static Delay3 of(DoubleSupplier input, double delayTime, LongSupplier currentStep) {
         return new Delay3(input, delayTime, currentStep, 0, false);
     }
 
@@ -92,7 +92,7 @@ public class Delay3 implements Formula, Resettable {
      * @return a new Delay3 formula
      */
     public static Delay3 of(DoubleSupplier input, double delayTime, double initialValue,
-                            IntSupplier currentStep) {
+                            LongSupplier currentStep) {
         return new Delay3(input, delayTime, currentStep, initialValue, true);
     }
 
@@ -119,7 +119,7 @@ public class Delay3 implements Formula, Resettable {
      */
     @Override
     public double getCurrentValue() {
-        int step = currentStep.getAsInt();
+        long step = currentStep.getAsLong();
         if (!initialized) {
             double init = hasExplicitInitial ? explicitInitial : input.getAsDouble();
             double stageTime = delayTime / 3.0;
@@ -131,7 +131,7 @@ public class Delay3 implements Formula, Resettable {
             lastStep = step;
         } else if (step > lastStep) {
             double stageTime = delayTime / 3.0;
-            int delta = step - lastStep;
+            long delta = step - lastStep;
             double inputVal = input.getAsDouble();
             for (int d = 0; d < delta; d++) {
                 // Compute outflow rates from current stage levels

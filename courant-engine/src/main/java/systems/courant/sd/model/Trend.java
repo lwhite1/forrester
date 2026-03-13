@@ -5,7 +5,7 @@ import com.google.common.base.Preconditions;
 import systems.courant.sd.model.compile.Resettable;
 
 import java.util.function.DoubleSupplier;
-import java.util.function.IntSupplier;
+import java.util.function.LongSupplier;
 
 /**
  * Computes the fractional rate of change of an input, providing the standard
@@ -31,15 +31,15 @@ public class Trend implements Formula, Resettable {
     private final DoubleSupplier input;
     private final double averagingTime;
     private final double initialTrend;
-    private final IntSupplier currentStep;
+    private final LongSupplier currentStep;
 
     private double averageInput;
     private double trend;
     private boolean initialized;
-    private int lastStep = -1;
+    private long lastStep = -1;
 
     private Trend(DoubleSupplier input, double averagingTime, double initialTrend,
-                  IntSupplier currentStep) {
+                  LongSupplier currentStep) {
         Preconditions.checkNotNull(input, "input supplier must not be null");
         Preconditions.checkNotNull(currentStep, "currentStep supplier must not be null");
         Preconditions.checkArgument(averagingTime > 0,
@@ -60,7 +60,7 @@ public class Trend implements Formula, Resettable {
      * @return a new Trend formula
      */
     public static Trend of(DoubleSupplier input, double averagingTime, double initialTrend,
-                           IntSupplier currentStep) {
+                           LongSupplier currentStep) {
         return new Trend(input, averagingTime, initialTrend, currentStep);
     }
 
@@ -84,7 +84,7 @@ public class Trend implements Formula, Resettable {
      */
     @Override
     public double getCurrentValue() {
-        int step = currentStep.getAsInt();
+        long step = currentStep.getAsLong();
         if (!initialized) {
             double inputVal = input.getAsDouble();
             // Initialize average so that the initial trend is correct:
@@ -96,7 +96,7 @@ public class Trend implements Formula, Resettable {
             initialized = true;
             lastStep = step;
         } else if (step > lastStep) {
-            int delta = step - lastStep;
+            long delta = step - lastStep;
             for (int d = 0; d < delta; d++) {
                 double inputVal = input.getAsDouble();
                 averageInput += (inputVal - averageInput) / averagingTime;

@@ -63,7 +63,7 @@ public class FlowTimeDemo {
 
         Flow throughput = Flow.create("Delivered Reports", DAY, () -> {
             int demandDelay = Math.max(0, (int) Math.round(tat.getValue()));
-            int stepToGet = Math.max(0, (int) sim.getCurrentStep() - demandDelay);
+            int stepToGet = Math.max(0, (int) (sim.getCurrentStep() - demandDelay));
             double demandPlusDelay = demand.getHistoryAtTimeStep(stepToGet);
             return new Quantity(Math.min(capacity, demandPlusDelay), ItemUnits.THING);
         });

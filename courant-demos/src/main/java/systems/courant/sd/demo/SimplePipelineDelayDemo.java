@@ -48,7 +48,7 @@ public class SimplePipelineDelayDemo {
         Flow arrivals = Flows.constant("Arrivals", DAY, new Quantity(arrivalRate, THING));
 
         Flow departures = Flows.pipelineDelay("Departures", DAY, arrivals,
-                () -> (int) run.getCurrentStep(), delayDays);
+                run::getCurrentStep, delayDays);
 
         wip.addInflow(arrivals);
         wip.addOutflow(departures);

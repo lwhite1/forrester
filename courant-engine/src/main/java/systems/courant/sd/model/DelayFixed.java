@@ -5,7 +5,7 @@ import com.google.common.base.Preconditions;
 import systems.courant.sd.model.compile.Resettable;
 
 import java.util.function.DoubleSupplier;
-import java.util.function.IntSupplier;
+import java.util.function.LongSupplier;
 
 /**
  * A fixed pipeline delay that implements {@link Formula}, providing the standard
@@ -28,15 +28,15 @@ public class DelayFixed implements Formula, Resettable {
     private final DoubleSupplier input;
     private final int delaySteps;
     private final DoubleSupplier initialValueSupplier;
-    private final IntSupplier currentStep;
+    private final LongSupplier currentStep;
 
     private double[] buffer;
     private int writeIndex;
     private boolean initialized;
-    private int lastStep = -1;
+    private long lastStep = -1;
 
     private DelayFixed(DoubleSupplier input, int delaySteps, DoubleSupplier initialValueSupplier,
-                       IntSupplier currentStep) {
+                       LongSupplier currentStep) {
         Preconditions.checkNotNull(input, "input supplier must not be null");
         Preconditions.checkNotNull(initialValueSupplier,
                 "initialValue supplier must not be null");
@@ -59,7 +59,7 @@ public class DelayFixed implements Formula, Resettable {
      * @return a new DelayFixed formula
      */
     public static DelayFixed of(DoubleSupplier input, int delaySteps, double initialValue,
-                                IntSupplier currentStep) {
+                                LongSupplier currentStep) {
         return new DelayFixed(input, delaySteps, () -> initialValue, currentStep);
     }
 
@@ -75,7 +75,7 @@ public class DelayFixed implements Formula, Resettable {
      */
     public static DelayFixed of(DoubleSupplier input, int delaySteps,
                                 DoubleSupplier initialValueSupplier,
-                                IntSupplier currentStep) {
+                                LongSupplier currentStep) {
         return new DelayFixed(input, delaySteps, initialValueSupplier, currentStep);
     }
 
@@ -98,7 +98,7 @@ public class DelayFixed implements Formula, Resettable {
      */
     @Override
     public double getCurrentValue() {
-        int step = currentStep.getAsInt();
+        long step = currentStep.getAsLong();
         if (!initialized) {
             buffer = new double[delaySteps + 1];
             java.util.Arrays.fill(buffer, initialValueSupplier.getAsDouble());
@@ -108,7 +108,7 @@ public class DelayFixed implements Formula, Resettable {
         }
         if (step > lastStep) {
             double currentInput = input.getAsDouble();
-            int delta = step - lastStep;
+            long delta = step - lastStep;
             // For missed intermediate steps, repeat the last written input (zero-order hold)
             double lastKnownInput = buffer[(writeIndex - 1 + buffer.length) % buffer.length];
             for (int d = 0; d < delta - 1; d++) {

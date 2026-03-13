@@ -276,7 +276,7 @@ class CompilationContextTest {
             int[] step = {0};
             CompilationContext stepCtx = new CompilationContext(new UnitRegistry(), () -> step[0]);
             step[0] = 5;
-            assertThat(stepCtx.getCurrentStep().getAsInt()).isEqualTo(5);
+            assertThat(stepCtx.getCurrentStep().getAsLong()).isEqualTo(5);
         }
 
         @Test

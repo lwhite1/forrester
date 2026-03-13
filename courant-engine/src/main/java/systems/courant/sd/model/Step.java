@@ -2,7 +2,7 @@ package systems.courant.sd.model;
 
 import com.google.common.base.Preconditions;
 
-import java.util.function.IntSupplier;
+import java.util.function.LongSupplier;
 
 /**
  * A step function that implements {@link Formula}, providing the standard SD STEP builtin.
@@ -21,10 +21,10 @@ import java.util.function.IntSupplier;
 public class Step implements Formula {
 
     private final double height;
-    private final int stepTime;
-    private final IntSupplier currentStep;
+    private final long stepTime;
+    private final LongSupplier currentStep;
 
-    private Step(double height, int stepTime, IntSupplier currentStep) {
+    private Step(double height, long stepTime, LongSupplier currentStep) {
         Preconditions.checkNotNull(currentStep, "currentStep supplier must not be null");
         Preconditions.checkArgument(stepTime >= 0,
                 "stepTime must be non-negative, but got %s", stepTime);
@@ -41,7 +41,7 @@ public class Step implements Formula {
      * @param currentStep supplies the current simulation timestep
      * @return a new Step formula
      */
-    public static Step of(double height, int stepTime, IntSupplier currentStep) {
+    public static Step of(double height, long stepTime, LongSupplier currentStep) {
         return new Step(height, stepTime, currentStep);
     }
 
@@ -52,6 +52,6 @@ public class Step implements Formula {
      */
     @Override
     public double getCurrentValue() {
-        return currentStep.getAsInt() >= stepTime ? height : 0;
+        return currentStep.getAsLong() >= stepTime ? height : 0;
     }
 }

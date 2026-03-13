@@ -628,7 +628,8 @@ public final class SvgExporter {
                 LayoutMetrics.COMMENT_BORDER_WIDTH);
 
         if (text != null && !text.isBlank()) {
-            String display = ElementRenderer.truncate(text, LayoutMetrics.COMMENT_TEXT_FONT, width - 12);
+            String display = ElementRenderer.truncate(
+                    text, LayoutMetrics.COMMENT_TEXT_FONT, width - 12);
             w.printf(Locale.US,
                     "  <text x=\"%.2f\" y=\"%.2f\" text-anchor=\"start\" dominant-baseline=\"hanging\" " +
                     "font-family=\"sans-serif\" font-size=\"%.0f\" fill=\"%s\">%s</text>%n",

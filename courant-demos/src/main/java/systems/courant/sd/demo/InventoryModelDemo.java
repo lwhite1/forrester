@@ -91,7 +91,7 @@ public class InventoryModelDemo {
             if (run.getCurrentStep() <= totalDelay) {
                 return new Quantity(initialPerceivedSales, THING);
             }
-            int priorStep = (int) run.getCurrentStep() - totalDelay;
+            int priorStep = (int) (run.getCurrentStep() - totalDelay);
             return new Quantity(ordersToFactory.getHistoryAtTimeStep(priorStep), THING);
         });
 

@@ -26,11 +26,11 @@ class ExprCompilerTest {
     private CompilationContext context;
     private ExprCompiler compiler;
     private List<Resettable> resettables;
-    private int[] step;
+    private long[] step;
 
     @BeforeEach
     void setUp() {
-        step = new int[]{0};
+        step = new long[]{0};
         UnitRegistry registry = new UnitRegistry();
         context = new CompilationContext(registry, () -> step[0]);
         resettables = new ArrayList<>();

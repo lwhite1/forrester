@@ -5,7 +5,7 @@ import systems.courant.sd.measure.TimeUnit;
 
 import com.google.common.base.Preconditions;
 
-import java.util.function.IntSupplier;
+import java.util.function.LongSupplier;
 
 /**
  * Factory methods for creating common system dynamics flow patterns.
@@ -102,10 +102,10 @@ public final class Flows {
      * @return a new pipeline delay flow
      */
     public static Flow pipelineDelay(String name, TimeUnit timeUnit, Flow inflow,
-                                     IntSupplier stepSupplier, int delay) {
+                                     LongSupplier stepSupplier, long delay) {
         return Flow.create(name, timeUnit, () -> {
-            int referenceStep = stepSupplier.getAsInt() - delay;
-            double value = inflow.getHistoryAtTimeStep(referenceStep);
+            long referenceStep = stepSupplier.getAsLong() - delay;
+            double value = inflow.getHistoryAtTimeStep((int) referenceStep);
             Stock sink = inflow.getSink();
             Preconditions.checkArgument(sink != null, "inflow must have a sink stock assigned");
             return new Quantity(value, sink.getUnit());

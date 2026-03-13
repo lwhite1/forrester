@@ -2,7 +2,7 @@ package systems.courant.sd.model;
 
 import com.google.common.base.Preconditions;
 
-import java.util.function.IntSupplier;
+import java.util.function.LongSupplier;
 
 /**
  * A ramp function that implements {@link Formula}, providing the standard SD RAMP builtin.
@@ -24,11 +24,11 @@ import java.util.function.IntSupplier;
 public class Ramp implements Formula {
 
     private final double slope;
-    private final int startStep;
-    private final int endStep;
-    private final IntSupplier currentStep;
+    private final long startStep;
+    private final long endStep;
+    private final LongSupplier currentStep;
 
-    private Ramp(double slope, int startStep, int endStep, IntSupplier currentStep) {
+    private Ramp(double slope, long startStep, long endStep, LongSupplier currentStep) {
         Preconditions.checkNotNull(currentStep, "currentStep supplier must not be null");
         Preconditions.checkArgument(startStep >= 0,
                 "startStep must be non-negative, but got %s", startStep);
@@ -48,8 +48,8 @@ public class Ramp implements Formula {
      * @param currentStep supplies the current simulation timestep
      * @return a new Ramp formula
      */
-    public static Ramp of(double slope, int startStep, IntSupplier currentStep) {
-        return new Ramp(slope, startStep, Integer.MAX_VALUE, currentStep);
+    public static Ramp of(double slope, long startStep, LongSupplier currentStep) {
+        return new Ramp(slope, startStep, Long.MAX_VALUE, currentStep);
     }
 
     /**
@@ -61,7 +61,7 @@ public class Ramp implements Formula {
      * @param currentStep supplies the current simulation timestep
      * @return a new Ramp formula
      */
-    public static Ramp of(double slope, int startStep, int endStep, IntSupplier currentStep) {
+    public static Ramp of(double slope, long startStep, long endStep, LongSupplier currentStep) {
         return new Ramp(slope, startStep, endStep, currentStep);
     }
 
@@ -73,11 +73,11 @@ public class Ramp implements Formula {
      */
     @Override
     public double getCurrentValue() {
-        int step = currentStep.getAsInt();
+        long step = currentStep.getAsLong();
         if (step < startStep) {
             return 0;
         }
-        int elapsed = Math.min(step, endStep) - startStep;
+        long elapsed = Math.min(step, endStep) - startStep;
         return slope * elapsed;
     }
 }
