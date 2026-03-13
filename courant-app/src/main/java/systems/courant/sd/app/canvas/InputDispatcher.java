@@ -469,7 +469,7 @@ final class InputDispatcher {
                         viewport.toWorldY(event.getY()),
                         canvasState, editor, () -> canvas.saveUndoState(
                                 "Reconnect " + reattachController.flowName()));
-                canvas.regenerateConnectors();
+                canvas.scheduleRegenerateConnectors();
             }
             canvas.requestRedraw();
             canvas.fireStatusChanged();
@@ -487,7 +487,7 @@ final class InputDispatcher {
                                     + " \u2192 " + rerouteController.getToName() + " connection"));
             if (rerouted) {
                 canvas.clearSelectedConnection();
-                canvas.regenerateConnectors();
+                canvas.scheduleRegenerateConnectors();
             }
             canvas.requestRedraw();
             canvas.fireStatusChanged();
