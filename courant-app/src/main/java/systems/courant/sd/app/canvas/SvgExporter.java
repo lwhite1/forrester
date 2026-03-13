@@ -313,9 +313,10 @@ public final class SvgExporter {
 
             w.printf(Locale.US,
                     "  <line x1=\"%.2f\" y1=\"%.2f\" x2=\"%.2f\" y2=\"%.2f\" " +
-                    "stroke=\"%s\" stroke-opacity=\"%.2f\" stroke-width=\"2.5\"/>%n",
+                    "stroke=\"%s\" stroke-opacity=\"%.2f\" stroke-width=\"%.1f\"/>%n",
                     cf.x(), cf.y(), ct.x(), ct.y(),
-                    svgColor(ColorPalette.LOOP_EDGE), svgOpacity(ColorPalette.LOOP_EDGE));
+                    svgColor(ColorPalette.LOOP_EDGE), svgOpacity(ColorPalette.LOOP_EDGE),
+                    LayoutMetrics.LOOP_EDGE_LINE_WIDTH);
         }
 
         // Material flow loop edges
@@ -332,9 +333,10 @@ public final class SvgExporter {
                         state, flow.source(), midX, midY);
                 w.printf(Locale.US,
                         "  <line x1=\"%.2f\" y1=\"%.2f\" x2=\"%.2f\" y2=\"%.2f\" " +
-                        "stroke=\"%s\" stroke-opacity=\"%.2f\" stroke-width=\"2.5\"/>%n",
+                        "stroke=\"%s\" stroke-opacity=\"%.2f\" stroke-width=\"%.1f\"/>%n",
                         midX, midY, edge.x(), edge.y(),
-                        svgColor(ColorPalette.LOOP_EDGE), svgOpacity(ColorPalette.LOOP_EDGE));
+                        svgColor(ColorPalette.LOOP_EDGE), svgOpacity(ColorPalette.LOOP_EDGE),
+                        LayoutMetrics.LOOP_EDGE_LINE_WIDTH);
             }
 
             if (flow.sink() != null && state.hasElement(flow.sink())
@@ -343,9 +345,10 @@ public final class SvgExporter {
                         state, flow.sink(), midX, midY);
                 w.printf(Locale.US,
                         "  <line x1=\"%.2f\" y1=\"%.2f\" x2=\"%.2f\" y2=\"%.2f\" " +
-                        "stroke=\"%s\" stroke-opacity=\"%.2f\" stroke-width=\"2.5\"/>%n",
+                        "stroke=\"%s\" stroke-opacity=\"%.2f\" stroke-width=\"%.1f\"/>%n",
                         midX, midY, edge.x(), edge.y(),
-                        svgColor(ColorPalette.LOOP_EDGE), svgOpacity(ColorPalette.LOOP_EDGE));
+                        svgColor(ColorPalette.LOOP_EDGE), svgOpacity(ColorPalette.LOOP_EDGE),
+                        LayoutMetrics.LOOP_EDGE_LINE_WIDTH);
             }
         }
 
@@ -368,9 +371,10 @@ public final class SvgExporter {
 
             w.printf(Locale.US,
                     "  <line x1=\"%.2f\" y1=\"%.2f\" x2=\"%.2f\" y2=\"%.2f\" " +
-                    "stroke=\"%s\" stroke-opacity=\"%.2f\" stroke-width=\"2.5\"/>%n",
+                    "stroke=\"%s\" stroke-opacity=\"%.2f\" stroke-width=\"%.1f\"/>%n",
                     cf.x(), cf.y(), ct.x(), ct.y(),
-                    svgColor(ColorPalette.LOOP_EDGE), svgOpacity(ColorPalette.LOOP_EDGE));
+                    svgColor(ColorPalette.LOOP_EDGE), svgOpacity(ColorPalette.LOOP_EDGE),
+                    LayoutMetrics.LOOP_EDGE_LINE_WIDTH);
         }
 
         // Loop type labels (CLD loops only, not S&F feedback groups)
@@ -398,9 +402,9 @@ public final class SvgExporter {
                 };
                 w.printf(Locale.US,
                         "  <text x=\"%.2f\" y=\"%.2f\" text-anchor=\"middle\" " +
-                        "dominant-baseline=\"central\" font-weight=\"bold\" font-size=\"14\" " +
+                        "dominant-baseline=\"central\" font-weight=\"bold\" font-size=\"%.0f\" " +
                         "fill=\"%s\">%s</text>%n",
-                        cx, cy, svgColor(color), escapeXml(loop.label()));
+                        cx, cy, LayoutMetrics.LOOP_LABEL_FONT_SIZE, svgColor(color), escapeXml(loop.label()));
             }
         }
     }
@@ -430,16 +434,16 @@ public final class SvgExporter {
         String stockLabel = ElementRenderer.truncate(name, LayoutMetrics.STOCK_NAME_FONT, width - 12);
         w.printf(Locale.US,
                 "  <text x=\"%.2f\" y=\"%.2f\" text-anchor=\"middle\" dominant-baseline=\"central\" " +
-                "font-family=\"sans-serif\" font-size=\"13\" font-weight=\"bold\" fill=\"%s\">%s</text>%n",
-                cx, cy, svgColor(ColorPalette.TEXT), escapeXml(stockLabel));
+                "font-family=\"sans-serif\" font-size=\"%.0f\" font-weight=\"bold\" fill=\"%s\">%s</text>%n",
+                cx, cy, LayoutMetrics.STOCK_NAME_FONT_SIZE, svgColor(ColorPalette.TEXT), escapeXml(stockLabel));
 
         // Unit badge
         if (unit != null && !unit.isBlank()) {
             w.printf(Locale.US,
                     "  <text x=\"%.2f\" y=\"%.2f\" text-anchor=\"end\" dominant-baseline=\"auto\" " +
-                    "font-family=\"sans-serif\" font-size=\"9\" fill=\"%s\">%s</text>%n",
+                    "font-family=\"sans-serif\" font-size=\"%.0f\" fill=\"%s\">%s</text>%n",
                     x + width - 6, y + height - 4,
-                    svgColor(ColorPalette.TEXT_SECONDARY), escapeXml(unit));
+                    LayoutMetrics.BADGE_FONT_SIZE, svgColor(ColorPalette.TEXT_SECONDARY), escapeXml(unit));
         }
     }
 
@@ -462,9 +466,9 @@ public final class SvgExporter {
                 LayoutMetrics.FLOW_LABEL_MAX_WIDTH);
         w.printf(Locale.US,
                 "  <text x=\"%.2f\" y=\"%.2f\" text-anchor=\"middle\" dominant-baseline=\"hanging\" " +
-                "font-family=\"sans-serif\" font-size=\"11\" fill=\"%s\">%s</text>%n",
+                "font-family=\"sans-serif\" font-size=\"%.0f\" fill=\"%s\">%s</text>%n",
                 cx, cy + half + LayoutMetrics.FLOW_NAME_GAP,
-                svgColor(ColorPalette.TEXT), escapeXml(flowLabel));
+                LayoutMetrics.FLOW_NAME_FONT_SIZE, svgColor(ColorPalette.TEXT), escapeXml(flowLabel));
     }
 
     private static void writeVariable(PrintWriter w, String name, String equation,
@@ -511,15 +515,15 @@ public final class SvgExporter {
         }
         w.printf(Locale.US,
                 "  <text x=\"%.2f\" y=\"%.2f\" text-anchor=\"start\" dominant-baseline=\"hanging\" " +
-                "font-family=\"sans-serif\" font-size=\"9\" fill=\"%s\">%s</text>%n",
-                x + 5, y + 3, svgColor(ColorPalette.TEXT_SECONDARY), escapeXml(badge));
+                "font-family=\"sans-serif\" font-size=\"%.0f\" fill=\"%s\">%s</text>%n",
+                x + 5, y + 3, LayoutMetrics.BADGE_FONT_SIZE, svgColor(ColorPalette.TEXT_SECONDARY), escapeXml(badge));
 
         // Name centered (truncated to fit)
         String auxLabel = ElementRenderer.truncate(name, LayoutMetrics.AUX_NAME_FONT, width - 20);
         w.printf(Locale.US,
                 "  <text x=\"%.2f\" y=\"%.2f\" text-anchor=\"middle\" dominant-baseline=\"central\" " +
-                "font-family=\"sans-serif\" font-size=\"12\" fill=\"%s\">%s</text>%n",
-                cx, cy, svgColor(ColorPalette.TEXT), escapeXml(auxLabel));
+                "font-family=\"sans-serif\" font-size=\"%.0f\" fill=\"%s\">%s</text>%n",
+                cx, cy, LayoutMetrics.AUX_NAME_FONT_SIZE, svgColor(ColorPalette.TEXT), escapeXml(auxLabel));
     }
 
     private static void writeModule(PrintWriter w, String name,
@@ -544,15 +548,15 @@ public final class SvgExporter {
         // Module badge
         w.printf(Locale.US,
                 "  <text x=\"%.2f\" y=\"%.2f\" text-anchor=\"start\" dominant-baseline=\"hanging\" " +
-                "font-family=\"sans-serif\" font-size=\"9\" fill=\"%s\">%s</text>%n",
-                x + 5, y + 3, svgColor(ColorPalette.TEXT_SECONDARY), ElementRenderer.BADGE_MODULE);
+                "font-family=\"sans-serif\" font-size=\"%.0f\" fill=\"%s\">%s</text>%n",
+                x + 5, y + 3, LayoutMetrics.BADGE_FONT_SIZE, svgColor(ColorPalette.TEXT_SECONDARY), ElementRenderer.BADGE_MODULE);
 
         // Name centered (truncated to fit)
         String modLabel = ElementRenderer.truncate(name, LayoutMetrics.MODULE_NAME_FONT, width - 12);
         w.printf(Locale.US,
                 "  <text x=\"%.2f\" y=\"%.2f\" text-anchor=\"middle\" dominant-baseline=\"central\" " +
-                "font-family=\"sans-serif\" font-size=\"13\" font-weight=\"bold\" fill=\"%s\">%s</text>%n",
-                cx, cy, svgColor(ColorPalette.TEXT), escapeXml(modLabel));
+                "font-family=\"sans-serif\" font-size=\"%.0f\" font-weight=\"bold\" fill=\"%s\">%s</text>%n",
+                cx, cy, LayoutMetrics.MODULE_NAME_FONT_SIZE, svgColor(ColorPalette.TEXT), escapeXml(modLabel));
     }
 
     private static void writeLookup(PrintWriter w, String name, int dataPoints,
@@ -578,23 +582,23 @@ public final class SvgExporter {
         // Table badge
         w.printf(Locale.US,
                 "  <text x=\"%.2f\" y=\"%.2f\" text-anchor=\"start\" dominant-baseline=\"hanging\" " +
-                "font-family=\"sans-serif\" font-size=\"9\" fill=\"%s\">%s</text>%n",
-                x + 4, y + 3, svgColor(ColorPalette.TEXT_SECONDARY), ElementRenderer.BADGE_LOOKUP);
+                "font-family=\"sans-serif\" font-size=\"%.0f\" fill=\"%s\">%s</text>%n",
+                x + 4, y + 3, LayoutMetrics.BADGE_FONT_SIZE, svgColor(ColorPalette.TEXT_SECONDARY), ElementRenderer.BADGE_LOOKUP);
 
         // Name centered (truncated to fit)
         String lookupLabel = ElementRenderer.truncate(name, LayoutMetrics.LOOKUP_NAME_FONT, width - 16);
         w.printf(Locale.US,
                 "  <text x=\"%.2f\" y=\"%.2f\" text-anchor=\"middle\" dominant-baseline=\"central\" " +
-                "font-family=\"sans-serif\" font-size=\"11\" fill=\"%s\">%s</text>%n",
+                "font-family=\"sans-serif\" font-size=\"%.0f\" fill=\"%s\">%s</text>%n",
                 cx, cy + LayoutMetrics.LABEL_NAME_OFFSET,
-                svgColor(ColorPalette.TEXT), escapeXml(lookupLabel));
+                LayoutMetrics.LOOKUP_NAME_FONT_SIZE, svgColor(ColorPalette.TEXT), escapeXml(lookupLabel));
 
         // Data point count
         w.printf(Locale.US,
                 "  <text x=\"%.2f\" y=\"%.2f\" text-anchor=\"middle\" dominant-baseline=\"central\" " +
-                "font-family=\"sans-serif\" font-size=\"9\" fill=\"%s\">%s</text>%n",
+                "font-family=\"sans-serif\" font-size=\"%.0f\" fill=\"%s\">%s</text>%n",
                 cx, cy + LayoutMetrics.LABEL_SUBLABEL_OFFSET,
-                svgColor(ColorPalette.TEXT_SECONDARY), dataPoints + " pts");
+                LayoutMetrics.BADGE_FONT_SIZE, svgColor(ColorPalette.TEXT_SECONDARY), dataPoints + " pts");
     }
 
     private static void writeCldVariable(PrintWriter w, String name,
@@ -603,8 +607,8 @@ public final class SvgExporter {
         String label = ElementRenderer.truncate(name, LayoutMetrics.AUX_NAME_FONT, width - 12);
         w.printf(Locale.US,
                 "  <text x=\"%.2f\" y=\"%.2f\" text-anchor=\"middle\" dominant-baseline=\"central\" " +
-                "font-family=\"sans-serif\" font-size=\"12\" fill=\"%s\">%s</text>%n",
-                cx, cy, svgColor(ColorPalette.TEXT), escapeXml(label));
+                "font-family=\"sans-serif\" font-size=\"%.0f\" fill=\"%s\">%s</text>%n",
+                cx, cy, LayoutMetrics.AUX_NAME_FONT_SIZE, svgColor(ColorPalette.TEXT), escapeXml(label));
     }
 
     private static void writeComment(PrintWriter w, String text,
@@ -625,8 +629,8 @@ public final class SvgExporter {
             String display = ElementRenderer.truncate(text, LayoutMetrics.COMMENT_TEXT_FONT, width - 12);
             w.printf(Locale.US,
                     "  <text x=\"%.2f\" y=\"%.2f\" text-anchor=\"start\" dominant-baseline=\"hanging\" " +
-                    "font-family=\"sans-serif\" font-size=\"11\" fill=\"%s\">%s</text>%n",
-                    x + 6, y + 6, svgColor(ColorPalette.TEXT), escapeXml(display));
+                    "font-family=\"sans-serif\" font-size=\"%.0f\" fill=\"%s\">%s</text>%n",
+                    x + 6, y + 6, LayoutMetrics.COMMENT_TEXT_FONT_SIZE, svgColor(ColorPalette.TEXT), escapeXml(display));
         }
     }
 
@@ -724,9 +728,9 @@ public final class SvgExporter {
         };
         w.printf(Locale.US,
                 "  <text x=\"%.2f\" y=\"%.2f\" text-anchor=\"middle\" " +
-                "dominant-baseline=\"central\" font-weight=\"bold\" font-size=\"12\" " +
+                "dominant-baseline=\"central\" font-weight=\"bold\" font-size=\"%.0f\" " +
                 "fill=\"%s\">%s</text>%n",
-                x, y, svgColor(labelColor), escapeXml(polarity.symbol()));
+                x, y, LayoutMetrics.CAUSAL_POLARITY_FONT_SIZE, svgColor(labelColor), escapeXml(polarity.symbol()));
     }
 
     private static void writeArrowheadFromTangent(PrintWriter w,
@@ -764,7 +768,7 @@ public final class SvgExporter {
             return;
         }
 
-        double glowPadding = 6;
+        double glowPadding = LayoutMetrics.LOOP_GLOW_PADDING;
 
         if (type == ElementType.FLOW) {
             double half = LayoutMetrics.FLOW_INDICATOR_SIZE / 2 + glowPadding;
@@ -772,20 +776,22 @@ public final class SvgExporter {
                     cx, cy - half, cx + half, cy, cx, cy + half, cx - half, cy);
             w.printf(Locale.US,
                     "  <polygon points=\"%s\" fill=\"%s\" fill-opacity=\"%.2f\" " +
-                    "stroke=\"%s\" stroke-opacity=\"%.2f\" stroke-width=\"2.5\"/>%n",
+                    "stroke=\"%s\" stroke-opacity=\"%.2f\" stroke-width=\"%.1f\"/>%n",
                     points,
                     svgColor(ColorPalette.LOOP_FILL), svgOpacity(ColorPalette.LOOP_FILL),
-                    svgColor(ColorPalette.LOOP_HIGHLIGHT), svgOpacity(ColorPalette.LOOP_HIGHLIGHT));
+                    svgColor(ColorPalette.LOOP_HIGHLIGHT), svgOpacity(ColorPalette.LOOP_HIGHLIGHT),
+                    LayoutMetrics.LOOP_GLOW_LINE_WIDTH);
         } else {
             double halfW = LayoutMetrics.effectiveWidth(state, name) / 2 + glowPadding;
             double halfH = LayoutMetrics.effectiveHeight(state, name) / 2 + glowPadding;
             w.printf(Locale.US,
                     "  <rect x=\"%.2f\" y=\"%.2f\" width=\"%.2f\" height=\"%.2f\" " +
                     "fill=\"%s\" fill-opacity=\"%.2f\" " +
-                    "stroke=\"%s\" stroke-opacity=\"%.2f\" stroke-width=\"2.5\"/>%n",
+                    "stroke=\"%s\" stroke-opacity=\"%.2f\" stroke-width=\"%.1f\"/>%n",
                     cx - halfW, cy - halfH, halfW * 2, halfH * 2,
                     svgColor(ColorPalette.LOOP_FILL), svgOpacity(ColorPalette.LOOP_FILL),
-                    svgColor(ColorPalette.LOOP_HIGHLIGHT), svgOpacity(ColorPalette.LOOP_HIGHLIGHT));
+                    svgColor(ColorPalette.LOOP_HIGHLIGHT), svgOpacity(ColorPalette.LOOP_HIGHLIGHT),
+                    LayoutMetrics.LOOP_GLOW_LINE_WIDTH);
         }
     }
 
@@ -799,8 +805,8 @@ public final class SvgExporter {
                 cx, cy, r, svgColor(ColorPalette.CLOUD), LayoutMetrics.CLOUD_LINE_WIDTH);
         w.printf(Locale.US,
                 "  <text x=\"%.2f\" y=\"%.2f\" text-anchor=\"middle\" dominant-baseline=\"central\" " +
-                "font-family=\"sans-serif\" font-size=\"9\" fill=\"%s\">~</text>%n",
-                cx, cy, svgColor(ColorPalette.CLOUD));
+                "font-family=\"sans-serif\" font-size=\"%.0f\" fill=\"%s\">~</text>%n",
+                cx, cy, LayoutMetrics.BADGE_FONT_SIZE, svgColor(ColorPalette.CLOUD));
     }
 
     private static void writeArrowhead(PrintWriter w, double fromX, double fromY,

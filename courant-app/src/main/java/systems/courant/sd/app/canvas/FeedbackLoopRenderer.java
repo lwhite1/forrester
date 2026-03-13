@@ -16,11 +16,12 @@ import javafx.scene.text.TextAlignment;
  */
 public final class FeedbackLoopRenderer {
 
-    private static final double GLOW_PADDING = 6;
-    private static final double GLOW_LINE_WIDTH = 2.5;
-    private static final double EDGE_LINE_WIDTH = 2.5;
-    private static final Font LOOP_LABEL_FONT = Font.font("System", FontWeight.BOLD, 14);
-    private static final double LABEL_PADDING = 6;
+    private static final double GLOW_PADDING = LayoutMetrics.LOOP_GLOW_PADDING;
+    private static final double GLOW_LINE_WIDTH = LayoutMetrics.LOOP_GLOW_LINE_WIDTH;
+    private static final double EDGE_LINE_WIDTH = LayoutMetrics.LOOP_EDGE_LINE_WIDTH;
+    private static final Font LOOP_LABEL_FONT = Font.font("System", FontWeight.BOLD,
+            LayoutMetrics.LOOP_LABEL_FONT_SIZE);
+    private static final double LABEL_PADDING = LayoutMetrics.LOOP_LABEL_PADDING;
 
     private FeedbackLoopRenderer() {
     }

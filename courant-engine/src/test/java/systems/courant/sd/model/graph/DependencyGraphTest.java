@@ -287,8 +287,8 @@ class DependencyGraphTest {
             ModelDefinition def = new ModelDefinitionBuilder()
                     .name("BadAux")
                     .stock("S", 50, "Thing")
-                    .aux("GoodAux", "S * 2", "Thing")
-                    .aux("BadAux", "### not valid", "Thing")
+                    .variable("GoodAux", "S * 2", "Thing")
+                    .variable("BadAux", "### not valid", "Thing")
                     .build();
 
             DependencyGraph graph = DependencyGraph.fromDefinition(def);
@@ -305,7 +305,7 @@ class DependencyGraphTest {
                     .name("AllBad")
                     .stock("S", 100, "Thing")
                     .flow("F1", "!!! bad", "Day", "S", null)
-                    .aux("A1", "??? also bad", "Thing")
+                    .variable("A1", "??? also bad", "Thing")
                     .build();
 
             DependencyGraph graph = DependencyGraph.fromDefinition(def);

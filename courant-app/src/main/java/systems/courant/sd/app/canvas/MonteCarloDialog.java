@@ -17,7 +17,6 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.GridPane;
-import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 
 import java.util.ArrayList;
@@ -177,21 +176,16 @@ public class MonteCarloDialog extends Dialog<MonteCarloDialog.Config> {
         return "";
     }
 
-    private class ParameterRow {
-        private final ComboBox<String> nameCombo;
+    private class ParameterRow extends ParameterRowBase {
         private final ComboBox<DistributionType> distCombo;
         private final TextField param1Field;
         private final TextField param2Field;
         private final Label param1Label;
         private final Label param2Label;
-        private final HBox pane;
 
         ParameterRow(List<String> constantNames, VBox container) {
-            nameCombo = new ComboBox<>(FXCollections.observableArrayList(constantNames));
-            if (!constantNames.isEmpty()) {
-                nameCombo.setValue(constantNames.getFirst());
-            }
-            nameCombo.setPrefWidth(130);
+            super(constantNames, null,
+                    () -> fieldChangeCounter.set(fieldChangeCounter.get() + 1));
 
             distCombo = new ComboBox<>(FXCollections.observableArrayList(DistributionType.values()));
             distCombo.setValue(DistributionType.NORMAL);
@@ -208,22 +202,16 @@ public class MonteCarloDialog extends Dialog<MonteCarloDialog.Config> {
                 updateLabels(val);
                 fieldChangeCounter.set(fieldChangeCounter.get() + 1);
             });
-            param1Field.textProperty().addListener((obs, o, n) ->
-                    fieldChangeCounter.set(fieldChangeCounter.get() + 1));
-            param2Field.textProperty().addListener((obs, o, n) ->
-                    fieldChangeCounter.set(fieldChangeCounter.get() + 1));
+            wireFieldChange(param1Field);
+            wireFieldChange(param2Field);
 
-            pane = new HBox(6);
-            pane.setPadding(new Insets(2));
-
-            Button removeBtn = new Button("X");
-            removeBtn.setOnAction(e -> {
+            Button removeBtn = createRemoveButton(() -> {
                 parameterRows.remove(this);
-                container.getChildren().remove(pane);
+                container.getChildren().remove(getPane());
             });
 
-            pane.getChildren().addAll(nameCombo, distCombo, param1Label, param1Field,
-                    param2Label, param2Field, removeBtn);
+            buildPane(removeBtn, distCombo, param1Label, param1Field,
+                    param2Label, param2Field);
         }
 
         private void updateLabels(DistributionType type) {
@@ -236,12 +224,9 @@ public class MonteCarloDialog extends Dialog<MonteCarloDialog.Config> {
             }
         }
 
-        HBox getPane() {
-            return pane;
-        }
-
+        @Override
         boolean isValid() {
-            if (nameCombo.getValue() == null) {
+            if (!isNameSelected()) {
                 return false;
             }
             try {
@@ -262,7 +247,7 @@ public class MonteCarloDialog extends Dialog<MonteCarloDialog.Config> {
 
         ParameterConfig toConfig() {
             return new ParameterConfig(
-                    nameCombo.getValue(),
+                    getSelectedName(),
                     distCombo.getValue(),
                     Double.parseDouble(param1Field.getText().trim()),
                     Double.parseDouble(param2Field.getText().trim())

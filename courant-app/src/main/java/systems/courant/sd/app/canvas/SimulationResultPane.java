@@ -7,10 +7,8 @@ import systems.courant.sd.model.def.ReferenceDataset;
 
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
-import javafx.embed.swing.SwingFXUtils;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
-import javafx.scene.SnapshotParameters;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
@@ -29,7 +27,6 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.control.Tooltip;
-import javafx.scene.image.WritableImage;
 import javafx.beans.property.DoubleProperty;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
@@ -37,7 +34,6 @@ import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
-
 import com.opencsv.CSVWriter;
 
 import java.io.File;
@@ -55,8 +51,6 @@ import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import javax.imageio.ImageIO;
 
 /**
  * Embeddable pane displaying simulation results as a chart and table.
@@ -722,33 +716,22 @@ public class SimulationResultPane extends BorderPane {
     }
 
     private void exportCsv() {
-        FileChooser fileChooser = new FileChooser();
-        fileChooser.setTitle("Export CSV");
-        fileChooser.getExtensionFilters().add(
-                new FileChooser.ExtensionFilter("CSV Files", "*.csv"));
-        fileChooser.setInitialFileName("simulation.csv");
-        LastDirectoryStore.applyExportDirectory(fileChooser);
-
-        File file = fileChooser.showSaveDialog(getScene() != null ? getScene().getWindow() : null);
-        if (file != null) {
-            LastDirectoryStore.recordExportDirectory(file);
-            try (CSVWriter writer = new CSVWriter(new OutputStreamWriter(
-                    Files.newOutputStream(file.toPath()), StandardCharsets.UTF_8))) {
-                List<String> columns = simulationResult.columnNames();
-                writer.writeNext(columns.toArray(new String[0]));
-                for (double[] row : simulationResult.rows()) {
-                    String[] line = new String[row.length];
-                    for (int i = 0; i < row.length; i++) {
-                        line[i] = (i == 0) ? String.valueOf((int) row[i])
-                                : String.valueOf(row[i]);
+        ChartUtils.showCsvSaveDialog("Export CSV", "simulation.csv",
+                getScene() != null ? getScene().getWindow() : null, file -> {
+                    try (CSVWriter writer = new CSVWriter(new OutputStreamWriter(
+                            Files.newOutputStream(file.toPath()), StandardCharsets.UTF_8))) {
+                        List<String> columns = simulationResult.columnNames();
+                        writer.writeNext(columns.toArray(new String[0]));
+                        for (double[] row : simulationResult.rows()) {
+                            String[] line = new String[row.length];
+                            for (int i = 0; i < row.length; i++) {
+                                line[i] = (i == 0) ? String.valueOf((int) row[i])
+                                        : String.valueOf(row[i]);
+                            }
+                            writer.writeNext(line);
+                        }
                     }
-                    writer.writeNext(line);
-                }
-            } catch (IOException e) {
-                new Alert(Alert.AlertType.ERROR,
-                        "Failed to export CSV: " + e.getMessage()).showAndWait();
-            }
-        }
+                });
     }
 
     /**
@@ -771,28 +754,8 @@ public class SimulationResultPane extends BorderPane {
     }
 
     private void saveChartAsPng() {
-        if (chart == null) {
-            return;
-        }
-        FileChooser fileChooser = new FileChooser();
-        fileChooser.setTitle("Save Chart as PNG");
-        fileChooser.getExtensionFilters().add(
-                new FileChooser.ExtensionFilter("PNG Image", "*.png"));
-        fileChooser.setInitialFileName("simulation_chart.png");
-        LastDirectoryStore.applyExportDirectory(fileChooser);
-
-        File file = fileChooser.showSaveDialog(getScene() != null ? getScene().getWindow() : null);
-        if (file != null) {
-            LastDirectoryStore.recordExportDirectory(file);
-            WritableImage image = chart.snapshot(new SnapshotParameters(), null);
-            try {
-                ImageIO.write(SwingFXUtils.fromFXImage(image, null), "png", file);
-            } catch (IOException e) {
-                Alert alert = new Alert(Alert.AlertType.ERROR,
-                        "Failed to save image: " + e.getMessage());
-                alert.showAndWait();
-            }
-        }
+        ChartUtils.saveNodeAsPng(chart, "simulation_chart.png",
+                getScene() != null ? getScene().getWindow() : null);
     }
 
 }
