@@ -102,6 +102,51 @@ class ElementRendererTest {
         void shouldFormatLargeWholeNumber() {
             assertThat(ElementRenderer.formatValue(1000.0)).isEqualTo("1000");
         }
+
+        @Test
+        @DisplayName("should handle NaN (#467)")
+        void shouldFormatNaN() {
+            assertThat(ElementRenderer.formatValue(Double.NaN)).isEqualTo("NaN");
+        }
+
+        @Test
+        @DisplayName("should handle positive infinity (#467)")
+        void shouldFormatPositiveInfinity() {
+            assertThat(ElementRenderer.formatValue(Double.POSITIVE_INFINITY))
+                    .isEqualTo(String.valueOf(Double.POSITIVE_INFINITY));
+        }
+
+        @Test
+        @DisplayName("should handle negative infinity (#467)")
+        void shouldFormatNegativeInfinity() {
+            assertThat(ElementRenderer.formatValue(Double.NEGATIVE_INFINITY))
+                    .isEqualTo(String.valueOf(Double.NEGATIVE_INFINITY));
+        }
+
+        @Test
+        @DisplayName("should not overflow for values exceeding Long.MAX_VALUE (#467)")
+        void shouldNotOverflowForHugeValues() {
+            double huge = 1e19; // > Long.MAX_VALUE (~9.2e18)
+            String result = ElementRenderer.formatValue(huge);
+            assertThat(result).isEqualTo(String.valueOf(huge));
+            assertThat(result).doesNotContain("-"); // would be negative if overflow occurred
+        }
+
+        @Test
+        @DisplayName("should not overflow for values below -Long.MAX_VALUE (#467)")
+        void shouldNotOverflowForHugeNegativeValues() {
+            double hugeNeg = -1e19;
+            String result = ElementRenderer.formatValue(hugeNeg);
+            assertThat(result).isEqualTo(String.valueOf(hugeNeg));
+        }
+
+        @Test
+        @DisplayName("should still format whole numbers at Long.MAX_VALUE boundary (#467)")
+        void shouldFormatAtLongMaxBoundary() {
+            // Long.MAX_VALUE is 9223372036854775807 — exact double representation may differ
+            // but values well within range should still format as integers
+            assertThat(ElementRenderer.formatValue(1e15)).isEqualTo("1000000000000000");
+        }
     }
 
     @Nested

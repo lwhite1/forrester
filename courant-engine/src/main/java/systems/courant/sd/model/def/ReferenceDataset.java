@@ -45,6 +45,26 @@ public record ReferenceDataset(String name, double[] timeValues, Map<String, dou
     }
 
     /**
+     * Returns a defensive copy of the time values array.
+     */
+    @Override
+    public double[] timeValues() {
+        return timeValues.clone();
+    }
+
+    /**
+     * Returns a defensive copy of the columns map with cloned value arrays.
+     */
+    @Override
+    public Map<String, double[]> columns() {
+        var copy = new java.util.LinkedHashMap<String, double[]>();
+        for (var entry : columns.entrySet()) {
+            copy.put(entry.getKey(), entry.getValue().clone());
+        }
+        return java.util.Collections.unmodifiableMap(copy);
+    }
+
+    /**
      * Returns the variable names in this dataset.
      */
     public List<String> variableNames() {

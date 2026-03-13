@@ -279,7 +279,9 @@ public class ChartViewerApplication extends Application {
         for (Series<String, Number> s : allSeries) {
             if (text.equals(s.getName())) {
                 if (cb.isSelected()) {
-                    lineChart.getData().add(s);
+                    if (!lineChart.getData().contains(s)) {
+                        lineChart.getData().add(s);
+                    }
                 } else {
                     lineChart.getData().remove(s);
                 }

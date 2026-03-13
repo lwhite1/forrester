@@ -133,24 +133,20 @@ public class SoftwareProduction {
             return Math.min(potentialRate, tasksRemaining.getValue());
         });
 
-        // Cache development split values so all three flows see the same rate and FCC,
-        // guaranteeing conservation: correctDevelopment + errorInjection == developmentOutflow
-        double[] devCache = new double[2]; // [rate, fcc]
-
         // Flow: Tasks Remaining → (split)
-        Flow developmentOutflow = Flow.create("Development", DAY, () -> {
-            devCache[0] = developmentRate.getValue();
-            devCache[1] = fractionCorrectAndComplete.getValue();
-            return new Quantity(devCache[0], TASKS);
-        });
+        // Each flow reads developmentRate and FCC directly. These are Variables backed
+        // by Stocks, so their values are stable within a single time step regardless
+        // of flow evaluation order — no shared cache needed.
+        Flow developmentOutflow = Flow.create("Development", DAY, () ->
+                new Quantity(developmentRate.getValue(), TASKS));
 
         // Flow: FCC portion → Tasks Completed (from development)
         Flow correctDevelopment = Flow.create("Correct Development", DAY, () ->
-                new Quantity(devCache[0] * devCache[1], TASKS));
+                new Quantity(developmentRate.getValue() * fractionCorrectAndComplete.getValue(), TASKS));
 
         // Flow: (1-FCC) portion → Undiscovered Rework (from development)
         Flow errorInjection = Flow.create("Error Injection", DAY, () ->
-                new Quantity(devCache[0] * (1 - devCache[1]), TASKS));
+                new Quantity(developmentRate.getValue() * (1 - fractionCorrectAndComplete.getValue()), TASKS));
 
         // Flow: Undiscovered Rework → Rework to Do (discovery)
         Flow reworkDiscovery = Flow.create("Rework Discovery", DAY, () -> {
@@ -170,24 +166,17 @@ public class SoftwareProduction {
             return Math.min(potentialRate, reworkToDo.getValue());
         });
 
-        // Cache rework split values so all three flows see the same rate and FCC,
-        // guaranteeing conservation: correctRework + reworkErrors == reworkOutflow
-        double[] reworkCache = new double[2]; // [rate, fcc]
-
         // Flow: Rework to Do → (split)
-        Flow reworkOutflow = Flow.create("Rework", DAY, () -> {
-            reworkCache[0] = reworkRate.getValue();
-            reworkCache[1] = fractionCorrectAndComplete.getValue();
-            return new Quantity(reworkCache[0], TASKS);
-        });
+        Flow reworkOutflow = Flow.create("Rework", DAY, () ->
+                new Quantity(reworkRate.getValue(), TASKS));
 
         // Flow: FCC portion of rework → Tasks Completed
         Flow correctRework = Flow.create("Correct Rework", DAY, () ->
-                new Quantity(reworkCache[0] * reworkCache[1], TASKS));
+                new Quantity(reworkRate.getValue() * fractionCorrectAndComplete.getValue(), TASKS));
 
         // Flow: (1-FCC) portion of rework → back to Undiscovered Rework
         Flow reworkErrors = Flow.create("Rework Errors", DAY, () ->
-                new Quantity(reworkCache[0] * (1 - reworkCache[1]), TASKS));
+                new Quantity(reworkRate.getValue() * (1 - fractionCorrectAndComplete.getValue()), TASKS));
 
         // --- Wire stocks and flows ---
 

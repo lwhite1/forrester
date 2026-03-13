@@ -31,6 +31,18 @@ public record FlowRoute(
         }
     }
 
+    /**
+     * Returns a defensive copy of the points, cloning each array.
+     */
+    @Override
+    public List<double[]> points() {
+        List<double[]> cloned = new ArrayList<>(points.size());
+        for (double[] point : points) {
+            cloned.add(point.clone());
+        }
+        return List.copyOf(cloned);
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {
