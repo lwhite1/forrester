@@ -93,6 +93,7 @@ public class DemoClassGenerator {
         if (!definition.stocks().isEmpty()) {
             sb.append("import systems.courant.sd.model.def.StockDef;\n");
         }
+        boolean hasSubscripts = hasAnySubscripts(definition);
         if (!definition.modules().isEmpty()) {
             sb.append("import systems.courant.sd.model.def.ModelDefinition;\n");
             sb.append("import systems.courant.sd.model.def.ModuleInstanceDef;\n");
@@ -100,6 +101,9 @@ public class DemoClassGenerator {
             sb.append("\n");
             sb.append("import java.util.List;\n");
             sb.append("import java.util.Map;\n");
+        } else if (hasSubscripts) {
+            sb.append("\n");
+            sb.append("import java.util.List;\n");
         }
 
         sb.append('\n');
@@ -179,13 +183,7 @@ public class DemoClassGenerator {
         if (!definition.stocks().isEmpty()) {
             sb.append(INDENT).append("// Stocks\n");
             for (StockDef stock : definition.stocks()) {
-                sb.append(INDENT).append("builder.stock(new StockDef(")
-                        .append(escapeString(stock.name())).append(", ")
-                        .append(escapeString(stock.comment())).append(", ")
-                        .append(stock.initialValue()).append(", ")
-                        .append(escapeString(stock.unit())).append(", ")
-                        .append(escapeString(stock.negativeValuePolicy()))
-                        .append("));\n");
+                emitStockDef(sb, stock, INDENT, "builder");
             }
             sb.append('\n');
         }
@@ -196,11 +194,16 @@ public class DemoClassGenerator {
         if (!literals.isEmpty()) {
             sb.append(INDENT).append("// Constants\n");
             for (VariableDef constant : literals) {
-                sb.append(INDENT).append("builder.constant(")
-                        .append(escapeString(constant.name())).append(", ")
-                        .append(constant.literalValue()).append(", ")
-                        .append(escapeString(constant.unit()))
-                        .append(");\n");
+                if (constant.subscripts().isEmpty()) {
+                    sb.append(INDENT).append("builder.constant(")
+                            .append(escapeString(constant.name())).append(", ")
+                            .append(constant.literalValue()).append(", ")
+                            .append(escapeString(constant.unit()))
+                            .append(");\n");
+                } else {
+                    // Use full VariableDef constructor to preserve subscripts
+                    emitVariableDef(sb, constant, INDENT, "builder");
+                }
             }
             sb.append('\n');
         }
@@ -226,12 +229,7 @@ public class DemoClassGenerator {
         if (!formulas.isEmpty()) {
             sb.append(INDENT).append("// Variables\n");
             for (VariableDef v : formulas) {
-                sb.append(INDENT).append("builder.variable(new VariableDef(")
-                        .append(escapeString(v.name())).append(", ")
-                        .append(escapeString(v.comment())).append(", ")
-                        .append(escapeString(v.equation())).append(", ")
-                        .append(escapeString(v.unit()))
-                        .append("));\n");
+                emitVariableDef(sb, v, INDENT, "builder");
             }
             sb.append('\n');
         }
@@ -240,14 +238,7 @@ public class DemoClassGenerator {
         if (!definition.flows().isEmpty()) {
             sb.append(INDENT).append("// Flows\n");
             for (FlowDef flow : definition.flows()) {
-                sb.append(INDENT).append("builder.flow(new FlowDef(")
-                        .append(escapeString(flow.name())).append(", ")
-                        .append(escapeString(flow.comment())).append(", ")
-                        .append(escapeString(flow.equation())).append(", ")
-                        .append(escapeString(flow.timeUnit())).append(", ")
-                        .append(escapeString(flow.source())).append(", ")
-                        .append(escapeString(flow.sink()))
-                        .append("));\n");
+                emitFlowDef(sb, flow, INDENT, "builder");
             }
             sb.append('\n');
         }
@@ -309,24 +300,23 @@ public class DemoClassGenerator {
         sb.append(";\n");
 
         // Emit inner stocks, constants, lookups, auxes, flows
+        String innerIndent = INDENT + "    ";
         for (StockDef stock : inner.stocks()) {
-            sb.append(INDENT).append("    innerBuilder.stock(new StockDef(")
-                    .append(escapeString(stock.name())).append(", ")
-                    .append(escapeString(stock.comment())).append(", ")
-                    .append(stock.initialValue()).append(", ")
-                    .append(escapeString(stock.unit())).append(", ")
-                    .append(escapeString(stock.negativeValuePolicy()))
-                    .append("));\n");
+            emitStockDef(sb, stock, innerIndent, "innerBuilder");
         }
         for (VariableDef constant : inner.variables().stream().filter(VariableDef::isLiteral).toList()) {
-            sb.append(INDENT).append("    innerBuilder.constant(")
-                    .append(escapeString(constant.name())).append(", ")
-                    .append(constant.literalValue()).append(", ")
-                    .append(escapeString(constant.unit()))
-                    .append(");\n");
+            if (constant.subscripts().isEmpty()) {
+                sb.append(innerIndent).append("innerBuilder.constant(")
+                        .append(escapeString(constant.name())).append(", ")
+                        .append(constant.literalValue()).append(", ")
+                        .append(escapeString(constant.unit()))
+                        .append(");\n");
+            } else {
+                emitVariableDef(sb, constant, innerIndent, "innerBuilder");
+            }
         }
         for (LookupTableDef table : inner.lookupTables()) {
-            sb.append(INDENT).append("    innerBuilder.lookupTable(new LookupTableDef(")
+            sb.append(innerIndent).append("innerBuilder.lookupTable(new LookupTableDef(")
                     .append(escapeString(table.name())).append(", ")
                     .append(escapeString(table.comment())).append(", ")
                     .append(doubleArrayLiteral(table.xValues())).append(", ")
@@ -335,22 +325,14 @@ public class DemoClassGenerator {
                     .append("));\n");
         }
         for (VariableDef v : inner.variables().stream().filter(a -> !a.isLiteral()).toList()) {
-            sb.append(INDENT).append("    innerBuilder.variable(new VariableDef(")
-                    .append(escapeString(v.name())).append(", ")
-                    .append(escapeString(v.comment())).append(", ")
-                    .append(escapeString(v.equation())).append(", ")
-                    .append(escapeString(v.unit()))
-                    .append("));\n");
+            emitVariableDef(sb, v, innerIndent, "innerBuilder");
         }
         for (FlowDef flow : inner.flows()) {
-            sb.append(INDENT).append("    innerBuilder.flow(new FlowDef(")
-                    .append(escapeString(flow.name())).append(", ")
-                    .append(escapeString(flow.comment())).append(", ")
-                    .append(escapeString(flow.equation())).append(", ")
-                    .append(escapeString(flow.timeUnit())).append(", ")
-                    .append(escapeString(flow.source())).append(", ")
-                    .append(escapeString(flow.sink()))
-                    .append("));\n");
+            emitFlowDef(sb, flow, innerIndent, "innerBuilder");
+        }
+        // Nested modules (#273)
+        for (ModuleInstanceDef nestedModule : inner.modules()) {
+            emitModuleInstance(sb, nestedModule);
         }
 
         sb.append(INDENT).append("    ModelDefinition ").append(varName)
@@ -365,6 +347,115 @@ public class DemoClassGenerator {
         emitMapLiteral(sb, module.outputBindings(), INDENT + "            ");
         sb.append("));\n");
         sb.append(INDENT).append("}\n");
+    }
+
+    /**
+     * Emits a StockDef constructor call, using the canonical constructor when initialExpression
+     * or subscripts are present, and the backward-compatible constructor otherwise.
+     */
+    private void emitStockDef(StringBuilder sb, StockDef stock, String indent, String builderName) {
+        if (stock.initialExpression() != null || !stock.subscripts().isEmpty()) {
+            // Use canonical 7-arg constructor to preserve initialExpression and subscripts
+            sb.append(indent).append(builderName).append(".stock(new StockDef(")
+                    .append(escapeString(stock.name())).append(", ")
+                    .append(escapeString(stock.comment())).append(", ")
+                    .append(formatDoubleForSource(stock.initialValue())).append(", ")
+                    .append(escapeString(stock.initialExpression())).append(", ")
+                    .append(escapeString(stock.unit())).append(", ")
+                    .append(escapeString(stock.negativeValuePolicy())).append(", ")
+                    .append(emitStringList(stock.subscripts()))
+                    .append("));\n");
+        } else {
+            sb.append(indent).append(builderName).append(".stock(new StockDef(")
+                    .append(escapeString(stock.name())).append(", ")
+                    .append(escapeString(stock.comment())).append(", ")
+                    .append(formatDoubleForSource(stock.initialValue())).append(", ")
+                    .append(escapeString(stock.unit())).append(", ")
+                    .append(escapeString(stock.negativeValuePolicy()))
+                    .append("));\n");
+        }
+    }
+
+    /**
+     * Emits a VariableDef constructor call, using the canonical constructor when subscripts
+     * are present.
+     */
+    private void emitVariableDef(StringBuilder sb, VariableDef v, String indent, String builderName) {
+        if (!v.subscripts().isEmpty()) {
+            sb.append(indent).append(builderName).append(".variable(new VariableDef(")
+                    .append(escapeString(v.name())).append(", ")
+                    .append(escapeString(v.comment())).append(", ")
+                    .append(escapeString(v.equation())).append(", ")
+                    .append(escapeString(v.unit())).append(", ")
+                    .append(emitStringList(v.subscripts()))
+                    .append("));\n");
+        } else {
+            sb.append(indent).append(builderName).append(".variable(new VariableDef(")
+                    .append(escapeString(v.name())).append(", ")
+                    .append(escapeString(v.comment())).append(", ")
+                    .append(escapeString(v.equation())).append(", ")
+                    .append(escapeString(v.unit()))
+                    .append("));\n");
+        }
+    }
+
+    /**
+     * Emits a FlowDef constructor call, using the canonical constructor when subscripts
+     * are present.
+     */
+    private void emitFlowDef(StringBuilder sb, FlowDef flow, String indent, String builderName) {
+        if (!flow.subscripts().isEmpty()) {
+            sb.append(indent).append(builderName).append(".flow(new FlowDef(")
+                    .append(escapeString(flow.name())).append(", ")
+                    .append(escapeString(flow.comment())).append(", ")
+                    .append(escapeString(flow.equation())).append(", ")
+                    .append(escapeString(flow.timeUnit())).append(", ")
+                    .append(escapeString(flow.source())).append(", ")
+                    .append(escapeString(flow.sink())).append(", ")
+                    .append(emitStringList(flow.subscripts()))
+                    .append("));\n");
+        } else {
+            sb.append(indent).append(builderName).append(".flow(new FlowDef(")
+                    .append(escapeString(flow.name())).append(", ")
+                    .append(escapeString(flow.comment())).append(", ")
+                    .append(escapeString(flow.equation())).append(", ")
+                    .append(escapeString(flow.timeUnit())).append(", ")
+                    .append(escapeString(flow.source())).append(", ")
+                    .append(escapeString(flow.sink()))
+                    .append("));\n");
+        }
+    }
+
+    /**
+     * Formats a double for Java source code. Handles NaN and Infinity which cannot be
+     * written as bare literals.
+     */
+    private static String formatDoubleForSource(double value) {
+        if (Double.isNaN(value)) {
+            return "Double.NaN";
+        }
+        if (Double.isInfinite(value)) {
+            return value > 0 ? "Double.POSITIVE_INFINITY" : "Double.NEGATIVE_INFINITY";
+        }
+        return String.valueOf(value);
+    }
+
+    /**
+     * Emits a {@code List.of("a", "b")} literal for a list of strings.
+     */
+    private static String emitStringList(List<String> items) {
+        if (items.isEmpty()) {
+            return "List.of()";
+        }
+        StringBuilder sb = new StringBuilder("List.of(");
+        for (int i = 0; i < items.size(); i++) {
+            if (i > 0) {
+                sb.append(", ");
+            }
+            sb.append(escapeString(items.get(i)));
+        }
+        sb.append(')');
+        return sb.toString();
     }
 
     private void emitMapLiteral(StringBuilder sb, Map<String, String> map, String indent) {
@@ -396,6 +487,12 @@ public class DemoClassGenerator {
             }
             sb.append(')');
         }
+    }
+
+    private static boolean hasAnySubscripts(ModelDefinition definition) {
+        return definition.stocks().stream().anyMatch(s -> !s.subscripts().isEmpty())
+                || definition.variables().stream().anyMatch(v -> !v.subscripts().isEmpty())
+                || definition.flows().stream().anyMatch(f -> !f.subscripts().isEmpty());
     }
 
     static String escapeHtml(String text) {
