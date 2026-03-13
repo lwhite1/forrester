@@ -14,6 +14,7 @@ import systems.courant.sd.model.graph.CausalTraceAnalysis;
 import systems.courant.sd.model.graph.DependencyGraph;
 import systems.courant.sd.model.graph.FeedbackAnalysis;
 
+import javafx.application.Platform;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Pane;
@@ -42,6 +43,12 @@ public class ModelCanvas extends Canvas {
 
     private ModelEditor editor;
     private List<ConnectorRoute> connectors = List.of();
+
+    // Resize redraw coalescing (#203)
+    private boolean resizeRedrawScheduled;
+
+    // Connector regeneration coalescing (#204)
+    private boolean connectorRegenerationScheduled;
 
     private final Viewport viewport = new Viewport();
     private final CanvasState canvasState = new CanvasState();
@@ -158,7 +165,7 @@ public class ModelCanvas extends Canvas {
                 @Override public void selectAll() { ModelCanvas.this.selectAll(); }
                 @Override public void switchTool(CanvasToolBar.Tool tool) { ModelCanvas.this.switchTool(tool); }
                 @Override public void saveUndoState(String label) { ModelCanvas.this.saveUndoState(label); }
-                @Override public void regenerateConnectors() { ModelCanvas.this.regenerateConnectors(); }
+                @Override public void regenerateConnectors() { ModelCanvas.this.scheduleRegenerateConnectors(); }
                 @Override public void redraw() { ModelCanvas.this.redraw(); }
                 @Override public void fireStatusChanged() { ModelCanvas.this.fireStatusChanged(); }
                 @Override public void clearSelectedConnection() { ModelCanvas.this.clearSelectedConnection(); }
@@ -215,8 +222,8 @@ public class ModelCanvas extends Canvas {
 
         setFocusTraversable(true);
 
-        widthProperty().addListener(observable -> redraw());
-        heightProperty().addListener(observable -> redraw());
+        widthProperty().addListener(observable -> scheduleResizeRedraw());
+        heightProperty().addListener(observable -> scheduleResizeRedraw());
 
         setOnScroll(event -> inputDispatcher.handleScroll(event, viewport, () -> {
             redraw();
@@ -231,6 +238,27 @@ public class ModelCanvas extends Canvas {
             inputDispatcher.handleKeyReleased(event);
             inputDispatcher.updateCursor(this);
         });
+    }
+
+    /**
+     * Coalesces width/height resize events into a single redraw per frame (#203).
+     * When both dimensions change during a resize, only one redraw fires.
+     */
+    private void scheduleResizeRedraw() {
+        if (!resizeRedrawScheduled) {
+            resizeRedrawScheduled = true;
+            Platform.runLater(() -> {
+                resizeRedrawScheduled = false;
+                redraw();
+            });
+        }
+    }
+
+    /**
+     * Returns whether a resize redraw is pending (visible for testing).
+     */
+    boolean isResizeRedrawScheduled() {
+        return resizeRedrawScheduled;
     }
 
     // --- Model lifecycle ---
@@ -253,6 +281,9 @@ public class ModelCanvas extends Canvas {
     }
 
     public ModelDefinition toModelDefinition() {
+        if (editor == null) {
+            return null;
+        }
         if (!navController.isInsideModule()) {
             return editor.toModelDefinition(canvasState.toViewDef());
         }
@@ -519,7 +550,7 @@ public class ModelCanvas extends Canvas {
     }
 
     void saveUndoState(String label) {
-        if (undoManager != null) {
+        if (undoManager != null && editor != null) {
             undoManager.pushUndo(captureSnapshot(), label);
         }
     }
@@ -549,21 +580,21 @@ public class ModelCanvas extends Canvas {
     }
 
     public void performUndo() {
-        if (undoManager == null) {
+        if (undoManager == null || editor == null) {
             return;
         }
         undoManager.undo(captureSnapshot()).ifPresent(this::restoreSnapshot);
     }
 
     public void performRedo() {
-        if (undoManager == null) {
+        if (undoManager == null || editor == null) {
             return;
         }
         undoManager.redo(captureSnapshot()).ifPresent(this::restoreSnapshot);
     }
 
     public void performUndoTo(int depth) {
-        if (undoManager == null) {
+        if (undoManager == null || editor == null) {
             return;
         }
         undoManager.undoTo(captureSnapshot(), depth).ifPresent(this::restoreSnapshot);
@@ -594,6 +625,9 @@ public class ModelCanvas extends Canvas {
     // --- Selection operations (public API, delegate to SelectionController) ---
 
     public void deleteSelectedElements() {
+        if (editor == null) {
+            return;
+        }
         selectionController.deleteSelected(editor, canvasState,
                 () -> saveUndoState("Delete " + describeSelection()));
         regenerateConnectors();
@@ -623,10 +657,16 @@ public class ModelCanvas extends Canvas {
     }
 
     public void copySelection() {
+        if (editor == null) {
+            return;
+        }
         selectionController.copy(editor, canvasState);
     }
 
     public void cutSelection() {
+        if (editor == null) {
+            return;
+        }
         selectionController.cut(editor, canvasState,
                 () -> saveUndoState("Cut " + describeSelection()));
         regenerateConnectors();
@@ -636,6 +676,9 @@ public class ModelCanvas extends Canvas {
     }
 
     public Set<String> pasteClipboard() {
+        if (editor == null) {
+            return Set.of();
+        }
         Set<String> replaced = selectionController.paste(
                 editor, canvasState, () -> saveUndoState("Paste elements"));
         if (replaced == null) {
@@ -673,8 +716,34 @@ public class ModelCanvas extends Canvas {
     }
 
     void regenerateConnectors() {
+        if (editor == null) {
+            return;
+        }
         connectors = editor.generateConnectors();
         invalidateAnalysis();
+    }
+
+    /**
+     * Schedules connector regeneration to coalesce rapid-fire model mutations (#204).
+     * Multiple calls within the same frame result in a single regeneration + redraw.
+     */
+    void scheduleRegenerateConnectors() {
+        if (!connectorRegenerationScheduled) {
+            connectorRegenerationScheduled = true;
+            Platform.runLater(() -> {
+                connectorRegenerationScheduled = false;
+                regenerateConnectors();
+                redraw();
+                fireStatusChanged();
+            });
+        }
+    }
+
+    /**
+     * Returns whether a connector regeneration is pending (visible for testing).
+     */
+    boolean isConnectorRegenerationScheduled() {
+        return connectorRegenerationScheduled;
     }
 
     void setSelectedConnection(ConnectionId connection, boolean isCausal) {
@@ -688,6 +757,9 @@ public class ModelCanvas extends Canvas {
     }
 
     void deleteSelectedOrConnection() {
+        if (editor == null) {
+            return;
+        }
         if (selectedConnection != null && canvasState.getSelection().isEmpty()) {
             if (selectionController.deleteConnection(
                     selectedConnection, selectedIsCausalLink, editor,
@@ -708,6 +780,9 @@ public class ModelCanvas extends Canvas {
     }
 
     void handleFlowClick(double worldX, double worldY) {
+        if (editor == null) {
+            return;
+        }
         FlowCreationController.FlowResult result = flowCreation.handleClick(
                 worldX, worldY, canvasState, editor);
         if (result.isCreated()) {
@@ -721,6 +796,9 @@ public class ModelCanvas extends Canvas {
     }
 
     void handleCausalLinkClick(double worldX, double worldY) {
+        if (editor == null) {
+            return;
+        }
         CausalLinkCreationController.LinkResult result = causalLinkCreation.handleClick(
                 worldX, worldY, canvasState, editor);
         if (result.isCreated()) {
@@ -732,6 +810,9 @@ public class ModelCanvas extends Canvas {
     }
 
     void handleInfoLinkClick(double worldX, double worldY) {
+        if (editor == null) {
+            return;
+        }
         InfoLinkCreationController.LinkResult result = infoLinkCreation.handleClick(
                 worldX, worldY, canvasState, editor);
         if (result.isCreated()) {
@@ -743,6 +824,9 @@ public class ModelCanvas extends Canvas {
     }
 
     void createElementAt(double worldX, double worldY) {
+        if (editor == null) {
+            return;
+        }
         String name = selectionController.createElementAt(
                 worldX, worldY, activeTool, editor, canvasState,
                 () -> saveUndoState("Add " + activeTool.label()));
@@ -754,6 +838,9 @@ public class ModelCanvas extends Canvas {
     }
 
     void startInlineEdit(String elementName) {
+        if (editor == null) {
+            return;
+        }
         inlineEdit.startEdit(elementName, canvasState, editor, viewport, inlineCallbacks);
     }
 
@@ -833,6 +920,9 @@ public class ModelCanvas extends Canvas {
     // --- Rendering ---
 
     private void regenerateAndRedraw() {
+        if (editor == null) {
+            return;
+        }
         connectors = editor.generateConnectors();
         invalidateAnalysis();
         redraw();
@@ -942,6 +1032,9 @@ public class ModelCanvas extends Canvas {
     // --- Rename ---
 
     private void applyRename(String oldName, String newName) {
+        if (editor == null) {
+            return;
+        }
         if (selectionController.applyRename(oldName, newName, editor, canvasState,
                 () -> saveUndoState("Rename " + oldName + " \u2192 " + newName))) {
             regenerateAndRedraw();
@@ -996,7 +1089,7 @@ public class ModelCanvas extends Canvas {
     }
 
     public void navigateBack() {
-        if (!navController.isInsideModule()) {
+        if (!navController.isInsideModule() || editor == null) {
             return;
         }
 
@@ -1068,6 +1161,9 @@ public class ModelCanvas extends Canvas {
 
     void showCausalLinkContextMenu(ConnectionId link,
                                    double screenX, double screenY) {
+        if (editor == null) {
+            return;
+        }
         contextMenuController.showCausalLinkContextMenu(
                 this, link, editor, screenX, screenY, contextMenuCallbacks);
     }
@@ -1085,6 +1181,9 @@ public class ModelCanvas extends Canvas {
     }
 
     private void classifyCldVariable(String name, ElementType targetType) {
+        if (editor == null) {
+            return;
+        }
         if (selectionController.classifyCldVariable(name, targetType, editor, canvasState,
                 () -> saveUndoState("Classify " + name + " as " + targetType.name().toLowerCase()))) {
             regenerateAndRedraw();
@@ -1093,11 +1192,17 @@ public class ModelCanvas extends Canvas {
     }
 
     private void openDefinePortsDialog(String moduleName) {
+        if (editor == null) {
+            return;
+        }
         navController.openDefinePortsDialog(moduleName, editor,
                 () -> saveUndoState("Define " + moduleName + " ports"), this::fireStatusChanged);
     }
 
     private void openBindingsDialog(String moduleName) {
+        if (editor == null) {
+            return;
+        }
         navController.openBindingsDialog(moduleName, editor,
                 () -> saveUndoState("Edit " + moduleName + " bindings"), this::fireStatusChanged);
     }
@@ -1105,6 +1210,9 @@ public class ModelCanvas extends Canvas {
     // --- Causal tracing ---
 
     void traceUpstream(String elementName) {
+        if (editor == null) {
+            return;
+        }
         traceController.startTrace(elementName,
                 CausalTraceAnalysis.TraceDirection.UPSTREAM,
                 editor.toModelDefinition(canvasState.toViewDef()));
@@ -1112,6 +1220,9 @@ public class ModelCanvas extends Canvas {
     }
 
     void traceDownstream(String elementName) {
+        if (editor == null) {
+            return;
+        }
         traceController.startTrace(elementName,
                 CausalTraceAnalysis.TraceDirection.DOWNSTREAM,
                 editor.toModelDefinition(canvasState.toViewDef()));
@@ -1131,6 +1242,9 @@ public class ModelCanvas extends Canvas {
      * (direct dependents — "where used").
      */
     Set<String> whereUsed(String elementName) {
+        if (editor == null) {
+            return Set.of();
+        }
         DependencyGraph graph = DependencyGraph.fromDefinition(
                 editor.toModelDefinition(canvasState.toViewDef()));
         return graph.dependentsOf(elementName);
@@ -1141,6 +1255,9 @@ public class ModelCanvas extends Canvas {
      * (direct dependencies — "uses").
      */
     Set<String> uses(String elementName) {
+        if (editor == null) {
+            return Set.of();
+        }
         DependencyGraph graph = DependencyGraph.fromDefinition(
                 editor.toModelDefinition(canvasState.toViewDef()));
         return graph.dependenciesOf(elementName);
