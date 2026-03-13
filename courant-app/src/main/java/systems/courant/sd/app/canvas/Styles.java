@@ -1,12 +1,36 @@
 package systems.courant.sd.app.canvas;
 
+import javafx.stage.Screen;
+
 /**
- * Shared inline CSS style constants used across UI components.
+ * Shared inline CSS style constants and layout utilities used across UI components.
  * Centralizes style strings to prevent duplication and simplify theme changes.
  */
 public final class Styles {
 
     private Styles() {
+    }
+
+    /**
+     * Standard width for configuration dialogs (SimulationSettings, ParameterSweep,
+     * MultiParameterSweep, MonteCarlo, Optimizer).
+     */
+    public static final double CONFIG_DIALOG_WIDTH = 520;
+
+    /**
+     * Returns the given dimension clamped to 80% of the primary screen width.
+     */
+    public static double screenAwareWidth(double desired) {
+        double screenWidth = Screen.getPrimary().getBounds().getWidth();
+        return Math.min(desired, screenWidth * 0.8);
+    }
+
+    /**
+     * Returns the given dimension clamped to 80% of the primary screen height.
+     */
+    public static double screenAwareHeight(double desired) {
+        double screenHeight = Screen.getPrimary().getBounds().getHeight();
+        return Math.min(desired, screenHeight * 0.8);
     }
 
     // --- Status bar ---

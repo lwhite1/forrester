@@ -7,8 +7,9 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
-import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
+import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
@@ -18,18 +19,19 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
 
 import java.util.function.Consumer;
 
 /**
- * A separate window that displays model validation results in a table.
+ * A dialog that displays model validation results in a table.
  * Clicking a row with an element name invokes a callback to select it on the canvas.
  *
  * <p>Only one validation dialog may be open at a time. Use {@link #showOrUpdate} to
  * create a new dialog or refresh and bring an existing one to the front.
  */
-public class ValidationDialog extends Stage {
+public class ValidationDialog extends Dialog<Void> {
 
     private static ValidationDialog openInstance;
 
@@ -48,8 +50,9 @@ public class ValidationDialog extends Stage {
     public static void showOrUpdate(ValidationResult result, Consumer<String> onSelectElement) {
         if (openInstance != null && openInstance.isShowing()) {
             openInstance.updateResult(result);
-            openInstance.toFront();
-            openInstance.requestFocus();
+            Stage window = (Stage) openInstance.getDialogPane().getScene().getWindow();
+            window.toFront();
+            window.requestFocus();
             return;
         }
         ValidationDialog dialog = new ValidationDialog(result, onSelectElement);
@@ -69,10 +72,12 @@ public class ValidationDialog extends Stage {
     }
 
     public ValidationDialog(ValidationResult result, Consumer<String> onSelectElement) {
+        initModality(Modality.NONE);
         setTitle("Model Validation");
         this.currentResult = result;
 
         table = new TableView<>();
+        table.setId("validationTable");
         table.setPlaceholder(new Label("No issues found. Model is clean."));
 
         TableColumn<ValidationIssue, String> severityCol = new TableColumn<>("Severity");
@@ -107,10 +112,12 @@ public class ValidationDialog extends Stage {
 
         // Summary label
         summaryLabel = new Label();
+        summaryLabel.setId("validationSummary");
         summaryLabel.setPadding(new Insets(6, 8, 6, 8));
         updateSummaryLabel(result);
 
         copyButton = new Button("Copy to Clipboard");
+        copyButton.setId("validationCopy");
         copyButton.setOnAction(e -> {
             String text = formatAsText(currentResult);
             ClipboardContent content = new ClipboardContent();
@@ -129,8 +136,12 @@ public class ValidationDialog extends Stage {
         root.setCenter(table);
         root.setBottom(bottomBar);
 
-        Scene scene = new Scene(root, 700, 400);
-        setScene(scene);
+        getDialogPane().setContent(root);
+        getDialogPane().setPrefWidth(Styles.screenAwareWidth(700));
+        getDialogPane().setPrefHeight(Styles.screenAwareHeight(400));
+        getDialogPane().getButtonTypes().add(ButtonType.CLOSE);
+
+        setResultConverter(button -> null);
 
         setOnHidden(e -> {
             if (openInstance == this) {

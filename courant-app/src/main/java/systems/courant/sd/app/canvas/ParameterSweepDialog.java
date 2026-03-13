@@ -39,10 +39,15 @@ public class ParameterSweepDialog extends Dialog<ParameterSweepDialog.Config> {
         setHeaderText("Configure parameter sweep");
 
         parameterCombo = new ComboBox<>(FXCollections.observableArrayList(constantNames));
+        parameterCombo.setId("sweepParameter");
         startField = new TextField("0");
+        startField.setId("sweepStart");
         endField = new TextField("10");
+        endField.setId("sweepEnd");
         stepField = new TextField("1");
+        stepField.setId("sweepStep");
         trackCombo = new ComboBox<>(FXCollections.observableArrayList(trackableNames));
+        trackCombo.setId("sweepTrack");
 
         if (!constantNames.isEmpty()) {
             parameterCombo.setValue(constantNames.getFirst());
@@ -81,6 +86,7 @@ public class ParameterSweepDialog extends Dialog<ParameterSweepDialog.Config> {
         grid.add(validationLabel, 0, 5, 2, 1);
 
         getDialogPane().setContent(grid);
+        getDialogPane().setPrefWidth(Styles.screenAwareWidth(Styles.CONFIG_DIALOG_WIDTH));
 
         ButtonType okButton = new ButtonType("OK", ButtonBar.ButtonData.OK_DONE);
         getDialogPane().getButtonTypes().addAll(okButton, ButtonType.CANCEL);

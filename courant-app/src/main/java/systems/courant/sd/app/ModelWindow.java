@@ -846,19 +846,31 @@ public class ModelWindow {
         contextHelpDialog.showTopic(topic);
         if (!contextHelpDialog.isShowing()) {
             contextHelpDialog.show();
+        } else {
+            bringToFront(contextHelpDialog);
         }
     }
 
     private Stage showHelpWindow(Stage existing, Supplier<? extends Stage> factory) {
         if (existing != null && existing.isShowing()) {
-            existing.toFront();
-            existing.requestFocus();
+            bringToFront(existing);
             return existing;
         }
         Stage window = factory.get();
         window.initOwner(stage);
         window.show();
         return window;
+    }
+
+    /**
+     * Forces a window to the front, working around platform-specific focus-stealing
+     * prevention by briefly toggling alwaysOnTop.
+     */
+    private static void bringToFront(Stage window) {
+        window.setAlwaysOnTop(true);
+        window.toFront();
+        window.requestFocus();
+        Platform.runLater(() -> window.setAlwaysOnTop(false));
     }
 
     private void showUndoHistoryPopup() {

@@ -62,6 +62,7 @@ public class OptimizerDialog extends Dialog<OptimizerDialog.Config> {
         paramBox.setPadding(new Insets(5));
 
         Button addButton = new Button("Add Parameter");
+        addButton.setId("optAddParam");
         addButton.setOnAction(e -> {
             ParamRow row = new ParamRow(constantNames, paramBox);
             paramRows.add(row);
@@ -81,14 +82,17 @@ public class OptimizerDialog extends Dialog<OptimizerDialog.Config> {
 
         objectiveCombo = new ComboBox<>(FXCollections.observableArrayList(ObjectiveType.values()));
         objectiveCombo.setValue(ObjectiveType.MINIMIZE);
+        objectiveCombo.setId("optObjective");
 
         targetVarCombo = new ComboBox<>(FXCollections.observableArrayList(stockNames));
+        targetVarCombo.setId("optTargetVar");
         if (!stockNames.isEmpty()) {
             targetVarCombo.setValue(stockNames.getFirst());
         }
 
         targetValueLabel = new Label("Target Value:");
         targetValueField = new TextField("0");
+        targetValueField.setId("optTargetValue");
         targetValueLabel.setVisible(false);
         targetValueLabel.setManaged(false);
         targetValueField.setVisible(false);
@@ -105,8 +109,10 @@ public class OptimizerDialog extends Dialog<OptimizerDialog.Config> {
         algorithmCombo = new ComboBox<>(FXCollections.observableArrayList(
                 "NELDER_MEAD", "BOBYQA", "CMAES"));
         algorithmCombo.setValue("NELDER_MEAD");
+        algorithmCombo.setId("optAlgorithm");
 
         maxEvalsField = new TextField("1000");
+        maxEvalsField.setId("optMaxEvals");
 
         GridPane settingsGrid = new GridPane();
         settingsGrid.setHgap(10);
@@ -142,7 +148,7 @@ public class OptimizerDialog extends Dialog<OptimizerDialog.Config> {
         VBox content = new VBox(10, paramsLabel, paramScroll, settingsGrid, validationLabel);
         content.setPadding(new Insets(10));
         getDialogPane().setContent(content);
-        getDialogPane().setPrefWidth(550);
+        getDialogPane().setPrefWidth(Styles.screenAwareWidth(Styles.CONFIG_DIALOG_WIDTH));
 
         ButtonType okButton = new ButtonType("OK", ButtonBar.ButtonData.OK_DONE);
         getDialogPane().getButtonTypes().addAll(okButton, ButtonType.CANCEL);
@@ -229,16 +235,21 @@ public class OptimizerDialog extends Dialog<OptimizerDialog.Config> {
         ParamRow(List<String> constantNames, VBox container) {
             super(constantNames, null,
                     () -> fieldChangeCounter.set(fieldChangeCounter.get() + 1));
+            int rowIndex = paramRows.size();
+            nameCombo.setId("optParamName" + rowIndex);
 
             lowerField = new TextField("0");
             lowerField.setPrefWidth(60);
             lowerField.setPromptText("Lower");
+            lowerField.setId("optLower" + rowIndex);
             upperField = new TextField("10");
             upperField.setPrefWidth(60);
             upperField.setPromptText("Upper");
+            upperField.setId("optUpper" + rowIndex);
             guessField = new TextField("");
             guessField.setPrefWidth(60);
             guessField.setPromptText("Guess");
+            guessField.setId("optGuess" + rowIndex);
 
             wireFieldChange(lowerField);
             wireFieldChange(upperField);

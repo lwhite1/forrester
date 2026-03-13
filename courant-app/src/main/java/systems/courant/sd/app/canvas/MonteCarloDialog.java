@@ -60,6 +60,7 @@ public class MonteCarloDialog extends Dialog<MonteCarloDialog.Config> {
         paramBox.setPadding(new Insets(5));
 
         Button addButton = new Button("Add Parameter");
+        addButton.setId("mcAddParam");
         addButton.setOnAction(e -> {
             ParameterRow row = new ParameterRow(constantNames, paramBox);
             parameterRows.add(row);
@@ -78,10 +79,13 @@ public class MonteCarloDialog extends Dialog<MonteCarloDialog.Config> {
         paramScroll.setPrefHeight(200);
 
         iterationsField = new TextField("200");
+        iterationsField.setId("mcIterations");
         samplingCombo = new ComboBox<>(FXCollections.observableArrayList(
                 "LATIN_HYPERCUBE", "RANDOM"));
         samplingCombo.setValue("LATIN_HYPERCUBE");
+        samplingCombo.setId("mcSampling");
         seedField = new TextField("12345");
+        seedField.setId("mcSeed");
 
         GridPane settingsGrid = new GridPane();
         settingsGrid.setHgap(10);
@@ -112,7 +116,7 @@ public class MonteCarloDialog extends Dialog<MonteCarloDialog.Config> {
         VBox content = new VBox(10, paramsLabel, paramScroll, settingsGrid, validationLabel);
         content.setPadding(new Insets(10));
         getDialogPane().setContent(content);
-        getDialogPane().setPrefWidth(500);
+        getDialogPane().setPrefWidth(Styles.screenAwareWidth(Styles.CONFIG_DIALOG_WIDTH));
 
         ButtonType okButton = new ButtonType("OK", ButtonBar.ButtonData.OK_DONE);
         getDialogPane().getButtonTypes().addAll(okButton, ButtonType.CANCEL);
@@ -186,17 +190,22 @@ public class MonteCarloDialog extends Dialog<MonteCarloDialog.Config> {
         ParameterRow(List<String> constantNames, VBox container) {
             super(constantNames, null,
                     () -> fieldChangeCounter.set(fieldChangeCounter.get() + 1));
+            int rowIndex = parameterRows.size();
+            nameCombo.setId("mcParamName" + rowIndex);
 
             distCombo = new ComboBox<>(FXCollections.observableArrayList(DistributionType.values()));
             distCombo.setValue(DistributionType.NORMAL);
             distCombo.setPrefWidth(100);
+            distCombo.setId("mcParamDist" + rowIndex);
 
             param1Label = new Label("Mean:");
             param1Field = new TextField("0");
             param1Field.setPrefWidth(60);
+            param1Field.setId("mcParam1_" + rowIndex);
             param2Label = new Label("StdDev:");
             param2Field = new TextField("1");
             param2Field.setPrefWidth(60);
+            param2Field.setId("mcParam2_" + rowIndex);
 
             distCombo.valueProperty().addListener((obs, old, val) -> {
                 updateLabels(val);

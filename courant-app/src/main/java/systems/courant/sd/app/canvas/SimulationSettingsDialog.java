@@ -69,6 +69,7 @@ public class SimulationSettingsDialog extends Dialog<SimulationSettings> {
         grid.add(dtField, 1, 3);
 
         getDialogPane().setContent(grid);
+        getDialogPane().setPrefWidth(Styles.screenAwareWidth(Styles.CONFIG_DIALOG_WIDTH));
 
         ButtonType okButton = new ButtonType("OK", ButtonBar.ButtonData.OK_DONE);
         getDialogPane().getButtonTypes().addAll(okButton, ButtonType.CANCEL);
