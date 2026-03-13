@@ -259,6 +259,68 @@ class DependencyGraphTest {
     }
 
     @Nested
+    @DisplayName("Graceful degradation on unparseable equations (#450)")
+    class UnparseableEquations {
+
+        @Test
+        void shouldBuildPartialGraphWhenFlowEquationIsUnparseable() {
+            ModelDefinition def = new ModelDefinitionBuilder()
+                    .name("BadFlow")
+                    .stock("Tank", 100, "Thing")
+                    .constant("Rate", 5, "Thing")
+                    .flow("GoodFlow", "Tank * Rate", "Day", "Tank", null)
+                    .flow("BadFlow", "@@@ totally invalid !!!", "Day", null, "Tank")
+                    .build();
+
+            DependencyGraph graph = DependencyGraph.fromDefinition(def);
+
+            // Should not throw — unparseable flow is skipped
+            assertThat(graph.allNodes()).contains("Tank", "Rate", "GoodFlow", "BadFlow");
+            // Good flow still has its dependencies extracted
+            assertThat(graph.dependenciesOf("GoodFlow")).contains("Tank", "Rate");
+            // Bad flow has no formula dependencies (only structural sink connection)
+            assertThat(graph.dependentsOf("BadFlow")).contains("Tank");
+        }
+
+        @Test
+        void shouldBuildPartialGraphWhenAuxEquationIsUnparseable() {
+            ModelDefinition def = new ModelDefinitionBuilder()
+                    .name("BadAux")
+                    .stock("S", 50, "Thing")
+                    .aux("GoodAux", "S * 2", "Thing")
+                    .aux("BadAux", "### not valid", "Thing")
+                    .build();
+
+            DependencyGraph graph = DependencyGraph.fromDefinition(def);
+
+            assertThat(graph.allNodes()).contains("S", "GoodAux", "BadAux");
+            assertThat(graph.dependenciesOf("GoodAux")).contains("S");
+            // Bad aux has no formula dependencies
+            assertThat(graph.dependenciesOf("BadAux")).isEmpty();
+        }
+
+        @Test
+        void shouldBuildGraphWhenAllEquationsAreUnparseable() {
+            ModelDefinition def = new ModelDefinitionBuilder()
+                    .name("AllBad")
+                    .stock("S", 100, "Thing")
+                    .flow("F1", "!!! bad", "Day", "S", null)
+                    .aux("A1", "??? also bad", "Thing")
+                    .build();
+
+            DependencyGraph graph = DependencyGraph.fromDefinition(def);
+
+            // Graph should still contain all nodes
+            assertThat(graph.allNodes()).contains("S", "F1", "A1");
+            // Structural connections (flow source/sink) should still be present
+            assertThat(graph.dependentsOf("F1")).contains("S");
+            // No formula dependencies extracted
+            assertThat(graph.dependenciesOf("F1")).isEmpty();
+            assertThat(graph.dependenciesOf("A1")).isEmpty();
+        }
+    }
+
+    @Nested
     @DisplayName("Where Used and Uses queries (#410)")
     class WhereUsedAndUses {
 
