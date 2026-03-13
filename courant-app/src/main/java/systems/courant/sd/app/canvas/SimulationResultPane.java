@@ -155,9 +155,18 @@ public class SimulationResultPane extends BorderPane {
 
         NumberAxis xAxis = new NumberAxis();
         xAxis.setLabel(columns.isEmpty() ? "Step" : columns.getFirst());
+        xAxis.setAutoRanging(false);
+        if (!rows.isEmpty()) {
+            double xMin = rows.getFirst()[0];
+            double xMax = rows.getLast()[0];
+            xAxis.setLowerBound(xMin);
+            xAxis.setUpperBound(xMax);
+            xAxis.setTickUnit(niceTickUnit(xMax - xMin));
+        }
 
         NumberAxis yAxis = new NumberAxis();
         yAxis.setLabel(resolveYAxisLabel(columns, result.units()));
+        yAxis.setAutoRanging(false);
 
         chart = new LineChart<>(xAxis, yAxis);
         chart.setCreateSymbols(false);
@@ -231,6 +240,38 @@ public class SimulationResultPane extends BorderPane {
         chart.getData().addAll(currentSeries);
         ChartUtils.applySeriesColors(currentSeries);
 
+        // Y-axis rescaling: recompute bounds from visible series (#542)
+        Runnable rescaleYAxis = () -> {
+            double yMin = Double.MAX_VALUE;
+            double yMax = -Double.MAX_VALUE;
+            for (XYChart.Series<Number, Number> s : chart.getData()) {
+                if (s.getNode() != null && !s.getNode().isVisible()) {
+                    continue;
+                }
+                for (XYChart.Data<Number, Number> d : s.getData()) {
+                    double val = d.getYValue().doubleValue();
+                    if (val < yMin) {
+                        yMin = val;
+                    }
+                    if (val > yMax) {
+                        yMax = val;
+                    }
+                }
+            }
+            if (yMin >= yMax) {
+                yMin = yMin - 1;
+                yMax = yMax + 1;
+            }
+            double pad = (yMax - yMin) * 0.05;
+            if (pad == 0) {
+                pad = 0.5;
+            }
+            yAxis.setLowerBound(yMin - pad);
+            yAxis.setUpperBound(yMax + pad);
+            yAxis.setTickUnit(niceTickUnit(yMax - yMin + 2 * pad));
+        };
+        rescaleYAxis.run();
+
         // Apply dashed stroke to non-stock (variable/auxiliary) series
         if (!stockNames.isEmpty()) {
             for (int i = 0; i < currentSeries.size(); i++) {
@@ -296,20 +337,20 @@ public class SimulationResultPane extends BorderPane {
             for (int i = 0; i < currentSeries.size(); i++) {
                 if (isStock.get(i)) {
                     addSeriesRow(sidebar, currentSeries.get(i), i,
-                            behaviorModes.get(i), seriesCheckBoxes);
+                            behaviorModes.get(i), seriesCheckBoxes, rescaleYAxis);
                 }
             }
             addSectionHeader(sidebar, "Variables");
             for (int i = 0; i < currentSeries.size(); i++) {
                 if (!isStock.get(i)) {
                     addSeriesRow(sidebar, currentSeries.get(i), i,
-                            behaviorModes.get(i), seriesCheckBoxes);
+                            behaviorModes.get(i), seriesCheckBoxes, rescaleYAxis);
                 }
             }
         } else {
             for (int i = 0; i < currentSeries.size(); i++) {
                 addSeriesRow(sidebar, currentSeries.get(i), i,
-                        behaviorModes.get(i), seriesCheckBoxes);
+                        behaviorModes.get(i), seriesCheckBoxes, rescaleYAxis);
             }
         }
 
@@ -558,7 +599,7 @@ public class SimulationResultPane extends BorderPane {
 
     private void addSeriesRow(VBox sidebar, XYChart.Series<Number, Number> series,
                               int colorIndex, String behaviorMode,
-                              List<CheckBox> seriesCheckBoxes) {
+                              List<CheckBox> seriesCheckBoxes, Runnable rescaleYAxis) {
         String color = ChartUtils.SERIES_COLORS.get(colorIndex % ChartUtils.SERIES_COLORS.size());
 
         CheckBox cb = new CheckBox();
@@ -572,6 +613,7 @@ public class SimulationResultPane extends BorderPane {
                     d.getNode().setVisible(isSelected);
                 }
             });
+            rescaleYAxis.run();
         });
         seriesCheckBoxes.add(cb);
 
@@ -758,4 +800,26 @@ public class SimulationResultPane extends BorderPane {
                 getScene() != null ? getScene().getWindow() : null);
     }
 
+    /**
+     * Computes a "nice" tick unit for an axis covering the given range,
+     * targeting roughly 5–10 tick marks.
+     */
+    static double niceTickUnit(double range) {
+        if (range <= 0) {
+            return 1;
+        }
+        double rawUnit = range / 10;
+        double exp = Math.pow(10, Math.floor(Math.log10(rawUnit)));
+        double frac = rawUnit / exp;
+        if (frac < 1.5) {
+            return exp;
+        }
+        if (frac < 3.5) {
+            return 2 * exp;
+        }
+        if (frac < 7.5) {
+            return 5 * exp;
+        }
+        return 10 * exp;
+    }
 }

@@ -38,6 +38,7 @@ public class CanvasState {
     private final Map<String, ElementType> types = new LinkedHashMap<>();
     private final Set<String> selection = new LinkedHashSet<>();
     private final SequencedSet<String> drawOrder = new LinkedHashSet<>();
+    private List<String> drawOrderCache;
     private String viewName = DEFAULT_VIEW_NAME;
 
     /**
@@ -49,6 +50,7 @@ public class CanvasState {
         sizes.clear();
         selection.clear();
         drawOrder.clear();
+        drawOrderCache = null;
         viewName = view.name();
 
         for (ElementPlacement ep : view.elements()) {
@@ -150,7 +152,12 @@ public class CanvasState {
      * Returns all element names in draw order.
      */
     public List<String> getDrawOrder() {
-        return List.copyOf(drawOrder);
+        List<String> cached = drawOrderCache;
+        if (cached == null) {
+            cached = List.copyOf(drawOrder);
+            drawOrderCache = cached;
+        }
+        return cached;
     }
 
     /**
@@ -230,6 +237,7 @@ public class CanvasState {
         positions.put(name, new Position(x, y));
         types.put(name, type);
         drawOrder.add(name);
+        drawOrderCache = null;
     }
 
     /**
@@ -259,6 +267,7 @@ public class CanvasState {
         }
         drawOrder.clear();
         drawOrder.addAll(reordered);
+        drawOrderCache = null;
 
         if (selection.remove(oldName)) {
             selection.add(newName);
@@ -294,6 +303,7 @@ public class CanvasState {
         types.remove(name);
         sizes.remove(name);
         drawOrder.remove(name);
+        drawOrderCache = null;
         selection.remove(name);
     }
 }

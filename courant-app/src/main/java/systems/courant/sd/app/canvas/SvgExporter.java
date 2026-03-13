@@ -28,16 +28,6 @@ public final class SvgExporter {
     }
 
     /**
-     * Exports the current diagram to an SVG file.
-     *
-     * @param canvasState  the canvas state containing element positions
-     * @param editor       the model editor
-     * @param connectors   the connector routes for info links
-     * @param loopAnalysis optional feedback analysis (null if loop highlighting is off)
-     * @param file         the output file
-     * @throws IOException if writing fails
-     */
-    /**
      * Returns the diagram as an SVG string, or null if the diagram is empty.
      */
     public static String toSvgString(CanvasState canvasState, ModelEditor editor,
@@ -74,87 +64,87 @@ public final class SvgExporter {
         double width = bounds.width();
         double height = bounds.height();
 
-            w.println("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
-            w.printf(Locale.US,
-                    "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"%.1f %.1f %.1f %.1f\" " +
-                    "width=\"%.1f\" height=\"%.1f\">%n",
-                    minX, minY, width, height, width, height);
+        w.println("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
+        w.printf(Locale.US,
+                "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"%.1f %.1f %.1f %.1f\" " +
+                "width=\"%.1f\" height=\"%.1f\">%n",
+                minX, minY, width, height, width, height);
 
-            // 1. Background
-            w.printf(Locale.US, "  <rect x=\"%.1f\" y=\"%.1f\" width=\"%.1f\" height=\"%.1f\" fill=\"%s\"/>%n",
-                    minX, minY, width, height, svgColor(ColorPalette.BACKGROUND));
+        // 1. Background
+        w.printf(Locale.US, "  <rect x=\"%.1f\" y=\"%.1f\" width=\"%.1f\" height=\"%.1f\" fill=\"%s\"/>%n",
+                minX, minY, width, height, svgColor(ColorPalette.BACKGROUND));
 
-            // 2. Material flows
-            writeMaterialFlows(w, canvasState, editor);
+        // 2. Material flows
+        writeMaterialFlows(w, canvasState, editor);
 
-            // 3. Info links
-            writeInfoLinks(w, canvasState, connectors);
+        // 3. Info links
+        writeInfoLinks(w, canvasState, connectors);
 
-            // 3b. Causal links
-            writeCausalLinks(w, canvasState, editor);
+        // 3b. Causal links
+        writeCausalLinks(w, canvasState, editor);
 
-            // 4. Loop edge highlights
-            if (loopAnalysis != null) {
-                writeLoopEdges(w, canvasState, connectors, editor, loopAnalysis);
+        // 4. Loop edge highlights
+        if (loopAnalysis != null) {
+            writeLoopEdges(w, canvasState, connectors, editor, loopAnalysis);
+        }
+
+        // 5. Elements
+        for (String name : canvasState.getDrawOrder()) {
+            ElementType type = canvasState.getType(name).orElse(null);
+            if (type == null) {
+                continue;
             }
+            double cx = canvasState.getX(name);
+            double cy = canvasState.getY(name);
 
-            // 5. Elements
-            for (String name : canvasState.getDrawOrder()) {
-                ElementType type = canvasState.getType(name).orElse(null);
-                if (type == null) {
-                    continue;
+            switch (type) {
+                case STOCK -> writeStock(w, name, editor.getStockUnit(name).orElse(null), cx, cy,
+                        LayoutMetrics.effectiveWidth(canvasState, name),
+                        LayoutMetrics.effectiveHeight(canvasState, name));
+                case FLOW -> {
+                    String eq = editor.getFlowEquation(name).orElse(null);
+                    writeFlow(w, name, eq, cx, cy);
                 }
-                double cx = canvasState.getX(name);
-                double cy = canvasState.getY(name);
-
-                switch (type) {
-                    case STOCK -> writeStock(w, name, editor.getStockUnit(name).orElse(null), cx, cy,
+                case AUX -> {
+                    boolean isLiteral = editor.getVariableByName(name)
+                            .map(VariableDef::isLiteral).orElse(false);
+                    writeVariable(w, name, editor.getVariableEquation(name).orElse(null),
+                            isLiteral, cx, cy,
                             LayoutMetrics.effectiveWidth(canvasState, name),
                             LayoutMetrics.effectiveHeight(canvasState, name));
-                    case FLOW -> {
-                        String eq = editor.getFlowEquation(name).orElse(null);
-                        writeFlow(w, name, eq, cx, cy);
-                    }
-                    case AUX -> {
-                        boolean isLiteral = editor.getVariableByName(name)
-                                .map(VariableDef::isLiteral).orElse(false);
-                        writeVariable(w, name, editor.getVariableEquation(name).orElse(null),
-                                isLiteral, cx, cy,
-                                LayoutMetrics.effectiveWidth(canvasState, name),
-                                LayoutMetrics.effectiveHeight(canvasState, name));
-                    }
-                    case MODULE -> writeModule(w, name, cx, cy,
-                            LayoutMetrics.effectiveWidth(canvasState, name),
-                            LayoutMetrics.effectiveHeight(canvasState, name));
-                    case CLD_VARIABLE -> writeCldVariable(w, name, cx, cy,
-                            LayoutMetrics.effectiveWidth(canvasState, name),
-                            LayoutMetrics.effectiveHeight(canvasState, name));
-                    case LOOKUP -> {
-                        int pts = editor.getLookupTableByName(name)
-                                .map(lt -> lt.xValues().length).orElse(0);
-                        writeLookup(w, name, pts, cx, cy,
-                                LayoutMetrics.effectiveWidth(canvasState, name),
-                                LayoutMetrics.effectiveHeight(canvasState, name));
-                    }
-                    case COMMENT -> {
-                        var commentDef = editor.getCommentByName(name);
-                        String text = commentDef != null ? commentDef.text() : "";
-                        writeComment(w, text, cx, cy,
-                                LayoutMetrics.effectiveWidth(canvasState, name),
-                                LayoutMetrics.effectiveHeight(canvasState, name));
-                    }
-                    default -> { }
                 }
+                case MODULE -> writeModule(w, name, cx, cy,
+                        LayoutMetrics.effectiveWidth(canvasState, name),
+                        LayoutMetrics.effectiveHeight(canvasState, name));
+                case CLD_VARIABLE -> writeCldVariable(w, name, cx, cy,
+                        LayoutMetrics.effectiveWidth(canvasState, name),
+                        LayoutMetrics.effectiveHeight(canvasState, name));
+                case LOOKUP -> {
+                    int pts = editor.getLookupTableByName(name)
+                            .map(lt -> lt.xValues().length).orElse(0);
+                    writeLookup(w, name, pts, cx, cy,
+                            LayoutMetrics.effectiveWidth(canvasState, name),
+                            LayoutMetrics.effectiveHeight(canvasState, name));
+                }
+                case COMMENT -> {
+                    var commentDef = editor.getCommentByName(name);
+                    String text = commentDef != null ? commentDef.text() : "";
+                    writeComment(w, text, cx, cy,
+                            LayoutMetrics.effectiveWidth(canvasState, name),
+                            LayoutMetrics.effectiveHeight(canvasState, name));
+                }
+                default -> { }
             }
+        }
 
-            // 6. Loop participant highlights
-            if (loopAnalysis != null) {
-                for (String name : loopAnalysis.loopParticipants()) {
-                    if (canvasState.hasElement(name)) {
-                        writeLoopHighlight(w, canvasState, name);
-                    }
+        // 6. Loop participant highlights
+        if (loopAnalysis != null) {
+            for (String name : loopAnalysis.loopParticipants()) {
+                if (canvasState.hasElement(name)) {
+                    writeLoopHighlight(w, canvasState, name);
                 }
             }
+        }
 
         w.println("</svg>");
     }
