@@ -9,7 +9,7 @@
  *       from a stock each timestep</li>
  *   <li>{@link systems.courant.sd.model.Variable} — a computed value defined by
  *       a {@link systems.courant.sd.model.Formula}, re-evaluated each timestep</li>
- *   <li>{@link systems.courant.sd.model.Constant} — an immutable parameter</li>
+ *   <li>Constant — an immutable parameter</li>
  *   <li>{@link systems.courant.sd.model.Module} — a named grouping of stocks,
  *       flows, and variables for organizing large models hierarchically</li>
  *   <li>{@link systems.courant.sd.model.Model} — the top-level container that

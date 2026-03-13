@@ -26,7 +26,7 @@ import static systems.courant.sd.measure.Units.WEEK;
  * capacity. A fraction of completed work introduces latent defects, which are discovered
  * and then fixed through separate feedback loops.
  *
- * <h3>Pipeline</h3>
+ * <p><strong>Pipeline</strong></p>
  * <pre>
  *   Product Backlog --[Sprint Pull]--> Sprint Backlog --[Completion]--> Completed Tasks
  *                                                             |
@@ -36,7 +36,7 @@ import static systems.courant.sd.measure.Units.WEEK;
  *                                                                                     [Fix Rate]
  * </pre>
  *
- * <h3>Default behavior (52 weeks)</h3>
+ * <p><strong>Default behavior (52 weeks)</strong></p>
  * <p>With 500 tasks and a 5-person team producing 20 tasks/person/week, the backlog drains
  * in roughly 5 weeks. Defects are created at a 20% rate, discovered at 40%/week, and fixed
  * at 50%/week, so the defect stocks rise then decay after development ends.

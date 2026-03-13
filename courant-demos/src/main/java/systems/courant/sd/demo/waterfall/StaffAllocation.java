@@ -20,7 +20,7 @@ import systems.courant.sd.model.Variable;
  * and communication overhead (Brooks's Law), then split between development and quality
  * assurance. An overhead loss constant further reduces the effective capacity.
  *
- * <h3>Expected behavior with default parameters</h3>
+ * <p><strong>Expected behavior with default parameters</strong></p>
  *
  * <p>With 15% planned for QA and 10% overhead loss, the initial 6-person team yields about
  * 4.6 person-days/day for development and 0.9 for QA (after training and communication

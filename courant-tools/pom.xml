@@ -11,6 +11,7 @@
     </parent>
 
     <artifactId>courant-tools</artifactId>
+    <name>courant-tools</name>
     <packaging>jar</packaging>
 
     <dependencies>

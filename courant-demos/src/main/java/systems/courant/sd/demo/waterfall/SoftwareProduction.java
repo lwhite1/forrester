@@ -37,7 +37,7 @@ import static systems.courant.sd.measure.Units.DAY;
  *       the project nears completion, modeling the waterfall integration tax</li>
  * </ul>
  *
- * <h3>Expected behavior with default parameters</h3>
+ * <p><strong>Expected behavior with default parameters</strong></p>
  *
  * <p><b>Development phase (days 0–84):</b> Tasks Remaining drains from 500 to zero. FCC hovers
  * around 0.69–0.80, meaning roughly 20–30% of completed work carries hidden errors. Undiscovered

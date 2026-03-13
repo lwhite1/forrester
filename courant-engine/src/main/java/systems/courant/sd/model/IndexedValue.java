@@ -24,7 +24,7 @@ import java.util.List;
  *       → {@code [Region × AgeGroup]}</li>
  * </ul>
  *
- * <h3>Result dimension ordering</h3>
+ * <p><strong>Result dimension ordering</strong></p>
  *
  * <p>When broadcasting produces a result with dimensions from both operands, the result
  * dimensions are ordered as: <em>all left-operand dimensions first</em> (preserving their

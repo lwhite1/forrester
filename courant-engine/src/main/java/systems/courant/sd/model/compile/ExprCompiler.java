@@ -61,7 +61,7 @@ public class ExprCompiler {
      * @param equation the expression string to parse and compile
      * @return a Formula that evaluates the expression at runtime
      * @throws CompilationException if the expression references unknown names or functions
-     * @throws ParseException if the expression string is syntactically invalid
+     * @throws RuntimeException if the expression string is syntactically invalid
      */
     public Formula compile(String equation) {
         Expr expr = ExprParser.parse(equation);

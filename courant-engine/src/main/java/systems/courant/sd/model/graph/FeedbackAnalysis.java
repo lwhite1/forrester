@@ -282,7 +282,7 @@ public record FeedbackAnalysis(
     }
 
     /**
-     * Returns the loop type for the loop at the given index, or null for S&F groups.
+     * Returns the loop type for the loop at the given index, or null for S&amp;F groups.
      */
     public LoopType loopType(int index) {
         if (index < 0 || index >= loopCount()) {
@@ -293,7 +293,7 @@ public record FeedbackAnalysis(
 
     /**
      * Returns the indices of all loops matching the given type filter.
-     * A null filter matches all loops. S&F groups (type=null) only match a null filter.
+     * A null filter matches all loops. S&amp;F groups (type=null) only match a null filter.
      */
     public List<Integer> filteredIndices(LoopType filter) {
         List<Integer> result = new ArrayList<>();

@@ -34,7 +34,7 @@ public final class ModelDefinitionFactory {
     /**
      * Creates a factory function that accepts a map of parameter name to value,
      * applies overrides to the definition, compiles, and returns the compiled model.
-     * Returning {@link CompiledModel} (rather than bare {@link Model}) ensures that
+     * Returning {@link CompiledModel} (rather than bare Model) ensures that
      * sweep classes can create simulations with proper step synchronization,
      * which is required for time-dependent functions (STEP, RAMP, PULSE, etc.).
      */

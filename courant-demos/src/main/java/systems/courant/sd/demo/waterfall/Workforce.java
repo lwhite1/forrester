@@ -25,7 +25,7 @@ import static systems.courant.sd.measure.Units.DAY;
  * daily training overhead imposed by new hires on experienced staff, and communication
  * overhead from Brooks's Law (overhead grows as n*(n-1) with team size).
  *
- * <h3>Expected behavior with default parameters</h3>
+ * <p><strong>Expected behavior with default parameters</strong></p>
  *
  * <p>The team starts at 6 (2 new hires + 4 experienced) and grows toward the need of 30. The
  * 8-week hiring delay and 16-week assimilation delay create a ramp: the workforce reaches ~19

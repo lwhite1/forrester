@@ -11,6 +11,7 @@
     </parent>
 
     <artifactId>courant-engine</artifactId>
+    <name>courant-engine</name>
 
     <dependencies>
         <dependency>

@@ -11,6 +11,7 @@
     </parent>
 
     <artifactId>courant-app</artifactId>
+    <name>courant-app</name>
 
     <dependencies>
         <dependency>

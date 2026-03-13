@@ -10,7 +10,7 @@ import java.util.function.IntConsumer;
 
 /**
  * A horizontal bar that displays the navigation path as clickable breadcrumbs.
- * Hidden when at root level (path length <= 1). Clicking an ancestor segment
+ * Hidden when at root level (path length &lt;= 1). Clicking an ancestor segment
  * navigates back to that depth.
  */
 public class BreadcrumbBar extends HBox {

@@ -20,7 +20,7 @@ import systems.courant.sd.ui.StockLevelChartViewer;
  * classic waterfall pathology: deferred integration causes errors to stay hidden until late in the
  * project, when rework becomes expensive and floods the schedule.
  *
- * <h3>Expected behavior with default parameters (200 days)</h3>
+ * <p><strong>Expected behavior with default parameters (200 days)</strong></p>
  *
  * <p><b>Days 0–80 (development phase):</b> The workforce ramps from 6 to ~19 people. Development
  * proceeds steadily, draining Tasks Remaining from 500 toward zero. Tasks Completed climbs to
