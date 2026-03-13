@@ -990,7 +990,14 @@ public class ExprCompiler {
         DoubleSupplier condition = compileExpr(cond.condition());
         DoubleSupplier thenExpr = compileExpr(cond.thenExpr());
         DoubleSupplier elseExpr = compileExpr(cond.elseExpr());
-        // Evaluate both branches every step so stateful SD functions (SMOOTH, DELAY3,
+        if (cond.shortCircuit()) {
+            // IF_SHORT: only evaluate the taken branch (true short-circuit).
+            // Stateful functions (SMOOTH, DELAY, TREND) in the untaken branch
+            // will NOT be updated, causing stale values when the condition flips.
+            return () -> condition.getAsDouble() != 0
+                    ? thenExpr.getAsDouble() : elseExpr.getAsDouble();
+        }
+        // IF: evaluate both branches every step so stateful SD functions (SMOOTH, DELAY3,
         // TREND, etc.) in the untaken branch keep their internal state current.
         return () -> {
             double thenVal = thenExpr.getAsDouble();
