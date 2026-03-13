@@ -2097,4 +2097,211 @@ class VensimImporterTest {
             assertThat(compiled).isNotNull();
         }
     }
+
+    @Nested
+    @DisplayName("splitRateTerms unary minus (#535)")
+    class SplitRateTermsUnaryMinus {
+
+        @Test
+        void shouldNotSplitOnUnaryMinusAfterMultiply() {
+            var terms = VensimImporter.splitRateTerms("a * -b");
+            // "a * -b" is a single term (unary minus on b), not "a *" minus "b"
+            assertThat(terms).isNull();
+        }
+
+        @Test
+        void shouldNotSplitOnUnaryMinusAfterDivide() {
+            var terms = VensimImporter.splitRateTerms("a / -b");
+            assertThat(terms).isNull();
+        }
+
+        @Test
+        void shouldNotSplitOnUnaryMinusAfterOpenParen() {
+            var terms = VensimImporter.splitRateTerms("(-a) + b");
+            assertThat(terms).hasSize(2);
+            assertThat(terms.get(0).expr()).isEqualTo("(-a)");
+            assertThat(terms.get(1).expr()).isEqualTo("b");
+        }
+
+        @Test
+        void shouldStillSplitOnBinaryMinus() {
+            var terms = VensimImporter.splitRateTerms("a - b");
+            assertThat(terms).hasSize(2);
+            assertThat(terms.get(0).expr()).isEqualTo("a");
+            assertThat(terms.get(1).expr()).isEqualTo("b");
+            assertThat(terms.get(1).positive()).isFalse();
+        }
+
+        @Test
+        void shouldSplitOnMinusAfterCloseParen() {
+            var terms = VensimImporter.splitRateTerms("(a + b) - c");
+            assertThat(terms).hasSize(2);
+            assertThat(terms.get(0).expr()).isEqualTo("(a + b)");
+            assertThat(terms.get(1).expr()).isEqualTo("c");
+        }
+
+        @Test
+        void shouldHandleMixedUnaryAndBinaryMinus() {
+            var terms = VensimImporter.splitRateTerms("a * -b + c");
+            assertThat(terms).hasSize(2);
+            assertThat(terms.get(0).expr()).isEqualTo("a * -b");
+            assertThat(terms.get(0).positive()).isTrue();
+            assertThat(terms.get(1).expr()).isEqualTo("c");
+            assertThat(terms.get(1).positive()).isTrue();
+        }
+    }
+
+    @Nested
+    @DisplayName("Quoted and special name handling (#540)")
+    class QuotedNameHandling {
+
+        @Test
+        void shouldResolveQuotedNamesWithHyphens() {
+            String mdl = """
+                    "net-increase rate" = 5
+                    \t~\t1/Year
+                    \t~\t
+                    \t|
+
+                    output = "net-increase rate" * 10
+                    \t~\t1/Year
+                    \t~\t
+                    \t|
+
+                    INITIAL TIME = 0
+                    \t~\tYear
+                    \t~\t
+                    \t|
+
+                    FINAL TIME = 10
+                    \t~\tYear
+                    \t~\t
+                    \t|
+
+                    TIME STEP = 1
+                    \t~\tYear
+                    \t~\t
+                    \t|
+                    """;
+            ImportResult result = importer.importModel(mdl, "test");
+            // Should not have unresolved reference warnings
+            assertThat(result.warnings()).noneMatch(w -> w.contains("unknown element"));
+        }
+
+        @Test
+        void shouldResolveDigitPrefixedQuotedNames() {
+            String mdl = """
+                    "1985 cost factor" = 100
+                    \t~\tDollar
+                    \t~\t
+                    \t|
+
+                    total cost = "1985 cost factor" * 2
+                    \t~\tDollar
+                    \t~\t
+                    \t|
+
+                    INITIAL TIME = 0
+                    \t~\tYear
+                    \t~\t
+                    \t|
+
+                    FINAL TIME = 10
+                    \t~\tYear
+                    \t~\t
+                    \t|
+
+                    TIME STEP = 1
+                    \t~\tYear
+                    \t~\t
+                    \t|
+                    """;
+            ImportResult result = importer.importModel(mdl, "test");
+            // Equation should contain the normalized name, not the quoted form
+            assertThat(result.definition().variables().stream()
+                    .filter(v -> v.name().contains("total"))
+                    .findFirst().get().equation())
+                    .contains("_1985_cost_factor");
+        }
+
+        @Test
+        void shouldSkipAFunctionOfDocumentation() {
+            String mdl = """
+                    production  = A FUNCTION OF( capacity,demand)
+                    \t~\t
+                    \t~\t
+                    \t|
+
+                    production = MIN(capacity, demand)
+                    \t~\tWidget/Day
+                    \t~\t
+                    \t|
+
+                    capacity = 100
+                    \t~\tWidget/Day
+                    \t~\t
+                    \t|
+
+                    demand = 80
+                    \t~\tWidget/Day
+                    \t~\t
+                    \t|
+
+                    INITIAL TIME = 0
+                    \t~\tDay
+                    \t~\t
+                    \t|
+
+                    FINAL TIME = 10
+                    \t~\tDay
+                    \t~\t
+                    \t|
+
+                    TIME STEP = 1
+                    \t~\tDay
+                    \t~\t
+                    \t|
+                    """;
+            ImportResult result = importer.importModel(mdl, "test");
+            // Should NOT produce a duplicate name warning
+            assertThat(result.warnings()).noneMatch(w -> w.contains("Duplicate"));
+        }
+
+        @Test
+        void shouldResolveUnquotedReferencesToQuotedNames() {
+            // When a variable is defined quoted but referenced unquoted in other equations
+            String mdl = """
+                    "radical action level" = 5
+                    \t~\t
+                    \t~\t
+                    \t|
+
+                    total = radical action level * 2
+                    \t~\t
+                    \t~\t
+                    \t|
+
+                    INITIAL TIME = 0
+                    \t~\tDay
+                    \t~\t
+                    \t|
+
+                    FINAL TIME = 10
+                    \t~\tDay
+                    \t~\t
+                    \t|
+
+                    TIME STEP = 1
+                    \t~\tDay
+                    \t~\t
+                    \t|
+                    """;
+            ImportResult result = importer.importModel(mdl, "test");
+            // The unquoted multi-word reference should resolve
+            assertThat(result.definition().variables().stream()
+                    .filter(v -> v.name().equals("total"))
+                    .findFirst().get().equation())
+                    .contains("radical_action_level");
+        }
+    }
 }

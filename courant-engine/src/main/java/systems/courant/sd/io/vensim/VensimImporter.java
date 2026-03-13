@@ -94,6 +94,11 @@ public class VensimImporter implements ModelImporter {
                 continue;
             }
             vensimNames.add(name);
+            // Also add the unquoted form so replaceMultiWordNames can match
+            // references that appear without quotes in other equations
+            if (name.startsWith("\"") && name.endsWith("\"") && name.length() > 2) {
+                vensimNames.add(name.substring(1, name.length() - 1));
+            }
             // For subscripted names like "growth rate[Region]", also register
             // the base name "growth rate" so multi-word replacement works
             // after dimension substitution (e.g., "growth rate[North]")
@@ -169,6 +174,9 @@ public class VensimImporter implements ModelImporter {
         for (MdlEquation eq : parsed.equations()) {
             String name = eq.name().strip();
             if (name.isEmpty() || isSystemVar(name)) {
+                continue;
+            }
+            if (isDocumentationBlock(eq.expression())) {
                 continue;
             }
 
@@ -250,6 +258,11 @@ public class VensimImporter implements ModelImporter {
         for (MdlEquation eq : parsed.equations()) {
             String name = eq.name().strip();
             if (name.isEmpty() || isSystemVar(name)) {
+                continue;
+            }
+            // Skip Vensim "A FUNCTION OF" documentation blocks — they're metadata,
+            // not executable equations, and would create duplicates of the real equation
+            if (isDocumentationBlock(eq.expression())) {
                 continue;
             }
             String eqName = VensimExprTranslator.normalizeName(name);
@@ -859,7 +872,7 @@ public class VensimImporter implements ModelImporter {
                 depth++;
             } else if (c == ')') {
                 depth--;
-            } else if (depth == 0 && (c == '+' || c == '-')) {
+            } else if (depth == 0 && (c == '+' || c == '-') && isBinaryOperatorAt(expr, i)) {
                 String termText = expr.substring(termStart, i).strip();
                 if (!termText.isEmpty()) {
                     terms.add(new RateTerm(termText, positive));
@@ -879,6 +892,34 @@ public class VensimImporter implements ModelImporter {
             return null;
         }
         return terms;
+    }
+
+    private static final Pattern A_FUNCTION_OF_PATTERN = Pattern.compile(
+            "(?i)^\\s*A\\s+FUNCTION\\s+OF\\s*\\(");
+
+    /**
+     * Returns true if the expression is a Vensim "A FUNCTION OF" documentation
+     * block, which lists dependencies for documentation purposes only.
+     */
+    private static boolean isDocumentationBlock(String expression) {
+        return expression != null && A_FUNCTION_OF_PATTERN.matcher(expression).find();
+    }
+
+    /**
+     * Returns true if the {@code +} or {@code -} at position {@code i} is a binary
+     * operator (subtraction/addition) rather than a unary sign. A sign is binary when
+     * the previous non-whitespace character could end a term: a letter, digit,
+     * underscore, closing paren, or decimal point.
+     */
+    private static boolean isBinaryOperatorAt(String expr, int i) {
+        for (int j = i - 1; j >= 0; j--) {
+            char prev = expr.charAt(j);
+            if (Character.isWhitespace(prev)) {
+                continue;
+            }
+            return Character.isLetterOrDigit(prev) || prev == '_' || prev == ')' || prev == '.';
+        }
+        return false;
     }
 
     private static int findTopLevelComma(String content) {
