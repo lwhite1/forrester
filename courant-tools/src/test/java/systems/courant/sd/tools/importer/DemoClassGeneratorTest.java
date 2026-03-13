@@ -1,12 +1,12 @@
 package systems.courant.sd.tools.importer;
 
 import systems.courant.sd.model.ModelMetadata;
-import systems.courant.sd.model.def.VariableDef;
 import systems.courant.sd.model.def.FlowDef;
 import systems.courant.sd.model.def.LookupTableDef;
-import systems.courant.sd.model.def.ModelDefinitionBuilder;
 import systems.courant.sd.model.def.ModelDefinition;
+import systems.courant.sd.model.def.ModelDefinitionBuilder;
 import systems.courant.sd.model.def.StockDef;
+import systems.courant.sd.model.def.VariableDef;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -370,5 +370,190 @@ class DemoClassGeneratorTest {
 
         assertThat(source).contains("Unsupported PULSE function");
         assertThat(source).contains("Unresolved reference: missing_var");
+    }
+
+    @Nested
+    @DisplayName("Issue #271 — initialExpression preservation")
+    class InitialExpressionPreservation {
+
+        @Test
+        void shouldEmitInitialExpressionForStocks() {
+            StockDef stock = new StockDef("Water", null, Double.NaN,
+                    "Capacity * 0.5", "liters", null, List.of());
+            ModelDefinition def = new ModelDefinitionBuilder()
+                    .name("Test")
+                    .stock(stock)
+                    .constant("Capacity", 100.0, "liters")
+                    .defaultSimulation("Day", 10.0, "Day")
+                    .build();
+
+            ModelMetadata metadata = ModelMetadata.builder().license("CC-BY-SA-4.0").build();
+            String source = generator.generate(def, metadata, "TestDemo",
+                    "systems.courant.sd.demo", "test.mdl", List.of(), List.of());
+
+            assertThat(source).contains("\"Capacity * 0.5\"");
+            assertThat(source).contains("Double.NaN");
+            // Bare NaN (without "Double." prefix) would be invalid Java
+            assertThat(source).doesNotContain(", NaN,");
+        }
+
+        @Test
+        void shouldEmitDoubleNanForNonFiniteInitialValue() {
+            StockDef stock = new StockDef("X", null, Double.NaN,
+                    "Y + 1", "unit", null, List.of());
+            ModelDefinition def = new ModelDefinitionBuilder()
+                    .name("Test")
+                    .stock(stock)
+                    .defaultSimulation("Day", 10.0, "Day")
+                    .build();
+
+            ModelMetadata metadata = ModelMetadata.builder().license("CC-BY-SA-4.0").build();
+            String source = generator.generate(def, metadata, "TestDemo",
+                    "systems.courant.sd.demo", "test.mdl", List.of(), List.of());
+
+            // Must use Double.NaN, not bare NaN which isn't valid Java
+            assertThat(source).contains("Double.NaN");
+        }
+
+        @Test
+        void shouldEmitFiniteInitialValueWithoutInitialExpression() {
+            ModelDefinition def = new ModelDefinitionBuilder()
+                    .name("Test")
+                    .stock("Water", 50.0, "liters")
+                    .defaultSimulation("Day", 10.0, "Day")
+                    .build();
+
+            ModelMetadata metadata = ModelMetadata.builder().license("CC-BY-SA-4.0").build();
+            String source = generator.generate(def, metadata, "TestDemo",
+                    "systems.courant.sd.demo", "test.mdl", List.of(), List.of());
+
+            assertThat(source).contains("50.0");
+            assertThat(source).doesNotContain("Double.NaN");
+        }
+    }
+
+    @Nested
+    @DisplayName("Issue #272 — subscript preservation")
+    class SubscriptPreservation {
+
+        @Test
+        void shouldEmitStockSubscripts() {
+            StockDef stock = new StockDef("Population", null, 100.0, null,
+                    "people", null, List.of("Region"));
+            ModelDefinition def = new ModelDefinitionBuilder()
+                    .name("Test")
+                    .stock(stock)
+                    .defaultSimulation("Year", 10.0, "Year")
+                    .build();
+
+            ModelMetadata metadata = ModelMetadata.builder().license("CC-BY-SA-4.0").build();
+            String source = generator.generate(def, metadata, "TestDemo",
+                    "systems.courant.sd.demo", "test.mdl", List.of(), List.of());
+
+            assertThat(source).contains("List.of(\"Region\")");
+            assertThat(source).contains("import java.util.List;");
+        }
+
+        @Test
+        void shouldEmitVariableSubscripts() {
+            VariableDef v = new VariableDef("growth_rate", null, "Pop * 0.03",
+                    "1/Year", List.of("Region", "AgeGroup"));
+            ModelDefinition def = new ModelDefinitionBuilder()
+                    .name("Test")
+                    .variable(v)
+                    .defaultSimulation("Year", 10.0, "Year")
+                    .build();
+
+            ModelMetadata metadata = ModelMetadata.builder().license("CC-BY-SA-4.0").build();
+            String source = generator.generate(def, metadata, "TestDemo",
+                    "systems.courant.sd.demo", "test.mdl", List.of(), List.of());
+
+            assertThat(source).contains("List.of(\"Region\", \"AgeGroup\")");
+        }
+
+        @Test
+        void shouldEmitFlowSubscripts() {
+            FlowDef flow = new FlowDef("births", null, "Pop * rate", "Year",
+                    null, "Population", List.of("Region"));
+            ModelDefinition def = new ModelDefinitionBuilder()
+                    .name("Test")
+                    .stock("Population", 100.0, "people")
+                    .flow(flow)
+                    .defaultSimulation("Year", 10.0, "Year")
+                    .build();
+
+            ModelMetadata metadata = ModelMetadata.builder().license("CC-BY-SA-4.0").build();
+            String source = generator.generate(def, metadata, "TestDemo",
+                    "systems.courant.sd.demo", "test.mdl", List.of(), List.of());
+
+            assertThat(source).contains("List.of(\"Region\")");
+        }
+
+        @Test
+        void shouldEmitSubscriptedConstantAsVariableDef() {
+            VariableDef constant = new VariableDef("rate", null, "0.05",
+                    "1/Year", List.of("Region"));
+            ModelDefinition def = new ModelDefinitionBuilder()
+                    .name("Test")
+                    .variable(constant)
+                    .defaultSimulation("Year", 10.0, "Year")
+                    .build();
+
+            ModelMetadata metadata = ModelMetadata.builder().license("CC-BY-SA-4.0").build();
+            String source = generator.generate(def, metadata, "TestDemo",
+                    "systems.courant.sd.demo", "test.mdl", List.of(), List.of());
+
+            // Subscripted constant should use VariableDef constructor, not builder.constant()
+            assertThat(source).contains("new VariableDef(");
+            assertThat(source).contains("List.of(\"Region\")");
+        }
+    }
+
+    @Nested
+    @DisplayName("Issue #273 — nested module preservation")
+    class NestedModulePreservation {
+
+        @Test
+        void shouldEmitNestedModulesWithinModuleDefinitions() {
+            ModelDefinition innerInnerDef = new ModelDefinitionBuilder()
+                    .name("InnerInner")
+                    .stock("Z", 0, "unit")
+                    .defaultSimulation("Day", 10.0, "Day")
+                    .build();
+
+            ModelDefinition innerDef = new ModelDefinitionBuilder()
+                    .name("Inner")
+                    .stock("Y", 0, "unit")
+                    .module("nested", innerInnerDef, Map.of(), Map.of())
+                    .defaultSimulation("Day", 10.0, "Day")
+                    .build();
+
+            ModelDefinition def = new ModelDefinitionBuilder()
+                    .name("Outer")
+                    .module("myModule", innerDef, Map.of("port1", "value1"), Map.of())
+                    .defaultSimulation("Day", 10.0, "Day")
+                    .build();
+
+            ModelMetadata metadata = ModelMetadata.builder().license("CC-BY-SA-4.0").build();
+            String source = generator.generate(def, metadata, "TestDemo",
+                    "systems.courant.sd.demo", "test.mdl", List.of(), List.of());
+
+            // The nested module should appear in the generated source
+            assertThat(source).contains("\"InnerInner\"");
+            assertThat(source).contains("\"nested\"");
+            // Two ModuleInstanceDef calls: one for myModule, one for nested
+            int count = countOccurrences(source, "new ModuleInstanceDef(");
+            assertThat(count).isEqualTo(2);
+        }
+
+        private int countOccurrences(String text, String search) {
+            int count = 0;
+            int idx = 0;
+            while ((idx = text.indexOf(search, idx)) != -1) {
+                count++;
+                idx += search.length();
+            }
+            return count;
+        }
     }
 }
