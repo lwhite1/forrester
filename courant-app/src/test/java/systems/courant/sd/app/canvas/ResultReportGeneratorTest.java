@@ -479,7 +479,7 @@ class ResultReportGeneratorTest {
         @Test
         @DisplayName("line chart should have valid SVG structure")
         void lineChartShouldBeValidSvg() {
-            int[] steps = {0, 1, 2, 3, 4};
+            long[] steps = {0, 1, 2, 3, 4};
             List<String> names = List.of("Series A");
             List<double[]> data = List.of(new double[]{10, 20, 15, 25, 30});
 
@@ -493,7 +493,7 @@ class ResultReportGeneratorTest {
         @Test
         @DisplayName("line chart should render title")
         void lineChartShouldRenderTitle() {
-            int[] steps = {0, 1, 2};
+            long[] steps = {0, 1, 2};
             List<String> names = List.of("A");
             List<double[]> data = List.of(new double[]{1, 2, 3});
 
@@ -505,7 +505,7 @@ class ResultReportGeneratorTest {
         @Test
         @DisplayName("line chart should render legend when multiple series")
         void lineChartShouldRenderLegend() {
-            int[] steps = {0, 1, 2};
+            long[] steps = {0, 1, 2};
             List<String> names = List.of("Series A", "Series B");
             List<double[]> data = List.of(
                     new double[]{1, 2, 3},
@@ -520,7 +520,7 @@ class ResultReportGeneratorTest {
         @Test
         @DisplayName("line chart should not render legend for single series")
         void lineChartShouldOmitLegendForSingle() {
-            int[] steps = {0, 1, 2};
+            long[] steps = {0, 1, 2};
             List<String> names = List.of("Only");
             List<double[]> data = List.of(new double[]{1, 2, 3});
 
@@ -535,7 +535,7 @@ class ResultReportGeneratorTest {
         @Test
         @DisplayName("line chart should handle constant data (yMin == yMax)")
         void lineChartShouldHandleConstantData() {
-            int[] steps = {0, 1, 2, 3};
+            long[] steps = {0, 1, 2, 3};
             List<String> names = List.of("Flat");
             List<double[]> data = List.of(new double[]{5, 5, 5, 5});
 
@@ -548,7 +548,7 @@ class ResultReportGeneratorTest {
         @Test
         @DisplayName("line chart should handle NaN values gracefully")
         void lineChartShouldHandleNaN() {
-            int[] steps = {0, 1, 2, 3};
+            long[] steps = {0, 1, 2, 3};
             List<String> names = List.of("WithNaN");
             List<double[]> data = List.of(new double[]{1, Double.NaN, 3, 4});
 

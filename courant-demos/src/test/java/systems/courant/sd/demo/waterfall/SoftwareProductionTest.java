@@ -12,6 +12,7 @@ import systems.courant.sd.model.Model;
 import systems.courant.sd.model.Module;
 import systems.courant.sd.model.Stock;
 import systems.courant.sd.model.Variable;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -214,6 +215,51 @@ class SoftwareProductionTest {
                 .filter(f -> f.getName().equals(name))
                 .findFirst()
                 .orElseThrow(() -> new IllegalStateException("Flow '" + name + "' not found"));
+    }
+
+    @Test
+    @DisplayName("Split flows should conserve tasks regardless of evaluation order (#465)")
+    void shouldConserveTasksRegardlessOfEvaluationOrder() {
+        // Evaluate sibling flows BEFORE the parent flow to verify no order dependency.
+        // Before #465, correctDevelopment/errorInjection read from a cache populated by
+        // developmentOutflow — evaluating them first would read stale (zero) values.
+        SoftwareProduction sp = createModule(10, 2, 0.8, 500);
+        Module mod = sp.getModule();
+
+        Flow development = mod.getFlows().stream()
+                .filter(f -> f.getName().equals("Development")).findFirst().orElseThrow();
+        Flow correctDev = mod.getFlows().stream()
+                .filter(f -> f.getName().equals("Correct Development")).findFirst().orElseThrow();
+        Flow errorInjection = mod.getFlows().stream()
+                .filter(f -> f.getName().equals("Error Injection")).findFirst().orElseThrow();
+        Flow rework = mod.getFlows().stream()
+                .filter(f -> f.getName().equals("Rework")).findFirst().orElseThrow();
+        Flow correctRework = mod.getFlows().stream()
+                .filter(f -> f.getName().equals("Correct Rework")).findFirst().orElseThrow();
+        Flow reworkErrors = mod.getFlows().stream()
+                .filter(f -> f.getName().equals("Rework Errors")).findFirst().orElseThrow();
+
+        // Evaluate siblings BEFORE their parent — this is the reverse of the old assumed order
+        Quantity correctDevQ = correctDev.flowPerTimeUnit(TimeUnits.DAY);
+        Quantity errorInjQ = errorInjection.flowPerTimeUnit(TimeUnits.DAY);
+        Quantity devQ = development.flowPerTimeUnit(TimeUnits.DAY);
+
+        double devTotal = devQ.getValue();
+        double splitSum = correctDevQ.getValue() + errorInjQ.getValue();
+        assertThat(Math.abs(splitSum - devTotal))
+                .as("Development split must conserve: total=%f, correct+error=%f", devTotal, splitSum)
+                .isLessThan(1e-9);
+
+        // Same check for rework split
+        Quantity correctRwQ = correctRework.flowPerTimeUnit(TimeUnits.DAY);
+        Quantity rwErrorsQ = reworkErrors.flowPerTimeUnit(TimeUnits.DAY);
+        Quantity rwQ = rework.flowPerTimeUnit(TimeUnits.DAY);
+
+        double rwTotal = rwQ.getValue();
+        double rwSplitSum = correctRwQ.getValue() + rwErrorsQ.getValue();
+        assertThat(Math.abs(rwSplitSum - rwTotal))
+                .as("Rework split must conserve: total=%f, correct+error=%f", rwTotal, rwSplitSum)
+                .isLessThan(1e-9);
     }
 
     @Test
