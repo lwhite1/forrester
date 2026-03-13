@@ -63,11 +63,14 @@ public class SampleIfTrue implements Formula, Resettable {
     public double getCurrentValue() {
         long step = currentStep.getAsLong();
         if (!initialized) {
-            heldValue = initialValue;
             initialized = true;
             lastStep = step;
-        }
-        if (step > lastStep) {
+            if (condition.getAsDouble() != 0.0) {
+                heldValue = input.getAsDouble();
+            } else {
+                heldValue = initialValue;
+            }
+        } else if (step > lastStep) {
             if (condition.getAsDouble() != 0.0) {
                 heldValue = input.getAsDouble();
             }

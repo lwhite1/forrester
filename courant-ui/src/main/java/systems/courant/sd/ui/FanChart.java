@@ -86,6 +86,11 @@ public class FanChart extends Application {
 
     @Override
     public void start(Stage stage) {
+        if (result == null || variableName == null) {
+            throw new IllegalStateException(
+                    "FanChart requires a MonteCarloResult and variable name. "
+                            + "Use FanChart.show(result, variableName) instead of Application.launch().");
+        }
 
         stage.setTitle("Fan Chart — " + variableName);
 
