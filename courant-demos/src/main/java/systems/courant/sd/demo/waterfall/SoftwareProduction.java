@@ -134,6 +134,9 @@ public class SoftwareProduction {
         });
 
         // Flow: Tasks Remaining → (split)
+        // Each flow reads developmentRate and FCC directly. These are Variables backed
+        // by Stocks, so their values are stable within a single time step regardless
+        // of flow evaluation order — no shared cache needed.
         Flow developmentOutflow = Flow.create("Development", DAY, () ->
                 new Quantity(developmentRate.getValue(), TASKS));
 

@@ -360,7 +360,8 @@ public final class ElementRenderer {
         if (Double.isNaN(value)) {
             return "NaN";
         }
-        if (value == Math.floor(value) && !Double.isInfinite(value)) {
+        if (value == Math.floor(value) && !Double.isInfinite(value)
+                && Math.abs(value) <= Long.MAX_VALUE) {
             return String.valueOf((long) value);
         }
         return String.valueOf(value);

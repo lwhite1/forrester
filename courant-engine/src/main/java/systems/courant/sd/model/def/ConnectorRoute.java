@@ -37,6 +37,18 @@ public record ConnectorRoute(
     }
 
     /**
+     * Returns a defensive copy of the control points, cloning each array.
+     */
+    @Override
+    public List<double[]> controlPoints() {
+        List<double[]> cloned = new ArrayList<>(controlPoints.size());
+        for (double[] point : controlPoints) {
+            cloned.add(point.clone());
+        }
+        return List.copyOf(cloned);
+    }
+
+    /**
      * Creates a straight connector with no intermediate control points.
      *
      * @param from the source element name

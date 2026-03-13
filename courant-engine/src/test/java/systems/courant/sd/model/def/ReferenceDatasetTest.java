@@ -78,7 +78,7 @@ class ReferenceDatasetTest {
         }
 
         @Test
-        @DisplayName("should defensively copy arrays")
+        @DisplayName("should defensively copy arrays on construction")
         void shouldDefensivelyCopy() {
             double[] times = {0, 1, 2};
             double[] values = {10, 20, 30};
@@ -89,6 +89,34 @@ class ReferenceDatasetTest {
 
             assertThat(ds.timeValues()[0]).isEqualTo(0);
             assertThat(ds.columns().get("X")[0]).isEqualTo(10);
+        }
+
+        @Test
+        @DisplayName("timeValues() accessor should return defensive copy (#445)")
+        void shouldReturnDefensiveCopyFromTimeValuesAccessor() {
+            ReferenceDataset ds = new ReferenceDataset("Test",
+                    new double[]{0, 1, 2}, Map.of("X", new double[]{10, 20, 30}));
+
+            double[] first = ds.timeValues();
+            first[0] = 999;
+
+            assertThat(ds.timeValues()[0])
+                    .as("Mutating returned array must not affect internal state")
+                    .isEqualTo(0);
+        }
+
+        @Test
+        @DisplayName("columns() accessor should return defensive copy (#445)")
+        void shouldReturnDefensiveCopyFromColumnsAccessor() {
+            ReferenceDataset ds = new ReferenceDataset("Test",
+                    new double[]{0, 1}, Map.of("X", new double[]{10, 20}));
+
+            double[] col = ds.columns().get("X");
+            col[0] = 999;
+
+            assertThat(ds.columns().get("X")[0])
+                    .as("Mutating returned column array must not affect internal state")
+                    .isEqualTo(10);
         }
 
         @Test
