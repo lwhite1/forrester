@@ -22,6 +22,8 @@ import systems.courant.sd.model.def.StockDef;
 import systems.courant.sd.model.def.SubscriptDef;
 import systems.courant.sd.model.def.ViewDef;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.StreamReadConstraints;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -54,11 +56,16 @@ public class ModelDefinitionSerializer {
     private final ObjectMapper mapper;
 
     /**
-     * Creates a new serializer with pretty-printing enabled.
+     * Creates a new serializer with pretty-printing and security hardening enabled.
      */
     public ModelDefinitionSerializer() {
         mapper = new ObjectMapper();
         mapper.enable(SerializationFeature.INDENT_OUTPUT);
+        mapper.enable(DeserializationFeature.FAIL_ON_TRAILING_TOKENS);
+        mapper.getFactory().setStreamReadConstraints(
+                StreamReadConstraints.builder()
+                        .maxNestingDepth(100)
+                        .build());
     }
 
     /**

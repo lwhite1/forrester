@@ -13,6 +13,7 @@ import systems.courant.sd.model.def.ReferenceDataset;
 import systems.courant.sd.model.def.PortDef;
 import systems.courant.sd.model.def.ViewDef;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -442,6 +443,43 @@ class ModelDefinitionSerializerTest {
         assertThat(roundTripped.variables().get(0).equation()).isEqualTo("Stock_1 * 0.1");
         assertThat(roundTripped.variables().get(1).name()).isEqualTo("k");
         assertThat(roundTripped.variables().get(1).isLiteral()).isTrue();
+    }
+
+    @Nested
+    @DisplayName("Security hardening")
+    class SecurityHardening {
+
+        @Test
+        @DisplayName("should reject JSON with trailing tokens")
+        void shouldRejectTrailingTokens() {
+            String json = serializer.toJson(buildSIR());
+            String jsonWithTrailing = json + " { \"extra\": true }";
+            assertThatThrownBy(() -> serializer.fromJson(jsonWithTrailing))
+                    .isInstanceOf(IllegalArgumentException.class);
+        }
+
+        @Test
+        @DisplayName("should reject deeply nested JSON beyond depth limit")
+        void shouldRejectDeeplyNestedJson() {
+            StringBuilder sb = new StringBuilder();
+            for (int i = 0; i < 150; i++) {
+                sb.append("{\"a\":");
+            }
+            sb.append("1");
+            for (int i = 0; i < 150; i++) {
+                sb.append("}");
+            }
+            assertThatThrownBy(() -> serializer.fromJson(sb.toString()))
+                    .isInstanceOf(IllegalArgumentException.class);
+        }
+
+        @Test
+        @DisplayName("should accept JSON within nesting depth limit")
+        void shouldAcceptNormalNesting() {
+            String json = serializer.toJson(buildSIR());
+            ModelDefinition roundTripped = serializer.fromJson(json);
+            assertThat(roundTripped.stocks()).hasSize(3);
+        }
     }
 
     private ModelDefinition buildSIR() {
