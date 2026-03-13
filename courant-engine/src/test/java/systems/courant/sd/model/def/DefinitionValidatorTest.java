@@ -1,0 +1,354 @@
+package systems.courant.sd.model.def;
+
+import systems.courant.sd.model.def.CausalLinkDef.Polarity;
+
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
+
+import java.util.List;
+import java.util.Map;
+
+import static org.assertj.core.api.Assertions.assertThat;
+
+@DisplayName("DefinitionValidator")
+class DefinitionValidatorTest {
+
+    @Test
+    void shouldPassForValidSIRModel() {
+        ModelDefinition sir = buildSIR();
+        List<String> errors = DefinitionValidator.validate(sir);
+        assertThat(errors).as("Expected no errors").isEmpty();
+    }
+
+    @Test
+    void shouldDetectDuplicateNames() {
+        ModelDefinition def = new ModelDefinitionBuilder()
+                .name("Dup")
+                .stock("S", 100, "Person")
+                .constant("S", 5.0, "Person") // same name as stock
+                .build();
+        List<String> errors = DefinitionValidator.validate(def);
+        assertThat(errors).anyMatch(e -> e.contains("Duplicate"));
+    }
+
+    @Test
+    void shouldDetectCaseInsensitiveDuplicateStockAndAux() {
+        ModelDefinition def = new ModelDefinitionBuilder()
+                .name("CaseDup")
+                .stock("Population", 100, "Person")
+                .constant("population", 0.04, "Dimensionless")
+                .build();
+        List<String> errors = DefinitionValidator.validate(def);
+        assertThat(errors).anyMatch(e -> e.contains("case-insensitive")
+                && e.contains("population") && e.contains("Population"));
+    }
+
+    @Test
+    void shouldDetectCaseInsensitiveDuplicateFlowAndAux() {
+        ModelDefinition def = new ModelDefinitionBuilder()
+                .name("CaseDup")
+                .stock("S", 100, "Person")
+                .flow("Drain", "S * Rate", "Day", "S", null)
+                .constant("drain", 0.1, "Dimensionless")
+                .build();
+        List<String> errors = DefinitionValidator.validate(def);
+        assertThat(errors).anyMatch(e -> e.contains("case-insensitive")
+                && e.contains("drain") && e.contains("Drain"));
+    }
+
+    @Test
+    void shouldDetectCaseInsensitiveDuplicateAcrossModulesAndStocks() {
+        ModelDefinition def = new ModelDefinitionBuilder()
+                .name("CaseDup")
+                .stock("Alpha", 0, "Thing")
+                .variable("ALPHA", "10", "Thing")
+                .build();
+        List<String> errors = DefinitionValidator.validate(def);
+        assertThat(errors).anyMatch(e -> e.contains("case-insensitive"));
+    }
+
+    @Test
+    void shouldStillDetectExactDuplicateNames() {
+        ModelDefinition def = new ModelDefinitionBuilder()
+                .name("Dup")
+                .stock("S", 100, "Person")
+                .constant("S", 5.0, "Person")
+                .build();
+        List<String> errors = DefinitionValidator.validate(def);
+        assertThat(errors).anyMatch(e -> e.contains("Duplicate element name: 'S'"));
+    }
+
+    @Test
+    void shouldAllowDistinctNamesWithDifferentCase() {
+        ModelDefinition def = new ModelDefinitionBuilder()
+                .name("OK")
+                .stock("Alpha", 100, "Thing")
+                .constant("Beta", 5, "Thing")
+                .build();
+        List<String> errors = DefinitionValidator.validate(def);
+        assertThat(errors).noneMatch(e -> e.contains("Duplicate"));
+    }
+
+    @Test
+    void shouldDetectDanglingFlowSource() {
+        ModelDefinition def = new ModelDefinitionBuilder()
+                .name("Bad")
+                .stock("A", 100, "Person")
+                .flow("F", "A * 0.1", "Day", "NonExistent", "A")
+                .build();
+        List<String> errors = DefinitionValidator.validate(def);
+        assertThat(errors).anyMatch(e -> e.contains("non-existent source"));
+    }
+
+    @Test
+    void shouldDetectDanglingFlowSink() {
+        ModelDefinition def = new ModelDefinitionBuilder()
+                .name("Bad")
+                .stock("A", 100, "Person")
+                .flow("F", "A * 0.1", "Day", "A", "NonExistent")
+                .build();
+        List<String> errors = DefinitionValidator.validate(def);
+        assertThat(errors).anyMatch(e -> e.contains("non-existent sink"));
+    }
+
+    @Test
+    void shouldDetectInvalidFormula() {
+        ModelDefinition def = new ModelDefinitionBuilder()
+                .name("Bad")
+                .stock("A", 100, "Person")
+                .flow("F", "A +", "Day", "A", null) // invalid expression
+                .build();
+        List<String> errors = DefinitionValidator.validate(def);
+        assertThat(errors).anyMatch(e -> e.contains("invalid equation"));
+    }
+
+    @Test
+    void shouldDetectCircularModuleReference() {
+        // Model A contains module instance of itself
+        ModelDefinition inner = new ModelDefinitionBuilder()
+                .name("A")
+                .stock("S", 0, "Thing")
+                .build();
+        ModelDefinition outer = new ModelDefinitionBuilder()
+                .name("A") // same name as inner → circular
+                .stock("S", 0, "Thing")
+                .module("sub", inner, Map.of(), Map.of())
+                .build();
+        List<String> errors = DefinitionValidator.validate(outer);
+        assertThat(errors).anyMatch(e -> e.contains("Circular"));
+    }
+
+    @Test
+    void shouldAllowNullSourceAndSinkForFlows() {
+        ModelDefinition def = new ModelDefinitionBuilder()
+                .name("Open")
+                .flow("Inflow", "10", "Day", null, null)
+                .build();
+        List<String> errors = DefinitionValidator.validate(def);
+        assertThat(errors).as("Null source/sink should be allowed").isEmpty();
+    }
+
+    @Test
+    void shouldDetectNonRootCircularModuleReference() {
+        // B contains C, C contains B — cycle that doesn't involve the root "Outer"
+        ModelDefinition defC = new ModelDefinitionBuilder()
+                .name("C")
+                .stock("S", 0, "Thing")
+                .build();
+        // B contains C — but we need C to contain B to form a cycle.
+        // Since ModelDefinition is immutable, we build them with matching names:
+        // B_inner contains a module named "C" whose definition is named "B" (same as B_inner).
+        ModelDefinition cycleBack = new ModelDefinitionBuilder()
+                .name("B")
+                .stock("S2", 0, "Thing")
+                .build();
+        ModelDefinition defCWithB = new ModelDefinitionBuilder()
+                .name("C")
+                .stock("S", 0, "Thing")
+                .module("back", cycleBack, Map.of(), Map.of())
+                .build();
+        ModelDefinition defB = new ModelDefinitionBuilder()
+                .name("B")
+                .stock("S", 0, "Thing")
+                .module("goToC", defCWithB, Map.of(), Map.of())
+                .build();
+        ModelDefinition outer = new ModelDefinitionBuilder()
+                .name("Outer")
+                .module("b", defB, Map.of(), Map.of())
+                .build();
+
+        List<String> errors = DefinitionValidator.validate(outer);
+        assertThat(errors.stream().anyMatch(e -> e.contains("Circular")))
+                .as("Should detect B→C→B cycle even though root is 'Outer': " + errors).isTrue();
+    }
+
+    @Test
+    void shouldDetectBadModuleInputBinding() {
+        ModelDefinition moduleDef = new ModelDefinitionBuilder()
+                .name("Module")
+                .moduleInterface(new ModuleInterface(
+                        List.of(new PortDef("input1", "Person")),
+                        List.of()))
+                .stock("S", 0, "Person")
+                .build();
+        ModelDefinition outer = new ModelDefinitionBuilder()
+                .name("Outer")
+                .module("m1", moduleDef,
+                        Map.of("nonExistentPort", "10"), // bad port name
+                        Map.of())
+                .build();
+        List<String> errors = DefinitionValidator.validate(outer);
+        assertThat(errors).anyMatch(e -> e.contains("non-existent input port"));
+    }
+
+    @Test
+    void shouldDetectUnboundRequiredInputPort() {
+        ModelDefinition moduleDef = new ModelDefinitionBuilder()
+                .name("Module")
+                .moduleInterface(new ModuleInterface(
+                        List.of(new PortDef("input1", "Person"),
+                                new PortDef("input2", "Person")),
+                        List.of()))
+                .stock("S", 0, "Person")
+                .build();
+        ModelDefinition outer = new ModelDefinitionBuilder()
+                .name("Outer")
+                .module("m1", moduleDef,
+                        Map.of("input1", "10"), // only bind input1, missing input2
+                        Map.of())
+                .build();
+        List<String> errors = DefinitionValidator.validate(outer);
+        assertThat(errors).anyMatch(e -> e.contains("missing binding") && e.contains("input2"));
+    }
+
+    @Test
+    void shouldDetectInvalidAuxEquation() {
+        ModelDefinition def = new ModelDefinitionBuilder()
+                .name("Bad")
+                .stock("S", 100, "Person")
+                .variable("Bad Aux", "S +", "Person")
+                .build();
+        List<String> errors = DefinitionValidator.validate(def);
+        assertThat(errors).anyMatch(e -> e.contains("invalid equation"));
+    }
+
+    @Nested
+    @DisplayName("CLD validation")
+    class CldValidation {
+
+        @Test
+        void shouldDetectDuplicateNameBetweenCldVariableAndStock() {
+            ModelDefinition def = new ModelDefinitionBuilder()
+                    .name("Dup")
+                    .stock("Population", 100, "Person")
+                    .cldVariable("Population")
+                    .build();
+            List<String> errors = DefinitionValidator.validate(def);
+            assertThat(errors).anyMatch(e -> e.contains("Duplicate"));
+        }
+
+        @Test
+        void shouldDetectSelfLoopCausalLink() {
+            ModelDefinition def = new ModelDefinitionBuilder()
+                    .name("Self")
+                    .cldVariable("A")
+                    .causalLink("A", "A", Polarity.POSITIVE)
+                    .build();
+            List<String> errors = DefinitionValidator.validate(def);
+            assertThat(errors).anyMatch(e -> e.contains("to itself"));
+        }
+
+        @Test
+        void shouldDetectDuplicateCausalLink() {
+            ModelDefinition def = new ModelDefinitionBuilder()
+                    .name("Dup Link")
+                    .cldVariable("A")
+                    .cldVariable("B")
+                    .causalLink("A", "B", Polarity.POSITIVE)
+                    .causalLink("A", "B", Polarity.NEGATIVE)
+                    .build();
+            List<String> errors = DefinitionValidator.validate(def);
+            assertThat(errors).anyMatch(e -> e.contains("Duplicate causal link"));
+        }
+
+        @Test
+        void shouldAllowBidirectionalCausalLinks() {
+            ModelDefinition def = new ModelDefinitionBuilder()
+                    .name("Bidir")
+                    .cldVariable("A")
+                    .cldVariable("B")
+                    .causalLink("A", "B", Polarity.POSITIVE)
+                    .causalLink("B", "A", Polarity.NEGATIVE)
+                    .build();
+            List<String> errors = DefinitionValidator.validate(def);
+            assertThat(errors).noneMatch(e -> e.contains("Duplicate causal link"));
+        }
+    }
+
+    @Nested
+    @DisplayName("validateStructure vs validate")
+    class StructureVsFullValidation {
+
+        @Test
+        void validateStructureShouldExcludeViewErrors() {
+            ModelDefinition def = new ModelDefinitionBuilder()
+                    .name("Test")
+                    .stock("S", 100, "Person")
+                    .view(new ViewDef("Main",
+                            List.of(new ElementPlacement("NonExistent", ElementType.AUX,
+                                    100, 100, 0, 0)),
+                            List.of(), List.of()))
+                    .build();
+            List<String> structureErrors = DefinitionValidator.validateStructure(def);
+            assertThat(structureErrors).noneMatch(e -> e.contains("View"));
+        }
+
+        @Test
+        void validateShouldIncludeViewErrors() {
+            ModelDefinition def = new ModelDefinitionBuilder()
+                    .name("Test")
+                    .stock("S", 100, "Person")
+                    .view(new ViewDef("Main",
+                            List.of(new ElementPlacement("NonExistent", ElementType.AUX,
+                                    100, 100, 0, 0)),
+                            List.of(), List.of()))
+                    .build();
+            List<String> allErrors = DefinitionValidator.validate(def);
+            assertThat(allErrors).anyMatch(e -> e.contains("View"));
+        }
+
+        @Test
+        void validateStructureShouldStillIncludeStructuralErrors() {
+            ModelDefinition def = new ModelDefinitionBuilder()
+                    .name("Test")
+                    .stock("S", 100, "Person")
+                    .flow("F", "S +", "Day", "S", null)
+                    .view(new ViewDef("Main",
+                            List.of(new ElementPlacement("NonExistent", ElementType.AUX,
+                                    100, 100, 0, 0)),
+                            List.of(), List.of()))
+                    .build();
+            List<String> structureErrors = DefinitionValidator.validateStructure(def);
+            assertThat(structureErrors).anyMatch(e -> e.contains("invalid equation"));
+            assertThat(structureErrors).noneMatch(e -> e.contains("View"));
+        }
+    }
+
+    private ModelDefinition buildSIR() {
+        return new ModelDefinitionBuilder()
+                .name("SIR Model")
+                .stock("Susceptible", 1000, "Person")
+                .stock("Infectious", 10, "Person")
+                .stock("Recovered", 0, "Person")
+                .flow("Infection",
+                        "Contact_Rate * Infectious / (Susceptible + Infectious + Recovered) * Infectivity * Susceptible",
+                        "Day", "Susceptible", "Infectious")
+                .flow("Recovery", "Infectious * Recovery_Rate", "Day", "Infectious", "Recovered")
+                .constant("Contact_Rate", 8.0, "Dimensionless")
+                .constant("Infectivity", 0.10, "Dimensionless")
+                .constant("Recovery_Rate", 0.20, "Dimensionless")
+                .defaultSimulation("Day", 56, "Day")
+                .build();
+    }
+}

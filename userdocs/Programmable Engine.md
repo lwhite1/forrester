@@ -1,6 +1,6 @@
 # Programmable Engine
 
-The Shrewd engine provides two code-first APIs for building and running System Dynamics models.
+The Courant engine provides two code-first APIs for building and running System Dynamics models.
 
 ## Lambda-based API (Programmatic)
 

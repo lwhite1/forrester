@@ -31,7 +31,7 @@ In the visual editor, use File → Open to load `.xmile` files and File → Expo
 
 ## Supported Constructs (Import)
 
-| XMILE Construct | Shrewd Element |
+| XMILE Construct | Courant Element |
 |---|---|
 | `<stock>` with `<eqn>` | `StockDef` (eqn = initial value) |
 | `<flow>` with `<eqn>` | `FlowDef` (source/sink from stock `<inflow>`/`<outflow>`) |

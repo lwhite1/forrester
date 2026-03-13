@@ -1,6 +1,6 @@
 # Visual Editor Guide
 
-The `shrewd-app` module provides a JavaFX canvas-based visual editor for creating and editing stock-and-flow diagrams and causal loop diagrams interactively. Models can be built, edited, saved, and simulated entirely through the GUI.
+The `courant-app` module provides a JavaFX canvas-based visual editor for creating and editing stock-and-flow diagrams and causal loop diagrams interactively. Models can be built, edited, saved, and simulated entirely through the GUI.
 
 ## Core Interactions
 
@@ -76,7 +76,7 @@ All panes support right-click CSV export.
 
 | Class | Purpose |
 |---|---|
-| `ShrewdApp` | JavaFX entry point and window management |
+| `CourantApp` | JavaFX entry point and window management |
 | `ModelWindow` | Per-model window with menus, toolbar, editor, dashboard, and activity log |
 | `ModelCanvas` | Event handling and editing orchestration |
 | `ModelEditor` | Mutable model editing layer with name index |

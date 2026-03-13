@@ -1,6 +1,6 @@
 # Vensim `.mdl` Import
 
-Shrewd reads Vensim `.mdl` model files and produces a `ModelDefinition` that can be compiled and simulated.
+Courant reads Vensim `.mdl` model files and produces a `ModelDefinition` that can be compiled and simulated.
 
 ## Usage
 
@@ -26,7 +26,7 @@ In the visual editor, use **File > Open** to load `.mdl` files directly.
 
 ### Core Variable Types
 
-| Vensim Construct | Shrewd Element | Notes |
+| Vensim Construct | Courant Element | Notes |
 |---|---|---|
 | `INTEG(rate, init)` | `StockDef` + `FlowDef` | Net flow auto-created as `{stock}_net_flow`; expression-based initial values supported |
 | Numeric literal (`=` or `==`) | `AuxDef` (literal) | Scientific notation supported (e.g. `1.5e-3`) |
@@ -58,7 +58,7 @@ All settings from the `.Control` group are extracted (case-insensitive):
 
 **Operator translation:**
 
-| Vensim | Shrewd |
+| Vensim | Courant |
 |---|---|
 | `:AND:` | `and` |
 | `:OR:` | `or` |
@@ -68,7 +68,7 @@ All settings from the `.Control` group are extracted (case-insensitive):
 
 **Function translation:**
 
-| Vensim | Shrewd | Notes |
+| Vensim | Courant | Notes |
 |---|---|---|
 | `IF THEN ELSE(c, t, e)` | `IF(c, t, e)` | |
 | `XIDZ(a, b, x)` | `IF((b)==0, x, (a)/(b))` | Safe division with fallback |
@@ -100,7 +100,7 @@ All settings from the `.Control` group are extracted (case-insensitive):
 
 ### CLD Mode Detection
 
-If a model has no stocks and no flow valves in its sketch, Shrewd treats it as a Causal Loop Diagram. Sketch connectors become `CausalLinkDef` entries with unknown polarity.
+If a model has no stocks and no flow valves in its sketch, Courant treats it as a Causal Loop Diagram. Sketch connectors become `CausalLinkDef` entries with unknown polarity.
 
 ### File Format Support
 
@@ -149,7 +149,7 @@ The following functions are recognized but not supported. They remain in the equ
 
 ### PULSE Semantics
 
-Vensim's `PULSE(start, width)` returns `1/TIME_STEP` for a duration. Shrewd's `PULSE(magnitude, start)` returns a magnitude for one timestep. Models using Vensim PULSE may need manual adjustment after import.
+Vensim's `PULSE(start, width)` returns `1/TIME_STEP` for a duration. Courant's `PULSE(magnitude, start)` returns a magnitude for one timestep. Models using Vensim PULSE may need manual adjustment after import.
 
 ### Name Normalization
 
@@ -213,7 +213,7 @@ Also tested against 25 models from the TU Delft repository (Pruyt, 2013):
 |---|---|
 | `VensimImporter` | Main entry point implementing `ModelImporter` |
 | `MdlParser` | Low-level `.mdl` file parser (equations + sketch extraction) |
-| `VensimExprTranslator` | Expression syntax translation (Vensim to Shrewd) |
+| `VensimExprTranslator` | Expression syntax translation (Vensim to Courant) |
 | `SketchParser` | Sketch section to `ViewDef` records |
 
 ---

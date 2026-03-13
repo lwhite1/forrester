@@ -1,12 +1,12 @@
 # UI Behaviors Reference
 
-Catalog of all interactive behaviors in the Shrewd canvas application.
+Catalog of all interactive behaviors in the Courant canvas application.
 This document serves as the source of truth for user-facing documentation and help text.
 
 ## Application Window
 
 - **Initial size:** 1200x800 pixels
-- **Title bar:** "Shrewd — [filename]" or "Shrewd — Untitled" when no file is loaded
+- **Title bar:** "Courant — [filename]" or "Courant — Untitled" when no file is loaded
 - **Layout:** Menu bar and toolbar at top, canvas in center, status bar at bottom
 
 ### Status Bar

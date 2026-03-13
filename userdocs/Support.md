@@ -1,6 +1,6 @@
 # Support
 
-Thank you for using this Shrewd. To ensure the sustainability of this open-source effort while managing a limited time budget, we use a community-driven support model.
+Thank you for using this Courant. To ensure the sustainability of this open-source effort while managing a limited time budget, we use a community-driven support model.
 
 ------
 
