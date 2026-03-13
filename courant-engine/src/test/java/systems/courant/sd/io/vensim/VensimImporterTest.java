@@ -2304,4 +2304,196 @@ class VensimImporterTest {
                     .contains("radical_action_level");
         }
     }
+
+    @Nested
+    @DisplayName("GET external data functions (#480)")
+    class GetExternalDataFunctions {
+
+        @Test
+        void shouldSubstitutePlaceholderForGetXlsData() {
+            String mdl = """
+                    External=
+                    \tGET XLS DATA('data.xlsx', 'Sheet1', 'A', 'B2')
+                    \t~\t
+                    \t~\t
+                    \t|
+
+                    INITIAL TIME = 0
+                    \t~\tDay
+                    \t~\t
+                    \t|
+
+                    FINAL TIME = 10
+                    \t~\tDay
+                    \t~\t
+                    \t|
+
+                    TIME STEP = 1
+                    \t~\tDay
+                    \t~\t
+                    \t|
+                    """;
+
+            ImportResult result = importer.importModel(mdl, "Test");
+            // Variable should exist with placeholder value "0"
+            assertThat(result.definition().variables()).anyMatch(
+                    v -> v.name().equals("External") && v.equation().equals("0"));
+            // Warning should reference the file
+            assertThat(result.warnings()).anyMatch(
+                    w -> w.contains("GET XLS DATA") && w.contains("data.xlsx"));
+        }
+
+        @Test
+        void shouldSubstitutePlaceholderForGetDirectConstants() {
+            String mdl = """
+                    Param=
+                    \tGET DIRECT CONSTANTS('params.csv', ',', 'B2')
+                    \t~\t
+                    \t~\t
+                    \t|
+
+                    INITIAL TIME = 0
+                    \t~\tDay
+                    \t~\t
+                    \t|
+
+                    FINAL TIME = 10
+                    \t~\tDay
+                    \t~\t
+                    \t|
+
+                    TIME STEP = 1
+                    \t~\tDay
+                    \t~\t
+                    \t|
+                    """;
+
+            ImportResult result = importer.importModel(mdl, "Test");
+            assertThat(result.definition().variables()).anyMatch(
+                    v -> v.name().equals("Param") && v.equation().equals("0"));
+            assertThat(result.warnings()).anyMatch(
+                    w -> w.contains("GET DIRECT CONSTANTS") && w.contains("params.csv"));
+        }
+
+        @Test
+        void shouldLoadCompanionCsvForGetDirectData() throws IOException {
+            // Create a temp directory with a CSV companion file
+            java.nio.file.Path tmpDir = java.nio.file.Files.createTempDirectory("vensim-test");
+            java.nio.file.Path csvFile = tmpDir.resolve("input.csv");
+            java.nio.file.Files.writeString(csvFile,
+                    "Time,Demand\n0,100\n1,110\n2,120\n");
+            java.nio.file.Path mdlFile = tmpDir.resolve("model.mdl");
+            String mdl = """
+                    External := GET DIRECT DATA('input.csv', ',', 'A', 'B2')
+                    \t~\t
+                    \t~\t
+                    \t|
+
+                    INITIAL TIME = 0
+                    \t~\tDay
+                    \t~\t
+                    \t|
+
+                    FINAL TIME = 10
+                    \t~\tDay
+                    \t~\t
+                    \t|
+
+                    TIME STEP = 1
+                    \t~\tDay
+                    \t~\t
+                    \t|
+                    """;
+            java.nio.file.Files.writeString(mdlFile, mdl);
+
+            ImportResult result = importer.importModel(mdlFile);
+            // Should have loaded the CSV as a reference dataset
+            assertThat(result.definition().referenceDatasets()).hasSize(1);
+            assertThat(result.definition().referenceDatasets().get(0).name())
+                    .isEqualTo("input.csv");
+            assertThat(result.definition().referenceDatasets().get(0).size()).isEqualTo(3);
+            assertThat(result.warnings()).anyMatch(w -> w.contains("Loaded companion CSV"));
+
+            // Cleanup
+            java.nio.file.Files.deleteIfExists(csvFile);
+            java.nio.file.Files.deleteIfExists(mdlFile);
+            java.nio.file.Files.deleteIfExists(tmpDir);
+        }
+
+        @Test
+        void shouldNotFailWhenCompanionCsvMissing() {
+            String mdl = """
+                    External=
+                    \tGET DIRECT DATA('missing.csv', ',', 'A', 'B2')
+                    \t~\t
+                    \t~\t
+                    \t|
+
+                    INITIAL TIME = 0
+                    \t~\tDay
+                    \t~\t
+                    \t|
+
+                    FINAL TIME = 10
+                    \t~\tDay
+                    \t~\t
+                    \t|
+
+                    TIME STEP = 1
+                    \t~\tDay
+                    \t~\t
+                    \t|
+                    """;
+
+            // String import has no base dir, so no companion resolution
+            ImportResult result = importer.importModel(mdl, "Test");
+            assertThat(result.definition().referenceDatasets()).isEmpty();
+        }
+
+        @Test
+        void shouldHandleMultipleGetFunctionsReferencingSameFile() throws IOException {
+            java.nio.file.Path tmpDir = java.nio.file.Files.createTempDirectory("vensim-test");
+            java.nio.file.Path csvFile = tmpDir.resolve("shared.csv");
+            java.nio.file.Files.writeString(csvFile,
+                    "Time,A,B\n0,10,20\n1,11,21\n");
+            java.nio.file.Path mdlFile = tmpDir.resolve("model.mdl");
+            String mdl = """
+                    X=
+                    \tGET DIRECT DATA('shared.csv', ',', 'A', 'B2')
+                    \t~\t
+                    \t~\t
+                    \t|
+
+                    Y=
+                    \tGET DIRECT DATA('shared.csv', ',', 'A', 'C2')
+                    \t~\t
+                    \t~\t
+                    \t|
+
+                    INITIAL TIME = 0
+                    \t~\tDay
+                    \t~\t
+                    \t|
+
+                    FINAL TIME = 10
+                    \t~\tDay
+                    \t~\t
+                    \t|
+
+                    TIME STEP = 1
+                    \t~\tDay
+                    \t~\t
+                    \t|
+                    """;
+            java.nio.file.Files.writeString(mdlFile, mdl);
+
+            ImportResult result = importer.importModel(mdlFile);
+            // Should load the CSV only once despite two references
+            assertThat(result.definition().referenceDatasets()).hasSize(1);
+
+            java.nio.file.Files.deleteIfExists(csvFile);
+            java.nio.file.Files.deleteIfExists(mdlFile);
+            java.nio.file.Files.deleteIfExists(tmpDir);
+        }
+    }
 }

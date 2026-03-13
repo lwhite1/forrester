@@ -98,7 +98,7 @@ public final class ResultReportGenerator {
 
         List<String> stockNames = run.getStockNames();
         if (!stockNames.isEmpty()) {
-            int[] steps = extractSteps(run);
+            long[] steps = extractSteps(run);
             List<double[]> stockSeries = new ArrayList<>();
             for (String name : stockNames) {
                 stockSeries.add(run.getStockSeries(name));
@@ -108,7 +108,7 @@ public final class ResultReportGenerator {
 
         List<String> varNames = run.getVariableNames();
         if (!varNames.isEmpty()) {
-            int[] steps = extractSteps(run);
+            long[] steps = extractSteps(run);
             List<double[]> varSeries = new ArrayList<>();
             for (String name : varNames) {
                 varSeries.add(variableSeries(run, name));
@@ -217,7 +217,7 @@ public final class ResultReportGenerator {
             seriesData.add(run.getStockSeries(stockName));
         }
 
-        int[] steps = extractSteps(sweep.getResult(0));
+        long[] steps = extractSteps(sweep.getResult(0));
         html.append(lineChartSvg(stockName + " — Parameter Sweep", steps, seriesNames, seriesData));
     }
 
@@ -324,7 +324,7 @@ public final class ResultReportGenerator {
             html.append("<h3>Best Run — Time Series</h3>\n");
             List<String> stockNames = bestRun.getStockNames();
             if (!stockNames.isEmpty()) {
-                int[] steps = extractSteps(bestRun);
+                long[] steps = extractSteps(bestRun);
                 List<double[]> series = new ArrayList<>();
                 for (String name : stockNames) {
                     series.add(bestRun.getStockSeries(name));
@@ -338,7 +338,7 @@ public final class ResultReportGenerator {
 
     // ── SVG: Line Chart ─────────────────────────────────────────────────
 
-    static String lineChartSvg(String title, int[] steps,
+    static String lineChartSvg(String title, long[] steps,
                                List<String> seriesNames, List<double[]> seriesData) {
         int plotLeft = MARGIN_LEFT;
         int plotRight = CHART_WIDTH - MARGIN_RIGHT;
@@ -372,8 +372,8 @@ public final class ResultReportGenerator {
         yMin -= yPad;
         yMax += yPad;
 
-        int stepMin = steps[0];
-        int stepMax = steps[steps.length - 1];
+        long stepMin = steps[0];
+        long stepMax = steps[steps.length - 1];
         if (stepMin == stepMax) {
             stepMax = stepMin + 1;
         }
@@ -438,7 +438,7 @@ public final class ResultReportGenerator {
         if (xTicks > 0) {
             for (int i = 0; i <= xTicks; i++) {
                 int stepIdx = (int) Math.round((double) i * (steps.length - 1) / xTicks);
-                int step = steps[stepIdx];
+                long step = steps[stepIdx];
                 double x = plotLeft + (double) (step - stepMin) / (stepMax - stepMin) * plotWidth;
                 svgLine(svg,
                         "<text x=\"%.1f\" y=\"%d\" text-anchor=\"middle\" "
@@ -802,8 +802,8 @@ public final class ResultReportGenerator {
         return "0%";
     }
 
-    private static int[] extractSteps(RunResult run) {
-        int[] steps = new int[run.getStepCount()];
+    private static long[] extractSteps(RunResult run) {
+        long[] steps = new long[run.getStepCount()];
         for (int i = 0; i < steps.length; i++) {
             steps[i] = run.getStep(i);
         }

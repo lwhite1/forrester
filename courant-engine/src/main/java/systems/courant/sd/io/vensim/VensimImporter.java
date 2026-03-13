@@ -3,6 +3,8 @@ package systems.courant.sd.io.vensim;
 import systems.courant.sd.io.FormatUtils;
 import systems.courant.sd.io.ImportResult;
 import systems.courant.sd.io.ModelImporter;
+import systems.courant.sd.io.ReferenceDataCsvReader;
+import systems.courant.sd.model.def.ReferenceDataset;
 import systems.courant.sd.model.def.VariableDef;
 import systems.courant.sd.model.def.CausalLinkDef;
 import systems.courant.sd.model.def.CldVariableDef;
@@ -72,11 +74,25 @@ public class VensimImporter implements ModelImporter {
         if (dotPos > 0) {
             modelName = modelName.substring(0, dotPos);
         }
-        return importModel(content, modelName);
+        return importModel(content, modelName, path.getParent());
     }
 
     @Override
     public ImportResult importModel(String content, String modelName) {
+        return importModel(content, modelName, null);
+    }
+
+    /**
+     * Imports a Vensim .mdl model with optional companion file resolution.
+     *
+     * @param content   the .mdl file content
+     * @param modelName the model name
+     * @param baseDir   the directory containing the .mdl file, or null if unavailable.
+     *                  When provided, GET DIRECT DATA/CONSTANTS references to CSV files
+     *                  are resolved relative to this directory.
+     * @return the import result
+     */
+    public ImportResult importModel(String content, String modelName, Path baseDir) {
         List<String> warnings = new ArrayList<>();
         MdlParser.ParsedMdl parsed = MdlParser.parse(content);
 
@@ -312,7 +328,63 @@ public class VensimImporter implements ModelImporter {
             }
         }
 
+        // Phase 2: Attempt to resolve companion CSV files for GET DIRECT DATA references
+        if (baseDir != null) {
+            resolveCompanionCsvFiles(parsed.equations(), baseDir, builder, warnings);
+        }
+
         return new ImportResult(builder.build(), warnings);
+    }
+
+    /**
+     * Scans equations for GET DIRECT DATA / GET DIRECT CONSTANTS references and attempts
+     * to load companion CSV files from the model's directory. Successfully loaded data
+     * is added as reference datasets to the model definition.
+     */
+    private void resolveCompanionCsvFiles(List<MdlEquation> equations, Path baseDir,
+                                          ModelDefinitionBuilder builder,
+                                          List<String> warnings) {
+        Set<String> resolvedFiles = new HashSet<>();
+        Pattern getDirectPattern = Pattern.compile(
+                "(?i)GET\\s+DIRECT\\s+(DATA|CONSTANTS|LOOKUPS)\\s*\\(");
+
+        for (MdlEquation eq : equations) {
+            String expression = eq.expression();
+            if (expression == null || expression.isBlank()) {
+                continue;
+            }
+            Matcher m = getDirectPattern.matcher(expression);
+            while (m.find()) {
+                int openParen = m.end() - 1;
+                int closeParen = VensimExprTranslator.findMatchingParen(expression, openParen);
+                if (closeParen <= 0) {
+                    continue;
+                }
+                String argsStr = expression.substring(openParen + 1, closeParen);
+                String filePath = VensimExprTranslator.extractFirstArgument(argsStr);
+                if (filePath == null || filePath.isBlank() || !resolvedFiles.add(filePath)) {
+                    continue;
+                }
+                // Only attempt CSV files
+                if (!filePath.toLowerCase(Locale.ROOT).endsWith(".csv")) {
+                    continue;
+                }
+                Path csvPath = baseDir.resolve(filePath);
+                if (!Files.isRegularFile(csvPath)) {
+                    continue;
+                }
+                try {
+                    ReferenceDataset dataset = ReferenceDataCsvReader.read(csvPath, filePath);
+                    builder.referenceDataset(dataset);
+                    warnings.add("Loaded companion CSV '" + filePath
+                            + "' as reference dataset (" + dataset.size()
+                            + " rows, " + dataset.variableNames().size() + " variables)");
+                } catch (IOException e) {
+                    warnings.add("Failed to read companion CSV '" + filePath
+                            + "': " + e.getMessage());
+                }
+            }
+        }
     }
 
     private void classifyAndBuild(MdlEquation eq, String displayName, String eqName,
