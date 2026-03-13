@@ -150,27 +150,44 @@ class ElementRendererTest {
     }
 
     @Nested
-    @DisplayName("MEASURE_TEXT reuse (#311)")
-    class MeasureTextReuse {
+    @DisplayName("MEASURE_TEXT thread safety (#529)")
+    class MeasureTextThreadSafety {
 
         @Test
-        void shouldHaveStaticFinalMeasureTextField() throws NoSuchFieldException {
+        void shouldBeThreadLocal() throws NoSuchFieldException {
             Field field = ElementRenderer.class.getDeclaredField("MEASURE_TEXT");
             assertThat(Modifier.isStatic(field.getModifiers()))
                     .as("MEASURE_TEXT should be static").isTrue();
             assertThat(Modifier.isFinal(field.getModifiers()))
                     .as("MEASURE_TEXT should be final").isTrue();
-            assertThat(field.getType())
-                    .as("MEASURE_TEXT should be a Text node").isEqualTo(Text.class);
+            assertThat(ThreadLocal.class.isAssignableFrom(field.getType()))
+                    .as("MEASURE_TEXT should be a ThreadLocal").isTrue();
         }
 
         @Test
-        void shouldReuseTheSameTextNodeAcrossCalls() throws Exception {
+        void shouldReturnSameInstanceOnSameThread() throws Exception {
             Field field = ElementRenderer.class.getDeclaredField("MEASURE_TEXT");
             field.setAccessible(true);
-            Text first = (Text) field.get(null);
-            Text second = (Text) field.get(null);
+            @SuppressWarnings("unchecked")
+            ThreadLocal<Text> tl = (ThreadLocal<Text>) field.get(null);
+            Text first = tl.get();
+            Text second = tl.get();
             assertThat(first).isSameAs(second);
+        }
+
+        @Test
+        void shouldReturnDifferentInstanceOnDifferentThread() throws Exception {
+            Field field = ElementRenderer.class.getDeclaredField("MEASURE_TEXT");
+            field.setAccessible(true);
+            @SuppressWarnings("unchecked")
+            ThreadLocal<Text> tl = (ThreadLocal<Text>) field.get(null);
+
+            Text mainText = tl.get();
+            Text[] otherText = new Text[1];
+            Thread t = new Thread(() -> otherText[0] = tl.get());
+            t.start();
+            t.join();
+            assertThat(otherText[0]).isNotSameAs(mainText);
         }
     }
 

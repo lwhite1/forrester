@@ -30,6 +30,12 @@ class ActivityLogPanelFxTest {
     }
 
     @Test
+    @DisplayName("Panel uses centralized Styles constants (#77)")
+    void usesCentralizedStyles(FxRobot robot) {
+        assertThat(panel.getStyle()).isEqualTo(Styles.ACTIVITY_LOG_PANEL);
+    }
+
+    @Test
     @DisplayName("Panel starts with empty log")
     @SuppressWarnings("unchecked")
     void startsEmpty(FxRobot robot) {

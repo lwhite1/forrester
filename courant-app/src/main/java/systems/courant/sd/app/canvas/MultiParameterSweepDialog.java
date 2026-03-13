@@ -7,9 +7,7 @@ import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.event.ActionEvent;
 import javafx.geometry.Insets;
-import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonBar;
 import javafx.scene.control.ButtonType;
@@ -105,34 +103,6 @@ public class MultiParameterSweepDialog extends Dialog<MultiParameterSweepDialog.
                 Bindings.createBooleanBinding(() -> !getValidationMessage().isEmpty(),
                         parameterRows, fieldChangeCounter)
         );
-
-        Button okNode = (Button) getDialogPane().lookupButton(okButton);
-        okNode.addEventFilter(ActionEvent.ACTION, event -> {
-            List<ParamConfig> validParams = getValidParams();
-            if (validParams.size() < 2) {
-                event.consume();
-                new Alert(Alert.AlertType.WARNING,
-                        "At least 2 valid parameter rows are required.").showAndWait();
-                return;
-            }
-            Set<String> names = new HashSet<>();
-            for (ParamConfig p : validParams) {
-                if (!names.add(p.name())) {
-                    event.consume();
-                    new Alert(Alert.AlertType.WARNING,
-                            "Duplicate parameter: " + p.name()
-                                    + ". Each parameter must be unique.").showAndWait();
-                    return;
-                }
-            }
-            long combos = computeCombinations(validParams);
-            if (combos > MAX_COMBINATIONS) {
-                event.consume();
-                new Alert(Alert.AlertType.WARNING,
-                        "Too many combinations (" + combos + "). Maximum is "
-                                + MAX_COMBINATIONS + ".").showAndWait();
-            }
-        });
 
         setResultConverter(button -> {
             if (button == okButton) {

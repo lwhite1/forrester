@@ -10,7 +10,7 @@ import javafx.scene.paint.Color;
  */
 public final class SelectionRenderer {
 
-    private static final Color SELECTION_COLOR = Color.web("#4A90D9", 0.8);
+    private static final Color SELECTION_COLOR = ColorPalette.SELECTION;
     static final double SELECTION_PADDING = 4;
     private static final double SELECTION_LINE_WIDTH = 1.5;
     private static final double SELECTION_DASH_LENGTH = 5;

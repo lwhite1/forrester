@@ -85,4 +85,16 @@ public final class Styles {
             "-fx-font-weight: bold; -fx-font-size: 13px;";
     public static final String BOLD_TEXT =
             "-fx-font-weight: bold;";
+
+    // --- Activity log panel ---
+    public static final String ACTIVITY_LOG_PANEL =
+            "-fx-background-color: #F5F6F8; -fx-border-color: #BDC3C7; -fx-border-width: 0 1 0 0;";
+    public static final String ACTIVITY_LOG_TITLE =
+            "-fx-font-weight: bold; -fx-font-size: 13px; -fx-padding: 8 8 4 8;";
+    public static final String TRANSPARENT_BACKGROUND =
+            "-fx-background-color: transparent;";
+    public static final String LOG_TIME_LABEL =
+            "-fx-font-size: 9px; -fx-text-fill: #999;";
+    public static final String LOG_MESSAGE_LABEL =
+            "-fx-font-size: 11px;";
 }

@@ -141,7 +141,7 @@ class WorkflowFileOperationsFxTest {
     void shouldBeDirtyAfterEquationChange(FxRobot robot) {
         loadExample("Bathtub", "introductory/bathtub.json");
 
-        Platform.runLater(() -> window.getEditor().setAuxEquation("Outflow Rate", "10"));
+        Platform.runLater(() -> window.getEditor().setVariableEquation("Outflow Rate", "10"));
         WaitForAsyncUtils.waitForFxEvents();
 
         assertThat(window.isDirty()).isTrue();

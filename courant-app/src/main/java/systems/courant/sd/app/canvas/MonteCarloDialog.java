@@ -6,8 +6,6 @@ import javafx.beans.property.SimpleIntegerProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
-import javafx.event.ActionEvent;
-import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonBar;
 import javafx.scene.control.ButtonType;
@@ -126,16 +124,6 @@ public class MonteCarloDialog extends Dialog<MonteCarloDialog.Config> {
                         iterationsField.textProperty(), seedField.textProperty(),
                         parameterRows, fieldChangeCounter)
         );
-
-        Button okNode = (Button) getDialogPane().lookupButton(okButton);
-        okNode.addEventFilter(ActionEvent.ACTION, event -> {
-            boolean hasValid = parameterRows.stream().anyMatch(ParameterRow::isValid);
-            if (!hasValid) {
-                event.consume();
-                new Alert(Alert.AlertType.WARNING,
-                        "At least one parameter row must have valid values.").showAndWait();
-            }
-        });
 
         setResultConverter(button -> {
             if (button == okButton) {

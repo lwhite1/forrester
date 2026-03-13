@@ -3,6 +3,7 @@ package systems.courant.sd.app.canvas;
 import javafx.application.Platform;
 import javafx.scene.Node;
 import javafx.scene.Scene;
+import javafx.scene.control.Button;
 import javafx.scene.control.DialogPane;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
@@ -115,6 +116,27 @@ class MultiParameterSweepDialogFxTest {
         assertThat(start0.getText()).isEqualTo("0");
         assertThat(end0.getText()).isEqualTo("10");
         assertThat(step0.getText()).isEqualTo("1");
+    }
+
+    @Test
+    @DisplayName("No event filter alerts on OK button (#407)")
+    void noEventFilterOnOkButton(FxRobot robot) {
+        showDialog(List.of("alpha", "beta"));
+
+        Button ok = (Button) okButton();
+        // Validation is handled solely by the disable binding — no event filters should be present
+        assertThat(ok.isDisabled()).isFalse();
+        assertThat(ok.disableProperty().isBound()).isTrue();
+    }
+
+    @Test
+    @DisplayName("Validation label shows message when fewer than 2 valid params (#407)")
+    void validationLabelShowsMessageWhenInvalid(FxRobot robot) {
+        showDialog(List.of());
+
+        Label validationLabel = robot.lookup("#multiSweepValidationLabel").queryAs(Label.class);
+        assertThat(validationLabel.getText()).isNotEmpty();
+        assertThat(okButton().isDisabled()).isTrue();
     }
 
     @Test

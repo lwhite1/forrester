@@ -26,14 +26,14 @@ public class ActivityLogPanel extends VBox {
     public ActivityLogPanel() {
         setPrefWidth(250);
         setMinWidth(180);
-        setStyle("-fx-background-color: #F5F6F8; -fx-border-color: #BDC3C7; -fx-border-width: 0 1 0 0;");
+        setStyle(Styles.ACTIVITY_LOG_PANEL);
 
         Label title = new Label("Activity Log");
-        title.setStyle("-fx-font-weight: bold; -fx-font-size: 13px; -fx-padding: 8 8 4 8;");
+        title.setStyle(Styles.ACTIVITY_LOG_TITLE);
 
         listView = new ListView<>(entries);
         listView.setCellFactory(lv -> new LogCell());
-        listView.setStyle("-fx-background-color: transparent;");
+        listView.setStyle(Styles.TRANSPARENT_BACKGROUND);
         VBox.setVgrow(listView, javafx.scene.layout.Priority.ALWAYS);
 
         getChildren().addAll(title, listView);
@@ -120,8 +120,8 @@ public class ActivityLogPanel extends VBox {
         private final Label messageLabel = new Label();
 
         LogCell() {
-            timeLabel.setStyle("-fx-font-size: 9px; -fx-text-fill: #999;");
-            messageLabel.setStyle("-fx-font-size: 11px;");
+            timeLabel.setStyle(Styles.LOG_TIME_LABEL);
+            messageLabel.setStyle(Styles.LOG_MESSAGE_LABEL);
             messageLabel.setWrapText(true);
             container.setPadding(new Insets(2, 6, 2, 6));
             container.getChildren().addAll(timeLabel, messageLabel);

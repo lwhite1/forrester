@@ -26,8 +26,8 @@ import java.util.Map;
  */
 public class CanvasRenderer {
 
-    private static final Color RUBBER_BAND_COLOR = Color.web("#4A90D9", 0.6);
-    private static final Color STOCK_HOVER_COLOR = Color.web("#4A90D9", 0.4);
+    private static final Color RUBBER_BAND_COLOR = ColorPalette.RUBBER_BAND;
+    private static final Color STOCK_HOVER_COLOR = ColorPalette.HOVER;
     private static final double RUBBER_BAND_DASH = 8;
     private static final double RUBBER_BAND_GAP = 4;
 
@@ -843,7 +843,7 @@ public class CanvasRenderer {
         }
     }
 
-    private static final Color PORT_HOVER_COLOR = Color.web("#4A90D9", 0.35);
+    private static final Color PORT_HOVER_COLOR = ColorPalette.PORT_HOVER;
     private static final double PORT_HOVER_RADIUS = 7.0;
 
     /**
@@ -1047,7 +1047,7 @@ public class CanvasRenderer {
         double w = Math.abs(state.endX() - state.startX());
         double h = Math.abs(state.endY() - state.startY());
 
-        gc.setFill(Color.web("#4A90D9", 0.1));
+        gc.setFill(ColorPalette.MARQUEE_FILL);
         gc.fillRect(x, y, w, h);
 
         gc.setStroke(RUBBER_BAND_COLOR);

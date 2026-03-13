@@ -388,10 +388,10 @@ public final class ElementRenderer {
 
         // Width: widest line + padding, clamped to [minWidth, COMMENT_WIDTH]
         double maxTextWidth = 0;
-        MEASURE_TEXT.setFont(LayoutMetrics.COMMENT_TEXT_FONT);
+        MEASURE_TEXT.get().setFont(LayoutMetrics.COMMENT_TEXT_FONT);
         for (String line : lines) {
-            MEASURE_TEXT.setText(line);
-            maxTextWidth = Math.max(maxTextWidth, MEASURE_TEXT.getLayoutBounds().getWidth());
+            MEASURE_TEXT.get().setText(line);
+            maxTextWidth = Math.max(maxTextWidth, MEASURE_TEXT.get().getLayoutBounds().getWidth());
         }
         double minW = LayoutMetrics.minWidthFor(
                 systems.courant.sd.model.def.ElementType.COMMENT);
@@ -415,7 +415,7 @@ public final class ElementRenderer {
         if (text == null || text.isEmpty()) {
             return lines;
         }
-        MEASURE_TEXT.setFont(font);
+        MEASURE_TEXT.get().setFont(font);
 
         for (String paragraph : text.split("\n", -1)) {
             if (paragraph.isEmpty()) {
@@ -429,8 +429,8 @@ public final class ElementRenderer {
                     current.append(word);
                 } else {
                     String candidate = current + " " + word;
-                    MEASURE_TEXT.setText(candidate);
-                    if (MEASURE_TEXT.getLayoutBounds().getWidth() > maxWidth) {
+                    MEASURE_TEXT.get().setText(candidate);
+                    if (MEASURE_TEXT.get().getLayoutBounds().getWidth() > maxWidth) {
                         lines.add(current.toString());
                         current = new StringBuilder(word);
                     } else {
@@ -447,29 +447,30 @@ public final class ElementRenderer {
      * Returns the line height for the given font, measured using the shared Text node.
      */
     static double measureLineHeight(Font font) {
-        MEASURE_TEXT.setFont(font);
-        MEASURE_TEXT.setText("Ay");
-        return MEASURE_TEXT.getLayoutBounds().getHeight();
+        MEASURE_TEXT.get().setFont(font);
+        MEASURE_TEXT.get().setText("Ay");
+        return MEASURE_TEXT.get().getLayoutBounds().getHeight();
     }
 
-    /** Reusable Text node for width measurement — only used on the FX Application Thread. */
-    private static final Text MEASURE_TEXT = new Text();
+    /** Thread-local Text node for width measurement — safe from any thread. */
+    private static final ThreadLocal<Text> MEASURE_TEXT =
+            ThreadLocal.withInitial(Text::new);
 
     /**
      * Truncates a name to fit within the given pixel width, appending "..." if needed.
      * Uses a shared {@link Text} node for measurement to avoid per-call allocation.
      */
     static String truncate(String name, Font font, double maxWidth) {
-        MEASURE_TEXT.setFont(font);
-        MEASURE_TEXT.setText(name);
-        if (MEASURE_TEXT.getLayoutBounds().getWidth() <= maxWidth) {
+        MEASURE_TEXT.get().setFont(font);
+        MEASURE_TEXT.get().setText(name);
+        if (MEASURE_TEXT.get().getLayoutBounds().getWidth() <= maxWidth) {
             return name;
         }
         String ellipsis = "\u2026";
         for (int end = name.length() - 1; end > 0; end--) {
             String candidate = name.substring(0, end) + ellipsis;
-            MEASURE_TEXT.setText(candidate);
-            if (MEASURE_TEXT.getLayoutBounds().getWidth() <= maxWidth) {
+            MEASURE_TEXT.get().setText(candidate);
+            if (MEASURE_TEXT.get().getLayoutBounds().getWidth() <= maxWidth) {
                 return candidate;
             }
         }
