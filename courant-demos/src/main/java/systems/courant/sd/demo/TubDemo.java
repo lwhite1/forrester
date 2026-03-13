@@ -68,7 +68,8 @@ public class TubDemo {
         model.addStock(tub);
 
         run.addEventHandler(new StockLevelChartViewer());
-        run.addEventHandler(new CsvSubscriber("tub.csv"));
+        run.addEventHandler(new CsvSubscriber(
+                System.getProperty("java.io.tmpdir") + "/courant-tub.csv"));
         run.execute();
     }
 }

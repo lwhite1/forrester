@@ -96,7 +96,8 @@ public class ThirdOrderMaterialDelayDemo {
 
         Simulation run = new Simulation(model, HOUR, Times.hours(durationHours));
         run.addEventHandler(new StockLevelChartViewer());
-        run.addEventHandler(new CsvSubscriber("3rd order.csv"));
+        run.addEventHandler(new CsvSubscriber(
+                System.getProperty("java.io.tmpdir") + "/courant-third-order-delay.csv"));
         run.execute();
     }
 }
