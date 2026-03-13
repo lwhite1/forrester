@@ -110,7 +110,7 @@ public class ModelCompiler {
         compileInto(expandedDef, model, context, resettables, stepHolder);
 
         return new CompiledModel(model, resettables, def, stepHolder, dtHolder,
-                simTimeUnitHolder, unitRegistry);
+                simTimeUnitHolder, unitRegistry, context.getWarnings());
     }
 
     /**

@@ -650,8 +650,10 @@ public class ExprCompiler {
         DoubleSupplier input = compileExpr(args.get(0));
         double delayTime = evaluateAtCompileTime(args.get(1), "DELAY1 delayTime");
         if (delayTime <= 0 || Double.isNaN(delayTime)) {
-            logger.warn("DELAY1 delayTime evaluated to {} at compile time, defaulting to 1.0",
-                    delayTime);
+            String msg = "DELAY1 delayTime evaluated to " + delayTime
+                    + " at compile time; using default of 1.0 — simulation results may be inaccurate";
+            logger.warn(msg);
+            context.addWarning(msg);
             delayTime = 1.0;
         }
         Delay1 delay1;
@@ -676,11 +678,10 @@ public class ExprCompiler {
         DoubleSupplier input = compileExpr(args.get(0));
         double delayTime = evaluateAtCompileTime(args.get(1), "DELAY3 delayTime");
         if (delayTime <= 0 || Double.isNaN(delayTime)) {
-            // Delay time couldn't be resolved at compile time (variable not yet initialized).
-            // Use a default of 1 timestep to avoid crashing; the model may still produce
-            // approximate results.
-            logger.warn("DELAY3 delayTime evaluated to {} at compile time, defaulting to 1.0",
-                    delayTime);
+            String msg = "DELAY3 delayTime evaluated to " + delayTime
+                    + " at compile time; using default of 1.0 — simulation results may be inaccurate";
+            logger.warn(msg);
+            context.addWarning(msg);
             delayTime = 1.0;
         }
         Delay3 delay3;
@@ -771,8 +772,12 @@ public class ExprCompiler {
         double delayTime = evaluateConstant(args.get(1), "DELAY_FIXED delayTime");
         int delaySteps = (int) Math.round(delayTime);
         if (delaySteps <= 0 || Double.isNaN(delayTime)) {
-            logger.warn("DELAY_FIXED delayTime evaluated to {} (rounded to {}) at compile time, "
-                    + "defaulting to 1 step", delayTime, delaySteps);
+            String msg = "DELAY_FIXED delayTime evaluated to " + delayTime
+                    + " (rounded to " + delaySteps
+                    + ") at compile time; using default of 1 step"
+                    + " — simulation results may be inaccurate";
+            logger.warn(msg);
+            context.addWarning(msg);
             delaySteps = 1;
         }
         DoubleSupplier initial = compileExpr(args.get(2));

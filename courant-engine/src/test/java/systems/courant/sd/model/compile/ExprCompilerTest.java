@@ -319,6 +319,34 @@ class ExprCompilerTest {
         }
 
         @Test
+        void shouldWarnForDELAY1WithNegativeDelayTime() {
+            compiler.compile("DELAY1(100, -5)");
+            assertThat(context.getWarnings())
+                    .anyMatch(w -> w.contains("DELAY1") && w.contains("inaccurate"));
+        }
+
+        @Test
+        void shouldWarnForDELAY1WithZeroDelayTime() {
+            compiler.compile("DELAY1(100, 0)");
+            assertThat(context.getWarnings())
+                    .anyMatch(w -> w.contains("DELAY1") && w.contains("inaccurate"));
+        }
+
+        @Test
+        void shouldWarnForDELAY3WithNegativeDelayTime() {
+            compiler.compile("DELAY3(100, -3)");
+            assertThat(context.getWarnings())
+                    .anyMatch(w -> w.contains("DELAY3") && w.contains("inaccurate"));
+        }
+
+        @Test
+        void shouldWarnForDELAY3WithZeroDelayTime() {
+            compiler.compile("DELAY3(100, 0)");
+            assertThat(context.getWarnings())
+                    .anyMatch(w -> w.contains("DELAY3") && w.contains("inaccurate"));
+        }
+
+        @Test
         void shouldThrowForRAMPWithTooManyArgs() {
             assertThatThrownBy(() -> compiler.compile("RAMP(1, 2, 3, 4)"))
                     .isInstanceOf(CompilationException.class)
@@ -831,14 +859,17 @@ class ExprCompilerTest {
         }
 
         @Test
-        void shouldDefaultToOneWhenDelayTimeRoundsToZero() {
-            // delayTime = 0.3 rounds to 0 — should default to 1 instead of crashing
+        void shouldDefaultToOneStepAndWarnWhenDelayTimeRoundsToZero() {
+            // delayTime = 0.3 rounds to 0 — should default to 1 and add a compilation warning
             Formula formula = compiler.compile("DELAY_FIXED(Population, 0.3, 0)");
             step[0] = 0;
             assertThat(formula.getCurrentValue()).isEqualTo(0.0);
             // After 1 step, the delay of 1 should have elapsed
             step[0] = 1;
             assertThat(formula.getCurrentValue()).isEqualTo(1000.0);
+            // Verify a compilation warning was recorded
+            assertThat(context.getWarnings())
+                    .anyMatch(w -> w.contains("DELAY_FIXED") && w.contains("inaccurate"));
         }
     }
 

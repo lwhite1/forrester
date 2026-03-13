@@ -8,8 +8,10 @@ import systems.courant.sd.model.Stock;
 import systems.courant.sd.model.Variable;
 import systems.courant.sd.model.def.LookupTableDef;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.OptionalDouble;
@@ -30,6 +32,8 @@ public class CompilationContext {
     private final Map<String, LookupTable> lookupTables = new LinkedHashMap<>();
     private final Map<String, double[]> lookupInputHolders = new LinkedHashMap<>();
     private final Map<String, LookupTableDef> lookupTableDefs = new LinkedHashMap<>();
+
+    private final List<String> warnings = new ArrayList<>();
 
     private final CompilationContext parent;
     private final UnitRegistry unitRegistry;
@@ -382,5 +386,26 @@ public class CompilationContext {
      */
     public TimeUnit[] getSimTimeUnitHolder() {
         return simTimeUnitHolder;
+    }
+
+    /**
+     * Records a non-fatal compilation warning. These warnings are surfaced
+     * through {@link CompiledModel#getCompilationWarnings()} so callers can
+     * inspect them after compilation.
+     *
+     * @param warning the warning message
+     */
+    public void addWarning(String warning) {
+        warnings.add(warning);
+        if (parent != null) {
+            parent.addWarning(warning);
+        }
+    }
+
+    /**
+     * Returns all compilation warnings recorded in this context (local only).
+     */
+    public List<String> getWarnings() {
+        return Collections.unmodifiableList(warnings);
     }
 }

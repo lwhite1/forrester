@@ -528,13 +528,17 @@ class VensimImporterTest {
                     "Contact Rate", "Recovery Time", "Total Population",
                     "TIME_STEP", "INITIAL_TIME", "FINAL_TIME");
 
-            // 2 formula variables + 6 literal-valued (constants) = 8 total
-            assertThat(def.variables()).hasSize(8);
-            assertThat(def.variables().stream().filter(a -> !a.isLiteral()).toList()).hasSize(2);
+            // 6 literal-valued constants (Infection Rate and Recovery Rate are now flows)
+            assertThat(def.variables()).hasSize(6);
+            assertThat(def.variables().stream().filter(a -> !a.isLiteral()).toList()).isEmpty();
 
             // 4 flows: Susceptible/Recovered each get a net flow,
-            // Infected decomposes INTEG(Infection Rate - Recovery Rate) into 2 individual flows
+            // Infected decomposes INTEG(Infection Rate - Recovery Rate) into 2 named flows
             assertThat(def.flows()).hasSize(4);
+            Set<String> flowNames = def.flows().stream()
+                    .map(FlowDef::name)
+                    .collect(Collectors.toSet());
+            assertThat(flowNames).contains("Infection Rate", "Recovery Rate");
 
             // Simulation settings: 200 days
             assertThat(def.defaultSimulation()).isNotNull();
@@ -1898,6 +1902,52 @@ class VensimImporterTest {
     }
 
     @Nested
+    @DisplayName("DELAY compile-time warning surfacing (#507)")
+    class DelayCompileTimeWarnings {
+
+        @Test
+        void shouldSurfaceDelayWarningThroughCompiledModel() {
+            // DELAY3 with a variable delay time that evaluates to 0 at compile time
+            String mdl = """
+                    output = DELAY3(input, delay time)
+                    \t~\tUnits
+                    \t~\t
+                    \t|
+
+                    input = 100
+                    \t~\tUnits
+                    \t~\t
+                    \t|
+
+                    delay time = 0
+                    \t~\tDay
+                    \t~\t
+                    \t|
+
+                    INITIAL TIME = 0
+                    \t~\tDay
+                    \t~\t
+                    \t|
+
+                    FINAL TIME = 10
+                    \t~\tDay
+                    \t~\t
+                    \t|
+
+                    TIME STEP = 1
+                    \t~\tDay
+                    \t~\t
+                    \t|
+                    """;
+            ImportResult result = importer.importModel(mdl, "test");
+            CompiledModel compiled = new ModelCompiler().compile(result.definition());
+            // Warning should be surfaced through compilationWarnings
+            assertThat(compiled.getCompilationWarnings())
+                    .anyMatch(w -> w.contains("DELAY3") && w.contains("inaccurate"));
+        }
+    }
+
+    @Nested
     @DisplayName("SAMPLE IF TRUE and FIND ZERO (#512)")
     class SampleIfTrueAndFindZeroImport {
 
@@ -2494,6 +2544,194 @@ class VensimImporterTest {
             java.nio.file.Files.deleteIfExists(csvFile);
             java.nio.file.Files.deleteIfExists(mdlFile);
             java.nio.file.Files.deleteIfExists(tmpDir);
+        }
+    }
+
+    @Nested
+    @DisplayName("INTEG decomposition uses sketch valve names (#505)")
+    class IntegSketchValveNames {
+
+        @Test
+        void shouldUseSketchValveNamesForDecomposedFlows() {
+            String mdl = """
+                    Population = INTEG(
+                    \tBirth Rate - Death Rate,
+                    \t\t100)
+                    \t~\tPeople
+                    \t~\t
+                    \t|
+
+                    Birth Rate =
+                    \tPopulation * 0.03
+                    \t~\tPeople/Year
+                    \t~\t
+                    \t|
+
+                    Death Rate =
+                    \tPopulation * 0.02
+                    \t~\tPeople/Year
+                    \t~\t
+                    \t|
+
+                    INITIAL TIME = 0
+                    \t~\tYear
+                    \t~\t
+                    \t|
+
+                    FINAL TIME = 100
+                    \t~\tYear
+                    \t~\t
+                    \t|
+
+                    TIME STEP = 1
+                    \t~\tYear
+                    \t~\t
+                    \t|
+
+                    \\---///
+                    *View 1
+                    10,1,Population,200,200
+                    11,2,Birth Rate,100,200
+                    11,3,Death Rate,300,200
+                    """;
+            ImportResult result = importer.importModel(mdl, "test");
+            ModelDefinition def = result.definition();
+
+            // Decomposed flows should use sketch valve names, not synthetic names
+            Set<String> flowNames = def.flows().stream()
+                    .map(FlowDef::name)
+                    .collect(Collectors.toSet());
+            assertThat(flowNames).contains("Birth Rate", "Death Rate");
+            assertThat(flowNames).noneMatch(n -> n.contains("inflow") || n.contains("outflow"));
+
+            // Flow equations should contain the actual formulas, not references
+            FlowDef birthFlow = def.flows().stream()
+                    .filter(f -> f.name().equals("Birth Rate"))
+                    .findFirst().orElseThrow();
+            assertThat(birthFlow.equation()).contains("Population");
+            assertThat(birthFlow.equation()).contains("0.03");
+
+            // Variables should NOT include Birth Rate or Death Rate (they are flows now)
+            Set<String> varNames = def.variables().stream()
+                    .map(VariableDef::name)
+                    .collect(Collectors.toSet());
+            assertThat(varNames).doesNotContain("Birth Rate", "Death Rate");
+
+            // Model should compile and simulate correctly
+            CompiledModel compiled = new ModelCompiler().compile(def);
+            Simulation sim = compiled.createSimulation();
+            sim.execute();
+            assertThat(compiled.getModel().getStocks().getFirst().getValue())
+                    .isGreaterThan(100); // Population should grow (birth > death)
+        }
+
+        @Test
+        void shouldFallBackToSyntheticNamesWhenNoSketchMatch() {
+            // No sketch section — should use synthetic names
+            String mdl = """
+                    Level = INTEG(
+                    \tinflow_a - outflow_b,
+                    \t\t50)
+                    \t~\tUnits
+                    \t~\t
+                    \t|
+
+                    inflow a =
+                    \t10
+                    \t~\tUnits/Day
+                    \t~\t
+                    \t|
+
+                    outflow b =
+                    \t5
+                    \t~\tUnits/Day
+                    \t~\t
+                    \t|
+
+                    INITIAL TIME = 0
+                    \t~\tDay
+                    \t~\t
+                    \t|
+
+                    FINAL TIME = 10
+                    \t~\tDay
+                    \t~\t
+                    \t|
+
+                    TIME STEP = 1
+                    \t~\tDay
+                    \t~\t
+                    \t|
+                    """;
+            ImportResult result = importer.importModel(mdl, "test");
+            ModelDefinition def = result.definition();
+
+            // Without sketch, flows should get synthetic names
+            Set<String> flowNames = def.flows().stream()
+                    .map(FlowDef::name)
+                    .collect(Collectors.toSet());
+            assertThat(flowNames).anyMatch(n -> n.contains("inflow") || n.contains("outflow"));
+        }
+
+        @Test
+        void shouldFallBackToSyntheticNamesForComplexTerms() {
+            // Complex rate term (not a simple variable reference) should use synthetic name
+            String mdl = """
+                    Tank = INTEG(
+                    \tpressure * area - flow out,
+                    \t\t100)
+                    \t~\tLiters
+                    \t~\t
+                    \t|
+
+                    pressure =
+                    \t5
+                    \t~\tBar
+                    \t~\t
+                    \t|
+
+                    area =
+                    \t2
+                    \t~\tM2
+                    \t~\t
+                    \t|
+
+                    flow out =
+                    \t3
+                    \t~\tLiters/Second
+                    \t~\t
+                    \t|
+
+                    INITIAL TIME = 0
+                    \t~\tSecond
+                    \t~\t
+                    \t|
+
+                    FINAL TIME = 10
+                    \t~\tSecond
+                    \t~\t
+                    \t|
+
+                    TIME STEP = 1
+                    \t~\tSecond
+                    \t~\t
+                    \t|
+
+                    \\---///
+                    *View 1
+                    10,1,Tank,200,200
+                    11,2,flow out,300,200
+                    """;
+            ImportResult result = importer.importModel(mdl, "test");
+            ModelDefinition def = result.definition();
+
+            // "flow out" matches a valve, but "pressure * area" does not
+            Set<String> flowNames = def.flows().stream()
+                    .map(FlowDef::name)
+                    .collect(Collectors.toSet());
+            assertThat(flowNames).contains("flow out");
+            // The complex term gets a synthetic name
+            assertThat(flowNames).anyMatch(n -> n.contains("inflow"));
         }
     }
 }
