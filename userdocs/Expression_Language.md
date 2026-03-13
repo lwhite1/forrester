@@ -97,9 +97,23 @@ IF(condition, then_value, else_value)
 
 Returns `then_value` if `condition` is non-zero, otherwise `else_value`.
 
+**Important:** `IF` always evaluates **both** branches on every time step, even the one that is not selected. This is intentional — stateful functions like `SMOOTH`, `DELAY3`, and `TREND` in the untaken branch continue to update their internal state, so they produce correct values when the condition changes. Side effects in both branches (e.g., `RANDOM` calls) will always occur.
+
 ```
 IF(Inventory > 0, Order_Rate, 0)
 IF(Population > Capacity, Capacity, Population)
+```
+
+### IF_SHORT — Short-Circuit Conditional
+
+```
+IF_SHORT(condition, then_value, else_value)
+```
+
+Like `IF`, but uses true short-circuit evaluation: only the taken branch is evaluated. This avoids the performance cost of evaluating unreachable expressions, but **stateful functions in the untaken branch will not be updated**. Use `IF_SHORT` only when neither branch contains stateful functions, or when you intentionally want to freeze the untaken branch.
+
+```
+IF_SHORT(x > 0, LN(x), 0)     -- avoids evaluating LN(x) when x <= 0
 ```
 
 ## Math Functions
@@ -464,6 +478,7 @@ unary      = ("-" | "not") unary | call
 call       = primary ( "(" arglist? ")" )?
 primary    = NUMBER | IDENTIFIER | QUOTED_ID | "(" expr ")"
            | "IF" "(" expr "," expr "," expr ")"
+           | "IF_SHORT" "(" expr "," expr "," expr ")"
 arglist    = expr ( "," expr )*
 ```
 

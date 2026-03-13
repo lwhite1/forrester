@@ -100,7 +100,8 @@ public final class ExprStringifier {
         if (lower.equals("and") || lower.equals("or") || lower.equals("not")) {
             return true;
         }
-        return name.equals("IF") || name.equals("TIME") || name.equals("DT");
+        return name.equals("IF") || name.equals("IF_SHORT")
+                || name.equals("TIME") || name.equals("DT");
     }
 
     private static void appendBinaryOp(StringBuilder sb, Expr.BinaryOp bin, int contextPrecedence) {
@@ -147,7 +148,7 @@ public final class ExprStringifier {
     }
 
     private static void appendConditional(StringBuilder sb, Expr.Conditional cond) {
-        sb.append("IF(");
+        sb.append(cond.shortCircuit() ? "IF_SHORT(" : "IF(");
         appendExpr(sb, cond.condition(), MIN_PRECEDENCE);
         sb.append(", ");
         appendExpr(sb, cond.thenExpr(), MIN_PRECEDENCE);

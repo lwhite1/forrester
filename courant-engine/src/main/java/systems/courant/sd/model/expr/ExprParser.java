@@ -324,8 +324,10 @@ public class ExprParser {
 
         skipWhitespace();
 
-        // IF is special: IF(condition, then, else)
-        if (name.equals("IF") && pos < input.length() && input.charAt(pos) == '(') {
+        // IF and IF_SHORT are special: IF(condition, then, else) / IF_SHORT(condition, then, else)
+        if ((name.equals("IF") || name.equals("IF_SHORT"))
+                && pos < input.length() && input.charAt(pos) == '(') {
+            boolean shortCircuit = name.equals("IF_SHORT");
             pos++; // skip '('
             Expr condition = parseExpr();
             expectChar(',');
@@ -333,7 +335,7 @@ public class ExprParser {
             expectChar(',');
             Expr elseExpr = parseExpr();
             expectChar(')');
-            return new Expr.Conditional(condition, thenExpr, elseExpr);
+            return new Expr.Conditional(condition, thenExpr, elseExpr, shortCircuit);
         }
 
         // Function call: NAME(args)

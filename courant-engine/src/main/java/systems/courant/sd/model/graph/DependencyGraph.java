@@ -26,9 +26,6 @@ import java.util.Set;
  */
 public class DependencyGraph {
 
-    /** Maximum recursion depth for graph traversal, matching ExprParser.MAX_DEPTH. */
-    private static final int MAX_DEPTH = 200;
-
     private final Map<String, Set<String>> adjacency; // from → {to}
     private final Set<String> allNodes;
 
@@ -260,26 +257,7 @@ public class DependencyGraph {
      * Returns a list of SCCs, where each SCC is a set of node names.
      */
     public List<Set<String>> findSCCs() {
-        int[] index = {0};
-        Map<String, Integer> nodeIndex = new LinkedHashMap<>();
-        Map<String, Integer> lowlink = new LinkedHashMap<>();
-        Set<String> onStack = new LinkedHashSet<>();
-        Deque<String> stack = new ArrayDeque<>();
-        List<Set<String>> result = new ArrayList<>();
-
-        for (String node : allNodes) {
-            if (!nodeIndex.containsKey(node)) {
-                tarjanStrongconnect(node, index, nodeIndex, lowlink, onStack, stack, result, 0);
-            }
-        }
-
-        List<Set<String>> nonTrivial = new ArrayList<>();
-        for (Set<String> scc : result) {
-            if (scc.size() >= 2) {
-                nonTrivial.add(scc);
-            }
-        }
-        return nonTrivial;
+        return TarjanSCC.findNonTrivial(allNodes, adjacency);
     }
 
     /**
@@ -293,44 +271,4 @@ public class DependencyGraph {
         return members;
     }
 
-    private void tarjanStrongconnect(String v, int[] index,
-            Map<String, Integer> nodeIndex, Map<String, Integer> lowlink,
-            Set<String> onStack, Deque<String> stack, List<Set<String>> result, int depth) {
-        if (depth > MAX_DEPTH) {
-            // Register node so callers can safely read index/lowlink,
-            // but don't push onto stack or recurse — treat as a dead end.
-            nodeIndex.put(v, index[0]);
-            lowlink.put(v, index[0]);
-            index[0]++;
-            return;
-        }
-        nodeIndex.put(v, index[0]);
-        lowlink.put(v, index[0]);
-        index[0]++;
-        stack.push(v);
-        onStack.add(v);
-
-        for (String w : adjacency.getOrDefault(v, Collections.emptySet())) {
-            if (!allNodes.contains(w)) {
-                continue;
-            }
-            if (!nodeIndex.containsKey(w)) {
-                tarjanStrongconnect(w, index, nodeIndex, lowlink, onStack, stack, result, depth + 1);
-                lowlink.put(v, Math.min(lowlink.get(v), lowlink.get(w)));
-            } else if (onStack.contains(w)) {
-                lowlink.put(v, Math.min(lowlink.get(v), nodeIndex.get(w)));
-            }
-        }
-
-        if (lowlink.get(v).equals(nodeIndex.get(v))) {
-            Set<String> scc = new LinkedHashSet<>();
-            String w;
-            do {
-                w = stack.pop();
-                onStack.remove(w);
-                scc.add(w);
-            } while (!w.equals(v));
-            result.add(scc);
-        }
-    }
 }

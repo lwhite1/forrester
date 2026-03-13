@@ -77,9 +77,25 @@ public sealed interface Expr
     }
 
     /**
-     * A conditional expression, corresponding to {@code IF(condition, thenExpr, elseExpr)}.
+     * A conditional expression, corresponding to {@code IF(condition, thenExpr, elseExpr)}
+     * or {@code IF_SHORT(condition, thenExpr, elseExpr)}.
+     *
+     * @param condition    the condition expression (non-zero = true)
+     * @param thenExpr     the value when condition is true
+     * @param elseExpr     the value when condition is false
+     * @param shortCircuit if true, only the taken branch is evaluated (IF_SHORT semantics);
+     *                     if false, both branches are always evaluated to keep stateful
+     *                     functions (SMOOTH, DELAY, etc.) current
      */
-    record Conditional(Expr condition, Expr thenExpr, Expr elseExpr) implements Expr {
+    record Conditional(Expr condition, Expr thenExpr, Expr elseExpr,
+                       boolean shortCircuit) implements Expr {
+
+        /**
+         * Constructs a standard (non-short-circuit) conditional.
+         */
+        public Conditional(Expr condition, Expr thenExpr, Expr elseExpr) {
+            this(condition, thenExpr, elseExpr, false);
+        }
 
         public Conditional {
             Objects.requireNonNull(condition, "Conditional condition must not be null");

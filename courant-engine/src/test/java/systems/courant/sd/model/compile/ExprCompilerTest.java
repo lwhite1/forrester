@@ -1171,4 +1171,71 @@ class ExprCompilerTest {
             assertThat(formula.getCurrentValue()).isCloseTo(16.0, within(0.001));
         }
     }
+
+    @Nested
+    @DisplayName("IF_SHORT short-circuit conditional (#504)")
+    class IfShortCircuit {
+
+        @Test
+        void shouldReturnThenBranchWhenConditionIsTrue() {
+            context.addLiteralConstant("x", 1.0);
+            Formula formula = compiler.compile("IF_SHORT(x, 10, 20)");
+            assertThat(formula.getCurrentValue()).isEqualTo(10.0);
+        }
+
+        @Test
+        void shouldReturnElseBranchWhenConditionIsFalse() {
+            context.addLiteralConstant("x", 0.0);
+            Formula formula = compiler.compile("IF_SHORT(x, 10, 20)");
+            assertThat(formula.getCurrentValue()).isEqualTo(20.0);
+        }
+
+        @Test
+        void shouldNotEvaluateElseBranchWhenConditionIsTrue() {
+            context.addLiteralConstant("cond", 1.0);
+            int[] elseCount = {0};
+            context.addVariable("side_effect",
+                    new systems.courant.sd.model.Variable("side_effect",
+                            ItemUnits.THING, () -> {
+                        elseCount[0]++;
+                        return 99.0;
+                    }));
+            Formula formula = compiler.compile("IF_SHORT(cond, 10, side_effect)");
+            formula.getCurrentValue();
+            assertThat(elseCount[0]).isZero();
+        }
+
+        @Test
+        void shouldNotEvaluateThenBranchWhenConditionIsFalse() {
+            context.addLiteralConstant("cond", 0.0);
+            int[] thenCount = {0};
+            context.addVariable("side_effect",
+                    new systems.courant.sd.model.Variable("side_effect",
+                            ItemUnits.THING, () -> {
+                        thenCount[0]++;
+                        return 99.0;
+                    }));
+            Formula formula = compiler.compile("IF_SHORT(cond, side_effect, 20)");
+            formula.getCurrentValue();
+            assertThat(thenCount[0]).isZero();
+        }
+
+        @Test
+        void shouldParseAndStringifyIfShort() {
+            Expr ast = ExprParser.parse("IF_SHORT(x > 0, x, 0)");
+            assertThat(ast).isInstanceOf(Expr.Conditional.class);
+            Expr.Conditional cond = (Expr.Conditional) ast;
+            assertThat(cond.shortCircuit()).isTrue();
+            assertThat(systems.courant.sd.model.expr.ExprStringifier.stringify(ast))
+                    .isEqualTo("IF_SHORT(x > 0, x, 0)");
+        }
+
+        @Test
+        void shouldDistinguishIfFromIfShort() {
+            Expr ifExpr = ExprParser.parse("IF(x > 0, x, 0)");
+            Expr ifShortExpr = ExprParser.parse("IF_SHORT(x > 0, x, 0)");
+            assertThat(((Expr.Conditional) ifExpr).shortCircuit()).isFalse();
+            assertThat(((Expr.Conditional) ifShortExpr).shortCircuit()).isTrue();
+        }
+    }
 }
