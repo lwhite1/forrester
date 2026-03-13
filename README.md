@@ -1,8 +1,8 @@
-# Shrewd — System Dynamics Modeling Tool
+# Courant — System Dynamics Modeling Tool
 
 > **Alpha-1 Release** — This system is not ready for production use. APIs, file formats, and features may change without notice.
 
-The ability to reason about and make predictions on complex, dynamic systems is essential today. Shrewd is an open-source [System Dynamics](userdocs/Key%20Reasons%20for%20Using%20System%20Dynamics.md) simulation engine and visual modeling environment written in Java. It was created so that, when it's ready, everyone will have access to a professional quality system dynamics environment for free. 
+The ability to reason about and make predictions on complex, dynamic systems is essential today. Courant is an open-source [System Dynamics](userdocs/Key%20Reasons%20for%20Using%20System%20Dynamics.md) simulation engine and visual modeling environment written in Java. It was created so that, when it's ready, everyone will have access to a professional quality system dynamics environment for free. 
 
 It provides two ways to build and run models:
 
@@ -27,7 +27,7 @@ The engine supports creating training simulations, games, scenario testing, and 
 
 ## Screenshots
 
-![Shrewd visual editor showing an aging population model with simulation results](userdocs/Shrewd-screenshot.png)
+![Courant visual editor showing an aging population model with simulation results](userdocs/Courant-screenshot.png)
 
 ## Installation
 
@@ -39,15 +39,15 @@ The engine supports creating training simulations, games, scenario testing, and 
 ### Build from Source
 
 ```bash
-git clone https://github.com/Courant-Systems/shrewd.git
-cd shrewd
+git clone https://github.com/Courant-Systems/courant.git
+cd courant
 mvn clean package -DskipTests
 ```
 
 ### Run the Visual Editor
 
 ```bash
-java -jar shrewd-app/target/shrewd-app-*.jar
+java -jar courant-app/target/courant-app-*.jar
 ```
 
 Open an example model via **File → Open Example** to explore the 35 bundled models.
@@ -115,7 +115,7 @@ CompiledModel compiled = new ModelCompiler().compile(def);
 compiled.createSimulation().execute();
 ```
 
-See [Programmable Engine](userdocs/Programmable%20Engine.md) for the full API reference. The 23 runnable demos in `shrewd-demos` cover exponential growth, delays, feedback, epidemiology, predator-prey, inventory management, and software development models.
+See [Programmable Engine](userdocs/Programmable%20Engine.md) for the full API reference. The 23 runnable demos in `courant-demos` cover exponential growth, delays, feedback, epidemiology, predator-prey, inventory management, and software development models.
 
 ## Core Concepts
 
@@ -131,7 +131,7 @@ System Dynamics models represent a system as a network of stocks, flows, and fee
 
 ### Causal Loop Diagrams
 
-Shrewd also supports **Causal Loop Diagrams (CLDs)** — the qualitative diagramming technique used in early-stage system dynamics modeling:
+Courant also supports **Causal Loop Diagrams (CLDs)** — the qualitative diagramming technique used in early-stage system dynamics modeling:
 
 - **CLD Variables** — qualitative concepts with no equation or unit
 - **Causal Links** — directed connections with polarity: positive (+), negative (−), or unknown (?)
@@ -146,17 +146,17 @@ CLDs and S&F elements share a single canvas and model definition.
 
 | Module | Purpose |
 |---|---|
-| **shrewd-engine** | Core simulation engine, model definitions, expression AST and parser, two-pass compiler, dependency graphs, dimensional analysis, parameter sweeps, Monte Carlo, optimization, JSON/Vensim/XMILE I/O |
-| **shrewd-ui** | JavaFX chart visualization components |
-| **shrewd-demos** | 23 runnable example programs with source code |
-| **shrewd-app** | Visual editor application with canvas-based GUI, inline editing, simulation, and analysis |
-| **shrewd-tools** | Model analysis and transformation utilities |
+| **courant-engine** | Core simulation engine, model definitions, expression AST and parser, two-pass compiler, dependency graphs, dimensional analysis, parameter sweeps, Monte Carlo, optimization, JSON/Vensim/XMILE I/O |
+| **courant-ui** | JavaFX chart visualization components |
+| **courant-demos** | 23 runnable example programs with source code |
+| **courant-app** | Visual editor application with canvas-based GUI, inline editing, simulation, and analysis |
+| **courant-tools** | Model analysis and transformation utilities |
 
 ## Model Import & Export
 
-Shrewd can exchange models with other System Dynamics tools:
+Courant can exchange models with other System Dynamics tools:
 
-- **Vensim `.mdl` import** — reads Vensim model files including stocks, flows, auxiliaries, constants, lookup tables, subscripts, sketch data, and simulation settings. See [Vensim Import](userdocs/Vensim%20Import.md).
+- **Vensim `.mdl` import** — reads Vensim model files including stocks, flows, auxiliaries, constants, lookup tables, subscripts, sketch data, and simulation settings. See [Vensim Import](userdocs/Vensim_Import.md).
 - **XMILE import & export** — bidirectional exchange with Stella/iThink via the OASIS standard XML format. See [XMILE Import & Export](userdocs/XMILE%20Import%20Export.md).
 - **JSON** — native round-trip persistence format. See [Programmable Engine](userdocs/Programmable%20Engine.md#json-serialization).
 
@@ -184,7 +184,7 @@ Shrewd can exchange models with other System Dynamics tools:
 | [Programmable Engine](userdocs/Programmable%20Engine.md) | Code API: lambda-based models, definitions, compiler, expressions, sweep/Monte Carlo/optimization |
 | [Expression Language](userdocs/Expression_Language.md) | Equation syntax, operators, and built-in functions reference |
 | [From Vensim PLE](userdocs/From_Vensim_PLE.md) | Migration guide for Vensim PLE users |
-| [Vensim Import](userdocs/Vensim%20Import.md) | Vensim `.mdl` import: supported constructs and limitations |
+| [Vensim Import](userdocs/Vensim_Import.md) | Vensim `.mdl` import: supported constructs and limitations |
 | [XMILE Import & Export](userdocs/XMILE%20Import%20Export.md) | XMILE import/export: supported constructs and limitations |
 
 ## Learning System Dynamics

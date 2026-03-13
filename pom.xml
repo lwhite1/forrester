@@ -6,12 +6,12 @@
 
     <groupId>systems.courant</groupId>
     <artifactId>dynamics</artifactId>
-    <version>1.0-Alpha-2</version>
+    <version>1.0-Alpha-3</version>
     <packaging>pom</packaging>
 
-    <name>Shrewd</name>
+    <name>Courant</name>
     <description>System Dynamics simulation engine and visual modeling environment for Java</description>
-    <url>https://github.com/Courant-Systems/Shrewd</url>
+    <url>https://github.com/Courant-Systems/Courant</url>
 
     <licenses>
         <license>
@@ -31,17 +31,17 @@
     </developers>
 
     <scm>
-        <connection>scm:git:git://github.com/Courant-Systems/Shrewd.git</connection>
-        <developerConnection>scm:git:ssh://github.com:Courant-Systems/Shrewd.git</developerConnection>
-        <url>https://github.com/Courant-Systems/Shrewd</url>
+        <connection>scm:git:git://github.com/Courant-Systems/Courant.git</connection>
+        <developerConnection>scm:git:ssh://github.com:Courant-Systems/Courant.git</developerConnection>
+        <url>https://github.com/Courant-Systems/Courant</url>
     </scm>
 
     <modules>
-        <module>shrewd-engine</module>
-        <module>shrewd-ui</module>
-        <module>shrewd-demos</module>
-        <module>shrewd-app</module>
-        <module>shrewd-tools</module>
+        <module>courant-engine</module>
+        <module>courant-ui</module>
+        <module>courant-demos</module>
+        <module>courant-app</module>
+        <module>courant-tools</module>
     </modules>
 
     <properties>
@@ -73,17 +73,17 @@
             <!-- Project modules -->
             <dependency>
                 <groupId>systems.courant</groupId>
-                <artifactId>shrewd-engine</artifactId>
+                <artifactId>courant-engine</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>systems.courant</groupId>
-                <artifactId>shrewd-ui</artifactId>
+                <artifactId>courant-ui</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>systems.courant</groupId>
-                <artifactId>shrewd-app</artifactId>
+                <artifactId>courant-app</artifactId>
                 <version>${project.version}</version>
             </dependency>
 
@@ -317,7 +317,7 @@
                 <repository>
                     <id>github</id>
                     <name>GitHub Packages</name>
-                    <url>https://maven.pkg.github.com/Courant-Systems/Shrewd</url>
+                    <url>https://maven.pkg.github.com/Courant-Systems/Courant</url>
                 </repository>
             </distributionManagement>
         </profile>

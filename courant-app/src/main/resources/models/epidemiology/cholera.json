@@ -1,0 +1,846 @@
+{
+  "name": "Cholera",
+  "stocks": [
+    {
+      "name": "cumulative cholera cases",
+      "comment": "cumulative cholera cases",
+      "initialValue": 0.0,
+      "unit": ""
+    },
+    {
+      "name": "cumulative cholera deaths",
+      "comment": "cumulative cholera deaths",
+      "initialValue": 0.0,
+      "unit": "person"
+    },
+    {
+      "name": "recently infected population",
+      "comment": "recently infected population",
+      "initialValue": 0.0,
+      "unit": ""
+    },
+    {
+      "name": "recovered temporarily immune population",
+      "comment": "recovered temporarily immune population",
+      "initialValue": 0.0,
+      "initialExpression": "1.3228e+007-3e+006-1000-1000-50",
+      "unit": "person"
+    },
+    {
+      "name": "mildly infected population",
+      "comment": "mildly infected population",
+      "initialValue": 0.0,
+      "unit": "person"
+    },
+    {
+      "name": "heavily infected population",
+      "comment": "heavily infected population",
+      "initialValue": 0.0,
+      "unit": "person"
+    },
+    {
+      "name": "susceptible population",
+      "comment": "susceptible population",
+      "initialValue": 3000000.0,
+      "unit": ""
+    }
+  ],
+  "flows": [
+    {
+      "name": "cumulative cholera cases net flow",
+      "comment": "Net flow for cumulative cholera cases",
+      "equation": "recorded_cholera_cases",
+      "timeUnit": "Day",
+      "sink": "cumulative cholera cases"
+    },
+    {
+      "name": "cumulative cholera deaths net flow",
+      "comment": "Net flow for cumulative cholera deaths",
+      "equation": "cholera_deaths",
+      "timeUnit": "Day",
+      "sink": "cumulative cholera deaths"
+    },
+    {
+      "name": "recently infected population net flow",
+      "comment": "Net flow for recently infected population",
+      "equation": "cholera_infections-mildly_infected-heavily_infected",
+      "timeUnit": "Day",
+      "sink": "recently infected population"
+    },
+    {
+      "name": "recovered temporarily immune population net flow",
+      "comment": "Net flow for recovered temporarily immune population",
+      "equation": "recovered_from_heavy_infection+recovered_from_mild_infection-recovered_to_susceptible_by_loss_of_immunity",
+      "timeUnit": "Day",
+      "sink": "recovered temporarily immune population"
+    },
+    {
+      "name": "mildly infected population net flow",
+      "comment": "Net flow for mildly infected population",
+      "equation": "+mildly_infected-recovered_from_mild_infection",
+      "timeUnit": "Day",
+      "sink": "mildly infected population"
+    },
+    {
+      "name": "heavily infected population net flow",
+      "comment": "Net flow for heavily infected population",
+      "equation": "+heavily_infected-cholera_deaths-recovered_from_heavy_infection",
+      "timeUnit": "Day",
+      "sink": "heavily infected population"
+    },
+    {
+      "name": "susceptible population net flow",
+      "comment": "Net flow for susceptible population",
+      "equation": "recovered_to_susceptible_by_loss_of_immunity-cholera_infections",
+      "timeUnit": "Day",
+      "sink": "susceptible population"
+    }
+  ],
+  "variables": [
+    {
+      "name": "recorded cholera cases",
+      "comment": "recorded cholera cases",
+      "equation": "heavily_infected+mildly_infected*0.25",
+      "unit": ""
+    },
+    {
+      "name": "effect of prevention and sanitation on the indirect degree of infection",
+      "comment": "effect of prevention and sanitation on the indirect degree of infection",
+      "equation": "LOOKUP(effect_of_prevention_and_sanitation_on_the_indirect_degree_of_infection_lookup, MAX(condition_of_the_sanitary_infrastructure,level_of_prevention))",
+      "unit": ""
+    },
+    {
+      "name": "level of prevention",
+      "comment": "level of prevention",
+      "equation": "0.1",
+      "unit": "Dmnl"
+    },
+    {
+      "name": "fraction of infected",
+      "comment": "fraction of infected",
+      "equation": "(recently_infected_population+mildly_infected_population+heavily_infected_population )/(recently_infected_population\n+mildly_infected_population+heavily_infected_population+susceptible_population+recovered_temporarily_immune_population )",
+      "unit": "Dmnl"
+    },
+    {
+      "name": "smoothed fraction of contaminated water",
+      "comment": "smoothed fraction of contaminated water",
+      "equation": "DELAY3I(effect_of_the_fraction_of_infected_on_the_fraction_of_contaminated_water, 14 , 0.0004)",
+      "unit": ""
+    },
+    {
+      "name": "indirect degree of infection",
+      "comment": "indirect degree of infection",
+      "equation": "smoothed_fraction_of_contaminated_water*effect_of_prevention_and_sanitation_on_the_indirect_degree_of_infection *connectedness_of_aquifers",
+      "unit": "1/Day"
+    },
+    {
+      "name": "cholera deaths",
+      "comment": "cholera deaths",
+      "equation": "heavily_infected_population/average_duration_of_illness*effect_of_the_average_state_of_health_services_on_the_fraction_of_cholera_deaths",
+      "unit": "person/Day"
+    },
+    {
+      "name": "effect of the fraction of infected on the fraction of contaminated water",
+      "comment": "effect of the fraction of infected on the fraction of contaminated water",
+      "equation": "LOOKUP(effect_of_the_fraction_of_infected_on_the_fraction_of_contaminated_water_lookup, fraction_of_infected)",
+      "unit": ""
+    },
+    {
+      "name": "effect of the average state of health services on the fraction of cholera deaths",
+      "comment": "effect of the average state of health services on the fraction of cholera deaths",
+      "equation": "LOOKUP(effect_of_the_average_state_of_health_services_on_the_fraction_of_cholera_deaths_lookup, average_state_of_health_services)",
+      "unit": ""
+    },
+    {
+      "name": "average immunity period",
+      "comment": "average immunity period",
+      "equation": "6*365",
+      "unit": "Day"
+    },
+    {
+      "name": "average state of health services",
+      "comment": "average state of health services",
+      "equation": "0.15",
+      "unit": ""
+    },
+    {
+      "name": "recovered from heavy infection",
+      "comment": "recovered from heavy infection",
+      "equation": "heavily_infected_population/average_duration_of_illness*(1-effect_of_the_average_state_of_health_services_on_the_fraction_of_cholera_deaths )",
+      "unit": "person/Day"
+    },
+    {
+      "name": "recovered to susceptible by loss of immunity",
+      "comment": "recovered to susceptible by loss of immunity",
+      "equation": "recovered_temporarily_immune_population/average_immunity_period",
+      "unit": ""
+    },
+    {
+      "name": "cholera infections",
+      "comment": "cholera infections",
+      "equation": "susceptible_population*indirect_degree_of_infection",
+      "unit": "person/Day"
+    },
+    {
+      "name": "recovered from mild infection",
+      "comment": "recovered from mild infection",
+      "equation": "mildly_infected_population/average_duration_of_illness",
+      "unit": "person/Day"
+    },
+    {
+      "name": "condition of the sanitary infrastructure",
+      "comment": "condition of the sanitary infrastructure",
+      "equation": "0.5",
+      "unit": "Dmnl"
+    },
+    {
+      "name": "mildly infected",
+      "comment": "mildly infected",
+      "equation": "recently_infected_population/average_incubation_time*effect_of_the_average_health_condition_on_the_fraction_of_mildly_infected_of_all_infected",
+      "unit": "person/Day"
+    },
+    {
+      "name": "heavily infected",
+      "comment": "heavily infected",
+      "equation": "recently_infected_population/average_incubation_time*(1-effect_of_the_average_health_condition_on_the_fraction_of_mildly_infected_of_all_infected )",
+      "unit": ""
+    },
+    {
+      "name": "TIME STEP",
+      "equation": "0.5",
+      "unit": "Day"
+    },
+    {
+      "name": "INITIAL TIME",
+      "equation": "0",
+      "unit": "Day"
+    },
+    {
+      "name": "FINAL TIME",
+      "equation": "3650",
+      "unit": "Day"
+    },
+    {
+      "name": "connectedness of aquifers",
+      "equation": "0.28",
+      "comment": "connectedness of aquifers"
+    },
+    {
+      "name": "effect of the average health condition on the fraction of mildly infected of all infected",
+      "equation": "0.95",
+      "comment": "effect of the average health condition on the fraction of mildly infected of all infected"
+    },
+    {
+      "name": "average incubation time",
+      "equation": "1",
+      "comment": "average incubation time",
+      "unit": "Day"
+    },
+    {
+      "name": "average duration of illness",
+      "equation": "10",
+      "comment": "average duration of illness",
+      "unit": "Day"
+    }
+  ],
+  "lookupTables": [
+    {
+      "name": "effect of prevention and sanitation on the indirect degree of infection lookup",
+      "xValues": [
+        0.0,
+        0.25,
+        0.5,
+        0.75,
+        1.0
+      ],
+      "yValues": [
+        1.0,
+        0.9,
+        0.5,
+        0.1,
+        0.0
+      ],
+      "interpolation": "LINEAR"
+    },
+    {
+      "name": "effect of the fraction of infected on the fraction of contaminated water lookup",
+      "xValues": [
+        0.0,
+        0.125,
+        0.25,
+        0.5,
+        0.75,
+        1.0
+      ],
+      "yValues": [
+        0.0,
+        0.5,
+        0.75,
+        0.9,
+        0.99,
+        1.0
+      ],
+      "interpolation": "LINEAR"
+    },
+    {
+      "name": "effect of the average state of health services on the fraction of cholera deaths lookup",
+      "xValues": [
+        0.0,
+        0.25,
+        0.5,
+        0.75,
+        1.0
+      ],
+      "yValues": [
+        1.0,
+        0.5,
+        0.2,
+        0.05,
+        0.0
+      ],
+      "interpolation": "LINEAR"
+    }
+  ],
+  "views": [
+    {
+      "name": "View 1",
+      "elements": [
+        {
+          "name": "susceptible population",
+          "type": "stock",
+          "x": 282.0,
+          "y": 204.0
+        },
+        {
+          "name": "recently infected population",
+          "type": "stock",
+          "x": 455.0,
+          "y": 207.0
+        },
+        {
+          "name": "recovered temporarily immune population",
+          "type": "stock",
+          "x": 854.0,
+          "y": 206.0
+        },
+        {
+          "name": "heavily infected population",
+          "type": "stock",
+          "x": 668.0,
+          "y": 431.0
+        },
+        {
+          "name": "mildly infected population",
+          "type": "stock",
+          "x": 667.0,
+          "y": 210.0
+        },
+        {
+          "name": "cumulative cholera deaths",
+          "type": "stock",
+          "x": 659.0,
+          "y": 571.0
+        },
+        {
+          "name": "_556",
+          "type": "flow",
+          "x": 673.0,
+          "y": 99.0
+        },
+        {
+          "name": "recovered to susceptible by loss of immunity",
+          "type": "aux",
+          "x": 673.0,
+          "y": 126.0
+        },
+        {
+          "name": "_684",
+          "type": "flow",
+          "x": 367.0,
+          "y": 209.0
+        },
+        {
+          "name": "cholera infections",
+          "type": "aux",
+          "x": 367.0,
+          "y": 239.0
+        },
+        {
+          "name": "_604",
+          "type": "flow",
+          "x": 471.0,
+          "y": 414.0
+        },
+        {
+          "name": "heavily infected",
+          "type": "aux",
+          "x": 471.0,
+          "y": 441.0
+        },
+        {
+          "name": "_156",
+          "type": "flow",
+          "x": 558.0,
+          "y": 205.0
+        },
+        {
+          "name": "mildly infected",
+          "type": "aux",
+          "x": 558.0,
+          "y": 232.0
+        },
+        {
+          "name": "_172",
+          "type": "flow",
+          "x": 854.0,
+          "y": 411.0
+        },
+        {
+          "name": "recovered from heavy infection",
+          "type": "aux",
+          "x": 854.0,
+          "y": 438.0
+        },
+        {
+          "name": "_652",
+          "type": "flow",
+          "x": 764.0,
+          "y": 203.0
+        },
+        {
+          "name": "recovered from mild infection",
+          "type": "aux",
+          "x": 764.0,
+          "y": 232.0
+        },
+        {
+          "name": "_668",
+          "type": "flow",
+          "x": 655.0,
+          "y": 511.0
+        },
+        {
+          "name": "cholera deaths",
+          "type": "aux",
+          "x": 709.0,
+          "y": 511.0
+        },
+        {
+          "name": "condition of the sanitary infrastructure",
+          "type": "aux",
+          "x": 100.0,
+          "y": 364.0
+        },
+        {
+          "name": "indirect degree of infection",
+          "type": "aux",
+          "x": 295.0,
+          "y": 294.0
+        },
+        {
+          "name": "average state of health services",
+          "type": "aux",
+          "x": 837.0,
+          "y": 582.0
+        },
+        {
+          "name": "effect of the average state of health services on the fraction of cholera deaths",
+          "type": "aux",
+          "x": 858.0,
+          "y": 515.0
+        },
+        {
+          "name": "effect of the average health condition on the fraction of mildly infected of all infected",
+          "type": "aux",
+          "x": 657.0,
+          "y": 353.0
+        },
+        {
+          "name": "fraction of infected",
+          "type": "aux",
+          "x": 422.0,
+          "y": 524.0
+        },
+        {
+          "name": "average incubation time",
+          "type": "aux",
+          "x": 550.0,
+          "y": 299.0
+        },
+        {
+          "name": "average immunity period",
+          "type": "aux",
+          "x": 462.0,
+          "y": 126.0
+        },
+        {
+          "name": "average duration of illness",
+          "type": "aux",
+          "x": 785.0,
+          "y": 319.0
+        },
+        {
+          "name": "effect of prevention and sanitation on the indirect degree of infection",
+          "type": "aux",
+          "x": 120.0,
+          "y": 293.0
+        },
+        {
+          "name": "connectedness of aquifers",
+          "type": "aux",
+          "x": 196.0,
+          "y": 212.0
+        },
+        {
+          "name": "effect of the fraction of infected on the fraction of contaminated water",
+          "type": "aux",
+          "x": 295.0,
+          "y": 455.0
+        },
+        {
+          "name": "cumulative cholera cases",
+          "type": "stock",
+          "x": 95.0,
+          "y": 119.0
+        },
+        {
+          "name": "_48",
+          "type": "flow",
+          "x": 198.0,
+          "y": 119.0
+        },
+        {
+          "name": "recorded cholera cases",
+          "type": "aux",
+          "x": 198.0,
+          "y": 146.0
+        },
+        {
+          "name": "mildly infected population",
+          "type": "stock",
+          "x": 311.0,
+          "y": 574.0
+        },
+        {
+          "name": "level of prevention",
+          "type": "aux",
+          "x": 94.0,
+          "y": 230.0
+        },
+        {
+          "name": "smoothed fraction of contaminated water",
+          "type": "aux",
+          "x": 277.0,
+          "y": 370.0
+        },
+        {
+          "name": "susceptible population",
+          "type": "stock",
+          "x": 411.0,
+          "y": 572.0
+        },
+        {
+          "name": "recovered temporarily immune population",
+          "type": "stock",
+          "x": 536.0,
+          "y": 569.0
+        },
+        {
+          "name": "mildly infected",
+          "type": "aux",
+          "x": 109.0,
+          "y": 74.0
+        },
+        {
+          "name": "heavily infected",
+          "type": "aux",
+          "x": 230.0,
+          "y": 75.0
+        }
+      ],
+      "connectors": [
+        {
+          "from": "8",
+          "to": "recovered temporarily immune population"
+        },
+        {
+          "from": "_556",
+          "to": "susceptible population"
+        },
+        {
+          "from": "13",
+          "to": "recently infected population"
+        },
+        {
+          "from": "13",
+          "to": "susceptible population"
+        },
+        {
+          "from": "17",
+          "to": "heavily infected population"
+        },
+        {
+          "from": "17",
+          "to": "recently infected population"
+        },
+        {
+          "from": "21",
+          "to": "mildly infected population"
+        },
+        {
+          "from": "21",
+          "to": "recently infected population"
+        },
+        {
+          "from": "25",
+          "to": "recovered temporarily immune population"
+        },
+        {
+          "from": "25",
+          "to": "heavily infected population"
+        },
+        {
+          "from": "29",
+          "to": "recovered temporarily immune population"
+        },
+        {
+          "from": "29",
+          "to": "mildly infected population"
+        },
+        {
+          "from": "33",
+          "to": "cumulative cholera deaths"
+        },
+        {
+          "from": "33",
+          "to": "heavily infected population"
+        },
+        {
+          "from": "recovered temporarily immune population",
+          "to": "recovered to susceptible by loss of immunity"
+        },
+        {
+          "from": "susceptible population",
+          "to": "_684"
+        },
+        {
+          "from": "condition of the sanitary infrastructure",
+          "to": "66"
+        },
+        {
+          "from": "indirect degree of infection",
+          "to": "cholera infections"
+        },
+        {
+          "from": "heavily infected population",
+          "to": "recovered from heavy infection"
+        },
+        {
+          "from": "heavily infected population",
+          "to": "cholera deaths"
+        },
+        {
+          "from": "average state of health services",
+          "to": "45"
+        },
+        {
+          "from": "effect of the average state of health services on the fraction of cholera deaths",
+          "to": "recovered from heavy infection"
+        },
+        {
+          "from": "effect of the average state of health services on the fraction of cholera deaths",
+          "to": "cholera deaths"
+        },
+        {
+          "from": "effect of the average health condition on the fraction of mildly infected of all infected",
+          "to": "mildly infected"
+        },
+        {
+          "from": "effect of the average health condition on the fraction of mildly infected of all infected",
+          "to": "_604"
+        },
+        {
+          "from": "mildly infected population",
+          "to": "_652"
+        },
+        {
+          "from": "fraction of infected",
+          "to": "70"
+        },
+        {
+          "from": "recently infected population",
+          "to": "fraction of infected"
+        },
+        {
+          "from": "heavily infected population",
+          "to": "fraction of infected"
+        },
+        {
+          "from": "recently infected population",
+          "to": "_156"
+        },
+        {
+          "from": "recently infected population",
+          "to": "_604"
+        },
+        {
+          "from": "average incubation time",
+          "to": "mildly infected"
+        },
+        {
+          "from": "average incubation time",
+          "to": "_604"
+        },
+        {
+          "from": "average duration of illness",
+          "to": "_172"
+        },
+        {
+          "from": "average duration of illness",
+          "to": "cholera deaths"
+        },
+        {
+          "from": "average duration of illness",
+          "to": "recovered from mild infection"
+        },
+        {
+          "from": "effect of prevention and sanitation on the indirect degree of infection",
+          "to": "indirect degree of infection"
+        },
+        {
+          "from": "connectedness of aquifers",
+          "to": "indirect degree of infection"
+        },
+        {
+          "from": "75",
+          "to": "cumulative cholera cases"
+        },
+        {
+          "from": "75",
+          "to": "72"
+        },
+        {
+          "from": "mildly infected population",
+          "to": "fraction of infected"
+        },
+        {
+          "from": "level of prevention",
+          "to": "effect of prevention and sanitation on the indirect degree of infection"
+        },
+        {
+          "from": "effect of the fraction of infected on the fraction of contaminated water",
+          "to": "smoothed fraction of contaminated water"
+        },
+        {
+          "from": "smoothed fraction of contaminated water",
+          "to": "indirect degree of infection"
+        },
+        {
+          "from": "susceptible population",
+          "to": "fraction of infected"
+        },
+        {
+          "from": "recovered temporarily immune population",
+          "to": "fraction of infected"
+        },
+        {
+          "from": "heavily infected",
+          "to": "_48"
+        },
+        {
+          "from": "mildly infected",
+          "to": "_48"
+        },
+        {
+          "from": "average immunity period",
+          "to": "recovered to susceptible by loss of immunity"
+        }
+      ],
+      "flowRoutes": [
+        {
+          "flowName": "_556",
+          "points": [
+            [
+              673.0,
+              99.0
+            ]
+          ]
+        },
+        {
+          "flowName": "_684",
+          "points": [
+            [
+              367.0,
+              209.0
+            ]
+          ]
+        },
+        {
+          "flowName": "_604",
+          "points": [
+            [
+              471.0,
+              414.0
+            ]
+          ]
+        },
+        {
+          "flowName": "_156",
+          "points": [
+            [
+              558.0,
+              205.0
+            ]
+          ]
+        },
+        {
+          "flowName": "_172",
+          "points": [
+            [
+              854.0,
+              411.0
+            ]
+          ]
+        },
+        {
+          "flowName": "_652",
+          "points": [
+            [
+              764.0,
+              203.0
+            ]
+          ]
+        },
+        {
+          "flowName": "_668",
+          "points": [
+            [
+              655.0,
+              511.0
+            ]
+          ]
+        },
+        {
+          "flowName": "_48",
+          "points": [
+            [
+              198.0,
+              119.0
+            ]
+          ]
+        }
+      ]
+    }
+  ],
+  "defaultSimulation": {
+    "timeStep": "Day",
+    "duration": 3650.0,
+    "durationUnit": "Day"
+  },
+  "metadata": {
+    "license": "CC-BY-NC-SA-4.0",
+    "author": "Dr. Erik Pruyt",
+    "source": "Pruyt, E., 2013. Small System Dynamics Models for Big Issues: Triple Jump towards Real-World Complexity. TU Delft Library. ISBN 978-94-6186-195-5",
+    "url": "https://simulation.tudelft.nl/SD/"
+  }
+}

@@ -1,18 +1,41 @@
-# Vensim (.mdl) Import Support
+# Vensim `.mdl` Import
 
-This document describes what Shrewd supports when importing Vensim `.mdl` files, what is unsupported, and what known limitations exist.
+Courant reads Vensim `.mdl` model files and produces a `ModelDefinition` that can be compiled and simulated.
 
-## Supported Features
+## Usage
+
+```java
+VensimImporter importer = new VensimImporter();
+ImportResult result = importer.importModel(Path.of("model.mdl"));
+if (!result.isClean()) {
+    result.warnings().forEach(System.out::println);
+}
+ModelDefinition def = result.definition();
+
+// Compile and run
+CompiledModel compiled = new ModelCompiler().compile(def);
+Simulation sim = compiled.createSimulation();
+sim.execute();
+```
+
+In the visual editor, use **File > Open** to load `.mdl` files directly.
+
+---
+
+## Supported Constructs
 
 ### Core Variable Types
 
-| Type | How Detected | Notes |
-|------|-------------|-------|
-| Stocks | `INTEG(rate_expr, initial_value)` | Net flow auto-created as `{stock}_net_flow` |
-| Constants | Numeric literal with `=` or `==` operator | Scientific notation supported (e.g. `1.5e-3`) |
-| Auxiliaries | Expression-based equation with `=` operator | Any non-INTEG, non-literal equation |
-| Lookup Tables | `()` operator or `WITH LOOKUP` | Range annotation `[(xmin,ymin)-(xmax,ymax)]` stripped |
-| Subscript Ranges | `:` operator (e.g. `Region : North, South`) | Labels normalized (spaces to underscores) |
+| Vensim Construct | Courant Element | Notes |
+|---|---|---|
+| `INTEG(rate, init)` | `StockDef` + `FlowDef` | Net flow auto-created as `{stock}_net_flow`; expression-based initial values supported |
+| Numeric literal (`=` or `==`) | `AuxDef` (literal) | Scientific notation supported (e.g. `1.5e-3`) |
+| Unchangeable (`==`) | `AuxDef` (literal) | |
+| Expression (`=`) | `AuxDef` | Any non-INTEG, non-literal equation |
+| Standalone lookup table | `LookupTableDef` | Range annotation `[(xmin,ymin)-(xmax,ymax)]` stripped |
+| `WITH LOOKUP(input, data)` | `AuxDef` + extracted `LookupTableDef` | |
+| Subscript range (`:`) | `SubscriptDef` | Labels normalized (spaces to underscores) |
+| Data variables (`:=`) | Skipped with warning | |
 
 ### Simulation Settings
 
@@ -20,7 +43,7 @@ All settings from the `.Control` group are extracted (case-insensitive):
 
 - `INITIAL TIME` -- simulation start time
 - `FINAL TIME` -- simulation end time (converted to duration)
-- `TIME STEP` -- extracted but preserved as metadata only (Shrewd uses fixed step dt=1)
+- `TIME STEP` -- extracted and preserved as fractional dt
 - `SAVEPER` -- recognized but not enforced
 
 ### Expression Translation
@@ -29,56 +52,43 @@ All settings from the `.Control` group are extracted (case-insensitive):
 - Multi-word names converted: `Contact Rate` becomes `Contact_Rate`
 - Longest-name-first matching prevents partial substitution
 - Case-insensitive, word-boundary-aware replacement
+- Special characters stripped; names starting with digits get `_` prefix
+- Surrounding quotes removed
+- Duplicate normalized names detected and warned
 
 **Operator translation:**
 
-| Vensim | Shrewd |
-|--------|-----------|
+| Vensim | Courant |
+|---|---|
 | `:AND:` | `and` |
 | `:OR:` | `or` |
-| `:NOT:` | `not` (parenthesized) |
+| `:NOT:` | `not(...)` |
+| `^` | `**` |
+| `Time` | `TIME` |
 
 **Function translation:**
 
-| Vensim | Shrewd | Notes |
-|--------|-----------|-------|
+| Vensim | Courant | Notes |
+|---|---|---|
 | `IF THEN ELSE(c, t, e)` | `IF(c, t, e)` | |
 | `XIDZ(a, b, x)` | `IF((b)==0, x, (a)/(b))` | Safe division with fallback |
 | `ZIDZ(a, b)` | `IF((b)==0, 0, (a)/(b))` | Safe division, zero fallback |
 | `WITH LOOKUP(input, data)` | `LOOKUP(name, input)` | Lookup extracted to separate table |
-| `Time` | `TIME` | |
-
-**Pass-through functions** (no translation needed):
-`INTEG`, `SMOOTH`, `DELAY3`, `MIN`, `MAX`, `ABS`, `EXP`, `LN`, `LOG`, `SQRT`, `SIN`, `COS`, `TAN`, `INT`, `ROUND`, `MODULO`, `POWER`, `QUANTUM`, `RAMP`, `STEP`, `PULSE`, `TREND`, `FORECAST`, `NPV`
-
-**Translated functions:**
-
-| Vensim | Shrewd | Notes |
-|--------|-----------|-------|
+| `GAME(expr)` | `expr` | Wrapper stripped |
 | `DELAY FIXED(input, time, init)` | `DELAY_FIXED(input, time, init)` | Space to underscore |
+| `PULSE TRAIN(start, dur, repeat, end)` | `PULSE_TRAIN(start, dur, repeat, end)` | Space to underscore |
+| `RANDOM NORMAL(min, max, mean, std, seed)` | `RANDOM_NORMAL(min, max, mean, std, seed)` | Space to underscore |
+| `RANDOM UNIFORM(min, max, seed)` | `RANDOM_UNIFORM(min, max, seed)` | Space to underscore |
+| `SAMPLE IF TRUE(cond, input, init)` | `SAMPLE_IF_TRUE(cond, input, init)` | Space to underscore |
+| `FIND ZERO(expr, var, lo, hi)` | `FIND_ZERO(expr, var, lo, hi)` | Space to underscore |
+| `LOOKUP AREA(table, x1, x2)` | `LOOKUP_AREA(table, x1, x2)` | Space to underscore |
+| `ACTIVE INITIAL(expr, init)` | `expr` | Pass-through first arg (no game mode) |
+| `MESSAGE(args)` | `0` | No-op (UI-only function) |
+| `SIMULTANEOUS(args)` | `0` | No-op (solver hint for Euler integration) |
 
-### Approximated Functions
+**Natively supported functions (pass-through):**
 
-These functions are translated with a warning because the semantics differ:
-
-| Vensim | Translated To | Difference |
-|--------|--------------|------------|
-| `SMOOTH3(input, time)` | `SMOOTH(input, time)` | Third-order smoothing reduced to first-order |
-| `SMOOTHI(input, time, init)` | `SMOOTH(input, time)` | Initial value argument dropped |
-| `SMOOTH3I(input, time, init)` | `SMOOTH(input, time)` | Third-order + initial value both lost |
-| `DELAY1(input, time)` | `DELAY3(input, time)` | First-order delay changed to third-order |
-| `DELAY1I(input, time, init)` | `DELAY3(input, time)` | First-order + initial value both lost |
-
-### File Format Support
-
-- CRLF and LF line endings
-- UTF-8 BOM stripping
-- `{UTF-8}` header stripping
-- Backslash continuation lines (e.g. `expr +\` / `  more`)
-- Pipe `|` block delimiters
-- Tilde-separated sections: `name ~ units ~ comment`
-- Comment preservation on each variable
-- Group sections (lines of `****` with `.Group_Name` headers)
+`SMOOTH`, `SMOOTH3`, `SMOOTH3I`, `SMOOTHI`, `DELAY1`, `DELAY1I`, `DELAY3`, `DELAY3I`, `DELAY_FIXED`, `PULSE`, `PULSE_TRAIN`, `RANDOM_NORMAL`, `RANDOM_UNIFORM`, `MIN`, `MAX`, `ABS`, `EXP`, `LN`, `LOG`, `SQRT`, `SIN`, `COS`, `TAN`, `ARCSIN`, `ARCCOS`, `ARCTAN`, `INT`, `ROUND`, `MODULO`, `POWER`, `QUANTUM`, `SIGN`, `PI`, `VMIN`, `VMAX`, `PROD`, `RAMP`, `STEP`, `TREND`, `FORECAST`, `NPV`, `INITIAL`, `LOOKUP`, `LOOKUP_AREA`, `SAMPLE_IF_TRUE`, `FIND_ZERO`, `NOT`, `OR`, `AND`, `TRUE`, `FALSE`
 
 ### Sketch/View Parsing
 
@@ -88,57 +98,61 @@ These functions are translated with a warning because the semantics differ:
 - Dependency connectors (type 1 lines)
 - Clouds (type 12 lines) recognized but skipped (source/sink boundaries)
 
+### CLD Mode Detection
+
+If a model has no stocks and no flow valves in its sketch, Courant treats it as a Causal Loop Diagram. Sketch connectors become `CausalLinkDef` entries with unknown polarity.
+
+### File Format Support
+
+- CRLF and LF line endings
+- UTF-8 BOM stripping; `{UTF-8}` header stripping
+- Backslash continuation lines (e.g. `expr +\` / `  more`)
+- Pipe `|` block delimiters
+- Tilde-separated sections: `name ~ units ~ comment`
+- Comment preservation on each variable
+- Group sections (lines of `****` with `.Group_Name` headers)
+- Quoted variable names (e.g. `"name with (parens)"`)
+
 ---
 
 ## Unsupported Features
 
-### Variable Types Not Imported
-
-| Type | Behavior |
-|------|----------|
-| Data variables (`:=` operator) | Skipped with warning |
-| Game variables | Silently skipped |
-| Reality checks | Not recognized |
-| `:SUPPLEMENTARY:` variables | Keyword not recognized |
-
 ### Functions That Trigger Warnings
 
-The following functions are recognized in equations but not supported. They remain in the equation text unchanged and a warning is issued:
+The following functions are recognized but not supported. They remain in the equation text unchanged and a warning is issued:
 
-`PULSE TRAIN`, `GAME`, `DELAY N`, `GET XLS DATA`, `GET DIRECT DATA`, `GET DIRECT CONSTANTS`, `TABBED ARRAY`, `SAMPLE IF TRUE`, `VECTOR SELECT`, `VECTOR ELM MAP`, `VECTOR SORT ORDER`, `ALLOCATE AVAILABLE`, `FIND ZERO`
-
-Note: Vensim's `PULSE(start, width)` has different semantics from Shrewd's `PULSE(magnitude, start)`. Vensim PULSE returns `1/TIME_STEP` for a duration; Shrewd's returns a magnitude for one timestep. Models using Vensim PULSE will need manual adjustment after import.
+| Function | Notes |
+|---|---|
+| `DELAY N` | Nth-order material delay. DELAY1 and DELAY3 are supported. |
+| `GET XLS DATA` | Reads time-series from Excel. External data dependency. |
+| `GET DIRECT DATA` | Reads data from external file. |
+| `GET DIRECT CONSTANTS` | Reads constants from external file. |
+| `TABBED ARRAY` | Inline array definition. Would need full array support. |
+| `VECTOR SELECT` | Vector operations. Would need array support. |
+| `VECTOR ELM MAP` | Vector element mapping. |
+| `VECTOR SORT ORDER` | Vector sorting. |
+| `ALLOCATE AVAILABLE` | Resource allocation across subscripts. |
 
 ### Structural Features
 
 | Feature | Status |
-|---------|--------|
+|---|---|
 | Macros (`:MACRO:` to `:END OF MACRO:`) | Content skipped entirely |
 | Module/component structures | Not supported |
-| A-to-B notation | No special handling beyond sketch connectors |
-| Subscripted variables (e.g. `Stock[Region]`) | Subscript ranges imported but subscripted variable access untested |
+| Reality checks | Not recognized |
+| `:SUPPLEMENTARY:` variables | Keyword not recognized |
+| Subscripted variable access (e.g. `Stock[Region]`) | Subscript ranges imported but subscripted variable access untested |
 
 ---
 
 ## Known Limitations
 
-### Initial Values
+### PULSE Semantics
 
-- Only numeric literals accepted for `INTEG` initial values
-- Expression-based initial values (e.g. `INTEG(rate, stock * 2)`) default to `0.0` with a warning
-- Missing initial values default to `0.0` with a warning
-
-### Time Step
-
-- `TIME STEP` is extracted but **not used in simulation**
-- Shrewd simulates with fixed Euler integration at dt=1 regardless of the `.mdl` setting
-- Models designed for different dt values may produce different results
+Vensim's `PULSE(start, width)` returns `1/TIME_STEP` for a duration. Courant's `PULSE(magnitude, start)` returns a magnitude for one timestep. Models using Vensim PULSE may need manual adjustment after import.
 
 ### Name Normalization
 
-- Special characters stripped (not preserved)
-- Names starting with digits get `_` prefix
-- Surrounding quotes removed
 - No validation against reserved words
 - Duplicate normalized names detected and warned
 
@@ -156,7 +170,7 @@ Note: Vensim's `PULSE(start, width)` has different semantics from Shrewd's `PULS
 ### Round-Trip Fidelity
 
 - Synthetic net flows (`{stock}_net_flow`) are inlined back into `INTEG` on export
-- Lookup table range annotations `[(xmin,ymin)-(xmax,ymax)]` are reconstructed on export but not preserved from import
+- Lookup table range annotations are reconstructed on export but not preserved from import
 - Function names protected from denormalization on export (e.g. `INTEG` not converted to `I N T E G`)
 
 ---
@@ -167,7 +181,6 @@ All import errors are non-fatal. The importer collects warnings in `ImportResult
 
 **Warning categories:**
 - Data variables skipped
-- Non-literal initial values defaulting to 0
 - Malformed INTEG or WITH LOOKUP expressions
 - Non-numeric simulation settings
 - Duplicate normalized names
@@ -179,50 +192,57 @@ All import errors are non-fatal. The importer collects warnings in `ImportResult
 
 ---
 
-## Test Coverage
+## Import Compatibility
 
-### Example Models
-- **teacup.mdl** -- Single stock, constant room temperature, auxiliary heat loss rate
-- **sir.mdl** -- Three stocks (S/I/R), two auxiliaries, three constants, full sketch view
+Tested against 59 Vensim sample models (`D:\Vensim\Models\Sample`):
+- **Import (parse .mdl)**: 59/59 (100%)
+- **Compile**: 45/59 (76%)
+- **Simulate**: 45/59 (76%)
 
-### Tested Scenarios
-- Element classification (INTEG, literal, expression, lookup, subscript, data variable)
-- Multi-word name normalization in expressions
-- Lookup table import and export
-- Simulation setting extraction
-- Case-insensitive system variables
-- Numeric literal detection (integers, decimals, negative, scientific notation)
-- Duplicate name detection
-- Continuation line handling
-- UTF-8 and BOM header stripping
-- Group section extraction
-- Sketch line parsing and view creation
-- Round-trip: import, export, reimport for SIR model
-- Full pipeline: import, compile, simulate for Teacup model
+The 14 compile failures are caused by subscript/array models that require array expansion the importer doesn't yet support, not by missing functions.
+
+Also tested against 25 models from the TU Delft repository (Pruyt, 2013):
+- **Compilation**: 25/25 (100%)
+- **Simulation**: 24/25 (96%) — ProjectManagement fails due to algebraic loops
+
+---
+
+## Key Classes
+
+| Class | Purpose |
+|---|---|
+| `VensimImporter` | Main entry point implementing `ModelImporter` |
+| `MdlParser` | Low-level `.mdl` file parser (equations + sketch extraction) |
+| `VensimExprTranslator` | Expression syntax translation (Vensim to Courant) |
+| `SketchParser` | Sketch section to `ViewDef` records |
 
 ---
 
 ## Summary
 
 | Category | Support Level |
-|----------|--------------|
-| Stocks (INTEG) | Full |
+|---|---|
+| Stocks (INTEG) | Full (including expression-based initial values) |
 | Constants | Full |
 | Auxiliaries | Full |
 | Lookup tables | Full |
 | Subscript range definitions | Full |
-| Simulation settings | Full (dt metadata only) |
+| Simulation settings | Full |
 | Multi-word name normalization | Full |
 | Logical operators | Full |
 | IF THEN ELSE / XIDZ / ZIDZ | Full |
-| SMOOTH, DELAY3 | Full |
-| SMOOTH3, SMOOTHI, DELAY1 | Approximated (with warnings) |
+| SMOOTH / SMOOTH3 / SMOOTH3I / SMOOTHI | Full (native) |
+| DELAY1 / DELAY1I / DELAY3 / DELAY3I / DELAY_FIXED | Full (native) |
+| PULSE / PULSE_TRAIN | Full (native) |
+| RANDOM_NORMAL / RANDOM_UNIFORM | Full (native) |
+| SAMPLE_IF_TRUE / FIND_ZERO | Full (native) |
+| LOOKUP_AREA | Full (trapezoidal integration) |
+| ACTIVE INITIAL / GAME / MESSAGE / SIMULTANEOUS | Full (translated or no-op) |
+| NOT / OR / AND / TRUE / FALSE (function forms) | Full |
+| TREND / FORECAST / NPV | Full |
 | Sketch/views | Full (4 line types) |
 | Macros | Skipped |
 | Data variables | Skipped (with warning) |
-| Game variables | Skipped |
-| DELAY FIXED | Full (translated to DELAY_FIXED) |
-| TREND, FORECAST, NPV | Full (pass-through) |
-| PULSE TRAIN, GAME, DELAY N, etc. | Warned, left in equation |
+| DELAY N, GET XLS DATA, etc. | Warned, left in equation |
 | Subscripted variable access | Untested |
 | Module/component hierarchy | Not supported |

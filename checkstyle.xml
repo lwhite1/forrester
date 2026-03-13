@@ -4,7 +4,7 @@
         "https://checkstyle.org/dtds/configuration_1_3.dtd">
 
 <!--
-    Checkstyle configuration for Shrewd, based on Google Java Style Guide
+    Checkstyle configuration for Courant, based on Google Java Style Guide
     with project-specific adjustments (4-space indent, 120-char lines).
 -->
 <module name="Checker">

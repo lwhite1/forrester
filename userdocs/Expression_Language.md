@@ -1,4 +1,4 @@
-# Shrewd Expression Language Reference
+# Courant Expression Language Reference
 
 This document describes the expression language used in flow equations, variable equations, and lookup table inputs.
 
@@ -97,9 +97,23 @@ IF(condition, then_value, else_value)
 
 Returns `then_value` if `condition` is non-zero, otherwise `else_value`.
 
+**Important:** `IF` always evaluates **both** branches on every time step, even the one that is not selected. This is intentional — stateful functions like `SMOOTH`, `DELAY3`, and `TREND` in the untaken branch continue to update their internal state, so they produce correct values when the condition changes. Side effects in both branches (e.g., `RANDOM` calls) will always occur.
+
 ```
 IF(Inventory > 0, Order_Rate, 0)
 IF(Population > Capacity, Capacity, Population)
+```
+
+### IF_SHORT — Short-Circuit Conditional
+
+```
+IF_SHORT(condition, then_value, else_value)
+```
+
+Like `IF`, but uses true short-circuit evaluation: only the taken branch is evaluated. This avoids the performance cost of evaluating unreachable expressions, but **stateful functions in the untaken branch will not be updated**. Use `IF_SHORT` only when neither branch contains stateful functions, or when you intentionally want to freeze the untaken branch.
+
+```
+IF_SHORT(x > 0, LN(x), 0)     -- avoids evaluating LN(x) when x <= 0
 ```
 
 ## Math Functions
@@ -116,16 +130,51 @@ IF(Population > Capacity, Capacity, Population)
 | `SIN(x)` | 1 | Sine (x in radians) |
 | `COS(x)` | 1 | Cosine (x in radians) |
 | `TAN(x)` | 1 | Tangent (x in radians) |
+| `ARCSIN(x)` | 1 | Inverse sine; x in [-1, 1], result in radians |
+| `ARCCOS(x)` | 1 | Inverse cosine; x in [-1, 1], result in radians |
+| `ARCTAN(x)` | 1 | Inverse tangent; result in radians |
+| `SIGN(x)` | 1 | Returns -1, 0, or 1 depending on sign of x |
+| `PI` | 0 | The constant π (3.14159...) |
 | `INT(x)` | 1 | Truncate to integer (toward zero) |
 | `ROUND(x)` | 1 | Round to nearest integer |
+| `QUANTUM(x, q)` | 2 | Round x down to nearest multiple of q |
 | `MODULO(a, b)` | 2 | Remainder of a / b (returns 0 if b is 0) |
-| `POWER(a, b)` | 2 | a raised to the power b (equivalent to `a ^ b`) |
+| `POWER(a, b)` | 2 | a raised to the power b (equivalent to `a ** b`) |
 | `SUM(a, b, ...)` | 1+ | Sum of all arguments |
 | `MEAN(a, b, ...)` | 1+ | Arithmetic mean of all arguments |
+| `VMIN(a, b, ...)` | 1+ | Minimum of all arguments (variadic) |
+| `VMAX(a, b, ...)` | 1+ | Maximum of all arguments (variadic) |
+| `PROD(a, b, ...)` | 1+ | Product of all arguments |
+| `XIDZ(a, b, x)` | 3 | a / b if b ≠ 0, otherwise x ("X If Divide by Zero") |
+| `ZIDZ(a, b)` | 2 | a / b if b ≠ 0, otherwise 0 ("Zero If Divide by Zero") |
+
+## Logical Functions
+
+In addition to the `and`, `or`, and `not` operators (see Operators above), these are available as function-call forms. They are equivalent to the operator forms and exist primarily for Vensim compatibility.
+
+| Function | Arguments | Description |
+|----------|-----------|-------------|
+| `NOT(x)` | 1 | Returns 1 if x is 0, otherwise 0 |
+| `OR(a, b)` | 2 | Returns 1 if either a or b is non-zero |
+| `AND(a, b)` | 2 | Returns 1 if both a and b are non-zero |
+| `TRUE()` | 0 | Returns 1 (boolean true constant) |
+| `FALSE()` | 0 | Returns 0 (boolean false constant) |
 
 ## System Dynamics Functions
 
-### SMOOTH — Exponential Smoothing
+### INITIAL — Value at Initial Time
+
+```
+INITIAL(expr)
+```
+
+Evaluates the expression once at the initial time step and returns that value for all subsequent time steps. Useful for capturing starting conditions.
+
+```
+INITIAL(Population)   -- value of Population at t=0, held constant
+```
+
+### SMOOTH — Exponential Smoothing (1st Order)
 
 ```
 SMOOTH(input, smoothing_time)
@@ -133,6 +182,56 @@ SMOOTH(input, smoothing_time, initial_value)
 ```
 
 First-order exponential smoothing. Smooths the input signal over the specified time. If no initial value is given, the first input value is used.
+
+### SMOOTHI — Exponential Smoothing with Initial (1st Order)
+
+```
+SMOOTHI(input, smoothing_time, initial_value)
+```
+
+First-order exponential smoothing with a caller-specified initial value. Behaves like SMOOTH but starts from `initial_value` instead of the first input value.
+
+```
+SMOOTHI(Revenue, 4, 1000)   -- smooths Revenue over 4 time units, starting at 1000
+```
+
+### SMOOTH3 — Exponential Smoothing (3rd Order)
+
+```
+SMOOTH3(input, smoothing_time)
+SMOOTH3(input, smoothing_time, initial_value)
+```
+
+Third-order exponential smoothing. Chains three first-order smooths, each with time constant `smoothing_time / 3`. Produces a more delayed, S-shaped response compared to first-order SMOOTH.
+
+```
+SMOOTH3(Revenue, 6)   -- third-order smooth of Revenue over 6 time units
+```
+
+### SMOOTH3I — Exponential Smoothing with Initial (3rd Order)
+
+```
+SMOOTH3I(input, smoothing_time, initial_value)
+```
+
+Third-order exponential smoothing with a caller-specified initial value. Combines the S-shaped response of SMOOTH3 with explicit initialization.
+
+```
+SMOOTH3I(Revenue, 6, 1000)   -- third-order smooth starting at 1000
+```
+
+### DELAY1 — First-Order Material Delay
+
+```
+DELAY1(input, delay_time)
+DELAY1(input, delay_time, initial_value)
+```
+
+Delays the input using a first-order exponential delay (single stage). Produces an immediate partial response that decays exponentially. The average delay equals `delay_time`. If no initial value is given, the first input value is used.
+
+```
+DELAY1(Orders, 5)   -- orders delayed by ~5 time units (exponential)
+```
 
 ### DELAY3 — Third-Order Material Delay
 
@@ -181,6 +280,18 @@ Returns `magnitude` for one timestep at `start_time`, then 0. If `interval` is s
 ```
 PULSE(100, 5)       -- 100 at step 5, 0 everywhere else
 PULSE(100, 5, 10)   -- 100 at steps 5, 15, 25, ...
+```
+
+### PULSE_TRAIN — Repeating Rectangular Pulse
+
+```
+PULSE_TRAIN(start, duration, repeat, end)
+```
+
+Returns 1 during each pulse window and 0 otherwise. Pulses start at `start`, last for `duration` time units, repeat every `repeat` time units, and stop after `end`.
+
+```
+PULSE_TRAIN(2, 1, 4, 20)   -- 1 at t=2, 0 at t=3-5, 1 at t=6, ...
 ```
 
 ### DELAY_FIXED — Fixed Pipeline Delay
@@ -233,6 +344,30 @@ NPV(Cash_Flow, 0.05)       -- accumulate PV at 5% discount per step
 NPV(Cash_Flow, 0.05, 0.5)  -- same, but each payment weighted by 0.5
 ```
 
+### SAMPLE_IF_TRUE — Conditional Sampling
+
+```
+SAMPLE_IF_TRUE(condition, input, initial_value)
+```
+
+A zero-order hold that samples its input only when the condition is non-zero. Returns the most recently sampled value at all other times. Starts at `initial_value` before the first sample is taken.
+
+```
+SAMPLE_IF_TRUE(Trigger > 0, Sensor_Reading, 0)   -- captures Sensor_Reading when Trigger fires
+```
+
+### FIND_ZERO — Numerical Root-Finding
+
+```
+FIND_ZERO(expression, variable, lo, hi)
+```
+
+Finds the value of `variable` in the range [`lo`, `hi`] that makes `expression` equal to zero, using bisection. The `variable` must be a variable reference that appears in `expression`. Useful for equilibrium-seeking and implicit equations.
+
+```
+FIND_ZERO(Supply - Demand, Price, 0, 1000)   -- find Price where Supply equals Demand
+```
+
 ### LOOKUP — Table Lookup
 
 ```
@@ -245,6 +380,18 @@ Looks up `input_value` in the named lookup table and returns the interpolated ou
 LOOKUP(Effect_of_Density, Population / Area)
 ```
 
+### LOOKUP_AREA — Area Under Lookup Curve
+
+```
+LOOKUP_AREA(table_name, from_x, to_x)
+```
+
+Computes the area under a lookup table's curve between `from_x` and `to_x` using trapezoidal integration. If `from_x > to_x`, the result is negated. The lookup table must be defined as a separate element in the model.
+
+```
+LOOKUP_AREA(Work_Profile, 0, 10)   -- total work scheduled from time 0 to 10
+```
+
 ### RANDOM_NORMAL — Random Normal Distribution
 
 ```
@@ -255,6 +402,18 @@ Returns a random value from a normal distribution with the specified mean and st
 
 ```
 RANDOM_NORMAL(0, 200, 100, 20)   -- normal around 100, std dev 20, clamped to [0, 200]
+```
+
+### RANDOM_UNIFORM — Uniform Random Distribution
+
+```
+RANDOM_UNIFORM(min, max, seed)
+```
+
+Returns a uniformly distributed random number between `min` and `max`. Each evaluation returns a new random value. The `seed` parameter is accepted for Vensim compatibility but currently uses system time.
+
+```
+RANDOM_UNIFORM(0, 1, 0)   -- uniform random in [0, 1]
 ```
 
 ## Common Equation Patterns
@@ -294,7 +453,7 @@ IF(Inventory > Reorder_Point, 0, Order_Quantity)
 ### Seasonal Input
 
 ```
-Base_Value * (1 + Amplitude * SIN(2 * 3.14159 * TIME / Period))
+Base_Value * (1 + Amplitude * SIN(2 * PI * TIME / Period))
 ```
 
 ### Clamping to Non-Negative
@@ -319,6 +478,7 @@ unary      = ("-" | "not") unary | call
 call       = primary ( "(" arglist? ")" )?
 primary    = NUMBER | IDENTIFIER | QUOTED_ID | "(" expr ")"
            | "IF" "(" expr "," expr "," expr ")"
+           | "IF_SHORT" "(" expr "," expr "," expr ")"
 arglist    = expr ( "," expr )*
 ```
 

@@ -1,0 +1,894 @@
+{
+  "name": "HousingMarket",
+  "stocks": [
+    {
+      "name": "cumulative inflation",
+      "comment": "cumulative inflation",
+      "initialValue": 1.0,
+      "unit": ""
+    },
+    {
+      "name": "in planning and under construction",
+      "comment": "in planning and under construction",
+      "initialValue": 250000.0,
+      "unit": ""
+    },
+    {
+      "name": "new houses",
+      "comment": "new houses",
+      "initialValue": 1550000.0,
+      "unit": "houses"
+    },
+    {
+      "name": "old houses",
+      "comment": "old houses",
+      "initialValue": 3600000.0,
+      "unit": "houses"
+    }
+  ],
+  "flows": [
+    {
+      "name": "cumulative inflation net flow",
+      "comment": "Net flow for cumulative inflation",
+      "equation": "expected_inflation_rate * cumulative_inflation * MAX((1 - (uncertainty-1)),0)",
+      "timeUnit": "Year",
+      "sink": "cumulative inflation"
+    },
+    {
+      "name": "in planning and under construction net flow",
+      "comment": "Net flow for in planning and under construction",
+      "equation": "in_planning_and_construction-construction_of_new_houses",
+      "timeUnit": "Year",
+      "sink": "in planning and under construction"
+    },
+    {
+      "name": "new houses net flow",
+      "comment": "Net flow for new houses",
+      "equation": "construction_of_new_houses-aging_of_houses",
+      "timeUnit": "Year",
+      "sink": "new houses"
+    },
+    {
+      "name": "old houses net flow",
+      "comment": "Net flow for old houses",
+      "equation": "aging_of_houses-demolition_of_old_houses",
+      "timeUnit": "Year",
+      "sink": "old houses"
+    }
+  ],
+  "variables": [
+    {
+      "name": "aging of houses",
+      "comment": "aging of houses",
+      "equation": "DELAY_FIXED(construction_of_new_houses,lifetime_of_new_houses,construction_of_new_houses )",
+      "unit": ""
+    },
+    {
+      "name": "average house prices",
+      "comment": "average house prices",
+      "equation": "SMOOTH(average_house_spending_capacity_per_household*housing_scarcity_ratio,1)",
+      "unit": "Euros"
+    },
+    {
+      "name": "average house spending capacity per household",
+      "comment": "average house spending capacity per household",
+      "equation": "average_salary_per_household*(1+salary_lending_multiplier)",
+      "unit": "Euros"
+    },
+    {
+      "name": "average salary per household",
+      "comment": "average salary per household",
+      "equation": "initial_average_salary * SMOOTH(cumulative_inflation,2) * expected_effective_workforce /expected_households",
+      "unit": "Euros"
+    },
+    {
+      "name": "construction of new houses",
+      "comment": "construction of new houses",
+      "equation": "DELAY3I(in_planning_and_construction, normal_planning_and_construction_time, in_planning_and_under_construction /normal_planning_and_construction_time)",
+      "unit": "houses/Year"
+    },
+    {
+      "name": "demolition multiplicator",
+      "comment": "demolition multiplicator",
+      "equation": "DELAY_FIXED(\n\t1/housing_scarcity_ratio,1,1/housing_scarcity_ratio)",
+      "unit": ""
+    },
+    {
+      "name": "demolition of old houses",
+      "comment": "demolition of old houses",
+      "equation": "old_houses/average_lifetime_old_houses * demolition_multiplicator",
+      "unit": "houses/Year"
+    },
+    {
+      "name": "expected effective workforce",
+      "comment": "expected effective workforce",
+      "equation": "LOOKUP(expected_effective_workforce_lookup, TIME)",
+      "unit": ""
+    },
+    {
+      "name": "housing scarcity ratio",
+      "comment": "housing scarcity ratio",
+      "equation": "expected_households/total_expected_supply_of_houses",
+      "unit": "Dmnl"
+    },
+    {
+      "name": "in planning and construction",
+      "comment": "in planning and construction",
+      "equation": "housing_gap * profitability_multiplier",
+      "unit": ""
+    },
+    {
+      "name": "loan risk",
+      "comment": "loan risk",
+      "equation": "DELAY3(MAX(0,uncertainty-1)/2,2)",
+      "unit": ""
+    },
+    {
+      "name": "normal planning and construction time",
+      "comment": "normal planning and construction time",
+      "equation": "LOOKUP(normal_planning_and_construction_time_lookup, in_planning_and_under_construction/ini_in_planning_and_under_construction)",
+      "unit": "Year"
+    },
+    {
+      "name": "normal salary lending multiplier",
+      "comment": "normal salary lending multiplier",
+      "equation": "LOOKUP(normal_salary_lending_multiplier_lookup, TIME)",
+      "unit": "Dmnl"
+    },
+    {
+      "name": "profitability multiplier",
+      "comment": "profitability multiplier",
+      "equation": "LOOKUP(profitability_multiplier_lookup, profitability_of_new_house_construction)",
+      "unit": "Dmnl"
+    },
+    {
+      "name": "profitability of new house construction",
+      "comment": "profitability of new house construction",
+      "equation": "((1+new_house_premium)*average_house_prices-total_construction_cost_new_houses)/total_construction_cost_new_houses",
+      "unit": "Dmnl"
+    },
+    {
+      "name": "housing gap",
+      "comment": "housing gap",
+      "equation": "MAX(expected_households*houses_per_household-total_expected_supply_of_houses,0)",
+      "unit": "houses"
+    },
+    {
+      "name": "salary lending multiplier",
+      "comment": "salary lending multiplier",
+      "equation": "normal_salary_lending_multiplier * (1-loan_risk)/uncertainty",
+      "unit": "Dmnl"
+    },
+    {
+      "name": "total construction cost new houses",
+      "comment": "total construction cost new houses",
+      "equation": "_1985_construction_cost_new_houses*cumulative_inflation",
+      "unit": "Euros"
+    },
+    {
+      "name": "total expected supply of houses",
+      "comment": "total expected supply of houses",
+      "equation": "new_houses+in_planning_and_under_construction+old_houses-old_houses/average_lifetime_old_houses",
+      "unit": "houses"
+    },
+    {
+      "name": "expected households",
+      "comment": "expected households",
+      "equation": "LOOKUP(expected_households_lookup, TIME)",
+      "unit": "houses"
+    },
+    {
+      "name": "uncertainty",
+      "comment": "uncertainty",
+      "equation": "LOOKUP(uncertainty_lookup, TIME)",
+      "unit": ""
+    },
+    {
+      "name": "TIME STEP",
+      "equation": "0.0078125",
+      "unit": "Year"
+    },
+    {
+      "name": "INITIAL TIME",
+      "equation": "1985",
+      "unit": "Year"
+    },
+    {
+      "name": "FINAL TIME",
+      "equation": "2085",
+      "unit": "Year"
+    },
+    {
+      "name": " 1985 construction cost new houses",
+      "equation": "95000",
+      "comment": " 1985 construction cost new houses",
+      "unit": "Euros"
+    },
+    {
+      "name": "average lifetime old houses",
+      "equation": "60",
+      "comment": "average lifetime old houses",
+      "unit": "Year"
+    },
+    {
+      "name": "houses per household",
+      "equation": "1",
+      "comment": "houses per household",
+      "unit": "houses/households"
+    },
+    {
+      "name": "expected inflation rate",
+      "equation": "0.02",
+      "comment": "expected inflation rate"
+    },
+    {
+      "name": "ini in planning and under construction",
+      "equation": "250000",
+      "comment": "ini in planning and under construction",
+      "unit": "houses"
+    },
+    {
+      "name": "initial average salary",
+      "equation": "27000",
+      "comment": "initial average salary",
+      "unit": "Euros"
+    },
+    {
+      "name": "lifetime of new houses",
+      "equation": "15",
+      "comment": "lifetime of new houses",
+      "unit": "Year"
+    },
+    {
+      "name": "new house premium",
+      "equation": "0.05",
+      "comment": "new house premium"
+    }
+  ],
+  "lookupTables": [
+    {
+      "name": "expected effective workforce lookup",
+      "xValues": [
+        1985.0,
+        2012.0,
+        2020.0,
+        2040.0,
+        2050.0,
+        2085.0
+      ],
+      "yValues": [
+        5750000.0,
+        7500000.0,
+        8000000.0,
+        7600000.0,
+        7300000.0,
+        6000000.0
+      ],
+      "interpolation": "LINEAR"
+    },
+    {
+      "name": "normal planning and construction time lookup",
+      "xValues": [
+        0.0,
+        1.0,
+        2.0,
+        5.0,
+        9.0,
+        20.0
+      ],
+      "yValues": [
+        1.0,
+        1.5,
+        2.0,
+        3.0,
+        3.75,
+        5.0
+      ],
+      "interpolation": "LINEAR"
+    },
+    {
+      "name": "normal salary lending multiplier lookup",
+      "xValues": [
+        1985.0,
+        2011.0,
+        2013.0,
+        2035.0,
+        2050.0,
+        2085.0
+      ],
+      "yValues": [
+        3.0,
+        5.0,
+        3.0,
+        3.0,
+        3.0,
+        3.0
+      ],
+      "interpolation": "LINEAR"
+    },
+    {
+      "name": "profitability multiplier lookup",
+      "xValues": [
+        -1.0,
+        -0.5,
+        -0.2,
+        -0.1,
+        0.0,
+        0.1,
+        0.2,
+        0.5,
+        1.0
+      ],
+      "yValues": [
+        0.0,
+        0.01,
+        0.02,
+        0.2,
+        0.8,
+        1.0,
+        1.1,
+        1.2,
+        1.25
+      ],
+      "interpolation": "LINEAR"
+    },
+    {
+      "name": "expected households lookup",
+      "xValues": [
+        1985.0,
+        1990.0,
+        2000.0,
+        2010.0,
+        2011.0,
+        2050.0,
+        2085.0
+      ],
+      "yValues": [
+        5430000.0,
+        5978000.0,
+        6798000.0,
+        7397000.0,
+        7470000.0,
+        8500000.0,
+        9000000.0
+      ],
+      "interpolation": "LINEAR"
+    },
+    {
+      "name": "uncertainty lookup",
+      "xValues": [
+        1985.0,
+        2000.0,
+        2007.0,
+        2009.0,
+        2015.0,
+        2035.0,
+        2050.0,
+        2085.0
+      ],
+      "yValues": [
+        1.0,
+        1.0,
+        1.0,
+        2.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "interpolation": "LINEAR"
+    }
+  ],
+  "views": [
+    {
+      "name": "View 1",
+      "elements": [
+        {
+          "name": "new houses",
+          "type": "stock",
+          "x": 572.0,
+          "y": 190.0
+        },
+        {
+          "name": "old houses",
+          "type": "stock",
+          "x": 766.0,
+          "y": 192.0
+        },
+        {
+          "name": "_604",
+          "type": "flow",
+          "x": 673.0,
+          "y": 191.0
+        },
+        {
+          "name": "aging of houses",
+          "type": "aux",
+          "x": 673.0,
+          "y": 210.0
+        },
+        {
+          "name": "total expected supply of houses",
+          "type": "aux",
+          "x": 650.0,
+          "y": 314.0
+        },
+        {
+          "name": "_652",
+          "type": "flow",
+          "x": 477.0,
+          "y": 189.0
+        },
+        {
+          "name": "construction of new houses",
+          "type": "aux",
+          "x": 477.0,
+          "y": 216.0
+        },
+        {
+          "name": "_48",
+          "type": "flow",
+          "x": 874.0,
+          "y": 192.0
+        },
+        {
+          "name": "demolition of old houses",
+          "type": "aux",
+          "x": 874.0,
+          "y": 219.0
+        },
+        {
+          "name": "average lifetime old houses",
+          "type": "aux",
+          "x": 768.0,
+          "y": 266.0
+        },
+        {
+          "name": "demolition multiplicator",
+          "type": "aux",
+          "x": 880.0,
+          "y": 279.0
+        },
+        {
+          "name": "salary lending multiplier",
+          "type": "aux",
+          "x": 634.0,
+          "y": 642.0
+        },
+        {
+          "name": "expected inflation rate",
+          "type": "aux",
+          "x": 378.0,
+          "y": 586.0
+        },
+        {
+          "name": "cumulative inflation",
+          "type": "stock",
+          "x": 484.0,
+          "y": 544.0
+        },
+        {
+          "name": "average house prices",
+          "type": "aux",
+          "x": 870.0,
+          "y": 697.0
+        },
+        {
+          "name": "total construction cost new houses",
+          "type": "aux",
+          "x": 394.0,
+          "y": 482.0
+        },
+        {
+          "name": "average salary per household",
+          "type": "aux",
+          "x": 683.0,
+          "y": 458.0
+        },
+        {
+          "name": "average house spending capacity per household",
+          "type": "aux",
+          "x": 682.0,
+          "y": 579.0
+        },
+        {
+          "name": "housing scarcity ratio",
+          "type": "aux",
+          "x": 881.0,
+          "y": 371.0
+        },
+        {
+          "name": "uncertainty",
+          "type": "aux",
+          "x": 482.0,
+          "y": 643.0
+        },
+        {
+          "name": "profitability of new house construction",
+          "type": "aux",
+          "x": 256.0,
+          "y": 435.0
+        },
+        {
+          "name": "loan risk",
+          "type": "aux",
+          "x": 557.0,
+          "y": 690.0
+        },
+        {
+          "name": "expected effective workforce",
+          "type": "aux",
+          "x": 531.0,
+          "y": 447.0
+        },
+        {
+          "name": "expected households",
+          "type": "aux",
+          "x": 569.0,
+          "y": 368.0
+        },
+        {
+          "name": "lifetime of new houses",
+          "type": "aux",
+          "x": 674.0,
+          "y": 119.0
+        },
+        {
+          "name": " 1985 construction cost new houses",
+          "type": "aux",
+          "x": 345.0,
+          "y": 533.0
+        },
+        {
+          "name": "normal salary lending multiplier",
+          "type": "aux",
+          "x": 734.0,
+          "y": 696.0
+        },
+        {
+          "name": "Time",
+          "type": "aux",
+          "x": 618.0,
+          "y": 398.0
+        },
+        {
+          "name": "Time",
+          "type": "aux",
+          "x": 534.0,
+          "y": 690.0
+        },
+        {
+          "name": "in planning and under construction",
+          "type": "stock",
+          "x": 367.0,
+          "y": 187.0
+        },
+        {
+          "name": "_48",
+          "type": "flow",
+          "x": 256.0,
+          "y": 183.0
+        },
+        {
+          "name": "in planning and construction",
+          "type": "aux",
+          "x": 256.0,
+          "y": 210.0
+        },
+        {
+          "name": "new house premium",
+          "type": "aux",
+          "x": 177.0,
+          "y": 484.0
+        },
+        {
+          "name": "housing gap",
+          "type": "aux",
+          "x": 457.0,
+          "y": 288.0
+        },
+        {
+          "name": "normal planning and construction time",
+          "type": "aux",
+          "x": 476.0,
+          "y": 55.0
+        },
+        {
+          "name": "ini in planning and under construction",
+          "type": "aux",
+          "x": 316.0,
+          "y": 43.0
+        },
+        {
+          "name": "initial average salary",
+          "type": "aux",
+          "x": 837.0,
+          "y": 459.0
+        },
+        {
+          "name": "profitability multiplier",
+          "type": "aux",
+          "x": 256.0,
+          "y": 317.0
+        },
+        {
+          "name": "houses per household",
+          "type": "aux",
+          "x": 417.0,
+          "y": 367.0
+        }
+      ],
+      "connectors": [
+        {
+          "from": "5",
+          "to": "old houses"
+        },
+        {
+          "from": "5",
+          "to": "new houses"
+        },
+        {
+          "from": "9",
+          "to": "new houses"
+        },
+        {
+          "from": "14",
+          "to": "11"
+        },
+        {
+          "from": "14",
+          "to": "old houses"
+        },
+        {
+          "from": "old houses",
+          "to": "_48"
+        },
+        {
+          "from": "demolition multiplicator",
+          "to": "demolition of old houses"
+        },
+        {
+          "from": "average lifetime old houses",
+          "to": "demolition of old houses"
+        },
+        {
+          "from": "_652",
+          "to": "_604"
+        },
+        {
+          "from": "new houses",
+          "to": "total expected supply of houses"
+        },
+        {
+          "from": "old houses",
+          "to": "total expected supply of houses"
+        },
+        {
+          "from": "cumulative inflation",
+          "to": "average salary per household"
+        },
+        {
+          "from": "housing scarcity ratio",
+          "to": "demolition multiplicator"
+        },
+        {
+          "from": "housing scarcity ratio",
+          "to": "average house prices"
+        },
+        {
+          "from": "total expected supply of houses",
+          "to": "housing scarcity ratio"
+        },
+        {
+          "from": "expected inflation rate",
+          "to": "cumulative inflation"
+        },
+        {
+          "from": "total construction cost new houses",
+          "to": "profitability of new house construction"
+        },
+        {
+          "from": "cumulative inflation",
+          "to": "total construction cost new houses"
+        },
+        {
+          "from": "average salary per household",
+          "to": "average house spending capacity per household"
+        },
+        {
+          "from": "salary lending multiplier",
+          "to": "average house spending capacity per household"
+        },
+        {
+          "from": "lifetime of new houses",
+          "to": "_604"
+        },
+        {
+          "from": "average house spending capacity per household",
+          "to": "average house prices"
+        },
+        {
+          "from": "loan risk",
+          "to": "salary lending multiplier"
+        },
+        {
+          "from": "average house prices",
+          "to": "profitability of new house construction"
+        },
+        {
+          "from": " 1985 construction cost new houses",
+          "to": "total construction cost new houses"
+        },
+        {
+          "from": "normal salary lending multiplier",
+          "to": "salary lending multiplier"
+        },
+        {
+          "from": "58",
+          "to": "uncertainty"
+        },
+        {
+          "from": "Time",
+          "to": "expected households"
+        },
+        {
+          "from": "Time",
+          "to": "normal salary lending multiplier"
+        },
+        {
+          "from": "_652",
+          "to": "in planning and under construction"
+        },
+        {
+          "from": "65",
+          "to": "in planning and under construction"
+        },
+        {
+          "from": "65",
+          "to": "62"
+        },
+        {
+          "from": "new house premium",
+          "to": "profitability of new house construction"
+        },
+        {
+          "from": "housing gap",
+          "to": "in planning and construction"
+        },
+        {
+          "from": "profitability of new house construction",
+          "to": "88"
+        },
+        {
+          "from": "uncertainty",
+          "to": "cumulative inflation"
+        },
+        {
+          "from": "ini in planning and under construction",
+          "to": "in planning and under construction"
+        },
+        {
+          "from": "normal planning and construction time",
+          "to": "_652"
+        },
+        {
+          "from": "_48",
+          "to": "_652"
+        },
+        {
+          "from": "uncertainty",
+          "to": "loan risk"
+        },
+        {
+          "from": "total expected supply of houses",
+          "to": "housing gap"
+        },
+        {
+          "from": "Time",
+          "to": "expected effective workforce"
+        },
+        {
+          "from": "ini in planning and under construction",
+          "to": "normal planning and construction time"
+        },
+        {
+          "from": "in planning and under construction",
+          "to": "normal planning and construction time"
+        },
+        {
+          "from": "expected households",
+          "to": "average salary per household"
+        },
+        {
+          "from": "expected effective workforce",
+          "to": "average salary per household"
+        },
+        {
+          "from": "initial average salary",
+          "to": "average salary per household"
+        },
+        {
+          "from": "in planning and under construction",
+          "to": "_652"
+        },
+        {
+          "from": "profitability multiplier",
+          "to": "in planning and construction"
+        },
+        {
+          "from": "in planning and under construction",
+          "to": "total expected supply of houses"
+        },
+        {
+          "from": "average lifetime old houses",
+          "to": "total expected supply of houses"
+        },
+        {
+          "from": "expected households",
+          "to": "housing gap"
+        },
+        {
+          "from": "expected households",
+          "to": "housing scarcity ratio"
+        },
+        {
+          "from": "houses per household",
+          "to": "housing gap"
+        },
+        {
+          "from": "uncertainty",
+          "to": "salary lending multiplier"
+        }
+      ],
+      "flowRoutes": [
+        {
+          "flowName": "_604",
+          "points": [
+            [
+              673.0,
+              191.0
+            ]
+          ]
+        },
+        {
+          "flowName": "_652",
+          "points": [
+            [
+              477.0,
+              189.0
+            ]
+          ]
+        },
+        {
+          "flowName": "_48",
+          "points": [
+            [
+              874.0,
+              192.0
+            ]
+          ]
+        },
+        {
+          "flowName": "_48",
+          "points": [
+            [
+              256.0,
+              183.0
+            ]
+          ]
+        }
+      ]
+    }
+  ],
+  "defaultSimulation": {
+    "timeStep": "Year",
+    "duration": 100.0,
+    "durationUnit": "Year"
+  },
+  "metadata": {
+    "license": "CC-BY-NC-SA-4.0",
+    "author": "Dr. Erik Pruyt",
+    "source": "Pruyt, E., 2013. Small System Dynamics Models for Big Issues: Triple Jump towards Real-World Complexity. TU Delft Library. ISBN 978-94-6186-195-5",
+    "url": "https://simulation.tudelft.nl/SD/"
+  }
+}

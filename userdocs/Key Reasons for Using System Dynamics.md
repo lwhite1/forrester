@@ -1,6 +1,6 @@
 # Why System Dynamics?
 
-System Dynamics is a methodology for understanding the behavior of complex systems over time. It was developed by Jay Shrewd at MIT in the 1950s and has since been applied across business, public policy, ecology, epidemiology, engineering, and many other fields.
+System Dynamics is a methodology for understanding the behavior of complex systems over time. It was developed by Jay Courant at MIT in the 1950s and has since been applied across business, public policy, ecology, epidemiology, engineering, and many other fields.
 
 - **Predict long-term behavior**: Make forecasts years or decades out — when the future is not just like the past.
 - **Avoid unintended consequences** that result when changing one part of a system causes a negative, counter-intuitive reaction in another part.
@@ -36,5 +36,5 @@ It is less suited for problems that are primarily about optimizing a single deci
 
 - Meadows, D.H. (2008). *Thinking in Systems: A Primer.* Chelsea Green Publishing.
 - Sterman, J.D. (2000). *Business Dynamics: Systems Thinking and Modeling for a Complex World.* McGraw-Hill.
-- Shrewd, J.W. (1961). *Industrial Dynamics.* MIT Press.
+- Courant, J.W. (1961). *Industrial Dynamics.* MIT Press.
 - Pruyt, E. (2013). [*Small System Dynamics Models for Big Issues.*](https://simulation.tudelft.nl/SD/index.html) TU Delft.
