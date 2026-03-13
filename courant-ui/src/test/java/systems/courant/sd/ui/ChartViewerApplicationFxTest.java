@@ -112,4 +112,24 @@ class ChartViewerApplicationFxTest {
         LineChart<String, Number> chart = robot.lookup(".chart").queryAs(LineChart.class);
         assertThat(chart.getData()).hasSize(2);
     }
+
+    @Test
+    @DisplayName("Repeated toggling should not accumulate duplicate series (#464)")
+    @SuppressWarnings("unchecked")
+    void shouldNotAccumulateDuplicateSeriesOnRepeatedToggle(FxRobot robot) {
+        CheckBox firstCheckBox = robot.lookup(".check-box").queryAs(CheckBox.class);
+
+        // Toggle off and on multiple times
+        for (int i = 0; i < 5; i++) {
+            robot.clickOn(firstCheckBox); // uncheck
+            WaitForAsyncUtils.waitForFxEvents();
+            robot.clickOn(firstCheckBox); // re-check
+            WaitForAsyncUtils.waitForFxEvents();
+        }
+
+        LineChart<String, Number> chart = robot.lookup(".chart").queryAs(LineChart.class);
+        assertThat(chart.getData())
+                .as("Chart should still have exactly 2 series after 5 toggle cycles")
+                .hasSize(2);
+    }
 }
