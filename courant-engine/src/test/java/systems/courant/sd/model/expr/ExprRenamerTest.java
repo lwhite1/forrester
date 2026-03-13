@@ -48,13 +48,21 @@ class ExprRenamerTest {
     }
 
     @Nested
-    @DisplayName("Case insensitive matching")
-    class CaseInsensitive {
+    @DisplayName("Exact-case matching (consistent with ExprDependencies)")
+    class ExactCaseMatching {
 
         @Test
-        void shouldMatchCaseInsensitively() {
-            assertThat(renameInEquation("population * Birth_Rate", "birth_rate", "growth_rate"))
+        void shouldMatchExactCase() {
+            assertThat(renameInEquation("population * Birth_Rate", "Birth_Rate", "growth_rate"))
                     .isEqualTo("population * growth_rate");
+        }
+
+        @Test
+        void shouldNotMatchDifferentCase() {
+            // "birth_rate" (lowercase) should NOT match "Birth_Rate" in the AST
+            Expr ast = ExprParser.parse("population * Birth_Rate");
+            Expr renamed = ExprRenamer.rename(ast, "birth_rate", "growth_rate");
+            assertThat(renamed).isSameAs(ast);
         }
     }
 

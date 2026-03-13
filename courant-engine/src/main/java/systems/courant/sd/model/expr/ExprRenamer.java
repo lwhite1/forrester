@@ -35,7 +35,8 @@ public final class ExprRenamer {
      * If the expression contains no matching references, the original tree is
      * returned unchanged.
      *
-     * <p>Matching is case-insensitive for element names (System Dynamics convention).</p>
+     * <p>Matching is exact-case, consistent with {@link ExprDependencies#extract}.
+     * Callers needing case-insensitive rename should normalise names before calling.</p>
      *
      * @param expr    the expression to transform
      * @param oldName the reference name to replace
@@ -46,7 +47,7 @@ public final class ExprRenamer {
         return switch (expr) {
             case Expr.Literal lit -> lit;
             case Expr.Ref ref -> {
-                if (ref.name().equalsIgnoreCase(oldName)) {
+                if (ref.name().equals(oldName)) {
                     yield replacementExpr(newName);
                 }
                 yield ref;
@@ -67,7 +68,7 @@ public final class ExprRenamer {
                 String funcName = call.name();
                 if (call.arguments().size() == 1
                         && !BUILTIN_FUNCTIONS.contains(funcName.toUpperCase(Locale.ROOT))
-                        && funcName.equalsIgnoreCase(oldName)) {
+                        && funcName.equals(oldName)) {
                     funcName = newName;
                 }
                 List<Expr> args = renameArgs(call.arguments(), oldName, newName);

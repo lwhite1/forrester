@@ -20,7 +20,7 @@ public class SweepResult {
      */
     public SweepResult(String parameterName, List<RunResult> results) {
         this.parameterName = parameterName;
-        this.results = results;
+        this.results = List.copyOf(results);
     }
 
     /**

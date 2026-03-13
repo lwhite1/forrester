@@ -45,6 +45,20 @@ public record FeedbackAnalysis(
         List<CausalLoop> causalLoops
 ) {
 
+    /**
+     * Compact constructor that defensively copies all mutable collection arguments.
+     */
+    public FeedbackAnalysis {
+        loopParticipants = loopParticipants.isEmpty()
+                ? Collections.emptySet() : Collections.unmodifiableSet(new LinkedHashSet<>(loopParticipants));
+        loopGroups = loopGroups.isEmpty()
+                ? Collections.emptyList() : Collections.unmodifiableList(new ArrayList<>(loopGroups));
+        loopEdges = loopEdges.isEmpty()
+                ? Collections.emptySet() : Collections.unmodifiableSet(new LinkedHashSet<>(loopEdges));
+        causalLoops = causalLoops.isEmpty()
+                ? Collections.emptyList() : Collections.unmodifiableList(new ArrayList<>(causalLoops));
+    }
+
     private static final Logger log = LoggerFactory.getLogger(FeedbackAnalysis.class);
 
     /**
@@ -93,6 +107,10 @@ public record FeedbackAnalysis(
             LoopType type,
             String label
     ) {
+        public CausalLoop {
+            path = List.copyOf(path);
+            polarities = List.copyOf(polarities);
+        }
     }
 
     /** Maximum number of elementary cycles to enumerate per analysis. */

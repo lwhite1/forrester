@@ -4,6 +4,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
+import java.util.Locale;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -159,5 +160,22 @@ class ExprStringifierTest {
         assertThat(ExprStringifier.stringify(new Expr.Ref("IF"))).isEqualTo("`IF`");
         assertThat(ExprStringifier.stringify(new Expr.Ref("TIME"))).isEqualTo("`TIME`");
         assertThat(ExprStringifier.stringify(new Expr.Ref("DT"))).isEqualTo("`DT`");
+    }
+
+    @Test
+    void shouldQuoteReservedWordsUnderTurkishLocale() {
+        Locale original = Locale.getDefault();
+        try {
+            Locale.setDefault(Locale.of("tr", "TR"));
+            // Turkish locale lowercases 'I' to '\u0131' (dotless i) without Locale.ROOT.
+            // "AND", "OR", "NOT" must still be detected as reserved.
+            assertThat(ExprStringifier.stringify(new Expr.Ref("AND"))).isEqualTo("`AND`");
+            assertThat(ExprStringifier.stringify(new Expr.Ref("OR"))).isEqualTo("`OR`");
+            assertThat(ExprStringifier.stringify(new Expr.Ref("NOT"))).isEqualTo("`NOT`");
+            // Non-reserved identifiers should pass through unquoted
+            assertThat(ExprStringifier.stringify(new Expr.Ref("Index"))).isEqualTo("Index");
+        } finally {
+            Locale.setDefault(original);
+        }
     }
 }

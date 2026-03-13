@@ -1,5 +1,7 @@
 package systems.courant.sd.model.expr;
 
+import java.util.Locale;
+
 /**
  * Converts an {@link Expr} AST back into a readable infix string with minimal parentheses.
  *
@@ -94,7 +96,7 @@ public final class ExprStringifier {
             }
         }
         // Reserved words that would be parsed as keywords or function calls
-        String lower = name.toLowerCase();
+        String lower = name.toLowerCase(Locale.ROOT);
         if (lower.equals("and") || lower.equals("or") || lower.equals("not")) {
             return true;
         }
