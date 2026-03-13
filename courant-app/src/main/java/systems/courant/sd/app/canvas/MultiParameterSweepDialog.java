@@ -202,23 +202,14 @@ public class MultiParameterSweepDialog extends Dialog<MultiParameterSweepDialog.
         return product;
     }
 
-    private class ParameterRow {
-        private final ComboBox<String> nameCombo;
+    private class ParameterRow extends ParameterRowBase {
         private final TextField startField;
         private final TextField endField;
         private final TextField stepField;
-        private final HBox pane;
 
         ParameterRow(List<String> constantNames, VBox container, String defaultName) {
+            super(constantNames, defaultName, MultiParameterSweepDialog.this::updateCombinationCount);
             int rowIndex = parameterRows.size();
-
-            nameCombo = new ComboBox<>(FXCollections.observableArrayList(constantNames));
-            if (defaultName != null) {
-                nameCombo.setValue(defaultName);
-            } else if (!constantNames.isEmpty()) {
-                nameCombo.setValue(constantNames.getFirst());
-            }
-            nameCombo.setPrefWidth(130);
             nameCombo.setId("multiSweepParamName" + rowIndex);
 
             startField = new TextField("0");
@@ -236,33 +227,25 @@ public class MultiParameterSweepDialog extends Dialog<MultiParameterSweepDialog.
             stepField.setPromptText("Step");
             stepField.setId("multiSweepStep" + rowIndex);
 
-            startField.textProperty().addListener((obs, o, n) -> updateCombinationCount());
-            endField.textProperty().addListener((obs, o, n) -> updateCombinationCount());
-            stepField.textProperty().addListener((obs, o, n) -> updateCombinationCount());
+            wireFieldChange(startField);
+            wireFieldChange(endField);
+            wireFieldChange(stepField);
 
-            Button removeBtn = new Button("X");
-
-            pane = new HBox(6,
-                    nameCombo,
-                    new Label("Start:"), startField,
-                    new Label("End:"), endField,
-                    new Label("Step:"), stepField,
-                    removeBtn);
-            pane.setPadding(new Insets(2));
-
-            removeBtn.setOnAction(e -> {
+            Button removeBtn = createRemoveButton(() -> {
                 parameterRows.remove(this);
-                container.getChildren().remove(pane);
+                container.getChildren().remove(getPane());
                 updateCombinationCount();
             });
+
+            buildPane(removeBtn,
+                    new Label("Start:"), startField,
+                    new Label("End:"), endField,
+                    new Label("Step:"), stepField);
         }
 
-        HBox getPane() {
-            return pane;
-        }
-
+        @Override
         boolean isValid() {
-            if (nameCombo.getValue() == null) {
+            if (!isNameSelected()) {
                 return false;
             }
             try {
@@ -278,7 +261,7 @@ public class MultiParameterSweepDialog extends Dialog<MultiParameterSweepDialog.
 
         ParamConfig toConfig() {
             return new ParamConfig(
-                    nameCombo.getValue(),
+                    getSelectedName(),
                     Double.parseDouble(startField.getText().trim()),
                     Double.parseDouble(endField.getText().trim()),
                     Double.parseDouble(stepField.getText().trim()));
