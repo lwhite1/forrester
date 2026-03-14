@@ -1026,7 +1026,7 @@ public class ExprCompiler {
             // Trapezoidal integration using the lookup table's data points
             double area = 0.0;
             double prevX = lo;
-            double prevY = table.withInput(() -> lo).getCurrentValue();
+            double prevY = table.evaluate(lo);
             for (double xVal : xValues) {
                 if (xVal <= lo) {
                     continue;
@@ -1034,13 +1034,13 @@ public class ExprCompiler {
                 if (xVal >= hi) {
                     break;
                 }
-                double curY = table.withInput(() -> xVal).getCurrentValue();
+                double curY = table.evaluate(xVal);
                 area += (xVal - prevX) * (prevY + curY) / 2.0;
                 prevX = xVal;
                 prevY = curY;
             }
             // Final segment to hi
-            double hiY = table.withInput(() -> hi).getCurrentValue();
+            double hiY = table.evaluate(hi);
             area += (hi - prevX) * (prevY + hiY) / 2.0;
             return negate ? -area : area;
         };
