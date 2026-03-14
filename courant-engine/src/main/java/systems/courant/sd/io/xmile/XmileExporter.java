@@ -381,6 +381,11 @@ public final class XmileExporter {
         double[] xVals = lookup.xValues();
         double[] yVals = lookup.yValues();
 
+        if (xVals.length == 0) {
+            parent.appendChild(gf);
+            return;
+        }
+
         // <xscale>
         Element xscale = doc.createElementNS(
                 XmileConstants.NAMESPACE_URI, XmileConstants.XSCALE);

@@ -6,11 +6,13 @@ import systems.courant.sd.event.SimulationStartEvent;
 import systems.courant.sd.event.TimeStepEvent;
 import systems.courant.sd.measure.Quantity;
 import systems.courant.sd.measure.TimeUnit;
+import systems.courant.sd.model.Formula;
 import systems.courant.sd.model.Model;
 import systems.courant.sd.model.Module;
 import systems.courant.sd.model.Stock;
 import systems.courant.sd.model.Flow;
 import systems.courant.sd.model.Variable;
+import systems.courant.sd.model.compile.Resettable;
 import systems.courant.sd.measure.Dimension;
 import com.google.common.base.Preconditions;
 
@@ -162,6 +164,7 @@ public class Simulation {
         currentDateTime = startTime;
         elapsedTime = Duration.ZERO;
         clearHistory();
+        resetStatefulFormulas();
 
         long nanos = Math.round(timeStep.ratioToBaseUnit() * 1_000_000_000L);
         if (nanos <= 0) {
@@ -406,6 +409,39 @@ public class Simulation {
         }
         for (Module module : model.getModules()) {
             clearModuleHistory(module, seenFlows, seenVars);
+        }
+    }
+
+    /**
+     * Resets any stateful formulas (Smooth, Delay, Trend, etc.) found in variables
+     * throughout the model and its modules. This ensures re-running the simulation
+     * produces correct results without requiring an external reset call.
+     */
+    private void resetStatefulFormulas() {
+        Set<Variable> seen = Collections.newSetFromMap(new IdentityHashMap<>());
+        for (Variable variable : model.getVariables()) {
+            seen.add(variable);
+            resetIfStateful(variable.getFormula());
+        }
+        for (Module module : model.getModules()) {
+            resetModuleFormulas(module, seen);
+        }
+    }
+
+    private static void resetModuleFormulas(Module module, Set<Variable> seen) {
+        for (Variable variable : module.getVariables()) {
+            if (seen.add(variable)) {
+                resetIfStateful(variable.getFormula());
+            }
+        }
+        for (Module child : module.getSubModules().values()) {
+            resetModuleFormulas(child, seen);
+        }
+    }
+
+    private static void resetIfStateful(Formula formula) {
+        if (formula instanceof Resettable resettable) {
+            resettable.reset();
         }
     }
 
