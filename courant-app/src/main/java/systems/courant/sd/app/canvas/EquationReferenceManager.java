@@ -52,7 +52,7 @@ final class EquationReferenceManager {
             VariableDef a = variables.get(i);
             String updated = replaceToken(a.equation(), oldToken, newToken);
             if (!updated.equals(a.equation())) {
-                variables.set(i, new VariableDef(a.name(), a.comment(), updated, a.unit()));
+                variables.set(i, new VariableDef(a.name(), a.comment(), updated, a.unit(), a.subscripts()));
             }
         }
     }
@@ -79,7 +79,7 @@ final class EquationReferenceManager {
             if (a.name().equals(targetName)) {
                 String updated = transform.apply(a.equation());
                 if (!updated.equals(a.equation())) {
-                    variables.set(i, new VariableDef(a.name(), a.comment(), updated, a.unit()));
+                    variables.set(i, new VariableDef(a.name(), a.comment(), updated, a.unit(), a.subscripts()));
                     return true;
                 }
                 return false;
@@ -98,7 +98,7 @@ final class EquationReferenceManager {
             FlowDef f = flows.get(i);
             if (f.name().equals(elementName)) {
                 String eq = f.equation();
-                if (eq.contains(token)) {
+                if (containsWholeToken(eq, token)) {
                     return true;
                 }
                 String updated = "0".equals(eq.trim()) ? token : eq + " * " + token;
@@ -112,15 +112,38 @@ final class EquationReferenceManager {
             VariableDef a = variables.get(i);
             if (a.name().equals(elementName)) {
                 String eq = a.equation();
-                if (eq.contains(token)) {
+                if (containsWholeToken(eq, token)) {
                     return true;
                 }
                 String updated = "0".equals(eq.trim()) ? token : eq + " * " + token;
-                variables.set(i, new VariableDef(a.name(), a.comment(), updated, a.unit()));
+                variables.set(i, new VariableDef(a.name(), a.comment(), updated, a.unit(), a.subscripts()));
                 return true;
             }
         }
 
+        return false;
+    }
+
+    /**
+     * Checks whether the equation contains the token as a whole word,
+     * respecting word boundaries (adjacent characters must not be token characters).
+     */
+    static boolean containsWholeToken(String equation, String token) {
+        int len = equation.length();
+        int tokenLen = token.length();
+        int i = 0;
+        while (i <= len - tokenLen) {
+            int idx = equation.indexOf(token, i);
+            if (idx < 0) {
+                return false;
+            }
+            boolean startOk = idx == 0 || !isTokenChar(equation.charAt(idx - 1));
+            boolean endOk = idx + tokenLen >= len || !isTokenChar(equation.charAt(idx + tokenLen));
+            if (startOk && endOk) {
+                return true;
+            }
+            i = idx + 1;
+        }
         return false;
     }
 
