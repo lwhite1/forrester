@@ -13,6 +13,7 @@ import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.GridPane;
+import systems.courant.sd.app.canvas.HelpContextResolver;
 import systems.courant.sd.app.canvas.Styles;
 
 /**
@@ -33,6 +34,7 @@ public class SimulationSettingsDialog extends Dialog<SimulationSettings> {
     private final TextField savePerField;
 
     public SimulationSettingsDialog(SimulationSettings existing) {
+        HelpContextResolver.installF1Handler(this);
         setTitle("Simulation Settings");
         setHeaderText("Configure simulation parameters");
 

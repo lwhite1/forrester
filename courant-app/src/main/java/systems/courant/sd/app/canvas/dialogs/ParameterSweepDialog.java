@@ -12,6 +12,7 @@ import javafx.scene.control.TextField;
 import javafx.scene.layout.GridPane;
 
 import java.util.List;
+import systems.courant.sd.app.canvas.HelpContextResolver;
 import systems.courant.sd.app.canvas.Styles;
 
 /**
@@ -36,6 +37,7 @@ public class ParameterSweepDialog extends Dialog<ParameterSweepDialog.Config> {
     private final ComboBox<String> trackCombo;
 
     public ParameterSweepDialog(List<String> constantNames, List<String> trackableNames) {
+        HelpContextResolver.installF1Handler(this);
         setTitle("Parameter Sweep");
         setHeaderText("Configure parameter sweep");
 

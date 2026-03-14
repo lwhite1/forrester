@@ -126,6 +126,7 @@ public class ModelWindow {
     private SplitPane editorSplitPane;
     private VBox topContainer;
     private CanvasToolBar toolBar;
+    private MenuBar menuBar;
     private LoopNavigatorBar loopNavigatorBar;
     private boolean editorShown;
     private final List<MenuItem> editorOnlyItems = new ArrayList<>();
@@ -180,7 +181,7 @@ public class ModelWindow {
         configureCanvasCallbacks();
         createRightPanel();
 
-        MenuBar menuBar = createMenuBar();
+        menuBar = createMenuBar();
         topContainer = new VBox(menuBar, toolBar, loopNavigatorBar, breadcrumbBar);
 
         root = new BorderPane();
@@ -217,6 +218,11 @@ public class ModelWindow {
         // immediately without requiring a click first.
         stage.focusedProperty().addListener((obs, wasFocused, isFocused) -> {
             if (isFocused) {
+                // Don't steal focus from MenuBar menus — doing so closes them
+                boolean menuShowing = menuBar.getMenus().stream().anyMatch(Menu::isShowing);
+                if (menuShowing) {
+                    return;
+                }
                 Node focused = scene.getFocusOwner();
                 if (focused == null || focused == root
                         || !(focused instanceof javafx.scene.control.TextInputControl)) {

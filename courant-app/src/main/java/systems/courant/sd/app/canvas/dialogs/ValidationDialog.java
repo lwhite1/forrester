@@ -1,5 +1,6 @@
 package systems.courant.sd.app.canvas.dialogs;
 
+import systems.courant.sd.app.canvas.HelpContextResolver;
 import systems.courant.sd.model.def.ValidationIssue;
 import systems.courant.sd.model.def.ValidationResult;
 
@@ -103,6 +104,7 @@ public class ValidationDialog extends Dialog<Void> {
 
     public ValidationDialog(ValidationResult result, Consumer<String> onSelectElement,
                             Stage owner) {
+        HelpContextResolver.installF1Handler(this);
         initModality(Modality.NONE);
         setTitle("Model Validation");
         this.currentResult = result;

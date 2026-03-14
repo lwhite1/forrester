@@ -1,5 +1,6 @@
 package systems.courant.sd.app.canvas.dialogs;
 
+import systems.courant.sd.app.canvas.HelpContextResolver;
 import systems.courant.sd.sweep.ExtremeConditionFinding;
 import systems.courant.sd.sweep.ExtremeConditionResult;
 
@@ -70,6 +71,7 @@ public class ExtremeConditionDialog extends Dialog<Void> {
     }
 
     public ExtremeConditionDialog(ExtremeConditionResult result) {
+        HelpContextResolver.installF1Handler(this);
         initModality(Modality.NONE);
         setTitle("Extreme Condition Test Results");
         this.currentResult = result;

@@ -19,6 +19,7 @@ import javafx.scene.layout.VBox;
 
 import java.util.ArrayList;
 import java.util.List;
+import systems.courant.sd.app.canvas.HelpContextResolver;
 import systems.courant.sd.app.canvas.ParameterRowBase;
 import systems.courant.sd.app.canvas.Styles;
 
@@ -52,6 +53,7 @@ public class MonteCarloDialog extends Dialog<MonteCarloDialog.Config> {
     private final TextField seedField;
 
     public MonteCarloDialog(List<String> constantNames) {
+        HelpContextResolver.installF1Handler(this);
         this.constantNames = constantNames;
         setTitle("Monte Carlo Simulation");
         setHeaderText("Configure Monte Carlo parameters");
