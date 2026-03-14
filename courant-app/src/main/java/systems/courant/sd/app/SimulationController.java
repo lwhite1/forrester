@@ -14,6 +14,7 @@ import systems.courant.sd.app.canvas.SensitivityPane;
 import systems.courant.sd.app.canvas.SimulationRunner;
 import systems.courant.sd.app.canvas.SimulationSettingsDialog;
 import systems.courant.sd.app.canvas.StatusBar;
+import systems.courant.sd.app.canvas.ExtremeConditionDialog;
 import systems.courant.sd.app.canvas.ValidationDialog;
 import systems.courant.sd.measure.Quantity;
 import systems.courant.sd.measure.TimeUnit;
@@ -21,8 +22,10 @@ import systems.courant.sd.model.def.ModelDefinition;
 import systems.courant.sd.model.def.ModelValidator;
 import systems.courant.sd.model.def.SimulationSettings;
 import systems.courant.sd.model.def.StockDef;
+import systems.courant.sd.model.def.VariableDef;
 import systems.courant.sd.model.graph.FeedbackAnalysis;
 import systems.courant.sd.model.graph.LoopDominanceAnalysis;
+import systems.courant.sd.sweep.ExtremeConditionTest;
 import systems.courant.sd.sweep.MonteCarlo;
 import systems.courant.sd.sweep.Objectives;
 import systems.courant.sd.sweep.ObjectiveFunction;
@@ -366,6 +369,47 @@ final class SimulationController {
                     fireLogEvent.accept(l -> l.onValidation(result.errorCount(), result.warningCount()));
                 },
                 "Validation Error");
+    }
+
+    void runExtremeConditionTest() {
+        SimulationSettings settings = ensureSettings();
+        if (settings == null) {
+            return;
+        }
+
+        ModelDefinition def = canvas.toModelDefinition();
+        List<VariableDef> params = def.parameters();
+
+        if (params.isEmpty()) {
+            showError.accept("Model has no parameters to test.");
+            return;
+        }
+
+        int totalRuns = params.size() * 3;
+        analysisRunner.run(
+                "Running extreme condition tests (" + totalRuns + " runs)...",
+                () -> {
+                    TimeUnit timeStep = ModelDefinitionFactory.resolveTimeStep(settings);
+                    Quantity duration = ModelDefinitionFactory.resolveDuration(settings);
+
+                    ExtremeConditionTest.Builder builder = ExtremeConditionTest.builder()
+                            .compiledModelFactory(
+                                    ModelDefinitionFactory.createFactory(def, settings))
+                            .timeStep(timeStep)
+                            .duration(duration);
+
+                    for (VariableDef param : params) {
+                        builder.parameter(param.name(), param.literalValue());
+                    }
+
+                    return builder.build().execute();
+                },
+                result -> {
+                    ExtremeConditionDialog.showOrUpdate(result);
+                    fireLogEvent.accept(l -> l.onAnalysisRun("Extreme Condition Test",
+                            params.size() + " parameters, " + result.findings().size() + " findings"));
+                },
+                "Extreme Condition Test Error");
     }
 
     private void showMultiSweepSensitivity(
