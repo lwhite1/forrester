@@ -29,6 +29,7 @@ public enum HelpTopic {
     PARAMETER_SWEEP("Parameter Sweep", "Analysis"),
     MONTE_CARLO("Monte Carlo Analysis", "Analysis"),
     OPTIMIZATION("Optimization", "Analysis"),
+    CALIBRATION("Calibration", "Analysis"),
     MULTI_SWEEP("Multi-Parameter Sweep", "Analysis"),
 
     // Structure

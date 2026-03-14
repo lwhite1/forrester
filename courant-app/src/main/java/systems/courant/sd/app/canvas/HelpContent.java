@@ -38,6 +38,7 @@ public final class HelpContent {
             case PARAMETER_SWEEP -> parameterSweepContent();
             case MONTE_CARLO -> monteCarloContent();
             case OPTIMIZATION -> optimizationContent();
+            case CALIBRATION -> calibrationContent();
             case MULTI_SWEEP -> multiSweepContent();
             case FEEDBACK_LOOPS -> feedbackLoopsContent();
             case CAUSAL_LOOPS -> causalLoopsContent();
@@ -336,6 +337,41 @@ public final class HelpContent {
                 bold("Results"),
                 plain(" show the best parameter values found, the objective value, "
                         + "and a convergence plot.")
+        );
+    }
+
+    private static TextFlow calibrationContent() {
+        return new TextFlow(
+                bold("Calibration"),
+                plain(" fits model parameters to observed data by minimizing the sum of squared "
+                        + "errors (SSE) between simulated and observed time series.\n\n"),
+                bold("Setup:\n"),
+                plain("  1. "), bold("Import CSV"),
+                plain(" \u2014 load a CSV file containing observed data. The first column must be "
+                        + "the time axis; remaining columns are data series\n"),
+                plain("  2. "), bold("Map columns"),
+                plain(" \u2014 map each CSV column to a model stock. Columns that don't correspond "
+                        + "to a stock can be skipped\n"),
+                plain("  3. "), bold("Set parameter bounds"),
+                plain(" \u2014 select which parameters to calibrate and specify lower/upper bounds "
+                        + "and an optional initial guess\n"),
+                plain("  4. "), bold("Pick algorithm"),
+                plain(" \u2014 choose the optimization algorithm and maximum evaluations\n\n"),
+                bold("How SSE works:\n\n"),
+                mono("  SSE = \u03a3 (simulated[t] \u2212 observed[t])\u00b2\n\n"),
+                plain("Lower SSE means a better fit. When multiple stocks are mapped, the total SSE "
+                        + "is the sum across all fit targets.\n\n"),
+                bold("Algorithms:\n"),
+                plain("  \u2022 "), bold("Nelder-Mead"),
+                plain(" \u2014 derivative-free simplex method, good for smooth objectives\n"),
+                plain("  \u2022 "), bold("BOBYQA"),
+                plain(" \u2014 bounded optimization by quadratic approximation, good for bounded parameters\n"),
+                plain("  \u2022 "), bold("CMA-ES"),
+                plain(" \u2014 evolutionary strategy, good for noisy or multimodal landscapes\n\n"),
+                bold("Results"),
+                plain(" show the recovered parameter values, total SSE, and a chart overlaying "
+                        + "simulated and observed data for each fit target. Observed data is shown "
+                        + "with a dashed line.")
         );
     }
 

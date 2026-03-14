@@ -145,6 +145,7 @@ public final class HelpContextResolver {
             case "SimulationSettingsDialog" -> HelpTopic.SIMULATION_SETTINGS;
             case "MonteCarloDialog" -> HelpTopic.MONTE_CARLO;
             case "OptimizerDialog" -> HelpTopic.OPTIMIZATION;
+            case "CalibrateDialog" -> HelpTopic.CALIBRATION;
             case "ParameterSweepDialog" -> HelpTopic.PARAMETER_SWEEP;
             case "MultiParameterSweepDialog" -> HelpTopic.MULTI_SWEEP;
             case "DefinePortsDialog" -> HelpTopic.MODULE_PORTS;
