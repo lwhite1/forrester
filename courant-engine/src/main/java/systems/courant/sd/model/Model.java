@@ -6,10 +6,12 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 /**
  * One representation of a dynamic system
@@ -19,7 +21,9 @@ public class Model extends Element {
     private static final Logger log = LoggerFactory.getLogger(Model.class);
 
     private final List<Stock> stocks = new ArrayList<>();
+    private final Set<String> stockNames = new HashSet<>();
     private final List<Flow> flows = new ArrayList<>();
+    private final Set<String> flowNames = new HashSet<>();
     private final Map<String, Variable> variables = new LinkedHashMap<>();
     private final List<Module> modules = new ArrayList<>();
     private ModelMetadata metadata;
@@ -55,11 +59,9 @@ public class Model extends Element {
      * @throws IllegalArgumentException if a stock with the same name already exists
      */
     public void addStock(Stock stock) {
-        for (Stock existing : stocks) {
-            if (existing.getName().equals(stock.getName())) {
-                throw new IllegalArgumentException(
-                        "Duplicate stock name '" + stock.getName() + "' in model '" + getName() + "'");
-            }
+        if (!stockNames.add(stock.getName())) {
+            throw new IllegalArgumentException(
+                    "Duplicate stock name '" + stock.getName() + "' in model '" + getName() + "'");
         }
         stocks.add(stock);
     }
@@ -70,6 +72,7 @@ public class Model extends Element {
      */
     public void removeStock(Stock stock) {
         if (stocks.remove(stock)) {
+            stockNames.remove(stock.getName());
             for (Flow flow : stock.getInflows()) {
                 flow.setSink(null);
             }
@@ -217,11 +220,9 @@ public class Model extends Element {
      * @throws IllegalArgumentException if a flow with the same name already exists
      */
     public void addFlow(Flow flow) {
-        for (Flow existing : flows) {
-            if (existing.getName().equals(flow.getName())) {
-                throw new IllegalArgumentException(
-                        "Duplicate flow name '" + flow.getName() + "' in model '" + getName() + "'");
-            }
+        if (!flowNames.add(flow.getName())) {
+            throw new IllegalArgumentException(
+                    "Duplicate flow name '" + flow.getName() + "' in model '" + getName() + "'");
         }
         flows.add(flow);
     }
