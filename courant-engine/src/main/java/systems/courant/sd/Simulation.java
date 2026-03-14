@@ -78,7 +78,6 @@ public class Simulation {
 
     private final List<EventHandler> eventHandlers = new ArrayList<>();
 
-    private final Set<String> warnedNonFiniteStocks = new java.util.HashSet<>();
 
     public Simulation(Model model, TimeUnit timeStep, Quantity duration) {
         this(model, timeStep, duration, LocalDateTime.now());
@@ -161,7 +160,6 @@ public class Simulation {
         currentStep = 0;
         currentDateTime = startTime;
         elapsedTime = Duration.ZERO;
-        warnedNonFiniteStocks.clear();
         clearHistory();
 
         fireStartEvent(new SimulationStartEvent(this));
@@ -285,24 +283,18 @@ public class Simulation {
         }
 
         // Phase 2: Apply all deltas simultaneously.
+        // In strict mode, non-finite values throw immediately. Otherwise,
+        // Stock.setValue() handles non-finite values by retaining the previous
+        // value and logging a warning, so no additional guard is needed.
         for (Stock stock : stocks) {
             double oldValue = stock.getQuantity().getValue();
             double newValue = oldValue + deltas.get(stock);
-            if (!Double.isFinite(newValue)) {
-                if (strictMode) {
-                    throw new NonFiniteValueException(
-                            "Stock '" + stock.getName() + "' became " + newValue
-                                    + " at step " + currentStep
-                                    + " (previous value: " + oldValue
-                                    + ", delta: " + deltas.get(stock) + ")");
-                }
-                if (warnedNonFiniteStocks.add(stock.getName())) {
-                    log.warn("Stock '{}' became {} at step {} (previous value: {}, delta: {})"
-                                    + " — keeping previous value",
-                            stock.getName(), newValue, currentStep, oldValue, deltas.get(stock));
-                }
-                // Keep the previous value instead of crashing
-                continue;
+            if (strictMode && !Double.isFinite(newValue)) {
+                throw new NonFiniteValueException(
+                        "Stock '" + stock.getName() + "' became " + newValue
+                                + " at step " + currentStep
+                                + " (previous value: " + oldValue
+                                + ", delta: " + deltas.get(stock) + ")");
             }
             stock.setValue(newValue);
         }

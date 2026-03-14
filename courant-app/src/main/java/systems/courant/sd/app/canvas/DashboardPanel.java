@@ -317,6 +317,8 @@ public class DashboardPanel extends VBox {
                 multiSweepTab = null;
             } else if (tab == sensitivityTab) {
                 sensitivityTab = null;
+            } else if (tab == dominanceTab) {
+                dominanceTab = null;
             } else if (tab == phasePlotTab) {
                 phasePlotTab = null;
             }
