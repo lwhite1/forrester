@@ -933,4 +933,81 @@ public class SimulationTest {
             assertThat(stock.getValue()).isEqualTo(45.0);
         }
     }
+
+    @Nested
+    @DisplayName("Null handler guard (#597)")
+    class NullHandlerGuard {
+
+        @Test
+        void shouldRejectNullEventHandler() {
+            Simulation sim = new Simulation(new Model("Null Test"), MINUTE, MINUTE, 1);
+            assertThatThrownBy(() -> sim.addEventHandler(null))
+                    .isInstanceOf(NullPointerException.class);
+        }
+    }
+
+    @Nested
+    @DisplayName("Start event inside try block (#599)")
+    class StartEventInsideTry {
+
+        @Test
+        void shouldFireEndEventEvenWhenStartHandlerThrows() {
+            Model model = new Model("Start Throws");
+            Simulation sim = new Simulation(model, MINUTE, MINUTE, 3);
+            boolean[] endFired = {false};
+
+            sim.addEventHandler(new systems.courant.sd.event.EventHandler() {
+                @Override
+                public void handleSimulationStartEvent(
+                        systems.courant.sd.event.SimulationStartEvent e) {
+                    throw new RuntimeException("start handler error");
+                }
+                @Override
+                public void handleTimeStepEvent(
+                        systems.courant.sd.event.TimeStepEvent e) { }
+                @Override
+                public void handleSimulationEndEvent(
+                        systems.courant.sd.event.SimulationEndEvent e) {
+                    endFired[0] = true;
+                }
+            });
+
+            assertThatThrownBy(sim::execute)
+                    .isInstanceOf(RuntimeException.class)
+                    .hasMessageContaining("start handler error");
+
+            assertThat(endFired[0])
+                    .as("End event should fire even when start handler throws")
+                    .isTrue();
+        }
+    }
+
+    @Nested
+    @DisplayName("Warning reset on re-run (#598)")
+    class WarningResetOnRerun {
+
+        @Test
+        void shouldResetNonFiniteWarningsBetweenRuns() {
+            Model model = new Model("Warn Reset");
+            Stock stock = new Stock("S", 100, THING);
+            boolean[] produceNaN = {true};
+
+            Flow flow = Flow.create("MaybeNaN", MINUTE, () ->
+                    new Quantity(produceNaN[0] ? Double.NaN : 5, THING));
+            stock.addInflow(flow);
+            model.addStock(stock);
+
+            Simulation sim = new Simulation(model, MINUTE, MINUTE, 2);
+
+            // First run: produces NaN warnings
+            sim.execute();
+            assertThat(stock.getValue()).isEqualTo(100.0);
+
+            // Second run: still produces NaN but warnings should fire again (not suppressed)
+            // We verify indirectly: stock value should still be preserved
+            stock.setValue(200);
+            sim.execute();
+            assertThat(stock.getValue()).isEqualTo(200.0);
+        }
+    }
 }

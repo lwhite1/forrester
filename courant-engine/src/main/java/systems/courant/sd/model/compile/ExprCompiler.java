@@ -826,7 +826,7 @@ public class ExprCompiler {
         DoubleSupplier input = compileExpr(args.get(0));
         double delayTime = evaluateConstant(args.get(1), "DELAY_FIXED delayTime");
         int delaySteps = (int) Math.round(delayTime);
-        if (delaySteps <= 0 || Double.isNaN(delayTime)) {
+        if (Double.isNaN(delayTime) || delaySteps <= 0) {
             String msg = "DELAY_FIXED delayTime evaluated to " + delayTime
                     + " (rounded to " + delaySteps
                     + ") at compile time; using default of 1 step"

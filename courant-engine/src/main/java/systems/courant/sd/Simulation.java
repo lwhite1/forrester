@@ -104,6 +104,7 @@ public class Simulation {
     }
 
     public void addEventHandler(EventHandler handler) {
+        Preconditions.checkNotNull(handler, "handler must not be null");
         eventHandlers.add(handler);
     }
 
@@ -162,8 +163,6 @@ public class Simulation {
         elapsedTime = Duration.ZERO;
         clearHistory();
 
-        fireStartEvent(new SimulationStartEvent(this));
-
         long nanos = Math.round(timeStep.ratioToBaseUnit() * 1_000_000_000L);
         if (nanos <= 0) {
             throw new IllegalArgumentException(
@@ -196,9 +195,14 @@ public class Simulation {
         long deadlineMs = timeoutMs > 0 ? System.currentTimeMillis() + timeoutMs : Long.MAX_VALUE;
         Map<Flow, Quantity> flowMap = new IdentityHashMap<>();
         List<Stock> allStocks = collectAllStocks();
+        for (Stock stock : allStocks) {
+            stock.resetWarnings();
+        }
         Map<Stock, Double> deltas = new IdentityHashMap<>();
 
         try {
+            fireStartEvent(new SimulationStartEvent(this));
+
             while (currentStep <= totalSteps) {
                 if (Thread.interrupted()) {
                     log.info("Simulation cancelled at step {}/{}", currentStep, totalSteps);
