@@ -5,12 +5,12 @@
 This is a Java project. Follow these conventions and guidelines when working on the codebase.
 
 ## INVARIANTS
-- Before committing, always execute every test 
-- Before testing, always perform clean builds of the entire system. NEVER build a module in isolation.
 - When auditing code, do a thorough code audit and quality assessment for the entire project. 
   Create agents to do a deep analysis of the entire codebase. Run StopBugs. Run JaCoCo for coverage, 
   but don't write a coverage report, just summarize any weaknesses. 
-  For every problem found, create an issue in github unless one already exists. 
+  For every problem found, create an issue in github unless one already exists. Label the issue with its priority:
+  critical, high, medium, or low, but no grade-inflation. Be consistent in the labeling of priorities regardless of
+  what you find. 
   Create a summary report in the devdocs/quality folder using the current date and timestamp for the file name. 
   If it's slow use more agents. Don't skip any part of this process.
 
