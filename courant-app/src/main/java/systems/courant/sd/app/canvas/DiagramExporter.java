@@ -124,7 +124,7 @@ public final class DiagramExporter {
                             CanvasRenderer.RerouteState.IDLE,
                             CanvasRenderer.MarqueeState.IDLE,
                             loopAnalysis, null, null,
-                            null, null, null, null, false, false, false));
+                            null, null, null, null, false, false, false, null));
 
             // Snapshot to image
             SnapshotParameters params = new SnapshotParameters();
