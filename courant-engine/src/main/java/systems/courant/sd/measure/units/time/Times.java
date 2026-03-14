@@ -6,7 +6,10 @@ import systems.courant.sd.measure.TimeUnit;
 /**
  * Factory methods for creating time {@link Quantity} instances in various time units.
  */
-public class Times {
+public final class Times {
+
+    private Times() {
+    }
 
     /**
      * Creates a quantity of the given value in milliseconds.

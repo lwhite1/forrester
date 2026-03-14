@@ -176,6 +176,59 @@ public class ModelWindow {
             simulationController.runSimulation();
         });
 
+        configureToolBarAndNavigation();
+        configureCanvasCallbacks();
+        createRightPanel();
+
+        MenuBar menuBar = createMenuBar();
+        topContainer = new VBox(menuBar, toolBar, loopNavigatorBar, breadcrumbBar);
+
+        root = new BorderPane();
+        root.setId("modelWindowRoot");
+
+        configureStartScreen();
+
+        Scene scene = new Scene(root, 1200, 800);
+        stage.setScene(scene);
+        stage.setOnCloseRequest(event -> {
+            if (!fileController.confirmDiscardChanges()) {
+                event.consume();
+                return;
+            }
+            close();
+        });
+
+        commandPalette = new CommandPalette(this::buildCommands);
+        scene.addEventFilter(KeyEvent.KEY_PRESSED, event -> {
+            if (event.isShortcutDown() && event.getCode() == KeyCode.K) {
+                commandPalette.show(stage);
+                event.consume();
+            }
+            if (event.getCode() == KeyCode.F1) {
+                showContextHelp();
+                event.consume();
+            }
+        });
+
+        updateTitle();
+
+        // When the window gains focus (e.g. switching from another window),
+        // give focus to the canvas so keyboard shortcuts (Ctrl+V, etc.) work
+        // immediately without requiring a click first.
+        stage.focusedProperty().addListener((obs, wasFocused, isFocused) -> {
+            if (isFocused) {
+                Node focused = scene.getFocusOwner();
+                if (focused == null || focused == root
+                        || !(focused instanceof javafx.scene.control.TextInputControl)) {
+                    canvas.requestFocus();
+                }
+            }
+        });
+
+        canvas.requestFocus();
+    }
+
+    private void configureToolBarAndNavigation() {
         toolBar = new CanvasToolBar();
         toolBar.setOnToolChanged(tool -> {
             canvas.setActiveTool(tool);
@@ -216,6 +269,9 @@ public class ModelWindow {
         });
         toolBar.setOnValidateClicked(simulationController::validateModel);
         toolBar.setOnSearchClicked(() -> commandPalette.show(stage));
+    }
+
+    private void configureCanvasCallbacks() {
         canvas.setToolBar(toolBar);
         canvas.setOnStatusChanged(() -> {
             updateStatusBar();
@@ -247,7 +303,9 @@ public class ModelWindow {
             canvas.requestFocus();
         });
         canvas.setOnNavigationChanged(this::updateBreadcrumb);
+    }
 
+    private void createRightPanel() {
         Pane canvasPane = new Pane(canvas);
         canvas.widthProperty().bind(canvasPane.widthProperty());
         canvas.heightProperty().bind(canvasPane.heightProperty());
@@ -282,14 +340,9 @@ public class ModelWindow {
         editorSplitPane = new SplitPane(canvasPane, rightTabPane);
         editorSplitPane.setDividerPositions(0.75);
         SplitPane.setResizableWithParent(rightTabPane, false);
+    }
 
-        MenuBar menuBar = createMenuBar();
-        topContainer = new VBox(menuBar, toolBar, loopNavigatorBar, breadcrumbBar);
-
-        root = new BorderPane();
-        root.setId("modelWindowRoot");
-
-        // Show start screen instead of blank editor
+    private void configureStartScreen() {
         StartScreen startScreen = new StartScreen();
         startScreen.setOnNewModel(() -> {
             showEditor();
@@ -332,45 +385,6 @@ public class ModelWindow {
         root.setTop(topContainer);
         root.setCenter(startScreen);
         root.setBottom(statusBar);
-
-        Scene scene = new Scene(root, 1200, 800);
-        stage.setScene(scene);
-        stage.setOnCloseRequest(event -> {
-            if (!fileController.confirmDiscardChanges()) {
-                event.consume();
-                return;
-            }
-            close();
-        });
-
-        commandPalette = new CommandPalette(this::buildCommands);
-        scene.addEventFilter(KeyEvent.KEY_PRESSED, event -> {
-            if (event.isShortcutDown() && event.getCode() == KeyCode.K) {
-                commandPalette.show(stage);
-                event.consume();
-            }
-            if (event.getCode() == KeyCode.F1) {
-                showContextHelp();
-                event.consume();
-            }
-        });
-
-        updateTitle();
-
-        // When the window gains focus (e.g. switching from another window),
-        // give focus to the canvas so keyboard shortcuts (Ctrl+V, etc.) work
-        // immediately without requiring a click first.
-        stage.focusedProperty().addListener((obs, wasFocused, isFocused) -> {
-            if (isFocused) {
-                Node focused = scene.getFocusOwner();
-                if (focused == null || focused == root
-                        || !(focused instanceof javafx.scene.control.TextInputControl)) {
-                    canvas.requestFocus();
-                }
-            }
-        });
-
-        canvas.requestFocus();
     }
 
     /**
@@ -391,6 +405,16 @@ public class ModelWindow {
     }
 
     private MenuBar createMenuBar() {
+        Menu fileMenu = createFileMenu();
+        Menu editMenu = createEditMenu();
+        Menu viewMenu = createViewMenu();
+        Menu simulateMenu = createSimulateMenu();
+        Menu helpMenu = createHelpMenu();
+
+        return new MenuBar(fileMenu, editMenu, viewMenu, simulateMenu, helpMenu);
+    }
+
+    private Menu createFileMenu() {
         Menu fileMenu = new Menu("File");
 
         MenuItem newWindowItem = new MenuItem("New Window");
@@ -476,6 +500,10 @@ public class ModelWindow {
                 new SeparatorMenuItem(), saveItem, saveAsItem, exportItem, exportReportItem,
                 new SeparatorMenuItem(), closeItem, exitItem);
 
+        return fileMenu;
+    }
+
+    private Menu createEditMenu() {
         Menu editMenu = new Menu("Edit");
 
         undoItem = new MenuItem("Undo");
@@ -535,7 +563,10 @@ public class ModelWindow {
         editMenu.setDisable(true);
         editorOnlyItems.add(editMenu);
 
-        // View menu
+        return editMenu;
+    }
+
+    private Menu createViewMenu() {
         Menu viewMenu = new Menu("View");
 
         CheckMenuItem activityLogItem = new CheckMenuItem("Activity Log");
@@ -618,7 +649,10 @@ public class ModelWindow {
         viewMenu.setDisable(true);
         editorOnlyItems.add(viewMenu);
 
-        // Simulate menu
+        return viewMenu;
+    }
+
+    private Menu createSimulateMenu() {
         Menu simulateMenu = new Menu("Simulate");
 
         MenuItem settingsItem = new MenuItem("Simulation Settings...");
@@ -654,6 +688,10 @@ public class ModelWindow {
         simulateMenu.setDisable(true);
         editorOnlyItems.add(simulateMenu);
 
+        return simulateMenu;
+    }
+
+    private Menu createHelpMenu() {
         Menu helpMenu = new Menu("Help");
 
         MenuItem contextHelpItem = new MenuItem("Context Help");
@@ -708,7 +746,7 @@ public class ModelWindow {
                 new SeparatorMenuItem(), shortcutsItem,
                 new SeparatorMenuItem(), aboutItem);
 
-        return new MenuBar(fileMenu, editMenu, viewMenu, simulateMenu, helpMenu);
+        return helpMenu;
     }
 
     void loadDefinition(ModelDefinition def, String displayName) {

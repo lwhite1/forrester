@@ -223,19 +223,19 @@ public class Simulation {
     }
 
     private void fireStartEvent(SimulationStartEvent event) {
-        for (EventHandler handler : eventHandlers) {
+        for (EventHandler handler : List.copyOf(eventHandlers)) {
             handler.handleSimulationStartEvent(event);
         }
     }
 
     private void fireTimeStepEvent(TimeStepEvent event) {
-        for (EventHandler handler : eventHandlers) {
+        for (EventHandler handler : List.copyOf(eventHandlers)) {
             handler.handleTimeStepEvent(event);
         }
     }
 
     private void fireEndEvent(SimulationEndEvent event) {
-        for (EventHandler handler : eventHandlers) {
+        for (EventHandler handler : List.copyOf(eventHandlers)) {
             handler.handleSimulationEndEvent(event);
         }
     }

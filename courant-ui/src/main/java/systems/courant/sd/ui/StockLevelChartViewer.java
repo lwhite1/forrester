@@ -16,7 +16,6 @@ public class StockLevelChartViewer implements EventHandler {
         ChartViewerApplication.addValues(
                 event.getModel().getStockValues(),
                 event.getModel().getVariableValues(),
-                //event.getCurrentTime(),
                 event.getStep());
     }
 

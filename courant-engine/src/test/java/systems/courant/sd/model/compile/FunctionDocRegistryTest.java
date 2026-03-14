@@ -74,4 +74,16 @@ class FunctionDocRegistryTest {
         assertThat(step.parameters().get(0).name()).isEqualTo("height");
         assertThat(step.parameters().get(1).name()).isEqualTo("step_time");
     }
+
+    @Test
+    void shouldDocumentRandomNormalWith5Parameters() {
+        FunctionDoc doc = FunctionDocRegistry.get("RANDOM_NORMAL").orElseThrow();
+        assertThat(doc.parameters()).hasSize(5);
+        assertThat(doc.parameters().get(0).name()).isEqualTo("min");
+        assertThat(doc.parameters().get(1).name()).isEqualTo("max");
+        assertThat(doc.parameters().get(2).name()).isEqualTo("mean");
+        assertThat(doc.parameters().get(3).name()).isEqualTo("std_dev");
+        assertThat(doc.parameters().get(4).name()).isEqualTo("seed");
+        assertThat(doc.signature()).contains("[, seed]");
+    }
 }

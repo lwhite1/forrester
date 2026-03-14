@@ -777,4 +777,73 @@ public class SimulationTest {
             assertThat(sim.getSavePer()).isEqualTo(1);
         }
     }
+
+    @Nested
+    @DisplayName("Event handler safety (#451)")
+    class EventHandlerSafety {
+
+        @Test
+        void shouldNotThrowWhenHandlerRemovesItselfDuringDispatch() {
+            Model model = new Model("Self-Remove");
+            Simulation sim = new Simulation(model, MINUTE, MINUTE, 3);
+
+            systems.courant.sd.event.EventHandler selfRemovingHandler =
+                    new systems.courant.sd.event.EventHandler() {
+                @Override
+                public void handleSimulationStartEvent(
+                        systems.courant.sd.event.SimulationStartEvent e) {
+                    e.getSimulation().removeEventHandler(this);
+                }
+                @Override
+                public void handleTimeStepEvent(
+                        systems.courant.sd.event.TimeStepEvent e) { }
+                @Override
+                public void handleSimulationEndEvent(
+                        systems.courant.sd.event.SimulationEndEvent e) { }
+            };
+
+            sim.addEventHandler(selfRemovingHandler);
+            sim.execute();
+
+            assertThat(sim.getCurrentStep()).isEqualTo(4);
+        }
+
+        @Test
+        void shouldNotThrowWhenHandlerAddsAnotherDuringDispatch() {
+            Model model = new Model("Add Handler");
+            int[] count = {0};
+            Simulation sim = new Simulation(model, MINUTE, MINUTE, 2);
+
+            systems.courant.sd.event.EventHandler addingHandler =
+                    new systems.courant.sd.event.EventHandler() {
+                @Override
+                public void handleSimulationStartEvent(
+                        systems.courant.sd.event.SimulationStartEvent e) {
+                    e.getSimulation().addEventHandler(
+                            new systems.courant.sd.event.EventHandler() {
+                        @Override
+                        public void handleSimulationStartEvent(
+                                systems.courant.sd.event.SimulationStartEvent ev) { }
+                        @Override
+                        public void handleTimeStepEvent(
+                                systems.courant.sd.event.TimeStepEvent ev) { count[0]++; }
+                        @Override
+                        public void handleSimulationEndEvent(
+                                systems.courant.sd.event.SimulationEndEvent ev) { }
+                    });
+                }
+                @Override
+                public void handleTimeStepEvent(
+                        systems.courant.sd.event.TimeStepEvent e) { }
+                @Override
+                public void handleSimulationEndEvent(
+                        systems.courant.sd.event.SimulationEndEvent e) { }
+            };
+
+            sim.addEventHandler(addingHandler);
+            sim.execute();
+
+            assertThat(sim.getCurrentStep()).isEqualTo(3);
+        }
+    }
 }

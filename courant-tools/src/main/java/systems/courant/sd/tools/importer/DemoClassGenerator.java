@@ -9,6 +9,7 @@ import systems.courant.sd.model.def.ModuleInstanceDef;
 import systems.courant.sd.model.def.SimulationSettings;
 import systems.courant.sd.model.def.StockDef;
 
+import java.time.Year;
 import java.util.List;
 import java.util.Map;
 
@@ -64,7 +65,7 @@ public class DemoClassGenerator {
             sb.append(" */\n");
         } else {
             sb.append("/*\n");
-            sb.append(" * Copyright (c) 2026 Courant Systems\n");
+            sb.append(" * Copyright (c) ").append(Year.now().getValue()).append(" Courant Systems\n");
             sb.append(" * Licensed under CC-BY-SA-4.0. See LICENSE in this module for details.\n");
             sb.append(" */\n");
         }
