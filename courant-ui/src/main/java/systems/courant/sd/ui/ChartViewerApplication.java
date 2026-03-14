@@ -33,6 +33,7 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -68,6 +69,10 @@ public class ChartViewerApplication extends Application {
             double height,
             String title,
             String xAxisLabel) {
+
+        ChartData {
+            series = Collections.unmodifiableList(series);
+        }
     }
 
     /** Package-private for test access. */
@@ -160,6 +165,11 @@ public class ChartViewerApplication extends Application {
 
     @Override
     public void start(Stage stage) {
+        if (chartData == null) {
+            throw new IllegalStateException(
+                    "ChartViewerApplication requires chart data. "
+                            + "Use ChartViewerApplication.showChart() instead of Application.launch().");
+        }
         List<Series<String, Number>> localSeries = chartData.series();
         String localTitle = chartData.title();
         String localXAxisLabel = chartData.xAxisLabel();

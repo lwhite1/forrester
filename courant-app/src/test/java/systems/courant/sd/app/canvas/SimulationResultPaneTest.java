@@ -53,4 +53,60 @@ class SimulationResultPaneTest {
             assertThat(tick).isLessThanOrEqualTo(10);
         }
     }
+
+    @Nested
+    @DisplayName("formatTimeStep")
+    class FormatTimeStep {
+
+        @Test
+        @DisplayName("should display whole numbers without decimal point")
+        void shouldDisplayWholeNumbersAsIntegers() {
+            assertThat(SimulationResultPane.formatTimeStep(0.0)).isEqualTo("0");
+            assertThat(SimulationResultPane.formatTimeStep(1.0)).isEqualTo("1");
+            assertThat(SimulationResultPane.formatTimeStep(10.0)).isEqualTo("10");
+            assertThat(SimulationResultPane.formatTimeStep(100.0)).isEqualTo("100");
+        }
+
+        @Test
+        @DisplayName("should display fractional steps with appropriate precision")
+        void shouldDisplayFractionalSteps() {
+            assertThat(SimulationResultPane.formatTimeStep(0.25)).isEqualTo("0.25");
+            assertThat(SimulationResultPane.formatTimeStep(0.5)).isEqualTo("0.5");
+            assertThat(SimulationResultPane.formatTimeStep(0.75)).isEqualTo("0.75");
+            assertThat(SimulationResultPane.formatTimeStep(1.25)).isEqualTo("1.25");
+        }
+
+        @Test
+        @DisplayName("should strip trailing zeros from fractional values")
+        void shouldStripTrailingZeros() {
+            assertThat(SimulationResultPane.formatTimeStep(0.5)).isEqualTo("0.5");
+            assertThat(SimulationResultPane.formatTimeStep(2.10)).isEqualTo("2.1");
+            assertThat(SimulationResultPane.formatTimeStep(3.500)).isEqualTo("3.5");
+        }
+
+        @Test
+        @DisplayName("should handle negative time values")
+        void shouldHandleNegativeValues() {
+            assertThat(SimulationResultPane.formatTimeStep(-1.0)).isEqualTo("-1");
+            assertThat(SimulationResultPane.formatTimeStep(-0.25)).isEqualTo("-0.25");
+        }
+
+        @Test
+        @DisplayName("should preserve up to 4 decimal places for high-precision steps")
+        void shouldPreserveUpToFourDecimalPlaces() {
+            assertThat(SimulationResultPane.formatTimeStep(0.1234)).isEqualTo("0.1234");
+            assertThat(SimulationResultPane.formatTimeStep(0.0001)).isEqualTo("0.0001");
+        }
+
+        @Test
+        @DisplayName("should handle typical DT=0.25 simulation sequence")
+        void shouldHandleQuarterStepSequence() {
+            assertThat(SimulationResultPane.formatTimeStep(0.0)).isEqualTo("0");
+            assertThat(SimulationResultPane.formatTimeStep(0.25)).isEqualTo("0.25");
+            assertThat(SimulationResultPane.formatTimeStep(0.50)).isEqualTo("0.5");
+            assertThat(SimulationResultPane.formatTimeStep(0.75)).isEqualTo("0.75");
+            assertThat(SimulationResultPane.formatTimeStep(1.0)).isEqualTo("1");
+            assertThat(SimulationResultPane.formatTimeStep(1.25)).isEqualTo("1.25");
+        }
+    }
 }

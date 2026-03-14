@@ -1,14 +1,18 @@
 package systems.courant.sd.ui;
 
+import javafx.application.Platform;
 import javafx.scene.chart.XYChart;
+import javafx.stage.Stage;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.testfx.framework.junit5.ApplicationExtension;
+import org.testfx.util.WaitForAsyncUtils;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
@@ -165,6 +169,27 @@ class ChartViewerApplicationTest {
         XYChart.Data<String, Number> dataPoint = snap.series().getFirst().getData().getFirst();
         assertThat(dataPoint.getXValue()).isEqualTo("5");
         assertThat(dataPoint.getYValue().doubleValue()).isEqualTo(42.0);
+    }
+
+    @Test
+    @DisplayName("start() with null chartData throws IllegalStateException (#546)")
+    void startWithNullChartDataThrowsIllegalState() {
+        CompletableFuture<Throwable> thrown = new CompletableFuture<>();
+        Platform.runLater(() -> {
+            try {
+                ChartViewerApplication app = new ChartViewerApplication();
+                app.start(new Stage());
+                thrown.complete(null);
+            } catch (Throwable t) {
+                thrown.complete(t);
+            }
+        });
+        WaitForAsyncUtils.waitForFxEvents();
+
+        Throwable result = thrown.join();
+        assertThat(result)
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining("ChartViewerApplication requires chart data");
     }
 
     @Test
