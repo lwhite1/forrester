@@ -9,6 +9,9 @@ import systems.courant.sd.measure.units.temperature.TemperatureUnits;
 import systems.courant.sd.measure.units.time.TimeUnits;
 import systems.courant.sd.measure.units.volume.VolumeUnits;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -21,6 +24,7 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class UnitRegistry {
 
+    private static final Logger log = LoggerFactory.getLogger(UnitRegistry.class);
     private static final int MAX_CUSTOM_UNITS = 10_000;
 
     private final Map<String, Unit> byName = new ConcurrentHashMap<>();
@@ -88,6 +92,7 @@ public class UnitRegistry {
                 return unit;
             }
             // Auto-create custom ItemUnit for unknown names
+            log.warn("Auto-creating unit for unknown name '{}' — possible typo", name);
             if (customUnitCount >= MAX_CUSTOM_UNITS) {
                 throw new IllegalStateException(
                         "Unit registry exceeded " + MAX_CUSTOM_UNITS
