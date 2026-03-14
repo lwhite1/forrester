@@ -80,7 +80,7 @@ public class SalesMixDemo {
 
         run.addEventHandler(new StockLevelChartViewer());
         run.addEventHandler(new CsvSubscriber(
-                System.getProperty("java.io.tmpdir") + "/courant-run1out.csv"));
+                System.getProperty("java.io.tmpdir") + "/courant-salesmix.csv"));
         run.execute();
     }
 }
