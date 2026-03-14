@@ -93,6 +93,33 @@ class AgileSoftwareDevelopmentDemoTest {
         }
 
         @Test
+        void shouldGenerateDefectsAtCorrectWeeklyRate() {
+            // With 100% fraction correct there should be zero defects;
+            // with 0% fraction correct, peak defect creation should match completion rate.
+            // Use a controlled scenario: 1 person, productivity 10/week, fractionCorrect=0.50
+            // Sprint pull is 1.0 so all backlog is available immediately.
+            Model zeroDefectModel = AgileSoftwareDevelopmentDemo.getModel(
+                    100, 1, 10, 1.0, 1.0, 0.0, 0.0);
+            runModel(zeroDefectModel, 5);
+            double zeroDefectTotal = getStockValue(zeroDefectModel, "Latent Defects");
+            assertThat(zeroDefectTotal)
+                    .as("No defects should be created when fractionCorrect=1.0")
+                    .isCloseTo(0.0, org.assertj.core.data.Offset.offset(0.01));
+
+            // With fractionCorrect=0.50, defects created per week = completionRate * 0.50
+            // After 5 weeks with no discovery/fix, defects should be roughly 50% of completed work
+            Model halfDefectModel = AgileSoftwareDevelopmentDemo.getModel(
+                    100, 1, 10, 0.50, 1.0, 0.0, 0.0);
+            runModel(halfDefectModel, 5);
+            double completedWork = getStockValue(halfDefectModel, "Completed Tasks");
+            double latentDefects = getStockValue(halfDefectModel, "Latent Defects");
+            double expectedDefects = completedWork * 0.50;
+            assertThat(latentDefects)
+                    .as("Defects should be ~50%% of completed work (was ~1/7 of that before #282 fix)")
+                    .isCloseTo(expectedDefects, org.assertj.core.data.Offset.offset(expectedDefects * 0.15));
+        }
+
+        @Test
         void shouldDiscoverLatentDefects() {
             runSimulation(20);
             assertThat(stockValue("Known Defects"))

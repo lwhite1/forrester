@@ -83,7 +83,8 @@ public class SoftwareProduction {
         Variable completionFraction = new Variable("Completion Fraction", DimensionlessUnits.DIMENSIONLESS, () -> {
             double completed = tasksCompleted.getValue();
             double undiscovered = undiscoveredRework.getValue();
-            double total = completed + undiscovered;
+            double rework = reworkToDo.getValue();
+            double total = completed + undiscovered + rework;
             if (projectSize <= 0) {
                 return 0.0;
             }
