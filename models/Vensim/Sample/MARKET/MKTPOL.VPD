@@ -1,0 +1,8 @@
+*policy
+:COMMENT
+:COMMENT  This file is used with market.vmf as described in chapter 19.
+:COMMENT  It sets up the payoff for a policy optimization.
+:COMMENT
+retained_cash_flow /1
+
+

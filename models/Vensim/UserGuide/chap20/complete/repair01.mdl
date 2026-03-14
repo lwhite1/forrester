@@ -1,0 +1,99 @@
+{UTF-8}
+average machine reliability  = A FUNCTION OF( routine maintenance work done)
+	~	
+	~		|
+
+number of repairs required  = A FUNCTION OF( average machine reliability)
+	~	
+	~		|
+
+routine maintenance work done  = A FUNCTION OF( workers available for routine maintenance\
+		)
+	~	
+	~		|
+
+total maintenance workforce  = A FUNCTION OF( )
+	~	
+	~		|
+
+workers available for routine maintenance  = A FUNCTION OF( total maintenance workforce\
+		,workers performing repairs)
+	~	
+	~		|
+
+workers performing repairs  = A FUNCTION OF( number of repairs required)
+	~	
+	~		|
+
+********************************************************
+	.Control
+********************************************************~
+		Simulation Control Parameters
+	|
+
+FINAL TIME  = 100
+	~	Month
+	~	The final time for the simulation.
+	|
+
+INITIAL TIME  = 0
+	~	Month
+	~	The initial time for the simulation.
+	|
+
+SAVEPER  = 
+        TIME STEP
+	~	Month [0,?]
+	~	The frequency with which output is stored.
+	|
+
+TIME STEP  = 1
+	~	Month [0,?]
+	~	The time step for the simulation.
+	|
+
+\\\---/// Sketch information - do not modify anything except names
+V300  Do not put anything below this section - it will be ignored
+*View 1
+$192-192-192,0,Arial|14||0-0-0|92-92-92|160-160-160|-1--1--1|-1--1--1|96,96,100,0
+10,1,average machine reliability,559,168,68,39,8,131,0,0,0,0,0,0
+10,2,number of repairs required,688,304,68,39,8,131,0,0,0,0,0,0
+10,3,workers performing repairs,540,417,68,39,8,131,0,0,0,0,0,0
+10,4,total maintenance workforce,363,487,68,39,8,131,0,2,0,0,0,0,0-0-0,0-0-0,|14||64-128-128
+10,5,workers available for routine maintenance,347,361,80,52,8,131,0,0,0,0,0,0
+10,6,routine maintenance work done,373,227,68,39,8,131,0,0,0,0,0,0
+1,7,5,6,1,0,43,0,0,64,0,-1--1--1,,1|(323,279)|
+1,8,6,1,1,0,43,0,0,64,0,-1--1--1,,1|(416,163)|
+1,9,1,2,1,0,45,0,2,64,0,-1--1--1,|12||0-0-0,1|(688,203)|
+1,10,2,3,1,0,43,0,0,64,0,-1--1--1,,1|(652,376)|
+1,11,3,5,1,0,45,0,2,64,0,-1--1--1,|12||0-0-0,1|(432,428)|
+1,12,4,5,1,0,43,0,0,64,0,-1--1--1,,1|(309,391)|
+12,13,4,512,304,27,27,4,0,0,0,-1,0,0,0
+///---\\\
+:L<%^E!@
+1:ReferenceMode.vdf
+9:Current
+22:$,Dollar,Dollars,$s
+22:Hour,Hours
+22:Month,Months
+22:Person,People,Persons
+22:Unit,Units
+22:Week,Weeks
+22:Year,Years
+22:Day,Days
+31:3,ReferenceMode
+32:5,number of repairs required
+33:(0,100),(6,100),(12,200),(18,500),(24,500),
+32:3,total maintenance workforce
+33:(0,10),(6,5),(24,5),
+32:5,routine maintenance work done
+33:(0,200),(6,175),(12,100),(18,0),(24,0),
+15:0,0,0,0,0,0
+19:100,0
+27:2,
+34:0,
+4:Time
+5:total maintenance workforce
+24:0
+25:24
+26:24

@@ -1,0 +1,166 @@
+{UTF-8}
+new customers=
+	sales / sales size
+	~	person/Year
+	~		|
+
+advertising spending= GAME (
+	c advertising spending)
+	~	$/Year
+	~		|
+
+c advertising spending=
+	2e+007
+	~	$/Year
+	~		|
+
+customer sales effectiveness=
+	3
+	~	widget/person/Year
+	~		|
+
+Customers= INTEG (
+	+new customers-leaving customers,
+		seed customers)
+	~	person
+	~		|
+
+fraction would be with real prospects=
+	Potential Customers / market size
+	~	Dmnl
+	~		|
+
+leaving customers=
+	Customers / obsolescence time
+	~	person/Year
+	~		|
+
+market size=
+	1e+008
+	~	person
+	~		|
+
+sales size=
+	1
+	~	widget/person
+	~		|
+
+obsolescence time=
+	2
+	~	Year
+	~		|
+
+Potential Customers= INTEG (
+	leaving customers - new customers,
+		market size - seed customers)
+	~	person
+	~		|
+
+sales=
+	(would be word of mouth sales + would be advertising sales ) * fraction would be with real prospects
+	~	widget/Year
+	~		|
+
+would be advertising sales=
+	advertising spending * advertising effectiveness
+	~	widget/Year
+	~		|
+
+seed customers=
+	10000
+	~	person
+	~		|
+
+would be word of mouth sales=
+	Customers * customer sales effectiveness
+	~	widget/Year
+	~		|
+
+advertising effectiveness=
+	0.1
+	~	widget/$
+	~		|
+
+********************************************************
+	.Control
+********************************************************~
+		Simulation Control Parameters
+	|
+
+FINAL TIME  = 5
+	~	Year
+	~	The final time for the simulation.
+	|
+
+INITIAL TIME  = 0
+	~	Year
+	~	The initial time for the simulation.
+	|
+
+SAVEPER  = 
+        TIME STEP
+	~	Year
+	~	The frequency with which output is stored.
+	|
+
+TIME STEP  = 0.0625
+	~	Year
+	~	The time step for the simulation.
+	|
+
+\\\---/// Sketch information - do not modify anything except names
+V300  Do not put anything below this section - it will be ignored
+*View 1
+$192-192-192,0,Arial|14||0-0-0|92-92-92|160-160-160|-1--1--1|-1--1--1|96,96,100,0
+10,1,Potential Customers,380,137,56,33,3,131,0,16,0,0,0,0,0-0-0,0-0-0,|14|B|0-0-0
+10,2,Customers,645,136,57,35,3,131,0,16,0,0,0,0,0-0-0,0-0-0,|14|B|0-0-0
+1,3,5,2,4,0,0,22,0,0,0,-1--1--1,,1|(553,140)|
+1,4,5,1,100,0,0,22,0,0,0,-1--1--1,,1|(471,140)|
+11,5,300,512,140,7,8,34,3,0,0,1,0,0,0
+10,6,new customers,512,160,65,12,32,3,0,0,-1,0,0,0
+1,7,9,1,4,0,0,22,0,0,0,-1--1--1,,4|(271,20)|(271,25)|(271,139)|(297,139)|
+1,8,9,2,100,0,0,22,0,0,0,-1--1--1,,4|(760,20)|(760,25)|(760,139)|(731,139)|
+11,9,140,512,20,7,8,34,3,0,0,1,0,0,0
+10,10,leaving customers,512,40,79,12,32,3,0,0,-1,0,0,0
+10,11,obsolescence time,675,72,80,12,0,3,0,2,0,0,0,0,0-0-0,0-0-0,|14||64-128-128
+10,12,seed customers,507,85,69,12,0,3,0,2,0,0,0,0,0-0-0,0-0-0,|14||64-128-128
+10,13,market size,229,188,51,12,0,3,0,2,0,0,0,0,0-0-0,0-0-0,|14||64-128-128
+10,14,sales size,440,216,44,12,0,3,0,2,0,0,0,0,0-0-0,0-0-0,|14||160-160-160
+10,15,fraction would be with real prospects,284,255,153,12,0,3,0,0,0,0,0,0
+10,16,would be advertising sales,407,319,112,12,0,3,0,0,0,0,0,0
+10,17,sales,512,239,25,12,0,3,0,0,0,0,0,0
+10,18,advertising spending,175,335,88,12,0,3,0,0,0,0,0,0
+10,19,advertising effectiveness,155,305,105,12,0,3,0,2,0,0,0,0,0-0-0,0-0-0,|14||64-128-128
+10,20,c advertising spending,103,392,96,12,0,3,0,2,0,0,0,0,0-0-0,0-0-0,|14||64-128-128
+10,21,customer sales effectiveness,848,165,123,12,0,3,0,2,0,0,0,0,0-0-0,0-0-0,|14||64-128-128
+10,22,would be word of mouth sales,719,259,127,12,0,3,0,0,0,0,0,0
+1,23,11,10,0,0,0,0,0,64,0,-1--1--1,,1|(601,57)|
+1,24,2,10,1,0,0,0,0,64,0,-1--1--1,,1|(581,75)|
+1,25,12,1,0,0,0,0,0,64,1,-1--1--1,,1|(465,101)|
+1,26,12,2,0,0,0,0,0,64,1,-1--1--1,,1|(553,103)|
+1,27,13,1,1,0,0,0,0,64,1,-1--1--1,,1|(272,172)|
+1,28,14,6,0,0,0,0,0,64,0,-1--1--1,,1|(467,193)|
+1,29,17,6,1,0,0,0,0,64,0,-1--1--1,,1|(504,207)|
+1,30,22,17,1,0,0,0,0,64,0,-1--1--1,,1|(632,312)|
+1,31,2,22,1,0,0,0,0,64,0,-1--1--1,,1|(712,192)|
+1,32,16,17,1,0,0,0,0,64,0,-1--1--1,,1|(501,269)|
+1,33,18,16,0,0,0,0,0,64,0,-1--1--1,,1|(269,328)|
+1,34,19,16,0,0,0,0,0,64,0,-1--1--1,,1|(268,311)|
+1,35,20,18,0,0,0,0,0,64,0,-1--1--1,,1|(131,368)|
+1,36,21,22,1,0,0,0,0,64,0,-1--1--1,,1|(793,212)|
+1,37,1,15,1,0,0,0,0,64,0,-1--1--1,,1|(299,181)|
+1,38,15,17,1,0,0,0,0,64,0,-1--1--1,,1|(464,271)|
+1,39,13,15,1,0,0,0,0,64,0,-1--1--1,,1|(239,212)|
+///---\\\
+:L<%^E!@
+1:Current.vdf
+9:Current
+15:0,0,0,0,0,0
+19:100,0
+27:0,
+34:0,
+4:Time
+5:sales size
+24:0
+25:5
+26:5

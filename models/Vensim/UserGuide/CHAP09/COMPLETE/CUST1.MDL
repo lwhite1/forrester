@@ -1,0 +1,113 @@
+{UTF-8}
+potential customer concentration=
+	Potential Customers/total market
+	~	dmnl
+	~		|
+
+new customers = word of mouth demand
+	~	person/Month
+	~		|
+
+contacts of noncustomers with customers = contacts with customers*potential customer concentration
+	~	contact/Month
+	~		|
+
+contacts with customers = Customers*sociability
+	~	contact/Month
+	~		|
+
+Customers = INTEG(new customers,1000)
+	~	person
+	~		|
+
+fruitfulness = 0.01
+	~	person/contact
+	~		|
+
+Potential Customers = INTEG( - new customers,1e+006)
+	~	person
+	~		|
+
+sociability = 20
+	~	contact/person/Month
+	~		|
+
+total market = Customers+Potential Customers
+	~	person
+	~		|
+
+word of mouth demand = contacts of noncustomers with customers*fruitfulness
+	~	person/Month
+	~		|
+
+********************************************************
+	.Control
+********************************************************~
+		Simulation Control Paramaters
+	|
+
+FINAL TIME  = 100
+	~	Month
+	~	The final time for the simulation.
+	|
+
+INITIAL TIME  = 0
+	~	Month
+	~	The initial time for the simulation.
+	|
+
+SAVEPER  = 
+        TIME STEP
+	~	Month
+	~	The frequency with which output is stored.
+	|
+
+TIME STEP  = 1
+	~	Month
+	~	The time step for the simulation.
+	|
+
+\\\---/// Sketch information - do not modify anything except names
+V300  Do not put anything below this section - it will be ignored
+*View 1
+$192-192-192,0,Arial|14||0-0-0|92-92-92|160-160-160|-1--1--1|255-255-255|96,96,100,0
+10,1,word of mouth demand,385,167,99,12,0,3,0,0,0,0,0,0
+10,2,Customers,585,224,65,35,3,131,0,16,0,0,0,0,0-0-0,0-0-0,|14|B|0-0-0
+10,3,Potential Customers,293,229,56,35,3,131,0,16,0,0,0,0,0-0-0,0-0-0,|14|B|0-0-0
+10,4,contacts of noncustomers with customers,373,35,175,12,0,3,0,0,0,0,0,0
+11,5,252,431,229,7,8,34,3,0,0,1,0,0,0
+10,6,new customers,431,249,65,12,32,3,0,0,0,0,0,0
+10,7,fruitfulness,348,107,48,12,0,3,0,2,-1,0,0,0,0-0-0,0-0-0,|14||64-128-128
+10,8,contacts with customers,603,108,103,12,0,3,0,0,0,0,0,0
+10,9,potential customer concentration,160,85,137,12,0,3,0,0,0,0,0,0
+10,10,total market,445,333,52,12,0,3,0,0,0,0,0,0
+10,11,sociability,549,157,44,12,0,3,0,2,0,0,0,0,0-0-0,0-0-0,|14||64-128-128
+1,12,1,5,2,0,0,0,0,0,0,-1--1--1,,1|(419,193)|
+1,13,4,1,2,0,0,0,0,0,0,-1--1--1,,1|(403,129)|
+1,14,11,8,1,0,0,0,0,0,0,-1--1--1,,1|(589,143)|
+1,15,2,8,2,0,0,0,0,0,0,-1--1--1,,1|(621,161)|
+1,16,9,4,2,0,0,0,0,0,0,-1--1--1,,1|(236,60)|
+1,17,3,9,2,0,0,0,0,0,0,-1--1--1,,1|(208,168)|
+1,18,8,4,2,0,0,0,0,0,0,-1--1--1,,1|(551,67)|
+1,19,5,3,100,0,0,22,0,0,0,-1--1--1,,1|(387,229)|
+1,20,5,2,4,0,0,22,0,0,0,-1--1--1,,1|(479,229)|
+1,21,7,1,1,0,0,0,0,0,0,-1--1--1,,1|(372,125)|
+1,22,3,10,1,0,0,0,0,64,0,-1--1--1,,1|(361,295)|
+1,23,2,10,1,0,0,0,0,64,0,-1--1--1,,1|(513,287)|
+1,24,10,9,3,0,0,0,0,64,0,-1--1--1,,2|(291,329)|(163,196)|
+12,25,21069848,396,536,203,172,3,188,0,0,2,0,0,0
+new customers,graph
+///---\\\
+:L<%^E!@
+1:cust2.vdf
+1:cust1.vdf
+9:cust1
+15:0,0,0,0,0,0
+19:100,0
+27:0,
+34:0,
+4:Time
+5:potential customer concentration
+24:0
+25:100
+26:100

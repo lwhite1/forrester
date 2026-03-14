@@ -1,0 +1,225 @@
+! Urban Model Venapp
+! Copyright 1988-1998 Ventana Systems, Inc.
+
+:SCREEN WELCOME
+SCREENFONT,Times New Roman|12||0-0-0
+COMMAND,"",0,0,0,0,,,SPECIAL>LOADMODEL|urban.vmf
+COMMAND,"",0,0,0,0,,,SPECIAL>READCUSTOM|urban.vgd
+COMMAND,"",0,0,0,0,,,SPECIAL>CLEARRUNS
+COMMAND,"",0,0,0,0,,,SPECIAL>LOADRUN|BASE
+COMMAND,"",0,0,0,0,,,SETTING>SHOWWARNING|0
+TEXTONLY,"The Urban Game",0,10,100,0,C||28|B|255-0-0,
+TEXTONLY,"Copyright © 1969 Jay W. Forrester",0,25,100,0,C,
+TEXTONLY,"Copyright © 1992-1999 Ventana Systems, Inc.",0,30,100,0,C,
+TEXTONLY,"Ventana Systems, Inc.",0,35,100,0,C||10||0-0-255,
+TEXTONLY,"60 Jacob Gates Road",0,38,100,0,C||10||0-0-255,
+TEXTONLY,"Harvard MA 01451",0,41,100,0,C||10||0-0-255
+TEXTONLY,"508 651 0432 - Fax:508 650 5422",0,44,100,0,C||10||0-0-255
+TEXTONLY,"Press any key or click to continue.",50,50,0,0,C|||B
+TEXTONLY,"Software subject to restriction of the license agreement",0,80,100,0,C||||92-92-92,
+TEXTONLY,"Copyright © 1988-1997 Ventana Systems, Inc. ALL RIGHTS RESERVED",0,90,100,0,C||||0-128-0,
+TEXTONLY,"Vensim and Venapp are trademarks of Ventana Systems, Inc.",0,95,100,0,C||||0-128-0,
+ANYKEY,"",0,0,0,0,0,,,INTRO
+
+:SCREEN INTRO
+TEXTONLY,"The Urban Game",0,5,100,0,C||28|B|255-0-0
+TEXTONLY, "You have been put in charge of a city in decline. Population",20,20,100,0,L
+TEXTONLY, "is falling, unemployment is high and rising, housing for the",20,25,100,0,L
+TEXTONLY, "poor is still inadequate.  Your challenge is to find programs",20,30,100,0,L
+TEXTONLY, "that can turn this city around.  You are free to decide what you",20,35,100,0,L
+TEXTONLY, "want to accomplish - growth, improved economic well being or",20,40,100,0,L
+TEXTONLY, "whatever you wish.  You will be given a few levers in the form",20,45,100,0,L
+TEXTONLY, "of job training, housing and business development programs.  Use",20,50,100,0,L
+TEXTONLY, "these to accomplish your goals.  You have 150 years, and you",20,55,100,0,L
+TEXTONLY, "can make a decision every 5 years.",20,60,100,0,L
+TEXTONLY, "You do not need to finish the 150 years, and there is no scorekeeping.",20,70,100,0,L
+TEXTONLY, "The purpose of the game is to see if your actions have their intended",20,75,100,0,L
+TEXTONLY, "effect, and attempt to understand why they work, or fail.",20,80,100,0,L
+BUTTON,"Press any key or click to continue.",50,90,30,0,C,,,MAIN
+ANYKEY,"",0,0,0,0,0,,,MAIN
+
+:SCREEN MAIN
+TEXTONLY,"The Urban Game - Main Menu",0,5,100,0,C||28|B|255-0-0
+!RECTANGLE,"",4,19,45,22,C 4
+BUTTON,"Go back to the introductory material",50,20,40,0,C,GgIi,,INTRO
+BUTTON,"Play the game",50,25,40,0,C,Pp,SIMULATE>RUNNAME|?Name for new game output (NOT BASE or BASE100!!!),STARTGAME
+BUTTON,"Continue with a previous game",50,30,40,0,C,Cc,SIMULATE>RUNNAME|?Name of game to continue|E,STARTGAME2
+BUTTON,"Analyze game results",50,35,40,0,C,Aa,,ANALYZE
+BUTTON,"Exit to model selection menu",50,40,40,0,C,EeXx,SPECIAL>LOADMODEL|..\intro.vmf&SPECIAL>LOADAPPINT|intro.vcd@3,
+LINE,"",0,45,100,0
+TEXTONLY,"Instructions and Comments - If Necessary use the scroll bar to see everything",0,55,100,0,C 3
+TOOL,"SP1",0,46,100,54,,,CUSTOM>COMM1
+
+:SCREEN STARTGAME
+COMMAND,"",0,0,0,0,,,SIMULATE>BASED|base100
+COMMAND,"",0,0,0,0,,,SIMULATE>RESUME|1
+COMMAND,"",0,0,0,0,,,SIMULATE>READCIN|GAME
+COMMAND,"",0,0,0,0,,,GAME>GAMEINTERVAL|5.0
+COMMAND,"",0,0,0,0,,,MENU>GAME|O
+COMMAND,"",0,0,0,0,,,SIMULATE>CHGFILE|
+COMMAND,"",0,0,0,0,,,SIMULATE>BASED|
+COMMAND,"",0,0,0,0,,,SIMULATE>RESUME|0
+CLOSESCREEN,"",0,0,0,0,,,,PLAY
+
+:SCREEN STARTGAME2
+COMMAND,"",0,0,0,0,,,GAME>RELOAD
+COMMAND,"",0,0,0,0,,,GAME>GAMEINTERVAL|5.0
+COMMAND,"",0,0,0,0,,,MENU>GAME
+CLOSESCREEN,"",0,0,0,0,,,,PLAY
+
+
+
+
+:SCREEN PLAY
+RECTANGLE,"",2,2,48,31
+TEXTONLY,"State of the City in year ",2,3,30,0,R
+TEXTONLY,"Total Population",3,10,0,0,L
+TEXTONLY,"(100 is normal)",3,18,0,0,L
+TEXTONLY,"Underemployed crowding",3,15,0,0,L
+TEXTONLY,"% of population underemployed",3,22,0,0,L
+TEXTONLY,"Unemployment rate for the city",3,27,0,0,L
+SHOWVAR,"Time",32,3,0,0,L
+SHOWVAR,"Population",38,10,0,0,L
+SHOWVAR,"Underemployed crowding",38,15,0,0,L
+SHOWVAR,"percent underemp",38,22,0,0,L
+SHOWVAR,"unemployment rate",38,27,0,0,L
+
+RECTANGLE,"",2,34,48,66
+TEXTONLY,"Policy Choices",2,35,48,0,C
+TEXTONLY,"Low cost housing",3,40,0,0,L
+TEXTONLY,"Slum Demolition",3,50,0,0,L
+TEXTONLY,"Job Programs",3,60,0,0,L
+TEXTONLY,"Job Training",3,70,0,0,L
+TEXTONLY,"Business Constr.",3,80,0,0,L
+TEXTONLY,"Business Demol.",3,90,0,0,L
+SLIDEVAR,"low cost housing prog coeff",24,40,25,9,H,[0|.2]
+SLIDEVAR,"slum housing demolition rate",24,50,25,9,H,[0|.2]
+SLIDEVAR,"underemp job program coeff",24,60,25,9,H,[0|.2]
+SLIDEVAR,"underemp training rate",24,70,25,9,H,[0|.2]
+SLIDEVAR,"new enterprise constr rate",24,80,25,9,H,[0|.2]
+SLIDEVAR,"declining industry demolition rate",24,90,25,9,H,[0|.2]
+
+BUTTON,"Explanation",3,44,0,5,L,,CUSTOM>EXP1
+BUTTON,"Explanation",3,54,0,5,L,,CUSTOM>EXP2
+BUTTON,"Explanation",3,64,0,5,L,,CUSTOM>EXP3
+BUTTON,"Explanation",3,74,0,5,L,,CUSTOM>EXP4
+BUTTON,"Explanation",3,84,0,5,L,,CUSTOM>EXP5
+BUTTON,"Explanation",3,94,0,5,L,,CUSTOM>EXP6
+BUTTON,"Step Forward",55,75,15,8,L,Cc,GAME>GAMEON
+BUTTON,"Step Backward",75,75,15,8,L,Cc,GAME>BACKUP,PLAY
+BUTTON,"Analyze Situation",55,88,15,8,L,,,ANALYZE_G
+BUTTON,"End Game",75,88,15,8,L,,GAME>ENDGAME,MAIN
+
+TOOL,"GR1",51,2,48,70,,,CUSTOM>HISTORY
+
+
+:SCREEN ANALYZE
+TEXTONLY,"Scenario analysis screen",0,5,100,0,C32
+BUTTON,"Load, unload and reorder previously run scenarios",50,15,40,0,C,1,MENU>LOAD_RUN,
+BUTTON,"Select a Variable as a start point for further analysis",50,20,40,0,C,2,SPECIAL>SETWBITEM|TOT COST&SPECIAL>VARSELECT|New variable to use
+BUTTON,"Trace underlying causes using Trees",50,25,40,0,C,3,,CAUSE1
+BUTTON,"Trace underlying causes using Graphs",50,30,40,0,C,4,,CAUSE2
+BUTTON,"Trace the Uses of a variable",50,35,40,0,C,5,,USE
+BUTTON,"List the differences between the first two loaded scenarios",50,40,40,0,C,6,,DIFF
+BUTTON,"Exit back to the main menu",50,60,40,0,C,EeXx,,MAIN
+TOOL,"SP1",0,70,100,30,,,CUSTOM>COMM3
+
+:SCREEN CAUSE1
+TEXTONLY,"Causal tracing -",0,2,50,0,R
+WBVAR,"",50,2,0,0,L
+TOOL,"TR1",2,6,96,42,,,WORKBENCH>CAUSES TREE
+BUTTON,"Trace on highlight",5,50,0,0,L,Tt,SPECIAL>SECONDCLICK|TR1,
+BUTTON,"Change to graph based",5,55,0,0,L,Cc,,CAUSE2
+BUTTON,"Print tree",5,60,0,0,L,Pp,PRINT>TR1
+BUTTON,"Print Graph",5,65,0,0,L,Gg,PRINT>GR1
+BUTTON,"Select a new variable to trace",5,70,0,0,L,Ss,SPECIAL>SETWBITEM|POPULATION&SPECIAL>VARSELECT|New variable for tracing
+BUTTON,"Exit - return to analysis",5,75,0,0,L,EeXx,,ANALYZE
+TOOL,"GR1",60,50,40,50,,,WORKBENCH>STRIP GRAPH
+TOOL,"COMM4",0,80,58,20,,,CUSTOM>COMM4
+SETWB,"",0,0,0,0,,,,CAUSE1
+
+:SCREEN CAUSE2
+TEXTONLY,"Causal tracing -",0,2,0,0,L
+WBVAR,"",20,2,0,0,L
+TOOL,"TR1",60,0,40,100,,,WORKBENCH>CAUSES STRIP
+BUTTON,"Trace on highlight",5,50,0,0,L,Tt,SPECIAL>SECONDCLICK|TR1,
+BUTTON,"Change to tree based",5,55,0,0,L,Cc,,CAUSE1
+BUTTON,"Print graph",5,60,0,0,L,Pp,PRINT>TR1
+BUTTON,"Print equation",5,65,0,0,L,Qq,PRINT>GR1
+BUTTON,"Select a new variable to trace",5,70,0,0,L,Ss,SPECIAL>VARSELECT|New variable for tracing
+BUTTON,"Exit - return to analysis",5,75,0,0,L,EeXx,,ANALYZE
+TOOL,"GR1",0,8,58,40,,,WORKBENCH>DOCUMENT
+TOOL,"COMM4",0,80,60,20,,,CUSTOM>COMM4
+SETWB,"",0,0,0,0,,,,CAUSE2
+
+:SCREEN USE
+TEXTONLY,"Uses of -",0,2,50,0,R
+WBVAR,"",50,2,0,0,L
+TOOL,"TR1",2,6,96,42,,,WORKBENCH>USES TREE
+BUTTON,"Trace on highlight",5,50,0,0,L,Tt,SPECIAL>SECONDCLICK|TR1,
+BUTTON,"Print tree",5,55,0,0,L,Pp,PRINT>TR1
+BUTTON,"Print Graph",5,60,0,0,L,Gg,PRINT>GR1
+BUTTON,"Select a new variable to trace",5,65,0,0,L,Ss,SPECIAL>VARSELECT|New variable for tracing
+BUTTON,"Exit - return to analysis",5,75,0,0,L,EeXx,,ANALYZE
+TOOL,"GR1",60,50,40,50,,,WORKBENCH>STRIP GRAPH
+TOOL,"COMM4",0,80,58,20,,,CUSTOM>COMM4
+SETWB,"",0,0,0,0,,,,USE
+
+:SCREEN DIFF
+TEXTONLY,"Constant and table differences between first two loaded scenarios",0,2,100,0,C32
+TOOL,"D1",5,10,90,80,,,WORKBENCH>RUNS COMPARE
+TEXTONLY,"Press P to print - any other key to continue",0,95,100,0,C
+BUTTON,"",0,0,0,0,L,Pp,PRINT>D1
+ANYKEY,"",0,0,0,0,0,,,ANALYZE
+
+
+:SCREEN ANALYZE_G
+TEXTONLY,"Game analysis screen",0,5,100,0,C32
+BUTTON,"Select a Variable as a start point for further analysis",5,20,0,0,L,2,SPECIAL>SETWBITEM|TOT COST&SPECIAL>VARSELECT|New variable to use
+BUTTON,"Trace underlying causes using Trees",5,25,0,0,L,3,,CAUSE1_G
+BUTTON,"Trace underlying causes using Graphs",5,30,0,0,L,4,,CAUSE2_G
+BUTTON,"Trace the Uses of a variable",5,35,0,0,L,5,,USE_G
+BUTTON,"Exit back to the game control panel",5,60,0,0,L,EeXx,,PLAY
+TOOL,"SP1",0,70,100,30,,,CUSTOM>COMM3
+
+:SCREEN CAUSE1_G
+TEXTONLY,"Causal tracing -",0,2,50,0,R
+WBVAR,"",50,2,0,0,L
+TOOL,"TR1",2,6,96,42,,,WORKBENCH>CAUSES TREE
+BUTTON,"Trace on highlight",5,50,0,0,L,Tt,SPECIAL>SECONDCLICK|TR1,
+BUTTON,"Change to graph based",5,55,0,0,L,Cc,,CAUSE2_G
+BUTTON,"Print tree",5,60,0,0,L,Pp,PRINT>TR1
+BUTTON,"Print Graph",5,65,0,0,L,Gg,PRINT>GR1
+BUTTON,"Select a new variable to trace",5,70,0,0,L,Ss,SPECIAL>SETWBITEM|POPULATION&SPECIAL>VARSELECT|New variable for tracing
+BUTTON,"Exit - return to analysis",5,75,0,0,L,EeXx,,ANALYZE_G
+TOOL,"GR1",60,50,40,50,,,WORKBENCH>STRIP GRAPH
+TOOL,"COMM4",0,80,58,20,,,CUSTOM>COMM4
+SETWB,"",0,0,0,0,,,,CAUSE1_G
+
+:SCREEN CAUSE2_G
+TEXTONLY,"Causal tracing -",0,2,0,0,L
+WBVAR,"",20,2,0,0,L
+TOOL,"TR1",60,0,40,100,,,WORKBENCH>CAUSES STRIP
+BUTTON,"Trace on highlight",5,50,0,0,L,Tt,SPECIAL>SECONDCLICK|TR1,
+BUTTON,"Change to tree based",5,55,0,0,L,Cc,,CAUSE1_G
+BUTTON,"Print graph",5,60,0,0,L,Pp,PRINT>TR1
+BUTTON,"Print equation",5,65,0,0,L,Qq,PRINT>GR1
+BUTTON,"Select a new variable to trace",5,70,0,0,L,Ss,SPECIAL>VARSELECT|New variable for tracing
+BUTTON,"Exit - return to analysis",5,75,0,0,L,EeXx,,ANALYZE_G
+TOOL,"GR1",0,8,58,40,,,WORKBENCH>DOCUMENT
+TOOL,"COMM4",0,80,60,20,,,CUSTOM>COMM4
+SETWB,"",0,0,0,0,,,,CAUSE2_G
+
+:SCREEN USE_G
+TEXTONLY,"Uses of -",0,2,50,0,R
+WBVAR,"",50,2,0,0,L
+TOOL,"TR1",2,6,96,42,,,WORKBENCH>USES TREE
+BUTTON,"Trace on highlight",5,50,0,0,L,Tt,SPECIAL>SECONDCLICK|TR1,
+BUTTON,"Print tree",5,55,0,0,L,Pp,PRINT>TR1
+BUTTON,"Print Graph",5,60,0,0,L,Gg,PRINT>GR1
+BUTTON,"Select a new variable to trace",5,65,0,0,L,Ss,SPECIAL>VARSELECT|New variable for tracing
+BUTTON,"Exit - return to analysis",5,75,0,0,L,EeXx,,ANALYZE_G
+TOOL,"GR1",60,50,40,50,,,WORKBENCH>STRIP GRAPH
+TOOL,"COMM4",0,80,58,20,,,CUSTOM>COMM4
+SETWB,"",0,0,0,0,,,,USE_G
+

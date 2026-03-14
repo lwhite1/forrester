@@ -1,0 +1,349 @@
+{UTF-8}
+********************************************************
+	.procrast
+********************************************************~
+		 A Little procrastion model (It's the model that is little, the
+		         procrastination can be large).
+	|
+
+correct thinking rate=
+	intensity effort applied
+	             * fraction thinking correct
+	~	Bytes / Day
+	~	 The rate at which in formation is thought about and correctly interpreted.
+	|
+
+thinking error rate=
+	intensity effort applied
+	             * ( 1
+	                  - fraction thinking correct )
+	~	Bytes / Day
+	~	  The rate at which errors are being made in the review of information.
+	|
+
+intensity effort applied  = IF THEN ELSE(Decision is Made,0,
+        indicated intensity of effort applied)
+	~	Bytes / Day
+	~	 The intensity with which the problem is attacked by the decision maker.
+	|
+
+Decision is Made = INTEG(
+      IF THEN ELSE(perc info req thought < min threshold delay,1/TIME STEP,0),0)
+	~	Dmnl
+	~	An indication that the decision has been made.
+	|
+
+effect of tension on frac correct  =
+        effect tension on frac correct lookup ( tension/normal tension )
+	~	Dimensionless
+	~	 The effect of tension on the fraction of the thinking that is
+		        done correctly.
+	|
+
+indicated intensity of effort applied  = INITIAL(perc info req thought/Expected Decision Time
+)
+	~	Bytes / Day
+	~	The  intensity with which a problem of the specified importance is 		\
+		attacked by the decision maker.
+	|
+
+eff importance tension = 1
+	~	Dimensionless
+	~	 The effect of the importance of a decision on the tension that
+		         decision generates.
+	|
+
+tension  = IF THEN ELSE(Decision is Made,0,
+        normal tension
+             * eff importance tension
+             * eff time remaining tension)
+	~	Tension units
+	~	 The tension that the decision maker is under.
+	|
+
+eff time remaining tension  =
+        eff time remaining tension lookup ( time remaining/Expected Decision Time )
+	~	Dimensionless
+	~	 The effect of time remaining on the tension felt by the decision maker.
+	|
+
+Expected Decision Time = 15
+	~	Day
+	~	The time expected to make a decision before any of the thinking takes 		\
+		place.
+	|
+
+FINAL TIME  = 100
+	~	days
+	~	 The final time for the simulation.
+	|
+
+INITIAL TIME  = 0
+	~	days
+	~	 The time at which the simulation is started
+	|
+
+initial info proc  = 0
+	~	Bytes
+	~	 The intial amount of information that has actually been processed
+		        (thought about).
+	|
+
+min threshold delay  = 1
+	~	Bytes
+	~	 The minimum threshold in terms of information that remains to be thought
+		        about warranting further delay.
+	|
+
+SAVEPER  = 0.5
+	~	days
+	~	 The frequency with which variable are stored for later review.
+	|
+
+TIME STEP  = 0.25
+	~	days
+	~	 The solution interval for integrating the model.
+	|
+
+Time to detect errors  = 2
+	~	days
+	~	 The time to detect errors that have occured in the processing of
+		        information.
+	|
+
+disc info req rethink  =
+        Info Requiring Rethinking
+             / Time to detect errors
+	~	Bytes/Day
+	~	 The discovery of information that has been misinterpreted and therefore
+		        requires rethinking.
+	|
+
+perc info req thought  =
+        tot info req thought
+             - info perceived reviewed
+	~	Bytes
+	~	 The percieved amount of information that remains to be though about.
+	|
+
+Thought Accomplished  =  INTEG( correct thinking rate  ,   initial info proc )
+	~	Bytes
+	~	 Information that has been reviewed and correctly interpretted.
+	|
+
+info perceived reviewed  =
+        Thought Accomplished
+             + Info Requiring Rethinking
+	~	Bytes
+	~	 The amount of information that it is perceived has been correctly
+		        reviewed.
+	|
+
+Info Requiring Rethinking  =
+        INTEG( thinking error rate  - disc info req rethink ,
+             initial info proc  * ( 1 - norm frac thinking correct ) )
+	~	Bytes
+	~	 The amount of information that has been interpreted incorrectly,
+		       but for which that error has not yet been discovered.
+	|
+
+fraction thinking correct  =
+        norm frac thinking correct
+             * effect of tension on frac correct
+	~	Fraction
+	~	 The fraction of thinking that is done correctly.
+	|
+
+norm frac thinking correct  = 0.8
+	~	Fraction
+	~	 The fraction of information that is normally processed without error
+		        or misinterpretation.
+	|
+
+normal tension  = 10
+	~	Tension units
+	~	 The normal amount of tension that a decision of this importance would
+		        bring about.
+	|
+
+effect tension on frac correct lookup ([(0,0)-(20,2)],(0,1.2),(2.5,1.1)
+,(5,0.9),(7.5,0.6),(10,0.2),(11,0.12),(12.5,0.08),(20,0.05) )
+	~	Dimensionless
+	~	 Table for the effect of tension on the fraction of thinking that
+		        is done correctly.
+	|
+
+eff time remaining tension lookup     ([(0,0)-(10,4)],(0,3),(0.1,2)
+,(0.2,1.5),(0.3,1.25),(0.4,1.1),(0.5,1),(0.6,0.95),(0.7,0.925)
+,(0.8,0.9),(0.9,0.9),(10,0.9),(10,0.9) )
+	~	Dimensionless
+	~	 Table for the effect of time remaining on tension.
+	|
+
+time remaining  = max(0,ZIDZ(perc info req thought -  min threshold delay,
+             intensity effort applied))
+	~	days
+	~	 Time remaining required to make the decision - given no external
+		        deadlines.
+	|
+
+tot info req thought  = 10
+	~	Bytes
+	~	 The size of the decision.
+	|
+
+\\\---/// Sketch information - do not modify anything except names
+V300  Do not put anything below this section - it will be ignored
+*View 1
+$192-192-192,0,|12||-1--1--1|92-92-92|160-160-160|-1--1--1|255-255-255|96,96,5,0
+10,1,Info Requiring Rethinking,1304,568,58,36,3,3,0,50,0,1,0,0,-1--1--1,0-0-0,Vensim Sans||B|0-0-0,0,0,0,0,0,0
+10,2,Decision is Made,1026,361,47,27,3,131,0,16,0,1,0,0,0-0-0,0-0-0,||B|0-0-0,0,0,0,0,0,0
+12,3,48,1174,425,10,8,0,3,0,0,-1,0,0,0,0,0,0,0,0,0
+12,4,48,1115,558,10,8,0,3,0,0,-1,0,0,0,0,0,0,0,0,0
+12,5,48,1522,561,10,8,0,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,6,TIME STEP,1059,433,75,30,0,2,0,2,-1,1,0,0,-1--1--1,-1--1--1,||B|160-160-160,0,0,0,0,0,0
+10,7,Thought Accomplished,1391,427,67,32,3,131,0,50,0,1,0,0,-1--1--1,0-0-0,Vensim Sans||B|0-0-0,0,0,0,0,0,0
+10,8,Expected Decision Time,566,244,75,30,0,3,0,2,-1,1,0,0,-1--1--1,-1--1--1,|||64-128-128,0,0,0,0,0,0
+10,9,initial info proc,1306,495,75,30,0,3,0,2,-1,1,0,0,-1--1--1,-1--1--1,||B|64-128-128,0,0,0,0,0,0
+10,10,fraction thinking correct,1037,543,75,30,0,3,0,0,-1,1,0,0,0,0,0,0,0,0
+10,11,intensity effort applied,799,208,75,30,0,3,0,0,0,1,0,0,0,0,0,0,0,0
+10,12,indicated intensity of effort applied,798,144,75,30,0,3,0,0,0,1,0,0,0,0,0,0,0,0
+10,13,effect of tension on frac correct,797,436,75,30,0,3,0,0,-1,1,0,0,0,0,0,0,0,0
+10,14,norm frac thinking correct,1003,627,75,30,0,3,0,2,-1,1,0,0,-1--1--1,-1--1--1,||B|64-128-128,0,0,0,0,0,0
+10,15,effect tension on frac correct lookup,474,455,75,30,0,3,0,2,0,1,0,0,-1--1--1,-1--1--1,|||64-128-128,0,0,0,0,0,0
+10,16,tension,790,379,75,30,0,3,0,0,-1,1,0,0,0,0,0,0,0,0
+10,17,eff importance tension,582,379,75,30,0,3,0,2,-1,1,0,0,-1--1--1,-1--1--1,||B|64-128-128,0,0,0,0,0,0
+10,18,eff time remaining tension,786,331,75,30,0,3,0,0,-1,1,0,0,0,0,0,0,0,0
+10,19,normal tension,574,420,75,30,0,3,0,2,-1,1,0,0,-1--1--1,-1--1--1,||B|64-128-128,0,0,0,0,0,0
+10,20,eff time remaining tension lookup,503,332,75,30,0,3,0,2,-1,1,0,0,-1--1--1,-1--1--1,|||64-128-128,0,0,0,0,0,0
+10,21,time remaining,805,268,75,30,0,3,0,0,-1,1,0,0,0,0,0,0,0,0
+10,22,min threshold delay,890,305,75,30,0,3,0,2,0,1,0,0,-1--1--1,-1--1--1,||B|64-128-128,0,0,0,0,0,0
+10,23,perc info req thought,1289,199,75,30,0,3,0,0,-1,1,0,0,0,0,0,0,0,0
+10,24,info perceived reviewed,1566,503,75,30,0,3,0,0,0,1,0,0,0,0,0,0,0,0
+10,25,tot info req thought,1331,272,75,30,0,3,0,2,-1,1,0,0,-1--1--1,-1--1--1,||B|64-128-128,0,0,0,0,0,0
+10,26,Time to detect errors,1388,635,75,30,0,3,0,2,0,1,0,0,-1--1--1,-1--1--1,||B|64-128-128,0,0,0,0,0,0
+11,27,0,1229,425,7,8,34,3,0,0,1,0,0,0,0,0,0,0,0,0
+10,28,correct thinking rate,1229,463,75,30,32,3,0,0,0,1,0,0,0,0,0,0,0,0
+11,29,0,1166,558,7,8,34,3,0,0,1,0,0,0,0,0,0,0,0,0
+10,30,thinking error rate,1166,596,75,30,32,3,0,0,-1,1,0,0,0,0,0,0,0,0
+11,31,0,1463,561,7,8,34,3,0,0,1,0,0,0,0,0,0,0,0,0
+10,32,disc info req rethink,1463,599,75,30,32,3,0,0,0,1,0,0,0,0,0,0,0,0
+1,33,12,11,1,0,0,0,0,0,0,-1--1--1,,1|(799,176)|
+1,34,13,10,1,0,0,0,0,0,0,-1--1--1,,1|(917,469)|
+1,35,16,13,1,0,0,0,0,0,0,-1--1--1,,1|(790,385)|
+1,36,18,16,1,0,0,0,0,0,0,-1--1--1,,1|(787,360)|
+1,37,19,16,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,38,21,18,1,0,0,0,0,0,0,-1--1--1,,1|(790,313)|
+1,39,11,21,1,0,0,0,0,0,0,-1--1--1,,1|(801,233)|
+1,40,26,32,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,41,1,24,1,0,0,0,0,0,0,-1--1--1,,1|(1437,510)|
+1,42,7,24,1,0,0,0,0,0,0,-1--1--1,,1|(1461,499)|
+1,43,27,7,4,0,0,22,0,0,0,-1--1--1,,1|(1280,425)|
+1,44,27,3,100,0,0,22,0,0,0,-1--1--1,,1|(1203,425)|
+1,45,29,1,4,0,0,22,0,0,0,-1--1--1,,1|(1209,558)|
+1,46,29,4,100,0,0,22,0,0,0,-1--1--1,,1|(1142,558)|
+1,47,31,5,4,0,0,22,0,0,0,-1--1--1,,1|(1491,561)|
+1,48,31,1,100,0,0,22,0,0,0,-1--1--1,,1|(1409,561)|
+1,49,1,31,2,0,0,0,0,0,0,-1--1--1,,1|(1374,538)|
+1,50,24,23,2,0,0,0,0,0,0,-1--1--1,,1|(1490,337)|
+1,51,6,2,1,0,0,0,0,0,0,-1--1--1,,1|(1070,415)|
+1,52,14,10,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,53,15,13,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,54,19,13,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,55,20,18,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,56,25,23,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,57,22,21,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,58,17,16,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,59,23,2,1,0,0,0,0,0,0,-1--1--1,,1|(1146,263)|
+1,60,9,1,0,0,0,0,0,0,1,-1--1--1,,1|(0,0)|
+1,61,14,1,1,0,0,0,0,0,1,-1--1--1,,1|(1203,645)|
+1,62,9,7,0,0,0,0,0,0,1,-1--1--1,,1|(0,0)|
+1,63,8,12,1,0,0,0,0,0,1,-1--1--1,,1|(661,197)|
+12,64,0,1141,501,12,12,11,131,0,5,-1,0,0,0,160-160-160,160-160-160,|||0-0-0,0,0,0,0,0,0
+1,65,11,64,33,0,0,0,2,64,0,-1--1--1,|||0-0-0,1|(923,208)|
+1,66,10,64,32,0,0,0,2,64,0,-1--1--1,|||0-0-0,1|(0,0)|
+1,67,64,28,0,0,0,0,0,64,0,-1--1--1,,1|(0,0)|
+1,68,64,29,0,0,0,0,0,64,0,-1--1--1,,1|(0,0)|
+1,69,8,18,1,0,0,0,0,64,0,-1--1--1,,1|(657,299)|
+1,70,2,11,1,0,0,0,0,64,0,-1--1--1,,1|(927,268)|
+1,71,2,16,0,0,0,0,0,64,0,-1--1--1,,1|(0,0)|
+1,72,22,2,0,0,0,0,0,64,0,-1--1--1,,1|(0,0)|
+1,73,23,12,0,0,0,0,0,64,1,-1--1--1,,1|(0,0)|
+1,74,23,21,0,0,0,0,0,64,0,-1--1--1,,1|(0,0)|
+12,75,0,605,663,276,195,3,188,0,0,1,0,0,0,0,0,0,0,0,0
+tension_and_thinking
+12,76,0,600,54,80,40,8,7,0,0,-1,1,0,0,0,0,0,0,0,0
+PROCRASTED MODEL
+///---\\\
+:GRAPH tension_and_thinking
+:TITLE tension and thinking
+:SCALE
+:VAR tension
+:DATASET 
+:SCALE
+:VAR correct thinking rate
+:DATASET 
+:L<%^E!@
+4:Time
+5:norm frac thinking correct
+9:Procrast
+19:5,0
+24:0
+25:100
+26:100
+22:$,Dollar,Dollars,$s
+22:Day,Days
+22:Hour,Hours
+22:Month,Months
+22:Person,People,Persons
+22:Unit,Units
+22:Week,Weeks
+22:Year,Years
+22:$,Dollar,Dollars,$s
+22:Day,Days
+22:Hour,Hours
+22:Month,Months
+22:Person,People,Persons
+22:Unit,Units
+22:Week,Weeks
+22:Year,Years
+22:$,Dollar,Dollars,$s
+22:Day,Days
+22:Hour,Hours
+22:Month,Months
+22:Person,People,Persons
+22:Unit,Units
+22:Week,Weeks
+22:Year,Years
+22:$,Dollar,Dollars,$s
+22:Day,Days
+22:Hour,Hours
+22:Month,Months
+22:Person,People,Persons
+22:Unit,Units
+22:Week,Weeks
+22:Year,Years
+23:0
+15:0,0,0,0,0,0
+27:0,
+34:0,
+42:0
+72:0
+73:0
+95:0
+96:0
+97:0
+77:0
+78:0
+102:1
+93:0
+94:0
+92:0
+91:0
+90:0
+87:0
+75:
+43:
+103:8,8,8,3,8
+105:0,0,0,0,0,0,0,0,0,0
+104:Vensim Sans|12||0-0-0|0-0-0|-1--1--1|0-0-255|192-192-192|-1--1--1

@@ -1,0 +1,483 @@
+{UTF-8}
+average accomplishments per week to date=
+	ZIDZ(Accomplishments to Date,Time)
+	~	TASKS/WEEK
+	~	AVERAGE ACCOMPLISHMENTS PER WEEK TO DATE
+	~	:SUPPLEMENTARY 
+	|
+
+average hours worked per week to date=
+	ZIDZ(hours worked to date,Time)
+	~	HOUR/WEEK
+	~	AVERAGE HOURS WORKED PER WEEK TO DATE
+	~	:SUPPLEMENTARY 
+	|
+
+accomplishments per week=
+	accomplishments per hour*Hours Worked Per Week
+	~	TASKS/WEEK
+	~	ACCOMPLISHMENTS PER WEEEK
+	|
+
+accomplishments per hour=
+	accomplishments per hour lookup(Energy Level)
+	~	TASKS/HOUR
+	~	ACCOMPLISHMENTS PER HOUR
+	|
+
+accomplishments per hour lookup(
+	0,0.2,0.4,0.6,0.8,1,
+	0,0.2,0.4,0.6,0.8,1)
+	~	TASKS/HOUR
+	~	TABLE FOR ACCOMPLISHMENTS PER HOUR
+	|
+
+Hours Worked Per Week= INTEG (
+	(indicated hours worked per week-Hours Worked Per Week)/time to adjust hours per week
+,
+		hours worked per week initial)
+	~	HOUR/WEEK
+	~	HOURS WORKED PER WEEK
+	|
+
+hours worked per week initial=
+	40
+	~	HOUR/WEEK
+	~	HOURS WORKED PER WEEK INITIAL
+	|
+
+time to adjust hours per week=
+	1
+	~	WEEK
+	~	TIME TO ADJUST HOURS PER WEEK
+	|
+
+indicated hours worked per week=
+	MIN(limit on hours worked per week,Hours Worked Per Week*effect of energy level on hours worked
+*effect of perceived adequacy of hours worked)
+	~	HOUR/WEEK
+	~	INDICATED HOURS WORKED PER WEEK
+	|
+
+limit on hours worked per week=
+	80
+	~	HOUR/WEEK
+	~	LIMIT ON HOURS WORKED PER WEEK
+	|
+
+effect of energy level on hours worked=
+	effect of energy levels on hours worked lookup(Energy Level)
+	~	DIMENSIONLESS
+	~	EFFECT OF ENERGY LEVEL ON HOURS WORKED
+	|
+
+effect of energy levels on hours worked lookup(
+	0,0.2,0.4,0.6,0.8,1,
+	0,0.4,0.7,0.9,1,1)
+	~	DIMENSIONLESS
+	~	TABLE FOR EFFECT OF ENERGY LEVELS ON HOURS WORKED
+	|
+
+effect of perceived adequacy of hours worked=
+	effect of perceived adequacy of hours worked lookup(perceived adequacy of accomplishment
+)
+	~	DIMENSIONLESS
+	~	EFFECT OF PERCEIVED ADEQUACY OF HOURS WORKED
+	|
+
+effect of perceived adequacy of hours worked lookup(
+	0,0.2,0.4,0.6,0.8,1,1.2,1.4,1.6,
+	2.3,1.9,1.6,1.35,1.15,1,0.9,0.8,0.75)
+	~	DIMENSIONLESS
+	~	TABLE FOR EFFECT OF PERCEIVED ADEQUACY OF HOURS WORKED
+	|
+
+perceived adequacy of accomplishment=
+	Perceived Accomplishments Per Week/Expected Accomplishments Per Week
+	~	DIMENSIONLESS
+	~	PERCEIVED ADEQUACY OF ACCOMPLISHMENT
+	|
+
+Perceived Accomplishments Per Week= INTEG (
+	(accomplishments per week - Perceived Accomplishments Per Week)/time to perceive accomplishments per week
+,
+		accomplishments per week)
+	~	TASKS/WEEK
+	~	PERCEIVED ACCOMPLISHMENTS PER WEEK
+	|
+
+time to perceive accomplishments per week=
+	1
+	~	WEEK
+	~	TIME TO PERCEIVE ACCOMPLISHMENTS PER WEEK
+	|
+
+Expected Accomplishments Per Week= INTEG (
+	(Expected Accomplishments Per Week * fractional change in expected accomplishments per week
+),
+		expected accomplishments per week initial)
+	~	TASKS/WEEK
+	~	EXPECTED ACCOMPLISHMENTS PER WEEK
+	|
+
+expected accomplishments per week initial=
+	40
+	~	TASKS/WEEK
+	~	EXPECTED ACCOMPLISHMENTS PER WEEK INITIAL
+	|
+
+fractional change in expected accomplishments per week=
+	base fractional change in expected accomplishments+fractional change in expectations from perceived adequacy
+	~	FRACTION/WEEK
+	~	FRACTIONAL CHANGE IN EXPECTED ACCOMPLISHMENTS PER WEEK
+	|
+
+base fractional change in expected accomplishments=
+	0.1
+	~	FRACTION/WEEK
+	~	BASE FRACTIONAL CHANGE IN EXPECTED ACCOMPLISHMENTS
+	|
+
+fractional change in expectations from perceived adequacy=
+	fractional change in expectations from perceived adequacy lookup(perceived adequacy of accomplishment
+)
+	~	FRACTION/WEEK
+	~	FRACTIONAL CHANGE IN EXPECTATIONS FROM PERCEIVED ADEQUACY
+	|
+
+fractional change in expectations from perceived adequacy lookup(
+	0,0.2,0.4,0.6,0.8,1,1.2,1.4,1.6,
+	-0.7,-0.5,-0.35,-0.2,-0.1,0,0.1,0.25,0.4)
+	~	FRACTION/WEEK
+	~	TABLE FOR FRACTIONAL CHANGE IN EXPECTATIONS FROM PERCEIVED ADEQUACY
+	|
+
+Energy Level= INTEG (
+	(energy recovery-energy drain),
+		energy level initial)
+	~	UMPH
+	~	ENERGY LEVEL
+	|
+
+energy level initial=
+	1
+	~	UMPH
+	~	ENERGY LEVEL INITIAL
+	|
+
+energy recovery=
+	energy recovery normal*effect of hours worked on energy recovery*effect of high energy on further recovery
+	~	UMPH/WEEK
+	~	ENERGY RECOVERY
+	|
+
+energy recovery normal=
+	0.3
+	~	UMPH/WEEK
+	~	ENERGY RECOVERY NORMAL
+	|
+
+effect of hours worked on energy recovery=
+	effect of hours worked on energy recovery lookup(Hours Worked Per Week)
+	~	DIMENSIONLESS
+	~	EFFECT OF HOURS WORKED ON ENERGY RECOVERY
+	|
+
+effect of hours worked on energy recovery lookup(
+	0,20,40,60,80,100,120,
+	1.3,1.2,1,0.7,0.5,0.35,0.25)
+	~	DIMENSIONLESS
+	~	TABLE FOR EFFECT OF HOURS WORKED ON ENERGY LEVEL
+	|
+
+effect of high energy on further recovery=
+	effect of high energy on further recovery lookup(Energy Level)
+	~	DIMENSIONLESS
+	~	EFFECT OF HIGH ENERGY ON FURTHER RECOVERY
+	|
+
+effect of high energy on further recovery lookup(
+	0.8,0.85,0.9,0.95,1,
+	1,0.9,0.7,0.4,0)
+	~	DIMENSIONLESS
+	~	TABLE FOR EFFECT OF HIGH ENERGY ON FURTHER RECOVERY
+	|
+
+energy drain=
+	energy drain normal*effect of perceived adequacy on energy drain*effect of hours worked on energy drain
+*effect of low energy on further depletion
+	~	UMPH/WEEK
+	~	ENERGY DRAIN
+	|
+
+energy drain normal=
+	0.06
+	~	UMPH/WEEK
+	~	ENERGY DRAIN NORMAL
+	|
+
+effect of perceived adequacy on energy drain=
+	effect of perceived adequacy on energy drain lookup(perceived adequacy of accomplishment
+)
+	~	DIMENSIONLESS
+	~	EFFECT OF PERCIEVED ADEQUACY ON ENERGY DRAIN
+	|
+
+effect of perceived adequacy on energy drain lookup(
+	0,0.2,0.4,0.6,0.8,1,1.2,1.4,1.6,
+	5,4,3.1,2.3,1.6,1,0.6,0.4,0.3)
+	~	DIMENSIONLESS
+	~	TABLE FOR EFFECT OF PERCEIVED ADEQUACY ON ENRGY DRAIN
+	|
+
+effect of hours worked on energy drain=
+	effect of hours worked on energy drain lookup(Hours Worked Per Week)
+	~	DIMENSIONLESS
+	~	EFFECT OF HOURS WORKED ON ENERGY DRAIN
+	|
+
+effect of hours worked on energy drain lookup(
+	[(0,0)-(200,4)],
+	(0,0.3),(20,0.6),(40,1),(60,1.5),(80,2),(100,2.5),(120,3))
+	~	DIMENSIONLESS
+	~	TABLE FOR EFFECT OF HOURS WORKED ON ENERGY DRAIN
+	|
+
+effect of low energy on further depletion=
+	effect of low energy on further depletion lookup(Energy Level)
+	~	DIMENSIONLESS
+	~	EFFECT OF LOW ENERGY ON FURTHER DEPLETION
+	|
+
+effect of low energy on further depletion lookup(
+	0,0.05,0.1,0.15,0.2,
+	0,0.4,0.7,0.9,1)
+	~	DIMENSIONLESS
+	~	TABLE FOR EFFECT OF LOW ENERGY ON FURTHER DEPLETION
+	|
+
+Accomplishments to Date= INTEG (
+	accomplishments per week,
+		0)
+	~	TASKS
+	~	ACCOMPLISHMENTS TO DATE
+	|
+
+hours worked to date= INTEG (
+	Hours Worked Per Week,
+		1e-010)
+	~	HOUR
+	~	HOURS WORTKED TO DATE
+	|
+
+average accomplishments per hour to date=
+	Accomplishments to Date/hours worked to date
+	~	TASKS/HOUR
+	~	AVERAGE ACCOMPLISHMENTS PER HOUR TO DATE
+	~	:SUPPLEMENTARY 
+	|
+
+TIME STEP=0.25
+	~	WEEK
+	~		|
+
+FINAL TIME=75
+	~	WEEK
+	~		|
+
+SAVEPER=1.5
+	~	WEEK
+	~		|
+
+{ Note that this model will run without modification directly from 
+  Dyn2ven.  Only the units of measure were added to the simulation 
+  control constants.	
+}
+INITIAL TIME = 0
+	~	WEEK
+	~	Assumed with FINAL_TIME = LENGTH
+	|
+
+\\\---/// Sketch information - do not modify anything except names
+V300  Do not put anything below this section - it will be ignored
+*Title Page
+$192-192-192,0,Vensim Sans|14||0-0-0|0-0-0|0-0-0|-1--1--1|255-255-255|96,96,100,0
+12,1,0,381,153,3,11,0,0,0,0,-1,0,0,0
+12,2,0,187,273,3,11,0,0,0,0,-1,0,0,0
+12,3,0,295,127,140,29,8,4,0,8,0,0,0,0,0-0-0,0-0-0,|14||0-0-0
+Copyright 1985 by Jack B. Homer from System Dynamics Review 1985 p. 60
+12,4,0,284,168,3,11,0,0,0,0,-1,0,0,0
+12,5,0,295,55,163,19,0,4,0,58,-1,0,0,0,0-0-0,0-0-0,Vensim Sans|24|U|0-0-255
+Worker Burnout Model
+12,6,0,91,288,3,11,0,0,0,0,-1,0,0,0
+12,7,0,301,212,193,11,0,4,0,32,-1,0,0,0,0-0-0,0-0-0,Vensim Sans|12||0-0-0
+Use Page Down / Page Up keys to move through views
+12,8,0,305,267,148,11,0,4,0,32,-1,0,0,0,0-0-0,0-0-0,Vensim Sans|12||0-0-0
+(or button at bottom that says "Title Page")
+\\\---/// Sketch information - do not modify anything except names
+V300  Do not put anything below this section - it will be ignored
+*Accomplishment
+$192-192-192,0,Vensim Sans|14||0-0-0|92-92-92|160-160-160|-1--1--1|255-255-255|96,96,100,0
+10,1,Accomplishments to Date,544,213,92,51,3,131,0,16,0,0,0,0,0-0-0,0-0-0,|14|B|0-0-0
+10,2,accomplishments per hour,299,192,112,12,0,3,0,0,-1,0,0,0
+1,3,2,38,0,0,0,0,0,0,0,-1--1--1,,1|(315,204)|
+10,4,perceived adequacy of accomplishment,681,456,167,12,0,3,0,0,0,0,0,0
+10,5,Perceived Accomplishments Per Week,583,367,91,39,3,131,0,16,0,0,0,0,0-0-0,0-0-0,|14|B|0-0-0
+1,6,5,4,1,0,0,0,0,0,0,-1--1--1,,1|(672,424)|
+10,7,Expected Accomplishments Per Week,952,535,89,45,3,131,0,16,0,0,0,0,0-0-0,0-0-0,|14|B|0-0-0
+1,8,7,4,1,0,0,0,0,0,0,-1--1--1,,1|(857,475)|
+10,9,fractional change in expected accomplishments per week,732,636,240,12,0,3,0,0,0,0,0,0
+1,10,9,7,1,0,0,0,0,0,0,-1--1--1,,1|(849,591)|
+10,11,expected accomplishments per week initial,1036,417,180,12,0,3,0,2,0,0,0,0,0-0-0,0-0-0,|14||64-128-128
+1,12,11,7,0,0,0,0,0,0,1,-1--1--1,,1|(1011,451)|
+1,13,39,5,1,0,0,0,0,0,0,-1--1--1,,1|(439,343)|
+10,14,time to perceive accomplishments per week,224,409,184,12,0,3,0,2,0,0,0,0,0-0-0,0-0-0,|14||64-128-128
+1,15,14,5,0,0,0,0,0,0,0,-1--1--1,,1|(399,388)|
+10,16,base fractional change in expected accomplishments,287,691,221,12,0,3,0,2,0,0,0,0,0-0-0,0-0-0,|14||64-128-128
+1,17,16,9,0,0,0,0,0,0,0,-1--1--1,,1|(499,664)|
+10,18,fractional change in expectations from perceived adequacy,584,552,247,12,0,3,0,0,0,0,0,0
+1,19,18,9,1,0,0,0,0,0,0,-1--1--1,,1|(611,593)|
+1,20,4,18,1,0,0,0,0,0,0,-1--1--1,,1|(608,508)|
+10,21,fractional change in expectations from perceived adequacy lookup,289,437,276,12,0,3,0,2,0,0,0,0,0-0-0,0-0-0,|14||64-128-128
+1,22,21,18,0,0,0,0,0,0,0,-1--1--1,,1|(427,491)|
+10,23,Energy Level,257,112,68,12,0,2,0,1,0,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,24,23,2,1,0,0,0,0,0,0,-1--1--1,,1|(327,127)|
+10,25,accomplishments per hour lookup,188,144,143,12,0,3,0,2,0,0,0,0,0-0-0,0-0-0,|14||64-128-128
+1,26,25,2,1,0,0,0,0,0,0,-1--1--1,,1|(264,161)|
+10,27,average accomplishments per hour to date,861,299,180,12,0,3,0,0,0,0,0,0
+1,28,1,27,0,0,0,0,0,0,0,-1--1--1,,1|(716,259)|
+10,29,average accomplishments per week to date,827,144,183,12,0,3,0,0,0,0,0,0
+1,30,1,29,0,0,0,0,0,0,0,-1--1--1,,1|(697,176)|
+10,31,Time,704,207,35,12,0,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,32,31,29,0,0,0,0,0,0,0,-1--1--1,,1|(756,179)|
+10,33,average hours worked per week to date,1101,216,167,12,0,3,0,0,0,0,0,0
+1,34,31,33,0,0,0,0,0,0,0,-1--1--1,,1|(827,208)|
+12,35,48,253,221,13,11,0,3,0,0,-1,0,0,0
+1,36,38,1,4,0,0,22,0,0,0,-1--1--1,,1|(397,220)|
+1,37,38,35,100,0,0,22,0,0,0,-1--1--1,,1|(299,220)|
+11,38,48,337,220,7,8,34,3,0,0,1,0,0,0
+10,39,accomplishments per week,337,240,116,12,32,3,0,0,0,0,0,0
+10,40,hours worked to date,763,232,101,12,0,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,41,40,27,0,0,0,0,0,0,0,-1--1--1,,1|(803,260)|
+1,42,40,33,0,0,0,0,0,0,0,-1--1--1,,1|(889,225)|
+10,43,Hours Worked Per Week,165,300,117,12,0,2,0,1,0,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,44,43,39,0,0,0,0,0,0,0,-1--1--1,,1|(241,272)|
+12,45,0,457,49,91,15,0,4,0,58,-1,0,0,0,0-0-0,0-0-0,Vensim Sans|18|U|0-0-255
+Accomplishment
+\\\---/// Sketch information - do not modify anything except names
+V300  Do not put anything below this section - it will be ignored
+*Hours Worked
+$192-192-192,0,Vensim Sans|14||0-0-0|92-92-92|160-160-160|-1--1--1|255-255-255|96,96,100,0
+10,1,Hours Worked Per Week,1028,265,51,25,3,3,0,16,0,0,0,0,0-0-0,0-0-0,|14|B|0-0-0
+10,2,hours worked per week initial,976,131,124,12,0,3,0,2,-1,0,0,0,0-0-0,0-0-0,|14||64-128-128
+1,3,2,1,0,0,0,0,0,0,1,-1--1--1,,1|(995,181)|
+10,4,indicated hours worked per week,825,268,140,12,0,3,0,0,-1,0,0,0
+1,5,4,1,1,0,0,0,0,0,0,-1--1--1,,1|(903,305)|
+10,6,time to adjust hours per week,1001,363,125,12,0,3,0,2,-1,0,0,0,0-0-0,0-0-0,|14||64-128-128
+1,7,6,1,0,0,0,0,0,0,0,-1--1--1,,1|(1009,329)|
+10,8,effect of energy level on hours worked,488,225,160,12,0,3,0,0,0,0,0,0
+1,9,8,4,1,0,0,0,0,0,0,-1--1--1,,1|(653,253)|
+10,10,effect of perceived adequacy of hours worked,576,361,191,12,0,3,0,0,0,0,0,0
+1,11,10,4,1,0,0,0,0,0,0,-1--1--1,,1|(664,296)|
+1,12,1,4,1,0,0,0,0,0,0,-1--1--1,,1|(904,224)|
+10,13,limit on hours worked per week,707,184,132,12,0,3,0,2,-1,0,0,0,0-0-0,0-0-0,|14||64-128-128
+1,14,13,4,0,0,0,0,0,0,0,-1--1--1,,1|(757,220)|
+10,15,effect of energy levels on hours worked lookup,221,269,195,12,0,3,0,2,0,0,0,0,0-0-0,0-0-0,|14||64-128-128
+1,16,15,8,0,0,0,0,0,0,0,-1--1--1,,1|(344,248)|
+10,17,effect of perceived adequacy of hours worked lookup,309,409,221,12,0,3,0,2,0,0,0,0,0-0-0,0-0-0,|14||64-128-128
+1,18,17,10,0,0,0,0,0,0,0,-1--1--1,,1|(433,387)|
+10,19,hours worked to date,1224,265,91,12,0,3,0,0,-1,0,0,0
+1,20,1,19,0,0,0,0,0,0,0,-1--1--1,,1|(1096,265)|
+10,21,Energy Level,220,180,68,12,0,2,0,1,0,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,22,21,8,0,0,0,0,0,0,0,-1--1--1,,1|(343,200)|
+10,23,perceived adequacy of accomplishment,277,333,177,12,0,2,0,1,0,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,24,23,10,1,0,0,0,0,0,0,-1--1--1,,1|(508,347)|
+12,25,0,645,72,80,15,0,4,0,58,-1,0,0,0,0-0-0,0-0-0,Vensim Sans|18|U|0-0-255
+Hours Worked
+\\\---/// Sketch information - do not modify anything except names
+V300  Do not put anything below this section - it will be ignored
+*Energy
+$192-192-192,0,Vensim Sans|14||0-0-0|92-92-92|160-160-160|-1--1--1|255-255-255|96,96,100,0
+10,1,Energy Level,604,111,51,25,3,3,0,16,0,0,0,0,0-0-0,0-0-0,|14|B|0-0-0
+10,2,energy level initial,603,173,77,12,0,3,0,2,-1,0,0,0,0-0-0,0-0-0,|14||64-128-128
+1,3,2,1,0,0,0,0,0,0,1,-1--1--1,,1|(603,157)|
+10,4,effect of high energy on further recovery,396,27,168,12,0,3,0,0,0,0,0,0
+1,5,4,40,1,0,0,0,0,0,0,-1--1--1,,1|(420,64)|
+10,6,effect of hours worked on energy recovery,300,203,177,12,0,3,0,0,0,0,0,0
+1,7,6,41,1,0,0,0,0,0,0,-1--1--1,,1|(379,167)|
+10,8,energy recovery normal,271,68,101,12,0,3,0,2,-1,0,0,0,0-0-0,0-0-0,|14||64-128-128
+1,9,8,40,0,0,0,0,0,0,0,-1--1--1,,1|(384,93)|
+10,10,energy drain normal,783,75,87,12,0,3,0,2,-1,0,0,0,0-0-0,0-0-0,|14||64-128-128
+1,11,10,42,0,0,0,0,0,0,0,-1--1--1,,1|(756,93)|
+10,12,effect of hours worked on energy drain,673,231,163,12,0,3,0,0,0,0,0,0
+1,13,12,43,1,0,0,0,0,0,0,-1--1--1,,1|(687,204)|
+10,14,effect of low energy on further depletion,763,25,167,12,0,3,0,0,0,0,0,0
+1,15,14,42,1,0,0,0,0,0,0,-1--1--1,,1|(699,49)|
+10,16,effect of perceived adequacy on energy drain,923,188,189,12,0,3,0,0,0,0,0,0
+10,17,effect of hours worked on energy recovery lookup,207,283,207,12,0,3,0,2,0,0,0,0,0-0-0,0-0-0,|14||64-128-128
+1,18,17,6,0,0,0,0,0,0,0,-1--1--1,,1|(245,248)|
+1,19,1,4,1,0,0,0,0,0,0,-1--1--1,,1|(525,51)|
+10,20,effect of high energy on further recovery lookup,231,-5,199,12,0,3,0,2,0,0,0,0,0-0-0,0-0-0,|14||64-128-128
+1,21,20,4,0,0,0,0,0,0,0,-1--1--1,,1|(303,8)|
+10,22,effect of perceived adequacy on energy drain lookup,999,288,220,12,0,3,0,2,0,0,0,0,0-0-0,0-0-0,|14||64-128-128
+1,23,22,16,0,0,0,0,0,0,0,-1--1--1,,1|(965,244)|
+10,24,effect of hours worked on energy drain lookup,588,323,192,12,0,3,0,2,0,0,0,0,0-0-0,0-0-0,|14||64-128-128
+1,25,24,12,0,0,0,0,0,0,0,-1--1--1,,1|(623,283)|
+1,26,1,14,1,0,0,0,0,0,0,-1--1--1,,1|(651,48)|
+10,27,effect of low energy on further depletion lookup,720,-13,197,12,0,3,0,2,0,0,0,0,0-0-0,0-0-0,|14||64-128-128
+1,28,27,14,0,0,0,0,0,0,0,-1--1--1,,1|(733,-1)|
+10,29,Hours Worked Per Week,463,260,117,12,0,2,0,1,0,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,30,29,6,1,0,0,0,0,0,0,-1--1--1,,1|(360,244)|
+1,31,29,12,1,0,0,0,0,0,0,-1--1--1,,1|(563,249)|
+10,32,perceived adequacy of accomplishment,1144,244,177,12,0,2,0,1,0,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,33,32,16,0,0,0,0,0,0,0,-1--1--1,,1|(1041,217)|
+12,34,48,399,115,13,11,0,3,0,0,-1,0,0,0
+1,35,40,1,4,0,0,22,0,0,0,-1--1--1,,1|(516,115)|
+1,36,40,34,100,0,0,22,0,0,0,-1--1--1,,1|(439,115)|
+12,37,48,797,119,13,11,0,3,0,0,-1,0,0,0
+1,38,42,37,4,0,0,22,0,0,0,-1--1--1,,1|(757,116)|
+1,39,42,1,100,0,0,22,0,0,0,-1--1--1,,1|(687,116)|
+11,40,48,472,115,7,8,34,3,0,0,1,0,0,0
+10,41,energy recovery,472,135,69,12,32,3,0,0,-1,0,0,0
+11,42,684,725,116,7,8,34,3,0,0,1,0,0,0
+10,43,energy drain,725,136,55,12,32,3,0,0,-1,0,0,0
+1,44,16,43,1,0,0,0,0,0,0,-1--1--1,,1|(799,171)|
+12,45,0,605,-69,41,15,0,4,0,58,-1,0,0,0,0-0-0,0-0-0,Vensim Sans|18|U|0-0-255
+Energy
+12,46,0,624,516,441,151,3,188,0,0,1,0,0,0
+BURNOUT
+///---\\\
+:GRAPH BURNOUT
+:TITLE Worker Burnout
+:SCALE
+:VAR Accomplishments to Date
+:Y-MIN 0
+:Y-MAX 5000
+:LINE-WIDTH 4
+:SCALE
+:VAR Expected Accomplishments Per Week
+:Y-MIN 0
+:Y-MAX 100
+:LINE-WIDTH 3
+:SCALE
+:VAR Hours Worked Per Week
+:Y-MIN 0
+:Y-MAX 100
+:LINE-WIDTH 2
+:SCALE
+:VAR Energy Level
+:Y-MIN 0
+:Y-MAX 2
+:LINE-WIDTH 3
+:L<%^E!@
+1:Burnout.vdf
+9:Burnout
+15:0,0,0,0,0,0
+19:100,0
+27:0,
+34:0,
+4:Time
+5:Hours Worked Per Week
+24:0
+25:75
+26:75

@@ -1,0 +1,441 @@
+! Introductory and Demonstration Venapp
+! Copyright 1988-1998 Ventana Systems, Inc.
+!
+:SCREEN WELCOME
+SCREENFONT,Times New Roman|12||0-0-0|-1--1--1
+PIXELPOS,0
+COMMAND,"",0,0,0,0,,,SPECIAL>LOADMODEL|intro.vmf
+COMMAND,"",0,0,0,0,,,"SPECIAL>SETTITLE|Vensim 5 Demonstration Program"
+COMMAND,"",0,0,,,,,"SETTING>SHOWWARNING|0",
+SKETCH,"SK1",0,0,100,100,B,,7,
+TEXTONLY,"Vensim 5",50,5,,,C||80|B|0-0-0,,"",
+TEXTONLY,"Demonstration",50,45,0,0,C||48|BI|255-0-0|,0
+TEXTONLY,"Press any key to continue",0,80,100,0,C,
+TEXTONLY,"Copyright © 1988-2006 Ventana Systems, Inc.  All Rights Reserved.",0,86,100,,C|Arial|14,0,"",
+TEXTONLY,"Ventana, Vensim, Causal Tracing and Reality Check, are registered trade marks of",0,92,100,0,C||10|\
+|0-0-255|,0
+TEXTONLY,"Ventana Systems, Inc.  Vensim is covered by US Patents 5,428,740 and 5,446,652.",0,96,100,0,C||10||\
+0-0-255|,0
+ANYKEY,"",0,0,0,0,0,,,MAIN
+TEXTONLY,"with SyntheSim",50,27,,,C|Times New Roman|30|BI|0-0-255,0,"",
+!
+:SCREEN GOODBYE
+SCREENFONT,Times New Roman|12||0-0-0|-1--1--1
+PIXELPOS,0
+SKETCH,"SK1",0,0,100,100,B,,7,
+TEXTONLY,"Vensim 5",50,5,,,C||80|B|0-0-0,,"",
+TEXTONLY,"Demonstration",50,45,0,0,C||48|BI|255-0-0|,0
+TEXTONLY,"Press any key to continue",0,80,100,0,C,
+TEXTONLY,"Copyright © 1988-2005 Ventana Systems, Inc.  All Rights Reserved.",0,86,100,,C|Arial|14,0,"",
+TEXTONLY,"Ventana, Vensim, Causal Tracing and Reality Check, are registered trade marks of",0,92,100,0,C||10|\
+|0-0-255|,0
+TEXTONLY,"Ventana Systems, Inc.  Vensim is covered by US Patents 5,428,740 and 5,446,652.",0,96,100,0,C||10||\
+0-0-255|,0
+COMMAND,"",5,30,0,0,L,EeXx,SPECIAL>ASKYESNO|Do you really want to end this session?&MENU>EXIT,
+ANYKEY,"",0,0,0,0,0,,,MAIN
+!
+TEXTONLY,"with SyntheSim",50,27,,,C|Times New Roman|30|BI|0-0-255,0,"",
+!
+:SCREEN MAIN
+SCREENFONT,Times New Roman|12||0-0-0|-1--1--1
+PIXELPOS,0
+COMMAND,"",0,0,0,0,,,SPECIAL>LOADMODEL|intro.vmf
+COMMAND,"",0,0,0,0,,,SPECIAL>READCUSTOM|intro.vgd
+TEXTONLY,"Vensim Demonstrator",0,10,100,0,C||28|B|255-0-0,0
+TEXTONLY,"Copyright © 1988-2005 Ventana Systems, Inc.",0,20,100,,C,0,"",
+BUTTON,"See how SyntheSim works",50,25,50,,C,Oo,"",DEMO9X
+BUTTON,"Overview of Vensim's capabilities",50,34,50,0,C,Oo,,DEMO1
+BUTTON,"Description of the Vensim Demo software",50,43,50,0,C,Dd,,INTRO
+BUTTON,"Exploration of sample models",50,52,50,0,C,Ee,,MODELS
+BUTTON,"Vensim Development Environment",50,61,50,0,C,Vv,,RAWVENSIM
+BUTTON,"??  Help ??",50,70,50,0,C,Vv,SPECIAL>WINHELP|VENDEMO.HLP,
+BUTTON,"Exit the demonstrator",50,90,40,0,C,EeXx,,GOODBYE
+!
+:SCREEN MODELS
+SCREENFONT,Times New Roman|12||0-0-0|-1--1--1
+PIXELPOS,0
+TEXTONLY,"Vensim Sample Models",0,10,100,0,C||28|B|255-0-0,0
+TEXTONLY,"Copyright © 1986-2005 Ventana Systems, Inc.",0,20,100,,C,0,"",
+COMMAND,"",0,0,0,0,,,SPECIAL>LOADTOOLSET|default.vts
+COMMAND,"",0,0,0,0,,,"SPECIAL>SETTITLE|Vensim 5 Demonstration Program"
+BUTTON,"Financial Modeling and Risk",50,30,50,0,C 4,Uu,SPECIAL>LOADMODEL|finance\finance.vmf&SPECIAL>LOADAP\
+PINT|finance.vcd,
+BUTTON,"Maintenance and Service Strategies Explorer",50,38,50,0,C 4,Mm,SPECIAL>LOADMODEL|maint1\maint1.vmf&\
+SPECIAL>LOADAPPINT|maint1.vcd,
+BUTTON,"Business Process Re-Engineering Explorer",50,46,50,0,C 4,Bb,SPECIAL>LOADMODEL|bpr\bpr0.vmf&SPECIAL>\
+LOADAPPINT|bpr.vcd,
+BUTTON,"Sales Cycle Explorer",50,54,50,0,C 4,Ss,SPECIAL>LOADMODEL|market\market2.vmf&SPECIAL>LOADAPPINT|mar\
+ket.vcd,
+BUTTON,"World3-03 Explorer (Limits to Growth)",50,62,50,0,C 4,Ww,SPECIAL>LOADMODEL|wrld3-03\wrld3-03.vmf&S\
+PECIAL>LOADAPPINT|wrld3-03.vcd,
+BUTTON,"Project Model Explorer",50,70,50,0,C 4,Pp,SPECIAL>LOADMODEL|mproject\mproj3.vmf&SPECIAL>LOADAPPINT|\
+mproject.vcd,
+BUTTON,"Urban Game",50,78,50,0,C 4,Uu,SPECIAL>LOADMODEL|urban\urban.vmf&SPECIAL>LOADAPPINT|urban.vcd,
+BUTTON,"Exit to the Main Menu",50,86,40,0,C 4,EeXx,,MAIN
+!
+:SCREEN RAWVENSIM
+SCREENFONT,Times New Roman|12||0-0-0|-1--1--1
+PIXELPOS,0
+TEXTONLY,"The Vensim Development Environment",0,10,100,0,C||28|B|255-0-0,0
+TEXTONLY,"Press any key or the button below to close the menu system and open the Vensim Workbench",0,30,100,\
+,C,,,
+TEXTONLY,"From the Vensim Workbench use 'Model>Demo' to return to the Demo",0,49,100,,C,,,
+TEXTONLY,"Press Esc or the button below to return to the Main Menu now",0,85,100,,C,,,
+BUTTON,"Return to Main Menu",49,92,0,0,C,,,MAIN
+ANYKEY,"",0,0,0,0,0,,SPECIAL>EXIT1
+BUTTON,"Development Environment",49,36,0,0,C,,SPECIAL>EXIT1|,
+!
+:SCREEN INTRO
+SCREENFONT,Times New Roman|12||0-0-0|-1--1--1
+PIXELPOS,0
+TEXTONLY,"Vensim Demonstrator",0,10,100,0,C||28|B|255-0-0,0
+TEXTONLY,"Copyright © 1988-2002 Ventana Systems, Inc.",0,20,100,0,C35,0
+TOOL,"TXT1",0,35,100,65,,,CUSTOM>TXT1
+TEXTONLY,"Press any key to continue or",5,27,100,0,L
+TEXTONLY,"Esc to return to the Main Menu",5,30,100,0,L
+TEXTONLY,"Click mouse on scroll bar to read text --->",50,30,48,0,R
+ANYKEY,"",10,80,0,0,L 4,,,MAIN
+!
+:SCREEN DEMO9X
+SCREENFONT,Times New Roman|10||0-0-0|-1--1--1
+PIXELPOS,0
+TEXTONLY,"SyntheSim",0,5,100,0,C||28|B|255-0-0,0
+SKETCH,"SK1",2,12,46,52,,5,"2",
+TEXTMENU,"",5,95,10,5,L,Ss,"SPECIAL>STOPSIM|NOSAVE",MAIN
+COMMAND,"",0,0,0,0,,,SIMULATE>RUNNAME|current,
+COMMAND,"",0,0,0,0,,,MENU>SYNTHESIM|O,
+COMMAND,"",0,0,0,0,,,SPECIAL>LOADRUN|current.vdf
+BUTTON,"Return to Main Menu",50,92,25,,C,,"SPECIAL>STOPSIM|",MAIN
+TEXTMENU,"",13,78,0,0,L,.,SPECIAL>STOPSIM,MAIN
+ANYKEY,"",10,80,,,L,,"SPECIAL>STOPSIM",MAIN
+WIPTOOL,"GR1",52,12,46,52,,,"CUSTOM>WIP1",
+SLIDEVAR,"delay in adding or removing overtime hours",16,69,18,7,,[.5|10|.5],,
+TEXTONLY,"Delay in increasing or decreasing overtime",25,66,0,0,C,,,
+SLIDEVAR,"time to hire or layoff",66,69,18,7,,[1|20|.5],"",
+TEXTONLY,"Time to adjust size of workforce",75,65,0,0,C,,,
+TEXTONLY,"As you move the sliders the model will be simulated and the results displayed both on the sketch an\
+d in the graph.",23,79,50,9,|Times New Roman|16||0-0-0,,,
+!
+:SCREEN DEMO1
+SCREENFONT,Times New Roman|12||0-0-0|-1--1--1
+PIXELPOS,0
+TEXTONLY,"Vensim",0,5,100,0,C||28|B|255-0-0,0
+TEXTONLY,"Vensim is a set of tools for:",10,25,100,0,L3,0
+TEXTONLY,"- making models",20,40,100,0,L,0
+TEXTONLY,"- analyzing data",20,50,100,0,L,0
+TEXTONLY,"- understanding models and data",20,60,100,0,L,0
+TEXTONLY,"- optimizing results",20,70,100,0,L,0
+TEXTONLY,"Press any key to continue or Esc to return to the Main Menu",0,95,100,0,C
+TEXTMENU,"",10,78,0,0,L 4,,,MAIN
+ANYKEY,"",10,80,0,0,L 4,,,DEMO2
+!
+!
+:SCREEN DEMO2
+SCREENFONT,Times New Roman|12||0-0-0|-1--1--1
+PIXELPOS,0
+TEXTONLY,"Vensim's Tools",0,5,100,0,C||28|B|255-0-0,0
+TEXTONLY,"Vensim's tools are accessible in two ways:",10,25,100,0,L3,0
+TEXTONLY,"Venapp (Vensim Application)",20,40,100,0,L,0
+TEXTONLY,"- is model specific",30,45,100,0,L,0
+TEXTONLY,"- features scripted menus",30,50,100,0,L,0
+TEXTONLY,"- this demonstration is a Venapp",30,55,100,0,L,0
+TEXTONLY,"Vensim (Ventana Simulation)",20,65,100,0,L,0
+TEXTONLY,"- is flexible and powerful as a development and analysis environment",30,70,100,0,L,0
+TEXTONLY,"- features a workbench/toolbox metaphor",30,75,100,0,L,0
+TEXTONLY,"- the Vensim Workbench is accessible from the Main Menu",30,80,100,0,L,0
+TEXTONLY,"Press any key to continue or Esc to return to the Main Menu",0,95,100,0,C
+TEXTMENU,"",10,78,0,0,L 4,,,MAIN
+ANYKEY,"",10,80,0,0,L 4,,,DEMO3
+!
+:SCREEN DEMO3
+SCREENFONT,Times New Roman|12||0-0-0|-1--1--1
+PIXELPOS,0
+TEXTONLY,"Conceptualization",0,5,100,0,C||28|B|255-0-0,0
+TEXTONLY,"The Sketch tool can help you structure thinking and communication",0,25,100,0,C3,0
+SKETCH,"SK1",15,30,70,40,,,2,
+TEXTONLY,"without forcing you into a specific format ahead of time.",0,71,100,0,C,0
+TEXTONLY,"Press any key to continue or Esc to return to the Main Menu",0,95,100,0,C
+TEXTMENU,"",10,78,0,0,L 4,,,MAIN
+ANYKEY,"",10,80,0,0,L 4,,,DEMO4
+!
+:SCREEN DEMO4
+SCREENFONT,Times New Roman|12||0-0-0|-1--1--1
+PIXELPOS,0
+TEXTONLY,"Model Building",0,5,100,0,C||28|B|255-0-0,0
+TEXTONLY,"The Sketch tool allows you to evolve models naturally,",0,15,100,0,C3,0
+SKETCH,"SK1",5,20,90,60,,,3,
+TEXTONLY,"allowing you at the same time to emphasize important structures.",0,81,100,0,C,0
+TEXTONLY,"Press any key to continue or Esc to return to the Main Menu",0,95,100,0,C
+TEXTMENU,"",10,78,0,0,L 4,,,MAIN
+ANYKEY,"",10,80,0,0,L 4,,,DEMO5
+!
+:SCREEN DEMO5
+SCREENFONT,Times New Roman|12||0-0-0|-1--1--1
+PIXELPOS,0
+TEXTONLY,"Model Presentation",0,5,100,0,C||28|B|255-0-0,0
+TEXTONLY,"You can display different views of a model for emphasis and explanation.",0,25,100,0,C3,0
+SKETCH,"SK1",10,30,80,50,,,4,
+TEXTONLY,"Vensim maintains consistency among the views automatically.",0,81,100,0,C,0
+TEXTONLY,"Press any key to continue or Esc to return to the Main Menu",0,95,100,0,C
+TEXTMENU,"",10,78,0,0,L 4,,,MAIN
+ANYKEY,"",10,80,0,0,L 4,,,DEMO6
+!
+:SCREEN DEMO6
+SCREENFONT,Times New Roman|12||0-0-0|-1--1--1
+PIXELPOS,0
+COMMAND,"",0,0,0,0,,,SPECIAL>SETWBITEM|production
+TEXTONLY,"Equations",0,5,100,0,C||28|B|255-0-0,0
+TEXTONLY,"Equations unambiguously define the relationships among variables.",0,25,100,0,C3,0
+TOOL,"SK1",10,30,80,45,,,WORKBENCH>DOCUMENT
+TEXTONLY,"Vensim uses a simple algebraic language for writing equations,",0,76,100,0,C,0
+TEXTONLY,"and has built-in documentation capabilities.",0,81,100,0,C,0
+TEXTONLY,"Press any key to continue or Esc to return to the Main Menu",0,95,100,0,C
+TEXTMENU,"",10,78,0,0,L 4,,,MAIN
+ANYKEY,"",10,80,0,0,L 4,,,DEMO7
+!
+:SCREEN DEMO7
+SCREENFONT,Times New Roman|12||0-0-0|-1--1--1
+PIXELPOS,0
+TEXTONLY,"Equation Writing",0,5,100,0,C||28|B|255-0-0,0
+TEXTONLY,"Equations can be entered in two ways:",10,25,100,0,L3,0
+TEXTONLY,"Using an Equation Editor",20,40,100,0,L,0
+TEXTONLY,"- allows focus upon one equation at a time",30,45,100,0,L,0
+TEXTONLY,"- can be based upon relationships defined in the sketch",30,50,100,0,L,0
+TEXTONLY,"Using a context-sensitive Text Editor",20,55,100,0,L,0
+TEXTONLY,"- allows work on all equations together",30,60,100,0,L,0
+TEXTONLY,"Equations can be entered with or without a sketch being created.",0,80,100,0,C,0
+TEXTONLY,"Modifications to equations are automatically carried over to a sketch.",0,85,100,0,C,0
+TEXTONLY,"Press any key to continue or Esc to return to the Main Menu",0,95,100,0,C
+TEXTMENU,"",10,78,0,0,L 4,,,MAIN
+ANYKEY,"",10,80,0,0,L 4,,,DEMO8
+!
+:SCREEN DEMO8
+SCREENFONT,Times New Roman|12||0-0-0|-1--1--1
+PIXELPOS,0
+COMMAND,"",0,0,0,0,,,SPECIAL>CLEARRUNS
+TEXTONLY,"Simulation",0,5,100,0,C||28|B|255-0-0,0
+TEXTONLY,"Based upon sketches, data, and equations, Vensim can simulate",10,25,100,0,L3,0
+TEXTONLY,"a model to determine the logical consequences of the assumptions",10,35,100,0,L3,0
+TEXTONLY,"going into the model.",10,45,100,0,L3,0
+TEXTONLY,"Press any key to continue or Esc to return to the Main Menu",0,95,100,0,C
+TEXTMENU,"",10,78,0,0,L 4,,,MAIN
+ANYKEY,"",10,80,0,0,L 4,,,DEMO9
+!
+:SCREEN DEMO9
+SCREENFONT,Times New Roman|12||0-0-0|-1--1--1
+PIXELPOS,0
+TEXTONLY,"Simulation in action",0,5,100,0,C||28|B|255-0-0,0
+WIPTOOL,"GR1",0,15,100,79,,,CUSTOM>WIP1
+TEXTMENU,"",5,95,10,5,L,Ss,SPECIAL>STOPSIM|NOSAVE,DEMO10
+COMMAND,"",0,0,0,0,,,SIMULATE>RUNNAME|current,
+COMMAND,"",0,0,0,0,,,MENU>RUN|O,
+COMMAND,"",0,0,0,0,,,SPECIAL>LOADRUN|current.vdf
+TEXTONLY,"Press any key to continue or Esc to return to the Main Menu (S will stop the simulation)",0,95,100,\
+0,C
+TEXTMENU,"",10,78,0,0,L 4,,,MAIN
+ANYKEY,"",10,80,0,0,L 4,,,DEMO9A
+!
+:SCREEN DEMO9A
+SCREENFONT,Times New Roman|12||0-0-0|-1--1--1
+PIXELPOS,0
+TEXTONLY,"SyntheSim",0,5,100,0,C||28|B|255-0-0,0
+SKETCH,"SK1",2,12,46,52,,5,"2",
+TEXTMENU,"",5,95,10,5,L,Ss,SPECIAL>STOPSIM|NOSAVE,DEMO10
+COMMAND,"",0,0,0,0,,,SIMULATE>RUNNAME|current,
+COMMAND,"",0,0,0,0,,,MENU>SYNTHESIM|O,
+COMMAND,"",0,0,0,0,,,SPECIAL>LOADRUN|current.vdf
+TEXTMENU,"",13,78,0,0,L,.,SPECIAL>STOPSIM,MAIN
+ANYKEY,"",10,80,0,0,L 4,,SPECIAL>STOPSIM,DEMO10
+WIPTOOL,"GR1",52,12,46,52,,,"CUSTOM>WIP1",
+SLIDEVAR,"delay in adding or removing overtime hours",16,69,18,7,,[.5|10|.5],,
+TEXTONLY,"Delay in increasing or decreasing overtime",25,66,0,0,C,,,
+SLIDEVAR,"time to hire or layoff",66,69,18,7,,[1|20|.5],"",
+TEXTONLY,"Time to adjust size of workforce",75,65,0,0,C,,,
+TEXTONLY,"As you move the sliders the model will be simulated and the results displayed both on the sketch an\
+d in the graph.",23,79,50,9,|Times New Roman|16||0-0-0,,,
+BUTTON,"Continue with Overview",50,95,50,,C,,"SPECIAL>STOPSIM|",DEMO10
+!
+:SCREEN DEMO10
+SCREENFONT,Times New Roman|12||0-0-0|-1--1--1
+PIXELPOS,0
+TEXTONLY,"Exploration and Analysis",0,5,100,0,C||28|B|255-0-0,0
+TEXTONLY,"Vensim provides a number of tools to explore and analyze",10,25,100,0,L3,0
+TEXTONLY,"the nature of a model and the results of simulations of a model.",10,30,100,0,L3,0
+TEXTONLY,"Some of the most commonly used tools are shown here.",10,35,100,0,L3,0
+TEXTONLY,"Press any key to continue or Esc to return to the Main Menu",0,95,100,0,C
+TEXTMENU,"",10,78,0,0,L 4,,,MAIN
+ANYKEY,"",10,80,0,0,L 4,,,DEMO11
+!
+:SCREEN DEMO11
+SCREENFONT,Times New Roman|12||0-0-0|-1--1--1
+PIXELPOS,0
+COMMAND,"",0,0,0,0,,,SPECIAL>SETWBITEM|production
+TEXTONLY,"Causal Trees",0,5,100,0,C||28|B|255-0-0,0
+TEXTONLY,"The Tree Diagram tool show the causes of a variable.",0,25,100,0,C3,0
+TOOL,"SK1",10,30,80,50,,,WORKBENCH>CAUSES TREE,
+TEXTONLY,"The diagram is created from structure, and does not depend upon the sketch.",0,81,100,0,C,0
+TEXTONLY,"Press any key to continue or Esc to return to the Main Menu",0,95,100,0,C
+TEXTMENU,"",10,78,0,0,L 4,,,MAIN
+ANYKEY,"",10,80,0,0,L 4,,,DEMO11A
+!
+:SCREEN DEMO11A
+SCREENFONT,Times New Roman|12||0-0-0|-1--1--1
+PIXELPOS,0
+COMMAND,"",0,0,0,0,,,SPECIAL>SETWBITEM|workforce
+TEXTONLY,"Trees Showing Uses",0,5,100,0,C||28|B|255-0-0,0
+TEXTONLY,"The Tree Diagram tool can also show the uses of a variable.",0,25,100,0,C3,0
+TOOL,"SK1",10,30,80,50,,,WORKBENCH>USES TREE,
+TEXTONLY,"The diagram is created from structure, and does not depend upon the sketch.",0,81,100,0,C,0
+TEXTONLY,"Press any key to continue or Esc to return to the Main Menu",0,95,100,0,C
+TEXTMENU,"",10,78,0,0,L 4,,,MAIN
+ANYKEY,"",10,80,0,0,L 4,,,DEMO12
+!
+:SCREEN DEMO12
+SCREENFONT,Times New Roman|12||0-0-0|-1--1--1
+PIXELPOS,0
+COMMAND,"",0,0,0,0,,,SPECIAL>SETWBITEM|production
+TEXTONLY,"Causal Graphs",0,5,100,0,C||28|B|255-0-0,0
+TEXTONLY,"The Strip Graph tool shows graphs for a variable and the causes of the variable.",50,15,40,30,C3,0
+TOOL,"SK1",2,15,45,80,,,WORKBENCH>CAUSES STRIP,
+TEXTONLY,"The causes are determined automatically based upon model structure.  Simulation results and data ca\
+n be shown together on the same graph.",50,61,40,30,C,0
+TEXTONLY,"Press any key to continue or Esc to return to the Main Menu",0,95,100,0,C
+TEXTMENU,"",10,78,0,0,L 4,,,MAIN
+ANYKEY,"",10,80,0,0,L 4,,,DEMO13
+!
+:SCREEN DEMO13
+SCREENFONT,Times New Roman|12||0-0-0|-1--1--1
+PIXELPOS,0
+COMMAND,"",0,0,0,0,,,SPECIAL>SETWBITEM|production
+TEXTONLY,"Tables of Causes",0,5,100,0,C||28|B|255-0-0,0
+TEXTONLY,"The Table tool allows you to look at the causes of a variable at each time.",0,25,100,0,C3,0
+TOOL,"SK1",10,30,80,50,,,WORKBENCH>TABLE,
+TEXTONLY,"The values can be tabled together for different frequencies and for different runs.",0,81,100,0,C,0
+TEXTONLY,"Press any key to continue or Esc to return to the Main Menu",0,95,100,0,C
+TEXTMENU,"",10,78,0,0,L 4,,,MAIN
+ANYKEY,"",10,80,0,0,L 4,,,DEMO13A
+!
+:SCREEN DEMO13A
+SCREENFONT,Times New Roman|12||0-0-0|-1--1--1
+PIXELPOS,0
+TEXTONLY,"Causal Tracing",0,5,100,0,C||28|B|255-0-0,0
+TEXTONLY,"You can trace the causes of behavior using causal graphs.",10,25,100,0,L3,0
+TEXTONLY,"This is done by selecting a new variable and calling a new graph.",10,35,100,0,L3,0
+TEXTONLY,"Press any key to continue or Esc to return to the Main Menu",0,95,100,0,C
+TEXTMENU,"",10,78,0,0,L 4,,,MAIN
+ANYKEY,"",10,80,0,0,L 4,,,DEMO13B
+!
+:SCREEN DEMO13B
+SCREENFONT,Times New Roman|12||0-0-0|-1--1--1
+PIXELPOS,0
+COMMAND,"",0,0,0,0,,,SPECIAL>SETWBITEM|productivity
+TEXTONLY,"Causal Tracing",0,5,100,0,C||28|B|255-0-0,0
+TEXTONLY,"Productivity is oscillating.",50,15,40,30,C3,0
+TOOL,"SK1",2,15,45,80,,,WORKBENCH>CAUSES STRIP,
+TEXTONLY,"This is caused by oscillating morale.",50,61,40,30,C3,0
+TEXTONLY,"Press any key to continue or Esc to return to the Main Menu",0,95,100,0,C
+TEXTMENU,"",10,78,0,0,L 4,,,MAIN
+ANYKEY,"",10,80,0,0,L 4,,,DEMO13C
+!
+:SCREEN DEMO13C
+SCREENFONT,Times New Roman|12||0-0-0|-1--1--1
+PIXELPOS,0
+COMMAND,"",0,0,0,0,,,SPECIAL>SETWBITEM|morale
+TEXTONLY,"Causal Tracing",0,5,100,0,C||28|B|255-0-0,0
+TEXTONLY,"Morale is oscillating.",50,15,40,30,C3,0
+TOOL,"SK1",2,15,45,80,,,WORKBENCH>CAUSES STRIP,
+TEXTONLY,"This is caused by oscillating average overtime.",50,61,40,30,C3,0
+TEXTONLY,"Press any key to continue or Esc to return to the Main Menu",0,95,100,0,C
+TEXTMENU,"",10,78,0,0,L 4,,,MAIN
+ANYKEY,"",10,80,0,0,L 4,,,DEMO13D
+!
+:SCREEN DEMO13D
+SCREENFONT,Times New Roman|12||0-0-0|-1--1--1
+PIXELPOS,0
+COMMAND,"",0,0,0,0,,,SPECIAL>SETWBITEM|Average Overtime
+TEXTONLY,"Causal Tracing",0,5,100,0,C||28|B|255-0-0,0
+TEXTONLY,"Average overtime is oscillating.",50,15,40,30,C3,0
+TOOL,"SK1",2,15,45,80,,,WORKBENCH>CAUSES STRIP,
+TEXTONLY,"This is caused by oscillating overtime.",50,61,40,30,C3,0
+TEXTONLY,"Press any key to continue or Esc to return to the Main Menu",0,95,100,0,C
+TEXTMENU,"",10,78,0,0,L 4,,,MAIN
+ANYKEY,"",10,80,0,0,L 4,,,DEMO13E
+!
+:SCREEN DEMO13E
+SCREENFONT,Times New Roman|12||0-0-0|-1--1--1
+PIXELPOS,0
+COMMAND,"",0,0,0,0,,,SPECIAL>SETWBITEM|Overtime
+TEXTONLY,"Causal Tracing",0,5,100,0,C||28|B|255-0-0,0
+TEXTONLY,"Overtime is oscillating.",50,15,40,30,C3,0
+TOOL,"SK1",2,15,45,80,,,WORKBENCH>CAUSES STRIP,
+TEXTONLY,"This is caused by oscillating productivity and workforce - the circle is complete.",50,61,40,30,C3,\
+0
+TEXTONLY,"Press any key to continue or Esc to return to the Main Menu",0,95,100,0,C
+TEXTMENU,"",10,78,0,0,L 4,,,MAIN
+ANYKEY,"",10,80,0,0,L 4,,,DEMO13F
+!
+:SCREEN DEMO13F
+SCREENFONT,Times New Roman|12||0-0-0|-1--1--1
+PIXELPOS,0
+TEXTONLY,"Causal Tracing",0,5,100,0,C||28|B|255-0-0,0
+TEXTONLY,"After ongoing overtime, morale goes down,",10,25,100,0,L3,0
+TEXTONLY,"causing a decrease in productivity,",10,35,100,0,L3,0
+TEXTONLY,"and in turn requiring more workers.",10,45,100,0,L3,0
+TEXTONLY,"The hiring of workers finally corrects this,",10,55,100,0,L3,0
+TEXTONLY,"making workers more productive,",10,65,100,0,L3,0
+TEXTONLY,"and generating a surplus of labor.",10,75,100,0,L3,0
+TEXTONLY,"Press any key to continue or Esc to return to the Main Menu",0,95,100,0,C
+TEXTMENU,"",10,78,0,0,L 4,,,MAIN
+ANYKEY,"",10,80,0,0,L 4,,,DEMO14
+!
+:SCREEN DEMO14
+SCREENFONT,Times New Roman|12||0-0-0|-1--1--1
+PIXELPOS,0
+TEXTONLY,"More Tools and Capabilities",0,5,100,0,C||28|B|255-0-0,0
+TEXTONLY,"Vensim also makes available",10,25,100,0,L3,0
+TEXTONLY,"- sensitivity testing",20,35,100,0,L,0
+TEXTONLY,"- bar graphs",20,40,100,0,L,0
+TEXTONLY,"- dimensional analysis (units checking)",20,45,100,0,L,0
+TEXTONLY,"- confidence bounds",20,50,100,0,L,0
+TEXTONLY,"- Gantt charts",20,55,100,0,L,0
+TEXTONLY,"- run comparisons",20,60,100,0,L,0
+TEXTONLY,"- loop identification",20,65,100,0,L,0
+TEXTONLY,"- Kalman filtering",20,70,100,0,L,0
+TEXTONLY,"- optimization",20,75,100,0,L,0
+TEXTONLY,". . . ",30,80,100,0,L,0
+TEXTONLY,"Press any key to continue or Esc to return to the Main Menu",0,95,100,0,C
+TEXTMENU,"",10,78,0,0,L 4,,,MAIN
+ANYKEY,"",10,80,0,0,L 4,,,DEMO15
+!
+:SCREEN DEMO15
+SCREENFONT,Times New Roman|12||0-0-0|-1--1--1
+PIXELPOS,0
+TEXTONLY,"More Tools and Capabilities (continued)",0,5,100,0,C||28|B|255-0-0,0
+TEXTONLY,"Vensim also includes",10,25,100,0,L3,0
+TEXTONLY,"- customizable fonts and colors",20,35,100,0,L,0
+TEXTONLY,"- exported graphs",20,40,100,0,L,0
+TEXTONLY,"- presentation quality output",20,45,100,0,L,0
+TEXTONLY,"- macros",20,50,100,0,L,0
+TEXTONLY,"- advanced subscripting",20,55,100,0,L,0
+TEXTONLY,"- user configurable toolsets",20,60,100,0,L,0
+TEXTONLY,"- large model capacity",20,65,100,0,L,0
+TEXTONLY,"- simple use of exogenous inputs",20,70,100,0,L,0
+TEXTONLY,"- summary statistics on variables",20,75,100,0,L,0
+TEXTONLY,"-   and much more",30,80,100,0,L,0
+TEXTONLY,"Press any key to continue or Esc to return to the Main Menu",0,95,100,0,C
+TEXTMENU,"",10,78,0,0,L 4,,,MAIN
+ANYKEY,"",10,80,0,0,L 4,,,DEMO16
+!
+:SCREEN DEMO16
+SCREENFONT,Times New Roman|12||0-0-0|-1--1--1
+PIXELPOS,0
+TEXTONLY,"The End",0,5,100,0,C||28|B|255-0-0,0
+TEXTONLY,"This concludes the Vensim Demo.",10,25,100,0,L3,0
+TEXTONLY,"The packaged sample models make use of the functions described.",20,35,100,0,L,0
+TEXTONLY,"The Vensim Development Environment gives you access to the full",20,45,100,0,L,0
+TEXTONLY,"Vensim, but without the guidance of the packaged models.",20,50,100,0,L,0
+TEXTONLY,"Press any key to continue or Esc to return to the Main Menu",0,95,100,0,C
+TEXTMENU,"",10,78,0,0,L 4,,,MAIN
+ANYKEY,"",10,80,0,0,L 4,,,MAIN
+!
+!

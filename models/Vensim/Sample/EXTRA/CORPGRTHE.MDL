@@ -1,0 +1,261 @@
+{UTF-8}
+{UTF-8}
+
+
+Delivery Delay Recognized= INTEG (
+	(delivery delay impending - Delivery Delay Recognized) 
+	          / time for delivery delay recognition,
+		 2)
+	~	Month
+	~		|
+
+normal backlog = 8000
+	~	unit
+	~		|
+
+normal delivery delay recognized = 2
+	~	Month
+	~		|
+
+normal delivery rate = 4000
+	~	unit/Month
+	~		|
+
+normal sales effectivness = 350
+	~	unit/(Month*person)
+	~		|
+
+delivery rate = normal delivery rate * effect of backlog on delivery rate
+	~	unit/Month
+	~		|
+
+effect of backlog on delivery rate = effect of backlog on delivery rate lookup(
+Backlog/normal backlog
+)
+	~	dmnl
+	~		|
+
+effect of delivery delay recognized = effect of delivery delay recognized lookup
+                                          (Delivery Delay Recognized/normal delivery delay recognized
+)
+	~	dmnl
+	~		|
+
+sales effectiveness = normal sales effectivness * effect of delivery delay recognized
+	~	unit/(person*Month)
+	~		|
+
+effect of backlog on delivery rate lookup                ([(0.8,0)-(20,8)],
+(0.9,0),(1,1),(1.7,3.5),(2.3,4.3),(3.5,5),(6.3,5.6),(10,6),(20,6.5)
+ )
+	~	dmnl
+	~		|
+
+effect of delivery delay recognized lookup        ([(0,0)-(3,2)],
+(0,1.15),(0.5,1.1),(1,1),(1.5,0.75),(2,0.5),(2.5,0.35),(3,0.3)
+ )
+	~	dmnl
+	~		|
+
+Backlog = INTEG(orders entered - orders completed, 8000)
+	~	unit
+	~		|
+
+budget = orders booked * revenue to sales
+	~	dollars/Month
+	~		|
+
+delivery delay impending = Backlog / delivery rate
+	~	Month
+	~		|
+
+indicated sales force = budget / sales person salary
+	~	person
+	~		|
+
+net hires = (indicated sales force - Sales Force) / sales force adjustment time
+	~	person/Month
+	~		|
+
+orders booked = Sales Force * sales effectiveness
+	~	unit/Month
+	~		|
+
+orders completed = delivery rate
+	~	unit/Month
+	~		|
+
+orders entered = orders booked
+	~	unit/Month
+	~		|
+
+revenue to sales = 10
+	~	dollars/unit
+	~		|
+
+sales force adjustment time = 20
+	~	Month
+	~		|
+
+sales person salary = 2000
+	~	dollars/(person*Month)
+	~		|
+
+Sales Force = INTEG(net hires, 10)
+	~	person
+	~		|
+
+time for delivery delay recognition = 5
+	~	Month
+	~		|
+
+********************************************************
+	.Control
+********************************************************~
+		Simulation Control Paramaters
+	|
+
+FINAL TIME  = 100
+	~	Month
+	~	The final time for the simulation.
+	|
+
+INITIAL TIME  = 0
+	~	Month
+	~	The initial time for the simulation.
+	|
+
+SAVEPER  = 
+        TIME STEP
+	~	Month
+	~	The frequency with which output is stored.
+	|
+
+TIME STEP  = 0.125
+	~	Month
+	~	The time step for the simulation.
+	|
+
+\\\---/// Sketch information - do not modify anything except names
+V300  Do not put anything below this section - it will be ignored
+*Corporate Growth
+$192-192-192,0,|12||-1--1--1|92-92-92|160-160-160|-1--1--1|255-255-255|96,96,100,0
+10,1,Sales Force,252,446,51,28,3,3,0,16,0,1,0,0,-1--1--1,0-0-0,||B|0-0-0,0,0,0,0,0,0
+12,2,48,92,446,10,8,0,3,0,0,-1,0,0,0,0,0,0,0,0,0
+11,3,0,149,446,7,8,34,3,0,0,1,0,0,0,0,0,0,0,0,0
+10,4,net hires,149,484,75,30,32,3,0,0,-1,1,0,0,0,0,0,0,0,0
+10,5,indicated sales force,230,521,75,30,0,3,0,0,-1,1,0,0,0,0,0,0,0,0
+10,6,sales person salary,190,589,75,30,0,3,0,2,0,1,0,0,-1--1--1,-1--1--1,|||64-128-128,0,0,0,0,0,0
+10,7,sales force adjustment time,141,361,75,30,0,3,0,2,0,1,0,0,-1--1--1,-1--1--1,|||64-128-128,0,0,0,0,0,0
+10,8,budget,333,557,75,30,0,3,0,0,-1,1,0,0,0,0,0,0,0,0
+10,9,revenue to sales,322,630,75,30,0,3,0,2,0,1,0,0,-1--1--1,-1--1--1,|||64-128-128,0,0,0,0,0,0
+10,10,orders booked,450,446,75,30,0,3,0,2,-1,1,0,0,-1--1--1,-1--1--1,|||0-0-0,0,0,0,0,0,0
+10,11,Delivery Delay Recognized,650,324,55,28,3,3,0,16,0,1,0,0,-1--1--1,0-0-0,||B|0-0-0,0,0,0,0,0,0
+10,12,Backlog,550,645,51,28,3,3,0,16,0,1,0,0,-1--1--1,0-0-0,||B|0-0-0,0,0,0,0,0,0
+10,13,time for delivery delay recognition,780,222,75,30,0,3,0,2,0,1,0,0,-1--1--1,-1--1--1,|||64-128-128,0,0,0,0,0,0
+12,14,48,412,630,10,8,0,3,0,0,-1,0,0,0,0,0,0,0,0,0
+12,15,2,356,464,21,21,0,0,0,0,1,0,0,0,0,0,0,0,0,0
+12,16,48,774,645,10,8,0,3,0,0,-1,0,0,0,0,0,0,0,0,0
+12,17,1,578,476,21,21,0,0,0,0,1,0,0,0,0,0,0,0,0,0
+10,18,sales effectiveness,486,341,75,30,0,3,0,0,-1,1,0,0,0,0,0,0,0,0
+10,19,delivery delay impending,666,422,75,30,0,3,0,0,0,1,0,0,0,0,0,0,0,0
+10,20,delivery rate,946,582,75,30,0,3,0,0,-1,1,0,0,0,0,0,0,0,0
+11,21,0,436,644,7,8,34,3,0,0,1,0,0,0,0,0,0,0,0,0
+10,22,orders entered,436,682,75,30,32,3,0,0,-1,1,0,0,0,0,0,0,0,0
+11,23,0,678,645,7,8,34,3,0,0,1,0,0,0,0,0,0,0,0,0
+10,24,orders completed,678,683,75,30,32,3,0,0,-1,1,0,0,0,0,0,0,0,0
+12,25,0,718,597,17,12,0,4,0,2,-1,0,0,0,-1--1--1,0-0-0,|||0-0-0,0,0,0,0,0,0
+( - )
+12,26,0,188,417,17,12,0,4,0,2,-1,0,0,0,-1--1--1,0-0-0,|||0-0-0,0,0,0,0,0,0
+( - )
+10,27,effect of backlog on delivery rate lookup,774,502,75,30,0,3,0,2,0,1,0,0,-1--1--1,-1--1--1,|||64-128-128,0,0,0,0,0,0
+10,28,effect of delivery delay recognized lookup,344,186,75,30,0,3,0,2,0,1,0,0,-1--1--1,-1--1--1,|||64-128-128,0,0,0,0,0,0
+10,29,normal sales effectivness,328,276,75,30,0,3,0,2,0,1,0,0,-1--1--1,-1--1--1,|||64-128-128,0,0,0,0,0,0
+10,30,normal delivery rate,917,661,75,30,0,3,0,2,0,1,0,0,-1--1--1,-1--1--1,|||64-128-128,0,0,0,0,0,0
+10,31,effect of delivery delay recognized,594,256,75,30,0,3,0,0,0,1,0,0,0,0,0,0,0,0
+10,32,effect of backlog on delivery rate,736,564,75,30,0,3,0,0,0,1,0,0,0,0,0,0,0,0
+10,33,normal delivery delay recognized,253,222,75,30,0,3,0,2,0,1,0,0,-1--1--1,-1--1--1,|||64-128-128,0,0,0,0,0,0
+10,34,normal backlog,668,524,75,30,0,3,0,2,0,1,0,0,-1--1--1,-1--1--1,|||64-128-128,0,0,0,0,0,0
+1,35,3,1,4,0,0,22,0,0,0,-1--1--1,,1|(178,446)|
+1,36,3,2,68,0,0,22,0,0,0,-1--1--1,,1|(122,446)|
+1,37,5,4,1,0,0,0,0,0,0,-1--1--1,,1|(173,497)|
+1,38,8,5,2,0,0,0,0,0,0,-1--1--1,,1|(284,554)|
+1,39,10,8,2,0,0,0,0,0,0,-1--1--1,,1|(432,502)|
+1,40,1,10,2,0,0,0,0,0,0,-1--1--1,,1|(349,365)|
+1,41,21,12,4,0,0,22,0,0,0,-1--1--1,,1|(471,644)|
+1,42,21,14,100,0,0,22,0,0,0,-1--1--1,,1|(412,644)|
+1,43,23,16,4,0,0,22,0,0,0,-1--1--1,,1|(724,645)|
+1,44,23,12,100,0,0,22,0,0,0,-1--1--1,,1|(636,645)|
+1,45,10,21,1,0,0,0,0,0,0,-1--1--1,,1|(460,572)|
+1,46,20,23,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,47,12,19,1,0,0,0,0,0,0,-1--1--1,,1|(596,533)|
+1,48,20,19,1,0,0,0,0,0,0,-1--1--1,,1|(938,504)|
+1,49,18,10,2,0,0,0,0,0,0,-1--1--1,,1|(466,377)|
+1,50,1,3,2,0,0,0,0,0,0,-1--1--1,,1|(196,390)|
+1,51,11,31,1,0,0,0,0,0,0,-1--1--1,,1|(637,290)|
+1,52,31,18,1,0,0,0,0,0,0,-1--1--1,,1|(505,284)|
+1,53,12,32,1,0,0,0,0,0,0,-1--1--1,,1|(620,576)|
+1,54,32,20,1,0,0,0,0,0,0,-1--1--1,,1|(878,565)|
+1,55,19,11,2,0,0,0,0,0,0,-1--1--1,,1|(682,374)|
+1,56,33,31,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,57,28,31,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,58,7,3,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,59,6,5,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,60,9,8,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,61,29,18,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,62,34,32,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,63,27,32,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,64,30,20,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,65,13,11,1,0,0,0,0,0,0,-1--1--1,,1|(732,293)|
+12,66,0,785,97,84,12,0,4,0,24,0,0,0,0,0-0-0,0-0-0,|14|I|0-0-0,0,0,0,0,0,0
+by Jay W. Forrester
+12,67,0,218,237,3,12,0,0,0,0,-1,0,0,0,0,0,0,0,0,0
+12,68,0,516,94,179,20,0,4,0,58,-1,0,0,0,0-0-0,0-0-0,Vensim Sans|24|IU|0-0-255,0,0,0,0,0,0
+Corporate Growth Model
+12,69,0,606,125,268,12,0,4,0,16,-1,0,0,0,0-0-0,0-0-0,||I|0-0-0,0,0,0,0,0,0
+As described fully in "Principles of Systems" by Jay W. Forrester
+12,70,0,588,154,168,12,0,4,0,16,-1,0,0,0,0-0-0,0-0-0,||I|0-0-0,0,0,0,0,0,0
+Published by Pegasus Communications
+12,71,0,1141,313,200,200,3,44,0,0,1,0,0,0,0,0,0,0,0,0
+orders_delay
+///---\\\
+:GRAPH orders_delay
+:TITLE orders and delay
+:SCALE
+:VAR orders booked
+:DATASET 
+:SCALE
+:VAR delivery delay recognized
+:DATASET 
+:L<%^E!@
+4:Time
+5:sales force adjustment time
+9:CorpGrow
+19:100,0
+24:0
+25:100
+26:100
+23:0
+15:0,0,0,0,0,0
+27:0,
+34:0,
+42:0
+72:0
+73:0
+95:0
+96:0
+97:0
+77:0
+78:0
+102:1
+93:0
+94:0
+92:0
+91:0
+90:0
+87:0
+75:
+43:
+103:8,8,8,3,8
+105:0,0,0,0,0,0,0,0,0,0
+104:Vensim Sans|12||0-0-0|0-0-0|-1--1--1|0-0-255|192-192-192|-1--1--1

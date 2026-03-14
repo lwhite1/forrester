@@ -1,0 +1,126 @@
+{UTF-8}
+cash flow = orders booked * price of item
+	~	dollars/Month
+	~		~	:SUPPLEMENTARY 
+	|
+
+price of item=
+	 100
+	~	dollars/unit
+	~		|
+
+sales budget = orders booked * revenue to sales
+	~	dollars/Month
+	~		|
+
+indicated sales force = sales budget / sales person salary
+	~	person
+	~		|
+
+net hires = (indicated sales force - Sales Force) / sales force adjustment time
+	~	person/Month
+	~		|
+
+orders booked = Sales Force * sales force productivity
+	~	unit/Month
+	~		|
+
+revenue to sales=
+	 10
+	~	dollars/unit
+	~		|
+
+Sales Force = INTEG(net hires, 50)
+	~	person
+	~		|
+
+sales force adjustment time=
+	 6
+	~	Month
+	~		|
+
+sales force productivity=
+	 210
+	~	unit/(person*Month)
+	~		|
+
+sales person salary = 2000
+	~	dollars/(person*Month)
+	~		|
+
+********************************************************
+	.Control
+********************************************************~
+		Simulation Control Paramaters
+	|
+
+FINAL TIME  = 60
+	~	Month
+	~		The final time for the simulation.
+	|
+
+INITIAL TIME  = 0
+	~	Month
+	~		The initial time for the simulation.
+	|
+
+SAVEPER  = 
+        TIME STEP
+	~	Month
+	~		The frequency with which output is stored.
+	|
+
+TIME STEP  = 0.25
+	~	Month
+	~		The time step for the simulation.
+	|
+
+\\\---/// Sketch information - do not modify anything except names
+V300  Do not put anything below this section - it will be ignored
+*View 1
+$192-192-192,0,Arial|14||0-0-0|92-92-92|160-160-160|-1--1--1|255-255-255|96,96,100,0
+10,1,Sales Force,521,104,61,28,3,131,0,58,0,0,0,0,-1--1--1,-1--1--1,Arial|14|B|0-0-0
+12,2,48,348,104,13,11,0,3,0,0,-1,0,0,0
+11,3,48,408,101,7,8,34,3,0,0,1,0,0,0
+10,4,net hires,408,121,39,12,32,3,0,0,-1,0,0,0
+10,5,indicated sales force,347,237,88,12,0,3,0,0,-1,0,0,0
+10,6,sales person salary,323,345,84,12,0,3,0,42,0,0,0,0,-1--1--1,-1--1--1,Arial|14||64-128-128
+10,7,sales force adjustment time,227,165,116,12,0,3,0,42,0,0,0,0,-1--1--1,-1--1--1,Arial|14||64-128-128
+10,8,sales budget,516,339,56,12,0,3,0,0,-1,0,0,0
+10,9,revenue to sales,695,325,72,12,0,3,0,42,0,0,0,0,-1--1--1,-1--1--1,Arial|14||64-128-128
+10,10,orders booked,633,239,63,12,0,3,0,42,-1,0,0,0,-1--1--1,-1--1--1,Arial|14||0-0-0
+12,11,2,504,220,21,21,0,0,0,0,1,0,0,0
+10,12,sales force productivity,701,139,97,12,0,3,0,42,-1,0,0,0,-1--1--1,-1--1--1,Arial|14||64-128-128
+10,13,cash flow,991,237,41,12,0,3,0,42,-1,0,0,0,-1--1--1,-1--1--1,Arial|14||0-0-0
+10,14,price of item,857,189,53,12,0,3,0,42,-1,0,0,0,-1--1--1,-1--1--1,Arial|14||64-128-128
+1,15,1,3,2,0,0,0,0,0,0,-1--1--1,,1|(445,60)|
+1,16,1,10,2,0,0,0,0,0,0,-1--1--1,,1|(616,180)|
+1,17,10,8,2,0,0,0,0,0,0,-1--1--1,,1|(620,292)|
+1,18,8,5,2,0,0,0,0,0,0,-1--1--1,,1|(369,285)|
+1,19,5,4,1,0,0,0,0,0,0,-1--1--1,,1|(355,183)|
+1,20,3,2,68,0,0,22,0,0,0,-1--1--1,,1|(381,101)|
+1,21,3,1,4,0,0,22,0,0,0,-1--1--1,,1|(437,101)|
+1,22,7,4,1,0,0,0,0,0,0,-1--1--1,,1|(323,149)|
+1,23,12,10,1,0,0,0,0,0,0,-1--1--1,,1|(661,180)|
+1,24,9,8,1,0,0,0,0,0,0,-1--1--1,,1|(608,341)|
+1,25,6,5,1,0,0,0,0,0,0,-1--1--1,,1|(343,297)|
+1,26,10,13,1,0,0,0,0,0,0,-1--1--1,,1|(813,237)|
+1,27,14,13,0,0,0,0,0,0,0,-1--1--1,,1|(915,209)|
+///---\\\
+:GRAPH GRAPH_FOR_CASH_FLOW
+:TITLE Graph for cash flow
+:SCALE
+:VAR cash flow
+:LINE-WIDTH 2
+:L<%^E!@
+1:Current.vdf
+9:Current
+15:0,0,0,0,0,0
+19:100,0
+27:0,
+34:0,
+4:Time
+5:sales force adjustment time
+24:0
+25:60
+26:60

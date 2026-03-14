@@ -1,0 +1,106 @@
+{UTF-8}
+{UTF-8}
+
+acceleration = (target speed-Speed)/time to adjust speed
+	~	Miles/Hour/Second
+	~		|
+
+FINAL TIME  = 60
+	~	Second
+	~	 The final time for the simulation.
+	|
+
+initial speed = 0
+	~	Miles/Hour
+	~		|
+
+INITIAL TIME  = 0
+	~	Second
+	~	 The initial time for the simulation.
+	|
+
+SAVEPER  = 
+        TIME STEP
+	~	Second
+	~	 The frequency with which output is stored.
+	|
+
+Speed = INTEG(acceleration,initial speed)
+	~	Miles/Hour
+	~		|
+
+target speed = 55
+	~	Miles/Hour
+	~		|
+
+TIME STEP  = 0.5
+	~	Second
+	~	 The time step for the simulation.
+	|
+
+time to adjust speed = 10
+	~	Second
+	~		|
+
+\\\---/// Sketch information - do not modify anything except names
+V300  Do not put anything below this section - it will be ignored
+*1
+$192-192-192,0,|12||-1--1--1|92-92-92|160-160-160|-1--1--1|255-255-255|96,96,100,0
+10,1,Speed,521,191,40,20,3,3,0,26,0,1,0,0,-1--1--1,0-0-0,|14|B|0-0-0,0,0,0,0,0,0
+12,2,48,365,187,10,8,0,3,0,8,-1,0,0,0,0-0-0,0-0-0,|12||0-0-0,0,0,0,0,0,0
+11,3,0,427,187,7,8,34,3,0,0,1,0,0,0,0,0,0,0,0,0
+10,4,acceleration,427,225,75,30,32,3,0,26,0,1,0,0,-1--1--1,-1--1--1,|14||0-0-0,0,0,0,0,0,0
+10,5,target speed,552,251,75,30,0,3,0,26,-1,1,0,0,-1--1--1,-1--1--1,|14||64-128-128,0,0,0,0,0,0
+10,6,time to adjust speed,352,252,75,30,0,3,0,2,-1,1,0,0,-1--1--1,-1--1--1,|||64-128-128,0,0,0,0,0,0
+10,7,initial speed,656,212,75,30,0,3,0,2,-1,1,0,0,-1--1--1,-1--1--1,|||64-128-128,0,0,0,0,0,0
+1,8,3,1,4,0,0,22,0,0,0,-1--1--1,,1|(457,187)|
+1,9,3,2,68,0,0,22,0,0,0,-1--1--1,,1|(397,187)|
+1,10,5,4,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,11,1,3,2,0,0,0,0,0,0,-1--1--1,,1|(473,151)|
+1,12,6,4,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,13,7,1,0,0,0,0,0,0,1,-1--1--1,,1|(0,0)|
+12,14,0,457,515,401,225,3,188,0,0,1,0,0,0,0,0,0,0,0,0
+speed_accel
+12,15,0,444,39,80,40,8,7,0,0,-1,1,0,0,0,0,0,0,0,0
+SPEED MODEL
+///---\\\
+:GRAPH speed_accel
+:TITLE speed and acceleration
+:SCALE
+:VAR speed
+:DATASET 
+:SCALE
+:VAR acceleration
+:DATASET 
+:L<%^E!@
+4:Time
+5:time to adjust speed
+9:Speed
+19:100,0
+24:0
+25:60
+26:60
+23:0
+15:0,0,0,0,0,0
+27:0,
+34:0,
+42:0
+72:0
+73:0
+95:0
+96:0
+97:0
+77:0
+78:0
+102:1
+93:0
+94:0
+92:0
+91:0
+90:0
+87:0
+75:
+43:
+103:8,8,8,3,8
+105:0,0,0,0,0,0,0,0,0,0
+104:Vensim Sans|12||0-0-0|0-0-0|-1--1--1|0-0-255|192-192-192|-1--1--1

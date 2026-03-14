@@ -1,0 +1,374 @@
+! Project Venapp
+! Copyright 1988-1997 Ventana Systems, Inc.
+!
+:SCREEN WELCOME
+SCREENFONT,Times New Roman|12||0-0-0|-1--1--1
+PIXELPOS,0
+COMMAND,"",0,0,0,0,,,SPECIAL>LOADMODEL|mproj3.vmf
+COMMAND,"",0,0,0,0,,,SPECIAL>READCUSTOM|mproject.vgd
+COMMAND,"",0,0,0,0,,,SPECIAL>LOADTOOLSET|mproject.vts
+COMMAND,"",0,0,0,0,,,SPECIAL>CLEARRUNS
+COMMAND,"",0,0,0,0,,,SPECIAL>SETWBITEM|tot_cost
+COMMAND,"",0,0,,,,,"SPECIAL>SUBSCRIPT|task|task",
+COMMAND,"",0,0,,,,,"SETTING>SHOWWARNING|0",
+TEXTONLY,"Ventana Project Explorer",0,10,100,0,C||24||255-0-0,
+TEXTONLY,"Copyright © 1991,1992 Ventana Systems, Inc.",0,30,100,0,C,
+TEXTONLY,"Ventana Systems, Inc.",0,35,100,0,C||10||0-0-255,
+TEXTONLY,"60 Jacob Gates Road",0,38,100,0,C||10||0-0-255,
+TEXTONLY,"Harvard Massachusetts 01451",0,41,100,0,C||10||0-0-255
+TEXTONLY,"508 651 0432 - Fax:508 650 5422",0,44,100,0,C||10||0-0-255
+TEXTONLY,"Press any Key to Continue",0,60,100,0,C,
+TEXTONLY,"Software subject to restriction of the license agreement",0,80,100,0,C 3,
+TEXTONLY,"Copyright © 1988-1999 Ventana Systems, Inc. ALL RIGHTS RESERVED",0,90,100,0,C 4,
+TEXTONLY,"Vensim and Ventana Project are trademarks of Ventana Systems, Inc.",0,95,100,0,C 4,
+ANYKEY,"",0,0,0,0,0,,,INTRO
+!
+:SCREEN INTRO
+SCREENFONT,Times New Roman|12||0-0-0|-1--1--1
+PIXELPOS,0
+TEXTONLY,"Welcome",0,5,100,0,C||24||255-0-0
+TEXTONLY,"to the",0,15,100,0,C12
+TEXTONLY,"Ventana Project Explorer",0,20,100,0,C||24||255-0-0
+TEXTONLY,"Press any key to continue.",5,30,100,0,L
+TOOL,"TXT1",0,35,100,65,,,CUSTOM>TXT1
+ANYKEY,"",0,0,0,0,0,,,MAIN
+!
+:SCREEN MAIN
+SCREENFONT,Times New Roman|12||0-0-0|-1--1--1
+PIXELPOS,0
+TEXTONLY,"Ventana Project Main Menu",0,5,100,0,C||24||255-0-0
+RECTANGLE,"",4,19,45,36,C 4
+TEXTMENU,"Go back to the introductory material",5,20,0,0,L,GgIi,,INTRO
+TEXTMENU,"Structural overview of the model",5,25,0,0,L,Ss,,OVERVIEW
+TEXTMENU,"Define the basic structure of the project",5,30,0,0,L,Dd,SIMULATE>RUNNAME|BASE&SIMULATE>READCIN,DEF\
+INE
+TEXTMENU,"Run a new scenario",5,35,0,0,L,Rr,,RUN
+TEXTMENU,"Analyze previously run scenarios",5,40,0,0,L,Aa,,ANALYZE
+TEXTMENU,"Optimize project performance",5,45,0,0,L,Oo,,OPTIMIZE
+TEXTMENU,"Exit to model selection menu",5,50,0,0,L,EeXx,SPECIAL>LOADMODEL|..\intro.vmf&SPECIAL>LOADAPPINT|in\
+tro.vcd@3,
+LINE,"",0,60,100,0
+TEXTONLY,"Instructions and Comments - If Necessary use the scroll bar to see everything",0,55,100,0,C 3
+TOOL,"SP1",0,60,100,40,,,CUSTOM>COMM1
+!
+:SCREEN OVERVIEW
+SCREENFONT,Times New Roman|12||0-0-0|-1--1--1
+PIXELPOS,0
+TEXTONLY,"Model Structure Overview",0,5,100,0,C||24||255-0-0
+TEXTMENU,"Work flow and rework discovery",5,20,0,0,L,Ww,,OV_WORK
+TEXTMENU,"Productivity (work speed)",5,30,0,0,L,Pp,,OV_PROD
+TEXTMENU,"Quality of work",5,40,0,0,L,Qq,,OV_QUAL
+TEXTMENU,"Labor determination",5,50,0,0,L,Ll,,OV_LAB
+TEXTMENU,"Task Startup Logic",5,60,0,0,L,Tt,,OV_TASK
+TEXTMENU,"Exit to main menu",5,70,0,0,L,EeXx,,MAIN
+!
+:SCREEN OV_WORK
+SCREENFONT,Times New Roman|12||0-0-0|-1--1--1
+PIXELPOS,0
+TEXTONLY,"Work Flow and Rework Discovery",0,0,100,0,C32
+SKETCH,"SK1",5,5,90,65,,,1,
+TOOL,"SP1",0,71,100,23,,,CUSTOM>OV_WORK
+TEXTONLY,"Press any key to return to overview menu",0,95,100,0,C
+ANYKEY,"",0,0,0,0,0,,,OVERVIEW
+!
+:SCREEN OV_PROD
+SCREENFONT,Times New Roman|12||0-0-0|-1--1--1
+PIXELPOS,0
+TEXTONLY,"Gross Productivity (Work Speed)",0,0,100,0,C32
+SKETCH,"SK1",5,5,90,65,,,3,
+TOOL,"SP1",0,71,100,23,,,CUSTOM>OV_PROD
+TEXTONLY,"Press any key to return to overview menu",0,95,100,0,C
+ANYKEY,"",0,0,0,0,0,,,OVERVIEW
+!
+:SCREEN OV_QUAL
+SCREENFONT,Times New Roman|12||0-0-0|-1--1--1
+PIXELPOS,0
+TEXTONLY,"Quality of Work",0,0,100,0,C32
+SKETCH,"SK1",5,5,90,65,,,4,
+TOOL,"SP1",0,71,100,23,,,CUSTOM>OV_QUAL
+TEXTONLY,"Press any key to return to overview menu",0,95,100,0,C
+ANYKEY,"",0,0,0,0,0,,,OVERVIEW
+!
+:SCREEN OV_LAB
+SCREENFONT,Times New Roman|12||0-0-0|-1--1--1
+PIXELPOS,0
+TEXTONLY,"Hiring and Labor Determination",0,0,100,0,C32
+SKETCH,"SK1",5,5,90,45,,,2,
+TOOL,"SP1",0,51,100,43,,,CUSTOM>OV_LAB
+TEXTONLY,"Press any key to return to overview menu",0,95,100,0,C
+ANYKEY,"",0,0,0,0,0,,,OVERVIEW
+!
+:SCREEN OV_TASK
+SCREENFONT,Times New Roman|12||0-0-0|-1--1--1
+PIXELPOS,0
+TEXTONLY,"Task Startup Logic",0,0,100,0,C32
+SKETCH,"SK1",5,5,90,45,,,5,
+TOOL,"SP1",0,51,100,43,,,CUSTOM>OV_TASK
+TEXTONLY,"Press any key to return to overview menu",0,95,100,0,C
+ANYKEY,"",0,0,0,0,0,,,OVERVIEW
+!
+:SCREEN RUNNING
+SCREENFONT,Times New Roman|12||0-0-0|-1--1--1
+PIXELPOS,0
+WIPTOOL,"GR1",0,0,100,100,,,CUSTOM>WIP_TOT_COST,
+COMMAND,"",0,0,0,0,,,MENU>RUN|O,
+CLOSESCREEN,"",0,0,0,0,,,,GANTT
+!
+:SCREEN RUNNING1
+SCREENFONT,Times New Roman|12||0-0-0|-1--1--1
+PIXELPOS,0
+WIPTOOL,"GR1",0,0,100,100,,,CUSTOM>WIP_TOT_COST,
+COMMAND,"",0,0,0,0,,,MENU>RUN|O,
+CLOSESCREEN,"",0,0,0,0,,,,MAIN
+!
+:SCREEN DEFINE
+SCREENFONT,Times New Roman|12||0-0-0|-1--1--1
+PIXELPOS,0
+TEXTONLY,"Project Definition",0,5,100,0,C32
+TEXTMENU,"Definition of task size",5,13,0,0,L,Dd,,SIZE
+TEXTMENU,"Scheduling of tasks",5,20,0,0,L,Ss,,SCHEDULE
+TEXTMENU,"Work intensity profiles",5,27,0,0,L,Ww,,PROFILE
+TEXTMENU,"Prerequisite definitions",5,34,0,0,L,Pp,,PREREQ
+TEXTMENU,"Simulate the base run with these definitions",5,41,0,0,L,Ss,,RUNNING1
+TEXTMENU,"Exit back to main menu (ignore changes)",5,48,0,0,L,EeXx,,MAIN
+TOOL,"SP1",0,55,100,45,,,CUSTOM>DEF_0
+!
+:SCREEN SIZE
+SCREENFONT,Times New Roman|12||0-0-0|-1--1--1
+PIXELPOS,0
+TEXTONLY,"Task Size Definition",0,5,100,0,C32
+TEXTONLY,"Tasks are defined in drawings - a generic unit to measure work to be done",0,20,100,0,C
+TEXTONLY,"Task 1",5,27,0,0,L
+MODVAR,"TASK DEFINITION[Task1]",20,26,15,0,L
+TEXTONLY,"Task 2",5,34,0,0,L
+MODVAR,"TASK DEFINITION[Task2]",20,33,15,0,L
+TEXTONLY,"Task 3",5,41,0,0,L
+MODVAR,"TASK DEFINITION[Task3]",20,40,15,0,L
+TEXTONLY,"Task 4",5,48,0,0,L
+MODVAR,"TASK DEFINITION[Task4]",20,47,15,0,L
+TEXTMENU,"Accept changes and return to main menu",5,54,0,0,L,Aa,,DEFINE
+TEXTMENU,"Exit back to main menu (ignore changes)",5,61,0,0,L,EeXx,CANCEL,DEFINE
+TOOL,"SP1",0,70,100,30,,,CUSTOM>DEF_SIZE
+!
+:SCREEN SCHEDULE
+SCREENFONT,Times New Roman|12||0-0-0|-1--1--1
+PIXELPOS,0
+TEXTONLY,"Project Scheduling",0,5,100,0,C32
+TEXTONLY,"Start Time",40,20,0,0,L
+TEXTONLY,"Completion Time",70,20,0,0,L
+TEXTONLY,"Task 1",5,27,0,0,L
+MODVAR,"INIT SCHED START TIME[Task1]|The initial scheduled start time for task 1",40,26,15,0,L
+MODVAR,"INIT SCHED COMP TIME[Task1]|The initial scheduled completion time for task 1",70,26,15,0,L
+TEXTONLY,"Task 2",5,34,0,0,L
+MODVAR,"INIT SCHED START TIME[Task2]|The initial scheduled start time for task 2",40,33,15,0,L
+MODVAR,"INIT SCHED COMP TIME[Task2]|The initial scheduled completion time for task 2",70,33,15,0,L
+TEXTONLY,"Task 3",5,41,0,0,L
+MODVAR,"INIT SCHED START TIME[Task3]|The initial scheduled start time for task 3",40,40,15,0,L
+MODVAR,"INIT SCHED COMP TIME[Task3]|The initial scheduled completion time for task 3",70,40,15,0,L
+TEXTONLY,"Task 4",5,48,0,0,L
+MODVAR,"INIT SCHED START TIME[Task4]|The initial scheduled start time for task 4",40,47,15,0,L
+MODVAR,"INIT SCHED COMP TIME[Task4]|The initial scheduled completion time for task 4",70,47,15,0,L
+TEXTMENU,"Accept changes and return to main menu",5,54,0,0,L,Aa,,DEFINE
+TEXTMENU,"Exit back to main menu (ignore changes)",5,61,0,0,L,EeXx,CANCEL,DEFINE
+PROMPT,"",0,65,0,0,L 3
+TOOL,"SP1",0,70,100,30,,,CUSTOM>DEF_SCHED
+!
+:SCREEN PROFILE
+SCREENFONT,Times New Roman|12||0-0-0|-1--1--1
+PIXELPOS,0
+TEXTONLY,"Profile of Task Efforts",0,5,100,0,C32
+MODTABLE,"PLANNED WORK PROFILE[TASK1]",10,15,10,10,L
+TEXTONLY,"- Task 1",22,19,0,0,L
+MODTABLE,"PLANNED WORK PROFILE[TASK2]",60,15,10,10,L
+TEXTONLY,"- Task 2",72,19,0,0,L
+MODTABLE,"PLANNED WORK PROFILE[TASK3]",10,30,10,10,L
+TEXTONLY,"- Task 3",22,34,0,0,L
+MODTABLE,"PLANNED WORK PROFILE[TASK4]",60,30,10,10,L
+TEXTONLY,"- Task 4",72,34,0,0,L
+TEXTMENU,"Accept changes and return to main menu",5,54,0,0,L,Aa,,DEFINE
+TEXTMENU,"Exit back to main menu (ignore changes)",5,61,0,0,L,EeXx,CANCEL,DEFINE
+PROMPT,"",0,65,0,0,L 3
+TOOL,"SP1",0,70,100,30,,,CUSTOM>DEF_PROF
+!
+:SCREEN PREREQ
+SCREENFONT,Times New Roman|12||0-0-0|-1--1--1
+PIXELPOS,0
+TEXTONLY,"Prerequisite Definition",0,5,100,0,C32
+TEXTONLY,"Prerequisites to task 1",0,21,0,0,L
+SWITCHVAR,"PREREQ REQ[TASK1,TASK2]",47,20,15,0,L,,Task 2
+SWITCHVAR,"PREREQ REQ[TASK1,TASK3]",64,20,15,0,L,,Task 3
+SWITCHVAR,"PREREQ REQ[TASK1,TASK4]",81,20,15,0,L,,Task 4
+TEXTONLY,"Prerequisites to task 2",0,28,0,0,L
+SWITCHVAR,"PREREQ REQ[TASK2,TASK1]",30,27,15,0,L,,Task 1
+SWITCHVAR,"PREREQ REQ[TASK2,TASK3]",64,27,15,0,L,,Task 3
+SWITCHVAR,"PREREQ REQ[TASK2,TASK4]",81,27,15,0,L,,Task 4
+TEXTONLY,"Prerequisites to task 3",0,35,0,0,L
+SWITCHVAR,"PREREQ REQ[TASK3,TASK1]",30,34,15,0,L,,Task 1
+SWITCHVAR,"PREREQ REQ[TASK3,TASK2]",47,34,15,0,L,,Task 2
+SWITCHVAR,"PREREQ REQ[TASK3,TASK4]",81,34,15,0,L,,Task 4
+TEXTONLY,"Prerequisites to task 4",0,42,0,0,L
+SWITCHVAR,"PREREQ REQ[TASK4,TASK1]",30,41,15,0,L,,Task 1
+SWITCHVAR,"PREREQ REQ[TASK4,TASK2]",47,41,15,0,L,,Task 2
+SWITCHVAR,"PREREQ REQ[TASK4,TASK3]",64,41,15,0,L,,Task 3
+TEXTMENU,"Accept changes and return to main menu",5,54,0,0,L,Aa,,DEFINE
+TEXTMENU,"Exit back to main menu (ignore changes)",5,61,0,0,L,EeXx,CANCEL,DEFINE
+PROMPT,"",0,65,0,0,L 3
+TOOL,"SP1",0,70,100,30,,,CUSTOM>DEF_PREREQ
+!
+:SCREEN RUN
+SCREENFONT,Times New Roman|12||0-0-0|-1--1--1
+PIXELPOS,0
+COMMAND,"",0,0,0,0,,,SIMULATE>RUNNAME|SCEN01
+TEXTONLY,"Scenario setup screen",0,5,100,0,C32
+TEXTONLY,"Enter the new name for the Scenario (<8 chars):",5,10,65,0,R
+MODRUNNAME,"|This name will be used in the graphs of behavior",75,10,20,0,L,
+TEXTONLY,"Normal quality as would occur in the absence of adverse pressures",2,18,0,0,L
+TEXTONLY,"Task 1",2,24,8,0,R
+MODVAR,"NORMAL QUALITY[TASK1]|The normal quality of work done in task 1",13,23,15,0,L
+TEXTONLY,"Task 2",28,24,8,0,R
+MODVAR,"NORMAL QUALITY[TASK2]|The normal quality of work done in task 2",37,23,15,0,L
+TEXTONLY,"Task 3",52,24,8,0,R
+MODVAR,"NORMAL QUALITY[TASK3]|The normal quality of work done in task 3",61,23,15,0,L
+TEXTONLY,"Task 4",76,24,8,0,R
+MODVAR,"NORMAL QUALITY[TASK4]|The normal quality of work done in task 4",85,23,15,0,L
+TEXTONLY,"Normal rework discovery time within a task",2,30,0,0,L
+TEXTONLY,"Task 1",2,36,8,0,R
+MODVAR,"NORM REWORK DISC TIME[TASK1]|The normal time (months) taken to discover errors in task 1",13,35,15,\
+0,L
+TEXTONLY,"Task 2",28,36,8,0,R
+MODVAR,"NORM REWORK DISC TIME[TASK2]|The normal time (months) taken to discover errors in task 2",37,35,15,\
+0,L
+TEXTONLY,"Task 3",52,36,8,0,R
+MODVAR,"NORM REWORK DISC TIME[TASK3]|The normal time (months) taken to discover errors in task 3",61,35,15,\
+0,L
+TEXTONLY,"Task 4",76,36,8,0,R
+MODVAR,"NORM REWORK DISC TIME[TASK4]|The normal time (months) taken to discover errors in task 4",85,35,15,\
+0,L
+TEXTMENU,"C - Change other CONSTANTS in the model",5,45,0,0,L,Cc,SIMULATE>GETCNSTCHG,RUN
+TEXTMENU,"L - Change other LOOKUP functions in the model",5,50,0,0,L,Ll,SIMULATE>GETTABCHG,RUN
+TEXTMENU,"R - Run the scenario",5,55,0,0,L,Rr,,RUNNING
+TEXTMENU,"Exit back to main menu",5,60,0,0,L,EeXx,CANCEL,MAIN
+PROMPT,"",0,65,0,0,L 3
+TOOL,"SP1",0,70,100,30,,,CUSTOM>COMM2
+!
+:SCREEN GANTT
+SCREENFONT,Times New Roman|12||0-0-0|-1--1--1
+PIXELPOS,0
+COMMAND,"",0,0,0,0,,,SPECIAL>SETWBITEM|TASK IS ACTIVE
+TEXTONLY,"Press P to print - any other key to continue",0,5,100,0,C
+TOOL,"GR1",10,10,80,80,,,WORKBENCH>GANTT
+TEXTMENU,"",0,0,0,0,L,Pp,PRINT>GR1
+ANYKEY,"",0,0,0,0,0,,,ANALYZE
+!
+:SCREEN BAR
+SCREENFONT,Times New Roman|12||0-0-0|-1--1--1
+PIXELPOS,0
+COMMAND,"",0,0,0,0,,,SPECIAL>SETWBITEM|Cum cost
+TEXTONLY,"Press P to print - any other key to continue",0,5,100,0,C
+TOOL,"GR1",10,10,80,80,,,WORKBENCH>BAR GRAPH
+TEXTMENU,"",0,0,0,0,L,Pp,PRINT>GR1
+ANYKEY,"",0,0,0,0,0,,,ANALYZE
+!
+:SCREEN ANALYZE
+SCREENFONT,Times New Roman|12||0-0-0|-1--1--1
+PIXELPOS,0
+TEXTONLY,"Scenario analysis screen",0,5,100,0,C32
+TEXTMENU,"1 - Load, unload and reorder previously run scenarios",5,15,0,0,L,1,MENU>LOAD_RUN,
+TEXTMENU,"2 - Gantt chart of active tasks",5,20,0,0,L,2,,GANTT
+TEXTMENU,"3 - Bar graph of cumulative cost",5,25,0,0,L,3,,BAR
+TEXTMENU,"4 - select a Variable as a start point for further analysis",5,30,0,0,L,4,SPECIAL>SETWBITEM|TOT COS\
+T&SPECIAL>VARSELECT|New variable to use
+TEXTMENU,"5 - trace underlying causes using Trees",5,35,0,0,L,5,,CAUSE1
+TEXTMENU,"6 - trace underlying causes using Graphs",5,40,0,0,L,6,,CAUSE2
+TEXTMENU,"7 - trace the Uses of a variable",5,45,0,0,L,7,,USE
+TEXTMENU,"8 - List the differences between the first two loaded scenarios",5,50,0,0,L,8,,DIFF
+TEXTMENU,"Exit back to the main menu",5,60,0,0,L,EeXx,,MAIN
+TOOL,"SP1",0,70,100,30,,,CUSTOM>COMM3
+!
+:SCREEN CAUSE1
+SCREENFONT,Times New Roman|12||0-0-0|-1--1--1
+PIXELPOS,0
+TEXTONLY,"Causal tracing -",0,2,50,0,R
+WBVAR,"",50,2,0,0,L
+TOOL,"TR1",2,6,96,42,,,WORKBENCH>CAUSES TREE
+TEXTMENU,"T - Trace on highlight",5,50,0,0,L,Tt,SPECIAL>SECONDCLICK|TR1,
+TEXTMENU,"C - Change to graph based",5,55,0,0,L,Cc,,CAUSE2
+TEXTMENU,"P - Print tree",5,60,0,0,L,Pp,PRINT>TR1
+TEXTMENU,"G - print Graph",5,65,0,0,L,Gg,PRINT>GR1
+TEXTMENU,"S - Select a new variable to trace",5,70,0,0,L,Ss,SPECIAL>SETWBITEM|POPULATION&SPECIAL>VARSELECT|Ne\
+w variable for tracing
+TEXTMENU,"Exit - return to analysis",5,75,0,0,L,EeXx,,ANALYZE
+TOOL,"GR1",60,50,40,50,,,WORKBENCH>STRIP GRAPH
+TOOL,"COMM4",0,80,58,20,,,CUSTOM>COMM4
+SETWB,"",0,0,0,0,,,,CAUSE1
+!
+:SCREEN CAUSE2
+SCREENFONT,Times New Roman|12||0-0-0|-1--1--1
+PIXELPOS,0
+TEXTONLY,"Causal tracing -",0,2,0,0,L
+WBVAR,"",20,2,0,0,L
+TOOL,"TR1",60,0,40,100,,,WORKBENCH>CAUSES STRIP
+TEXTMENU,"T - Trace on highlight",5,50,0,0,L,Tt,SPECIAL>SECONDCLICK|TR1,
+TEXTMENU,"C - Change to tree based",5,55,0,0,L,Cc,,CAUSE1
+TEXTMENU,"P - Print graph",5,60,0,0,L,Pp,PRINT>TR1
+TEXTMENU,"Q - Print eQuation",5,65,0,0,L,Qq,PRINT>GR1
+TEXTMENU,"S - Select a new variable to trace",5,70,0,0,L,Ss,SPECIAL>VARSELECT|New variable for tracing
+TEXTMENU,"Exit - return to analysis",5,75,0,0,L,EeXx,,ANALYZE
+TOOL,"GR1",0,8,58,40,,,WORKBENCH>DOCUMENT
+TOOL,"COMM4",0,80,60,20,,,CUSTOM>COMM4
+SETWB,"",0,0,0,0,,,,CAUSE2
+!
+:SCREEN USE
+SCREENFONT,Times New Roman|12||0-0-0|-1--1--1
+PIXELPOS,0
+TEXTONLY,"Uses of -",0,2,50,0,R
+WBVAR,"",50,2,0,0,L
+TOOL,"TR1",2,6,96,42,,,WORKBENCH>USES TREE
+TEXTMENU,"T - Trace on highlight",5,50,0,0,L,Tt,SPECIAL>SECONDCLICK|TR1,
+TEXTMENU,"P - Print tree",5,55,0,0,L,Pp,PRINT>TR1
+TEXTMENU,"G - print Graph",5,60,0,0,L,Gg,PRINT>GR1
+TEXTMENU,"S - Select a new variable to trace",5,65,0,0,L,Ss,SPECIAL>VARSELECT|New variable for tracing
+TEXTMENU,"Exit - return to analysis",5,75,0,0,L,EeXx,,ANALYZE
+TOOL,"GR1",60,50,40,50,,,WORKBENCH>STRIP GRAPH
+TOOL,"COMM4",0,80,58,20,,,CUSTOM>COMM4
+SETWB,"",0,0,0,0,,,,USE
+!
+:SCREEN DIFF
+SCREENFONT,Times New Roman|12||0-0-0|-1--1--1
+PIXELPOS,0
+TEXTONLY,"Constant and table differences between first two loaded scenarios",0,2,100,0,C32
+TOOL,"D1",5,10,90,80,,,WORKBENCH>RUNS COMPARE
+TEXTONLY,"Press P to print - any other key to continue",0,95,100,0,C
+TEXTMENU,"",0,0,0,0,L,Pp,PRINT>D1
+ANYKEY,"",0,0,0,0,0,,,ANALYZE
+!
+:SCREEN OPTIMIZE
+SCREENFONT,Times New Roman|12||0-0-0|-1--1--1
+PIXELPOS,0
+COMMAND,"",0,0,0,0,,,SIMULATE>READRUNCHG|BASE
+COMMAND,"",0,0,0,0,,,SIMULATE>RUNNAME|OPTIMAL
+TEXTONLY,"Optimization using Ventana Project",0,5,100,0,C32
+TEXTONLY,"Payoff definition - Used to determine what is good",2,18,0,0,L
+TEXTONLY,"Wage rate ($/month/person) including overhead:",5,24,54,0,R
+MODVAR,"WAGE RATE|Enter the base wage rate $/month/person",60,23,15,0,L
+TEXTONLY,"Penalty for project over schedules ($/month):",5,34,54,0,R
+MODVAR,"OVERRUN CHARGE RATE|Enter the penalty for being late in $/month",60,33,15,0,L
+TEXTMENU,"O - Optimize Performance",5,45,0,0,L,Oo,,OPTIMIZING
+TEXTMENU,"Exit back to main menu",5,55,0,0,L,EeXx,CANCEL,MAIN
+PROMPT,"",0,65,0,0,L  3
+TOOL,"SP1",0,70,100,30,,,CUSTOM>COMM7
+!
+:SCREEN OPTIMIZING
+SCREENFONT,Times New Roman|12||0-0-0|-1--1--1
+PIXELPOS,0
+TEXTONLY,"Optimization in progress - please stand by",0,25,100,0,C32
+COMMAND,"",0,0,0,0,,,SIMULATE>PAYOFF|mproject.vpd
+COMMAND,"",0,0,0,0,,,SIMULATE>OPTPARM|mproject.voc
+TOOL,"SP1",0,50,100,50,,,ERROR>COMM7
+COMMAND,"",0,0,0,0,,,MENU>RUN_OPTIMIZE|O
+TEXTONLY,"Press any key to return to main menu",0,30,100,0,C
+ANYKEY,"",0,0,0,0,0,,,MAIN
+!
+!
+!
+!

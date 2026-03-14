@@ -1,0 +1,386 @@
+{UTF-8}
+Game Interval=
+	0.25
+	~	Year
+	~		~	:SUPPLEMENTARY 
+	|
+
+advertising effectiveness=
+	0.1
+	~	Widget/$
+	~		|
+
+advertising spending= GAME (
+	c advertising spending)
+	~	$/Year
+	~		|
+
+c advertising spending=
+	2e+07
+	~	$/Year
+	~		|
+
+customer sales effectiveness=
+	3
+	~	Widget/Person/Year
+	~		|
+
+Customers= INTEG (
+	new customers - leaving customers,
+		Seed Customers)
+	~	Person
+	~		|
+
+fraction would be with real prospects=
+	Potential Customers/Market Size
+	~	Dmnl
+	~		|
+
+leaving customers=
+	Customers/obsolescence time
+	~	Person
+	~		|
+
+Market Size=
+	1e+08
+	~	Person
+	~		|
+
+new customers=
+	sales/sales size
+	~	Person/Year
+	~		|
+
+obsolescence time=
+	2
+	~	Year
+	~		|
+
+Potential Customers= INTEG (
+	-new customers + leaving customers,
+		Market Size - Seed Customers)
+	~	Person
+	~		|
+
+sales=
+	(would be word of mouth sales + would be advertising sales) * fraction would be with real prospects
+	~	Widget/Year
+	~		|
+
+sales size=
+	1
+	~	Widget/Person
+	~		|
+
+Seed Customers=
+	10000
+	~	Person
+	~		|
+
+would be advertising sales=
+	advertising spending * advertising effectiveness
+	~	Widget/Year
+	~		|
+
+********************************************************
+	.Control
+********************************************************~
+		Simulation Control Parameters
+	|
+
+would be word of mouth sales=
+	Customers * customer sales effectiveness
+	~	Widget/Year
+	~		|
+
+FINAL TIME  = 5
+	~	Year
+	~	The final time for the simulation.
+	|
+
+INITIAL TIME  = 0
+	~	Year
+	~	The initial time for the simulation.
+	|
+
+SAVEPER  = 
+        TIME STEP 
+	~	Year
+	~	The frequency with which output is stored.
+	|
+
+TIME STEP  = 0.0625
+	~	Year
+	~	The time step for the simulation.
+	|
+
+\\\---/// Sketch information - do not modify anything except names
+V300  Do not put anything below this section - it will be ignored
+*Intro
+$192-192-192,0,Arial|12||0-0-0|0-0-0|0-0-255|-1--1--1|-1--1--1|96,96,5,0
+12,1,0,1250,589,231,29,0,4,0,26,-1,0,0,0,0-0-0,0-0-0,|36|B|0-0-255,0,0,0,0,0,0
+Vensim Model Reader
+12,2,0,1250,465,79,19,0,4,0,10,-1,0,0,0,0-0-0,0-0-0,|24||0-0-128,0,0,0,0,0,0
+Welcome to
+12,3,0,1250,523,11,11,0,4,0,0,-1,0,0,0,0,0,0,0,0,0
+the
+12,4,0,1250,687,219,40,3,4,0,4,-1,2,2,0,0-0-0,192-192-192,|||0-0-0,0,0,0,0,0,0
+Click here to for a quick tour of the Vensim Model Reader
+\\\---/// Sketch information - do not modify anything except names
+V300  Do not put anything below this section - it will be ignored
+*Overview
+$192-192-192,0,Arial|12||0-0-0|0-0-0|0-0-255|-1--1--1|-1--1--1|96,96,5,0
+12,1,0,1261,527,221,17,8,4,0,0,-1,0,0,0,0,0,0,0,0,0
+The Vensim Model Reader is a freely distributable program that allows Vensim users to publish their models.
+12,2,0,1266,611,220,23,8,4,0,0,-1,0,0,0,0,0,0,0,0,0
+With it you can open, explore and simulate models that have been developed by others.
+12,3,0,1248,680,161,11,0,4,0,0,-1,0,0,0,0,0,0,0,0,0
+Click on one of the options below to find out how to:
+12,4,0,1092,722,45,11,0,4,0,18,-1,0,6,0,0-0-0,0-0-0,||U|0-0-255,0,0,0,0,0,0
+Open a model
+12,5,0,1092,762,55,11,0,4,0,18,-1,0,4,0,0-0-0,0-0-0,||U|0-0-255,0,0,0,0,0,0
+Simulate a model
+12,6,0,1092,804,79,11,0,4,0,18,-1,0,5,0,0-0-0,0-0-0,||U|0-0-255,0,0,0,0,0,0
+Run a game with a model
+12,7,0,1380,762,48,11,0,4,0,18,-1,0,8,0,0-0-0,0-0-0,||U|0-0-255,0,0,0,0,0,0
+Print and Copy
+12,8,0,1380,722,45,11,8,4,0,18,-1,0,7,0,0-0-0,0-0-0,||U|0-0-255,0,0,0,0,0,0
+Make a graph
+12,9,0,1257,396,127,39,0,4,0,10,-1,0,0,0,0-0-0,0-0-0,|48||255-0-0,0,0,0,0,0,0
+Overview
+12,10,0,1380,804,87,11,0,4,0,18,-1,0,9,0,0-0-0,0-0-0,||U|0-0-255,0,0,0,0,0,0
+Get more info about Vensim
+\\\---/// Sketch information - do not modify anything except names
+V300  Do not put anything below this section - it will be ignored
+*Structure
+$192-192-192,0,Arial|12||0-0-0|0-0-0|0-0-255|-1--1--1|-1--1--1|96,96,5,0
+10,1,Customers,1371,510,40,20,3,3,0,0,0,0,0,0,0,0,0,0,0,0
+1,2,4,1,4,0,0,22,0,0,0,-1--1--1,,1|(1239,508)|
+1,3,4,16,100,0,0,22,0,0,0,-1--1--1,,1|(1057,508)|
+11,4,0,1140,508,7,8,34,3,0,0,1,0,0,0,0,0,0,0,0,0
+10,5,new customers,1140,546,75,30,32,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,6,would be word of mouth sales,1338,584,75,30,0,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,7,customer sales effectiveness,1670,575,75,30,0,3,0,0,0,0,0,0,0,0,0,0,0,0
+1,8,1,6,1,0,0,0,0,64,0,-1--1--1,,1|(1348,551)|
+1,9,7,6,1,0,0,0,0,64,0,-1--1--1,,1|(1464,629)|
+10,10,sales,1085,668,75,30,0,3,0,0,0,0,0,0,0,0,0,0,0,0
+1,11,6,10,1,0,0,0,0,64,0,-1--1--1,,1|(1230,653)|
+10,12,sales size,1156,581,75,30,0,3,0,0,0,0,0,0,0,0,0,0,0,0
+1,13,10,5,1,0,0,0,0,64,0,-1--1--1,,1|(1074,587)|
+1,14,12,5,1,0,0,0,0,64,0,-1--1--1,,1|(1141,575)|
+10,15,Seed Customers,988,388,75,30,0,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,16,Potential Customers,942,507,40,20,3,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,17,Market Size,784,579,75,30,0,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,18,fraction would be with real prospects,888,710,75,30,0,3,0,0,0,0,0,0,0,0,0,0,0,0
+1,19,16,18,1,0,0,0,0,64,0,-1--1--1,,1|(983,604)|
+1,20,17,18,1,0,0,0,0,64,0,-1--1--1,,1|(894,651)|
+1,21,18,10,1,0,0,0,0,64,0,-1--1--1,,1|(1054,663)|
+10,22,would be advertising sales,1197,735,75,30,0,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,23,advertising spending,1368,674,75,30,0,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,24,advertising effectiveness,1230,833,75,30,0,3,0,0,0,0,0,0,0,0,0,0,0,0
+1,25,23,22,0,0,0,0,0,64,0,-1--1--1,,1|(0,0)|
+1,26,24,22,1,0,0,0,0,64,0,-1--1--1,,1|(1246,774)|
+1,27,22,10,1,0,0,0,0,64,0,-1--1--1,,1|(1130,706)|
+1,28,15,1,1,0,0,0,0,0,1,-1--1--1,,1|(1304,453)|
+1,29,17,16,1,0,0,0,0,0,1,-1--1--1,,1|(846,522)|
+1,30,15,16,1,0,0,0,0,0,1,-1--1--1,,1|(902,434)|
+1,31,33,16,4,0,0,22,0,0,0,-1--1--1,,4|(765,343)|(765,351)|(765,505)|(833,505)|
+1,32,33,1,100,0,0,22,0,0,0,-1--1--1,,4|(1568,343)|(1568,351)|(1568,508)|(1489,508)|
+11,33,0,1188,343,7,8,34,3,0,0,1,0,0,0,0,0,0,0,0,0
+10,34,leaving customers,1188,381,75,30,32,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,35,obsolescence time,1431,235,75,30,0,3,0,0,0,0,0,0,0,0,0,0,0,0
+1,36,1,34,1,0,0,0,0,64,0,-1--1--1,,1|(1310,385)|
+1,37,35,34,0,0,0,0,0,64,0,-1--1--1,,1|(0,0)|
+10,38,c advertising spending,1590,715,75,30,0,3,0,0,0,0,0,0,0,0,0,0,0,0
+1,39,38,23,1,0,0,0,0,64,0,-1--1--1,,1|(1500,658)|
+10,40,Game Interval,955,809,75,30,0,3,0,0,0,0,0,0,0,0,0,0,0,0
+12,41,0,1062,928,61,11,0,4,0,18,-1,0,2,0,0-0-0,0-0-0,||U|0-0-255,0,0,0,0,0,0
+Back to Overview
+12,42,0,890,240,128,11,0,4,0,2,-1,0,0,0,0-0-0,0-0-0,|||255-0-0,0,0,0,0,0,0
+This is what a model usually looks like
+12,43,0,1267,935,57,11,0,4,0,18,-1,0,4,0,0-0-0,0-0-0,||U|0-0-255,0,0,0,0,0,0
+How to Simulate
+\\\---/// Sketch information - do not modify anything except names
+V300  Do not put anything below this section - it will be ignored
+*Simulate
+$192-192-192,0,Arial|12||0-0-0|0-0-0|0-0-255|-1--1--1|-1--1--1|96,96,5,0
+12,1,0,1317,548,310,159,3,60,0,0,1,0,0,0,0,0,0,0,0,0
+WIPPER
+12,2,0,800,425,79,21,3,60,0,0,0,0,0,0,0,0,0,0,0,0
+c advertising spending,0,2e+008,500000
+12,3,0,800,398,100,11,0,4,0,0,-1,0,0,0,0,0,0,0,0,0
+Advertising Spending ($/year)
+12,4,0,800,533,79,21,3,60,0,0,0,0,0,0,0,0,0,0,0,0
+obsolescence time,0.5,10,0.1
+12,5,0,801,511,81,11,0,4,0,0,-1,0,0,0,0,0,0,0,0,0
+Product Lifetime (years)
+10,6,customer sales effectiveness,790,630,75,30,8,2,0,1,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,7,Market Size,800,714,75,30,8,2,0,1,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+12,8,0,899,320,212,11,0,4,0,2,-1,0,0,0,-1--1--1,0-0-0,|||255-0-0,0,0,0,0,0,0
+1.  To simulate a model first click on the "SyntheSim Icon" in the toolbar
+12,9,0,574,547,40,116,8,4,0,2,-1,0,0,0,0-0-0,0-0-0,|||255-0-0,0,0,0,0,0,0
+2. Then make changes to model assumptions by dragging sliders or clicking on highlighted names
+12,10,0,1030,839,339,11,0,4,0,2,-1,0,0,0,0-0-0,0-0-0,|||255-0-0,0,0,0,0,0,0
+3.  Then click on the running person to the right of the name - you can name your run whatever you want
+12,11,0,939,916,59,11,8,4,0,18,-1,0,2,0,0-0-0,0-0-0,||U|0-128-255,0,0,0,0,0,0
+Back to Overview
+12,12,0,1080,910,15,17,8,4,0,26,-1,0,0,0,0-0-0,0-0-0,|22|B|255-0-0,0,0,0,0,0,0
+or
+12,13,0,1222,915,43,11,8,4,0,18,-1,0,5,0,0-0-0,0-0-0,||U|0-128-255,0,0,0,0,0,0
+Start Gaming
+\\\---/// Sketch information - do not modify anything except names
+V300  Do not put anything below this section - it will be ignored
+*Game
+$192-192-192,0,Arial|12||0-0-0|0-0-0|0-0-255|-1--1--1|-1--1--1|96,96,5,0
+12,1,0,1216,650,293,191,3,60,0,0,1,0,0,0,0,0,0,0,0,0
+WIPPER
+12,2,0,708,488,107,19,3,60,0,0,0,0,0,0,0,0,0,0,0,0
+advertising spending,0,2e+008,500000
+12,3,0,708,437,92,11,0,4,0,0,-1,0,0,0,0,0,0,0,0,0
+Advertising Spending ($/year)
+12,4,0,917,389,187,11,0,4,0,2,-1,0,0,0,-1--1--1,0-0-0,|||255-0-0,0,0,0,0,0,0
+1.  To start gaming click on the game icon (like a chess board)
+12,5,0,701,575,112,28,8,4,0,2,-1,0,0,0,0-0-0,0-0-0,|||255-0-0,0,0,0,0,0,0
+2.  When you do that some variables may highlight or there may be sliders like the one above
+12,6,0,701,684,107,36,8,4,0,2,-1,0,0,0,0-0-0,0-0-0,|||255-0-0,0,0,0,0,0,0
+3.  Drag the slider or click on a highlighted variable and then click on the forward arrow button in the tool bar
+12,7,0,696,791,107,33,8,4,0,2,-1,0,0,0,0-0-0,0-0-0,|||255-0-0,0,0,0,0,0,0
+4.  You can make more changes and continue to move forward.  You can also look at graphs and tables anytime
+12,8,0,698,872,59,11,8,4,0,18,-1,0,2,0,0-0-0,0-0-0,||U|0-128-255,0,0,0,0,0,0
+Back to Overview
+\\\---/// Sketch information - do not modify anything except names
+V300  Do not put anything below this section - it will be ignored
+*Opening a Model
+$192-192-192,0,Arial|12||0-0-0|0-0-0|0-0-255|-1--1--1|-1--1--1|96,96,5,0
+12,1,0,1222,459,99,19,0,4,0,10,-1,0,0,0,0-0-0,0-0-0,|22||255-0-0,0,0,0,0,0,0
+Opening a model
+12,2,0,1250,511,245,23,8,4,0,0,-1,0,0,0,0,0,0,0,0,0
+To open a model just use the File>Open Model command or click on the opening folder icon in the toolbar.
+12,3,0,1246,551,243,21,8,4,0,0,-1,0,0,0,0,0,0,0,0,0
+A file selection dialog will appear.  Select the model you want to work with and click on Open.
+12,4,0,1243,591,228,23,8,4,0,0,-1,0,0,0,0,0,0,0,0,0
+Whatever model you have open will close - you can only have one model open at a time in the model reader.
+12,5,0,1250,639,292,24,8,4,0,0,-1,0,0,0,0,0,0,0,0,0
+The Model Reader will only open .vmf files.  If someone has given you a file with extension .mdl it won't work.  You will need to ask them to save the model with extension .vmf.
+12,6,0,1123,763,76,11,0,4,0,18,-1,0,3,0,0-0-0,0-0-0,||U|0-0-255,0,0,0,0,0,0
+What a model looks like
+12,7,0,1368,762,59,11,8,4,0,18,-1,0,2,0,0-0-0,0-0-0,||U|0-0-255,0,0,0,0,0,0
+Back to Overview
+12,8,0,1246,685,289,19,8,4,0,0,-1,0,0,0,0,0,0,0,0,0
+Use the page up and page down keys to move through a model or, of the model has navigation buttons like this one does use those instead.
+\\\---/// Sketch information - do not modify anything except names
+V300  Do not put anything below this section - it will be ignored
+*Making a Graph
+$192-192-192,0,Arial|12||0-0-0|0-0-0|0-0-255|-1--1--1|-1--1--1|96,96,5,0
+12,1,0,1198,390,160,29,0,4,0,10,-1,0,0,0,0-0-0,0-0-0,|36||255-0-0,0,0,0,0,0,0
+Making a Graph
+12,2,0,1222,454,231,11,0,4,0,0,-1,0,0,0,0,0,0,0,0,0
+Once you have made a simulation you can make graph for any variable
+10,3,Customers,1240,510,35,16,3,3,0,8,-1,0,0,0,0-0-0,0-0-0,|10||128-128-128,0,0,0,0,0,0
+10,4,Seed Customers,1282,568,75,30,8,2,0,11,-1,0,0,0,128-128-128,0-0-0,|10||128-128-128,0,0,0,0,0,0
+1,5,4,3,0,0,0,0,0,0,1,-1--1--1,,1|(0,0)|
+12,6,48,1006,510,10,8,0,3,0,8,-1,0,0,0,0-0-0,0-0-0,|10||0-0-0,0,0,0,0,0,0
+1,7,12,3,4,0,0,22,0,0,0,-1--1--1,,1|(1165,510)|
+1,8,12,6,100,0,0,22,0,0,0,-1--1--1,,1|(1063,510)|
+12,9,48,1466,510,10,8,0,3,0,8,-1,0,0,0,0-0-0,0-0-0,|10||0-0-0,0,0,0,0,0,0
+1,10,14,9,4,0,0,22,0,0,0,-1--1--1,,1|(1428,510)|
+1,11,14,3,100,0,0,22,0,0,0,-1--1--1,,1|(1330,510)|
+11,12,0,1118,510,7,8,34,3,0,0,1,0,0,0,0,0,0,0,0,0
+10,13,new customers,1118,548,75,30,40,2,0,11,-1,0,0,0,128-128-128,0-0-0,|10||128-128-128,0,0,0,0,0,0
+11,14,0,1393,510,7,8,34,3,0,0,1,0,0,0,0,0,0,0,0,0
+10,15,leaving customers,1393,548,75,30,40,2,0,11,-1,0,0,0,128-128-128,0-0-0,|10||128-128-128,0,0,0,0,0,0
+12,16,0,1246,598,272,11,0,4,0,0,-1,0,0,0,0,0,0,0,0,0
+Double click on a variable name above and then click on a graph like icon at the left
+12,17,0,1219,658,236,21,8,132,0,0,-1,0,0,0,0,0,0,0,0,0
+You can also select variable names by clicking on the Control Panel icon at the top and clicking on the Variable tab.
+12,18,0,1250,730,284,24,8,132,0,0,-1,0,0,0,0,0,0,0,0,0
+If you hold down the shift key and drag across a graph - the next time you make a graph it will be for a smaller time range.  Use the Time Axis button of the Control Panel to reset.
+12,19,0,1238,801,59,11,8,4,0,18,-1,0,2,0,0-0-0,0-0-0,||U|0-128-255,0,0,0,0,0,0
+Back to Overview
+\\\---/// Sketch information - do not modify anything except names
+V300  Do not put anything below this section - it will be ignored
+*Printing and Copying
+$192-192-192,0,Arial|12||0-0-0|0-0-0|0-0-255|-1--1--1|-1--1--1|96,96,5,0
+12,1,0,1252,409,203,29,0,4,0,10,-1,0,0,0,0-0-0,0-0-0,|36||255-0-0,0,0,0,0,0,0
+Printing and Copying
+12,2,0,1264,494,208,25,8,4,0,0,-1,0,0,0,0,0,0,0,0,0
+To print what is on a view just delete any graphs, or push them to the background by clickin on the sketch, and then use File>Print
+12,3,0,1265,574,231,23,8,4,0,0,-1,0,0,0,0,0,0,0,0,0
+To copy a view to the clipboard use Edit>Select all then Edit>Copy.  You can also select by dragging across an area
+12,4,0,1246,652,243,31,8,4,0,0,-1,0,0,0,0,0,0,0,0,0
+To print or place a graph in the clipboard make the graph and then use File>Print or Edito>Copy (there are also icons on the graphs that do this).
+12,5,0,1264,724,212,19,8,4,0,0,-1,0,0,0,0,0,0,0,0,0
+To show graphs you have placed in the background click on the Graph icon at the top (third from right).
+12,6,0,1289,781,59,11,8,4,0,18,-1,0,2,0,0-0-0,0-0-0,||U|0-128-255,0,0,0,0,0,0
+Back to Overview
+\\\---/// Sketch information - do not modify anything except names
+V300  Do not put anything below this section - it will be ignored
+*Vensim Info
+$192-192-192,0,Arial|12||0-0-0|0-0-0|0-0-255|-1--1--1|-1--1--1|96,96,5,0
+12,1,0,1224,351,121,29,0,4,0,10,-1,0,0,0,0-0-0,0-0-0,|36||255-0-0,0,0,0,0,0,0
+Vensim Info
+12,2,0,1256,429,219,17,8,132,0,0,-1,0,0,0,0,0,0,0,0,0
+Vensim is available in a variety of configurations to meet your budget and performance needs.  For more information  contact us:
+12,3,0,1238,488,73,11,0,4,0,0,-1,0,0,0,0,0,0,0,0,0
+Ventana Systems, Inc.
+12,4,0,1238,518,71,11,0,4,0,0,-1,0,0,0,0,0,0,0,0,0
+60 Jacob Gates Road
+12,5,0,1238,548,68,11,0,4,0,0,-1,0,0,0,0,0,0,0,0,0
+Harvard MA 01451 
+12,6,0,1238,578,19,11,0,4,0,0,-1,0,0,0,0,0,0,0,0,0
+USA
+12,7,0,1238,608,121,11,0,4,0,0,-1,0,0,0,0,0,0,0,0,0
+Sales 800 836 7461 (800 VENSIM1)
+12,8,0,1238,638,89,11,0,4,0,0,-1,0,0,0,0,0,0,0,0,0
+International 508 651 0432
+12,9,0,1238,668,63,11,0,4,0,0,-1,0,0,0,0,0,0,0,0,0
+Fax: 508 650 5422
+12,10,0,1238,698,96,11,0,4,0,0,-1,0,0,0,0,0,0,0,0,0
+email:  vensim@vensim.com
+12,11,0,1238,719,80,11,0,4,0,0,-1,0,0,0,0,0,0,0,0,0
+http://www.vensim.com
+12,12,0,1250,789,241,21,8,4,0,0,-1,0,0,0,0,0,0,0,0,0
+For technical support send email to reader@vensim.com.  We do not provide phone support for the Vensim Model Reader.
+12,13,0,1254,839,59,11,8,4,0,18,-1,0,2,0,0-0-0,0-0-0,||U|0-0-255,0,0,0,0,0,0
+Back to Overview
+///---\\\
+:GRAPH WIPPER
+:TITLE New customers and leaving customer
+:WIP
+:SCALE
+:VAR new customers
+:DATASET *
+:VAR leaving customers
+:DATASET *
+:L<%^E!@
+1:test.vdfx
+4:Time
+5:customer sales effectiveness
+9:test
+19:5,8
+24:0
+25:5
+26:5
+15:0,0,0,0,0,0
+27:0,
+34:0,
+42:0
+72:0
+73:0
+95:0
+96:1
+97:0
+77:0
+78:0
+102:1
+93:0
+94:0
+92:0
+91:0
+90:0
+87:0
+75:
+43:
+103:8,8,8,3,8
+105:0,0,0,0,0,0,0,0,0,0
+104:Courier|12||0-0-0|0-0-0|-1--1--1|0-0-255|192-192-192|-1--1--1

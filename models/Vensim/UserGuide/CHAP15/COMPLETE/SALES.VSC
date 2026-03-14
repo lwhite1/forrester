@@ -1,0 +1,4 @@
+200,M,1234,,0
+sales force productivity=RANDOM_UNIFORM(200,220)
+sales force adjustment time=RANDOM_UNIFORM(3,12)
+sales person salary=RANDOM_NORMAL(1800,2200,2000,100)

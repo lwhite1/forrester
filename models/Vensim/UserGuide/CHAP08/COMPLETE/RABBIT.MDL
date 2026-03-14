@@ -1,0 +1,121 @@
+{UTF-8}
+effect of rabbit crowding on deaths= WITH LOOKUP (
+	Rabbit Population / carrying capacity,
+		([(0,0)-(4,2)],(0,0.9),(1,1),(2,1.2),(3,1.5),(4,2) ))
+	~	Dmnl
+	~		|
+
+deaths=
+	(Rabbit Population / average lifetime ) * effect of rabbit crowding on deaths
+	~	rabbit/Year
+	~		|
+
+average lifetime=
+	8
+	~	Year
+	~		|
+
+birth rate=
+	0.23
+	~	fraction/Year
+	~		|
+
+births=
+	Rabbit Population * birth rate
+	~	rabbit/Year
+	~		|
+
+initial population=
+	1000
+	~	rabbit
+	~		|
+
+carrying capacity=
+	1000
+	~	rabbit
+	~		|
+
+Rabbit Population= INTEG (
+	births - deaths,
+		initial population)
+	~	rabbit
+	~		|
+
+********************************************************
+	.Control
+********************************************************~
+		Simulation Control Parameters
+	|
+
+FINAL TIME  = 30
+	~	Year
+	~	The final time for the simulation.
+	|
+
+INITIAL TIME  = 0
+	~	Year
+	~	The initial time for the simulation.
+	|
+
+SAVEPER  = 
+        TIME STEP
+	~	Year
+	~	The frequency with which output is stored.
+	|
+
+TIME STEP  = 0.125
+	~	Year
+	~	The time step for the simulation.
+	|
+
+\\\---/// Sketch information - do not modify anything except names
+V300  Do not put anything below this section - it will be ignored
+*View 1
+$192-192-192,0,Arial|14||0-0-0|92-92-92|160-160-160|-1--1--1|-1--1--1|96,96,100,0
+10,1,Rabbit Population,249,87,55,32,3,131,0,16,0,0,0,0,0-0-0,0-0-0,|14|B|0-0-0
+12,2,48,44,79,13,11,0,3,0,0,-1,0,0,0
+1,3,5,1,4,0,0,22,0,0,0,-1--1--1,,1|(160,81)|
+1,4,5,2,100,0,0,22,0,0,0,-1--1--1,,1|(85,81)|
+11,5,48,120,81,7,8,34,3,0,0,1,0,0,0
+10,6,births,120,101,25,12,32,3,0,0,-1,0,0,0
+12,7,48,451,80,13,11,0,3,0,0,-1,0,0,0
+1,8,10,7,4,0,0,22,0,0,0,-1--1--1,,1|(401,81)|
+1,9,10,1,100,0,0,22,0,0,0,-1--1--1,,1|(328,81)|
+11,10,48,360,81,7,8,34,3,0,0,1,0,0,0
+10,11,deaths,360,101,31,12,32,3,0,0,-1,0,0,0
+10,12,birth rate,60,31,40,12,0,3,0,2,0,0,0,0,0-0-0,0-0-0,|14||64-128-128
+10,13,initial population,240,20,69,12,0,3,0,2,0,0,0,0,0-0-0,0-0-0,|14||64-128-128
+10,14,average lifetime,411,31,69,12,0,3,0,2,0,0,0,0,0-0-0,0-0-0,|14||64-128-128
+10,15,carrying capacity,135,253,73,12,0,3,0,2,0,0,0,0,0-0-0,0-0-0,|14||64-128-128
+1,16,12,5,0,0,0,0,0,64,0,-1--1--1,,1|(87,53)|
+1,17,14,10,0,0,0,0,0,64,0,-1--1--1,,1|(388,52)|
+1,18,13,1,0,0,0,0,0,64,1,-1--1--1,,1|(241,33)|
+1,19,1,5,1,0,0,0,0,64,0,-1--1--1,,1|(164,43)|
+1,20,1,10,1,0,0,0,0,64,0,-1--1--1,,1|(308,40)|
+10,21,effect of rabbit crowding on deaths,256,196,145,12,0,3,0,0,0,0,0,0
+1,22,1,21,1,0,0,0,0,64,0,-1--1--1,,1|(205,139)|
+1,23,15,21,1,0,0,0,0,64,0,-1--1--1,,1|(203,236)|
+1,24,21,11,1,0,0,0,0,64,0,-1--1--1,,1|(341,152)|
+12,25,0,249,477,200,200,3,44,0,0,2,0,0,0
+Rabbit Population,graph
+///---\\\
+:L<%^E!@
+1:Current.vdf
+9:Current
+22:$,Dollar,Dollars,$s
+22:Hour,Hours
+22:Month,Months
+22:Person,People,Persons
+22:Unit,Units
+22:Week,Weeks
+22:Year,Years
+22:Day,Days
+15:0,0,0,0,0,0
+19:100,0
+27:0,
+34:0,
+4:Time
+5:birth rate
+24:0
+25:30
+26:30

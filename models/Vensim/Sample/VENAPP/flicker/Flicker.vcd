@@ -1,0 +1,17 @@
+!
+:SCREEN SCREEN1
+SCREENFONT,Times New Roman|10||0-0-0|-1--1--1
+COMMAND,,,,,,,,"SPECIAL>LOADMODEL|flicker.mdl"
+COMMAND,,,,,,,,"SPECIAL>READCUSTOM|flicker.vgd"
+COMMAND,,,,,,,,"SPECIAL>LOADTOOLSET|flicker.vts"
+BUTTON,"Start Flickering",37,21,0,0,,,,FLICK
+BUTTON,"Exit",40,39,0,0,,,MENU>EXIT|,
+!
+:SCREEN FLICK
+SCREENFONT,Times New Roman|10||0-0-0|-1--1--1
+SHOWVAR,"Time",43,20,0,0,,,,
+WIPTOOL,"GR",35,30,21,13,,,"CUSTOM>WIP1",
+COMMAND,"",,,,,,,"MENU>RUN|O",
+BUTTON,"Back to main",42,52,,,,,"",SCREEN1
+TEXTONLY,"set the x position to 110 percent to make this graph invisible",30,43,0,0,,,,
+!

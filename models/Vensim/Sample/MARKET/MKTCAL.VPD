@@ -1,0 +1,8 @@
+*Calibration
+:COMMENT
+:COMMENT  This file is used with market.vmf as described in chapter 19.
+:COMMENT  It sets up the calibration payoff function.
+:COMMENT
+cash_revenue / 0.5E-5
+fraction_custs_buying / 1.0
+

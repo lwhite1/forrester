@@ -1,0 +1,755 @@
+{UTF-8}
+{UTF-8}
+
+
+
+Cumulative Complex Progress= INTEG (
+	real progress rate,
+		0)
+	~	TASKS
+	~	CUMULATIVE COMPLEX PROGRESS
+	|
+
+real progress rate=
+	apparent progress rate*fraction satisfactory
+	~	TASKS/MONTH
+	~	REAL PROGRESS RATE
+	|
+
+apparent progress rate=
+	workforce*gross productivity*effect of schedule pressure on gross productivity
+	~	TASKS/MONTH
+	~	APPARENT PROGRESS RATE
+	|
+
+gross productivity=
+	normal gross productivity*effect of experience on gross productivity
+	~	TASKS/WORKER/MONTH
+	~	GROSS PRODUCTIVITY
+	|
+
+normal gross productivity=
+	1
+	~	TASKS/WORKER/MONTH
+	~	NORMAL GROSS PRODUCTIVITY
+	|
+
+fraction satisfactory=
+	normal fraction satisfactory*effect of experience on fraction satisfactory*effect of schedule pressure on fraction satisfactory
+	~	DIMENSIONLESS
+	~	FRACTION SATISFACTORY
+	|
+
+normal fraction satisfactory=
+	normal fraction satisfactory lookup(fraction completed)
+	~	DIMENSIONLESS
+	~	NORMAL FRACTION SATISFACTORY
+	|
+
+normal fraction satisfactory lookup(
+	0,0.2,0.4,0.6,0.8,1,
+	0.5,0.55,0.63,0.75,0.87,1)
+	~	DIMENSIONLESS
+	~		|
+
+effect of experience on gross productivity=
+	effect of experience on gross productivity lookup(fraction of workforce experienced)
+	~	DIMENSIONLESS
+	~	EFFECT OF EXPERIENCE ON GROSS PRODUCTIVITY
+	|
+
+effect of experience on gross productivity lookup(
+	0,0.2,0.4,0.6,0.8,1,
+	0.5,0.55,0.65,0.75,0.87,1)
+	~	DIMENSIONLESS
+	~		|
+
+fraction of workforce experienced=
+	Experienced Workforce/workforce
+	~	DIMENSIONLESS
+	~	FRACTION OF WORKFORCE EXPERIENCED
+	|
+
+effect of experience on fraction satisfactory=
+	fraction of workforce experienced lookup(fraction of workforce experienced)
+	~	DIMENSIONLESS
+	~	EFFECT OF EXPERIENCE ON FRACTION SATISFACTORY
+	|
+
+fraction of workforce experienced lookup(
+	0,0.2,0.4,0.6,0.8,1,
+	0.5,0.6,0.7,0.8,0.9,1)
+	~	DIMENSIONLESS
+	~		|
+
+effect of schedule pressure on fraction satisfactory=
+	effect of schedule pressure on fraction satisfactory lookup(indicated completion date
+/Scheduled Completion Date
+)
+	~	DIMENSIONLESS
+	~	EFFECT OF SCHEDULE PRESSURE ON FRACTION SATISFACTORY
+	|
+
+effect of schedule pressure on fraction satisfactory lookup(
+	0.9,0.95,1,1.05,1.1,1.15,1.2,
+	1.1,1.06,1,0.96,0.9,0.83,0.75)
+	~	DIMENSIONLESS
+	~		|
+
+effect of schedule pressure on gross productivity=
+	effect of schedule pressure on gross productivity lookup(indicated completion date/Scheduled Completion Date
+)
+	~	DIMENSIONLESS
+	~	EFFECT OF SCHEDULE PRESSURE ON GROSS PRODUCTIVITY
+	|
+
+effect of schedule pressure on gross productivity lookup(
+	0.9,0.95,1,1.05,1.1,1.15,1.2,
+	0.9,0.92,1,1.1,1.18,1.23,1.25)
+	~	DIMENSIONLESS
+	~		|
+
+generation of undiscovered rework=
+	apparent progress rate*(1-fraction satisfactory)
+	~	TASKS/MONTH
+	~	GENERATION OF UNDISCOVERED REWORK
+	|
+
+Undiscovered Rework= INTEG (
+	generation of undiscovered rework-detection of undiscovered rework,
+		0)
+	~	TASKS
+	~	UNDISCOVERED REWORK
+	|
+
+detection of undiscovered rework=
+	Undiscovered Rework/time to detect rework
+	~	TASKS/MONTH
+	~	DETECTION OF UNDICOVERED REWORK
+	|
+
+time to detect rework=
+	time to detect rework lookup(fraction perceived complete)
+	~	MONTHS
+	~	TIME TO DETECT REWORK
+	|
+
+time to detect rework lookup(
+	0,0.2,0.4,0.6,0.8,1,
+	12,12,12,10,5,0.5)
+	~	MONTH
+	~	TABLE FOR TIME TO DETECT REWORK
+	|
+
+cumulative perceived progress=
+	Cumulative Complex Progress+Undiscovered Rework
+	~	TASKS
+	~	CUMULATIVE PERCEIVED PROGRESS
+	|
+
+fraction perceived complete=
+	cumulative perceived progress/current project definition
+	~	DIMENSIONLESS
+	~	FRACTION PERCEIVED COMPLETE
+	|
+
+current project definition=
+	project definition lookup(fraction completed)
+	~	TASKS
+	~	CURRENT PROJECT DEFINITION
+	|
+
+project definition lookup(
+	0,0.2,0.4,0.6,0.8,1,
+	800,830,900,1000,1140,1200)
+	~	TASKS
+	~		|
+
+final project definition= INITIAL(
+	project definition lookup(1))
+	~	TASKS
+	~	FINAL PROJECT DEFINITION
+	|
+
+fraction completed=
+	Cumulative Complex Progress/final project definition
+	~	DIMENSIONLESS
+	~	FRACTION COMPLETED
+	|
+
+effort perceived remaining=
+	(current project definition-cumulative perceived progress)/Perceived Productivity
+	~	WORKER*MONTHS
+	~	EFFORT PERCEIVED REMAINING
+	|
+
+Perceived Productivity= INTEG (
+	(Indicated Productivity-Perceived Productivity)/time to perceive productivity,
+		Indicated Productivity)
+	~	TASKS/WORKER/MONTH
+	~	PERCEIVED PRODUCTIVITY
+	|
+
+time to perceive productivity=
+	6
+	~	MONTHS
+	~	TIME TO PERCEIVE PRODUCTIVITY
+	|
+
+Indicated Productivity= ACTIVE INITIAL (
+	weight to real productivity*real productivity+(1-weight to real productivity)*normal gross productivity
+,
+		normal gross productivity)
+	~	TASKS/WORKER/MONTH
+	~	
+		INDICATED PRODUCTIVITY
+	|
+
+weight to real productivity=
+	weight to perceived productivity lookup(fraction perceived complete)
+	~	DIMENSIONLESS
+	~	WEIGHT TO REAL PRODUCTIVITY
+	|
+
+weight to perceived productivity lookup(
+	0,0.2,0.4,0.6,0.8,1,
+	0,0.1,0.25,0.5,0.9,1)
+	~	DIMENSIONLESS
+	~		|
+
+real productivity=
+	normal gross productivity*fraction satisfactory
+	~	TASKS/WORKER/MONTH
+	~	REAL PRODUCTIVITY
+	|
+
+workforce=
+	Experienced Workforce+New Workforce
+	~	WORKERS
+	~	WORKFORCE
+	|
+
+Experienced Workforce= INTEG (
+	workforce assimilation rate,
+		initial experienced workforce)
+	~	WORKERS
+	~	EXPERIENCED WORKFORCE
+	|
+
+initial experienced workforce=
+	2
+	~	WORKERS
+	~	INITIAL EXPERIENCED WORKFORCE
+	|
+
+workforce assimilation rate=
+	New Workforce/assimilation time
+	~	WORKERS/MONTH
+	~	WORKFORCE ASSIMILATION RATE
+	|
+
+assimilation time=
+	6
+	~	MONTHS
+	~	ASSIMILATION TIME
+	|
+
+New Workforce= INTEG (
+	hiring rate,
+		initial new workforce)
+	~	WORKERS
+	~	NEW WORKFORCE
+	|
+
+initial new workforce=
+	1
+	~	WORKERS
+	~	INITIAL NEW WORKFORCE
+	|
+
+hiring rate=
+	((workforce sought-workforce)/workforce adjustment time)
+	~	WORKERS/MONTH
+	~	HIRING RATE
+	|
+
+workforce adjustment time=
+	3
+	~	MONTHS
+	~	WORKFORCE ADJUSTMENT TIME
+	|
+
+workforce sought=
+	willingness to change workforce*indicated workforce+(1-willingness to change workforce
+)*workforce
+	~	WORKERS
+	~	WORKFORCE SOUGHT
+	|
+
+willingness to change workforce=
+	willingness to change workforce lookup(time remaining)
+	~	DIMENSIONLESS
+	~	WILLINGNESS TO CHANGE WORKFORCE
+	|
+
+willingness to change workforce lookup(
+	0,3,6,9,12,15,18,21,
+	0,0,0,0.1,0.3,0.7,0.9,1)
+	~	DIMENSIONLESS
+	~		|
+
+indicated workforce=
+	effort perceived remaining/time remaining
+	~	WORKERS
+	~	INDICATED WORKFORCE
+	|
+
+time remaining=
+	Scheduled Completion Date-Time
+	~	MONTHS
+	~	TIME REMAINING
+	|
+
+Scheduled Completion Date= INTEG (
+	net additions to schedule,
+		initial scheduled completion date)
+	~	MONTH
+	~	SCHEDULED COMPLETION DATE
+	|
+
+initial scheduled completion date=
+	40
+	~	MONTH
+	~	INITIAL SCHEDULED COMPLETION DATE
+	|
+
+net additions to schedule=
+	(indicated completion date-Scheduled Completion Date)/schedule adjustment time
+	~	MONTHS/MONTH
+	~	NET ADDITIONS TO SCHEDULE
+	|
+
+schedule adjustment time=
+	6
+	~	MONTHS
+	~	SCHEDULE ADJUSTMENT TIME
+	|
+
+indicated completion date=
+	Time+time perceived required
+	~	MONTH
+	~	INDICATED COMPLETION DATE
+	|
+
+time perceived required=
+	effort perceived remaining/workforce sought
+	~	MONTHS
+	~	TIME PERCEIVED REQUIRED
+	|
+
+Cumulative Effort= INTEG (
+	workforce*effect of schedule pressure on gross productivity,
+		0)
+	~	WORKER*MONTH
+	~	CUMULATIVE EFFORT
+	|
+
+cost=
+	cost per worker month*Cumulative Effort
+	~	DOLLARS
+	~	COST
+	~	:SUPPLEMENTARY 
+	|
+
+cost per worker month=
+	3000
+	~	DOLLARS/(WORKER*MONTH)
+	~	COST PER WORKER MONTH
+	|
+
+TIME STEP  = 0.125
+	~	MONTH
+	~		|
+
+SAVEPER  = 0.125
+	~	MONTH
+	~		|
+
+FINAL TIME=IF THEN ELSE(fraction completed >= 1,MAX(10,Time),MAXLEN)
+	~	MONTH
+	~		|
+
+MAXLEN=100
+	~	MONTH
+	~		|
+
+INITIAL TIME  = 0
+	~	MONTH
+	~		|
+
+\\\---/// Sketch information - do not modify anything except names
+V300  Do not put anything below this section - it will be ignored
+*Title Page
+$192-192-192,0,|12||-1--1--1|0-0-0|0-0-0|-1--1--1|255-255-255|96,96,100,0
+12,1,0,296,337,155,20,0,4,0,26,-1,0,0,0,-1--1--1,0-0-0,|24|IU|0-0-255,0,0,0,0,0,0
+Simple Project Model
+12,2,0,547,388,409,12,0,4,0,16,0,0,0,0,-1--1--1,0-0-0,||I|0-0-0,0,0,0,0,0,0
+From Richardson and Pugh, "Introduction to Simulation Modeling with Dynamo" 1982 pp 305 - 309
+\\\---/// Sketch information - do not modify anything except names
+V300  Do not put anything below this section - it will be ignored
+*progress
+$192-192-192,0,Vensim Sans|14||0-0-0|92-92-92|160-160-160|-1--1--1|255-255-255|96,96,100,0
+10,1,Cumulative Complex Progress,370,49,63,36,3,3,0,16,0,1,0,0,0-0-0,0-0-0,||B|0-0-0,0,0,0,0,0,0
+10,2,apparent progress rate,101,231,75,30,0,3,0,16,-1,1,0,0,-1--1--1,-1--1--1,||B|0-0-0,0,0,0,0,0,0
+1,3,2,18,1,0,0,0,0,0,0,-1--1--1,,1|(135,147)|
+10,4,fraction satisfactory,454,157,75,30,0,3,0,16,-1,1,0,0,-1--1--1,-1--1--1,||B|0-0-0,0,0,0,0,0,0
+10,5,effect of schedule pressure on gross productivity,138,529,127,21,8,3,0,16,0,1,0,0,0-0-0,0-0-0,||B|0-0-0,0,0,0,0,0,0
+1,6,5,2,1,0,0,0,0,0,0,-1--1--1,,1|(83,409)|
+10,7,gross productivity,233,366,75,30,0,2,0,0,-1,1,0,0,0,0,0,0,0,0
+1,8,7,2,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+10,9,workforce,149,393,75,30,0,2,0,0,-1,1,0,0,0,0,0,0,0,0
+1,10,9,2,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+10,11,effect of experience on fraction satisfactory,385,231,100,23,8,3,0,0,0,1,0,0,0,0,0,0,0,0
+10,12,effect of schedule pressure on fraction satisfactory,710,351,135,24,8,3,0,0,0,1,0,0,0,0,0,0,0,0
+10,13,normal fraction satisfactory,702,214,75,30,0,3,0,0,-1,1,0,0,0,0,0,0,0,0
+12,14,48,82,53,10,8,0,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,15,17,1,4,0,0,22,0,0,0,-1--1--1,,1|(255,53)|
+1,16,17,14,100,0,0,22,0,0,0,-1--1--1,,1|(139,53)|
+11,17,0,195,53,8,11,34,3,0,0,1,0,0,0,0,0,0,0,0,0
+10,18,real progress rate,195,91,75,30,32,3,0,0,-1,1,0,0,0,0,0,0,0,0
+10,19,fraction of workforce experienced,481,362,101,21,8,2,0,1,0,1,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,20,19,11,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+10,21,fraction of workforce experienced lookup,335,314,99,21,8,3,0,2,0,1,0,0,0-0-0,0-0-0,|||64-128-128,0,0,0,0,0,0
+1,22,21,11,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+10,23,effect of schedule pressure on fraction satisfactory lookup,881,442,91,33,8,131,0,2,0,1,0,0,0-0-0,0-0-0,|||64-128-128,0,0,0,0,0,0
+1,24,23,12,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,25,34,12,1,0,0,0,0,0,0,-1--1--1,,1|(763,551)|
+10,26,Scheduled Completion Date,606,521,63,36,3,3,0,16,0,1,0,0,0-0-0,0-0-0,||B|0-0-0,0,0,0,0,0,0
+1,27,26,12,1,0,0,0,0,0,0,-1--1--1,,1|(675,457)|
+10,28,fraction completed,691,147,75,30,0,3,0,0,-1,1,0,0,0,0,0,0,0,0
+1,29,28,13,1,0,0,0,0,0,0,-1--1--1,,1|(697,165)|
+10,30,normal fraction satisfactory lookup,723,281,84,23,8,3,0,0,0,1,0,0,0,0,0,0,0,0
+1,31,30,13,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+10,32,initial scheduled completion date,550,426,71,21,8,3,0,2,0,1,0,0,0-0-0,0-0-0,|||64-128-128,0,0,0,0,0,0
+1,33,32,26,0,0,0,0,0,0,1,-1--1--1,,1|(0,0)|
+10,34,indicated completion date,527,705,75,30,0,3,0,0,-1,1,0,0,0,0,0,0,0,0
+1,35,34,60,1,0,0,0,0,0,0,-1--1--1,,1|(479,609)|
+10,36,schedule adjustment time,350,613,75,30,0,3,0,2,-1,1,0,0,-1--1--1,-1--1--1,|||64-128-128,0,0,0,0,0,0
+1,37,36,60,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,38,26,59,1,0,0,0,0,0,0,-1--1--1,,1|(478,478)|
+10,39,Time,633,662,75,30,0,2,0,2,-1,1,0,0,-1--1--1,-1--1--1,|||128-128-128,0,0,0,0,0,0
+1,40,39,34,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+10,41,time perceived required,1097,411,75,30,0,3,0,0,-1,1,0,0,0,0,0,0,0,0
+1,42,41,34,1,0,0,0,0,0,0,-1--1--1,,1|(823,661)|
+10,43,effect of schedule pressure on gross productivity lookup,122,658,77,39,8,3,0,2,0,1,0,0,0-0-0,0-0-0,|||64-128-128,0,0,0,0,0,0
+1,44,43,5,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,45,34,5,1,0,0,0,0,0,0,-1--1--1,,1|(178,581)|
+1,46,26,5,1,0,0,0,0,0,0,-1--1--1,,1|(339,442)|
+1,47,1,28,1,0,0,0,0,0,0,-1--1--1,,1|(525,85)|
+10,48,final project definition,957,277,75,30,0,3,0,0,-1,1,0,0,0,0,0,0,0,0
+1,49,48,28,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+10,50,project definition lookup,1002,207,75,30,0,3,0,2,-1,1,0,0,-1--1--1,-1--1--1,|||64-128-128,0,0,0,0,0,0
+1,51,50,48,0,0,0,0,0,0,1,-1--1--1,,1|(0,0)|
+10,52,cumulative perceived progress,703,49,75,30,0,3,0,16,-1,1,0,0,-1--1--1,-1--1--1,||B|0-0-0,0,0,0,0,0,0
+1,53,1,52,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+10,54,Undiscovered Rework,597,-26,67,35,3,2,0,1,0,1,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,55,54,52,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+12,56,48,306,518,10,8,0,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,57,59,26,4,0,0,22,0,0,0,-1--1--1,,1|(484,518)|
+1,58,59,56,68,0,0,22,32,0,0,-1--1--1,Vensim Sans|||0-0-0,1|(362,518)|
+11,59,0,417,518,8,11,34,3,0,0,1,0,0,0,0,0,0,0,0,0
+10,60,net additions to schedule,417,556,75,30,32,3,0,0,-1,1,0,0,0,0,0,0,0,0
+10,61,effort perceived remaining,1034,51,75,30,0,3,0,16,-1,1,0,0,-1--1--1,-1--1--1,||B|0-0-0,0,0,0,0,0,0
+1,62,52,61,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+10,63,current project definition,969,153,75,30,0,3,0,16,-1,1,0,0,-1--1--1,-1--1--1,||B|0-0-0,0,0,0,0,0,0
+1,64,63,61,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+10,65,Perceived Productivity,893,-21,63,36,3,2,0,1,0,1,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,66,65,61,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,67,28,63,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,68,50,63,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,69,4,18,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,70,11,4,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,71,12,4,1,0,0,0,0,0,0,-1--1--1,,1|(566,262)|
+1,72,13,4,1,0,0,0,0,0,0,-1--1--1,,1|(575,198)|
+1,73,61,41,1,0,0,0,0,0,0,-1--1--1,,1|(1133,215)|
+10,74,workforce sought,969,331,75,30,0,2,0,0,-1,1,0,0,0,0,0,0,0,0
+1,75,74,41,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+10,76,time remaining,574,607,75,30,0,3,0,16,-1,1,0,0,-1--1--1,-1--1--1,||B|0-0-0,0,0,0,0,0,0
+1,77,26,76,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,78,39,76,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+10,79,fraction perceived complete,822,99,75,30,0,3,0,16,-1,1,0,0,-1--1--1,-1--1--1,||B|128-128-128,0,0,0,0,0,0
+1,80,52,79,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,81,63,79,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+12,82,0,1075,634,171,112,3,188,0,0,1,0,0,0,0,0,0,0,0,0
+frac_complete
+12,83,0,751,-150,80,40,8,7,0,0,-1,1,0,0,0,0,0,0,0,0
+Progress View
+\\\---/// Sketch information - do not modify anything except names
+V300  Do not put anything below this section - it will be ignored
+*workforce
+$192-192-192,0,Vensim Sans|14||0-0-0|92-92-92|160-160-160|-1--1--1|255-255-255|96,96,100,0
+10,1,Experienced Workforce,519,248,63,36,3,3,0,16,0,1,0,0,0-0-0,0-0-0,||B|0-0-0,0,0,0,0,0,0
+10,2,initial experienced workforce,391,161,75,30,0,3,0,2,-1,1,0,0,-1--1--1,-1--1--1,|||64-128-128,0,0,0,0,0,0
+1,3,2,1,0,0,0,0,0,0,1,-1--1--1,,1|(0,0)|
+10,4,assimilation time,140,320,75,30,0,3,0,2,-1,1,0,0,-1--1--1,-1--1--1,|||64-128-128,0,0,0,0,0,0
+1,5,4,57,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+10,6,New Workforce,452,441,63,36,3,3,0,16,0,1,0,0,0-0-0,0-0-0,||B|0-0-0,0,0,0,0,0,0
+1,7,6,57,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+10,8,initial new workforce,243,386,75,30,0,3,0,2,-1,1,0,0,-1--1--1,-1--1--1,|||64-128-128,0,0,0,0,0,0
+1,9,8,6,0,0,0,0,0,0,1,-1--1--1,,1|(0,0)|
+10,10,workforce,738,354,75,30,0,3,0,16,-1,1,0,0,-1--1--1,-1--1--1,||B|0-0-0,0,0,0,0,0,0
+1,11,10,59,1,0,0,0,0,0,0,-1--1--1,,1|(538,512)|
+10,12,workforce adjustment time,203,552,75,30,0,3,0,2,-1,1,0,0,-1--1--1,-1--1--1,|||64-128-128,0,0,0,0,0,0
+1,13,12,59,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+10,14,workforce sought,563,588,75,30,0,3,0,16,-1,1,0,0,-1--1--1,-1--1--1,||B|0-0-0,0,0,0,0,0,0
+1,15,14,59,1,0,0,0,0,0,0,-1--1--1,,1|(374,560)|
+1,16,1,10,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,17,6,10,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+10,18,indicated workforce,707,664,75,30,0,3,0,0,-1,1,0,0,0,0,0,0,0,0
+1,19,18,14,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+10,20,willingness to change workforce,396,646,75,30,0,3,0,0,-1,1,0,0,0,0,0,0,0,0
+1,21,20,14,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,22,10,14,1,0,0,0,0,0,0,-1--1--1,,1|(683,489)|
+10,23,effort perceived remaining,840,725,75,30,0,2,0,0,-1,1,0,0,0,0,0,0,0,0
+1,24,23,18,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+10,25,time remaining,556,726,75,30,0,2,0,0,-1,1,0,0,0,0,0,0,0,0
+1,26,25,18,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,27,25,20,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+10,28,willingness to change workforce lookup,246,720,75,30,0,3,0,2,-1,1,0,0,-1--1--1,-1--1--1,|||64-128-128,0,0,0,0,0,0
+1,29,28,20,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+10,30,fraction of workforce experienced,896,252,75,30,0,3,0,16,-1,1,0,0,-1--1--1,-1--1--1,||B|0-0-0,0,0,0,0,0,0
+1,31,1,30,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,32,10,30,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+10,33,gross productivity,1036,464,75,30,0,3,0,16,-1,1,0,0,-1--1--1,-1--1--1,||B|128-128-128,0,0,0,0,0,0
+10,34,effect of experience on gross productivity,984,386,75,30,0,3,0,0,-1,1,0,0,0,0,0,0,0,0
+1,35,34,33,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+10,36,normal gross productivity,1044,528,75,30,0,3,0,2,-1,1,0,0,-1--1--1,-1--1--1,|||64-128-128,0,0,0,0,0,0
+1,37,36,33,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+10,38,effect of experience on gross productivity lookup,1064,312,115,20,8,3,0,2,0,1,0,0,0-0-0,0-0-0,|||64-128-128,0,0,0,0,0,0
+1,39,38,34,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,40,30,34,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+10,41,fraction of workforce experienced lookup,942,264,75,30,0,2,1,1,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,42,Cumulative Effort,807,488,63,36,3,3,0,16,0,1,0,0,0-0-0,0-0-0,||B|0-0-0,0,0,0,0,0,0
+10,43,effect of schedule pressure on gross productivity,796,582,124,20,8,2,0,1,0,1,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,44,43,42,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,45,10,42,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+10,46,cost,975,598,75,30,0,3,0,0,-1,1,0,0,0,0,0,0,0,0
+10,47,cost per worker month,971,662,75,30,0,3,0,2,-1,1,0,0,-1--1--1,-1--1--1,|||64-128-128,0,0,0,0,0,0
+1,48,47,46,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,49,42,46,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+12,50,48,218,250,10,8,0,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,51,56,1,4,0,0,22,0,0,0,-1--1--1,,1|(403,250)|
+1,52,56,50,100,0,0,22,0,0,0,-1--1--1,,1|(281,250)|
+12,53,48,172,442,10,8,0,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,54,58,6,4,0,0,22,0,0,0,-1--1--1,,1|(341,442)|
+1,55,58,53,100,0,0,22,0,0,0,-1--1--1,,1|(230,442)|
+11,56,0,342,250,8,11,34,3,0,0,1,0,0,0,0,0,0,0,0,0
+10,57,workforce assimilation rate,342,282,73,21,40,3,0,0,0,1,0,0,0,0,0,0,0,0
+11,58,0,286,442,8,11,34,3,0,0,1,0,0,0,0,0,0,0,0,0
+10,59,hiring rate,286,480,75,30,32,3,0,0,-1,1,0,0,0,0,0,0,0,0
+12,60,0,752,50,80,40,8,7,0,0,-1,1,0,0,0,0,0,0,0,0
+WORKFORCE VIEW
+12,61,0,1528,494,300,200,0,15,0,0,1,0,0,0,0,0,0,0,0,0
+Work_Force_
+\\\---/// Sketch information - do not modify anything except names
+V300  Do not put anything below this section - it will be ignored
+*rework
+$192-192-192,0,Vensim Sans|14||0-0-0|92-92-92|160-160-160|-1--1--1|255-255-255|96,96,100,0
+10,1,Undiscovered Rework,669,325,65,36,3,3,0,16,0,0,0,0,0-0-0,0-0-0,||B|0-0-0,0,0,0,0,0,0
+10,2,time to detect rework,884,467,75,30,0,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,3,2,22,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,4,1,21,1,0,0,0,0,0,0,-1--1--1,,1|(762,289)|
+10,5,apparent progress rate,338,452,75,30,0,2,0,0,-1,0,0,0,0,0,0,0,0,0
+1,6,5,20,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+10,7,fraction satisfactory,561,455,75,30,0,2,0,0,-1,0,0,0,0,0,0,0,0,0
+1,8,7,20,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+10,9,fraction perceived complete,766,556,75,30,0,2,0,0,-1,0,0,0,0,0,0,0,0,0
+1,10,9,2,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+10,11,time to detect rework lookup,1065,547,75,30,0,3,0,2,-1,0,0,0,0-0-0,0-0-0,|||64-128-128,0,0,0,0,0,0
+1,12,11,2,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+12,13,48,361,331,10,8,0,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,14,19,1,4,0,0,22,0,0,0,-1--1--1,,1|(551,331)|
+1,15,19,13,100,0,0,22,0,0,0,-1--1--1,,1|(426,331)|
+12,16,48,1006,332,10,8,0,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,17,21,16,4,0,0,22,0,0,0,-1--1--1,,1|(935,332)|
+1,18,21,1,100,0,0,22,0,0,0,-1--1--1,,1|(796,332)|
+11,19,0,490,331,8,11,34,3,0,0,1,0,0,0,0,0,0,0,0,0
+10,20,generation of undiscovered rework,490,364,91,23,40,3,0,0,0,0,0,0,0,0,0,0,0,0
+11,21,0,866,332,8,11,34,3,0,0,1,0,0,0,0,0,0,0,0,0
+10,22,detection of undiscovered rework,866,365,97,23,40,3,0,0,0,0,0,0,0,0,0,0,0,0
+12,23,0,708,181,80,40,8,7,0,0,-1,1,0,0,0,0,0,0,0,0
+ReWork View
+12,24,0,1345,283,300,200,0,15,0,0,1,0,0,0,0,0,0,0,0,0
+Undiscovered_Rework
+\\\---/// Sketch information - do not modify anything except names
+V300  Do not put anything below this section - it will be ignored
+*productivity
+$192-192-192,0,Vensim Sans|14||0-0-0|92-92-92|160-160-160|-1--1--1|255-255-255|96,96,100,0
+10,1,Perceived Productivity,732,357,63,36,3,3,0,16,0,0,0,0,0-0-0,0-0-0,||B|0-0-0,0,0,0,0,0,0
+10,2,Indicated Productivity,471,355,63,36,3,3,0,16,0,0,0,0,0-0-0,0-0-0,||B|0-0-0,0,0,0,0,0,0
+1,3,2,1,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+10,4,time to perceive productivity,707,457,75,30,0,3,0,2,-1,0,0,0,0-0-0,0-0-0,|||64-128-128,0,0,0,0,0,0
+1,5,4,1,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+10,6,normal gross productivity,215,430,75,30,0,3,0,2,-1,0,0,0,0-0-0,0-0-0,|||64-128-128,0,0,0,0,0,0
+1,7,6,2,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+10,8,real productivity,407,489,75,30,0,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,9,8,2,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+10,10,weight to real productivity,557,541,75,30,0,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,11,10,2,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+10,12,fraction perceived complete,581,622,75,30,0,2,0,1,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,13,12,10,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+10,14,weight to perceived productivity lookup,855,538,97,21,8,3,0,2,0,0,0,0,0-0-0,0-0-0,|||64-128-128,0,0,0,0,0,0
+1,15,14,10,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+10,16,fraction satisfactory,345,622,75,30,0,2,0,0,-1,0,0,0,0,0,0,0,0,0
+1,17,16,8,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,18,6,8,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+12,19,0,582,182,80,40,8,7,0,0,-1,1,0,0,0,0,0,0,0,0
+Productivity View|<<NnN>>|
+12,20,0,1195,277,300,200,0,15,0,0,1,0,0,0,0,0,0,0,0,0
+Indicated_&_Perceived_Productivity
+///---\\\
+:GRAPH frac_complete
+:TITLE frac_complete
+:SCALE
+:VAR fraction completed
+:Y-MIN 0
+:Y-MAX 1
+:DATASET 
+
+:GRAPH Undiscovered_Rework
+:TITLE Undiscovered Rework
+:X-AXIS Undiscovered Rework
+:SCALE
+:VAR Undiscovered Rework
+:DATASET 
+:LINE-WIDTH 1
+
+:GRAPH Indicated_&_Perceived_Productivity
+:TITLE Indicated & Perceived Productivity
+:SCALE
+:VAR Indicated Productivity
+:DATASET 
+:LINE-WIDTH 1
+:SCALE
+:VAR Perceived Productivity
+:DATASET 
+:LINE-WIDTH 1
+
+:GRAPH Work_Force_
+:TITLE Work Force
+:SCALE
+:VAR Experienced Workforce
+:DATASET 
+:LINE-WIDTH 1
+:SCALE
+:VAR New Workforce
+:DATASET 
+:LINE-WIDTH 1
+:SCALE
+:VAR workforce
+:DATASET 
+:LINE-WIDTH 1
+:L<%^E!@
+4:Time
+5:fraction of workforce experienced
+9:Proj
+19:100,4
+24:0
+25:54.625
+26:54.625
+22:$,Dollar,Dollars,$s
+22:Day,Days
+22:Hour,Hours
+22:Month,Months
+22:Person,People,Persons
+22:Unit,Units
+22:Week,Weeks
+22:worker,workers
+22:Year,Years
+22:$,Dollar,Dollars,$s
+22:Day,Days
+22:Hour,Hours
+22:Month,Months
+22:Person,People,Persons
+22:Unit,Units
+22:Week,Weeks
+22:worker,workers
+22:Year,Years
+22:$,Dollar,Dollars,$s
+22:Day,Days
+22:Hour,Hours
+22:Month,Months
+22:Person,People,Persons
+22:Unit,Units
+22:Week,Weeks
+22:worker,workers
+22:Year,Years
+22:$,Dollar,Dollars,$s
+22:Day,Days
+22:Hour,Hours
+22:Month,Months
+22:Person,People,Persons
+22:Unit,Units
+22:Week,Weeks
+22:worker,workers
+22:Year,Years
+22:$,Dollar,Dollars,$s
+22:Day,Days
+22:Hour,Hours
+22:Month,Months
+22:Person,People,Persons
+22:Unit,Units
+22:Week,Weeks
+22:worker,workers
+22:Year,Years
+22:$,Dollar,Dollars,$s
+22:Day,Days
+22:Hour,Hours
+22:Month,Months
+22:Person,People,Persons
+22:Unit,Units
+22:Week,Weeks
+22:worker,workers
+22:Year,Years
+22:$,Dollar,Dollars,$s
+22:Day,Days
+22:Hour,Hours
+22:Month,Months
+22:Person,People,Persons
+22:Unit,Units
+22:Week,Weeks
+22:worker,workers
+22:Year,Years
+22:$,Dollar,Dollars,$s
+22:Day,Days
+22:Hour,Hours
+22:Month,Months
+22:Person,People,Persons
+22:Unit,Units
+22:Week,Weeks
+22:worker,workers
+22:Year,Years
+23:0
+15:0,0,0,0,0,0
+27:0,
+34:0,
+42:0
+72:0
+73:0
+95:0
+96:0
+97:0
+77:0
+78:0
+102:1
+93:0
+94:0
+92:0
+91:0
+90:0
+87:0
+75:
+43:
+103:8,8,8,3,8
+105:0,0,0,0,0,0,0,0,0,0
+104:Vensim Sans|12||0-0-0|0-0-0|-1--1--1|0-0-255|192-192-192|-1--1--1

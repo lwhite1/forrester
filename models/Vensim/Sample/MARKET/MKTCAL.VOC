@@ -1,0 +1,8 @@
+:COMMENT
+:COMMENT  This file is used with market.vmf as described in Chapter 19.
+:COMMENT  It sets up the controls for the calibration optimization.
+:COMMENT
+NORMAL_SHARE_OF_SALES  = 0.8
+DEMOS_PER_PERSON_MONTH  = 12
+
+

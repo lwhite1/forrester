@@ -1,0 +1,116 @@
+{UTF-8}
+{UTF-8}
+
+
+Activate Service  = A FUNCTION OF( Tests OK,Dispatch Service Technician)
+	~	
+	~		|
+
+dedicated facilities  = A FUNCTION OF( Process Order)
+	~	
+	~		|
+
+Dispatch Service Technician  = A FUNCTION OF( dedicated facilities,Tests OK)
+	~	
+	~		|
+
+FINAL TIME  = 100
+	~	Month
+	~	 The final time for the simulation.
+	|
+
+INITIAL TIME  = 0
+	~	Month
+	~	 The initial time for the simulation.
+	|
+
+Process Order  = A FUNCTION OF( Take Order)
+	~	
+	~		|
+
+SAVEPER  = 
+        TIME STEP
+	~	Month
+	~	 The frequency with which output is stored.
+	|
+
+Set Program Switch  = A FUNCTION OF( dedicated facilities)
+	~	
+	~		|
+
+Take Order  = A FUNCTION OF( )
+	~	
+	~		|
+
+Test  = A FUNCTION OF( Set Program Switch)
+	~	
+	~		|
+
+Tests OK  = A FUNCTION OF( Test)
+	~	
+	~		|
+
+TIME STEP  = 1
+	~	Month
+	~	 The time step for the simulation.
+	|
+
+\\\---/// Sketch information - do not modify anything except names
+V300  Do not put anything below this section - it will be ignored
+*1
+$160-160-160,0,|12||-1--1--1|64-64-64|128-128-128|-1--1--1|-1--1--1|96,96,5,0
+10,1,Take Order,329,248,53,27,3,3,0,0,0,1,0,0,0,0,0,0,0,0
+10,2,Process Order,499,252,53,27,3,3,0,0,0,1,0,0,0,0,0,0,0,0
+10,3,dedicated facilities,675,246,83,83,11,131,0,0,0,1,0,0,0,0,0,0,0,0
+10,4,Set Program Switch,868,256,53,27,3,3,0,0,0,1,0,0,0,0,0,0,0,0
+10,5,Dispatch Service Technician,685,394,74,30,3,3,0,3,0,1,0,0,255-0-0,0-0-0,|||255-0-0,0,0,0,0,0,0
+10,6,Test,873,342,53,27,3,3,0,0,0,1,0,0,0,0,0,0,0,0
+10,7,Tests OK,865,460,47,47,11,131,0,0,0,1,0,0,0,0,0,0,0,0
+10,8,Activate Service,1045,463,53,27,3,3,0,0,0,1,0,0,0,0,0,0,0,0
+12,9,48,1045,586,10,8,0,3,0,0,-1,0,0,0,0,0,0,0,0,0
+12,10,48,328,344,10,8,0,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,11,1,2,4,0,0,0,0,0,0,-1--1--1,,1|(414,248)|
+1,12,2,3,4,0,0,0,0,0,0,-1--1--1,,1|(572,246)|
+1,13,3,4,4,0,89,0,0,0,0,-1--1--1,,1|(786,246)|
+1,14,3,5,4,0,78,0,1,0,0,255-0-0,|||0-0-0,1|(675,346)|
+1,15,6,7,4,0,0,0,0,0,0,-1--1--1,,1|(865,391)|
+1,16,7,8,4,0,89,0,0,0,0,-1--1--1,,1|(952,460)|
+1,17,4,6,4,0,0,0,0,0,0,-1--1--1,,1|(868,299)|
+1,18,7,5,4,0,78,0,1,0,0,255-0-0,|||0-0-0,1|(685,460)|
+1,19,8,9,4,0,0,0,0,0,0,-1--1--1,,1|(1045,534)|
+1,20,10,1,4,0,0,0,0,0,0,-1--1--1,,1|(328,305)|
+1,21,5,8,4,0,0,0,1,0,0,255-0-0,|||0-0-0,4|(652,493)|(652,562)|(1028,562)|(1028,526)|
+12,22,0,610,48,105,38,8,7,0,8,-1,1,0,0,0-0-0,0-0-0,|22||0-0-0,0,0,0,0,0,0
+Business Process ReEngineering Model 1
+///---\\\
+:L<%^E!@
+5:Tests OK
+9:Current
+19:5,0
+24:0
+25:0
+26:0
+23:0
+15:0,0,0,0,0,0
+27:0,
+34:0,
+42:0
+72:0
+73:0
+95:0
+96:0
+97:0
+77:0
+78:0
+102:1
+93:0
+94:0
+92:0
+91:0
+90:0
+87:0
+75:
+43:
+103:8,8,8,3,8
+105:0,0,0,0,0,0,0,0,0,0
+104:Vensim Sans|12||0-0-0|0-0-0|-1--1--1|0-0-255|192-192-192|-1--1--1

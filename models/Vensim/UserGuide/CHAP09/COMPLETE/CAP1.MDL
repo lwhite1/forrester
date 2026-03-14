@@ -1,0 +1,117 @@
+{UTF-8}
+investment=
+	 capacity adjustment
+	~	Gadget/Month/Month
+	~		|
+
+Capacity = INTEG(investment-reductions,
+    target capacity )
+	~	Gadget/Month
+	~		|
+
+capacity adjustment = (target capacity - Capacity)/time to adjust capacity
+	~	Gadget/Month/Month
+	~		|
+
+capacity life = 20
+	~	Month
+	~		|
+
+target capacity = desired production
+	~	Gadget/Month
+	~		|
+
+desired production = 1000 + STEP(500,10) + STEP(-800, 50)
+	~	Gadget/Month
+	~		|
+
+potential production = Capacity
+	~	Gadget/Month
+	~		|
+
+production =  MIN(desired production,potential production)
+	~	Gadget/Month
+	~		~	:SUPPLEMENTARY 
+	|
+
+reductions = Capacity/capacity life
+	~	Gadget/(Month*Month)
+	~		|
+
+time to adjust capacity = 12
+	~	Month
+	~		|
+
+********************************************************
+	.Control
+********************************************************~
+		Simulation Control Paramaters
+	|
+
+FINAL TIME  = 100
+	~	Month
+	~	The final time for the simulation.
+	|
+
+INITIAL TIME  = 0
+	~	Month
+	~	The initial time for the simulation.
+	|
+
+SAVEPER  = 
+        TIME STEP
+	~	Month
+	~	The frequency with which output is stored.
+	|
+
+TIME STEP  = 1
+	~	Month
+	~	The time step for the simulation.
+	|
+
+\\\---/// Sketch information - do not modify anything except names
+V300  Do not put anything below this section - it will be ignored
+*View 1
+$192-192-192,0,Arial|14||0-0-0|92-92-92|160-160-160|-1--1--1|255-255-255|96,96,100,0
+10,1,Capacity,523,129,48,24,3,131,0,16,0,0,0,0,0-0-0,0-0-0,|14|B|0-0-0
+12,2,48,353,125,13,11,0,3,0,0,0,0,0,0
+11,3,48,416,125,7,8,34,3,0,0,1,0,0,0
+10,4,investment,416,144,48,12,32,3,0,0,0,0,0,0
+12,5,48,693,127,13,11,0,3,0,0,0,0,0,0
+11,6,48,625,125,7,8,34,3,0,0,1,0,0,0
+10,7,reductions,625,144,47,12,32,3,0,0,0,0,0,0
+10,8,capacity life,543,60,52,12,0,3,0,2,0,0,0,0,0-0-0,0-0-0,|14||64-128-128
+10,9,potential production,617,217,84,12,0,3,0,0,0,0,0,0
+10,10,desired production,257,311,80,12,0,3,0,2,0,0,0,0,0-0-0,0-0-0,|14||64-128-128
+10,11,target capacity,351,269,64,12,0,3,0,0,0,0,0,0
+10,12,time to adjust capacity,277,169,96,12,0,3,0,3,0,0,0,0,128-128-128,0-0-0,|12||64-128-128
+10,13,capacity adjustment,396,219,85,12,0,3,0,0,0,0,0,0
+10,14,production,717,299,47,12,0,3,0,0,-1,0,0,0
+1,15,1,13,2,0,0,0,0,0,0,-1--1--1,,1|(480,193)|
+1,16,12,13,1,0,0,0,0,0,0,-1--1--1,,1|(317,197)|
+1,17,1,6,2,0,0,0,0,0,0,-1--1--1,,1|(567,95)|
+1,18,11,1,1,1,0,0,0,0,1,-1--1--1,,1|(493,223)|
+1,19,10,14,1,0,0,0,0,0,0,-1--1--1,,1|(537,321)|
+1,20,9,14,1,0,0,0,0,0,0,-1--1--1,,1|(624,244)|
+1,21,1,9,1,0,0,0,0,0,0,-1--1--1,,1|(543,189)|
+1,22,8,6,1,0,0,0,0,0,0,-1--1--1,,1|(611,76)|
+1,23,6,1,100,0,0,22,0,0,0,-1--1--1,,1|(595,125)|
+1,24,6,5,4,0,0,22,0,0,0,-1--1--1,,1|(656,125)|
+1,25,3,2,100,0,0,22,0,0,0,-1--1--1,,1|(388,125)|
+1,26,3,1,4,0,0,22,0,0,0,-1--1--1,,1|(448,125)|
+1,27,13,4,1,0,0,0,0,0,0,-1--1--1,,1|(391,185)|
+1,28,11,13,1,0,0,0,0,0,0,-1--1--1,,1|(377,249)|
+1,29,10,11,1,0,0,0,0,0,0,-1--1--1,,1|(305,295)|
+///---\\\
+:L<%^E!@
+1:Current.vdf
+9:Current
+15:0,0,0,0,0,0
+19:100,0
+27:0,
+34:0,
+4:Time
+5:time to adjust capacity
+24:0
+25:100
+26:100

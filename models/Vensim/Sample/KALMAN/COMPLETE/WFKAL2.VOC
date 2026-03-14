@@ -1,0 +1,19 @@
+:OPTIMIZER=Powell
+:SENSITIVITY=Payoff Value=2
+:MULTIPLE_START=Off
+:RANDOM_NUMER=Linear
+:OUTPUT_LEVEL=On
+:TRACE=Off
+:MAX_ITERATIONS=1000
+:RESTART_MAX=0
+:PASS_LIMIT=2
+:FRACTIONAL_TOLERANCE=0.0003
+:TOLERANCE_MULTIPLIER=21
+:ABSOLUTE_TOLERANCE=1
+:SCALE_ABSOLUTE=1
+:VECTOR_POINTS=25
+.001<=inventory drive variance=20<=200
+.001<=workforce drive variance=20<=200
+0.001<=meas workforce variance=20<=200
+1 <= time_correct_inventory=20 <= 50
+1<=time adjust workforce=20<=50

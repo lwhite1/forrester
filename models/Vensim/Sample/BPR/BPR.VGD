@@ -1,0 +1,87 @@
+:GRAPH WIP
+:TITLE Orders in different States
+:X-MIN 0
+:X-MAX 100
+:WIP
+:SCALE
+:VAR Orders in Process|Orders in Process
+:Y-MIN 0
+:Y-MAX 500
+:VAR Orders Requiring Testing|Orders Requiring Testing
+:VAR Orders Requiring Service|Orders Requiring Service
+:VAR Awaiting Activation|Orders Awaiting Activation
+:REPORT BPRINTRO
+Vensim supports the development and deployment of a variety of different kinds of models to aid in 
+Business Process Re-Engineering.  In order to demonstrate this consider the simple case of a 
+request for telephone service and the resulting service activation.  If the required facilities are in 
+place this request will result in a switch being thrown, and the line being tested.  If the line passes
+the test service will be activated.  If adequate facilities are not in place, or the line test fails a 
+technician will need to be dispatched.
+
+This explorer provides you with a number of different representations of this simple process from
+a simple process map without formal flow charting conventions to a simulation model in which 
+capacity adjusts in response to requirements at the different process phases.  The models presented
+are not intended to be prototypical, but to display the range of activities that Vensim can support
+in doing re-engineering.  
+
+Vensim Arrow can be used to develop process maps and flow charts.  Vensim standard is required 
+to do the simulation part.  This explorer was developed using Vensim DSS which gives you access
+to the simple front end interface for playing with the models.
+
+You can play with the models underlying this explorer by entering Vensim's development environment
+and opening the models in the subdirectory BPR.  The models are bpr0, bpr1, bpr2 and bpr3.  Only
+bpr2 and bpr3 can be simulated.
+:END-OF-REPORT
+:REPORT BPRMAIN
+Click on the button you want or hold down the Alt key and press the first letter in the name on the 
+button.  By clicking on the buttons in sequence you can see the evolution of a simple conceptual 
+map of a business process to an adaptive simulation model showing the potential dynamics that the
+process can generate.
+
+Click on Exit to return to the model selection menu.
+:END-OF-REPORT
+:REPORT BPR0
+Vensim's flexible sketch tool allows you to capture the components of a process and link them as 
+they flow from one to another in a simple, clean and straightforward manner.  In this diagram we
+capture the process as taking and processing an order.  There is a branch depending on whether
+or not there are dedicated facilities and another branch depending on whether or not the test of 
+the line passes.  Either problematic condition requires the dispatch of a service technician.
+
+You can use Vensim's analysis tools to look at prerequisites of any step, or potential 
+consequences.  Click on one of the buttons to see an example of this output.
+:END-OF-REPORT
+:REPORT BPR1
+In this sketch the same problem is represented using a flow diagram.  It is easy to construct and 
+maintain flow diagrams in Vensim.  In the above diagram the color red has been used to emphasize
+that the expensive part of the process is in play.  When appropriate it is also possible to add 
+commentary and icons to the diagram.
+
+Again Vensim's structural analysis tools allow you to make tree diagrams show prerequisites and 
+consequences and these diagrams are generated automatically based on the information you
+have entered.  Click on one of the buttons to see an example of this output.
+:END-OF-REPORT
+:REPORT BPR2
+The diagrams we have been looking at so far are event oriented and focus in on certain activities 
+and the order they occur in.  In order to simulate a process it is important to focus in on structure
+and the logical and physical interconnections involved.  In this model we show the amount of
+work requiring action at each phase in the process and the capacity available to do that work.
+
+By clicking on the different buttons you can see the consequences of adding capacity at different
+points in the processing.  Because there is no local control of capacity, the system cannot adapt
+and large backlogs result from attempts at increased throughput.  By clicking on the buttons in
+sequence you can add capacity at the identified bottleneck.  The result, because there is no 
+adaptation, is to move the bottleneck downstream.
+:END-OF-REPORT
+:REPORT BPR3
+In this diagram each capacity is set locally in response to current backlog conditions.  You can 
+think of the capacity adjustment process as the redeployment of an existing workforce, or as
+including the hiring and training of new personnel.
+
+If you click on the Simulate button you will see the behavior that results when this system is
+subject to an increase in orders.  Before you do click, however, think about what you might expect
+to see.
+:END-OF-REPORT
+
+
+
+
