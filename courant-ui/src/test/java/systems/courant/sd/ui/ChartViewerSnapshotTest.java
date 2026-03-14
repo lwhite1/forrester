@@ -9,6 +9,7 @@ import org.testfx.framework.junit5.ApplicationExtension;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /**
  * Tests that ChartViewerApplication.snapshot() captures an atomic, independent
@@ -95,6 +96,36 @@ class ChartViewerSnapshotTest {
         assertThat(snap.series()).isEmpty();
         assertThat(snap.width()).isEqualTo(800);
         assertThat(snap.height()).isEqualTo(600);
+    }
+
+    @Test
+    @DisplayName("addValues after snapshot does not mutate snapshot Series data")
+    void shouldIsolateSnapshotSeriesDataFromAddValues() {
+        ChartViewerApplication.setSeries(List.of("S1"), List.of());
+        ChartViewerApplication.addValues(List.of(1.0), List.of(), 0);
+
+        ChartViewerApplication.ChartData snap = ChartViewerApplication.snapshot();
+
+        // Add more values to the static state after the snapshot was taken
+        ChartViewerApplication.addValues(List.of(2.0), List.of(), 1);
+        ChartViewerApplication.addValues(List.of(3.0), List.of(), 2);
+
+        // The snapshot's Series should still have only the original data point
+        assertThat(snap.series()).hasSize(1);
+        assertThat(snap.series().getFirst().getData()).hasSize(1);
+        assertThat(snap.series().getFirst().getData().getFirst().getYValue().doubleValue())
+                .isEqualTo(1.0);
+    }
+
+    @Test
+    @DisplayName("snapshot series list is unmodifiable")
+    void shouldReturnUnmodifiableSeriesList() {
+        ChartViewerApplication.setSeries(List.of("X"), List.of());
+
+        ChartViewerApplication.ChartData snap = ChartViewerApplication.snapshot();
+
+        assertThatThrownBy(() -> snap.series().add(new javafx.scene.chart.XYChart.Series<>()))
+                .isInstanceOf(UnsupportedOperationException.class);
     }
 
 }
