@@ -263,6 +263,58 @@ class SoftwareProductionTest {
     }
 
     @Test
+    @DisplayName("Completion fraction should include reworkToDo (#268)")
+    void shouldIncludeReworkToDoInCompletionFraction() {
+        // Run long enough for rework to accumulate in Rework to Do
+        SoftwareProduction sp = createModule(10, 0.1, 0.8, 500);
+
+        Model model = new Model("Completion Fraction Test");
+        model.addModule(sp.getModule());
+
+        Simulation sim = new Simulation(model, TimeUnits.DAY,
+                new Quantity(100, TimeUnits.DAY));
+        sim.execute();
+
+        Stock tasksCompleted = sp.getModule().getStock("Tasks Completed").orElseThrow();
+        Stock undiscoveredRework = sp.getModule().getStock("Undiscovered Rework").orElseThrow();
+        Stock reworkToDo = sp.getModule().getStock("Rework to Do").orElseThrow();
+        Variable completionFraction = sp.getModule().getVariable("Completion Fraction").orElseThrow();
+
+        double expectedCf = (tasksCompleted.getValue() + undiscoveredRework.getValue()
+                + reworkToDo.getValue()) / 500.0;
+        assertThat(completionFraction.getValue())
+                .as("Completion fraction must include reworkToDo (was missing before #268 fix)")
+                .isCloseTo(expectedCf, org.assertj.core.data.Offset.offset(0.001));
+
+        // Verify reworkToDo is non-trivial so this test is meaningful
+        assertThat(reworkToDo.getValue())
+                .as("Rework to Do should be significant with low QA staffing")
+                .isGreaterThan(10.0);
+    }
+
+    @Test
+    @DisplayName("Integration effort multiplier should reflect reworkToDo in completion (#268)")
+    void shouldReflectReworkToDoInIntegrationMultiplier() {
+        // With low QA staffing, rework accumulates → completion fraction stays high →
+        // integration multiplier should remain high rather than dropping
+        SoftwareProduction sp = createModule(10, 0.1, 0.8, 500);
+
+        Model model = new Model("Integration Multiplier Test");
+        model.addModule(sp.getModule());
+
+        Simulation sim = new Simulation(model, TimeUnits.DAY,
+                new Quantity(100, TimeUnits.DAY));
+        sim.execute();
+
+        Variable multiplier = sp.getModule().getVariable("Integration Effort Multiplier").orElseThrow();
+        // With the fix, completion fraction counts reworkToDo, so multiplier = 1 + 1.5 * cf^2
+        // should be substantially above 1.0
+        assertThat(multiplier.getValue())
+                .as("Integration multiplier should be high when reworkToDo is included in completion")
+                .isGreaterThan(1.5);
+    }
+
+    @Test
     void shouldProduceMoreErrorsWithInexperiencedTeam() {
         SoftwareProduction expTeam = createModule(10, 2, 1.0, 500);
         SoftwareProduction newTeam = createModule(10, 2, 0.0, 500);
