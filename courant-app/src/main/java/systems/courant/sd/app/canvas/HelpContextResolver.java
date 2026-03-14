@@ -10,17 +10,7 @@ import javafx.scene.input.KeyEvent;
 
 import java.util.Set;
 
-import systems.courant.sd.app.canvas.dialogs.BindingConfigDialog;
 import systems.courant.sd.app.canvas.dialogs.ContextHelpDialog;
-import systems.courant.sd.app.canvas.dialogs.DefinePortsDialog;
-import systems.courant.sd.app.canvas.dialogs.ExpressionLanguageDialog;
-import systems.courant.sd.app.canvas.dialogs.MonteCarloDialog;
-import systems.courant.sd.app.canvas.dialogs.MultiParameterSweepDialog;
-import systems.courant.sd.app.canvas.dialogs.OptimizerDialog;
-import systems.courant.sd.app.canvas.dialogs.ParameterSweepDialog;
-import systems.courant.sd.app.canvas.dialogs.SdConceptsDialog;
-import systems.courant.sd.app.canvas.dialogs.SimulationSettingsDialog;
-import systems.courant.sd.app.canvas.forms.CodeAreaEquationField;
 
 /**
  * Stateless utility that resolves the current UI context to a {@link HelpTopic}.

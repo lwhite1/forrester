@@ -12,12 +12,12 @@ public interface ElementForm {
      *
      * @return the next available row index
      */
-    public int build(int startRow);
+    int build(int startRow);
 
     /**
      * Updates field values for the cached form fast-path (same element type, different element).
      */
-    public void updateValues();
+    void updateValues();
 
     /**
      * Cleans up resources (e.g., detach autocomplete popups).

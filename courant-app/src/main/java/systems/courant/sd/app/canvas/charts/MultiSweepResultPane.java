@@ -27,7 +27,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import systems.courant.sd.app.canvas.ChartUtils;
-import systems.courant.sd.app.canvas.Clipboard;
 import systems.courant.sd.app.canvas.ClipboardExporter;
 
 /**

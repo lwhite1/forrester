@@ -54,7 +54,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import systems.courant.sd.app.canvas.BehaviorModeClassifier;
 import systems.courant.sd.app.canvas.ChartUtils;
-import systems.courant.sd.app.canvas.Clipboard;
 import systems.courant.sd.app.canvas.ClipboardExporter;
 import systems.courant.sd.app.canvas.GhostRun;
 import systems.courant.sd.app.canvas.SimulationRunner;

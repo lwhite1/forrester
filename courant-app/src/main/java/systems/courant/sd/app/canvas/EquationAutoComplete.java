@@ -31,7 +31,6 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import systems.courant.sd.app.canvas.forms.InlineEditor;
 import systems.courant.sd.app.canvas.forms.TextFieldEquationField;
 
 /**
