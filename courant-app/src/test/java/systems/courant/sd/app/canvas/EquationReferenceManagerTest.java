@@ -123,6 +123,14 @@ class EquationReferenceManagerTest {
             manager.updateEquationReferences("Rate", "New_Rate");
             assertThat(flows.getFirst().equation()).isEqualTo("Pop * 5");
         }
+
+        @Test
+        void shouldPreserveVariableSubscripts() {
+            variables.add(new VariableDef("Ratio", "comment", "Pop / Total", "units",
+                    List.of("Region", "Age")));
+            manager.updateEquationReferences("Total", "Grand_Total");
+            assertThat(variables.getFirst().subscripts()).containsExactly("Region", "Age");
+        }
     }
 
     @Nested
@@ -172,6 +180,14 @@ class EquationReferenceManagerTest {
                     "Person", "Source", "Sink", List.of("Region", "Age")));
             manager.updateEquationByName("Drain", eq -> eq.replace("Rate", "0"));
             assertThat(flows.getFirst().subscripts()).containsExactly("Region", "Age");
+        }
+
+        @Test
+        void shouldPreserveSubscriptsWhenTransformingVariable() {
+            variables.add(new VariableDef("Ratio", "comment", "Pop / Total", "units",
+                    List.of("Region")));
+            manager.updateEquationByName("Ratio", eq -> eq.replace("Total", "100"));
+            assertThat(variables.getFirst().subscripts()).containsExactly("Region");
         }
     }
 

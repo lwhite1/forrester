@@ -254,7 +254,11 @@ public class DependencyGraph {
      * Returns an unmodifiable view of the adjacency map (from → {to}).
      */
     public Map<String, Set<String>> adjacencyMap() {
-        return Collections.unmodifiableMap(adjacency);
+        Map<String, Set<String>> result = new LinkedHashMap<>();
+        for (Map.Entry<String, Set<String>> entry : adjacency.entrySet()) {
+            result.put(entry.getKey(), Collections.unmodifiableSet(entry.getValue()));
+        }
+        return Collections.unmodifiableMap(result);
     }
 
     /**
