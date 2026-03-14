@@ -1052,6 +1052,7 @@ public class VensimImporter implements ModelImporter {
         String expr = rateExpr.strip();
         List<RateTerm> terms = new ArrayList<>();
         int depth = 0;
+        boolean inQuote = false;
         int termStart = 0;
         boolean positive = true;
 
@@ -1065,7 +1066,11 @@ public class VensimImporter implements ModelImporter {
 
         for (int i = termStart; i < expr.length(); i++) {
             char c = expr.charAt(i);
-            if (c == '(') {
+            if (c == '"') {
+                inQuote = !inQuote;
+            } else if (inQuote) {
+                continue;
+            } else if (c == '(') {
                 depth++;
             } else if (c == ')') {
                 depth--;
@@ -1106,7 +1111,7 @@ public class VensimImporter implements ModelImporter {
      * Returns true if the {@code +} or {@code -} at position {@code i} is a binary
      * operator (subtraction/addition) rather than a unary sign. A sign is binary when
      * the previous non-whitespace character could end a term: a letter, digit,
-     * underscore, closing paren, or decimal point.
+     * underscore, closing paren, closing quote, or decimal point.
      */
     private static boolean isBinaryOperatorAt(String expr, int i) {
         for (int j = i - 1; j >= 0; j--) {
@@ -1114,7 +1119,8 @@ public class VensimImporter implements ModelImporter {
             if (Character.isWhitespace(prev)) {
                 continue;
             }
-            return Character.isLetterOrDigit(prev) || prev == '_' || prev == ')' || prev == '.';
+            return Character.isLetterOrDigit(prev) || prev == '_' || prev == ')'
+                    || prev == '.' || prev == '"';
         }
         return false;
     }
