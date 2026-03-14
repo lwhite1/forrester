@@ -4,6 +4,9 @@ import systems.courant.sd.measure.Quantity;
 import systems.courant.sd.measure.Unit;
 import com.google.common.base.Preconditions;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.Set;
@@ -13,12 +16,15 @@ import java.util.Set;
  */
 public class Stock extends Element {
 
+    private static final Logger log = LoggerFactory.getLogger(Stock.class);
+
     private final Set<Flow> inflows = new LinkedHashSet<>();
     private final Set<Flow> outflows = new LinkedHashSet<>();
 
     private final Unit unit;
     private double value;
     private final NegativeValuePolicy negativeValuePolicy;
+    private boolean warnedNonFinite;
 
     /**
      * Creates a new stock with the given name, initial value, and unit.
@@ -44,6 +50,8 @@ public class Stock extends Element {
         super(name);
         Preconditions.checkNotNull(unit, "unit must not be null");
         Preconditions.checkNotNull(negativeValuePolicy, "negativeValuePolicy must not be null");
+        Preconditions.checkArgument(Double.isFinite(initialAmount),
+                "Stock '%s' initial value must be finite, but got: %s", name, initialAmount);
         this.unit = unit;
         this.negativeValuePolicy = negativeValuePolicy;
         this.value = applyPolicy(initialAmount);
@@ -99,10 +107,12 @@ public class Stock extends Element {
 
     /**
      * Sets the current value of this stock, applying the configured
-     * {@link NegativeValuePolicy} if the value is negative.
+     * {@link NegativeValuePolicy} if the value is negative. Non-finite values
+     * (NaN, Infinity) are silently rejected — the stock retains its previous
+     * value and logs a warning once.
      *
      * @param value the new value
-     * @throws IllegalArgumentException if the value is NaN, Infinite, or negative when the
+     * @throws IllegalArgumentException if the value is negative when the
      *                                  policy is {@link NegativeValuePolicy#THROW}
      */
     public void setValue(double value) {
@@ -125,9 +135,13 @@ public class Stock extends Element {
 
 
     private double applyPolicy(double candidateValue) {
-        if (Double.isNaN(candidateValue) || Double.isInfinite(candidateValue)) {
-            throw new IllegalArgumentException(
-                    "Stock '" + getName() + "' received non-finite value: " + candidateValue);
+        if (!Double.isFinite(candidateValue)) {
+            if (!warnedNonFinite) {
+                log.warn("Stock '{}' received non-finite value: {} — keeping previous value",
+                        getName(), candidateValue);
+                warnedNonFinite = true;
+            }
+            return value;
         }
         if (candidateValue >= 0) {
             return candidateValue;

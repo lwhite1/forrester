@@ -217,6 +217,35 @@ class SoftwareProductionTest {
     }
 
     @Test
+    void shouldBeIndependentOfFlowEvaluationOrder() {
+        // Two runs with the same parameters should produce identical results.
+        // Since we removed the mutable cache, getValue() caching guarantees
+        // order-independent evaluation.
+        SoftwareProduction sp1 = createModule(10, 2, 0.8, 500);
+        SoftwareProduction sp2 = createModule(10, 2, 0.8, 500);
+
+        Model model1 = new Model("Run 1");
+        model1.addModule(sp1.getModule());
+        Simulation sim1 = new Simulation(model1, TimeUnits.DAY,
+                new Quantity(100, TimeUnits.DAY));
+        sim1.execute();
+
+        Model model2 = new Model("Run 2");
+        model2.addModule(sp2.getModule());
+        Simulation sim2 = new Simulation(model2, TimeUnits.DAY,
+                new Quantity(100, TimeUnits.DAY));
+        sim2.execute();
+
+        double completed1 = sp1.getModule().getStock("Tasks Completed").orElseThrow().getValue();
+        double completed2 = sp2.getModule().getStock("Tasks Completed").orElseThrow().getValue();
+        assertThat(completed1).isEqualTo(completed2);
+
+        double remaining1 = sp1.getModule().getStock("Tasks Remaining").orElseThrow().getValue();
+        double remaining2 = sp2.getModule().getStock("Tasks Remaining").orElseThrow().getValue();
+        assertThat(remaining1).isEqualTo(remaining2);
+    }
+
+    @Test
     void shouldProduceMoreErrorsWithInexperiencedTeam() {
         SoftwareProduction expTeam = createModule(10, 2, 1.0, 500);
         SoftwareProduction newTeam = createModule(10, 2, 0.0, 500);

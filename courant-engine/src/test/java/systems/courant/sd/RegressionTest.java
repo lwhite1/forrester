@@ -223,18 +223,21 @@ public class RegressionTest {
     // --- Stock regressions ---
 
     @Test
-    public void stockShouldRejectNaN() {
-        // Fixed: NaN fell through applyPolicy to CLAMP_TO_ZERO
+    public void stockShouldRetainValueOnNaN() {
+        // Fixed (#545): NaN no longer crashes — stock retains previous value
         Stock stock = new Stock("S", 100, THING);
-        assertThrows(IllegalArgumentException.class, () -> stock.setValue(Double.NaN));
+        stock.setValue(Double.NaN);
+        assertEquals(100, stock.getValue(), 0.0);
     }
 
     @Test
-    public void stockShouldRejectInfinity() {
-        // Fixed: Infinity passed unchecked
+    public void stockShouldRetainValueOnInfinity() {
+        // Fixed (#545): Infinity no longer crashes — stock retains previous value
         Stock stock = new Stock("S", 100, THING);
-        assertThrows(IllegalArgumentException.class, () -> stock.setValue(Double.POSITIVE_INFINITY));
-        assertThrows(IllegalArgumentException.class, () -> stock.setValue(Double.NEGATIVE_INFINITY));
+        stock.setValue(Double.POSITIVE_INFINITY);
+        assertEquals(100, stock.getValue(), 0.0);
+        stock.setValue(Double.NEGATIVE_INFINITY);
+        assertEquals(100, stock.getValue(), 0.0);
     }
 
     @Test

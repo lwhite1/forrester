@@ -104,6 +104,35 @@ public class StockTest {
         assertEquals(100, stock.getValue(), 0.0);
     }
 
+    @Test
+    public void shouldRetainPreviousValueWhenSetToNaN() {
+        Stock stock = new Stock("Water", 100, GALLON_US);
+        stock.setValue(Double.NaN);
+        assertEquals(100, stock.getValue(), 0.0);
+    }
+
+    @Test
+    public void shouldRetainPreviousValueWhenSetToPositiveInfinity() {
+        Stock stock = new Stock("Water", 100, GALLON_US);
+        stock.setValue(Double.POSITIVE_INFINITY);
+        assertEquals(100, stock.getValue(), 0.0);
+    }
+
+    @Test
+    public void shouldRetainPreviousValueWhenSetToNegativeInfinity() {
+        Stock stock = new Stock("Water", 100, GALLON_US);
+        stock.setValue(Double.NEGATIVE_INFINITY);
+        assertEquals(100, stock.getValue(), 0.0);
+    }
+
+    @Test
+    public void shouldThrowOnNonFiniteInitialValue() {
+        assertThrows(IllegalArgumentException.class, () ->
+                new Stock("Bad", Double.NaN, GALLON_US));
+        assertThrows(IllegalArgumentException.class, () ->
+                new Stock("Bad", Double.POSITIVE_INFINITY, GALLON_US));
+    }
+
     private static Flow createConstantFlow(String name, double value, Unit unit) {
         return Flow.create(name, MINUTE, () -> new Quantity(value, unit));
     }
