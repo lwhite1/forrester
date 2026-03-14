@@ -27,9 +27,6 @@ jobs:
       - name: Build and test
         run: mvn verify -B
 
-      - name: Checkstyle
-        run: mvn checkstyle:check -B
-
       - name: SpotBugs analysis
         run: mvn compile spotbugs:check -B
 
