@@ -145,8 +145,18 @@ public class ExprCompiler {
                     return result;
                 };
             }
-            case EQ -> () -> Math.abs(left.getAsDouble() - right.getAsDouble()) < 1e-10 ? 1.0 : 0.0;
-            case NE -> () -> Math.abs(left.getAsDouble() - right.getAsDouble()) >= 1e-10 ? 1.0 : 0.0;
+            case EQ -> () -> {
+                double a = left.getAsDouble();
+                double b = right.getAsDouble();
+                return Math.abs(a - b) <= 1e-10 * Math.max(1.0, Math.max(Math.abs(a), Math.abs(b)))
+                        ? 1.0 : 0.0;
+            };
+            case NE -> () -> {
+                double a = left.getAsDouble();
+                double b = right.getAsDouble();
+                return Math.abs(a - b) > 1e-10 * Math.max(1.0, Math.max(Math.abs(a), Math.abs(b)))
+                        ? 1.0 : 0.0;
+            };
             case LT -> () -> left.getAsDouble() < right.getAsDouble() ? 1.0 : 0.0;
             case LE -> () -> left.getAsDouble() <= right.getAsDouble() ? 1.0 : 0.0;
             case GT -> () -> left.getAsDouble() > right.getAsDouble() ? 1.0 : 0.0;
