@@ -6,7 +6,7 @@ package systems.courant.sd.app.canvas;
  * exponential decay, goal-seeking, linear growth/decline, oscillation,
  * S-shaped growth, and overshoot-and-collapse.
  */
-final class BehaviorModeClassifier {
+public final class BehaviorModeClassifier {
 
     private BehaviorModeClassifier() {
     }
@@ -17,7 +17,7 @@ final class BehaviorModeClassifier {
      * @param values the time-series values (at least 4 data points required)
      * @return a short label describing the behavior, or empty string if unclassifiable
      */
-    static String classify(double[] values) {
+    public static String classify(double[] values) {
         if (values.length < 4) {
             return "";
         }

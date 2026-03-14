@@ -12,12 +12,12 @@ import java.util.Optional;
  * from a {@link ModelEditor}. Bridges definition-layer types to {@link CompositeUnit}
  * values for dimensional analysis.
  */
-final class EditorUnitContext implements DimensionalAnalyzer.UnitContext {
+public final class EditorUnitContext implements DimensionalAnalyzer.UnitContext {
 
     private final ModelEditor editor;
     private final UnitRegistry registry;
 
-    EditorUnitContext(ModelEditor editor, UnitRegistry registry) {
+    public EditorUnitContext(ModelEditor editor, UnitRegistry registry) {
         this.editor = editor;
         this.registry = registry;
     }

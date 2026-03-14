@@ -31,6 +31,8 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import systems.courant.sd.app.canvas.forms.InlineEditor;
+import systems.courant.sd.app.canvas.forms.TextFieldEquationField;
 
 /**
  * Attaches autocomplete behaviour to equation fields.
@@ -50,7 +52,7 @@ public final class EquationAutoComplete {
     private static final double POPUP_WIDTH = 360;
     private static final int MIN_PREFIX_LENGTH = 1;
 
-    static final List<String> BUILT_IN_FUNCTIONS = FunctionDocRegistry.allNames();
+    public static final List<String> BUILT_IN_FUNCTIONS = FunctionDocRegistry.allNames();
 
     private static final Set<String> FUNCTION_SET = Set.copyOf(BUILT_IN_FUNCTIONS);
 
@@ -60,7 +62,7 @@ public final class EquationAutoComplete {
 
     // ── Token record ────────────────────────────────────────────────────
 
-    record Token(String prefix, int start, int end) { }
+    public record Token(String prefix, int start, int end) { }
 
     /**
      * Describes the function call context at the caret position.
@@ -68,7 +70,7 @@ public final class EquationAutoComplete {
      * @param functionName the uppercase name of the enclosing function
      * @param paramIndex   the zero-based index of the parameter the caret is in
      */
-    record FunctionCallContext(String functionName, int paramIndex) { }
+    public record FunctionCallContext(String functionName, int paramIndex) { }
 
     // ── Public API ──────────────────────────────────────────────────────
 
@@ -79,7 +81,7 @@ public final class EquationAutoComplete {
      * @param editor      the model editor providing element names
      * @param excludeName the name of the element being edited (excluded from suggestions)
      */
-    static void attach(EquationField field, ModelEditor editor, String excludeName) {
+    public static void attach(EquationField field, ModelEditor editor, String excludeName) {
         detach(field);
         Node node = field.node();
         State state = new State(field, editor, excludeName);
@@ -113,7 +115,7 @@ public final class EquationAutoComplete {
     /**
      * Detaches autocomplete from the given {@link EquationField}, cleaning up listeners and popup.
      */
-    static void detach(EquationField field) {
+    public static void detach(EquationField field) {
         if (field == null) {
             return;
         }
@@ -139,7 +141,7 @@ public final class EquationAutoComplete {
     /**
      * Returns true if the autocomplete popup is currently showing for the given field.
      */
-    static boolean isPopupShowing(EquationField field) {
+    public static boolean isPopupShowing(EquationField field) {
         if (field == null) {
             return false;
         }
@@ -153,12 +155,12 @@ public final class EquationAutoComplete {
      * Attaches autocomplete to a plain {@link TextField}.
      * Convenience overload that wraps the field in a {@link TextFieldEquationField}.
      */
-    static void attach(TextField tf, ModelEditor editor, String excludeName) {
+    public static void attach(TextField tf, ModelEditor editor, String excludeName) {
         attach(new TextFieldEquationField(tf), editor, excludeName);
     }
 
     /** Detaches autocomplete from a plain {@link TextField}. */
-    static void detach(TextField tf) {
+    public static void detach(TextField tf) {
         if (tf == null) {
             return;
         }
@@ -166,7 +168,7 @@ public final class EquationAutoComplete {
     }
 
     /** Returns true if the autocomplete popup is showing for the given {@link TextField}. */
-    static boolean isPopupShowing(TextField tf) {
+    public static boolean isPopupShowing(TextField tf) {
         if (tf == null) {
             return false;
         }
@@ -175,7 +177,7 @@ public final class EquationAutoComplete {
 
     // ── Token extraction (package-private for testing) ──────────────────
 
-    static Token extractToken(String text, int caret) {
+    public static Token extractToken(String text, int caret) {
         if (text == null || caret <= 0 || caret > text.length()) {
             return null;
         }
@@ -199,7 +201,7 @@ public final class EquationAutoComplete {
      *
      * @return the function call context, or null if the caret is not inside a function call
      */
-    static FunctionCallContext detectFunctionContext(String text, int caret) {
+    public static FunctionCallContext detectFunctionContext(String text, int caret) {
         if (text == null || caret <= 0 || caret > text.length()) {
             return null;
         }
@@ -242,13 +244,13 @@ public final class EquationAutoComplete {
     /**
      * Returns plain name strings for backward-compatible tests.
      */
-    static List<String> getSuggestions(ModelEditor editor, String excludeName) {
+    public static List<String> getSuggestions(ModelEditor editor, String excludeName) {
         return getRichSuggestions(editor, excludeName).stream()
                 .map(AutoCompleteSuggestion::name)
                 .toList();
     }
 
-    static List<AutoCompleteSuggestion> getRichSuggestions(ModelEditor editor, String excludeName) {
+    public static List<AutoCompleteSuggestion> getRichSuggestions(ModelEditor editor, String excludeName) {
         String excludeUnderscore = excludeName != null
                 ? excludeName.replace(' ', '_') : null;
 
@@ -282,7 +284,7 @@ public final class EquationAutoComplete {
 
     // ── Filtering (package-private for testing) ─────────────────────────
 
-    static List<String> filterSuggestions(List<String> all, String prefix) {
+    public static List<String> filterSuggestions(List<String> all, String prefix) {
         if (prefix == null || prefix.isEmpty()) {
             return List.of();
         }
@@ -296,7 +298,7 @@ public final class EquationAutoComplete {
         return result;
     }
 
-    static List<AutoCompleteSuggestion> filterRichSuggestions(
+    public static List<AutoCompleteSuggestion> filterRichSuggestions(
             List<AutoCompleteSuggestion> all, String prefix) {
         if (prefix == null || prefix.isEmpty()) {
             return List.of();
@@ -338,7 +340,7 @@ public final class EquationAutoComplete {
         }
     }
 
-    static boolean isBuiltInFunction(String name) {
+    public static boolean isBuiltInFunction(String name) {
         return FUNCTION_SET.contains(name);
     }
 

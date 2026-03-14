@@ -19,6 +19,10 @@ import java.util.List;
 import java.util.Set;
 
 import javax.imageio.ImageIO;
+import systems.courant.sd.app.canvas.controllers.CausalLinkCreationController;
+import systems.courant.sd.app.canvas.controllers.FlowCreationController;
+import systems.courant.sd.app.canvas.controllers.InfoLinkCreationController;
+import systems.courant.sd.app.canvas.renderers.CanvasRenderer;
 
 /**
  * Exports the diagram to a PNG, JPEG, or SVG file.

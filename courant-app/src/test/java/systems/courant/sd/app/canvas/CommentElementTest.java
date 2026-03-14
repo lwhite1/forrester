@@ -15,6 +15,8 @@ import org.junit.jupiter.api.Test;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import systems.courant.sd.app.canvas.controllers.CopyPasteController;
+import systems.courant.sd.app.canvas.controllers.SelectionController;
 
 @DisplayName("Comment Element")
 class CommentElementTest {

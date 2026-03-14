@@ -16,7 +16,7 @@ import java.util.stream.Collectors;
  * Computes syntax highlighting {@link StyleSpans} for Courant equation text.
  * Recognizes built-in function keywords, numeric literals, operators, and parentheses.
  */
-final class EquationHighlighter {
+public final class EquationHighlighter {
 
     private EquationHighlighter() {
     }
@@ -45,7 +45,7 @@ final class EquationHighlighter {
      * @param text the equation source text
      * @return style spans mapping character ranges to CSS style class collections
      */
-    static StyleSpans<Collection<String>> computeHighlighting(String text) {
+    public static StyleSpans<Collection<String>> computeHighlighting(String text) {
         Matcher matcher = TOKEN_PATTERN.matcher(text);
         StyleSpansBuilder<Collection<String>> builder = new StyleSpansBuilder<>();
         int lastEnd = 0;

@@ -28,6 +28,14 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import systems.courant.sd.app.canvas.forms.CldVariableForm;
+import systems.courant.sd.app.canvas.forms.CommentForm;
+import systems.courant.sd.app.canvas.forms.ElementForm;
+import systems.courant.sd.app.canvas.forms.FlowForm;
+import systems.courant.sd.app.canvas.forms.FormContext;
+import systems.courant.sd.app.canvas.forms.LookupForm;
+import systems.courant.sd.app.canvas.forms.StockForm;
+import systems.courant.sd.app.canvas.forms.VariableForm;
 
 /**
  * Right-side panel that displays properties of the currently selected canvas element.

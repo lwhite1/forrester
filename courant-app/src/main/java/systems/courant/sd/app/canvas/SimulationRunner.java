@@ -89,7 +89,7 @@ public class SimulationRunner {
      * Event handler that captures column names at simulation start and
      * stock/variable values at each time step.
      */
-    static class DataCaptureHandler implements EventHandler {
+    public static class DataCaptureHandler implements EventHandler {
 
         private final List<String> columnNames = new ArrayList<>();
         private final List<double[]> rows = new ArrayList<>();

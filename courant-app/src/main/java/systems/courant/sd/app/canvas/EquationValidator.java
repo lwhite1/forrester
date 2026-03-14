@@ -14,7 +14,7 @@ import java.util.Set;
  * Validates equation strings for syntax and reference errors.
  * Used for real-time feedback in equation fields.
  */
-final class EquationValidator {
+public final class EquationValidator {
 
     private static final Set<String> BUILTIN_NAMES = Set.of(
             "TIME", "DT", "Pi", "PI", "E");
@@ -28,7 +28,7 @@ final class EquationValidator {
      * @param valid   true if no errors were found
      * @param message error description, or null if valid
      */
-    record Result(boolean valid, String message) {
+    public record Result(boolean valid, String message) {
         static final Result OK = new Result(true, null);
     }
 
@@ -41,7 +41,7 @@ final class EquationValidator {
      * @param selfName    the name of the element being edited (excluded from self-reference check)
      * @return validation result
      */
-    static Result validate(String equation, ModelEditor editor, String selfName) {
+    public static Result validate(String equation, ModelEditor editor, String selfName) {
         if (equation == null || equation.isBlank()) {
             return Result.OK; // blank handled by commit logic
         }
@@ -112,7 +112,7 @@ final class EquationValidator {
      * Finds the closest match for an unknown name using Levenshtein distance.
      * Returns null if no reasonably close match exists (distance > 3).
      */
-    static String findClosestMatch(String unknown, Set<String> knownNames) {
+    public static String findClosestMatch(String unknown, Set<String> knownNames) {
         String best = null;
         int bestDist = Integer.MAX_VALUE;
         String lowerUnknown = unknown.toLowerCase();
@@ -130,7 +130,7 @@ final class EquationValidator {
         return null;
     }
 
-    static int levenshtein(String a, String b) {
+    public static int levenshtein(String a, String b) {
         int[] prev = new int[b.length() + 1];
         int[] curr = new int[b.length() + 1];
         for (int j = 0; j <= b.length(); j++) {

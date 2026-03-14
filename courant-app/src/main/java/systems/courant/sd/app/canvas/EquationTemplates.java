@@ -8,7 +8,7 @@ import javafx.scene.control.MenuItem;
  * Provides equation template snippets for common system dynamics patterns.
  * Templates insert placeholder variable names that users can select and replace.
  */
-final class EquationTemplates {
+public final class EquationTemplates {
 
     private EquationTemplates() {
     }
@@ -17,7 +17,7 @@ final class EquationTemplates {
      * Creates a context menu of equation templates. Selecting a template inserts
      * the snippet into the given equation field, replacing any existing content.
      */
-    static ContextMenu createMenu(EquationField equationField) {
+    public static ContextMenu createMenu(EquationField equationField) {
         ContextMenu menu = new ContextMenu();
 
         Menu flowPatterns = new Menu("Flow patterns");

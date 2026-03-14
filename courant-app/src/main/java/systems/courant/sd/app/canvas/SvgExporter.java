@@ -17,6 +17,8 @@ import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Locale;
+import systems.courant.sd.app.canvas.renderers.CanvasRenderer;
+import systems.courant.sd.app.canvas.renderers.ElementRenderer;
 
 /**
  * Exports the diagram to an SVG file by translating canvas drawing operations
@@ -446,7 +448,7 @@ public final class SvgExporter {
                 cx, cy - half, cx + half, cy, cx, cy + half, cx - half, cy);
         w.printf(Locale.US,
                 "  <polygon points=\"%s\" fill=\"%s\"/>%n",
-                points, svgColor(ColorPalette.STOCK_FILL));
+                points, svgColor(ColorPalette.ELEMENT_FILL));
         w.printf(Locale.US,
                 "  <polygon points=\"%s\" fill=\"none\" stroke=\"%s\" stroke-width=\"1.5\"/>%n",
                 points, svgColor(ColorPalette.AUX_BORDER));
@@ -472,7 +474,7 @@ public final class SvgExporter {
         w.printf(Locale.US,
                 "  <rect x=\"%.2f\" y=\"%.2f\" width=\"%.2f\" height=\"%.2f\" rx=\"%.1f\" " +
                 "fill=\"%s\"/>%n",
-                x, y, width, height, r, svgColor(ColorPalette.STOCK_FILL));
+                x, y, width, height, r, svgColor(ColorPalette.ELEMENT_FILL));
 
         // Border: dashed for literals, solid for formulas
         if (isLiteral) {
@@ -526,7 +528,7 @@ public final class SvgExporter {
         w.printf(Locale.US,
                 "  <rect x=\"%.2f\" y=\"%.2f\" width=\"%.2f\" height=\"%.2f\" rx=\"%.1f\" " +
                 "fill=\"%s\"/>%n",
-                x, y, width, height, r, svgColor(ColorPalette.STOCK_FILL));
+                x, y, width, height, r, svgColor(ColorPalette.ELEMENT_FILL));
 
         // Border
         w.printf(Locale.US,
@@ -560,7 +562,7 @@ public final class SvgExporter {
         w.printf(Locale.US,
                 "  <rect x=\"%.2f\" y=\"%.2f\" width=\"%.2f\" height=\"%.2f\" rx=\"%.1f\" " +
                 "fill=\"%s\"/>%n",
-                x, y, width, height, r, svgColor(ColorPalette.STOCK_FILL));
+                x, y, width, height, r, svgColor(ColorPalette.ELEMENT_FILL));
 
         // Dot-dash border
         w.printf(Locale.US,

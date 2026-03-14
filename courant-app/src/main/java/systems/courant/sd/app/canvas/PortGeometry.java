@@ -1,5 +1,6 @@
 package systems.courant.sd.app.canvas;
 
+import systems.courant.sd.app.canvas.renderers.ElementRenderer;
 /**
  * Shared port position calculations for module input/output ports.
  * Used by both the renderer ({@link ElementRenderer}) and hit-tester ({@link HitTester}).

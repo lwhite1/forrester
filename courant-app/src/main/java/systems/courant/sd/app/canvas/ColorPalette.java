@@ -11,7 +11,8 @@ public final class ColorPalette {
     }
 
     public static final Color STOCK_BORDER = Color.web("#2C3E50");
-    public static final Color STOCK_FILL = Color.WHITE;
+    public static final Color STOCK_FILL = Color.web("#EBF5FB");
+    public static final Color ELEMENT_FILL = Color.WHITE;
     public static final Color AUX_BORDER = Color.web("#7F8C8D");
     /** Border color for literal-valued variables (dashed). */
     public static final Color AUX_LITERAL_BORDER = Color.web("#BDC3C7");

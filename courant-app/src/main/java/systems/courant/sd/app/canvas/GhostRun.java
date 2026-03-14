@@ -16,7 +16,7 @@ import java.util.stream.Collectors;
  * @param colorIndex index into {@link ChartUtils#GHOST_COLORS}
  * @param parameters parameter name-to-value snapshot at time of run
  */
-record GhostRun(SimulationRunner.SimulationResult result,
+public record GhostRun(SimulationRunner.SimulationResult result,
                 String name,
                 int colorIndex,
                 Map<String, Double> parameters) {
@@ -24,14 +24,14 @@ record GhostRun(SimulationRunner.SimulationResult result,
     private static final DateTimeFormatter TIME_FMT = DateTimeFormatter.ofPattern("HH:mm:ss");
     private static final int MAX_SHOWN_PARAMS = 2;
 
-    GhostRun {
+    public GhostRun {
         parameters = parameters == null ? Map.of() : Map.copyOf(parameters);
     }
 
     /**
      * Returns a new GhostRun with the given name, preserving all other fields.
      */
-    GhostRun withName(String newName) {
+    public GhostRun withName(String newName) {
         return new GhostRun(result, newName, colorIndex, parameters);
     }
 
@@ -46,7 +46,7 @@ record GhostRun(SimulationRunner.SimulationResult result,
      * @param previousParams  parameter snapshot from the previous run (may be empty)
      * @return a descriptive run name
      */
-    static String generateName(int runNumber, Map<String, Double> currentParams,
+    public static String generateName(int runNumber, Map<String, Double> currentParams,
                                Map<String, Double> previousParams) {
         if (currentParams == null || currentParams.isEmpty()) {
             return "Run " + runNumber + " (" + LocalTime.now().format(TIME_FMT) + ")";
@@ -79,7 +79,7 @@ record GhostRun(SimulationRunner.SimulationResult result,
     /**
      * Builds a tooltip string showing the run name and all parameter values.
      */
-    String tooltipText() {
+    public String tooltipText() {
         if (parameters.isEmpty()) {
             return name;
         }

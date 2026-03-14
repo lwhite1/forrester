@@ -20,14 +20,14 @@ import java.util.function.UnaryOperator;
  *
  * <p>Extracted from {@link ModelEditor} to isolate equation manipulation logic.</p>
  */
-final class EquationReferenceManager {
+public final class EquationReferenceManager {
 
     private static final Logger log = LoggerFactory.getLogger(EquationReferenceManager.class);
 
     private final List<FlowDef> flows;
     private final List<VariableDef> variables;
 
-    EquationReferenceManager(List<FlowDef> flows, List<VariableDef> variables) {
+    public EquationReferenceManager(List<FlowDef> flows, List<VariableDef> variables) {
         this.flows = flows;
         this.variables = variables;
     }
@@ -36,7 +36,7 @@ final class EquationReferenceManager {
      * Replaces all occurrences of {@code oldToken} with {@code newToken} in every
      * flow and variable equation, respecting word boundaries.
      */
-    void updateEquationReferences(String oldToken, String newToken) {
+    public void updateEquationReferences(String oldToken, String newToken) {
         if (oldToken.equals(newToken)) {
             return;
         }
@@ -61,7 +61,7 @@ final class EquationReferenceManager {
      * Finds the flow or auxiliary with the given name and applies a transform to its equation.
      * Returns true if the equation was actually changed.
      */
-    boolean updateEquationByName(String targetName, UnaryOperator<String> transform) {
+    public boolean updateEquationByName(String targetName, UnaryOperator<String> transform) {
         for (int i = 0; i < flows.size(); i++) {
             FlowDef f = flows.get(i);
             if (f.name().equals(targetName)) {
@@ -93,7 +93,7 @@ final class EquationReferenceManager {
      * If the equation is exactly "0", replaces it with the token.
      * Otherwise appends " * token" to the equation.
      */
-    boolean addConnectionReference(String elementName, String token) {
+    public boolean addConnectionReference(String elementName, String token) {
         for (int i = 0; i < flows.size(); i++) {
             FlowDef f = flows.get(i);
             if (f.name().equals(elementName)) {
@@ -129,7 +129,7 @@ final class EquationReferenceManager {
      * Parses the equation to an AST, renames matching references, and stringifies
      * the result. Falls back to word-boundary string replacement if parsing fails.
      */
-    static String replaceToken(String equation, String oldToken, String newToken) {
+    public static String replaceToken(String equation, String oldToken, String newToken) {
         if (equation == null || equation.isBlank()) {
             return equation;
         }
@@ -151,7 +151,7 @@ final class EquationReferenceManager {
      * Fallback word-boundary-aware string token replacement.
      * Used when the equation cannot be parsed to an AST.
      */
-    static String replaceTokenByString(String equation, String oldToken, String newToken) {
+    public static String replaceTokenByString(String equation, String oldToken, String newToken) {
         StringBuilder result = new StringBuilder();
         int len = equation.length();
         int tokenLen = oldToken.length();
@@ -180,7 +180,7 @@ final class EquationReferenceManager {
         return result.toString();
     }
 
-    static boolean isTokenChar(char c) {
+    public static boolean isTokenChar(char c) {
         return Character.isLetterOrDigit(c) || c == '_';
     }
 }

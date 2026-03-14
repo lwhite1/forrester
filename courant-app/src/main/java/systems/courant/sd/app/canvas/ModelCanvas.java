@@ -26,6 +26,23 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Consumer;
+import systems.courant.sd.app.canvas.controllers.CanvasContextMenuController;
+import systems.courant.sd.app.canvas.controllers.CausalLinkCreationController;
+import systems.courant.sd.app.canvas.controllers.CausalTraceController;
+import systems.courant.sd.app.canvas.controllers.ConnectionRerouteController;
+import systems.courant.sd.app.canvas.controllers.CopyPasteController;
+import systems.courant.sd.app.canvas.controllers.DragController;
+import systems.courant.sd.app.canvas.controllers.FlowCreationController;
+import systems.courant.sd.app.canvas.controllers.InfoLinkCreationController;
+import systems.courant.sd.app.canvas.controllers.InlineEditController;
+import systems.courant.sd.app.canvas.controllers.LoopHighlightController;
+import systems.courant.sd.app.canvas.controllers.MarqueeController;
+import systems.courant.sd.app.canvas.controllers.ModuleNavigationController;
+import systems.courant.sd.app.canvas.controllers.ReattachController;
+import systems.courant.sd.app.canvas.controllers.ResizeController;
+import systems.courant.sd.app.canvas.controllers.SelectionController;
+import systems.courant.sd.app.canvas.controllers.TooltipController;
+import systems.courant.sd.app.canvas.renderers.CanvasRenderer;
 
 /**
  * Canvas component that renders a model using the Layered Flow Diagram visual language.
@@ -257,7 +274,7 @@ public class ModelCanvas extends Canvas {
     /**
      * Returns whether a resize redraw is pending (visible for testing).
      */
-    boolean isResizeRedrawScheduled() {
+    public boolean isResizeRedrawScheduled() {
         return resizeRedrawScheduled;
     }
 
@@ -549,7 +566,7 @@ public class ModelCanvas extends Canvas {
                 canvasState.toViewDef());
     }
 
-    void saveUndoState(String label) {
+    public void saveUndoState(String label) {
         if (undoManager != null && editor != null) {
             undoManager.pushUndo(captureSnapshot(), label);
         }
@@ -695,11 +712,11 @@ public class ModelCanvas extends Canvas {
 
     // --- Package-private methods for InputDispatcher ---
 
-    CanvasState canvasState() {
+    public CanvasState canvasState() {
         return canvasState;
     }
 
-    Viewport viewport() {
+    public Viewport viewport() {
         return viewport;
     }
 
@@ -711,11 +728,11 @@ public class ModelCanvas extends Canvas {
         return connectors;
     }
 
-    void requestRedraw() {
+    public void requestRedraw() {
         redraw();
     }
 
-    void regenerateConnectors() {
+    public void regenerateConnectors() {
         if (editor == null) {
             return;
         }
@@ -727,7 +744,7 @@ public class ModelCanvas extends Canvas {
      * Schedules connector regeneration to coalesce rapid-fire model mutations (#204).
      * Multiple calls within the same frame result in a single regeneration + redraw.
      */
-    void scheduleRegenerateConnectors() {
+    public void scheduleRegenerateConnectors() {
         if (!connectorRegenerationScheduled) {
             connectorRegenerationScheduled = true;
             Platform.runLater(() -> {
@@ -742,21 +759,21 @@ public class ModelCanvas extends Canvas {
     /**
      * Returns whether a connector regeneration is pending (visible for testing).
      */
-    boolean isConnectorRegenerationScheduled() {
+    public boolean isConnectorRegenerationScheduled() {
         return connectorRegenerationScheduled;
     }
 
-    void setSelectedConnection(ConnectionId connection, boolean isCausal) {
+    public void setSelectedConnection(ConnectionId connection, boolean isCausal) {
         this.selectedConnection = connection;
         this.selectedIsCausalLink = isCausal;
     }
 
-    void clearSelectedConnection() {
+    public void clearSelectedConnection() {
         this.selectedConnection = null;
         this.selectedIsCausalLink = false;
     }
 
-    void deleteSelectedOrConnection() {
+    public void deleteSelectedOrConnection() {
         if (editor == null) {
             return;
         }
@@ -779,7 +796,7 @@ public class ModelCanvas extends Canvas {
         }
     }
 
-    void handleFlowClick(double worldX, double worldY) {
+    public void handleFlowClick(double worldX, double worldY) {
         if (editor == null) {
             return;
         }
@@ -795,7 +812,7 @@ public class ModelCanvas extends Canvas {
         fireStatusChanged();
     }
 
-    void handleCausalLinkClick(double worldX, double worldY) {
+    public void handleCausalLinkClick(double worldX, double worldY) {
         if (editor == null) {
             return;
         }
@@ -809,7 +826,7 @@ public class ModelCanvas extends Canvas {
         fireStatusChanged();
     }
 
-    void handleInfoLinkClick(double worldX, double worldY) {
+    public void handleInfoLinkClick(double worldX, double worldY) {
         if (editor == null) {
             return;
         }
@@ -823,7 +840,7 @@ public class ModelCanvas extends Canvas {
         fireStatusChanged();
     }
 
-    void createElementAt(double worldX, double worldY) {
+    public void createElementAt(double worldX, double worldY) {
         if (editor == null) {
             return;
         }
@@ -837,25 +854,25 @@ public class ModelCanvas extends Canvas {
         }
     }
 
-    void startInlineEdit(String elementName) {
+    public void startInlineEdit(String elementName) {
         if (editor == null) {
             return;
         }
         inlineEdit.startEdit(elementName, canvasState, editor, viewport, inlineCallbacks);
     }
 
-    void updateTooltip(String elementName, MouseEvent event) {
+    public void updateTooltip(String elementName, MouseEvent event) {
         List<ValidationIssue> issues = elementName != null
                 ? elementIssueDetails.getOrDefault(elementName, List.of())
                 : List.of();
         tooltipController.update(elementName, event, this, canvasState, editor, issues);
     }
 
-    void updateCloudTooltip(FlowEndpointCalculator.CloudHit cloudHit, MouseEvent event) {
+    public void updateCloudTooltip(FlowEndpointCalculator.CloudHit cloudHit, MouseEvent event) {
         tooltipController.updateCloud(cloudHit, event, this);
     }
 
-    void resetToolToSelect() {
+    public void resetToolToSelect() {
         if (toolBar != null) {
             toolBar.resetToSelect();
         } else {
@@ -1148,18 +1165,18 @@ public class ModelCanvas extends Canvas {
 
     // --- Context menus (delegated to CanvasContextMenuController) ---
 
-    void showElementContextMenu(String elementName, double screenX, double screenY) {
+    public void showElementContextMenu(String elementName, double screenX, double screenY) {
         contextMenuController.showElementContextMenu(
                 this, elementName, canvasState, screenX, screenY, contextMenuCallbacks);
     }
 
-    void showGeneralElementContextMenu(String elementName,
+    public void showGeneralElementContextMenu(String elementName,
                                        double screenX, double screenY) {
         contextMenuController.showGeneralElementContextMenu(
                 this, elementName, canvasState, screenX, screenY, contextMenuCallbacks);
     }
 
-    void showCausalLinkContextMenu(ConnectionId link,
+    public void showCausalLinkContextMenu(ConnectionId link,
                                    double screenX, double screenY) {
         if (editor == null) {
             return;
@@ -1168,13 +1185,13 @@ public class ModelCanvas extends Canvas {
                 this, link, editor, screenX, screenY, contextMenuCallbacks);
     }
 
-    void showInfoLinkContextMenu(ConnectionId link,
+    public void showInfoLinkContextMenu(ConnectionId link,
                                  double screenX, double screenY) {
         contextMenuController.showInfoLinkContextMenu(
                 this, link, screenX, screenY, contextMenuCallbacks);
     }
 
-    void showCanvasContextMenu(double worldX, double worldY,
+    public void showCanvasContextMenu(double worldX, double worldY,
                                double screenX, double screenY) {
         contextMenuController.showCanvasContextMenu(
                 this, worldX, worldY, screenX, screenY, contextMenuCallbacks);
@@ -1209,7 +1226,7 @@ public class ModelCanvas extends Canvas {
 
     // --- Causal tracing ---
 
-    void traceUpstream(String elementName) {
+    public void traceUpstream(String elementName) {
         if (editor == null) {
             return;
         }
@@ -1219,7 +1236,7 @@ public class ModelCanvas extends Canvas {
         redraw();
     }
 
-    void traceDownstream(String elementName) {
+    public void traceDownstream(String elementName) {
         if (editor == null) {
             return;
         }
@@ -1229,11 +1246,11 @@ public class ModelCanvas extends Canvas {
         redraw();
     }
 
-    boolean isTraceActive() {
+    public boolean isTraceActive() {
         return traceController.isActive();
     }
 
-    void clearTrace() {
+    public void clearTrace() {
         traceController.clearTrace();
     }
 
@@ -1241,7 +1258,7 @@ public class ModelCanvas extends Canvas {
      * Returns the set of elements whose equations reference the named element
      * (direct dependents — "where used").
      */
-    Set<String> whereUsed(String elementName) {
+    public Set<String> whereUsed(String elementName) {
         if (editor == null) {
             return Set.of();
         }
@@ -1254,7 +1271,7 @@ public class ModelCanvas extends Canvas {
      * Returns the set of elements that the named element's equation references
      * (direct dependencies — "uses").
      */
-    Set<String> uses(String elementName) {
+    public Set<String> uses(String elementName) {
         if (editor == null) {
             return Set.of();
         }
@@ -1263,7 +1280,7 @@ public class ModelCanvas extends Canvas {
         return graph.dependenciesOf(elementName);
     }
 
-    void showWhereUsed(String elementName) {
+    public void showWhereUsed(String elementName) {
         Set<String> dependents = whereUsed(elementName);
         canvasState.clearSelection();
         dependents.forEach(canvasState::addToSelection);
@@ -1271,7 +1288,7 @@ public class ModelCanvas extends Canvas {
         redraw();
     }
 
-    void showUses(String elementName) {
+    public void showUses(String elementName) {
         Set<String> dependencies = uses(elementName);
         canvasState.clearSelection();
         dependencies.forEach(canvasState::addToSelection);

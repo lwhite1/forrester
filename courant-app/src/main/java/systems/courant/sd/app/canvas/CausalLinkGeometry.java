@@ -12,10 +12,10 @@ import java.util.List;
 public final class CausalLinkGeometry {
 
     /** Default perpendicular offset for the curve control point. */
-    static final double DEFAULT_BULGE = 40;
+    public static final double DEFAULT_BULGE = 40;
 
     /** Radius for self-loop arcs. */
-    static final double SELF_LOOP_RADIUS = 50;
+    public static final double SELF_LOOP_RADIUS = 50;
 
     /** Number of sample segments for hit-testing a curve. */
     private static final int HIT_TEST_SAMPLES = 20;

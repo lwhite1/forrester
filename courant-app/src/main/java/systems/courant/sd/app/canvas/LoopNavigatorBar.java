@@ -276,7 +276,7 @@ public class LoopNavigatorBar extends HBox {
         updateFilterStyles();
     }
 
-    static String formatType(LoopType type) {
+    public static String formatType(LoopType type) {
         if (type == null) {
             return null;
         }
