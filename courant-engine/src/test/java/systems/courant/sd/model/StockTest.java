@@ -133,6 +133,19 @@ public class StockTest {
                 () -> new Stock("Water", Double.POSITIVE_INFINITY, GALLON_US));
     }
 
+    @Test
+    public void shouldResetNonFiniteWarningFlag() {
+        Stock stock = new Stock("Water", 100, GALLON_US);
+        // Trigger the warning
+        stock.setValue(Double.NaN);
+        assertEquals(100, stock.getValue(), 0.0);
+
+        // Reset and verify a new warning can fire (no NPE or suppression)
+        stock.resetWarnings();
+        stock.setValue(Double.NaN);
+        assertEquals(100, stock.getValue(), 0.0);
+    }
+
     private static Flow createConstantFlow(String name, double value, Unit unit) {
         return Flow.create(name, MINUTE, () -> new Quantity(value, unit));
     }

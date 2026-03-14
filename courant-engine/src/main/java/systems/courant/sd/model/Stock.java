@@ -135,6 +135,14 @@ public class Stock extends Element {
     }
 
     /**
+     * Resets the non-finite warning flag so that warnings will fire again
+     * on the next simulation re-run.
+     */
+    public void resetWarnings() {
+        warnedNonFinite = false;
+    }
+
+    /**
      * Returns the policy that governs how this stock handles negative values.
      */
     public NegativeValuePolicy getNegativeValuePolicy() {
