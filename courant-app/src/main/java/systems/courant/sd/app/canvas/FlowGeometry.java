@@ -1,7 +1,6 @@
 package systems.courant.sd.app.canvas;
 
 import systems.courant.sd.model.def.ElementType;
-import systems.courant.sd.app.canvas.renderers.CanvasRenderer;
 
 /**
  * Shared geometry utilities for flow and connection rendering/hit-testing.

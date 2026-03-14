@@ -16,41 +16,41 @@ import systems.courant.sd.app.canvas.forms.TextFieldEquationField;
 public interface EquationField {
 
     /** Returns the current text content. */
-    public String getText();
+    String getText();
 
     /** Replaces the entire text content. */
-    public void setText(String text);
+    void setText(String text);
 
     /** Selects all text. */
-    public void selectAll();
+    void selectAll();
 
     /** Returns the current caret (cursor) position as a character offset. */
-    public int getCaretPosition();
+    int getCaretPosition();
 
     /** Moves the caret to the given character offset. */
-    public void positionCaret(int position);
+    void positionCaret(int position);
 
     /** Requests keyboard focus for this control. */
-    public void requestFocus();
+    void requestFocus();
 
     /** Observable text content for attaching change listeners. */
-    public ObservableValue<String> textObservable();
+    ObservableValue<String> textObservable();
 
     /** Observable caret position for attaching change listeners. */
-    public ObservableValue<Number> caretPositionObservable();
+    ObservableValue<Number> caretPositionObservable();
 
     /** Observable focus state. */
-    public ReadOnlyBooleanProperty focusedProperty();
+    ReadOnlyBooleanProperty focusedProperty();
 
     /** Returns the underlying JavaFX {@link Node} for layout, event filters, and properties. */
-    public Node node();
+    Node node();
 
     /** Sets an inline CSS style on the control (e.g., error border). */
-    public void setFieldStyle(String style);
+    void setFieldStyle(String style);
 
     /** Sets the action handler invoked when the user presses Enter to commit. */
-    public void setOnAction(EventHandler<ActionEvent> handler);
+    void setOnAction(EventHandler<ActionEvent> handler);
 
     /** Returns the current action handler. */
-    public EventHandler<ActionEvent> getOnAction();
+    EventHandler<ActionEvent> getOnAction();
 }

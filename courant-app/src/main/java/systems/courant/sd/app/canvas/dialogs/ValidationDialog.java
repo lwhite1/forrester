@@ -37,7 +37,7 @@ import systems.courant.sd.app.canvas.Styles;
  */
 public class ValidationDialog extends Dialog<Void> {
 
-    private static final Map<Stage, ValidationDialog> openInstances = new WeakHashMap<>();
+    private static final Map<Stage, ValidationDialog> OPEN_INSTANCES = new WeakHashMap<>();
 
     private final TableView<ValidationIssue> table;
     private final Label summaryLabel;
@@ -56,7 +56,7 @@ public class ValidationDialog extends Dialog<Void> {
      */
     public static void showOrUpdate(ValidationResult result, Consumer<String> onSelectElement,
                                     Stage owner) {
-        ValidationDialog existing = openInstances.get(owner);
+        ValidationDialog existing = OPEN_INSTANCES.get(owner);
         if (existing != null && existing.isShowing()) {
             existing.updateResult(result);
             existing.onSelectElement = onSelectElement;
@@ -66,7 +66,7 @@ public class ValidationDialog extends Dialog<Void> {
             return;
         }
         ValidationDialog dialog = new ValidationDialog(result, onSelectElement, owner);
-        openInstances.put(owner, dialog);
+        OPEN_INSTANCES.put(owner, dialog);
         dialog.show();
     }
 
@@ -86,9 +86,9 @@ public class ValidationDialog extends Dialog<Void> {
      * or {@code null} if none is showing. Visible for testing.
      */
     public static ValidationDialog getOpenInstance(Stage owner) {
-        ValidationDialog instance = openInstances.get(owner);
+        ValidationDialog instance = OPEN_INSTANCES.get(owner);
         if (instance != null && !instance.isShowing()) {
-            openInstances.remove(owner);
+            OPEN_INSTANCES.remove(owner);
             return null;
         }
         return instance;
@@ -177,7 +177,7 @@ public class ValidationDialog extends Dialog<Void> {
 
         setResultConverter(button -> null);
 
-        setOnHidden(e -> openInstances.values().remove(this));
+        setOnHidden(e -> OPEN_INSTANCES.values().remove(this));
     }
 
     /**

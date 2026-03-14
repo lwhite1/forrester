@@ -612,18 +612,12 @@ public class ModelWindow {
         zoomToFitItem.setId("menuZoomToFit");
         zoomToFitItem.setAccelerator(new KeyCodeCombination(KeyCode.F,
                 KeyCombination.SHORTCUT_DOWN, KeyCombination.SHIFT_DOWN));
-        zoomToFitItem.setOnAction(e -> {
-            canvas.zoomToFit();
-            canvas.requestFocus();
-        });
+        zoomToFitItem.setOnAction(e -> { canvas.zoomToFit(); canvas.requestFocus(); });
 
         MenuItem resetZoomItem = new MenuItem("Reset Zoom");
         resetZoomItem.setId("menuResetZoom");
         resetZoomItem.setAccelerator(new KeyCodeCombination(KeyCode.DIGIT0, KeyCombination.SHORTCUT_DOWN));
-        resetZoomItem.setOnAction(e -> {
-            canvas.resetZoom();
-            canvas.requestFocus();
-        });
+        resetZoomItem.setOnAction(e -> { canvas.resetZoom(); canvas.requestFocus(); });
 
         validationIssuesItem = new MenuItem("Validation Issues\u2026");
         validationIssuesItem.setId("menuValidationIssues");
@@ -632,24 +626,17 @@ public class ModelWindow {
 
         CheckMenuItem hideAuxItem = new CheckMenuItem("Hide Variables");
         hideAuxItem.setId("menuHideVariables");
-        hideAuxItem.setOnAction(e -> {
-            canvas.setHideVariables(hideAuxItem.isSelected());
-            canvas.requestFocus();
-        });
+        hideAuxItem.setOnAction(e -> { canvas.setHideVariables(hideAuxItem.isSelected()); canvas.requestFocus(); });
 
         CheckMenuItem showDelayItem = new CheckMenuItem("Show Delay Indicators");
         showDelayItem.setId("menuShowDelayIndicators");
         showDelayItem.setOnAction(e -> {
-            canvas.setShowDelayBadges(showDelayItem.isSelected());
-            canvas.requestFocus();
-        });
+            canvas.setShowDelayBadges(showDelayItem.isSelected()); canvas.requestFocus(); });
 
         CheckMenuItem hideInfoLinksItem = new CheckMenuItem("Hide Info Links");
         hideInfoLinksItem.setId("menuHideInfoLinks");
         hideInfoLinksItem.setOnAction(e -> {
-            canvas.setHideInfoLinks(hideInfoLinksItem.isSelected());
-            canvas.requestFocus();
-        });
+            canvas.setHideInfoLinks(hideInfoLinksItem.isSelected()); canvas.requestFocus(); });
 
         viewMenu.getItems().addAll(commandPaletteItem, new SeparatorMenuItem(),
                 zoomToFitItem, resetZoomItem, new SeparatorMenuItem(),
@@ -713,35 +700,29 @@ public class ModelWindow {
         contextHelpItem.setOnAction(e -> showContextHelp());
 
         MenuItem gettingStartedItem = new MenuItem("Getting Started\u2026");
-        gettingStartedItem.setOnAction(e -> {
-            quickstartWindow = showHelpWindow(quickstartWindow, QuickstartDialog::new);
-        });
+        gettingStartedItem.setOnAction(e ->
+                quickstartWindow = showHelpWindow(quickstartWindow, QuickstartDialog::new));
 
         MenuItem sirTutorialItem = new MenuItem("Tutorial: SIR Epidemic\u2026");
-        sirTutorialItem.setOnAction(e -> {
-            sirTutorialWindow = showHelpWindow(sirTutorialWindow, SirTutorialDialog::new);
-        });
+        sirTutorialItem.setOnAction(e ->
+                sirTutorialWindow = showHelpWindow(sirTutorialWindow, SirTutorialDialog::new));
 
         MenuItem supplyChainTutorialItem = new MenuItem("Tutorial: Supply Chain\u2026");
-        supplyChainTutorialItem.setOnAction(e -> {
-            supplyChainTutorialWindow = showHelpWindow(supplyChainTutorialWindow,
-                    SupplyChainTutorialDialog::new);
-        });
+        supplyChainTutorialItem.setOnAction(e ->
+                supplyChainTutorialWindow = showHelpWindow(supplyChainTutorialWindow,
+                        SupplyChainTutorialDialog::new));
 
         MenuItem sdConceptsItem = new MenuItem("SD Concepts");
-        sdConceptsItem.setOnAction(e -> {
-            sdConceptsWindow = showHelpWindow(sdConceptsWindow, SdConceptsDialog::new);
-        });
+        sdConceptsItem.setOnAction(e ->
+                sdConceptsWindow = showHelpWindow(sdConceptsWindow, SdConceptsDialog::new));
 
         MenuItem exprLangItem = new MenuItem("Expression Language");
-        exprLangItem.setOnAction(e -> {
-            exprLangWindow = showHelpWindow(exprLangWindow, ExpressionLanguageDialog::new);
-        });
+        exprLangItem.setOnAction(e ->
+                exprLangWindow = showHelpWindow(exprLangWindow, ExpressionLanguageDialog::new));
 
         MenuItem shortcutsItem = new MenuItem("Keyboard Shortcuts");
-        shortcutsItem.setOnAction(e -> {
-            shortcutsWindow = showHelpWindow(shortcutsWindow, KeyboardShortcutsDialog::new);
-        });
+        shortcutsItem.setOnAction(e ->
+                shortcutsWindow = showHelpWindow(shortcutsWindow, KeyboardShortcutsDialog::new));
 
         MenuItem aboutItem = new MenuItem("About Courant");
         aboutItem.setOnAction(e -> {
