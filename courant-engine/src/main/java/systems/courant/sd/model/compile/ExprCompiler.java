@@ -169,6 +169,69 @@ public class ExprCompiler {
         List<Expr> args = call.arguments();
 
         return switch (name) {
+            case "TIME", "DT" -> compileSpecialVariable(name, args);
+            case "ABS", "SQRT", "LN", "EXP", "LOG", "SIN", "COS", "TAN",
+                    "ARCSIN", "ARCCOS", "ARCTAN", "SIGN", "PI", "INT", "ROUND",
+                    "MODULO", "QUANTUM", "POWER", "MIN", "MAX" ->
+                compileMathFunction(name, args);
+            case "SUM", "MEAN", "VMIN", "VMAX", "PROD" ->
+                compileAggregateFunction(name, args);
+            case "XIDZ", "ZIDZ" -> compileSafeDivision(name, args);
+            case "NOT", "OR", "AND", "TRUE", "FALSE" ->
+                compileLogicFunction(name, args);
+            case "INITIAL" -> {
+                requireArgs(name, args, 1);
+                DoubleSupplier a = compileExpr(args.get(0));
+                double[] cached = {Double.NaN};
+                boolean[] initialized = {false};
+                Resettable reset = () -> {
+                    cached[0] = Double.NaN;
+                    initialized[0] = false;
+                };
+                resettables.add(reset);
+                yield () -> {
+                    if (!initialized[0]) {
+                        cached[0] = a.getAsDouble();
+                        initialized[0] = true;
+                    }
+                    return cached[0];
+                };
+            }
+            case "SMOOTH" -> compileSmooth(args);
+            case "SMOOTHI" -> compileSmoothI(args);
+            case "SMOOTH3" -> compileSmooth3(args);
+            case "SMOOTH3I" -> compileSmooth3I(args);
+            case "DELAY1", "DELAY1I" -> compileDelay1(args);
+            case "DELAY3", "DELAY3I" -> compileDelay3(args);
+            case "STEP" -> compileStep(args);
+            case "RAMP" -> compileRamp(args);
+            case "PULSE" -> compilePulse(args);
+            case "PULSE_TRAIN" -> compilePulseTrain(args);
+            case "DELAY_FIXED" -> compileDelayFixed(args);
+            case "TREND" -> compileTrend(args);
+            case "FORECAST" -> compileForecast(args);
+            case "NPV" -> compileNpv(args);
+            case "RANDOM_NORMAL" -> compileRandomNormal(args);
+            case "RANDOM_UNIFORM" -> compileRandomUniform(args);
+            case "SAMPLE_IF_TRUE" -> compileSampleIfTrue(args);
+            case "FIND_ZERO" -> compileFindZero(args);
+            case "LOOKUP_AREA" -> compileLookupArea(args);
+            case "LOOKUP" -> compileLookup(args);
+            default -> {
+                // Check if the function name is a lookup table (Vensim allows table(input) syntax)
+                String originalName = call.name();
+                if (args.size() == 1 && context.resolveLookupTable(originalName).isPresent()) {
+                    List<Expr> lookupArgs = List.of(new Expr.Ref(originalName), args.get(0));
+                    yield compileLookup(lookupArgs);
+                }
+                throw new CompilationException(
+                        "Unknown function: " + name, name);
+            }
+        };
+    }
+
+    private DoubleSupplier compileSpecialVariable(String name, List<Expr> args) {
+        return switch (name) {
             case "TIME" -> {
                 requireArgs(name, args, 0);
                 yield () -> context.getCurrentStep().getAsLong();
@@ -177,6 +240,13 @@ public class ExprCompiler {
                 requireArgs(name, args, 0);
                 yield () -> context.getDt();
             }
+            default -> throw new CompilationException(
+                    "Unknown special variable: " + name, name);
+        };
+    }
+
+    private DoubleSupplier compileMathFunction(String name, List<Expr> args) {
+        return switch (name) {
             case "ABS" -> {
                 requireArgs(name, args, 1);
                 DoubleSupplier a = compileExpr(args.get(0));
@@ -400,6 +470,13 @@ public class ExprCompiler {
                 DoubleSupplier b = compileExpr(args.get(1));
                 yield () -> Math.max(a.getAsDouble(), b.getAsDouble());
             }
+            default -> throw new CompilationException(
+                    "Unknown math function: " + name, name);
+        };
+    }
+
+    private DoubleSupplier compileAggregateFunction(String name, List<Expr> args) {
+        return switch (name) {
             case "SUM" -> {
                 List<DoubleSupplier> compiled = new ArrayList<>();
                 for (Expr arg : args) {
@@ -482,6 +559,13 @@ public class ExprCompiler {
                     return result;
                 };
             }
+            default -> throw new CompilationException(
+                    "Unknown aggregate function: " + name, name);
+        };
+    }
+
+    private DoubleSupplier compileSafeDivision(String name, List<Expr> args) {
+        return switch (name) {
             case "XIDZ" -> {
                 requireArgs(name, args, 3);
                 DoubleSupplier a = compileExpr(args.get(0));
@@ -501,42 +585,13 @@ public class ExprCompiler {
                     return divisor == 0 ? 0.0 : a.getAsDouble() / divisor;
                 };
             }
-            case "INITIAL" -> {
-                requireArgs(name, args, 1);
-                DoubleSupplier a = compileExpr(args.get(0));
-                double[] cached = {Double.NaN};
-                boolean[] initialized = {false};
-                Resettable reset = () -> {
-                    cached[0] = Double.NaN;
-                    initialized[0] = false;
-                };
-                resettables.add(reset);
-                yield () -> {
-                    if (!initialized[0]) {
-                        cached[0] = a.getAsDouble();
-                        initialized[0] = true;
-                    }
-                    return cached[0];
-                };
-            }
-            case "SMOOTH" -> compileSmooth(args);
-            case "SMOOTHI" -> compileSmoothI(args);
-            case "SMOOTH3" -> compileSmooth3(args);
-            case "SMOOTH3I" -> compileSmooth3I(args);
-            case "DELAY1", "DELAY1I" -> compileDelay1(args);
-            case "DELAY3", "DELAY3I" -> compileDelay3(args);
-            case "STEP" -> compileStep(args);
-            case "RAMP" -> compileRamp(args);
-            case "PULSE" -> compilePulse(args);
-            case "PULSE_TRAIN" -> compilePulseTrain(args);
-            case "DELAY_FIXED" -> compileDelayFixed(args);
-            case "TREND" -> compileTrend(args);
-            case "FORECAST" -> compileForecast(args);
-            case "NPV" -> compileNpv(args);
-            case "RANDOM_NORMAL" -> compileRandomNormal(args);
-            case "RANDOM_UNIFORM" -> compileRandomUniform(args);
-            case "SAMPLE_IF_TRUE" -> compileSampleIfTrue(args);
-            case "FIND_ZERO" -> compileFindZero(args);
+            default -> throw new CompilationException(
+                    "Unknown safe division function: " + name, name);
+        };
+    }
+
+    private DoubleSupplier compileLogicFunction(String name, List<Expr> args) {
+        return switch (name) {
             case "NOT" -> {
                 requireArgs(name, args, 1);
                 DoubleSupplier a = compileExpr(args.get(0));
@@ -562,18 +617,8 @@ public class ExprCompiler {
                 requireArgs(name, args, 0);
                 yield () -> 0.0;
             }
-            case "LOOKUP_AREA" -> compileLookupArea(args);
-            case "LOOKUP" -> compileLookup(args);
-            default -> {
-                // Check if the function name is a lookup table (Vensim allows table(input) syntax)
-                String originalName = call.name();
-                if (args.size() == 1 && context.resolveLookupTable(originalName).isPresent()) {
-                    List<Expr> lookupArgs = List.of(new Expr.Ref(originalName), args.get(0));
-                    yield compileLookup(lookupArgs);
-                }
-                throw new CompilationException(
-                        "Unknown function: " + name, name);
-            }
+            default -> throw new CompilationException(
+                    "Unknown logic function: " + name, name);
         };
     }
 

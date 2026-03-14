@@ -502,6 +502,49 @@ public class ModelDefinitionSerializer {
             moduleInterface = deserializeModuleInterface(root.get("moduleInterface"));
         }
 
+        List<StockDef> stocks = deserializeStocks(root);
+        List<FlowDef> flows = deserializeFlows(root);
+        List<VariableDef> variables = deserializeVariables(root);
+        List<VariableDef> migratedConstants = deserializeLegacyConstants(root);
+        List<LookupTableDef> lookupTables = deserializeLookupTables(root);
+        List<ModuleInstanceDef> modules = deserializeModules(root, depth);
+        List<SubscriptDef> subscripts = deserializeSubscripts(root);
+        List<CldVariableDef> cldVariables = deserializeCldVariables(root);
+        List<CausalLinkDef> causalLinks = deserializeCausalLinks(root);
+        List<CommentDef> comments = deserializeComments(root);
+
+        List<ViewDef> views = new ArrayList<>();
+        if (root.has("views")) {
+            for (JsonNode n : root.get("views")) {
+                views.add(deserializeView(n));
+            }
+        }
+
+        SimulationSettings defaultSimulation = deserializeSimulationSettings(root);
+        ModelMetadata metadata = deserializeMetadata(root);
+        List<ReferenceDataset> referenceDatasets = deserializeReferenceDatasets(root);
+
+        if (!migratedConstants.isEmpty()) {
+            ModelDefinition migrated = ModelDefinition.withMigratedConstants(
+                    name, comment, moduleInterface,
+                    stocks, flows, variables, migratedConstants, lookupTables,
+                    modules, subscripts, cldVariables, causalLinks, comments,
+                    views, defaultSimulation, metadata);
+            if (referenceDatasets.isEmpty()) {
+                return migrated;
+            }
+            return migrated.toBuilder()
+                    .clearReferenceDatasets()
+                    .referenceDatasets(referenceDatasets)
+                    .build();
+        }
+        return new ModelDefinition(name, comment, moduleInterface,
+                stocks, flows, variables, lookupTables,
+                modules, subscripts, cldVariables, causalLinks,
+                comments, views, defaultSimulation, metadata, referenceDatasets);
+    }
+
+    private List<StockDef> deserializeStocks(JsonNode root) {
         List<StockDef> stocks = new ArrayList<>();
         if (root.has("stocks")) {
             for (JsonNode n : root.get("stocks")) {
@@ -515,7 +558,10 @@ public class ModelDefinitionSerializer {
                         readStringList(n, "subscripts")));
             }
         }
+        return stocks;
+    }
 
+    private List<FlowDef> deserializeFlows(JsonNode root) {
         List<FlowDef> flows = new ArrayList<>();
         if (root.has("flows")) {
             for (JsonNode n : root.get("flows")) {
@@ -530,7 +576,10 @@ public class ModelDefinitionSerializer {
                         readStringList(n, "subscripts")));
             }
         }
+        return flows;
+    }
 
+    private List<VariableDef> deserializeVariables(JsonNode root) {
         List<VariableDef> variables = new ArrayList<>();
         if (root.has("variables")) {
             for (JsonNode n : root.get("variables")) {
@@ -543,8 +592,11 @@ public class ModelDefinitionSerializer {
                         readStringList(n, "subscripts")));
             }
         }
+        return variables;
+    }
 
-        // Backward compatibility: migrate legacy constants into variables
+    // Backward compatibility: migrate legacy constants into variables
+    private List<VariableDef> deserializeLegacyConstants(JsonNode root) {
         List<VariableDef> migratedConstants = new ArrayList<>();
         if (root.has("constants")) {
             for (JsonNode n : root.get("constants")) {
@@ -556,7 +608,10 @@ public class ModelDefinitionSerializer {
                         requiredText(n, "unit")));
             }
         }
+        return migratedConstants;
+    }
 
+    private List<LookupTableDef> deserializeLookupTables(JsonNode root) {
         List<LookupTableDef> lookupTables = new ArrayList<>();
         if (root.has("lookupTables")) {
             for (JsonNode n : root.get("lookupTables")) {
@@ -568,7 +623,10 @@ public class ModelDefinitionSerializer {
                         requiredText(n, "interpolation")));
             }
         }
+        return lookupTables;
+    }
 
+    private List<ModuleInstanceDef> deserializeModules(JsonNode root, int depth) {
         List<ModuleInstanceDef> modules = new ArrayList<>();
         if (root.has("modules")) {
             for (JsonNode n : root.get("modules")) {
@@ -581,7 +639,10 @@ public class ModelDefinitionSerializer {
                         outputBindings));
             }
         }
+        return modules;
+    }
 
+    private List<SubscriptDef> deserializeSubscripts(JsonNode root) {
         List<SubscriptDef> subscripts = new ArrayList<>();
         if (root.has("subscripts")) {
             for (JsonNode n : root.get("subscripts")) {
@@ -593,7 +654,10 @@ public class ModelDefinitionSerializer {
                 subscripts.add(new SubscriptDef(requiredText(n, "name"), labels));
             }
         }
+        return subscripts;
+    }
 
+    private List<CldVariableDef> deserializeCldVariables(JsonNode root) {
         List<CldVariableDef> cldVariables = new ArrayList<>();
         if (root.has("cldVariables")) {
             for (JsonNode n : root.get("cldVariables")) {
@@ -602,7 +666,10 @@ public class ModelDefinitionSerializer {
                         textOrNull(n, "comment")));
             }
         }
+        return cldVariables;
+    }
 
+    private List<CausalLinkDef> deserializeCausalLinks(JsonNode root) {
         List<CausalLinkDef> causalLinks = new ArrayList<>();
         if (root.has("causalLinks")) {
             for (JsonNode n : root.get("causalLinks")) {
@@ -625,7 +692,10 @@ public class ModelDefinitionSerializer {
                         textOrNull(n, "comment")));
             }
         }
+        return causalLinks;
+    }
 
+    private List<CommentDef> deserializeComments(JsonNode root) {
         List<CommentDef> comments = new ArrayList<>();
         if (root.has("comments")) {
             for (JsonNode n : root.get("comments")) {
@@ -635,40 +705,40 @@ public class ModelDefinitionSerializer {
                         text != null ? text : ""));
             }
         }
+        return comments;
+    }
 
-        List<ViewDef> views = new ArrayList<>();
-        if (root.has("views")) {
-            for (JsonNode n : root.get("views")) {
-                views.add(deserializeView(n));
-            }
+    private SimulationSettings deserializeSimulationSettings(JsonNode root) {
+        if (!root.has("defaultSimulation")) {
+            return null;
         }
+        JsonNode s = root.get("defaultSimulation");
+        double dt = s.has("dt") ? s.get("dt").asDouble() : 1.0;
+        boolean strict = s.has("strictMode") && s.get("strictMode").asBoolean();
+        long savePerVal = s.has("savePer") ? s.get("savePer").asLong() : 1;
+        return new SimulationSettings(
+                requiredText(s, "timeStep"),
+                requiredDouble(s, "duration"),
+                requiredText(s, "durationUnit"),
+                dt,
+                strict,
+                savePerVal);
+    }
 
-        SimulationSettings defaultSimulation = null;
-        if (root.has("defaultSimulation")) {
-            JsonNode s = root.get("defaultSimulation");
-            double dt = s.has("dt") ? s.get("dt").asDouble() : 1.0;
-            boolean strict = s.has("strictMode") && s.get("strictMode").asBoolean();
-            long savePerVal = s.has("savePer") ? s.get("savePer").asLong() : 1;
-            defaultSimulation = new SimulationSettings(
-                    requiredText(s, "timeStep"),
-                    requiredDouble(s, "duration"),
-                    requiredText(s, "durationUnit"),
-                    dt,
-                    strict,
-                    savePerVal);
+    private ModelMetadata deserializeMetadata(JsonNode root) {
+        if (!root.has("metadata")) {
+            return null;
         }
+        JsonNode m = root.get("metadata");
+        return ModelMetadata.builder()
+                .author(textOrNull(m, "author"))
+                .source(textOrNull(m, "source"))
+                .license(textOrNull(m, "license"))
+                .url(textOrNull(m, "url"))
+                .build();
+    }
 
-        ModelMetadata metadata = null;
-        if (root.has("metadata")) {
-            JsonNode m = root.get("metadata");
-            metadata = ModelMetadata.builder()
-                    .author(textOrNull(m, "author"))
-                    .source(textOrNull(m, "source"))
-                    .license(textOrNull(m, "license"))
-                    .url(textOrNull(m, "url"))
-                    .build();
-        }
-
+    private List<ReferenceDataset> deserializeReferenceDatasets(JsonNode root) {
         List<ReferenceDataset> referenceDatasets = new ArrayList<>();
         if (root.has("referenceDatasets")) {
             for (JsonNode n : root.get("referenceDatasets")) {
@@ -684,26 +754,7 @@ public class ModelDefinitionSerializer {
                 referenceDatasets.add(new ReferenceDataset(dsName, timeValues, columns));
             }
         }
-
-        if (!migratedConstants.isEmpty()) {
-            ModelDefinition migrated = ModelDefinition.withMigratedConstants(
-                    name, comment, moduleInterface,
-                    stocks, flows, variables, migratedConstants, lookupTables,
-                    modules, subscripts, cldVariables, causalLinks, comments,
-                    views, defaultSimulation, metadata);
-            if (referenceDatasets.isEmpty()) {
-                return migrated;
-            }
-            // Re-wrap with reference datasets
-            return migrated.toBuilder()
-                    .clearReferenceDatasets()
-                    .referenceDatasets(referenceDatasets)
-                    .build();
-        }
-        return new ModelDefinition(name, comment, moduleInterface,
-                stocks, flows, variables, lookupTables,
-                modules, subscripts, cldVariables, causalLinks,
-                comments, views, defaultSimulation, metadata, referenceDatasets);
+        return referenceDatasets;
     }
 
     private ViewDef deserializeView(JsonNode n) {

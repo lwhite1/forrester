@@ -105,11 +105,4 @@ public final class JavaSourceEscaper {
         return base;
     }
 
-    /**
-     * Returns "null" if the value is null, otherwise the escaped string literal.
-     * Convenience for generating nullable constructor arguments.
-     */
-    public static String nullableString(String value) {
-        return escapeString(value);
-    }
 }

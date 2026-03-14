@@ -195,7 +195,7 @@ class WorkflowSimulationFxTest {
         var banner = robot.lookup("#staleBanner").queryAs(javafx.scene.layout.HBox.class);
         assertThat(banner.isVisible()).isFalse();
 
-        Platform.runLater(() -> window.getEditor().setAuxEquation("Outflow Rate", "10"));
+        Platform.runLater(() -> window.getEditor().setVariableEquation("Outflow Rate", "10"));
         WaitForAsyncUtils.waitForFxEvents();
 
         banner = robot.lookup("#staleBanner").queryAs(javafx.scene.layout.HBox.class);
@@ -210,7 +210,7 @@ class WorkflowSimulationFxTest {
         triggerSimulation(robot);
         waitForDashboardResults(robot);
 
-        Platform.runLater(() -> window.getEditor().setAuxEquation("Outflow Rate", "10"));
+        Platform.runLater(() -> window.getEditor().setVariableEquation("Outflow Rate", "10"));
         WaitForAsyncUtils.waitForFxEvents();
 
         triggerSimulation(robot);
@@ -228,7 +228,7 @@ class WorkflowSimulationFxTest {
         triggerSimulation(robot);
         waitForDashboardResults(robot);
 
-        Platform.runLater(() -> window.getEditor().setAuxEquation("Outflow Rate", "10"));
+        Platform.runLater(() -> window.getEditor().setVariableEquation("Outflow Rate", "10"));
         WaitForAsyncUtils.waitForFxEvents();
 
         robot.clickOn("#staleRerunLink");

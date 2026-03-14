@@ -59,9 +59,9 @@ class WorkflowSweepAnalysisFxTest {
         Platform.runLater(() -> {
             editor.addStock();
             editor.setStockInitialValue("Stock 1", 100);
-            editor.addAux();
-            editor.renameElement("Aux 1", "Drain Rate");
-            editor.setAuxEquation("Drain Rate", "5");
+            editor.addVariable();
+            editor.renameElement("Variable 1", "Drain Rate");
+            editor.setVariableEquation("Drain Rate", "5");
             editor.addFlow("Stock 1", null);
             editor.setFlowEquation("Flow 1", "Drain_Rate");
             editor.setSimulationSettings(new SimulationSettings("Day", 20, "Day"));
@@ -78,12 +78,12 @@ class WorkflowSweepAnalysisFxTest {
         Platform.runLater(() -> {
             editor.addStock();
             editor.setStockInitialValue("Stock 1", 100);
-            editor.addAux();
-            editor.renameElement("Aux 1", "Drain Rate");
-            editor.setAuxEquation("Drain Rate", "5");
-            editor.addAux();
-            editor.renameElement("Aux 2", "Fill Rate");
-            editor.setAuxEquation("Fill Rate", "3");
+            editor.addVariable();
+            editor.renameElement("Variable 1", "Drain Rate");
+            editor.setVariableEquation("Drain Rate", "5");
+            editor.addVariable();
+            editor.renameElement("Variable 2", "Fill Rate");
+            editor.setVariableEquation("Fill Rate", "3");
             editor.addFlow("Stock 1", null);
             editor.setFlowEquation("Flow 1", "Drain_Rate");
             editor.addFlow(null, "Stock 1");
@@ -359,7 +359,7 @@ class WorkflowSweepAnalysisFxTest {
         waitForDashboardResults(robot);
 
         // Modify parameter
-        Platform.runLater(() -> window.getEditor().setAuxEquation("Drain Rate", "8"));
+        Platform.runLater(() -> window.getEditor().setVariableEquation("Drain Rate", "8"));
         WaitForAsyncUtils.waitForFxEvents();
 
         // Re-simulate
