@@ -1,4 +1,4 @@
-package systems.courant.sd.app.canvas;
+package systems.courant.sd.app.canvas.dialogs;
 
 import systems.courant.sd.sweep.ExtremeCondition;
 import systems.courant.sd.sweep.ExtremeConditionFinding;

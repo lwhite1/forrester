@@ -1,5 +1,8 @@
-package systems.courant.sd.app.canvas;
+package systems.courant.sd.app.canvas.controllers;
 
+import systems.courant.sd.app.canvas.CanvasState;
+import systems.courant.sd.app.canvas.FlowEndpointCalculator;
+import systems.courant.sd.app.canvas.ModelEditor;
 import systems.courant.sd.model.def.ElementType;
 import systems.courant.sd.model.def.ModelDefinition;
 import systems.courant.sd.model.def.ModelDefinitionBuilder;
