@@ -27,11 +27,18 @@ import java.util.Set;
 public class DependencyGraph {
 
     private final Map<String, Set<String>> adjacency; // from → {to}
+    private final Map<String, Set<String>> reverseAdjacency; // to → {from}
     private final Set<String> allNodes;
 
     private DependencyGraph(Map<String, Set<String>> adjacency, Set<String> allNodes) {
         this.adjacency = adjacency;
         this.allNodes = allNodes;
+        this.reverseAdjacency = new LinkedHashMap<>();
+        for (Map.Entry<String, Set<String>> entry : adjacency.entrySet()) {
+            for (String to : entry.getValue()) {
+                reverseAdjacency.computeIfAbsent(to, k -> new LinkedHashSet<>()).add(entry.getKey());
+            }
+        }
     }
 
     /**
@@ -106,13 +113,11 @@ public class DependencyGraph {
      * @return the set of element names that influence the given element
      */
     public Set<String> dependenciesOf(String name) {
-        Set<String> deps = new LinkedHashSet<>();
-        for (Map.Entry<String, Set<String>> entry : adjacency.entrySet()) {
-            if (entry.getValue().contains(name)) {
-                deps.add(entry.getKey());
-            }
+        Set<String> deps = reverseAdjacency.get(name);
+        if (deps == null) {
+            return Collections.emptySet();
         }
-        return deps;
+        return Collections.unmodifiableSet(deps);
     }
 
     /**
