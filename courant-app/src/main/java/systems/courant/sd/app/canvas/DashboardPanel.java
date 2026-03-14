@@ -68,6 +68,7 @@ public class DashboardPanel extends VBox {
     private ChangeListener<Number> domToSimListener;
     private Consumer<String> onVariableClicked;
     private Consumer<ReferenceDataset> onReferenceDataImported;
+    private boolean updatingCursor;
 
     /** Previous simulation runs for ghost overlay comparison. Most recent last. */
     private final List<GhostRun> runHistory = new ArrayList<>();
@@ -369,10 +370,26 @@ public class DashboardPanel extends VBox {
         if (simulationCursor == null || dominanceCursor == null) {
             return;
         }
-        simToDomListener = (obs, oldVal, newVal) ->
-                dominanceCursor.set(newVal.doubleValue());
-        domToSimListener = (obs, oldVal, newVal) ->
-                simulationCursor.set(newVal.doubleValue());
+        simToDomListener = (obs, oldVal, newVal) -> {
+            if (!updatingCursor) {
+                updatingCursor = true;
+                try {
+                    dominanceCursor.set(newVal.doubleValue());
+                } finally {
+                    updatingCursor = false;
+                }
+            }
+        };
+        domToSimListener = (obs, oldVal, newVal) -> {
+            if (!updatingCursor) {
+                updatingCursor = true;
+                try {
+                    simulationCursor.set(newVal.doubleValue());
+                } finally {
+                    updatingCursor = false;
+                }
+            }
+        };
         simulationCursor.addListener(simToDomListener);
         dominanceCursor.addListener(domToSimListener);
     }
