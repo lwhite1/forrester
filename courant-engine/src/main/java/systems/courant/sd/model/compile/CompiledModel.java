@@ -140,6 +140,7 @@ public class CompiledModel {
     public Simulation createSimulation(TimeUnit timeStep, double duration, TimeUnit durationUnit) {
         simTimeUnitHolder[0] = timeStep;
         Simulation sim = new Simulation(model, timeStep, durationUnit, duration);
+        sim.setDt(dtHolder[0]);
         installStepSync(sim);
         return sim;
     }
@@ -151,6 +152,7 @@ public class CompiledModel {
     public Simulation createSimulation(TimeUnit timeStep, Quantity duration) {
         simTimeUnitHolder[0] = timeStep;
         Simulation sim = new Simulation(model, timeStep, duration);
+        sim.setDt(dtHolder[0]);
         installStepSync(sim);
         return sim;
     }
@@ -172,6 +174,7 @@ public class CompiledModel {
         Simulation sim = new Simulation(model, timeStep, new Quantity(settings.duration(), durationUnit));
         sim.setStrictMode(settings.strictMode());
         sim.setSavePer(settings.savePer());
+        sim.setDt(settings.dt());
         installStepSync(sim);
         return sim;
     }

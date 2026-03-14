@@ -72,6 +72,8 @@ public class Simulation {
 
     private long savePer = 1;
 
+    private double dt = 1.0;
+
     private long currentStep = 0;
 
     private LocalDateTime currentDateTime;
@@ -158,6 +160,24 @@ public class Simulation {
         return savePer;
     }
 
+    /**
+     * Sets the fractional time step (dt) for the simulation. When dt is less than 1.0,
+     * the simulation takes more steps per time unit, producing finer-grained Euler
+     * integration. For example, dt = 0.25 with a Year time step means each step
+     * advances 0.25 years.
+     *
+     * @param dt the fractional time step (must be positive and finite, default 1.0)
+     */
+    public void setDt(double dt) {
+        Preconditions.checkArgument(dt > 0 && Double.isFinite(dt),
+                "dt must be positive and finite, got %s", dt);
+        this.dt = dt;
+    }
+
+    public double getDt() {
+        return dt;
+    }
+
     public void execute() {
         // Reset state so the simulation can be re-run
         currentStep = 0;
@@ -166,14 +186,14 @@ public class Simulation {
         clearHistory();
         resetStatefulFormulas();
 
-        long nanos = Math.round(timeStep.ratioToBaseUnit() * 1_000_000_000L);
+        long nanos = Math.round(timeStep.ratioToBaseUnit() * dt * 1_000_000_000L);
         if (nanos <= 0) {
             throw new IllegalArgumentException(
                     "Time step too small to represent in nanoseconds: " + timeStep.getName()
                             + " (ratioToBaseUnit=" + timeStep.ratioToBaseUnit() + ")");
         }
 
-        double rawSteps = duration.inBaseUnits().getValue() / timeStep.ratioToBaseUnit();
+        double rawSteps = duration.inBaseUnits().getValue() / (timeStep.ratioToBaseUnit() * dt);
         // Snap to nearest integer if within epsilon (avoids FP off-by-one)
         long totalSteps;
         double nearest = Math.rint(rawSteps);
@@ -304,7 +324,7 @@ public class Simulation {
         // value and logging a warning, so no additional guard is needed.
         for (Stock stock : stocks) {
             double oldValue = stock.getValue();
-            double newValue = oldValue + deltas.get(stock);
+            double newValue = oldValue + deltas.get(stock) * dt;
             if (strictMode && !Double.isFinite(newValue)) {
                 throw new NonFiniteValueException(
                         "Stock '" + stock.getName() + "' became " + newValue

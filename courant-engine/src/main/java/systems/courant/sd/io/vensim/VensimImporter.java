@@ -16,6 +16,8 @@ import systems.courant.sd.model.def.StockDef;
 import systems.courant.sd.model.def.ViewDef;
 
 import java.io.IOException;
+import java.nio.charset.Charset;
+import java.nio.charset.MalformedInputException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -67,7 +69,12 @@ public class VensimImporter implements ModelImporter {
             throw new IOException("File exceeds maximum allowed size of "
                     + (MAX_FILE_SIZE / (1024 * 1024)) + " MB: " + path);
         }
-        String content = Files.readString(path, StandardCharsets.UTF_8);
+        String content;
+        try {
+            content = Files.readString(path, StandardCharsets.UTF_8);
+        } catch (MalformedInputException e) {
+            content = Files.readString(path, Charset.forName("windows-1252"));
+        }
         Path fileName = path.getFileName();
         String modelName = fileName != null ? fileName.toString() : path.toString();
         int dotPos = modelName.lastIndexOf('.');
@@ -163,11 +170,6 @@ public class VensimImporter implements ModelImporter {
         double finalTime = getDoubleFromControl(controlVars, "FINAL TIME", 100.0, warnings);
         double timeStepValue = getDoubleFromControl(controlVars, "TIME STEP", 1.0, warnings);
         String timeUnit = inferTimeUnit(controlVars, "Day");
-
-        if (timeStepValue != 1.0) {
-            warnings.add("TIME STEP = " + timeStepValue
-                    + " (Courant uses fixed step; value preserved as metadata only)");
-        }
 
         double duration = finalTime - initialTime;
         if (duration <= 0) {
