@@ -8,6 +8,7 @@ import systems.courant.sd.model.compile.CompiledModel;
 import systems.courant.sd.model.compile.ModelCompiler;
 import systems.courant.sd.model.def.ModelDefinition;
 
+import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -25,7 +26,6 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.stream.Stream;
 
-import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Batch import test: scans Vensim Sample, UserGuide, and Delft directories,
@@ -86,7 +86,8 @@ class VensimBatchImportTest {
             }
         }
 
-        assertThat(results).isNotEmpty();
+        Assumptions.assumeFalse(results.isEmpty(),
+                "No .mdl model files found — skipping (model directories are not present in CI)");
 
         Files.createDirectories(DEVDOCS);
 
