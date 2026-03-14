@@ -32,9 +32,9 @@ public class VariableForm implements ElementForm {
 
     @Override
     public int build(int startRow) {
-        Optional<VariableDef> varOpt = ctx.editor.getVariableByName(ctx.elementName);
+        Optional<VariableDef> varOpt = ctx.editor.getVariableByName(ctx.getElementName());
         if (varOpt.isEmpty()) {
-            ctx.addReadOnlyRow(startRow++, "Name", ctx.elementName);
+            ctx.addReadOnlyRow(startRow++, "Name", ctx.getElementName());
             return startRow;
         }
         VariableDef v = varOpt.get();
@@ -56,7 +56,7 @@ public class VariableForm implements ElementForm {
 
         equationField = ctx.createEquationField(v.equation());
         ctx.addEquationCommitHandlers(equationField, this::commitEquation);
-        EquationAutoComplete.attach(equationField, ctx.editor, ctx.elementName);
+        EquationAutoComplete.attach(equationField, ctx.editor, ctx.getElementName());
         ctx.addFieldRow(row++, "Equation", ctx.wrapWithHelpButton(equationField),
                 "A formula computed each time step from other model elements");
         ctx.attachEquationValidation(equationField, row++);
@@ -71,12 +71,12 @@ public class VariableForm implements ElementForm {
 
     @Override
     public void updateValues() {
-        Optional<VariableDef> varOpt = ctx.editor.getVariableByName(ctx.elementName);
+        Optional<VariableDef> varOpt = ctx.editor.getVariableByName(ctx.getElementName());
         if (varOpt.isEmpty() || nameField == null) {
             return;
         }
         VariableDef v = varOpt.get();
-        nameField.setText(ctx.elementName);
+        nameField.setText(ctx.getElementName());
         equationField.setText(v.equation());
         unitBox.setValue(v.unit() != null ? v.unit() : "");
         commentArea.setText(v.comment() != null ? v.comment() : "");
@@ -90,33 +90,33 @@ public class VariableForm implements ElementForm {
     private void commitComment(TextArea area) {
         String text = area.getText().trim();
         String comment = text.isEmpty() ? null : text;
-        Optional<VariableDef> varOpt = ctx.editor.getVariableByName(ctx.elementName);
+        Optional<VariableDef> varOpt = ctx.editor.getVariableByName(ctx.getElementName());
         if (varOpt.isEmpty() || Objects.equals(comment, varOpt.get().comment())) {
             return;
         }
-        ctx.canvas.applyMutation(() -> ctx.editor.setVariableComment(ctx.elementName, comment));
+        ctx.canvas.applyMutation(() -> ctx.editor.setVariableComment(ctx.getElementName(), comment));
     }
 
     private void commitEquation(EquationField field) {
         String equation = field.getText().trim();
         if (equation.isEmpty()) {
-            ctx.editor.getVariableByName(ctx.elementName)
+            ctx.editor.getVariableByName(ctx.getElementName())
                     .ifPresent(v -> field.setText(v.equation()));
             return;
         }
-        Optional<VariableDef> varOpt = ctx.editor.getVariableByName(ctx.elementName);
+        Optional<VariableDef> varOpt = ctx.editor.getVariableByName(ctx.getElementName());
         if (varOpt.isPresent() && equation.equals(varOpt.get().equation())) {
             return;
         }
-        ctx.canvas.applyMutation(() -> ctx.editor.setVariableEquation(ctx.elementName, equation));
+        ctx.canvas.applyMutation(() -> ctx.editor.setVariableEquation(ctx.getElementName(), equation));
     }
 
     private void commitUnit(ComboBox<String> box) {
         String unit = box.getValue() != null ? box.getValue().trim() : "";
-        Optional<VariableDef> varOpt = ctx.editor.getVariableByName(ctx.elementName);
+        Optional<VariableDef> varOpt = ctx.editor.getVariableByName(ctx.getElementName());
         if (varOpt.isPresent() && unit.equals(varOpt.get().unit())) {
             return;
         }
-        ctx.canvas.applyMutation(() -> ctx.editor.setVariableUnit(ctx.elementName, unit));
+        ctx.canvas.applyMutation(() -> ctx.editor.setVariableUnit(ctx.getElementName(), unit));
     }
 }

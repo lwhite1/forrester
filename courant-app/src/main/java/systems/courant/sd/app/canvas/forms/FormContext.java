@@ -43,7 +43,15 @@ public class FormContext {
     public ModelCanvas canvas;
     public ModelEditor editor;
     public GridPane grid;
-    public String elementName;
+    private String elementName;
+
+    public String getElementName() {
+        return elementName;
+    }
+
+    public void setElementName(String elementName) {
+        this.elementName = elementName;
+    }
     public boolean updatingFields;
     public Runnable onFormRebuildRequested;
     public Runnable onOpenExpressionHelp;

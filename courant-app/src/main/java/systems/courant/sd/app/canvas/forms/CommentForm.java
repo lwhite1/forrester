@@ -24,9 +24,9 @@ public class CommentForm implements ElementForm {
 
     @Override
     public int build(int startRow) {
-        CommentDef comment = ctx.editor.getCommentByName(ctx.elementName);
+        CommentDef comment = ctx.editor.getCommentByName(ctx.getElementName());
         if (comment == null) {
-            ctx.addReadOnlyRow(startRow++, "Name", ctx.elementName);
+            ctx.addReadOnlyRow(startRow++, "Name", ctx.getElementName());
             return startRow;
         }
 
@@ -48,7 +48,7 @@ public class CommentForm implements ElementForm {
 
     @Override
     public void updateValues() {
-        CommentDef comment = ctx.editor.getCommentByName(ctx.elementName);
+        CommentDef comment = ctx.editor.getCommentByName(ctx.getElementName());
         if (comment == null || textArea == null) {
             return;
         }
@@ -57,10 +57,10 @@ public class CommentForm implements ElementForm {
 
     private void commitText(TextArea area) {
         String text = area.getText().trim();
-        CommentDef comment = ctx.editor.getCommentByName(ctx.elementName);
+        CommentDef comment = ctx.editor.getCommentByName(ctx.getElementName());
         if (comment == null || Objects.equals(text, comment.text())) {
             return;
         }
-        ctx.canvas.applyMutation(() -> ctx.editor.setCommentText(ctx.elementName, text));
+        ctx.canvas.applyMutation(() -> ctx.editor.setCommentText(ctx.getElementName(), text));
     }
 }
