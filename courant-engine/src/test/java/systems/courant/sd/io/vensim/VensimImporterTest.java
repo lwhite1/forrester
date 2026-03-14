@@ -2734,4 +2734,124 @@ class VensimImporterTest {
             assertThat(flowNames).anyMatch(n -> n.contains("inflow"));
         }
     }
+
+    @Nested
+    @DisplayName("Macro expansion")
+    class MacroExpansion {
+
+        @Test
+        void shouldExpandSmoothMacroAndSimulate() {
+            String mdl = """
+                    :MACRO: MY SMOOTH(input, delay time, output)
+                    smooth stock = INTEG((input - smooth stock) / delay time, input)
+                    \t~\t
+                    \t~\t
+                    \t|
+                    output = smooth stock
+                    \t~\t
+                    \t~\t
+                    \t|
+                    :END OF MACRO:
+
+                    raw data = 100
+                    \t~\tWidgets
+                    \t~\t
+                    \t|
+
+                    smoothed = MY SMOOTH(raw data, 5)
+                    \t~\tWidgets
+                    \t~\t
+                    \t|
+
+                    INITIAL TIME = 0
+                    \t~\tDay
+                    \t~\t
+                    \t|
+
+                    FINAL TIME = 20
+                    \t~\tDay
+                    \t~\t
+                    \t|
+
+                    TIME STEP = 1
+                    \t~\tDay
+                    \t~\t
+                    \t|
+                    """;
+
+            ImportResult result = importer.importModel(mdl, "MacroTest");
+            assertThat(result.warnings()).isEmpty();
+
+            ModelDefinition def = result.definition();
+
+            // Should have a stock (the expanded internal stock)
+            assertThat(def.stocks()).isNotEmpty();
+
+            // Should compile and simulate
+            CompiledModel compiled = new ModelCompiler().compile(def);
+            Simulation sim = compiled.createSimulation();
+            sim.execute();
+
+            // The smooth stock should approach raw data (100) over time
+            Stock smoothStock = compiled.getModel().getStocks().stream()
+                    .filter(s -> s.getName().contains("smooth_stock"))
+                    .findFirst()
+                    .orElseThrow();
+            double finalValue = smoothStock.getValue();
+            // At t=20 with delay=5: (1 - e^(-20/5)) * 100 ≈ 98.2
+            assertThat(finalValue).isGreaterThan(90.0);
+        }
+
+        @Test
+        void shouldExpandMultipleMacroInstantiations() {
+            String mdl = """
+                    :MACRO: SCALE(x, factor, result)
+                    result = x * factor
+                    \t~\t
+                    \t~\t
+                    \t|
+                    :END OF MACRO:
+
+                    input = 10
+                    \t~\t
+                    \t~\t
+                    \t|
+
+                    doubled = SCALE(input, 2)
+                    \t~\t
+                    \t~\t
+                    \t|
+
+                    tripled = SCALE(input, 3)
+                    \t~\t
+                    \t~\t
+                    \t|
+
+                    INITIAL TIME = 0
+                    \t~\tDay
+                    \t~\t
+                    \t|
+
+                    FINAL TIME = 1
+                    \t~\tDay
+                    \t~\t
+                    \t|
+
+                    TIME STEP = 1
+                    \t~\tDay
+                    \t~\t
+                    \t|
+                    """;
+
+            ImportResult result = importer.importModel(mdl, "MultiMacro");
+            assertThat(result.warnings()).isEmpty();
+
+            ModelDefinition def = result.definition();
+            CompiledModel compiled = new ModelCompiler().compile(def);
+            Simulation sim = compiled.createSimulation();
+            sim.execute();
+
+            assertThat(compiled).isNotNull();
+        }
+    }
 }

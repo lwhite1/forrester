@@ -137,7 +137,7 @@ The following functions are recognized but not supported. They remain in the equ
 
 | Feature | Status |
 |---|---|
-| Macros (`:MACRO:` to `:END OF MACRO:`) | Content skipped entirely |
+| Macros (`:MACRO:` to `:END OF MACRO:`) | Inline expansion (single-output only) |
 | Module/component structures | Not supported |
 | Reality checks | Not recognized |
 | `:SUPPLEMENTARY:` variables | Keyword not recognized |
@@ -212,7 +212,9 @@ Also tested against 25 models from the TU Delft repository (Pruyt, 2013):
 | Class | Purpose |
 |---|---|
 | `VensimImporter` | Main entry point implementing `ModelImporter` |
-| `MdlParser` | Low-level `.mdl` file parser (equations + sketch extraction) |
+| `MdlParser` | Low-level `.mdl` file parser (equations, macros + sketch extraction) |
+| `MacroDef` | Parsed macro definition record (name, params, body) |
+| `MacroExpander` | Inline expansion of macro calls into ordinary equations |
 | `VensimExprTranslator` | Expression syntax translation (Vensim to Courant) |
 | `SketchParser` | Sketch section to `ViewDef` records |
 
@@ -241,7 +243,7 @@ Also tested against 25 models from the TU Delft repository (Pruyt, 2013):
 | NOT / OR / AND / TRUE / FALSE (function forms) | Full |
 | TREND / FORECAST / NPV | Full |
 | Sketch/views | Full (4 line types) |
-| Macros | Skipped |
+| Macros (single-output) | Full (inline expansion) |
 | Data variables | Skipped (with warning) |
 | DELAY N, GET XLS DATA, etc. | Warned, left in equation |
 | Subscripted variable access | Untested |

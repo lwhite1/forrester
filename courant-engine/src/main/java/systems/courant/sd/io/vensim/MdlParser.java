@@ -31,13 +31,25 @@ public final class MdlParser {
     private static final Pattern LOOKUP_DEF_PATTERN = Pattern.compile(
             "^((?:\"[^\"]*\"|[^(])+?)\\s*\\(\\s*$", Pattern.DOTALL);
 
+    private static final Pattern MACRO_HEADER_PATTERN = Pattern.compile(
+            ":MACRO:\\s+(.+?)\\s*\\(([^)]*)\\)", Pattern.CASE_INSENSITIVE);
+
     /**
-     * Result of parsing a .mdl file: equation blocks and sketch lines.
+     * Result of parsing a .mdl file: equation blocks, macro definitions, and sketch lines.
      */
-    public record ParsedMdl(List<MdlEquation> equations, List<String> sketchLines) {
+    public record ParsedMdl(List<MdlEquation> equations, List<MacroDef> macros,
+                             List<String> sketchLines) {
         public ParsedMdl {
             equations = List.copyOf(equations);
+            macros = List.copyOf(macros);
             sketchLines = List.copyOf(sketchLines);
+        }
+
+        /**
+         * Backward-compatible constructor for callers that don't need macros.
+         */
+        public ParsedMdl(List<MdlEquation> equations, List<String> sketchLines) {
+            this(equations, List.of(), sketchLines);
         }
     }
 
@@ -72,8 +84,9 @@ public final class MdlParser {
             sketchLines = List.of();
         }
 
-        List<MdlEquation> equations = parseEquations(equationSection);
-        return new ParsedMdl(equations, sketchLines);
+        List<MacroDef> macros = new ArrayList<>();
+        List<MdlEquation> equations = parseEquations(equationSection, macros);
+        return new ParsedMdl(equations, macros, sketchLines);
     }
 
     private static String stripHeader(String content) {
@@ -95,13 +108,16 @@ public final class MdlParser {
         return content;
     }
 
-    private static List<MdlEquation> parseEquations(String section) {
+    private static List<MdlEquation> parseEquations(String section, List<MacroDef> macros) {
         // Join continuation lines (backslash + newline + optional whitespace → space)
         section = CONTINUATION_PATTERN.matcher(section).replaceAll(" ");
 
         List<MdlEquation> equations = new ArrayList<>();
         String currentGroup = "";
         boolean inMacro = false;
+        String macroName = null;
+        List<String> macroParams = null;
+        List<MdlEquation> macroBody = null;
 
         // Split on pipe delimiter
         String[] blocks = section.split("\\|");
@@ -118,19 +134,6 @@ public final class MdlParser {
                 continue;
             }
 
-            // Check for macro start/end
-            if (MACRO_START_PATTERN.matcher(trimmed).find()) {
-                inMacro = true;
-                continue;
-            }
-            if (MACRO_END_PATTERN.matcher(trimmed).find()) {
-                inMacro = false;
-                continue;
-            }
-            if (inMacro) {
-                continue;
-            }
-
             // Split block on tilde to get [equation, units, comment]
             String[] tildeParts = trimmed.split("~", -1);
             String equationPart = tildeParts[0].strip();
@@ -141,14 +144,106 @@ public final class MdlParser {
                 continue;
             }
 
-            MdlEquation equation = parseEquationBlock(equationPart, unitsPart, commentPart,
+            // The :MACRO: header or :END OF MACRO: may share a pipe-block with
+            // an equation (the header line followed by the first body equation, or
+            // :END OF MACRO: followed by the next regular equation). Split by
+            // newlines to detect and separate them.
+            String[] eqLines = equationPart.split("\n");
+            String macroHeaderLine = null;
+            boolean endMacroInBlock = false;
+            List<String> bodyLines = new ArrayList<>();
+
+            for (String line : eqLines) {
+                String lineStripped = line.strip();
+                if (lineStripped.isEmpty()) {
+                    continue;
+                }
+                if (MACRO_START_PATTERN.matcher(lineStripped).find()) {
+                    macroHeaderLine = lineStripped;
+                } else if (MACRO_END_PATTERN.matcher(lineStripped).find()) {
+                    endMacroInBlock = true;
+                } else {
+                    bodyLines.add(lineStripped);
+                }
+            }
+
+            // Handle :END OF MACRO: — finalize current macro
+            if (endMacroInBlock) {
+                if (inMacro && macroName != null && macroParams != null && macroBody != null) {
+                    macros.add(buildMacroDef(macroName, macroParams, macroBody));
+                }
+                inMacro = false;
+                macroName = null;
+                macroParams = null;
+                macroBody = null;
+            }
+
+            // Handle :MACRO: header — start new macro
+            if (macroHeaderLine != null) {
+                inMacro = true;
+                macroBody = new ArrayList<>();
+                Matcher headerMatcher = MACRO_HEADER_PATTERN.matcher(macroHeaderLine);
+                if (headerMatcher.find()) {
+                    macroName = headerMatcher.group(1).strip();
+                    String paramStr = headerMatcher.group(2).strip();
+                    macroParams = new ArrayList<>();
+                    if (!paramStr.isEmpty()) {
+                        for (String p : paramStr.split(",")) {
+                            String param = p.strip();
+                            if (!param.isEmpty()) {
+                                macroParams.add(param);
+                            }
+                        }
+                    }
+                } else {
+                    macroName = null;
+                    macroParams = null;
+                }
+            }
+
+            // Process the remaining equation text (if any) from the same block
+            String remainingEq = String.join(" ", bodyLines).strip();
+            if (remainingEq.isEmpty()) {
+                continue;
+            }
+
+            MdlEquation equation = parseEquationBlock(remainingEq, unitsPart, commentPart,
                     currentGroup);
             if (equation != null) {
-                equations.add(equation);
+                if (inMacro && macroBody != null) {
+                    macroBody.add(equation);
+                } else {
+                    equations.add(equation);
+                }
             }
         }
 
         return equations;
+    }
+
+    /**
+     * Builds a {@link MacroDef} by classifying parameters as inputs or outputs.
+     * A parameter is an output if it appears as the LHS name of a body equation.
+     */
+    private static MacroDef buildMacroDef(String name, List<String> allParams,
+                                           List<MdlEquation> bodyEquations) {
+        // Collect body LHS names (case-insensitive comparison for classification)
+        java.util.Set<String> bodyLhsNames = new java.util.HashSet<>();
+        for (MdlEquation eq : bodyEquations) {
+            bodyLhsNames.add(eq.name().strip().toLowerCase(java.util.Locale.ROOT));
+        }
+
+        List<String> inputs = new ArrayList<>();
+        List<String> outputs = new ArrayList<>();
+        for (String param : allParams) {
+            if (bodyLhsNames.contains(param.strip().toLowerCase(java.util.Locale.ROOT))) {
+                outputs.add(param);
+            } else {
+                inputs.add(param);
+            }
+        }
+
+        return new MacroDef(name, inputs, outputs, bodyEquations);
     }
 
     private static MdlEquation parseEquationBlock(String equationPart, String units,
