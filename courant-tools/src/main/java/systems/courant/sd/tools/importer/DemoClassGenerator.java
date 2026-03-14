@@ -279,16 +279,23 @@ public class DemoClassGenerator {
     }
 
     private void emitModuleInstance(StringBuilder sb, ModuleInstanceDef module) {
+        emitModuleInstance(sb, module, INDENT, "builder");
+    }
+
+    private void emitModuleInstance(StringBuilder sb, ModuleInstanceDef module,
+                                    String indent, String parentBuilderName) {
         // Generate the inner module definition inline
         String varName = JavaSourceEscaper.toValidIdentifier(module.instanceName()) + "Def";
         ModelDefinition inner = module.definition();
 
-        sb.append(INDENT).append("{\n");
-        sb.append(INDENT).append("    var innerBuilder = new ModelDefinitionBuilder()\n");
-        sb.append(INDENT).append("            .name(").append(escapeString(inner.name())).append(")");
+        sb.append(indent).append("{\n");
+        String blockIndent = indent + "    ";
+        String chainIndent = indent + "            ";
+        sb.append(blockIndent).append("var innerBuilder = new ModelDefinitionBuilder()\n");
+        sb.append(chainIndent).append(".name(").append(escapeString(inner.name())).append(")");
         if (inner.defaultSimulation() != null) {
             SimulationSettings sim = inner.defaultSimulation();
-            sb.append("\n").append(INDENT).append("            .defaultSimulation(")
+            sb.append("\n").append(chainIndent).append(".defaultSimulation(")
                     .append(escapeString(sim.timeStep())).append(", ")
                     .append(sim.duration()).append(", ")
                     .append(escapeString(sim.durationUnit()));
@@ -300,23 +307,22 @@ public class DemoClassGenerator {
         sb.append(";\n");
 
         // Emit inner stocks, constants, lookups, auxes, flows
-        String innerIndent = INDENT + "    ";
         for (StockDef stock : inner.stocks()) {
-            emitStockDef(sb, stock, innerIndent, "innerBuilder");
+            emitStockDef(sb, stock, blockIndent, "innerBuilder");
         }
         for (VariableDef constant : inner.variables().stream().filter(VariableDef::isLiteral).toList()) {
             if (constant.subscripts().isEmpty()) {
-                sb.append(innerIndent).append("innerBuilder.constant(")
+                sb.append(blockIndent).append("innerBuilder.constant(")
                         .append(escapeString(constant.name())).append(", ")
                         .append(constant.literalValue()).append(", ")
                         .append(escapeString(constant.unit()))
                         .append(");\n");
             } else {
-                emitVariableDef(sb, constant, innerIndent, "innerBuilder");
+                emitVariableDef(sb, constant, blockIndent, "innerBuilder");
             }
         }
         for (LookupTableDef table : inner.lookupTables()) {
-            sb.append(innerIndent).append("innerBuilder.lookupTable(new LookupTableDef(")
+            sb.append(blockIndent).append("innerBuilder.lookupTable(new LookupTableDef(")
                     .append(escapeString(table.name())).append(", ")
                     .append(escapeString(table.comment())).append(", ")
                     .append(doubleArrayLiteral(table.xValues())).append(", ")
@@ -325,28 +331,28 @@ public class DemoClassGenerator {
                     .append("));\n");
         }
         for (VariableDef v : inner.variables().stream().filter(a -> !a.isLiteral()).toList()) {
-            emitVariableDef(sb, v, innerIndent, "innerBuilder");
+            emitVariableDef(sb, v, blockIndent, "innerBuilder");
         }
         for (FlowDef flow : inner.flows()) {
-            emitFlowDef(sb, flow, innerIndent, "innerBuilder");
+            emitFlowDef(sb, flow, blockIndent, "innerBuilder");
         }
         // Nested modules (#273)
         for (ModuleInstanceDef nestedModule : inner.modules()) {
-            emitModuleInstance(sb, nestedModule);
+            emitModuleInstance(sb, nestedModule, blockIndent, "innerBuilder");
         }
 
-        sb.append(INDENT).append("    ModelDefinition ").append(varName)
+        sb.append(blockIndent).append("ModelDefinition ").append(varName)
                 .append(" = innerBuilder.build();\n");
 
         // Emit bindings
-        sb.append(INDENT).append("    builder.module(new ModuleInstanceDef(\n");
-        sb.append(INDENT).append("            ").append(escapeString(module.instanceName())).append(",\n");
-        sb.append(INDENT).append("            ").append(varName).append(",\n");
-        emitMapLiteral(sb, module.inputBindings(), INDENT + "            ");
+        sb.append(blockIndent).append(parentBuilderName).append(".module(new ModuleInstanceDef(\n");
+        sb.append(chainIndent).append(escapeString(module.instanceName())).append(",\n");
+        sb.append(chainIndent).append(varName).append(",\n");
+        emitMapLiteral(sb, module.inputBindings(), chainIndent);
         sb.append(",\n");
-        emitMapLiteral(sb, module.outputBindings(), INDENT + "            ");
+        emitMapLiteral(sb, module.outputBindings(), chainIndent);
         sb.append("));\n");
-        sb.append(INDENT).append("}\n");
+        sb.append(indent).append("}\n");
     }
 
     /**

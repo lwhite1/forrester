@@ -37,7 +37,7 @@ public class FlowChartViewer implements EventHandler {
     @Override
     public void handleSimulationStartEvent(SimulationStartEvent event) {
         ChartViewerApplication.setSimulation(event.getSimulation());
-        ChartViewerApplication.addFlowSeries(Arrays.stream(flows).map(Flow::getName).collect(Collectors.toList()));
+        ChartViewerApplication.setFlowSeries(Arrays.stream(flows).map(Flow::getName).collect(Collectors.toList()));
     }
 
     @Override

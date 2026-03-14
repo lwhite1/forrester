@@ -4,6 +4,7 @@ import systems.courant.sd.model.ModelMetadata;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import java.io.Closeable;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -23,15 +24,23 @@ import java.util.Scanner;
  *       [--dry-run] [--overwrite]
  * </pre>
  */
-public class ImportPipelineCli {
+public class ImportPipelineCli implements Closeable {
 
     public static void main(String[] args) {
-        try {
-            int exitCode = new ImportPipelineCli().run(args);
+        try (ImportPipelineCli cli = new ImportPipelineCli()) {
+            int exitCode = cli.run(args);
             System.exit(exitCode);
         } catch (Exception e) {
             System.err.println("Error: " + e.getMessage());
             System.exit(1);
+        }
+    }
+
+    @Override
+    public void close() {
+        if (stdinScanner != null) {
+            stdinScanner.close();
+            stdinScanner = null;
         }
     }
 

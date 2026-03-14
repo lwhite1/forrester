@@ -200,7 +200,7 @@ public class ChartViewerApplication extends Application {
     /**
      * Initializes chart series from stock and variable names.
      */
-    public static void addSeries(List<String> modelEntityNames, List<String> modelVariableNames) {
+    public static void setSeries(List<String> modelEntityNames, List<String> modelVariableNames) {
         synchronized (LOCK) {
             series = new ArrayList<>();
             List<String> allNames = new ArrayList<>(modelEntityNames);
@@ -216,7 +216,7 @@ public class ChartViewerApplication extends Application {
     /**
      * Initializes chart series from flow names.
      */
-    public static void addFlowSeries(List<String> flowNames) {
+    public static void setFlowSeries(List<String> flowNames) {
         synchronized (LOCK) {
             series = new ArrayList<>();
             for (String name : flowNames) {

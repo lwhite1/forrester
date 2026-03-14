@@ -321,6 +321,8 @@ public class DashboardPanel extends VBox {
                 dominanceTab = null;
             } else if (tab == phasePlotTab) {
                 phasePlotTab = null;
+            } else if (tab == dominanceTab) {
+                dominanceTab = null;
             }
             if (resultTabs.getTabs().isEmpty()) {
                 hideTabs();
@@ -365,6 +367,7 @@ public class DashboardPanel extends VBox {
         multiSweepTab = null;
         sensitivityTab = null;
         phasePlotTab = null;
+        dominanceTab = null;
         hideTabs();
     }
 

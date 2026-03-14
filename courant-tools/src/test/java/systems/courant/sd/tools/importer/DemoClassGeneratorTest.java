@@ -546,6 +546,67 @@ class DemoClassGeneratorTest {
             assertThat(count).isEqualTo(2);
         }
 
+        @Test
+        @DisplayName("nested module code should be indented deeper than parent module (#568)")
+        void shouldIndentNestedModuleDeeperThanParent() {
+            ModelDefinition innerInnerDef = new ModelDefinitionBuilder()
+                    .name("InnerInner")
+                    .stock("Z", 0, "unit")
+                    .defaultSimulation("Day", 10.0, "Day")
+                    .build();
+
+            ModelDefinition innerDef = new ModelDefinitionBuilder()
+                    .name("Inner")
+                    .stock("Y", 0, "unit")
+                    .module("nested", innerInnerDef, Map.of(), Map.of())
+                    .defaultSimulation("Day", 10.0, "Day")
+                    .build();
+
+            ModelDefinition def = new ModelDefinitionBuilder()
+                    .name("Outer")
+                    .module("myModule", innerDef, Map.of(), Map.of())
+                    .defaultSimulation("Day", 10.0, "Day")
+                    .build();
+
+            ModelMetadata metadata = ModelMetadata.builder().license("CC-BY-SA-4.0").build();
+            String source = generator.generate(def, metadata, "TestDemo",
+                    "systems.courant.sd.demo", "test.mdl", List.of(), List.of());
+
+            // Outer module block opens at 8-space indent (INDENT)
+            // Inner (nested) module block should open at 12-space indent (INDENT + 4)
+            String[] lines = source.split("\n");
+            int outerBlockIndent = -1;
+            int nestedBlockIndent = -1;
+            boolean foundOuter = false;
+            for (String line : lines) {
+                if (line.contains("\"Inner\"") && !line.contains("\"InnerInner\"")) {
+                    outerBlockIndent = countLeadingSpaces(line);
+                    foundOuter = true;
+                }
+                if (foundOuter && line.contains("\"InnerInner\"")) {
+                    nestedBlockIndent = countLeadingSpaces(line);
+                    break;
+                }
+            }
+            assertThat(outerBlockIndent).as("outer block indent found").isGreaterThan(0);
+            assertThat(nestedBlockIndent).as("nested block indent found").isGreaterThan(0);
+            assertThat(nestedBlockIndent)
+                    .as("nested module should be indented deeper than parent module")
+                    .isGreaterThan(outerBlockIndent);
+        }
+
+        private int countLeadingSpaces(String line) {
+            int count = 0;
+            for (char c : line.toCharArray()) {
+                if (c == ' ') {
+                    count++;
+                } else {
+                    break;
+                }
+            }
+            return count;
+        }
+
         private int countOccurrences(String text, String search) {
             int count = 0;
             int idx = 0;

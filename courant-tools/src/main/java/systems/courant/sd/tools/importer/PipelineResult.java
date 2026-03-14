@@ -25,6 +25,12 @@ public record PipelineResult(
         Path outputFile
 ) {
 
+    public PipelineResult {
+        importWarnings = List.copyOf(importWarnings);
+        validationErrors = List.copyOf(validationErrors);
+        trialCompileErrors = List.copyOf(trialCompileErrors);
+    }
+
     public boolean hasValidationErrors() {
         return !validationErrors.isEmpty();
     }

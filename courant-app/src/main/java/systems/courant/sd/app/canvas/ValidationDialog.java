@@ -22,6 +22,8 @@ import javafx.scene.layout.Region;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 
+import java.util.Map;
+import java.util.WeakHashMap;
 import java.util.function.Consumer;
 
 /**
@@ -33,7 +35,7 @@ import java.util.function.Consumer;
  */
 public class ValidationDialog extends Dialog<Void> {
 
-    private static ValidationDialog openInstance;
+    private static final Map<Stage, ValidationDialog> openInstances = new WeakHashMap<>();
 
     private final TableView<ValidationIssue> table;
     private final Label summaryLabel;
@@ -42,38 +44,64 @@ public class ValidationDialog extends Dialog<Void> {
     private Consumer<String> onSelectElement;
 
     /**
-     * Shows a validation dialog with the given result. If a dialog is already open,
-     * refreshes its contents and brings it to the front instead of creating a new one.
+     * Shows a validation dialog with the given result. If a dialog is already open
+     * for the given owner, refreshes its contents and brings it to the front
+     * instead of creating a new one.
+     *
+     * @param result          the validation result to display
+     * @param onSelectElement callback invoked when a row is clicked
+     * @param owner           the owner stage (used to track one dialog per window)
+     */
+    public static void showOrUpdate(ValidationResult result, Consumer<String> onSelectElement,
+                                    Stage owner) {
+        ValidationDialog existing = openInstances.get(owner);
+        if (existing != null && existing.isShowing()) {
+            existing.updateResult(result);
+            existing.onSelectElement = onSelectElement;
+            Stage window = (Stage) existing.getDialogPane().getScene().getWindow();
+            window.toFront();
+            window.requestFocus();
+            return;
+        }
+        ValidationDialog dialog = new ValidationDialog(result, onSelectElement, owner);
+        openInstances.put(owner, dialog);
+        dialog.show();
+    }
+
+    /**
+     * Shows a validation dialog with the given result using a global singleton.
+     * Prefer {@link #showOrUpdate(ValidationResult, Consumer, Stage)} for multi-window use.
      *
      * @param result          the validation result to display
      * @param onSelectElement callback invoked when a row is clicked
      */
     public static void showOrUpdate(ValidationResult result, Consumer<String> onSelectElement) {
-        if (openInstance != null && openInstance.isShowing()) {
-            openInstance.updateResult(result);
-            openInstance.onSelectElement = onSelectElement;
-            Stage window = (Stage) openInstance.getDialogPane().getScene().getWindow();
-            window.toFront();
-            window.requestFocus();
-            return;
-        }
-        ValidationDialog dialog = new ValidationDialog(result, onSelectElement);
-        openInstance = dialog;
-        dialog.show();
+        showOrUpdate(result, onSelectElement, null);
     }
 
     /**
-     * Returns the currently open validation dialog, or {@code null} if none is showing.
-     * Visible for testing.
+     * Returns the currently open validation dialog for the given owner,
+     * or {@code null} if none is showing. Visible for testing.
      */
-    static ValidationDialog getOpenInstance() {
-        if (openInstance != null && !openInstance.isShowing()) {
-            openInstance = null;
+    static ValidationDialog getOpenInstance(Stage owner) {
+        ValidationDialog instance = openInstances.get(owner);
+        if (instance != null && !instance.isShowing()) {
+            openInstances.remove(owner);
+            return null;
         }
-        return openInstance;
+        return instance;
     }
 
-    public ValidationDialog(ValidationResult result, Consumer<String> onSelectElement) {
+    /**
+     * Returns the currently open validation dialog (global/null-owner variant),
+     * or {@code null} if none is showing. Visible for testing.
+     */
+    static ValidationDialog getOpenInstance() {
+        return getOpenInstance(null);
+    }
+
+    public ValidationDialog(ValidationResult result, Consumer<String> onSelectElement,
+                            Stage owner) {
         initModality(Modality.NONE);
         setTitle("Model Validation");
         this.currentResult = result;
@@ -146,11 +174,7 @@ public class ValidationDialog extends Dialog<Void> {
 
         setResultConverter(button -> null);
 
-        setOnHidden(e -> {
-            if (openInstance == this) {
-                openInstance = null;
-            }
-        });
+        setOnHidden(e -> openInstances.values().remove(this));
     }
 
     /**

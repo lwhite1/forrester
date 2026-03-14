@@ -3,6 +3,7 @@ package systems.courant.sd.tools.importer;
 import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayInputStream;
+import java.io.Closeable;
 import java.nio.charset.StandardCharsets;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -68,6 +69,31 @@ class ImportPipelineCliTest {
             assertThat(r1).isEqualTo("first");
             assertThat(r2).isEqualTo("second");
             assertThat(r3).isEqualTo("third");
+        } finally {
+            System.setIn(originalIn);
+        }
+    }
+
+    @Test
+    void shouldImplementCloseable() {
+        assertThat(Closeable.class).isAssignableFrom(ImportPipelineCli.class);
+    }
+
+    @Test
+    void shouldCloseWithoutErrorWhenScannerNotCreated() {
+        ImportPipelineCli cli = new ImportPipelineCli();
+        cli.close(); // should not throw even if scanner was never created
+    }
+
+    @Test
+    void shouldCloseCleanlyAfterPromptCalls() {
+        java.io.InputStream originalIn = System.in;
+        System.setIn(new ByteArrayInputStream("test\n".getBytes(StandardCharsets.UTF_8)));
+        try {
+            ImportPipelineCli cli = new ImportPipelineCli();
+            cli.prompt("Q: "); // forces scanner creation
+            cli.close(); // should close the scanner without error
+            cli.close(); // double-close should be safe
         } finally {
             System.setIn(originalIn);
         }

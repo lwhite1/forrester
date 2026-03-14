@@ -168,4 +168,34 @@ public class ModelTest {
         model.addVariable(v); // same object — should not throw
         assertThat(model.getVariables()).hasSize(1);
     }
+
+    @Test
+    public void shouldAllowReAddingStockAfterRemoval() {
+        Stock stock = new Stock("Population", 100, THING);
+        model.addStock(stock);
+        model.removeStock(stock);
+        // After removal, re-adding a stock with the same name should succeed
+        model.addStock(new Stock("Population", 200, THING));
+        assertThat(model.getStocks()).hasSize(1);
+    }
+
+    @Test
+    public void shouldHandleManyStocksEfficiently() {
+        for (int i = 0; i < 1000; i++) {
+            model.addStock(new Stock("Stock" + i, i, THING));
+        }
+        assertThat(model.getStocks()).hasSize(1000);
+        assertThatThrownBy(() -> model.addStock(new Stock("Stock500", 0, THING)))
+                .isInstanceOf(IllegalArgumentException.class);
+    }
+
+    @Test
+    public void shouldHandleManyFlowsEfficiently() {
+        for (int i = 0; i < 1000; i++) {
+            model.addFlow(Flow.create("Flow" + i, MINUTE, () -> new Quantity(0, THING)));
+        }
+        assertThat(model.getFlows()).hasSize(1000);
+        assertThatThrownBy(() -> model.addFlow(Flow.create("Flow500", MINUTE, () -> new Quantity(0, THING))))
+                .isInstanceOf(IllegalArgumentException.class);
+    }
 }

@@ -23,7 +23,7 @@ public class StockLevelChartViewer implements EventHandler {
     @Override
     public void handleSimulationStartEvent(SimulationStartEvent event) {
         ChartViewerApplication.setSimulation(event.getSimulation());
-        ChartViewerApplication.addSeries(event.getModel().getStockNames(), event.getModel().getVariableNames());
+        ChartViewerApplication.setSeries(event.getModel().getStockNames(), event.getModel().getVariableNames());
     }
 
     @Override

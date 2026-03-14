@@ -82,6 +82,18 @@ class UnitRegistryTest {
     }
 
     @Test
+    @DisplayName("resolve() for unknown name should not throw but should auto-create (#557)")
+    void shouldAutoCreateForUnknownNameWithoutThrowing() {
+        // Simulates a typo — "Perosn" instead of "Person"
+        Unit typo = registry.resolve("Perosn");
+        assertThat(typo).isNotNull();
+        assertThat(typo.getName()).isEqualTo("Perosn");
+        // The auto-created unit is not compatible with the real "Person" unit
+        Unit person = registry.find("Person");
+        assertThat(typo).isNotSameAs(person);
+    }
+
+    @Test
     void shouldReturnSameCustomUnitOnReResolve() {
         Unit first = registry.resolve("Error");
         Unit second = registry.resolve("Error");

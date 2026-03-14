@@ -11,6 +11,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -123,6 +124,51 @@ class PipelineResultTest {
             String report = captureReport(result);
 
             assertThat(report).doesNotContain("Output:");
+        }
+    }
+
+    @Nested
+    @DisplayName("Defensive copy (#284)")
+    class DefensiveCopy {
+
+        @Test
+        void shouldDefensivelyCopyImportWarnings() {
+            ArrayList<String> warnings = new ArrayList<>(List.of("warning1"));
+            PipelineResult result = new PipelineResult(
+                    MINIMAL_DEF, warnings, List.of(), List.of(), "source", null);
+            warnings.add("warning2");
+            assertThat(result.importWarnings()).hasSize(1);
+        }
+
+        @Test
+        void shouldDefensivelyCopyValidationErrors() {
+            ArrayList<String> errors = new ArrayList<>(List.of("error1"));
+            PipelineResult result = new PipelineResult(
+                    MINIMAL_DEF, List.of(), errors, List.of(), "source", null);
+            errors.add("error2");
+            assertThat(result.validationErrors()).hasSize(1);
+        }
+
+        @Test
+        void shouldDefensivelyCopyTrialCompileErrors() {
+            ArrayList<String> errors = new ArrayList<>(List.of("compile1"));
+            PipelineResult result = new PipelineResult(
+                    MINIMAL_DEF, List.of(), List.of(), errors, "source", null);
+            errors.add("compile2");
+            assertThat(result.trialCompileErrors()).hasSize(1);
+        }
+
+        @Test
+        void shouldReturnUnmodifiableLists() {
+            PipelineResult result = new PipelineResult(
+                    MINIMAL_DEF,
+                    new ArrayList<>(List.of("w")),
+                    new ArrayList<>(List.of("v")),
+                    new ArrayList<>(List.of("c")),
+                    "source", null);
+            assertThat(result.importWarnings()).isUnmodifiable();
+            assertThat(result.validationErrors()).isUnmodifiable();
+            assertThat(result.trialCompileErrors()).isUnmodifiable();
         }
     }
 }

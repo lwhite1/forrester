@@ -26,7 +26,7 @@ class ChartViewerSnapshotTest {
     @Test
     @DisplayName("snapshot captures current state independently of later mutations")
     void shouldIsolateSnapshotFromLaterMutations() {
-        ChartViewerApplication.addSeries(List.of("A"), List.of());
+        ChartViewerApplication.setSeries(List.of("A"), List.of());
         ChartViewerApplication.addValues(List.of(1.0), List.of(), 0);
         ChartViewerApplication.setSize(1024, 768);
 
@@ -34,7 +34,7 @@ class ChartViewerSnapshotTest {
 
         // Mutate static state after snapshot
         ChartViewerApplication.reset();
-        ChartViewerApplication.addSeries(List.of("B", "C"), List.of());
+        ChartViewerApplication.setSeries(List.of("B", "C"), List.of());
         ChartViewerApplication.setSize(640, 480);
 
         // Snapshot should still reflect the original state
@@ -49,13 +49,13 @@ class ChartViewerSnapshotTest {
     @DisplayName("snapshot taken before next caller mutates state is unaffected")
     void shouldIsolateSequentialCallers() {
         // Caller 1 accumulates data and snapshots
-        ChartViewerApplication.addSeries(List.of("Alpha"), List.of());
+        ChartViewerApplication.setSeries(List.of("Alpha"), List.of());
         ChartViewerApplication.addValues(List.of(10.0), List.of(), 0);
         ChartViewerApplication.ChartData snap1 = ChartViewerApplication.snapshot();
 
         // Caller 2 resets and accumulates different data
         ChartViewerApplication.reset();
-        ChartViewerApplication.addSeries(List.of("Beta"), List.of());
+        ChartViewerApplication.setSeries(List.of("Beta"), List.of());
         ChartViewerApplication.addValues(List.of(20.0), List.of(), 0);
         ChartViewerApplication.ChartData snap2 = ChartViewerApplication.snapshot();
 
@@ -75,7 +75,7 @@ class ChartViewerSnapshotTest {
     @Test
     @DisplayName("snapshot title and xAxisLabel match what was set")
     void shouldCaptureTitle() {
-        ChartViewerApplication.addSeries(List.of("X"), List.of());
+        ChartViewerApplication.setSeries(List.of("X"), List.of());
 
         ChartViewerApplication.ChartData snap = ChartViewerApplication.snapshot();
 
@@ -87,7 +87,7 @@ class ChartViewerSnapshotTest {
     @Test
     @DisplayName("snapshot after reset returns empty series")
     void shouldReturnEmptyAfterReset() {
-        ChartViewerApplication.addSeries(List.of("A", "B"), List.of());
+        ChartViewerApplication.setSeries(List.of("A", "B"), List.of());
         ChartViewerApplication.reset();
 
         ChartViewerApplication.ChartData snap = ChartViewerApplication.snapshot();
