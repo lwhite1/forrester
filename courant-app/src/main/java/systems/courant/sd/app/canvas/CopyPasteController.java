@@ -56,6 +56,20 @@ final class CopyPasteController {
      * The caller is responsible for undo state, selection, and connector regeneration.
      */
     PasteResult paste(CanvasState canvasState, ModelEditor editor) {
+        return paste(canvasState, editor, null);
+    }
+
+    /**
+     * Pastes clipboard contents, creating new elements offset from the originals.
+     * Returns the pasted element names and any references that were replaced with 0.
+     * The caller is responsible for undo state, selection, and connector regeneration.
+     *
+     * @param viewportCenter the center of the current viewport in world coordinates,
+     *                       used as the paste anchor when no elements are selected.
+     *                       If null, falls back to (30, 30).
+     */
+    PasteResult paste(CanvasState canvasState, ModelEditor editor,
+                      CanvasState.Position viewportCenter) {
         if (clipboard.isEmpty()) {
             return new PasteResult(List.of(), Set.of());
         }
@@ -63,7 +77,7 @@ final class CopyPasteController {
         double offsetX = 30;
         double offsetY = 30;
 
-        // Compute anchor from current selection or default offset
+        // Compute anchor from current selection or viewport center
         Set<String> currentSel = canvasState.getSelection();
         double anchorX;
         double anchorY;
@@ -82,6 +96,9 @@ final class CopyPasteController {
             }
             anchorX = cnt > 0 ? sx / cnt + offsetX : offsetX;
             anchorY = cnt > 0 ? sy / cnt + offsetY : offsetY;
+        } else if (viewportCenter != null) {
+            anchorX = viewportCenter.x();
+            anchorY = viewportCenter.y();
         } else {
             anchorX = offsetX;
             anchorY = offsetY;
