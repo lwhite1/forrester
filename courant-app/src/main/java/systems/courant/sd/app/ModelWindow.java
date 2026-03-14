@@ -964,7 +964,7 @@ public class ModelWindow {
         if (result.isClean()) {
             return;
         }
-        ValidationDialog.showOrUpdate(result, canvas::selectElement);
+        ValidationDialog.showOrUpdate(result, canvas::selectElement, stage);
     }
 
     private void importReferenceData() {
