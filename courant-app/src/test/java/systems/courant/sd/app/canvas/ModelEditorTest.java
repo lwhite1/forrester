@@ -15,6 +15,7 @@ import systems.courant.sd.model.def.StockDef;
 import systems.courant.sd.model.def.SubscriptDef;
 import systems.courant.sd.model.def.ViewDef;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -366,6 +367,52 @@ class ModelEditorTest {
 
             FlowDef flow = editor.getFlows().get(0);
             assertThat(flow.equation()).isEqualTo("0 + 1");
+        }
+
+        @Test
+        void shouldFireEquationChangedForModifiedEquations() {
+            ModelDefinition def = new ModelDefinitionBuilder()
+                    .name("Test")
+                    .stock("S", 100, "u")
+                    .constant("Rate", 0.5, "1/day")
+                    .flow("Drain", "S * Rate", "day", "S", null)
+                    .variable("Calc", "Rate + 1", "u")
+                    .build();
+            editor.loadFrom(def);
+
+            List<String> equationChanges = new ArrayList<>();
+            editor.addListener(new ModelEditListener() {
+                @Override
+                public void onEquationChanged(String elementName) {
+                    equationChanges.add(elementName);
+                }
+            });
+
+            editor.removeElement("Rate");
+
+            assertThat(equationChanges).containsExactlyInAnyOrder("Drain", "Calc");
+        }
+
+        @Test
+        void shouldNotFireEquationChangedWhenNoEquationsModified() {
+            ModelDefinition def = new ModelDefinitionBuilder()
+                    .name("Test")
+                    .stock("S", 100, "u")
+                    .stock("T", 50, "u")
+                    .build();
+            editor.loadFrom(def);
+
+            List<String> equationChanges = new ArrayList<>();
+            editor.addListener(new ModelEditListener() {
+                @Override
+                public void onEquationChanged(String elementName) {
+                    equationChanges.add(elementName);
+                }
+            });
+
+            editor.removeElement("T");
+
+            assertThat(equationChanges).isEmpty();
         }
     }
 

@@ -58,13 +58,20 @@ final class ReattachController {
     /**
      * Completes the reattachment: if released on a stock, reconnects the
      * flow endpoint; if released on empty space, disconnects to cloud.
+     *
+     * <p>Saves undo state before the reconnection. If the reconnection
+     * is rejected (e.g. self-loop), the caller should discard the
+     * spurious undo entry.
+     *
+     * @return true if the flow was reconnected, false if rejected
      */
-    void complete(double worldX, double worldY, CanvasState state,
-                  ModelEditor editor, Runnable saveUndo) {
-        saveUndo.run();
+    boolean complete(double worldX, double worldY, CanvasState state,
+                     ModelEditor editor, Runnable saveUndo) {
         String stockHit = FlowCreationController.hitTestStockOnly(worldX, worldY, state);
-        editor.reconnectFlow(flowName, end, stockHit);
+        saveUndo.run();
+        boolean reconnected = editor.reconnectFlow(flowName, end, stockHit);
         cancel();
+        return reconnected;
     }
 
     /**

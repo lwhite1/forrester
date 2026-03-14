@@ -10,6 +10,7 @@ import systems.courant.sd.model.expr.Expr;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.function.UnaryOperator;
 
@@ -35,17 +36,21 @@ final class EquationReferenceManager {
     /**
      * Replaces all occurrences of {@code oldToken} with {@code newToken} in every
      * flow and variable equation, respecting word boundaries.
+     *
+     * @return the names of elements whose equations were actually modified
      */
-    void updateEquationReferences(String oldToken, String newToken) {
+    List<String> updateEquationReferences(String oldToken, String newToken) {
         if (oldToken.equals(newToken)) {
-            return;
+            return List.of();
         }
+        List<String> modified = new ArrayList<>();
         for (int i = 0; i < flows.size(); i++) {
             FlowDef f = flows.get(i);
             String updated = replaceToken(f.equation(), oldToken, newToken);
             if (!updated.equals(f.equation())) {
                 flows.set(i, new FlowDef(f.name(), f.comment(), updated,
                         f.timeUnit(), f.materialUnit(), f.source(), f.sink(), f.subscripts()));
+                modified.add(f.name());
             }
         }
         for (int i = 0; i < variables.size(); i++) {
@@ -53,8 +58,10 @@ final class EquationReferenceManager {
             String updated = replaceToken(a.equation(), oldToken, newToken);
             if (!updated.equals(a.equation())) {
                 variables.set(i, new VariableDef(a.name(), a.comment(), updated, a.unit(), a.subscripts()));
+                modified.add(a.name());
             }
         }
+        return modified;
     }
 
     /**
