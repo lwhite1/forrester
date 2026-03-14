@@ -110,6 +110,7 @@ public class Model extends Element {
         for (Stock stock : arrayedStock.getStocks()) {
             if (!stocks.contains(stock)) {
                 stocks.add(stock);
+                stockNames.add(stock.getName());
             }
         }
     }
@@ -130,6 +131,7 @@ public class Model extends Element {
         for (Stock stock : multiArrayedStock.getStocks()) {
             if (!stocks.contains(stock)) {
                 stocks.add(stock);
+                stockNames.add(stock.getName());
             }
         }
     }
@@ -165,24 +167,22 @@ public class Model extends Element {
         modules.add(module);
         for (Stock stock : module.getStocks()) {
             if (!stocks.contains(stock)) {
-                boolean nameExists = stocks.stream()
-                        .anyMatch(s -> s.getName().equals(stock.getName()));
-                if (nameExists) {
+                if (stockNames.contains(stock.getName())) {
                     log.warn("Module '{}' stock '{}' has same name as existing stock in model '{}'",
                             module.getName(), stock.getName(), getName());
                 }
                 stocks.add(stock);
+                stockNames.add(stock.getName());
             }
         }
         for (Flow flow : module.getFlows()) {
             if (!flows.contains(flow)) {
-                boolean nameExists = flows.stream()
-                        .anyMatch(f -> f.getName().equals(flow.getName()));
-                if (nameExists) {
+                if (flowNames.contains(flow.getName())) {
                     log.warn("Module '{}' flow '{}' has same name as existing flow in model '{}'",
                             module.getName(), flow.getName(), getName());
                 }
                 flows.add(flow);
+                flowNames.add(flow.getName());
             }
         }
         for (Variable variable : module.getVariables()) {

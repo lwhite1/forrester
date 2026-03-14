@@ -365,6 +365,7 @@ public class DashboardPanel extends VBox {
         multiSweepTab = null;
         sensitivityTab = null;
         phasePlotTab = null;
+        dominanceTab = null;
         hideTabs();
     }
 
