@@ -216,5 +216,61 @@ class EquationReferenceManagerTest {
             boolean added = manager.addConnectionReference("Missing", "Pop");
             assertThat(added).isFalse();
         }
+
+        @Test
+        void shouldNotFalsePositiveOnSubstringMatch() {
+            // Issue #266: "Rate" is a substring of "Birth_Rate" but not a whole token
+            flows.add(new FlowDef("Drain", "Birth_Rate * 2", "Day", null, null));
+            boolean added = manager.addConnectionReference("Drain", "Rate");
+            assertThat(added).isTrue();
+            assertThat(flows.getFirst().equation()).isEqualTo("Birth_Rate * 2 * Rate");
+        }
+
+        @Test
+        void shouldDetectWholeTokenAsExistingReference() {
+            flows.add(new FlowDef("Drain", "Rate * Pop", "Day", null, null));
+            boolean added = manager.addConnectionReference("Drain", "Rate");
+            assertThat(added).isTrue();
+            // Should not append duplicate
+            assertThat(flows.getFirst().equation()).isEqualTo("Rate * Pop");
+        }
+
+        @Test
+        void shouldNotFalsePositiveOnSubstringMatchForVariable() {
+            variables.add(new VariableDef("Ratio", "Birth_Rate * 2", "units"));
+            boolean added = manager.addConnectionReference("Ratio", "Rate");
+            assertThat(added).isTrue();
+            assertThat(variables.getFirst().equation()).isEqualTo("Birth_Rate * 2 * Rate");
+        }
+    }
+
+    @Nested
+    @DisplayName("containsWholeToken (static)")
+    class ContainsWholeToken {
+
+        @Test
+        void shouldMatchWholeToken() {
+            assertThat(EquationReferenceManager.containsWholeToken("Rate * Pop", "Rate")).isTrue();
+        }
+
+        @Test
+        void shouldNotMatchSubstring() {
+            assertThat(EquationReferenceManager.containsWholeToken("Birth_Rate * 2", "Rate")).isFalse();
+        }
+
+        @Test
+        void shouldMatchTokenAtEnd() {
+            assertThat(EquationReferenceManager.containsWholeToken("Pop * Rate", "Rate")).isTrue();
+        }
+
+        @Test
+        void shouldMatchSoleToken() {
+            assertThat(EquationReferenceManager.containsWholeToken("Rate", "Rate")).isTrue();
+        }
+
+        @Test
+        void shouldNotMatchWhenTokenAbsent() {
+            assertThat(EquationReferenceManager.containsWholeToken("Pop * 5", "Rate")).isFalse();
+        }
     }
 }
