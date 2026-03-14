@@ -1,0 +1,194 @@
+{UTF-8}
+average lifetime=
+	30
+	~	Year
+	~		|
+
+fraction leaving= WITH LOOKUP (
+	perceived quality of life by social housing families,
+		([(0,0)-(1,1)],(0,1),(0.25,0.45),(0.5,0.15),(0.75,0.05),(1,0) ))
+	~	
+	~	100% of the remaining social housing families leave at a perceived quality of life \
+		(QoL) of 0%, that 45% leave at a perceived QoL of 25%, that 15% leave at a \
+		perceived QoL of 50%, that 5% leave at a perceived QoL of 75%,
+		and that 0% leave at a perceived QoL of 100%
+	|
+
+fraction of social housing families=
+	social housing families/3000
+	~	
+	~		|
+
+importance foshf=
+	2
+	~	
+	~		|
+
+importance qosha=
+	1
+	~	
+	~		|
+
+initial average quality of the social housing apartments=
+	0.7
+	~	
+	~		|
+
+loss of quality of social housing apartments through ageing=
+	total quality of all social housing apartments/average lifetime
+	~	
+	~		|
+
+loss of total quality of social housing apartments at privatisation=
+	outflow of social housing families*quality of social housing apartments
+	~	
+	~		|
+
+outflow of social housing families=
+	fraction leaving*social housing families
+	~	
+	~		|
+
+perceived quality of life by social housing families=
+	(fraction of social housing families*importance foshf+importance qosha*quality of social housing apartments\
+		)/(importance foshf+importance qosha)
+	~	
+	~		|
+
+quality of social housing apartments=
+	total quality of all social housing apartments/social housing families
+	~	
+	~		|
+
+refurbishment=
+	refurbishment rate*(1-quality of social housing apartments)*social housing families
+	~	
+	~		|
+
+refurbishment rate=
+	0.05
+	~	
+	~		|
+
+social housing families= INTEG (
+	-outflow of social housing families,
+		2990)
+	~	
+	~		|
+
+total quality of all social housing apartments= INTEG (
+	refurbishment-loss of quality of social housing apartments through ageing-loss of total quality of social housing apartments at privatisation\
+		,
+		initial average quality of the social housing apartments*social housing families)
+	~	
+	~		|
+
+********************************************************
+	.Control
+********************************************************~
+		Simulation Control Parameters
+	|
+
+FINAL TIME  = 50
+	~	Year
+	~	The final time for the simulation.
+	|
+
+INITIAL TIME  = 0
+	~	Year
+	~	The initial time for the simulation.
+	|
+
+SAVEPER  = 
+        TIME STEP
+	~	Year [0,?]
+	~	The frequency with which output is stored.
+	|
+
+TIME STEP  = 0.0625
+	~	Year [0,?]
+	~	The time step for the simulation.
+	|
+
+\\\---/// Sketch information - do not modify anything except names
+V300  Do not put anything below this section - it will be ignored
+*View 1
+$192-192-192,0,Times New Roman|12||0-0-0|0-0-0|0-0-255|-1--1--1|-1--1--1|96,96,100,0
+10,1,social housing families,711,244,29,27,3,131,0,0,0,0,0,0
+12,2,48,900,245,10,8,0,3,0,0,-1,0,0,0
+1,3,5,2,4,0,0,22,0,0,0,-1--1--1,,1|(855,245)|
+1,4,5,1,100,0,0,22,0,0,0,-1--1--1,,1|(774,245)|
+11,5,48,815,245,6,8,34,3,0,0,1,0,0,0
+10,6,outflow of social housing families,815,272,53,19,40,3,0,0,-1,0,0,0
+10,7,perceived quality of life by social housing families,691,104,79,19,8,3,0,0,0,0,0,0
+1,8,7,9,1,0,0,0,0,64,0,-1--1--1,,1|(803,129)|
+10,9,fraction leaving,801,187,47,11,8,3,0,0,0,0,0,0
+1,10,9,5,0,0,0,0,0,64,0,-1--1--1,,1|(806,211)|
+1,11,1,5,1,0,0,0,0,64,0,-1--1--1,,1|(771,226)|
+10,12,quality of social housing apartments,292,98,61,19,8,3,0,0,0,0,0,0
+10,13,fraction of social housing families,678,154,53,19,8,3,0,0,0,0,0,0
+1,14,13,7,0,0,0,0,0,64,0,-1--1--1,,1|(681,135)|
+1,15,12,7,1,0,0,0,0,64,0,-1--1--1,,1|(470,74)|
+10,16,importance qosha,552,35,56,11,8,3,0,0,0,0,0,0
+10,17,importance foshf,876,39,52,11,8,3,0,0,0,0,0,0
+1,18,17,7,0,0,0,0,0,64,0,-1--1--1,,1|(801,65)|
+1,19,16,7,0,0,0,0,0,64,0,-1--1--1,,1|(606,61)|
+10,20,total quality of all social housing apartments,344,238,63,20,3,131,0,0,0,0,0,0
+1,21,1,12,1,0,0,0,0,64,0,-1--1--1,,1|(555,148)|
+1,22,20,12,1,0,0,0,0,64,0,-1--1--1,,1|(375,162)|
+12,23,48,555,237,10,8,0,3,0,0,-1,0,0,0
+1,24,26,23,4,0,0,22,0,0,0,-1--1--1,,1|(513,237)|
+1,25,26,20,100,0,0,22,0,0,0,-1--1--1,,1|(438,237)|
+11,26,48,476,237,6,8,34,3,0,0,1,0,0,0
+10,27,loss of quality of social housing apartments through ageing,476,264,86,28,40,3,0,0,-1,0,0,0
+10,28,initial average quality of the social housing apartments,425,366,85,19,8,3,0,0,0,0,0,0
+10,29,average lifetime,480,204,49,11,8,3,0,0,0,0,0,0
+1,30,29,26,0,0,0,0,0,64,0,-1--1--1,,1|(478,216)|
+1,31,20,27,1,0,0,0,0,64,0,-1--1--1,,1|(364,277)|
+12,32,48,316,364,10,8,0,3,0,0,-1,0,0,0
+1,33,35,20,4,0,0,22,0,0,0,-1--1--1,,1|(315,282)|
+1,34,35,32,100,0,0,22,0,0,0,-1--1--1,,1|(315,337)|
+11,35,48,315,313,8,6,33,3,0,0,4,0,0,0
+10,36,refurbishment,366,313,43,11,40,3,0,0,-1,0,0,0
+10,37,refurbishment rate,233,326,56,11,8,3,0,0,0,0,0,0
+1,38,37,35,0,0,0,0,0,64,0,-1--1--1,,1|(291,317)|
+1,39,28,20,0,0,0,0,0,64,1,-1--1--1,,1|(388,308)|
+1,40,1,20,0,0,0,0,0,64,1,-1--1--1,,1|(551,241)|
+1,41,12,35,1,0,0,0,0,64,0,-1--1--1,,1|(77,290)|
+1,42,1,36,1,0,0,0,0,64,0,-1--1--1,,1|(549,309)|
+12,43,48,124,239,10,8,0,3,0,0,-1,0,0,0
+1,44,46,43,4,0,0,22,0,0,0,-1--1--1,,1|(167,239)|
+1,45,46,20,100,0,0,22,0,0,0,-1--1--1,,1|(247,239)|
+11,46,48,207,239,6,8,34,3,0,0,1,0,0,0
+10,47,loss of total quality of social housing apartments at privatisation,207,275,87,28,40,3,0,0,-1,0,0,0
+1,48,6,47,1,0,0,0,0,64,0,-1--1--1,,1|(672,414)|
+1,49,12,46,0,0,0,0,0,64,0,-1--1--1,,1|(249,169)|
+1,50,1,13,0,0,0,0,0,64,0,-1--1--1,,1|(695,201)|
+///---\\\
+:L<%^E!@
+9:Current
+22:$,Dollar,Dollars,$s
+22:Hour,Hours
+22:Month,Months
+22:Person,People,Persons
+22:Unit,Units
+22:Week,Weeks
+22:Year,Years
+22:Day,Days
+15:0,0,0,5,0,0
+19:100,0
+27:2,
+34:0,
+4:Time
+5:outflow of social housing families
+35:Date
+36:YYYY-MM-DD
+37:2000
+38:1
+39:1
+40:0
+41:0
+42:0
+24:0
+25:50
+26:50

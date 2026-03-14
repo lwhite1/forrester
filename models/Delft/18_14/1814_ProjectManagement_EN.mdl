@@ -1,0 +1,364 @@
+{UTF-8}
+fraction personnel for testing= WITH LOOKUP (
+	reported fraction detection undiscovered rework,
+		([(0,0)-(1,1)],(0,0.1),(0.2,0.15),(0.4,0.3),(0.6,0.6),(0.8,0.75),(1,0.8) ))
+	~	dmnl
+	~	gerapporteerde fractie detectie van onontdekt rework
+	|
+
+average quality of completed project tasks=
+	properly completed project tasks/MAX((properly completed project tasks+undiscovered rework\
+		),1)
+	~	dmnl
+	~		|
+
+productivity of testing=
+	maximum productivity of testing*fraction undiscovered rework
+	~	tasks/(person*Month)
+	~		|
+
+initial project time remaining=
+	40
+	~	Month
+	~		|
+
+remaining project tasks= INTEG (
+	detecting undiscovered rework-poor completion of project tasks-proper completion of project tasks\
+		,
+		initial number of project tasks)
+	~	tasks
+	~		|
+
+perceived time remaining=
+	MAX(0.25,SMOOTHI(Time + (perceived effort remaining/desired workforce),time to adapt the project schedule\
+		,initial project time remaining) - Time)
+	~	Month
+	~	Time remaining
+	|
+
+additional cumulative effort=
+	workforce
+	~	Month*person/Month
+	~		|
+
+reported fraction detection undiscovered rework=
+	DELAY3I( detecting undiscovered rework/(proper completion of project tasks+detecting undiscovered rework\
+		),1,0)
+	~	dmnl
+	~		|
+
+fraction undiscovered rework=
+	undiscovered rework/MAX(perceived cumulative progress,0.01)
+	~	dmnl
+	~		|
+
+project personnel=
+	(1-fraction personnel for testing)*workforce
+	~	person
+	~		|
+
+maximum productivity of testing=
+	2
+	~	tasks/(person*Month)
+	~		|
+
+detecting undiscovered rework=
+	productivity of testing*testing personnel
+	~	tasks/Month
+	~		|
+
+progress=
+	gross productivity of project personnel*project personnel
+	~	tasks/Month
+	~		|
+
+testing personnel=
+	fraction personnel for testing*workforce
+	~	person
+	~		|
+
+gross productivity of project personnel= WITH LOOKUP (
+	remaining project tasks,
+		([(0,0)-(1200,1)],(0,0.2),(50,0.85),(75,0.95),(100,1),(200,1),(1200,1) ))
+	~	tasks/person/Month
+	~		|
+
+perceived effort remaining=
+	remaining project tasks/MAX(perceived productivity,1)
+	~	person*Month
+	~		|
+
+undiscovered rework= INTEG (
+	poor completion of project tasks - detecting undiscovered rework,
+		0)
+	~	tasks
+	~		|
+
+cumulative effort= INTEG (
+	additional cumulative effort,
+		0.001)
+	~	person*Month
+	~		|
+
+properly completed project tasks= INTEG (
+	proper completion of project tasks,
+		0)
+	~	tasks
+	~		|
+
+poor completion of project tasks=
+	progress*(1 - fraction properly completed)
+	~	tasks/Month
+	~		|
+
+proper completion of project tasks=
+	progress* fraction properly completed
+	~	tasks/Month
+	~		|
+
+time to adapt workforce=
+	1
+	~	Month
+	~		|
+
+time to adapt the project schedule=
+	1
+	~	Month
+	~		|
+
+net hiring of personnel=
+	(desired workforce - workforce)/time to adapt workforce
+	~	person/Month
+	~	(gewenst personeelsbestand - personeelsbestand)/tijd om personeelsbestand \
+		aan te passen
+	|
+
+perceived cumulative progress=
+	properly completed project tasks + undiscovered rework
+	~	tasks
+	~	behoorlijk afgewerkte projecttaken + MAX(0,"gebrekkig afgewerkte \
+		projecttaken (undiscovered rework)")
+	|
+
+FINAL TIME=
+	IF THEN ELSE(perceived fraction completed<0.999,200,Time)
+	~	Month
+	~	The final time for the simulation.
+	|
+
+perceived fraction completed = perceived cumulative progress/initial number of project tasks
+	~	fraction
+	~		|
+
+fraction properly completed=
+	0.5
+	~	dmnl
+	~		|
+
+initial number of project tasks = 1200
+	~	tasks
+	~		|
+
+INITIAL TIME  = 0
+	~	Month
+	~	The initial time for the simulation.
+	|
+
+perceived productivity = perceived cumulative progress/cumulative effort
+	~	tasks/person/Month
+	~		|
+
+SAVEPER  = 
+        TIME STEP
+	~	Month
+	~	The frequency with which output is stored.
+	|
+
+TIME STEP  = 0.0078125
+	~	Month
+	~	The time step for the simulation.
+	|
+
+workforce = INTEG(net hiring of personnel,2)
+	~	person
+	~		|
+
+desired workforce=
+	perceived effort remaining/perceived time remaining
+	~	person
+	~		|
+
+\\\---/// Sketch information - do not modify anything except names
+V300  Do not put anything below this section - it will be ignored
+*View 1
+$192-192-192,0,Comic Sans MS|12||0-0-0|0-0-0|0-0-255|-1--1--1|-1--1--1|96,96,90,0
+10,1,workforce,720,343,73,18,3,131,0,40,0,0,0,0,-1--1--1,255-192-128,Arial|10||0-0-0
+10,2,progress,1140,351,27,9,8,131,0,40,-1,0,0,0,0-0-0,0-0-0,Arial|10||0-0-0
+10,3,properly completed project tasks,1242,750,76,27,3,131,0,40,0,0,0,0,-1--1--1,255-192-128,Arial|10||0-0-0
+10,4,perceived effort remaining,771,746,46,16,8,131,0,40,0,0,0,0,0-0-0,0-0-0,Arial|10||0-0-0
+10,5,gross productivity of project personnel,1113,427,61,16,8,3,0,42,-1,0,0,0,-1--1--1,0-0-0,Arial|10||255-0-0
+10,6,initial number of project tasks,1144,659,48,16,8,131,0,40,0,0,0,0,0-0-0,0-0-0,Arial|10||0-0-0
+10,7,perceived time remaining,535,732,56,25,3,131,0,40,-1,0,0,0,0-0-0,0-0-0,Arial|10||0-0-0
+10,8,undiscovered rework,1658,517,72,21,3,131,0,40,0,0,0,0,-1--1--1,255-192-128,Arial|10||0-0-0
+10,9,perceived cumulative progress,1320,849,61,16,8,3,0,40,0,0,0,0,0-0-0,0-0-0,Arial|10||0-0-0
+10,10,fraction properly completed,1420,622,49,16,8,131,0,42,-1,0,0,0,0-0-0,0-0-0,Arial|10||255-0-255
+10,11,cumulative effort,944,424,63,18,3,131,0,40,0,0,0,0,-1--1--1,255-192-128,Arial|10||0-0-0
+10,12,perceived productivity,895,799,35,16,8,3,0,40,0,0,0,0,0-0-0,0-0-0,Arial|10||0-0-0
+10,13,Time,611,672,24,9,0,2,0,43,-1,0,0,0,0-0-0,0-0-0,Arial|10||0-0-0
+10,14,desired workforce,450,485,53,9,8,131,0,40,-1,0,0,0,0-0-0,0-0-0,Arial|10||0-0-0
+10,15,perceived fraction completed,1092,761,53,16,8,131,0,40,-1,0,0,0,0-0-0,0-0-0,Arial|10||0-0-0
+10,16,time to adapt workforce,473,255,41,16,8,3,0,40,0,0,0,0,0-0-0,0-0-0,Arial|10||0-0-0
+10,17,time to adapt the project schedule,649,800,52,16,8,3,0,40,0,0,0,0,0-0-0,0-0-0,Arial|10||0-0-0
+1,18,2,49,2,0,0,0,3,0,0,0-0-255,|12||0-0-0,1|(1322,499)|
+1,19,1,37,2,0,0,0,0,0,0,-1--1--1,,1|(620,287)|
+1,20,5,2,1,0,0,0,0,0,0,-1--1--1,,1|(1120,383)|
+1,21,2,46,2,0,0,0,1,0,0,255-0-255,|12||0-0-0,1|(1394,439)|
+1,22,3,9,1,0,0,0,0,0,0,-1--1--1,,1|(1289,803)|
+1,23,8,9,1,0,0,0,1,0,0,255-0-255,|12||0-0-0,1|(1547,752)|
+1,24,10,49,0,0,0,0,1,0,0,255-0-255,|12||0-0-0,1|(1364,648)|
+1,25,10,47,0,0,0,0,1,0,0,255-0-255,|12||0-0-0,1|(1456,591)|
+1,26,1,53,2,0,0,0,0,0,0,-1--1--1,,1|(770,363)|
+1,27,9,12,1,0,0,0,0,0,0,-1--1--1,,1|(1051,846)|
+1,28,11,12,1,0,0,0,0,0,0,-1--1--1,,1|(968,654)|
+1,29,12,4,2,0,0,0,0,0,0,-1--1--1,,1|(817,780)|
+1,30,14,38,2,0,0,0,0,0,0,-1--1--1,,1|(478,410)|
+1,31,9,15,1,0,0,0,0,0,0,-1--1--1,,1|(1204,811)|
+1,32,6,15,1,0,0,0,0,0,0,-1--1--1,,1|(1119,690)|
+1,33,16,37,1,0,0,0,0,0,0,-1--1--1,,1|(480,296)|
+12,34,48,436,339,10,8,0,3,0,40,-1,0,0,0,0-0-0,0-0-0,Arial|10||0-0-0
+1,35,37,1,4,0,0,22,0,0,0,-1--1--1,,1|(594,341)|
+1,36,37,34,100,0,0,22,0,0,0,-1--1--1,,1|(485,341)|
+11,37,48,533,341,8,11,34,3,0,0,1,0,0,0
+10,38,net hiring of personnel,533,361,66,9,32,3,0,40,2,0,0,0,0-0-0,0-0-0,Arial|10||0-0-0
+1,39,48,3,4,0,0,22,0,0,0,-1--1--1,,1|(1227,706)|
+1,40,46,8,4,0,0,22,1,0,0,255-0-255,|12||0-0-0,1|(1549,526)|
+1,41,46,55,100,0,0,22,1,0,0,255-0-255,|12||0-0-0,1|(1407,526)|
+1,42,44,55,4,0,0,22,3,0,0,255-0-255,|12||0-0-0,1|(1242,340)|
+1,43,44,8,100,0,0,22,3,0,0,255-0-255,|12||0-0-0,1|(1658,340)|
+11,44,748,1455,340,8,11,34,3,0,1,1,0,0,0,255-0-255,0-0-0,|12||0-0-0
+10,45,detecting undiscovered rework,1455,367,62,16,40,131,0,42,0,0,0,0,-1--1--1,0-0-0,Arial|10||255-0-255
+11,46,380,1505,526,8,11,34,3,0,0,1,0,0,0
+10,47,poor completion of project tasks,1505,553,56,16,40,131,0,42,-1,0,0,0,0-0-0,0-0-0,Arial|10||255-0-255
+11,48,396,1227,681,11,8,33,3,0,0,4,0,0,0
+10,49,proper completion of project tasks,1296,681,62,16,40,131,0,40,-1,0,0,0,0-0-0,0-0-0,Arial|10||0-0-0
+12,50,48,735,423,10,8,0,3,0,40,-1,0,0,0,0-0-0,0-0-0,Arial|10||0-0-0
+1,51,53,11,4,0,0,22,0,0,0,-1--1--1,,1|(843,425)|
+1,52,53,50,100,0,0,22,0,0,0,-1--1--1,,1|(767,425)|
+11,53,48,797,425,8,11,34,3,0,0,1,0,0,0
+10,54,additional cumulative effort,797,452,49,16,40,131,0,40,-1,0,0,0,0-0-0,0-0-0,Arial|10||0-0-0
+10,55,remaining project tasks,1242,518,75,21,3,131,0,40,0,0,0,0,-1--1--1,255-192-128,Arial|10||0-0-0
+1,56,6,55,1,0,0,0,0,64,1,-1--1--1,,1|(1188,609)|
+1,57,55,4,1,0,0,0,0,64,0,-1--1--1,,1|(999,682)|
+1,58,13,7,0,0,0,0,0,64,0,-1--1--1,,1|(588,689)|
+1,59,55,5,1,0,0,0,0,64,0,-1--1--1,,1|(1149,499)|
+10,60,project personnel,986,326,52,9,8,3,0,40,0,0,0,0,0-0-0,0-0-0,Arial|10||0-0-0
+10,61,testing personnel,1246,301,52,9,8,3,0,42,0,0,0,0,-1--1--1,0-0-0,Arial|10||255-0-255
+1,62,1,61,1,0,0,0,1,64,0,255-0-255,|12||0-0-0,1|(945,280)|
+1,63,61,44,1,0,0,0,1,64,0,255-0-255,|12||0-0-0,1|(1356,308)|
+10,64,productivity of testing,1619,277,42,16,8,3,0,42,0,0,0,0,0-0-0,0-0-0,Arial|10||255-0-255
+1,65,64,44,1,0,0,0,1,64,0,255-0-255,|12||0-0-0,1|(1513,293)|
+1,66,60,2,1,0,0,0,0,64,0,-1--1--1,,1|(1060,326)|
+10,67,fraction personnel for testing,980,222,54,16,8,3,0,42,0,0,0,0,0-0-0,0-0-0,Arial|10||255-0-255
+1,68,67,60,1,0,0,0,1,64,0,255-0-255,|12||0-0-0,1|(968,274)|
+1,69,67,61,1,0,0,0,1,64,0,255-0-255,|12||0-0-0,1|(1145,248)|
+10,70,maximum productivity of testing,1726,234,65,16,8,131,0,42,0,0,0,0,0-0-0,0-0-0,Arial|10||255-0-255
+1,71,70,64,1,0,0,0,1,64,0,255-0-255,|12||0-0-0,1|(1666,265)|
+10,72,FINAL TIME,1008,750,47,9,8,2,0,59,-1,0,0,0,128-128-128,0-0-0,Arial|10|V|0-128-0
+1,73,1,60,1,0,0,0,0,64,0,-1--1--1,,1|(853,321)|
+10,74,fraction undiscovered rework,1761,402,62,16,8,131,0,42,0,0,0,0,0-0-0,0-0-0,Arial|10||255-0-255
+1,75,8,74,1,0,0,0,1,64,0,255-0-255,|12||0-0-0,1|(1725,487)|
+1,76,9,74,1,0,0,0,1,64,0,255-0-255,|12||0-0-0,1|(1720,662)|
+10,77,reported fraction detection undiscovered rework,1329,243,70,24,8,131,0,42,0,0,0,0,0-0-0,0-0-0,Arial|10||255-0-255
+1,78,44,77,1,0,0,0,1,64,0,255-0-255,|12||0-0-0,1|(1405,298)|
+1,79,49,77,1,0,0,0,1,64,0,255-0-255,|12||0-0-0,1|(1371,524)|
+1,80,4,7,0,0,0,0,0,64,0,-1--1--1,,1|(664,739)|
+1,81,17,7,0,0,0,0,0,64,0,-1--1--1,,1|(605,773)|
+1,82,14,7,1,0,0,0,0,64,0,-1--1--1,,1|(550,613)|
+1,83,48,55,100,0,0,22,0,0,0,-1--1--1,,1|(1227,606)|
+1,84,4,14,1,0,0,0,0,64,0,-1--1--1,,1|(643,602)|
+1,85,7,14,1,0,0,0,0,64,0,-1--1--1,,1|(462,621)|
+10,86,initial project time remaining,455,802,54,16,8,3,0,40,-1,0,0,0,0-0-0,0-0-0,Arial|10||0-0-0
+1,87,86,7,0,0,0,0,0,64,0,-1--1--1,,1|(484,776)|
+1,88,74,64,1,0,0,0,1,64,0,255-0-255,|12||0-0-0,1|(1717,309)|
+10,89,average quality of completed project tasks,1454,754,55,24,8,131,0,42,0,0,0,0,0-0-0,0-0-0,Arial|10||0-128-0
+1,90,3,89,0,0,0,0,1,64,0,255-0-255,|12||0-0-0,1|(1351,751)|
+1,91,8,89,0,0,0,0,1,64,0,255-0-255,|12||0-0-0,1|(1561,628)|
+1,92,77,67,1,0,0,2,3,64,0,255-0-255,|12||0-0-0,1|(1255,215)|
+///---\\\
+:GRAPH Summary
+:TITLE Summary
+:SCALE
+:VAR Workforce
+:LINE-WIDTH 2
+:SCALE
+:VAR Cumulative preceived progress
+:LINE-WIDTH 2
+:SCALE
+:VAR Fraction perceived complete
+:LINE-WIDTH 2
+:VAR Fraction flawed
+:LINE-WIDTH 2
+:SCALE
+:VAR Scheduled completion date
+:LINE-WIDTH 2
+:SCALE
+:VAR Perceived productivity
+
+:GRAPH Tasks
+:TITLE Tasks
+:SCALE
+:VAR Cumulative preceived progress
+:LINE-WIDTH 2
+:VAR Cumulative real progress
+:LINE-WIDTH 2
+:VAR Undiscovered rework
+:LINE-WIDTH 2
+:VAR Tasks remaining
+:LINE-WIDTH 2
+:SCALE
+:VAR Fraction flawed
+
+:GRAPH Workforce
+:TITLE Workforce
+:SCALE
+:VAR Workforce
+:LINE-WIDTH 2
+:VAR Workforce on tasks
+:LINE-WIDTH 2
+:VAR Workforce in testing
+:LINE-WIDTH 2
+:VAR Workforce sought
+:LINE-WIDTH 2
+
+:GRAPH Schedule
+:TITLE Schedule
+:SCALE
+:VAR Effort perceived remaining
+:LINE-WIDTH 2
+:SCALE
+:VAR Time perceived required
+:LINE-WIDTH 2
+:VAR Time remaining
+:LINE-WIDTH 2
+:VAR Scheduled completion date
+:LINE-WIDTH 2
+:L<%^E!@
+9:Exogeen
+23:0
+15:0,0,0,1,0,0
+19:90,0
+27:0,
+34:0,
+4:Time
+5:reported fraction detection undiscovered rework
+35:Date
+36:YYYY-MM-DD
+37:2000
+38:1
+39:1
+40:2
+41:0
+42:0
+24:0
+25:111.375
+26:111.375

@@ -1,0 +1,130 @@
+Deer Killed per Predator = WITH LOOKUP (
+	Deer Density/Initial Deer Density,
+		((0,0),(1,2),(2,4),(4,6),(5,6) ))
+	~	Deer/(year*lion)
+	~	When density is equal to 0, the deer killed are 0. Point (0.0). When the \
+		Deer Density is equal to the Initial Deer Density each predator hunts 2 \
+		deer each year. Point (1,2).
+	|
+
+Deer Predation Rate=
+	Deer Killed per Predator*Predator Population
+	~	Deer/year
+	~		|
+
+Initial Deer Density=
+	200
+	~	acre/Deer
+	~	1,000,000 acres / 5,000 deer
+	|
+
+Growth Rate Factor=
+	0.2
+	~	1/year
+	~	Here we work with the net growth rate of the deer population. This means \
+		birth minus deceases. If every female had a fawn, the rate will be 0.50% \
+		But there are female too old and too young to have fawns, so we reduce \
+		this amount to the 0.30%. Now we need to consider the life expectancy, may \
+		be 10 years. This is - 0.10% due to deceases. So we assume the Net Growth \
+		Rate Factor equal to 0.2
+	|
+
+Area=
+	1e+006
+	~	acre
+	~		|
+
+Deer Population= INTEG (
+	+Deer Net Growth Rate-Deer Predation Rate,
+		5000)
+	~	Deer
+	~	Initial amount of deers is 5,000 and remains constant.
+	|
+
+Deer Density=
+	Area/Deer Population
+	~	acre/Deer
+	~	This is the amount of acres per deer
+	|
+
+Deer Net Growth Rate=
+	Deer Population*Growth Rate Factor
+	~	Deer/year
+	~		|
+
+Predator Population=
+	500
+	~	lion
+	~	We assume that Net Growth Rate was 1000 deer, so Deer Predation Rate must \
+		be also 1000 deer. In Table 1 we define that with a density of 0.005 \
+		deer/acre are killed 2 deer/predator, so we have  1000 (deer) /2 \
+		(deer/predator) = 500 predators
+	|
+
+********************************************************
+	.Control
+********************************************************~
+		Simulation Control Paramaters
+	|
+
+FINAL TIME  = 1950
+	~	year
+	~	The final time for the simulation.
+	|
+
+INITIAL TIME  = 1900
+	~	year
+	~	The initial time for the simulation.
+	|
+
+SAVEPER  = 1
+	~	year
+	~	The frequency with which output is stored.
+	|
+
+TIME STEP  = 1
+	~	year
+	~	The time step for the simulation.
+	|
+
+\\\---/// Sketch information - do not modify anything except names
+V300  Do not put anything below this section - it will be ignored
+*View 1
+$192-192-192,0,Times New Roman|12||0-0-0|0-0-0|0-0-255|-1--1--1|-1--1--1|96,96
+10,1,Deer Population,287,97,40,20,3,3,0,0,0,0,0,0
+12,2,48,43,92,10,8,0,3,0,0,-1,0,0,0
+1,3,5,1,4,0,0,22,0,0,0,-1--1--1,,1|(192,92)|
+1,4,5,2,100,0,0,22,0,0,0,-1--1--1,,1|(89,92)|
+11,5,48,132,92,6,8,34,3,0,0,1,0,0,0
+10,6,Deer Net Growth Rate,132,111,72,11,32,3,0,0,-1,0,0,0
+12,7,48,535,94,10,8,0,3,0,0,-1,0,0,0
+1,8,10,7,4,0,0,22,0,0,0,-1--1--1,,1|(470,94)|
+1,9,10,1,100,0,0,22,0,0,0,-1--1--1,,1|(365,94)|
+11,10,48,410,94,6,8,34,3,0,0,1,0,0,0
+10,11,Deer Predation Rate,410,113,64,11,32,3,0,0,-1,0,0,0
+10,12,Growth Rate Factor,86,228,63,11,0,3,0,0,0,0,0,0
+10,13,Deer Density,299,198,42,11,0,3,0,0,0,0,0,0
+10,14,Predator Population,535,150,63,11,0,3,0,0,0,0,0,0
+10,15,Area,246,256,17,11,0,3,0,0,0,0,0,0
+1,16,1,6,1,0,0,0,0,64,0,-1--1--1,,1|(225,154)|
+1,17,1,13,1,0,0,0,0,64,0,-1--1--1,,1|(283,149)|
+1,18,14,11,1,0,0,0,0,64,0,-1--1--1,,1|(458,118)|
+1,19,15,13,1,0,0,0,0,64,0,-1--1--1,,1|(283,238)|
+1,20,12,6,1,0,0,0,0,64,0,-1--1--1,,1|(93,144)|
+10,21,Deer Killed per Predator,440,195,50,19,8,3,0,0,0,0,0,0
+1,22,13,21,1,0,0,0,0,64,0,-1--1--1,,1|(353,235)|
+1,23,21,11,1,0,0,0,0,64,0,-1--1--1,,1|(445,149)|
+10,24,Initial Deer Density,557,244,35,18,8,3,0,0,0,0,0,0
+1,25,24,21,1,0,0,0,0,64,0,-1--1--1,,1|(487,242)|
+///---\\\
+:L<%^E!@
+1:Current.vdf
+9:Current
+15:0,0,0,0,0,0
+19:100,0
+27:2,
+4:Time
+5:Deer Population
+24:1900
+25:1950
+26:1950

@@ -1,0 +1,384 @@
+{UTF-8}
+net service jobs additions=
+	(1-service demand fulfillment)*(financial buffer of the state-state debt)*unemployment rate\
+		*service jobs hiring rate
+	~	1/Year
+	~		|
+
+state cash inflow=
+	tax revenues on sales value+state debt increase
+	~	1/Year
+	~		|
+
+state debt increase=
+	IF THEN ELSE(financial buffer of the state<0, -financial buffer of the state/ TIME STEP\
+		, 0)
+	~	1/Year
+	~		|
+
+state debt= INTEG (
+	state debt increase,
+		0)
+	~	1
+	~		|
+
+REDUCTION RATE=
+	0.1
+	~	1/Year
+	~		|
+
+productivity increase=
+	PRODUCTIVITY INCREASE RATE*productivity*(1-productivity/PRODUCTIVITY LIMIT)
+	~	1/(Year*Year)
+	~		|
+
+net production jobs reductions=
+	REDUCTION RATE * employment in production * MIN(relative production surplus,0.1)
+	~	1/Year
+	~	IF THEN ELSE(relative production surplus<0.1, REDUCTION RATE* relative \
+		production surplus*employment in production, 0.1*REDUCTION RATE*employment \
+		in production)
+	|
+
+PRODUCTIVITY INCREASE RATE=
+	0.1
+	~	1/Year
+	~		|
+
+service jobs hiring rate=
+	0.05
+	~	1/Year
+	~		|
+
+tax revenues on sales value=
+	revenues dependent tax rate*sales value
+	~	1/Year
+	~		|
+
+revenues dependent tax rate = WITH LOOKUP (
+	financial buffer of the state,
+		([(-2,0)-(2,1)],(-10,0.6),(-2,0.6),(-1.6,0.6),(-1.2,0.6),(-0.8,0.6),(-0.4,0.6),(0,0.6\
+		),(0.4,0.5),(0.8,0.4),(1.2,0.3),(1.6,0.2),(2,0.2),(10,0.2) ))
+	~	1
+	~		|
+
+sales value=
+	IF THEN ELSE(DEMAND VALUE>product value, product value, DEMAND VALUE)
+	~	1/Year
+	~		|
+
+POTENTIAL LABOR FORCE=
+	1
+	~	1
+	~		|
+
+unemployment rate=
+	(POTENTIAL LABOR FORCE-employment in production-employment in services)/POTENTIAL LABOR FORCE
+	~	1
+	~		|
+
+employment in services= INTEG (
+	net service jobs additions,
+		0.5)
+	~	1
+	~		|
+
+employment in production= INTEG (
+	-net production jobs reductions,
+		0.5)
+	~	1
+	~		|
+
+SERVICE DEMAND=
+	1
+	~	1
+	~		|
+
+service demand fulfillment=
+	employment in services/SERVICE DEMAND
+	~	1
+	~		|
+
+wages=
+	wage index*WAGE FACTOR*employment in services
+	~	1/Year
+	~		|
+
+WAGE FACTOR=
+	0.25
+	~	1
+	~		|
+
+wage index=
+	productivity
+	~	1/Year
+	~		|
+
+DEMAND VALUE=
+	1
+	~	1/Year
+	~		|
+
+productivity= INTEG (
+	productivity increase,
+		1)
+	~	1/Year
+	~		|
+
+PRODUCTIVITY LIMIT=
+	5
+	~	1/Year
+	~		|
+
+product value=
+	employment in production*productivity
+	~	1/Year
+	~		|
+
+relative production surplus=
+	(product value-DEMAND VALUE)/DEMAND VALUE
+	~	1
+	~		|
+
+state cash outflow=
+	wages
+	~	1/Year
+	~		|
+
+financial buffer of the state= INTEG (
+	+state cash inflow-state cash outflow,
+		1)
+	~	1
+	~		|
+
+********************************************************
+	.Control
+********************************************************~
+		Simulation Control Parameters
+	|
+
+FINAL TIME  = 100
+	~	Year
+	~	The final time for the simulation.
+	|
+
+INITIAL TIME  = 0
+	~	Year
+	~	The initial time for the simulation.
+	|
+
+SAVEPER  = 
+        TIME STEP 
+	~	Year [0,?]
+	~	The frequency with which output is stored.
+	|
+
+TIME STEP  = 0.0625
+	~	Year [0,?]
+	~	The time step for the simulation.
+	|
+
+\\\---/// Sketch information - do not modify anything except names
+V300  Do not put anything below this section - it will be ignored
+*View 1
+$192-192-192,0,Arial|12||0-0-0|0-0-0|0-0-0|-1--1--1|-1--1--1|96,96,140,0
+10,1,productivity,788,153,47,24,3,3,0,0,0,0,0,0
+10,2,employment in production,1032,217,50,24,3,3,0,0,0,0,0,0
+10,3,financial buffer of the state,797,492,50,24,3,3,0,2,0,0,0,0,0-0-0,0-0-0,|12||255-128-0
+10,4,employment in services,984,384,49,24,3,3,0,0,0,0,0,0
+12,5,48,639,151,10,8,0,3,0,0,-1,0,0,0
+1,6,8,1,4,0,0,22,0,0,0,-1--1--1,,1|(720,151)|
+1,7,8,5,100,0,0,22,0,0,0,-1--1--1,,1|(669,151)|
+11,8,48,694,151,5,6,34,3,0,0,1,0,0,0
+10,9,productivity increase,694,174,42,18,40,3,0,0,-1,0,0,0
+12,10,48,1247,213,10,8,0,3,0,0,-1,0,0,0
+1,11,13,2,36,0,0,22,2,0,0,-1--1--1,|12||0-0-0,1|(1115,216)|
+1,12,13,10,68,0,0,22,2,0,0,-1--1--1,|12||0-0-0,1|(1197,216)|
+11,13,48,1153,216,5,6,34,3,0,0,1,0,0,0
+10,14,net production jobs reductions,1153,237,39,15,35,131,0,11,-1,1,0,0,255-0-0,0-0-0,|8||255-128-0
+12,15,48,631,492,10,8,0,3,0,0,-1,0,0,0
+1,16,18,3,4,0,0,22,0,0,0,-1--1--1,,1|(723,492)|
+1,17,18,15,100,0,0,22,0,0,0,-1--1--1,,1|(665,492)|
+11,18,48,694,492,5,6,34,3,0,0,1,0,0,0
+10,19,state cash inflow,694,515,49,17,40,3,0,2,-1,0,0,0,0-0-0,0-0-0,|12||255-128-0
+12,20,48,942,490,10,8,0,3,0,0,-1,0,0,0
+1,21,23,20,4,0,0,22,0,0,0,-1--1--1,,1|(915,490)|
+1,22,23,3,100,0,0,22,0,0,0,-1--1--1,,1|(867,490)|
+11,23,48,893,490,5,6,34,3,0,0,1,0,0,0
+10,24,state cash outflow,893,513,37,17,40,3,0,0,-1,0,0,0
+12,25,48,832,380,10,8,0,3,0,0,-1,0,0,0
+1,26,28,4,4,0,0,22,0,0,0,-1--1--1,,1|(912,380)|
+1,27,28,25,100,0,0,22,0,0,0,-1--1--1,,1|(861,380)|
+11,28,48,885,380,5,6,34,3,0,0,1,0,0,0
+10,29,net service jobs additions,885,399,39,13,40,3,0,10,-1,0,0,0,0-0-0,0-0-0,|8||0-255-255
+10,30,PRODUCTIVITY LIMIT,687,89,49,16,8,3,0,8,0,0,0,0,0-0-0,0-0-0,|10||0-0-0
+10,31,DEMAND VALUE,1022,87,32,16,8,3,0,8,0,0,0,0,0-0-0,0-0-0,|10||0-0-0
+10,32,POTENTIAL LABOR FORCE,1181,334,49,16,8,3,0,8,0,0,0,0,0-0-0,0-0-0,|10||0-0-0
+10,33,SERVICE DEMAND,1196,466,31,16,8,3,0,8,0,0,0,0,0-0-0,0-0-0,|10||0-0-0
+10,34,WAGE FACTOR,1194,526,32,19,8,3,0,8,0,0,0,0,0-0-0,0-0-0,|10||0-0-0
+10,35,product value,943,154,31,17,8,3,0,0,0,0,0,0
+10,36,sales value,856,257,25,17,8,3,0,0,0,0,0,0
+10,37,tax revenues on sales value,698,268,57,18,8,3,0,2,0,0,0,0,0-0-0,0-0-0,|12||255-128-0
+10,38,revenues dependent tax rate,729,391,68,18,8,3,0,2,0,0,0,0,0-0-0,0-0-0,|12||255-128-0
+10,39,relative production surplus,1158,155,67,18,8,3,0,0,0,0,0,0
+10,40,unemployment rate,985,307,53,18,8,3,0,0,0,0,0,0
+10,41,wages,1044,526,25,10,8,3,0,0,0,0,0,0
+10,42,wage index,526,507,42,10,8,3,0,0,0,0,0,0
+1,43,30,9,1,0,0,0,0,64,0,-1--1--1,,1|(673,131)|
+1,44,1,9,1,0,0,0,0,64,0,-1--1--1,,1|(751,194)|
+1,45,1,35,1,0,0,0,0,64,0,-1--1--1,,1|(865,152)|
+1,46,2,35,1,0,0,0,0,64,0,-1--1--1,,1|(1003,179)|
+1,47,35,36,1,0,0,0,0,64,0,-1--1--1,,1|(954,189)|
+1,48,36,37,1,0,0,0,0,64,0,-1--1--1,,1|(791,240)|
+1,49,37,19,1,0,0,0,0,64,0,-1--1--1,,1|(652,408)|
+1,50,3,38,1,0,0,0,0,64,0,-1--1--1,,1|(745,446)|
+1,51,38,37,1,0,0,0,0,64,0,-1--1--1,,1|(706,347)|
+1,52,3,29,1,0,0,0,0,64,0,-1--1--1,,1|(824,416)|
+1,53,31,36,1,0,0,0,0,64,0,-1--1--1,,1|(917,130)|
+1,54,31,39,1,0,0,0,0,64,0,-1--1--1,,1|(1096,102)|
+1,55,35,39,1,0,0,0,0,64,0,-1--1--1,,1|(1025,154)|
+1,56,2,14,1,0,0,0,0,64,0,-1--1--1,,1|(1055,269)|
+1,57,32,40,1,0,0,0,0,64,0,-1--1--1,,1|(1125,304)|
+1,58,2,40,1,0,0,0,0,64,0,-1--1--1,,1|(995,254)|
+1,59,40,29,1,0,0,0,0,64,0,-1--1--1,,1|(928,332)|
+10,60,service demand fulfillment,1137,385,59,18,8,3,0,0,0,0,0,0
+1,61,4,60,0,0,0,0,0,64,0,-1--1--1,,1|(1048,384)|
+1,62,33,60,1,0,0,0,0,64,0,-1--1--1,,1|(1189,417)|
+1,63,60,29,1,0,0,0,0,64,0,-1--1--1,,1|(1007,451)|
+1,64,4,41,1,0,0,0,0,64,0,-1--1--1,,1|(1003,466)|
+1,65,34,41,1,0,0,0,0,64,0,-1--1--1,,1|(1122,526)|
+1,66,42,41,1,0,0,0,0,64,0,-1--1--1,,1|(773,729)|
+1,67,41,24,1,0,0,0,0,64,0,-1--1--1,,1|(959,557)|
+1,68,1,42,1,0,0,0,0,64,0,-1--1--1,,1|(614,227)|
+1,69,4,40,1,0,0,0,0,64,0,-1--1--1,,1|(985,342)|
+1,70,39,14,1,0,0,0,0,64,0,-1--1--1,,1|(1168,195)|
+10,71,PRODUCTIVITY INCREASE RATE,840,89,55,16,8,3,0,8,0,0,0,0,0-0-0,0-0-0,|10||0-0-0
+1,72,71,9,1,0,0,0,0,64,0,-1--1--1,,1|(739,105)|
+10,73,REDUCTION RATE,1169,282,58,9,8,3,0,8,0,0,0,0,0-0-0,0-0-0,|10||0-0-0
+1,74,73,14,1,0,0,0,0,64,0,-1--1--1,,1|(1186,273)|
+10,75,service jobs hiring rate,871,308,36,16,8,3,0,10,0,0,0,0,0-0-0,0-0-0,|10||255-128-0
+1,76,75,29,1,0,0,0,0,64,0,-1--1--1,,1|(867,347)|
+10,77,state debt,796,598,50,23,3,3,0,0,0,0,0,0
+12,78,48,635,598,10,8,0,3,0,0,-1,0,0,0
+1,79,81,77,4,0,0,22,0,0,0,-1--1--1,,1|(723,598)|
+1,80,81,78,100,0,0,22,0,0,0,-1--1--1,,1|(667,598)|
+11,81,48,695,598,6,8,34,3,0,0,1,0,0,0
+10,82,state debt increase,695,623,40,17,40,3,0,0,-1,0,0,0
+1,83,3,82,1,0,0,0,0,64,0,-1--1--1,,1|(705,559)|
+1,84,82,19,1,0,0,0,0,64,0,-1--1--1,,1|(659,583)|
+10,85,TIME STEP,695,658,52,10,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,86,85,82,0,0,0,0,0,64,0,-1--1--1,,1|(695,651)|
+1,87,77,29,0,0,0,0,0,64,0,-1--1--1,,1|(839,499)|
+///---\\\
+:GRAPH EZ511b
+:TITLE Unemployment
+:X-AXIS Time
+:X-DIV 8
+:X-MIN 0
+:X-MAX 40
+:SCALE
+:VAR employment in services
+:Y-MIN 0
+:Y-MAX 1
+:LINE-WIDTH 2
+:VAR employment in production
+:Y-MIN 0
+:LINE-WIDTH 3
+:VAR unemployment
+:Y-MIN 0
+:LINE-WIDTH 4
+
+:GRAPH EZ511c
+:TITLE Unemployment
+:X-AXIS Time
+:X-DIV 8
+:X-MIN 0
+:X-MAX 40
+:SCALE
+:VAR state revenue income
+:Y-MIN 0
+:Y-MAX 2
+:LINE-WIDTH 2
+:VAR state expenses
+:Y-MIN 0
+:Y-MAX 2
+:LINE-WIDTH 3
+:VAR state debt increase
+:Y-MIN 0
+:Y-MAX 2
+:LINE-WIDTH 4
+
+:GRAPH EZ511f
+:TITLE Unemployment
+:X-AXIS Time
+:X-DIV 8
+:X-MIN 0
+:X-MAX 40
+:SCALE
+:VAR unemployment
+:Y-MIN 0
+:Y-MAX 0.4
+:DATASET wage factor=0,25
+:LINE-WIDTH 1
+:VAR unemployment
+:Y-MIN 0
+:Y-MAX 0.4
+:DATASET wage factor=0,5
+:LINE-WIDTH 2
+:VAR unemployment
+:Y-MIN 0
+:Y-MAX 0.4
+:DATASET wage factor=0,75
+:LINE-WIDTH 3
+:VAR unemployment
+:Y-MIN 0
+:Y-MAX 0.4
+:DATASET wage factor=1,0
+:LINE-WIDTH 4
+
+:GRAPH EZ511g
+:TITLE Unemployment
+:X-AXIS Time
+:X-DIV 8
+:X-MIN 0
+:X-MAX 40
+:SCALE
+:VAR state debt
+:Y-MIN 0
+:Y-MAX 40
+:DATASET wage factor=0,25
+:LINE-WIDTH 1
+:VAR state debt
+:Y-MIN 0
+:Y-MAX 40
+:DATASET wage factor=0,5
+:LINE-WIDTH 2
+:VAR state debt
+:Y-MIN 0
+:Y-MAX 40
+:DATASET wage factor=0,75
+:LINE-WIDTH 3
+:VAR state debt
+:Y-MIN 0
+:Y-MAX 40
+:DATASET wage factor=1,0
+:LINE-WIDTH 4
+:L<%^E!@
+9:EP3run04
+15:0,0,0,1,0,0
+19:140,0
+27:2,
+34:0,
+4:Time
+5:unemployment rate
+35:Date
+36:YYYY-MM-DD
+37:2000
+38:1
+39:1
+40:2
+41:0
+42:0
+24:0
+25:100
+26:100

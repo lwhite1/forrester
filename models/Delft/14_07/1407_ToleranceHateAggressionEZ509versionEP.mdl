@@ -1,0 +1,535 @@
+{UTF-8}
+unfamiliar experience=
+	intolerance*DEGREE OF UNFAMILIARITY*encounters*ENCOUNTER INTENSITY*unfamiliarity*(1-\
+		unfamiliarity/MAX UNFAMILIARITY) * (1+violence)
+	~	1/Month
+	~		|
+
+hate increase=
+	unfamiliarity*intolerance*social problems*hate*(1-hate/MAX HATE)/adaptation TIME * (\
+		1+violence)
+	~	1/Month
+	~		|
+
+tolerance erosion=
+	tolerance*hate/adaptation TIME * (1+violence)
+	~	1/Month
+	~		|
+
+increase in tolerance through educational effort=
+	SMOOTH(education effort*tolerance*(1-tolerance/MAX TOLERANCE),1)
+	~	1/Month
+	~		|
+
+restraint loss=
+	hate*social problems*VIOLENCE IN MEDIA*restraint threshold/adaptation TIME
+	~	1/Month
+	~		|
+
+restraint buildup=
+	max restraint*restraint threshold*(1-restraint threshold/max restraint)/adaptation TIME
+	~	1/Month
+	~		|
+
+EDUCATION ACTIVITY=
+	0.5
+	~	1/Month
+	~		|
+
+education effort=
+	0+EDUCATION ACTIVITY*STEP(1, 15)
+	~	1/Month
+	~		|
+
+encounters=
+	PULSE TRAIN(5,1, ENCOUNTER INTERVAL,50)
+	~	1/Month
+	~		|
+
+ENCOUNTER INTERVAL=
+	2
+	~	Month
+	~		|
+
+ENCOUNTER INTENSITY=
+	5
+	~	1
+	~		|
+
+unfamiliarity= INTEG (
+	unfamiliar experience-accustoming,
+		0.1)
+	~	1
+	~		|
+
+DEGREE OF UNFAMILIARITY=
+	0.5
+	~	1
+	~		|
+
+violence=
+	hate*violent action
+	~	1
+	~		|
+
+VIOLENCE IN MEDIA=
+	0.4
+	~	1
+	~		|
+
+violent action=
+	IF THEN ELSE(hate-restraint threshold>0, 1, 0)
+	~	1
+	~		|
+
+accustoming=
+	unfamiliarity*tolerance/adaptation TIME
+	~	1/Month
+	~		|
+
+ETHICAL SCRUPLES=
+	0.1
+	~	1
+	~		|
+
+hate= INTEG (
+	+hate increase-hate decrease,
+		0.1)
+	~	1
+	~		|
+
+hate decrease=
+	hate*tolerance/adaptation TIME
+	~	1/Month
+	~		|
+
+restraint threshold= INTEG (
+	+restraint buildup-restraint loss,
+		0.5)
+	~	1
+	~		|
+
+intolerance=
+	MAX TOLERANCE-tolerance
+	~	1
+	~		|
+
+MAX UNFAMILIARITY=
+	1
+	~	1
+	~		|
+
+MAX HATE=
+	1
+	~	1
+	~		|
+
+max restraint=
+	govt authority*(1-VIOLENCE IN MEDIA)+ETHICAL SCRUPLES
+	~	1
+	~		|
+
+MAX TOLERANCE=
+	1
+	~	1
+	~		|
+
+PROBLEM BEGINNING=
+	5
+	~	Month
+	~		|
+
+PROBLEM STRENGTH=
+	4
+	~	1
+	~		|
+
+social problems=
+	STEP(PROBLEM STRENGTH, PROBLEM BEGINNING)
+	~	1
+	~		|
+
+govt authority=
+	0+GOVT RESOLVE*STEP(1, 10)
+	~	1
+	~		|
+
+GOVT RESOLVE=
+	1
+	~	1
+	~		|
+
+tolerance= INTEG (
+	increase in tolerance through educational effort-tolerance erosion,
+		0.5)
+	~	1
+	~		|
+
+adaptation TIME=
+	5
+	~	Month
+	~		|
+
+********************************************************
+	.Control
+********************************************************~
+		Simulation Control Parameters
+	|
+
+FINAL TIME  = 50
+	~	Month
+	~	The final time for the simulation.
+	|
+
+INITIAL TIME  = 0
+	~	Month
+	~	The initial time for the simulation.
+	|
+
+SAVEPER  = 
+        TIME STEP
+	~	Month [0,?]
+	~	The frequency with which output is stored.
+	|
+
+TIME STEP  = 0.0625
+	~	Month [0,?]
+	~	The time step for the simulation.
+	|
+
+\\\---/// Sketch information - do not modify anything except names
+V300  Do not put anything below this section - it will be ignored
+*View 1
+$192-192-192,0,Arial|12||0-0-0|0-0-0|0-0-0|-1--1--1|-1--1--1|96,96,100,0
+10,1,tolerance,192,239,44,27,3,3,0,2,0,0,0,0,0-0-0,0-0-0,|0||0-0-255
+10,2,unfamiliarity,454,242,43,27,3,3,0,2,0,0,0,0,0-0-0,0-0-0,|0||0-0-255
+10,3,restraint threshold,420,732,42,26,3,3,0,0,0,0,0,0
+10,4,hate,308,480,43,27,3,3,0,0,0,0,0,0
+12,5,48,179,75,10,8,0,3,0,0,-1,0,0,0
+1,6,8,1,4,0,0,22,0,0,0,-1--1--1,,1|(173,179)|
+1,7,8,5,100,0,0,22,0,0,0,-1--1--1,,1|(173,110)|
+11,8,48,173,142,6,5,33,3,0,0,4,0,0,0
+10,9,increase in tolerance through educational effort,255,142,76,27,40,3,0,2,-1,0,0,0,0-0-0,0-0-0,|0||255-128-0
+12,10,48,196,351,10,8,0,3,0,0,-1,0,0,0
+1,11,13,10,4,0,0,22,0,0,0,-1--1--1,,1|(196,325)|
+1,12,13,1,100,0,0,22,0,0,0,-1--1--1,,1|(196,281)|
+11,13,48,196,302,6,5,33,3,0,0,4,0,0,0
+10,14,tolerance erosion,236,302,34,18,40,3,0,2,-1,0,0,0,0-0-0,0-0-0,|0||0-0-255
+12,15,48,307,352,10,8,0,3,0,0,-1,0,0,0
+1,16,18,4,4,0,0,22,0,0,0,-1--1--1,,1|(306,431)|
+1,17,18,15,100,0,0,22,0,0,0,-1--1--1,,1|(306,380)|
+11,18,48,306,405,6,5,33,3,0,0,4,0,0,0
+10,19,hate increase,349,405,37,17,40,3,0,2,-1,0,0,0,0-0-0,0-0-0,|0||0-0-255
+12,20,48,310,612,10,8,0,3,0,0,-1,0,0,0
+1,21,23,20,4,0,0,22,0,0,0,-1--1--1,,1|(306,581)|
+1,22,23,4,100,0,0,22,0,0,0,-1--1--1,,1|(306,528)|
+11,23,48,306,554,6,5,33,3,0,0,4,0,0,0
+10,24,hate decrease,349,554,37,17,40,3,0,2,-1,0,0,0,0-0-0,0-0-0,|0||0-0-255
+12,25,48,421,609,10,8,0,3,0,0,-1,0,0,0
+1,26,28,3,4,0,0,22,0,0,0,-1--1--1,,1|(420,683)|
+1,27,28,25,100,0,0,22,0,0,0,-1--1--1,,1|(420,634)|
+11,28,48,420,656,6,5,33,3,0,0,4,0,0,0
+10,29,restraint buildup,457,656,31,17,40,3,0,0,-1,0,0,0
+12,30,48,422,866,10,8,0,3,0,0,-1,0,0,0
+1,31,33,30,4,0,0,22,0,0,0,-1--1--1,,1|(422,836)|
+1,32,33,3,100,0,0,22,0,0,0,-1--1--1,,1|(422,781)|
+11,33,48,422,809,6,5,33,3,0,0,4,0,0,0
+10,34,restraint loss,460,809,32,18,40,3,0,0,-1,0,0,0
+12,35,48,456,353,10,8,0,3,0,0,-1,0,0,0
+1,36,38,35,4,0,0,22,0,0,0,-1--1--1,,1|(455,327)|
+1,37,38,2,100,0,0,22,0,0,0,-1--1--1,,1|(455,284)|
+11,38,48,455,304,6,5,33,3,0,0,4,0,0,0
+10,39,accustoming,507,304,46,10,40,3,0,2,-1,0,0,0,0-0-0,0-0-0,|0||0-0-255
+12,40,48,456,111,10,8,0,3,0,0,-1,0,0,0
+1,41,43,2,4,0,0,22,0,0,0,-1--1--1,,1|(456,193)|
+1,42,43,40,100,0,0,22,0,0,0,-1--1--1,,1|(456,140)|
+11,43,48,456,166,6,5,33,3,0,0,4,0,0,0
+10,44,unfamiliar experience,503,166,41,18,40,3,0,2,-1,0,0,0,0-0-0,0-0-0,|0||0-0-255
+10,45,MAX TOLERANCE,226,34,50,16,8,3,0,10,0,0,0,0,0-0-0,0-0-0,|10||0-0-255
+10,46,intolerance,356,191,40,10,8,3,0,2,0,0,0,0,0-0-0,0-0-0,|0||0-0-255
+10,47,MAX HATE,631,353,35,9,8,3,0,10,0,0,0,0,0-0-0,0-0-0,|10||0-0-255
+10,48,social problems,535,479,50,17,8,3,0,2,0,0,0,0,0-0-0,0-0-0,|0||0-0-255
+10,49,PROBLEM BEGINNING,635,405,38,16,8,3,0,10,0,0,0,0,0-0-0,0-0-0,|10||0-0-255
+10,50,PROBLEM STRENGTH,635,480,37,16,8,3,0,10,0,0,0,0,0-0-0,0-0-0,|10||0-0-255
+10,51,adaptation TIME,442,480,46,16,8,3,0,10,0,0,0,0,0-0-0,0-0-0,|10||0-0-255
+10,52,govt authority,622,643,48,10,8,3,0,0,0,0,0,0
+10,53,max restraint,547,731,33,17,8,3,0,0,0,0,0,0
+10,54,ETHICAL SCRUPLES,635,781,37,16,8,3,0,8,0,0,0,0,0-0-0,0-0-0,|10||0-0-0
+10,55,VIOLENCE IN MEDIA,633,834,43,16,8,3,0,8,0,0,0,0,0-0-0,0-0-0,|10||0-0-0
+10,56,violence,192,582,31,10,8,3,0,0,0,0,0,0
+10,57,violent action,237,672,35,16,8,3,0,0,0,0,0,0
+10,58,education effort,101,115,39,17,8,3,0,2,0,0,0,0,0-0-0,0-0-0,|0||0-0-255
+10,59,MAX UNFAMILIARITY,598,33,51,16,8,3,0,10,0,0,0,0,0-0-0,0-0-0,|10||0-0-255
+10,60,DEGREE OF UNFAMILIARITY,610,243,51,16,8,3,0,10,0,0,0,0,0-0-0,0-0-0,|10||0-0-255
+1,61,58,9,1,0,0,0,0,64,0,-1--1--1,,1|(160,148)|
+1,62,45,9,1,0,0,0,0,64,0,-1--1--1,,1|(235,73)|
+1,63,45,46,1,0,0,0,0,64,0,-1--1--1,,1|(315,82)|
+1,64,1,46,1,0,0,0,0,64,0,-1--1--1,,1|(289,220)|
+1,65,1,14,1,0,0,0,0,64,0,-1--1--1,,1|(254,267)|
+1,66,1,39,1,0,0,0,0,64,0,-1--1--1,,1|(368,266)|
+1,67,46,44,1,0,0,0,0,64,0,-1--1--1,,1|(420,179)|
+1,68,59,44,1,0,0,0,0,64,0,-1--1--1,,1|(572,118)|
+1,69,60,44,1,0,0,0,0,64,0,-1--1--1,,1|(591,191)|
+1,70,2,44,1,0,0,0,0,64,0,-1--1--1,,1|(509,228)|
+1,71,2,39,1,0,0,0,0,64,0,-1--1--1,,1|(522,255)|
+1,72,46,19,1,0,0,0,0,64,0,-1--1--1,,1|(348,293)|
+1,73,2,19,1,0,0,0,0,64,0,-1--1--1,,1|(387,329)|
+1,74,47,19,1,0,0,0,0,64,0,-1--1--1,,1|(460,377)|
+1,75,48,19,1,0,0,0,0,64,0,-1--1--1,,1|(466,414)|
+1,76,49,48,1,0,0,0,0,64,0,-1--1--1,,1|(583,428)|
+1,77,50,48,1,0,0,0,0,64,0,-1--1--1,,1|(600,511)|
+1,78,4,19,1,0,0,0,0,64,0,-1--1--1,,1|(372,473)|
+1,79,4,24,1,0,0,0,0,64,0,-1--1--1,,1|(383,509)|
+1,80,4,57,1,0,0,0,0,64,0,-1--1--1,,1|(254,559)|
+1,81,4,56,1,0,0,0,0,64,0,-1--1--1,,1|(230,507)|
+1,82,57,56,1,0,0,0,0,64,0,-1--1--1,,1|(204,640)|
+1,83,3,57,1,0,0,0,0,64,0,-1--1--1,,1|(342,717)|
+1,84,52,53,1,0,0,0,0,64,0,-1--1--1,,1|(614,680)|
+1,85,53,29,1,0,0,0,0,64,0,-1--1--1,,1|(541,702)|
+1,86,3,29,1,0,0,0,0,64,0,-1--1--1,,1|(457,700)|
+1,87,3,34,1,0,0,0,0,64,0,-1--1--1,,1|(458,773)|
+1,88,54,53,1,0,0,0,0,64,0,-1--1--1,,1|(592,769)|
+1,89,55,53,1,0,0,0,0,64,0,-1--1--1,,1|(558,768)|
+1,90,55,34,1,0,0,0,0,64,0,-1--1--1,,1|(516,837)|
+1,91,51,24,1,0,0,0,0,64,0,-1--1--1,,1|(430,543)|
+1,92,1,24,1,0,0,0,0,64,0,-1--1--1,,1|(211,479)|
+1,93,4,14,1,0,0,0,0,64,0,-1--1--1,,1|(230,400)|
+1,94,51,39,1,0,0,0,0,64,0,-1--1--1,,1|(506,399)|
+1,95,51,14,1,0,0,0,0,64,0,-1--1--1,,1|(407,325)|
+10,96,EDUCATION ACTIVITY,107,33,40,16,8,3,0,10,0,0,0,0,0-0-0,0-0-0,|10||0-0-255
+1,97,96,58,1,0,0,0,0,64,0,-1--1--1,,1|(96,71)|
+10,98,GOVT RESOLVE,619,559,53,9,8,3,0,8,0,0,0,0,0-0-0,0-0-0,|10||0-0-0
+1,99,98,52,1,0,0,0,0,64,0,-1--1--1,,1|(623,584)|
+10,100,encounters,384,100,40,10,8,3,0,2,0,0,0,0,0-0-0,0-0-0,|0||0-0-255
+10,101,ENCOUNTER INTENSITY,455,33,43,16,8,3,0,10,0,0,0,0,0-0-0,0-0-0,|10||0-0-255
+1,102,100,44,1,0,0,0,0,64,0,-1--1--1,,1|(425,142)|
+1,103,101,44,1,0,0,0,0,64,0,-1--1--1,,1|(505,106)|
+10,104,ENCOUNTER INTERVAL,339,33,43,16,8,3,0,10,0,0,0,0,0-0-0,0-0-0,|10||0-0-255
+1,105,104,100,1,0,0,0,0,64,0,-1--1--1,,1|(374,75)|
+1,106,48,34,1,0,0,0,0,64,0,-1--1--1,,1|(539,675)|
+1,107,4,34,1,0,0,0,0,64,0,-1--1--1,,1|(312,693)|
+1,108,1,9,1,0,0,0,0,64,0,-1--1--1,,1|(279,207)|
+1,109,51,29,1,0,0,0,0,64,0,-1--1--1,,1|(460,551)|
+1,110,51,19,1,0,0,0,0,64,0,-1--1--1,,1|(429,436)|
+1,111,51,34,1,0,0,0,0,64,0,-1--1--1,,1|(509,600)|
+1,112,56,18,1,0,0,0,3,64,0,255-128-0,|0||-1--1--1,1|(213,455)|
+1,113,56,14,1,0,0,0,3,64,0,255-128-0,|0||-1--1--1,1|(184,437)|
+1,114,56,43,1,0,0,0,3,64,0,255-128-0,|0||-1--1--1,1|(307,268)|
+///---\\\
+:GRAPH EZ509b
+:TITLE Aggression
+:X-AXIS Time
+:X-MIN 0
+:X-MAX 50
+:SCALE
+:VAR restraint threshold
+:Y-MIN 0
+:Y-MAX 1
+:LINE-WIDTH 1
+:VAR unfamiliarity
+:Y-MIN 0
+:Y-MAX 1
+:LINE-WIDTH 2
+:VAR hate
+:Y-MIN 0
+:Y-MAX 1
+:LINE-WIDTH 3
+:VAR tolerance
+:Y-MIN 0
+:Y-MAX 1
+:LINE-WIDTH 4
+:VAR violence
+:Y-MIN 0
+:Y-MAX 1
+:LINE-WIDTH 5
+
+:GRAPH EZ509c
+:TITLE Aggression
+:X-AXIS Time
+:X-MIN 0
+:X-MAX 50
+:SCALE
+:VAR restraint threshold
+:Y-MIN 0
+:Y-MAX 1
+:LINE-WIDTH 1
+:VAR unfamiliarity
+:Y-MIN 0
+:Y-MAX 1
+:LINE-WIDTH 2
+:VAR hate
+:Y-MIN 0
+:Y-MAX 1
+:LINE-WIDTH 3
+:VAR tolerance
+:Y-MIN 0
+:Y-MAX 1
+:LINE-WIDTH 4
+:VAR violence
+:Y-MIN 0
+:Y-MAX 1
+:LINE-WIDTH 5
+
+:GRAPH EZ509d
+:TITLE Aggression
+:X-AXIS Time
+:X-MIN 0
+:X-MAX 50
+:SCALE
+:VAR restraint threshold
+:Y-MIN 0
+:Y-MAX 1
+:LINE-WIDTH 1
+:VAR unfamiliarity
+:Y-MIN 0
+:Y-MAX 1
+:LINE-WIDTH 2
+:VAR hate
+:Y-MIN 0
+:Y-MAX 1
+:LINE-WIDTH 3
+:VAR tolerance
+:Y-MIN 0
+:Y-MAX 1
+:LINE-WIDTH 4
+:VAR violence
+:Y-MIN 0
+:Y-MAX 1
+:LINE-WIDTH 5
+
+:GRAPH EZ509e
+:TITLE Aggression
+:X-AXIS Time
+:X-MIN 0
+:X-MAX 50
+:SCALE
+:VAR restraint threshold
+:Y-MIN 0
+:Y-MAX 1
+:LINE-WIDTH 1
+:VAR unfamiliarity
+:Y-MIN 0
+:Y-MAX 1
+:LINE-WIDTH 2
+:VAR hate
+:Y-MIN 0
+:Y-MAX 1
+:LINE-WIDTH 3
+:VAR tolerance
+:Y-MIN 0
+:Y-MAX 1
+:LINE-WIDTH 4
+:VAR violence
+:Y-MIN 0
+:Y-MAX 1
+:LINE-WIDTH 5
+
+:GRAPH EZ509f
+:TITLE Influence of Educational Activity
+:X-AXIS Time
+:X-MIN 0
+:X-MAX 50
+:WIDTH 5
+:HEIGHT 4
+:SCALE
+:VAR tolerance
+:Y-MIN 0
+:Y-MAX 1
+:DATASET e=0
+:LINE-WIDTH 1
+:VAR tolerance
+:DATASET e=0,25
+:LINE-WIDTH 2
+:VAR tolerance
+:DATASET e=0,5
+:LINE-WIDTH 3
+:VAR tolerance
+:DATASET e=0,75
+:LINE-WIDTH 4
+
+:GRAPH EZ509g
+:TITLE Influence of Educational Activity
+:X-AXIS Time
+:X-MIN 0
+:X-MAX 50
+:WIDTH 5
+:HEIGHT 4
+:SCALE
+:VAR restraint threshold
+:Y-MIN 0
+:Y-MAX 1
+:DATASET e=0
+:LINE-WIDTH 1
+:VAR restraint threshold
+:DATASET e=0,25
+:LINE-WIDTH 2
+:VAR restraint threshold
+:DATASET e=0,5
+:LINE-WIDTH 3
+:VAR restraint threshold
+:DATASET e=0,75
+:LINE-WIDTH 4
+
+:GRAPH EZ509h
+:TITLE Influence of Educational Activity
+:X-AXIS Time
+:X-MIN 0
+:X-MAX 50
+:WIDTH 5
+:HEIGHT 4
+:SCALE
+:VAR hate
+:Y-MIN 0
+:Y-MAX 1
+:DATASET e=0
+:LINE-WIDTH 1
+:VAR hate
+:DATASET e=0,25
+:LINE-WIDTH 2
+:VAR hate
+:DATASET e=0,5
+:LINE-WIDTH 3
+:VAR hate
+:DATASET e=0,75
+:LINE-WIDTH 4
+
+:GRAPH EZ509i
+:TITLE Influence of Educational Activity
+:X-AXIS Time
+:X-MIN 0
+:X-MAX 50
+:WIDTH 5
+:HEIGHT 4
+:SCALE
+:VAR violence
+:Y-MIN 0
+:Y-MAX 1
+:DATASET e=0
+:LINE-WIDTH 1
+:VAR violence
+:DATASET e=0,25
+:LINE-WIDTH 2
+:VAR violence
+:DATASET e=0,5
+:LINE-WIDTH 3
+:VAR violence
+:DATASET e=0,75
+:LINE-WIDTH 4
+:L<%^E!@
+1:EP7.vdf
+1:EP6.vdf
+1:EP5.vdf
+1:EP4.vdf
+1:EP3.vdf
+1:EP2.vdf
+1:EP.vdf
+9:EP7
+15:0,0,0,0,0,0
+19:100,0
+27:2,
+34:0,
+4:Time
+5:restraint loss
+24:0
+25:50
+26:50

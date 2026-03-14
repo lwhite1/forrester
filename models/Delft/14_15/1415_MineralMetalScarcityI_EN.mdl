@@ -1,0 +1,525 @@
+{UTF-8}
+use of RAM in production of goods=
+	MIN(Available Supply of RAM/demand supply time,demand for RAM)
+	~	t/Year
+	~		|
+
+demand supply time=
+	1
+	~	Year
+	~		|
+
+planning time=
+	1
+	~	Year
+	~		|
+
+decommissioning unprofitable extraction capacity=
+	Installed Extraction Capacity* (-MIN(profitability of RAM extraction,0))/closing time
+	~	t/Year/Year
+	~	SMOOTH3I(winstgevendheid ZAM extractie,5,winstgevendheid ZAM extractie)
+	|
+
+closing time=
+	1
+	~	Year
+	~		|
+
+newly planned extraction capacity=
+	MIN(MAX(profitability of RAM extraction, 0),1)*MIN(MAX(desired extraction capacity-Installed Extraction Capacity\
+		,0),Installed Extraction Capacity
+	)/planning time
+	~	t/Year/Year
+	~		|
+
+supply demand ratio=
+	Available Supply of RAM/demand for RAM/demand supply time
+	~	Dmnl
+	~		|
+
+substitution loses=
+	MAX((relative price-relative price of the cheapest price substitute)/relative price \
+		* demand for RAM, 0)/demand supply time
+	~	t/Year/Year
+	~	IF THEN ELSE(relatieve prijs > relatieve prijs van het goedkoopste \
+		prijssubstituut, (relatieve prijs-relatieve prijs van het goedkoopste \
+		prijssubstituut)/relatieve prijs * vraag naar ZAM, 0)
+	|
+
+economic growth rate= WITH LOOKUP (
+	relative price,
+		([(0,-0.2)-(100,10)],(0,0.05),(1,0.03),(100,-0.1) ))
+	~	1/Year
+	~	([(2000,-0.4)-(2050,0.4)],(2000,0.03),(2008,0.03),(2009,-0.3),(2010,0.2),(2\
+		011,0.03),(2050,0.03) )
+	|
+
+real RAM extraction=
+	Installed Extraction Capacity*MIN(scarcity price effect,1)
+	~	t/Year
+	~	maximale ZAM extractie maal schaarsteprijseffect
+	|
+
+net change intrinsic demand=
+	economic growth rate*Intrinsic Demand
+	~	t/Year/Year
+	~	economic growth rate*Intrinsic Annual Demand
+	|
+
+growth demand for RAM=
+	demand for RAM*economic growth rate
+	~	t/Year/Year
+	~		|
+
+commissioning extraction capacity= DELAY FIXED (
+	newly planned extraction capacity, precise construction time of extraction capacity,\
+		 Extraction Capaciteit under Construction/precise construction time of extraction capacity\
+		)
+	~	t/Year/Year
+	~		|
+
+profitability of RAM extraction=
+	(relative price-average RAM extraction costs)/average RAM extraction costs
+	~	Dmnl
+	~		|
+
+processing of RAM=
+	real RAM extraction
+	~	t/Year
+	~	MIN(X,Annual Demand-recycled)
+	|
+
+average RAM extraction costs= WITH LOOKUP (
+	(Cumulatively Extracted RAM-initially cumulatively extracted amount),
+		([(0,0)-(2e+007,800)],(0,1),(2e+006,2),(4e+006,4),(6e+006,8),(8e+006,16),(1e+007,32\
+		),(1.2e+007,64),(1.4e+007,128),(1.6e+007,256),(1.8e+007,512) ))
+	~	Dmnl
+	~	([(0,0)-(2e+007,800)],(0,1.25),(2e+006,2.5),(4e+006,5),(6e+006,10),(8e+006,\
+		20),(1e+007,40),(1.2e+007,80),(1.4e+007,160),(1.6e+007,320),(1.8e+007,640) \
+		)
+	|
+
+Available Supply of RAM= INTEG (
+	processing of RAM-use of RAM in production of goods,
+		initial available supply of RAM)
+	~	t
+	~		|
+
+relative price=
+	scarcity price effect * average RAM extraction costs * (1+normal profitability margin\
+		)
+	~	Dmnl
+	~		|
+
+average lifetime in goods=
+	15
+	~	Year
+	~		|
+
+loss of RAM in goods=
+	RAM in Goods/average lifetime in goods
+	~	t/Year
+	~		|
+
+RAM in Goods= INTEG (
+	use of RAM in production of goods-loss of RAM in goods,
+		initial amount of RAM in goods)
+	~	t
+	~		|
+
+desired extraction capacity=
+	demand for RAM
+	~	t/Year
+	~	FORECAST( vraag naar ZAM, 2, 4)
+	|
+
+normal profitability margin=
+	0.15
+	~	Dmnl
+	~		|
+
+initial extraction capacity under construction=
+	60000
+	~	t/Year
+	~		|
+
+Extraction Capaciteit under Construction= INTEG (
+	newly planned extraction capacity-commissioning extraction capacity,
+		60000)
+	~	t/Year
+	~		|
+
+relative price of the cheapest price substitute=
+	100
+	~	Dmnl
+	~		|
+
+demand for RAM= INTEG (
+	growth demand for RAM-substitution loses-demand reduction via price elasticity of demand\
+		,
+		initial annual demand for RAM)
+	~	t/Year
+	~		|
+
+demand reduction via price elasticity of demand=
+	-price elasticity of demand*demand for RAM*(1/relative price-1/relative price previous year\
+		)/(1/relative price previous year)
+	~	t/Year/Year
+	~		|
+
+scarcity price effect= WITH LOOKUP (
+	supply demand ratio,
+		([(0,0)-(40,1)],(0,100),(0.55,10),(1.1,1),(2.2,0.75),(10.2752,0.372807),(22,0.2) ))
+	~	Dmnl
+	~		|
+
+price elasticity of demand=
+	0.1
+	~	1/Year
+	~		|
+
+relative price previous year=
+	DELAY FIXED(relative price, 1, relative price)
+	~	Dmnl
+	~	MIN(MAX(1/(DELAY1I(relative price, 1, relative price)),0),1)
+	|
+
+production wrt intrinsic demand=
+	use of RAM in production of goods/Intrinsic Demand
+	~	Dmnl
+	~		|
+
+precise construction time of extraction capacity=
+	8
+	~	Year
+	~		|
+
+average life time of extraction capacity=
+	30
+	~	Year
+	~		|
+
+Installed Extraction Capacity= INTEG (
+	commissioning extraction capacity-decommissioning extraction capacity at end of lifetime\
+		-decommissioning unprofitable extraction capacity,
+		initial extraction infrastructure)
+	~	t/Year
+	~		|
+
+decommissioning extraction capacity at end of lifetime=
+	MAX(Installed Extraction Capacity/average life time of extraction capacity-decommissioning unprofitable extraction capacity\
+		,0)
+	~	t/Year/Year
+	~		|
+
+initially cumulatively extracted amount=
+	4e+006
+	~	t
+	~		|
+
+Cumulatively Extracted RAM= INTEG (
+	real RAM extraction,
+		initially cumulatively extracted amount)
+	~	t
+	~		|
+
+Intrinsic Demand= INTEG (
+	net change intrinsic demand,
+		initial annual demand for RAM)
+	~	t/Year
+	~		|
+
+initial annual demand for RAM=
+	100000
+	~	t/Year
+	~		|
+
+initial available supply of RAM=
+	250000
+	~	t
+	~		|
+
+initial extraction infrastructure=
+	100000
+	~	t/Year
+	~		|
+
+initial amount of RAM in goods=
+	2e+006
+	~	t
+	~		|
+
+********************************************************
+	.Control
+********************************************************~
+		Simulation Control Parameters
+	|
+
+FINAL TIME  = 2200
+	~	Year
+	~	The final time for the simulation.
+	|
+
+INITIAL TIME  = 2000
+	~	Year
+	~	The initial time for the simulation.
+	|
+
+SAVEPER  = 
+        TIME STEP
+	~	Year [0,?]
+	~	The frequency with which output is stored.
+	|
+
+TIME STEP  = 0.0625
+	~	Year [0,?]
+	~	The time step for the simulation.
+	|
+
+\\\---/// Sketch information - do not modify anything except names
+V300  Do not put anything below this section - it will be ignored
+*Dashboard
+$192-192-192,0,Times New Roman|12||0-0-0|0-0-0|0-0-255|-1--1--1|-1--1--1|96,96,80,0
+10,1,initial annual demand for RAM,-573,-2,69,15,8,131,0,0,0,0,0,0
+10,2,initial available supply of RAM,-572,140,68,14,8,131,0,0,0,0,0,0
+10,3,economic growth rate,-571,18,69,10,8,131,0,0,0,0,0,0
+10,4,initial amount of RAM in goods,-588,165,51,13,8,131,0,0,0,0,0,0
+10,5,scarcity price effect,-573,84,68,10,8,131,0,2,0,0,0,0,0-0-0,0-0-0,|12||255-0-0
+10,6,price elasticity of demand,-560,59,83,12,8,131,0,2,0,0,0,0,0-0-0,0-0-0,|12||255-0-0
+10,7,Time,-599,433,26,11,8,2,1,1,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+10,8,supply demand ratio,-210,376,53,19,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,9,8,5,0,1,0,0,0,64,0,-1--1--1,,1|(-392,229)|
+10,10,Intrinsic Demand,-511,551,54,19,8,2,1,1,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+10,11,use of RAM in production of goods,-511,551,44,11,8,2,1,1,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+10,12,initial extraction infrastructure,-546,242,94,13,8,131,0,0,0,0,0,0
+10,13,initially cumulatively extracted amount,-528,429,113,12,8,131,0,0,0,0,0,0
+10,14,precise construction time of extraction capacity,-505,319,137,12,8,131,0,0,0,0,0,0
+10,15,average life time of extraction capacity,-532,269,107,13,8,131,0,0,0,0,0,0
+10,16,initial extraction capacity under construction,-506,293,134,12,8,131,0,0,0,0,0,0
+10,17,Time,5,107,26,11,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+10,18,Time,193,99,26,11,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+12,19,9897588,51,305,372,339,3,188,0,0,1,0,0,0
+produced_of_demanded
+12,20,9635198,806,305,375,339,3,188,0,0,1,0,0,0
+prices
+10,21,Time,-521,710,26,11,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+10,22,Time,-517,482,26,11,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+10,23,relative price of the cheapest price substitute,-563,107,73,11,8,131,0,2,0,0,0,0,0-0-0,0-0-0,|12||255-0-0
+10,24,Time,-233,489,26,11,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+10,25,Time,-322,214,26,11,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+10,26,normal profitability margin,-570,-27,66,13,8,131,0,0,0,0,0,0
+10,27,Time,-571,47,26,11,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,28,27,3,0,0,0,0,0,64,0,-1--1--1,,1|(-571,39)|
+10,29,Time,-533,69,26,11,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+\\\---/// Sketch information - do not modify anything except names
+V300  Do not put anything below this section - it will be ignored
+*Demand Supply
+$192-192-192,0,Times New Roman|12||0-0-0|0-0-0|0-0-255|-1--1--1|-1--1--1|96,96,100,0
+10,1,Available Supply of RAM,1046,202,41,26,3,131,0,4,0,0,0,0,0-0-0,255-192-128,|12||0-0-0
+10,2,relative price,486,241,41,11,8,3,0,4,0,0,0,0,0-0-0,255-255-0,|12||128-0-128
+1,3,4,1,4,0,0,22,0,0,0,-1--1--1,,1|(1055,249)|
+11,4,156,1055,277,8,6,33,3,0,0,4,0,0,0
+10,5,processing of RAM,1106,277,43,19,40,3,0,4,-1,0,0,0,0-0-0,255-192-128,|12||255-192-128
+1,6,7,1,100,0,0,22,0,0,0,-1--1--1,,1|(1041,149)|
+11,7,508,1041,117,8,6,33,3,0,0,2,0,0,0
+10,8,use of RAM in production of goods,968,117,65,19,40,3,0,4,-1,0,0,0,0-0-0,255-192-128,|12||0-0-0
+10,9,initial annual demand for RAM,206,-28,66,19,8,3,0,4,0,0,0,0,0-0-0,255-255-0,|12||255-128-192
+10,10,initial available supply of RAM,1151,203,50,19,8,131,0,4,0,0,0,0,0-0-0,255-192-128,|12||255-128-192
+10,11,economic growth rate,689,-133,55,19,8,3,0,4,0,0,0,0,0-0-0,255-255-0,|12||255-0-0
+1,12,1,8,1,0,0,0,0,64,0,-1--1--1,,1|(977,153)|
+10,13,RAM in Goods,1048,60,40,20,3,3,0,4,0,0,0,0,0-0-0,255-192-128,|12||0-0-0
+1,14,7,13,4,0,0,22,0,0,0,-1--1--1,,1|(1041,95)|
+1,15,16,13,100,0,0,22,0,0,0,-1--1--1,,1|(1041,13)|
+11,16,636,1041,-20,8,6,33,3,0,0,2,0,0,0
+10,17,loss of RAM in goods,984,-20,49,19,40,3,0,4,-1,0,0,0,0-0-0,255-192-128,|12||0-0-0
+10,18,initial amount of RAM in goods,1149,56,50,19,8,131,0,4,0,0,0,0,0-0-0,255-192-128,|12||255-128-192
+1,19,13,17,1,0,0,0,0,64,0,-1--1--1,,1|(1002,32)|
+10,20,Intrinsic Demand,756,-215,40,20,3,3,0,0,0,0,0,0
+12,21,48,563,-218,10,8,0,3,0,2,-1,0,0,0,0-0-0,0-0-0,|12||255-0-0
+1,22,24,20,4,0,0,22,1,0,0,0-128-0,|12||0-0-0,1|(676,-214)|
+1,23,24,21,100,0,0,22,1,0,0,0-128-0,|12||0-0-0,1|(598,-214)|
+11,24,48,630,-214,6,8,34,3,0,0,1,0,0,0
+10,25,net change intrinsic demand,630,-187,60,19,40,3,0,0,-1,0,0,0
+1,26,9,20,0,0,0,0,0,64,1,-1--1--1,,1|(481,-121)|
+12,27,48,1052,331,10,8,0,3,0,0,-1,0,0,0
+1,28,4,27,100,0,0,22,0,0,0,-1--1--1,,1|(1055,303)|
+10,29,scarcity price effect,593,318,43,19,8,3,0,4,0,0,0,0,0-0-0,255-255-0,|12||255-0-0
+1,30,29,2,1,0,0,0,0,64,0,-1--1--1,,1|(534,288)|
+10,31,production wrt intrinsic demand,912,-212,52,19,8,3,0,0,0,0,0,0
+1,32,8,31,1,0,0,0,1,64,0,0-128-0,|12||0-0-0,1|(902,-43)|
+1,33,20,31,0,0,0,0,1,64,0,0-128-0,|12||0-0-0,1|(821,-214)|
+10,34,supply demand ratio,825,278,48,19,8,3,0,4,0,0,0,0,0-0-0,255-255-0,|12||0-0-0
+10,35,demand for RAM,633,56,40,20,3,3,0,4,0,0,0,0,0-0-0,255-255-0,|12||0-0-0
+12,36,48,434,56,10,8,0,3,0,0,-1,0,0,0
+1,37,39,36,4,0,0,22,0,0,0,-1--1--1,,1|(518,56)|
+1,38,39,35,68,0,0,22,2,0,0,-1--1--1,|12||0-0-0,1|(558,68)|
+11,39,48,518,68,6,8,34,3,0,0,1,0,0,0
+10,40,demand reduction via price elasticity of demand,518,95,81,19,40,131,0,4,-1,0,0,0,0-0-0,255-255-0,|12||255-0-0
+12,41,48,631,-93,10,8,0,3,0,0,-1,0,0,0
+1,42,44,35,4,0,0,22,0,0,0,-1--1--1,,1|(634,10)|
+1,43,44,41,100,0,0,22,0,0,0,-1--1--1,,1|(634,-56)|
+11,44,48,634,-21,8,6,33,3,0,0,4,0,0,0
+10,45,growth demand for RAM,692,-21,50,19,40,3,0,4,-1,0,0,0,0-0-0,255-255-0,|12||0-0-0
+1,46,35,40,1,0,0,0,0,64,0,-1--1--1,,1|(597,91)|
+10,47,relative price previous year,431,163,43,19,8,131,0,4,0,0,0,0,0-0-0,255-255-0,|12||0-0-0
+1,48,35,45,1,0,0,0,0,64,0,-1--1--1,,1|(689,16)|
+1,49,11,45,1,0,0,0,0,64,0,-1--1--1,,1|(685,-76)|
+1,50,9,35,0,0,0,0,0,64,1,-1--1--1,,1|(425,14)|
+1,51,35,34,1,0,0,0,0,64,0,-1--1--1,,1|(830,126)|
+1,52,35,8,1,0,0,0,0,64,0,-1--1--1,,1|(765,37)|
+10,53,price elasticity of demand,338,224,54,19,8,3,0,4,0,0,0,0,0-0-0,255-255-0,|12||255-0-0
+1,54,53,40,1,0,0,0,0,64,0,-1--1--1,,1|(405,128)|
+1,55,2,47,1,0,0,0,0,64,0,-1--1--1,,1|(428,212)|
+1,56,76,2,1,0,0,0,0,64,0,-1--1--1,,1|(545,346)|
+1,57,2,40,1,0,0,0,0,64,0,-1--1--1,,1|(487,158)|
+1,58,47,40,1,0,0,0,0,64,0,-1--1--1,,1|(464,105)|
+1,59,34,29,1,0,0,0,0,64,0,-1--1--1,,1|(722,315)|
+12,60,48,641,171,10,8,0,3,0,0,-1,0,0,0
+1,61,63,60,4,0,0,22,0,0,0,-1--1--1,,1|(639,144)|
+1,62,63,35,100,0,0,22,0,0,0,-1--1--1,,1|(639,94)|
+11,63,48,639,119,8,6,33,3,0,0,4,0,0,0
+10,64,substitution loses,700,119,53,11,40,131,0,4,-1,0,0,0,0-0-0,255-255-0,|12||0-0-0
+1,65,35,64,0,0,0,0,0,64,0,-1--1--1,,1|(665,87)|
+10,66,relative price of the cheapest price substitute,733,188,78,19,8,3,0,4,0,0,0,0,0-0-0,255-255-0,|12||255-0-0
+1,67,2,63,1,0,0,0,0,64,0,-1--1--1,,1|(545,160)|
+1,68,66,64,1,0,0,0,0,64,0,-1--1--1,,1|(727,152)|
+10,69,normal profitability margin,610,261,59,19,8,3,0,4,0,0,0,0,0-0-0,255-255-0,|12||0-0-0
+1,70,69,2,0,0,0,0,0,64,0,-1--1--1,,1|(545,250)|
+10,71,average lifetime in goods,1149,-20,57,19,8,3,0,4,-1,0,0,0,0-0-0,255-192-128,|12||0-0-0
+1,72,71,16,0,0,0,0,0,64,0,-1--1--1,,1|(1077,-20)|
+1,73,18,13,0,0,0,0,0,64,1,-1--1--1,,1|(1100,56)|
+1,74,10,1,0,0,0,0,0,64,1,-1--1--1,,1|(1100,202)|
+10,75,initial extraction infrastructure,661,766,49,19,8,131,0,4,0,0,0,0,0-0-0,192-255-192,|12||255-128-192
+10,76,average RAM extraction costs,669,401,50,19,8,3,0,4,0,0,0,0,0-0-0,192-255-192,|12||255-0-0
+10,77,Cumulatively Extracted RAM,870,450,52,24,3,131,0,4,0,0,0,0,0-0-0,192-255-192,|12||0-0-0
+12,78,48,1082,454,10,8,0,3,0,0,-1,0,0,0
+1,79,81,77,4,0,0,22,0,0,0,-1--1--1,,1|(950,449)|
+1,80,81,78,100,0,0,22,0,0,0,-1--1--1,,1|(1031,449)|
+11,81,48,984,449,6,8,34,3,0,0,3,0,0,0
+10,82,real RAM extraction,984,422,33,19,40,131,0,4,-1,0,0,0,0-0-0,192-255-192,|12||0-0-0
+10,83,initially cumulatively extracted amount,722,467,62,19,8,3,0,4,0,0,0,0,0-0-0,192-255-192,|12||255-128-192
+1,84,83,77,0,0,0,0,0,64,1,-1--1--1,,1|(794,458)|
+1,85,77,76,0,0,0,0,0,64,0,-1--1--1,,1|(775,427)|
+1,86,83,76,0,0,0,0,0,64,0,-1--1--1,,1|(699,439)|
+10,87,desired extraction capacity,250,363,57,19,8,3,0,4,0,0,0,0,0-0-0,192-255-192,|12||0-0-0
+10,88,profitability of RAM extraction,456,465,65,19,8,3,0,4,0,0,0,0,0-0-0,192-255-192,|12||0-0-0
+10,89,Extraction Capaciteit under Construction,415,658,52,26,3,131,0,4,0,0,0,0,0-0-0,192-255-192,|12||0-0-0
+10,90,Installed Extraction Capacity,630,663,39,25,3,131,0,4,0,0,0,0,0-0-0,192-255-192,|12||0-0-0
+12,91,48,241,658,10,8,0,3,0,0,-1,0,0,0
+1,92,94,89,4,0,0,22,0,0,0,-1--1--1,,1|(331,658)|
+1,93,94,91,100,0,0,22,0,0,0,-1--1--1,,1|(269,658)|
+11,94,48,293,658,6,8,34,3,0,0,1,0,0,0
+10,95,newly planned extraction capacity,293,685,60,19,40,3,0,0,-1,0,0,0
+1,96,98,90,4,0,0,22,0,0,0,-1--1--1,,1|(562,646)|
+1,97,98,89,100,0,0,22,0,0,0,-1--1--1,,1|(494,646)|
+11,98,428,528,646,6,8,34,3,0,0,1,0,0,0
+10,99,commissioning extraction capacity,528,673,60,19,40,3,0,4,-1,0,0,0,0-0-0,192-255-192,|12||0-0-0
+12,100,48,813,649,10,8,0,3,0,0,-1,0,0,0
+1,101,103,100,4,0,0,22,0,0,0,-1--1--1,,1|(782,648)|
+1,102,103,90,100,0,0,22,0,0,0,-1--1--1,,1|(709,648)|
+11,103,48,755,648,6,8,34,3,0,0,1,0,0,0
+10,104,decommissioning extraction capacity at end of lifetime,755,684,81,28,40,3,0,0,-1,0,0,0
+10,105,precise construction time of extraction capacity,495,768,79,19,8,3,0,4,0,0,0,0,0-0-0,192-255-192,|12||255-0-0
+1,106,105,99,1,0,0,0,0,64,0,-1--1--1,,1|(512,697)|
+10,107,average life time of extraction capacity,853,610,60,19,8,3,0,4,0,0,0,0,0-0-0,192-255-192,|12||255-0-0
+1,108,107,103,0,0,0,0,0,64,0,-1--1--1,,1|(788,634)|
+1,109,90,103,1,0,0,0,0,64,0,-1--1--1,,1|(703,630)|
+12,110,48,636,503,10,8,0,3,0,0,-1,0,0,0
+1,111,113,110,4,0,0,22,0,0,0,-1--1--1,,1|(629,532)|
+1,112,113,90,100,0,0,22,0,0,0,-1--1--1,,1|(629,602)|
+11,113,48,629,560,8,6,33,3,0,0,4,0,0,0
+10,114,decommissioning unprofitable extraction capacity,708,560,71,28,40,3,0,4,-1,0,0,0,0-0-0,192-255-192,|12||192-255-192
+1,115,88,113,1,0,0,0,0,64,0,-1--1--1,,1|(528,554)|
+1,116,90,113,1,0,0,0,0,64,0,-1--1--1,,1|(612,605)|
+1,117,75,90,0,0,0,0,0,64,1,-1--1--1,,1|(648,724)|
+1,118,114,103,0,0,0,0,0,64,0,-1--1--1,,1|(733,608)|
+1,119,90,94,1,0,0,0,0,64,0,-1--1--1,,1|(419,611)|
+1,120,87,94,1,0,0,0,0,64,0,-1--1--1,,1|(289,518)|
+1,121,88,94,1,0,0,0,0,64,0,-1--1--1,,1|(370,540)|
+1,122,76,88,1,0,0,0,0,64,0,-1--1--1,,1|(556,418)|
+1,123,35,87,1,0,0,0,0,64,0,-1--1--1,,1|(328,105)|
+1,124,2,88,1,0,0,0,0,64,0,-1--1--1,,1|(472,342)|
+10,125,initial extraction capacity under construction,295,769,78,19,8,131,0,4,0,0,0,0,0-0-0,192-255-192,|12||255-128-192
+1,126,11,25,1,0,0,0,1,64,0,0-128-0,|12||0-0-0,1|(668,-147)|
+1,127,20,25,0,0,0,0,1,64,0,0-128-0,|12||0-0-0,1|(709,-205)|
+1,128,82,5,1,0,0,16,2,64,0,-1--1--1,|12||0-0-0,1|(1077,362)|
+1,129,95,99,1,0,0,0,0,64,0,-1--1--1,,1|(387,719)|
+1,130,1,34,1,0,0,0,0,64,0,-1--1--1,,1|(937,254)|
+1,131,89,98,1,0,0,0,0,64,1,-1--1--1,,1|(504,633)|
+12,132,48,1041,-79,10,8,0,3,0,0,-1,0,0,0
+1,133,16,132,4,0,0,22,0,0,0,-1--1--1,,1|(1041,-48)|
+1,134,29,82,1,0,0,0,0,64,0,-1--1--1,,1|(944,404)|
+1,135,90,81,1,0,0,0,0,64,0,-1--1--1,,1|(861,724)|
+1,136,2,11,1,0,0,0,3,64,0,255-0-0,|12||0-0-0,1|(520,19)|
+10,137,closing time,860,544,37,11,8,3,0,0,0,0,0,0
+1,138,137,114,0,0,0,0,0,64,0,-1--1--1,,1|(807,548)|
+10,139,demand supply time,640,224,48,19,8,3,17,0,0,0,0,0
+1,140,139,63,0,17,0,0,0,64,0,-1--1--1,,1|(639,171)|
+1,141,139,34,0,17,0,0,0,64,0,-1--1--1,,1|(725,248)|
+1,142,139,8,0,17,0,0,0,64,0,-1--1--1,,1|(791,174)|
+10,145,planning time,223,583,41,11,8,3,0,0,0,0,0,0
+1,146,145,95,0,0,0,0,0,64,0,-1--1--1,,1|(250,624)|
+\\\---/// Sketch information - do not modify anything except names
+V300  Do not put anything below this section - it will be ignored
+*Extraction Capacity
+$192-192-192,0,Times New Roman|12||0-0-0|0-0-0|0-0-255|-1--1--1|-1--1--1|96,96,80,0
+\\\---/// Sketch information - do not modify anything except names
+V300  Do not put anything below this section - it will be ignored
+*Recycling Capacity
+$192-192-192,0,Times New Roman|12||0-0-0|0-0-0|0-0-255|-1--1--1|-1--1--1|96,96,80,0
+10,1,Time,276,159,26,11,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+10,2,Time,274,535,26,11,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+///---\\\
+:GRAPH produced_of_demanded
+:TITLE produced_of_demanded
+:SCALE
+:VAR produced of intrinsically demanded
+:Y-MIN 0
+:Y-MAX 1
+:SCALE
+:VAR Real Annual Demand
+:Y-MAX 800000
+:VAR production
+:VAR recycling
+:VAR extraction
+
+:GRAPH prices
+:TITLE prices
+:Y-DIV 10
+:SCALE
+:VAR relative market price
+:Y-MAX 30
+:VAR average recycling cost
+:VAR average extraction costs
+:VAR shortage price effect
+:L<%^E!@
+1:testEP2.vdf
+1:testEP.vdf
+9:testEP2
+22:$,Dollar,Dollars,$s
+22:Hour,Hours
+22:Month,Months
+22:Person,People,Persons
+22:Unit,Units
+22:Week,Weeks
+22:Year,Years
+22:Day,Days
+18:MCmetals.vsc
+20:MCmetals.lst
+15:0,0,0,1,0,0
+19:100,1
+27:2,
+34:0,
+4:Time
+5:Installed Extraction Capacity
+35:Date
+36:YYYY-MM-DD
+37:2000
+38:1
+39:1
+40:0
+41:0
+42:0
+24:2000
+25:2200
+26:2200

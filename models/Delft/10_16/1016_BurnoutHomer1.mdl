@@ -1,0 +1,299 @@
+{UTF-8}
+cumulative accomplishments= INTEG (
+	accomplishments per week,
+		0)
+	~	
+	~		|
+
+perceived adequacy of accomplishment=
+	perceived accomplishments per week / expected accomplishments per week
+	~	Dmnl
+	~		|
+
+fractional change in expectations from perceived adequacy = WITH LOOKUP (
+	perceived adequacy of accomplishment,
+		([(0,-0.8)-(1.6,0.4)],(0,-0.7),(0.2,-0.5),(0.4,-0.35),(0.6,-0.2),(0.8,-0.1),(1,0),(\
+		1.2,0.1),(1.4,0.25),(1.6,0.4) ))
+	~	1/week
+	~		|
+
+energy level= INTEG (
+	energy recovery-energy depletion,
+		1)
+	~	energyunits
+	~		|
+
+bias for fractional change in expectations=
+	0.1
+	~	1/week
+	~		|
+
+change in expected accomplishments per week=
+	expected accomplishments per week * fractional change in expected accomplishments per week
+	~	tasks/week/week
+	~		|
+
+change in hours worked per week=
+	(indicated hours worked per week - hours worked per week) / time to adjust hours worked per week
+	~	hour / week / week
+	~		|
+
+change in perceived accomplishments per week=
+	(accomplishments per week - perceived accomplishments per week) / time to perceive accomplishments per week
+	~	tasks/week/week
+	~		|
+
+effect of energy level on hours worked = WITH LOOKUP (
+	energy level,
+		([(0,0)-(1,1)],(0,0),(0.2,0.4),(0.4,0.7),(0.6,0.9),(0.8,1),(1,1) ))
+	~	Dmnl
+	~		|
+
+effect of high energy on further recovery= WITH LOOKUP (
+	energy level,
+		([(0,0)-(1,1)],(0,1),(0.8,1),(0.85,0.9),(0.9,0.7),(0.95,0.4),(1,0) ))
+	~	Dmnl
+	~		|
+
+effect of hours worked on energy depletion = WITH LOOKUP (
+	hours worked per week,
+		([(0,0)-(120,3)],(0,0.3),(20,0.6),(40,1),(60,1.5),(80,2),(100,2.5),(120,3) ))
+	~	Dmnl
+	~		|
+
+effect of hours worked on recovery = WITH LOOKUP (
+	hours worked per week,
+		([(0,0)-(120,1.4)],(0,1.3),(20,1.2),(40,1),(60,0.7),(80,0.5),(100,0.35),(120,0.25) \
+		))
+	~	Dmnl
+	~		|
+
+effect of low energy on further depletion= WITH LOOKUP (
+	energy level,
+		([(0,0)-(1,1)],(0,0),(0.05,0.4),(0.1,0.7),(0.15,0.9),(0.2,1),(1,1) ))
+	~	Dmnl
+	~		|
+
+effect of perceived adequacy on energy depletion = WITH LOOKUP (
+	perceived adequacy of accomplishment,
+		([(0,0)-(1.6,5)],(0,5),(0.2,4),(0.4,3.1),(0.6,2.3),(0.8,1.6),(1,1),(1.2,0.6),(1.4,0.4\
+		),(1.6,0.3) ))
+	~	Dmnl
+	~		|
+
+effect of perceived adequacy on hours worked = WITH LOOKUP (
+	perceived adequacy of accomplishment,
+		([(0,0.5)-(1.6,2.5)],(0,2.3),(0.2,1.9),(0.4,1.6),(0.6,1.35),(0.8,1.15),(1,1),(1.2,0.9\
+		),(1.4,0.8),(1.6,0.75) ))
+	~	Dmnl
+	~		|
+
+energy depletion=
+	energy depletion normal * effect of perceived adequacy on energy depletion * effect of hours worked on energy depletion\
+		 * effect of low energy on further depletion
+	~	energyunits/week
+	~		|
+
+energy depletion normal=
+	0.06
+	~	energyunits/week
+	~		|
+
+indicated hours worked per week=
+	MIN(limit on hours worked per week, (hours worked per week * effect of energy level on hours worked\
+		 * effect of perceived adequacy on hours worked))
+	~	hour/week
+	~		|
+
+energy recovery=
+	energy recovery normal * effect of hours worked on recovery * effect of high energy on further recovery
+	~	energyunits/week
+	~		|
+
+energy recovery normal=
+	0.3
+	~	energyunits/week
+	~		|
+
+expected accomplishments per week= INTEG (
+	change in expected accomplishments per week,
+		40)
+	~	tasks/week
+	~		|
+
+fractional change in expected accomplishments per week=
+	bias for fractional change in expectations + fractional change in expectations from perceived adequacy
+	~	1/week
+	~		|
+
+hours worked per week= INTEG (
+	change in hours worked per week,
+		40)
+	~	hour/week
+	~		|
+
+limit on hours worked per week=
+	80
+	~	hour/week
+	~		|
+
+perceived accomplishments per week= INTEG (
+	change in perceived accomplishments per week,
+		accomplishments per week)
+	~	tasks/week
+	~		|
+
+time to perceive accomplishments per week=
+	1
+	~	week
+	~		|
+
+time to adjust hours worked per week=
+	1
+	~	week
+	~		|
+
+accomplishments per week=
+	hours worked per week * accomplishments per hour
+	~	tasks/week
+	~		|
+
+accomplishments per hour = WITH LOOKUP (
+	energy level,
+		([(0,0)-(1,1)],(0,0),(0.2,0.2),(0.4,0.4),(0.6,0.6),(0.8,0.8),(1,1) ))
+	~	tasks/hour
+	~		|
+
+********************************************************
+	.Control
+********************************************************~
+		Simulation Control Parameters
+	|
+
+FINAL TIME  = 75
+	~	week
+	~	The final time for the simulation.
+	|
+
+INITIAL TIME  = 0
+	~	week
+	~	The initial time for the simulation.
+	|
+
+SAVEPER  = 
+        TIME STEP
+	~	week [0,?]
+	~	The frequency with which output is stored.
+	|
+
+TIME STEP  = 0.015625
+	~	week [0,?]
+	~	The time step for the simulation.
+	|
+
+\\\---/// Sketch information - do not modify anything except names
+V300  Do not put anything below this section - it will be ignored
+*View 1
+$192-192-192,0,Times New Roman|12||0-0-0|0-0-0|0-0-255|-1--1--1|-1--1--1|96,96,70,0
+10,1,hours worked per week,551,398,40,20,3,3,0,0,0,0,0,0
+10,2,accomplishments per hour,584,504,81,11,0,3,0,0,0,0,0,0
+10,3,accomplishments per week,805,494,59,19,8,131,0,0,0,0,0,0
+1,4,1,3,1,0,0,0,0,64,0,-1--1--1,,1|(690,417)|
+1,5,2,3,1,0,0,0,0,64,0,-1--1--1,,1|(673,481)|
+10,6,energy level,493,598,40,20,3,3,0,0,0,0,0,0
+1,7,6,2,1,0,0,0,0,64,0,-1--1--1,,1|(509,550)|
+10,8,time to adjust hours worked per week,267,366,62,19,8,3,0,2,0,0,0,0,0-0-0,0-0-0,|12||255-128-0
+12,9,48,356,390,10,8,0,3,0,0,-1,0,0,0
+1,10,12,1,4,0,0,22,0,0,0,-1--1--1,,1|(477,390)|
+1,11,12,9,100,0,0,22,0,0,0,-1--1--1,,1|(398,390)|
+11,12,48,437,390,6,8,34,3,0,0,1,0,0,0
+10,13,change in hours worked per week,437,417,57,19,40,3,0,0,-1,0,0,0
+10,14,indicated hours worked per week,513,303,57,19,8,3,0,0,0,0,0,0
+1,15,1,12,1,0,0,0,0,64,0,-1--1--1,,1|(531,365)|
+1,16,14,12,1,0,0,0,0,64,0,-1--1--1,,1|(457,329)|
+1,17,8,12,1,0,0,0,0,64,0,-1--1--1,,1|(345,345)|
+10,18,limit on hours worked per week,298,269,57,19,8,3,0,2,0,0,0,0,0-0-0,0-0-0,|12||0-255-0
+1,19,18,14,1,0,0,0,0,64,0,-1--1--1,,1|(413,272)|
+10,20,effect of energy level on hours worked,284,116,66,19,8,3,0,0,0,0,0,0
+10,21,effect of perceived adequacy on hours worked,862,63,60,28,8,3,0,0,0,0,0,0
+1,22,1,14,1,0,0,0,0,64,0,-1--1--1,,1|(593,324)|
+1,23,20,14,1,0,0,0,0,64,0,-1--1--1,,1|(431,112)|
+1,24,21,14,1,0,0,0,0,64,0,-1--1--1,,1|(642,158)|
+1,25,6,20,1,0,0,0,0,64,0,-1--1--1,,1|(179,436)|
+10,26,perceived adequacy of accomplishment,1269,395,72,19,8,3,0,0,0,0,0,0
+1,27,26,21,1,0,0,0,0,64,0,-1--1--1,,1|(1156,145)|
+10,28,perceived accomplishments per week,1099,495,55,20,3,131,0,0,0,0,0,0
+12,29,48,904,496,10,8,0,3,0,0,-1,0,0,0
+1,30,32,28,4,0,0,22,0,0,0,-1--1--1,,1|(1013,496)|
+1,31,32,29,100,0,0,22,0,0,0,-1--1--1,,1|(942,496)|
+11,32,48,976,496,6,8,34,3,0,0,1,0,0,0
+10,33,change in perceived accomplishments per week,976,532,67,28,40,3,0,0,-1,0,0,0
+10,34,time to perceive accomplishments per week,1056,620,67,28,8,3,0,2,0,0,0,0,0-0-0,255-0-0,|12||255-0-0
+1,35,28,33,1,0,0,0,0,64,0,-1--1--1,,1|(1069,563)|
+1,36,34,33,1,0,0,0,0,64,0,-1--1--1,,1|(974,591)|
+1,37,3,33,1,0,0,0,0,64,0,-1--1--1,,1|(845,529)|
+10,38,expected accomplishments per week,1061,200,59,20,3,131,0,0,0,0,0,0
+1,39,38,26,1,0,0,0,0,64,0,-1--1--1,,1|(1117,220)|
+12,40,48,837,189,10,8,0,3,0,0,-1,0,0,0
+1,41,43,38,4,0,0,22,0,0,0,-1--1--1,,1|(968,195)|
+1,42,43,40,100,0,0,22,0,0,0,-1--1--1,,1|(884,195)|
+11,43,48,928,195,6,8,34,3,0,0,1,0,0,0
+10,44,change in expected accomplishments per week,928,231,67,28,40,3,0,0,-1,0,0,0
+1,45,3,28,1,0,0,0,0,64,1,-1--1--1,,1|(1010,458)|
+10,46,fractional change in expectations from perceived adequacy,1015,414,90,28,8,3,0,0,0,0,0,0
+10,47,bias for fractional change in expectations,713,290,71,19,8,3,0,2,0,0,0,0,0-0-0,0-0-0,|12||0-255-0
+10,48,fractional change in expected accomplishments per week,899,334,85,28,8,3,0,0,0,0,0,0
+1,49,47,48,1,0,0,0,0,64,0,-1--1--1,,1|(780,310)|
+1,50,46,48,1,0,0,0,0,64,0,-1--1--1,,1|(937,409)|
+1,51,48,44,1,0,0,0,0,64,0,-1--1--1,,1|(902,262)|
+1,52,38,43,1,0,0,0,0,64,0,-1--1--1,,1|(969,166)|
+12,53,48,326,602,10,8,0,3,0,0,-1,0,0,0
+1,54,56,6,4,0,0,22,0,0,0,-1--1--1,,1|(425,602)|
+1,55,56,53,100,0,0,22,0,0,0,-1--1--1,,1|(361,602)|
+11,56,48,392,602,6,8,34,3,0,0,1,0,0,0
+10,57,energy recovery,392,621,51,11,40,3,0,0,-1,0,0,0
+12,58,48,675,600,10,8,0,3,0,0,-1,0,0,0
+1,59,61,58,4,0,0,22,0,0,0,-1--1--1,,1|(635,600)|
+1,60,61,6,100,0,0,22,0,0,0,-1--1--1,,1|(563,600)|
+11,61,48,599,600,6,8,34,3,0,0,1,0,0,0
+10,62,energy depletion,599,619,52,11,40,3,0,0,-1,0,0,0
+10,63,energy recovery normal,212,668,52,19,8,3,0,2,0,0,0,0,0-0-0,0-0-0,|12||255-0-0
+10,64,effect of hours worked on recovery,407,478,65,19,8,3,0,0,0,0,0,0
+1,65,1,64,1,0,0,0,0,64,0,-1--1--1,,1|(503,449)|
+1,66,64,56,1,0,0,0,0,64,0,-1--1--1,,1|(380,532)|
+1,67,63,57,1,0,0,0,0,64,0,-1--1--1,,1|(299,662)|
+10,68,effect of high energy on further recovery,442,690,74,19,8,3,0,0,0,0,0,0
+1,69,68,57,1,0,0,0,0,64,0,-1--1--1,,1|(378,662)|
+1,70,6,68,1,0,0,0,0,64,0,-1--1--1,,1|(511,638)|
+10,71,energy depletion normal,879,649,53,19,8,3,0,2,0,0,0,0,0-0-0,0-0-0,|12||255-0-0
+10,72,effect of perceived adequacy on energy depletion,828,707,64,28,8,3,0,0,0,0,0,0
+1,73,26,72,1,0,0,0,0,64,0,-1--1--1,,1|(1262,557)|
+10,74,effect of hours worked on energy depletion,725,552,72,19,8,3,0,0,0,0,0,0
+1,75,1,74,1,0,0,0,0,64,0,-1--1--1,,1|(686,448)|
+10,76,effect of low energy on further depletion,591,721,73,19,8,3,0,0,0,0,0,0
+1,77,6,76,1,0,0,0,0,64,0,-1--1--1,,1|(551,664)|
+1,78,76,62,1,0,0,0,0,64,0,-1--1--1,,1|(610,673)|
+1,79,72,62,1,0,0,0,0,64,0,-1--1--1,,1|(704,689)|
+1,80,71,62,1,0,0,0,0,64,0,-1--1--1,,1|(728,661)|
+1,81,74,62,1,0,0,0,0,64,0,-1--1--1,,1|(712,584)|
+1,82,26,46,1,0,0,0,0,64,0,-1--1--1,,1|(1140,433)|
+1,83,28,26,1,0,0,0,0,64,0,-1--1--1,,1|(1191,462)|
+10,84,cumulative accomplishments,1290,709,40,20,3,3,0,0,0,0,0,0
+1,85,3,84,1,0,0,0,0,64,0,-1--1--1,,1|(960,665)|
+///---\\\
+:L<%^E!@
+1:O:\DesktopStuff\SA1.vdf
+1:O:\DesktopStuff\Hoog.vdf
+9:SA1
+23:0
+18:Burnoutcontrol.vsc
+20:burnout.lst
+15:0,0,0,5,0,0
+19:70,0
+27:2,
+34:0,
+4:Time
+5:perceived accomplishments per week
+24:0
+25:75
+26:75
