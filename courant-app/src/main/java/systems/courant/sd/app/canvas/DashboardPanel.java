@@ -319,6 +319,8 @@ public class DashboardPanel extends VBox {
                 sensitivityTab = null;
             } else if (tab == phasePlotTab) {
                 phasePlotTab = null;
+            } else if (tab == dominanceTab) {
+                dominanceTab = null;
             }
             if (resultTabs.getTabs().isEmpty()) {
                 hideTabs();
