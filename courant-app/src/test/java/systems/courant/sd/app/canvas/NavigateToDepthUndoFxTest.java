@@ -44,10 +44,17 @@ class NavigateToDepthUndoFxTest {
      * Each module contains a sub-module so we can drill into it.
      */
     private void loadNestedModules() {
-        // Innermost module definition (depth 2) — leaf, no sub-modules
+        // Deepest module definition (depth 3) — leaf, no sub-modules
+        ModelDefinition deepDef = new ModelDefinitionBuilder()
+                .name("Deep")
+                .stock("DeepStock", 5, "units")
+                .build();
+
+        // Innermost module definition (depth 2) — contains the deep module
         ModelDefinition innerDef = new ModelDefinitionBuilder()
                 .name("Inner")
                 .stock("InnerStock", 10, "units")
+                .module("Module 1", deepDef, Map.of(), Map.of())
                 .build();
 
         // Middle module definition (depth 1) — contains the inner module

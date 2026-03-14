@@ -597,7 +597,7 @@ class DemoSmokeTest {
     @Test
     @DisplayName("ThirdOrderMaterialDelayDemo CSV path uses tmpdir, not relative path (#556)")
     void thirdOrderDelayDemoCsvUsesAbsolutePath() throws Exception {
-        Path sourceFile = Path.of("courant-demos/src/main/java/systems/courant/sd/demo/"
+        Path sourceFile = Path.of("src/main/java/systems/courant/sd/demo/"
                 + "ThirdOrderMaterialDelayDemo.java");
         String source = Files.readString(sourceFile);
         assertThat(source)
@@ -612,7 +612,7 @@ class DemoSmokeTest {
     @Test
     @DisplayName("TubDemo CSV path uses tmpdir, not relative path (#556)")
     void tubDemoCsvUsesAbsolutePath() throws Exception {
-        Path sourceFile = Path.of("courant-demos/src/main/java/systems/courant/sd/demo/"
+        Path sourceFile = Path.of("src/main/java/systems/courant/sd/demo/"
                 + "TubDemo.java");
         String source = Files.readString(sourceFile);
         assertThat(source)
@@ -627,7 +627,7 @@ class DemoSmokeTest {
     @Test
     @DisplayName("All demo CSV paths use absolute tmpdir paths, not relative (#556)")
     void allDemoCsvPathsUseAbsolutePaths() throws Exception {
-        Path demoDir = Path.of("courant-demos/src/main/java/systems/courant/sd/demo");
+        Path demoDir = Path.of("src/main/java/systems/courant/sd/demo");
         try (var stream = Files.list(demoDir)) {
             var demoFiles = stream
                     .filter(p -> p.toString().endsWith("Demo.java"))
