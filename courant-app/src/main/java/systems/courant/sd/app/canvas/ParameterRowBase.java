@@ -17,7 +17,7 @@ import java.util.List;
  *
  * <p>Subclasses add dialog-specific fields and implement {@link #isValid()}.
  */
-abstract class ParameterRowBase {
+public abstract class ParameterRowBase {
 
     protected final ComboBox<String> nameCombo;
     protected final HBox pane;
@@ -74,26 +74,26 @@ abstract class ParameterRowBase {
         pane.getChildren().add(removeBtn);
     }
 
-    HBox getPane() {
+    public HBox getPane() {
         return pane;
     }
 
     /**
      * Returns true if this row has a valid, complete configuration.
      */
-    abstract boolean isValid();
+    public abstract boolean isValid();
 
     /**
      * Returns the selected parameter name, or null if none is selected.
      */
-    String getSelectedName() {
+    public String getSelectedName() {
         return nameCombo.getValue();
     }
 
     /**
      * Returns true if a parameter name is selected.
      */
-    boolean isNameSelected() {
+    public boolean isNameSelected() {
         return nameCombo.getValue() != null;
     }
 }

@@ -6,16 +6,16 @@ import systems.courant.sd.app.canvas.ModelCanvas;
 import systems.courant.sd.app.canvas.ModelDefinitionFactory;
 import systems.courant.sd.app.canvas.ModelEditListener;
 import systems.courant.sd.app.canvas.ModelEditor;
-import systems.courant.sd.app.canvas.MonteCarloDialog;
-import systems.courant.sd.app.canvas.MultiParameterSweepDialog;
-import systems.courant.sd.app.canvas.OptimizerDialog;
-import systems.courant.sd.app.canvas.ParameterSweepDialog;
-import systems.courant.sd.app.canvas.SensitivityPane;
+import systems.courant.sd.app.canvas.dialogs.MonteCarloDialog;
+import systems.courant.sd.app.canvas.dialogs.MultiParameterSweepDialog;
+import systems.courant.sd.app.canvas.dialogs.OptimizerDialog;
+import systems.courant.sd.app.canvas.dialogs.ParameterSweepDialog;
+import systems.courant.sd.app.canvas.charts.SensitivityPane;
 import systems.courant.sd.app.canvas.SimulationRunner;
-import systems.courant.sd.app.canvas.SimulationSettingsDialog;
+import systems.courant.sd.app.canvas.dialogs.SimulationSettingsDialog;
 import systems.courant.sd.app.canvas.StatusBar;
-import systems.courant.sd.app.canvas.ExtremeConditionDialog;
-import systems.courant.sd.app.canvas.ValidationDialog;
+import systems.courant.sd.app.canvas.dialogs.ExtremeConditionDialog;
+import systems.courant.sd.app.canvas.dialogs.ValidationDialog;
 import systems.courant.sd.measure.Quantity;
 import systems.courant.sd.measure.TimeUnit;
 import systems.courant.sd.model.def.ModelDefinition;
@@ -103,7 +103,7 @@ final class SimulationController {
                 result -> {
                     dashboardPanel.showSimulationResult(result, paramSnapshot, def.flows(),
                             def.referenceDatasets());
-                    canvas.setSparklineData(new systems.courant.sd.app.canvas.CanvasRenderer.SparklineData(
+                    canvas.setSparklineData(new systems.courant.sd.app.canvas.renderers.CanvasRenderer.SparklineData(
                             ModelCanvas.extractStockSeries(result), false));
                     computeLoopDominance(result);
                     switchToDashboard.run();

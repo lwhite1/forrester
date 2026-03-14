@@ -18,37 +18,37 @@ import java.util.StringJoiner;
  * Tab-separated format is recognized by Excel, Google Sheets, and most spreadsheet tools
  * when pasting.
  */
-final class ClipboardExporter {
+public final class ClipboardExporter {
 
     private ClipboardExporter() {
     }
 
     // ── Copy methods (format + clipboard) ──────────────────────────────
 
-    static void copySimulationResult(SimulationRunner.SimulationResult result) {
+    public static void copySimulationResult(SimulationRunner.SimulationResult result) {
         copyToClipboard(formatSimulationResult(result));
     }
 
-    static void copySweepTimeSeries(SweepResult result) {
+    public static void copySweepTimeSeries(SweepResult result) {
         copyToClipboard(formatSweepTimeSeries(result));
     }
 
-    static void copySweepSummary(SweepResult result) {
+    public static void copySweepSummary(SweepResult result) {
         copyToClipboard(formatSweepSummary(result));
     }
 
-    static void copyMonteCarloPercentiles(MonteCarloResult result, String variableName) {
+    public static void copyMonteCarloPercentiles(MonteCarloResult result, String variableName) {
         String text = formatMonteCarloPercentiles(result, variableName);
         if (text != null) {
             copyToClipboard(text);
         }
     }
 
-    static void copyMultiSweepSummary(MultiSweepResult result) {
+    public static void copyMultiSweepSummary(MultiSweepResult result) {
         copyToClipboard(formatMultiSweepSummary(result));
     }
 
-    static void copyOptimizationBestRun(OptimizationResult result) {
+    public static void copyOptimizationBestRun(OptimizationResult result) {
         copyToClipboard(formatOptimizationBestRun(result));
     }
 
@@ -57,7 +57,7 @@ final class ClipboardExporter {
     /**
      * Formats a single simulation result as tab-separated text.
      */
-    static String formatSimulationResult(SimulationRunner.SimulationResult result) {
+    public static String formatSimulationResult(SimulationRunner.SimulationResult result) {
         StringBuilder sb = new StringBuilder();
         sb.append(String.join("\t", result.columnNames())).append('\n');
         for (double[] row : result.rows()) {
@@ -73,7 +73,7 @@ final class ClipboardExporter {
     /**
      * Formats a parameter sweep time-series as tab-separated text.
      */
-    static String formatSweepTimeSeries(SweepResult result) {
+    public static String formatSweepTimeSeries(SweepResult result) {
         StringBuilder sb = new StringBuilder();
         StringJoiner header = new StringJoiner("\t");
         header.add(result.getParameterName());
@@ -103,7 +103,7 @@ final class ClipboardExporter {
     /**
      * Formats a parameter sweep summary as tab-separated text.
      */
-    static String formatSweepSummary(SweepResult result) {
+    public static String formatSweepSummary(SweepResult result) {
         StringBuilder sb = new StringBuilder();
         StringJoiner header = new StringJoiner("\t");
         header.add(result.getParameterName());
@@ -129,7 +129,7 @@ final class ClipboardExporter {
      * Formats Monte Carlo percentile data as tab-separated text, or returns null
      * if no variable is selected.
      */
-    static String formatMonteCarloPercentiles(MonteCarloResult result, String variableName) {
+    public static String formatMonteCarloPercentiles(MonteCarloResult result, String variableName) {
         if (variableName == null) {
             return null;
         }
@@ -159,7 +159,7 @@ final class ClipboardExporter {
     /**
      * Formats a multi-parameter sweep summary as tab-separated text.
      */
-    static String formatMultiSweepSummary(MultiSweepResult result) {
+    public static String formatMultiSweepSummary(MultiSweepResult result) {
         StringBuilder sb = new StringBuilder();
         StringJoiner header = new StringJoiner("\t");
         result.getParameterNames().forEach(header::add);
@@ -188,7 +188,7 @@ final class ClipboardExporter {
     /**
      * Formats optimization best-run time series as tab-separated text.
      */
-    static String formatOptimizationBestRun(OptimizationResult result) {
+    public static String formatOptimizationBestRun(OptimizationResult result) {
         RunResult bestRun = result.getBestRunResult();
         StringBuilder sb = new StringBuilder();
         StringJoiner header = new StringJoiner("\t");

@@ -12,6 +12,15 @@ import systems.courant.sd.model.def.ElementType;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import systems.courant.sd.app.canvas.controllers.CausalLinkCreationController;
+import systems.courant.sd.app.canvas.controllers.ConnectionRerouteController;
+import systems.courant.sd.app.canvas.controllers.DragController;
+import systems.courant.sd.app.canvas.controllers.FlowCreationController;
+import systems.courant.sd.app.canvas.controllers.InfoLinkCreationController;
+import systems.courant.sd.app.canvas.controllers.InlineEditController;
+import systems.courant.sd.app.canvas.controllers.MarqueeController;
+import systems.courant.sd.app.canvas.controllers.ReattachController;
+import systems.courant.sd.app.canvas.controllers.ResizeController;
 
 /**
  * Routes mouse, keyboard, and scroll events to the appropriate interaction

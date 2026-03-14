@@ -12,6 +12,7 @@ import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.within;
+import systems.courant.sd.app.canvas.charts.SimulationResultPane;
 
 @DisplayName("SimulationResultPane.computeNetFlows")
 class NetFlowComputationTest {

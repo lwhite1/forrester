@@ -1,0 +1,256 @@
+package systems.courant.sd.app.canvas.dialogs;
+
+import javafx.beans.binding.Bindings;
+import javafx.beans.property.IntegerProperty;
+import javafx.beans.property.SimpleIntegerProperty;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import javafx.geometry.Insets;
+import javafx.scene.control.Button;
+import javafx.scene.control.ButtonBar;
+import javafx.scene.control.ButtonType;
+import javafx.scene.control.ComboBox;
+import javafx.scene.control.Dialog;
+import javafx.scene.control.Label;
+import javafx.scene.control.ScrollPane;
+import javafx.scene.control.TextField;
+import javafx.scene.layout.GridPane;
+import javafx.scene.layout.VBox;
+
+import java.util.ArrayList;
+import java.util.List;
+import systems.courant.sd.app.canvas.ParameterRowBase;
+import systems.courant.sd.app.canvas.Styles;
+
+/**
+ * Dialog for configuring a Monte Carlo simulation: add parameters with
+ * distribution types, set iteration count, sampling method, and seed.
+ */
+public class MonteCarloDialog extends Dialog<MonteCarloDialog.Config> {
+
+    public enum DistributionType {
+        NORMAL, UNIFORM
+    }
+
+    public record ParameterConfig(String name, DistributionType distribution,
+                                  double param1, double param2) {
+    }
+
+    public record Config(
+            List<ParameterConfig> parameters,
+            int iterations,
+            String samplingMethod,
+            long seed
+    ) {
+    }
+
+    private final ObservableList<ParameterRow> parameterRows = FXCollections.observableArrayList();
+    private final IntegerProperty fieldChangeCounter = new SimpleIntegerProperty(0);
+    private final List<String> constantNames;
+    private final TextField iterationsField;
+    private final ComboBox<String> samplingCombo;
+    private final TextField seedField;
+
+    public MonteCarloDialog(List<String> constantNames) {
+        this.constantNames = constantNames;
+        setTitle("Monte Carlo Simulation");
+        setHeaderText("Configure Monte Carlo parameters");
+
+        VBox paramBox = new VBox(6);
+        paramBox.setPadding(new Insets(5));
+
+        Button addButton = new Button("Add Parameter");
+        addButton.setId("mcAddParam");
+        addButton.setOnAction(e -> {
+            ParameterRow row = new ParameterRow(constantNames, paramBox);
+            parameterRows.add(row);
+            paramBox.getChildren().add(paramBox.getChildren().size() - 1, row.getPane());
+        });
+
+        paramBox.getChildren().add(addButton);
+
+        // Add one default row
+        ParameterRow defaultRow = new ParameterRow(constantNames, paramBox);
+        parameterRows.add(defaultRow);
+        paramBox.getChildren().add(0, defaultRow.getPane());
+
+        ScrollPane paramScroll = new ScrollPane(paramBox);
+        paramScroll.setFitToWidth(true);
+        paramScroll.setPrefHeight(200);
+
+        iterationsField = new TextField("200");
+        iterationsField.setId("mcIterations");
+        samplingCombo = new ComboBox<>(FXCollections.observableArrayList(
+                "LATIN_HYPERCUBE", "RANDOM"));
+        samplingCombo.setValue("LATIN_HYPERCUBE");
+        samplingCombo.setId("mcSampling");
+        seedField = new TextField("12345");
+        seedField.setId("mcSeed");
+
+        GridPane settingsGrid = new GridPane();
+        settingsGrid.setHgap(10);
+        settingsGrid.setVgap(10);
+        settingsGrid.setPadding(new Insets(10, 0, 0, 0));
+
+        settingsGrid.add(new Label("Iterations:"), 0, 0);
+        settingsGrid.add(iterationsField, 1, 0);
+        settingsGrid.add(new Label("Sampling:"), 0, 1);
+        settingsGrid.add(samplingCombo, 1, 1);
+        settingsGrid.add(new Label("Seed:"), 0, 2);
+        settingsGrid.add(seedField, 1, 2);
+
+        Label paramsLabel = new Label("Parameters");
+        paramsLabel.setStyle(Styles.SECTION_HEADER);
+
+        Label validationLabel = new Label();
+        validationLabel.setStyle(Styles.VALIDATION_ERROR);
+        validationLabel.setWrapText(true);
+        validationLabel.setMaxWidth(Double.MAX_VALUE);
+        validationLabel.setId("mcValidationLabel");
+        validationLabel.textProperty().bind(
+                Bindings.createStringBinding(this::getValidationMessage,
+                        iterationsField.textProperty(), seedField.textProperty(),
+                        parameterRows, fieldChangeCounter)
+        );
+
+        VBox content = new VBox(10, paramsLabel, paramScroll, settingsGrid, validationLabel);
+        content.setPadding(new Insets(10));
+        getDialogPane().setContent(content);
+        getDialogPane().setPrefWidth(Styles.screenAwareWidth(Styles.CONFIG_DIALOG_WIDTH));
+
+        ButtonType okButton = new ButtonType("OK", ButtonBar.ButtonData.OK_DONE);
+        getDialogPane().getButtonTypes().addAll(okButton, ButtonType.CANCEL);
+
+        getDialogPane().lookupButton(okButton).disableProperty().bind(
+                Bindings.createBooleanBinding(this::isInvalid,
+                        iterationsField.textProperty(), seedField.textProperty(),
+                        parameterRows, fieldChangeCounter)
+        );
+
+        setResultConverter(button -> {
+            if (button == okButton) {
+                List<ParameterConfig> params = new ArrayList<>();
+                for (ParameterRow row : parameterRows) {
+                    if (row.isValid()) {
+                        params.add(row.toConfig());
+                    }
+                }
+                return new Config(
+                        params,
+                        Integer.parseInt(iterationsField.getText().trim()),
+                        samplingCombo.getValue(),
+                        Long.parseLong(seedField.getText().trim())
+                );
+            }
+            return null;
+        });
+    }
+
+    private boolean isInvalid() {
+        return !getValidationMessage().isEmpty();
+    }
+
+    private String getValidationMessage() {
+        try {
+            int iter = Integer.parseInt(iterationsField.getText().trim());
+            if (iter < 1) {
+                return "Iterations must be at least 1.";
+            }
+        } catch (NumberFormatException e) {
+            return "Iterations must be a valid integer.";
+        }
+        try {
+            Long.parseLong(seedField.getText().trim());
+        } catch (NumberFormatException e) {
+            return "Seed must be a valid integer.";
+        }
+        if (parameterRows.stream().noneMatch(ParameterRow::isValid)) {
+            return "At least one parameter row must have valid values.";
+        }
+        return "";
+    }
+
+    private class ParameterRow extends ParameterRowBase {
+        private final ComboBox<DistributionType> distCombo;
+        private final TextField param1Field;
+        private final TextField param2Field;
+        private final Label param1Label;
+        private final Label param2Label;
+
+        ParameterRow(List<String> constantNames, VBox container) {
+            super(constantNames, null,
+                    () -> fieldChangeCounter.set(fieldChangeCounter.get() + 1));
+            int rowIndex = parameterRows.size();
+            nameCombo.setId("mcParamName" + rowIndex);
+
+            distCombo = new ComboBox<>(FXCollections.observableArrayList(DistributionType.values()));
+            distCombo.setValue(DistributionType.NORMAL);
+            distCombo.setPrefWidth(100);
+            distCombo.setId("mcParamDist" + rowIndex);
+
+            param1Label = new Label("Mean:");
+            param1Field = new TextField("0");
+            param1Field.setPrefWidth(60);
+            param1Field.setId("mcParam1_" + rowIndex);
+            param2Label = new Label("StdDev:");
+            param2Field = new TextField("1");
+            param2Field.setPrefWidth(60);
+            param2Field.setId("mcParam2_" + rowIndex);
+
+            distCombo.valueProperty().addListener((obs, old, val) -> {
+                updateLabels(val);
+                fieldChangeCounter.set(fieldChangeCounter.get() + 1);
+            });
+            wireFieldChange(param1Field);
+            wireFieldChange(param2Field);
+
+            Button removeBtn = createRemoveButton(() -> {
+                parameterRows.remove(this);
+                container.getChildren().remove(getPane());
+            });
+
+            buildPane(removeBtn, distCombo, param1Label, param1Field,
+                    param2Label, param2Field);
+        }
+
+        private void updateLabels(DistributionType type) {
+            if (type == DistributionType.UNIFORM) {
+                param1Label.setText("Min:");
+                param2Label.setText("Max:");
+            } else {
+                param1Label.setText("Mean:");
+                param2Label.setText("StdDev:");
+            }
+        }
+
+        @Override
+        public boolean isValid() {
+            if (!isNameSelected()) {
+                return false;
+            }
+            try {
+                Double.parseDouble(param1Field.getText().trim());
+                double p2 = Double.parseDouble(param2Field.getText().trim());
+                if (distCombo.getValue() == DistributionType.NORMAL && p2 <= 0) {
+                    return false;
+                }
+                if (distCombo.getValue() == DistributionType.UNIFORM) {
+                    double p1 = Double.parseDouble(param1Field.getText().trim());
+                    return p1 < p2;
+                }
+                return true;
+            } catch (NumberFormatException e) {
+                return false;
+            }
+        }
+
+        ParameterConfig toConfig() {
+            return new ParameterConfig(
+                    getSelectedName(),
+                    distCombo.getValue(),
+                    Double.parseDouble(param1Field.getText().trim()),
+                    Double.parseDouble(param2Field.getText().trim())
+            );
+        }
+    }
+}

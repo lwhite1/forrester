@@ -27,6 +27,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
+import systems.courant.sd.app.canvas.charts.LoopDominancePane;
+import systems.courant.sd.app.canvas.charts.MonteCarloResultPane;
+import systems.courant.sd.app.canvas.charts.MultiSweepResultPane;
+import systems.courant.sd.app.canvas.charts.OptimizationResultPane;
+import systems.courant.sd.app.canvas.charts.PhasePlotPane;
+import systems.courant.sd.app.canvas.charts.SensitivityPane;
+import systems.courant.sd.app.canvas.charts.SimulationResultPane;
+import systems.courant.sd.app.canvas.charts.SweepResultPane;
 
 /**
  * Dashboard panel that displays results from simulation, parameter sweep,

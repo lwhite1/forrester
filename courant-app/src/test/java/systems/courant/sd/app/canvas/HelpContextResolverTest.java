@@ -7,6 +7,14 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import systems.courant.sd.app.canvas.dialogs.BindingConfigDialog;
+import systems.courant.sd.app.canvas.dialogs.DefinePortsDialog;
+import systems.courant.sd.app.canvas.dialogs.ExpressionLanguageDialog;
+import systems.courant.sd.app.canvas.dialogs.MonteCarloDialog;
+import systems.courant.sd.app.canvas.dialogs.MultiParameterSweepDialog;
+import systems.courant.sd.app.canvas.dialogs.OptimizerDialog;
+import systems.courant.sd.app.canvas.dialogs.ParameterSweepDialog;
+import systems.courant.sd.app.canvas.dialogs.SimulationSettingsDialog;
 
 @DisplayName("HelpContextResolver")
 class HelpContextResolverTest {

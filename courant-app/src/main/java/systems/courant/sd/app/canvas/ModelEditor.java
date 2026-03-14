@@ -816,7 +816,7 @@ public class ModelEditor {
         return nameIndex.contains(name);
     }
 
-    static final int MAX_NAME_LENGTH = ElementNameValidator.MAX_NAME_LENGTH;
+    public static final int MAX_NAME_LENGTH = ElementNameValidator.MAX_NAME_LENGTH;
 
     /**
      * Returns true if the given name is valid for an element identifier.

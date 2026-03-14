@@ -86,9 +86,15 @@ class ColorPaletteTest {
         }
 
         @Test
-        @DisplayName("Stock fill is white")
-        void stockFillIsWhite() {
-            assertThat(ColorPalette.STOCK_FILL).isEqualTo(Color.WHITE);
+        @DisplayName("Stock fill is a light blue tint (#EBF5FB)")
+        void stockFillIsLightBlueTint() {
+            assertThat(ColorPalette.STOCK_FILL).isEqualTo(Color.web("#EBF5FB"));
+        }
+
+        @Test
+        @DisplayName("Element fill is white (non-stock elements)")
+        void elementFillIsWhite() {
+            assertThat(ColorPalette.ELEMENT_FILL).isEqualTo(Color.WHITE);
         }
     }
 

@@ -16,6 +16,9 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import systems.courant.sd.app.canvas.dialogs.MonteCarloDialog;
+import systems.courant.sd.app.canvas.dialogs.MultiParameterSweepDialog;
+import systems.courant.sd.app.canvas.dialogs.OptimizerDialog;
 
 @DisplayName("ParameterRowBase (#68)")
 @ExtendWith(ApplicationExtension.class)
@@ -42,7 +45,7 @@ class ParameterRowBaseTest {
         }
 
         @Override
-        boolean isValid() {
+        public boolean isValid() {
             return valid;
         }
 
@@ -138,7 +141,7 @@ class ParameterRowBaseTest {
             AtomicInteger counter = new AtomicInteger(0);
             ParameterRowBase row = new ParameterRowBase(List.of("a"), null, () -> {}) {
                 @Override
-                boolean isValid() {
+                public boolean isValid() {
                     return true;
                 }
             };

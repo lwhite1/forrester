@@ -3,6 +3,7 @@ package systems.courant.sd.app.canvas;
 import systems.courant.sd.model.def.ElementType;
 
 import java.util.Optional;
+import systems.courant.sd.app.canvas.renderers.SelectionRenderer;
 
 /**
  * Corner resize handles for selected elements on the canvas.

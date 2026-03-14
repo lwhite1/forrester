@@ -272,7 +272,7 @@ public final class HitTester {
      * Computes the minimum distance from point (px, py) to the line segment
      * from (x1, y1) to (x2, y2) using projection clamping.
      */
-    static double pointToSegmentDistance(double px, double py,
+    public static double pointToSegmentDistance(double px, double py,
                                          double x1, double y1,
                                          double x2, double y2) {
         double dx = x2 - x1;
@@ -302,7 +302,7 @@ public final class HitTester {
      * Rectangular AABB hit test: checks if (worldX, worldY) is within
      * a rectangle centered at (cx, cy) with given half-width and half-height.
      */
-    static boolean hitTestRect(double worldX, double worldY,
+    public static boolean hitTestRect(double worldX, double worldY,
                                double cx, double cy,
                                double halfW, double halfH) {
         return Math.abs(worldX - cx) <= halfW && Math.abs(worldY - cy) <= halfH;
