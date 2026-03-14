@@ -576,6 +576,12 @@ public class ModelCanvas extends Canvas {
         }
     }
 
+    private void pushUndoSnapshot(UndoManager.Snapshot snapshot, String label) {
+        if (undoManager != null) {
+            undoManager.pushUndo(snapshot, label);
+        }
+    }
+
     /**
      * Returns a short description of the current selection for undo labels.
      * Single element: its name. Multiple: "N elements". Empty: "elements".
@@ -808,10 +814,11 @@ public class ModelCanvas extends Canvas {
         if (editor == null) {
             return;
         }
+        var snapshot = captureSnapshot();
         FlowCreationController.FlowResult result = flowCreation.handleClick(
                 worldX, worldY, canvasState, editor);
         if (result.isCreated()) {
-            saveUndoState("Add flow");
+            pushUndoSnapshot(snapshot, "Add flow");
             regenerateConnectors();
             canvasState.clearSelection();
             canvasState.select(result.flowName());
@@ -824,10 +831,11 @@ public class ModelCanvas extends Canvas {
         if (editor == null) {
             return;
         }
+        var snapshot = captureSnapshot();
         CausalLinkCreationController.LinkResult result = causalLinkCreation.handleClick(
                 worldX, worldY, canvasState, editor);
         if (result.isCreated()) {
-            saveUndoState("Add causal link");
+            pushUndoSnapshot(snapshot, "Add causal link");
             regenerateConnectors();
         }
         redraw();
@@ -838,10 +846,11 @@ public class ModelCanvas extends Canvas {
         if (editor == null) {
             return;
         }
+        var snapshot = captureSnapshot();
         InfoLinkCreationController.LinkResult result = infoLinkCreation.handleClick(
                 worldX, worldY, canvasState, editor);
         if (result.isCreated()) {
-            saveUndoState("Bind module port");
+            pushUndoSnapshot(snapshot, "Bind module port");
             regenerateConnectors();
         }
         redraw();

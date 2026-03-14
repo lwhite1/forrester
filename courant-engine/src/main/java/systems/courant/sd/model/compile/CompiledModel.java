@@ -82,6 +82,9 @@ public class CompiledModel {
         for (Stock stock : model.getStocks()) {
             initialStockValues.put(stock, stock.getValue());
         }
+        for (Module module : model.getModules()) {
+            collectModuleStockValues(module);
+        }
     }
 
     /**
@@ -214,6 +217,15 @@ public class CompiledModel {
         }
         for (Module child : module.getSubModules().values()) {
             clearModuleHistory(child, seenFlows, seenVars);
+        }
+    }
+
+    private void collectModuleStockValues(Module module) {
+        for (Stock stock : module.getStocks()) {
+            initialStockValues.putIfAbsent(stock, stock.getValue());
+        }
+        for (Module child : module.getSubModules().values()) {
+            collectModuleStockValues(child);
         }
     }
 
