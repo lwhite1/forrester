@@ -34,7 +34,7 @@ class ChartViewerApplicationFxTest {
         ChartViewerApplication.reset();
 
         // Seed the static state, then snapshot via showChart-style flow
-        ChartViewerApplication.addSeries(List.of("Population"), List.of("BirthRate"));
+        ChartViewerApplication.setSeries(List.of("Population"), List.of("BirthRate"));
         ChartViewerApplication.addValues(List.of(100.0), List.of(5.0), 0);
         ChartViewerApplication.addValues(List.of(105.0), List.of(5.2), 1);
         ChartViewerApplication.addValues(List.of(110.0), List.of(5.5), 2);
