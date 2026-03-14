@@ -52,6 +52,10 @@ public final class ClipboardExporter {
         copyToClipboard(formatOptimizationBestRun(result));
     }
 
+    public static void copyCalibrationBestRun(OptimizationResult result) {
+        copyToClipboard(formatOptimizationBestRun(result));
+    }
+
     // ── Format methods (pure functions, testable) ──────────────────────
 
     /**

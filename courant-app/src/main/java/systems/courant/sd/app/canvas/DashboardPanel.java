@@ -30,11 +30,13 @@ import java.util.function.Consumer;
 import systems.courant.sd.app.canvas.charts.LoopDominancePane;
 import systems.courant.sd.app.canvas.charts.MonteCarloResultPane;
 import systems.courant.sd.app.canvas.charts.MultiSweepResultPane;
+import systems.courant.sd.app.canvas.charts.CalibrationResultPane;
 import systems.courant.sd.app.canvas.charts.OptimizationResultPane;
 import systems.courant.sd.app.canvas.charts.PhasePlotPane;
 import systems.courant.sd.app.canvas.charts.SensitivityPane;
 import systems.courant.sd.app.canvas.charts.SimulationResultPane;
 import systems.courant.sd.app.canvas.charts.SweepResultPane;
+import systems.courant.sd.app.canvas.dialogs.CalibrateDialog;
 
 /**
  * Dashboard panel that displays results from simulation, parameter sweep,
@@ -60,6 +62,7 @@ public class DashboardPanel extends VBox {
     private Tab sweepTab;
     private Tab monteCarloTab;
     private Tab optimizationTab;
+    private Tab calibrationTab;
     private Tab multiSweepTab;
     private Tab sensitivityTab;
     private Tab dominanceTab;
@@ -233,6 +236,14 @@ public class DashboardPanel extends VBox {
         resultTabs.getSelectionModel().select(optimizationTab);
     }
 
+    public void showCalibrationResult(OptimizationResult result,
+                                      List<CalibrateDialog.FitTarget> fitTargets) {
+        clearStale();
+        CalibrationResultPane pane = new CalibrationResultPane(result, fitTargets);
+        calibrationTab = ensureTab(calibrationTab, "Calibration", pane);
+        resultTabs.getSelectionModel().select(calibrationTab);
+    }
+
     public void showMultiSweepResult(MultiSweepResult result) {
         clearStale();
         MultiSweepResultPane pane = new MultiSweepResultPane(result);
@@ -321,6 +332,8 @@ public class DashboardPanel extends VBox {
                 monteCarloTab = null;
             } else if (tab == optimizationTab) {
                 optimizationTab = null;
+            } else if (tab == calibrationTab) {
+                calibrationTab = null;
             } else if (tab == multiSweepTab) {
                 multiSweepTab = null;
             } else if (tab == sensitivityTab) {
@@ -372,6 +385,7 @@ public class DashboardPanel extends VBox {
         sweepTab = null;
         monteCarloTab = null;
         optimizationTab = null;
+        calibrationTab = null;
         multiSweepTab = null;
         sensitivityTab = null;
         phasePlotTab = null;

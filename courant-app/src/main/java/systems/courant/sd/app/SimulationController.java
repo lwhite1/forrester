@@ -8,6 +8,7 @@ import systems.courant.sd.app.canvas.ModelEditListener;
 import systems.courant.sd.app.canvas.ModelEditor;
 import systems.courant.sd.app.canvas.dialogs.MonteCarloDialog;
 import systems.courant.sd.app.canvas.dialogs.MultiParameterSweepDialog;
+import systems.courant.sd.app.canvas.dialogs.CalibrateDialog;
 import systems.courant.sd.app.canvas.dialogs.OptimizerDialog;
 import systems.courant.sd.app.canvas.dialogs.ParameterSweepDialog;
 import systems.courant.sd.app.canvas.charts.SensitivityPane;
@@ -356,6 +357,90 @@ final class SimulationController {
                             config.algorithm() + ", " + config.parameters().size() + " params"));
                 },
                 "Optimization Error");
+    }
+
+    void runCalibration() {
+        SimulationSettings settings = ensureSettings();
+        if (settings == null) {
+            return;
+        }
+
+        ModelEditor activeEditor = canvas.getEditor();
+        List<String> parameterNames = activeEditor.getParameterNames();
+        List<String> stockNames = activeEditor.getStocks().stream()
+                .map(StockDef::name).toList();
+
+        if (parameterNames.isEmpty()) {
+            showError.accept("Model has no parameters to calibrate.");
+            return;
+        }
+        if (stockNames.isEmpty()) {
+            showError.accept("Model has no stocks to fit against observed data.");
+            return;
+        }
+
+        CalibrateDialog dialog = new CalibrateDialog(parameterNames, stockNames);
+        Optional<CalibrateDialog.Config> configOpt = dialog.showAndWait();
+        if (configOpt.isEmpty()) {
+            return;
+        }
+
+        CalibrateDialog.Config config = configOpt.get();
+        ModelDefinition def = canvas.toModelDefinition();
+        SimulationSettings finalSettings = settings;
+
+        analysisRunner.run(
+                "Calibrating (" + config.maxEvaluations() + " max evals)...",
+                () -> {
+                    TimeUnit timeStep = ModelDefinitionFactory.resolveTimeStep(finalSettings);
+                    Quantity duration = ModelDefinitionFactory.resolveDuration(finalSettings);
+
+                    // Build composite objective: sum SSE across all fit targets
+                    List<CalibrateDialog.FitTarget> targets = config.fitTargets();
+                    List<ObjectiveFunction> perTarget = targets.stream()
+                            .map(t -> Objectives.fitToTimeSeries(t.stockName(), t.observedData()))
+                            .toList();
+                    ObjectiveFunction objective = runResult -> {
+                        double totalSse = 0.0;
+                        for (ObjectiveFunction fn : perTarget) {
+                            totalSse += fn.evaluate(runResult);
+                        }
+                        return totalSse;
+                    };
+
+                    OptimizationAlgorithm algorithm = switch (config.algorithm()) {
+                        case "BOBYQA" -> OptimizationAlgorithm.BOBYQA;
+                        case "CMAES" -> OptimizationAlgorithm.CMAES;
+                        default -> OptimizationAlgorithm.NELDER_MEAD;
+                    };
+
+                    Optimizer.Builder builder = Optimizer.builder()
+                            .compiledModelFactory(
+                                    ModelDefinitionFactory.createFactory(def, finalSettings))
+                            .objective(objective)
+                            .algorithm(algorithm)
+                            .maxEvaluations(config.maxEvaluations())
+                            .timeStep(timeStep)
+                            .duration(duration);
+
+                    for (CalibrateDialog.ParamConfig p : config.parameters()) {
+                        if (Double.isNaN(p.initialGuess())) {
+                            builder.parameter(p.name(), p.lower(), p.upper());
+                        } else {
+                            builder.parameter(p.name(), p.lower(), p.upper(), p.initialGuess());
+                        }
+                    }
+
+                    return builder.build().execute();
+                },
+                result -> {
+                    dashboardPanel.showCalibrationResult(result, config.fitTargets());
+                    switchToDashboard.run();
+                    fireLogEvent.accept(l -> l.onAnalysisRun("Calibration",
+                            config.algorithm() + ", " + config.parameters().size() + " params, "
+                                    + config.fitTargets().size() + " targets"));
+                },
+                "Calibration Error");
     }
 
     void validateModel() {

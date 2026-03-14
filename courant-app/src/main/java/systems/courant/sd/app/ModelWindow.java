@@ -686,9 +686,13 @@ public class ModelWindow {
         MenuItem optimizeItem = new MenuItem("Optimize...");
         optimizeItem.setOnAction(e -> simulationController.runOptimization());
 
+        MenuItem calibrateItem = new MenuItem("Calibrate...");
+        calibrateItem.setOnAction(e -> simulationController.runCalibration());
+
         simulateMenu.getItems().addAll(settingsItem, runItem,
                 new SeparatorMenuItem(), validateItem, extremeCondItem,
-                new SeparatorMenuItem(), sweepItem, multiSweepItem, monteCarloItem, optimizeItem);
+                new SeparatorMenuItem(), sweepItem, multiSweepItem, monteCarloItem, optimizeItem,
+                calibrateItem);
         simulateMenu.setDisable(true);
         editorOnlyItems.add(simulateMenu);
 
@@ -1224,6 +1228,7 @@ public class ModelWindow {
         commands.add(cmd("Multi-Parameter Sweep", "Simulate", simulationController::runMultiParameterSweep));
         commands.add(cmd("Monte Carlo", "Simulate", simulationController::runMonteCarlo));
         commands.add(cmd("Optimize", "Simulate", simulationController::runOptimization));
+        commands.add(cmd("Calibrate", "Simulate", simulationController::runCalibration));
 
         // View
         commands.add(cmd("Validation Issues", "View", this::showValidationDialog));
