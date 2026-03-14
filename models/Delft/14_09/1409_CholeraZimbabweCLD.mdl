@@ -1,0 +1,162 @@
+{UTF-8}
+cumulative cholera deaths  = A FUNCTION OF( average state of health services,infected population\
+		) ~~|
+cumulative cholera deaths= INTEG (
+	cholerasterftes,
+		0)
+	~	person
+	~		|
+
+fraction of infected  = A FUNCTION OF( recovered temporarily immune population,infected population\
+		,susceptible population) ~~|
+fraction of infected=
+	(infecties+infected population+Zwaar Geinfecteerde Populatie)/(infecties
++infected population+Zwaar Geinfecteerde Populatie+susceptible population+recovered temporarily immune population
+)
+	~	Dmnl
+	~		|
+
+smoothed fraction of contaminated water  = A FUNCTION OF( fraction of infected) ~~|
+smoothed fraction of contaminated water=
+	DELAY1I(effect van de fractie geinfecteerden op de fractie besmet water, 30, 0.0005)
+	~	
+	~		|
+
+recovered temporarily immune population  = A FUNCTION OF( infected population) ~~|
+recovered temporarily immune population= INTEG (
+	herstelden van een zwaar ziekbed+herstelden van een licht ziekbed-herstelden naar vatbaren door verlies immuniteit\
+		,
+		7.25e+006)
+	~	person
+	~		|
+
+indirect infection rate  = A FUNCTION OF( prevention and sanitation infrastructure on the infection rate\
+		,smoothed fraction of contaminated water) ~~|
+indirect infection rate=
+	smoothed fraction of contaminated water*prevention and sanitation infrastructure on the infection rate\
+		*verbondenheid aquifers
+	~	1/Day
+	~		|
+
+infections  = A FUNCTION OF( indirect infection rate,susceptible population) ~~|
+infections= INTEG (
+	cholera infecties-zieken met lichte symptomen-zieken met zware symptomen,
+		280)
+	~	
+	~		|
+
+prevention and sanitation infrastructure on the infection rate  = A FUNCTION OF( ) ~~|
+prevention and sanitation infrastructure on the infection rate= WITH LOOKUP (
+	MAX(conditie van de sanitaire infrastructuur,niveau van preventie),
+		([(0,0)-(1,1)],(0,1),(0.25,0.9),(0.5,0.5),(0.75,0.1),(1,0) ))
+	~	
+	~		|
+
+infected population  = A FUNCTION OF( infections) ~~|
+infected population= INTEG (
+	+zieken met lichte symptomen-herstelden van een licht ziekbed,
+		1500)
+	~	person
+	~		|
+
+susceptible population  = A FUNCTION OF( recovered temporarily immune population,infections\
+		) ~~|
+susceptible population= INTEG (
+	herstelden naar vatbaren door verlies immuniteit-cholera infecties,
+		4e+006)
+	~	
+	~		|
+
+average state of health services=
+	0.7
+	~	
+	~	0.35 + 0*STEP(0.35,150)
+	|
+
+********************************************************
+	.Control
+********************************************************~
+		Simulation Control Parameters
+	|
+
+FINAL TIME  = 3650
+	~	Day
+	~	The final time for the simulation.
+	|
+
+INITIAL TIME  = 0
+	~	Day
+	~	The initial time for the simulation.
+	|
+
+SAVEPER  = 
+        TIME STEP
+	~	Day
+	~	The frequency with which output is stored.
+	|
+
+TIME STEP  = 0.125
+	~	Day
+	~	The time step for the simulation.
+	|
+
+\\\---/// Sketch information - do not modify anything except names
+V300  Do not put anything below this section - it will be ignored
+*View 1
+$192-192-192,0,Times New Roman|12||0-0-0|0-0-0|0-0-255|-1--1--1|-1--1--1|96,96,100,0
+10,1,susceptible population,444,134,35,19,8,3,0,0,0,0,0,0
+10,2,infections,452,258,30,11,8,3,0,0,0,0,0,0
+10,3,recovered temporarily immune population,627,157,70,19,8,3,0,0,0,0,0,0
+10,4,infected population,546,311,59,11,8,3,0,0,0,0,0,0
+10,5,cumulative cholera deaths,696,300,59,19,8,3,0,0,0,0,0,0
+10,6,indirect infection rate,364,321,52,19,8,3,0,0,0,0,0,0
+10,7,average state of health services,664,411,50,19,8,3,0,1,0,0,0,0,128-128-128,0-0-0,|12||128-128-128
+10,8,fraction of infected,533,405,58,11,8,3,0,0,0,0,0,0
+10,9,prevention and sanitation infrastructure on the infection rate,312,240,79,28,8,3,0,0,0,0,0,0
+1,10,9,6,1,0,45,0,2,64,0,-1--1--1,|12||0-0-0,1|(347,276)|
+1,11,3,8,0,1,0,0,0,64,0,-1--1--1,,1|(580,278)|
+1,12,1,8,1,1,0,0,0,64,0,-1--1--1,,1|(398,300)|
+10,13,smoothed fraction of contaminated water,383,403,66,19,8,3,0,0,0,0,0,0
+1,14,13,6,1,0,43,0,2,64,0,-1--1--1,|12||0-0-0,1|(364,361)|
+1,15,6,2,1,0,43,0,2,64,0,-1--1--1,|12||0-0-0,1|(381,290)|
+1,16,2,4,1,0,43,0,2,64,0,-1--1--1,|12||0-0-0,1|(493,261)|
+1,17,4,3,1,0,43,0,2,65,0,-1--1--1,|12||0-0-0,1|(635,235)|
+1,18,3,1,1,0,43,1,2,65,0,-1--1--1,|12||0-0-0,1|(527,93)|
+1,19,4,5,1,0,43,0,2,64,0,-1--1--1,|12||0-0-0,1|(614,321)|
+1,20,4,8,1,0,43,0,2,64,0,-1--1--1,|12||0-0-0,1|(548,377)|
+1,21,8,13,1,0,43,0,2,64,0,-1--1--1,|12||0-0-0,1|(453,438)|
+1,22,1,2,1,0,43,0,2,64,0,-1--1--1,|12||0-0-0,1|(405,153)|
+1,23,7,5,1,0,45,0,2,64,0,-1--1--1,|12||0-0-0,1|(644,350)|
+12,24,0,455,320,11,11,4,4,0,0,-1,0,0,0
++
+1,25,2,1,1,0,45,0,2,64,0,-1--1--1,|12||0-0-0,1|(515,173)|
+12,26,0,557,199,13,13,4,4,0,0,-1,0,0,0
++
+12,27,0,451,166,11,11,5,4,0,0,-1,0,0,0
+-
+12,28,0,456,200,60,21,8,4,0,24,-1,0,0,0,0-0-0,0-0-0,|10|BI|0-0-0
+depletion of susceptible population loop
+12,29,0,458,350,49,16,8,4,0,24,-1,0,0,0,0-0-0,0-0-0,|10|BI|0-0-0
+indirecte infectie loop
+12,30,0,566,237,54,24,8,4,0,24,-1,0,0,0,0-0-0,0-0-0,|10|BI|0-0-0
+susceptible ill recovered immune loop
+///---\\\
+:GRAPH GRAPH
+:TITLE GRAPH
+:SCALE
+:VAR fractie besmet water
+:SCALE
+:VAR smoothed fractie besmet water
+:SCALE
+:VAR effect fractie geinfecteerden op besmetting water
+:L<%^E!@
+9:6jaarGZszor80
+15:0,0,0,0,0,0
+19:100,0
+27:0,
+34:0,
+4:Time
+5:average state of health services
+24:0
+25:3650
+26:3650

@@ -1,0 +1,363 @@
+{UTF-8}
+EV batteries needed=
+	electrification European vehicle fleet*battery per vehicle+"electric vehicles (EV)"/\
+		average lifetime EV batteries*batteries per vehicle
+	~	accu/year
+	~		|
+
+battery per vehicle=
+	1
+	~	accu/auto
+	~		|
+
+lithium exploitation=
+	MAX(MIN(total demand lithium to be exploited-lithium in recycling/average recycling time\
+		,unexploited lithium reserves/exploitation time),0)
+	~	ktonLi/year
+	~		|
+
+lithium from recycling to reprocessing=
+	lithium in recycling/average recycling time
+	~	ktonLi/year
+	~		|
+
+average recycling time=
+	0.25
+	~	year
+	~		|
+
+processing and introduction time
+	=1
+	~	year
+	~		|
+
+exploitation time=
+	0.0825
+	~	year
+	~		|
+
+lithium products brought into use=
+	processing of lithium in products/processing and introduction time
+	~	ktonLi/year
+	~		|
+
+batteries per vehicle=
+	1
+	~	accu/auto
+	~		|
+
+approximated fraction of lithium use in EV batteries over the total amount of lithium in use\
+		=
+	lithium needed for EV batteries/total demand lithium to be exploited
+	~	Dmnl
+	~		|
+
+lithium needed for EV batteries=
+	lithium per EV battery*EV batteries needed
+	~	ktonLi/year
+	~		|
+
+conventional vehicles= INTEG (
+	-electrification European vehicle fleet,
+		1e+008)
+	~	auto
+	~		|
+
+average lifetime products containing lithium=
+	average use time of ICT products containing lithium*(1-approximated fraction of lithium use in EV batteries over the total amount of lithium in use\
+		)+"average lifetime EV batteries (during and after use in EV)"*approximated fraction of lithium use in EV batteries over the total amount of lithium in use
+	~	year
+	~		|
+
+electrification European vehicle fleet=
+	intensive advertisement*conventional vehicles/average lifetime conventional vehicles\
+		*"electric vehicles (EV)"/totale European vehicle fleet
+	~	auto/year
+	~		|
+
+"electric vehicles (EV)"= INTEG (
+	+electrification European vehicle fleet,
+		1000)
+	~	auto
+	~		|
+
+"average lifetime EV batteries (during and after use in EV)"=
+	10
+	~	year
+	~		|
+
+average use time of ICT products containing lithium=
+	5
+	~	year
+	~		|
+
+average lifetime conventional vehicles=
+	9
+	~	year
+	~		|
+
+average lifetime EV batteries=
+	3
+	~	year
+	~		|
+
+lithium per EV battery=
+	2e-005
+	~	ktonLi/accu
+	~		|
+
+growth rate lithium demand ICT sector=
+	0
+	~	1/year
+	~		|
+
+total demand lithium to be exploited=
+	lithium needed for EV batteries+annual ICT lithium demand
+	~	ktonLi/year
+	~		|
+
+processing of lithium in products= INTEG (
+	+lithium exploitation-lithium products brought into use+lithium from recycling to reprocessing\
+		,
+		22)
+	~	ktonLi
+	~		|
+
+net increase annual ICT lithium demand=
+	annual ICT lithium demand*growth rate lithium demand ICT sector
+	~	ktonLi/year/year
+	~		|
+
+intensive advertisement=
+	10-STEP(9,2017)
+	~	Dmnl
+	~		|
+
+annual ICT lithium demand= INTEG (
+	net increase annual ICT lithium demand,
+		20)
+	~	ktonLi/year
+	~		|
+
+totale European vehicle fleet=
+	conventional vehicles+"electric vehicles (EV)"
+	~	auto
+	~		|
+
+lithium in products= INTEG (
+	lithium products brought into use-"loss of non-recyled lithium"-recovery lithium through recycling\
+		,
+		initial value lithium in products)
+	~	ktonLi
+	~		|
+
+initial value lithium in products=
+	100
+	~	ktonLi
+	~		|
+
+initially unexploited lithium reserves=
+	13000
+	~	ktonLi
+	~		|
+
+lithium in recycling= INTEG (
+	recovery lithium through recycling-lithium from recycling to reprocessing,
+		0)
+	~	ktonLi
+	~		|
+
+recovery lithium through recycling=
+	lithium in products/average lifetime products containing lithium * effective recycling fraction lithium
+	~	ktonLi/year
+	~		|
+
+"loss of non-recyled lithium"=
+	lithium in products/average lifetime products containing lithium * (1-effective recycling fraction lithium\
+		)
+	~	ktonLi/year
+	~		|
+
+unexploited lithium reserves= INTEG (
+	-lithium exploitation,
+		initially unexploited lithium reserves)
+	~	ktonLi
+	~		|
+
+effective recycling fraction lithium=
+	0.2
+	~	Dmnl
+	~		|
+
+********************************************************
+	.Control
+********************************************************~
+		Simulation Control Parameters
+	|
+
+FINAL TIME  = 2100
+	~	year
+	~	The final time for the simulation.
+	|
+
+INITIAL TIME  = 2009
+	~	year
+	~	The initial time for the simulation.
+	|
+
+SAVEPER  = 
+        TIME STEP 
+	~	year
+	~	The frequency with which output is stored.
+	|
+
+TIME STEP  = 0.015625
+	~	year
+	~	The time step for the simulation.
+	|
+
+\\\---/// Sketch information - do not modify anything except names
+V300  Do not put anything below this section - it will be ignored
+*Lithium
+$192-192-192,0,Times New Roman|12||0-0-0|0-0-0|0-0-255|-1--1--1|-1--1--1|96,96,100,0
+10,1,unexploited lithium reserves,365,210,43,25,3,3,0,0,0,0,0,0
+10,2,initially unexploited lithium reserves,363,94,60,19,8,3,0,0,0,0,0,0
+1,3,2,1,0,0,0,0,0,64,1,-1--1--1,,1|(363,142)|
+10,4,lithium in products,771,211,44,23,3,3,0,0,0,0,0,0
+1,5,7,30,4,0,0,22,0,0,0,-1--1--1,,1|(481,228)|
+1,6,7,1,100,0,0,22,0,0,0,-1--1--1,,1|(429,228)|
+11,7,780,457,228,6,8,34,3,0,0,1,0,0,0
+10,8,lithium exploitation,457,247,58,11,40,3,0,0,-1,0,0,0
+1,9,1,7,1,0,0,0,0,64,0,-1--1--1,,1|(417,177)|
+10,10,initial value lithium in products,621,106,64,19,8,3,0,0,0,0,0,0
+1,11,10,4,0,0,0,0,0,64,1,-1--1--1,,1|(687,152)|
+12,12,48,743,45,10,8,0,3,0,0,-1,0,0,0
+1,13,15,12,4,0,0,22,0,0,0,-1--1--1,,1|(736,64)|
+1,14,15,4,100,0,0,22,0,0,0,-1--1--1,,1|(736,140)|
+11,15,48,736,84,6,8,33,3,0,0,4,0,0,0
+10,16,"loss of non-recyled lithium",814,84,61,19,40,3,0,0,-1,0,0,0
+1,17,4,16,1,0,0,0,0,64,0,-1--1--1,,1|(787,153)|
+10,18,average lifetime products containing lithium,958,361,62,28,8,3,0,0,0,0,0,0
+10,19,effective recycling fraction lithium,859,150,57,19,8,3,0,2,0,0,0,0,0-0-0,0-0-0,|12||255-128-0
+10,20,lithium in recycling,852,305,40,20,3,3,0,0,0,0,0,0
+1,21,23,20,4,0,0,22,0,0,0,-1--1--1,,1|(857,254)|
+1,22,23,4,100,0,0,22,0,0,0,-1--1--1,,1|(833,215)|
+11,23,156,857,215,6,8,33,3,0,0,4,0,0,0
+10,24,recovery lithium through recycling,917,215,54,19,40,3,0,0,-1,0,0,0
+1,25,26,20,100,0,0,22,0,0,0,-1--1--1,,1|(782,292)|
+11,26,812,746,292,6,8,34,3,0,0,1,0,0,0
+10,27,lithium from recycling to reprocessing,746,319,67,19,40,3,0,0,-1,0,0,0
+1,28,4,23,1,0,0,0,0,64,0,-1--1--1,,1|(801,208)|
+1,29,20,26,1,0,0,0,0,64,0,-1--1--1,,1|(773,273)|
+10,30,processing of lithium in products,545,214,46,24,3,3,0,0,0,0,0,0
+1,31,33,4,4,0,0,22,0,0,0,-1--1--1,,1|(698,217)|
+1,32,33,30,100,0,0,22,0,0,0,-1--1--1,,1|(624,217)|
+11,33,284,663,217,6,8,34,3,0,0,1,0,0,0
+10,34,lithium products brought into use,663,244,51,19,40,3,0,0,-1,0,0,0
+1,35,30,33,1,0,0,0,0,64,0,-1--1--1,,1|(590,186)|
+1,36,18,24,0,0,0,0,0,64,0,-1--1--1,,1|(938,290)|
+1,37,18,16,1,0,0,0,0,64,0,-1--1--1,,1|(951,156)|
+1,38,19,16,0,0,0,0,0,64,0,-1--1--1,,1|(840,122)|
+1,39,19,24,0,0,0,0,0,64,0,-1--1--1,,1|(882,177)|
+1,40,26,30,4,0,0,22,0,0,0,-1--1--1,,1|(545,292)|
+10,41,EV batteries needed,375,465,40,19,8,3,0,2,0,0,0,0,0-0-0,0-0-0,|12||0-0-255
+1,42,69,41,1,0,0,0,0,64,0,-1--1--1,,1|(345,430)|
+10,43,average lifetime EV batteries,335,551,62,19,8,3,0,2,0,0,0,0,0-0-0,0-0-0,|12||0-0-255
+10,44,lithium per EV battery,547,523,46,19,8,3,0,2,0,0,0,0,0-0-0,0-0-0,|12||0-0-255
+10,45,batteries per vehicle,435,521,40,19,8,3,0,2,0,0,0,0,0-0-0,0-0-0,|12||0-0-255
+10,46,lithium needed for EV batteries,521,448,57,19,8,3,0,2,0,0,0,0,0-0-0,0-0-0,|12||0-0-255
+1,47,44,46,1,0,0,0,0,64,0,-1--1--1,,1|(539,488)|
+10,48,total demand lithium to be exploited,387,328,64,19,8,3,0,0,0,0,0,0
+10,49,annual ICT lithium demand,153,261,53,24,3,3,0,2,0,0,0,0,0-0-0,0-0-0,|12||0-128-0
+12,50,48,190,127,10,8,0,3,0,0,-1,0,0,0
+1,51,53,49,4,0,0,22,0,0,0,-1--1--1,,1|(187,205)|
+1,52,53,50,100,0,0,22,0,0,0,-1--1--1,,1|(187,146)|
+11,53,48,187,166,6,8,33,3,0,0,2,0,0,0
+10,54,net increase annual ICT lithium demand,120,166,63,19,40,3,0,2,-1,0,0,0,0-0-0,0-0-0,|12||0-128-0
+1,55,49,53,1,0,0,0,0,64,0,-1--1--1,,1|(218,197)|
+10,56,growth rate lithium demand ICT sector,128,89,62,19,8,3,0,2,0,0,0,0,0-0-0,0-0-0,|12||0-128-0
+1,57,56,54,1,0,0,0,0,64,0,-1--1--1,,1|(123,127)|
+1,58,46,48,1,0,0,0,0,64,0,-1--1--1,,1|(473,393)|
+1,59,48,8,1,0,0,0,3,64,0,255-128-0,|12||0-0-0,1|(424,290)|
+1,60,20,8,1,0,0,0,3,64,0,255-0-0,|12||0-0-0,1|(611,405)|
+10,61,"average lifetime EV batteries (during and after use in EV)",798,514,73,30,8,3,0,0,0,0,0,0
+10,62,approximated fraction of lithium use in EV batteries over the total amount of lithium in use,766,448,103,28,8,3,0,2,0,0,0,0,0-0-0,0-0-0,|12||255-128-0
+10,63,average use time of ICT products containing lithium,989,518,84,19,8,3,0,0,0,0,0,0
+1,64,63,18,1,0,0,0,0,64,0,-1--1--1,,1|(987,428)|
+1,65,62,18,1,0,0,0,3,64,0,255-128-0,|12||0-0-0,1|(865,434)|
+1,66,61,18,1,0,0,0,0,64,0,-1--1--1,,1|(924,442)|
+1,67,46,62,1,0,0,0,3,64,0,255-128-0,|12||0-0-0,1|(612,464)|
+1,68,48,62,1,0,0,0,3,64,0,255-128-0,|12||0-0-0,1|(563,406)|
+10,69,"electric vehicles (EV)",311,395,45,20,3,3,0,2,0,0,0,0,0-0-0,0-0-0,|12||0-0-255
+10,70,conventional vehicles,63,396,48,18,3,3,0,2,0,0,0,0,0-0-0,0-0-0,|12||0-0-255
+10,71,average lifetime conventional vehicles,113,494,67,19,8,3,0,2,0,0,0,0,0-0-0,0-0-0,|12||0-0-255
+1,72,74,69,4,0,0,22,0,0,0,-1--1--1,,1|(227,396)|
+1,73,74,70,100,0,0,22,0,0,0,-1--1--1,,1|(144,396)|
+11,74,684,183,396,6,8,34,3,0,0,1,0,0,0
+10,75,electrification European vehicle fleet,183,423,70,19,40,3,0,2,-1,0,0,0,0-0-0,0-0-0,|12||0-0-255
+1,76,70,74,1,0,0,0,0,64,0,-1--1--1,,1|(119,368)|
+1,77,69,74,1,0,0,0,0,64,0,-1--1--1,,1|(231,367)|
+10,78,totale European vehicle fleet,183,334,50,19,8,3,0,2,0,0,0,0,0-0-0,0-0-0,|12||0-0-255
+1,79,70,78,1,0,0,0,0,64,0,-1--1--1,,1|(92,342)|
+1,80,69,78,1,0,0,0,0,64,0,-1--1--1,,1|(298,364)|
+1,81,71,75,0,0,0,0,0,64,0,-1--1--1,,1|(142,463)|
+10,82,intensive advertisement,50,446,44,19,8,3,0,2,0,0,0,0,0-0-0,0-0-0,|12||0-0-255
+1,83,82,75,0,0,0,0,0,64,0,-1--1--1,,1|(96,438)|
+10,84,processing and introduction time,567,151,53,19,8,3,0,0,0,0,0,0
+1,85,84,33,1,0,0,0,0,64,0,-1--1--1,,1|(646,173)|
+10,86,exploitation time,438,138,51,11,8,3,0,0,0,0,0,0
+1,87,86,7,1,0,0,0,0,64,0,-1--1--1,,1|(468,174)|
+10,88,average recycling time,583,345,55,19,8,3,0,0,0,0,0,0
+1,89,88,27,0,0,0,0,0,64,0,-1--1--1,,1|(651,334)|
+1,90,49,48,1,0,0,0,0,64,0,-1--1--1,,1|(311,290)|
+1,91,43,41,0,0,0,0,0,64,0,-1--1--1,,1|(351,514)|
+1,92,41,46,0,0,0,0,0,64,0,-1--1--1,,1|(432,458)|
+1,93,45,41,0,0,0,0,0,64,0,-1--1--1,,1|(410,497)|
+1,94,78,74,0,0,0,0,0,64,0,-1--1--1,,1|(183,364)|
+1,95,75,41,1,0,0,0,0,64,0,-1--1--1,,1|(276,458)|
+10,96,battery per vehicle,253,500,58,11,8,3,0,0,0,0,0,0
+1,97,96,41,0,0,0,0,0,64,0,-1--1--1,,1|(306,484)|
+1,98,88,8,0,0,0,0,0,64,0,-1--1--1,,1|(520,296)|
+\\\---/// Sketch information - do not modify anything except names
+V300  Do not put anything below this section - it will be ignored
+*View 2
+$192-192-192,0,Times New Roman|12||0-0-0|0-0-0|0-0-255|-1--1--1|-1--1--1|96,96,0,0
+///---\\\
+:GRAPH GRAPH
+:TITLE GRAPH
+:SCALE
+:VAR Conventionele Autos
+:VAR Elektrische Autos
+:VAR Electrificatie Wagenpark
+
+:GRAPH GRAPH_0
+:TITLE GRAPH_0
+:SCALE
+:VAR Onontgonnen Lithium Voorraad
+:VAR Lithium in Producten
+
+:GRAPH GRAPH_1
+:TITLE GRAPH_1
+:SCALE
+:VAR Ontginning Lithium
+:VAR Verwerking Lithium in Producten
+:L<%^E!@
+1:O:\00_E-BOOK-SD\1_Models\test.vdf
+9:BCnoICTincrease
+15:0,0,0,5,0,0
+19:100,0
+27:0,
+34:0,
+4:Time
+5:totale European vehicle fleet
+35:Date
+36:YYYY-MM-DD
+37:2000
+38:1
+39:1
+40:2
+41:0
+42:0
+24:2009
+25:2100
+26:2100

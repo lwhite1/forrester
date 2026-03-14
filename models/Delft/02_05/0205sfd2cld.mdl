@@ -1,0 +1,195 @@
+{UTF-8}
+complaints  = A FUNCTION OF( deterioration of the quality)
+	~	
+	~		|
+
+cost per student  = A FUNCTION OF( deterioration of the quality,online students)
+	~	
+	~		|
+
+deterioration of the quality  = A FUNCTION OF( perceived quality of the teaching,perceived quality of the teaching in the previous period\
+		)
+	~	
+	~		|
+
+enrollments  = A FUNCTION OF( former students and current students,perceived quality of the teaching\
+		,tuition fee)
+	~	
+	~		|
+
+experience  = A FUNCTION OF( former students and current students)
+	~	
+	~		|
+
+expertise  = A FUNCTION OF( workload)
+	~	
+	~		|
+
+finishers  = A FUNCTION OF( percentage of passers,online students)
+	~	
+	~		|
+
+former students  = A FUNCTION OF( finishers)
+	~	
+	~		|
+
+former students and current students  = A FUNCTION OF( former students,online students\
+		)
+	~	
+	~		|
+
+motivation  = A FUNCTION OF( complaints,workload)
+	~	
+	~		|
+
+online students  = A FUNCTION OF( enrollments,-finishers,-quitters)
+	~	
+	~		|
+
+perceived quality of the teaching  = A FUNCTION OF( quality of the teaching)
+	~	
+	~		|
+
+perceived quality of the teaching in the previous period  = A FUNCTION OF( quality of the teaching\
+		)
+	~	
+	~		|
+
+percentage of passers  = A FUNCTION OF( )
+	~	
+	~		|
+
+quality of the teaching  = A FUNCTION OF( experience,expertise,motivation)
+	~	
+	~		|
+
+quitters  = A FUNCTION OF( satisfaction,online students)
+	~	
+	~		|
+
+satisfaction  = A FUNCTION OF( perceived quality of the teaching)
+	~	
+	~		|
+
+tuition fee  = A FUNCTION OF( cost per student)
+	~	
+	~		|
+
+workload  = A FUNCTION OF( online students)
+	~	
+	~		|
+
+********************************************************
+	.Control
+********************************************************~
+		Simulation Control Parameters
+	|
+
+FINAL TIME  = 2030
+	~	Year
+	~	The final time for the simulation.
+	|
+
+INITIAL TIME  = 2014
+	~	Year
+	~	The initial time for the simulation.
+	|
+
+SAVEPER  = 
+        TIME STEP 
+	~	Year [0,?]
+	~	The frequency with which output is stored.
+	|
+
+TIME STEP  = 1
+	~	Year [0,?]
+	~	The time step for the simulation.
+	|
+
+\\\---/// Sketch information - do not modify anything except names
+V300  Do not put anything below this section - it will be ignored
+*View 1
+$192-192-192,0,Times New Roman|12||0-0-0|0-0-0|0-0-255|-1--1--1|-1--1--1|96,96,125,0
+10,1,online students,586,241,40,20,3,3,0,2,0,0,0,0,-1--1--1,0-0-0,|0||64-160-98
+12,2,48,363,232,10,8,0,3,0,0,-1,0,0,0
+1,4,6,1,4,0,0,22,0,0,0,-1--1--1,,1|(505,232)|
+1,5,6,2,100,0,0,22,0,0,0,-1--1--1,,1|(413,232)|
+11,6,0,459,232,6,8,34,3,0,0,1,0,0,0
+10,7,enrollments,459,251,36,11,40,3,0,0,-1,0,0,0
+12,8,48,832,242,10,8,0,3,0,0,-1,0,0,0
+1,10,12,8,4,0,0,22,0,0,0,-1--1--1,,1|(776,242)|
+1,11,12,1,100,0,0,22,0,0,0,-1--1--1,,1|(672,242)|
+11,12,0,724,242,6,8,34,3,0,0,1,0,0,0
+10,13,quitters,724,261,24,11,40,3,0,0,-1,0,0,0
+1,17,18,1,100,0,0,22,0,0,0,-1--1--1,,1|(587,201)|
+11,18,0,587,175,8,6,33,3,0,0,4,0,0,0
+10,19,finishers,621,175,26,11,40,3,0,0,-1,0,0,0
+1,20,1,19,0,0,43,0,0,64,0,-1--1--1,,1|(602,209)|
+10,21,percentage of passers,694,114,44,19,8,3,0,0,0,0,0,0
+1,22,21,19,0,0,43,0,0,64,0,-1--1--1,,1|(658,144)|
+1,23,1,13,1,0,43,0,0,64,0,-1--1--1,,1|(655,264)|
+10,24,satisfaction,625,310,35,11,8,3,0,0,0,0,0,0
+1,25,24,13,0,0,45,0,2,64,0,-1--1--1,|0||-1--1--1,1|(667,288)|
+10,26,perceived quality of the teaching,625,374,62,19,8,3,0,0,0,0,0,0
+10,27,tuition fee,437,48,31,11,8,3,0,0,0,0,0,0
+1,28,27,6,1,0,45,0,2,64,0,-1--1--1,|0||-1--1--1,1|(374,147)|
+1,29,26,24,0,0,43,0,0,64,0,-1--1--1,,1|(625,345)|
+1,30,26,7,1,0,43,0,0,64,0,-1--1--1,,1|(524,331)|
+10,31,former students,586,90,40,20,3,3,0,0,0,0,0,0
+1,32,18,31,4,0,0,22,0,0,0,-1--1--1,,1|(587,139)|
+10,33,former students and current students,450,140,63,19,8,3,0,0,0,0,0,0
+1,34,31,33,1,0,43,0,0,64,0,-1--1--1,,1|(531,87)|
+1,35,1,33,1,0,43,0,0,64,0,-1--1--1,,1|(536,163)|
+1,36,33,6,1,0,43,0,0,64,0,-1--1--1,,1|(445,175)|
+10,37,cost per student,866,68,50,11,8,3,0,0,0,0,0,0
+1,38,1,37,1,0,43,0,2,64,0,-1--1--1,|0||-1--1--1,1|(715,170)|
+10,39,quality of the teaching,791,444,41,19,8,3,0,0,0,0,0,0
+10,40,experience,403,386,35,11,8,3,0,0,0,0,0,0
+10,41,expertise,792,504,29,11,8,3,0,0,0,0,0,0
+10,42,motivation,1010,453,33,11,8,3,0,0,0,0,0,0
+10,43,workload,791,560,31,11,8,3,0,0,0,0,0,0
+10,44,complaints,1036,373,34,11,8,3,0,0,0,0,0,0
+1,45,43,42,1,0,45,0,2,0,0,-1--1--1,|0||-1--1--1,1|(911,534)|
+1,46,44,42,1,0,45,0,2,64,0,-1--1--1,|0||-1--1--1,1|(1028,413)|
+10,47,perceived quality of the teaching in the previous period,825,348,74,28,8,3,0,0,0,0,0,0
+10,48,deterioration of the quality,936,257,60,19,8,3,0,0,0,0,0,0
+1,49,26,48,1,0,45,0,2,64,0,-1--1--1,|0||-1--1--1,1|(769,301)|
+1,50,47,48,1,0,43,0,2,64,0,-1--1--1,|0||-1--1--1,1|(870,295)|
+1,51,48,37,1,0,45,0,2,64,0,-1--1--1,|0||-1--1--1,1|(927,138)|
+1,52,43,41,0,0,45,0,2,65,0,-1--1--1,|0||-1--1--1,1|(791,539)|
+1,53,41,39,0,0,43,0,2,0,0,-1--1--1,|0||-1--1--1,1|(791,484)|
+1,54,42,39,1,0,43,0,2,64,0,-1--1--1,|0||-1--1--1,1|(890,493)|
+1,55,40,39,1,0,43,0,2,64,0,-1--1--1,|0||-1--1--1,1|(593,452)|
+1,56,39,26,0,0,43,0,2,64,0,-1--1--1,|0||-1--1--1,1|(716,412)|
+1,57,39,47,1,0,43,0,2,65,0,-1--1--1,|0||-1--1--1,1|(802,397)|
+1,58,48,44,1,0,43,0,2,64,0,-1--1--1,|0||-1--1--1,1|(1022,321)|
+1,60,33,40,1,0,43,0,2,64,0,-1--1--1,|0||-1--1--1,1|(385,163)|
+1,61,37,27,1,0,43,0,2,64,0,-1--1--1,|0||-1--1--1,1|(748,28)|
+10,63,online students,490,483,55,11,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|0||64-160-98
+1,64,63,43,1,0,43,0,2,64,0,-1--1--1,|0||-1--1--1,1|(635,556)|
+///---\\\
+:L<%^E!@
+9:Current
+22:$,Dollar,Dollars,$s
+22:Hour,Hours
+22:Month,Months
+22:Person,People,Persons
+22:Unit,Units
+22:Week,Weeks
+22:Year,Years
+22:Day,Days
+15:0,0,0,1,0,0
+19:125,0
+27:2,
+34:0,
+5:perceived quality of the teaching in the previous period
+35:Date
+36:YYYY-MM-DD
+37:2000
+38:1
+39:1
+40:0
+41:0
+24:0
+25:0
+26:0

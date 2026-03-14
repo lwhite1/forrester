@@ -1,0 +1,150 @@
+Initial Food per Deer=
+	20
+	~	ton/Deer
+	~		|
+
+Growth Rate Factor = WITH LOOKUP (
+	Food per Deer/Initial Food per Deer,
+		([(0,-0.8)-(1,0.4)],(0,-0.6),(0.05,0),(0.1,0.2),(1,0.2) ))
+	~	1/Year
+	~	MODIFIED
+	|
+
+Initial Deer Density=
+	200
+	~	acre/Deer
+	~	1,000,000 acres / 5,000 deer
+	|
+
+Deer Killed per Predator = WITH LOOKUP (
+	Deer Density/Initial Deer Density,
+		([(0,0)-(6,8)],(0,0),(1,2),(2,4),(4,6),(5,6) ))
+	~	Deer/(Year*lion)
+	~	When density is equal to 0, the deer killed are 0. Point (0.0). When the \
+		Deer Density is equal to the Initial Deer Density each predator hunts 2 \
+		deer each year. Point (1,2).
+	|
+
+Deer Predation Rate=
+	Deer Killed per Predator*Predator Population
+	~	Deer/Year
+	~		|
+
+Food=
+	100000
+	~	ton
+	~	 In this simulation we will take this like a constant.
+	|
+
+Food per Deer=
+	Food/Deer Population
+	~	ton/Deer
+	~	Initially the amount is 100,000/5,000 = 20
+	|
+
+Area=
+	1e+006
+	~	acre
+	~	 We find this information in the text
+	|
+
+Deer Population= INTEG (
+	+Deer Net Growth Rate-Deer Predation Rate,
+		5000)
+	~	Deer
+	~	The initial amount of deer change in base a Net Growth Rate and Predation \
+		Rate.
+	|
+
+Deer Density=
+	Area/Deer Population
+	~	acre/Deer
+	~	This is the amount of acres per deer
+	|
+
+Deer Net Growth Rate=
+	Deer Population*Growth Rate Factor
+	~	Deer/Year
+	~		|
+
+Predator Population=
+	500-STEP(500,1910)
+	~	lion
+	~	MODIFIED - Here we are reproducing the hunting or fall the lions during \
+		1910.
+	|
+
+********************************************************
+	.Control
+********************************************************~
+		Simulation Control Paramaters
+	|
+
+FINAL TIME  = 1950
+	~	Year
+	~	The final time for the simulation.
+	|
+
+INITIAL TIME  = 1900
+	~	Year
+	~	The initial time for the simulation.
+	|
+
+SAVEPER  = 1
+	~	Year
+	~	The frequency with which output is stored.
+	|
+
+TIME STEP  = 1
+	~	Year
+	~	The time step for the simulation.
+	|
+
+\\\---/// Sketch information - do not modify anything except names
+V300  Do not put anything below this section - it will be ignored
+*View 1
+$192-192-192,0,Times New Roman|12||0-0-0|0-0-0|0-0-0|-1--1--1|-1--1--1|96,96,100
+10,1,Deer Population,287,97,40,20,3,3,0,0,0,0,0,0
+12,2,48,43,92,10,8,0,3,0,0,-1,0,0,0
+1,3,5,1,4,0,0,22,0,0,0,-1--1--1,,1|(192,92)|
+1,4,5,2,100,0,0,22,0,0,0,-1--1--1,,1|(89,92)|
+11,5,48,132,92,6,8,34,3,0,0,1,0,0,0
+10,6,Deer Net Growth Rate,132,111,72,11,32,3,0,0,-1,0,0,0
+12,7,48,535,94,10,8,0,3,0,0,-1,0,0,0
+1,8,10,7,4,0,0,22,0,0,0,-1--1--1,,1|(470,94)|
+1,9,10,1,100,0,0,22,0,0,0,-1--1--1,,1|(365,94)|
+11,10,48,410,94,6,8,34,3,0,0,1,0,0,0
+10,11,Deer Predation Rate,410,113,64,11,32,3,0,0,-1,0,0,0
+10,12,Growth Rate Factor,87,185,63,11,0,3,0,0,0,0,0,0
+10,13,Deer Density,316,233,42,11,0,3,0,0,0,0,0,0
+10,14,Predator Population,514,161,63,11,0,3,0,0,0,0,0,0
+10,15,Area,296,293,17,11,0,3,0,0,0,0,0,0
+1,16,1,6,1,0,0,0,0,64,0,-1--1--1,,1|(225,154)|
+1,17,1,13,1,0,0,0,0,64,0,-1--1--1,,1|(283,170)|
+1,18,14,11,1,0,0,0,0,64,0,-1--1--1,,1|(497,148)|
+1,19,15,13,1,0,0,0,0,64,0,-1--1--1,,1|(315,270)|
+1,20,12,6,1,0,0,0,0,64,0,-1--1--1,,1|(100,130)|
+10,21,Food per Deer,160,240,48,11,0,3,0,0,0,0,0,0
+1,22,1,21,1,0,0,0,0,64,0,-1--1--1,,1|(225,191)|
+1,23,21,12,1,0,0,0,0,64,0,-1--1--1,,1|(123,233)|
+10,24,Food,214,330,19,11,0,3,0,0,0,0,0,0
+1,25,24,21,1,0,0,0,0,0,0,-1--1--1,,1|(180,292)|
+10,26,Deer Killed per Predator,460,225,50,19,8,3,0,0,0,0,0,0
+10,27,Initial Deer Density,469,301,60,11,8,3,0,0,0,0,0,0
+1,28,27,26,1,0,0,0,0,64,0,-1--1--1,,1|(492,259)|
+1,29,13,26,1,0,0,0,0,64,0,-1--1--1,,1|(381,257)|
+1,30,26,11,1,0,0,0,0,64,0,-1--1--1,,1|(448,168)|
+10,31,Initial Food per Deer,77,295,49,19,8,3,0,0,0,0,0,0
+1,32,31,12,1,0,0,0,0,64,0,-1--1--1,,1|(58,236)|
+///---\\\
+:L<%^E!@
+1:Current.vdf
+9:Current
+15:0,0,0,0,0,0
+19:100,0
+27:2,
+4:Time
+5:Deer Population
+24:1900
+25:1950
+26:1950

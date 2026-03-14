@@ -1,0 +1,356 @@
+{UTF-8}
+relative attractiveness to immigrate=
+	(avg salary immigrants/normal salary immigrants)/(REU price/subsidy)
+	~	Dmnl
+	~		|
+
+subsidy=
+	960
+	~	dollar/real estate unit
+	~		|
+
+workforce emigration=
+	MAX((immigrants-labour demand)/avg emigration time,0)
+	~	person/Month
+	~	+ MAX(exogenous emigration/avg emigration time,0)
+	|
+
+REU price=
+	normal cost REU*REU shortage price effect(REU shortage)
+	~	dollar/real estate unit
+	~		|
+
+REU under construction= INTEG (
+	new REU plans approved-REU commissioning,
+		immigrants/workers per REU under construction)
+	~	real estate unit
+	~		|
+
+labour shortage=
+	labour demand/immigrants
+	~	Dmnl
+	~		|
+
+REU shortage price effect(
+	[(0,0)-(100,25)],(0,0.6),(10,4),(50,7.5),(100,10))
+	~	Dmnl
+	~		|
+
+avg REU approval time=
+	1
+	~	Month
+	~		|
+
+avg emigration time=
+	1
+	~	Month
+	~		|
+
+avg immigration time=
+	1
+	~	Month
+	~		|
+
+avg lifetime REU=
+	500
+	~	Month
+	~		|
+
+avg salary immigrants=
+	normal salary immigrants*labour shortage
+	~	dollar/person/Month
+	~		|
+
+Al Maktoum exogenous investment rate=
+	0.01
+	~	Dmnl
+	~	-STEP(0.01,10)
+	|
+
+expected new REU due to immigration=
+	(immigrants - immigrants previous period)*immigration multiplication factor
+	~	real estate unit
+	~		|
+
+expected REU shortage=
+	REU demand-REU supply-REU under construction + expected new REU due to immigration
+	~	real estate unit
+	~		|
+
+immigrants= INTEG (
+	workforce immigration-workforce emigration-immigrant integration,
+		2e+006)
+	~	person
+	~		|
+
+immigrants previous period=
+	DELAY FIXED(immigrants, 1, immigrants)
+	~	person
+	~		|
+
+workforce immigration=
+	MAX(relative attractiveness to immigrate*immigrants/avg immigration time,0)
+	~	person/Month
+	~	+MIN((labour demand-immigrants)/avg emigration time,0)   relative \
+		attractiveness to immigrate*immigrants/avg immigration time
+	|
+
+immigration multiplication factor=
+	1
+	~	real estate unit/person
+	~		|
+
+immigrant integration=
+	immigrants*immigrant integration rate
+	~	person/Month
+	~		|
+
+immigrant integration rate=
+	0.001
+	~	1/Month
+	~		|
+
+labour demand=
+	workers per REU under construction*REU under construction
+	~	person
+	~	number of workers per real estate unit under construction*real estate units under \
+		construction*normal reu construction time
+		/real estate unit construction time
+	|
+
+locals= INTEG (
+	immigrant integration,
+		220000)
+	~	person
+	~		|
+
+new REU plans approved=
+	MAX(expected REU shortage/avg REU approval time,0) + Al Maktoum exogenous investment rate\
+		*REU supply/avg REU approval time
+	~	real estate unit/Month
+	~		|
+
+normal cost REU=
+	50000 + avg salary immigrants*REU construction time*workers per REU under construction
+	~	dollar/real estate unit
+	~		|
+
+normal salary immigrants=
+	1000
+	~	dollar/person/Month
+	~		|
+
+REU supply= INTEG (
+	REU commissioning-REU demolition,
+		1.8e+006)
+	~	real estate unit
+	~		|
+
+REU shortage=
+	REU demand/REU supply
+	~	Dmnl
+	~		|
+
+REU commissioning=
+	MIN(immigrants/workers per REU under construction,REU under construction)/REU construction time
+	~	real estate unit/Month
+	~	MIN(real estate units under construction/real estate unit construction \
+		time,MAX(0,buffer))
+	|
+
+REU construction time=
+	3
+	~	Month
+	~		|
+
+REU demand=
+	(immigrants+locals)*REU demand per person
+	~	real estate unit
+	~		|
+
+REU demand per person= WITH LOOKUP (
+	Time,
+		([(0,0)-(2000,10)],(0,1),(240,2)))
+	~	real estate unit/person
+	~		|
+
+REU demolition=
+	REU supply/avg lifetime REU
+	~	real estate unit/Month
+	~		|
+
+workers per REU under construction=
+	25
+	~	person/real estate unit
+	~		|
+
+********************************************************
+	.Control
+********************************************************~
+		Simulation Control Parameters
+	|
+
+FINAL TIME  = 240
+	~	Month
+	~	The final time for the simulation.
+	|
+
+INITIAL TIME  = 0
+	~	Month
+	~	The initial time for the simulation.
+	|
+
+SAVEPER  = 
+        TIME STEP
+	~	Month [0,?]
+	~	The frequency with which output is stored.
+	|
+
+TIME STEP  = 0.0625
+	~	Month [0,?]
+	~	The time step for the simulation.
+	|
+
+\\\---/// Sketch information - do not modify anything except names
+V300  Do not put anything below this section - it will be ignored
+*View 1
+$192-192-192,0,Times New Roman|12||0-0-0|0-0-0|0-0-255|-1--1--1|-1--1--1|96,96,100,0
+10,1,REU supply,634,176,40,20,3,3,0,0,0,0,0,0
+10,2,locals,745,614,40,20,3,3,0,0,0,0,0,0
+10,3,immigrants,560,613,40,20,3,3,0,0,0,0,0,0
+10,4,REU demand,706,426,43,11,8,3,0,0,0,0,0,0
+1,5,2,4,1,0,0,0,0,64,0,-1--1--1,,1|(747,515)|
+1,6,3,4,1,0,0,0,0,64,0,-1--1--1,,1|(611,578)|
+10,7,REU under construction,411,175,40,20,3,3,0,2,0,0,0,0,-1--1--1,0-0-0,|0||255-0-0
+1,8,10,1,4,0,0,22,0,0,0,-1--1--1,,1|(567,176)|
+1,9,10,7,100,0,0,22,0,0,0,-1--1--1,,1|(489,176)|
+11,10,444,534,176,6,8,34,3,0,0,1,0,0,0
+10,11,REU commissioning,534,203,46,19,40,3,0,0,-1,0,0,0
+10,12,avg salary immigrants,277,428,34,19,8,3,0,0,0,0,0,0
+12,13,48,393,605,10,8,0,3,0,0,-1,0,0,0
+1,14,16,3,4,0,0,22,0,0,0,-1--1--1,,1|(489,606)|
+1,15,16,13,100,0,0,22,0,0,0,-1--1--1,,1|(424,606)|
+11,16,48,452,606,6,8,34,3,0,0,1,0,0,0
+10,17,workforce immigration,452,633,37,19,40,131,0,0,-1,0,0,0
+10,18,labour demand,225,337,47,11,8,3,0,0,0,0,0,0
+10,19,workers per REU under construction,388,263,59,19,8,3,0,2,0,0,0,0,0-0-0,0-0-0,|12||128-128-128
+1,20,7,18,1,0,0,0,0,64,0,-1--1--1,,1|(316,238)|
+1,21,19,18,0,0,0,0,1,64,0,128-128-128,|12||0-0-0,1|(304,301)|
+10,22,labour shortage,219,592,28,17,8,131,0,0,0,0,0,0
+10,23,REU demand per person,870,474,56,19,8,3,0,0,0,0,0,0
+1,24,23,4,0,0,0,0,0,64,0,-1--1--1,,1|(785,449)|
+1,25,18,22,1,0,0,0,0,64,0,-1--1--1,,1|(189,469)|
+12,26,48,210,175,10,8,0,3,0,0,-1,0,0,0
+1,27,29,7,4,0,0,22,0,0,0,-1--1--1,,1|(339,175)|
+1,28,29,26,100,0,0,22,0,0,0,-1--1--1,,1|(257,175)|
+11,29,48,301,175,6,8,34,3,0,0,1,0,0,0
+10,30,new REU plans approved,301,202,50,19,40,3,0,0,-1,0,0,0
+12,31,48,857,176,10,8,0,3,0,0,-1,0,0,0
+1,32,34,31,4,0,0,22,0,0,0,-1--1--1,,1|(800,175)|
+1,33,34,1,100,0,0,22,0,0,0,-1--1--1,,1|(708,175)|
+11,34,48,748,175,6,8,34,3,0,0,1,0,0,0
+10,35,REU demolition,748,202,50,11,40,3,0,0,-1,0,0,0
+1,36,1,34,1,0,0,0,0,64,0,-1--1--1,,1|(723,148)|
+10,37,avg lifetime REU,761,113,53,11,8,3,0,0,0,0,0,0
+10,38,relative attractiveness to immigrate,477,476,44,23,8,131,0,0,0,0,0,0
+1,39,3,22,1,0,0,0,0,64,0,-1--1--1,,1|(291,642)|
+10,40,normal salary immigrants,339,503,43,19,8,3,0,2,0,0,0,0,0-0-0,0-0-0,|12||128-128-128
+1,41,40,12,0,0,0,0,1,64,0,128-128-128,|12||0-0-0,1|(312,470)|
+1,42,37,34,0,0,0,0,0,64,0,-1--1--1,,1|(755,139)|
+10,43,expected REU shortage,108,129,47,19,8,3,0,0,0,0,0,0
+1,44,43,30,1,0,0,0,0,64,0,-1--1--1,,1|(188,195)|
+1,45,1,43,1,0,0,0,0,64,0,-1--1--1,,1|(470,51)|
+1,46,7,43,1,0,0,0,0,64,0,-1--1--1,,1|(305,97)|
+1,47,22,12,1,0,0,0,0,64,0,-1--1--1,,1|(223,513)|
+10,48,REU shortage,707,322,45,11,8,3,0,0,0,0,0,0
+1,49,1,48,1,0,0,0,0,64,0,-1--1--1,,1|(667,211)|
+1,50,4,48,1,0,0,0,0,64,0,-1--1--1,,1|(713,368)|
+10,51,avg REU approval time,130,247,44,19,8,3,0,0,0,0,0,0
+1,52,51,30,0,0,0,0,0,64,0,-1--1--1,,1|(205,227)|
+1,53,38,16,1,0,0,0,0,64,0,-1--1--1,,1|(480,547)|
+1,54,3,17,0,0,0,0,0,64,0,-1--1--1,,1|(511,621)|
+10,55,avg immigration time,378,566,38,23,8,131,0,2,0,0,0,0,0-0-0,0-0-0,|12||255-0-0
+1,56,55,16,0,0,0,0,1,64,0,128-128-128,|12||0-0-0,1|(424,591)|
+10,57,avg emigration time,807,700,46,19,8,3,0,0,0,0,0,0
+10,58,expected new REU due to immigration,123,619,62,19,8,3,0,0,0,0,0,0
+1,59,58,43,1,0,0,0,0,64,0,-1--1--1,,1|(32,263)|
+10,60,REU demand,93,67,52,11,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,61,60,43,0,0,0,0,0,64,0,-1--1--1,,1|(97,87)|
+10,62,immigration multiplication factor,98,716,62,19,8,3,0,0,0,0,0,0
+1,63,62,58,0,0,0,0,0,64,0,-1--1--1,,1|(108,674)|
+10,64,REU price,463,412,34,11,8,3,0,0,0,0,0,0
+1,65,48,64,0,0,0,0,0,64,0,-1--1--1,,1|(591,364)|
+10,66,normal cost REU,379,369,54,11,8,3,0,0,0,0,0,0
+1,67,3,58,1,0,0,0,0,64,0,-1--1--1,,1|(338,733)|
+10,68,immigrants previous period,312,787,50,19,8,3,0,0,0,0,0,0
+1,69,3,68,1,0,0,0,0,64,0,-1--1--1,,1|(472,755)|
+1,70,68,58,1,0,0,0,0,64,0,-1--1--1,,1|(185,727)|
+1,71,3,11,1,0,0,0,0,64,0,-1--1--1,,1|(645,386)|
+1,72,19,11,0,0,0,0,1,64,0,128-128-128,|12||0-0-0,1|(454,235)|
+10,73,REU construction time,487,304,57,19,8,3,0,2,-1,0,0,0,0-0-0,0-0-0,|12||128-128-128
+1,74,7,10,1,0,0,0,0,64,0,-1--1--1,,1|(496,138)|
+10,75,Al Maktoum exogenous investment rate,247,128,69,28,8,3,0,4,0,0,0,0,0-0-0,255-255-0,|12||0-0-0
+1,76,75,29,0,0,0,0,0,64,0,-1--1--1,,1|(282,158)|
+1,77,1,29,1,0,0,0,0,64,0,-1--1--1,,1|(447,99)|
+1,78,73,11,0,0,0,0,1,64,0,128-128-128,|12||0-0-0,1|(506,259)|
+1,79,66,64,1,0,0,0,0,64,0,-1--1--1,,1|(423,372)|
+12,80,48,579,724,10,8,0,3,0,0,-1,0,0,0
+1,81,83,80,4,0,0,22,0,0,0,-1--1--1,,1|(579,702)|
+1,82,83,3,100,0,0,22,0,0,0,-1--1--1,,1|(579,655)|
+11,83,48,579,683,8,6,33,3,0,0,4,0,0,0
+10,84,workforce emigration,621,683,34,19,40,3,0,0,-1,0,0,0
+1,85,57,84,0,0,0,0,0,64,0,-1--1--1,,1|(714,691)|
+1,86,3,84,0,0,0,0,0,64,0,-1--1--1,,1|(585,643)|
+10,87,labour demand,650,785,56,11,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,88,87,84,0,0,0,0,0,64,0,-1--1--1,,1|(638,744)|
+1,89,19,66,0,0,0,0,1,64,0,128-128-128,|12||0-0-0,1|(383,313)|
+1,90,12,66,1,0,0,0,0,64,0,-1--1--1,,1|(311,383)|
+1,91,73,66,0,0,0,0,1,64,0,128-128-128,|12||0-0-0,1|(432,336)|
+1,92,64,38,1,0,0,0,0,64,0,-1--1--1,,1|(468,440)|
+1,93,95,2,4,0,0,22,0,0,0,-1--1--1,,1|(682,612)|
+1,94,95,3,100,0,0,22,0,0,0,-1--1--1,,1|(624,612)|
+11,95,188,654,612,6,8,34,3,0,0,1,0,0,0
+10,96,immigrant integration,654,639,33,19,40,3,0,0,-1,0,0,0
+1,97,3,95,1,0,0,0,0,64,0,-1--1--1,,1|(633,592)|
+10,98,immigrant integration rate,665,566,47,19,8,3,0,0,0,0,0,0
+1,99,98,95,0,0,0,0,0,64,0,-1--1--1,,1|(659,588)|
+1,100,3,7,0,0,0,0,0,64,1,-1--1--1,,1|(487,400)|
+1,101,19,7,0,0,0,0,0,64,1,-1--1--1,,1|(396,226)|
+10,102,Time,970,550,26,11,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,103,102,23,0,0,0,0,0,64,0,-1--1--1,,1|(931,520)|
+10,104,REU shortage price effect,511,355,45,19,8,3,0,2,0,0,0,0,0-0-0,0-0-0,|12||128-128-128
+1,105,104,64,0,0,0,0,1,64,0,128-128-128,|12||0-0-0,1|(488,382)|
+1,106,12,38,1,0,0,0,0,64,0,-1--1--1,,1|(369,402)|
+1,107,40,38,0,0,0,0,1,64,0,128-128-128,|12||0-0-0,1|(400,490)|
+10,108,subsidy,565,444,25,11,8,3,0,0,0,0,0,0
+1,109,108,38,0,0,0,0,0,64,0,-1--1--1,,1|(537,454)|
+///---\\\
+:L<%^E!@
+1:O:\00_E-BOOK-SD\1_Models\EPA1321Exam25102010modelDUBAI\ExamQuestion5cEP0001.vdf
+1:O:\00_E-BOOK-SD\1_Models\EPA1321Exam25102010modelDUBAI\Exam1.vdf
+9:ExamQuestion5cEP0001
+22:$,Dollar,Dollars,$s
+22:Day,Days
+22:Hour,Hours
+22:Month,Months
+22:Person,People,Persons
+22:Unit,Units
+22:Week,Weeks
+22:Year,Years
+15:0,0,0,5,0,0
+19:100,0
+27:2,
+34:0,
+4:Time
+5:REU demand per person
+35:Date
+36:YYYY-MM-DD
+37:2000
+38:1
+39:1
+40:2
+41:0
+42:0
+24:0
+25:240
+26:240

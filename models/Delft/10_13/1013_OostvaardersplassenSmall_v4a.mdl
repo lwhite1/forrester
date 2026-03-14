@@ -1,0 +1,191 @@
+{UTF-8}
+duur geboorte seizoen=
+	TIME STEP
+	~	
+	~		|
+
+duur sterfte seizoen=
+	TIME STEP
+	~	
+	~		|
+
+procentuele sterfte= WITH LOOKUP (
+	grote grazers,
+		([(0,0)-(10000,1)],(0,0.05),(1000,0.075),(3000,0.2),(4000,0.3),(5000,0.45),(6000,0.75\
+		) ))
+	~	
+	~		|
+
+geboortes grote grazers=
+	DELAY FIXED(grote grazers*procentuele aanwas*geboorteseizoen/duur geboorte seizoen*randomizer geboortes\
+		, 2, grote grazers*procentuele aanwas*geboorteseizoen/duur geboorte seizoen*randomizer geboortes\
+		)
+	~	grote grazers/year
+	~		|
+
+randomizer geboortes=
+	RANDOM NORMAL(0, 2, 1, 0.5, 2)
+	~	
+	~	RANDOM NORMAL(0, 2, 1, 0.5, 2)
+	|
+
+initieel aantal grote grazers=
+	75
+	~	
+	~		|
+
+geboorteseizoen=
+	PULSE TRAIN(1982.5, duur geboorte seizoen, 1, FINAL TIME)
+	~	
+	~	/TIME STEP
+	|
+
+grote grazers= INTEG (
+	geboortes grote grazers-sterftes grote grazers,
+		initieel aantal grote grazers)
+	~	grote grazers
+	~	Initial amount of deer is 5,000 and remains constant
+	|
+
+randomizer sterftes=
+	RANDOM UNIFORM(0.5, 3, 3)
+	~	
+	~	RANDOM NORMAL(0, 5, 1, 1, 1)
+	|
+
+uitgemiddelde informatie grote grazers=
+	SMOOTH3I(grote grazers, 1, initieel aantal grote grazers)
+	~	grote grazers
+	~		|
+
+sterfteseizoen=
+	PULSE TRAIN(1982, duur sterfte seizoen, 1, FINAL TIME)
+	~	
+	~	/TIME STEP
+	|
+
+uitgemiddelde info geboortes grote grazers=
+	SMOOTH3I(geboortes grote grazers, 2,2)
+	~	grote grazers/year
+	~		|
+
+sterftes grote grazers=
+	MIN(grote grazers*procentuele sterfte*sterfteseizoen/duur sterfte seizoen*randomizer sterftes\
+		,grote grazers/TIME STEP)
+	~	grote grazers/year
+	~		|
+
+uitgemiddelde info sterftes grote grazers=
+	SMOOTH3I(sterftes grote grazers, 2,0)
+	~	grote grazers/year
+	~		|
+
+procentuele aanwas= WITH LOOKUP (
+	grote grazers,
+		([(0,0)-(6000,0.6)],(0,0.5),(3500,0.25),(5000,0.15) ))
+	~	1/year
+	~	MODIFIED
+	|
+
+********************************************************
+	.Control
+********************************************************~
+		Simulation Control Paramaters
+	|
+
+FINAL TIME  = 2035
+	~	year
+	~	The final time for the simulation.
+	|
+
+INITIAL TIME  = 1985
+	~	year
+	~	The initial time for the simulation.
+	|
+
+SAVEPER  = 
+        TIME STEP
+	~	year
+	~	The frequency with which output is stored.
+	|
+
+TIME STEP  = 0.015625
+	~	year
+	~	The time step for the simulation.
+	|
+
+\\\---/// Sketch information - do not modify anything except names
+V300  Do not put anything below this section - it will be ignored
+*View 1
+$192-192-192,0,Times New Roman|12||0-0-0|0-0-0|0-0-255|-1--1--1|-1--1--1|96,96,100,0
+10,1,grote grazers,423,250,40,20,3,3,0,0,0,0,0,0
+12,2,48,190,247,10,8,0,3,0,0,-1,0,0,0
+1,3,5,1,4,0,0,22,0,0,0,-1--1--1,,1|(328,245)|
+1,4,5,2,100,0,0,22,0,0,0,-1--1--1,,1|(231,245)|
+11,5,48,268,245,6,8,34,3,0,0,1,0,0,0
+10,6,geboortes grote grazers,268,264,73,11,32,3,0,0,-1,0,0,0
+12,7,48,671,247,10,8,0,3,0,0,-1,0,0,0
+1,8,10,7,4,0,0,22,0,0,0,-1--1--1,,1|(622,245)|
+1,9,10,1,100,0,0,22,0,0,0,-1--1--1,,1|(517,245)|
+11,10,48,577,245,6,8,34,3,0,0,1,0,0,0
+10,11,sterftes grote grazers,577,264,65,11,32,3,0,0,-1,0,0,0
+1,12,1,13,1,0,0,0,0,64,0,-1--1--1,,1|(399,222)|
+10,13,procentuele aanwas,344,198,62,11,0,131,0,0,0,0,0,0
+1,14,1,10,1,0,0,0,0,64,0,-1--1--1,,1|(508,223)|
+1,15,13,5,1,0,0,0,0,64,0,-1--1--1,,1|(288,219)|
+1,16,1,5,1,0,0,0,0,64,0,-1--1--1,,1|(304,230)|
+10,17,geboorteseizoen,268,174,51,11,8,3,0,0,0,0,0,0
+1,18,17,5,0,0,0,0,0,64,0,-1--1--1,,1|(268,205)|
+10,19,sterfteseizoen,576,174,43,11,8,3,0,0,0,0,0,0
+1,20,19,10,0,0,0,0,0,64,0,-1--1--1,,1|(576,205)|
+10,21,procentuele sterfte,502,196,58,11,0,131,0,0,0,0,0,0
+1,22,1,21,1,0,0,0,0,64,0,-1--1--1,,1|(452,217)|
+1,23,21,10,1,0,0,0,0,64,0,-1--1--1,,1|(544,211)|
+10,24,randomizer geboortes,215,316,37,18,8,131,0,0,0,0,0,0
+10,25,randomizer sterftes,684,311,37,19,8,131,0,0,0,0,0,0
+10,26,duur sterfte seizoen,654,211,27,21,8,131,0,0,0,0,0,0
+1,27,26,19,1,0,0,0,0,64,0,-1--1--1,,1|(611,207)|
+1,28,26,10,1,0,0,0,0,64,0,-1--1--1,,1|(604,221)|
+10,29,duur geboorte seizoen,209,216,33,20,8,131,0,0,0,0,0,0
+1,30,29,17,1,0,0,0,0,64,0,-1--1--1,,1|(238,212)|
+1,31,29,5,1,0,0,0,0,64,0,-1--1--1,,1|(238,216)|
+10,32,FINAL TIME,420,145,55,11,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,33,32,19,0,1,0,0,0,64,0,-1--1--1,,1|(497,159)|
+1,34,24,6,0,0,0,0,0,64,0,-1--1--1,,1|(239,291)|
+1,35,25,11,0,0,0,0,0,64,0,-1--1--1,,1|(630,287)|
+1,36,32,17,0,1,0,0,0,64,0,-1--1--1,,1|(348,158)|
+10,37,TIME STEP,420,121,50,11,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+10,38,uitgemiddelde informatie grote grazers,424,361,74,19,8,3,0,0,0,0,0,0
+10,39,uitgemiddelde info geboortes grote grazers,269,362,75,19,8,3,0,0,0,0,0,0
+10,40,uitgemiddelde info sterftes grote grazers,577,363,66,19,8,3,0,0,0,0,0,0
+1,41,6,39,0,0,0,0,0,64,0,-1--1--1,,1|(268,302)|
+1,42,11,40,0,0,0,0,0,64,0,-1--1--1,,1|(577,302)|
+10,43,initieel aantal grote grazers,468,288,42,18,8,131,0,0,0,0,0,0
+1,44,43,1,1,0,0,0,0,64,1,-1--1--1,,1|(466,268)|
+1,45,43,38,0,0,0,0,0,64,0,-1--1--1,,1|(450,318)|
+1,46,37,29,0,1,0,0,0,64,0,-1--1--1,,1|(325,163)|
+1,47,37,26,0,1,0,0,0,64,0,-1--1--1,,1|(530,163)|
+1,48,1,38,0,0,0,0,0,64,0,-1--1--1,,1|(423,299)|
+10,49,TIME STEP,722,391,50,11,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,50,49,11,0,0,0,0,0,64,0,-1--1--1,,1|(654,332)|
+///---\\\
+:L<%^E!@
+9:OVPzonderdelayTEST
+18:kaibab.vsc
+20:kaibab.lst
+15:0,0,0,0,0,0
+19:100,0
+27:2,
+34:0,
+4:Time
+5:uitgemiddelde informatie grote grazers
+35:Date
+36:YYYY-MM-DD
+37:2000
+38:1
+39:1
+40:2
+41:0
+24:1985
+25:2035
+26:2035

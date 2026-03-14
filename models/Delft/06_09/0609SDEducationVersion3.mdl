@@ -1,0 +1,158 @@
+{UTF-8}
+average SD student cohort size per professor=
+	25
+	~	student/professor/Year
+	~		|
+
+average time to finish SD studies=
+	7
+	~	Year
+	~		|
+
+ini SD professors=
+	1
+	~	professor
+	~		|
+
+ini SD trained=
+	0
+	~	student
+	~		|
+
+ini students in SD programs=
+	10
+	~	student
+	~		|
+
+new professors teaching SD=
+	SD students finishing*percentage of SD students finishing that become SD professors
+	~	professor/Year
+	~		|
+
+percentage of SD students finishing that become SD professors=
+	0.01
+	~	professor/student
+	~		|
+
+SD professors= INTEG (
+	new professors teaching SD,
+		ini SD professors)
+	~	professor
+	~		|
+
+SD students entering=
+	average SD student cohort size per professor*SD professors
+	~	student/Year
+	~		|
+
+SD students finishing=
+	students in SD programs/average time to finish SD studies
+	~	student/Year
+	~		|
+
+SD trained= INTEG (
+	SD students finishing,
+		ini SD trained)
+	~	student
+	~		|
+
+students in SD programs= INTEG (
+	SD students entering-SD students finishing,
+		ini students in SD programs)
+	~	student
+	~		|
+
+********************************************************
+	.Control
+********************************************************~
+		Simulation Control Parameters
+	|
+
+FINAL TIME  = 2012
+	~	Year
+	~	The final time for the simulation.
+	|
+
+INITIAL TIME  = 1962
+	~	Year
+	~	The initial time for the simulation.
+	|
+
+SAVEPER  = 
+        TIME STEP 
+	~	Year [0,?]
+	~	The frequency with which output is stored.
+	|
+
+TIME STEP  = 0.0625
+	~	Year [0,?]
+	~	The time step for the simulation.
+	|
+
+\\\---/// Sketch information - do not modify anything except names
+V300  Do not put anything below this section - it will be ignored
+*View 1
+$192-192-192,0,Times New Roman|12||0-0-0|0-0-0|0-0-255|-1--1--1|-1--1--1|96,96,100,0
+10,1,SD professors,458,111,40,20,3,3,0,0,0,0,0,0
+10,2,ini SD professors,454,74,54,11,8,3,0,0,0,0,0,0
+12,3,48,188,105,10,8,0,3,0,0,-1,0,0,0
+1,5,7,1,4,0,0,22,0,0,0,-1--1--1,,1|(366,105)|
+1,6,7,3,100,0,0,22,0,0,0,-1--1--1,,1|(250,105)|
+11,7,0,308,105,6,8,34,3,0,0,1,0,0,0
+10,8,new professors teaching SD,308,132,49,19,40,3,0,0,-1,0,0,0
+10,9,students in SD programs,463,220,40,20,3,3,0,0,0,0,0,0
+12,10,48,183,224,10,8,0,3,0,0,-1,0,0,0
+1,12,14,9,4,0,0,22,0,0,0,-1--1--1,,1|(368,224)|
+1,13,14,10,100,0,0,22,0,0,0,-1--1--1,,1|(247,224)|
+11,14,0,308,224,6,8,34,3,0,0,1,0,0,0
+10,15,SD students entering,308,251,39,19,40,3,0,0,-1,0,0,0
+10,17,average SD student cohort size per professor,90,270,79,19,8,3,0,0,0,0,0,0
+1,18,17,15,1,0,0,0,0,64,0,-1--1--1,,1|(225,273)|
+1,20,1,14,0,0,0,0,0,64,0,-1--1--1,,1|(377,171)|
+10,21,ini students in SD programs,459,278,55,19,8,3,0,0,0,0,0,0
+1,22,21,9,0,0,0,0,0,64,1,-1--1--1,,1|(460,256)|
+1,23,2,1,0,0,0,0,0,64,1,-1--1--1,,1|(455,81)|
+10,24,average time to finish SD studies,722,294,67,19,8,3,0,0,0,0,0,0
+10,25,SD trained,746,224,40,20,3,3,0,0,0,0,0,0
+1,27,29,25,4,0,0,22,0,0,0,-1--1--1,,1|(657,226)|
+1,28,29,9,100,0,0,22,0,0,0,-1--1--1,,1|(550,226)|
+11,29,0,603,226,6,8,34,3,0,0,1,0,0,0
+10,30,SD students finishing,603,253,39,19,40,3,0,0,-1,0,0,0
+1,31,9,29,1,0,0,0,0,64,0,-1--1--1,,1|(533,191)|
+1,32,24,30,0,0,0,0,0,64,0,-1--1--1,,1|(661,272)|
+10,33,ini SD trained,745,171,43,11,8,3,0,0,-1,0,0,0
+1,34,33,25,0,0,0,0,0,64,1,-1--1--1,,1|(745,186)|
+10,38,percentage of SD students finishing that become SD professors,657,41,84,28,8,3,0,0,0,0,0,0
+1,39,29,7,1,0,0,0,0,64,0,-1--1--1,,1|(566,105)|
+1,40,38,7,1,0,0,0,0,64,0,-1--1--1,,1|(417,15)|
+///---\\\
+:L<%^E!@
+1:0609version3till2012.vdf
+1:version3.vdf
+1:Current.vdf
+9:0609version3till2012
+22:$,Dollar,Dollars,$s
+22:Hour,Hours
+22:Month,Months
+22:Person,People,Persons
+22:Unit,Units
+22:Week,Weeks
+22:Year,Years
+22:Day,Days
+15:0,0,0,1,0,0
+19:100,0
+27:2,
+34:0,
+4:Time
+5:SD professors
+35:Date
+36:YYYY-MM-DD
+37:2000
+38:1
+39:1
+40:0
+41:0
+42:1
+24:1962
+25:2012
+26:2012

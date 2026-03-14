@@ -1,0 +1,444 @@
+{UTF-8}
+uitstroom van onderwijsgelden=
+	fractie langstudeerder*totaal aantal studenten*boete per langstudeerder+docenten*gemiddelde kost per docent
+	~	
+	~		|
+
+hoogte boete per langstudeerder=
+	3000
+	~	
+	~		|
+
+instroom BSc studenten=
+	jaarlijkse BSc instroom*kwaliteit
+	~	
+	~	OP DIT MOMENT KWALITEIT NOG NIET TOEGEVOEGD
+	|
+
+instroom MSc studenten=
+	(jaarlijkse MSc instroom+fractie van BSc naar MSc*uitstroom BSc studenten)*kwaliteit
+	~	
+	~		|
+
+fractie afvallers MSc=
+	MIN(MAX((0.1+0.1)/kwaliteit,0),1)
+	~	
+	~		|
+
+fractie afvallers BSc=
+	MAX(MIN((0.3+0.1+0.05)/kwaliteit,1),0)
+	~	
+	~		|
+
+boete per langstudeerder=
+	IF THEN ELSE(Time>2011,hoogte boete per langstudeerder,0)
+	~	
+	~		|
+
+aantal docenturen per student=
+	SMOOTH3(1000*docenten/MAX(totaal aantal studenten,1),1)
+	~	
+	~		|
+
+financien= INTEG (
+	instroom onderwijsgelden-uitstroom van onderwijsgelden,
+		0)
+	~	euro
+	~		|
+
+afvallers MSc=
+	MSc uitstroom na vaste en bijkomende vertraging*fractie afvallers MSc
+	~	
+	~	AFVALLERS JAARLIJKS LATEN AFVALLEN EN TESTEN
+	|
+
+jaarlijkse MSc instroom=
+	evolutie van de nieuwe MSc instromers/TIME STEP*instroommoment MSc
+	~	
+	~		|
+
+jaarlijkse lump sum en andere gelden=
+	1e+006
+	~	
+	~		|
+
+bijkomende jaarlijkse vertraging BSc=
+	0.5/kwaliteit
+	~	
+	~		|
+
+bijkomende jaarlijkse vertraging MSc=
+	0.5/kwaliteit
+	~	
+	~		|
+
+BSc uitstroom na vaste en bijkomende vertraging=
+	DELAY1I(BSc uitstroom indien enkel vaste vertraging door minimale studieduur, minimale BSc studieduur\
+		*bijkomende jaarlijkse vertraging BSc, 0)
+	~	
+	~		|
+
+MSc uitstroom na vaste en bijkomende vertraging=
+	DELAY1I(MSc uitstroom indien enkel vaste vertraging door minimale studieduur, bijkomende jaarlijkse vertraging MSc\
+		*minimale MSc studieduur, 0)
+	~	
+	~		|
+
+MSc studenten= INTEG (
+	instroom MSc studenten-afvallers MSc-uitstroom MSc studenten,
+		0)
+	~	student
+	~		|
+
+netto werving van docenten=
+	(maximaal aantal docenten-docenten)/wervingstijd
+	~	
+	~		|
+
+docenten= INTEG (
+	netto werving van docenten,
+		5)
+	~	
+	~		|
+
+instroom onderwijsgelden=
+	subsidie per BSc instromer*instroom BSc studenten+subsidie per BSc afstudeerder*uitstroom BSc studenten\
+		 + subsidie per MSc instromer*instroom MSc studenten+subsidie per MSc afstudeerder*\
+		uitstroom MSc studenten + jaarlijkse lump sum en andere gelden
+	~	
+	~		|
+
+evolutie van de nieuwe MSc instromers= WITH LOOKUP (
+	Time,
+		([(1990,0)-(2030,200)],(1990,0),(1995,0),(2000,0),(2008,2),(2010,5),(2015,15),(2020\
+		,20),(2030,20) ))
+	~	
+	~		|
+
+instroommoment MSc=
+	PULSE TRAIN(1990,TIME STEP,1,2030)
+	~	
+	~		|
+
+fractie langstudeerder= WITH LOOKUP (
+	kwaliteit,
+		([(0,0)-(2,1)],(0,0.9),(0.25,0.85),(0.5,0.66),(0.75,0.4),(1,0.25) ))
+	~	
+	~		|
+
+fractie van BSc naar MSc=
+	IF THEN ELSE(Time<2008,1,0.8)
+	~	
+	~		|
+
+subsidie per BSc afstudeerder=
+	5000
+	~	euro/student
+	~		|
+
+subsidie per BSc instromer=
+	15000
+	~	euro/student
+	~		|
+
+subsidie per MSc afstudeerder=
+	5000
+	~	euro/student
+	~		|
+
+subsidie per MSc instromer=
+	5000
+	~	
+	~		|
+
+gemiddelde kost per docent=
+	100000
+	~	euro/docent/Year
+	~		|
+
+uitstroom MSc studenten=
+	MSc uitstroom na vaste en bijkomende vertraging*(1-fractie afvallers MSc)
+	~	student/Year
+	~		|
+
+MSc uitstroom indien enkel vaste vertraging door minimale studieduur= DELAY FIXED (
+	instroom MSc studenten, minimale MSc studieduur, 0)
+	~	
+	~		|
+
+totaal aantal studenten=
+	BSc studenten+MSc studenten
+	~	
+	~		|
+
+kwaliteit= WITH LOOKUP (
+	aantal docenturen per student,
+		([(0,0)-(200,2)],(0,0.1),(50,0.6),(100,0.9),(150,1),(200,1) ))
+	~	
+	~		|
+
+maximaal aantal docenten=
+	financien/gemiddelde kost per docent
+	~	
+	~	SMOOTH3( financien/gemiddelde kost docent,1)
+	|
+
+minimale MSc studieduur=
+	2
+	~	Year
+	~		|
+
+wervingstijd=
+	2
+	~	Year
+	~		|
+
+afvallers BSc=
+	BSc uitstroom na vaste en bijkomende vertraging*fractie afvallers BSc
+	~	
+	~	AFVALLERS JAARLIJKS LATEN AFVALLEN EN TESTEN
+	|
+
+BSc studenten= INTEG (
+	instroom BSc studenten-afvallers BSc-uitstroom BSc studenten,
+		0)
+	~	student
+	~		|
+
+evolutie van de nieuwe BSc instromers= WITH LOOKUP (
+	Time,
+		([(1990,0)-(2030,200)],(1990,20),(1995,90),(2000,120),(2008,130),(2010,200),(2015,200\
+		),(2020,200),(2030,200) ))
+	~	
+	~		|
+
+BSc instroommoment=
+	PULSE TRAIN(1990,TIME STEP,1,2030)
+	~	
+	~		|
+
+jaarlijkse BSc instroom=
+	evolutie van de nieuwe BSc instromers/TIME STEP*BSc instroommoment
+	~	
+	~		|
+
+minimale BSc studieduur=
+	3
+	~	Year
+	~		|
+
+uitstroom BSc studenten=
+	BSc uitstroom na vaste en bijkomende vertraging*(1-fractie afvallers BSc)
+	~	student/Year
+	~		|
+
+BSc uitstroom indien enkel vaste vertraging door minimale studieduur= DELAY FIXED (
+	instroom BSc studenten, minimale BSc studieduur, 0)
+	~	
+	~		|
+
+********************************************************
+	.Control
+********************************************************~
+		Simulation Control Parameters
+	|
+
+FINAL TIME  = 2030
+	~	Year
+	~	The final time for the simulation.
+	|
+
+INITIAL TIME  = 1990
+	~	Year
+	~	The initial time for the simulation.
+	|
+
+SAVEPER  = 
+        TIME STEP
+	~	Year [0,?]
+	~	The frequency with which output is stored.
+	|
+
+TIME STEP  = 0.015625
+	~	Year [0,?]
+	~	The time step for the simulation.
+	|
+
+\\\---/// Sketch information - do not modify anything except names
+V300  Do not put anything below this section - it will be ignored
+*View 1
+$192-192-192,0,Times New Roman|12||0-0-0|0-0-0|0-0-255|-1--1--1|-1--1--1|96,96,80,0
+10,1,BSc instroommoment,99,660,53,19,8,3,0,2,0,0,0,0,0-0-0,0-0-0,|12||0-192-192
+10,2,TIME STEP,105,568,50,11,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||0-192-192
+1,3,2,1,0,0,0,0,0,64,0,-1--1--1,,1|(103,603)|
+10,4,evolutie van de nieuwe BSc instromers,234,670,72,19,8,3,0,2,0,0,0,0,0-0-0,0-0-0,|12||0-192-192
+10,5,Time,234,726,26,11,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||0-192-192
+1,6,5,4,0,0,0,0,0,64,0,-1--1--1,,1|(234,709)|
+10,7,jaarlijkse BSc instroom,235,604,45,19,8,3,0,2,0,0,0,0,0-0-0,0-0-0,|12||0-192-192
+1,8,1,7,0,0,0,0,0,64,0,-1--1--1,,1|(161,634)|
+1,9,4,7,0,0,0,0,0,64,0,-1--1--1,,1|(234,644)|
+1,10,2,7,0,0,0,0,0,64,0,-1--1--1,,1|(160,583)|
+10,11,BSc studenten,363,503,40,20,3,3,0,0,0,0,0,0
+12,12,48,172,503,10,8,0,3,0,0,-1,0,0,0
+1,13,15,11,4,0,0,22,0,0,0,-1--1--1,,1|(280,500)|
+1,14,15,12,100,0,0,22,0,0,0,-1--1--1,,1|(203,500)|
+11,15,48,231,500,6,8,34,3,0,0,1,0,0,0
+10,16,instroom BSc studenten,231,527,44,19,40,3,0,2,-1,0,0,0,0-0-0,0-0-0,|12||255-0-0
+10,17,BSc uitstroom indien enkel vaste vertraging door minimale studieduur,265,345,96,28,8,3,0,2,0,0,0,0,0-0-0,0-0-0,|12||255-128-0
+10,18,BSc uitstroom na vaste en bijkomende vertraging,519,347,80,19,8,3,0,2,0,0,0,0,0-0-0,0-0-0,|12||255-128-0
+1,19,20,11,100,0,0,22,0,0,0,-1--1--1,,1|(461,498)|
+11,20,636,525,498,6,8,34,3,0,0,1,0,0,0
+10,21,uitstroom BSc studenten,525,525,46,19,40,3,0,0,-1,0,0,0
+1,22,15,17,1,0,0,0,0,64,0,-1--1--1,,1|(228,444)|
+1,23,17,18,1,0,0,0,0,64,0,-1--1--1,,1|(393,346)|
+1,24,18,20,1,0,0,0,0,64,0,-1--1--1,,1|(550,415)|
+12,25,48,336,400,10,8,0,3,0,0,-1,0,0,0
+1,26,28,25,4,0,0,22,0,0,0,-1--1--1,,1|(340,422)|
+1,27,28,11,100,0,0,22,0,0,0,-1--1--1,,1|(340,466)|
+11,28,48,340,442,8,6,33,3,0,0,4,0,0,0
+10,29,afvallers BSc,390,442,42,11,40,131,0,2,-1,0,0,0,0-0-0,0-0-0,|12||255-0-0
+1,30,18,29,0,0,0,0,0,64,0,-1--1--1,,1|(454,395)|
+10,31,fractie afvallers BSc,470,445,29,22,8,131,0,2,0,0,0,0,0-0-0,0-0-0,|12||255-0-255
+1,32,31,29,0,0,0,0,0,64,0,-1--1--1,,1|(443,444)|
+1,33,31,20,0,0,0,0,0,64,0,-1--1--1,,1|(500,476)|
+1,34,7,16,0,0,0,0,0,64,0,-1--1--1,,1|(233,572)|
+10,35,minimale BSc studieduur,381,280,44,19,8,131,0,0,0,0,0,0
+1,36,35,17,1,0,0,0,0,64,0,-1--1--1,,1|(369,331)|
+10,37,MSc studenten,1086,500,40,20,3,3,0,0,0,0,0,0
+12,38,48,895,500,10,8,0,3,0,0,-1,0,0,0
+1,39,41,37,4,0,0,22,0,0,0,-1--1--1,,1|(1005,498)|
+1,40,41,38,100,0,0,22,0,0,0,-1--1--1,,1|(929,498)|
+11,41,48,959,498,6,8,34,3,0,0,1,0,0,0
+10,42,instroom MSc studenten,959,525,46,19,40,3,0,0,-1,0,0,0
+10,43,MSc uitstroom indien enkel vaste vertraging door minimale studieduur,1003,361,96,28,8,3,0,0,0,0,0,0
+10,44,MSc uitstroom na vaste en bijkomende vertraging,1248,362,80,19,8,3,0,0,0,0,0,0
+1,45,46,37,100,0,0,22,0,0,0,-1--1--1,,1|(1184,495)|
+11,46,540,1248,495,6,8,34,3,0,0,1,0,0,0
+10,47,uitstroom MSc studenten,1248,522,48,19,40,3,0,0,-1,0,0,0
+1,48,41,43,1,0,0,0,0,64,0,-1--1--1,,1|(950,455)|
+1,49,43,44,0,0,0,0,0,64,0,-1--1--1,,1|(1126,362)|
+1,50,44,46,0,0,0,0,0,64,0,-1--1--1,,1|(1248,428)|
+12,51,48,1059,397,10,8,0,3,0,0,-1,0,0,0
+1,52,54,51,4,0,0,22,0,0,0,-1--1--1,,1|(1063,419)|
+1,53,54,37,100,0,0,22,0,0,0,-1--1--1,,1|(1063,463)|
+11,54,48,1063,439,8,6,33,3,0,0,4,0,0,0
+10,55,afvallers MSc,1098,439,27,18,40,131,0,2,-1,0,0,0,0-0-0,0-0-0,|12||255-0-0
+1,56,44,55,0,0,0,0,0,64,0,-1--1--1,,1|(1174,401)|
+10,57,fractie afvallers MSc,1201,444,29,25,8,131,0,2,0,0,0,0,0-0-0,0-0-0,|12||255-0-255
+1,58,57,55,0,0,0,0,0,64,0,-1--1--1,,1|(1155,443)|
+1,59,57,46,0,0,0,0,0,64,0,-1--1--1,,1|(1228,475)|
+10,60,minimale MSc studieduur,1108,292,46,19,8,131,0,0,0,0,0,0
+1,61,60,43,0,0,0,0,0,64,0,-1--1--1,,1|(1068,319)|
+10,62,fractie van BSc naar MSc,788,402,49,19,8,3,0,2,0,0,0,0,0-0-0,0-0-0,|12||255-0-255
+10,63,instroommoment MSc,824,664,53,19,8,3,0,0,0,0,0,0
+10,64,TIME STEP,785,593,50,11,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,65,64,63,0,0,0,0,0,64,0,-1--1--1,,1|(798,618)|
+10,66,evolutie van de nieuwe MSc instromers,957,659,72,19,8,3,0,0,0,0,0,0
+10,67,Time,957,715,26,11,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,68,67,66,0,0,0,0,0,64,0,-1--1--1,,1|(957,698)|
+10,69,jaarlijkse MSc instroom,958,593,47,19,8,3,0,0,0,0,0,0
+1,70,63,69,0,0,0,0,0,64,0,-1--1--1,,1|(884,631)|
+1,71,66,69,0,0,0,0,0,64,0,-1--1--1,,1|(957,633)|
+1,72,64,69,0,0,0,0,0,64,0,-1--1--1,,1|(866,593)|
+1,73,69,42,0,0,0,0,0,64,0,-1--1--1,,1|(958,566)|
+1,74,21,42,1,1,0,0,0,64,0,-1--1--1,,1|(760,552)|
+1,75,62,41,0,0,0,0,0,64,0,-1--1--1,,1|(880,455)|
+12,76,0,811,-89,50,19,8,7,0,2,-1,0,0,0,0-0-0,0-0-0,|12||0-255-0
+ZONDER HARDE KNIP
+1,77,78,62,0,0,0,0,0,64,0,-1--1--1,,1|(723,376)|
+10,78,Time,692,363,26,11,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+10,79,docenten,545,1128,40,20,3,3,0,4,0,0,0,0,0-0-0,255-255-0,|12||0-0-0
+10,80,financien,700,912,40,20,3,3,0,4,0,0,0,0,0-0-0,255-255-0,|12||0-0-0
+12,81,48,997,915,10,8,0,3,0,0,-1,0,0,0
+1,82,84,80,4,0,0,22,0,0,0,-1--1--1,,1|(800,918)|
+1,83,84,81,100,0,0,22,0,0,0,-1--1--1,,1|(930,918)|
+11,84,48,867,918,6,8,34,3,0,0,1,0,0,0
+10,85,instroom onderwijsgelden,867,945,52,19,40,3,0,4,-1,0,0,0,0-0-0,255-255-0,|12||0-0-0
+12,86,48,438,913,10,8,0,3,0,0,-1,0,0,0
+1,87,89,86,4,0,0,22,0,0,0,-1--1--1,,1|(500,915)|
+1,88,89,80,100,0,0,22,0,0,0,-1--1--1,,1|(612,915)|
+11,89,48,559,915,6,8,34,3,0,0,1,0,0,0
+10,90,uitstroom van onderwijsgelden,559,942,52,19,40,3,0,6,-1,0,0,0,0-0-0,255-255-0,|12||255-0-0
+10,91,jaarlijkse lump sum en andere gelden,909,999,70,19,8,3,0,6,0,0,0,0,0-0-0,255-255-0,|12||255-0-0
+10,92,subsidie per MSc afstudeerder,864,785,56,19,8,3,0,4,0,0,0,0,0-0-0,255-255-0,|12||0-0-0
+10,93,subsidie per BSc afstudeerder,748,822,54,19,8,3,0,4,0,0,0,0,0-0-0,255-255-0,|12||0-0-0
+1,94,21,84,1,1,0,0,0,64,0,-1--1--1,,1|(728,695)|
+1,95,93,84,1,1,0,0,0,64,0,-1--1--1,,1|(797,856)|
+1,96,47,84,1,1,0,0,0,64,0,-1--1--1,,1|(1061,806)|
+1,97,92,84,1,1,0,0,0,64,0,-1--1--1,,1|(862,846)|
+1,98,91,85,0,0,0,0,0,64,0,-1--1--1,,1|(892,977)|
+10,99,maximaal aantal docenten,653,1055,50,19,8,3,0,4,0,0,0,0,0-0-0,255-255-0,|12||0-0-0
+10,100,gemiddelde kost per docent,460,1037,53,19,8,3,0,4,0,0,0,0,0-0-0,255-255-0,|12||255-255-0
+10,101,kwaliteit,145,1004,27,11,8,3,0,6,0,0,0,0,0-0-0,255-255-0,|12||0-255-0
+10,102,bijkomende jaarlijkse vertraging BSc,525,284,68,19,8,3,0,0,0,0,0,0
+1,103,35,18,1,0,0,0,0,64,0,-1--1--1,,1|(418,325)|
+1,104,102,18,0,0,0,0,0,64,0,-1--1--1,,1|(523,309)|
+10,105,bijkomende jaarlijkse vertraging MSc,1247,286,68,19,8,3,0,0,0,0,0,0
+1,106,105,44,0,0,0,0,0,64,0,-1--1--1,,1|(1247,317)|
+1,107,60,44,0,0,0,0,0,64,0,-1--1--1,,1|(1171,324)|
+1,108,101,102,1,1,0,0,0,64,0,-1--1--1,,1|(87,474)|
+1,109,101,105,1,1,0,0,0,64,0,-1--1--1,,1|(1325,706)|
+1,110,16,84,1,1,0,0,0,64,0,-1--1--1,,1|(764,772)|
+1,111,42,84,1,1,0,0,0,64,0,-1--1--1,,1|(980,825)|
+10,112,subsidie per BSc instromer,637,832,42,19,8,3,0,4,0,0,0,0,0-0-0,255-255-0,|12||0-0-0
+10,113,subsidie per MSc instromer,917,834,56,19,8,3,0,4,0,0,0,0,0-0-0,255-255-0,|12||0-0-0
+1,114,113,84,0,0,0,0,0,64,0,-1--1--1,,1|(891,876)|
+1,115,112,84,0,1,0,0,0,64,0,-1--1--1,,1|(763,878)|
+10,116,boete per langstudeerder,854,1065,47,19,8,3,0,6,0,0,0,0,0-0-0,255-255-0,|12||0-255-0
+1,117,116,90,1,0,0,0,0,64,0,-1--1--1,,1|(619,978)|
+1,118,80,99,0,0,0,0,0,64,0,-1--1--1,,1|(678,977)|
+1,119,100,99,0,0,0,0,0,64,0,-1--1--1,,1|(550,1044)|
+12,120,48,712,1130,10,8,0,3,0,0,-1,0,0,0
+1,121,123,79,4,0,0,22,0,0,0,-1--1--1,,1|(611,1130)|
+1,122,123,120,100,0,0,22,0,0,0,-1--1--1,,1|(675,1130)|
+11,123,48,643,1130,6,8,34,3,0,0,1,0,0,0
+10,124,netto werving van docenten,643,1157,56,19,40,3,0,5,-1,0,0,0,255-255-0,255-255-0,|12||0-0-0
+1,125,99,123,0,0,0,0,0,64,0,-1--1--1,,1|(648,1092)|
+1,126,79,123,1,0,0,0,0,64,0,-1--1--1,,1|(622,1102)|
+10,127,wervingstijd,644,1194,38,11,8,3,0,4,-1,0,0,0,0-0-0,255-255-0,|12||0-0-0
+1,128,127,124,0,0,0,0,0,64,0,-1--1--1,,1|(644,1186)|
+1,129,79,90,0,0,0,0,0,64,0,-1--1--1,,1|(550,1041)|
+1,130,100,90,0,0,0,0,0,64,0,-1--1--1,,1|(503,994)|
+10,131,aantal docenturen per student,298,1016,56,19,8,3,0,6,0,0,0,0,0-0-0,255-255-0,|12||0-255-0
+1,132,79,131,0,0,0,0,0,64,0,-1--1--1,,1|(428,1075)|
+1,133,37,141,0,1,0,0,0,64,0,-1--1--1,,1|(836,597)|
+1,134,11,141,0,1,0,0,0,64,0,-1--1--1,,1|(463,597)|
+1,135,131,101,1,0,0,0,0,64,0,-1--1--1,,1|(220,1028)|
+10,136,fractie langstudeerder,406,836,47,19,8,3,0,6,0,0,0,0,0-0-0,255-255-0,|12||0-255-0
+1,137,101,136,1,0,0,0,0,64,0,-1--1--1,,1|(331,858)|
+1,138,136,89,1,1,0,0,0,64,0,-1--1--1,,1|(481,849)|
+10,139,Time,1011,1090,26,11,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,140,139,116,0,0,0,0,0,64,0,-1--1--1,,1|(949,1080)|
+10,141,totaal aantal studenten,574,701,39,19,8,3,0,4,0,0,0,0,0-0-0,255-255-128,|12||0-0-0
+1,142,141,131,0,1,0,0,0,64,0,-1--1--1,,1|(440,853)|
+1,143,141,89,0,1,0,0,0,64,0,-1--1--1,,1|(566,807)|
+12,144,48,643,498,10,8,0,3,0,0,-1,0,0,0
+1,145,20,144,4,0,0,22,0,0,0,-1--1--1,,1|(582,498)|
+12,146,48,1387,494,10,8,0,3,0,0,-1,0,0,0
+1,147,46,146,4,0,0,22,0,0,0,-1--1--1,,1|(1315,495)|
+10,148,hoogte boete per langstudeerder,882,1136,55,19,8,3,0,4,0,0,0,0,0-0-0,255-255-0,|12||0-0-0
+1,149,148,116,0,0,0,0,0,64,0,-1--1--1,,1|(870,1106)|
+1,150,101,16,1,1,0,0,0,64,0,-1--1--1,,1|(144,686)|
+1,151,101,42,1,1,0,0,0,64,0,-1--1--1,,1|(537,579)|
+1,152,101,31,1,1,0,0,0,64,0,-1--1--1,,1|(300,736)|
+1,153,101,57,1,1,0,0,0,64,0,-1--1--1,,1|(684,570)|
+///---\\\
+:L<%^E!@
+9:Exam2
+15:0,0,0,0,0,0
+19:80,0
+27:2,
+34:0,
+4:Time
+5:uitstroom BSc studenten
+35:Date
+36:YYYY-MM-DD
+37:2000
+38:1
+39:1
+40:0
+41:0
+42:0
+24:1990
+25:2030
+26:2030

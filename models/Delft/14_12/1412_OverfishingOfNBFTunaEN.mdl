@@ -1,0 +1,255 @@
+{UTF-8}
+Tuna Biomass= INTEG (
+	growth existing tuna biomass+tuna recruitment-natural deaths-tuna catch,
+		unfished biomass 1990)
+	~	ton
+	~		|
+
+effect= WITH LOOKUP (
+	perceived state of tuna fishery,
+		([(-10,-1)-(100,10)],(-10,-0.9),(-7.5,-0.5),(-5,-0.25),(-2.5,-0.1),(0,0),(2.5,0.075\
+		),(5,0.15),(7.5,0.21),(10,0.25),(100,0.25) ))
+	~	Dmnl
+	~		|
+
+fraction tuna catch=
+	average efficiency tuna ships*total number of tuna ships
+	~	1/Year
+	~		|
+
+average efficiency tuna ships=
+	4e-006
+	~	1/Ship/Year
+	~		|
+
+perceived state of tuna fishery=
+	SMOOTHI(most recent perception concerning tuna fishery, delay time, initial state tuna fishery\
+		)
+	~	Dmnl
+	~		|
+
+growth existing tuna biomass=
+	Tuna Biomass*tuna growth rate
+	~	ton/Year
+	~		|
+
+illegal tuna ships=
+	10000-STEP(10000,2010)*0
+	~	Ship
+	~		|
+
+implementation time delay=
+	2
+	~	Year
+	~		|
+
+initial state tuna fishery=
+	10
+	~	Dmnl
+	~		|
+
+most recent perception concerning tuna fishery=
+	change in tuna perception lookup(ratio of biomass to unfished biomass)
+	~	Dmnl
+	~		|
+
+natural deaths=
+	Tuna Biomass*ratio of biomass to unfished biomass/normal death rate
+	~	ton/Year
+	~		|
+
+net increase official number of tuna ships=
+	proposed change in the number of tuna ships/implementation time delay
+	~	Ship/Year
+	~		|
+
+normal death rate=
+	20
+	~	Year
+	~		|
+
+Official Number of Tuna Ships= INTEG (
+	net increase official number of tuna ships,
+		15000)
+	~	Ship
+	~		|
+
+unfished biomass 1990=
+	100000
+	~	ton
+	~		|
+
+tuna recruitment= DELAY FIXED (
+	Tuna Biomass*tuna recruitment rate,4,Tuna Biomass*tuna recruitment rate)
+	~	ton/Year
+	~		|
+
+tuna recruitment rate=
+	0.01
+	~	1/Year
+	~		|
+
+delay time=
+	2
+	~	Year
+	~		|
+
+tuna growth rate=
+	0.04
+	~	1/Year
+	~		|
+
+tuna catch=
+	Tuna Biomass*fraction tuna catch
+	~	ton/Year
+	~		|
+
+total number of tuna ships=
+	illegal tuna ships+Official Number of Tuna Ships
+	~	Ship
+	~		|
+
+change in tuna perception lookup(
+	[(0,-10)-(1,10)],(0,-10),(0.25,-2),(0.5,0),(0.75,1.5),(1,10))
+	~	Dmnl
+	~		|
+
+ratio of biomass to unfished biomass=
+	Tuna Biomass/unfished biomass 1990
+	~	Dmnl
+	~		|
+
+proposed change in the number of tuna ships=
+	(effect)*Official Number of Tuna Ships
+	~	Ship
+	~		|
+
+********************************************************
+	.Control
+********************************************************~
+		Simulation Control Parameters
+	|
+
+FINAL TIME  = 2290
+	~	Year
+	~	The final time for the simulation.
+	|
+
+INITIAL TIME  = 1990
+	~	Year
+	~	The initial time for the simulation.
+	|
+
+SAVEPER  = 
+        TIME STEP
+	~	Year [0,?]
+	~	The frequency with which output is stored.
+	|
+
+TIME STEP  = 0.125
+	~	Year [0,?]
+	~	The time step for the simulation.
+	|
+
+\\\---/// Sketch information - do not modify anything except names
+V300  Do not put anything below this section - it will be ignored
+*View 1
+$192-192-192,0,Times New Roman|12||0-0-0|0-0-0|0-0-255|-1--1--1|-1--1--1|96,96,90,0
+10,1,Tuna Biomass,610,265,40,20,3,3,0,2,0,0,0,0,0-0-0,0-0-0,|12||0-128-0
+12,2,48,431,266,10,8,0,3,0,0,-1,0,0,0
+1,3,5,1,4,0,0,22,0,0,0,-1--1--1,,1|(539,265)|
+1,4,5,2,100,0,0,22,0,0,0,-1--1--1,,1|(469,265)|
+11,5,48,503,265,6,8,34,3,0,0,1,0,0,0
+10,6,tuna recruitment,503,284,50,11,40,3,0,2,-1,0,0,0,0-0-0,0-0-0,|12||0-128-0
+12,7,48,612,392,10,8,0,3,0,0,-1,0,0,0
+1,8,10,1,4,0,0,22,0,0,0,-1--1--1,,1|(608,308)|
+1,9,10,7,100,0,0,22,0,0,0,-1--1--1,,1|(608,364)|
+11,10,48,608,338,8,6,33,3,0,0,2,0,0,0
+10,11,growth existing tuna biomass,546,338,54,21,40,131,0,2,-1,0,0,0,0-0-0,0-0-0,|12||0-128-0
+12,12,48,603,151,10,8,0,3,0,0,-1,0,0,0
+1,13,15,12,4,0,0,22,1,0,0,0-0-0,|12||0-0-0,1|(605,175)|
+1,14,15,1,100,0,0,22,0,0,0,-1--1--1,,1|(605,224)|
+11,15,48,605,198,8,6,33,3,0,0,4,0,0,0
+10,16,tuna catch,646,198,33,11,40,3,0,2,-1,0,0,0,0-0-0,0-0-0,|12||0-128-0
+12,17,48,807,265,10,8,0,3,0,0,-1,0,0,0
+1,18,20,17,4,0,0,22,0,0,0,-1--1--1,,1|(763,265)|
+1,19,20,1,100,0,0,22,0,0,0,-1--1--1,,1|(683,265)|
+11,20,48,723,265,6,8,34,3,0,0,1,0,0,0
+10,21,natural deaths,723,284,44,11,40,3,0,2,-1,0,0,0,0-0-0,0-0-0,|12||0-128-0
+10,22,tuna growth rate,478,404,51,11,8,131,0,2,0,0,0,0,0-0-0,0-0-0,|12||0-128-0
+10,23,tuna recruitment rate,421,206,51,19,8,3,0,2,0,0,0,0,0-0-0,0-0-0,|12||0-128-0
+1,24,23,5,0,0,0,0,1,64,0,0-128-0,|12||0-0-0,1|(466,238)|
+1,25,22,11,0,0,0,0,0,64,0,-1--1--1,,1|(501,380)|
+1,26,1,11,1,0,0,0,1,64,0,0-128-0,|12||0-0-0,1|(579,307)|
+1,27,1,5,1,0,0,0,1,64,0,0-128-0,|12||0-0-0,1|(544,216)|
+10,28,ratio of biomass to unfished biomass,725,382,59,19,8,3,0,2,0,0,0,0,0-0-0,0-0-0,|12||0-128-0
+10,29,normal death rate,810,335,55,11,8,3,0,2,0,0,0,0,0-0-0,0-0-0,|12||0-128-0
+1,30,1,20,1,0,0,0,1,64,0,0-128-0,|12||0-0-0,1|(676,234)|
+1,31,1,28,1,0,0,0,1,64,0,0-128-0,|12||0-0-0,1|(652,331)|
+1,32,28,21,1,0,0,0,1,64,0,0-128-0,|12||0-0-0,1|(739,330)|
+1,33,29,21,0,0,0,0,1,64,0,0-128-0,|12||0-0-0,1|(772,312)|
+10,34,unfished biomass 1990,773,449,54,19,8,3,0,2,0,0,0,0,0-0-0,0-0-0,|12||0-128-0
+1,35,34,28,0,0,0,0,1,64,0,0-128-0,|12||0-0-0,1|(753,421)|
+1,36,34,1,0,0,0,0,0,64,1,-1--1--1,,1|(696,362)|
+1,37,1,16,1,0,0,0,1,64,0,0-128-0,|12||0-0-0,1|(633,232)|
+10,38,fraction tuna catch,519,90,57,11,8,3,0,2,0,0,0,0,0-0-0,0-0-0,|12||0-128-0
+1,39,38,16,1,0,0,0,1,64,0,0-128-0,|12||0-0-0,1|(595,110)|
+10,40,total number of tuna ships,320,81,48,19,8,3,0,2,0,0,0,0,0-0-0,0-0-0,|12||0-128-0
+10,41,average efficiency tuna ships,404,139,57,19,8,3,0,2,0,0,0,0,0-0-0,0-0-0,|12||0-128-0
+10,42,Official Number of Tuna Ships,151,163,53,19,3,131,0,2,0,0,0,0,0-0-0,0-0-0,|12||0-128-0
+10,43,illegal tuna ships,149,98,50,11,8,3,0,2,0,0,0,0,0-0-0,0-0-0,|12||0-128-0
+1,44,43,40,1,0,0,0,1,64,0,0-128-0,|12||0-0-0,1|(237,74)|
+1,45,42,40,1,0,0,0,1,64,0,0-128-0,|12||0-0-0,1|(223,103)|
+1,46,40,38,1,0,0,0,1,64,0,0-128-0,|12||0-0-0,1|(391,69)|
+1,47,41,38,1,0,0,0,1,64,0,0-128-0,|12||0-0-0,1|(479,127)|
+10,48,change in tuna perception lookup,745,501,58,19,8,3,0,0,0,0,0,0
+10,49,most recent perception concerning tuna fishery,520,502,73,19,8,3,0,0,0,0,0,0
+1,50,28,49,1,0,0,0,0,64,0,-1--1--1,,1|(645,463)|
+1,51,48,49,0,0,0,0,0,64,0,-1--1--1,,1|(647,501)|
+10,52,perceived state of tuna fishery,284,503,57,19,8,3,0,0,0,0,0,0
+1,53,49,52,0,0,0,0,0,64,0,-1--1--1,,1|(401,502)|
+10,54,delay time,266,440,33,11,8,3,0,0,0,0,0,0
+1,55,54,52,0,0,0,0,0,64,0,-1--1--1,,1|(271,460)|
+10,56,initial state tuna fishery,378,440,48,19,8,3,0,0,0,0,0,0
+1,57,56,52,0,0,0,0,0,64,0,-1--1--1,,1|(336,467)|
+12,58,48,152,269,10,8,0,3,0,0,-1,0,0,0
+1,59,61,42,4,0,0,22,0,0,0,-1--1--1,,1|(156,197)|
+1,60,61,58,100,0,0,22,0,0,0,-1--1--1,,1|(156,242)|
+11,61,48,156,218,8,6,33,3,0,0,4,0,0,0
+10,62,net increase official number of tuna ships,235,218,66,19,40,3,0,0,-1,0,0,0
+10,63,proposed change in the number of tuna ships,134,335,74,19,8,131,0,0,0,0,0,0
+10,64,implementation time delay,328,326,48,19,8,3,0,0,0,0,0,0
+1,65,63,62,1,0,0,0,0,64,0,-1--1--1,,1|(204,284)|
+1,66,64,62,0,0,0,0,0,64,0,-1--1--1,,1|(286,277)|
+10,67,effect,166,435,19,11,8,3,0,0,0,0,0,0
+1,68,52,67,1,0,0,0,0,64,0,-1--1--1,,1|(213,481)|
+1,69,67,63,1,0,0,0,0,64,0,-1--1--1,,1|(143,397)|
+1,70,42,63,1,0,0,0,0,64,0,-1--1--1,,1|(129,235)|
+///---\\\
+:L<%^E!@
+9:SensitiviteitEffectMin10Percent
+22:$,Dollar,Dollars,$s
+22:Hour,Hours
+22:Month,Months
+22:Person,People,Persons
+22:Unit,Units
+22:Week,Weeks
+22:Year,Years
+22:Day,Days
+15:0,0,0,1,0,0
+19:90,0
+27:2,
+34:0,
+4:Time
+5:proposed change in the number of tuna ships
+35:Date
+36:YYYY-MM-DD
+37:2000
+38:1
+39:1
+40:0
+41:0
+42:0
+24:1990
+25:2290
+26:2290
