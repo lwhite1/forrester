@@ -148,7 +148,7 @@ public class PropertiesPanel extends VBox {
             } else if (selection.size() == 1) {
                 String name = selection.iterator().next();
                 ElementType type = canvas.getSelectedElementType(name);
-                ctx.elementName = name;
+                ctx.setElementName(name);
                 if (type == cachedFormType && currentForm != null && isCacheableType(type)) {
                     currentForm.updateValues();
                 } else {
@@ -432,7 +432,7 @@ public class PropertiesPanel extends VBox {
 
     private void showSingleElement(String name, ElementType type) {
         disposeCurrentForm();
-        ctx.elementName = name;
+        ctx.setElementName(name);
         getChildren().clear();
 
         // Build context toolbar
@@ -466,7 +466,7 @@ public class PropertiesPanel extends VBox {
             drillBtn.setId("propertiesDrill");
             drillBtn.setOnAction(e -> {
                 if (ctx.canvas != null) {
-                    ctx.canvas.drillInto(ctx.elementName);
+                    ctx.canvas.drillInto(ctx.getElementName());
                     ctx.canvas.requestFocus();
                 }
             });
@@ -475,7 +475,7 @@ public class PropertiesPanel extends VBox {
             bindingsBtn.setId("propertiesBindings");
             bindingsBtn.setOnAction(e -> {
                 if (ctx.canvas != null) {
-                    ctx.canvas.triggerBindingConfig(ctx.elementName);
+                    ctx.canvas.triggerBindingConfig(ctx.getElementName());
                     ctx.canvas.requestFocus();
                 }
             });
@@ -528,9 +528,9 @@ public class PropertiesPanel extends VBox {
     }
 
     private int buildModuleForm(int row) {
-        Optional<ModuleInstanceDef> moduleOpt = ctx.editor.getModuleByName(ctx.elementName);
+        Optional<ModuleInstanceDef> moduleOpt = ctx.editor.getModuleByName(ctx.getElementName());
         if (moduleOpt.isEmpty()) {
-            ctx.addReadOnlyRow(row++, "Name", ctx.elementName);
+            ctx.addReadOnlyRow(row++, "Name", ctx.getElementName());
             return row;
         }
         ModuleInstanceDef module = moduleOpt.get();
@@ -617,7 +617,7 @@ public class PropertiesPanel extends VBox {
             currentForm = null;
         }
         cachedFormType = null;
-        ctx.elementName = null;
+        ctx.setElementName(null);
     }
 
     private static boolean isCacheableType(ElementType type) {

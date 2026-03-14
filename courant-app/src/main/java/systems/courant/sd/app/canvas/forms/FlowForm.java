@@ -36,9 +36,9 @@ public class FlowForm implements ElementForm {
 
     @Override
     public int build(int startRow) {
-        Optional<FlowDef> flowOpt = ctx.editor.getFlowByName(ctx.elementName);
+        Optional<FlowDef> flowOpt = ctx.editor.getFlowByName(ctx.getElementName());
         if (flowOpt.isEmpty()) {
-            ctx.addReadOnlyRow(startRow++, "Name", ctx.elementName);
+            ctx.addReadOnlyRow(startRow++, "Name", ctx.getElementName());
             return startRow;
         }
         FlowDef flow = flowOpt.get();
@@ -60,7 +60,7 @@ public class FlowForm implements ElementForm {
 
         equationField = ctx.createEquationField(flow.equation());
         ctx.addEquationCommitHandlers(equationField, this::commitEquation);
-        EquationAutoComplete.attach(equationField, ctx.editor, ctx.elementName);
+        EquationAutoComplete.attach(equationField, ctx.editor, ctx.getElementName());
         ctx.addFieldRow(row++, "Equation", ctx.wrapWithHelpButton(equationField),
                 "The rate equation determining how fast material flows.\n"
                 + "Use element names, operators (+, -, *, /), and functions.");
@@ -89,12 +89,12 @@ public class FlowForm implements ElementForm {
 
     @Override
     public void updateValues() {
-        Optional<FlowDef> flowOpt = ctx.editor.getFlowByName(ctx.elementName);
+        Optional<FlowDef> flowOpt = ctx.editor.getFlowByName(ctx.getElementName());
         if (flowOpt.isEmpty() || nameField == null) {
             return;
         }
         FlowDef flow = flowOpt.get();
-        nameField.setText(ctx.elementName);
+        nameField.setText(ctx.getElementName());
         equationField.setText(flow.equation());
         materialUnitBox.setValue(flow.materialUnit() != null ? flow.materialUnit() : "");
         timeUnitBox.setValue(flow.timeUnit() != null ? flow.timeUnit() : "");
@@ -111,49 +111,49 @@ public class FlowForm implements ElementForm {
     private void commitComment(TextArea area) {
         String text = area.getText().trim();
         String comment = text.isEmpty() ? null : text;
-        Optional<FlowDef> flowOpt = ctx.editor.getFlowByName(ctx.elementName);
+        Optional<FlowDef> flowOpt = ctx.editor.getFlowByName(ctx.getElementName());
         if (flowOpt.isEmpty() || Objects.equals(comment, flowOpt.get().comment())) {
             return;
         }
-        ctx.canvas.applyMutation(() -> ctx.editor.setFlowComment(ctx.elementName, comment));
+        ctx.canvas.applyMutation(() -> ctx.editor.setFlowComment(ctx.getElementName(), comment));
     }
 
     private void commitEquation(EquationField field) {
         String equation = field.getText().trim();
         if (equation.isEmpty()) {
-            ctx.editor.getFlowByName(ctx.elementName)
+            ctx.editor.getFlowByName(ctx.getElementName())
                     .ifPresent(flow -> field.setText(flow.equation()));
             return;
         }
-        Optional<FlowDef> flowOpt = ctx.editor.getFlowByName(ctx.elementName);
+        Optional<FlowDef> flowOpt = ctx.editor.getFlowByName(ctx.getElementName());
         if (flowOpt.isPresent() && equation.equals(flowOpt.get().equation())) {
             return;
         }
-        ctx.canvas.applyMutation(() -> ctx.editor.setFlowEquation(ctx.elementName, equation));
+        ctx.canvas.applyMutation(() -> ctx.editor.setFlowEquation(ctx.getElementName(), equation));
     }
 
     private void commitMaterialUnit(ComboBox<String> box) {
         String materialUnit = box.getValue() != null ? box.getValue().trim() : "";
         String resolved = materialUnit.isEmpty() ? null : materialUnit;
-        Optional<FlowDef> flowOpt = ctx.editor.getFlowByName(ctx.elementName);
+        Optional<FlowDef> flowOpt = ctx.editor.getFlowByName(ctx.getElementName());
         if (flowOpt.isPresent() && Objects.equals(resolved, flowOpt.get().materialUnit())) {
             return;
         }
         ctx.canvas.applyMutation(
-                () -> ctx.editor.setFlowMaterialUnit(ctx.elementName, resolved));
+                () -> ctx.editor.setFlowMaterialUnit(ctx.getElementName(), resolved));
     }
 
     private void commitTimeUnit(ComboBox<String> box) {
         String timeUnit = box.getValue() != null ? box.getValue().trim() : "";
         if (timeUnit.isEmpty()) {
-            ctx.editor.getFlowByName(ctx.elementName)
+            ctx.editor.getFlowByName(ctx.getElementName())
                     .ifPresent(flow -> box.setValue(flow.timeUnit()));
             return;
         }
-        Optional<FlowDef> flowOpt = ctx.editor.getFlowByName(ctx.elementName);
+        Optional<FlowDef> flowOpt = ctx.editor.getFlowByName(ctx.getElementName());
         if (flowOpt.isPresent() && timeUnit.equals(flowOpt.get().timeUnit())) {
             return;
         }
-        ctx.canvas.applyMutation(() -> ctx.editor.setFlowTimeUnit(ctx.elementName, timeUnit));
+        ctx.canvas.applyMutation(() -> ctx.editor.setFlowTimeUnit(ctx.getElementName(), timeUnit));
     }
 }

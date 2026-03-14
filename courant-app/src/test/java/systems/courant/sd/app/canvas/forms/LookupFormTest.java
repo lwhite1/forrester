@@ -47,7 +47,7 @@ class LookupFormTest {
         ctx.editor = editor;
         ctx.canvas = canvas;
         ctx.grid = new GridPane();
-        ctx.elementName = "Lookup 1";
+        ctx.setElementName("Lookup 1");
         ctx.updatingFields = false;
 
         form = new LookupForm(ctx);
