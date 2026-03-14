@@ -106,6 +106,45 @@ class ValidationDialogFxTest {
     }
 
     @Test
+    @DisplayName("showOrUpdate updates the callback when dialog is reused (#379)")
+    void shouldUpdateCallbackOnReuse(FxRobot robot) {
+        String[] selectedByA = {null};
+        String[] selectedByB = {null};
+
+        ValidationResult result1 = new ValidationResult(List.of(
+                new ValidationIssue(Severity.ERROR, "StockA", "Error A")
+        ));
+
+        // Window A opens the dialog
+        Platform.runLater(() -> ValidationDialog.showOrUpdate(result1, name -> selectedByA[0] = name));
+        WaitForAsyncUtils.waitForFxEvents();
+
+        // Window B calls showOrUpdate with a different callback and result
+        ValidationResult result2 = new ValidationResult(List.of(
+                new ValidationIssue(Severity.ERROR, "StockB", "Error B")
+        ));
+        Platform.runLater(() -> ValidationDialog.showOrUpdate(result2, name -> selectedByB[0] = name));
+        WaitForAsyncUtils.waitForFxEvents();
+
+        // Select row 0 — should invoke B's callback, not A's
+        @SuppressWarnings("unchecked")
+        TableView<ValidationIssue> table = robot.lookup("#validationTable")
+                .queryAs(TableView.class);
+        Platform.runLater(() -> table.getSelectionModel().select(0));
+        WaitForAsyncUtils.waitForFxEvents();
+
+        assertThat(selectedByA[0]).isNull();
+        assertThat(selectedByB[0]).isEqualTo("StockB");
+
+        // Clean up
+        ValidationDialog instance = ValidationDialog.getOpenInstance();
+        if (instance != null) {
+            Platform.runLater(instance::close);
+            WaitForAsyncUtils.waitForFxEvents();
+        }
+    }
+
+    @Test
     @DisplayName("Dialog title is 'Model Validation'")
     void dialogTitle(FxRobot robot) {
         showDialog(new ValidationResult(List.of()));
