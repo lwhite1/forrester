@@ -1,0 +1,125 @@
+{UTF-8}
+market fear and uncertainty  = A FUNCTION OF( degree of external climate of fear,stock market fear factor\
+		,stock market value loss) ~~|
+market fear and uncertainty=
+	MIN(stock market value loss/(stock market value/market loss delay*stock market fear factor\
+		) * degree of external climate of fear
+,1)
+	~	Dmnl
+	~		|
+
+underlying asset loss  = A FUNCTION OF( average stickiness of assets,estimated underlying asset value\
+		,external shock real value loss,market fear and uncertainty) ~~|
+underlying asset loss=
+	MAX((average bank client's fear and uncertainty/average stickiness of assets+external shock real value loss\
+		)*estimated underlying asset value
+,0)
+	~	EURO/Week
+	~		|
+
+estimated underlying asset value  = A FUNCTION OF( underlying asset loss) ~~|
+estimated underlying asset value= INTEG (
+	+underlying asset increase-underlying asset loss,
+		initial estimated underlying asset value)
+	~	EURO
+	~		|
+
+stock market value loss  = A FUNCTION OF( underlying asset loss) ~~|
+stock market value loss=
+	MAX(stock market value * (perceived overvaluation/market loss delay),0)
+	~	EURO/Week
+	~		|
+
+average stickiness of assets=
+	4
+	~	Week
+	~		|
+
+degree of external climate of fear=
+	2
+	~	Dmnl
+	~		|
+
+external shock real value loss=
+	STEP(0.35,10) - STEP(0.35,11)
+	~	1/Week
+	~	 0.01 - STEP(0.01,11)
+	|
+
+stock market fear factor=
+	0.25
+	~	Dmnl
+	~		|
+
+********************************************************
+	.Control
+********************************************************~
+		Simulation Control Parameters
+	|
+
+FINAL TIME  = 52
+	~	Week
+	~	The final time for the simulation.
+	|
+
+INITIAL TIME  = 0
+	~	Week
+	~	The initial time for the simulation.
+	|
+
+SAVEPER  = 
+        TIME STEP
+	~	Week
+	~	The frequency with which output is stored.
+	|
+
+TIME STEP  = 0.0078125
+	~	Week
+	~	The time step for the simulation.
+	|
+
+\\\---/// Sketch information - do not modify anything except names
+V300  Do not put anything below this section - it will be ignored
+*View 1
+$192-192-192,0,Times New Roman|12||0-0-0|0-0-0|0-0-255|-1--1--1|-1--1--1|96,96,100,0
+10,1,estimated underlying asset value,648,271,38,29,8,3,0,0,0,0,0,0
+11,2,236,323,194,6,8,38,3,0,0,1,0,0,0
+10,3,stock market value loss,323,221,42,19,40,3,0,0,-1,0,0,0
+11,4,188,477,251,6,8,38,3,0,0,1,0,0,0
+10,5,underlying asset loss,477,282,35,23,40,3,0,0,-1,0,0,0
+10,6,market fear and uncertainty,350,352,50,19,8,3,0,0,0,0,0,0
+10,7,degree of external climate of fear,218,380,57,19,8,3,0,2,0,0,0,0,0-0-0,0-0-0,|12||255-128-0
+1,8,7,6,1,0,43,0,2,0,0,-1--1--1,|12||0-0-0,1|(299,377)|
+10,9,external shock real value loss,574,389,60,19,8,3,0,2,0,0,0,0,0-0-0,0-0-0,|12||255-0-0
+1,10,9,5,1,0,43,0,2,128,0,-1--1--1,|12||0-0-0,1|(495,341)|
+10,11,average stickiness of assets,448,410,57,19,8,3,0,2,0,0,0,0,0-0-0,0-0-0,|12||255-128-0
+1,12,11,5,1,0,45,0,2,0,0,-1--1--1,|12||0-0-0,1|(467,356)|
+1,13,1,5,1,0,43,2,3,64,0,0-192-255,|12||0-0-0,1|(541,195)|
+10,14,stock market fear factor,218,297,46,22,8,3,0,2,0,0,0,0,0-0-0,0-0-0,|12||255-128-0
+1,15,14,6,1,0,43,0,3,64,0,0-0-255,|12||0-0-0,1|(253,333)|
+1,16,6,5,1,0,43,0,2,64,0,-1--1--1,|12||0-0-0,1|(435,348)|
+1,17,5,1,1,0,45,0,2,64,0,-1--1--1,|12||0-0-0,1|(554,352)|
+1,18,3,6,1,0,43,0,2,65,0,-1--1--1,|12||0-0-0,1|(302,277)|
+12,19,0,383,272,20,20,5,4,0,0,-1,0,0,0
++
+12,20,0,555,264,20,20,5,4,0,3,-1,0,0,0,0-192-255,0-0-0,|12||0-192-255
+-
+1,21,5,3,1,0,43,0,2,1,0,-1--1--1,|12||0-0-0,1|(427,199)|
+12,22,0,386,301,36,9,8,4,0,24,-1,0,0,0,0-0-0,0-0-0,|10|BI|0-0-0
+run on bank
+12,23,0,559,306,44,16,8,4,0,24,-1,0,0,0,0-0-0,0-0-0,|10|BI|0-0-0
+nothing left nothing to lose
+///---\\\
+:L<%^E!@
+9:basecase
+18:BankCrisis.vsc
+20:BankCrisis.lst
+15:0,0,0,0,0,0
+19:100,0
+27:0,
+34:0,
+4:Time
+5:average stickiness of assets
+24:0
+25:52
+26:52

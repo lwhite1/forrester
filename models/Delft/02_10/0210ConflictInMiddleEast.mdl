@@ -1,0 +1,165 @@
+{UTF-8}
+"'successful' suicide attacks"  = A FUNCTION OF( autonomy Palestinians,willingness suicide attacks\
+		,"security by shielding (wall)")
+	~	
+	~		|
+
+autonomy Palestinians  = A FUNCTION OF( progress peace process)
+	~	
+	~		|
+
+preparedness to dialogue  = A FUNCTION OF( living conditions Palestinians,trust Isi in Paln\
+		,trust Paln in Isi)
+	~	
+	~		|
+
+willingness suicide attacks  = A FUNCTION OF( living conditions Palestinians)
+	~	
+	~		|
+
+"security by shielding (wall)"  = A FUNCTION OF( trust Isi in Paln)
+	~	
+	~		|
+
+degree of equality in negotiations  = A FUNCTION OF( living conditions Palestinians)
+	~	
+	~		|
+
+living conditions Palestinians  = A FUNCTION OF( autonomy Palestinians,"security by shielding (wall)"\
+		,restrictions on Palestinians,reprisal Isi on Paln)
+	~	
+	~		|
+
+mijn visie op europees beleid  = A FUNCTION OF( )
+	~	
+	~		|
+
+restrictions on Palestinians  = A FUNCTION OF( trust Isi in Paln)
+	~	
+	~		|
+
+reprisal Isi on Paln  = A FUNCTION OF( "'successful' suicide attacks")
+	~	
+	~		|
+
+trust Isi in Paln  = A FUNCTION OF( "'successful' suicide attacks",progress peace process\
+		)
+	~	
+	~		|
+
+trust Paln in Isi  = A FUNCTION OF( reprisal Isi on Paln,progress peace process)
+	~	
+	~		|
+
+progress peace process  = A FUNCTION OF( preparedness to dialogue,chance of success of peace process\
+		)
+	~	
+	~		|
+
+chance of success of peace process  = A FUNCTION OF( degree of equality in negotiations\
+		)
+	~	
+	~		|
+
+********************************************************
+	.Control
+********************************************************~
+		Simulation Control Parameters
+	|
+
+FINAL TIME  = 2100
+	~	Year
+	~	The final time for the simulation.
+	|
+
+INITIAL TIME  = 1980
+	~	Year
+	~	The initial time for the simulation.
+	|
+
+SAVEPER  = 
+        TIME STEP
+	~	Year
+	~	The frequency with which output is stored.
+	|
+
+TIME STEP  = 1
+	~	Year
+	~	The time step for the simulation.
+	|
+
+\\\---/// Sketch information - do not modify anything except names
+V300  Do not put anything below this section - it will be ignored
+*View 1
+$192-192-192,0,Times New Roman|12||0-0-0|0-0-0|0-0-255|-1--1--1|-1--1--1|96,96,100,0
+10,1,trust Isi in Paln,405,470,46,11,0,3,0,0,0,0,0,0
+10,2,trust Paln in Isi,444,59,46,11,0,3,0,0,0,0,0,0
+10,3,"'successful' suicide attacks",290,410,59,19,8,3,0,0,0,0,0,0
+10,4,living conditions Palestinians,431,276,50,19,8,3,0,2,0,0,0,0,0-0-0,0-0-0,|12||0-128-0
+10,5,restrictions on Palestinians,531,369,45,19,8,3,0,0,0,0,0,0
+1,6,1,5,1,0,45,0,2,64,0,-1--1--1,|12||0-0-0,1|(515,427)|
+1,7,5,4,1,0,45,0,2,64,0,-1--1--1,|12||0-0-0,1|(502,315)|
+1,8,3,1,1,0,45,0,2,64,0,-1--1--1,|12||0-0-0,1|(319,459)|
+10,9,reprisal Isi on Paln,225,218,42,18,8,3,0,2,0,0,0,0,0-0-0,0-0-0,|12||0-128-0
+1,10,3,9,1,0,43,0,2,64,0,-1--1--1,|12||0-0-0,1|(231,330)|
+1,11,9,4,1,0,45,0,2,192,0,-1--1--1,|12||0-0-0,1|(318,223)|
+10,12,"security by shielding (wall)",431,370,47,19,8,3,0,2,0,0,0,0,0-0-0,0-0-0,|12||0-128-0
+1,13,1,12,1,0,45,0,2,64,0,-1--1--1,|12||0-0-0,1|(440,428)|
+1,14,12,3,1,0,45,0,3,64,0,0-128-0,|12||0-0-0,1|(348,342)|
+1,15,12,4,1,0,45,2,3,64,0,0-128-0,|12||0-0-0,1|(443,323)|
+10,16,willingness suicide attacks,286,313,43,23,8,3,0,0,0,0,0,0
+1,17,4,16,1,0,45,0,2,64,0,-1--1--1,|12||0-0-0,1|(310,289)|
+1,18,16,3,1,0,43,0,2,64,0,-1--1--1,|12||0-0-0,1|(276,343)|
+10,19,progress peace process,581,156,49,19,8,3,0,0,0,0,0,0
+10,20,preparedness to dialogue,651,312,52,19,8,3,0,2,0,0,0,0,0-0-0,0-0-0,|12||0-128-0
+1,21,4,20,1,0,43,0,2,64,0,-1--1--1,|12||0-0-0,1|(547,306)|
+1,22,2,20,1,0,43,0,2,192,0,-1--1--1,|12||0-0-0,1|(656,189)|
+1,23,1,20,1,0,43,0,2,64,0,-1--1--1,|12||0-0-0,1|(602,406)|
+1,24,20,19,1,0,43,0,2,64,0,-1--1--1,|12||0-0-0,1|(641,227)|
+1,25,9,2,1,0,45,0,2,64,0,-1--1--1,|12||0-0-0,1|(258,139)|
+12,26,0,373,406,16,16,5,4,0,0,-1,0,0,0
+-
+12,27,0,482,416,14,14,5,4,0,0,-1,0,0,0
++
+12,28,0,366,307,14,14,5,4,0,0,-1,0,0,0
++
+12,29,0,590,345,14,14,5,4,0,0,-1,0,0,0
++
+12,30,0,342,127,16,16,4,4,0,0,-1,0,0,0
++
+12,31,0,264,274,14,14,4,4,0,0,-1,0,0,0
++
+12,32,0,573,266,15,15,5,4,0,0,-1,0,0,0
++
+10,33,autonomy Palestinians,533,221,37,19,8,3,0,0,0,0,0,0
+10,34,chance of success of peace process,488,109,66,19,8,3,0,0,0,0,0,0
+10,35,degree of equality in negotiations,400,169,58,21,8,3,0,2,0,0,0,0,0-0-0,0-0-0,|12||0-128-0
+1,36,4,35,1,0,43,0,2,64,0,-1--1--1,|12||0-0-0,1|(402,220)|
+1,37,35,34,1,0,43,0,2,64,0,-1--1--1,|12||0-0-0,1|(418,136)|
+1,38,34,19,1,0,43,0,2,64,0,-1--1--1,|12||0-0-0,1|(557,115)|
+12,39,0,492,178,15,15,4,4,0,0,-1,0,0,0
++
+1,40,19,33,1,0,43,0,2,193,0,-1--1--1,|12||0-0-0,1|(575,188)|
+1,41,33,4,1,0,43,0,2,193,0,-1--1--1,|12||0-0-0,1|(480,239)|
+1,42,33,3,1,0,43,2,3,64,0,255-0-0,|12||0-0-0,1|(429,334)|
+1,43,19,2,1,0,0,0,3,64,0,0-128-0,|12||0-0-0,1|(582,84)|
+1,44,19,1,1,0,0,0,3,64,0,0-128-0,|12||0-0-0,1|(696,341)|
+///---\\\
+:L<%^E!@
+9:Current
+22:$,Dollar,Dollars,$s
+22:Hour,Hours
+22:Month,Months
+22:Person,People,Persons
+22:Unit,Units
+22:Week,Weeks
+22:Year,Years
+22:Day,Days
+15:0,0,0,0,0,0
+19:100,0
+27:0,
+34:0,
+5:FINAL TIME
+24:0
+25:0
+26:0

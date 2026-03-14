@@ -1,0 +1,327 @@
+{UTF-8}
+recorded cholera cases=
+	heavily infected+mildly infected*0.25
+	~	
+	~		|
+
+effect of prevention and sanitation on the indirect degree of infection= WITH LOOKUP \
+		(
+	MAX(condition of the sanitary infrastructure,level of prevention),
+		([(0,0)-(1,1)],(0,1),(0.25,0.9),(0.5,0.5),(0.75,0.1),(1,0) ))
+	~	
+	~		|
+
+level of prevention= GAME (
+	0.1)
+	~	Dmnl
+	~	([(0,0)-(4000,10)],(0,0.1),(130,0.1),(186,0.3),(206,0.5),(365,0.8),(3650,0.\
+		8) )
+	|
+
+fraction of infected=
+	(recently infected population+mildly infected population+heavily infected population\
+		)/(recently infected population
++mildly infected population+heavily infected population+susceptible population+recovered temporarily immune population\
+		)
+	~	Dmnl
+	~		|
+
+smoothed fraction of contaminated water=
+	DELAY3I(effect of the fraction of infected on the fraction of contaminated water, 14\
+		, 0.0004)
+	~	
+	~		|
+
+indirect degree of infection=
+	smoothed fraction of contaminated water*effect of prevention and sanitation on the indirect degree of infection\
+		*connectedness of aquifers
+	~	1/Day
+	~		|
+
+cumulative cholera cases= INTEG (
+	recorded cholera cases,
+		0)
+	~	
+	~		|
+
+connectedness of aquifers=
+	0.28
+	~	
+	~		|
+
+cholera deaths=
+	heavily infected population/average duration of illness*effect of the average state of health services on the fraction of cholera deaths
+	~	person/Day
+	~		|
+
+cumulative cholera deaths= INTEG (
+	cholera deaths,
+		0)
+	~	person
+	~		|
+
+effect of the fraction of infected on the fraction of contaminated water= WITH LOOKUP\
+		 (
+	fraction of infected,
+		([(0,0)-(1,1)],(0,0),(0.125,0.5),(0.25,0.75),(0.5,0.9),(0.75,0.99),(1,1) ))
+	~	
+	~	([(0,0)-(1,1)],(0,0),(0.25,0.8),(0.5,0.95),(0.75,0.98),(1,1) )\!\!\!
+	|
+
+effect of the average health condition on the fraction of mildly infected of all infected\
+		=
+	0.95
+	~	
+	~		|
+
+effect of the average state of health services on the fraction of cholera deaths= WITH LOOKUP\
+		 (
+	average state of health services,
+		([(0,0)-(1,1)],(0,1),(0.25,0.5),(0.5,0.2),(0.75,0.05),(1,0) ))
+	~	
+	~		|
+
+recently infected population= INTEG (
+	cholera infections-mildly infected-heavily infected,
+		0)
+	~	
+	~		|
+
+average immunity period=
+	6*365
+	~	Day
+	~		|
+
+average incubation time=
+	1
+	~	Day
+	~		|
+
+average state of health services= GAME (
+	0.15)
+	~	
+	~	([(0,0)-(4000,1)],(0,0.15),(130,0.15),(183,0.4),(206,0.7),(250,0.75),(300,0\
+		.8),(3650,0.8) ) over time
+	|
+
+average duration of illness=
+	10
+	~	Day
+	~		|
+
+recovered from heavy infection=
+	heavily infected population/average duration of illness*(1-effect of the average state of health services on the fraction of cholera deaths\
+		)
+	~	person/Day
+	~		|
+
+recovered temporarily immune population= INTEG (
+	recovered from heavy infection+recovered from mild infection-recovered to susceptible by loss of immunity\
+		,
+		1.3228e+007-3e+006-1000-1000-50)
+	~	person
+	~		|
+
+recovered to susceptible by loss of immunity=
+	recovered temporarily immune population/average immunity period
+	~	
+	~		|
+
+cholera infections=
+	susceptible population*indirect degree of infection
+	~	person/Day
+	~		|
+
+mildly infected population= INTEG (
+	+mildly infected-recovered from mild infection,
+		0)
+	~	person
+	~		|
+
+recovered from mild infection=
+	mildly infected population/average duration of illness
+	~	person/Day
+	~		|
+
+condition of the sanitary infrastructure= GAME (
+	0.5)
+	~	Dmnl
+	~	([(0,0)-(4000,1)],(0,0.5),(183,0.55),(365,0.6),(1825,0.85),(3650,0.9) ) \
+		over time
+	|
+
+mildly infected=
+	recently infected population/average incubation time*effect of the average health condition on the fraction of mildly infected of all infected
+	~	person/Day
+	~		|
+
+heavily infected=
+	recently infected population/average incubation time*(1-effect of the average health condition on the fraction of mildly infected of all infected\
+		)
+	~	
+	~		|
+
+heavily infected population= INTEG (
+	+heavily infected-cholera deaths-recovered from heavy infection,
+		0)
+	~	person
+	~		|
+
+susceptible population= INTEG (
+	recovered to susceptible by loss of immunity-cholera infections,
+		3e+006)
+	~	
+	~		|
+
+********************************************************
+	.Control
+********************************************************~
+		Simulation Control Parameters
+	|
+
+FINAL TIME  = 3650
+	~	Day
+	~	The final time for the simulation.
+	|
+
+INITIAL TIME  = 0
+	~	Day
+	~	The initial time for the simulation.
+	|
+
+SAVEPER  = 
+        TIME STEP
+	~	Day
+	~	The frequency with which output is stored.
+	|
+
+TIME STEP  = 0.5
+	~	Day
+	~	The time step for the simulation.
+	|
+
+\\\---/// Sketch information - do not modify anything except names
+V300  Do not put anything below this section - it will be ignored
+*View 1
+$192-192-192,0,Times New Roman|12||0-0-0|0-0-0|0-0-255|-1--1--1|-1--1--1|96,96,100,0
+10,1,susceptible population,282,204,40,20,3,3,0,0,0,0,0,0
+10,2,recently infected population,455,207,46,26,3,3,0,0,0,0,0,0
+10,3,recovered temporarily immune population,854,206,40,31,3,3,0,0,0,0,0,0
+10,4,heavily infected population,668,431,47,27,3,3,0,0,0,0,0,0
+10,5,mildly infected population,667,210,45,29,3,3,0,0,0,0,0,0
+10,6,cumulative cholera deaths,659,571,36,25,3,3,0,0,0,0,0,0
+1,7,8,3,100,0,0,22,0,0,0,-1--1--1,,1|(854,99)|
+11,8,556,673,99,6,8,34,3,0,0,1,0,0,0
+10,9,recovered to susceptible by loss of immunity,673,126,78,19,40,3,0,0,-1,0,0,0
+1,10,8,1,4,0,0,22,0,0,0,-1--1--1,,1|(282,99)|
+1,11,13,2,4,0,0,22,0,0,0,-1--1--1,,1|(391,209)|
+1,12,13,1,100,0,0,22,0,0,0,-1--1--1,,1|(341,209)|
+11,13,684,367,209,6,8,34,3,0,0,1,0,0,0
+10,14,cholera infections,367,239,54,11,40,3,0,0,-1,0,0,0
+1,15,17,4,4,0,0,22,0,0,0,-1--1--1,,1|(549,414)|
+1,16,17,2,100,0,0,22,0,0,0,-1--1--1,,1|(471,319)|
+11,17,604,471,414,6,8,34,3,0,0,1,0,0,0
+10,18,heavily infected,471,441,48,11,40,3,0,0,-1,0,0,0
+1,19,21,5,4,0,0,22,0,0,0,-1--1--1,,1|(593,205)|
+1,20,21,2,100,0,0,22,0,0,0,-1--1--1,,1|(526,205)|
+11,21,156,558,205,6,8,34,3,0,0,1,0,0,0
+10,22,mildly infected,558,232,45,11,40,3,0,0,-1,0,0,0
+1,23,25,3,4,0,0,22,0,0,0,-1--1--1,,1|(854,320)|
+1,24,25,4,100,0,0,22,0,0,0,-1--1--1,,1|(781,411)|
+11,25,172,854,411,6,8,34,3,0,0,1,0,0,0
+10,26,recovered from heavy infection,854,438,49,19,40,3,0,0,-1,0,0,0
+1,27,29,3,4,0,0,22,0,0,0,-1--1--1,,1|(792,203)|
+1,28,29,5,100,0,0,22,0,0,0,-1--1--1,,1|(735,203)|
+11,29,652,764,203,6,8,34,3,0,0,1,0,0,0
+10,30,recovered from mild infection,764,232,49,19,40,3,0,0,-1,0,0,0
+1,31,33,6,4,0,0,22,0,0,0,-1--1--1,,1|(655,531)|
+1,32,33,4,100,0,0,22,0,0,0,-1--1--1,,1|(655,481)|
+11,33,668,655,511,8,6,33,3,0,0,4,0,0,0
+10,34,cholera deaths,709,511,46,11,40,3,0,0,-1,0,0,0
+10,35,condition of the sanitary infrastructure,100,364,68,19,8,3,0,2,0,0,0,0,0-0-0,0-0-0,|12||0-128-0
+1,36,3,9,1,0,0,0,0,64,0,-1--1--1,,1|(793,133)|
+1,37,1,13,1,0,0,0,0,64,0,-1--1--1,,1|(356,180)|
+10,38,indirect degree of infection,295,294,56,19,8,3,0,0,0,0,0,0
+1,39,35,66,0,0,0,0,0,64,0,-1--1--1,,1|(106,339)|
+1,40,38,14,1,0,0,0,0,64,0,-1--1--1,,1|(314,257)|
+10,41,average state of health services,837,582,50,19,8,3,0,3,0,0,0,0,128-128-128,0-0-0,|12||0-128-0
+1,42,4,26,1,0,0,0,0,64,0,-1--1--1,,1|(791,446)|
+1,43,4,34,1,0,0,0,0,64,0,-1--1--1,,1|(701,482)|
+1,44,41,45,1,0,0,0,0,64,0,-1--1--1,,1|(852,557)|
+10,45,effect of the average state of health services on the fraction of cholera deaths,858,515,102,28,8,3,0,1,0,0,0,0,128-128-128,0-0-0,|12||0-0-0
+10,46,effect of the average health condition on the fraction of mildly infected of all infected,657,353,105,28,8,3,0,2,0,0,0,0,0-0-0,0-0-0,|12||255-0-0
+1,47,45,26,1,0,0,0,0,64,0,-1--1--1,,1|(865,466)|
+1,48,45,34,1,0,0,0,0,64,0,-1--1--1,,1|(804,546)|
+1,49,46,22,0,0,0,0,0,64,0,-1--1--1,,1|(605,289)|
+1,50,46,17,0,0,0,0,0,64,0,-1--1--1,,1|(530,394)|
+1,51,5,29,1,0,0,0,0,64,0,-1--1--1,,1|(736,190)|
+10,52,fraction of infected,422,524,58,11,8,3,0,0,0,0,0,0
+1,53,52,70,1,0,0,0,0,64,0,-1--1--1,,1|(363,513)|
+1,54,2,52,1,0,0,0,0,64,0,-1--1--1,,1|(406,360)|
+1,55,4,52,1,0,0,0,0,64,0,-1--1--1,,1|(558,510)|
+1,56,2,21,1,0,0,0,0,64,0,-1--1--1,,1|(527,183)|
+1,57,2,17,1,0,0,0,0,64,0,-1--1--1,,1|(503,304)|
+10,58,average incubation time,550,299,48,19,8,3,0,0,0,0,0,0
+1,59,58,22,0,0,0,0,0,64,0,-1--1--1,,1|(553,268)|
+1,60,58,17,1,0,0,0,0,64,0,-1--1--1,,1|(522,367)|
+10,61,average immunity period,462,126,55,19,8,3,0,0,0,0,0,0
+10,62,average duration of illness,785,319,53,19,8,3,0,0,0,0,0,0
+1,63,62,25,0,0,0,0,0,64,0,-1--1--1,,1|(820,366)|
+1,64,62,34,1,0,0,0,0,64,0,-1--1--1,,1|(746,464)|
+1,65,62,30,0,0,0,0,0,64,0,-1--1--1,,1|(776,282)|
+10,66,effect of prevention and sanitation on the indirect degree of infection,120,293,77,28,8,3,0,0,0,0,0,0
+1,67,66,38,0,0,0,0,0,64,0,-1--1--1,,1|(211,293)|
+10,68,connectedness of aquifers,196,212,47,19,8,3,0,0,0,0,0,0
+1,69,68,38,0,0,0,0,0,64,0,-1--1--1,,1|(239,248)|
+10,70,effect of the fraction of infected on the fraction of contaminated water,295,455,81,28,8,3,0,0,0,0,0,0
+10,71,cumulative cholera cases,95,119,41,24,3,3,0,0,0,0,0,0
+12,72,48,252,120,10,8,0,3,0,0,-1,0,0,0
+1,73,75,71,4,0,0,22,0,0,0,-1--1--1,,1|(164,119)|
+1,74,75,72,100,0,0,22,0,0,0,-1--1--1,,1|(223,119)|
+11,75,48,198,119,6,8,34,3,0,0,1,0,0,0
+10,76,recorded cholera cases,198,146,55,19,40,3,0,0,-1,0,0,0
+10,77,mildly infected population,311,574,50,19,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,78,77,52,1,0,0,0,0,64,0,-1--1--1,,1|(357,558)|
+10,79,level of prevention,94,230,57,11,8,3,0,2,0,0,0,0,0-0-0,0-0-0,|12||0-128-0
+1,80,79,66,0,0,0,0,0,64,0,-1--1--1,,1|(100,246)|
+10,81,smoothed fraction of contaminated water,277,370,66,19,8,3,0,2,0,0,0,0,0-0-0,0-0-0,|12||255-0-0
+1,82,70,81,1,0,0,0,0,64,0,-1--1--1,,1|(279,414)|
+1,83,81,38,1,0,0,0,0,64,0,-1--1--1,,1|(279,326)|
+10,84,susceptible population,411,572,40,19,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+10,85,recovered temporarily immune population,536,569,75,19,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,86,84,52,1,0,0,0,0,64,0,-1--1--1,,1|(419,550)|
+1,87,85,52,1,0,0,0,0,64,0,-1--1--1,,1|(483,545)|
+10,88,mildly infected,109,74,54,11,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+10,89,heavily infected,230,75,57,11,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,90,89,75,0,0,0,0,0,64,0,-1--1--1,,1|(215,94)|
+1,91,88,75,0,0,0,0,0,64,0,-1--1--1,,1|(154,97)|
+1,92,61,9,0,0,0,0,0,64,0,-1--1--1,,1|(549,126)|
+///---\\\
+:GRAPH GRAPH
+:TITLE GRAPH
+:SCALE
+:VAR fractie besmet water
+:SCALE
+:VAR smoothed fractie besmet water
+:SCALE
+:VAR effect fractie geinfecteerden op besmetting water
+:L<%^E!@
+1:ASHSandPrevInfraTEST.vdf
+9:ASHSandPrevInfraTEST
+15:0,0,0,5,0,0
+19:100,0
+27:0,
+34:0,
+4:Time
+5:susceptible population
+35:Date
+36:YYYY-MM-DD
+37:2000
+38:1
+39:1
+40:2
+41:0
+42:0
+24:0
+25:3650
+26:3650

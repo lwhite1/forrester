@@ -1,0 +1,441 @@
+{UTF-8}
+emigratie=
+	bevolking*normale emigratiegraad*(1+(1-slummultiplicator voor migratie))
+	~	people/year
+	~		|
+
+switch jobs=
+	1
+	~	
+	~		|
+
+immigratie=
+	bevolking*normale immigratiegraad*jobbeschikbaarheids multiplicator voor immigratie*\
+		huizenbeschikbaarheids multiplicator voor immigratie
+	*(slummultiplicator voor migratie*switch leegstandseffect+(1-switch leegstandseffect\
+		))
+	~	people/year
+	~		|
+
+slummultiplicator voor migratie= WITH LOOKUP (
+	leegstandsgraad van huizen,
+		([(0,0)-(1,1)],(0,1),(0.2,1),(0.4,0.5),(0.6,0.1),(0.8,0) ))
+	~	
+	~		|
+
+grondgebruik per bedrijf=
+	0.1
+	~	ha/structure
+	~		|
+
+afbraak van huizen=
+	afbraakgraad van huizen*huizen+extra afbraakgraad*huizen*switch leegstandseffect
+	~	structure/year
+	~		|
+
+landgebruik=
+	(bedrijven*grondgebruik per bedrijf + huizen*grondgebruik per huis)/totale grondoppervlakte
+	~	fraction
+	~		|
+
+leegstandsgraad van huizen=
+	MIN(MAX((1-verhouding huishoudens tot huizen),0),1)
+	~	
+	~		|
+
+effect schaarste landgebruik op intensiviteit bedrijfsgebouwen= WITH LOOKUP (
+	landgebruik,
+		([(0,0)-(1,3)],(0,1),(0.5,1),(0.75,1.15),(1,2) ))
+	~	
+	~		|
+
+totale grondoppervlakte=
+	5000
+	~	ha
+	~		|
+
+extra afbraakgraad= WITH LOOKUP (
+	leegstandsgraad van huizen,
+		([(0,0)-(100,10)],(0,0),(0.1,0),(0.15,0.05),(1,0.5) ))
+	~	
+	~		|
+
+switch leegstandseffect=
+	1
+	~	
+	~		|
+
+jobs=
+	initieel aantal jobs per bedrijfsgebouw*bedrijven*(effect schaarste landgebruik op intensiviteit bedrijfsgebouwen\
+		*switch jobs + (1- switch jobs))
+	~	job
+	~		|
+
+verhouding huishoudens tot huizen=
+	huishoudens/huizen
+	~	family/structure
+	~		|
+
+geboortes=
+	geboortegraad*bevolking
+	~	people/year
+	~		|
+
+huishoudens=
+	bevolking/gemiddelde grootte van huishoudens
+	~	units
+	~		|
+
+bevolking= INTEG (
+	immigratie+geboortes-emigratie-sterftes,
+		50000)
+	~	people
+	~		|
+
+sterftes=
+	sterftegraad*bevolking
+	~	
+	~		|
+
+werkloosheidsgraad=
+	MIN(MAX((1 - 1/beroepsbevolking tot jobs ratio),0),1)
+	~	
+	~		|
+
+constructie van huizen=
+	 constructiegraad van huizen*landbeschikbaarheids multiplicator voor huizen*huizenschaarste multiplicator\
+		*huizen
+	~	structure/year
+	~		|
+
+constructie van bedrijfsgebouwen=
+	constructiegraad van bedrijfsgebouwen*landbeschikbaarheids multiplicator voor bedrijfsgebouwen\
+		*beroepsbevolkings multiplicator voor bedrijven*bedrijven
+	~	structure/year
+	~		|
+
+jobbeschikbaarheids multiplicator voor immigratie= WITH LOOKUP (
+	beroepsbevolking tot jobs ratio,
+		([(0,0)-(2,2)],(0,2),(0.5,1.75),(1,1),(1.5,0.25),(2,0.1) ))
+	~	fraction
+	~		|
+
+huizenbeschikbaarheids multiplicator voor immigratie= WITH LOOKUP (
+	verhouding huishoudens tot huizen,
+		([(0,0)-(2,2)],(0,1.4),(0.5,1.3),(1,0.9),(1.5,0.05),(2,0) ))
+	~	fraction
+	~		|
+
+constructiegraad van bedrijfsgebouwen = 0.07
+	~	fraction/year
+	~		|
+
+afbraakgraad van bedrijfsgebouwen = 0.025
+	~	fraction/year
+	~		|
+
+geboortegraad=
+	0.03
+	~	fraction/year
+	~		|
+
+afbraak van bedrijfsgebouwen = afbraakgraad van bedrijfsgebouwen*bedrijven
+	~	structure/year
+	~		|
+
+beroepsbevolkings multiplicator voor bedrijven= WITH LOOKUP (
+	beroepsbevolking tot jobs ratio,
+		([(0,0)-(2,2)],(0,0.2),(0.5,0.3),(1,1),(1.5,1.7),(2,2) ))
+	~	fraction
+	~		|
+
+landbeschikbaarheids multiplicator voor bedrijfsgebouwen= WITH LOOKUP (
+	landgebruik,
+		([(0,0)-(1,2)],(0,1),(0.5,1.5),(1,0) ))
+	~	fraction
+	~		|
+
+bedrijven = INTEG(constructie van bedrijfsgebouwen-afbraak van bedrijfsgebouwen,1000)
+	~	units
+	~		|
+
+sterftegraad = 0.015
+	~	fraction/year
+	~		|
+
+constructiegraad van huizen = 0.07
+	~	fraction/year
+	~		|
+
+afbraakgraad van huizen = 0.015
+	~	fraction/year
+	~		|
+
+huizen = INTEG(constructie van huizen-afbraak van huizen,14000)
+	~	units
+	~		|
+
+huizenschaarste multiplicator= WITH LOOKUP (
+	verhouding huishoudens tot huizen,
+		([(0,0)-(2,2)],(0,0.2),(0.5,0.3),(1,1),(1.5,1.7),(2,2) ))
+	~	fraction
+	~		|
+
+landbeschikbaarheids multiplicator voor huizen= WITH LOOKUP (
+	landgebruik,
+		([(0,0)-(1,2)],(0,0.4),(0.25,1),(0.5,1.5),(0.75,1),(1,0) ))
+	~	fraction
+	~		|
+
+gemiddelde grootte van huishoudens = 4
+	~	people/family
+	~		|
+
+normale immigratiegraad = 0.1
+	~	fraction/year
+	~		|
+
+initieel aantal jobs per bedrijfsgebouw = 18
+	~	job/structure
+	~		|
+
+beroepsbevolking = beroepsbevolkingsratio*bevolking
+	~	people
+	~		|
+
+beroepsbevolking tot jobs ratio = beroepsbevolking/jobs
+	~	people/job
+	~		|
+
+beroepsbevolkingsratio = 0.35
+	~	fraction
+	~		|
+
+grondgebruik per huis=
+	0.05
+	~	ha/structure
+	~		|
+
+normale emigratiegraad = 0.07
+	~	fraction/year
+	~		|
+
+********************************************************
+	.Control
+********************************************************~
+		Simulation Control Paramaters
+	|
+
+FINAL TIME  = 200
+	~	year
+	~	The final time for the simulation.
+	|
+
+INITIAL TIME  = 0
+	~	year
+	~	The initial time for the simulation.
+	|
+
+SAVEPER  = 
+        TIME STEP
+	~	year
+	~	The frequency with which output is stored.
+	|
+
+TIME STEP  = 0.03125
+	~	year
+	~	The time step for the simulation.
+	|
+
+\\\---/// Sketch information - do not modify anything except names
+V300  Do not put anything below this section - it will be ignored
+*View 1
+$192-192-192,0,Geneva|9||0-0-0|0-0-0|0-0-255|-1--1--1|-1--1--1|96,96,90,0
+10,1,bedrijven,601,168,53,27,3,3,0,26,0,0,0,0,-1--1--1,0-0-0,|12|B|0-0-255
+10,2,huizen,330,594,53,27,3,3,0,26,0,0,0,0,-1--1--1,0-0-0,|12|B|0-0-255
+10,3,bevolking,944,595,53,27,3,3,0,26,0,0,0,0,-1--1--1,0-0-0,|12|B|0-0-255
+10,4,landgebruik,318,350,48,11,8,3,1,26,0,0,0,0,-1--1--1,0-0-0,|12|B|0-0-255
+10,5,landbeschikbaarheids multiplicator voor bedrijfsgebouwen,381,82,81,27,8,3,1,10,0,0,0,0,-1--1--1,0-0-0,|12||0-0-255
+10,6,landbeschikbaarheids multiplicator voor huizen,233,463,87,18,8,3,3,10,0,0,0,0,-1--1--1,0-0-0,|12||0-0-255
+10,7,jobs,698,282,17,10,8,3,2,10,0,0,0,0,-1--1--1,0-0-0,|12||0-0-255
+10,8,beroepsbevolking,899,424,40,19,8,3,2,10,0,0,0,0,-1--1--1,0-0-0,|12||0-0-255
+10,9,beroepsbevolking tot jobs ratio,929,257,73,19,8,3,2,26,0,0,0,0,-1--1--1,0-0-0,|12|B|0-0-255
+10,10,verhouding huishoudens tot huizen,572,710,66,28,8,3,3,26,0,0,0,0,-1--1--1,0-0-0,|12|B|0-0-255
+10,11,huizenschaarste multiplicator,285,755,59,18,8,3,3,10,0,0,0,0,-1--1--1,0-0-0,|12||0-0-255
+10,12,huizenbeschikbaarheids multiplicator voor immigratie,1032,833,89,27,8,3,3,10,0,0,0,0,-1--1--1,0-0-0,|12||0-0-255
+10,13,jobbeschikbaarheids multiplicator voor immigratie,1102,381,77,27,8,3,2,10,0,0,0,0,-1--1--1,0-0-0,|12||0-0-255
+10,14,beroepsbevolkings multiplicator voor bedrijven,747,94,70,27,8,3,2,10,0,0,0,0,-1--1--1,0-0-0,|12||0-0-255
+10,15,constructiegraad van huizen,144,687,61,18,8,3,4,10,0,0,0,0,0-0-0,0-0-0,|12||0-0-255
+10,16,normale immigratiegraad,1267,577,61,18,8,3,4,10,0,0,0,0,-1--1--1,0-0-0,|12||0-0-255
+10,17,normale emigratiegraad,778,660,57,18,8,3,4,10,0,0,0,0,-1--1--1,0-0-0,|12||0-0-255
+10,18,afbraakgraad van huizen,328,700,50,18,8,3,4,10,0,0,0,0,0-0-0,0-0-0,|12||0-0-255
+10,19,initieel aantal jobs per bedrijfsgebouw,757,403,70,18,8,3,4,10,0,0,0,0,0-0-0,0-0-0,|12||0-0-255
+10,20,afbraakgraad van bedrijfsgebouwen,759,253,65,18,8,3,4,10,0,0,0,0,-1--1--1,0-0-0,|12||0-0-255
+10,21,beroepsbevolkingsratio,992,471,84,10,0,3,4,10,0,0,0,0,-1--1--1,0-0-0,|12||0-0-255
+10,22,constructiegraad van bedrijfsgebouwen,445,251,76,18,8,3,4,10,0,0,0,0,0-0-0,0-0-0,|12||0-0-255
+10,23,geboortegraad,1028,748,54,10,8,3,4,10,0,0,0,0,-1--1--1,0-0-0,|12||0-0-255
+10,24,sterftegraad,835,738,44,10,0,3,4,10,0,0,0,0,-1--1--1,0-0-0,|12||0-0-255
+10,25,grondgebruik per bedrijf,239,131,49,18,8,3,4,10,0,0,0,0,0-0-0,0-0-0,|12||0-0-255
+10,26,grondgebruik per huis,467,458,49,18,8,3,4,10,0,0,0,0,-1--1--1,0-0-0,|12||0-0-255
+10,27,gemiddelde grootte van huishoudens,590,525,72,18,8,3,4,10,0,0,0,0,-1--1--1,0-0-0,|12||0-0-255
+1,28,1,60,2,0,0,0,0,0,0,-1--1--1,,1|(510,213)|
+1,29,1,67,2,0,0,0,0,0,0,-1--1--1,,1|(656,218)|
+1,30,1,4,1,1,0,0,0,0,0,-1--1--1,,1|(504,277)|
+1,31,2,4,1,3,0,0,0,0,0,-1--1--1,,1|(333,441)|
+1,32,4,5,1,1,0,0,0,0,0,-1--1--1,,1|(310,177)|
+1,33,4,6,1,3,0,0,0,0,0,-1--1--1,,1|(256,416)|
+1,34,2,72,2,0,0,0,0,0,0,-1--1--1,,1|(286,658)|
+1,35,2,77,2,0,0,0,0,0,0,-1--1--1,,1|(378,659)|
+1,36,1,7,2,2,0,0,0,0,0,-1--1--1,,1|(626,242)|
+1,37,3,8,1,2,0,0,0,0,0,-1--1--1,,1|(916,558)|
+1,38,7,9,1,2,0,0,0,0,0,-1--1--1,,1|(771,292)|
+1,39,8,9,0,2,0,0,0,0,0,-1--1--1,,1|(912,347)|
+1,40,2,10,1,3,0,0,0,0,0,-1--1--1,,1|(482,559)|
+1,41,11,72,1,3,0,0,0,0,0,-1--1--1,,1|(226,715)|
+1,42,10,11,1,3,0,0,0,0,0,-1--1--1,,1|(436,785)|
+1,43,10,12,1,3,0,0,0,0,0,-1--1--1,,1|(787,860)|
+1,44,9,13,2,2,0,0,0,0,0,-1--1--1,,1|(957,250)|
+1,45,9,14,2,2,0,0,0,0,0,-1--1--1,,1|(873,188)|
+1,46,15,72,0,4,0,0,0,0,0,-1--1--1,,1|(169,661)|
+1,47,18,77,0,4,0,0,0,0,0,-1--1--1,,1|(379,665)|
+1,48,19,7,0,4,0,0,0,0,0,-1--1--1,,1|(728,344)|
+1,49,20,67,1,4,0,0,0,0,0,-1--1--1,,1|(739,237)|
+1,50,21,8,1,4,0,0,0,0,0,-1--1--1,,1|(947,444)|
+1,51,22,60,1,4,0,0,0,0,0,-1--1--1,,1|(463,239)|
+1,52,23,84,0,4,0,0,0,0,0,-1--1--1,,1|(1024,730)|
+1,53,24,116,0,4,0,0,0,0,0,-1--1--1,,1|(855,717)|
+1,54,26,4,0,4,0,0,0,0,0,-1--1--1,,1|(393,404)|
+1,55,25,4,1,4,0,0,0,0,0,-1--1--1,,1|(251,247)|
+12,56,48,421,162,10,8,0,3,0,0,-1,0,0,0
+1,57,59,1,4,0,0,22,0,0,0,-1--1--1,,1|(524,165)|
+1,58,59,56,100,0,0,22,0,0,0,-1--1--1,,1|(459,165)|
+11,59,48,494,165,7,11,34,3,0,0,1,0,0,0
+10,60,constructie van bedrijfsgebouwen,494,194,65,18,40,3,0,10,0,0,0,0,-1--1--1,0-0-0,|12||0-0-255
+1,61,5,59,1,1,0,0,0,64,0,-1--1--1,,1|(454,98)|
+1,62,14,59,1,2,0,0,0,64,0,-1--1--1,,1|(594,92)|
+12,63,48,798,166,10,8,0,3,0,0,-1,0,0,0
+1,64,66,63,4,0,0,22,0,0,0,-1--1--1,,1|(758,166)|
+1,65,66,1,100,0,0,22,0,0,0,-1--1--1,,1|(683,166)|
+11,66,48,721,166,8,11,34,3,0,0,1,0,0,0
+10,67,afbraak van bedrijfsgebouwen,721,195,65,18,40,3,0,10,0,0,0,0,-1--1--1,0-0-0,|12||0-0-255
+12,68,48,148,599,10,8,0,3,0,0,-1,0,0,0
+1,69,71,2,4,0,0,22,0,0,0,-1--1--1,,1|(245,598)|
+1,70,71,68,100,0,0,22,0,0,0,-1--1--1,,1|(178,598)|
+11,71,48,206,598,8,11,34,3,0,0,1,0,0,0
+10,72,constructie van huizen,206,627,55,18,40,3,0,10,0,0,0,0,-1--1--1,0-0-0,|12||0-0-255
+12,73,48,504,595,10,8,0,3,0,0,-1,0,0,0
+1,74,76,73,4,0,0,22,0,0,0,-1--1--1,,1|(473,594)|
+1,75,76,2,100,0,0,22,0,0,0,-1--1--1,,1|(409,594)|
+11,76,48,444,594,8,11,34,3,0,0,1,0,0,0
+10,77,afbraak van huizen,444,623,43,18,40,3,0,10,0,0,0,0,-1--1--1,0-0-0,|12||64-160-98
+12,78,48,781,591,10,8,0,3,0,2,-1,0,0,0,0-0-0,0-0-0,|9||0-0-255
+12,79,48,1121,588,10,8,0,3,0,2,-1,0,0,0,0-0-0,0-0-0,|9||0-0-255
+12,80,48,975,747,10,8,0,3,0,2,-1,0,0,0,0-0-0,0-0-0,|9||0-0-255
+1,81,83,3,4,0,0,22,0,0,0,-1--1--1,,1|(968,656)|
+1,82,83,80,100,0,0,22,0,0,0,-1--1--1,,1|(968,723)|
+11,83,48,968,699,11,8,33,3,0,0,4,0,0,0
+10,84,geboortes,1017,699,38,10,40,3,0,10,0,0,0,0,-1--1--1,0-0-0,|12||0-0-255
+1,85,6,71,1,3,0,0,0,64,0,-1--1--1,,1|(207,571)|
+1,86,88,78,4,0,0,22,0,0,0,-1--1--1,,1|(807,598)|
+1,87,88,3,100,0,0,22,0,0,0,-1--1--1,,1|(865,598)|
+11,88,684,831,598,8,11,34,3,0,0,1,0,0,0
+10,89,emigratie,831,619,35,10,40,3,0,10,-1,0,0,0,0-0-0,0-0-0,|12||0-0-255
+1,90,17,89,0,4,0,0,0,64,0,-1--1--1,,1|(803,639)|
+1,91,3,88,1,0,0,0,0,64,0,-1--1--1,,1|(869,564)|
+1,92,94,3,4,0,0,22,0,0,0,-1--1--1,,1|(1020,590)|
+1,93,94,79,100,0,0,22,0,0,0,-1--1--1,,1|(1085,590)|
+11,94,140,1052,590,8,11,34,3,0,0,1,0,0,0
+10,95,immigratie,1052,611,39,10,40,3,0,10,-1,0,0,0,0-0-0,0-0-0,|12||0-0-255
+1,96,13,94,1,2,0,0,0,64,0,-1--1--1,,1|(1102,438)|
+1,97,16,95,0,4,0,0,0,64,0,-1--1--1,,1|(1155,593)|
+1,98,12,95,1,3,0,0,0,64,0,-1--1--1,,1|(1128,750)|
+1,99,3,84,1,0,0,0,0,64,0,-1--1--1,,1|(1000,666)|
+1,100,3,94,1,0,0,0,0,64,0,-1--1--1,,1|(996,543)|
+10,101,werkloosheidsgraad,1170,193,59,9,8,3,0,2,0,0,0,0,-1--1--1,0-0-0,|9||0-0-255
+1,102,9,101,0,0,0,0,0,64,0,-1--1--1,,1|(1061,222)|
+10,103,huishoudens,657,626,39,9,8,3,0,2,0,0,0,0,0-0-0,0-0-0,|9||0-0-255
+1,104,27,103,0,0,0,0,0,64,0,-1--1--1,,1|(622,574)|
+1,105,3,103,1,0,0,0,0,64,0,-1--1--1,,1|(832,522)|
+10,106,leegstandsgraad van huizen,583,816,50,15,8,3,0,2,0,0,0,0,-1--1--1,0-0-0,|9||0-0-255
+1,107,10,106,0,0,0,0,1,64,0,64-160-98,|9||0-0-0,1|(576,762)|
+1,108,103,10,0,0,0,0,0,64,0,-1--1--1,,1|(629,653)|
+1,109,106,110,1,0,0,0,1,64,0,64-160-98,|9||0-0-0,1|(530,821)|
+10,110,extra afbraakgraad,458,808,53,9,8,3,0,2,0,0,0,0,0-0-0,0-0-0,|9||64-160-98
+1,111,110,77,0,0,0,0,1,64,0,64-160-98,|9||0-0-0,1|(452,726)|
+12,112,48,924,753,10,8,0,3,0,2,-1,0,0,0,0-0-0,0-0-0,|9||0-0-255
+1,113,115,112,4,0,0,22,0,0,0,-1--1--1,,1|(918,720)|
+1,114,115,3,100,0,0,22,0,0,0,-1--1--1,,1|(918,652)|
+11,115,48,918,689,8,6,33,3,0,0,2,0,0,0
+10,116,sterftes,887,689,23,9,40,3,0,2,-1,0,0,0,0-0-0,0-0-0,|9||0-0-255
+1,117,3,116,0,0,0,0,0,64,0,-1--1--1,,1|(913,645)|
+10,118,switch leegstandseffect,308,903,48,15,8,3,0,0,0,0,0,0
+1,119,118,77,0,0,0,0,0,64,0,-1--1--1,,1|(371,770)|
+10,120,effect schaarste landgebruik op intensiviteit bedrijfsgebouwen,510,332,77,22,8,3,0,2,0,0,0,0,0-0-0,0-0-0,|9||0-128-0
+1,121,4,120,1,0,0,0,1,64,0,0-128-0,|9||0-0-0,1|(416,361)|
+1,122,120,7,0,0,0,0,1,64,0,0-128-0,|9||0-0-0,1|(627,302)|
+10,123,totale grondoppervlakte,157,346,50,15,8,3,0,2,-1,0,0,0,0-0-0,0-0-0,|9||0-0-255
+1,124,123,4,0,0,0,0,0,64,0,-1--1--1,,1|(231,347)|
+12,125,0,469,849,22,9,8,7,0,0,-1,0,0,0
+Policy1
+12,126,0,492,882,22,9,8,7,0,0,-1,0,0,0
+Policy2
+10,127,switch jobs,609,363,33,9,8,3,0,2,-1,0,0,0,-1--1--1,0-0-0,|9||0-128-0
+1,128,127,7,0,0,0,0,0,64,0,-1--1--1,,1|(647,328)|
+10,129,slummultiplicator voor migratie,904,930,50,15,8,3,0,2,0,0,0,0,-1--1--1,0-0-0,|9||0-128-0
+1,130,106,129,1,0,0,0,0,64,0,-1--1--1,,1|(666,866)|
+1,131,129,95,1,0,0,0,0,64,0,-1--1--1,,1|(1144,899)|
+1,132,118,95,1,0,0,0,0,64,0,-1--1--1,,1|(678,954)|
+1,133,129,89,1,0,0,0,0,64,0,-1--1--1,,1|(807,795)|
+\\\---/// Sketch information - do not modify anything except names
+V300  Do not put anything below this section - it will be ignored
+*View 2
+$192-192-192,0,Times New Roman|12||0-0-0|0-0-0|0-0-255|-1--1--1|-1--1--1|96,96,80,0
+///---\\\
+:GRAPH URBAN1
+:TITLE URBAN1
+:WIP
+:X-DIV 4
+:MAX-POINTS 2000
+:SCALE
+:VAR Population
+:DATASET *
+:LINE-WIDTH 3
+:SCALE
+:VAR Business structures
+:DATASET *
+:LINE-WIDTH 2
+:SCALE
+:VAR Housing
+:DATASET *
+:LINE-WIDTH 2
+
+:GRAPH Land_and_People_Ratios
+:TITLE Land and People Ratios
+:X-DIV 5
+:SCALE
+:VAR Land fraction occupied
+:SCALE
+:VAR Labor to job ratio
+:VAR Households to housing ratio
+:L<%^E!@
+1:Pol1en2.vdf
+1:Pol1.vdf
+1:testMet2zonderzonder.vdf
+9:Pol1en2
+15:0,0,0,1,0,0
+19:90,0
+27:2,
+34:0,
+4:Time
+5:emigratie
+35:Date
+36:YYYY-MM-DD
+37:2000
+38:1
+39:1
+40:2
+41:0
+42:0
+24:0
+25:200
+26:200

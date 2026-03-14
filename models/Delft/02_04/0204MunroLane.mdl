@@ -1,0 +1,136 @@
+{UTF-8}
+average caseload  = A FUNCTION OF( staff absence or sickness rate,staff turnover rate\
+		)
+	~	
+	~		|
+
+prescription of practice  = A FUNCTION OF( )
+	~	
+	~		|
+
+quality of outcomes for CYPs  = A FUNCTION OF( quality of social worker relationship with CYP and family\
+		,scope for dealing with variety of CYP needs with professional expertise,variety of needs of CYPs\
+		)
+	~	
+	~		|
+
+quality of social worker relationship with CYP and family  = A FUNCTION OF( time spent working with CYPs and families\
+		)
+	~	
+	~		|
+
+scope for dealing with variety of CYP needs with professional expertise  = A FUNCTION OF\
+		( prescription of practice)
+	~	
+	~		|
+
+"sense of satisfaction, self-esteem and personal responsibility"  = A FUNCTION OF( quality of outcomes for CYPs\
+		,scope for dealing with variety of CYP needs with professional expertise)
+	~	
+	~		|
+
+staff absence or sickness rate  = A FUNCTION OF( "sense of satisfaction, self-esteem and personal responsibility"\
+		)
+	~	
+	~		|
+
+staff turnover rate  = A FUNCTION OF( "sense of satisfaction, self-esteem and personal responsibility"\
+		)
+	~	
+	~		|
+
+time spent working with CYPs and families  = A FUNCTION OF( average caseload,prescription of practice\
+		)
+	~	
+	~		|
+
+variety of needs of CYPs  = A FUNCTION OF( )
+	~	
+	~		|
+
+********************************************************
+	.Control
+********************************************************~
+		Simulation Control Parameters
+	|
+
+FINAL TIME  = 100
+	~	Month
+	~	The final time for the simulation.
+	|
+
+INITIAL TIME  = 0
+	~	Month
+	~	The initial time for the simulation.
+	|
+
+SAVEPER  = 
+        TIME STEP
+	~	Month [0,?]
+	~	The frequency with which output is stored.
+	|
+
+TIME STEP  = 1
+	~	Month [0,?]
+	~	The time step for the simulation.
+	|
+
+\\\---/// Sketch information - do not modify anything except names
+V300  Do not put anything below this section - it will be ignored
+*View 1
+$192-192-192,0,Times New Roman|12||0-0-0|0-0-0|0-0-255|-1--1--1|-1--1--1|96,96,100,0
+10,1,prescription of practice,555,203,72,11,8,131,0,0,0,0,0,0
+10,2,scope for dealing with variety of CYP needs with professional expertise,232,415,93,28,8,3,0,0,0,0,0,0
+10,3,quality of outcomes for CYPs,437,420,62,19,8,3,0,0,0,0,0,0
+10,4,"sense of satisfaction, self-esteem and personal responsibility",450,543,79,28,8,3,0,0,0,0,0,0
+10,5,staff absence or sickness rate,660,569,50,19,8,3,0,0,0,0,0,0
+10,6,staff turnover rate,637,649,55,11,8,3,0,0,0,0,0,0
+10,7,average caseload,805,506,54,11,8,3,0,0,0,0,0,0
+10,8,time spent working with CYPs and families,811,412,75,19,8,3,0,0,0,0,0,0
+10,9,quality of social worker relationship with CYP and family,617,319,83,28,8,3,0,0,0,0,0,0
+10,10,variety of needs of CYPs,436,328,37,27,8,131,0,0,0,0,0,0
+1,11,10,3,0,0,45,0,1,64,0,255-0-0,|12||0-0-0,1|(436,371)|
+1,12,1,2,1,0,45,0,1,64,0,255-0-0,|12||0-0-0,1|(396,264)|
+1,13,2,3,1,0,43,0,2,65,0,-1--1--1,|12||0-0-0,1|(343,417)|
+1,14,2,4,1,0,43,0,0,64,0,-1--1--1,,1|(316,494)|
+1,15,3,4,1,0,43,0,0,64,0,-1--1--1,,1|(430,473)|
+1,16,4,5,1,0,45,0,1,64,0,255-0-0,|12||0-0-0,1|(602,573)|
+1,17,5,7,1,0,43,0,0,64,0,-1--1--1,,1|(762,545)|
+1,18,7,8,1,0,45,0,1,64,0,255-0-0,|12||0-0-0,1|(810,479)|
+1,19,8,9,1,0,43,0,0,64,0,-1--1--1,,1|(770,368)|
+1,20,9,3,1,0,43,0,2,65,0,-1--1--1,|12||0-0-0,1|(504,349)|
+1,21,4,6,1,0,45,0,1,64,0,255-0-0,|12||0-0-0,1|(537,629)|
+1,22,6,7,1,0,43,0,2,192,0,-1--1--1,|12||0-0-0,1|(751,611)|
+1,23,1,8,1,0,45,0,3,192,0,255-0-0,|12||0-0-0,1|(746,312)|
+12,24,2,608,447,23,23,5,3,0,0,-1,0,0,0
+12,25,2,647,616,23,23,5,3,0,0,-1,0,0,0
+12,26,0,618,433,5,7,8,7,0,8,-1,0,0,0,0-0-0,0-0-0,|8||0-0-0
+1
+12,27,0,659,600,5,7,8,7,0,8,-1,0,0,0,0-0-0,0-0-0,|8||0-0-0
+2
+///---\\\
+:L<%^E!@
+9:Current
+22:$,Dollar,Dollars,$s
+22:Hour,Hours
+22:Month,Months
+22:Person,People,Persons
+22:Unit,Units
+22:Week,Weeks
+22:Year,Years
+22:Day,Days
+15:0,0,0,0,0,0
+19:100,0
+27:2,
+34:0,
+5:variety of needs of CYPs
+35:Date
+36:YYYY-MM-DD
+37:2000
+38:1
+39:1
+40:2
+41:0
+24:0
+25:0
+26:0

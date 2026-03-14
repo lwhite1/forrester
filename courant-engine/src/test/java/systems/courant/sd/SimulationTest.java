@@ -11,6 +11,8 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
+import systems.courant.sd.measure.Dimension;
+
 import static systems.courant.sd.measure.Units.DAY;
 import static systems.courant.sd.measure.Units.GALLON_US;
 import static systems.courant.sd.measure.Units.HOUR;
@@ -775,6 +777,160 @@ public class SimulationTest {
         void shouldDefaultSavePerToOne() {
             Simulation sim = new Simulation(new Model("Default"), MINUTE, MINUTE, 1);
             assertThat(sim.getSavePer()).isEqualTo(1);
+        }
+    }
+
+    @Nested
+    @DisplayName("Event handler safety (#451)")
+    class EventHandlerSafety {
+
+        @Test
+        void shouldNotThrowWhenHandlerRemovesItselfDuringDispatch() {
+            Model model = new Model("Self-Remove");
+            Simulation sim = new Simulation(model, MINUTE, MINUTE, 3);
+
+            systems.courant.sd.event.EventHandler selfRemovingHandler =
+                    new systems.courant.sd.event.EventHandler() {
+                @Override
+                public void handleSimulationStartEvent(
+                        systems.courant.sd.event.SimulationStartEvent e) {
+                    e.getSimulation().removeEventHandler(this);
+                }
+                @Override
+                public void handleTimeStepEvent(
+                        systems.courant.sd.event.TimeStepEvent e) { }
+                @Override
+                public void handleSimulationEndEvent(
+                        systems.courant.sd.event.SimulationEndEvent e) { }
+            };
+
+            sim.addEventHandler(selfRemovingHandler);
+            sim.execute();
+
+            assertThat(sim.getCurrentStep()).isEqualTo(4);
+        }
+
+        @Test
+        void shouldNotThrowWhenHandlerAddsAnotherDuringDispatch() {
+            Model model = new Model("Add Handler");
+            int[] count = {0};
+            Simulation sim = new Simulation(model, MINUTE, MINUTE, 2);
+
+            systems.courant.sd.event.EventHandler addingHandler =
+                    new systems.courant.sd.event.EventHandler() {
+                @Override
+                public void handleSimulationStartEvent(
+                        systems.courant.sd.event.SimulationStartEvent e) {
+                    e.getSimulation().addEventHandler(
+                            new systems.courant.sd.event.EventHandler() {
+                        @Override
+                        public void handleSimulationStartEvent(
+                                systems.courant.sd.event.SimulationStartEvent ev) { }
+                        @Override
+                        public void handleTimeStepEvent(
+                                systems.courant.sd.event.TimeStepEvent ev) { count[0]++; }
+                        @Override
+                        public void handleSimulationEndEvent(
+                                systems.courant.sd.event.SimulationEndEvent ev) { }
+                    });
+                }
+                @Override
+                public void handleTimeStepEvent(
+                        systems.courant.sd.event.TimeStepEvent e) { }
+                @Override
+                public void handleSimulationEndEvent(
+                        systems.courant.sd.event.SimulationEndEvent e) { }
+            };
+
+            sim.addEventHandler(addingHandler);
+            sim.execute();
+
+            assertThat(sim.getCurrentStep()).isEqualTo(3);
+        }
+    }
+
+    @Nested
+    @DisplayName("Nanosecond step validation (#369)")
+    class NanosecondStepValidation {
+
+        @Test
+        void shouldRejectTimeStepTooSmallForNanoseconds() {
+            Model model = new Model("Tiny Step");
+            // A time unit with ratio 0.4e-9 seconds → rounds to 0 nanoseconds
+            TimeUnit tinyUnit = new TimeUnit() {
+                @Override
+                public String getName() { return "SubNano"; }
+                @Override
+                public Dimension getDimension() { return Dimension.TIME; }
+                @Override
+                public double ratioToBaseUnit() { return 0.4e-9; }
+            };
+            Simulation sim = new Simulation(model, tinyUnit, new Quantity(1, SECOND));
+
+            assertThatThrownBy(sim::execute)
+                    .isInstanceOf(IllegalArgumentException.class)
+                    .hasMessageContaining("too small to represent in nanoseconds");
+        }
+
+        @Test
+        void shouldAcceptTimeStepOfOneNanosecond() {
+            Model model = new Model("One Nano");
+            // A time unit with ratio 1e-9 seconds → exactly 1 nanosecond
+            TimeUnit nanoUnit = new TimeUnit() {
+                @Override
+                public String getName() { return "Nanosecond"; }
+                @Override
+                public Dimension getDimension() { return Dimension.TIME; }
+                @Override
+                public double ratioToBaseUnit() { return 1e-9; }
+            };
+            // 5 nanoseconds duration, 1 nanosecond step → 5 steps
+            Simulation sim = new Simulation(model, nanoUnit,
+                    new Quantity(5e-9, SECOND));
+            sim.execute();
+
+            assertThat(sim.getCurrentStep()).isEqualTo(6); // 0..5
+        }
+    }
+
+    @Nested
+    @DisplayName("Hot-path allocation optimization (#276)")
+    class HotPathOptimization {
+
+        @Test
+        void shouldProduceCorrectResultsWithPreAllocatedCollections() {
+            Model model = new Model("Pre-Alloc Test");
+            Stock tank = new Stock("Tank", 1000, THING);
+
+            Flow outflow = Flow.create("Drain", MINUTE, () -> new Quantity(10, THING));
+            tank.addOutflow(outflow);
+            model.addStock(tank);
+
+            Simulation sim = new Simulation(model, MINUTE, MINUTE, 50);
+            sim.execute();
+
+            // 51 steps, each draining 10: 1000 - 510 = 490
+            assertThat(tank.getValue()).isEqualTo(490.0);
+        }
+
+        @Test
+        void shouldHandleModuleStocksWithPreAllocatedCollections() {
+            Model model = new Model("Module Pre-Alloc");
+            Module mod = new Module("M1");
+
+            Stock stock = new Stock("Inventory", 100, THING);
+            Flow outflow = Flow.create("Consume", MINUTE, () -> new Quantity(5, THING));
+            stock.addOutflow(outflow);
+
+            mod.addStock(stock);
+            mod.addFlow(outflow);
+            model.addModulePreserved(mod);
+
+            Simulation sim = new Simulation(model, MINUTE, MINUTE, 10);
+            sim.execute();
+
+            // 11 steps, each removing 5: 100 - 55 = 45
+            assertThat(stock.getValue()).isEqualTo(45.0);
         }
     }
 }

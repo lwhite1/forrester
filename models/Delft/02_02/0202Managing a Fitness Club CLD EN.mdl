@@ -1,0 +1,160 @@
+more members less m2m publicity loop  = A FUNCTION OF( )
+	~	
+	~		|
+
+more members more leavers loop  = A FUNCTION OF( )
+	~	
+	~		|
+
+more members more m2m publicity loop  = A FUNCTION OF( )
+	~	
+	~		|
+
+"more members higher non-recurrent enrolment costs"  = A FUNCTION OF( )
+	~	
+	~		|
+
+fraction of effective waiting time over desired waiting time  = A FUNCTION OF( average effective waiting time per device\
+		,desired waiting time)
+	~	
+	~		|
+
+desired waiting time  = A FUNCTION OF( implicite maximum acceptable waiting time per device\
+		)
+	~	
+	~		|
+
+number of fitness devices  = A FUNCTION OF( )
+	~	
+	~		|
+
+number of members  = A FUNCTION OF( new members,dissatisfied cancellations)
+	~	
+	~		|
+
+fraction of number of members over desired number of members  = A FUNCTION OF( number of members\
+		,desired number of members)
+	~	
+	~		|
+
+average effective waiting time per device  = A FUNCTION OF( number of members,number of fitness devices\
+		)
+	~	
+	~		|
+
+implicite maximum acceptable waiting time per device  = A FUNCTION OF( )
+	~	
+	~		|
+
+desired number of members  = A FUNCTION OF( )
+	~	
+	~		|
+
+"non-recurrent enrolment cost"  = A FUNCTION OF( fraction of number of members over desired number of members\
+		)
+	~	
+	~		|
+
+monthly membership contribution  = A FUNCTION OF( )
+	~	
+	~		|
+
+new members  = A FUNCTION OF( "non-recurrent enrolment cost",monthly membership contribution\
+		,positive mouth to mouth publicity)
+	~	
+	~		|
+
+dissatisfied cancellations  = A FUNCTION OF( satisfaction)
+	~	
+	~		|
+
+positive mouth to mouth publicity  = A FUNCTION OF( number of members,satisfaction)
+	~	
+	~		|
+
+satisfaction  = A FUNCTION OF( fraction of effective waiting time over desired waiting time\
+		)
+	~	
+	~		|
+
+********************************************************
+	.Control
+********************************************************~
+		Simulation Control Parameters
+	|
+
+FINAL TIME  = 100
+	~	Month
+	~	The final time for the simulation.
+	|
+
+INITIAL TIME  = 0
+	~	Month
+	~	The initial time for the simulation.
+	|
+
+SAVEPER  = 1
+	~	Month
+	~	The frequency with which output is stored.
+	|
+
+TIME STEP  = 1
+	~	Month
+	~	The time step for the simulation.
+	|
+
+\\\---/// Sketch information - do not modify anything except names
+V300  Do not put anything below this section - it will be ignored
+*View 1
+$192-192-192,0,Times New Roman|12||0-0-0|0-0-0|0-0-255|-1--1--1|-1--1--1|96,96
+10,1,number of members,392,251,33,19,8,3,0,0,0,0,0,0
+10,2,number of fitness devices,131,363,54,19,8,3,0,0,0,0,0,0
+10,3,average effective waiting time per device,296,359,73,19,8,3,0,0,0,0,0,0
+1,4,1,3,1,0,43,0,2,64,0,-1--1--1,|12||0-0-0,1|(371,322)|
+1,5,2,3,1,0,45,0,2,64,0,-1--1--1,|12||0-0-0,1|(203,372)|
+10,6,implicite maximum acceptable waiting time per device,112,129,74,28,8,3,0,0,0,0,0,0
+10,7,fraction of effective waiting time over desired waiting time,169,275,62,29,8,3,0,0,0,0,0,0
+10,8,"non-recurrent enrolment cost",606,232,47,19,8,3,0,0,0,0,0,0
+10,9,monthly membership contribution,628,124,66,19,8,3,0,0,0,0,0,0
+10,10,desired number of members,658,354,58,19,8,3,0,2,0,0,0,0,0-0-0,0-0-0,|12||255-128-0
+10,11,fraction of number of members over desired number of members,497,361,71,28,8,3,0,2,0,0,0,0,0-0-0,0-0-0,|12||255-128-0
+1,12,1,11,1,0,43,0,3,64,0,255-128-0,|12||0-0-0,1|(409,315)|
+1,13,10,11,1,0,45,0,3,64,0,255-128-0,|12||0-0-0,1|(592,365)|
+10,14,positive mouth to mouth publicity,369,48,55,19,8,3,0,0,0,0,0,0
+1,15,1,14,1,0,43,0,2,64,0,-1--1--1,|12||0-0-0,1|(382,128)|
+10,16,new members,518,164,44,11,8,3,0,0,0,0,0,0
+1,17,14,16,1,0,43,0,2,64,0,-1--1--1,|12||0-0-0,1|(514,91)|
+1,18,11,8,1,0,43,0,3,64,0,255-128-0,|12||0-0-0,1|(593,321)|
+1,19,8,16,1,0,45,0,2,64,0,-1--1--1,|12||0-0-0,1|(573,180)|
+1,20,9,16,1,0,45,0,2,0,0,-1--1--1,|12||0-0-0,1|(572,133)|
+1,21,6,34,1,0,43,0,2,64,0,-1--1--1,|12||0-0-0,1|(98,169)|
+1,22,3,7,1,0,43,0,2,64,0,-1--1--1,|12||0-0-0,1|(210,348)|
+10,23,satisfaction,201,206,35,11,8,3,0,0,0,0,0,0
+1,24,7,23,1,0,45,0,2,64,0,-1--1--1,|12||0-0-0,1|(182,231)|
+1,25,23,14,1,0,43,0,2,64,0,-1--1--1,|12||0-0-0,1|(203,103)|
+10,26,dissatisfied cancellations,318,190,41,19,8,3,0,0,0,0,0,0
+1,27,23,26,1,0,45,0,2,65,0,-1--1--1,|12||0-0-0,1|(225,188)|
+1,28,26,1,1,0,45,0,2,64,0,-1--1--1,|12||0-0-0,1|(356,203)|
+1,29,16,1,1,0,43,0,2,64,0,-1--1--1,|12||0-0-0,1|(433,180)|
+12,30,1,293,241,23,23,4,0,0,0,-1,0,0,0
+12,31,2,445,138,23,23,4,0,0,0,-1,0,0,0
+12,32,1,501,233,23,23,5,0,0,0,-1,0,0,0
+12,33,1,305,140,23,23,4,0,0,0,-1,0,0,0
+10,34,desired waiting time,105,200,48,19,8,3,0,0,0,0,0,0
+1,35,34,7,1,0,45,0,2,64,0,-1--1--1,|12||0-0-0,1|(108,227)|
+10,36,more members less m2m publicity loop,298,100,57,16,8,3,0,24,0,0,0,0,0-0-0,0-0-0,|10|BI|0-0-0
+10,37,more members more m2m publicity loop,443,99,59,16,8,3,0,24,0,0,0,0,0-0-0,0-0-0,|10|BI|0-0-0
+10,38,more members more leavers loop,302,282,59,16,8,3,0,24,0,0,0,0,0-0-0,0-0-0,|10|BI|0-0-0
+10,39,"more members higher non-recurrent enrolment costs",502,285,71,24,8,3,0,24,0,0,0,0,0-0-0,0-0-0,|10|BI|0-0-0
+///---\\\
+:L<%^E!@
+9:Current
+23:0
+15:0,0,0,0,0,0
+19:100,0
+27:0,
+34:0,
+5:FINAL TIME
+24:0
+25:0
+26:0

@@ -1,0 +1,188 @@
+{UTF-8}
+birth randomizer=
+	RANDOM NORMAL(0, 2, 1, 0.5, seed births)
+	~	
+	~		|
+
+death randomizer=
+	RANDOM UNIFORM(0.5, 3, seed deaths)
+	~	
+	~		|
+
+seed deaths=
+	3
+	~	
+	~		|
+
+seed births=
+	2
+	~	
+	~		|
+
+deaths=
+	death randomizer*death season*large herbivores*percentage death rates/length of death season
+	~	
+	~		|
+
+birth season=
+	PULSE TRAIN(1982.5, length of the birth seaseon ,1 , 2050 )
+	~	
+	~		|
+
+births=
+	birth randomizer*birth season*large herbivores*percentage birth rate/length of the birth seaseon
+	~	
+	~		|
+
+death season=
+	PULSE TRAIN(1982.5, length of death season , 1 , 2050)
+	~	
+	~		|
+
+large herbivores= INTEG (
+	births-deaths,
+		75)
+	~	
+	~		|
+
+length of death season=
+	0.25
+	~	
+	~		|
+
+length of the birth seaseon=
+	0.25
+	~	
+	~		|
+
+percentage birth rate = WITH LOOKUP (
+	large herbivores,
+		([(0,0)-(5000,1)],(0,0.5),(1000,0.42),(2000,0.36),(3000,0.28),(4000,0.2),(5000,0.15\
+		) ))
+	~	
+	~		|
+
+percentage death rates = WITH LOOKUP (
+	large herbivores,
+		([(0,0)-(6000,1)],(0,0.05),(1000,0.08),(2000,0.12),(3000,0.2),(4000,0.3),(5000,0.45\
+		),(6000,0.7) ))
+	~	
+	~		|
+
+smoothed birth info=
+	SMOOTH3(births, 1 )
+	~	
+	~		|
+
+smoothed info on nr of herbivores=
+	SMOOTH3(large herbivores, 1 )
+	~	
+	~		|
+
+"smoothed nr. of deaths"=
+	SMOOTH3(deaths, 1)
+	~	
+	~		|
+
+********************************************************
+	.Control
+********************************************************~
+		Simulation Control Parameters
+	|
+
+FINAL TIME  = 2050
+	~	Year
+	~	The final time for the simulation.
+	|
+
+INITIAL TIME  = 1985
+	~	Year
+	~	The initial time for the simulation.
+	|
+
+SAVEPER  = 
+        TIME STEP 
+	~	Year [0,?]
+	~	The frequency with which output is stored.
+	|
+
+TIME STEP  = 0.25
+	~	Year [0,?]
+	~	The time step for the simulation.
+	|
+
+\\\---/// Sketch information - do not modify anything except names
+V300  Do not put anything below this section - it will be ignored
+*View 1
+$192-192-192,0,Times New Roman|12||0-0-0|0-0-0|0-0-255|-1--1--1|-1--1--1|96,96,100,0
+10,1,large herbivores,540,186,40,20,3,3,0,0,0,0,0,0
+12,2,48,313,186,10,8,0,3,0,0,-1,0,0,0
+1,3,5,1,4,0,0,22,0,0,0,-1--1--1,,1|(448,186)|
+1,4,5,2,100,0,0,22,0,0,0,-1--1--1,,1|(353,186)|
+11,5,48,390,186,6,8,34,3,0,0,1,0,0,0
+10,6,births,390,205,19,11,40,3,0,0,-1,0,0,0
+10,7,percentage birth rate,463,88,52,19,8,3,0,0,0,0,0,0
+10,8,birth season,264,233,38,11,8,3,0,0,0,0,0,0
+10,9,birth randomizer,351,110,51,11,8,3,0,0,0,0,0,0
+10,10,length of the birth seaseon,234,131,55,19,8,3,0,0,0,0,0,0
+1,11,1,5,1,0,0,0,0,64,0,-1--1--1,,1|(460,155)|
+1,12,8,6,0,0,0,0,0,64,0,-1--1--1,,1|(329,218)|
+1,13,9,5,0,0,0,0,0,64,0,-1--1--1,,1|(368,144)|
+1,14,10,5,1,0,0,0,0,64,0,-1--1--1,,1|(327,160)|
+1,15,7,5,1,0,0,0,0,64,0,-1--1--1,,1|(396,151)|
+12,16,48,790,184,10,8,0,3,0,0,-1,0,0,0
+1,17,19,16,4,0,0,22,0,0,0,-1--1--1,,1|(730,184)|
+1,18,19,1,100,0,0,22,0,0,0,-1--1--1,,1|(624,184)|
+11,19,48,674,184,6,8,34,3,0,0,1,0,0,0
+10,20,deaths,674,203,22,11,40,3,0,0,-1,0,0,0
+10,21,percentage death rates,607,87,55,19,8,3,0,0,0,0,0,0
+10,22,length of death season,890,130,47,19,8,3,0,0,0,0,0,0
+10,23,death randomizer,733,114,54,11,8,3,0,0,0,0,0,0
+10,24,death season,838,240,41,11,8,3,0,0,0,0,0,0
+1,25,1,19,1,0,0,0,0,64,0,-1--1--1,,1|(614,162)|
+1,26,24,20,0,0,0,0,0,64,0,-1--1--1,,1|(753,220)|
+1,27,23,19,0,0,0,0,0,64,0,-1--1--1,,1|(705,146)|
+1,28,22,19,1,0,0,0,0,64,0,-1--1--1,,1|(728,161)|
+1,29,21,19,1,0,0,0,0,64,0,-1--1--1,,1|(649,116)|
+1,30,10,8,1,0,0,0,0,64,0,-1--1--1,,1|(253,205)|
+1,31,22,24,1,0,0,0,0,64,0,-1--1--1,,1|(865,182)|
+1,32,1,7,1,0,0,0,0,64,0,-1--1--1,,1|(520,136)|
+1,33,1,21,1,0,0,0,0,64,0,-1--1--1,,1|(559,128)|
+10,34,smoothed birth info,391,285,48,19,8,3,0,0,0,0,0,0
+10,35,smoothed info on nr of herbivores,541,287,64,19,8,3,0,0,0,0,0,0
+10,36,"smoothed nr. of deaths",675,286,50,19,8,3,0,0,0,0,0,0
+1,37,6,34,0,0,0,0,0,64,0,-1--1--1,,1|(390,234)|
+1,38,1,35,0,0,0,0,0,64,0,-1--1--1,,1|(540,230)|
+1,39,20,36,0,0,0,0,0,64,0,-1--1--1,,1|(674,233)|
+10,40,seed births,331,63,35,11,8,3,0,0,0,0,0,0
+10,41,seed deaths,780,72,38,11,8,3,0,0,0,0,0,0
+1,42,40,9,0,0,0,0,0,64,0,-1--1--1,,1|(337,80)|
+1,43,41,23,0,0,0,0,0,64,0,-1--1--1,,1|(761,88)|
+///---\\\
+:L<%^E!@
+9:Current0
+22:$,Dollar,Dollars,$s
+22:Hour,Hours
+22:Month,Months
+22:Person,People,Persons
+22:Unit,Units
+22:Week,Weeks
+22:Year,Years
+22:Day,Days
+23:0
+15:0,0,0,0,0,0
+19:100,0
+27:2,
+34:0,
+4:Time
+5:death season
+35:Date
+36:YYYY-MM-DD
+37:2000
+38:1
+39:1
+40:0
+41:0
+24:1985
+25:2050
+26:2050

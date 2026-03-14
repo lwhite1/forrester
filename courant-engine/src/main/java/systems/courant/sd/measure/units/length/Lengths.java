@@ -8,6 +8,9 @@ import systems.courant.sd.measure.Unit;
  */
 public final class Lengths {
 
+    private Lengths() {
+    }
+
     /**
      * Creates a quantity of the given value in feet.
      */

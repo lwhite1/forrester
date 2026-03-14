@@ -572,7 +572,7 @@ class DemoSmokeTest {
         assertThat(pop.getValue()).isLessThan(500);
     }
 
-    // ---- CSV path tests (#447) ----
+    // ---- CSV path tests (#447, #556) ----
 
     @Test
     @DisplayName("CsvSubscriber writes to tmpdir path, not relative CWD (#447)")
@@ -592,5 +592,54 @@ class DemoSmokeTest {
         assertThat(written).exists();
         assertThat(written.isAbsolute()).isTrue();
         assertThat(Files.readAllLines(written)).hasSizeGreaterThan(1);
+    }
+
+    @Test
+    @DisplayName("ThirdOrderMaterialDelayDemo CSV path uses tmpdir, not relative path (#556)")
+    void thirdOrderDelayDemoCsvUsesAbsolutePath() throws Exception {
+        Path sourceFile = Path.of("src/main/java/systems/courant/sd/demo/"
+                + "ThirdOrderMaterialDelayDemo.java");
+        String source = Files.readString(sourceFile);
+        assertThat(source)
+                .describedAs("ThirdOrderMaterialDelayDemo must use java.io.tmpdir for CSV output")
+                .contains("System.getProperty(\"java.io.tmpdir\")");
+        assertThat(source)
+                .describedAs("ThirdOrderMaterialDelayDemo must not use a relative CSV path")
+                .doesNotContain("new CsvSubscriber(\"courant-")
+                .doesNotContain("new CsvSubscriber(\"third");
+    }
+
+    @Test
+    @DisplayName("TubDemo CSV path uses tmpdir, not relative path (#556)")
+    void tubDemoCsvUsesAbsolutePath() throws Exception {
+        Path sourceFile = Path.of("src/main/java/systems/courant/sd/demo/"
+                + "TubDemo.java");
+        String source = Files.readString(sourceFile);
+        assertThat(source)
+                .describedAs("TubDemo must use java.io.tmpdir for CSV output")
+                .contains("System.getProperty(\"java.io.tmpdir\")");
+        assertThat(source)
+                .describedAs("TubDemo must not use a relative CSV path")
+                .doesNotContain("new CsvSubscriber(\"courant-")
+                .doesNotContain("new CsvSubscriber(\"tub");
+    }
+
+    @Test
+    @DisplayName("All demo CSV paths use absolute tmpdir paths, not relative (#556)")
+    void allDemoCsvPathsUseAbsolutePaths() throws Exception {
+        Path demoDir = Path.of("src/main/java/systems/courant/sd/demo");
+        try (var stream = Files.list(demoDir)) {
+            var demoFiles = stream
+                    .filter(p -> p.toString().endsWith("Demo.java"))
+                    .toList();
+            for (Path file : demoFiles) {
+                String source = Files.readString(file);
+                if (source.contains("CsvSubscriber")) {
+                    assertThat(source)
+                            .describedAs(file.getFileName() + " must use java.io.tmpdir for CSV output")
+                            .contains("System.getProperty(\"java.io.tmpdir\")");
+                }
+            }
+        }
     }
 }

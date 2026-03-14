@@ -43,6 +43,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.Locale;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -132,7 +133,7 @@ public class SimulationResultPane extends BorderPane {
                 if (colIndex < row.length) {
                     double val = row[colIndex];
                     if (colIndex == 0) {
-                        return new SimpleStringProperty(String.valueOf((int) val));
+                        return new SimpleStringProperty(formatTimeStep(val));
                     }
                     return new SimpleStringProperty(ChartUtils.formatNumber(val));
                 }
@@ -357,7 +358,6 @@ public class SimulationResultPane extends BorderPane {
         // --- Reference data overlay ---
         List<XYChart.Series<Number, Number>> allRefSeries = new ArrayList<>();
         if (!referenceDatasets.isEmpty()) {
-            int refColorIdx = 0;
             for (ReferenceDataset refData : referenceDatasets) {
                 for (String varName : refData.variableNames()) {
                     XYChart.Series<Number, Number> refSeries = new XYChart.Series<>();
@@ -370,7 +370,6 @@ public class SimulationResultPane extends BorderPane {
                         }
                     }
                     allRefSeries.add(refSeries);
-                    refColorIdx++;
                 }
             }
             chart.getData().addAll(allRefSeries);
@@ -798,6 +797,25 @@ public class SimulationResultPane extends BorderPane {
     private void saveChartAsPng() {
         ChartUtils.saveNodeAsPng(chart, "simulation_chart.png",
                 getScene() != null ? getScene().getWindow() : null);
+    }
+
+    /**
+     * Formats a time-step value for the table's step column.
+     * Whole numbers are displayed without a decimal point (e.g. "0", "1").
+     * Fractional values are displayed with up to 4 decimal places, with
+     * trailing zeros stripped (e.g. "0.25", "0.5").
+     */
+    static String formatTimeStep(double value) {
+        if (value == Math.floor(value) && Double.isFinite(value)
+                && Math.abs(value) <= Long.MAX_VALUE) {
+            return String.valueOf((long) value);
+        }
+        // Format to 4 decimal places, then strip trailing zeros
+        String formatted = String.format(Locale.US, "%.4f", value);
+        formatted = formatted.contains(".")
+                ? formatted.replaceAll("0+$", "").replaceAll("\\.$", "")
+                : formatted;
+        return formatted;
     }
 
     /**

@@ -1,0 +1,377 @@
+{UTF-8}
+percentage of youngsters with criminal behavior=
+	0.5
+	~	
+	~		|
+
+crimes by others
+	=
+	2.6e+007
+	~	
+	~		|
+
+crimes=
+	criminal kids*ciminal acts per criminal kid + ciminal acts per criminal youngster*criminal youngsters\
+		 + criminal acts per criminal adult
+	*criminal adults + criminal acts per criminal retiree
+	*criminal retirees + crimes by others
+	~	
+	~		|
+
+criminal kids=
+	kids*percentage of kids and youngsters with criminal behavior
+	~	
+	~		|
+
+ciminal acts per criminal kid=
+	2
+	~	
+	~		|
+
+criminal youngsters=
+	youngsters*percentage of youngsters with criminal behavior
+	~	
+	~		|
+
+ciminal acts per criminal youngster=
+	4
+	~	
+	~		|
+
+annual fertility rate adults=
+	0.03
+	~	
+	~		|
+
+annual fertility rate youngsters=
+	0.001
+	~	
+	~		|
+
+average time as adult=
+	40
+	~	
+	~		|
+
+average time as kid=
+	12
+	~	
+	~		|
+
+average time as retirees=
+	15
+	~	
+	~		|
+
+average time as youngster=
+	12
+	~	
+	~		|
+
+average time pregnancy=
+	0.75
+	~	
+	~		|
+
+births=
+	(1-percentage early ended pregnancies) * unborns/average time pregnancy
+	~	
+	~		|
+
+percentage early ended pregnancies=
+	0.75
+	~	
+	~		|
+
+criminal acts per criminal adult=
+	12
+	~	
+	~		|
+
+criminal acts per criminal retiree=
+	4
+	~	
+	~		|
+
+criminal adults=
+	adults*percentage of adults with criminal behavior
+	~	
+	~		|
+
+criminal retirees=
+	retirees*percentage of retirees with criminal behavior
+	~	
+	~		|
+
+ini youngsters=
+	1e+006
+	~	
+	~		|
+
+ini adults=
+	3e+006
+	~	
+	~		|
+
+ini kids=
+	1e+006
+	~	
+	~		|
+
+percentage of adults with criminal behavior=
+	0.6
+	~	
+	~		|
+
+percentage of retirees with criminal behavior=
+	0.1
+	~	
+	~		|
+
+"total multi-problem family population"=
+	adults+kids+retirees+youngsters
+	~	
+	~		|
+
+percentage of kids and youngsters with criminal behavior=
+	0.05
+	~	
+	~		|
+
+ini unborns=
+	68000
+	~	
+	~		|
+
+ini retirees=
+	750000
+	~	
+	~		|
+
+adults= INTEG (
+	from young adults to adults-from adults to retirees,
+		ini adults)
+	~	
+	~		|
+
+deaths=
+	retirees/average time as retirees
+	~	
+	~		|
+
+early ended pregnancies=
+	percentage early ended pregnancies*unborns/average time pregnancy
+	~	
+	~		|
+
+from adults to retirees=
+	adults/average time as adult
+	~	
+	~		|
+
+from young adults to adults=
+	youngsters/average time as youngster
+	~	
+	~		|
+
+growing up=
+	kids/average time as kid
+	~	
+	~		|
+
+kids= INTEG (
+	births-growing up,
+		ini kids)
+	~	
+	~		|
+
+unborns= INTEG (
+	conceptions-births-early ended pregnancies,
+		ini unborns)
+	~	
+	~		|
+
+retirees= INTEG (
+	from adults to retirees-deaths,
+		ini retirees)
+	~	
+	~		|
+
+conceptions=
+	adults*annual fertility rate adults + youngsters*annual fertility rate youngsters
+	~	
+	~		|
+
+youngsters= INTEG (
+	growing up-from young adults to adults,
+		ini youngsters)
+	~	
+	~		|
+
+********************************************************
+	.Control
+********************************************************~
+		Simulation Control Parameters
+	|
+
+FINAL TIME  = 50
+	~	Year
+	~	The final time for the simulation.
+	|
+
+INITIAL TIME  = 0
+	~	Year
+	~	The initial time for the simulation.
+	|
+
+SAVEPER  = 
+        TIME STEP
+	~	Year [0,?]
+	~	The frequency with which output is stored.
+	|
+
+TIME STEP  = 0.125
+	~	Year [0,?]
+	~	The time step for the simulation.
+	|
+
+\\\---/// Sketch information - do not modify anything except names
+V300  Do not put anything below this section - it will be ignored
+*View 1
+$192-192-192,0,Times New Roman|12||0-0-0|0-0-0|0-0-255|-1--1--1|-1--1--1|96,96,100,0
+10,1,kids,416,147,40,20,3,3,0,0,0,0,0,0
+10,2,youngsters,605,145,40,20,3,3,0,0,0,0,0,0
+10,3,adults,813,141,40,20,3,3,0,0,0,0,0,0
+10,4,retirees,1015,141,40,20,3,3,0,0,0,0,0,0
+1,5,7,2,4,0,0,22,0,0,0,-1--1--1,,1|(540,146)|
+1,6,7,1,100,0,0,22,0,0,0,-1--1--1,,1|(480,146)|
+11,7,444,510,146,6,8,34,3,0,0,1,0,0,0
+10,8,growing up,510,165,36,11,40,3,0,0,-1,0,0,0
+1,9,11,3,4,0,0,22,0,0,0,-1--1--1,,1|(744,143)|
+1,10,11,2,100,0,0,22,0,0,0,-1--1--1,,1|(674,143)|
+11,11,684,709,143,6,8,34,3,0,0,1,0,0,0
+10,12,from young adults to adults,709,170,57,19,40,3,0,0,-1,0,0,0
+1,13,15,4,4,0,0,22,0,0,0,-1--1--1,,1|(947,143)|
+1,14,15,3,100,0,0,22,0,0,0,-1--1--1,,1|(880,143)|
+11,15,620,914,143,6,8,34,3,0,0,1,0,0,0
+10,16,from adults to retirees,914,170,44,19,40,3,0,0,-1,0,0,0
+1,17,1,7,1,0,0,0,0,64,0,-1--1--1,,1|(482,112)|
+1,18,2,11,1,0,0,0,0,64,0,-1--1--1,,1|(662,105)|
+1,19,3,15,1,0,0,0,0,64,0,-1--1--1,,1|(873,105)|
+10,20,average time as kid,521,230,49,19,8,3,0,0,0,0,0,0
+10,21,average time as youngster,717,233,49,19,8,3,0,0,0,0,0,0
+10,22,average time as adult,916,245,49,19,8,3,0,0,0,0,0,0
+12,23,48,1202,142,10,8,0,3,0,0,-1,0,0,0
+1,24,26,23,4,0,0,22,0,0,0,-1--1--1,,1|(1160,142)|
+1,25,26,4,100,0,0,22,0,0,0,-1--1--1,,1|(1086,142)|
+11,26,48,1123,142,6,8,34,3,0,0,1,0,0,0
+10,27,deaths,1123,161,22,11,40,3,0,0,-1,0,0,0
+1,28,4,26,1,0,0,0,0,64,0,-1--1--1,,1|(1077,101)|
+10,29,average time as retirees,1132,231,49,19,8,3,0,0,0,0,0,0
+1,30,20,8,0,0,0,0,0,64,0,-1--1--1,,1|(515,200)|
+1,31,21,12,0,0,0,0,0,64,0,-1--1--1,,1|(714,208)|
+1,32,22,16,0,0,0,0,0,64,0,-1--1--1,,1|(915,214)|
+1,33,29,27,0,0,0,0,0,64,0,-1--1--1,,1|(1128,198)|
+10,34,unborns,217,152,40,20,3,3,0,0,0,0,0,0
+1,35,37,1,4,0,0,22,0,0,0,-1--1--1,,1|(349,149)|
+1,36,37,34,100,0,0,22,0,0,0,-1--1--1,,1|(283,149)|
+11,37,300,316,149,6,8,34,3,0,0,1,0,0,0
+10,38,births,316,168,19,11,40,3,0,0,-1,0,0,0
+12,39,48,54,151,10,8,0,3,0,0,-1,0,0,0
+1,40,42,34,4,0,0,22,0,0,0,-1--1--1,,1|(151,151)|
+1,41,42,39,100,0,0,22,0,0,0,-1--1--1,,1|(89,151)|
+11,42,48,120,151,6,8,34,3,0,0,1,0,0,0
+10,43,conceptions,120,170,38,11,40,3,0,0,-1,0,0,0
+10,44,average time pregnancy,360,237,41,19,8,3,0,0,0,0,0,0
+1,45,44,38,0,0,0,0,0,64,0,-1--1--1,,1|(339,204)|
+1,46,2,42,1,0,0,0,0,64,0,-1--1--1,,1|(522,61)|
+1,47,3,42,1,0,0,0,0,64,0,-1--1--1,,1|(516,-40)|
+10,48,annual fertility rate youngsters,93,62,58,19,8,3,0,0,0,0,0,0
+10,49,annual fertility rate adults,170,-4,58,19,8,3,0,0,0,0,0,0
+1,50,48,42,0,0,0,0,0,64,0,-1--1--1,,1|(105,106)|
+1,51,49,42,0,0,0,0,0,64,0,-1--1--1,,1|(144,73)|
+10,52,ini unborns,215,108,35,11,8,3,0,0,0,0,0,0
+10,53,ini kids,414,109,23,11,8,3,0,0,0,0,0,0
+10,54,ini youngsters,595,102,43,11,8,3,0,0,0,0,0,0
+10,55,ini adults,808,96,28,11,8,3,0,0,0,0,0,0
+10,56,ini retirees,1015,102,33,11,8,3,0,0,0,0,0,0
+1,57,53,1,0,0,0,0,0,64,1,-1--1--1,,1|(414,116)|
+1,58,54,2,0,0,0,0,0,64,1,-1--1--1,,1|(596,112)|
+1,59,55,3,0,0,0,0,0,64,1,-1--1--1,,1|(809,107)|
+1,60,56,4,0,0,0,0,0,64,1,-1--1--1,,1|(1015,110)|
+12,61,48,217,241,10,8,0,3,0,0,-1,0,0,0
+1,62,64,61,4,0,0,22,0,0,0,-1--1--1,,1|(217,220)|
+1,63,64,34,100,0,0,22,0,0,0,-1--1--1,,1|(217,184)|
+11,64,48,217,202,8,6,33,3,0,0,4,0,0,0
+10,65,early ended pregnancies,263,202,38,19,40,3,0,0,-1,0,0,0
+1,66,44,65,0,0,0,0,0,64,0,-1--1--1,,1|(316,221)|
+10,67,percentage early ended pregnancies,299,273,59,19,8,3,0,0,0,0,0,0
+1,68,67,65,0,0,0,0,0,64,0,-1--1--1,,1|(284,243)|
+1,69,67,38,0,0,0,0,0,64,0,-1--1--1,,1|(306,223)|
+1,70,34,65,0,0,0,0,0,64,0,-1--1--1,,1|(235,172)|
+1,71,52,34,0,0,0,0,0,64,1,-1--1--1,,1|(214,118)|
+10,72,percentage of kids and youngsters with criminal behavior,152,301,65,28,8,3,0,0,0,0,0,0
+10,73,percentage of adults with criminal behavior,743,299,69,19,8,3,0,0,0,0,0,0
+10,74,criminal youngsters,606,374,59,11,8,3,0,0,0,0,0,0
+10,75,criminal adults,816,383,45,11,8,3,0,0,0,0,0,0
+1,77,2,74,0,0,0,0,0,64,0,-1--1--1,,1|(605,257)|
+1,78,3,75,0,0,0,0,0,64,0,-1--1--1,,1|(813,259)|
+1,79,73,75,0,0,0,0,0,64,0,-1--1--1,,1|(777,339)|
+10,80,criminal retirees,1022,385,49,11,8,3,0,0,0,0,0,0
+1,81,4,80,0,0,0,0,0,64,0,-1--1--1,,1|(1017,260)|
+10,82,ciminal acts per criminal youngster,473,372,57,19,8,3,0,0,0,0,0,0
+10,83,criminal acts per criminal adult,723,387,52,19,8,3,0,0,0,0,0,0
+10,84,criminal acts per criminal retiree,915,383,52,19,8,3,0,0,0,0,0,0
+10,85,crimes,474,504,22,11,8,3,0,0,0,0,0,0
+1,86,74,85,0,0,0,0,0,64,0,-1--1--1,,1|(544,434)|
+1,87,82,85,0,0,0,0,0,64,0,-1--1--1,,1|(473,435)|
+1,88,83,85,0,0,0,0,0,64,0,-1--1--1,,1|(595,446)|
+1,89,75,85,0,0,0,0,0,64,0,-1--1--1,,1|(647,442)|
+1,90,84,85,0,0,0,0,0,64,0,-1--1--1,,1|(686,445)|
+1,91,80,85,0,0,0,0,0,64,0,-1--1--1,,1|(741,445)|
+10,92,"total multi-problem family population",777,-32,60,19,8,3,0,0,0,0,0,0
+1,93,1,92,0,0,0,0,0,64,0,-1--1--1,,1|(590,60)|
+1,94,2,92,0,0,0,0,0,64,0,-1--1--1,,1|(686,61)|
+1,95,3,92,0,0,0,0,0,64,0,-1--1--1,,1|(795,60)|
+1,96,4,92,0,0,0,0,0,64,0,-1--1--1,,1|(901,58)|
+10,97,percentage of retirees with criminal behavior,916,301,69,19,8,3,0,0,0,0,0,0
+1,98,97,80,0,0,0,0,0,64,0,-1--1--1,,1|(967,342)|
+1,99,34,38,0,0,0,0,0,64,0,-1--1--1,,1|(270,159)|
+10,100,ciminal acts per criminal kid,246,368,49,19,8,3,0,0,0,0,0,0
+1,101,100,85,0,0,0,0,0,64,0,-1--1--1,,1|(359,436)|
+10,102,criminal kids,351,369,40,11,8,3,0,0,0,0,0,0
+1,103,102,85,0,0,0,0,0,64,0,-1--1--1,,1|(407,431)|
+1,104,1,102,0,0,0,0,0,64,0,-1--1--1,,1|(384,255)|
+1,105,72,102,0,0,0,0,0,64,0,-1--1--1,,1|(260,338)|
+10,108,crimes by others,398,580,52,11,8,3,0,0,0,0,0,0
+1,109,108,85,0,0,0,0,0,64,0,-1--1--1,,1|(431,546)|
+10,110,percentage of youngsters with criminal behavior,585,291,79,19,8,3,0,0,0,0,0,0
+1,111,110,74,0,0,0,0,0,64,0,-1--1--1,,1|(594,329)|
+///---\\\
+:L<%^E!@
+9:CurrentPol
+22:$,Dollar,Dollars,$s
+22:Hour,Hours
+22:Month,Months
+22:Person,People,Persons
+22:Unit,Units
+22:Week,Weeks
+22:Year,Years
+22:Day,Days
+15:0,0,0,1,0,0
+19:100,0
+27:2,
+34:0,
+4:Time
+5:percentage of adults with criminal behavior
+35:Date
+36:YYYY-MM-DD
+37:2000
+38:1
+39:1
+40:0
+41:0
+42:0
+24:0
+25:50
+26:50

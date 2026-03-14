@@ -1,5 +1,8 @@
 package systems.courant.sd.tools.importer;
 
+import static systems.courant.sd.io.json.JsonNodeHelper.requiredText;
+import static systems.courant.sd.io.json.JsonNodeHelper.textOrNull;
+
 import systems.courant.sd.model.ModelMetadata;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -244,10 +247,23 @@ public class BatchImportCli {
             }
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
+            cleanupTempFile(tempFile, tempDir);
             throw new IOException("Download interrupted: " + url, e);
+        } catch (IOException e) {
+            cleanupTempFile(tempFile, tempDir);
+            throw e;
         }
 
         return tempFile;
+    }
+
+    private static void cleanupTempFile(Path tempFile, Path tempDir) {
+        try {
+            Files.deleteIfExists(tempFile);
+            Files.deleteIfExists(tempDir);
+        } catch (IOException ex) {
+            log.warn("Could not clean up temp file on error: {}", tempFile);
+        }
     }
 
     private static long copyWithLimit(InputStream in, Path target, long maxBytes)
@@ -309,18 +325,6 @@ public class BatchImportCli {
                 """);
     }
 
-    private static String requiredText(JsonNode node, String field) {
-        JsonNode child = node.get(field);
-        if (child == null || child.isNull()) {
-            throw new IllegalArgumentException("Missing required field: " + field);
-        }
-        return child.asText();
-    }
-
-    private static String textOrNull(JsonNode node, String field) {
-        JsonNode child = node.get(field);
-        return (child != null && !child.isNull()) ? child.asText() : null;
-    }
 
     static class CliArgs {
         String manifestFile;

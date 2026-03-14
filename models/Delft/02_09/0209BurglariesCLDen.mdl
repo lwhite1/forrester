@@ -1,0 +1,447 @@
+{UTF-8}
+members of OC active in HB in NL  = A FUNCTION OF( effective chance of being caught for burglary in NL\
+		,net increase of active members of OC in HB in NL) ~~|
+members of OC active in HB in NL= INTEG (
+	net increase of active members of OC in HB in NL,
+		2450)
+	~	
+	~		|
+
+OC headstart loop  = A FUNCTION OF( )
+	~	
+	~		|
+
+HB under investigation  = A FUNCTION OF( -closing of old HB investigations,opening of new HB investigations\
+		,total number of burglaries) ~~|
+HB under investigation= INTEG (
+	opening of new HB investigations-closing of old HB investigations,
+		32725)
+	~	
+	~		|
+
+police catching up loop  = A FUNCTION OF( )
+	~	
+	~		|
+
+"man-hours available for burglaries"  = A FUNCTION OF( "man-hours per policeman per month"\
+		,"man-hours required",policemen assigned to HB,"total man-hours required for burglaries"\
+		) ~~|
+"man-hours available for burglaries"=
+	policemen assigned to HB*"man-hours per policeman per month"
+	~	
+	~	MIN(9000,policemen assigned to HB)*"man-hours per policeman per month"
+	|
+
+burglaries by members of the OC  = A FUNCTION OF( chance of being caught for burglary in neighboring countries\
+		,effective chance of being caught for burglary in NL,HB per member of the OC per month\
+		,members of OC active in HB in NL) ~~|
+burglaries by members of the OC=
+	members of OC active in HB in NL*HB per member of the OC per month
+	~	
+	~	Het aantal WI door leden van de GM is gelijk aan het aantal leden van de \
+		GM actief in WI in Nederland maal gemiddeld 4 WI per lid van de GM per \
+		maand.
+	|
+
+effective chance of being caught for burglary in NL  = A FUNCTION OF( available hours for investigation wrt HB\
+		,"man-hours available for burglaries","total man-hours required for investigation",\
+		"total man-hours required for burglaries") ~~|
+effective chance of being caught for burglary in NL = WITH LOOKUP (
+	available hours for investigation wrt HB/"total man-hours required for investigation"\
+		,
+		([(0,0)-(10,1)],(0,0),(1,0.2),(2,0.3),(4,0.4),(8,0.5) ))
+	~	
+	~		|
+
+"total man-hours required for investigation"  = A FUNCTION OF( HB under investigation\
+		,"man-hours required for investigation of a HB under investigation per month",total number of burglaries\
+		) ~~|
+"total man-hours required for investigation"=
+	HB under investigation*"man-hours required for investigation of a HB under investigation per month"
+	~	
+	~		|
+
+percentage houses with opportunities for burglary  = A FUNCTION OF( relative media attention wrt burglaries\
+		,seasonality burglaries,-vigilence regarding HB) ~~|
+percentage houses with opportunities for burglary=
+	seasonality burglaries * MAX((1 - vigilence regarding HB), 0.1)
+	~	
+	~	Het percentage woningen met gelegenheid voor WI is seizoensgevoelig. Modelleer
+		het als de seizoensinvloed WI maal (1 - oplettendheid mbt WI) of 0.1 als \
+		(1 - oplettendheid mbt WI) kleiner is dan 10%.
+	|
+
+occasional HB  = A FUNCTION OF( )
+	~	
+	~		|
+
+opening of new HB investigations  = A FUNCTION OF( ) ~~|
+opening of new HB investigations=
+	total number of HB
+	~	
+	~		|
+
+houses=
+	7e+006
+	~	
+	~		|
+
+"\"acceptable\" number of burglaries"=
+	4500
+	~	
+	~	SMOOTH3I(0.25 * totaal aantal WI, 24, 4670) Het acceptabel aantal WI kan \
+		gemodelleerd worden als een derde-orde vertraging met een vertragingstijd \
+		van 24 maanden van een kwart van het totaal aantal WI, startend van een \
+		initi¨ele waarde van 4670 WI per maand.
+	|
+
+"man-hours required"=
+	("total man-hours required for burglaries"+"total man-hours required for investigation"\
+		)/"man-hours per policeman per month"
+	~	
+	~		|
+
+policemen assigned to HB= INTEG (
+	net formation of teams of policemen assigned to HB,
+		8760)
+	~	
+	~		|
+
+"man-hours required for intervention per HB"=
+	2
+	~	
+	~		|
+
+"man-hours required for investigation of a HB under investigation per month"=
+	40
+	~	
+	~		|
+
+available hours for investigation wrt HB=
+	"man-hours available for burglaries"-"total man-hours required for burglaries"
+	~	
+	~		|
+
+average time under investigation=
+	2
+	~	Months
+	~		|
+
+monthly percentage HB by occasional thieves in houses with opportunities for HB=
+	0.2
+	~	
+	~		|
+
+"man-hours per policeman per month"=
+	160
+	~	
+	~		|
+
+net increase of active members of OC in HB in NL=
+	normal size of OC in HB in NL*chance of being caught for burglary in neighboring countries\
+		/effective chance of being caught for burglary in NL - members of OC active in HB in NL
+	~	
+	~	De netto toename van actieve leden van de GM in WI in NL zou bijvoorbeeld \
+		gemodelleerd
+		kunnen worden als het product van de normale omvang van de GM mbt WI in NL, de \
+		pakkans
+		mbt WI in omringende landen gedeeld door de effectieve pakkans WI in NL \
+		min het aantal leden van de GM actief in WI in NL.
+	|
+
+net formation of teams of policemen assigned to HB=
+	("man-hours required"-policemen assigned to HB)/conversion time to HB
+	~	
+	~		|
+
+normal size of OC in HB in NL=
+	2500
+	~	
+	~		|
+
+conversion time to HB=
+	1
+	~	
+	~		|
+
+vigilence regarding HB=
+	SMOOTH3I(relative media attention wrt burglaries, 3, 0.7)
+	~	
+	~	Modelleer de oplettendheid mbt WI als een derde-orde informatievertraging \
+		van de relatieve media aandacht mbt WI met een gemiddelde vertragingstijd \
+		van 3 maanden en een initi¨ele waarde gelijk aan 70%.
+	|
+
+chance of being caught for burglary in neighboring countries=
+	0.2
+	~	
+	~		|
+
+percentage occasional thieves among coincidental passers=
+	0.05
+	~	
+	~		|
+
+relative media attention wrt burglaries = WITH LOOKUP (
+	total number of burglaries/"\"acceptable\" number of burglaries",
+		((0,0),(2,0.2),(4,0.8),(6,1),(8,1),(12,1)))
+	~	
+	~		|
+
+seasonality burglaries=
+	(SIN(Time * 3.14 / 6 - 3.14 / 1.5) +2) /4
+	~	
+	~		|
+
+closing of old HB investigations=
+	HB under investigation/average time under investigation
+	~	
+	~		|
+
+total number of burglaries=
+	burglaries by occasional thieves+burglaries by members of the OC
+	~	
+	~	Het totaal aantal WI is de som van het aantal WI door leden van de GM (GM staat voor
+		‘georganiseerde misdaad’) en het aantal WI door gelegenheidsdieven.
+	|
+
+"total man-hours required for burglaries"=
+	"man-hours required for intervention per HB"*total number of burglaries
+	~	
+	~		|
+
+burglaries by occasional thieves=
+	houses*monthly percentage HB by occasional thieves in houses with opportunities for HB\
+		*percentage occasional thieves among coincidental passers*percentage houses with opportunities for burglary
+	~	
+	~	Het aantal WI door gelegenheidsdieven is gelijk aan het product van het \
+		aantal woningen, het percentage woningen met gelegenheid voor WI, het \
+		percentage gelegenheidsdieven onder ‘toevallige’ voorbijgangers, en \
+		het maandelijks percentage WI door gelegenheidsdieven in woningen met \
+		gelegenheid tot inbraak.
+	|
+
+HB per member of the OC per month=
+	4
+	~	
+	~		|
+
+********************************************************
+	.Control
+********************************************************~
+		Simulation Control Parameters
+	|
+
+FINAL TIME  = 120
+	~	Month
+	~	The final time for the simulation.
+	|
+
+INITIAL TIME  = 0
+	~	Month
+	~	The initial time for the simulation.
+	|
+
+SAVEPER  = 
+        TIME STEP
+	~	Month [0,?]
+	~	The frequency with which output is stored.
+	|
+
+TIME STEP  = 0.125
+	~	Month [0,?]
+	~	The time step for the simulation.
+	|
+
+\\\---/// Sketch information - do not modify anything except names
+V300  Do not put anything below this section - it will be ignored
+*View 1
+$192-192-192,0,Times New Roman|12||0-0-0|0-0-0|0-0-255|-1--1--1|-1--1--1|96,96,120,0
+10,1,total number of burglaries,818,276,48,19,8,3,0,0,0,0,0,0
+10,2,burglaries by members of the OC,744,189,64,19,8,3,0,0,0,0,0,0
+10,3,burglaries by occasional thieves,930,373,57,19,8,3,0,0,0,0,0,0
+1,4,2,1,1,0,43,0,0,64,0,-1--1--1,,1|(790,211)|
+1,5,3,1,1,0,43,0,0,64,0,-1--1--1,,1|(854,342)|
+10,6,houses,887,444,23,11,8,3,1,2,0,0,0,0,0-0-0,0-0-0,|12||128-128-128
+10,7,percentage houses with opportunities for burglary,1043,311,80,19,8,3,0,0,0,0,0,0
+10,8,percentage occasional thieves among coincidental passers,1052,458,84,28,8,3,1,2,0,0,0,0,0-0-0,0-0-0,|12||128-128-128
+10,9,monthly percentage HB by occasional thieves in houses with opportunities for HB,963,516,103,28,8,3,1,2,0,0,0,0,0-0-0,0-0-0,|12||128-128-128
+1,10,6,3,0,1,0,0,1,64,0,128-128-128,|12||0-0-0,1|(901,418)|
+1,11,7,3,1,0,43,0,0,64,0,-1--1--1,,1|(999,367)|
+1,12,8,3,0,1,0,0,1,64,0,128-128-128,|12||0-0-0,1|(990,414)|
+1,13,9,3,0,1,0,0,1,64,0,128-128-128,|12||0-0-0,1|(947,446)|
+10,14,seasonality burglaries,1099,370,35,19,8,3,0,2,0,0,0,0,0-0-0,0-0-0,|12||128-128-128
+10,15,vigilence regarding HB,1034,223,43,19,8,3,1,0,0,0,0,0
+1,16,14,7,0,0,0,0,1,64,0,128-128-128,|12||0-0-0,1|(1075,345)|
+1,17,15,7,1,1,0,0,0,64,0,-1--1--1,,1|(1047,264)|
+10,18,Time,1132,412,26,11,8,2,1,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,19,18,14,0,1,0,0,1,64,0,128-128-128,|12||0-0-0,1|(1123,400)|
+10,20,relative media attention wrt burglaries,965,189,72,19,8,3,0,0,0,0,0,0
+1,21,20,15,1,1,0,0,0,64,0,-1--1--1,,1|(1010,201)|
+10,22,"\"acceptable\" number of burglaries",1128,188,66,19,8,131,0,2,0,0,0,0,0-0-0,0-0-0,|12||128-128-128
+1,23,1,20,1,0,43,0,0,64,0,-1--1--1,,1|(872,196)|
+1,24,22,20,0,0,45,0,3,64,0,128-128-128,|12||0-0-0,1|(1056,188)|
+10,25,members of OC active in HB in NL,621,81,60,19,8,131,1,0,0,0,0,0
+1,26,25,2,1,1,0,0,0,64,0,-1--1--1,,1|(533,158)|
+10,27,HB per member of the OC per month,669,218,72,19,8,3,1,2,0,0,0,0,0-0-0,0-0-0,|12||128-128-128
+1,28,27,2,0,1,0,0,1,64,0,128-128-128,|12||0-0-0,1|(699,206)|
+12,29,48,328,83,10,8,0,3,1,0,-1,0,0,0
+1,30,32,25,4,1,0,22,0,0,0,-1--1--1,,1|(540,77)|
+1,31,32,29,100,1,0,22,0,0,0,-1--1--1,,1|(423,77)|
+11,32,48,514,77,6,8,34,3,1,0,1,0,0,0
+10,33,net increase of active members of OC in HB in NL,514,105,94,20,40,131,1,0,-1,0,0,0
+10,34,normal size of OC in HB in NL,601,208,66,19,8,3,1,2,0,0,0,0,0-0-0,0-0-0,|12||128-128-128
+10,35,chance of being caught for burglary in neighboring countries,741,116,83,28,8,3,0,2,0,0,0,0,0-0-0,0-0-0,|12||128-128-128
+10,36,effective chance of being caught for burglary in NL,580,200,80,19,8,3,0,0,0,0,0,0
+1,37,34,33,0,1,0,0,1,64,0,128-128-128,|12||0-0-0,1|(562,162)|
+1,38,35,33,0,1,0,0,1,64,0,128-128-128,|12||0-0-0,1|(639,110)|
+1,39,36,33,1,1,0,0,0,64,0,-1--1--1,,1|(530,197)|
+1,40,25,32,1,1,0,0,0,64,0,-1--1--1,,1|(540,38)|
+10,41,available hours for investigation wrt HB,361,263,65,19,8,3,1,0,0,0,0,0
+10,42,"total man-hours required for investigation",557,640,78,19,8,3,1,0,0,0,0,0
+1,43,41,36,1,1,0,0,0,64,0,-1--1--1,,1|(463,227)|
+1,44,42,36,1,1,0,0,0,64,0,-1--1--1,,1|(387,364)|
+10,45,HB under investigation,776,463,39,19,8,3,1,0,0,0,0,0
+10,46,"man-hours required for investigation of a HB under investigation per month",550,570,86,28,8,3,1,2,0,0,0,0,0-0-0,0-0-0,|12||128-128-128
+1,47,46,42,0,1,0,0,1,64,0,128-128-128,|12||0-0-0,1|(552,602)|
+1,48,45,42,1,1,0,0,0,64,0,-1--1--1,,1|(603,637)|
+12,49,48,698,509,10,8,0,3,1,0,-1,0,0,0
+1,50,52,45,4,1,0,22,0,0,0,-1--1--1,,1|(776,536)|
+1,51,52,49,100,1,0,22,0,0,0,-1--1--1,,1|(701,523)|
+11,52,48,701,536,8,6,33,3,1,0,4,0,0,0
+10,53,opening of new HB investigations,771,536,62,19,40,3,1,0,-1,0,0,0
+12,54,48,698,685,10,8,0,3,1,0,-1,0,0,0
+1,55,57,54,4,1,0,22,0,0,0,-1--1--1,,1|(698,662)|
+1,56,57,45,100,1,0,22,0,0,0,-1--1--1,,1|(776,641)|
+11,57,48,698,641,8,6,33,3,1,0,4,0,0,0
+10,58,closing of old HB investigations,759,641,56,19,40,3,1,0,-1,0,0,0
+10,59,average time under investigation,824,590,60,19,8,3,1,2,0,0,0,0,0-0-0,0-0-0,|12||128-128-128
+1,60,59,58,0,1,0,0,0,64,0,-1--1--1,,1|(797,611)|
+1,61,45,57,1,1,0,0,0,64,0,-1--1--1,,1|(449,486)|
+1,62,1,45,1,1,0,0,0,64,0,-1--1--1,,1|(813,369)|
+10,63,"man-hours available for burglaries",565,350,64,19,8,3,0,0,0,0,0,0
+10,64,"total man-hours required for burglaries",736,361,70,19,8,131,0,0,0,0,0,0
+1,65,63,41,0,1,0,0,0,64,0,-1--1--1,,1|(469,309)|
+1,66,64,41,1,1,0,0,0,64,0,-1--1--1,,1|(526,339)|
+10,67,"man-hours required for intervention per HB",552,467,73,19,8,3,1,2,0,0,0,0,0-0-0,0-0-0,|12||128-128-128
+1,68,67,64,0,1,0,0,1,64,0,128-128-128,|12||0-0-0,1|(637,417)|
+1,69,1,64,1,0,43,0,0,64,0,-1--1--1,,1|(783,332)|
+10,70,policemen assigned to HB,443,409,49,19,3,131,1,0,0,0,0,0
+10,71,"man-hours per policeman per month",500,401,67,19,8,3,1,2,0,0,0,0,0-0-0,0-0-0,|12||128-128-128
+12,72,48,391,512,10,8,0,3,1,0,-1,0,0,0
+1,73,75,70,4,1,0,22,0,0,0,-1--1--1,,1|(396,445)|
+1,74,75,72,100,1,0,22,0,0,0,-1--1--1,,1|(396,489)|
+11,75,48,396,468,8,6,33,3,1,0,2,0,0,0
+10,76,net formation of teams of policemen assigned to HB,305,468,83,19,40,3,1,0,-1,0,0,0
+1,77,70,63,1,1,0,0,0,64,0,-1--1--1,,1|(478,349)|
+1,78,71,63,1,1,0,0,1,64,0,128-128-128,|12||0-0-0,1|(550,335)|
+1,79,70,75,1,1,0,0,0,64,0,-1--1--1,,1|(430,438)|
+10,80,conversion time to HB,305,529,50,19,8,3,1,2,0,0,0,0,0-0-0,0-0-0,|12||128-128-128
+1,81,80,76,0,1,0,0,1,64,0,128-128-128,|12||0-0-0,1|(305,505)|
+10,82,"man-hours required",491,433,34,19,8,3,1,0,0,0,0,0
+1,83,64,82,1,1,0,0,0,64,0,-1--1--1,,1|(572,422)|
+1,84,42,82,1,1,0,0,0,64,0,-1--1--1,,1|(501,547)|
+1,85,71,82,0,1,0,0,1,64,0,128-128-128,|12||0-0-0,1|(497,410)|
+1,86,82,75,1,1,0,0,0,64,0,-1--1--1,,1|(464,441)|
+1,87,82,63,1,1,0,0,2,65,0,-1--1--1,|12||0-0-0,1|(527,350)|
+1,88,36,25,1,1,0,0,0,64,0,-1--1--1,,1|(569,182)|
+1,89,35,2,0,0,43,0,0,64,0,-1--1--1,,1|(742,150)|
+1,90,36,2,1,0,45,0,0,64,0,-1--1--1,,1|(661,167)|
+1,91,63,36,1,0,43,0,2,0,0,-1--1--1,|12||0-0-0,1|(541,272)|
+1,92,64,36,1,0,45,0,0,64,0,-1--1--1,,1|(636,295)|
+1,93,20,7,1,0,45,0,0,64,0,-1--1--1,,1|(1037,242)|
+1,94,1,42,1,1,0,0,0,64,0,-1--1--1,,1|(773,485)|
+1,95,64,63,1,0,43,0,2,193,0,-1--1--1,|12||0-0-0,1|(655,382)|
+12,96,0,932,254,12,12,4,135,0,0,-1,0,0,0
+-
+12,97,0,577,249,12,12,4,135,0,0,-1,0,0,0
+-
+12,98,0,705,250,13,13,4,135,0,0,-1,0,0,0
++
+10,99,occasional HB,930,275,43,9,8,3,0,24,0,0,0,0,0-0-0,0-0-0,|10|BI|0-0-0
+10,100,OC headstart loop,703,275,53,9,8,3,0,24,0,0,0,0,0-0-0,0-0-0,|10|BI|0-0-0
+10,101,police catching up loop,584,288,28,22,8,131,0,24,0,0,0,0,0-0-0,0-0-0,|10|BI|0-0-0
+///---\\\
+:GRAPH GRAPH
+:SCALE
+:VAR total number of HB
+:UNITS HB/Month
+:LINE-WIDTH 2
+:VAR HB by members of the OC
+:UNITS HB/Month
+:LINE-WIDTH 2
+:VAR HB by occasional thieves
+:UNITS HB/Month
+:LINE-WIDTH 2
+
+:GRAPH GRAPH_0
+:SCALE
+:VAR effective chance of being caught for HB in NL
+:Y-MIN 0.15
+:Y-MAX 0.25
+:LINE-WIDTH 2
+:SCALE
+:VAR members of OC active in HB in NL
+:UNITS members
+:Y-MIN 2400
+:Y-MAX 2700
+:LINE-WIDTH 2
+
+:GRAPH GRAPH_1
+:SCALE
+:VAR HB by members of the OC
+:UNITS HB/Month
+:Y-MIN 9000
+:Y-MAX 12000
+:DATASET Q4
+:VAR HB by members of the OC
+:DATASET Q5sens1
+:VAR HB by members of the OC
+:DATASET Q5sens2
+
+:GRAPH GRAPH_2
+:SCALE
+:VAR HB by occasional thieves
+:UNITS HB/Month
+:Y-MIN 0
+:Y-MAX 25000
+:DATASET Q4
+:LINE-WIDTH 2
+:VAR HB by occasional thieves
+:DATASET Q5sens1
+:LINE-WIDTH 2
+:VAR HB by occasional thieves
+:DATASET Q5sens2
+:LINE-WIDTH 2
+:VAR total number of HB
+:DATASET Q4
+:LINE-WIDTH 2
+:VAR total number of HB
+:DATASET Q5sens1
+:LINE-WIDTH 2
+:VAR total number of HB
+:DATASET Q5sens2
+:LINE-WIDTH 2
+:L<%^E!@
+1:O:\E-BOOK-SD\1_Models\WIengels\Q4.vdf
+1:O:\E-BOOK-SD\1_Models\WIengels\Q5sens2.vdf
+1:O:\E-BOOK-SD\1_Models\WIengels\Q5sens1.vdf
+9:Q5sens1
+23:0
+15:0,0,0,1,0,0
+19:120,0
+27:2,
+34:0,
+4:Time
+5:"total man-hours required for HB"
+35:Date
+36:YYYY-MM-DD
+37:2000
+38:1
+39:1
+40:2
+41:0
+42:0
+24:0
+25:120
+26:120

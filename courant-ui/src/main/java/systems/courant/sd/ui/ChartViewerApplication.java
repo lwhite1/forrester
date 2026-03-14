@@ -33,6 +33,7 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -68,6 +69,10 @@ public class ChartViewerApplication extends Application {
             double height,
             String title,
             String xAxisLabel) {
+
+        ChartData {
+            series = Collections.unmodifiableList(series);
+        }
     }
 
     /** Package-private for test access. */
@@ -160,6 +165,11 @@ public class ChartViewerApplication extends Application {
 
     @Override
     public void start(Stage stage) {
+        if (chartData == null) {
+            throw new IllegalStateException(
+                    "ChartViewerApplication requires chart data. "
+                            + "Use ChartViewerApplication.showChart() instead of Application.launch().");
+        }
         List<Series<String, Number>> localSeries = chartData.series();
         String localTitle = chartData.title();
         String localXAxisLabel = chartData.xAxisLabel();
@@ -200,7 +210,7 @@ public class ChartViewerApplication extends Application {
     /**
      * Initializes chart series from stock and variable names.
      */
-    public static void addSeries(List<String> modelEntityNames, List<String> modelVariableNames) {
+    public static void setSeries(List<String> modelEntityNames, List<String> modelVariableNames) {
         synchronized (LOCK) {
             series = new ArrayList<>();
             List<String> allNames = new ArrayList<>(modelEntityNames);
@@ -216,7 +226,7 @@ public class ChartViewerApplication extends Application {
     /**
      * Initializes chart series from flow names.
      */
-    public static void addFlowSeries(List<String> flowNames) {
+    public static void setFlowSeries(List<String> flowNames) {
         synchronized (LOCK) {
             series = new ArrayList<>();
             for (String name : flowNames) {

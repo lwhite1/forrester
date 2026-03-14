@@ -1,0 +1,373 @@
+{UTF-8}
+initial credibility DSB=
+	0.9
+	~	Dmnl
+	~		|
+
+concerted liquid fraction running=
+	organised run*(STEP(concerted percentage running,2)-STEP(concerted percentage running\
+		,4))
+	~	Dmnl
+	~		|
+
+concerted percentage running=
+	0.05
+	~	Dmnl
+	~		|
+
+credibility denials=
+	initial credibility DSB-STEP(loss of credibility DSB,1)*organised run
+	~	Dmnl
+	~		|
+
+new fixed loan= GAME (
+	0)
+	~	EURO/Day
+	~		|
+
+loss of credibility DSB=
+	0.8
+	~	Dmnl
+	~		|
+
+new fixed deposits and loans=
+	liquid deposits and loans lost*new fixed loan as fraction of liq lost+new fixed loan
+	~	EURO/Week
+	~		|
+
+fixed deposits and loans= INTEG (
+	new fixed deposits and loans,
+		1e+009)
+	~	EURO
+	~		|
+
+intervention cost= INTEG (
+	new liquid assets,
+		0)
+	~	
+	~		|
+
+new liquid assets=
+	new fixed deposits and loans+new liquid equity
+	~	EURO/Day
+	~		|
+
+new liquid equity= GAME (
+	0)
+	~	EURO/Day
+	~		|
+
+liquid assets= INTEG (
+	liquidation+new liquid assets-liquid assets lost,
+		1.15e+009)
+	~	EURO
+	~		|
+
+new fixed loan as fraction of liq lost= GAME (
+	0)
+	~	Dmnl
+	~		|
+
+organised run=
+	1
+	~	Dmnl
+	~		|
+
+total asset total liability ratio=
+	(fixed assets+liquid assets)/(liquid deposits and loans+fixed deposits and loans)
+	~	Dmnl
+	~		|
+
+perceived likelihood bank failure risk=
+	MAX(perceived likelihood liquidity failure,perceived likelihood solvency failure)*(1\
+		-credibility denials)
+	~	Dmnl
+	~		|
+
+anger=
+	0.5
+	~	Dmnl
+	~		|
+
+liquid fraction running= WITH LOOKUP (
+	perceived likelihood bank failure risk,
+		([(0,0)-(1,1)],(0,0),(0.25,0),(0.5,0.01),(0.75,0.1),(1,0.5) ))
+	~	Dmnl
+	~		|
+
+liquidation losses=
+	liquidation/(1-liquidation premium)*liquidation premium
+	~	EURO/Day
+	~		|
+
+fixed assets= INTEG (
+	-liquidation-liquidation losses,
+		4.6e+009)
+	~	EURO
+	~		|
+
+liquidation time=
+	1
+	~	Day
+	~		|
+
+liquid asset liability target=
+	0.2
+	~	Dmnl
+	~		|
+
+liquidation=
+	MAX(0,(liquid asset liability target*liquid deposits and loans-liquid assets)/liquidation time\
+		*(1-liquidation premium))
+	~	EURO/Day
+	~		|
+
+liquid deposits and loans lost=
+	MIN((liquid fraction running*(1+expected hindrance possible bank failure)*(1+anger)+\
+		concerted liquid fraction running)*liquid deposits and loans
+	/withdrawal time
+	,liquid deposits and loans/withdrawal time)
+	~	EURO/Day
+	~	MIN((liquid fraction running+concerted liquid fraction running)*hindrance \
+		bank failures*liquid deposits and loans/opnametijd,liquid deposits and \
+		loans/opnametijd)
+	|
+
+DNB bank failure declaration=
+	IF THEN ELSE(liquid asset liability ratio < 0.01 :OR: total asset total liability ratio\
+		 < 0.9, 1, 0)
+	~	
+	~		|
+
+liquid deposits and loans= INTEG (
+	-liquid deposits and loans lost,
+		4.5e+009)
+	~	EURO
+	~		|
+
+expected hindrance possible bank failure=
+	0.5
+	~	Dmnl
+	~		|
+
+perceived likelihood solvency failure= WITH LOOKUP (
+	total asset total liability ratio,
+		([(0,0)-(2,1)],(0,1),(0.8,1),(0.9,0.9),(1,0.5),(1.1,0.1),(1.2,0),(2,0) ))
+	~	Dmnl
+	~	solvency = total assets/total deposits and loans
+	|
+
+liquid asset liability ratio=
+	liquid assets/liquid deposits and loans
+	~	Dmnl
+	~		|
+
+perceived likelihood liquidity failure= WITH LOOKUP (
+	liquid asset liability ratio,
+		([(-1,0)-(1,1)],(-1,1),(0,1),(0.1,0.8),(0.2,0.4),(0.3,0.1),(0.4,0.01),(0.5,0),(1,0)\
+		 ))
+	~	Dmnl
+	~		|
+
+withdrawal time=
+	1
+	~	Day
+	~		|
+
+liquid assets lost=
+	liquid deposits and loans lost
+	~	EURO/Day
+	~		|
+
+initial number of shares=
+	1e+008
+	~	share
+	~		|
+
+liquidation premium=
+	0.15
+	~	Dmnl
+	~		|
+
+********************************************************
+	.Control
+********************************************************~
+		Simulation Control Parameters
+	|
+
+FINAL TIME  = 100
+	~	Day
+	~	The final time for the simulation.
+	|
+
+INITIAL TIME  = 0
+	~	Day
+	~	The initial time for the simulation.
+	|
+
+SAVEPER  = 
+        TIME STEP
+	~	Day
+	~	The frequency with which output is stored.
+	|
+
+TIME STEP  = 0.0625
+	~	Day
+	~	The time step for the simulation.
+	|
+
+\\\---/// Sketch information - do not modify anything except names
+V300  Do not put anything below this section - it will be ignored
+*View 1
+$192-192-192,0,Times New Roman|12||0-0-0|0-0-0|0-0-255|-1--1--1|-1--1--1|96,96,100,0
+10,1,liquid assets,381,417,40,20,3,131,0,0,0,0,0,0
+10,2,liquid deposits and loans,671,295,35,28,3,131,0,0,0,0,0,0
+12,3,48,839,285,10,8,0,3,0,0,-1,0,0,0
+1,4,5,3,4,0,0,22,0,0,0,-1--1--1,,1|(812,285)|
+11,5,48,789,285,6,8,34,3,0,0,1,0,0,0
+10,6,liquid deposits and loans lost,789,312,59,19,40,3,0,0,-1,0,0,0
+1,7,6,2,0,1,0,0,0,64,0,-1--1--1,,1|(724,303)|
+1,8,2,6,1,0,0,0,0,64,0,-1--1--1,,1|(733,360)|
+12,9,48,385,571,10,8,0,3,0,0,-1,0,0,0
+1,10,12,9,4,0,0,22,0,0,0,-1--1--1,,1|(383,546)|
+1,11,12,1,100,0,0,22,0,0,0,-1--1--1,,1|(383,477)|
+11,12,48,383,523,8,6,33,3,0,0,2,0,0,0
+10,13,liquid assets lost,324,523,51,11,40,3,0,0,-1,0,0,0
+1,14,5,2,100,0,0,22,0,0,0,-1--1--1,,1|(744,285)|
+10,15,initial number of shares,166,253,50,19,8,3,1,2,0,0,0,0,0-0-0,0-0-0,|12||160-160-160
+10,16,liquidation premium,557,488,33,19,8,131,0,2,0,0,0,0,0-0-0,0-0-0,|12||255-128-0
+10,17,fixed deposits and loans,598,295,36,28,3,131,0,0,0,0,0,0
+10,18,fixed assets,599,417,40,20,3,3,0,0,0,0,0,0
+1,19,6,12,1,0,0,0,0,64,0,-1--1--1,,1|(696,515)|
+10,20,liquid asset liability ratio,320,303,39,19,8,3,0,0,0,0,0,0
+1,21,1,20,1,0,0,0,0,64,0,-1--1--1,,1|(372,368)|
+1,22,2,20,1,0,0,0,0,64,0,-1--1--1,,1|(548,367)|
+10,23,total asset total liability ratio,367,163,48,19,8,3,0,0,0,0,0,0
+10,24,perceived likelihood liquidity failure,272,101,64,19,8,3,0,0,0,0,0,0
+10,25,perceived likelihood solvency failure,395,37,64,19,8,3,0,0,0,0,0,0
+1,26,20,24,1,0,0,0,0,64,0,-1--1--1,,1|(280,242)|
+1,27,23,25,1,0,0,0,0,64,0,-1--1--1,,1|(386,50)|
+10,28,expected hindrance possible bank failure,789,23,65,19,8,3,0,0,0,0,0,0
+1,29,28,5,1,0,0,0,0,64,0,-1--1--1,,1|(789,153)|
+10,30,withdrawal time,827,405,50,11,8,3,0,0,-1,0,0,0
+1,31,30,6,1,0,0,0,0,64,0,-1--1--1,,1|(813,354)|
+10,32,perceived likelihood bank failure risk,521,-22,64,19,8,3,0,0,0,0,0,0
+1,33,32,39,1,0,0,0,0,64,0,-1--1--1,,1|(599,-18)|
+10,34,DNB bank failure declaration,271,-9,57,23,8,131,0,0,0,0,0,0
+1,35,23,34,1,1,0,0,0,64,0,-1--1--1,,1|(306,62)|
+1,36,20,34,1,1,0,0,0,64,0,-1--1--1,,1|(279,88)|
+1,37,24,32,1,0,0,0,0,64,0,-1--1--1,,1|(350,3)|
+1,38,25,32,1,0,0,0,0,64,0,-1--1--1,,1|(443,-4)|
+10,39,liquid fraction running,668,28,43,19,8,3,0,0,0,0,0,0
+1,40,39,5,1,0,0,0,0,64,0,-1--1--1,,1|(736,98)|
+1,41,43,1,4,0,0,22,0,0,0,-1--1--1,,1|(452,417)|
+1,42,43,18,100,0,0,22,0,0,0,-1--1--1,,1|(527,417)|
+11,43,620,490,417,6,8,34,3,0,0,1,0,0,0
+10,44,liquidation,490,436,33,11,40,3,0,0,-1,0,0,0
+1,45,2,43,1,0,0,0,0,64,0,-1--1--1,,1|(572,373)|
+1,46,1,44,0,0,0,0,0,64,0,-1--1--1,,1|(432,425)|
+10,47,liquidation time,490,524,47,11,8,3,0,0,-1,0,0,0
+1,48,47,44,0,0,0,0,0,64,0,-1--1--1,,1|(490,487)|
+10,49,liquid asset liability target,437,485,48,20,8,131,0,0,-1,0,0,0
+1,50,49,44,0,0,0,0,0,64,0,-1--1--1,,1|(462,460)|
+10,51,concerted liquid fraction running,660,106,51,19,8,3,0,0,0,0,0,0
+1,52,51,5,1,0,0,0,0,64,0,-1--1--1,,1|(711,128)|
+12,53,48,626,501,10,8,0,3,0,0,-1,0,0,0
+1,54,56,53,4,0,0,22,0,0,0,-1--1--1,,1|(629,475)|
+1,55,56,18,100,0,0,22,0,0,0,-1--1--1,,1|(629,441)|
+11,56,48,629,452,8,6,33,3,0,0,4,0,0,0
+10,57,liquidation losses,690,452,53,11,40,3,0,0,-1,0,0,0
+1,58,43,56,1,0,0,0,0,64,0,-1--1--1,,1|(547,439)|
+1,59,16,44,0,0,0,0,0,64,0,-1--1--1,,1|(524,462)|
+1,60,16,56,0,0,0,0,0,64,0,-1--1--1,,1|(599,467)|
+10,61,anger,821,103,19,11,8,3,0,0,0,0,0,0
+1,62,61,5,1,0,0,0,0,64,0,-1--1--1,,1|(794,236)|
+10,63,credibility denials,521,44,54,11,8,3,0,0,0,0,0,0
+1,64,63,32,0,0,0,0,0,64,0,-1--1--1,,1|(521,22)|
+10,65,organised run,521,105,43,11,8,3,0,0,0,0,0,0
+1,66,65,63,0,0,0,0,0,64,0,-1--1--1,,1|(521,81)|
+1,67,65,51,0,0,0,0,0,64,0,-1--1--1,,1|(579,105)|
+1,68,17,23,1,0,0,0,0,64,0,-1--1--1,,1|(456,307)|
+1,69,2,23,1,0,0,0,0,64,0,-1--1--1,,1|(510,347)|
+1,70,1,23,1,0,0,0,0,64,0,-1--1--1,,1|(374,296)|
+1,71,18,23,1,0,0,0,0,64,0,-1--1--1,,1|(430,323)|
+10,72,concerted percentage running,509,146,38,25,8,131,0,0,0,0,0,0
+1,73,72,51,0,0,0,0,0,64,0,-1--1--1,,1|(571,129)|
+10,74,loss of credibility DSB,459,81,54,19,8,3,0,0,0,0,0,0
+1,75,74,63,0,0,0,0,0,64,0,-1--1--1,,1|(489,62)|
+10,76,initial credibility DSB,575,78,49,19,8,3,0,0,0,0,0,0
+1,77,76,63,0,0,0,0,0,64,0,-1--1--1,,1|(547,60)|
+12,78,48,601,177,10,8,0,3,0,0,-1,0,0,0
+1,79,81,17,4,0,0,22,0,0,0,-1--1--1,,1|(601,239)|
+1,80,81,78,100,0,0,22,0,0,0,-1--1--1,,1|(601,192)|
+11,81,48,601,205,8,6,33,3,0,0,4,0,0,0
+10,82,new fixed deposits and loans,647,205,38,21,40,131,0,0,-1,0,0,0
+1,83,5,82,1,0,0,0,0,64,0,-1--1--1,,1|(683,215)|
+10,84,new fixed loan as fraction of liq lost,522,240,55,19,8,3,0,2,0,0,0,0,0-0-0,0-0-0,|12||255-0-0
+1,85,84,81,0,0,0,0,0,64,0,-1--1--1,,1|(572,217)|
+12,86,48,222,411,10,8,0,3,0,0,-1,0,0,0
+1,87,89,1,4,0,0,22,0,0,0,-1--1--1,,1|(316,411)|
+1,88,89,86,100,0,0,22,0,0,0,-1--1--1,,1|(256,411)|
+11,89,48,286,411,6,8,34,3,0,0,1,0,0,0
+10,90,new liquid assets,286,430,53,11,40,3,0,0,-1,0,0,0
+10,91,new liquid equity,195,474,53,11,8,3,0,2,0,0,0,0,0-0-0,0-0-0,|12||255-0-0
+1,92,91,90,0,0,0,0,0,64,0,-1--1--1,,1|(233,455)|
+10,93,new fixed loan,518,207,46,11,8,3,0,2,0,0,0,0,0-0-0,0-0-0,|12||255-0-0
+1,94,93,81,0,0,0,0,0,64,0,-1--1--1,,1|(571,205)|
+10,95,intervention cost,196,361,51,11,8,3,0,0,0,0,0,0
+1,96,89,95,0,0,0,0,0,64,0,-1--1--1,,1|(254,393)|
+10,97,new fixed deposits and loans,306,470,64,19,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,98,97,90,0,0,0,0,0,64,0,-1--1--1,,1|(297,452)|
+///---\\\
+:GRAPH GRAPH
+:TITLE GRAPH
+:SCALE
+:VAR liquid asset liability fraction
+:VAR liquid asset liability target
+
+:GRAPH GRAPH_0
+:TITLE GRAPH_0
+:SCALE
+:VAR perceived liquidity failure
+:VAR perceived solvency failure
+:VAR perceived bank failure risk
+
+:GRAPH GRAPH_1
+:TITLE  
+:SCALE
+:VAR liquid deposits and loans
+:DATASET DSB1_concerted_run_low
+:VAR liquid deposits and loans lost
+:DATASET DSB1_concerted_run_low
+:VAR liquid deposits and loans
+:DATASET DSB2_concerted_run_medium
+:VAR liquid deposits and loans lost
+:DATASET DSB2_concerted_run_medium
+:VAR liquid deposits and loans
+:DATASET DSB3_concerted_run_high
+:VAR liquid deposits and loans lost
+:DATASET DSB3_concerted_run_high
+:L<%^E!@
+1:DSB0_no_concerted_run.vdf
+1:DSB1_concerted_run_low.vdf
+1:DSB2_concerted_run_medium.vdf
+1:DSB3_concerted_run_high.vdf
+9:DSB_LH_N
+18:DSB_MV.vsc
+20:DSB.lst
+15:0,0,0,0,0,0
+19:100,0
+27:0,
+34:0,
+4:Time
+5:liquid deposits and loans
+35:Date
+36:YYYY-MM-DD
+37:2000
+38:1
+39:1
+40:4
+41:0
+24:0
+25:60
+26:60

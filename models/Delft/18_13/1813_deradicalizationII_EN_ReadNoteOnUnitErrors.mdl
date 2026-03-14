@@ -1,0 +1,396 @@
+{UTF-8}
+visibility of the problem=
+	problem symptoms*radical action level*commitment of radical individuals to radical action
+	~	Dmnl
+	~		|
+
+commitment of radical individuals to radical action=
+	1
+	~	1/citizens
+	~		|
+
+extremists= INTEG (
+	activists 2 extremists,
+		ini extremists)
+	~	citizens
+	~		|
+
+frustration of convinced citizens=
+	min(MAX((frustration due to marginalization+frustration due to inertia)*perceived animal distress\
+		,0),1)
+	~	Dmnl
+	~	OLD: min(MAX(frustration due to marginalization*frustration due to \
+		inertia*average degree of conviction of convinced citizens*percived \
+		magnitude of the problem,0),1)
+	|
+
+"non-radical action level"=
+	frustration of convinced citizens
+	~	Dmnl
+	~	OLD: (1-frustration of convinced citizens)*"total readiness to take \
+		non-radical action"*(homegrown activists+convinced citizens)/total \
+		population
+	|
+
+fraction of convinced citizens=
+	(convinced citizens+activists+extremists)/(convinced citizens+activists+extremists+unconvinced citizens\
+		+citizens that cannot be convinced)
+	~	Dmnl
+	~		|
+
+radical action level=
+	frustration of convinced citizens*extremists*fraction of convinced citizens
+	~	citizens
+	~	EXPRESSED IN TOTALLY FRUSTRATED CITIZENS TAKING RADICAL ACTION
+	|
+
+potential fraction of extremists=
+	0.1
+	~	Dmnl
+	~		|
+
+activists 2 extremists=
+	(potential number of extremists-extremists)/average time to change states
+	~	citizens/Year
+	~		|
+
+average time to change states=
+	10
+	~	Year
+	~		|
+
+persuasion=
+	min(contact rate of convinced citizens*fraction of convinced citizens*unconvinced citizens\
+		*"persuasiveness of non-radical actions" *visibility of the problem/"strength of incompatible self-interest"\
+		/average time to change states,unconvinced citizens/average time to change states)
+	~	citizens/Year
+	~	min(dedicated contact rate of convinced citizens*fraction of convinced \
+		citizens*unconvinced citizens*"persuasiveness of non-radical actions" \
+		*visibility of the problem/"strength of incompatible \
+		self-interest"/average time to change states,unconvinced citizens/average \
+		time to change states)
+	|
+
+convinced 2 activist=
+	(potential number of activitsts-activists)/average time to change states
+	~	citizens/Year
+	~		|
+
+convinced citizens= INTEG (
+	persuasion-convinced 2 activist,
+		ini convinced)
+	~	citizens
+	~		|
+
+contact rate of convinced citizens=
+	min(normal contact rate of convinced citizens*"non-radical action level",3650)
+	~	contacts/(citizen)
+	~	DIFFERENT FORMULATION
+	|
+
+potential number of extremists=
+	potential fraction of extremists*activists*frustration of convinced citizens*frustration due to marginalization
+	~	citizens
+	~		|
+
+ini extremists=
+	0
+	~	citizens
+	~		|
+
+activists= INTEG (
+	convinced 2 activist-activists 2 extremists,
+		ini activists)
+	~	citizens
+	~		|
+
+ini activists=
+	1000
+	~	citizens
+	~		|
+
+potential number of activitsts=
+	potential fraction of activists*convinced citizens*frustration of convinced citizens
+	~	citizens
+	~		|
+
+potential fraction of activists=
+	0.1
+	~	Dmnl
+	~		|
+
+"persuasiveness of non-radical actions"=
+	0.01
+	~	citizens/contacts
+	~	OLD: "non-radical action level"*normal persuasiveness
+	|
+
+citizens that cannot be convinced=
+	3e+006
+	~	citizens
+	~		|
+
+frustration due to inertia=
+	DELAY FIXED( (maximum attainable rate of decrease through societal change-rate of decrease through societal change\
+		)/maximum attainable rate of decrease through societal change, 1, (maximum attainable rate of decrease through societal change\
+		-rate of decrease through societal change)/maximum attainable rate of decrease through societal change\
+		)
+	~	Dmnl
+	~		|
+
+frustration due to marginalization= WITH LOOKUP (
+	fraction of convinced citizens,
+		([(0,0)-(1,1)],(0,1),(0.025,0.5),(0.103976,0.20614),(0.25,0.04),(0.5,0),(1,0) ))
+	~	Dmnl
+	~		|
+
+ini convinced=
+	100000
+	~	citizens
+	~		|
+
+ini unconvinced=
+	1.29e+007
+	~	citizens
+	~		|
+
+initial value of underlying phenomenon=
+	100
+	~	Dmnl
+	~		|
+
+exogenous rate of increase of animal distress=
+	0
+	~	1/Year
+	~		|
+
+maximum attainable rate of decrease through societal change=
+	0.05
+	~	1/Year
+	~		|
+
+net increase of animal distress=
+	animal distress*(exogenous rate of increase of animal distress-rate of decrease through societal change\
+		)
+	~	1/Year
+	~		|
+
+normal contact rate of convinced citizens=
+	1000
+	~	contacts/citizen
+	~		|
+
+perceived animal distress=
+	SMOOTH3( animal distress/societal acceptation threshold with regard to animal distress\
+		,1)
+	~	Dmnl
+	~		|
+
+problem symptoms=
+	MAX(animal distress-societal acceptation threshold with regard to animal distress,0)\
+		/societal acceptation threshold with regard to animal distress
+	~	Dmnl
+	~		|
+
+societal acceptation threshold with regard to animal distress= WITH LOOKUP (
+	Time,
+		([(1950,0)-(2100,100)],(1980,100),(2020,50),(2080,20) ))
+	~	Dmnl
+	~	60
+	|
+
+rate of decrease through societal change=
+	fraction of convinced citizens*maximum attainable rate of decrease through societal change
+	~	1/Year
+	~		|
+
+"strength of incompatible self-interest"=
+	10
+	~	Dmnl
+	~		|
+
+unconvinced citizens= INTEG (
+	-persuasion,
+		ini unconvinced)
+	~	citizens
+	~		|
+
+animal distress= INTEG (
+	net increase of animal distress,
+		initial value of underlying phenomenon)
+	~	Dmnl
+	~		|
+
+********************************************************
+	.Control
+********************************************************~
+		Simulation Control Parameters
+	|
+
+FINAL TIME  = 2080
+	~	Year
+	~	The final time for the simulation.
+	|
+
+INITIAL TIME  = 1980
+	~	Year
+	~	The initial time for the simulation.
+	|
+
+SAVEPER  = 
+        TIME STEP
+	~	Year [0,?]
+	~	The frequency with which output is stored.
+	|
+
+TIME STEP  = 0.125
+	~	Year [0,?]
+	~	The time step for the simulation.
+	|
+
+\\\---/// Sketch information - do not modify anything except names
+V300  Do not put anything below this section - it will be ignored
+*View 1
+$192-192-192,0,Times New Roman|12||0-0-0|0-0-0|0-0-255|-1--1--1|-1--1--1|96,96,90,0
+10,1,animal distress,625,290,42,20,3,131,0,0,0,0,0,0
+12,2,48,889,292,10,8,0,3,0,0,-1,0,0,0
+1,3,5,1,4,0,0,22,0,0,0,-1--1--1,,1|(716,292)|
+1,4,5,2,100,0,0,22,0,0,0,-1--1--1,,1|(828,292)|
+11,5,48,771,292,6,8,34,3,0,0,1,0,0,0
+10,6,net increase of animal distress,771,319,46,19,40,3,0,0,-1,0,0,0
+10,7,societal acceptation threshold with regard to animal distress,617,178,75,28,8,3,0,0,0,0,0,0
+10,8,problem symptoms,964,173,60,11,8,3,0,0,0,0,0,0
+1,9,7,8,1,0,0,0,0,64,0,-1--1--1,,1|(803,148)|
+1,10,1,8,1,0,0,0,0,64,0,-1--1--1,,1|(743,224)|
+10,11,perceived animal distress,483,517,33,27,8,131,0,0,0,0,0,0
+1,12,7,11,1,0,0,0,0,64,0,-1--1--1,,1|(499,360)|
+1,13,1,11,1,0,0,0,0,64,0,-1--1--1,,1|(522,433)|
+10,14,frustration of convinced citizens,843,881,57,19,8,3,0,2,0,0,0,0,0-0-0,0-0-0,|12||255-0-0
+1,15,11,14,1,0,0,0,0,64,0,-1--1--1,,1|(607,787)|
+10,16,frustration due to marginalization,824,603,54,19,8,3,0,0,0,0,0,0
+1,17,16,14,1,0,0,0,0,64,0,-1--1--1,,1|(808,743)|
+10,18,frustration due to inertia,693,626,54,19,8,3,0,2,0,0,0,0,0-0-0,0-0-0,|12||255-0-0
+1,19,18,14,1,0,0,0,0,64,0,-1--1--1,,1|(738,755)|
+10,20,convinced citizens,1351,403,40,20,3,3,0,0,0,0,0,0
+10,21,unconvinced citizens,1551,405,40,20,3,3,0,0,0,0,0,0
+1,22,24,20,4,0,0,22,0,0,0,-1--1--1,,1|(1418,404)|
+1,23,24,21,100,0,0,22,0,0,0,-1--1--1,,1|(1484,404)|
+11,24,428,1451,404,6,8,34,3,0,0,1,0,0,0
+10,25,persuasion,1451,423,34,11,40,3,0,2,-1,0,0,0,0-0-0,0-0-0,|12||255-0-255
+10,26,citizens that cannot be convinced,1655,401,40,20,3,3,0,0,0,0,0,0
+10,27,initial value of underlying phenomenon,627,241,51,23,8,131,0,0,0,0,0,0
+10,28,ini convinced,1337,441,35,15,8,131,0,0,0,0,0,0
+10,29,ini unconvinced,1551,443,42,15,8,131,0,0,0,0,0,0
+10,30,fraction of convinced citizens,1054,231,57,19,8,131,0,0,0,0,0,0
+1,31,20,30,1,0,0,0,0,64,0,-1--1--1,,1|(1245,295)|
+1,32,30,24,1,0,0,0,0,64,0,-1--1--1,,1|(1359,318)|
+10,33,contact rate of convinced citizens,1497,621,57,19,8,3,0,3,0,0,0,0,255-0-0,0-0-0,|12||255-0-0
+1,34,33,25,1,0,0,0,0,64,0,-1--1--1,,1|(1500,542)|
+10,35,"persuasiveness of non-radical actions",1581,553,60,19,8,3,0,3,0,0,0,0,255-0-0,0-0-0,|12||255-0-0
+1,36,35,25,1,0,0,0,0,64,0,-1--1--1,,1|(1507,491)|
+10,37,"strength of incompatible self-interest",1369,598,46,28,8,131,0,2,0,0,0,0,0-0-0,0-0-0,|12||255-128-0
+1,38,37,25,0,0,0,0,0,64,0,-1--1--1,,1|(1410,508)|
+10,39,rate of decrease through societal change,775,413,54,27,8,131,0,0,0,0,0,0
+1,40,30,39,1,0,0,0,0,64,0,-1--1--1,,1|(912,308)|
+10,41,maximum attainable rate of decrease through societal change,600,490,55,38,8,131,0,0,0,0,0,0
+1,42,41,39,1,0,0,0,0,64,0,-1--1--1,,1|(646,468)|
+1,43,39,6,1,0,0,0,0,64,0,-1--1--1,,1|(722,403)|
+1,44,1,5,1,0,0,0,0,64,0,-1--1--1,,1|(694,260)|
+10,45,exogenous rate of increase of animal distress,878,234,57,28,8,3,0,0,0,0,0,0
+1,46,45,5,0,0,0,0,0,64,0,-1--1--1,,1|(807,272)|
+1,47,41,18,0,0,0,0,0,64,0,-1--1--1,,1|(648,561)|
+1,48,39,18,1,0,0,0,0,64,0,-1--1--1,,1|(718,501)|
+10,49,normal contact rate of convinced citizens,1500,724,70,19,8,3,0,2,0,0,0,0,0-0-0,0-0-0,|12||255-128-0
+1,50,49,33,1,0,0,0,0,64,0,-1--1--1,,1|(1500,673)|
+10,51,radical action level,1746,546,58,11,8,3,0,2,0,0,0,0,0-0-0,255-255-0,|12||255-0-255
+1,52,14,51,1,0,0,0,0,64,0,-1--1--1,,1|(1578,757)|
+1,53,21,24,1,0,0,0,0,64,0,-1--1--1,,1|(1492,387)|
+10,54,"non-radical action level",1336,727,57,19,8,3,0,2,0,0,0,0,0-0-0,0-0-0,|12||255-0-0
+1,55,14,54,1,0,0,0,0,64,0,-1--1--1,,1|(1018,840)|
+1,56,27,1,0,0,0,0,0,64,1,-1--1--1,,1|(628,260)|
+1,57,29,21,0,0,0,0,0,64,1,-1--1--1,,1|(1551,433)|
+10,58,visibility of the problem,1450,214,47,19,8,3,0,0,0,0,0,0
+1,59,8,58,1,0,0,0,0,64,0,-1--1--1,,1|(1351,182)|
+1,60,30,16,1,0,0,0,0,64,0,-1--1--1,,1|(845,525)|
+1,61,58,24,0,0,0,0,0,64,0,-1--1--1,,1|(1450,308)|
+10,62,activists,1168,401,40,20,3,3,0,3,0,0,0,0,255-0-0,0-0-0,|12||255-0-0
+10,63,extremists,1011,399,40,20,3,3,0,3,0,0,0,0,255-0-0,0-0-0,|12||255-0-0
+1,64,62,30,1,0,0,0,1,64,0,255-0-0,|12||0-0-0,1|(1116,303)|
+1,65,63,30,0,0,0,0,1,64,0,255-0-0,|12||0-0-0,1|(1030,321)|
+1,66,68,62,4,0,0,22,1,0,0,255-0-0,|12||0-0-0,1|(1231,399)|
+1,67,68,20,100,0,0,22,1,0,0,255-0-0,|12||0-0-0,1|(1288,399)|
+11,68,140,1260,399,6,8,34,3,0,1,1,0,0,0,255-0-0,0-0-0,|12||0-0-0
+10,69,convinced 2 activist,1260,426,39,19,40,3,0,3,-1,0,0,0,255-0-0,0-0-0,|12||255-0-0
+1,70,72,63,4,0,0,22,1,0,0,255-0-0,|12||0-0-0,1|(1067,400)|
+1,71,72,62,100,0,0,22,1,0,0,255-0-0,|12||0-0-0,1|(1111,400)|
+11,72,588,1089,400,6,8,34,3,0,1,1,0,0,0,255-0-0,0-0-0,|12||0-0-0
+10,73,activists 2 extremists,1089,427,32,19,40,3,0,3,-1,0,0,0,255-0-0,0-0-0,|12||255-0-0
+1,74,28,20,0,0,0,0,0,64,1,-1--1--1,,1|(1340,431)|
+10,75,ini activists,1164,441,27,15,8,131,0,0,0,0,0,0
+10,76,ini extremists,1002,441,34,17,8,131,0,0,0,0,0,0
+1,77,75,62,0,0,0,0,0,64,1,-1--1--1,,1|(1164,430)|
+1,78,76,63,0,0,0,0,0,64,1,-1--1--1,,1|(1004,428)|
+1,79,54,33,1,0,0,0,3,64,0,255-0-0,|12||0-0-0,1|(1417,687)|
+10,80,average time to change states,1612,504,49,19,8,3,0,0,0,0,0,0
+1,81,80,25,1,0,0,0,0,64,0,-1--1--1,,1|(1498,470)|
+10,82,potential fraction of activists,1275,657,40,24,8,131,0,3,0,0,0,0,255-0-0,0-0-0,|12||255-0-0
+10,83,potential fraction of extremists,1099,668,41,22,8,131,0,3,0,0,0,0,255-0-0,0-0-0,|12||255-0-0
+10,84,potential number of activitsts,1269,575,61,19,8,3,0,3,0,0,0,0,255-0-0,0-0-0,|12||255-0-0
+10,85,potential number of extremists,1098,575,61,19,8,3,0,3,0,0,0,0,255-0-0,0-0-0,|12||255-0-0
+1,86,84,69,1,0,0,0,1,64,0,255-0-0,|12||0-0-0,1|(1241,504)|
+1,87,62,68,1,0,0,0,1,64,0,255-0-0,|12||0-0-0,1|(1224,373)|
+1,88,80,68,0,1,0,0,0,64,0,-1--1--1,,1|(1421,447)|
+1,89,80,72,0,1,0,0,1,64,0,255-0-0,|12||0-0-0,1|(1335,449)|
+1,90,85,73,1,0,0,0,1,64,0,255-0-0,|12||0-0-0,1|(1064,505)|
+1,91,20,84,1,0,0,0,1,64,0,255-0-0,|12||0-0-0,1|(1390,488)|
+1,92,62,85,1,0,0,0,1,64,0,255-0-0,|12||0-0-0,1|(1221,484)|
+1,93,63,72,1,0,0,0,1,64,0,255-0-0,|12||0-0-0,1|(1056,373)|
+1,94,82,84,0,0,0,0,1,64,0,255-0-0,|12||0-0-0,1|(1272,620)|
+1,95,83,85,0,0,0,0,1,64,0,255-0-0,|12||0-0-0,1|(1098,626)|
+1,96,14,84,1,0,0,0,1,64,0,255-0-0,|12||0-0-0,1|(1087,727)|
+1,97,14,85,1,0,0,0,1,64,0,255-0-0,|12||0-0-0,1|(1025,711)|
+1,98,16,85,1,0,0,0,1,64,0,255-0-0,|12||0-0-0,1|(972,635)|
+10,99,extremists,1721,740,41,11,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,100,99,51,1,0,0,0,0,64,0,-1--1--1,,1|(1741,649)|
+10,101,Time,513,226,26,11,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,102,101,7,0,0,0,0,0,64,0,-1--1--1,,1|(539,213)|
+1,103,51,58,1,0,0,0,0,64,0,-1--1--1,,1|(1677,327)|
+1,104,21,30,1,0,0,0,0,64,0,-1--1--1,,1|(1423,305)|
+1,105,26,30,1,0,0,0,0,64,0,-1--1--1,,1|(1410,251)|
+10,106,fraction of convinced citizens,1642,785,62,19,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,107,106,51,1,0,0,0,0,64,0,-1--1--1,,1|(1705,668)|
+10,108,commitment of radical individuals to radical action,1631,208,85,19,8,3,0,0,0,0,0,0
+1,109,108,58,0,0,0,0,0,64,0,-1--1--1,,1|(1528,210)|
+///---\\\
+:L<%^E!@
+1:O:\00_E-BOOK-SD\1_Models\testtest4.vdf
+1:O:\00_E-BOOK-SD\1_Models\testtest3.vdf
+1:O:\00_E-BOOK-SD\1_Models\testtest2.vdf
+9:testtest4
+22:$,Dollar,Dollars,$s
+22:citizen,citizens
+22:Day,Days
+22:Hour,Hours
+22:Month,Months
+22:Person,People,Persons
+22:Unit,Units
+22:Week,Weeks
+22:Year,Years
+23:0
+15:0,0,0,1,0,0
+19:90,0
+27:2,
+34:0,
+4:Time
+5:perceived animal distress
+35:Date
+36:YYYY-MM-DD
+37:2000
+38:1
+39:1
+40:0
+41:0
+42:0
+24:1980
+25:2080
+26:2080
