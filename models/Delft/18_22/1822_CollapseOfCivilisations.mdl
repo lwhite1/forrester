@@ -1,0 +1,221 @@
+{UTF-8}
+Deforestation=
+	MIN(Gap/MAX(Fertility of Lands,1),Forest/4)/Intensity
+	~	km2/year
+	~	Basically they deforest the amount of km2 that they need to close the Gap \
+		(kg) considering the Land Fertility (kg/km2).      Function MAX is used to \
+		prevent error if model need to divide by 0 .    Function MIN is used to \
+		atemperate the response of model.  Intensity gives us a way to regulate \
+		the speed of the model.  So, Intensity=1 means that every year they \
+		deforest all the forest they need.
+	|
+
+Losses=
+	Fertility of Lands*MIN(2,(Lands/Forest)^1.9)/Intensity
+	~	kg/(km2*year)/year
+	~	We can accept that Loses of Fertility are proportional to the Fertility \
+		that exist, and of the difference from the Lands and Forests with a \
+		quadratic relation (we like to avoid the use of a Table). We need to use \
+		as exponent 1.9 to see the collapse in year 800, as text explains. If we \
+		use 2 as exponent, the collapse occus in year 1000.
+	|
+
+Natural Increase=
+	Population*Natural Increase Rate
+	~	person/year
+	~	The calculated value of 0.17% is the net value from birth and deceases. \
+		With this rate population goes from 100,000 to 2,000,000 inhabitants in \
+		1,800 years.
+	|
+
+Natural Increase Rate=
+	0.0017
+	~	1/year
+	~	If the population doubles every 408 years, as in the text, the percentage \
+		must be 0,170 % as we can see (1+0.0017)^408=2
+	|
+
+Emigration Ratio=
+	0.05
+	~	1/year
+	~	Percentage of persons emigrating because of food shortage.
+	|
+
+Intensity=
+	1
+	~	year
+	~	The same variable is used to regulate: 1.- The period of time that \
+		population decide to close the gap, and deforest all that they need. 2.- \
+		The speed in with teh Fertility of lands are taken place.
+	|
+
+Emigration=
+	(Gap/Consumed Food per Person)*Emigration Ratio
+	~	person/year
+	~	We assume that if know the amount of Gap of food (kg/year) and the \
+		comsumption per person and year (kg/person/year), we can obtain the \
+		equivalent number of people without food (personas/año). We correct the \
+		obtained value, aplying the Emigration Ratio (5%) asssuming that only a \
+		small part of this people really emigrates (they redistribute the existing \
+		food).
+	|
+
+Population= INTEG (
+	Natural Increase-Emigration,
+		100000)
+	~	person
+	~	If we assume 2,000,000 inhabitants in the moment of collapse (+800 A.D.), \
+		we can obtain the initial value in year 1000 B.D., with a rate of 0.17%. \
+		They  were 100.000 inhabitants aprox.
+	|
+
+Consumed Food per Person=
+	400
+	~	kg/(person*year)
+	~	We assume a few more than 1 kilo per person and day.
+	|
+
+Demand of Food=
+	Consumed Food per Person*Population
+	~	kg/year
+	~		|
+
+Fertility of Lands= INTEG (
+	-Losses,
+		5e+006)
+	~	kg/(km2*year)
+	~	With the initial value of 5,000,000 kg/km2 we can obtain 40,000,000 kg if \
+		we have  8 km2 of Land. This is equal to the inicial food demanded for \
+		100,000 inhabitants with a Consumed food per person equal to 400 kg every \
+		year.
+	|
+
+Gap=
+	Demand of Food-Food Produced
+	~	kg/year
+	~		|
+
+Food Produced=
+	Fertility of Lands*Lands
+	~	kg/year
+	~		|
+
+Lands= INTEG (
+	Deforestation,
+		8)
+	~	km2
+	~	Initial value is obtained from the total food consumed 40,000,000 kg every \
+		year for the initial value of inhabitants: 100.000 persons, and an Initial \
+		fertility of Land of 5.000.000 kg/km2 and year. (40,000,000/5,000,000=8)
+	|
+
+Forest= INTEG (
+	-Deforestation,
+		5000)
+	~	km2
+	~	Initial value is obtained from an assumed density of 400 person/km2, and \
+		from the final inhabitants assumed: 2.000.000 persons (2 000 000/400=5,000)
+	|
+
+********************************************************
+	.Control
+********************************************************~
+		Simulation Control Paramaters
+	|
+
+FINAL TIME  = 1000
+	~	year
+	~	The final time for the simulation.
+	|
+
+INITIAL TIME  = -1000
+	~	year
+	~	The initial time for the simulation.
+	|
+
+SAVEPER  = 
+        TIME STEP
+	~	year
+	~	The frequency with which output is stored.
+	|
+
+TIME STEP  = 0.25
+	~	year
+	~	The time step for the simulation.
+	|
+
+\\\---/// Sketch information - do not modify anything except names
+V300  Do not put anything below this section - it will be ignored
+*View 1
+$192-192-192,0,Times New Roman|12||0-0-0|0-0-0|0-0-255|-1--1--1|-1--1--1|96,96,100,0
+10,1,Forest,238,132,40,29,3,3,0,0,0,0,0,0
+10,2,Lands,598,133,42,28,3,3,0,0,0,0,0,0
+10,3,Population,301,501,40,20,3,3,0,16,0,0,0,0,0-0-0,0-0-0,|12|B|0-0-0
+10,4,Fertility of Lands,397,260,47,32,3,3,0,0,0,0,0,0
+1,5,7,2,4,0,0,12,0,0,0,-1--1--1,,1|(495,140)|
+1,6,7,1,100,0,0,12,0,0,0,-1--1--1,,1|(350,140)|
+11,7,204,429,140,6,8,34,3,0,0,1,0,0,0
+10,8,Deforestation,429,159,43,11,32,3,0,0,-1,0,0,0
+12,9,48,586,259,10,8,0,3,0,0,-1,0,0,0
+1,10,12,9,4,0,0,12,0,0,0,-1--1--1,,1|(548,260)|
+1,11,12,4,100,0,0,12,0,0,0,-1--1--1,,1|(476,260)|
+11,12,48,515,260,6,8,34,3,0,0,3,0,0,0
+10,13,Losses,515,241,23,11,32,3,0,0,3,0,0,0
+12,14,48,506,503,10,8,0,3,0,0,-1,0,0,0
+1,15,17,14,4,0,0,12,0,0,0,-1--1--1,,1|(445,504)|
+1,16,17,3,100,0,0,12,32,0,0,-1--1--1,Times New Roman|12||0-0-0,1|(362,504)|
+11,17,48,389,504,6,8,34,3,0,0,3,0,0,0
+10,18,Emigration,389,485,34,11,32,3,0,0,-1,0,0,0
+1,19,1,13,1,0,0,12,0,64,0,-1--1--1,,1|(372,202)|
+1,20,2,13,1,0,0,12,0,64,0,-1--1--1,,1|(608,179)|
+1,21,4,8,1,0,0,12,0,64,0,-1--1--1,,1|(407,204)|
+1,22,4,13,1,0,0,12,0,64,0,-1--1--1,,1|(457,252)|
+10,23,Food Produced,569,379,40,20,3,3,0,1,0,0,0,0,255-255-255,0-0-0,|12||0-0-0
+10,24,Demand of Food,203,352,40,20,3,3,0,1,0,0,0,0,255-255-255,0-0-0,|12||0-0-0
+10,25,Consumed Food per Person,316,403,54,19,8,3,0,1,0,0,0,0,255-255-255,0-0-0,|12||0-0-0
+10,26,Gap,340,323,15,11,0,3,0,0,0,0,0,0
+1,27,1,8,1,0,0,12,0,64,0,-1--1--1,,1|(320,151)|
+1,28,26,8,1,0,0,12,32,64,0,-1--1--1,Times New Roman|12||0-0-0,1|(314,239)|
+1,29,4,23,1,0,0,12,0,64,0,-1--1--1,,1|(544,333)|
+1,30,2,23,1,0,0,12,0,64,0,-1--1--1,,1|(645,222)|
+1,31,23,26,1,0,0,12,0,64,0,-1--1--1,,1|(460,323)|
+1,32,24,26,1,0,0,12,32,64,0,-1--1--1,Times New Roman|12||0-0-0,1|(286,315)|
+1,33,25,24,1,0,0,12,0,64,0,-1--1--1,,1|(273,373)|
+1,34,25,18,1,0,0,12,0,64,0,-1--1--1,,1|(365,441)|
+1,35,26,18,1,0,0,12,32,64,0,-1--1--1,Times New Roman|12||0-0-0,1|(407,426)|
+1,36,3,24,1,0,0,12,32,64,0,-1--1--1,Times New Roman|12||0-0-0,1|(245,424)|
+12,37,48,110,493,10,8,0,3,0,0,-1,0,0,0
+1,38,40,3,4,0,0,12,32,0,0,-1--1--1,Times New Roman|12||0-0-0,1|(208,496)|
+1,39,40,37,100,0,0,12,0,0,0,-1--1--1,,1|(131,496)|
+11,40,48,149,496,6,8,34,3,0,0,3,0,0,0
+10,41,Natural Increase,149,477,52,11,32,3,0,0,3,0,0,0
+1,42,3,41,1,0,0,12,0,0,0,-1--1--1,,1|(193,457)|
+10,43,Emigration Ratio,493,441,52,11,0,3,0,0,0,0,0,0
+1,44,43,18,1,0,0,12,0,0,0,-1--1--1,,1|(444,468)|
+10,45,Natural Increase Rate,139,407,68,11,0,3,0,0,0,0,0,0
+1,46,45,41,0,0,0,12,0,0,0,-1--1--1,,1|(142,433)|
+10,47,Intensity,546,189,27,11,0,3,0,1,0,0,0,0,255-255-255,0-0-0,|12||0-0-0
+1,48,47,8,1,0,0,12,0,0,0,-1--1--1,,1|(502,180)|
+1,49,47,13,1,0,0,12,0,0,0,-1--1--1,,1|(524,202)|
+///---\\\
+:GRAPH GRAPH
+:SCALE
+:VAR Population
+:SCALE
+:VAR Forest
+:SCALE
+:VAR Lands
+:SCALE
+:VAR Fertility of Lands
+:L<%^E!@
+1:O:\00_E-BOOK-SD\1_Models\Case52CollapseMayaTBD\maya.vdf
+9:maya
+15:0,0,0,5,0,0
+19:100,0
+27:2,
+34:0,
+4:Time
+5:Losses
+24:-1000
+25:1000
+26:1000

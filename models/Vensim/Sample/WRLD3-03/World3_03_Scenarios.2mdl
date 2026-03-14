@@ -1,0 +1,4282 @@
+{UTF-8}
+********************************************************
+	.world3 03 scenarios
+********************************************************~
+		 THE DYNAMICS OF GROWTH IN A FINITE WORLD
+		 Copyright © 1971-1992 Dennis L. Meadows et al
+		 Laboratory for Interactive Learning
+		 IPSSR - Hood House UNH
+		 Durham, NH 03825
+		 603 862 2186
+		 Fax 603 862 1488
+		 e-mail:MEADOWS@UNHH.UNH.EDU
+	|
+
+zero population growth time use custom=
+	0
+	~	Dmnl [0,1,1]
+	~		|
+
+zero population growth time=
+	2100
+	~	year [1900,2100,1]
+	~		|
+
+zero population growth time s=
+	IF THEN ELSE ( scenario = 0 :OR: zero population growth time use custom = 1 ,
+	   zero population growth time ,
+	   zero population growth time scenario table ( scenario ) )
+	~	year
+	~		|
+
+zero population growth time scenario table(
+	[(0,0)-(20,2100)],(6,2100),(7,2002),(9,2002),(10,1982),(11,2012))
+	~	year
+	~	A table for allowing easy selection of which scenario to run, and to allow \
+		preferred percent to be used so that two scenario values may be merged \
+		into that preferred.\!\!\!
+	|
+
+resource technology change time=
+	2100
+	~	year [1900,2100,1]
+	~		|
+
+resource technology change time s=
+	IF THEN ELSE ( scenario = 0 :OR: resource technology change time use custom = 1 ,
+	   resource technology change time ,
+	   resource technology change time scenario table ( scenario ) )
+	~	year
+	~		|
+
+resource technology change time scenario table(
+	[(0,0)-(20,2100)],(4,2100),(6,2002),(7,2100),(8,2100),(9,2002),(10,1982),(11,2012))
+	~	year
+	~	A table for allowing easy selection of which scenario to run, and to allow \
+		preferred percent to be used so that two scenario values may be merged \
+		into that preferred.\!\!\!
+	|
+
+resource technology change time use custom=
+	0
+	~	Dmnl [0,1,1]
+	~		|
+
+resource technology change table 1(
+	[(-1,0)-(0,10)],(-1,0),(0,0))
+	~	1/year
+	~		|
+
+resource technology change table 2(
+	[(-1,-0.1)-(0,0)],(-1,-0.04),(0,0))
+	~	1/year
+	~		|
+
+resource technology change rate multiplier=
+	IF THEN ELSE ( Time < resource technology change time s ,
+	   resource technology change rate multiplier 1 ,
+	   resource technology change rate multiplier 2 )
+	~	1/year
+	~	Resource technology change multiplier (NRCM#--)
+	|
+
+resource technology change rate multiplier 1=
+	resource technology change table 1 ( 1  - resource usage rate / desired resource use rate\
+		 )
+	~	1/year
+	~	  Resource technology change multiplier (NRCM#--)
+	|
+
+resource technology change rate multiplier 2=
+	resource technology change table 2 ( 1  - resource usage rate / desired resource use rate\
+		 )
+	~	1/year
+	~	  Resource technology change multiplier (NRCM#--)
+	|
+
+industrial output per capita desired use custom=
+	0
+	~	Dmnl [0,1,1]
+	~		|
+
+initial nonrenewable resources=
+	1e+12
+	~	Resource units [5e+11,9e+12,5e+11]
+	~		|
+
+initial nonrenewable resources s=
+	IF THEN ELSE ( scenario = 0 :OR: initial nonrenewable resources use custom = 1 ,
+	   initial nonrenewable resources ,
+	   initial nonrenewable resources scenario table ( scenario ) )
+	~	Resource units
+	~	  NONRENEWABLE RESOURCE INITIAL (NR#129.2).
+	|
+
+initial nonrenewable resources scenario table(
+	[(1,0)-(2,2e+12)],(1,1e+12),(2,2e+12))
+	~	Resource units
+	~	A table for allowing easy selection of which scenario to run, and to allow \
+		preferred percent to be used so that two scenario values may be merged \
+		into that preferred.\!\!\!
+	|
+
+initial nonrenewable resources use custom=
+	0
+	~	Dmnl [0,1,1]
+	~		|
+
+land life policy implementation time=
+	2100
+	~	year [1900,2100,1]
+	~		|
+
+land life policy implementation time s=
+	IF THEN ELSE ( scenario = 0 :OR: land life policy time use custom = 1 ,
+	   land life policy implementation time ,
+	   land life policy time scenario table ( scenario ) )
+	~	year
+	~		|
+
+land life policy time scenario table(
+	[(0,0)-(20,2100)],(4,2100),(5,2002),(6,2002),(7,2100),(8,2100),(9,2002),(10,1982),(11\
+		,2012))
+	~	year
+	~	A table for allowing easy selection of which scenario to run, and to allow \
+		preferred percent to be used so that two scenario values may be merged \
+		into that preferred.\!\!\!
+	|
+
+land life policy time use custom=
+	0
+	~	Dmnl [0,1,1]
+	~		|
+
+land yield policy time=
+	2100
+	~	year [1900,2100,1]
+	~		|
+
+land yield policy time s=
+	IF THEN ELSE ( scenario = 0 :OR: land yield policy time use custom = 1 ,
+	   land yield policy time ,
+	   land yield policy time scenario table ( scenario ) )
+	~	year
+	~		|
+
+land yield policy time scenario table(
+	[(0,0)-(20,2100)],(3,2100),(4,2002),(6,2002),(7,2100),(8,2100),(9,2002),(10,1982),(11\
+		,2012))
+	~	year
+	~	A table for allowing easy selection of which scenario to run, and to allow \
+		preferred percent to be used so that two scenario values may be merged \
+		into that preferred.\!\!\!
+	|
+
+land yield policy time use custom=
+	0
+	~	Dmnl [0,1,1]
+	~		|
+
+land yield technology change rate multiplier=
+	IF THEN ELSE ( Time < land yield policy time s ,
+	   land yield technology change rate multiplier 1 ,
+	   land yield technology change rate multiplier 2 )
+	~	1/year
+	~	Land yield from technology change multiplier (LYCM#--)
+	|
+
+land yield technology change rate multiplier 1=
+	land yield technology change rate multiplier table 1 ( desired food ratio 
+	                  - food ratio )
+	~	1/year
+	~	  Land yield from technology change multiplier
+		         (LYCM#--)
+	|
+
+land yield technology change rate multiplier 2=
+	land yield technology change rate multiplier table 2 ( desired food ratio 
+	                  - food ratio )
+	~	1/year
+	~	  Land yield from technology change multiplier
+		         (LYCM#--)
+	|
+
+land yield technology change rate multiplier table 1  ( 
+            (0,0),(1,0) )
+	~	1/year
+	~	  Table relating the food ratio gap to the change in
+		         agricultural technology (LYCMT#--).
+	|
+
+land yield technology change rate multiplier table 2(
+	[(0,0)-(1,0.2)],(0,0),(1,0.04))
+	~	1/year
+	~	  Table relating the food ratio gap to the change in
+		         agricultural technology (LYCMT#--).\!\!\!
+	|
+
+industrial output per capita desired s=
+	IF THEN ELSE ( scenario = 0 :OR: industrial output per capita desired use custom = 1\
+		 ,
+	   industrial output per capita desired ,
+	   industrial output per capita desired scenario table ( scenario ) )
+	~	$/(Person*year)
+	~	  Industrial output per capita desired (IOPCD#59.2).
+	|
+
+industrial output per capita desired scenario table(
+	[(0,0)-(10,1000)],(7,400),(8,350))
+	~	$/(Person*year)
+	~	A table for allowing easy selection of which scenario to run, and to allow \
+		preferred percent to be used so that two scenario values may be merged \
+		into that preferred.\!\!\!
+	|
+
+persistent pollution technology change use custom=
+	0
+	~	Dmnl [0,1,1]
+	~		|
+
+persistent pollution technology change time s=
+	IF THEN ELSE ( scenario = 0 :OR: persistent pollution technology change use custom =\
+		 1 ,
+	   persistent pollution technology change time ,
+	   persistent pollution technology change scenario table ( scenario ) )
+	~	year
+	~		|
+
+persistent pollution technology change mult table 1  ( 
+            (-1,0),(0,0) )
+	~	1/year
+	~	  Table relating persisten pollution to changes due to
+		         technology (POLGFMT#--).
+	|
+
+persistent pollution technology change mult table 2(
+	[(-1,-0.04)-(0,0.2)],(-1,-0.04),(0,0))
+	~	1/year
+	~	  Table relating persisten pollution to changes due to
+		         technology (POLGFMT#--).\!\!
+	|
+
+persistent pollution technology change multiplier=
+	IF THEN ELSE ( Time < persistent pollution technology change time s, 
+	   persistent pollution technology change multiplier 1 ,
+	   persistent pollution technology change multiplier 2 )
+	~	1/year
+	~	POLLUTION CONTROL TECHNOLOGY CHANGE MULTIPLIER (POLGFM#--).
+	|
+
+persistent pollution technology change multiplier 1=
+	persistent pollution technology change mult table 1 ( 1
+	                  - persistent pollution index 
+	                       / desired persistent pollution index )
+	~	1/year
+	~	  POLLUTION CONTROL TECHNOLOGY CHANGE MULTIPLIER
+		         (POLGFM#--).
+	|
+
+persistent pollution technology change multiplier 2=
+	persistent pollution technology change mult table 2 ( 1  - persistent pollution index\
+		 / desired persistent pollution index )
+	~	1/year
+	~	  POLLUTION CONTROL TECHNOLOGY CHANGE MULTIPLIER
+		         (POLGFM#--).
+	|
+
+persistent pollution technology change scenario table(
+	[(0,0)-(20,2100)],(2,2100),(3,2002),(6,2002),(7,2100),(8,2100),(9,2002),(10,1982),(11\
+		,2012))
+	~	year
+	~	A table for allowing easy selection of which scenario to run, and to allow \
+		preferred percent to be used so that two scenario values may be merged \
+		into that preferred.\!\!\!
+	|
+
+persistent pollution technology change time=
+	2100
+	~	year [1900,2100,1]
+	~		|
+
+industrial output per capita desired=
+	400
+	~	$/(Person*year) [0,1000,10]
+	~		|
+
+industrial equilibrium time use custom=
+	0
+	~	Dmnl [0,1,1]
+	~		|
+
+industrial equilibrium time=
+	2100
+	~	year [1900,2100,1]
+	~		|
+
+industrial equilibrium time scenario table(
+	[(6,0)-(20,2100)],(7,2100),(8,2002),(9,2002),(10,1982),(11,2012))
+	~	year
+	~	A table for allowing easy selection of which scenario to run, and to allow \
+		preferred percent to be used so that two scenario values may be merged \
+		into that preferred.\!\!\!
+	|
+
+industrial equilibrium time s=
+	IF THEN ELSE ( scenario = 0 :OR: industrial equilibrium time use custom = 1 ,
+	   industrial equilibrium time ,
+	   industrial equilibrium time scenario table ( scenario ) )
+	~	year
+	~		|
+
+fraction of industrial capital allocated to obtaining resources switch time scenario table\
+		(
+	[(0,0)-(20,2100)],(1,2100),(2,2002),(10,2002),(11,2012))
+	~	year
+	~	A table for allowing easy selection of which scenario to run, and to allow \
+		preferred percent to be used so that two scenario values may be merged \
+		into that preferred.\!\!\!
+	|
+
+fraction of industrial capital allocated to obtaining resources switch time use custom\
+		=
+	0
+	~	Dmnl [0,1,1]
+	~		|
+
+average life of agricultural inputs 2=
+	2
+	~	year [0.5,20,0.5]
+	~		|
+
+average life of agricultural inputs 2 s=
+	IF THEN ELSE ( scenario = 0 :OR: average life of agricultural inputs 2 use custom = \
+		1 ,
+	   average life of agricultural inputs 2 ,
+	   average life of agricultural inputs scenario table ( scenario ) )
+	~	year
+	~	  The average life of agricultural inputs after policy
+		         time (ALAI2#100.2)
+	|
+
+average life of agricultural inputs 2 use custom=
+	0
+	~	Dmnl [0,1,1]
+	~		|
+
+average life of agricultural inputs scenario table(
+	[(0,0)-(20,3)],(7,2),(8,2.5))
+	~	year
+	~	A table for allowing easy selection of which scenario to run, and to allow \
+		preferred percent to be used so that two scenario values may be merged \
+		into that preferred.\!\!\!
+	|
+
+fertility control effectiveness time s=
+	IF THEN ELSE ( scenario = 0 :OR: fertility control effectiveness time use custom = 1\
+		 ,
+	   fertility control effectiveness time ,
+	   fertility control effectiveness time scenario table ( scenario ) )
+	~	year
+	~		|
+
+fertility control effectiveness time scenario table(
+	[(0,1900)-(20,2100)],(6,2100),(7,2002),(9,2002),(10,1982),(11,2012))
+	~	year
+	~	A table for allowing easy selection of which scenario to run, and to allow \
+		preferred percent to be used so that two scenario values may be merged \
+		into that preferred.\!\!\!
+	|
+
+fertility control effectiveness time use custom=
+	0
+	~	Dmnl [0,1,1]
+	~		|
+
+fraction of industrial capital allocated to obtaining resources switch time=
+	2100
+	~	year [1900,2100,1]
+	~		|
+
+average life of service capital 2=
+	20
+	~	year [1,100,1]
+	~		|
+
+average life of service capital 2 s=
+	IF THEN ELSE ( scenario = 0 :OR: average life of service capital 2 use custom = 1 ,
+	   average life of service capital 2 ,
+	   average life of service capital scenario table ( scenario ) )
+	~	year
+	~	  Average lifetime of service capital after policy
+		         time (ALSC2#69.2).
+	|
+
+average life of service capital 2 use custom=
+	0
+	~	Dmnl [0,1,1]
+	~		|
+
+average life of service capital scenario table(
+	[(0,0)-(20,40)],(7,20),(8,25))
+	~	year
+	~	A table for allowing easy selection of which scenario to run, and to allow \
+		preferred percent to be used so that two scenario values may be merged \
+		into that preferred.\!\!\!
+	|
+
+fertility control effectiveness time=
+	2100
+	~	year [1900,2100,1]
+	~		|
+
+fraction of industrial capital allocated to obtaining resources switch time s=
+	IF THEN ELSE ( scenario = 0 :OR: fraction of industrial capital allocated to obtaining resources switch time use custom\
+		 = 1 ,
+	   fraction of industrial capital allocated to obtaining resources switch time ,
+	   fraction of industrial capital allocated to obtaining resources switch time scenario table\
+		 ( scenario ) )
+	~	year
+	~		|
+
+POLICY YEAR use custom=
+	0
+	~	Dmnl [0,1,1]
+	~	If 1 use "POLICY YEAR" to override table
+	|
+
+average life of industrial capital 2 use custom=
+	0
+	~	Dmnl [0,1,1]
+	~		|
+
+average life of industrial capital 2=
+	14
+	~	year [1,100,1]
+	~		|
+
+average life of industrial capital 2 s=
+	IF THEN ELSE ( scenario = 0 :OR: average life of industrial capital 2 use custom = 1\
+		 ,
+	   average life of industrial capital 2 ,
+	   average life of industrial capital scenario table ( scenario ) )
+	~	year
+	~	  Average life of industrial capital after policy year
+		         (ALIC2#54.2)
+	|
+
+scenario=
+	0
+	~	Dmnl [0,10,1]
+	~	The scenario number. Use 0 to have changes to the scenario... parameters \
+		pass directly through.
+	|
+
+average life of industrial capital scenario table(
+	[(0,0)-(20,20)],(7,14),(8,18))
+	~	year
+	~	A table for allowing easy selection of which scenario to run, and to allow \
+		preferred percent to be used so that two scenario values may be merged \
+		into that preferred.\!\!\!
+	|
+
+POLICY YEAR scenario table(
+	[(0,1900)-(10,2100)],(0,2100),(1,2100),(2,2100),(3,2002),(6,2002),(7,2100),(8,2002),\
+		(9,2002),(10,1982))
+	~	year
+	~		|
+
+POLICY YEAR=
+	2100
+	~	year [1950,2100,1]
+	~	constant for year in which policies implemented - the name maches the \
+		world3-03 name but is passed through to scenario policy year.
+	|
+
+GDP pc unit=
+	1
+	~	$/Person/year
+	~		|
+
+unit agricultural input=
+	1
+	~	$/hectare/year
+	~		|
+
+unit population=
+	1
+	~	Person
+	~		|
+
+"Absorption Land (GHA)"=
+	persistent pollution generation rate*ha per unit of pollution/ha per Gha
+	~	Ghectares
+	~		|
+
+"Arable Land in Gigahectares (GHA)"=
+	Arable Land/ha per Gha
+	~	Ghectares
+	~		|
+
+Education Index=
+	Education Index LOOKUP(GDP per capita/GDP pc unit)
+	~	Dmnl
+	~		|
+
+Education Index LOOKUP((0,0),(1000,0.81),(2000,0.88),(3000,0.92),(2100,0.95)
+,(5000,0.98),(6000,0.99),(7000,1))
+	~	Dmnl
+	~		|
+
+GDP Index=
+	LOG(GDP per capita/Ref Lo GDP,10)/LOG(Ref Hi GDP/Ref Lo GDP,10)
+	~	Dmnl
+	~		|
+
+GDP per capita=
+	GDP per capita LOOKUP(industrial output per capita/GDP pc unit)
+	~	$/(year*Person)
+	~		|
+
+GDP per capita LOOKUP((0,120),(200,600),(400,1200),(600,1800),(800,2500),(1000,3200)
+)
+	~	$/(year*Person)
+	~		|
+
+ha per Gha=
+	1e+09
+	~	hectare/Ghectare
+	~		|
+
+ha per unit of pollution=
+	4
+	~	hectares/(Pollution units/year)
+	~		|
+
+Human Ecological Footprint=
+	("Arable Land in Gigahectares (GHA)"+"Urban Land (GHA)"+"Absorption Land (GHA)"
+	)/Total Land
+	~	Dmnl
+	~	See Appendix 2 of Limits to Growth - the 30-Year Update for discussion of \
+		this index
+	~	:SUPPLEMENTARY 
+	|
+
+Human Welfare Index=(Life Expectancy Index+Education Index+GDP Index)/3
+	~	Dmnl
+	~	See Appendix 2 of Limits to Growth - the 30-Year Update for discussion of \
+		this index
+	~	:SUPPLEMENTARY 
+	|
+
+Life Expectancy Index=
+	Life Expectancy Index LOOKUP(life expectancy/one year)
+	~	Dmnl
+	~		|
+
+Life Expectancy Index LOOKUP((25,0),(35,0.16),(45,0.33),(55,0.5),(65,0.67)
+,(75,0.84),(85,1))
+	~	Dmnl
+	~		|
+
+one year=
+	1
+	~	year
+	~		|
+
+Ref Hi GDP=
+	9508
+	~	$/(year*Person)
+	~		|
+
+Ref Lo GDP=
+	24
+	~	$/(year*Person)
+	~		|
+
+Total Land=
+	1.91
+	~	Ghectares
+	~		|
+
+"Urban Land (GHA)"=
+	Urban and Industrial Land/ha per Gha
+	~	Ghectares
+	~		|
+
+********************************************************
+	.Agriculture
+********************************************************~
+		
+		AGRICULTURAL SECTOR
+	|
+
+********************************************************
+	.Agriculture.Loop1
+********************************************************~
+		
+		LOOP 1: FOOD FROM INVESTMENT IN LAND DEVELOPMENT
+	|
+
+Arable Land  = 
+        INTEG( land development rate 
+                  - land erosion rate 
+                  - land removal for urban and industrial use , 
+             initial arable land )
+	~	hectare
+	~	  Arable land (AL#85).
+	|
+
+initial arable land  = 9e+08
+	~	hectare
+	~	  The initial amount of land that is arable.
+		         (ALI#85.2).
+	|
+
+development cost per hectare  = 
+        development cost per hectare table ( Potentially Arable Land 
+                  / potentially arable land total )
+	~	$/hectare
+	~	  Development cost per hectare (DCPH#97).
+	|
+
+development cost per hectare table  ( 
+            (0,100000),(0.1,7400),(0.2,5200),(0.3,3500),(0.4,2400),(0.5,1500)
+            ,(0.6,750),(0.7,300),(0.8,150),(0.9,75),(1,50) )
+	~	$/hectare
+	~	  Table relating undeveloped land to the cost of land
+		         development (DCPHT#97.1).
+	|
+
+food  = 
+        land yield 
+             * Arable Land 
+             * land fraction harvested 
+             * ( 1
+                  - processing loss )
+	~	Veg equiv kg/year
+	~	  The total amount of usable food (F#87).
+	|
+
+food per capita  = 
+        food 
+             / population
+	~	Veg equiv kg/(Person*year)
+	~	  Food per capita (FPC#88)
+	|
+
+land development rate  = 
+        total agricultural investment 
+             * fraction of agricultural inputs allocated to land development 
+             / development cost per hectare
+	~	hectare/year
+	~	  The land developmen rate (LDR#96).
+	|
+
+land fr cult  = 
+        Arable Land 
+             / potentially arable land total
+	~	Dmnl
+	~	  Land fraction under cultivarion (LFC#84).
+	~	:SUPPLEMENTARY 
+	|
+
+land fraction harvested  = 0.7
+	~	Dmnl
+	~	  Land fraction harvested (LFH#87.1).
+	|
+
+fraction of industrial output allocated to agriculture 1  = 
+        fraction industrial output allocated to agriculture table 1 ( food per capita\
+		 
+                  / indicated food per capita )
+	~	Dmnl
+	~	  Fraction of industrial output allocated to
+		         agriculture before policy time (FIOAA1#94).
+	|
+
+fraction industrial output allocated to agriculture table 1  ( 
+            (0,0.4),(0.5,0.2),(1,0.1),(1.5,0.025),(2,0),(2.5,0) )
+	~	Dmnl
+	~	  Table relating food per capita to the fraction of
+		        industrial output allocated to agriculture
+		         (FIOAA1T#94.1).
+	|
+
+fraction of industrial output allocated to agriculture 2  = 
+        fraction industrial output allocated to agriculture table 2 ( food per capita\
+		 
+                  / indicated food per capita )
+	~	Dmnl
+	~	  Fraction of industrial output allocated to
+		         agriculture after policy time (FIOAA2#95).
+	|
+
+fraction industrial output allocated to agriculture table 2  ( 
+            (0,0.4),(0.5,0.2),(1,0.1),(1.5,0.025),(2,0),(2.5,0) )
+	~	Dmnl
+	~	  Table relating food per capita to the fraction of
+		        industrial output allocated to agriculture
+		         (FIOAA2T#95.1).
+	|
+
+indicated food per capita 1=
+	indicated food per capita table 1 ( industrial output per capita/GDP pc unit )
+	~	Veg equiv kg/(Person*year)
+	~	  Indicated foord per capita befor policy time
+		         (IFPC1#90).
+	|
+
+indicated food per capita table 1  ( 
+            (0,230),(200,480),(400,690),(600,850),(800,970),(1000,1070)
+            ,(1200,1150),(1400,1210),(1600,1250) )
+	~	Veg equiv kg/(Person*year)
+	~	  Table relating industrial output to indicated food
+		         requirements 1 (IFPC1T#90.1).
+	|
+
+indicated food per capita 2=
+	indicated food per capita table 2 ( industrial output per capita/GDP pc unit )
+	~	Veg equiv kg/(Person*year)
+	~	  Indicated foord per capita after policy time
+		         (IFPC1#90).
+	|
+
+indicated food per capita table 2  ( 
+            (0,230),(200,480),(400,690),(600,850),(800,970),(1000,1070)
+            ,(1200,1150),(1400,1210),(1600,1250) )
+	~	Veg equiv kg/(Person*year)
+	~	  Table relating industrial output to indicated food
+		         requirements 2 (IFPC1T#90.1).
+	|
+
+Potentially Arable Land  = 
+        INTEG( ( - land development rate  ) , 
+             initial potentially arable land )
+	~	hectare
+	~	  POTENTIALLY ARABLE LAND (PAL#86).
+	|
+
+initial potentially arable land  = 2.3e+09
+	~	hectare
+	~	  The initial amount of potentially arable land
+		         (PALI#86.2).
+	|
+
+potentially arable land total  = 3.2e+09
+	~	hectare
+	~	  POTENTIALLY ARABLE LAND TOTAL (PALT#84.1).
+	|
+
+processing loss  = 0.1
+	~	Dmnl
+	~	  PROCESSING LOSS (PL#87.2)
+	|
+
+fraction of industrial output allocated to agriculture  = 
+        IF THEN ELSE ( Time 
+                  >= POLICY YEAR s , 
+             fraction of industrial output allocated to agriculture 2 , 
+             fraction of industrial output allocated to agriculture 1 )
+	~	Dmnl
+	~	  FRACTION OF INDUSTRIAL OUTPUT ALLOCATED TO
+		         AGRICULTURE (FIOAA#93).
+	|
+
+indicated food per capita  = 
+        IF THEN ELSE ( Time 
+                  >= POLICY YEAR s , 
+             indicated food per capita 2 , 
+             indicated food per capita 1 )
+	~	Veg equiv kg/(Person*year)
+	~	  Indicated food per capita (IFPC#89).
+	|
+
+total agricultural investment  = 
+        industrial output 
+             * fraction of industrial output allocated to agriculture
+	~	$/year
+	~	  TOTAL AGRICULTURAL INVESTMENT (TAI#92)
+	|
+
+********************************************************
+	.Agriculture.Loop2
+********************************************************~
+		
+		LOOP 2: FOOD FROM INVESTMENT IN AGRICULTURAL INPUTS
+	|
+
+land yield technology change rate=
+	IF THEN ELSE ( Time 
+	                  >= POLICY YEAR s , 
+	             Land Yield Technology 
+	                  * land yield technology change rate multiplier , 
+	             0)
+	~	1/year
+	~	  Land yield from technology change rate (LYTDR#--)
+	|
+
+Agricultural Inputs  = 
+        SMOOTH (current agricultural inputs, 
+             average life agricultural inputs )
+	~	$/year
+	~	AGRICULTURAL INPUTS (AI#99)
+	|
+
+average life agricultural inputs  = 
+        IF THEN ELSE ( Time 
+                  >= POLICY YEAR s , 
+             average life of agricultural inputs 2 s , 
+             average life of agricultural inputs 1 )
+	~	year
+	~	AVERAGE LIFETIME OF AGRICULTURAL INPUTS (ALAI#100)
+	|
+
+agricultural input per hectare  = 
+        Agricultural Inputs 
+             * ( 1
+                  - fraction of agricultural inputs for land maintenance ) 
+             / Arable Land
+	~	$/(year*hectare)
+	~	  AGRICULTURAL INPUTS PER HECTARE (AIPH#101)
+	|
+
+current agricultural inputs  = 
+        ACTIVE INITIAL( total agricultural investment 
+                  * ( 1
+                       - fraction of agricultural inputs allocated to land development\
+		 ) , 
+             5e+09)
+	~	$/year
+	~	  CURRENT AGRICULTURAL INPUTS (CAI#98).
+	|
+
+desired food ratio  = 2
+	~	Dmnl
+	~	  desired food ratio (DFR#--)
+	|
+
+IND OUT IN 1970  = 7.9e+11
+	~	$/year
+	~	  INDUSTRIAL OUTPUT IN 1970 (IO70#107.2)
+	|
+
+land yield  = 
+        land yield multiplier from technology 
+             * Land Fertility 
+             * land yield multiplier from capital 
+             * land yield multiplier from air pollution
+	~	Veg equiv kg/(year*hectare)
+	~	  LAND YIELD (LY#103)
+	|
+
+land yield multiplier from capital=
+	land yield multiplier from capital table ( 
+	agricultural input per hectare/unit agricultural input )
+	~	Dmnl
+	~	  LAND YIELD MULTIPLIER FROM CAPITAL (LYMC#102)
+	|
+
+land yield multiplier from capital table  ( 
+            (0,1),(40,3),(80,4.5),(120,5),(160,5.3),(200,5.6),(240,5.9)
+            ,(280,6.1),(320,6.35),(360,6.6),(400,6.9),(440,7.2),(480,7.4)
+            ,(520,7.6),(560,7.8),(600,8),(640,8.2),(680,8.4),(720,8.6)
+            ,(760,8.8),(800,9),(840,9.2),(880,9.4),(920,9.6),(960,9.8)
+            ,(1000,10) )
+	~	Dmnl
+	~	  Table relating agricultural inputs to land yeild
+		         (LYMCT#102.1).
+	|
+
+average life of agricultural inputs 1  = 2
+	~	year
+	~	  The average life of agricultural inputs before
+		         policy time (ALAI1#100.1)
+	|
+
+land yield factor 1  = 1
+	~	Dmnl
+	~	  Land yield factor before policy year (LYF1#104.1).
+	|
+
+land yield factor 2  = 
+        SMOOTH3 ( Land Yield Technology , 
+             technology development delay )
+	~	Dmnl
+	~	  Land yield factor after policy year (LYF1#104.2).
+	|
+
+land yield multipler from air pollution 1  = 
+        land yield multipler from air pollution table 1 ( industrial output 
+                  / IND OUT IN 1970 )
+	~	Dmnl
+	~	  Land yield multiplier from air pollution before air
+		         poll time (LYMAP1#106).
+	|
+
+land yield multipler from air pollution table 1  ( 
+            (0,1),(10,1),(20,0.7),(30,0.4) )
+	~	Dmnl
+	~	  Table relating non-persistent pollution from
+		         industry to agricultural output (LYMAPT#106.1).
+	|
+
+land yield multiplier from air pollution 2  = 
+        land yield multipler from air pollution table 2 ( industrial output 
+                  / IND OUT IN 1970 )
+	~	Dmnl
+	~	  Land yield multiplier from air pollution after air
+		         poll time (LYMAP2#107).
+	|
+
+land yield multipler from air pollution table 2  ( 
+            (0,1),(10,1),(20,0.98),(30,0.95) )
+	~	Dmnl
+	~	  Table relating non-persistent pollution from
+		         industry to agricultural output (LYMAPT#107.1).
+	|
+
+land yield multiplier from technology=
+	IF THEN ELSE ( Time >= POLICY YEAR s , 
+	             land yield factor 2 , 
+	             land yield factor 1 )
+	~	Dmnl
+	~	  Land Yield factor (LYF#104)
+	|
+
+land yield multiplier from air pollution  = 
+        IF THEN ELSE ( Time 
+                  >= air pollution policy implementation time , 
+             land yield multiplier from air pollution 2 , 
+             land yield multipler from air pollution 1 )
+	~	Dmnl
+	~	  Land yield multiplier from air pollution
+		         (LYMAP#105).
+	|
+
+air pollution policy implementation time  = 2100
+	~	year
+	~	  Air Pollution switch time (ARPTM#--)
+	|
+
+Land Yield Technology= INTEG (
+	  land yield technology change rate ,
+		 
+		             1)
+	~	Dmnl
+	~	  LAND YIELD TECHNOLOGY INITIATED (LYTD#--)
+	|
+
+********************************************************
+	.Agriculture.Loop3
+********************************************************~
+		
+		LOOP 3: LAND EROSION AND URBAN-INDUSTRIAL USE
+	|
+
+average life of land  = 
+        average life of land normal 
+             * land life multiplier from land yield
+	~	year
+	~	  Average life of land (ALL#112).
+	|
+
+average life of land normal  = 1000
+	~	year
+	~	  AVERAGE LIFE OF LAND NORMAL (ALLN#112.1).
+	|
+
+land erosion rate  = 
+        Arable Land 
+             / average life of land
+	~	hectare/year
+	~	  Land erosion rate (LER#
+	|
+
+land removal for urban and industrial use=
+	MAX(0, urban and industrial land required 
+	             - Urban and Industrial Land ) 
+	             / urban and industrial land development time
+	~	hectare/year
+	~	  LAND REMOVAL FOR URBAN-INDUSTRIAL USE (LRUI#119).
+	|
+
+land life multiplier from land yield 1  = 
+        land life multiplier from land yield table 1 ( land yield 
+                  / inherent land fertility )
+	~	Dmnl
+	~	  Land life multiplier from yield before switch time
+		         (LLMY1#114).
+	|
+
+land life multiplier from land yield table 1  ( 
+            (0,1.2),(1,1),(2,0.63),(3,0.36),(4,0.16),(5,0.055),(6,0.04)
+            ,(7,0.025),(8,0.015),(9,0.01) )
+	~	Dmnl
+	~	  Table relating yield to the effect on land life
+		         (LLMY1T#114.1).
+	|
+
+land life multiplier from land yield 2  = 
+        land life multiplier from land yield table 2 ( land yield 
+                  / inherent land fertility )
+	~	Dmnl
+	~	  Land life multiplier from yield after switch time
+		         (LLMY2#115).
+	|
+
+land life multiplier from land yield table 2  ( 
+            (0,1.2),(1,1),(2,0.63),(3,0.36),(4,0.29),(5,0.26),(6,0.24)
+            ,(7,0.22),(8,0.21),(9,0.2) )
+	~	Dmnl
+	~	  Table relating yield to the effect on land life
+		         (LLMY2T#115.1).
+	|
+
+land life multiplier from land yield=
+	IF THEN ELSE ( Time 
+	                  >= land life policy implementation time s , 
+	             ( 0.95 ^ (( Time - land life policy implementation time s )/one year ) \
+		)
+	                  * land life multiplier from land yield 1 
+	               + ( 1 - 0.95 ^ (( Time - land life policy implementation time s )/one year\
+		)) 
+	                       * land life multiplier from land yield 2 , 
+	             land life multiplier from land yield 1 )
+	~	Dmnl
+	~	  LAND LIFE MULTIPLIER FROM YIELD (LLMY#113).
+	|
+
+urban and industrial land development time  = 10
+	~	year
+	~	  Urban industrial land development time
+		         (UILDT#119.1).
+	|
+
+urban and industrial land required per capita=
+	urban and industrial land required per capita table ( 
+	industrial output per capita/GDP pc unit )
+	~	hectare/Person
+	~	  Urban industrial land per capita (UILPC#117).
+	|
+
+urban and industrial land required per capita table  ( 
+            (0,0.005),(200,0.008),(400,0.015),(600,0.025),(800,0.04),(1000,0.055)
+            ,(1200,0.07),(1400,0.08),(1600,0.09) )
+	~	hectare/Person
+	~	  Table relating industrial output to urban industrial
+		         land (UILPCT#117.1)
+	|
+
+urban and industrial land required  = 
+        urban and industrial land required per capita 
+             * population
+	~	hectare
+	~	  Urban industrial land required (UILR#118).
+	|
+
+Urban and Industrial Land  = 
+        INTEG( ( land removal for urban and industrial use ) , 
+             initial urban and industrial land )
+	~	hectare
+	~	  URBAN-INDUSTRIAL LAND (UIL#120).
+	|
+
+initial urban and industrial land  = 8.2e+06
+	~	hectare
+	~	  URBAN-INDUSTRIAL LAND INITIAL (UILI#120.1).
+	|
+
+********************************************************
+	.Agriculture.Loop4
+********************************************************~
+		
+		LOOP4 : LAND FERTILITY DEGRADATION
+	|
+
+land fertility degredation  = 
+        Land Fertility 
+             * land fertility degredation rate
+	~	Veg equiv kg/(year*year*hectare)
+	~	  LAND FERTILITY DEGRADATION (LFD#123).
+	|
+
+land fertility degredation rate  = 
+        land fertility degredation rate table ( persistent pollution index )
+	~	1/year
+	~	  Land fertility degradation rate (LFDR#122).
+	|
+
+land fertility degredation rate table  ( 
+            (0,0),(10,0.1),(20,0.3),(30,0.5) )
+	~	1/year
+	~	  Table relating persistent pollution to land
+		         fertility degradation (LFDRT#122.1).
+	|
+
+Land Fertility  = 
+        INTEG( ( land fertility regeneration 
+                  - land fertility degredation ) , 
+             initial land fertility )
+	~	Veg equiv kg/(year*hectare)
+	~	  Land fertility (LFERT#121).
+	|
+
+initial land fertility  = 600
+	~	Veg equiv kg/(year*hectare)
+	~	  LAND FERTILITY INITIAL (LFERTI#121.2)
+	|
+
+********************************************************
+	.Agriculture.Loop5
+********************************************************~
+		
+		LOOP 5: LAND FERTILITY REGENERATION
+	|
+
+inherent land fertility  = 600
+	~	Veg equiv kg/(year*hectare)
+	~	  INHERENT LAND FERTILITY (ILF#124.1).
+	|
+
+land fertility regeneration  = 
+        ( inherent land fertility 
+             - Land Fertility ) 
+             / land fertility regeneration time
+	~	Veg equiv kg/(year*year*hectare)
+	~	  Land fertility regeneration (LFR#124).
+	|
+
+land fertility regeneration time  = 
+        land fertility regeneration time table ( fraction of agricultural inputs for land maintenance
+ )
+	~	year
+	~	  LAND FERTILITY REGENERATION TIME (LFRT#125)
+	|
+
+land fertility regeneration time table  ( 
+            (0,20),(0.02,13),(0.04,8),(0.06,4),(0.08,2),(0.1,2) )
+	~	year
+	~	  Table relating inputs to land maintenance to land
+		         fertility regeneration (LFRTT#125.1).
+	|
+
+********************************************************
+	.Agriculture.Loop6
+********************************************************~
+		
+		LOOP 6: DISCONTINUING LAND MAINTENANCE
+	|
+
+Perceived Food Ratio  = 
+        SMOOTH (food ratio, 
+             food shortage perception delay )
+	~	Dmnl
+	~	PERCEIVED FOOD RATIO (PFR#128).
+	|
+
+food ratio  = 
+        ACTIVE INITIAL( food per capita 
+                  / subsistence food per capita , 
+             1)
+	~	Dmnl
+	~	  FOOD RATIO (FR#127)
+	|
+
+food shortage perception delay  = 2
+	~	year
+	~	  FOOD SHORTAGE PERCEPTION DELAY (FSPD#128.2)
+	|
+
+fraction of agricultural inputs for land maintenance  = 
+        fraction of agricultural inputs for land maintenance table ( Perceived Food Ratio\
+		 )
+	~	Dmnl
+	~	  FRACTION OF INPUTS ALLOCATED TO LAND MAINTENANCE
+		         (FALM#126).
+	|
+
+fraction of agricultural inputs for land maintenance table  ( 
+            (0,0),(1,0.04),(2,0.07),(3,0.09),(4,0.1) )
+	~	Dmnl
+	~	  Table relating the perceived food ratio to the
+		        fraction of input used for land maintenance
+		         (FALMT#126.1).
+	|
+
+subsistence food per capita  = 230
+	~	Veg equiv kg/(Person*year)
+	~	  Subsistence food per capita (SFPC#127.1).
+	|
+
+********************************************************
+	.Agriculture.Loops1&2
+********************************************************~
+		
+		LOOPS 1 & 2: THE INVESTMENT ALLOCATION DECISION
+	|
+
+fraction of agricultural inputs allocated to land development  = 
+        fraction of agricultural inputs allocated to land development table ( ( marginal productivity of land development
+ 
+                  / marginal productivity of agricultural inputs ) )
+	~	Dmnl
+	~	  Fraction of inputs allocated to land devlelopment
+		         (FIALD#108).
+	|
+
+fraction of agricultural inputs allocated to land development table  ( 
+            (0,0),(0.25,0.05),(0.5,0.15),(0.75,0.3),(1,0.5),(1.25,0.7)
+            ,(1.5,0.85),(1.75,0.95),(2,1) )
+	~	Dmnl
+	~	  Table relating the marginal productivity of land to
+		        the fraction of inputs allocated to new land
+		         development (FIALDT#108.1).
+	|
+
+marginal land yield multiplier from capital=
+	marginal land yield multiplier from capital table ( 
+	agricultural input per hectare/unit agricultural input )
+	~	hectare/$
+	~	  MARGINAL LAND YIELD MULTIPLIER FROM CAPITAL
+		         (MLYMC#111).
+	|
+
+marginal land yield multiplier from capital table  ( 
+            (0,0.075),(40,0.03),(80,0.015),(120,0.011),(160,0.009),(200,0.008)
+            ,(240,0.007),(280,0.006),(320,0.005),(360,0.005),(400,0.005)
+            ,(440,0.005),(480,0.005),(520,0.005),(560,0.005),(600,0.005)
+             )
+	~	hectare/$
+	~	  Table relating agricultural inputs to marginal land
+		         yield (MLYMCT#111.1).
+	|
+
+marginal productivity of agricultural inputs  = 
+        average life agricultural inputs 
+             * land yield 
+             * marginal land yield multiplier from capital 
+             / land yield multiplier from capital
+	~	Veg equiv kg/$
+	~	  MARGINAL PRODUCTIVITY OF AGRICULTURAL INPUTS
+		         (MPAI#110).
+	|
+
+marginal productivity of land development  = 
+        land yield 
+             / ( development cost per hectare 
+                  * social discount )
+	~	Veg equiv kg/$
+	~	  The marginal productivity of land development
+		         (MPLD#109)
+	|
+
+social discount  = 0.07
+	~	1/year
+	~	  SOCIAL DISCOUNT (SD#109.1)
+	|
+
+********************************************************
+	.Capital
+********************************************************~
+		
+		CAPITAL SECTOR
+	|
+
+********************************************************
+	.Capital.Industry
+********************************************************~
+		
+		INDUSTRIAL SUBSECTOR
+	|
+
+industrial capital output ratio multiplier from resource conservation technology=
+	industrial capital output ratio multiplier from resource table ( resource use factor
+	 )
+	~	year
+	~	  Technology driven industrial capital output ratio
+		         (ICOR2T#--)
+	|
+
+industrial capital output ratio multiplier from pollution technology=
+	industrial capital output ratio multiplier from pollution table ( persistent pollution generation factor
+	 )
+	~	Dmnl
+	~	  Pollution control technology multiplier for capital
+		         output ratio (COPM#--).
+	|
+
+industrial capital output ratio multiplier from land yield technology=
+	industrial capital output ratio multiplier table ( land yield multiplier from technology\
+		 )
+	~	Dmnl
+	~	  CAPITAL OUTPUT YIELD MULTIPLIER (COYM#--)
+	|
+
+fraction of industrial output allocated to investment  = 
+        ( 1
+             - fraction of industrial output allocated to agriculture 
+             - fraction of industrial output allocated to services 
+             - fraction of industrial output allocated to consumption )
+	~	Dmnl
+	~	  Fraction of industrial output allocated to industry
+		         (FIAOI#56).
+	|
+
+industrial capital depreciation  = 
+        Industrial Capital 
+             / average life of industrial capital
+	~	$/year
+	~	  Industrial capital depreciation rate (ICDR#53).
+	|
+
+industrial capital investment  = 
+        ( ( industrial output ) ) 
+             * ( fraction of industrial output allocated to investment )
+	~	$/year
+	~	  Industrial capital investment rate (ICIR#55).
+	|
+
+industrial capital output ratio multiplier from resource table  ( 
+            (0,3.75),(0.1,3.6),(0.2,3.47),(0.3,3.36),(0.4,3.25),(0.5,3.16)
+            ,(0.6,3.1),(0.7,3.06),(0.8,3.02),(0.9,3.01),(1,3) )
+	~	year
+	~	  CAPITAL OUTPUT FROM RESOURCES technology multiplier
+		         TABLE (ICOR2TT#--)
+	|
+
+industrial output per capita  = 
+        industrial output 
+             / population
+	~	$/(Person*year)
+	~	  INDUSTRIAL OUTPUT PER CAPITA (IOPC#49)
+	|
+
+Industrial Capital  = 
+        INTEG( ( industrial capital investment 
+                  - industrial capital depreciation ) , 
+             initial industrial capital )
+	~	$
+	~	  INDUSTRIAL CAPITAL (IC#52).
+	|
+
+initial industrial capital  = 2.1e+11
+	~	$
+	~	  INDUSTRIAL CAPITAL INITIAL (ICI#52.1).
+	|
+
+industrial output  = 
+        ( ( ( Industrial Capital ) ) 
+             * ( 1
+                  - fraction of industrial capital allocated to obtaining resources )\
+		 ) 
+             * ( capacity utilization fraction ) 
+             / industrial capital output ratio
+	~	$/year
+	~	  Industrial output (IO#50)
+	|
+
+average life of industrial capital 1  = 14
+	~	year
+	~	  Average life of industrial capital before policy
+		         year (ALIC1#54.1).
+	|
+
+fraction of industrial output allocated to consumption constant  = 
+        IF THEN ELSE ( Time 
+                  >= POLICY YEAR s , 
+             fraction of industrial output allocated to consumption constant 2 , 
+             fraction of industrial output allocated to consumption constant 1 )
+	~	Dmnl
+	~	  Fraction of output allocated to consumption CONSTANT
+		         (FIAOCC#58).
+	|
+
+fraction of industrial output allocated to consumption constant 1  = 0.43
+	~	Dmnl
+	~	  Fraction of output allocated to consuption constant
+		         1 (FIAOC1#58.1).
+	|
+
+fraction of industrial output allocated to consumption constant 2  = 0.43
+	~	Dmnl
+	~	  Fraction of output allocated to consuption constant
+		         2 (FIAOC1#58.2).
+	|
+
+fraction of industrial output allocated to consumption variable  = 
+        fraction of industrial output allocated to consumption variable table ( industrial output per capita
+ 
+                  / industrial output per capita desired s )
+	~	Dmnl
+	~	  Fraction industrial output allocated to consumption
+		         variable (FIAOCV#59)
+	|
+
+fraction of industrial output allocated to consumption variable table  ( 
+            (0,0.3),(0.2,0.32),(0.4,0.34),(0.6,0.36),(0.8,0.38),(1,0.43)
+            ,(1.2,0.73),(1.4,0.77),(1.6,0.81),(1.8,0.82),(2,0.83) )
+	~	Dmnl
+	~	  Fraction of industrial output allocated to
+		         consumption variable TABLE (FIAOCVT#59.1)
+	|
+
+industrial capital output ratio 1  = 3
+	~	year
+	~	  Industrial capital output ratio prior to the policy
+		         year (ICOR1#51.1)
+	|
+
+industrial capital output ratio 2  = 
+        industrial capital output ratio multiplier from resource conservation technology\
+		 
+             * industrial capital output ratio multiplier from land yield technology 
+             * industrial capital output ratio multiplier from pollution technology
+	~	year
+	~	  Industrial capital output ratio after the policy
+		         year (ICOR2#51.2)
+	|
+
+industrial capital output ratio multiplier from pollution table  ( 
+            (0,1.25),(0.1,1.2),(0.2,1.15),(0.3,1.11),(0.4,1.08),(0.5,1.05)
+            ,(0.6,1.03),(0.7,1.02),(0.8,1.01),(0.9,1),(1,1) )
+	~	Dmnl
+	~	  Table relating pollution correction technology to
+		         the capital output ratio (COPMT#--)
+	|
+
+average life of industrial capital  = 
+        IF THEN ELSE ( Time 
+                  >= POLICY YEAR s , 
+             average life of industrial capital 2 s , 
+             average life of industrial capital 1 )
+	~	year
+	~	  AVERAGE LIFETIME OF INDUSTRIAL CAPITAL (ALIC#54).
+	|
+
+fraction of industrial output allocated to consumption  = 
+        IF THEN ELSE ( Time 
+                  >= industrial equilibrium time s , 
+             fraction of industrial output allocated to consumption variable , 
+             fraction of industrial output allocated to consumption constant )
+	~	Dmnl
+	~	  Fraction of industrial output allocated to
+		         consumption (FIAOC#58)
+	|
+
+industrial capital output ratio  = 
+        IF THEN ELSE ( Time 
+                  >= POLICY YEAR s , 
+             industrial capital output ratio 2 , 
+             industrial capital output ratio 1 )
+	~	year
+	~	  INDUSTRIAL CAPITAL-OUTPUT RATIO (ICOR#51)
+	|
+
+industrial capital output ratio multiplier table(
+	[(1,0.8)-(2,2)],(1,1),(1.2,1.05),(1.4,1.12),(1.6,1.25),(1.8,1.35),(2,1.5))
+	~	Dmnl
+	~	  Table relating the yield of technology to the effect
+		         on the capital output ratio (COYMT#--)\!\!
+	|
+
+********************************************************
+	.Capital.Jobs
+********************************************************~
+		
+		JOB SUBSECTOR
+	|
+
+Delayed Labor Utilization Fraction=
+	SMOOTHI (labor utilization fraction, 
+	             labor utilization fraction delay time
+	,1 )
+	~	Dmnl
+	~	LABOR UTILIZATION FRACTION DELAYED (LUFD#82)
+	|
+
+capacity utilization fraction  = 
+        ACTIVE INITIAL( capacity utilization fraction table ( Delayed Labor Utilization Fraction\
+		 ) 
+             , 
+             1)
+	~	Dmnl
+	~	  CAPITAL UTILIZATION FRACTION (CUF#83)
+	|
+
+capacity utilization fraction table  ( 
+            (1,1),(3,0.9),(5,0.7),(7,0.3),(9,0.1),(11,0.1) )
+	~	Dmnl
+	~	  Table relating labor utilization to capacity
+		         utilization (CUFT#83.2).
+	|
+
+jobs  = 
+        potential jobs industrial sector 
+             + potential jobs agricultural sector 
+             + potential jobs service sector
+	~	Person
+	~	  JOBS (J#73).
+	|
+
+jobs per hectare=
+	jobs per hectare table ( agricultural input per hectare/unit agricultural input )
+	~	Person/hectare
+	~	  Jobs per hectare in agriculture (JPH#79).
+	|
+
+jobs per hectare table  ( 
+            (2,2),(6,0.5),(10,0.4),(14,0.3),(18,0.27),(22,0.24),(26,0.2)
+            ,(30,0.2) )
+	~	Person/hectare
+	~	  Table relating agricultural input intensity to the
+		        number of jobs per hectare in agriculture
+		         (JPHT#79.1).
+	|
+
+jobs per industrial capital unit=
+	( jobs per industrial capital unit table ( industrial output per capita/GDP pc unit \
+		) ) 
+	             * 0.001
+	~	Person/$
+	~	  Jobs per industrial capital units (JPICU#75).
+	|
+
+jobs per industrial capital unit table  ( 
+            (50,0.37),(200,0.18),(350,0.12),(500,0.09),(650,0.07),(800,0.06)
+             )
+	~	Person/$
+	~	  Table relating industrial output per capita to job
+		         per industrial capital unit (JPICUT#75.1).
+	|
+
+jobs per service capital unit=
+	( jobs per service capital unit table ( service output per capita/GDP pc unit ) ) 
+	             * 0.001
+	~	Person/$
+	~	  Jobs per service capital unit (JPSCU#77).
+	|
+
+jobs per service capital unit table  ( 
+            (50,1.1),(200,0.6),(350,0.35),(500,0.2),(650,0.15),(800,0.15)
+             )
+	~	Person/$
+	~	  Table relating service output per capita to job per
+		         service capital unit (JPICUT#77.1).
+	|
+
+labor force  = 
+        ( Population 15 To 44 
+             + Population 45 To 64 ) 
+             * labor force participation fraction
+	~	Person
+	~	  LABOR FORCE (LF#80).
+	|
+
+labor force participation fraction  = 0.75
+	~	Dmnl
+	~	  LABOR FORCE PARTICIPATION FRACTION (LFPF#80.1)
+	|
+
+labor utilization fraction  = 
+        jobs 
+             / labor force
+	~	Dmnl
+	~	  Labor utilization fraction (LUF#81).
+	|
+
+labor utilization fraction delay time  = 2
+	~	year
+	~	  Labor utilization fraction delay time (LUFDT#82.1)
+	|
+
+potential jobs agricultural sector  = 
+        ( ( jobs per hectare ) ) 
+             * ( Arable Land )
+	~	Person
+	~	  Potential jobs in the agricultural sector (PJAS#78).
+	|
+
+potential jobs industrial sector  = 
+        Industrial Capital 
+             * jobs per industrial capital unit
+	~	Person
+	~	  POTENTIAL JOBS IN INDUSTRIAL SECTOR (PKIS#74).
+	|
+
+potential jobs service sector  = 
+        ( ( Service Capital ) ) 
+             * ( jobs per service capital unit )
+	~	Person
+	~	  Potential jobs in the service sector (PJSS#76).
+	|
+
+********************************************************
+	.Capital.Service
+********************************************************~
+		
+		SERVICE SUBSECTOR
+	|
+
+average life of service capital 1  = 20
+	~	year
+	~	  Average lifetime of service capital before policy
+		         time (ALSC1#69.1).
+	|
+
+fraction of industrial output allocated to services 1  = 
+        fraction of industrial output allocated to services table 1 ( service output per capita\
+		 
+                  / indicated services output per capita )
+	~	Dmnl
+	~	  FRACTION OF INDUSTRIAL OUTPUT ALLOCATED TO SERVICES
+		         before policy year (FIOAS1#64).
+	|
+
+fraction of industrial output allocated to services table 1  ( 
+            (0,0.3),(0.5,0.2),(1,0.1),(1.5,0.05),(2,0) )
+	~	Dmnl
+	~	  Table relating service output to the fraction of
+		        industrial output allocated to service
+		         (FIOAS1T#64.1).
+	|
+
+fraction of industrial output allocated to services 2  = 
+        fraction of industrial output allocated to services table 2 ( service output per capita\
+		 
+                  / indicated services output per capita )
+	~	Dmnl
+	~	  FRACTION OF INDUSTRIAL OUTPUT ALLOCATED TO SERVICES
+		         after policy year (FIOAS2#65).
+	|
+
+fraction of industrial output allocated to services table 2  ( 
+            (0,0.3),(0.5,0.2),(1,0.1),(1.5,0.05),(2,0) )
+	~	Dmnl
+	~	  Table relating service output to the fraction of
+		        industrial output allocated to service
+		         (FIOAS2T#65.1).
+	|
+
+indicated services output per capita 1=
+	indicated services output per capita table 1 ( industrial output per capita/GDP pc unit\
+		 )
+	~	$/(Person*year)
+	~	  Indicated service output per capita before policy
+		         year (ISOPC1#61).
+	|
+
+indicated services output per capita table 1  ( 
+            (0,40),(200,300),(400,640),(600,1000),(800,1220),(1000,1450)
+            ,(1200,1650),(1400,1800),(1600,2000) )
+	~	$/(Person*year)
+	~	  Table relating industrial output per capita to the
+		        indicated service output per capita before policy
+		         year (ISOPC1T#61.1).
+	|
+
+indicated services output per capita 2=
+	indicated services output per capita table 2 ( industrial output per capita/GDP pc unit\
+		 )
+	~	$/(Person*year)
+	~	  Indicated service output per capita after policy
+		         year (ISOPC2#621).
+	|
+
+indicated services output per capita table 2  ( 
+            (0,40),(200,300),(400,640),(600,1000),(800,1220),(1000,1450)
+            ,(1200,1650),(1400,1800),(1600,2000) )
+	~	$/(Person*year)
+	~	  Table relating industrial output per capita to the
+		        indicated service output per capita afte policy
+		         year (ISOPC1T#62.1).
+	|
+
+service capital output ratio 1  = 1
+	~	year
+	~	  Service capital output ratio before policy year
+		         (SCOR1#72.1).
+	|
+
+service capital output ratio 2  = 1
+	~	year
+	~	  Service capital output ratio after policy year
+		         (SCOR1#72.1).
+	|
+
+average life of service capital  = 
+        IF THEN ELSE ( Time 
+                  >= POLICY YEAR s , 
+             average life of service capital 2 s , 
+             average life of service capital 1 )
+	~	year
+	~	  AVERAGE LIFETIME OF SERVICE CAPITAL (ALSC#69)
+	|
+
+fraction of industrial output allocated to services  = 
+        IF THEN ELSE ( Time 
+                  >= POLICY YEAR s , 
+             fraction of industrial output allocated to services 2 , 
+             fraction of industrial output allocated to services 1 )
+	~	Dmnl
+	~	  FRACTION OF INDUSTRIAL OUTPUT ALLOCATED TO SERVICES
+		         (FIOAS#63).
+	|
+
+indicated services output per capita  = 
+        IF THEN ELSE ( Time 
+                  >= POLICY YEAR s , 
+             indicated services output per capita 2 , 
+             indicated services output per capita 1 )
+	~	$/(Person*year)
+	~	  Indicated service output per capita (ISOPC#60).
+	|
+
+service capital output ratio  = 
+        IF THEN ELSE ( Time 
+                  >= POLICY YEAR s , 
+             service capital output ratio 2 , 
+             service capital output ratio 1 )
+	~	year
+	~	  Service capital output ratio (SCOR#72).
+	|
+
+service capital depreciation  = 
+        Service Capital 
+             / average life of service capital
+	~	$/year
+	~	  SERVICE CAPITAL DEPRECIATION RATE (SCDR#68).
+	|
+
+service capital investment  = 
+        ( ( industrial output ) ) 
+             * ( fraction of industrial output allocated to services )
+	~	$/year
+	~	  SERVICE CAPITAL INVESTMENT RATE (SCIR#66).
+	|
+
+service output per capita  = 
+        service output 
+             / population
+	~	$/(Person*year)
+	~	  SERVICE OUTPUT PER CAPITA (SOPC#71).
+	|
+
+Service Capital  = 
+        INTEG( ( service capital investment 
+                  - service capital depreciation ) , 
+             initial service capital )
+	~	$
+	~	  Service capital (SC#67).
+	|
+
+initial service capital  = 1.44e+11
+	~	$
+	~	  The initial level of service capital (SCI#67.2)
+	|
+
+service output  = 
+        ( ( Service Capital ) ) 
+             * ( capacity utilization fraction ) 
+             / service capital output ratio
+	~	$/year
+	~	  Service output (SO#70).
+	|
+
+********************************************************
+	.Control
+********************************************************~
+		
+		CONTROL CARDS FOR SIMULATION
+	|
+
+FINAL TIME  = 2100
+	~	year
+	~	  The time at which simulation stops.
+	|
+
+INITIAL TIME  = 1900
+	~	year
+	~	  The time at which the simulation begins.
+	|
+
+SAVEPER  = 
+        TIME STEP
+	~	year
+	~	  The frequency with which results are saved.
+	|
+
+POLICY YEAR s=
+	IF THEN ELSE ( scenario = 0 :OR: POLICY YEAR use custom = 1, 
+	   POLICY YEAR , POLICY YEAR scenario table ( scenario ) )
+	~	year
+	~	The time at which policies are implemented set up to switch based on \
+		scenario choice (PYEAR#150.1).
+	|
+
+TIME STEP  = 0.5
+	~	year
+	~	  The time step for computing the model
+	|
+
+********************************************************
+	.Pollution
+********************************************************~
+		
+		PERSISTENT POLLUTION SECTOR
+	|
+
+persistent pollution technology change rate=
+	IF THEN ELSE ( Time 
+	                  >= POLICY YEAR s , 
+	             Persistent Pollution Technology 
+	                  * persistent pollution technology change multiplier , 
+	             0)
+	~	1/year
+	~	  pollution control technology change rate (PTDR#--)
+	|
+
+agricultural material toxicity index  = 1
+	~	Pollution units/$
+	~	  Agricultural material toxicity index (AMTI#140.2).
+	|
+
+assimilation half life  = 
+        assimilation half life in 1970 
+             * assimilation half life multiplier
+	~	year
+	~	  ASSIMILATION HALF-LIFE (AHL#146).
+	|
+
+assimilation half life in 1970  = 1.5
+	~	year
+	~	  Assimilation half life of persistent pollution int
+		         1970 (AHL70#146.1).
+	|
+
+assimilation half life multiplier  = 
+        assimilation half life mult table ( persistent pollution index )
+	~	Dmnl
+	~	  Assimilation half life of multiplier of persistent
+		         pollution (AHLM#145)
+	|
+
+assimilation half life mult table  ( 
+            (1,1),(251,11),(501,21),(751,31),(1001,41) )
+	~	Dmnl
+	~	  Table relating the level of persisten pollution to
+		         its assimilation rate (AHLMT#145.1).
+	|
+
+desired persistent pollution index  = 1.2
+	~	Dmnl
+	~	  Desires persistent pollution index (DPOLX#--).
+	|
+
+fraction of agricultural inputs from persistent materials  = 0.001
+	~	Dmnl
+	~	  Fraction of inputs as persistent materials
+		         (FIPM#140.1).
+	|
+
+fraction of resources from persistent materials  = 0.02
+	~	Dmnl
+	~	  Fraction of resources as persistent materials
+		         (FRPM#139.1)
+	|
+
+industrial material toxicity index  = 10
+	~	Pollution units/Resource unit
+	~	  Industrial materials toxicity index (IMTI#139.3)
+	|
+
+industrial material emissions factor  = 0.1
+	~	Dmnl
+	~	  Industrial materials emission factor (IMEF#139.2).
+	|
+
+persistent pollution generation factor 1  = 1
+	~	Dmnl
+	~	  Persistent pollution generation factor before policy
+		         time (PPGF1#138.1).
+	|
+
+persistent pollution generation factor 2  = 
+        SMOOTH3 ( Persistent Pollution Technology , 
+             technology development delay )
+	~	Dmnl
+	~	  Persistent pollution generation factor after policy
+		         time (PPGF1#138.2).
+	|
+
+Persistent Pollution  = 
+        INTEG( ( persistent pollution appearance rate 
+                  - persistent pollution assimilation rate ) , 
+             initial persistent pollution )
+	~	Pollution units
+	~	  Persistent pollution (PPOL#142).
+	|
+
+initial persistent pollution  = 2.5e+07
+	~	Pollution units
+	~	  persistent pollution initial (PPOLI#142.2
+	|
+
+persistent pollution generation industry  = 
+        per capita resource use multiplier 
+             * population 
+             * fraction of resources from persistent materials 
+             * industrial material emissions factor 
+             * industrial material toxicity index
+	~	Pollution units/year
+	~	  Persistent pollution generated by industrial output.
+		         (PPGIO#139)
+	|
+
+persistent pollution generation agriculture  = 
+        agricultural input per hectare 
+             * Arable Land 
+             * fraction of agricultural inputs from persistent materials 
+             * agricultural material toxicity index
+	~	Pollution units/year
+	~	  Persistent pollution generated by agriculture
+		         (PPGAO#140)
+	|
+
+persistent pollution generation rate  = 
+        ( persistent pollution generation industry 
+             + persistent pollution generation agriculture ) 
+             * ( persistent pollution generation factor )
+	~	Pollution units/year
+	~	  PERSISTENT POLLUTION GENERATION RATE (PPGR#137).
+	|
+
+persistent pollution appearance rate  = 
+        DELAY3 ( persistent pollution generation rate , 
+             persistent pollution transmission delay )
+	~	Pollution units/year
+	~	  Persistent pollution appearance rate (PPAPR#141)
+	|
+
+persistent pollution assimilation rate  = 
+        Persistent Pollution 
+             / ( assimilation half life 
+                  * 1.4)
+	~	Pollution units/year
+	~	  PERSISTENT POLLUTION ASSIMILATION RATE (PPASR#144).
+	|
+
+persistent pollution in 1970  = 1.36e+08
+	~	Pollution units
+	~	  PERSISTENT POLLUTION IN 1970 (PPOL70#143.1).
+	|
+
+persistent pollution index  = 
+        Persistent Pollution 
+             / persistent pollution in 1970
+	~	Dmnl
+	~	  Persistent pollution index relative to 1970
+		         (PPOLX#143).
+	|
+
+Persistent Pollution Technology  = 
+        INTEG( persistent pollution technology change rate , 
+             1)
+	~	Dmnl
+	~	  Pollution control technology initiated (PTD#--)
+	|
+
+persistent pollution transmission delay  = 20
+	~	year
+	~	  Persistent pollution transmission delay
+		         (PPTD#141.1).
+	|
+
+persistent pollution generation factor  = 
+        IF THEN ELSE ( Time 
+                  >= POLICY YEAR s , 
+             persistent pollution generation factor 2 , 
+             persistent pollution generation factor 1 )
+	~	Dmnl
+	~	  PERSISTENT POLLUTION GENERATED FACTOR (PPGF#138).
+	|
+
+********************************************************
+	.Population
+********************************************************~
+		
+		POPULATION SECTOR
+	|
+
+deaths 0 to 14  = 
+        Population 0 To 14 
+             * mortality 0 to 14
+	~	Person/year
+	~	  The number of deaths per year among people 0 to 14
+		         years of age (D1#3).
+	|
+
+deaths 15 to 44  = 
+        Population 15 To 44 
+             * mortality 15 to 44
+	~	Person/year
+	~	  The number of deaths per year among people 15 to 44
+		         years of age (D2#7).
+	|
+
+deaths 45 to 64  = 
+        Population 45 To 64 
+             * mortality 45 to 64
+	~	Person/year
+	~	  The number of deaths per year among people 55 to 64
+		         years of age (D3#11).
+	|
+
+deaths 65 plus  = 
+        Population 65 Plus 
+             * mortality 65 plus
+	~	Person/year
+	~	  The number of deaths per year among people 65 and
+		         older (D4#15).
+	|
+
+maturation 14 to 15  = 
+        ( ( Population 0 To 14 ) ) 
+             * ( 1
+                  - mortality 0 to 14 ) 
+             / 15
+	~	Person/year
+	~	  The fractional rate at which people aged 0-14 mature
+		         into the next age cohort (MAT1#5).
+	|
+
+maturation 44 to 45  = 
+        ( ( Population 15 To 44 ) ) 
+             * ( 1
+                  - mortality 15 to 44 ) 
+             / 30
+	~	Person/year
+	~	  The fractional rate at which people aged 15-44
+		         mature into the next age cohort (MAT2#9).
+	|
+
+maturation 64 to 65  = 
+        ( ( Population 45 To 64 ) ) 
+             * ( 1
+                  - mortality 45 to 64 ) 
+             / 20
+	~	Person/year
+	~	  The fractional rate at which people aged 45-64
+		         mature into the next age cohort (MAT3#13).
+	|
+
+mortality 45 to 64=
+	mortality 45 to 64 table ( life expectancy/one year )
+	~	1/year
+	~	  The fractional mortality rate for people aged 45-64
+		         (M3#12).
+	|
+
+mortality 45 to 64 table  ( 
+            (20,0.0562),(30,0.0373),(40,0.0252),(50,0.0171),(60,0.0118)
+            ,(70,0.0083),(80,0.006) )
+	~	1/year
+	~	  The table relating average life to mortality in the
+		         45 to 64 age group (M2T#12.1).
+	|
+
+mortality 65 plus=
+	mortality 65 plus table ( life expectancy/one year )
+	~	1/year
+	~	  The fractional mortality rate for people over 65
+		         (M4#16).
+	|
+
+mortality 65 plus table  ( 
+            (20,0.13),(30,0.11),(40,0.09),(50,0.07),(60,0.06),(70,0.05)
+            ,(80,0.04) )
+	~	1/year
+	~	  The table relating average life expectancy to
+		         mortality among people over 65 (M4T#16.1)
+	|
+
+mortality 0 to 14=
+	mortality 0 to 14 table ( life expectancy/one year )
+	~	1/year
+	~	  The fractional mortality rate for people aged 0-14
+		         (M1#4).
+	|
+
+mortality 0 to 14 table  ( 
+            (20,0.0567),(30,0.0366),(40,0.0243),(50,0.0155),(60,0.0082)
+            ,(70,0.0023),(80,0.001) )
+	~	1/year
+	~	  The table relating average life to mortality in the
+		         0 to 14 age group (M1T#4.1).
+	|
+
+mortality 15 to 44=
+	mortality 15 to 44 table ( life expectancy/one year )
+	~	1/year
+	~	  The fractional mortality rate for people aged 15-44
+		         (M2#8).
+	|
+
+mortality 15 to 44 table  ( 
+            (20,0.0266),(30,0.0171),(40,0.011),(50,0.0065),(60,0.004),
+            (70,0.0016),(80,0.0008) )
+	~	1/year
+	~	  The table relating average life to mortality in the
+		         15 to 44 age group (M2T#8.1).
+	|
+
+Population 0 To 14  = 
+        INTEG( ( births 
+                  - deaths 0 to 14 
+                  - maturation 14 to 15 ) , 
+             initial population 0 to 14 )
+	~	Person
+	~	  World population, AGES 0-14 (P1#2)
+	|
+
+initial population 0 to 14  = 6.5e+08
+	~	Person
+	~	  The initial number of people aged 0 to 14 (P1I#2.2).
+	|
+
+Population 15 To 44  = 
+        INTEG( ( maturation 14 to 15 
+                  - deaths 15 to 44 
+                  - maturation 44 to 45 ) , 
+             initial population 15 to 44 )
+	~	Person
+	~	  World population, AGES 15-44 (P2#6)
+	|
+
+initial population 15 to 44  = 7e+08
+	~	Person
+	~	  The initial number of people aged 15 to 44
+		         (P2I#6.2).
+	|
+
+Population 45 To 64  = 
+        INTEG( ( maturation 44 to 45 
+                  - deaths 45 to 64 
+                  - maturation 64 to 65 ) , 
+             initial population 54 to 64 )
+	~	Person
+	~	  The world population aged 0 to 14 (P3#10).
+	|
+
+initial population 54 to 64  = 1.9e+08
+	~	Person
+	~	  The initial number of people aged 45 to 64
+		         (P3I#10.2).
+	|
+
+Population 65 Plus  = 
+        INTEG( ( maturation 64 to 65 
+                  - deaths 65 plus ) , 
+             initial population 65 plus )
+	~	Person
+	~	  The world population aged 65 and over (P4#14).
+	|
+
+initial population 65 plus  = 6e+07
+	~	Person
+	~	  The initial number of people aged 65 and over
+		         (P4I#14.2)
+	|
+
+population  = 
+        Population 0 To 14 
+             + Population 15 To 44 
+             + Population 45 To 64 
+             + Population 65 Plus
+	~	Person
+	~	  Total world population in all age groups (POP#1).
+	|
+
+********************************************************
+	.Population.Births
+********************************************************~
+		
+		BIRTH RATE SUBSECTOR
+	|
+
+average industrial output per capita  = 
+        SMOOTH ( industrial output per capita , 
+             income expectation averaging time )
+	~	$/(Person*year)
+	~	  Average industrial output per capita (AIOPC#43).
+	|
+
+birth rate  = 
+        THOUSAND 
+             * births 
+             / population
+	~	C/year
+	~	  The crude birth rate measured in people per thousand
+		         people per year (CBR#31).
+	~	:SUPPLEMENTARY 
+	|
+
+births  = 
+        IF THEN ELSE ( Time 
+                  >= population equilibrium time , 
+             deaths , 
+             ( total fertility 
+                  * Population 15 To 44 
+                  * 0.5
+                  / reproductive lifetime ) )
+	~	Person/year
+	~	  The total number of births in the world (B#30).
+	|
+
+completed multiplier from perceived lifetime=
+	completed multiplier from perceived lifetime table ( perceived life expectancy/one year\
+		 )
+	~	Dmnl
+	~	  COMPENSATORY MULTIPLIER FROM PERCEIVED LIFE
+		         EXPECTANCY (CMPLE#36).
+	|
+
+completed multiplier from perceived lifetime table  ( 
+            (0,3),(10,2.1),(20,1.6),(30,1.4),(40,1.3),(50,1.2),(60,1.1)
+            ,(70,1.05),(80,1) )
+	~	Dmnl
+	~	  Table relating perceived life expectancy to birth
+		         rate compensation (CMPLET#36.1).
+	|
+
+delayed industrial output per capita  = 
+        SMOOTH3 ( industrial output per capita , 
+             social adjustment delay )
+	~	$/(Person*year)
+	~	  Delayed industrial output per capita (DIOPC#40).
+	|
+
+desired completed family size  = 
+        IF THEN ELSE ( Time 
+                  >= zero population growth time s , 
+             2, 
+             desired completed family size normal 
+                  * family response to social norm 
+                  * social family size normal )
+	~	Dmnl
+	~	  Desired completed family size (DCFS#38)
+	|
+
+desired completed family size normal  = 3.8
+	~	Dmnl
+	~	  DESIRED COMPLETED FAMILY SIZE NORMAL (DCFSN#38.2).
+	|
+
+desired total fertility  = 
+        desired completed family size 
+             * completed multiplier from perceived lifetime
+	~	Dmnl
+	~	  DESIRED TOTAL FERTILITY (DTF#35).
+	|
+
+family income expectation  = 
+        ( industrial output per capita 
+             - average industrial output per capita ) 
+             / average industrial output per capita
+	~	Dmnl
+	~	  Family income expectations (FIE#42).
+	|
+
+family response to social norm  = 
+        family response to social norm table ( family income expectation )
+	~	Dmnl
+	~	  FAMILY RESPONSE TO SOCIAL NORM (FRSN#41).
+	|
+
+family response to social norm table  ( 
+            (-0.2,0.5),(-0.1,0.6),(0,0.7),(0.1,0.85),(0.2,1) )
+	~	Dmnl
+	~	  The table relating income expectations to family
+		         size (FRSNT#41.1).
+	|
+
+fecundity multiplier=
+	fecundity multiplier table ( life expectancy/one year )
+	~	Dmnl
+	~	  FECUNDITY MULTIPLIER (FM#34).
+	|
+
+fecundity multiplier table  ( 
+            (0,0),(10,0.2),(20,0.4),(30,0.6),(40,0.7),(50,0.75),(60,0.79)
+            ,(70,0.84),(80,0.87) )
+	~	Dmnl
+	~	  Table relating life expectancy to fecundity
+		         (FMT#34.1).
+	|
+
+fertility control allocation per capita  = 
+        fraction services allocated to fertility control 
+             * service output per capita
+	~	$/(Person*year)
+	~	  FERTILITY CONTROL ALLOCATIONS PER CAPITA (FCAPC#47).
+	|
+
+fertility control effectiveness=
+	IF THEN ELSE ( Time >= fertility control effectiveness time s 
+	,  1
+	,  ( fertility control effectiveness table ( 
+	     fertility control facilities per capita/GDP pc unit ) ) )
+	~	Dmnl
+	~	  Fertility control effectiveness (FCE#45).
+	|
+
+fertility control effectiveness table  ( 
+            (0,0.75),(0.5,0.85),(1,0.9),(1.5,0.95),(2,0.98),(2.5,0.99)
+            ,(3,1) )
+	~	Dmnl
+	~	  Fertility control effectiveness table (FCET#45.2).
+	|
+
+fertility control facilities per capita  = 
+        SMOOTH3 ( fertility control allocation per capita , 
+             health services impact delay )
+	~	$/(Person*year)
+	~	  FERTILITY CONTROL FACILITIES PER CAPITA (FCFPC#46).
+	|
+
+fraction services allocated to fertility control  = 
+        fraction services allocated to fertility control table ( need for fertility control\
+		 )
+	~	Dmnl
+	~	  FRACTION OF SERVICES ALLOCATED TO FERTILITY CONTROL
+		         (FSAFC#48).
+	|
+
+fraction services allocated to fertility control table  ( 
+            (0,0),(2,0.005),(4,0.015),(6,0.025),(8,0.03),(10,0.035) )
+	~	Dmnl
+	~	  Table relating the need for fertility control to
+		         services allocated. (FSAFCT#48.1).
+	|
+
+income expectation averaging time  = 3
+	~	year
+	~	  Income expectation averaging time (IEAT#43.1)
+	|
+
+lifetime perception delay  = 20
+	~	year
+	~	  Lifetime perception delay (LPD#37.1)
+	|
+
+maximum total fertility  = 
+        maximum total fertility normal 
+             * fecundity multiplier
+	~	Dmnl
+	~	  MAXIMUM TOTAL FERTILITY (MTF#33).
+	|
+
+maximum total fertility normal  = 12
+	~	Dmnl
+	~	  The normal maximum fertility that would be realized
+		        if people had sufficient food and perfect health.
+		         (MTFN#33)
+	|
+
+need for fertility control  = 
+        ( maximum total fertility 
+             / desired total fertility ) 
+             - 1
+	~	Dmnl
+	~	  NEED FOR FERTILITY CONTROL (NFC#44).
+	|
+
+perceived life expectancy  = 
+        SMOOTH3 ( life expectancy , 
+             lifetime perception delay )
+	~	year
+	~	  Perceived life expectancy (PLE#37)
+	|
+
+reproductive lifetime  = 30
+	~	year
+	~	  The number of years people can reproduce (RLT#30.1)
+	|
+
+social family size normal=
+	social family size normal table ( delayed industrial output per capita/GDP pc unit )
+	~	Dmnl
+	~	  SOCIAL FAMILY SIZE NORM (SFN#39).
+	|
+
+social family size normal table(
+	(0,1.25),(200,0.94),(400,0.715),(600,0.59),(800,0.5))
+	~	Dmnl
+	~	  Table relating material well being to family size
+		         (SFNT#39.1)
+	|
+
+social adjustment delay  = 20
+	~	year
+	~	  SOCIAL ADJUSTMENT DELAY (SAD#40.1).
+	|
+
+population equilibrium time  = 2100
+	~	year
+	~	  The time at which, as a model test, the population
+		         is forced to remain constant. (PET#30.2)
+	|
+
+THOUSAND  = 1000
+	~	C
+	~	  Units converted for /1000 rates (--).
+	|
+
+total fertility  = 
+        MIN ( maximum total fertility , 
+             ( maximum total fertility 
+                  * ( 1
+                       - fertility control effectiveness ) 
+                  + desired total fertility 
+                       * fertility control effectiveness ) )
+	~	Dmnl
+	~	  TOTAL FERTILITY (TF#32).
+	|
+
+********************************************************
+	.Population.Death
+********************************************************~
+		
+		DEATH RATE SUBSECTOR
+	|
+
+crowding multiplier from industry=
+	crowding multiplier from industry table ( industrial output per capita/GDP pc unit )
+	~	Dmnl
+	~	  CROWDING MULTIPLIER FROM INDUSTRIALIZATION (CMI#27).
+	|
+
+crowding multiplier from industry table  ( 
+            (0,0.5),(200,0.05),(400,-0.1),(600,-0.08),(800,-0.02),(1000,0.05)
+            ,(1200,0.1),(1400,0.15),(1600,0.2) )
+	~	Dmnl
+	~	  Table relating industrial output to crowding
+		         (CMIT#27.1).
+	|
+
+death rate  = 
+        THOUSAND 
+             * deaths 
+             / population
+	~	C/year
+	~	  CRUDE DEATH RATE (CDR#18)
+	~	:SUPPLEMENTARY 
+	|
+
+deaths  = 
+        deaths 0 to 14 
+             + deaths 15 to 44 
+             + deaths 45 to 64 
+             + deaths 65 plus
+	~	Person/year
+	~	  The total number of deaths per year for all age
+		         groups (D#17).
+	|
+
+effective health services per capita  = 
+        SMOOTH ( health services per capita , 
+             health services impact delay )
+	~	$/(Person*year)
+	~	  Effective health services per capita - delayed from
+		         allocation (EHSPC#22)
+	|
+
+fraction of population urban=
+	fraction of population urban table ( population/unit population )
+	~	Dmnl
+	~	  FRACTION OF POPULATION URBAN (FPU#26).
+	|
+
+fraction of population urban table  ( 
+            (0,0),(2e+09,0.2),(4e+09,0.4),(6e+09,0.5),(8e+09,0.58)
+            ,(1e+10,0.65),(1.2e+10,0.72),(1.4e+10,0.78),(1.6e+10,0.8)
+             )
+	~	Dmnl
+	~	  Table relating population to the fraction of
+		         population that is urban (FPUT#26.1).
+	|
+
+health services per capita=
+	health services per capita table ( service output per capita/GDP pc unit )
+	~	$/(Person*year)
+	~	  Health services allocation per capita (HSAPC#21).
+	|
+
+health services per capita table  ( 
+            (0,0),(250,20),(500,50),(750,95),(1000,140),(1250,175),(1500,200)
+            ,(1750,220),(2000,230) )
+	~	$/(Person*year)
+	~	  The table relating service output to health services
+		         (HSAPCT#21.1).
+	|
+
+health services impact delay  = 20
+	~	year
+	~	  The delay between allocating health services, and
+		         realizing the benefit (HSID#22.1).
+	|
+
+life expectancy normal  = 28
+	~	year
+	~	  The normal life expectancy with subsistance food, no
+		         medical care and no industrialization (LEN#19.1)
+	|
+
+life expectancy  = 
+        life expectancy normal 
+             * lifetime multiplier from food 
+             * lifetime multiplier from health services 
+             * lifetime multiplier from persistent pollution 
+             * lifetime multiplier from crowding
+	~	year
+	~	  The average life expectancy (LE#19).
+	|
+
+lifetime multiplier from crowding  = 
+        1
+             - ( crowding multiplier from industry 
+                  * fraction of population urban )
+	~	Dmnl
+	~	  LIFETIME MULTIPLIER FROM CROWDING (LMC#28)
+	|
+
+lifetime multiplier from food  = 
+        lifetime multiplier from food table ( food per capita 
+                  / subsistence food per capita )
+	~	Dmnl
+	~	  The life expectancy multiplier from food (LMF#20)
+	|
+
+lifetime multiplier from food table  ( 
+            (0,0),(1,1),(2,1.43),(3,1.5),(4,1.5),(5,1.5) )
+	~	Dmnl
+	~	  The table ralating relative food to the life
+		         expectancy multiplier for food (LMFT#20.1)
+	|
+
+lifetime multiplier from health services=
+	IF THEN ELSE ( Time 
+	                  > 1940, 
+	             lifetime multiplier from health services 2 , 
+	             lifetime multiplier from health services 1 )
+	~	Dmnl
+	~	  The life expectancy multiplier from health services
+		         (LMHS#23).
+	|
+
+lifetime multiplier from health services 1=
+	lifetime multiplier from health services 1 table ( 
+	effective health services per capita/GDP pc unit )
+	~	Dmnl
+	~	  The life expectancy multiplier from health services
+		         before 1940 (LMHS1#24).
+	|
+
+lifetime multiplier from health services 1 table  ( 
+            (0,1),(20,1.1),(40,1.4),(60,1.6),(80,1.7),(100,1.8) )
+	~	Dmnl
+	~	  Table relating effective health care to life
+		         expectancy (LMHS1T#24.1).
+	|
+
+lifetime multiplier from health services 2=
+	lifetime multiplier from health services 2 table ( 
+	effective health services per capita/GDP pc unit )
+	~	Dmnl
+	~	  The life expectancy multipier from health services
+		         value after 1940 (LMHS2#25).
+	|
+
+lifetime multiplier from health services 2 table  ( 
+            (0,1),(20,1.5),(40,1.9),(60,2),(80,2),(100,2) )
+	~	Dmnl
+	~	  Table relating effective health care to life
+		         expectancy (LMHS2T#25.1)
+	|
+
+lifetime multiplier from persistent pollution  = 
+        lifetime multiplier from persistent pollution table ( persistent pollution index\
+		 )
+	~	Dmnl
+	~	  LIFETIME MULTIPLIER FROM PERSISTENT POLLUTION
+		         (LMP#29)
+	|
+
+lifetime multiplier from persistent pollution table  ( 
+            (0,1),(10,0.99),(20,0.97),(30,0.95),(40,0.9),(50,0.85),(60,0.75)
+            ,(70,0.65),(80,0.55),(90,0.4),(100,0.2) )
+	~	Dmnl
+	~	  Table relating persistent pollution to life
+		         expectancy (LMPT#29.1)
+	|
+
+********************************************************
+	.Resource
+********************************************************~
+		
+		NONRENEWABLE RESOURCE SECTOR
+	|
+
+resource technology change rate=
+	IF THEN ELSE ( Time 
+	                  >= POLICY YEAR s , 
+	             Resource Conservation Technology 
+	                  * resource technology change rate multiplier , 
+	             0)
+	~	1/year
+	~	  RESOURCE TECHNOLOGY IMPROVEMENT RATE (NRATE-##).
+	|
+
+desired resource use rate  = 4.8e+09
+	~	Resource units/year
+	~	  Desired non-renewable resource usage rate (DNRUR#--)
+	|
+
+fraction of resources remaining  = 
+        Nonrenewable Resources 
+             / initial nonrenewable resources s
+	~	Dmnl
+	~	  Non-renewable resource fraction remaining
+		         (NRFR#133).
+	|
+
+resource usage rate  = 
+        ( ( ( population ) ) 
+             * ( per capita resource use multiplier ) ) 
+             * ( resource use factor )
+	~	Resource units/year
+	~	  Non-renewable resource use rate (NRUR#130).
+	|
+
+Nonrenewable Resources  = 
+        INTEG( ( - resource usage rate  ) , 
+             initial nonrenewable resources s )
+	~	Resource units
+	~	  Non-renewable resource (NR#129)
+	|
+
+fraction of capital allocated to obtaining resources 1  = 
+        fraction of capital allocated to obtaining resources 1 table ( fraction of resources remaining
+ )
+	~	Dmnl
+	~	  Fraction of capital allocated to obtaining resources
+		         before switch time (FCAOR1#135).
+	|
+
+fraction of capital allocated to obtaining resources 1 table(
+	[(0,0)-(1,1)],(0,1),(0.1,0.9),(0.2,0.7),(0.3,0.5),(0.4,0.2),(0.5,0.1),(0.6,0.05),(0.7\
+		,0.05),(0.8,0.05),(0.9,0.05),(1,0.05))
+	~	Dmnl
+	~	  Table relating the fraction of resources remaining
+		        to capital allocated to resource extraction
+		         (FCAOR1T#135.1).
+	|
+
+fraction of capital allocated to obtaining resources 2  = 
+        fraction of capital allocated to obtaining resources 2 table ( fraction of resources remaining
+ )
+	~	Dmnl
+	~	  Fraction of capital allocated to obtaining resources
+		         after switch time (FCAOR2#136).
+	|
+
+fraction of capital allocated to obtaining resources 2 table(
+	[(0,0)-(1,1)],(0,1),(0.1,0.1),(0.2,0.05),(0.3,0.05),(0.4,0.05),(0.5,0.05),(0.6,0.05)\
+		,(0.7,0.05),(0.8,0.05),(0.9,0.05),(1,0.05))
+	~	Dmnl
+	~	Table relating the fraction of resources remaining to capital allocated to resource \
+		extraction
+		 (FCAOR2T#136.1). Note that the original LTG model uses (0,1), (0.1,0.2), \
+		(0.2,0.1), as the first entries but this table is changed to replicate \
+		scenarios in the new book.
+	|
+
+resource use factor 1  = 1
+	~	Dmnl
+	~	  The nonrenewable resource usage factor before the
+		         policy year (NRUF1#131.1).
+	|
+
+resource use fact 2  = 
+        SMOOTH3 ( Resource Conservation Technology , 
+             technology development delay )
+	~	Dmnl
+	~	  The nonrenewable resource usage factor after the
+		         policy year (NRUF2#131.2).
+	|
+
+per capita resource use multiplier=
+	per capita resource use mult table ( industrial output per capita/GDP pc unit )
+	~	Resource unit/(Person*year)
+	~	  Per capita resource usage multiplier (PCRUM#132).
+	|
+
+per capita resource use mult table  ( 
+            (0,0),(200,0.85),(400,2.6),(600,3.4),(800,3.8),(1000,4.1),
+            (1200,4.4),(1400,4.7),(1600,5) )
+	~	Resource units/(Person*year)
+	~	  Table relating industrial output to resource usage
+		         per capita (PCRUMT#132.1).
+	|
+
+Resource Conservation Technology= INTEG (
+	  resource technology change rate ,
+		 
+		             1)
+	~	Dmnl
+	~	  Non-renewable resource technology (NRTD#--)
+	|
+
+fraction of industrial capital allocated to obtaining resources  = 
+        IF THEN ELSE ( Time 
+                  >= fraction of industrial capital allocated to obtaining resources switch time s\
+		 , 
+             fraction of capital allocated to obtaining resources 2 , 
+             fraction of capital allocated to obtaining resources 1 )
+	~	Dmnl
+	~	  FRACTION OF CAPITAL ALLOCATED TO OBTAINING RESOURCES
+		         (FCAOR#134).
+	|
+
+resource use factor  = 
+        IF THEN ELSE ( Time 
+                  >= POLICY YEAR s , 
+             resource use fact 2 , 
+             resource use factor 1 )
+	~	Dmnl
+	~	  NONRENEWABLE RESOURCE USAGE FACTOR (NRUF#131).
+	|
+
+technology development delay  = 20
+	~	year
+	~	  The technology development delay (TDD#--)
+	|
+
+********************************************************
+	.Supplementary
+********************************************************~
+		
+		SUPPLEMENTARY EQUATIONS
+	|
+
+consumed industrial output  = 
+        industrial output 
+             * fraction of industrial output allocated to consumption
+	~	$/year
+	~	  Consumed industrial output (CIO#--).
+	|
+
+consumed industrial output per capita  = 
+        consumed industrial output
+             / population
+	~	$/(Person*year)
+	~	  Consumption Industrial Output per Capita (CIOPC#--)
+	~	:SUPPLEMENTARY 
+	|
+
+fraction of output in agriculture  = 
+        ( PRICE OF FOOD 
+             * food ) 
+             / ( PRICE OF FOOD 
+                  * food 
+                  + service output 
+                  + industrial output )
+	~	Dmnl
+	~	  FRACTION OF OUTPUT IN AGRICULTURE (FAO#147)
+	~	:SUPPLEMENTARY 
+	|
+
+fraction of output in industry  = 
+        industrial output 
+             / ( PRICE OF FOOD 
+                  * food 
+                  + service output 
+                  + industrial output )
+	~	Dmnl
+	~	  Fraction of output that is industrial output
+		         (FOI#148).
+	~	:SUPPLEMENTARY 
+	|
+
+fraction of output in services  = 
+        service output 
+             / ( PRICE OF FOOD 
+                  * food 
+                  + service output 
+                  + industrial output )
+	~	Dmnl
+	~	  FRACTION OF OUTPUT IN SERVICES (FOS#149).
+	~	:SUPPLEMENTARY 
+	|
+
+persistent pollution intensity industry  = 
+        persistent pollution generation industry 
+             * persistent pollution generation factor 
+             / industrial output
+	~	Pollution units/$
+	~	  pollution intensity indicator (PLINID#--).
+	~	:SUPPLEMENTARY 
+	|
+
+PRICE OF FOOD  = 0.22
+	~	$/Veg equiv kg
+	~	  The price of food used as a basis for comparing
+		         agricultural and industrial output. (--).
+	|
+
+resource use intensity  = 
+        resource usage rate 
+             / industrial output
+	~	Resource units/$
+	~	  ADAPTIVE TECHNOLOGICAL CONTROL CARDS nonrenewable
+		         resource usage intensity (RESINT#--)
+	~	:SUPPLEMENTARY 
+	|
+
+\\\---/// Sketch information - do not modify anything except names
+V300  Do not put anything below this section - it will be ignored
+*Title Page
+$192-192-192,0,|12||-1--1--1|0-0-0|0-0-255|-1--1--1|-1--1--1|96,96,100,0
+12,1,0,304,193,175,11,0,4,0,0,0,0,0,0,0,0,0,0,0,0
+Developed from the World model by Jay W. Forrester
+12,2,0,304,168,3,11,0,0,0,0,-1,0,0,0,0,0,0,0,0,0
+12,3,0,304,48,143,20,0,4,0,58,-1,0,0,0,0-0-0,0-0-0,Arial|24|U|0-0-255,0,0,0,0,0,0
+World3-2003 Model
+12,4,0,304,243,3,11,0,0,0,24,-1,0,0,0,0-0-0,0-0-0,|11|B|0-0-0,0,0,0,0,0,0
+12,5,0,304,267,193,11,0,4,0,56,-1,0,0,0,0-0-0,0-0-0,Arial|11|B|0-0-0,0,0,0,0,0,0
+Use Page Down / Page Up keys to move through views
+12,6,0,304,287,153,11,0,4,0,56,-1,0,0,0,0-0-0,0-0-0,Arial|11|B|0-0-0,0,0,0,0,0,0
+(or button at bottom that says "Title Page")
+12,7,0,304,117,147,12,0,4,0,24,-1,0,0,0,0-0-0,0-0-0,|14|I|0-0-0,0,0,0,0,0,0
+Limits to Growth - the 30-Year Update
+12,8,0,304,152,124,23,8,132,0,0,-1,0,0,0,0,0,0,0,0,0
+Chelsea Green Publishing Co., White River Junction VT 05001, 2004
+12,9,0,304,325,33,11,0,4,0,16,-1,0,0,0,0-0-0,0-0-0,||U|0-0-0,0,0,0,0,0,0
+See Also:
+12,10,0,304,373,221,33,8,132,0,0,-1,0,0,0,0,0,0,0,0,0
+Dennis L. Meadows, William W. Behrens III, Donella H. Meadows, Roger F. Naill, Jorgen Randers, Erich K.O. Zahn, 1974 "Dynamics of Growth in a Finite World," Cambridge MA: Wright-Allen Press
+12,11,0,304,419,260,11,0,132,0,0,-1,0,0,0,0,0,0,0,0,0
+Jay W. Forrester, 1971, "World Dynamics," Cambridge MA: Wright-Allen Press
+12,12,0,304,500,281,11,0,132,0,0,-1,0,0,0,0,0,0,0,0,0
+Donella H. Meadows et al., 1972, "The Limits to Growth," New York: Universe Books
+12,13,0,304,460,249,28,8,132,0,0,-1,0,0,0,0,0,0,0,0,0
+Donella H. Meadows, Dennis L. Meadows, Jorgen Randers, 1992, "Beyond the Limits," White River Junction VT: Chelsea Green Publishing Co.
+12,14,0,304,217,184,11,0,4,0,0,-1,0,0,0,0,0,0,0,0,0
+World3_03_Scenario.vmf revision date August 14, 2008
+12,15,0,304,241,247,11,0,4,0,18,-1,0,0,0,0-0-0,0-0-0,||B|0-0-255,0,0,0,0,0,0
+Special thanks to Jack Harich for setting up slider based policy changes
+\\\---/// Sketch information - do not modify anything except names
+V300  Do not put anything below this section - it will be ignored
+*Scenario Summary Graphs
+$192-192-192,0,|12||-1--1--1|0-0-0|0-0-255|-1--1--1|-1--1--1|96,96,100,0
+12,1,0,283,167,267,155,3,188,0,0,1,0,0,0,0,0,0,0,0,0
+STATE_OF_WORLD
+12,2,0,831,167,267,155,3,188,0,0,1,0,0,0,0,0,0,0,0,0
+MATERIAL_STANDARD_LIVING
+12,3,0,283,489,267,155,3,188,0,0,1,0,0,0,0,0,0,0,0,0
+HUMAN_WELFARE
+12,4,0,665,369,77,9,0,4,0,8,-1,0,0,0,0-0-0,0-0-0,|10||0-0-0,0,0,0,0,0,0
+Click on the SyntheSim Icon
+12,5,0,904,369,132,9,0,132,0,8,-1,0,0,0,0-0-0,0-0-0,|10||0-0-0,0,0,0,0,0,0
+or use Control + B to begin simulating the model.
+30,6,World3_03_Scenarios0000.bmp,755,367,7,7,8,0,0,0,-1,0,0,0,0,0,0,0,0,0
+12,7,0,820,412,147,15,8,132,0,8,-1,0,0,0,0-0-0,0-0-0,|10||0-0-0,0,0,0,0,0,0
+Use the scenario slider to select the scenario to run. 
+12,8,0,840,537,239,9,0,132,0,8,-1,0,0,0,0-0-0,0-0-0,|10||0-0-0,0,0,0,0,0,0
+Scenarios 1 to 10 are the ones described in the third edition of the Limits to Growth book.
+12,9,0,789,605,188,9,0,132,0,8,-1,0,0,0,0-0-0,0-0-0,|10||0-0-0,0,0,0,0,0,0
+The use of scenario 0 is described in the Scenario Control Detail page.
+12,10,0,773,571,171,9,0,132,0,8,-1,0,0,0,0-0-0,0-0-0,|10||0-0-0,0,0,0,0,0,0
+The scenarios are described on the Scenario Descriptions page.
+10,11,scenario,803,461,27,11,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+\\\---/// Sketch information - do not modify anything except names
+V300  Do not put anything below this section - it will be ignored
+*Table of Scenarios
+$192-192-192,0,|12||-1--1--1|0-0-0|0-0-255|-1--1--1|-1--1--1|96,96,100,0
+12,1,0,919,-43,129,19,0,132,0,26,-1,0,0,0,0-0-0,0-0-0,|24|B|0-0-255,0,0,0,0,0,0
+Table of Scenarios
+12,2,0,2074,437,80,40,0,3,0,18,-1,1,0,0,-1--1--1,-1--1--1,|||0-0-0,0,0,0,0,0,0
+12,3,0,501,411,254,357,3,7,0,0,-1,1,0,0,0,0,0,0,0,0
+Model Variable:|<<NnN>>||<<NnN>>|initial nonrenewable resources:|<<NnN>>||<<NnN>>|fraction of industrial capital allocated to obtaining resources switch times:|<<NnN>>||<<NnN>>||<<NnN>>|persistent pollution technology change times:|<<NnN>>||<<NnN>>||<<NnN>>|policy years:|<<NnN>>||<<NnN>>|land yield policy times:|<<NnN>>||<<NnN>>|land life policy implementation times:|<<NnN>>||<<NnN>>|resource technology change times:|<<NnN>>||<<NnN>>|resource technology change times:|<<NnN>>||<<NnN>>|fertility control effectiveness times:|<<NnN>>||<<NnN>>||<<NnN>>|industrial equilibrium times:|<<NnN>>||<<NnN>>||<<NnN>>||<<NnN>>|industrial output per capita desireds:|<<NnN>>||<<NnN>>||<<NnN>>||<<NnN>>|average life of agricultural inputs 2 s:|<<NnN>>||<<NnN>>||<<NnN>>||<<NnN>>|average life of industrial capital 2 s:|<<NnN>>||<<NnN>>||<<NnN>>||<<NnN>>|average life of servicce capital 2 s:|<<NnN>>||<<NnN>>||<<NnN>>||<<NnN>>|persistent pollution generation factor:|<<NnN>>||<<NnN>>||<<NnN>>||<<NnN>>|resource use factor:|<<NnN>>||<<NnN>>||<<NnN>>||<<NnN>>|
+12,4,0,837,412,82,357,3,7,0,0,-1,1,0,0,0,0,0,0,0,0
+View:|<<NnN>>||<<NnN>>|Nonrenew Resources|<<NnN>>||<<NnN>>|Nonrenew Resources|<<NnN>>||<<NnN>>||<<NnN>>|Persistent Pollution|<<NnN>>||<<NnN>>|(many)|<<NnN>>||<<NnN>>|Ag Productiv|<<NnN>>||<<NnN>>|Land Develop|<<NnN>>||<<NnN>>|Nonrenew Res|<<NnN>>||<<NnN>>|Fertility|<<NnN>>||<<NnN>>|Fertility|<<NnN>>||<<NnN>>|Industrial Out|<<NnN>>||<<NnN>>||<<NnN>>||<<NnN>>|Industrial Out |<<NnN>>||<<NnN>>||<<NnN>>||<<NnN>>|Food Prod|<<NnN>>||<<NnN>>||<<NnN>>||<<NnN>>|Industrial Out|<<NnN>>||<<NnN>>||<<NnN>>|Services Out|<<NnN>>||<<NnN>>||<<NnN>>||<<NnN>>|Persistent Poll|<<NnN>>||<<NnN>>||<<NnN>>||<<NnN>>|Nonrenew Res
+12,5,0,950,412,31,357,3,7,0,0,-1,1,0,0,0,0,0,0,0,0
+      1|<<NnN>>||<<NnN>>| 1e12|<<NnN>>||<<NnN>>| 2100|<<NnN>>||<<NnN>>||<<NnN>>||<<NnN>>| 2100|<<NnN>>||<<NnN>>|2100|<<NnN>>||<<NnN>>| 2100|<<NnN>>||<<NnN>>| 2100|<<NnN>>||<<NnN>>|2100|<<NnN>>||<<NnN>>| 2100|<<NnN>>||<<NnN>>| 2100|<<NnN>>||<<NnN>>| 2100|<<NnN>>||<<NnN>>||<<NnN>>||<<NnN>>||<<NnN>>| Var|<<NnN>>| 400|<<NnN>>||<<NnN>>||<<NnN>>| 2|<<NnN>>| 2|<<NnN>>||<<NnN>>||<<NnN>>| 14|<<NnN>>| 14|<<NnN>>||<<NnN>>||<<NnN>>|20|<<NnN>>|20|<<NnN>>||<<NnN>>||<<NnN>>| 1|<<NnN>>| 1|<<NnN>>||<<NnN>>||<<NnN>>| 1|<<NnN>>| 1|<<NnN>>||<<NnN>>||<<NnN>>||<<NnN>>||<<NnN>>||<<NnN>>|
+12,6,0,1011,412,31,357,3,7,0,0,-1,1,0,0,0,0,0,0,0,0
+2|<<NnN>>||<<NnN>>| 2e13|<<NnN>>||<<NnN>>|2002|<<NnN>>||<<NnN>>||<<NnN>>||<<NnN>>|2100|<<NnN>>||<<NnN>>|2100|<<NnN>>||<<NnN>>|2100|<<NnN>>||<<NnN>>|2100|<<NnN>>||<<NnN>>|2100|<<NnN>>||<<NnN>>|2100|<<NnN>>||<<NnN>>|2100|<<NnN>>||<<NnN>>|2100|<<NnN>>||<<NnN>>||<<NnN>>||<<NnN>>||<<NnN>>| Var|<<NnN>>|400|<<NnN>>||<<NnN>>||<<NnN>>|2|<<NnN>>|2|<<NnN>>||<<NnN>>||<<NnN>>|14|<<NnN>>|14|<<NnN>>||<<NnN>>||<<NnN>>|14|<<NnN>>|14|<<NnN>>||<<NnN>>||<<NnN>>|1|<<NnN>>|1|<<NnN>>||<<NnN>>||<<NnN>>|1|<<NnN>>|1
+12,7,0,1068,412,26,357,3,7,0,0,-1,1,0,0,0,0,0,0,0,0
+3|<<NnN>>||<<NnN>>|2e13|<<NnN>>||<<NnN>>|2002|<<NnN>>||<<NnN>>||<<NnN>>||<<NnN>>|2002|<<NnN>>||<<NnN>>|2002|<<NnN>>||<<NnN>>|2100|<<NnN>>||<<NnN>>|2100|<<NnN>>||<<NnN>>|2100|<<NnN>>||<<NnN>>|2100|<<NnN>>||<<NnN>>|2100|<<NnN>>||<<NnN>>|2100|<<NnN>>||<<NnN>>||<<NnN>>||<<NnN>>||<<NnN>>|Var|<<NnN>>|400|<<NnN>>||<<NnN>>||<<NnN>>|2|<<NnN>>|2|<<NnN>>||<<NnN>>||<<NnN>>|14|<<NnN>>|14|<<NnN>>||<<NnN>>||<<NnN>>|20|<<NnN>>|20|<<NnN>>||<<NnN>>||<<NnN>>||<<NnN>>|1|<<NnN>>|var<|<<NnN>>||<<NnN>>|1|<<NnN>>| var<
+12,8,0,1120,412,27,357,3,7,0,0,-1,1,0,0,0,0,0,0,0,0
+4|<<NnN>>||<<NnN>>| 2e13|<<NnN>>||<<NnN>>| 2002|<<NnN>>||<<NnN>>||<<NnN>>||<<NnN>>| 2002|<<NnN>>||<<NnN>>| 2002|<<NnN>>||<<NnN>>| 2002|<<NnN>>||<<NnN>>| 2100|<<NnN>>||<<NnN>>|2100|<<NnN>>||<<NnN>>|2100|<<NnN>>||<<NnN>>|2100|<<NnN>>||<<NnN>>|2100|<<NnN>>||<<NnN>>||<<NnN>>||<<NnN>>||<<NnN>>| Var|<<NnN>>| 400|<<NnN>>||<<NnN>>||<<NnN>>| 2|<<NnN>>| 2 |<<NnN>>||<<NnN>>||<<NnN>>| 14|<<NnN>>| 14 |<<NnN>>||<<NnN>>||<<NnN>>| 20|<<NnN>>| 20|<<NnN>>||<<NnN>>||<<NnN>>||<<NnN>>| 1|<<NnN>>| var<|<<NnN>>||<<NnN>>| 1|<<NnN>>| var<
+12,9,0,1176,412,30,357,3,7,0,0,-1,1,0,0,0,0,0,0,0,0
+5|<<NnN>>||<<NnN>>| 2e13|<<NnN>>||<<NnN>>| 2002|<<NnN>>||<<NnN>>||<<NnN>>||<<NnN>>| 2002|<<NnN>>||<<NnN>>| 2002|<<NnN>>||<<NnN>>| 2002|<<NnN>>||<<NnN>>| 2002|<<NnN>>||<<NnN>>| 2100|<<NnN>>||<<NnN>>| 2100|<<NnN>>||<<NnN>>| 2100|<<NnN>>||<<NnN>>| 2100|<<NnN>>||<<NnN>>||<<NnN>>||<<NnN>>||<<NnN>>| Var|<<NnN>>| 400|<<NnN>>||<<NnN>>||<<NnN>>|2|<<NnN>>|2|<<NnN>>||<<NnN>>||<<NnN>>| 14|<<NnN>>| 14|<<NnN>>||<<NnN>>||<<NnN>>| 20|<<NnN>>| 20|<<NnN>>||<<NnN>>||<<NnN>>||<<NnN>>| 1 |<<NnN>>| var<|<<NnN>>||<<NnN>>| 1 |<<NnN>>| var<
+12,10,0,1234,412,27,357,3,7,0,0,-1,1,0,0,0,0,0,0,0,0
+6|<<NnN>>||<<NnN>>| 2e13|<<NnN>>||<<NnN>>| 2002|<<NnN>>||<<NnN>>||<<NnN>>||<<NnN>>| 2002|<<NnN>>||<<NnN>>| 2002|<<NnN>>||<<NnN>>| 2002|<<NnN>>||<<NnN>>| 2002|<<NnN>>||<<NnN>>| 2002|<<NnN>>||<<NnN>>| 2100|<<NnN>>||<<NnN>>| 2100|<<NnN>>||<<NnN>>| 2100|<<NnN>>||<<NnN>>||<<NnN>>||<<NnN>>||<<NnN>>| Var|<<NnN>>| 400|<<NnN>>||<<NnN>>||<<NnN>>| 2 |<<NnN>>| 2|<<NnN>>||<<NnN>>||<<NnN>>| 14|<<NnN>>| 14|<<NnN>>||<<NnN>>||<<NnN>>| 20|<<NnN>>| 20 |<<NnN>>||<<NnN>>||<<NnN>>||<<NnN>>| 1|<<NnN>>| var<|<<NnN>>||<<NnN>>| 1 |<<NnN>>| var<|<<NnN>>||<<NnN>>||<<NnN>>|
+12,11,0,1289,412,27,357,3,7,0,0,-1,1,0,0,0,0,0,0,0,0
+7|<<NnN>>||<<NnN>>| 2e13|<<NnN>>||<<NnN>>| 2002|<<NnN>>||<<NnN>>||<<NnN>>||<<NnN>>| 2100|<<NnN>>||<<NnN>>| 2100|<<NnN>>||<<NnN>>| 2100|<<NnN>>||<<NnN>>| 2100|<<NnN>>||<<NnN>>| 2100|<<NnN>>||<<NnN>>| 2002|<<NnN>>||<<NnN>>| 2002|<<NnN>>||<<NnN>>| 2100|<<NnN>>||<<NnN>>||<<NnN>>||<<NnN>>||<<NnN>>| Var|<<NnN>>| 400|<<NnN>>||<<NnN>>||<<NnN>>| 2|<<NnN>>| 2|<<NnN>>||<<NnN>>||<<NnN>>| 14|<<NnN>>| 14|<<NnN>>||<<NnN>>||<<NnN>>| 20|<<NnN>>| 20|<<NnN>>||<<NnN>>||<<NnN>>||<<NnN>>|1|<<NnN>>|1|<<NnN>>||<<NnN>>||<<NnN>>|1|<<NnN>>|1
+12,12,0,1345,412,28,357,3,7,0,0,-1,1,0,0,0,0,0,0,0,0
+8|<<NnN>>||<<NnN>>| 2e13|<<NnN>>||<<NnN>>| 2002|<<NnN>>||<<NnN>>||<<NnN>>||<<NnN>>| 2100|<<NnN>>||<<NnN>>| 2002|<<NnN>>||<<NnN>>| 2100|<<NnN>>||<<NnN>>| 2100|<<NnN>>||<<NnN>>| 2100|<<NnN>>||<<NnN>>| 2000|<<NnN>>||<<NnN>>| 2000|<<NnN>>||<<NnN>>| 2002|<<NnN>>||<<NnN>>||<<NnN>>||<<NnN>>||<<NnN>>| Var|<<NnN>>| 350|<<NnN>>||<<NnN>>||<<NnN>>|2|<<NnN>>|2|<<NnN>>||<<NnN>>||<<NnN>>| 14|<<NnN>>| 18|<<NnN>>||<<NnN>>||<<NnN>>| 20|<<NnN>>| 25|<<NnN>>||<<NnN>>||<<NnN>>| 1|<<NnN>>| var<|<<NnN>>||<<NnN>>||<<NnN>>| 1 |<<NnN>>| var<
+12,13,0,1401,412,27,357,3,7,0,0,-1,1,0,0,0,0,0,0,0,0
+9|<<NnN>>||<<NnN>>| 2e13|<<NnN>>||<<NnN>>| 2002|<<NnN>>||<<NnN>>||<<NnN>>||<<NnN>>| 2002|<<NnN>>||<<NnN>>| 2002|<<NnN>>||<<NnN>>| 2002|<<NnN>>||<<NnN>>| 2002|<<NnN>>||<<NnN>>| 2002|<<NnN>>||<<NnN>>| 2002|<<NnN>>||<<NnN>>| 2002|<<NnN>>||<<NnN>>| 2002 |<<NnN>>||<<NnN>>||<<NnN>>||<<NnN>>||<<NnN>>| Var|<<NnN>>| 350|<<NnN>>||<<NnN>>||<<NnN>>| 2 |<<NnN>>| 2 |<<NnN>>||<<NnN>>||<<NnN>>| 14|<<NnN>>| 18|<<NnN>>||<<NnN>>||<<NnN>>| 20|<<NnN>>| 25|<<NnN>>||<<NnN>>||<<NnN>>| 1 |<<NnN>>| var<|<<NnN>>||<<NnN>>||<<NnN>>| 1 |<<NnN>>| var<
+12,14,0,1461,412,34,357,3,7,0,0,-1,1,0,0,0,0,0,0,0,0
+10|<<NnN>>||<<NnN>>| 2e13|<<NnN>>||<<NnN>>| 2002|<<NnN>>||<<NnN>>||<<NnN>>||<<NnN>>| 2002|<<NnN>>||<<NnN>>| 1982|<<NnN>>||<<NnN>>| 1982|<<NnN>>||<<NnN>>| 1982|<<NnN>>||<<NnN>>| 1982|<<NnN>>||<<NnN>>| 1982|<<NnN>>||<<NnN>>| 1982|<<NnN>>||<<NnN>>| 1982|<<NnN>>||<<NnN>>||<<NnN>>||<<NnN>>||<<NnN>>| Var|<<NnN>>| 350|<<NnN>>||<<NnN>>||<<NnN>>| 2|<<NnN>>| 2 |<<NnN>>||<<NnN>>||<<NnN>>| 14|<<NnN>>| 18|<<NnN>>||<<NnN>>||<<NnN>>| 20|<<NnN>>| 25|<<NnN>>||<<NnN>>||<<NnN>>| 1|<<NnN>>| var<|<<NnN>>||<<NnN>>||<<NnN>>| 1 |<<NnN>>| var<
+12,15,0,1295,802,184,24,8,7,0,0,-1,1,0,0,0,0,0,0,0,0
+Note var means variable and var< means variable but less than the value above.
+12,16,0,1207,41,289,14,3,7,0,0,-1,1,0,0,0,0,0,0,0,0
+Scenarios
+\\\---/// Sketch information - do not modify anything except names
+V300  Do not put anything below this section - it will be ignored
+*Scenario Descriptions
+$192-192-192,0,|12||-1--1--1|0-0-0|0-0-255|-1--1--1|-1--1--1|96,96,100,0
+12,1,0,720,12,151,19,0,132,0,26,-1,0,0,0,0-0-0,0-0-0,|24|B|0-0-255,0,0,0,0,0,0
+Scenario Descriptions
+12,2,0,700,119,379,89,8,7,0,0,-1,1,0,0,0,0,256,0,0,0
+Scenario 1 — Described on page 168 of third edition of Limits to Growth. This shows "tie behavior of |<<NnN>>|World3 when it is run as is, wit) numbers we consider a realistic description of the situation as it appeared on average during the latter part of the twentieth century. In 1972 we called it tie standard run." |<<NnN>>|In all the remaining scenarios the changes start in 2002, except for scenario 10, which starts in 1982. |<<NnN>>||<<NnN>>|Scenario 2 - Described on page 171. Scenario 1 plus optimistic assumptions about the system . Initial |<<NnN>>|nonrenewable resources are doubled and the fraction of capital allocated to obtaining resources is |<<NnN>>|increased substantially to about 5% of industrial Page 210 states that "scenario 2 will be basis |<<NnN>>|of comparison for the technology and policy changes that follow." In other words, scenario 2 is tie |<<NnN>>|business as usual scenario. It is the problem to solve. |<<NnN>>||<<NnN>>|Scenario 3 — Page 210. Scenario 2 plus more accessible nonrenewable resources and pollution control|<<NnN>>|technology, all starting in 2002. "This allows much higher welfare for more people after 2040 because of |<<NnN>>|fewer negative effects from pollution. But food production does ultimately decline, drawing capital from |<<NnN>>|the industrial sector and triggering a collapse." |<<NnN>>||<<NnN>>|Scenario 4 - Page 214. Scenario 3 plus higher land yield, via an increase in Land Yield Technology. "The |<<NnN>>|world's farmers end up trying to squeeze more and more food output from less and less land. This proves unsustainable." |<<NnN>>||<<NnN>>|Scenario 5 — Page 216. Scenario 4 plus longer agricultural land life. "The result is a postponement of the collapse at the end of the twenty-first century." |<<NnN>>||<<NnN>>||<<NnN>>|
+12,3,0,775,396,456,45,8,7,0,0,-1,1,0,0,0,0,256,0,0,0
+Scenario 6 — Page 218. Scenario 5 plus more efficient use of nonrenewable resources, via improvement |<<NnN>>|in Resource Conservation Technology. "Now the world is developing powerful technologies for pollution |<<NnN>>|abatement, land yield enhancement, land protection, and conservation of nonrenewable resources all at |<<NnN>>|once. All these technologies are assumed to involve costs and to tae 20 years to be fully implemented. In |<<NnN>>|combination they permit a large and prosperous simulated world, until the bliss starts declining in |<<NnN>>|response to the accumulated cost of the technologies." |<<NnN>>||<<NnN>>|Scenario 7 — Page 240. Scenario 2 (not 5) plus a family size of 2 and 100% effective fertility control |<<NnN>>|effectiveness. "Because of age structure momentum, tie population continues to grow for another |<<NnN>>|generation. But the slower population growth permit industrial output to rise faster, until it is stopped by the cost of dealing with rising pollution, as in scenario 2." |<<NnN>>||<<NnN>>|Scenario 8 - Page 242. Scenario 7 plus "a definition of enough. This world has decided to aim for an |<<NnN>>|industrial output per capita level for everyone that is about 10% higher than the world average in the year 2000." The result is society "an extend somewhat the 'golden period' of fairly high human welfare |<<NnN>>|between 2020 and 2040 in scenario 7. But pollution increasingly stresses agricultural resources. Per capita food production deadlines, eventually bringing down life expectancy and population." |<<NnN>>||<<NnN>>|Scenario 9 — Page 244. Scenario 8 plus the technology improvements introduced in scenarios 3, 4, 5, and 6. "The resulting society is sustainable: Nearly 8 billion people live with high human welfare and a |<<NnN>>|continuously declining ecological footprint."|<<NnN>>||<<NnN>>|Scenario 10 — Page 248. Same as scenario 9 except the changes are introduced 20 years earlier, in |<<NnN>>|1982. "The scenario 10 population is able to maintain its standard of living and support its improving |<<NnN>>|technologies with no problems. This society,' has a more pleasant environment, more resources, more |<<NnN>>|degrees of freedom; it is farther from it limits, less on the edge than the society in scenario 9. But the |<<NnN>>|world society of 1982 did not grasp the opportunity." 
+\\\---/// Sketch information - do not modify anything except names
+V300  Do not put anything below this section - it will be ignored
+*Demographics
+$192-192-192,0,|12||-1--1--1|64-64-64|128-128-128|-1--1--1|-1--1--1|96,96,100,0
+10,1,Population 0 To 14,381,501,47,25,3,3,0,16,0,0,0,0,-1--1--1,0-0-0,||B|1-1-1,0,0,0,0,0,0
+12,2,48,375,715,10,8,0,3,0,0,-1,0,0,0,0,0,0,0,0,0
+11,3,0,694,614,7,4,33,3,0,0,4,0,0,0,0,0,0,0,0,0
+10,4,deaths 15 to 44,777,614,75,30,32,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,5,initial population 0 to 14,270,198,75,30,0,3,0,2,-1,0,0,0,128-128-128,0-0-0,|||64-128-128,0,0,0,0,0,0
+10,6,Population 15 To 44,688,501,47,25,3,3,0,16,0,0,0,0,-1--1--1,0-0-0,||B|1-1-1,0,0,0,0,0,0
+10,7,deaths,396,991,75,30,0,3,0,0,-1,0,0,0,0,0,0,0,0,0
+11,8,0,1186,502,4,7,34,3,0,0,1,0,0,0,0,0,0,0,0,0
+10,9,maturation 64 to 65,1186,533,47,24,40,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,10,initial population 15 to 44,577,337,75,30,0,3,0,2,-1,0,0,0,128-128-128,0-0-0,|||64-128-128,0,0,0,0,0,0
+10,11,Population 45 To 64,1018,501,47,25,3,3,0,16,0,0,0,0,-1--1--1,0-0-0,||B|1-1-1,0,0,0,0,0,0
+10,12,reproductive lifetime,166,385,50,21,8,3,0,2,0,0,0,0,128-128-128,0-0-0,|||64-128-128,0,0,0,0,0,0
+12,13,48,694,726,10,8,0,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,14,population equilibrium time,109,742,50,28,8,3,0,2,0,0,0,0,128-128-128,0-0-0,|||64-128-128,0,0,0,0,0,0
+10,15,initial population 54 to 64,1153,402,75,30,0,3,0,2,-1,0,0,0,128-128-128,0-0-0,|||64-128-128,0,0,0,0,0,0
+10,16,Population 65 Plus,1342,501,47,25,3,3,0,16,0,0,0,0,-1--1--1,0-0-0,||B|1-1-1,0,0,0,0,0,0
+10,17,Time,87,651,75,30,0,2,0,0,-1,0,0,0,0,0,0,0,0,0
+10,18,total fertility,181,805,75,30,0,2,0,0,-1,0,0,0,0,0,0,0,0,0
+10,19,initial population 65 plus,1455,402,75,30,0,3,0,2,-1,0,0,0,128-128-128,0-0-0,|||64-128-128,0,0,0,0,0,0
+12,20,48,126,513,10,8,0,3,0,0,-1,0,0,0,0,0,0,0,0,0
+11,21,0,860,501,4,7,34,3,0,0,1,0,0,0,0,0,0,0,0,0
+10,22,maturation 44 to 45,860,527,48,19,40,3,0,0,0,0,0,0,0,0,0,0,0,0
+12,23,48,1016,723,10,8,0,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,24,mortality 0 to 14,558,694,75,30,0,3,0,0,-1,0,0,0,0,0,0,0,0,0
+12,25,48,1600,506,10,8,0,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,26,mortality 15 to 44,854,725,75,30,0,3,0,0,-1,0,0,0,0,0,0,0,0,0
+11,27,0,230,513,4,7,34,3,0,0,1,0,0,0,0,0,0,0,0,0
+10,28,births,230,551,75,30,32,3,0,0,-1,0,0,0,0,0,0,0,0,0
+11,29,0,533,507,4,7,34,3,0,0,1,0,0,0,0,0,0,0,0,0
+10,30,maturation 14 to 15,533,537,44,23,40,3,0,0,0,0,0,0,0,0,0,0,0,0
+11,31,0,375,617,7,4,33,3,0,0,4,0,0,0,0,0,0,0,0,0
+10,32,deaths 0 to 14,458,617,75,30,32,3,0,0,0,0,0,0,0,0,0,0,0,0
+11,33,0,1016,603,7,4,33,3,0,0,4,0,0,0,0,0,0,0,0,0
+10,34,deaths 45 to 64,1099,603,75,30,32,3,0,0,-1,0,0,0,0,0,0,0,0,0
+11,35,0,1484,506,4,7,34,3,0,0,1,0,0,0,0,0,0,0,0,0
+10,36,deaths 65 plus,1484,544,75,30,32,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,37,mortality 45 to 64,1192,700,75,30,0,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,38,mortality 65 plus,1537,688,75,30,0,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,39,mortality 45 to 64 table,1126,790,48,13,8,3,0,2,0,0,0,0,128-128-128,0-0-0,|||64-128-128,0,0,0,0,0,0
+10,40,mortality 15 to 44 table,814,879,48,15,8,3,0,2,0,0,0,0,128-128-128,0-0-0,|||64-128-128,0,0,0,0,0,0
+10,41,mortality 0 to 14 table,541,787,48,15,8,3,0,2,0,0,0,0,128-128-128,0-0-0,|||64-128-128,0,0,0,0,0,0
+10,42,mortality 65 plus table,1426,781,47,13,8,3,0,2,0,0,0,0,128-128-128,0-0-0,|||64-128-128,0,0,0,0,0,0
+10,43,labor force,856,399,75,30,0,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,44,labor force participation fraction,853,276,63,31,8,3,0,2,0,0,0,0,128-128-128,0-0-0,|||64-128-128,0,0,0,0,0,0
+10,45,population,861,175,75,30,0,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,46,5,1,0,0,0,0,0,0,1,-1--1--1,,1|(0,0)|
+1,47,10,6,0,0,0,0,0,0,1,-1--1--1,,1|(0,0)|
+1,48,15,11,0,0,0,0,0,0,1,-1--1--1,,1|(0,0)|
+1,49,19,16,0,0,0,0,0,0,1,-1--1--1,,1|(0,0)|
+1,50,27,1,4,0,0,22,0,0,0,-1--1--1,,1|(284,513)|
+1,51,27,20,100,0,0,22,0,0,0,-1--1--1,,1|(181,513)|
+1,52,29,6,4,0,0,22,0,0,0,-1--1--1,,1|(589,507)|
+1,53,29,1,100,0,0,22,0,0,0,-1--1--1,,1|(478,507)|
+1,54,21,11,4,0,0,22,0,0,0,-1--1--1,,1|(917,501)|
+1,55,21,6,100,0,0,22,0,0,0,-1--1--1,,1|(795,501)|
+1,56,8,16,4,0,0,22,0,0,0,-1--1--1,,1|(1242,502)|
+1,57,8,11,100,0,0,22,0,0,0,-1--1--1,,1|(1123,502)|
+1,58,35,25,4,0,0,22,0,0,0,-1--1--1,,1|(1539,506)|
+1,59,35,16,100,0,0,22,0,0,0,-1--1--1,,1|(1434,506)|
+1,60,31,2,4,0,0,22,0,0,0,-1--1--1,,1|(375,664)|
+1,61,31,1,100,0,0,22,0,0,0,-1--1--1,,1|(375,569)|
+1,62,3,13,4,0,0,22,0,0,0,-1--1--1,,1|(694,668)|
+1,63,3,6,100,0,0,22,0,0,0,-1--1--1,,1|(694,568)|
+1,64,33,23,4,0,0,22,0,0,0,-1--1--1,,1|(1016,661)|
+1,65,33,11,100,0,0,22,0,0,0,-1--1--1,,1|(1016,562)|
+1,66,7,28,1,0,0,0,0,0,0,-1--1--1,,1|(281,762)|
+1,67,6,27,1,0,0,0,0,0,0,-1--1--1,,1|(415,417)|
+1,68,12,27,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,69,14,28,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,70,17,28,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,71,18,28,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,72,24,32,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,73,1,32,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,74,26,4,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,75,6,4,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,76,37,34,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,77,11,34,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,78,39,37,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,79,40,26,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,80,41,24,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,81,26,22,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,82,6,22,1,0,0,0,0,0,0,-1--1--1,,1|(783,546)|
+1,83,37,9,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,84,11,9,1,0,0,0,0,0,0,-1--1--1,,1|(1116,555)|
+1,85,24,30,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,86,1,30,1,0,0,0,0,0,0,-1--1--1,,1|(463,548)|
+1,87,38,36,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,88,16,36,1,0,0,0,0,0,0,-1--1--1,,1|(1411,558)|
+1,89,42,38,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,90,32,7,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,91,4,7,1,0,0,0,0,0,0,-1--1--1,,1|(641,827)|
+1,92,34,7,1,0,0,0,0,0,0,-1--1--1,,1|(892,866)|
+1,93,36,7,1,0,0,0,0,0,0,-1--1--1,,1|(1163,888)|
+1,94,44,43,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,95,6,43,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,96,11,43,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,97,1,45,1,0,0,0,0,0,0,-1--1--1,,1|(535,280)|
+1,98,6,45,1,0,0,0,0,0,0,-1--1--1,,1|(721,313)|
+1,99,11,45,1,0,0,0,0,0,0,-1--1--1,,1|(988,306)|
+1,100,16,45,1,0,0,0,0,0,0,-1--1--1,,1|(1192,295)|
+1,101,102,24,1,0,0,0,1,0,0,160-160-160,|||0-0-0,1|(640,772)|
+10,102,one year,586,849,32,9,8,2,0,2,-1,0,0,0,128-128-128,0-0-0,|||160-160-160,0,0,0,0,0,0
+10,103,one year,1600,753,32,9,8,2,0,2,-1,0,0,0,128-128-128,0-0-0,|||160-160-160,0,0,0,0,0,0
+1,104,103,38,0,0,0,0,1,0,0,160-160-160,|||0-0-0,1|(0,0)|
+10,105,life expectancy,583,556,49,9,8,2,1,0,-1,0,0,0,0,0,0,0,0,0
+1,106,105,24,0,1,0,0,0,0,0,-1--1--1,,1|(0,0)|
+10,107,life expectancy,871,501,49,9,8,2,1,0,-1,0,0,0,0,0,0,0,0,0
+1,108,107,26,0,1,0,0,0,0,0,-1--1--1,,1|(0,0)|
+10,109,life expectancy,1212,517,49,9,8,2,1,0,-1,0,0,0,0,0,0,0,0,0
+1,110,109,37,0,1,0,0,0,0,0,-1--1--1,,1|(0,0)|
+10,111,life expectancy,1521,420,49,9,8,2,1,0,-1,0,0,0,0,0,0,0,0,0
+1,112,111,38,0,1,0,0,0,0,0,-1--1--1,,1|(0,0)|
+10,113,one year,1260,751,32,9,8,2,0,2,-1,0,0,0,128-128-128,0-0-0,|||160-160-160,0,0,0,0,0,0
+10,114,one year,951,772,32,9,8,2,0,2,-1,0,0,0,128-128-128,0-0-0,|||160-160-160,0,0,0,0,0,0
+1,115,113,37,0,0,0,0,1,64,0,160-160-160,|||0-0-0,1|(0,0)|
+1,116,114,26,0,0,0,0,1,64,0,160-160-160,|||0-0-0,1|(0,0)|
+12,117,0,838,42,80,40,8,7,0,0,-1,1,0,0,0,0,0,0,0,0
+Demographics
+\\\---/// Sketch information - do not modify anything except names
+V300  Do not put anything below this section - it will be ignored
+*Fertility
+$192-192-192,0,|12||-1--1--1|64-64-64|128-128-128|-1--1--1|-1--1--1|96,96,100,0
+10,1,total fertility,653,205,75,30,0,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,2,desired total fertility,1103,167,75,30,0,2,0,0,-1,0,0,0,0,0,0,0,0,0
+10,3,fertility control effectiveness,465,269,68,29,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,4,maximum total fertility,891,271,75,30,0,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,5,fertility control effectiveness table,198,323,75,30,0,3,0,2,-1,0,0,0,128-128-128,0-0-0,|||64-128-128,0,0,0,0,0,0
+10,6,fertility control facilities per capita,503,395,86,29,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,7,Time,194,257,75,30,0,2,0,0,-1,0,0,0,0,0,0,0,0,0
+10,8,fertility control allocation per capita,567,508,68,42,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,9,health services impact delay,180,394,75,30,0,2,0,0,-1,0,0,0,0,0,0,0,0,0
+10,10,fraction services allocated to fertility control,695,622,74,42,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,11,service output per capita,249,508,75,30,0,2,0,0,-1,0,0,0,0,0,0,0,0,0
+10,12,fecundity multiplier,1031,358,75,30,0,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,13,maximum total fertility normal,1257,269,75,30,0,3,0,2,-1,0,0,0,128-128-128,0-0-0,|||64-128-128,0,0,0,0,0,0
+10,14,fecundity multiplier table,1307,406,75,30,0,3,0,2,-1,0,0,0,128-128-128,0-0-0,|||64-128-128,0,0,0,0,0,0
+10,15,life expectancy,1070,449,75,30,0,2,0,0,-1,0,0,0,0,0,0,0,0,0
+10,16,fraction services allocated to fertility control table,299,616,89,42,8,3,0,2,0,0,0,0,128-128-128,0-0-0,|||64-128-128,0,0,0,0,0,0
+10,17,need for fertility control,815,400,68,29,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,18,desired total fertility,962,574,59,29,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,19,completed multiplier from perceived lifetime,1071,754,82,42,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,20,desired completed family size,704,730,86,29,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,21,desired completed family size normal,257,730,75,30,0,3,0,2,-1,0,0,0,128-128-128,0-0-0,|||64-128-128,0,0,0,0,0,0
+10,22,family response to social norm,594,853,73,29,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,23,social family size normal,863,817,75,30,0,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,24,Time,461,694,75,30,0,2,0,0,-1,0,0,0,0,0,0,0,0,0
+10,25,completed multiplier from perceived lifetime table,1350,826,96,42,8,3,0,2,0,0,0,0,128-128-128,0-0-0,|||64-128-128,0,0,0,0,0,0
+10,26,perceived life expectancy,1185,565,62,29,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,27,delayed industrial output per capita,872,925,83,29,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,28,lifetime perception delay,1331,485,75,30,0,3,0,2,-1,0,0,0,128-128-128,0-0-0,|||64-128-128,0,0,0,0,0,0
+10,29,social family size normal table,1107,878,76,29,8,3,0,2,0,0,0,0,128-128-128,0-0-0,|||64-128-128,0,0,0,0,0,0
+10,30,industrial output per capita,1043,1048,75,30,0,2,0,0,-1,0,0,0,0,0,0,0,0,0
+10,31,social adjustment delay,1167,971,75,30,0,3,0,2,-1,0,0,0,128-128-128,0-0-0,|||64-128-128,0,0,0,0,0,0
+10,32,family income expectation,675,976,65,29,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,33,family response to social norm table,380,949,75,30,0,3,0,2,-1,0,0,0,128-128-128,0-0-0,|||64-128-128,0,0,0,0,0,0
+10,34,average industrial output per capita,728,1097,87,29,3,3,0,16,0,0,0,0,-1--1--1,0-0-0,||B|0-255-128,0,0,0,0,0,0
+10,35,income expectation averaging time,375,1099,75,30,0,3,0,2,-1,0,0,0,128-128-128,0-0-0,|||64-128-128,0,0,0,0,0,0
+1,36,2,1,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,37,3,1,1,0,0,0,0,0,0,-1--1--1,,1|(587,259)|
+1,38,4,1,1,0,0,0,0,0,0,-1--1--1,,1|(731,256)|
+1,39,5,3,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,40,6,3,1,0,0,0,0,0,0,-1--1--1,,1|(438,334)|
+1,41,7,3,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,42,8,6,1,0,0,0,0,0,0,-1--1--1,,1|(524,466)|
+1,43,9,6,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,44,10,8,1,0,0,0,0,0,0,-1--1--1,,1|(609,565)|
+1,45,11,8,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,46,12,4,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,47,13,4,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,48,14,12,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,49,15,12,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,50,16,10,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,51,17,10,1,0,0,0,0,0,0,-1--1--1,,1|(803,511)|
+1,52,18,17,1,0,0,0,0,0,0,-1--1--1,,1|(897,481)|
+1,53,4,17,1,0,0,0,0,0,0,-1--1--1,,1|(870,323)|
+1,54,19,18,1,0,0,0,0,0,0,-1--1--1,,1|(992,691)|
+1,55,20,18,1,0,0,0,0,0,0,-1--1--1,,1|(846,709)|
+1,56,21,20,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,57,22,20,1,0,0,0,0,0,0,-1--1--1,,1|(671,802)|
+1,58,23,20,1,0,0,0,0,0,0,-1--1--1,,1|(779,790)|
+1,59,24,20,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,60,25,19,1,0,0,0,0,0,0,-1--1--1,,1|(1160,814)|
+1,61,26,19,1,0,0,0,0,0,0,-1--1--1,,1|(1149,688)|
+1,62,15,26,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,63,28,26,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,64,27,23,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,65,29,23,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,66,30,27,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,67,31,27,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,68,32,22,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,69,33,22,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,70,34,32,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,71,30,32,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,72,35,34,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,73,30,34,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+10,74,one year,1316,748,52,15,8,2,0,2,-1,0,0,0,128-128-128,0-0-0,|||160-160-160,0,0,0,0,0,0
+1,75,74,19,0,0,0,0,1,0,0,160-160-160,|||0-0-0,1|(0,0)|
+10,76,one year,1278,341,52,15,8,2,0,2,-1,0,0,0,128-128-128,0-0-0,|||160-160-160,0,0,0,0,0,0
+1,77,76,12,0,0,0,0,1,0,0,160-160-160,|||0-0-0,1|(0,0)|
+10,78,GDP pc unit,609,328,40,29,8,2,0,2,-1,0,0,0,0-0-0,0-0-0,|||160-160-160,0,0,0,0,0,0
+1,79,78,3,0,0,0,0,1,0,0,160-160-160,|||0-0-0,1|(0,0)|
+10,80,GDP pc unit,882,755,40,29,8,2,0,2,-1,0,0,0,0-0-0,0-0-0,|||160-160-160,0,0,0,0,0,0
+1,81,80,23,0,0,0,0,1,0,0,160-160-160,|||0-0-0,1|(0,0)|
+10,82,fertility control effectiveness time s,411,197,83,42,8,2,0,3,-1,0,0,0,0-0-0,0-0-0,|||0-0-0,0,0,0,0,0,0
+1,83,82,3,0,0,0,0,0,64,0,-1--1--1,,1|(0,0)|
+10,84,zero population growth time s,330,817,78,29,8,2,0,3,-1,0,0,0,0-0-0,0-0-0,|||0-0-0,0,0,0,0,0,0
+1,85,84,20,0,0,0,0,0,64,0,-1--1--1,,1|(0,0)|
+12,86,0,728,34,36,15,8,7,0,0,-1,1,0,0,0,0,0,0,0,0
+Fertility
+\\\---/// Sketch information - do not modify anything except names
+V300  Do not put anything below this section - it will be ignored
+*Life Expectancy
+$192-192-192,0,|12||-1--1--1|64-64-64|128-128-128|-1--1--1|-1--1--1|96,96,100,0
+10,1,life expectancy,844,225,75,30,0,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,2,life expectancy normal,1102,242,75,30,0,3,0,2,-1,0,0,0,128-128-128,0-0-0,|||64-128-128,0,0,0,0,0,0
+10,3,lifetime multiplier from crowding,768,465,82,29,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,4,lifetime multiplier from food,940,482,82,29,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,5,lifetime multiplier from health services,648,338,82,42,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,6,lifetime multiplier from persistent pollution,1023,351,82,42,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,7,lifetime multiplier from persistent pollution table,1293,422,82,42,8,3,0,2,0,0,0,0,128-128-128,0-0-0,|||64-128-128,0,0,0,0,0,0
+10,8,persistent pollution index,1288,339,75,30,0,2,0,0,-1,0,0,0,0,0,0,0,0,0
+10,9,crowding multiplier from industry,684,609,70,42,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,10,fraction of population urban,894,680,81,29,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,11,fraction of population urban table,1107,866,75,30,0,3,0,2,-1,0,0,0,128-128-128,0-0-0,|||64-128-128,0,0,0,0,0,0
+10,12,population,1110,777,75,30,0,2,0,0,-1,0,0,0,0,0,0,0,0,0
+10,13,crowding multiplier from industry table,822,890,70,42,8,3,0,2,0,0,0,0,128-128-128,0-0-0,|||64-128-128,0,0,0,0,0,0
+10,14,industrial output per capita,627,813,75,30,0,2,0,0,-1,0,0,0,0,0,0,0,0,0
+10,15,lifetime multiplier from health services 1,369,345,82,42,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,16,lifetime multiplier from health services 2,549,500,82,42,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,17,Time,426,284,75,30,0,2,0,2,-1,0,0,0,128-128-128,0-0-0,|||160-160-160,0,0,0,0,0,0
+10,18,food per capita,1221,525,75,30,0,2,0,0,-1,0,0,0,0,0,0,0,0,0
+10,19,lifetime multiplier from food table,1254,603,75,30,0,3,0,2,-1,0,0,0,128-128-128,0-0-0,|||64-128-128,0,0,0,0,0,0
+10,20,subsistence food per capita,1140,669,75,30,0,2,0,0,-1,0,0,0,0,0,0,0,0,0
+10,21,effective health services per capita,270,579,75,42,3,131,0,16,0,0,0,0,130-130-130,0-0-0,||B|130-130-130,0,0,0,0,0,0
+10,22,lifetime multiplier from health services 1 table,117,399,82,42,8,3,0,2,0,0,0,0,128-128-128,0-0-0,|||64-128-128,0,0,0,0,0,0
+10,23,health services per capita,285,777,69,29,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,24,health services impact delay,105,710,69,29,8,3,0,2,0,0,0,0,128-128-128,0-0-0,|||64-128-128,0,0,0,0,0,0
+10,25,health services per capita table,186,926,75,30,0,3,0,2,-1,0,0,0,128-128-128,0-0-0,|||64-128-128,0,0,0,0,0,0
+10,26,service output per capita,507,914,75,30,0,2,0,0,-1,0,0,0,0,0,0,0,0,0
+10,27,lifetime multiplier from health services 2 table,468,669,82,42,8,3,0,2,0,0,0,0,128-128-128,0-0-0,|||64-128-128,0,0,0,0,0,0
+1,28,2,1,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,29,3,1,1,0,0,0,0,0,0,-1--1--1,,1|(808,321)|
+1,30,4,1,1,0,0,0,0,0,0,-1--1--1,,1|(864,309)|
+1,31,5,1,1,0,0,0,0,0,0,-1--1--1,,1|(744,272)|
+1,32,6,1,1,0,0,0,0,0,0,-1--1--1,,1|(928,278)|
+1,33,7,6,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,34,8,6,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,35,9,3,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,36,10,3,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,37,11,10,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,38,12,10,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,39,13,9,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,40,14,9,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,41,15,5,1,0,0,0,0,0,0,-1--1--1,,1|(498,326)|
+1,42,16,5,1,0,0,0,0,0,0,-1--1--1,,1|(568,422)|
+1,43,17,5,0,0,0,0,1,0,0,160-160-160,|||128-128-128,1|(0,0)|
+1,44,18,4,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,45,19,4,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,46,20,4,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,47,21,15,1,0,0,0,0,0,0,-1--1--1,,1|(280,429)|
+1,48,22,15,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,49,23,21,1,0,0,0,0,0,0,-1--1--1,,1|(246,704)|
+1,50,24,21,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,51,25,23,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,52,26,23,1,0,0,0,0,0,0,-1--1--1,,1|(363,890)|
+1,53,21,16,1,0,0,0,0,0,0,-1--1--1,,1|(348,495)|
+1,54,27,16,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+10,55,GDP pc unit,538,743,40,29,8,2,0,2,0,0,0,0,0-0-0,0-0-0,|||160-160-160,0,0,0,0,0,0
+1,56,55,9,0,0,0,0,1,64,0,160-160-160,|||0-0-0,1|(0,0)|
+10,57,unit population,892,789,56,29,8,130,0,2,-1,0,0,0,128-128-128,0-0-0,|||160-160-160,0,0,0,0,0,0
+1,58,57,10,0,0,0,0,1,0,0,160-160-160,|||0-0-0,1|(0,0)|
+10,59,GDP pc unit,93,848,40,29,8,2,0,2,-1,0,0,0,128-128-128,0-0-0,|||160-160-160,0,0,0,0,0,0
+10,60,GDP pc unit,184,485,40,29,8,2,0,2,-1,0,0,0,128-128-128,0-0-0,|||160-160-160,0,0,0,0,0,0
+10,61,GDP pc unit,435,581,40,29,8,2,0,2,-1,0,0,0,128-128-128,0-0-0,|||160-160-160,0,0,0,0,0,0
+1,62,59,23,0,0,0,0,1,64,0,160-160-160,|||0-0-0,1|(0,0)|
+1,63,60,15,0,0,0,0,1,64,0,160-160-160,|||0-0-0,1|(0,0)|
+1,64,61,16,0,0,0,0,1,64,0,160-160-160,|||0-0-0,1|(0,0)|
+12,65,0,636,63,53,29,8,7,0,0,-1,1,0,0,0,0,0,0,0,0
+Life Expectancy
+\\\---/// Sketch information - do not modify anything except names
+V300  Do not put anything below this section - it will be ignored
+*Persistant Pollution
+$192-192-192,0,|12||-1--1--1|64-64-64|128-128-128|-1--1--1|-1--1--1|96,96,100,0
+10,1,Persistent Pollution Technology,1012,368,66,34,3,3,0,17,0,0,0,0,64-64-64,0-0-0,||B|0-0-0,0,0,0,0,0,0
+10,2,persistent pollution technology change multiplier,1154,513,97,24,8,3,0,1,0,0,0,0,64-64-64,0-0-0,|||0-0-0,0,0,0,0,0,0
+12,3,48,1352,369,10,8,0,3,0,1,-1,0,0,0,64-64-64,0-0-0,|||0-0-0,0,0,0,0,0,0
+11,4,0,1202,369,7,8,34,3,0,1,1,0,0,0,64-64-64,0-0-0,|||0-0-0,0,0,0,0,0,0
+10,5,persistent pollution technology change rate,1202,402,84,25,40,3,0,1,0,0,0,0,64-64-64,0-0-0,|||0-0-0,0,0,0,0,0,0
+10,6,Time,1369,431,75,30,0,2,0,3,-1,0,0,0,64-64-64,0-0-0,|||160-160-160,0,0,0,0,0,0
+10,7,persistent pollution index,984,682,75,30,0,3,0,1,-1,0,0,0,64-64-64,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,8,Persistent Pollution,823,798,40,20,3,3,0,17,0,0,0,0,64-64-64,0-0-0,||B|128-128-128,0,0,0,0,0,0
+10,9,persistent pollution in 1970,713,638,75,30,0,3,0,3,-1,0,0,0,64-64-64,0-0-0,|||64-128-128,0,0,0,0,0,0
+10,10,initial persistent pollution,736,725,75,30,0,3,0,3,-1,0,0,0,64-64-64,0-0-0,|||64-128-128,0,0,0,0,0,0
+10,11,persistent pollution generation rate,448,617,57,15,8,3,0,1,0,0,0,0,64-64-64,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,12,persistent pollution transmission delay,796,923,59,15,8,3,0,3,0,0,0,0,64-64-64,0-0-0,|||64-128-128,0,0,0,0,0,0
+12,13,48,555,804,10,8,0,3,0,1,-1,0,0,0,64-64-64,0-0-0,|||0-0-0,0,0,0,0,0,0
+10,14,assimilation half life,1231,833,75,30,0,3,0,1,-1,0,0,0,64-64-64,0-0-0,|||128-128-128,0,0,0,0,0,0
+12,15,48,1100,805,10,8,0,3,0,1,-1,0,0,0,64-64-64,0-0-0,|||0-0-0,0,0,0,0,0,0
+10,16,assimilation half life in 1970,1372,785,75,30,0,3,0,3,0,0,0,0,64-64-64,0-0-0,|||64-128-128,0,0,0,0,0,0
+11,17,0,667,804,7,8,34,3,0,1,1,0,0,0,64-64-64,0-0-0,|||0-0-0,0,0,0,0,0,0
+10,18,persistent pollution appearance rate,667,829,66,17,40,3,0,1,0,0,0,0,64-64-64,0-0-0,|||128-128-128,0,0,0,0,0,0
+11,19,0,966,805,7,8,34,3,0,1,1,0,0,0,64-64-64,0-0-0,|||0-0-0,0,0,0,0,0,0
+10,20,persistent pollution assimilation rate,966,842,64,29,40,3,0,1,0,0,0,0,64-64-64,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,21,assimilation half life multiplier,1185,744,75,30,0,3,0,1,-1,0,0,0,64-64-64,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,22,assimilation half life mult table,1342,666,75,30,0,3,0,3,0,0,0,0,64-64-64,0-0-0,|||64-128-128,0,0,0,0,0,0
+10,23,persistent pollution generation industry,328,498,60,19,8,3,0,1,0,0,0,0,64-64-64,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,24,persistent pollution generation agriculture,257,691,89,30,8,3,0,1,0,0,0,0,64-64-64,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,25,persistent pollution generation factor,609,512,72,30,8,3,0,1,0,0,0,0,64-64-64,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,26,fraction of resources from persistent materials,340,340,92,29,8,3,0,3,0,0,0,0,64-64-64,0-0-0,|||64-128-128,0,0,0,0,0,0
+10,27,industrial material toxicity index,146,298,68,27,8,3,0,3,0,0,0,0,64-64-64,0-0-0,|||64-128-128,0,0,0,0,0,0
+10,28,industrial material emissions factor,109,419,71,32,8,3,0,3,0,0,0,0,64-64-64,0-0-0,|||64-128-128,0,0,0,0,0,0
+10,29,per capita resource use multiplier,166,572,57,13,8,2,0,1,0,0,0,0,64-64-64,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,30,population,80,529,75,30,0,2,0,1,-1,0,0,0,64-64-64,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,31,persistent pollution generation factor 1,594,367,72,23,8,3,0,3,0,0,0,0,64-64-64,0-0-0,|||64-128-128,0,0,0,0,0,0
+10,32,persistent pollution generation factor 2,810,397,81,27,8,3,0,1,0,0,0,0,64-64-64,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,33,Time,779,474,75,30,0,2,0,3,-1,0,0,0,64-64-64,0-0-0,|||160-160-160,0,0,0,0,0,0
+10,34,technology development delay,1012,449,85,9,8,3,0,3,0,0,0,0,64-64-64,0-0-0,|||64-128-128,0,0,0,0,0,0
+10,35,agricultural input per hectare,454,857,75,30,0,2,0,1,-1,0,0,0,64-64-64,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,36,agricultural material toxicity index,167,818,56,35,8,3,0,3,0,0,0,0,64-64-64,0-0-0,|||64-128-128,0,0,0,0,0,0
+10,37,Arable Land,451,761,75,30,0,2,0,1,0,0,0,0,64-64-64,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,38,fraction of agricultural inputs from persistent materials,308,927,110,41,8,3,0,3,0,0,0,0,64-64-64,0-0-0,|||64-128-128,0,0,0,0,0,0
+10,39,industrial capital output ratio multiplier from pollution technology,771,259,91,45,8,3,0,1,0,0,0,0,64-64-64,0-0-0,|||0-0-0,0,0,0,0,0,0
+10,40,industrial capital output ratio multiplier from pollution table,419,233,83,19,8,131,0,3,0,0,0,0,64-64-64,0-0-0,|||64-128-128,0,0,0,0,0,0
+1,41,4,1,4,0,0,22,1,0,0,128-128-128,|||128-128-128,1|(1136,369)|
+1,42,4,3,68,0,0,22,1,0,0,128-128-128,|||128-128-128,1|(1275,369)|
+1,43,2,5,1,0,0,0,1,0,0,128-128-128,|||128-128-128,1|(1188,453)|
+1,44,1,4,1,0,0,0,1,0,0,128-128-128,|||128-128-128,1|(1111,321)|
+1,45,6,5,0,0,0,0,1,0,0,160-160-160,|||128-128-128,1|(0,0)|
+1,46,8,7,1,0,0,0,1,0,0,128-128-128,|||128-128-128,1|(912,745)|
+1,47,9,7,0,0,0,0,1,0,0,128-128-128,|||128-128-128,1|(0,0)|
+1,48,10,8,0,0,0,0,1,0,1,128-128-128,|||128-128-128,1|(0,0)|
+1,49,17,8,4,0,0,22,1,0,0,128-128-128,|||128-128-128,1|(728,804)|
+1,50,17,13,100,0,0,22,1,0,0,128-128-128,|||128-128-128,1|(612,804)|
+1,51,19,15,4,0,0,22,1,0,0,128-128-128,|||128-128-128,1|(1031,805)|
+1,52,19,8,100,0,0,22,1,0,0,128-128-128,|||128-128-128,1|(911,805)|
+1,53,11,17,1,0,0,0,1,0,0,128-128-128,|||128-128-128,1|(508,700)|
+1,54,12,18,0,0,0,0,1,0,0,128-128-128,|||128-128-128,1|(0,0)|
+1,55,14,20,1,0,0,0,1,0,0,128-128-128,|||128-128-128,1|(1106,860)|
+1,56,8,19,1,0,0,0,1,0,0,128-128-128,|||128-128-128,1|(907,766)|
+1,57,16,14,0,0,0,0,1,0,0,128-128-128,|||128-128-128,1|(0,0)|
+1,58,21,14,1,0,0,0,1,0,0,128-128-128,|||128-128-128,1|(1212,771)|
+1,59,22,21,0,0,0,0,1,0,0,128-128-128,|||128-128-128,1|(0,0)|
+1,60,7,21,1,0,0,0,1,0,0,128-128-128,|||128-128-128,1|(1085,700)|
+1,61,23,11,1,0,0,0,1,0,0,128-128-128,|||128-128-128,1|(395,545)|
+1,62,24,11,1,0,0,0,1,0,0,128-128-128,|||128-128-128,1|(316,637)|
+1,63,25,11,1,0,0,0,1,0,0,128-128-128,|||128-128-128,1|(527,534)|
+1,64,26,23,0,0,0,0,1,0,0,128-128-128,|||128-128-128,1|(0,0)|
+1,65,27,23,0,0,0,0,1,0,0,128-128-128,|||128-128-128,1|(0,0)|
+1,66,28,23,0,0,0,0,1,0,0,128-128-128,|||128-128-128,1|(0,0)|
+1,67,29,23,0,0,0,0,1,0,0,128-128-128,|||128-128-128,1|(0,0)|
+1,68,30,23,0,0,0,0,1,0,0,128-128-128,|||128-128-128,1|(0,0)|
+1,69,31,25,0,0,0,0,1,0,0,128-128-128,|||128-128-128,1|(0,0)|
+1,70,32,25,1,0,0,0,1,0,0,128-128-128,|||128-128-128,1|(695,447)|
+1,71,33,25,0,0,0,0,1,0,0,160-160-160,|||128-128-128,1|(0,0)|
+1,72,1,32,1,0,0,0,1,0,0,128-128-128,|||128-128-128,1|(913,362)|
+1,73,34,32,0,0,0,0,1,0,0,128-128-128,|||128-128-128,1|(0,0)|
+1,74,35,24,0,0,0,0,1,0,0,128-128-128,|||128-128-128,1|(0,0)|
+1,75,36,24,0,0,0,0,1,0,0,128-128-128,|||128-128-128,1|(0,0)|
+1,76,37,24,0,0,0,0,1,0,0,128-128-128,|||128-128-128,1|(0,0)|
+1,77,38,24,0,0,0,0,1,0,0,128-128-128,|||128-128-128,1|(0,0)|
+1,78,40,39,0,0,0,0,1,0,0,128-128-128,|||128-128-128,1|(0,0)|
+10,79,persistent pollution intensity industry,476,437,77,27,8,3,0,1,-1,0,0,0,64-64-64,0-0-0,|||0-0-0,0,0,0,0,0,0
+10,80,industrial output,475,311,55,9,8,2,0,1,-1,0,0,0,64-64-64,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,81,80,79,0,0,0,0,1,0,0,128-128-128,|||0-0-0,1|(0,0)|
+1,82,25,79,0,0,0,0,1,0,0,128-128-128,|||0-0-0,1|(0,0)|
+1,83,23,79,0,0,0,0,1,0,0,128-128-128,|||0-0-0,1|(0,0)|
+1,84,25,39,1,0,0,0,1,64,0,128-128-128,|||0-0-0,1|(692,402)|
+10,85,persistent pollution technology change multiplier 1,1412,602,116,26,8,2,0,3,-1,0,0,0,0-0-0,0-0-0,|||0-0-0,0,0,0,0,0,0
+1,86,85,2,0,0,0,0,0,64,0,-1--1--1,,1|(0,0)|
+10,87,persistent pollution technology change multiplier 2,1139,595,95,37,8,2,0,3,-1,0,0,0,0-0-0,0-0-0,|||0-0-0,0,0,0,0,0,0
+1,88,87,2,0,0,0,0,0,64,0,-1--1--1,,1|(0,0)|
+10,89,persistent pollution technology change time s,878,567,102,28,8,2,0,3,-1,0,0,0,0-0-0,0-0-0,|||0-0-0,0,0,0,0,0,0
+1,90,89,2,0,0,0,0,0,64,0,-1--1--1,,1|(0,0)|
+10,91,Time,1390,506,24,9,8,2,0,3,-1,0,0,0,0-0-0,0-0-0,|||0-0-0,0,0,0,0,0,0
+1,92,91,2,0,0,0,0,0,64,0,-1--1--1,,1|(0,0)|
+10,93,POLICY YEAR s,1411,392,59,9,8,2,0,3,-1,0,0,0,0-0-0,0-0-0,|||0-0-0,0,0,0,0,0,0
+1,94,93,5,0,0,0,0,0,64,0,-1--1--1,,1|(0,0)|
+10,95,POLICY YEAR s,619,588,59,9,8,2,0,3,-1,0,0,0,0-0-0,0-0-0,|||0-0-0,0,0,0,0,0,0
+1,96,95,25,0,0,0,0,0,64,0,-1--1--1,,1|(0,0)|
+12,97,0,697,89,80,40,8,7,0,0,-1,1,0,0,0,0,0,0,0,0
+Persistant Pollution
+\\\---/// Sketch information - do not modify anything except names
+V300  Do not put anything below this section - it will be ignored
+*Nonrenewable Resources
+$192-192-192,0,|12||-1--1--1|64-64-64|128-128-128|-1--1--1|-1--1--1|96,96,100,0
+10,1,Resource Conservation Technology,744,386,64,42,3,3,0,17,0,0,0,0,64-64-64,0-0-0,||B|0-0-0,0,0,0,0,0,0
+10,2,per capita resource use multiplier,432,735,75,30,0,3,0,1,-1,0,0,0,64-64-64,0-0-0,|||0-0-0,0,0,0,0,0,0
+10,3,Nonrenewable Resources,331,609,71,29,3,131,0,17,0,0,0,0,64-64-64,0-0-0,||B|0-0-0,0,0,0,0,0,0
+10,4,population,696,725,75,30,0,2,0,1,-1,0,0,0,64-64-64,0-0-0,|||128-128-128,0,0,0,0,0,0
+12,5,48,595,608,10,8,0,3,0,1,-1,0,0,0,64-64-64,0-0-0,|||0-0-0,0,0,0,0,0,0
+10,6,resource use factor,385,471,75,30,0,3,0,1,-1,0,0,0,64-64-64,0-0-0,|||128-128-128,0,0,0,0,0,0
+12,7,48,1062,387,10,8,0,3,0,1,-1,0,0,0,64-64-64,0-0-0,|||0-0-0,0,0,0,0,0,0
+10,8,resource technology change rate multiplier,885,585,86,42,8,3,0,1,0,0,0,0,64-64-64,0-0-0,|||128-128-128,0,0,0,0,0,0
+11,9,0,493,608,6,8,34,3,0,1,1,0,0,0,64-64-64,0-0-0,|||0-0-0,0,0,0,0,0,0
+10,10,resource usage rate,493,645,49,29,40,3,0,1,0,0,0,0,64-64-64,0-0-0,|||128-128-128,0,0,0,0,0,0
+11,11,0,925,387,6,8,34,3,0,1,1,0,0,0,64-64-64,0-0-0,|||0-0-0,0,0,0,0,0,0
+10,12,resource technology change rate,925,421,74,26,40,3,0,1,0,0,0,0,64-64-64,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,13,fraction of industrial capital allocated to obtaining resources,645,980,93,42,8,3,0,1,0,0,0,0,64-64-64,0-0-0,|||0-0-0,0,0,0,0,0,0
+10,14,desired resource use rate,918,728,75,30,0,3,0,3,-1,0,0,0,64-64-64,0-0-0,|||64-128-128,0,0,0,0,0,0
+10,15,industrial output per capita,739,782,75,30,0,2,0,1,-1,0,0,0,64-64-64,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,16,per capita resource use mult table,517,813,75,30,0,3,0,3,-1,0,0,0,64-64-64,0-0-0,|||64-128-128,0,0,0,0,0,0
+10,17,resource use factor 1,306,335,75,30,0,3,0,3,-1,0,0,0,64-64-64,0-0-0,|||64-128-128,0,0,0,0,0,0
+10,18,resource use fact 2,504,365,75,30,0,3,0,1,-1,0,0,0,64-64-64,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,19,Time,229,441,75,30,0,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,20,technology development delay,648,476,75,30,0,2,0,1,-1,0,0,0,64-64-64,0-0-0,|||130-130-130,0,0,0,0,0,0
+10,21,fraction of resources remaining,189,734,48,42,8,3,0,1,0,0,0,0,64-64-64,0-0-0,|||0-0-0,0,0,0,0,0,0
+10,22,fraction of capital allocated to obtaining resources 1,204,885,99,42,8,3,0,1,0,0,0,0,64-64-64,0-0-0,|||0-0-0,0,0,0,0,0,0
+10,23,fraction of capital allocated to obtaining resources 1 table,204,971,99,42,8,3,0,3,0,0,0,0,64-64-64,0-0-0,|||64-128-128,0,0,0,0,0,0
+10,24,fraction of capital allocated to obtaining resources 2,492,884,99,42,8,3,0,1,0,0,0,0,64-64-64,0-0-0,|||0-0-0,0,0,0,0,0,0
+10,25,fraction of capital allocated to obtaining resources 2 table,813,878,99,42,8,3,0,3,0,0,0,0,64-64-64,0-0-0,|||64-128-128,0,0,0,0,0,0
+10,26,fraction of industrial capital allocated to obtaining resources switch time,1027,971,146,42,8,3,0,3,0,0,0,0,64-64-64,0-0-0,|||64-128-128,0,0,0,0,0,0
+10,27,Time,402,977,75,30,0,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,28,industrial capital output ratio multiplier from resource conservation technology,606,212,110,56,8,3,0,1,0,0,0,0,64-64-64,0-0-0,|||0-0-0,0,0,0,0,0,0
+10,29,industrial capital output ratio multiplier from resource table,985,200,102,42,8,131,0,3,0,0,0,0,64-64-64,0-0-0,|||64-128-128,0,0,0,0,0,0
+10,30,Time,1029,512,75,30,0,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,31,9,3,4,0,0,22,1,0,0,128-128-128,|||0-0-0,1|(444,608)|
+1,32,9,5,68,0,0,22,1,0,0,128-128-128,|||0-0-0,1|(542,608)|
+1,33,11,1,4,0,0,22,1,0,0,128-128-128,|||0-0-0,1|(863,387)|
+1,34,11,7,68,0,0,22,1,0,0,128-128-128,|||0-0-0,1|(991,387)|
+1,35,2,10,1,0,0,0,1,0,0,128-128-128,|||128-128-128,1|(441,686)|
+1,36,4,10,1,0,0,0,1,0,0,128-128-128,|||128-128-128,1|(553,686)|
+1,37,6,9,1,0,0,0,1,0,0,128-128-128,|||128-128-128,1|(396,524)|
+1,38,8,12,1,0,0,0,1,0,0,128-128-128,|||128-128-128,1|(930,514)|
+1,39,1,11,1,0,0,0,1,0,0,128-128-128,|||128-128-128,1|(831,332)|
+1,40,15,2,1,0,0,0,1,0,0,128-128-128,|||128-128-128,1|(525,764)|
+1,41,16,2,0,0,0,0,1,0,0,128-128-128,|||128-128-128,1|(0,0)|
+1,42,17,6,0,0,0,0,1,0,0,128-128-128,|||128-128-128,1|(0,0)|
+1,43,18,6,1,0,0,0,1,0,0,128-128-128,|||128-128-128,1|(426,398)|
+1,44,19,6,0,0,0,0,1,0,0,128-128-128,|||128-128-128,1|(0,0)|
+1,45,1,18,1,0,0,0,1,0,0,128-128-128,|||128-128-128,1|(625,332)|
+1,46,20,18,0,0,0,0,1,0,0,128-128-128,|||128-128-128,1|(0,0)|
+1,47,3,21,1,0,0,0,1,0,0,128-128-128,|||128-128-128,1|(235,641)|
+1,48,21,22,1,0,0,0,1,0,0,128-128-128,|||128-128-128,1|(174,795)|
+1,49,23,22,0,0,0,0,1,0,0,128-128-128,|||128-128-128,1|(0,0)|
+1,50,21,24,1,0,0,0,1,0,0,128-128-128,|||128-128-128,1|(295,821)|
+1,51,25,24,0,0,0,0,1,0,0,128-128-128,|||128-128-128,1|(0,0)|
+1,52,22,13,1,0,0,0,1,0,0,128-128-128,|||128-128-128,1|(387,944)|
+1,53,24,13,1,0,0,0,1,0,0,128-128-128,|||128-128-128,1|(534,927)|
+1,54,27,13,0,0,0,0,1,0,0,128-128-128,|||128-128-128,1|(0,0)|
+1,55,29,28,1,0,0,0,1,0,0,128-128-128,|||128-128-128,1|(846,182)|
+1,56,30,12,0,0,0,0,1,0,0,128-128-128,|||128-128-128,1|(0,0)|
+1,57,6,28,1,0,0,0,1,64,0,128-128-128,|||0-0-0,1|(393,381)|
+10,58,GDP pc unit,363,783,40,29,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,59,58,2,0,0,0,0,1,0,0,128-128-128,|||0-0-0,1|(0,0)|
+1,60,75,3,0,0,0,0,0,64,1,-1--1--1,,1|(0,0)|
+10,61,POLICY YEAR s,255,371,39,29,8,2,0,3,-1,0,0,0,0-0-0,0-0-0,|||0-0-0,0,0,0,0,0,0
+1,62,61,6,0,0,0,0,0,64,0,-1--1--1,,1|(0,0)|
+10,63,resource technology change rate multiplier 1,1149,701,86,42,8,2,0,3,-1,0,0,0,0-0-0,0-0-0,|||0-0-0,0,0,0,0,0,0
+1,64,63,8,0,0,0,0,0,64,0,-1--1--1,,1|(0,0)|
+10,65,resource technology change rate multiplier 2,1165,650,86,42,8,2,0,3,-1,0,0,0,0-0-0,0-0-0,|||0-0-0,0,0,0,0,0,0
+1,66,65,8,0,0,0,0,0,64,0,-1--1--1,,1|(0,0)|
+10,67,resource technology change time s,1122,593,86,42,8,2,0,3,-1,0,0,0,0-0-0,0-0-0,|||0-0-0,0,0,0,0,0,0
+1,68,67,8,0,0,0,0,0,64,0,-1--1--1,,1|(0,0)|
+10,69,Time,888,677,35,15,8,2,0,3,-1,0,0,0,0-0-0,0-0-0,|||160-160-160,0,0,0,0,0,0
+1,70,69,8,0,0,0,0,0,64,0,-1--1--1,,1|(0,0)|
+10,71,POLICY YEAR s,1017,545,39,29,8,2,0,3,-1,0,0,0,0-0-0,0-0-0,|||0-0-0,0,0,0,0,0,0
+1,72,71,12,0,0,0,0,0,64,0,-1--1--1,,1|(0,0)|
+10,73,fraction of industrial capital allocated to obtaining resources switch time s,453,1052,122,56,8,2,0,3,-1,0,0,0,0-0-0,0-0-0,|||0-0-0,0,0,0,0,0,0
+1,74,73,13,0,0,0,0,0,64,0,-1--1--1,,1|(0,0)|
+10,75,initial nonrenewable resources s,168,596,67,42,8,2,0,3,-1,0,0,0,0-0-0,0-0-0,|||0-0-0,0,0,0,0,0,0
+1,76,75,21,0,0,0,0,0,64,0,-1--1--1,,1|(0,0)|
+12,77,0,690,48,68,29,8,7,0,0,-1,1,0,0,0,0,0,0,0,0
+Nonrenewable Resources
+\\\---/// Sketch information - do not modify anything except names
+V300  Do not put anything below this section - it will be ignored
+*Food Production
+$192-192-192,0,|12||-1--1--1|64-64-64|128-128-128|-1--1--1|-1--1--1|96,96,100,0
+10,1,Perceived Food Ratio,141,609,52,29,3,3,0,16,0,0,0,0,128-128-128,0-0-0,||B|0-0-0,0,0,0,0,0,0
+10,2,Time,1231,362,75,30,0,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,3,food shortage perception delay,162,716,78,29,8,3,0,2,0,0,0,0,128-128-128,0-0-0,|||64-128-128,0,0,0,0,0,0
+12,4,48,339,614,10,8,0,3,0,0,-1,0,0,0,0,0,0,0,0,0
+11,5,0,270,614,6,8,2,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,6,food per capita,457,764,75,30,0,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,7,subsistence food per capita,324,867,75,30,0,3,0,2,-1,0,0,0,128-128-128,0-0-0,|||64-128-128,0,0,0,0,0,0
+10,8,food,385,561,75,30,0,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,9,population,492,638,75,30,0,2,0,0,-1,0,0,0,0,0,0,0,0,0
+10,10,Arable Land,330,380,75,30,0,2,0,0,0,0,0,0,0,0,0,0,0,0
+10,11,land fraction harvested,463,434,75,30,0,3,0,2,-1,0,0,0,128-128-128,0-0-0,|||64-128-128,0,0,0,0,0,0
+10,12,land yield,276,464,75,30,0,2,0,0,-1,0,0,0,0,0,0,0,0,0
+10,13,processing loss,523,497,75,30,0,3,0,2,-1,0,0,0,128-128-128,0-0-0,|||64-128-128,0,0,0,0,0,0
+10,14,Agricultural Inputs,744,260,58,29,3,3,0,16,0,0,0,0,128-128-128,0-0-0,||B|128-128-128,0,0,0,0,0,0
+10,15,current agricultural inputs,996,375,75,30,0,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,16,indicated food per capita 1,432,917,66,29,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+12,17,48,1014,260,10,8,0,3,0,0,-1,0,0,0,0,0,0,0,0,0
+11,18,0,903,260,6,8,2,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,19,average life of agricultural inputs 1,1107,201,75,30,0,3,0,2,-1,0,0,0,128-128-128,0-0-0,|||64-128-128,0,0,0,0,0,0
+10,20,fraction of agricultural inputs allocated to land development,679,368,108,42,8,2,0,0,0,0,0,0,0,0,0,0,0,0
+10,21,total agricultural investment,1014,489,75,30,0,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,22,industrial output,739,491,75,30,0,2,0,0,-1,0,0,0,0,0,0,0,0,0
+10,23,fraction of industrial output allocated to agriculture,993,611,93,42,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,24,fraction of industrial output allocated to agriculture 1,738,701,93,42,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,25,fraction of industrial output allocated to agriculture 2,925,800,93,42,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,26,Time,777,1010,75,30,0,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,27,fraction industrial output allocated to agriculture table 2,1056,890,87,42,8,3,0,2,0,0,0,0,128-128-128,0-0-0,|||64-128-128,0,0,0,0,0,0
+10,28,POLICY YEAR,1212,398,75,30,0,3,0,2,-1,0,0,0,128-128-128,0-0-0,|||64-128-128,0,0,0,0,0,0
+10,29,fraction industrial output allocated to agriculture table 1,702,578,87,42,8,3,0,2,0,0,0,0,128-128-128,0-0-0,|||64-128-128,0,0,0,0,0,0
+10,30,indicated food per capita,636,902,66,29,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,31,industrial output per capita,210,1017,83,29,8,2,0,0,0,0,0,0,0,0,0,0,0,0
+10,32,indicated food per capita 2,486,1047,66,29,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,33,indicated food per capita table 1,225,939,84,29,8,3,0,2,0,0,0,0,128-128-128,0-0-0,|||64-128-128,0,0,0,0,0,0
+10,34,indicated food per capita table 2,217,1073,84,29,8,3,0,2,0,0,0,0,128-128-128,0-0-0,|||64-128-128,0,0,0,0,0,0
+10,35,agricultural input per hectare,486,261,80,29,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,36,fraction of agricultural inputs for land maintenance table,204,215,101,42,8,3,0,2,0,0,0,0,128-128-128,0-0-0,|||64-128-128,0,0,0,0,0,0
+10,37,fraction of agricultural inputs for land maintenance,204,303,101,42,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,38,food ratio,285,783,75,30,0,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,39,average life agricultural inputs,1141,315,75,30,0,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,40,Time,1081,704,75,30,0,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,41,3,5,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,42,5,1,4,0,0,22,0,0,0,-1--1--1,,1|(228,614)|
+1,43,5,4,68,0,0,22,0,0,0,-1--1--1,,1|(302,614)|
+1,44,8,6,1,0,0,0,0,0,0,-1--1--1,,1|(391,627)|
+1,45,9,6,1,0,0,0,0,0,0,-1--1--1,,1|(465,692)|
+1,46,10,8,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,47,11,8,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,48,12,8,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,49,13,8,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,50,18,14,4,0,0,22,0,0,0,-1--1--1,,1|(849,260)|
+1,51,18,17,68,0,0,22,0,0,0,-1--1--1,,1|(956,260)|
+1,52,20,15,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,53,21,15,1,0,0,0,0,0,0,-1--1--1,,1|(1020,435)|
+1,54,22,21,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,55,23,21,1,0,0,0,0,0,0,-1--1--1,,1|(1014,554)|
+1,56,24,23,1,0,0,0,0,0,0,-1--1--1,,1|(855,644)|
+1,57,25,23,1,0,0,0,0,0,0,-1--1--1,,1|(979,707)|
+1,58,27,25,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,59,29,24,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,60,16,30,1,0,0,0,0,0,0,-1--1--1,,1|(511,891)|
+1,61,32,30,1,0,0,0,0,0,0,-1--1--1,,1|(573,989)|
+1,62,26,30,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,63,14,35,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,64,10,35,1,0,0,0,0,0,0,-1--1--1,,1|(402,311)|
+1,65,37,35,1,0,0,0,0,0,0,-1--1--1,,1|(342,273)|
+1,66,36,37,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,67,1,37,1,0,0,0,0,0,0,-1--1--1,,1|(153,407)|
+1,68,38,5,1,0,0,0,0,0,0,-1--1--1,,1|(265,687)|
+1,69,39,18,1,0,0,0,0,0,0,-1--1--1,,1|(978,290)|
+1,70,6,38,1,0,0,0,0,0,0,-1--1--1,,1|(387,809)|
+1,71,7,38,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,72,15,18,1,0,0,0,0,0,0,-1--1--1,,1|(966,303)|
+1,73,19,39,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,74,2,39,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,75,40,23,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,76,31,16,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,77,33,16,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,78,31,32,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,79,34,32,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,80,6,24,2,0,0,0,0,0,0,-1--1--1,,1|(624,765)|
+1,81,6,25,2,0,0,0,0,0,0,-1--1--1,,1|(714,824)|
+1,82,30,24,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,83,30,25,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+10,84,GDP pc unit,426,977,40,29,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||160-160-160,0,0,0,0,0,0
+1,85,84,16,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,86,84,32,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+10,87,POLICY YEAR s,1207,674,39,29,8,2,0,3,-1,0,0,0,0-0-0,0-0-0,|||0-0-0,0,0,0,0,0,0
+1,88,87,23,0,0,0,0,0,64,0,-1--1--1,,1|(0,0)|
+10,89,POLICY YEAR s,643,1010,39,29,8,2,0,3,-1,0,0,0,0-0-0,0-0-0,|||0-0-0,0,0,0,0,0,0
+1,90,89,30,0,0,0,0,0,64,0,-1--1--1,,1|(0,0)|
+10,91,average life of agricultural inputs 2 s,1398,345,84,42,8,2,0,3,-1,0,0,0,0-0-0,0-0-0,|||0-0-0,0,0,0,0,0,0
+1,92,91,39,0,0,0,0,0,64,0,-1--1--1,,1|(0,0)|
+10,93,POLICY YEAR s,1380,303,39,29,8,2,0,3,-1,0,0,0,0-0-0,0-0-0,|||0-0-0,0,0,0,0,0,0
+1,94,93,39,0,0,0,0,0,64,0,-1--1--1,,1|(0,0)|
+12,95,0,669,24,51,29,8,7,0,0,-1,1,0,0,0,0,0,0,0,0
+Food Production
+\\\---/// Sketch information - do not modify anything except names
+V300  Do not put anything below this section - it will be ignored
+*Agriculture Productivity
+$192-192-192,0,|12||-1--1--1|64-64-64|128-128-128|-1--1--1|-1--1--1|96,96,100,0
+10,1,land yield,511,455,75,30,0,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,2,Land Fertility,199,397,75,30,0,2,0,0,0,0,0,0,0,0,0,0,0,0
+10,3,land yield multiplier from technology,627,551,70,42,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,4,land yield multiplier from air pollution,415,532,84,42,8,131,0,0,0,0,0,0,0,0,0,0,0,0
+10,5,land yield factor 1,870,551,75,30,0,3,0,2,-1,0,0,0,0-0-0,0-0-0,|||64-128-128,0,0,0,0,0,0
+10,6,land yield factor 2,822,695,48,29,3,3,0,16,0,0,0,0,128-128-128,0-0-0,||B|128-128-128,0,0,0,0,0,0
+10,7,Time,816,617,75,30,0,2,0,0,-1,0,0,0,0,0,0,0,0,0
+10,8,technology development delay,708,781,75,30,0,3,0,2,-1,0,0,0,0-0-0,0-0-0,|||64-128-128,0,0,0,0,0,0
+10,9,Land Yield Technology,1003,844,56,29,3,3,0,16,0,0,0,0,-1--1--1,0-0-0,||B|128-128-128,0,0,0,0,0,0
+10,10,land yield technology change rate multiplier,546,916,86,42,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+12,11,48,672,841,10,8,0,3,0,0,-1,0,0,0,0,0,0,0,0,0
+11,12,0,810,841,6,8,34,3,0,0,1,0,0,0,0,0,0,0,0,0
+10,13,land yield technology change rate,810,891,86,42,40,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,14,land yield multipler from air pollution 1,189,617,82,42,8,131,0,0,0,0,0,0,0,0,0,0,0,0
+10,15,land yield multiplier from air pollution 2,393,661,84,42,8,131,0,0,0,0,0,0,0,0,0,0,0,0
+10,16,air pollution policy implementation time,573,700,85,42,8,3,0,2,0,0,0,0,0-0-0,0-0-0,|||64-128-128,0,0,0,0,0,0
+10,17,Time,552,619,75,30,0,2,0,0,-1,0,0,0,0,0,0,0,0,0
+10,18,desired food ratio,246,911,75,30,0,3,0,2,-1,0,0,0,128-128-128,0-0-0,|||64-128-128,0,0,0,0,0,0
+10,19,industrial output,186,790,75,30,0,2,0,0,-1,0,0,0,0,0,0,0,0,0
+10,20,land yield multipler from air pollution table 2,379,781,82,42,8,3,0,2,0,0,0,0,128-128-128,0-0-0,|||64-128-128,0,0,0,0,0,0
+10,21,IND OUT IN 1970,223,724,75,30,0,3,0,2,-1,0,0,0,0-0-0,0-0-0,|||64-128-128,0,0,0,0,0,0
+10,22,land yield multipler from air pollution table 1,144,527,82,42,8,3,0,2,0,0,0,0,128-128-128,0-0-0,|||64-128-128,0,0,0,0,0,0
+10,23,Time,1002,934,75,30,0,2,0,0,-1,0,0,0,0,0,0,0,0,0
+10,24,marginal productivity of agricultural inputs,643,370,84,42,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,25,land yield multiplier from capital,871,473,70,42,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,26,marginal land yield multiplier from capital,876,343,70,42,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,27,agricultural input per hectare,1159,424,85,29,8,2,0,0,0,0,0,0,0,0,0,0,0,0
+10,28,marginal land yield multiplier from capital table,1086,328,81,42,8,3,0,2,0,0,0,0,128-128-128,0-0-0,|||64-128-128,0,0,0,0,0,0
+10,29,land yield multiplier from capital table,1075,529,70,42,8,3,0,2,0,0,0,0,128-128-128,0-0-0,|||64-128-128,0,0,0,0,0,0
+10,30,food ratio,295,856,75,30,0,2,0,0,-1,0,0,0,0,0,0,0,0,0
+10,31,average life agricultural inputs,732,286,75,30,0,2,0,0,-1,0,0,0,0,0,0,0,0,0
+10,32,industrial capital output ratio multiplier from land yield technology,1143,640,116,42,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,33,industrial capital output ratio multiplier table,1203,769,77,42,8,3,0,2,0,0,0,0,128-128-128,0-0-0,|||64-128-128,0,0,0,0,0,0
+10,34,land life multiplier from land yield 1,307,325,75,30,0,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,35,inherent land fertility,207,214,75,30,0,2,0,0,-1,0,0,0,0,0,0,0,0,0
+10,36,land life multiplier from land yield table 1,366,281,84,42,8,3,0,2,0,0,0,0,128-128-128,0-0-0,|||64-128-128,0,0,0,0,0,0
+10,37,land life multiplier from land yield 2,571,209,75,30,0,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,38,land life multiplier from land yield table 2,877,247,84,42,8,3,0,2,0,0,0,0,128-128-128,0-0-0,|||64-128-128,0,0,0,0,0,0
+1,39,2,1,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,40,3,1,1,0,0,0,0,0,0,-1--1--1,,1|(555,517)|
+1,41,4,1,1,0,0,0,0,0,0,-1--1--1,,1|(463,484)|
+1,42,5,3,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,43,6,3,1,0,0,0,0,0,0,-1--1--1,,1|(738,616)|
+1,44,7,3,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,45,8,6,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,46,9,6,1,0,0,0,0,0,0,-1--1--1,,1|(901,745)|
+1,47,12,9,4,0,0,22,0,0,0,-1--1--1,,1|(881,841)|
+1,48,12,11,68,0,0,22,0,0,0,-1--1--1,,1|(743,841)|
+1,49,10,13,1,0,0,0,0,0,0,-1--1--1,,1|(702,922)|
+1,50,9,12,1,0,0,0,0,0,0,-1--1--1,,1|(882,802)|
+1,51,14,4,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,52,15,4,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,53,16,4,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,54,17,4,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,55,21,15,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,56,19,15,1,0,0,0,0,0,0,-1--1--1,,1|(295,748)|
+1,57,20,15,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,58,21,14,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,59,19,14,1,0,0,0,0,0,0,-1--1--1,,1|(141,709)|
+1,60,22,14,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,61,23,13,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,62,1,24,1,0,0,0,0,0,0,-1--1--1,,1|(612,431)|
+1,63,25,24,1,0,0,0,0,0,0,-1--1--1,,1|(733,424)|
+1,64,26,24,1,0,0,0,0,0,0,-1--1--1,,1|(775,364)|
+1,65,27,26,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,66,28,26,1,0,0,0,0,0,0,-1--1--1,,1|(975,311)|
+1,67,27,25,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,68,29,25,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,69,31,24,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,70,33,32,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,71,35,34,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,72,1,34,1,0,0,0,0,0,0,-1--1--1,,1|(408,397)|
+1,73,36,34,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,74,35,37,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,75,1,37,1,0,0,0,0,0,0,-1--1--1,,1|(522,341)|
+1,76,38,37,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,77,25,1,1,0,0,0,0,0,0,-1--1--1,,1|(666,487)|
+1,78,3,32,1,0,0,0,0,64,0,-1--1--1,,1|(885,520)|
+1,79,80,25,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+10,80,unit agricultural input,954,413,79,29,8,2,0,0,-1,0,0,0,0,0,0,0,0,0
+1,81,80,26,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+10,82,POLICY YEAR s,627,598,39,29,8,2,0,3,-1,0,0,0,0-0-0,0-0-0,|||0-0-0,0,0,0,0,0,0
+1,83,82,3,0,0,0,0,0,64,0,-1--1--1,,1|(0,0)|
+10,84,land yield policy time s,840,1007,63,29,8,2,0,3,-1,0,0,0,0-0-0,0-0-0,|||0-0-0,0,0,0,0,0,0
+1,85,84,10,0,0,0,0,0,64,0,-1--1--1,,1|(0,0)|
+10,86,land yield technology change rate multiplier 1,708,1061,86,42,8,2,0,3,-1,0,0,0,0-0-0,0-0-0,|||0-0-0,0,0,0,0,0,0
+1,87,86,10,0,0,0,0,0,64,0,-1--1--1,,1|(0,0)|
+10,88,land yield technology change rate multiplier 2,477,1051,86,42,8,2,0,3,-1,0,0,0,0-0-0,0-0-0,|||0-0-0,0,0,0,0,0,0
+1,89,88,10,0,0,0,0,0,64,0,-1--1--1,,1|(0,0)|
+10,90,Time,307,965,35,15,8,2,0,3,-1,0,0,0,0-0-0,0-0-0,|||0-0-0,0,0,0,0,0,0
+1,91,90,10,0,0,0,0,0,64,0,-1--1--1,,1|(0,0)|
+10,92,POLICY YEAR s,807,959,39,29,8,2,0,3,-1,0,0,0,0-0-0,0-0-0,|||0-0-0,0,0,0,0,0,0
+1,93,92,13,0,0,0,0,0,64,0,-1--1--1,,1|(0,0)|
+12,94,0,600,64,55,29,8,7,0,0,-1,1,0,0,0,0,0,0,0,0
+Agriculture Productivity
+\\\---/// Sketch information - do not modify anything except names
+V300  Do not put anything below this section - it will be ignored
+*Land Development, Loss, Fertility
+$192-192-192,0,|12||-1--1--1|64-64-64|128-128-128|-1--1--1|-1--1--1|96,96,100,0
+10,1,Arable Land,544,455,58,15,3,3,0,16,0,0,0,0,-1--1--1,0-0-0,||B|0-0-0,0,0,0,0,0,0
+10,2,initial arable land,434,377,75,30,0,3,0,2,-1,0,0,0,128-128-128,0-0-0,|||64-128-128,0,0,0,0,0,0
+10,3,urban and industrial land development time,169,588,84,42,8,3,0,2,0,0,0,0,128-128-128,0-0-0,|||64-128-128,0,0,0,0,0,0
+10,4,urban and industrial land required,391,593,67,42,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,5,average life of land,886,563,75,30,0,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,6,Land Fertility,872,809,39,29,3,3,0,16,0,0,0,0,-1--1--1,0-0-0,||B|0-0-0,0,0,0,0,0,0
+10,7,inherent land fertility,862,918,75,30,0,3,0,2,-1,0,0,0,128-128-128,0-0-0,|||64-128-128,0,0,0,0,0,0
+10,8,land fertility regeneration time,554,914,83,29,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,9,initial land fertility,824,713,75,30,0,3,0,2,-1,0,0,0,128-128-128,0-0-0,|||64-128-128,0,0,0,0,0,0
+10,10,Potentially Arable Land,913,455,58,29,3,3,0,16,0,0,0,0,-1--1--1,0-0-0,||B|0-0-0,0,0,0,0,0,0
+10,11,development cost per hectare,919,288,82,29,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,12,initial potentially arable land,1072,389,75,30,0,3,0,2,-1,0,0,0,128-128-128,0-0-0,|||64-128-128,0,0,0,0,0,0
+10,13,Urban and Industrial Land,169,456,73,29,3,3,0,16,0,0,0,0,-1--1--1,0-0-0,||B|0-0-0,0,0,0,0,0,0
+10,14,fraction of agricultural inputs allocated to land development,644,281,101,42,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,15,initial urban and industrial land,200,378,75,30,0,3,0,2,-1,0,0,0,128-128-128,0-0-0,|||64-128-128,0,0,0,0,0,0
+11,16,0,548,557,8,6,33,3,0,0,4,0,0,0,0,0,0,0,0,0
+10,17,land erosion rate,631,557,75,30,32,3,0,0,-1,0,0,0,0,0,0,0,0,0
+12,18,48,548,620,10,8,0,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,19,total agricultural investment,493,330,75,30,0,2,0,0,-1,0,0,0,0,0,0,0,0,0
+11,20,0,733,452,6,8,34,3,0,0,1,0,0,0,0,0,0,0,0,0
+10,21,land development rate,733,489,84,29,40,3,0,0,0,0,0,0,0,0,0,0,0,0
+11,22,0,361,455,6,8,34,3,0,0,1,0,0,0,0,0,0,0,0,0
+10,23,land removal for urban and industrial use,361,505,76,42,40,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,24,development cost per hectare table,1112,234,75,30,0,3,0,2,-1,0,0,0,128-128-128,0-0-0,|||64-128-128,0,0,0,0,0,0
+10,25,potentially arable land total,1184,278,75,30,0,3,0,2,-1,0,0,0,128-128-128,0-0-0,|||64-128-128,0,0,0,0,0,0
+10,26,fraction of agricultural inputs allocated to land development table,367,228,108,42,8,3,0,2,0,0,0,0,128-128-128,0-0-0,|||64-128-128,0,0,0,0,0,0
+10,27,marginal productivity of agricultural inputs,481,152,103,29,8,2,0,0,0,0,0,0,0,0,0,0,0,0
+10,28,marginal productivity of land development,811,155,84,42,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,29,land yield,1063,131,75,30,0,2,0,0,-1,0,0,0,0,0,0,0,0,0
+10,30,social discount,1070,170,75,30,0,3,0,2,-1,0,0,0,128-128-128,0-0-0,|||64-128-128,0,0,0,0,0,0
+10,31,average life of land normal,1093,506,75,30,0,3,0,2,-1,0,0,0,128-128-128,0-0-0,|||64-128-128,0,0,0,0,0,0
+10,32,land life multiplier from land yield,1064,611,84,29,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,33,land life multiplier from land yield 1,1216,689,75,30,0,2,0,0,-1,0,0,0,0,0,0,0,0,0
+10,34,land life multiplier from land yield 2,1303,644,75,30,0,2,0,0,-1,0,0,0,0,0,0,0,0,0
+10,35,Time,1166,558,75,30,0,2,0,0,-1,0,0,0,0,0,0,0,0,0
+12,36,48,604,809,10,8,0,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,37,land fertility degredation rate,1168,930,78,29,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+12,38,48,1136,812,10,8,0,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,39,land fertility regeneration time table,254,984,83,42,8,3,0,2,0,0,0,0,128-128-128,0-0-0,|||64-128-128,0,0,0,0,0,0
+11,40,0,712,809,6,8,34,3,0,0,1,0,0,0,0,0,0,0,0,0
+10,41,land fertility regeneration,712,846,60,29,40,3,0,0,0,0,0,0,0,0,0,0,0,0
+11,42,0,1027,812,6,8,34,3,0,0,1,0,0,0,0,0,0,0,0,0
+10,43,land fertility degredation,1027,849,57,29,40,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,44,fraction of agricultural inputs for land maintenance,265,924,99,42,8,2,0,0,0,0,0,0,0,0,0,0,0,0
+10,45,land fertility degredation rate table,1345,858,78,42,8,3,0,2,0,0,0,0,128-128-128,0-0-0,|||64-128-128,0,0,0,0,0,0
+10,46,persistent pollution index,1279,806,75,29,8,2,0,0,0,0,0,0,0,0,0,0,0,0
+10,47,population,500,689,75,30,0,2,0,0,-1,0,0,0,0,0,0,0,0,0
+10,48,urban and industrial land required per capita,253,689,95,42,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,49,industrial output per capita,409,779,75,30,0,2,0,0,-1,0,0,0,0,0,0,0,0,0
+10,50,urban and industrial land required per capita table,104,809,95,42,8,3,0,2,0,0,0,0,128-128-128,0-0-0,|||64-128-128,0,0,0,0,0,0
+1,51,2,1,0,0,0,0,0,0,1,-1--1--1,,1|(0,0)|
+1,52,9,6,0,0,0,0,0,0,1,-1--1--1,,1|(0,0)|
+1,53,12,10,0,0,0,0,0,0,1,-1--1--1,,1|(0,0)|
+1,54,15,13,0,0,0,0,0,0,1,-1--1--1,,1|(0,0)|
+1,55,20,1,4,0,0,22,0,0,0,-1--1--1,,1|(664,452)|
+1,56,20,10,100,0,0,22,0,0,0,-1--1--1,,1|(797,452)|
+1,57,22,13,4,0,0,22,0,0,0,-1--1--1,,1|(298,455)|
+1,58,22,1,100,0,0,22,0,0,0,-1--1--1,,1|(426,455)|
+1,59,16,18,4,0,0,22,0,0,0,-1--1--1,,1|(548,587)|
+1,60,16,1,100,0,0,22,0,0,0,-1--1--1,,1|(548,510)|
+1,61,3,23,1,0,0,0,0,0,0,-1--1--1,,1|(295,542)|
+1,62,4,23,1,0,0,0,0,0,0,-1--1--1,,1|(361,545)|
+1,63,13,22,1,0,0,0,0,0,0,-1--1--1,,1|(259,413)|
+1,64,1,17,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,65,5,17,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,66,11,20,1,0,0,0,0,0,0,-1--1--1,,1|(853,386)|
+1,67,14,20,1,0,0,0,0,0,0,-1--1--1,,1|(649,365)|
+1,68,19,20,1,0,0,0,0,0,0,-1--1--1,,1|(596,378)|
+1,69,24,11,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,70,10,11,1,0,0,0,0,0,0,-1--1--1,,1|(931,366)|
+1,71,25,11,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,72,26,14,1,0,0,0,0,0,0,-1--1--1,,1|(488,236)|
+1,73,27,14,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,74,28,14,1,0,0,0,0,0,0,-1--1--1,,1|(670,192)|
+1,75,11,28,1,0,0,0,0,0,0,-1--1--1,,1|(910,221)|
+1,76,29,28,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,77,30,28,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,78,31,5,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,79,32,5,1,0,0,0,0,0,0,-1--1--1,,1|(914,581)|
+1,80,33,32,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,81,34,32,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,82,35,32,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,83,40,6,4,0,0,22,0,0,0,-1--1--1,,1|(775,809)|
+1,84,40,36,100,0,0,22,0,0,0,-1--1--1,,1|(660,809)|
+1,85,42,38,4,0,0,22,0,0,0,-1--1--1,,1|(1079,812)|
+1,86,42,6,100,0,0,22,0,0,0,-1--1--1,,1|(966,812)|
+1,87,7,41,1,0,0,0,0,0,0,-1--1--1,,1|(754,899)|
+1,88,8,41,1,0,0,0,0,0,0,-1--1--1,,1|(649,902)|
+1,89,6,40,1,0,0,0,0,0,0,-1--1--1,,1|(778,770)|
+1,90,37,43,1,0,0,0,0,0,0,-1--1--1,,1|(1075,911)|
+1,91,6,42,1,0,0,0,0,0,0,-1--1--1,,1|(943,773)|
+1,92,39,8,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,93,44,8,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,94,45,37,1,0,0,0,0,0,0,-1--1--1,,1|(1243,905)|
+1,95,46,37,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,96,47,4,1,0,0,0,0,0,0,-1--1--1,,1|(433,644)|
+1,97,48,4,1,0,0,0,0,0,0,-1--1--1,,1|(332,653)|
+1,98,49,48,1,0,0,0,0,0,0,-1--1--1,,1|(325,749)|
+1,99,50,48,1,0,0,0,0,0,0,-1--1--1,,1|(202,759)|
+10,100,one year,998,689,52,15,8,2,0,0,-1,0,0,0,0,0,0,0,0,0
+1,101,100,32,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+10,102,GDP pc unit,259,833,40,29,8,2,0,2,-1,0,0,0,128-128-128,0-0-0,|||160-160-160,0,0,0,0,0,0
+1,103,102,48,0,0,0,0,1,0,0,160-160-160,|||0-0-0,1|(0,0)|
+10,104,land life policy implementation time s,1292,590,74,42,8,2,0,3,-1,0,0,0,0-0-0,0-0-0,|||0-0-0,0,0,0,0,0,0
+1,105,104,32,0,0,0,0,0,64,0,-1--1--1,,1|(0,0)|
+12,106,0,646,63,65,42,8,7,0,0,-1,1,0,0,0,0,0,0,0,0
+Land Development, Loss, Fertility
+\\\---/// Sketch information - do not modify anything except names
+V300  Do not put anything below this section - it will be ignored
+*Industrial Output
+$192-192-192,0,|12||-1--1--1|64-64-64|128-128-128|-1--1--1|-1--1--1|96,96,100,0
+10,1,Industrial Capital,627,496,47,29,3,3,0,16,0,0,0,0,-1--1--1,0-0-0,||B|0-0-0,0,0,0,0,0,0
+10,2,fraction of industrial output allocated to investment,452,655,93,42,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,3,industrial output,548,304,75,30,0,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,4,initial industrial capital,771,400,75,30,0,3,0,2,-1,0,0,0,128-128-128,0-0-0,|||64-128-128,0,0,0,0,0,0
+12,5,48,315,494,10,8,0,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,6,average life of industrial capital,939,625,75,30,0,3,0,0,-1,0,0,0,0,0,0,0,0,0
+12,7,48,932,494,10,8,0,3,0,0,-1,0,0,0,0,0,0,0,0,0
+11,8,0,803,494,6,8,34,3,0,0,1,0,0,0,0,0,0,0,0,0
+10,9,industrial capital depreciation,803,531,77,29,40,3,0,0,0,0,0,0,0,0,0,0,0,0
+11,10,0,447,494,6,8,34,3,0,0,1,0,0,0,0,0,0,0,0,0
+10,11,industrial capital investment,447,531,77,29,40,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,12,average life of industrial capital 1,1143,710,75,30,0,3,0,2,-1,0,0,0,128-128-128,0-0-0,|||64-128-128,0,0,0,0,0,0
+10,13,industrial capital output ratio multiplier from resource conservation technology,1034,386,116,56,8,2,0,0,0,0,0,0,0,0,0,0,0,0
+10,14,fraction of industrial output allocated to agriculture,713,721,98,42,8,2,0,0,0,0,0,0,0,0,0,0,0,0
+10,15,fraction of industrial output allocated to consumption,375,790,93,42,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,16,fraction of industrial output allocated to services,644,775,98,42,8,2,0,0,0,0,0,0,0,0,0,0,0,0
+10,17,capacity utilization fraction,417,199,75,30,0,2,0,0,-1,0,0,0,0,0,0,0,0,0
+10,18,fraction of industrial capital allocated to obtaining resources,659,200,98,42,8,2,0,0,0,0,0,0,0,0,0,0,0,0
+10,19,industrial capital output ratio,842,290,75,30,0,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,20,industrial capital output ratio 1,933,218,75,30,0,3,0,2,-1,0,0,0,128-128-128,0-0-0,|||64-128-128,0,0,0,0,0,0
+10,21,industrial capital output ratio 2,1203,298,75,30,0,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,22,Time,1178,643,75,30,0,2,0,0,-1,0,0,0,0,0,0,0,0,0
+10,23,industrial capital output ratio multiplier from pollution technology,1304,397,116,42,8,2,0,0,0,0,0,0,0,0,0,0,0,0
+10,24,industrial capital output ratio multiplier from land yield technology,1160,460,116,42,8,2,0,0,0,0,0,0,0,0,0,0,0,0
+10,25,fraction of industrial output allocated to consumption constant,374,922,102,42,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,26,fraction of industrial output allocated to consumption variable,194,590,99,42,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,27,Time,167,886,75,30,0,2,0,0,-1,0,0,0,0,0,0,0,0,0
+10,28,fraction of industrial output allocated to consumption constant 1,740,916,110,42,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,29,fraction of industrial output allocated to consumption constant 2,742,1012,110,42,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,30,industrial output per capita,273,385,78,29,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,31,fraction of industrial output allocated to consumption variable table,101,460,125,42,8,3,0,2,0,0,0,0,128-128-128,0-0-0,|||64-128-128,0,0,0,0,0,0
+10,32,population,213,268,75,30,0,2,0,0,-1,0,0,0,0,0,0,0,0,0
+10,33,Time,1058,320,75,30,0,2,0,0,-1,0,0,0,0,0,0,0,0,0
+1,34,4,1,0,0,0,0,0,0,1,-1--1--1,,1|(0,0)|
+1,35,10,1,4,0,0,22,0,0,0,-1--1--1,,1|(516,494)|
+1,36,10,5,100,0,0,22,0,0,0,-1--1--1,,1|(383,494)|
+1,37,8,7,4,0,0,22,0,0,0,-1--1--1,,1|(865,494)|
+1,38,8,1,100,0,0,22,0,0,0,-1--1--1,,1|(735,494)|
+1,39,2,11,1,0,0,0,0,0,0,-1--1--1,,1|(473,601)|
+1,40,3,10,1,0,0,0,0,0,0,-1--1--1,,1|(434,380)|
+1,41,1,8,1,0,0,0,0,0,0,-1--1--1,,1|(728,460)|
+1,42,6,9,1,0,0,0,0,0,0,-1--1--1,,1|(848,583)|
+1,43,12,6,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,44,22,6,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,45,14,2,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,46,15,2,1,0,0,0,0,0,0,-1--1--1,,1|(428,734)|
+1,47,16,2,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,48,17,3,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,49,1,3,1,0,0,0,0,0,0,-1--1--1,,1|(626,386)|
+1,50,18,3,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,51,19,3,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,52,20,19,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,53,21,19,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,54,13,21,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,55,23,21,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,56,24,21,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,57,25,15,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,58,26,15,1,0,0,0,0,0,0,-1--1--1,,1|(225,697)|
+1,59,27,15,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,60,28,25,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,61,29,25,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,62,27,25,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,63,30,26,1,0,0,0,0,0,0,-1--1--1,,1|(206,478)|
+1,64,31,26,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,65,3,30,1,0,0,0,0,0,0,-1--1--1,,1|(410,325)|
+1,66,32,30,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,67,33,19,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+10,68,average life of industrial capital 2 s,935,772,85,42,8,2,0,3,-1,0,0,0,0-0-0,0-0-0,|||0-0-0,0,0,0,0,0,0
+1,69,68,6,0,0,0,0,0,64,0,-1--1--1,,1|(0,0)|
+10,70,POLICY YEAR s,737,655,39,29,8,2,0,3,-1,0,0,0,0-0-0,0-0-0,|||0-0-0,0,0,0,0,0,0
+1,71,70,6,0,0,0,0,0,64,0,-1--1--1,,1|(0,0)|
+10,72,industrial equilibrium time s,555,860,77,42,8,2,0,3,-1,0,0,0,0-0-0,0-0-0,|||0-0-0,0,0,0,0,0,0
+1,73,72,15,0,0,0,0,0,64,0,-1--1--1,,1|(0,0)|
+10,74,POLICY YEAR s,836,361,39,29,8,2,0,3,-1,0,0,0,0-0-0,0-0-0,|||0-0-0,0,0,0,0,0,0
+1,75,74,19,0,0,0,0,0,64,0,-1--1--1,,1|(0,0)|
+10,76,POLICY YEAR s,272,1017,39,29,8,2,0,3,-1,0,0,0,0-0-0,0-0-0,|||0-0-0,0,0,0,0,0,0
+1,77,76,25,0,0,0,0,0,64,0,-1--1--1,,1|(0,0)|
+10,78,industrial output per capita desired s,135,716,84,42,8,2,0,3,-1,0,0,0,0-0-0,0-0-0,|||0-0-0,0,0,0,0,0,0
+1,79,78,26,0,0,0,0,0,64,0,-1--1--1,,1|(0,0)|
+12,80,0,646,58,45,29,8,7,0,0,-1,1,0,0,0,0,0,0,0,0
+Industrial Output
+\\\---/// Sketch information - do not modify anything except names
+V300  Do not put anything below this section - it will be ignored
+*Services Output
+$192-192-192,0,|12||-1--1--1|64-64-64|128-128-128|-1--1--1|-1--1--1|96,96,100,0
+10,1,Service Capital,557,757,36,29,3,3,0,16,0,0,0,0,-1--1--1,0-0-0,||B|0-0-0,0,0,0,0,0,0
+10,2,industrial output,232,871,75,30,0,2,0,0,-1,0,0,0,0,0,0,0,0,0
+10,3,fraction of industrial output allocated to services,223,611,93,42,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,4,initial service capital,467,685,75,30,0,3,0,2,-1,0,0,0,128-128-128,0-0-0,|||64-128-128,0,0,0,0,0,0
+12,5,48,274,757,10,8,0,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,6,fraction of industrial output allocated to services 1,437,505,93,42,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+12,7,48,853,757,10,8,0,3,0,0,-1,0,0,0,0,0,0,0,0,0
+11,8,0,724,757,6,8,34,3,0,0,1,0,0,0,0,0,0,0,0,0
+10,9,service capital depreciation,724,794,65,29,40,3,0,0,0,0,0,0,0,0,0,0,0,0
+11,10,0,377,757,6,8,34,3,0,0,1,0,0,0,0,0,0,0,0,0
+10,11,service capital investment,377,794,65,29,40,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,12,fraction of industrial output allocated to services 2,271,427,93,42,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,13,service capital output ratio 1,1171,683,75,30,0,3,0,2,-1,0,0,0,128-128-128,0-0-0,|||64-128-128,0,0,0,0,0,0
+10,14,fraction of industrial output allocated to services table 2,154,341,93,42,8,3,0,2,0,0,0,0,128-128-128,0-0-0,|||64-128-128,0,0,0,0,0,0
+10,15,indicated services output per capita,451,268,82,29,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,16,service output per capita,700,418,75,30,0,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,17,population,976,418,75,30,0,2,0,0,-1,0,0,0,0,0,0,0,0,0
+10,18,service output,754,598,75,30,0,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,19,capacity utilization fraction,934,533,75,30,0,2,0,0,-1,0,0,0,0,0,0,0,0,0
+10,20,service capital output ratio,982,623,75,30,0,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,21,average life of service capital,850,880,75,30,0,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,22,average life of service capital 1,1157,850,75,30,0,3,0,2,-1,0,0,0,128-128-128,0-0-0,|||64-128-128,0,0,0,0,0,0
+10,23,Time,97,539,75,30,0,2,0,2,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,24,service capital output ratio 2,1054,713,75,30,0,3,0,2,-1,0,0,0,128-128-128,0-0-0,|||64-128-128,0,0,0,0,0,0
+10,25,Time,1180,598,75,30,0,2,0,2,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,26,Time,1031,820,75,30,0,2,0,2,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,27,industrial output per capita,1006,280,75,30,0,2,0,0,-1,0,0,0,0,0,0,0,0,0
+10,28,fraction of industrial output allocated to services table 1,517,569,93,42,8,3,0,2,0,0,0,0,128-128-128,0-0-0,|||64-128-128,0,0,0,0,0,0
+10,29,indicated services output per capita 1,715,223,82,42,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,30,indicated services output per capita 2,719,346,82,42,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,31,Time,232,269,75,30,0,2,0,2,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,32,indicated services output per capita table 1,1066,226,75,30,0,3,0,2,-1,0,0,0,128-128-128,0-0-0,|||64-128-128,0,0,0,0,0,0
+10,33,indicated services output per capita table 2,1057,346,75,30,0,3,0,2,-1,0,0,0,128-128-128,0-0-0,|||64-128-128,0,0,0,0,0,0
+1,34,4,1,0,0,0,0,0,0,1,-1--1--1,,1|(0,0)|
+1,35,10,1,4,0,0,22,0,0,0,-1--1--1,,1|(452,757)|
+1,36,10,5,100,0,0,22,0,0,0,-1--1--1,,1|(327,757)|
+1,37,8,7,4,0,0,22,0,0,0,-1--1--1,,1|(786,757)|
+1,38,8,1,100,0,0,22,0,0,0,-1--1--1,,1|(655,757)|
+1,39,2,11,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,40,3,10,1,0,0,0,0,0,0,-1--1--1,,1|(274,706)|
+1,41,6,3,1,0,0,0,0,0,0,-1--1--1,,1|(256,544)|
+1,42,12,3,1,0,0,0,0,0,0,-1--1--1,,1|(215,508)|
+1,43,23,3,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,44,14,12,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,45,15,12,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,46,16,12,1,0,0,0,0,0,0,-1--1--1,,1|(520,376)|
+1,47,17,16,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,48,18,16,1,0,0,0,0,0,0,-1--1--1,,1|(755,568)|
+1,49,19,18,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,50,20,18,1,0,0,0,0,0,0,-1--1--1,,1|(883,599)|
+1,51,1,18,1,0,0,0,0,0,0,-1--1--1,,1|(679,695)|
+1,52,21,9,1,0,0,0,0,0,0,-1--1--1,,1|(779,850)|
+1,53,1,8,1,0,0,0,0,0,0,-1--1--1,,1|(634,731)|
+1,54,22,21,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,55,13,20,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,56,24,20,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,57,25,20,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,58,26,21,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,59,15,6,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,60,28,6,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,61,16,6,1,0,0,0,0,0,0,-1--1--1,,1|(505,451)|
+1,62,29,15,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,63,30,15,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,64,31,15,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,65,27,29,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,66,32,29,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,67,27,30,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,68,33,30,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+10,69,GDP pc unit,781,286,40,29,8,2,0,2,-1,0,0,0,128-128-128,0-0-0,|||160-160-160,0,0,0,0,0,0
+1,70,69,29,0,0,0,0,1,0,0,160-160-160,|||0-0-0,1|(0,0)|
+1,71,69,30,0,0,0,0,1,0,0,160-160-160,|||0-0-0,1|(0,0)|
+10,72,POLICY YEAR s,203,715,39,29,8,2,0,3,-1,0,0,0,0-0-0,0-0-0,|||0-0-0,0,0,0,0,0,0
+1,73,72,3,0,0,0,0,0,64,0,-1--1--1,,1|(0,0)|
+10,74,POLICY YEAR s,191,223,39,29,8,2,0,3,-1,0,0,0,0-0-0,0-0-0,|||0-0-0,0,0,0,0,0,0
+1,75,74,15,0,0,0,0,0,64,0,-1--1--1,,1|(0,0)|
+10,76,POLICY YEAR s,883,682,39,29,8,2,0,3,-1,0,0,0,0-0-0,0-0-0,|||0-0-0,0,0,0,0,0,0
+1,77,76,20,0,0,0,0,0,64,0,-1--1--1,,1|(0,0)|
+10,78,average life of service capital 2 s,931,931,86,29,8,2,0,3,-1,0,0,0,0-0-0,0-0-0,|||0-0-0,0,0,0,0,0,0
+1,79,78,21,0,0,0,0,0,64,0,-1--1--1,,1|(0,0)|
+10,80,POLICY YEAR s,659,922,39,29,8,2,0,3,-1,0,0,0,0-0-0,0-0-0,|||0-0-0,0,0,0,0,0,0
+1,81,80,21,0,0,0,0,0,64,0,-1--1--1,,1|(0,0)|
+12,82,0,694,44,38,29,8,7,0,0,-1,1,0,0,0,0,0,0,0,0
+Services Output
+\\\---/// Sketch information - do not modify anything except names
+V300  Do not put anything below this section - it will be ignored
+*Jobs
+$192-192-192,0,|12||-1--1--1|64-64-64|128-128-128|-1--1--1|-1--1--1|96,96,100,0
+10,1,labor utilization fraction,419,596,75,30,0,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,2,jobs,485,500,75,30,0,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,3,labor force,320,512,75,30,0,2,0,0,-1,0,0,0,0,0,0,0,0,0
+10,4,Delayed Labor Utilization Fraction,674,689,70,42,3,3,0,16,0,0,0,0,128-128-128,0-0-0,||B|128-128-128,0,0,0,0,0,0
+10,5,labor utilization fraction delay time,398,767,75,30,0,3,0,2,-1,0,0,0,128-128-128,0-0-0,|||64-128-128,0,0,0,0,0,0
+12,6,48,377,687,10,8,0,3,0,0,-1,0,0,0,0,0,0,0,0,0
+11,7,0,497,687,6,8,2,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,8,potential jobs agricultural sector,389,395,83,29,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,9,potential jobs industrial sector,596,398,75,29,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,10,potential jobs service sector,683,464,63,29,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,11,Arable Land,371,278,75,30,0,2,0,0,0,0,0,0,0,0,0,0,0,0
+10,12,jobs per hectare,167,392,75,30,0,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,13,Industrial Capital,767,285,75,30,0,2,0,0,0,0,0,0,0,0,0,0,0,0
+10,14,jobs per industrial capital unit,845,386,84,29,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,15,jobs per service capital unit,830,551,72,29,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,16,Service Capital,944,471,75,30,0,2,0,0,0,0,0,0,0,0,0,0,0,0
+10,17,industrial output per capita,1052,326,75,30,0,2,0,0,-1,0,0,0,0,0,0,0,0,0
+10,18,jobs per industrial capital unit table,1073,389,84,29,8,3,0,2,0,0,0,0,128-128-128,0-0-0,|||64-128-128,0,0,0,0,0,0
+10,19,jobs per service capital unit table,1074,605,78,29,8,3,0,2,0,0,0,0,128-128-128,0-0-0,|||64-128-128,0,0,0,0,0,0
+10,20,service output per capita,1092,549,75,30,0,2,0,0,-1,0,0,0,0,0,0,0,0,0
+10,21,agricultural input per hectare,119,272,85,29,8,2,0,0,0,0,0,0,0,0,0,0,0,0
+10,22,jobs per hectare table,150,464,75,30,0,3,0,2,0,0,0,0,128-128-128,0-0-0,|||64-128-128,0,0,0,0,0,0
+10,23,capacity utilization fraction,1019,692,75,30,0,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,24,capacity utilization fraction table,881,765,75,30,0,3,0,2,-1,0,0,0,128-128-128,0-0-0,|||64-128-128,0,0,0,0,0,0
+1,25,2,1,1,0,0,0,0,0,0,-1--1--1,,1|(440,536)|
+1,26,3,1,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,27,8,2,1,0,0,0,0,0,0,-1--1--1,,1|(473,447)|
+1,28,9,2,1,0,0,0,0,0,0,-1--1--1,,1|(533,435)|
+1,29,10,2,1,0,0,0,0,0,0,-1--1--1,,1|(569,467)|
+1,30,11,8,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,31,12,8,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,32,13,9,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,33,14,9,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,34,15,10,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,35,16,10,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,36,17,14,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,37,18,14,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,38,19,15,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,39,20,15,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,40,21,12,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,41,22,12,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,42,24,23,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,43,4,23,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,44,7,4,4,0,0,22,0,0,0,-1--1--1,,1|(553,687)|
+1,45,7,6,68,0,0,22,0,0,0,-1--1--1,,1|(439,687)|
+1,46,1,7,2,0,0,0,0,0,0,-1--1--1,,1|(446,645)|
+1,47,5,7,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+10,48,unit agricultural input,264,339,79,29,8,130,0,0,-1,0,0,0,0,0,0,0,0,0
+1,49,48,12,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+10,50,GDP pc unit,923,279,40,29,8,2,0,2,-1,0,0,0,128-128-128,0-0-0,|||160-160-160,0,0,0,0,0,0
+1,51,50,14,0,0,0,0,1,0,0,160-160-160,|||0-0-0,1|(0,0)|
+10,52,GDP pc unit,914,635,40,29,8,2,0,2,-1,0,0,0,128-128-128,0-0-0,|||160-160-160,0,0,0,0,0,0
+1,53,52,15,0,0,0,0,1,0,0,160-160-160,|||0-0-0,1|(0,0)|
+12,54,0,641,99,20,15,8,7,0,0,-1,1,0,0,0,0,0,0,0,0
+Jobs
+\\\---/// Sketch information - do not modify anything except names
+V300  Do not put anything below this section - it will be ignored
+*Welfare & Footprint
+$192-192-192,0,|12||-1--1--1|64-64-64|128-128-128|-1--1--1|-1--1--1|96,96,100,0
+10,1,life expectancy,338,444,58,29,8,130,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,2,industrial output per capita,502,477,83,29,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,3,Arable Land,217,807,37,29,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,4,Urban and Industrial Land,404,870,75,29,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,5,persistent pollution generation rate,596,858,77,42,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,6,Human Ecological Footprint,436,535,81,29,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,7,"Absorption Land (GHA)",549,684,53,29,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,8,7,6,1,0,0,0,0,0,0,-1--1--1,,1|(512,611)|
+10,9,"Arable Land in Gigahectares (GHA)",319,677,67,42,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,10,9,6,1,0,0,0,0,0,0,-1--1--1,,1|(356,601)|
+10,11,"Urban Land (GHA)",433,683,55,29,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,12,11,6,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,13,3,9,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,14,4,11,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+10,15,ha per unit of pollution,788,609,53,29,8,3,0,2,-1,0,0,0,0-0-0,0-0-0,|||64-128-128,0,0,0,0,0,0
+1,16,15,7,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,17,5,7,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+10,18,ha per Gha,341,778,52,15,8,3,0,3,-1,0,0,0,160-160-160,0-0-0,|||160-160-160,0,0,0,0,0,0
+1,19,18,9,0,0,0,0,1,0,0,160-160-160,|||0-0-0,1|(0,0)|
+1,20,18,11,0,0,0,0,1,64,0,160-160-160,|||0-0-0,1|(0,0)|
+10,21,Total Land,722,538,49,15,8,3,0,2,-1,0,0,0,0-0-0,0-0-0,|||64-128-128,0,0,0,0,0,0
+1,22,21,6,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+10,23,Human Welfare Index,452,155,73,29,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,24,Education Index,464,253,47,29,8,131,0,0,-1,0,0,0,0,0,0,0,0,0
+1,25,24,23,1,0,0,0,0,0,0,-1--1--1,,1|(464,207)|
+10,26,GDP Index,603,251,49,15,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,27,26,23,1,0,0,0,0,0,0,-1--1--1,,1|(543,199)|
+10,28,Life Expectancy Index,339,247,71,29,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,29,28,23,1,0,0,0,0,0,0,-1--1--1,,1|(383,193)|
+1,30,1,28,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+10,31,Life Expectancy Index LOOKUP,206,395,71,29,8,131,0,2,-1,0,0,0,0-0-0,0-0-0,|||64-128-128,0,0,0,0,0,0
+1,32,31,28,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+10,33,Education Index LOOKUP,469,390,68,29,8,3,0,2,-1,0,0,0,0-0-0,0-0-0,|||64-128-128,0,0,0,0,0,0
+1,34,33,24,1,0,0,0,0,0,0,-1--1--1,,1|(478,320)|
+10,35,GDP per capita,593,351,39,29,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,36,35,24,1,0,0,0,0,0,0,-1--1--1,,1|(539,295)|
+10,37,GDP per capita LOOKUP,684,482,69,29,8,131,0,2,-1,0,0,0,0-0-0,0-0-0,|||64-128-128,0,0,0,0,0,0
+1,38,37,35,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,39,2,35,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,40,35,26,1,0,0,0,0,0,0,-1--1--1,,1|(611,304)|
+10,41,Ref Lo GDP,772,311,51,15,8,3,0,2,-1,0,0,0,0-0-0,0-0-0,|||64-128-128,0,0,0,0,0,0
+1,42,41,26,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+10,43,Ref Hi GDP,819,210,50,15,8,131,0,2,-1,0,0,0,0-0-0,0-0-0,|||64-128-128,0,0,0,0,0,0
+1,44,43,26,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+10,45,GDP pc unit,386,349,40,29,8,2,0,3,-1,0,0,0,160-160-160,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,46,45,24,1,0,0,0,1,0,0,160-160-160,|||0-0-0,1|(407,292)|
+10,47,one year,179,273,52,15,8,2,0,3,-1,0,0,0,160-160-160,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,48,47,28,0,0,0,0,1,0,0,160-160-160,|||0-0-0,1|(0,0)|
+10,49,GDP pc unit,798,397,40,29,8,2,0,3,-1,0,0,0,160-160-160,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,50,49,35,0,0,0,0,1,0,0,160-160-160,|||0-0-0,1|(0,0)|
+10,51,ha per Gha,728,752,37,29,8,2,0,3,-1,0,0,0,160-160-160,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,52,51,7,0,0,0,0,1,64,0,160-160-160,|||0-0-0,1|(0,0)|
+12,53,0,448,35,46,29,8,7,0,0,-1,1,0,0,0,0,0,0,0,0
+Welfare & Footprint
+\\\---/// Sketch information - do not modify anything except names
+V300  Do not put anything below this section - it will be ignored
+*Scenario Inputs
+$192-192-192,0,|12||-1--1--1|0-0-0|0-0-255|-1--1--1|-1--1--1|96,96,100,0
+10,1,POLICY YEAR s,690,165,75,30,0,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,2,POLICY YEAR,674,117,75,30,0,3,0,2,-1,0,0,0,0-0-0,0-0-0,|||128-0-0,0,0,0,0,0,0
+1,3,2,1,0,0,0,0,0,64,0,-1--1--1,,1|(0,0)|
+10,4,POLICY YEAR scenario table,677,68,75,30,0,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,5,4,1,0,0,0,0,0,64,0,-1--1--1,,1|(0,0)|
+10,6,POLICY YEAR use custom,659,92,75,30,0,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,7,6,1,0,0,0,0,0,64,0,-1--1--1,,1|(0,0)|
+10,8,scenario,743,428,75,30,0,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,9,8,1,0,0,0,0,0,64,0,-1--1--1,,1|(0,0)|
+10,10,average life of industrial capital scenario table,122,519,75,30,0,131,0,0,0,0,0,0,0,0,0,0,0,0
+10,11,average life of industrial capital 2 s,491,476,85,42,8,131,0,1,-1,0,0,0,128-128-128,0-0-0,|||0-0-0,0,0,0,0,0,0
+10,12,average life of industrial capital 2,179,554,75,30,0,131,0,2,0,0,0,0,0-0-0,0-0-0,|||128-0-0,0,0,0,0,0,0
+10,13,average life of industrial capital 2 use custom,150,483,75,30,0,131,0,0,0,0,0,0,0,0,0,0,0,0
+1,14,13,11,0,0,0,0,0,64,0,-1--1--1,,1|(0,0)|
+1,15,12,11,0,0,0,0,0,64,0,-1--1--1,,1|(0,0)|
+1,16,10,11,0,0,0,0,0,64,0,-1--1--1,,1|(0,0)|
+1,17,8,11,0,0,0,0,0,64,0,-1--1--1,,1|(0,0)|
+10,18,average life of agricultural inputs 2 s,569,257,84,42,8,131,0,1,0,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,19,average life of agricultural inputs scenario table,227,212,75,30,0,131,0,0,0,0,0,0,0,0,0,0,0,0
+10,20,average life of agricultural inputs 2,258,183,75,30,0,131,0,2,0,0,0,0,0-0-0,0-0-0,|||128-0-0,0,0,0,0,0,0
+10,21,average life of agricultural inputs 2 use custom,227,254,75,30,0,131,0,0,0,0,0,0,0,0,0,0,0,0
+1,22,19,18,0,0,0,0,0,64,0,-1--1--1,,1|(0,0)|
+1,23,20,18,1,0,0,0,0,64,0,-1--1--1,,1|(401,182)|
+1,24,21,18,0,0,0,0,0,64,0,-1--1--1,,1|(0,0)|
+1,25,8,18,0,0,0,0,0,64,0,-1--1--1,,1|(0,0)|
+10,26,average life of service capital 2 s,509,345,80,29,8,131,0,1,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,27,average life of service capital scenario table,210,371,75,30,0,131,0,0,0,0,0,0,0,0,0,0,0,0
+10,28,average life of service capital 2,257,401,75,30,0,131,0,2,0,0,0,0,0-0-0,0-0-0,|||128-0-0,0,0,0,0,0,0
+10,29,average life of service capital 2 use custom,221,341,75,30,0,131,0,0,0,0,0,0,0,0,0,0,0,0
+1,30,29,26,0,0,0,0,0,64,0,-1--1--1,,1|(0,0)|
+1,31,28,26,0,0,0,0,0,64,0,-1--1--1,,1|(0,0)|
+1,32,27,26,0,0,0,0,0,64,0,-1--1--1,,1|(0,0)|
+1,33,8,26,0,0,0,0,0,64,0,-1--1--1,,1|(0,0)|
+10,34,fertility control effectiveness time scenario table,1421,248,75,30,0,131,0,0,0,0,0,0,0,0,0,0,0,0
+10,35,fertility control effectiveness time,1361,269,75,30,0,131,0,2,0,0,0,0,0-0-0,0-0-0,|||128-0-0,0,0,0,0,0,0
+10,36,fertility control effectiveness time s,1034,239,83,42,8,131,0,0,0,0,0,0,0,0,0,0,0,0
+1,37,34,36,0,0,0,0,0,64,0,-1--1--1,,1|(0,0)|
+1,38,35,36,0,0,0,0,0,64,0,-1--1--1,,1|(0,0)|
+10,39,fertility control effectiveness time use custom,1392,218,75,30,0,131,0,0,0,0,0,0,0,0,0,0,0,0
+1,40,39,36,0,0,0,0,0,64,0,-1--1--1,,1|(0,0)|
+1,41,8,36,0,0,0,0,0,64,0,-1--1--1,,1|(0,0)|
+10,42,fraction of industrial capital allocated to obtaining resources switch time scenario table,1682,590,75,30,0,131,0,0,0,0,0,0,0,0,0,0,0,0
+10,43,fraction of industrial capital allocated to obtaining resources switch time,1614,615,75,30,0,131,0,2,0,0,0,0,0-0-0,0-0-0,|||128-0-0,0,0,0,0,0,0
+10,44,fraction of industrial capital allocated to obtaining resources switch time use custom,1664,555,75,30,0,131,0,0,0,0,0,0,0,0,0,0,0,0
+1,45,42,48,0,0,0,0,0,64,0,-1--1--1,,1|(0,0)|
+1,46,43,48,0,0,0,0,0,64,0,-1--1--1,,1|(0,0)|
+1,47,44,48,0,0,0,0,0,64,0,-1--1--1,,1|(0,0)|
+10,48,fraction of industrial capital allocated to obtaining resources switch time s,1094,573,146,42,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+1,49,8,48,0,0,0,0,0,64,0,-1--1--1,,1|(0,0)|
+10,50,industrial equilibrium time,1349,329,75,30,0,131,0,2,0,0,0,0,0-0-0,0-0-0,|||128-0-0,0,0,0,0,0,0
+10,51,industrial equilibrium time use custom,1416,374,75,30,0,131,0,0,0,0,0,0,0,0,0,0,0,0
+10,52,industrial equilibrium time s,1050,327,84,29,8,131,0,0,0,0,0,0,0,0,0,0,0,0
+1,53,50,52,0,0,0,0,0,64,0,-1--1--1,,1|(0,0)|
+1,54,51,52,0,0,0,0,0,64,0,-1--1--1,,1|(0,0)|
+1,55,8,52,0,0,0,0,0,64,0,-1--1--1,,1|(0,0)|
+10,56,industrial equilibrium time scenario table,1421,350,75,30,0,131,0,0,0,0,0,0,0,0,0,0,0,0
+1,57,56,52,0,0,0,0,0,64,0,-1--1--1,,1|(0,0)|
+10,58,industrial output per capita desired s,902,164,84,42,8,131,0,1,0,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,59,industrial output per capita desired scenario table,1218,165,75,30,0,131,0,0,0,0,0,0,0,0,0,0,0,0
+10,60,industrial output per capita desired,1176,132,75,30,0,131,0,2,0,0,0,0,0-0-0,0-0-0,|||128-0-0,0,0,0,0,0,0
+10,61,industrial output per capita desired use custom,1201,91,75,30,0,131,0,0,0,0,0,0,0,0,0,0,0,0
+1,62,61,58,1,0,0,0,0,64,0,-1--1--1,,1|(1012,107)|
+1,63,60,58,1,0,0,0,0,64,0,-1--1--1,,1|(1008,135)|
+1,64,59,58,1,0,0,0,0,64,0,-1--1--1,,1|(1000,192)|
+1,65,8,58,0,0,0,0,0,64,0,-1--1--1,,1|(0,0)|
+10,66,initial nonrenewable resources s,1056,440,67,42,8,131,0,1,0,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,67,initial nonrenewable resources scenario table,1382,437,75,30,0,131,0,0,0,0,0,0,0,0,0,0,0,0
+10,68,initial nonrenewable resources use custom,1386,506,75,30,0,131,0,0,0,0,0,0,0,0,0,0,0,0
+10,69,initial nonrenewable resources,1380,471,75,30,0,3,0,2,0,0,0,0,0-0-0,0-0-0,|||128-0-0,0,0,0,0,0,0
+1,70,68,66,0,0,0,0,0,64,0,-1--1--1,,1|(0,0)|
+1,71,67,66,1,0,0,0,0,64,0,-1--1--1,,1|(1253,470)|
+1,72,69,66,0,0,0,0,0,64,0,-1--1--1,,1|(0,0)|
+1,73,8,66,0,0,0,0,0,64,0,-1--1--1,,1|(0,0)|
+10,74,land life policy time scenario table,1254,717,75,30,0,131,0,0,0,0,0,0,0,0,0,0,0,0
+10,75,land life policy implementation time,1242,689,75,30,0,131,0,2,0,0,0,0,0-0-0,0-0-0,|||128-0-0,0,0,0,0,0,0
+10,76,land life policy time use custom,1274,747,75,30,0,131,0,0,0,0,0,0,0,0,0,0,0,0
+10,77,land life policy implementation time s,995,705,74,42,8,131,0,0,0,0,0,0,0,0,0,0,0,0
+1,78,76,77,0,0,0,0,0,64,0,-1--1--1,,1|(0,0)|
+1,79,75,77,0,0,0,0,0,64,0,-1--1--1,,1|(0,0)|
+1,80,74,77,0,0,0,0,0,64,0,-1--1--1,,1|(0,0)|
+1,81,8,77,0,0,0,0,0,64,0,-1--1--1,,1|(0,0)|
+10,82,land yield policy time scenario table,918,866,75,30,0,131,0,0,0,0,0,0,0,0,0,0,0,0
+10,83,land yield policy time,888,831,75,30,0,131,0,2,0,0,0,0,0-0-0,0-0-0,|||128-0-0,0,0,0,0,0,0
+10,84,land yield policy time use custom,876,897,75,30,0,131,0,0,0,0,0,0,0,0,0,0,0,0
+10,85,land yield policy time s,857,771,58,29,8,131,0,0,0,0,0,0,0,0,0,0,0,0
+1,86,82,85,0,0,0,0,0,64,0,-1--1--1,,1|(0,0)|
+1,87,83,85,0,0,0,0,0,64,0,-1--1--1,,1|(0,0)|
+1,88,84,85,1,0,0,0,0,64,0,-1--1--1,,1|(863,848)|
+1,89,8,85,0,0,0,0,0,64,0,-1--1--1,,1|(0,0)|
+10,90,persistent pollution technology change scenario table,260,675,75,30,0,131,0,0,0,0,0,0,0,0,0,0,0,0
+10,91,persistent pollution technology change time,293,711,75,30,0,131,0,2,0,0,0,0,0-0-0,0-0-0,|||128-0-0,0,0,0,0,0,0
+10,92,persistent pollution technology change use custom,300,644,75,30,0,131,0,0,0,0,0,0,0,0,0,0,0,0
+10,93,persistent pollution technology change time s,557,585,90,42,8,131,0,0,0,0,0,0,0,0,0,0,0,0
+1,94,90,93,1,0,0,0,0,64,0,-1--1--1,,1|(413,645)|
+1,95,91,93,1,0,0,0,0,64,0,-1--1--1,,1|(530,637)|
+1,96,92,93,0,0,0,0,0,64,0,-1--1--1,,1|(0,0)|
+1,97,8,93,0,0,0,0,0,64,0,-1--1--1,,1|(0,0)|
+10,98,resource technology change time scenario table,236,857,75,30,0,131,0,0,0,0,0,0,0,0,0,0,0,0
+10,99,resource technology change time,272,821,75,30,0,131,0,2,0,0,0,0,0-0-0,0-0-0,|||128-0-0,0,0,0,0,0,0
+10,100,resource technology change time use custom,234,789,75,30,0,131,0,0,0,0,0,0,0,0,0,0,0,0
+10,101,resource technology change time s,576,783,86,42,8,131,0,0,0,0,0,0,0,0,0,0,0,0
+1,102,98,101,0,0,0,0,0,64,0,-1--1--1,,1|(0,0)|
+1,103,100,101,0,0,0,0,0,64,0,-1--1--1,,1|(0,0)|
+1,104,99,101,0,0,0,0,0,64,0,-1--1--1,,1|(0,0)|
+1,105,8,101,0,0,0,0,0,64,0,-1--1--1,,1|(0,0)|
+10,106,zero population growth time scenario table,650,1070,75,30,0,131,0,0,0,0,0,0,0,0,0,0,0,0
+10,107,zero population growth time,653,992,75,30,0,131,0,2,0,0,0,0,0-0-0,0-0-0,|||128-0-0,0,0,0,0,0,0
+10,108,zero population growth time use custom,660,1031,75,30,0,131,0,0,0,0,0,0,0,0,0,0,0,0
+10,109,zero population growth time s,632,921,73,29,8,131,0,0,0,0,0,0,0,0,0,0,0,0
+1,110,106,109,0,0,0,0,0,64,0,-1--1--1,,1|(0,0)|
+1,111,107,109,1,0,0,0,0,64,0,-1--1--1,,1|(641,956)|
+1,112,108,109,0,0,0,0,0,64,0,-1--1--1,,1|(0,0)|
+1,113,8,109,1,0,0,0,0,64,0,-1--1--1,,1|(731,677)|
+12,114,0,1123,1028,214,83,3,132,0,4,-1,0,0,0,0-0-0,255-255-0,|||0-0-0,0,0,0,0,0,0
+All this structure is just a way to allows changes to the scenario number to be used to replicate each scenario. When the scenario number is 0 (or ... use custom is 1)  the ...s values used match exactly the input constant (shown in magenta).
+12,115,0,762,-114,40,29,8,7,0,0,-1,1,0,0,0,0,0,0,0,0
+Scenario Inputs
+///---\\\
+:GRAPH STATE_OF_WORLD
+:TITLE State of the World
+:X-DIV 4
+:Y-DIV 4
+:NO-LEGEND 4
+:SCALE
+:VAR population
+:Y-MIN 0
+:Y-MAX 1.2e+10
+:DATASET 
+:SCALE
+:VAR food
+:Y-MIN 0
+:Y-MAX 6e+12
+:DATASET 
+:SCALE
+:VAR industrial output
+:Y-MIN 0
+:Y-MAX 4e+12
+:DATASET 
+:SCALE
+:VAR persistent pollution index
+:Y-MIN 0
+:Y-MAX 40
+:DATASET 
+:SCALE
+:VAR nonrenewable resources
+:Y-MIN 0
+:Y-MAX 2e+12
+:DATASET 
+
+:GRAPH MATERIAL_STANDARD_LIVING
+:TITLE Material standard of living
+:X-DIV 4
+:Y-DIV 4
+:NO-LEGEND 4
+:SCALE
+:VAR food per capita
+:Y-MIN 0
+:Y-MAX 1000
+:DATASET 
+:SCALE
+:VAR consumed industrial output per capita
+:Y-MIN 0
+:Y-MAX 250
+:DATASET 
+:SCALE
+:VAR service output per capita
+:Y-MIN 0
+:Y-MAX 1000
+:DATASET 
+:SCALE
+:VAR life expectancy
+:Y-MIN 0
+:Y-MAX 90
+:DATASET 
+
+:GRAPH WIP_STATE_OF_WORLD
+:TITLE State of the World
+:WIP
+:X-DIV 4
+:Y-DIV 4
+:X-MIN 1900
+:X-MAX 2100
+:SOFT-BOUNDS
+:NO-LEGEND 4
+:MAX-POINTS 200
+:SCALE
+:VAR population
+:Y-MIN 0
+:Y-MAX 1.2e+10
+:DATASET 
+:SCALE
+:VAR food
+:Y-MIN 0
+:Y-MAX 6e+12
+:DATASET 
+:SCALE
+:VAR industrial output
+:Y-MIN 0
+:Y-MAX 4e+12
+:DATASET 
+:SCALE
+:VAR persistent pollution index
+:Y-MIN 0
+:Y-MAX 40
+:DATASET 
+:SCALE
+:VAR Nonrenewable Resources
+:Y-MIN 0
+:Y-MAX 2e+12
+:DATASET 
+
+:GRAPH HUMAN_WELFARE
+:TITLE Human Welfare and Ecological Footprint
+:X-DIV 4
+:Y-DIV 4
+:NO-LEGEND 4
+:SCALE
+:VAR Human Welfare Index
+:Y-MIN 0
+:Y-MAX 1
+:DATASET 
+:SCALE
+:VAR Human Ecological Footprint
+:Y-MIN 0
+:Y-MAX 4
+:DATASET 
+:L<%^E!@
+4:Time
+5:deaths 0 to 14
+9:Scen 5
+120:AllScenarios.runconfig
+19:100,4
+24:1900
+25:2100
+26:2100
+22:Ghectare,Ghectares
+22:hectare,hectares
+22:Pollution unit,Pollution units
+22:Resource unit,Resource units
+22:Ghectare,Ghectares
+22:hectare,hectares
+22:Pollution unit,Pollution units
+22:Resource unit,Resource units
+23:0
+15:0,0,0,0,0,0
+27:0,
+34:0,
+42:0
+72:0
+73:0
+95:0
+96:0
+97:0
+77:0
+78:0
+102:1
+93:0
+94:0
+92:0
+91:0
+90:0
+87:0
+75:
+43:
+103:8,8,8,3,8
+105:0,0,0,0,0,0,0,0,0,0
+104:Vensim Sans|12||0-0-0|0-0-0|-1--1--1|0-0-255|192-192-192|-1--1--1

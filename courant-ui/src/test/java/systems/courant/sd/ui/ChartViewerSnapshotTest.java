@@ -9,6 +9,7 @@ import org.testfx.framework.junit5.ApplicationExtension;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /**
  * Tests that ChartViewerApplication.snapshot() captures an atomic, independent
@@ -26,7 +27,7 @@ class ChartViewerSnapshotTest {
     @Test
     @DisplayName("snapshot captures current state independently of later mutations")
     void shouldIsolateSnapshotFromLaterMutations() {
-        ChartViewerApplication.addSeries(List.of("A"), List.of());
+        ChartViewerApplication.setSeries(List.of("A"), List.of());
         ChartViewerApplication.addValues(List.of(1.0), List.of(), 0);
         ChartViewerApplication.setSize(1024, 768);
 
@@ -34,7 +35,7 @@ class ChartViewerSnapshotTest {
 
         // Mutate static state after snapshot
         ChartViewerApplication.reset();
-        ChartViewerApplication.addSeries(List.of("B", "C"), List.of());
+        ChartViewerApplication.setSeries(List.of("B", "C"), List.of());
         ChartViewerApplication.setSize(640, 480);
 
         // Snapshot should still reflect the original state
@@ -49,13 +50,13 @@ class ChartViewerSnapshotTest {
     @DisplayName("snapshot taken before next caller mutates state is unaffected")
     void shouldIsolateSequentialCallers() {
         // Caller 1 accumulates data and snapshots
-        ChartViewerApplication.addSeries(List.of("Alpha"), List.of());
+        ChartViewerApplication.setSeries(List.of("Alpha"), List.of());
         ChartViewerApplication.addValues(List.of(10.0), List.of(), 0);
         ChartViewerApplication.ChartData snap1 = ChartViewerApplication.snapshot();
 
         // Caller 2 resets and accumulates different data
         ChartViewerApplication.reset();
-        ChartViewerApplication.addSeries(List.of("Beta"), List.of());
+        ChartViewerApplication.setSeries(List.of("Beta"), List.of());
         ChartViewerApplication.addValues(List.of(20.0), List.of(), 0);
         ChartViewerApplication.ChartData snap2 = ChartViewerApplication.snapshot();
 
@@ -75,7 +76,7 @@ class ChartViewerSnapshotTest {
     @Test
     @DisplayName("snapshot title and xAxisLabel match what was set")
     void shouldCaptureTitle() {
-        ChartViewerApplication.addSeries(List.of("X"), List.of());
+        ChartViewerApplication.setSeries(List.of("X"), List.of());
 
         ChartViewerApplication.ChartData snap = ChartViewerApplication.snapshot();
 
@@ -87,7 +88,7 @@ class ChartViewerSnapshotTest {
     @Test
     @DisplayName("snapshot after reset returns empty series")
     void shouldReturnEmptyAfterReset() {
-        ChartViewerApplication.addSeries(List.of("A", "B"), List.of());
+        ChartViewerApplication.setSeries(List.of("A", "B"), List.of());
         ChartViewerApplication.reset();
 
         ChartViewerApplication.ChartData snap = ChartViewerApplication.snapshot();
@@ -95,6 +96,36 @@ class ChartViewerSnapshotTest {
         assertThat(snap.series()).isEmpty();
         assertThat(snap.width()).isEqualTo(800);
         assertThat(snap.height()).isEqualTo(600);
+    }
+
+    @Test
+    @DisplayName("addValues after snapshot does not mutate snapshot Series data")
+    void shouldIsolateSnapshotSeriesDataFromAddValues() {
+        ChartViewerApplication.setSeries(List.of("S1"), List.of());
+        ChartViewerApplication.addValues(List.of(1.0), List.of(), 0);
+
+        ChartViewerApplication.ChartData snap = ChartViewerApplication.snapshot();
+
+        // Add more values to the static state after the snapshot was taken
+        ChartViewerApplication.addValues(List.of(2.0), List.of(), 1);
+        ChartViewerApplication.addValues(List.of(3.0), List.of(), 2);
+
+        // The snapshot's Series should still have only the original data point
+        assertThat(snap.series()).hasSize(1);
+        assertThat(snap.series().getFirst().getData()).hasSize(1);
+        assertThat(snap.series().getFirst().getData().getFirst().getYValue().doubleValue())
+                .isEqualTo(1.0);
+    }
+
+    @Test
+    @DisplayName("snapshot series list is unmodifiable")
+    void shouldReturnUnmodifiableSeriesList() {
+        ChartViewerApplication.setSeries(List.of("X"), List.of());
+
+        ChartViewerApplication.ChartData snap = ChartViewerApplication.snapshot();
+
+        assertThatThrownBy(() -> snap.series().add(new javafx.scene.chart.XYChart.Series<>()))
+                .isInstanceOf(UnsupportedOperationException.class);
     }
 
 }

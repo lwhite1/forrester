@@ -126,15 +126,21 @@ public final class SelectionController {
     /**
      * Pastes clipboard contents. Returns the set of reference names that were
      * replaced with 0 (empty if none).
+     *
+     * @param viewportCenter the center of the current viewport in world coordinates,
+     *                       used as the paste anchor when no elements are selected.
+     *                       May be null.
      */
-    public Set<String> paste(ModelEditor editor, CanvasState canvasState, Runnable saveUndo) {
+    public Set<String> paste(ModelEditor editor, CanvasState canvasState, Runnable saveUndo,
+                      CanvasState.Position viewportCenter) {
         if (editor == null || !copyPaste.hasContent()) {
             return Set.of();
         }
 
         saveUndo.run();
 
-        CopyPasteController.PasteResult result = copyPaste.paste(canvasState, editor);
+        CopyPasteController.PasteResult result =
+                copyPaste.paste(canvasState, editor, viewportCenter);
         if (result.pastedNames().isEmpty()) {
             return Set.of();
         }

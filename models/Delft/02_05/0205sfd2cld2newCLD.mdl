@@ -1,0 +1,110 @@
+{UTF-8}
+attention from the platform  = A FUNCTION OF( )
+	~	
+	~		|
+
+enrollments  = A FUNCTION OF( attention from the platform,former students and current students\
+		,perceived quality of the teaching)
+	~	
+	~		|
+
+experience  = A FUNCTION OF( former students and current students)
+	~	
+	~		|
+
+former students and current students  = A FUNCTION OF( students)
+	~	
+	~		|
+
+perceived quality of the teaching  = A FUNCTION OF( experience)
+	~	
+	~		|
+
+satisfaction  = A FUNCTION OF( perceived quality of the teaching)
+	~	
+	~		|
+
+students  = A FUNCTION OF( enrollments,satisfaction)
+	~	
+	~		|
+
+********************************************************
+	.Control
+********************************************************~
+		Simulation Control Parameters
+	|
+
+FINAL TIME  = 2030
+	~	Year
+	~	The final time for the simulation.
+	|
+
+INITIAL TIME  = 2014
+	~	Year
+	~	The initial time for the simulation.
+	|
+
+SAVEPER  = 
+        TIME STEP 
+	~	Year [0,?]
+	~	The frequency with which output is stored.
+	|
+
+TIME STEP  = 1
+	~	Year [0,?]
+	~	The time step for the simulation.
+	|
+
+\\\---/// Sketch information - do not modify anything except names
+V300  Do not put anything below this section - it will be ignored
+*View 1
+$192-192-192,0,Times New Roman|12||0-0-0|0-0-0|0-0-255|-1--1--1|-1--1--1|96,96,140,0
+10,1,students,594,202,27,11,8,3,0,2,0,0,0,0,-1--1--1,0-0-0,|0||64-160-98
+11,2,0,459,232,6,8,38,3,0,0,1,0,0,0
+10,3,enrollments,459,251,36,11,40,3,0,0,-1,0,0,0
+10,12,satisfaction,572,360,35,11,8,3,0,0,0,0,0,0
+10,14,perceived quality of the teaching,406,398,62,19,8,3,0,0,0,0,0,0
+1,17,14,12,1,0,43,0,2,0,0,-1--1--1,|0||-1--1--1,1|(499,399)|
+1,18,14,3,1,0,43,0,0,64,0,-1--1--1,,1|(439,345)|
+10,20,former students and current students,450,140,63,19,8,3,0,0,0,0,0,0
+1,22,1,20,1,0,43,0,0,64,0,-1--1--1,,1|(536,141)|
+1,23,20,3,1,0,43,0,0,64,0,-1--1--1,,1|(445,175)|
+10,27,experience,303,216,35,11,8,3,0,0,0,0,0,0
+1,42,27,14,1,0,43,0,2,64,0,-1--1--1,|0||-1--1--1,1|(305,300)|
+1,46,20,27,1,0,43,0,2,64,0,-1--1--1,|0||-1--1--1,1|(387,135)|
+1,49,3,1,1,0,43,0,2,0,0,-1--1--1,|0||-1--1--1,1|(530,257)|
+10,54,attention from the platform,377,304,56,19,8,3,0,0,0,0,0,0
+1,55,54,3,0,0,0,0,0,64,0,-1--1--1,,1|(417,277)|
+12,56,0,504,207,12,12,5,135,0,0,-1,0,0,0
++
+12,57,0,364,226,12,12,5,135,0,0,-1,0,0,0
++
+12,58,0,512,317,12,12,5,135,0,0,-1,0,0,0
++
+1,59,12,1,1,0,43,0,2,0,0,-1--1--1,|0||-1--1--1,1|(599,282)|
+///---\\\
+:L<%^E!@
+9:Current
+22:$,Dollar,Dollars,$s
+22:Hour,Hours
+22:Month,Months
+22:Person,People,Persons
+22:Unit,Units
+22:Week,Weeks
+22:Year,Years
+22:Day,Days
+15:0,0,0,1,0,0
+19:140,0
+27:2,
+34:0,
+5:experience
+35:Date
+36:YYYY-MM-DD
+37:2000
+38:1
+39:1
+40:0
+41:0
+24:0
+25:0
+26:0

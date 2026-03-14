@@ -20,6 +20,8 @@ import javafx.scene.paint.Color;
 import java.util.List;
 import java.util.Map;
 import systems.courant.sd.app.canvas.CanvasState;
+import systems.courant.sd.app.canvas.MaturityAnalysis;
+import systems.courant.sd.app.canvas.MaturityIndicatorRenderer;
 import systems.courant.sd.app.canvas.CausalLinkGeometry;
 import systems.courant.sd.app.canvas.ColorPalette;
 import systems.courant.sd.app.canvas.ConnectionId;
@@ -84,9 +86,6 @@ public class CanvasRenderer {
     }
 
     /**
-     * Groups the per-frame interactive state passed to {@link #render}.
-     */
-    /**
      * Pre-extracted sparkline data for stock elements.
      *
      * @param stockSeries map of stock name to time-series values
@@ -113,7 +112,8 @@ public class CanvasRenderer {
             ConnectionId selectedConnection,
             boolean hideVariables,
             boolean showDelayBadges,
-            boolean hideInfoLinks
+            boolean hideInfoLinks,
+            MaturityAnalysis maturityAnalysis
     ) {}
 
     private final CanvasState canvasState;
@@ -143,18 +143,9 @@ public class CanvasRenderer {
 
         ModelEditor editor = ctx.editor();
         List<ConnectorRoute> connectors = ctx.connectors();
-        FlowCreationController.State flowState = ctx.flowState();
-        CausalLinkCreationController.State causalLinkState = ctx.causalLinkState();
-        InfoLinkCreationController.State infoLinkState = ctx.infoLinkState();
-        ReattachState reattachState = ctx.reattachState();
-        RerouteState rerouteState = ctx.rerouteState();
-        MarqueeState marqueeState = ctx.marqueeState();
         FeedbackAnalysis loopAnalysis = ctx.loopAnalysis();
         CausalTraceAnalysis traceAnalysis = ctx.traceAnalysis();
-        Map<String, ValidationIssue.Severity> elementIssues = ctx.elementIssues();
         String hoveredElement = ctx.hoveredElement();
-        ConnectionId hoveredConnection = ctx.hoveredConnection();
-        ConnectionId selectedConnection = ctx.selectedConnection();
         boolean hideAux = ctx.hideVariables();
         boolean showDelay = ctx.showDelayBadges();
 
@@ -168,7 +159,7 @@ public class CanvasRenderer {
 
         // 1. Draw connections first (behind elements)
         // When hovering or tracing, dim non-related connections
-        drawMaterialFlows(gc, editor);
+        drawMaterialFlows(gc, editor, ctx.maturityAnalysis());
         if (!ctx.hideInfoLinks()) {
             drawInfoLinks(gc, connectors, hideAux, hoveredElement, traceAnalysis);
         }
@@ -185,6 +176,16 @@ public class CanvasRenderer {
         }
 
         // 2. Draw elements on top
+        renderElements(gc, editor, hideAux, showDelay);
+
+        // 3. Draw overlays: sparklines, validation, loops, highlights, rubber bands, marquee
+        renderOverlays(gc, ctx, connectors, editor.getCausalLinks(), hideAux);
+
+        gc.restore();
+    }
+
+    private void renderElements(GraphicsContext gc, ModelEditor editor,
+                                boolean hideAux, boolean showDelay) {
         for (String name : canvasState.getDrawOrder()) {
             ElementType type = canvasState.getType(name).orElse(null);
             double cx = canvasState.getX(name);
@@ -278,6 +279,23 @@ public class CanvasRenderer {
                 default -> { }
             }
         }
+    }
+
+    private void renderOverlays(GraphicsContext gc, RenderContext ctx,
+                                List<ConnectorRoute> connectors,
+                                List<CausalLinkDef> allCausalLinks, boolean hideAux) {
+        FeedbackAnalysis loopAnalysis = ctx.loopAnalysis();
+        CausalTraceAnalysis traceAnalysis = ctx.traceAnalysis();
+        Map<String, ValidationIssue.Severity> elementIssues = ctx.elementIssues();
+        String hoveredElement = ctx.hoveredElement();
+        ConnectionId hoveredConnection = ctx.hoveredConnection();
+        ConnectionId selectedConnection = ctx.selectedConnection();
+        FlowCreationController.State flowState = ctx.flowState();
+        CausalLinkCreationController.State causalLinkState = ctx.causalLinkState();
+        InfoLinkCreationController.State infoLinkState = ctx.infoLinkState();
+        ReattachState reattachState = ctx.reattachState();
+        RerouteState rerouteState = ctx.rerouteState();
+        MarqueeState marqueeState = ctx.marqueeState();
 
         // 2-spark. Draw sparklines inside stock elements (above fill, below overlays)
         if (ctx.sparklineData() != null) {
@@ -292,6 +310,21 @@ public class CanvasRenderer {
                         && !isHiddenAux(entry.getKey(), hideAux)) {
                     ErrorIndicatorRenderer.drawIndicator(
                             gc, canvasState, entry.getKey(), entry.getValue());
+                }
+            }
+        }
+
+        // 2a2. Draw maturity indicators (missing equation accent, missing unit badge)
+        MaturityAnalysis maturity = ctx.maturityAnalysis();
+        if (maturity != null) {
+            for (String name : maturity.missingEquation()) {
+                if (canvasState.hasElement(name) && !isHiddenAux(name, hideAux)) {
+                    MaturityIndicatorRenderer.drawMissingEquationAccent(gc, canvasState, name);
+                }
+            }
+            for (String name : maturity.missingUnit()) {
+                if (canvasState.hasElement(name) && !isHiddenAux(name, hideAux)) {
+                    MaturityIndicatorRenderer.drawMissingUnitBadge(gc, canvasState, name);
                 }
             }
         }
@@ -325,7 +358,6 @@ public class CanvasRenderer {
         }
 
         // 2c. Draw connection highlights (above loops, below element hover)
-        List<CausalLinkDef> allCausalLinks = editor.getCausalLinks();
         if (selectedConnection != null) {
             drawConnectionHighlight(gc, connectors, allCausalLinks, selectedConnection, false);
         }
@@ -381,16 +413,16 @@ public class CanvasRenderer {
         if (marqueeState.active()) {
             drawMarquee(gc, marqueeState);
         }
-
-        gc.restore();
     }
 
     /**
      * Draws material flow arrows routed through the flow indicator (diamond).
      * Cloud positions are computed via {@link FlowEndpointCalculator#cloudPosition}
      * so that rendering and hit-testing use the same logic.
+     * Flows with unit mismatches are drawn in red.
      */
-    private void drawMaterialFlows(GraphicsContext gc, ModelEditor editor) {
+    private void drawMaterialFlows(GraphicsContext gc, ModelEditor editor,
+                                   MaturityAnalysis maturity) {
         for (FlowDef flow : editor.getFlows()) {
             if (!canvasState.hasElement(flow.name())) {
                 continue;
@@ -434,8 +466,16 @@ public class CanvasRenderer {
                 sinkIsCloud = true;
             }
 
-            ConnectionRenderer.drawMaterialFlow(gc, sourceX, sourceY, midX, midY,
-                    sinkX, sinkY, sourceIsCloud, sinkIsCloud);
+            boolean mismatch = maturity != null
+                    && maturity.unitMismatchFlows().contains(flow.name());
+            if (mismatch) {
+                ConnectionRenderer.drawMaterialFlow(gc, sourceX, sourceY, midX, midY,
+                        sinkX, sinkY, sourceIsCloud, sinkIsCloud,
+                        ColorPalette.UNIT_MISMATCH);
+            } else {
+                ConnectionRenderer.drawMaterialFlow(gc, sourceX, sourceY, midX, midY,
+                        sinkX, sinkY, sourceIsCloud, sinkIsCloud);
+            }
         }
     }
 

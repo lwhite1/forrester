@@ -1,0 +1,187 @@
+{UTF-8}
+budgetcoverage=
+	1
+	~	Month
+	~		|
+
+desired number of professors=
+	money / average professor salary /budgetcoverage
+	~	people
+	~		|
+
+teaching fee=
+	150000
+	~	euro/Month
+	~		|
+
+average hiring time=
+	12
+	~	Month
+	~		|
+
+average professor salary=
+	3500
+	~	euro/person/Month
+	~		|
+
+earnings from papers=
+	earnings per published paper * number of papers published
+	~	euro/Month
+	~		|
+
+earnings per published paper=
+	4000
+	~	euro/paper
+	~		|
+
+initially available money=
+	500000
+	~	euro
+	~		|
+
+money= INTEG (
+	+subsidy and earnings from papers-money spent on salaries,
+		initially available money)
+	~	euro
+	~		|
+
+money spent on salaries=
+	professors * average professor salary
+	~	euro/Month
+	~		|
+
+new professors hired=
+	MAX((desired number of professors - professors) / average hiring time,0 )
+	~	person/Month
+	~		|
+
+number of papers per professor=
+	0.5
+	~	paper/person/Month
+	~		|
+
+number of papers published=
+	number of papers per professor * professors
+	~	paper/Month
+	~		|
+
+subsidy and earnings from papers=
+	teaching fee + earnings from papers
+	~	euro/Month
+	~		|
+
+professors leaving=
+	professors*percentage of leavers
+	~	person/Month
+	~		|
+
+professors= INTEG (
+	+new professors hired-professors leaving,
+		25)
+	~	person
+	~		|
+
+percentage of leavers=
+	0.1/12
+	~	1/Month
+	~		|
+
+********************************************************
+	.Control
+********************************************************~
+		Simulation Control Parameters
+	|
+
+FINAL TIME  = 200
+	~	Month
+	~	The final time for the simulation.
+	|
+
+INITIAL TIME  = 0
+	~	Month
+	~	The initial time for the simulation.
+	|
+
+SAVEPER  = 
+        TIME STEP
+	~	Month [0,?]
+	~	The frequency with which output is stored.
+	|
+
+TIME STEP  = 0.0625
+	~	Month [0,?]
+	~	The time step for the simulation.
+	|
+
+\\\---/// Sketch information - do not modify anything except names
+V300  Do not put anything below this section - it will be ignored
+*View 1
+$192-192-192,0,Times New Roman|12||0-0-0|0-0-0|0-0-255|-1--1--1|-1--1--1|96,96,100,0
+10,1,professors,368,112,40,20,3,3,0,0,0,0,0,0
+12,2,48,186,118,10,8,0,3,0,0,-1,0,0,0
+1,3,5,1,4,0,0,22,0,0,0,-1--1--1,,1|(298,118)|
+1,4,5,2,100,0,0,22,0,0,0,-1--1--1,,1|(226,118)|
+11,5,48,262,118,6,8,34,3,0,0,1,0,0,0
+10,6,new professors hired,262,137,49,19,40,3,0,0,-1,0,0,0
+12,7,48,545,112,10,8,0,3,0,0,-1,0,0,0
+1,8,10,7,4,0,0,22,0,0,0,-1--1--1,,1|(506,112)|
+1,9,10,1,100,0,0,22,0,0,0,-1--1--1,,1|(436,112)|
+11,10,48,471,112,6,8,34,3,0,0,1,0,0,0
+10,11,professors leaving,471,131,56,11,40,3,0,0,-1,0,0,0
+1,12,1,10,1,0,0,0,0,64,0,-1--1--1,,1|(418,74)|
+10,13,percentage of leavers,600,136,44,19,8,3,0,0,0,0,0,0
+1,14,13,11,0,0,0,0,0,64,0,-1--1--1,,1|(548,134)|
+10,15,money,345,334,40,20,3,3,0,0,0,0,0,0
+12,16,48,132,337,10,8,0,3,0,0,-1,0,0,0
+1,17,19,16,4,0,0,22,0,0,0,-1--1--1,,1|(179,337)|
+1,18,19,15,100,0,0,22,0,0,0,-1--1--1,,1|(267,337)|
+11,19,48,223,337,6,8,34,3,0,0,1,0,0,0
+10,20,money spent on salaries,223,356,50,19,40,3,0,0,-1,0,0,0
+12,21,48,545,338,10,8,0,3,0,0,-1,0,0,0
+1,22,24,15,4,0,0,22,0,0,0,-1--1--1,,1|(419,338)|
+1,23,24,21,100,0,0,22,0,0,0,-1--1--1,,1|(500,338)|
+11,24,48,460,338,6,8,34,3,0,0,1,0,0,0
+10,25,subsidy and earnings from papers,460,357,66,19,40,3,0,0,-1,0,0,0
+10,26,teaching fee,485,409,38,11,8,3,0,0,0,0,0,0
+1,27,26,25,0,0,0,0,0,64,0,-1--1--1,,1|(477,393)|
+10,28,number of papers per professor,636,198,56,19,8,3,0,0,0,0,0,0
+10,29,number of papers published,482,192,56,19,8,3,0,0,0,0,0,0
+10,30,earnings per published paper,639,272,51,19,8,3,0,0,0,0,0,0
+1,31,1,29,1,0,0,0,0,64,0,-1--1--1,,1|(429,164)|
+1,32,28,29,1,0,0,0,0,64,0,-1--1--1,,1|(527,182)|
+10,33,earnings from papers,492,274,43,19,8,3,0,0,0,0,0,0
+1,34,29,33,1,0,0,0,0,64,0,-1--1--1,,1|(495,226)|
+1,35,30,33,0,0,0,0,0,64,0,-1--1--1,,1|(568,272)|
+1,36,33,24,1,0,0,0,0,64,0,-1--1--1,,1|(486,307)|
+10,37,desired number of professors,82,158,58,19,8,3,0,2,0,0,0,0,0-0-0,0-0-0,|12||255-128-0
+10,38,average professor salary,154,246,57,19,8,3,0,0,0,0,0,0
+1,39,38,37,1,0,0,0,0,64,0,-1--1--1,,1|(112,203)|
+1,40,37,6,0,0,0,0,0,64,0,-1--1--1,,1|(169,147)|
+1,41,1,5,1,0,0,0,0,64,0,-1--1--1,,1|(286,97)|
+10,42,average hiring time,269,192,58,11,8,3,0,0,0,0,0,0
+1,43,42,6,0,0,0,0,0,64,0,-1--1--1,,1|(267,175)|
+1,44,15,37,1,0,0,0,0,64,0,-1--1--1,,1|(175,407)|
+1,45,38,19,1,0,0,0,0,64,0,-1--1--1,,1|(185,295)|
+1,46,1,19,1,0,0,0,0,64,0,-1--1--1,,1|(315,241)|
+10,47,initially available money,342,408,51,19,8,3,0,0,0,0,0,0
+10,48,budgetcoverage,77,49,50,11,8,3,0,0,0,0,0,0
+1,49,48,37,0,0,0,0,0,64,0,-1--1--1,,1|(78,92)|
+1,50,47,15,0,0,0,0,0,64,1,-1--1--1,,1|(342,378)|
+///---\\\
+:GRAPH GRAPH
+:TITLE GRAPH
+:SCALE
+:VAR desired number of professors
+:SCALE
+:VAR professors
+:L<%^E!@
+9:000
+15:0,0,0,5,0,0
+19:100,0
+27:2,
+34:0,
+4:Time
+5:teaching fee
+24:0
+25:200
+26:200

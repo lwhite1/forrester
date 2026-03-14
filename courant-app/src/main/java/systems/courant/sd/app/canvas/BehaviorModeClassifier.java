@@ -197,16 +197,6 @@ public final class BehaviorModeClassifier {
         return rise > 0 && fall > rise * 0.3;
     }
 
-    private static double min(double[] values) {
-        double min = values[0];
-        for (double v : values) {
-            if (v < min) {
-                min = v;
-            }
-        }
-        return min;
-    }
-
     private static double range(double[] values) {
         double min = values[0];
         double max = values[0];

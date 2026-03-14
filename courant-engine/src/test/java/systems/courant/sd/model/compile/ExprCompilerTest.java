@@ -270,6 +270,42 @@ class ExprCompilerTest {
     }
 
     @Test
+    void shouldDistinguishSmallValuesBeyondEpsilonFloor() {
+        // Values that differ by more than the absolute epsilon floor (1e-10)
+        // should not compare equal, even when both are small
+        context.addLiteralConstant("Small1", 0.0);
+        context.addLiteralConstant("Small2", 1e-5);
+        Formula eq = compiler.compile("Small1 == Small2");
+        assertThat(eq.getCurrentValue())
+                .as("0 and 1e-5 differ by more than epsilon floor and should not be equal")
+                .isEqualTo(0.0);
+
+        Formula ne = compiler.compile("Small1 != Small2");
+        assertThat(ne.getCurrentValue())
+                .as("0 and 1e-5 should be not-equal")
+                .isEqualTo(1.0);
+    }
+
+    @Test
+    void shouldUseRelativeEpsilonForLargeValues() {
+        // For large values, the epsilon should scale with the magnitude
+        context.addLiteralConstant("Big1", 1_000_000.0);
+        context.addLiteralConstant("Big2", 1_000_000.0 + 1e-4);
+        Formula eq = compiler.compile("Big1 == Big2");
+        assertThat(eq.getCurrentValue())
+                .as("Values differing by 1e-4 at scale 1e6 should be equal (relative diff ~1e-10)")
+                .isEqualTo(1.0);
+
+        // Values differing more significantly should not be equal
+        context.addLiteralConstant("Big3", 1_000_000.0);
+        context.addLiteralConstant("Big4", 1_000_001.0);
+        Formula neq = compiler.compile("Big3 == Big4");
+        assertThat(neq.getCurrentValue())
+                .as("1_000_000 and 1_000_001 should not be equal")
+                .isEqualTo(0.0);
+    }
+
+    @Test
     void shouldCompileDTWithCustomValue() {
         UnitRegistry registry = new UnitRegistry();
         CompilationContext customContext = new CompilationContext(

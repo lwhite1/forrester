@@ -78,7 +78,6 @@ public class Simulation {
 
     private final List<EventHandler> eventHandlers = new ArrayList<>();
 
-    private final Set<String> warnedNonFiniteStocks = new java.util.HashSet<>();
 
     public Simulation(Model model, TimeUnit timeStep, Quantity duration) {
         this(model, timeStep, duration, LocalDateTime.now());
@@ -105,6 +104,7 @@ public class Simulation {
     }
 
     public void addEventHandler(EventHandler handler) {
+        Preconditions.checkNotNull(handler, "handler must not be null");
         eventHandlers.add(handler);
     }
 
@@ -161,10 +161,14 @@ public class Simulation {
         currentStep = 0;
         currentDateTime = startTime;
         elapsedTime = Duration.ZERO;
-        warnedNonFiniteStocks.clear();
         clearHistory();
 
-        fireStartEvent(new SimulationStartEvent(this));
+        long nanos = Math.round(timeStep.ratioToBaseUnit() * 1_000_000_000L);
+        if (nanos <= 0) {
+            throw new IllegalArgumentException(
+                    "Time step too small to represent in nanoseconds: " + timeStep.getName()
+                            + " (ratioToBaseUnit=" + timeStep.ratioToBaseUnit() + ")");
+        }
 
         double rawSteps = duration.inBaseUnits().getValue() / timeStep.ratioToBaseUnit();
         // Snap to nearest integer if within epsilon (avoids FP off-by-one)
@@ -187,10 +191,18 @@ public class Simulation {
                             + "). Check duration and time step values.");
         }
 
+        Duration stepDuration = Duration.ofNanos(nanos);
         long deadlineMs = timeoutMs > 0 ? System.currentTimeMillis() + timeoutMs : Long.MAX_VALUE;
         Map<Flow, Quantity> flowMap = new IdentityHashMap<>();
+        List<Stock> allStocks = collectAllStocks();
+        for (Stock stock : allStocks) {
+            stock.resetWarnings();
+        }
+        Map<Stock, Double> deltas = new IdentityHashMap<>();
 
         try {
+            fireStartEvent(new SimulationStartEvent(this));
+
             while (currentStep <= totalSteps) {
                 if (Thread.interrupted()) {
                     log.info("Simulation cancelled at step {}/{}", currentStep, totalSteps);
@@ -214,9 +226,8 @@ public class Simulation {
                     fireTimeStepEvent(new TimeStepEvent(currentDateTime, model, currentStep, timeStep));
                     recordVariableValues();
                 }
-                List<Stock> allStocks = collectAllStocks();
-                updateStocks(flowMap, allStocks, shouldRecord);
-                addStep(currentDateTime);
+                updateStocks(flowMap, deltas, allStocks, shouldRecord);
+                advanceClock(stepDuration);
                 currentStep++;
             }
         } finally {
@@ -225,19 +236,19 @@ public class Simulation {
     }
 
     private void fireStartEvent(SimulationStartEvent event) {
-        for (EventHandler handler : eventHandlers) {
+        for (EventHandler handler : List.copyOf(eventHandlers)) {
             handler.handleSimulationStartEvent(event);
         }
     }
 
     private void fireTimeStepEvent(TimeStepEvent event) {
-        for (EventHandler handler : eventHandlers) {
+        for (EventHandler handler : List.copyOf(eventHandlers)) {
             handler.handleTimeStepEvent(event);
         }
     }
 
     private void fireEndEvent(SimulationEndEvent event) {
-        for (EventHandler handler : eventHandlers) {
+        for (EventHandler handler : List.copyOf(eventHandlers)) {
             handler.handleSimulationEndEvent(event);
         }
     }
@@ -271,12 +282,12 @@ public class Simulation {
         }
     }
 
-    private void updateStocks(Map<Flow, Quantity> flowMap, List<Stock> stocks,
-                              boolean shouldRecord) {
+    private void updateStocks(Map<Flow, Quantity> flowMap, Map<Stock, Double> deltas,
+                              List<Stock> stocks, boolean shouldRecord) {
         // Phase 1: Compute all flow rates and net deltas using pre-step stock values.
         // This ensures standard Euler integration where all stocks see the same
         // time-step snapshot, regardless of processing order.
-        Map<Stock, Double> deltas = new IdentityHashMap<>();
+        deltas.clear();
         for (Stock stock : stocks) {
             double delta = 0.0;
             delta += computeFlowDelta(true, flowMap, stock.getInflows(), shouldRecord);
@@ -285,24 +296,18 @@ public class Simulation {
         }
 
         // Phase 2: Apply all deltas simultaneously.
+        // In strict mode, non-finite values throw immediately. Otherwise,
+        // Stock.setValue() handles non-finite values by retaining the previous
+        // value and logging a warning, so no additional guard is needed.
         for (Stock stock : stocks) {
-            double oldValue = stock.getQuantity().getValue();
+            double oldValue = stock.getValue();
             double newValue = oldValue + deltas.get(stock);
-            if (!Double.isFinite(newValue)) {
-                if (strictMode) {
-                    throw new NonFiniteValueException(
-                            "Stock '" + stock.getName() + "' became " + newValue
-                                    + " at step " + currentStep
-                                    + " (previous value: " + oldValue
-                                    + ", delta: " + deltas.get(stock) + ")");
-                }
-                if (warnedNonFiniteStocks.add(stock.getName())) {
-                    log.warn("Stock '{}' became {} at step {} (previous value: {}, delta: {})"
-                                    + " — keeping previous value",
-                            stock.getName(), newValue, currentStep, oldValue, deltas.get(stock));
-                }
-                // Keep the previous value instead of crashing
-                continue;
+            if (strictMode && !Double.isFinite(newValue)) {
+                throw new NonFiniteValueException(
+                        "Stock '" + stock.getName() + "' became " + newValue
+                                + " at step " + currentStep
+                                + " (previous value: " + oldValue
+                                + ", delta: " + deltas.get(stock) + ")");
             }
             stock.setValue(newValue);
         }
@@ -355,10 +360,8 @@ public class Simulation {
         }
     }
 
-    private void addStep(LocalDateTime dateTime) {
-        long nanos = Math.round(timeStep.ratioToBaseUnit() * 1_000_000_000L);
-        Duration stepDuration = Duration.ofNanos(nanos);
-        currentDateTime = dateTime.plus(stepDuration);
+    private void advanceClock(Duration stepDuration) {
+        currentDateTime = currentDateTime.plus(stepDuration);
         elapsedTime = elapsedTime.plus(stepDuration);
     }
 

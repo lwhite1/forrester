@@ -117,6 +117,9 @@ public class ModelCanvas extends Canvas {
     // Full validation issues per element (for tooltips and dialog)
     private Map<String, List<ValidationIssue>> elementIssueDetails = Map.of();
 
+    // Maturity analysis (missing equations, units, mismatches)
+    private MaturityAnalysis maturityAnalysis = MaturityAnalysis.EMPTY;
+
     // Last validation result (for dialog access)
     private ValidationResult lastValidationResult = new ValidationResult(List.of());
 
@@ -250,6 +253,7 @@ public class ModelCanvas extends Canvas {
         setOnMouseDragged(event -> inputDispatcher.handleMouseDragged(event, this));
         setOnMouseReleased(event -> inputDispatcher.handleMouseReleased(event, this));
         setOnMouseMoved(event -> inputDispatcher.handleMouseMoved(event, this));
+        setOnMouseExited(event -> inputDispatcher.handleMouseExited(event, this));
         setOnKeyPressed(event -> inputDispatcher.handleKeyPressed(event, this));
         setOnKeyReleased(event -> {
             inputDispatcher.handleKeyReleased(event);
@@ -501,9 +505,8 @@ public class ModelCanvas extends Canvas {
         }
     }
 
-    private void invalidateLoopAnalysis() {
-        loopController.invalidate(
-                editor != null ? editor.toModelDefinition(canvasState.toViewDef()) : null);
+    private void invalidateLoopAnalysis(ModelDefinition def) {
+        loopController.invalidate(def);
     }
 
     // --- Validation indicators ---
@@ -512,15 +515,15 @@ public class ModelCanvas extends Canvas {
      * Recomputes validation issues for all elements in the model.
      * Called from {@link #invalidateAnalysis()} on every structural mutation.
      */
-    private void recomputeValidation() {
-        if (editor == null) {
+    private void recomputeValidation(ModelDefinition def) {
+        if (def == null) {
             elementIssues = Map.of();
             elementIssueDetails = Map.of();
             lastValidationResult = new ValidationResult(List.of());
+            maturityAnalysis = MaturityAnalysis.EMPTY;
             return;
         }
-        ValidationResult result = ModelValidator.validate(
-                editor.toModelDefinition(canvasState.toViewDef()));
+        ValidationResult result = ModelValidator.validate(def);
         Map<String, Severity> issues = new LinkedHashMap<>();
         Map<String, List<ValidationIssue>> details = new LinkedHashMap<>();
         for (ValidationIssue issue : result.issues()) {
@@ -534,6 +537,7 @@ public class ModelCanvas extends Canvas {
         elementIssues = issues;
         elementIssueDetails = details;
         lastValidationResult = result;
+        maturityAnalysis = MaturityAnalysis.analyze(def);
         if (onValidationChanged != null) {
             onValidationChanged.accept(result);
         }
@@ -544,10 +548,10 @@ public class ModelCanvas extends Canvas {
      * Must be called after any structural model mutation.
      */
     private void invalidateAnalysis() {
-        invalidateLoopAnalysis();
-        traceController.invalidate(
-                editor != null ? editor.toModelDefinition(canvasState.toViewDef()) : null);
-        recomputeValidation();
+        ModelDefinition def = editor != null ? editor.toModelDefinition(canvasState.toViewDef()) : null;
+        invalidateLoopAnalysis(def);
+        traceController.invalidate(def);
+        recomputeValidation(def);
     }
 
     // --- Undo/redo ---
@@ -696,8 +700,12 @@ public class ModelCanvas extends Canvas {
         if (editor == null) {
             return Set.of();
         }
+        double centerWorldX = viewport.toWorldX(getWidth() / 2.0);
+        double centerWorldY = viewport.toWorldY(getHeight() / 2.0);
+        var viewportCenter = new CanvasState.Position(centerWorldX, centerWorldY);
         Set<String> replaced = selectionController.paste(
-                editor, canvasState, () -> saveUndoState("Paste elements"));
+                editor, canvasState, () -> saveUndoState("Paste elements"),
+                viewportCenter);
         if (replaced == null) {
             return Set.of();
         }
@@ -1043,7 +1051,8 @@ public class ModelCanvas extends Canvas {
                         selectedConnection,
                         hideVariables,
                         showDelayBadges,
-                        hideInfoLinks));
+                        hideInfoLinks,
+                        maturityAnalysis));
     }
 
     // --- Rename ---
@@ -1110,25 +1119,7 @@ public class ModelCanvas extends Canvas {
             return;
         }
 
-        ModelDefinition childDef = editor.toModelDefinition(canvasState.toViewDef());
-        NavigationStack.Frame frame = navController.pop();
-
-        this.undoManager.close();
-        this.editor = frame.editor();
-        this.undoManager = frame.undoManager();
-
-        saveUndoState("Edit module " + frame.moduleName());
-        editor.updateModuleDefinition(frame.moduleIndex(), childDef);
-
-        canvasState.loadFrom(frame.viewSnapshot());
-        viewport.restoreState(frame.viewportTranslateX(),
-                frame.viewportTranslateY(), frame.viewportScale());
-
-        if (toolBar != null) {
-            toolBar.selectTool(frame.activeTool());
-        } else {
-            activeTool = frame.activeTool();
-        }
+        popNavigationLevel(true);
 
         connectors = editor.generateConnectors();
         invalidateAnalysis();
@@ -1139,8 +1130,60 @@ public class ModelCanvas extends Canvas {
     }
 
     public void navigateToDepth(int targetDepth) {
-        while (navController.depth() > targetDepth) {
+        int levelsToNavigate = navController.depth() - targetDepth;
+        if (levelsToNavigate <= 0 || editor == null) {
+            return;
+        }
+
+        if (levelsToNavigate == 1) {
             navigateBack();
+            return;
+        }
+
+        // Navigate multiple levels: push a single undo state at the target level
+        // rather than one per level.
+        popNavigationLevel(false);
+        for (int i = 1; i < levelsToNavigate; i++) {
+            popNavigationLevel(i == levelsToNavigate - 1);
+        }
+
+        connectors = editor.generateConnectors();
+        invalidateAnalysis();
+        redraw();
+
+        navController.fireNavigationChanged();
+        fireStatusChanged();
+    }
+
+    /**
+     * Pops one navigation level: restores the parent editor and undo manager,
+     * merges the child module definition back into the parent, and restores
+     * the canvas/viewport/tool state.
+     *
+     * @param saveUndo if true, pushes an undo state on the restored parent's
+     *                 undo manager before applying the child module update
+     */
+    private void popNavigationLevel(boolean saveUndo) {
+        ModelDefinition childDef = editor.toModelDefinition(canvasState.toViewDef());
+        NavigationStack.Frame frame = navController.pop();
+
+        this.undoManager.close();
+        this.editor = frame.editor();
+        this.undoManager = frame.undoManager();
+
+        if (saveUndo) {
+            saveUndoState("Edit module " + frame.moduleName());
+        }
+        editor.updateModuleDefinition(frame.moduleIndex(), childDef);
+
+        canvasState.loadFrom(frame.viewSnapshot());
+        viewport.restoreState(frame.viewportTranslateX(),
+                frame.viewportTranslateY(), frame.viewportScale());
+
+        if (toolBar != null) {
+            toolBar.selectTool(frame.activeTool());
+        } else {
+            activeTool = frame.activeTool();
         }
     }
 

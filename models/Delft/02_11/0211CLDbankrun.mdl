@@ -1,0 +1,142 @@
+{UTF-8}
+depositors' and lenders' fear of bank failure  = A FUNCTION OF( relative share price loss\
+		)
+	~	
+	~		|
+
+exogenous net worth loss  = A FUNCTION OF( )
+	~	
+	~		|
+
+fixed asset loss  = A FUNCTION OF( liquid deposito and loan loss)
+	~	
+	~		|
+
+liquid asset loss  = A FUNCTION OF( liquid deposito and loan loss)
+	~	
+	~		|
+
+liquid deposito and loan loss  = A FUNCTION OF( depositors' and lenders' fear of bank failure\
+		)
+	~	
+	~		|
+
+net worth loss  = A FUNCTION OF( exogenous net worth loss,fixed asset loss)
+	~	
+	~		|
+
+relative share price loss  = A FUNCTION OF( net worth loss)
+	~	
+	~		|
+
+fear of bank failure  = A FUNCTION OF( perceived solvency of the bank,weak or uncertain economic conditions\
+		)
+	~	
+	~		|
+
+liquid bank reserves  = A FUNCTION OF( tendency to withdraw personal savings)
+	~	
+	~		|
+
+perceived solvency of the bank  = A FUNCTION OF( solvency of the bank,tendency to withdraw personal savings\
+		,weak or uncertain economic conditions)
+	~	
+	~		|
+
+solvency of the bank  = A FUNCTION OF( liquid bank reserves)
+	~	
+	~		|
+
+tendency to withdraw personal savings  = A FUNCTION OF( fear of bank failure)
+	~	
+	~		|
+
+weak or uncertain economic conditions  = A FUNCTION OF( )
+	~	
+	~		|
+
+********************************************************
+	.Control
+********************************************************~
+		Simulation Control Parameters
+	|
+
+FINAL TIME  = 100
+	~	Month
+	~	The final time for the simulation.
+	|
+
+INITIAL TIME  = 0
+	~	Month
+	~	The initial time for the simulation.
+	|
+
+SAVEPER  = 
+        TIME STEP
+	~	Month [0,?]
+	~	The frequency with which output is stored.
+	|
+
+TIME STEP  = 1
+	~	Month [0,?]
+	~	The time step for the simulation.
+	|
+
+\\\---/// Sketch information - do not modify anything except names
+V300  Do not put anything below this section - it will be ignored
+*View 1
+$192-192-192,0,Times New Roman|12||0-0-0|0-0-0|0-0-255|-1--1--1|-1--1--1|96,96,100,0
+10,1,perceived solvency of the bank,239,119,61,19,8,3,0,0,0,0,0,0
+10,2,fear of bank failure,354,209,38,22,8,131,0,0,0,0,0,0
+10,3,tendency to withdraw personal savings,220,293,69,19,8,3,0,0,0,0,0,0
+10,4,liquid bank reserves,76,252,35,19,8,131,0,0,0,0,0,0
+10,5,solvency of the bank,73,163,39,20,8,131,0,0,0,0,0,0
+1,6,2,3,1,0,43,0,0,64,0,-1--1--1,,1|(321,282)|
+1,7,3,1,1,0,45,0,0,64,0,-1--1--1,,1|(194,199)|
+1,8,1,2,1,0,45,0,0,64,0,-1--1--1,,1|(328,140)|
+1,9,3,4,1,0,45,0,0,64,0,-1--1--1,,1|(142,297)|
+1,10,4,5,1,0,43,0,0,64,0,-1--1--1,,1|(68,184)|
+1,11,5,1,1,0,43,0,0,64,0,-1--1--1,,1|(118,125)|
+10,12,weak or uncertain economic conditions,391,113,37,29,8,131,0,0,0,0,0,0
+1,13,12,1,1,0,45,0,2,192,0,-1--1--1,|12||0-0-0,1|(331,114)|
+1,14,12,2,1,0,43,0,0,64,0,-1--1--1,,1|(372,152)|
+12,15,2,275,204,23,23,4,0,0,0,-1,0,0,0
+12,16,2,149,204,23,23,4,0,0,0,-1,0,0,0
+10,17,relative share price loss,723,97,42,19,8,3,0,0,0,0,0,0
+10,18,net worth loss,631,138,44,11,8,3,0,0,0,0,0,0
+10,19,depositors' and lenders' fear of bank failure,816,183,75,19,8,131,0,0,0,0,0,0
+10,20,liquid deposito and loan loss,719,273,60,19,8,131,0,0,0,0,0,0
+10,21,liquid asset loss,555,253,49,11,8,3,0,0,0,0,0,0
+10,22,fixed asset loss,627,220,47,11,8,3,0,0,0,0,0,0
+10,23,exogenous net worth loss,540,192,36,24,8,131,0,2,0,0,0,0,0-0-0,0-0-0,|12||255-0-0
+1,24,23,18,1,0,43,0,3,64,0,255-0-0,|12||255-0-0,1|(590,171)|
+1,25,18,17,1,0,43,0,0,64,0,-1--1--1,,1|(663,109)|
+1,26,17,19,1,0,43,0,0,64,0,-1--1--1,,1|(770,102)|
+1,27,19,20,1,0,43,0,0,64,0,-1--1--1,,1|(785,260)|
+1,28,20,22,1,0,43,0,0,64,0,-1--1--1,,1|(641,238)|
+1,29,22,18,1,0,43,0,0,64,0,-1--1--1,,1|(623,180)|
+1,30,20,21,1,0,43,0,2,192,0,-1--1--1,|12||0-0-0,1|(617,281)|
+12,31,2,721,183,23,23,4,0,0,0,-1,0,0,0
+\\\---/// Sketch information - do not modify anything except names
+V300  Do not put anything below this section - it will be ignored
+*View 2
+$192-192-192,0,Times New Roman|12||0-0-0|0-0-0|0-0-255|-1--1--1|-1--1--1|96,96,100,0
+///---\\\
+:L<%^E!@
+9:Current
+22:$,Dollar,Dollars,$s
+22:Hour,Hours
+22:Month,Months
+22:Person,People,Persons
+22:Unit,Units
+22:Week,Weeks
+22:Year,Years
+22:Day,Days
+15:0,0,0,0,0,0
+19:100,0
+27:2,
+34:0,
+5:relative share price loss
+24:0
+25:0
+26:0

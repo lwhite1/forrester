@@ -762,4 +762,130 @@ class CopyPasteControllerTest {
             assertThat(result).isEqualTo("`Unknown Name` + X");
         }
     }
+
+    @Nested
+    @DisplayName("paste with viewport center")
+    class PasteWithViewportCenter {
+
+        @Test
+        void shouldPlaceElementsAtViewportCenterWhenNoSelection() {
+            ModelDefinition def = new ModelDefinitionBuilder()
+                    .name("Test")
+                    .stock("Population", 100, "people")
+                    .build();
+            editor.loadFrom(def);
+            canvasState.addElement("Population", ElementType.STOCK, 200, 300);
+            canvasState.select("Population");
+
+            controller.copy(canvasState, editor);
+
+            // Paste into a fresh canvas with no selection, providing a viewport center
+            // far from the origin to simulate a panned view
+            ModelEditor targetEditor = new ModelEditor();
+            CanvasState targetCanvas = new CanvasState();
+            var viewportCenter = new CanvasState.Position(5000, 3000);
+
+            CopyPasteController.PasteResult result =
+                    controller.paste(targetCanvas, targetEditor, viewportCenter);
+            List<String> pasted = result.pastedNames();
+
+            assertThat(pasted).hasSize(1);
+            String pastedName = pasted.get(0);
+            // The element should be placed near the viewport center, not at (30, 30)
+            double pastedX = targetCanvas.getX(pastedName);
+            double pastedY = targetCanvas.getY(pastedName);
+            assertThat(pastedX).isEqualTo(5000.0);
+            assertThat(pastedY).isEqualTo(3000.0);
+        }
+
+        @Test
+        void shouldPreserveRelativePositionsWhenPastingAtViewportCenter() {
+            ModelDefinition def = new ModelDefinitionBuilder()
+                    .name("Test")
+                    .stock("S1", 100, null)
+                    .constant("C1", 5, null)
+                    .build();
+            editor.loadFrom(def);
+            canvasState.addElement("S1", ElementType.STOCK, 100, 100);
+            canvasState.addElement("C1", ElementType.AUX, 200, 300);
+            canvasState.select("S1");
+            canvasState.addToSelection("C1");
+
+            controller.copy(canvasState, editor);
+
+            ModelEditor targetEditor = new ModelEditor();
+            CanvasState targetCanvas = new CanvasState();
+            var viewportCenter = new CanvasState.Position(4000, 2000);
+
+            CopyPasteController.PasteResult result =
+                    controller.paste(targetCanvas, targetEditor, viewportCenter);
+            List<String> pasted = result.pastedNames();
+
+            assertThat(pasted).hasSize(2);
+            double x0 = targetCanvas.getX(pasted.get(0));
+            double y0 = targetCanvas.getY(pasted.get(0));
+            double x1 = targetCanvas.getX(pasted.get(1));
+            double y1 = targetCanvas.getY(pasted.get(1));
+            // The relative offset between the two elements should be preserved:
+            // original offset was (200-100, 300-100) = (100, 200)
+            assertThat(Math.abs((x1 - x0) - 100)).isLessThan(0.001);
+            assertThat(Math.abs((y1 - y0) - 200)).isLessThan(0.001);
+        }
+
+        @Test
+        void shouldUseSelectionAnchorWhenSelectionExistsEvenWithViewportCenter() {
+            ModelDefinition def = new ModelDefinitionBuilder()
+                    .name("Test")
+                    .stock("Population", 100, "people")
+                    .build();
+            editor.loadFrom(def);
+            canvasState.addElement("Population", ElementType.STOCK, 200, 300);
+            canvasState.select("Population");
+
+            controller.copy(canvasState, editor);
+
+            // Selection is still active, so viewport center should be ignored
+            var viewportCenter = new CanvasState.Position(9999, 9999);
+            CopyPasteController.PasteResult result =
+                    controller.paste(canvasState, editor, viewportCenter);
+            List<String> pasted = result.pastedNames();
+
+            assertThat(pasted).hasSize(1);
+            String pastedName = pasted.get(0);
+            double pastedX = canvasState.getX(pastedName);
+            double pastedY = canvasState.getY(pastedName);
+            // Should be anchored to selection center (200,300) + offset (30,30) = (230, 330)
+            assertThat(pastedX).isEqualTo(230.0);
+            assertThat(pastedY).isEqualTo(330.0);
+        }
+
+        @Test
+        void shouldFallBackToFixedOffsetWhenNoViewportCenterProvided() {
+            ModelDefinition def = new ModelDefinitionBuilder()
+                    .name("Test")
+                    .stock("Population", 100, "people")
+                    .build();
+            editor.loadFrom(def);
+            canvasState.addElement("Population", ElementType.STOCK, 200, 300);
+            canvasState.select("Population");
+
+            controller.copy(canvasState, editor);
+
+            // Paste with no selection and null viewport center (backwards compatibility)
+            ModelEditor targetEditor = new ModelEditor();
+            CanvasState targetCanvas = new CanvasState();
+
+            CopyPasteController.PasteResult result =
+                    controller.paste(targetCanvas, targetEditor, null);
+            List<String> pasted = result.pastedNames();
+
+            assertThat(pasted).hasSize(1);
+            String pastedName = pasted.get(0);
+            double pastedX = targetCanvas.getX(pastedName);
+            double pastedY = targetCanvas.getY(pastedName);
+            // Should fall back to (30, 30)
+            assertThat(pastedX).isEqualTo(30.0);
+            assertThat(pastedY).isEqualTo(30.0);
+        }
+    }
 }

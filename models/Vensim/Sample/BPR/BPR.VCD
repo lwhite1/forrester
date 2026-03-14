@@ -1,0 +1,102 @@
+!
+:SCREEN WELCOME
+SCREENFONT,Times New Roman|12||0-0-0|-1--1--1
+COMMAND,"",0,0,0,0,,,"SPECIAL>SETTITLE|Business Process Re-Engineering"
+COMMAND,"",0,0,0,0,,,SPECIAL>LOADMODEL|bpr0.vmf
+COMMAND,"",0,0,0,0,,,SPECIAL>READCUSTOM|bpr.vgd
+TEXTONLY,"Business Process Re-Engineering",0,10,100,0,C||28|UB|255-0-0,
+TEXTONLY,"With Vensim 3.0",0,22,100,0,C||28|UB|255-0-0,
+TEXTONLY,"Copyright © 1994-1997 Ventana Systems, Inc.",0,50,100,0,C||18||0-0-255
+TEXTONLY,"Press any Key to Continue",0,68,100,0,C||18||0-0-255
+TEXTONLY,"Software subject to restriction of the license agreement",0,86,100,0,C||||92-92-92,
+TEXTONLY,"Copyright © 1988-1997 Ventana Systems, Inc. ALL RIGHTS RESERVED",0,91,100,0,C||||0-128-0,
+TEXTONLY,"Vensim and Venapp are trademarks of Ventana Systems, Inc.",0,95,100,0,C||||0-128-0,
+ANYKEY,"",0,0,0,0,0,,,INTRO
+!
+:SCREEN INTRO
+SCREENFONT,Times New Roman|12||0-0-0|-1--1--1
+TEXTONLY,"Using Vensim for BPR",50,2,0,0,C||32||255-0-0,
+TOOL,"SP1",0,12,100,70,,,CUSTOM>BPRINTRO
+TEXTONLY,"Press any Key to Continue",50,90,0,0,C||18||0-0-255
+ANYKEY,"",0,0,0,0,0,,,MAIN
+!
+:SCREEN MAIN
+SCREENFONT,Times New Roman|12||0-0-0|-1--1--1
+COMMAND,"",0,0,0,0,,,SPECIAL>LOADMODEL|bpr0.vmf
+COMMAND,"",0,0,0,0,,,SPECIAL>READCUSTOM|bpr.vgd
+TEXTONLY,"Main Menu",0,5,100,0,C||24|B|255-0-0
+RECTANGLE,"",20,14,60,58,C||||0-0-255
+BUTTON,"&Back To Introductory Material",50,15,50,6,C|Times New Roman|12,Bb,,INTRO
+BUTTON,"&Simple Process Components",50,25,50,6,C|Times New Roman|12,Ss,,BPR0
+BUTTON,"&Flow Chart Representation",50,35,50,6,C|Times New Roman|12,Ff,,BPR1
+BUTTON,"&Mechanical Simulation",50,45,50,6,C|Times New Roman|12,Mm,,BPR2
+BUTTON,"&Adaptive Simulation",50,55,50,6,C|Times New Roman|12,Aa,,BPR3
+BUTTON,"E&xit to the model selection menu",50,65,50,6,C,EeXx,SPECIAL>SETTITLE|Vensim Demonstration Program&SPECIAL>LOADMODEL|..\intro.vmf&SPECIAL>LOADAPPINT|intro.vcd@3,
+LINE,"",0,75,100,0
+TOOL,"SP1",0,75,100,25,,,CUSTOM>BPRMAIN
+!
+:SCREEN BPR0
+SCREENFONT,Times New Roman|12||0-0-0|-1--1--1
+COMMAND,,,,,,,,"SPECIAL>LOADMODEL|bpr0.vmf"
+COMMAND,,,,,,,,"SPECIAL>READCUSTOM|bpr.vgd"
+SKETCH,"SK1",0,0,100,60,,,"1",
+BUTTON,"&Return to Main Menu",98,62,25,,R,Rr,,MAIN
+BUTTON,"&Causes of Activate Service",50,62,25,,C,Cc,"SPECIAL>SETWBITEM|Activate Service&WORKBENCH>Causes Tree",
+BUTTON,"Con&sequences of Facilities",2,62,25,,L,Ss,"SPECIAL>SETWBITEM|Dedicated facilities&WORKBENCH>Uses Tree",
+TOOL,"SP1",0,70,100,25,,,CUSTOM>BPR0
+ANYKEY,"",0,0,0,0,0,,,MAIN
+TEXTONLY,"Press Return or Space Key to Continue",50,95,0,0,C||12||0-0-255
+!
+:SCREEN BPR1
+SCREENFONT,Times New Roman|12||0-0-0|-1--1--1
+COMMAND,,,,,,,,"SPECIAL>LOADMODEL|bpr1.vmf"
+COMMAND,,,,,,,,"SPECIAL>READCUSTOM|bpr.vgd"
+SKETCH,"SK1",0,0,100,60,,,"1",
+BUTTON,"&Return to Main Menu",69,63,25,0,L,Rr,,MAIN
+BUTTON,"&Causes of Activate Service",50,63,25,,C,Cc,"SPECIAL>SETWBITEM|Activate Service&WORKBENCH>Causes Tree",
+BUTTON,"Con&sequences of Facilities",2,63,25,,L,Ss,"SPECIAL>SETWBITEM|Dedicat ed faci lities&WORKBENCH>Uses Tree",
+TOOL,"SP1",0,70,100,25,,,CUSTOM>BPR1
+ANYKEY,"",0,0,0,0,0,,,MAIN
+TEXTONLY,"Press Return or Space Key to Continue",50,95,0,0,C||12||0-0-255
+!
+:SCREEN BPR2
+SCREENFONT,Times New Roman|12||0-0-0|-1--1--1
+COMMAND,,,,,,,,"SPECIAL>LOADMODEL|bpr2.vmf"
+COMMAND,,,,,,,,"SPECIAL>READCUSTOM|bpr.vgd"
+SKETCH,"SK1",0,0,100,60,,,1,
+BUTTON,"&Return to Main Menu",80,63,0,0,L,Rr,,MAIN
+BUTTON,"&Simulate",6,60,25,,L,Ss,"SIMULATE>READCIN",RUNBPR2
+BUTTON,"+&Processing",6,66,25,,L,Pp,"SIMULATE>READCIN|BPR2-1",RUNBPR2
+BUTTON,"+&Testing/Dispatch",34,60,25,,L,Tt,"SIMULATE>READCIN|BPR2-2",RUNBPR2
+BUTTON,"+&Activating",34,66,25,,L,Aa,"SIMULATE>READCIN|BPR2-3",RUNBPR2
+TOOL,"SP1",0,70,100,25,,,CUSTOM>BPR2
+ANYKEY,"",0,0,0,0,0,,,MAIN
+TEXTONLY,"Press Return or Space Key to Continue",50,95,0,0,C||12||0-0-255
+!
+:SCREEN RUNBPR2
+SCREENFONT,Times New Roman|12||0-0-0|-1--1--1
+WIPTOOL,"GR1",0,0,100,90,,,CUSTOM>WIP
+COMMAND,"",0,0,0,0,,,MENU>RUN1|O,
+TEXTONLY,"Press any key to continue to return to diagram",0,95,100,0,C||12||0-0-255,
+ANYKEY,"",0,0,0,0,0,,,BPR2
+!
+!
+:SCREEN BPR3
+SCREENFONT,Times New Roman|12||0-0-0|-1--1--1
+COMMAND,"",0,0,0,0,,,SPECIAL>LOADMODEL|bpr3.vmf
+COMMAND,"",0,0,0,0,,,SPECIAL>READCUSTOM|bpr.vgd
+SKETCH,"SK1",0,0,100,70,,,1,
+TOOL,"SP1",0,70,100,25,,,CUSTOM>BPR3
+BUTTON,"&Return",98,95,25,5,R,Rr,,MAIN
+BUTTON,"&Simulate",2,95,25,5,L,Ss,SIMULATE>READCIN,RUNBPR3
+ANYKEY,"",0,0,0,0,0,,,MAIN
+TEXTONLY,"Press Return or Space Key to Continue",50,95,0,0,C||10||0-0-255
+!
+:SCREEN RUNBPR3
+SCREENFONT,Times New Roman|12||0-0-0|-1--1--1
+WIPTOOL,"GR1",0,0,100,90,,,CUSTOM>WIP
+COMMAND,"",0,0,0,0,,,MENU>RUN1|O,
+TEXTONLY,"Press any key to continue to return to diagram",0,95,100,0,C||12||0-0-255,
+ANYKEY,"",0,0,0,0,0,,,BPR3
+!
+!

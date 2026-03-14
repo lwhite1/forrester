@@ -1,0 +1,285 @@
+{UTF-8}
+liquid deposits and loans loss fraction=
+	average bank client's fear and uncertainty/average stickiness of deposits and loans
+	~	1/Week
+	~		|
+
+underlying asset loss=
+	MAX((liquid deposits and loans loss fraction*fraction of asset loss to deposit loss+\
+		external shock real value loss)*estimated underlying asset value
+	,0)
+	~	EURO/Week
+	~		|
+
+fraction of asset loss to deposit loss=
+	1
+	~	Dmnl
+	~		|
+
+external shock real value loss=
+	STEP(size of the external underlying asset shock,10) - STEP(size of the external underlying asset shock\
+		,11)
+	~	1/Week
+	~	 0.01 - STEP(0.01,11)
+	|
+
+size of the external underlying asset shock= GAME (
+	0.35)
+	~	1/Week
+	~		|
+
+stock market value increase=
+	MAX(stock market value * perceived undervaluation/market increase delay,0)
+	~	EURO/Week
+	~		|
+
+action delay=
+	1
+	~	Week
+	~		|
+
+average profitability=
+	0.002
+	~	1/Week
+	~		|
+
+average stickiness of deposits and loans= GAME (
+	4)
+	~	Week
+	~		|
+
+degree of external climate of fear= GAME (
+	2)
+	~	Dmnl
+	~		|
+
+market loss delay=
+	1
+	~	Week
+	~		|
+
+estimated underlying asset value= INTEG (
+	+underlying asset increase-underlying asset loss,
+		initial estimated underlying asset value)
+	~	EURO
+	~		|
+
+financial intervention=
+	MAX(0,(fraction initial guaranteed*initial estimated underlying asset value - estimated underlying asset value\
+		)/action delay) * policy switch
+	~	EURO/Week
+	~	IF THEN ELSE(estimated asset value<initial underlying value*0.5, initial \
+		underlying value*0.2, 0)
+	|
+
+fraction initial guaranteed= GAME (
+	0.5)
+	~	Dmnl
+	~		|
+
+initial market fear and uncertainty=
+	0
+	~	Dmnl
+	~		|
+
+initial stock market value=
+	24.6
+	~	EURO
+	~		|
+
+initial estimated underlying asset value=
+	25
+	~	EURO
+	~		|
+
+instant market fear and uncertainty=
+	MIN(stock market value loss/(stock market value/market loss delay*stock market fear factor\
+		) * degree of external climate of fear,1)
+	~	Dmnl
+	~		|
+
+average bank client's fear and uncertainty=
+	smoothed market fear and uncertainty
+	~	Dmnl
+	~		|
+
+perceived overvaluation=
+	MAX((stock market value-estimated underlying asset value)/stock market value,0)
+	~	Dmnl
+	~		|
+
+perceived undervaluation=
+	MAX((estimated underlying asset value-stock market value)/stock market value,0)
+	~	Dmnl
+	~		|
+
+policy switch= GAME (
+	0)
+	~	Dmnl
+	~		|
+
+market increase delay=
+	4
+	~	Week
+	~		|
+
+smoothed market fear and uncertainty=
+	DELAY3I(instant market fear and uncertainty, uncertainty and fear delay, initial market fear and uncertainty\
+		)
+	~	Dmnl
+	~		|
+
+stock market fear factor= GAME (
+	0.25)
+	~	Dmnl
+	~		|
+
+stock market value= INTEG (
+	+stock market value increase-stock market value loss,
+		initial stock market value)
+	~	EURO
+	~		|
+
+stock market value loss=
+	MAX(stock market value * (perceived overvaluation/market loss delay),0)
+	~	EURO/Week
+	~		|
+
+uncertainty and fear delay=
+	2
+	~	Week
+	~		|
+
+underlying asset increase=
+	average profitability*estimated underlying asset value + financial intervention
+	~	EURO/Week
+	~		|
+
+********************************************************
+	.Control
+********************************************************~
+		Simulation Control Parameters
+	|
+
+FINAL TIME  = 52
+	~	Week
+	~	The final time for the simulation.
+	|
+
+INITIAL TIME  = 0
+	~	Week
+	~	The initial time for the simulation.
+	|
+
+SAVEPER  = 
+        TIME STEP
+	~	Week
+	~	The frequency with which output is stored.
+	|
+
+TIME STEP  = 0.0078125
+	~	Week
+	~	The time step for the simulation.
+	|
+
+\\\---/// Sketch information - do not modify anything except names
+V300  Do not put anything below this section - it will be ignored
+*View 1
+$192-192-192,0,Times New Roman|12||0-0-0|0-0-0|0-0-255|-1--1--1|-1--1--1|96,96,100,0
+10,1,stock market value,395,237,40,20,3,3,0,0,0,0,0,0
+10,2,estimated underlying asset value,387,419,39,25,3,3,0,0,0,0,0,0
+12,3,48,218,240,10,8,0,3,0,0,-1,0,0,0
+1,4,6,3,4,0,0,22,0,0,0,-1--1--1,,1|(256,240)|
+1,5,6,1,100,0,0,22,0,0,0,-1--1--1,,1|(325,240)|
+11,6,48,290,240,6,8,34,3,0,0,1,0,0,0
+10,7,stock market value loss,290,259,42,19,40,3,0,0,-1,0,0,0
+12,8,48,547,239,10,8,0,3,0,0,-1,0,0,0
+1,9,11,1,4,0,0,22,0,0,0,-1--1--1,,1|(470,238)|
+1,10,11,8,100,0,0,22,0,0,0,-1--1--1,,1|(527,238)|
+11,11,48,511,238,6,8,34,3,0,0,1,0,0,0
+10,12,stock market value increase,511,265,60,19,40,3,0,0,-1,0,0,0
+12,13,48,530,423,10,8,0,3,0,0,-1,0,0,0
+1,14,16,13,4,0,0,22,0,0,0,-1--1--1,,1|(507,423)|
+1,15,16,2,100,0,0,22,0,0,0,-1--1--1,,1|(454,423)|
+11,16,48,489,423,6,8,34,3,0,0,1,0,0,0
+10,17,underlying asset loss,489,450,50,19,40,3,0,0,-1,0,0,0
+12,18,48,241,420,10,8,0,3,0,0,-1,0,0,0
+1,19,21,2,4,0,0,22,0,0,0,-1--1--1,,1|(317,421)|
+1,20,21,18,100,0,0,22,0,0,0,-1--1--1,,1|(262,421)|
+11,21,48,280,421,6,8,34,3,0,0,1,0,0,0
+10,22,underlying asset increase,280,448,50,19,40,3,0,0,-1,0,0,0
+1,23,1,6,1,0,0,0,0,64,0,-1--1--1,,1|(321,220)|
+1,24,1,11,1,0,0,0,0,64,0,-1--1--1,,1|(461,216)|
+1,25,2,21,1,0,0,0,0,64,0,-1--1--1,,1|(328,399)|
+10,26,perceived undervaluation,498,341,46,19,8,3,0,0,0,0,0,0
+10,27,instant market fear and uncertainty,464,122,59,19,8,3,0,0,0,0,0,0
+1,28,6,27,1,0,0,0,0,64,0,-1--1--1,,1|(334,170)|
+1,29,1,27,1,0,0,0,0,64,0,-1--1--1,,1|(402,187)|
+10,30,degree of external climate of fear,559,69,57,19,8,3,0,2,0,0,0,0,0-0-0,0-0-0,|12||255-128-0
+1,31,30,27,1,0,0,0,0,64,0,-1--1--1,,1|(522,92)|
+10,32,average bank client's fear and uncertainty,676,277,66,19,8,3,0,0,0,0,0,0
+10,33,external shock real value loss,561,505,60,19,8,3,0,2,0,0,0,0,0-0-0,0-0-0,|12||255-0-0
+1,34,33,17,1,0,0,0,0,64,0,-1--1--1,,1|(518,474)|
+10,35,perceived overvaluation,293,341,43,19,8,3,0,0,0,0,0,0
+1,36,1,35,1,0,0,0,0,64,0,-1--1--1,,1|(339,272)|
+1,37,2,35,1,0,0,0,0,64,0,-1--1--1,,1|(323,380)|
+1,38,2,26,1,0,0,0,0,64,0,-1--1--1,,1|(445,393)|
+1,39,1,26,1,0,0,0,0,64,0,-1--1--1,,1|(450,270)|
+1,40,35,7,1,0,0,0,0,64,0,-1--1--1,,1|(285,299)|
+10,41,initial stock market value,391,318,41,19,8,3,0,0,0,0,0,0
+1,42,41,1,0,0,0,0,0,64,1,-1--1--1,,1|(392,284)|
+10,43,market increase delay,545,178,50,19,8,3,0,0,0,0,0,0
+1,44,43,11,1,0,0,0,0,64,0,-1--1--1,,1|(536,204)|
+10,45,market loss delay,299,125,55,11,8,3,0,0,0,0,0,0
+1,46,45,6,1,0,0,0,0,64,0,-1--1--1,,1|(290,194)|
+10,47,initial estimated underlying asset value,473,558,69,19,8,3,0,0,0,0,0,0
+1,48,47,2,1,0,0,0,0,64,1,-1--1--1,,1|(416,487)|
+10,49,average stickiness of deposits and loans,734,407,66,19,8,3,0,2,0,0,0,0,0-0-0,0-0-0,|12||255-128-0
+1,50,49,78,1,0,0,0,0,64,0,-1--1--1,,1|(701,380)|
+1,51,2,16,1,0,0,0,0,64,0,-1--1--1,,1|(440,399)|
+10,52,average profitability,190,387,36,19,8,3,0,0,0,0,0,0
+1,53,52,22,1,0,0,0,0,64,0,-1--1--1,,1|(222,444)|
+10,54,smoothed market fear and uncertainty,662,206,70,19,8,3,0,0,0,0,0,0
+10,55,stock market fear factor,377,67,56,19,8,3,0,2,0,0,0,0,0-0-0,0-0-0,|12||255-128-0
+1,56,55,27,1,0,0,0,3,64,0,0-0-255,|12||0-0-0,1|(418,89)|
+1,57,54,32,1,0,0,0,0,64,0,-1--1--1,,1|(677,237)|
+1,58,27,54,1,0,0,0,0,64,0,-1--1--1,,1|(571,136)|
+10,59,financial intervention,294,534,37,19,8,3,1,2,0,0,0,0,0-0-0,0-0-0,|12||128-0-128
+1,60,47,59,1,1,0,0,1,64,0,128-0-128,|12||0-0-0,1|(374,534)|
+1,61,2,59,1,1,0,0,1,64,0,128-0-128,|12||0-0-0,1|(345,476)|
+1,62,59,22,0,1,0,0,1,64,0,128-0-128,|12||0-0-0,1|(288,497)|
+10,63,action delay,130,471,38,11,8,3,1,2,0,0,0,0,0-0-0,0-0-0,|12||128-0-128
+1,64,63,59,0,1,0,0,1,64,0,128-0-128,|12||0-0-0,1|(200,498)|
+10,65,fraction initial guaranteed,135,532,42,19,8,3,1,2,0,0,0,0,0-0-0,0-0-0,|12||128-0-128
+1,66,65,59,0,1,0,0,1,64,0,128-0-128,|12||0-0-0,1|(210,532)|
+10,67,initial market fear and uncertainty,762,128,45,34,8,131,0,0,0,0,0,0
+1,68,67,54,1,0,0,0,0,64,0,-1--1--1,,1|(717,171)|
+10,69,uncertainty and fear delay,660,116,48,19,8,3,0,0,0,0,0,0
+1,70,69,54,1,0,0,0,0,64,0,-1--1--1,,1|(667,158)|
+1,71,45,27,1,0,0,2,3,64,0,0-0-255,|12||0-0-0,1|(366,113)|
+10,72,policy switch,352,578,41,11,8,3,1,2,0,0,0,0,0-0-0,0-0-0,|12||128-0-128
+1,73,72,59,0,1,0,0,3,64,0,128-0-128,|12||0-0-0,1|(334,564)|
+1,74,26,12,1,0,0,0,0,64,0,-1--1--1,,1|(521,309)|
+10,75,size of the external underlying asset shock,742,520,71,19,8,3,0,0,0,0,0,0
+1,76,75,33,0,0,0,0,0,64,0,-1--1--1,,1|(652,512)|
+12,77,0,963,247,102,90,8,132,0,18,-1,0,0,0,0-0-0,0-0-0,|12|BI|255-0-0
+From: Erik Pruyt, 2009. Saving a Bank? Cracking the Case of the Fortis Bank? In: Proceedings of the 27th International Conference of the System Dynamics Society, Albuquerque, USA.
+10,78,liquid deposits and loans loss fraction,659,349,59,19,8,3,0,0,0,0,0,0
+1,79,78,17,1,0,0,0,0,64,0,-1--1--1,,1|(624,399)|
+1,80,32,78,1,0,0,0,0,64,0,-1--1--1,,1|(675,302)|
+10,81,fraction of asset loss to deposit loss,675,459,65,19,8,3,0,0,0,0,0,0
+1,82,81,17,1,0,0,0,0,64,0,-1--1--1,,1|(583,461)|
+///---\\\
+:L<%^E!@
+9:basecase
+18:BankCrisis.vsc
+20:BankCrisis.lst
+15:0,0,0,0,0,0
+19:100,0
+27:0,
+34:0,
+4:Time
+5:size of the external underlying asset shock
+24:0
+25:52
+26:52

@@ -1,0 +1,215 @@
+Predator Population=
+	500-STEP(Change Predator Population,1910)
+	~	lion
+	~		|
+
+Change Predator Population=
+	500
+	~	lion
+	~		|
+
+Food Consumption per Deer = WITH LOOKUP (
+	Food/Food Capacity,
+		([(0,0)-(1,1)],(0,0),(0.2,0.4),(0.4,0.8),(1,1) ))
+	~	ton/Deer/year
+	~	Food Consumption per Deer will depends from the Food Capacity and present \
+		Food. We will assume that the ratio (Food/Food Capacity) will be a good \
+		way to obtain the Food Consumption per Deer, using Table.  When Food = \
+		Food Capacity we will assume that Food Regeneration time will be 1 ton. A \
+		lower ratio will produce an lower Food Consumption per Deer.\!\!
+	|
+
+Food Regeneration Time = WITH LOOKUP (
+	Food/Food Capacity,
+		([(0,0)-(1,40)],(0,40),(0.5,1.5),(1,1) ))
+	~	year
+	~	Food Regeneration Time will depends from the Food Capacity and present \
+		Food. We will assume that the ratio (Food/Food Capacity) will be a good \
+		way to obtain the Food Regeneration Time, using Table.  When Food = Food \
+		Capacity we will assume that Food Regeneration time will be 1 year. A \
+		lower ratio will produce an higher Food Regeneration Time.
+	|
+
+Growth Rate Factor = WITH LOOKUP (
+	Food per Deer/Initial Food per Deer,
+		([(0,-0.8)-(1,0.4)],(0,-0.6),(0.05,0),(0.1,0.2),(1,0.2) ))
+	~	1/year
+	~	MODIFIED
+	|
+
+Deer Predation Rate=
+	Deer Killed per Predator*Predator Population
+	~	Deer/year
+	~		|
+
+Deer Killed per Predator = WITH LOOKUP (
+	Deer Density/Initial Deer Density,
+		([(0,0)-(6,8)],(0,0),(1,2),(2,4),(4,6),(5,6) ))
+	~	Deer/(year*lion)
+	~	When density is equal to 0, the deer killed are 0. Point (0.0). When the \
+		Deer Density is equal to the Initial Deer Density each predator hunts 2 \
+		deer each year. Point (1,2).
+	|
+
+Deer Net Growth Rate=
+	Deer Population*Growth Rate Factor
+	~	Deer/year
+	~		|
+
+Initial Food per Deer=
+	20
+	~	ton/Deer
+	~		|
+
+Initial Deer Density=
+	200
+	~	acre/Deer
+	~	1,000,000 acres / 5,000 deer
+	|
+
+Food Capacity=
+	100000
+	~	ton
+	~		|
+
+Food Generation Rate=
+	(Food Capacity-Food)/Food Regeneration Time
+	~	ton/year
+	~		|
+
+Food= INTEG (
+	Food Generation Rate-Food Consumption Rate,
+		100000)
+	~	ton
+	~	MODIFIED - Now Food depends from the Food Consumption Rate and from the \
+		Food Generation Rate.
+	|
+
+Food Consumption Rate=
+	Deer Population*Food Consumption per Deer
+	~	ton/year
+	~		|
+
+Area=
+	1e+006
+	~	acre
+	~		|
+
+Deer Population= INTEG (
+	+Deer Net Growth Rate-Deer Predation Rate,
+		5000)
+	~	Deer
+	~	Initial amount of deer is 5,000 and remains constant
+	|
+
+Deer Density=
+	Area/Deer Population
+	~	acre/Deer
+	~	This is the amount of acres per deer
+	|
+
+Food per Deer=
+	Food/Deer Population
+	~	ton/Deer
+	~		|
+
+********************************************************
+	.Control
+********************************************************~
+		Simulation Control Paramaters
+	|
+
+FINAL TIME  = 1950
+	~	year
+	~	The final time for the simulation.
+	|
+
+INITIAL TIME  = 1900
+	~	year
+	~	The initial time for the simulation.
+	|
+
+SAVEPER  = 1
+	~	year
+	~	The frequency with which output is stored.
+	|
+
+TIME STEP  = 1
+	~	year
+	~	The time step for the simulation.
+	|
+
+\\\---/// Sketch information - do not modify anything except names
+V300  Do not put anything below this section - it will be ignored
+*View 1
+$192-192-192,0,Times New Roman|12||0-0-0|0-0-0|0-0-255|-1--1--1|-1--1--1|96,96
+10,1,Deer Population,287,97,40,20,3,3,0,0,0,0,0,0
+12,2,48,43,92,8,8,0,3,0,0,-1,0,0,0
+1,3,5,1,4,0,0,22,0,0,0,-1--1--1,,1|(192,92)|
+1,4,5,2,100,0,0,22,0,0,0,-1--1--1,,1|(88,92)|
+11,5,48,132,92,6,8,34,3,0,0,1,0,0,0
+10,6,Deer Net Growth Rate,132,111,72,11,32,3,0,0,-1,0,0,0
+12,7,48,535,94,8,8,0,3,0,0,-1,0,0,0
+1,8,10,7,4,0,0,22,0,0,0,-1--1--1,,1|(471,94)|
+1,9,10,1,100,0,0,22,0,0,0,-1--1--1,,1|(365,94)|
+11,10,48,410,94,6,8,34,3,0,0,1,0,0,0
+10,11,Deer Predation Rate,410,113,64,11,32,3,0,0,-1,0,0,0
+10,12,Deer Density,355,221,42,11,0,3,0,0,0,0,0,0
+10,13,Predator Population,548,144,63,11,0,3,0,0,0,0,0,0
+10,14,Area,364,286,17,11,0,3,0,0,0,0,0,0
+1,15,1,6,1,0,0,0,0,64,0,-1--1--1,,1|(225,154)|
+1,16,1,12,1,0,0,0,0,64,0,-1--1--1,,1|(305,170)|
+1,17,13,11,1,0,0,0,0,64,0,-1--1--1,,1|(458,118)|
+1,18,14,12,1,0,0,0,0,64,0,-1--1--1,,1|(370,255)|
+10,19,Food,259,337,40,20,3,3,0,0,0,0,0,0
+10,20,Food per Deer,170,238,48,11,0,3,0,0,0,0,0,0
+1,21,1,20,1,0,0,0,0,64,0,-1--1--1,,1|(230,189)|
+1,22,19,20,1,0,0,0,0,64,0,-1--1--1,,1|(209,292)|
+12,23,48,49,334,8,8,0,3,0,0,-1,0,0,0
+1,24,26,19,4,0,0,22,0,0,0,-1--1--1,,1|(172,334)|
+1,25,26,23,100,0,0,22,0,0,0,-1--1--1,,1|(85,334)|
+11,26,48,120,334,6,8,34,3,0,0,1,0,0,0
+10,27,Food Generation Rate,120,353,70,11,32,3,0,0,-1,0,0,0
+12,28,48,509,334,8,8,0,3,0,0,-1,0,0,0
+1,29,31,28,4,0,0,22,0,0,0,-1--1--1,,1|(452,336)|
+1,30,31,19,100,0,0,22,0,0,0,-1--1--1,,1|(345,336)|
+11,31,48,397,336,6,8,34,3,0,0,1,0,0,0
+10,32,Food Consumption Rate,397,355,77,11,32,3,0,0,-1,0,0,0
+10,33,Food Capacity,68,472,48,11,0,3,0,0,0,0,0,0
+10,34,Food Regeneration Time,227,437,77,11,0,3,0,0,0,0,0,0
+10,35,Food Consumption per Deer,433,437,90,11,0,3,0,0,0,0,0,0
+1,36,33,27,1,0,0,0,0,64,0,-1--1--1,,1|(51,408)|
+1,37,34,27,1,0,0,0,0,64,0,-1--1--1,,1|(173,416)|
+1,38,19,27,1,0,0,0,0,64,0,-1--1--1,,1|(201,367)|
+1,39,35,32,1,0,0,0,0,64,0,-1--1--1,,1|(444,399)|
+1,40,19,35,1,0,0,0,0,64,0,-1--1--1,,1|(344,402)|
+1,41,19,34,1,0,0,0,0,64,0,-1--1--1,,1|(261,391)|
+1,42,33,35,1,0,0,0,0,64,0,-1--1--1,,1|(237,520)|
+1,43,1,32,1,0,0,0,0,64,0,-1--1--1,,1|(287,247)|
+1,44,33,34,1,0,0,0,0,64,0,-1--1--1,,1|(129,480)|
+10,45,Growth Rate Factor,87,185,63,11,0,3,0,0,0,0,0,0
+10,46,Deer Killed per Predator,463,192,50,19,8,3,0,0,0,0,0,0
+10,47,Initial Deer Density,505,277,60,11,8,3,0,0,0,0,0,0
+1,48,47,46,1,0,0,0,0,64,0,-1--1--1,,1|(528,227)|
+10,49,Initial Food per Deer,69,271,49,19,8,3,0,0,0,0,0,0
+1,50,49,45,1,0,0,0,0,64,0,-1--1--1,,1|(64,223)|
+1,51,45,6,0,0,0,0,0,64,0,-1--1--1,,1|(105,153)|
+1,52,20,45,0,0,0,0,0,64,0,-1--1--1,,1|(134,215)|
+1,53,12,46,1,0,0,0,0,64,0,-1--1--1,,1|(408,231)|
+1,54,46,11,1,0,0,0,0,64,0,-1--1--1,,1|(448,141)|
+10,55,Change Predator Population,646,97,55,19,8,3,0,0,0,0,0,0
+1,56,55,13,0,0,0,0,0,64,0,-1--1--1,,1|(594,121)|
+///---\\\
+:L<%^E!@
+9:test
+18:kaibab.vsc
+20:kaibab.lst
+15:0,0,0,5,0,0
+19:100,0
+27:2,
+34:0,
+4:Time
+5:Deer Population
+24:1900
+25:1950
+26:1950

@@ -1,0 +1,44 @@
+:GRAPH WIP1
+:TITLE Important Results from the WORLD model.
+:WIP
+:X-DIV 7
+:WIDTH 25
+:HEIGHT 15
+:SCALE
+:VAR Capital
+:SCALE
+:VAR Natural Resources
+:SCALE
+:VAR quality of life
+:SCALE
+:VAR Population
+:SCALE
+:VAR Pollution
+:GRAPH GRAPH1_DOTS
+:TITLE Results from the WORLD model.
+:X-DIV 7
+:WIDTH 25
+:HEIGHT 15
+:DOTS
+:SCALE
+:VAR Capital
+:SHAPE CIRCLE,3
+:SCALE
+:VAR Natural_Resources
+:SHAPE X,2
+:SCALE
+:VAR quality_of_life
+:SHAPE CROSS,2
+:SCALE
+:VAR Population
+:SHAPE DIAMOND,2
+:SCALE
+:VAR Pollution
+:SHAPE TRIANGLE,3
+:GRAPH GRAPH1_0
+:TITLE Important Results from the WORLD model.
+:X-DIV 7
+:WIDTH 25
+:HEIGHT 15
+:SCALE
+:VAR Natural Resources

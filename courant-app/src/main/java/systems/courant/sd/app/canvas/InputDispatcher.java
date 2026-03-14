@@ -105,6 +105,16 @@ final class InputDispatcher {
         event.consume();
     }
 
+    // --- Mouse exited ---
+
+    void handleMouseExited(MouseEvent event, ModelCanvas canvas) {
+        hoveredElement = null;
+        hoveredConnection = null;
+        canvas.updateTooltip(null, event);
+        canvas.updateCloudTooltip(null, event);
+        canvas.requestRedraw();
+    }
+
     // --- Mouse moved ---
 
     void handleMouseMoved(MouseEvent event, ModelCanvas canvas) {
@@ -474,12 +484,20 @@ final class InputDispatcher {
                     canvasState.select(flow);
                 }
             } else {
-                reattachController.complete(
+                String flowLabel = reattachController.flowName();
+                boolean reconnected = reattachController.complete(
                         viewport.toWorldX(event.getX()),
                         viewport.toWorldY(event.getY()),
                         canvasState, editor, () -> canvas.saveUndoState(
-                                "Reconnect " + reattachController.flowName()));
-                canvas.scheduleRegenerateConnectors();
+                                "Reconnect " + flowLabel));
+                if (!reconnected) {
+                    UndoManager um = canvas.getUndoManager();
+                    if (um != null) {
+                        um.discardLastUndo();
+                    }
+                } else {
+                    canvas.scheduleRegenerateConnectors();
+                }
             }
             canvas.requestRedraw();
             canvas.fireStatusChanged();

@@ -1,0 +1,177 @@
+{UTF-8}
+Water=
+	100
+	~	ml
+	~	The amount of water in the bowl.
+	|
+
+average lifetime  = 250
+	~	Minute
+	~	  The average length of time a yeast survives.
+	|
+
+division rate  = 0.08
+	~	1/Minute
+	~	  The rate at which yeast divide.
+	|
+
+divisions  = Yeast Count*division rate
+	~	Cell/Minute
+	~		|
+
+FINAL TIME  = 300
+	~	Minute
+	~	  FINAL TIME
+	|
+
+INITIAL TIME  = 0
+	~	Minute
+	~	  The initial time for the simulation.
+	|
+
+SAVEPER  = 1
+	~	Minute
+	~	  The frequency with which output is stored.
+	|
+
+Sugar  = 100
+	~	g
+	~	  The amount of sugar in the bowl.
+	|
+
+temperature  = 85
+	~	degrees farenheit
+	~	  The temperature of the water in the bowl.
+	|
+
+terminations  = Yeast Count/average lifetime
+	~	Cell/Minute
+	~	  The rate of termination of yeast.
+	|
+
+TIME STEP  = 1
+	~	Minute
+	~	  The time step for the simulation.
+	|
+
+Yeast Count  = INTEG( divisions-terminations,100)
+	~	Cell
+	~	   The number of yeast.
+	|
+
+********************************************************
+	.Constraints
+********************************************************~
+	|
+
+RC START TIME = 10
+	~	Minute
+	~		~	:SUPPLEMENTARY 
+	|
+
+cold is dormant :THE CONDITION: temperature < 50 :IMPLIES: 
+		divisions = 0
+	~	
+	~		|
+
+hot is dead:THE CONDITION:
+	 temperature = RC STEP(120,1):IMPLIES: Yeast Count <= RC DECAY CHECK(1,Yeast Count,2\
+		)
+	~	
+	~		|
+
+eat or die :THE CONDITION: Sugar = RC STEP(Sugar,0) :AND: temperature > 65 :IMPLIES:
+		Yeast Count <= RC DECAY CHECK(1,Yeast Count,15)
+	~	
+	~		|
+
+drink or die :THE CONDITION: Water = RC STEP(Water,0) :AND: temperature > 65
+		:IMPLIES: Yeast Count <= RC DECAY CHECK(1,Yeast Count,1)
+	~	
+	~		|
+
+big growth :TEST INPUT: divisions = 1e+022
+	~	
+	~		|
+
+hunger from growth :THE CONDITION: big growth :IMPLIES:
+		Sugar <= RC DECAY CHECK(1,Sugar,0.5,INITIAL TIME)
+	~	
+	~		|
+
+thirst from growth :THE CONDITION: big growth :IMPLIES:
+		Water <= RC DECAY CHECK(1,Water,0.5,INITIAL TIME)
+	~	
+	~		|
+
+\\\---/// Sketch information - do not modify anything except names
+V300  Do not put anything below this section - it will be ignored
+*1
+$192-192-192,0,Arial|14||0-0-0|92-92-92|160-160-160|-1--1--1|255-255-255|96,96,100,0
+10,1,Yeast Count,397,101,40,20,3,3,0,16,0,0,0,0,0-0-0,0-0-0,|14|B|0-0-0
+12,2,48,171,101,13,11,0,3,0,0,0,0,0,0
+11,3,48,263,101,7,8,34,3,0,0,1,0,0,0
+10,4,divisions,263,119,39,12,32,3,0,0,0,0,0,0
+12,5,48,620,103,13,11,0,3,0,0,0,0,0,0
+11,6,48,529,103,7,8,34,3,0,0,1,0,0,0
+10,7,terminations,529,119,53,12,32,3,0,0,0,0,0,0
+10,8,division rate,205,163,53,12,0,3,0,2,0,0,0,0,0-0-0,0-0-0,|14||64-128-128
+10,9,average lifetime,555,157,69,12,0,3,0,2,0,0,0,0,0-0-0,0-0-0,|14||64-128-128
+10,10,temperature,397,177,53,12,0,3,0,2,0,0,0,0,0-0-0,0-0-0,|14||64-128-128
+10,11,Sugar,71,55,40,20,3,3,0,16,0,0,0,0,0-0-0,0-0-0,|14|B|0-0-0
+10,12,Water,263,55,40,20,3,3,0,16,0,0,0,0,0-0-0,0-0-0,|14|B|0-0-0
+1,13,3,1,4,0,0,22,0,0,0,-1--1--1,,1|(313,101)|
+1,14,3,2,100,0,0,22,0,0,0,-1--1--1,,1|(220,101)|
+1,15,6,5,4,0,0,22,0,0,0,-1--1--1,,1|(571,103)|
+1,16,6,1,100,0,0,22,0,0,0,-1--1--1,,1|(480,103)|
+1,17,1,4,2,0,0,0,0,0,0,-1--1--1,,1|(315,143)|
+1,18,9,7,0,0,0,0,0,0,0,-1--1--1,,1|(547,144)|
+1,19,1,7,2,0,0,0,0,0,0,-1--1--1,,1|(464,139)|
+1,20,8,4,1,0,0,0,0,0,0,-1--1--1,,1|(217,139)|
+\\\---/// Sketch information - do not modify anything except names
+V300  Do not put anything below this section - it will be ignored
+*View 2
+$192-192-192,0,Arial|14||0-0-0|92-92-92|160-160-160|-1--1--1|-1--1--1|96,96,100,0
+10,1,cold is dormant,419,143,67,12,0,3,0,2,-1,0,0,0,0-0-0,0-0-0,|10||255-0-0
+10,2,divisions,99,31,49,12,0,2,0,1,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,3,2,1,1,0,0,0,0,0,0,-1--1--1,,1|(241,111)|
+10,4,temperature,112,236,64,12,0,2,0,1,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,5,4,1,1,0,0,0,0,0,0,-1--1--1,,1|(247,181)|
+10,6,drink or die,401,241,49,12,0,3,0,2,-1,0,0,0,0-0-0,0-0-0,|10||255-0-0
+1,7,23,6,1,0,0,0,0,0,0,-1--1--1,,1|(231,193)|
+10,8,Yeast Count,112,196,64,12,0,2,0,1,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,9,8,6,0,0,0,0,0,0,0,-1--1--1,,1|(255,217)|
+10,10,eat or die,393,100,41,12,0,3,0,2,-1,0,0,0,0-0-0,0-0-0,|10||255-0-0
+1,11,19,10,0,0,0,0,0,0,0,-1--1--1,,1|(228,84)|
+1,12,4,10,0,0,0,0,0,0,0,-1--1--1,,1|(243,172)|
+1,13,8,10,0,0,0,0,0,0,0,-1--1--1,,1|(243,151)|
+10,14,hot is dead,400,183,48,12,0,3,0,2,-1,0,0,0,0-0-0,0-0-0,|10||255-0-0
+1,15,4,14,0,0,0,0,0,0,0,-1--1--1,,1|(255,209)|
+1,16,8,14,1,0,0,0,0,0,0,-1--1--1,,1|(255,188)|
+10,17,hunger from growth,436,31,84,12,0,3,0,2,-1,0,0,0,0-0-0,0-0-0,|10||255-0-0
+1,18,25,17,0,0,0,0,0,0,0,-1--1--1,,1|(308,31)|
+10,19,Sugar,84,72,39,12,0,2,0,1,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,20,19,17,0,0,0,0,0,0,0,-1--1--1,,1|(228,55)|
+10,21,thirst from growth,427,65,75,12,0,3,0,2,-1,0,0,0,0-0-0,0-0-0,|10||255-0-0
+1,22,25,21,1,0,0,0,0,0,0,-1--1--1,,1|(311,75)|
+10,23,Water,84,155,39,12,0,2,0,1,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,24,23,21,1,0,0,0,0,0,0,-1--1--1,,1|(219,109)|
+10,25,big growth,237,31,47,12,0,3,0,2,0,0,0,0,0-0-0,0-0-0,|10||0-0-255
+1,26,2,25,1,0,0,0,0,0,0,-1--1--1,,1|(161,32)|
+1,27,4,6,0,0,0,0,0,0,0,-1--1--1,,1|(255,237)|
+10,28,INITIAL TIME,115,113,69,12,0,2,0,1,-1,0,0,0,128-128-128,0-0-0,|10||128-128-128
+1,29,28,17,1,0,0,0,0,0,0,-1--1--1,,1|(248,61)|
+1,30,28,21,0,0,0,0,0,0,0,-1--1--1,,1|(259,91)|
+///---\\\
+:L<%^E!@
+1:Yeast1.vdf
+9:Yeast1
+15:0,0,0,0,0,0
+19:100,1
+27:0,
+34:0,
+4:Time
+5:divisions
+24:0
+25:300
+26:300

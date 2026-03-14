@@ -202,6 +202,144 @@ class ExampleModelGeneratorTest {
     }
 
     // -------------------------------------------------------------------
+    // Behavioral assertions per model (#29)
+    // -------------------------------------------------------------------
+
+    @Test
+    @DisplayName("exponential growth: population grows beyond initial value")
+    void exponentialGrowth_shouldGrow() {
+        CompiledModel compiled = compiler.compile(CanonicalModels.exponentialGrowth());
+        Simulation sim = compiled.createSimulation();
+        sim.execute();
+
+        Stock population = findStock(compiled.getModel().getStocks(), "Population");
+        assertThat(population.getValue())
+                .as("Population should grow beyond 100 after 365 days (net rate 1%/day)")
+                .isGreaterThan(100);
+    }
+
+    @Test
+    @DisplayName("bathtub: water drains then stabilizes when inflow matches outflow")
+    void bathtub_shouldDrainThenStabilize() {
+        CompiledModel compiled = compiler.compile(CanonicalModels.bathtub());
+        Simulation sim = compiled.createSimulation();
+        sim.execute();
+
+        Stock water = findStock(compiled.getModel().getStocks(), "Water_in_Tub");
+        assertThat(water.getValue())
+                .as("Water should drain from 50 and stabilize near 25")
+                .isLessThan(50)
+                .isGreaterThan(0);
+    }
+
+    @Test
+    @DisplayName("goal seeking: inventory approaches goal of 860")
+    void goalSeeking_shouldApproachGoal() {
+        CompiledModel compiled = compiler.compile(CanonicalModels.goalSeeking());
+        Simulation sim = compiled.createSimulation();
+        sim.execute();
+
+        Stock inventory = findStock(compiled.getModel().getStocks(), "Inventory");
+        assertThat(inventory.getValue())
+                .as("Inventory should approach goal of 860")
+                .isCloseTo(860, within(50.0));
+    }
+
+    @Test
+    @DisplayName("coffee cooling: temperature decreases but stays above room temp")
+    void coffeeCooling_shouldCoolTowardRoomTemp() {
+        CompiledModel compiled = compiler.compile(CanonicalModels.coffeeCooling());
+        Simulation sim = compiled.createSimulation();
+        sim.execute();
+
+        Stock temp = findStock(compiled.getModel().getStocks(), "Coffee_Temperature");
+        assertThat(temp.getValue())
+                .as("Coffee should cool below initial 100°C")
+                .isLessThan(100);
+        assertThat(temp.getValue())
+                .as("Coffee should stay above room temperature (18°C)")
+                .isGreaterThan(18);
+    }
+
+    @Test
+    @DisplayName("SIR epidemic: infection peaks then declines, recovered > 0")
+    void sirEpidemic_shouldPeakAndRecover() {
+        CompiledModel compiled = compiler.compile(CanonicalModels.sirEpidemic());
+        Simulation sim = compiled.createSimulation();
+        sim.execute();
+
+        Stock infectious = findStock(compiled.getModel().getStocks(), "Infectious");
+        Stock recovered = findStock(compiled.getModel().getStocks(), "Recovered");
+        Stock susceptible = findStock(compiled.getModel().getStocks(), "Susceptible");
+
+        assertThat(recovered.getValue())
+                .as("Recovered should be > 0 at end of epidemic")
+                .isGreaterThan(0);
+        assertThat(infectious.getValue())
+                .as("Infectious should decline from peak by end of simulation")
+                .isLessThan(susceptible.getValue() + infectious.getValue() + recovered.getValue());
+        assertThat(susceptible.getValue())
+                .as("Susceptible should decrease from initial 1000")
+                .isLessThan(1000);
+    }
+
+    @Test
+    @DisplayName("predator-prey: neither population collapses to zero or diverges")
+    void predatorPrey_shouldOscillateWithoutCollapse() {
+        CompiledModel compiled = compiler.compile(CanonicalModels.predatorPrey());
+        Simulation sim = compiled.createSimulation();
+        sim.execute();
+
+        Stock rabbits = findStock(compiled.getModel().getStocks(), "Rabbits");
+        Stock coyotes = findStock(compiled.getModel().getStocks(), "Coyotes");
+
+        assertThat(rabbits.getValue())
+                .as("Rabbit population should remain positive")
+                .isGreaterThan(0);
+        assertThat(coyotes.getValue())
+                .as("Coyote population should remain positive")
+                .isGreaterThan(0);
+        assertThat(rabbits.getValue())
+                .as("Rabbit population should not diverge")
+                .isLessThan(1_000_000);
+        assertThat(coyotes.getValue())
+                .as("Coyote population should not diverge")
+                .isLessThan(1_000_000);
+    }
+
+    @Test
+    @DisplayName("s-shaped growth: population approaches carrying capacity")
+    void sShapedGrowth_shouldApproachCarryingCapacity() {
+        CompiledModel compiled = compiler.compile(CanonicalModels.sShapedGrowth());
+        Simulation sim = compiled.createSimulation();
+        sim.execute();
+
+        Stock population = findStock(compiled.getModel().getStocks(), "Population");
+        assertThat(population.getValue())
+                .as("Population should grow well beyond initial 10")
+                .isGreaterThan(500);
+        assertThat(population.getValue())
+                .as("Population should not exceed carrying capacity of 1000")
+                .isLessThanOrEqualTo(1000);
+    }
+
+    @Test
+    @DisplayName("inventory oscillation: cars on lot remains positive and oscillates")
+    void inventoryOscillation_shouldOscillate() {
+        CompiledModel compiled = compiler.compile(CanonicalModels.inventoryOscillation());
+        Simulation sim = compiled.createSimulation();
+        sim.execute();
+
+        Stock carsOnLot = findStock(compiled.getModel().getStocks(), "Cars_on_Lot");
+        assertThat(carsOnLot.getValue())
+                .as("Cars on lot should remain positive")
+                .isGreaterThan(0);
+        assertThat(carsOnLot.getValue())
+                .as("Cars on lot should remain reasonable (not diverge)")
+                .isLessThan(10_000);
+    }
+
+    // -------------------------------------------------------------------
     // Helpers
     // -------------------------------------------------------------------
 

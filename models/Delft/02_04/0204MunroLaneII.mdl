@@ -1,0 +1,261 @@
+{UTF-8}
+ability to acknowledge errors  = A FUNCTION OF( "availability of `we just followed the rules' defence"\
+		)
+	~	
+	~		|
+
+"availability of `we just followed the rules' defence"  = A FUNCTION OF( compliance with prescriptions\
+		)
+	~	
+	~		|
+
+average caseload  = A FUNCTION OF( staff absence or sickness rate,staff turnover rate\
+		)
+	~	
+	~		|
+
+average experience level of staff  = A FUNCTION OF( staff turnover)
+	~	
+	~		|
+
+compliance enforcement  = A FUNCTION OF( compliance with prescriptions,target level of procedural prescription\
+		)
+	~	
+	~		|
+
+compliance with prescriptions  = A FUNCTION OF( scope for dealing with variety of circumstances using professional judgment\
+		)
+	~	
+	~		|
+
+errors  = A FUNCTION OF( quality of help to CYP)
+	~	
+	~		|
+
+perceived procedural effectiveness of prescriptive approach  = A FUNCTION OF( ability to acknowledge errors\
+		,reflection on success of prescriptive approach)
+	~	
+	~		|
+
+prescription of practice  = A FUNCTION OF( )
+	~	
+	~		|
+
+public status of child protection workers  = A FUNCTION OF( average experience level of staff\
+		)
+	~	
+	~		|
+
+quality of help to CYP  = A FUNCTION OF( average experience level of staff,scope for dealing with variety of circumstances using professional judgment\
+		,variety of circumstances of CYP)
+	~	
+	~		|
+
+quality of outcomes for CYPs  = A FUNCTION OF( quality of social worker relationship with CYP and family\
+		,scope for dealing with variety of CYP needs with professional expertise,variety of needs of CYPs\
+		)
+	~	
+	~		|
+
+quality of social worker relationship with CYP and family  = A FUNCTION OF( time spent working with CYPs and families\
+		)
+	~	
+	~		|
+
+reflection on success of prescriptive approach  = A FUNCTION OF( errors)
+	~	
+	~		|
+
+scope for dealing with variety of circumstances using professional judgment  = A FUNCTION OF\
+		( compliance enforcement)
+	~	
+	~		|
+
+scope for dealing with variety of CYP needs with professional expertise  = A FUNCTION OF\
+		( prescription of practice)
+	~	
+	~		|
+
+sense of satisfaction derived from work  = A FUNCTION OF( scope for dealing with variety of circumstances using professional judgment\
+		)
+	~	
+	~		|
+
+"sense of satisfaction, self-esteem and personal responsibility"  = A FUNCTION OF( quality of outcomes for CYPs\
+		,scope for dealing with variety of CYP needs with professional expertise)
+	~	
+	~		|
+
+staff absence or sickness rate  = A FUNCTION OF( "sense of satisfaction, self-esteem and personal responsibility"\
+		)
+	~	
+	~		|
+
+staff turnover  = A FUNCTION OF( sense of satisfaction derived from work)
+	~	
+	~		|
+
+staff turnover rate  = A FUNCTION OF( "sense of satisfaction, self-esteem and personal responsibility"\
+		)
+	~	
+	~		|
+
+target level of procedural prescription  = A FUNCTION OF( perceived procedural effectiveness of prescriptive approach\
+		)
+	~	
+	~		|
+
+time spent working with CYPs and families  = A FUNCTION OF( average caseload,prescription of practice\
+		)
+	~	
+	~		|
+
+variety of circumstances of CYP  = A FUNCTION OF( )
+	~	
+	~		|
+
+variety of needs of CYPs  = A FUNCTION OF( )
+	~	
+	~		|
+
+********************************************************
+	.Control
+********************************************************~
+		Simulation Control Parameters
+	|
+
+FINAL TIME  = 100
+	~	Month
+	~	The final time for the simulation.
+	|
+
+INITIAL TIME  = 0
+	~	Month
+	~	The initial time for the simulation.
+	|
+
+SAVEPER  = 
+        TIME STEP
+	~	Month [0,?]
+	~	The frequency with which output is stored.
+	|
+
+TIME STEP  = 1
+	~	Month [0,?]
+	~	The time step for the simulation.
+	|
+
+\\\---/// Sketch information - do not modify anything except names
+V300  Do not put anything below this section - it will be ignored
+*Munro I final report
+$192-192-192,0,Times New Roman|12||0-0-0|0-0-0|0-0-255|-1--1--1|-1--1--1|96,96,100,0
+10,1,prescription of practice,555,203,72,11,8,131,0,0,0,0,0,0
+10,2,scope for dealing with variety of CYP needs with professional expertise,232,415,93,28,8,3,0,0,0,0,0,0
+10,3,quality of outcomes for CYPs,437,420,62,19,8,3,0,0,0,0,0,0
+10,4,"sense of satisfaction, self-esteem and personal responsibility",450,543,79,28,8,3,0,0,0,0,0,0
+10,5,staff absence or sickness rate,653,571,50,19,8,3,0,0,0,0,0,0
+10,6,staff turnover rate,637,649,55,11,8,3,0,0,0,0,0,0
+10,7,average caseload,805,506,54,11,8,3,0,0,0,0,0,0
+10,8,time spent working with CYPs and families,811,412,75,19,8,3,0,0,0,0,0,0
+10,9,quality of social worker relationship with CYP and family,617,319,83,28,8,3,0,0,0,0,0,0
+10,10,variety of needs of CYPs,436,328,59,19,8,131,0,0,0,0,0,0
+1,11,10,3,0,0,45,0,1,64,0,255-0-0,|12||0-0-0,1|(436,367)|
+1,12,1,2,1,0,45,0,1,64,0,255-0-0,|12||0-0-0,1|(396,264)|
+1,13,2,3,1,0,43,0,2,65,0,-1--1--1,|12||0-0-0,1|(343,417)|
+1,14,2,4,1,0,43,0,0,64,0,-1--1--1,,1|(316,494)|
+1,15,3,4,1,0,43,0,0,64,0,-1--1--1,,1|(430,473)|
+1,16,4,5,1,0,45,0,1,64,0,255-0-0,|12||0-0-0,1|(597,574)|
+1,17,5,7,1,0,43,0,0,64,0,-1--1--1,,1|(760,547)|
+1,18,7,8,1,0,45,0,1,64,0,255-0-0,|12||0-0-0,1|(810,479)|
+1,19,8,9,1,0,43,0,0,64,0,-1--1--1,,1|(770,368)|
+1,20,9,3,1,0,43,0,2,65,0,-1--1--1,|12||0-0-0,1|(504,349)|
+1,21,4,6,1,0,45,0,1,64,0,255-0-0,|12||0-0-0,1|(537,629)|
+1,22,6,7,1,0,43,0,2,192,0,-1--1--1,|12||0-0-0,1|(751,611)|
+1,23,1,8,1,0,45,0,3,192,0,255-0-0,|12||0-0-0,1|(746,312)|
+12,24,2,608,447,23,23,5,3,0,0,-1,0,0,0
+12,25,2,647,616,23,23,5,3,0,0,-1,0,0,0
+12,26,0,618,433,5,7,8,7,0,8,-1,0,0,0,0-0-0,0-0-0,|8||0-0-0
+1
+12,27,0,659,600,5,7,8,7,0,8,-1,0,0,0,0-0-0,0-0-0,|8||0-0-0
+2
+\\\---/// Sketch information - do not modify anything except names
+V300  Do not put anything below this section - it will be ignored
+*Munro I analysis
+$192-192-192,0,Times New Roman|12||0-0-0|0-0-0|0-0-255|-1--1--1|-1--1--1|96,96,100,0
+10,1,variety of circumstances of CYP,213,78,71,19,8,3,0,0,0,0,0,0
+10,2,quality of help to CYP,269,182,53,19,8,3,0,0,0,0,0,0
+10,3,errors,394,73,20,11,8,3,0,0,0,0,0,0
+10,4,reflection on success of prescriptive approach,594,81,74,19,8,3,0,0,0,0,0,0
+10,5,perceived procedural effectiveness of prescriptive approach,715,323,87,28,8,3,0,0,0,0,0,0
+10,6,target level of procedural prescription,695,433,74,19,8,3,0,0,0,0,0,0
+10,7,ability to acknowledge errors,625,192,46,27,8,131,0,0,0,0,0,0
+10,8,"availability of `we just followed the rules' defence",442,206,84,19,8,3,0,0,0,0,0,0
+10,9,compliance with prescriptions,388,293,52,19,8,3,0,0,0,0,0,0
+10,10,scope for dealing with variety of circumstances using professional judgment,362,489,101,28,8,3,0,0,0,0,0,0
+10,11,sense of satisfaction derived from work,179,436,63,19,8,3,0,0,0,0,0,0
+10,12,staff turnover,133,350,42,11,8,3,0,0,0,0,0,0
+10,13,average experience level of staff,136,256,61,19,8,3,0,0,0,0,0,0
+10,14,public status of child protection workers,136,137,65,19,8,3,0,0,0,0,0,0
+10,15,compliance enforcement,554,508,40,19,8,3,0,0,0,0,0,0
+1,16,9,8,1,0,43,0,2,64,0,-1--1--1,|12||0-0-0,1|(405,243)|
+1,17,8,7,1,0,45,0,3,64,0,255-0-0,|12||0-0-0,1|(556,171)|
+1,18,7,5,1,0,45,0,1,64,0,255-0-0,|12||0-0-0,1|(688,223)|
+1,19,5,6,1,0,43,0,0,64,0,-1--1--1,,1|(719,370)|
+1,20,6,15,1,0,43,0,0,64,0,-1--1--1,,1|(636,492)|
+1,21,9,15,1,0,45,0,1,64,0,255-0-0,|12||0-0-0,1|(597,365)|
+1,22,15,10,1,0,45,0,1,64,0,255-0-0,|12||0-0-0,1|(502,533)|
+1,23,10,9,1,0,45,0,1,64,0,255-0-0,|12||0-0-0,1|(337,379)|
+1,24,10,2,1,0,43,0,0,64,0,-1--1--1,,1|(254,331)|
+1,25,2,3,1,0,45,0,1,64,0,255-0-0,|12||0-0-0,1|(316,116)|
+1,26,3,4,1,0,43,0,2,192,0,-1--1--1,|12||0-0-0,1|(443,58)|
+1,27,4,5,1,0,45,0,3,192,0,255-0-0,|12||0-0-0,1|(700,158)|
+1,28,1,2,1,0,45,0,1,64,0,255-0-0,|12||0-0-0,1|(250,113)|
+1,29,10,11,1,0,43,0,2,192,0,-1--1--1,|12||0-0-0,1|(242,475)|
+1,30,11,12,1,0,45,0,1,64,0,255-0-0,|12||0-0-0,1|(139,378)|
+1,31,12,13,1,0,45,0,1,64,0,255-0-0,|12||0-0-0,1|(128,308)|
+1,32,13,14,1,0,43,0,0,64,0,-1--1--1,,1|(131,187)|
+1,33,13,2,1,0,43,1,3,64,0,160-160-160,|12||128-128-128,1|(201,200)|
+12,34,1,464,396,23,23,4,3,0,0,-1,0,0,0
+12,35,1,479,129,23,23,4,3,0,0,-1,0,0,0
+12,36,2,595,286,23,23,4,3,0,0,-1,0,0,0
+12,37,0,464,406,5,7,8,7,0,8,-1,0,0,0,0-0-0,0-0-0,|8||0-0-0
+1
+12,38,0,479,140,5,7,8,7,0,8,-1,0,0,0,0-0-0,0-0-0,|8||0-0-0
+2
+12,39,1,223,370,23,23,4,3,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+12,40,0,223,381,5,7,8,7,0,8,-1,0,0,0,0-0-0,0-0-0,|8||0-0-0
+3
+12,41,0,392,132,40,16,8,7,0,24,-1,0,0,0,0-0-0,0-0-0,|10|BI|0-0-0
+But it's going wrong!
+12,42,0,593,246,37,16,8,7,0,24,-1,0,0,0,0-0-0,0-0-0,|10|BI|0-0-0
+We followed procedures
+12,43,0,479,436,26,9,8,7,0,24,-1,0,0,0,0-0-0,0-0-0,|10|BI|0-0-0
+Comply!
+12,44,0,209,314,41,22,8,135,0,26,-1,0,0,0,0-0-0,0-0-0,|10|BI|128-128-128
+Reflection without experience?
+///---\\\
+:L<%^E!@
+9:Current
+22:$,Dollar,Dollars,$s
+22:Hour,Hours
+22:Month,Months
+22:Person,People,Persons
+22:Unit,Units
+22:Week,Weeks
+22:Year,Years
+22:Day,Days
+15:0,0,0,0,0,0
+19:100,1
+27:2,
+34:0,
+5:scope for dealing with variety of CYP needs with professional expertise
+35:Date
+36:YYYY-MM-DD
+37:2000
+38:1
+39:1
+40:2
+41:0
+24:0
+25:0
+26:0

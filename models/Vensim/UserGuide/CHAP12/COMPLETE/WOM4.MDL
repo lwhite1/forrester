@@ -1,0 +1,227 @@
+{UTF-8}
+GAME INTERVAL=
+	0.25
+	~	Year
+	~		~	:SUPPLEMENTARY 
+	|
+
+new customers=
+	sales / sales size
+	~	person/Year
+	~		|
+
+advertising spending= GAME (
+	c advertising spending)
+	~	$/Year
+	~		|
+
+c advertising spending=
+	2e+007
+	~	$/Year
+	~		|
+
+customer sales effectiveness=
+	3
+	~	widget/person/Year
+	~		|
+
+Customers= INTEG (
+	+new customers-leaving customers,
+		seed customers)
+	~	person
+	~		|
+
+fraction would be with real prospects=
+	Potential Customers / market size
+	~	Dmnl
+	~		|
+
+leaving customers=
+	Customers / obsolescence time
+	~	person/Year
+	~		|
+
+market size=
+	1e+008
+	~	person
+	~		|
+
+sales size=
+	1
+	~	widget/person
+	~		|
+
+obsolescence time=
+	2
+	~	Year
+	~		|
+
+Potential Customers= INTEG (
+	leaving customers - new customers,
+		market size - seed customers)
+	~	person
+	~		|
+
+sales=
+	(would be word of mouth sales + would be advertising sales ) * fraction would be with real prospects
+	~	widget/Year
+	~		|
+
+would be advertising sales=
+	advertising spending * advertising effectiveness
+	~	widget/Year
+	~		|
+
+seed customers=
+	10000
+	~	person
+	~		|
+
+would be word of mouth sales=
+	Customers * customer sales effectiveness
+	~	widget/Year
+	~		|
+
+advertising effectiveness=
+	0.1
+	~	widget/$
+	~		|
+
+********************************************************
+	.Control
+********************************************************~
+		Simulation Control Parameters
+	|
+
+FINAL TIME  = 5
+	~	Year
+	~	The final time for the simulation.
+	|
+
+INITIAL TIME  = 0
+	~	Year
+	~	The initial time for the simulation.
+	|
+
+SAVEPER  = 
+        TIME STEP
+	~	Year
+	~	The frequency with which output is stored.
+	|
+
+TIME STEP  = 0.0625
+	~	Year
+	~	The time step for the simulation.
+	|
+
+\\\---/// Sketch information - do not modify anything except names
+V300  Do not put anything below this section - it will be ignored
+*Overview
+$192-192-192,0,Arial|14||0-0-0|0-0-0|0-0-255|-1--1--1|-1--1--1|96,96,100,0
+12,1,0,413,67,85,20,0,4,0,58,-1,0,0,0,0-0-0,0-0-0,Arial|24|B|64-64-128
+Main Menu
+12,2,0,403,103,204,12,0,4,0,0,-1,0,0,0
+Welcome to the Word of Mouth Market Simulator
+12,3,0,412,165,299,29,8,132,0,0,-1,0,0,0
+This model will help you understand the dynamics of growth in an emerging market.  Click on one of the links below to go to that page.
+12,4,0,139,251,55,36,3,132,0,55,-1,3,2,0,192-192-192,128-128-128,Arial|12|B|0-0-0
+Model Structure
+12,5,0,139,349,55,32,3,132,0,55,-1,3,3,0,192-192-192,128-128-128,Arial|12|B|0-0-0
+Simulation Setup
+12,6,0,139,444,56,32,3,132,0,55,0,3,4,0,192-192-192,128-128-128,Arial|12|B|0-0-0
+Gaming Control
+12,7,0,520,259,261,27,8,132,0,0,-1,0,0,0
+Review the structure of the model.  Position the mouse over a variable to get more information about its meaning.
+12,8,0,531,343,323,27,8,132,0,0,-1,0,0,0
+Setup and run a simulation.  Type Ctrl+E, move the sliders and/or click on the constants and go to Gaming, or press Ctrl+R to see simulation results.
+12,9,0,495,439,237,21,8,132,0,0,-1,0,0,0
+Run a game with this model.  You can first use simulation setup and then go to gaming if you want.
+\\\---/// Sketch information - do not modify anything except names
+V300  Do not put anything below this section - it will be ignored
+*Structure
+$192-192-192,0,Arial|14||0-0-0|64-64-64|160-160-160|-1--1--1|-1--1--1|96,96,100,0
+10,1,Potential Customers,317,157,56,29,3,131,0,0,0,0,0,0
+10,2,Customers,603,159,63,27,3,131,0,0,0,0,0,0
+1,3,5,2,4,0,0,22,0,0,0,-1--1--1,,1|(503,161)|
+1,4,5,1,100,0,0,22,0,0,0,-1--1--1,,1|(413,161)|
+11,5,316,460,161,7,8,34,3,0,0,1,0,0,0
+10,6,new customers,460,181,65,12,40,3,0,0,-1,0,0,0
+1,7,9,1,4,0,0,22,0,0,0,-1--1--1,,4|(219,43)|(219,48)|(219,161)|(240,161)|
+1,8,9,2,100,0,0,22,0,0,0,-1--1--1,,4|(708,43)|(708,48)|(708,161)|(687,161)|
+11,9,172,460,43,7,8,34,3,0,0,1,0,0,0
+10,10,leaving customers,460,61,79,12,40,3,0,0,-1,0,0,0
+10,11,obsolescence time,605,101,61,21,8,3,0,2,0,0,0,0,0-0-0,0-0-0,|14||64-128-128
+10,12,seed customers,440,112,69,12,8,3,0,2,0,0,0,0,0-0-0,0-0-0,|14||64-128-128
+10,13,market size,153,240,51,12,8,3,0,2,0,0,0,0,0-0-0,0-0-0,|14||64-128-128
+10,14,sales size,348,240,44,12,8,3,0,2,0,0,0,0,0-0-0,0-0-0,|14||64-128-128
+10,15,fraction would be with real prospects,316,313,81,21,8,3,0,0,0,0,0,0
+10,16,would be advertising sales,515,332,73,21,8,3,0,0,0,0,0,0
+10,17,sales,460,261,25,12,8,3,0,0,0,0,0,0
+10,18,advertising spending,681,287,48,21,8,3,0,0,0,0,0,0
+10,19,advertising effectiveness,691,375,57,21,8,3,0,2,0,0,0,0,0-0-0,0-0-0,|14||64-128-128
+10,20,c advertising spending,844,296,56,21,8,3,0,2,0,0,0,0,0-0-0,0-0-0,|14||64-128-128
+10,21,customer sales effectiveness,768,231,67,21,8,3,0,2,0,0,0,0,0-0-0,0-0-0,|14||64-128-128
+10,22,would be word of mouth sales,555,232,75,21,8,3,0,0,0,0,0,0
+1,23,11,10,0,0,0,0,0,64,0,-1--1--1,,1|(532,81)|
+1,24,2,10,0,0,0,0,0,64,0,-1--1--1,,1|(528,107)|
+1,25,12,1,0,0,0,0,0,64,1,-1--1--1,,1|(399,127)|
+1,26,12,2,0,0,0,0,0,64,1,-1--1--1,,1|(501,129)|
+1,27,13,1,1,0,0,0,0,64,1,-1--1--1,,1|(201,200)|
+1,28,14,6,0,0,0,0,0,64,0,-1--1--1,,1|(395,215)|
+1,29,17,6,1,0,0,0,0,64,0,-1--1--1,,1|(440,233)|
+1,30,22,17,1,0,0,0,0,64,0,-1--1--1,,1|(531,260)|
+1,31,2,22,0,0,0,0,0,64,0,-1--1--1,,1|(581,189)|
+1,32,16,17,0,0,0,0,0,64,0,-1--1--1,,1|(488,299)|
+1,33,18,16,0,0,0,0,0,64,0,-1--1--1,,1|(619,303)|
+1,34,19,16,0,0,0,0,0,64,0,-1--1--1,,1|(619,357)|
+1,35,20,18,0,0,0,0,0,64,0,-1--1--1,,1|(767,291)|
+1,36,21,22,0,0,0,0,0,64,0,-1--1--1,,1|(675,231)|
+1,37,1,15,1,0,0,0,0,64,0,-1--1--1,,1|(232,251)|
+1,38,15,17,1,0,0,0,0,64,0,-1--1--1,,1|(403,309)|
+1,39,13,15,1,0,0,0,0,64,0,-1--1--1,,1|(192,285)|
+12,40,0,300,459,45,25,3,4,0,55,0,3,1,0,192-192-192,128-128-128,Arial|12|B|0-0-0
+Overview
+\\\---/// Sketch information - do not modify anything except names
+V300  Do not put anything below this section - it will be ignored
+*Simulate
+$192-192-192,0,Arial|14||0-0-0|0-0-0|0-0-255|-1--1--1|-1--1--1|96,96,100,0
+12,1,20193308,671,251,285,240,3,60,0,0,2,0,0,0
+sales,Graph
+12,2,20195060,160,100,100,31,3,60,0,0,0,0,0,0
+c advertising spending,0,2e+008,5e+006
+12,3,0,160,51,124,12,0,4,0,0,-1,0,0,0
+advertising spending ($/Year)
+12,4,0,160,191,103,12,0,4,0,0,-1,0,0,0
+Product Lifetime (years)
+12,5,20195108,160,240,95,31,3,60,0,0,0,0,0,0
+obsolescence time,0.5,10,0.1
+10,6,customer sales effectiveness,160,341,133,12,0,2,0,1,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+10,7,market size,141,395,61,12,0,2,0,1,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+12,8,0,135,489,45,25,3,4,0,55,0,3,4,0,192-192-192,128-128-128,Arial|12|B|0-0-0
+Gaming Control
+12,9,0,133,560,45,25,3,4,0,55,0,3,1,0,192-192-192,128-128-128,Arial|12|B|0-0-0
+Overview
+\\\---/// Sketch information - do not modify anything except names
+V300  Do not put anything below this section - it will be ignored
+*Game
+$192-192-192,0,Arial|14||0-0-0|0-0-0|0-0-255|-1--1--1|-1--1--1|96,96,100,0
+12,1,20195060,671,251,285,240,3,60,0,0,2,0,0,0
+sales,Graph
+12,2,20195064,160,100,100,31,3,60,0,0,0,0,0,0
+advertising spending,0,2e+008,5e+006
+12,3,0,160,51,97,11,0,4,0,0,-1,0,0,0
+advertising spending ($/Year)
+12,4,0,133,560,45,25,3,4,0,55,0,3,1,0,192-192-192,128-128-128,Arial|12|B|0-0-0
+Overview
+///---\\\
+:L<%^E!@
+9:Current
+15:0,0,0,0,0,0
+19:100,0
+27:0,
+34:0,
+4:Time
+5:GAME INTERVAL
+24:0
+25:5
+26:5

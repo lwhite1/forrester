@@ -1,0 +1,244 @@
+{UTF-8}
+AREA  = A FUNCTION OF( )
+	~	
+	~		|
+
+CARRYING CAPACITY  = A FUNCTION OF( )
+	~	
+	~		|
+
+catch per ship  = A FUNCTION OF( density,EFFECT OF DENSITY ON CATCH PER SHIP,NORMAL DENSITY\
+		)
+	~	
+	~		|
+
+costs  = A FUNCTION OF( Ships,UNIT SHIP OPERATING COST)
+	~	
+	~		|
+
+death fraction  = A FUNCTION OF( CARRYING CAPACITY,EFFECT OF FISH AND CARRYING CAPACITY ON DEATH FRACTION\
+		,Fish)
+	~	
+	~		|
+
+density  = A FUNCTION OF( AREA,Fish)
+	~	
+	~		|
+
+EFFECT OF DENSITY ON CATCH PER SHIP  = A FUNCTION OF( )
+	~	
+	~		|
+
+EFFECT OF FISH AND CARRYING CAPACITY ON DEATH FRACTION  = A FUNCTION OF( )
+	~	
+	~		|
+
+Fish  = A FUNCTION OF( -fish death rate,fish hatch rate,INTIAL FISH,-total catch per year\
+		)
+	~	
+	~		|
+
+fish death rate  = A FUNCTION OF( death fraction,Fish)
+	~	
+	~		|
+
+fish hatch rate  = A FUNCTION OF( Fish,HATCH FRACTION)
+	~	
+	~		|
+
+FISH PRICE  = A FUNCTION OF( )
+	~	
+	~		|
+
+FRACTION INVESTED  = A FUNCTION OF( )
+	~	
+	~		|
+
+HATCH FRACTION  = A FUNCTION OF( )
+	~	
+	~		|
+
+INITIAL SHIPS  = A FUNCTION OF( )
+	~	
+	~		|
+
+INITIAL TOTAL PROFITS  = A FUNCTION OF( )
+	~	
+	~		|
+
+INTIAL FISH  = A FUNCTION OF( )
+	~	
+	~		|
+
+NORMAL DENSITY  = A FUNCTION OF( )
+	~	
+	~		|
+
+profits each year  = A FUNCTION OF( yearly profits)
+	~	
+	~		|
+
+revenues  = A FUNCTION OF( FISH PRICE,total catch per year)
+	~	
+	~		|
+
+ship building rate  = A FUNCTION OF( FRACTION INVESTED,SHIP COST,yearly profits)
+	~	
+	~		|
+
+SHIP COST  = A FUNCTION OF( )
+	~	
+	~		|
+
+Ships  = A FUNCTION OF( INITIAL SHIPS,ship building rate)
+	~	
+	~		|
+
+total catch per year  = A FUNCTION OF( catch per ship,Ships)
+	~	
+	~		|
+
+Total Profits  = A FUNCTION OF( INITIAL TOTAL PROFITS,profits each year)
+	~	
+	~		|
+
+UNIT SHIP OPERATING COST  = A FUNCTION OF( )
+	~	
+	~		|
+
+yearly profits  = A FUNCTION OF( costs,revenues)
+	~	
+	~		|
+
+********************************************************
+	.Control
+********************************************************~
+		Simulation Control Parameters
+	|
+
+FINAL TIME  = 20
+	~	Year
+	~	The final time for the simulation.
+	|
+
+INITIAL TIME  = 0
+	~	Year
+	~	The initial time for the simulation.
+	|
+
+SAVEPER  = 
+        TIME STEP
+	~	Year [0,?]
+	~	The frequency with which output is stored.
+	|
+
+TIME STEP  = 0.25
+	~	Year [0,?]
+	~	The time step for the simulation.
+	|
+
+\\\---/// Sketch information - do not modify anything except names
+V300  Do not put anything below this section - it will be ignored
+*View 1
+$192-192-192,0,Times New Roman|12||0-0-0|0-0-0|0-0-255|-1--1--1|-1--1--1|96,96,100,0
+10,1,Fish,300,116,40,20,3,3,0,0,0,0,0,0
+10,2,Ships,305,365,40,20,3,3,0,0,0,0,0,0
+10,3,Total Profits,318,545,40,20,3,3,0,0,0,0,0,0
+12,4,48,105,546,10,8,0,3,0,0,-1,0,0,0
+1,5,7,3,4,0,0,22,0,0,0,-1--1--1,,1|(240,546)|
+1,6,7,4,100,0,0,22,0,0,0,-1--1--1,,1|(152,546)|
+11,7,48,196,546,6,8,34,3,0,0,1,0,0,0
+10,8,profits each year,196,565,52,11,40,3,0,0,-1,0,0,0
+12,9,48,116,109,10,8,0,3,0,0,-1,0,0,0
+1,10,12,1,4,0,0,22,0,0,0,-1--1--1,,1|(229,109)|
+1,11,12,9,100,0,0,22,0,0,0,-1--1--1,,1|(156,109)|
+11,12,48,193,109,6,8,34,3,0,0,1,0,0,0
+10,13,fish hatch rate,193,128,44,11,40,3,0,0,-1,0,0,0
+12,14,48,484,117,10,8,0,3,0,0,-1,0,0,0
+1,15,17,14,4,0,0,22,0,0,0,-1--1--1,,1|(443,117)|
+1,16,17,1,100,0,0,22,0,0,0,-1--1--1,,1|(370,117)|
+11,17,48,407,117,6,8,34,3,0,0,1,0,0,0
+10,18,fish death rate,407,136,44,11,40,3,0,0,-1,0,0,0
+12,19,48,488,208,10,8,0,3,0,0,-1,0,0,0
+1,20,22,19,4,0,0,22,0,0,0,-1--1--1,,1|(418,205)|
+1,21,22,1,100,0,0,22,0,0,0,-1--1--1,,1|(300,205)|
+11,22,48,353,205,6,8,34,3,0,0,3,0,0,0
+10,23,total catch per year,353,178,46,19,40,3,0,0,-1,0,0,0
+12,24,48,553,354,10,8,0,3,0,0,-1,0,0,0
+1,25,27,2,4,0,0,22,0,0,0,-1--1--1,,1|(391,354)|
+1,26,27,24,100,0,0,22,0,0,0,-1--1--1,,1|(496,354)|
+11,27,48,444,354,6,8,34,3,0,0,1,0,0,0
+10,28,ship building rate,444,373,53,11,40,3,0,0,-1,0,0,0
+10,29,costs,440,428,18,11,8,3,0,0,0,0,0,0
+10,30,yearly profits,476,485,41,11,8,3,0,0,0,0,0,0
+10,31,FRACTION INVESTED,584,440,42,19,8,3,0,0,0,0,0,0
+10,32,SHIP COST,649,386,42,11,8,3,0,0,0,0,0,0
+10,33,INITIAL TOTAL PROFITS,519,572,58,19,8,3,0,0,0,0,0,0
+10,34,FISH PRICE,101,396,43,11,8,3,0,0,0,0,0,0
+10,35,revenues,224,431,29,11,8,3,0,0,0,0,0,0
+10,36,EFFECT OF DENSITY ON CATCH PER SHIP,88,301,80,19,8,3,0,0,0,0,0,0
+10,37,NORMAL DENSITY,51,247,36,19,8,3,0,0,0,0,0,0
+10,38,catch per ship,186,244,44,11,8,3,0,0,0,0,0,0
+10,39,density,168,191,23,11,8,3,0,0,0,0,0,0
+10,40,AREA,52,187,23,11,8,3,0,0,0,0,0,0
+10,41,HATCH FRACTION,58,143,42,19,8,3,0,0,0,0,0,0
+10,42,death fraction,559,161,43,11,8,3,0,0,0,0,0,0
+10,43,CARRYING CAPACITY,559,258,43,19,8,3,0,0,0,0,0,0
+10,44,INITIAL SHIPS,387,306,54,11,8,3,0,0,0,0,0,0
+10,45,UNIT SHIP OPERATING COST,333,459,49,27,8,131,0,0,0,0,0,0
+1,46,1,12,1,0,0,0,0,64,0,-1--1--1,,1|(227,88)|
+1,47,41,13,0,0,0,0,0,64,0,-1--1--1,,1|(117,136)|
+1,48,40,39,0,0,0,0,0,64,0,-1--1--1,,1|(103,188)|
+1,49,1,39,0,0,0,0,0,64,0,-1--1--1,,1|(232,154)|
+1,50,1,42,1,0,0,0,0,64,0,-1--1--1,,1|(385,79)|
+10,51,EFFECT OF FISH AND CARRYING CAPACITY ON DEATH FRACTION,699,87,100,28,8,3,0,0,0,0,0,0
+1,52,51,42,0,0,0,0,0,64,0,-1--1--1,,1|(619,129)|
+1,53,42,18,0,0,0,0,0,64,0,-1--1--1,,1|(490,149)|
+1,54,43,42,0,0,0,0,0,64,0,-1--1--1,,1|(559,212)|
+1,55,1,18,1,0,0,0,0,64,0,-1--1--1,,1|(347,149)|
+1,56,38,22,0,0,0,0,0,64,0,-1--1--1,,1|(281,221)|
+1,57,39,38,0,0,0,0,0,64,0,-1--1--1,,1|(174,210)|
+1,58,37,38,0,0,0,0,0,64,0,-1--1--1,,1|(107,245)|
+1,59,36,38,0,0,0,0,0,64,0,-1--1--1,,1|(137,271)|
+1,60,34,35,0,0,0,0,0,64,0,-1--1--1,,1|(160,412)|
+1,61,22,35,1,0,0,0,0,64,0,-1--1--1,,1|(228,310)|
+1,62,2,29,0,0,0,0,0,64,0,-1--1--1,,1|(377,398)|
+1,63,29,30,0,0,0,0,0,64,0,-1--1--1,,1|(453,450)|
+1,64,45,29,0,0,0,0,0,64,0,-1--1--1,,1|(395,441)|
+1,65,30,28,1,0,0,0,0,64,0,-1--1--1,,1|(473,436)|
+1,66,32,28,0,0,0,0,0,64,0,-1--1--1,,1|(558,380)|
+1,67,31,28,0,0,0,0,0,64,0,-1--1--1,,1|(511,405)|
+1,68,35,30,1,0,0,0,0,64,0,-1--1--1,,1|(314,498)|
+1,69,30,8,1,0,0,0,0,64,0,-1--1--1,,1|(401,562)|
+1,70,44,2,0,0,0,0,0,64,0,-1--1--1,,1|(357,326)|
+1,71,33,3,0,0,0,0,0,64,0,-1--1--1,,1|(416,558)|
+10,72,INTIAL FISH,296,59,47,11,8,3,0,0,0,0,0,0
+1,73,72,1,0,0,0,0,0,64,0,-1--1--1,,1|(296,76)|
+1,74,2,22,0,0,0,0,0,64,0,-1--1--1,,1|(329,284)|
+///---\\\
+:L<%^E!@
+9:Current
+22:$,Dollar,Dollars,$s
+22:Hour,Hours
+22:Month,Months
+22:Person,People,Persons
+22:Unit,Units
+22:Week,Weeks
+22:Year,Years
+22:Day,Days
+15:0,0,0,1,0,0
+19:100,0
+27:2,
+34:0,
+5:FINAL TIME
+35:Date
+36:YYYY-MM-DD
+37:2000
+38:1
+39:1
+40:0
+41:0
+42:0
+24:0
+25:0
+26:0

@@ -1,0 +1,9 @@
+:COMMENT
+:COMMENT  This file is for use with wfinv.vmf as described in Chpater 20.
+:COMMENT  It brings noise into the model to generate synthetic data.
+:COMMENT
+inventory meas_noise = 0.4
+workforce meas noise = .025
+productivity_noise = .20
+net hire noise = 4
+

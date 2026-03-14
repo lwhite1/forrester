@@ -42,7 +42,7 @@ class ValidationDialogFxTest {
 
     private void showDialog(ValidationResult result, java.util.function.Consumer<String> callback) {
         Platform.runLater(() -> {
-            validationDialog = new ValidationDialog(result, callback);
+            validationDialog = new ValidationDialog(result, callback, null);
             validationDialog.show();
         });
         WaitForAsyncUtils.waitForFxEvents();

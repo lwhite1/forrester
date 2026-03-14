@@ -1,0 +1,15 @@
+:BAR-GRAPH POPPYR
+:TITLE Population Pyramids
+:SUBTITLE Female
+:OSUBTITLE Male
+:WIP
+:FORCE
+:HORIZONTAL
+:Y-MIN 0
+:Y-MAX 300
+:VAR Population Group[FEMALE,age group]
+:OVAR Population Group[MALE,age group]
+:SOFT-BOUNDS
+
+
+

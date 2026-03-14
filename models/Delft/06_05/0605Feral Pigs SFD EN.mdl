@@ -1,0 +1,153 @@
+{UTF-8}
+births=
+	piglets
+	~	pig/year
+	~		|
+
+catch per trap=
+	RANDOM UNIFORM(0.15, 0.17, 0.1)
+	~	1/trap
+	~		|
+
+feral pig traps=
+	traps per license*licences granted per year
+	~	trap/year
+	~		|
+
+feral pigs= INTEG (
+	births-pigs removed,
+		20000)
+	~	pig
+	~		|
+
+licences granted per year=
+	10
+	~	license/year
+	~		|
+
+litter=
+	sows*litter per sow
+	~	litter/year
+	~		|
+
+litter per sow=
+	4
+	~	litter/pig/year
+	~		|
+
+piglet per litter=
+	8
+	~	pig/litter
+	~		|
+
+piglets=
+	litter*piglet per litter
+	~	pig/year
+	~		|
+
+pigs removed=
+	feral pigs*catch per trap*feral pig traps
+	~	pig/year
+	~		|
+
+sows=
+	feral pigs/2
+	~	pig
+	~		|
+
+traps per license=
+	10
+	~	trap/license
+	~		|
+
+********************************************************
+	.Control
+********************************************************~
+		Simulation Control Parameters
+	|
+
+FINAL TIME  = 10
+	~	year
+	~	The final time for the simulation.
+	|
+
+INITIAL TIME  = 0
+	~	year
+	~	The initial time for the simulation.
+	|
+
+SAVEPER  = 
+        TIME STEP 
+	~	year [0,?]
+	~	The frequency with which output is stored.
+	|
+
+TIME STEP  = 0.125
+	~	year [0,?]
+	~	The time step for the simulation.
+	|
+
+\\\---/// Sketch information - do not modify anything except names
+V300  Do not put anything below this section - it will be ignored
+*View 1
+$192-192-192,0,Times New Roman|12||0-0-0|0-0-0|0-0-255|-1--1--1|-1--1--1|96,96,100,0
+10,1,feral pigs,466,218,32,16,3,3,0,0,0,0,0,0
+12,2,48,724,208,10,8,0,3,0,0,-1,0,0,0
+1,3,5,2,4,0,0,22,0,0,0,-1--1--1,,1|(662,208)|
+1,4,5,1,100,0,0,22,0,0,0,-1--1--1,,1|(549,208)|
+11,5,48,606,208,5,6,34,3,0,0,1,0,0,0
+10,6,pigs removed,606,224,45,10,40,3,0,0,-1,0,0,0
+12,7,48,258,209,10,8,0,3,0,0,-1,0,0,0
+1,8,10,1,4,0,0,22,0,0,0,-1--1--1,,1|(393,209)|
+1,9,10,7,100,0,0,22,0,0,0,-1--1--1,,1|(305,209)|
+11,10,48,348,209,5,6,34,3,0,0,1,0,0,0
+10,11,births,348,225,20,10,40,3,0,0,-1,0,0,0
+10,12,sows,460,115,18,10,8,3,0,0,0,0,0,0
+10,13,litter,346,82,17,10,8,3,0,0,0,0,0,0
+10,14,piglets,270,141,23,10,8,3,0,0,0,0,0,0
+10,15,litter per sow,466,41,45,10,8,3,0,0,0,0,0,0
+10,16,piglet per litter,225,78,33,18,8,3,0,0,0,0,0,0
+1,17,1,12,1,0,0,0,0,64,0,-1--1--1,,1|(473,166)|
+1,18,12,13,1,0,0,0,0,64,0,-1--1--1,,1|(401,90)|
+1,19,13,14,1,0,0,0,0,64,0,-1--1--1,,1|(305,103)|
+1,20,14,10,1,0,0,0,0,64,0,-1--1--1,,1|(291,182)|
+1,21,16,14,1,0,0,0,0,64,0,-1--1--1,,1|(226,117)|
+1,22,15,13,1,0,0,0,0,64,0,-1--1--1,,1|(371,60)|
+10,23,licences granted per year,675,419,54,18,8,3,0,0,0,0,0,0
+10,24,feral pig traps,574,335,46,10,8,3,0,0,0,0,0,0
+10,25,traps per license,532,410,30,18,8,3,0,0,0,0,0,0
+1,26,25,24,1,0,0,0,0,64,0,-1--1--1,,1|(566,392)|
+1,27,23,24,1,0,0,0,0,64,0,-1--1--1,,1|(634,349)|
+10,28,catch per trap,667,292,45,10,8,3,0,0,0,0,0,0
+1,29,28,6,1,0,0,0,0,64,0,-1--1--1,,1|(653,251)|
+1,30,1,6,1,0,0,0,0,64,0,-1--1--1,,1|(514,171)|
+1,31,24,6,1,0,0,0,0,64,0,-1--1--1,,1|(558,258)|
+///---\\\
+:L<%^E!@
+1:Current.vdf
+9:Current
+22:$,Dollar,Dollars,$s
+22:Hour,Hours
+22:Month,Months
+22:Person,People,Persons
+22:Unit,Units
+22:Week,Weeks
+22:Year,Years
+22:Day,Days
+15:0,0,0,1,0,0
+19:100,0
+27:2,
+34:0,
+4:Time
+5:pigs removed
+35:Date
+36:YYYY-MM-DD
+37:2000
+38:1
+39:1
+40:0
+41:0
+42:0
+24:0
+25:10
+26:10

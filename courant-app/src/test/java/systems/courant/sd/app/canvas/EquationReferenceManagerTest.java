@@ -123,6 +123,14 @@ class EquationReferenceManagerTest {
             manager.updateEquationReferences("Rate", "New_Rate");
             assertThat(flows.getFirst().equation()).isEqualTo("Pop * 5");
         }
+
+        @Test
+        void shouldPreserveVariableSubscripts() {
+            variables.add(new VariableDef("Ratio", "comment", "Pop / Total", "units",
+                    List.of("Region", "Age")));
+            manager.updateEquationReferences("Total", "Grand_Total");
+            assertThat(variables.getFirst().subscripts()).containsExactly("Region", "Age");
+        }
     }
 
     @Nested
@@ -173,6 +181,14 @@ class EquationReferenceManagerTest {
             manager.updateEquationByName("Drain", eq -> eq.replace("Rate", "0"));
             assertThat(flows.getFirst().subscripts()).containsExactly("Region", "Age");
         }
+
+        @Test
+        void shouldPreserveSubscriptsWhenTransformingVariable() {
+            variables.add(new VariableDef("Ratio", "comment", "Pop / Total", "units",
+                    List.of("Region")));
+            manager.updateEquationByName("Ratio", eq -> eq.replace("Total", "100"));
+            assertThat(variables.getFirst().subscripts()).containsExactly("Region");
+        }
     }
 
     @Nested
@@ -215,6 +231,62 @@ class EquationReferenceManagerTest {
         void shouldReturnFalseForUnknownElement() {
             boolean added = manager.addConnectionReference("Missing", "Pop");
             assertThat(added).isFalse();
+        }
+
+        @Test
+        void shouldNotFalsePositiveOnSubstringMatch() {
+            // Issue #266: "Rate" is a substring of "Birth_Rate" but not a whole token
+            flows.add(new FlowDef("Drain", "Birth_Rate * 2", "Day", null, null));
+            boolean added = manager.addConnectionReference("Drain", "Rate");
+            assertThat(added).isTrue();
+            assertThat(flows.getFirst().equation()).isEqualTo("Birth_Rate * 2 * Rate");
+        }
+
+        @Test
+        void shouldDetectWholeTokenAsExistingReference() {
+            flows.add(new FlowDef("Drain", "Rate * Pop", "Day", null, null));
+            boolean added = manager.addConnectionReference("Drain", "Rate");
+            assertThat(added).isTrue();
+            // Should not append duplicate
+            assertThat(flows.getFirst().equation()).isEqualTo("Rate * Pop");
+        }
+
+        @Test
+        void shouldNotFalsePositiveOnSubstringMatchForVariable() {
+            variables.add(new VariableDef("Ratio", "Birth_Rate * 2", "units"));
+            boolean added = manager.addConnectionReference("Ratio", "Rate");
+            assertThat(added).isTrue();
+            assertThat(variables.getFirst().equation()).isEqualTo("Birth_Rate * 2 * Rate");
+        }
+    }
+
+    @Nested
+    @DisplayName("containsWholeToken (static)")
+    class ContainsWholeToken {
+
+        @Test
+        void shouldMatchWholeToken() {
+            assertThat(EquationReferenceManager.containsWholeToken("Rate * Pop", "Rate")).isTrue();
+        }
+
+        @Test
+        void shouldNotMatchSubstring() {
+            assertThat(EquationReferenceManager.containsWholeToken("Birth_Rate * 2", "Rate")).isFalse();
+        }
+
+        @Test
+        void shouldMatchTokenAtEnd() {
+            assertThat(EquationReferenceManager.containsWholeToken("Pop * Rate", "Rate")).isTrue();
+        }
+
+        @Test
+        void shouldMatchSoleToken() {
+            assertThat(EquationReferenceManager.containsWholeToken("Rate", "Rate")).isTrue();
+        }
+
+        @Test
+        void shouldNotMatchWhenTokenAbsent() {
+            assertThat(EquationReferenceManager.containsWholeToken("Pop * 5", "Rate")).isFalse();
         }
     }
 }

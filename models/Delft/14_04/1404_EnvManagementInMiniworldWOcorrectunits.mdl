@@ -1,0 +1,233 @@
+{UTF-8}
+births=
+	birth rate*population*environmental quality*consumption level
+	~	1/Year
+	~		|
+
+capacity increase=
+	(normal growth rate*consumption level*environmental quality*population*(1-(consumption level\
+		*population*environmental quality/consumption goal)))
+	~	1/Year
+	~	(GROWTH RATE*consumption level*environmental \
+		pollution*population*(1-(consumption level*environmental \
+		pollution/CONSUMPTION GOAL)))
+	|
+
+regeneration=
+	normal regeneration rate*environmental pollution
+	~	1/Year
+	~	environmental pollution^(1/2)*REGENERATION RATE^(environmental pollution)                                              \
+		+  REGENERATION RATE^(environmental pollution)
+	|
+
+consumption level=
+	production capacity
+	~	Dmnl
+	~		|
+
+degradation=
+	normal degradation rate*population*consumption level
+	~	1/Year
+	~		|
+
+INITAL POPULATION=
+	1
+	~	Dmnl
+	~		|
+
+INITIAL CAPACITY=
+	1
+	~	Dmnl
+	~		|
+
+INITIAL POLLUTION=
+	1
+	~	Dmnl
+	~		|
+
+population= INTEG (
+	births-deaths,
+		INITAL POPULATION)
+	~	Dmnl
+	~		|
+
+environmental pollution= INTEG (
+	+degradation-regeneration,
+		INITIAL POLLUTION)
+	~	Dmnl
+	~		|
+
+production capacity= INTEG (
+	capacity increase,
+		INITIAL CAPACITY)
+	~	Dmnl
+	~		|
+
+normal regeneration rate=
+	0.02
+	~	1/Year
+	~		|
+
+birth rate=
+	0.03
+	~	1/Year
+	~		|
+
+normal growth rate=
+	0.04
+	~	1/Year
+	~		|
+
+consumption goal=
+	4
+	~	Dmnl
+	~		|
+
+DAMAGE THRESHOLD=
+	2
+	~	Dmnl
+	~		|
+
+deaths=
+	death rate*population*DELAY3(environmental pollution,10)
+	~	1/Year
+	~		|
+
+death rate=
+	0.015
+	~	1/Year
+	~		|
+
+environmental quality=
+	DELAY3(MIN(DAMAGE THRESHOLD/environmental pollution,1),20)
+	~	Dmnl
+	~		|
+
+normal degradation rate=
+	0.02
+	~	1/Year
+	~		|
+
+********************************************************
+	.Control
+********************************************************~
+		Simulation Control Parameters
+	|
+
+FINAL TIME  = 500
+	~	Year
+	~	The final time for the simulation.
+	|
+
+INITIAL TIME  = 0
+	~	Year
+	~	The initial time for the simulation.
+	|
+
+SAVEPER  = 
+        TIME STEP
+	~	Year [0,?]
+	~	The frequency with which output is stored.
+	|
+
+TIME STEP  = 0.2
+	~	Year [0,?]
+	~	The time step for the simulation.
+	|
+
+\\\---/// Sketch information - do not modify anything except names
+V300  Do not put anything below this section - it will be ignored
+*View 1
+$192-192-192,0,Arial|12||0-0-0|0-0-0|0-0-0|-1--1--1|-1--1--1|96,96,100,0
+10,1,population,223,360,46,24,3,3,0,0,0,0,0,0
+10,2,environmental pollution,471,244,41,25,3,3,0,0,0,0,0,0
+10,3,production capacity,473,490,43,25,3,3,0,0,0,0,0,0
+12,4,48,77,358,10,8,0,3,0,0,-1,0,0,0
+1,5,7,1,4,0,0,22,0,0,0,-1--1--1,,1|(155,359)|
+1,6,7,4,100,0,0,22,0,0,0,-1--1--1,,1|(105,359)|
+11,7,48,128,359,5,6,34,3,0,0,1,0,0,0
+10,8,births,128,375,21,10,40,3,0,0,-1,0,0,0
+12,9,48,381,361,10,8,0,3,0,0,-1,0,0,0
+1,10,12,9,4,0,0,22,0,0,0,-1--1--1,,1|(346,361)|
+1,11,12,1,100,0,0,22,0,0,0,-1--1--1,,1|(290,361)|
+11,12,48,317,361,5,6,34,3,0,0,1,0,0,0
+10,13,deaths,317,377,26,10,40,3,0,0,-1,0,0,0
+12,14,48,317,243,10,8,0,3,0,0,-1,0,0,0
+1,15,17,2,4,0,0,22,0,0,0,-1--1--1,,1|(406,243)|
+1,16,17,14,100,0,0,22,0,0,0,-1--1--1,,1|(349,243)|
+11,17,48,377,243,5,6,34,3,0,0,1,0,0,0
+10,18,degradation,377,259,44,10,40,3,0,0,-1,0,0,0
+12,19,48,627,244,10,8,0,3,0,0,-1,0,0,0
+1,20,22,19,4,0,0,22,0,0,0,-1--1--1,,1|(594,244)|
+1,21,22,2,100,0,0,22,0,0,0,-1--1--1,,1|(536,244)|
+11,22,48,566,244,5,6,34,3,0,0,1,0,0,0
+10,23,regeneration,566,260,46,10,40,3,0,0,-1,0,0,0
+12,24,48,769,487,10,8,0,3,0,0,-1,0,0,0
+1,25,27,3,4,0,0,22,0,0,0,-1--1--1,,1|(583,485)|
+1,26,27,24,100,0,0,22,0,0,0,-1--1--1,,1|(710,485)|
+11,27,48,656,485,5,6,34,3,0,0,1,0,0,0
+10,28,capacity increase,656,509,32,18,40,3,0,0,-1,0,0,0
+10,29,birth rate,134,455,28,9,8,3,0,8,0,0,0,0,0-0-0,0-0-0,|10||0-0-0
+10,30,death rate,295,437,31,9,8,3,0,8,0,0,0,0,0-0-0,0-0-0,|10||0-0-0
+10,31,environmental quality,382,101,51,18,8,3,0,0,0,0,0,0
+10,32,DAMAGE THRESHOLD,488,149,42,16,8,3,0,8,0,0,0,0,0-0-0,0-0-0,|10||0-0-0
+10,33,normal regeneration rate,649,299,54,16,8,3,0,8,0,0,0,0,0-0-0,0-0-0,|10||0-0-0
+10,34,normal degradation rate,316,205,49,16,8,3,0,8,0,0,0,0,0-0-0,0-0-0,|10||0-0-0
+10,35,consumption goal,618,358,53,9,8,3,0,8,0,0,0,0,0-0-0,0-0-0,|10||0-0-0
+10,36,normal growth rate,650,392,56,9,8,3,0,8,0,0,0,0,0-0-0,0-0-0,|10||0-0-0
+1,37,29,8,1,0,0,0,0,64,0,-1--1--1,,1|(120,398)|
+1,38,1,8,1,0,0,0,0,64,0,-1--1--1,,1|(183,398)|
+1,39,30,13,1,0,0,0,0,64,0,-1--1--1,,1|(319,406)|
+1,40,1,13,1,0,0,0,0,64,0,-1--1--1,,1|(260,401)|
+1,41,1,18,1,0,0,0,0,64,0,-1--1--1,,1|(262,289)|
+1,42,33,23,1,0,0,0,0,64,0,-1--1--1,,1|(577,280)|
+1,43,2,23,1,0,0,0,0,64,0,-1--1--1,,1|(531,290)|
+1,44,2,31,1,0,0,0,0,64,0,-1--1--1,,1|(380,176)|
+1,45,31,8,1,0,0,0,0,64,0,-1--1--1,,1|(189,186)|
+1,46,32,31,1,0,0,0,0,64,0,-1--1--1,,1|(440,132)|
+1,47,2,13,1,0,0,0,0,64,0,-1--1--1,,1|(412,371)|
+10,48,INITAL POPULATION,197,324,36,12,8,3,0,8,0,0,0,0,0-0-0,0-0-0,|8||0-0-0
+10,49,INITIAL POLLUTION,470,206,32,12,8,3,0,8,0,0,0,0,0-0-0,0-0-0,|8||0-0-0
+10,50,INITIAL CAPACITY,397,489,29,11,8,3,0,8,0,0,0,0,0-0-0,0-0-0,|8||0-0-0
+10,51,consumption level,455,402,47,18,8,3,0,0,0,0,0,0
+1,52,35,27,1,0,0,0,0,64,0,-1--1--1,,1|(594,399)|
+1,53,36,27,1,0,0,0,0,64,0,-1--1--1,,1|(634,414)|
+1,54,3,51,1,0,0,0,0,64,0,-1--1--1,,1|(465,444)|
+1,55,51,18,1,0,0,0,0,64,0,-1--1--1,,1|(404,341)|
+1,56,51,8,1,0,0,0,0,64,0,-1--1--1,,1|(241,483)|
+1,57,51,27,1,0,0,0,0,64,0,-1--1--1,,1|(505,448)|
+1,58,48,1,0,0,0,0,0,0,1,-1--1--1,,1|(205,336)|
+1,59,49,2,0,0,0,0,0,0,1,-1--1--1,,1|(470,211)|
+1,60,50,3,0,0,0,0,0,0,1,-1--1--1,,1|(421,489)|
+1,61,1,28,1,0,0,0,3,64,0,0-0-255,|12||0-0-0,1|(320,572)|
+1,62,34,18,0,0,0,0,0,64,0,-1--1--1,,1|(344,230)|
+1,63,31,28,1,0,0,0,0,64,0,-1--1--1,,1|(755,223)|
+///---\\\
+:GRAPH EZ605b
+:TITLE Miniworld
+:X-AXIS Time
+:X-DIV 5
+:X-MIN 0
+:X-MAX 250
+:SCALE
+:VAR population
+:Y-MIN 0
+:Y-MAX 8
+:LINE-WIDTH 4
+:VAR environ pollution
+:Y-MIN 0
+:LINE-WIDTH 3
+:VAR consumption level
+:Y-MIN 0
+:LINE-WIDTH 2
+:L<%^E!@
+9:EP33
+15:0,0,0,1,0,0
+19:100,0
+27:2,
+34:0,
+4:Time
+5:DAMAGE THRESHOLD
+24:0
+25:500.012
+26:500.012

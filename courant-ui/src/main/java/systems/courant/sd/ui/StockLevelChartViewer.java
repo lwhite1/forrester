@@ -16,14 +16,13 @@ public class StockLevelChartViewer implements EventHandler {
         ChartViewerApplication.addValues(
                 event.getModel().getStockValues(),
                 event.getModel().getVariableValues(),
-                //event.getCurrentTime(),
                 event.getStep());
     }
 
     @Override
     public void handleSimulationStartEvent(SimulationStartEvent event) {
         ChartViewerApplication.setSimulation(event.getSimulation());
-        ChartViewerApplication.addSeries(event.getModel().getStockNames(), event.getModel().getVariableNames());
+        ChartViewerApplication.setSeries(event.getModel().getStockNames(), event.getModel().getVariableNames());
     }
 
     @Override

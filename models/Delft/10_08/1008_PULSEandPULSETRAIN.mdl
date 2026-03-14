@@ -1,0 +1,92 @@
+{UTF-8}
+inflow=
+	2*PULSE TRAIN(5, TIME STEP , 2 , 35)/TIME STEP
+	~	units/Year
+	~		|
+
+outflow=
+	PULSE TRAIN(6, 1, 2 , 40 ) * stock/TIME STEP
+	~	units/Year
+	~		|
+
+stock= INTEG (
+	inflow-outflow,
+		0)
+	~	
+	~		|
+
+********************************************************
+	.Control
+********************************************************~
+		Simulation Control Parameters
+	|
+
+FINAL TIME  = 40
+	~	Month
+	~	The final time for the simulation.
+	|
+
+INITIAL TIME  = 0
+	~	Month
+	~	The initial time for the simulation.
+	|
+
+SAVEPER  = 
+        TIME STEP 
+	~	Month [0,?]
+	~	The frequency with which output is stored.
+	|
+
+TIME STEP  = 0.125
+	~	Month [0,?]
+	~	The time step for the simulation.
+	|
+
+\\\---/// Sketch information - do not modify anything except names
+V300  Do not put anything below this section - it will be ignored
+*View 1
+$192-192-192,0,Times New Roman|12||0-0-0|0-0-0|0-0-255|-1--1--1|-1--1--1|96,96,100,0
+10,1,stock,482,255,40,20,3,3,0,0,0,0,0,0
+12,2,48,302,248,10,8,0,3,0,0,-1,0,0,0
+1,4,6,1,4,0,0,22,0,0,0,-1--1--1,,1|(412,248)|
+1,5,6,2,100,0,0,22,0,0,0,-1--1--1,,1|(341,248)|
+11,6,0,377,248,6,8,34,3,0,0,1,0,0,0
+10,7,inflow,377,267,20,11,40,3,0,0,-1,0,0,0
+12,8,48,649,253,10,8,0,3,0,0,-1,0,0,0
+1,10,12,8,4,0,0,22,0,0,0,-1--1--1,,1|(612,253)|
+1,11,12,1,100,0,0,22,0,0,0,-1--1--1,,1|(548,253)|
+11,12,0,580,253,6,8,34,3,0,0,1,0,0,0
+10,13,outflow,580,272,25,11,40,3,0,0,-1,0,0,0
+1,14,1,13,0,0,0,0,0,64,0,-1--1--1,,1|(531,262)|
+10,15,TIME STEP,580,302,50,11,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|0||128-128-128
+1,16,15,13,0,0,0,0,0,64,0,-1--1--1,,1|(580,294)|
+10,17,TIME STEP,377,297,50,11,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|0||128-128-128
+1,18,17,7,0,0,0,0,0,64,0,-1--1--1,,1|(377,289)|
+///---\\\
+:L<%^E!@
+9:Current3
+22:$,Dollar,Dollars,$s
+22:Hour,Hours
+22:Month,Months
+22:Person,People,Persons
+22:Unit,Units
+22:Week,Weeks
+22:Year,Years
+22:Day,Days
+15:0,0,0,5,0,0
+19:100,0
+27:2,
+34:0,
+4:Time
+5:outflow
+35:Date
+36:YYYY-MM-DD
+37:2000
+38:1
+39:1
+40:2
+41:0
+42:0
+24:0
+25:40
+26:40

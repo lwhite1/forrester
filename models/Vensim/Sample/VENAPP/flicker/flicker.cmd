@@ -1,0 +1,10 @@
+FILE>MDL2VMF|flicker.mdl
+!FILE>ENCRYPT|flicker.vmf
+FILE>RENAME|flicker.vmf|ship\flicker.mdl
+FILE>VGD2VGF|flicker.vgd
+!FILE>ENCRYPT|flicker.vgf
+FILE>RENAME|flicker.vgf|ship\flicker.vgd
+FIlE>VCD2VCF|flicker.vcd
+!FILE>ENCRYPT|flicker.vcf
+FILE>RENAME|flicker.vcf|ship\flicker.vcd
+FILE>copy|flicker.vts|ship\flicker.vts

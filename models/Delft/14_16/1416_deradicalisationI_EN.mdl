@@ -1,0 +1,355 @@
+{UTF-8}
+visibillity of the problem=
+	problem syntoms*"reinforcement of the visibility of the problem through radical and non-radical actions"
+	~	Dmnl
+	~		|
+
+persuasion=
+	contact rate of convinced citizens*fraction of convinced citizens*unconvinced citizens\
+		*"persuasivness of non-radical actions"*visibillity of the problem/"strength of incompatible self-interest"
+	~	citizens/Year
+	~		|
+
+average degree of conviction of convinced citizens=
+	total readiness to take action of all the convinced citizens/convinced citizens
+	~	Dmnl
+	~		|
+
+average readiness to take action=
+	total readiness to take action of all the convinced citizens/convinced citizens
+	~	Dmnl
+	~		|
+
+citizens that cannot be convinced=
+	3e+006
+	~	citizens
+	~		|
+
+contact rate of convinced citizens=
+	normal contact rate of convinced citizens*(1-radical action level)
+	~	contacts/(Year*citizen)
+	~		|
+
+convinced citizens= INTEG (
+	persuasion,
+		initial number of convinced citizens)
+	~	citizens
+	~		|
+
+fraction of convinced citizens=
+	convinced citizens/total population
+	~	Dmnl
+	~		|
+
+frustration due to inertia=
+	(maximum attainable rate of decrease through societal change-rate of decrease through societal change\
+		)/maximum attainable rate of decrease through societal change
+	~	Dmnl
+	~		|
+
+frustration due to marginalization = WITH LOOKUP (
+	fraction of convinced citizens,
+		([(0,0)-(1,1)],(0,1),(0.025,0.5),(0.05,0.2),(0.075,0.05),(0.1,0),(1,0) ))
+	~	Dmnl
+	~		|
+
+frustration of convinced citizens=
+	min(MAX(frustration due to marginalization*frustration due to inertia*average degree of conviction of convinced citizens\
+		*percived magnitude of the problem,0),1)
+	~	Dmnl
+	~		|
+
+initial number of convinced citizens=
+	1000
+	~	citizens
+	~		|
+
+initial number of unconvinced citizens=
+	1.2999e+007
+	~	citizens
+	~		|
+
+initial readiness to take action per contact=
+	0.8
+	~	Dmnl
+	~		|
+
+initial value of underlying phenomena=
+	50
+	~	Dmnl
+	~		|
+
+intristic rate of increase of the underlying phenomenon=
+	0.01
+	~	1/Year
+	~		|
+
+maximum attainable rate of decrease through societal change=
+	0.05
+	~	1/Year
+	~		|
+
+"net-increase of the underlying phenomenon"=
+	underlying phenimenon*(intristic rate of increase of the underlying phenomenon-rate of decrease through societal change\
+		)
+	~	1/Year
+	~		|
+
+"non-radical action level"=
+	(1-frustration of convinced citizens)*average readiness to take action
+	~	Dmnl
+	~		|
+
+normal contact rate of convinced citizens=
+	1000
+	~	contacts/citizen/Year
+	~		|
+
+normal persuasiveness=
+	0.01
+	~	citizens/contacts
+	~		|
+
+percived magnitude of the problem=
+	underlying phenimenon/problematic phenomenon level
+	~	Dmnl
+	~		|
+
+"persuasivness of non-radical actions"=
+	"non-radical action level"*normal persuasiveness
+	~	citizens/contacts
+	~		|
+
+problem syntoms=
+	MAX(underlying phenimenon-problematic phenomenon level,0)/problematic phenomenon level
+	~	Dmnl
+	~		|
+
+problematic phenomenon level=
+	60
+	~	Dmnl
+	~		|
+
+radical action level=
+	average readiness to take action*frustration of convinced citizens
+	~	Dmnl
+	~		|
+
+rate of decrease through societal change=
+	fraction of convinced citizens*maximum attainable rate of decrease through societal change
+	~	1/Year
+	~		|
+
+readiness to take action of the newly convinced citizens=
+	persuasion*readiness to take action per newly convinced citizen
+	~	citizens/Year
+	~		|
+
+readiness to take action per newly convinced citizen=
+	0.5
+	~	Dmnl
+	~		|
+
+reinforcement of the visibility of the problem through radical actions=
+	10
+	~	Dmnl
+	~		|
+
+"reinforcement of the visibility of the problem through radical and non-radical actions"\
+		=
+	(1+"non-radical action level")*(1+radical action level*reinforcement of the visibility of the problem through radical actions\
+		)
+	~	Dmnl
+	~		|
+
+"strength of incompatible self-interest"=
+	2
+	~	Dmnl
+	~		|
+
+total population=
+	citizens that cannot be convinced+convinced citizens+unconvinced citizens
+	~	citizens
+	~		|
+
+total readiness to take action of all the convinced citizens= INTEG (
+	readiness to take action of the newly convinced citizens,
+		convinced citizens*initial readiness to take action per contact)
+	~	citizens
+	~		|
+
+unconvinced citizens= INTEG (
+	-persuasion,
+		initial number of unconvinced citizens)
+	~	citizens
+	~		|
+
+underlying phenimenon= INTEG (
+	"net-increase of the underlying phenomenon",
+		initial value of underlying phenomena)
+	~	Dmnl
+	~		|
+
+********************************************************
+	.Control
+********************************************************~
+		Simulation Control Parameters
+	|
+
+FINAL TIME  = 2080
+	~	Year
+	~	The final time for the simulation.
+	|
+
+INITIAL TIME  = 1980
+	~	Year
+	~	The initial time for the simulation.
+	|
+
+SAVEPER  = 
+        TIME STEP
+	~	Year [0,?]
+	~	The frequency with which output is stored.
+	|
+
+TIME STEP  = 0.125
+	~	Year [0,?]
+	~	The time step for the simulation.
+	|
+
+\\\---/// Sketch information - do not modify anything except names
+V300  Do not put anything below this section - it will be ignored
+*View 1
+$192-192-192,0,Times New Roman|12||0-0-0|0-0-0|0-0-255|-1--1--1|-1--1--1|96,96,80,0
+10,1,underlying phenimenon,473,198,40,20,3,3,0,0,0,0,0,0
+12,2,48,696,204,10,8,0,3,0,0,-1,0,0,0
+1,3,5,1,4,0,0,22,0,0,0,-1--1--1,,1|(559,199)|
+1,4,5,2,100,0,0,22,0,0,0,-1--1--1,,1|(651,199)|
+11,5,48,611,199,6,8,34,3,0,0,1,0,0,0
+10,6,"net-increase of the underlying phenomenon",611,226,75,19,40,3,0,0,-1,0,0,0
+10,7,problematic phenomenon level,314,211,57,19,8,3,0,0,0,0,0,0
+10,8,problem syntoms,762,76,54,11,8,3,0,0,0,0,0,0
+1,9,7,8,1,0,0,0,0,64,0,-1--1--1,,1|(515,95)|
+1,10,1,8,1,0,0,0,0,64,0,-1--1--1,,1|(594,109)|
+10,11,percived magnitude of the problem,251,411,62,19,8,3,0,0,0,0,0,0
+1,12,7,11,1,0,0,0,0,64,0,-1--1--1,,1|(276,293)|
+1,13,1,11,1,0,0,0,0,64,0,-1--1--1,,1|(322,303)|
+10,14,frustration of convinced citizens,418,712,57,19,8,3,0,0,0,0,0,0
+1,15,11,14,1,0,0,0,0,64,0,-1--1--1,,1|(302,600)|
+10,16,frustration due to marginalization,565,392,54,19,8,3,0,0,0,0,0,0
+1,17,16,14,1,0,0,0,0,64,0,-1--1--1,,1|(457,535)|
+10,18,frustration due to inertia,367,482,54,19,8,3,0,0,0,0,0,0
+10,19,average degree of conviction of convinced citizens,704,525,75,28,8,3,0,0,0,0,0,0
+1,20,19,14,1,0,0,0,0,64,0,-1--1--1,,1|(533,561)|
+1,21,18,14,1,0,0,0,0,64,0,-1--1--1,,1|(373,591)|
+10,22,convinced citizens,908,308,40,20,3,3,0,0,0,0,0,0
+10,23,unconvinced citizens,1108,310,40,20,3,3,0,0,0,0,0,0
+1,24,26,22,4,0,0,22,0,0,0,-1--1--1,,1|(975,309)|
+1,25,26,23,100,0,0,22,0,0,0,-1--1--1,,1|(1041,309)|
+11,26,300,1008,309,6,8,34,3,0,0,1,0,0,0
+10,27,persuasion,1008,328,34,11,40,3,0,0,-1,0,0,0
+10,28,citizens that cannot be convinced,1204,309,40,20,3,3,0,0,0,0,0,0
+10,29,total population,1144,211,49,11,8,3,0,0,0,0,0,0
+1,30,22,29,1,0,0,0,3,64,0,192-192-192,|12||0-0-0,1|(985,254)|
+1,31,23,29,1,0,0,0,0,64,0,-1--1--1,,1|(1150,263)|
+1,32,28,29,1,0,0,0,0,64,0,-1--1--1,,1|(1197,260)|
+10,33,initial value of underlying phenomena,278,62,71,19,8,3,0,0,0,0,0,0
+10,34,initial number of convinced citizens,1316,720,57,19,8,3,0,0,0,0,0,0
+10,35,initial number of unconvinced citizens,1319,769,65,19,8,3,0,0,0,0,0,0
+10,36,fraction of convinced citizens,806,226,57,19,8,3,0,0,0,0,0,0
+1,37,22,36,1,0,0,0,0,64,0,-1--1--1,,1|(885,242)|
+1,38,29,36,1,0,0,0,3,64,0,160-160-160,|12||0-0-0,1|(971,185)|
+1,39,36,26,1,0,0,0,0,64,0,-1--1--1,,1|(927,240)|
+10,40,contact rate of convinced citizens,1054,445,57,19,8,3,0,0,0,0,0,0
+1,41,40,27,1,0,0,0,0,64,0,-1--1--1,,1|(1044,375)|
+10,42,"persuasivness of non-radical actions",1215,443,60,19,8,3,0,0,0,0,0,0
+1,43,42,27,1,0,0,0,0,64,0,-1--1--1,,1|(1098,355)|
+10,44,"strength of incompatible self-interest",909,458,75,19,8,131,0,2,0,0,0,0,0-0-0,0-0-0,|12||255-128-0
+1,45,44,27,0,0,0,0,0,64,0,-1--1--1,,1|(956,394)|
+10,46,rate of decrease through societal change,592,297,74,19,8,3,0,0,0,0,0,0
+1,47,36,46,1,0,0,0,0,64,0,-1--1--1,,1|(702,293)|
+10,48,maximum attainable rate of decrease through societal change,401,311,55,38,8,131,0,0,0,0,0,0
+1,49,48,46,1,0,0,0,0,64,0,-1--1--1,,1|(447,311)|
+1,50,46,6,1,0,0,0,0,64,0,-1--1--1,,1|(547,270)|
+1,51,1,5,1,0,0,0,0,64,0,-1--1--1,,1|(539,172)|
+10,52,intristic rate of increase of the underlying phenomenon,694,134,86,19,8,3,0,0,0,0,0,0
+1,53,52,5,0,0,0,0,0,64,0,-1--1--1,,1|(648,169)|
+1,54,48,18,0,0,0,0,0,64,0,-1--1--1,,1|(383,399)|
+1,55,46,18,1,0,0,0,0,64,0,-1--1--1,,1|(458,362)|
+10,56,normal contact rate of convinced citizens,1018,529,70,19,8,3,0,2,0,0,0,0,0-0-0,0-0-0,|12||255-128-0
+1,57,56,40,1,0,0,0,0,64,0,-1--1--1,,1|(1053,492)|
+10,58,radical action level,1139,564,58,11,8,3,0,0,0,0,0,0
+1,59,58,40,1,0,0,0,0,64,0,-1--1--1,,1|(1135,493)|
+1,60,14,58,1,0,0,0,0,64,0,-1--1--1,,1|(886,750)|
+10,61,average readiness to take action,976,594,65,19,8,3,0,0,0,0,0,0
+1,62,61,58,1,0,0,0,0,64,0,-1--1--1,,1|(1050,601)|
+1,63,23,26,1,0,0,0,0,64,0,-1--1--1,,1|(1049,292)|
+10,64,"non-radical action level",1216,654,57,19,8,3,0,0,0,0,0,0
+1,65,61,64,1,0,0,0,0,64,0,-1--1--1,,1|(1090,643)|
+1,66,14,64,1,0,0,0,0,64,0,-1--1--1,,1|(707,799)|
+10,67,normal persuasiveness,1239,373,47,19,8,3,0,2,0,0,0,0,0-0-0,0-0-0,|12||255-128-0
+1,68,67,42,0,0,0,0,0,64,0,-1--1--1,,1|(1229,401)|
+1,69,64,42,1,0,0,0,0,64,0,-1--1--1,,1|(1241,566)|
+1,70,22,61,1,0,0,0,0,64,0,-1--1--1,,1|(839,492)|
+10,71,initial readiness to take action per contact,851,714,72,19,8,3,0,2,0,0,0,0,0-0-0,0-0-0,|12||255-128-0
+10,72,total readiness to take action of all the convinced citizens,851,664,55,28,3,131,0,0,0,0,0,0
+1,73,71,72,0,0,0,0,0,64,1,-1--1--1,,1|(851,700)|
+1,74,22,72,0,0,0,0,0,64,1,-1--1--1,,1|(881,475)|
+1,75,33,1,0,0,0,0,0,64,1,-1--1--1,,1|(368,125)|
+1,76,34,22,0,0,0,0,0,64,1,-1--1--1,,1|(1117,519)|
+1,77,35,23,0,0,0,0,0,64,1,-1--1--1,,1|(1216,546)|
+12,78,48,576,664,10,8,0,3,0,0,-1,0,0,0
+1,79,81,72,4,0,0,22,0,0,0,-1--1--1,,1|(736,663)|
+1,80,81,78,100,0,0,22,0,0,0,-1--1--1,,1|(625,663)|
+11,81,48,670,663,6,8,34,3,0,0,1,0,0,0
+10,82,readiness to take action of the newly convinced citizens,670,690,89,19,40,3,0,0,-1,0,0,0
+10,83,readiness to take action per newly convinced citizen,664,602,87,19,8,3,0,2,0,0,0,0,0-0-0,0-0-0,|12||255-128-0
+1,84,83,81,0,0,0,0,0,64,0,-1--1--1,,1|(666,632)|
+1,85,72,19,1,0,0,0,0,64,0,-1--1--1,,1|(815,554)|
+1,86,22,19,1,0,0,0,0,64,0,-1--1--1,,1|(798,381)|
+10,87,"reinforcement of the visibility of the problem through radical and non-radical actions",1317,194,78,41,8,131,0,0,0,0,0,0
+1,88,64,87,1,0,0,0,0,64,0,-1--1--1,,1|(1370,360)|
+10,89,reinforcement of the visibility of the problem through radical actions,1317,98,61,32,8,131,0,2,0,0,0,0,0-0-0,0-0-0,|12||255-128-0
+1,90,89,87,0,0,0,0,0,64,0,-1--1--1,,1|(1317,134)|
+10,91,visibillity of the problem,1007,83,47,19,8,3,0,0,0,0,0,0
+1,92,8,91,1,0,0,0,0,64,0,-1--1--1,,1|(908,72)|
+1,93,87,91,1,0,0,0,0,64,0,-1--1--1,,1|(1172,110)|
+1,94,36,16,1,0,0,0,0,64,0,-1--1--1,,1|(708,336)|
+1,95,72,61,0,0,0,0,0,64,0,-1--1--1,,1|(915,627)|
+10,96,persuasion,668,750,43,11,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,97,96,82,0,0,0,0,0,64,0,-1--1--1,,1|(668,730)|
+10,98,radical action level,1311,320,47,19,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,99,98,87,1,0,0,0,0,64,0,-1--1--1,,1|(1330,269)|
+1,100,91,26,0,0,0,0,0,64,0,-1--1--1,,1|(1007,195)|
+1,102,14,101,0,0,0,0,0,64,0,-1--1--1,,1|(422,779)|
+///---\\\
+:L<%^E!@
+1:O:\00_E-BOOK-SD\1_Models\radicalizationB.vdf
+9:radicalizationB
+22:$,Dollar,Dollars,$s
+22:citizen,citizens
+22:Day,Days
+22:Hour,Hours
+22:Month,Months
+22:Person,People,Persons
+22:Unit,Units
+22:Week,Weeks
+22:Year,Years
+23:0
+15:0,0,0,1,0,0
+19:80,0
+27:2,
+34:0,
+4:Time
+5:average degree of conviction of convinced citizens
+35:Date
+36:YYYY-MM-DD
+37:2000
+38:1
+39:1
+40:0
+41:0
+42:0
+24:1980
+25:2080
+26:2080

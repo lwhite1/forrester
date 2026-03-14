@@ -413,13 +413,14 @@ public final class FunctionDocRegistry {
                 "LOOKUP(Effect_of_Density, Population / Area)",
                 List.of());
 
-        add(m, "RANDOM_NORMAL", "RANDOM_NORMAL(min, max, mean, std_dev)",
+        add(m, "RANDOM_NORMAL", "RANDOM_NORMAL(min, max, mean, std_dev [, seed])",
                 "Bounded normal random number",
                 "SD",
                 List.of(p("min", "minimum allowed value"),
                         p("max", "maximum allowed value"),
                         p("mean", "mean of the normal distribution"),
-                        p("std_dev", "standard deviation")),
+                        p("std_dev", "standard deviation"),
+                        p("seed", "(optional) random seed (currently ignored; uses system time)")),
                 "Generates a random number from a normal distribution with the given mean "
                         + "and standard deviation, clamped to [min, max].",
                 "RANDOM_NORMAL(0, 100, 50, 10) → ~50 with std dev 10, clamped to 0-100",

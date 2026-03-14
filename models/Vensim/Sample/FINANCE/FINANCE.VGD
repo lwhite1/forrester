@@ -1,0 +1,34 @@
+:GRAPH WIP1
+:TITLE Graph for Net Income
+:SCALE
+:VAR net income
+:Y-MIN -1e+006
+:Y-MAX 1e+006
+:REPORT COMM4
+:TITLE COMM4
+:LOCATION -1,-1
+:SIZE -1,-1
+:FONT Times New Roman|12||0-0-0
+The cause and use screens show lists of
+different variables.  The graphs allows
+you to compare different scenarios.
+The trees allow you to investigate the
+structure of the model.
+
+You can double click on a variable name
+in the graphs, trees or documentation to
+view the same analysis screen for that
+variable.  You can also use the S
+command to select a new variable to work
+with.
+
+You can print the contents of the graphs
+and trees using the P command.  Output
+will be directed to your default printer.
+
+During causal tracing you can switch
+between the Tree and Graph represen-
+tations of causes.  This can be
+useful as means of understanding both
+structure and behavior.
+:END-OF-REPORT

@@ -1,0 +1,572 @@
+{UTF-8}
+{UTF-8}
+
+normal consumption= INITIAL(
+	 slaughtering / population)
+	~	hogs/(Month*person)
+	~		|
+
+acquiring breeding stock = if then else ( desired breeding stock > Breeding Stock , if then else
+ ( Mature Stock
+                  > TIME STEP * ( desired breeding stock - Breeding Stock ) / breeding stock acquisition delay
+                            , ( desired breeding stock - Breeding Stock ) / breeding stock acquisition delay
+                       , Mature Stock / TIME STEP ) , ( desired breeding stock - Breeding Stock
+ ) / 
+                  breeding stock acquisition delay )
+	~	hogs/Month
+	~		 Net rate at which sows and gilts are either acquired for breeding or returned to 				\
+		mature
+		        stock for slaughtering. A positive rate indicates more sows and gilts are 				\
+		being acquired
+		        for breeding than are being returned to feeding pens for slaughter. A 				\
+		negative number
+		        indicates more are being returned for slaughter than are being added to the 				\
+		breeding
+		        stock. Note: The basic policy is (Desired Breeding Stock-Breeding 				\
+		Stock)/Breeding Stock
+		         Acquisition Delay. The complication keeps the level of mature 				\
+		hogs from going negative.
+	|
+
+breeding = Breeding Stock * fertility
+	~	hogs/Month
+	~		 Rate at which pigs are created in utero. This rate is net of any pigs that do not 				\
+		survive to
+		         maturity.
+	|
+
+Breeding Stock = INTEG( acquiring breeding stock , desired breeding stock )
+	~	hogs
+	~		 Sows and gilts held for breeding.
+	|
+
+breeding stock acquisition delay = 5
+	~	months
+	~		 Dealy for farmers to adjust their breeding stocks to desired levels. Source: 				\
+		Meadows' Hog
+		         Cycle model (BSAD)
+	|
+
+consuming = if then else ( Inventory + slaughtering * TIME STEP > Per Capita Consumption
+ * population
+                       * TIME STEP , Per Capita Consumption * population , Inventory 
+/ TIME STEP )
+	~	hog/Month
+	~		 National consumption of pork
+	|
+
+coverage effect on price = coverage effect on price func ( relative coverage )
+	~	dmnl
+	~		 Effect that surplus or deficient pork inventories have on the price of 				\
+		live hogs.
+	|
+
+coverage effect on price func ( [(0,0)-(2,2.12)],(0,2.12),(0.25,1.61),(0.5,1.32),(0.75
+,1.13),(1,1),(
+1.25,0.79)
+            ,(1.5,0.58),(1.75,0.33),(2,0.100421) )
+	~	dmnl
+	~		 Functional relationship between pork relative pork inventory coverage and its 				\
+		effect on the
+		        price of live-hogs. Source: Meadows (HPTAB). Normalized around 16.5, the 				\
+		coverage effect
+		        for a relative coverage of 1. Meadow's table goes to 0 at rcov=2; the above 				\
+		table does
+		         not.
+	|
+
+desired breeding stock=
+	GAME( normal breeding stock * price effect on breeding stock )
+	~	hogs
+	~		 Number of sows and gilts farmers would like to have for breeding.
+	|
+
+desired coverage = 0.36
+	~	months
+	~		 Desired months of pork inventory. Source: Meadows (DCOV)
+	|
+
+effect of price on consumption = effect of price on consumption func ( relative hog price
+ )
+	~	dmnl
+	~		 Impact of retail price on national consumption of pork.
+	|
+
+effect of price on consumption func ( [(0.67,0.74)-(1.33,1.28)],(0.67,1.28),(1,1),(1.33
+,0.74) )
+	~	dmnl
+	~		 Functional relationship between relative price of pork and its impact on per capita
+		        consumption. Source: Meadows PCCP. We have assumed the "Normal" retail price 				\
+		is 60, and
+		         so the normal consumption per capita is 5/person/month
+	|
+
+expected corn price = 1.14
+	~	$/bushel
+	~		 Farmers' expected price of corn. Source: Meadows (FECCP)
+	|
+
+Expected Hog Price = SMOOTHI ( hog price , time to form price expectations , normal hog price
+ )
+	~	$/hog
+	~		 The price farmers expect to receive for live hogs.
+	|
+
+farrowing = Piglets In Utero / gestation time
+	~	hogs/Month
+	~		 Hog birth rate.
+	|
+
+fertility = 0.83
+	~	hogs/(Month*hog)
+	~		 The fertility of hogs after accounting for hogs lost at birth, weaning or 				\
+		elswewhere before
+		        slaughter or breeding. Source: Meadows: Litters per hog * pigs saved per 				\
+		litter * weaning
+		         survival factor =LPHM*PSPL*WSF = .17*7 *.7=0.83
+	|
+
+FINAL TIME  = 100
+	~	Month
+	~		 The final time for the simulation.
+	|
+
+gestation time = 3.7
+	~	months
+	~		 Average pregnancy period for hogs. Source: Meadows, figure 5-14
+	|
+
+hog corn price ratio = Expected Hog Price / expected corn price
+	~	bushel/hog
+	~		 The ratio of the price of a hog to the price of a bushel of corn. The "exchange 				\
+		rate" of a
+		         hog in terms of bushels of corn.
+	|
+
+hog dressing yield = 0.58
+	~	fraction
+	~		 Fraction of each hog that is not discarded as waste during dressing. 				\
+		Source: Meadows (DY)
+	|
+
+hog price = normal hog price * coverage effect on price
+	~	$/hog
+	~		 The price farmers receive for live hogs.
+	|
+
+indicated per capita consumption=
+	 ( normal consumption * effect of price on consumption
+	 ) * input
+	~	hogs/(Month*person)
+	~		 Per capita consumption that would hold if the retail price had worked its way 				\
+		through the
+		         system, and if people had had time to completely react to it.
+	|
+
+INITIAL TIME  = 0
+	~	Month
+	~		 The initial time for the simulation.
+	|
+
+input=
+	 ( 1 + STEP ( 0.1, 0) )
+	~	dmnl
+	~		 Test input that disturbs the system from an initial equilibrium. The test input is 				\
+		designed
+		        to elicit the inherent dynamics of the system. The test input does not 				\
+		represent an
+		         historical event.
+	|
+
+Inventory = INTEG( - consuming + slaughtering , normal consumption * population * desired coverage
+ )
+	~	hogs
+	~		 Inventory of frozen and cured pork.
+	|
+
+inventory coverage = Inventory / consuming
+	~	Month
+	~		 Months of inventory at the current consumption rate
+	|
+
+live weight of slaughtered hogs = 240
+	~	lbs/hog
+	~		 Weight of fully mature hogs, ready for slaughter. Source: Meadows (LWSH)
+	|
+
+marketing margin = 30
+	~	$/hog
+	~		 Marketing Margin in Meadows is $28/100 lbs. A hog is 240 lbs, and the dressing 				\
+		yield in .58.
+		        So the margin is $39/hog. However, this leads to unstable (or undamped) 				\
+		oscillations,
+		        because of the delay in consumption (which is not in the original model) so 				\
+		we go with
+		         $30/hog.
+	|
+
+Mature Stock = INTEG( - acquiring breeding stock - slaughtering + maturing , mature stock feeding period
+             * maturing )
+	~	hogs
+	~		 "Hogs in the terminal stage of feeding and preparation either for slaughter or for 				\
+		addition
+		         to the breeding stock." (Meadows, p.54).
+	|
+
+mature stock feeding period = 2
+	~	months
+	~		 Average time hogs are held (and fed) after becoming mature. Source: 				\
+		Meadows, figure 5-14.
+	|
+
+maturing = Piglets / time to mature
+	~	hogs/Month
+	~		 Rate at which piglets becoming mature hogs.
+	|
+
+normal breeding stock = 9e+06
+	~	hogs
+	~		 The normal number of sows and gilts held for breeding. This is the equilibrium 				\
+		quantity,
+		        given the normal hog/corn price ratio. Source: Meadows (BSTAB). Note: the 				\
+		normal hog
+		         dcorn price ratio is about 20 bushels per hog.
+	|
+
+normal hog corn price ratio = normal hog price / expected corn price
+	~	bushel/hog
+	~		 The equilibrium hog corn price ratio.
+	|
+
+normal hog price = normal price per pounds * live weight of slaughtered hogs * hog dressing yield
+	~	$/hog
+	~		 The initial normal hog price.
+	|
+
+normal price per pounds = 0.165
+	~	$/lbs
+	~		 The initial normal price per pound of live hogs. Source: From meadows HPTAB, this 				\
+		is the
+		         price per lbs when RCOV = 1. (In Meadows, the price is 16.5 per 				\
+		hundred pound.
+	|
+
+normal retail price = normal hog price + marketing margin
+	~	$/hog
+	~		 The initial normal retail price of pork.
+	|
+
+Per Capita Consumption = SMOOTHI ( indicated per capita consumption , time to change consumption
+ , 
+             normal consumption )
+	~	hogs/(Month*person)
+	~		 Pork consumption per person per month in the U.S.
+	|
+
+Piglets = INTEG( farrowing - maturing , time to mature * farrowing )
+	~	hogs
+	~		 Immature hogs.
+	|
+
+Piglets In Utero = INTEG( breeding - farrowing , breeding * gestation time )
+	~	hogs
+	~		 Pig fetuses that will survive birth and weening.
+	|
+
+population = 2e+08
+	~	people
+	~		 U.S. population. Source: Meadows (POP)
+	|
+
+price effect on breeding stock = price effect on breeding stock function ( Relative Hog Corn Ratio
+ )
+	~	dmnl
+	~		 Impact of relative hog/corn price ratio on desired breeding stock. As the relative 				\
+		hog/corn
+		        price ratio increases, farmers desire to increase their production, and 				\
+		hence to increase
+		         breeding stock.
+	|
+
+price effect on breeding stock function ( [(0.5,0.55)-(1.25,1.18)],(0.5,0.55),(0.75,0.78\
+		)
+,(1,1),(1.25,1.18
+)
+            )
+	~	dmnl
+	~		 Functional relationship between relative Hog/Corn price ratio and its impact on 				\
+		desired
+		        breeding stock. Source: Meadows(BSTAB). We have normalized in the following 				\
+		way. The
+		        normal expected hog corn ratio is about 20 bushels/hog. The normal breeding 				\
+		stock (from
+		         the table, then, is about 9 million hogs.
+	|
+
+relative coverage = inventory coverage / desired coverage
+	~	fraction
+	~		 Months of pork inventory, relative to desired.
+	|
+
+Relative Hog Corn Ratio = hog corn price ratio / normal hog corn price ratio
+	~	dimensionless
+	~		 The hog corn price ratio relative to normal
+	|
+
+relative hog price = retail price / normal retail price
+	~	fraction
+	~		 Retail price of pork, relative to normal retail price
+	|
+
+retail price = hog price + marketing margin
+	~	$/hog
+	~		 Retail price of pork.
+	|
+
+SAVEPER  = 
+        TIME STEP
+	~	Month
+	~		 The frequency with which output is stored.
+	|
+
+slaughtering = Mature Stock / mature stock feeding period
+	~	hogs/Month
+	~		 Hog slaughter rate.
+	|
+
+TIME STEP  = 1
+	~	Month
+	~		 The time step for the simulation.
+	|
+
+time to change consumption = 0.5
+	~	months
+	~		 Average for pork consumption to react to a change in price. Represents perception 				\
+		and
+		        reaction delays, as well as the time it takes for a wholesale price increase 				\
+		to work its
+		        way through the system. This constant does not appear in Meadows. Source: 				\
+		LeapTec
+		         estimate.
+	|
+
+time to form price expectations = 6
+	~	months
+	~		 Average time for farmers to adjust their expectations to a change in the level of 				\
+		live-hog
+		         prices. Source: Meadows (FEHPAD)
+	|
+
+time to mature = 5
+	~	months
+	~		 Average time for a pig to reach maturity. The average period from Farrowing to 				\
+		Maturity.
+		        Includes time from Farrowing to Weaning (2 months), Weaning to First Heat (1 				\
+		month), and
+		         from First Heat to Maturity (2 months). Source: Meadows, figure 				\
+		5-14.
+	|
+
+\\\---/// Sketch information - do not modify anything except names
+V300  Do not put anything below this section - it will be ignored
+*1
+$192-192-192,0,|12||-1--1--1|92-92-92|160-160-160|-1--1--1|255-255-255|96,96,100,0
+10,1,Piglets In Utero,135,239,45,25,3,131,0,16,0,1,0,0,-1--1--1,255-0-0,||B|255-0-0,0,0,0,0,0,0
+10,2,Piglets,314,239,44,21,3,131,0,16,0,1,0,0,-1--1--1,255-0-0,||B|255-0-0,0,0,0,0,0,0
+10,3,Mature Stock,490,240,40,25,3,131,0,16,0,1,0,0,-1--1--1,255-0-0,||B|255-0-0,0,0,0,0,0,0
+10,4,Inventory,691,239,47,25,3,131,0,16,0,1,0,0,-1--1--1,255-0-0,||B|255-0-0,0,0,0,0,0,0
+12,5,48,8,240,10,8,0,3,0,43,-1,0,0,0,-1--1--1,255-0-0,Vensim Sans|14||255-0-0,0,0,0,0,0,0
+11,6,0,402,240,7,8,34,3,0,1,1,0,0,0,-1--1--1,255-0-0,||B|255-0-0,0,0,0,0,0,0
+10,7,maturing,402,278,75,30,32,3,0,0,0,1,0,0,0,0,0,0,0,0
+11,8,0,795,237,7,8,34,3,0,1,1,0,0,0,-1--1--1,0-0-255,||B|255-0-0,0,0,0,0,0,0
+10,9,consuming,795,275,75,30,32,3,0,0,0,1,0,0,0,0,0,0,0,0
+12,10,48,858,237,10,8,0,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,11,Breeding Stock,188,357,48,29,3,131,0,16,0,1,0,0,-1--1--1,255-0-0,||B|255-0-0,0,0,0,0,0,0
+11,12,0,55,240,7,8,34,3,0,1,1,0,0,0,-1--1--1,255-0-0,||B|255-0-0,0,0,0,0,0,0
+10,13,breeding,55,278,75,30,32,3,0,0,0,1,0,0,0,0,0,0,0,0
+11,14,0,230,240,7,8,34,3,0,1,1,0,0,0,-1--1--1,255-0-0,||B|255-0-0,0,0,0,0,0,0
+10,15,farrowing,230,278,75,30,32,3,0,0,0,1,0,0,0,0,0,0,0,0
+11,16,0,588,240,7,8,34,3,0,1,1,0,0,0,-1--1--1,255-0-0,||B|255-0-0,0,0,0,0,0,0
+10,17,slaughtering,588,278,75,30,32,3,0,0,0,1,0,0,0,0,0,0,0,0
+10,18,desired breeding stock,223,451,75,30,0,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,19,gestation time,204,168,75,30,0,3,0,2,-1,1,0,0,-1--1--1,-1--1--1,|||64-128-128,0,0,0,0,0,0
+11,20,0,350,361,7,8,34,3,0,1,1,0,0,0,-1--1--1,255-0-0,||B|255-0-0,0,0,0,0,0,0
+10,21,acquiring breeding stock,350,399,75,30,32,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,22,time to mature,344,167,75,30,0,3,0,2,-1,1,0,0,-1--1--1,-1--1--1,|||64-128-128,0,0,0,0,0,0
+10,23,mature stock feeding period,542,168,75,30,0,3,0,2,-1,1,0,0,-1--1--1,-1--1--1,|||64-128-128,0,0,0,0,0,0
+10,24,fertility,163,305,75,30,0,3,0,2,-1,1,0,0,-1--1--1,-1--1--1,|||64-128-128,0,0,0,0,0,0
+10,25,breeding stock acquisition delay,479,453,75,30,0,3,0,2,0,1,0,0,-1--1--1,-1--1--1,|||64-128-128,0,0,0,0,0,0
+10,26,inventory coverage,727,352,75,30,0,3,0,0,0,1,0,0,0,0,0,0,0,0
+10,27,population,866,201,75,30,0,3,0,0,-1,1,0,0,0,0,0,0,0,0
+10,28,indicated per capita consumption,991,428,75,30,0,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,29,relative coverage,691,421,75,30,0,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,30,hog price,599,576,75,30,0,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,31,relative hog price,914,585,75,30,0,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,32,Expected Hog Price,452,679,47,28,3,3,0,16,0,0,0,0,-1--1--1,255-0-0,||B|255-0-0,0,0,0,0,0,0
+10,33,hog corn price ratio,258,671,75,30,0,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,34,expected corn price,475,753,75,30,0,3,0,2,0,0,0,0,0-0-0,0-0-0,|||64-128-128,0,0,0,0,0,0
+10,35,desired coverage,571,324,75,30,0,3,0,2,0,1,0,0,-1--1--1,-1--1--1,|||64-128-128,0,0,0,0,0,0
+10,36,coverage effect on price,650,508,75,30,0,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,37,normal hog price,663,781,75,30,0,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,38,normal breeding stock,284,503,75,30,0,3,0,2,0,0,0,0,0-0-0,0-0-0,|||64-128-128,0,0,0,0,0,0
+10,39,effect of price on consumption,990,517,75,30,0,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,40,normal consumption,1018,180,75,30,0,3,0,0,0,1,0,0,0,0,0,0,0,0
+10,41,normal retail price,919,652,75,30,0,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,42,marketing margin,722,676,75,30,0,3,0,2,0,0,0,0,0-0-0,0-0-0,|||64-128-128,0,0,0,0,0,0
+10,43,TIME STEP,824,324,75,30,0,2,1,3,-1,0,0,0,-1--1--1,128-128-128,|||128-128-128,0,0,0,0,0,0
+10,44,normal hog corn price ratio,174,712,75,30,0,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,45,Relative Hog Corn Ratio,171,616,75,30,0,3,0,8,-1,1,0,0,-1--1--1,-1--1--1,|14||255-0-0,0,0,0,0,0,0
+10,46,live weight of slaughtered hogs,959,735,75,30,0,3,0,2,0,0,0,0,0-0-0,0-0-0,|||64-128-128,0,0,0,0,0,0
+10,47,hog dressing yield,919,776,75,30,0,3,0,2,0,0,0,0,0-0-0,0-0-0,|||64-128-128,0,0,0,0,0,0
+10,48,normal price per pounds,960,807,75,30,0,3,0,2,0,0,0,0,0-0-0,0-0-0,|||64-128-128,0,0,0,0,0,0
+10,49,time to form price expectations,418,619,75,30,0,3,0,2,0,0,0,0,0-0-0,0-0-0,|||64-128-128,0,0,0,0,0,0
+10,50,TIME STEP,502,415,75,30,0,2,1,3,-1,0,0,0,-1--1--1,128-128-128,|||128-128-128,0,0,0,0,0,0
+10,51,input,1043,480,75,30,0,3,0,2,-1,0,0,0,0-0-0,0-0-0,|||64-128-128,0,0,0,0,0,0
+10,52,Per Capita Consumption,966,304,67,32,3,131,0,17,0,1,0,0,-1--1--1,0-0-255,||B|0-0-255,0,0,0,0,0,0
+10,53,time to change consumption,846,391,75,30,0,3,0,2,0,0,0,0,0-0-0,0-0-0,|||64-128-128,0,0,0,0,0,0
+10,54,price effect on breeding stock,150,545,75,30,0,3,0,0,-1,1,0,0,0,0,0,0,0,0
+10,55,retail price,743,625,75,30,0,3,0,0,-1,0,0,0,0,0,0,0,0,0
+12,56,0,634,848,456,12,0,4,0,18,0,0,0,0,-1--1--1,-1--1--1,||I|64-64-64,0,0,0,0,0,0
+Copyright (c) 1994 LeapTec and Ventana.  After Meadows. 1970. Dynamics of Commodity Production Cycles.
+10,57,coverage effect on price func,838,456,75,30,0,3,1,2,-1,0,0,0,-1--1--1,128-128-128,|||64-128-128,0,0,0,0,0,0
+10,58,effect of price on consumption func,1104,615,75,30,0,3,1,2,-1,0,0,0,-1--1--1,128-128-128,|||64-128-128,0,0,0,0,0,0
+10,59,price effect on breeding stock function,388,580,75,30,0,3,1,2,-1,0,0,0,-1--1--1,128-128-128,|||64-128-128,0,0,0,0,0,0
+1,60,12,1,4,0,0,22,2,0,0,-1--1--1,|||0-0-0,1|(76,240)|
+1,61,12,5,100,0,0,22,0,0,0,-1--1--1,,1|(33,240)|
+1,62,14,2,4,0,0,22,2,0,0,-1--1--1,|||0-0-0,1|(253,240)|
+1,63,14,1,100,0,0,22,0,0,0,-1--1--1,,1|(201,240)|
+1,64,6,3,4,0,0,22,2,0,0,-1--1--1,|||0-0-0,1|(429,240)|
+1,65,6,2,100,0,0,22,0,0,0,-1--1--1,,1|(376,240)|
+1,66,16,4,4,0,0,22,2,0,0,-1--1--1,|||0-0-0,1|(619,240)|
+1,67,16,3,100,0,0,22,0,0,0,-1--1--1,,1|(555,240)|
+1,68,8,10,4,0,0,22,0,0,0,-1--1--1,,1|(825,237)|
+1,69,8,4,100,0,0,22,0,0,0,-1--1--1,,1|(763,237)|
+1,70,20,11,4,0,0,22,2,0,0,-1--1--1,|||0-0-0,1|(289,361)|
+1,71,20,3,68,0,0,22,0,0,0,-1--1--1,,1|(490,361)|
+1,72,1,15,2,0,0,0,0,0,0,-1--1--1,,1|(199,280)|
+1,73,2,7,2,0,0,0,0,0,0,-1--1--1,,1|(350,279)|
+1,74,3,17,2,0,0,0,0,0,0,-1--1--1,,1|(534,281)|
+1,75,4,9,2,0,0,0,1,0,0,160-160-160,|||0-0-0,1|(715,260)|
+1,76,11,13,2,0,0,0,1,0,0,255-0-0,|||128-128-128,1|(64,315)|
+1,77,19,14,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,78,22,6,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,79,23,16,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,80,11,21,2,0,0,0,0,0,0,-1--1--1,,1|(246,409)|
+1,81,24,13,2,0,0,0,0,0,0,-1--1--1,,1|(111,305)|
+1,82,4,26,2,0,0,0,1,0,0,255-0-0,|||128-128-128,1|(726,304)|
+1,83,27,8,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,84,18,21,2,0,0,0,1,0,0,255-0-0,|||128-128-128,1|(328,428)|
+1,85,26,29,0,0,0,0,1,0,0,255-0-0,|||128-128-128,1|(0,0)|
+1,86,30,32,2,0,0,0,1,0,0,255-0-0,|||128-128-128,1|(576,636)|
+1,87,34,33,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,88,32,33,2,0,0,0,1,0,0,255-0-0,|||128-128-128,1|(387,671)|
+1,89,35,29,0,0,0,0,3,0,0,160-160-160,|||0-0-0,1|(0,0)|
+1,90,25,21,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,91,29,36,0,0,0,0,1,0,0,255-0-0,|||128-128-128,1|(0,0)|
+1,92,36,30,0,0,0,0,1,0,0,255-0-0,|||128-128-128,1|(0,0)|
+1,93,37,30,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,94,54,18,1,0,0,0,1,0,0,255-0-0,|||128-128-128,1|(176,508)|
+1,95,31,39,1,0,0,0,1,0,0,0-0-255,|||128-128-128,1|(959,565)|
+1,96,39,28,1,0,0,0,1,0,0,0-0-255,|||128-128-128,1|(1000,476)|
+1,97,40,28,1,0,0,0,0,0,0,-1--1--1,,1|(1054,396)|
+1,98,35,4,0,1,0,0,0,0,1,-1--1--1,,1|(0,0)|
+1,99,23,3,0,1,0,0,0,0,1,-1--1--1,,1|(0,0)|
+1,100,19,1,0,1,0,0,0,0,1,-1--1--1,,1|(0,0)|
+1,101,22,2,0,1,0,0,0,0,1,-1--1--1,,1|(0,0)|
+1,102,18,11,0,1,0,0,0,0,1,-1--1--1,,1|(0,0)|
+1,103,43,9,1,1,0,0,1,0,0,192-192-192,|||0-0-0,1|(835,308)|
+1,104,33,45,0,0,0,0,1,0,0,255-0-0,|||128-128-128,1|(0,0)|
+1,105,45,54,0,0,0,0,1,0,0,255-0-0,|||128-128-128,1|(0,0)|
+1,106,44,45,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,107,38,18,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,108,48,37,0,1,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,109,46,37,0,1,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,110,49,32,1,0,0,0,0,0,0,-1--1--1,,1|(451,644)|
+1,111,37,32,0,1,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,112,34,44,0,1,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,113,37,44,1,1,0,0,0,0,0,-1--1--1,,1|(426,776)|
+1,114,47,37,0,1,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,115,3,20,1,0,0,0,0,0,0,-1--1--1,,1|(406,305)|
+1,116,50,21,0,1,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,117,27,40,0,1,0,0,0,0,1,-1--1--1,,1|(0,0)|
+1,118,17,9,1,1,0,0,1,0,0,160-160-160,|||0-0-0,1|(632,279)|
+1,119,28,52,0,0,0,0,1,0,0,0-0-255,|||128-128-128,1|(0,0)|
+1,120,52,9,0,0,0,0,1,0,0,0-0-255,|||128-128-128,1|(0,0)|
+1,121,53,52,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,122,40,52,0,1,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,123,9,26,0,0,0,0,1,0,0,0-0-255,|||128-128-128,1|(0,0)|
+1,124,40,4,1,1,0,0,0,0,1,-1--1--1,,1|(815,177)|
+1,125,27,4,0,1,0,0,0,0,1,-1--1--1,,1|(0,0)|
+1,126,37,41,0,1,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,127,42,41,0,1,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,128,30,55,1,0,0,0,1,0,0,0-0-255,|||128-128-128,1|(636,600)|
+1,129,42,55,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,130,55,31,1,0,0,0,1,0,0,0-0-255,|||128-128-128,1|(786,625)|
+1,131,41,31,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,132,57,36,0,1,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,133,58,39,0,1,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,134,59,54,0,1,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,135,51,28,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,136,16,40,1,0,0,0,0,64,1,-1--1--1,,1|(714,179)|
+12,137,0,1258,285,148,121,3,188,0,0,2,0,0,0,0,0,0,0,0,0
+hog price,graph
+12,138,0,733,71,80,40,8,7,0,0,-1,1,0,0,0,0,0,0,0,0
+COMMOD MODEL
+///---\\\
+:L<%^E!@
+4:Time
+5:gestation time
+9:Commod
+19:100,0
+24:0
+25:100
+26:100
+22:$,Dollar,Dollars,$s
+22:Day,Days
+22:Hour,Hours
+22:Month,Months
+22:Person,People,Persons
+22:Unit,Units
+22:Week,Weeks
+22:Year,Years
+22:hog,hogs
+22:$,Dollar,Dollars,$s
+22:Day,Days
+22:Hour,Hours
+22:Month,Months
+22:Person,People,Persons
+22:Unit,Units
+22:Week,Weeks
+22:Year,Years
+22:hog,hogs
+23:0
+15:0,0,0,0,0,0
+27:0,
+34:0,
+42:0
+72:0
+73:0
+35:Date
+36:YYYY-MM-DD
+37:2000
+38:1
+39:1
+40:2
+41:0
+95:0
+96:0
+97:0
+77:0
+78:0
+102:1
+93:0
+94:0
+92:0
+91:0
+90:0
+87:0
+75:
+43:
+103:8,8,8,3,8
+105:0,0,0,0,0,0,0,0,0,0
+104:Vensim Sans|12||0-0-0|0-0-0|-1--1--1|0-0-255|192-192-192|-1--1--1

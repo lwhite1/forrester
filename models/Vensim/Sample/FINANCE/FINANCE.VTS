@@ -1,0 +1,34 @@
+1.62 - Vensim Analysis Tools
+width=2,height=22,=1,=1,=1,=1
+Tree Diagram|Causes Tree
+x=0,y=0,foreground=-1,background=-1,auto=0,sx=0,sy=0,sw=0,sh=0,
+2,0,1,1,1,1,1,1,1,1,0,0,Times New Roman|18||0-0-0,Times New Roman|12||0-0-0,Times New Roman|10||0-0-0,Times New Roman|8||0-0-0,Times New Roman|6||0-0-0,2,0,0,0,
+Tree Diagram|Uses Tree
+x=0,y=2,foreground=-1,background=-1,auto=0,sx=0,sy=0,sw=0,sh=0,
+2,1,1,1,1,1,1,1,1,1,0,0,Times New Roman|18||0-0-0,Times New Roman|12||0-0-0,Times New Roman|10||0-0-0,Times New Roman|8||0-0-0,Times New Roman|6||0-0-0,2,0,0,0,
+Loops|Loops
+x=0,y=4,foreground=-1,background=-1,auto=0,sx=0,sy=0,sw=0,sh=0,
+Document|Document
+x=0,y=6,foreground=-1,background=-1,auto=0,sx=0,sy=0,sw=0,sh=0,
+0,0,0,0,0,1,0,0,1,1,0,0,0,1,0,0,0,0,1,0,75,Times New Roman|12||0-0-0,
+Strip Graph|Causes Strip
+x=0,y=9,foreground=-1,background=-1,auto=0,sx=0,sy=0,sw=0,sh=0,
+0,0,0,1,0,1,1,1,0,1,1,0,0,6,2,0,Times New Roman|12||0-0-0,Times New Roman|10||0-0-0,Times New Roman|8||0-0-0,60,25,40,0,
+Graph|Graph
+x=0,y=11,foreground=-1,background=-1,auto=0,sx=0,sy=0,sw=0,sh=0,
+16,12,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,Times New Roman|12||0-0-0,Times New Roman|10||0-0-0,Times New Roman|8||0-0-0,Times New Roman|16||0-0-0,Times New Roman|12||0-0-0,Times New Roman|48||0-0-0,
+
+
+
+Sensitivity Graph|Sensitivity Graph
+x=0,y=13,foreground=-1,background=-1,auto=0,sx=0,sy=0,sw=0,sh=0,
+-1,1,1,1,1,1,1,1,1,0,0,6,2,0,Times New Roman|12||0-0-0,Times New Roman|10||0-0-0,Times New Roman|8||0-0-0,60,25,1,500,750,950,1000,0,0,0,0,8454143,65280,16711680,8421504,16777215,16777215,16777215,16777215,0,0,0,0,
+Sensitivity Graph|Sensitivity Traces
+x=0,y=15,foreground=0,background=12632256,auto=0,sx=0,sy=0,sw=0,sh=0,
+-1,1,1,1,1,1,1,1,1,0,0,6,2,0,Times New Roman|12||0-0-0,Times New Roman|10||0-0-0,Times New Roman|8||0-0-0,152,76,0,500,750,950,1000,0,0,0,0,8454143,65280,16711680,8421504,16777215,16777215,16777215,16777215,0,0,0,0,
+Table|Table
+x=0,y=17,foreground=-1,background=-1,auto=0,sx=0,sy=0,sw=0,sh=0,
+-1,1,1,1,1,1,1,1,1,1,0,0,Times New Roman|12||0-0-0,30,10,0,0,0,0,0,
+Runs Compare|Runs Compare
+x=0,y=19,foreground=-1,background=-1,auto=0,sx=0,sy=0,sw=0,sh=0,
+0,0,0,0,0,0,1,1,0,0,Times New Roman|12||0-0-0,0,

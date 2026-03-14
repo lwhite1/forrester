@@ -355,13 +355,13 @@ class SelectionControllerTest {
 
         @Test
         void shouldReturnEmptySet_whenEditorIsNull() {
-            assertThat(controller.paste(null, canvasState, undoCount::incrementAndGet))
+            assertThat(controller.paste(null, canvasState, undoCount::incrementAndGet, null))
                     .isEmpty();
         }
 
         @Test
         void shouldReturnEmptySet_whenClipboardEmpty() {
-            assertThat(controller.paste(editor, canvasState, undoCount::incrementAndGet))
+            assertThat(controller.paste(editor, canvasState, undoCount::incrementAndGet, null))
                     .isEmpty();
         }
     }

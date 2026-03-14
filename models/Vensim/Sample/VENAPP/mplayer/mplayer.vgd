@@ -1,0 +1,12 @@
+:GRAPH POP
+:TITLE pop
+:WIP
+:SOFT-BOUNDS
+:X-MIN 0
+:X-MAX 100
+:SCALE
+:Y-MIN 0
+:Y-MAX 100
+:VAR Pop by region[north]
+:VAR Pop by region[south]
+:VAR Pop by region[east]

@@ -1,0 +1,372 @@
+:GRAPH WIP_TOT_COST
+:Title Fraction complete of each task and cumulative cost.
+:WIP
+:MAX-POINTS 400
+:label-lines
+:x-min 0
+:x-max 100
+:VAR total_cost|Total Spending
+:Y-MIN 0
+:Y-MAX 20E6
+:SCALE
+:VAR REP FRAC COMPLETE[Task1]|Fraction Complete - Task1
+:VAR REP FRAC COMPLETE[Task2]|. . . - Task2
+:VAR REP FRAC COMPLETE[Task3]|. . . . - Task3
+:VAR REP FRAC COMPLETE[Task4]|. . . . - Task4
+:Y-MIN=0
+:Y-MAX=1
+:REPORT TXT1
+:SIZE 50,15
+You may need to use the scroll bars at the right, and 
+on the bottom to see all of the information contained
+in this window.
+
+This demonstration allows you to review structure and do simple
+experimentation with a generic Ventana Project model.  It is 
+intended to help clarify the structure of Ventana Project, and
+show some of the uses for a model.  The model contained in this
+demonstration is a simple four task representation of a project
+requiring only labor.  For simplicity and clarity such issues as
+intertask resource flows have been excluded.
+
+A Ventana Project application uses a model refined relative to
+the one shown here by application of various physical and 
+organizational constraints.  The number, ordering and interactions
+among tasks are also formulated to be appropriate for your particular 
+situation.  Differentiation among labor types, material flow 
+requirements and subcontracting are all included in a typical 
+Ventana Project application.
+:END-OF-REPORT
+:REPORT OV_TASK
+A task is started when all of its prerequisites have been completed
+to a sufficient extent to allow work to begin.  In the model this is
+represented by tracking the scheduled start time for the task.  If 
+prerequisites are still not in place when the scheduled start time
+is reached it is slipped.  As the model is configured here this will
+also slip the scheduled completion time.
+
+Note that prerequisite tasks only need to be completed to the
+prerequisite required fraction complete to allow a downstream task to
+start.  This allows partial task overlap.  If a prerequisite task is
+halted the downstream task will also be forced to slow and eventually
+stop.
+:END-OF-REPORT
+:REPORT OV_WORK
+:SIZE 50,15
+The flow of work is represented by the gross completion rate. This
+depends on the effective amount of available labor, and gross
+productivity.  Overtime can also be used to increas the rate at
+which work is completed.  The determination of gross productivity
+is discusses in another diagram.
+
+Because quality is not always 100%, only part of the work being
+done is completed correctly.  Some of the work being done will,
+eventually, be recognized as requiring rework.  The model explicitly
+breaks out the generation of work requiring rework even before it
+is detected.  The quantity of work completed correctly and the 
+amount of undiscovered rework are not ever known during a project.
+What is known is the reported work complete.  The model tracks 
+unknowns because they are critical to the dynamics of a project.
+
+Undiscovered rework, thought not measureable, is very real and
+eventually gets discovered.  Within a given task errors and omissions
+are discovered over the course of the task, and more quickly toward
+the end of the task.  Downstream tasks that depend on the output
+output of a task can also uncover problems.  The dashed red arrow
+here denotes the interconnection between different tasks.
+:END-OF-REPORT
+:REPORT OV_PROD
+Gross productivity, or work speed, is determined by a normal productivity
+combined with effects from schedule pressure, fatique, morale and 
+prerequisite readiness.  It is important to note that the determination
+of productivity and quality are very similar in structure.  The important
+factors in determining the two are the same, though the nature, and even
+direction, of impact is different.  See the overview diagram on quality 
+for comparison.
+
+Schedule pressure is computed based on the relationship between scheduled
+time remaining and expected time remaining.  If time is running out
+people are motivated to work faster.  In the long term, however, both
+morale and fatigue can counteract this direct beneficial effect.
+
+Fatigue is based on historic overtime patterns.  Sustained overtime will
+decrease the speed with which people can work.  Morale is based on how
+it is perceived the project is doing.  If the task is badly behind
+schedule people become depressed and demotivated.  In the model here 
+these effects are local to a task, but could also depend on the overall
+project.
+
+Even though a task can start without a prerequisite being completely 
+done, the task cannot finish.  If prototyping depends on design, then
+prototyping can get started without a finished design by building basic
+components.  Ultimately, however, there is no way to put the prototype 
+together until it is designed.
+:END-OF-REPORT
+:REPORT OV_QUAL
+Quality is determined by normal quality, and the effects from schedule
+pressure, fatigue, morale and prerequisite quality.  The factors 
+determining quality are almost the same as those determining productvity,
+but may work in different ways.  Almost all changes that cause a project
+to deviate from schedule work to decrease quality.
+
+Schedule pressure is determined by the time remaining relative to the
+scheduled time remaining.  High schedule pressure will lead to a decrease
+in quality as people attempt to do more in less time.  
+
+Fatigue effects result from having worked overtime for sustanined
+periods of time and also decrease quality.  Morale is based on how fast
+the task is moving toward completion relative to schedule. Tasks that
+are significantly behind schedule decrease morale, and thereby quality.
+
+The quality of prerequisite tasks is an important determinant of
+quality in a task.  The red dashed arrow in this diagram shows the inter
+task connection that results.  The prerequisite quality that is 
+important is average quality of work after corrections have been made.
+As rework is discovered this quality will grow toward 100%.
+:END-OF-REPORT
+:REPORT OV_LAB
+Labor is hired over some horizon to try to keep progress on shcedule.
+There is a single category of labor, with no inter-task resource sharing.
+Labor requirements for a task are unrestricted except that there is a 
+cap on both the absolute number of people, and the rate at which people 
+can be hired.  Other than these two restrictions, people are hired as 
+needed to achieve schedule over a hiring horizon.  
+
+The planned relative labor intensity is determined by using a manning
+or effor profile curve.  Such a curve typically starts at 0, ramps up,
+plateaus and ramps back to 0.  This curve is used to determine how
+much labor is desirable in the future, after the time it takes to 
+bring on labor is passed.  The remaining amount of work expected to
+be in place is used to detemrine how many people are expected to be
+needed.
+
+The treatment of labor in this model is appropriate only for tasks 
+requiring commonly available skills and little specialized training.  
+The potential costs of brining people on-line, and getting them up
+to speed on what is being done have been excluded.
+:END-OF-REPORT
+:REPORT COMM6
+:SIZE 50,15
+In order to run a scenario you need to set up the assumptions you
+want to use.  This is done by first basing your scenario on a
+predefined or previous scenario.  Once you have done this you 
+can change whatever additional assumptions your want to run your
+scenario.
+
+The base scenario assumes that the pro-active replacement technology
+is turned on at month 3.  No overtime is allowed for pro-active 
+replacements, and labor is hired based on the currently indicated
+amount of work.
+
+The slowed roll-out scenario is the same as the base scenario, except
+that instead of turning on all the pro-active service technology,
+it is turned on bit by bit.
+
+The anticipatory labor hiring scenario is the same as the base
+scenario, except that labor is hired to meet the expected amount
+of labor required when pro-active servicing is all in place.  This
+is substantially lower then the amount of labor required for
+reactive servicing.
+
+The 20% overtime allowance scenario is the same as the base 
+scenario, except that the workforce will work overtime to 
+do the pro-active servicing.
+
+All of the above scenarios are small, vary one thing at-a-time
+variations on the base scenario.  In designing a good policy it
+is, of course, necessary to vary more than one thing.  You can
+choose a previously run scenario as the basis for a new scenario.
+This is particularly useful when you are refining the changes
+you have made.
+:END-OF-REPORT
+:REPORT COMM7
+:SIZE 50,15
+In order to optimize performance over the transition it is
+necessary to define the cost of the transition.  The most obvious
+definition of this is simple the total wages paid - straight time
+plus overtime.  You may, also, however, choose to penalize parts 
+consumption above a certain level.  To do this enter the maximum
+number of parts it is acceptable to replace per month, and the
+penalty to assessed when this maximum is exceeded.
+
+Once you are happy with your choices select optimize to begin
+the optimization process.  
+:END-OF-REPORT
+:REPORT COMM8
+:SIZE 50,15
+In order to optimize performance over the project it is necessary
+to define the cost of the project. For this software project 
+this is just the labor cost of the software engineers and the
+testing, documentation and support people.  You may also choose
+to assess a penalty for finishing the project late.  If not missing
+the deadline is of paramount importance, then set the penalty 
+for being late to a very big number (1E12).
+
+After you have set these values select the "Optimize Performance"
+menu item to begin optimization.  The system will find the
+initial schedule and the proactive testing extent to minimize
+the cost of completing the project,
+.  The most obvious
+definition of this is simple the total wages paid - straight time
+plus overtime.  You may, also, however, choose to penalize parts 
+consumption above a certain level.  To do this enter the maximum
+number of parts it is acceptable to replace per month, and the
+penalty to assessed when this maximum is exceeded.
+
+Once you are happy with your choices select optimize to begin
+the optimization process.  
+:END-OF-REPORT
+:report COMM1
+The software allows you to explore a model through a number of menus
+and output screens.  To select a menu item you can click on it, type the
+first letter in the menu description of select it using the up and down
+arrow keys and then press the enter key.  The selected menu item appears 
+highlighted - usually black on white.  
+
+Additional functionality available in the software is described in 
+places where it can be used.  To conserve space, later commentaries
+will be kept small, and you will need to scroll them to read all the
+information they contain.
+
+The model used for this application is a simplified generic four stage
+Ventana Project model.  It does not represent any particular project,
+but is intended only as a basis for explanation and clarification.
+:end-of-report
+:report COMM2
+Anything you type will appear in the editing boxes.  Use the 
+Tab key or mouse to move between editing boxes.  Hold down the
+alt key and press the letter for the command you desire,
+or use the mouse to select the command.
+
+You can change any constants or lookup tables in the model.
+Important constants are shown on this screen.  All others
+can be accessed using the L and C commands for Lookups and
+Constants respectively.
+
+When you type Alt+R your scenario will be run using the changes you 
+have entered.  After your scenario runs you will see a Gantt chart
+showing the performance of different tasks relative to the
+base run, and any other runs you have made.
+:end-of-report
+:report comm3
+You can do analysis of the model by first loading in scenarios of 
+interest, and then reviewing the output or doing causal tracing.  
+The Load and reorder command will put up a small window with two lists.  
+On the left is a list of loaded scenarios, on the right a list of 
+scenarios that have been run.  The << button loads scenarios.  Click 
+on the scenario you want to load in the right hand list, and then 
+click the << button.  The >> button unloads scenarios.  Click on the 
+scenario you want to unload in the left hand list, and the click on 
+the >> button.
+
+You can load up to 8 scenarios at a time, but it is difficult to read
+graphs with more than 4 scenarios loaded.
+
+If the list on the right is empty, you will need to run some 
+scenarios.  Exit back to the main menu and do this.  You can run
+the scenarios described in "Beyond the Limits" by choosing one
+of the named scenarios to base your scenario on, and running the
+scenario without making any additional changes.
+
+Causal tracing is a process the allows you to determine the underlying
+causes of behavior, and differences in behavior between different
+scenarios.  There are two options for doing causal tracing available.
+The first uses tree diagrams and single graphs.  The second uses
+equations and multiple graphs.  Try them both out to see which you
+prefer.
+:end-of-report
+:report COMM4
+The cause and use screens show lists of
+different variables.  The graphs allows
+your to compare different scenarios.
+The trees allow you to investigate the
+structure of the model.
+
+You can double click on a variable name
+in the graphs, trees or documentation to
+view the same analysis screen for that
+variable.  You can also use the S
+command to select a new variable to work
+with.
+
+You can print the contents of the graphs
+and trees using the P command.  Output
+will be directed to your default printer.
+
+During causal tracing you can switch
+between the Tree and Graph represen-
+tations of causes.  This can be
+useful as means of understanding both
+structure and behavior.
+:end-of-report
+:report COMM5
+Use the Tab key or mouse to move between the number entry positions.
+When you see the bar | cursor you can type in a new number. To 
+change the lookup tables relating different input and outputs
+select the appropriate menu item, and modify the lookup 
+graphically by dragging points around, or typing in new
+XY pairs.
+
+You will need to hold down the Alt key or use the mouse to
+select menu items.
+
+Changes you make to tables are recorded when you click OK on the table
+changing window.  Changes you make to constants are recorded when you
+select the Record (R) command.  You can exit without recording changes
+you make with the E command.
+:end-of-report
+:report DEF_0
+Use this to define some of the basic characteristics of the
+project.  You can set up size and schedules, define 
+prerequisites and specify the planned work profiles.  
+
+What parts of a project are defined using this type of interface
+depends on the purpose of the model and the interface.  For big
+projects, the important characteristics of the project are built
+into the model, and are not changed directly from an interface
+such as this.  This type of interface is most suitable to
+situations in which a number of similar project need to be dealt
+with in an on-going fashion.
+:END-OF-REPORT
+:REPORT DEF_SCHED
+Set the start and stop date for each task.  There are no special
+requirements on duration or overlap.  The first task should 
+at or near time 0, and the last end by time 100 (the model 
+will stop at time 100 even if the project is not complete). 
+Task 4 is used to define the completion of the project, and
+should end last.
+
+Use the Tab key or mouse to move between the input fields.
+Press return to accept changes, or Esc to ignore them.  You
+can also use Alt+A or Alt+E.
+:END-OF-REPORT
+:REPORT DEF_PROF
+Set the profile of effort over the course of the different tasks.
+You can use the mouse to click on the profile curve shown to the
+left of each task name.  A graphical table editor will appear
+that will allow you to change the profile.  Note that only the
+relative values between 0 and 1 make any difference to what is
+actually done during the task.  
+
+The default profiles show a ramp up of effort, then a plateau,
+and then a ramp down.
+:END-OF-REPORT
+:REPORT DEF_PREREQ
+Prerequisite requirements are set by clicking the mouse on the
+different possibilities to turn prerequisites on and off. There
+are no real restrictions on what is a prerequisite of what, but
+it is important that there be some logical flow or the project
+will never finish.
+
+Note that it is important to check all prerequisites, since these
+will be used to determine not only when a task starts, but
+the prerequisite quality effects and downstream error discovery.
+Thus if task 3 requires task 2, it should also require task 1.
+:END-OF-REPORT
+:REPORT DEF_SIZE
+Task size is defined in drawings.  Given the purpose of this 
+model definition of relative sizes is the only important issue
+to be dealt with here.
+:END-OF-REPORT
+
+

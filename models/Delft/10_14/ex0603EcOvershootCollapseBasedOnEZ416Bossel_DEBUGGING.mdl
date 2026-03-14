@@ -1,0 +1,204 @@
+{UTF-8}
+deaths=
+	population/resource availability dependent lifetime
+	~	consumer/Year
+	~		|
+
+resource availability dependent lifetime=
+	MAX(15,MIN(100,normal lifetime*per capita renewable resource availability))
+	~	
+	~	MAX(MIN(normal lifetime*per capita renewable resource availability,100),20)
+	|
+
+rapid resource depletion time=
+	1
+	~	Year
+	~		|
+
+resource use=
+	MIN(renewable resources/rapid resource depletion time, renewable resource consumption per capita\
+		*population)
+	~	resource/Year
+	~	IF THEN ELSE(renewable resources/rapid resource depletion time < renewable \
+		resource consumption per capita*population, renewable resources/rapid \
+		resource depletion time, renewable resource consumption per \
+		capita*population)
+	|
+
+INITIAL RESOURCES=
+	7e+006
+	~	resource
+	~		|
+
+INITIAL CONSUMERS=
+	100000
+	~	consumer
+	~		|
+
+renewable resources= INTEG (
+	+regeneration-resource use,
+		INITIAL RESOURCES)
+	~	resource
+	~		|
+
+regeneration=
+	regeneration rate*renewable resources*(renewable resources/carrying capacity)*(1-renewable resources\
+		/carrying capacity)+minimum regeneration rate*carrying capacity
+	~	resource/Year
+	~		|
+
+regeneration rate=
+	1.2
+	~	1/Year
+	~		|
+
+normal birth rate=
+	0.0035
+	~	1/Year
+	~		|
+
+minimum regeneration rate=
+	0.01
+	~	1/Year
+	~		|
+
+carrying capacity=
+	7.5e+006
+	~	resource
+	~		|
+
+per capita renewable resource availability=
+	renewable resources/population
+	~	resource/consumer
+	~		|
+
+renewable resource consumption per capita=
+	1
+	~	resource/(consumer*Year)
+	~		|
+
+normal lifetime=
+	25
+	~	1/Year
+	~		|
+
+population= INTEG (
+	+births-deaths,
+		INITIAL CONSUMERS)
+	~	consumer
+	~		|
+
+births=
+	normal birth rate*population/per capita renewable resource availability
+	~	consumer/Year
+	~		|
+
+********************************************************
+	.Control
+********************************************************~
+		Simulation Control Parameters
+	|
+
+FINAL TIME  = 500
+	~	Year
+	~	The final time for the simulation.
+	|
+
+INITIAL TIME  = 0
+	~	Year
+	~	The initial time for the simulation.
+	|
+
+SAVEPER  = 
+        TIME STEP
+	~	Year [0,?]
+	~	The frequency with which output is stored.
+	|
+
+TIME STEP  = 0.02
+	~	Year [0,?]
+	~	The time step for the simulation.
+	|
+
+\\\---/// Sketch information - do not modify anything except names
+V300  Do not put anything below this section - it will be ignored
+*View 1
+$192-192-192,0,Arial|12||0-0-0|0-0-0|0-0-0|-1--1--1|-1--1--1|96,96,100,0
+10,1,renewable resources,268,250,47,28,3,3,0,0,0,0,0,0
+10,2,population,552,251,46,27,3,3,0,2,0,0,0,0,0-0-0,0-0-0,|12||255-128-0
+12,3,48,122,252,10,8,0,3,0,0,-1,0,0,0
+1,4,6,1,4,0,0,22,0,0,0,-1--1--1,,1|(196,251)|
+1,5,6,3,100,0,0,22,0,0,0,-1--1--1,,1|(147,251)|
+11,6,48,167,251,5,6,34,3,0,0,1,0,0,0
+10,7,regeneration,167,267,46,10,40,3,0,2,-1,0,0,0,0-0-0,0-0-0,|12||255-0-0
+10,8,regeneration rate,95,313,51,9,8,3,0,10,0,0,0,0,0-0-0,0-0-0,|10||255-128-0
+10,9,carrying capacity,174,172,77,20,8,3,0,10,0,0,0,0,0-0-0,0-0-0,|10||255-128-0
+10,10,renewable resource consumption per capita,319,420,71,16,8,3,0,8,0,0,0,0,0-0-0,0-0-0,|10||0-0-0
+10,11,normal birth rate,462,328,49,9,8,3,0,8,0,0,0,0,0-0-0,0-0-0,|10||0-0-0
+10,12,normal lifetime,740,344,44,9,8,3,0,10,0,0,0,0,0-0-0,0-0-0,|10||255-128-0
+10,13,minimum regeneration rate,163,358,52,16,8,3,0,10,0,0,0,0,0-0-0,0-0-0,|10||255-128-0
+10,14,INITIAL RESOURCES,268,214,54,8,8,3,0,10,0,0,0,0,0-0-0,0-0-0,|8||255-128-0
+10,15,INITIAL CONSUMERS,552,216,55,8,8,3,0,10,0,0,0,0,0-0-0,0-0-0,|8||255-128-0
+12,16,48,401,250,10,8,0,3,0,0,-1,0,0,0
+1,17,19,16,4,0,0,22,0,0,0,-1--1--1,,1|(379,250)|
+1,18,19,1,100,0,0,22,0,0,0,-1--1--1,,1|(336,250)|
+11,19,48,363,250,5,6,34,3,0,0,1,0,0,0
+10,20,resource use,363,266,47,10,40,3,0,2,-1,0,0,0,0-0-0,0-0-0,|12||255-128-0
+1,21,2,20,1,0,0,0,0,64,0,-1--1--1,,1|(529,352)|
+1,22,10,20,1,0,0,0,0,64,0,-1--1--1,,1|(340,306)|
+1,23,1,20,1,0,0,0,0,64,0,-1--1--1,,1|(299,291)|
+10,24,per capita renewable resource availability,410,167,77,18,8,3,0,2,0,0,0,0,0-0-0,0-0-0,|12||255-128-0
+1,25,1,24,1,0,0,0,0,64,0,-1--1--1,,1|(369,204)|
+1,26,2,24,1,0,0,0,0,64,0,-1--1--1,,1|(450,204)|
+12,27,48,426,250,10,8,0,3,0,0,-1,0,0,0
+1,28,30,2,4,0,0,22,0,0,0,-1--1--1,,1|(489,250)|
+1,29,30,27,100,0,0,22,0,0,0,-1--1--1,,1|(449,250)|
+11,30,48,468,250,5,6,34,3,0,0,1,0,0,0
+10,31,births,468,266,21,10,40,3,0,2,-1,0,0,0,0-0-0,0-0-0,|12||255-128-0
+12,32,48,684,251,10,8,0,3,0,0,-1,0,0,0
+1,33,35,32,4,0,0,22,0,0,0,-1--1--1,,1|(654,251)|
+1,34,35,2,100,0,0,22,0,0,0,-1--1--1,,1|(611,251)|
+11,35,48,630,251,5,6,34,3,0,0,1,0,0,0
+10,36,deaths,630,267,26,10,40,3,0,2,-1,0,0,0,0-0-0,0-0-0,|12||255-128-0
+1,37,12,51,1,0,0,0,0,64,0,-1--1--1,,1|(735,274)|
+1,38,2,36,1,0,0,0,0,64,0,-1--1--1,,1|(599,297)|
+1,39,24,31,1,0,0,0,0,64,0,-1--1--1,,1|(435,230)|
+1,40,11,31,1,0,0,0,0,64,0,-1--1--1,,1|(461,283)|
+1,41,8,7,1,0,0,0,0,64,0,-1--1--1,,1|(137,280)|
+1,42,1,7,1,0,0,0,0,64,0,-1--1--1,,1|(210,228)|
+1,43,9,7,1,0,0,0,0,64,0,-1--1--1,,1|(144,236)|
+1,44,13,7,1,0,0,0,0,64,0,-1--1--1,,1|(159,284)|
+1,45,2,31,1,0,0,0,0,64,0,-1--1--1,,1|(522,295)|
+1,46,14,1,0,0,0,0,0,0,1,-1--1--1,,1|(268,222)|
+1,47,15,2,0,0,0,0,0,0,1,-1--1--1,,1|(552,217)|
+1,48,24,51,1,0,0,0,0,64,0,-1--1--1,,1|(549,166)|
+10,49,rapid resource depletion time,252,330,54,18,8,3,0,0,-1,0,0,0
+1,50,49,20,1,0,0,0,0,64,0,-1--1--1,,1|(324,317)|
+10,51,resource availability dependent lifetime,675,192,72,18,8,3,0,2,0,0,0,0,0-0-0,0-0-0,|12||255-128-0
+1,52,51,36,0,0,0,0,0,64,0,-1--1--1,,1|(654,227)|
+///---\\\
+:GRAPH GRAPH
+:TITLE GRAPH
+:X-AXIS renewable resources
+:SCALE
+:VAR consumer population
+:L<%^E!@
+1:Real4l.vdf
+9:Real4l
+15:0,0,0,1,0,0
+19:100,0
+27:2,
+34:0,
+4:Time
+5:renewable resources
+35:Date
+36:YYYY-MM-DD
+37:2000
+38:1
+39:1
+40:2
+41:0
+42:0
+24:0
+25:500.004
+26:500.004

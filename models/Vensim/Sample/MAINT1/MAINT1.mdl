@@ -1,0 +1,897 @@
+{UTF-8}
+{UTF-8}
+
+Total Age Of Failing Parts= INTEG (
+	Failing Parts - 
+	          ( failures + proactive replacements)* avg age failing parts,
+		             Failing Parts* NORM FAIL TIME)
+	~	Part*Month
+	~	     The total age of parts that are failing (relative to
+		        when they began failing.
+	|
+
+normal age of failing parts=
+	1
+	~	Month
+	~		|
+
+accept pro overtime = INITIAL(IF THEN ELSE(pro overtime percent > 0,
+                 1 + pro overtime percent / 100,1))
+	~	Dmnl
+	~	    The acceptable level of overtime introduced to manage
+		         proactive parts replacement.
+	|
+
+aging parts = Good Parts/AVG PART LIFE
+	~	Part/Month
+	~	     The number of parts that are aged and therefore no
+		        longer good.
+	|
+
+antic labor hiring = 0
+	~	Dmnl
+	~	    Switch to indicate if labor hiring is being done in
+		        anticipation of what the required labor force
+		         will be.
+	|
+
+attrition  = Labor/avg labor tenancy
+	~	Person/Month
+	~	     The rate at which service engineers leave to go on to
+		        other jobs or retirement.
+	|
+
+avail pro capacity = IF THEN ELSE(Labor*lab hours per month*accept pro overtime
+ > 
+                    reactive service time, Labor * lab hours per month
+*accept pro overtime
+                                - reactive service time,0)
+	~	Hour/Month
+	~	     The amount of labor capacity available for use in
+		         proactive
+		         service delivery.
+	|
+
+avg age failing parts  = Total Age Of Failing Parts/Failing Parts
+	~	Month
+	~	     The average age of parts that have begun the failure
+		         process.
+	|
+
+average diagnostic time = 1
+	~	Hour/Part
+	~	     The average amount of time spent diagnosing a problem to
+		         determine the correct part to replace.
+	|
+
+average assembly time = 1
+	~	Hour/Part
+	~	     The average amount of time that is spent doing the actual
+		        replacement of a part not including any
+		         diagnosis.
+	|
+
+avg labor tenancy = 30
+	~	Month
+	~	     The average time service engineers remain working as
+		         service
+		        engineers.
+	|
+
+AVG PART LIFE = 60
+	~	Month
+	~	     The mean lifetime of a part.
+	|
+
+eff age fail ((0,0),(1,1),(1.8866,2.05263),(2.75258,3.19737)
+,(3.29897,3.96711),(3.84536,4.98684),(6.10825,24.4737) )
+	~	Dmnl
+	~	     The effect of age relative to the normal fail time on
+		        failure.
+	|
+
+eff age failure ((0,0),(1,1),(10,10))
+	~	Dmnl
+	~	     The effect of age on the rate of parts failure.
+	|
+
+eff error proactive rpl ((0,0),(1,1),(2,2))
+	~	Dmnl
+	~	     The effect of measured error rates on the proactive
+		        replacement of parts.
+	|
+
+excess rpl penalty = 5
+	~	$/Part
+	~	    The penalty assessed for monthly replacements in excess of
+		         the specified maximum.
+	|
+
+exp tot rpl = aging parts
+	~	Part/Month
+	~	    The expected total number of replacements that will be
+		         made.
+	|
+
+Failing Parts = INTEG(aging parts - failures - proactive replacements,
+INIT FAILING PARTS)
+	~	Part
+	~	     The number of parts that have begun to fail, but not 
+		         yet failed.
+	|
+
+failures  = Failing Parts/NORM FAIL TIME * eff age fail(
+            avg age failing parts/NORM FAIL TIME)
+	~	Part/Month
+	~	     The rate at which parts fail, and therefore require
+		         replacement.
+	|
+
+FINAL TIME  = 24
+	~	Month
+	~	      FINAL TIME
+	|
+
+Good Parts  = INTEG(NEW EQUIPMENT PARTS + reactive replacements + proactive replacements
+ - aging parts,
+                INIT GOOD PARTS)
+	~	Part
+	~	     The number of parts that are good.
+	|
+
+hiring  = IF THEN ELSE( indicated net hiring > -attrition,
+          indicated net hiring + attrition,0)
+	~	Person/Month
+	~	     The net number of people hired.  Note that only attrition
+		        is used to decrease the workforce.
+	|
+
+ind proactive rpl  = IF THEN ELSE(Time > pro start time,
+                  Failing Parts / plan pro rpl time * 
+                 implement table((Time-pro start time)/pro phase in time
+)*
+                   eff error proactive rpl( avg soft faults/
+                         norm err generation),0)
+	~	Part/Month
+	~	     Indicate proactive replacement of parts based on the error
+		         rate
+		        of failing parts.
+	|
+
+implement table   ((0,1),(1,1) )
+	~	Dmnl
+	~	    The profile of proactive service implementation over time.
+	|
+
+ind proactive service time = ind proactive rpl * average assembly time
+	~	Hour/Month
+	~	    The indicated number of hours that should be spent doing
+		         proactive service.
+	|
+
+indicated labor  = IF THEN ELSE(antic labor hiring :AND:
+                            Time > pro start time,
+                                   pot pro service time/lab hours per month
+,
+                                                ind total service time
+/lab hours per month)
+	~	Person
+	~	     The indicated amount of labor for proactive and 
+		        reactive servicing.
+	|
+
+ind total service time  = ind proactive service time+reactive service time
+	~	Hour/Month
+	~	     The total amount of time reuquired to do service.
+	|
+
+indicated net hiring  = (indicated labor-Labor)/time adj labor
+	~	Person/Month
+	~	     The indicated net number of people to hire.
+	|
+
+INIT FAILING PARTS = INITIAL(Good Parts*NORM FAIL TIME/
+                   AVG PART LIFE)
+	~	Part
+	~	     The initial number of failing parts.
+	|
+
+INIT GOOD PARTS = 100000
+	~	Part
+	~	     The initial number of good parts.
+	|
+
+INITIAL TIME  = 0
+	~	Month
+	~	     The initial time for the simulation.
+	|
+
+lab hours per month = 130
+	~	Hour/Person/Month
+	~	     The number of hours of direct labor available from 
+		        workers after netting sick leave, vacation, holiday,
+		        training and travel time.
+	|
+
+Labor  = INTEG(hiring-attrition,indicated labor)
+	~	Person
+	~		|
+
+labor utilization = (proactive service time + reactive service time)/
+                         (Labor*lab hours per month)
+	~	Dmnl
+	~	    The utilization rate of labor relative to plan.  1.0 is
+		         normal, anything over that requires overtime.
+	|
+
+max accept rpl = 2000
+	~	Part/Month
+	~	    The maximum acceptable number of replacements in a month
+		         above which a penalty must be assessed.
+	|
+
+NEW EQUIPMENT PARTS = 0
+	~	Part/Month
+	~	    New parts coming into the stock of good parts as a
+		         consequence of new equipment.
+	|
+
+norm err generation = 10
+	~	Fault/Part/Month
+	~	     The normal rate of error generation on parts that are
+		         failing, but have not yet failed.
+	|
+
+NORM FAIL TIME = 3
+	~	Month
+	~	     The normal time a part that is prone to failure remains
+		        in use without failing.
+	|
+
+plan pro rpl time  = 1
+	~	Month
+	~	     The planned time to proactively replace parts indicating
+		         that
+		        they may have failed.
+	|
+
+overtime wage = 20
+	~	$/Hour
+	~	    The wage that is paid for overtime work.
+	|
+
+pot pro service time = exp tot rpl * average assembly time
+	~	Hour/Month
+	~	    The potential time spent on proactive service when steady
+		         state is achieved.
+	|
+
+pro overtime percent = 0
+	~	Dmnl
+	~	    The acceptable amount of overtime for proactive service. 
+		         Entered as a percent.
+	|
+
+pro phase in time = 4
+	~	Month
+	~	    The time over which proactive replacement is phased in. 
+		        Used only when the 
+		IMPLEMENT TABLE is not flat
+		         at 1.
+	|
+
+pro start time = 3
+	~	Month
+	~	     The time at which the proactive replacemnt of parts
+		        begins.
+	|
+
+proactive replacements  = ACTIVE INITIAL(
+                 IF THEN ELSE(avail pro capacity / average assembly time
+                   > ind proactive rpl,ind proactive rpl,avail pro capacity
+/average assembly time),
+                  0)
+	~	Part/Month
+	~	     The number of parts replaced proactively.
+	|
+
+proactive service time  = proactive replacements*average assembly time
+	~	Hour/Month
+	~	     The amount of time spent in the proactive replacement
+		         of parts.
+	|
+
+reactive replacements  = failures
+	~	Part/Month
+	~	     The number of parts replaced.
+	|
+
+reactive service time  = reactive replacements *(average assembly time+
+              average diagnostic time)
+	~	Hour/Month
+	~	     The amount of time spent in the diagnosis and replacement
+		        of failed parts.
+	|
+
+SAVEPER  = 0.125
+	~	Month
+	~	      The frequency with which output is stored.
+	|
+
+time adj labor = 24
+	~	Month
+	~	     The time required to adjust the labor force.
+	|
+
+TIME STEP  = 0.125
+	~	Month
+	~	      The time step for the simulation.
+	|
+
+total parts = Good Parts + Failing Parts
+	~	Part
+	~	     The total number of parts in the system.
+	~	:SUPPLEMENTARY 
+	|
+
+total replacements = reactive replacements + proactive replacements
+	~	Part/Month
+	~	    The total number of parts being replaced.
+	|
+
+variable cost =  Labor*wage* lab hours per month + 
+              MAX(0,labor utilization-1)*Labor*lab hours per month*overtime wage
+ +
+                  MAX(0,total replacements- max accept rpl)*excess rpl penalty
+	~	$/Month
+	~	    The variable cost of providing service.  Use in the
+		        determination of the best rollout time and
+		         overtime policies.
+	~	:SUPPLEMENTARY 
+	|
+
+wage = 10
+	~	$/Hour
+	~	    The base wage rate in the model.
+	|
+
+\\\---/// Sketch information - do not modify anything except names
+V300  Do not put anything below this section - it will be ignored
+*parts failure process
+$192-192-192,0,Vensim Sans|12||0-0-0|64-64-64|128-128-128|-1--1--1|-1--1--1|96,96,100,0
+12,1,0,374,222,105,12,0,4,0,48,0,0,0,0,-1--1--1,0-0-0,Arial||I|255-0-0,0,0,0,0,0,0
+The parts failure process
+10,2,Good Parts,645,533,47,21,3,3,0,17,0,1,0,0,0-0-0,0-0-0,||B|255-0-0,0,0,0,0,0,0
+10,3,Failing Parts,714,352,49,23,3,3,0,17,0,1,0,0,0-0-0,0-0-0,||B|255-0-0,0,0,0,0,0,0
+10,4,failures,591,377,75,30,0,3,0,0,0,1,0,0,0,0,0,0,0,0
+10,5,Total Age Of Failing Parts,326,333,68,24,3,131,0,17,0,1,0,0,0-0-0,0-0-0,||B|255-0-0,0,0,0,0,0,0
+10,6,avg age failing parts,503,336,75,30,0,3,0,0,0,1,0,0,0,0,0,0,0,0
+10,7,aging parts,719,408,75,30,0,3,0,0,0,1,0,0,0,0,0,0,0,0
+10,8,INIT GOOD PARTS,-65,490,75,30,0,2,1,1,0,0,0,0,0-0-0,0-0-0,||B|255-0-0,0,0,0,0,0,0
+10,9,AVG PART LIFE,-35,365,75,30,0,2,1,1,0,0,0,0,0-0-0,0-0-0,||B|255-0-0,0,0,0,0,0,0
+10,10,reactive replacements,565,440,75,30,0,3,0,0,0,1,0,0,0,0,0,0,0,0
+10,11,NEW EQUIPMENT PARTS,-31,525,75,30,0,2,1,1,0,0,0,0,0-0-0,0-0-0,||B|255-0-0,0,0,0,0,0,0
+10,12,INIT FAILING PARTS,209,636,75,30,0,2,1,1,0,0,0,0,0-0-0,0-0-0,||B|255-0-0,0,0,0,0,0,0
+10,13,proactive replacements,106,334,75,30,0,2,0,0,0,1,0,0,0,0,0,0,0,0
+10,14,NORM FAIL TIME,275,454,75,30,0,2,1,1,0,0,0,0,0-0-0,0-0-0,||B|255-0-0,0,0,0,0,0,0
+10,15,norm err generation,274,378,75,30,0,2,1,1,0,0,0,0,0-0-0,0-0-0,||B|255-0-0,0,0,0,0,0,0
+10,16,NORM FAIL TIME,63,304,75,30,0,2,1,1,0,0,0,0,0-0-0,0-0-0,||B|255-0-0,0,0,0,0,0,0
+10,17,eff age fail,454,386,75,30,0,3,0,2,-1,1,0,0,-1--1--1,-1--1--1,||B|64-128-128,0,0,0,0,0,0
+1,18,3,4,1,0,0,0,0,0,0,-1--1--1,,1|(627,356)|
+1,19,5,6,1,0,0,0,0,0,0,-1--1--1,,1|(417,274)|
+1,20,3,6,1,0,0,0,0,0,0,-1--1--1,,1|(570,312)|
+1,21,6,4,1,0,0,0,0,0,0,-1--1--1,,1|(549,362)|
+1,22,6,5,1,0,0,0,0,0,0,-1--1--1,,1|(417,373)|
+1,23,4,3,1,0,0,0,0,0,0,-1--1--1,,1|(618,394)|
+1,24,7,2,1,0,0,0,0,0,0,-1--1--1,,1|(663,462)|
+1,25,8,2,0,1,0,0,0,0,1,-1--1--1,,1|(0,0)|
+1,26,13,2,1,0,0,0,0,0,0,-1--1--1,,1|(354,484)|
+1,27,10,2,1,0,0,0,0,0,0,-1--1--1,,1|(585,477)|
+1,28,7,3,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,29,12,3,0,1,0,0,0,0,1,-1--1--1,,1|(0,0)|
+1,30,13,3,1,0,0,0,0,0,0,-1--1--1,,1|(427,250)|
+1,31,14,4,0,1,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,32,3,5,1,1,0,0,0,0,0,-1--1--1,,1|(443,493)|
+1,33,16,5,0,1,0,0,0,0,1,-1--1--1,,1|(0,0)|
+1,34,4,10,1,0,0,0,0,0,0,-1--1--1,,1|(570,401)|
+1,35,13,5,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,36,9,7,0,1,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,37,2,7,1,0,0,0,0,0,0,-1--1--1,,1|(717,461)|
+1,38,11,2,0,1,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,39,17,4,1,0,0,0,0,0,0,-1--1--1,,1|(505,380)|
+1,40,4,5,1,0,0,0,0,64,0,-1--1--1,,1|(399,400)|
+12,41,0,590,132,80,40,8,7,0,0,-1,1,0,0,0,0,0,0,0,0
+MAIN 1 MODEL
+\\\---/// Sketch information - do not modify anything except names
+V300  Do not put anything below this section - it will be ignored
+*traditional reactive
+$192-192-192,0,Vensim Sans|12||0-0-0|64-64-64|128-128-128|-1--1--1|-1--1--1|96,96,100,0
+12,1,0,239,45,119,12,0,4,0,49,0,0,0,0,0-0-0,0-0-0,Arial||I|255-0-0,0,0,0,0,0,0
+Traditional Reactive Service
+10,2,failures,137,108,75,30,0,2,0,0,0,1,0,0,0,0,0,0,0,0
+10,3,reactive replacements,323,108,75,30,0,3,0,0,0,1,0,0,0,0,0,0,0,0
+10,4,reactive service time,381,167,75,30,0,3,0,0,0,1,0,0,0,0,0,0,0,0
+10,5,average diagnostic time,172,137,75,30,0,3,0,2,0,1,0,0,-1--1--1,-1--1--1,|||64-128-128,0,0,0,0,0,0
+10,6,average assembly time,165,193,75,30,0,3,0,2,0,1,0,0,-1--1--1,-1--1--1,|||64-128-128,0,0,0,0,0,0
+1,7,2,3,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,8,5,4,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,9,6,4,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,10,3,4,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+\\\---/// Sketch information - do not modify anything except names
+V300  Do not put anything below this section - it will be ignored
+*proactive service strategy
+$192-192-192,0,Vensim Sans|14||0-0-0|64-64-64|128-128-128|-1--1--1|-1--1--1|96,96,100,0
+12,1,0,535,21,113,12,0,4,0,48,0,0,0,0,-1--1--1,0-0-0,Arial||I|255-0-0,0,0,0,0,0,0
+Proactive Service Strategy
+10,2,proactive replacements,843,253,75,30,0,3,0,0,0,1,0,0,0,0,0,0,0,0
+10,3,avg soft faults,448,221,75,30,0,3,0,0,0,1,0,0,0,0,0,0,0,0
+10,4,Failing Parts,305,281,75,30,0,2,0,0,0,1,0,0,0,0,0,0,0,0
+10,5,norm err generation,-259,73,75,30,0,2,1,1,0,0,0,0,0-0-0,0-0-0,||B|255-0-0,0,0,0,0,0,0
+10,6,ind proactive rpl,636,219,75,30,0,3,0,0,0,1,0,0,0,0,0,0,0,0
+10,7,average assembly time,829,175,75,30,0,3,0,2,0,1,0,0,-1--1--1,-1--1--1,||B|64-128-128,0,0,0,0,0,0
+10,8,pro start time,-16,61,75,30,0,2,1,1,0,0,0,0,0-0-0,0-0-0,||B|255-0-0,0,0,0,0,0,0
+10,9,avail pro capacity,639,287,75,30,0,2,0,0,0,1,0,0,0,0,0,0,0,0
+10,10,Time,-93,24,75,30,0,2,1,1,0,0,0,0,0-0-0,0-0-0,||B|255-0-0,0,0,0,0,0,0
+10,11,plan pro rpl time,441,59,75,30,0,3,0,2,0,1,0,0,-1--1--1,-1--1--1,|||64-128-128,0,0,0,0,0,0
+10,12,pro start time,453,115,75,30,0,3,0,2,0,1,0,0,-1--1--1,-1--1--1,|||64-128-128,0,0,0,0,0,0
+10,13,Time,-315,116,75,30,0,2,1,1,0,0,0,0,0-0-0,0-0-0,||B|255-0-0,0,0,0,0,0,0
+10,14,pro phase in time,435,84,75,30,0,3,0,2,0,1,0,0,-1--1--1,-1--1--1,|||64-128-128,0,0,0,0,0,0
+10,15,eff error proactive rpl,424,143,75,30,0,3,0,2,-1,1,0,0,-1--1--1,-1--1--1,|||64-128-128,0,0,0,0,0,0
+10,16,implement table,440,172,75,30,0,3,0,2,-1,1,0,0,-1--1--1,-1--1--1,|||64-128-128,0,0,0,0,0,0
+1,17,6,2,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,18,7,2,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,19,9,2,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,20,13,6,0,1,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,21,12,6,1,0,0,0,0,0,0,-1--1--1,,1|(533,141)|
+1,22,11,6,1,0,0,0,0,0,0,-1--1--1,,1|(540,85)|
+1,23,5,6,0,1,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,24,4,6,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,25,3,6,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,26,14,6,1,0,0,0,0,0,0,-1--1--1,,1|(527,107)|
+1,27,15,6,1,0,0,0,0,0,0,-1--1--1,,1|(520,163)|
+1,28,16,6,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+10,29,avg age failing parts,120,220,75,30,0,2,0,0,-1,1,0,0,0,0,0,0,0,0
+10,30,eff age failure,168,173,75,30,0,3,0,0,-1,1,0,0,0,0,0,0,0,0
+10,31,norm err generation,140,143,75,30,0,3,0,0,-1,1,0,0,0,0,0,0,0,0
+10,32,normal age of failing parts,115,101,75,30,0,3,0,0,-1,1,0,0,0,0,0,0,0,0
+\\\---/// Sketch information - do not modify anything except names
+V300  Do not put anything below this section - it will be ignored
+*workforce determination
+$192-192-192,0,Vensim Sans|12||0-0-0|128-128-128|-1--1--1|-1--1--1|-1--1--1|96,96,100,0
+12,1,0,516,21,107,12,0,4,0,56,0,0,0,0,-1--1--1,0-0-0,Arial|14|I|255-0-0,0,0,0,0,0,0
+Workforce Determination
+10,2,ind proactive service time,312,193,75,30,0,3,0,0,0,1,0,0,0,0,0,0,0,0
+10,3,reactive service time,432,229,75,30,0,2,0,0,0,1,0,0,0,0,0,0,0,0
+10,4,ind total service time,539,163,75,30,0,3,0,0,0,1,0,0,0,0,0,0,0,0
+10,5,lab hours per month,671,77,75,30,0,3,0,2,0,1,0,0,-1--1--1,-1--1--1,|||64-128-128,0,0,0,0,0,0
+10,6,indicated labor,711,135,75,30,0,3,0,0,0,1,0,0,0,0,0,0,0,0
+10,7,Labor,892,205,39,17,3,3,0,17,0,1,0,0,0-0-0,0-0-0,||B|255-0-0,0,0,0,0,0,0
+10,8,hiring,1008,184,75,30,0,3,0,0,0,1,0,0,0,0,0,0,0,0
+10,9,attrition,895,299,75,30,0,3,0,0,0,1,0,0,0,0,0,0,0,0
+10,10,indicated net hiring,894,129,75,30,0,3,0,0,0,1,0,0,0,0,0,0,0,0
+10,11,avg labor tenancy,758,296,75,30,0,3,0,2,0,1,0,0,-1--1--1,-1--1--1,|||64-128-128,0,0,0,0,0,0
+10,12,time adj labor,832,81,75,30,0,3,0,2,0,1,0,0,-1--1--1,-1--1--1,|||64-128-128,0,0,0,0,0,0
+10,13,pot pro service time,540,109,75,30,0,3,0,0,0,1,0,0,0,0,0,0,0,0
+10,14,average assembly time,223,129,75,30,0,3,0,2,0,1,0,0,-1--1--1,-1--1--1,||B|64-128-128,0,0,0,0,0,0
+10,15,exp tot rpl,330,101,75,30,0,3,0,0,0,1,0,0,0,0,0,0,0,0
+10,16,antic labor hiring,668,195,75,30,0,3,0,2,0,1,0,0,-1--1--1,-1--1--1,|||64-128-128,0,0,0,0,0,0
+10,17,pro start time,427,41,75,30,0,2,1,1,0,0,0,0,0-0-0,0-0-0,||B|255-0-0,0,0,0,0,0,0
+10,18,Time,440,119,75,30,0,2,1,1,0,0,0,0,0-0-0,0-0-0,||B|255-0-0,0,0,0,0,0,0
+1,19,3,4,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,20,4,6,1,0,0,0,0,0,0,-1--1--1,,1|(623,140)|
+1,21,8,7,1,0,0,0,0,0,0,-1--1--1,,1|(972,199)|
+1,22,9,7,1,0,0,0,2,0,0,-1--1--1,|||0-0-0,1|(874,264)|
+1,23,7,9,1,0,0,0,0,0,0,-1--1--1,,1|(906,241)|
+1,24,6,10,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,25,7,10,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,26,10,8,1,0,0,0,0,0,0,-1--1--1,,1|(974,161)|
+1,27,9,8,1,0,0,0,0,0,0,-1--1--1,,1|(990,236)|
+1,28,5,6,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,29,6,7,0,0,0,0,0,0,1,-1--1--1,,1|(0,0)|
+1,30,11,9,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,31,12,10,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,32,14,13,1,0,0,0,0,0,0,-1--1--1,,1|(440,124)|
+1,33,15,13,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,34,13,6,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,35,16,6,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,36,17,6,0,1,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,37,18,6,0,1,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,38,2,4,1,0,0,0,0,0,0,-1--1--1,,1|(420,168)|
+10,39,aging parts,162,100,75,30,0,2,0,2,-1,1,0,0,-1--1--1,-1--1--1,|||128-128-128,0,0,0,0,0,0
+1,40,39,15,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,41,14,2,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+10,42,ind proactive rpl,90,192,75,30,0,2,0,2,-1,1,0,0,-1--1--1,-1--1--1,|||128-128-128,0,0,0,0,0,0
+1,43,42,2,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+\\\---/// Sketch information - do not modify anything except names
+V300  Do not put anything below this section - it will be ignored
+*Proactive Capacity
+$192-192-192,0,Vensim Sans|12||0-0-0|64-64-64|128-128-128|-1--1--1|-1--1--1|96,96,100,0
+12,1,0,291,19,81,12,0,4,0,48,0,0,0,0,-1--1--1,0-0-0,Arial||I|255-0-0,0,0,0,0,0,0
+Proactive Capacity
+10,2,avail pro capacity,535,127,75,30,0,3,0,0,0,1,0,0,0,0,0,0,0,0
+10,3,Labor,516,64,75,30,0,2,0,0,0,1,0,0,0,0,0,0,0,0
+10,4,reactive service time,360,195,75,30,0,2,0,0,0,1,0,0,0,0,0,0,0,0
+10,5,lab hours per month,339,141,75,30,0,3,0,0,0,1,0,0,0,0,0,0,0,0
+10,6,accept pro overtime,328,97,75,30,0,3,0,0,0,1,0,0,0,0,0,0,0,0
+1,7,3,2,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,8,4,2,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,9,5,2,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,10,6,2,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+10,11,pro overtime percent,92,96,75,30,0,3,0,0,-1,1,0,0,0,0,0,0,0,0
+1,12,11,6,0,0,0,0,0,0,1,-1--1--1,,1|(0,0)|
+\\\---/// Sketch information - do not modify anything except names
+V300  Do not put anything below this section - it will be ignored
+*variable cost
+$192-192-192,0,Vensim Sans|12||0-0-0|64-64-64|128-128-128|-1--1--1|-1--1--1|96,96,100,0
+10,1,variable cost,577,276,75,30,0,3,0,0,0,1,0,0,0,0,0,0,0,0
+10,2,max accept rpl,245,457,75,30,0,3,0,2,0,1,0,0,-1--1--1,-1--1--1,|||64-128-128,0,0,0,0,0,0
+10,3,wage,284,488,75,30,0,3,0,2,0,1,0,0,-1--1--1,-1--1--1,|||64-128-128,0,0,0,0,0,0
+10,4,overtime wage,257,523,75,30,0,3,0,2,0,1,0,0,-1--1--1,-1--1--1,|||64-128-128,0,0,0,0,0,0
+10,5,Labor,191,339,75,30,0,2,0,0,0,1,0,0,0,0,0,0,0,0
+10,6,total replacements,229,368,75,30,0,2,0,0,0,1,0,0,0,0,0,0,0,0
+10,7,excess rpl penalty,233,419,75,30,0,3,0,2,0,1,0,0,-1--1--1,-1--1--1,|||64-128-128,0,0,0,0,0,0
+10,8,labor utilization,365,273,75,30,0,3,0,0,0,1,0,0,0,0,0,0,0,0
+10,9,lab hours per month,332,201,75,30,0,3,0,2,0,1,0,0,-1--1--1,-1--1--1,|||64-128-128,0,0,0,0,0,0
+1,10,5,1,1,0,0,0,0,0,0,-1--1--1,,1|(361,320)|
+1,11,6,1,1,0,0,0,0,0,0,-1--1--1,,1|(368,356)|
+1,12,4,1,1,0,0,0,0,0,0,-1--1--1,,1|(380,496)|
+1,13,3,1,1,0,0,0,0,0,0,-1--1--1,,1|(384,459)|
+1,14,2,1,1,0,0,0,0,0,0,-1--1--1,,1|(385,427)|
+1,15,7,1,1,0,0,0,0,0,0,-1--1--1,,1|(383,385)|
+1,16,8,1,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,17,9,1,1,0,0,0,0,0,0,-1--1--1,,1|(443,227)|
+1,18,9,8,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,19,5,8,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+10,20,proactive service time,108,284,75,30,0,2,0,0,-1,1,0,0,0,0,0,0,0,0
+1,21,20,8,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+10,22,reactive service time,156,229,75,30,0,2,0,0,-1,1,0,0,0,0,0,0,0,0
+1,23,22,8,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+12,24,0,317,97,80,40,8,7,0,0,-1,1,0,0,0,0,0,0,0,0
+Variable Cost
+///---\\\
+:GRAPH WIP_DISPLAY
+:TITLE Parts replacements and workforce
+:WIP
+:X-MIN 0
+:X-MAX 24
+:SCALE
+:VAR LABOR
+:Y-MIN 0
+:Y-MAX 100
+:DATASET 
+:SCALE
+:VAR LABOR UTILIZATION
+:Y-MIN 0
+:Y-MAX 2
+:DATASET 
+:SCALE
+:VAR TOTAL replacements
+:DATASET 
+:VAR proactive replacements
+:DATASET 
+:VAR reactive replacements
+:Y-MIN 0
+:Y-MAX 10000
+:DATASET 
+
+:REPORT TXT1
+:TITLE TXT1
+:FONT Times New Roman|10||0-0-0
+You may need to use the scroll bars to the side and on
+the bottom to see all of the information contained
+in this window.
+
+This software is intended to help explore issues in the introduction
+of pro-active equipment maintenance.  It is applicable to any situation
+in which you are moving from a reactive - fix things that are broken 
+maintenance strategy to a pro-active - fix things that have indications
+they may break strategy.
+
+The model used here is a simplification of a model that was used in
+consulting work to help in this area.  It included sufficient
+detail to help manage parts availability and labor utilization, two
+important aspects of the transition.  The application you are using
+allows you to explore the consequences of different roll-out, hiring 
+and overtime strategies.
+
+This application is menu driven.  Each time you take an action, new
+information will appear on the screen including a menu of choices 
+or, as for this screen, a message that you can hit any key.  When
+you are being asked to enter information, additional instructions
+may appear in a small window on the bottom of the screen.  If you 
+wish to read these instructions use the scroll bar at the right to
+scroll through the text.
+
+:END-OF-REPORT
+
+:REPORT COMM1
+:TITLE COMM1
+:FONT Times New Roman|10||0-0-0
+The software allows you to explore a model through a number of menus
+and output screens.  To select a menu item you can click on it, type the
+first letter in the menu description, or select it using the up and down
+arrow keys and then press the Enter key.  The selected menu item appears 
+highlighted - usually black on white.  
+
+Additional functionality available in the software is described in 
+places where it can be used.  To conserve space, later commentaries
+will be kept small, and you will need to scroll them to read all the
+information they contain.
+:END-OF-REPORT
+
+:REPORT COMM2
+:TITLE COMM2
+:FONT Times New Roman|10||0-0-0
+Anything you type will appear in the editing boxes.  Use the 
+Tab key or mouse to move between editing boxes.  Hold down the
+Alt key and press the letter for the command you desire,
+or use the mouse to select the command.
+
+You can change any constants or lookup tables in the model.
+Important constants are shown on this screen.  All others
+can be accessed using the L and C commands for Lookups and
+Constants respectively.
+
+When you type Alt+R your scenario will be run using the changes you 
+have entered.  While the scenario runs, you will see a graph showing
+some of the key indicators of performance.  After the simulation has
+completed, you can print the graph by pressing P or go on to do 
+analysis on the scenario you have just run relative to other scenarios.
+:END-OF-REPORT
+
+:REPORT COMM3
+:TITLE COMM3
+:FONT Times New Roman|10||0-0-0
+You can do analysis of the model by first loading in scenarios of 
+interest, and then reviewing the output or doing causal tracing.  
+The Load and reorder command will put up a small window with two lists.  
+On the left is a list of loaded scenarios, on the right a list of 
+scenarios that have been run.  The << button loads scenarios.  Click 
+on the scenario you want to load in the right hand list, and then 
+click the << button.  The >> button unloads scenarios.  Click on the 
+scenario you want to unload in the left hand list, and then click on 
+the >> button.
+
+You can load up to 8 scenarios at a time, but it is difficult to read
+graphs with more than 4 scenarios loaded.
+
+If the list on the right is empty, you will need to run some 
+scenarios.  Exit back to the Main Menu and do this.  You can run
+one of the four standard scenarios, or make any variations on
+these scenarios you wish.
+
+Causal tracing is a process the allows you to determine the underlying
+causes of behavior, and differences in behavior between different
+scenarios.  There are two options available for doing causal tracing.
+The first uses tree diagrams and single graphs.  The second uses
+equations and multiple graphs.  You can also trace the uses of a 
+variable (backwards from causes).  Try the different alternatives to
+see which you prefer.
+:END-OF-REPORT
+
+:REPORT COMM4
+:TITLE COMM4
+:FONT Times New Roman|10||0-0-0
+The cause and use screens show lists of
+different variables.  The graphs allow
+you to compare different scenarios.
+The trees allow you to investigate the
+structure of the model.
+
+You can double click on a variable name
+in the graphs, trees or documentation to
+view the same analysis screen for that
+variable.  You can also use the S
+command to Select a new working variable.
+
+You can Print the contents of the graphs
+and trees using the P command.  Output
+will be directed to your default printer.
+
+During causal tracing you can switch
+between the Tree and Graph represent-
+ations of causes.  This can be
+useful as means of understanding both
+structure and behavior.
+
+You can also switch between causes
+and uses.  When looking at causes 
+hit U to see Uses, then C to see Causes
+again.
+:END-OF-REPORT
+
+:REPORT COMM5
+:TITLE COMM5
+:FONT Times New Roman|10||0-0-0
+Use the Tab key or mouse to move between the number entry positions.
+When you see the bar | cursor you can type in a new number. To 
+change the lookup tables relating different inputs and outputs
+click on the small graph for the lookup you want to change, or
+use the Tab key to highlight the graph, and press the space bar.
+You will be able to modify the lookup table graphically by
+dragging points around, or typing in new XY pairs.
+
+You will need to hold down the Alt key or use the mouse to
+select menu items.
+
+Changes you make to tables are recorded when you click OK on the table
+changing window.  Changes you make to constants are recorded when you
+select the Record (R) command.  You can Exit without recording changes
+you make with the E command.
+:END-OF-REPORT
+
+:REPORT OV_FAIL
+:TITLE OV_FAIL
+:FONT Times New Roman|10||0-0-0
+The failure process is a very simple representation that seems to have
+empirical validity for a variety of electro-mechanical devices.  Parts
+are installed as good parts and operate with little or no problem for
+some time.  After a certain time, parts enter a class called "failing
+parts".  These are parts that are prone to failure, and will degrade 
+relatively rapidly over time.  
+
+The degradation of failing parts over time is key to the effectiveness
+of pro-active maintenance.  "Soft faults" generated by the failing parts
+are used as an indication that service is required.  By monitoring and
+responding to soft faults, a failing part can be replaced before it 
+actually fails.
+
+The total age of failing parts is important because it increases both the
+failure rate of parts, and their soft fault generation rate.  The final
+effect of pro-active service is to get failing parts out faster, reducing
+both the failure rate, and the soft fault generation rate.
+
+There are, of course, a number of difficulties in detecting and responding
+to soft faults.  First, good parts may generate soft faults at a low 
+intensity, forcing a tradeoff between replacing aggressively, and not 
+replacing parts that are not broken.  Second, good parts may fail 
+spontaneously without any warning at all.  Both of these are abstracted 
+from in the simplified model used here.
+:END-OF-REPORT
+
+:REPORT OV_REACT
+:TITLE OV_REACT
+:FONT Times New Roman|10||0-0-0
+The traditional reactive service is very straightforward.  You wait until 
+something fails, then you replace.  In this setup, time is spent 
+pinpointing the part that failed - which can be hard since the whole 
+system is often down - and then replacing the part.  
+
+The simple model used here assumes that the workforce is put on overtime as
+much as necessary to replace the failing parts.  The long term effects of
+overtime, such as worker burnout, are not dealt with here.
+:END-OF-REPORT
+
+:REPORT OV_PRO
+:TITLE OV_PRO
+:FONT Times New Roman|10||0-0-0
+In pro-active servicing you do not wait for parts to fail, but monitor
+the "soft faults" generated by the parts.  Since this is done before 
+outright failure, it is normally easy to associate a fault with a 
+particular part.  This means that pro-active service requires little 
+or no diagnosis be done.
+
+Pro-active replacements are made on the basis of the indicated 
+pro-active replacements (ind pro-active rpl) and the capacity to 
+do the replacements.  Capacity determination is discussed in the
+screen on pro-active capacity.  The indicated replacements are based
+on the average number of soft faults, and the intensity with which
+the pro-active replacements will be made (PLAN PRO RPL TIME).
+
+Note that the whole process of pro-active replacement does not start
+up until PRO START TIME, prior to that the process is one of 
+reactive replacement only.
+:END-OF-REPORT
+
+:REPORT OV_WORK
+:TITLE OV_WORK
+:FONT Times New Roman|10||0-0-0
+In the reactive replacement world labor is hired to meet ongoing
+requirements, or allowed to attrit away.  Once the pro-active 
+replacement program is started there are two possibilities (which 
+can be switched between using the policy switch ANTIC LABOR HIRING)
+The first is the same as for reactive replacements, i.e. hiring is based
+on perceived demand for labor.  The second is that the labor force
+is targeted to its equilibrium size under pro-active replacement
+(which is smaller).
+
+Note that decreases in the labor force only occur through attrition.
+Layoffs are not considered in this model.
+:END-OF-REPORT
+
+:REPORT OV_CAP
+:TITLE OV_CAP
+:FONT Times New Roman|10||0-0-0
+Pro-active capacity is determined as the amount of working time left
+over after necessary repairs are made.  The important policy lever
+ACCEPT PRO OVERTIME determines how much overtime is acceptable to
+perform pro-active work.  It turns out that overtime is the only 
+sensible way to bring the pro-active replacement strategy on-line.
+:END-OF-REPORT
+
+:REPORT COMM6
+:TITLE COMM6
+:FONT Times New Roman|10||0-0-0
+In order to run a scenario you need to set up the assumptions you
+want to use.  This is done by first basing your scenario on a
+predefined or previous scenario.  Once you have done this you 
+can change whatever additional assumptions your want to run your
+scenario.
+
+The base scenario assumes that the pro-active replacement technology
+is turned on at month 3.  No overtime is allowed for pro-active 
+replacements, and labor is hired based on the currently indicated
+amount of work.
+
+
+The slowed roll-out scenario is the same as the base scenario, except
+that instead of turning on all the pro-active service technology,
+it is turned on bit by bit.
+
+The anticipatory labor hiring scenario is the same as the base
+scenario, except that labor is hired to meet the expected amount
+of labor required when pro-active servicing is all in place.  This
+is substantially lower then the amount of labor required for
+reactive servicing.
+
+The 20% overtime allowance scenario is the same as the base 
+scenario, except that the workforce will work overtime to 
+do the pro-active servicing.
+
+All of the above scenarios are small, varying one thing at a time
+on the base scenario.  In designing a good policy it
+is, of course, necessary to vary more than one thing.  You can
+choose a previously run scenario as the basis for a new scenario.
+This is particularly useful when you are refining the changes
+you have made.
+:END-OF-REPORT
+
+:REPORT COMM7
+:TITLE COMM7
+:SIZE 50,15
+:FONT Times New Roman|10||0-0-0
+In order to optimize performance over the transition it is
+necessary to define the cost of the transition.  The most obvious
+definition of this is simple the total wages paid - straight time
+plus overtime.  You may, also, however, choose to penalize parts 
+consumption above a certain level.  To do this enter the maximum
+number of parts it is acceptable to replace per month, and the
+penalty to assessed when this maximum is exceeded.
+
+Once you are happy with your choices select optimize to begin
+the optimization process.  
+:END-OF-REPORT
+:L<%^E!@
+4:Time
+5:lab hours per month
+9:Maint
+19:100,5
+24:0
+25:24
+26:24
+11:maint1.voc
+12:maint1.vpd
+23:0
+15:0,0,0,0,0,0
+27:0,
+34:0,
+42:0
+72:0
+73:0
+95:0
+96:0
+97:0
+77:0
+78:0
+102:1
+93:0
+94:0
+92:0
+91:0
+90:0
+87:0
+75:
+43:
+103:8,8,8,3,8
+105:0,0,0,0,0,0,0,0,0,0
+104:Courier|12||0-0-0|0-0-0|-1--1--1|0-0-255|192-192-192|-1--1--1

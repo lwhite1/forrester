@@ -104,4 +104,67 @@ class ModelDefinitionBuilderTest {
         List<String> errors = DefinitionValidator.validate(sir);
         assertThat(errors.isEmpty()).as("SIR model should validate: " + errors).isTrue();
     }
+
+    @Test
+    void shouldClearLookupTables() {
+        ModelDefinition def = new ModelDefinitionBuilder()
+                .name("Clear Test")
+                .lookupTable("T1", new double[]{0, 1}, new double[]{0, 1}, "LINEAR")
+                .clearLookupTables()
+                .build();
+        assertThat(def.lookupTables()).isEmpty();
+    }
+
+    @Test
+    void shouldClearModules() {
+        ModelDefinition inner = new ModelDefinitionBuilder().name("Inner").build();
+        ModelDefinition def = new ModelDefinitionBuilder()
+                .name("Clear Modules Test")
+                .module("m1", inner, java.util.Map.of(), java.util.Map.of())
+                .clearModules()
+                .build();
+        assertThat(def.modules()).isEmpty();
+    }
+
+    @Test
+    void shouldClearSubscripts() {
+        ModelDefinition def = new ModelDefinitionBuilder()
+                .name("Clear Subscripts")
+                .subscript("Region", List.of("North", "South"))
+                .clearSubscripts()
+                .build();
+        assertThat(def.subscripts()).isEmpty();
+    }
+
+    @Test
+    void shouldClearCldVariables() {
+        ModelDefinition def = new ModelDefinitionBuilder()
+                .name("Clear CLD")
+                .cldVariable("Population")
+                .clearCldVariables()
+                .build();
+        assertThat(def.cldVariables()).isEmpty();
+    }
+
+    @Test
+    void shouldClearCausalLinks() {
+        ModelDefinition def = new ModelDefinitionBuilder()
+                .name("Clear Links")
+                .cldVariable("A")
+                .cldVariable("B")
+                .causalLink("A", "B", CausalLinkDef.Polarity.POSITIVE)
+                .clearCausalLinks()
+                .build();
+        assertThat(def.causalLinks()).isEmpty();
+    }
+
+    @Test
+    void shouldClearComments() {
+        ModelDefinition def = new ModelDefinitionBuilder()
+                .name("Clear Comments")
+                .comment("note1", "Some text")
+                .clearComments()
+                .build();
+        assertThat(def.comments()).isEmpty();
+    }
 }

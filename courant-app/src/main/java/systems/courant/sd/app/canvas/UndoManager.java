@@ -15,8 +15,11 @@ import java.util.Deque;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 /**
  * Snapshot-based undo/redo manager. Stores LZ4-compressed JSON snapshots
@@ -64,7 +67,6 @@ public class UndoManager implements AutoCloseable {
             this.future = future;
             this.label = label;
             this.rawSnapshot = rawSnapshot;
-            future.thenRun(() -> this.rawSnapshot = null);
         }
 
         CompletableFuture<CompressedData> future() { return future; }
@@ -216,11 +218,33 @@ public class UndoManager implements AutoCloseable {
     }
 
     /**
+     * Pushes a raw entry onto the undo stack. Package-private for testing.
+     */
+    void pushEntry(UndoEntry entry) {
+        undoStack.push(entry);
+        redoStack.clear();
+        if (undoStack.size() > MAX_UNDO) {
+            undoStack.removeLast();
+        }
+    }
+
+    /**
      * Clears both undo and redo stacks.
      */
     public void clear() {
         undoStack.clear();
         redoStack.clear();
+    }
+
+    /**
+     * Discards the most recent undo entry without moving it to the redo stack.
+     * Used when an operation saved undo state but was subsequently rejected
+     * (e.g., a failed flow reconnection).
+     */
+    public void discardLastUndo() {
+        if (!undoStack.isEmpty()) {
+            undoStack.pop();
+        }
     }
 
     /**
@@ -256,15 +280,30 @@ public class UndoManager implements AutoCloseable {
         // avoiding blocking the FX Application Thread
         Snapshot raw = entry.rawSnapshot;
         if (raw != null) {
+            entry.rawSnapshot = null;
             return raw;
         }
         // Prefer non-blocking getNow() to avoid stalling the FX thread.
-        // If the future is not yet complete, fall back to join() which will
-        // only block briefly since rawSnapshot was already nulled (meaning
-        // compression completed or is about to complete).
-        CompressedData data = entry.future().getNow(null);
+        // Fall back to a bounded get() with a 5-second timeout to prevent
+        // indefinite blocking if something goes wrong.
+        CompressedData data;
+        try {
+            data = entry.future().getNow(null);
+        } catch (java.util.concurrent.CompletionException e) {
+            throw new IllegalStateException("Undo compression failed", e.getCause());
+        }
         if (data == null) {
-            data = entry.future().join();
+            try {
+                data = entry.future().get(5, TimeUnit.SECONDS);
+            } catch (TimeoutException e) {
+                throw new IllegalStateException(
+                        "Undo decompression timed out — compression did not complete within 5 seconds", e);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                throw new IllegalStateException("Undo decompression interrupted", e);
+            } catch (ExecutionException e) {
+                throw new IllegalStateException("Undo compression failed", e.getCause());
+            }
         }
         byte[] rawBytes = new byte[data.originalLength()];
         DECOMPRESSOR.decompress(data.data(), 0, rawBytes, 0, data.originalLength());

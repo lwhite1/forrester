@@ -1,0 +1,328 @@
+{UTF-8}
+water per division=
+	 0.001
+	~	ml/Cell
+	~		|
+
+Water= INTEG (
+	 - water consumption,
+		100)
+	~	ml
+	~	  The amount of water in the bowl.
+	|
+
+water consumption=
+	divisions * water per division
+	~	ml/Minute
+	~		|
+
+Sugar= INTEG (
+	-sugar consumption,
+		100)
+	~	g
+	~	The amount of sugar in the bowl.
+	|
+
+sugar consumption=
+	divisions * sugar per division
+	~	g/Minute
+	~		|
+
+sugar per division=
+	 0.001
+	~	g/Cell
+	~		|
+
+average water=
+	 ZIDZ(Water,Yeast Count)
+	~	ml/Cell
+	~	The average amount of water.  Note use of ZIDZ to prevent problems on 0 										\
+		yeast count.
+	|
+
+average lifetime  = norm lifetime*
+              life from temp lookup( temperature/norm temperature) *
+             life from water lookup(average water/norm water) *
+             life from sugar lookup(average sugar/norm sugar)
+	~	Minute
+	~	  The average length of time a yeast survives.
+	|
+
+average sugar = ZIDZ(Sugar,Yeast Count)
+	~	g/Cell
+	~	The average amount of sugar.  Note the use of ZIDZ to prevent problems 										\
+		when Yeast Count is 0.
+	|
+
+division from sugar lookup  ([(0,0)-(1,1)],(0,0),(1,1) )
+	~	Dmnl
+	~		|
+
+life from sugar lookup   ([(0,0)-(1,1)],(0,0.001),(1,1) )
+	~	Dmnl
+	~		|
+
+division from water lookup    ([(0,0)-(1,1)],(0,0),(1,1) )
+	~	Dmnl
+	~		|
+
+division rate  = norm division rate *
+             division from temp lookup( temperature/norm temperature) *
+             division from sugar lookup(average sugar/norm sugar) *
+             division from water lookup(average water/norm water)
+	~	1/Minute
+	~	  The rate at which yeast divide.
+	|
+
+norm water = 0.001
+	~	ml/Cell
+	~	The normal amount of water for a cell.
+	|
+
+norm sugar = 0.001
+	~	g/Cell
+	~	The normal amount of sugar.
+	|
+
+life from water lookup    ([(0,0)-(1,1)],(0,0.001),(1,1) )
+	~	Dmnl
+	~		|
+
+norm lifetime = 250
+	~	Minute
+	~	 The normal lifetime of a cell at normal temperature.
+	|
+
+norm temperature = 80
+	~	degrees farenheit
+	~	 The normal termperature used as a reference to determine division and 										\
+		termination effects.
+	|
+
+division from temp lookup  ([(0,0)-(2,1)],(0,0),(0.8,0),(1,1)
+,(2,1) )
+	~	Dmnl
+	~		|
+
+norm division rate = 0.08
+	~	1/Minute
+	~	 The normal rate of division at normal temperatures
+	|
+
+life from temp lookup  ([(0,0)-(2,1)],(0,1),(1,1),(1.25,0.02)
+,(2,0.001) )
+	~	Dmnl
+	~		|
+
+divisions  = Yeast Count*division rate
+	~	Cell/Minute
+	~		|
+
+FINAL TIME  = 300
+	~	Minute
+	~	  FINAL TIME
+	|
+
+INITIAL TIME  = 0
+	~	Minute
+	~	  The initial time for the simulation.
+	|
+
+SAVEPER  = 1
+	~	Minute
+	~	  The frequency with which output is stored.
+	|
+
+temperature  = 85
+	~	degrees farenheit
+	~	  The temperature of the water in the bowl.
+	|
+
+terminations  = MIN(Yeast Count/TIME STEP,Yeast Count/average lifetime)
+	~	Cell/Minute
+	~	  The rate of termination of yeast.  Using a MIN to prevent silly results on extreme 										\
+		conditions
+		         integration.
+	|
+
+TIME STEP  = 0.5
+	~	Minute
+	~	  The time step for the simulation.
+	|
+
+Yeast Count  = INTEG( divisions-terminations,100)
+	~	Cell
+	~	   The number of yeast.
+	|
+
+********************************************************
+	.Constraints
+********************************************************~
+	|
+
+RC START TIME = 10
+	~	Minute
+	~		~	:SUPPLEMENTARY 
+	|
+
+cold is dormant :THE CONDITION: temperature < 50 :IMPLIES: 
+		divisions = 0
+	~	
+	~		|
+
+hot is dead:THE CONDITION:
+	 temperature = RC STEP(120,1):IMPLIES: Yeast Count <= RC DECAY CHECK(1,Yeast Count,5\
+		)
+	~	
+	~		|
+
+eat or die :THE CONDITION: Sugar = RC STEP(Sugar,0) :AND: temperature > 65 :IMPLIES:
+		Yeast Count <= RC DECAY CHECK(1,Yeast Count,15)
+	~	
+	~		|
+
+drink or die :THE CONDITION: Water = RC STEP(Water,0) :AND: temperature > 65
+		:IMPLIES: Yeast Count <= RC DECAY CHECK(1,Yeast Count,1)
+	~	
+	~		|
+
+big growth :TEST INPUT: divisions = 1e+022
+	~	
+	~		|
+
+hunger from growth :THE CONDITION: big growth :IMPLIES:
+		Sugar <= RC DECAY CHECK(1,Sugar,0.5,INITIAL TIME)
+	~	
+	~		|
+
+thirst from growth :THE CONDITION: big growth :IMPLIES:
+		Water <= RC DECAY CHECK(1,Water,0.5,INITIAL TIME)
+	~	
+	~		|
+
+\\\---/// Sketch information - do not modify anything except names
+V300  Do not put anything below this section - it will be ignored
+*1
+$192-192-192,0,Arial|14||0-0-0|92-92-92|160-160-160|-1--1--1|255-255-255|96,96,100,0
+10,1,Yeast Count,575,225,40,20,3,3,0,16,0,0,0,0,0-0-0,0-0-0,|14|B|0-0-0
+12,2,48,347,225,13,11,0,3,0,0,0,0,0,0
+11,3,48,439,225,7,8,34,3,0,0,1,0,0,0
+10,4,divisions,439,241,39,12,32,3,0,0,0,0,0,0
+12,5,48,797,225,13,11,0,3,0,0,0,0,0,0
+11,6,48,707,225,7,8,34,3,0,0,1,0,0,0
+10,7,terminations,707,243,53,12,32,3,0,0,0,0,0,0
+10,8,division rate,273,225,53,12,0,3,0,0,0,0,0,0
+10,9,average lifetime,881,229,69,12,0,3,0,0,0,0,0,0
+10,10,temperature,580,501,53,12,0,3,0,2,0,0,0,0,0-0-0,0-0-0,|14||64-128-128
+10,11,Sugar,631,101,40,20,3,3,0,16,0,0,0,0,0-0-0,0-0-0,|14|B|0-0-0
+10,12,norm division rate,356,155,76,12,0,3,0,2,0,0,0,0,0-0-0,0-0-0,|14||64-128-128
+10,13,norm temperature,583,528,77,12,0,3,0,2,0,0,0,0,0-0-0,0-0-0,|14||64-128-128
+10,14,norm lifetime,956,171,56,12,0,3,0,2,0,0,0,0,0-0-0,0-0-0,|14||64-128-128
+10,15,Water,629,369,40,20,3,3,0,16,0,0,0,0,0-0-0,0-0-0,|14|B|0-0-0
+10,16,average water,575,289,63,12,0,3,0,0,0,0,0,0
+10,17,norm water,583,443,49,12,0,3,0,2,0,0,0,0,0-0-0,0-0-0,|14||64-128-128
+10,18,norm sugar,581,473,51,12,0,3,0,2,0,0,0,0,0-0-0,0-0-0,|14||64-128-128
+10,19,average sugar,573,161,63,12,0,3,0,0,0,0,0,0
+10,20,TIME STEP,679,191,63,12,0,2,17,3,0,0,0,0,128-128-128,0-0-0,|10||128-128-128
+10,21,division from sugar lookup,132,96,112,12,0,3,0,2,-1,0,0,0,0-0-0,0-0-0,|14||64-128-128
+10,22,division from temp lookup,136,123,109,12,0,3,0,2,-1,0,0,0,0-0-0,0-0-0,|14||64-128-128
+10,23,division from water lookup,137,153,111,12,0,3,0,2,-1,0,0,0,0-0-0,0-0-0,|14||64-128-128
+10,24,life from sugar lookup,772,111,92,12,0,3,0,2,-1,0,0,0,0-0-0,0-0-0,|14||64-128-128
+10,25,life from temp lookup,769,141,89,12,0,3,0,2,-1,0,0,0,0-0-0,0-0-0,|14||64-128-128
+10,26,life from water lookup,775,84,92,12,0,3,0,2,-1,0,0,0,0-0-0,0-0-0,|14||64-128-128
+1,27,3,1,4,0,0,22,0,0,0,-1--1--1,,1|(489,225)|
+1,28,3,2,100,0,0,22,0,0,0,-1--1--1,,1|(396,225)|
+1,29,6,5,4,0,0,22,0,0,0,-1--1--1,,1|(748,225)|
+1,30,6,1,100,0,0,22,0,0,0,-1--1--1,,1|(657,225)|
+1,31,1,4,2,0,0,0,0,0,0,-1--1--1,,1|(488,263)|
+1,32,9,7,1,0,0,0,0,0,0,-1--1--1,,1|(807,253)|
+1,33,1,7,2,0,0,0,0,0,0,-1--1--1,,1|(641,263)|
+1,34,8,4,1,0,0,0,0,0,0,-1--1--1,,1|(363,249)|
+1,35,12,8,0,0,0,0,0,0,0,-1--1--1,,1|(321,184)|
+1,36,13,8,1,0,0,0,0,0,0,-1--1--1,,1|(339,417)|
+1,37,10,8,1,0,0,0,0,0,0,-1--1--1,,1|(335,392)|
+1,38,14,9,0,0,0,0,0,0,0,-1--1--1,,1|(925,193)|
+1,39,13,9,1,0,0,0,0,0,0,-1--1--1,,1|(751,465)|
+1,40,10,9,1,0,0,0,0,0,0,-1--1--1,,1|(740,433)|
+1,41,11,19,0,0,0,0,0,0,0,-1--1--1,,1|(604,128)|
+1,42,17,8,2,0,0,0,0,0,0,-1--1--1,,1|(419,401)|
+1,43,18,8,2,0,0,0,0,0,0,-1--1--1,,1|(411,423)|
+1,44,17,9,1,0,0,0,0,0,0,-1--1--1,,1|(744,400)|
+1,45,18,9,2,0,0,0,0,0,0,-1--1--1,,1|(721,429)|
+1,46,19,8,1,0,0,0,0,0,0,-1--1--1,,1|(415,169)|
+1,47,20,6,1,17,0,0,0,0,0,-1--1--1,,1|(681,196)|
+1,48,21,8,1,0,0,0,0,0,0,-1--1--1,,1|(273,151)|
+1,49,22,8,1,0,0,0,0,0,0,-1--1--1,,1|(244,140)|
+1,50,23,8,1,0,0,0,0,0,0,-1--1--1,,1|(243,169)|
+1,51,24,9,1,0,0,0,0,0,0,-1--1--1,,1|(869,131)|
+1,52,25,9,1,0,0,0,0,0,0,-1--1--1,,1|(863,165)|
+1,53,26,9,1,0,0,0,0,0,0,-1--1--1,,1|(892,132)|
+1,54,1,19,1,0,0,0,0,0,0,-1--1--1,,1|(572,192)|
+1,55,19,9,1,0,0,0,0,0,0,-1--1--1,,1|(747,175)|
+1,56,16,8,1,0,0,0,0,0,0,-1--1--1,,1|(395,279)|
+1,57,16,9,1,0,0,0,0,0,0,-1--1--1,,1|(708,289)|
+1,58,1,16,0,0,0,0,0,0,0,-1--1--1,,1|(575,252)|
+1,59,15,16,0,0,0,0,0,0,0,-1--1--1,,1|(604,332)|
+12,60,48,395,99,13,11,0,3,0,0,-1,0,0,0
+1,61,63,60,4,0,0,22,0,0,0,-1--1--1,,1|(447,101)|
+1,62,63,11,100,0,0,22,32,0,0,-1--1--1,Arial|14||0-0-0,1|(544,101)|
+11,63,48,492,101,7,8,34,3,0,0,1,0,0,0
+10,64,sugar consumption,492,121,81,12,32,3,0,0,-1,0,0,0
+1,65,3,64,2,0,0,0,0,0,0,-1--1--1,,1|(435,173)|
+10,66,sugar per division,564,61,76,12,0,3,0,2,-1,0,0,0,0-0-0,0-0-0,|14||64-128-128
+1,67,66,63,0,0,0,0,0,0,0,-1--1--1,,1|(528,80)|
+12,68,48,419,365,13,11,0,3,0,0,-1,0,0,0
+1,69,71,68,4,0,0,22,0,0,0,-1--1--1,,1|(463,364)|
+1,70,71,15,100,0,0,22,0,0,0,-1--1--1,,1|(548,364)|
+11,71,48,500,364,7,8,34,3,0,0,1,0,0,0
+10,72,water consumption,500,381,81,12,32,3,0,0,-1,0,0,0
+10,73,water per division,587,416,76,12,0,3,0,2,0,0,0,0,0-0-0,0-0-0,|14||64-128-128
+1,74,73,72,0,0,0,0,0,64,0,-1--1--1,,1|(552,401)|
+1,75,4,71,1,0,0,0,0,64,0,-1--1--1,,1|(453,303)|
+\\\---/// Sketch information - do not modify anything except names
+V300  Do not put anything below this section - it will be ignored
+*View 2
+$192-192-192,0,Arial|14||0-0-0|64-64-64|160-160-160|-1--1--1|255-255-255|96,96,100,0
+10,1,cold is dormant,397,155,67,12,0,3,0,2,-1,0,0,0,0-0-0,0-0-0,|10||255-0-0
+10,2,divisions,107,35,49,12,0,2,0,1,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,3,2,1,1,0,0,0,0,0,0,-1--1--1,,1|(228,115)|
+10,4,temperature,96,219,64,12,0,2,0,1,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,5,4,1,0,0,0,0,0,0,0,-1--1--1,,1|(236,188)|
+10,6,drink or die,387,215,49,12,0,3,0,2,-1,0,0,0,0-0-0,0-0-0,|10||255-0-0
+1,7,23,6,0,0,0,0,0,0,0,-1--1--1,,1|(235,176)|
+10,8,Yeast Count,97,173,64,12,0,2,0,1,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,9,8,6,0,0,0,0,0,0,0,-1--1--1,,1|(240,192)|
+10,10,eat or die,381,117,41,12,0,3,0,2,-1,0,0,0,0-0-0,0-0-0,|10||255-0-0
+1,11,19,10,0,0,0,0,0,0,0,-1--1--1,,1|(236,89)|
+1,12,4,10,0,0,0,0,0,0,0,-1--1--1,,1|(228,171)|
+1,13,8,10,0,0,0,0,0,0,0,-1--1--1,,1|(239,144)|
+10,14,hot is dead,387,184,48,12,0,3,0,2,-1,0,0,0,0-0-0,0-0-0,|10||255-0-0
+1,15,4,14,0,0,0,0,0,0,0,-1--1--1,,1|(240,201)|
+1,16,8,14,0,0,0,0,0,0,0,-1--1--1,,1|(240,177)|
+10,17,hunger from growth,409,43,84,12,0,3,0,2,-1,0,0,0,0-0-0,0-0-0,|10||255-0-0
+1,18,25,17,0,0,0,0,0,0,0,-1--1--1,,1|(295,39)|
+10,19,Sugar,113,67,39,12,0,2,0,1,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,20,19,17,0,0,0,0,0,0,0,-1--1--1,,1|(229,57)|
+10,21,thirst from growth,404,83,75,12,0,3,0,2,-1,0,0,0,0-0-0,0-0-0,|10||255-0-0
+1,22,25,21,1,0,0,0,0,0,0,-1--1--1,,1|(299,69)|
+10,23,Water,112,147,39,12,0,2,0,1,-1,0,0,0,128-128-128,0-0-0,|12||128-128-128
+1,24,23,21,1,0,0,0,0,0,0,-1--1--1,,1|(227,107)|
+10,25,big growth,237,37,47,12,0,3,0,2,0,0,0,0,0-0-0,0-0-0,|10||0-0-255
+1,26,2,25,1,0,0,0,0,0,0,-1--1--1,,1|(165,35)|
+1,27,4,6,0,0,0,0,0,0,0,-1--1--1,,1|(239,216)|
+10,28,INITIAL TIME,99,103,69,12,8,2,0,1,-1,0,0,0,128-128-128,0-0-0,|10||128-128-128
+1,29,28,17,1,0,0,0,0,0,0,-1--1--1,,1|(236,67)|
+1,30,28,21,0,0,0,0,0,0,0,-1--1--1,,1|(239,93)|
+///---\\\
+:L<%^E!@
+1:Current.vdf
+9:Current
+15:0,0,0,0,0,0
+19:100,0
+27:0,
+34:0,
+4:Time
+5:division from sugar lookup
+24:0
+25:300
+26:300

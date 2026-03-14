@@ -1,0 +1,7 @@
+:COMMENT 
+:COMMENT This file is used with wfkal.mdl as described in chapter 20.
+:COMMENT It sets up the covariance matrix for the driving noise.
+:COMMENT
+inventory/inventory drive_variance/.1
+workforce/workforce drive variance/.1
+

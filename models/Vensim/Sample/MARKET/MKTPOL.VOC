@@ -1,0 +1,6 @@
+:COMMENT
+:COMMENT  This file is used with market.vmf as described in chapter 19.
+:COMMENT  It sets up the optimization controls for a policy optimization.
+:COMMENT
+0 <= PERCENT_BUDGET_INT_DIR_SALES = 6 <= 50
+

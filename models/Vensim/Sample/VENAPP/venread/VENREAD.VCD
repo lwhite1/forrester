@@ -1,0 +1,452 @@
+
+! Venrun.vcd - free Vensim runtime control engine
+
+:SCREEN WELCOME
+SCREENFONT,Times New Roman|12|B
+COMMAND,"",18,77,20,6,L,,SPECIAL>LOADMODEL|intro.vmf
+SKETCH,"SK1",0,0,100,100,B,,1,
+TEXTONLY,"Vensim",0,5,27,0,R||36|B|0-0-255,
+TEXTONLY,"3.0",30,5,0,0,L||36|B|0-0-255,
+TEXTONLY,"®",28,5,0,0,C||20|B|0-0-255,
+TEXTONLY,"Model Reader",49,5,0,0,L||36|B|0-0-255,
+TEXTONLY,"The Ventana Simulation Environment",0,20,100,0,C|Arial|18|B|255-0-0,
+TEXTONLY,"The Vensim Model Reader software allows you to review, simulate and analyze models",50,28,0,0,C
+TEXTONLY,"developed using the Vensim software.  This software is available free of charge from",50,32,0,0,C
+TEXTONLY,"Ventana Systems, Inc., but is subject to the terms of a license agreement and protected",50,36,0,0,C
+TEXTONLY,"by US and International copyright laws.  The software may be redistributed only in the",50,40,0,0,C
+TEXTONLY,"form of the original installation executable (usually called \"venred16.exe\" or",50,44,0,0,C
+TEXTONLY,"\"venred32.exe\" on the PC and \"Vensim_Reader_Installer\" on the Macintosh).",50,48,0,0,C
+TEXTONLY,"Ventana Systems, Inc.",50,54,0,0,C|Arial|10|B|0-0-255
+TEXTONLY,"60 Jacob Gates Road",50,58,0,0,C|Arial|10|B|0-0-255
+TEXTONLY,"Harvard MA 01451 - USA",50,62,0,0,C|Arial|10|B|0-0-255
+TEXTONLY,"Phone 508 651 0432   Fax 508 650 5422   US Sales 1-800-VENSIM1",50,66,0,0,C|Arial|10|B|0-0-255
+TEXTONLY,"email  vensim@vensim.com    http://www.vensim.com",50,70,0,0,C|Arial|10|B|0-0-255
+
+TEXTONLY,"Software subject to restriction of the license agreement.",0,78,100,0,C||10||128-0-128|,
+TEXTONLY,"Copyright © 1986-1997 Ventana Systems, Inc. ALL RIGHTS RESERVED.",0,82,100,0,C||10||128-0-128|,
+TEXTONLY,"Vensim, Ventan, Causal Tracing and Reality Check are registered trademarks",0,86,100,0,C||10||128-0-128,
+TEXTONLY," of Ventana Systems, Inc.  Vensim is covered by US Patents 5,428,740 and 5,446,652.",0,90,100,0,C||10||128-0-128,
+BUTTON,"Continue",50,94,50,5,C,,,MAIN
+ANYKEY,"",0,0,0,0,0,,,MAIN
+
+:SCREEN MAIN
+COMMAND,"",18,77,20,6,L,,SPECIAL>SETTITLE|*M|Vensim Model Reader - %s
+TEXTONLY,"Vensim 3.0 Model Reader",50,4,0,0,C|Arial|24|B|0-0-255,
+TEXTONLY,"Main Menu",50,18,0,0,C|Times New Roman|22|BU|200-55-0,
+BUTTON,"Load Model",50,32,50,6,C,,SPECIAL>LOADMODEL|?Name of model to load&SPECIAL>SETTITLE|*M|Vensim Model Reader - %s
+BUTTON,"Review Model Structure",50,40,50,6,C,,,STRUCTURE
+BUTTON,"Simulate the Model",50,48,50,6,C,,,SIMULATE
+BUTTON,"Analyze Simulation Results",50,56,50,6,C,,,ANALYSIS
+BUTTON,"Find Out More about Vensim",50,64,50,6,C,,,DEMO1
+BUTTON,"? Help ?",30,80,15,6,L,,SPECIAL>WINHELP|VRHELP.HLP|1100
+BUTTON,"About",70,80,15,6,R,,MENU>ABOUT
+BUTTON,"Exit Model Reader",50,90,40,6,C,Qq,SPECIAL>ASKYESNO|Do you really want to exit?&MENU>EXIT,
+
+
+:SCREEN STRUCTURE
+SKETCH,"SK1",0,0,100,82,S,,1,
+COMMAND,"",18,77,20,6,L,,SPECIAL>SETTITLE|*MV|%s - View:%s
+BUTTON,"Choose a View",5,84,22,6,L,,SKETCH>CHOOSEVIEW|SK1|Choose a view of model structure&SPECIAL>SETTITLE|*MV|%s - View:%s
+BUTTON,"Previous",5,92,10,6,L,,SKETCH>PREVVIEW|SK1&SPECIAL>SETTITLE|*MV|%s - View:%s,
+BUTTON,"Next",17,92,10,6,L,,SKETCH>NEXTVIEW|SK1&SPECIAL>SETTITLE|*MV|%s - View:%s,
+BUTTON,"Zoom (custom)",32,84,18,6,L,,SKETCH>ZOOM|SK1|?Percent to zoom to (10-500),
+BUTTON,"100%",32,92,8,6,L,,SKETCH>ZOOM|SK1|100,
+BUTTON,"Fit",42,92,8,6,L,,SKETCH>ZOOM|SK1|5,
+BUTTON,"Print",56,84,10,6,L,,PRINT>SK1
+BUTTON,"Export",56,92,10,6,L,,EXPORT>SK1
+BUTTON,"? Help ?",73,84,22,6,L,,SPECIAL>WINHELP|VRHELP.HLP|1200
+BUTTON,"Exit to Main Menu",73,92,22,6,L,,,MAIN
+
+
+:SCREEN SIMULATE
+TEXTONLY,"Vensim 3.0 Model Reader",50,4,0,0,C|Arial|24|B|0-0-255,
+TEXTONLY,"Scenario Setup",50,18,0,0,C|Times New Roman|22|BU|200-55-0,
+BUTTON,"New scenario  (build from base scenario)",50,32,50,6,C,Ss,\
+SIMULATE>READRUNCHG&\
+SIMULATE>RUNNAME|?Name for the new scenario,RUNMENU
+BUTTON,"New scenario  (build from changes (.cin) file)",50,42,50,6,C,Ss,\
+SIMULATE>READCIN|?Choose a changes file&\
+SIMULATE>RUNNAME|?Name for the new scenario,RUNMENU
+BUTTON,"Build from an existing scenario",50,52,50,6,C,Ss,\
+SIMULATE>READRUNCHG|?Select scenario for basis&\
+SIMULATE>RUNNAME|?Name for the new scenario,RUNMENU
+BUTTON,"Modify and rerun an existing scenario",50,62,50,6,C,Mm,\
+SIMULATE>RUNNAME|?Select the scenario to work with&SIMULATE>READRUNCHG|!,RUNMENU
+BUTTON,"? Help ?",50,80,40,6,C,,SPECIAL>WINHELP|VRHELP.HLP|1300
+BUTTON,"Exit to Main Menu",50,90,40,6,C,EeXx,,MAIN
+
+:SCREEN RUNMENU
+TEXTONLY,"Vensim 3.0 Model Reader",50,4,0,0,C|Arial|24|B|0-0-255,
+TEXTONLY,"Simulation Setup",50,18,0,0,C|Times New Roman|22|BU|200-55-0,
+BUTTON,"Make changes to model constants",50,32,50,6,C,,SIMULATE>GETCNSTCHG
+BUTTON,"Make changes to model lookup tables",50,42,50,6,C,,SIMULATE>GETTABCHG
+BUTTON,"Save changes made to .cin file",50,52,50,6,C,,SIMULATE>WRITECIN|?Choose a file,
+BUTTON,"Simulate the Model",50,62,50,10,C,,,RUNNING
+BUTTON,"? Help ?",50,80,40,6,C,,SPECIAL>WINHELP|VRHELP.HLP|1400
+BUTTON,"Exit to Main Menu",50,90,40,6,C,,,MAIN
+
+:SCREEN RUNNING
+TEXTONLY,"Simulating - Please Wait",50,20,0,0,C||18|B|255-0-0
+TOOL,"SP1",0,50,100,50,,,ERROR>COMM7
+COMMAND,"",0,0,0,0,,,MENU>RUN
+TEXTONLY,"Press any key to continue",50,45,0,0,C
+ANYKEY,"",0,0,0,0,0,,,ANALYSIS
+
+
+:SCREEN ANALYSIS
+TEXTONLY,"Analysis Control",0,3,100,0,C|Times New Roman|22|BU|200-55-0
+BUTTON,"Select a variable for analysis",50,13,60,5,C,4,SPECIAL>VARSELECT|New variable to use
+BUTTON,"Load, unload, or reorder previous runs",50,20,60,5,C,1,MENU>LOAD_RUN,
+BUTTON,"Change subscript selection",50,27,60,5,C,8,SPECIAL>SUBSCRIPT|?Choose a subscript to control selection on,
+BUTTON,"List differences between the first two loaded runs",50,34,60,5,C,8,,DIFF
+TEXTONLY,"Results",0,43,100,0,C|Times New Roman|18|B|0-0-255
+BUTTON,"Display a predefined graph or report",50,51,60,5,C,,,RESULT
+TEXTONLY,"Causal Tracing™",0,60,100,0,C|Times New Roman|18|B|0-0-255
+BUTTON,"Trace underlying causes using Trees",50,68,60,5,C,5,,CAUSE1
+BUTTON,"Trace underlying causes using Graphs",50,75,60,5,C,6,,CAUSE2
+BUTTON,"Trace the Uses of a variable",50,82,60,5,C,7,,USE
+BUTTON,"? Help ?",20,92,28,5,L,,SPECIAL>WINHELP|VRHELP.HLP|1500
+BUTTON,"Exit to Main Menu",80,92,28,5,R,,,MAIN
+
+
+:SCREEN DIFF
+TEXTONLY,"Constant and table differences between first two loaded scenarios",0,2,100,0,C32
+TOOL,"D1",5,10,90,80,,,WORKBENCH>RUNS COMPARE
+BUTTON,"Print",30,92,20,6,C,Pp,PRINT>D1
+BUTTON,"Analysis Control",70,92,20,6,C,,,ANALYSIS
+ANYKEY,"",0,0,0,0,0,,,ANALYSIS
+
+:SCREEN RESULT
+TOOL,"GR1",2,5,96,80,,,CUSTOM>?Graph to display
+BUTTON,"Select another graph or report",2,90,34,6,L,,CUSTOM>?Other graph|GR1
+!BUTTON,"Modify and Rerun Scenario",75,82,0,6,L,,SIMULATE>READRUNCHG|?Select the scenario to work with,RUNMENU
+BUTTON,"Print",38,90,10,6,L,,PRINT>GR1
+BUTTON,"Copy",50,90,10,6,L,,EXPORT>GR1
+BUTTON,"? Help ?",62,90,12,6,L,,SPECIAL>WINHELP|VRHELP.HLP|1600
+BUTTON,"Analysis Control",76,90,22,6,L,,,ANALYSIS
+
+:SCREEN CAUSE1
+TEXTONLY,"Causal tracing -",0,2,50,0,R
+WBVAR,"",50,2,0,0,L
+TOOL,"TR1",2,6,96,42,,,WORKBENCH>CAUSES TREE
+BUTTON,"Graph based",2,50,40,0,L,Cc,,CAUSE2
+BUTTON,"Definition...",43,50,0,0,L,Cc,WORKBENCH>DOCUMENT,
+BUTTON,"Uses - of current variable",2,57,40,0,L,Cc,,USE
+BUTTON,"Select a new variable to trace",2,64,40,0,L,Ss,SPECIAL>VARSELECT|New variable for tracing
+BUTTON,"? Help ?",2,71,40,0,L,,SPECIAL>WINHELP|VRHELP.HLP|1700
+BUTTON,"Analysis Control",2,78,40,0,L,EeXx,,ANALYSIS
+TOOL,"GR1",60,50,40,50,,,WORKBENCH>GRAPH
+SETWB,"",0,0,0,0,,,,CAUSE1
+
+:SCREEN CAUSE2
+TEXTONLY,"Causal tracing -",2,2,0,0,L
+WBVAR,"",20,2,0,0,L
+TOOL,"TR1",60,0,40,100,,,WORKBENCH>CAUSES STRIP
+BUTTON,"Tree based",2,50,40,0,L,Cc,,CAUSE1
+BUTTON,"Uses - of current variable",2,57,40,0,L,Cc,,USE
+BUTTON,"Select a new variable to trace",2,64,40,0,L,Ss,SPECIAL>SETWBITEM|POPULATION&SPECIAL>VARSELECT|New variable for tracing
+BUTTON,"? Help ?",2,71,40,0,L,,SPECIAL>WINHELP|VRHELP.HLP|1800
+BUTTON,"Analysis Control",2,78,40,0,L,EeXx,,ANALYSIS
+TOOL,"GR1",2,8,58,40,,,WORKBENCH>DOCUMENT
+SETWB,"",0,0,0,0,,,,CAUSE2
+
+
+:SCREEN USE
+TEXTONLY,"Uses of -",0,2,50,0,R
+WBVAR,"",50,2,0,0,L
+TOOL,"TR1",2,6,96,42,,,WORKBENCH>USES TREE
+BUTTON,"Causes - of Current variable",2,50,40,0,L,Cc,,CAUSE1
+BUTTON,"Definition...",43,50,0,0,L,Cc,WORKBENCH>DOCUMENT,
+BUTTON,"Causes - Graph Based",2,57,40,0,L,Cc,,CAUSE2
+BUTTON,"Select a new variable to trace",2,64,40,0,L,Ss,SPECIAL>SETWBITEM|POPULATION&SPECIAL>VARSELECT|New variable for tracing
+BUTTON,"? Help ?",2,71,40,0,L,,SPECIAL>WINHELP|VRHELP.HLP|1900
+BUTTON,"Analysis Control",2,78,40,0,L,EeXx,,ANALYSIS
+TOOL,"GR1",60,50,40,50,,,WORKBENCH>STRIP GRAPH
+SETWB,"",0,0,0,0,,,,USE
+
+
+:SCREEN DEMO1
+COMMAND,"",18,77,20,6,L,,SPECIAL>LOADMODEL|intro.vmf
+TEXTONLY,"Vensim",0,5,100,0,C||28|B|255-0-0,0
+TEXTONLY,"Vensim is a set of tools for:",10,25,100,0,L3,0
+TEXTONLY,"- making models",20,40,100,0,L,0
+TEXTONLY,"- analyzing data",20,50,100,0,L,0
+TEXTONLY,"- understanding models and data",20,60,100,0,L,0
+TEXTONLY,"- optimizing results",20,70,100,0,L,0
+TEXTONLY,"Press any key to continue or Esc to return to the Main Menu",0,95,100,0,C
+TEXTMENU,"",10,78,0,0,L 4,,,MAIN
+ANYKEY,"",10,80,0,0,L 4,,,DEMO2
+
+
+:SCREEN DEMO2
+TEXTONLY,"Vensim's Tools",0,5,100,0,C||28|B|255-0-0,0
+TEXTONLY,"Vensim's tools are accessible in two ways:",10,25,100,0,L3,0
+TEXTONLY,"Venapp (Vensim Application)",20,40,100,0,L,0
+TEXTONLY,"- is model specific",30,45,100,0,L,0
+TEXTONLY,"- features scripted menus",30,50,100,0,L,0
+TEXTONLY,"- this demonstration is a Venapp",30,55,100,0,L,0
+TEXTONLY,"Vensim (Ventana Simulation)",20,65,100,0,L,0
+TEXTONLY,"- is flexible and powerful as a development and analysis environment",30,70,100,0,L,0
+TEXTONLY,"- features a workbench/toolbox metaphor",30,75,100,0,L,0
+TEXTONLY,"- the Vensim Workbench is accessible from the Main Menu",30,80,100,0,L,0
+TEXTONLY,"Press any key to continue or Esc to return to the Main Menu",0,95,100,0,C
+TEXTMENU,"",10,78,0,0,L 4,,,MAIN
+ANYKEY,"",10,80,0,0,L 4,,,DEMO3
+
+:SCREEN DEMO3
+TEXTONLY,"Conceptualization",0,5,100,0,C||28|B|255-0-0,0
+TEXTONLY,"The Sketch tool can help you structure thinking and communication",0,25,100,0,C3,0
+SKETCH,"SK1",15,30,70,40,,,2,
+TEXTONLY,"without forcing you into a specific format ahead of time.",0,71,100,0,C,0
+TEXTONLY,"Press any key to continue or Esc to return to the Main Menu",0,95,100,0,C
+TEXTMENU,"",10,78,0,0,L 4,,,MAIN
+ANYKEY,"",10,80,0,0,L 4,,,DEMO4
+
+:SCREEN DEMO4
+TEXTONLY,"Model Building",0,5,100,0,C||28|B|255-0-0,0
+TEXTONLY,"The Sketch tool allows you to evolve models naturally,",0,15,100,0,C3,0
+SKETCH,"SK1",5,20,90,60,,,3,
+TEXTONLY,"allowing you at the same time to emphasize important structures.",0,81,100,0,C,0
+TEXTONLY,"Press any key to continue or Esc to return to the Main Menu",0,95,100,0,C
+TEXTMENU,"",10,78,0,0,L 4,,,MAIN
+ANYKEY,"",10,80,0,0,L 4,,,DEMO4A
+
+:SCREEN DEMO4A
+TEXTONLY,"Stocks and Flows",0,5,100,0,C||28|B|255-0-0,0
+TEXTONLY,"The Sketch tool also allows stock and flow diagramming,",0,15,100,0,C3,0
+SKETCH,"SK1",5,20,90,60,,,5,
+TEXTONLY,"making it easier to model concrete concepts.",0,81,100,0,C,0
+TEXTONLY,"Press any key to continue or Esc to return to the Main Menu",0,95,100,0,C
+TEXTMENU,"",10,78,0,0,L 4,,,MAIN
+ANYKEY,"",10,80,0,0,L 4,,,DEMO5
+
+:SCREEN DEMO5
+TEXTONLY,"Model Presentation",0,5,100,0,C||28|B|255-0-0,0
+TEXTONLY,"You can display different views of a model for emphasis and explanation.",0,25,100,0,C3,0
+SKETCH,"SK1",10,30,80,50,,,4,
+TEXTONLY,"Vensim maintains consistency among the views automatically.",0,81,100,0,C,0
+TEXTONLY,"Press any key to continue or Esc to return to the Main Menu",0,95,100,0,C
+TEXTMENU,"",10,78,0,0,L 4,,,MAIN
+ANYKEY,"",10,80,0,0,L 4,,,DEMO6
+
+:SCREEN DEMO6
+COMMAND,"",0,0,0,0,,,SPECIAL>SETWBITEM|production
+TEXTONLY,"Equations",0,5,100,0,C||28|B|255-0-0,0
+TEXTONLY,"Equations unambiguously define the relationships among variables.",0,25,100,0,C3,0
+TOOL,"SK1",10,30,80,45,,,WORKBENCH>DOCUMENT
+TEXTONLY,"Vensim uses a simple algebraic language for writing equations,",0,76,100,0,C,0
+TEXTONLY,"and has built-in documentation capabilities.",0,81,100,0,C,0
+TEXTONLY,"Press any key to continue or Esc to return to the Main Menu",0,95,100,0,C
+TEXTMENU,"",10,78,0,0,L 4,,,MAIN
+ANYKEY,"",10,80,0,0,L 4,,,DEMO7
+
+:SCREEN DEMO7
+TEXTONLY,"Equation Writing",0,5,100,0,C||28|B|255-0-0,0
+TEXTONLY,"Equations can be entered in two ways:",10,25,100,0,L3,0
+TEXTONLY,"Using a point and shoot Equation Edit tool",20,40,100,0,L,0
+TEXTONLY,"- allows focus upon one equation at a time",30,45,100,0,L,0
+TEXTONLY,"- can be based upon relationships defined in the sketch",30,50,100,0,L,0
+TEXTONLY,"Using a context sensitive editor",20,55,100,0,L,0
+TEXTONLY,"- allows work on all equations together",30,60,100,0,L,0
+TEXTONLY,"Equations can be entered with or without a sketch being created.",0,80,100,0,C,0
+TEXTONLY,"Modifications to equations are automatically carried over to a sketch.",0,85,100,0,C,0
+TEXTONLY,"Press any key to continue or Esc to return to the Main Menu",0,95,100,0,C
+TEXTMENU,"",10,78,0,0,L 4,,,MAIN
+ANYKEY,"",10,80,0,0,L 4,,,DEMO8
+
+:SCREEN DEMO8
+COMMAND,"",0,0,0,0,,,SPECIAL>CLEARRUNS
+TEXTONLY,"Simulation",0,5,100,0,C||28|B|255-0-0,0
+TEXTONLY,"Based upon sketches, data, and equations, Vensim can simulate",10,25,100,0,L3,0
+TEXTONLY,"a model to determine the logical consequences of the assumptions",10,35,100,0,L3,0
+TEXTONLY,"going into the model.",10,45,100,0,L3,0
+TEXTONLY,"Press any key to continue or Esc to return to the Main Menu",0,95,100,0,C
+TEXTMENU,"",10,78,0,0,L 4,,,MAIN
+ANYKEY,"",10,80,0,0,L 4,,,DEMO9
+
+:SCREEN DEMO9
+TEXTONLY,"Simulation in action",0,5,100,0,C||28|B|255-0-0,0
+WIPTOOL,"GR1",0,15,100,79,,,CUSTOM>WIP1
+TEXTMENU,"",5,95,10,5,L,Ss,SPECIAL>STOPSIM|NOSAVE,DEMO10
+COMMAND,"",0,0,0,0,,,SIMULATE>RUNNAME|current,
+COMMAND,"",0,0,0,0,,,MENU>RUN|O,
+COMMAND,"",0,0,0,0,,,SPECIAL>LOADRUN|current.vdf
+TEXTONLY,"Press any key to continue or Esc to return to the Main Menu (S will stop the simulation)",0,95,100,0,C
+TEXTMENU,"",10,78,0,0,L 4,,,MAIN
+ANYKEY,"",10,80,0,0,L 4,,,DEMO10
+
+
+:SCREEN DEMO10
+TEXTONLY,"Exploration and Analysis",0,5,100,0,C||28|B|255-0-0,0
+TEXTONLY,"Vensim provides a number of tools to explore and analyze",10,25,100,0,L3,0
+TEXTONLY,"the nature of a model and the results of simulations of a model.",10,30,100,0,L3,0
+TEXTONLY,"Some of the most commonly used tools are shown here.",10,35,100,0,L3,0
+TEXTONLY,"Press any key to continue or Esc to return to the Main Menu",0,95,100,0,C
+TEXTMENU,"",10,78,0,0,L 4,,,MAIN
+ANYKEY,"",10,80,0,0,L 4,,,DEMO11
+
+:SCREEN DEMO11
+COMMAND,"",0,0,0,0,,,SPECIAL>SETWBITEM|production
+TEXTONLY,"Causal Trees",0,5,100,0,C||28|B|255-0-0,0
+TEXTONLY,"The Tree Diagram tool show the causes of a variable.",0,25,100,0,C3,0
+TOOL,"SK1",10,30,80,50,,,WORKBENCH>CAUSES TREE,
+TEXTONLY,"The diagram is created from structure, and does not depend upon the sketch.",0,81,100,0,C,0
+TEXTONLY,"Press any key to continue or Esc to return to the Main Menu",0,95,100,0,C
+TEXTMENU,"",10,78,0,0,L 4,,,MAIN
+ANYKEY,"",10,80,0,0,L 4,,,DEMO11A
+
+:SCREEN DEMO11A
+COMMAND,"",0,0,0,0,,,SPECIAL>SETWBITEM|workforce
+TEXTONLY,"Trees Showing Uses",0,5,100,0,C||28|B|255-0-0,0
+TEXTONLY,"The Tree Diagram tool can also show the uses of a variable.",0,25,100,0,C3,0
+TOOL,"SK1",10,30,80,50,,,WORKBENCH>USES TREE,
+TEXTONLY,"The diagram is created from structure, and does not depend upon the sketch.",0,81,100,0,C,0
+TEXTONLY,"Press any key to continue or Esc to return to the Main Menu",0,95,100,0,C
+TEXTMENU,"",10,78,0,0,L 4,,,MAIN
+ANYKEY,"",10,80,0,0,L 4,,,DEMO12
+
+:SCREEN DEMO12
+COMMAND,"",0,0,0,0,,,SPECIAL>SETWBITEM|production
+TEXTONLY,"Causal Graphs",0,5,100,0,C||28|B|255-0-0,0
+TEXTONLY,"The Strip Graph tool shows graphs for a variable and the causes of the variable.",50,15,40,30,C3,0
+TOOL,"SK1",2,15,45,80,,,WORKBENCH>CAUSES STRIP,
+TEXTONLY,"The causes are determined automatically based upon model structure.  Simulation results and data can be shown together on the same graph.",50,61,40,30,C,0
+TEXTONLY,"Press any key to continue or Esc to return to the Main Menu",0,95,100,0,C
+TEXTMENU,"",10,78,0,0,L 4,,,MAIN
+ANYKEY,"",10,80,0,0,L 4,,,DEMO13
+
+:SCREEN DEMO13
+COMMAND,"",0,0,0,0,,,SPECIAL>SETWBITEM|production
+TEXTONLY,"Tables of Causes",0,5,100,0,C||28|B|255-0-0,0
+TEXTONLY,"The Table tool allows you to look at the causes of a variable at each time.",0,25,100,0,C3,0
+TOOL,"SK1",10,30,80,50,,,WORKBENCH>CAUSES TAB,
+TEXTONLY,"The values can be tabled together for different frequencies and for different runs.",0,81,100,0,C,0
+TEXTONLY,"Press any key to continue or Esc to return to the Main Menu",0,95,100,0,C
+TEXTMENU,"",10,78,0,0,L 4,,,MAIN
+ANYKEY,"",10,80,0,0,L 4,,,DEMO13A
+
+:SCREEN DEMO13A
+TEXTONLY,"Causal Tracing",0,5,100,0,C||28|B|255-0-0,0
+TEXTONLY,"You can trace the causes of behavior using causal graphs.",10,25,100,0,L3,0
+TEXTONLY,"This is done by selecting a new variable and calling a new graph.",10,35,100,0,L3,0
+TEXTONLY,"Press any key to continue or Esc to return to the Main Menu",0,95,100,0,C
+TEXTMENU,"",10,78,0,0,L 4,,,MAIN
+ANYKEY,"",10,80,0,0,L 4,,,DEMO13B
+
+:SCREEN DEMO13B
+COMMAND,"",0,0,0,0,,,SPECIAL>SETWBITEM|productivity
+TEXTONLY,"Causal Tracing",0,5,100,0,C||28|B|255-0-0,0
+TEXTONLY,"Productivity is oscillating.",50,15,40,30,C3,0
+TOOL,"SK1",2,15,45,80,,,WORKBENCH>CAUSES STRIP,
+TEXTONLY,"This is caused by oscillating morale.",50,61,40,30,C3,0
+TEXTONLY,"Press any key to continue or Esc to return to the Main Menu",0,95,100,0,C
+TEXTMENU,"",10,78,0,0,L 4,,,MAIN
+ANYKEY,"",10,80,0,0,L 4,,,DEMO13C
+
+:SCREEN DEMO13C
+COMMAND,"",0,0,0,0,,,SPECIAL>SETWBITEM|morale
+TEXTONLY,"Causal Tracing",0,5,100,0,C||28|B|255-0-0,0
+TEXTONLY,"Morale is oscillating.",50,15,40,30,C3,0
+TOOL,"SK1",2,15,45,80,,,WORKBENCH>CAUSES STRIP,
+TEXTONLY,"This is caused by oscillating average overtime.",50,61,40,30,C3,0
+TEXTONLY,"Press any key to continue or Esc to return to the Main Menu",0,95,100,0,C
+TEXTMENU,"",10,78,0,0,L 4,,,MAIN
+ANYKEY,"",10,80,0,0,L 4,,,DEMO13D
+
+:SCREEN DEMO13D
+COMMAND,"",0,0,0,0,,,SPECIAL>SETWBITEM|Average Overtime
+TEXTONLY,"Causal Tracing",0,5,100,0,C||28|B|255-0-0,0
+TEXTONLY,"Average overtime is oscillating.",50,15,40,30,C3,0
+TOOL,"SK1",2,15,45,80,,,WORKBENCH>CAUSES STRIP,
+TEXTONLY,"This is caused by oscillating overtime.",50,61,40,30,C3,0
+TEXTONLY,"Press any key to continue or Esc to return to the Main Menu",0,95,100,0,C
+TEXTMENU,"",10,78,0,0,L 4,,,MAIN
+ANYKEY,"",10,80,0,0,L 4,,,DEMO13E
+
+:SCREEN DEMO13E
+COMMAND,"",0,0,0,0,,,SPECIAL>SETWBITEM|Overtime
+TEXTONLY,"Causal Tracing",0,5,100,0,C||28|B|255-0-0,0
+TEXTONLY,"Overtime is oscillating.",50,15,40,30,C3,0
+TOOL,"SK1",2,15,45,80,,,WORKBENCH>CAUSES STRIP,
+TEXTONLY,"This is caused by oscillating productivity and workforce - the circle is complete.",50,61,40,30,C3,0
+TEXTONLY,"Press any key to continue or Esc to return to the Main Menu",0,95,100,0,C
+TEXTMENU,"",10,78,0,0,L 4,,,MAIN
+ANYKEY,"",10,80,0,0,L 4,,,DEMO13F
+
+:SCREEN DEMO13F
+TEXTONLY,"Causal Tracing",0,5,100,0,C||28|B|255-0-0,0
+TEXTONLY,"After ongoing overtime, morale goes down,",10,25,100,0,L3,0
+TEXTONLY,"causing a decrease in productivity,",10,35,100,0,L3,0
+TEXTONLY,"and in turn requiring more workers.",10,45,100,0,L3,0
+TEXTONLY,"The hiring of workers finally corrects this,",10,55,100,0,L3,0
+TEXTONLY,"making workers more productive,",10,65,100,0,L3,0
+TEXTONLY,"and generating a surplus of labor.",10,75,100,0,L3,0
+TEXTONLY,"Press any key to continue or Esc to return to the Main Menu",0,95,100,0,C
+TEXTMENU,"",10,78,0,0,L 4,,,MAIN
+ANYKEY,"",10,80,0,0,L 4,,,DEMO14
+
+:SCREEN DEMO14
+TEXTONLY,"More Tools and Capabilities",0,5,100,0,C||28|B|255-0-0,0
+TEXTONLY,"Vensim also makes available",10,25,100,0,L3,0
+TEXTONLY,"- sensitivity testing",20,35,100,0,L,0
+TEXTONLY,"- bar graphs",20,40,100,0,L,0
+TEXTONLY,"- dimensional analysis (units checking)",20,45,100,0,L,0
+TEXTONLY,"- confidence bounds",20,50,100,0,L,0
+TEXTONLY,"- Gantt charts",20,55,100,0,L,0
+TEXTONLY,"- run comparisons",20,60,100,0,L,0
+TEXTONLY,"- loop identification",20,65,100,0,L,0
+TEXTONLY,"- Kalman filtering",20,70,100,0,L,0
+TEXTONLY,"- optimization",20,75,100,0,L,0
+TEXTONLY,". . . ",30,80,100,0,L,0
+TEXTONLY,"Press any key to continue or Esc to return to the Main Menu",0,95,100,0,C
+TEXTMENU,"",10,78,0,0,L 4,,,MAIN
+ANYKEY,"",10,80,0,0,L 4,,,DEMO15
+
+:SCREEN DEMO15
+TEXTONLY,"More Tools and Capabilities (continued)",0,5,100,0,C||28|B|255-0-0,0
+TEXTONLY,"Vensim also includes",10,25,100,0,L3,0
+TEXTONLY,"- customizable fonts and colors",20,35,100,0,L,0
+TEXTONLY,"- exported graphs",20,40,100,0,L,0
+TEXTONLY,"- presentation quality output",20,45,100,0,L,0
+TEXTONLY,"- macros",20,50,100,0,L,0
+TEXTONLY,"- advanced subscripting",20,55,100,0,L,0
+TEXTONLY,"- user configurable toolsets",20,60,100,0,L,0
+TEXTONLY,"- large model capacity",20,65,100,0,L,0
+TEXTONLY,"- simple use of exogenous inputs",20,70,100,0,L,0
+TEXTONLY,"- summary statistics on variables",20,75,100,0,L,0
+TEXTONLY,"-   and much more",30,80,100,0,L,0
+TEXTONLY,"Press any key to continue or Esc to return to the Main Menu",0,95,100,0,C
+TEXTMENU,"",10,78,0,0,L 4,,,MAIN
+ANYKEY,"",10,80,0,0,L 4,,,DEMO16
+
+:SCREEN DEMO16
+TEXTONLY,"The End",0,5,100,0,C||28|B|255-0-0,0
+TEXTONLY,"For more information please contact us.",0,25,100,0,C||18,0
+TEXTONLY,"Ventana Systems, Inc.",50,54,0,0,C|Arial|10|B|0-0-255
+TEXTONLY,"60 Jacob Gates Road",50,58,0,0,C|Arial|10|B|0-0-255
+TEXTONLY,"Havard MA 01451 - USA",50,62,0,0,C|Arial|10|B|0-0-255
+TEXTONLY,"Phone 508 651 o432  Fax 508 650 5422   US Sales 1-800-VENSIM1",50,66,0,0,C|Arial|10|B|0-0-255
+TEXTONLY,"email  vensim@vensim.com    http://www.std.com/vensim",50,70,0,0,C|Arial|10|B|0-0-255
+TEXTONLY,"Press any key to continue or Esc to return to the Main Menu",0,95,100,0,C
+TEXTMENU,"",10,78,0,0,L 4,,,MAIN
+ANYKEY,"",10,80,0,0,L 4,,,MAIN
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

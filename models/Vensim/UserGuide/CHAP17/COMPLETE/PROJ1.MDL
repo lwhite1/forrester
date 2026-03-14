@@ -1,0 +1,89 @@
+{UTF-8}
+work accomplishment = max work accomplishment * task is active
+	~	Drawing/Month
+	~		|
+
+max work accomplishment = 8
+	~	Drawing/Month
+	~		|
+
+task is active = IF THEN ELSE( Work Done < task size, 1, 0)
+	~	Dmnl
+	~		|
+
+task size=
+	 180
+	~	Drawing
+	~		|
+
+Work Done = INTEG(work accomplishment, 0)
+	~	Drawing
+	~		|
+
+Work To Do= INTEG (
+	 - work accomplishment,
+		task size)
+	~	Drawing
+	~		~	:SUPPLEMENTARY 
+	|
+
+********************************************************
+	.Control
+********************************************************~
+		Simulation Control Paramaters
+	|
+
+FINAL TIME  = 100
+	~	Month
+	~	The final time for the simulation.
+	|
+
+INITIAL TIME  = 0
+	~	Month
+	~	The initial time for the simulation.
+	|
+
+SAVEPER  = 
+        TIME STEP
+	~	Month
+	~	The frequency with which output is stored.
+	|
+
+TIME STEP  = 0.125
+	~	Month
+	~	The time step for the simulation.
+	|
+
+\\\---/// Sketch information - do not modify anything except names
+V300  Do not put anything below this section - it will be ignored
+*View 1
+$192-192-192,0,Arial|14||0-0-0|92-92-92|160-160-160|-1--1--1|255-255-255|96,96,100,0
+10,1,Work To Do,113,124,48,27,3,131,0,16,0,0,0,0,0-0-0,-1--1--1,|12|B|0-0-0
+10,2,task size,145,32,39,12,0,3,0,50,-1,0,0,0,-1--1--1,-1--1--1,Arial|14||64-128-128
+10,3,task is active,281,56,56,12,0,3,0,0,-1,0,0,0
+10,4,Work Done,421,125,45,25,3,3,0,58,0,0,0,0,-1--1--1,-1--1--1,Arial|14|B|0-0-0
+11,5,236,260,125,7,8,34,3,0,0,1,0,0,0
+10,6,work accomplishment,260,145,93,12,32,3,0,0,0,0,0,0
+10,7,max work accomplishment,184,197,113,12,0,3,0,50,-1,0,0,0,-1--1--1,-1--1--1,Arial|14||64-128-128
+1,8,5,4,4,0,0,22,0,0,0,-1--1--1,,1|(321,125)|
+1,9,5,1,100,0,0,22,0,0,0,-1--1--1,,1|(207,125)|
+1,10,7,6,0,0,0,0,0,0,0,-1--1--1,,1|(213,176)|
+1,11,4,3,2,0,0,0,0,0,0,-1--1--1,,1|(347,75)|
+1,12,2,1,0,0,0,0,0,0,1,-1--1--1,,1|(133,61)|
+1,13,3,5,2,0,0,0,0,0,0,-1--1--1,,1|(235,76)|
+1,14,2,3,0,0,0,0,0,0,0,-1--1--1,,1|(195,40)|
+12,15,0,231,461,200,200,3,44,0,0,2,0,0,0
+Work Done,Graph
+///---\\\
+:L<%^E!@
+1:Current.vdf
+9:Current
+15:0,0,0,0,0,0
+19:100,0
+27:0,
+34:0,
+4:Time
+5:task size
+24:0
+25:100
+26:100

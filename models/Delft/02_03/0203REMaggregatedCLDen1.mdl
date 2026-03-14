@@ -1,0 +1,82 @@
+{UTF-8}
+average lifetime of goods containing REM  = A FUNCTION OF( )
+	~	
+	~		|
+
+demand for REM in goods  = A FUNCTION OF( )
+	~	
+	~		|
+
+loss of REM in goods  = A FUNCTION OF( average lifetime of goods containing REM,use of REM in production of goods\
+		)
+	~	
+	~		|
+
+processing of REM  = A FUNCTION OF( )
+	~	
+	~		|
+
+use of REM in production of goods  = A FUNCTION OF( demand for REM in goods,processing of REM\
+		)
+	~	
+	~		|
+
+********************************************************
+	.Control
+********************************************************~
+		Simulation Control Parameters
+	|
+
+FINAL TIME  = 100
+	~	Month
+	~	The final time for the simulation.
+	|
+
+INITIAL TIME  = 0
+	~	Month
+	~	The initial time for the simulation.
+	|
+
+SAVEPER  = 
+        TIME STEP
+	~	Month [0,?]
+	~	The frequency with which output is stored.
+	|
+
+TIME STEP  = 1
+	~	Month [0,?]
+	~	The time step for the simulation.
+	|
+
+\\\---/// Sketch information - do not modify anything except names
+V300  Do not put anything below this section - it will be ignored
+*View 1
+$192-192-192,0,Times New Roman|12||0-0-0|0-0-0|0-0-255|-1--1--1|-1--1--1|96,96,100,0
+10,1,processing of REM,303,440,43,19,8,3,1,0,0,0,0,0
+10,2,use of REM in production of goods,305,306,65,19,8,3,0,0,0,0,0,0
+10,3,loss of REM in goods,305,186,48,19,8,3,0,0,0,0,0,0
+10,4,average lifetime of goods containing REM,304,115,73,19,8,3,1,0,0,0,0,0
+1,5,4,3,0,1,45,0,2,64,0,-1--1--1,|12||0-0-0,1|(304,143)|
+10,6,demand for REM in goods,225,271,10,32,8,131,1,16,0,0,0,0,0-0-0,0-0-0,|12|V|0-0-0
+1,7,6,2,1,1,43,0,2,64,0,-1--1--1,|12||0-0-0,1|(257,266)|
+1,8,1,2,0,0,43,0,2,65,0,-1--1--1,|12||0-0-0,1|(303,379)|
+1,9,2,3,0,0,43,0,2,65,0,-1--1--1,|12||0-0-0,1|(305,253)|
+///---\\\
+:L<%^E!@
+9:Current
+22:$,Dollar,Dollars,$s
+22:Hour,Hours
+22:Month,Months
+22:Person,People,Persons
+22:Unit,Units
+22:Week,Weeks
+22:Year,Years
+22:Day,Days
+15:0,0,0,0,0,0
+19:100,0
+27:2,
+34:0,
+5:average lifetime of goods containing REM
+24:0
+25:0
+26:0

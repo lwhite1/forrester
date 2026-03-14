@@ -1,0 +1,392 @@
+{UTF-8}
+"production Supplier (T2)"  = A FUNCTION OF( "productivity Supplier (T2)",WithWithoutProductionPolicy\
+		,"Workforce Supplier (T2)") ~~|
+"production Supplier (T2)"=
+	 "Workforce Supplier (T2)"*"productivity Supplier (T2)"
+	~	Sofa/Month
+	~		|
+
+production  = A FUNCTION OF( productivity,sales,WithWithoutProductionPolicy,Workforce\
+		) ~~|
+production = Workforce*productivity
+	~	Sofa/Month
+	~		|
+
+WithWithoutProductionPolicy  = A FUNCTION OF( )
+	~	
+	~		|
+
+"production Supplier (T1)"  = A FUNCTION OF( "productivity Supplier (T1)",WithWithoutProductionPolicy\
+		,"Workforce Supplier (T1)") ~~|
+"production Supplier (T1)"=
+	 "Workforce Supplier (T1)"*"productivity Supplier (T1)"
+	~	Sofa/Month
+	~		|
+
+"sales Supplier (T2)"=
+	(1-WithWithoutSCMPolicy) * "production Supplier (T1)" + WithWithoutSCMPolicy * "sales Supplier (T1)"
+	~	Sofa/Month
+	~		|
+
+"time to correct inventory Supplier (T2)" = 2
+	~	Month
+	~		|
+
+"net hire rate Supplier (T2)" = ("target workforce Supplier (T2)"-"Workforce Supplier (T2)"\
+		)/"time to adjust workforce Supplier (T2)"
+	~	Person/Month
+	~		|
+
+"time to adjust workforce Supplier (T2)"=
+	10
+	~	Month
+	~		|
+
+"target inventory Supplier (T2)" = "sales Supplier (T2)" * "inventory coverage Supplier (T2)"
+	~	Sofa
+	~		|
+
+"inventory correction Supplier (T2)" = ("target inventory Supplier (T2)" - "Inventory Supplier (T2)"\
+		)/
+                "time to correct inventory Supplier (T2)"
+	~	Sofa/Month
+	~		|
+
+"target production Supplier (T2)" = "sales Supplier (T2)" + "inventory correction Supplier (T2)"
+	~	Sofa/Month
+	~		|
+
+"inventory coverage Supplier (T2)" = 3
+	~	Month
+	~		|
+
+"productivity Supplier (T2)" = 1
+	~	Sofa/Month/Person
+	~		|
+
+"Inventory Supplier (T2)" = INTEG("production Supplier (T2)"-"sales Supplier (T2)",300\
+		)
+	~	Sofa
+	~		|
+
+"sales Supplier (T1)"=
+	(1-WithWithoutSCMPolicy) * production + WithWithoutSCMPolicy * sales
+	~	Sofa/Month
+	~		|
+
+"target workforce Supplier (T2)" = "target production Supplier (T2)"/"productivity Supplier (T2)"
+	~	Person
+	~		|
+
+WithWithoutSCMPolicy=
+	0
+	~	Dmnl
+	~	0 is without policy; 1 is with policy
+	|
+
+"Workforce Supplier (T2)" = INTEG("net hire rate Supplier (T2)",     "target workforce Supplier (T2)"\
+		)
+	~	Person
+	~		|
+
+"target workforce Supplier (T1)" = "target production Supplier (T1)"/"productivity Supplier (T1)"
+	~	Person
+	~		|
+
+"net hire rate Supplier (T1)" = ("target workforce Supplier (T1)"-"Workforce Supplier (T1)"\
+		)/"time to adjust workforce Supplier (T1)"
+	~	Person/Month
+	~		|
+
+"Inventory Supplier (T1)" = INTEG("production Supplier (T1)"-"sales Supplier (T1)",300\
+		)
+	~	Sofa
+	~		|
+
+"inventory correction Supplier (T1)" = ("target inventory Supplier (T1)" - "Inventory Supplier (T1)"\
+		)/
+                "time to correct inventory Supplier (T1)"
+	~	Sofa/Month
+	~		|
+
+"productivity Supplier (T1)" = 1
+	~	Sofa/Month/Person
+	~		|
+
+"inventory coverage Supplier (T1)" = 3
+	~	Month
+	~		|
+
+"target inventory Supplier (T1)" = "sales Supplier (T1)" * "inventory coverage Supplier (T1)"
+	~	Sofa
+	~		|
+
+"time to correct inventory Supplier (T1)" = 2
+	~	Month
+	~		|
+
+"time to adjust workforce Supplier (T1)"=
+	10
+	~	Month
+	~		|
+
+"Workforce Supplier (T1)" = INTEG("net hire rate Supplier (T1)",     "target workforce Supplier (T1)"\
+		)
+	~	Person
+	~		|
+
+"target production Supplier (T1)" = "sales Supplier (T1)" + "inventory correction Supplier (T1)"
+	~	Sofa/Month
+	~		|
+
+FINAL TIME  = 100
+	~	Month
+	~		 The final time for the simulation.
+	|
+
+target inventory = sales * inventory coverage
+	~	Sofa
+	~		|
+
+target production = sales + inventory correction
+	~	Sofa/Month
+	~		|
+
+inventory correction = (target inventory - Inventory)/
+                time to correct inventory
+	~	Sofa/Month
+	~		|
+
+inventory coverage = 3
+	~	Month
+	~		|
+
+time to correct inventory = 2
+	~	Month
+	~		|
+
+INITIAL TIME  = 0
+	~	Month
+	~		 The initial time for the simulation.
+	|
+
+Inventory = INTEG(production-sales,300)
+	~	Sofa
+	~		|
+
+net hire rate = (target workforce-Workforce)/time to adjust workforce
+	~	Person/Month
+	~		|
+
+productivity = 1
+	~	Sofa/Month/Person
+	~		|
+
+sales=
+	 100+STEP(50,20)
+	~	Sofa/Month
+	~		|
+
+SAVEPER  = 
+        TIME STEP
+	~	Month
+	~		  The frequency with which output is stored.
+	|
+
+target workforce = target production/productivity
+	~	Person
+	~		|
+
+TIME STEP  = 0.125
+	~	Month
+	~		 The time step for the simulation.
+	|
+
+time to adjust workforce=
+	10
+	~	Month
+	~		|
+
+Workforce = INTEG(net hire rate,     target workforce)
+	~	Person
+	~		|
+
+\\\---/// Sketch information - do not modify anything except names
+V300  Do not put anything below this section - it will be ignored
+*1
+$192-192-192,0,Times New Roman|10||0-0-0|0-0-0|0-0-255|-1--1--1|255-255-255|96,96,100,0
+10,1,Workforce,557,152,40,20,3,3,0,58,0,0,0,0,-1--1--1,0-0-0,Times New Roman|12|B|0-0-0
+12,2,48,730,151,10,8,0,3,0,0,0,0,0,0
+10,3,Inventory,673,23,40,20,3,3,0,58,0,0,0,0,-1--1--1,0-0-0,Times New Roman|12|B|0-0-0
+12,4,48,507,20,10,8,0,3,0,0,0,0,0,0
+10,5,productivity,704,102,35,9,0,3,0,0,0,0,0,0
+12,6,48,841,21,10,8,0,3,0,0,0,0,0,0
+11,7,48,766,21,6,8,34,3,0,0,1,0,0,0
+10,8,sales,766,38,16,9,104,3,0,0,0,0,0,0
+11,9,460,559,21,6,8,34,3,0,0,1,0,0,0
+10,10,production,559,38,32,9,104,3,0,0,0,0,0,0
+11,11,444,660,151,6,8,34,3,0,0,1,0,0,0
+10,12,net hire rate,660,168,34,9,104,3,0,0,0,0,0,0
+10,13,target workforce,764,200,46,9,0,3,0,0,0,0,0,0
+10,14,time to adjust workforce,630,217,66,9,0,3,0,0,0,0,0,0
+10,15,target production,828,150,49,9,0,3,0,0,0,0,0,0
+10,16,target inventory,868,94,45,9,0,3,0,0,0,0,0,0
+10,17,inventory coverage,853,47,54,9,0,3,0,0,0,0,0,0
+10,18,inventory correction,962,121,57,9,0,3,0,0,0,0,0,0
+10,19,time to correct inventory,950,176,68,9,0,3,0,0,0,0,0,0
+1,20,9,3,4,0,0,22,0,0,0,-1--1--1,,1|(599,21)|
+1,21,9,4,100,0,0,22,0,0,0,-1--1--1,,1|(535,21)|
+1,22,7,6,4,0,0,22,0,0,0,-1--1--1,,1|(801,21)|
+1,23,7,3,100,0,0,22,0,0,0,-1--1--1,,1|(736,21)|
+1,24,11,2,4,0,0,22,2,0,0,-1--1--1,|10||0-0-0,1|(693,151)|
+1,25,11,1,68,0,0,22,0,0,0,-1--1--1,,1|(625,151)|
+1,26,1,10,1,0,0,0,0,0,0,-1--1--1,,1|(524,89)|
+1,27,1,12,2,0,0,0,0,0,0,-1--1--1,,1|(601,183)|
+1,28,14,12,1,0,0,0,0,0,0,-1--1--1,,1|(645,202)|
+1,29,8,15,1,0,0,0,0,0,0,-1--1--1,,1|(797,78)|
+1,30,15,13,1,0,0,0,0,0,0,-1--1--1,,1|(814,166)|
+1,31,5,13,2,0,0,0,0,0,0,-1--1--1,,1|(750,126)|
+1,32,5,10,0,0,0,0,0,0,0,-1--1--1,,1|(637,72)|
+1,33,13,12,1,0,0,0,0,0,0,-1--1--1,,1|(703,196)|
+1,34,8,16,1,0,0,0,0,0,0,-1--1--1,,1|(808,70)|
+1,35,18,15,1,0,0,0,0,0,0,-1--1--1,,1|(903,146)|
+1,36,19,18,0,0,0,0,0,0,0,-1--1--1,,1|(953,155)|
+1,37,16,18,1,0,0,0,0,0,0,-1--1--1,,1|(920,95)|
+1,38,17,16,0,0,0,0,0,0,0,-1--1--1,,1|(857,63)|
+1,39,3,18,1,0,0,0,0,64,0,-1--1--1,,1|(884,7)|
+1,40,13,1,0,0,0,0,0,0,1,-1--1--1,,1|(668,177)|
+10,41,"Workforce Supplier (T1)",395,411,39,25,3,3,0,24,0,0,0,0,-1--1--1,0-0-0,|12|B|0-0-0
+12,42,48,568,410,10,8,0,3,0,0,0,0,0,0
+10,43,"Inventory Supplier (T1)",498,282,40,25,3,3,0,24,0,0,0,0,-1--1--1,0-0-0,|12|B|0-0-0
+12,44,48,345,279,10,8,0,3,0,0,0,0,0,0
+10,45,"productivity Supplier (T1)",542,361,71,9,0,3,0,0,0,0,0,0
+12,46,48,679,280,10,8,0,3,0,0,0,0,0,0
+11,47,48,604,280,6,8,34,3,0,0,1,0,0,0
+10,48,"sales Supplier (T1)",604,297,52,9,104,3,0,0,0,0,0,0
+11,49,188,397,280,6,8,34,3,0,0,1,0,0,0
+10,50,"production Supplier (T1)",397,297,37,15,104,3,0,0,0,0,0,0
+11,51,172,498,410,6,8,34,3,0,0,1,0,0,0
+10,52,"net hire rate Supplier (T1)",498,427,37,15,104,3,0,0,0,0,0,0
+10,53,"target workforce Supplier (T1)",602,459,82,9,0,3,0,0,0,0,0,0
+10,54,"time to adjust workforce Supplier (T1)",468,476,102,9,0,3,0,0,0,0,0,0
+10,55,"target production Supplier (T1)",666,409,85,9,0,3,0,0,0,0,0,0
+10,56,"target inventory Supplier (T1)",744,362,81,9,0,3,0,0,0,0,0,0
+10,57,"inventory coverage Supplier (T1)",730,320,90,9,0,3,0,0,0,0,0,0
+10,58,"inventory correction Supplier (T1)",876,384,93,9,0,3,0,0,0,0,0,0
+10,59,"time to correct inventory Supplier (T1)",855,452,104,9,0,3,0,0,0,0,0,0
+1,60,49,43,4,0,0,22,0,0,0,-1--1--1,,1|(430,280)|
+1,61,49,44,100,0,0,22,0,0,0,-1--1--1,,1|(373,280)|
+1,62,47,46,4,0,0,22,0,0,0,-1--1--1,,1|(639,280)|
+1,63,47,43,100,0,0,22,0,0,0,-1--1--1,,1|(568,280)|
+1,64,51,42,4,0,0,22,2,0,0,-1--1--1,|10||0-0-0,1|(531,410)|
+1,65,51,41,68,0,0,22,0,0,0,-1--1--1,,1|(463,410)|
+1,66,41,50,1,0,0,0,0,0,0,-1--1--1,,1|(380,345)|
+1,67,41,52,2,0,0,0,0,0,0,-1--1--1,,1|(439,442)|
+1,68,54,52,1,0,0,0,0,0,0,-1--1--1,,1|(483,461)|
+1,69,48,55,1,0,0,0,0,0,0,-1--1--1,,1|(635,337)|
+1,70,55,53,1,0,0,0,0,0,0,-1--1--1,,1|(652,425)|
+1,71,45,53,2,0,0,0,0,0,0,-1--1--1,,1|(588,385)|
+1,72,45,50,0,0,0,0,0,0,0,-1--1--1,,1|(482,334)|
+1,73,53,52,1,0,0,0,0,0,0,-1--1--1,,1|(541,455)|
+1,74,48,56,1,0,0,0,0,0,0,-1--1--1,,1|(658,343)|
+1,75,58,55,1,0,0,0,0,0,0,-1--1--1,,1|(783,424)|
+1,76,59,58,0,0,0,0,0,0,0,-1--1--1,,1|(862,424)|
+1,77,56,58,1,0,0,0,0,0,0,-1--1--1,,1|(814,359)|
+1,78,57,56,0,0,0,0,0,0,0,-1--1--1,,1|(734,334)|
+1,79,43,58,1,0,0,0,0,64,0,-1--1--1,,1|(744,267)|
+1,80,53,41,0,0,0,0,0,0,1,-1--1--1,,1|(505,436)|
+10,81,"Workforce Supplier (T2)",213,674,39,26,3,3,0,24,0,0,0,0,-1--1--1,0-0-0,|12|B|0-0-0
+12,82,48,385,674,10,8,0,3,0,0,0,0,0,0
+10,83,"Inventory Supplier (T2)",328,546,40,27,3,3,0,24,0,0,0,0,-1--1--1,0-0-0,|12|B|0-0-0
+12,84,48,162,543,10,8,0,3,0,0,0,0,0,0
+10,85,"productivity Supplier (T2)",359,625,71,9,0,3,0,0,0,0,0,0
+12,86,48,496,544,10,8,0,3,0,0,0,0,0,0
+11,87,48,421,544,6,8,34,3,0,0,1,0,0,0
+10,88,"sales Supplier (T2)",421,561,52,9,104,3,0,0,0,0,0,0
+11,89,140,214,544,6,8,34,3,0,0,1,0,0,0
+10,90,"production Supplier (T2)",214,561,37,15,104,3,0,0,0,0,0,0
+11,91,396,315,674,6,8,34,3,0,0,1,0,0,0
+10,92,"net hire rate Supplier (T2)",315,691,37,15,104,3,0,0,0,0,0,0
+10,93,"target workforce Supplier (T2)",419,723,82,9,0,3,0,0,0,0,0,0
+10,94,"time to adjust workforce Supplier (T2)",154,738,102,9,0,3,0,0,0,0,0,0
+10,95,"target production Supplier (T2)",483,673,85,9,0,3,0,0,0,0,0,0
+10,96,"target inventory Supplier (T2)",576,622,81,9,0,3,0,0,0,0,0,0
+10,97,"inventory coverage Supplier (T2)",563,578,90,9,0,3,0,0,0,0,0,0
+10,98,"inventory correction Supplier (T2)",712,645,93,9,0,3,0,0,0,0,0,0
+10,99,"time to correct inventory Supplier (T2)",653,698,104,9,0,3,0,0,0,0,0,0
+1,100,89,83,4,0,0,22,0,0,0,-1--1--1,,1|(254,544)|
+1,101,89,84,100,0,0,22,0,0,0,-1--1--1,,1|(190,544)|
+1,102,87,86,4,0,0,22,0,0,0,-1--1--1,,1|(456,544)|
+1,103,87,83,100,0,0,22,0,0,0,-1--1--1,,1|(391,544)|
+1,104,91,82,4,0,0,22,2,0,0,-1--1--1,|10||0-0-0,1|(348,674)|
+1,105,91,81,68,0,0,22,0,0,0,-1--1--1,,1|(280,674)|
+1,106,81,90,1,0,0,0,0,0,0,-1--1--1,,1|(179,612)|
+1,107,81,92,2,0,0,0,0,0,0,-1--1--1,,1|(256,706)|
+1,108,94,92,1,0,0,0,0,0,0,-1--1--1,,1|(300,725)|
+1,109,88,95,1,0,0,0,0,0,0,-1--1--1,,1|(452,601)|
+1,110,95,93,1,0,0,0,0,0,0,-1--1--1,,1|(469,689)|
+1,111,85,93,2,0,0,0,0,0,0,-1--1--1,,1|(405,649)|
+1,112,85,90,0,0,0,0,0,0,0,-1--1--1,,1|(299,598)|
+1,113,93,92,1,0,0,0,0,0,0,-1--1--1,,1|(358,719)|
+1,114,88,96,1,0,0,0,0,0,0,-1--1--1,,1|(485,603)|
+1,115,98,95,1,0,0,0,0,0,0,-1--1--1,,1|(605,671)|
+1,116,99,98,0,0,0,0,0,0,0,-1--1--1,,1|(676,676)|
+1,117,96,98,1,0,0,0,0,0,0,-1--1--1,,1|(655,619)|
+1,118,97,96,0,0,0,0,0,0,0,-1--1--1,,1|(566,593)|
+1,119,83,98,1,0,0,0,0,64,0,-1--1--1,,1|(592,529)|
+1,120,93,81,0,0,0,0,0,0,1,-1--1--1,,1|(323,700)|
+1,121,8,47,0,0,0,0,0,64,0,-1--1--1,,1|(687,155)|
+1,122,48,88,0,0,0,0,0,64,0,-1--1--1,,1|(516,423)|
+10,123,WithWithoutSCMPolicy,275,211,70,7,8,3,0,0,0,0,0,0
+1,124,10,47,1,0,0,0,0,64,0,-1--1--1,,1|(503,170)|
+1,125,50,87,1,0,0,0,0,64,0,-1--1--1,,1|(320,352)|
+1,126,123,87,1,0,0,0,0,64,0,-1--1--1,,1|(232,327)|
+1,127,123,47,1,0,0,0,0,64,0,-1--1--1,,1|(407,217)|
+10,128,WithWithoutProductionPolicy,207,150,86,7,8,3,0,0,0,0,0,0
+1,129,7,9,1,0,0,0,0,64,0,-1--1--1,,1|(654,-23)|
+1,130,128,10,1,0,0,0,0,64,0,-1--1--1,,1|(370,63)|
+1,131,128,50,1,0,0,0,0,64,0,-1--1--1,,1|(340,181)|
+1,132,128,89,1,0,0,0,0,64,0,-1--1--1,,1|(131,272)|
+///---\\\
+:GRAPH GRAPH
+:TITLE GRAPH
+:SOFT-BOUNDS
+:SCALE
+:VAR sales
+:Y-MIN 0
+:Y-MAX 600
+:SCALE
+:VAR Inventory
+:Y-MIN 0
+:Y-MAX 600
+:SCALE
+:VAR Workforce
+:Y-MIN 0
+:Y-MAX 600
+
+:GRAPH GRAPH_0
+:TITLE GRAPH_0
+:SCALE
+:VAR sales
+:SCALE
+:VAR inventory
+:SCALE
+:VAR inventory 0
+
+:GRAPH SCM
+:TITLE SCM
+:SCALE
+:VAR Inventory
+:VAR "Inventory Supplier (T1)"
+:VAR "Inventory Supplier (T2)"
+:L<%^E!@
+9:testSCMpolicy
+15:0,0,0,5,0,0
+19:100,0
+27:0,
+34:0,
+4:Time
+5:"inventory coverage Supplier (T2)"
+24:0
+25:100
+26:100

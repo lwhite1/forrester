@@ -452,6 +452,24 @@ public class ModelDefinitionBuilder {
     /** Clears all view definitions. */
     public ModelDefinitionBuilder clearViews() { views.clear(); return this; }
 
+    /** Clears all lookup table definitions. */
+    public ModelDefinitionBuilder clearLookupTables() { lookupTables.clear(); return this; }
+
+    /** Clears all module instance definitions. */
+    public ModelDefinitionBuilder clearModules() { modules.clear(); return this; }
+
+    /** Clears all subscript definitions. */
+    public ModelDefinitionBuilder clearSubscripts() { subscripts.clear(); return this; }
+
+    /** Clears all CLD variable definitions. */
+    public ModelDefinitionBuilder clearCldVariables() { cldVariables.clear(); return this; }
+
+    /** Clears all causal link definitions. */
+    public ModelDefinitionBuilder clearCausalLinks() { causalLinks.clear(); return this; }
+
+    /** Clears all comment definitions. */
+    public ModelDefinitionBuilder clearComments() { comments.clear(); return this; }
+
     /** Adds all stock definitions from the given list. */
     public ModelDefinitionBuilder stocks(List<StockDef> defs) { stocks.addAll(defs); return this; }
 

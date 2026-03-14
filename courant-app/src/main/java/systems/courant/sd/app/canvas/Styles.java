@@ -62,7 +62,7 @@ public final class Styles {
 
     // --- Validation ---
     public static final String VALIDATION_ERROR =
-            "-fx-text-fill: #E74C3C; -fx-font-size: 11;";
+            "-fx-text-fill: #E74C3C; -fx-font-size: 11px;";
     public static final String VALIDATION_WARNING =
             "-fx-text-fill: #cc7700; -fx-font-weight: bold;";
 
