@@ -79,6 +79,7 @@ public final class CanvasContextMenuController {
                                        CanvasState canvasState, double screenX, double screenY,
                                        Callbacks callbacks) {
         ContextMenu menu = new ContextMenu();
+        ElementType type = canvasState.getType(elementName).orElse(null);
 
         MenuItem editItem = new MenuItem("Edit");
         editItem.setOnAction(e -> callbacks.startInlineEdit(elementName));
@@ -106,21 +107,26 @@ public final class CanvasContextMenuController {
             callbacks.copySelection();
         });
 
-        MenuItem traceUpItem = new MenuItem("Trace Upstream");
-        traceUpItem.setOnAction(e -> callbacks.traceUpstream(elementName));
+        menu.getItems().add(editItem);
 
-        MenuItem traceDownItem = new MenuItem("Trace Downstream");
-        traceDownItem.setOnAction(e -> callbacks.traceDownstream(elementName));
+        if (type != ElementType.COMMENT) {
+            MenuItem traceUpItem = new MenuItem("Trace Upstream");
+            traceUpItem.setOnAction(e -> callbacks.traceUpstream(elementName));
 
-        MenuItem whereUsedItem = new MenuItem("Where Used");
-        whereUsedItem.setOnAction(e -> callbacks.showWhereUsed(elementName));
+            MenuItem traceDownItem = new MenuItem("Trace Downstream");
+            traceDownItem.setOnAction(e -> callbacks.traceDownstream(elementName));
 
-        MenuItem usesItem = new MenuItem("Uses");
-        usesItem.setOnAction(e -> callbacks.showUses(elementName));
+            MenuItem whereUsedItem = new MenuItem("Where Used");
+            whereUsedItem.setOnAction(e -> callbacks.showWhereUsed(elementName));
 
-        menu.getItems().addAll(editItem, new SeparatorMenuItem(),
-                traceUpItem, traceDownItem,
-                whereUsedItem, usesItem, new SeparatorMenuItem(),
+            MenuItem usesItem = new MenuItem("Uses");
+            usesItem.setOnAction(e -> callbacks.showUses(elementName));
+
+            menu.getItems().addAll(new SeparatorMenuItem(),
+                    traceUpItem, traceDownItem, whereUsedItem, usesItem);
+        }
+
+        menu.getItems().addAll(new SeparatorMenuItem(),
                 cutItem, copyItem, new SeparatorMenuItem(), deleteItem);
         menu.show(canvas, screenX, screenY);
     }
