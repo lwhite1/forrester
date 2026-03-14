@@ -133,17 +133,24 @@ public class LookupTable implements Formula {
 
     @Override
     public double getCurrentValue() {
-        double input = inputSupplier.getAsDouble();
-        if (Double.isNaN(input)) {
+        return evaluate(inputSupplier.getAsDouble());
+    }
+
+    /**
+     * Evaluates the lookup table at the given x value without allocating a new object.
+     * Handles NaN and out-of-range clamping identically to {@link #getCurrentValue()}.
+     */
+    public double evaluate(double x) {
+        if (Double.isNaN(x)) {
             return Double.NaN;
         }
-        if (input <= xMin) {
+        if (x <= xMin) {
             return yAtXMin;
         }
-        if (input >= xMax) {
+        if (x >= xMax) {
             return yAtXMax;
         }
-        return interpolation.value(input);
+        return interpolation.value(x);
     }
 
     private static void validateArrays(double[] xValues, double[] yValues, int minPoints) {
