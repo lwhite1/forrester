@@ -289,7 +289,8 @@ public class ModelEditor {
         if (name.startsWith("Variable ")) {
             nextVariableId = parseIdSuffix(name, "Variable ") + 1;
         }
-        variables.add(new VariableDef(name, template.comment(), equation, template.unit()));
+        variables.add(new VariableDef(name, template.comment(), equation, template.unit(),
+                template.subscripts()));
         nameIndex.add(name);
         return name;
     }
@@ -464,7 +465,7 @@ public class ModelEditor {
                 (f, n) -> new FlowDef(n, f.comment(), f.equation(),
                         f.timeUnit(), f.materialUnit(), f.source(), f.sink(), f.subscripts()))
                 || renameInList(variables, oldName, newName, VariableDef::name,
-                (a, n) -> new VariableDef(n, a.comment(), a.equation(), a.unit()))
+                (a, n) -> new VariableDef(n, a.comment(), a.equation(), a.unit(), a.subscripts()))
                 || renameInList(modules, oldName, newName, ModuleInstanceDef::instanceName,
                 (m, n) -> new ModuleInstanceDef(n, m.definition(),
                         m.inputBindings(), m.outputBindings()))
@@ -617,7 +618,7 @@ public class ModelEditor {
             return false;
         }
         boolean updated = updateInList(variables, name, VariableDef::name,
-                a -> new VariableDef(a.name(), a.comment(), equation, a.unit()));
+                a -> new VariableDef(a.name(), a.comment(), equation, a.unit(), a.subscripts()));
         if (updated) {
             fireEquationChanged(name);
         }
@@ -701,7 +702,7 @@ public class ModelEditor {
             return false;
         }
         return updateInList(variables, name, VariableDef::name,
-                a -> new VariableDef(a.name(), a.comment(), a.equation(), unit));
+                a -> new VariableDef(a.name(), a.comment(), a.equation(), unit, a.subscripts()));
     }
 
     /**
@@ -736,7 +737,7 @@ public class ModelEditor {
     public boolean setVariableComment(String name, String comment) {
         checkFxThread();
         return updateInList(variables, name, VariableDef::name,
-                a -> new VariableDef(a.name(), comment, a.equation(), a.unit()));
+                a -> new VariableDef(a.name(), comment, a.equation(), a.unit(), a.subscripts()));
     }
 
     /**

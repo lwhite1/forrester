@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -25,6 +26,11 @@ class UndoManagerTest {
     @BeforeEach
     void setUp() {
         manager = new UndoManager();
+    }
+
+    @AfterEach
+    void tearDown() {
+        manager.close();
     }
 
     private static UndoManager.Snapshot snapshot(String name) {
@@ -490,6 +496,24 @@ class UndoManagerTest {
 
             // Redo was cleared by pushUndo, not by discardLastUndo
             assertThat(manager.canRedo()).isFalse();
+        }
+
+        @Test
+        void shouldPreservePopulatedRedoStack() {
+            // Set up: push two, undo one to populate redo stack
+            manager.pushUndo(snapshot("S1"), "First");
+            manager.pushUndo(snapshot("S2"), "Second");
+            manager.undo(snapshot("S3"), "Undone");
+            // Undo stack: [S1], Redo stack: [S3]
+            assertThat(manager.canRedo()).isTrue();
+            assertThat(manager.undoDepth()).isEqualTo(1);
+
+            // Discard the remaining undo entry
+            manager.discardLastUndo();
+
+            // Redo stack should be untouched
+            assertThat(manager.canRedo()).isTrue();
+            assertThat(manager.undoDepth()).isEqualTo(0);
         }
     }
 }

@@ -15,6 +15,7 @@ import systems.courant.sd.model.def.StockDef;
 import systems.courant.sd.model.def.SubscriptDef;
 import systems.courant.sd.model.def.ViewDef;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -379,7 +380,7 @@ class ModelEditorTest {
                     .build();
             editor.loadFrom(def);
 
-            List<String> equationChanges = new java.util.ArrayList<>();
+            List<String> equationChanges = new ArrayList<>();
             editor.addListener(new ModelEditListener() {
                 @Override
                 public void onEquationChanged(String elementName) {
@@ -401,7 +402,7 @@ class ModelEditorTest {
                     .build();
             editor.loadFrom(def);
 
-            List<String> equationChanges = new java.util.ArrayList<>();
+            List<String> equationChanges = new ArrayList<>();
             editor.addListener(new ModelEditListener() {
                 @Override
                 public void onEquationChanged(String elementName) {

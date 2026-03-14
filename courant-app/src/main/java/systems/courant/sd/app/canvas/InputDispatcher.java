@@ -465,18 +465,20 @@ final class InputDispatcher {
                     canvasState.select(flow);
                 }
             } else {
+                String flowLabel = reattachController.flowName();
                 boolean reconnected = reattachController.complete(
                         viewport.toWorldX(event.getX()),
                         viewport.toWorldY(event.getY()),
                         canvasState, editor, () -> canvas.saveUndoState(
-                                "Reconnect " + reattachController.flowName()));
+                                "Reconnect " + flowLabel));
                 if (!reconnected) {
                     UndoManager um = canvas.getUndoManager();
                     if (um != null) {
                         um.discardLastUndo();
                     }
+                } else {
+                    canvas.scheduleRegenerateConnectors();
                 }
-                canvas.scheduleRegenerateConnectors();
             }
             canvas.requestRedraw();
             canvas.fireStatusChanged();
