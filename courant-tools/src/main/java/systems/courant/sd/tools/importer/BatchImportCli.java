@@ -244,10 +244,23 @@ public class BatchImportCli {
             }
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
+            cleanupTempFile(tempFile, tempDir);
             throw new IOException("Download interrupted: " + url, e);
+        } catch (IOException e) {
+            cleanupTempFile(tempFile, tempDir);
+            throw e;
         }
 
         return tempFile;
+    }
+
+    private static void cleanupTempFile(Path tempFile, Path tempDir) {
+        try {
+            Files.deleteIfExists(tempFile);
+            Files.deleteIfExists(tempDir);
+        } catch (IOException ex) {
+            log.warn("Could not clean up temp file on error: {}", tempFile);
+        }
     }
 
     private static long copyWithLimit(InputStream in, Path target, long maxBytes)
