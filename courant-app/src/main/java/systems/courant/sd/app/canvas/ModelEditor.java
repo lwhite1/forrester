@@ -431,7 +431,10 @@ public class ModelEditor {
 
         // Clean equation references: replace deleted element's token with "0"
         String deletedToken = name.replace(' ', '_');
-        equationRefManager.updateEquationReferences(deletedToken, "0");
+        List<String> modifiedElements = equationRefManager.updateEquationReferences(deletedToken, "0");
+        for (String modified : modifiedElements) {
+            fireEquationChanged(modified);
+        }
 
         fireElementRemoved(name);
     }

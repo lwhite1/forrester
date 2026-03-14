@@ -1,5 +1,6 @@
 package systems.courant.sd.app.canvas;
 
+import systems.courant.sd.model.ModelMetadata;
 import systems.courant.sd.model.def.ModelDefinition;
 import systems.courant.sd.model.def.ModelDefinitionBuilder;
 import systems.courant.sd.model.def.ViewDef;
@@ -402,6 +403,93 @@ class UndoManagerTest {
 
             manager.undo(snapshot("Current"));
             assertThat(manager.undoDepth()).isEqualTo(2);
+        }
+
+        @Test
+        void shouldPreserveMetadataThroughUndoRedo() {
+            ModelMetadata meta = ModelMetadata.builder()
+                    .author("Test Author")
+                    .source("Test Source")
+                    .license("MIT")
+                    .build();
+            ModelDefinition model = new ModelDefinitionBuilder()
+                    .name("MetaModel")
+                    .metadata(meta)
+                    .stock("Population", 1000, "people")
+                    .build();
+            ViewDef view = new ViewDef("Main", List.of(), List.of(), List.of());
+            UndoManager.Snapshot original = new UndoManager.Snapshot(model, view);
+
+            manager.pushUndo(original, "Add elements");
+
+            UndoManager.Snapshot restored = manager.undo(snapshot("Current")).orElseThrow();
+
+            assertThat(restored.model().metadata()).isNotNull();
+            assertThat(restored.model().metadata().author()).isEqualTo("Test Author");
+            assertThat(restored.model().metadata().source()).isEqualTo("Test Source");
+            assertThat(restored.model().metadata().license()).isEqualTo("MIT");
+        }
+
+        @Test
+        void shouldPreserveMetadataThroughCompressionRoundTrip() throws Exception {
+            ModelMetadata meta = ModelMetadata.builder()
+                    .author("Compressed Author")
+                    .license("AGPL-3.0")
+                    .build();
+            ModelDefinition model = new ModelDefinitionBuilder()
+                    .name("CompressedMeta")
+                    .metadata(meta)
+                    .build();
+            ViewDef view = new ViewDef("View1", List.of(), List.of(), List.of());
+            UndoManager.Snapshot original = new UndoManager.Snapshot(model, view);
+
+            manager.pushUndo(original, "With metadata");
+
+            // Wait for background compression to complete
+            Thread.sleep(200);
+
+            UndoManager.Snapshot restored = manager.undo(snapshot("Current")).orElseThrow();
+
+            assertThat(restored.model().metadata()).isNotNull();
+            assertThat(restored.model().metadata().author()).isEqualTo("Compressed Author");
+            assertThat(restored.model().metadata().license()).isEqualTo("AGPL-3.0");
+        }
+    }
+
+    @Nested
+    @DisplayName("discardLastUndo")
+    class DiscardLastUndo {
+
+        @Test
+        void shouldRemoveMostRecentUndoEntry() {
+            manager.pushUndo(snapshot("S1"), "First");
+            manager.pushUndo(snapshot("S2"), "Second");
+
+            manager.discardLastUndo();
+
+            assertThat(manager.undoDepth()).isEqualTo(1);
+            UndoManager.Snapshot result = manager.undo(snapshot("Current")).orElseThrow();
+            assertSnapshotName(result, "S1");
+        }
+
+        @Test
+        void shouldDoNothingWhenStackIsEmpty() {
+            manager.discardLastUndo();
+
+            assertThat(manager.canUndo()).isFalse();
+        }
+
+        @Test
+        void shouldNotAffectRedoStack() {
+            manager.pushUndo(snapshot("S1"));
+            manager.undo(snapshot("S2"));
+            assertThat(manager.canRedo()).isTrue();
+
+            manager.pushUndo(snapshot("S3"));
+            manager.discardLastUndo();
+
+            // Redo was cleared by pushUndo, not by discardLastUndo
+            assertThat(manager.canRedo()).isFalse();
         }
     }
 }

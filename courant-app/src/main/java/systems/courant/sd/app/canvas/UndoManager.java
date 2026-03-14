@@ -237,6 +237,17 @@ public class UndoManager implements AutoCloseable {
     }
 
     /**
+     * Discards the most recent undo entry without moving it to the redo stack.
+     * Used when an operation saved undo state but was subsequently rejected
+     * (e.g., a failed flow reconnection).
+     */
+    public void discardLastUndo() {
+        if (!undoStack.isEmpty()) {
+            undoStack.pop();
+        }
+    }
+
+    /**
      * Shuts down the background compressor thread. Call when this manager
      * is no longer needed (e.g., when navigating out of a module).
      */
