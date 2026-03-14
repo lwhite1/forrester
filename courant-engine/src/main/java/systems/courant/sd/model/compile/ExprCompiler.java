@@ -1112,8 +1112,12 @@ public class ExprCompiler {
                 case DIV -> right == 0 ? Double.NaN : left / right;
                 case POW -> Math.pow(left, right);
                 case MOD -> right == 0 ? Double.NaN : left % right;
-                case EQ -> left == right ? 1.0 : 0.0;
-                case NE -> left != right ? 1.0 : 0.0;
+                case EQ -> Math.abs(left - right)
+                        <= 1e-10 * Math.max(1.0, Math.max(Math.abs(left), Math.abs(right)))
+                        ? 1.0 : 0.0;
+                case NE -> Math.abs(left - right)
+                        > 1e-10 * Math.max(1.0, Math.max(Math.abs(left), Math.abs(right)))
+                        ? 1.0 : 0.0;
                 case LT -> left < right ? 1.0 : 0.0;
                 case GT -> left > right ? 1.0 : 0.0;
                 case LE -> left <= right ? 1.0 : 0.0;

@@ -192,6 +192,7 @@ public class Simulation {
                             + "). Check duration and time step values.");
         }
 
+        Duration stepDuration = Duration.ofNanos(nanos);
         long deadlineMs = timeoutMs > 0 ? System.currentTimeMillis() + timeoutMs : Long.MAX_VALUE;
         Map<Flow, Quantity> flowMap = new IdentityHashMap<>();
         List<Stock> allStocks = collectAllStocks();
@@ -222,7 +223,7 @@ public class Simulation {
                     recordVariableValues();
                 }
                 updateStocks(flowMap, deltas, allStocks, shouldRecord);
-                addStep(currentDateTime);
+                advanceClock(stepDuration);
                 currentStep++;
             }
         } finally {
@@ -355,10 +356,8 @@ public class Simulation {
         }
     }
 
-    private void addStep(LocalDateTime dateTime) {
-        long nanos = Math.round(timeStep.ratioToBaseUnit() * 1_000_000_000L);
-        Duration stepDuration = Duration.ofNanos(nanos);
-        currentDateTime = dateTime.plus(stepDuration);
+    private void advanceClock(Duration stepDuration) {
+        currentDateTime = currentDateTime.plus(stepDuration);
         elapsedTime = elapsedTime.plus(stepDuration);
     }
 
