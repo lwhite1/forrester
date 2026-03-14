@@ -39,6 +39,7 @@ public class ValidationDialog extends Dialog<Void> {
     private final Label summaryLabel;
     private final Button copyButton;
     private ValidationResult currentResult;
+    private Consumer<String> onSelectElement;
 
     /**
      * Shows a validation dialog with the given result. If a dialog is already open,
@@ -50,6 +51,7 @@ public class ValidationDialog extends Dialog<Void> {
     public static void showOrUpdate(ValidationResult result, Consumer<String> onSelectElement) {
         if (openInstance != null && openInstance.isShowing()) {
             openInstance.updateResult(result);
+            openInstance.onSelectElement = onSelectElement;
             Stage window = (Stage) openInstance.getDialogPane().getScene().getWindow();
             window.toFront();
             window.requestFocus();
@@ -75,6 +77,7 @@ public class ValidationDialog extends Dialog<Void> {
         initModality(Modality.NONE);
         setTitle("Model Validation");
         this.currentResult = result;
+        this.onSelectElement = onSelectElement;
 
         table = new TableView<>();
         table.setId("validationTable");
@@ -105,8 +108,8 @@ public class ValidationDialog extends Dialog<Void> {
 
         // Click a row to select the element on the canvas
         table.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
-            if (newVal != null && newVal.elementName() != null && onSelectElement != null) {
-                onSelectElement.accept(newVal.elementName());
+            if (newVal != null && newVal.elementName() != null && this.onSelectElement != null) {
+                this.onSelectElement.accept(newVal.elementName());
             }
         });
 
