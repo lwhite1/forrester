@@ -96,6 +96,17 @@ public class VensimImporter implements ModelImporter {
         List<String> warnings = new ArrayList<>();
         MdlParser.ParsedMdl parsed = MdlParser.parse(content);
 
+        // Expand macro calls before classification
+        List<MdlEquation> equations;
+        if (!parsed.macros().isEmpty()) {
+            MacroExpander.ExpansionResult expansion = MacroExpander.expand(
+                    parsed.equations(), parsed.macros());
+            equations = expansion.expandedEquations();
+            warnings.addAll(expansion.warnings());
+        } else {
+            equations = parsed.equations();
+        }
+
         // Pass 1: Collect all variable names and subscript dimensions
         Set<String> vensimNames = new HashSet<>();
         Map<String, MdlEquation> controlVars = new LinkedHashMap<>();
@@ -104,7 +115,7 @@ public class VensimImporter implements ModelImporter {
         // Map from normalized dimension name → list of original (display) labels
         Map<String, List<String>> subscriptDisplayLabels = new LinkedHashMap<>();
 
-        for (MdlEquation eq : parsed.equations()) {
+        for (MdlEquation eq : equations) {
             String name = eq.name().strip();
             if (name.isEmpty()) {
                 continue;
@@ -187,7 +198,7 @@ public class VensimImporter implements ModelImporter {
         constantValues.put("TIME_STEP", timeStepValue);
         constantValues.put("INITIAL_TIME", initialTime);
         constantValues.put("FINAL_TIME", finalTime);
-        for (MdlEquation eq : parsed.equations()) {
+        for (MdlEquation eq : equations) {
             String name = eq.name().strip();
             if (name.isEmpty() || isSystemVar(name)) {
                 continue;
@@ -279,7 +290,7 @@ public class VensimImporter implements ModelImporter {
         // gets the variable's actual equation (not just a reference) and the variable
         // is skipped to avoid duplicate names.
         Map<String, MdlEquation> equationsByName = new LinkedHashMap<>();
-        for (MdlEquation eq : parsed.equations()) {
+        for (MdlEquation eq : equations) {
             String name = eq.name().strip();
             if (!name.isEmpty()) {
                 String norm = VensimExprTranslator.normalizeName(name);
@@ -289,7 +300,7 @@ public class VensimImporter implements ModelImporter {
 
         // Second sub-pass: build definitions
         Set<String> sketchFlowNames = new HashSet<>();
-        for (MdlEquation eq : parsed.equations()) {
+        for (MdlEquation eq : equations) {
             String name = eq.name().strip();
             if (name.isEmpty() || isSystemVar(name)) {
                 continue;
@@ -349,7 +360,7 @@ public class VensimImporter implements ModelImporter {
 
         // Phase 2: Attempt to resolve companion CSV files for GET DIRECT DATA references
         if (baseDir != null) {
-            resolveCompanionCsvFiles(parsed.equations(), baseDir, builder, warnings);
+            resolveCompanionCsvFiles(equations, baseDir, builder, warnings);
         }
 
         return new ImportResult(builder.build(), warnings);

@@ -120,7 +120,12 @@ Stock initial values that are expressions rather than numbers (e.g., `INTEG(rate
 
 ### Macros
 
-Vensim macros (`:MACRO:` blocks) are skipped entirely. If your model uses macros, you'll need to inline the logic or use Courant's module system instead.
+Vensim macros (`:MACRO:` blocks) are expanded inline during import. Each macro call is replaced with the macro's body equations, with parameter substitution and unique prefixes for local variables. This means stocks defined inside macros (e.g., INTEG in a SMOOTH-like macro) become regular stocks in the imported model.
+
+**Limitations:**
+- Only single-output macros are supported. Multi-output macros emit a warning and are skipped.
+- Nested macro calls (a macro body calling another macro) are not supported and emit a warning.
+- Recursive macros are not supported.
 
 ---
 
