@@ -474,7 +474,11 @@ public class ModelWindow {
         });
 
         MenuItem exitItem = new MenuItem("Exit");
-        exitItem.setOnAction(e -> Platform.exit());
+        exitItem.setOnAction(e -> {
+            if (fileController.confirmDiscardChanges()) {
+                Platform.exit();
+            }
+        });
 
         Menu examplesMenu = fileController.buildExamplesMenu();
 
