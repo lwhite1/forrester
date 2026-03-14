@@ -218,6 +218,17 @@ public class UndoManager implements AutoCloseable {
     }
 
     /**
+     * Pushes a raw entry onto the undo stack. Package-private for testing.
+     */
+    void pushEntry(UndoEntry entry) {
+        undoStack.push(entry);
+        redoStack.clear();
+        if (undoStack.size() > MAX_UNDO) {
+            undoStack.removeLast();
+        }
+    }
+
+    /**
      * Clears both undo and redo stacks.
      */
     public void clear() {
@@ -264,7 +275,12 @@ public class UndoManager implements AutoCloseable {
         // Prefer non-blocking getNow() to avoid stalling the FX thread.
         // Fall back to a bounded get() with a 5-second timeout to prevent
         // indefinite blocking if something goes wrong.
-        CompressedData data = entry.future().getNow(null);
+        CompressedData data;
+        try {
+            data = entry.future().getNow(null);
+        } catch (java.util.concurrent.CompletionException e) {
+            throw new IllegalStateException("Undo compression failed", e.getCause());
+        }
         if (data == null) {
             try {
                 data = entry.future().get(5, TimeUnit.SECONDS);

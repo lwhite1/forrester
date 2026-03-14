@@ -379,18 +379,17 @@ class UndoManagerTest {
 
         @Test
         void shouldThrowOnCompressionFailure() {
-            // Create an entry with a future that completes exceptionally
+            // Inject an entry whose compression future completed exceptionally
+            // and whose rawSnapshot is null (simulating a lost snapshot)
             CompletableFuture<UndoManager.CompressedData> failedFuture = new CompletableFuture<>();
             failedFuture.completeExceptionally(new RuntimeException("compression failed"));
             UndoManager.UndoEntry entry = new UndoManager.UndoEntry(
                     failedFuture, "Bad", null);
+            manager.pushEntry(entry);
 
-            // Accessing via reflection-free path: push a known-broken entry
-            // We test the decompress behavior through the public API indirectly
-            // by verifying that a normal round-trip works correctly
-            manager.pushUndo(snapshot("S1"), "Normal");
-            UndoManager.Snapshot result = manager.undo(snapshot("Current")).orElseThrow();
-            assertSnapshotName(result, "S1");
+            assertThatThrownBy(() -> manager.undo(snapshot("Current")))
+                    .isInstanceOf(IllegalStateException.class)
+                    .hasMessageContaining("compression failed");
         }
 
         @Test
