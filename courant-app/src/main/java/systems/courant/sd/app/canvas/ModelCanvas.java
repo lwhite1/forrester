@@ -488,11 +488,6 @@ public class ModelCanvas extends Canvas {
         }
     }
 
-    private void invalidateLoopAnalysis() {
-        invalidateLoopAnalysis(
-                editor != null ? editor.toModelDefinition(canvasState.toViewDef()) : null);
-    }
-
     private void invalidateLoopAnalysis(ModelDefinition def) {
         loopController.invalidate(def);
     }
@@ -503,10 +498,6 @@ public class ModelCanvas extends Canvas {
      * Recomputes validation issues for all elements in the model.
      * Called from {@link #invalidateAnalysis()} on every structural mutation.
      */
-    private void recomputeValidation() {
-        recomputeValidation(editor != null ? editor.toModelDefinition(canvasState.toViewDef()) : null);
-    }
-
     private void recomputeValidation(ModelDefinition def) {
         if (def == null) {
             elementIssues = Map.of();
