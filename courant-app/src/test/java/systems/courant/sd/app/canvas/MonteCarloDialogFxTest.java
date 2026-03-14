@@ -3,8 +3,10 @@ package systems.courant.sd.app.canvas;
 import javafx.application.Platform;
 import javafx.scene.Node;
 import javafx.scene.Scene;
+import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.DialogPane;
+import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
@@ -116,6 +118,26 @@ class MonteCarloDialogFxTest {
         showDialog(List.of());
 
         // No parameter row can be valid without a constant name
+        assertThat(okButton().isDisabled()).isTrue();
+    }
+
+    @Test
+    @DisplayName("No event filter alerts on OK button (#407)")
+    void noEventFilterOnOkButton(FxRobot robot) {
+        showDialog(List.of("alpha"));
+
+        Button ok = (Button) okButton();
+        assertThat(ok.isDisabled()).isFalse();
+        assertThat(ok.disableProperty().isBound()).isTrue();
+    }
+
+    @Test
+    @DisplayName("Validation label shows message when no valid params (#407)")
+    void validationLabelShowsMessageWhenInvalid(FxRobot robot) {
+        showDialog(List.of());
+
+        Label validationLabel = robot.lookup("#mcValidationLabel").queryAs(Label.class);
+        assertThat(validationLabel.getText()).isNotEmpty();
         assertThat(okButton().isDisabled()).isTrue();
     }
 

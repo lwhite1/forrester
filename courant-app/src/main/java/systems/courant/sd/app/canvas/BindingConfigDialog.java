@@ -111,6 +111,7 @@ public class BindingConfigDialog extends Dialog<BindingConfigDialog.BindingResul
 
             TextField field = new TextField();
             field.setPrefWidth(200);
+            field.setId("binding_" + fieldLabel.toLowerCase() + "_" + port.name());
             String existing = existingBindings.get(port.name());
             if (existing != null) {
                 field.setText(existing);

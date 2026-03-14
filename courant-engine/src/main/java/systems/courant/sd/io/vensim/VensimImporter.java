@@ -3,6 +3,8 @@ package systems.courant.sd.io.vensim;
 import systems.courant.sd.io.FormatUtils;
 import systems.courant.sd.io.ImportResult;
 import systems.courant.sd.io.ModelImporter;
+import systems.courant.sd.io.ReferenceDataCsvReader;
+import systems.courant.sd.model.def.ReferenceDataset;
 import systems.courant.sd.model.def.VariableDef;
 import systems.courant.sd.model.def.CausalLinkDef;
 import systems.courant.sd.model.def.CldVariableDef;
@@ -72,13 +74,38 @@ public class VensimImporter implements ModelImporter {
         if (dotPos > 0) {
             modelName = modelName.substring(0, dotPos);
         }
-        return importModel(content, modelName);
+        return importModel(content, modelName, path.getParent());
     }
 
     @Override
     public ImportResult importModel(String content, String modelName) {
+        return importModel(content, modelName, null);
+    }
+
+    /**
+     * Imports a Vensim .mdl model with optional companion file resolution.
+     *
+     * @param content   the .mdl file content
+     * @param modelName the model name
+     * @param baseDir   the directory containing the .mdl file, or null if unavailable.
+     *                  When provided, GET DIRECT DATA/CONSTANTS references to CSV files
+     *                  are resolved relative to this directory.
+     * @return the import result
+     */
+    public ImportResult importModel(String content, String modelName, Path baseDir) {
         List<String> warnings = new ArrayList<>();
         MdlParser.ParsedMdl parsed = MdlParser.parse(content);
+
+        // Expand macro calls before classification
+        List<MdlEquation> equations;
+        if (!parsed.macros().isEmpty()) {
+            MacroExpander.ExpansionResult expansion = MacroExpander.expand(
+                    parsed.equations(), parsed.macros());
+            equations = expansion.expandedEquations();
+            warnings.addAll(expansion.warnings());
+        } else {
+            equations = parsed.equations();
+        }
 
         // Pass 1: Collect all variable names and subscript dimensions
         Set<String> vensimNames = new HashSet<>();
@@ -88,12 +115,17 @@ public class VensimImporter implements ModelImporter {
         // Map from normalized dimension name → list of original (display) labels
         Map<String, List<String>> subscriptDisplayLabels = new LinkedHashMap<>();
 
-        for (MdlEquation eq : parsed.equations()) {
+        for (MdlEquation eq : equations) {
             String name = eq.name().strip();
             if (name.isEmpty()) {
                 continue;
             }
             vensimNames.add(name);
+            // Also add the unquoted form so replaceMultiWordNames can match
+            // references that appear without quotes in other equations
+            if (name.startsWith("\"") && name.endsWith("\"") && name.length() > 2) {
+                vensimNames.add(name.substring(1, name.length() - 1));
+            }
             // For subscripted names like "growth rate[Region]", also register
             // the base name "growth rate" so multi-word replacement works
             // after dimension substitution (e.g., "growth rate[North]")
@@ -166,9 +198,12 @@ public class VensimImporter implements ModelImporter {
         constantValues.put("TIME_STEP", timeStepValue);
         constantValues.put("INITIAL_TIME", initialTime);
         constantValues.put("FINAL_TIME", finalTime);
-        for (MdlEquation eq : parsed.equations()) {
+        for (MdlEquation eq : equations) {
             String name = eq.name().strip();
             if (name.isEmpty() || isSystemVar(name)) {
+                continue;
+            }
+            if (isDocumentationBlock(eq.expression())) {
                 continue;
             }
 
@@ -245,11 +280,34 @@ public class VensimImporter implements ModelImporter {
         boolean isCld = stockNames.isEmpty() && !hasFlowValves
                 && !parsed.sketchLines().isEmpty();
 
+        // Pre-extract flow valve names from sketch section (type-11 lines).
+        // These are the original Vensim flow valve names used to match decomposed
+        // INTEG rate terms so we preserve the original names instead of synthetic ones.
+        Set<String> sketchValveNames = extractSketchFlowValveNames(parsed.sketchLines());
+
+        // Pre-collect variable equations for flow valve name matching.
+        // When a decomposed INTEG rate term matches a sketch valve name, the flow
+        // gets the variable's actual equation (not just a reference) and the variable
+        // is skipped to avoid duplicate names.
+        Map<String, MdlEquation> equationsByName = new LinkedHashMap<>();
+        for (MdlEquation eq : equations) {
+            String name = eq.name().strip();
+            if (!name.isEmpty()) {
+                String norm = VensimExprTranslator.normalizeName(name);
+                equationsByName.put(norm, eq);
+            }
+        }
+
         // Second sub-pass: build definitions
         Set<String> sketchFlowNames = new HashSet<>();
-        for (MdlEquation eq : parsed.equations()) {
+        for (MdlEquation eq : equations) {
             String name = eq.name().strip();
             if (name.isEmpty() || isSystemVar(name)) {
+                continue;
+            }
+            // Skip Vensim "A FUNCTION OF" documentation blocks — they're metadata,
+            // not executable equations, and would create duplicates of the real equation
+            if (isDocumentationBlock(eq.expression())) {
                 continue;
             }
             String eqName = VensimExprTranslator.normalizeName(name);
@@ -273,7 +331,8 @@ public class VensimImporter implements ModelImporter {
                 try {
                     classifyAndBuild(eq, displayName, eqName, unit, comment, builder,
                             vensimNames, stockNames, flowNames, lookupNames,
-                            sketchFlowNames, constantValues, timeUnit,
+                            sketchFlowNames, sketchValveNames, equationsByName,
+                            constantValues, timeUnit,
                             subscriptDimensions, subscriptDisplayLabels, warnings);
                 } catch (IllegalArgumentException e) {
                     warnings.add("Error processing '" + name + "': " + e.getMessage());
@@ -299,7 +358,63 @@ public class VensimImporter implements ModelImporter {
             }
         }
 
+        // Phase 2: Attempt to resolve companion CSV files for GET DIRECT DATA references
+        if (baseDir != null) {
+            resolveCompanionCsvFiles(equations, baseDir, builder, warnings);
+        }
+
         return new ImportResult(builder.build(), warnings);
+    }
+
+    /**
+     * Scans equations for GET DIRECT DATA / GET DIRECT CONSTANTS references and attempts
+     * to load companion CSV files from the model's directory. Successfully loaded data
+     * is added as reference datasets to the model definition.
+     */
+    private void resolveCompanionCsvFiles(List<MdlEquation> equations, Path baseDir,
+                                          ModelDefinitionBuilder builder,
+                                          List<String> warnings) {
+        Set<String> resolvedFiles = new HashSet<>();
+        Pattern getDirectPattern = Pattern.compile(
+                "(?i)GET\\s+DIRECT\\s+(DATA|CONSTANTS|LOOKUPS)\\s*\\(");
+
+        for (MdlEquation eq : equations) {
+            String expression = eq.expression();
+            if (expression == null || expression.isBlank()) {
+                continue;
+            }
+            Matcher m = getDirectPattern.matcher(expression);
+            while (m.find()) {
+                int openParen = m.end() - 1;
+                int closeParen = VensimExprTranslator.findMatchingParen(expression, openParen);
+                if (closeParen <= 0) {
+                    continue;
+                }
+                String argsStr = expression.substring(openParen + 1, closeParen);
+                String filePath = VensimExprTranslator.extractFirstArgument(argsStr);
+                if (filePath == null || filePath.isBlank() || !resolvedFiles.add(filePath)) {
+                    continue;
+                }
+                // Only attempt CSV files
+                if (!filePath.toLowerCase(Locale.ROOT).endsWith(".csv")) {
+                    continue;
+                }
+                Path csvPath = baseDir.resolve(filePath);
+                if (!Files.isRegularFile(csvPath)) {
+                    continue;
+                }
+                try {
+                    ReferenceDataset dataset = ReferenceDataCsvReader.read(csvPath, filePath);
+                    builder.referenceDataset(dataset);
+                    warnings.add("Loaded companion CSV '" + filePath
+                            + "' as reference dataset (" + dataset.size()
+                            + " rows, " + dataset.variableNames().size() + " variables)");
+                } catch (IOException e) {
+                    warnings.add("Failed to read companion CSV '" + filePath
+                            + "': " + e.getMessage());
+                }
+            }
+        }
     }
 
     private void classifyAndBuild(MdlEquation eq, String displayName, String eqName,
@@ -308,6 +423,8 @@ public class VensimImporter implements ModelImporter {
                                    Set<String> vensimNames, Set<String> stockNames,
                                    Set<String> flowNames, Set<String> lookupNames,
                                    Set<String> sketchFlowNames,
+                                   Set<String> sketchValveNames,
+                                   Map<String, MdlEquation> equationsByName,
                                    Map<String, Double> constantValues,
                                    String timeUnit,
                                    Map<String, List<String>> subscriptDimensions,
@@ -328,7 +445,8 @@ public class VensimImporter implements ModelImporter {
                 expandSubscriptedVariable(eq, baseName, dimName, dimNameRaw,
                         normalizedLabels, displayLabels, unit, builder,
                         vensimNames, stockNames, flowNames, lookupNames,
-                        sketchFlowNames, constantValues, timeUnit, warnings);
+                        sketchFlowNames, sketchValveNames, equationsByName,
+                        constantValues, timeUnit, warnings);
                 return;
             }
             // If dimension not found, fall through — the brackets will be normalized away
@@ -366,7 +484,8 @@ public class VensimImporter implements ModelImporter {
         if (INTEG_PATTERN.matcher(expression).find()) {
             buildStock(eq, displayName, eqName, expression, unit, comment, builder,
                     vensimNames, flowNames, lookupNames, sketchFlowNames,
-                    constantValues, timeUnit, warnings);
+                    sketchValveNames, equationsByName, constantValues, timeUnit,
+                    warnings);
             return;
         }
 
@@ -391,6 +510,11 @@ public class VensimImporter implements ModelImporter {
             builder.variable(new VariableDef(displayName, comment, "0", unit));
             warnings.add("Variable '" + eq.name()
                     + "' has no equation; imported as constant 0");
+            return;
+        }
+
+        // Skip variable if it was already consumed as a flow during INTEG decomposition
+        if (flowNames.contains(eqName)) {
             return;
         }
 
@@ -456,6 +580,8 @@ public class VensimImporter implements ModelImporter {
                                             Set<String> vensimNames, Set<String> stockNames,
                                             Set<String> flowNames, Set<String> lookupNames,
                                             Set<String> sketchFlowNames,
+                                            Set<String> sketchValveNames,
+                                            Map<String, MdlEquation> equationsByName,
                                             Map<String, Double> constantValues,
                                             String timeUnit, List<String> warnings) {
         String operator = eq.operator();
@@ -488,8 +614,8 @@ public class VensimImporter implements ModelImporter {
                     eq.units(), comment, eq.group());
             classifyAndBuild(labelEq, expandedDisplayName, expandedEqName, unit, comment,
                     builder, vensimNames, stockNames, flowNames, lookupNames,
-                    sketchFlowNames, constantValues, timeUnit,
-                    Map.of(), Map.of(), warnings);
+                    sketchFlowNames, sketchValveNames, equationsByName,
+                    constantValues, timeUnit, Map.of(), Map.of(), warnings);
         }
     }
 
@@ -535,6 +661,8 @@ public class VensimImporter implements ModelImporter {
                              ModelDefinitionBuilder builder,
                              Set<String> vensimNames, Set<String> flowNames,
                              Set<String> lookupNames, Set<String> sketchFlowNames,
+                             Set<String> sketchValveNames,
+                             Map<String, MdlEquation> equationsByName,
                              Map<String, Double> constantValues,
                              String timeUnit, List<String> warnings) {
         // Parse INTEG(rate_expr, initial_value)
@@ -581,19 +709,48 @@ public class VensimImporter implements ModelImporter {
         if (terms != null && terms.size() > 1) {
             for (int i = 0; i < terms.size(); i++) {
                 RateTerm term = terms.get(i);
-                VensimExprTranslator.TranslationResult tr =
-                        VensimExprTranslator.translate(term.expr, eqName, vensimNames, lookupNames);
-                warnings.addAll(tr.warnings());
-                // Use synthetic flow name to avoid conflicts with existing variables
-                String flowSuffix = term.positive ? "_inflow_" + i : "_outflow_" + i;
-                String flowDisplayName = displayName + (term.positive ? " inflow " : " outflow ") + (i + 1);
-                String flowEqName = eqName + flowSuffix;
+                // Try to match the rate term to a sketch flow valve name.
+                // When matched, use the variable's actual equation as the flow equation
+                // and skip creating the variable (since the flow replaces it).
+                String matchedValveName = matchSketchValveName(term.expr, sketchValveNames);
+                String flowDisplayName;
+                String flowEqName;
+                String flowEquation;
+                if (matchedValveName != null) {
+                    flowDisplayName = matchedValveName;
+                    flowEqName = VensimExprTranslator.normalizeName(matchedValveName);
+                    MdlEquation varEq = equationsByName.get(flowEqName);
+                    if (varEq != null && !varEq.expression().isBlank()) {
+                        VensimExprTranslator.TranslationResult varTr =
+                                VensimExprTranslator.translate(varEq.expression(),
+                                        flowEqName, vensimNames, lookupNames);
+                        warnings.addAll(varTr.warnings());
+                        flowEquation = varTr.expression();
+                    } else {
+                        // Fallback: use the term expression directly
+                        VensimExprTranslator.TranslationResult tr =
+                                VensimExprTranslator.translate(term.expr, eqName,
+                                        vensimNames, lookupNames);
+                        warnings.addAll(tr.warnings());
+                        flowEquation = tr.expression();
+                    }
+                } else {
+                    String flowSuffix = term.positive ? "_inflow_" + i : "_outflow_" + i;
+                    flowDisplayName = displayName
+                            + (term.positive ? " inflow " : " outflow ") + (i + 1);
+                    flowEqName = eqName + flowSuffix;
+                    VensimExprTranslator.TranslationResult tr =
+                            VensimExprTranslator.translate(term.expr, eqName,
+                                    vensimNames, lookupNames);
+                    warnings.addAll(tr.warnings());
+                    flowEquation = tr.expression();
+                }
                 if (term.positive) {
                     builder.flow(new FlowDef(flowDisplayName, null,
-                            tr.expression(), timeUnit, null, displayName));
+                            flowEquation, timeUnit, null, displayName));
                 } else {
                     builder.flow(new FlowDef(flowDisplayName, null,
-                            tr.expression(), timeUnit, displayName, null));
+                            flowEquation, timeUnit, displayName, null));
                 }
                 flowNames.add(flowEqName);
                 sketchFlowNames.add(flowEqName);
@@ -824,6 +981,57 @@ public class VensimImporter implements ModelImporter {
     }
 
     /**
+     * Extracts flow valve display names from sketch section type-11 lines.
+     *
+     * @param sketchLines the raw sketch lines from the .mdl file
+     * @return a set of display names for flow valve elements
+     */
+    private static Set<String> extractSketchFlowValveNames(List<String> sketchLines) {
+        Set<String> names = new HashSet<>();
+        for (String line : sketchLines) {
+            String trimmed = line.strip();
+            if (!trimmed.startsWith("11,")) {
+                continue;
+            }
+            String[] parts = trimmed.split(",");
+            if (parts.length < 3) {
+                continue;
+            }
+            String displayName = VensimExprTranslator.normalizeDisplayName(parts[2].strip());
+            if (!displayName.isEmpty()) {
+                names.add(displayName);
+            }
+        }
+        return names;
+    }
+
+    /**
+     * Attempts to match a rate term expression to a sketch flow valve name.
+     * Returns the matching display name when the term is a simple variable reference
+     * that matches a sketch valve, or {@code null} if no match is found.
+     *
+     * @param termExpr the rate term expression (e.g., "Infection Rate")
+     * @param sketchValveNames the set of known sketch flow valve display names
+     * @return the matching display name, or null
+     */
+    private static String matchSketchValveName(String termExpr, Set<String> sketchValveNames) {
+        if (termExpr == null || sketchValveNames.isEmpty()) {
+            return null;
+        }
+        // Only match simple variable references (no operators, no function calls)
+        String stripped = termExpr.strip();
+        if (stripped.contains("(") || stripped.contains(")") || stripped.contains("+")
+                || stripped.contains("-") || stripped.contains("*") || stripped.contains("/")) {
+            return null;
+        }
+        String displayName = VensimExprTranslator.normalizeDisplayName(stripped);
+        if (sketchValveNames.contains(displayName)) {
+            return displayName;
+        }
+        return null;
+    }
+
+    /**
      * A single term from a rate expression, with sign information.
      */
     record RateTerm(String expr, boolean positive) {}
@@ -859,7 +1067,7 @@ public class VensimImporter implements ModelImporter {
                 depth++;
             } else if (c == ')') {
                 depth--;
-            } else if (depth == 0 && (c == '+' || c == '-')) {
+            } else if (depth == 0 && (c == '+' || c == '-') && isBinaryOperatorAt(expr, i)) {
                 String termText = expr.substring(termStart, i).strip();
                 if (!termText.isEmpty()) {
                     terms.add(new RateTerm(termText, positive));
@@ -879,6 +1087,34 @@ public class VensimImporter implements ModelImporter {
             return null;
         }
         return terms;
+    }
+
+    private static final Pattern A_FUNCTION_OF_PATTERN = Pattern.compile(
+            "(?i)^\\s*A\\s+FUNCTION\\s+OF\\s*\\(");
+
+    /**
+     * Returns true if the expression is a Vensim "A FUNCTION OF" documentation
+     * block, which lists dependencies for documentation purposes only.
+     */
+    private static boolean isDocumentationBlock(String expression) {
+        return expression != null && A_FUNCTION_OF_PATTERN.matcher(expression).find();
+    }
+
+    /**
+     * Returns true if the {@code +} or {@code -} at position {@code i} is a binary
+     * operator (subtraction/addition) rather than a unary sign. A sign is binary when
+     * the previous non-whitespace character could end a term: a letter, digit,
+     * underscore, closing paren, or decimal point.
+     */
+    private static boolean isBinaryOperatorAt(String expr, int i) {
+        for (int j = i - 1; j >= 0; j--) {
+            char prev = expr.charAt(j);
+            if (Character.isWhitespace(prev)) {
+                continue;
+            }
+            return Character.isLetterOrDigit(prev) || prev == '_' || prev == ')' || prev == '.';
+        }
+        return false;
     }
 
     private static int findTopLevelComma(String content) {

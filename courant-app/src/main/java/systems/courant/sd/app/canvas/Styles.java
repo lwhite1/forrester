@@ -1,12 +1,36 @@
 package systems.courant.sd.app.canvas;
 
+import javafx.stage.Screen;
+
 /**
- * Shared inline CSS style constants used across UI components.
+ * Shared inline CSS style constants and layout utilities used across UI components.
  * Centralizes style strings to prevent duplication and simplify theme changes.
  */
 public final class Styles {
 
     private Styles() {
+    }
+
+    /**
+     * Standard width for configuration dialogs (SimulationSettings, ParameterSweep,
+     * MultiParameterSweep, MonteCarlo, Optimizer).
+     */
+    public static final double CONFIG_DIALOG_WIDTH = 520;
+
+    /**
+     * Returns the given dimension clamped to 80% of the primary screen width.
+     */
+    public static double screenAwareWidth(double desired) {
+        double screenWidth = Screen.getPrimary().getBounds().getWidth();
+        return Math.min(desired, screenWidth * 0.8);
+    }
+
+    /**
+     * Returns the given dimension clamped to 80% of the primary screen height.
+     */
+    public static double screenAwareHeight(double desired) {
+        double screenHeight = Screen.getPrimary().getBounds().getHeight();
+        return Math.min(desired, screenHeight * 0.8);
     }
 
     // --- Status bar ---
@@ -61,4 +85,16 @@ public final class Styles {
             "-fx-font-weight: bold; -fx-font-size: 13px;";
     public static final String BOLD_TEXT =
             "-fx-font-weight: bold;";
+
+    // --- Activity log panel ---
+    public static final String ACTIVITY_LOG_PANEL =
+            "-fx-background-color: #F5F6F8; -fx-border-color: #BDC3C7; -fx-border-width: 0 1 0 0;";
+    public static final String ACTIVITY_LOG_TITLE =
+            "-fx-font-weight: bold; -fx-font-size: 13px; -fx-padding: 8 8 4 8;";
+    public static final String TRANSPARENT_BACKGROUND =
+            "-fx-background-color: transparent;";
+    public static final String LOG_TIME_LABEL =
+            "-fx-font-size: 9px; -fx-text-fill: #999;";
+    public static final String LOG_MESSAGE_LABEL =
+            "-fx-font-size: 11px;";
 }

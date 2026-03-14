@@ -33,7 +33,7 @@ class CompiledModelTest {
     private Model model;
     private Stock population;
     private CompiledModel compiled;
-    private int[] stepHolder;
+    private long[] stepHolder;
     private double[] dtHolder;
     private AtomicInteger resetCount;
 
@@ -47,7 +47,7 @@ class CompiledModelTest {
         model.addStock(population);
         model.addFlow(growth);
 
-        stepHolder = new int[]{0};
+        stepHolder = new long[]{0};
         dtHolder = new double[]{1.0};
         resetCount = new AtomicInteger(0);
 

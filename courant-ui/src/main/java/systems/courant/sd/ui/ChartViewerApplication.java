@@ -108,7 +108,16 @@ public class ChartViewerApplication extends Application {
      */
     static ChartData snapshot() {
         synchronized (LOCK) {
-            return new ChartData(new ArrayList<>(series), width, height, title, xAxisLabel);
+            List<Series<String, Number>> deepCopy = new ArrayList<>(series.size());
+            for (Series<String, Number> original : series) {
+                Series<String, Number> copy = new Series<>();
+                copy.setName(original.getName());
+                for (XYChart.Data<String, Number> d : original.getData()) {
+                    copy.getData().add(new XYChart.Data<>(d.getXValue(), d.getYValue()));
+                }
+                deepCopy.add(copy);
+            }
+            return new ChartData(deepCopy, width, height, title, xAxisLabel);
         }
     }
 
@@ -270,7 +279,9 @@ public class ChartViewerApplication extends Application {
         for (Series<String, Number> s : allSeries) {
             if (text.equals(s.getName())) {
                 if (cb.isSelected()) {
-                    lineChart.getData().add(s);
+                    if (!lineChart.getData().contains(s)) {
+                        lineChart.getData().add(s);
+                    }
                 } else {
                     lineChart.getData().remove(s);
                 }

@@ -5,7 +5,7 @@ import com.google.common.base.Preconditions;
 import systems.courant.sd.model.compile.Resettable;
 
 import java.util.function.DoubleSupplier;
-import java.util.function.IntSupplier;
+import java.util.function.LongSupplier;
 
 /**
  * Third-order exponential smoothing that implements {@link Formula}, providing the standard
@@ -39,7 +39,7 @@ public class Smooth3 implements Formula, Resettable {
 
     private final DoubleSupplier input;
     private final double smoothingTime;
-    private final IntSupplier currentStep;
+    private final LongSupplier currentStep;
     private final double explicitInitial;
     private final boolean hasExplicitInitial;
 
@@ -47,9 +47,9 @@ public class Smooth3 implements Formula, Resettable {
     private double stage2;
     private double stage3;
     private boolean initialized;
-    private int lastStep = -1;
+    private long lastStep = -1;
 
-    private Smooth3(DoubleSupplier input, double smoothingTime, IntSupplier currentStep,
+    private Smooth3(DoubleSupplier input, double smoothingTime, LongSupplier currentStep,
                     double explicitInitial, boolean hasExplicitInitial) {
         Preconditions.checkNotNull(input, "input supplier must not be null");
         Preconditions.checkNotNull(currentStep, "currentStep supplier must not be null");
@@ -70,7 +70,7 @@ public class Smooth3 implements Formula, Resettable {
      * @param currentStep   supplies the current simulation timestep
      * @return a new Smooth3 formula
      */
-    public static Smooth3 of(DoubleSupplier input, double smoothingTime, IntSupplier currentStep) {
+    public static Smooth3 of(DoubleSupplier input, double smoothingTime, LongSupplier currentStep) {
         return new Smooth3(input, smoothingTime, currentStep, 0, false);
     }
 
@@ -84,7 +84,7 @@ public class Smooth3 implements Formula, Resettable {
      * @return a new Smooth3 formula
      */
     public static Smooth3 of(DoubleSupplier input, double smoothingTime, double initialValue,
-                             IntSupplier currentStep) {
+                             LongSupplier currentStep) {
         return new Smooth3(input, smoothingTime, currentStep, initialValue, true);
     }
 
@@ -109,7 +109,7 @@ public class Smooth3 implements Formula, Resettable {
      */
     @Override
     public double getCurrentValue() {
-        int step = currentStep.getAsInt();
+        long step = currentStep.getAsLong();
         if (!initialized) {
             double init = hasExplicitInitial ? explicitInitial : input.getAsDouble();
             stage1 = init;
@@ -119,7 +119,7 @@ public class Smooth3 implements Formula, Resettable {
             lastStep = step;
         } else if (step > lastStep) {
             double stageTime = smoothingTime / 3.0;
-            int delta = step - lastStep;
+            long delta = step - lastStep;
             double inputVal = input.getAsDouble();
             for (int i = 0; i < delta; i++) {
                 stage1 += (inputVal - stage1) / stageTime;

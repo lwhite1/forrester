@@ -776,4 +776,85 @@ class VensimExprTranslatorTest {
             assertThat(result.expression()).isEqualTo("LOOKUP_AREA(tbl, 0, 5)");
         }
     }
+
+    @Nested
+    @DisplayName("GET external data functions (#480)")
+    class GetExternalDataFunctions {
+
+        @Test
+        void shouldReplaceGetXlsDataWithZero() {
+            var result = VensimExprTranslator.translate(
+                    "GET XLS DATA('data.xlsx', 'Sheet1', 'A', 'B2')", "var", EMPTY_NAMES);
+            assertThat(result.expression()).isEqualTo("0");
+            assertThat(result.warnings()).anyMatch(w -> w.contains("GET XLS DATA"));
+            assertThat(result.warnings()).anyMatch(w -> w.contains("data.xlsx"));
+        }
+
+        @Test
+        void shouldReplaceGetDirectDataWithZero() {
+            var result = VensimExprTranslator.translate(
+                    "GET DIRECT DATA('input.csv', ',', 'A', 'B2')", "var", EMPTY_NAMES);
+            assertThat(result.expression()).isEqualTo("0");
+            assertThat(result.warnings()).anyMatch(w -> w.contains("GET DIRECT DATA"));
+            assertThat(result.warnings()).anyMatch(w -> w.contains("input.csv"));
+        }
+
+        @Test
+        void shouldReplaceGetXlsConstantsWithZero() {
+            var result = VensimExprTranslator.translate(
+                    "GET XLS CONSTANTS('params.xlsx', 'Sheet1', 'B2')", "var", EMPTY_NAMES);
+            assertThat(result.expression()).isEqualTo("0");
+            assertThat(result.warnings()).anyMatch(w -> w.contains("GET XLS CONSTANTS"));
+        }
+
+        @Test
+        void shouldReplaceGetDirectConstantsWithZero() {
+            var result = VensimExprTranslator.translate(
+                    "GET DIRECT CONSTANTS('config.csv', ',', 'B2')", "var", EMPTY_NAMES);
+            assertThat(result.expression()).isEqualTo("0");
+            assertThat(result.warnings()).anyMatch(w -> w.contains("GET DIRECT CONSTANTS"));
+        }
+
+        @Test
+        void shouldReplaceGetXlsLookupsWithZero() {
+            var result = VensimExprTranslator.translate(
+                    "GET XLS LOOKUPS('tables.xlsx', 'Sheet1', 'A', 'B2')", "var", EMPTY_NAMES);
+            assertThat(result.expression()).isEqualTo("0");
+            assertThat(result.warnings()).anyMatch(w -> w.contains("GET XLS LOOKUPS"));
+        }
+
+        @Test
+        void shouldReplaceGetDirectLookupsWithZero() {
+            var result = VensimExprTranslator.translate(
+                    "GET DIRECT LOOKUPS('tables.csv', ',', 'A', 'B2')", "var", EMPTY_NAMES);
+            assertThat(result.expression()).isEqualTo("0");
+            assertThat(result.warnings()).anyMatch(w -> w.contains("GET DIRECT LOOKUPS"));
+        }
+
+        @Test
+        void shouldHandleGetFunctionInLargerExpression() {
+            var result = VensimExprTranslator.translate(
+                    "x + GET XLS DATA('file.xlsx', 'S', 'A', 'B') * 2", "var", EMPTY_NAMES);
+            assertThat(result.expression()).isEqualTo("x + 0 * 2");
+            assertThat(result.warnings()).anyMatch(w -> w.contains("GET XLS DATA"));
+        }
+
+        @Test
+        void shouldHandleCaseInsensitiveGetFunctions() {
+            var result = VensimExprTranslator.translate(
+                    "get direct data('file.csv', ',', 'A', 'B')", "var", EMPTY_NAMES);
+            assertThat(result.expression()).isEqualTo("0");
+            assertThat(result.warnings()).anyMatch(w -> w.contains("GET DIRECT DATA"));
+        }
+
+        @Test
+        void shouldExtractFirstArgument() {
+            assertThat(VensimExprTranslator.extractFirstArgument(
+                    "'file.csv', ',', 'A', 'B2'")).isEqualTo("file.csv");
+            assertThat(VensimExprTranslator.extractFirstArgument(
+                    "\"file.xlsx\", 'Sheet'")).isEqualTo("file.xlsx");
+            assertThat(VensimExprTranslator.extractFirstArgument(
+                    "single_arg")).isEqualTo("single_arg");
+        }
+    }
 }

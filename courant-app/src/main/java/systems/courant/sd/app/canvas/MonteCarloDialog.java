@@ -6,8 +6,6 @@ import javafx.beans.property.SimpleIntegerProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
-import javafx.event.ActionEvent;
-import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonBar;
 import javafx.scene.control.ButtonType;
@@ -17,7 +15,6 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.GridPane;
-import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 
 import java.util.ArrayList;
@@ -61,6 +58,7 @@ public class MonteCarloDialog extends Dialog<MonteCarloDialog.Config> {
         paramBox.setPadding(new Insets(5));
 
         Button addButton = new Button("Add Parameter");
+        addButton.setId("mcAddParam");
         addButton.setOnAction(e -> {
             ParameterRow row = new ParameterRow(constantNames, paramBox);
             parameterRows.add(row);
@@ -79,10 +77,13 @@ public class MonteCarloDialog extends Dialog<MonteCarloDialog.Config> {
         paramScroll.setPrefHeight(200);
 
         iterationsField = new TextField("200");
+        iterationsField.setId("mcIterations");
         samplingCombo = new ComboBox<>(FXCollections.observableArrayList(
                 "LATIN_HYPERCUBE", "RANDOM"));
         samplingCombo.setValue("LATIN_HYPERCUBE");
+        samplingCombo.setId("mcSampling");
         seedField = new TextField("12345");
+        seedField.setId("mcSeed");
 
         GridPane settingsGrid = new GridPane();
         settingsGrid.setHgap(10);
@@ -113,7 +114,7 @@ public class MonteCarloDialog extends Dialog<MonteCarloDialog.Config> {
         VBox content = new VBox(10, paramsLabel, paramScroll, settingsGrid, validationLabel);
         content.setPadding(new Insets(10));
         getDialogPane().setContent(content);
-        getDialogPane().setPrefWidth(500);
+        getDialogPane().setPrefWidth(Styles.screenAwareWidth(Styles.CONFIG_DIALOG_WIDTH));
 
         ButtonType okButton = new ButtonType("OK", ButtonBar.ButtonData.OK_DONE);
         getDialogPane().getButtonTypes().addAll(okButton, ButtonType.CANCEL);
@@ -123,16 +124,6 @@ public class MonteCarloDialog extends Dialog<MonteCarloDialog.Config> {
                         iterationsField.textProperty(), seedField.textProperty(),
                         parameterRows, fieldChangeCounter)
         );
-
-        Button okNode = (Button) getDialogPane().lookupButton(okButton);
-        okNode.addEventFilter(ActionEvent.ACTION, event -> {
-            boolean hasValid = parameterRows.stream().anyMatch(ParameterRow::isValid);
-            if (!hasValid) {
-                event.consume();
-                new Alert(Alert.AlertType.WARNING,
-                        "At least one parameter row must have valid values.").showAndWait();
-            }
-        });
 
         setResultConverter(button -> {
             if (button == okButton) {
@@ -177,53 +168,47 @@ public class MonteCarloDialog extends Dialog<MonteCarloDialog.Config> {
         return "";
     }
 
-    private class ParameterRow {
-        private final ComboBox<String> nameCombo;
+    private class ParameterRow extends ParameterRowBase {
         private final ComboBox<DistributionType> distCombo;
         private final TextField param1Field;
         private final TextField param2Field;
         private final Label param1Label;
         private final Label param2Label;
-        private final HBox pane;
 
         ParameterRow(List<String> constantNames, VBox container) {
-            nameCombo = new ComboBox<>(FXCollections.observableArrayList(constantNames));
-            if (!constantNames.isEmpty()) {
-                nameCombo.setValue(constantNames.getFirst());
-            }
-            nameCombo.setPrefWidth(130);
+            super(constantNames, null,
+                    () -> fieldChangeCounter.set(fieldChangeCounter.get() + 1));
+            int rowIndex = parameterRows.size();
+            nameCombo.setId("mcParamName" + rowIndex);
 
             distCombo = new ComboBox<>(FXCollections.observableArrayList(DistributionType.values()));
             distCombo.setValue(DistributionType.NORMAL);
             distCombo.setPrefWidth(100);
+            distCombo.setId("mcParamDist" + rowIndex);
 
             param1Label = new Label("Mean:");
             param1Field = new TextField("0");
             param1Field.setPrefWidth(60);
+            param1Field.setId("mcParam1_" + rowIndex);
             param2Label = new Label("StdDev:");
             param2Field = new TextField("1");
             param2Field.setPrefWidth(60);
+            param2Field.setId("mcParam2_" + rowIndex);
 
             distCombo.valueProperty().addListener((obs, old, val) -> {
                 updateLabels(val);
                 fieldChangeCounter.set(fieldChangeCounter.get() + 1);
             });
-            param1Field.textProperty().addListener((obs, o, n) ->
-                    fieldChangeCounter.set(fieldChangeCounter.get() + 1));
-            param2Field.textProperty().addListener((obs, o, n) ->
-                    fieldChangeCounter.set(fieldChangeCounter.get() + 1));
+            wireFieldChange(param1Field);
+            wireFieldChange(param2Field);
 
-            pane = new HBox(6);
-            pane.setPadding(new Insets(2));
-
-            Button removeBtn = new Button("X");
-            removeBtn.setOnAction(e -> {
+            Button removeBtn = createRemoveButton(() -> {
                 parameterRows.remove(this);
-                container.getChildren().remove(pane);
+                container.getChildren().remove(getPane());
             });
 
-            pane.getChildren().addAll(nameCombo, distCombo, param1Label, param1Field,
-                    param2Label, param2Field, removeBtn);
+            buildPane(removeBtn, distCombo, param1Label, param1Field,
+                    param2Label, param2Field);
         }
 
         private void updateLabels(DistributionType type) {
@@ -236,12 +221,9 @@ public class MonteCarloDialog extends Dialog<MonteCarloDialog.Config> {
             }
         }
 
-        HBox getPane() {
-            return pane;
-        }
-
+        @Override
         boolean isValid() {
-            if (nameCombo.getValue() == null) {
+            if (!isNameSelected()) {
                 return false;
             }
             try {
@@ -262,7 +244,7 @@ public class MonteCarloDialog extends Dialog<MonteCarloDialog.Config> {
 
         ParameterConfig toConfig() {
             return new ParameterConfig(
-                    nameCombo.getValue(),
+                    getSelectedName(),
                     distCombo.getValue(),
                     Double.parseDouble(param1Field.getText().trim()),
                     Double.parseDouble(param2Field.getText().trim())

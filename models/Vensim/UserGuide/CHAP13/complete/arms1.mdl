@@ -1,0 +1,393 @@
+{UTF-8}
+target armament 1=
+	Total Armament 2 * desired strength ratio 1
+	~	M$
+	~		|
+
+target armament 2=
+	Total Armament 1 * desired strength ratio 2
+	~	M$
+	~		|
+
+desired strength ratio 1=
+	1
+	~	Dmnl
+	~		|
+
+desired strength ratio 2=
+	1
+	~	Dmnl
+	~		|
+
+capacity lifetime 2=
+	30
+	~	Year
+	~		|
+
+armament capacity 2=
+	Economic Capacity 2 * max capacity to armament 2
+	~	M$/Year
+	~		|
+
+armament lifetime 2=
+	20
+	~	Year
+	~		|
+
+initial armament 2=
+	50
+	~	M$
+	~		|
+
+armament obsolescence 2=
+	Total Armament 2/armament lifetime 2
+	~	M$/Year
+	~		|
+
+initial economic capacity2=
+	100
+	~	M$/Year
+	~		|
+
+armament spending 2=
+	armament capacity 2 * fraction armament capacity used 2
+	~	M$/Year
+	~		|
+
+investment spending 2=
+	non armament spending 2 * fraction spending to investment 2
+	~	M$/Year
+	~		|
+
+capacity degradation 2=
+	Economic Capacity 2/capacity lifetime 2
+	~	M$/Year/Year
+	~		|
+
+growth in capacity 2=
+	investment spending 2 * investment effectiveness 2
+	~	M$/Year/Year
+	~		|
+
+Total Armament 2= INTEG (
+	armament spending 2-armament obsolescence 2,
+		initial armament 2)
+	~	M$
+	~		|
+
+indicated armament building 2=
+	MAX(0,armament obsolescence 2 + (target armament 2 - Total Armament 2)/time to correct armament 2\
+		)
+	~	M$/Year
+	~		|
+
+non armament spending 2=
+	Economic Capacity 2 - armament spending 2
+	~	M$/Year
+	~		|
+
+Economic Capacity 2= INTEG (
+	growth in capacity 2 - capacity degradation 2,
+		initial economic capacity2)
+	~	M$/Year
+	~		|
+
+fraction armament capacity used 2= WITH LOOKUP (
+	ZIDZ(indicated armament building 2,armament capacity 2),
+		([(0,0)-(10,1),(0,0),(1,1),(10,1)],(0,0),(0.4,0.4),(2,0.8),(3,0.9),(5,1),(10,1) ))
+	~	Dmnl
+	~		|
+
+time to correct armament 2=
+	5
+	~	Year
+	~		|
+
+fraction spending to investment 2=
+	0.3
+	~	Fraction
+	~		|
+
+investment effectiveness 2=
+	0.15
+	~	1/Year
+	~		|
+
+non armament spending 1=
+	Economic Capacity 1 - armament spending 1
+	~	M$/Year
+	~		|
+
+max capacity to armament 2=
+	0.4
+	~	Fraction
+	~		|
+
+armament capacity 1=
+	Economic Capacity 1 * max capacity to armament 1
+	~	M$/Year
+	~		|
+
+armament spending 1=
+	armament capacity 1 * fraction armament capacity used 1
+	~	M$/Year
+	~		|
+
+armament lifetime 1=
+	20
+	~	Year
+	~		|
+
+armament obsolescence 1=
+	Total Armament 1/armament lifetime 1
+	~	M$/Year
+	~		|
+
+capacity degradation 1=
+	Economic Capacity 1/capacity lifetime1
+	~	M$/Year/Year
+	~		|
+
+capacity lifetime1=
+	30
+	~	Year
+	~		|
+
+indicated armament building 1=
+	MAX(0,armament obsolescence 1 + (target armament 1 - Total Armament 1)/time to correct armament 1\
+		)
+	~	M$/Year
+	~		|
+
+Economic Capacity 1= INTEG (
+	growth in capacity1 - capacity degradation 1,
+		initial economic capacity1)
+	~	M$/Year
+	~		|
+
+fraction armament capacity used 1= WITH LOOKUP (
+	ZIDZ(indicated armament building 1,armament capacity 1),
+		([(0,0)-(10,1),(0,0),(1,1),(10,1)],(0,0),(0.4,0.4),(2,0.8),(3,0.9),(5,1),(10,1) ))
+	~	Dmnl
+	~		|
+
+fraction spending to investment 1=
+	0.3
+	~	Fraction [0,0.6]
+	~		|
+
+growth in capacity1=
+	investment spending 1 * investment effectiveness1
+	~	M$/Year/Year
+	~		|
+
+initial armament 1=
+	50
+	~	M$
+	~		|
+
+initial economic capacity1=
+	100
+	~	M$/Year
+	~		|
+
+investment spending 1=
+	non armament spending 1 * fraction spending to investment 1
+	~	M$/Year
+	~		|
+
+investment effectiveness1=
+	0.15
+	~	1/Year [0.01,0.4]
+	~		|
+
+max capacity to armament 1=
+	0.4
+	~	Fraction [0,1]
+	~		|
+
+time to correct armament 1=
+	5
+	~	Year
+	~		|
+
+Total Armament 1= INTEG (
+	armament spending 1-armament obsolescence 1,
+		initial armament 1)
+	~	M$
+	~		|
+
+********************************************************
+	.Control
+********************************************************~
+		Simulation Control Parameters
+	|
+
+FINAL TIME  = 100
+	~	Year
+	~	The final time for the simulation.
+	|
+
+INITIAL TIME  = 0
+	~	Year
+	~	The initial time for the simulation.
+	|
+
+SAVEPER  = 
+        TIME STEP
+	~	Year [0,?]
+	~	The frequency with which output is stored.
+	|
+
+TIME STEP  = 0.125
+	~	Year [0,?]
+	~	The time step for the simulation.
+	|
+
+\\\---/// Sketch information - do not modify anything except names
+V300  Do not put anything below this section - it will be ignored
+*View 1
+$192-192-192,0,Arial|14||0-0-0|92-92-92|160-160-160|-1--1--1|-1--1--1|96,96,100,0
+10,1,Economic Capacity 1,485,85,53,27,3,3,0,16,0,0,0,0,0-0-0,0-0-0,|14|B|0-0-0
+10,2,Total Armament 1,780,280,59,25,3,131,0,16,0,0,0,0,0-0-0,0-0-0,|14|B|0-0-0
+12,3,48,529,276,13,11,0,3,0,0,-1,0,0,0
+1,4,6,2,4,0,0,22,0,0,0,-1--1--1,,1|(673,277)|
+1,5,6,3,100,0,0,22,0,0,0,-1--1--1,,1|(576,277)|
+11,6,48,617,277,8,11,34,3,0,0,1,0,0,0
+10,7,armament spending 1,617,300,93,12,32,3,0,0,-1,0,0,0
+12,8,48,1107,276,13,11,0,3,0,0,-1,0,0,0
+1,9,11,8,4,0,0,22,0,0,0,-1--1--1,,1|(1027,276)|
+1,10,11,2,100,0,0,22,0,0,0,-1--1--1,,1|(892,276)|
+11,11,48,953,276,8,11,34,3,0,0,1,0,0,0
+10,12,armament obsolescence 1,953,299,112,12,32,3,0,0,-1,0,0,0
+10,13,non armament spending 1,288,264,112,12,0,3,0,0,0,0,0,0
+10,14,investment spending 1,223,176,96,12,0,3,0,0,0,0,0,0
+12,15,48,209,83,13,11,0,3,0,0,-1,0,0,0
+1,16,18,1,4,0,0,22,0,0,0,-1--1--1,,1|(383,85)|
+1,17,18,15,100,0,0,22,0,0,0,-1--1--1,,1|(271,85)|
+11,18,48,327,85,8,11,34,3,0,0,1,0,0,0
+10,19,growth in capacity1,327,108,83,12,32,3,0,0,-1,0,0,0
+1,20,13,14,1,0,0,0,0,64,0,-1--1--1,,1|(241,219)|
+10,21,target armament 1,1040,120,79,12,0,3,0,0,0,0,0,0
+10,22,time to correct armament 1,1056,164,115,12,0,3,0,2,0,0,0,0,0-0-0,0-0-0,|14||64-128-128
+1,23,2,25,1,0,0,0,0,64,0,-1--1--1,,1|(856,232)|
+10,24,fraction armament capacity used 1,765,145,145,12,0,3,0,0,0,0,0,0
+10,25,indicated armament building 1,889,188,128,12,0,3,0,0,0,0,0,0
+1,26,21,25,0,0,0,0,0,64,0,-1--1--1,,1|(972,149)|
+1,27,24,6,1,0,0,0,0,64,0,-1--1--1,,1|(657,213)|
+1,28,25,24,1,0,0,0,0,64,0,-1--1--1,,1|(855,156)|
+10,29,armament lifetime 1,1048,237,85,12,0,3,0,2,0,0,0,0,0-0-0,0-0-0,|14||64-128-128
+1,30,29,11,1,0,0,0,0,64,0,-1--1--1,,1|(985,253)|
+1,31,1,13,1,0,0,0,0,64,0,-1--1--1,,1|(331,180)|
+1,32,7,13,1,0,0,0,0,64,0,-1--1--1,,1|(445,320)|
+10,33,fraction spending to investment 1,165,297,140,12,0,3,0,2,0,0,0,0,0-0-0,0-0-0,|14||64-128-128
+1,34,33,14,1,0,0,0,0,64,0,-1--1--1,,1|(177,236)|
+10,35,investment effectiveness1,129,139,111,12,0,3,0,2,0,0,0,0,0-0-0,0-0-0,|14||64-128-128
+1,36,35,19,1,0,0,0,0,64,0,-1--1--1,,1|(216,120)|
+1,37,14,19,1,0,0,0,0,64,0,-1--1--1,,1|(245,159)|
+10,38,initial armament 1,729,236,76,12,0,3,0,2,0,0,0,0,0-0-0,0-0-0,|14||64-128-128
+1,39,22,25,1,0,0,0,0,0,0,-1--1--1,,1|(1009,173)|
+1,40,11,25,1,0,0,0,0,64,0,-1--1--1,,1|(928,243)|
+1,41,2,11,1,0,0,0,0,64,0,-1--1--1,,1|(881,256)|
+10,42,initial economic capacity1,329,40,109,12,0,3,0,2,0,0,0,0,0-0-0,0-0-0,|14||64-128-128
+10,43,max capacity to armament 1,453,208,120,12,0,3,0,2,0,0,0,0,0-0-0,0-0-0,|14||64-128-128
+12,44,48,765,79,13,11,0,3,0,0,-1,0,0,0
+1,45,47,44,4,0,0,22,0,0,0,-1--1--1,,1|(703,76)|
+1,46,47,1,100,0,0,22,0,0,0,-1--1--1,,1|(588,76)|
+11,47,48,645,76,8,11,34,3,0,0,1,0,0,0
+10,48,capacity degradation 1,645,99,97,12,32,3,0,0,-1,0,0,0
+10,49,capacity lifetime1,553,23,75,12,0,3,0,2,0,0,0,0,0-0-0,0-0-0,|14||64-128-128
+1,50,49,47,1,0,0,0,0,64,0,-1--1--1,,1|(612,39)|
+1,51,1,47,1,0,0,0,0,64,0,-1--1--1,,1|(616,55)|
+10,52,armament capacity 1,563,176,89,12,0,3,0,0,0,0,0,0
+1,53,1,52,1,0,0,0,0,0,0,-1--1--1,,1|(520,129)|
+1,54,43,52,1,0,0,0,0,0,0,-1--1--1,,1|(477,187)|
+1,55,52,6,1,0,0,0,0,0,0,-1--1--1,,1|(611,232)|
+1,56,52,24,0,0,0,0,0,64,0,-1--1--1,,1|(653,161)|
+10,57,desired strength ratio 1,1127,85,99,12,0,3,0,2,0,0,0,0,0-0-0,0-0-0,|14||64-128-128
+1,58,57,21,1,0,0,0,0,64,0,-1--1--1,,1|(1065,104)|
+10,59,Economic Capacity 2,479,437,53,27,3,3,0,16,0,0,0,0,0-0-0,0-0-0,|14|B|0-0-0
+10,60,Total Armament 2,772,636,63,29,3,131,0,16,0,0,0,0,0-0-0,0-0-0,|14|B|0-0-0
+12,61,48,523,628,13,11,0,3,0,0,-1,0,0,0
+1,62,64,60,4,0,0,22,0,0,0,-1--1--1,,1|(664,629)|
+1,63,64,61,100,0,0,22,0,0,0,-1--1--1,,1|(569,629)|
+11,64,48,611,629,8,11,34,3,0,0,1,0,0,0
+10,65,armament spending 2,611,652,93,12,32,3,0,0,-1,0,0,0
+12,66,48,1081,636,13,11,0,3,0,0,-1,0,0,0
+1,67,69,66,4,0,0,22,0,0,0,-1--1--1,,1|(1013,635)|
+1,68,69,60,100,0,0,22,0,0,0,-1--1--1,,1|(889,635)|
+11,69,48,952,635,8,11,34,3,0,0,1,0,0,0
+10,70,armament obsolescence 2,952,657,112,12,32,3,0,0,-1,0,0,0
+10,71,non armament spending 2,296,620,112,12,0,3,0,0,0,0,0,0
+10,72,investment spending 2,204,540,96,12,0,3,0,0,0,0,0,0
+12,73,48,207,439,13,11,0,3,0,0,-1,0,0,0
+1,74,76,59,4,0,0,22,0,0,0,-1--1--1,,1|(384,436)|
+1,75,76,73,100,0,0,22,0,0,0,-1--1--1,,1|(273,436)|
+11,76,48,335,436,8,11,34,3,0,0,1,0,0,0
+10,77,growth in capacity 2,335,459,85,12,32,3,0,0,-1,0,0,0
+1,78,71,72,1,0,0,0,0,64,0,-1--1--1,,1|(233,584)|
+10,79,target armament 2,1013,479,79,12,0,3,0,0,0,0,0,0
+10,80,time to correct armament 2,1128,507,115,12,0,3,0,2,0,0,0,0,0-0-0,0-0-0,|14||64-128-128
+1,81,60,83,1,0,0,0,0,64,0,-1--1--1,,1|(881,581)|
+10,82,fraction armament capacity used 2,761,504,145,12,0,3,0,0,0,0,0,0
+10,83,indicated armament building 2,927,541,128,12,0,3,0,0,0,0,0,0
+1,84,79,83,0,0,0,0,0,64,0,-1--1--1,,1|(977,504)|
+1,85,82,64,1,0,0,0,0,64,0,-1--1--1,,1|(717,528)|
+1,86,83,82,1,0,0,0,0,64,0,-1--1--1,,1|(857,513)|
+10,87,armament lifetime 2,1036,576,85,12,0,3,0,2,0,0,0,0,0-0-0,0-0-0,|14||64-128-128
+1,88,87,69,1,0,0,0,0,64,0,-1--1--1,,1|(1015,596)|
+1,89,59,71,1,0,0,0,0,64,0,-1--1--1,,1|(333,537)|
+1,90,65,71,1,0,0,0,0,64,0,-1--1--1,,1|(447,671)|
+10,91,fraction spending to investment 2,153,663,140,12,0,3,0,2,0,0,0,0,0-0-0,0-0-0,|14||64-128-128
+1,92,91,72,1,0,0,0,0,64,0,-1--1--1,,1|(163,601)|
+10,93,investment effectiveness 2,116,497,113,12,0,3,0,2,0,0,0,0,0-0-0,0-0-0,|14||64-128-128
+1,94,93,77,1,0,0,0,0,64,0,-1--1--1,,1|(185,471)|
+1,95,72,77,1,0,0,0,0,64,0,-1--1--1,,1|(245,495)|
+10,96,initial armament 2,741,588,76,12,0,3,0,2,0,0,0,0,0-0-0,0-0-0,|14||64-128-128
+1,97,80,83,1,0,0,0,0,0,0,-1--1--1,,1|(1071,520)|
+1,98,69,83,1,0,0,0,0,64,0,-1--1--1,,1|(948,603)|
+1,99,60,69,1,0,0,0,0,64,0,-1--1--1,,1|(875,608)|
+10,100,initial economic capacity2,389,385,109,12,0,3,0,2,0,0,0,0,0-0-0,0-0-0,|14||64-128-128
+10,101,max capacity to armament 2,443,576,120,12,0,3,0,2,0,0,0,0,0-0-0,0-0-0,|14||64-128-128
+12,102,48,831,431,13,11,0,3,0,0,-1,0,0,0
+1,103,105,102,4,0,0,22,0,0,0,-1--1--1,,1|(765,431)|
+1,104,105,59,100,0,0,22,0,0,0,-1--1--1,,1|(615,431)|
+11,105,48,705,431,8,11,34,3,0,0,1,0,0,0
+10,106,capacity degradation 2,705,453,97,12,32,3,0,0,-1,0,0,0
+10,107,capacity lifetime 2,813,404,77,12,0,3,0,2,0,0,0,0,0-0-0,0-0-0,|14||64-128-128
+1,108,107,105,1,0,0,0,0,64,0,-1--1--1,,1|(727,411)|
+1,109,59,105,1,0,0,0,0,64,0,-1--1--1,,1|(607,395)|
+10,110,armament capacity 2,552,533,89,12,0,3,0,0,0,0,0,0
+1,111,59,110,0,0,0,0,0,0,0,-1--1--1,,1|(515,484)|
+1,112,101,110,1,0,0,0,0,0,0,-1--1--1,,1|(465,541)|
+1,113,110,64,1,0,0,0,0,0,0,-1--1--1,,1|(609,587)|
+1,114,110,82,0,0,0,0,0,64,0,-1--1--1,,1|(647,519)|
+10,115,desired strength ratio 2,1112,428,99,12,0,3,0,2,0,0,0,0,0-0-0,0-0-0,|14||64-128-128
+1,116,115,79,1,0,0,0,0,64,0,-1--1--1,,1|(1065,447)|
+1,117,42,1,0,0,0,0,0,0,1,-1--1--1,,1|(391,57)|
+1,118,38,2,0,0,0,0,0,0,1,-1--1--1,,1|(739,245)|
+1,119,100,59,0,0,0,0,0,0,1,-1--1--1,,1|(412,399)|
+1,120,96,60,0,0,0,0,0,0,1,-1--1--1,,1|(744,595)|
+1,121,60,21,1,0,0,0,0,64,0,-1--1--1,,1|(1192,155)|
+1,122,2,79,0,0,0,0,0,64,0,-1--1--1,,1|(896,379)|
+///---\\\
+:L<%^E!@
+1:Current.vdf
+9:Current
+22:$,Dollar,Dollars,$s
+22:Hour,Hours
+22:Month,Months
+22:Person,People,Persons
+22:Unit,Units
+22:Week,Weeks
+22:Year,Years
+22:Day,Days
+15:0,0,0,0,0,0
+19:100,0
+27:34,
+34:0,
+4:Time
+5:target armament 2
+24:0
+25:100
+26:100

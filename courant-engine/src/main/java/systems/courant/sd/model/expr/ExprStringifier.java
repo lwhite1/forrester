@@ -1,5 +1,7 @@
 package systems.courant.sd.model.expr;
 
+import java.util.Locale;
+
 /**
  * Converts an {@link Expr} AST back into a readable infix string with minimal parentheses.
  *
@@ -94,11 +96,12 @@ public final class ExprStringifier {
             }
         }
         // Reserved words that would be parsed as keywords or function calls
-        String lower = name.toLowerCase();
+        String lower = name.toLowerCase(Locale.ROOT);
         if (lower.equals("and") || lower.equals("or") || lower.equals("not")) {
             return true;
         }
-        return name.equals("IF") || name.equals("TIME") || name.equals("DT");
+        return name.equals("IF") || name.equals("IF_SHORT")
+                || name.equals("TIME") || name.equals("DT");
     }
 
     private static void appendBinaryOp(StringBuilder sb, Expr.BinaryOp bin, int contextPrecedence) {
@@ -145,7 +148,7 @@ public final class ExprStringifier {
     }
 
     private static void appendConditional(StringBuilder sb, Expr.Conditional cond) {
-        sb.append("IF(");
+        sb.append(cond.shortCircuit() ? "IF_SHORT(" : "IF(");
         appendExpr(sb, cond.condition(), MIN_PRECEDENCE);
         sb.append(", ");
         appendExpr(sb, cond.thenExpr(), MIN_PRECEDENCE);

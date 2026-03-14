@@ -121,6 +121,53 @@ class ChartViewerApplicationTest {
     }
 
     @Test
+    @DisplayName("snapshot deep-copies series so mutations do not leak (#530)")
+    void shouldDeepCopySeriesInSnapshot() {
+        ChartViewerApplication.reset();
+        ChartViewerApplication.addSeries(List.of("Stock"), List.of());
+        ChartViewerApplication.addValues(List.of(10.0), List.of(), 0);
+        ChartViewerApplication.addValues(List.of(20.0), List.of(), 1);
+
+        ChartViewerApplication.ChartData snap = ChartViewerApplication.snapshot();
+
+        // Mutate the original by adding more data after snapshot
+        ChartViewerApplication.addValues(List.of(30.0), List.of(), 2);
+
+        // The snapshot should still have only 2 data points
+        assertThat(snap.series()).hasSize(1);
+        assertThat(snap.series().getFirst().getData()).hasSize(2);
+    }
+
+    @Test
+    @DisplayName("snapshot preserves series names")
+    void shouldPreserveSeriesNamesInSnapshot() {
+        ChartViewerApplication.reset();
+        ChartViewerApplication.addSeries(List.of("Alpha", "Beta"), List.of("Gamma"));
+        ChartViewerApplication.addValues(List.of(1.0, 2.0), List.of(3.0), 0);
+
+        ChartViewerApplication.ChartData snap = ChartViewerApplication.snapshot();
+
+        assertThat(snap.series()).hasSize(3);
+        assertThat(snap.series().get(0).getName()).isEqualTo("Alpha");
+        assertThat(snap.series().get(1).getName()).isEqualTo("Beta");
+        assertThat(snap.series().get(2).getName()).isEqualTo("Gamma");
+    }
+
+    @Test
+    @DisplayName("snapshot preserves data point values")
+    void shouldPreserveDataPointValuesInSnapshot() {
+        ChartViewerApplication.reset();
+        ChartViewerApplication.addSeries(List.of("S"), List.of());
+        ChartViewerApplication.addValues(List.of(42.0), List.of(), 5);
+
+        ChartViewerApplication.ChartData snap = ChartViewerApplication.snapshot();
+
+        XYChart.Data<String, Number> dataPoint = snap.series().getFirst().getData().getFirst();
+        assertThat(dataPoint.getXValue()).isEqualTo("5");
+        assertThat(dataPoint.getYValue().doubleValue()).isEqualTo(42.0);
+    }
+
+    @Test
     void shouldReadSizeUnderLockFromAnotherThread() throws InterruptedException {
         // Set size on this thread
         ChartViewerApplication.setSize(1024, 768);

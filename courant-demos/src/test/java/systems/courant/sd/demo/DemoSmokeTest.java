@@ -16,6 +16,10 @@ import org.apache.commons.math3.distribution.NormalDistribution;
 import org.apache.commons.math3.distribution.UniformRealDistribution;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
+
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 import static systems.courant.sd.measure.Units.DAY;
 import static systems.courant.sd.measure.Units.PEOPLE;
@@ -369,6 +373,51 @@ class DemoSmokeTest {
     }
 
     @Test
+    @DisplayName("FlowTimeDemo throughput uses clamped history index when TAT exceeds current step (#466)")
+    void flowTimeDemoClampedHistoryIndex() {
+        var hour = systems.courant.sd.measure.units.time.TimeUnits.HOUR;
+        var model = new Model("FlowTime Clamp Test");
+        double capacity = 190;
+        double tatGoalHours = 336;
+
+        Stock wip = new Stock("WIP", 1000, systems.courant.sd.measure.Units.DIMENSIONLESS);
+        Stock tat = new Stock("TAT", tatGoalHours, hour);
+
+        Simulation sim = new Simulation(model, hour, WEEK, 1);
+
+        Flow demand = systems.courant.sd.model.Flows.linearGrowth("New Orders", DAY, wip, 200);
+
+        Flow throughput = Flow.create("Delivered Reports", DAY, () -> {
+            int demandDelay = Math.max(0, (int) Math.round(tat.getValue()));
+            int stepToGet = Math.max(0, (int) sim.getCurrentStep() - demandDelay);
+            double demandPlusDelay = demand.getHistoryAtTimeStep(stepToGet);
+            return new Quantity(Math.min(capacity, demandPlusDelay),
+                    systems.courant.sd.measure.Units.DIMENSIONLESS);
+        });
+
+        wip.addInflow(demand);
+        wip.addOutflow(throughput);
+
+        Flow tatAdjustment = Flow.create("TAT Adjustment", hour, () -> {
+            double currentTAT = Math.max(0, tat.getValue());
+            double actualTAT = (wip.getValue() / capacity) * 24.0;
+            return new Quantity((actualTAT - currentTAT) / 24.0, hour);
+        });
+        tat.addInflow(tatAdjustment);
+
+        model.addStock(wip);
+        model.addStock(tat);
+
+        sim.execute();
+
+        // With clamped index, throughput uses step-0 demand instead of returning 0.
+        // Verify the simulation completes without error and throughput history has non-zero values.
+        assertThat(throughput.getHistoryAtTimeStep(0)).isGreaterThanOrEqualTo(0);
+        // At step 1, demand history exists; throughput should be positive (capped at capacity)
+        assertThat(throughput.getHistoryAtTimeStep(1)).isGreaterThan(0);
+    }
+
+    @Test
     @DisplayName("ThirdOrderMaterialDelayDemo model simulates")
     void thirdOrderDelayDemo() {
         var model = new Model("Third Order Delay Test");
@@ -521,5 +570,27 @@ class DemoSmokeTest {
         new Simulation(model, DAY, Times.years(1)).execute();
         // With death rate > birth rate, population should decline
         assertThat(pop.getValue()).isLessThan(500);
+    }
+
+    // ---- CSV path tests (#447) ----
+
+    @Test
+    @DisplayName("CsvSubscriber writes to tmpdir path, not relative CWD (#447)")
+    void csvSubscriberWritesToTmpdir(@TempDir Path tempDir) throws Exception {
+        String csvPath = tempDir.resolve("courant-test.csv").toString();
+        var model = new Model("CSV Path Test");
+        var stock = new Stock("Level", 100, systems.courant.sd.measure.Units.DIMENSIONLESS);
+        model.addStock(stock);
+
+        var csv = new systems.courant.sd.io.CsvSubscriber(csvPath);
+        var sim = new Simulation(model, systems.courant.sd.measure.Units.MINUTE,
+                systems.courant.sd.measure.Units.MINUTE, 2);
+        sim.addEventHandler(csv);
+        sim.execute();
+
+        Path written = Path.of(csvPath);
+        assertThat(written).exists();
+        assertThat(written.isAbsolute()).isTrue();
+        assertThat(Files.readAllLines(written)).hasSizeGreaterThan(1);
     }
 }

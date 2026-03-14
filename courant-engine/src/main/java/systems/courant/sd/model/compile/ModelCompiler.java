@@ -100,7 +100,7 @@ public class ModelCompiler {
             model.setMetadata(def.metadata());
         }
         List<Resettable> resettables = new ArrayList<>();
-        int[] stepHolder = {0};
+        long[] stepHolder = {0};
         double[] dtHolder = {1.0};
         TimeUnit[] simTimeUnitHolder = new TimeUnit[1];
 
@@ -110,7 +110,7 @@ public class ModelCompiler {
         compileInto(expandedDef, model, context, resettables, stepHolder);
 
         return new CompiledModel(model, resettables, def, stepHolder, dtHolder,
-                simTimeUnitHolder, unitRegistry);
+                simTimeUnitHolder, unitRegistry, context.getWarnings());
     }
 
     /**
@@ -118,7 +118,7 @@ public class ModelCompiler {
      */
     private void compileInto(ModelDefinition def, Model model,
                              CompilationContext context,
-                             List<Resettable> resettables, int[] stepHolder) {
+                             List<Resettable> resettables, long[] stepHolder) {
         // Stocks — create all first, then evaluate initial expressions
         // (expressions may reference other stocks)
         for (StockDef sDef : def.stocks()) {
@@ -165,7 +165,7 @@ public class ModelCompiler {
 
     private void compileModule(ModuleInstanceDef mDef, Model parentModel,
                                CompilationContext parentContext,
-                               List<Resettable> resettables, int[] stepHolder) {
+                               List<Resettable> resettables, long[] stepHolder) {
         ModelDefinition innerDef = mDef.definition();
         Module module = new Module(mDef.instanceName());
         String errorContext = " in module '" + mDef.instanceName() + "'";

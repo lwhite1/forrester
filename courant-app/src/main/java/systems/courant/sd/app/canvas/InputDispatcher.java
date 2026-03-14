@@ -9,6 +9,7 @@ import javafx.scene.input.ScrollEvent;
 
 import systems.courant.sd.model.def.ElementType;
 
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
@@ -590,6 +591,12 @@ final class InputDispatcher {
         if (event.getCode() == KeyCode.ESCAPE) {
             handleEscape(canvas);
             event.consume();
+        } else if (event.getCode() == KeyCode.ENTER && isConnectionTool(canvas.getActiveTool())) {
+            handleConnectionEnter(canvas);
+            event.consume();
+        } else if (event.getCode() == KeyCode.TAB && isConnectionTool(canvas.getActiveTool())) {
+            handleConnectionTab(canvas, event.isShiftDown());
+            event.consume();
         } else if (event.getCode() == KeyCode.SPACE) {
             spaceDown = true;
             updateCursor(canvas);
@@ -654,6 +661,82 @@ final class InputDispatcher {
         if (event.getCode() == KeyCode.SPACE) {
             spaceDown = false;
         }
+    }
+
+    private static boolean isConnectionTool(CanvasToolBar.Tool tool) {
+        return tool == CanvasToolBar.Tool.PLACE_FLOW
+                || tool == CanvasToolBar.Tool.PLACE_CAUSAL_LINK
+                || tool == CanvasToolBar.Tool.PLACE_INFO_LINK;
+    }
+
+    /**
+     * Performs a connection click at the selected element's center, enabling
+     * fully keyboard-driven connection creation (Enter to confirm source/target).
+     */
+    private void handleConnectionEnter(ModelCanvas canvas) {
+        CanvasState canvasState = canvas.canvasState();
+        Set<String> selection = canvasState.getSelection();
+
+        if (selection.isEmpty()) {
+            return;
+        }
+
+        String selected = selection.iterator().next();
+        double worldX = canvasState.getX(selected);
+        double worldY = canvasState.getY(selected);
+
+        if (Double.isNaN(worldX) || Double.isNaN(worldY)) {
+            return;
+        }
+
+        CanvasToolBar.Tool activeTool = canvas.getActiveTool();
+        if (activeTool == CanvasToolBar.Tool.PLACE_FLOW) {
+            canvas.handleFlowClick(worldX, worldY);
+        } else if (activeTool == CanvasToolBar.Tool.PLACE_CAUSAL_LINK) {
+            canvas.handleCausalLinkClick(worldX, worldY);
+        } else if (activeTool == CanvasToolBar.Tool.PLACE_INFO_LINK) {
+            canvas.handleInfoLinkClick(worldX, worldY);
+        }
+        updateCursor(canvas);
+    }
+
+    /**
+     * Cycles element selection forward (Tab) or backward (Shift+Tab),
+     * enabling keyboard navigation to choose connection endpoints.
+     */
+    private void handleConnectionTab(ModelCanvas canvas, boolean reverse) {
+        CanvasState canvasState = canvas.canvasState();
+        List<String> drawOrder = canvasState.getDrawOrder();
+        if (drawOrder.isEmpty()) {
+            return;
+        }
+
+        Set<String> selection = canvasState.getSelection();
+        String current = selection.isEmpty() ? null : selection.iterator().next();
+
+        int currentIndex = current != null ? drawOrder.indexOf(current) : -1;
+        int nextIndex;
+        if (reverse) {
+            nextIndex = currentIndex <= 0 ? drawOrder.size() - 1 : currentIndex - 1;
+        } else {
+            nextIndex = currentIndex < 0 || currentIndex >= drawOrder.size() - 1
+                    ? 0 : currentIndex + 1;
+        }
+
+        String next = drawOrder.get(nextIndex);
+        canvasState.select(next);
+
+        // Update rubber-band to point at the newly selected element
+        double worldX = canvasState.getX(next);
+        double worldY = canvasState.getY(next);
+        if (!Double.isNaN(worldX) && !Double.isNaN(worldY)) {
+            flowCreation.updateRubberBand(worldX, worldY);
+            causalLinkCreation.updateRubberBand(worldX, worldY);
+            infoLinkCreation.updateRubberBand(worldX, worldY);
+        }
+
+        canvas.requestRedraw();
+        canvas.fireStatusChanged();
     }
 
     private void handleEscape(ModelCanvas canvas) {

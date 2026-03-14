@@ -48,6 +48,7 @@ the license of the underlying model content, not the engine.
 | Engine, UI, app, tools   | AGPL-3.0         | `LICENSE`                   |
 | Original demo models     | CC-BY-SA-4.0     | `courant-demos/LICENSE`   |
 | TU Delft / Pruyt models  | CC-BY-NC-SA-4.0  | `THIRD-PARTY-LICENSES`      |
+| Vensim bundled models    | MIT              | `models/Vensim/LICENSE`     |
 
 ## Viewing Model Metadata
 

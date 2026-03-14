@@ -223,16 +223,18 @@ public class RegressionTest {
     // --- Stock regressions ---
 
     @Test
-    public void stockShouldRetainValueOnNaN() {
-        // Fixed (#545): NaN no longer crashes — stock retains previous value
+    public void stockShouldKeepPreviousValueOnNaN() {
+        // Changed in #278: setValue now logs and keeps previous value instead of throwing,
+        // consistent with Simulation.updateStocks() behavior
         Stock stock = new Stock("S", 100, THING);
         stock.setValue(Double.NaN);
         assertEquals(100, stock.getValue(), 0.0);
     }
 
     @Test
-    public void stockShouldRetainValueOnInfinity() {
-        // Fixed (#545): Infinity no longer crashes — stock retains previous value
+    public void stockShouldKeepPreviousValueOnInfinity() {
+        // Changed in #278: setValue now logs and keeps previous value instead of throwing,
+        // consistent with Simulation.updateStocks() behavior
         Stock stock = new Stock("S", 100, THING);
         stock.setValue(Double.POSITIVE_INFINITY);
         assertEquals(100, stock.getValue(), 0.0);

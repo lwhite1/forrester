@@ -1,0 +1,104 @@
+{UTF-8}
+{UTF-8}
+
+Coffee Temperature = INTEG(-cooling, initial temperature)
+	~	Farenheit
+	~		|
+
+cooling = (Coffee Temperature - room temperature) / time to cool
+	~	Farenheit/minute
+	~		|
+
+initial temperature = 140
+	~	Farenheit
+	~		|
+
+room temperature = 68
+	~	Farenheit
+	~		|
+
+time to cool = 20
+	~	minute
+	~		|
+
+********************************************************
+	.Control
+********************************************************~
+		Simulation Control Paramaters
+	|
+
+FINAL TIME  = 100
+	~	minute
+	~	The final time for the simulation.
+	|
+
+INITIAL TIME  = 0
+	~	minute
+	~	The initial time for the simulation.
+	|
+
+SAVEPER  = 
+        TIME STEP
+	~	minute
+	~	The frequency with which output is stored.
+	|
+
+TIME STEP  = 0.25
+	~	minute
+	~	The time step for the simulation.
+	|
+
+\\\---/// Sketch information - do not modify anything except names
+V300  Do not put anything below this section - it will be ignored
+*View 1
+$192-192-192,0,|12||-1--1--1|92-92-92|160-160-160|-1--1--1|255-255-255|96,96,100,0
+10,1,Coffee Temperature,136,232,60,31,3,131,0,50,0,1,0,0,-1--1--1,0-0-0,Vensim Sans||B|0-0-0,0,0,0,0,0,0
+12,2,48,321,233,10,8,0,3,0,0,-1,0,0,0,0,0,0,0,0,0
+11,3,0,239,233,7,8,34,3,0,0,1,0,0,0,0,0,0,0,0,0
+10,4,cooling,239,271,75,30,32,3,0,0,0,1,0,0,0,0,0,0,0,0
+10,5,time to cool,309,297,75,30,0,3,0,2,0,1,0,0,-1--1--1,-1--1--1,|||64-128-128,0,0,0,0,0,0
+10,6,initial temperature,105,153,75,30,0,3,0,2,0,1,0,0,-1--1--1,-1--1--1,|||64-128-128,0,0,0,0,0,0
+10,7,room temperature,267,173,75,30,0,3,0,2,0,1,0,0,-1--1--1,-1--1--1,|||64-128-128,0,0,0,0,0,0
+1,8,3,2,4,0,0,22,0,0,0,-1--1--1,,1|(278,233)|
+1,9,3,1,100,0,0,22,0,0,0,-1--1--1,,1|(214,233)|
+1,10,5,4,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,11,7,3,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,12,1,4,2,0,0,0,0,0,0,-1--1--1,,1|(181,291)|
+1,13,6,1,0,0,0,0,0,0,1,-1--1--1,,1|(0,0)|
+12,14,0,221,539,200,200,3,44,0,0,2,0,0,0,0,0,0,0,0,0
+Coffee Temperature,graph
+12,15,0,199,85,80,40,8,7,0,0,-1,1,0,0,0,0,0,0,0,0
+COOL MODEL
+///---\\\
+:L<%^E!@
+4:Time
+5:initial temperature
+9:Cool
+19:100,0
+24:0
+25:100
+26:100
+23:0
+15:0,0,0,0,0,0
+27:0,
+34:0,
+42:0
+72:0
+73:0
+95:0
+96:0
+97:0
+77:0
+78:0
+102:1
+93:0
+94:0
+92:0
+91:0
+90:0
+87:0
+75:
+43:
+103:8,8,8,3,8
+105:0,0,0,0,0,0,0,0,0,0
+104:Vensim Sans|12||0-0-0|0-0-0|-1--1--1|0-0-255|192-192-192|-1--1--1

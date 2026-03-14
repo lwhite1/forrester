@@ -5,7 +5,7 @@ import com.google.common.base.Preconditions;
 import systems.courant.sd.model.compile.Resettable;
 
 import java.util.function.DoubleSupplier;
-import java.util.function.IntSupplier;
+import java.util.function.LongSupplier;
 
 /**
  * First-order exponential smoothing that implements {@link Formula}, providing the standard
@@ -36,15 +36,15 @@ public class Smooth implements Formula, Resettable {
 
     private final DoubleSupplier input;
     private final double smoothingTime;
-    private final IntSupplier currentStep;
+    private final LongSupplier currentStep;
     private final double explicitInitial;
     private final boolean hasExplicitInitial;
 
     private double smoothed;
     private boolean initialized;
-    private int lastStep = -1;
+    private long lastStep = -1;
 
-    private Smooth(DoubleSupplier input, double smoothingTime, IntSupplier currentStep,
+    private Smooth(DoubleSupplier input, double smoothingTime, LongSupplier currentStep,
                    double explicitInitial, boolean hasExplicitInitial) {
         Preconditions.checkNotNull(input, "input supplier must not be null");
         Preconditions.checkNotNull(currentStep, "currentStep supplier must not be null");
@@ -65,7 +65,7 @@ public class Smooth implements Formula, Resettable {
      * @param currentStep   supplies the current simulation timestep
      * @return a new Smooth formula
      */
-    public static Smooth of(DoubleSupplier input, double smoothingTime, IntSupplier currentStep) {
+    public static Smooth of(DoubleSupplier input, double smoothingTime, LongSupplier currentStep) {
         return new Smooth(input, smoothingTime, currentStep, 0, false);
     }
 
@@ -79,7 +79,7 @@ public class Smooth implements Formula, Resettable {
      * @return a new Smooth formula
      */
     public static Smooth of(DoubleSupplier input, double smoothingTime, double initialValue,
-                            IntSupplier currentStep) {
+                            LongSupplier currentStep) {
         return new Smooth(input, smoothingTime, currentStep, initialValue, true);
     }
 
@@ -104,13 +104,13 @@ public class Smooth implements Formula, Resettable {
      */
     @Override
     public double getCurrentValue() {
-        int step = currentStep.getAsInt();
+        long step = currentStep.getAsLong();
         if (!initialized) {
             smoothed = hasExplicitInitial ? explicitInitial : input.getAsDouble();
             initialized = true;
             lastStep = step;
         } else if (step > lastStep) {
-            int delta = step - lastStep;
+            long delta = step - lastStep;
             double inputVal = input.getAsDouble();
             for (int i = 0; i < delta; i++) {
                 smoothed += (inputVal - smoothed) / smoothingTime;

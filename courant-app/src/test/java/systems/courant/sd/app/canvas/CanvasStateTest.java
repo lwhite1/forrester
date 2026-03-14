@@ -526,6 +526,72 @@ class CanvasStateTest {
     }
 
     @Nested
+    @DisplayName("drawOrder caching (#532)")
+    class DrawOrderCaching {
+
+        @Test
+        void shouldReturnSameInstanceOnConsecutiveCalls() {
+            state.addElement("A", ElementType.STOCK, 0, 0);
+            List<String> first = state.getDrawOrder();
+            List<String> second = state.getDrawOrder();
+
+            assertThat(first).isSameAs(second);
+        }
+
+        @Test
+        void shouldInvalidateCacheOnAddElement() {
+            state.addElement("A", ElementType.STOCK, 0, 0);
+            List<String> before = state.getDrawOrder();
+
+            state.addElement("B", ElementType.FLOW, 100, 0);
+            List<String> after = state.getDrawOrder();
+
+            assertThat(before).isNotSameAs(after);
+            assertThat(after).containsExactly("A", "B");
+        }
+
+        @Test
+        void shouldInvalidateCacheOnRemoveElement() {
+            state.addElement("A", ElementType.STOCK, 0, 0);
+            state.addElement("B", ElementType.FLOW, 100, 0);
+            List<String> before = state.getDrawOrder();
+
+            state.removeElement("A");
+            List<String> after = state.getDrawOrder();
+
+            assertThat(before).isNotSameAs(after);
+            assertThat(after).containsExactly("B");
+        }
+
+        @Test
+        void shouldInvalidateCacheOnRenameElement() {
+            state.addElement("A", ElementType.STOCK, 0, 0);
+            List<String> before = state.getDrawOrder();
+
+            state.renameElement("A", "Alpha");
+            List<String> after = state.getDrawOrder();
+
+            assertThat(before).isNotSameAs(after);
+            assertThat(after).containsExactly("Alpha");
+        }
+
+        @Test
+        void shouldInvalidateCacheOnLoadFrom() {
+            state.addElement("X", ElementType.STOCK, 0, 0);
+            List<String> before = state.getDrawOrder();
+
+            ViewDef view = new ViewDef("test", List.of(
+                    new ElementPlacement("Y", ElementType.AUX, 50, 50)
+            ), List.of(), List.of());
+            state.loadFrom(view);
+            List<String> after = state.getDrawOrder();
+
+            assertThat(before).isNotSameAs(after);
+            assertThat(after).containsExactly("Y");
+        }
+    }
+
+    @Nested
     @DisplayName("drawOrder set semantics (#433)")
     class DrawOrderSetSemantics {
 

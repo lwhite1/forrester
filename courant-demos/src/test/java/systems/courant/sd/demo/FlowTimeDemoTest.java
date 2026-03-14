@@ -27,9 +27,17 @@ class FlowTimeDemoTest {
     @Test
     @DisplayName("run() completes without exception")
     void shouldRunWithoutException() {
-        assertThatCode(() -> new FlowTimeDemo().run(
-                1000, 336, 190, 200, 24.0, 24.0, 4))
-                .doesNotThrowAnyException();
+        // FlowTimeDemo.run() uses StockLevelChartViewer which requires a display.
+        // Skip on headless CI environments where JavaFX toolkit cannot initialize.
+        try {
+            new FlowTimeDemo().run(1000, 336, 190, 200, 24.0, 24.0, 4);
+        } catch (UnsupportedOperationException e) {
+            if (e.getMessage() != null && e.getMessage().contains("DISPLAY")) {
+                org.junit.jupiter.api.Assumptions.assumeTrue(false,
+                        "Skipping: headless environment, no DISPLAY available");
+            }
+            throw e;
+        }
     }
 
     @Test

@@ -30,11 +30,12 @@ public class CompiledModel {
     private final Model model;
     private final List<Resettable> resettables;
     private final ModelDefinition source;
-    private final int[] stepHolder;
+    private final long[] stepHolder;
     private final double[] dtHolder;
     private final TimeUnit[] simTimeUnitHolder;
     private final UnitRegistry unitRegistry;
     private final Map<Stock, Double> initialStockValues;
+    private final List<String> compilationWarnings;
 
     /**
      * Creates a compiled model wrapping the runnable model and its compilation artifacts.
@@ -48,8 +49,27 @@ public class CompiledModel {
      * @param unitRegistry the unit registry used during compilation
      */
     public CompiledModel(Model model, List<Resettable> resettables, ModelDefinition source,
-                         int[] stepHolder, double[] dtHolder, TimeUnit[] simTimeUnitHolder,
+                         long[] stepHolder, double[] dtHolder, TimeUnit[] simTimeUnitHolder,
                          UnitRegistry unitRegistry) {
+        this(model, resettables, source, stepHolder, dtHolder, simTimeUnitHolder,
+                unitRegistry, List.of());
+    }
+
+    /**
+     * Creates a compiled model with compilation warnings.
+     *
+     * @param model       the compiled runnable model
+     * @param resettables stateful formulas that need resetting between simulation runs
+     * @param source      the original model definition
+     * @param stepHolder  a single-element array tracking the current simulation step
+     * @param dtHolder    a single-element array holding the DT value
+     * @param simTimeUnitHolder a single-element array holding the simulation time unit
+     * @param unitRegistry the unit registry used during compilation
+     * @param compilationWarnings non-fatal warnings from compilation
+     */
+    public CompiledModel(Model model, List<Resettable> resettables, ModelDefinition source,
+                         long[] stepHolder, double[] dtHolder, TimeUnit[] simTimeUnitHolder,
+                         UnitRegistry unitRegistry, List<String> compilationWarnings) {
         this.model = model;
         this.resettables = List.copyOf(resettables);
         this.source = source;
@@ -57,6 +77,7 @@ public class CompiledModel {
         this.dtHolder = dtHolder;
         this.simTimeUnitHolder = simTimeUnitHolder;
         this.unitRegistry = unitRegistry;
+        this.compilationWarnings = List.copyOf(compilationWarnings);
         this.initialStockValues = new LinkedHashMap<>();
         for (Stock stock : model.getStocks()) {
             initialStockValues.put(stock, stock.getValue());
@@ -82,6 +103,14 @@ public class CompiledModel {
      */
     public ModelDefinition getSource() {
         return source;
+    }
+
+    /**
+     * Returns non-fatal warnings from compilation (e.g. delay parameters that
+     * could not be resolved at compile time and fell back to defaults).
+     */
+    public List<String> getCompilationWarnings() {
+        return compilationWarnings;
     }
 
     /**
@@ -138,6 +167,8 @@ public class CompiledModel {
         simTimeUnitHolder[0] = timeStep;
         setDt(settings.dt());
         Simulation sim = new Simulation(model, timeStep, new Quantity(settings.duration(), durationUnit));
+        sim.setStrictMode(settings.strictMode());
+        sim.setSavePer(settings.savePer());
         installStepSync(sim);
         return sim;
     }
@@ -194,17 +225,17 @@ public class CompiledModel {
      * Event handler that synchronizes the compiled model's step counter with the simulation.
      */
     private static class StepSyncHandler implements EventHandler {
-        private final int[] stepHolder;
+        private final long[] stepHolder;
         private final Simulation sim;
 
-        StepSyncHandler(int[] stepHolder, Simulation sim) {
+        StepSyncHandler(long[] stepHolder, Simulation sim) {
             this.stepHolder = stepHolder;
             this.sim = sim;
         }
 
         @Override
         public void handleTimeStepEvent(TimeStepEvent event) {
-            stepHolder[0] = (int) sim.getCurrentStep();
+            stepHolder[0] = sim.getCurrentStep();
         }
     }
 }

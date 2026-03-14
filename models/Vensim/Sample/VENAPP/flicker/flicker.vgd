@@ -1,0 +1,6 @@
+:GRAPH WIP1
+:TITLE A wip graph to keep the Wip window from coming up
+:WIP
+:NO-LEGEND 7
+:SCALE
+:VAR time

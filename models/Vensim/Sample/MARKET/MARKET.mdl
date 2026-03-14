@@ -1,0 +1,534 @@
+{UTF-8}
+{UTF-8}
+
+accrued revenue  =
+        unit sales
+             * PRICE
+	~	$/ Month
+	~		|
+
+adv budget  =
+        FRAC BUDGET ADV
+             * cash revenue
+	~	$/ Month
+	~		|
+
+Adv Budget Effective  =
+        INTEG( ( adv budget
+                  - Adv Budget Effective )
+                  / ADV IMPACT DELAY ,
+             adv budget )
+	~	$/ Month
+	~		|
+
+ADV IMPACT DELAY  = 12
+	~	Months
+	~		|
+
+cash revenue  =
+        Receivables
+             / TIME TO CLEAR RECEIVABLES
+	~	$/ Month
+	~		|
+
+Cum Retained Cash  =
+        INTEG( retained cash flow ,
+             0)
+	~	$
+	~		~	:SUPPLEMENTARY 
+	|
+
+DEMOS PER PERSON MONTH  = 12
+	~	Orders / Month / Person
+	~		|
+
+eff of lead avail on demos  =
+        TABLE FOR EFF OF LEADS ( Potential Orders
+                  / Int Dir Salespeople )
+	~	Dimensionless
+	~		|
+
+effect of advertising  =
+        TABLE FOR EFFECT OF ADV ( Adv Budget Effective
+                  / Products )
+	~	Dimensionless
+	~		|
+
+DURATION OF NEGOTIATION  = 1
+	~	Month
+	~		|
+
+EXT SALES REP FEE  = 400
+	~	$/ Person / Month
+	~		|
+
+external sales reps  =
+        cash revenue
+             * FRAC BUDGET EXT SALES REPS
+             / EXT SALES REP FEE
+	~	People
+	~		|
+
+FINAL TIME  = 60
+	~	Month
+	~	    The final time for the simulation
+	|
+
+FRAC BUDGET ADV  = INITIAL(PERCENT BUDGET ADV/100)
+	~	Dimensionless
+	~		|
+
+FRAC BUDGET EXT SALES REPS  = INITIAL(PERCENT BUDGET EXT SALES REPS/100)
+	~	Dimensionless
+	~		|
+
+FRAC BUDGET INT DIR SALES  = INITIAL(PERCENT BUDGET INT DIR SALES/100)
+	~	Dimensionless
+	~		|
+
+FRAC BUDGET MFG  = 0.47
+	~	Dimensionless
+	~		|
+
+FRAC BUDGET R AND D  = 0.15
+	~	Dimensionless
+	~		|
+
+frac cash retained  =
+        ( 1
+             - FRAC BUDGET MFG
+             - FRAC BUDGET R AND D
+             - FRAC BUDGET ADV
+             - FRAC BUDGET EXT SALES REPS
+             - FRAC BUDGET INT DIR SALES )
+	~	Fraction
+	~		|
+
+fraction custs buying  =
+        TABLE FOR FRAC BUYING ( Pot Orders In Negotiation
+                  / Potential Orders )
+	~	Dimensionless
+	~		|
+
+INITIAL TIME  = 0
+	~	Month
+	~	    The initial time for the simulation
+	|
+
+INT DIR SALES COST  = 2400
+	~	$/ Person / Month
+	~		|
+
+Int Dir Salespeople  =
+        INTEG( ( target int dir sales
+                  - Int Dir Salespeople )
+                  / THIDS ,
+             target int dir sales )
+	~	People
+	~		|
+
+LIFETIME OF MAILING LIST  = 60
+	~	Months
+	~		|
+
+NORMAL LEAD GEN EFFIC  = 7
+	~	Orders / Products / Month
+	~		|
+
+NORMAL SHARE OF SALES  = 0.8
+	~	Dimensionless
+	~		|
+
+PERCENT BUDGET ADV  = 4
+	~	Dimensionless
+	~		|
+
+PERCENT BUDGET EXT SALES REPS  = 8
+	~	Dimensionless
+	~		|
+
+PERCENT BUDGET INT DIR SALES  = 6
+	~	Dimensionless
+	~		|
+
+pot order creation  =
+        NORMAL LEAD GEN EFFIC
+             * Products
+             * effect of advertising
+	~	Orders / Month
+	~		|
+
+Pot Orders In Negotiation  =
+        INTEG( pot ords mov to negot
+                  - unit sales
+                  - pot orders lost to comp
+                  - pot orders not buying ,
+             25)
+	~	Orders
+	~		|
+
+pot orders lost to comp  =
+        Pot Orders In Negotiation
+             * fraction custs buying
+             * ( 1
+                  - NORMAL SHARE OF SALES )
+             / DURATION OF NEGOTIATION
+	~	Orders / Month
+	~		|
+
+pot orders not buying  =
+        Pot Orders In Negotiation
+             * ( 1
+                  - fraction custs buying )
+             / DURATION OF NEGOTIATION
+	~	Orders / Month
+	~		|
+
+pot ords mov to negot  =
+        Int Dir Salespeople
+             * DEMOS PER PERSON MONTH
+             * eff of lead avail on demos
+             * sales rep effect mult
+	~	Orders / Month
+	~		|
+
+pot ords obs rate  =
+        Potential Orders
+             / LIFETIME OF MAILING LIST
+	~	Orders / Month
+	~		|
+
+Potential Orders  =
+        INTEG( pot order creation
+                  - pot ords obs rate
+                  - pot ords mov to negot
+                  + pot orders not buying
+                  + unit sales ,
+             POTENTIAL ORDERS I )
+	~	Orders
+	~		|
+
+POTENTIAL ORDERS I  = 2400
+	~	Orders
+	~		|
+
+PRICE  = 7000
+	~	$/ Orders
+	~		|
+
+prod dev budget  =
+        cash revenue
+             * FRAC BUDGET R AND D
+	~	$/ Month
+	~		|
+
+PROD DEV EFFICIENCY  = 3e-05
+	~	Product / $
+	~		|
+
+PROD DEVT TIME  = 12
+	~	Month
+	~		|
+
+Prod Gen Rate  =
+        INTEG( ( PROD DEV EFFICIENCY
+                  * prod dev budget
+                  - Prod Gen Rate )
+                  / PROD DEVT TIME ,
+             PROD DEV EFFICIENCY
+                  * prod dev budget )
+	~	Product / Month
+	~		|
+
+PROD OBS TIME  = 60
+	~	Months
+	~		|
+
+prod obsolescence rate  =
+        Products
+             / PROD OBS TIME
+	~	Product / Month
+	~		|
+
+Products  =
+        INTEG( Prod Gen Rate
+                  - prod obsolescence rate ,
+             10)
+	~	Product
+	~		|
+
+Receivables  =
+        INTEG( accrued revenue
+                  - cash revenue ,
+             accrued revenue
+                  * TIME TO CLEAR RECEIVABLES )
+	~	$
+	~		|
+
+retained cash flow  =
+        cash revenue
+             * frac cash retained
+	~	$/ Month
+	~		|
+
+sales rep effect mult  =
+        TABLE FOR SALES REP EFFECT ( external sales reps
+                  / Potential Orders )
+	~	Dimensionless
+	~		|
+
+SAVEPER  = 1
+	~	Month
+	~	    The frequency with which data is stored
+	|
+
+TABLE FOR EFF OF LEADS  (
+            0, 100, 200, 300, 400, 500, 0, 0.32, 0.6, 0.8, 0.9, 1 )
+	~	Dimensionless
+	~		|
+
+TABLE FOR EFFECT OF ADV  (
+            0, 40, 80, 120, 160, 200, 240, 280, 320, 360, 400, 0.01, 0.2, 0.5
+            , 0.7, 0.8, 1, 1.03, 1.06, 1.08, 1.09, 1.1 )
+	~	Dimensionless
+	~		|
+
+TABLE FOR FRAC BUYING  (
+            0, 0.005, 0.01, 0.015, 0.02, 0.025, 0.03, 1, 0.75, 0.55, 0.43,
+            0.38, 0.35, 0.34 )
+	~	Dimensionless
+	~		|
+
+TABLE FOR SALES REP EFFECT  (
+            0.0017, 0.0027, 0.0037, 0.0047, 0.0057, 0.0067, 0.0077, 0.0087,
+            0.0097, 0.0107, 0.4, 0.55, 0.7, 0.85, 1, 1.1, 1.2, 1.3, 1.4, 1.4
+             )
+	~	Dimensionless
+	~		|
+
+target int dir sales  =
+        cash revenue
+             * FRAC BUDGET INT DIR SALES
+             / INT DIR SALES COST
+	~	People
+	~		|
+
+THIDS  = 10
+	~	Months
+	~		|
+
+TIME STEP  = 1
+	~	Month
+	~	    The time step for the simulation
+	|
+
+TIME TO CLEAR RECEIVABLES  = 6
+	~	Months
+	~		|
+
+unit sales  =
+        Pot Orders In Negotiation
+             * NORMAL SHARE OF SALES
+             * fraction custs buying
+             / DURATION OF NEGOTIATION
+	~	Orders / Month
+	~		|
+
+\\\---/// Sketch information - do not modify anything except names
+V300  Do not put anything below this section - it will be ignored
+*1
+$0-0-0,0,Vensim Sans|12||0-0-0|0-0-0|0-0-0|-1--1--1|-1--1--1|96,96,100,0
+10,1,Cum Retained Cash,585,165,75,30,0,3,1,40,-1,0,0,0,0-0-0,0-0-0,Vensim Sans|12||0-0-0,0,0,0,0,0,0
+10,2,retained cash flow,366,210,75,30,0,3,1,41,-1,0,0,0,128-128-128,0-0-0,Vensim Sans|12||0-0-0,0,0,0,0,0,0
+10,3,cash revenue,1029,201,75,30,0,3,0,8,-1,1,0,0,-1--1--1,-1--1--1,|12||0-0-0,0,0,0,0,0,0
+10,4,frac cash retained,322,315,75,30,0,3,1,41,-1,0,0,0,128-128-128,0-0-0,Vensim Sans|12||0-0-0,0,0,0,0,0,0
+10,5,Receivables,822,159,75,30,0,3,0,8,-1,1,0,0,-1--1--1,-1--1--1,|12||128-128-128,0,0,0,0,0,0
+10,6,TIME TO CLEAR RECEIVABLES,531,300,75,30,0,3,1,41,-1,0,0,0,128-128-128,0-0-0,Vensim Sans|12||0-0-0,0,0,0,0,0,0
+10,7,accrued revenue,549,133,75,30,0,3,0,8,-1,1,0,0,-1--1--1,-1--1--1,|12||0-0-0,0,0,0,0,0,0
+10,8,PRICE,909,210,75,30,0,3,1,41,-1,0,0,0,128-128-128,0-0-0,Vensim Sans|12||0-0-0,0,0,0,0,0,0
+10,9,unit sales,375,217,75,30,0,3,0,8,-1,1,0,0,-1--1--1,-1--1--1,|12||0-0-0,0,0,0,0,0,0
+10,10,DURATION OF NEGOTIATION,978,261,75,30,0,3,1,41,-1,0,0,0,128-128-128,0-0-0,Vensim Sans|12||0-0-0,0,0,0,0,0,0
+10,11,fraction custs buying,766,246,75,30,0,3,0,8,-1,1,0,0,-1--1--1,-1--1--1,|12||0-0-0,0,0,0,0,0,0
+10,12,NORMAL SHARE OF SALES,945,297,75,30,0,3,1,41,-1,0,0,0,128-128-128,0-0-0,Vensim Sans|12||0-0-0,0,0,0,0,0,0
+10,13,Pot Orders In Negotiation,375,390,72,24,8,3,0,9,0,1,0,0,128-128-128,0-0-0,|12||0-0-0,0,0,0,0,0,0
+10,14,pot orders lost to comp,399,477,75,30,0,3,0,8,-1,1,0,0,-1--1--1,-1--1--1,|12||0-0-0,0,0,0,0,0,0
+10,15,Adv Budget Effective,927,714,75,30,0,3,0,8,-1,1,0,0,-1--1--1,-1--1--1,|12||0-0-0,0,0,0,0,0,0
+10,16,TABLE FOR FRAC BUYING,903,402,75,30,0,3,1,41,-1,0,0,0,128-128-128,0-0-0,Vensim Sans|12||0-0-0,0,0,0,0,0,0
+10,17,pot orders not buying,639,351,65,9,8,3,0,9,0,1,0,0,128-128-128,0-0-0,|12||0-0-0,0,0,0,0,0,0
+10,18,DEMOS PER PERSON MONTH,366,444,75,30,0,3,1,41,-1,0,0,0,128-128-128,0-0-0,Vensim Sans|12||0-0-0,0,0,0,0,0,0
+10,19,eff of lead avail on demos,651,493,79,22,8,3,0,9,0,1,0,0,128-128-128,0-0-0,|12||0-0-0,0,0,0,0,0,0
+10,20,Int Dir Salespeople,813,432,75,30,0,3,0,8,-1,1,0,0,-1--1--1,-1--1--1,|12||0-0-0,0,0,0,0,0,0
+10,21,sales rep effect mult,663,540,75,30,0,3,0,8,-1,1,0,0,-1--1--1,-1--1--1,|12||0-0-0,0,0,0,0,0,0
+10,22,target int dir sales,864,349,53,22,8,3,0,9,0,1,0,0,128-128-128,0-0-0,|12||0-0-0,0,0,0,0,0,0
+10,23,Potential Orders,333,583,75,30,0,3,0,8,-1,1,0,0,-1--1--1,-1--1--1,|12||0-0-0,0,0,0,0,0,0
+10,24,TABLE FOR EFF OF LEADS,520,564,75,30,0,3,1,41,-1,0,0,0,128-128-128,0-0-0,Vensim Sans|12||0-0-0,0,0,0,0,0,0
+10,25,pot order creation,465,663,75,30,0,3,0,8,-1,1,0,0,-1--1--1,-1--1--1,|12||0-0-0,0,0,0,0,0,0
+10,26,pot ords obs rate,327,717,75,30,0,3,0,8,-1,1,0,0,-1--1--1,-1--1--1,|12||0-0-0,0,0,0,0,0,0
+10,27,external sales reps,870,511,75,30,0,3,0,8,-1,1,0,0,-1--1--1,-1--1--1,|12||0-0-0,0,0,0,0,0,0
+10,28,TABLE FOR SALES REP EFFECT,672,607,75,30,0,3,1,41,-1,0,0,0,128-128-128,0-0-0,Vensim Sans|12||0-0-0,0,0,0,0,0,0
+10,29,INT DIR SALES COST,852,643,75,30,0,3,1,41,-1,0,0,0,128-128-128,0-0-0,Vensim Sans|12||0-0-0,0,0,0,0,0,0
+10,30,PERCENT BUDGET INT DIR SALES,789,666,75,30,0,3,1,41,-1,0,0,0,128-128-128,0-0-0,Vensim Sans|12||0-0-0,0,0,0,0,0,0
+10,31,LIFETIME OF MAILING LIST,334,661,75,30,0,3,1,41,-1,0,0,0,128-128-128,0-0-0,Vensim Sans|12||0-0-0,0,0,0,0,0,0
+10,32,effect of advertising,615,729,75,30,0,3,0,8,-1,1,0,0,-1--1--1,-1--1--1,|12||0-0-0,0,0,0,0,0,0
+10,33,NORMAL LEAD GEN EFFIC,309,480,75,30,0,3,1,41,-1,0,0,0,128-128-128,0-0-0,Vensim Sans|12||0-0-0,0,0,0,0,0,0
+10,34,PERCENT BUDGET ADV,321,162,75,30,0,2,1,41,-1,0,0,0,128-128-128,0-0-0,Vensim Sans|12||0-0-0,0,0,0,0,0,0
+10,35,FRAC BUDGET MFG,285,367,75,30,0,3,1,41,-1,0,0,0,128-128-128,0-0-0,Vensim Sans|12||0-0-0,0,0,0,0,0,0
+10,36,FRAC BUDGET R AND D,358,385,75,30,0,3,1,41,-1,0,0,0,128-128-128,0-0-0,Vensim Sans|12||0-0-0,0,0,0,0,0,0
+10,37,PERCENT BUDGET ADV,310,318,75,30,0,3,1,41,-1,0,0,0,128-128-128,0-0-0,Vensim Sans|12||0-0-0,0,0,0,0,0,0
+10,38,PERCENT BUDGET EXT SALES REPS,646,210,75,30,0,3,1,41,-1,0,0,0,128-128-128,0-0-0,Vensim Sans|12||0-0-0,0,0,0,0,0,0
+10,39,Products,873,655,75,30,0,3,0,8,-1,1,0,0,-1--1--1,-1--1--1,|12||0-0-0,0,0,0,0,0,0
+10,40,TABLE FOR EFFECT OF ADV,393,709,75,30,0,3,1,41,-1,0,0,0,128-128-128,0-0-0,Vensim Sans|12||0-0-0,0,0,0,0,0,0
+10,41,adv budget,1044,639,75,30,0,3,0,8,-1,1,0,0,-1--1--1,-1--1--1,|12||0-0-0,0,0,0,0,0,0
+10,42,ADV IMPACT DELAY,582,720,75,30,0,3,1,41,-1,0,0,0,128-128-128,0-0-0,Vensim Sans|12||0-0-0,0,0,0,0,0,0
+10,43,Prod Gen Rate,982,573,75,30,0,3,0,8,-1,1,0,0,-1--1--1,-1--1--1,|12||0-0-0,0,0,0,0,0,0
+10,44,prod obsolescence rate,675,595,75,30,0,3,0,8,-1,1,0,0,-1--1--1,-1--1--1,|12||0-0-0,0,0,0,0,0,0
+10,45,PROD OBS TIME,1006,510,75,30,0,3,1,41,-1,0,0,0,128-128-128,0-0-0,Vensim Sans|12||0-0-0,0,0,0,0,0,0
+10,46,prod dev budget,1035,471,75,30,0,3,0,8,-1,1,0,0,-1--1--1,-1--1--1,|12||0-0-0,0,0,0,0,0,0
+10,47,PROD DEV EFFICIENCY,1036,672,75,30,0,3,1,41,-1,0,0,0,128-128-128,0-0-0,Vensim Sans|12||0-0-0,0,0,0,0,0,0
+10,48,PROD DEVT TIME,969,726,75,30,0,3,1,41,-1,0,0,0,128-128-128,0-0-0,Vensim Sans|12||0-0-0,0,0,0,0,0,0
+10,49,EXT SALES REP FEE,826,423,75,30,0,3,1,41,-1,0,0,0,128-128-128,0-0-0,Vensim Sans|12||0-0-0,0,0,0,0,0,0
+1,50,2,1,0,1,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,51,3,2,0,1,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,52,4,2,0,1,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,53,5,3,1,0,0,0,1,0,0,0-0-255,|||0-0-0,1|(936,147)|
+1,54,6,3,0,1,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,55,7,5,0,0,0,0,1,0,0,0-0-255,|||0-0-0,1|(0,0)|
+1,56,3,5,1,0,0,0,1,0,0,128-128-128,|||0-0-0,1|(922,198)|
+1,57,8,7,0,1,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,58,9,7,1,0,0,0,1,0,0,0-0-255,|||0-0-0,1|(411,177)|
+1,59,10,9,0,1,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,60,11,9,1,0,0,0,1,0,0,255-0-0,|||0-0-0,1|(549,212)|
+1,61,12,9,0,1,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,62,13,9,1,0,0,0,1,0,0,0-0-255,|||0-0-0,1|(337,308)|
+1,63,13,11,1,0,0,0,1,0,0,128-128-128,|||0-0-0,1|(512,302)|
+1,64,16,11,0,1,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,65,14,13,1,0,0,0,1,0,0,128-128-128,|||0-0-0,1|(414,439)|
+1,66,17,13,1,0,0,0,1,0,0,128-128-128,|||0-0-0,1|(525,411)|
+1,67,9,13,1,0,0,0,1,0,0,128-128-128,|||0-0-0,1|(430,283)|
+1,68,10,14,0,1,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,69,11,14,1,0,0,0,1,0,0,128-128-128,|||0-0-0,1|(560,336)|
+1,70,12,14,0,1,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,71,13,14,1,0,0,0,1,0,0,128-128-128,|||0-0-0,1|(356,438)|
+1,72,10,17,0,1,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,73,11,17,0,0,0,0,1,0,0,128-128-128,|||0-0-0,1|(0,0)|
+1,74,13,17,1,0,0,0,1,0,0,128-128-128,|||0-0-0,1|(506,342)|
+1,75,20,19,1,0,0,0,1,0,0,0-0-255,|||0-0-0,1|(729,470)|
+1,76,23,19,1,0,0,0,1,0,0,255-0-0,|||0-0-0,1|(490,557)|
+1,77,24,19,0,1,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,78,25,23,1,0,0,0,1,0,0,255-0-0,|||0-0-0,1|(388,637)|
+1,79,17,23,1,0,0,0,1,0,0,128-128-128,|||0-0-0,1|(502,492)|
+1,80,26,23,1,0,0,0,1,0,0,128-128-128,|||0-0-0,1|(345,672)|
+1,81,22,20,1,0,0,0,1,0,0,0-0-255,|||0-0-0,1|(850,398)|
+1,82,27,21,1,0,0,0,1,0,0,128-128-128,|||0-0-0,1|(801,537)|
+1,83,23,21,1,0,0,0,1,0,0,128-128-128,|||0-0-0,1|(477,571)|
+1,84,28,21,0,1,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,85,3,22,1,0,0,0,1,0,0,0-0-255,|||0-0-0,1|(952,293)|
+1,86,29,22,0,1,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,87,31,26,0,1,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,88,23,26,1,0,0,0,1,0,0,128-128-128,|||0-0-0,1|(303,631)|
+1,89,32,25,1,0,0,0,1,0,0,255-0-0,|||0-0-0,1|(534,714)|
+1,90,33,25,0,1,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,91,39,25,1,0,0,0,1,0,0,255-0-0,|||0-0-0,1|(694,675)|
+1,92,35,4,0,1,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,93,36,4,0,1,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,94,15,32,1,0,0,0,1,0,0,255-0-0,|||0-0-0,1|(771,727)|
+1,95,39,32,1,0,0,0,1,0,0,128-128-128,|||0-0-0,1|(756,696)|
+1,96,40,32,0,1,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,97,41,15,0,0,0,0,1,0,0,255-0-0,|||0-0-0,1|(0,0)|
+1,98,42,15,0,1,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,99,43,39,0,0,0,0,1,0,0,255-0-0,|||0-0-0,1|(0,0)|
+1,100,44,39,1,0,0,0,1,0,0,128-128-128,|||0-0-0,1|(736,645)|
+1,101,3,41,1,0,0,0,1,0,0,255-0-0,|||0-0-0,1|(1140,396)|
+1,102,45,44,0,1,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,103,39,44,1,0,0,0,1,0,0,128-128-128,|||0-0-0,1|(837,618)|
+1,104,46,43,1,0,0,0,1,0,0,128-128-128,|||0-0-0,1|(1023,507)|
+1,105,47,43,0,1,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,106,48,43,0,1,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,107,3,46,1,0,0,0,1,0,0,255-0-0,|||0-0-0,1|(1077,330)|
+1,108,36,46,0,1,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,109,3,27,1,0,0,0,1,0,0,128-128-128,|||0-0-0,1|(993,366)|
+1,110,49,27,0,1,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,111,23,11,2,0,0,0,1,0,0,255-0-0,|||0-0-0,1|(332,167)|
+10,112,FRAC BUDGET ADV,306,354,75,30,0,2,1,41,-1,0,0,0,128-128-128,0-0-0,Vensim Sans|12||128-128-128,0,0,0,0,0,0
+1,113,112,4,0,1,0,0,0,0,0,-1--1--1,,1|(0,0)|
+10,114,FRAC BUDGET EXT SALES REPS,306,354,75,30,0,2,1,41,-1,0,0,0,128-128-128,0-0-0,Vensim Sans|12||128-128-128,0,0,0,0,0,0
+1,115,114,4,0,1,0,0,0,0,0,-1--1--1,,1|(0,0)|
+10,116,FRAC BUDGET INT DIR SALES,306,354,75,30,0,2,1,41,-1,0,0,0,128-128-128,0-0-0,Vensim Sans|12||128-128-128,0,0,0,0,0,0
+1,117,116,4,0,1,0,0,0,0,0,-1--1--1,,1|(0,0)|
+10,118,pot ords mov to negot,306,348,75,30,0,2,1,41,-1,0,0,0,128-128-128,0-0-0,Vensim Sans|12||128-128-128,0,0,0,0,0,0
+1,119,118,13,0,1,0,0,0,0,0,-1--1--1,,1|(0,0)|
+10,120,THIDS,795,469,75,30,0,2,1,41,-1,0,0,0,128-128-128,0-0-0,Vensim Sans|12||128-128-128,0,0,0,0,0,0
+1,121,120,20,0,1,0,0,0,0,0,-1--1--1,,1|(0,0)|
+10,122,FRAC BUDGET INT DIR SALES,952,385,75,30,0,2,1,41,-1,0,0,0,128-128-128,0-0-0,Vensim Sans|12||128-128-128,0,0,0,0,0,0
+1,123,122,22,0,1,0,0,0,0,0,-1--1--1,,1|(0,0)|
+10,124,pot ords mov to negot,315,621,75,30,0,2,1,41,-1,0,0,0,128-128-128,0-0-0,Vensim Sans|12||128-128-128,0,0,0,0,0,0
+1,125,124,23,0,1,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,126,9,23,1,0,0,0,1,0,0,128-128-128,|||0-0-0,1|(273,373)|
+10,127,FRAC BUDGET EXT SALES REPS,855,549,75,30,0,2,1,41,-1,0,0,0,128-128-128,0-0-0,Vensim Sans|12||128-128-128,0,0,0,0,0,0
+1,128,127,27,0,1,0,0,0,0,0,-1--1--1,,1|(0,0)|
+10,129,FRAC BUDGET ADV,1029,678,75,30,0,2,1,41,-1,0,0,0,128-128-128,0-0-0,Vensim Sans|12||128-128-128,0,0,0,0,0,0
+1,130,129,41,0,1,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,131,6,5,1,1,0,0,1,0,1,128-128-128,|||0-0-0,1|(658,219)|
+10,132,POTENTIAL ORDERS I,234,631,44,15,8,2,1,41,-1,0,0,0,128-128-128,0-0-0,Vensim Sans|12||128-128-128,0,0,0,0,0,0
+1,133,132,23,0,1,0,0,0,0,1,-1--1--1,,1|(0,0)|
+12,134,0,760,35,80,40,8,7,0,0,-1,1,0,0,0,0,0,0,0,0
+MARKET MODEL|<<NnN>>|
+12,135,0,1515,341,300,200,0,15,0,0,1,0,0,0,0,0,0,0,0,0
+Fraction_Custs_Buying_
+///---\\\
+:GRAPH Fraction_Custs_Buying_
+:TITLE Fraction Custs Buying
+:SCALE
+:VAR fraction custs buying
+:DATASET 
+:LINE-WIDTH 1
+:L<%^E!@
+4:Time
+5:fraction custs buying
+9:Mkt
+19:100,0
+24:0
+25:60
+26:60
+22:$,Dollar,Dollars,$s
+22:Day,Days
+22:Hour,Hours
+22:Month,Months
+22:Person,People,Persons
+22:product,products
+22:Unit,Units
+22:Week,Weeks
+22:Year,Years
+22:$,Dollar,Dollars,$s
+22:Day,Days
+22:Hour,Hours
+22:Month,Months
+22:Person,People,Persons
+22:product,products
+22:Unit,Units
+22:Week,Weeks
+22:Year,Years
+23:0
+15:0,0,0,0,0,0
+27:0,
+34:0,
+42:0
+72:0
+73:0
+95:0
+96:0
+97:0
+77:0
+78:0
+102:1
+93:0
+94:0
+92:0
+91:0
+90:0
+87:0
+75:
+43:
+103:8,8,8,3,8
+105:0,0,0,0,0,0,0,0,0,0
+104:Courier|12||0-0-0|0-0-0|-1--1--1|0-0-255|192-192-192|-1--1--1

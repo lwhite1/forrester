@@ -1,0 +1,175 @@
+{UTF-8}
+change in price=
+	IF THEN ELSE(target price > price,
+	(target price - price)/time to adjust price up,
+	(target price-price)/time to adjust price down)
+	~	$/Box/Month
+	~		|
+
+time to adjust price down=
+	6
+	~	Month
+	~		|
+
+target price=
+	target revenue/expected demand
+	~	$/Box
+	~		|
+
+demand=
+	reference demand * effect price demand
+	~	Box/Month
+	~		|
+
+demand elasticity=
+	1
+	~	Dmnl
+	~		|
+
+effect price demand=
+	EXP(-demand elasticity * LN(price/reference price))
+	~	Dmnl
+	~		|
+
+expected demand=
+	SMOOTH(demand,time to form expectations)
+	~	Box/Month
+	~		|
+
+initial price=
+	100
+	~	$/Box
+	~		|
+
+price= INTEG (
+	change in price,
+		initial price)
+	~	$/Box
+	~		|
+
+reference demand=
+	100
+	~	Box/Month
+	~		|
+
+reference price=
+	100
+	~	$/Box
+	~		|
+
+target revenue=
+	10000+STEP(5000, 10)
+	~	$/Month
+	~		|
+
+time to adjust price up=
+	4
+	~	Month
+	~		|
+
+time to form expectations=
+	6
+	~	Month
+	~		|
+
+********************************************************
+	.Control
+********************************************************~
+		Simulation Control Parameters
+	|
+
+FINAL TIME  = 100
+	~	Month
+	~	The final time for the simulation.
+	|
+
+INITIAL TIME  = 0
+	~	Month
+	~	The initial time for the simulation.
+	|
+
+SAVEPER  = 
+        TIME STEP
+	~	Month [0,?]
+	~	The frequency with which output is stored.
+	|
+
+TIME STEP  = 1
+	~	Month [0,?]
+	~	The time step for the simulation.
+	|
+
+\\\---/// Sketch information - do not modify anything except names
+V300  Do not put anything below this section - it will be ignored
+*View 1
+$192-192-192,0,Arial|14||0-0-0|92-92-92|160-160-160|-1--1--1|-1--1--1|96,96,100,0
+10,1,reference demand,645,56,79,12,0,3,0,2,0,0,0,0,0-0-0,0-0-0,|14||64-128-128
+10,2,effect price demand,669,103,85,12,0,3,0,0,0,0,0,0
+10,3,price,529,188,40,20,3,3,0,16,0,0,0,0,0-0-0,0-0-0,|14|B|0-0-0
+10,4,demand,483,73,37,12,0,3,0,0,0,0,0,0
+10,5,target price,269,147,49,12,0,3,0,0,0,0,0,0
+10,6,time to adjust price up,252,245,95,12,0,3,0,2,0,0,0,0,0-0-0,0-0-0,|14||64-128-128
+10,7,target revenue,172,109,63,12,0,3,0,2,0,0,0,0,0-0-0,0-0-0,|14||64-128-128
+1,8,1,4,1,0,0,0,0,64,0,-1--1--1,,1|(561,63)|
+1,9,2,4,1,0,0,0,0,64,0,-1--1--1,,1|(597,81)|
+1,10,3,2,1,0,0,0,0,64,0,-1--1--1,,1|(659,188)|
+10,11,demand elasticity,776,171,75,12,0,3,0,2,0,0,0,0,0-0-0,0-0-0,|14||64-128-128
+1,12,11,2,1,0,0,0,0,64,0,-1--1--1,,1|(737,129)|
+1,13,6,22,1,0,0,0,0,64,0,-1--1--1,,1|(364,240)|
+1,14,17,5,1,0,0,0,0,64,0,-1--1--1,,1|(300,101)|
+1,15,7,5,1,0,0,0,0,64,0,-1--1--1,,1|(224,131)|
+10,16,initial price,588,247,47,12,0,3,0,2,0,0,0,0,0-0-0,0-0-0,|14||64-128-128
+10,17,expected demand,352,73,47,28,3,131,0,16,0,0,0,0,0-0-0,0-0-0,|14|B|0-0-0
+12,18,48,327,188,13,11,0,3,0,0,-1,0,0,0
+1,19,21,3,4,0,0,22,0,0,0,-1--1--1,,1|(455,187)|
+1,20,21,18,68,0,0,22,2,0,0,-1--1--1,|12||0-0-0,1|(373,187)|
+11,21,48,413,187,7,8,34,3,0,0,1,0,0,0
+10,22,change in price,413,207,67,12,32,3,0,0,-1,0,0,0
+1,23,4,17,1,0,0,0,0,0,0,-1--1--1,,1|(424,67)|
+10,24,time to form expectations,172,69,107,12,0,3,0,2,-1,0,0,0,0-0-0,0-0-0,|14||64-128-128
+1,25,24,17,1,0,0,0,0,0,0,-1--1--1,,1|(283,71)|
+1,26,3,22,1,0,0,0,0,0,0,-1--1--1,,1|(483,235)|
+1,27,5,22,1,0,0,0,0,0,0,-1--1--1,,1|(292,191)|
+10,28,reference price,836,141,65,12,0,3,0,2,-1,0,0,0,0-0-0,0-0-0,|14||64-128-128
+1,29,28,2,1,0,0,0,0,0,0,-1--1--1,,1|(765,116)|
+10,30,time to adjust price down,305,285,107,12,0,3,0,2,0,0,0,0,0-0-0,0-0-0,|14||64-128-128
+1,31,30,22,1,0,0,0,0,64,0,-1--1--1,,1|(385,243)|
+1,32,16,3,0,0,0,0,0,0,1,-1--1--1,,1|(568,227)|
+12,33,21070460,248,504,237,199,3,188,0,0,1,0,0,0
+price_and_demand
+12,34,21072128,709,504,223,200,3,188,0,0,1,0,0,0
+price_v_demand
+///---\\\
+:GRAPH price_and_demand
+:TITLE price and demand v. time
+:SCALE
+:VAR price
+:SCALE
+:VAR demand
+
+:GRAPH price_v_demand
+:TITLE Price vs. demand
+:X-AXIS demand
+:DOTS
+:SCALE
+:VAR price
+:L<%^E!@
+1:Current.vdf
+9:Current
+22:$,Dollar,Dollars,$s
+22:Hour,Hours
+22:Month,Months
+22:Person,People,Persons
+22:Unit,Units
+22:Week,Weeks
+22:Year,Years
+22:Day,Days
+15:0,0,0,0,0,0
+19:100,0
+27:2,
+34:0,
+4:Time
+5:time to form expectations
+24:0
+25:100
+26:100

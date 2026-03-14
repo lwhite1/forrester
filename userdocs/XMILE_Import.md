@@ -1,8 +1,35 @@
-# XMILE (.xmile / .stmx / .itmx) Import Support
+# XMILE (.xmile / .stmx / .itmx) Import & Export
 
-This document describes what Courant supports when importing XMILE files (IEEE 1855-2016 / OASIS XMILE 1.0), what is unsupported, and what known limitations exist. The `.stmx` (Stella) and `.itmx` (iThink) extensions use the same XMILE format.
+`XmileImporter` reads XMILE XML files (IEEE 1855-2016 / OASIS XMILE 1.0) and produces a `ModelDefinition` that can be compiled and simulated. `XmileExporter` writes any `ModelDefinition` to valid XMILE 1.0 XML. Together they enable bidirectional model exchange with the Stella/iThink ecosystem. The `.stmx` (Stella) and `.itmx` (iThink) extensions use the same XMILE format.
 
-## Supported Features
+## Usage
+
+### Import
+
+```java
+XmileImporter importer = new XmileImporter();
+ImportResult result = importer.importModel(Path.of("model.xmile"));
+if (!result.isClean()) {
+    result.warnings().forEach(System.out::println);
+}
+ModelDefinition def = result.definition();
+
+// Compile and run
+CompiledModel compiled = new ModelCompiler().compile(def);
+Simulation sim = compiled.createSimulation();
+sim.execute();
+```
+
+### Export
+
+```java
+String xml = XmileExporter.toXmile(modelDefinition);
+XmileExporter.toFile(modelDefinition, Path.of("model.xmile"));
+```
+
+In the visual editor, use File > Open to load `.xmile` files and File > Export XMILE to export.
+
+## Supported Features (Import)
 
 ### Core Model Elements
 
@@ -249,6 +276,14 @@ All import errors are non-fatal. The importer returns `ImportResult` containing 
 - All other errors are caught per-element and added as warnings
 
 ---
+
+## Export Limitations
+
+- Constants are exported as `<aux>` with numeric equations (re-imported correctly)
+- Start time is always 0
+- dt is always written as 1.0
+- Subscripts and module instances are not exported
+- Display attributes (color, font, size) are not exported
 
 ## Round-Trip Fidelity
 

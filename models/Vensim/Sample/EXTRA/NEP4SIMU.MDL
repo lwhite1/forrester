@@ -1,0 +1,485 @@
+{UTF-8}
+{UTF-8}
+
+Initial Pt = 12
+	~	mmHg
+	~		|
+
+********************************************************
+	.Mosekilde
+********************************************************~
+		Erik Mosekilde's model of chaos in rat kidneys. Replicated
+		from equations presented in Mosekilde's paper by Tom
+		Fiddaman, with help from Bob Eberlein on the use of Vensim's
+		SIMULTANEOUS function. While I have been unable to find chaotic
+		behavior at the exact parameter values specified in the paper,
+		try setting d = 0.10, T_Mac_Dens_Aff_Art_Delay = 10 for a
+		chaotic or at least very high periodicity regime.
+		
+		For chaotic runs, you should extend the final time to 1000 or
+		2000 seconds and set the time axis controls so that results
+		are plotted only after initial transients have died out - 200
+		to 500 seconds.
+	|
+
+********************************************************
+	.Afferent
+********************************************************~
+	|
+
+Ra Afferent Arter Resist= INTEG (
+	dRa,
+		 Ra0)
+	~	sec*mmHg/nl
+	~		|
+
+Alpha = 9
+	~	dmnl
+	~		|
+
+Chg dRa=
+	-2*d*Omega*(K)^0.5*dRa-Omega*Omega*K*(Ra Afferent Arter Resist-Psi Input*Ra0)
+	~	mmHg/nl/sec
+	~		|
+
+d = 0.16
+	~	dmnl
+	~	
+		Raising d may increase the amplitude of oscillation!
+	|
+
+dRa = INTEG(Chg dRa, 0)
+	~	s*mmHg/nl/s
+	~	{initialized stationary}
+	|
+
+K =IF THEN ELSE(Ra Normalized>K Thresh Max,1+K Coeff* 
+(Ra Normalized-K Thresh Max)^2,IF THEN ELSE(Ra Normalized
+<K Thresh Min,1+K Coeff*(K Thresh Min-Ra Normalized)^2,1))
+	~	dmnl
+	~		|
+
+K Coeff = 600
+	~	dmnl
+	~		|
+
+K Thresh Max = 1.5
+	~	dmnl
+	~		|
+
+K Thresh Min = 0.75
+	~	dmnl
+	~		|
+
+Omega = 0.22
+	~	1/s
+	~	{1/s}
+	|
+
+Psi = Psi max-(Psi max-Psi min)/(1+exp(Alpha*(Fhen Norm Delayed-S)))
+	~	dmnl
+	~	Note: there was apparently a mistake in the specification of this logistic-type \
+		curve in the
+		         article.
+	|
+
+Psi Input = Psi Test SW*Psi Test+(1-Psi Test SW)*Psi
+	~	dmnl
+	~		|
+
+Psi max = 1.5
+	~	dmnl
+	~		|
+
+Psi min = 0.75
+	~	dmnl
+	~		|
+
+Psi Test = 1+step(0.1,20)
+	~	dmnl
+	~		|
+
+Psi Test SW = 0
+	~	dmnl
+	~		|
+
+Ra0 = 18.3
+	~	mmHg*s/nl
+	~	{mmHg*s/nl}
+	|
+
+Ra Normalized = Ra Afferent Arter Resist/Ra0
+	~	dmnl
+	~		|
+
+S = INITIAL(1-ln((1-Psi min)/(Psi max-1))/Alpha)
+	~	dmnl
+	~	INITIAL used to save a few clock cycles.
+	|
+
+********************************************************
+	.Blood
+********************************************************~
+		This portion of the model solves a system of simultaneous
+		equations describing the equilibrium glomerular pressure
+		and blood flow. Mosekilde uses a Pascal routine to solve
+		the equations; here the Vensim SIMULTANEOUS function is
+		used.
+	|
+
+Indicated BF =  SIMULTANEOUS(
+ (Pa Arterial Pressure-Actual Pg)/Ra Afferent Arter Resist,
+(Pa Arterial Pressure-Actual Pg)/Ra Afferent Arter Resist)
+	~	nl/s
+	~	Note: the indicated BF and BF loop is a dummy loop ied to reduce
+		the gain of the Pg->BF->Pg positive loop, so that the convergence routine
+		will work properly.
+	|
+
+chg BF Blood Flow = SIMULTANEOUS((Indicated BF-BF Blood Flow)*bld flow adj frac,0)
+	~	nl/s
+	~		|
+
+bld flow adj frac = 0.2
+	~	dmnl
+	~		|
+
+a = 0.163
+	~	mmHg*nl/ng
+	~	{mmHg*l/g}
+	|
+
+Actual Pg = SIMULTANEOUS(Actual Pg + dPg, 45)
+	~	mmHg
+	~		|
+
+b = 0.0029
+	~	mmHg*(nl*nl)/(ng*ng)
+	~	{mmHg*l^2/g^2}
+	|
+
+BF Blood Flow = SIMULTANEOUS(
+BF Blood Flow + chg BF Blood Flow,
+Indicated BF)
+	~	nl/s
+	~		|
+
+Ca Affer Blood Protein Conc = 54
+	~	ng/nl
+	~	{g/l}
+	|
+
+Ce Effer Blood Protein Conc = SIMULTANEOUS(
+((a/2/b)^2+(Actual Pg-Pt Proxim Tub Pressure)/b)^0.5-a/2/b,
+((a/2/b)^2+(Actual Pg-Pt Proxim Tub Pressure)/b)^0.5-a/2/b)
+	~	ng/nl
+	~		|
+
+dPg =  SIMULTANEOUS((Indicated Pg-Actual Pg)*Pg Adj Frac,0)
+	~	mmHg
+	~		|
+
+Ha Hematocrit = 0.5
+	~	dmnl
+	~		|
+
+Indicated Pg =SIMULTANEOUS(
+Pv Veinous Pressure+Re Efferent Resist*(BF Blood Flow-SNGFR Filtrat Flow),
+Pv Veinous Pressure+Re Efferent Resist*(BF Blood Flow-SNGFR Filtrat Flow))
+	~	mmHg
+	~	Note: the Indicated Pg and Actual Pg loop is a dummy loop inserted to reduce
+		the gain of both Pg loops, so that the convergence routine
+		will work properly.
+	|
+
+Pa Arterial Pressure = 100
+	~	mmHg
+	~	{mmHg}
+	|
+
+Pg Adj Frac = 0.2
+	~	dmnl
+	~	Note: this parameter has no physical meaning; it sets the gain around the \
+		SIMULTANEOUS equation loop needed to solve for the blood & filtration flow \
+		and pressure.
+	|
+
+Pv Veinous Pressure = 10
+	~	mmHg
+	~	{mmHg}
+	|
+
+Re Efferent Resist = 14
+	~	mmHg*s/nl
+	~	{mmHg*s/nl}
+	|
+
+SNGFR Filtrat Flow =SIMULTANEOUS(
+BF Blood Flow*(1-Ha Hematocrit)*(1-Ca Affer Blood Protein Conc/Ce Effer Blood Protein Conc\
+		),
+BF Blood Flow*(1-Ha Hematocrit)*(1-Ca Affer Blood Protein Conc/Ce Effer Blood Protein Conc\
+		))
+	~	nl/s
+	~	{ Equation 2 }
+	|
+
+********************************************************
+	.Loop
+********************************************************~
+	|
+
+Fhen0 = 0.1875
+	~	nl/s
+	~		|
+
+Fhen Flow to Loop of Henle =
+(Pt Proxim Tub Pressure-Pd Distal Tub Pressure)/Rhen Henle Loop Resist
+	~	nl/s
+	~		|
+
+Fhen Norm Delayed =
+smOOth3(Fhen Flow to Loop of Henle,T Mac Dens Aff Art Delay)/Fhen0
+	~	dmnl
+	~		|
+
+Pd Distal Tub Pressure = 4.5
+	~	mmHg
+	~	{mmHg}
+	|
+
+Rhen Henle Loop Resist = 40
+	~	mmHg*s/nl
+	~	{mmHg*s/nl}
+	|
+
+T Mac Dens Aff Art Delay = 4.5 { + 9*RAMP(1/(FINAL_TIME-INITIAL_TIME),INITIAL_TIME,FINAL_TIME)}
+	~	s
+	~		|
+
+********************************************************
+	.Proximal
+********************************************************~
+	|
+
+Ctub Tubule Compliance = 0.4
+	~	nl/mmHg
+	~	{nl/mmHg}
+	|
+
+dPt Chg Prox Tub Press =
+(SNGFR Filtrat Flow-Freab Reabsorb Flow-Fhen Flow to Loop of Henle)/Ctub Tubule Compliance
+	~	mmHg/s
+	~		|
+
+Freab Reabsorb Flow = 0.3
+	~	nl/s
+	~	{nl/s}
+	|
+
+Pt Proxim Tub Pressure = INTEG(dPt Chg Prox Tub Press, Initial Pt)
+	~	mmHg
+	~	{mmHg - guestimate, pg. 92 left side 3rd paragraph}
+	|
+
+********************************************************
+	.Control
+********************************************************~
+		Note: the model MUST be simulated with RK4 integration for
+		reasonable accuracy. Mosekilde uses RK4 with a fixed step
+		of .05; you could probably do better with a variable step
+		of similar or perhaps larger size (.0625 or .125). I haven't
+		tested these in this version.
+	|
+
+TIME STEP  = 0.05
+	~	seconds
+	~		|
+
+FINAL TIME  = 400
+	~	seconds
+	~		|
+
+INITIAL TIME  = 0
+	~	seconds
+	~		|
+
+SAVEPER  = 0.25
+	~	seconds
+	~		|
+
+\\\---/// Sketch information - do not modify anything except names
+V300  Do not put anything below this section - it will be ignored
+*Page 1
+$192-192-192,0,|12||-1--1--1|92-92-92|160-160-160|-1--1--1|-1--1--1|96,96,100,0
+12,1,48,296,276,10,8,0,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,2,Pt Proxim Tub Pressure,520,277,63,28,3,131,0,16,0,1,0,0,0-0-0,0-0-0,||B|0-0-0,0,0,0,0,0,0
+12,3,48,414,881,10,8,0,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,4,SNGFR Filtrat Flow,238,441,75,30,0,3,0,0,-1,1,0,0,0,0,0,0,0,0
+10,5,Freab Reabsorb Flow,134,290,75,30,0,3,0,2,-1,1,0,0,-1--1--1,-1--1--1,|||64-128-128,0,0,0,0,0,0
+10,6,Ctub Tubule Compliance,120,326,75,30,0,3,0,2,-1,1,0,0,-1--1--1,-1--1--1,|||64-128-128,0,0,0,0,0,0
+10,7,Ha Hematocrit,82,457,75,30,0,3,0,2,-1,1,0,0,-1--1--1,-1--1--1,|||64-128-128,0,0,0,0,0,0
+10,8,Ca Affer Blood Protein Conc,127,486,75,30,0,3,0,2,-1,1,0,0,-1--1--1,-1--1--1,|||64-128-128,0,0,0,0,0,0
+10,9,Ce Effer Blood Protein Conc,396,405,75,30,0,3,0,0,-1,1,0,0,0,0,0,0,0,0
+10,10,Indicated Pg,362,510,75,30,0,3,0,0,-1,1,0,0,0,0,0,0,0,0
+10,11,Indicated BF,374,606,75,30,0,3,0,0,-1,1,0,0,0,0,0,0,0,0
+10,12,Fhen Flow to Loop of Henle,758,290,75,30,0,3,0,0,-1,1,0,0,0,0,0,0,0,0
+10,13,Actual Pg,538,474,75,30,0,3,0,0,0,1,0,0,0,0,0,0,0,0
+10,14,a,559,384,75,30,0,3,0,2,-1,0,0,0,0-0-0,0-0-0,|||64-128-128,0,0,0,0,0,0
+10,15,b,563,409,75,30,0,3,0,2,-1,0,0,0,0-0-0,0-0-0,|||64-128-128,0,0,0,0,0,0
+10,16,Pd Distal Tub Pressure,572,364,75,30,0,3,0,2,-1,1,0,0,-1--1--1,-1--1--1,|||64-128-128,0,0,0,0,0,0
+10,17,Rhen Henle Loop Resist,586,334,75,30,0,3,0,2,-1,1,0,0,-1--1--1,-1--1--1,|||64-128-128,0,0,0,0,0,0
+10,18,chg BF Blood Flow,212,596,75,30,0,3,0,0,-1,1,0,0,0,0,0,0,0,0
+10,19,BF Blood Flow,246,534,75,30,0,3,0,0,-1,1,0,0,0,0,0,0,0,0
+10,20,Pv Veinous Pressure,367,450,75,30,0,3,0,2,-1,1,0,0,-1--1--1,-1--1--1,|||64-128-128,0,0,0,0,0,0
+10,21,Re Efferent Resist,371,564,75,30,0,3,0,2,-1,1,0,0,-1--1--1,-1--1--1,|||64-128-128,0,0,0,0,0,0
+10,22,Pa Arterial Pressure,212,634,75,30,0,3,0,2,-1,1,0,0,-1--1--1,-1--1--1,|||64-128-128,0,0,0,0,0,0
+10,23,Ra Afferent Arter Resist,248,690,59,41,3,131,0,16,0,1,0,0,0-0-0,0-0-0,||B|0-0-0,0,0,0,0,0,0
+10,24,bld flow adj frac,76,553,75,30,0,3,0,2,-1,1,0,0,-1--1--1,-1--1--1,|||64-128-128,0,0,0,0,0,0
+10,25,K,498,804,75,30,0,3,0,0,-1,1,0,0,0,0,0,0,0,0
+10,26,Ra Normalized,410,754,75,30,0,3,0,0,-1,1,0,0,0,0,0,0,0,0
+10,27,Psi Input,498,890,75,30,0,3,0,0,-1,1,0,0,0,0,0,0,0,0
+10,28,Ra0,399,806,75,30,0,3,0,2,-1,1,0,0,-1--1--1,-1--1--1,|||64-128-128,0,0,0,0,0,0
+10,29,K Thresh Min,408,721,75,30,0,3,0,2,-1,1,0,0,-1--1--1,-1--1--1,|||64-128-128,0,0,0,0,0,0
+10,30,K Coeff,438,694,75,30,0,3,0,2,-1,1,0,0,-1--1--1,-1--1--1,|||64-128-128,0,0,0,0,0,0
+10,31,Psi,579,842,75,30,0,3,0,0,-1,1,0,0,0,0,0,0,0,0
+10,32,Psi min,694,868,75,30,0,3,0,2,-1,1,0,0,-1--1--1,-1--1--1,|||64-128-128,0,0,0,0,0,0
+10,33,Fhen Norm Delayed,686,716,75,30,0,3,0,0,-1,1,0,0,0,0,0,0,0,0
+10,34,T Mac Dens Aff Art Delay,774,804,75,30,0,3,0,2,-1,1,0,0,-1--1--1,-1--1--1,|||64-128-128,0,0,0,0,0,0
+10,35,Fhen0,798,762,75,30,0,3,0,2,-1,1,0,0,-1--1--1,-1--1--1,|||64-128-128,0,0,0,0,0,0
+10,36,K Thresh Max,412,669,75,30,0,3,0,2,-1,1,0,0,-1--1--1,-1--1--1,|||64-128-128,0,0,0,0,0,0
+10,37,Pg Adj Frac,462,542,75,30,0,3,0,2,-1,1,0,0,-1--1--1,-1--1--1,|||64-128-128,0,0,0,0,0,0
+10,38,d,382,948,75,30,0,3,0,2,-1,1,0,0,-1--1--1,-1--1--1,|||64-128-128,0,0,0,0,0,0
+10,39,Omega,306,950,75,30,0,3,0,2,-1,1,0,0,-1--1--1,-1--1--1,|||64-128-128,0,0,0,0,0,0
+10,40,Psi Test,422,990,75,30,0,3,0,2,-1,1,0,0,-1--1--1,-1--1--1,|||64-128-128,0,0,0,0,0,0
+10,41,Psi max,598,938,75,30,0,3,0,2,-1,1,0,0,-1--1--1,-1--1--1,|||64-128-128,0,0,0,0,0,0
+10,42,Alpha,630,912,75,30,0,3,0,2,-1,1,0,0,-1--1--1,-1--1--1,|||64-128-128,0,0,0,0,0,0
+10,43,S,710,920,75,30,0,3,0,0,-1,1,0,0,0,0,0,0,0,0
+10,44,Psi Test SW,550,986,75,30,0,3,0,2,-1,1,0,0,-1--1--1,-1--1--1,|||64-128-128,0,0,0,0,0,0
+11,45,0,355,276,7,8,34,3,0,0,1,0,0,0,0,0,0,0,0,0
+10,46,dPt Chg Prox Tub Press,355,314,75,30,32,3,0,0,-1,1,0,0,0,0,0,0,0,0
+10,47,dPg,458,492,75,30,0,3,0,0,-1,1,0,0,0,0,0,0,0,0
+10,48,dRa,250,881,40,20,3,3,0,16,0,1,0,0,0-0-0,0-0-0,||B|0-0-0,0,0,0,0,0,0
+11,49,0,343,881,7,8,34,3,0,0,1,0,0,0,0,0,0,0,0,0
+10,50,Chg dRa,343,919,75,30,32,3,0,0,-1,1,0,0,0,0,0,0,0,0
+1,51,15,9,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,52,14,9,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,53,15,9,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,54,2,9,1,0,0,0,0,0,0,-1--1--1,,1|(431,342)|
+1,55,13,9,1,0,0,0,0,0,0,-1--1--1,,1|(476,433)|
+1,56,15,9,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,57,14,9,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,58,28,49,1,0,0,0,0,0,0,-1--1--1,,1|(382,844)|
+1,59,27,50,1,0,0,0,0,0,0,-1--1--1,,1|(423,900)|
+1,60,23,49,1,0,0,0,0,0,0,-1--1--1,,1|(323,762)|
+1,61,25,49,1,0,0,0,0,0,0,-1--1--1,,1|(448,849)|
+1,62,39,50,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,63,39,50,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,64,38,50,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,65,6,46,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,66,12,45,1,0,0,0,0,0,0,-1--1--1,,1|(619,220)|
+1,67,5,46,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,68,4,46,1,0,0,0,0,0,0,-1--1--1,,1|(275,362)|
+1,69,17,12,1,0,0,0,0,0,0,-1--1--1,,1|(707,328)|
+1,70,16,12,1,0,0,0,0,0,0,-1--1--1,,1|(699,360)|
+1,71,2,12,1,0,0,0,0,0,0,-1--1--1,,1|(620,272)|
+1,72,35,33,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,73,34,33,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,74,12,33,1,0,0,0,0,0,0,-1--1--1,,1|(738,494)|
+1,75,4,10,1,0,0,0,0,0,0,-1--1--1,,1|(286,477)|
+1,76,19,10,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,77,21,10,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,78,20,10,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,79,26,25,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,80,29,25,1,0,0,0,0,0,0,-1--1--1,,1|(471,736)|
+1,81,30,25,1,0,0,0,0,0,0,-1--1--1,,1|(470,709)|
+1,82,26,25,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,83,26,25,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,84,36,25,1,0,0,0,0,0,0,-1--1--1,,1|(483,680)|
+1,85,26,25,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,86,43,31,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,87,33,31,1,0,0,0,0,0,0,-1--1--1,,1|(647,788)|
+1,88,42,31,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,89,32,31,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,90,41,31,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,91,41,31,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,92,31,27,1,0,0,0,0,0,0,-1--1--1,,1|(550,868)|
+1,93,44,27,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,94,40,27,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,95,44,27,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,96,28,26,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,97,23,26,1,0,0,0,0,0,0,-1--1--1,,1|(302,714)|
+1,98,9,4,1,0,0,0,0,0,0,-1--1--1,,1|(311,413)|
+1,99,8,4,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,100,7,4,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,101,19,4,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,102,45,2,4,0,0,22,0,0,0,-1--1--1,,1|(409,276)|
+1,103,45,1,100,0,0,22,0,0,0,-1--1--1,,1|(327,276)|
+1,104,49,48,4,0,0,22,0,0,0,-1--1--1,,1|(313,881)|
+1,105,49,3,100,0,0,22,0,0,0,-1--1--1,,1|(377,881)|
+1,106,13,11,1,0,0,0,0,0,0,-1--1--1,,1|(512,544)|
+1,107,22,11,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,108,23,11,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,109,18,19,1,0,0,0,0,0,0,-1--1--1,,1|(204,562)|
+1,110,11,18,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,111,19,18,1,0,0,0,0,0,0,-1--1--1,,1|(274,564)|
+1,112,24,18,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,113,13,47,1,0,0,0,0,0,0,-1--1--1,,1|(502,496)|
+1,114,10,47,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,115,37,47,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,116,47,13,1,0,0,0,0,0,0,-1--1--1,,1|(475,474)|
+12,117,48,242,813,10,8,0,3,0,0,-1,0,0,0,0,0,0,0,0,0
+11,118,0,242,764,8,7,1,3,0,0,1,0,0,0,0,0,0,0,0,0
+1,119,118,23,4,0,0,22,0,0,0,-1--1--1,,1|(242,744)|
+1,120,118,117,100,0,0,22,0,0,0,-1--1--1,,1|(242,788)|
+1,121,48,118,1,0,0,0,0,0,0,-1--1--1,,1|(214,820)|
+1,122,48,50,1,0,0,0,0,0,0,-1--1--1,,1|(270,908)|
+10,123,Initial Pt,378,329,75,30,0,3,0,2,-1,1,0,0,-1--1--1,-1--1--1,|||64-128-128,0,0,0,0,0,0
+1,124,123,2,0,0,0,0,0,0,1,-1--1--1,,1|(0,0)|
+1,125,11,19,0,0,0,0,0,0,1,-1--1--1,,1|(0,0)|
+1,126,28,23,0,0,0,0,0,0,1,-1--1--1,,1|(0,0)|
+1,127,42,43,0,0,0,0,0,0,1,-1--1--1,,1|(0,0)|
+1,128,41,43,0,0,0,0,0,0,1,-1--1--1,,1|(0,0)|
+1,129,32,43,0,0,0,0,0,0,1,-1--1--1,,1|(0,0)|
+12,130,0,1084,361,211,12,0,4,0,16,-1,0,0,0,-1--1--1,0-0-0,||I|255-0-0,0,0,0,0,0,0
+Replicated by Tom Fiddaman (Tom@Vensim.com)
+12,131,0,1071,277,207,72,8,132,0,16,-1,0,0,0,-1--1--1,0-0-0,||I|255-0-0,0,0,0,0,0,0
+From Jensen, K.S., Mosekilde, Erik, and Holstein-Rathlou, N. Self-Sustained Oscillations and Chaotic Behavior in Kidney Pressure Regulation. In I. Prigogine and M. Sanglier, eds., Laws of Nature and Human Conduct. Brussels: Taskforce of Research Informat
+12,132,0,1063,582,200,200,3,44,0,0,2,0,0,0,0,0,0,0,0,0
+Pt Proxim Tub Pressure,graph
+12,133,0,784,112,80,40,8,7,0,0,-1,1,0,0,0,0,0,0,0,0
+NEP4SIMU MODEL
+///---\\\
+:L<%^E!@
+4:Time
+5:Ra0
+9:Nep4
+19:100,0
+24:0
+25:400
+26:400
+22:s,sec,second,seconds
+22:s,sec,second,seconds
+23:0
+15:0,0,0,5,0,0
+27:0,
+34:0,
+42:0
+72:0
+73:0
+95:0
+96:0
+97:0
+77:0
+78:0
+102:1
+93:0
+94:0
+92:0
+91:0
+90:0
+87:0
+75:
+43:
+103:8,8,8,3,8
+105:0,0,0,0,0,0,0,0,0,0
+104:Vensim Sans|12||0-0-0|0-0-0|-1--1--1|0-0-255|192-192-192|-1--1--1

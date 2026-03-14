@@ -194,13 +194,18 @@ public final class AutoLayout {
             }
         }
 
-        // Add causal link edges
+        // Add causal link edges, marking back-edges for cycle breaking
+        Set<String> causalBackEdges = identifyCausalLinkBackEdges(def, chainOrder);
         for (CausalLinkDef link : def.causalLinks()) {
             ElkNode sourceNode = nodeMap.get(link.from());
             ElkNode targetNode = nodeMap.get(link.to());
             if (sourceNode != null && targetNode != null) {
+                String key = link.from() + "->" + link.to();
                 ElkEdge elkEdge = createEdge(factory, root, sourceNode, targetNode);
                 elkEdge.setProperty(CoreOptions.PRIORITY, INFO_LINK_PRIORITY);
+                if (causalBackEdges.contains(key)) {
+                    elkEdge.setProperty(LayeredOptions.FEEDBACK_EDGES, true);
+                }
             }
         }
 
@@ -448,6 +453,44 @@ public final class AutoLayout {
         for (Set<String> scc : depGraph.findSCCs()) {
             for (String node : scc) {
                 for (String neighbor : depGraph.dependentsOf(node)) {
+                    if (!scc.contains(neighbor)) {
+                        continue;
+                    }
+                    Integer fromOrder = chainOrder.get(node);
+                    Integer toOrder = chainOrder.get(neighbor);
+                    if (fromOrder != null && toOrder != null && fromOrder > toOrder) {
+                        backEdges.add(node + "->" + neighbor);
+                    }
+                }
+            }
+        }
+
+        return backEdges;
+    }
+
+    /**
+     * Identifies back-edges within causal link cycles by building a separate
+     * adjacency graph from causal links and finding SCCs using Tarjan's algorithm.
+     * Uses the same chainOrder positions to determine edge direction.
+     */
+    private static Set<String> identifyCausalLinkBackEdges(ModelDefinition def,
+                                                            Map<String, Integer> chainOrder) {
+        if (def.causalLinks().isEmpty()) {
+            return Set.of();
+        }
+
+        Set<String> allNodes = new LinkedHashSet<>();
+        Map<String, Set<String>> adjacency = new LinkedHashMap<>();
+        for (CausalLinkDef link : def.causalLinks()) {
+            allNodes.add(link.from());
+            allNodes.add(link.to());
+            adjacency.computeIfAbsent(link.from(), k -> new LinkedHashSet<>()).add(link.to());
+        }
+
+        Set<String> backEdges = new HashSet<>();
+        for (Set<String> scc : TarjanSCC.findNonTrivial(allNodes, adjacency)) {
+            for (String node : scc) {
+                for (String neighbor : adjacency.getOrDefault(node, Set.of())) {
                     if (!scc.contains(neighbor)) {
                         continue;
                     }

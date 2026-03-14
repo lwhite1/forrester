@@ -11,8 +11,12 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -528,6 +532,65 @@ class FeedbackAnalysisTest {
             assertThat(analysis.loopCount()).isEqualTo(2);
             assertThat(analysis.causalLoops().get(0).label()).contains("1");
             assertThat(analysis.causalLoops().get(1).label()).contains("2");
+        }
+    }
+
+    @Nested
+    @DisplayName("immutability (#462)")
+    class Immutability {
+
+        @Test
+        void shouldDefensivelyCopyLoopParticipants() {
+            Set<String> participants = new LinkedHashSet<>(Set.of("A", "B"));
+            FeedbackAnalysis analysis = new FeedbackAnalysis(
+                    participants, List.of(), Set.of(), List.of());
+
+            participants.add("C");
+            assertThat(analysis.loopParticipants()).doesNotContain("C");
+        }
+
+        @Test
+        void shouldReturnUnmodifiableLoopParticipants() {
+            FeedbackAnalysis analysis = new FeedbackAnalysis(
+                    new LinkedHashSet<>(Set.of("A")), List.of(), Set.of(), List.of());
+            assertThat(analysis.loopParticipants()).isUnmodifiable();
+        }
+
+        @Test
+        void shouldDefensivelyCopyLoopEdges() {
+            Set<FeedbackAnalysis.Edge> edges = new HashSet<>();
+            edges.add(new FeedbackAnalysis.Edge("A", "B"));
+            FeedbackAnalysis analysis = new FeedbackAnalysis(
+                    Set.of(), List.of(), edges, List.of());
+
+            edges.add(new FeedbackAnalysis.Edge("C", "D"));
+            assertThat(analysis.loopEdges()).hasSize(1);
+        }
+
+        @Test
+        void shouldDefensivelyCopyCausalLoops() {
+            List<CausalLoop> loops = new ArrayList<>();
+            loops.add(new CausalLoop(List.of("X", "Y"),
+                    List.of(CausalLinkDef.Polarity.POSITIVE, CausalLinkDef.Polarity.POSITIVE),
+                    LoopType.REINFORCING, "R1"));
+            FeedbackAnalysis analysis = new FeedbackAnalysis(
+                    Set.of(), List.of(), Set.of(), loops);
+
+            loops.add(new CausalLoop(List.of("A", "B"),
+                    List.of(CausalLinkDef.Polarity.NEGATIVE, CausalLinkDef.Polarity.NEGATIVE),
+                    LoopType.REINFORCING, "R2"));
+            assertThat(analysis.causalLoops()).hasSize(1);
+        }
+
+        @Test
+        void shouldReturnUnmodifiableCausalLoopPath() {
+            CausalLoop loop = new CausalLoop(
+                    new ArrayList<>(List.of("X", "Y")),
+                    new ArrayList<>(List.of(CausalLinkDef.Polarity.POSITIVE,
+                            CausalLinkDef.Polarity.POSITIVE)),
+                    LoopType.REINFORCING, "R1");
+            assertThat(loop.path()).isUnmodifiable();
+            assertThat(loop.polarities()).isUnmodifiable();
         }
     }
 

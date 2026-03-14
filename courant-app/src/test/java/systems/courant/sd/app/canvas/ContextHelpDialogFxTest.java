@@ -2,6 +2,7 @@ package systems.courant.sd.app.canvas;
 
 import javafx.application.Platform;
 import javafx.scene.Scene;
+import javafx.scene.control.TreeCell;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeView;
 import javafx.scene.layout.BorderPane;
@@ -100,6 +101,26 @@ class ContextHelpDialogFxTest {
         @SuppressWarnings("unchecked")
         TreeView<HelpTopic> tree = (TreeView<HelpTopic>) root.getLeft();
         assertThat(tree.isShowRoot()).isFalse();
+    }
+
+    @Test
+    @DisplayName("empty tree cell clears bold style from category header (#469)")
+    void emptyCellClearsStyle(FxRobot robot) {
+        Platform.runLater(() -> dialog.show());
+        WaitForAsyncUtils.waitForFxEvents();
+
+        // Find a tree cell that is a category header (bold), then check that
+        // empty cells do NOT retain bold style
+        var cells = robot.lookup(".tree-cell").queryAllAs(TreeCell.class);
+        for (TreeCell<?> cell : cells) {
+            if (cell.getText() == null && cell.isEmpty()) {
+                // Empty cells must not have bold style
+                String style = cell.getStyle();
+                assertThat(style == null || !style.contains("-fx-font-weight: bold"))
+                        .as("Empty cell should not retain bold style")
+                        .isTrue();
+            }
+        }
     }
 
     private int countLeaves(TreeItem<HelpTopic> item) {

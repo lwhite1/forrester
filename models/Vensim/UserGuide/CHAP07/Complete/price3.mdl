@@ -1,0 +1,184 @@
+{UTF-8}
+target price=
+	MIN(
+	XIDZ(target revenue,expected demand,maximum price),
+	maximum price)
+	~	$/Box
+	~		|
+
+maximum price=
+	25000
+	~	$/Box
+	~		|
+
+change in price=
+	IF THEN ELSE(target price > price,
+	(target price - price)/time to adjust price up,
+	(target price-price)/time to adjust price down)
+	~	$/Box/Month
+	~		|
+
+time to adjust price down=
+	6
+	~	Month
+	~		|
+
+demand=
+	reference demand * effect price demand
+	~	Box/Month
+	~		|
+
+demand elasticity=
+	1
+	~	Dmnl
+	~		|
+
+effect price demand=
+	EXP(-demand elasticity * LN(price/reference price))
+	~	Dmnl
+	~		|
+
+expected demand=
+	SMOOTH(demand,time to form expectations)
+	~	Box/Month
+	~		|
+
+initial price=
+	100
+	~	$/Box
+	~		|
+
+price= INTEG (
+	change in price,
+		initial price)
+	~	$/Box
+	~		|
+
+reference demand=
+	100
+	~	Box/Month
+	~		|
+
+reference price=
+	100
+	~	$/Box
+	~		|
+
+target revenue=
+	10000+STEP(5000, 10)
+	~	$/Month
+	~		|
+
+time to adjust price up=
+	4
+	~	Month
+	~		|
+
+time to form expectations=
+	6
+	~	Month
+	~		|
+
+********************************************************
+	.Control
+********************************************************~
+		Simulation Control Parameters
+	|
+
+FINAL TIME  = 100
+	~	Month
+	~	The final time for the simulation.
+	|
+
+INITIAL TIME  = 0
+	~	Month
+	~	The initial time for the simulation.
+	|
+
+SAVEPER  = 
+        TIME STEP
+	~	Month [0,?]
+	~	The frequency with which output is stored.
+	|
+
+TIME STEP  = 1
+	~	Month [0,?]
+	~	The time step for the simulation.
+	|
+
+\\\---/// Sketch information - do not modify anything except names
+V300  Do not put anything below this section - it will be ignored
+*View 1
+$192-192-192,0,Arial|14||0-0-0|92-92-92|160-160-160|-1--1--1|-1--1--1|96,96,100,0
+10,1,reference demand,657,49,79,12,0,3,0,2,0,0,0,0,0-0-0,0-0-0,|14||64-128-128
+10,2,effect price demand,615,111,85,12,0,3,0,0,0,0,0,0
+10,3,price,515,187,40,20,3,3,0,16,0,0,0,0,0-0-0,0-0-0,|14|B|0-0-0
+10,4,demand,491,69,37,12,0,3,0,0,0,0,0,0
+10,5,target price,249,160,49,12,0,3,0,0,0,0,0,0
+10,6,time to adjust price up,237,241,95,12,0,3,0,2,0,0,0,0,0-0-0,0-0-0,|14||64-128-128
+10,7,target revenue,140,119,63,12,0,3,0,2,0,0,0,0,0-0-0,0-0-0,|14||64-128-128
+1,8,1,4,1,0,0,0,0,64,0,-1--1--1,,1|(569,56)|
+1,9,2,4,1,0,0,0,0,64,0,-1--1--1,,1|(580,87)|
+1,10,3,2,1,0,0,0,0,64,0,-1--1--1,,1|(581,183)|
+10,11,demand elasticity,771,163,75,12,0,3,0,2,0,0,0,0,0-0-0,0-0-0,|14||64-128-128
+1,12,11,2,1,0,0,0,0,64,0,-1--1--1,,1|(687,152)|
+1,13,6,22,1,0,0,0,0,64,0,-1--1--1,,1|(347,233)|
+1,14,17,5,1,0,0,0,0,64,0,-1--1--1,,1|(277,105)|
+1,15,7,5,1,0,0,0,0,64,0,-1--1--1,,1|(197,143)|
+10,16,initial price,581,235,47,12,0,3,0,2,0,0,0,0,0-0-0,0-0-0,|14||64-128-128
+10,17,expected demand,336,69,55,29,3,131,0,16,0,0,0,0,0-0-0,0-0-0,|14|B|0-0-0
+12,18,48,315,184,13,11,0,3,0,0,-1,0,0,0
+1,19,21,3,4,0,0,22,0,0,0,-1--1--1,,1|(444,191)|
+1,20,21,18,68,0,0,22,2,0,0,-1--1--1,|12||0-0-0,1|(364,191)|
+11,21,48,407,191,7,8,34,3,0,0,1,0,0,0
+10,22,change in price,407,211,67,12,32,3,0,0,-1,0,0,0
+1,23,4,17,1,0,0,0,0,0,0,-1--1--1,,1|(417,61)|
+10,24,time to form expectations,135,40,107,12,0,3,0,2,-1,0,0,0,0-0-0,0-0-0,|14||64-128-128
+1,25,24,17,1,0,0,0,0,0,0,-1--1--1,,1|(211,71)|
+1,26,3,22,1,0,0,0,0,0,0,-1--1--1,,1|(464,240)|
+1,27,5,22,1,0,0,0,0,0,0,-1--1--1,,1|(305,204)|
+10,28,reference price,755,208,65,12,0,3,0,2,-1,0,0,0,0-0-0,0-0-0,|14||64-128-128
+1,29,28,2,1,0,0,0,0,0,0,-1--1--1,,1|(671,172)|
+10,30,time to adjust price down,252,277,107,12,0,3,0,2,0,0,0,0,0-0-0,0-0-0,|14||64-128-128
+1,31,30,22,1,0,0,0,0,64,0,-1--1--1,,1|(359,248)|
+1,32,16,3,0,0,0,0,0,0,1,-1--1--1,,1|(560,219)|
+10,33,maximum price,91,151,67,12,0,3,0,2,0,0,0,0,0-0-0,0-0-0,|14||64-128-128
+1,34,33,5,1,0,0,0,0,64,0,-1--1--1,,1|(143,163)|
+12,35,0,229,500,221,201,3,188,0,0,1,0,0,0
+price_and_demand
+12,36,0,677,497,221,201,3,188,0,0,1,0,0,0
+Price_v_demand
+///---\\\
+:GRAPH price_and_demand
+:TITLE Price and demand vs. time
+:SCALE
+:VAR Price
+:SCALE
+:VAR demand
+
+:GRAPH Price_v_demand
+:TITLE Price vs. demand
+:X-AXIS demand
+:DOTS
+:SCALE
+:VAR Price
+:L<%^E!@
+1:Current.vdf
+9:Current
+22:$,Dollar,Dollars,$s
+22:Hour,Hours
+22:Month,Months
+22:Person,People,Persons
+22:Unit,Units
+22:Week,Weeks
+22:Year,Years
+22:Day,Days
+15:0,0,0,0,0,0
+19:100,0
+27:2,
+34:0,
+4:Time
+5:time to form expectations
+24:0
+25:100
+26:100

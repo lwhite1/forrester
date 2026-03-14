@@ -1,0 +1,139 @@
+{UTF-8}
+acceleration = g + compression acceleration
+	~	Feet/Second/Second
+	~		|
+
+ball diameter = 0.25
+	~	Feet
+	~		|
+
+big time step = 0.0625
+	~	Second
+	~		|
+
+compression acceleration = IF THEN ELSE(Position <= ball diameter,
+        (ball diameter-Position)*stiffness constant,0)
+	~	Feet/Second/Second
+	~		|
+
+could be position = IF THEN ELSE(Velocity>0,Position,
+        Position+Velocity*big time step)
+	~	Feet
+	~		|
+
+g = -32
+	~	Feet/(Second*Second)
+	~	Negative because up is positive.
+	|
+
+little time step =    0.000488281
+	~	Second
+	~		|
+
+Position = INTEG(Velocity,30)
+	~	Feet
+	~		|
+
+stiffness constant = 200000
+	~	1/Second/Second
+	~		|
+
+Velocity = INTEG(acceleration,0)
+	~	Feet/Second
+	~		|
+
+********************************************************
+	.Control
+********************************************************~
+		Simulation Control Paramaters
+	|
+
+TIME STEP=
+	 IF THEN ELSE(could be position <= ball diameter , little time step,big time step)
+	~	Second
+	~	The time step for the simulation.
+	|
+
+FINAL TIME  = 20
+	~	Second
+	~	The final time for the simulation.
+	|
+
+INITIAL TIME  = 0
+	~	Second
+	~	The initial time for the simulation.
+	|
+
+SAVEPER  = 0.125
+	~	Second
+	~	The frequency with which output is stored.
+	|
+
+\\\---/// Sketch information - do not modify anything except names
+V300  Do not put anything below this section - it will be ignored
+*View 1
+$192-192-192,0,Vensim Sans|14||0-0-0|92-92-92|160-160-160|-1--1--1|255-255-255|96,96,100,0
+10,1,Position,377,235,40,20,3,3,0,0,0,0,0,0
+12,2,48,156,235,13,11,0,3,0,0,-1,0,0,0
+11,3,48,251,235,7,8,34,3,0,0,1,0,0,0
+10,4,Velocity,251,263,40,20,35,3,0,0,0,0,0,0
+12,5,48,55,265,13,11,0,3,0,0,-1,0,0,0
+11,6,48,136,265,7,8,34,3,0,0,1,0,0,0
+10,7,acceleration,136,284,53,12,32,3,0,0,0,0,0,0
+10,8,g,155,395,8,12,0,3,0,2,-1,0,0,0,0-0-0,0-0-0,|14||64-128-128
+10,9,compression acceleration,311,355,109,12,0,3,0,0,-1,0,0,0
+10,10,stiffness constant,323,404,75,12,0,3,0,2,-1,0,0,0,0-0-0,0-0-0,|14||64-128-128
+10,11,ball diameter,520,343,56,12,0,3,0,2,-1,0,0,0,0-0-0,0-0-0,|14||64-128-128
+10,12,could be position,308,151,73,12,0,3,0,0,-1,0,0,0
+10,13,TIME STEP,307,83,52,12,0,3,0,0,-1,0,0,0
+10,14,big time step,173,117,56,12,0,3,0,2,-1,0,0,0,0-0-0,0-0-0,|14||64-128-128
+10,15,little time step,528,123,60,12,0,3,0,2,-1,0,0,0,0-0-0,0-0-0,|14||64-128-128
+1,16,3,1,4,0,0,22,0,0,0,-1--1--1,,1|(297,235)|
+1,17,3,2,100,0,0,22,0,0,0,-1--1--1,,1|(207,235)|
+1,18,6,5,100,0,0,22,0,0,0,-1--1--1,,1|(99,265)|
+1,19,6,4,4,0,0,22,0,0,0,-1--1--1,,1|(176,265)|
+1,20,8,7,2,0,0,0,0,0,0,-1--1--1,,1|(135,347)|
+1,21,9,7,2,0,0,0,0,0,0,-1--1--1,,1|(177,325)|
+1,22,1,9,2,0,0,0,0,0,0,-1--1--1,,1|(380,285)|
+1,23,11,9,2,0,0,0,0,0,0,-1--1--1,,1|(428,367)|
+1,24,10,9,0,0,0,0,0,0,0,-1--1--1,,1|(319,388)|
+1,25,3,12,2,0,0,0,0,0,0,-1--1--1,,1|(279,187)|
+1,26,1,12,2,0,0,0,0,0,0,-1--1--1,,1|(347,187)|
+1,27,12,13,0,0,0,0,0,0,0,-1--1--1,,1|(307,125)|
+1,28,14,12,0,0,0,0,0,0,0,-1--1--1,,1|(231,131)|
+1,29,14,13,0,0,0,0,0,0,0,-1--1--1,,1|(229,101)|
+1,30,11,13,1,0,0,0,0,0,0,-1--1--1,,1|(447,181)|
+1,31,15,13,0,0,0,0,0,0,0,-1--1--1,,1|(421,103)|
+12,32,20133404,963,256,371,211,3,188,0,0,1,0,0,0
+p_and_v
+///---\\\
+:GRAPH BALL_TEST
+:TITLE ball test
+:WIP
+:SCALE
+:VAR could be position
+:DATASET *
+
+:GRAPH AB2
+:TITLE ab2
+:SCALE
+:VAR Position
+
+:GRAPH p_and_v
+:TITLE p and v
+:SCALE
+:VAR Position
+:SCALE
+:VAR Velocity
+:L<%^E!@
+1:Ball.vdf
+9:Ball
+15:0,0,0,1,0,0
+19:100,0
+27:0,
+34:0,
+4:Time
+5:g
+24:0
+25:19.9116
+26:19.9116

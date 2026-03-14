@@ -26,11 +26,11 @@ class ExprCompilerTest {
     private CompilationContext context;
     private ExprCompiler compiler;
     private List<Resettable> resettables;
-    private int[] step;
+    private long[] step;
 
     @BeforeEach
     void setUp() {
-        step = new int[]{0};
+        step = new long[]{0};
         UnitRegistry registry = new UnitRegistry();
         context = new CompilationContext(registry, () -> step[0]);
         resettables = new ArrayList<>();
@@ -316,6 +316,34 @@ class ExprCompilerTest {
             assertThatThrownBy(() -> compiler.compile("DELAY3(1, 2, 3, 4)"))
                     .isInstanceOf(CompilationException.class)
                     .hasMessageContaining("2-3 arguments");
+        }
+
+        @Test
+        void shouldWarnForDELAY1WithNegativeDelayTime() {
+            compiler.compile("DELAY1(100, -5)");
+            assertThat(context.getWarnings())
+                    .anyMatch(w -> w.contains("DELAY1") && w.contains("inaccurate"));
+        }
+
+        @Test
+        void shouldWarnForDELAY1WithZeroDelayTime() {
+            compiler.compile("DELAY1(100, 0)");
+            assertThat(context.getWarnings())
+                    .anyMatch(w -> w.contains("DELAY1") && w.contains("inaccurate"));
+        }
+
+        @Test
+        void shouldWarnForDELAY3WithNegativeDelayTime() {
+            compiler.compile("DELAY3(100, -3)");
+            assertThat(context.getWarnings())
+                    .anyMatch(w -> w.contains("DELAY3") && w.contains("inaccurate"));
+        }
+
+        @Test
+        void shouldWarnForDELAY3WithZeroDelayTime() {
+            compiler.compile("DELAY3(100, 0)");
+            assertThat(context.getWarnings())
+                    .anyMatch(w -> w.contains("DELAY3") && w.contains("inaccurate"));
         }
 
         @Test
@@ -831,14 +859,17 @@ class ExprCompilerTest {
         }
 
         @Test
-        void shouldDefaultToOneWhenDelayTimeRoundsToZero() {
-            // delayTime = 0.3 rounds to 0 — should default to 1 instead of crashing
+        void shouldDefaultToOneStepAndWarnWhenDelayTimeRoundsToZero() {
+            // delayTime = 0.3 rounds to 0 — should default to 1 and add a compilation warning
             Formula formula = compiler.compile("DELAY_FIXED(Population, 0.3, 0)");
             step[0] = 0;
             assertThat(formula.getCurrentValue()).isEqualTo(0.0);
             // After 1 step, the delay of 1 should have elapsed
             step[0] = 1;
             assertThat(formula.getCurrentValue()).isEqualTo(1000.0);
+            // Verify a compilation warning was recorded
+            assertThat(context.getWarnings())
+                    .anyMatch(w -> w.contains("DELAY_FIXED") && w.contains("inaccurate"));
         }
     }
 
@@ -1169,6 +1200,73 @@ class ExprCompilerTest {
 
             Formula formula = compiler.compile("LOOKUP_AREA(ramp2, 2, 6)");
             assertThat(formula.getCurrentValue()).isCloseTo(16.0, within(0.001));
+        }
+    }
+
+    @Nested
+    @DisplayName("IF_SHORT short-circuit conditional (#504)")
+    class IfShortCircuit {
+
+        @Test
+        void shouldReturnThenBranchWhenConditionIsTrue() {
+            context.addLiteralConstant("x", 1.0);
+            Formula formula = compiler.compile("IF_SHORT(x, 10, 20)");
+            assertThat(formula.getCurrentValue()).isEqualTo(10.0);
+        }
+
+        @Test
+        void shouldReturnElseBranchWhenConditionIsFalse() {
+            context.addLiteralConstant("x", 0.0);
+            Formula formula = compiler.compile("IF_SHORT(x, 10, 20)");
+            assertThat(formula.getCurrentValue()).isEqualTo(20.0);
+        }
+
+        @Test
+        void shouldNotEvaluateElseBranchWhenConditionIsTrue() {
+            context.addLiteralConstant("cond", 1.0);
+            int[] elseCount = {0};
+            context.addVariable("side_effect",
+                    new systems.courant.sd.model.Variable("side_effect",
+                            ItemUnits.THING, () -> {
+                        elseCount[0]++;
+                        return 99.0;
+                    }));
+            Formula formula = compiler.compile("IF_SHORT(cond, 10, side_effect)");
+            formula.getCurrentValue();
+            assertThat(elseCount[0]).isZero();
+        }
+
+        @Test
+        void shouldNotEvaluateThenBranchWhenConditionIsFalse() {
+            context.addLiteralConstant("cond", 0.0);
+            int[] thenCount = {0};
+            context.addVariable("side_effect",
+                    new systems.courant.sd.model.Variable("side_effect",
+                            ItemUnits.THING, () -> {
+                        thenCount[0]++;
+                        return 99.0;
+                    }));
+            Formula formula = compiler.compile("IF_SHORT(cond, side_effect, 20)");
+            formula.getCurrentValue();
+            assertThat(thenCount[0]).isZero();
+        }
+
+        @Test
+        void shouldParseAndStringifyIfShort() {
+            Expr ast = ExprParser.parse("IF_SHORT(x > 0, x, 0)");
+            assertThat(ast).isInstanceOf(Expr.Conditional.class);
+            Expr.Conditional cond = (Expr.Conditional) ast;
+            assertThat(cond.shortCircuit()).isTrue();
+            assertThat(systems.courant.sd.model.expr.ExprStringifier.stringify(ast))
+                    .isEqualTo("IF_SHORT(x > 0, x, 0)");
+        }
+
+        @Test
+        void shouldDistinguishIfFromIfShort() {
+            Expr ifExpr = ExprParser.parse("IF(x > 0, x, 0)");
+            Expr ifShortExpr = ExprParser.parse("IF_SHORT(x > 0, x, 0)");
+            assertThat(((Expr.Conditional) ifExpr).shortCircuit()).isFalse();
+            assertThat(((Expr.Conditional) ifShortExpr).shortCircuit()).isTrue();
         }
     }
 }

@@ -544,6 +544,65 @@ class AutoLayoutTest {
         }
 
         @Test
+        @DisplayName("Causal link cycles should get back-edge treatment (#116)")
+        void shouldMarkCausalLinkBackEdgesForCycleBreaking() {
+            // A→B→C→D→A forms a cycle; layout should not crash and elements
+            // should be placed without overlaps, demonstrating proper cycle breaking
+            ModelDefinition def = new ModelDefinitionBuilder()
+                    .name("CLD Cycle Back-Edges")
+                    .cldVariable("A")
+                    .cldVariable("B")
+                    .cldVariable("C")
+                    .cldVariable("D")
+                    .causalLink("A", "B",
+                            systems.courant.sd.model.def.CausalLinkDef.Polarity.POSITIVE)
+                    .causalLink("B", "C",
+                            systems.courant.sd.model.def.CausalLinkDef.Polarity.POSITIVE)
+                    .causalLink("C", "D",
+                            systems.courant.sd.model.def.CausalLinkDef.Polarity.NEGATIVE)
+                    .causalLink("D", "A",
+                            systems.courant.sd.model.def.CausalLinkDef.Polarity.NEGATIVE)
+                    .build();
+
+            ViewDef view = AutoLayout.layout(def);
+
+            assertThat(view.elements()).hasSize(4);
+            assertNoOverlaps(view.elements());
+
+            // The chain should flow mostly left-to-right (A, B, C before D at least)
+            Map<String, ElementPlacement> map = placementMap(view);
+            assertThat(map.get("A").x()).isLessThan(map.get("C").x());
+        }
+
+        @Test
+        @DisplayName("Multiple causal link cycles should lay out without overlaps (#116)")
+        void shouldHandleMultipleCausalLinkCycles() {
+            // Two interlocking cycles: A→B→A and B→C→D→B
+            ModelDefinition def = new ModelDefinitionBuilder()
+                    .name("CLD Multi Cycle")
+                    .cldVariable("A")
+                    .cldVariable("B")
+                    .cldVariable("C")
+                    .cldVariable("D")
+                    .causalLink("A", "B",
+                            systems.courant.sd.model.def.CausalLinkDef.Polarity.POSITIVE)
+                    .causalLink("B", "A",
+                            systems.courant.sd.model.def.CausalLinkDef.Polarity.NEGATIVE)
+                    .causalLink("B", "C",
+                            systems.courant.sd.model.def.CausalLinkDef.Polarity.POSITIVE)
+                    .causalLink("C", "D",
+                            systems.courant.sd.model.def.CausalLinkDef.Polarity.POSITIVE)
+                    .causalLink("D", "B",
+                            systems.courant.sd.model.def.CausalLinkDef.Polarity.NEGATIVE)
+                    .build();
+
+            ViewDef view = AutoLayout.layout(def);
+
+            assertThat(view.elements()).hasSize(4);
+            assertNoOverlaps(view.elements());
+        }
+
+        @Test
         void shouldHandleCldOnlyModel() {
             ModelDefinition def = new ModelDefinitionBuilder()
                     .name("CLD Only")

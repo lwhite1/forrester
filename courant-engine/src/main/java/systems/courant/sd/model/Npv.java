@@ -5,7 +5,7 @@ import com.google.common.base.Preconditions;
 import systems.courant.sd.model.compile.Resettable;
 
 import java.util.function.DoubleSupplier;
-import java.util.function.IntSupplier;
+import java.util.function.LongSupplier;
 
 /**
  * Net present value accumulator that implements {@link Formula}, providing the standard
@@ -32,15 +32,15 @@ public class Npv implements Formula, Resettable {
     private final DoubleSupplier stream;
     private final double discountRate;
     private final double factor;
-    private final IntSupplier currentStep;
+    private final LongSupplier currentStep;
 
     private double accumulated;
     private double cumulativeDiscount;
     private boolean initialized;
-    private int lastStep = -1;
+    private long lastStep = -1;
 
     private Npv(DoubleSupplier stream, double discountRate, double factor,
-                IntSupplier currentStep) {
+                LongSupplier currentStep) {
         Preconditions.checkNotNull(stream, "stream supplier must not be null");
         Preconditions.checkNotNull(currentStep, "currentStep supplier must not be null");
         Preconditions.checkArgument(discountRate > -1.0,
@@ -60,7 +60,7 @@ public class Npv implements Formula, Resettable {
      * @return a new Npv formula
      */
     public static Npv of(DoubleSupplier stream, double discountRate,
-                         IntSupplier currentStep) {
+                         LongSupplier currentStep) {
         return new Npv(stream, discountRate, 1.0, currentStep);
     }
 
@@ -74,7 +74,7 @@ public class Npv implements Formula, Resettable {
      * @return a new Npv formula
      */
     public static Npv of(DoubleSupplier stream, double discountRate, double factor,
-                         IntSupplier currentStep) {
+                         LongSupplier currentStep) {
         return new Npv(stream, discountRate, factor, currentStep);
     }
 
@@ -97,14 +97,14 @@ public class Npv implements Formula, Resettable {
      */
     @Override
     public double getCurrentValue() {
-        int step = currentStep.getAsInt();
+        long step = currentStep.getAsLong();
         if (!initialized) {
             cumulativeDiscount = 1.0;
             accumulated = stream.getAsDouble() * factor;
             initialized = true;
             lastStep = step;
         } else if (step > lastStep) {
-            int delta = step - lastStep;
+            long delta = step - lastStep;
             double discountMultiplier = 1 + discountRate;
             double streamVal = stream.getAsDouble();
             // Compound discount for all elapsed steps

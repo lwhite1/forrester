@@ -1,0 +1,116 @@
+:GRAPH WIP_CASH_REV
+:TITLE Retains Cash Revenue
+:X-MIN 0
+:X-MAX 60
+:WIP
+:SCALE
+:VAR RETAINED CASH FLOW
+:Y-MIN 0
+:Y-MAX 40000
+:DATASET BASE
+:VAR RETAINED CASH FLOW
+:VAR RETAINED CASH FLOW
+:DATASET *2
+:VAR RETAINED CASH FLOW
+:DATASET *3
+:GRAPH BASE_V_ACTUAL
+:TITLE Base Run Versus Available Data
+:SCALE
+:VAR cash revenue|Revenue in base run
+:Y-MIN 0
+:Y-MAX 500000
+:DATASET base
+:VAR cash revenue|.......................actual
+:DATASET market
+:SCALE
+:VAR fraction custs buying|Marketing effectiveness in base
+:Y-MIN 0
+:Y-MAX 1
+:DATASET base
+:VAR fraction custs buying|.....................................actual
+:DATASET market
+:GRAPH DATA_AND_BEST
+:TITLE Optimized Run Versus Available Data
+:SCALE
+:VAR cash_revenue|Revenue in optimized run
+:DATASET calibrate.vdf
+:VAR cash_revenue|..................... actual
+:DATASET market.vdf
+:SCALE
+:VAR fraction_custs_buying|Marketing effectiveness in optimized
+:DATASET calibrate.vdf
+:VAR fraction_custs_buying|....................................... actual
+:DATASET market.vdf
+:GRAPH RETAINED_CASH
+:TITLE Perfomance Before and After Policy Optimization
+:SCALE
+:VAR retained_cash_flow|Retained earnings before
+:DATASET calibrat.vdf
+:VAR retained_cash_flow|...................after
+:UNITS Dollars/Month
+:DATASET optimal.vdf
+:SCALE
+:VAR cash_revenue|Revenue before
+:Y-MAX 800000
+:DATASET calibrat.vdf
+:VAR cash_revenue|..............after
+:UNITS $/Month
+:Y-MAX 800000
+:DATASET optimal.vdf
+:GRAPH MARKET_EFF
+:TITLE Market Effectiveness in Model Relative to Data
+:X-LABEL Months since January 1, 1985
+:X-MIN 12
+:SCALE
+:VAR fraction_custs_buying|Model Results
+:DATASET best.vdf
+:VAR fraction_custs_buying|Actual Data
+:UNITS Fraction
+:Y-MIN 0.45
+:Y-MAX 0.55
+:DATASET market.vdf
+:REPORT COMM1
+:TITLE COMM1
+:LOCATION -1,-1
+:SIZE -1,-1
+:FONT Times New Roman|10||0-0-0
+The software allows you to explore a model through a number of menus
+and output screens.  To select a menu item you can click on it, type the
+first letter in the menu description or select it using the up and down
+arrow keys and then press the enter key.  The selected menu item appears 
+highlighted - usually black on white.  In some cases buttons are used in
+place of menu items.  To activate these click on them.
+
+Additional functionality available in the software is described in 
+places where it can be used.  To conserve space, later commentaries
+will be kept small, and you will need to scroll them to read all the
+information they contain.
+:END-OF-REPORT
+:REPORT COMM4
+:TITLE COMM4
+:LOCATION -1,-1
+:SIZE -1,-1
+:FONT Times New Roman|10||0-0-0
+The cause and use screens show lists of
+different variables.  The graphs allows
+you to compare different scenarios.
+The trees allow you to investigate the
+structure of the model.
+
+You can double click on a variable name
+in the graphs, trees or documentation to
+view the same analysis screen for that
+variable.  You can also use the S
+command to select a new variable to work
+with.
+
+You can print the contents of the graphs
+and trees using the P command.  Output
+will be directed to your default printer.
+
+During causal tracing you can switch
+between the Tree and Graph represen-
+tations of causes.  This can be
+useful as means of understanding both
+structure and behavior.
+:END-OF-REPORT

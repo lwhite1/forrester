@@ -6,6 +6,7 @@ import systems.courant.sd.model.def.ValidationResult;
 
 import javafx.application.Platform;
 import javafx.scene.Scene;
+import javafx.scene.control.DialogPane;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableView;
 import javafx.scene.layout.StackPane;
@@ -20,7 +21,6 @@ import org.testfx.framework.junit5.Start;
 import org.testfx.util.WaitForAsyncUtils;
 
 import java.util.List;
-import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -58,7 +58,7 @@ class ValidationDialogFxTest {
         showDialog(result);
 
         @SuppressWarnings("unchecked")
-        TableView<ValidationIssue> table = robot.lookup(".table-view")
+        TableView<ValidationIssue> table = robot.lookup("#validationTable")
                 .queryAs(TableView.class);
         assertThat(table.getItems()).hasSize(2);
     }
@@ -73,10 +73,8 @@ class ValidationDialogFxTest {
         ));
         showDialog(result);
 
-        Set<Label> labels = robot.lookup(".label").queryAllAs(Label.class);
-        boolean foundSummary = labels.stream()
-                .anyMatch(l -> l.getText() != null && l.getText().contains("2 errors"));
-        assertThat(foundSummary).isTrue();
+        Label summary = robot.lookup("#validationSummary").queryAs(Label.class);
+        assertThat(summary.getText()).contains("2 errors");
     }
 
     @Test
@@ -84,10 +82,8 @@ class ValidationDialogFxTest {
     void showsCleanMessage(FxRobot robot) {
         showDialog(new ValidationResult(List.of()));
 
-        Set<Label> labels = robot.lookup(".label").queryAllAs(Label.class);
-        boolean found = labels.stream()
-                .anyMatch(l -> l.getText() != null && l.getText().contains("No issues found"));
-        assertThat(found).isTrue();
+        Label summary = robot.lookup("#validationSummary").queryAs(Label.class);
+        assertThat(summary.getText()).contains("No issues found");
     }
 
     @Test
@@ -100,7 +96,7 @@ class ValidationDialogFxTest {
         showDialog(result, name -> selected[0] = name);
 
         @SuppressWarnings("unchecked")
-        TableView<ValidationIssue> table = robot.lookup(".table-view")
+        TableView<ValidationIssue> table = robot.lookup("#validationTable")
                 .queryAs(TableView.class);
 
         Platform.runLater(() -> table.getSelectionModel().select(0));
@@ -110,10 +106,80 @@ class ValidationDialogFxTest {
     }
 
     @Test
+    @DisplayName("showOrUpdate updates the callback when dialog is reused (#379)")
+    void shouldUpdateCallbackOnReuse(FxRobot robot) {
+        String[] selectedByA = {null};
+        String[] selectedByB = {null};
+
+        ValidationResult result1 = new ValidationResult(List.of(
+                new ValidationIssue(Severity.ERROR, "StockA", "Error A")
+        ));
+
+        // Window A opens the dialog
+        Platform.runLater(() -> ValidationDialog.showOrUpdate(result1, name -> selectedByA[0] = name));
+        WaitForAsyncUtils.waitForFxEvents();
+
+        // Window B calls showOrUpdate with a different callback and result
+        ValidationResult result2 = new ValidationResult(List.of(
+                new ValidationIssue(Severity.ERROR, "StockB", "Error B")
+        ));
+        Platform.runLater(() -> ValidationDialog.showOrUpdate(result2, name -> selectedByB[0] = name));
+        WaitForAsyncUtils.waitForFxEvents();
+
+        // Select row 0 — should invoke B's callback, not A's
+        @SuppressWarnings("unchecked")
+        TableView<ValidationIssue> table = robot.lookup("#validationTable")
+                .queryAs(TableView.class);
+        Platform.runLater(() -> table.getSelectionModel().select(0));
+        WaitForAsyncUtils.waitForFxEvents();
+
+        assertThat(selectedByA[0]).isNull();
+        assertThat(selectedByB[0]).isEqualTo("StockB");
+
+        // Clean up
+        ValidationDialog instance = ValidationDialog.getOpenInstance();
+        if (instance != null) {
+            Platform.runLater(instance::close);
+            WaitForAsyncUtils.waitForFxEvents();
+        }
+    }
+
+    @Test
     @DisplayName("Dialog title is 'Model Validation'")
     void dialogTitle(FxRobot robot) {
         showDialog(new ValidationResult(List.of()));
 
         assertThat(validationDialog.getTitle()).isEqualTo("Model Validation");
+    }
+
+    @Test
+    @DisplayName("Dialog has a Close button (#213)")
+    void hasCloseButton(FxRobot robot) {
+        showDialog(new ValidationResult(List.of()));
+
+        DialogPane pane = validationDialog.getDialogPane();
+        assertThat(pane.getButtonTypes()).contains(javafx.scene.control.ButtonType.CLOSE);
+    }
+
+    @Test
+    @DisplayName("Dialog uses screen-aware width (#202)")
+    void usesScreenAwareWidth(FxRobot robot) {
+        showDialog(new ValidationResult(List.of()));
+
+        double prefWidth = validationDialog.getDialogPane().getPrefWidth();
+        assertThat(prefWidth).isLessThanOrEqualTo(700);
+        assertThat(prefWidth).isGreaterThan(0);
+    }
+
+    @Test
+    @DisplayName("Table, summary and copy button have fx:id values (#408)")
+    void controlsHaveFxIds(FxRobot robot) {
+        showDialog(new ValidationResult(List.of(
+                new ValidationIssue(Severity.ERROR, "S1", "Err")
+        )));
+
+        assertThat(robot.lookup("#validationTable").tryQuery()).isPresent();
+        assertThat(robot.lookup("#validationSummary").tryQuery()).isPresent();
+        assertThat(robot.lookup("#validationCopy").tryQuery()).isPresent();
     }
 }

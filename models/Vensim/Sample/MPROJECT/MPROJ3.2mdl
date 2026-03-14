@@ -1,0 +1,1630 @@
+{UTF-8}
+********************************************************
+	.Mproj3
+********************************************************~
+		
+		
+		
+		  A simple multitask project model.  
+		  Copyright (c) 1991,1992 Ventana Systems, Inc.
+		  This is a simple example showing prerequisite dependency 
+		  and work quality flow through.
+	|
+
+max labor[task] = 1000
+	~	person
+	~		|
+
+overrun charge = IF THEN ELSE(:NOT: project is done :AND:
+         Time > init sched comp time[TASK4],
+         overrun charge rate,0)
+	~	$/Month
+	~	     The charge applied to a project based on the overrun
+		         penalty
+		         applied past the initial start time.
+	|
+
+overrun charge rate = 100000
+	~	$/Month
+	~	     The penalty assessed on project lateness.
+	|
+
+Project Compl Time = INTEG(IF THEN ELSE(Project Compl Time = 0 :AND: 
+               project is done,Time/TIME STEP,0),0)
+	~	Month
+	~	    The time at which the project was completed.
+	|
+
+total cost plus penalty = total cost + overrun charge
+	~	$/Month
+	~	     The total cost of the project plus the penalties accrued.
+	~	:SUPPLEMENTARY 
+	|
+
+********************************************************
+	.Activity
+********************************************************~
+	|
+
+task is active[task]=
+	IF THEN ELSE(task is started[task] :AND: :NOT: 
+	    task is done[task],1,0)
+	~	dmnl
+	~	       Flag to show which tasks are active.
+	|
+
+task is started[task]=
+	IF THEN ELSE(Time >= Sched Start Time[task],1,
+	0)
+	~	dmnl
+	~	       Flag to indicate if a task has been started.
+	|
+
+project is done = task is done[TASK4]
+	~	dmnl
+	~	       Flag to indicate that the project is completed.
+	|
+
+task is done[task] = IF THEN ELSE(rep frac complete[task] > 
+     req frac complete[task],1,0)
+	~	dmnl
+	~	       Flag to indicate if the task is finished.
+	|
+
+********************************************************
+	.Control
+********************************************************~
+		
+		
+		
+		
+		
+		
+		  Control parameters for the model.
+	|
+
+FINAL TIME = IF THEN ELSE(Project Compl Time > 0,
+                 QUANTUM(Project Compl Time+15*UNIT TIME,10*UNIT TIME)
+,
+                 max final time)
+	~	Month
+	~	       The time at which the simulation ends.
+	|
+
+INITIAL TIME = INITIAL(VMIN(init sched start time[task!]))
+	~	Month
+	~	       The initial time for the simulation
+	|
+
+max final time = 100
+	~	Month
+	~	      The maximum number of months for simulation even
+		        when the project is not finished.
+	|
+
+SAVEPER = 1
+	~	Month
+	~	       The frequency with which data is stored.
+	|
+
+TIME STEP = 0.25
+	~	Month
+	~	       The solution interval for simulating the model.
+	|
+
+UNIT TIME=1
+	~	Month
+	~	      Unit time used for dimensional consistency
+	|
+
+********************************************************
+	.Definition
+********************************************************~
+		
+		
+		
+		
+		
+		
+		  The size, scheduling, work requirements and patterns for
+		         the project.
+	|
+
+init sched comp time[task] = 20,40,50,70
+	~	Month
+	~	       The initial scheduled completion timee.
+	|
+
+init sched start time[task] = 0,20,40,50
+	~	Month
+	~	       The time at which the project starts.
+	|
+
+normal productivity[task] = 20,25,15,25
+	~	dwg/person/Month
+	~	       The normal amount of work that is done in the absence of
+		         any effects on productivity.
+	|
+
+normal quality[task] = 0.95
+	~	dmnl
+	~	       The normal quality of work done when no factors are
+		         deteriorating performance.
+	|
+
+prereq req[TASK1,prereq] = 0,0,0,0 ~~|
+prereq req[TASK2,prereq] = 1,0,0,0 ~~|
+prereq req[TASK3,prereq] = 1,1,0,0 ~~|
+prereq req[TASK4,prereq] = 1,1,1,0
+	~	dmnl
+	~	       Switches showing which tasks depend on which for
+		         completion.
+	|
+
+prereq req frac complete = 0.9
+	~	dmnl
+	~	       The required completeness on prerequisite work before a
+		         task can be started.  Could be by [task,prereq].
+	|
+
+req frac complete[task] = 0.98
+	~	dmnl
+	~	       The fraction of a task that needs to be complete before
+		         the
+		         task can be stopped.
+	|
+
+task definition[task] = 100000,200000,50000,400000
+	~	dwg
+	~	       The definition of how big the job is, in drawing
+		         equivalent
+		         units.
+	|
+
+********************************************************
+	.Financial
+********************************************************~
+		
+		
+		
+		
+		
+		
+		 Financial performance of the project
+	|
+
+cost[task] = labor cost[task]
+	~	$/Month
+	~	       The ongoing cost of a task including labor and
+		         materials.
+	|
+
+Cum Cost[task] = INTEG(cost[task],0)
+	~	$
+	~	       The cummulative cost of each task
+	|
+
+labor cost[task] = Labor[task]*wage rate
+	~	$/Month
+	~	       The cost of labor for each particular task and skill
+		         type.
+	|
+
+total cost = SUM(cost[task!])
+	~	$/Month
+	~	       The total ongoing cost of running the project
+	|
+
+total cum cost = SUM(Cum Cost[task!])
+	~	$
+	~	       The total cummulative cost of running the project
+	~	:SUPPLEMENTARY 
+	|
+
+wage rate = 8000
+	~	$/Month/person
+	~	       The wage rate (including benefits and overhead) for
+		         workers.
+	|
+
+********************************************************
+	.Productivity
+********************************************************~
+		
+		
+		
+		
+		
+		
+		   The total amount of work people get done, and are able to
+		         get done.
+	|
+
+Avg Overtime Frac[task] = INTEG(
+              (overtime frac[task] - Avg Overtime Frac[task])/
+          time avg overtime,1)
+	~	dmnl
+	~	       The average overtime fraction used as a measure of
+		         fatigue.
+	|
+
+eff fatigue prod[task] = table eff fatigue prod(
+           Avg Overtime Frac[task])
+	~	dmnl
+	~	       The effect of fatigue on productivity.
+	|
+
+eff morale prod[task] = table eff morale prod(
+               (exp comp time[task] - init sched comp time[task])/
+                 init task length[task])
+	~	dmnl
+	~	       The effect of morale on productivity
+	|
+
+eff prereq ready prod[task,prereq] = 
+      IF THEN ELSE(prereq req[task,prereq],
+        IF THEN ELSE(task is done[prereq],
+           1,
+           prereq eff speed lookup(rep frac complete[task])),
+        1)
+	~	dmnl
+	~	      The effect of prerequisite readyness on work speed.
+	|
+
+eff sched press prod[task] = table eff sched press prod(MIN(5,
+    XIDZ(exp time remaining[task],sched time remaining[task],5)))
+	~	dmnl
+	~	       The effect of schedule pressure on gross productivity.
+	|
+
+gross productivity[task] = normal productivity[task] *
+     eff morale prod[task] *
+     eff fatigue prod[task] *
+     eff sched press prod[task] *
+     PROD(eff prereq ready prod[task,prereq!])
+        * (1 + (RANDOM 0 1() - 0.5) * productivity noise)
+	~	dwg/person/Month
+	~	       The gross amount that people can get done in an hour
+		         neglecting
+		       any quality or potential rework measures.
+	|
+
+prereq eff speed lookup((0,1),(0.5,1),(1,0))
+	~	dmnl
+	~	      Table relating the fraction complete of a task to 
+		         effect on work speed of prerequisites that are not
+		         yet completely finished.
+	|
+
+productivity noise = 0
+	~	dmnl
+	~	       The noise in productivity.
+	|
+
+table eff fatigue prod ( 0.5,1,1.1,1.2,1.3,1.4,1.5,
+                                 1,1,0.95,0.9,0.85,0.8,0.7)
+	~	dmnl
+	~	       Table showing the effect of fatigue (average overtime)
+		         on
+		         productivity.
+	|
+
+table eff morale prod (-1,-0.5,0,0.5,1,1.5,2,
+     4,2,1,0.85,0.75,0.7,0.65)
+	~	dmnl
+	~	       The table describing the effect of morale on
+		         productivity.
+	|
+
+table eff sched press prod (0,1,2,5,10,
+                    1,1,1.1,1.2,1.25)
+	~	dmnl
+	~	       Table showing the effect of schedule pressure on
+		         productivity.
+	|
+
+time avg overtime = 2
+	~	Month
+	~	       The time taken to average overtime in determining its
+		         impact on
+		          fatigue.
+	|
+
+********************************************************
+	.Progress
+********************************************************~
+		
+		
+		
+		
+		
+		
+		  Work that is actually getting done.
+	|
+
+rep work remaining[task]=
+	MAX(0,
+	            task definition[task] - reported work complete[task])
+	~	dwg
+	~	       The reported amount of work remaining.
+	|
+
+exp time remaining[task]=
+	IF THEN ELSE(task is started[task],
+	         IF THEN ELSE(task is done[task],
+	             0,
+	             MIN(2*init task length[task],
+	                XIDZ(rep work remaining[task],
+	                    normal productivity[task] * 
+	                    expected effective labor[task],
+	                    2*init task length[task]))),
+	         init task length[task])
+	~	Month
+	~	       The expected time remaining to the completion of the
+		         task.
+	|
+
+expected effective labor[task]=
+	XIDZ(Labor[task],
+	         relative effort intensity[task],
+	         rep work remaining[task]/normal productivity[task]/
+	           init task length[task])
+	~	person
+	~	       The expected effective workforce based on perceived
+		       flexibility into the future.  A convex combination of
+		       desired and effective would be better.
+	|
+
+rep frac complete[task]=
+	reported work complete[task]/task definition
+	[task
+	]
+	~	dmnl
+	~	       The fraction of work that is reported to be complete.
+	|
+
+downstream rework disc[downstream,task] = IF THEN ELSE(
+         task is active[downstream] :AND:
+         prereq req[downstream,task], Undis Rework[task]/
+         prereq rework disc time[downstream,task],
+          0)
+	~	dwg/Month
+	~	       The discovery of errors in downstream tasks.
+	|
+
+gross completion rate[task] = Labor[task] * 
+            overtime frac[task] *
+            gross productivity[task]
+	~	dwg/Month
+	~	       The rate at which both correct and flawed work is being
+		         completed.
+	|
+
+norm rework disc time[task] = 40,25,15,10
+	~	Month
+	~	       The normal time it takes to discover errors.
+	|
+
+overtime frac[task] = table overtime frac(XIDZ(exp time remaining[task
+],sched time remaining[task],
+            1))
+	~	dmnl
+	~	The amount of overtime being worked.
+	|
+
+prereq rework disc time[TASK1,task] = 1 ~~|
+prereq rework disc time[TASK2,task] = 6 ~~|
+prereq rework disc time[TASK3,task] = 6 ~~|
+prereq rework disc time[TASK4,task] = 2
+	~	Month
+	~	       The time to discover errors in prerequisite work.
+	|
+
+reported work complete[task] = Work Completed Correctly[task] + Undis Rework
+[task]
+	~	dwg
+	~	       The amount of work that is reported to be complete.
+	|
+
+rework discovery[task] = MAX(0,MIN(Undis Rework[task]/
+          TIME STEP,
+          Undis Rework[task]/rework discovery time[task] +
+           SUM(downstream rework disc[downstream!,task])))
+	~	dwg/Month
+	~	       The rate of discovery of rework.
+	|
+
+rework discovery time[task] = norm rework disc time[task] *
+        table eff frac complete[task](rep frac complete[task])
+	~	Month
+	~	       The time required to detect existing problems.
+	|
+
+table eff frac complete[TASK1] ((0,1),(0.5,1),(0.6,0.8),(0.7,0.6),
+        (0.8,0.4),(1,0.2)) ~~|
+table eff frac complete[TASK2] ((0,1),(0.5,0.9),(0.75,0.4),
+           (1,0.2)) ~~|
+table eff frac complete[TASK3] ((0,1),(0.5,0.9),(0.75,0.4),
+           (1,0.2)) ~~|
+table eff frac complete[TASK4] ((0,1),(0.5,0.9),(0.75,0.4),
+           (1,0.1))
+	~	dmnl
+	~	       Table showing the effect of the fraction complete on the
+		         speed with which
+		       errors are discovered.
+	|
+
+table overtime frac ( -0.1,0,1,1.2,1.5,2,3,
+                     0,0.3,1,1.1,1.2,1.3,1.3)
+	~	dmnl
+	~	       Table showint the overtime fraction as a function of
+		         behind
+		         schedule.
+	|
+
+Undis Rework[task] = INTEG(gross completion rate[task] * (1-work quality
+[task]) -
+                   rework discovery[task],0)
+	~	dwg
+	~	       The amount of work that is done incorrectly and requires
+		         correction,
+		     but has not yet been detected.
+	|
+
+Work Completed Correctly[task] = INTEG(gross completion rate[task] * work quality
+[task],
+     0)
+	~	dwg
+	~	       The amount of work that is completed correctly.
+	|
+
+********************************************************
+	.Quality
+********************************************************~
+		
+		
+		
+		
+		
+		
+		   Equations describing quality and its determinants.
+	|
+
+eff fatigue qual[task] = table eff fatigue qual(
+           Avg Overtime Frac[task])
+	~	dmnl
+	~	       The effect of fatigue on quality.
+	|
+
+eff morale qual[task] = table eff morale qual(
+               (exp comp time[task] - init sched comp time[task])/
+                 init task length[task])
+	~	dmnl
+	~	       The effect of morale on qualuctivity
+	|
+
+eff prereq qual qual[task,prereq] = 
+   IF THEN ELSE(prereq req[task,prereq],
+     XIDZ(Work Completed Correctly[prereq],reported work complete[prereq
+],1),
+   1)
+	~	dmnl
+	~	      The effect of prerequisite quality on quality.  Note
+		      quality is computed in terms of unmeasurable
+		         quantities.
+	|
+
+eff sched press qual[task] = IF THEN ELSE(task is active[task],
+     table eff sched press qual(XIDZ(
+     exp time remaining[task],sched time remaining[task],5)),
+     1)
+	~	dmnl
+	~	       The effect of schedule pressure on gross quality.
+	|
+
+quality noise = 0
+	~	dmnl
+	~	       Noise output as a result of quality variation.
+	|
+
+table eff fatigue qual ( 0.5,1,1.1,1.2,1.3,1.4,1.5,
+                           1,1,0.95,0.9,0.85,0.8,0.7)
+	~	dmnl
+	~	       Table showing the effect of fatigue (average overtime)
+		         on
+		         quality.
+	|
+
+table eff morale qual (-1,-0.5,0,0.5,1,1.5,2,
+     1,1,1,0.95,0.9,0.85,0.85)
+	~	dmnl
+	~	       The table describing the effect of morale on quality.
+	|
+
+table eff sched press qual (0,1,2,5,10,
+               1,1,0.95,0.9,0.8)
+	~	dmnl
+	~	       Table showing the effect of schedule pressure on
+		         quality.
+	|
+
+work quality[task] = normal quality[task] *
+     eff morale qual[task] *
+     eff fatigue qual[task] *
+     eff sched press qual[task] *
+     PROD(eff prereq qual qual[task,prereq!]) *
+      (1 - RANDOM 0 1() * quality noise)
+	~	dmnl
+	~	       The quality of work being done by people.
+	|
+
+********************************************************
+	.Schedule
+********************************************************~
+		
+		
+		
+		
+		
+		
+		  Things relating to scheduling.
+	|
+
+exp comp time[task]=
+	IF THEN ELSE(task is active[task],
+	                Time + exp time remaining[task],
+	                Sched Comp Time[task])
+	~	Month
+	~	       The excpected time at which the task will complete.
+	|
+
+sched start time slip[task]=
+	IF THEN ELSE(task is active[task] :OR:
+	             VMIN(prereq in place[task,prereq!]) > 0  :OR:
+	             (Time + TIME STEP < Sched Start Time[task]) ,
+	             0,start slip increment/TIME STEP)
+	~	Month/Month
+	~	       The amount of time the scheduled start time slips in
+		         response to slippage
+		     in prerequisite tasks.
+	|
+
+sched comp time slip[task]=
+	sched start time slip[task] +
+	                IF THEN ELSE(task is active[task] :AND:
+	                  sched time remaining[task] < slip zone :AND:
+	                  exp time remaining[task] -
+	                  sched time remaining[task] > slip trigger,
+	                  slip increment/TIME STEP,0)
+	~	Month/Month
+	~	       The slippage in the scheduled completion time.
+	|
+
+prereq in place[task,prereq]=
+	IF THEN ELSE((prereq req[task,prereq] = 0) :OR:
+	        rep frac complete[prereq] > 
+	          prereq req frac complete,1,0)
+	~	dmnl
+	~	       Switch to indicate if all prerequisites are in place.
+	|
+
+fraction schedule passed[task] = IF THEN ELSE (
+           Time > Sched Start Time[task],
+           IF THEN ELSE(Time < Sched Comp Time[task],
+              (Time - Sched Start Time[task])/
+               (Sched Comp Time[task] - 
+                  Sched Start Time[task]),1),0)
+	~	dmnl
+	~	      The fraction of the schedule that has passed - not the
+		         same
+		         as
+		       the fraction of work done.  Adjusts itself in
+		         response to
+		       schedule shifts.
+	|
+
+init task length[task] = INITIAL(
+         init sched comp time[task] - init sched start time[task])
+	~	Month
+	~	       The initial length of the task in months.
+	|
+
+Sched Comp Time[task] = INTEG(sched comp time slip[task],
+           init sched comp time[task])
+	~	Month
+	~	       The scheduled completion time.
+	|
+
+Sched Start Time[task] = INTEG(sched start time slip[task],init sched start time
+[task])
+	~	Month
+	~	       The scheduled start time.
+	|
+
+sched time remaining[task] = MAX(0,Sched Comp Time[task] - Time)
+	~	Month
+	~	       The amount of time remaining in the schedule.
+	|
+
+slip increment = 1
+	~	Month
+	~	       The amount of time the schedule is slipped, if it needs
+		         slipping.
+	|
+
+slip trigger = 2
+	~	Month
+	~	       The amount of time behind schedule at which the
+		         completion
+		         date will be slipped.
+	|
+
+slip zone = 4
+	~	Month
+	~	       The distance from the end of a project at which schedule
+		         slippage becomes an
+		     alternative.
+	|
+
+start slip increment = 0.5
+	~	Month
+	~	       The slip increment for starting a task up if things are
+		         behind schedule.
+	|
+
+********************************************************
+	.Subscript
+********************************************************~
+		
+		
+		
+		
+		
+		
+		   A list of subscripts used by the model.
+	|
+
+downstream <-> task
+	~	Nil
+	~	       Downstreem tasks.
+	|
+
+prereq <-> task
+	~	Nil
+	~	       The prerequisites for doing task (other tasks)
+	|
+
+task : TASK1, TASK2, TASK3, TASK4
+	~	Nil
+	~	       The tasks that need to be done
+	|
+
+********************************************************
+	.Workforce
+********************************************************~
+	|
+
+des labor[task]=
+	MIN(max labor[task],
+	           IF THEN ELSE(Time + time adj labor[task]>= 
+	            Sched Start Time[task] :AND: :NOT: 
+	            task is done[task],
+	           XIDZ(
+	              (planned work remaining[task] / 
+	                normal productivity[task])
+	             *planned relative effort intensity[task],
+	             sched time remaining[task],max labor[task]),0))
+	~	person
+	~	       The amount of labor it is desired to have.
+	|
+
+planned fraction schedule passed[task]=
+	IF THEN ELSE (
+	           Time + time adj labor[task]> Sched Start Time[task],
+	           IF THEN ELSE(Time + time adj labor[task] < 
+	                Sched Comp Time[task],
+	              (Time +time adj labor[task] - Sched Start Time[task])/
+	               (Sched Comp Time[task] - 
+	                  Sched Start Time[task]),1),0)
+	~	dmnl
+	~	      The fraction of the schedule that has passed - not the
+		         same
+		         as
+		       the fraction of work done.  Adjusts itself in
+		         response to
+		       schedule shifts.
+	|
+
+Labor[task] = INTEG(net labor adj[task],des labor[task])
+	~	person
+	~	        The number of people of a given skill on a given task.
+	|
+
+max labor adj[task] = 250
+	~	person/Month
+	~	      The maximum rate at which labor can be adjusted for
+		        a task.
+	|
+
+net labor adj[task] = MIN(max labor adj[task],
+                (des labor[task] - Labor[task])/
+                  time adj labor[task])
+	~	person/Month
+	~	      The net adjustment of labor (additions or 
+		        reductions.  Notice this is capped.
+	|
+
+planned relative effort intensity[task] = 
+            XIDZ(planned work profile[task]
+                    (planned fraction schedule passed[task]) *
+                    (1 - planned fraction schedule passed[task]),
+                     LOOKUP AREA(planned work profile[task],
+                     planned fraction schedule passed[task],1),1)
+	~	dmnl
+	~	      Relative effort intensity as determined by the planned 
+		        profile of effort - for the fraction of time in a
+		         task left
+		        remaining.
+	|
+
+planned work profile[TASK1] ((0,0),(0.2,1),(0.8,1),(1,0)) ~~|
+planned work profile[TASK2] ((0,0),(0.2,0.5),(0.8,1),(1,0)) ~~|
+planned work profile[TASK3] ((0,0),(0.2,1),(0.8,1),(1,0)) ~~|
+planned work profile[TASK4] ((0,0),(0.2,1),(0.8,1),(1,0))
+	~	dmnl
+	~	      The planned profile of effort for each task - shows ramp
+		       up and ramp down.  The actual numbers are irrelevent,
+		         only
+		       the relative values are used.
+	|
+
+planned work remaining[task] = ACTIVE INITIAL(
+        MAX(0,rep work remaining[task] -
+           Labor[task]*normal productivity[task]*
+           time adj labor[task] *
+           XIDZ({planned work profile[task](
+                fraction schedule passed[task]) +}
+                planned work profile[task](
+                planned fraction schedule passed[task]),
+                {2*}   planned work profile[task](
+                   fraction schedule passed[task]),1)),
+        rep work remaining[task])
+	~	dwg
+	~	      The planned amount of work remaining as used in 
+		         hiring decisions.
+	|
+
+relative effort intensity[task] = XIDZ(planned work profile[task]
+                    (fraction schedule passed[task]) *
+                    (1 - fraction schedule passed[task]),
+                     LOOKUP AREA(planned work profile[task],
+                     fraction schedule passed[task],1),1)
+	~	dmnl
+	~	      Relative effort intensity as determined by the planned 
+		        profile of effort - for the fraction of time in a
+		         task left
+		        remaining.
+	|
+
+time adj labor[task] = 1
+	~	Month
+	~	      The amount of time required to adjust labor to 
+		        target values.
+	|
+
+\\\---/// Sketch information - do not modify anything except names
+V300  Do not put anything below this section - it will be ignored
+*Work Flow and Rework Discovery
+$192-192-192,0,Vensim Sans|14||0-0-0|64-64-64|128-128-128|-1--1--1|-1--1--1|96,96,100,0
+10,1,Work Completed Correctly,675,462,57,36,3,131,0,16,0,0,0,0,0-0-0,0-0-0,||B|0-0-0,0,0,0,0,0,0
+10,2,gross completion rate,516,523,75,30,0,3,0,1,0,0,0,0,0-0-0,0-0-0,|||0-0-0,0,0,0,0,0,0
+10,3,work quality,675,530,75,30,0,2,0,1,0,0,0,0,0-0-0,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,4,gross productivity,392,392,75,30,0,2,0,1,0,0,0,0,0-0-0,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,5,overtime frac,409,569,75,30,0,3,1,1,0,0,0,0,0-0-0,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,6,Undis Rework,672,611,59,32,3,131,0,16,0,0,0,0,0-0-0,0-0-0,||B|0-0-0,0,0,0,0,0,0
+10,7,rework discovery,680,707,75,30,0,3,0,1,0,0,0,0,0-0-0,0-0-0,|||0-0-0,0,0,0,0,0,0
+10,8,downstream rework disc,507,662,75,30,0,3,0,1,0,0,0,0,0-0-0,0-0-0,|||0-0-0,0,0,0,0,0,0
+10,9,rework discovery time,832,666,75,30,0,3,0,1,0,0,0,0,0-0-0,0-0-0,|||0-0-0,0,0,0,0,0,0
+10,10,TIME STEP,457,701,75,30,0,2,1,3,0,0,0,0,0-0-0,0-0-0,|||160-160-160,0,0,0,0,0,0
+10,11,norm rework disc time,984,638,75,30,0,3,1,3,0,0,0,0,0-0-0,0-0-0,|||64-128-128,0,0,0,0,0,0
+10,12,rep frac complete,868,579,75,30,0,3,0,1,0,0,0,0,0-0-0,0-0-0,|||0-0-0,0,0,0,0,0,0
+10,13,reported work complete,845,509,75,30,0,3,0,1,0,0,0,0,0-0-0,0-0-0,|||0-0-0,0,0,0,0,0,0
+10,14,task definition,972,538,75,30,0,3,0,3,0,0,0,0,0-0-0,0-0-0,|||64-128-128,0,0,0,0,0,0
+10,15,Labor,266,503,75,30,0,2,0,1,0,0,0,0,0-0-0,0-0-0,|||0-0-0,0,0,0,0,0,0
+10,16,prereq req,288,638,75,30,0,3,1,3,0,0,0,0,0-0-0,0-0-0,|||64-128-128,0,0,0,0,0,0
+10,17,prereq rework disc time,256,694,75,30,0,3,1,3,0,0,0,0,0-0-0,0-0-0,|||64-128-128,0,0,0,0,0,0
+10,18,task is active,299,665,75,30,0,2,1,1,0,0,0,0,0-0-0,0-0-0,|||0-0-0,0,0,0,0,0,0
+10,19,table eff frac complete,997,607,75,30,0,3,1,2,-1,0,0,0,0-0-0,0-0-0,|||64-128-128,0,0,0,0,0,0
+1,20,2,1,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,21,3,1,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,22,15,2,1,0,0,0,0,0,0,-1--1--1,,1|(373,518)|
+1,23,4,2,1,0,0,0,0,0,0,-1--1--1,,1|(442,434)|
+1,24,5,2,0,1,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,25,2,6,1,0,0,0,0,0,0,-1--1--1,,1|(584,557)|
+1,26,7,6,1,0,0,0,0,0,0,-1--1--1,,1|(700,659)|
+1,27,3,6,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,28,8,7,1,0,0,0,0,0,0,-1--1--1,,1|(569,698)|
+1,29,9,7,1,0,0,0,0,0,0,-1--1--1,,1|(784,687)|
+1,30,10,7,0,1,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,31,6,7,1,0,0,0,0,0,0,-1--1--1,,1|(659,682)|
+1,32,11,9,1,1,0,0,0,0,0,-1--1--1,,1|(884,642)|
+1,33,12,9,1,0,0,0,0,0,0,-1--1--1,,1|(863,614)|
+1,34,13,12,1,0,0,0,0,0,0,-1--1--1,,1|(871,538)|
+1,35,14,12,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,36,6,13,1,0,0,0,0,0,0,-1--1--1,,1|(745,543)|
+1,37,1,13,1,0,0,0,0,0,0,-1--1--1,,1|(753,466)|
+1,38,16,8,0,1,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,39,17,8,0,1,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,40,18,8,0,1,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,41,6,8,1,0,0,0,2,0,0,-1--1--1,|||-1--1--1,1|(607,603)|
+1,42,19,9,1,1,0,0,0,0,0,-1--1--1,,1|(900,623)|
+10,43,exp time remaining,236,559,75,30,0,2,1,1,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,44,43,5,0,1,0,0,0,0,0,-1--1--1,,1|(0,0)|
+10,45,sched time remaining,243,593,75,30,0,2,1,1,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,46,45,5,0,1,0,0,0,0,0,-1--1--1,,1|(0,0)|
+10,47,table overtime frac,233,523,75,30,0,3,1,2,-1,0,0,0,128-128-128,0-0-0,|||64-128-128,0,0,0,0,0,0
+1,48,47,5,0,1,0,0,0,0,0,-1--1--1,,1|(0,0)|
+12,49,0,584,777,129,12,0,7,0,18,-1,0,0,0,-1--1--1,0-0-0,||I|64-64-64,0,0,0,0,0,0
+Toggle 'h' to show/hide details.
+\\\---/// Sketch information - do not modify anything except names
+V300  Do not put anything below this section - it will be ignored
+*Labor Determination
+$192-192-192,0,Vensim Sans|14||0-0-0|64-64-64|128-128-128|-1--1--1|-1--1--1|96,96,100,0
+10,1,Labor,885,512,40,20,3,3,0,24,0,0,0,0,0-0-0,0-0-0,|14|B|0-0-0,0,0,0,0,0,0
+10,2,des labor,761,440,75,30,0,3,0,9,0,0,0,0,0-0-0,0-0-0,|14||0-0-0,0,0,0,0,0,0
+10,3,net labor adj,762,508,75,30,0,3,0,9,0,0,0,0,0-0-0,0-0-0,|14||0-0-0,0,0,0,0,0,0
+10,4,max labor,594,471,75,30,0,3,1,11,0,0,0,0,0-0-0,0-0-0,|14||64-128-128,0,0,0,0,0,0
+10,5,planned relative effort intensity,592,368,75,30,0,3,0,9,0,0,0,0,0-0-0,0-0-0,|14||0-0-0,0,0,0,0,0,0
+10,6,planned work remaining,1073,482,75,30,0,3,0,9,0,0,0,0,0-0-0,0-0-0,|14||0-0-0,0,0,0,0,0,0
+10,7,Sched Start Time,284,354,75,30,0,2,0,9,0,0,0,0,0-0-0,0-0-0,|14||0-0-0,0,0,0,0,0,0
+10,8,sched time remaining,522,398,75,30,0,2,1,9,0,0,0,0,0-0-0,0-0-0,|14||0-0-0,0,0,0,0,0,0
+10,9,task is done,569,423,75,30,0,2,1,9,0,0,0,0,0-0-0,0-0-0,|14||0-0-0,0,0,0,0,0,0
+10,10,Time,284,509,75,30,0,2,0,11,0,0,0,0,0-0-0,0-0-0,|14||160-160-160,0,0,0,0,0,0
+10,11,max labor adj,605,500,75,30,0,3,1,11,0,0,0,0,0-0-0,0-0-0,|14||64-128-128,0,0,0,0,0,0
+10,12,time adj labor,265,463,75,30,0,3,1,11,0,0,0,0,0-0-0,0-0-0,|14||64-128-128,0,0,0,0,0,0
+10,13,planned fraction schedule passed,585,302,75,30,0,3,0,8,0,0,0,0,0-0-0,0-0-0,|14||0-0-0,0,0,0,0,0,0
+10,14,Sched Comp Time,293,299,75,30,0,2,0,9,0,0,0,0,0-0-0,0-0-0,|14||0-0-0,0,0,0,0,0,0
+10,15,fraction schedule passed,1058,563,75,30,0,2,1,9,0,0,0,0,0-0-0,0-0-0,|14||0-0-0,0,0,0,0,0,0
+10,16,normal productivity,824,383,75,30,0,3,1,11,0,0,0,0,0-0-0,0-0-0,|14||64-128-128,0,0,0,0,0,0
+10,17,rep work remaining,1169,542,75,30,0,2,1,9,0,0,0,0,0-0-0,0-0-0,|14||0-0-0,0,0,0,0,0,0
+10,18,planned work profile,700,334,75,30,0,3,0,10,-1,0,0,0,128-128-128,0-0-0,|14||64-128-128,0,0,0,0,0,0
+1,19,3,1,1,0,0,0,0,0,0,-1--1--1,,1|(822,554)|
+1,20,4,2,1,1,0,0,0,0,0,-1--1--1,,1|(670,467)|
+1,21,16,2,1,1,0,0,0,0,0,-1--1--1,,1|(752,408)|
+1,22,5,2,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,23,6,2,1,0,0,0,0,0,0,-1--1--1,,1|(942,450)|
+1,24,8,2,1,1,0,0,0,0,0,-1--1--1,,1|(640,411)|
+1,25,9,2,1,1,0,0,0,0,0,-1--1--1,,1|(662,435)|
+1,26,2,3,1,0,0,0,0,0,0,-1--1--1,,1|(761,472)|
+1,27,1,3,1,0,0,0,0,0,0,-1--1--1,,1|(822,476)|
+1,28,11,3,0,1,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,29,13,5,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,30,14,13,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,31,15,6,1,1,0,0,0,0,0,-1--1--1,,1|(1077,520)|
+1,32,1,6,1,0,0,0,0,0,0,-1--1--1,,1|(965,515)|
+1,33,17,6,1,1,0,0,0,0,0,-1--1--1,,1|(1126,502)|
+1,34,18,5,1,0,0,0,0,0,0,-1--1--1,,1|(618,359)|
+1,35,2,1,1,0,0,0,0,0,1,-1--1--1,,1|(849,464)|
+1,36,18,6,1,0,0,0,0,64,0,-1--1--1,,1|(949,371)|
+1,37,16,6,1,1,0,0,0,64,0,-1--1--1,,1|(946,403)|
+1,38,12,6,1,1,0,0,0,64,0,-1--1--1,,1|(945,550)|
+1,39,12,3,1,1,0,0,0,64,0,-1--1--1,,1|(622,523)|
+1,40,13,6,1,0,0,0,0,64,0,-1--1--1,,1|(1042,420)|
+12,41,0,368,414,9,9,11,131,0,5,-1,0,0,0,128-128-128,128-128-128,|||0-0-0,0,0,0,0,0,0
+1,42,41,13,1,0,0,0,0,64,0,-1--1--1,,1|(430,362)|
+1,43,41,2,1,0,0,0,0,64,0,-1--1--1,,1|(525,447)|
+1,44,10,41,32,0,0,0,0,64,0,-1--1--1,,1|(0,0)|
+1,45,7,41,32,0,0,0,0,64,0,-1--1--1,,1|(0,0)|
+1,46,12,41,33,1,0,0,0,64,0,-1--1--1,,1|(325,424)|
+12,47,0,636,611,129,12,0,7,0,18,-1,0,0,0,-1--1--1,0-0-0,||I|64-64-64,0,0,0,0,0,0
+Toggle 'h' to show/hide details.
+\\\---/// Sketch information - do not modify anything except names
+V300  Do not put anything below this section - it will be ignored
+*Productivity
+$192-192-192,0,Vensim Sans|14||0-0-0|64-64-64|128-128-128|-1--1--1|-1--1--1|96,96,100,0
+10,1,gross productivity,617,188,75,30,0,3,0,1,0,0,0,0,0-0-0,0-0-0,|||0-0-0,0,0,0,0,0,0
+10,2,eff fatigue prod,423,388,75,30,0,3,0,1,0,0,0,0,0-0-0,0-0-0,|||0-0-0,0,0,0,0,0,0
+10,3,eff morale prod,401,84,75,30,0,3,0,1,0,0,0,0,0-0-0,0-0-0,|||0-0-0,0,0,0,0,0,0
+10,4,eff prereq ready prod,407,277,75,30,0,3,0,1,0,0,0,0,0-0-0,0-0-0,|||0-0-0,0,0,0,0,0,0
+10,5,eff sched press prod,403,183,75,30,0,3,0,1,0,0,0,0,0-0-0,0-0-0,|||0-0-0,0,0,0,0,0,0
+10,6,normal productivity,395,36,75,30,0,3,0,3,0,0,0,0,0-0-0,0-0-0,|||64-128-128,0,0,0,0,0,0
+10,7,productivity noise,613,43,75,30,0,3,1,3,0,0,0,0,0-0-0,0-0-0,|||128-128-192,0,0,0,0,0,0
+10,8,exp time remaining,127,203,75,30,0,2,0,3,0,0,0,0,0-0-0,0-0-0,|||0-0-0,0,0,0,0,0,0
+10,9,sched time remaining,136,163,75,30,0,2,0,3,0,0,0,0,0-0-0,0-0-0,|||0-0-0,0,0,0,0,0,0
+10,10,Avg Overtime Frac,260,392,53,28,3,131,0,16,0,0,0,0,0-0-0,0-0-0,||B|0-0-0,0,0,0,0,0,0
+10,11,exp comp time,108,123,75,30,0,2,0,3,0,0,0,0,0-0-0,0-0-0,|||0-0-0,0,0,0,0,0,0
+10,12,init sched comp time,121,43,75,30,0,3,1,3,0,0,0,0,0-0-0,0-0-0,|||64-128-128,0,0,0,0,0,0
+10,13,prereq req,80,323,75,30,0,3,1,3,0,0,0,0,0-0-0,0-0-0,|||64-128-128,0,0,0,0,0,0
+10,14,rep frac complete,120,283,75,30,0,2,0,3,0,0,0,0,0-0-0,0-0-0,|||0-0-0,0,0,0,0,0,0
+10,15,task is done,97,243,75,30,0,2,0,3,0,0,0,0,0-0-0,0-0-0,|||0-0-0,0,0,0,0,0,0
+10,16,init task length,107,83,75,30,0,2,1,3,0,0,0,0,0-0-0,0-0-0,|||0-0-0,0,0,0,0,0,0
+10,17,overtime frac,101,363,75,30,0,2,0,1,0,0,0,0,0-0-0,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,18,time avg overtime,109,408,75,30,0,3,1,3,0,0,0,0,0-0-0,0-0-0,|||64-128-128,0,0,0,0,0,0
+10,19,table eff fatigue prod,364,441,75,30,0,3,0,2,-1,0,0,0,128-128-128,0-0-0,|||64-128-128,0,0,0,0,0,0
+10,20,table eff morale prod,335,137,75,30,0,3,0,2,-1,0,0,0,128-128-128,0-0-0,|||64-128-128,0,0,0,0,0,0
+10,21,prereq eff speed lookup,325,328,75,30,0,3,0,2,-1,0,0,0,128-128-128,0-0-0,|||64-128-128,0,0,0,0,0,0
+10,22,table eff sched press prod,324,223,75,30,0,3,0,2,-1,0,0,0,128-128-128,0-0-0,|||64-128-128,0,0,0,0,0,0
+1,23,2,1,1,0,0,0,0,0,0,-1--1--1,,1|(469,396)|
+1,24,3,1,1,0,0,0,0,0,0,-1--1--1,,1|(495,95)|
+1,25,4,1,1,0,0,0,0,0,0,-1--1--1,,1|(467,299)|
+1,26,5,1,1,0,0,0,0,0,0,-1--1--1,,1|(509,188)|
+1,27,6,1,1,0,0,0,0,0,0,-1--1--1,,1|(487,43)|
+1,28,7,1,0,1,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,29,8,5,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,30,9,5,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,31,10,2,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,32,11,3,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,33,12,3,0,1,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,34,16,3,0,1,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,35,13,4,0,1,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,36,14,4,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,37,15,4,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,38,17,10,1,0,0,0,0,0,0,-1--1--1,,1|(153,365)|
+1,39,18,10,0,1,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,40,19,2,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,41,20,3,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,42,21,4,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,43,22,5,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+12,44,0,331,477,129,12,0,7,0,18,-1,0,0,0,-1--1--1,0-0-0,||I|64-64-64,0,0,0,0,0,0
+Toggle 'h' to show/hide details.
+\\\---/// Sketch information - do not modify anything except names
+V300  Do not put anything below this section - it will be ignored
+*Quality
+$192-192-192,0,Arial|14||0-0-0|64-64-64|128-128-128|-1--1--1|-1--1--1|96,96,100,0
+10,1,work quality,519,187,75,30,0,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,2,eff fatigue qual,321,383,75,30,0,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,3,2,1,1,0,0,0,0,0,0,-1--1--1,,1|(467,333)|
+10,4,eff morale qual,327,61,75,30,0,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,5,4,1,1,0,0,0,0,0,0,-1--1--1,,1|(419,83)|
+10,6,eff prereq qual qual,347,311,75,30,0,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,7,6,1,1,0,0,0,0,0,0,-1--1--1,,1|(448,283)|
+10,8,eff sched press qual,344,183,75,30,0,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,9,8,1,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+10,10,normal quality,335,17,75,30,0,3,0,2,-1,0,0,0,0-0-0,0-0-0,|||64-128-128,0,0,0,0,0,0
+1,11,10,1,1,0,0,0,0,0,0,-1--1--1,,1|(452,59)|
+10,12,quality noise,516,24,75,30,0,3,0,2,-1,0,0,0,0-0-0,0-0-0,|||128-128-192,0,0,0,0,0,0
+1,13,12,1,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+10,14,exp comp time,81,55,75,30,0,2,0,3,-1,0,0,0,0-0-0,0-0-0,|||0-0-0,0,0,0,0,0,0
+1,15,14,4,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+10,16,init sched comp time,96,27,75,30,0,3,1,2,-1,0,0,0,0-0-0,0-0-0,|||64-128-128,0,0,0,0,0,0
+1,17,16,4,0,1,0,0,0,0,0,-1--1--1,,1|(0,0)|
+10,18,init task length,84,85,75,30,0,2,0,3,-1,0,0,0,0-0-0,0-0-0,|||0-0-0,0,0,0,0,0,0
+1,19,18,4,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+10,20,table eff morale qual,199,111,75,30,0,3,0,2,-1,0,0,0,0-0-0,0-0-0,|||64-128-128,0,0,0,0,0,0
+1,21,20,4,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+10,22,exp time remaining,100,149,75,30,0,2,0,3,-1,0,0,0,0-0-0,0-0-0,|||0-0-0,0,0,0,0,0,0
+1,23,22,8,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+10,24,sched time remaining,107,183,75,30,0,2,0,3,-1,0,0,0,0-0-0,0-0-0,|||0-0-0,0,0,0,0,0,0
+1,25,24,8,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+10,26,table eff sched press qual,207,244,75,30,0,3,0,2,-1,0,0,0,0-0-0,0-0-0,|||64-128-128,0,0,0,0,0,0
+1,27,26,8,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+10,28,task is active,75,217,75,30,0,2,1,3,-1,0,0,0,0-0-0,0-0-0,|||0-0-0,0,0,0,0,0,0
+1,29,28,8,0,1,0,0,0,0,0,-1--1--1,,1|(0,0)|
+10,30,prereq req,53,281,75,30,0,3,0,2,-1,0,0,0,0-0-0,0-0-0,|||64-128-128,0,0,0,0,0,0
+1,31,30,6,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+10,32,reported work complete,119,315,75,30,0,2,1,3,-1,0,0,0,0-0-0,0-0-0,|||0-0-0,0,0,0,0,0,0
+1,33,32,6,0,1,0,0,0,0,0,-1--1--1,,1|(0,0)|
+10,34,Work Completed Correctly,129,340,75,30,0,2,0,3,-1,0,0,0,0-0-0,0-0-0,|||0-0-0,0,0,0,0,0,0
+1,35,34,6,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+10,36,Avg Overtime Frac,100,389,75,30,0,2,0,3,-1,0,0,0,0-0-0,0-0-0,|||0-0-0,0,0,0,0,0,0
+1,37,36,2,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+10,38,table eff fatigue qual,224,424,75,30,0,3,0,2,-1,0,0,0,0-0-0,0-0-0,|||64-128-128,0,0,0,0,0,0
+1,39,38,2,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+12,40,0,243,460,129,12,0,7,0,18,-1,0,0,0,-1--1--1,0-0-0,||I|64-64-64,0,0,0,0,0,0
+Toggle 'h' to show/hide details.
+\\\---/// Sketch information - do not modify anything except names
+V300  Do not put anything below this section - it will be ignored
+*Schedule
+$192-192-192,0,Vensim Sans|14||0-0-0|64-64-64|128-128-128|-1--1--1|-1--1--1|96,96,100,0
+10,1,task is started,236,261,75,30,0,3,0,1,0,0,0,0,0-0-0,0-0-0,|||0-0-0,0,0,0,0,0,0
+10,2,Sched Start Time,301,359,45,33,3,131,0,16,0,0,0,0,0-0-0,0-0-0,||B|0-0-0,0,0,0,0,0,0
+10,3,Time,751,456,75,30,0,2,17,3,0,0,0,0,0-0-0,0-0-0,|||160-160-160,0,0,0,0,0,0
+10,4,init sched start time,177,56,75,30,0,3,1,2,0,0,0,0,0-0-0,0-0-0,|||64-128-128,0,0,0,0,0,0
+10,5,sched start time slip,472,368,75,30,0,3,0,1,0,0,0,0,0-0-0,0-0-0,|||0-0-0,0,0,0,0,0,0
+10,6,prereq in place,245,495,75,30,0,3,0,1,0,0,0,0,0-0-0,0-0-0,|||0-0-0,0,0,0,0,0,0
+10,7,start slip increment,517,457,75,30,0,3,1,2,0,0,0,0,0-0-0,0-0-0,|||64-128-128,0,0,0,0,0,0
+10,8,TIME STEP,523,307,75,30,0,2,17,3,0,0,0,0,0-0-0,0-0-0,|||160-160-160,0,0,0,0,0,0
+10,9,prereq req,167,440,75,30,0,3,1,2,0,0,0,0,0-0-0,0-0-0,|||64-128-128,0,0,0,0,0,0
+10,10,prereq req frac complete,232,413,75,30,0,3,17,3,0,0,0,0,0-0-0,0-0-0,|||64-128-128,0,0,0,0,0,0
+10,11,rep frac complete,87,183,75,30,0,3,0,1,0,0,0,0,0-0-0,0-0-0,|||0-0-0,0,0,0,0,0,0
+10,12,task definition,72,120,75,30,0,3,17,2,0,0,0,0,0-0-0,0-0-0,|||64-128-128,0,0,0,0,0,0
+1,13,2,1,1,0,0,0,3,64,0,0-64-0,|||-1--1--1,1|(244,304)|
+1,14,5,2,1,0,0,0,3,0,0,0-128-0,|||-1--1--1,1|(385,397)|
+1,15,6,5,1,0,0,0,0,0,0,-1--1--1,,1|(329,480)|
+1,16,2,5,1,0,0,0,3,64,0,0-128-0,|||-1--1--1,1|(413,319)|
+1,17,7,5,1,1,0,0,0,0,0,-1--1--1,,1|(503,405)|
+1,18,42,5,1,0,0,0,3,0,0,0-64-0,|||-1--1--1,1|(465,309)|
+1,19,8,5,0,17,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,20,9,6,0,1,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,21,10,6,1,17,0,0,0,0,0,-1--1--1,,1|(233,457)|
+1,22,11,6,1,0,0,0,2,0,0,-1--1--1,|||-1--1--1,1|(56,399)|
+10,23,sched time remaining,777,413,75,30,0,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,24,Sched Comp Time,907,305,44,33,3,131,0,16,-1,0,0,0,0-0-0,0-0-0,||B|0-0-0,0,0,0,0,0,0
+1,25,24,23,1,0,0,0,1,0,0,192-128-192,|||0-0-0,1|(873,391)|
+1,26,3,23,0,17,0,0,0,0,0,-1--1--1,,1|(0,0)|
+10,27,exp comp time,751,267,75,30,0,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,28,24,27,1,0,0,0,0,0,0,-1--1--1,,1|(840,276)|
+10,29,task is done,272,183,75,30,0,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,30,11,29,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+10,31,req frac complete,143,217,75,30,0,3,17,2,-1,0,0,0,0-0-0,0-0-0,|||64-128-128,0,0,0,0,0,0
+1,32,31,29,0,17,0,0,0,0,0,-1--1--1,,1|(0,0)|
+10,33,exp time remaining,473,200,75,30,0,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,34,expected effective labor,568,85,75,30,0,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,35,34,33,1,0,0,0,1,0,0,128-0-64,|||0-0-0,1|(505,128)|
+10,36,normal productivity,421,35,75,30,0,3,17,2,-1,0,0,0,0-0-0,0-0-0,|||64-128-128,0,0,0,0,0,0
+10,37,rep work remaining,301,132,75,30,0,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,38,init task length,347,83,75,30,0,3,17,0,-1,0,0,0,0,0,0,0,0,0
+10,39,init sched comp time,227,29,75,30,0,3,1,2,-1,0,0,0,0-0-0,0-0-0,|||64-128-128,0,0,0,0,0,0
+1,40,39,38,0,17,0,0,0,0,1,-1--1--1,,1|(0,0)|
+1,41,4,38,0,17,0,0,0,0,1,-1--1--1,,1|(0,0)|
+10,42,task is active,449,275,75,30,0,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,43,29,69,32,0,0,0,2,0,0,-1--1--1,|||-1--1--1,1|(0,0)|
+1,44,1,69,33,0,0,0,3,0,0,0-64-0,|||-1--1--1,1|(280,221)|
+10,45,sched comp time slip,693,327,75,30,0,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,46,45,24,1,0,0,0,1,0,0,192-128-192,|||0-0-0,1|(816,325)|
+1,47,5,45,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,48,23,45,1,0,0,0,1,0,0,192-128-192,|||0-0-0,1|(747,393)|
+10,49,slip increment,624,435,75,30,0,3,1,2,-1,0,0,0,0-0-0,0-0-0,|||64-128-128,0,0,0,0,0,0
+1,50,49,45,1,1,0,0,0,0,0,-1--1--1,,1|(665,409)|
+10,51,slip trigger,623,372,75,30,0,3,1,2,-1,0,0,0,0-0-0,0-0-0,|||64-128-128,0,0,0,0,0,0
+1,52,51,45,1,1,0,0,0,0,0,-1--1--1,,1|(664,361)|
+10,53,slip zone,625,401,75,30,0,3,1,2,-1,0,0,0,0-0-0,0-0-0,|||64-128-128,0,0,0,0,0,0
+1,54,53,45,1,1,0,0,0,0,0,-1--1--1,,1|(665,388)|
+1,55,8,45,0,17,0,0,0,0,0,-1--1--1,,1|(0,0)|
+10,56,Labor,556,27,75,30,0,2,0,3,-1,0,0,0,0-0-0,0-0-0,|||0-0-0,0,0,0,0,0,0
+1,57,56,34,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+10,58,relative effort intensity,861,75,75,30,0,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,59,58,34,1,0,0,0,1,0,0,128-0-64,|||0-0-0,1|(664,47)|
+10,60,fraction schedule passed,1011,223,75,30,0,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,61,60,58,1,0,0,0,1,0,0,128-0-64,|||0-0-0,1|(957,133)|
+10,62,planned work profile,821,17,75,30,0,3,1,2,-1,0,0,0,0-0-0,0-0-0,|||64-128-128,0,0,0,0,0,0
+1,63,62,58,0,1,0,0,0,0,0,-1--1--1,,1|(0,0)|
+10,64,reported work complete,149,91,75,30,0,2,0,3,-1,0,0,0,0-0-0,0-0-0,|||0-0-0,0,0,0,0,0,0
+1,65,24,60,1,0,0,0,1,0,0,128-0-64,|||0-0-0,1|(968,267)|
+1,66,2,60,1,0,0,0,0,0,0,-1--1--1,,1|(967,357)|
+12,67,0,161,132,8,8,11,131,0,5,-1,0,0,0,160-160-160,160-160-160,|||0-0-0,0,0,0,0,0,0
+12,68,0,428,135,8,8,11,131,0,5,-1,0,0,0,160-160-160,160-160-160,|||0-0-0,0,0,0,0,0,0
+12,69,0,332,223,8,8,11,131,0,5,-1,0,0,0,160-160-160,160-160-160,|||0-0-0,0,0,0,0,0,0
+1,70,67,37,0,0,0,0,0,64,0,-1--1--1,,1|(0,0)|
+1,71,67,11,0,0,0,0,0,64,0,-1--1--1,,1|(0,0)|
+1,72,12,67,32,17,0,0,2,64,0,-1--1--1,|||-1--1--1,1|(0,0)|
+1,73,64,67,32,0,0,0,2,64,0,-1--1--1,|||-1--1--1,1|(0,0)|
+1,74,68,34,0,0,0,0,0,64,0,-1--1--1,,1|(0,0)|
+1,75,68,33,0,0,0,0,0,64,0,-1--1--1,,1|(0,0)|
+1,76,36,68,32,17,0,0,2,64,0,-1--1--1,|||-1--1--1,1|(0,0)|
+1,77,38,68,32,17,0,0,2,64,0,-1--1--1,|||-1--1--1,1|(0,0)|
+1,78,37,68,32,0,0,0,2,64,0,-1--1--1,|||-1--1--1,1|(0,0)|
+1,79,69,33,0,0,0,0,0,64,0,-1--1--1,,1|(0,0)|
+1,80,69,42,1,0,0,0,3,64,0,0-64-0,|||-1--1--1,1|(381,229)|
+12,81,0,592,292,8,8,11,131,0,5,-1,0,0,0,160-160-160,160-160-160,|||0-0-0,0,0,0,0,0,0
+1,82,33,81,33,0,0,0,3,64,0,128-0-64,|||-1--1--1,1|(520,252)|
+1,83,42,81,32,0,0,0,2,64,0,-1--1--1,|||-1--1--1,1|(0,0)|
+1,84,81,27,0,0,0,0,0,64,0,-1--1--1,,1|(0,0)|
+1,85,81,45,0,0,0,0,1,64,0,128-0-64,|||0-0-0,1|(0,0)|
+10,86,Time,344,287,75,30,0,2,17,3,-1,0,0,0,0-0-0,0-0-0,|||160-160-160,0,0,0,0,0,0
+1,87,86,1,1,17,0,0,0,64,0,-1--1--1,,1|(299,269)|
+1,88,86,5,1,17,0,0,0,64,0,-1--1--1,,1|(424,304)|
+10,89,Time,837,231,75,30,0,2,1,3,-1,0,0,0,0-0-0,0-0-0,|||160-160-160,0,0,0,0,0,0
+1,90,89,27,0,1,0,0,0,64,0,-1--1--1,,1|(0,0)|
+1,91,89,60,0,1,0,0,0,64,0,-1--1--1,,1|(0,0)|
+10,92,init sched start time,141,349,75,30,0,2,1,3,-1,0,0,0,0-0-0,0-0-0,|||160-160-160,0,0,0,0,0,0
+1,93,92,2,0,1,0,0,3,64,1,192-192-192,|||-1--1--1,1|(0,0)|
+10,94,init sched comp time,749,295,75,30,0,2,1,3,-1,0,0,0,0-0-0,0-0-0,|||160-160-160,0,0,0,0,0,0
+1,95,94,24,0,1,0,0,3,64,1,192-192-192,|||-1--1--1,1|(0,0)|
+12,96,0,324,531,129,12,0,7,0,18,-1,0,0,0,-1--1--1,0-0-0,||I|64-64-64,0,0,0,0,0,0
+Toggle 'h' to show/hide details.
+\\\---/// Sketch information - do not modify anything except names
+V300  Do not put anything below this section - it will be ignored
+*Performance
+$192-192-192,0,Arial|14||0-0-0|64-64-64|128-128-128|-1--1--1|-1--1--1|96,96,100,0
+10,1,total cost plus penalty,629,236,75,30,0,3,0,1,0,0,0,0,0-0-0,0-0-0,|||0-0-0,0,0,0,0,0,0
+10,2,overrun charge,425,187,75,30,0,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,3,2,1,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+10,4,total cost,463,273,75,30,0,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,5,4,1,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+10,6,init sched comp time,221,157,75,30,0,3,0,2,-1,0,0,0,0-0-0,0-0-0,|||64-128-128,0,0,0,0,0,0
+1,7,6,2,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+10,8,overrun charge rate,217,205,75,30,0,3,0,2,-1,0,0,0,0-0-0,0-0-0,|||64-128-128,0,0,0,0,0,0
+1,9,8,2,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+10,10,project is done,247,45,75,30,0,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,11,10,2,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+10,12,Time,420,117,75,30,0,2,1,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,13,12,2,0,1,0,0,0,0,0,-1--1--1,,1|(0,0)|
+10,14,task is done,67,45,75,30,0,2,0,1,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,15,14,10,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+10,16,cost,336,273,75,30,0,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,17,16,4,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+10,18,labor cost,209,276,75,30,0,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,19,18,16,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+10,20,Labor,87,273,75,30,0,2,0,1,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,21,20,18,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+10,22,wage rate,67,309,75,30,0,3,0,2,-1,0,0,0,0-0-0,0-0-0,|||64-128-128,0,0,0,0,0,0
+1,23,22,18,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+10,24,Cum Cost,336,365,53,27,3,3,0,16,-1,0,0,0,0-0-0,0-0-0,||B|0-0-0,0,0,0,0,0,0
+1,25,16,24,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+10,26,Project Compl Time,419,55,53,27,3,3,0,16,-1,0,0,0,0-0-0,0-0-0,||B|0-0-0,0,0,0,0,0,0
+1,27,10,26,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,28,12,26,0,1,0,0,0,0,0,-1--1--1,,1|(0,0)|
+10,29,TIME STEP,259,13,75,30,0,2,1,3,-1,0,0,0,0-0-0,0-0-0,|||160-160-160,0,0,0,0,0,0
+1,30,29,26,0,1,0,0,0,0,0,-1--1--1,,1|(0,0)|
+10,31,max final time,537,13,75,30,0,3,1,0,-1,0,0,0,0,0,0,0,0,0
+10,32,total cum cost,499,369,75,30,0,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,33,24,32,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+10,34,UNIT TIME,529,93,75,30,0,3,1,0,-1,0,0,0,0,0,0,0,0,0
+10,35,FINAL TIME,627,55,75,30,0,3,1,0,-1,0,0,0,0,0,0,0,0,0
+1,36,31,35,0,1,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,37,26,35,0,1,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,38,34,35,0,1,0,0,0,0,0,-1--1--1,,1|(0,0)|
+12,39,0,375,419,129,12,0,7,0,18,-1,0,0,0,-1--1--1,0-0-0,||I|64-64-64,0,0,0,0,0,0
+Toggle 'h' to show/hide details.
+///---\\\
+:GRAPH WIP_TOT_COST
+:TITLE Fraction complete of each task and cumulative cost.
+:WIP
+:X-MIN 0
+:X-MAX 100
+:MAX-POINTS 400
+:SCALE
+:VAR total_cost|Total Spending
+:Y-MIN 0
+:Y-MAX 2e+07
+:SCALE
+:VAR REP FRAC COMPLETE[Task1]|Fraction Complete - Task1
+:VAR REP FRAC COMPLETE[Task2]|. . . - Task2
+:VAR REP FRAC COMPLETE[Task3]|. . . . - Task3
+:VAR REP FRAC COMPLETE[Task4]|. . . . - Task4
+:Y-MIN 0
+:Y-MAX 1
+
+:REPORT TXT1
+:TITLE TXT1
+:SIZE 50,15
+:FONT Times New Roman|12||0-0-0
+You may need to use the scroll bars at the right, and 
+on the bottom to see all of the information contained
+in this window.
+
+This demonstration allows you to review structure and do simple
+experimentation with a generic Ventana Project model.  It is 
+intended to help clarify the structure of Ventana Project, and
+show some of the uses for a model.  The model contained in this
+demonstration is a simple four task representation of a project
+requiring only labor.  For simplicity and clarity such issues as
+intertask resource flows have been excluded.
+
+A Ventana Project application uses a model refined relative to
+the one shown here by application of various physical and 
+organizational constraints.  The number, ordering and interactions
+among tasks are also formulated to be appropriate for your particular 
+situation.  Differentiation among labor types, material flow 
+requirements and subcontracting are all included in a typical 
+Ventana Project application.
+:END-OF-REPORT
+
+:REPORT OV_TASK
+:TITLE OV_TASK
+:FONT Times New Roman|12||0-0-0
+A task is started when all of its prerequisites have been completed
+to a sufficient extent to allow work to begin.  In the model this is
+represented by tracking the scheduled start time for the task.  If 
+prerequisites are still not in place when the scheduled start time
+is reached it is slipped.  As the model is configured here this will
+also slip the scheduled completion time.
+
+Note that prerequisite tasks only need to be completed to the
+prerequisite required fraction complete to allow a downstream task to
+start.  This allows partial task overlap.  If a prerequisite task is
+halted the downstream task will also be forced to slow and eventually
+stop.
+:END-OF-REPORT
+
+:REPORT OV_WORK
+:TITLE OV_WORK
+:SIZE 50,15
+:FONT Times New Roman|12||0-0-0
+The flow of work is represented by the gross completion rate. This
+depends on the effective amount of available labor, and gross
+productivity.  Overtime can also be used to increas the rate at
+which work is completed.  The determination of gross productivity
+is discusses in another diagram.
+
+Because quality is not always 100%, only part of the work being
+done is completed correctly.  Some of the work being done will,
+eventually, be recognized as requiring rework.  The model explicitly
+breaks out the generation of work requiring rework even before it
+is detected.  The quantity of work completed correctly and the 
+amount of undiscovered rework are not ever known during a project.
+What is known is the reported work complete.  The model tracks 
+unknowns because they are critical to the dynamics of a project.
+
+Undiscovered rework, thought not measureable, is very real and
+eventually gets discovered.  Within a given task errors and omissions
+are discovered over the course of the task, and more quickly toward
+the end of the task.  Downstream tasks that depend on the output
+output of a task can also uncover problems.  The dashed red arrow
+here denotes the interconnection between different tasks.
+:END-OF-REPORT
+
+:REPORT OV_PROD
+:TITLE OV_PROD
+:FONT Times New Roman|12||0-0-0
+Gross productivity, or work speed, is determined by a normal productivity
+combined with effects from schedule pressure, fatique, morale and 
+prerequisite readiness.  It is important to note that the determination
+of productivity and quality are very similar in structure.  The important
+factors in determining the two are the same, though the nature, and even
+direction, of impact is different.  See the overview diagram on quality 
+for comparison.
+
+Schedule pressure is computed based on the relationship between scheduled
+time remaining and expected time remaining.  If time is running out
+people are motivated to work faster.  In the long term, however, both
+morale and fatigue can counteract this direct beneficial effect.
+
+Fatigue is based on historic overtime patterns.  Sustained overtime will
+decrease the speed with which people can work.  Morale is based on how
+it is perceived the project is doing.  If the task is badly behind
+schedule people become depressed and demotivated.  In the model here 
+these effects are local to a task, but could also depend on the overall
+project.
+
+Even though a task can start without a prerequisite being completely 
+done, the task cannot finish.  If prototyping depends on design, then
+prototyping can get started without a finished design by building basic
+components.  Ultimately, however, there is no way to put the prototype 
+together until it is designed.
+:END-OF-REPORT
+
+:REPORT OV_QUAL
+:TITLE OV_QUAL
+:FONT Times New Roman|12||0-0-0
+Quality is determined by normal quality, and the effects from schedule
+pressure, fatigue, morale and prerequisite quality.  The factors 
+determining quality are almost the same as those determining productvity,
+but may work in different ways.  Almost all changes that cause a project
+to deviate from schedule work to decrease quality.
+
+Schedule pressure is determined by the time remaining relative to the
+scheduled time remaining.  High schedule pressure will lead to a decrease
+in quality as people attempt to do more in less time.  
+
+Fatigue effects result from having worked overtime for sustanined
+periods of time and also decrease quality.  Morale is based on how fast
+the task is moving toward completion relative to schedule. Tasks that
+are significantly behind schedule decrease morale, and thereby quality.
+
+The quality of prerequisite tasks is an important determinant of
+quality in a task.  The red dashed arrow in this diagram shows the inter
+task connection that results.  The prerequisite quality that is 
+important is average quality of work after corrections have been made.
+As rework is discovered this quality will grow toward 100%.
+:END-OF-REPORT
+
+:REPORT OV_LAB
+:TITLE OV_LAB
+:FONT Times New Roman|12||0-0-0
+Labor is hired over some horizon to try to keep progress on shcedule.
+There is a single category of labor, with no inter-task resource sharing.
+Labor requirements for a task are unrestricted except that there is a 
+cap on both the absolute number of people, and the rate at which people 
+can be hired.  Other than these two restrictions, people are hired as 
+needed to achieve schedule over a hiring horizon.  
+
+The planned relative labor intensity is determined by using a manning
+or effor profile curve.  Such a curve typically starts at 0, ramps up,
+plateaus and ramps back to 0.  This curve is used to determine how
+much labor is desirable in the future, after the time it takes to 
+bring on labor is passed.  The remaining amount of work expected to
+be in place is used to detemrine how many people are expected to be
+needed.
+
+The treatment of labor in this model is appropriate only for tasks 
+requiring commonly available skills and little specialized training.  
+The potential costs of brining people on-line, and getting them up
+to speed on what is being done have been excluded.
+:END-OF-REPORT
+
+:REPORT COMM6
+:TITLE COMM6
+:SIZE 50,15
+:FONT Times New Roman|12||0-0-0
+In order to run a scenario you need to set up the assumptions you
+want to use.  This is done by first basing your scenario on a
+predefined or previous scenario.  Once you have done this you 
+can change whatever additional assumptions your want to run your
+scenario.
+
+The base scenario assumes that the pro-active replacement technology
+is turned on at month 3.  No overtime is allowed for pro-active 
+replacements, and labor is hired based on the currently indicated
+amount of work.
+
+The slowed roll-out scenario is the same as the base scenario, except
+that instead of turning on all the pro-active service technology,
+it is turned on bit by bit.
+
+The anticipatory labor hiring scenario is the same as the base
+scenario, except that labor is hired to meet the expected amount
+of labor required when pro-active servicing is all in place.  This
+is substantially lower then the amount of labor required for
+reactive servicing.
+
+The 20% overtime allowance scenario is the same as the base 
+scenario, except that the workforce will work overtime to 
+do the pro-active servicing.
+
+All of the above scenarios are small, vary one thing at-a-time
+variations on the base scenario.  In designing a good policy it
+is, of course, necessary to vary more than one thing.  You can
+choose a previously run scenario as the basis for a new scenario.
+This is particularly useful when you are refining the changes
+you have made.
+:END-OF-REPORT
+
+:REPORT COMM7
+:TITLE COMM7
+:SIZE 50,15
+:FONT Times New Roman|12||0-0-0
+In order to optimize performance over the transition it is
+necessary to define the cost of the transition.  The most obvious
+definition of this is simple the total wages paid - straight time
+plus overtime.  You may, also, however, choose to penalize parts 
+consumption above a certain level.  To do this enter the maximum
+number of parts it is acceptable to replace per month, and the
+penalty to assessed when this maximum is exceeded.
+
+Once you are happy with your choices select optimize to begin
+the optimization process.  
+:END-OF-REPORT
+
+:REPORT COMM8
+:TITLE COMM8
+:SIZE 50,15
+:FONT Times New Roman|12||0-0-0
+In order to optimize performance over the project it is necessary
+to define the cost of the project. For this software project 
+this is just the labor cost of the software engineers and the
+testing, documentation and support people.  You may also choose
+to assess a penalty for finishing the project late.  If not missing
+the deadline is of paramount importance, then set the penalty 
+for being late to a very big number (1E12).
+
+After you have set these values select the "Optimize Performance"
+menu item to begin optimization.  The system will find the
+initial schedule and the proactive testing extent to minimize
+the cost of completing the project,
+.  The most obvious
+definition of this is simple the total wages paid - straight time
+plus overtime.  You may, also, however, choose to penalize parts 
+consumption above a certain level.  To do this enter the maximum
+number of parts it is acceptable to replace per month, and the
+penalty to assessed when this maximum is exceeded.
+
+Once you are happy with your choices select optimize to begin
+the optimization process.  
+:END-OF-REPORT
+
+:REPORT COMM1
+:TITLE COMM1
+:FONT Times New Roman|12||0-0-0
+The software allows you to explore a model through a number of menus
+and output screens.  To select a menu item you can click on it, type the
+first letter in the menu description of select it using the up and down
+arrow keys and then press the enter key.  The selected menu item appears 
+highlighted - usually black on white.  
+
+Additional functionality available in the software is described in 
+places where it can be used.  To conserve space, later commentaries
+will be kept small, and you will need to scroll them to read all the
+information they contain.
+
+The model used for this application is a simplified generic four stage
+Ventana Project model.  It does not represent any particular project,
+but is intended only as a basis for explanation and clarification.
+:END-OF-REPORT
+
+:REPORT COMM2
+:TITLE COMM2
+:FONT Times New Roman|12||0-0-0
+Anything you type will appear in the editing boxes.  Use the 
+Tab key or mouse to move between editing boxes.  Hold down the
+alt key and press the letter for the command you desire,
+or use the mouse to select the command.
+
+You can change any constants or lookup tables in the model.
+Important constants are shown on this screen.  All others
+can be accessed using the L and C commands for Lookups and
+Constants respectively.
+
+When you type Alt+R your scenario will be run using the changes you 
+have entered.  After your scenario runs you will see a Gantt chart
+showing the performance of different tasks relative to the
+base run, and any other runs you have made.
+:END-OF-REPORT
+
+:REPORT COMM3
+:TITLE COMM3
+:FONT Times New Roman|12||0-0-0
+You can do analysis of the model by first loading in scenarios of 
+interest, and then reviewing the output or doing causal tracing.  
+The Load and reorder command will put up a small window with two lists.  
+On the left is a list of loaded scenarios, on the right a list of 
+scenarios that have been run.  The << button loads scenarios.  Click 
+on the scenario you want to load in the right hand list, and then 
+click the << button.  The >> button unloads scenarios.  Click on the 
+scenario you want to unload in the left hand list, and the click on 
+the >> button.
+
+You can load up to 8 scenarios at a time, but it is difficult to read
+graphs with more than 4 scenarios loaded.
+
+If the list on the right is empty, you will need to run some 
+scenarios.  Exit back to the main menu and do this.  You can run
+the scenarios described in "Beyond the Limits" by choosing one
+of the named scenarios to base your scenario on, and running the
+scenario without making any additional changes.
+
+Causal tracing is a process the allows you to determine the underlying
+causes of behavior, and differences in behavior between different
+scenarios.  There are two options for doing causal tracing available.
+The first uses tree diagrams and single graphs.  The second uses
+equations and multiple graphs.  Try them both out to see which you
+prefer.
+:END-OF-REPORT
+
+:REPORT COMM4
+:TITLE COMM4
+:FONT Times New Roman|12||0-0-0
+The cause and use screens show lists of
+different variables.  The graphs allows
+your to compare different scenarios.
+The trees allow you to investigate the
+structure of the model.
+
+You can double click on a variable name
+in the graphs, trees or documentation to
+view the same analysis screen for that
+variable.  You can also use the S
+command to select a new variable to work
+with.
+
+You can print the contents of the graphs
+and trees using the P command.  Output
+will be directed to your default printer.
+
+During causal tracing you can switch
+between the Tree and Graph represen-
+tations of causes.  This can be
+useful as means of understanding both
+structure and behavior.
+:END-OF-REPORT
+
+:REPORT COMM5
+:TITLE COMM5
+:FONT Times New Roman|12||0-0-0
+Use the Tab key or mouse to move between the number entry positions.
+When you see the bar | cursor you can type in a new number. To 
+change the lookup tables relating different input and outputs
+select the appropriate menu item, and modify the lookup 
+graphically by dragging points around, or typing in new
+XY pairs.
+
+You will need to hold down the Alt key or use the mouse to
+select menu items.
+
+Changes you make to tables are recorded when you click OK on the table
+changing window.  Changes you make to constants are recorded when you
+select the Record (R) command.  You can exit without recording changes
+you make with the E command.
+:END-OF-REPORT
+
+:REPORT DEF_0
+:TITLE DEF_0
+:FONT Times New Roman|12||0-0-0
+Use this to define some of the basic characteristics of the
+project.  You can set up size and schedules, define 
+prerequisites and specify the planned work profiles.  
+
+What parts of a project are defined using this type of interface
+depends on the purpose of the model and the interface.  For big
+projects, the important characteristics of the project are built
+into the model, and are not changed directly from an interface
+such as this.  This type of interface is most suitable to
+situations in which a number of similar project need to be dealt
+with in an on-going fashion.
+:END-OF-REPORT
+
+:REPORT DEF_SCHED
+:TITLE DEF_SCHED
+:FONT Times New Roman|12||0-0-0
+Set the start and stop date for each task.  There are no special
+requirements on duration or overlap.  The first task should 
+at or near time 0, and the last end by time 100 (the model 
+will stop at time 100 even if the project is not complete). 
+Task 4 is used to define the completion of the project, and
+should end last.
+
+Use the Tab key or mouse to move between the input fields.
+Press return to accept changes, or Esc to ignore them.  You
+can also use Alt+A or Alt+E.
+:END-OF-REPORT
+
+:REPORT DEF_PROF
+:TITLE DEF_PROF
+:FONT Times New Roman|12||0-0-0
+Set the profile of effort over the course of the different tasks.
+You can use the mouse to click on the profile curve shown to the
+left of each task name.  A graphical table editor will appear
+that will allow you to change the profile.  Note that only the
+relative values between 0 and 1 make any difference to what is
+actually done during the task.  
+
+The default profiles show a ramp up of effort, then a plateau,
+and then a ramp down.
+:END-OF-REPORT
+
+:REPORT DEF_PREREQ
+:TITLE DEF_PREREQ
+:FONT Times New Roman|12||0-0-0
+Prerequisite requirements are set by clicking the mouse on the
+different possibilities to turn prerequisites on and off. There
+are no real restrictions on what is a prerequisite of what, but
+it is important that there be some logical flow or the project
+will never finish.
+
+Note that it is important to check all prerequisites, since these
+will be used to determine not only when a task starts, but
+the prerequisite quality effects and downstream error discovery.
+Thus if task 3 requires task 2, it should also require task 1.
+:END-OF-REPORT
+
+:REPORT DEF_SIZE
+:TITLE DEF_SIZE
+:FONT Times New Roman|12||0-0-0
+Task size is defined in drawings.  Given the purpose of this 
+model definition of relative sizes is the only important issue
+to be dealt with here.
+:END-OF-REPORT
+:L<%^E!@
+4:Time
+5:Time
+6:TASK1
+6:TASK2
+6:TASK3
+6:TASK4
+9:MProj
+19:100,2
+24:0
+25:80
+26:80
+8:mproject.vgd
+15:0,0,0,0,0,0
+27:0,
+34:0,
+42:0
+72:0
+73:0
+35:Date
+36:YYYY-MM-DD
+37:2000
+38:1
+39:1
+40:2
+41:0
+95:0
+96:0
+97:0
+77:0
+78:0
+102:1
+93:0
+94:0
+92:0
+91:0
+90:0
+87:0
+75:
+43:
+103:8,8,8,3,8
+105:0,0,0,0,0,0,0,0,0,0
+104:Courier|12||0-0-0|0-0-0|-1--1--1|0-0-255|192-192-192|-1--1--1

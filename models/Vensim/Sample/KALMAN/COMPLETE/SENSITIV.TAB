@@ -1,0 +1,8 @@
+:COM The base payoff is     -93.8141
+:COM A * Means a bound was reached, i.e. payoff not at criterion.
+:SENSITIVITY = PAYOFF_VALUE = 2
+     2.00344 <= inventory drive variance =      12.4509 <=       95.897 
+    0.725992 <= workforce drive variance =      1.17941 <=      1.90881 
+    0.362842 <= meas workforce variance =     0.673933 <=      1.16075 
+     2.98619 <= time_correct_inventory =      3.68222 <=      4.68627 
+     10.7322 <= time adjust workforce =      13.0287 <=      16.3335 

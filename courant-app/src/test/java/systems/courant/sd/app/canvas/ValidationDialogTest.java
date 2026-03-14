@@ -23,7 +23,7 @@ class ValidationDialogTest {
 
     @Start
     void start(Stage stage) {
-        // No-op — tests create their own ValidationDialog stages
+        // No-op — tests create their own ValidationDialog instances
     }
 
     private ValidationResult resultWith(int errors, int warnings) {
@@ -134,6 +134,53 @@ class ValidationDialogTest {
         // The dialog should still be the same instance, showing updated data
         assertThat(ValidationDialog.getOpenInstance()).isSameAs(instance);
         assertThat(instance.isShowing()).isTrue();
+
+        Platform.runLater(() -> instance.close());
+        WaitForAsyncUtils.waitForFxEvents();
+    }
+
+    @Test
+    @DisplayName("showOrUpdate updates the callback when reusing an existing dialog (#379)")
+    void shouldUpdateCallbackOnReuse() {
+        String[] selectedByA = {null};
+        String[] selectedByB = {null};
+
+        ValidationResult result1 = resultWith(1, 0);
+        Platform.runLater(() -> ValidationDialog.showOrUpdate(result1, name -> selectedByA[0] = name));
+        WaitForAsyncUtils.waitForFxEvents();
+
+        ValidationDialog instance = ValidationDialog.getOpenInstance();
+        assertThat(instance).isNotNull();
+
+        // Window B calls showOrUpdate with a different callback
+        ValidationResult result2 = resultWith(1, 0);
+        Platform.runLater(() -> ValidationDialog.showOrUpdate(result2, name -> selectedByB[0] = name));
+        WaitForAsyncUtils.waitForFxEvents();
+
+        // Select a row — should invoke B's callback, not A's
+        Platform.runLater(() -> instance.getDialogPane().lookupAll(".table-view").stream()
+                .filter(n -> n instanceof javafx.scene.control.TableView<?>)
+                .map(n -> (javafx.scene.control.TableView<?>) n)
+                .findFirst()
+                .ifPresent(t -> t.getSelectionModel().select(0)));
+        WaitForAsyncUtils.waitForFxEvents();
+
+        assertThat(selectedByA[0]).isNull();
+        assertThat(selectedByB[0]).isEqualTo("Element0");
+
+        Platform.runLater(() -> instance.close());
+        WaitForAsyncUtils.waitForFxEvents();
+    }
+
+    @Test
+    @DisplayName("ValidationDialog extends Dialog, not Stage (#213)")
+    void shouldExtendDialog() {
+        ValidationResult result = resultWith(1, 0);
+        Platform.runLater(() -> ValidationDialog.showOrUpdate(result, name -> {}));
+        WaitForAsyncUtils.waitForFxEvents();
+
+        ValidationDialog instance = ValidationDialog.getOpenInstance();
+        assertThat(instance).isInstanceOf(javafx.scene.control.Dialog.class);
 
         Platform.runLater(() -> instance.close());
         WaitForAsyncUtils.waitForFxEvents();

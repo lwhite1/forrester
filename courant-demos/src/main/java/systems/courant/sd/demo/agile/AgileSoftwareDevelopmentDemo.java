@@ -108,7 +108,7 @@ public class AgileSoftwareDevelopmentDemo {
 
         // A fraction of completed work introduces latent defects
         Flow defectCreation = Flow.create("Defect Creation", WEEK, () ->
-                completion.flowPerTimeUnit(TimeUnits.DAY)
+                completion.flowPerTimeUnit(TimeUnits.WEEK)
                         .multiply(1.0 - fractionCorrect));
         latentDefects.addInflow(defectCreation);
 

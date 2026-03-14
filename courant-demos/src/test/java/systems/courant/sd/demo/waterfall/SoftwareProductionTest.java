@@ -12,6 +12,7 @@ import systems.courant.sd.model.Model;
 import systems.courant.sd.model.Module;
 import systems.courant.sd.model.Stock;
 import systems.courant.sd.model.Variable;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -217,32 +218,100 @@ class SoftwareProductionTest {
     }
 
     @Test
-    void shouldBeIndependentOfFlowEvaluationOrder() {
-        // Two runs with the same parameters should produce identical results.
-        // Since we removed the mutable cache, getValue() caching guarantees
-        // order-independent evaluation.
-        SoftwareProduction sp1 = createModule(10, 2, 0.8, 500);
-        SoftwareProduction sp2 = createModule(10, 2, 0.8, 500);
+    @DisplayName("Split flows should conserve tasks regardless of evaluation order (#465)")
+    void shouldConserveTasksRegardlessOfEvaluationOrder() {
+        // Evaluate sibling flows BEFORE the parent flow to verify no order dependency.
+        // Before #465, correctDevelopment/errorInjection read from a cache populated by
+        // developmentOutflow — evaluating them first would read stale (zero) values.
+        SoftwareProduction sp = createModule(10, 2, 0.8, 500);
+        Module mod = sp.getModule();
 
-        Model model1 = new Model("Run 1");
-        model1.addModule(sp1.getModule());
-        Simulation sim1 = new Simulation(model1, TimeUnits.DAY,
+        Flow development = mod.getFlows().stream()
+                .filter(f -> f.getName().equals("Development")).findFirst().orElseThrow();
+        Flow correctDev = mod.getFlows().stream()
+                .filter(f -> f.getName().equals("Correct Development")).findFirst().orElseThrow();
+        Flow errorInjection = mod.getFlows().stream()
+                .filter(f -> f.getName().equals("Error Injection")).findFirst().orElseThrow();
+        Flow rework = mod.getFlows().stream()
+                .filter(f -> f.getName().equals("Rework")).findFirst().orElseThrow();
+        Flow correctRework = mod.getFlows().stream()
+                .filter(f -> f.getName().equals("Correct Rework")).findFirst().orElseThrow();
+        Flow reworkErrors = mod.getFlows().stream()
+                .filter(f -> f.getName().equals("Rework Errors")).findFirst().orElseThrow();
+
+        // Evaluate siblings BEFORE their parent — this is the reverse of the old assumed order
+        Quantity correctDevQ = correctDev.flowPerTimeUnit(TimeUnits.DAY);
+        Quantity errorInjQ = errorInjection.flowPerTimeUnit(TimeUnits.DAY);
+        Quantity devQ = development.flowPerTimeUnit(TimeUnits.DAY);
+
+        double devTotal = devQ.getValue();
+        double splitSum = correctDevQ.getValue() + errorInjQ.getValue();
+        assertThat(Math.abs(splitSum - devTotal))
+                .as("Development split must conserve: total=%f, correct+error=%f", devTotal, splitSum)
+                .isLessThan(1e-9);
+
+        // Same check for rework split
+        Quantity correctRwQ = correctRework.flowPerTimeUnit(TimeUnits.DAY);
+        Quantity rwErrorsQ = reworkErrors.flowPerTimeUnit(TimeUnits.DAY);
+        Quantity rwQ = rework.flowPerTimeUnit(TimeUnits.DAY);
+
+        double rwTotal = rwQ.getValue();
+        double rwSplitSum = correctRwQ.getValue() + rwErrorsQ.getValue();
+        assertThat(Math.abs(rwSplitSum - rwTotal))
+                .as("Rework split must conserve: total=%f, correct+error=%f", rwTotal, rwSplitSum)
+                .isLessThan(1e-9);
+    }
+
+    @Test
+    @DisplayName("Completion fraction should include reworkToDo (#268)")
+    void shouldIncludeReworkToDoInCompletionFraction() {
+        // Run long enough for rework to accumulate in Rework to Do
+        SoftwareProduction sp = createModule(10, 0.1, 0.8, 500);
+
+        Model model = new Model("Completion Fraction Test");
+        model.addModule(sp.getModule());
+
+        Simulation sim = new Simulation(model, TimeUnits.DAY,
                 new Quantity(100, TimeUnits.DAY));
-        sim1.execute();
+        sim.execute();
 
-        Model model2 = new Model("Run 2");
-        model2.addModule(sp2.getModule());
-        Simulation sim2 = new Simulation(model2, TimeUnits.DAY,
+        Stock tasksCompleted = sp.getModule().getStock("Tasks Completed").orElseThrow();
+        Stock undiscoveredRework = sp.getModule().getStock("Undiscovered Rework").orElseThrow();
+        Stock reworkToDo = sp.getModule().getStock("Rework to Do").orElseThrow();
+        Variable completionFraction = sp.getModule().getVariable("Completion Fraction").orElseThrow();
+
+        double expectedCf = (tasksCompleted.getValue() + undiscoveredRework.getValue()
+                + reworkToDo.getValue()) / 500.0;
+        assertThat(completionFraction.getValue())
+                .as("Completion fraction must include reworkToDo (was missing before #268 fix)")
+                .isCloseTo(expectedCf, org.assertj.core.data.Offset.offset(0.001));
+
+        // Verify reworkToDo is non-trivial so this test is meaningful
+        assertThat(reworkToDo.getValue())
+                .as("Rework to Do should be significant with low QA staffing")
+                .isGreaterThan(10.0);
+    }
+
+    @Test
+    @DisplayName("Integration effort multiplier should reflect reworkToDo in completion (#268)")
+    void shouldReflectReworkToDoInIntegrationMultiplier() {
+        // With low QA staffing, rework accumulates → completion fraction stays high →
+        // integration multiplier should remain high rather than dropping
+        SoftwareProduction sp = createModule(10, 0.1, 0.8, 500);
+
+        Model model = new Model("Integration Multiplier Test");
+        model.addModule(sp.getModule());
+
+        Simulation sim = new Simulation(model, TimeUnits.DAY,
                 new Quantity(100, TimeUnits.DAY));
-        sim2.execute();
+        sim.execute();
 
-        double completed1 = sp1.getModule().getStock("Tasks Completed").orElseThrow().getValue();
-        double completed2 = sp2.getModule().getStock("Tasks Completed").orElseThrow().getValue();
-        assertThat(completed1).isEqualTo(completed2);
-
-        double remaining1 = sp1.getModule().getStock("Tasks Remaining").orElseThrow().getValue();
-        double remaining2 = sp2.getModule().getStock("Tasks Remaining").orElseThrow().getValue();
-        assertThat(remaining1).isEqualTo(remaining2);
+        Variable multiplier = sp.getModule().getVariable("Integration Effort Multiplier").orElseThrow();
+        // With the fix, completion fraction counts reworkToDo, so multiplier = 1 + 1.5 * cf^2
+        // should be substantially above 1.0
+        assertThat(multiplier.getValue())
+                .as("Integration multiplier should be high when reworkToDo is included in completion")
+                .isGreaterThan(1.5);
     }
 
     @Test

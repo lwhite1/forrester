@@ -22,6 +22,8 @@ import systems.courant.sd.model.def.StockDef;
 import systems.courant.sd.model.def.SubscriptDef;
 import systems.courant.sd.model.def.ViewDef;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.StreamReadConstraints;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -54,11 +56,16 @@ public class ModelDefinitionSerializer {
     private final ObjectMapper mapper;
 
     /**
-     * Creates a new serializer with pretty-printing enabled.
+     * Creates a new serializer with pretty-printing and security hardening enabled.
      */
     public ModelDefinitionSerializer() {
         mapper = new ObjectMapper();
         mapper.enable(SerializationFeature.INDENT_OUTPUT);
+        mapper.enable(DeserializationFeature.FAIL_ON_TRAILING_TOKENS);
+        mapper.getFactory().setStreamReadConstraints(
+                StreamReadConstraints.builder()
+                        .maxNestingDepth(100)
+                        .build());
     }
 
     /**
@@ -362,6 +369,12 @@ public class ModelDefinitionSerializer {
         if (settings.dt() != 1.0) {
             node.put("dt", settings.dt());
         }
+        if (settings.strictMode()) {
+            node.put("strictMode", true);
+        }
+        if (settings.savePer() != 1) {
+            node.put("savePer", settings.savePer());
+        }
         return node;
     }
 
@@ -634,11 +647,15 @@ public class ModelDefinitionSerializer {
         if (root.has("defaultSimulation")) {
             JsonNode s = root.get("defaultSimulation");
             double dt = s.has("dt") ? s.get("dt").asDouble() : 1.0;
+            boolean strict = s.has("strictMode") && s.get("strictMode").asBoolean();
+            long savePerVal = s.has("savePer") ? s.get("savePer").asLong() : 1;
             defaultSimulation = new SimulationSettings(
                     requiredText(s, "timeStep"),
                     requiredDouble(s, "duration"),
                     requiredText(s, "durationUnit"),
-                    dt);
+                    dt,
+                    strict,
+                    savePerVal);
         }
 
         ModelMetadata metadata = null;

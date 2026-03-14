@@ -20,8 +20,8 @@ public class MultiSweepResult {
      * @param results        the list of run results, one per parameter combination
      */
     public MultiSweepResult(List<String> parameterNames, List<RunResult> results) {
-        this.parameterNames = parameterNames;
-        this.results = results;
+        this.parameterNames = List.copyOf(parameterNames);
+        this.results = List.copyOf(results);
     }
 
     /**

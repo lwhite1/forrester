@@ -7,10 +7,8 @@ import systems.courant.sd.model.def.ReferenceDataset;
 
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
-import javafx.embed.swing.SwingFXUtils;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
-import javafx.scene.SnapshotParameters;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
@@ -29,7 +27,6 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.control.Tooltip;
-import javafx.scene.image.WritableImage;
 import javafx.beans.property.DoubleProperty;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
@@ -37,7 +34,6 @@ import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
-
 import com.opencsv.CSVWriter;
 
 import java.io.File;
@@ -55,8 +51,6 @@ import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import javax.imageio.ImageIO;
 
 /**
  * Embeddable pane displaying simulation results as a chart and table.
@@ -161,9 +155,18 @@ public class SimulationResultPane extends BorderPane {
 
         NumberAxis xAxis = new NumberAxis();
         xAxis.setLabel(columns.isEmpty() ? "Step" : columns.getFirst());
+        xAxis.setAutoRanging(false);
+        if (!rows.isEmpty()) {
+            double xMin = rows.getFirst()[0];
+            double xMax = rows.getLast()[0];
+            xAxis.setLowerBound(xMin);
+            xAxis.setUpperBound(xMax);
+            xAxis.setTickUnit(niceTickUnit(xMax - xMin));
+        }
 
         NumberAxis yAxis = new NumberAxis();
         yAxis.setLabel(resolveYAxisLabel(columns, result.units()));
+        yAxis.setAutoRanging(false);
 
         chart = new LineChart<>(xAxis, yAxis);
         chart.setCreateSymbols(false);
@@ -237,6 +240,38 @@ public class SimulationResultPane extends BorderPane {
         chart.getData().addAll(currentSeries);
         ChartUtils.applySeriesColors(currentSeries);
 
+        // Y-axis rescaling: recompute bounds from visible series (#542)
+        Runnable rescaleYAxis = () -> {
+            double yMin = Double.MAX_VALUE;
+            double yMax = -Double.MAX_VALUE;
+            for (XYChart.Series<Number, Number> s : chart.getData()) {
+                if (s.getNode() != null && !s.getNode().isVisible()) {
+                    continue;
+                }
+                for (XYChart.Data<Number, Number> d : s.getData()) {
+                    double val = d.getYValue().doubleValue();
+                    if (val < yMin) {
+                        yMin = val;
+                    }
+                    if (val > yMax) {
+                        yMax = val;
+                    }
+                }
+            }
+            if (yMin >= yMax) {
+                yMin = yMin - 1;
+                yMax = yMax + 1;
+            }
+            double pad = (yMax - yMin) * 0.05;
+            if (pad == 0) {
+                pad = 0.5;
+            }
+            yAxis.setLowerBound(yMin - pad);
+            yAxis.setUpperBound(yMax + pad);
+            yAxis.setTickUnit(niceTickUnit(yMax - yMin + 2 * pad));
+        };
+        rescaleYAxis.run();
+
         // Apply dashed stroke to non-stock (variable/auxiliary) series
         if (!stockNames.isEmpty()) {
             for (int i = 0; i < currentSeries.size(); i++) {
@@ -302,20 +337,20 @@ public class SimulationResultPane extends BorderPane {
             for (int i = 0; i < currentSeries.size(); i++) {
                 if (isStock.get(i)) {
                     addSeriesRow(sidebar, currentSeries.get(i), i,
-                            behaviorModes.get(i), seriesCheckBoxes);
+                            behaviorModes.get(i), seriesCheckBoxes, rescaleYAxis);
                 }
             }
             addSectionHeader(sidebar, "Variables");
             for (int i = 0; i < currentSeries.size(); i++) {
                 if (!isStock.get(i)) {
                     addSeriesRow(sidebar, currentSeries.get(i), i,
-                            behaviorModes.get(i), seriesCheckBoxes);
+                            behaviorModes.get(i), seriesCheckBoxes, rescaleYAxis);
                 }
             }
         } else {
             for (int i = 0; i < currentSeries.size(); i++) {
                 addSeriesRow(sidebar, currentSeries.get(i), i,
-                        behaviorModes.get(i), seriesCheckBoxes);
+                        behaviorModes.get(i), seriesCheckBoxes, rescaleYAxis);
             }
         }
 
@@ -564,7 +599,7 @@ public class SimulationResultPane extends BorderPane {
 
     private void addSeriesRow(VBox sidebar, XYChart.Series<Number, Number> series,
                               int colorIndex, String behaviorMode,
-                              List<CheckBox> seriesCheckBoxes) {
+                              List<CheckBox> seriesCheckBoxes, Runnable rescaleYAxis) {
         String color = ChartUtils.SERIES_COLORS.get(colorIndex % ChartUtils.SERIES_COLORS.size());
 
         CheckBox cb = new CheckBox();
@@ -578,6 +613,7 @@ public class SimulationResultPane extends BorderPane {
                     d.getNode().setVisible(isSelected);
                 }
             });
+            rescaleYAxis.run();
         });
         seriesCheckBoxes.add(cb);
 
@@ -722,33 +758,22 @@ public class SimulationResultPane extends BorderPane {
     }
 
     private void exportCsv() {
-        FileChooser fileChooser = new FileChooser();
-        fileChooser.setTitle("Export CSV");
-        fileChooser.getExtensionFilters().add(
-                new FileChooser.ExtensionFilter("CSV Files", "*.csv"));
-        fileChooser.setInitialFileName("simulation.csv");
-        LastDirectoryStore.applyExportDirectory(fileChooser);
-
-        File file = fileChooser.showSaveDialog(getScene() != null ? getScene().getWindow() : null);
-        if (file != null) {
-            LastDirectoryStore.recordExportDirectory(file);
-            try (CSVWriter writer = new CSVWriter(new OutputStreamWriter(
-                    Files.newOutputStream(file.toPath()), StandardCharsets.UTF_8))) {
-                List<String> columns = simulationResult.columnNames();
-                writer.writeNext(columns.toArray(new String[0]));
-                for (double[] row : simulationResult.rows()) {
-                    String[] line = new String[row.length];
-                    for (int i = 0; i < row.length; i++) {
-                        line[i] = (i == 0) ? String.valueOf((int) row[i])
-                                : String.valueOf(row[i]);
+        ChartUtils.showCsvSaveDialog("Export CSV", "simulation.csv",
+                getScene() != null ? getScene().getWindow() : null, file -> {
+                    try (CSVWriter writer = new CSVWriter(new OutputStreamWriter(
+                            Files.newOutputStream(file.toPath()), StandardCharsets.UTF_8))) {
+                        List<String> columns = simulationResult.columnNames();
+                        writer.writeNext(columns.toArray(new String[0]));
+                        for (double[] row : simulationResult.rows()) {
+                            String[] line = new String[row.length];
+                            for (int i = 0; i < row.length; i++) {
+                                line[i] = (i == 0) ? String.valueOf((int) row[i])
+                                        : String.valueOf(row[i]);
+                            }
+                            writer.writeNext(line);
+                        }
                     }
-                    writer.writeNext(line);
-                }
-            } catch (IOException e) {
-                new Alert(Alert.AlertType.ERROR,
-                        "Failed to export CSV: " + e.getMessage()).showAndWait();
-            }
-        }
+                });
     }
 
     /**
@@ -771,28 +796,30 @@ public class SimulationResultPane extends BorderPane {
     }
 
     private void saveChartAsPng() {
-        if (chart == null) {
-            return;
-        }
-        FileChooser fileChooser = new FileChooser();
-        fileChooser.setTitle("Save Chart as PNG");
-        fileChooser.getExtensionFilters().add(
-                new FileChooser.ExtensionFilter("PNG Image", "*.png"));
-        fileChooser.setInitialFileName("simulation_chart.png");
-        LastDirectoryStore.applyExportDirectory(fileChooser);
-
-        File file = fileChooser.showSaveDialog(getScene() != null ? getScene().getWindow() : null);
-        if (file != null) {
-            LastDirectoryStore.recordExportDirectory(file);
-            WritableImage image = chart.snapshot(new SnapshotParameters(), null);
-            try {
-                ImageIO.write(SwingFXUtils.fromFXImage(image, null), "png", file);
-            } catch (IOException e) {
-                Alert alert = new Alert(Alert.AlertType.ERROR,
-                        "Failed to save image: " + e.getMessage());
-                alert.showAndWait();
-            }
-        }
+        ChartUtils.saveNodeAsPng(chart, "simulation_chart.png",
+                getScene() != null ? getScene().getWindow() : null);
     }
 
+    /**
+     * Computes a "nice" tick unit for an axis covering the given range,
+     * targeting roughly 5–10 tick marks.
+     */
+    static double niceTickUnit(double range) {
+        if (range <= 0) {
+            return 1;
+        }
+        double rawUnit = range / 10;
+        double exp = Math.pow(10, Math.floor(Math.log10(rawUnit)));
+        double frac = rawUnit / exp;
+        if (frac < 1.5) {
+            return exp;
+        }
+        if (frac < 3.5) {
+            return 2 * exp;
+        }
+        if (frac < 7.5) {
+            return 5 * exp;
+        }
+        return 10 * exp;
+    }
 }

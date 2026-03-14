@@ -45,7 +45,8 @@ public class ExpressionLanguageDialog extends Stage {
                 createTextTab("Grammar", grammarContent())
         );
 
-        Scene scene = new Scene(tabs, 680, 560);
+        Scene scene = new Scene(tabs,
+                Styles.screenAwareWidth(680), Styles.screenAwareHeight(560));
         setScene(scene);
     }
 

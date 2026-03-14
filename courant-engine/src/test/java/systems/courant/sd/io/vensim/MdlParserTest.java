@@ -241,4 +241,115 @@ class MdlParserTest {
             assertThat(eq.expression()).contains("North");
         }
     }
+
+    @Nested
+    @DisplayName("Macro parsing")
+    class MacroParsing {
+
+        @Test
+        void shouldParseMacroDefinition() {
+            String content = """
+                    :MACRO: SMOOTH CUSTOM(input, delay, output)
+                    internal stock = INTEG((input - internal stock) / delay, input)
+                    \t~\t
+                    \t~\t
+                    \t|
+                    output = internal stock
+                    \t~\t
+                    \t~\t
+                    \t|
+                    :END OF MACRO:
+                    x = 5
+                    \t~\t
+                    \t~\t
+                    \t|
+                    """;
+            MdlParser.ParsedMdl result = MdlParser.parse(content);
+
+            // Macro body equations should NOT be in the main equations list
+            assertThat(result.equations()).hasSize(1);
+            assertThat(result.equations().get(0).name()).isEqualTo("x");
+
+            // Macro should be parsed
+            assertThat(result.macros()).hasSize(1);
+            MacroDef macro = result.macros().get(0);
+            assertThat(macro.name()).isEqualTo("SMOOTH CUSTOM");
+            assertThat(macro.inputParams()).containsExactly("input", "delay");
+            assertThat(macro.outputParams()).containsExactly("output");
+            assertThat(macro.bodyEquations()).hasSize(2);
+        }
+
+        @Test
+        void shouldParseMultipleMacros() {
+            String content = """
+                    :MACRO: MACRO1(a, result)
+                    result = a * 2
+                    \t~\t
+                    \t~\t
+                    \t|
+                    :END OF MACRO:
+                    :MACRO: MACRO2(b, result)
+                    result = b + 1
+                    \t~\t
+                    \t~\t
+                    \t|
+                    :END OF MACRO:
+                    y = 10
+                    \t~\t
+                    \t~\t
+                    \t|
+                    """;
+            MdlParser.ParsedMdl result = MdlParser.parse(content);
+
+            assertThat(result.equations()).hasSize(1);
+            assertThat(result.macros()).hasSize(2);
+            assertThat(result.macros().get(0).name()).isEqualTo("MACRO1");
+            assertThat(result.macros().get(1).name()).isEqualTo("MACRO2");
+        }
+
+        @Test
+        void shouldClassifyOutputParameters() {
+            String content = """
+                    :MACRO: CALC(x, y, out)
+                    temp = x + y
+                    \t~\t
+                    \t~\t
+                    \t|
+                    out = temp * 2
+                    \t~\t
+                    \t~\t
+                    \t|
+                    :END OF MACRO:
+                    """;
+            MdlParser.ParsedMdl result = MdlParser.parse(content);
+
+            assertThat(result.macros()).hasSize(1);
+            MacroDef macro = result.macros().get(0);
+            assertThat(macro.inputParams()).containsExactly("x", "y");
+            assertThat(macro.outputParams()).containsExactly("out");
+        }
+
+        @Test
+        void shouldHandleCaseInsensitiveMacroKeywords() {
+            String content = """
+                    :macro: double(x, result)
+                    result = x * 2
+                    \t~\t
+                    \t~\t
+                    \t|
+                    :end of macro:
+                    """;
+            MdlParser.ParsedMdl result = MdlParser.parse(content);
+
+            assertThat(result.macros()).hasSize(1);
+            assertThat(result.macros().get(0).name()).isEqualTo("double");
+        }
+
+        @Test
+        void shouldHandleNoParsedMacros() {
+            String content = "x = 5\n\t~\t\n\t~\t\n\t|";
+            MdlParser.ParsedMdl result = MdlParser.parse(content);
+            assertThat(result.macros()).isEmpty();
+        }
+    }
 }

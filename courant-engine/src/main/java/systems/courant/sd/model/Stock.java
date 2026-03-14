@@ -23,8 +23,8 @@ public class Stock extends Element {
 
     private final Unit unit;
     private double value;
-    private final NegativeValuePolicy negativeValuePolicy;
     private boolean warnedNonFinite;
+    private final NegativeValuePolicy negativeValuePolicy;
 
     /**
      * Creates a new stock with the given name, initial value, and unit.
@@ -51,7 +51,7 @@ public class Stock extends Element {
         Preconditions.checkNotNull(unit, "unit must not be null");
         Preconditions.checkNotNull(negativeValuePolicy, "negativeValuePolicy must not be null");
         Preconditions.checkArgument(Double.isFinite(initialAmount),
-                "Stock '%s' initial value must be finite, but got: %s", name, initialAmount);
+                "Stock '%s' initial value must be finite, got: %s", name, initialAmount);
         this.unit = unit;
         this.negativeValuePolicy = negativeValuePolicy;
         this.value = applyPolicy(initialAmount);
@@ -108,14 +108,22 @@ public class Stock extends Element {
     /**
      * Sets the current value of this stock, applying the configured
      * {@link NegativeValuePolicy} if the value is negative. Non-finite values
-     * (NaN, Infinity) are silently rejected — the stock retains its previous
-     * value and logs a warning once.
+     * (NaN, Infinity) are rejected with a warning and the previous value is kept,
+     * consistent with the Simulation engine's behavior.
      *
      * @param value the new value
      * @throws IllegalArgumentException if the value is negative when the
      *                                  policy is {@link NegativeValuePolicy#THROW}
      */
     public void setValue(double value) {
+        if (!Double.isFinite(value)) {
+            if (!warnedNonFinite) {
+                log.warn("Stock '{}' received non-finite value: {} — keeping previous value ({})",
+                        getName(), value, this.value);
+                warnedNonFinite = true;
+            }
+            return;
+        }
         this.value = applyPolicy(value);
     }
 
@@ -135,14 +143,6 @@ public class Stock extends Element {
 
 
     private double applyPolicy(double candidateValue) {
-        if (!Double.isFinite(candidateValue)) {
-            if (!warnedNonFinite) {
-                log.warn("Stock '{}' received non-finite value: {} — keeping previous value",
-                        getName(), candidateValue);
-                warnedNonFinite = true;
-            }
-            return value;
-        }
         if (candidateValue >= 0) {
             return candidateValue;
         }

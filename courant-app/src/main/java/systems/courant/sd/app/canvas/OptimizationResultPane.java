@@ -9,25 +9,13 @@ import javafx.geometry.Insets;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
-import javafx.scene.control.Alert;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Label;
 import javafx.scene.control.MenuItem;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
-import systems.courant.sd.app.LastDirectoryStore;
 
-import javafx.scene.SnapshotParameters;
-import javafx.scene.image.WritableImage;
-import javafx.stage.FileChooser;
-
-import javax.imageio.ImageIO;
-
-import javafx.embed.swing.SwingFXUtils;
-
-import java.io.File;
-import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -126,68 +114,38 @@ public class OptimizationResultPane extends BorderPane {
     }
 
     private void saveChartAsPng() {
-        if (chart == null) {
-            return;
-        }
-        FileChooser fileChooser = new FileChooser();
-        fileChooser.setTitle("Save Chart as PNG");
-        fileChooser.getExtensionFilters().add(
-                new FileChooser.ExtensionFilter("PNG Image", "*.png"));
-        fileChooser.setInitialFileName("optimization_chart.png");
-        LastDirectoryStore.applyExportDirectory(fileChooser);
-
-        File file = fileChooser.showSaveDialog(getScene() != null ? getScene().getWindow() : null);
-        if (file != null) {
-            LastDirectoryStore.recordExportDirectory(file);
-            WritableImage image = chart.snapshot(new SnapshotParameters(), null);
-            try {
-                ImageIO.write(SwingFXUtils.fromFXImage(image, null), "png", file);
-            } catch (IOException e) {
-                new Alert(Alert.AlertType.ERROR,
-                        "Failed to save image: " + e.getMessage()).showAndWait();
-            }
-        }
+        ChartUtils.saveNodeAsPng(chart, "optimization_chart.png",
+                getScene() != null ? getScene().getWindow() : null);
     }
 
     private void exportBestRunCsv() {
-        FileChooser fileChooser = new FileChooser();
-        fileChooser.setTitle("Export Best Run CSV");
-        fileChooser.getExtensionFilters().add(
-                new FileChooser.ExtensionFilter("CSV Files", "*.csv"));
-        fileChooser.setInitialFileName("optimization_best_run.csv");
-        LastDirectoryStore.applyExportDirectory(fileChooser);
+        ChartUtils.showCsvSaveDialog("Export Best Run CSV", "optimization_best_run.csv",
+                getScene() != null ? getScene().getWindow() : null, file -> {
+                    RunResult bestRun = result.getBestRunResult();
+                    List<String> stockNames = bestRun.getStockNames();
+                    List<String> varNames = bestRun.getVariableNames();
 
-        File file = fileChooser.showSaveDialog(getScene() != null ? getScene().getWindow() : null);
-        if (file != null) {
-            LastDirectoryStore.recordExportDirectory(file);
-            RunResult bestRun = result.getBestRunResult();
-            List<String> stockNames = bestRun.getStockNames();
-            List<String> varNames = bestRun.getVariableNames();
+                    try (CSVWriter writer = new CSVWriter(new OutputStreamWriter(
+                            Files.newOutputStream(file.toPath()), StandardCharsets.UTF_8))) {
+                        List<String> header = new ArrayList<>();
+                        header.add("Step");
+                        header.addAll(stockNames);
+                        header.addAll(varNames);
+                        writer.writeNext(header.toArray(new String[0]));
 
-            try (CSVWriter writer = new CSVWriter(new OutputStreamWriter(
-                    Files.newOutputStream(file.toPath()), StandardCharsets.UTF_8))) {
-                List<String> header = new ArrayList<>();
-                header.add("Step");
-                header.addAll(stockNames);
-                header.addAll(varNames);
-                writer.writeNext(header.toArray(new String[0]));
-
-                for (int s = 0; s < bestRun.getStepCount(); s++) {
-                    List<String> row = new ArrayList<>();
-                    row.add(String.valueOf(bestRun.getStep(s)));
-                    for (double v : bestRun.getStockValuesAtStep(s)) {
-                        row.add(String.valueOf(v));
+                        for (int s = 0; s < bestRun.getStepCount(); s++) {
+                            List<String> row = new ArrayList<>();
+                            row.add(String.valueOf(bestRun.getStep(s)));
+                            for (double v : bestRun.getStockValuesAtStep(s)) {
+                                row.add(String.valueOf(v));
+                            }
+                            for (double v : bestRun.getVariableValuesAtStep(s)) {
+                                row.add(String.valueOf(v));
+                            }
+                            writer.writeNext(row.toArray(new String[0]));
+                        }
                     }
-                    for (double v : bestRun.getVariableValuesAtStep(s)) {
-                        row.add(String.valueOf(v));
-                    }
-                    writer.writeNext(row.toArray(new String[0]));
-                }
-            } catch (IOException e) {
-                new Alert(Alert.AlertType.ERROR,
-                        "Failed to export CSV: " + e.getMessage()).showAndWait();
-            }
-        }
+                });
     }
 
     private static Label boldLabel(String text) {

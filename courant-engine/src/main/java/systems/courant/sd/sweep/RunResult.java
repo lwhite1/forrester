@@ -6,7 +6,7 @@ import systems.courant.sd.event.SimulationStartEvent;
 import systems.courant.sd.event.TimeStepEvent;
 import systems.courant.sd.model.Model;
 
-import com.carrotsearch.hppc.IntArrayList;
+import com.carrotsearch.hppc.LongArrayList;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -27,7 +27,7 @@ public class RunResult implements EventHandler {
     private List<String> stockNames = Collections.emptyList();
     private List<String> variableNames = Collections.emptyList();
 
-    private final IntArrayList steps = new IntArrayList();
+    private final LongArrayList steps = new LongArrayList();
     private final List<double[]> stockSnapshots = new ArrayList<>();
     private final List<double[]> variableSnapshots = new ArrayList<>();
 
@@ -63,7 +63,7 @@ public class RunResult implements EventHandler {
     @Override
     public void handleTimeStepEvent(TimeStepEvent event) {
         Model model = event.getModel();
-        steps.add((int) event.getStep());
+        steps.add(event.getStep());
         stockSnapshots.add(toDoubleArray(model.getStockValues()));
         variableSnapshots.add(toDoubleArray(model.getVariableValues()));
     }
@@ -126,7 +126,7 @@ public class RunResult implements EventHandler {
      * @param index the zero-based index into the recorded steps
      * @return the step number
      */
-    public int getStep(int index) {
+    public long getStep(int index) {
         return steps.get(index);
     }
 

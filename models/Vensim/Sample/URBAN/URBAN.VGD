@@ -1,0 +1,129 @@
+:GRAPH WIP1
+:TITLE WIP1
+:X-MIN 0
+:X-MAX 250
+:SCALE
+:VAR population
+:GRAPH HISTORY
+:WIP
+:label-lines
+:Title History of Conditions
+:x-min 100
+:x-max 250
+:x-label Years
+:var population|Total Population
+:line-width 2
+:y-min 0
+:y-max 10e6
+:Var underemployed crowding|Underemployed crowding
+:y-min 0
+:y-max 200
+:units /100
+:line-width 2
+:scale
+:VAR percent underemp|% of population underemployed
+:line-width 2
+:VAR unemployment rate|Unemployment rate
+:units %
+:y-min 0
+:y-max 100
+:line-width 2
+:report COMM1
+This game allows you to play with and understand a model through 
+interaction and analysis.  Most screens have menu items.  To select
+a menu item you can click on it, type the first letter, or highlight
+it using the up and down arrow keys and press the enter key.  
+
+The main gaming screen has buttons rather than menu selections.  Use
+the mouse to click on a button and activate the associated action.
+
+Additional functionality available in the software is described in 
+places where it can be used.  To conserve space, later commentaries
+will be kept small, and you will need to scroll them to read all the
+information they contain.
+
+The model used for this application is the Urban Dynamics model as 
+published in the book Urban Dynamics by Jay W. Forrester (MIT Press,
+Cambridge, MA 1969).
+:end-of-report
+:report comm3
+You can do analysis of the model by first loading in scenarios of 
+interest, and then reviewing the output or doing causal tracing.  
+The Load and reorder command will put up a small window with two lists.  
+On the left is a list of loaded scenarios, on the right a list of 
+scenarios that have been run.  The << button loads scenarios.  Click 
+on the scenario you want to load in the right hand list, and then 
+click the << button.  The >> button unloads scenarios.  Click on the 
+scenario you want to unload in the left hand list, and the click on 
+the >> button.
+
+You can load up to 8 scenarios at a time, but it is difficult to read
+graphs with more than 4 scenarios loaded.
+
+If the list on the right is empty, you will need to run some 
+scenarios.  Exit back to the main menu and do this.  You can run
+the scenarios described in "Beyond the Limits" by choosing one
+of the named scenarios to base your scenario on, and running the
+scenario without making any additional changes.
+
+Causal tracing is a process the allows you to determine the underlying
+causes of behavior, and differences in behavior between different
+scenarios.  There are two options for doing causal tracing available.
+The first uses tree diagrams and single graphs.  The second uses
+equations and multiple graphs.  Try them both out to see which you
+prefer.
+:end-of-report
+:report COMM4
+The cause and use screens show lists of
+different variables.  The graphs allows
+your to compare different scenarios.
+The trees allow you to investigate the
+structure of the model.
+
+You can double click on a variable name
+in the graphs, trees or documentation to
+view the same analysis screen for that
+variable.  You can also use the S
+command to select a new variable to work
+with.
+
+You can print the contents of the graphs
+and trees using the P command.  Output
+will be directed to your default printer.
+
+During causal tracing you can switch
+between the Tree and Graph represen-
+tations of causes.  This can be
+useful as means of understanding both
+structure and behavior.
+:end-of-report
+:REPORT EXP1
+Build low cost housing in order to improve the 
+condition of the underemployed.  This is housing
+units/person/year so that .2 means everyone should
+have a new house in five year.
+:END-OF-REPORT
+:REPORT EXP2
+Demolish slum housing.  Encourages new higher quality
+housing and business growth, but at the expense of
+available housing for the underemployed.  Measure in 
+fraction/year destroyed.
+:END-OF-REPORT
+:REPORT EXP3
+Programs to make jobs available to the underemployed.
+Measured as the % of unemployed offered jobs.
+:END-OF-REPORT
+:REPORT EXP4
+Job training programs.  Measured as the fraction/year of
+underemployed trained.
+:END-OF-REPORT
+:REPORT EXP5
+Construction of new business subsidized and/or directed
+by the government.  Measures in fraction/year of existing
+business the is created.
+:END-OF-REPORT
+:REPORT EXP6
+Demolition of ailing businesses.  Buyouts and accelerated
+shutdowns.  Measures in fraction/year removed.
+:END-OF-REPORT
+

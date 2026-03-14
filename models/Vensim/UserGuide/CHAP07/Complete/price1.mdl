@@ -1,0 +1,141 @@
+{UTF-8}
+change in price=A FUNCTION OF(change in price,price,target price,time to adjust price down\
+		,time to adjust price up)
+	~	
+	~		|
+
+time to adjust price down=A FUNCTION OF(time to adjust price down)
+	~	
+	~		|
+
+target price=A FUNCTION OF(target price,expected demand,target revenue)
+	~	
+	~		|
+
+demand=A FUNCTION OF(demand,effect price demand,reference demand)
+	~	
+	~		|
+
+demand elasticity=A FUNCTION OF(demand elasticity)
+	~	
+	~		|
+
+effect price demand=A FUNCTION OF(effect price demand,demand elasticity,price,reference price\
+		)
+	~	
+	~		|
+
+expected demand=A FUNCTION OF(expected demand,demand,time to form expectations)
+	~	
+	~		|
+
+initial price=A FUNCTION OF(initial price)
+	~	
+	~		|
+
+price=A FUNCTION OF(price,change in price)
+	~	
+	~		|
+
+reference demand=A FUNCTION OF(reference demand)
+	~	
+	~		|
+
+reference price=A FUNCTION OF(reference price)
+	~	
+	~		|
+
+target revenue=A FUNCTION OF(target revenue)
+	~	
+	~		|
+
+time to adjust price up=A FUNCTION OF(time to adjust price up)
+	~	
+	~		|
+
+time to form expectations=A FUNCTION OF(time to form expectations)
+	~	
+	~		|
+
+********************************************************
+	.Control
+********************************************************~
+		Simulation Control Parameters
+	|
+
+FINAL TIME  = 100
+	~	Month
+	~	The final time for the simulation.
+	|
+
+INITIAL TIME  = 0
+	~	Month
+	~	The initial time for the simulation.
+	|
+
+SAVEPER  = 
+        TIME STEP
+	~	Month [0,?]
+	~	The frequency with which output is stored.
+	|
+
+TIME STEP  = 1
+	~	Month [0,?]
+	~	The time step for the simulation.
+	|
+
+\\\---/// Sketch information - do not modify anything except names
+V300  Do not put anything below this section - it will be ignored
+*View 1
+$192-192-192,0,Arial|14||0-0-0|92-92-92|160-160-160|-1--1--1|-1--1--1|96,96,100,0
+10,1,reference demand,748,81,79,12,0,3,0,2,0,0,0,0,0-0-0,0-0-0,|14||64-128-128
+10,2,effect price demand,731,117,85,12,0,3,0,0,0,0,0,0
+10,3,price,573,171,40,20,3,3,0,16,0,0,0,0,0-0-0,0-0-0,|14|B|0-0-0
+10,4,demand,533,80,37,12,0,3,0,0,0,0,0,0
+10,5,target price,205,155,49,12,0,3,0,0,0,0,0,0
+10,6,time to adjust price up,240,223,95,12,0,3,0,2,0,0,0,0,0-0-0,0-0-0,|14||64-128-128
+10,7,target revenue,147,95,63,12,0,3,0,2,0,0,0,0,0-0-0,0-0-0,|14||64-128-128
+1,8,1,4,1,0,0,0,0,64,0,-1--1--1,,1|(628,73)|
+1,9,2,4,1,0,0,0,0,64,0,-1--1--1,,1|(627,87)|
+1,10,3,2,1,0,0,0,0,64,0,-1--1--1,,1|(643,167)|
+10,11,demand elasticity,879,144,75,12,0,3,0,2,0,0,0,0,0-0-0,0-0-0,|14||64-128-128
+1,12,11,2,1,0,0,0,0,64,0,-1--1--1,,1|(783,145)|
+1,13,6,22,1,0,0,0,0,64,0,-1--1--1,,1|(356,223)|
+1,14,17,5,1,0,0,0,0,64,0,-1--1--1,,1|(248,107)|
+1,15,7,5,1,0,0,0,0,64,0,-1--1--1,,1|(200,124)|
+10,16,initial price,631,219,47,12,0,3,0,2,0,0,0,0,0-0-0,0-0-0,|14||64-128-128
+10,17,expected demand,409,79,47,28,3,131,0,16,0,0,0,0,0-0-0,0-0-0,|14|B|0-0-0
+12,18,48,301,164,13,11,0,3,0,0,-1,0,0,0
+1,19,21,3,4,0,0,22,0,0,0,-1--1--1,,1|(481,171)|
+1,20,21,18,68,0,0,22,2,0,0,-1--1--1,|12||0-0-0,1|(365,171)|
+11,21,48,423,171,7,8,34,3,0,0,1,0,0,0
+10,22,change in price,423,191,67,12,32,3,0,0,-1,0,0,0
+1,23,4,17,1,0,0,0,0,0,0,-1--1--1,,1|(476,72)|
+10,24,time to form expectations,216,51,107,12,0,3,0,2,-1,0,0,0,0-0-0,0-0-0,|14||64-128-128
+1,25,24,17,1,0,0,0,0,0,0,-1--1--1,,1|(324,47)|
+1,26,3,22,1,0,0,0,0,0,0,-1--1--1,,1|(517,213)|
+1,27,5,22,1,0,0,0,0,0,0,-1--1--1,,1|(273,192)|
+10,28,reference price,853,180,65,12,0,3,0,2,-1,0,0,0,0-0-0,0-0-0,|14||64-128-128
+1,29,28,2,1,0,0,0,0,0,0,-1--1--1,,1|(775,168)|
+10,30,time to adjust price down,336,248,107,12,0,3,0,2,0,0,0,0,0-0-0,0-0-0,|14||64-128-128
+1,31,30,22,1,0,0,0,0,64,0,-1--1--1,,1|(397,225)|
+///---\\\
+:L<%^E!@
+9:Current
+22:$,Dollar,Dollars,$s
+22:Hour,Hours
+22:Month,Months
+22:Person,People,Persons
+22:Unit,Units
+22:Week,Weeks
+22:Year,Years
+22:Day,Days
+15:0,0,0,0,0,0
+19:100,0
+27:2,
+34:0,
+4:Time
+5:time to form expectations
+24:0
+25:100
+26:100

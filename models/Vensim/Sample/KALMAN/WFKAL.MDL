@@ -1,0 +1,323 @@
+{UTF-8}
+********************************************************
+	.Wfinv
+********************************************************~
+		
+		
+		 A simple workforce inventory oscillator.
+	|
+
+Inventory  = A FUNCTION OF( -des inventory,production,-sales) ~~|
+Inventory = INTEG(production - sales,des inventory)
+	~	widget
+	~	 The amount of inventory on hand.
+	|
+
+Workforce = INTEG(net hire,initial workforce)
+	~	person
+	~	 The number of working people.
+	|
+
+initial workforce= INITIAL(
+	 des workforce)
+	~	person
+	~	 The number of people working initially.
+	|
+
+net hire = (des workforce - Workforce)/time adjust workforce +
+           net hire noise*RANDOM UNIFORM(-0.5,0.5,0)
+	~	person/month
+	~	  The net hire rate.
+	|
+
+net hire noise = 0
+	~	person/month
+	~	 Noise in net hiring to to unexpected events.
+	|
+
+time adjust workforce = 12
+	~	month
+	~	  The time to adjust the workforce.
+	|
+
+des workforce = des production / norm productivity
+	~	person
+	~	  The desired number of people working.
+	|
+
+productivity = (norm productivity+RANDOM UNIFORM(-0.5,0.5,0)*productivity noise)
+	~	widget/person/month
+	~	  The average productivity of workers.
+	|
+
+norm productivity = 1
+	~	widget/person/month
+	~	  The normal average productivity of workers.
+	|
+
+productivity noise = 0
+	~	widget/(person*month)
+	~	  The magnitude of driving noise in determining productivity.
+	|
+
+des production = Exp Sales + inv correction
+	~	widget/month
+	~	 The desired production level.
+	|
+
+Exp Sales = INTEG((sales - Exp Sales)/Time Avg Sales,sales)
+	~	widget/month
+	~	 The expected amount of sales.
+	|
+
+Time Avg Sales = 6
+	~	month
+	~	 The horizon over which sales are averaged.
+	|
+
+inv correction = (des inventory - Inventory)/
+            time correct inventory
+	~	widget/month
+	~	 The desired correction to the level of inventory held.
+	|
+
+time correct inventory = 4
+	~	month
+	~	  The time over which inventory discrepencies are 
+		        corrected.
+	|
+
+des inventory = Exp Sales * inventory coverage
+	~	widget
+	~	 The desired amunt of stock to keep in inventory.
+	|
+
+inventory coverage = 3
+	~	month
+	~	 The number of months of sales held in inventory.
+	|
+
+production = Workforce * productivity
+	~	widget/month
+	~	 The rate of production.
+	|
+
+********************************************************
+	.Measurement
+********************************************************~
+		  Measurement equations.
+	|
+
+meas inventory = Inventory * (1+RANDOM UNIFORM(-0.5,0.5,0)*inventory meas noise)
+	~	widget
+	~	 The error prone measured sales.
+	~	:SUPPLEMENTARY 
+	|
+
+inventory meas noise = 0
+	~	dmnl
+	~	 The magnitude of error in measuring inventory.
+	|
+
+meas workforce = Workforce * (1+RANDOM UNIFORM(-0.5,0.5,0)*workforce meas noise)
+	~	person
+	~	 The error prone measured sales.
+	~	:SUPPLEMENTARY 
+	|
+
+workforce meas noise = 0
+	~	dmnl
+	~	 The magnitude of error in measuring workforce..
+	|
+
+********************************************************
+	.Exogenous
+********************************************************~
+		   Exogenouse inputs.
+	|
+
+sales
+	~	widget/month
+	~	 The rate at which products are sold - exogenously input.
+	|
+
+********************************************************
+	.filter
+********************************************************~
+		   Filter control constants
+	|
+
+meas workforce variance = 0.5
+	~	dmnl
+	~	  The variance in measurement. .0833*(.025*100)^2
+	~	:SUPPLEMENTARY 
+	|
+
+meas inventory variance=
+	1200
+	~	dmnl
+	~	  The variance in measurement .0833*(.4*300)^2
+	~	:SUPPLEMENTARY 
+	|
+
+inventory drive variance = 33
+	~	dmnl
+	~	  The variance in driving noise .0833*(.2*1*100)
+	~	:SUPPLEMENTARY 
+	|
+
+workforce drive variance = 1.3
+	~	dmnl
+	~	  The variance in driving workforce noise .0833*(4)^2
+	~	:SUPPLEMENTARY 
+	|
+
+********************************************************
+	.control
+********************************************************~
+		   Simulation control constants.
+	|
+
+FINAL TIME  =100
+	~	month
+	~	  The final time for the simulation
+	|
+
+INITIAL TIME  = 0
+	~	month
+	~	 The initial time for the simulation
+	|
+
+SAVEPER  = 1
+	~	month
+	~	 The frequency with which data is stored
+	|
+
+TIME STEP  = 1
+	~	month
+	~	 The time step for the simulation
+	|
+
+\\\---/// Sketch information - do not modify anything except names
+V300  Do not put anything below this section - it will be ignored
+*1
+$192-192-192,0,Vensim Sans|12||0-0-0|92-92-92|160-160-160|-1--1--1|255-255-255|96,96,100,0
+10,1,Workforce,1098,284,51,24,3,131,0,50,0,1,0,0,0-0-0,0-0-0,Vensim Sans||B|0-0-0,0,0,0,0,0,0
+10,2,initial workforce,1211,299,75,30,0,3,1,1,0,0,0,0,128-128-128,0-0-0,|||0-0-0,0,0,0,0,0,0
+10,3,des workforce,849,352,75,30,0,3,0,34,0,1,0,0,-1--1--1,-1--1--1,Vensim Sans|||0-0-0,0,0,0,0,0,0
+12,4,48,881,284,10,8,0,3,0,0,0,0,0,0,0,0,0,0,0,0
+11,5,0,970,284,7,8,34,3,0,0,1,0,0,0,0,0,0,0,0,0
+10,6,net hire,970,322,75,30,32,3,0,34,0,1,0,0,-1--1--1,-1--1--1,Vensim Sans|||0-0-0,0,0,0,0,0,0
+10,7,time adjust workforce,818,312,75,30,0,3,0,34,0,1,0,0,-1--1--1,-1--1--1,Vensim Sans|||64-128-128,0,0,0,0,0,0
+10,8,des production,830,409,75,30,0,3,0,34,0,1,0,0,-1--1--1,-1--1--1,Vensim Sans|||0-0-0,0,0,0,0,0,0
+10,9,net hire noise,907,240,75,30,0,3,0,34,0,1,0,0,-1--1--1,-1--1--1,Vensim Sans|||128-128-192,0,0,0,0,0,0
+10,10,Exp Sales,1331,553,51,24,3,131,0,50,0,1,0,0,0-0-0,0-0-0,Vensim Sans||B|0-0-0,0,0,0,0,0,0
+10,11,inv correction,922,503,75,30,0,3,0,34,0,1,0,0,-1--1--1,-1--1--1,Vensim Sans|||0-0-0,0,0,0,0,0,0
+10,12,Time Avg Sales,1438,492,75,30,0,3,0,34,0,1,0,0,-1--1--1,-1--1--1,Vensim Sans|||64-128-128,0,0,0,0,0,0
+10,13,productivity noise,1003,356,75,30,0,3,0,34,0,1,0,0,-1--1--1,-1--1--1,Vensim Sans|||128-128-192,0,0,0,0,0,0
+10,14,Inventory,1217,420,45,21,3,131,0,50,0,1,0,0,0-0-0,0-0-0,Vensim Sans||B|0-0-0,0,0,0,0,0,0
+10,15,time correct inventory,1042,607,75,30,0,3,0,34,0,1,0,0,-1--1--1,-1--1--1,Vensim Sans|||64-128-128,0,0,0,0,0,0
+10,16,des inventory,1081,569,75,30,0,3,0,34,0,1,0,0,-1--1--1,-1--1--1,Vensim Sans|||0-0-0,0,0,0,0,0,0
+10,17,productivity,998,435,75,30,0,3,0,34,0,1,0,0,-1--1--1,-1--1--1,Vensim Sans|||0-0-0,0,0,0,0,0,0
+12,18,48,1069,420,10,8,0,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,19,inventory coverage,1226,519,75,30,0,3,0,34,0,1,0,0,-1--1--1,-1--1--1,Vensim Sans|||64-128-128,0,0,0,0,0,0
+12,20,48,1350,419,10,8,0,3,0,0,0,0,0,0,0,0,0,0,0,0
+11,21,0,1117,420,7,8,34,3,0,0,1,0,0,0,0,0,0,0,0,0
+10,22,production,1117,458,75,30,32,3,0,34,0,1,0,0,-1--1--1,-1--1--1,Vensim Sans|||0-0-0,0,0,0,0,0,0
+10,23,meas inventory,1307,364,75,30,0,3,0,32,0,1,0,0,-1--1--1,-1--1--1,Vensim Sans|||0-0-0,0,0,0,0,0,0
+10,24,inventory meas noise,1209,329,75,30,0,3,0,2,0,1,0,0,-1--1--1,-1--1--1,|||128-128-192,0,0,0,0,0,0
+10,25,meas workforce,1297,288,75,30,0,3,0,32,0,1,0,0,-1--1--1,-1--1--1,Vensim Sans|||0-0-0,0,0,0,0,0,0
+10,26,workforce meas noise,1234,248,75,30,0,3,0,34,0,1,0,0,-1--1--1,-1--1--1,Vensim Sans|||128-128-192,0,0,0,0,0,0
+10,27,norm productivity,941,391,75,30,0,3,0,34,0,1,0,0,-1--1--1,-1--1--1,Vensim Sans|||64-128-128,0,0,0,0,0,0
+1,28,2,1,0,1,0,0,0,0,1,-1--1--1,,1|(0,0)|
+1,29,5,1,4,0,0,22,0,0,0,-1--1--1,,1|(1012,284)|
+1,30,5,4,68,0,0,22,0,0,0,-1--1--1,,1|(927,284)|
+1,31,3,6,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,32,7,6,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,33,1,6,1,0,0,0,0,0,0,-1--1--1,,1|(1029,316)|
+1,34,8,3,1,0,0,0,0,0,0,-1--1--1,,1|(829,376)|
+1,35,10,8,1,0,0,0,0,0,0,-1--1--1,,1|(861,527)|
+1,36,11,8,1,0,0,0,0,0,0,-1--1--1,,1|(857,451)|
+1,37,61,10,1,0,0,0,0,0,0,-1--1--1,,1|(1330,476)|
+1,38,12,10,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,39,16,11,1,0,0,0,0,0,0,-1--1--1,,1|(1001,548)|
+1,40,14,11,1,0,0,0,0,0,0,-1--1--1,,1|(1023,509)|
+1,41,15,11,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,42,16,14,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,43,21,14,4,0,0,22,0,0,0,-1--1--1,,1|(1148,420)|
+1,44,21,18,100,0,0,22,0,0,0,-1--1--1,,1|(1094,420)|
+1,45,60,20,4,0,0,22,0,0,0,-1--1--1,,1|(1320,419)|
+1,46,60,14,100,0,0,22,0,0,0,-1--1--1,,1|(1274,419)|
+1,47,17,22,1,0,0,0,0,0,0,-1--1--1,,1|(1038,459)|
+1,48,1,21,1,0,0,0,0,0,0,-1--1--1,,1|(1109,351)|
+1,49,10,16,1,0,0,0,0,0,0,-1--1--1,,1|(1205,572)|
+1,50,19,16,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,51,13,17,1,0,0,0,0,0,0,-1--1--1,,1|(1021,388)|
+1,52,3,2,0,1,0,0,0,0,1,-1--1--1,,1|(0,0)|
+1,53,9,5,1,0,0,0,0,0,0,-1--1--1,,1|(959,249)|
+1,54,14,23,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,55,24,23,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,56,1,25,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,57,26,25,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,58,27,3,1,0,0,0,0,0,0,-1--1--1,,1|(901,371)|
+1,59,27,17,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+11,60,0,1293,419,7,8,34,3,0,0,1,0,0,0,0,0,0,0,0,0
+10,61,sales,1293,457,75,30,32,3,0,34,0,1,0,0,-1--1--1,-1--1--1,Vensim Sans|||64-128-128,0,0,0,0,0,0
+12,62,0,1093,136,80,40,8,7,0,0,-1,1,0,0,0,0,0,0,0,0
+WFKAL MODEL
+///---\\\
+:GRAPH COMPARE
+:TITLE Actual Inventory versus potential measurement
+:SCALE
+:VAR inventory|Actual Inventory (data.vdf)
+:DATASET data
+:VAR meas inventory|Measured Inventory (data.vdf)
+:DATASET data
+:VAR inventory|Simple Simulation (simple.vdf)
+:DATASET simple
+:VAR inventory|Kalman Filtering (filter.vdf)
+:DATASET filter
+
+:GRAPH COMPARE2
+:TITLE Actual Inventory versus estimate based on workforce measurement
+:SCALE
+:VAR inventory|Actual Inventory (data.vdf)
+:DATASET data
+:SCALE
+:VAR inventory|Simple simulation (simple.vdf)
+:DATASET simple
+:SCALE
+:VAR inventory|Filter Estimate (filter2.vdf)
+:DATASET filter2
+:L<%^E!@
+4:Time
+5:time correct inventory
+9:Current
+19:100,0
+24:0
+25:0
+26:0
+23:0
+15:0,0,0,0,0,0
+27:0,
+34:0,
+42:0
+72:0
+73:0
+95:0
+96:0
+97:0
+77:0
+78:0
+102:1
+93:0
+94:0
+92:0
+91:0
+90:0
+87:0
+75:
+43:
+103:8,8,8,3,8
+105:0,0,0,0,0,0,0,0,0,0
+104:Courier|12||0-0-0|0-0-0|-1--1--1|0-0-255|192-192-192|-1--1--1

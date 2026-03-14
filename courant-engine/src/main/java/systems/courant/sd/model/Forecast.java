@@ -5,7 +5,7 @@ import com.google.common.base.Preconditions;
 import systems.courant.sd.model.compile.Resettable;
 
 import java.util.function.DoubleSupplier;
-import java.util.function.IntSupplier;
+import java.util.function.LongSupplier;
 
 /**
  * Linear extrapolation forecast that implements {@link Formula}, providing the standard
@@ -31,16 +31,16 @@ public class Forecast implements Formula, Resettable {
     private final double averagingTime;
     private final double horizon;
     private final double initialTrend;
-    private final IntSupplier currentStep;
+    private final LongSupplier currentStep;
 
     private double averageInput;
     private double trend;
     private double lastInputVal;
     private boolean initialized;
-    private int lastStep = -1;
+    private long lastStep = -1;
 
     private Forecast(DoubleSupplier input, double averagingTime, double horizon,
-                     double initialTrend, IntSupplier currentStep) {
+                     double initialTrend, LongSupplier currentStep) {
         Preconditions.checkNotNull(input, "input supplier must not be null");
         Preconditions.checkNotNull(currentStep, "currentStep supplier must not be null");
         Preconditions.checkArgument(averagingTime > 0,
@@ -63,7 +63,7 @@ public class Forecast implements Formula, Resettable {
      * @return a new Forecast formula
      */
     public static Forecast of(DoubleSupplier input, double averagingTime, double horizon,
-                              double initialTrend, IntSupplier currentStep) {
+                              double initialTrend, LongSupplier currentStep) {
         return new Forecast(input, averagingTime, horizon, initialTrend, currentStep);
     }
 
@@ -87,7 +87,7 @@ public class Forecast implements Formula, Resettable {
      */
     @Override
     public double getCurrentValue() {
-        int step = currentStep.getAsInt();
+        long step = currentStep.getAsLong();
         if (!initialized) {
             lastInputVal = input.getAsDouble();
             double denom = 1 + initialTrend * averagingTime;
@@ -96,7 +96,7 @@ public class Forecast implements Formula, Resettable {
             initialized = true;
             lastStep = step;
         } else if (step > lastStep) {
-            int delta = step - lastStep;
+            long delta = step - lastStep;
             for (int d = 0; d < delta; d++) {
                 lastInputVal = input.getAsDouble();
                 averageInput += (lastInputVal - averageInput) / averagingTime;

@@ -528,13 +528,17 @@ class VensimImporterTest {
                     "Contact Rate", "Recovery Time", "Total Population",
                     "TIME_STEP", "INITIAL_TIME", "FINAL_TIME");
 
-            // 2 formula variables + 6 literal-valued (constants) = 8 total
-            assertThat(def.variables()).hasSize(8);
-            assertThat(def.variables().stream().filter(a -> !a.isLiteral()).toList()).hasSize(2);
+            // 6 literal-valued constants (Infection Rate and Recovery Rate are now flows)
+            assertThat(def.variables()).hasSize(6);
+            assertThat(def.variables().stream().filter(a -> !a.isLiteral()).toList()).isEmpty();
 
             // 4 flows: Susceptible/Recovered each get a net flow,
-            // Infected decomposes INTEG(Infection Rate - Recovery Rate) into 2 individual flows
+            // Infected decomposes INTEG(Infection Rate - Recovery Rate) into 2 named flows
             assertThat(def.flows()).hasSize(4);
+            Set<String> flowNames = def.flows().stream()
+                    .map(FlowDef::name)
+                    .collect(Collectors.toSet());
+            assertThat(flowNames).contains("Infection Rate", "Recovery Rate");
 
             // Simulation settings: 200 days
             assertThat(def.defaultSimulation()).isNotNull();
@@ -1898,6 +1902,52 @@ class VensimImporterTest {
     }
 
     @Nested
+    @DisplayName("DELAY compile-time warning surfacing (#507)")
+    class DelayCompileTimeWarnings {
+
+        @Test
+        void shouldSurfaceDelayWarningThroughCompiledModel() {
+            // DELAY3 with a variable delay time that evaluates to 0 at compile time
+            String mdl = """
+                    output = DELAY3(input, delay time)
+                    \t~\tUnits
+                    \t~\t
+                    \t|
+
+                    input = 100
+                    \t~\tUnits
+                    \t~\t
+                    \t|
+
+                    delay time = 0
+                    \t~\tDay
+                    \t~\t
+                    \t|
+
+                    INITIAL TIME = 0
+                    \t~\tDay
+                    \t~\t
+                    \t|
+
+                    FINAL TIME = 10
+                    \t~\tDay
+                    \t~\t
+                    \t|
+
+                    TIME STEP = 1
+                    \t~\tDay
+                    \t~\t
+                    \t|
+                    """;
+            ImportResult result = importer.importModel(mdl, "test");
+            CompiledModel compiled = new ModelCompiler().compile(result.definition());
+            // Warning should be surfaced through compilationWarnings
+            assertThat(compiled.getCompilationWarnings())
+                    .anyMatch(w -> w.contains("DELAY3") && w.contains("inaccurate"));
+        }
+    }
+
+    @Nested
     @DisplayName("SAMPLE IF TRUE and FIND ZERO (#512)")
     class SampleIfTrueAndFindZeroImport {
 
@@ -2094,6 +2144,713 @@ class VensimImporterTest {
             Simulation sim = compiled.createSimulation();
             sim.execute();
             // Model should compile and run without errors
+            assertThat(compiled).isNotNull();
+        }
+    }
+
+    @Nested
+    @DisplayName("splitRateTerms unary minus (#535)")
+    class SplitRateTermsUnaryMinus {
+
+        @Test
+        void shouldNotSplitOnUnaryMinusAfterMultiply() {
+            var terms = VensimImporter.splitRateTerms("a * -b");
+            // "a * -b" is a single term (unary minus on b), not "a *" minus "b"
+            assertThat(terms).isNull();
+        }
+
+        @Test
+        void shouldNotSplitOnUnaryMinusAfterDivide() {
+            var terms = VensimImporter.splitRateTerms("a / -b");
+            assertThat(terms).isNull();
+        }
+
+        @Test
+        void shouldNotSplitOnUnaryMinusAfterOpenParen() {
+            var terms = VensimImporter.splitRateTerms("(-a) + b");
+            assertThat(terms).hasSize(2);
+            assertThat(terms.get(0).expr()).isEqualTo("(-a)");
+            assertThat(terms.get(1).expr()).isEqualTo("b");
+        }
+
+        @Test
+        void shouldStillSplitOnBinaryMinus() {
+            var terms = VensimImporter.splitRateTerms("a - b");
+            assertThat(terms).hasSize(2);
+            assertThat(terms.get(0).expr()).isEqualTo("a");
+            assertThat(terms.get(1).expr()).isEqualTo("b");
+            assertThat(terms.get(1).positive()).isFalse();
+        }
+
+        @Test
+        void shouldSplitOnMinusAfterCloseParen() {
+            var terms = VensimImporter.splitRateTerms("(a + b) - c");
+            assertThat(terms).hasSize(2);
+            assertThat(terms.get(0).expr()).isEqualTo("(a + b)");
+            assertThat(terms.get(1).expr()).isEqualTo("c");
+        }
+
+        @Test
+        void shouldHandleMixedUnaryAndBinaryMinus() {
+            var terms = VensimImporter.splitRateTerms("a * -b + c");
+            assertThat(terms).hasSize(2);
+            assertThat(terms.get(0).expr()).isEqualTo("a * -b");
+            assertThat(terms.get(0).positive()).isTrue();
+            assertThat(terms.get(1).expr()).isEqualTo("c");
+            assertThat(terms.get(1).positive()).isTrue();
+        }
+    }
+
+    @Nested
+    @DisplayName("Quoted and special name handling (#540)")
+    class QuotedNameHandling {
+
+        @Test
+        void shouldResolveQuotedNamesWithHyphens() {
+            String mdl = """
+                    "net-increase rate" = 5
+                    \t~\t1/Year
+                    \t~\t
+                    \t|
+
+                    output = "net-increase rate" * 10
+                    \t~\t1/Year
+                    \t~\t
+                    \t|
+
+                    INITIAL TIME = 0
+                    \t~\tYear
+                    \t~\t
+                    \t|
+
+                    FINAL TIME = 10
+                    \t~\tYear
+                    \t~\t
+                    \t|
+
+                    TIME STEP = 1
+                    \t~\tYear
+                    \t~\t
+                    \t|
+                    """;
+            ImportResult result = importer.importModel(mdl, "test");
+            // Should not have unresolved reference warnings
+            assertThat(result.warnings()).noneMatch(w -> w.contains("unknown element"));
+        }
+
+        @Test
+        void shouldResolveDigitPrefixedQuotedNames() {
+            String mdl = """
+                    "1985 cost factor" = 100
+                    \t~\tDollar
+                    \t~\t
+                    \t|
+
+                    total cost = "1985 cost factor" * 2
+                    \t~\tDollar
+                    \t~\t
+                    \t|
+
+                    INITIAL TIME = 0
+                    \t~\tYear
+                    \t~\t
+                    \t|
+
+                    FINAL TIME = 10
+                    \t~\tYear
+                    \t~\t
+                    \t|
+
+                    TIME STEP = 1
+                    \t~\tYear
+                    \t~\t
+                    \t|
+                    """;
+            ImportResult result = importer.importModel(mdl, "test");
+            // Equation should contain the normalized name, not the quoted form
+            assertThat(result.definition().variables().stream()
+                    .filter(v -> v.name().contains("total"))
+                    .findFirst().get().equation())
+                    .contains("_1985_cost_factor");
+        }
+
+        @Test
+        void shouldSkipAFunctionOfDocumentation() {
+            String mdl = """
+                    production  = A FUNCTION OF( capacity,demand)
+                    \t~\t
+                    \t~\t
+                    \t|
+
+                    production = MIN(capacity, demand)
+                    \t~\tWidget/Day
+                    \t~\t
+                    \t|
+
+                    capacity = 100
+                    \t~\tWidget/Day
+                    \t~\t
+                    \t|
+
+                    demand = 80
+                    \t~\tWidget/Day
+                    \t~\t
+                    \t|
+
+                    INITIAL TIME = 0
+                    \t~\tDay
+                    \t~\t
+                    \t|
+
+                    FINAL TIME = 10
+                    \t~\tDay
+                    \t~\t
+                    \t|
+
+                    TIME STEP = 1
+                    \t~\tDay
+                    \t~\t
+                    \t|
+                    """;
+            ImportResult result = importer.importModel(mdl, "test");
+            // Should NOT produce a duplicate name warning
+            assertThat(result.warnings()).noneMatch(w -> w.contains("Duplicate"));
+        }
+
+        @Test
+        void shouldResolveUnquotedReferencesToQuotedNames() {
+            // When a variable is defined quoted but referenced unquoted in other equations
+            String mdl = """
+                    "radical action level" = 5
+                    \t~\t
+                    \t~\t
+                    \t|
+
+                    total = radical action level * 2
+                    \t~\t
+                    \t~\t
+                    \t|
+
+                    INITIAL TIME = 0
+                    \t~\tDay
+                    \t~\t
+                    \t|
+
+                    FINAL TIME = 10
+                    \t~\tDay
+                    \t~\t
+                    \t|
+
+                    TIME STEP = 1
+                    \t~\tDay
+                    \t~\t
+                    \t|
+                    """;
+            ImportResult result = importer.importModel(mdl, "test");
+            // The unquoted multi-word reference should resolve
+            assertThat(result.definition().variables().stream()
+                    .filter(v -> v.name().equals("total"))
+                    .findFirst().get().equation())
+                    .contains("radical_action_level");
+        }
+    }
+
+    @Nested
+    @DisplayName("GET external data functions (#480)")
+    class GetExternalDataFunctions {
+
+        @Test
+        void shouldSubstitutePlaceholderForGetXlsData() {
+            String mdl = """
+                    External=
+                    \tGET XLS DATA('data.xlsx', 'Sheet1', 'A', 'B2')
+                    \t~\t
+                    \t~\t
+                    \t|
+
+                    INITIAL TIME = 0
+                    \t~\tDay
+                    \t~\t
+                    \t|
+
+                    FINAL TIME = 10
+                    \t~\tDay
+                    \t~\t
+                    \t|
+
+                    TIME STEP = 1
+                    \t~\tDay
+                    \t~\t
+                    \t|
+                    """;
+
+            ImportResult result = importer.importModel(mdl, "Test");
+            // Variable should exist with placeholder value "0"
+            assertThat(result.definition().variables()).anyMatch(
+                    v -> v.name().equals("External") && v.equation().equals("0"));
+            // Warning should reference the file
+            assertThat(result.warnings()).anyMatch(
+                    w -> w.contains("GET XLS DATA") && w.contains("data.xlsx"));
+        }
+
+        @Test
+        void shouldSubstitutePlaceholderForGetDirectConstants() {
+            String mdl = """
+                    Param=
+                    \tGET DIRECT CONSTANTS('params.csv', ',', 'B2')
+                    \t~\t
+                    \t~\t
+                    \t|
+
+                    INITIAL TIME = 0
+                    \t~\tDay
+                    \t~\t
+                    \t|
+
+                    FINAL TIME = 10
+                    \t~\tDay
+                    \t~\t
+                    \t|
+
+                    TIME STEP = 1
+                    \t~\tDay
+                    \t~\t
+                    \t|
+                    """;
+
+            ImportResult result = importer.importModel(mdl, "Test");
+            assertThat(result.definition().variables()).anyMatch(
+                    v -> v.name().equals("Param") && v.equation().equals("0"));
+            assertThat(result.warnings()).anyMatch(
+                    w -> w.contains("GET DIRECT CONSTANTS") && w.contains("params.csv"));
+        }
+
+        @Test
+        void shouldLoadCompanionCsvForGetDirectData() throws IOException {
+            // Create a temp directory with a CSV companion file
+            java.nio.file.Path tmpDir = java.nio.file.Files.createTempDirectory("vensim-test");
+            java.nio.file.Path csvFile = tmpDir.resolve("input.csv");
+            java.nio.file.Files.writeString(csvFile,
+                    "Time,Demand\n0,100\n1,110\n2,120\n");
+            java.nio.file.Path mdlFile = tmpDir.resolve("model.mdl");
+            String mdl = """
+                    External := GET DIRECT DATA('input.csv', ',', 'A', 'B2')
+                    \t~\t
+                    \t~\t
+                    \t|
+
+                    INITIAL TIME = 0
+                    \t~\tDay
+                    \t~\t
+                    \t|
+
+                    FINAL TIME = 10
+                    \t~\tDay
+                    \t~\t
+                    \t|
+
+                    TIME STEP = 1
+                    \t~\tDay
+                    \t~\t
+                    \t|
+                    """;
+            java.nio.file.Files.writeString(mdlFile, mdl);
+
+            ImportResult result = importer.importModel(mdlFile);
+            // Should have loaded the CSV as a reference dataset
+            assertThat(result.definition().referenceDatasets()).hasSize(1);
+            assertThat(result.definition().referenceDatasets().get(0).name())
+                    .isEqualTo("input.csv");
+            assertThat(result.definition().referenceDatasets().get(0).size()).isEqualTo(3);
+            assertThat(result.warnings()).anyMatch(w -> w.contains("Loaded companion CSV"));
+
+            // Cleanup
+            java.nio.file.Files.deleteIfExists(csvFile);
+            java.nio.file.Files.deleteIfExists(mdlFile);
+            java.nio.file.Files.deleteIfExists(tmpDir);
+        }
+
+        @Test
+        void shouldNotFailWhenCompanionCsvMissing() {
+            String mdl = """
+                    External=
+                    \tGET DIRECT DATA('missing.csv', ',', 'A', 'B2')
+                    \t~\t
+                    \t~\t
+                    \t|
+
+                    INITIAL TIME = 0
+                    \t~\tDay
+                    \t~\t
+                    \t|
+
+                    FINAL TIME = 10
+                    \t~\tDay
+                    \t~\t
+                    \t|
+
+                    TIME STEP = 1
+                    \t~\tDay
+                    \t~\t
+                    \t|
+                    """;
+
+            // String import has no base dir, so no companion resolution
+            ImportResult result = importer.importModel(mdl, "Test");
+            assertThat(result.definition().referenceDatasets()).isEmpty();
+        }
+
+        @Test
+        void shouldHandleMultipleGetFunctionsReferencingSameFile() throws IOException {
+            java.nio.file.Path tmpDir = java.nio.file.Files.createTempDirectory("vensim-test");
+            java.nio.file.Path csvFile = tmpDir.resolve("shared.csv");
+            java.nio.file.Files.writeString(csvFile,
+                    "Time,A,B\n0,10,20\n1,11,21\n");
+            java.nio.file.Path mdlFile = tmpDir.resolve("model.mdl");
+            String mdl = """
+                    X=
+                    \tGET DIRECT DATA('shared.csv', ',', 'A', 'B2')
+                    \t~\t
+                    \t~\t
+                    \t|
+
+                    Y=
+                    \tGET DIRECT DATA('shared.csv', ',', 'A', 'C2')
+                    \t~\t
+                    \t~\t
+                    \t|
+
+                    INITIAL TIME = 0
+                    \t~\tDay
+                    \t~\t
+                    \t|
+
+                    FINAL TIME = 10
+                    \t~\tDay
+                    \t~\t
+                    \t|
+
+                    TIME STEP = 1
+                    \t~\tDay
+                    \t~\t
+                    \t|
+                    """;
+            java.nio.file.Files.writeString(mdlFile, mdl);
+
+            ImportResult result = importer.importModel(mdlFile);
+            // Should load the CSV only once despite two references
+            assertThat(result.definition().referenceDatasets()).hasSize(1);
+
+            java.nio.file.Files.deleteIfExists(csvFile);
+            java.nio.file.Files.deleteIfExists(mdlFile);
+            java.nio.file.Files.deleteIfExists(tmpDir);
+        }
+    }
+
+    @Nested
+    @DisplayName("INTEG decomposition uses sketch valve names (#505)")
+    class IntegSketchValveNames {
+
+        @Test
+        void shouldUseSketchValveNamesForDecomposedFlows() {
+            String mdl = """
+                    Population = INTEG(
+                    \tBirth Rate - Death Rate,
+                    \t\t100)
+                    \t~\tPeople
+                    \t~\t
+                    \t|
+
+                    Birth Rate =
+                    \tPopulation * 0.03
+                    \t~\tPeople/Year
+                    \t~\t
+                    \t|
+
+                    Death Rate =
+                    \tPopulation * 0.02
+                    \t~\tPeople/Year
+                    \t~\t
+                    \t|
+
+                    INITIAL TIME = 0
+                    \t~\tYear
+                    \t~\t
+                    \t|
+
+                    FINAL TIME = 100
+                    \t~\tYear
+                    \t~\t
+                    \t|
+
+                    TIME STEP = 1
+                    \t~\tYear
+                    \t~\t
+                    \t|
+
+                    \\---///
+                    *View 1
+                    10,1,Population,200,200
+                    11,2,Birth Rate,100,200
+                    11,3,Death Rate,300,200
+                    """;
+            ImportResult result = importer.importModel(mdl, "test");
+            ModelDefinition def = result.definition();
+
+            // Decomposed flows should use sketch valve names, not synthetic names
+            Set<String> flowNames = def.flows().stream()
+                    .map(FlowDef::name)
+                    .collect(Collectors.toSet());
+            assertThat(flowNames).contains("Birth Rate", "Death Rate");
+            assertThat(flowNames).noneMatch(n -> n.contains("inflow") || n.contains("outflow"));
+
+            // Flow equations should contain the actual formulas, not references
+            FlowDef birthFlow = def.flows().stream()
+                    .filter(f -> f.name().equals("Birth Rate"))
+                    .findFirst().orElseThrow();
+            assertThat(birthFlow.equation()).contains("Population");
+            assertThat(birthFlow.equation()).contains("0.03");
+
+            // Variables should NOT include Birth Rate or Death Rate (they are flows now)
+            Set<String> varNames = def.variables().stream()
+                    .map(VariableDef::name)
+                    .collect(Collectors.toSet());
+            assertThat(varNames).doesNotContain("Birth Rate", "Death Rate");
+
+            // Model should compile and simulate correctly
+            CompiledModel compiled = new ModelCompiler().compile(def);
+            Simulation sim = compiled.createSimulation();
+            sim.execute();
+            assertThat(compiled.getModel().getStocks().getFirst().getValue())
+                    .isGreaterThan(100); // Population should grow (birth > death)
+        }
+
+        @Test
+        void shouldFallBackToSyntheticNamesWhenNoSketchMatch() {
+            // No sketch section — should use synthetic names
+            String mdl = """
+                    Level = INTEG(
+                    \tinflow_a - outflow_b,
+                    \t\t50)
+                    \t~\tUnits
+                    \t~\t
+                    \t|
+
+                    inflow a =
+                    \t10
+                    \t~\tUnits/Day
+                    \t~\t
+                    \t|
+
+                    outflow b =
+                    \t5
+                    \t~\tUnits/Day
+                    \t~\t
+                    \t|
+
+                    INITIAL TIME = 0
+                    \t~\tDay
+                    \t~\t
+                    \t|
+
+                    FINAL TIME = 10
+                    \t~\tDay
+                    \t~\t
+                    \t|
+
+                    TIME STEP = 1
+                    \t~\tDay
+                    \t~\t
+                    \t|
+                    """;
+            ImportResult result = importer.importModel(mdl, "test");
+            ModelDefinition def = result.definition();
+
+            // Without sketch, flows should get synthetic names
+            Set<String> flowNames = def.flows().stream()
+                    .map(FlowDef::name)
+                    .collect(Collectors.toSet());
+            assertThat(flowNames).anyMatch(n -> n.contains("inflow") || n.contains("outflow"));
+        }
+
+        @Test
+        void shouldFallBackToSyntheticNamesForComplexTerms() {
+            // Complex rate term (not a simple variable reference) should use synthetic name
+            String mdl = """
+                    Tank = INTEG(
+                    \tpressure * area - flow out,
+                    \t\t100)
+                    \t~\tLiters
+                    \t~\t
+                    \t|
+
+                    pressure =
+                    \t5
+                    \t~\tBar
+                    \t~\t
+                    \t|
+
+                    area =
+                    \t2
+                    \t~\tM2
+                    \t~\t
+                    \t|
+
+                    flow out =
+                    \t3
+                    \t~\tLiters/Second
+                    \t~\t
+                    \t|
+
+                    INITIAL TIME = 0
+                    \t~\tSecond
+                    \t~\t
+                    \t|
+
+                    FINAL TIME = 10
+                    \t~\tSecond
+                    \t~\t
+                    \t|
+
+                    TIME STEP = 1
+                    \t~\tSecond
+                    \t~\t
+                    \t|
+
+                    \\---///
+                    *View 1
+                    10,1,Tank,200,200
+                    11,2,flow out,300,200
+                    """;
+            ImportResult result = importer.importModel(mdl, "test");
+            ModelDefinition def = result.definition();
+
+            // "flow out" matches a valve, but "pressure * area" does not
+            Set<String> flowNames = def.flows().stream()
+                    .map(FlowDef::name)
+                    .collect(Collectors.toSet());
+            assertThat(flowNames).contains("flow out");
+            // The complex term gets a synthetic name
+            assertThat(flowNames).anyMatch(n -> n.contains("inflow"));
+        }
+    }
+
+    @Nested
+    @DisplayName("Macro expansion")
+    class MacroExpansion {
+
+        @Test
+        void shouldExpandSmoothMacroAndSimulate() {
+            String mdl = """
+                    :MACRO: MY SMOOTH(input, delay time, output)
+                    smooth stock = INTEG((input - smooth stock) / delay time, input)
+                    \t~\t
+                    \t~\t
+                    \t|
+                    output = smooth stock
+                    \t~\t
+                    \t~\t
+                    \t|
+                    :END OF MACRO:
+
+                    raw data = 100
+                    \t~\tWidgets
+                    \t~\t
+                    \t|
+
+                    smoothed = MY SMOOTH(raw data, 5)
+                    \t~\tWidgets
+                    \t~\t
+                    \t|
+
+                    INITIAL TIME = 0
+                    \t~\tDay
+                    \t~\t
+                    \t|
+
+                    FINAL TIME = 20
+                    \t~\tDay
+                    \t~\t
+                    \t|
+
+                    TIME STEP = 1
+                    \t~\tDay
+                    \t~\t
+                    \t|
+                    """;
+
+            ImportResult result = importer.importModel(mdl, "MacroTest");
+            assertThat(result.warnings()).isEmpty();
+
+            ModelDefinition def = result.definition();
+
+            // Should have a stock (the expanded internal stock)
+            assertThat(def.stocks()).isNotEmpty();
+
+            // Should compile and simulate
+            CompiledModel compiled = new ModelCompiler().compile(def);
+            Simulation sim = compiled.createSimulation();
+            sim.execute();
+
+            // The smooth stock should approach raw data (100) over time
+            Stock smoothStock = compiled.getModel().getStocks().stream()
+                    .filter(s -> s.getName().contains("smooth_stock"))
+                    .findFirst()
+                    .orElseThrow();
+            double finalValue = smoothStock.getValue();
+            // At t=20 with delay=5: (1 - e^(-20/5)) * 100 ≈ 98.2
+            assertThat(finalValue).isGreaterThan(90.0);
+        }
+
+        @Test
+        void shouldExpandMultipleMacroInstantiations() {
+            String mdl = """
+                    :MACRO: SCALE(x, factor, result)
+                    result = x * factor
+                    \t~\t
+                    \t~\t
+                    \t|
+                    :END OF MACRO:
+
+                    input = 10
+                    \t~\t
+                    \t~\t
+                    \t|
+
+                    doubled = SCALE(input, 2)
+                    \t~\t
+                    \t~\t
+                    \t|
+
+                    tripled = SCALE(input, 3)
+                    \t~\t
+                    \t~\t
+                    \t|
+
+                    INITIAL TIME = 0
+                    \t~\tDay
+                    \t~\t
+                    \t|
+
+                    FINAL TIME = 1
+                    \t~\tDay
+                    \t~\t
+                    \t|
+
+                    TIME STEP = 1
+                    \t~\tDay
+                    \t~\t
+                    \t|
+                    """;
+
+            ImportResult result = importer.importModel(mdl, "MultiMacro");
+            assertThat(result.warnings()).isEmpty();
+
+            ModelDefinition def = result.definition();
+            CompiledModel compiled = new ModelCompiler().compile(def);
+            Simulation sim = compiled.createSimulation();
+            sim.execute();
+
             assertThat(compiled).isNotNull();
         }
     }

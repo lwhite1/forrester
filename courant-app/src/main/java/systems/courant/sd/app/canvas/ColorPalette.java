@@ -32,6 +32,10 @@ public final class ColorPalette {
     public static final Color CAUSAL_UNKNOWN = Color.web("#BDC3C7");
 
     public static final Color HOVER = Color.web("#4A90D9", 0.4);
+    public static final Color SELECTION = Color.web("#4A90D9", 0.8);
+    public static final Color RUBBER_BAND = Color.web("#4A90D9", 0.6);
+    public static final Color MARQUEE_FILL = Color.web("#4A90D9", 0.1);
+    public static final Color PORT_HOVER = Color.web("#4A90D9", 0.35);
 
     // Validation error/warning indicators on canvas elements
     public static final Color ERROR_BORDER = Color.web("#E74C3C", 0.8);

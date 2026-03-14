@@ -5,6 +5,7 @@ import systems.courant.sd.app.canvas.ActivityLogPanel;
 import systems.courant.sd.app.canvas.BreadcrumbBar;
 import systems.courant.sd.app.canvas.CanvasToolBar;
 import systems.courant.sd.app.canvas.Clipboard;
+import systems.courant.sd.app.canvas.ColumnMappingDialog;
 import systems.courant.sd.app.canvas.CommandPalette;
 import systems.courant.sd.app.canvas.ContextHelpDialog;
 import systems.courant.sd.app.canvas.LoopNavigatorBar;
@@ -28,7 +29,9 @@ import systems.courant.sd.app.canvas.UndoHistoryPopup;
 import systems.courant.sd.app.canvas.UndoManager;
 import systems.courant.sd.app.canvas.ValidationDialog;
 import systems.courant.sd.app.canvas.ZoomOverlay;
+import systems.courant.sd.io.ReferenceDataCsvReader;
 import systems.courant.sd.model.ModelMetadata;
+import systems.courant.sd.model.def.ReferenceDataset;
 import systems.courant.sd.model.def.ElementType;
 import systems.courant.sd.model.def.ModelDefinition;
 import systems.courant.sd.model.def.ValidationResult;
@@ -62,6 +65,7 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
+import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
 import org.slf4j.Logger;
@@ -453,17 +457,22 @@ public class ModelWindow {
         MenuItem modelInfoItem = new MenuItem("Model Info\u2026");
         modelInfoItem.setOnAction(e -> showModelInfoDialog());
 
+        MenuItem importRefDataItem = new MenuItem("Import Reference Data\u2026");
+        importRefDataItem.setId("menuImportRefData");
+        importRefDataItem.setOnAction(e -> importReferenceData());
+
         // Disable file items that require an open model
         saveItem.setDisable(true);
         saveAsItem.setDisable(true);
         exportItem.setDisable(true);
         exportReportItem.setDisable(true);
         modelInfoItem.setDisable(true);
+        importRefDataItem.setDisable(true);
         editorOnlyItems.addAll(List.of(saveItem, saveAsItem, exportItem, exportReportItem,
-                modelInfoItem));
+                modelInfoItem, importRefDataItem));
 
         fileMenu.getItems().addAll(newWindowItem, newItem, openItem, examplesMenu,
-                new SeparatorMenuItem(), modelInfoItem,
+                new SeparatorMenuItem(), modelInfoItem, importRefDataItem,
                 new SeparatorMenuItem(), saveItem, saveAsItem, exportItem, exportReportItem,
                 new SeparatorMenuItem(), closeItem, exitItem);
 
@@ -624,6 +633,9 @@ public class ModelWindow {
         validateItem.setAccelerator(new KeyCodeCombination(KeyCode.B, KeyCombination.SHORTCUT_DOWN));
         validateItem.setOnAction(e -> simulationController.validateModel());
 
+        MenuItem extremeCondItem = new MenuItem("Extreme Conditions...");
+        extremeCondItem.setOnAction(e -> simulationController.runExtremeConditionTest());
+
         MenuItem sweepItem = new MenuItem("Parameter Sweep...");
         sweepItem.setOnAction(e -> simulationController.runParameterSweep());
 
@@ -637,7 +649,7 @@ public class ModelWindow {
         optimizeItem.setOnAction(e -> simulationController.runOptimization());
 
         simulateMenu.getItems().addAll(settingsItem, runItem,
-                new SeparatorMenuItem(), validateItem,
+                new SeparatorMenuItem(), validateItem, extremeCondItem,
                 new SeparatorMenuItem(), sweepItem, multiSweepItem, monteCarloItem, optimizeItem);
         simulateMenu.setDisable(true);
         editorOnlyItems.add(simulateMenu);
@@ -846,19 +858,31 @@ public class ModelWindow {
         contextHelpDialog.showTopic(topic);
         if (!contextHelpDialog.isShowing()) {
             contextHelpDialog.show();
+        } else {
+            bringToFront(contextHelpDialog);
         }
     }
 
     private Stage showHelpWindow(Stage existing, Supplier<? extends Stage> factory) {
         if (existing != null && existing.isShowing()) {
-            existing.toFront();
-            existing.requestFocus();
+            bringToFront(existing);
             return existing;
         }
         Stage window = factory.get();
         window.initOwner(stage);
         window.show();
         return window;
+    }
+
+    /**
+     * Forces a window to the front, working around platform-specific focus-stealing
+     * prevention by briefly toggling alwaysOnTop.
+     */
+    private static void bringToFront(Stage window) {
+        window.setAlwaysOnTop(true);
+        window.toFront();
+        window.requestFocus();
+        Platform.runLater(() -> window.setAlwaysOnTop(false));
     }
 
     private void showUndoHistoryPopup() {
@@ -941,6 +965,53 @@ public class ModelWindow {
             return;
         }
         ValidationDialog.showOrUpdate(result, canvas::selectElement);
+    }
+
+    private void importReferenceData() {
+        FileChooser chooser = new FileChooser();
+        chooser.setTitle("Import Reference Data (CSV)");
+        chooser.getExtensionFilters().addAll(
+                new FileChooser.ExtensionFilter("CSV Files", "*.csv"),
+                new FileChooser.ExtensionFilter("All Files", "*.*"));
+        java.io.File file = chooser.showOpenDialog(stage);
+        if (file == null) {
+            return;
+        }
+        try {
+            String name = file.getName();
+            int dot = name.lastIndexOf('.');
+            if (dot > 0) {
+                name = name.substring(0, dot);
+            }
+            ReferenceDataset rawDataset = ReferenceDataCsvReader.read(
+                    file.toPath(), name);
+
+            // Show column mapping dialog
+            ModelDefinition def = canvas.getEditor().toModelDefinition();
+            List<String> modelVarNames = new java.util.ArrayList<>();
+            def.stocks().forEach(s -> modelVarNames.add(s.name()));
+            def.variables().forEach(v -> modelVarNames.add(v.name()));
+
+            ColumnMappingDialog mappingDialog = new ColumnMappingDialog(
+                    rawDataset, modelVarNames);
+            mappingDialog.initOwner(stage);
+            ReferenceDataset mapped = mappingDialog.showAndWait().orElse(null);
+            if (mapped == null) {
+                return;
+            }
+
+            canvas.getEditor().addReferenceDataset(mapped);
+            simulationController.runSimulation();
+            log.info("Imported reference data '{}' ({} rows, {} variables)",
+                    mapped.name(), mapped.size(), mapped.variableNames().size());
+        } catch (java.io.IOException ex) {
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle("Import Error");
+            alert.setHeaderText("Failed to import reference data");
+            alert.setContentText(ex.getMessage());
+            alert.initOwner(stage);
+            alert.showAndWait();
+        }
     }
 
     private void showModelInfoDialog() {
@@ -1106,6 +1177,7 @@ public class ModelWindow {
         commands.add(cmd("Run Simulation", "Simulate", simulationController::runSimulation));
         commands.add(cmd("Validate Model", "Simulate", simulationController::validateModel));
         commands.add(cmd("Simulation Settings", "Simulate", simulationController::openSimulationSettings));
+        commands.add(cmd("Extreme Conditions", "Simulate", simulationController::runExtremeConditionTest));
         commands.add(cmd("Parameter Sweep", "Simulate", simulationController::runParameterSweep));
         commands.add(cmd("Multi-Parameter Sweep", "Simulate", simulationController::runMultiParameterSweep));
         commands.add(cmd("Monte Carlo", "Simulate", simulationController::runMonteCarlo));

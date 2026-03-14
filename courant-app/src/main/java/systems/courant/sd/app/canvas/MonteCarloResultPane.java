@@ -4,25 +4,12 @@ import systems.courant.sd.sweep.MonteCarloResult;
 
 import javafx.collections.FXCollections;
 import javafx.geometry.Insets;
-import javafx.scene.control.Alert;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Label;
 import javafx.scene.control.MenuItem;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
-import systems.courant.sd.app.LastDirectoryStore;
-
-import javafx.scene.SnapshotParameters;
-import javafx.scene.image.WritableImage;
-import javafx.stage.FileChooser;
-
-import javax.imageio.ImageIO;
-
-import javafx.embed.swing.SwingFXUtils;
-
-import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -82,50 +69,17 @@ public class MonteCarloResultPane extends BorderPane {
     }
 
     private void saveChartAsPng() {
-        if (fanChartPane == null) {
-            return;
-        }
-        FileChooser fileChooser = new FileChooser();
-        fileChooser.setTitle("Save Chart as PNG");
-        fileChooser.getExtensionFilters().add(
-                new FileChooser.ExtensionFilter("PNG Image", "*.png"));
-        fileChooser.setInitialFileName("montecarlo_chart.png");
-        LastDirectoryStore.applyExportDirectory(fileChooser);
-
-        File file = fileChooser.showSaveDialog(getScene() != null ? getScene().getWindow() : null);
-        if (file != null) {
-            LastDirectoryStore.recordExportDirectory(file);
-            WritableImage image = fanChartPane.snapshot(new SnapshotParameters(), null);
-            try {
-                ImageIO.write(SwingFXUtils.fromFXImage(image, null), "png", file);
-            } catch (IOException e) {
-                new Alert(Alert.AlertType.ERROR,
-                        "Failed to save image: " + e.getMessage()).showAndWait();
-            }
-        }
+        ChartUtils.saveNodeAsPng(fanChartPane, "montecarlo_chart.png",
+                getScene() != null ? getScene().getWindow() : null);
     }
 
     private void exportPercentileCsv() {
         if (currentVariable == null) {
             return;
         }
-        FileChooser fileChooser = new FileChooser();
-        fileChooser.setTitle("Export Percentile CSV");
-        fileChooser.getExtensionFilters().add(
-                new FileChooser.ExtensionFilter("CSV Files", "*.csv"));
-        fileChooser.setInitialFileName("montecarlo_percentiles.csv");
-        LastDirectoryStore.applyExportDirectory(fileChooser);
-
-        File file = fileChooser.showSaveDialog(getScene() != null ? getScene().getWindow() : null);
-        if (file != null) {
-            LastDirectoryStore.recordExportDirectory(file);
-            try {
-                result.writePercentileCsv(file.getAbsolutePath(), currentVariable,
-                        2.5, 25, 50, 75, 97.5);
-            } catch (java.io.UncheckedIOException e) {
-                new Alert(Alert.AlertType.ERROR,
-                        "Failed to export CSV: " + e.getMessage()).showAndWait();
-            }
-        }
+        ChartUtils.showCsvSaveDialog("Export Percentile CSV", "montecarlo_percentiles.csv",
+                getScene() != null ? getScene().getWindow() : null,
+                file -> result.writePercentileCsv(file.getAbsolutePath(), currentVariable,
+                        2.5, 25, 50, 75, 97.5));
     }
 }

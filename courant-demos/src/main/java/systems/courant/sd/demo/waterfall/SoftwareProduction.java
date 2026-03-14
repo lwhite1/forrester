@@ -83,7 +83,8 @@ public class SoftwareProduction {
         Variable completionFraction = new Variable("Completion Fraction", DimensionlessUnits.DIMENSIONLESS, () -> {
             double completed = tasksCompleted.getValue();
             double undiscovered = undiscoveredRework.getValue();
-            double total = completed + undiscovered;
+            double rework = reworkToDo.getValue();
+            double total = completed + undiscovered + rework;
             if (projectSize <= 0) {
                 return 0.0;
             }
@@ -134,8 +135,9 @@ public class SoftwareProduction {
         });
 
         // Flow: Tasks Remaining → (split)
-        // Each flow calls getValue() directly; Variable.getValue() caches results per
-        // evaluation cycle, so all flows see the same values within a timestep.
+        // Each flow reads developmentRate and FCC directly. These are Variables backed
+        // by Stocks, so their values are stable within a single time step regardless
+        // of flow evaluation order — no shared cache needed.
         Flow developmentOutflow = Flow.create("Development", DAY, () ->
                 new Quantity(developmentRate.getValue(), TASKS));
 

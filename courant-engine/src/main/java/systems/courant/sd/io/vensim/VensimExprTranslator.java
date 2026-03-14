@@ -70,13 +70,23 @@ public final class VensimExprTranslator {
             "(?i)FIND\\s+ZERO\\s*\\(");
     private static final Pattern LOOKUP_AREA_PATTERN = Pattern.compile(
             "(?i)LOOKUP\\s+AREA\\s*\\(");
+    private static final Pattern GET_XLS_DATA_PATTERN = Pattern.compile(
+            "(?i)GET\\s+XLS\\s+DATA\\s*\\(");
+    private static final Pattern GET_DIRECT_DATA_PATTERN = Pattern.compile(
+            "(?i)GET\\s+DIRECT\\s+DATA\\s*\\(");
+    private static final Pattern GET_XLS_CONSTANTS_PATTERN = Pattern.compile(
+            "(?i)GET\\s+XLS\\s+CONSTANTS\\s*\\(");
+    private static final Pattern GET_DIRECT_CONSTANTS_PATTERN = Pattern.compile(
+            "(?i)GET\\s+DIRECT\\s+CONSTANTS\\s*\\(");
+    private static final Pattern GET_XLS_LOOKUPS_PATTERN = Pattern.compile(
+            "(?i)GET\\s+XLS\\s+LOOKUPS\\s*\\(");
+    private static final Pattern GET_DIRECT_LOOKUPS_PATTERN = Pattern.compile(
+            "(?i)GET\\s+DIRECT\\s+LOOKUPS\\s*\\(");
     private static final Pattern CARET_PATTERN = Pattern.compile("\\^");
     private static final Pattern TIME_VAR_PATTERN = Pattern.compile(
             "(?i)\\bTime\\b");
     private static final Set<String> UNSUPPORTED_FUNCTIONS = Set.of(
-            "DELAY N",
-            "GET XLS DATA", "GET DIRECT DATA",
-            "GET DIRECT CONSTANTS", "TABBED ARRAY",
+            "DELAY N", "TABBED ARRAY",
             "VECTOR SELECT", "VECTOR ELM MAP", "VECTOR SORT ORDER",
             "ALLOCATE AVAILABLE");
 
@@ -226,7 +236,17 @@ public final class VensimExprTranslator {
         // 12. Rewrite lookupName(arg) → LOOKUP(lookupName, arg)
         expr = rewriteLookupCalls(expr, lookupNames);
 
-        // 13. Check for unsupported functions
+        // 13. GET XLS/DIRECT functions → 0 placeholder with warning
+        expr = translateGetFunction(expr, GET_XLS_DATA_PATTERN, "GET XLS DATA", warnings);
+        expr = translateGetFunction(expr, GET_DIRECT_DATA_PATTERN, "GET DIRECT DATA", warnings);
+        expr = translateGetFunction(expr, GET_XLS_CONSTANTS_PATTERN, "GET XLS CONSTANTS", warnings);
+        expr = translateGetFunction(expr, GET_DIRECT_CONSTANTS_PATTERN,
+                "GET DIRECT CONSTANTS", warnings);
+        expr = translateGetFunction(expr, GET_XLS_LOOKUPS_PATTERN, "GET XLS LOOKUPS", warnings);
+        expr = translateGetFunction(expr, GET_DIRECT_LOOKUPS_PATTERN,
+                "GET DIRECT LOOKUPS", warnings);
+
+        // 14. Check for unsupported functions
         checkUnsupportedFunctions(expr, warnings);
 
         return new TranslationResult(expr, lookups, warnings);
@@ -731,6 +751,70 @@ public final class VensimExprTranslator {
             }
         }
         return expr;
+    }
+
+    /**
+     * Replaces a GET function call with {@code 0} and emits a warning containing
+     * the referenced file path (extracted from the first argument).
+     */
+    static String translateGetFunction(String expr, Pattern pattern, String funcName,
+                                       List<String> warnings) {
+        Matcher m = pattern.matcher(expr);
+        while (m.find()) {
+            int openParen = m.end() - 1;
+            int closeParen = findMatchingParen(expr, openParen);
+            if (closeParen > 0) {
+                String argsStr = expr.substring(openParen + 1, closeParen);
+                String filePath = extractFirstArgument(argsStr);
+                String warning = "Variable references external file via " + funcName;
+                if (filePath != null && !filePath.isEmpty()) {
+                    warning += " ('" + filePath + "')";
+                }
+                warning += " — substituted with 0";
+                warnings.add(warning);
+                expr = expr.substring(0, m.start()) + "0" + expr.substring(closeParen + 1);
+                m = pattern.matcher(expr);
+            } else {
+                break;
+            }
+        }
+        return expr;
+    }
+
+    /**
+     * Extracts the first comma-delimited argument from a function argument string,
+     * stripping surrounding quotes and whitespace. Respects nested parentheses.
+     */
+    static String extractFirstArgument(String argsStr) {
+        if (argsStr == null || argsStr.isBlank()) {
+            return null;
+        }
+        int depth = 0;
+        for (int i = 0; i < argsStr.length(); i++) {
+            char c = argsStr.charAt(i);
+            if (c == '(') {
+                depth++;
+            } else if (c == ')') {
+                depth--;
+            } else if (c == ',' && depth == 0) {
+                String arg = argsStr.substring(0, i).strip();
+                // Strip surrounding quotes
+                if (arg.length() >= 2
+                        && ((arg.startsWith("'") && arg.endsWith("'"))
+                        || (arg.startsWith("\"") && arg.endsWith("\"")))) {
+                    arg = arg.substring(1, arg.length() - 1);
+                }
+                return arg;
+            }
+        }
+        // No comma found — entire string is the first arg
+        String arg = argsStr.strip();
+        if (arg.length() >= 2
+                && ((arg.startsWith("'") && arg.endsWith("'"))
+                || (arg.startsWith("\"") && arg.endsWith("\"")))) {
+            arg = arg.substring(1, arg.length() - 1);
+        }
+        return arg;
     }
 
     private static void checkUnsupportedFunctions(String expr, List<String> warnings) {

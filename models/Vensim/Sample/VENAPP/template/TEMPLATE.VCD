@@ -1,0 +1,223 @@
+! Venapp Modeling Template
+! the exclamation mark marks something as a comment (the item is not functional in the venapp)
+! remove the exclamation marks (below) to restore functionality
+! This template is described in Chapter 5 of the Vensim DSS Reference Supplement
+
+:SCREEN WELCOME
+SCREENFONT,Times New Roman|12|B
+COMMAND,"",0,0,0,0,,,"SPECIAL>SETTITLE|Venapp Template Example"
+COMMAND,"",0,0,0,0,,,SPECIAL>LOADMODEL|worldapp.vmf
+COMMAND,"",0,0,0,0,,,SPECIAL>READCUSTOM|world.vgd
+COMMAND,"",0,0,0,0,,,SPECIAL>LOADTOOLSET|world.vts
+COMMAND,"",0,0,0,0,,,SPECIAL>CLEARRUNS
+COMMAND,"",0,0,0,0,,,SPECIAL>LOADRUN|base.vdf
+COMMAND,"",0,0,0,0,,,SETTING>SHOWWARNING|0
+TEXTONLY,"World Model",50,5,0,0,C||36|B|255-0-0,
+TEXTONLY,"Vensim Application Template",0,20,100,0,C|Arial|22|B|0-0-255,
+TEXTONLY,"Ventana Systems, Inc.",0,58,100,0,C||10||128-0-128|,
+TEXTONLY,"60 Jacob Gates Road",0,62,100,0,C||10||128-0-128|,
+TEXTONLY,"Harvard MA 01451 - USA",0,66,100,0,C||10||128-0-128|,
+TEXTONLY,"Software subject to restriction of the license agreement",0,70,100,0,C||10||128-0-128|,
+TEXTONLY,"Copyright © 1986-1999 Ventana Systems, Inc. ALL RIGHTS RESERVED",0,74,100,0,C||10||128-0-128|,
+TEXTONLY,"Press any key or button to continue",0,84,100,0,C||14|||,
+BUTTON,"Continue",50,90,45,5,C,,,MAIN
+ANYKEY,"",0,0,0,0,0,,,MAIN
+
+:SCREEN MAIN
+TEXTONLY,"World Model",50,5,0,0,C|Times New Roman|30|B|200-55-0,
+TEXTONLY,"Main Menu",50,18,0,0,C|Arial|24|B|0-0-255,
+RECTANGLE,"",20,30,60,46,C||||0-0-255
+BUTTON,"Review Model Structure",50,35,50,6,C,,,STRUCTURE
+BUTTON,"Simulate the Model",50,45,50,6,C,,,SETUPSCENARIO
+BUTTON,"Play a Game",50,55,50,6,C,,SIMULATE>RUNNAME|?Name for new game output,STARTGAME
+BUTTON,"Analyze Simulation Results",50,65,50,6,C,,SPECIAL>ALIASSCREEN|ARETURN|MAIN,ANALYSIS
+BUTTON,"? Help ?",50,80,40,6,C,,SPECIAL>WINHELP|VRHELP.HLP|1100
+BUTTON,"Exit",50,90,40,6,C,Qq,SPECIAL>ASKYESNO|Do you really want to exit?&MENU>EXIT,
+
+
+:SCREEN STRUCTURE
+SKETCH,"SK1",0,0,100,82,,5,1,
+COMMAND,"",18,77,20,6,L,,SPECIAL>SETTITLE|*MV|%s - View:%s
+BUTTON,"Choose a View",8,84,20,6,L,,SKETCH>CHOOSEVIEW|SK1|Choose a view of model structure&SPECIAL>SETTITLE|*MV|%s - View:%s
+BUTTON,"Previous",7,92,10,6,L,,SKETCH>PREVVIEW|SK1&SPECIAL>SETTITLE|*MV|%s - View:%s,
+BUTTON,"Next",19,92,10,6,L,,SKETCH>NEXTVIEW|SK1&SPECIAL>SETTITLE|*MV|%s - View:%s,
+BUTTON,"Print",54,84,10,6,L,,PRINT>SK1
+BUTTON,"Export",54,92,10,6,L,,EXPORT>SK1
+BUTTON,"? Help ?",71,84,22,6,L,,SPECIAL>WINHELP|VRHELP.HLP|1200
+BUTTON,"Exit to Main Menu",71,92,22,6,L,,,MAIN
+
+
+:SCREEN SETUPSCENARIO
+TEXTONLY,"Scenario Setup",50,5,0,0,C|Arial|24|B|0-0-255,
+BUTTON,"Scenario based on model constants",50,32,50,6,C,Ss,\
+SIMULATE>READRUNCHG&\
+SIMULATE>RUNNAME|?Name the new scenario,SETUPSIM
+BUTTON,"Modify and rerun an existing scenario",50,42,50,6,C,Mm,\
+SIMULATE>RUNNAME|?Select the scenario to modify|E&\
+SIMULATE>READRUNCHG|!,SETUPSIM
+BUTTON,"Scenario based on an existing scenario",50,52,50,6,C,Ss,\
+SIMULATE>READRUNCHG|?Select scenario for basis&\
+SIMULATE>RUNNAME|?Name the new scenario,SETUPSIM
+BUTTON,"Scenario based on changes (.cin) file",50,62,50,6,C,Ss,\
+SIMULATE>READCIN|?Choose a changes file&\
+SIMULATE>RUNNAME|?Name the new scenario,SETUPSIM
+BUTTON,"Exit to Main Menu",50,90,40,6,C,EeXx,,MAIN
+
+
+:SCREEN SETUPSIM
+TEXTONLY,"Set Up the Model",50,5,0,0,C|Arial|24|B|0-0-255,
+TEXTONLY,"Simulate the Model",75,52,0,0,C|Arial|24|B|0-0-255,
+TEXTONLY,"Save Setup",25,52,0,0,C|Arial|24|B|0-0-255,
+BUTTON,"Change model assumptions",25,20,40,6,C,,,INPUT1
+BUTTON,"Modify policy options",25,30,40,6,C,,,INPUT2
+BUTTON,"Make changes to other constants",75,20,40,6,C,,SIMULATE>GETCNSTCHG
+BUTTON,"Make changes to other lookup tables",75,30,40,6,C,,SIMULATE>GETTABCHG
+BUTTON,"Save setup as changes file (.cin)",25,65,40,10,C,,SIMULATE>WRITECIN|?Name the changes file,
+BUTTON,"SIMULATE",75,65,40,10,C,,,RUNNING
+!BUTTON,"GAME",75,65,40,10,C,,,STARTGAME
+BUTTON,"Exit to Main Menu",50,90,40,6,C,,,MAIN
+
+:SCREEN INPUT1
+TEXTONLY,"Scenario Assumptions",50,5,0,0,C|Arial|24|B|0-0-255,
+TEXTONLY,"Birth Rate",15,15,0,0,L
+LISTVAR,"birth rate normal",60,15,20,0,,[0|0.1]Very low (0.005) = 0.005|Low (0.02) = 0.02|Medium (0.04) = 0.04|High (0.06) = 0.06|Very high (0.1) = 0.1
+TEXTONLY,"Capital Agriculture Fraction Adjustment Time",15,25,0,0,L
+RADIO1VAR,"capital agriculture fraction adjustment time",60,25,8,0,,[8],Low
+RADIOVAR,"capital agriculture fraction adjustment time",70,25,8,0,,[15],Medium
+RADIOVAR,"capital agriculture fraction adjustment time",80,25,8,0,,[30],High
+TEXTONLY,"Natural Resource Extraction Table Function",15,35,0,0,L
+MODTABLE,"natural resource extraction mult tab",60,35,0,0,L,
+TEXTONLY,"Initial Natural Resources",15,45,0,0,L
+MODVAR,"natural resources initial",60,45,20,0,L,|[9e10|9e12]
+TEXTONLY,"Initial Pollution Level",15,55,0,0,L
+MODVAR,"pollution initial",60,55,20,0,L,|[2e7|2e9]
+BUTTON,"Record changes and return to Modeling Choices",20,70,50,5,L,Rr,,SETUPSIM
+BUTTON,"Return to Modeling Choices (cancel changes)",20,80,50,5,L,EeXx,CANCEL,SETUPSIM
+
+:SCREEN INPUT2
+TEXTONLY,"Scenario Policy Options",50,5,0,0,C|Arial|24|B|0-0-255,
+TEXTONLY,"Rate of Capital Investment",20,22,0,0,L
+TEXTONLY,"Pollution Per Capita",20,37,0,0,L
+TEXTONLY,"Natural Resource Utilization",20,52,0,0,L
+SLIDEVAR,"capital investment rate normal c",50,20,15,10,H,[0|0.2|.01]
+SLIDEVAR,"pollution per capita normal c",50,35,15,10,H,[.05|2|.025]
+SLIDEVAR,"natural resource utilization normal",50,50,15,10,H,[.05|2|.025]
+BUTTON,"Record changes and return to Modeling Choices",20,70,50,5,L,Rr,,SETUPSIM
+BUTTON,"Return to Modeling Choices (cancel changes)",20,80,50,5,L,EeXx,CANCEL,SETUPSIM
+
+:SCREEN RUNNING
+WIPTOOL,"GR1",5,5,90,80,,,CUSTOM>WIP1
+COMMAND,"",0,0,0,0,,,MENU>RUN1|O
+COMMAND,"",0,0,0,0,,,SPECIAL>SETWBITEM|Population
+CLOSESCREEN,"",0,0,0,0,,,,OUTPUT1
+
+:SCREEN OUTPUT1
+TOOL,"GR1",5,5,90,70,,,WORKBENCH>Graph
+BUTTON,"Show table",20,82,25,10,C,,,OUTPUT2
+!BUTTON,"Modify and Rerun Last Scenario",75,82,0,6,L,,SIMULATE>READRUNCHG|!,SETUPSIM
+BUTTON,"Select a new variable",50,80,25,0,C,,SPECIAL>VARSELECT|New variable to use,OUTPUT1
+BUTTON,"Change subscripts",50,90,25,0,C,8,SPECIAL>SUBSCRIPT|?Choose a subscript to control selection on,OUTPUT1
+BUTTON,"Perform detailed analysis",80,80,25,0,C,,SPECIAL>ALIASSCREEN|ARETURN|OUTPUT1,ANALYSIS
+BUTTON,"Return to Main Menu",80,90,25,0,C,,,MAIN
+
+:SCREEN OUTPUT2
+TOOL,"GR1",5,5,90,70,,,WORKBENCH>Table
+BUTTON,"Show graph",20,82,25,10,C,,,OUTPUT1
+BUTTON,"Select a new variable",50,80,25,0,C,,SPECIAL>VARSELECT|New variable to use,OUTPUT2
+BUTTON,"Change subscripts",50,90,25,0,C,8,SPECIAL>SUBSCRIPT|?Choose a subscript to control selection on,OUTPUT2
+BUTTON,"Perform detailed analysis",80,80,25,0,C,,SPECIAL>ALIASSCREEN|ARETURN|OUTPUT2,ANALYSIS
+BUTTON,"Return to Main Menu",80,90,25,0,C,,,MAIN
+
+
+:SCREEN STARTGAME
+COMMAND,"",0,0,0,0,,,GAME>GAMEINTERVAL|10
+COMMAND,"",0,0,0,0,,,MENU>GAME|O
+CLOSESCREEN,"",0,0,0,0,,,,GAMECONTROL
+
+:SCREEN GAMECONTROL
+TEXTONLY,"Game Control",50,0,0,0,C|Arial|24|BU|200-55-0,
+RECTANGLE,"",13,10,15,7,C||||0-0-255
+TEXTONLY,"Time = ",22,12,0,0,R
+SHOWVAR,"Time%4.0f",22,12,0,0,L
+WIPTOOL,"GR1",40,10,58,55,,,CUSTOM>WIP1
+BUTTON,"Forward",20,25,0,0,C,Ff,GAME>GAMEON
+BUTTON,"Backup",20,35,0,0,C,Ff,GAME>BACKUP
+TEXTONLY,"Natural Resource Utilization Per Person",20,45,0,0,C
+MODVAR,"natural resource utilization normal",15,50,10,0,L,[0|2]
+TEXTONLY,"Fraction of Capital Invested",20,65,0,0,C
+SLIDEVAR,"capital investment rate normal",5,70,30,10,H,[0|0.1|.005]
+BUTTON,"Perform detailed analysis",20,90,0,0,C,,SPECIAL>ALIASSCREEN|ARETURN|GAMECONTROL,ANALYSIS
+TEXTONLY,"End the Game and Return to Main Menu",70,73,0,0,C|Arial|14|B|0-0-255,
+BUTTON,"End Game",70,80,0,0,C,,GAME>ENDGAME,MAIN
+
+
+
+:SCREEN ANALYSIS
+TEXTONLY,"Analysis Control",50,5,0,0,C|Arial|24|B|0-0-255,
+BUTTON,"Select a variable for analysis",50,13,60,5,C,4,SPECIAL>SETWBITEM|TOT COST&SPECIAL>VARSELECT|New variable to use
+BUTTON,"Load, unload, or reorder previous runs",50,20,60,5,C,1,MENU>LOAD_RUN,
+BUTTON,"Change subscript selection",50,27,60,5,C,8,SPECIAL>SUBSCRIPT|?Choose a subscript to control selection on,
+TEXTONLY,"Results",0,36,100,0,C|Times New Roman|24||0-0-255
+BUTTON,"List differences between the first two loaded runs",50,43,60,5,C,8,,DIFF
+BUTTON,"Display a predefined graph or report",50,50,60,5,C,,,RESULT
+BUTTON,"Trace underlying causes using Trees",50,57,60,5,C,5,,CAUSE1
+BUTTON,"Trace underlying causes using Graphs",50,64,60,5,C,6,,CAUSE2
+BUTTON,"Trace the Uses of a variable",50,71,60,5,C,7,,USE
+BUTTON,"Return to Menu",50,90,40,5,C,,,ARETURN
+
+:SCREEN DIFF
+TEXTONLY,"Constant and table differences between first two loaded scenarios",0,2,100,0,C32
+TOOL,"D1",5,10,90,80,,,WORKBENCH>RUNS COMPARE
+BUTTON,"Print",30,92,20,6,C,Pp,PRINT>D1
+BUTTON,"Analysis Control",70,92,20,6,C,,,ANALYSIS
+ANYKEY,"",0,0,0,0,0,,,ANALYSIS
+
+:SCREEN RESULT
+TOOL,"GR1",2,5,96,80,,,CUSTOM>?Graph to display
+BUTTON,"Select another graph or report",2,90,34,6,L,,CUSTOM>?Other graph|GR1
+BUTTON,"Print",38,90,10,6,L,,PRINT>GR1
+BUTTON,"Copy",50,90,10,6,L,,EXPORT>GR1
+BUTTON,"? Help ?",62,90,12,6,L,,SPECIAL>WINHELP|VRHELP.HLP|1600
+BUTTON,"Analysis Control",76,90,22,6,L,,,ANALYSIS
+
+
+
+:SCREEN CAUSE1
+TEXTONLY,"Causal tracing -",0,2,50,0,R
+WBVAR,"",50,2,0,0,L
+TOOL,"TR1",2,6,96,42,,,WORKBENCH>CAUSES TREE
+BUTTON,"Graph based",2,50,40,0,L,Cc,,CAUSE2
+BUTTON,"Definition...",43,50,0,0,L,Cc,WORKBENCH>DOCUMENT,
+BUTTON,"Uses - of current variable",2,57,40,0,L,Cc,,USE
+BUTTON,"Select a new variable to trace",2,64,40,0,L,Ss,SPECIAL>VARSELECT|New variable for tracing
+BUTTON,"? Help ?",2,71,40,0,L,,SPECIAL>WINHELP|VRHELP.HLP|1700
+BUTTON,"Analysis Control",2,78,40,0,L,EeXx,,ANALYSIS
+TOOL,"GR1",60,50,40,50,,,WORKBENCH>STRIP GRAPH
+SETWB,"",0,0,0,0,,,,CAUSE1
+
+:SCREEN CAUSE2
+TEXTONLY,"Causal tracing -",2,2,0,0,L
+WBVAR,"",20,2,0,0,L
+TOOL,"TR1",60,0,40,100,,,WORKBENCH>CAUSES STRIP
+BUTTON,"Tree based",2,50,40,0,L,Cc,,CAUSE1
+BUTTON,"Uses - of current variable",2,57,40,0,L,Cc,,USE
+BUTTON,"Select a new variable to trace",2,64,40,0,L,Ss,SPECIAL>SETWBITEM|POPULATION&SPECIAL>VARSELECT|New variable for tracing
+BUTTON,"? Help ?",2,71,40,0,L,,SPECIAL>WINHELP|VRHELP.HLP|1800
+BUTTON,"Analysis Control",2,78,40,0,L,EeXx,,ANALYSIS
+TOOL,"GR1",2,8,58,40,,,WORKBENCH>DOCUMENT
+SETWB,"",0,0,0,0,,,,CAUSE2
+
+
+:SCREEN USE
+TEXTONLY,"Uses of -",0,2,50,0,R
+WBVAR,"",50,2,0,0,L
+TOOL,"TR1",2,6,96,42,,,WORKBENCH>USES TREE
+BUTTON,"Causes - of Current variable",2,50,40,0,L,Cc,,CAUSE1
+BUTTON,"Definition...",43,50,0,0,L,Cc,WORKBENCH>DOCUMENT,
+BUTTON,"Causes - Graph Based",2,57,40,0,L,Cc,,CAUSE2
+BUTTON,"Select a new variable to trace",2,64,40,0,L,Ss,SPECIAL>SETWBITEM|POPULATION&SPECIAL>VARSELECT|New variable for tracing
+BUTTON,"? Help ?",2,71,40,0,L,,SPECIAL>WINHELP|VRHELP.HLP|1900
+BUTTON,"Analysis Control",2,78,40,0,L,EeXx,,ANALYSIS
+TOOL,"GR1",60,50,40,50,,,WORKBENCH>STRIP GRAPH
+SETWB,"",0,0,0,0,,,,USE
+

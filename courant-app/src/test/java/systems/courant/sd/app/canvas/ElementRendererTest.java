@@ -102,30 +102,92 @@ class ElementRendererTest {
         void shouldFormatLargeWholeNumber() {
             assertThat(ElementRenderer.formatValue(1000.0)).isEqualTo("1000");
         }
+
+        @Test
+        @DisplayName("should handle NaN (#467)")
+        void shouldFormatNaN() {
+            assertThat(ElementRenderer.formatValue(Double.NaN)).isEqualTo("NaN");
+        }
+
+        @Test
+        @DisplayName("should handle positive infinity (#467)")
+        void shouldFormatPositiveInfinity() {
+            assertThat(ElementRenderer.formatValue(Double.POSITIVE_INFINITY))
+                    .isEqualTo(String.valueOf(Double.POSITIVE_INFINITY));
+        }
+
+        @Test
+        @DisplayName("should handle negative infinity (#467)")
+        void shouldFormatNegativeInfinity() {
+            assertThat(ElementRenderer.formatValue(Double.NEGATIVE_INFINITY))
+                    .isEqualTo(String.valueOf(Double.NEGATIVE_INFINITY));
+        }
+
+        @Test
+        @DisplayName("should not overflow for values exceeding Long.MAX_VALUE (#467)")
+        void shouldNotOverflowForHugeValues() {
+            double huge = 1e19; // > Long.MAX_VALUE (~9.2e18)
+            String result = ElementRenderer.formatValue(huge);
+            assertThat(result).isEqualTo(String.valueOf(huge));
+            assertThat(result).doesNotContain("-"); // would be negative if overflow occurred
+        }
+
+        @Test
+        @DisplayName("should not overflow for values below -Long.MAX_VALUE (#467)")
+        void shouldNotOverflowForHugeNegativeValues() {
+            double hugeNeg = -1e19;
+            String result = ElementRenderer.formatValue(hugeNeg);
+            assertThat(result).isEqualTo(String.valueOf(hugeNeg));
+        }
+
+        @Test
+        @DisplayName("should still format whole numbers at Long.MAX_VALUE boundary (#467)")
+        void shouldFormatAtLongMaxBoundary() {
+            // Long.MAX_VALUE is 9223372036854775807 — exact double representation may differ
+            // but values well within range should still format as integers
+            assertThat(ElementRenderer.formatValue(1e15)).isEqualTo("1000000000000000");
+        }
     }
 
     @Nested
-    @DisplayName("MEASURE_TEXT reuse (#311)")
-    class MeasureTextReuse {
+    @DisplayName("MEASURE_TEXT thread safety (#529)")
+    class MeasureTextThreadSafety {
 
         @Test
-        void shouldHaveStaticFinalMeasureTextField() throws NoSuchFieldException {
+        void shouldBeThreadLocal() throws NoSuchFieldException {
             Field field = ElementRenderer.class.getDeclaredField("MEASURE_TEXT");
             assertThat(Modifier.isStatic(field.getModifiers()))
                     .as("MEASURE_TEXT should be static").isTrue();
             assertThat(Modifier.isFinal(field.getModifiers()))
                     .as("MEASURE_TEXT should be final").isTrue();
-            assertThat(field.getType())
-                    .as("MEASURE_TEXT should be a Text node").isEqualTo(Text.class);
+            assertThat(ThreadLocal.class.isAssignableFrom(field.getType()))
+                    .as("MEASURE_TEXT should be a ThreadLocal").isTrue();
         }
 
         @Test
-        void shouldReuseTheSameTextNodeAcrossCalls() throws Exception {
+        void shouldReturnSameInstanceOnSameThread() throws Exception {
             Field field = ElementRenderer.class.getDeclaredField("MEASURE_TEXT");
             field.setAccessible(true);
-            Text first = (Text) field.get(null);
-            Text second = (Text) field.get(null);
+            @SuppressWarnings("unchecked")
+            ThreadLocal<Text> tl = (ThreadLocal<Text>) field.get(null);
+            Text first = tl.get();
+            Text second = tl.get();
             assertThat(first).isSameAs(second);
+        }
+
+        @Test
+        void shouldReturnDifferentInstanceOnDifferentThread() throws Exception {
+            Field field = ElementRenderer.class.getDeclaredField("MEASURE_TEXT");
+            field.setAccessible(true);
+            @SuppressWarnings("unchecked")
+            ThreadLocal<Text> tl = (ThreadLocal<Text>) field.get(null);
+
+            Text mainText = tl.get();
+            Text[] otherText = new Text[1];
+            Thread t = new Thread(() -> otherText[0] = tl.get());
+            t.start();
+            t.join();
+            assertThat(otherText[0]).isNotSameAs(mainText);
         }
     }
 

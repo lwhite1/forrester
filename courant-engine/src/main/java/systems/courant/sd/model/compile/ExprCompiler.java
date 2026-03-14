@@ -171,7 +171,7 @@ public class ExprCompiler {
         return switch (name) {
             case "TIME" -> {
                 requireArgs(name, args, 0);
-                yield () -> context.getCurrentStep().getAsInt();
+                yield () -> context.getCurrentStep().getAsLong();
             }
             case "DT" -> {
                 requireArgs(name, args, 0);
@@ -650,8 +650,10 @@ public class ExprCompiler {
         DoubleSupplier input = compileExpr(args.get(0));
         double delayTime = evaluateAtCompileTime(args.get(1), "DELAY1 delayTime");
         if (delayTime <= 0 || Double.isNaN(delayTime)) {
-            logger.warn("DELAY1 delayTime evaluated to {} at compile time, defaulting to 1.0",
-                    delayTime);
+            String msg = "DELAY1 delayTime evaluated to " + delayTime
+                    + " at compile time; using default of 1.0 — simulation results may be inaccurate";
+            logger.warn(msg);
+            context.addWarning(msg);
             delayTime = 1.0;
         }
         Delay1 delay1;
@@ -676,11 +678,10 @@ public class ExprCompiler {
         DoubleSupplier input = compileExpr(args.get(0));
         double delayTime = evaluateAtCompileTime(args.get(1), "DELAY3 delayTime");
         if (delayTime <= 0 || Double.isNaN(delayTime)) {
-            // Delay time couldn't be resolved at compile time (variable not yet initialized).
-            // Use a default of 1 timestep to avoid crashing; the model may still produce
-            // approximate results.
-            logger.warn("DELAY3 delayTime evaluated to {} at compile time, defaulting to 1.0",
-                    delayTime);
+            String msg = "DELAY3 delayTime evaluated to " + delayTime
+                    + " at compile time; using default of 1.0 — simulation results may be inaccurate";
+            logger.warn(msg);
+            context.addWarning(msg);
             delayTime = 1.0;
         }
         Delay3 delay3;
@@ -701,7 +702,7 @@ public class ExprCompiler {
         requireArgs("STEP", args, 2);
         double height = evaluateConstant(args.get(0), "STEP height");
         double time = evaluateConstant(args.get(1), "STEP time");
-        Step step = Step.of(height, (int) Math.round(time), context.getCurrentStep());
+        Step step = Step.of(height, Math.round(time), context.getCurrentStep());
         return step::getCurrentValue;
     }
 
@@ -715,10 +716,10 @@ public class ExprCompiler {
         Ramp ramp;
         if (args.size() == 3) {
             double end = evaluateConstant(args.get(2), "RAMP endStep");
-            ramp = Ramp.of(slope, (int) Math.round(start), (int) Math.round(end),
+            ramp = Ramp.of(slope, Math.round(start), Math.round(end),
                     context.getCurrentStep());
         } else {
-            ramp = Ramp.of(slope, (int) Math.round(start), context.getCurrentStep());
+            ramp = Ramp.of(slope, Math.round(start), context.getCurrentStep());
         }
         return ramp::getCurrentValue;
     }
@@ -733,10 +734,10 @@ public class ExprCompiler {
         Pulse pulse;
         if (args.size() == 3) {
             double interval = evaluateConstant(args.get(2), "PULSE interval");
-            pulse = Pulse.of(magnitude, (int) Math.round(start),
-                    (int) Math.round(interval), context.getCurrentStep());
+            pulse = Pulse.of(magnitude, Math.round(start),
+                    Math.round(interval), context.getCurrentStep());
         } else {
-            pulse = Pulse.of(magnitude, (int) Math.round(start), context.getCurrentStep());
+            pulse = Pulse.of(magnitude, Math.round(start), context.getCurrentStep());
         }
         return pulse::getCurrentValue;
     }
@@ -748,7 +749,7 @@ public class ExprCompiler {
         DoubleSupplier repeatInterval = compileExpr(args.get(2));
         DoubleSupplier endTime = compileExpr(args.get(3));
         return () -> {
-            double t = context.getCurrentStep().getAsInt();
+            double t = context.getCurrentStep().getAsLong();
             double start = startTime.getAsDouble();
             double end = endTime.getAsDouble();
             double dur = duration.getAsDouble();
@@ -771,8 +772,12 @@ public class ExprCompiler {
         double delayTime = evaluateConstant(args.get(1), "DELAY_FIXED delayTime");
         int delaySteps = (int) Math.round(delayTime);
         if (delaySteps <= 0 || Double.isNaN(delayTime)) {
-            logger.warn("DELAY_FIXED delayTime evaluated to {} (rounded to {}) at compile time, "
-                    + "defaulting to 1 step", delayTime, delaySteps);
+            String msg = "DELAY_FIXED delayTime evaluated to " + delayTime
+                    + " (rounded to " + delaySteps
+                    + ") at compile time; using default of 1 step"
+                    + " — simulation results may be inaccurate";
+            logger.warn(msg);
+            context.addWarning(msg);
             delaySteps = 1;
         }
         DoubleSupplier initial = compileExpr(args.get(2));
@@ -990,7 +995,14 @@ public class ExprCompiler {
         DoubleSupplier condition = compileExpr(cond.condition());
         DoubleSupplier thenExpr = compileExpr(cond.thenExpr());
         DoubleSupplier elseExpr = compileExpr(cond.elseExpr());
-        // Evaluate both branches every step so stateful SD functions (SMOOTH, DELAY3,
+        if (cond.shortCircuit()) {
+            // IF_SHORT: only evaluate the taken branch (true short-circuit).
+            // Stateful functions (SMOOTH, DELAY, TREND) in the untaken branch
+            // will NOT be updated, causing stale values when the condition flips.
+            return () -> condition.getAsDouble() != 0
+                    ? thenExpr.getAsDouble() : elseExpr.getAsDouble();
+        }
+        // IF: evaluate both branches every step so stateful SD functions (SMOOTH, DELAY3,
         // TREND, etc.) in the untaken branch keep their internal state current.
         return () -> {
             double thenVal = thenExpr.getAsDouble();

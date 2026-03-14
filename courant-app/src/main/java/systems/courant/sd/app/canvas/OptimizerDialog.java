@@ -6,8 +6,6 @@ import javafx.beans.property.SimpleIntegerProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
-import javafx.event.ActionEvent;
-import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonBar;
 import javafx.scene.control.ButtonType;
@@ -17,7 +15,6 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.GridPane;
-import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 
 import java.util.ArrayList;
@@ -63,6 +60,7 @@ public class OptimizerDialog extends Dialog<OptimizerDialog.Config> {
         paramBox.setPadding(new Insets(5));
 
         Button addButton = new Button("Add Parameter");
+        addButton.setId("optAddParam");
         addButton.setOnAction(e -> {
             ParamRow row = new ParamRow(constantNames, paramBox);
             paramRows.add(row);
@@ -82,14 +80,17 @@ public class OptimizerDialog extends Dialog<OptimizerDialog.Config> {
 
         objectiveCombo = new ComboBox<>(FXCollections.observableArrayList(ObjectiveType.values()));
         objectiveCombo.setValue(ObjectiveType.MINIMIZE);
+        objectiveCombo.setId("optObjective");
 
         targetVarCombo = new ComboBox<>(FXCollections.observableArrayList(stockNames));
+        targetVarCombo.setId("optTargetVar");
         if (!stockNames.isEmpty()) {
             targetVarCombo.setValue(stockNames.getFirst());
         }
 
         targetValueLabel = new Label("Target Value:");
         targetValueField = new TextField("0");
+        targetValueField.setId("optTargetValue");
         targetValueLabel.setVisible(false);
         targetValueLabel.setManaged(false);
         targetValueField.setVisible(false);
@@ -106,8 +107,10 @@ public class OptimizerDialog extends Dialog<OptimizerDialog.Config> {
         algorithmCombo = new ComboBox<>(FXCollections.observableArrayList(
                 "NELDER_MEAD", "BOBYQA", "CMAES"));
         algorithmCombo.setValue("NELDER_MEAD");
+        algorithmCombo.setId("optAlgorithm");
 
         maxEvalsField = new TextField("1000");
+        maxEvalsField.setId("optMaxEvals");
 
         GridPane settingsGrid = new GridPane();
         settingsGrid.setHgap(10);
@@ -143,7 +146,7 @@ public class OptimizerDialog extends Dialog<OptimizerDialog.Config> {
         VBox content = new VBox(10, paramsLabel, paramScroll, settingsGrid, validationLabel);
         content.setPadding(new Insets(10));
         getDialogPane().setContent(content);
-        getDialogPane().setPrefWidth(550);
+        getDialogPane().setPrefWidth(Styles.screenAwareWidth(Styles.CONFIG_DIALOG_WIDTH));
 
         ButtonType okButton = new ButtonType("OK", ButtonBar.ButtonData.OK_DONE);
         getDialogPane().getButtonTypes().addAll(okButton, ButtonType.CANCEL);
@@ -154,16 +157,6 @@ public class OptimizerDialog extends Dialog<OptimizerDialog.Config> {
                         objectiveCombo.valueProperty(), targetVarCombo.valueProperty(),
                         paramRows, fieldChangeCounter)
         );
-
-        Button okNode = (Button) getDialogPane().lookupButton(okButton);
-        okNode.addEventFilter(ActionEvent.ACTION, event -> {
-            boolean hasValid = paramRows.stream().anyMatch(ParamRow::isValid);
-            if (!hasValid) {
-                event.consume();
-                new Alert(Alert.AlertType.WARNING,
-                        "At least one parameter row must have valid values.").showAndWait();
-            }
-        });
 
         setResultConverter(button -> {
             if (button == okButton) {
@@ -222,60 +215,48 @@ public class OptimizerDialog extends Dialog<OptimizerDialog.Config> {
         return "";
     }
 
-    private class ParamRow {
-        private final ComboBox<String> nameCombo;
+    private class ParamRow extends ParameterRowBase {
         private final TextField lowerField;
         private final TextField upperField;
         private final TextField guessField;
-        private final HBox pane;
 
         ParamRow(List<String> constantNames, VBox container) {
-            nameCombo = new ComboBox<>(FXCollections.observableArrayList(constantNames));
-            if (!constantNames.isEmpty()) {
-                nameCombo.setValue(constantNames.getFirst());
-            }
-            nameCombo.setPrefWidth(130);
+            super(constantNames, null,
+                    () -> fieldChangeCounter.set(fieldChangeCounter.get() + 1));
+            int rowIndex = paramRows.size();
+            nameCombo.setId("optParamName" + rowIndex);
 
             lowerField = new TextField("0");
             lowerField.setPrefWidth(60);
             lowerField.setPromptText("Lower");
+            lowerField.setId("optLower" + rowIndex);
             upperField = new TextField("10");
             upperField.setPrefWidth(60);
             upperField.setPromptText("Upper");
+            upperField.setId("optUpper" + rowIndex);
             guessField = new TextField("");
             guessField.setPrefWidth(60);
             guessField.setPromptText("Guess");
+            guessField.setId("optGuess" + rowIndex);
 
-            lowerField.textProperty().addListener((obs, o, n) ->
-                    fieldChangeCounter.set(fieldChangeCounter.get() + 1));
-            upperField.textProperty().addListener((obs, o, n) ->
-                    fieldChangeCounter.set(fieldChangeCounter.get() + 1));
-            guessField.textProperty().addListener((obs, o, n) ->
-                    fieldChangeCounter.set(fieldChangeCounter.get() + 1));
+            wireFieldChange(lowerField);
+            wireFieldChange(upperField);
+            wireFieldChange(guessField);
 
-            pane = new HBox(6);
-            pane.setPadding(new Insets(2));
-
-            Button removeBtn = new Button("X");
-            removeBtn.setOnAction(e -> {
+            Button removeBtn = createRemoveButton(() -> {
                 paramRows.remove(this);
-                container.getChildren().remove(pane);
+                container.getChildren().remove(getPane());
             });
 
-            pane.getChildren().addAll(
-                    nameCombo,
+            buildPane(removeBtn,
                     new Label("Low:"), lowerField,
                     new Label("High:"), upperField,
-                    new Label("Guess:"), guessField,
-                    removeBtn);
+                    new Label("Guess:"), guessField);
         }
 
-        HBox getPane() {
-            return pane;
-        }
-
+        @Override
         boolean isValid() {
-            if (nameCombo.getValue() == null) {
+            if (!isNameSelected()) {
                 return false;
             }
             try {
@@ -300,7 +281,7 @@ public class OptimizerDialog extends Dialog<OptimizerDialog.Config> {
             double high = Double.parseDouble(upperField.getText().trim());
             String guessText = guessField.getText().trim();
             double guess = guessText.isEmpty() ? Double.NaN : Double.parseDouble(guessText);
-            return new ParamConfig(nameCombo.getValue(), low, high, guess);
+            return new ParamConfig(getSelectedName(), low, high, guess);
         }
     }
 }

@@ -102,12 +102,29 @@ public final class LayoutMetrics {
     /** Y offset from flow center to equation editor position (world units). */
     public static final double FLOW_EQUATION_EDITOR_OFFSET = 28;
 
+    // Font sizes (used by both Canvas renderer and SVG exporter)
+    public static final double STOCK_NAME_FONT_SIZE = 13;
+    public static final double AUX_NAME_FONT_SIZE = 12;
+    public static final double MODULE_NAME_FONT_SIZE = 13;
+    public static final double BADGE_FONT_SIZE = 9;
+    public static final double FLOW_NAME_FONT_SIZE = 11;
+    public static final double LOOKUP_NAME_FONT_SIZE = 11;
+    public static final double COMMENT_TEXT_FONT_SIZE = 11;
+    public static final double CAUSAL_POLARITY_FONT_SIZE = 12;
+
+    // Feedback loop rendering
+    public static final double LOOP_GLOW_PADDING = 6;
+    public static final double LOOP_GLOW_LINE_WIDTH = 2.5;
+    public static final double LOOP_EDGE_LINE_WIDTH = 2.5;
+    public static final double LOOP_LABEL_FONT_SIZE = 14;
+    public static final double LOOP_LABEL_PADDING = 6;
+
     // Fonts
-    public static final Font STOCK_NAME_FONT = Font.font("System", FontWeight.BOLD, 13);
-    public static final Font AUX_NAME_FONT = Font.font("System", FontWeight.NORMAL, 12);
-    public static final Font MODULE_NAME_FONT = Font.font("System", FontWeight.BOLD, 13);
-    public static final Font BADGE_FONT = Font.font("System", FontWeight.NORMAL, 9);
-    public static final Font FLOW_NAME_FONT = Font.font("System", FontWeight.NORMAL, 11);
+    public static final Font STOCK_NAME_FONT = Font.font("System", FontWeight.BOLD, STOCK_NAME_FONT_SIZE);
+    public static final Font AUX_NAME_FONT = Font.font("System", FontWeight.NORMAL, AUX_NAME_FONT_SIZE);
+    public static final Font MODULE_NAME_FONT = Font.font("System", FontWeight.BOLD, MODULE_NAME_FONT_SIZE);
+    public static final Font BADGE_FONT = Font.font("System", FontWeight.NORMAL, BADGE_FONT_SIZE);
+    public static final Font FLOW_NAME_FONT = Font.font("System", FontWeight.NORMAL, FLOW_NAME_FONT_SIZE);
 
     /**
      * Returns the width for a given element type.

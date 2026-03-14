@@ -66,6 +66,10 @@ public class Simulation {
 
     private long timeoutMs = DEFAULT_TIMEOUT_MS;
 
+    private boolean strictMode;
+
+    private long savePer = 1;
+
     private long currentStep = 0;
 
     private LocalDateTime currentDateTime;
@@ -74,6 +78,7 @@ public class Simulation {
 
     private final List<EventHandler> eventHandlers = new ArrayList<>();
 
+    private final Set<String> warnedNonFiniteStocks = new java.util.HashSet<>();
 
     public Simulation(Model model, TimeUnit timeStep, Quantity duration) {
         this(model, timeStep, duration, LocalDateTime.now());
@@ -119,11 +124,44 @@ public class Simulation {
         this.timeoutMs = timeoutMs;
     }
 
+    /**
+     * Enables or disables strict mode. When strict mode is on, the simulation throws
+     * {@link NonFiniteValueException} immediately when a non-finite value (NaN or Infinity)
+     * is produced in a flow calculation or stock update. When off (default), non-finite
+     * values are silently reverted to the previous stock value with a warning.
+     *
+     * @param strictMode {@code true} to enable fail-fast on non-finite values
+     */
+    public void setStrictMode(boolean strictMode) {
+        this.strictMode = strictMode;
+    }
+
+    public boolean isStrictMode() {
+        return strictMode;
+    }
+
+    /**
+     * Sets the recording interval: only every Nth step is recorded to history
+     * and fires time step events. A value of 1 (default) records every step.
+     * Use higher values for long-running simulations to reduce memory usage.
+     *
+     * @param savePer the recording interval in steps (must be &ge; 1)
+     */
+    public void setSavePer(long savePer) {
+        Preconditions.checkArgument(savePer >= 1, "savePer must be >= 1, got %s", savePer);
+        this.savePer = savePer;
+    }
+
+    public long getSavePer() {
+        return savePer;
+    }
+
     public void execute() {
         // Reset state so the simulation can be re-run
         currentStep = 0;
         currentDateTime = startTime;
         elapsedTime = Duration.ZERO;
+        warnedNonFiniteStocks.clear();
         clearHistory();
 
         fireStartEvent(new SimulationStartEvent(this));
@@ -150,6 +188,7 @@ public class Simulation {
         }
 
         long deadlineMs = timeoutMs > 0 ? System.currentTimeMillis() + timeoutMs : Long.MAX_VALUE;
+        Map<Flow, Quantity> flowMap = new IdentityHashMap<>();
 
         try {
             while (currentStep <= totalSteps) {
@@ -167,12 +206,16 @@ public class Simulation {
                                     + " seconds at step " + currentStep + "/" + totalSteps);
                 }
 
-                Map<Flow, Quantity> flowMap = new IdentityHashMap<>();
+                flowMap.clear();
 
-                fireTimeStepEvent(new TimeStepEvent(currentDateTime, model, currentStep, timeStep));
-                recordVariableValues();
+                boolean shouldRecord = currentStep % savePer == 0
+                        || currentStep == totalSteps;
+                if (shouldRecord) {
+                    fireTimeStepEvent(new TimeStepEvent(currentDateTime, model, currentStep, timeStep));
+                    recordVariableValues();
+                }
                 List<Stock> allStocks = collectAllStocks();
-                updateStocks(flowMap, allStocks);
+                updateStocks(flowMap, allStocks, shouldRecord);
                 addStep(currentDateTime);
                 currentStep++;
             }
@@ -228,28 +271,45 @@ public class Simulation {
         }
     }
 
-    private void updateStocks(Map<Flow, Quantity> flowMap, List<Stock> stocks) {
+    private void updateStocks(Map<Flow, Quantity> flowMap, List<Stock> stocks,
+                              boolean shouldRecord) {
         // Phase 1: Compute all flow rates and net deltas using pre-step stock values.
         // This ensures standard Euler integration where all stocks see the same
         // time-step snapshot, regardless of processing order.
         Map<Stock, Double> deltas = new IdentityHashMap<>();
         for (Stock stock : stocks) {
             double delta = 0.0;
-            delta += computeFlowDelta(true, flowMap, stock.getInflows());
-            delta += computeFlowDelta(false, flowMap, stock.getOutflows());
+            delta += computeFlowDelta(true, flowMap, stock.getInflows(), shouldRecord);
+            delta += computeFlowDelta(false, flowMap, stock.getOutflows(), shouldRecord);
             deltas.put(stock, delta);
         }
 
         // Phase 2: Apply all deltas simultaneously.
-        // Stock.setValue() handles non-finite values by retaining the previous value
-        // and logging a warning, so no additional guard is needed here.
         for (Stock stock : stocks) {
-            double newValue = stock.getQuantity().getValue() + deltas.get(stock);
+            double oldValue = stock.getQuantity().getValue();
+            double newValue = oldValue + deltas.get(stock);
+            if (!Double.isFinite(newValue)) {
+                if (strictMode) {
+                    throw new NonFiniteValueException(
+                            "Stock '" + stock.getName() + "' became " + newValue
+                                    + " at step " + currentStep
+                                    + " (previous value: " + oldValue
+                                    + ", delta: " + deltas.get(stock) + ")");
+                }
+                if (warnedNonFiniteStocks.add(stock.getName())) {
+                    log.warn("Stock '{}' became {} at step {} (previous value: {}, delta: {})"
+                                    + " — keeping previous value",
+                            stock.getName(), newValue, currentStep, oldValue, deltas.get(stock));
+                }
+                // Keep the previous value instead of crashing
+                continue;
+            }
             stock.setValue(newValue);
         }
     }
 
-    private double computeFlowDelta(boolean isInflow, Map<Flow, Quantity> flows, Set<Flow> flowSet) {
+    private double computeFlowDelta(boolean isInflow, Map<Flow, Quantity> flows, Set<Flow> flowSet,
+                                    boolean shouldRecord) {
         double delta = 0.0;
         for (Flow flow : flowSet) {
             Quantity q;
@@ -259,7 +319,13 @@ public class Simulation {
                 q = flow.flowPerTimeUnit(timeStep);
                 flows.put(flow, q);
                 if (Double.isFinite(q.getValue())) {
-                    flow.recordValue(q);
+                    if (shouldRecord) {
+                        flow.recordValue(q);
+                    }
+                } else if (strictMode) {
+                    throw new NonFiniteValueException(
+                            "Flow '" + flow.getName() + "' produced " + q.getValue()
+                                    + " at step " + currentStep);
                 }
             }
             delta += isInflow ? q.getValue() : -q.getValue();

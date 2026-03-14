@@ -8,7 +8,6 @@ import javafx.geometry.Insets;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
-import javafx.scene.control.Alert;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.ContextMenu;
@@ -18,18 +17,6 @@ import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
-import systems.courant.sd.app.LastDirectoryStore;
-
-import javafx.scene.SnapshotParameters;
-import javafx.scene.image.WritableImage;
-import javafx.stage.FileChooser;
-
-import javax.imageio.ImageIO;
-
-import javafx.embed.swing.SwingFXUtils;
-
-import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -157,66 +144,19 @@ public class SweepResultPane extends BorderPane {
     }
 
     private void exportTimeSeriesCsv() {
-        FileChooser fileChooser = new FileChooser();
-        fileChooser.setTitle("Export Time Series CSV");
-        fileChooser.getExtensionFilters().add(
-                new FileChooser.ExtensionFilter("CSV Files", "*.csv"));
-        fileChooser.setInitialFileName("sweep_timeseries.csv");
-        LastDirectoryStore.applyExportDirectory(fileChooser);
-
-        File file = fileChooser.showSaveDialog(getScene() != null ? getScene().getWindow() : null);
-        if (file != null) {
-            LastDirectoryStore.recordExportDirectory(file);
-            try {
-                result.writeTimeSeriesCsv(file.getAbsolutePath());
-            } catch (java.io.UncheckedIOException e) {
-                new Alert(Alert.AlertType.ERROR,
-                        "Failed to export CSV: " + e.getMessage()).showAndWait();
-            }
-        }
+        ChartUtils.showCsvSaveDialog("Export Time Series CSV", "sweep_timeseries.csv",
+                getScene() != null ? getScene().getWindow() : null,
+                file -> result.writeTimeSeriesCsv(file.getAbsolutePath()));
     }
 
     private void saveChartAsPng() {
-        if (currentChart == null) {
-            return;
-        }
-        FileChooser fileChooser = new FileChooser();
-        fileChooser.setTitle("Save Chart as PNG");
-        fileChooser.getExtensionFilters().add(
-                new FileChooser.ExtensionFilter("PNG Image", "*.png"));
-        fileChooser.setInitialFileName("sweep_chart.png");
-        LastDirectoryStore.applyExportDirectory(fileChooser);
-
-        File file = fileChooser.showSaveDialog(getScene() != null ? getScene().getWindow() : null);
-        if (file != null) {
-            LastDirectoryStore.recordExportDirectory(file);
-            WritableImage image = currentChart.snapshot(new SnapshotParameters(), null);
-            try {
-                ImageIO.write(SwingFXUtils.fromFXImage(image, null), "png", file);
-            } catch (IOException e) {
-                new Alert(Alert.AlertType.ERROR,
-                        "Failed to save image: " + e.getMessage()).showAndWait();
-            }
-        }
+        ChartUtils.saveNodeAsPng(currentChart, "sweep_chart.png",
+                getScene() != null ? getScene().getWindow() : null);
     }
 
     private void exportSummaryCsv() {
-        FileChooser fileChooser = new FileChooser();
-        fileChooser.setTitle("Export Summary CSV");
-        fileChooser.getExtensionFilters().add(
-                new FileChooser.ExtensionFilter("CSV Files", "*.csv"));
-        fileChooser.setInitialFileName("sweep_summary.csv");
-        LastDirectoryStore.applyExportDirectory(fileChooser);
-
-        File file = fileChooser.showSaveDialog(getScene() != null ? getScene().getWindow() : null);
-        if (file != null) {
-            LastDirectoryStore.recordExportDirectory(file);
-            try {
-                result.writeSummaryCsv(file.getAbsolutePath());
-            } catch (java.io.UncheckedIOException e) {
-                new Alert(Alert.AlertType.ERROR,
-                        "Failed to export CSV: " + e.getMessage()).showAndWait();
-            }
-        }
+        ChartUtils.showCsvSaveDialog("Export Summary CSV", "sweep_summary.csv",
+                getScene() != null ? getScene().getWindow() : null,
+                file -> result.writeSummaryCsv(file.getAbsolutePath()));
     }
 }

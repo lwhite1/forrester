@@ -82,7 +82,7 @@ public class SirInfectiousDiseaseDemo {
 
         Simulation run = new Simulation(model, DAY, Times.weeks(durationWeeks));
         run.addEventHandler(new CsvSubscriber(
-                System.getProperty("java.io.tmpdir") + "/courant-run1out.csv"));
+                System.getProperty("java.io.tmpdir") + "/courant-sir.csv"));
         run.addEventHandler(new StockLevelChartViewer());
         run.execute();
     }

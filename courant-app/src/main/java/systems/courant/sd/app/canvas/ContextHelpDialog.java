@@ -101,6 +101,7 @@ public class ContextHelpDialog extends Stage {
                 super.updateItem(item, empty);
                 if (empty || getTreeItem() == null) {
                     setText(null);
+                    setStyle("");
                 } else if (item == null) {
                     // Category node — find category name from first child
                     TreeItem<HelpTopic> treeItem = getTreeItem();

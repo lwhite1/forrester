@@ -45,6 +45,20 @@ public record FeedbackAnalysis(
         List<CausalLoop> causalLoops
 ) {
 
+    /**
+     * Compact constructor that defensively copies all mutable collection arguments.
+     */
+    public FeedbackAnalysis {
+        loopParticipants = loopParticipants.isEmpty()
+                ? Collections.emptySet() : Collections.unmodifiableSet(new LinkedHashSet<>(loopParticipants));
+        loopGroups = loopGroups.isEmpty()
+                ? Collections.emptyList() : Collections.unmodifiableList(new ArrayList<>(loopGroups));
+        loopEdges = loopEdges.isEmpty()
+                ? Collections.emptySet() : Collections.unmodifiableSet(new LinkedHashSet<>(loopEdges));
+        causalLoops = causalLoops.isEmpty()
+                ? Collections.emptyList() : Collections.unmodifiableList(new ArrayList<>(causalLoops));
+    }
+
     private static final Logger log = LoggerFactory.getLogger(FeedbackAnalysis.class);
 
     /**
@@ -93,6 +107,10 @@ public record FeedbackAnalysis(
             LoopType type,
             String label
     ) {
+        public CausalLoop {
+            path = List.copyOf(path);
+            polarities = List.copyOf(polarities);
+        }
     }
 
     /** Maximum number of elementary cycles to enumerate per analysis. */
@@ -474,7 +492,7 @@ public record FeedbackAnalysis(
         }
 
         // Find SCCs of size >= 2
-        List<Set<String>> sccs = tarjanSCC(stockNames, stockGraph);
+        List<Set<String>> sccs = TarjanSCC.findAll(stockNames, stockGraph);
         List<Set<String>> loopSCCs = new ArrayList<>();
         for (Set<String> scc : sccs) {
             if (scc.size() >= 2) {
@@ -584,7 +602,7 @@ public record FeedbackAnalysis(
         }
 
         // Find SCCs of size >= 2
-        List<Set<String>> sccs = tarjanSCC(nodes, graph);
+        List<Set<String>> sccs = TarjanSCC.findAll(nodes, graph);
 
         // Enumerate elementary cycles within each SCC
         List<CausalLoop> loops = new ArrayList<>();
@@ -778,66 +796,4 @@ public record FeedbackAnalysis(
         return null;
     }
 
-    // ---- Tarjan's SCC algorithm ----
-
-    /**
-     * Finds all strongly connected components using Tarjan's algorithm.
-     */
-    private static List<Set<String>> tarjanSCC(Set<String> nodes,
-            Map<String, Set<String>> graph) {
-        int[] index = {0};
-        Map<String, Integer> nodeIndex = new LinkedHashMap<>();
-        Map<String, Integer> lowlink = new LinkedHashMap<>();
-        Set<String> onStack = new LinkedHashSet<>();
-        Deque<String> stack = new ArrayDeque<>();
-        List<Set<String>> result = new ArrayList<>();
-
-        for (String node : nodes) {
-            if (!nodeIndex.containsKey(node)) {
-                strongconnect(node, graph, index, nodeIndex, lowlink,
-                        onStack, stack, result, 0);
-            }
-        }
-        return result;
-    }
-
-    private static void strongconnect(String v, Map<String, Set<String>> graph,
-            int[] index, Map<String, Integer> nodeIndex,
-            Map<String, Integer> lowlink, Set<String> onStack,
-            Deque<String> stack, List<Set<String>> result, int depth) {
-        if (depth > MAX_DEPTH) {
-            // Register node so callers can safely read index/lowlink,
-            // but don't push onto stack or recurse — treat as a dead end.
-            nodeIndex.put(v, index[0]);
-            lowlink.put(v, index[0]);
-            index[0]++;
-            return;
-        }
-        nodeIndex.put(v, index[0]);
-        lowlink.put(v, index[0]);
-        index[0]++;
-        stack.push(v);
-        onStack.add(v);
-
-        for (String w : graph.getOrDefault(v, Collections.emptySet())) {
-            if (!nodeIndex.containsKey(w)) {
-                strongconnect(w, graph, index, nodeIndex, lowlink,
-                        onStack, stack, result, depth + 1);
-                lowlink.put(v, Math.min(lowlink.get(v), lowlink.get(w)));
-            } else if (onStack.contains(w)) {
-                lowlink.put(v, Math.min(lowlink.get(v), nodeIndex.get(w)));
-            }
-        }
-
-        if (lowlink.get(v).equals(nodeIndex.get(v))) {
-            Set<String> scc = new LinkedHashSet<>();
-            String w;
-            do {
-                w = stack.pop();
-                onStack.remove(w);
-                scc.add(w);
-            } while (!w.equals(v));
-            result.add(scc);
-        }
-    }
 }

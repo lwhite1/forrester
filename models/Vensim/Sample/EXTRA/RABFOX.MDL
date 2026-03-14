@@ -1,0 +1,250 @@
+{UTF-8}
+{UTF-8}
+
+average fox life=
+	 4
+	~	Year
+	~		|
+
+average rabbit life=
+	 2
+	~	Year
+	~		|
+
+carrying capacity=
+	 500
+	~	Rabbit
+	~		|
+
+effect of crowding on deaths lookup(
+	[(0,0)-(10,20)],(0,0.75)
+	,(3,2.5),(6,6),(8,11),(10,20))
+	~	Dmnl
+	~		|
+
+FINAL TIME  = 50
+	~	Year
+	~	  The final time for the simulation.
+	|
+
+fox birth rate = 0.25
+	~	1/Year [0,2]
+	~		|
+
+fox births = Fox Population * fox birth rate
+	~	Fox/Year
+	~		|
+
+fox deaths = Fox Population / average fox life *
+                    fox mortality lookup(fox food availability)
+	~	Fox/Year
+	~		|
+
+fox food availability = fox consumption of rabbits/(Fox Population * fox food requirements
+)
+	~	Dmnl
+	~	 A lookup table showing the relationship between the input (crowding) along the x 														\
+		axis and the
+		         output
+		         (the effect that crowding has on the death rate) along the y-axis.
+	|
+
+fox food requirements = 25
+	~	Rabbit/Year/Fox
+	~		|
+
+fox mortality lookup(
+	[(0,0)-(2,20)],(0,20),(0.3,5),(0.5,2),
+	(1,1),(2,0.5))
+	~	Dmnl
+	~		|
+
+Fox Population = INTEG(fox births-fox deaths,initial fox population)
+	~	Fox
+	~		|
+
+fox consumption of rabbits = Fox Population * fox food requirements *
+                     fox rabbit consumption lookup(rabbit crowding)
+	~	Rabbit/Year
+	~		|
+
+fox rabbit consumption lookup   ([(0,0)-(6,6)],(0,0),(1,1),(2,2),
+(6,2) )
+	~	Dmnl
+	~	 Relating rabbits to foxes
+	|
+
+initial fox population=
+	 30
+	~	Fox
+	~		|
+
+initial rabbit population=
+	 500
+	~	Rabbit
+	~		|
+
+INITIAL TIME  = 0
+	~	Year
+	~	  The initial time for the simulation.
+	|
+
+rabbit birth rate=
+	 2
+	~	1/Year
+	~		|
+
+rabbit births = Rabbit Population * rabbit birth rate
+	~	Rabbit/Year
+	~		|
+
+rabbit crowding = Rabbit Population/carrying capacity
+	~	Dmnl
+	~		|
+
+rabbit deaths = MAX(Rabbit Population / average rabbit life *
+                   effect of crowding on deaths lookup(rabbit crowding),
+                   fox consumption of rabbits)
+	~	Rabbit/Year
+	~		|
+
+Rabbit Population = INTEG(rabbit births-rabbit deaths,initial rabbit population)
+	~	Rabbit
+	~		|
+
+SAVEPER  = TIME STEP
+	~	Year
+	~	  The frequency with which output is stored.
+	|
+
+TIME STEP  = 0.25
+	~	Year
+	~	  The time step for the simulation.
+	|
+
+\\\---/// Sketch information - do not modify anything except names
+V300  Do not put anything below this section - it will be ignored
+*1
+$192-192-192,0,|12||-1--1--1|0-0-0|160-160-160|-1--1--1|255-255-255|96,96,100,0
+10,1,Fox Population,969,261,63,35,3,131,0,56,0,1,0,0,-1--1--1,0-0-0,Vensim Sans|14|B|64-0-0,0,0,0,0,0,0
+10,2,fox food availability,893,397,75,30,0,3,0,8,0,1,0,0,-1--1--1,-1--1--1,|14||64-0-0,0,0,0,0,0,0
+10,3,fox food requirements,803,457,75,30,0,3,0,2,0,1,0,0,-1--1--1,-1--1--1,|||64-128-128,0,0,0,0,0,0
+10,4,average fox life,1081,194,75,30,0,3,0,2,0,1,0,0,-1--1--1,-1--1--1,|||64-128-128,0,0,0,0,0,0
+10,5,fox consumption of rabbits,688,350,75,30,0,3,0,0,0,1,0,0,0,0,0,0,0,0
+10,6,fox birth rate,817,205,75,30,0,3,0,2,0,1,0,0,-1--1--1,-1--1--1,|||64-128-128,0,0,0,0,0,0
+10,7,initial fox population,917,171,75,30,0,3,0,2,0,1,0,0,-1--1--1,-1--1--1,|||64-128-128,0,0,0,0,0,0
+10,8,fox mortality lookup,1072,405,75,30,0,3,0,2,0,1,0,0,-1--1--1,-1--1--1,|||64-128-128,0,0,0,0,0,0
+12,9,48,812,253,10,8,0,3,0,0,-1,0,0,0,0,0,0,0,0,0
+12,10,48,1155,258,10,8,0,3,0,0,-1,0,0,0,0,0,0,0,0,0
+11,11,0,856,253,7,8,34,3,0,0,1,0,0,0,0,0,0,0,0,0
+10,12,fox births,856,291,75,30,32,3,0,40,0,1,0,0,-1--1--1,-1--1--1,Vensim Sans|14||64-0-0,0,0,0,0,0,0
+11,13,0,1084,258,7,8,34,3,0,0,1,0,0,0,0,0,0,0,0,0
+10,14,fox deaths,1084,296,75,30,32,3,0,8,0,1,0,0,-1--1--1,-1--1--1,|14||64-0-0,0,0,0,0,0,0
+1,15,1,2,1,0,0,0,0,0,0,-1--1--1,,1|(940,309)|
+1,16,2,14,1,0,0,0,0,0,0,-1--1--1,,1|(1059,341)|
+1,17,1,11,1,0,0,0,0,0,0,-1--1--1,,1|(889,217)|
+1,18,1,13,1,0,0,0,0,0,0,-1--1--1,,1|(1000,218)|
+1,19,5,2,1,0,0,0,0,0,0,-1--1--1,,1|(761,385)|
+1,20,1,5,1,0,0,0,0,0,0,-1--1--1,,1|(759,322)|
+1,21,8,14,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,22,11,1,4,0,0,22,1,0,0,128-128-128,|||0-0-0,1|(884,253)|
+1,23,11,9,100,0,0,22,1,0,0,128-128-128,|||0-0-0,1|(835,253)|
+1,24,13,10,4,0,0,22,1,0,0,128-128-128,|||0-0-0,1|(1118,258)|
+1,25,13,1,100,0,0,22,1,0,0,128-128-128,|||0-0-0,1|(1054,258)|
+1,26,3,5,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+10,27,Rabbit Population,285,247,64,39,3,131,0,57,0,1,0,0,64-64-64,0-0-0,Vensim Sans|14|B|64-0-0,0,0,0,0,0,0
+11,28,0,171,247,7,8,34,3,0,0,1,0,0,0,0,0,0,0,0,0
+10,29,rabbit births,171,285,75,30,32,3,0,40,0,1,0,0,-1--1--1,-1--1--1,Vensim Sans|14||64-0-0,0,0,0,0,0,0
+10,30,rabbit crowding,393,406,75,30,0,3,0,40,0,1,0,0,-1--1--1,-1--1--1,Vensim Sans|14||64-0-0,0,0,0,0,0,0
+10,31,carrying capacity,317,458,75,30,0,3,0,2,0,1,0,0,-1--1--1,-1--1--1,|||64-128-128,0,0,0,0,0,0
+10,32,average rabbit life,415,135,75,30,0,3,0,2,0,1,0,0,-1--1--1,-1--1--1,|||64-128-128,0,0,0,0,0,0
+10,33,rabbit birth rate,152,191,75,30,0,3,0,2,0,1,0,0,-1--1--1,-1--1--1,|||64-128-128,0,0,0,0,0,0
+10,34,initial rabbit population,217,141,75,30,0,3,0,2,0,1,0,0,-1--1--1,-1--1--1,|||64-128-128,0,0,0,0,0,0
+10,35,effect of crowding on deaths lookup,595,166,75,30,0,3,0,2,0,1,0,0,-1--1--1,-1--1--1,|||64-128-128,0,0,0,0,0,0
+10,36,fox rabbit consumption lookup,561,458,75,30,0,3,0,2,0,1,0,0,-1--1--1,-1--1--1,|||64-128-128,0,0,0,0,0,0
+12,37,48,647,255,10,8,0,3,0,0,-1,0,0,0,0,0,0,0,0,0
+11,38,0,452,255,7,8,34,3,0,0,1,0,0,0,0,0,0,0,0,0
+10,39,rabbit deaths,452,293,75,30,32,3,0,8,0,1,0,0,-1--1--1,-1--1--1,|14||64-0-0,0,0,0,0,0,0
+12,40,48,120,247,10,8,0,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,41,27,38,1,0,0,0,0,0,0,-1--1--1,,1|(369,217)|
+1,42,27,28,1,0,0,0,0,0,0,-1--1--1,,1|(179,238)|
+1,43,27,30,1,0,0,0,0,0,0,-1--1--1,,1|(243,346)|
+1,44,31,30,1,0,0,0,0,0,0,-1--1--1,,1|(365,439)|
+1,45,32,38,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,46,38,37,4,0,0,22,1,0,0,128-128-128,|||0-0-0,1|(548,255)|
+1,47,38,27,100,0,0,22,1,0,0,128-128-128,|||0-0-0,1|(397,255)|
+1,48,28,27,4,0,0,22,1,0,0,128-128-128,|||0-0-0,1|(199,247)|
+1,49,28,40,100,0,0,22,1,0,0,128-128-128,|||0-0-0,1|(147,247)|
+1,50,36,5,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,51,30,5,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,52,5,39,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,53,33,28,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,54,35,38,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,55,30,39,1,0,0,0,0,0,0,-1--1--1,,1|(459,339)|
+1,56,6,11,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,57,4,13,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,58,3,2,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,59,7,1,0,0,0,0,0,0,1,-1--1--1,,1|(0,0)|
+1,60,34,27,0,0,0,0,0,0,1,-1--1--1,,1|(0,0)|
+12,61,0,568,656,328,185,3,188,0,0,1,0,0,0,0,0,0,0,0,0
+RABFOX
+12,62,0,1072,656,177,185,3,188,0,0,1,0,0,0,0,0,0,0,0,0
+Phase
+12,63,0,756,65,80,40,8,7,0,0,-1,1,0,0,0,0,0,0,0,0
+RABBIT & FOX MODEL|<<NnN>>|
+///---\\\
+:GRAPH RABFOX
+:TITLE Rabbit and Fox Populations
+:SCALE
+:VAR Rabbit Population
+:Y-MIN 0
+:Y-MAX 3000
+:DATASET 
+:LINE-WIDTH 2
+:SCALE
+:VAR Fox Population
+:Y-MIN 0
+:Y-MAX 200
+:DATASET 
+:LINE-WIDTH 2
+
+:GRAPH Phase
+:TITLE Phase
+:X-AXIS Rabbit Population
+:X-MIN 0
+:SCALE
+:VAR Fox Population
+:Y-MIN 0
+:DATASET 
+:L<%^E!@
+4:Time
+5:rabbit birth rate
+9:RabFox
+19:100,0
+24:0
+25:50
+26:50
+23:0
+15:0,0,0,1,0,0
+27:0,
+34:0,
+42:0
+72:0
+73:0
+95:0
+96:0
+97:0
+77:0
+78:0
+102:1
+93:0
+94:0
+92:0
+91:0
+90:0
+87:0
+75:
+43:
+103:8,8,8,3,8
+105:0,0,0,0,0,0,0,0,0,0
+104:Vensim Sans|12||0-0-0|0-0-0|-1--1--1|0-0-255|192-192-192|-1--1--1

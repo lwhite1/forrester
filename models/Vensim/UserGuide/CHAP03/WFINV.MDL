@@ -1,0 +1,143 @@
+{UTF-8}
+FINAL TIME  = 100
+	~	Month
+	~	 The final time for the simulation.
+	|
+
+target inventory=
+	 sales * inventory coverage
+	~	Widget
+	~		|
+
+target production = sales + inventory correction
+	~	Widget/Month
+	~		|
+
+inventory correction = (target inventory - Inventory)/
+                time to correct inventory
+	~	Widget/Month
+	~		|
+
+inventory coverage = 3
+	~	Month
+	~		|
+
+time to correct inventory=
+	 2
+	~	Month
+	~		|
+
+INITIAL TIME  = 0
+	~	Month
+	~	 The initial time for the simulation.
+	|
+
+Inventory = INTEG(production-sales,300)
+	~	Widget
+	~		|
+
+net hire rate = (target workforce-Workforce)/time to adjust workforce
+	~	Person/Month
+	~		|
+
+production = Workforce*productivity
+	~	Widget/Month
+	~		|
+
+productivity = 1
+	~	Widget/Month/Person
+	~		|
+
+sales = 100 + STEP(50,20)
+	~	Widget/Month
+	~		|
+
+SAVEPER  = 1
+	~	Month
+	~	  The frequency with which output is stored.
+	|
+
+target workforce = target production/productivity
+	~	Person
+	~		|
+
+TIME STEP  = 0.25
+	~	Month
+	~	 The time step for the simulation.
+	|
+
+time to adjust workforce=
+	 3
+	~	Month
+	~		|
+
+Workforce = INTEG(net hire rate,     target workforce)
+	~	Person
+	~		|
+
+\\\---/// Sketch information - do not modify anything except names
+V300  Do not put anything below this section - it will be ignored
+*1
+$192-192-192,0,Arial|14||0-0-0|92-92-92|160-160-160|-1--1--1|255-255-255|72,72,100,0
+10,1,Workforce,67,137,38,16,3,131,0,58,0,0,0,0,-1--1--1,-1--1--1,Arial|14|B|0-0-0
+12,2,48,205,139,10,8,0,3,0,0,0,0,0,0
+10,3,Inventory,180,41,35,18,3,131,0,58,0,0,0,0,-1--1--1,-1--1--1,Arial|14|B|0-0-0
+12,4,48,46,42,10,8,0,3,0,0,0,0,0,0
+10,5,productivity,170,99,38,9,0,3,0,2,0,0,0,0,0-0-0,0-0-0,|14||64-128-128
+12,6,48,302,41,10,8,0,3,0,0,0,0,0,0
+11,7,48,245,41,5,6,34,3,0,0,1,0,0,0
+10,8,sales,245,53,19,9,32,3,0,0,0,0,0,0
+11,9,172,95,41,5,6,34,3,0,0,1,0,0,0
+10,10,production,95,54,35,9,32,3,0,0,0,0,0,0
+11,11,284,153,138,5,6,34,3,0,0,1,0,0,0
+10,12,net hire rate,153,151,40,9,32,3,0,0,0,0,0,0
+10,13,target workforce,261,198,52,9,0,3,0,0,0,0,0,0
+10,14,time to adjust workforce,96,197,76,9,0,3,0,2,0,0,0,0,0-0-0,0-0-0,|14||64-128-128
+10,15,target production,413,159,55,9,0,3,0,0,0,0,0,0
+10,16,target inventory,334,107,50,9,0,3,0,0,0,0,0,0
+10,17,inventory coverage,335,68,61,9,0,3,0,2,0,0,0,0,0-0-0,0-0-0,|14||64-128-128
+10,18,inventory correction,461,119,63,9,0,3,0,0,0,0,0,0
+10,19,time to correct inventory,430,24,77,9,0,3,0,2,0,0,0,0,0-0-0,0-0-0,|14||64-128-128
+12,20,3,262,125,18,18,4,0,0,0,1,0,0,0
+1,21,9,3,4,0,0,22,0,0,0,-1--1--1,,1|(122,41)|
+1,22,9,4,100,0,0,22,0,0,0,-1--1--1,,1|(73,41)|
+1,23,7,6,4,0,0,22,32,0,0,-1--1--1,Arial|14||0-0-0,1|(271,41)|
+1,24,7,3,100,0,0,22,32,0,0,-1--1--1,Arial|14||0-0-0,1|(227,41)|
+1,25,11,2,4,0,0,22,0,0,0,-1--1--1,,1|(176,138)|
+1,26,11,1,68,0,0,22,0,0,0,-1--1--1,,1|(126,138)|
+1,27,1,10,1,0,0,0,0,0,0,-1--1--1,,1|(49,88)|
+1,28,1,12,2,0,0,0,0,0,0,-1--1--1,,1|(128,164)|
+1,29,8,15,1,0,0,0,0,0,0,-1--1--1,,1|(317,141)|
+1,30,15,13,1,0,0,0,0,0,0,-1--1--1,,1|(358,194)|
+1,31,5,10,0,0,0,0,0,0,0,-1--1--1,,1|(138,80)|
+1,32,13,12,1,0,0,0,0,0,0,-1--1--1,,1|(169,179)|
+1,33,13,1,1,1,0,0,0,0,1,-1--1--1,,1|(123,117)|
+1,34,8,16,1,0,0,0,0,0,0,-1--1--1,,1|(271,88)|
+1,35,18,15,1,0,0,0,0,0,0,-1--1--1,,1|(441,139)|
+1,36,19,18,0,0,0,0,0,0,0,-1--1--1,,1|(442,64)|
+1,37,16,18,1,0,0,0,0,0,0,-1--1--1,,1|(400,84)|
+1,38,17,16,0,0,0,0,0,0,0,-1--1--1,,1|(334,80)|
+1,39,14,12,1,0,0,0,0,0,0,-1--1--1,,1|(123,182)|
+1,40,5,13,1,0,0,0,0,0,0,-1--1--1,,1|(217,134)|
+1,41,3,18,2,0,0,0,0,0,0,-1--1--1,,1|(340,38)|
+12,42,21070460,264,338,245,111,3,188,0,0,1,0,0,0
+WORKFORCE_AND_INVENTORY
+///---\\\
+:GRAPH WORKFORCE_AND_INVENTORY
+:TITLE Workforce and Inventory
+:SCALE
+:VAR Workforce
+:SCALE
+:VAR Inventory
+:L<%^E!@
+1:Currrent.vdf
+9:Currrent
+15:0,0,0,0,0,0
+19:100,0
+27:0,
+34:0,
+4:Time
+5:Inventory
+24:0
+25:100
+26:100
