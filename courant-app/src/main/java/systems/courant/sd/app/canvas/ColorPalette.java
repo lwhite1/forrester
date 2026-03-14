@@ -59,4 +59,12 @@ public final class ColorPalette {
 
     // Delay indicator badge
     public static final Color DELAY_BADGE = Color.web("#8E44AD");
+
+    // Maturity indicators (#89)
+    /** Amber accent stripe on elements missing equations. */
+    public static final Color MATURITY_ACCENT = Color.web("#F39C12", 0.8);
+    /** Color for the "?" unit badge on elements without units. */
+    public static final Color MATURITY_UNIT_BADGE = Color.web("#F39C12");
+    /** Red color for flow connection lines with unit mismatches. */
+    public static final Color UNIT_MISMATCH = Color.web("#E74C3C", 0.8);
 }

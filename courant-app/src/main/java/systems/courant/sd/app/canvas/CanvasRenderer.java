@@ -100,7 +100,8 @@ public class CanvasRenderer {
             ConnectionId selectedConnection,
             boolean hideVariables,
             boolean showDelayBadges,
-            boolean hideInfoLinks
+            boolean hideInfoLinks,
+            MaturityAnalysis maturityAnalysis
     ) {}
 
     private final CanvasState canvasState;
@@ -155,7 +156,7 @@ public class CanvasRenderer {
 
         // 1. Draw connections first (behind elements)
         // When hovering or tracing, dim non-related connections
-        drawMaterialFlows(gc, editor);
+        drawMaterialFlows(gc, editor, ctx.maturityAnalysis());
         if (!ctx.hideInfoLinks()) {
             drawInfoLinks(gc, connectors, hideAux, hoveredElement, traceAnalysis);
         }
@@ -283,6 +284,21 @@ public class CanvasRenderer {
             }
         }
 
+        // 2a2. Draw maturity indicators (missing equation accent, missing unit badge)
+        MaturityAnalysis maturity = ctx.maturityAnalysis();
+        if (maturity != null) {
+            for (String name : maturity.missingEquation()) {
+                if (canvasState.hasElement(name) && !isHiddenAux(name, hideAux)) {
+                    MaturityIndicatorRenderer.drawMissingEquationAccent(gc, canvasState, name);
+                }
+            }
+            for (String name : maturity.missingUnit()) {
+                if (canvasState.hasElement(name) && !isHiddenAux(name, hideAux)) {
+                    MaturityIndicatorRenderer.drawMissingUnitBadge(gc, canvasState, name);
+                }
+            }
+        }
+
         // 2b. Draw loop participant highlights around elements in loops
         if (loopAnalysis != null) {
             for (String name : loopAnalysis.loopParticipants()) {
@@ -376,8 +392,10 @@ public class CanvasRenderer {
      * Draws material flow arrows routed through the flow indicator (diamond).
      * Cloud positions are computed via {@link FlowEndpointCalculator#cloudPosition}
      * so that rendering and hit-testing use the same logic.
+     * Flows with unit mismatches are drawn in red.
      */
-    private void drawMaterialFlows(GraphicsContext gc, ModelEditor editor) {
+    private void drawMaterialFlows(GraphicsContext gc, ModelEditor editor,
+                                   MaturityAnalysis maturity) {
         for (FlowDef flow : editor.getFlows()) {
             if (!canvasState.hasElement(flow.name())) {
                 continue;
@@ -421,8 +439,16 @@ public class CanvasRenderer {
                 sinkIsCloud = true;
             }
 
-            ConnectionRenderer.drawMaterialFlow(gc, sourceX, sourceY, midX, midY,
-                    sinkX, sinkY, sourceIsCloud, sinkIsCloud);
+            boolean mismatch = maturity != null
+                    && maturity.unitMismatchFlows().contains(flow.name());
+            if (mismatch) {
+                ConnectionRenderer.drawMaterialFlow(gc, sourceX, sourceY, midX, midY,
+                        sinkX, sinkY, sourceIsCloud, sinkIsCloud,
+                        ColorPalette.UNIT_MISMATCH);
+            } else {
+                ConnectionRenderer.drawMaterialFlow(gc, sourceX, sourceY, midX, midY,
+                        sinkX, sinkY, sourceIsCloud, sinkIsCloud);
+            }
         }
     }
 

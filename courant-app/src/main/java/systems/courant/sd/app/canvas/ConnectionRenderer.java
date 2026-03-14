@@ -16,6 +16,19 @@ public final class ConnectionRenderer {
     }
 
     /**
+     * Draws a material flow routed through the flow indicator (diamond) position,
+     * using the default color.
+     */
+    public static void drawMaterialFlow(GraphicsContext gc,
+                                        double sourceX, double sourceY,
+                                        double midX, double midY,
+                                        double sinkX, double sinkY,
+                                        boolean sourceIsCloud, boolean sinkIsCloud) {
+        drawMaterialFlow(gc, sourceX, sourceY, midX, midY, sinkX, sinkY,
+                sourceIsCloud, sinkIsCloud, ColorPalette.MATERIAL_FLOW);
+    }
+
+    /**
      * Draws a material flow routed through the flow indicator (diamond) position.
      * The path is: source → diamond → sink, with clouds drawn at endpoints marked as clouds.
      * All coordinates must be concrete (no NaN) — the caller is responsible for computing
@@ -29,12 +42,14 @@ public final class ConnectionRenderer {
      * @param sinkY         sink endpoint Y
      * @param sourceIsCloud true if the source endpoint is a cloud (disconnected)
      * @param sinkIsCloud   true if the sink endpoint is a cloud (disconnected)
+     * @param color         the color for the flow line and arrowhead
      */
     public static void drawMaterialFlow(GraphicsContext gc,
                                         double sourceX, double sourceY,
                                         double midX, double midY,
                                         double sinkX, double sinkY,
-                                        boolean sourceIsCloud, boolean sinkIsCloud) {
+                                        boolean sourceIsCloud, boolean sinkIsCloud,
+                                        Color color) {
         // Draw clouds at disconnected endpoints
         if (sourceIsCloud) {
             drawCloud(gc, sourceX, sourceY);
@@ -70,7 +85,7 @@ public final class ConnectionRenderer {
         }
 
         // Source → diamond segment (no arrowhead — draw full length)
-        gc.setStroke(ColorPalette.MATERIAL_FLOW);
+        gc.setStroke(color);
         gc.setLineWidth(LayoutMetrics.MATERIAL_FLOW_WIDTH);
         gc.setLineDashes();
         gc.strokeLine(pipeSourceX, pipeSourceY, midX, midY);
@@ -92,7 +107,7 @@ public final class ConnectionRenderer {
         // Arrowhead fills the gap from lineEnd to pipeSink
         drawArrowhead(gc, midX, midY, pipeSinkX, pipeSinkY,
                 LayoutMetrics.ARROWHEAD_LENGTH, LayoutMetrics.ARROWHEAD_WIDTH,
-                ColorPalette.MATERIAL_FLOW);
+                color);
     }
 
     /**
