@@ -1,0 +1,131 @@
+{UTF-8}
+{UTF-8}
+
+inflow[T1]=
+	IF THEN ELSE(Time > 10,1,0) ~~|
+inflow[lowtub] = outflow[hightub]
+	~	Gallon/Minute
+	~	The inflow into each tub.
+	|
+
+FINAL TIME  = 100
+	~	Minute
+	~	The final time for the simulation.
+	|
+
+hightub : T1, T2, T3, T4 -> lowtub
+	~	
+	~	The four highest tubs.
+	|
+
+INITIAL TIME  = 0
+	~	Minute
+	~	The initial time for the simulation.
+	|
+
+lowtub : T2, T3, T4, T5
+	~	
+	~	The four lowest tubs.
+	|
+
+outflow[tub] = IF THEN ELSE(Water[tub] > 10,inflow[tub],0)
+	~	Gallon/Minute
+	~	The amount of water flowing out of the tub.
+	|
+
+SAVEPER  = 
+        TIME STEP
+	~	Minute
+	~	The frequency with which output is stored.
+	|
+
+TIME STEP  = 1
+	~	Minute
+	~	The time step for the simulation.
+	|
+
+tub : T1, T2, T3, T4, T5
+	~	
+	~	The different tubs in the experiment.
+	|
+
+Water[tub] = INTEG(inflow[tub]-outflow[tub],0)
+	~	Gallon
+	~	The amount of water in each tub.
+	|
+
+\\\---/// Sketch information - do not modify anything except names
+V300  Do not put anything below this section - it will be ignored
+*1
+$192-192-192,0,|12||-1--1--1|92-92-92|160-160-160|-1--1--1|-1--1--1|96,96,100,0
+10,1,Water,297,207,53,27,3,3,0,16,0,1,0,0,0-0-0,0-0-0,||B|0-0-0,0,0,0,0,0,0
+12,2,48,103,204,10,8,0,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,3,Time,93,271,75,30,0,2,0,2,0,1,0,0,-1--1--1,-1--1--1,|||128-128-128,0,0,0,0,0,0
+12,4,48,497,205,10,8,0,3,0,0,0,0,0,0,0,0,0,0,0,0
+11,5,0,179,204,8,11,34,3,0,0,1,0,0,0,0,0,0,0,0,0
+10,6,inflow,179,242,75,30,32,3,0,0,0,1,0,0,0,0,0,0,0,0
+11,7,0,419,205,8,11,34,3,0,0,1,0,0,0,0,0,0,0,0,0
+10,8,outflow,419,243,75,30,32,3,0,0,0,1,0,0,0,0,0,0,0,0
+1,9,5,1,4,0,0,22,0,0,0,-1--1--1,,1|(215,204)|
+1,10,5,2,100,0,0,22,0,0,0,-1--1--1,,1|(142,204)|
+1,11,7,4,4,0,0,22,0,0,0,-1--1--1,,1|(457,205)|
+1,12,7,1,100,0,0,22,0,0,0,-1--1--1,,1|(380,205)|
+1,13,1,8,2,0,0,0,0,0,0,-1--1--1,,1|(365,264)|
+1,14,5,7,2,0,0,0,0,0,0,-1--1--1,,1|(292,121)|
+1,15,3,6,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,16,8,6,1,0,0,0,0,64,0,-1--1--1,,1|(263,329)|
+12,17,0,281,560,221,205,3,188,0,0,1,0,0,0,0,0,0,0,0,0
+GRAPH
+12,18,0,288,53,80,40,8,7,0,0,-1,1,0,0,0,0,0,0,0,0
+TUBS MODEL
+///---\\\
+:GRAPH GRAPH
+:TITLE Water Level by Tub
+:SCALE
+:VAR Water[T1]
+:DATASET 
+:VAR Water[T2]
+:DATASET 
+:VAR Water[T3]
+:DATASET 
+:VAR Water[T4]
+:DATASET 
+:VAR Water[T5]
+:DATASET 
+:L<%^E!@
+4:Time
+5:inflow[tub]
+6:T1
+6:T2
+6:T3
+6:T4
+6:T5
+9:Tubs
+19:100,0
+24:0
+25:100
+26:100
+23:0
+15:0,0,0,0,0,0
+27:0,
+34:0,
+42:0
+72:0
+73:0
+95:0
+96:0
+97:0
+77:0
+78:0
+102:1
+93:0
+94:0
+92:0
+91:0
+90:0
+87:0
+75:
+43:
+103:8,8,8,3,8
+105:0,0,0,0,0,0,0,0,0,0
+104:Vensim Sans|12||0-0-0|0-0-0|-1--1--1|0-0-255|192-192-192|-1--1--1

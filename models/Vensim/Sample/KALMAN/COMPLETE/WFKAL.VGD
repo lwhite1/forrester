@@ -1,0 +1,77 @@
+:GRAPH FILTER
+:TITLE Filtered Run Versus Underlying "Data"
+:SCALE
+:VAR inventory|Inventory from actual run.
+:DATASET wfinv.vdf
+:VAR inventory|......from Filter Estimation.
+:DATASET filter.vdf
+:SCALE
+:VAR production|Production from actual run.
+:DATASET wfinv.vdf
+:VAR production|......from Filter Estimation.
+:DATASET filter.vdf
+:GRAPH VECTOR
+:TITLE Vector Search on Parameters
+:SCALE
+:VAR DRIVE_VARIANCE
+:DATASET vector.vdf
+:SCALE
+:VAR MEAS_VARIANCE
+:DATASET vector.vdf
+:SCALE
+:VAR TIME_ADJUST_WORKFORCE
+:DATASET vector.vdf
+:SCALE
+:VAR TIME_CORRECT_INVENTORY
+:DATASET vector.vdf
+:GRAPH GRAPH_0
+:TITLE Model ouput versus "Data" for measured series
+:SCALE
+:VAR meas inventory
+:DATASET wfinv
+:VAR meas inventory
+:Y-MIN 200
+:Y-MAX 400
+:DATASET optfilt
+:SCALE
+:VAR meas workforce
+:DATASET wfinv
+:VAR meas workforce
+:Y-MIN 75
+:Y-MAX 125
+:DATASET optfilt
+:GRAPH GRAPH_1
+:TITLE Actual inventory versus potential estimates
+:SCALE
+:VAR inventory|Actual inventory
+:DATASET wfinv
+:VAR meas inventory|Measured is actual
+:DATASET wfinv
+:VAR inventory|Simple simulation
+:DATASET nofilt
+:VAR inventory|Kalman Filtering
+:DATASET filter
+:GRAPH GRAPH_1_0
+:TITLE Actual workforce versus potential estimates
+:SCALE
+:VAR workforce|Actual workforce
+:DATASET wfinv
+:VAR meas workforce|Measured is actual
+:DATASET wfinv
+:VAR workforce|Simple simulation
+:DATASET nofilt
+:VAR workforce|Kalman Filtering
+:DATASET filter
+:GRAPH GRAPH_2
+:TITLE  
+:SCALE
+:VAR inventory
+:SCALE
+:VAR meas inventory
+:GRAPH GRAPH_1_1
+:TITLE Actual inventory versus estimate based on workforce measurment
+:SCALE
+:VAR inventory|Actual inventory
+:DATASET wfinv
+:VAR inventory|Filter Estimate
+:DATASET filter2

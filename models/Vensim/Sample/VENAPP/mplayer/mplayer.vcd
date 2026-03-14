@@ -1,0 +1,144 @@
+! This script is designed to be played by up to three players and a 
+! moderator on a network.  The model itself is not coupled so that
+! it won't hurt if one player is missing.  As a rule of design
+! it is best to force the reading of the .gin files before the
+! moderator can take the publish and proceed step - it is to easy to
+! move on before others are ready if this is not done.
+!
+! use the batch file mplayer.bat to start the program 
+! it can be tested on a single computer by calling mplayer
+! a number of times
+!
+! mplayer setup
+! this sets up the file and directory structure to play the game locally
+!
+! mplayer mod
+! play the moderator - choose moderator in the next screen
+! 
+! mplayer south
+! play the south - choose south in next screen - same for north and east
+!
+! mplayer cleanup
+! deletes all the extra files (including runs) that have been created
+! by playing the game
+!
+! 
+! Note that this file uses the hardwired directory
+! c:\vensim\models\sample\mplayer
+! to play the game accross a network replace this with
+! the mapped network directory (eg \\Servnam\C\mplayer 
+! or g:\mplayer if the directory mapping has been completed
+! to a drive letter
+ 
+:SCREEN START
+COMMAND,"",0,0,0,0,L,,TIMER>CREATE|T1
+! Note the timer is made permanent so that if there is an
+! analysis screen the from eg NORTH the time will not be lost
+! on returning to north
+COMMAND,"",0,0,0,0,,,TIMER>PERMANENT|T1
+COMMAND,"",0,0,0,0,,,SPECIAL>LOADMODEL|mplayer.vmf
+COMMAND,"",0,0,0,0,,,SPECIAL>READCUSTOM|mplayer.vgd
+COMMAND,"",0,0,0,0,,,GAME>GAMEINTERVAL|SPECIAL GI
+TEXTONLY,"Decide who you are",50,10,0,0,C|Times New Roman|24|B|0-0-0
+Button,"North",50,20,0,0,C,,SPECIAL>ALIASSCREEN|DECISION|NORTH&SPECIAL>SETTITLE|North,WIP1
+Button,"South",50,30,0,0,C,,SPECIAL>ALIASSCREEN|DECISION|SOUTH&SPECIAL>SETTITLE|South,WIP1
+Button,"East",50,40,0,0,C,,SPECIAL>ALIASSCREEN|DECISION|EAST&SPECIAL>SETTITLE|East,WIP1
+Button,"Moderator",50,50,0,0,C,,SPECIAL>SETTITLE|Moderator,MODERATOR1
+
+:SCREEN FROMWIP
+COMMAND,"",0,0,0,0,L,,SPECIAL>CLEARRUNS|current.vdf&\
+FILE>COPY|c:\vensim\models\sample\mplayer\current.vdf|current.vdf&GAME>RELOAD&\
+SIMULATE>RUNNAME|current&MENU>GAME
+CLOSESCREEN,"",0,0,0,0,,,,DECISION
+
+:SCREEN WIP1
+TEXTONLY,"Please",50,50,0,0,C|Times New Roman|64|B|255-0-0
+TIMER,"T2",120,80,20,10,C,.5|.1,ifthenelse&FILE>EXISTS|c:\vensim\models\sample\mplayer\current.mrk&BRANCH>OUT&BRANCH>BR2,
+BRANCH,"OUT",0,0,0,0,,,,FROMWIP
+BRANCH,"BR2",0,0,0,0,,,,WIP2
+:SCREEN WIP2
+TEXTONLY,"stand",50,50,0,0,C|Times New Roman|64|B|255-0-0
+TIMER,"T2",120,80,20,10,C,.5|.1,ifthenelse&FILE>EXISTS|c:\vensim\models\sample\mplayer\current.mrk&BRANCH>OUT&BRANCH>BR3,
+BRANCH,"OUT",0,0,0,0,,,,FROMWIP
+BRANCH,"BR3",0,0,0,0,,,,WIP3
+:SCREEN WIP3
+TEXTONLY,"by",50,50,0,0,C|Times New Roman|64|B|255-0-0
+TIMER,"T2",120,80,20,10,C,.5|.1,ifthenelse&FILE>EXISTS|c:\vensim\models\sample\mplayer\current.mrk&BRANCH>OUT&BRANCH>BR1,
+BRANCH,"OUT",0,0,0,0,,,,FROMWIP
+BRANCH,"BR1",0,0,0,0,,,,WIP1
+
+
+! North south and east are all the same - could have more than one
+! screen for them note that the times is a permanent timer
+:SCREEN NORTH
+WIPTOOL,"GR1",50,10,50,60,,,CUSTOM>POP
+TEXTONLY,"The North",5,10,0,0,L|Times New Roman|24|B|0-0-0
+TIMER,"T1",80,80,20,10,C|Times New Roman|24|B|0-0-0,300|1,SPECIAL>MESSAGE|Time to go on!
+SHOWVAR,"Time",5,20,0,0,L
+TEXTONLY,"Total Birth Settings",5,25,0,0,L
+MODVAR,"births[NORTH]",15,30,10,0
+BUTTON,"Submit",30,30,0,0,L,,FILE>DELETE|c:\vensim\models\sample\mplayer\current.mrk&GAME>WRITEGIN|c:\vensim\models\sample\mplayer\north.gin|north.lst&GAME>ENDGAME,WIP1
+BUTTON,"Exit",10,90,20,0,L,,MENU>EXIT
+
+:SCREEN SOUTH
+WIPTOOL,"GR1",50,10,50,60,,,CUSTOM>POP
+TEXTONLY,"The South",5,10,0,0,L|Times New Roman|24|B|0-0-0
+TIMER,"T1",80,80,20,10,C|Times New Roman|24|B|0-0-0,300|1,SPECIAL>MESSAGE|Time to go on!
+SHOWVAR,"Time",5,20,0,0,L
+TEXTONLY,"Total Birth Settings",5,25,0,0,L
+MODVAR,"births[south]",15,30,10,0
+BUTTON,"Submit",30,30,0,0,L,,FILE>DELETE|c:\vensim\models\sample\mplayer\current.mrk&GAME>WRITEGIN|c:\vensim\models\sample\mplayer\south.gin|south.lst&GAME>ENDGAME,WIP1
+BUTTON,"Exit",10,90,20,0,L,,MENU>EXIT
+
+:SCREEN EAST
+WIPTOOL,"GR1",50,10,50,60,,,CUSTOM>POP
+TEXTONLY,"The East",5,10,0,0,L|Times New Roman|24|B|0-0-0
+TIMER,"T1",80,80,20,10,C|Times New Roman|24|B|0-0-0,300|1,SPECIAL>MESSAGE|Time to go on!
+SHOWVAR,"Time",5,20,0,0,L
+TEXTONLY,"Total Birth Settings",5,25,0,0,L
+MODVAR,"births[EAST]",15,30,10,0
+BUTTON,"Submit",30,30,0,0,L,,FILE>DELETE|c:\vensim\models\sample\mplayer\current.mrk&GAME>WRITEGIN|c:\vensim\models\sample\mplayer\east.gin|east.lst&GAME>ENDGAME,WIP1
+BUTTON,"Exit",10,90,20,0,L,,MENU>EXIT
+
+:SCREEN MODERATOR1
+BUTTON,"Start New Game",50,10,0,0,C,,SIMULATE>RUNNAME|?Enter new game name,MOD2
+BUTTON,"Restart Old Game",50,20,0,0,C,,SIMULATE>RUNNAME|?Enter old game name|E&GAME>RELOAD,MOD2
+BUTTON,"Cleanup",50,70,0,0,C,,SPECIAL>CLEARRUNS|current.vdf&\
+FILE>DELETE|current.vdf&FILE>DELETE|current.mrk&\
+FILE>DELETE|north.gin&FILE>DELETE|south.gin&FILE>DELETE|east.gin
+
+:SCREEN MOD2
+COMMAND,"",0,0,0,0,L,,TIMER>CREATE|MODTIME
+COMMAND,"",0,0,0,0,L,,TIMER>COMMAND|MODTIME|FILE>DELETE|current.mrk
+COMMAND,"",0,0,0,0,L,,MENU>GAME|O&FILE>COPY|!|current.vdf
+COMMAND,"",0,0,0,0,L,,FILE>CREATE|current.mrk
+COMMAND,"",0,0,0,0,L,,TIMER>SET|MODTIME|60|1
+CLOSESCREEN,"",0,0,0,0,,,,MODERATOR
+:SCREEN MODERATOR
+WIPTOOL,"GR1",50,10,50,60,,,CUSTOM>POP
+TEXTONLY,"Moderator",5,10,0,0,L|Times New Roman|24|B|0-0-0
+TIMER,"T1",80,70,20,10,C|Times New Roman|24|B|0-0-0,300|1,SPECIAL>MESSAGE|Time to go!
+TEXTONLY,"Time=",20,20,0,0,R|Times New Roman|12|B|0-0-0
+SHOWVAR,"Time",21,20,0,0,L|Times New Roman|12|B|0-0-0
+TEXTONLY,"Total Birth Settings",5,25,0,0,L
+TEXTONLY,"North",5,30,0,0,L
+SHOWVAR,"births[NORTH]",15,30,10,0
+TEXTONLY,"South",5,40,0,0,L
+SHOWVAR,"births[SOUTH]",15,40,10,0
+TEXTONLY,"East",5,50,0,0,L
+SHOWVAR,"births[EAST]",15,50,10,0
+Button,"Load North",20,80,0,0,,,GAME>READGIN|north.gin&SPECIAL>REFRESH
+Button,"Load South",35,80,0,0,,,GAME>READGIN|south.gin&SPECIAL>REFRESH
+Button,"Load East",50,80,0,0,,,GAME>READGIN|east.gin&SPECIAL>REFRESH
+Button,"Proceed and Publish",80,80,0,0,C,,GAME>GAMEON,PUBLISH
+BUTTON,"Exit",10,90,20,0,L,,MENU>EXIT
+
+:SCREEN PUBLISH
+COMMAND,"",0,0,0,0,L,,FILE>COPY|!|current.vdf
+COMMAND,"",0,0,0,0,L,,FILE>CREATE|current.mrk
+COMMAND,"",0,0,0,0,L,,FILE>DELETE|north.gin
+COMMAND,"",0,0,0,0,L,,FILE>DELETE|south.gin
+COMMAND,"",0,0,0,0,L,,FILE>DELETE|east.gin
+COMMAND,"",0,0,0,0,L,,TIMER>SET|MODTIME|30|1
+CLOSESCREEN,"",0,0,0,0,L,,,MODERATOR
+

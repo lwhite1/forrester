@@ -1,0 +1,935 @@
+{UTF-8}
+{UTF-8}
+
+accrued revenue  =
+        unit sales
+             * price
+	~	$/ Month
+	~		|
+
+adv budget  =
+        percent budget adv/100
+             * cash revenue
+	~	$/ Month
+	~		|
+
+Adv Budget Effective  =
+        INTEG( ( adv budget
+                  - Adv Budget Effective )
+                  / adv impact delay ,
+             adv budget )
+	~	$/ Month
+	~		|
+
+adv impact delay  = 12
+	~	Months
+	~		|
+
+cash revenue  =
+        Receivables
+             / time to clear receivables
+	~	$/ Month
+	~		|
+
+Cum Retained Cash  =
+        INTEG( retained cash flow ,
+             0)
+	~	$
+	~		~	:SUPPLEMENTARY 
+	|
+
+demos per person month  = 12
+	~	Orders / Month / Person
+	~		|
+
+eff of lead avail on demos  =
+        table for eff of leads ( Potential Orders
+                  / Int Dir Salespeople )
+	~	Dimensionless
+	~		|
+
+effect of advertising  =
+        table for effect of adv ( Adv Budget Effective
+                  / Products )
+	~	Dimensionless
+	~		|
+
+duration of negotiation  = 1
+	~	Month
+	~		|
+
+ext sales rep fee  = 400
+	~	$/ Person / Month
+	~		|
+
+external sales reps  =
+        cash revenue
+             * percent budget ext sales reps/100
+             / ext sales rep fee
+	~	People
+	~		|
+
+FINAL TIME  = 60
+	~	Month
+	~	   The final time for the simulation
+	|
+
+frac budget mfg  = 0.47
+	~	Dimensionless
+	~		|
+
+frac budget r and d  = 0.15
+	~	Dimensionless
+	~		|
+
+frac cash retained  =
+        ( 1
+             - frac budget mfg
+             - frac budget r and d
+             - percent budget adv/100
+             - percent budget ext sales reps/100
+             - percent budget int dir sales /100)
+	~	Fraction
+	~		|
+
+fraction custs buying  =
+        table for frac buying ( Pot Orders In Negotiation
+                  / Potential Orders )
+	~	Dimensionless
+	~		|
+
+INITIAL TIME  = 0
+	~	Month
+	~	   The initial time for the simulation
+	|
+
+int dir sales cost  = 2400
+	~	$/ Person / Month
+	~		|
+
+Int Dir Salespeople  =
+        INTEG( ( target int dir sales
+                  - Int Dir Salespeople )
+                  / time to hire int dir salespeople ,
+             target int dir sales )
+	~	People
+	~		|
+
+lifetime of mailing list  = 60
+	~	Months
+	~		|
+
+normal lead gen effic  = 7
+	~	Orders / Products / Month
+	~		|
+
+normal share of sales  = 0.8
+	~	Dimensionless
+	~		|
+
+percent budget adv  = 4
+	~	Dimensionless
+	~		|
+
+percent budget ext sales reps  = 8
+	~	Dimensionless
+	~		|
+
+percent budget int dir sales  = 6
+	~	Dimensionless
+	~		|
+
+pot order creation  =
+        normal lead gen effic
+             * Products
+             * effect of advertising
+	~	Orders / Month
+	~		|
+
+Pot Orders In Negotiation  =
+        INTEG( pot orders moving to negot
+                  - unit sales
+                  - pot orders lost to comp
+                  - pot orders not buying ,
+             23)
+	~	Orders
+	~		|
+
+pot orders lost to comp  =
+        Pot Orders In Negotiation
+             * fraction custs buying
+             * ( 1
+                  - normal share of sales )
+             / duration of negotiation
+	~	Orders / Month
+	~		|
+
+pot orders not buying  =
+        Pot Orders In Negotiation
+             * ( 1
+                  - fraction custs buying )
+             / duration of negotiation
+	~	Orders / Month
+	~		|
+
+pot orders moving to negot  =
+        Int Dir Salespeople
+             * demos per person month
+             * eff of lead avail on demos
+             * sales rep effect mult
+	~	Orders / Month
+	~		|
+
+pot ords obs rate  =
+        Potential Orders
+             / lifetime of mailing list
+	~	Orders / Month
+	~		|
+
+Potential Orders  =
+        INTEG( pot order creation
+                  - pot ords obs rate
+                  - pot orders moving to negot
+                  + pot orders not buying,
+             potential orders initial )
+	~	Orders
+	~		|
+
+potential orders initial  = 2400
+	~	Orders
+	~		|
+
+price  = 7000
+	~	$/ Orders
+	~		|
+
+prod dev budget  =
+        cash revenue
+             * frac budget r and d
+	~	$/ Month
+	~		|
+
+prod dev efficiency  = 3e-05
+	~	Product / $
+	~		|
+
+prod dev time  = 12
+	~	Month
+	~		|
+
+prod gen rate  =
+        INTEG( ( prod dev efficiency
+                  * prod dev budget
+                  - prod gen rate )
+                  / prod dev time ,
+             prod dev efficiency
+                  * prod dev budget )
+	~	Product / Month
+	~		|
+
+prod obs time  = 60
+	~	Months
+	~		|
+
+prod obsolescence rate  =
+        Products
+             / prod obs time
+	~	Product / Month
+	~		|
+
+Products  =
+        INTEG( prod gen rate
+                  - prod obsolescence rate ,
+             10)
+	~	Product
+	~		|
+
+Receivables  =
+        INTEG( accrued revenue
+                  - cash revenue ,
+             accrued revenue
+                  * time to clear receivables )
+	~	$
+	~		|
+
+retained cash flow  =
+        cash revenue
+             * frac cash retained
+	~	$/ Month
+	~		|
+
+sales rep effect mult  =
+        table for sales rep effect ( external sales reps
+                  / Potential Orders )
+	~	Dimensionless
+	~		|
+
+SAVEPER  = 1
+	~	Month
+	~	   The frequency with which data is stored
+	|
+
+table for eff of leads  (
+            0, 100, 200, 300, 400, 500, 0, 0.32, 0.6, 0.8, 0.9, 1 )
+	~	Dimensionless
+	~		|
+
+table for effect of adv  (
+            0, 40, 80, 120, 160, 200, 240, 280, 320, 360, 400, 0.01, 0.2, 0.5
+            , 0.7, 0.8, 1, 1.03, 1.06, 1.08, 1.09, 1.1 )
+	~	Dimensionless
+	~		|
+
+table for frac buying  (
+            0, 0.005, 0.01, 0.015, 0.02, 0.025, 0.03, 1, 0.75, 0.55, 0.43,
+            0.38, 0.35, 0.34 )
+	~	Dimensionless
+	~		|
+
+table for sales rep effect  (
+            0.0017, 0.0027, 0.0037, 0.0047, 0.0057, 0.0067, 0.0077, 0.0087,
+            0.0097, 0.0107, 0.4, 0.55, 0.7, 0.85, 1, 1.1, 1.2, 1.3, 1.4, 1.4
+             )
+	~	Dimensionless
+	~		|
+
+target int dir sales  =
+        cash revenue
+             * percent budget int dir sales/100
+             / int dir sales cost
+	~	People
+	~		|
+
+time to hire int dir salespeople  = 10
+	~	Months
+	~		|
+
+TIME STEP  = 1
+	~	Month
+	~	   The time step for the simulation
+	|
+
+time to clear receivables  = 6
+	~	Months
+	~		|
+
+unit sales  =
+        Pot Orders In Negotiation
+             * normal share of sales
+             * fraction custs buying
+             / duration of negotiation
+	~	Orders / Month
+	~		|
+
+\\\---/// Sketch information - do not modify anything except names
+V300  Do not put anything below this section - it will be ignored
+*Overview
+$0-0-0,0,Vensim Sans|12||0-0-0|0-0-0|0-0-0|-1--1--1|-1--1--1|96,96,100,0
+10,1,Cum Retained Cash,395,162,75,30,0,3,1,40,-1,0,0,0,0-0-0,0-0-0,Vensim Sans|14||0-0-0,0,0,0,0,0,0
+10,2,retained cash flow,176,207,75,30,0,3,1,41,-1,0,0,0,128-128-128,0-0-0,Vensim Sans|14||0-0-0,0,0,0,0,0,0
+10,3,cash revenue,839,198,75,30,0,3,0,8,-1,1,0,0,-1--1--1,-1--1--1,|14||0-0-0,0,0,0,0,0,0
+10,4,frac cash retained,132,312,75,30,0,3,1,41,-1,0,0,0,128-128-128,0-0-0,Vensim Sans|14||0-0-0,0,0,0,0,0,0
+10,5,Receivables,632,156,75,30,0,3,0,8,-1,1,0,0,-1--1--1,-1--1--1,|14||0-0-0,0,0,0,0,0,0
+10,6,time to clear receivables,341,297,75,30,0,3,1,41,-1,0,0,0,128-128-128,0-0-0,Vensim Sans|14||0-0-0,0,0,0,0,0,0
+10,7,accrued revenue,359,130,75,30,0,3,0,8,-1,1,0,0,-1--1--1,-1--1--1,|14||0-0-0,0,0,0,0,0,0
+10,8,price,719,207,75,30,0,3,1,41,-1,0,0,0,128-128-128,0-0-0,Vensim Sans|14||0-0-0,0,0,0,0,0,0
+10,9,unit sales,176,199,75,30,0,3,0,8,-1,1,0,0,-1--1--1,-1--1--1,|14||0-0-0,0,0,0,0,0,0
+10,10,duration of negotiation,788,258,75,30,0,3,1,41,-1,0,0,0,128-128-128,0-0-0,Vensim Sans|14||0-0-0,0,0,0,0,0,0
+10,11,fraction custs buying,572,216,75,30,0,3,0,8,-1,1,0,0,-1--1--1,-1--1--1,|14||0-0-0,0,0,0,0,0,0
+10,12,normal share of sales,755,294,75,30,0,3,1,41,-1,0,0,0,128-128-128,0-0-0,Vensim Sans|14||0-0-0,0,0,0,0,0,0
+10,13,Pot Orders In Negotiation,146,319,61,28,8,3,0,9,0,1,0,0,128-128-128,0-0-0,|14||0-0-0,0,0,0,0,0,0
+10,14,pot orders lost to comp,488,366,75,30,0,3,0,8,-1,1,0,0,-1--1--1,-1--1--1,|14||0-0-0,0,0,0,0,0,0
+10,15,Adv Budget Effective,737,711,75,30,0,3,0,8,-1,1,0,0,-1--1--1,-1--1--1,|14||0-0-0,0,0,0,0,0,0
+10,16,table for frac buying,713,399,75,30,0,3,1,41,-1,0,0,0,128-128-128,0-0-0,Vensim Sans|14||0-0-0,0,0,0,0,0,0
+10,17,pot orders not buying,398,292,69,24,8,3,0,9,0,1,0,0,128-128-128,0-0-0,|14||0-0-0,0,0,0,0,0,0
+10,18,pot orders moving to negot,149,446,70,30,8,3,0,9,0,1,0,0,128-128-128,0-0-0,|14||0-0-0,0,0,0,0,0,0
+10,19,demos per person month,176,441,75,30,0,3,1,41,-1,0,0,0,128-128-128,0-0-0,Vensim Sans|14||0-0-0,0,0,0,0,0,0
+10,20,eff of lead avail on demos,407,477,75,25,8,3,0,9,0,1,0,0,128-128-128,0-0-0,|14||0-0-0,0,0,0,0,0,0
+10,21,Int Dir Salespeople,623,429,75,30,0,3,0,8,-1,1,0,0,-1--1--1,-1--1--1,|14||0-0-0,0,0,0,0,0,0
+10,22,sales rep effect mult,473,537,75,30,0,3,0,8,-1,1,0,0,-1--1--1,-1--1--1,|14||0-0-0,0,0,0,0,0,0
+10,23,target int dir sales,673,349,63,27,8,3,0,9,0,1,0,0,128-128-128,0-0-0,|14||0-0-0,0,0,0,0,0,0
+10,24,Potential Orders,143,580,75,30,0,3,0,8,-1,1,0,0,-1--1--1,-1--1--1,|14||0-0-0,0,0,0,0,0,0
+10,25,table for eff of leads,330,561,75,30,0,3,1,41,-1,0,0,0,128-128-128,0-0-0,Vensim Sans|14||0-0-0,0,0,0,0,0,0
+10,26,pot order creation,275,660,75,30,0,3,0,8,-1,1,0,0,-1--1--1,-1--1--1,|14||0-0-0,0,0,0,0,0,0
+10,27,pot ords obs rate,137,714,75,30,0,3,0,8,-1,1,0,0,-1--1--1,-1--1--1,|14||0-0-0,0,0,0,0,0,0
+10,28,potential orders initial,288,600,75,30,0,3,1,41,-1,0,0,0,128-128-128,0-0-0,Vensim Sans|14||0-0-0,0,0,0,0,0,0
+10,29,time to hire int dir salespeople,767,537,75,30,0,3,1,41,-1,0,0,0,128-128-128,0-0-0,Vensim Sans|14||0-0-0,0,0,0,0,0,0
+10,30,external sales reps,680,508,75,30,0,3,0,8,-1,1,0,0,-1--1--1,-1--1--1,|14||0-0-0,0,0,0,0,0,0
+10,31,table for sales rep effect,482,604,75,30,0,3,1,41,-1,0,0,0,128-128-128,0-0-0,Vensim Sans|14||0-0-0,0,0,0,0,0,0
+10,32,int dir sales cost,662,640,75,30,0,3,1,41,-1,0,0,0,128-128-128,0-0-0,Vensim Sans|14||0-0-0,0,0,0,0,0,0
+10,33,percent budget int dir sales,599,663,75,30,0,3,1,41,-1,0,0,0,128-128-128,0-0-0,Vensim Sans|14||0-0-0,0,0,0,0,0,0
+10,34,lifetime of mailing list,144,658,75,30,0,3,1,41,-1,0,0,0,128-128-128,0-0-0,Vensim Sans|14||0-0-0,0,0,0,0,0,0
+10,35,effect of advertising,425,726,75,30,0,3,0,8,-1,1,0,0,-1--1--1,-1--1--1,|14||0-0-0,0,0,0,0,0,0
+10,36,normal lead gen effic,119,477,75,30,0,3,1,41,-1,0,0,0,128-128-128,0-0-0,Vensim Sans|14||0-0-0,0,0,0,0,0,0
+10,37,percent budget adv,131,159,75,30,0,2,1,41,-1,0,0,0,128-128-128,0-0-0,Vensim Sans|14||0-0-0,0,0,0,0,0,0
+10,38,frac budget mfg,95,364,75,30,0,3,1,41,-1,0,0,0,128-128-128,0-0-0,Vensim Sans|14||0-0-0,0,0,0,0,0,0
+10,39,frac budget r and d,168,382,75,30,0,3,1,41,-1,0,0,0,128-128-128,0-0-0,Vensim Sans|14||0-0-0,0,0,0,0,0,0
+10,40,percent budget adv,120,315,75,30,0,3,1,41,-1,0,0,0,128-128-128,0-0-0,Vensim Sans|14||0-0-0,0,0,0,0,0,0
+10,41,percent budget ext sales reps,456,207,75,30,0,3,1,41,-1,0,0,0,128-128-128,0-0-0,Vensim Sans|14||0-0-0,0,0,0,0,0,0
+10,42,Products,683,652,75,30,0,3,0,8,-1,1,0,0,-1--1--1,-1--1--1,|14||0-0-0,0,0,0,0,0,0
+10,43,table for effect of adv,203,706,75,30,0,3,1,41,-1,0,0,0,128-128-128,0-0-0,Vensim Sans|14||0-0-0,0,0,0,0,0,0
+10,44,adv budget,854,636,75,30,0,3,0,8,-1,1,0,0,-1--1--1,-1--1--1,|14||0-0-0,0,0,0,0,0,0
+10,45,adv impact delay,392,717,75,30,0,3,1,41,-1,0,0,0,128-128-128,0-0-0,Vensim Sans|14||0-0-0,0,0,0,0,0,0
+10,46,prod gen rate,792,570,75,30,0,3,0,8,-1,1,0,0,-1--1--1,-1--1--1,|14||0-0-0,0,0,0,0,0,0
+10,47,prod obsolescence rate,485,592,75,30,0,3,0,8,-1,1,0,0,-1--1--1,-1--1--1,|14||0-0-0,0,0,0,0,0,0
+10,48,prod obs time,816,507,75,30,0,3,1,41,-1,0,0,0,128-128-128,0-0-0,Vensim Sans|14||0-0-0,0,0,0,0,0,0
+10,49,prod dev budget,845,468,75,30,0,3,0,8,-1,1,0,0,-1--1--1,-1--1--1,|14||0-0-0,0,0,0,0,0,0
+10,50,prod dev efficiency,846,669,75,30,0,3,1,41,-1,0,0,0,128-128-128,0-0-0,Vensim Sans|14||0-0-0,0,0,0,0,0,0
+10,51,prod dev time,779,723,75,30,0,3,1,41,-1,0,0,0,128-128-128,0-0-0,Vensim Sans|14||0-0-0,0,0,0,0,0,0
+10,52,ext sales rep fee,636,420,75,30,0,3,1,41,-1,0,0,0,128-128-128,0-0-0,Vensim Sans|14||0-0-0,0,0,0,0,0,0
+1,53,2,1,0,1,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,54,3,2,0,1,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,55,4,2,0,1,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,56,5,3,1,0,0,0,1,0,0,0-0-255,|||0-0-0,1|(746,144)|
+1,57,6,3,0,1,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,58,7,5,0,0,0,0,1,0,0,0-0-255,|||0-0-0,1|(0,0)|
+1,59,3,5,1,0,0,0,1,0,0,128-128-128,|||0-0-0,1|(732,195)|
+1,60,6,5,0,1,0,0,0,0,1,-1--1--1,,1|(0,0)|
+1,61,8,7,0,1,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,62,9,7,1,0,0,0,1,0,0,0-0-255,|||0-0-0,1|(216,160)|
+1,63,10,9,0,1,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,64,11,9,1,0,0,0,1,0,0,255-0-0,|||0-0-0,1|(356,182)|
+1,65,12,9,0,1,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,66,13,9,1,0,0,0,1,0,0,0-0-255,|||0-0-0,1|(134,263)|
+1,67,13,11,1,0,0,0,1,0,0,128-128-128,|||0-0-0,1|(306,242)|
+1,68,16,11,0,1,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,69,14,13,1,0,0,0,1,0,0,128-128-128,|||0-0-0,1|(259,369)|
+1,70,17,13,1,0,0,0,1,0,0,128-128-128,|||0-0-0,1|(281,333)|
+1,71,18,13,0,0,0,0,1,0,0,0-0-255,|||0-0-0,1|(0,0)|
+1,72,9,13,1,0,0,0,1,0,0,128-128-128,|||0-0-0,1|(211,255)|
+1,73,10,14,0,1,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,74,11,14,0,0,0,0,1,0,0,128-128-128,|||0-0-0,1|(0,0)|
+1,75,12,14,0,1,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,76,13,14,1,0,0,0,1,0,0,128-128-128,|||0-0-0,1|(339,320)|
+1,77,10,17,0,1,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,78,11,17,0,0,0,0,1,0,0,128-128-128,|||0-0-0,1|(0,0)|
+1,79,13,17,1,0,0,0,1,0,0,128-128-128,|||0-0-0,1|(273,284)|
+1,80,19,18,0,1,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,81,20,18,1,0,0,0,1,0,0,0-0-255,|||0-0-0,1|(285,474)|
+1,82,21,18,1,0,0,0,1,0,0,128-128-128,|||0-0-0,1|(367,422)|
+1,83,22,18,1,0,0,0,1,0,0,128-128-128,|||0-0-0,1|(293,522)|
+1,84,21,20,1,0,0,0,1,0,0,0-0-255,|||0-0-0,1|(516,459)|
+1,85,24,20,1,0,0,0,1,0,0,255-0-0,|||0-0-0,1|(265,549)|
+1,86,25,20,0,1,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,87,26,24,1,0,0,0,1,0,0,255-0-0,|||0-0-0,1|(198,634)|
+1,88,17,24,0,0,0,0,1,0,0,128-128-128,|||0-0-0,1|(0,0)|
+1,89,18,24,1,0,0,0,1,0,0,128-128-128,|||0-0-0,1|(137,501)|
+1,90,27,24,1,0,0,0,1,0,0,128-128-128,|||0-0-0,1|(155,669)|
+1,91,28,24,0,1,0,0,0,0,1,-1--1--1,,1|(0,0)|
+1,92,23,21,1,0,0,0,1,0,0,0-0-255,|||0-0-0,1|(658,395)|
+1,93,29,21,0,1,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,94,30,22,1,0,0,0,1,0,0,128-128-128,|||0-0-0,1|(611,534)|
+1,95,24,22,1,0,0,0,1,0,0,128-128-128,|||0-0-0,1|(287,568)|
+1,96,31,22,0,1,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,97,3,23,1,0,0,0,1,0,0,0-0-255,|||0-0-0,1|(762,293)|
+1,98,33,23,0,1,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,99,32,23,0,1,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,100,34,27,0,1,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,101,24,27,1,0,0,0,1,0,0,128-128-128,|||0-0-0,1|(113,628)|
+1,102,35,26,1,0,0,0,1,0,0,255-0-0,|||0-0-0,1|(344,711)|
+1,103,36,26,0,1,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,104,42,26,1,0,0,0,1,0,0,255-0-0,|||0-0-0,1|(504,672)|
+1,105,37,4,0,1,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,106,41,4,0,1,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,107,33,4,0,1,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,108,38,4,0,1,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,109,39,4,0,1,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,110,15,35,1,0,0,0,1,0,0,255-0-0,|||0-0-0,1|(581,724)|
+1,111,42,35,1,0,0,0,1,0,0,128-128-128,|||0-0-0,1|(566,693)|
+1,112,43,35,0,1,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,113,44,15,0,0,0,0,1,0,0,255-0-0,|||0-0-0,1|(0,0)|
+1,114,45,15,0,1,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,115,46,42,0,0,0,0,1,0,0,255-0-0,|||0-0-0,1|(0,0)|
+1,116,47,42,1,0,0,0,1,0,0,128-128-128,|||0-0-0,1|(546,642)|
+1,117,3,44,1,0,0,0,1,0,0,255-0-0,|||0-0-0,1|(950,393)|
+1,118,37,44,0,1,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,119,48,47,0,1,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,120,42,47,1,0,0,0,1,0,0,128-128-128,|||0-0-0,1|(647,615)|
+1,121,49,46,1,0,0,0,1,0,0,128-128-128,|||0-0-0,1|(833,504)|
+1,122,50,46,0,1,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,123,51,46,0,1,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,124,3,49,1,0,0,0,1,0,0,255-0-0,|||0-0-0,1|(887,327)|
+1,125,39,49,0,1,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,126,3,30,1,0,0,0,1,0,0,128-128-128,|||0-0-0,1|(803,363)|
+1,127,52,30,0,1,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,128,41,30,0,1,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,129,24,11,2,0,0,0,1,0,0,255-0-0,|||0-0-0,1|(131,162)|
+12,130,0,629,33,80,40,8,7,0,0,-1,1,0,0,0,0,0,0,0,0
+MARKET 2 MODEL
+12,131,0,1306,375,300,200,0,15,0,0,1,0,0,0,0,0,0,0,0,0
+MARKET_2_MODEL
+\\\---/// Sketch information - do not modify anything except names
+V300  Do not put anything below this section - it will be ignored
+*Sales Process
+$192-192-192,0,Vensim Sans|12||0-0-0|64-64-64|128-128-128|-1--1--1|-1--1--1|96,96,120,0
+10,1,Pot Orders In Negotiation,367,315,53,25,3,131,0,24,0,1,0,0,-1--1--1,0-0-0,|12|B|0-0-0,0,0,0,0,0,0
+10,2,table for frac buying,624,162,75,30,0,3,0,18,0,1,0,0,-1--1--1,-1--1--1,|||64-128-128,0,0,0,0,0,0
+12,3,48,31,573,10,8,0,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,4,Potential Orders,25,318,40,20,3,3,0,24,0,1,0,0,-1--1--1,0-0-0,|12|B|0-0-0,0,0,0,0,0,0
+12,5,48,-183,318,10,8,0,3,0,0,-1,0,0,0,0,0,0,0,0,0
+12,6,48,643,319,10,8,0,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,7,demos per person month,145,429,75,30,0,3,0,18,0,1,0,0,-1--1--1,-1--1--1,|||64-128-128,0,0,0,0,0,0
+10,8,eff of lead avail on demos,195,654,75,30,0,3,0,0,0,1,0,0,0,0,0,0,0,0
+10,9,Int Dir Salespeople,237,528,75,30,0,2,0,0,0,1,0,0,0,0,0,0,0,0
+10,10,sales rep effect mult,145,463,75,30,0,2,0,0,0,1,0,0,0,0,0,0,0,0
+11,11,0,198,321,7,8,34,3,0,0,1,0,0,0,0,0,0,0,0,0
+10,12,pot orders moving to negot,198,359,75,30,32,3,0,0,0,1,0,0,0,0,0,0,0,0
+12,13,48,390,507,10,8,0,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,14,potential orders initial,-123,222,75,30,0,3,0,18,0,1,0,0,-1--1--1,-1--1--1,|||64-128-128,0,0,0,0,0,0
+10,15,lifetime of mailing list,-23,631,75,30,0,3,0,19,0,0,0,0,128-128-128,0-0-0,|||64-128-128,0,0,0,0,0,0
+10,16,table for eff of leads,423,595,75,30,0,3,0,18,0,1,0,0,-1--1--1,-1--1--1,|||64-128-128,0,0,0,0,0,0
+10,17,effect of advertising,-173,519,75,30,0,2,0,0,0,1,0,0,0,0,0,0,0,0
+10,18,normal lead gen effic,-159,594,75,30,0,3,0,18,0,1,0,0,-1--1--1,-1--1--1,|||64-128-128,0,0,0,0,0,0
+10,19,Products,-189,426,75,30,0,2,0,0,-1,1,0,0,0,0,0,0,0,0
+11,20,0,-123,318,7,8,34,3,0,0,1,0,0,0,0,0,0,0,0,0
+10,21,pot order creation,-123,356,75,30,32,3,0,0,-1,1,0,0,0,0,0,0,0,0
+10,22,duration of negotiation,709,237,75,30,0,3,0,18,0,1,0,0,-1--1--1,-1--1--1,|||64-128-128,0,0,0,0,0,0
+10,23,fraction custs buying,468,198,75,30,0,3,0,0,-1,1,0,0,0,0,0,0,0,0
+10,24,normal share of sales,627,378,75,30,0,3,0,18,0,1,0,0,-1--1--1,-1--1--1,|||64-128-128,0,0,0,0,0,0
+11,25,0,522,319,7,8,34,3,0,0,1,0,0,0,0,0,0,0,0,0
+10,26,unit sales,522,357,75,30,32,3,0,0,-1,1,0,0,0,0,0,0,0,0
+11,27,0,151,231,7,8,34,3,0,0,3,0,0,0,0,0,0,0,0,0
+10,28,pot orders not buying,151,193,75,30,32,3,0,0,-1,1,0,0,0,0,0,0,0,0
+11,29,0,31,504,8,7,33,3,0,0,2,0,0,0,0,0,0,0,0,0
+10,30,pot ords obs rate,-52,504,75,30,32,3,0,0,0,1,0,0,0,0,0,0,0,0
+11,31,0,390,415,8,7,33,3,0,0,4,0,0,0,0,0,0,0,0,0
+10,32,pot orders lost to comp,473,415,75,30,32,3,0,0,0,1,0,0,0,0,0,0,0,0
+1,33,11,1,4,0,0,22,0,0,0,-1--1--1,,1|(259,321)|
+1,34,11,4,100,0,0,22,0,0,0,-1--1--1,,1|(128,321)|
+1,35,7,12,1,0,0,0,0,0,0,-1--1--1,,1|(151,402)|
+1,36,8,12,1,0,0,0,0,0,0,-1--1--1,,1|(342,457)|
+1,37,9,12,1,0,0,0,0,0,0,-1--1--1,,1|(183,445)|
+1,38,10,12,1,0,0,0,0,0,0,-1--1--1,,1|(153,420)|
+1,39,14,4,0,0,0,0,0,0,1,-1--1--1,,1|(0,0)|
+1,40,20,4,4,0,0,22,0,0,0,-1--1--1,,1|(-66,318)|
+1,41,20,5,100,0,0,22,0,0,0,-1--1--1,,1|(-152,318)|
+1,42,17,21,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,43,18,21,1,0,0,0,0,0,0,-1--1--1,,1|(-132,474)|
+1,44,19,21,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,45,25,6,4,0,0,22,0,0,0,-1--1--1,,1|(581,319)|
+1,46,25,1,100,0,0,22,0,0,0,-1--1--1,,1|(467,319)|
+1,47,22,25,1,0,0,0,0,0,0,-1--1--1,,1|(597,235)|
+1,48,23,25,1,0,0,0,0,0,0,-1--1--1,,1|(505,253)|
+1,49,24,26,1,0,0,0,0,0,0,-1--1--1,,1|(589,345)|
+1,50,1,25,1,0,0,0,0,0,0,-1--1--1,,1|(471,253)|
+1,51,9,8,1,0,0,0,0,0,0,-1--1--1,,1|(217,591)|
+1,52,4,8,1,0,0,0,0,0,0,-1--1--1,,1|(85,543)|
+1,53,16,8,1,0,0,0,0,0,0,-1--1--1,,1|(313,643)|
+1,54,27,4,4,0,0,22,0,0,0,-1--1--1,,1|(25,231)|
+1,55,27,1,100,0,0,22,0,0,0,-1--1--1,,1|(367,231)|
+1,56,23,28,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,57,1,27,1,0,0,0,0,0,0,-1--1--1,,1|(205,294)|
+1,58,29,3,4,0,0,22,0,0,0,-1--1--1,,1|(31,538)|
+1,59,29,4,100,0,0,22,0,0,0,-1--1--1,,1|(31,417)|
+1,60,15,30,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,61,4,30,1,0,0,0,0,0,0,-1--1--1,,1|(-21,391)|
+1,62,31,13,4,0,0,22,0,0,0,-1--1--1,,1|(390,460)|
+1,63,31,1,100,0,0,22,0,0,0,-1--1--1,,1|(390,374)|
+1,64,23,32,1,0,0,0,0,0,0,-1--1--1,,1|(463,336)|
+1,65,24,32,1,0,0,0,0,0,0,-1--1--1,,1|(553,415)|
+1,66,1,32,1,0,0,0,0,0,0,-1--1--1,,1|(456,342)|
+1,67,1,23,1,0,0,0,0,0,0,-1--1--1,,1|(399,243)|
+1,68,2,23,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,69,4,23,3,0,0,0,0,0,0,-1--1--1,,3|(48,258)|(48,156)|(343,156)|
+1,70,22,28,3,0,0,0,0,0,0,-1--1--1,,2|(709,126)|(300,126)|
+1,71,22,32,3,0,0,0,0,0,0,-1--1--1,,2|(709,459)|(531,459)|
+12,72,0,243,32,80,40,8,7,0,0,-1,1,0,0,0,0,0,0,0,0
+Sales Process
+12,73,0,1152,261,300,200,0,15,0,0,1,0,0,0,0,0,0,0,0,0
+Sales_Process
+\\\---/// Sketch information - do not modify anything except names
+V300  Do not put anything below this section - it will be ignored
+*Cash Revenue
+$192-192-192,0,Vensim Sans|12||0-0-0|64-64-64|128-128-128|-1--1--1|-1--1--1|96,96,100,0
+10,1,frac cash retained,713,597,75,30,0,3,0,0,-1,1,0,0,0,0,0,0,0,0
+10,2,frac budget mfg,454,549,75,30,0,3,0,18,-1,1,0,0,-1--1--1,-1--1--1,|||64-128-128,0,0,0,0,0,0
+10,3,frac budget r and d,431,588,75,30,0,3,0,18,-1,1,0,0,-1--1--1,-1--1--1,|||64-128-128,0,0,0,0,0,0
+10,4,percent budget adv,431,630,75,30,0,3,0,18,-1,1,0,0,-1--1--1,-1--1--1,|||64-128-128,0,0,0,0,0,0
+10,5,percent budget ext sales reps,365,669,75,30,0,3,0,18,-1,1,0,0,-1--1--1,-1--1--1,|||64-128-128,0,0,0,0,0,0
+10,6,Receivables,775,352,56,23,3,131,0,16,0,1,0,0,0-0-0,0-0-0,||B|0-0-0,0,0,0,0,0,0
+10,7,time to clear receivables,629,438,75,30,0,3,0,18,0,1,0,0,-1--1--1,-1--1--1,|||64-128-128,0,0,0,0,0,0
+12,8,48,1063,358,10,8,0,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,9,percent budget int dir sales,389,717,75,30,0,3,0,18,-1,1,0,0,-1--1--1,-1--1--1,|||64-128-128,0,0,0,0,0,0
+10,10,price,388,456,75,30,0,3,0,18,-1,1,0,0,-1--1--1,-1--1--1,|||64-128-128,0,0,0,0,0,0
+10,11,unit sales,334,412,75,30,0,2,0,2,-1,1,0,0,-1--1--1,-1--1--1,|||128-128-128,0,0,0,0,0,0
+12,12,48,460,351,10,8,0,3,0,0,-1,0,0,0,0,0,0,0,0,0
+11,13,0,574,351,7,8,34,3,0,0,1,0,0,0,0,0,0,0,0,0
+10,14,accrued revenue,574,389,75,30,32,3,0,0,-1,1,0,0,0,0,0,0,0,0
+11,15,0,946,358,7,8,34,3,0,0,1,0,0,0,0,0,0,0,0,0
+10,16,cash revenue,946,396,75,30,32,3,0,0,-1,1,0,0,0,0,0,0,0,0
+10,17,Cum Retained Cash,1045,495,53,27,3,131,0,16,0,1,0,0,0-0-0,0-0-0,||B|0-0-0,0,0,0,0,0,0
+12,18,48,749,498,10,8,0,3,0,0,-1,0,0,0,0,0,0,0,0,0
+11,19,0,835,498,7,8,34,3,0,0,1,0,0,0,0,0,0,0,0,0
+10,20,retained cash flow,835,536,75,30,32,3,0,0,-1,1,0,0,0,0,0,0,0,0
+1,21,6,15,1,0,0,0,0,0,0,-1--1--1,,1|(844,291)|
+1,22,7,16,1,0,0,0,0,0,0,-1--1--1,,1|(769,432)|
+1,23,7,6,1,1,0,0,0,0,1,-1--1--1,,1|(661,388)|
+1,24,10,14,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,25,11,14,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,26,13,6,4,0,0,22,0,0,0,-1--1--1,,1|(650,351)|
+1,27,13,12,100,0,0,22,0,0,0,-1--1--1,,1|(518,351)|
+1,28,15,8,4,0,0,22,0,0,0,-1--1--1,,1|(1003,358)|
+1,29,15,6,100,0,0,22,0,0,0,-1--1--1,,1|(885,358)|
+1,30,16,19,1,0,0,0,0,0,0,-1--1--1,,1|(929,436)|
+1,31,1,20,1,0,0,0,0,0,0,-1--1--1,,1|(793,562)|
+1,32,2,1,1,0,0,0,0,0,0,-1--1--1,,1|(592,555)|
+1,33,3,1,1,0,0,0,0,0,0,-1--1--1,,1|(583,598)|
+1,34,4,1,1,0,0,0,0,0,0,-1--1--1,,1|(587,630)|
+1,35,5,1,1,0,0,0,0,0,0,-1--1--1,,1|(581,660)|
+1,36,9,1,1,0,0,0,0,0,0,-1--1--1,,1|(605,694)|
+1,37,19,17,4,0,0,22,0,0,0,-1--1--1,,1|(917,498)|
+1,38,19,18,100,0,0,22,0,0,0,-1--1--1,,1|(793,498)|
+12,39,0,737,211,80,40,8,7,0,0,-1,1,0,0,0,0,0,0,0,0
+Cash Revenue
+12,40,0,1464,369,300,200,0,15,0,0,1,0,0,0,0,0,0,0,0,0
+Cash_Revenue
+\\\---/// Sketch information - do not modify anything except names
+V300  Do not put anything below this section - it will be ignored
+*Sales People
+$192-192-192,0,Vensim Sans|12||0-0-0|64-64-64|128-128-128|-1--1--1|-1--1--1|96,96,100,0
+10,1,Int Dir Salespeople,761,378,53,27,3,131,0,16,0,1,0,0,0-0-0,0-0-0,||B|0-0-0,0,0,0,0,0,0
+10,2,target int dir sales,568,402,75,30,0,3,0,0,-1,1,0,0,0,0,0,0,0,0
+10,3,time to hire int dir salespeople,753,463,75,30,0,3,0,18,0,1,0,0,-1--1--1,-1--1--1,|||64-128-128,0,0,0,0,0,0
+10,4,external sales reps,360,320,75,30,0,3,0,0,-1,1,0,0,0,0,0,0,0,0
+10,5,int dir sales cost,370,430,75,30,0,3,0,18,0,1,0,0,-1--1--1,-1--1--1,|||64-128-128,0,0,0,0,0,0
+10,6,percent budget int dir sales,414,463,75,30,0,3,0,18,0,1,0,0,-1--1--1,-1--1--1,|||64-128-128,0,0,0,0,0,0
+10,7,ext sales rep fee,138,324,75,30,0,3,0,18,0,1,0,0,-1--1--1,-1--1--1,|||64-128-128,0,0,0,0,0,0
+10,8,percent budget ext sales reps,177,372,75,30,0,3,0,18,0,1,0,0,-1--1--1,-1--1--1,|||64-128-128,0,0,0,0,0,0
+10,9,pot orders moving to negot,865,300,75,30,0,3,0,0,-1,1,0,0,0,0,0,0,0,0
+10,10,cash revenue,346,395,75,30,0,2,0,0,-1,1,0,0,0,0,0,0,0,0
+10,11,demos per person month,466,227,75,30,0,3,0,16,0,1,0,0,-1--1--1,-1--1--1,|||0-0-0,0,0,0,0,0,0
+10,12,eff of lead avail on demos,708,224,75,30,0,2,0,0,-1,1,0,0,0,0,0,0,0,0
+10,13,sales rep effect mult,620,299,75,30,0,3,0,0,-1,1,0,0,0,0,0,0,0,0
+10,14,Potential Orders,266,227,75,30,0,2,0,0,-1,1,0,0,0,0,0,0,0,0
+10,15,table for sales rep effect,280,280,75,30,0,3,0,18,0,1,0,0,-1--1--1,-1--1--1,|||64-128-128,0,0,0,0,0,0
+1,16,8,4,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,17,7,4,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,18,5,2,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,19,6,2,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,20,3,1,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,21,2,1,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,22,10,2,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,23,10,4,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,24,11,9,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,25,12,9,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,26,1,9,1,0,0,0,0,0,0,-1--1--1,,1|(798,330)|
+1,27,13,9,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,28,4,13,1,0,0,0,0,0,0,-1--1--1,,1|(485,315)|
+1,29,14,13,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,30,15,13,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+12,31,0,504,117,80,40,8,7,0,0,-1,1,0,0,0,0,0,0,0,0
+Sales People
+12,32,0,1323,348,300,200,0,15,0,0,1,0,0,0,0,0,0,0,0,0
+Sales_People
+\\\---/// Sketch information - do not modify anything except names
+V300  Do not put anything below this section - it will be ignored
+*Advertising
+$192-192-192,0,Vensim Sans|12||0-0-0|64-64-64|128-128-128|-1--1--1|-1--1--1|96,96,100,0
+10,1,Adv Budget Effective,498,279,48,27,3,131,0,16,0,1,0,0,0-0-0,0-0-0,||B|0-0-0,0,0,0,0,0,0
+10,2,adv budget,356,299,75,30,0,3,0,0,-1,1,0,0,0,0,0,0,0,0
+10,3,adv impact delay,333,259,75,30,0,3,0,2,-1,1,0,0,-1--1--1,-1--1--1,|||64-128-128,0,0,0,0,0,0
+10,4,cash revenue,188,303,75,30,0,2,0,0,-1,1,0,0,0,0,0,0,0,0
+10,5,effect of advertising,668,279,75,30,0,3,0,0,-1,1,0,0,0,0,0,0,0,0
+10,6,percent budget adv,204,346,75,30,0,3,0,2,-1,1,0,0,-1--1--1,-1--1--1,|||64-128-128,0,0,0,0,0,0
+10,7,Products,616,230,75,30,0,2,0,0,-1,1,0,0,0,0,0,0,0,0
+10,8,table for effect of adv,638,337,75,30,0,3,0,2,0,1,0,0,-1--1--1,-1--1--1,|||64-128-128,0,0,0,0,0,0
+10,9,pot order creation,889,275,75,30,0,3,0,0,-1,1,0,0,0,0,0,0,0,0
+10,10,normal lead gen effic,837,334,75,30,0,3,0,2,-1,1,0,0,-1--1--1,-1--1--1,|||64-128-128,0,0,0,0,0,0
+1,11,2,1,1,0,0,0,0,0,0,-1--1--1,,1|(432,303)|
+1,12,3,1,1,0,0,0,0,0,0,-1--1--1,,1|(397,265)|
+1,13,4,2,1,0,0,0,0,0,0,-1--1--1,,1|(258,303)|
+1,14,6,2,1,0,0,0,0,0,0,-1--1--1,,1|(301,329)|
+1,15,1,5,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,16,7,5,1,0,0,0,0,0,0,-1--1--1,,1|(642,253)|
+1,17,8,5,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,18,5,9,1,0,0,0,0,0,0,-1--1--1,,1|(768,283)|
+1,19,10,9,1,0,0,0,0,0,0,-1--1--1,,1|(868,302)|
+1,20,7,9,1,0,0,0,0,0,0,-1--1--1,,1|(704,238)|
+12,21,0,501,140,80,40,8,7,0,0,-1,1,0,0,0,0,0,0,0,0
+Advertising
+12,22,0,1411,320,300,200,0,15,0,0,1,0,0,0,0,0,0,0,0,0
+Advertising
+\\\---/// Sketch information - do not modify anything except names
+V300  Do not put anything below this section - it will be ignored
+*Products
+$192-192-192,0,Vensim Sans|12||0-0-0|64-64-64|128-128-128|-1--1--1|-1--1--1|96,96,100,0
+10,1,Products,407,258,44,20,3,131,0,16,0,0,0,0,0-0-0,0-0-0,||B|0-0-0,0,0,0,0,0,0
+10,2,cash revenue,76,390,75,30,0,2,0,1,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,3,frac budget r and d,99,433,75,30,0,3,0,19,0,0,0,0,128-128-128,0-0-0,|||64-128-128,0,0,0,0,0,0
+10,4,prod dev budget,249,386,75,30,0,3,0,1,-1,0,0,0,128-128-128,0-0-0,|||0-0-0,0,0,0,0,0,0
+10,5,prod dev efficiency,408,330,75,30,0,3,0,19,0,0,0,0,128-128-128,0-0-0,|||64-128-128,0,0,0,0,0,0
+10,6,prod dev time,165,339,75,30,0,3,0,3,0,0,0,0,128-128-128,0-0-0,|||64-128-128,0,0,0,0,0,0
+10,7,prod obs time,592,334,75,30,0,3,0,19,0,0,0,0,128-128-128,0-0-0,|||64-128-128,0,0,0,0,0,0
+12,8,48,209,257,10,8,0,3,0,0,-1,0,0,0,0,0,0,0,0,0
+12,9,48,695,257,10,8,0,3,0,0,-1,0,0,0,0,0,0,0,0,0
+11,10,0,559,257,7,8,34,3,0,0,1,0,0,0,0,0,0,0,0,0
+10,11,prod obsolescence rate,559,295,75,30,32,3,0,1,-1,0,0,0,128-128-128,0-0-0,|||0-0-0,0,0,0,0,0,0
+11,12,0,281,257,7,8,34,3,0,0,1,0,0,0,0,0,0,0,0,0
+10,13,prod gen rate,281,295,75,30,32,3,0,1,-1,0,0,0,128-128-128,0-0-0,|||0-0-0,0,0,0,0,0,0
+1,14,4,13,1,0,0,0,0,0,0,-1--1--1,,1|(272,339)|
+1,15,5,13,1,0,0,0,0,0,0,-1--1--1,,1|(343,313)|
+1,16,6,13,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,17,7,11,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,18,1,10,1,0,0,0,0,0,0,-1--1--1,,1|(481,234)|
+1,19,12,1,4,0,0,22,0,0,0,-1--1--1,,1|(325,257)|
+1,20,12,8,100,0,0,22,0,0,0,-1--1--1,,1|(246,257)|
+1,21,10,9,4,0,0,22,0,0,0,-1--1--1,,1|(625,257)|
+1,22,10,1,100,0,0,22,0,0,0,-1--1--1,,1|(501,257)|
+1,23,2,4,1,0,0,0,0,0,0,-1--1--1,,1|(159,385)|
+1,24,3,4,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+12,25,0,414,137,80,40,8,7,0,0,-1,1,0,0,0,0,0,0,0,0
+Products
+12,26,0,1106,279,300,200,0,15,0,0,1,0,0,0,0,0,0,0,0,0
+Products
+///---\\\
+:GRAPH WIP_CASH_REV
+:TITLE Retains Cash Revenue
+:WIP
+:X-MIN 0
+:X-MAX 60
+:SCALE
+:VAR RETAINED CASH FLOW
+:Y-MIN 0
+:Y-MAX 40000
+:DATASET BASE
+:VAR RETAINED CASH FLOW
+:DATASET 
+:VAR RETAINED CASH FLOW
+:DATASET *2
+:VAR RETAINED CASH FLOW
+:DATASET *3
+
+:GRAPH BASE_V_ACTUAL
+:TITLE Base Run Versus Available Data
+:SCALE
+:VAR cash revenue|Revenue in base run
+:Y-MIN 0
+:Y-MAX 500000
+:DATASET base
+:VAR cash revenue|.......................actual
+:DATASET market
+:SCALE
+:VAR fraction custs buying|Marketing effectiveness in base
+:Y-MIN 0
+:Y-MAX 1
+:DATASET base
+:VAR fraction custs buying|.....................................actual
+:DATASET market
+
+:GRAPH DATA_AND_BEST
+:TITLE Optimized Run Versus Available Data
+:SCALE
+:VAR cash_revenue|Revenue in optimized run
+:DATASET calibrate.vdf
+:VAR cash_revenue|..................... actual
+:DATASET market.vdf
+:SCALE
+:VAR fraction_custs_buying|Marketing effectiveness in optimized
+:DATASET calibrate.vdf
+:VAR fraction_custs_buying|....................................... actual
+:DATASET market.vdf
+
+:GRAPH RETAINED_CASH
+:TITLE Perfomance Before and After Policy Optimization
+:SCALE
+:VAR retained_cash_flow|Retained earnings before
+:DATASET calibrat.vdf
+:VAR retained_cash_flow|...................after
+:UNITS Dollars/Month
+:DATASET optimal.vdf
+:SCALE
+:VAR cash_revenue|Revenue before
+:Y-MAX 800000
+:DATASET calibrat.vdf
+:VAR cash_revenue|..............after
+:UNITS $/Month
+:Y-MAX 800000
+:DATASET optimal.vdf
+
+:GRAPH MARKET_EFF
+:TITLE Market Effectiveness in Model Relative to Data
+:X-LABEL Months since January 1, 1985
+:X-MIN 12
+:SCALE
+:VAR fraction_custs_buying|Model Results
+:DATASET best.vdf
+:VAR fraction_custs_buying|Actual Data
+:UNITS Fraction
+:Y-MIN 0.45
+:Y-MAX 0.55
+:DATASET market.vdf
+
+:REPORT COMM1
+:TITLE COMM1
+:LOCATION -1,-1
+:SIZE -1,-1
+:FONT Times New Roman|10||0-0-0
+The software allows you to explore a model through a number of menus
+and output screens.  To select a menu item you can click on it, type the
+first letter in the menu description or select it using the up and down
+arrow keys and then press the enter key.  The selected menu item appears 
+highlighted - usually black on white.  In some cases buttons are used in
+place of menu items.  To activate these click on them.
+
+Additional functionality available in the software is described in 
+places where it can be used.  To conserve space, later commentaries
+will be kept small, and you will need to scroll them to read all the
+information they contain.
+:END-OF-REPORT
+
+:REPORT COMM4
+:TITLE COMM4
+:LOCATION -1,-1
+:SIZE -1,-1
+:FONT Times New Roman|10||0-0-0
+The cause and use screens show lists of
+different variables.  The graphs allows
+you to compare different scenarios.
+The trees allow you to investigate the
+structure of the model.
+
+You can double click on a variable name
+in the graphs, trees or documentation to
+view the same analysis screen for that
+variable.  You can also use the S
+command to select a new variable to work
+with.
+
+You can print the contents of the graphs
+and trees using the P command.  Output
+will be directed to your default printer.
+
+During causal tracing you can switch
+between the Tree and Graph represen-
+tations of causes.  This can be
+useful as means of understanding both
+structure and behavior.
+:END-OF-REPORT
+
+:GRAPH MARKET_2_MODEL
+:TITLE Accrued Revenue
+:SCALE
+:VAR accrued revenue
+:DATASET 
+:LINE-WIDTH 1
+
+:GRAPH Sales_Process
+:TITLE Sales Process
+:SCALE
+:VAR Potential Orders
+:DATASET 
+:LINE-WIDTH 1
+:SCALE
+:VAR unit sales
+:DATASET 
+:LINE-WIDTH 1
+
+:GRAPH Cash_Revenue
+:TITLE Cash Revenue
+:SCALE
+:VAR accrued revenue
+:DATASET 
+:LINE-WIDTH 1
+:SCALE
+:VAR Receivables
+:DATASET 
+:LINE-WIDTH 1
+:SCALE
+:VAR cash revenue
+:DATASET 
+:LINE-WIDTH 1
+
+:GRAPH Sales_People
+:SCALE
+:VAR external sales reps
+:DATASET 
+:LINE-WIDTH 1
+:SCALE
+:VAR sales rep effect mult
+:DATASET 
+:LINE-WIDTH 1
+:SCALE
+:VAR pot orders moving to negot
+:DATASET 
+:LINE-WIDTH 1
+
+:GRAPH Advertising
+:TITLE Advertising
+:SCALE
+:VAR Adv Budget Effective
+:DATASET 
+:LINE-WIDTH 1
+:SCALE
+:VAR pot order creation
+:DATASET 
+:LINE-WIDTH 1
+
+:GRAPH Products
+:TITLE Products
+:SCALE
+:VAR prod dev budget
+:DATASET 
+:LINE-WIDTH 1
+:SCALE
+:VAR prod gen rate
+:DATASET 
+:LINE-WIDTH 1
+:SCALE
+:VAR Products
+:DATASET 
+:LINE-WIDTH 1
+:SCALE
+:VAR prod obsolescence rate
+:DATASET 
+:LINE-WIDTH 1
+:L<%^E!@
+1:Mkt2.vdfx
+4:Time
+5:unit sales
+9:Mkt2
+19:100,5
+24:0
+25:60
+26:60
+22:$,Dollar,Dollars,$s
+22:Day,Days
+22:Hour,Hours
+22:Month,Months
+22:Person,People,Persons
+22:product,products
+22:Unit,Units
+22:Week,Weeks
+22:Year,Years
+22:$,Dollar,Dollars,$s
+22:Day,Days
+22:Hour,Hours
+22:Month,Months
+22:Person,People,Persons
+22:product,products
+22:Unit,Units
+22:Week,Weeks
+22:Year,Years
+23:0
+15:0,0,0,0,0,0
+27:0,
+34:0,
+42:0
+72:0
+73:0
+95:0
+96:0
+97:0
+77:0
+78:0
+102:1
+93:0
+94:0
+92:0
+91:0
+90:0
+87:0
+75:
+43:
+103:8,8,8,3,8
+105:0,0,0,0,0,0,0,0,0,0
+104:Courier|12||0-0-0|0-0-0|-1--1--1|0-0-255|192-192-192|-1--1--1

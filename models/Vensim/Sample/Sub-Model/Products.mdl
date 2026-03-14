@@ -1,0 +1,166 @@
+{UTF-8}
+{UTF-8}
+
+cash revenue=
+	70000
+	~	$/ Month
+	~		|
+
+frac budget r and d  = 0.15
+	~	Dimensionless
+	~		|
+
+prod dev budget  =
+        cash revenue
+             * frac budget r and d
+	~	$/ Month
+	~		|
+
+prod dev efficiency  = 3e-05
+	~	Product / $
+	~		|
+
+prod dev time  = 12
+	~	Month
+	~		|
+
+prod gen rate  =
+        INTEG( ( prod dev efficiency
+                  * prod dev budget
+                  - prod gen rate )
+                  / prod dev time ,
+             prod dev efficiency
+                  * prod dev budget )
+	~	Product / Month
+	~		|
+
+prod obs time  = 60
+	~	Months
+	~		|
+
+prod obsolescence rate  =
+        Products
+             / prod obs time
+	~	Product / Month
+	~		|
+
+Products  =
+        INTEG( prod gen rate
+                  - prod obsolescence rate ,
+             10)
+	~	Product
+	~		|
+
+********************************************************
+	.Control
+********************************************************~
+		Simulation Control Parameters
+	|
+
+FINAL TIME  = 60
+	~	Month
+	~	The final time for the simulation.
+	|
+
+INITIAL TIME  = 0
+	~	Month
+	~	The initial time for the simulation.
+	|
+
+SAVEPER  = 
+        TIME STEP
+	~	Month [0,?]
+	~	The frequency with which output is stored.
+	|
+
+TIME STEP  = 1
+	~	Month [0,?]
+	~	The time step for the simulation.
+	|
+
+\\\---/// Sketch information - do not modify anything except names
+V300  Do not put anything below this section - it will be ignored
+*Products
+$192-192-192,0,|12||-1--1--1|0-0-0|0-0-255|-1--1--1|-1--1--1|96,96,100,0
+10,1,Products,407,258,44,20,3,131,0,16,0,1,0,0,0-0-0,0-0-0,||B|0-0-0,0,0,0,0,0,0
+10,2,cash revenue,76,390,75,30,0,2,0,0,-1,1,0,0,0,0,0,0,0,0
+10,3,frac budget r and d,99,433,75,30,0,3,0,18,0,1,0,0,-1--1--1,-1--1--1,|||64-128-128,0,0,0,0,0,0
+10,4,prod dev budget,249,386,75,30,0,3,0,0,-1,1,0,0,0,0,0,0,0,0
+10,5,prod dev efficiency,408,330,75,30,0,3,0,18,0,1,0,0,-1--1--1,-1--1--1,|||64-128-128,0,0,0,0,0,0
+10,6,prod dev time,165,339,75,30,0,3,0,2,0,1,0,0,-1--1--1,-1--1--1,|||64-128-128,0,0,0,0,0,0
+10,7,prod obs time,592,334,75,30,0,3,0,2,0,1,0,0,-1--1--1,-1--1--1,|||64-128-128,0,0,0,0,0,0
+12,8,48,209,257,10,8,0,3,0,0,-1,0,0,0,0,0,0,0,0,0
+12,9,48,695,257,10,8,0,3,0,0,-1,0,0,0,0,0,0,0,0,0
+11,10,0,559,257,7,8,34,3,0,0,1,0,0,0,0,0,0,0,0,0
+10,11,prod obsolescence rate,559,295,75,30,32,3,0,0,-1,1,0,0,0,0,0,0,0,0
+11,12,0,281,257,7,8,34,3,0,0,1,0,0,0,0,0,0,0,0,0
+10,13,prod gen rate,281,295,75,30,32,3,0,0,-1,1,0,0,0,0,0,0,0,0
+1,14,4,13,1,0,0,0,0,0,0,-1--1--1,,1|(272,339)|
+1,15,5,13,1,0,0,0,0,0,0,-1--1--1,,1|(343,313)|
+1,16,6,13,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,17,7,11,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,18,1,10,1,0,0,0,0,0,0,-1--1--1,,1|(481,234)|
+1,19,12,1,4,0,0,22,0,0,0,-1--1--1,,1|(325,257)|
+1,20,12,8,100,0,0,22,0,0,0,-1--1--1,,1|(246,257)|
+1,21,10,9,4,0,0,22,0,0,0,-1--1--1,,1|(625,257)|
+1,22,10,1,100,0,0,22,0,0,0,-1--1--1,,1|(501,257)|
+1,23,2,4,1,0,0,0,0,0,0,-1--1--1,,1|(159,385)|
+1,24,3,4,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+12,25,0,400,98,80,40,8,7,0,0,-1,1,0,0,0,0,0,0,0,0
+Products Model
+12,26,0,1123,339,300,200,0,15,0,0,1,0,0,0,0,0,0,0,0,0
+Products
+///---\\\
+:GRAPH Products
+:TITLE Products
+:SCALE
+:VAR prod gen rate
+:DATASET 
+:LINE-WIDTH 1
+:SCALE
+:VAR Products
+:DATASET 
+:LINE-WIDTH 1
+:SCALE
+:VAR prod obsolescence rate
+:DATASET 
+:LINE-WIDTH 1
+:L<%^E!@
+4:Time
+5:prod obsolescence rate
+9:Current
+19:100,0
+24:0
+25:60
+26:60
+23:0
+15:0,0,0,0,0,0
+27:0,
+34:0,
+42:1
+72:0
+73:0
+35:Date
+36:YYYY-MM-DD
+37:2000
+38:1
+39:1
+40:2
+41:0
+95:0
+96:0
+97:0
+77:0
+78:0
+102:1
+93:0
+94:0
+92:0
+91:0
+90:0
+87:0
+75:
+43:
+103:8,8,8,3,8
+105:0,0,0,0,0,0,0,0,0,0
+104:Vensim Sans|12||0-0-0|0-0-0|-1--1--1|0-0-255|192-192-192|-1--1--1

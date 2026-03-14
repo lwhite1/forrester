@@ -1,0 +1,1408 @@
+{UTF-8}
+{UTF-8}
+
+
+RC no investment:THE CONDITION:
+	TI no capital:IMPLIES:capital investment = RC STEP CHECK( 1, capital investment , 0,\
+		 Step Check time )
+	~	
+	~		|
+
+Step Check time=
+	1950
+	~	Year
+	~		|
+
+TI no capital:TEST INPUT:
+	Capital = RC STEP( Capital , 0, Step Check time )
+	~	
+	~		|
+
+birth rate=
+	births/Population
+	~	1/Year
+	~		|
+
+death rate=
+	deaths/Population
+	~	1/Year
+	~		|
+
+net pop growth rate=
+	birth rate-death rate
+	~	1/Year
+	~		|
+
+********************************************************
+	.World2
+********************************************************~
+		 The model from World Dynamics. Variable names have been
+		         lengthened to
+		         increase clarity.
+	|
+
+deaths  =
+        Population
+             * IF THEN ELSE ( Time
+                       > switch time 3 ,
+                  death rate normal 1 ,
+                  death rate normal )
+             * deaths material multiplier
+             * deaths pollution multiplier
+             * deaths food multiplier
+             * deaths crowding multiplier
+	~	Person / Year
+	~		The worldwide number of deaths occurring.
+	|
+
+births  =
+        Population
+             * IF THEN ELSE ( Time
+                       > switch time 1 ,
+                  birth rate normal 1 ,
+                  birth rate normal )
+             * births material multiplier
+             * births crowding multiplier
+             * births food multiplier
+             * births pollution multiplier
+	~	Person / Year
+	~		The total number of births.
+	|
+
+Capital Agriculture Fraction  =
+        INTEG( ( capital agriculture fraction indicated
+                  * capital investment from quality ratio
+                  - Capital Agriculture Fraction )
+                  / capital agriculture fraction adjustment time ,
+             capital agriculture fraction initial )
+	~	Dimensionless [0,1]
+	~		  The fraction of capital in agriculture.
+	|
+
+Capital  =
+        INTEG( capital investment
+                  - capital depreciation ,
+             capital initial )
+	~	Capital units
+	~		  The capital stock.
+	|
+
+birth rate normal  = 0.04
+	~	1 / Year [0,0.1]
+	~		  The normal fractional birth rate.
+	|
+
+birth rate normal 1  = 0.04
+	~	1 / Year [0,0.1]
+	~		  The alternate normal fractional birth rate.
+	|
+
+births crowding mult tab  (
+            0, 1, 2, 3, 4, 5, 1.05, 1, 0.9, 0.7, 0.6, 0.55 )
+	~	Dimensionless
+	~		  The table for the effect of crowding on the number of
+		         births.
+	|
+
+births crowding multiplier  =
+        births crowding mult tab ( crowding )
+	~	Dimensionless
+	~		  The effect of crowding on the number of births.
+	|
+
+births food mult tab  (
+            0, 1, 2, 3, 4, 0, 1, 1.6, 1.9, 2 )
+	~	Dimensionless
+	~		  The table for the effect of food on the number of births.
+	|
+
+births food multiplier  =
+        births food mult tab ( food ratio )
+	~	Dimensionless
+	~		  The effect of food on the number of births.
+	|
+
+births material mult tab  (
+            0, 1, 2, 3, 4, 5, 1.2, 1, 0.85, 0.75, 0.7, 0.7 )
+	~	Dimensionless
+	~		  Table for the effect of the material standard of living on
+		         births.
+	|
+
+births material multiplier  =
+        births material mult tab ( material standard of living )
+	~	Dimensionless
+	~		  The effect of the material standard of living on births.
+	|
+
+births pollution mult tab  (
+            0, 10, 20, 30, 40, 50, 60, 1.02, 0.9, 0.7, 0.4, 0.25, 0.15, 0.1
+             )
+	~	Dimensionless
+	~		  The table for the effect of pollution on the number of
+		         births.
+	|
+
+births pollution multiplier  =
+        births pollution mult tab ( pollution ratio )
+	~	Dimensionless
+	~		  The effect of pollution on the number of births.
+	|
+
+capital agriculture fraction adjustment time  = 15
+	~	Year [1,80]
+	~		  The time to adjust the fraction of capital in agriculture.
+	|
+
+capital agriculture fraction indicated  =
+        capital agriculture fraction indicated tab ( food ratio )
+	~	Dimensionless
+	~		  The fraction of capital that should be agricultural as
+		         indicated by
+		         the availability of food.
+	|
+
+capital agriculture fraction indicated tab  (
+            0, 0.5, 1, 1.5, 2, 1, 0.6, 0.3, 0.15, 0.1 )
+	~	Dimensionless
+	~		  The fraction of capital that should be agricultural as
+		         indicated by
+		         the availability of food table.
+	|
+
+capital agriculture fraction initial  = 0.2
+	~	Dimensionless [0,1]
+	~		  The fraction of capital in agriculture initially.
+	|
+
+capital agriculture fraction normal  = 0.3
+	~	Dimensionless [0,1]
+	~		  The fraction of capital investment devoted to agriculture.
+	|
+
+capital depreciation  =
+        Capital
+             * IF THEN ELSE ( Time
+                       > switch time 5 ,
+                  capital depreciation normal 1 ,
+                  capital depreciation normal )
+	~	Capital units / Year
+	~		  The rate at which the capital stock depreciates.
+	|
+
+capital depreciation normal  = 0.025
+	~	1 / Year [0,1]
+	~		  The fractional rate at which the capital stock degrades.
+	|
+
+capital depreciation normal 1  = 0.025
+	~	1 / Year [0,1]
+	~		  The alternative fractional rate at which the capital stock
+		         degrades.
+	|
+
+capital initial  = 4e+08
+	~	Capital units [0,2e+10]
+	~		  The initial capital stock.
+	|
+
+capital investment mult tab  (
+            0, 1, 2, 3, 4, 5, 0.1, 1, 1.8, 2.4, 2.8, 3 )
+	~	Dimensionless
+	~		  Multiplier for the effect of the material standard of
+		         living on
+		         capital investment table.
+	|
+
+capital investment quality ratio tab  (
+            0, 0.5, 1, 1.5, 2, 0.7, 0.8, 1, 1.5, 2 )
+	~	Dimensionless
+	~		  Capital investment from quality table.
+	|
+
+capital investment rate normal 1  = 0.05
+	~	Capital units / Person / Year [0,1]
+	~		  The normal per capita rate of capital investment.
+	|
+
+capital investment  =
+        Population
+             * capital investment multiplier
+             * IF THEN ELSE ( Time
+                       > switch time 4 ,
+                  capital investment rate normal 1 ,
+                  capital investment rate normal )
+	~	Capital units / Year
+	~		  The gross amount of investment in capital.
+	|
+
+capital investment from quality ratio  =
+        capital investment quality ratio tab ( quality material multiplier
+                  / quality food multiplier )
+	~	Dimensionless
+	~		  Capital investment from quality.
+	|
+
+capital investment multiplier  =
+        capital investment mult tab ( material standard of living )
+	~	Dimensionless
+	~		  Multiplier for the effect of the material standard of
+		         living on
+		         capital investment.
+	|
+
+capital investment rate normal  = 0.05
+	~	Capital units / Person / Year [0,1]
+	~		  The normal per capita rate of capital investment.
+	|
+
+capital ratio  =
+        Capital
+             / Population
+	~	Capital units / Person
+	~		  The capital investment ratio (per capita investment).
+	|
+
+capital ratio agriculture  =
+        capital ratio
+             * Capital Agriculture Fraction
+             / capital agriculture fraction normal
+	~	Capital units / Person
+	~		  The capital investment ratio in agriculure.
+	|
+
+crowding  =
+        Population
+             / ( land area
+                  * population density normal )
+	~	Dimensionless
+	~		  The ratio oioulation to normally supportable population
+		         used as a
+		         measure of crowding.
+	|
+
+death rate normal  = 0.028
+	~	1 / Year [0,0.1]
+	~		  The normal fractional rate of death.
+	|
+
+death rate normal 1  = 0.028
+	~	1 / Year [0,0.1]
+	~		  The alternate normal fractional rate of death.
+	|
+
+deaths crowding mult tab  (
+            0, 1, 2, 3, 4, 5, 0.9, 1, 1.2, 1.5, 1.9, 3 )
+	~	Dimensionless
+	~		  The table for the effect of crowding on the number of
+		         deaths.
+	|
+
+deaths crowding multiplier  =
+        deaths crowding mult tab ( crowding )
+	~	Dimensionless
+	~		  The effect of crowding on the number of deaths.
+	|
+
+deaths food mult tab  (
+            0, 0.25, 0.5, 0.75, 1, 1.25, 1.5, 1.75, 2, 30, 3, 2, 1.4, 1, 0.7
+            , 0.6, 0.5, 0.5 )
+	~	Dimensionless
+	~		  The table for the effect of food on the number of deaths.
+	|
+
+deaths food multiplier  =
+        deaths food mult tab ( food ratio )
+	~	Dimensionless
+	~		  The effect of food on the number of deaths.
+	|
+
+deaths material mult tab  (
+            0, 0.5, 1, 1.5, 2, 2.5, 3, 3.5, 4, 4.5, 5, 3, 1.8, 1, 0.8, 0.7,
+            0.6, 0.53, 0.5, 0.5, 0.5, 0.5 )
+	~	Dimensionless
+	~		  Table for the effect of the material standard of living on
+		         deaths.
+	|
+
+deaths material multiplier  =
+        deaths material mult tab ( material standard of living )
+	~	Dimensionless
+	~		  The effect of the material standard of living on deaths.
+	|
+
+deaths pollution mult tab  (
+            0, 10, 20, 30, 40, 50, 60, 0.92, 1.3, 2, 3.2, 4.8, 6.8, 9.2 )
+	~	Dimensionless
+	~		  The table for the effect of pollution on the number of
+		         deaths.
+	|
+
+deaths pollution multiplier  =
+        deaths pollution mult tab ( pollution ratio )
+	~	Dimensionless
+	~		  The effect of pollution on the number of deaths.
+	|
+
+effective capital ratio normal  = 1
+	~	Capital units / Person [0,2]
+	~		  The effective ratio between capital and investment.
+	|
+
+effective capital ratio  =
+        capital ratio
+             * natural resource extraction multiplier
+             * ( 1
+                  - Capital Agriculture Fraction )
+             / ( 1
+                  - capital agriculture fraction normal )
+	~	Capital units / Person
+	~		  The effective ratio between capital and investment.
+	|
+
+FINAL TIME  = 2100
+	~	Year [2000,4000]
+	~		  The final time for the simulation
+	|
+
+food coefficient  = 1
+	~	Dimensionless [0,2]
+	~		  Coeffecient for diddling the food supply.
+	|
+
+food coefficient 1  = 1
+	~	Dimensionless [0,2]
+	~		  Alternative coeffecient for diddling the food supply.
+	|
+
+food crowding mult tab  (
+            0, 1, 2, 3, 4, 5, 2.4, 1, 0.6, 0.4, 0.3, 0.2 )
+	~	Dimensionless
+	~		  The table for the effect of crowding on the production of
+		         food.
+	|
+
+food crowding multiplier  =
+        food crowding mult tab ( crowding )
+	~	Dimensionless
+	~		  The effect of crowding on the production of food.
+	|
+
+food per capita normal  = 1
+	~	Food units / Person / Year
+	~		  The normal amount of food required for an individual.
+	|
+
+food per capita potential  =
+        food per capita potential tab ( capital ratio agriculture )
+	~	Food units / Person / Year
+	~		  The potential amount of food that can be grown based on
+		         capital
+		         investment.
+	|
+
+food per capita potential tab  (
+            0, 1, 2, 3, 4, 5, 6, 0.5, 1, 1.4, 1.7, 1.9, 2.05, 2.2 )
+	~	Food units / Person / Year
+	~		  The potential amount of food that can be grown based on
+		         capital
+		         investment table.
+	|
+
+food pollution mult tab  (
+            0, 10, 20, 30, 40, 50, 60, 1.02, 0.9, 0.65, 0.35, 0.2, 0.1, 0.05
+             )
+	~	Dimensionless
+	~		  The effect of pollution on the ability to grow food table.
+	|
+
+food pollution multiplier  =
+        food pollution mult tab ( pollution ratio )
+	~	Dimensionless
+	~		  The effect of pollution on the ability to grow food.
+	|
+
+food ratio  =
+        food per capita potential
+             * food crowding multiplier
+             * food pollution multiplier
+             * IF THEN ELSE ( Time
+                       > switch time 7 ,
+                  food coefficient 1 ,
+                  food coefficient )
+             / food per capita normal
+	~	Dimensionless
+	~		  The ration of food available to required food.
+	|
+
+INITIAL TIME  = 1900
+	~	Year
+	~		  The initial time for the simulation
+	|
+
+land area  = 1.35e+08
+	~	Kilometer * Kilometer [0,5e+08]
+	~		  The total amount of habitable land.
+	|
+
+material standard of living  =
+        effective capital ratio
+             / effective capital ratio normal
+	~	Dimensionless
+	~		  The relative material standard of living.
+	|
+
+natural resource extraction mult tab  (
+            0, 0.25, 0.5, 0.75, 1, 0, 0.15, 0.5, 0.85, 1 )
+	~	Dimensionless
+	~		  Table for the multiplier on effective capital investment
+		         from
+		         remaining natural resources.
+	|
+
+natural resource fraction remaining  =
+        Natural Resources
+             / natural resources initial
+	~	Dimensionless
+	~		  The fraction of natural resource still remaining.
+	|
+
+natural resource material mult tab  (
+            0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 0, 1, 1.8, 2.4, 2.9, 3.3, 3.6
+            , 3.8, 3.9, 3.95, 4 )
+	~	Dimensionless
+	~		  Table for the effect of the material well being on natural
+		         resoure
+		         use.
+	|
+
+nat res matl multiplier  =
+        natural resource material mult tab ( material standard of living )
+	~	Dimensionless
+	~		  The effect of the material well being on natural resource
+		         use.
+	|
+
+natural resource utilization normal  = 1
+	~	Resource units / Person / Year [0,2]
+	~		  The normal rate of natural resources.
+	|
+
+natural resource utilization normal 1  = 1
+	~	Resource units / Person / Year [0,2]
+	~		  The normal rate of natural resources.
+	|
+
+natural resource extraction multiplier  =
+        natural resource extraction mult tab ( natural resource fraction remaining )
+	~	Dimensionless
+	~		  The multiplier on effective capital investment from
+		         remaining natural
+		         resources.
+	|
+
+natural resource utilization  =
+        Population
+             * IF THEN ELSE ( Time
+                       > switch time 2 ,
+                  natural resource utilization normal 1 ,
+                  natural resource utilization normal )
+             * nat res matl multiplier
+	~	Resource units / Year
+	~		  The rate of natural resource utilization.
+	|
+
+Natural Resources  =
+        INTEG( - natural resource utilization  ,
+             natural resources initial )
+	~	Resource units
+	~		  The amount of natural resources remaining.
+	|
+
+natural resources initial  = 9e+11
+	~	Resource units [0,4e+12]
+	~		  The amount of natual resource initially available.
+	|
+
+Pollution  =
+        INTEG( pollution generation
+                  - pollution absorption ,
+             pollution initial )
+	~	Pollution units
+	~		  The amount of non-incorporated pollution.
+	|
+
+pollution absorption  =
+        Pollution
+             / pollution absorption time
+	~	Pollution units / Year
+	~		  The rate at which pollution is reincorporated into the
+		         ecology.
+	|
+
+pollution absorption time  =
+        pollution absorption time tab ( pollution ratio )
+	~	Year
+	~		  The time it takes to incorporate pollution back into the
+		         environment.
+	|
+
+pollution absorption time tab  (
+            0, 10, 20, 30, 40, 50, 60, 0.6, 2.5, 5, 8, 11.5, 15.5, 20 )
+	~	Year
+	~		  The time it takes to incorporate pollution back into the
+		         environment
+		         table.
+	|
+
+pollution capital mult tab  (
+            0, 1, 2, 3, 4, 5, 0.05, 1, 3, 5.4, 7.4, 8 )
+	~	Dimensionless
+	~		  The effect of capital on pollution generation table.
+	|
+
+pollution capital multiplier  =
+        pollution capital mult tab ( capital ratio )
+	~	Dimensionless
+	~		  The effect of capital on pollution generation.
+	|
+
+pollution generation  =
+        Population
+             * IF THEN ELSE ( Time
+                       > switch time 6 ,
+                  pollution per capita normal ,
+                  pollution per capita normal 1 )
+             * pollution capital multiplier
+	~	Pollution units / Year
+	~		  The rate at which non-ncorporate poltion changes.
+	|
+
+pollution initial  = 2e+08
+	~	Pollution units [0,1e+11]
+	~		  The amount of non-incorporated pollution initially.
+	|
+
+pollution per capita normal  = 1
+	~	Pollution units / Person / Year [0,2]
+	~		  The amount of pollution produced by a person in a year.
+	|
+
+pollution per capita normal 1  = 1
+	~	Pollution units / Person / Year [0,2]
+	~		  The alternative amount of pollution produced by a person in
+		         a year.
+	|
+
+pollution ratio  =
+        Pollution
+             / pollution standard
+	~	Dimensionless
+	~		  The ration of pollution to standard.
+	|
+
+pollution standard  = 3.6e+09
+	~	Pollution units
+	~		  The standard amount of non-incorporated pollution.
+	|
+
+Population  =
+        INTEG( births
+                  - deaths ,
+             population initial )
+	~	Person
+	~		  World population.
+	|
+
+population density normal  = 26.5
+	~	Person / ( Kilometer * Kilometer )
+	~		  The normal density of population.
+	|
+
+population initial  = 1.65e+09
+	~	Person [0,4e+09]
+	~		  The world population at the beginning of the simulation.
+	|
+
+quality crowding mult tab  (
+            0, 0.5, 1, 1.5, 2, 2.5, 3, 3.5, 4, 5.5, 5, 2, 1.3, 1, 0.75, 0.55
+            , 0.45, 0.38, 0.3, 0.25, 0.22, 0.2 )
+	~	Dimensionless
+	~		  The table for the effect of crowding on the quality of
+		         life.
+	|
+
+quality crowding multiplier  =
+        quality crowding mult tab ( crowding )
+	~	Dimensionless
+	~		  The effect of crowding on the quality of life.
+	|
+
+quality food mult tab  (
+            0, 1, 2, 3, 4, 0, 1, 1.8, 2.4, 2.7 )
+	~	Dimensionless
+	~		  The table for the effect of food on the quality of life.
+	|
+
+quality food multiplier  =
+        quality food mult tab ( food ratio )
+	~	Dimensionless
+	~		  The effect of food on the quality of life.
+	|
+
+quality material mult tab  (
+            0, 1, 2, 3, 4, 5, 0.2, 1, 1.7, 2.3, 2.7, 2.9 )
+	~	Dimensionless
+	~		  Table for the effect of the material standard of living on
+		         quality of
+		         life.
+	|
+
+quality material multiplier  =
+        quality material mult tab ( material standard of living )
+	~	Dimensionless
+	~		  The effect of the material standard of living on the
+		         quality of life.
+	|
+
+quality of life  =
+        quality of life normal
+             * quality material multiplier
+             * quality crowding multiplier
+             * quality food multiplier
+             * quality pollution multiplier
+	~	Satisfaction units
+	~		  The quality of life.
+	~	:SUPPLEMENTARY 
+	|
+
+quality of life normal  = 1
+	~	Satisfaction units [0,2]
+	~		  The standard quality of life.
+	|
+
+quality pollution mult tab  (
+            0, 10, 20, 30, 40, 50, 60, 1.04, 0.85, 0.5, 0.3, 0.15, 0.05, 0.02
+             )
+	~	Dimensionless
+	~		  The table for the effect of pollution on the quality of
+		         life.
+	|
+
+quality pollution multiplier  =
+        quality pollution mult tab ( pollution ratio )
+	~	Dimensionless
+	~		  The effect of pollution on the quality of life.
+	|
+
+SAVEPER  = 
+        TIME STEP
+	~	Year
+	~		  The frequency with which data is stored
+	|
+
+switch time 1  = 1970
+	~	Year [1900,2100]
+	~		  The time at which the birth rate normal switches
+	|
+
+switch time 2  = 1970
+	~	Year [1900,2100]
+	~		  The time at which to swithc the natural rate of resource
+		         utilization.
+	|
+
+switch time 3  = 1970
+	~	Year [1900,2100]
+	~		  The time at which to switch the death rate.
+	|
+
+switch time 4  = 1970
+	~	Year [1900,2100]
+	~		  The time at which to switch the capital investment rate.
+	|
+
+switch time 5  = 1970
+	~	Year [1900,2100]
+	~		  The time at which to swithc the capital depreciation rate.
+	|
+
+switch time 6  = 1970
+	~	Year [1900,2100]
+	~		  The time at which pollution generation rate switches.
+	|
+
+switch time 7  = 1970
+	~	Year [1900,2100]
+	~		  The time at which to switch the food supply.
+	|
+
+TIME STEP  = 0.25
+	~	Year
+	~		  The time step for the simulation
+	|
+
+\\\---/// Sketch information - do not modify anything except names
+V300  Do not put anything below this section - it will be ignored
+*Title Page
+$192-192-192,0,|12||-1--1--1|0-0-0|0-0-255|-1--1--1|-1--1--1|96,96,100,0
+12,1,0,294,178,81,12,0,4,0,8,0,0,0,0,0-0-0,0-0-0,|14||0-0-0,0,0,0,0,0,0
+by Jay W. Forrester
+12,2,0,284,219,2,10,0,0,0,0,-1,0,0,0,0,0,0,0,0,0
+12,3,0,294,105,91,19,0,4,0,58,-1,0,0,0,0-0-0,0-0-0,Vensim Sans|24|U|0-0-255,0,0,0,0,0,0
+World Model
+12,4,0,90,339,2,10,0,0,0,0,-1,0,0,0,0,0,0,0,0,0
+12,5,0,301,263,193,10,0,4,0,32,-1,0,0,0,0-0-0,0-0-0,Vensim Sans|||0-0-0,0,0,0,0,0,0
+Use Page Down / Page Up keys to move through views
+12,6,0,305,317,146,10,0,4,0,32,-1,0,0,0,-1--1--1,0-0-0,Vensim Sans|||0-0-0,0,0,0,0,0,0
+(or menu at bottom that says "Title Page")
+12,7,0,661,154,52,52,6,135,0,4,-1,0,2,0,-1--1--1,192-192-192,|||0-0-0,0,0,0,0,0,0
+Population & Food
+12,8,0,817,213,51,51,6,135,0,4,-1,0,3,0,-1--1--1,192-192-192,|||0-0-0,0,0,0,0,0,0
+Capital & Quality of Life
+12,9,0,682,300,55,55,6,135,0,4,-1,0,4,0,-1--1--1,192-192-192,|||0-0-0,0,0,0,0,0,0
+Pollution & Resources
+12,10,0,298,409,93,28,8,7,0,0,-1,0,0,0,0,0,0,0,0,0
+Interface upgrades, Tom Fiddaman, Ventana Systems, Inc., 2013
+\\\---/// Sketch information - do not modify anything except names
+V300  Do not put anything below this section - it will be ignored
+*Population & Food
+$192-192-192,0,|12||-1--1--1|0-0-0|0-0-255|-1--1--1|-1--1--1|96,96,100,0
+10,1,Population,389,149,46,24,3,3,0,58,0,1,0,0,-1--1--1,0-0-0,Times New Roman|14|B|0-0-0,0,0,0,0,0,0
+10,2,birth rate normal,208,64,75,30,0,3,0,10,-1,1,0,0,-1--1--1,-1--1--1,|10||0-0-0,0,0,0,0,0,0
+10,3,birth rate normal 1,193,90,75,30,0,3,0,26,-1,1,0,0,-1--1--1,-1--1--1,|10||0-0-0,0,0,0,0,0,0
+10,4,population initial,438,213,75,30,0,3,0,26,0,1,0,0,-1--1--1,-1--1--1,|10||0-0-0,0,0,0,0,0,0
+12,5,48,222,145,10,8,0,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,6,births crowding multiplier,251,259,49,16,8,3,0,1,0,0,0,0,128-128-128,0-0-0,|||0-0-0,0,0,0,0,0,0
+12,7,48,563,145,10,8,0,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,8,births food multiplier,173,229,75,30,0,3,0,0,-1,1,0,0,0,0,0,0,0,0
+11,9,0,286,145,6,8,34,3,0,0,1,0,0,0,0,0,0,0,0,0
+10,10,births,286,183,75,30,32,3,0,1,-1,0,0,0,128-128-128,0-0-0,|||0-0-0,0,0,0,0,0,0
+11,11,0,487,145,6,8,34,3,0,0,1,0,0,0,0,0,0,0,0,0
+10,12,deaths,487,183,75,30,32,3,0,1,-1,0,0,0,128-128-128,0-0-0,|||0-0-0,0,0,0,0,0,0
+10,13,births material multiplier,128,166,75,30,0,3,0,0,-1,1,0,0,0,0,0,0,0,0
+10,14,births pollution multiplier,126,188,75,30,0,3,0,0,-1,1,0,0,0,0,0,0,0,0
+10,15,switch time 1,185,115,75,30,0,3,0,10,-1,1,0,0,-1--1--1,-1--1--1,|10||0-0-0,0,0,0,0,0,0
+10,16,Time,282,55,75,30,0,2,0,2,-1,1,0,0,-1--1--1,-1--1--1,|||128-128-128,0,0,0,0,0,0
+10,17,death rate normal,582,66,75,30,0,3,0,26,-1,1,0,0,-1--1--1,-1--1--1,|10||0-0-0,0,0,0,0,0,0
+10,18,death rate normal 1,605,92,75,30,0,3,0,26,-1,1,0,0,-1--1--1,-1--1--1,|10||0-0-0,0,0,0,0,0,0
+10,19,deaths crowding multiplier,528,247,34,21,8,3,0,1,0,0,0,0,128-128-128,0-0-0,|||0-0-0,0,0,0,0,0,0
+10,20,deaths food multiplier,634,235,75,30,0,3,0,1,-1,0,0,0,128-128-128,0-0-0,|||0-0-0,0,0,0,0,0,0
+10,21,deaths material multiplier,672,206,75,30,0,3,0,1,-1,0,0,0,128-128-128,0-0-0,|||0-0-0,0,0,0,0,0,0
+10,22,deaths pollution multiplier,667,178,75,30,0,3,0,1,-1,0,0,0,128-128-128,0-0-0,|||0-0-0,0,0,0,0,0,0
+10,23,switch time 3,590,118,75,30,0,3,0,26,-1,1,0,0,-1--1--1,-1--1--1,|10||0-0-0,0,0,0,0,0,0
+10,24,crowding,388,243,75,30,0,3,0,1,-1,0,0,0,128-128-128,0-0-0,|||0-0-0,0,0,0,0,0,0
+10,25,land area,335,297,75,30,0,3,0,26,-1,1,0,0,-1--1--1,-1--1--1,|10||0-0-0,0,0,0,0,0,0
+10,26,population density normal,355,320,43,13,8,3,0,27,0,1,0,0,128-128-128,0-0-0,|10||0-0-0,0,0,0,0,0,0
+12,27,0,385,25,93,13,0,4,0,58,-1,0,0,0,-1--1--1,0-0-0,Times New Roman|16|BU|255-0-0,0,0,0,0,0,0
+Population  &  Food
+10,28,births crowding mult tab,235,319,32,19,8,3,0,26,0,1,0,0,-1--1--1,0-0-0,|10||0-0-0,0,0,0,0,0,0
+10,29,deaths crowding mult tab,529,321,37,20,8,3,0,26,0,1,0,0,-1--1--1,0-0-0,|10||0-0-0,0,0,0,0,0,0
+10,30,food ratio,273,394,75,30,0,3,0,0,-1,1,0,0,0,0,0,0,0,0
+10,31,food coefficient,169,488,75,30,0,3,0,26,-1,1,0,0,-1--1--1,-1--1--1,|10||0-0-0,0,0,0,0,0,0
+10,32,food coefficient 1,187,517,75,30,0,3,0,26,-1,1,0,0,-1--1--1,-1--1--1,|10||0-0-0,0,0,0,0,0,0
+10,33,food crowding multiplier,394,370,75,30,0,3,0,0,-1,1,0,0,0,0,0,0,0,0
+10,34,food per capita normal,286,492,40,20,8,3,0,26,0,1,0,0,-1--1--1,0-0-0,|10||0-0-0,0,0,0,0,0,0
+10,35,food per capita potential,360,453,75,30,0,3,0,0,-1,1,0,0,0,0,0,0,0,0
+10,36,food pollution multiplier,156,408,44,17,8,3,0,1,0,1,0,0,128-128-128,0-0-0,|||0-0-0,0,0,0,0,0,0
+10,37,switch time 7,151,463,75,30,0,3,0,26,-1,1,0,0,-1--1--1,-1--1--1,|10||0-0-0,0,0,0,0,0,0
+10,38,Time,148,445,75,30,0,2,0,2,-1,1,0,0,-1--1--1,-1--1--1,|||128-128-128,0,0,0,0,0,0
+10,39,food pollution mult tab,61,446,27,21,8,3,0,26,0,1,0,0,-1--1--1,0-0-0,|10||0-0-0,0,0,0,0,0,0
+10,40,pollution ratio,89,335,75,30,0,2,0,2,-1,1,0,0,-1--1--1,-1--1--1,|||128-128-128,0,0,0,0,0,0
+10,41,capital ratio agriculture,546,466,75,30,0,2,0,2,-1,1,0,0,-1--1--1,-1--1--1,|||128-128-128,0,0,0,0,0,0
+10,42,food per capita potential tab,494,496,44,16,8,3,0,26,0,1,0,0,-1--1--1,0-0-0,|10||0-0-0,0,0,0,0,0,0
+10,43,food crowding mult tab,446,316,31,20,8,2,0,26,0,1,0,0,-1--1--1,0-0-0,|10||0-0-0,0,0,0,0,0,0
+10,44,Time,501,58,75,30,0,2,0,2,-1,1,0,0,-1--1--1,-1--1--1,|||128-128-128,0,0,0,0,0,0
+10,45,capital agriculture fraction indicated,555,433,75,30,0,3,0,0,0,1,0,0,0,0,0,0,0,0
+10,46,births food mult tab,131,301,40,20,8,3,0,11,0,1,0,0,128-128-128,0-0-0,|10||0-0-0,0,0,0,0,0,0
+10,47,deaths food mult tab,619,334,38,13,8,3,0,27,0,1,0,0,128-128-128,0-0-0,|10||0-0-0,0,0,0,0,0,0
+10,48,capital agriculture fraction indicated tab,619,386,67,14,8,3,0,27,0,1,0,0,128-128-128,0-0-0,|10||0-0-0,0,0,0,0,0,0
+10,49,material standard of living,716,334,64,16,8,2,0,3,0,1,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,50,deaths material mult tab,701,296,29,18,8,3,0,27,0,1,0,0,128-128-128,0-0-0,|10||0-0-0,0,0,0,0,0,0
+10,51,births pollution mult tab,51,234,27,18,8,3,0,43,0,1,0,0,128-128-128,0-0-0,Vensim Sans|10||0-0-0,0,0,0,0,0,0
+10,52,births material mult tab,92,71,40,20,8,3,0,11,0,1,0,0,128-128-128,0-0-0,|10||0-0-0,0,0,0,0,0,0
+10,53,material standard of living,66,118,36,18,8,2,0,3,0,1,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,54,deaths pollution mult tab,714,101,48,16,8,3,0,59,0,0,0,0,128-128-128,0-0-0,Times New Roman|10||0-0-0,0,0,0,0,0,0
+10,55,pollution ratio,744,132,75,30,0,2,0,2,-1,1,0,0,-1--1--1,-1--1--1,|||128-128-128,0,0,0,0,0,0
+1,56,4,1,0,0,0,0,1,0,1,0-0-255,|||128-128-128,1|(0,0)|
+1,57,9,1,4,0,0,22,1,0,0,0-0-0,|||128-128-128,1|(317,145)|
+1,58,11,7,4,0,0,22,1,0,0,0-0-0,|||128-128-128,1|(523,145)|
+1,59,11,1,100,0,0,22,1,0,0,0-0-0,|||128-128-128,1|(458,145)|
+1,60,6,10,1,0,0,0,1,0,0,0-0-255,|||128-128-128,1|(270,202)|
+1,61,8,10,1,0,0,0,1,0,0,0-0-255,|||128-128-128,1|(243,204)|
+1,62,13,10,1,0,0,0,1,0,0,0-0-255,|||128-128-128,1|(230,166)|
+1,63,14,10,1,0,0,0,1,0,0,0-0-255,|||128-128-128,1|(227,189)|
+1,64,19,12,1,0,0,0,1,0,0,0-0-255,|||128-128-128,1|(512,205)|
+1,65,20,12,1,0,0,0,1,0,0,0-0-255,|||128-128-128,1|(573,204)|
+1,66,21,12,1,0,0,0,1,0,0,0-0-255,|||128-128-128,1|(553,185)|
+1,67,22,12,0,0,0,0,1,0,0,0-0-255,|||128-128-128,1|(0,0)|
+1,68,15,9,1,0,0,0,1,0,0,0-0-255,|||128-128-128,1|(254,124)|
+1,69,3,9,1,0,0,0,1,0,0,0-0-255,|||128-128-128,1|(276,120)|
+1,70,2,9,1,0,0,0,1,0,0,0-0-255,|||128-128-128,1|(275,108)|
+1,71,16,9,1,0,0,0,1,0,0,0-0-255,|||128-128-128,1|(288,102)|
+1,72,9,5,36,0,0,22,1,0,0,0-0-0,|||128-128-128,1|(256,145)|
+1,73,1,9,2,0,0,0,1,0,0,0-0-255,|||128-128-128,1|(346,113)|
+1,74,17,11,1,0,0,0,1,0,0,0-0-255,|||128-128-128,1|(507,101)|
+1,75,23,11,1,0,0,0,1,0,0,0-0-255,|||128-128-128,1|(521,124)|
+1,76,18,11,1,0,0,0,1,0,0,0-0-255,|||128-128-128,1|(513,115)|
+1,77,1,11,2,0,0,0,1,0,0,0-0-255,|||128-128-128,1|(429,114)|
+1,78,24,6,1,0,0,0,1,0,0,0-0-255,|||128-128-128,1|(332,252)|
+1,79,24,19,1,0,0,0,1,0,0,0-0-255,|||128-128-128,1|(429,262)|
+1,80,25,24,0,0,0,0,1,0,0,0-0-255,|||128-128-128,1|(0,0)|
+1,81,1,24,1,0,0,0,1,0,0,0-0-255,|||128-128-128,1|(364,183)|
+1,82,26,24,0,0,0,0,1,0,0,0-0-255,|||128-128-128,1|(0,0)|
+1,83,28,6,0,0,0,0,1,0,0,0-0-255,|||128-128-128,1|(0,0)|
+1,84,29,19,1,0,0,0,1,0,0,0-0-255,|||128-128-128,1|(540,286)|
+1,85,31,30,1,0,0,0,1,0,0,0-0-255,|||128-128-128,1|(240,440)|
+1,86,32,30,1,0,0,0,1,0,0,0-0-255,|||128-128-128,1|(257,444)|
+1,87,33,30,1,0,0,0,1,0,0,0-0-255,|||128-128-128,1|(346,393)|
+1,88,34,30,1,0,0,0,1,0,0,0-0-255,|||128-128-128,1|(283,427)|
+1,89,35,30,0,0,0,0,1,0,0,0-0-255,|||128-128-128,1|(0,0)|
+1,90,36,30,0,0,0,0,1,0,0,0-0-255,|||128-128-128,1|(0,0)|
+1,91,37,30,1,0,0,0,1,0,0,0-0-255,|||128-128-128,1|(210,446)|
+1,92,38,30,1,0,0,0,1,0,0,0-0-255,|||128-128-128,1|(206,436)|
+1,93,39,36,1,0,0,0,1,0,0,0-0-255,|||128-128-128,1|(87,411)|
+1,94,40,36,1,0,0,0,1,0,0,0-0-255,|||128-128-128,1|(100,361)|
+1,95,42,35,0,0,0,0,1,0,0,0-0-255,|||128-128-128,1|(0,0)|
+1,96,24,33,1,0,0,0,1,0,0,0-0-255,|||128-128-128,1|(401,298)|
+1,97,43,33,0,0,0,0,1,0,0,0-0-255,|||128-128-128,1|(0,0)|
+1,98,46,8,0,0,0,0,1,0,0,0-0-255,|||128-128-128,1|(0,0)|
+1,99,30,8,1,0,0,0,1,0,0,0-0-255,|||128-128-128,1|(183,323)|
+1,100,47,20,1,0,0,0,1,0,0,0-0-255,|||128-128-128,1|(635,287)|
+1,101,30,20,1,0,0,0,1,0,0,0-0-255,|||128-128-128,1|(505,379)|
+1,102,48,45,1,0,0,0,1,0,0,0-0-255,|||128-128-128,1|(575,412)|
+1,103,30,45,1,0,0,0,1,0,0,0-0-255,|||128-128-128,1|(388,429)|
+1,104,50,21,1,0,0,0,1,0,0,0-0-255,|||128-128-128,1|(731,256)|
+1,105,49,21,1,0,0,0,1,0,0,0-0-255,|||128-128-128,1|(743,251)|
+1,106,51,14,1,0,0,0,1,0,0,0-0-255,|||128-128-128,1|(92,212)|
+1,107,40,14,1,0,0,0,1,0,0,0-0-255,|||128-128-128,1|(91,267)|
+1,108,52,13,1,0,0,0,1,0,0,0-0-255,|||128-128-128,1|(120,107)|
+1,109,53,13,1,0,0,0,1,0,0,0-0-255,|||128-128-128,1|(95,142)|
+1,110,54,22,0,0,0,0,1,0,0,0-0-255,|||128-128-128,1|(0,0)|
+1,111,55,22,1,0,0,0,1,0,0,0-0-255,|||128-128-128,1|(697,145)|
+1,112,41,35,0,0,0,0,1,0,0,0-0-255,|||128-128-128,1|(0,0)|
+1,113,44,11,2,0,0,0,1,0,0,0-0-255,|||128-128-128,1|(490,109)|
+12,114,0,948,166,150,150,3,44,0,0,2,0,0,0,0,0,0,0,0,0
+Population,graph
+12,115,0,948,469,150,150,3,44,0,0,2,0,0,0,0,0,0,0,0,0
+food ratio,graph
+12,116,0,727,41,24,24,6,135,0,4,-1,1,1,0,-1--1--1,192-192-192,|||0-0-0,0,0,0,0,0,0
+Home
+10,117,birth rate,338,84,26,9,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,118,death rate,440,85,29,9,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+1,119,9,117,1,0,0,0,0,64,0,-1--1--1,,1|(293,112)|
+1,120,1,117,1,0,0,0,0,64,0,-1--1--1,,1|(365,104)|
+1,121,1,118,1,0,0,0,0,64,0,-1--1--1,,1|(405,109)|
+1,122,11,118,1,0,0,0,0,64,0,-1--1--1,,1|(479,111)|
+10,123,net pop growth rate,389,56,55,9,8,3,0,0,0,1,0,0,0,0,0,0,0,0
+1,124,117,123,0,0,0,0,0,64,0,-1--1--1,,1|(0,0)|
+1,125,118,123,0,0,0,0,0,64,0,-1--1--1,,1|(0,0)|
+\\\---/// Sketch information - do not modify anything except names
+V300  Do not put anything below this section - it will be ignored
+*Capital & Quality Life
+$192-192-192,0,|12||-1--1--1|0-0-0|0-0-255|-1--1--1|-1--1--1|96,96,100,0
+10,1,Capital,280,152,43,26,3,3,0,26,0,1,0,0,-1--1--1,0-0-0,|14|B|0-0-0,0,0,0,0,0,0
+12,2,48,468,150,10,8,0,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,3,capital initial,241,207,75,30,0,3,0,26,0,1,0,0,-1--1--1,-1--1--1,|10||0-0-0,0,0,0,0,0,0
+10,4,capital ratio,357,232,75,30,0,3,0,0,-1,1,0,0,0,0,0,0,0,0
+11,5,0,397,150,6,8,34,3,0,0,1,0,0,0,0,0,0,0,0,0
+10,6,capital depreciation,397,188,75,30,32,3,0,0,-1,1,0,0,0,0,0,0,0,0
+10,7,capital investment rate normal 1,46,140,36,18,8,3,0,26,0,1,0,0,-1--1--1,0-0-0,|10||0-0-0,0,0,0,0,0,0
+12,8,48,103,151,10,8,0,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,9,capital depreciation normal,524,86,58,13,8,3,0,26,0,1,0,0,-1--1--1,0-0-0,|10||0-0-0,0,0,0,0,0,0
+10,10,capital depreciation normal 1,543,119,55,14,8,3,0,26,0,1,0,0,-1--1--1,0-0-0,|10||0-0-0,0,0,0,0,0,0
+10,11,switch time 5,421,80,75,30,0,3,0,26,0,1,0,0,-1--1--1,-1--1--1,|10||0-0-0,0,0,0,0,0,0
+10,12,capital ratio agriculture,484,287,38,17,8,3,0,0,0,1,0,0,0,0,0,0,0,0
+10,13,capital agriculture fraction normal,377,284,44,18,8,3,0,26,0,1,0,0,-1--1--1,0-0-0,|10||0-0-0,0,0,0,0,0,0
+10,14,capital investment multiplier,103,225,35,21,8,3,0,1,0,1,0,0,128-128-128,0-0-0,|||0-0-0,0,0,0,0,0,0
+10,15,effective capital ratio,281,331,75,30,0,3,0,0,-1,1,0,0,0,0,0,0,0,0
+10,16,capital investment mult tab,71,286,40,20,8,3,0,27,0,1,0,0,128-128-128,0-0-0,|10||0-0-0,0,0,0,0,0,0
+11,17,0,162,151,6,8,34,3,0,0,1,0,0,0,0,0,0,0,0,0
+10,18,capital investment,162,189,75,30,32,3,0,0,-1,1,0,0,0,0,0,0,0,0
+10,19,capital investment rate normal,71,48,38,20,8,3,0,26,0,1,0,0,-1--1--1,0-0-0,|10||0-0-0,0,0,0,0,0,0
+10,20,Population,237,247,40,20,3,2,0,3,0,1,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,21,switch time 4,166,92,75,30,0,3,0,26,0,1,0,0,-1--1--1,-1--1--1,|10||0-0-0,0,0,0,0,0,0
+10,22,Time,195,109,75,30,0,2,0,2,-1,1,0,0,-1--1--1,-1--1--1,|||128-128-128,0,0,0,0,0,0
+12,23,0,276,52,118,13,0,4,0,58,-1,0,0,0,-1--1--1,0-0-0,Times New Roman|16|BU|255-0-0,0,0,0,0,0,0
+Capital  &  Quality of Life
+10,24,Capital Agriculture Fraction,450,437,43,26,3,3,0,24,0,0,0,0,-1--1--1,0-0-0,|12|B|0-0-0,0,0,0,0,0,0
+10,25,capital agriculture fraction adjustment time,417,508,55,18,8,3,0,26,0,1,0,0,-1--1--1,0-0-0,|10||0-0-0,0,0,0,0,0,0
+10,26,capital agriculture fraction indicated,299,508,50,15,8,3,0,0,0,1,0,0,0,0,0,0,0,0
+10,27,capital agriculture fraction initial,514,508,40,19,8,3,0,26,0,1,0,0,-1--1--1,0-0-0,|10||0-0-0,0,0,0,0,0,0
+10,28,capital investment from quality ratio,180,440,58,17,8,3,0,1,0,1,0,0,128-128-128,0-0-0,|||0-0-0,0,0,0,0,0,0
+12,29,48,266,434,10,8,0,3,0,0,-1,0,0,0,0,0,0,0,0,0
+11,30,0,338,434,6,8,2,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,31,natural resource extraction multiplier,281,350,75,30,0,2,1,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,32,quality material multiplier,125,392,75,30,0,3,0,0,-1,1,0,0,0,0,0,0,0,0
+10,33,quality material mult tab,239,365,25,19,8,3,0,26,0,1,0,0,-1--1--1,0-0-0,|10||0-0-0,0,0,0,0,0,0
+10,34,material standard of living,202,283,75,30,0,3,0,0,-1,1,0,0,0,0,0,0,0,0
+10,35,effective capital ratio normal,104,334,34,18,8,3,0,26,0,1,0,0,-1--1--1,0-0-0,|10||0-0-0,0,0,0,0,0,0
+10,36,capital investment quality ratio tab,123,510,45,20,8,3,0,0,0,1,0,0,0,0,0,0,0,0
+10,37,quality food multiplier,196,500,40,14,8,2,0,3,0,1,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,38,natural resource extraction multiplier,400,363,57,20,8,2,0,3,0,1,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,39,quality of life,571,378,75,30,0,3,0,58,-1,0,0,0,-1--1--1,0-0-0,Times New Roman|14|B|0-0-0,0,0,0,0,0,0
+10,40,quality crowding multiplier,568,268,32,24,8,3,0,1,0,1,0,0,128-128-128,0-0-0,||B|0-0-0,0,0,0,0,0,0
+10,41,quality food multiplier,655,292,37,17,8,3,0,1,0,1,0,0,128-128-128,0-0-0,||B|0-0-0,0,0,0,0,0,0
+10,42,quality of life normal,622,468,39,14,8,3,0,27,0,1,0,0,128-128-128,0-0-0,|10||0-0-0,0,0,0,0,0,0
+10,43,quality pollution multiplier,685,348,49,16,8,3,0,1,0,0,0,0,128-128-128,0-0-0,|||0-0-0,0,0,0,0,0,0
+10,44,crowding,557,171,75,30,0,2,0,2,-1,1,0,0,-1--1--1,-1--1--1,|||128-128-128,0,0,0,0,0,0
+10,45,quality crowding mult tab,502,195,29,19,8,3,0,27,0,1,0,0,128-128-128,0-0-0,|10||0-0-0,0,0,0,0,0,0
+10,46,food ratio,628,198,75,30,0,2,0,2,-1,1,0,0,-1--1--1,-1--1--1,|||128-128-128,0,0,0,0,0,0
+10,47,quality food mult tab,687,220,23,19,8,3,0,27,0,1,0,0,128-128-128,0-0-0,|10||0-0-0,0,0,0,0,0,0
+10,48,pollution ratio,666,417,75,30,0,2,0,2,-1,1,0,0,-1--1--1,-1--1--1,|||128-128-128,0,0,0,0,0,0
+10,49,quality pollution mult tab,719,443,28,19,8,3,0,27,0,1,0,0,128-128-128,0-0-0,|10||0-0-0,0,0,0,0,0,0
+10,50,Time,390,94,75,30,0,2,0,2,-1,1,0,0,-1--1--1,-1--1--1,|||128-128-128,0,0,0,0,0,0
+1,51,30,29,68,0,0,22,0,0,0,-1--1--1,,1|(304,434)|
+1,52,30,24,4,0,0,22,0,0,0,-1--1--1,,1|(375,434)|
+1,53,28,30,1,0,0,0,1,0,0,0-0-255,|||128-128-128,1|(252,470)|
+1,54,27,24,0,0,0,0,1,0,1,0-0-255,|||128-128-128,1|(0,0)|
+1,55,26,30,1,0,0,0,1,0,0,0-0-255,|||128-128-128,1|(330,466)|
+1,56,25,30,1,0,0,0,1,0,0,0-0-255,|||128-128-128,1|(351,466)|
+1,57,3,1,0,0,0,0,1,0,1,0-0-255,|||128-128-128,1|(0,0)|
+1,58,1,5,1,0,0,0,1,0,0,0-0-255,|||128-128-128,1|(358,122)|
+1,59,9,5,1,0,0,0,1,0,0,0-0-255,|||128-128-128,1|(438,125)|
+1,60,10,5,1,0,0,0,1,0,0,0-0-255,|||128-128-128,1|(463,120)|
+1,61,11,5,1,0,0,0,1,0,0,0-0-255,|||128-128-128,1|(406,110)|
+1,62,5,2,4,0,0,22,1,0,0,0-0-0,|||128-128-128,1|(430,150)|
+1,63,5,1,36,0,0,22,1,0,0,0-0-0,|||128-128-128,1|(357,150)|
+1,64,7,17,1,0,0,0,1,0,0,0-0-255,|||128-128-128,1|(95,128)|
+1,65,14,18,1,0,0,0,1,0,0,0-0-255,|||128-128-128,1|(132,196)|
+1,66,19,17,0,0,0,0,1,0,0,0-0-255,|||128-128-128,1|(0,0)|
+1,67,20,18,1,0,0,0,1,0,0,0-0-255,|||128-128-128,1|(195,221)|
+1,68,21,17,1,0,0,0,1,0,0,0-0-255,|||128-128-128,1|(167,132)|
+1,69,22,17,1,0,0,0,1,0,0,0-0-255,|||128-128-128,1|(174,121)|
+1,70,17,1,4,0,0,22,1,0,0,0-0-0,|||128-128-128,1|(202,151)|
+1,71,17,8,36,0,0,22,1,0,0,0-0-0,|||128-128-128,1|(134,151)|
+1,72,1,4,0,0,0,0,1,0,0,0-0-255,|||128-128-128,1|(0,0)|
+1,73,20,4,1,0,0,0,1,0,0,0-0-255,|||128-128-128,1|(279,244)|
+1,74,13,12,0,0,0,0,1,0,0,0-0-255,|||128-128-128,1|(0,0)|
+1,75,24,12,1,0,0,0,1,0,0,0-0-255,|||128-128-128,1|(477,383)|
+1,76,4,12,1,0,0,0,1,0,0,0-0-255,|||128-128-128,1|(427,240)|
+1,77,24,15,1,0,0,0,1,0,0,0-0-255,|||128-128-128,1|(301,357)|
+1,78,4,15,1,0,0,0,1,0,0,0-0-255,|||128-128-128,1|(320,287)|
+1,79,35,34,0,0,0,0,1,0,0,0-0-255,|||128-128-128,1|(0,0)|
+1,80,15,34,0,0,0,0,1,0,0,0-0-255,|||128-128-128,1|(0,0)|
+1,81,13,15,1,0,0,0,1,0,0,0-0-255,|||128-128-128,1|(364,311)|
+1,82,16,14,0,0,0,0,1,0,0,0-0-255,|||128-128-128,1|(0,0)|
+1,83,34,14,1,0,0,0,1,0,0,0-0-255,|||128-128-128,1|(166,255)|
+1,84,34,32,1,0,0,0,1,0,0,0-0-255,|||128-128-128,1|(166,321)|
+1,85,33,32,1,0,0,0,1,0,0,0-0-255,|||128-128-128,1|(188,366)|
+1,86,36,28,1,0,0,0,1,0,0,0-0-255,|||128-128-128,1|(112,475)|
+1,87,37,28,0,0,0,0,1,0,0,0-0-255,|||128-128-128,1|(0,0)|
+1,88,32,28,0,0,0,0,1,0,0,0-0-255,|||128-128-128,1|(0,0)|
+1,89,38,15,1,0,0,0,1,0,0,0-0-255,|||128-128-128,1|(372,341)|
+1,90,40,39,0,0,0,0,1,0,0,0-0-255,|||128-128-128,1|(0,0)|
+1,91,41,39,1,0,0,0,1,0,0,0-0-255,|||128-128-128,1|(605,330)|
+1,92,42,39,0,0,0,0,1,0,0,0-0-255,|||128-128-128,1|(0,0)|
+1,93,43,39,1,0,0,0,1,0,0,0-0-255,|||128-128-128,1|(621,353)|
+1,94,44,40,1,0,0,0,1,0,0,0-0-255,|||128-128-128,1|(563,204)|
+1,95,45,40,1,0,0,0,1,0,0,0-0-255,|||128-128-128,1|(542,222)|
+1,96,48,43,1,0,0,0,1,0,0,0-0-255,|||128-128-128,1|(699,391)|
+1,97,49,43,1,0,0,0,1,0,0,0-0-255,|||128-128-128,1|(720,394)|
+1,98,32,39,4,0,0,0,1,0,0,0-0-255,|||128-128-128,4|(65,500)|(65,593)|(571,593)|(571,492)|
+1,99,46,41,0,0,0,0,1,0,0,0-0-255,|||128-128-128,1|(0,0)|
+1,100,47,41,1,0,0,0,1,0,0,0-0-255,|||128-128-128,1|(661,246)|
+1,101,50,5,1,0,0,0,1,0,0,0-0-255,|||128-128-128,1|(399,112)|
+12,102,0,913,204,150,150,3,44,0,0,2,0,0,0,0,0,0,0,0,0
+Capital,graph
+12,103,0,913,510,150,150,3,44,0,0,2,0,0,0,0,0,0,0,0,0
+Capital Agriculture Fraction,graph
+12,104,0,1219,203,150,150,3,44,0,0,2,0,0,0,0,0,0,0,0,0
+quality of life,graph
+12,105,0,690,79,24,24,6,135,0,4,-1,1,1,0,-1--1--1,192-192-192,|||0-0-0,0,0,0,0,0,0
+Home
+10,106,capital agriculture fraction indicated tab,228,566,60,15,8,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,107,106,26,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+10,108,food ratio,348,570,35,9,8,2,0,3,-1,1,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,109,108,26,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+10,110,TI no capital,230,630,36,9,8,3,0,0,0,1,0,0,0,0,0,0,0,0
+10,111,RC no investment,408,630,50,9,8,3,0,0,0,1,0,0,0,0,0,0,0,0
+1,112,110,111,0,0,0,0,0,64,0,-1--1--1,,1|(0,0)|
+10,113,capital investment,568,631,58,9,8,2,0,3,-1,1,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,114,113,111,0,0,0,0,0,64,0,-1--1--1,,1|(0,0)|
+10,115,Step Check time,316,666,45,9,8,3,0,0,0,1,0,0,0,0,0,0,0,0
+1,116,115,110,0,0,0,0,0,64,0,-1--1--1,,1|(0,0)|
+1,117,115,111,0,0,0,0,0,64,0,-1--1--1,,1|(0,0)|
+10,118,Capital,102,630,28,9,8,2,0,3,-1,1,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,119,118,110,0,0,0,0,0,64,0,-1--1--1,,1|(0,0)|
+\\\---/// Sketch information - do not modify anything except names
+V300  Do not put anything below this section - it will be ignored
+*Pollution & Resource
+$192-192-192,0,|12||-1--1--1|0-0-0|0-0-255|-1--1--1|-1--1--1|96,96,100,0
+10,1,Natural Resources,262,344,45,26,3,3,0,58,0,0,0,0,-1--1--1,0-0-0,Times New Roman|14|B|0-0-0,0,0,0,0,0,0
+10,2,pollution absorption time tab,500,240,42,22,8,3,0,26,0,1,0,0,-1--1--1,0-0-0,|10||0-0-0,0,0,0,0,0,0
+10,3,natural resources initial,161,407,40,20,8,3,0,27,0,1,0,0,128-128-128,0-0-0,|10||0-0-0,0,0,0,0,0,0
+12,4,48,457,340,10,8,0,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,5,pollution ratio,351,211,75,30,0,3,0,0,-1,1,0,0,0,0,0,0,0,0
+10,6,pollution standard,395,264,75,30,0,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,7,nat res matl multiplier,332,411,75,30,0,3,0,0,-1,1,0,0,0,0,0,0,0,0
+10,8,natural resource utilization normal,488,412,50,14,8,3,0,26,0,1,0,0,-1--1--1,0-0-0,|10||0-0-0,0,0,0,0,0,0
+10,9,natural resource utilization normal 1,517,365,56,15,8,3,0,26,0,1,0,0,-1--1--1,0-0-0,|10||0-0-0,0,0,0,0,0,0
+10,10,capital ratio,84,258,75,30,0,2,0,2,-1,1,0,0,-1--1--1,-1--1--1,|||128-128-128,0,0,0,0,0,0
+10,11,switch time 2,422,300,75,30,0,3,0,26,-1,1,0,0,-1--1--1,-1--1--1,|10||0-0-0,0,0,0,0,0,0
+10,12,pollution capital mult tab,40,221,27,21,8,3,0,26,0,1,0,0,-1--1--1,0-0-0,|10||0-0-0,0,0,0,0,0,0
+11,13,0,367,340,6,8,34,3,0,0,1,0,0,0,0,0,0,0,0,0
+10,14,natural resource utilization,367,363,52,15,40,3,0,0,0,1,0,0,0,0,0,0,0,0
+12,15,0,294,22,143,13,0,4,0,58,-1,0,0,0,-1--1--1,0-0-0,Times New Roman|16|BU|255-0-0,0,0,0,0,0,0
+Pollution  &  Natural Resources
+10,16,Pollution,303,88,44,27,3,3,0,26,0,1,0,0,-1--1--1,0-0-0,|14|B|0-0-0,0,0,0,0,0,0
+10,17,pollution initial,261,151,38,14,8,3,0,26,0,1,0,0,-1--1--1,0-0-0,|10||0-0-0,0,0,0,0,0,0
+12,18,48,467,89,10,8,0,3,0,0,-1,0,0,0,0,0,0,0,0,0
+12,19,48,131,88,10,8,0,3,0,0,-1,0,0,0,0,0,0,0,0,0
+10,20,pollution capital multiplier,137,186,49,15,8,3,0,1,0,1,0,0,128-128-128,0-0-0,|||0-0-0,0,0,0,0,0,0
+10,21,pollution per capita normal,68,137,42,20,8,3,0,26,0,1,0,0,-1--1--1,0-0-0,|10||0-0-0,0,0,0,0,0,0
+10,22,pollution per capita normal 1,68,84,44,15,8,3,0,26,0,1,0,0,-1--1--1,0-0-0,|10||0-0-0,0,0,0,0,0,0
+10,23,Population,208,245,40,20,3,2,0,3,0,1,0,0,128-128-128,0-0-0,|||64-128-128,0,0,0,0,0,0
+10,24,switch time 6,98,50,75,30,0,3,0,26,-1,1,0,0,-1--1--1,-1--1--1,|10||0-0-0,0,0,0,0,0,0
+10,25,Time,128,66,75,30,0,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,26,pollution absorption time,440,170,45,14,8,3,0,1,0,1,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+11,27,0,401,89,6,8,34,3,0,0,1,0,0,0,0,0,0,0,0,0
+10,28,pollution absorption,401,113,41,16,40,3,0,0,0,1,0,0,0,0,0,0,0,0
+11,29,0,196,88,6,8,34,3,0,0,1,0,0,0,0,0,0,0,0,0
+10,30,pollution generation,196,111,43,15,40,3,0,0,0,1,0,0,0,0,0,0,0,0
+10,31,material standard of living,227,452,75,30,0,2,0,2,-1,1,0,0,-1--1--1,-1--1--1,|||128-128-128,0,0,0,0,0,0
+10,32,natural resource material mult tab,438,452,75,30,0,3,0,26,-1,1,0,0,-1--1--1,-1--1--1,|10||0-0-0,0,0,0,0,0,0
+10,33,natural resource extraction multiplier,67,377,45,18,8,3,0,0,0,1,0,0,0,0,0,0,0,0
+10,34,natural resource extraction mult tab,72,442,53,14,8,3,0,27,0,1,0,0,128-128-128,0-0-0,|10||0-0-0,0,0,0,0,0,0
+10,35,natural resource fraction remaining,67,304,50,17,8,3,0,1,0,1,0,0,128-128-128,0-0-0,|||0-0-0,0,0,0,0,0,0
+10,36,Time,444,313,75,30,0,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,37,26,28,1,0,0,0,1,0,0,0-0-255,|||128-128-128,1|(424,144)|
+1,38,16,28,1,0,0,0,1,0,0,0-0-255,|||128-128-128,1|(360,140)|
+1,39,25,29,1,0,0,0,1,0,0,0-0-255,|||128-128-128,1|(157,64)|
+1,40,24,29,1,0,0,0,1,0,0,0-0-255,|||128-128-128,1|(158,56)|
+1,41,23,30,1,0,0,0,1,0,0,0-0-255,|||128-128-128,1|(212,181)|
+1,42,22,30,1,0,0,0,1,0,0,0-0-255,|||128-128-128,1|(130,116)|
+1,43,21,30,1,0,0,0,1,0,0,0-0-255,|||128-128-128,1|(128,136)|
+1,44,20,30,1,0,0,0,1,0,0,0-0-255,|||128-128-128,1|(165,149)|
+1,45,27,18,4,0,0,22,0,0,0,-1--1--1,,1|(432,89)|
+1,46,29,19,36,0,0,22,0,0,0,-1--1--1,,1|(165,88)|
+1,47,29,16,4,0,0,22,0,0,0,-1--1--1,,1|(230,88)|
+1,48,27,16,36,0,0,22,0,0,0,-1--1--1,,1|(371,89)|
+1,49,17,16,0,0,0,0,1,0,1,0-0-255,|||128-128-128,1|(0,0)|
+1,50,3,1,1,0,0,0,1,0,1,0-0-255,|||128-128-128,1|(189,373)|
+1,51,13,4,4,0,0,22,0,0,0,-1--1--1,,1|(410,340)|
+1,52,13,1,100,0,0,22,0,0,0,-1--1--1,,1|(334,340)|
+1,53,7,14,1,0,0,0,1,0,0,0-0-255,|||128-128-128,1|(350,386)|
+1,54,8,14,1,0,0,0,1,0,0,0-0-255,|||128-128-128,1|(439,383)|
+1,55,9,14,1,0,0,0,1,0,0,0-0-255,|||128-128-128,1|(442,366)|
+1,56,23,13,1,0,0,0,1,0,0,0-0-255,|||128-128-128,1|(337,316)|
+1,57,11,13,0,0,0,0,1,0,0,0-0-255,|||128-128-128,1|(0,0)|
+1,58,2,26,1,0,0,0,1,0,0,0-0-255,|||128-128-128,1|(459,207)|
+1,59,5,26,1,0,0,0,1,0,0,0-0-255,|||128-128-128,1|(405,206)|
+1,60,16,5,1,0,0,0,1,0,0,0-0-255,|||128-128-128,1|(316,154)|
+1,61,6,5,0,0,0,0,1,0,0,0-0-255,|||128-128-128,1|(0,0)|
+1,62,10,20,0,0,0,0,1,0,0,0-0-255,|||128-128-128,1|(0,0)|
+1,63,12,20,1,0,0,0,1,0,0,0-0-255,|||128-128-128,1|(75,215)|
+1,64,31,7,0,0,0,0,1,0,0,0-0-255,|||128-128-128,1|(0,0)|
+1,65,32,7,0,0,0,0,1,0,0,0-0-255,|||128-128-128,1|(0,0)|
+1,66,34,33,0,0,0,0,1,0,0,0-0-255,|||128-128-128,1|(0,0)|
+1,67,35,33,0,0,0,0,1,0,0,0-0-255,|||128-128-128,1|(0,0)|
+1,68,1,35,1,0,0,0,1,0,0,0-0-255,|||128-128-128,1|(172,317)|
+1,69,3,35,1,0,0,0,1,0,0,0-0-255,|||128-128-128,1|(147,352)|
+1,70,36,13,1,0,0,0,1,0,0,0-0-255,|||128-128-128,1|(402,319)|
+12,71,0,751,165,150,150,3,44,0,0,2,0,0,0,0,0,0,0,0,0
+Pollution,graph
+12,72,0,751,469,150,150,3,44,0,0,2,0,0,0,0,0,0,0,0,0
+Natural Resources,graph
+12,73,0,538,40,24,24,6,135,0,4,-1,0,1,0,-1--1--1,192-192-192,|||0-0-0,0,0,0,0,0,0
+Home
+\\\---/// Sketch information - do not modify anything except names
+V300  Do not put anything below this section - it will be ignored
+*Control 1
+$192-192-192,0,|12||-1--1--1|0-0-0|0-0-255|-1--1--1|-1--1--1|96,96,100,0
+10,1,natural resource utilization normal,706,446,48,15,8,3,0,26,0,1,0,0,-1--1--1,0-0-0,|10||0-0-0,0,0,0,0,0,0
+10,2,natural resource utilization normal 1,708,391,53,15,8,3,0,26,0,1,0,0,-1--1--1,0-0-0,|10||0-0-0,0,0,0,0,0,0
+10,3,switch time 2,710,340,75,30,0,3,0,26,-1,1,0,0,-1--1--1,-1--1--1,|10||0-0-0,0,0,0,0,0,0
+10,4,pollution per capita normal,997,440,38,15,8,3,0,26,0,1,0,0,-1--1--1,0-0-0,|10||0-0-0,0,0,0,0,0,0
+10,5,pollution per capita normal 1,997,387,43,15,8,3,0,26,0,1,0,0,-1--1--1,0-0-0,|10||0-0-0,0,0,0,0,0,0
+10,6,switch time 6,996,344,75,30,0,3,0,26,-1,1,0,0,-1--1--1,-1--1--1,|10||0-0-0,0,0,0,0,0,0
+12,7,0,164,156,150,150,3,44,0,0,2,0,0,0,0,0,0,0,0,0
+Population,graph
+12,8,0,463,156,150,150,3,44,0,0,2,0,0,0,0,0,0,0,0,0
+Capital,graph
+12,9,0,762,156,150,150,3,44,0,0,2,0,0,0,0,0,0,0,0,0
+Natural Resources,graph
+12,10,0,1061,156,150,150,3,44,0,0,2,0,0,0,0,0,0,0,0,0
+Pollution,graph
+10,11,pollution absorption time tab,1145,424,55,15,8,3,0,26,0,1,0,0,-1--1--1,0-0-0,|10||0-0-0,0,0,0,0,0,0
+10,12,pollution capital mult tab,1145,361,46,15,8,3,0,26,0,1,0,0,-1--1--1,0-0-0,|10||0-0-0,0,0,0,0,0,0
+10,13,natural resources initial,833,345,45,15,8,3,0,27,0,1,0,0,128-128-128,0-0-0,|10||0-0-0,0,0,0,0,0,0
+10,14,natural resource material mult tab,838,450,46,15,8,3,0,9,-1,1,0,0,128-128-128,0-0-0,|10||0-0-0,0,0,0,0,0,0
+10,15,natural resource extraction mult tab,839,395,52,15,8,3,0,27,0,1,0,0,128-128-128,0-0-0,|10||0-0-0,0,0,0,0,0,0
+10,16,capital investment rate normal 1,389,444,52,15,8,3,0,26,0,1,0,0,-1--1--1,0-0-0,|10||0-0-0,0,0,0,0,0,0
+10,17,capital depreciation normal,530,390,55,15,8,3,0,26,0,1,0,0,-1--1--1,0-0-0,|10||0-0-0,0,0,0,0,0,0
+10,18,capital depreciation normal 1,535,440,55,15,8,3,0,26,0,1,0,0,-1--1--1,0-0-0,|10||0-0-0,0,0,0,0,0,0
+10,19,switch time 5,526,344,75,30,0,3,0,26,0,1,0,0,-1--1--1,-1--1--1,|10||0-0-0,0,0,0,0,0,0
+10,20,capital investment mult tab,469,504,52,15,8,3,0,27,0,1,0,0,128-128-128,0-0-0,|10||0-0-0,0,0,0,0,0,0
+10,21,capital investment rate normal,383,391,52,15,8,3,0,26,0,1,0,0,-1--1--1,0-0-0,|10||0-0-0,0,0,0,0,0,0
+10,22,switch time 4,383,346,75,30,0,3,0,26,0,1,0,0,-1--1--1,-1--1--1,|10||0-0-0,0,0,0,0,0,0
+10,23,birth rate normal,87,383,75,30,0,3,0,26,-1,1,0,0,-1--1--1,-1--1--1,|10||0-0-0,0,0,0,0,0,0
+10,24,birth rate normal 1,84,426,75,30,0,3,0,26,-1,1,0,0,-1--1--1,-1--1--1,|10||0-0-0,0,0,0,0,0,0
+10,25,switch time 1,84,348,75,30,0,3,0,26,-1,1,0,0,-1--1--1,-1--1--1,|10||0-0-0,0,0,0,0,0,0
+10,26,death rate normal,225,387,75,30,0,3,0,26,-1,1,0,0,-1--1--1,-1--1--1,|10||0-0-0,0,0,0,0,0,0
+10,27,death rate normal 1,231,426,75,30,0,3,0,26,-1,1,0,0,-1--1--1,-1--1--1,|10||0-0-0,0,0,0,0,0,0
+10,28,switch time 3,223,350,75,30,0,3,0,26,-1,1,0,0,-1--1--1,-1--1--1,|10||0-0-0,0,0,0,0,0,0
+10,29,births crowding mult tab,227,530,45,15,8,3,0,26,0,1,0,0,-1--1--1,0-0-0,|10||0-0-0,0,0,0,0,0,0
+10,30,deaths crowding mult tab,234,620,47,15,8,3,0,26,0,1,0,0,-1--1--1,0-0-0,|10||0-0-0,0,0,0,0,0,0
+10,31,births food mult tab,151,582,55,9,8,3,0,27,0,1,0,0,128-128-128,0-0-0,|10||0-0-0,0,0,0,0,0,0
+10,32,deaths food mult tab,152,664,57,9,8,3,0,27,0,1,0,0,128-128-128,0-0-0,|10||0-0-0,0,0,0,0,0,0
+10,33,deaths material mult tab,73,619,43,15,8,3,0,27,0,1,0,0,128-128-128,0-0-0,|10||0-0-0,0,0,0,0,0,0
+10,34,births pollution mult tab,78,527,44,15,8,3,0,27,0,1,0,0,128-128-128,0-0-0,|10||0-0-0,0,0,0,0,0,0
+10,35,births material mult tab,80,470,40,15,8,3,0,27,0,1,0,0,128-128-128,0-0-0,|10||0-0-0,0,0,0,0,0,0
+10,36,deaths pollution mult tab,229,475,46,15,8,3,0,27,0,1,0,0,128-128-128,0-0-0,|10||0-0-0,0,0,0,0,0,0
+12,37,0,1360,156,150,150,3,44,0,0,2,0,0,0,0,0,0,0,0,0
+Capital Agriculture Fraction,graph
+10,38,capital agriculture fraction adjustment time,1314,425,68,15,8,3,0,26,0,1,0,0,-1--1--1,0-0-0,|10||0-0-0,0,0,0,0,0,0
+10,39,capital agriculture fraction initial,1304,356,50,15,8,3,0,26,0,1,0,0,-1--1--1,0-0-0,|10||0-0-0,0,0,0,0,0,0
+10,40,capital investment quality ratio tab,1448,358,52,15,8,3,0,8,0,1,0,0,0-0-0,0-0-0,|10||0-0-0,0,0,0,0,0,0
+10,41,capital agriculture fraction indicated tab,1462,424,60,15,8,3,0,8,-1,1,0,0,0-0-0,0-0-0,|10||0-0-0,0,0,0,0,0,0
+\\\---/// Sketch information - do not modify anything except names
+V300  Do not put anything below this section - it will be ignored
+*Control 2
+$192-192-192,0,|12||-1--1--1|0-0-0|0-0-255|-1--1--1|-1--1--1|96,96,100,0
+12,1,0,164,156,150,150,3,44,0,0,2,0,0,0,0,0,0,0,0,0
+quality of life,graph
+12,2,0,463,156,150,150,3,44,0,0,2,0,0,0,0,0,0,0,0,0
+crowding,graph
+12,3,0,762,156,150,150,3,44,0,0,2,0,0,0,0,0,0,0,0,0
+food ratio,graph
+12,4,0,1061,156,150,150,3,44,0,0,2,0,0,0,0,0,0,0,0,0
+material standard of living,graph
+10,5,food coefficient,693,372,75,30,0,3,0,26,-1,1,0,0,-1--1--1,-1--1--1,|10||0-0-0,0,0,0,0,0,0
+10,6,food coefficient 1,694,410,75,30,0,3,0,26,-1,1,0,0,-1--1--1,-1--1--1,|10||0-0-0,0,0,0,0,0,0
+10,7,switch time 7,690,339,75,30,0,3,0,26,-1,1,0,0,-1--1--1,-1--1--1,|10||0-0-0,0,0,0,0,0,0
+10,8,food pollution mult tab,829,401,41,15,8,3,0,26,0,1,0,0,-1--1--1,0-0-0,|10||0-0-0,0,0,0,0,0,0
+10,9,food per capita potential tab,828,344,43,15,8,3,0,26,0,1,0,0,-1--1--1,0-0-0,|10||0-0-0,0,0,0,0,0,0
+10,10,births food mult tab,692,488,55,9,8,3,0,27,0,1,0,0,128-128-128,0-0-0,|10||0-0-0,0,0,0,0,0,0
+10,11,deaths food mult tab,833,487,57,9,8,3,0,27,0,1,0,0,128-128-128,0-0-0,|10||0-0-0,0,0,0,0,0,0
+10,12,food crowding mult tab,831,447,42,15,8,3,0,26,0,1,0,0,-1--1--1,0-0-0,|10||0-0-0,0,0,0,0,0,0
+10,13,quality crowding mult tab,166,343,48,15,8,3,0,27,0,1,0,0,128-128-128,0-0-0,|10||0-0-0,0,0,0,0,0,0
+10,14,quality food mult tab,166,391,58,9,8,3,0,27,0,1,0,0,128-128-128,0-0-0,|10||0-0-0,0,0,0,0,0,0
+10,15,quality pollution mult tab,164,440,47,15,8,3,0,27,0,1,0,0,128-128-128,0-0-0,|10||0-0-0,0,0,0,0,0,0
+10,16,capital investment mult tab,1068,345,52,15,8,3,0,27,0,1,0,0,128-128-128,0-0-0,|10||0-0-0,0,0,0,0,0,0
+\\\---/// Sketch information - do not modify anything except names
+V300  Do not put anything below this section - it will be ignored
+*Equilibrium
+$192-192-192,0,|12||-1--1--1|0-0-0|0-0-255|-1--1--1|-1--1--1|96,96,100,0
+12,1,0,161,160,150,150,3,44,0,0,2,0,0,0,0,0,0,0,0,0
+Population,graph
+12,2,0,460,160,150,150,3,44,0,0,2,0,0,0,0,0,0,0,0,0
+Capital,graph
+12,3,0,759,160,150,150,3,44,0,0,2,0,0,0,0,0,0,0,0,0
+Natural Resources,graph
+12,4,0,1058,160,150,150,3,44,0,0,2,0,0,0,0,0,0,0,0,0
+Pollution,graph
+12,5,0,1357,160,150,150,3,44,0,0,2,0,0,0,0,0,0,0,0,0
+Capital Agriculture Fraction,graph
+10,6,population initial,151,349,58,10,8,3,0,0,-1,1,0,0,0,0,0,0,0,0
+10,7,capital initial,460,347,45,10,8,3,0,0,-1,1,0,0,0,0,0,0,0,0
+10,8,natural resources initial,763,344,58,18,8,3,0,0,-1,1,0,0,0,0,0,0,0,0
+10,9,pollution initial,1060,345,51,10,8,3,0,0,-1,1,0,0,0,0,0,0,0,0
+10,10,capital agriculture fraction initial,1367,342,65,18,8,3,0,0,-1,1,0,0,0,0,0,0,0,0
+10,11,FINAL TIME,766,483,44,10,8,3,0,0,-1,1,0,0,0,0,0,0,0,0
+10,12,Population,162,412,51,21,3,130,0,3,-1,1,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,13,Capital,456,406,40,20,3,2,0,3,-1,1,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,14,Natural Resources,765,403,48,20,3,130,0,3,-1,1,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,15,Pollution,1057,403,40,20,3,2,0,3,-1,1,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,16,Capital Agriculture Fraction,1373,404,47,22,3,130,0,3,-1,1,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+\\\---/// Sketch information - do not modify anything except names
+V300  Do not put anything below this section - it will be ignored
+*Population-Pollution
+$192-192-192,0,|12||-1--1--1|0-0-0|0-0-255|-1--1--1|-1--1--1|96,96,100,0
+12,1,0,233,230,219,224,3,188,0,0,1,0,0,0,0,0,0,0,0,0
+Population_-_Pollution
+10,2,population initial,90,484,58,10,8,3,0,0,-1,1,0,0,0,0,0,0,0,0
+10,3,pollution initial,320,489,51,10,8,3,0,0,-1,1,0,0,0,0,0,0,0,0
+10,4,Population,101,547,51,21,3,130,0,3,-1,1,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+10,5,Pollution,317,547,40,20,3,2,0,3,-1,1,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+12,6,0,612,156,150,150,3,44,0,0,2,0,0,0,0,0,0,0,0,0
+Population,graph
+12,7,0,612,465,150,150,3,44,0,0,2,0,0,0,0,0,0,0,0,0
+Pollution,graph
+10,8,FINAL TIME,214,613,44,10,8,3,0,0,-1,1,0,0,0,0,0,0,0,0
+///---\\\
+:GRAPH WORLD
+:TITLE World Model Results
+:X-DIV 7
+:WIDTH 25
+:HEIGHT 15
+:SCALE
+:VAR Population
+:DATASET 
+:LINE-WIDTH 4
+:SCALE
+:VAR Capital
+:DATASET 
+:LINE-WIDTH 2
+:SCALE
+:VAR Pollution
+:DATASET 
+:LINE-WIDTH 2
+:SCALE
+:VAR Natural Resources
+:DATASET 
+:LINE-WIDTH 2
+:SCALE
+:VAR quality of life
+:DATASET 
+:LINE-WIDTH 2
+
+:GRAPH GRAPH1_DOTS
+:TITLE Results from the WORLD model.
+:X-DIV 7
+:WIDTH 25
+:HEIGHT 15
+:DOTS
+:SCALE
+:VAR Capital
+:DATASET 
+:SHAPE CIRCLE,3
+:SCALE
+:VAR Natural_Resources
+:DATASET 
+:SHAPE X,2
+:SCALE
+:VAR quality_of_life
+:DATASET 
+:SHAPE CROSS,2
+:SCALE
+:VAR Population
+:DATASET 
+:SHAPE DIAMOND,2
+:SCALE
+:VAR Pollution
+:DATASET 
+:SHAPE TRIANGLE,3
+
+:GRAPH Population_Drivers
+:TITLE Population Drivers
+:SCALE
+:VAR food ratio
+:DATASET 
+:VAR crowding
+:DATASET 
+:VAR material standard of living
+:DATASET 
+:VAR pollution ratio
+:DATASET 
+
+:GRAPH Population-Material_Std
+:TITLE Population - Material Standard
+:X-AXIS material standard of living
+:SCALE
+:VAR births material multiplier
+:DATASET 
+:VAR deaths material multiplier
+:DATASET 
+
+:GRAPH Birth_&_Death_Rates
+:TITLE Birth & Death Rates
+:SCALE
+:VAR birth rate
+:DATASET 
+:LINE-WIDTH 3
+:VAR death rate
+:DATASET 
+:LINE-WIDTH 3
+:SCALE
+:VAR food ratio
+:DATASET 
+:LINE-WIDTH 1
+:VAR pollution ratio
+:DATASET 
+:LINE-STYLE DASH
+:VAR material standard of living
+:DATASET 
+:LINE-STYLE DOT
+
+:GRAPH Population_-_Food
+:TITLE Population - Food
+:X-AXIS food ratio
+:X-MIN 0
+:SCALE
+:VAR births food multiplier
+:Y-MIN 0
+:DATASET 
+:VAR deaths food multiplier
+:DATASET 
+
+:GRAPH Population_-_Pollution
+:TITLE Population - Pollution
+:X-AXIS Population
+:DOTS
+:SCALE
+:VAR Pollution
+:DATASET 
+:L<%^E!@
+4:Time
+5:capital investment rate normal
+9:World
+19:100,0
+24:1900
+25:2100
+26:2100
+22:$,Dollar,Dollars,$s
+22:Day,Days
+22:Hour,Hours
+22:Month,Months
+22:Person,People,Persons
+22:Unit,Units
+22:Week,Weeks
+22:Year,Years
+22:$,Dollar,Dollars,$s
+22:Day,Days
+22:Hour,Hours
+22:Month,Months
+22:Person,People,Persons
+22:Unit,Units
+22:Week,Weeks
+22:Year,Years
+22:$,Dollar,Dollars,$s
+22:Day,Days
+22:Hour,Hours
+22:Month,Months
+22:Person,People,Persons
+22:Unit,Units
+22:Week,Weeks
+22:Year,Years
+22:$,Dollar,Dollars,$s
+22:Day,Days
+22:Hour,Hours
+22:Month,Months
+22:Person,People,Persons
+22:Unit,Units
+22:Week,Weeks
+22:Year,Years
+11:AllConstants.voc
+12:QualityOfLife.vpd
+23:0
+15:0,0,0,0,0,0
+27:0,
+34:0,
+42:0
+72:0
+73:0
+35:Date
+36:YYYY-MM-DD
+37:2000
+38:1
+39:1
+40:2
+41:0
+95:0
+96:0
+97:0
+77:0
+78:0
+102:1
+93:0
+94:0
+92:0
+91:0
+90:0
+87:0
+75:
+43:
+103:8,8,8,3,8
+105:0,0,0,0,0,0,0,0,0,0
+104:Vensim Sans|12||0-0-0|0-0-0|-1--1--1|0-0-255|192-192-192|-1--1--1

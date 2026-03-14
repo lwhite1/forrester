@@ -1,0 +1,22 @@
+:COMSYS After 725 simulations
+:COMSYS Best payoff is -93.8141
+:COMSYS Normally terminated optimization
+:OPTIMIZER=Powell
+:SENSITIVITY=Payoff Value=2
+:MULTIPLE_START=Off
+:RANDOM_NUMER=Linear
+:OUTPUT_LEVEL=On
+:TRACE=Off
+:MAX_ITERATIONS=1000
+:RESTART_MAX=0
+:PASS_LIMIT=2
+:FRACTIONAL_TOLERANCE=0.0003
+:TOLERANCE_MULTIPLIER=21
+:ABSOLUTE_TOLERANCE=1
+:SCALE_ABSOLUTE=1
+:VECTOR_POINTS=25
+0.001 <= inventory drive variance = 12.4509  <= 200
+0.001 <= workforce drive variance = 1.17941  <= 200
+0.001 <= meas workforce variance = 0.673933  <= 200
+1 <= time_correct_inventory = 3.68222  <= 50
+1 <= time adjust workforce = 13.0287  <= 50

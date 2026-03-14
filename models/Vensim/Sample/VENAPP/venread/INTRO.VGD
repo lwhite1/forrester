@@ -1,0 +1,438 @@
+:REPORT TXT1
+:TITLE TXT1
+:FONT Times New Roman|12||0-0-0
+You may need to use the scroll bars to the right and on
+the bottom to see all of the information contained
+in this window.
+
+Welcome to Vensim.  This software is designed to let you evaluate
+Vensim to see if it is suitable to your needs and experience.
+
+The demo allows you to learn a little bit about how Vensim works, and
+then to work with Vensim itself.  The Vensim Demo is intended for 
+evaluation purposes only.  You must use Vensim in accordance with the
+license agreement and subject to the restrictions in paragraph 4.
+
+The demonstration copy of Vensim is constructed as a Vensim Application
+(Venapp).  Vensim Applications are models packaged with a customized
+user interface that allow exploration and analysis of a specific model.
+Vensim Applications organize the functionality of Vensim so that a model
+can be analyzed without learning how to use Vensim itself.  This demo
+allows you to learn something of how Vensim can be used, and to explore
+a number of different models to better understand how Vensim operates.
+Finally, you can experiment with the development version of Vensim
+which is more powerful but less controlled and directed.
+
+The normal development functionality of Vensim can be accessed by 
+selecting the appropriate menu item from the Main Menu, or by closing 
+this window from the box in the upper left hand corner.  You can close 
+this window anytime and continue working with the model you are using 
+inside Venapp.  If you choose to work with Vensim in its development 
+form and wish to return to this menu driven format, select the 
+Model>Demo command from the Vensim Workbench menu.
+
+There are four models available for use and analysis using the Vensim
+Application environment.  You can choose among these different models from
+the Main Menu.  Each of the models is stored in a separate subdirectory.
+There are a number of additional models available in the directory in which
+this demonstration was installed.  If you open the Text Edit tool on
+these models you will see a brief commentary on the nature and source
+of the model.
+
+The demonstration copy of Vensim contains the full functionality 
+of Vensim with the following exceptions:
+
+1.  The software will close after 2 hours of inactivity.
+2.  Nothing can be copied or exported to the clipboard.
+3.  Nothing can be pasted from the clipboard.
+4.  Models cannot be read in equation only format.
+5.  Printed output is marked "demonstration version".
+6.  Changes made to models or files cannot be saved.
+7.  Only models shipped with the Demo can be used.
+
+If you have problems, questions, or would like to order Vensim please 
+call us at 508 651 0432.
+
+Good luck, and have fun.
+
+:END-OF-REPORT
+:REPORT TXT2
+:TITLE TXT2
+:FONT Times New Roman|12||0-0-0
+                        VensimTM
+                          the
+               VentanaTM Simulation Environment
+
+                        VenappTM
+                          the
+               VensimTM Application Environment
+
+1. System Requirements
+   
+   To use this Demo you will need a PC compatible computer running
+   Microsoft WindowsTM version 3.0 or 3.1.  The Demo requires two
+   megabytes of disk space and at least two megabytes of memory to
+   function well.  Unless you made a special request, the software
+   is shipped on one high density 3.5 inch diskette.
+   
+2. Installing the Demo
+   
+   To install the Demo insert the Demo disk into drive A or drive
+   B.  Then, at the DOS prompt, type A:INSTALL or B:INSTALL.  If
+   you are running windows then use the File>Run command of the
+   program manager, type A:INSTALL or B:INSTALL in the command line
+   and click OK.
+   
+   The installation program will ask you where you want to install
+   the Demo.  Normally the demo will be installed in the directory
+   C:\\VENDEMO.  You may choose a different disk or directory.  The
+   Demo is designed so that any files created during installation
+   and use of the Demo will be contained in the directory it is
+   installed in, or a sub-directory thereof.
+   
+   NOTE  Installing the Demo will not make any modifications to
+   your existing files.
+   
+3. Starting the Demo
+   
+   If you are running Windows you start the Demo by invoking the
+   File>Run command from the Program Manager, and then entering the
+   full path and name for the Demo (normally C:\\VENDEMO\\VENDEMO). 
+   
+   To start the Demo from DOS change to the directory the Demo is
+   installed in and type WIN VENDEMO at the DOS prompt.
+   
+4. Using the Demo
+   
+   When the Demo starts you will find yourself inside of a menu
+   driven Vensim Application (Venapp).  You can use the up and down
+   arrow keys and the Enter key to choose between menu items, or
+   the mouse to click on menu items.  A straightforward explanation
+   of what Vensim does can be obtained by pressing the Enter key
+   repeatedly.
+   
+   You can explore a number of different Vensim Applications using
+   the demo.  You may also, if you wish, look at the Vensim
+   Development Environment, a powerful and flexible user directed
+   environment for developing and working with models.  Section 8
+   below gives a brief description of basic operations in the
+   Vensim Development environment.
+   
+   After exiting the Demo, you may, if you wish, start the Demo
+   again from step 3.
+   
+   NOTE  The Demo will terminate automatically after two hours of
+   inactivity.  This is a security measure.  If you return to your
+   computer and the Demo is no longer active you may restart it by
+   going back to step 3.
+   
+5. Removing the Demo
+   
+   The Demo will not modify any of your existing files, or create
+   any files outside of the directory it is installed in.  To
+   remove the Demo you simply need to erase the files in the
+   directory you installed the Demo and each sub-directory thereof.
+    A utility named VENDELET.exe is included to make this more
+   convenient.
+   
+   To remove the Demo, at the DOS prompt use the CD command to
+   change directory to the directory the Demo is installed in, and
+   then type VENDELET.  For example if you installed the Demo in
+   C:\\VENDEMO you would type:
+
+   C:
+   CD \\VENDEMO
+   VENDELET
+   
+   You will be asked if you want to delete all the files in five
+   directories.  Normally you will just answer yes each time.  The
+   purpose of this prompt is to prevent you from inadvertently
+   deleting a file you may wish to keep.  If you installed the Demo
+   in a directory you did not previously have, and did not place
+   any other files in that directory or its sub-directories you
+   will want to answer yes to deleting all the files.
+   
+   After you remove the Demo you may, if you wish,  try the Demo
+   again by starting at step 2.
+   
+6. License
+   
+   The Vensim Demonstration Disk is provided to you for evaluation
+   purposes only and is subject to the terms of the license
+   agreement the disk is enclosed in.  The Demo software may not be
+   used in any consulting or commercial activity.
+   
+7. Questions and Comments
+   
+   We will be happy to answer your questions and would like to hear
+   your comments.  Please contact us:  Vensim Product Center,
+   Ventana Systems, Inc., 60 Jacob Gates Road, Harvard MA 01451,
+   USA.  vensim@vensim.com Phone: 508 651 0432. 
+   
+8. Vensim Development Environment
+   
+   When you start the Demo you will be inside a Vensim Application.
+    Vensim Applications contain a model, and directed way of
+   interacting with a model.  They are intended to help people
+   unfamiliar with modeling interact and learn from existing
+   debugged and refined models.  The Vensim Development Environment
+   lets you create, refine and debug models  quickly and
+   effectively.
+   
+8.1 Workbench-Toolbox
+   
+   Vensim uses a Workbench-Toolbox metaphor to help you work with
+   models.  The Workbench is the main Vensim window, and it is
+   labeled "Vensim Workbench."  It always contains a model, and the
+   model is always positioned at a variable - called the Workbench
+   variable.  When you click on a tool, the tool is applied to the
+   Workbench variable of the Workbench model.  For example,
+   clicking on the Causes Tree tool will create a tree showing the
+   causes of the Workbench variable.
+   
+   A Toolbox - accessible using the Toolset>Add Tool command -
+   allows you to add new tools to the Workbench.  Shift clicking on
+   a tool on the Workbench allows you to modify the behavior of
+   that tool.
+   
+8.2 Changing the Workbench Variable
+   
+   You can change the Workbench Variable by double clicking on a
+   different variable name appearing in any Vensim window - trees,
+   graphs, tables and so on.  There is also a variable selection
+   window accessible from the Var>Select menu item on the
+   Workbench.  You can do wildcard pattern matching, or select
+   variables by type from this window.
+   
+8.3 Datasets
+   
+   Simulation results are called datasets.  You can load up to 8
+   datasets into Vensim to compare the behavior of variables.  The
+   datasets do not have to come from the same model.  The
+   Datasets>Load command allows you to load and unload datasets. 
+   When you do a simulation, the corresponding dataset is
+   automatically loaded.
+   
+8.4 Simulations
+   
+   To start a simulation use the Datasets>Simulate command.  A
+   dialog box will appear asking you for input.  For simple
+   simulations you will probably just want to name the simulation,
+   modify constants or lookups, and run the simulation.  If you ask
+   to run a simulation with the name of an existing dataset, you
+   will be asked if you want to overwrite the old dataset.
+   
+8.5 Controlling Output
+   
+   There are a number of dialogs that allows you to control the
+   amount and appearance of output.  Most important are the dialog
+   brought up by the Globals>Time Axis, and Globals>Scaling
+   command.  Note that shift clicking on graphs can also be used to
+   change the displayed time ranges.
+   
+8.6 Sketch Tool
+   
+   The Sketch tool is used to graphically display and modify
+   information about cause and effect.  To activate it click on the
+   tool labeled Sketch, or use the Model>Sketch menu item.
+   
+   Once the Sketch tool is activated you can use it to create and
+   modify cause and effect diagrams.  A number of sub-tools appear
+   to the left of the window the sketch appears in, and operate
+   similarly to tools found in draw programs.
+   
+8.7 Modifying Equations
+   
+   Vensim is designed so that models can be entered both visually
+   and algebraically.  You can do one without the other, but to
+   simulate a model you will need to create equations.  You can
+   modify the model equations one at a time using the Equation Edit
+   tool.  If you Ctrl-Click on a name on the sketch, or click on
+   the Equation Edit tool the Equation Editor will start.  Vensim
+   will make sure the sketch is kept correct if you make changes
+   using the Equation Editor.
+   
+   You can also modify model equations using the Text Edit tool. 
+   Click on the Text Edit tool or select the Model>Edit command.  
+   The straightforward Text Editor will appear allowing you to
+   change equations.
+   
+   You can create equations in any order.  Vensim will order them
+   automatically and tell if you if there are problems before it
+   simulate the model.
+   
+   NOTE  To create a Level or State variable in Vensim use the
+   INTEG function as in:
+   
+   Water Level = INTEG(inflow-outflow,INITIAL WATER LEVEL).
+   
+8.9 Existing Models
+   
+   The Vensim Demo is shipped with a number of models.  Four of
+   these models are put in separate sub-directories, and a number
+   are included in the main VENDEMO directory.  You can load the
+   different models using the Model>Load command.  
+   
+8.10 Printing
+   
+   If you want to work by example, and this is highly recommended,
+   than you may find it useful to print off one or more of the
+   models included with the demo.  To do this start the Text Edit
+   tool using the Model>Edit command, then select the File>Print
+   menu item from the Text Editor.  For security reasons there will
+   be a mark printed in the middle of the paper, but the output
+   should be quite legible.
+   
+8.11 Developing a model
+
+   The following two pages take you through the development and use
+   of the simples possible model using Vensim.  This process is
+   intended to give you a chance to work hands on with the Vensim
+   development environment.
+
+8.12 Other Features
+   
+   There is not sufficient space to go into all of the features of
+   Vensim here, and the on-line help capabilities are not, as yet,
+   in place.  You are, of course, welcome to experiment.  If you
+   have specific questions about capabilities please contact us.
+
+************* Simple Population Model ********************
+                   Step by Step
+
+   This two page guide shows you how to develop and use a simple
+   model of population in Vensim.  The steps are numbered, and no
+   prerequisite knowledge is assumed. The problem is to develop the
+   simplest possible model of population growth.
+
+1. Exit the demo to the Vensim development environment by selecting
+   this option from the main menu.
+
+2. From the Vensim Workbench menu select the command Model>New.
+
+3. Click on the sketch tool icon (labeled Sketch), or select the
+   menu item Model>Sketch.
+
+4. In the new window that appears (labeled "On-line Model without
+   name View: 1"), click on the word icon () and position the
+   pointer over the empty area of the window.
+
+5. Click on the window, an editing box should appear, type the word
+   "Population" into the editing box.  Click somewhere else and
+   type the word "births".  Continue clicking and typing the words
+   "birth rate", "deaths", "death rate".  The window should look
+   like this:
+
+6. Click on the curved arrow tool () and then click on the work
+   "Population" in the sketch.  As you move the cursor an arrow
+   should follow.  Click on the work "births", an arrow should
+   connect the two.  Drag the circle in the middle of the arrow to
+   reshape the arrow.  (To drag, press the mouse button over the
+   circle and then move the mouse without releasing the mouse
+   button.).  Continue making connections from:
+
+   deaths --> population
+
+   death rate --> deaths
+
+   Population ---> births
+
+   births ---> Population
+
+   birth rate --> births
+
+   This should leave you with:
+
+   If you do not reshape the double arrows between "Population" and
+   "deaths"  (or "Population" and "births") the arrows will sit on
+   top of one another and not be completely visible.
+
+7. You have now completely specified the structure for the model. 
+   Next you need to specify the equations precisely defining that
+   structure.  Hold down the Control (Ctrl) key and click on
+   "Population."  The Equation Edit tool will appear as:
+
+8. Complete the equation for population as
+
+   Population=INTEG(births - deaths,100)
+
+   You can type this in (beginning with the = sign) or click on the
+   various symbols appearing in the buttons and lists.  The INTEG
+   function, for example, is in the function list, just below
+   INITIAL.  The INTEG function defines population as an
+   accumulation or Level variable.  The 100 is the initial value of
+   the variable.
+
+9. After you have completed the equation click on the Finish
+   button.  You will see a list of errors reported:
+
+10.The errors all relate to incomplete definitions.  Click on any
+   of these errors to go to the corresponding equations.  Continue
+   inputting equations in this manner, clicking on the Finish
+   button to get a list of what is not yet completed after each
+   equation is entered.  The remaining equations requiring entry
+   are:
+
+   births = Population * net birth rate
+
+   net birth rate = .06
+
+   deaths = Population * death rate
+
+   death rate = .04
+
+   After you enter the last equation, and click on the Finish
+   button the Equation Editor will disappear, your model is
+   complete.
+
+   NOTE if you make syntax errors during equation entry the finish
+   button will describe your error, and position the cursor where
+   the error was detected.  Spacing and capitalization are not
+   important.  Use whatever you want to maximize readability and
+   clarity.
+
+11.To simulation the model select Datasets>Simulate from the Vensim
+   Workbench Menu.  You will see a simulation control dialog.  Type
+   in a new name ("pop1" as an example) for the simulation and
+   click OK.  The simulation will begin.
+
+12.To view the simulation results select Variable>Select from the
+   Vensim Workbench menu.  From the list of variables that appears 
+   double-click on population.  The name population should appear
+   in the workbench.  Now click on the tool () labeled "Causes
+   Strip."  You should see a graph of population and its causes:
+
+13.You have created a model, made a simulation and used the tools
+   of Vensim to view the simulation results.  You can continue to
+   explore the model and its results with Vensim tools.  As an
+   experiment, click on each of the tools in turn and look at the
+   output it generates.
+:END-OF-REPORT
+:GRAPH WIP1
+:TITLE Workforce and Productivity after a Sales Step
+:WIP
+:X-MIN 0
+:X-MAX 100
+:SCALE
+:VAR sales|Sales
+:Y-MIN 50
+:Y-MAX 150
+:SCALE
+:VAR Workforce|Workforce
+:Y-MIN 50
+:Y-MAX 150
+:SCALE
+:VAR productivity|Productivity
+:Y-MIN 0.5
+:Y-MAX 1.5
+:REPORT SILLY
+:TITLE SILLY
+:FONT Times New Roman|12||0-0-0
+This is a silly report.
+Starting Workforce= \Workforce?100=Normal Value?119.68=Final Value@0/
+Midle  Workforce= \Workforce?100=Normal Value?119.68=Final Value@50/
+Final Workforce= \Workforce?100=Normal Value?119.68=Final Value@100/
+Net hires @36 =   \Net Hires?-3=Special@36/
+Net hires @38 =   \Net Hires?-3=Special%5.5g@38/
+
+:END-OF-REPORT

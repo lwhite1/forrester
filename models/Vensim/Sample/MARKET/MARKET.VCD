@@ -1,0 +1,209 @@
+! Market Sales Cycle Venapp
+! Copyright 1988-1997 Ventana Systems, Inc.
+!
+:SCREEN WELCOME
+SCREENFONT,Time New Roman|12||0-0-0|-1--1--1
+COMMAND,"",0,0,0,0,,,SPECIAL>LOADMODEL|market2.vmf
+COMMAND,"",0,0,0,0,,,SPECIAL>READCUSTOM|market2.vgd
+COMMAND,"",0,0,0,0,,,SPECIAL>CLEARRUNS
+COMMAND,"",0,0,0,0,,,SIMULATE>RUNNAME|SCEN01
+COMMAND,"",0,0,0,0,,,"SPECIAL>SETTITLE|Ventana Sales Cycle"
+TEXTONLY,"Ventana Sales Cycle",0,10,100,0,C||24|B|255-0-0,
+TEXTONLY,"Copyright © 1991-1999 Ventana Systems, Inc.",0,30,100,0,C,
+TEXTONLY,"Vensim Product Center",0,35,100,0,C0 5,
+TEXTONLY,"60 Jacob Gates Road",0,38,100,0,C0 5,
+TEXTONLY,"Harvard MA 01451 USA",0,41,100,0,C0 5
+TEXTONLY,"508 651 0432 - Fax: 608 650 5422",0,44,100,0,C0 5
+TEXTONLY,"Press any key to continue",0,60,100,0,C,
+TEXTONLY,"Software subject to the terms of the license agreement.",0,80,100,0,C  3,
+TEXTONLY,"Copyright © 1988-1997 Ventana Systems, Inc.  ALL RIGHTS RESERVED.",0,90,100,0,C  4,
+ANYKEY,"",0,0,0,0,0,,,MAIN
+!
+:SCREEN MAIN
+SCREENFONT,Times New Roman|12||0-0-0|-1--1--1
+TEXTONLY,"Sales Cycle Main Menu",0,5,100,0,C||24|B|255-0-0
+RECTANGLE,"",20,14,60,32,C||||0-0-255
+BUTTON,"Review model structure",50,15,50,6,C|Times New Roman|12,Oo,,OVERVIEW
+BUTTON,"Setup and run a scenario",50,23,50,6,C|Times New Roman|12,Ss,,DEFINE
+BUTTON,"Analyze previously run scenarios",50,31,50,6,C|Times New Roman|12,Aa,,ANALYZE
+BUTTON,"Exit to model selection menu",50,39,50,5,C,EeXx,SPECIAL>LOADMODEL|..\intro.vmf&SPECIAL>LOADAPPINT|intro.vcd@3,
+LINE,"",0,52,100,0
+TEXTONLY,"Instructions and Comments - If necessary use the scroll bar to see everything",0,55,100,0,C 3
+TOOL,"SP1",0,52,100,48,,,CUSTOM>COMM1
+!
+!
+:SCREEN DEFINE
+SCREENFONT,Times New Roman|12||0-0-0|-1--1--1
+TEXTONLY,"Scenario creation",0,5,100,0,C||24|B|255-0-0
+TEXTONLY,"Loaded scenarios",50,15,50,0,C
+TEXTONLY,"New scenario",25,25,0,0,L
+TEXTONLY,"1.",50,25,0,0,L
+TEXTONLY,"2.",62,25,0,0,L
+TEXTONLY,"3.",74,25,0,0,L
+TEXTONLY,"4.",86,25,0,0,L
+TEXTONLY,"Name",24,30,0,0,R
+MODRUNNAME,"|Enter the new name (<8 chars) for the run",25,29,20,0,L,
+RUNNAME,"*1",50,30,0,0,L
+RUNNAME,"*2",62,30,0,0,L
+RUNNAME,"*3",74,30,0,0,L
+RUNNAME,"*4",86,30,0,0,L
+TEXTONLY,"Budgets",0,38,52,0,C
+TEXTONLY,"Advertising",24,45,0,0,R
+SLIDEVAR,"PERCENT BUDGET ADV|Enter the percent of total revenue going to advertising",25,44,20,10,L,[1|10|.25]
+SHOWVAR,"PERCENT BUDGET ADV&*1",50,45,0,0,L
+SHOWVAR,"PERCENT BUDGET ADV&*2",62,45,0,0,L
+SHOWVAR,"PERCENT BUDGET ADV&*3",74,45,0,0,L
+SHOWVAR,"PERCENT BUDGET ADV&*4",86,45,0,0,L
+TEXTONLY,"Internal salesforce",24,56,0,0,R
+SLIDEVAR,"PERCENT BUDGET INT DIR SALES|Enter the percent of total revenue going to internal direct sales",25,55,20,10,L,[1|20|.25]
+SHOWVAR,"PERCENT BUDGET INT DIR SALES&*1",50,52,0,0,L
+SHOWVAR,"PERCENT BUDGET INT DIR SALES&*2",62,52,0,0,L
+SHOWVAR,"PERCENT BUDGET INT DIR SALES&*3",74,52,0,0,L
+SHOWVAR,"PERCENT BUDGET INT DIR SALES&*4",86,52,0,0,L
+TEXTONLY,"External salesforce",24,67,0,0,R
+SLIDEVAR,"PERCENT BUDGET EXT SALES REPS|Enter the percent of total revenue going to the external sales force",25,66,20,10,L,[1|20|.25]
+SHOWVAR,"PERCENT BUDGET EXT SALES REPS&*1",50,59,0,0,L
+SHOWVAR,"PERCENT BUDGET EXT SALES REPS&*2",62,59,0,0,L
+SHOWVAR,"PERCENT BUDGET EXT SALES REPS&*3",74,59,0,0,L
+SHOWVAR,"PERCENT BUDGET EXT SALES REPS&*4",86,59,0,0,L
+PROMPT,"",1,77,0,0,L
+LINE,"",0,80,100,0
+BUTTON,"Run the scenario",50,84,40,0,C,Rr,SPECIAL>CLEARRUNS|3,RUNNING
+BUTTON,"Cancel and return to Main Menu",50,92,40,0,C,Cc,CANCEL,MAIN
+!
+:SCREEN RUNNING
+SCREENFONT,Times New Roman|12||0-0-0|-1--1--1
+WIPTOOL,"GR1",5,5,90,80,,,CUSTOM>WIP_CASH_REV,
+COMMAND,"",0,0,0,0,,,SPECIAL>SETWBITEM|cash revenue
+COMMAND,"",0,0,0,0,,,MENU>RUN|O,
+CLOSESCREEN,"",0,0,0,0,,,,SHOW
+!
+:SCREEN SHOW
+SCREENFONT,Times New Roman|12||0-0-0|-1--1--1
+TOOL,"GR1",5,5,90,80,,,WORKBENCH>Graph
+BUTTON,"Select new variable",5,90,25,0,L,Ss,SPECIAL>VARSELECT|New variable to use,SHOW
+BUTTON,"Modify and rerun",50,90,25,0,C|,EeXx,,DEFINE
+BUTTON,"Use analysis tools",70,90,25,0,L|,EeXx,,ANALYZE
+!
+!
+!
+!
+:SCREEN OVERVIEW
+SCREENFONT,Times New Roman|12||0-0-0|-1--1--1
+TEXTONLY,"Model Structure Overview",0,5,100,0,C||24|B|255-0-0
+LINE,"",50,45,-40,-25,C||||0-0-255
+LINE,"",50,45,-40,0,C||||0-0-255
+LINE,"",50,45,40,-25,C||||0-0-255
+LINE,"",50,45,40,0,C||||0-0-255
+LINE,"",50,45,0,35,C||||0-0-255
+BUTTON,"Sales Process",10,15,15,15,C,Ww,,OV_SPROCESS
+BUTTON,"Cash",10,40,15,15,C,Ww,,OV_CASH
+BUTTON,"Advertising",50,70,15,15,C,Ww,,OV_ADVERT
+BUTTON,"Products",90,40,15,15,C,Ww,,OV_PRODUCT
+BUTTON,"Sales Force",90,15,15,15,C,Ww,,OV_SFORCE
+BUTTON,"Conceptual Model Overview",50,40,0,10,C,,,OV_CONCEPT
+BUTTON,"Exit to main menu",50,90,90,0,C|,EeXx,,MAIN
+!
+:SCREEN OV_CONCEPT
+SCREENFONT,Times New Roman|12||0-0-0|-1--1--1
+SKETCH,"SK1",0,0,100,83,,,1,
+TEXTONLY,"Press any key to return to overview menu",1,97,00,0,L|Times New Roman|10||0-0-0
+ANYKEY,"",0,0,0,0,0,,,OVERVIEW
+!
+:SCREEN OV_SPROCESS
+SCREENFONT,Times New Roman|12||0-0-0|-1--1--1
+SKETCH,"SK1",0,0,100,83,,,2,
+TEXTONLY,"Press any key to return to overview menu",1,97,00,0,L|Times New Roman|10||0-0-0
+ANYKEY,"",0,0,0,0,0,,,OVERVIEW
+!
+:SCREEN OV_CASH
+SCREENFONT,Times New Roman|12||0-0-0|-1--1--1
+SKETCH,"SK1",0,0,100,83,,,3,
+TEXTONLY,"Press any key to return to overview menu",1,97,00,0,L|Times New Roman|10||0-0-0
+ANYKEY,"",0,0,0,0,0,,,OVERVIEW
+!
+:SCREEN OV_ADVERT
+SCREENFONT,Times New Roman|12||0-0-0|-1--1--1
+SKETCH,"SK1",0,0,100,83,,,5,
+TEXTONLY,"Press any key to return to overview menu",1,97,00,0,L|Times New Roman|10||0-0-0
+ANYKEY,"",0,0,0,0,0,,,OVERVIEW
+!
+:SCREEN OV_PRODUCT
+SCREENFONT,Times New Roman|12||0-0-0|-1--1--1
+SKETCH,"SK1",0,0,100,83,,,6,
+TEXTONLY,"Press any key to return to overview menu",1,97,00,0,L|Times New Roman|10||0-0-0
+ANYKEY,"",0,0,0,0,0,,,OVERVIEW
+!
+:SCREEN OV_SFORCE
+SCREENFONT,Times New Roman|12||0-0-0|-1--1--1
+SKETCH,"SK1",0,0,100,83,,,4,
+TEXTONLY,"Press any key to return to overview menu",1,97,00,0,L|Times New Roman|10||0-0-0
+ANYKEY,"",0,0,0,0,0,,,OVERVIEW
+!
+!
+:SCREEN ANALYZE
+SCREENFONT,Times New Roman|12||0-0-0|-1--1--1
+TEXTONLY,"Analysis Control",0,10,100,0,C||25|B|255-0-0
+BUTTON,"Load, unload and reorder previously run scenarios",15,20,70,0,L|Times New Roman|10||0-0-0,1,MENU>LOAD_RUN,
+BUTTON,"List the differences between the first two loaded scenarios",15,26,70,0,L|Times New Roman|10||0-0-0,8,,DIFF
+TEXTONLY,"Causal Tracing™",0,44,100,0,C||20|B|0-0-255
+BUTTON,"Select a Variable as a start point for further analysis",15,52,70,0,L|Times New Roman|10||0-0-0,4,SPECIAL>SETWBITEM|TOT COST&SPECIAL>VARSELECT|New variable to use
+BUTTON,"Trace underlying causes using Trees",15,58,70,0,L|Times New Roman|10||0-0-0,5,,CAUSE1
+BUTTON,"Trace underlying causes using Graphs",15,64,70,0,L|Times New Roman|10||0-0-0,6,,CAUSE2
+BUTTON,"Trace the Uses of a variable",15,70,70,0,L|Times New Roman|10||0-0-0,7,,USE
+BUTTON,"Exit back to the main menu",15,80,70,0,L,EeXx,,MAIN
+!
+:SCREEN DIFF
+SCREENFONT,Times New Roman|12||0-0-0|-1--1--1
+TEXTONLY,"Constant and table differences between first two loaded scenarios",0,2,100,0,C32
+TOOL,"D1",5,10,90,80,,,WORKBENCH>RUNS COMPARE
+TEXTONLY,"Press P to print - any other key to continue",0,95,100,0,C
+BUTTON,"",0,0,0,0,L,Pp,PRINT>D1
+ANYKEY,"",0,0,0,0,0,,,ANALYZE
+!
+:SCREEN USE
+SCREENFONT,Times New Roman|12||0-0-0|-1--1--1
+TEXTONLY,"Uses of -",0,2,50,0,R
+WBVAR,"",50,2,0,0,L
+TOOL,"TR1",2,6,96,42,,,WORKBENCH>USES TREE
+BUTTON,"Causes - of Current variable",2,50,40,0,L,Cc,,CAUSE1
+BUTTON,"Definition...",43,50,0,0,L,Cc,WORKBENCH>DOCUMENT,
+BUTTON,"Causes - Graph Based",2,57,40,0,L,Cc,,CAUSE2
+BUTTON,"Select a new variable to trace",2,64,40,0,L,Ss,SPECIAL>SETWBITEM|POPULATION&SPECIAL>VARSELECT|New variable for tracing
+BUTTON,"Exit - return to analysis",2,71,40,0,L,EeXx,,ANALYZE
+TOOL,"GR1",60,50,40,50,,,WORKBENCH>STRIP GRAPH
+TOOL,"COMM4",0,80,58,20,,,CUSTOM>COMM4
+SETWB,"",0,0,0,0,,,,USE
+!
+:SCREEN CAUSE1
+SCREENFONT,Times New Roman|12||0-0-0|-1--1--1
+TEXTONLY,"Causal tracing -",0,2,50,0,R
+WBVAR,"",50,2,0,0,L
+TOOL,"TR1",2,6,96,42,,,WORKBENCH>CAUSES TREE
+BUTTON,"Graph based",2,50,40,0,L,Cc,,CAUSE2
+BUTTON,"Definition...",43,50,0,0,L,Cc,WORKBENCH>DOCUMENT,
+BUTTON,"Uses - of current variable",2,57,40,0,L,Cc,,USE
+BUTTON,"Select a new variable to trace",2,64,40,0,L,Ss,SPECIAL>SETWBITEM|POPULATION&SPECIAL>VARSELECT|New variable for tracing
+BUTTON,"Exit - return to analysis",2,71,40,0,L,EeXx,,ANALYZE
+TOOL,"GR1",60,50,40,50,,,WORKBENCH>STRIP GRAPH
+TOOL,"COMM4",0,80,58,20,,,CUSTOM>COMM4
+SETWB,"",0,0,0,0,,,,CAUSE1
+!
+:SCREEN CAUSE2
+SCREENFONT,Times New Roman|12||0-0-0|-1--1--1
+TEXTONLY,"Causal tracing -",0,2,0,0,L
+WBVAR,"",20,2,0,0,L
+TOOL,"TR1",60,0,40,100,,,WORKBENCH>CAUSES STRIP
+BUTTON,"Tree based",5,50,40,0,L,Cc,,CAUSE1
+BUTTON,"Uses - of current variable",5,57,40,0,L,Cc,,USE
+BUTTON,"Select a new variable to trace",5,64,40,0,L,Ss,SPECIAL>SETWBITEM|POPULATION&SPECIAL>VARSELECT|New variable for tracing
+BUTTON,"Exit - return to analysis",5,71,40,0,L,EeXx,,ANALYZE
+TOOL,"GR1",0,8,58,40,,,WORKBENCH>DOCUMENT
+TOOL,"COMM4",0,80,60,20,,,CUSTOM>COMM4
+SETWB,"",0,0,0,0,,,,CAUSE2
+!
+!
+!
+!
+!
+!

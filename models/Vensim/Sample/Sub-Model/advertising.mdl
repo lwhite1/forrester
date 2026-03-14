@@ -1,0 +1,163 @@
+{UTF-8}
+{UTF-8}
+
+adv budget  =
+        percent budget adv/100
+             * cash revenue
+	~	$/ Month
+	~		|
+
+Adv Budget Effective  =
+        INTEG( ( adv budget
+                  - Adv Budget Effective )
+                  / adv impact delay ,
+             adv budget )
+	~	$/ Month
+	~		|
+
+adv impact delay  = 12
+	~	Months
+	~		|
+
+cash revenue=
+	70000
+	~	$/ Month
+	~		|
+
+effect of advertising  =
+        table for effect of adv ( Adv Budget Effective
+                  / Products )
+	~	Dimensionless
+	~		|
+
+normal lead gen effic  = 7
+	~	Orders / Products / Month
+	~		|
+
+percent budget adv  = 4
+	~	Dimensionless
+	~		|
+
+pot order creation  =
+        normal lead gen effic
+             * Products
+             * effect of advertising
+	~	Orders / Month
+	~		|
+
+Products=
+	10
+	~	Product
+	~		|
+
+table for effect of adv  (
+            0, 40, 80, 120, 160, 200, 240, 280, 320, 360, 400, 0.01, 0.2, 0.5
+            , 0.7, 0.8, 1, 1.03, 1.06, 1.08, 1.09, 1.1 )
+	~	Dimensionless
+	~		|
+
+********************************************************
+	.Control
+********************************************************~
+		Simulation Control Parameters
+	|
+
+FINAL TIME  = 60
+	~	Month
+	~	The final time for the simulation.
+	|
+
+INITIAL TIME  = 0
+	~	Month
+	~	The initial time for the simulation.
+	|
+
+SAVEPER  = 
+        TIME STEP
+	~	Month [0,?]
+	~	The frequency with which output is stored.
+	|
+
+TIME STEP  = 1
+	~	Month [0,?]
+	~	The time step for the simulation.
+	|
+
+\\\---/// Sketch information - do not modify anything except names
+V300  Do not put anything below this section - it will be ignored
+*Advertising
+$192-192-192,0,|12||-1--1--1|0-0-0|0-0-255|-1--1--1|-1--1--1|96,96,100,0
+10,1,Adv Budget Effective,389,536,48,27,3,131,0,16,0,1,0,0,0-0-0,0-0-0,||B|0-0-0,0,0,0,0,0,0
+10,2,adv budget,247,556,75,30,0,3,0,0,-1,1,0,0,0,0,0,0,0,0
+10,3,adv impact delay,224,516,75,30,0,3,0,2,-1,1,0,0,-1--1--1,-1--1--1,|||64-128-128,0,0,0,0,0,0
+10,4,cash revenue,79,560,75,30,0,2,0,0,-1,1,0,0,0,0,0,0,0,0
+10,5,effect of advertising,559,536,75,30,0,3,0,0,-1,1,0,0,0,0,0,0,0,0
+10,6,percent budget adv,95,603,75,30,0,3,0,2,-1,1,0,0,-1--1--1,-1--1--1,|||64-128-128,0,0,0,0,0,0
+10,7,Products,608,464,75,30,0,2,0,0,-1,1,0,0,0,0,0,0,0,0
+10,8,table for effect of adv,529,594,75,30,0,3,0,2,0,1,0,0,-1--1--1,-1--1--1,|||64-128-128,0,0,0,0,0,0
+10,9,pot order creation,780,532,75,30,0,3,0,0,-1,1,0,0,0,0,0,0,0,0
+10,10,normal lead gen effic,830,637,75,30,0,3,0,2,-1,1,0,0,-1--1--1,-1--1--1,|||64-128-128,0,0,0,0,0,0
+1,11,2,1,1,0,0,0,0,0,0,-1--1--1,,1|(323,560)|
+1,12,3,1,1,0,0,0,0,0,0,-1--1--1,,1|(288,522)|
+1,13,4,2,1,0,0,0,0,0,0,-1--1--1,,1|(149,560)|
+1,14,6,2,1,0,0,0,0,0,0,-1--1--1,,1|(192,586)|
+1,15,1,5,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,16,7,5,1,0,0,0,0,0,0,-1--1--1,,1|(586,500)|
+1,17,8,5,0,0,0,0,0,0,0,-1--1--1,,1|(0,0)|
+1,18,5,9,1,0,0,0,0,0,0,-1--1--1,,1|(659,540)|
+1,19,10,9,1,0,0,0,0,0,0,-1--1--1,,1|(806,576)|
+1,20,7,9,1,0,0,0,0,0,0,-1--1--1,,1|(664,483)|
+12,21,0,411,364,80,40,8,7,0,0,-1,1,0,0,0,0,0,0,0,0
+Advertising Model
+12,22,0,1335,393,300,200,0,15,0,0,1,0,0,0,0,0,0,0,0,0
+Advertising
+///---\\\
+:GRAPH Advertising
+:TITLE Advertising
+:SCALE
+:VAR adv budget
+:DATASET 
+:LINE-WIDTH 1
+:SCALE
+:VAR effect of advertising
+:DATASET 
+:LINE-WIDTH 1
+:L<%^E!@
+4:Time
+5:Adv Budget Effective
+9:advertising
+19:100,0
+24:0
+25:60
+26:60
+23:0
+15:0,0,0,0,0,0
+27:0,
+34:0,
+42:1
+72:0
+73:0
+35:Date
+36:YYYY-MM-DD
+37:2000
+38:1
+39:1
+40:2
+41:0
+95:0
+96:0
+97:0
+77:0
+78:0
+102:1
+93:0
+94:0
+92:0
+91:0
+90:0
+87:0
+75:
+43:
+103:8,8,8,3,8
+105:0,0,0,0,0,0,0,0,0,0
+104:Vensim Sans|12||0-0-0|0-0-0|-1--1--1|0-0-255|192-192-192|-1--1--1

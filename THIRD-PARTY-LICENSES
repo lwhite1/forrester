@@ -9,6 +9,7 @@ original licenses, separate from the project source code license (AGPL-3.0).
 All third-party model content resides under:
   - forrester-app/src/main/resources/models/   (JSON definitions)
   - forrester-demos/src/main/java/             (generated Java demo classes)
+  - models/Vensim/                             (original .mdl files from Vensim)
 
 Generated Java demo classes derived from third-party models carry a
 file-level license header indicating CC-BY-NC-SA-4.0.
@@ -44,3 +45,24 @@ URL:     https://simulation.tudelft.nl/
 | Supply Chain Bullwhip     | supply-chain  | supply-chain-bullwhip.json   |
 
 Full license text: https://creativecommons.org/licenses/by-nc-sa/4.0/legalcode
+
+────────────────────────────────────────────────────────────────────────
+
+Vensim Bundled Models
+──────────────────────
+
+Source:  Sample and User Guide models bundled with Vensim by Ventana
+         Systems, Inc. (https://vensim.com).
+License: MIT License (Copyright 2025, Ventana Systems, Inc.)
+URL:     https://www.vensim.com/documentation/models.html
+
+Original .mdl files reside under models/Vensim/Sample/ and
+models/Vensim/UserGuide/. Imported versions (JSON definitions and
+generated Java classes) may not exactly reproduce the originals due to
+format conversion and parser limitations.
+
+See models/Vensim/LICENSE for the full MIT license text.
+See models/Vensim/manifest.json for the complete list of 107 models
+with per-model metadata.
+
+Full license text: https://opensource.org/licenses/MIT
