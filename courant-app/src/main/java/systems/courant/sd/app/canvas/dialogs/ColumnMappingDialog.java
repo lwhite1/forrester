@@ -13,6 +13,7 @@ import javafx.scene.layout.GridPane;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import systems.courant.sd.app.canvas.HelpContextResolver;
 import systems.courant.sd.app.canvas.Styles;
 
 /**
@@ -31,6 +32,7 @@ public class ColumnMappingDialog extends Dialog<ReferenceDataset> {
      * @param modelVariables the known model variable names available for mapping
      */
     public ColumnMappingDialog(ReferenceDataset dataset, List<String> modelVariables) {
+        HelpContextResolver.installF1Handler(this);
         setTitle("Map Reference Data Columns");
         setHeaderText("Map CSV columns to model variables");
 

@@ -3,10 +3,15 @@ package systems.courant.sd.app.canvas;
 import systems.courant.sd.model.def.ElementType;
 
 import javafx.scene.Node;
+import javafx.scene.control.Dialog;
 import javafx.scene.control.TabPane;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 
 import java.util.Set;
+
 import systems.courant.sd.app.canvas.dialogs.BindingConfigDialog;
+import systems.courant.sd.app.canvas.dialogs.ContextHelpDialog;
 import systems.courant.sd.app.canvas.dialogs.DefinePortsDialog;
 import systems.courant.sd.app.canvas.dialogs.ExpressionLanguageDialog;
 import systems.courant.sd.app.canvas.dialogs.MonteCarloDialog;
@@ -189,6 +194,30 @@ public final class HelpContextResolver {
             case PLACE_COMMENT -> HelpTopic.COMMENT;
             case SELECT -> null;
         };
+    }
+
+    /**
+     * Installs an F1 key handler on a {@link Dialog} so that pressing F1
+     * opens context help for that dialog type.
+     *
+     * <p>Modal dialogs have their own Stage, so they don't receive the
+     * Scene-level F1 filter installed in ModelWindow. This method bridges
+     * the gap by adding a filter directly on the dialog pane.
+     *
+     * @param dialog the dialog to install the handler on
+     */
+    public static void installF1Handler(Dialog<?> dialog) {
+        dialog.getDialogPane().addEventFilter(KeyEvent.KEY_PRESSED, event -> {
+            if (event.getCode() == KeyCode.F1) {
+                String className = dialog.getClass().getSimpleName();
+                HelpTopic topic = topicForDialog(className);
+                ContextHelpDialog helpDialog = new ContextHelpDialog();
+                helpDialog.initOwner(dialog.getDialogPane().getScene().getWindow());
+                helpDialog.showTopic(topic);
+                helpDialog.show();
+                event.consume();
+            }
+        });
     }
 
     private static boolean isEquationFieldFocused(Node focusOwner) {

@@ -18,6 +18,7 @@ import javafx.scene.layout.VBox;
 
 import java.util.ArrayList;
 import java.util.List;
+import systems.courant.sd.app.canvas.HelpContextResolver;
 import systems.courant.sd.app.canvas.Styles;
 
 /**
@@ -34,6 +35,7 @@ public class DefinePortsDialog extends Dialog<ModuleInterface> {
     private record PortRow(TextField nameField, TextField unitField, HBox container) {}
 
     public DefinePortsDialog(String moduleName, ModuleInterface existing) {
+        HelpContextResolver.installF1Handler(this);
         setTitle("Define Ports — " + moduleName);
         setHeaderText("Define input and output ports for module '" + moduleName + "'");
         setResizable(true);

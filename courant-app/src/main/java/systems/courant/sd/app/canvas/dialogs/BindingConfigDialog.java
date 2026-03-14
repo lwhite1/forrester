@@ -16,6 +16,7 @@ import javafx.scene.layout.VBox;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import systems.courant.sd.app.canvas.HelpContextResolver;
 import systems.courant.sd.app.canvas.Styles;
 
 /**
@@ -37,6 +38,7 @@ public class BindingConfigDialog extends Dialog<BindingConfigDialog.BindingResul
     private final Map<String, TextField> outputFields = new HashMap<>();
 
     public BindingConfigDialog(ModuleInstanceDef module) {
+        HelpContextResolver.installF1Handler(this);
         setTitle("Configure Bindings — " + module.instanceName());
         setHeaderText("Configure port bindings for module '" + module.instanceName() + "'");
 

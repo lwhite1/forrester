@@ -19,6 +19,7 @@ import javafx.scene.layout.VBox;
 
 import java.util.ArrayList;
 import java.util.List;
+import systems.courant.sd.app.canvas.HelpContextResolver;
 import systems.courant.sd.app.canvas.ParameterRowBase;
 import systems.courant.sd.app.canvas.Styles;
 
@@ -55,6 +56,7 @@ public class OptimizerDialog extends Dialog<OptimizerDialog.Config> {
     private final TextField maxEvalsField;
 
     public OptimizerDialog(List<String> constantNames, List<String> stockNames) {
+        HelpContextResolver.installF1Handler(this);
         setTitle("Optimize");
         setHeaderText("Configure optimization");
 
