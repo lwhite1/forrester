@@ -28,14 +28,16 @@ import java.util.stream.Stream;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Batch import test: scans Vensim Sample and UserGuide directories,
+ * Batch import test: scans Vensim Sample, UserGuide, and Delft directories,
  * imports every .mdl file, attempts compile and simulate, and writes
  * detailed reports to devdocs/.
  */
-@DisplayName("Vensim batch import (Sample + UserGuide)")
+@DisplayName("Vensim batch import (Sample + UserGuide + Delft)")
 class VensimBatchImportTest {
 
-    private static final Path VENSIM_ROOT = Path.of("D:/projects/forrester/models/Vensim");
+    private static final Path MODELS_ROOT = Path.of("D:/projects/forrester/models");
+    private static final Path VENSIM_ROOT = MODELS_ROOT.resolve("Vensim");
+    private static final Path DELFT_ROOT = MODELS_ROOT.resolve("Delft");
     private static final Path DEVDOCS = Path.of("D:/projects/forrester/devdocs");
 
     private final VensimImporter importer = new VensimImporter();
@@ -55,28 +57,31 @@ class VensimBatchImportTest {
             int auxes
     ) {}
 
+    record SourceDir(Path root, String label) {}
+
     @Test
-    @DisplayName("should import all Sample and UserGuide models and generate reports")
+    @DisplayName("should import all Sample, UserGuide, and Delft models and generate reports")
     void batchImportAndReport() throws IOException {
-        List<Path> dirs = List.of(
-                VENSIM_ROOT.resolve("Sample"),
-                VENSIM_ROOT.resolve("UserGuide")
+        List<SourceDir> sources = List.of(
+                new SourceDir(VENSIM_ROOT.resolve("Sample"), "Sample"),
+                new SourceDir(VENSIM_ROOT.resolve("UserGuide"), "UserGuide"),
+                new SourceDir(DELFT_ROOT, "Delft")
         );
 
         List<ModelResult> results = new ArrayList<>();
 
-        for (Path dir : dirs) {
-            if (!Files.isDirectory(dir)) {
+        for (SourceDir src : sources) {
+            if (!Files.isDirectory(src.root)) {
                 continue;
             }
-            try (Stream<Path> walk = Files.walk(dir)) {
+            try (Stream<Path> walk = Files.walk(src.root)) {
                 List<Path> mdlFiles = walk
                         .filter(p -> p.toString().toLowerCase().endsWith(".mdl"))
                         .sorted()
                         .toList();
 
                 for (Path mdlFile : mdlFiles) {
-                    results.add(processModel(mdlFile, dir.getParent()));
+                    results.add(processModel(mdlFile, src.root, src.label));
                 }
             }
         }
@@ -98,13 +103,8 @@ class VensimBatchImportTest {
         System.out.printf("Simulate success: %d%n", results.stream().filter(r -> r.simulateOk).count());
     }
 
-    private ModelResult processModel(Path mdlFile, Path vensimRoot) {
-        String relativePath = vensimRoot.relativize(mdlFile).toString().replace('/', '\\');
-        String source = mdlFile.getParent().getFileName().toString();
-
-        // Determine which top-level dir (Sample or UserGuide)
-        Path relFromVensim = VENSIM_ROOT.relativize(mdlFile);
-        String topDir = relFromVensim.getName(0).toString();
+    private ModelResult processModel(Path mdlFile, Path sourceRoot, String sourceLabel) {
+        String relativePath = sourceRoot.relativize(mdlFile).toString().replace('/', '\\');
 
         boolean importOk = false;
         List<String> warnings = List.of();
@@ -129,7 +129,7 @@ class VensimBatchImportTest {
             auxes = def.variables().size() + def.parameters().size();
         } catch (Exception e) {
             compileError = e.getClass().getSimpleName() + ": " + truncate(e.getMessage(), 200);
-            return new ModelResult(relativePath, topDir, importOk, warnings,
+            return new ModelResult(relativePath, sourceLabel, importOk, warnings,
                     compileOk, compileError, simulateOk, simulateError,
                     stocks, flows, auxes);
         }
@@ -163,7 +163,7 @@ class VensimBatchImportTest {
             }
         }
 
-        return new ModelResult(relativePath, topDir, importOk, warnings,
+        return new ModelResult(relativePath, sourceLabel, importOk, warnings,
                 compileOk, compileError, simulateOk, simulateError,
                 stocks, flows, auxes);
     }
@@ -279,7 +279,7 @@ class VensimBatchImportTest {
         try (PrintWriter w = new PrintWriter(Files.newBufferedWriter(path, StandardCharsets.UTF_8))) {
             w.printf("# Vensim Import Compatibility Summary%n%n");
             w.printf("**Date:** %s%n", LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")));
-            w.printf("**Source:** `models/Vensim/Sample` and `models/Vensim/UserGuide`%n");
+            w.printf("**Source:** `models/Vensim/Sample`, `models/Vensim/UserGuide`, and `models/Delft`%n");
             w.printf("**Tool:** `VensimBatchImportTest.java`%n%n");
 
             w.printf("## Results at a Glance%n%n");
@@ -292,12 +292,10 @@ class VensimBatchImportTest {
             // Breakdown by source directory
             w.printf("## Results by Source Directory%n%n");
 
-            // Group by top-level dir (Sample vs UserGuide)
-            Map<String, List<ModelResult>> byTopDir = new TreeMap<>();
+            // Group by source label (Sample, UserGuide, Delft)
+            Map<String, List<ModelResult>> byTopDir = new LinkedHashMap<>();
             for (ModelResult r : results) {
-                Path rel = VENSIM_ROOT.relativize(Path.of("D:/projects/forrester/models/Vensim").resolve(r.relativePath.replace('\\', '/')));
-                String topDir = rel.getName(0).toString();
-                byTopDir.computeIfAbsent(topDir, k -> new ArrayList<>()).add(r);
+                byTopDir.computeIfAbsent(r.source, k -> new ArrayList<>()).add(r);
             }
 
             for (var entry : byTopDir.entrySet()) {
