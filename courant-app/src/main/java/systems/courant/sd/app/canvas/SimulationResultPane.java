@@ -357,7 +357,6 @@ public class SimulationResultPane extends BorderPane {
         // --- Reference data overlay ---
         List<XYChart.Series<Number, Number>> allRefSeries = new ArrayList<>();
         if (!referenceDatasets.isEmpty()) {
-            int refColorIdx = 0;
             for (ReferenceDataset refData : referenceDatasets) {
                 for (String varName : refData.variableNames()) {
                     XYChart.Series<Number, Number> refSeries = new XYChart.Series<>();
@@ -370,7 +369,6 @@ public class SimulationResultPane extends BorderPane {
                         }
                     }
                     allRefSeries.add(refSeries);
-                    refColorIdx++;
                 }
             }
             chart.getData().addAll(allRefSeries);

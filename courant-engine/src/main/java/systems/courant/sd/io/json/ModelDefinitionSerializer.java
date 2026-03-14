@@ -1,5 +1,8 @@
 package systems.courant.sd.io.json;
 
+import static systems.courant.sd.io.json.JsonNodeHelper.requiredText;
+import static systems.courant.sd.io.json.JsonNodeHelper.textOrNull;
+
 import systems.courant.sd.model.ModelMetadata;
 import systems.courant.sd.model.def.VariableDef;
 import systems.courant.sd.model.def.CausalLinkDef;
@@ -882,17 +885,6 @@ public class ModelDefinitionSerializer {
         return result;
     }
 
-    private String textOrNull(JsonNode node, String field) {
-        return node.has(field) && !node.get(field).isNull() ? node.get(field).asText() : null;
-    }
-
-    private String requiredText(JsonNode node, String field) {
-        JsonNode child = node.get(field);
-        if (child == null || child.isNull()) {
-            throw new IllegalArgumentException("Missing required field: " + field);
-        }
-        return child.asText();
-    }
 
     private double requiredDouble(JsonNode node, String field) {
         JsonNode child = node.get(field);

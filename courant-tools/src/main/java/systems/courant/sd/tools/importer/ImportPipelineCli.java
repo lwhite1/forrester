@@ -1,5 +1,7 @@
 package systems.courant.sd.tools.importer;
 
+import static systems.courant.sd.io.json.JsonNodeHelper.textOrNull;
+
 import systems.courant.sd.model.ModelMetadata;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -121,10 +123,6 @@ public class ImportPipelineCli {
                 .build();
     }
 
-    private static String textOrNull(JsonNode node, String field) {
-        JsonNode child = node.get(field);
-        return (child != null && !child.isNull()) ? child.asText() : null;
-    }
 
     /** Lazily initialized Scanner for reading from System.in when System.console() is null. */
     private Scanner stdinScanner;
