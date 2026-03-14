@@ -100,6 +100,9 @@ public class ModelCanvas extends Canvas {
     // Full validation issues per element (for tooltips and dialog)
     private Map<String, List<ValidationIssue>> elementIssueDetails = Map.of();
 
+    // Maturity analysis (missing equations, units, mismatches)
+    private MaturityAnalysis maturityAnalysis = MaturityAnalysis.EMPTY;
+
     // Last validation result (for dialog access)
     private ValidationResult lastValidationResult = new ValidationResult(List.of());
 
@@ -500,10 +503,11 @@ public class ModelCanvas extends Canvas {
             elementIssues = Map.of();
             elementIssueDetails = Map.of();
             lastValidationResult = new ValidationResult(List.of());
+            maturityAnalysis = MaturityAnalysis.EMPTY;
             return;
         }
-        ValidationResult result = ModelValidator.validate(
-                editor.toModelDefinition(canvasState.toViewDef()));
+        ModelDefinition def = editor.toModelDefinition(canvasState.toViewDef());
+        ValidationResult result = ModelValidator.validate(def);
         Map<String, Severity> issues = new LinkedHashMap<>();
         Map<String, List<ValidationIssue>> details = new LinkedHashMap<>();
         for (ValidationIssue issue : result.issues()) {
@@ -517,6 +521,7 @@ public class ModelCanvas extends Canvas {
         elementIssues = issues;
         elementIssueDetails = details;
         lastValidationResult = result;
+        maturityAnalysis = MaturityAnalysis.analyze(def);
         if (onValidationChanged != null) {
             onValidationChanged.accept(result);
         }
@@ -1026,7 +1031,8 @@ public class ModelCanvas extends Canvas {
                         selectedConnection,
                         hideVariables,
                         showDelayBadges,
-                        hideInfoLinks));
+                        hideInfoLinks,
+                        maturityAnalysis));
     }
 
     // --- Rename ---

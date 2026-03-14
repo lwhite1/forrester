@@ -633,6 +633,9 @@ public class ModelWindow {
         validateItem.setAccelerator(new KeyCodeCombination(KeyCode.B, KeyCombination.SHORTCUT_DOWN));
         validateItem.setOnAction(e -> simulationController.validateModel());
 
+        MenuItem extremeCondItem = new MenuItem("Extreme Conditions...");
+        extremeCondItem.setOnAction(e -> simulationController.runExtremeConditionTest());
+
         MenuItem sweepItem = new MenuItem("Parameter Sweep...");
         sweepItem.setOnAction(e -> simulationController.runParameterSweep());
 
@@ -646,7 +649,7 @@ public class ModelWindow {
         optimizeItem.setOnAction(e -> simulationController.runOptimization());
 
         simulateMenu.getItems().addAll(settingsItem, runItem,
-                new SeparatorMenuItem(), validateItem,
+                new SeparatorMenuItem(), validateItem, extremeCondItem,
                 new SeparatorMenuItem(), sweepItem, multiSweepItem, monteCarloItem, optimizeItem);
         simulateMenu.setDisable(true);
         editorOnlyItems.add(simulateMenu);
@@ -1174,6 +1177,7 @@ public class ModelWindow {
         commands.add(cmd("Run Simulation", "Simulate", simulationController::runSimulation));
         commands.add(cmd("Validate Model", "Simulate", simulationController::validateModel));
         commands.add(cmd("Simulation Settings", "Simulate", simulationController::openSimulationSettings));
+        commands.add(cmd("Extreme Conditions", "Simulate", simulationController::runExtremeConditionTest));
         commands.add(cmd("Parameter Sweep", "Simulate", simulationController::runParameterSweep));
         commands.add(cmd("Multi-Parameter Sweep", "Simulate", simulationController::runMultiParameterSweep));
         commands.add(cmd("Monte Carlo", "Simulate", simulationController::runMonteCarlo));
