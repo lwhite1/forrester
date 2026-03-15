@@ -6,6 +6,7 @@ import systems.courant.sd.model.Variable;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.within;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class StaffAllocationTest {
@@ -93,8 +94,8 @@ class StaffAllocationTest {
         double production = alloc.getDailyResourcesForProduction().getValue();
         double totalUsed = qa + production;
 
-        // QA fraction of net resources should not exceed planned fraction
+        // QA fraction of net resources should equal planned fraction
         double actualQAFraction = qa / totalUsed;
-        assertThat(actualQAFraction).isLessThanOrEqualTo(plannedQAFraction + 0.001);
+        assertThat(actualQAFraction).isCloseTo(plannedQAFraction, within(0.001));
     }
 }
