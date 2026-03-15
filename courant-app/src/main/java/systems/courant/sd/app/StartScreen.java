@@ -22,8 +22,10 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.function.BiConsumer;
@@ -45,6 +47,7 @@ final class StartScreen extends VBox {
     private BiConsumer<String, String> onOpenExample;
 
     private List<ExampleEntry> allExamples = List.of();
+    private Map<ExampleEntry, Region> cardCache = new HashMap<>();
     private FlowPane exampleGrid;
     private String activeDifficulty = ALL;
     private final Set<String> activeDomains = new HashSet<>();
@@ -183,7 +186,9 @@ final class StartScreen extends VBox {
         exampleGrid.setAlignment(Pos.CENTER);
         exampleGrid.setMaxWidth(720);
 
-        applyFilters();
+        // Defer card creation until after the stage is shown so the start
+        // screen appears immediately and cards are populated on the next pulse.
+        javafx.application.Platform.runLater(this::applyFilters);
 
         section.getChildren().addAll(headerBox, filterBar, exampleGrid);
         return section;
@@ -270,7 +275,8 @@ final class StartScreen extends VBox {
             boolean matchesDomain = activeDomains.isEmpty()
                     || activeDomains.contains(toDomain(example.category));
             if (matchesDifficulty && matchesDomain) {
-                exampleGrid.getChildren().add(buildExampleCard(example));
+                exampleGrid.getChildren().add(
+                        cardCache.computeIfAbsent(example, this::buildExampleCard));
             }
         }
     }
