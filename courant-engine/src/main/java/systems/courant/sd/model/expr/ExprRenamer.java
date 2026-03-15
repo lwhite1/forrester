@@ -83,7 +83,7 @@ public final class ExprRenamer {
                 yield (condition == cond.condition() && thenExpr == cond.thenExpr()
                         && elseExpr == cond.elseExpr())
                         ? cond
-                        : new Expr.Conditional(condition, thenExpr, elseExpr);
+                        : new Expr.Conditional(condition, thenExpr, elseExpr, cond.shortCircuit());
             }
         };
     }

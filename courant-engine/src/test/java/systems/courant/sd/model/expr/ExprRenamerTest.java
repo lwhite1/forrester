@@ -108,6 +108,25 @@ class ExprRenamerTest {
         }
 
         @Test
+        void shouldPreserveShortCircuitFlagWhenRenaming() {
+            assertThat(renameInEquation("IF_SHORT(x > 0, y / x, 0)", "x", "denominator"))
+                    .isEqualTo("IF_SHORT(denominator > 0, y / denominator, 0)");
+        }
+
+        @Test
+        void shouldPreserveNonShortCircuitFlagWhenRenaming() {
+            assertThat(renameInEquation("IF(flag > 0, SMOOTH(a, 3), SMOOTH(b, 3))", "a", "demand"))
+                    .isEqualTo("IF(flag > 0, SMOOTH(demand, 3), SMOOTH(b, 3))");
+        }
+
+        @Test
+        void shouldReturnSameInstanceWhenNoChangeInShortCircuit() {
+            Expr ast = ExprParser.parse("IF_SHORT(x > 0, y / x, 0)");
+            Expr renamed = ExprRenamer.rename(ast, "z", "w");
+            assertThat(renamed).isSameAs(ast);
+        }
+
+        @Test
         void shouldRenameInNestedBinaryOps() {
             assertThat(renameInEquation("(a + b) * (c - a)", "a", "alpha"))
                     .isEqualTo("(alpha + b) * (c - alpha)");
