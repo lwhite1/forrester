@@ -97,7 +97,7 @@ public class ImportPipelineCli implements Closeable {
         System.err.println("=== Import Summary ===");
         result.printReport(System.err);
 
-        return 0;
+        return result.hasValidationErrors() || result.hasTrialCompileErrors() ? 1 : 0;
     }
 
     private ModelMetadata buildMetadata(CliArgs parsed) throws IOException {
@@ -165,15 +165,15 @@ public class ImportPipelineCli implements Closeable {
         CliArgs parsed = new CliArgs();
         for (int i = 0; i < args.length; i++) {
             switch (args[i]) {
-                case "--file" -> parsed.file = requireValue(args, i++);
-                case "--class-name" -> parsed.className = requireValue(args, i++);
-                case "--category" -> parsed.category = requireValue(args, i++);
-                case "--author" -> parsed.author = requireValue(args, i++);
-                case "--source" -> parsed.source = requireValue(args, i++);
-                case "--license" -> parsed.license = requireValue(args, i++);
-                case "--url" -> parsed.url = requireValue(args, i++);
-                case "--output-dir" -> parsed.outputDir = requireValue(args, i++);
-                case "--metadata-file" -> parsed.metadataFile = requireValue(args, i++);
+                case "--file" -> { parsed.file = requireValue(args, i); i++; }
+                case "--class-name" -> { parsed.className = requireValue(args, i); i++; }
+                case "--category" -> { parsed.category = requireValue(args, i); i++; }
+                case "--author" -> { parsed.author = requireValue(args, i); i++; }
+                case "--source" -> { parsed.source = requireValue(args, i); i++; }
+                case "--license" -> { parsed.license = requireValue(args, i); i++; }
+                case "--url" -> { parsed.url = requireValue(args, i); i++; }
+                case "--output-dir" -> { parsed.outputDir = requireValue(args, i); i++; }
+                case "--metadata-file" -> { parsed.metadataFile = requireValue(args, i); i++; }
                 case "--dry-run" -> parsed.dryRun = true;
                 case "--overwrite" -> parsed.overwrite = true;
                 case "--json-only" -> parsed.jsonOnly = true;

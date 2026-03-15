@@ -81,9 +81,13 @@ public class BatchImportCli {
                     i + 1, entries.size(), entry.className(), entry.url());
 
             Path tempFile = null;
+            // tempDir tracks the unique temporary directory created by downloadToTemp
+            // so the finally block deletes the correct directory even if downloadToTemp changes
+            Path tempDir = null;
             try {
                 // Download
                 tempFile = downloadToTemp(entry.url());
+                tempDir = tempFile.getParent();
                 log.info("  Downloaded to {}", tempFile);
 
                 // Check if output already exists
@@ -140,9 +144,8 @@ public class BatchImportCli {
                 if (tempFile != null) {
                     try {
                         Files.deleteIfExists(tempFile);
-                        Path tempParent = tempFile.getParent();
-                        if (tempParent != null) {
-                            Files.deleteIfExists(tempParent);
+                        if (tempDir != null) {
+                            Files.deleteIfExists(tempDir);
                         }
                     } catch (IOException e) {
                         log.warn("  Could not delete temp file: {}", tempFile);
@@ -288,8 +291,8 @@ public class BatchImportCli {
         CliArgs parsed = new CliArgs();
         for (int i = 0; i < args.length; i++) {
             switch (args[i]) {
-                case "--manifest" -> parsed.manifestFile = requireValue(args, i++);
-                case "--output-dir" -> parsed.outputDir = requireValue(args, i++);
+                case "--manifest" -> { parsed.manifestFile = requireValue(args, i); i++; }
+                case "--output-dir" -> { parsed.outputDir = requireValue(args, i); i++; }
                 case "--json-only" -> parsed.jsonOnly = true;
                 case "--dry-run" -> parsed.dryRun = true;
                 case "--overwrite" -> parsed.overwrite = true;
