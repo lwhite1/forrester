@@ -16,9 +16,7 @@ import systems.courant.sd.model.def.SimulationSettings;
 
 import java.util.Collections;
 import java.util.IdentityHashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 /**
@@ -34,7 +32,6 @@ public class CompiledModel {
     private final double[] dtHolder;
     private final TimeUnit[] simTimeUnitHolder;
     private final UnitRegistry unitRegistry;
-    private final Map<Stock, Double> initialStockValues;
     private final List<String> compilationWarnings;
 
     /**
@@ -78,13 +75,6 @@ public class CompiledModel {
         this.simTimeUnitHolder = simTimeUnitHolder;
         this.unitRegistry = unitRegistry;
         this.compilationWarnings = List.copyOf(compilationWarnings);
-        this.initialStockValues = new LinkedHashMap<>();
-        for (Stock stock : model.getStocks()) {
-            initialStockValues.put(stock, stock.getValue());
-        }
-        for (Module module : model.getModules()) {
-            collectModuleStockValues(module);
-        }
     }
 
     /**
@@ -187,8 +177,11 @@ public class CompiledModel {
         for (Resettable r : resettables) {
             r.reset();
         }
-        for (Map.Entry<Stock, Double> entry : initialStockValues.entrySet()) {
-            entry.getKey().setValue(entry.getValue());
+        for (Stock stock : model.getStocks()) {
+            stock.resetToInitialValue();
+        }
+        for (Module module : model.getModules()) {
+            resetModuleStocks(module);
         }
         // Clear history for top-level flows and variables, then walk modules
         Set<Flow> seenFlows = Collections.newSetFromMap(new IdentityHashMap<>());
@@ -223,12 +216,12 @@ public class CompiledModel {
         }
     }
 
-    private void collectModuleStockValues(Module module) {
+    private static void resetModuleStocks(Module module) {
         for (Stock stock : module.getStocks()) {
-            initialStockValues.putIfAbsent(stock, stock.getValue());
+            stock.resetToInitialValue();
         }
         for (Module child : module.getSubModules().values()) {
-            collectModuleStockValues(child);
+            resetModuleStocks(child);
         }
     }
 
