@@ -27,7 +27,7 @@ public final class MdlParser {
     private static final Pattern CONTINUATION_PATTERN = Pattern.compile(
             "\\\\\n\\s*");
     private static final Pattern OPERATOR_PATTERN = Pattern.compile(
-            "^((?:\"[^\"]*\"|[^=:()])+?)\\s*(==|:=|=|:)\\s*(.*)$", Pattern.DOTALL);
+            "^((?:\"[^\"]*\"|[^=:()])+?)\\s*(<->|==|:=|=|:)\\s*(.*)$", Pattern.DOTALL);
     private static final Pattern LOOKUP_DEF_PATTERN = Pattern.compile(
             "^((?:\"[^\"]*\"|[^(])+?)\\s*\\(\\s*$", Pattern.DOTALL);
 

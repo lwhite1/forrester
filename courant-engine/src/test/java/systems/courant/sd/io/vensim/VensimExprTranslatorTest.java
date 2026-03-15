@@ -4,6 +4,8 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -952,6 +954,100 @@ class VensimExprTranslatorTest {
                     "\"file.xlsx\", 'Sheet'")).isEqualTo("file.xlsx");
             assertThat(VensimExprTranslator.extractFirstArgument(
                     "single_arg")).isEqualTo("single_arg");
+        }
+    }
+
+    @Nested
+    @DisplayName("SUM expansion (#664)")
+    class SumExpansion {
+
+        private static final Map<String, List<String>> TASK_DIMS = Map.of(
+                "task", List.of("design", "prototype", "build"));
+
+        @Test
+        void shouldExpandSumWithBangDimension() {
+            var result = VensimExprTranslator.translate(
+                    "SUM(Work_Done[task!])", "var", EMPTY_NAMES, Set.of(), TASK_DIMS);
+            assertThat(result.expression()).isEqualTo(
+                    "(Work_Done_design + Work_Done_prototype + Work_Done_build)");
+        }
+
+        @Test
+        void shouldBeCaseInsensitive() {
+            var result = VensimExprTranslator.translate(
+                    "sum(x[task!])", "var", EMPTY_NAMES, Set.of(), TASK_DIMS);
+            assertThat(result.expression()).isEqualTo(
+                    "(x_design + x_prototype + x_build)");
+        }
+
+        @Test
+        void shouldHandleSumInLargerExpression() {
+            var result = VensimExprTranslator.translate(
+                    "2 * SUM(x[task!]) + 1", "var", EMPTY_NAMES, Set.of(), TASK_DIMS);
+            assertThat(result.expression()).isEqualTo(
+                    "2 * (x_design + x_prototype + x_build) + 1");
+        }
+
+        @Test
+        void shouldHandleSumWithoutDimensions() {
+            // Without dimension info, SUM is left as-is
+            var result = VensimExprTranslator.translate(
+                    "SUM(x[task!])", "var", EMPTY_NAMES);
+            assertThat(result.expression()).isEqualTo("SUM(x_task)");
+        }
+    }
+
+    @Nested
+    @DisplayName("VMIN expansion (#664)")
+    class VminExpansion {
+
+        private static final Map<String, List<String>> TASK_DIMS = Map.of(
+                "prereqtask", List.of("design", "prototype", "build"));
+
+        @Test
+        void shouldExpandVminToNestedMin() {
+            var result = VensimExprTranslator.translate(
+                    "VMIN(x[prereqtask!])", "var", EMPTY_NAMES, Set.of(), TASK_DIMS);
+            assertThat(result.expression()).isEqualTo(
+                    "MIN(x_design, MIN(x_prototype, x_build))");
+        }
+
+        @Test
+        void shouldHandleTwoElementVmin() {
+            Map<String, List<String>> dims = Map.of("d", List.of("a", "b"));
+            var result = VensimExprTranslator.translate(
+                    "VMIN(x[d!])", "var", EMPTY_NAMES, Set.of(), dims);
+            assertThat(result.expression()).isEqualTo("MIN(x_a, x_b)");
+        }
+
+        @Test
+        void shouldExpandVminWithComplexInnerExpression() {
+            var result = VensimExprTranslator.translate(
+                    "VMIN(IF(y[prereqtask!], z[prereqtask!], 1))",
+                    "var", EMPTY_NAMES, Set.of(), TASK_DIMS);
+            assertThat(result.expression()).contains("MIN(");
+            assertThat(result.expression()).contains("z_design");
+            assertThat(result.expression()).contains("z_prototype");
+            assertThat(result.expression()).contains("z_build");
+        }
+    }
+
+    @Nested
+    @DisplayName("Multi-dimensional subscript brackets (#664)")
+    class MultiDimSubscripts {
+
+        @Test
+        void shouldTranslateCommaSeparatedSubscripts() {
+            var result = VensimExprTranslator.translate(
+                    "x[design,prototype]", "var", EMPTY_NAMES);
+            assertThat(result.expression()).isEqualTo("x_design_prototype");
+        }
+
+        @Test
+        void shouldTranslateMultipleBracketedReferences() {
+            var result = VensimExprTranslator.translate(
+                    "x[a,b] + y[c,d]", "var", EMPTY_NAMES);
+            assertThat(result.expression()).isEqualTo("x_a_b + y_c_d");
         }
     }
 }
