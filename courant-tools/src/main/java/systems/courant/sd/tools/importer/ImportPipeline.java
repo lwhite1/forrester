@@ -149,8 +149,10 @@ public class ImportPipeline {
                 compiled.createSimulation();
             }
         } catch (systems.courant.sd.model.compile.CompilationException
-                 | systems.courant.sd.model.expr.ParseException
-                 | IllegalStateException e) {
+                 | systems.courant.sd.model.expr.ParseException e) {
+            errors.add(e.getClass().getSimpleName() + ": " + e.getMessage());
+        } catch (IllegalStateException e) {
+            log.warn("Unexpected IllegalStateException during trial compile", e);
             errors.add(e.getClass().getSimpleName() + ": " + e.getMessage());
         }
         return errors;

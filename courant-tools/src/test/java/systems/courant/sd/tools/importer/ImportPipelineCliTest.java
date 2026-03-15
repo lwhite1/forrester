@@ -207,6 +207,36 @@ class ImportPipelineCliTest {
         }
 
         @Test
+        void shouldReturnOneWhenPipelineHasErrors(@TempDir Path tempDir) throws IOException {
+            // Create a model file with invalid content that will cause trial-compile errors
+            Path brokenModel = tempDir.resolve("broken.xmile");
+            Files.writeString(brokenModel, """
+                    <?xml version="1.0" encoding="utf-8"?>
+                    <xmile version="1.0" xmlns="http://docs.oasis-open.org/xmile/ns/XMILE/v1.0">
+                        <header><name>Broken</name></header>
+                        <sim_specs><stop>10</stop><dt>1</dt></sim_specs>
+                        <model>
+                            <variables>
+                                <aux name="bad_ref">
+                                    <eqn>nonexistent_var * 2</eqn>
+                                </aux>
+                            </variables>
+                        </model>
+                    </xmile>
+                    """);
+            try (ImportPipelineCli cli = new ImportPipelineCli()) {
+                int exitCode = cli.run(new String[]{
+                        "--file", brokenModel.toString(),
+                        "--class-name", "BrokenDemo",
+                        "--license", "CC-BY-SA-4.0",
+                        "--output-dir", tempDir.toString(),
+                        "--dry-run"
+                });
+                assertThat(exitCode).isEqualTo(1);
+            }
+        }
+
+        @Test
         void shouldWriteJsonOnlyOutput(@TempDir Path tempDir) throws IOException {
             Path model = copyTestModel(tempDir);
             try (ImportPipelineCli cli = new ImportPipelineCli()) {

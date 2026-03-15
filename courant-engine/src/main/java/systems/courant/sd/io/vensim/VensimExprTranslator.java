@@ -102,6 +102,22 @@ public final class VensimExprTranslator {
             "VECTOR SELECT", "VECTOR ELM MAP", "VECTOR SORT ORDER",
             "ALLOCATE AVAILABLE");
 
+    private static final Pattern QUOTED_NAME_PATTERN = Pattern.compile("\"([^\"]+)\"");
+    private static final Pattern LOOKUP_RANGE_PATTERN = Pattern.compile(
+            "^\\s*\\(?\\s*\\[\\s*\\([^)]*\\)\\s*-\\s*\\([^)]*\\)\\s*\\]\\s*,?");
+    private static final Pattern LOOKUP_PAIR_PATTERN = Pattern.compile(
+            "\\(\\s*(-?[\\d.eE+\\-]+)\\s*,\\s*(-?[\\d.eE+\\-]+)\\s*\\)");
+    private static final Pattern NUMBER_PATTERN = Pattern.compile("-?[\\d.eE+\\-]+");
+    private static final List<Pattern> UNSUPPORTED_FUNCTION_PATTERNS;
+    static {
+        List<Pattern> patterns = new ArrayList<>();
+        for (String func : UNSUPPORTED_FUNCTIONS) {
+            patterns.add(Pattern.compile(
+                    "(?i)\\b" + Pattern.quote(func) + "\\s*\\("));
+        }
+        UNSUPPORTED_FUNCTION_PATTERNS = List.copyOf(patterns);
+    }
+
     /**
      * Result of translating a Vensim expression.
      *
@@ -368,8 +384,7 @@ public final class VensimExprTranslator {
      * Vensim uses quotes for names containing special characters: "electric vehicles (EV)".
      */
     private static String translateQuotedNames(String expr) {
-        Pattern quoted = Pattern.compile("\"([^\"]+)\"");
-        Matcher m = quoted.matcher(expr);
+        Matcher m = QUOTED_NAME_PATTERN.matcher(expr);
         StringBuilder sb = new StringBuilder();
         while (m.find()) {
             String name = m.group(1);
@@ -678,9 +693,7 @@ public final class VensimExprTranslator {
         // Strip Vensim range annotation: [(xmin,ymin)-(xmax,ymax)]
         // May be preceded by an outer paren from WITH LOOKUP context
         // This is a display range hint, not a data point
-        Pattern rangePattern = Pattern.compile(
-                "^\\s*\\(?\\s*\\[\\s*\\([^)]*\\)\\s*-\\s*\\([^)]*\\)\\s*\\]\\s*,?");
-        Matcher rangeMatcher = rangePattern.matcher(cleaned);
+        Matcher rangeMatcher = LOOKUP_RANGE_PATTERN.matcher(cleaned);
         if (rangeMatcher.find()) {
             cleaned = cleaned.substring(rangeMatcher.end()).strip();
         } else {
@@ -696,9 +709,7 @@ public final class VensimExprTranslator {
 
         // Try parenthesized pair format: (x1,y1),(x2,y2),...
         List<double[]> points = new ArrayList<>();
-        Pattern pairPattern = Pattern.compile(
-                "\\(\\s*(-?[\\d.eE+\\-]+)\\s*,\\s*(-?[\\d.eE+\\-]+)\\s*\\)");
-        Matcher m = pairPattern.matcher(cleaned);
+        Matcher m = LOOKUP_PAIR_PATTERN.matcher(cleaned);
         while (m.find()) {
             try {
                 double x = Double.parseDouble(m.group(1));
@@ -725,8 +736,7 @@ public final class VensimExprTranslator {
     }
 
     private static Optional<double[][]> parseFlatCsvLookup(String data) {
-        Pattern numberPattern = Pattern.compile("-?[\\d.eE+\\-]+");
-        Matcher m = numberPattern.matcher(data);
+        Matcher m = NUMBER_PATTERN.matcher(data);
         List<Double> values = new ArrayList<>();
         while (m.find()) {
             try {
@@ -1038,15 +1048,16 @@ public final class VensimExprTranslator {
     }
 
     private static void checkUnsupportedFunctions(String expr, List<String> warnings) {
-        String upper = expr.toUpperCase();
-        for (String func : UNSUPPORTED_FUNCTIONS) {
-            if (upper.contains(func.toUpperCase())) {
-                // Verify it's a function call: name must be followed by whitespace+paren or direct paren
-                Pattern p = Pattern.compile(
-                        "(?i)\\b" + Pattern.quote(func) + "\\s*\\(");
-                if (p.matcher(expr).find()) {
-                    warnings.add("Unsupported Vensim function: " + func);
-                }
+        for (Pattern p : UNSUPPORTED_FUNCTION_PATTERNS) {
+            Matcher m = p.matcher(expr);
+            if (m.find()) {
+                // Extract the function name from the matched text (everything before whitespace/paren)
+                String matched = m.group().strip();
+                int parenIdx = matched.indexOf('(');
+                String funcName = (parenIdx > 0)
+                        ? matched.substring(0, parenIdx).strip()
+                        : matched;
+                warnings.add("Unsupported Vensim function: " + funcName);
             }
         }
     }

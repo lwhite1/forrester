@@ -21,7 +21,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @DisplayName("DemoClassGenerator")
 class DemoClassGeneratorTest {
 
-    private final DemoClassGenerator generator = new DemoClassGenerator();
+    private final DemoClassGenerator generator = new DemoClassGenerator(2025);
 
     @Test
     void shouldGenerateMinimalModel() {
@@ -244,7 +244,7 @@ class DemoClassGeneratorTest {
 
         assertThat(source).contains("CC-BY-NC-SA-4.0");
         assertThat(source).contains("THIRD-PARTY-LICENSES");
-        assertThat(source).doesNotContain("Copyright (c) 2026 Courant Systems");
+        assertThat(source).doesNotContain("Copyright (c) 2025 Courant Systems");
     }
 
     @Test
@@ -263,7 +263,7 @@ class DemoClassGeneratorTest {
                 "systems.courant.sd.demo", "test.xmile",
                 List.of(), List.of());
 
-        assertThat(source).contains("Copyright (c) 2026 Courant Systems");
+        assertThat(source).contains("Copyright (c) 2025 Courant Systems");
         assertThat(source).doesNotContain("THIRD-PARTY-LICENSES");
     }
 
@@ -370,6 +370,45 @@ class DemoClassGeneratorTest {
 
         assertThat(source).contains("Unsupported PULSE function");
         assertThat(source).contains("Unresolved reference: missing_var");
+    }
+
+    @Nested
+    @DisplayName("Issue #718 — copyrightYear reproducibility")
+    class CopyrightYearReproducibility {
+
+        @Test
+        void shouldProduceIdenticalOutputWithSameYear() {
+            DemoClassGenerator gen = new DemoClassGenerator(2025);
+            ModelDefinition def = new ModelDefinitionBuilder()
+                    .name("Test")
+                    .stock("S", 100.0, "people")
+                    .defaultSimulation("Day", 10.0, "Day")
+                    .build();
+            ModelMetadata metadata = ModelMetadata.builder().license("CC-BY-SA-4.0").build();
+
+            String first = gen.generate(def, metadata, "TestDemo",
+                    "systems.courant.sd.demo", "test.xmile", List.of(), List.of());
+            String second = gen.generate(def, metadata, "TestDemo",
+                    "systems.courant.sd.demo", "test.xmile", List.of(), List.of());
+
+            assertThat(first).isEqualTo(second);
+        }
+
+        @Test
+        void shouldUseProvidedCopyrightYear() {
+            DemoClassGenerator gen = new DemoClassGenerator(2024);
+            ModelDefinition def = new ModelDefinitionBuilder()
+                    .name("Test")
+                    .stock("S", 100.0, "people")
+                    .defaultSimulation("Day", 10.0, "Day")
+                    .build();
+            ModelMetadata metadata = ModelMetadata.builder().license("CC-BY-SA-4.0").build();
+
+            String source = gen.generate(def, metadata, "TestDemo",
+                    "systems.courant.sd.demo", "test.xmile", List.of(), List.of());
+
+            assertThat(source).contains("Copyright (c) 2024 Courant Systems");
+        }
     }
 
     @Nested

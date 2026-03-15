@@ -9,7 +9,6 @@ import systems.courant.sd.model.def.ModuleInstanceDef;
 import systems.courant.sd.model.def.SimulationSettings;
 import systems.courant.sd.model.def.StockDef;
 
-import java.time.Year;
 import java.util.List;
 import java.util.Map;
 
@@ -26,6 +25,24 @@ public class DemoClassGenerator {
 
     private static final String INDENT = "        ";
     private static final String INDENT2 = "                ";
+
+    private final int copyrightYear;
+
+    /**
+     * Creates a generator that uses the given copyright year in license headers.
+     *
+     * @param copyrightYear the year to emit in Courant copyright headers
+     */
+    public DemoClassGenerator(int copyrightYear) {
+        this.copyrightYear = copyrightYear;
+    }
+
+    /**
+     * Creates a generator using the current year for copyright headers.
+     */
+    public DemoClassGenerator() {
+        this(java.time.Year.now().getValue());
+    }
 
     /**
      * Generates the full Java source for a demo class.
@@ -65,7 +82,7 @@ public class DemoClassGenerator {
             sb.append(" */\n");
         } else {
             sb.append("/*\n");
-            sb.append(" * Copyright (c) ").append(Year.now().getValue()).append(" Courant Systems\n");
+            sb.append(" * Copyright (c) ").append(copyrightYear).append(" Courant Systems\n");
             sb.append(" * Licensed under CC-BY-SA-4.0. See LICENSE in this module for details.\n");
             sb.append(" */\n");
         }

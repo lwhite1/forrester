@@ -246,6 +246,20 @@ class VensimExporterTest {
         }
 
         @Test
+        @DisplayName("Issue #648 — mixed-case AND/OR/NOT should be converted")
+        void shouldTranslateMixedCaseLogicalOperators() {
+            assertThat(VensimExporter.toVensimExpr("x AND y"))
+                    .contains(":AND:");
+            assertThat(VensimExporter.toVensimExpr("a Or b"))
+                    .contains(":OR:");
+            assertThat(VensimExporter.toVensimExpr("NOT(flag)"))
+                    .contains(":NOT:");
+            assertThat(VensimExporter.toVensimExpr("x And y Or z"))
+                    .contains(":AND:")
+                    .contains(":OR:");
+        }
+
+        @Test
         void shouldTranslateComparisonOperators() {
             assertThat(VensimExporter.toVensimExpr("x == 0"))
                     .contains("x = 0");

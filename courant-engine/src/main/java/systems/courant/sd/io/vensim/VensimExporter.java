@@ -50,9 +50,9 @@ public final class VensimExporter {
     private static final Logger logger = LoggerFactory.getLogger(VensimExporter.class);
 
     private static final Pattern IF_FUNC_PATTERN = Pattern.compile("(?i)\\bIF\\s*\\(");
-    private static final Pattern AND_OP_PATTERN = Pattern.compile("\\band\\b");
-    private static final Pattern OR_OP_PATTERN = Pattern.compile("\\bor\\b");
-    private static final Pattern NOT_OP_PATTERN = Pattern.compile("\\bnot\\b");
+    private static final Pattern AND_OP_PATTERN = Pattern.compile("\\band\\b", Pattern.CASE_INSENSITIVE);
+    private static final Pattern OR_OP_PATTERN = Pattern.compile("\\bor\\b", Pattern.CASE_INSENSITIVE);
+    private static final Pattern NOT_OP_PATTERN = Pattern.compile("\\bnot\\b", Pattern.CASE_INSENSITIVE);
     private static final Pattern DOUBLE_STAR_PATTERN = Pattern.compile("\\*\\*");
     private static final Pattern DOUBLE_EQ_PATTERN = Pattern.compile("==");
     private static final Pattern NOT_EQ_PATTERN = Pattern.compile("!=");
