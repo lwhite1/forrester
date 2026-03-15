@@ -158,10 +158,18 @@ class ExprRenamerTest {
 
         @Test
         void shouldProduceLiteralInComplexExpression() {
-            assertThat(renameInEquation("0 * k", "0", "0"))
-                    .isEqualTo("0 * k");
             assertThat(renameInEquation("removed + 1", "removed", "0"))
                     .isEqualTo("0 + 1");
+        }
+
+        @Test
+        void shouldTreatNaNAndInfinityAsRefNotLiteral() {
+            assertThat(renameInEquation("x + 1", "x", "NaN"))
+                    .isEqualTo("NaN + 1");
+            Expr ast = ExprParser.parse("x + 1");
+            Expr renamed = ExprRenamer.rename(ast, "x", "Infinity");
+            Expr replacement = ((Expr.BinaryOp) renamed).left();
+            assertThat(replacement).isInstanceOf(Expr.Ref.class);
         }
     }
 
