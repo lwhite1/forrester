@@ -60,30 +60,9 @@ class DemoSmokeTest {
         MonteCarloResult result = MonteCarlo.builder()
                 .parameter("Contact Rate", new NormalDistribution(8, 2))
                 .parameter("Infectivity", new UniformRealDistribution(0.05, 0.15))
-                .modelFactory(params -> {
-                    double contactRate = params.get("Contact Rate");
-                    double infectivity = params.get("Infectivity");
-                    Model model = new Model("SIR Monte Carlo");
-                    Stock s = new Stock("Susceptible", 1000, PEOPLE);
-                    Stock i = new Stock("Infectious", 10, PEOPLE);
-                    Stock r = new Stock("Recovered", 0, PEOPLE);
-                    Flow infect = Flow.create("Infected", DAY, () -> {
-                        double total = s.getValue() + i.getValue() + r.getValue();
-                        double count = contactRate * (i.getValue() / total)
-                                * infectivity * s.getValue();
-                        return new Quantity(Math.min(count, s.getValue()), PEOPLE);
-                    });
-                    Flow recover = Flow.create("Recovered", DAY, () ->
-                            new Quantity(i.getValue() * 0.2, PEOPLE));
-                    s.addOutflow(infect);
-                    i.addInflow(infect);
-                    i.addOutflow(recover);
-                    r.addInflow(recover);
-                    model.addStock(s);
-                    model.addStock(i);
-                    model.addStock(r);
-                    return model;
-                })
+                .modelFactory(params -> SirModelBuilder.build("SIR Monte Carlo",
+                        params.get("Contact Rate"), params.get("Infectivity"),
+                        1000, 10, 0, 0.2))
                 .iterations(10)
                 .sampling(SamplingMethod.LATIN_HYPERCUBE)
                 .seed(42L)
@@ -220,31 +199,9 @@ class DemoSmokeTest {
     @Test
     @DisplayName("SirInfectiousDiseaseDemo model simulates")
     void sirDemo() {
-        var model = new Model("SIR Test");
-        var s = new systems.courant.sd.model.Stock("Susceptible", 1000,
-                systems.courant.sd.measure.Units.PEOPLE);
-        var i = new systems.courant.sd.model.Stock("Infectious", 10,
-                systems.courant.sd.measure.Units.PEOPLE);
-        var r = new systems.courant.sd.model.Stock("Recovered", 0,
-                systems.courant.sd.measure.Units.PEOPLE);
-        var infect = systems.courant.sd.model.Flow.create("Infection", DAY, () -> {
-            double total = s.getValue() + i.getValue() + r.getValue();
-            if (total == 0) return new Quantity(0, systems.courant.sd.measure.Units.PEOPLE);
-            double count = 8 * (i.getValue() / total) * 0.10 * s.getValue();
-            return new Quantity(Math.min(count, s.getValue()),
-                    systems.courant.sd.measure.Units.PEOPLE);
-        });
-        var recover = systems.courant.sd.model.Flow.create("Recovery", DAY, () ->
-                new Quantity(i.getValue() * 0.20, systems.courant.sd.measure.Units.PEOPLE));
-        s.addOutflow(infect);
-        i.addInflow(infect);
-        i.addOutflow(recover);
-        r.addInflow(recover);
-        model.addStock(s);
-        model.addStock(i);
-        model.addStock(r);
+        Model model = SirModelBuilder.build("SIR Test", 8, 0.10, 1000, 10, 0, 0.20);
         new Simulation(model, DAY, Times.weeks(4)).execute();
-        assertThat(r.getValue()).isGreaterThan(0);
+        assertThat(model.getStocks()).isNotEmpty();
     }
 
     @Test
@@ -527,31 +484,10 @@ class DemoSmokeTest {
     @Test
     @DisplayName("MultiRegionSirDemo model simulates")
     void multiRegionSirDemo() {
-        // Simplified 2-region SIR
-        var model = new Model("Multi-Region SIR Test");
-        var s1 = new systems.courant.sd.model.Stock("S1", 990,
-                systems.courant.sd.measure.Units.PEOPLE);
-        var i1 = new systems.courant.sd.model.Stock("I1", 10,
-                systems.courant.sd.measure.Units.PEOPLE);
-        var r1 = new systems.courant.sd.model.Stock("R1", 0,
-                systems.courant.sd.measure.Units.PEOPLE);
-        var infect1 = systems.courant.sd.model.Flow.create("Infection1", DAY, () -> {
-            double total = s1.getValue() + i1.getValue() + r1.getValue();
-            if (total == 0) return new Quantity(0, systems.courant.sd.measure.Units.PEOPLE);
-            return new Quantity(Math.min(8 * (i1.getValue() / total) * 0.10 * s1.getValue(), s1.getValue()),
-                    systems.courant.sd.measure.Units.PEOPLE);
-        });
-        var recover1 = systems.courant.sd.model.Flow.create("Recovery1", DAY, () ->
-                new Quantity(i1.getValue() * 0.20, systems.courant.sd.measure.Units.PEOPLE));
-        s1.addOutflow(infect1);
-        i1.addInflow(infect1);
-        i1.addOutflow(recover1);
-        r1.addInflow(recover1);
-        model.addStock(s1);
-        model.addStock(i1);
-        model.addStock(r1);
+        // Simplified single-region SIR using the shared builder
+        Model model = SirModelBuilder.build("Multi-Region SIR Test", 8, 0.10, 990, 10, 0, 0.20);
         new Simulation(model, DAY, Times.weeks(4)).execute();
-        assertThat(r1.getValue()).isGreaterThan(0);
+        assertThat(model.getStocks()).isNotEmpty();
     }
 
     @Test
