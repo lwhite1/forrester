@@ -83,7 +83,7 @@ public final class ExprRenamer {
                 yield (condition == cond.condition() && thenExpr == cond.thenExpr()
                         && elseExpr == cond.elseExpr())
                         ? cond
-                        : new Expr.Conditional(condition, thenExpr, elseExpr);
+                        : new Expr.Conditional(condition, thenExpr, elseExpr, cond.shortCircuit());
             }
         };
     }
@@ -95,10 +95,13 @@ public final class ExprRenamer {
     private static Expr replacementExpr(String newName) {
         try {
             double value = Double.parseDouble(newName);
-            return new Expr.Literal(value);
+            if (Double.isFinite(value)) {
+                return new Expr.Literal(value);
+            }
         } catch (NumberFormatException e) {
-            return new Expr.Ref(newName);
+            // fall through to Ref
         }
+        return new Expr.Ref(newName);
     }
 
     private static List<Expr> renameArgs(List<Expr> args, String oldName, String newName) {
