@@ -155,8 +155,21 @@ class ImportPipelineCliTest {
         }
 
         @Test
-        void shouldRunDryRunSuccessfully(@TempDir Path tempDir) throws IOException {
+        void shouldReturnOneWhenClassNameMissing(@TempDir Path tempDir) throws IOException {
             Path model = copyTestModel(tempDir);
+            try (ImportPipelineCli cli = new ImportPipelineCli()) {
+                int exitCode = cli.run(new String[]{
+                        "--file", model.toString(),
+                        "--license", "CC-BY-SA-4.0"
+                });
+                assertThat(exitCode).isEqualTo(1);
+            }
+        }
+
+        @Test
+        void shouldRunDryRunWithoutWritingFiles(@TempDir Path tempDir) throws IOException {
+            Path model = copyTestModel(tempDir);
+            long fileCountBefore = Files.list(tempDir).count();
             try (ImportPipelineCli cli = new ImportPipelineCli()) {
                 int exitCode = cli.run(new String[]{
                         "--file", model.toString(),
@@ -167,10 +180,13 @@ class ImportPipelineCliTest {
                 });
                 assertThat(exitCode).isZero();
             }
+            // Dry run should not create new directories or files beyond what was there
+            long fileCountAfter = Files.list(tempDir).count();
+            assertThat(fileCountAfter).isEqualTo(fileCountBefore);
         }
 
         @Test
-        void shouldWriteOutputFile(@TempDir Path tempDir) throws IOException {
+        void shouldWriteJavaOutputFile(@TempDir Path tempDir) throws IOException {
             Path model = copyTestModel(tempDir);
             try (ImportPipelineCli cli = new ImportPipelineCli()) {
                 int exitCode = cli.run(new String[]{
@@ -182,10 +198,16 @@ class ImportPipelineCliTest {
                 });
                 assertThat(exitCode).isZero();
             }
+            // Verify Java file was created under the expected package path
+            String packageName = ImportPipeline.resolvePackageName(null);
+            Path expectedFile = ImportPipeline.resolveOutputPath(
+                    tempDir, packageName, "TeacupDemo");
+            assertThat(expectedFile).exists();
+            assertThat(Files.readString(expectedFile)).contains("class TeacupDemo");
         }
 
         @Test
-        void shouldRunJsonOnly(@TempDir Path tempDir) throws IOException {
+        void shouldWriteJsonOnlyOutput(@TempDir Path tempDir) throws IOException {
             Path model = copyTestModel(tempDir);
             try (ImportPipelineCli cli = new ImportPipelineCli()) {
                 int exitCode = cli.run(new String[]{
@@ -198,6 +220,10 @@ class ImportPipelineCliTest {
                 });
                 assertThat(exitCode).isZero();
             }
+            // JSON-only mode writes a .json file, not a .java file
+            Path expectedJson = tempDir.resolve("TeacupDemo.json");
+            assertThat(expectedJson).exists();
+            assertThat(Files.readString(expectedJson)).contains("Teacup");
         }
     }
 
@@ -224,10 +250,18 @@ class ImportPipelineCliTest {
                         "--class-name", "TeacupDemo",
                         "--metadata-file", metadataFile.toString(),
                         "--output-dir", tempDir.toString(),
-                        "--dry-run"
+                        "--overwrite"
                 });
                 assertThat(exitCode).isZero();
             }
+
+            // Verify metadata from file was applied to generated source
+            String packageName = ImportPipeline.resolvePackageName(null);
+            Path outputFile = ImportPipeline.resolveOutputPath(
+                    tempDir, packageName, "TeacupDemo");
+            String source = Files.readString(outputFile);
+            assertThat(source).contains("File Author");
+            assertThat(source).contains("MIT");
         }
 
         @Test
@@ -249,10 +283,20 @@ class ImportPipelineCliTest {
                         "--license", "CC-BY-SA-4.0",
                         "--author", "CLI Author",
                         "--output-dir", tempDir.toString(),
-                        "--dry-run"
+                        "--overwrite"
                 });
                 assertThat(exitCode).isZero();
             }
+
+            // CLI flags should override metadata file values
+            String packageName = ImportPipeline.resolvePackageName(null);
+            Path outputFile = ImportPipeline.resolveOutputPath(
+                    tempDir, packageName, "TeacupDemo");
+            String source = Files.readString(outputFile);
+            assertThat(source).contains("CLI Author");
+            assertThat(source).contains("CC-BY-SA-4.0");
+            assertThat(source).doesNotContain("File Author");
+            assertThat(source).doesNotContain("MIT");
         }
 
         @Test
@@ -287,8 +331,7 @@ class ImportPipelineCliTest {
             java.io.InputStream originalIn = System.in;
             String input = "first\nsecond\nthird\n";
             System.setIn(new ByteArrayInputStream(input.getBytes(StandardCharsets.UTF_8)));
-            try {
-                ImportPipelineCli cli = new ImportPipelineCli();
+            try (ImportPipelineCli cli = new ImportPipelineCli()) {
                 String r1 = cli.prompt("Q1: ");
                 String r2 = cli.prompt("Q2: ");
                 String r3 = cli.prompt("Q3: ");

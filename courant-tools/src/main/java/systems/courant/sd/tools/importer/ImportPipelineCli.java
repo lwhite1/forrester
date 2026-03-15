@@ -63,6 +63,11 @@ public class ImportPipelineCli implements Closeable {
             return 1;
         }
 
+        if (parsed.className == null) {
+            System.err.println("Error: --class-name is required");
+            return 1;
+        }
+
         // Load metadata from file if provided, then overlay CLI flags
         ModelMetadata metadata = buildMetadata(parsed);
 
