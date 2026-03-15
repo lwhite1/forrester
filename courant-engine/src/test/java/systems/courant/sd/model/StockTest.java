@@ -146,6 +146,36 @@ public class StockTest {
         assertEquals(100, stock.getValue(), 0.0);
     }
 
+    @Test
+    public void shouldReturnInitialAmount() {
+        Stock stock = new Stock("Water", 100, GALLON_US);
+        assertEquals(100, stock.getInitialAmount(), 0.0);
+        stock.setValue(50);
+        assertEquals(100, stock.getInitialAmount(), 0.0);
+    }
+
+    @Test
+    public void shouldResetToInitialValue() {
+        Stock stock = new Stock("Water", 100, GALLON_US);
+        stock.setValue(50);
+        assertEquals(50, stock.getValue(), 0.0);
+
+        stock.resetToInitialValue();
+        assertEquals(100, stock.getValue(), 0.0);
+    }
+
+    @Test
+    public void shouldResetToInitialValueAndClearWarnings() {
+        Stock stock = new Stock("Water", 100, GALLON_US);
+        stock.setValue(Double.NaN); // triggers warning
+        stock.resetToInitialValue();
+        assertEquals(100, stock.getValue(), 0.0);
+
+        // Warning flag should be cleared — setting NaN again should not throw
+        stock.setValue(Double.NaN);
+        assertEquals(100, stock.getValue(), 0.0);
+    }
+
     private static Flow createConstantFlow(String name, double value, Unit unit) {
         return Flow.create(name, MINUTE, () -> new Quantity(value, unit));
     }

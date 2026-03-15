@@ -22,6 +22,7 @@ public class Stock extends Element {
     private final Set<Flow> outflows = new LinkedHashSet<>();
 
     private final Unit unit;
+    private final double initialAmount;
     private double value;
     private boolean warnedNonFinite;
     private final NegativeValuePolicy negativeValuePolicy;
@@ -54,6 +55,7 @@ public class Stock extends Element {
                 "Stock '%s' initial value must be finite, got: %s", name, initialAmount);
         this.unit = unit;
         this.negativeValuePolicy = negativeValuePolicy;
+        this.initialAmount = initialAmount;
         this.value = applyPolicy(initialAmount);
     }
 
@@ -132,6 +134,22 @@ public class Stock extends Element {
      */
     public double getValue() {
         return value;
+    }
+
+    /**
+     * Returns the initial amount this stock was created with.
+     */
+    public double getInitialAmount() {
+        return initialAmount;
+    }
+
+    /**
+     * Resets this stock's value to the initial amount it was created with,
+     * and clears the non-finite warning flag.
+     */
+    public void resetToInitialValue() {
+        this.value = applyPolicy(initialAmount);
+        this.warnedNonFinite = false;
     }
 
     /**
