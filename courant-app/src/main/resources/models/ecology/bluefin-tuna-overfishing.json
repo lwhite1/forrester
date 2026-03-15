@@ -1,595 +1,457 @@
 {
-  "name": "1412_OverfishingOfNBFTunaEN",
-  "stocks": [
-    {
-      "name": "Tuna Biomass",
-      "comment": "Tuna Biomass",
-      "initialValue": 0.0,
-      "unit": "ton"
-    },
-    {
-      "name": "Official Number of Tuna Ships",
-      "comment": "Official Number of Tuna Ships",
-      "initialValue": 15000.0,
-      "unit": "Ship"
-    }
-  ],
-  "flows": [
-    {
-      "name": "Tuna Biomass net flow",
-      "comment": "Net flow for Tuna Biomass",
-      "equation": "growth_existing_tuna_biomass+tuna_recruitment-natural_deaths-tuna_catch",
-      "timeUnit": "Year",
-      "sink": "Tuna Biomass"
-    },
-    {
-      "name": "Official Number of Tuna Ships net flow",
-      "comment": "Net flow for Official Number of Tuna Ships",
-      "equation": "net_increase_official_number_of_tuna_ships",
-      "timeUnit": "Year",
-      "sink": "Official Number of Tuna Ships"
-    }
-  ],
-  "variables": [
-    {
-      "name": "effect",
-      "comment": "effect",
-      "equation": "LOOKUP(effect_lookup, perceived_state_of_tuna_fishery)",
-      "unit": "Dmnl"
-    },
-    {
-      "name": "fraction tuna catch",
-      "comment": "fraction tuna catch",
-      "equation": "average_efficiency_tuna_ships*total_number_of_tuna_ships",
-      "unit": "1/Year"
-    },
-    {
-      "name": "perceived state of tuna fishery",
-      "comment": "perceived state of tuna fishery",
-      "equation": "SMOOTH(most_recent_perception_concerning_tuna_fishery, delay_time, initial_state_tuna_fishery )",
-      "unit": "Dmnl"
-    },
-    {
-      "name": "growth existing tuna biomass",
-      "comment": "growth existing tuna biomass",
-      "equation": "Tuna_Biomass*tuna_growth_rate",
-      "unit": "ton/Year"
-    },
-    {
-      "name": "illegal tuna ships",
-      "comment": "illegal tuna ships",
-      "equation": "10000-STEP(10000,2010)*0",
-      "unit": "Ship"
-    },
-    {
-      "name": "most recent perception concerning tuna fishery",
-      "comment": "most recent perception concerning tuna fishery",
-      "equation": "LOOKUP(change_in_tuna_perception_lookup, ratio_of_biomass_to_unfished_biomass)",
-      "unit": "Dmnl"
-    },
-    {
-      "name": "natural deaths",
-      "comment": "natural deaths",
-      "equation": "Tuna_Biomass*ratio_of_biomass_to_unfished_biomass/normal_death_rate",
-      "unit": "ton/Year"
-    },
-    {
-      "name": "net increase official number of tuna ships",
-      "comment": "net increase official number of tuna ships",
-      "equation": "proposed_change_in_the_number_of_tuna_ships/implementation_time_delay",
-      "unit": "Ship/Year"
-    },
-    {
-      "name": "tuna recruitment",
-      "comment": "tuna recruitment",
-      "equation": "DELAY_FIXED(\n\tTuna_Biomass*tuna_recruitment_rate,4,Tuna_Biomass*tuna_recruitment_rate)",
-      "unit": "ton/Year"
-    },
-    {
-      "name": "tuna catch",
-      "comment": "tuna catch",
-      "equation": "Tuna_Biomass*fraction_tuna_catch",
-      "unit": "ton/Year"
-    },
-    {
-      "name": "total number of tuna ships",
-      "comment": "total number of tuna ships",
-      "equation": "illegal_tuna_ships+Official_Number_of_Tuna_Ships",
-      "unit": "Ship"
-    },
-    {
-      "name": "ratio of biomass to unfished biomass",
-      "comment": "ratio of biomass to unfished biomass",
-      "equation": "Tuna_Biomass/unfished_biomass_1990",
-      "unit": "Dmnl"
-    },
-    {
-      "name": "proposed change in the number of tuna ships",
-      "comment": "proposed change in the number of tuna ships",
-      "equation": "(effect)*Official_Number_of_Tuna_Ships",
-      "unit": "Ship"
-    },
-    {
-      "name": "average efficiency tuna ships",
-      "equation": "4e-06",
-      "comment": "average efficiency tuna ships",
-      "unit": "1/Ship/Year"
-    },
-    {
-      "name": "implementation time delay",
-      "equation": "2",
-      "comment": "implementation time delay",
-      "unit": "Year"
-    },
-    {
-      "name": "initial state tuna fishery",
-      "equation": "10",
-      "comment": "initial state tuna fishery",
-      "unit": "Dmnl"
-    },
-    {
-      "name": "normal death rate",
-      "equation": "20",
-      "comment": "normal death rate",
-      "unit": "Year"
-    },
-    {
-      "name": "unfished biomass 1990",
-      "equation": "100000",
-      "comment": "unfished biomass 1990",
-      "unit": "ton"
-    },
-    {
-      "name": "tuna recruitment rate",
-      "equation": "0.01",
-      "comment": "tuna recruitment rate",
-      "unit": "1/Year"
-    },
-    {
-      "name": "delay time",
-      "equation": "2",
-      "comment": "delay time",
-      "unit": "Year"
-    },
-    {
-      "name": "tuna growth rate",
-      "equation": "0.04",
-      "comment": "tuna growth rate",
-      "unit": "1/Year"
-    }
-  ],
-  "lookupTables": [
-    {
-      "name": "effect lookup",
-      "xValues": [
-        -10.0,
-        -7.5,
-        -5.0,
-        -2.5,
-        0.0,
-        2.5,
-        5.0,
-        7.5,
-        10.0,
-        100.0
-      ],
-      "yValues": [
-        -0.9,
-        -0.5,
-        -0.25,
-        -0.1,
-        0.0,
-        0.075,
-        0.15,
-        0.21,
-        0.25,
-        0.25
-      ],
-      "interpolation": "LINEAR"
-    },
-    {
-      "name": "change in tuna perception lookup",
-      "comment": "change in tuna perception lookup",
-      "xValues": [
-        0.0,
-        0.25,
-        0.5,
-        0.75,
-        1.0
-      ],
-      "yValues": [
-        -10.0,
-        -2.0,
-        0.0,
-        1.5,
-        10.0
-      ],
-      "interpolation": "LINEAR"
-    }
-  ],
-  "views": [
-    {
-      "name": "View 1",
-      "elements": [
-        {
-          "name": "Tuna Biomass",
-          "type": "stock",
-          "x": 610.0,
-          "y": 265.0
-        },
-        {
-          "name": "_48",
-          "type": "flow",
-          "x": 503.0,
-          "y": 265.0
-        },
-        {
-          "name": "tuna recruitment",
-          "type": "aux",
-          "x": 503.0,
-          "y": 284.0
-        },
-        {
-          "name": "_48",
-          "type": "flow",
-          "x": 608.0,
-          "y": 338.0
-        },
-        {
-          "name": "growth existing tuna biomass",
-          "type": "aux",
-          "x": 546.0,
-          "y": 338.0
-        },
-        {
-          "name": "_48",
-          "type": "flow",
-          "x": 605.0,
-          "y": 198.0
-        },
-        {
-          "name": "tuna catch",
-          "type": "aux",
-          "x": 646.0,
-          "y": 198.0
-        },
-        {
-          "name": "_48",
-          "type": "flow",
-          "x": 723.0,
-          "y": 265.0
-        },
-        {
-          "name": "natural deaths",
-          "type": "aux",
-          "x": 723.0,
-          "y": 284.0
-        },
-        {
-          "name": "tuna growth rate",
-          "type": "aux",
-          "x": 478.0,
-          "y": 404.0
-        },
-        {
-          "name": "tuna recruitment rate",
-          "type": "aux",
-          "x": 421.0,
-          "y": 206.0
-        },
-        {
-          "name": "ratio of biomass to unfished biomass",
-          "type": "aux",
-          "x": 725.0,
-          "y": 382.0
-        },
-        {
-          "name": "normal death rate",
-          "type": "aux",
-          "x": 810.0,
-          "y": 335.0
-        },
-        {
-          "name": "unfished biomass 1990",
-          "type": "aux",
-          "x": 773.0,
-          "y": 449.0
-        },
-        {
-          "name": "fraction tuna catch",
-          "type": "aux",
-          "x": 519.0,
-          "y": 90.0
-        },
-        {
-          "name": "total number of tuna ships",
-          "type": "aux",
-          "x": 320.0,
-          "y": 81.0
-        },
-        {
-          "name": "average efficiency tuna ships",
-          "type": "aux",
-          "x": 404.0,
-          "y": 139.0
-        },
-        {
-          "name": "Official Number of Tuna Ships",
-          "type": "stock",
-          "x": 151.0,
-          "y": 163.0
-        },
-        {
-          "name": "illegal tuna ships",
-          "type": "aux",
-          "x": 149.0,
-          "y": 98.0
-        },
-        {
-          "name": "change in tuna perception lookup",
-          "type": "lookup",
-          "x": 745.0,
-          "y": 501.0
-        },
-        {
-          "name": "most recent perception concerning tuna fishery",
-          "type": "aux",
-          "x": 520.0,
-          "y": 502.0
-        },
-        {
-          "name": "perceived state of tuna fishery",
-          "type": "aux",
-          "x": 284.0,
-          "y": 503.0
-        },
-        {
-          "name": "delay time",
-          "type": "aux",
-          "x": 266.0,
-          "y": 440.0
-        },
-        {
-          "name": "initial state tuna fishery",
-          "type": "aux",
-          "x": 378.0,
-          "y": 440.0
-        },
-        {
-          "name": "_48",
-          "type": "flow",
-          "x": 156.0,
-          "y": 218.0
-        },
-        {
-          "name": "net increase official number of tuna ships",
-          "type": "aux",
-          "x": 235.0,
-          "y": 218.0
-        },
-        {
-          "name": "proposed change in the number of tuna ships",
-          "type": "aux",
-          "x": 134.0,
-          "y": 335.0
-        },
-        {
-          "name": "implementation time delay",
-          "type": "aux",
-          "x": 328.0,
-          "y": 326.0
-        },
-        {
-          "name": "effect",
-          "type": "aux",
-          "x": 166.0,
-          "y": 435.0
-        }
-      ],
-      "connectors": [
-        {
-          "from": "5",
-          "to": "Tuna Biomass"
-        },
-        {
-          "from": "5",
-          "to": "2"
-        },
-        {
-          "from": "10",
-          "to": "Tuna Biomass"
-        },
-        {
-          "from": "10",
-          "to": "7"
-        },
-        {
-          "from": "15",
-          "to": "12"
-        },
-        {
-          "from": "15",
-          "to": "Tuna Biomass"
-        },
-        {
-          "from": "20",
-          "to": "17"
-        },
-        {
-          "from": "20",
-          "to": "Tuna Biomass"
-        },
-        {
-          "from": "tuna recruitment rate",
-          "to": "_48"
-        },
-        {
-          "from": "tuna growth rate",
-          "to": "growth existing tuna biomass"
-        },
-        {
-          "from": "Tuna Biomass",
-          "to": "growth existing tuna biomass"
-        },
-        {
-          "from": "Tuna Biomass",
-          "to": "_48"
-        },
-        {
-          "from": "Tuna Biomass",
-          "to": "_48"
-        },
-        {
-          "from": "Tuna Biomass",
-          "to": "ratio of biomass to unfished biomass"
-        },
-        {
-          "from": "ratio of biomass to unfished biomass",
-          "to": "natural deaths"
-        },
-        {
-          "from": "normal death rate",
-          "to": "natural deaths"
-        },
-        {
-          "from": "unfished biomass 1990",
-          "to": "ratio of biomass to unfished biomass"
-        },
-        {
-          "from": "unfished biomass 1990",
-          "to": "Tuna Biomass"
-        },
-        {
-          "from": "Tuna Biomass",
-          "to": "tuna catch"
-        },
-        {
-          "from": "fraction tuna catch",
-          "to": "tuna catch"
-        },
-        {
-          "from": "illegal tuna ships",
-          "to": "total number of tuna ships"
-        },
-        {
-          "from": "Official Number of Tuna Ships",
-          "to": "total number of tuna ships"
-        },
-        {
-          "from": "total number of tuna ships",
-          "to": "fraction tuna catch"
-        },
-        {
-          "from": "average efficiency tuna ships",
-          "to": "fraction tuna catch"
-        },
-        {
-          "from": "ratio of biomass to unfished biomass",
-          "to": "most recent perception concerning tuna fishery"
-        },
-        {
-          "from": "change in tuna perception lookup",
-          "to": "most recent perception concerning tuna fishery"
-        },
-        {
-          "from": "most recent perception concerning tuna fishery",
-          "to": "perceived state of tuna fishery"
-        },
-        {
-          "from": "delay time",
-          "to": "perceived state of tuna fishery"
-        },
-        {
-          "from": "initial state tuna fishery",
-          "to": "perceived state of tuna fishery"
-        },
-        {
-          "from": "61",
-          "to": "Official Number of Tuna Ships"
-        },
-        {
-          "from": "61",
-          "to": "58"
-        },
-        {
-          "from": "proposed change in the number of tuna ships",
-          "to": "net increase official number of tuna ships"
-        },
-        {
-          "from": "implementation time delay",
-          "to": "net increase official number of tuna ships"
-        },
-        {
-          "from": "perceived state of tuna fishery",
-          "to": "effect"
-        },
-        {
-          "from": "effect",
-          "to": "proposed change in the number of tuna ships"
-        },
-        {
-          "from": "Official Number of Tuna Ships",
-          "to": "proposed change in the number of tuna ships"
-        }
-      ],
-      "flowRoutes": [
-        {
-          "flowName": "_48",
-          "points": [
-            [
-              503.0,
-              265.0
-            ]
-          ]
-        },
-        {
-          "flowName": "_48",
-          "points": [
-            [
-              608.0,
-              338.0
-            ]
-          ]
-        },
-        {
-          "flowName": "_48",
-          "points": [
-            [
-              605.0,
-              198.0
-            ]
-          ]
-        },
-        {
-          "flowName": "_48",
-          "points": [
-            [
-              723.0,
-              265.0
-            ]
-          ]
-        },
-        {
-          "flowName": "_48",
-          "points": [
-            [
-              156.0,
-              218.0
-            ]
-          ]
-        }
-      ]
-    }
-  ],
-  "defaultSimulation": {
-    "timeStep": "Year",
-    "duration": 300.0,
-    "durationUnit": "Year"
+  "name" : "1412_OverfishingOfNBFTunaEN",
+  "stocks" : [ {
+    "name" : "Tuna Biomass",
+    "comment" : "Tuna Biomass",
+    "initialValue" : 100000.0,
+    "unit" : "ton"
+  }, {
+    "name" : "Official Number of Tuna Ships",
+    "comment" : "Official Number of Tuna Ships",
+    "initialValue" : 15000.0,
+    "unit" : "Ship"
+  } ],
+  "flows" : [ {
+    "name" : "Tuna Biomass inflow 1",
+    "equation" : "growth_existing_tuna_biomass",
+    "timeUnit" : "Year",
+    "sink" : "Tuna Biomass"
+  }, {
+    "name" : "Tuna Biomass inflow 2",
+    "equation" : "tuna_recruitment",
+    "timeUnit" : "Year",
+    "sink" : "Tuna Biomass"
+  }, {
+    "name" : "Tuna Biomass outflow 3",
+    "equation" : "natural_deaths",
+    "timeUnit" : "Year",
+    "source" : "Tuna Biomass"
+  }, {
+    "name" : "Tuna Biomass outflow 4",
+    "equation" : "tuna_catch",
+    "timeUnit" : "Year",
+    "source" : "Tuna Biomass"
+  }, {
+    "name" : "Official Number of Tuna Ships net flow",
+    "comment" : "Net flow for Official Number of Tuna Ships",
+    "equation" : "net_increase_official_number_of_tuna_ships",
+    "timeUnit" : "Year",
+    "sink" : "Official Number of Tuna Ships"
+  } ],
+  "variables" : [ {
+    "name" : "TIME_STEP",
+    "equation" : "0.125",
+    "unit" : "Year"
+  }, {
+    "name" : "INITIAL_TIME",
+    "equation" : "1990",
+    "unit" : "Year"
+  }, {
+    "name" : "FINAL_TIME",
+    "equation" : "2290",
+    "unit" : "Year"
+  }, {
+    "name" : "effect",
+    "comment" : "effect",
+    "equation" : "LOOKUP(effect_lookup, perceived_state_of_tuna_fishery)",
+    "unit" : "Dmnl"
+  }, {
+    "name" : "fraction tuna catch",
+    "comment" : "fraction tuna catch",
+    "equation" : "average_efficiency_tuna_ships*total_number_of_tuna_ships",
+    "unit" : "1/Year"
+  }, {
+    "name" : "average efficiency tuna ships",
+    "comment" : "average efficiency tuna ships",
+    "equation" : "4.0E-6",
+    "unit" : "1/Ship/Year"
+  }, {
+    "name" : "perceived state of tuna fishery",
+    "comment" : "perceived state of tuna fishery",
+    "equation" : "SMOOTHI(most_recent_perception_concerning_tuna_fishery, delay_time, initial_state_tuna_fishery )",
+    "unit" : "Dmnl"
+  }, {
+    "name" : "growth existing tuna biomass",
+    "comment" : "growth existing tuna biomass",
+    "equation" : "Tuna_Biomass*tuna_growth_rate",
+    "unit" : "ton/Year"
+  }, {
+    "name" : "illegal tuna ships",
+    "comment" : "illegal tuna ships",
+    "equation" : "10000-STEP(10000,2010)*0",
+    "unit" : "Ship"
+  }, {
+    "name" : "implementation time delay",
+    "comment" : "implementation time delay",
+    "equation" : "2",
+    "unit" : "Year"
+  }, {
+    "name" : "initial state tuna fishery",
+    "comment" : "initial state tuna fishery",
+    "equation" : "10",
+    "unit" : "Dmnl"
+  }, {
+    "name" : "most recent perception concerning tuna fishery",
+    "comment" : "most recent perception concerning tuna fishery",
+    "equation" : "LOOKUP(change_in_tuna_perception_lookup, ratio_of_biomass_to_unfished_biomass)",
+    "unit" : "Dmnl"
+  }, {
+    "name" : "natural deaths",
+    "comment" : "natural deaths",
+    "equation" : "Tuna_Biomass*ratio_of_biomass_to_unfished_biomass/normal_death_rate",
+    "unit" : "ton/Year"
+  }, {
+    "name" : "net increase official number of tuna ships",
+    "comment" : "net increase official number of tuna ships",
+    "equation" : "proposed_change_in_the_number_of_tuna_ships/implementation_time_delay",
+    "unit" : "Ship/Year"
+  }, {
+    "name" : "normal death rate",
+    "comment" : "normal death rate",
+    "equation" : "20",
+    "unit" : "Year"
+  }, {
+    "name" : "unfished biomass 1990",
+    "comment" : "unfished biomass 1990",
+    "equation" : "100000",
+    "unit" : "ton"
+  }, {
+    "name" : "tuna recruitment",
+    "comment" : "tuna recruitment",
+    "equation" : "DELAY_FIXED( Tuna_Biomass*tuna_recruitment_rate,4,Tuna_Biomass*tuna_recruitment_rate)",
+    "unit" : "ton/Year"
+  }, {
+    "name" : "tuna recruitment rate",
+    "comment" : "tuna recruitment rate",
+    "equation" : "0.01",
+    "unit" : "1/Year"
+  }, {
+    "name" : "delay time",
+    "comment" : "delay time",
+    "equation" : "2",
+    "unit" : "Year"
+  }, {
+    "name" : "tuna growth rate",
+    "comment" : "tuna growth rate",
+    "equation" : "0.04",
+    "unit" : "1/Year"
+  }, {
+    "name" : "tuna catch",
+    "comment" : "tuna catch",
+    "equation" : "Tuna_Biomass*fraction_tuna_catch",
+    "unit" : "ton/Year"
+  }, {
+    "name" : "total number of tuna ships",
+    "comment" : "total number of tuna ships",
+    "equation" : "illegal_tuna_ships+Official_Number_of_Tuna_Ships",
+    "unit" : "Ship"
+  }, {
+    "name" : "ratio of biomass to unfished biomass",
+    "comment" : "ratio of biomass to unfished biomass",
+    "equation" : "Tuna_Biomass/unfished_biomass_1990",
+    "unit" : "Dmnl"
+  }, {
+    "name" : "proposed change in the number of tuna ships",
+    "comment" : "proposed change in the number of tuna ships",
+    "equation" : "(effect)*Official_Number_of_Tuna_Ships",
+    "unit" : "Ship"
+  } ],
+  "lookupTables" : [ {
+    "name" : "effect_lookup",
+    "xValues" : [ -10.0, -7.5, -5.0, -2.5, 0.0, 2.5, 5.0, 7.5, 10.0, 100.0 ],
+    "yValues" : [ -0.9, -0.5, -0.25, -0.1, 0.0, 0.075, 0.15, 0.21, 0.25, 0.25 ],
+    "interpolation" : "LINEAR"
+  }, {
+    "name" : "change in tuna perception lookup",
+    "comment" : "change in tuna perception lookup",
+    "xValues" : [ 0.0, 0.25, 0.5, 0.75, 1.0 ],
+    "yValues" : [ -10.0, -2.0, 0.0, 1.5, 10.0 ],
+    "interpolation" : "LINEAR"
+  } ],
+  "views" : [ {
+    "name" : "View 1",
+    "elements" : [ {
+      "name" : "Tuna Biomass",
+      "type" : "stock",
+      "x" : 610.0,
+      "y" : 265.0
+    }, {
+      "name" : "_48",
+      "type" : "flow",
+      "x" : 503.0,
+      "y" : 265.0
+    }, {
+      "name" : "tuna recruitment",
+      "type" : "aux",
+      "x" : 503.0,
+      "y" : 284.0
+    }, {
+      "name" : "_48",
+      "type" : "flow",
+      "x" : 608.0,
+      "y" : 338.0
+    }, {
+      "name" : "growth existing tuna biomass",
+      "type" : "aux",
+      "x" : 546.0,
+      "y" : 338.0
+    }, {
+      "name" : "_48",
+      "type" : "flow",
+      "x" : 605.0,
+      "y" : 198.0
+    }, {
+      "name" : "tuna catch",
+      "type" : "aux",
+      "x" : 646.0,
+      "y" : 198.0
+    }, {
+      "name" : "_48",
+      "type" : "flow",
+      "x" : 723.0,
+      "y" : 265.0
+    }, {
+      "name" : "natural deaths",
+      "type" : "aux",
+      "x" : 723.0,
+      "y" : 284.0
+    }, {
+      "name" : "tuna growth rate",
+      "type" : "aux",
+      "x" : 478.0,
+      "y" : 404.0
+    }, {
+      "name" : "tuna recruitment rate",
+      "type" : "aux",
+      "x" : 421.0,
+      "y" : 206.0
+    }, {
+      "name" : "ratio of biomass to unfished biomass",
+      "type" : "aux",
+      "x" : 725.0,
+      "y" : 382.0
+    }, {
+      "name" : "normal death rate",
+      "type" : "aux",
+      "x" : 810.0,
+      "y" : 335.0
+    }, {
+      "name" : "unfished biomass 1990",
+      "type" : "aux",
+      "x" : 773.0,
+      "y" : 449.0
+    }, {
+      "name" : "fraction tuna catch",
+      "type" : "aux",
+      "x" : 519.0,
+      "y" : 90.0
+    }, {
+      "name" : "total number of tuna ships",
+      "type" : "aux",
+      "x" : 320.0,
+      "y" : 81.0
+    }, {
+      "name" : "average efficiency tuna ships",
+      "type" : "aux",
+      "x" : 404.0,
+      "y" : 139.0
+    }, {
+      "name" : "Official Number of Tuna Ships",
+      "type" : "stock",
+      "x" : 151.0,
+      "y" : 163.0
+    }, {
+      "name" : "illegal tuna ships",
+      "type" : "aux",
+      "x" : 149.0,
+      "y" : 98.0
+    }, {
+      "name" : "change in tuna perception lookup",
+      "type" : "lookup",
+      "x" : 745.0,
+      "y" : 501.0
+    }, {
+      "name" : "most recent perception concerning tuna fishery",
+      "type" : "aux",
+      "x" : 520.0,
+      "y" : 502.0
+    }, {
+      "name" : "perceived state of tuna fishery",
+      "type" : "aux",
+      "x" : 284.0,
+      "y" : 503.0
+    }, {
+      "name" : "delay time",
+      "type" : "aux",
+      "x" : 266.0,
+      "y" : 440.0
+    }, {
+      "name" : "initial state tuna fishery",
+      "type" : "aux",
+      "x" : 378.0,
+      "y" : 440.0
+    }, {
+      "name" : "_48",
+      "type" : "flow",
+      "x" : 156.0,
+      "y" : 218.0
+    }, {
+      "name" : "net increase official number of tuna ships",
+      "type" : "aux",
+      "x" : 235.0,
+      "y" : 218.0
+    }, {
+      "name" : "proposed change in the number of tuna ships",
+      "type" : "aux",
+      "x" : 134.0,
+      "y" : 335.0
+    }, {
+      "name" : "implementation time delay",
+      "type" : "aux",
+      "x" : 328.0,
+      "y" : 326.0
+    }, {
+      "name" : "effect",
+      "type" : "aux",
+      "x" : 166.0,
+      "y" : 435.0
+    } ],
+    "connectors" : [ {
+      "from" : "5",
+      "to" : "Tuna Biomass"
+    }, {
+      "from" : "5",
+      "to" : "2"
+    }, {
+      "from" : "10",
+      "to" : "Tuna Biomass"
+    }, {
+      "from" : "10",
+      "to" : "7"
+    }, {
+      "from" : "15",
+      "to" : "12"
+    }, {
+      "from" : "15",
+      "to" : "Tuna Biomass"
+    }, {
+      "from" : "20",
+      "to" : "17"
+    }, {
+      "from" : "20",
+      "to" : "Tuna Biomass"
+    }, {
+      "from" : "tuna recruitment rate",
+      "to" : "_48"
+    }, {
+      "from" : "tuna growth rate",
+      "to" : "growth existing tuna biomass"
+    }, {
+      "from" : "Tuna Biomass",
+      "to" : "growth existing tuna biomass"
+    }, {
+      "from" : "Tuna Biomass",
+      "to" : "_48"
+    }, {
+      "from" : "Tuna Biomass",
+      "to" : "_48"
+    }, {
+      "from" : "Tuna Biomass",
+      "to" : "ratio of biomass to unfished biomass"
+    }, {
+      "from" : "ratio of biomass to unfished biomass",
+      "to" : "natural deaths"
+    }, {
+      "from" : "normal death rate",
+      "to" : "natural deaths"
+    }, {
+      "from" : "unfished biomass 1990",
+      "to" : "ratio of biomass to unfished biomass"
+    }, {
+      "from" : "unfished biomass 1990",
+      "to" : "Tuna Biomass"
+    }, {
+      "from" : "Tuna Biomass",
+      "to" : "tuna catch"
+    }, {
+      "from" : "fraction tuna catch",
+      "to" : "tuna catch"
+    }, {
+      "from" : "illegal tuna ships",
+      "to" : "total number of tuna ships"
+    }, {
+      "from" : "Official Number of Tuna Ships",
+      "to" : "total number of tuna ships"
+    }, {
+      "from" : "total number of tuna ships",
+      "to" : "fraction tuna catch"
+    }, {
+      "from" : "average efficiency tuna ships",
+      "to" : "fraction tuna catch"
+    }, {
+      "from" : "ratio of biomass to unfished biomass",
+      "to" : "most recent perception concerning tuna fishery"
+    }, {
+      "from" : "change in tuna perception lookup",
+      "to" : "most recent perception concerning tuna fishery"
+    }, {
+      "from" : "most recent perception concerning tuna fishery",
+      "to" : "perceived state of tuna fishery"
+    }, {
+      "from" : "delay time",
+      "to" : "perceived state of tuna fishery"
+    }, {
+      "from" : "initial state tuna fishery",
+      "to" : "perceived state of tuna fishery"
+    }, {
+      "from" : "61",
+      "to" : "Official Number of Tuna Ships"
+    }, {
+      "from" : "61",
+      "to" : "58"
+    }, {
+      "from" : "proposed change in the number of tuna ships",
+      "to" : "net increase official number of tuna ships"
+    }, {
+      "from" : "implementation time delay",
+      "to" : "net increase official number of tuna ships"
+    }, {
+      "from" : "perceived state of tuna fishery",
+      "to" : "effect"
+    }, {
+      "from" : "effect",
+      "to" : "proposed change in the number of tuna ships"
+    }, {
+      "from" : "Official Number of Tuna Ships",
+      "to" : "proposed change in the number of tuna ships"
+    } ],
+    "flowRoutes" : [ {
+      "flowName" : "_48",
+      "points" : [ [ 503.0, 265.0 ] ]
+    }, {
+      "flowName" : "_48",
+      "points" : [ [ 608.0, 338.0 ] ]
+    }, {
+      "flowName" : "_48",
+      "points" : [ [ 605.0, 198.0 ] ]
+    }, {
+      "flowName" : "_48",
+      "points" : [ [ 723.0, 265.0 ] ]
+    }, {
+      "flowName" : "_48",
+      "points" : [ [ 156.0, 218.0 ] ]
+    } ]
+  } ],
+  "defaultSimulation" : {
+    "timeStep" : "Year",
+    "duration" : 300.0,
+    "durationUnit" : "Year",
+    "dt" : 0.125
   },
-  "metadata": {
-    "author": "Dr. Erik Pruyt",
-    "source": "Pruyt, E., 2013. Small System Dynamics Models for Big Issues: Triple Jump towards Real-World Complexity. TU Delft Library. ISBN 978-94-6186-195-5",
-    "license": "CC-BY-NC-SA-4.0",
-    "url": "https://simulation.tudelft.nl/SD/model_files_nested/14_12"
+  "metadata" : {
+    "author" : "Dr. Erik Pruyt",
+    "source" : "Pruyt, E., 2013. Small System Dynamics Models for Big Issues: Triple Jump towards Real-World Complexity. TU Delft Library. ISBN 978-94-6186-195-5",
+    "license" : "CC-BY-NC-SA-4.0",
+    "url" : "https://simulation.tudelft.nl/SD/"
   }
 }

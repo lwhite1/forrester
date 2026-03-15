@@ -1,0 +1,206 @@
+{
+  "name" : "EPIDEMIC",
+  "stocks" : [ {
+    "name" : "Infected Population",
+    "comment" : "Infected Population",
+    "initialValue" : 10.0,
+    "unit" : "Person"
+  }, {
+    "name" : "Susceptible Population",
+    "comment" : "Susceptible Population",
+    "initialValue" : 1000000.0,
+    "unit" : "Person"
+  } ],
+  "flows" : [ {
+    "name" : "Infected Population net flow",
+    "comment" : "Net flow for Infected Population",
+    "equation" : "infections",
+    "timeUnit" : "Day",
+    "sink" : "Infected Population"
+  }, {
+    "name" : "Susceptible Population net flow",
+    "comment" : "Net flow for Susceptible Population",
+    "equation" : "- infections",
+    "timeUnit" : "Day",
+    "sink" : "Susceptible Population"
+  } ],
+  "variables" : [ {
+    "name" : "TIME_STEP",
+    "equation" : "1",
+    "unit" : "Day"
+  }, {
+    "name" : "INITIAL_TIME",
+    "equation" : "0",
+    "unit" : "Day"
+  }, {
+    "name" : "FINAL_TIME",
+    "equation" : "50",
+    "unit" : "Day"
+  }, {
+    "name" : "rate that people contact other people",
+    "comment" : "rate that people contact other people",
+    "equation" : "5",
+    "unit" : "1/day"
+  }, {
+    "name" : "contacts between infected and unaffected",
+    "comment" : "contacts between infected and unaffected",
+    "equation" : "rate_of_potential_infectious_contacts  * fraction_of_population_infected",
+    "unit" : "Person/day"
+  }, {
+    "name" : "total population",
+    "comment" : "total population",
+    "equation" : "Susceptible_Population + Infected_Population",
+    "unit" : "Person"
+  }, {
+    "name" : "fraction infected from contact",
+    "comment" : "fraction infected from contact",
+    "equation" : "0.1",
+    "unit" : "Dmnl"
+  }, {
+    "name" : "fraction of population infected",
+    "comment" : "fraction of population infected",
+    "equation" : "Infected_Population / total_population",
+    "unit" : "Dmnl"
+  }, {
+    "name" : "infections",
+    "comment" : "infections",
+    "equation" : "contacts_between_infected_and_unaffected  * fraction_infected_from_contact",
+    "unit" : "Person/day"
+  }, {
+    "name" : "initial infected",
+    "comment" : "initial infected",
+    "equation" : "10",
+    "unit" : "Person"
+  }, {
+    "name" : "initial susceptible",
+    "comment" : "initial susceptible",
+    "equation" : "1000000",
+    "unit" : "Person"
+  }, {
+    "name" : "rate of potential infectious contacts",
+    "comment" : "rate of potential infectious contacts",
+    "equation" : "Susceptible_Population  * rate_that_people_contact_other_people",
+    "unit" : "Person/day"
+  } ],
+  "views" : [ {
+    "name" : "View 1",
+    "elements" : [ {
+      "name" : "Susceptible Population",
+      "type" : "stock",
+      "x" : 354.0,
+      "y" : 409.0
+    }, {
+      "name" : "Infected Population",
+      "type" : "stock",
+      "x" : 646.0,
+      "y" : 409.0
+    }, {
+      "name" : "_0",
+      "type" : "flow",
+      "x" : 475.0,
+      "y" : 413.0
+    }, {
+      "name" : "infections",
+      "type" : "aux",
+      "x" : 475.0,
+      "y" : 451.0
+    }, {
+      "name" : "rate of potential infectious contacts",
+      "type" : "aux",
+      "x" : 229.0,
+      "y" : 236.0
+    }, {
+      "name" : "rate that people contact other people",
+      "type" : "aux",
+      "x" : 198.0,
+      "y" : 152.0
+    }, {
+      "name" : "fraction of population infected",
+      "type" : "aux",
+      "x" : 789.0,
+      "y" : 285.0
+    }, {
+      "name" : "total population",
+      "type" : "aux",
+      "x" : 494.0,
+      "y" : 539.0
+    }, {
+      "name" : "contacts between infected and unaffected",
+      "type" : "aux",
+      "x" : 531.0,
+      "y" : 179.0
+    }, {
+      "name" : "fraction infected from contact",
+      "type" : "aux",
+      "x" : 386.0,
+      "y" : 305.0
+    }, {
+      "name" : "initial infected",
+      "type" : "aux",
+      "x" : 635.0,
+      "y" : 481.0
+    }, {
+      "name" : "initial susceptible",
+      "type" : "aux",
+      "x" : 287.0,
+      "y" : 484.0
+    } ],
+    "connectors" : [ {
+      "from" : "Infected Population",
+      "to" : "fraction of population infected"
+    }, {
+      "from" : "fraction infected from contact",
+      "to" : "_0"
+    }, {
+      "from" : "contacts between infected and unaffected",
+      "to" : "_0"
+    }, {
+      "from" : "Susceptible Population",
+      "to" : "rate of potential infectious contacts"
+    }, {
+      "from" : "rate that people contact other people",
+      "to" : "rate of potential infectious contacts"
+    }, {
+      "from" : "rate of potential infectious contacts",
+      "to" : "contacts between infected and unaffected"
+    }, {
+      "from" : "fraction of population infected",
+      "to" : "contacts between infected and unaffected"
+    }, {
+      "from" : "_0",
+      "to" : "Susceptible Population"
+    }, {
+      "from" : "_0",
+      "to" : "Infected Population"
+    }, {
+      "from" : "total population",
+      "to" : "fraction of population infected"
+    }, {
+      "from" : "Susceptible Population",
+      "to" : "total population"
+    }, {
+      "from" : "Infected Population",
+      "to" : "total population"
+    }, {
+      "from" : "initial susceptible",
+      "to" : "Susceptible Population"
+    }, {
+      "from" : "initial infected",
+      "to" : "Infected Population"
+    } ],
+    "flowRoutes" : [ {
+      "flowName" : "_0",
+      "points" : [ [ 475.0, 413.0 ] ]
+    } ]
+  } ],
+  "defaultSimulation" : {
+    "timeStep" : "Day",
+    "duration" : 50.0,
+    "durationUnit" : "Day"
+  },
+  "metadata" : {
+    "author" : "Ventana Systems",
+    "source" : "Vensim Sample Models",
+    "license" : "MIT"
+  }
+}

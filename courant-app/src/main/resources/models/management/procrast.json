@@ -1,0 +1,463 @@
+{
+  "name" : "PROCRAST",
+  "stocks" : [ {
+    "name" : "Decision is Made",
+    "comment" : "An indication that the decision has been made.",
+    "initialValue" : 0.0,
+    "unit" : "Dmnl"
+  }, {
+    "name" : "Thought Accomplished",
+    "comment" : "Information that has been reviewed and correctly interpretted.",
+    "initialValue" : 0.0,
+    "unit" : "Bytes"
+  }, {
+    "name" : "Info Requiring Rethinking",
+    "comment" : "The amount of information that has been interpreted incorrectly,\n\t\t       but for which that error has not yet been discovered.",
+    "initialValue" : 0.0,
+    "initialExpression" : "initial_info_proc  * ( 1 - norm_frac_thinking_correct )",
+    "unit" : "Bytes"
+  } ],
+  "flows" : [ {
+    "name" : "Decision is Made net flow",
+    "comment" : "Net flow for Decision is Made",
+    "equation" : "IF(perc_info_req_thought < min_threshold_delay,1/TIME_STEP,0)",
+    "timeUnit" : "Days",
+    "sink" : "Decision is Made"
+  }, {
+    "name" : "Thought Accomplished net flow",
+    "comment" : "Net flow for Thought Accomplished",
+    "equation" : "correct_thinking_rate",
+    "timeUnit" : "Days",
+    "sink" : "Thought Accomplished"
+  }, {
+    "name" : "Info Requiring Rethinking inflow 1",
+    "equation" : "thinking_error_rate",
+    "timeUnit" : "Days",
+    "sink" : "Info Requiring Rethinking"
+  }, {
+    "name" : "Info Requiring Rethinking outflow 2",
+    "equation" : "disc_info_req_rethink",
+    "timeUnit" : "Days",
+    "source" : "Info Requiring Rethinking"
+  } ],
+  "variables" : [ {
+    "name" : "TIME_STEP",
+    "equation" : "0.25",
+    "unit" : "Days"
+  }, {
+    "name" : "INITIAL_TIME",
+    "equation" : "0",
+    "unit" : "Days"
+  }, {
+    "name" : "FINAL_TIME",
+    "equation" : "100",
+    "unit" : "Days"
+  }, {
+    "name" : "correct thinking rate",
+    "comment" : "The rate at which in formation is thought about and correctly interpreted.",
+    "equation" : "intensity_effort_applied * fraction_thinking_correct",
+    "unit" : "Bytes / Day"
+  }, {
+    "name" : "thinking error rate",
+    "comment" : "The rate at which errors are being made in the review of information.",
+    "equation" : "intensity_effort_applied * ( 1 - fraction_thinking_correct )",
+    "unit" : "Bytes / Day"
+  }, {
+    "name" : "intensity effort applied",
+    "comment" : "The intensity with which the problem is attacked by the decision maker.",
+    "equation" : "IF(Decision_is_Made,0, indicated_intensity_of_effort_applied)",
+    "unit" : "Bytes / Day"
+  }, {
+    "name" : "effect of tension on frac correct",
+    "comment" : "The effect of tension on the fraction of the thinking that is\n\t\t        done correctly.",
+    "equation" : "LOOKUP(effect_tension_on_frac_correct_lookup, tension/normal_tension)",
+    "unit" : "Dimensionless"
+  }, {
+    "name" : "indicated intensity of effort applied",
+    "comment" : "The  intensity with which a problem of the specified importance is \t\t attacked by the decision maker.",
+    "equation" : "INITIAL(perc_info_req_thought/Expected_Decision_Time )",
+    "unit" : "Bytes / Day"
+  }, {
+    "name" : "eff importance tension",
+    "comment" : "The effect of the importance of a decision on the tension that\n\t\t         decision generates.",
+    "equation" : "1",
+    "unit" : "Dimensionless"
+  }, {
+    "name" : "tension",
+    "comment" : "The tension that the decision maker is under.",
+    "equation" : "IF(Decision_is_Made,0, normal_tension * eff_importance_tension * eff_time_remaining_tension)",
+    "unit" : "Tension units"
+  }, {
+    "name" : "eff time remaining tension",
+    "comment" : "The effect of time remaining on the tension felt by the decision maker.",
+    "equation" : "LOOKUP(eff_time_remaining_tension_lookup, time_remaining/Expected_Decision_Time)",
+    "unit" : "Dimensionless"
+  }, {
+    "name" : "Expected Decision Time",
+    "comment" : "The time expected to make a decision before any of the thinking takes \t\t place.",
+    "equation" : "15",
+    "unit" : "Day"
+  }, {
+    "name" : "initial info proc",
+    "comment" : "The intial amount of information that has actually been processed\n\t\t        (thought about).",
+    "equation" : "0",
+    "unit" : "Bytes"
+  }, {
+    "name" : "min threshold delay",
+    "comment" : "The minimum threshold in terms of information that remains to be thought\n\t\t        about warranting further delay.",
+    "equation" : "1",
+    "unit" : "Bytes"
+  }, {
+    "name" : "Time to detect errors",
+    "comment" : "The time to detect errors that have occured in the processing of\n\t\t        information.",
+    "equation" : "2",
+    "unit" : "days"
+  }, {
+    "name" : "disc info req rethink",
+    "comment" : "The discovery of information that has been misinterpreted and therefore\n\t\t        requires rethinking.",
+    "equation" : "Info_Requiring_Rethinking / Time_to_detect_errors",
+    "unit" : "Bytes/Day"
+  }, {
+    "name" : "perc info req thought",
+    "comment" : "The percieved amount of information that remains to be though about.",
+    "equation" : "tot_info_req_thought - info_perceived_reviewed",
+    "unit" : "Bytes"
+  }, {
+    "name" : "info perceived reviewed",
+    "comment" : "The amount of information that it is perceived has been correctly\n\t\t        reviewed.",
+    "equation" : "Thought_Accomplished + Info_Requiring_Rethinking",
+    "unit" : "Bytes"
+  }, {
+    "name" : "fraction thinking correct",
+    "comment" : "The fraction of thinking that is done correctly.",
+    "equation" : "norm_frac_thinking_correct * effect_of_tension_on_frac_correct",
+    "unit" : "Fraction"
+  }, {
+    "name" : "norm frac thinking correct",
+    "comment" : "The fraction of information that is normally processed without error\n\t\t        or misinterpretation.",
+    "equation" : "0.8",
+    "unit" : "Fraction"
+  }, {
+    "name" : "normal tension",
+    "comment" : "The normal amount of tension that a decision of this importance would\n\t\t        bring about.",
+    "equation" : "10",
+    "unit" : "Tension units"
+  }, {
+    "name" : "time remaining",
+    "comment" : "Time remaining required to make the decision - given no external\n\t\t        deadlines.",
+    "equation" : "max(0,IF((intensity_effort_applied) == 0, 0, (perc_info_req_thought -  min_threshold_delay) / (intensity_effort_applied)))",
+    "unit" : "days"
+  }, {
+    "name" : "tot info req thought",
+    "comment" : "The size of the decision.",
+    "equation" : "10",
+    "unit" : "Bytes"
+  } ],
+  "lookupTables" : [ {
+    "name" : "effect tension on frac correct lookup",
+    "comment" : "Table for the effect of tension on the fraction of thinking that\n\t\t        is done correctly.",
+    "xValues" : [ 0.0, 2.5, 5.0, 7.5, 10.0, 11.0, 12.5, 20.0 ],
+    "yValues" : [ 1.2, 1.1, 0.9, 0.6, 0.2, 0.12, 0.08, 0.05 ],
+    "interpolation" : "LINEAR"
+  }, {
+    "name" : "eff time remaining tension lookup",
+    "comment" : "Table for the effect of time remaining on tension.",
+    "xValues" : [ 0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 10.0 ],
+    "yValues" : [ 3.0, 2.0, 1.5, 1.25, 1.1, 1.0, 0.95, 0.925, 0.9, 0.9, 0.9 ],
+    "interpolation" : "LINEAR"
+  } ],
+  "views" : [ {
+    "name" : "View 1",
+    "elements" : [ {
+      "name" : "Info Requiring Rethinking",
+      "type" : "stock",
+      "x" : 1304.0,
+      "y" : 568.0
+    }, {
+      "name" : "Decision is Made",
+      "type" : "stock",
+      "x" : 1026.0,
+      "y" : 361.0
+    }, {
+      "name" : "TIME STEP",
+      "type" : "aux",
+      "x" : 1059.0,
+      "y" : 433.0
+    }, {
+      "name" : "Thought Accomplished",
+      "type" : "stock",
+      "x" : 1391.0,
+      "y" : 427.0
+    }, {
+      "name" : "Expected Decision Time",
+      "type" : "aux",
+      "x" : 566.0,
+      "y" : 244.0
+    }, {
+      "name" : "initial info proc",
+      "type" : "aux",
+      "x" : 1306.0,
+      "y" : 495.0
+    }, {
+      "name" : "fraction thinking correct",
+      "type" : "aux",
+      "x" : 1037.0,
+      "y" : 543.0
+    }, {
+      "name" : "intensity effort applied",
+      "type" : "aux",
+      "x" : 799.0,
+      "y" : 208.0
+    }, {
+      "name" : "indicated intensity of effort applied",
+      "type" : "aux",
+      "x" : 798.0,
+      "y" : 144.0
+    }, {
+      "name" : "effect of tension on frac correct",
+      "type" : "aux",
+      "x" : 797.0,
+      "y" : 436.0
+    }, {
+      "name" : "norm frac thinking correct",
+      "type" : "aux",
+      "x" : 1003.0,
+      "y" : 627.0
+    }, {
+      "name" : "effect tension on frac correct lookup",
+      "type" : "lookup",
+      "x" : 474.0,
+      "y" : 455.0
+    }, {
+      "name" : "tension",
+      "type" : "aux",
+      "x" : 790.0,
+      "y" : 379.0
+    }, {
+      "name" : "eff importance tension",
+      "type" : "aux",
+      "x" : 582.0,
+      "y" : 379.0
+    }, {
+      "name" : "eff time remaining tension",
+      "type" : "aux",
+      "x" : 786.0,
+      "y" : 331.0
+    }, {
+      "name" : "normal tension",
+      "type" : "aux",
+      "x" : 574.0,
+      "y" : 420.0
+    }, {
+      "name" : "eff time remaining tension lookup",
+      "type" : "lookup",
+      "x" : 503.0,
+      "y" : 332.0
+    }, {
+      "name" : "time remaining",
+      "type" : "aux",
+      "x" : 805.0,
+      "y" : 268.0
+    }, {
+      "name" : "min threshold delay",
+      "type" : "aux",
+      "x" : 890.0,
+      "y" : 305.0
+    }, {
+      "name" : "perc info req thought",
+      "type" : "aux",
+      "x" : 1289.0,
+      "y" : 199.0
+    }, {
+      "name" : "info perceived reviewed",
+      "type" : "aux",
+      "x" : 1566.0,
+      "y" : 503.0
+    }, {
+      "name" : "tot info req thought",
+      "type" : "aux",
+      "x" : 1331.0,
+      "y" : 272.0
+    }, {
+      "name" : "Time to detect errors",
+      "type" : "aux",
+      "x" : 1388.0,
+      "y" : 635.0
+    }, {
+      "name" : "_0",
+      "type" : "flow",
+      "x" : 1229.0,
+      "y" : 425.0
+    }, {
+      "name" : "correct thinking rate",
+      "type" : "aux",
+      "x" : 1229.0,
+      "y" : 463.0
+    }, {
+      "name" : "_0",
+      "type" : "flow",
+      "x" : 1166.0,
+      "y" : 558.0
+    }, {
+      "name" : "thinking error rate",
+      "type" : "aux",
+      "x" : 1166.0,
+      "y" : 596.0
+    }, {
+      "name" : "_0",
+      "type" : "flow",
+      "x" : 1463.0,
+      "y" : 561.0
+    }, {
+      "name" : "disc info req rethink",
+      "type" : "aux",
+      "x" : 1463.0,
+      "y" : 599.0
+    } ],
+    "connectors" : [ {
+      "from" : "indicated intensity of effort applied",
+      "to" : "intensity effort applied"
+    }, {
+      "from" : "effect of tension on frac correct",
+      "to" : "fraction thinking correct"
+    }, {
+      "from" : "tension",
+      "to" : "effect of tension on frac correct"
+    }, {
+      "from" : "eff time remaining tension",
+      "to" : "tension"
+    }, {
+      "from" : "normal tension",
+      "to" : "tension"
+    }, {
+      "from" : "time remaining",
+      "to" : "eff time remaining tension"
+    }, {
+      "from" : "intensity effort applied",
+      "to" : "time remaining"
+    }, {
+      "from" : "Time to detect errors",
+      "to" : "disc info req rethink"
+    }, {
+      "from" : "Info Requiring Rethinking",
+      "to" : "info perceived reviewed"
+    }, {
+      "from" : "Thought Accomplished",
+      "to" : "info perceived reviewed"
+    }, {
+      "from" : "_0",
+      "to" : "Thought Accomplished"
+    }, {
+      "from" : "_0",
+      "to" : "3"
+    }, {
+      "from" : "_0",
+      "to" : "Info Requiring Rethinking"
+    }, {
+      "from" : "_0",
+      "to" : "4"
+    }, {
+      "from" : "_0",
+      "to" : "5"
+    }, {
+      "from" : "_0",
+      "to" : "Info Requiring Rethinking"
+    }, {
+      "from" : "Info Requiring Rethinking",
+      "to" : "_0"
+    }, {
+      "from" : "info perceived reviewed",
+      "to" : "perc info req thought"
+    }, {
+      "from" : "TIME STEP",
+      "to" : "Decision is Made"
+    }, {
+      "from" : "norm frac thinking correct",
+      "to" : "fraction thinking correct"
+    }, {
+      "from" : "effect tension on frac correct lookup",
+      "to" : "effect of tension on frac correct"
+    }, {
+      "from" : "normal tension",
+      "to" : "effect of tension on frac correct"
+    }, {
+      "from" : "eff time remaining tension lookup",
+      "to" : "eff time remaining tension"
+    }, {
+      "from" : "tot info req thought",
+      "to" : "perc info req thought"
+    }, {
+      "from" : "min threshold delay",
+      "to" : "time remaining"
+    }, {
+      "from" : "eff importance tension",
+      "to" : "tension"
+    }, {
+      "from" : "perc info req thought",
+      "to" : "Decision is Made"
+    }, {
+      "from" : "initial info proc",
+      "to" : "Info Requiring Rethinking"
+    }, {
+      "from" : "norm frac thinking correct",
+      "to" : "Info Requiring Rethinking"
+    }, {
+      "from" : "initial info proc",
+      "to" : "Thought Accomplished"
+    }, {
+      "from" : "Expected Decision Time",
+      "to" : "indicated intensity of effort applied"
+    }, {
+      "from" : "intensity effort applied",
+      "to" : "64"
+    }, {
+      "from" : "fraction thinking correct",
+      "to" : "64"
+    }, {
+      "from" : "64",
+      "to" : "correct thinking rate"
+    }, {
+      "from" : "64",
+      "to" : "_0"
+    }, {
+      "from" : "Expected Decision Time",
+      "to" : "eff time remaining tension"
+    }, {
+      "from" : "Decision is Made",
+      "to" : "intensity effort applied"
+    }, {
+      "from" : "Decision is Made",
+      "to" : "tension"
+    }, {
+      "from" : "min threshold delay",
+      "to" : "Decision is Made"
+    }, {
+      "from" : "perc info req thought",
+      "to" : "indicated intensity of effort applied"
+    }, {
+      "from" : "perc info req thought",
+      "to" : "time remaining"
+    } ],
+    "flowRoutes" : [ {
+      "flowName" : "_0",
+      "points" : [ [ 1229.0, 425.0 ] ]
+    }, {
+      "flowName" : "_0",
+      "points" : [ [ 1166.0, 558.0 ] ]
+    }, {
+      "flowName" : "_0",
+      "points" : [ [ 1463.0, 561.0 ] ]
+    } ]
+  } ],
+  "defaultSimulation" : {
+    "timeStep" : "Days",
+    "duration" : 100.0,
+    "durationUnit" : "Days",
+    "dt" : 0.25
+  },
+  "metadata" : {
+    "author" : "Ventana Systems",
+    "source" : "Vensim Sample Models",
+    "license" : "MIT"
+  }
+}

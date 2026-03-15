@@ -1,790 +1,606 @@
 {
-  "name": "ProjectManagement",
-  "stocks": [
-    {
-      "name": "remaining project tasks",
-      "comment": "remaining project tasks",
-      "initialValue": 1200.0,
-      "unit": "tasks"
-    },
-    {
-      "name": "undiscovered rework",
-      "comment": "undiscovered rework",
-      "initialValue": 0.0,
-      "unit": "tasks"
-    },
-    {
-      "name": "cumulative effort",
-      "comment": "cumulative effort",
-      "initialValue": 0.001,
-      "unit": "person*Month"
-    },
-    {
-      "name": "properly completed project tasks",
-      "comment": "properly completed project tasks",
-      "initialValue": 0.0,
-      "unit": "tasks"
-    },
-    {
-      "name": "workforce",
-      "comment": "workforce",
-      "initialValue": 2.0,
-      "unit": "person"
-    }
-  ],
-  "flows": [
-    {
-      "name": "remaining project tasks net flow",
-      "comment": "Net flow for remaining project tasks",
-      "equation": "detecting_undiscovered_rework-poor_completion_of_project_tasks-proper_completion_of_project_tasks",
-      "timeUnit": "Month",
-      "sink": "remaining project tasks"
-    },
-    {
-      "name": "undiscovered rework net flow",
-      "comment": "Net flow for undiscovered rework",
-      "equation": "poor_completion_of_project_tasks - detecting_undiscovered_rework",
-      "timeUnit": "Month",
-      "sink": "undiscovered rework"
-    },
-    {
-      "name": "cumulative effort net flow",
-      "comment": "Net flow for cumulative effort",
-      "equation": "additional_cumulative_effort",
-      "timeUnit": "Month",
-      "sink": "cumulative effort"
-    },
-    {
-      "name": "properly completed project tasks net flow",
-      "comment": "Net flow for properly completed project tasks",
-      "equation": "proper_completion_of_project_tasks",
-      "timeUnit": "Month",
-      "sink": "properly completed project tasks"
-    },
-    {
-      "name": "workforce net flow",
-      "comment": "Net flow for workforce",
-      "equation": "net_hiring_of_personnel",
-      "timeUnit": "Month",
-      "sink": "workforce"
-    }
-  ],
-  "variables": [
-    {
-      "name": "fraction personnel for testing",
-      "comment": "fraction personnel for testing",
-      "equation": "LOOKUP(fraction_personnel_for_testing_lookup, reported_fraction_detection_undiscovered_rework)",
-      "unit": "dmnl"
-    },
-    {
-      "name": "average quality of completed project tasks",
-      "comment": "average quality of completed project tasks",
-      "equation": "properly_completed_project_tasks/MAX((properly_completed_project_tasks+undiscovered_rework ),1)",
-      "unit": "dmnl"
-    },
-    {
-      "name": "productivity of testing",
-      "comment": "productivity of testing",
-      "equation": "maximum_productivity_of_testing*fraction_undiscovered_rework",
-      "unit": "tasks/(person*Month)"
-    },
-    {
-      "name": "perceived time remaining",
-      "comment": "Time remaining",
-      "equation": "MAX(0.25,SMOOTH(TIME + (perceived_effort_remaining/desired_workforce),time_to_adapt_the_project_schedule ,initial_project_time_remaining) - TIME)",
-      "unit": "Month"
-    },
-    {
-      "name": "additional cumulative effort",
-      "comment": "additional cumulative effort",
-      "equation": "workforce",
-      "unit": "Month*person/Month"
-    },
-    {
-      "name": "reported fraction detection undiscovered rework",
-      "comment": "reported fraction detection undiscovered rework",
-      "equation": "DELAY3I( detecting_undiscovered_rework/(proper_completion_of_project_tasks+detecting_undiscovered_rework ),1,0)",
-      "unit": "dmnl"
-    },
-    {
-      "name": "fraction undiscovered rework",
-      "comment": "fraction undiscovered rework",
-      "equation": "undiscovered_rework/MAX(perceived_cumulative_progress,0.01)",
-      "unit": "dmnl"
-    },
-    {
-      "name": "project personnel",
-      "comment": "project personnel",
-      "equation": "(1-fraction_personnel_for_testing)*workforce",
-      "unit": "person"
-    },
-    {
-      "name": "detecting undiscovered rework",
-      "comment": "detecting undiscovered rework",
-      "equation": "productivity_of_testing*testing_personnel",
-      "unit": "tasks/Month"
-    },
-    {
-      "name": "progress",
-      "comment": "progress",
-      "equation": "gross_productivity_of_project_personnel*project_personnel",
-      "unit": "tasks/Month"
-    },
-    {
-      "name": "testing personnel",
-      "comment": "testing personnel",
-      "equation": "fraction_personnel_for_testing*workforce",
-      "unit": "person"
-    },
-    {
-      "name": "gross productivity of project personnel",
-      "comment": "gross productivity of project personnel",
-      "equation": "LOOKUP(gross_productivity_of_project_personnel_lookup, remaining_project_tasks)",
-      "unit": "tasks/person/Month"
-    },
-    {
-      "name": "perceived effort remaining",
-      "comment": "perceived effort remaining",
-      "equation": "remaining_project_tasks/MAX(perceived_productivity,1)",
-      "unit": "person*Month"
-    },
-    {
-      "name": "poor completion of project tasks",
-      "comment": "poor completion of project tasks",
-      "equation": "progress*(1 - fraction_properly_completed)",
-      "unit": "tasks/Month"
-    },
-    {
-      "name": "proper completion of project tasks",
-      "comment": "proper completion of project tasks",
-      "equation": "progress* fraction_properly_completed",
-      "unit": "tasks/Month"
-    },
-    {
-      "name": "net hiring of personnel",
-      "comment": "net hiring of personnel",
-      "equation": "(desired_workforce - workforce)/time_to_adapt_workforce",
-      "unit": "person/Month"
-    },
-    {
-      "name": "perceived cumulative progress",
-      "comment": "perceived cumulative progress",
-      "equation": "properly_completed_project_tasks + undiscovered_rework",
-      "unit": "tasks"
-    },
-    {
-      "name": "perceived fraction completed",
-      "comment": "perceived fraction completed",
-      "equation": "perceived_cumulative_progress/initial_number_of_project_tasks",
-      "unit": "fraction"
-    },
-    {
-      "name": "perceived productivity",
-      "comment": "perceived productivity",
-      "equation": "perceived_cumulative_progress/cumulative_effort",
-      "unit": "tasks/person/Month"
-    },
-    {
-      "name": "desired workforce",
-      "comment": "desired workforce",
-      "equation": "perceived_effort_remaining/perceived_time_remaining",
-      "unit": "person"
-    },
-    {
-      "name": "TIME STEP",
-      "equation": "0.0078125",
-      "unit": "Month"
-    },
-    {
-      "name": "INITIAL TIME",
-      "equation": "0",
-      "unit": "Month"
-    },
-    {
-      "name": "FINAL TIME",
-      "equation": "100",
-      "unit": "Month"
-    },
-    {
-      "name": "initial project time remaining",
-      "equation": "40",
-      "comment": "initial project time remaining",
-      "unit": "Month"
-    },
-    {
-      "name": "maximum productivity of testing",
-      "equation": "2",
-      "comment": "maximum productivity of testing",
-      "unit": "tasks/(person*Month)"
-    },
-    {
-      "name": "time to adapt workforce",
-      "equation": "1",
-      "comment": "time to adapt workforce",
-      "unit": "Month"
-    },
-    {
-      "name": "time to adapt the project schedule",
-      "equation": "1",
-      "comment": "time to adapt the project schedule",
-      "unit": "Month"
-    },
-    {
-      "name": "fraction properly completed",
-      "equation": "0.5",
-      "comment": "fraction properly completed",
-      "unit": "dmnl"
-    },
-    {
-      "name": "initial number of project tasks",
-      "equation": "1200",
-      "comment": "initial number of project tasks",
-      "unit": "tasks"
-    }
-  ],
-  "lookupTables": [
-    {
-      "name": "fraction personnel for testing lookup",
-      "xValues": [
-        0.0,
-        0.2,
-        0.4,
-        0.6,
-        0.8,
-        1.0
-      ],
-      "yValues": [
-        0.1,
-        0.15,
-        0.3,
-        0.6,
-        0.75,
-        0.8
-      ],
-      "interpolation": "LINEAR"
-    },
-    {
-      "name": "gross productivity of project personnel lookup",
-      "xValues": [
-        0.0,
-        50.0,
-        75.0,
-        100.0,
-        200.0,
-        1200.0
-      ],
-      "yValues": [
-        0.2,
-        0.85,
-        0.95,
-        1.0,
-        1.0,
-        1.0
-      ],
-      "interpolation": "LINEAR"
-    }
-  ],
-  "views": [
-    {
-      "name": "View 1",
-      "elements": [
-        {
-          "name": "workforce",
-          "type": "stock",
-          "x": 720.0,
-          "y": 343.0
-        },
-        {
-          "name": "progress",
-          "type": "aux",
-          "x": 1140.0,
-          "y": 351.0
-        },
-        {
-          "name": "properly completed project tasks",
-          "type": "stock",
-          "x": 1242.0,
-          "y": 750.0
-        },
-        {
-          "name": "perceived effort remaining",
-          "type": "aux",
-          "x": 771.0,
-          "y": 746.0
-        },
-        {
-          "name": "gross productivity of project personnel",
-          "type": "aux",
-          "x": 1113.0,
-          "y": 427.0
-        },
-        {
-          "name": "initial number of project tasks",
-          "type": "aux",
-          "x": 1144.0,
-          "y": 659.0
-        },
-        {
-          "name": "perceived time remaining",
-          "type": "aux",
-          "x": 535.0,
-          "y": 732.0
-        },
-        {
-          "name": "undiscovered rework",
-          "type": "stock",
-          "x": 1658.0,
-          "y": 517.0
-        },
-        {
-          "name": "perceived cumulative progress",
-          "type": "aux",
-          "x": 1320.0,
-          "y": 849.0
-        },
-        {
-          "name": "fraction properly completed",
-          "type": "aux",
-          "x": 1420.0,
-          "y": 622.0
-        },
-        {
-          "name": "cumulative effort",
-          "type": "stock",
-          "x": 944.0,
-          "y": 424.0
-        },
-        {
-          "name": "perceived productivity",
-          "type": "aux",
-          "x": 895.0,
-          "y": 799.0
-        },
-        {
-          "name": "Time",
-          "type": "aux",
-          "x": 611.0,
-          "y": 672.0
-        },
-        {
-          "name": "desired workforce",
-          "type": "aux",
-          "x": 450.0,
-          "y": 485.0
-        },
-        {
-          "name": "perceived fraction completed",
-          "type": "aux",
-          "x": 1092.0,
-          "y": 761.0
-        },
-        {
-          "name": "time to adapt workforce",
-          "type": "aux",
-          "x": 473.0,
-          "y": 255.0
-        },
-        {
-          "name": "time to adapt the project schedule",
-          "type": "aux",
-          "x": 649.0,
-          "y": 800.0
-        },
-        {
-          "name": "_48",
-          "type": "flow",
-          "x": 533.0,
-          "y": 341.0
-        },
-        {
-          "name": "net hiring of personnel",
-          "type": "aux",
-          "x": 533.0,
-          "y": 361.0
-        },
-        {
-          "name": "_748",
-          "type": "flow",
-          "x": 1455.0,
-          "y": 340.0
-        },
-        {
-          "name": "detecting undiscovered rework",
-          "type": "aux",
-          "x": 1455.0,
-          "y": 367.0
-        },
-        {
-          "name": "_380",
-          "type": "flow",
-          "x": 1505.0,
-          "y": 526.0
-        },
-        {
-          "name": "poor completion of project tasks",
-          "type": "aux",
-          "x": 1505.0,
-          "y": 553.0
-        },
-        {
-          "name": "_396",
-          "type": "flow",
-          "x": 1227.0,
-          "y": 681.0
-        },
-        {
-          "name": "proper completion of project tasks",
-          "type": "aux",
-          "x": 1296.0,
-          "y": 681.0
-        },
-        {
-          "name": "_48",
-          "type": "flow",
-          "x": 797.0,
-          "y": 425.0
-        },
-        {
-          "name": "additional cumulative effort",
-          "type": "aux",
-          "x": 797.0,
-          "y": 452.0
-        },
-        {
-          "name": "remaining project tasks",
-          "type": "stock",
-          "x": 1242.0,
-          "y": 518.0
-        },
-        {
-          "name": "project personnel",
-          "type": "aux",
-          "x": 986.0,
-          "y": 326.0
-        },
-        {
-          "name": "testing personnel",
-          "type": "aux",
-          "x": 1246.0,
-          "y": 301.0
-        },
-        {
-          "name": "productivity of testing",
-          "type": "aux",
-          "x": 1619.0,
-          "y": 277.0
-        },
-        {
-          "name": "fraction personnel for testing",
-          "type": "aux",
-          "x": 980.0,
-          "y": 222.0
-        },
-        {
-          "name": "maximum productivity of testing",
-          "type": "aux",
-          "x": 1726.0,
-          "y": 234.0
-        },
-        {
-          "name": "FINAL TIME",
-          "type": "aux",
-          "x": 1008.0,
-          "y": 750.0
-        },
-        {
-          "name": "fraction undiscovered rework",
-          "type": "aux",
-          "x": 1761.0,
-          "y": 402.0
-        },
-        {
-          "name": "reported fraction detection undiscovered rework",
-          "type": "aux",
-          "x": 1329.0,
-          "y": 243.0
-        },
-        {
-          "name": "initial project time remaining",
-          "type": "aux",
-          "x": 455.0,
-          "y": 802.0
-        },
-        {
-          "name": "average quality of completed project tasks",
-          "type": "aux",
-          "x": 1454.0,
-          "y": 754.0
-        }
-      ],
-      "connectors": [
-        {
-          "from": "progress",
-          "to": "49"
-        },
-        {
-          "from": "workforce",
-          "to": "37"
-        },
-        {
-          "from": "gross productivity of project personnel",
-          "to": "progress"
-        },
-        {
-          "from": "progress",
-          "to": "46"
-        },
-        {
-          "from": "properly completed project tasks",
-          "to": "perceived cumulative progress"
-        },
-        {
-          "from": "undiscovered rework",
-          "to": "perceived cumulative progress"
-        },
-        {
-          "from": "fraction properly completed",
-          "to": "49"
-        },
-        {
-          "from": "fraction properly completed",
-          "to": "47"
-        },
-        {
-          "from": "workforce",
-          "to": "53"
-        },
-        {
-          "from": "perceived cumulative progress",
-          "to": "perceived productivity"
-        },
-        {
-          "from": "cumulative effort",
-          "to": "perceived productivity"
-        },
-        {
-          "from": "perceived productivity",
-          "to": "perceived effort remaining"
-        },
-        {
-          "from": "desired workforce",
-          "to": "38"
-        },
-        {
-          "from": "perceived cumulative progress",
-          "to": "perceived fraction completed"
-        },
-        {
-          "from": "initial number of project tasks",
-          "to": "perceived fraction completed"
-        },
-        {
-          "from": "time to adapt workforce",
-          "to": "37"
-        },
-        {
-          "from": "37",
-          "to": "workforce"
-        },
-        {
-          "from": "37",
-          "to": "34"
-        },
-        {
-          "from": "48",
-          "to": "properly completed project tasks"
-        },
-        {
-          "from": "46",
-          "to": "undiscovered rework"
-        },
-        {
-          "from": "46",
-          "to": "55"
-        },
-        {
-          "from": "44",
-          "to": "55"
-        },
-        {
-          "from": "44",
-          "to": "undiscovered rework"
-        },
-        {
-          "from": "53",
-          "to": "cumulative effort"
-        },
-        {
-          "from": "53",
-          "to": "50"
-        },
-        {
-          "from": "initial number of project tasks",
-          "to": "remaining project tasks"
-        },
-        {
-          "from": "remaining project tasks",
-          "to": "perceived effort remaining"
-        },
-        {
-          "from": "Time",
-          "to": "perceived time remaining"
-        },
-        {
-          "from": "remaining project tasks",
-          "to": "gross productivity of project personnel"
-        },
-        {
-          "from": "workforce",
-          "to": "testing personnel"
-        },
-        {
-          "from": "testing personnel",
-          "to": "_748"
-        },
-        {
-          "from": "productivity of testing",
-          "to": "_748"
-        },
-        {
-          "from": "project personnel",
-          "to": "progress"
-        },
-        {
-          "from": "fraction personnel for testing",
-          "to": "project personnel"
-        },
-        {
-          "from": "fraction personnel for testing",
-          "to": "testing personnel"
-        },
-        {
-          "from": "maximum productivity of testing",
-          "to": "productivity of testing"
-        },
-        {
-          "from": "workforce",
-          "to": "project personnel"
-        },
-        {
-          "from": "undiscovered rework",
-          "to": "fraction undiscovered rework"
-        },
-        {
-          "from": "perceived cumulative progress",
-          "to": "fraction undiscovered rework"
-        },
-        {
-          "from": "_748",
-          "to": "reported fraction detection undiscovered rework"
-        },
-        {
-          "from": "proper completion of project tasks",
-          "to": "reported fraction detection undiscovered rework"
-        },
-        {
-          "from": "perceived effort remaining",
-          "to": "perceived time remaining"
-        },
-        {
-          "from": "time to adapt the project schedule",
-          "to": "perceived time remaining"
-        },
-        {
-          "from": "desired workforce",
-          "to": "perceived time remaining"
-        },
-        {
-          "from": "_396",
-          "to": "remaining project tasks"
-        },
-        {
-          "from": "perceived effort remaining",
-          "to": "desired workforce"
-        },
-        {
-          "from": "perceived time remaining",
-          "to": "desired workforce"
-        },
-        {
-          "from": "initial project time remaining",
-          "to": "perceived time remaining"
-        },
-        {
-          "from": "fraction undiscovered rework",
-          "to": "productivity of testing"
-        },
-        {
-          "from": "properly completed project tasks",
-          "to": "average quality of completed project tasks"
-        },
-        {
-          "from": "undiscovered rework",
-          "to": "average quality of completed project tasks"
-        },
-        {
-          "from": "reported fraction detection undiscovered rework",
-          "to": "fraction personnel for testing"
-        }
-      ],
-      "flowRoutes": [
-        {
-          "flowName": "_48",
-          "points": [
-            [
-              533.0,
-              341.0
-            ]
-          ]
-        },
-        {
-          "flowName": "_748",
-          "points": [
-            [
-              1455.0,
-              340.0
-            ]
-          ]
-        },
-        {
-          "flowName": "_380",
-          "points": [
-            [
-              1505.0,
-              526.0
-            ]
-          ]
-        },
-        {
-          "flowName": "_396",
-          "points": [
-            [
-              1227.0,
-              681.0
-            ]
-          ]
-        },
-        {
-          "flowName": "_48",
-          "points": [
-            [
-              797.0,
-              425.0
-            ]
-          ]
-        }
-      ]
-    }
-  ],
-  "defaultSimulation": {
-    "timeStep": "Month",
-    "duration": 100.0,
-    "durationUnit": "Month"
+  "name" : "1814_ProjectManagement_EN",
+  "stocks" : [ {
+    "name" : "remaining project tasks",
+    "comment" : "remaining project tasks",
+    "initialValue" : 1200.0,
+    "unit" : "tasks"
+  }, {
+    "name" : "undiscovered rework",
+    "comment" : "undiscovered rework",
+    "initialValue" : 0.0,
+    "unit" : "tasks"
+  }, {
+    "name" : "cumulative effort",
+    "comment" : "cumulative effort",
+    "initialValue" : 0.001,
+    "unit" : "person*Month"
+  }, {
+    "name" : "properly completed project tasks",
+    "comment" : "properly completed project tasks",
+    "initialValue" : 0.0,
+    "unit" : "tasks"
+  }, {
+    "name" : "workforce",
+    "comment" : "workforce",
+    "initialValue" : 2.0,
+    "unit" : "person"
+  } ],
+  "flows" : [ {
+    "name" : "remaining project tasks inflow 1",
+    "equation" : "detecting_undiscovered_rework",
+    "timeUnit" : "Month",
+    "sink" : "remaining project tasks"
+  }, {
+    "name" : "remaining project tasks outflow 2",
+    "equation" : "poor_completion_of_project_tasks",
+    "timeUnit" : "Month",
+    "source" : "remaining project tasks"
+  }, {
+    "name" : "remaining project tasks outflow 3",
+    "equation" : "proper_completion_of_project_tasks",
+    "timeUnit" : "Month",
+    "source" : "remaining project tasks"
+  }, {
+    "name" : "undiscovered rework inflow 1",
+    "equation" : "poor_completion_of_project_tasks",
+    "timeUnit" : "Month",
+    "sink" : "undiscovered rework"
+  }, {
+    "name" : "undiscovered rework outflow 2",
+    "equation" : "detecting_undiscovered_rework",
+    "timeUnit" : "Month",
+    "source" : "undiscovered rework"
+  }, {
+    "name" : "cumulative effort net flow",
+    "comment" : "Net flow for cumulative effort",
+    "equation" : "additional_cumulative_effort",
+    "timeUnit" : "Month",
+    "sink" : "cumulative effort"
+  }, {
+    "name" : "properly completed project tasks net flow",
+    "comment" : "Net flow for properly completed project tasks",
+    "equation" : "proper_completion_of_project_tasks",
+    "timeUnit" : "Month",
+    "sink" : "properly completed project tasks"
+  }, {
+    "name" : "workforce net flow",
+    "comment" : "Net flow for workforce",
+    "equation" : "net_hiring_of_personnel",
+    "timeUnit" : "Month",
+    "sink" : "workforce"
+  } ],
+  "variables" : [ {
+    "name" : "TIME_STEP",
+    "equation" : "0.0078125",
+    "unit" : "Month"
+  }, {
+    "name" : "INITIAL_TIME",
+    "equation" : "0",
+    "unit" : "Month"
+  }, {
+    "name" : "FINAL_TIME",
+    "equation" : "100",
+    "unit" : "Month"
+  }, {
+    "name" : "fraction personnel for testing",
+    "comment" : "gerapporteerde fractie detectie van onontdekt rework",
+    "equation" : "LOOKUP(fraction_personnel_for_testing_lookup, reported_fraction_detection_undiscovered_rework)",
+    "unit" : "dmnl"
+  }, {
+    "name" : "average quality of completed project tasks",
+    "comment" : "average quality of completed project tasks",
+    "equation" : "properly_completed_project_tasks/MAX((properly_completed_project_tasks+undiscovered_rework ),1)",
+    "unit" : "dmnl"
+  }, {
+    "name" : "productivity of testing",
+    "comment" : "productivity of testing",
+    "equation" : "maximum_productivity_of_testing*fraction_undiscovered_rework",
+    "unit" : "tasks/(person*Month)"
+  }, {
+    "name" : "initial project time remaining",
+    "comment" : "initial project time remaining",
+    "equation" : "40",
+    "unit" : "Month"
+  }, {
+    "name" : "perceived time remaining",
+    "comment" : "Time remaining",
+    "equation" : "MAX(0.25,SMOOTHI(TIME + (perceived_effort_remaining/desired_workforce),time_to_adapt_the_project_schedule ,initial_project_time_remaining) - TIME)",
+    "unit" : "Month"
+  }, {
+    "name" : "additional cumulative effort",
+    "comment" : "additional cumulative effort",
+    "equation" : "workforce",
+    "unit" : "Month*person/Month"
+  }, {
+    "name" : "reported fraction detection undiscovered rework",
+    "comment" : "reported fraction detection undiscovered rework",
+    "equation" : "DELAY3I( detecting_undiscovered_rework/(proper_completion_of_project_tasks+detecting_undiscovered_rework ),1,0)",
+    "unit" : "dmnl"
+  }, {
+    "name" : "fraction undiscovered rework",
+    "comment" : "fraction undiscovered rework",
+    "equation" : "undiscovered_rework/MAX(perceived_cumulative_progress,0.01)",
+    "unit" : "dmnl"
+  }, {
+    "name" : "project personnel",
+    "comment" : "project personnel",
+    "equation" : "(1-fraction_personnel_for_testing)*workforce",
+    "unit" : "person"
+  }, {
+    "name" : "maximum productivity of testing",
+    "comment" : "maximum productivity of testing",
+    "equation" : "2",
+    "unit" : "tasks/(person*Month)"
+  }, {
+    "name" : "detecting undiscovered rework",
+    "comment" : "detecting undiscovered rework",
+    "equation" : "productivity_of_testing*testing_personnel",
+    "unit" : "tasks/Month"
+  }, {
+    "name" : "progress",
+    "comment" : "progress",
+    "equation" : "gross_productivity_of_project_personnel*project_personnel",
+    "unit" : "tasks/Month"
+  }, {
+    "name" : "testing personnel",
+    "comment" : "testing personnel",
+    "equation" : "fraction_personnel_for_testing*workforce",
+    "unit" : "person"
+  }, {
+    "name" : "gross productivity of project personnel",
+    "comment" : "gross productivity of project personnel",
+    "equation" : "LOOKUP(gross_productivity_of_project_personnel_lookup, remaining_project_tasks)",
+    "unit" : "tasks/person/Month"
+  }, {
+    "name" : "perceived effort remaining",
+    "comment" : "perceived effort remaining",
+    "equation" : "remaining_project_tasks/MAX(perceived_productivity,1)",
+    "unit" : "person*Month"
+  }, {
+    "name" : "poor completion of project tasks",
+    "comment" : "poor completion of project tasks",
+    "equation" : "progress*(1 - fraction_properly_completed)",
+    "unit" : "tasks/Month"
+  }, {
+    "name" : "proper completion of project tasks",
+    "comment" : "proper completion of project tasks",
+    "equation" : "progress* fraction_properly_completed",
+    "unit" : "tasks/Month"
+  }, {
+    "name" : "time to adapt workforce",
+    "comment" : "time to adapt workforce",
+    "equation" : "1",
+    "unit" : "Month"
+  }, {
+    "name" : "time to adapt the project schedule",
+    "comment" : "time to adapt the project schedule",
+    "equation" : "1",
+    "unit" : "Month"
+  }, {
+    "name" : "net hiring of personnel",
+    "comment" : "(gewenst personeelsbestand - personeelsbestand)/tijd om personeelsbestand  aan te passen",
+    "equation" : "(desired_workforce - workforce)/time_to_adapt_workforce",
+    "unit" : "person/Month"
+  }, {
+    "name" : "perceived cumulative progress",
+    "comment" : "behoorlijk afgewerkte projecttaken + MAX(0,\"gebrekkig afgewerkte  projecttaken (undiscovered rework)\")",
+    "equation" : "properly_completed_project_tasks + undiscovered_rework",
+    "unit" : "tasks"
+  }, {
+    "name" : "perceived fraction completed",
+    "comment" : "perceived fraction completed",
+    "equation" : "perceived_cumulative_progress/initial_number_of_project_tasks",
+    "unit" : "fraction"
+  }, {
+    "name" : "fraction properly completed",
+    "comment" : "fraction properly completed",
+    "equation" : "0.5",
+    "unit" : "dmnl"
+  }, {
+    "name" : "initial number of project tasks",
+    "comment" : "initial number of project tasks",
+    "equation" : "1200",
+    "unit" : "tasks"
+  }, {
+    "name" : "perceived productivity",
+    "comment" : "perceived productivity",
+    "equation" : "perceived_cumulative_progress/cumulative_effort",
+    "unit" : "tasks/person/Month"
+  }, {
+    "name" : "desired workforce",
+    "comment" : "desired workforce",
+    "equation" : "perceived_effort_remaining/perceived_time_remaining",
+    "unit" : "person"
+  } ],
+  "lookupTables" : [ {
+    "name" : "fraction_personnel_for_testing_lookup",
+    "xValues" : [ 0.0, 0.2, 0.4, 0.6, 0.8, 1.0 ],
+    "yValues" : [ 0.1, 0.15, 0.3, 0.6, 0.75, 0.8 ],
+    "interpolation" : "LINEAR"
+  }, {
+    "name" : "gross_productivity_of_project_personnel_lookup",
+    "xValues" : [ 0.0, 50.0, 75.0, 100.0, 200.0, 1200.0 ],
+    "yValues" : [ 0.2, 0.85, 0.95, 1.0, 1.0, 1.0 ],
+    "interpolation" : "LINEAR"
+  } ],
+  "views" : [ {
+    "name" : "View 1",
+    "elements" : [ {
+      "name" : "workforce",
+      "type" : "stock",
+      "x" : 720.0,
+      "y" : 343.0
+    }, {
+      "name" : "progress",
+      "type" : "aux",
+      "x" : 1140.0,
+      "y" : 351.0
+    }, {
+      "name" : "properly completed project tasks",
+      "type" : "stock",
+      "x" : 1242.0,
+      "y" : 750.0
+    }, {
+      "name" : "perceived effort remaining",
+      "type" : "aux",
+      "x" : 771.0,
+      "y" : 746.0
+    }, {
+      "name" : "gross productivity of project personnel",
+      "type" : "aux",
+      "x" : 1113.0,
+      "y" : 427.0
+    }, {
+      "name" : "initial number of project tasks",
+      "type" : "aux",
+      "x" : 1144.0,
+      "y" : 659.0
+    }, {
+      "name" : "perceived time remaining",
+      "type" : "aux",
+      "x" : 535.0,
+      "y" : 732.0
+    }, {
+      "name" : "undiscovered rework",
+      "type" : "stock",
+      "x" : 1658.0,
+      "y" : 517.0
+    }, {
+      "name" : "perceived cumulative progress",
+      "type" : "aux",
+      "x" : 1320.0,
+      "y" : 849.0
+    }, {
+      "name" : "fraction properly completed",
+      "type" : "aux",
+      "x" : 1420.0,
+      "y" : 622.0
+    }, {
+      "name" : "cumulative effort",
+      "type" : "stock",
+      "x" : 944.0,
+      "y" : 424.0
+    }, {
+      "name" : "perceived productivity",
+      "type" : "aux",
+      "x" : 895.0,
+      "y" : 799.0
+    }, {
+      "name" : "Time",
+      "type" : "aux",
+      "x" : 611.0,
+      "y" : 672.0
+    }, {
+      "name" : "desired workforce",
+      "type" : "aux",
+      "x" : 450.0,
+      "y" : 485.0
+    }, {
+      "name" : "perceived fraction completed",
+      "type" : "aux",
+      "x" : 1092.0,
+      "y" : 761.0
+    }, {
+      "name" : "time to adapt workforce",
+      "type" : "aux",
+      "x" : 473.0,
+      "y" : 255.0
+    }, {
+      "name" : "time to adapt the project schedule",
+      "type" : "aux",
+      "x" : 649.0,
+      "y" : 800.0
+    }, {
+      "name" : "_48",
+      "type" : "flow",
+      "x" : 533.0,
+      "y" : 341.0
+    }, {
+      "name" : "net hiring of personnel",
+      "type" : "aux",
+      "x" : 533.0,
+      "y" : 361.0
+    }, {
+      "name" : "_748",
+      "type" : "flow",
+      "x" : 1455.0,
+      "y" : 340.0
+    }, {
+      "name" : "detecting undiscovered rework",
+      "type" : "aux",
+      "x" : 1455.0,
+      "y" : 367.0
+    }, {
+      "name" : "_380",
+      "type" : "flow",
+      "x" : 1505.0,
+      "y" : 526.0
+    }, {
+      "name" : "poor completion of project tasks",
+      "type" : "aux",
+      "x" : 1505.0,
+      "y" : 553.0
+    }, {
+      "name" : "_396",
+      "type" : "flow",
+      "x" : 1227.0,
+      "y" : 681.0
+    }, {
+      "name" : "proper completion of project tasks",
+      "type" : "aux",
+      "x" : 1296.0,
+      "y" : 681.0
+    }, {
+      "name" : "_48",
+      "type" : "flow",
+      "x" : 797.0,
+      "y" : 425.0
+    }, {
+      "name" : "additional cumulative effort",
+      "type" : "aux",
+      "x" : 797.0,
+      "y" : 452.0
+    }, {
+      "name" : "remaining project tasks",
+      "type" : "stock",
+      "x" : 1242.0,
+      "y" : 518.0
+    }, {
+      "name" : "project personnel",
+      "type" : "aux",
+      "x" : 986.0,
+      "y" : 326.0
+    }, {
+      "name" : "testing personnel",
+      "type" : "aux",
+      "x" : 1246.0,
+      "y" : 301.0
+    }, {
+      "name" : "productivity of testing",
+      "type" : "aux",
+      "x" : 1619.0,
+      "y" : 277.0
+    }, {
+      "name" : "fraction personnel for testing",
+      "type" : "aux",
+      "x" : 980.0,
+      "y" : 222.0
+    }, {
+      "name" : "maximum productivity of testing",
+      "type" : "aux",
+      "x" : 1726.0,
+      "y" : 234.0
+    }, {
+      "name" : "FINAL TIME",
+      "type" : "aux",
+      "x" : 1008.0,
+      "y" : 750.0
+    }, {
+      "name" : "fraction undiscovered rework",
+      "type" : "aux",
+      "x" : 1761.0,
+      "y" : 402.0
+    }, {
+      "name" : "reported fraction detection undiscovered rework",
+      "type" : "aux",
+      "x" : 1329.0,
+      "y" : 243.0
+    }, {
+      "name" : "initial project time remaining",
+      "type" : "aux",
+      "x" : 455.0,
+      "y" : 802.0
+    }, {
+      "name" : "average quality of completed project tasks",
+      "type" : "aux",
+      "x" : 1454.0,
+      "y" : 754.0
+    } ],
+    "connectors" : [ {
+      "from" : "progress",
+      "to" : "49"
+    }, {
+      "from" : "workforce",
+      "to" : "37"
+    }, {
+      "from" : "gross productivity of project personnel",
+      "to" : "progress"
+    }, {
+      "from" : "progress",
+      "to" : "46"
+    }, {
+      "from" : "properly completed project tasks",
+      "to" : "perceived cumulative progress"
+    }, {
+      "from" : "undiscovered rework",
+      "to" : "perceived cumulative progress"
+    }, {
+      "from" : "fraction properly completed",
+      "to" : "49"
+    }, {
+      "from" : "fraction properly completed",
+      "to" : "47"
+    }, {
+      "from" : "workforce",
+      "to" : "53"
+    }, {
+      "from" : "perceived cumulative progress",
+      "to" : "perceived productivity"
+    }, {
+      "from" : "cumulative effort",
+      "to" : "perceived productivity"
+    }, {
+      "from" : "perceived productivity",
+      "to" : "perceived effort remaining"
+    }, {
+      "from" : "desired workforce",
+      "to" : "38"
+    }, {
+      "from" : "perceived cumulative progress",
+      "to" : "perceived fraction completed"
+    }, {
+      "from" : "initial number of project tasks",
+      "to" : "perceived fraction completed"
+    }, {
+      "from" : "time to adapt workforce",
+      "to" : "37"
+    }, {
+      "from" : "37",
+      "to" : "workforce"
+    }, {
+      "from" : "37",
+      "to" : "34"
+    }, {
+      "from" : "48",
+      "to" : "properly completed project tasks"
+    }, {
+      "from" : "46",
+      "to" : "undiscovered rework"
+    }, {
+      "from" : "46",
+      "to" : "55"
+    }, {
+      "from" : "44",
+      "to" : "55"
+    }, {
+      "from" : "44",
+      "to" : "undiscovered rework"
+    }, {
+      "from" : "53",
+      "to" : "cumulative effort"
+    }, {
+      "from" : "53",
+      "to" : "50"
+    }, {
+      "from" : "initial number of project tasks",
+      "to" : "remaining project tasks"
+    }, {
+      "from" : "remaining project tasks",
+      "to" : "perceived effort remaining"
+    }, {
+      "from" : "Time",
+      "to" : "perceived time remaining"
+    }, {
+      "from" : "remaining project tasks",
+      "to" : "gross productivity of project personnel"
+    }, {
+      "from" : "workforce",
+      "to" : "testing personnel"
+    }, {
+      "from" : "testing personnel",
+      "to" : "_748"
+    }, {
+      "from" : "productivity of testing",
+      "to" : "_748"
+    }, {
+      "from" : "project personnel",
+      "to" : "progress"
+    }, {
+      "from" : "fraction personnel for testing",
+      "to" : "project personnel"
+    }, {
+      "from" : "fraction personnel for testing",
+      "to" : "testing personnel"
+    }, {
+      "from" : "maximum productivity of testing",
+      "to" : "productivity of testing"
+    }, {
+      "from" : "workforce",
+      "to" : "project personnel"
+    }, {
+      "from" : "undiscovered rework",
+      "to" : "fraction undiscovered rework"
+    }, {
+      "from" : "perceived cumulative progress",
+      "to" : "fraction undiscovered rework"
+    }, {
+      "from" : "_748",
+      "to" : "reported fraction detection undiscovered rework"
+    }, {
+      "from" : "proper completion of project tasks",
+      "to" : "reported fraction detection undiscovered rework"
+    }, {
+      "from" : "perceived effort remaining",
+      "to" : "perceived time remaining"
+    }, {
+      "from" : "time to adapt the project schedule",
+      "to" : "perceived time remaining"
+    }, {
+      "from" : "desired workforce",
+      "to" : "perceived time remaining"
+    }, {
+      "from" : "_396",
+      "to" : "remaining project tasks"
+    }, {
+      "from" : "perceived effort remaining",
+      "to" : "desired workforce"
+    }, {
+      "from" : "perceived time remaining",
+      "to" : "desired workforce"
+    }, {
+      "from" : "initial project time remaining",
+      "to" : "perceived time remaining"
+    }, {
+      "from" : "fraction undiscovered rework",
+      "to" : "productivity of testing"
+    }, {
+      "from" : "properly completed project tasks",
+      "to" : "average quality of completed project tasks"
+    }, {
+      "from" : "undiscovered rework",
+      "to" : "average quality of completed project tasks"
+    }, {
+      "from" : "reported fraction detection undiscovered rework",
+      "to" : "fraction personnel for testing"
+    } ],
+    "flowRoutes" : [ {
+      "flowName" : "_48",
+      "points" : [ [ 533.0, 341.0 ] ]
+    }, {
+      "flowName" : "_748",
+      "points" : [ [ 1455.0, 340.0 ] ]
+    }, {
+      "flowName" : "_380",
+      "points" : [ [ 1505.0, 526.0 ] ]
+    }, {
+      "flowName" : "_396",
+      "points" : [ [ 1227.0, 681.0 ] ]
+    }, {
+      "flowName" : "_48",
+      "points" : [ [ 797.0, 425.0 ] ]
+    } ]
+  } ],
+  "defaultSimulation" : {
+    "timeStep" : "Month",
+    "duration" : 100.0,
+    "durationUnit" : "Month",
+    "dt" : 0.0078125
   },
-  "metadata": {
-    "license": "CC-BY-NC-SA-4.0",
-    "author": "Dr. Erik Pruyt",
-    "source": "Pruyt, E., 2013. Small System Dynamics Models for Big Issues: Triple Jump towards Real-World Complexity. TU Delft Library. ISBN 978-94-6186-195-5",
-    "url": "https://simulation.tudelft.nl/SD/"
+  "metadata" : {
+    "author" : "Dr. Erik Pruyt",
+    "source" : "Pruyt, E., 2013. Small System Dynamics Models for Big Issues: Triple Jump towards Real-World Complexity. TU Delft Library. ISBN 978-94-6186-195-5",
+    "license" : "CC-BY-NC-SA-4.0",
+    "url" : "https://simulation.tudelft.nl/SD/"
   }
 }

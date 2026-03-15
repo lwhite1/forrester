@@ -1,0 +1,30 @@
+{
+  "name" : "flicker",
+  "variables" : [ {
+    "name" : "TIME_STEP",
+    "equation" : "0.0078125",
+    "unit" : "Month"
+  }, {
+    "name" : "INITIAL_TIME",
+    "equation" : "0",
+    "unit" : "Month"
+  }, {
+    "name" : "FINAL_TIME",
+    "equation" : "1000",
+    "unit" : "Month"
+  } ],
+  "views" : [ {
+    "name" : "View 1"
+  } ],
+  "defaultSimulation" : {
+    "timeStep" : "Month",
+    "duration" : 1000.0,
+    "durationUnit" : "Month",
+    "dt" : 0.0078125
+  },
+  "metadata" : {
+    "author" : "Ventana Systems",
+    "source" : "Vensim Sample Models",
+    "license" : "MIT"
+  }
+}

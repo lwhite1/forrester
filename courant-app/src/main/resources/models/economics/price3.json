@@ -1,0 +1,249 @@
+{
+  "name" : "price3",
+  "stocks" : [ {
+    "name" : "price",
+    "comment" : "price",
+    "initialValue" : 100.0,
+    "unit" : "$/Box"
+  } ],
+  "flows" : [ {
+    "name" : "price net flow",
+    "comment" : "Net flow for price",
+    "equation" : "change_in_price",
+    "timeUnit" : "Month",
+    "sink" : "price"
+  } ],
+  "variables" : [ {
+    "name" : "TIME_STEP",
+    "equation" : "1",
+    "unit" : "Month"
+  }, {
+    "name" : "INITIAL_TIME",
+    "equation" : "0",
+    "unit" : "Month"
+  }, {
+    "name" : "FINAL_TIME",
+    "equation" : "100",
+    "unit" : "Month"
+  }, {
+    "name" : "target price",
+    "comment" : "target price",
+    "equation" : "MIN( IF((expected_demand) == 0, maximum_price, (target_revenue) / (expected_demand)), maximum_price)",
+    "unit" : "$/Box"
+  }, {
+    "name" : "maximum price",
+    "comment" : "maximum price",
+    "equation" : "25000",
+    "unit" : "$/Box"
+  }, {
+    "name" : "change in price",
+    "comment" : "change in price",
+    "equation" : "IF(target_price > price, (target_price - price)/time_to_adjust_price_up, (target_price-price)/time_to_adjust_price_down)",
+    "unit" : "$/Box/Month"
+  }, {
+    "name" : "time to adjust price down",
+    "comment" : "time to adjust price down",
+    "equation" : "6",
+    "unit" : "Month"
+  }, {
+    "name" : "demand",
+    "comment" : "demand",
+    "equation" : "reference_demand * effect_price_demand",
+    "unit" : "Box/Month"
+  }, {
+    "name" : "demand elasticity",
+    "comment" : "demand elasticity",
+    "equation" : "1",
+    "unit" : "Dmnl"
+  }, {
+    "name" : "effect price demand",
+    "comment" : "effect price demand",
+    "equation" : "EXP(-demand_elasticity * LN(price/reference_price))",
+    "unit" : "Dmnl"
+  }, {
+    "name" : "expected demand",
+    "comment" : "expected demand",
+    "equation" : "SMOOTH(demand,time_to_form_expectations)",
+    "unit" : "Box/Month"
+  }, {
+    "name" : "initial price",
+    "comment" : "initial price",
+    "equation" : "100",
+    "unit" : "$/Box"
+  }, {
+    "name" : "reference demand",
+    "comment" : "reference demand",
+    "equation" : "100",
+    "unit" : "Box/Month"
+  }, {
+    "name" : "reference price",
+    "comment" : "reference price",
+    "equation" : "100",
+    "unit" : "$/Box"
+  }, {
+    "name" : "target revenue",
+    "comment" : "target revenue",
+    "equation" : "10000+STEP(5000, 10)",
+    "unit" : "$/Month"
+  }, {
+    "name" : "time to adjust price up",
+    "comment" : "time to adjust price up",
+    "equation" : "4",
+    "unit" : "Month"
+  }, {
+    "name" : "time to form expectations",
+    "comment" : "time to form expectations",
+    "equation" : "6",
+    "unit" : "Month"
+  } ],
+  "views" : [ {
+    "name" : "View 1",
+    "elements" : [ {
+      "name" : "reference demand",
+      "type" : "aux",
+      "x" : 657.0,
+      "y" : 49.0
+    }, {
+      "name" : "effect price demand",
+      "type" : "aux",
+      "x" : 615.0,
+      "y" : 111.0
+    }, {
+      "name" : "price",
+      "type" : "stock",
+      "x" : 515.0,
+      "y" : 187.0
+    }, {
+      "name" : "demand",
+      "type" : "aux",
+      "x" : 491.0,
+      "y" : 69.0
+    }, {
+      "name" : "target price",
+      "type" : "aux",
+      "x" : 249.0,
+      "y" : 160.0
+    }, {
+      "name" : "time to adjust price up",
+      "type" : "aux",
+      "x" : 237.0,
+      "y" : 241.0
+    }, {
+      "name" : "target revenue",
+      "type" : "aux",
+      "x" : 140.0,
+      "y" : 119.0
+    }, {
+      "name" : "demand elasticity",
+      "type" : "aux",
+      "x" : 771.0,
+      "y" : 163.0
+    }, {
+      "name" : "initial price",
+      "type" : "aux",
+      "x" : 581.0,
+      "y" : 235.0
+    }, {
+      "name" : "expected demand",
+      "type" : "aux",
+      "x" : 336.0,
+      "y" : 69.0
+    }, {
+      "name" : "_48",
+      "type" : "flow",
+      "x" : 407.0,
+      "y" : 191.0
+    }, {
+      "name" : "change in price",
+      "type" : "aux",
+      "x" : 407.0,
+      "y" : 211.0
+    }, {
+      "name" : "time to form expectations",
+      "type" : "aux",
+      "x" : 135.0,
+      "y" : 40.0
+    }, {
+      "name" : "reference price",
+      "type" : "aux",
+      "x" : 755.0,
+      "y" : 208.0
+    }, {
+      "name" : "time to adjust price down",
+      "type" : "aux",
+      "x" : 252.0,
+      "y" : 277.0
+    }, {
+      "name" : "maximum price",
+      "type" : "aux",
+      "x" : 91.0,
+      "y" : 151.0
+    } ],
+    "connectors" : [ {
+      "from" : "reference demand",
+      "to" : "demand"
+    }, {
+      "from" : "effect price demand",
+      "to" : "demand"
+    }, {
+      "from" : "price",
+      "to" : "effect price demand"
+    }, {
+      "from" : "demand elasticity",
+      "to" : "effect price demand"
+    }, {
+      "from" : "time to adjust price up",
+      "to" : "22"
+    }, {
+      "from" : "17",
+      "to" : "target price"
+    }, {
+      "from" : "target revenue",
+      "to" : "target price"
+    }, {
+      "from" : "21",
+      "to" : "price"
+    }, {
+      "from" : "21",
+      "to" : "18"
+    }, {
+      "from" : "demand",
+      "to" : "expected demand"
+    }, {
+      "from" : "time to form expectations",
+      "to" : "expected demand"
+    }, {
+      "from" : "price",
+      "to" : "change in price"
+    }, {
+      "from" : "target price",
+      "to" : "change in price"
+    }, {
+      "from" : "reference price",
+      "to" : "effect price demand"
+    }, {
+      "from" : "time to adjust price down",
+      "to" : "change in price"
+    }, {
+      "from" : "initial price",
+      "to" : "price"
+    }, {
+      "from" : "maximum price",
+      "to" : "target price"
+    } ],
+    "flowRoutes" : [ {
+      "flowName" : "_48",
+      "points" : [ [ 407.0, 191.0 ] ]
+    } ]
+  } ],
+  "defaultSimulation" : {
+    "timeStep" : "Month",
+    "duration" : 100.0,
+    "durationUnit" : "Month"
+  },
+  "metadata" : {
+    "author" : "Ventana Systems",
+    "source" : "Vensim User's Guide",
+    "license" : "MIT"
+  }
+}

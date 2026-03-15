@@ -1,0 +1,280 @@
+{
+  "name" : "DELIV",
+  "stocks" : [ {
+    "name" : "Customers",
+    "comment" : "Customers",
+    "initialValue" : 100.0,
+    "unit" : "Person"
+  }, {
+    "name" : "Backlog",
+    "comment" : "Backlog",
+    "initialValue" : 10.0,
+    "unit" : "Machine"
+  } ],
+  "flows" : [ {
+    "name" : "Customers net flow",
+    "comment" : "Net flow for Customers",
+    "equation" : "new_customers",
+    "timeUnit" : "Week",
+    "sink" : "Customers"
+  }, {
+    "name" : "Backlog inflow 1",
+    "equation" : "orders",
+    "timeUnit" : "Week",
+    "sink" : "Backlog"
+  }, {
+    "name" : "Backlog outflow 2",
+    "equation" : "shipments",
+    "timeUnit" : "Week",
+    "source" : "Backlog"
+  } ],
+  "variables" : [ {
+    "name" : "TIME_STEP",
+    "equation" : "0.5",
+    "unit" : "Week"
+  }, {
+    "name" : "INITIAL_TIME",
+    "equation" : "0",
+    "unit" : "Week"
+  }, {
+    "name" : "FINAL_TIME",
+    "equation" : "208",
+    "unit" : "Week"
+  }, {
+    "name" : "new customers",
+    "comment" : "new customers",
+    "equation" : "shipments / products_per_customer",
+    "unit" : "Person/Week"
+  }, {
+    "name" : "new people ready to order",
+    "comment" : "new people ready to order",
+    "equation" : "Customers * normal_effective_referral_fraction",
+    "unit" : "Person/Week"
+  }, {
+    "name" : "orders",
+    "comment" : "orders",
+    "equation" : "new_people_ready_to_order * effect_of_delivery_delay_on_orders * products_per_customer",
+    "unit" : "Machine/Week"
+  }, {
+    "name" : "products per customer",
+    "comment" : "products per customer",
+    "equation" : "1",
+    "unit" : "Machine/Person"
+  }, {
+    "name" : "capacity",
+    "comment" : "capacity",
+    "equation" : "1000",
+    "unit" : "Machine/Week"
+  }, {
+    "name" : "delivery delay",
+    "comment" : "delivery delay",
+    "equation" : "Backlog/shipments",
+    "unit" : "Week"
+  }, {
+    "name" : "effect of delivery delay on orders",
+    "comment" : "effect of delivery delay on orders",
+    "equation" : "LOOKUP(effect_of_delivery_delay_on_orders_lookup, delivery_delay/normal_delivery_delay)",
+    "unit" : "Dmnl"
+  }, {
+    "name" : "minimum cycle time",
+    "comment" : "minimum cycle time",
+    "equation" : "1",
+    "unit" : "Week"
+  }, {
+    "name" : "normal delivery delay",
+    "comment" : "normal delivery delay",
+    "equation" : "2",
+    "unit" : "Week"
+  }, {
+    "name" : "normal effective referral fraction",
+    "comment" : "normal effective referral fraction",
+    "equation" : "0.1",
+    "unit" : "fraction/Week"
+  }, {
+    "name" : "shipments",
+    "comment" : "shipments",
+    "equation" : "MIN(Backlog/minimum_cycle_time, capacity)",
+    "unit" : "Machine/Week"
+  } ],
+  "lookupTables" : [ {
+    "name" : "effect of delivery delay on orders lookup",
+    "comment" : "effect of delivery delay on orders lookup",
+    "xValues" : [ 0.0, 0.4, 1.0, 2.5, 5.0, 10.0 ],
+    "yValues" : [ 2.0, 1.4, 1.0, 0.6, 0.3, 0.0 ],
+    "interpolation" : "LINEAR"
+  } ],
+  "views" : [ {
+    "name" : "View 1",
+    "elements" : [ {
+      "name" : "Backlog",
+      "type" : "stock",
+      "x" : 427.0,
+      "y" : 463.0
+    }, {
+      "name" : "_0",
+      "type" : "flow",
+      "x" : 325.0,
+      "y" : 461.0
+    }, {
+      "name" : "orders",
+      "type" : "aux",
+      "x" : 325.0,
+      "y" : 499.0
+    }, {
+      "name" : "effect of delivery delay on orders",
+      "type" : "aux",
+      "x" : 347.0,
+      "y" : 622.0
+    }, {
+      "name" : "normal effective referral fraction",
+      "type" : "aux",
+      "x" : 232.0,
+      "y" : 195.0
+    }, {
+      "name" : "Customers",
+      "type" : "stock",
+      "x" : 725.0,
+      "y" : 262.0
+    }, {
+      "name" : "_0",
+      "type" : "flow",
+      "x" : 536.0,
+      "y" : 461.0
+    }, {
+      "name" : "shipments",
+      "type" : "aux",
+      "x" : 536.0,
+      "y" : 499.0
+    }, {
+      "name" : "capacity",
+      "type" : "aux",
+      "x" : 620.0,
+      "y" : 546.0
+    }, {
+      "name" : "minimum cycle time",
+      "type" : "aux",
+      "x" : 491.0,
+      "y" : 397.0
+    }, {
+      "name" : "normal delivery delay",
+      "type" : "aux",
+      "x" : 620.0,
+      "y" : 623.0
+    }, {
+      "name" : "delivery delay",
+      "type" : "aux",
+      "x" : 479.0,
+      "y" : 546.0
+    }, {
+      "name" : "effect of delivery delay on orders lookup",
+      "type" : "lookup",
+      "x" : 627.0,
+      "y" : 662.0
+    }, {
+      "name" : "_0",
+      "type" : "flow",
+      "x" : 604.0,
+      "y" : 269.0
+    }, {
+      "name" : "new customers",
+      "type" : "aux",
+      "x" : 604.0,
+      "y" : 307.0
+    }, {
+      "name" : "products per customer",
+      "type" : "aux",
+      "x" : 439.0,
+      "y" : 359.0
+    }, {
+      "name" : "new people ready to order",
+      "type" : "aux",
+      "x" : 272.0,
+      "y" : 302.0
+    } ],
+    "connectors" : [ {
+      "from" : "5",
+      "to" : "Backlog"
+    }, {
+      "from" : "5",
+      "to" : "2"
+    }, {
+      "from" : "effect of delivery delay on orders",
+      "to" : "orders"
+    }, {
+      "from" : "12",
+      "to" : "Backlog"
+    }, {
+      "from" : "minimum cycle time",
+      "to" : "_0"
+    }, {
+      "from" : "delivery delay",
+      "to" : "effect of delivery delay on orders"
+    }, {
+      "from" : "normal delivery delay",
+      "to" : "effect of delivery delay on orders"
+    }, {
+      "from" : "capacity",
+      "to" : "shipments"
+    }, {
+      "from" : "Backlog",
+      "to" : "_0"
+    }, {
+      "from" : "Backlog",
+      "to" : "delivery delay"
+    }, {
+      "from" : "shipments",
+      "to" : "delivery delay"
+    }, {
+      "from" : "effect of delivery delay on orders lookup",
+      "to" : "effect of delivery delay on orders"
+    }, {
+      "from" : "30",
+      "to" : "Customers"
+    }, {
+      "from" : "30",
+      "to" : "27"
+    }, {
+      "from" : "_0",
+      "to" : "33"
+    }, {
+      "from" : "normal effective referral fraction",
+      "to" : "38"
+    }, {
+      "from" : "products per customer",
+      "to" : "new customers"
+    }, {
+      "from" : "products per customer",
+      "to" : "_0"
+    }, {
+      "from" : "Customers",
+      "to" : "new people ready to order"
+    }, {
+      "from" : "new people ready to order",
+      "to" : "_0"
+    }, {
+      "from" : "_0",
+      "to" : "new customers"
+    } ],
+    "flowRoutes" : [ {
+      "flowName" : "_0",
+      "points" : [ [ 325.0, 461.0 ] ]
+    }, {
+      "flowName" : "_0",
+      "points" : [ [ 536.0, 461.0 ] ]
+    }, {
+      "flowName" : "_0",
+      "points" : [ [ 604.0, 269.0 ] ]
+    } ]
+  } ],
+  "defaultSimulation" : {
+    "timeStep" : "Week",
+    "duration" : 208.0,
+    "durationUnit" : "Week",
+    "dt" : 0.5
+  },
+  "metadata" : {
+    "author" : "Ventana Systems",
+    "source" : "Vensim Sample Models",
+    "license" : "MIT"
+  }
+}

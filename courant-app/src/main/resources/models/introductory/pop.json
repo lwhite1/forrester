@@ -1,0 +1,135 @@
+{
+  "name" : "POP",
+  "stocks" : [ {
+    "name" : "Rabbit Population",
+    "comment" : "Rabbit Population",
+    "initialValue" : 1000.0,
+    "unit" : "rabbit"
+  } ],
+  "flows" : [ {
+    "name" : "Rabbit Population inflow 1",
+    "equation" : "births",
+    "timeUnit" : "Year",
+    "sink" : "Rabbit Population"
+  }, {
+    "name" : "Rabbit Population outflow 2",
+    "equation" : "deaths",
+    "timeUnit" : "Year",
+    "source" : "Rabbit Population"
+  } ],
+  "variables" : [ {
+    "name" : "TIME_STEP",
+    "equation" : "0.125",
+    "unit" : "Year"
+  }, {
+    "name" : "INITIAL_TIME",
+    "equation" : "0",
+    "unit" : "Year"
+  }, {
+    "name" : "FINAL_TIME",
+    "equation" : "30",
+    "unit" : "Year"
+  }, {
+    "name" : "average lifetime",
+    "comment" : "average lifetime",
+    "equation" : "8",
+    "unit" : "Year"
+  }, {
+    "name" : "birth rate",
+    "comment" : "birth rate",
+    "equation" : "0.125",
+    "unit" : "fraction/Year"
+  }, {
+    "name" : "births",
+    "comment" : "births",
+    "equation" : "Rabbit_Population * birth_rate",
+    "unit" : "rabbit/Year"
+  }, {
+    "name" : "deaths",
+    "comment" : "deaths",
+    "equation" : "Rabbit_Population / average_lifetime",
+    "unit" : "rabbit/Year"
+  } ],
+  "views" : [ {
+    "name" : "View 1",
+    "elements" : [ {
+      "name" : "Rabbit Population",
+      "type" : "stock",
+      "x" : 180.0,
+      "y" : 45.0
+    }, {
+      "name" : "_48",
+      "type" : "flow",
+      "x" : 90.0,
+      "y" : 47.0
+    }, {
+      "name" : "births",
+      "type" : "aux",
+      "x" : 90.0,
+      "y" : 62.0
+    }, {
+      "name" : "_48",
+      "type" : "flow",
+      "x" : 270.0,
+      "y" : 47.0
+    }, {
+      "name" : "deaths",
+      "type" : "aux",
+      "x" : 270.0,
+      "y" : 62.0
+    }, {
+      "name" : "birth rate",
+      "type" : "aux",
+      "x" : 53.0,
+      "y" : 99.0
+    }, {
+      "name" : "average lifetime",
+      "type" : "aux",
+      "x" : 300.0,
+      "y" : 99.0
+    } ],
+    "connectors" : [ {
+      "from" : "5",
+      "to" : "Rabbit Population"
+    }, {
+      "from" : "5",
+      "to" : "2"
+    }, {
+      "from" : "10",
+      "to" : "7"
+    }, {
+      "from" : "10",
+      "to" : "Rabbit Population"
+    }, {
+      "from" : "birth rate",
+      "to" : "births"
+    }, {
+      "from" : "average lifetime",
+      "to" : "deaths"
+    }, {
+      "from" : "Rabbit Population",
+      "to" : "births"
+    }, {
+      "from" : "Rabbit Population",
+      "to" : "deaths"
+    } ],
+    "flowRoutes" : [ {
+      "flowName" : "_48",
+      "points" : [ [ 90.0, 47.0 ] ]
+    }, {
+      "flowName" : "_48",
+      "points" : [ [ 270.0, 47.0 ] ]
+    } ]
+  } ],
+  "defaultSimulation" : {
+    "timeStep" : "Year",
+    "duration" : 30.0,
+    "durationUnit" : "Year",
+    "dt" : 0.125
+  },
+  "metadata" : {
+    "author" : "Ventana Systems",
+    "source" : "Vensim User's Guide",
+    "license" : "MIT"
+  }
+}

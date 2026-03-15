@@ -1,0 +1,327 @@
+{
+  "name" : "1414_DistrictHousingWOunits",
+  "stocks" : [ {
+    "name" : "social housing families",
+    "comment" : "social housing families",
+    "initialValue" : 2990.0,
+    "unit" : ""
+  }, {
+    "name" : "total quality of all social housing apartments",
+    "comment" : "total quality of all social housing apartments",
+    "initialValue" : 0.0,
+    "initialExpression" : "initial_average_quality_of_the_social_housing_apartments*social_housing_families",
+    "unit" : ""
+  } ],
+  "flows" : [ {
+    "name" : "social housing families net flow",
+    "comment" : "Net flow for social housing families",
+    "equation" : "-outflow_of_social_housing_families",
+    "timeUnit" : "Year",
+    "sink" : "social housing families"
+  }, {
+    "name" : "total quality of all social housing apartments inflow 1",
+    "equation" : "refurbishment",
+    "timeUnit" : "Year",
+    "sink" : "total quality of all social housing apartments"
+  }, {
+    "name" : "total quality of all social housing apartments outflow 2",
+    "equation" : "loss_of_quality_of_social_housing_apartments_through_ageing",
+    "timeUnit" : "Year",
+    "source" : "total quality of all social housing apartments"
+  }, {
+    "name" : "total quality of all social housing apartments outflow 3",
+    "equation" : "loss_of_total_quality_of_social_housing_apartments_at_privatisation",
+    "timeUnit" : "Year",
+    "source" : "total quality of all social housing apartments"
+  } ],
+  "variables" : [ {
+    "name" : "TIME_STEP",
+    "equation" : "0.0625",
+    "unit" : "Year"
+  }, {
+    "name" : "INITIAL_TIME",
+    "equation" : "0",
+    "unit" : "Year"
+  }, {
+    "name" : "FINAL_TIME",
+    "equation" : "50",
+    "unit" : "Year"
+  }, {
+    "name" : "average lifetime",
+    "comment" : "average lifetime",
+    "equation" : "30",
+    "unit" : "Year"
+  }, {
+    "name" : "fraction leaving",
+    "comment" : "100% of the remaining social housing families leave at a perceived quality of life  (QoL) of 0%, that 45% leave at a perceived QoL of 25%, that 15% leave at a  perceived QoL of 50%, that 5% leave at a perceived QoL of 75%,\n\t\tand that 0% leave at a perceived QoL of 100%",
+    "equation" : "LOOKUP(fraction_leaving_lookup, perceived_quality_of_life_by_social_housing_families)",
+    "unit" : ""
+  }, {
+    "name" : "fraction of social housing families",
+    "comment" : "fraction of social housing families",
+    "equation" : "social_housing_families/3000",
+    "unit" : ""
+  }, {
+    "name" : "importance foshf",
+    "comment" : "importance foshf",
+    "equation" : "2",
+    "unit" : ""
+  }, {
+    "name" : "importance qosha",
+    "comment" : "importance qosha",
+    "equation" : "1",
+    "unit" : ""
+  }, {
+    "name" : "initial average quality of the social housing apartments",
+    "comment" : "initial average quality of the social housing apartments",
+    "equation" : "0.7",
+    "unit" : ""
+  }, {
+    "name" : "loss of quality of social housing apartments through ageing",
+    "comment" : "loss of quality of social housing apartments through ageing",
+    "equation" : "total_quality_of_all_social_housing_apartments/average_lifetime",
+    "unit" : ""
+  }, {
+    "name" : "loss of total quality of social housing apartments at privatisation",
+    "comment" : "loss of total quality of social housing apartments at privatisation",
+    "equation" : "outflow_of_social_housing_families*quality_of_social_housing_apartments",
+    "unit" : ""
+  }, {
+    "name" : "outflow of social housing families",
+    "comment" : "outflow of social housing families",
+    "equation" : "fraction_leaving*social_housing_families",
+    "unit" : ""
+  }, {
+    "name" : "perceived quality of life by social housing families",
+    "comment" : "perceived quality of life by social housing families",
+    "equation" : "(fraction_of_social_housing_families*importance_foshf+importance_qosha*quality_of_social_housing_apartments )/(importance_foshf+importance_qosha)",
+    "unit" : ""
+  }, {
+    "name" : "quality of social housing apartments",
+    "comment" : "quality of social housing apartments",
+    "equation" : "total_quality_of_all_social_housing_apartments/social_housing_families",
+    "unit" : ""
+  }, {
+    "name" : "refurbishment",
+    "comment" : "refurbishment",
+    "equation" : "refurbishment_rate*(1-quality_of_social_housing_apartments)*social_housing_families",
+    "unit" : ""
+  }, {
+    "name" : "refurbishment rate",
+    "comment" : "refurbishment rate",
+    "equation" : "0.05",
+    "unit" : ""
+  } ],
+  "lookupTables" : [ {
+    "name" : "fraction_leaving_lookup",
+    "xValues" : [ 0.0, 0.25, 0.5, 0.75, 1.0 ],
+    "yValues" : [ 1.0, 0.45, 0.15, 0.05, 0.0 ],
+    "interpolation" : "LINEAR"
+  } ],
+  "views" : [ {
+    "name" : "View 1",
+    "elements" : [ {
+      "name" : "social housing families",
+      "type" : "stock",
+      "x" : 711.0,
+      "y" : 244.0
+    }, {
+      "name" : "_48",
+      "type" : "flow",
+      "x" : 815.0,
+      "y" : 245.0
+    }, {
+      "name" : "outflow of social housing families",
+      "type" : "aux",
+      "x" : 815.0,
+      "y" : 272.0
+    }, {
+      "name" : "perceived quality of life by social housing families",
+      "type" : "aux",
+      "x" : 691.0,
+      "y" : 104.0
+    }, {
+      "name" : "fraction leaving",
+      "type" : "aux",
+      "x" : 801.0,
+      "y" : 187.0
+    }, {
+      "name" : "quality of social housing apartments",
+      "type" : "aux",
+      "x" : 292.0,
+      "y" : 98.0
+    }, {
+      "name" : "fraction of social housing families",
+      "type" : "aux",
+      "x" : 678.0,
+      "y" : 154.0
+    }, {
+      "name" : "importance qosha",
+      "type" : "aux",
+      "x" : 552.0,
+      "y" : 35.0
+    }, {
+      "name" : "importance foshf",
+      "type" : "aux",
+      "x" : 876.0,
+      "y" : 39.0
+    }, {
+      "name" : "total quality of all social housing apartments",
+      "type" : "stock",
+      "x" : 344.0,
+      "y" : 238.0
+    }, {
+      "name" : "_48",
+      "type" : "flow",
+      "x" : 476.0,
+      "y" : 237.0
+    }, {
+      "name" : "loss of quality of social housing apartments through ageing",
+      "type" : "aux",
+      "x" : 476.0,
+      "y" : 264.0
+    }, {
+      "name" : "initial average quality of the social housing apartments",
+      "type" : "aux",
+      "x" : 425.0,
+      "y" : 366.0
+    }, {
+      "name" : "average lifetime",
+      "type" : "aux",
+      "x" : 480.0,
+      "y" : 204.0
+    }, {
+      "name" : "_48",
+      "type" : "flow",
+      "x" : 315.0,
+      "y" : 313.0
+    }, {
+      "name" : "refurbishment",
+      "type" : "aux",
+      "x" : 366.0,
+      "y" : 313.0
+    }, {
+      "name" : "refurbishment rate",
+      "type" : "aux",
+      "x" : 233.0,
+      "y" : 326.0
+    }, {
+      "name" : "_48",
+      "type" : "flow",
+      "x" : 207.0,
+      "y" : 239.0
+    }, {
+      "name" : "loss of total quality of social housing apartments at privatisation",
+      "type" : "aux",
+      "x" : 207.0,
+      "y" : 275.0
+    } ],
+    "connectors" : [ {
+      "from" : "5",
+      "to" : "2"
+    }, {
+      "from" : "5",
+      "to" : "social housing families"
+    }, {
+      "from" : "perceived quality of life by social housing families",
+      "to" : "9"
+    }, {
+      "from" : "fraction leaving",
+      "to" : "_48"
+    }, {
+      "from" : "social housing families",
+      "to" : "_48"
+    }, {
+      "from" : "fraction of social housing families",
+      "to" : "perceived quality of life by social housing families"
+    }, {
+      "from" : "quality of social housing apartments",
+      "to" : "perceived quality of life by social housing families"
+    }, {
+      "from" : "importance foshf",
+      "to" : "perceived quality of life by social housing families"
+    }, {
+      "from" : "importance qosha",
+      "to" : "perceived quality of life by social housing families"
+    }, {
+      "from" : "social housing families",
+      "to" : "quality of social housing apartments"
+    }, {
+      "from" : "total quality of all social housing apartments",
+      "to" : "quality of social housing apartments"
+    }, {
+      "from" : "26",
+      "to" : "23"
+    }, {
+      "from" : "26",
+      "to" : "total quality of all social housing apartments"
+    }, {
+      "from" : "average lifetime",
+      "to" : "_48"
+    }, {
+      "from" : "total quality of all social housing apartments",
+      "to" : "loss of quality of social housing apartments through ageing"
+    }, {
+      "from" : "35",
+      "to" : "total quality of all social housing apartments"
+    }, {
+      "from" : "35",
+      "to" : "32"
+    }, {
+      "from" : "refurbishment rate",
+      "to" : "_48"
+    }, {
+      "from" : "initial average quality of the social housing apartments",
+      "to" : "total quality of all social housing apartments"
+    }, {
+      "from" : "social housing families",
+      "to" : "total quality of all social housing apartments"
+    }, {
+      "from" : "quality of social housing apartments",
+      "to" : "_48"
+    }, {
+      "from" : "social housing families",
+      "to" : "refurbishment"
+    }, {
+      "from" : "46",
+      "to" : "43"
+    }, {
+      "from" : "46",
+      "to" : "total quality of all social housing apartments"
+    }, {
+      "from" : "outflow of social housing families",
+      "to" : "loss of total quality of social housing apartments at privatisation"
+    }, {
+      "from" : "quality of social housing apartments",
+      "to" : "_48"
+    }, {
+      "from" : "social housing families",
+      "to" : "fraction of social housing families"
+    } ],
+    "flowRoutes" : [ {
+      "flowName" : "_48",
+      "points" : [ [ 815.0, 245.0 ] ]
+    }, {
+      "flowName" : "_48",
+      "points" : [ [ 476.0, 237.0 ] ]
+    }, {
+      "flowName" : "_48",
+      "points" : [ [ 315.0, 313.0 ] ]
+    }, {
+      "flowName" : "_48",
+      "points" : [ [ 207.0, 239.0 ] ]
+    } ]
+  } ],
+  "defaultSimulation" : {
+    "timeStep" : "Year",
+    "duration" : 50.0,
+    "durationUnit" : "Year",
+    "dt" : 0.0625
+  },
+  "metadata" : {
+    "author" : "Dr. Erik Pruyt",
+    "source" : "Pruyt, E., 2013. Small System Dynamics Models for Big Issues: Triple Jump towards Real-World Complexity. TU Delft Library. ISBN 978-94-6186-195-5",
+    "license" : "CC-BY-NC-SA-4.0",
+    "url" : "https://simulation.tudelft.nl/SD/"
+  }
+}

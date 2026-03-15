@@ -1,0 +1,123 @@
+{
+  "name" : "BPR0",
+  "variables" : [ {
+    "name" : "TIME_STEP",
+    "equation" : "1",
+    "unit" : "Month"
+  }, {
+    "name" : "INITIAL_TIME",
+    "equation" : "0",
+    "unit" : "Month"
+  }, {
+    "name" : "FINAL_TIME",
+    "equation" : "100",
+    "unit" : "Month"
+  } ],
+  "causalLinks" : [ {
+    "from" : "Set Program Switch",
+    "to" : "Test",
+    "polarity" : "UNKNOWN"
+  }, {
+    "from" : "dedicated facilities",
+    "to" : "Set Program Switch",
+    "polarity" : "UNKNOWN"
+  }, {
+    "from" : "Process Order",
+    "to" : "dedicated facilities",
+    "polarity" : "UNKNOWN"
+  }, {
+    "from" : "Take Order",
+    "to" : "Process Order",
+    "polarity" : "UNKNOWN"
+  }, {
+    "from" : "dedicated facilities",
+    "to" : "Dispatch Service Technician",
+    "polarity" : "UNKNOWN"
+  }, {
+    "from" : "Dispatch Service Technician",
+    "to" : "Activate Service",
+    "polarity" : "UNKNOWN"
+  }, {
+    "from" : "Test",
+    "to" : "Dispatch Service Technician",
+    "polarity" : "UNKNOWN"
+  }, {
+    "from" : "Test",
+    "to" : "Activate Service",
+    "polarity" : "UNKNOWN"
+  } ],
+  "views" : [ {
+    "name" : "1",
+    "elements" : [ {
+      "name" : "Activate Service",
+      "type" : "aux",
+      "x" : 842.0,
+      "y" : 417.0
+    }, {
+      "name" : "Test",
+      "type" : "aux",
+      "x" : 788.0,
+      "y" : 311.0
+    }, {
+      "name" : "Set Program Switch",
+      "type" : "aux",
+      "x" : 659.0,
+      "y" : 235.0
+    }, {
+      "name" : "dedicated facilities",
+      "type" : "aux",
+      "x" : 395.0,
+      "y" : 207.0
+    }, {
+      "name" : "Process Order",
+      "type" : "aux",
+      "x" : 282.0,
+      "y" : 151.0
+    }, {
+      "name" : "Take Order",
+      "type" : "aux",
+      "x" : 199.0,
+      "y" : 98.0
+    }, {
+      "name" : "Dispatch Service Technician",
+      "type" : "aux",
+      "x" : 508.0,
+      "y" : 342.0
+    } ],
+    "connectors" : [ {
+      "from" : "Set Program Switch",
+      "to" : "Test"
+    }, {
+      "from" : "dedicated facilities",
+      "to" : "Set Program Switch"
+    }, {
+      "from" : "Process Order",
+      "to" : "dedicated facilities"
+    }, {
+      "from" : "Take Order",
+      "to" : "Process Order"
+    }, {
+      "from" : "dedicated facilities",
+      "to" : "Dispatch Service Technician"
+    }, {
+      "from" : "Dispatch Service Technician",
+      "to" : "Activate Service"
+    }, {
+      "from" : "Test",
+      "to" : "Dispatch Service Technician"
+    }, {
+      "from" : "Test",
+      "to" : "Activate Service"
+    } ]
+  } ],
+  "defaultSimulation" : {
+    "timeStep" : "Month",
+    "duration" : 100.0,
+    "durationUnit" : "Month"
+  },
+  "metadata" : {
+    "author" : "Ventana Systems",
+    "source" : "Vensim Sample Models",
+    "license" : "MIT"
+  }
+}

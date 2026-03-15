@@ -111,7 +111,7 @@ public class DemoClassGenerator {
         if (!definition.stocks().isEmpty()) {
             sb.append("import systems.courant.sd.model.def.StockDef;\n");
         }
-        boolean hasSubscripts = hasAnySubscripts(definition);
+        boolean needsList = needsListImport(definition);
         if (!definition.modules().isEmpty()) {
             sb.append("import systems.courant.sd.model.def.ModelDefinition;\n");
             sb.append("import systems.courant.sd.model.def.ModuleInstanceDef;\n");
@@ -119,7 +119,7 @@ public class DemoClassGenerator {
             sb.append("\n");
             sb.append("import java.util.List;\n");
             sb.append("import java.util.Map;\n");
-        } else if (hasSubscripts) {
+        } else if (needsList) {
             sb.append("\n");
             sb.append("import java.util.List;\n");
         }
@@ -513,8 +513,11 @@ public class DemoClassGenerator {
         }
     }
 
-    private static boolean hasAnySubscripts(ModelDefinition definition) {
-        return definition.stocks().stream().anyMatch(s -> !s.subscripts().isEmpty())
+    private static boolean needsListImport(ModelDefinition definition) {
+        // List is needed for subscripts or for the 7-arg StockDef constructor
+        // (used when initialExpression is present)
+        return definition.stocks().stream().anyMatch(
+                        s -> !s.subscripts().isEmpty() || s.initialExpression() != null)
                 || definition.variables().stream().anyMatch(v -> !v.subscripts().isEmpty())
                 || definition.flows().stream().anyMatch(f -> !f.subscripts().isEmpty());
     }

@@ -80,22 +80,28 @@ public class BatchImportCli {
             log.info("[{}/{}] Processing: {} ({})",
                     i + 1, entries.size(), entry.className(), entry.url());
 
-            Path tempFile = null;
-            // tempDir tracks the unique temporary directory created by downloadToTemp
-            // so the finally block deletes the correct directory even if downloadToTemp changes
+            Path sourceFile = null;
+            boolean isTemp = false;
             Path tempDir = null;
             try {
-                // Download
-                tempFile = downloadToTemp(entry.url());
-                tempDir = tempFile.getParent();
-                log.info("  Downloaded to {}", tempFile);
+                // Resolve source: local path or remote download
+                sourceFile = resolveSource(entry.url());
+                if (!sourceFile.equals(Path.of(entry.url()))) {
+                    isTemp = true;
+                    tempDir = sourceFile.getParent();
+                    log.info("  Downloaded to {}", sourceFile);
+                } else {
+                    log.info("  Using local file: {}", sourceFile);
+                }
 
                 // Check if output already exists
                 Path outputDir = Path.of(parsed.outputDir);
-                String extension = parsed.jsonOnly ? ".json" : ".java";
                 Path expectedOutput;
                 if (parsed.jsonOnly) {
-                    expectedOutput = outputDir.resolve(entry.className() + extension);
+                    PipelineConfig checkConfig = new PipelineConfig(
+                            sourceFile, entry.metadata(), entry.category(),
+                            entry.className(), entry.id(), outputDir, false, false, false);
+                    expectedOutput = ImportPipeline.resolveJsonOutputPath(checkConfig);
                 } else {
                     String packageName = ImportPipeline.resolvePackageName(entry.category());
                     expectedOutput = ImportPipeline.resolveOutputPath(
@@ -109,10 +115,11 @@ public class BatchImportCli {
 
                 // Build pipeline config
                 PipelineConfig config = new PipelineConfig(
-                        tempFile,
+                        sourceFile,
                         entry.metadata(),
                         entry.category(),
                         entry.className(),
+                        entry.id(),
                         outputDir,
                         parsed.dryRun,
                         parsed.overwrite,
@@ -141,14 +148,14 @@ public class BatchImportCli {
                 failures.add(msg);
                 log.error("  FAILED: {}", msg);
             } finally {
-                if (tempFile != null) {
+                if (isTemp && sourceFile != null) {
                     try {
-                        Files.deleteIfExists(tempFile);
+                        Files.deleteIfExists(sourceFile);
                         if (tempDir != null) {
                             Files.deleteIfExists(tempDir);
                         }
                     } catch (IOException e) {
-                        log.warn("  Could not delete temp file: {}", tempFile);
+                        log.warn("  Could not delete temp file: {}", sourceFile);
                     }
                 }
             }
@@ -182,6 +189,7 @@ public class BatchImportCli {
         for (JsonNode node : root) {
             String url = requiredText(node, "url");
             String className = requiredText(node, "className");
+            String id = textOrNull(node, "id");
             String category = textOrNull(node, "category");
             String comment = textOrNull(node, "comment");
 
@@ -204,9 +212,25 @@ public class BatchImportCli {
                     .url(textOrNull(metaNode, "url"))
                     .build();
 
-            entries.add(new ManifestEntry(url, className, category, comment, metadata));
+            entries.add(new ManifestEntry(url, className, id, category, comment, metadata));
         }
         return entries;
+    }
+
+    /**
+     * Resolves a source string to a local file path. If the source is a local file path,
+     * returns it directly. If it is an HTTP/HTTPS URL, downloads to a temporary file.
+     */
+    static Path resolveSource(String source) throws IOException {
+        if (source.startsWith("http://") || source.startsWith("https://")) {
+            return downloadToTemp(source);
+        }
+        // Treat as local file path
+        Path local = Path.of(source);
+        if (!Files.isRegularFile(local)) {
+            throw new IOException("Local file not found: " + local.toAbsolutePath());
+        }
+        return local;
     }
 
     static Path downloadToTemp(String url) throws IOException {

@@ -1,0 +1,551 @@
+{
+  "name" : "1803_HospitalManagement",
+  "stocks" : [ {
+    "name" : "Operative Patients in the Hospital",
+    "comment" : "Operative Patients in the Hospital",
+    "initialValue" : 0.0,
+    "initialExpression" : "Capacity_of_the_Hospital",
+    "unit" : "patient"
+  }, {
+    "name" : "PostOperative Patients in Aftercare",
+    "comment" : "\"Post-Operative Patients in Aftercare\"",
+    "initialValue" : 0.0,
+    "initialExpression" : "Capacity_of_the_PostOperative_Aftercare",
+    "unit" : "patient"
+  }, {
+    "name" : "PostOperative Patients Without Aftercare",
+    "comment" : "\"Post-Operative Patients Without Aftercare\"",
+    "initialValue" : 300.0,
+    "unit" : "patient"
+  }, {
+    "name" : "PreOperative Patients on the Waiting List for Hospitalisation",
+    "comment" : "\"Pre-Operative Patients on the Waiting List for Hospitalisation\"",
+    "initialValue" : 2000.0,
+    "unit" : "patient"
+  } ],
+  "flows" : [ {
+    "name" : "Operative Patients in the Hospital inflow 1",
+    "equation" : "Hospitalisation_of_PreOperative_Patients",
+    "timeUnit" : "Week",
+    "sink" : "Operative Patients in the Hospital"
+  }, {
+    "name" : "Operative Patients in the Hospital outflow 2",
+    "equation" : "PostOperative_Patients_Directed_Towards_Aftercare",
+    "timeUnit" : "Week",
+    "source" : "Operative Patients in the Hospital"
+  }, {
+    "name" : "Operative Patients in the Hospital outflow 3",
+    "equation" : "PostOperative_Patients_Directed_Home_Without_Aftercare",
+    "timeUnit" : "Week",
+    "source" : "Operative Patients in the Hospital"
+  }, {
+    "name" : "PostOperative Patients in Aftercare inflow 1",
+    "equation" : "PostOperative_Patients_Directed_Towards_Aftercare",
+    "timeUnit" : "Week",
+    "sink" : "PostOperative Patients in Aftercare"
+  }, {
+    "name" : "PostOperative Patients in Aftercare inflow 2",
+    "equation" : "Recovered_PostOperative_Patients_With_Aftercare",
+    "timeUnit" : "Week",
+    "sink" : "PostOperative Patients in Aftercare"
+  }, {
+    "name" : "PostOperative Patients in Aftercare outflow 3",
+    "equation" : "NonRecovered_Patients_With_Aftercare_Referred_Back_to_the_Hospital",
+    "timeUnit" : "Week",
+    "source" : "PostOperative Patients in Aftercare"
+  }, {
+    "name" : "PostOperative Patients Without Aftercare inflow 1",
+    "equation" : "PostOperative_Patients_Directed_Home_Without_Aftercare",
+    "timeUnit" : "Week",
+    "sink" : "PostOperative Patients Without Aftercare"
+  }, {
+    "name" : "PostOperative Patients Without Aftercare outflow 2",
+    "equation" : "Recovered_PostOperative_Patients_Without_Aftercare",
+    "timeUnit" : "Week",
+    "source" : "PostOperative Patients Without Aftercare"
+  }, {
+    "name" : "PostOperative Patients Without Aftercare outflow 3",
+    "equation" : "NonRecovered_Patients_Without_Aftercare_Referred_Back_to_the_Hospital",
+    "timeUnit" : "Week",
+    "source" : "PostOperative Patients Without Aftercare"
+  }, {
+    "name" : "PreOperative Patients on the Waiting List for Hospitalisation inflow 1",
+    "equation" : "Newly_Referred_PreOperative_Patients",
+    "timeUnit" : "Week",
+    "sink" : "PreOperative Patients on the Waiting List for Hospitalisation"
+  }, {
+    "name" : "PreOperative Patients on the Waiting List for Hospitalisation inflow 2",
+    "equation" : "NonRecovered_Patients_Without_Aftercare_Referred_Back_to_the_Hospital",
+    "timeUnit" : "Week",
+    "sink" : "PreOperative Patients on the Waiting List for Hospitalisation"
+  }, {
+    "name" : "PreOperative Patients on the Waiting List for Hospitalisation inflow 3",
+    "equation" : "NonRecovered_Patients_With_Aftercare_Referred_Back_to_the_Hospital",
+    "timeUnit" : "Week",
+    "sink" : "PreOperative Patients on the Waiting List for Hospitalisation"
+  }, {
+    "name" : "PreOperative Patients on the Waiting List for Hospitalisation outflow 4",
+    "equation" : "Hospitalisation_of_PreOperative_Patients",
+    "timeUnit" : "Week",
+    "source" : "PreOperative Patients on the Waiting List for Hospitalisation"
+  } ],
+  "variables" : [ {
+    "name" : "TIME_STEP",
+    "equation" : "0.03125",
+    "unit" : "Week"
+  }, {
+    "name" : "INITIAL_TIME",
+    "equation" : "0",
+    "unit" : "Week"
+  }, {
+    "name" : "FINAL_TIME",
+    "equation" : "156",
+    "unit" : "Week"
+  }, {
+    "name" : "PostOperative Patients Directed Towards Aftercare",
+    "comment" : "\"Post-Operative Patients Directed Towards Aftercare\"",
+    "equation" : "MAX( (Capacity_of_the_PostOperative_Aftercare - PostOperative_Patients_in_Aftercare )/Average_Administrative_Processing_Time_before_Hospitalisation_of_Transfer_to_Aftercare + NonRecovered_Patients_With_Aftercare_Referred_Back_to_the_Hospital + Recovered_PostOperative_Patients_With_Aftercare,Number_of_Discharged_PostOperative_Patients )",
+    "unit" : "patient/Week"
+  }, {
+    "name" : "Average Administrative Processing Time before Hospitalisation",
+    "comment" : "Average Administrative Processing Time before Hospitalisation",
+    "equation" : "1",
+    "unit" : "Week"
+  }, {
+    "name" : "Average Administrative Processing Time before Hospitalisation of Transfer to Aftercare",
+    "comment" : "Average Administrative Processing Time before Hospitalisation of Transfer to Aftercare",
+    "equation" : "1",
+    "unit" : "Week"
+  }, {
+    "name" : "Hospitalisation of PreOperative Patients",
+    "comment" : "\"Hospitalisation of Pre-Operative Patients\"",
+    "equation" : "MAX((Capacity_of_the_Hospital - Operative_Patients_in_the_Hospital)/Average_Administrative_Processing_Time_before_Hospitalisation + PostOperative_Patients_Directed_Towards_Aftercare + PostOperative_Patients_Directed_Home_Without_Aftercare ,PreOperative_Patients_on_the_Waiting_List_for_Hospitalisation/Average_Administrative_Processing_Time_before_Hospitalisation )",
+    "unit" : "patient/Week"
+  }, {
+    "name" : "Number of Discharged PostOperative Patients",
+    "comment" : "\"Number of Discharged Post-Operative Patients\"",
+    "equation" : "Operative_Patients_in_the_Hospital/Average_Residence_Time_in_the_Hospital",
+    "unit" : "patient/Week"
+  }, {
+    "name" : "Capacity of the PostOperative Aftercare",
+    "comment" : "\"Capacity of the Post-Operative Aftercare\"",
+    "equation" : "1000 + STEP(Capacity_Extension_of_the_Aftercare,26)",
+    "unit" : "patient"
+  }, {
+    "name" : "Capacity of the Hospital",
+    "comment" : "Capacity of the Hospital",
+    "equation" : "700+STEP(Capacity_Extension_of_the_Hospital,52)",
+    "unit" : "patient"
+  }, {
+    "name" : "Capacity Extension of the Aftercare",
+    "comment" : "500",
+    "equation" : "0",
+    "unit" : "patient"
+  }, {
+    "name" : "Capacity Extension of the Hospital",
+    "comment" : "250",
+    "equation" : "0",
+    "unit" : "patient"
+  }, {
+    "name" : "Fraction of Recovered Patients With Aftercare",
+    "comment" : "Fraction of Recovered Patients With Aftercare",
+    "equation" : "0.98",
+    "unit" : "Dmnl"
+  }, {
+    "name" : "Fraction of Recovered Patients Without Aftercare",
+    "comment" : "Fraction of Recovered Patients Without Aftercare",
+    "equation" : "0.8",
+    "unit" : "Dmnl"
+  }, {
+    "name" : "Average Recovery Time Without Aftercare",
+    "comment" : "Average Recovery Time Without Aftercare",
+    "equation" : "7",
+    "unit" : "Week"
+  }, {
+    "name" : "Average Residence Time in Aftercare",
+    "comment" : "Average Residence Time in Aftercare",
+    "equation" : "3",
+    "unit" : "Week"
+  }, {
+    "name" : "Average Residence Time in the Hospital",
+    "comment" : "Average Residence Time in the Hospital",
+    "equation" : "1",
+    "unit" : "Week"
+  }, {
+    "name" : "Recovered PostOperative Patients With Aftercare",
+    "comment" : "\"Recovered Post-Operative Patients With Aftercare\"",
+    "equation" : "Fraction_of_Recovered_Patients_With_Aftercare * PostOperative_Patients_in_Aftercare / Average_Residence_Time_in_Aftercare",
+    "unit" : "patient/Week"
+  }, {
+    "name" : "Recovered PostOperative Patients Without Aftercare",
+    "comment" : "\"Recovered Post-Operative Patients Without Aftercare\"",
+    "equation" : "Fraction_of_Recovered_Patients_Without_Aftercare * PostOperative_Patients_Without_Aftercare /Average_Recovery_Time_Without_Aftercare",
+    "unit" : "patient/Week"
+  }, {
+    "name" : "Newly Referred PreOperative Patients",
+    "comment" : "\"Newly Referred Pre-Operative Patients\"",
+    "equation" : "800",
+    "unit" : "patient/Week"
+  }, {
+    "name" : "PostOperative Patients Directed Home Without Aftercare",
+    "comment" : "\"Post-Operative Patients Directed Home Without Aftercare\"",
+    "equation" : "Number_of_Discharged_PostOperative_Patients - PostOperative_Patients_Directed_Towards_Aftercare",
+    "unit" : "patient/Week"
+  }, {
+    "name" : "NonRecovered Patients Without Aftercare Referred Back to the Hospital",
+    "comment" : "\"Non-Recovered Patients Without Aftercare Referred Back to the Hospital\"",
+    "equation" : "(1-Fraction_of_Recovered_Patients_Without_Aftercare) * PostOperative_Patients_Without_Aftercare / Average_Recovery_Time_Without_Aftercare",
+    "unit" : "patient/Week"
+  }, {
+    "name" : "NonRecovered Patients With Aftercare Referred Back to the Hospital",
+    "comment" : "\"Non-Recovered Patients With Aftercare Referred Back to the Hospital\"",
+    "equation" : "(1 - Fraction_of_Recovered_Patients_With_Aftercare) * PostOperative_Patients_in_Aftercare / Average_Residence_Time_in_Aftercare",
+    "unit" : "patient/Week"
+  } ],
+  "views" : [ {
+    "name" : "View 1",
+    "elements" : [ {
+      "name" : "Operative Patients in the Hospital",
+      "type" : "stock",
+      "x" : 486.0,
+      "y" : 382.0
+    }, {
+      "name" : "PostOperative Patients in Aftercare",
+      "type" : "stock",
+      "x" : 760.0,
+      "y" : 383.0
+    }, {
+      "name" : "PostOperative Patients Without Aftercare",
+      "type" : "stock",
+      "x" : 206.0,
+      "y" : 380.0
+    }, {
+      "name" : "_48",
+      "type" : "flow",
+      "x" : 767.0,
+      "y" : 445.0
+    }, {
+      "name" : "Recovered PostOperative Patients With Aftercare",
+      "type" : "aux",
+      "x" : 851.0,
+      "y" : 445.0
+    }, {
+      "name" : "_236",
+      "type" : "flow",
+      "x" : 623.0,
+      "y" : 399.0
+    }, {
+      "name" : "PostOperative Patients Directed Towards Aftercare",
+      "type" : "aux",
+      "x" : 623.0,
+      "y" : 435.0
+    }, {
+      "name" : "_140",
+      "type" : "flow",
+      "x" : 335.0,
+      "y" : 397.0
+    }, {
+      "name" : "PostOperative Patients Directed Home Without Aftercare",
+      "type" : "aux",
+      "x" : 335.0,
+      "y" : 433.0
+    }, {
+      "name" : "_48",
+      "type" : "flow",
+      "x" : 191.0,
+      "y" : 455.0
+    }, {
+      "name" : "Recovered PostOperative Patients Without Aftercare",
+      "type" : "aux",
+      "x" : 97.0,
+      "y" : 455.0
+    }, {
+      "name" : "PreOperative Patients on the Waiting List for Hospitalisation",
+      "type" : "stock",
+      "x" : 488.0,
+      "y" : 170.0
+    }, {
+      "name" : "_380",
+      "type" : "flow",
+      "x" : 474.0,
+      "y" : 331.0
+    }, {
+      "name" : "Hospitalisation of PreOperative Patients",
+      "type" : "aux",
+      "x" : 393.0,
+      "y" : 331.0
+    }, {
+      "name" : "_316",
+      "type" : "flow",
+      "x" : 192.0,
+      "y" : 209.0
+    }, {
+      "name" : "NonRecovered Patients Without Aftercare Referred Back to the Hospital",
+      "type" : "aux",
+      "x" : 287.0,
+      "y" : 209.0
+    }, {
+      "name" : "_588",
+      "type" : "flow",
+      "x" : 764.0,
+      "y" : 211.0
+    }, {
+      "name" : "NonRecovered Patients With Aftercare Referred Back to the Hospital",
+      "type" : "aux",
+      "x" : 657.0,
+      "y" : 211.0
+    }, {
+      "name" : "_48",
+      "type" : "flow",
+      "x" : 489.0,
+      "y" : 98.0
+    }, {
+      "name" : "Newly Referred PreOperative Patients",
+      "type" : "aux",
+      "x" : 578.0,
+      "y" : 98.0
+    }, {
+      "name" : "Capacity of the PostOperative Aftercare",
+      "type" : "aux",
+      "x" : 593.0,
+      "y" : 585.0
+    }, {
+      "name" : "Average Residence Time in the Hospital",
+      "type" : "aux",
+      "x" : 493.0,
+      "y" : 522.0
+    }, {
+      "name" : "Number of Discharged PostOperative Patients",
+      "type" : "aux",
+      "x" : 489.0,
+      "y" : 452.0
+    }, {
+      "name" : "Average Residence Time in Aftercare",
+      "type" : "aux",
+      "x" : 889.0,
+      "y" : 246.0
+    }, {
+      "name" : "Capacity of the Hospital",
+      "type" : "aux",
+      "x" : 576.0,
+      "y" : 323.0
+    }, {
+      "name" : "Fraction of Recovered Patients With Aftercare",
+      "type" : "aux",
+      "x" : 841.0,
+      "y" : 319.0
+    }, {
+      "name" : "Fraction of Recovered Patients Without Aftercare",
+      "type" : "aux",
+      "x" : 120.0,
+      "y" : 300.0
+    }, {
+      "name" : "Average Recovery Time Without Aftercare",
+      "type" : "aux",
+      "x" : 89.0,
+      "y" : 200.0
+    }, {
+      "name" : "Capacity Extension of the Hospital",
+      "type" : "aux",
+      "x" : 565.0,
+      "y" : 254.0
+    }, {
+      "name" : "Capacity Extension of the Aftercare",
+      "type" : "aux",
+      "x" : 788.0,
+      "y" : 604.0
+    }, {
+      "name" : "Average Administrative Processing Time before Hospitalisation",
+      "type" : "aux",
+      "x" : 373.0,
+      "y" : 268.0
+    }, {
+      "name" : "Average Administrative Processing Time before Hospitalisation of Transfer to Aftercare",
+      "type" : "aux",
+      "x" : 735.0,
+      "y" : 537.0
+    } ],
+    "connectors" : [ {
+      "from" : "7",
+      "to" : "4"
+    }, {
+      "from" : "7",
+      "to" : "PostOperative Patients in Aftercare"
+    }, {
+      "from" : "11",
+      "to" : "PostOperative Patients in Aftercare"
+    }, {
+      "from" : "11",
+      "to" : "Operative Patients in the Hospital"
+    }, {
+      "from" : "15",
+      "to" : "PostOperative Patients Without Aftercare"
+    }, {
+      "from" : "15",
+      "to" : "Operative Patients in the Hospital"
+    }, {
+      "from" : "20",
+      "to" : "17"
+    }, {
+      "from" : "20",
+      "to" : "PostOperative Patients Without Aftercare"
+    }, {
+      "from" : "25",
+      "to" : "Operative Patients in the Hospital"
+    }, {
+      "from" : "25",
+      "to" : "PreOperative Patients on the Waiting List for Hospitalisation"
+    }, {
+      "from" : "28",
+      "to" : "PostOperative Patients Without Aftercare"
+    }, {
+      "from" : "_316",
+      "to" : "PreOperative Patients on the Waiting List for Hospitalisation"
+    }, {
+      "from" : "32",
+      "to" : "PostOperative Patients in Aftercare"
+    }, {
+      "from" : "_588",
+      "to" : "PreOperative Patients on the Waiting List for Hospitalisation"
+    }, {
+      "from" : "38",
+      "to" : "PreOperative Patients on the Waiting List for Hospitalisation"
+    }, {
+      "from" : "38",
+      "to" : "35"
+    }, {
+      "from" : "Operative Patients in the Hospital",
+      "to" : "Number of Discharged PostOperative Patients"
+    }, {
+      "from" : "Average Residence Time in the Hospital",
+      "to" : "Number of Discharged PostOperative Patients"
+    }, {
+      "from" : "PostOperative Patients in Aftercare",
+      "to" : "PostOperative Patients Directed Towards Aftercare"
+    }, {
+      "from" : "Capacity of the PostOperative Aftercare",
+      "to" : "PostOperative Patients Directed Towards Aftercare"
+    }, {
+      "from" : "Number of Discharged PostOperative Patients",
+      "to" : "PostOperative Patients Directed Home Without Aftercare"
+    }, {
+      "from" : "PostOperative Patients Without Aftercare",
+      "to" : "Recovered PostOperative Patients Without Aftercare"
+    }, {
+      "from" : "PostOperative Patients in Aftercare",
+      "to" : "Recovered PostOperative Patients With Aftercare"
+    }, {
+      "from" : "Average Residence Time in Aftercare",
+      "to" : "_588"
+    }, {
+      "from" : "PostOperative Patients in Aftercare",
+      "to" : "_588"
+    }, {
+      "from" : "Average Residence Time in Aftercare",
+      "to" : "Recovered PostOperative Patients With Aftercare"
+    }, {
+      "from" : "Capacity of the Hospital",
+      "to" : "_380"
+    }, {
+      "from" : "Operative Patients in the Hospital",
+      "to" : "Hospitalisation of PreOperative Patients"
+    }, {
+      "from" : "Fraction of Recovered Patients With Aftercare",
+      "to" : "Recovered PostOperative Patients With Aftercare"
+    }, {
+      "from" : "Fraction of Recovered Patients With Aftercare",
+      "to" : "_588"
+    }, {
+      "from" : "Average Recovery Time Without Aftercare",
+      "to" : "_316"
+    }, {
+      "from" : "Average Recovery Time Without Aftercare",
+      "to" : "Recovered PostOperative Patients Without Aftercare"
+    }, {
+      "from" : "Fraction of Recovered Patients Without Aftercare",
+      "to" : "_316"
+    }, {
+      "from" : "Fraction of Recovered Patients Without Aftercare",
+      "to" : "Recovered PostOperative Patients Without Aftercare"
+    }, {
+      "from" : "PostOperative Patients Without Aftercare",
+      "to" : "NonRecovered Patients Without Aftercare Referred Back to the Hospital"
+    }, {
+      "from" : "PreOperative Patients on the Waiting List for Hospitalisation",
+      "to" : "_380"
+    }, {
+      "from" : "Number of Discharged PostOperative Patients",
+      "to" : "PostOperative Patients Directed Towards Aftercare"
+    }, {
+      "from" : "PostOperative Patients Directed Towards Aftercare",
+      "to" : "PostOperative Patients Directed Home Without Aftercare"
+    }, {
+      "from" : "NonRecovered Patients With Aftercare Referred Back to the Hospital",
+      "to" : "_236"
+    }, {
+      "from" : "Recovered PostOperative Patients With Aftercare",
+      "to" : "PostOperative Patients Directed Towards Aftercare"
+    }, {
+      "from" : "_140",
+      "to" : "Hospitalisation of PreOperative Patients"
+    }, {
+      "from" : "_236",
+      "to" : "_380"
+    }, {
+      "from" : "Capacity Extension of the Hospital",
+      "to" : "Capacity of the Hospital"
+    }, {
+      "from" : "Capacity Extension of the Aftercare",
+      "to" : "Capacity of the PostOperative Aftercare"
+    }, {
+      "from" : "Average Administrative Processing Time before Hospitalisation",
+      "to" : "Hospitalisation of PreOperative Patients"
+    }, {
+      "from" : "Average Administrative Processing Time before Hospitalisation of Transfer to Aftercare",
+      "to" : "PostOperative Patients Directed Towards Aftercare"
+    }, {
+      "from" : "Capacity of the Hospital",
+      "to" : "Operative Patients in the Hospital"
+    }, {
+      "from" : "Capacity of the PostOperative Aftercare",
+      "to" : "PostOperative Patients in Aftercare"
+    } ],
+    "flowRoutes" : [ {
+      "flowName" : "_48",
+      "points" : [ [ 767.0, 445.0 ] ]
+    }, {
+      "flowName" : "_236",
+      "points" : [ [ 623.0, 399.0 ] ]
+    }, {
+      "flowName" : "_140",
+      "points" : [ [ 335.0, 397.0 ] ]
+    }, {
+      "flowName" : "_48",
+      "points" : [ [ 191.0, 455.0 ] ]
+    }, {
+      "flowName" : "_380",
+      "points" : [ [ 474.0, 331.0 ] ]
+    }, {
+      "flowName" : "_316",
+      "points" : [ [ 192.0, 209.0 ] ]
+    }, {
+      "flowName" : "_588",
+      "points" : [ [ 764.0, 211.0 ] ]
+    }, {
+      "flowName" : "_48",
+      "points" : [ [ 489.0, 98.0 ] ]
+    } ]
+  } ],
+  "defaultSimulation" : {
+    "timeStep" : "Week",
+    "duration" : 156.0,
+    "durationUnit" : "Week",
+    "dt" : 0.03125
+  },
+  "metadata" : {
+    "author" : "Dr. Erik Pruyt",
+    "source" : "Pruyt, E., 2013. Small System Dynamics Models for Big Issues: Triple Jump towards Real-World Complexity. TU Delft Library. ISBN 978-94-6186-195-5",
+    "license" : "CC-BY-NC-SA-4.0",
+    "url" : "https://simulation.tudelft.nl/SD/"
+  }
+}

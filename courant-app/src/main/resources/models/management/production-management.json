@@ -1,0 +1,620 @@
+{
+  "name" : "1413_ProductionManagement",
+  "stocks" : [ {
+    "name" : "cumulative unfulfilled company orders",
+    "comment" : "cumulative unfulfilled company orders",
+    "initialValue" : 0.0,
+    "unit" : "component"
+  }, {
+    "name" : "cumulative unfulfilled final customer orders",
+    "comment" : "cumulative unfulfilled final customer orders",
+    "initialValue" : 0.0,
+    "unit" : "item"
+  }, {
+    "name" : "inventory component",
+    "comment" : "inventory component",
+    "initialValue" : 0.0,
+    "initialExpression" : "desired_component_inventory",
+    "unit" : "component"
+  }, {
+    "name" : "inventory finished products",
+    "comment" : "inventory finished products",
+    "initialValue" : 0.0,
+    "initialExpression" : "desired_inventory_final_product",
+    "unit" : "item"
+  }, {
+    "name" : "production capacity assembly line",
+    "comment" : "production capacity assembly line",
+    "initialValue" : 0.0,
+    "initialExpression" : "internal_order_rate_final_product",
+    "unit" : "item/week"
+  }, {
+    "name" : "production capacity components line",
+    "comment" : "production capacity components line",
+    "initialValue" : 0.0,
+    "initialExpression" : "number_of_components_per_finished_product*internal_order_rate_final_product",
+    "unit" : "component/week"
+  } ],
+  "flows" : [ {
+    "name" : "cumulative unfulfilled company orders net flow",
+    "comment" : "Net flow for cumulative unfulfilled company orders",
+    "equation" : "unfulfilled_component_orders",
+    "timeUnit" : "Week",
+    "sink" : "cumulative unfulfilled company orders"
+  }, {
+    "name" : "cumulative unfulfilled final customer orders net flow",
+    "comment" : "Net flow for cumulative unfulfilled final customer orders",
+    "equation" : "unfulfilled_customer_orders",
+    "timeUnit" : "Week",
+    "sink" : "cumulative unfulfilled final customer orders"
+  }, {
+    "name" : "inventory component inflow 1",
+    "equation" : "production_component",
+    "timeUnit" : "Week",
+    "sink" : "inventory component"
+  }, {
+    "name" : "inventory component outflow 2",
+    "equation" : "deliveries_of_components",
+    "timeUnit" : "Week",
+    "source" : "inventory component"
+  }, {
+    "name" : "inventory finished products inflow 1",
+    "equation" : "assembly_finished_product",
+    "timeUnit" : "Week",
+    "sink" : "inventory finished products"
+  }, {
+    "name" : "inventory finished products outflow 2",
+    "equation" : "deliveries_of_finished_product",
+    "timeUnit" : "Week",
+    "source" : "inventory finished products"
+  }, {
+    "name" : "production capacity assembly line net flow",
+    "comment" : "Net flow for production capacity assembly line",
+    "equation" : "capacity_change_assembly_line",
+    "timeUnit" : "Week",
+    "sink" : "production capacity assembly line"
+  }, {
+    "name" : "production capacity components line net flow",
+    "comment" : "Net flow for production capacity components line",
+    "equation" : "capacity_change_component_production_capacity",
+    "timeUnit" : "Week",
+    "sink" : "production capacity components line"
+  } ],
+  "variables" : [ {
+    "name" : "TIME_STEP",
+    "equation" : "0.0625",
+    "unit" : "Week"
+  }, {
+    "name" : "INITIAL_TIME",
+    "equation" : "0",
+    "unit" : "Week"
+  }, {
+    "name" : "FINAL_TIME",
+    "equation" : "208",
+    "unit" : "Week"
+  }, {
+    "name" : "desired component inventory",
+    "comment" : "desired component inventory",
+    "equation" : "full_capacity_internal_component_order_rate*desired_component_inventory_coverage",
+    "unit" : "component"
+  }, {
+    "name" : "desired component inventory coverage",
+    "comment" : "desired component inventory coverage",
+    "equation" : "1.5",
+    "unit" : "week"
+  }, {
+    "name" : "assembly finished product",
+    "comment" : "assembly finished product",
+    "equation" : "MAX(deliveries_of_components,0)/number_of_components_per_finished_product",
+    "unit" : "item/week"
+  }, {
+    "name" : "assembly time",
+    "comment" : "assembly time",
+    "equation" : "1",
+    "unit" : "week"
+  }, {
+    "name" : "capacity change assembly line",
+    "comment" : "capacity change assembly line",
+    "equation" : "(desired_inventory_final_product-inventory_finished_products)/assembly_time/adaptation_time_assembly_line",
+    "unit" : "item/week/week"
+  }, {
+    "name" : "capacity change component production capacity",
+    "comment" : "IF THEN ELSE( desired component inventory<inventory component, IF THEN  ELSE(-(desired component inventory-inventory component\n\t\t)/component production time/adaptation time component production capacity>production  capacity components, -production capacity components/adaptation time  component production capacity , (desired component inventory\n\t\t-inventory component)/component production time/adaptation time component production  capacity), (desired component inventory-inventory component)/component  production time/\n\t\tadaptation time component production capacity)",
+    "equation" : "(desired_component_inventory-inventory_component)/component_production_time/adaptation_time_component_production_capacity",
+    "unit" : "component/week/week"
+  }, {
+    "name" : "component production time",
+    "comment" : "component production time",
+    "equation" : "1",
+    "unit" : "week"
+  }, {
+    "name" : "customer order rate",
+    "comment" : "10000+STEP(1000,5) - STEP(1000,10)",
+    "equation" : "10000+STEP(1000,5) - STEP(1000,10)",
+    "unit" : "item/week"
+  }, {
+    "name" : "deliveries of components",
+    "comment" : "deliveries of components",
+    "equation" : "MAX(MIN(full_capacity_internal_component_order_rate,inventory_component/delivery_period ),0)",
+    "unit" : "component/week"
+  }, {
+    "name" : "deliveries of finished product",
+    "comment" : "deliveries of finished product",
+    "equation" : "MIN(internal_order_rate_final_product,inventory_finished_products/delivery_period_finished_products )",
+    "unit" : "item/week"
+  }, {
+    "name" : "delivery period",
+    "comment" : "delivery period",
+    "equation" : "1",
+    "unit" : "week"
+  }, {
+    "name" : "delivery period finished products",
+    "comment" : "delivery period finished products",
+    "equation" : "1",
+    "unit" : "week"
+  }, {
+    "name" : "unfulfilled customer orders",
+    "comment" : "unfulfilled customer orders",
+    "equation" : "MAX(internal_order_rate_final_product-deliveries_of_finished_product,0)",
+    "unit" : "item/week"
+  }, {
+    "name" : "number of components per finished product",
+    "comment" : "number of components per finished product",
+    "equation" : "2",
+    "unit" : "component/item"
+  }, {
+    "name" : "desired inventory coverage finished product",
+    "comment" : "desired inventory coverage finished product",
+    "equation" : "1.5",
+    "unit" : "week"
+  }, {
+    "name" : "desired inventory final product",
+    "comment" : "desired inventory final product",
+    "equation" : "desired_inventory_coverage_finished_product*internal_order_rate_final_product",
+    "unit" : "item"
+  }, {
+    "name" : "full capacity internal component order rate",
+    "comment" : "internal order rate final product*number of components per finished product",
+    "equation" : "production_capacity_assembly_line*number_of_components_per_finished_product",
+    "unit" : "component/week"
+  }, {
+    "name" : "internal order rate final product",
+    "comment" : "SMOOTH3I(customer order rate, 26, customer order rate)",
+    "equation" : "customer_order_rate",
+    "unit" : "item/week"
+  }, {
+    "name" : "production component",
+    "comment" : "production component",
+    "equation" : "MAX(production_capacity_components_line,0)",
+    "unit" : "component/week"
+  }, {
+    "name" : "unfulfilled component orders",
+    "comment" : "unfulfilled component orders",
+    "equation" : "MAX(full_capacity_internal_component_order_rate-deliveries_of_components,0)",
+    "unit" : "component/week"
+  }, {
+    "name" : "adaptation time assembly line",
+    "comment" : "adaptation time assembly line",
+    "equation" : "12",
+    "unit" : "week"
+  }, {
+    "name" : "adaptation time component production capacity",
+    "comment" : "adaptation time component production capacity",
+    "equation" : "8",
+    "unit" : "week"
+  } ],
+  "views" : [ {
+    "name" : "View 1",
+    "elements" : [ {
+      "name" : "inventory finished products",
+      "type" : "stock",
+      "x" : 932.0,
+      "y" : 217.0
+    }, {
+      "name" : "_48",
+      "type" : "flow",
+      "x" : 823.0,
+      "y" : 214.0
+    }, {
+      "name" : "assembly finished product",
+      "type" : "aux",
+      "x" : 823.0,
+      "y" : 241.0
+    }, {
+      "name" : "_48",
+      "type" : "flow",
+      "x" : 1036.0,
+      "y" : 216.0
+    }, {
+      "name" : "deliveries of finished product",
+      "type" : "aux",
+      "x" : 1036.0,
+      "y" : 235.0
+    }, {
+      "name" : "desired inventory final product",
+      "type" : "aux",
+      "x" : 1178.0,
+      "y" : 297.0
+    }, {
+      "name" : "adaptation time assembly line",
+      "type" : "aux",
+      "x" : 1025.0,
+      "y" : 438.0
+    }, {
+      "name" : "production capacity assembly line",
+      "type" : "stock",
+      "x" : 925.0,
+      "y" : 351.0
+    }, {
+      "name" : "_636",
+      "type" : "flow",
+      "x" : 1038.0,
+      "y" : 347.0
+    }, {
+      "name" : "capacity change assembly line",
+      "type" : "aux",
+      "x" : 1038.0,
+      "y" : 366.0
+    }, {
+      "name" : "inventory component",
+      "type" : "stock",
+      "x" : 248.0,
+      "y" : 179.0
+    }, {
+      "name" : "_48",
+      "type" : "flow",
+      "x" : 148.0,
+      "y" : 176.0
+    }, {
+      "name" : "production component",
+      "type" : "aux",
+      "x" : 148.0,
+      "y" : 195.0
+    }, {
+      "name" : "_48",
+      "type" : "flow",
+      "x" : 361.0,
+      "y" : 178.0
+    }, {
+      "name" : "deliveries of components",
+      "type" : "aux",
+      "x" : 361.0,
+      "y" : 205.0
+    }, {
+      "name" : "desired component inventory",
+      "type" : "aux",
+      "x" : 408.0,
+      "y" : 282.0
+    }, {
+      "name" : "adaptation time component production capacity",
+      "type" : "aux",
+      "x" : 302.0,
+      "y" : 459.0
+    }, {
+      "name" : "production capacity components line",
+      "type" : "stock",
+      "x" : 252.0,
+      "y" : 357.0
+    }, {
+      "name" : "_668",
+      "type" : "flow",
+      "x" : 361.0,
+      "y" : 349.0
+    }, {
+      "name" : "capacity change component production capacity",
+      "type" : "aux",
+      "x" : 361.0,
+      "y" : 385.0
+    }, {
+      "name" : "delivery period",
+      "type" : "aux",
+      "x" : 383.0,
+      "y" : 125.0
+    }, {
+      "name" : "full capacity internal component order rate",
+      "type" : "aux",
+      "x" : 525.0,
+      "y" : 214.0
+    }, {
+      "name" : "internal order rate final product",
+      "type" : "aux",
+      "x" : 1224.0,
+      "y" : 225.0
+    }, {
+      "name" : "delivery period finished products",
+      "type" : "aux",
+      "x" : 999.0,
+      "y" : 155.0
+    }, {
+      "name" : "desired component inventory coverage",
+      "type" : "aux",
+      "x" : 553.0,
+      "y" : 355.0
+    }, {
+      "name" : "cumulative unfulfilled final customer orders",
+      "type" : "stock",
+      "x" : 1034.0,
+      "y" : 525.0
+    }, {
+      "name" : "_48",
+      "type" : "flow",
+      "x" : 917.0,
+      "y" : 515.0
+    }, {
+      "name" : "unfulfilled customer orders",
+      "type" : "aux",
+      "x" : 917.0,
+      "y" : 542.0
+    }, {
+      "name" : "cumulative unfulfilled company orders",
+      "type" : "stock",
+      "x" : 578.0,
+      "y" : 529.0
+    }, {
+      "name" : "_48",
+      "type" : "flow",
+      "x" : 467.0,
+      "y" : 526.0
+    }, {
+      "name" : "unfulfilled component orders",
+      "type" : "aux",
+      "x" : 467.0,
+      "y" : 553.0
+    }, {
+      "name" : "desired inventory coverage finished product",
+      "type" : "aux",
+      "x" : 1248.0,
+      "y" : 377.0
+    }, {
+      "name" : "customer order rate",
+      "type" : "aux",
+      "x" : 1224.0,
+      "y" : 153.0
+    }, {
+      "name" : "number of components per finished product",
+      "type" : "aux",
+      "x" : 834.0,
+      "y" : 301.0
+    }, {
+      "name" : "number of components per finished product",
+      "type" : "aux",
+      "x" : 143.0,
+      "y" : 458.0
+    }, {
+      "name" : "internal order rate final product",
+      "type" : "aux",
+      "x" : 103.0,
+      "y" : 399.0
+    }, {
+      "name" : "assembly time",
+      "type" : "aux",
+      "x" : 1137.0,
+      "y" : 426.0
+    }, {
+      "name" : "component production time",
+      "type" : "aux",
+      "x" : 445.0,
+      "y" : 455.0
+    }, {
+      "name" : "deliveries of components",
+      "type" : "aux",
+      "x" : 746.0,
+      "y" : 356.0
+    }, {
+      "name" : "production capacity assembly line",
+      "type" : "stock",
+      "x" : 541.0,
+      "y" : 136.0
+    }, {
+      "name" : "number of components per finished product",
+      "type" : "aux",
+      "x" : 563.0,
+      "y" : 290.0
+    }, {
+      "name" : "deliveries of components",
+      "type" : "aux",
+      "x" : 296.0,
+      "y" : 520.0
+    }, {
+      "name" : "full capacity internal component order rate",
+      "type" : "aux",
+      "x" : 294.0,
+      "y" : 562.0
+    }, {
+      "name" : "deliveries of finished product",
+      "type" : "aux",
+      "x" : 767.0,
+      "y" : 516.0
+    }, {
+      "name" : "internal order rate final product",
+      "type" : "aux",
+      "x" : 755.0,
+      "y" : 562.0
+    } ],
+    "connectors" : [ {
+      "from" : "5",
+      "to" : "inventory finished products"
+    }, {
+      "from" : "5",
+      "to" : "2"
+    }, {
+      "from" : "10",
+      "to" : "7"
+    }, {
+      "from" : "10",
+      "to" : "inventory finished products"
+    }, {
+      "from" : "16",
+      "to" : "production capacity assembly line"
+    }, {
+      "from" : "_636",
+      "to" : "18"
+    }, {
+      "from" : "adaptation time assembly line",
+      "to" : "capacity change assembly line"
+    }, {
+      "from" : "desired inventory final product",
+      "to" : "_636"
+    }, {
+      "from" : "inventory finished products",
+      "to" : "_636"
+    }, {
+      "from" : "27",
+      "to" : "inventory component"
+    }, {
+      "from" : "27",
+      "to" : "24"
+    }, {
+      "from" : "32",
+      "to" : "29"
+    }, {
+      "from" : "32",
+      "to" : "inventory component"
+    }, {
+      "from" : "38",
+      "to" : "production capacity components line"
+    }, {
+      "from" : "_668",
+      "to" : "40"
+    }, {
+      "from" : "production capacity components line",
+      "to" : "production component"
+    }, {
+      "from" : "adaptation time component production capacity",
+      "to" : "capacity change component production capacity"
+    }, {
+      "from" : "desired component inventory",
+      "to" : "_668"
+    }, {
+      "from" : "inventory component",
+      "to" : "_668"
+    }, {
+      "from" : "inventory component",
+      "to" : "_48"
+    }, {
+      "from" : "delivery period",
+      "to" : "_48"
+    }, {
+      "from" : "full capacity internal component order rate",
+      "to" : "deliveries of components"
+    }, {
+      "from" : "internal order rate final product",
+      "to" : "deliveries of finished product"
+    }, {
+      "from" : "inventory finished products",
+      "to" : "_48"
+    }, {
+      "from" : "delivery period finished products",
+      "to" : "_48"
+    }, {
+      "from" : "internal order rate final product",
+      "to" : "desired inventory final product"
+    }, {
+      "from" : "full capacity internal component order rate",
+      "to" : "desired component inventory"
+    }, {
+      "from" : "desired component inventory coverage",
+      "to" : "desired component inventory"
+    }, {
+      "from" : "64",
+      "to" : "cumulative unfulfilled final customer orders"
+    }, {
+      "from" : "64",
+      "to" : "61"
+    }, {
+      "from" : "70",
+      "to" : "cumulative unfulfilled company orders"
+    }, {
+      "from" : "70",
+      "to" : "67"
+    }, {
+      "from" : "desired inventory coverage finished product",
+      "to" : "desired inventory final product"
+    }, {
+      "from" : "desired inventory final product",
+      "to" : "inventory finished products"
+    }, {
+      "from" : "desired component inventory",
+      "to" : "inventory component"
+    }, {
+      "from" : "internal order rate final product",
+      "to" : "production capacity assembly line"
+    }, {
+      "from" : "customer order rate",
+      "to" : "internal order rate final product"
+    }, {
+      "from" : "number of components per finished product",
+      "to" : "assembly finished product"
+    }, {
+      "from" : "number of components per finished product",
+      "to" : "production capacity components line"
+    }, {
+      "from" : "internal order rate final product",
+      "to" : "production capacity components line"
+    }, {
+      "from" : "assembly time",
+      "to" : "capacity change assembly line"
+    }, {
+      "from" : "component production time",
+      "to" : "capacity change component production capacity"
+    }, {
+      "from" : "deliveries of components",
+      "to" : "assembly finished product"
+    }, {
+      "from" : "production capacity assembly line",
+      "to" : "full capacity internal component order rate"
+    }, {
+      "from" : "number of components per finished product",
+      "to" : "full capacity internal component order rate"
+    }, {
+      "from" : "deliveries of components",
+      "to" : "unfulfilled component orders"
+    }, {
+      "from" : "full capacity internal component order rate",
+      "to" : "unfulfilled component orders"
+    }, {
+      "from" : "deliveries of finished product",
+      "to" : "unfulfilled customer orders"
+    }, {
+      "from" : "internal order rate final product",
+      "to" : "unfulfilled customer orders"
+    } ],
+    "flowRoutes" : [ {
+      "flowName" : "_48",
+      "points" : [ [ 823.0, 214.0 ] ]
+    }, {
+      "flowName" : "_48",
+      "points" : [ [ 1036.0, 216.0 ] ]
+    }, {
+      "flowName" : "_636",
+      "points" : [ [ 1038.0, 347.0 ] ]
+    }, {
+      "flowName" : "_48",
+      "points" : [ [ 148.0, 176.0 ] ]
+    }, {
+      "flowName" : "_48",
+      "points" : [ [ 361.0, 178.0 ] ]
+    }, {
+      "flowName" : "_668",
+      "points" : [ [ 361.0, 349.0 ] ]
+    }, {
+      "flowName" : "_48",
+      "points" : [ [ 917.0, 515.0 ] ]
+    }, {
+      "flowName" : "_48",
+      "points" : [ [ 467.0, 526.0 ] ]
+    } ]
+  } ],
+  "defaultSimulation" : {
+    "timeStep" : "Week",
+    "duration" : 208.0,
+    "durationUnit" : "Week",
+    "dt" : 0.0625
+  },
+  "metadata" : {
+    "author" : "Dr. Erik Pruyt",
+    "source" : "Pruyt, E., 2013. Small System Dynamics Models for Big Issues: Triple Jump towards Real-World Complexity. TU Delft Library. ISBN 978-94-6186-195-5",
+    "license" : "CC-BY-NC-SA-4.0",
+    "url" : "https://simulation.tudelft.nl/SD/"
+  }
+}

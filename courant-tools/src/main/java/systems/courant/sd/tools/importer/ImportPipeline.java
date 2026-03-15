@@ -94,7 +94,7 @@ public class ImportPipeline {
                 String packageName = resolvePackageName(config.category());
                 outputFile = resolveOutputPath(config.outputDir(), packageName, config.className());
             } else {
-                outputFile = config.outputDir().resolve(config.className() + outputExtension);
+                outputFile = resolveJsonOutputPath(config);
             }
             if (Files.exists(outputFile) && !config.overwrite()) {
                 throw new IOException("Output file already exists (use --overwrite to replace): " + outputFile);
@@ -156,6 +156,19 @@ public class ImportPipeline {
             errors.add(e.getClass().getSimpleName() + ": " + e.getMessage());
         }
         return errors;
+    }
+
+    /**
+     * Resolves the output path for JSON model files. When a {@code jsonFileName} and
+     * {@code category} are set, the file is written to {@code outputDir/category/jsonFileName.json}.
+     * Otherwise falls back to {@code outputDir/className.json}.
+     */
+    static Path resolveJsonOutputPath(PipelineConfig config) {
+        String baseName = config.jsonFileName() != null ? config.jsonFileName() : config.className();
+        if (config.category() != null && !config.category().isBlank()) {
+            return config.outputDir().resolve(config.category()).resolve(baseName + ".json");
+        }
+        return config.outputDir().resolve(baseName + ".json");
     }
 
     static String resolvePackageName(String category) {

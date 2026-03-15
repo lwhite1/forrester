@@ -1,0 +1,750 @@
+{
+  "name" : "BURNOUT",
+  "stocks" : [ {
+    "name" : "Hours Worked Per Week",
+    "comment" : "HOURS WORKED PER WEEK",
+    "initialValue" : 40.0,
+    "unit" : "HOUR/WEEK"
+  }, {
+    "name" : "Perceived Accomplishments Per Week",
+    "comment" : "PERCEIVED ACCOMPLISHMENTS PER WEEK",
+    "initialValue" : 0.0,
+    "initialExpression" : "accomplishments_per_week",
+    "unit" : "TASKS/WEEK"
+  }, {
+    "name" : "Expected Accomplishments Per Week",
+    "comment" : "EXPECTED ACCOMPLISHMENTS PER WEEK",
+    "initialValue" : 40.0,
+    "unit" : "TASKS/WEEK"
+  }, {
+    "name" : "Energy Level",
+    "comment" : "ENERGY LEVEL",
+    "initialValue" : 1.0,
+    "unit" : "UMPH"
+  }, {
+    "name" : "Accomplishments to Date",
+    "comment" : "ACCOMPLISHMENTS TO DATE",
+    "initialValue" : 0.0,
+    "unit" : "TASKS"
+  }, {
+    "name" : "hours worked to date",
+    "comment" : "HOURS WORTKED TO DATE",
+    "initialValue" : 1.0E-10,
+    "unit" : "HOUR"
+  } ],
+  "flows" : [ {
+    "name" : "Hours Worked Per Week net flow",
+    "comment" : "Net flow for Hours Worked Per Week",
+    "equation" : "(indicated_hours_worked_per_week-Hours_Worked_Per_Week)/time_to_adjust_hours_per_week",
+    "timeUnit" : "Week",
+    "sink" : "Hours Worked Per Week"
+  }, {
+    "name" : "Perceived Accomplishments Per Week net flow",
+    "comment" : "Net flow for Perceived Accomplishments Per Week",
+    "equation" : "(accomplishments_per_week - Perceived_Accomplishments_Per_Week)/time_to_perceive_accomplishments_per_week",
+    "timeUnit" : "Week",
+    "sink" : "Perceived Accomplishments Per Week"
+  }, {
+    "name" : "Expected Accomplishments Per Week net flow",
+    "comment" : "Net flow for Expected Accomplishments Per Week",
+    "equation" : "(Expected_Accomplishments_Per_Week * fractional_change_in_expected_accomplishments_per_week )",
+    "timeUnit" : "Week",
+    "sink" : "Expected Accomplishments Per Week"
+  }, {
+    "name" : "Energy Level net flow",
+    "comment" : "Net flow for Energy Level",
+    "equation" : "(energy_recovery-energy_drain)",
+    "timeUnit" : "Week",
+    "sink" : "Energy Level"
+  }, {
+    "name" : "Accomplishments to Date net flow",
+    "comment" : "Net flow for Accomplishments to Date",
+    "equation" : "accomplishments_per_week",
+    "timeUnit" : "Week",
+    "sink" : "Accomplishments to Date"
+  }, {
+    "name" : "hours worked to date net flow",
+    "comment" : "Net flow for hours worked to date",
+    "equation" : "Hours_Worked_Per_Week",
+    "timeUnit" : "Week",
+    "sink" : "hours worked to date"
+  } ],
+  "variables" : [ {
+    "name" : "TIME_STEP",
+    "equation" : "0.25",
+    "unit" : "Week"
+  }, {
+    "name" : "INITIAL_TIME",
+    "equation" : "0",
+    "unit" : "Week"
+  }, {
+    "name" : "FINAL_TIME",
+    "equation" : "75",
+    "unit" : "Week"
+  }, {
+    "name" : "average accomplishments per week to date",
+    "comment" : "AVERAGE ACCOMPLISHMENTS PER WEEK TO DATE",
+    "equation" : "IF((TIME) == 0, 0, (Accomplishments_to_Date) / (TIME))",
+    "unit" : "TASKS/WEEK"
+  }, {
+    "name" : "average hours worked per week to date",
+    "comment" : "AVERAGE HOURS WORKED PER WEEK TO DATE",
+    "equation" : "IF((TIME) == 0, 0, (hours_worked_to_date) / (TIME))",
+    "unit" : "HOUR/WEEK"
+  }, {
+    "name" : "accomplishments per week",
+    "comment" : "ACCOMPLISHMENTS PER WEEEK",
+    "equation" : "accomplishments_per_hour*Hours_Worked_Per_Week",
+    "unit" : "TASKS/WEEK"
+  }, {
+    "name" : "accomplishments per hour",
+    "comment" : "ACCOMPLISHMENTS PER HOUR",
+    "equation" : "LOOKUP(accomplishments_per_hour_lookup, Energy_Level)",
+    "unit" : "TASKS/HOUR"
+  }, {
+    "name" : "hours worked per week initial",
+    "comment" : "HOURS WORKED PER WEEK INITIAL",
+    "equation" : "40",
+    "unit" : "HOUR/WEEK"
+  }, {
+    "name" : "time to adjust hours per week",
+    "comment" : "TIME TO ADJUST HOURS PER WEEK",
+    "equation" : "1",
+    "unit" : "WEEK"
+  }, {
+    "name" : "indicated hours worked per week",
+    "comment" : "INDICATED HOURS WORKED PER WEEK",
+    "equation" : "MIN(limit_on_hours_worked_per_week,Hours_Worked_Per_Week*effect_of_energy_level_on_hours_worked *effect_of_perceived_adequacy_of_hours_worked)",
+    "unit" : "HOUR/WEEK"
+  }, {
+    "name" : "limit on hours worked per week",
+    "comment" : "LIMIT ON HOURS WORKED PER WEEK",
+    "equation" : "80",
+    "unit" : "HOUR/WEEK"
+  }, {
+    "name" : "effect of energy level on hours worked",
+    "comment" : "EFFECT OF ENERGY LEVEL ON HOURS WORKED",
+    "equation" : "LOOKUP(effect_of_energy_levels_on_hours_worked_lookup, Energy_Level)",
+    "unit" : "DIMENSIONLESS"
+  }, {
+    "name" : "effect of perceived adequacy of hours worked",
+    "comment" : "EFFECT OF PERCEIVED ADEQUACY OF HOURS WORKED",
+    "equation" : "LOOKUP(effect_of_perceived_adequacy_of_hours_worked_lookup, perceived_adequacy_of_accomplishment)",
+    "unit" : "DIMENSIONLESS"
+  }, {
+    "name" : "perceived adequacy of accomplishment",
+    "comment" : "PERCEIVED ADEQUACY OF ACCOMPLISHMENT",
+    "equation" : "Perceived_Accomplishments_Per_Week/Expected_Accomplishments_Per_Week",
+    "unit" : "DIMENSIONLESS"
+  }, {
+    "name" : "time to perceive accomplishments per week",
+    "comment" : "TIME TO PERCEIVE ACCOMPLISHMENTS PER WEEK",
+    "equation" : "1",
+    "unit" : "WEEK"
+  }, {
+    "name" : "expected accomplishments per week initial",
+    "comment" : "EXPECTED ACCOMPLISHMENTS PER WEEK INITIAL",
+    "equation" : "40",
+    "unit" : "TASKS/WEEK"
+  }, {
+    "name" : "fractional change in expected accomplishments per week",
+    "comment" : "FRACTIONAL CHANGE IN EXPECTED ACCOMPLISHMENTS PER WEEK",
+    "equation" : "base_fractional_change_in_expected_accomplishments+fractional_change_in_expectations_from_perceived_adequacy",
+    "unit" : "FRACTION/WEEK"
+  }, {
+    "name" : "base fractional change in expected accomplishments",
+    "comment" : "BASE FRACTIONAL CHANGE IN EXPECTED ACCOMPLISHMENTS",
+    "equation" : "0.1",
+    "unit" : "FRACTION/WEEK"
+  }, {
+    "name" : "fractional change in expectations from perceived adequacy",
+    "comment" : "FRACTIONAL CHANGE IN EXPECTATIONS FROM PERCEIVED ADEQUACY",
+    "equation" : "LOOKUP(fractional_change_in_expectations_from_perceived_adequacy_lookup, perceived_adequacy_of_accomplishment)",
+    "unit" : "FRACTION/WEEK"
+  }, {
+    "name" : "energy level initial",
+    "comment" : "ENERGY LEVEL INITIAL",
+    "equation" : "1",
+    "unit" : "UMPH"
+  }, {
+    "name" : "energy recovery",
+    "comment" : "ENERGY RECOVERY",
+    "equation" : "energy_recovery_normal*effect_of_hours_worked_on_energy_recovery*effect_of_high_energy_on_further_recovery",
+    "unit" : "UMPH/WEEK"
+  }, {
+    "name" : "energy recovery normal",
+    "comment" : "ENERGY RECOVERY NORMAL",
+    "equation" : "0.3",
+    "unit" : "UMPH/WEEK"
+  }, {
+    "name" : "effect of hours worked on energy recovery",
+    "comment" : "EFFECT OF HOURS WORKED ON ENERGY RECOVERY",
+    "equation" : "LOOKUP(effect_of_hours_worked_on_energy_recovery_lookup, Hours_Worked_Per_Week)",
+    "unit" : "DIMENSIONLESS"
+  }, {
+    "name" : "effect of high energy on further recovery",
+    "comment" : "EFFECT OF HIGH ENERGY ON FURTHER RECOVERY",
+    "equation" : "LOOKUP(effect_of_high_energy_on_further_recovery_lookup, Energy_Level)",
+    "unit" : "DIMENSIONLESS"
+  }, {
+    "name" : "energy drain",
+    "comment" : "ENERGY DRAIN",
+    "equation" : "energy_drain_normal*effect_of_perceived_adequacy_on_energy_drain*effect_of_hours_worked_on_energy_drain *effect_of_low_energy_on_further_depletion",
+    "unit" : "UMPH/WEEK"
+  }, {
+    "name" : "energy drain normal",
+    "comment" : "ENERGY DRAIN NORMAL",
+    "equation" : "0.06",
+    "unit" : "UMPH/WEEK"
+  }, {
+    "name" : "effect of perceived adequacy on energy drain",
+    "comment" : "EFFECT OF PERCIEVED ADEQUACY ON ENERGY DRAIN",
+    "equation" : "LOOKUP(effect_of_perceived_adequacy_on_energy_drain_lookup, perceived_adequacy_of_accomplishment)",
+    "unit" : "DIMENSIONLESS"
+  }, {
+    "name" : "effect of hours worked on energy drain",
+    "comment" : "EFFECT OF HOURS WORKED ON ENERGY DRAIN",
+    "equation" : "LOOKUP(effect_of_hours_worked_on_energy_drain_lookup, Hours_Worked_Per_Week)",
+    "unit" : "DIMENSIONLESS"
+  }, {
+    "name" : "effect of low energy on further depletion",
+    "comment" : "EFFECT OF LOW ENERGY ON FURTHER DEPLETION",
+    "equation" : "LOOKUP(effect_of_low_energy_on_further_depletion_lookup, Energy_Level)",
+    "unit" : "DIMENSIONLESS"
+  }, {
+    "name" : "average accomplishments per hour to date",
+    "comment" : "AVERAGE ACCOMPLISHMENTS PER HOUR TO DATE",
+    "equation" : "Accomplishments_to_Date/hours_worked_to_date",
+    "unit" : "TASKS/HOUR"
+  }, {
+    "name" : "Note that this model will run without modification directly from Dyn2ven Only the units of measure were added to the simulation control constants  INITIAL TIME",
+    "comment" : "Assumed with FINAL_TIME = LENGTH",
+    "equation" : "0",
+    "unit" : "WEEK"
+  } ],
+  "lookupTables" : [ {
+    "name" : "accomplishments per hour lookup",
+    "comment" : "TABLE FOR ACCOMPLISHMENTS PER HOUR",
+    "xValues" : [ 0.0, 0.2, 0.4, 0.6, 0.8, 1.0 ],
+    "yValues" : [ 0.0, 0.2, 0.4, 0.6, 0.8, 1.0 ],
+    "interpolation" : "LINEAR"
+  }, {
+    "name" : "effect of energy levels on hours worked lookup",
+    "comment" : "TABLE FOR EFFECT OF ENERGY LEVELS ON HOURS WORKED",
+    "xValues" : [ 0.0, 0.2, 0.4, 0.6, 0.8, 1.0 ],
+    "yValues" : [ 0.0, 0.4, 0.7, 0.9, 1.0, 1.0 ],
+    "interpolation" : "LINEAR"
+  }, {
+    "name" : "effect of perceived adequacy of hours worked lookup",
+    "comment" : "TABLE FOR EFFECT OF PERCEIVED ADEQUACY OF HOURS WORKED",
+    "xValues" : [ 0.0, 0.2, 0.4, 0.6, 0.8, 1.0, 1.2, 1.4, 1.6 ],
+    "yValues" : [ 2.3, 1.9, 1.6, 1.35, 1.15, 1.0, 0.9, 0.8, 0.75 ],
+    "interpolation" : "LINEAR"
+  }, {
+    "name" : "fractional change in expectations from perceived adequacy lookup",
+    "comment" : "TABLE FOR FRACTIONAL CHANGE IN EXPECTATIONS FROM PERCEIVED ADEQUACY",
+    "xValues" : [ 0.0, 0.2, 0.4, 0.6, 0.8, 1.0, 1.2, 1.4, 1.6 ],
+    "yValues" : [ -0.7, -0.5, -0.35, -0.2, -0.1, 0.0, 0.1, 0.25, 0.4 ],
+    "interpolation" : "LINEAR"
+  }, {
+    "name" : "effect of hours worked on energy recovery lookup",
+    "comment" : "TABLE FOR EFFECT OF HOURS WORKED ON ENERGY LEVEL",
+    "xValues" : [ 0.0, 20.0, 40.0, 60.0, 80.0, 100.0, 120.0 ],
+    "yValues" : [ 1.3, 1.2, 1.0, 0.7, 0.5, 0.35, 0.25 ],
+    "interpolation" : "LINEAR"
+  }, {
+    "name" : "effect of high energy on further recovery lookup",
+    "comment" : "TABLE FOR EFFECT OF HIGH ENERGY ON FURTHER RECOVERY",
+    "xValues" : [ 0.8, 0.85, 0.9, 0.95, 1.0 ],
+    "yValues" : [ 1.0, 0.9, 0.7, 0.4, 0.0 ],
+    "interpolation" : "LINEAR"
+  }, {
+    "name" : "effect of perceived adequacy on energy drain lookup",
+    "comment" : "TABLE FOR EFFECT OF PERCEIVED ADEQUACY ON ENRGY DRAIN",
+    "xValues" : [ 0.0, 0.2, 0.4, 0.6, 0.8, 1.0, 1.2, 1.4, 1.6 ],
+    "yValues" : [ 5.0, 4.0, 3.1, 2.3, 1.6, 1.0, 0.6, 0.4, 0.3 ],
+    "interpolation" : "LINEAR"
+  }, {
+    "name" : "effect of hours worked on energy drain lookup",
+    "comment" : "TABLE FOR EFFECT OF HOURS WORKED ON ENERGY DRAIN",
+    "xValues" : [ 0.0, 20.0, 40.0, 60.0, 80.0, 100.0, 120.0 ],
+    "yValues" : [ 0.3, 0.6, 1.0, 1.5, 2.0, 2.5, 3.0 ],
+    "interpolation" : "LINEAR"
+  }, {
+    "name" : "effect of low energy on further depletion lookup",
+    "comment" : "TABLE FOR EFFECT OF LOW ENERGY ON FURTHER DEPLETION",
+    "xValues" : [ 0.0, 0.05, 0.1, 0.15, 0.2 ],
+    "yValues" : [ 0.0, 0.4, 0.7, 0.9, 1.0 ],
+    "interpolation" : "LINEAR"
+  } ],
+  "views" : [ {
+    "name" : "Title Page"
+  }, {
+    "name" : "Accomplishment",
+    "elements" : [ {
+      "name" : "Accomplishments to Date",
+      "type" : "stock",
+      "x" : 544.0,
+      "y" : 213.0
+    }, {
+      "name" : "accomplishments per hour",
+      "type" : "aux",
+      "x" : 299.0,
+      "y" : 192.0
+    }, {
+      "name" : "perceived adequacy of accomplishment",
+      "type" : "aux",
+      "x" : 681.0,
+      "y" : 456.0
+    }, {
+      "name" : "Perceived Accomplishments Per Week",
+      "type" : "stock",
+      "x" : 583.0,
+      "y" : 367.0
+    }, {
+      "name" : "Expected Accomplishments Per Week",
+      "type" : "stock",
+      "x" : 952.0,
+      "y" : 535.0
+    }, {
+      "name" : "fractional change in expected accomplishments per week",
+      "type" : "aux",
+      "x" : 732.0,
+      "y" : 636.0
+    }, {
+      "name" : "expected accomplishments per week initial",
+      "type" : "aux",
+      "x" : 1036.0,
+      "y" : 417.0
+    }, {
+      "name" : "time to perceive accomplishments per week",
+      "type" : "aux",
+      "x" : 224.0,
+      "y" : 409.0
+    }, {
+      "name" : "base fractional change in expected accomplishments",
+      "type" : "aux",
+      "x" : 287.0,
+      "y" : 691.0
+    }, {
+      "name" : "fractional change in expectations from perceived adequacy",
+      "type" : "aux",
+      "x" : 584.0,
+      "y" : 552.0
+    }, {
+      "name" : "fractional change in expectations from perceived adequacy lookup",
+      "type" : "lookup",
+      "x" : 289.0,
+      "y" : 437.0
+    }, {
+      "name" : "Energy Level",
+      "type" : "stock",
+      "x" : 257.0,
+      "y" : 112.0
+    }, {
+      "name" : "accomplishments per hour lookup",
+      "type" : "lookup",
+      "x" : 188.0,
+      "y" : 144.0
+    }, {
+      "name" : "average accomplishments per hour to date",
+      "type" : "aux",
+      "x" : 861.0,
+      "y" : 299.0
+    }, {
+      "name" : "average accomplishments per week to date",
+      "type" : "aux",
+      "x" : 827.0,
+      "y" : 144.0
+    }, {
+      "name" : "Time",
+      "type" : "aux",
+      "x" : 704.0,
+      "y" : 207.0
+    }, {
+      "name" : "average hours worked per week to date",
+      "type" : "aux",
+      "x" : 1101.0,
+      "y" : 216.0
+    }, {
+      "name" : "_48",
+      "type" : "flow",
+      "x" : 337.0,
+      "y" : 220.0
+    }, {
+      "name" : "accomplishments per week",
+      "type" : "aux",
+      "x" : 337.0,
+      "y" : 240.0
+    }, {
+      "name" : "hours worked to date",
+      "type" : "stock",
+      "x" : 763.0,
+      "y" : 232.0
+    }, {
+      "name" : "Hours Worked Per Week",
+      "type" : "stock",
+      "x" : 165.0,
+      "y" : 300.0
+    } ],
+    "connectors" : [ {
+      "from" : "accomplishments per hour",
+      "to" : "38"
+    }, {
+      "from" : "Perceived Accomplishments Per Week",
+      "to" : "perceived adequacy of accomplishment"
+    }, {
+      "from" : "Expected Accomplishments Per Week",
+      "to" : "perceived adequacy of accomplishment"
+    }, {
+      "from" : "fractional change in expected accomplishments per week",
+      "to" : "Expected Accomplishments Per Week"
+    }, {
+      "from" : "expected accomplishments per week initial",
+      "to" : "Expected Accomplishments Per Week"
+    }, {
+      "from" : "39",
+      "to" : "Perceived Accomplishments Per Week"
+    }, {
+      "from" : "time to perceive accomplishments per week",
+      "to" : "Perceived Accomplishments Per Week"
+    }, {
+      "from" : "base fractional change in expected accomplishments",
+      "to" : "fractional change in expected accomplishments per week"
+    }, {
+      "from" : "fractional change in expectations from perceived adequacy",
+      "to" : "fractional change in expected accomplishments per week"
+    }, {
+      "from" : "perceived adequacy of accomplishment",
+      "to" : "fractional change in expectations from perceived adequacy"
+    }, {
+      "from" : "fractional change in expectations from perceived adequacy lookup",
+      "to" : "fractional change in expectations from perceived adequacy"
+    }, {
+      "from" : "Energy Level",
+      "to" : "accomplishments per hour"
+    }, {
+      "from" : "accomplishments per hour lookup",
+      "to" : "accomplishments per hour"
+    }, {
+      "from" : "Accomplishments to Date",
+      "to" : "average accomplishments per hour to date"
+    }, {
+      "from" : "Accomplishments to Date",
+      "to" : "average accomplishments per week to date"
+    }, {
+      "from" : "Time",
+      "to" : "average accomplishments per week to date"
+    }, {
+      "from" : "Time",
+      "to" : "average hours worked per week to date"
+    }, {
+      "from" : "38",
+      "to" : "Accomplishments to Date"
+    }, {
+      "from" : "38",
+      "to" : "35"
+    }, {
+      "from" : "hours worked to date",
+      "to" : "average accomplishments per hour to date"
+    }, {
+      "from" : "hours worked to date",
+      "to" : "average hours worked per week to date"
+    }, {
+      "from" : "Hours Worked Per Week",
+      "to" : "accomplishments per week"
+    } ],
+    "flowRoutes" : [ {
+      "flowName" : "_48",
+      "points" : [ [ 337.0, 220.0 ] ]
+    } ]
+  }, {
+    "name" : "Hours Worked",
+    "elements" : [ {
+      "name" : "Hours Worked Per Week",
+      "type" : "stock",
+      "x" : 1028.0,
+      "y" : 265.0
+    }, {
+      "name" : "hours worked per week initial",
+      "type" : "aux",
+      "x" : 976.0,
+      "y" : 131.0
+    }, {
+      "name" : "indicated hours worked per week",
+      "type" : "aux",
+      "x" : 825.0,
+      "y" : 268.0
+    }, {
+      "name" : "time to adjust hours per week",
+      "type" : "aux",
+      "x" : 1001.0,
+      "y" : 363.0
+    }, {
+      "name" : "effect of energy level on hours worked",
+      "type" : "aux",
+      "x" : 488.0,
+      "y" : 225.0
+    }, {
+      "name" : "effect of perceived adequacy of hours worked",
+      "type" : "aux",
+      "x" : 576.0,
+      "y" : 361.0
+    }, {
+      "name" : "limit on hours worked per week",
+      "type" : "aux",
+      "x" : 707.0,
+      "y" : 184.0
+    }, {
+      "name" : "effect of energy levels on hours worked lookup",
+      "type" : "lookup",
+      "x" : 221.0,
+      "y" : 269.0
+    }, {
+      "name" : "effect of perceived adequacy of hours worked lookup",
+      "type" : "lookup",
+      "x" : 309.0,
+      "y" : 409.0
+    }, {
+      "name" : "hours worked to date",
+      "type" : "stock",
+      "x" : 1224.0,
+      "y" : 265.0
+    }, {
+      "name" : "Energy Level",
+      "type" : "stock",
+      "x" : 220.0,
+      "y" : 180.0
+    }, {
+      "name" : "perceived adequacy of accomplishment",
+      "type" : "aux",
+      "x" : 277.0,
+      "y" : 333.0
+    } ],
+    "connectors" : [ {
+      "from" : "hours worked per week initial",
+      "to" : "Hours Worked Per Week"
+    }, {
+      "from" : "indicated hours worked per week",
+      "to" : "Hours Worked Per Week"
+    }, {
+      "from" : "time to adjust hours per week",
+      "to" : "Hours Worked Per Week"
+    }, {
+      "from" : "effect of energy level on hours worked",
+      "to" : "indicated hours worked per week"
+    }, {
+      "from" : "effect of perceived adequacy of hours worked",
+      "to" : "indicated hours worked per week"
+    }, {
+      "from" : "Hours Worked Per Week",
+      "to" : "indicated hours worked per week"
+    }, {
+      "from" : "limit on hours worked per week",
+      "to" : "indicated hours worked per week"
+    }, {
+      "from" : "effect of energy levels on hours worked lookup",
+      "to" : "effect of energy level on hours worked"
+    }, {
+      "from" : "effect of perceived adequacy of hours worked lookup",
+      "to" : "effect of perceived adequacy of hours worked"
+    }, {
+      "from" : "Hours Worked Per Week",
+      "to" : "hours worked to date"
+    }, {
+      "from" : "Energy Level",
+      "to" : "effect of energy level on hours worked"
+    }, {
+      "from" : "perceived adequacy of accomplishment",
+      "to" : "effect of perceived adequacy of hours worked"
+    } ]
+  }, {
+    "name" : "Energy",
+    "elements" : [ {
+      "name" : "Energy Level",
+      "type" : "stock",
+      "x" : 604.0,
+      "y" : 111.0
+    }, {
+      "name" : "energy level initial",
+      "type" : "aux",
+      "x" : 603.0,
+      "y" : 173.0
+    }, {
+      "name" : "effect of high energy on further recovery",
+      "type" : "aux",
+      "x" : 396.0,
+      "y" : 27.0
+    }, {
+      "name" : "effect of hours worked on energy recovery",
+      "type" : "aux",
+      "x" : 300.0,
+      "y" : 203.0
+    }, {
+      "name" : "energy recovery normal",
+      "type" : "aux",
+      "x" : 271.0,
+      "y" : 68.0
+    }, {
+      "name" : "energy drain normal",
+      "type" : "aux",
+      "x" : 783.0,
+      "y" : 75.0
+    }, {
+      "name" : "effect of hours worked on energy drain",
+      "type" : "aux",
+      "x" : 673.0,
+      "y" : 231.0
+    }, {
+      "name" : "effect of low energy on further depletion",
+      "type" : "aux",
+      "x" : 763.0,
+      "y" : 25.0
+    }, {
+      "name" : "effect of perceived adequacy on energy drain",
+      "type" : "aux",
+      "x" : 923.0,
+      "y" : 188.0
+    }, {
+      "name" : "effect of hours worked on energy recovery lookup",
+      "type" : "lookup",
+      "x" : 207.0,
+      "y" : 283.0
+    }, {
+      "name" : "effect of high energy on further recovery lookup",
+      "type" : "lookup",
+      "x" : 231.0,
+      "y" : -5.0
+    }, {
+      "name" : "effect of perceived adequacy on energy drain lookup",
+      "type" : "lookup",
+      "x" : 999.0,
+      "y" : 288.0
+    }, {
+      "name" : "effect of hours worked on energy drain lookup",
+      "type" : "lookup",
+      "x" : 588.0,
+      "y" : 323.0
+    }, {
+      "name" : "effect of low energy on further depletion lookup",
+      "type" : "lookup",
+      "x" : 720.0,
+      "y" : -13.0
+    }, {
+      "name" : "Hours Worked Per Week",
+      "type" : "stock",
+      "x" : 463.0,
+      "y" : 260.0
+    }, {
+      "name" : "perceived adequacy of accomplishment",
+      "type" : "aux",
+      "x" : 1144.0,
+      "y" : 244.0
+    }, {
+      "name" : "_48",
+      "type" : "flow",
+      "x" : 472.0,
+      "y" : 115.0
+    }, {
+      "name" : "energy recovery",
+      "type" : "aux",
+      "x" : 472.0,
+      "y" : 135.0
+    }, {
+      "name" : "_684",
+      "type" : "flow",
+      "x" : 725.0,
+      "y" : 116.0
+    }, {
+      "name" : "energy drain",
+      "type" : "aux",
+      "x" : 725.0,
+      "y" : 136.0
+    } ],
+    "connectors" : [ {
+      "from" : "energy level initial",
+      "to" : "Energy Level"
+    }, {
+      "from" : "effect of high energy on further recovery",
+      "to" : "40"
+    }, {
+      "from" : "effect of hours worked on energy recovery",
+      "to" : "41"
+    }, {
+      "from" : "energy recovery normal",
+      "to" : "40"
+    }, {
+      "from" : "energy drain normal",
+      "to" : "42"
+    }, {
+      "from" : "effect of hours worked on energy drain",
+      "to" : "43"
+    }, {
+      "from" : "effect of low energy on further depletion",
+      "to" : "42"
+    }, {
+      "from" : "effect of hours worked on energy recovery lookup",
+      "to" : "effect of hours worked on energy recovery"
+    }, {
+      "from" : "Energy Level",
+      "to" : "effect of high energy on further recovery"
+    }, {
+      "from" : "effect of high energy on further recovery lookup",
+      "to" : "effect of high energy on further recovery"
+    }, {
+      "from" : "effect of perceived adequacy on energy drain lookup",
+      "to" : "effect of perceived adequacy on energy drain"
+    }, {
+      "from" : "effect of hours worked on energy drain lookup",
+      "to" : "effect of hours worked on energy drain"
+    }, {
+      "from" : "Energy Level",
+      "to" : "effect of low energy on further depletion"
+    }, {
+      "from" : "effect of low energy on further depletion lookup",
+      "to" : "effect of low energy on further depletion"
+    }, {
+      "from" : "Hours Worked Per Week",
+      "to" : "effect of hours worked on energy recovery"
+    }, {
+      "from" : "Hours Worked Per Week",
+      "to" : "effect of hours worked on energy drain"
+    }, {
+      "from" : "perceived adequacy of accomplishment",
+      "to" : "effect of perceived adequacy on energy drain"
+    }, {
+      "from" : "40",
+      "to" : "Energy Level"
+    }, {
+      "from" : "40",
+      "to" : "34"
+    }, {
+      "from" : "42",
+      "to" : "37"
+    }, {
+      "from" : "42",
+      "to" : "Energy Level"
+    }, {
+      "from" : "effect of perceived adequacy on energy drain",
+      "to" : "energy drain"
+    } ],
+    "flowRoutes" : [ {
+      "flowName" : "_48",
+      "points" : [ [ 472.0, 115.0 ] ]
+    }, {
+      "flowName" : "_684",
+      "points" : [ [ 725.0, 116.0 ] ]
+    } ]
+  } ],
+  "defaultSimulation" : {
+    "timeStep" : "Week",
+    "duration" : 75.0,
+    "durationUnit" : "Week",
+    "dt" : 0.25
+  },
+  "metadata" : {
+    "author" : "Ventana Systems",
+    "source" : "Vensim Sample Models",
+    "license" : "MIT"
+  }
+}

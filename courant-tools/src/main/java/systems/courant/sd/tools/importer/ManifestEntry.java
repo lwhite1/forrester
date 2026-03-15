@@ -5,8 +5,9 @@ import systems.courant.sd.model.ModelMetadata;
 /**
  * A single entry in a batch import manifest.
  *
- * @param url       the remote URL of the model file (.mdl, .xmile, .stmx)
- * @param className the Java class name or JSON file base name for the output
+ * @param url       the URL or local file path of the model file (.mdl, .xmile, .stmx)
+ * @param className the Java class name for generated demo code
+ * @param id        optional kebab-case slug used as the JSON filename and catalog ID
  * @param category  optional sub-package / subdirectory (e.g. "ecology"), or null
  * @param comment   optional description of the model
  * @param metadata  attribution and licensing metadata
@@ -14,6 +15,7 @@ import systems.courant.sd.model.ModelMetadata;
 public record ManifestEntry(
         String url,
         String className,
+        String id,
         String category,
         String comment,
         ModelMetadata metadata
