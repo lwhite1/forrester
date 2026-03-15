@@ -10,6 +10,7 @@ import systems.courant.sd.app.canvas.ModelEditor;
  * Each element type (stock, flow, auxiliary, module, etc.) has its own implementation
  * that encapsulates both data extraction and drawing.
  */
+@FunctionalInterface
 public interface ElementTypeRenderer {
 
     /**

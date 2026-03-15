@@ -12,6 +12,9 @@ import systems.courant.sd.model.graph.FeedbackAnalysis.CausalLoop;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
@@ -36,6 +39,8 @@ import systems.courant.sd.app.canvas.controllers.InfoLinkCreationController;
  * Draws connections, elements, selection indicators, and rubber-band overlays.
  */
 public class CanvasRenderer {
+
+    private static final Logger log = LoggerFactory.getLogger(CanvasRenderer.class);
 
     private static final Color RUBBER_BAND_COLOR = ColorPalette.RUBBER_BAND;
     private static final Color STOCK_HOVER_COLOR = ColorPalette.HOVER;
@@ -205,6 +210,8 @@ public class CanvasRenderer {
             if (renderer != null) {
                 renderer.render(gc, name, canvasState.getX(name), canvasState.getY(name),
                         canvasState, editor, showDelay);
+            } else {
+                log.warn("No renderer registered for element type: {}", type);
             }
         }
     }
