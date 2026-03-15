@@ -1391,6 +1391,13 @@ public class ModelWindow {
             editor = null;
         }
 
+        // Cancel pending analysis tasks and create a fresh runner
+        if (analysisRunner != null) {
+            analysisRunner.shutdown();
+        }
+        analysisRunner = new AnalysisRunner(statusBar, this::showError);
+        simulationController.setAnalysisRunner(analysisRunner);
+
         // Clear undo history
         undoManager.clear();
 
@@ -1405,10 +1412,13 @@ public class ModelWindow {
             dashboardStage = null;
         }
 
-        // Clear dashboard
+        // Clear canvas and dashboard state
+        canvas.clearNavigation();
+        canvas.clearSparklines();
         if (dashboardPanel != null) {
             dashboardPanel.clear();
         }
+        statusBar.clearProgress();
 
         // Reset file state
         fileController.setCurrentFile(null);
