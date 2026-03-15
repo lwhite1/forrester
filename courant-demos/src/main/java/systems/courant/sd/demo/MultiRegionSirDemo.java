@@ -87,18 +87,9 @@ public class MultiRegionSirDemo {
                 initialRecovered, PEOPLE);
 
         ArrayedFlow infectionFlow = ArrayedFlow.create("Infection", DAY, region, i -> {
-            double s = susceptible.getValue(i);
-            double inf = infectious.getValue(i);
-            double r = recovered.getValue(i);
-            double totalPop = s + inf + r;
-            if (totalPop == 0) {
-                return new Quantity(0, PEOPLE);
-            }
-            double infectiousFraction = inf / totalPop;
-            double newInfections = contactRate * infectiousFraction * infectivity * s;
-            if (newInfections > s) {
-                newInfections = s;
-            }
+            double newInfections = SirModelBuilder.computeNewInfections(
+                    contactRate, infectivity,
+                    susceptible.getValue(i), infectious.getValue(i), recovered.getValue(i));
             return new Quantity(newInfections, PEOPLE);
         });
 

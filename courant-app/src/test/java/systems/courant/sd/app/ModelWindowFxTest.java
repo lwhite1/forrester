@@ -2,7 +2,10 @@ package systems.courant.sd.app;
 
 import systems.courant.sd.app.canvas.Clipboard;
 
+import javafx.scene.Node;
 import javafx.scene.control.Label;
+import javafx.scene.control.Menu;
+import javafx.scene.control.MenuItem;
 import javafx.scene.control.TextField;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.TabPane;
@@ -162,5 +165,76 @@ class ModelWindowFxTest {
         enterEditor(robot);
         assertThat(robot.lookup("#breadcrumbBar").queryAs(javafx.scene.Node.class).isVisible())
                 .isFalse();
+    }
+
+    @Test
+    @DisplayName("Close returns to start screen without closing window")
+    void closeReturnsToStartScreen(FxRobot robot) {
+        enterEditor(robot);
+        // Verify we are in the editor
+        assertThat(stage.getTitle()).contains("Untitled");
+
+        // Fire Close via keyboard shortcut (Ctrl+W)
+        robot.push(javafx.scene.input.KeyCode.CONTROL, javafx.scene.input.KeyCode.W);
+        WaitForAsyncUtils.waitForFxEvents();
+
+        // Window should still be showing
+        assertThat(stage.isShowing()).isTrue();
+
+        // Title should be the start screen title
+        assertThat(stage.getTitle()).isEqualTo("Courant");
+
+        // Start screen cards should be visible again
+        assertThat(robot.lookup("#startNewModel").tryQuery()).isPresent();
+        assertThat(robot.lookup("#startOpenModel").tryQuery()).isPresent();
+        assertThat(robot.lookup("#startTutorials").tryQuery()).isPresent();
+    }
+
+    @Test
+    @DisplayName("Close disables editor-only menu items")
+    void closeDisablesEditorMenuItems(FxRobot robot) {
+        enterEditor(robot);
+
+        // Fire Close via keyboard shortcut
+        robot.push(javafx.scene.input.KeyCode.CONTROL, javafx.scene.input.KeyCode.W);
+        WaitForAsyncUtils.waitForFxEvents();
+
+        // File menu should have Close and Save disabled
+        MenuBar menuBar = robot.lookup(".menu-bar").queryAs(MenuBar.class);
+        Menu fileMenu = menuBar.getMenus().get(0);
+        MenuItem closeItem = fileMenu.getItems().stream()
+                .filter(i -> "Close".equals(i.getText()))
+                .findFirst().orElseThrow();
+        assertThat(closeItem.isDisable()).isTrue();
+
+        MenuItem saveItem = fileMenu.getItems().stream()
+                .filter(i -> "Save".equals(i.getText()))
+                .findFirst().orElseThrow();
+        assertThat(saveItem.isDisable()).isTrue();
+
+        // Edit menu should be disabled
+        Menu editMenu = menuBar.getMenus().get(1);
+        assertThat(editMenu.isDisable()).isTrue();
+    }
+
+    @Test
+    @DisplayName("Can reopen editor after Close by clicking New Model")
+    void canReopenAfterClose(FxRobot robot) {
+        enterEditor(robot);
+
+        // Close back to start screen
+        robot.push(javafx.scene.input.KeyCode.CONTROL, javafx.scene.input.KeyCode.W);
+        WaitForAsyncUtils.waitForFxEvents();
+
+        // Click New Model again
+        robot.clickOn("#startNewModel");
+        WaitForAsyncUtils.waitForFxEvents();
+
+        // Should be back in editor
+        assertThat(stage.getTitle()).contains("Untitled");
+        assertThat(robot.lookup("#toolSelect").tryQuery()).isPresent();
+
+        Label elementsLabel = robot.lookup("#statusElements").queryAs(Label.class);
+        assertThat(elementsLabel.getText()).isEqualTo("Empty model");
     }
 }

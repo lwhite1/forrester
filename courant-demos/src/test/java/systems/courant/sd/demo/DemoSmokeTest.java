@@ -23,7 +23,6 @@ import java.nio.file.Path;
 
 import static systems.courant.sd.measure.Units.DAY;
 import static systems.courant.sd.measure.Units.MINUTE;
-import static systems.courant.sd.measure.Units.PEOPLE;
 import static systems.courant.sd.measure.Units.WEEK;
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -59,30 +58,9 @@ class DemoSmokeTest {
         MonteCarloResult result = MonteCarlo.builder()
                 .parameter("Contact Rate", new NormalDistribution(8, 2))
                 .parameter("Infectivity", new UniformRealDistribution(0.05, 0.15))
-                .modelFactory(params -> {
-                    double contactRate = params.get("Contact Rate");
-                    double infectivity = params.get("Infectivity");
-                    Model model = new Model("SIR Monte Carlo");
-                    Stock s = new Stock("Susceptible", 1000, PEOPLE);
-                    Stock i = new Stock("Infectious", 10, PEOPLE);
-                    Stock r = new Stock("Recovered", 0, PEOPLE);
-                    Flow infect = Flow.create("Infected", DAY, () -> {
-                        double total = s.getValue() + i.getValue() + r.getValue();
-                        double count = contactRate * (i.getValue() / total)
-                                * infectivity * s.getValue();
-                        return new Quantity(Math.min(count, s.getValue()), PEOPLE);
-                    });
-                    Flow recover = Flow.create("Recovered", DAY, () ->
-                            new Quantity(i.getValue() * 0.2, PEOPLE));
-                    s.addOutflow(infect);
-                    i.addInflow(infect);
-                    i.addOutflow(recover);
-                    r.addInflow(recover);
-                    model.addStock(s);
-                    model.addStock(i);
-                    model.addStock(r);
-                    return model;
-                })
+                .modelFactory(params -> SirModelBuilder.build("SIR Monte Carlo",
+                        params.get("Contact Rate"), params.get("Infectivity"),
+                        1000, 10, 0, 0.2))
                 .iterations(10)
                 .sampling(SamplingMethod.LATIN_HYPERCUBE)
                 .seed(42L)
@@ -306,7 +284,6 @@ class DemoSmokeTest {
     void thirdOrderDelayFlowsClamped() {
         var hour = systems.courant.sd.measure.units.time.TimeUnits.HOUR;
         var model = new Model("Clamp Test");
-        // Start with a negative stock value to test the guard
         var step1 = new systems.courant.sd.model.Stock("Step 1", -10,
                 systems.courant.sd.measure.Units.DIMENSIONLESS);
         double delayHours = 5.0;
@@ -326,7 +303,6 @@ class DemoSmokeTest {
     void flowTimeDemoTatNonNegative() {
         var hour = systems.courant.sd.measure.units.time.TimeUnits.HOUR;
         var model = new Model("TAT Clamp Test");
-        // Start TAT at 0 to force the edge case
         var tat = new systems.courant.sd.model.Stock("TAT", 0, hour);
         double capacity = 100;
         double hoursPerDay = 24.0;
@@ -383,10 +359,7 @@ class DemoSmokeTest {
 
         sim.execute();
 
-        // With clamped index, throughput uses step-0 demand instead of returning 0.
-        // Verify the simulation completes without error and throughput history has non-zero values.
         assertThat(throughput.getHistoryAtTimeStep(0)).isGreaterThanOrEqualTo(0);
-        // At step 1, demand history exists; throughput should be positive (capped at capacity)
         assertThat(throughput.getHistoryAtTimeStep(1)).isGreaterThan(0);
     }
 

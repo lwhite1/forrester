@@ -385,8 +385,7 @@ public class SimulationTest {
             // Flow should have history from first run
             assertThat(outflow.getHistoryAtTimeStep(0)).isEqualTo(5.0);
 
-            // Re-run: execute() calls clearHistory() internally
-            stock.setValue(50);
+            // Re-run: execute() resets stocks and calls clearHistory() internally
             sim.execute();
 
             // History should reflect second run, not accumulate from first
@@ -412,12 +411,11 @@ public class SimulationTest {
 
             assertThat(var.getHistoryAtTimeStep(0)).isEqualTo(50.0);
 
-            // Change stock value and re-run
-            stock.setValue(99);
+            // Re-run: stock resets to initial value (50), history is cleared
             sim.execute();
 
-            // Variable history should reflect the new initial value, not stale data
-            assertThat(var.getHistoryAtTimeStep(0)).isEqualTo(99.0);
+            // Variable history should reflect the reset initial value
+            assertThat(var.getHistoryAtTimeStep(0)).isEqualTo(50.0);
         }
 
         @Test
@@ -443,8 +441,7 @@ public class SimulationTest {
             assertThat(flow.getHistoryAtTimeStep(0)).isEqualTo(10.0);
             assertThat(var.getHistoryAtTimeStep(0)).isEqualTo(100.0);
 
-            // Re-run
-            stock.setValue(100);
+            // Re-run: stock resets to initial value automatically
             sim.execute();
 
             // History should be fresh from second run
@@ -999,15 +996,13 @@ public class SimulationTest {
 
             Simulation sim = new Simulation(model, MINUTE, MINUTE, 2);
 
-            // First run: produces NaN warnings
+            // First run: produces NaN warnings, stock unchanged (NaN skipped)
             sim.execute();
             assertThat(stock.getValue()).isEqualTo(100.0);
 
-            // Second run: still produces NaN but warnings should fire again (not suppressed)
-            // We verify indirectly: stock value should still be preserved
-            stock.setValue(200);
+            // Second run: stock resets to initial value, NaN warnings fire again
             sim.execute();
-            assertThat(stock.getValue()).isEqualTo(200.0);
+            assertThat(stock.getValue()).isEqualTo(100.0);
         }
     }
 
@@ -1054,6 +1049,81 @@ public class SimulationTest {
             // 3 steps (0..2), valid inflow adds 5 per step: 50 + 15 = 65
             // Infinity outflow should be skipped
             assertThat(stock.getValue()).isEqualTo(65.0);
+        }
+    }
+
+    @Nested
+    @DisplayName("Stock reset on re-run (#720)")
+    class StockResetOnRerun {
+
+        @Test
+        void shouldResetStockToInitialValueOnRerun() {
+            Model model = new Model("Reset");
+            Stock stock = new Stock("S", 100, THING);
+
+            Flow drain = Flow.create("Drain", MINUTE, () -> new Quantity(10, THING));
+            stock.addOutflow(drain);
+            model.addStock(stock);
+
+            Simulation sim = new Simulation(model, MINUTE, MINUTE, 5);
+
+            // First run: 100 - 60 = 40
+            sim.execute();
+            assertThat(stock.getValue()).isEqualTo(40.0);
+
+            // Second run: should start from 100 again, not 40
+            sim.execute();
+            assertThat(stock.getValue()).isEqualTo(40.0);
+        }
+
+        @Test
+        void shouldResetMultipleStocksOnRerun() {
+            Model model = new Model("Multi Reset");
+            Stock s1 = new Stock("S1", 200, THING);
+            Stock s2 = new Stock("S2", 50, THING);
+
+            Flow drain1 = Flow.create("D1", MINUTE, () -> new Quantity(20, THING));
+            Flow fill2 = Flow.create("F2", MINUTE, () -> new Quantity(10, THING));
+
+            s1.addOutflow(drain1);
+            s2.addInflow(fill2);
+            model.addStock(s1);
+            model.addStock(s2);
+
+            Simulation sim = new Simulation(model, MINUTE, MINUTE, 3);
+
+            // First run: s1 = 200 - 80 = 120, s2 = 50 + 40 = 90
+            sim.execute();
+            assertThat(s1.getValue()).isEqualTo(120.0);
+            assertThat(s2.getValue()).isEqualTo(90.0);
+
+            // Second run: should reset to initial values
+            sim.execute();
+            assertThat(s1.getValue()).isEqualTo(120.0);
+            assertThat(s2.getValue()).isEqualTo(90.0);
+        }
+
+        @Test
+        void shouldResetStockInsideModuleOnRerun() {
+            Model model = new Model("Module Reset");
+            Module module = new Module("M");
+            Stock stock = new Stock("S", 75, THING);
+
+            Flow drain = Flow.create("D", MINUTE, () -> new Quantity(25, THING));
+            stock.addOutflow(drain);
+            module.addStock(stock);
+            module.addFlow(drain);
+            model.addModulePreserved(module);
+
+            Simulation sim = new Simulation(model, MINUTE, MINUTE, 2);
+
+            // First run: 75 - 75 = 0 (3 steps of 25)
+            sim.execute();
+            assertThat(stock.getValue()).isEqualTo(0.0);
+
+            // Second run: should reset to 75
+            sim.execute();
+            assertThat(stock.getValue()).isEqualTo(0.0);
         }
     }
 }

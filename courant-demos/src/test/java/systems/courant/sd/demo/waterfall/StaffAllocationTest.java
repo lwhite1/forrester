@@ -5,6 +5,8 @@ import systems.courant.sd.measure.units.item.ItemUnits;
 import systems.courant.sd.model.Variable;
 import org.junit.jupiter.api.Test;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.within;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class StaffAllocationTest {
@@ -72,5 +74,28 @@ class StaffAllocationTest {
 
         assertTrue(noCommProduction > highCommProduction,
                 "Production resources should decrease when communication overhead increases");
+    }
+
+    @Test
+    void shouldComputeQAFromNetAvailableNotGrossStaffing() {
+        // Team of 28, overhead of ~4.5 from training + communication
+        Variable totalWorkforce = new Variable("Total Workforce", ItemUnits.PEOPLE, () -> 28.0);
+        Variable trainingOverhead = new Variable("Training", ItemUnits.PEOPLE, () -> 2.0);
+        Variable commOverhead = new Variable("Comm", DimensionlessUnits.DIMENSIONLESS, () -> 2.5);
+
+        double plannedQAFraction = 0.15;
+        double overheadLoss = 0.10;
+
+        StaffAllocation alloc = new StaffAllocation(
+                totalWorkforce, trainingOverhead, commOverhead,
+                plannedQAFraction, overheadLoss);
+
+        double qa = alloc.getDailyResourcesForQA().getValue();
+        double production = alloc.getDailyResourcesForProduction().getValue();
+        double totalUsed = qa + production;
+
+        // QA fraction of net resources should equal planned fraction
+        double actualQAFraction = qa / totalUsed;
+        assertThat(actualQAFraction).isCloseTo(plannedQAFraction, within(0.001));
     }
 }

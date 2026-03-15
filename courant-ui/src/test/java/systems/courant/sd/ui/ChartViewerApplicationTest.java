@@ -4,6 +4,7 @@ import javafx.application.Platform;
 import javafx.scene.chart.XYChart;
 import javafx.stage.Stage;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -27,14 +28,22 @@ import static org.assertj.core.api.Assertions.assertThat;
 @ExtendWith(ApplicationExtension.class)
 class ChartViewerApplicationTest {
 
+    @BeforeEach
+    void setUp() {
+        ChartViewerApplication.reset();
+    }
+
     @Test
     @DisplayName("setSeries creates series from stock and variable names")
     void shouldCreateSeriesFromNames() {
         ChartViewerApplication.setSeries(List.of("S1", "S2"), List.of("V1"));
-
-        // Verify by adding values — if series count mismatches, the value won't be added
         ChartViewerApplication.addValues(List.of(1.0, 2.0), List.of(3.0), 0);
-        // No exception means the series were created correctly
+
+        ChartViewerApplication.ChartData snap = ChartViewerApplication.snapshot();
+        assertThat(snap.series()).hasSize(3);
+        assertThat(snap.series().get(0).getName()).isEqualTo("S1");
+        assertThat(snap.series().get(1).getName()).isEqualTo("S2");
+        assertThat(snap.series().get(2).getName()).isEqualTo("V1");
     }
 
     @Test
@@ -42,62 +51,88 @@ class ChartViewerApplicationTest {
     void shouldCreateFlowSeries() {
         ChartViewerApplication.setFlowSeries(List.of("FlowA", "FlowB"));
         ChartViewerApplication.addValues(List.of(), List.of(10.0, 20.0), 1);
+
+        ChartViewerApplication.ChartData snap = ChartViewerApplication.snapshot();
+        assertThat(snap.series()).hasSize(2);
+        assertThat(snap.series().get(0).getName()).isEqualTo("FlowA");
+        assertThat(snap.series().get(1).getName()).isEqualTo("FlowB");
     }
 
     @Test
-    @DisplayName("addValues with step number does not throw")
+    @DisplayName("addValues with step number records data point")
     void shouldAcceptStepBasedValues() {
         ChartViewerApplication.setSeries(List.of("X"), List.of());
         ChartViewerApplication.addValues(List.of(42.0), List.of(), 5);
+
+        XYChart.Data<String, Number> dp =
+                ChartViewerApplication.snapshot().series().getFirst().getData().getFirst();
+        assertThat(dp.getXValue()).isEqualTo("5");
+        assertThat(dp.getYValue().doubleValue()).isEqualTo(42.0);
     }
 
     @Test
-    @DisplayName("addValues with timestamp does not throw")
+    @DisplayName("addValues with timestamp records data point")
     void shouldAcceptTimestampBasedValues() {
         ChartViewerApplication.setSeries(List.of("X"), List.of());
         ChartViewerApplication.addValues(List.of(42.0), List.of(),
                 LocalDateTime.of(2026, 1, 1, 12, 0));
+
+        ChartViewerApplication.ChartData snap = ChartViewerApplication.snapshot();
+        assertThat(snap.series().getFirst().getData()).hasSize(1);
+        assertThat(snap.series().getFirst().getData().getFirst().getYValue().doubleValue())
+                .isEqualTo(42.0);
     }
 
     @Test
-    @DisplayName("setSize does not throw")
+    @DisplayName("setSize updates snapshot dimensions")
     void shouldAcceptSizeChange() {
         ChartViewerApplication.setSize(1024, 768);
+
+        ChartViewerApplication.ChartData snap = ChartViewerApplication.snapshot();
+        assertThat(snap.width()).isEqualTo(1024);
+        assertThat(snap.height()).isEqualTo(768);
     }
 
     @Test
     @DisplayName("addValues gracefully handles more values than series")
     void shouldHandleExtraValues() {
         ChartViewerApplication.setSeries(List.of("OnlyOne"), List.of());
-        // Pass more values than series — should not throw
         ChartViewerApplication.addValues(List.of(1.0, 2.0, 3.0), List.of(), 0);
+
+        // Only the first value should be recorded (one series exists)
+        ChartViewerApplication.ChartData snap = ChartViewerApplication.snapshot();
+        assertThat(snap.series()).hasSize(1);
+        assertThat(snap.series().getFirst().getData()).hasSize(1);
+        assertThat(snap.series().getFirst().getData().getFirst().getYValue().doubleValue())
+                .isEqualTo(1.0);
     }
 
     @Test
     @DisplayName("addValues gracefully handles fewer values than series")
     void shouldHandleFewerValues() {
         ChartViewerApplication.setSeries(List.of("A", "B", "C"), List.of());
-        // Pass fewer values than series — should not throw
         ChartViewerApplication.addValues(List.of(1.0), List.of(), 0);
+
+        // Only the first series should have a data point
+        ChartViewerApplication.ChartData snap = ChartViewerApplication.snapshot();
+        assertThat(snap.series().get(0).getData()).hasSize(1);
+        assertThat(snap.series().get(1).getData()).isEmpty();
+        assertThat(snap.series().get(2).getData()).isEmpty();
     }
 
     @Test
     @DisplayName("reset clears all accumulated state")
     void shouldClearStateOnReset() {
-        // Accumulate some state
         ChartViewerApplication.setSeries(List.of("A", "B"), List.of("C"));
         ChartViewerApplication.addValues(List.of(1.0, 2.0), List.of(3.0), 0);
         ChartViewerApplication.setSize(1920, 1080);
 
-        // Reset should clear everything
         ChartViewerApplication.reset();
 
-        // After reset, adding values with no series should be a no-op (no exception)
-        ChartViewerApplication.addValues(List.of(1.0), List.of(), 0);
-
-        // Re-adding a single series should work cleanly without leftover data
-        ChartViewerApplication.setSeries(List.of("Fresh"), List.of());
-        ChartViewerApplication.addValues(List.of(99.0), List.of(), 1);
+        ChartViewerApplication.ChartData snap = ChartViewerApplication.snapshot();
+        assertThat(snap.series()).isEmpty();
+        assertThat(snap.width()).isEqualTo(800);
+        assertThat(snap.height()).isEqualTo(600);
     }
 
     @Test
@@ -127,7 +162,6 @@ class ChartViewerApplicationTest {
     @Test
     @DisplayName("snapshot deep-copies series so mutations do not leak (#530)")
     void shouldDeepCopySeriesInSnapshot() {
-        ChartViewerApplication.reset();
         ChartViewerApplication.setSeries(List.of("Stock"), List.of());
         ChartViewerApplication.addValues(List.of(10.0), List.of(), 0);
         ChartViewerApplication.addValues(List.of(20.0), List.of(), 1);
@@ -145,7 +179,6 @@ class ChartViewerApplicationTest {
     @Test
     @DisplayName("snapshot preserves series names")
     void shouldPreserveSeriesNamesInSnapshot() {
-        ChartViewerApplication.reset();
         ChartViewerApplication.setSeries(List.of("Alpha", "Beta"), List.of("Gamma"));
         ChartViewerApplication.addValues(List.of(1.0, 2.0), List.of(3.0), 0);
 
@@ -160,7 +193,6 @@ class ChartViewerApplicationTest {
     @Test
     @DisplayName("snapshot preserves data point values")
     void shouldPreserveDataPointValuesInSnapshot() {
-        ChartViewerApplication.reset();
         ChartViewerApplication.setSeries(List.of("S"), List.of());
         ChartViewerApplication.addValues(List.of(42.0), List.of(), 5);
 
@@ -193,25 +225,24 @@ class ChartViewerApplicationTest {
     }
 
     @Test
+    @DisplayName("reader thread sees size set by writer thread via synchronized snapshot")
     void shouldReadSizeUnderLockFromAnotherThread() throws InterruptedException {
         // Set size on this thread
         ChartViewerApplication.setSize(1024, 768);
 
         // Read it back from another thread to verify thread-safe publication
-        AtomicReference<double[]> result = new AtomicReference<>();
+        AtomicReference<ChartViewerApplication.ChartData> result = new AtomicReference<>();
         CountDownLatch latch = new CountDownLatch(1);
 
         Thread reader = new Thread(() -> {
-            // setSize writes under LOCK; the values should be visible to this thread
-            // after the synchronized block completes
-            ChartViewerApplication.setSize(1024, 768); // re-set to force sync
-            result.set(new double[]{1024, 768});
+            // snapshot() reads under LOCK; the values set above should be visible
+            result.set(ChartViewerApplication.snapshot());
             latch.countDown();
         });
         reader.start();
 
         assertThat(latch.await(5, TimeUnit.SECONDS)).isTrue();
-        assertThat(result.get()[0]).isEqualTo(1024);
-        assertThat(result.get()[1]).isEqualTo(768);
+        assertThat(result.get().width()).isEqualTo(1024);
+        assertThat(result.get().height()).isEqualTo(768);
     }
 }

@@ -480,7 +480,7 @@ public class ModelWindow {
         closeItem.setAccelerator(new KeyCodeCombination(KeyCode.W, KeyCombination.SHORTCUT_DOWN));
         closeItem.setOnAction(e -> {
             if (fileController.confirmDiscardChanges()) {
-                close();
+                resetToStartScreen();
             }
         });
 
@@ -501,13 +501,14 @@ public class ModelWindow {
         importRefDataItem.setOnAction(e -> importReferenceData());
 
         // Disable file items that require an open model
+        closeItem.setDisable(true);
         saveItem.setDisable(true);
         saveAsItem.setDisable(true);
         exportItem.setDisable(true);
         exportReportItem.setDisable(true);
         modelInfoItem.setDisable(true);
         importRefDataItem.setDisable(true);
-        editorOnlyItems.addAll(List.of(saveItem, saveAsItem, exportItem, exportReportItem,
+        editorOnlyItems.addAll(List.of(closeItem, saveItem, saveAsItem, exportItem, exportReportItem,
                 modelInfoItem, importRefDataItem));
 
         fileMenu.getItems().addAll(newWindowItem, newItem, openItem, examplesMenu,
@@ -1368,6 +1369,68 @@ public class ModelWindow {
             case CLD_VARIABLE -> "CLD Variable";
             case COMMENT -> "Comment";
         };
+    }
+
+    /**
+     * Resets the window back to the start screen, tearing down the current editor
+     * session without closing the window. Callers must check for unsaved changes
+     * via {@link FileController#confirmDiscardChanges()} before calling this method.
+     */
+    void resetToStartScreen() {
+        // Detach listeners from the current editor
+        if (editor != null) {
+            if (logListener != null) {
+                editor.removeListener(logListener);
+            }
+            if (staleListener != null) {
+                editor.removeListener(staleListener);
+            }
+            if (dirtyListener != null) {
+                editor.removeListener(dirtyListener);
+            }
+            editor = null;
+        }
+
+        // Cancel pending analysis tasks and create a fresh runner
+        if (analysisRunner != null) {
+            analysisRunner.shutdown();
+        }
+        analysisRunner = new AnalysisRunner(statusBar, this::showError);
+        simulationController.setAnalysisRunner(analysisRunner);
+
+        // Clear undo history
+        undoManager.clear();
+
+        // Close auxiliary windows
+        if (contextHelpDialog != null) {
+            contextHelpDialog.close();
+            contextHelpDialog = null;
+        }
+        if (dashboardStage != null) {
+            dashboardStage.setOnHidden(null);
+            dashboardStage.close();
+            dashboardStage = null;
+        }
+
+        // Clear canvas and dashboard state
+        canvas.clearNavigation();
+        canvas.clearSparklines();
+        if (dashboardPanel != null) {
+            dashboardPanel.clear();
+        }
+        statusBar.clearProgress();
+
+        // Reset file state
+        fileController.setCurrentFile(null);
+        fileController.setDirty(false);
+
+        // Switch UI back to start screen
+        editorShown = false;
+        for (MenuItem item : editorOnlyItems) {
+            item.setDisable(true);
+        }
+        configureStartScreen();
+        updateTitle();
     }
 
     /**

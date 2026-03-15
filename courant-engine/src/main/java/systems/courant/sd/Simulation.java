@@ -219,7 +219,7 @@ public class Simulation {
         Map<Flow, Quantity> flowMap = new IdentityHashMap<>();
         List<Stock> allStocks = collectAllStocks();
         for (Stock stock : allStocks) {
-            stock.resetWarnings();
+            stock.resetToInitialValue();
         }
         Map<Stock, Double> deltas = new IdentityHashMap<>();
 
