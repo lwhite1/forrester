@@ -122,4 +122,25 @@ class Smooth3Test {
         assertThatThrownBy(() -> Smooth3.of(() -> 100, -1, () -> 0))
                 .isInstanceOf(IllegalArgumentException.class);
     }
+
+    @Test
+    void shouldAcceptVariableSmoothingTime() {
+        int[] step = {0};
+        double[] smoothTime = {6};
+        Smooth3 formula = Smooth3.of(() -> 100, () -> smoothTime[0], 0, () -> step[0]);
+
+        // Initialize at step 0
+        assertThat(formula.getCurrentValue()).isEqualTo(0.0);
+
+        // Advance with smoothingTime=6 (stageTime=2)
+        step[0] = 1;
+        double afterStep1 = formula.getCurrentValue();
+        assertThat(afterStep1).isGreaterThan(0.0);
+
+        // Change smoothingTime to 3 (stageTime=1) for faster convergence
+        smoothTime[0] = 3;
+        step[0] = 2;
+        double afterStep2 = formula.getCurrentValue();
+        assertThat(afterStep2).isGreaterThan(afterStep1);
+    }
 }

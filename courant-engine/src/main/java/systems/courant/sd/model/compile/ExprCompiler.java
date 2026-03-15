@@ -641,7 +641,10 @@ public class ExprCompiler {
         DoubleSupplier smoothingTime = compileExpr(args.get(1));
         Smooth smooth;
         if (args.size() == 3) {
-            double initial = evaluateConstant(args.get(2), "SMOOTH initialValue");
+            double initial = evaluateAtCompileTime(args.get(2), "SMOOTH initialValue");
+            if (Double.isNaN(initial)) {
+                initial = 0.0;
+            }
             smooth = Smooth.of(input, smoothingTime, initial, context.getCurrentStep());
         } else {
             smooth = Smooth.of(input, smoothingTime, context.getCurrentStep());
