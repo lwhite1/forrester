@@ -57,6 +57,10 @@ public final class VensimExprTranslator {
             "(?i)RANDOM\\s+UNIFORM\\s*\\(");
     private static final Pattern PULSE_TRAIN_PATTERN = Pattern.compile(
             "(?i)PULSE\\s+TRAIN\\s*\\(");
+    private static final Pattern DELAY_MATERIAL_PATTERN = Pattern.compile(
+            "(?i)DELAY\\s+MATERIAL\\s*\\(");
+    private static final Pattern RANDOM_0_1_PATTERN = Pattern.compile(
+            "(?i)RANDOM\\s+0\\s+1\\s*\\(\\s*\\)");
     private static final Pattern NOT_EQUAL_PATTERN = Pattern.compile("<>");
     private static final Pattern MESSAGE_PATTERN = Pattern.compile(
             "(?i)MESSAGE\\s*\\(");
@@ -178,6 +182,10 @@ public final class VensimExprTranslator {
         // 4a. Not-equal operator: <> → !=
         expr = NOT_EQUAL_PATTERN.matcher(expr).replaceAll("!=");
 
+        // 4b. Single = (equality) → == (Vensim uses = for both assignment and comparison;
+        // by this point we're processing the RHS, so any remaining = is equality)
+        expr = expr.replaceAll("(?<![<>=!])=(?!=)", "==");
+
         // 5. XIDZ and ZIDZ
         expr = translateXidz(expr, warnings);
         expr = translateZidz(expr, warnings);
@@ -193,6 +201,12 @@ public final class VensimExprTranslator {
 
         // 8. DELAY FIXED → DELAY_FIXED
         expr = DELAY_FIXED_PATTERN.matcher(expr).replaceAll("DELAY_FIXED(");
+
+        // 8-1. DELAY MATERIAL(input, delay, init, transit) → DELAY_FIXED(input, delay, init)
+        expr = translateDelayMaterial(expr);
+
+        // 8-2. RANDOM 0 1() → RANDOM_UNIFORM(0, 1, 0)
+        expr = RANDOM_0_1_PATTERN.matcher(expr).replaceAll("RANDOM_UNIFORM(0, 1, 0)");
 
         // 8a. GAME(expr) → expr (pass-through; GAME is Vensim's interactive override)
         expr = translateGame(expr);
@@ -746,6 +760,39 @@ public final class VensimExprTranslator {
             if (closeParen > 0) {
                 expr = expr.substring(0, m.start()) + "0" + expr.substring(closeParen + 1);
                 m = SIMULTANEOUS_PATTERN.matcher(expr);
+            } else {
+                break;
+            }
+        }
+        return expr;
+    }
+
+    /**
+     * Translates DELAY MATERIAL(input, delay, init, transit) to DELAY_FIXED(input, delay, init).
+     * DELAY MATERIAL is a pipeline delay; dropping the 4th transit argument gives equivalent
+     * behavior for Euler integration.
+     */
+    private static String translateDelayMaterial(String expr) {
+        Matcher m = DELAY_MATERIAL_PATTERN.matcher(expr);
+        while (m.find()) {
+            int openParen = m.end() - 1;
+            int closeParen = findMatchingParen(expr, openParen);
+            if (closeParen > 0) {
+                String argsContent = expr.substring(openParen + 1, closeParen);
+                List<String> args = splitTopLevelArgs(argsContent);
+                // Take first 3 args (input, delay, init), drop 4th (transit)
+                String replacement;
+                if (args.size() >= 3) {
+                    replacement = "DELAY_FIXED(" + args.get(0).strip()
+                            + ", " + args.get(1).strip()
+                            + ", " + args.get(2).strip() + ")";
+                } else {
+                    // Fallback: just rename the function
+                    replacement = "DELAY_FIXED(" + argsContent + ")";
+                }
+                expr = expr.substring(0, m.start()) + replacement
+                        + expr.substring(closeParen + 1);
+                m = DELAY_MATERIAL_PATTERN.matcher(expr);
             } else {
                 break;
             }

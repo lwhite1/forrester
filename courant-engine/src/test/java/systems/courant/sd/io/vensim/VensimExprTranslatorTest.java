@@ -722,6 +722,103 @@ class VensimExprTranslatorTest {
     }
 
     @Nested
+    @DisplayName("Equality operator translation (#596)")
+    class EqualityOperator {
+
+        @Test
+        void shouldTranslateSingleEqualsToDoubleEquals() {
+            var result = VensimExprTranslator.translate(
+                    "IF THEN ELSE(x = 0, 1, 0)", "var", EMPTY_NAMES);
+            assertThat(result.expression()).isEqualTo("IF(x == 0, 1, 0)");
+        }
+
+        @Test
+        void shouldNotDoubleExistingDoubleEquals() {
+            var result = VensimExprTranslator.translate(
+                    "IF THEN ELSE(x == 0, 1, 0)", "var", EMPTY_NAMES);
+            assertThat(result.expression()).isEqualTo("IF(x == 0, 1, 0)");
+        }
+
+        @Test
+        void shouldNotAffectNotEquals() {
+            var result = VensimExprTranslator.translate("x != 0", "var", EMPTY_NAMES);
+            assertThat(result.expression()).isEqualTo("x != 0");
+        }
+
+        @Test
+        void shouldNotAffectLessEquals() {
+            var result = VensimExprTranslator.translate("x <= 5", "var", EMPTY_NAMES);
+            assertThat(result.expression()).isEqualTo("x <= 5");
+        }
+
+        @Test
+        void shouldNotAffectGreaterEquals() {
+            var result = VensimExprTranslator.translate("x >= 5", "var", EMPTY_NAMES);
+            assertThat(result.expression()).isEqualTo("x >= 5");
+        }
+
+        @Test
+        void shouldHandleMultipleEqualityChecks() {
+            var result = VensimExprTranslator.translate(
+                    "IF THEN ELSE(scenario = 0 :OR: scenario = 1, a, b)", "var", EMPTY_NAMES);
+            assertThat(result.expression()).contains("scenario == 0");
+            assertThat(result.expression()).contains("scenario == 1");
+        }
+    }
+
+    @Nested
+    @DisplayName("DELAY MATERIAL translation (#596)")
+    class DelayMaterial {
+
+        @Test
+        void shouldTranslateDelayMaterialToDelayFixed() {
+            var result = VensimExprTranslator.translate(
+                    "DELAY MATERIAL(input, 5, init, 3)", "var", EMPTY_NAMES);
+            assertThat(result.expression()).isEqualTo("DELAY_FIXED(input, 5, init)");
+        }
+
+        @Test
+        void shouldBeCaseInsensitive() {
+            var result = VensimExprTranslator.translate(
+                    "delay material(x, 10, 0, 5)", "var", EMPTY_NAMES);
+            assertThat(result.expression()).isEqualTo("DELAY_FIXED(x, 10, 0)");
+        }
+
+        @Test
+        void shouldHandleComplexArguments() {
+            var result = VensimExprTranslator.translate(
+                    "DELAY MATERIAL(a + b, c * d, e, f)", "var", EMPTY_NAMES);
+            assertThat(result.expression()).isEqualTo("DELAY_FIXED(a + b, c * d, e)");
+        }
+    }
+
+    @Nested
+    @DisplayName("RANDOM 0 1 translation (#596)")
+    class Random01 {
+
+        @Test
+        void shouldTranslateRandom01() {
+            var result = VensimExprTranslator.translate(
+                    "RANDOM 0 1()", "var", EMPTY_NAMES);
+            assertThat(result.expression()).isEqualTo("RANDOM_UNIFORM(0, 1, 0)");
+        }
+
+        @Test
+        void shouldBeCaseInsensitive() {
+            var result = VensimExprTranslator.translate(
+                    "random 0 1()", "var", EMPTY_NAMES);
+            assertThat(result.expression()).isEqualTo("RANDOM_UNIFORM(0, 1, 0)");
+        }
+
+        @Test
+        void shouldHandleRandom01InExpression() {
+            var result = VensimExprTranslator.translate(
+                    "x + RANDOM 0 1() * 10", "var", EMPTY_NAMES);
+            assertThat(result.expression()).isEqualTo("x + RANDOM_UNIFORM(0, 1, 0) * 10");
+        }
+    }
+
+    @Nested
     @DisplayName("Edge cases")
     class EdgeCases {
 
