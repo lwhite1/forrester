@@ -868,6 +868,9 @@ public class ModelCanvas extends Canvas {
             regenerateConnectors();
             redraw();
             fireStatusChanged();
+            if (activeTool == CanvasToolBar.Tool.PLACE_COMMENT) {
+                startInlineEdit(name);
+            }
         }
     }
 

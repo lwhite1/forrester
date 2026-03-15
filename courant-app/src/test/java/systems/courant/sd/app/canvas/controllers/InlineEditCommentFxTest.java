@@ -128,8 +128,8 @@ class InlineEditCommentFxTest {
     }
 
     @Test
-    @DisplayName("Escape commits comment text")
-    void shouldCommitOnEscape(FxRobot robot) {
+    @DisplayName("Escape discards comment edits and closes editor")
+    void shouldDiscardOnEscape(FxRobot robot) {
         String name = editor.addComment();
         canvasState.addElement(name, ElementType.COMMENT, 400, 300);
 
@@ -138,6 +138,23 @@ class InlineEditCommentFxTest {
         TextArea area = (TextArea) overlayPane.getChildren().get(0);
         robot.clickOn(area).write("A note");
         robot.push(KeyCode.ESCAPE);
+
+        assertThat(lastCommentName).isNull();
+        assertThat(lastCommentText).isNull();
+        assertThat(controller.isActive()).isFalse();
+    }
+
+    @Test
+    @DisplayName("Ctrl+Enter commits comment text")
+    void shouldCommitOnCtrlEnter(FxRobot robot) {
+        String name = editor.addComment();
+        canvasState.addElement(name, ElementType.COMMENT, 400, 300);
+
+        startEditOnFxThread(name, robot);
+
+        TextArea area = (TextArea) overlayPane.getChildren().get(0);
+        robot.clickOn(area).write("A note");
+        robot.push(KeyCode.CONTROL, KeyCode.ENTER);
 
         assertThat(lastCommentName).isEqualTo(name);
         assertThat(lastCommentText).isEqualTo("A note");
