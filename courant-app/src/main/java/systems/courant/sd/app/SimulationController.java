@@ -53,7 +53,7 @@ import java.util.function.Consumer;
 final class SimulationController {
 
     private final ModelCanvas canvas;
-    private final AnalysisRunner analysisRunner;
+    private AnalysisRunner analysisRunner;
     private final DashboardPanel dashboardPanel;
     private final Runnable switchToDashboard;
     private final StatusBar statusBar;
@@ -74,6 +74,10 @@ final class SimulationController {
         this.statusBar = statusBar;
         this.showError = showError;
         this.fireLogEvent = fireLogEvent;
+    }
+
+    void setAnalysisRunner(AnalysisRunner runner) {
+        this.analysisRunner = runner;
     }
 
     void openSimulationSettings() {
