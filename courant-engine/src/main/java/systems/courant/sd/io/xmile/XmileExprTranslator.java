@@ -24,7 +24,7 @@ public final class XmileExprTranslator {
             "(?i)\\bNOT\\b");
     private static final Pattern INEQUALITY_PATTERN = Pattern.compile("<>");
     private static final Pattern EQUALITY_SINGLE_PATTERN = Pattern.compile(
-            "(?<![<>!=])=(?!=)");
+            "(?<![<>!=\\w])=(?!=)");
     private static final Pattern SMTH3_PATTERN = Pattern.compile(
             "(?i)\\bSMTH3\\s*\\(");
     private static final Pattern SMTH1_PATTERN = Pattern.compile(

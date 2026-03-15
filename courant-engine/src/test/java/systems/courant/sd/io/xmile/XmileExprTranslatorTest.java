@@ -177,6 +177,40 @@ class XmileExprTranslatorTest {
         }
 
         @Test
+        void shouldNotTranslateNamedArgumentEquals() {
+            // DELAY(input, delay=5) should NOT become DELAY(input, delay==5)
+            var result = XmileExprTranslator.toCourant("DELAY(input, delay=5)");
+            assertThat(result.expression()).isEqualTo("DELAY(input, delay=5)");
+        }
+
+        @Test
+        void shouldNotTranslateMultipleNamedArguments() {
+            var result = XmileExprTranslator.toCourant("FUNC(a=1, b=2)");
+            assertThat(result.expression()).isEqualTo("FUNC(a=1, b=2)");
+        }
+
+        @Test
+        void shouldStillTranslateSpacedEqualityOperator() {
+            // Standard XMILE comparison with spaces should still work
+            var result = XmileExprTranslator.toCourant("x = 5");
+            assertThat(result.expression()).isEqualTo("x == 5");
+        }
+
+        @Test
+        void shouldTranslateEqualityAfterParenthesis() {
+            var result = XmileExprTranslator.toCourant("(x) = 5");
+            assertThat(result.expression()).isEqualTo("(x) == 5");
+        }
+
+        @Test
+        void shouldHandleMixOfNamedArgsAndComparisons() {
+            var result = XmileExprTranslator.toCourant(
+                    "IF_THEN_ELSE(x = 5, DELAY(input, delay=3), 0)");
+            assertThat(result.expression()).isEqualTo(
+                    "IF(x == 5, DELAY(input, delay=3), 0)");
+        }
+
+        @Test
         void shouldHandleCombinedExpression() {
             var result = XmileExprTranslator.toCourant(
                     "IF_THEN_ELSE(x = 5 AND y <> 3, Time, 0)");
