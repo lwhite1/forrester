@@ -47,11 +47,11 @@ class ModelWindowFxTest {
     }
 
     @Test
-    @DisplayName("Start screen shows New Model, Open Model, and Getting Started cards")
+    @DisplayName("Start screen shows New Model, Open Model, and Tutorials cards")
     void startScreenCardsPresent(FxRobot robot) {
         assertThat(robot.lookup("#startNewModel").tryQuery()).isPresent();
         assertThat(robot.lookup("#startOpenModel").tryQuery()).isPresent();
-        assertThat(robot.lookup("#startGettingStarted").tryQuery()).isPresent();
+        assertThat(robot.lookup("#startTutorials").tryQuery()).isPresent();
     }
 
     @Test

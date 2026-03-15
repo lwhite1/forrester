@@ -41,9 +41,7 @@ final class StartScreen extends VBox {
 
     private Runnable onNewModel;
     private Runnable onOpenFile;
-    private Runnable onGettingStarted;
-    private Runnable onSirTutorial;
-    private Runnable onSupplyChainTutorial;
+    private Runnable onTutorials;
     private BiConsumer<String, String> onOpenExample;
 
     private List<ExampleEntry> allExamples = List.of();
@@ -120,26 +118,13 @@ final class StartScreen extends VBox {
                 () -> { if (onOpenFile != null) onOpenFile.run(); });
         openModelCard.setId("startOpenModel");
 
-        VBox gettingStartedCard = buildActionCard("Getting Started",
-                "Learn the basics step by step",
+        VBox tutorialsCard = buildActionCard("Tutorials",
+                "Step-by-step guides to learn modeling",
                 "#2C3E50",
-                () -> { if (onGettingStarted != null) onGettingStarted.run(); });
-        gettingStartedCard.setId("startGettingStarted");
+                () -> { if (onTutorials != null) onTutorials.run(); });
+        tutorialsCard.setId("startTutorials");
 
-        VBox sirTutorialCard = buildActionCard("SIR Epidemic",
-                "Reinforcing feedback and S-shaped growth",
-                "#2C3E50",
-                () -> { if (onSirTutorial != null) onSirTutorial.run(); });
-        sirTutorialCard.setId("startSirTutorial");
-
-        VBox supplyChainCard = buildActionCard("Supply Chain",
-                "Delays, oscillation, and the bullwhip effect",
-                "#2C3E50",
-                () -> { if (onSupplyChainTutorial != null) onSupplyChainTutorial.run(); });
-        supplyChainCard.setId("startSupplyChainTutorial");
-
-        cards.getChildren().addAll(newModelCard, openModelCard, gettingStartedCard,
-                sirTutorialCard, supplyChainCard);
+        cards.getChildren().addAll(newModelCard, openModelCard, tutorialsCard);
 
         return cards;
     }
@@ -419,16 +404,8 @@ final class StartScreen extends VBox {
         this.onOpenFile = handler;
     }
 
-    void setOnGettingStarted(Runnable handler) {
-        this.onGettingStarted = handler;
-    }
-
-    void setOnSirTutorial(Runnable handler) {
-        this.onSirTutorial = handler;
-    }
-
-    void setOnSupplyChainTutorial(Runnable handler) {
-        this.onSupplyChainTutorial = handler;
+    void setOnTutorials(Runnable handler) {
+        this.onTutorials = handler;
     }
 
     void setOnOpenExample(BiConsumer<String, String> handler) {

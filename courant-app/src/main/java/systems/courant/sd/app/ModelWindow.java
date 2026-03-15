@@ -22,6 +22,7 @@ import systems.courant.sd.app.canvas.PropertiesPanel;
 import systems.courant.sd.app.canvas.dialogs.QuickstartDialog;
 import systems.courant.sd.app.canvas.dialogs.SirTutorialDialog;
 import systems.courant.sd.app.canvas.dialogs.SupplyChainTutorialDialog;
+import systems.courant.sd.app.canvas.dialogs.TutorialChooserDialog;
 import systems.courant.sd.app.canvas.dialogs.KeyboardShortcutsDialog;
 import systems.courant.sd.app.canvas.dialogs.SdConceptsDialog;
 import systems.courant.sd.app.canvas.StatusBar;
@@ -361,24 +362,28 @@ public class ModelWindow {
             // If user cancelled the file chooser, still show the editor
             canvas.requestFocus();
         });
-        startScreen.setOnGettingStarted(() -> {
-            showEditor();
-            fileController.newModel();
-            quickstartWindow = showHelpWindow(quickstartWindow, QuickstartDialog::new);
-            canvas.requestFocus();
-        });
-        startScreen.setOnSirTutorial(() -> {
-            showEditor();
-            fileController.newModel();
-            sirTutorialWindow = showHelpWindow(sirTutorialWindow, SirTutorialDialog::new);
-            canvas.requestFocus();
-        });
-        startScreen.setOnSupplyChainTutorial(() -> {
-            showEditor();
-            fileController.newModel();
-            supplyChainTutorialWindow = showHelpWindow(supplyChainTutorialWindow,
-                    SupplyChainTutorialDialog::new);
-            canvas.requestFocus();
+        startScreen.setOnTutorials(() -> {
+            TutorialChooserDialog chooser = new TutorialChooserDialog();
+            chooser.setOnGettingStarted(() -> {
+                showEditor();
+                fileController.newModel();
+                quickstartWindow = showHelpWindow(quickstartWindow, QuickstartDialog::new);
+                canvas.requestFocus();
+            });
+            chooser.setOnSirTutorial(() -> {
+                showEditor();
+                fileController.newModel();
+                sirTutorialWindow = showHelpWindow(sirTutorialWindow, SirTutorialDialog::new);
+                canvas.requestFocus();
+            });
+            chooser.setOnSupplyChainTutorial(() -> {
+                showEditor();
+                fileController.newModel();
+                supplyChainTutorialWindow = showHelpWindow(supplyChainTutorialWindow,
+                        SupplyChainTutorialDialog::new);
+                canvas.requestFocus();
+            });
+            chooser.show();
         });
         startScreen.setOnOpenExample((name, path) -> {
             showEditor();
