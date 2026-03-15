@@ -772,4 +772,49 @@ class VensimExporterTest {
             assertThat(mdl).contains("200.5,150.75");
         }
     }
+
+    @Nested
+    @DisplayName("extractEqZeroOperand balanced parens (#633)")
+    class ExtractEqZeroOperand {
+
+        @Test
+        void shouldMatchBalancedParensAroundOperand() {
+            // (a + b) == 0 should extract "a + b"
+            String result = VensimExporter.reverseXidzZidz(
+                    "IF((a + b) == 0, 0, (x) / (a + b))");
+            assertThat(result).isEqualTo("ZIDZ(x, a + b)");
+        }
+
+        @Test
+        void shouldNotMatchUnbalancedParens() {
+            // (a) + (b == 0 has unbalanced parens — should NOT match XIDZ/ZIDZ
+            String expr = "IF((a) + (b == 0, fallback, something)";
+            String result = VensimExporter.reverseXidzZidz(expr);
+            // Should pass through unchanged (no XIDZ/ZIDZ match)
+            assertThat(result).isEqualTo(expr);
+        }
+    }
+
+    @Nested
+    @DisplayName("reverseXidzZidz skip non-matching IF (#629)")
+    class ReverseXidzZidzSkip {
+
+        @Test
+        void shouldNotInfiniteLoopOnNonMatchingIf() {
+            // Two IF calls, first doesn't match XIDZ pattern, second does
+            String expr = "IF(x > 0, 1, 0) + IF((b) == 0, 0, (a) / (b))";
+            String result = VensimExporter.reverseXidzZidz(expr);
+            assertThat(result).contains("ZIDZ(a, b)");
+            // First IF should remain unchanged
+            assertThat(result).startsWith("IF(x > 0, 1, 0)");
+        }
+
+        @Test
+        void shouldHandleConsecutiveNonMatchingIfs() {
+            String expr = "IF(a, b, c) + IF(d, e, f)";
+            String result = VensimExporter.reverseXidzZidz(expr);
+            // Neither matches — should pass through unchanged without looping
+            assertThat(result).isEqualTo(expr);
+        }
+    }
 }

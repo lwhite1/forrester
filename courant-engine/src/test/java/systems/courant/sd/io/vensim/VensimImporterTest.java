@@ -2854,4 +2854,115 @@ class VensimImporterTest {
             assertThat(compiled).isNotNull();
         }
     }
+
+    @Nested
+    @DisplayName("Transitive dimension equivalences (#695)")
+    class TransitiveDimensionEquivalences {
+
+        @Test
+        void shouldResolveTransitiveEquivalences() {
+            String mdl = """
+                    dim_a : x1, x2
+                    \t~\t
+                    \t~\t
+                    \t|
+
+                    dim_b <-> dim_a
+                    \t~\t
+                    \t~\t
+                    \t|
+
+                    dim_c <-> dim_b
+                    \t~\t
+                    \t~\t
+                    \t|
+
+                    var[dim_c] = 10
+                    \t~\t
+                    \t~\t
+                    \t|
+
+                    INITIAL TIME = 0
+                    \t~\tYear
+                    \t~\t
+                    \t|
+
+                    FINAL TIME = 10
+                    \t~\tYear
+                    \t~\t
+                    \t|
+
+                    TIME STEP = 1
+                    \t~\tYear
+                    \t~\t
+                    \t|
+                    """;
+
+            ImportResult result = importer.importModel(mdl, "TransTest");
+            ModelDefinition def = result.definition();
+
+            // dim_c should have resolved through dim_b to dim_a's labels
+            Set<String> subscriptNames = def.subscripts().stream()
+                    .map(SubscriptDef::name)
+                    .collect(Collectors.toSet());
+            assertThat(subscriptNames).contains("dim_c");
+
+            SubscriptDef dimC = def.subscripts().stream()
+                    .filter(s -> s.name().equals("dim_c"))
+                    .findFirst().orElseThrow();
+            assertThat(dimC.labels()).containsExactly("x1", "x2");
+        }
+    }
+
+    @Nested
+    @DisplayName("Path traversal protection (#627)")
+    class PathTraversalProtection {
+
+        @Test
+        void shouldRejectPathsOutsideModelDirectory() throws IOException {
+            // Create a temp directory structure
+            var tempDir = java.nio.file.Files.createTempDirectory("vensim-test");
+            var modelDir = tempDir.resolve("model");
+            java.nio.file.Files.createDirectories(modelDir);
+            var secretFile = tempDir.resolve("secret.csv");
+            java.nio.file.Files.writeString(secretFile, "time,value\n0,1\n");
+
+            String mdl = """
+                    x = GET DIRECT DATA('../secret.csv', 'Sheet', 'A', 'B')
+                    \t~\t
+                    \t~\t
+                    \t|
+
+                    INITIAL TIME = 0
+                    \t~\tYear
+                    \t~\t
+                    \t|
+
+                    FINAL TIME = 10
+                    \t~\tYear
+                    \t~\t
+                    \t|
+
+                    TIME STEP = 1
+                    \t~\tYear
+                    \t~\t
+                    \t|
+                    """;
+
+            // Write the mdl to the model directory
+            var mdlPath = modelDir.resolve("test.mdl");
+            java.nio.file.Files.writeString(mdlPath, mdl);
+
+            ImportResult result = importer.importModel(mdlPath);
+
+            // Should warn about the rejected path
+            assertThat(result.warnings()).anyMatch(w -> w.contains("outside model directory"));
+
+            // Cleanup
+            java.nio.file.Files.deleteIfExists(secretFile);
+            java.nio.file.Files.deleteIfExists(mdlPath);
+            java.nio.file.Files.deleteIfExists(modelDir);
+            java.nio.file.Files.deleteIfExists(tempDir);
+        }
+    }
 }

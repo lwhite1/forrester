@@ -125,6 +125,7 @@ public class VensimImporter implements ModelImporter {
         Map<String, SubscriptMapping> subscriptMappings = new LinkedHashMap<>();
         // Deferred <-> equivalences (resolved after all : definitions)
         Map<String, String> equivalences = new LinkedHashMap<>();
+        Map<String, String> equivalenceDisplayNames = new LinkedHashMap<>();
 
         for (MdlEquation eq : equations) {
             String name = eq.name().strip();
@@ -190,21 +191,30 @@ public class VensimImporter implements ModelImporter {
             // Dimension equivalence: prereqtask <-> task
             if (eq.operator().equals("<->")) {
                 String dimName = VensimExprTranslator.normalizeName(name);
+                String displayName = VensimExprTranslator.normalizeDisplayName(name);
                 String targetDim = VensimExprTranslator.normalizeName(
                         eq.expression().strip());
                 equivalences.put(dimName, targetDim);
+                equivalenceDisplayNames.put(dimName, displayName);
             }
         }
 
-        // Resolve <-> equivalences after all dimension definitions
-        for (var entry : equivalences.entrySet()) {
-            String dimName = entry.getKey();
-            String targetDim = entry.getValue();
-            List<String> targetLabels = subscriptDimensions.get(targetDim);
-            List<String> targetDisplayLabels = subscriptDisplayLabels.get(targetDim);
-            if (targetLabels != null) {
-                subscriptDimensions.put(dimName, targetLabels);
-                subscriptDisplayLabels.put(dimName, targetDisplayLabels);
+        // Resolve <-> equivalences after all dimension definitions.
+        // Iterate until no new resolutions are made to handle transitive chains
+        // (e.g. A <-> B, B <-> C: first pass resolves B, second pass resolves A via B).
+        boolean changed = true;
+        while (changed) {
+            changed = false;
+            for (var entry : equivalences.entrySet()) {
+                String dimName = entry.getKey();
+                String targetDim = entry.getValue();
+                List<String> targetLabels = subscriptDimensions.get(targetDim);
+                List<String> targetDisplayLabels = subscriptDisplayLabels.get(targetDim);
+                if (targetLabels != null && !targetLabels.equals(subscriptDimensions.get(dimName))) {
+                    subscriptDimensions.put(dimName, targetLabels);
+                    subscriptDisplayLabels.put(dimName, targetDisplayLabels);
+                    changed = true;
+                }
             }
         }
 
@@ -224,6 +234,16 @@ public class VensimImporter implements ModelImporter {
         ModelDefinitionBuilder builder = new ModelDefinitionBuilder()
                 .name(modelName)
                 .defaultSimulation(timeUnit, duration, timeUnit, timeStepValue);
+
+        // Register resolved equivalence dimensions as subscripts
+        for (var entry : equivalences.entrySet()) {
+            String dimName = entry.getKey();
+            List<String> labels = subscriptDisplayLabels.get(dimName);
+            String displayName = equivalenceDisplayNames.get(dimName);
+            if (labels != null && displayName != null) {
+                builder.subscript(displayName, labels);
+            }
+        }
 
         // Inject Vensim built-in simulation constants so expressions can reference them
         builder.constant("TIME_STEP", timeStepValue, timeUnit);
@@ -490,7 +510,12 @@ public class VensimImporter implements ModelImporter {
                 if (!filePath.toLowerCase(Locale.ROOT).endsWith(".csv")) {
                     continue;
                 }
-                Path csvPath = baseDir.resolve(filePath);
+                Path csvPath = baseDir.resolve(filePath).normalize();
+                if (!csvPath.startsWith(baseDir.normalize())) {
+                    warnings.add("Rejected companion CSV path '" + filePath
+                            + "': resolves outside model directory");
+                    continue;
+                }
                 if (!Files.isRegularFile(csvPath)) {
                     continue;
                 }
@@ -823,7 +848,8 @@ public class VensimImporter implements ModelImporter {
                 result.append(expr, pos, expr.length());
                 break;
             }
-            int bracketEnd = expr.indexOf(']', bracketStart);
+            // Find matching ']' accounting for nested brackets and quoted strings
+            int bracketEnd = findMatchingBracket(expr, bracketStart);
             if (bracketEnd < 0) {
                 result.append(expr, pos, expr.length());
                 break;
@@ -842,6 +868,31 @@ public class VensimImporter implements ModelImporter {
             pos = bracketEnd + 1;
         }
         return result.toString();
+    }
+
+    /**
+     * Finds the closing ']' that matches the opening '[' at the given position,
+     * accounting for nested brackets and skipping content inside double quotes.
+     */
+    private static int findMatchingBracket(String expr, int openPos) {
+        int depth = 0;
+        boolean inQuote = false;
+        for (int i = openPos; i < expr.length(); i++) {
+            char c = expr.charAt(i);
+            if (c == '"') {
+                inQuote = !inQuote;
+            } else if (!inQuote) {
+                if (c == '[') {
+                    depth++;
+                } else if (c == ']') {
+                    depth--;
+                    if (depth == 0) {
+                        return i;
+                    }
+                }
+            }
+        }
+        return -1;
     }
 
     /**
