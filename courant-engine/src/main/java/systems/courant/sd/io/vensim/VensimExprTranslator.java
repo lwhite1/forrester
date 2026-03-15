@@ -530,13 +530,29 @@ public final class VensimExprTranslator {
         // Sort names longest-first to avoid partial matches
         List<String> sortedNames = knownNames.stream()
                 .filter(n -> n.contains(" "))
-                .sorted(Comparator.comparingInt(String::length).reversed())
+                .sorted(Comparator.comparingInt(String::length).reversed()
+                        .thenComparing(Comparator.naturalOrder()))
                 .toList();
 
+        // Two-pass approach: first try exact (case-sensitive) match, then fall back
+        // to case-insensitive for any names not found exactly. This ensures that when
+        // two names differ only by case, each is replaced with its own normalized form.
+        List<String> unmatchedNames = new ArrayList<>();
         for (String name : sortedNames) {
             String normalized = normalizeName(name);
-            // Use word-boundary-aware replacement
-            // Vensim names with spaces: match the literal multi-word name
+            String escaped = Pattern.quote(name);
+            Pattern exact = Pattern.compile("(?<![a-zA-Z0-9_])" + escaped + "(?![a-zA-Z0-9_])");
+            Matcher m = exact.matcher(expr);
+            if (m.find()) {
+                expr = m.replaceAll(normalized);
+            } else {
+                unmatchedNames.add(name);
+            }
+        }
+
+        // Second pass: case-insensitive fallback for names not found exactly
+        for (String name : unmatchedNames) {
+            String normalized = normalizeName(name);
             String escaped = Pattern.quote(name);
             Pattern p = Pattern.compile("(?<![a-zA-Z0-9_])" + escaped + "(?![a-zA-Z0-9_])",
                     Pattern.CASE_INSENSITIVE);

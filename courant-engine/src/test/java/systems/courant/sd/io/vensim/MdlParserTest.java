@@ -346,6 +346,43 @@ class MdlParserTest {
         }
 
         @Test
+        void shouldClassifyEquationBetweenEndAndMacroAsRegular() {
+            // When :END OF MACRO: and :MACRO: appear in the same pipe-block with
+            // an equation between them, the middle equation should be a regular
+            // equation, not part of either macro.
+            String content = """
+                    :MACRO: FIRST(a, out)
+                    out = a * 2
+                    \t~\t
+                    \t~\t
+                    \t|
+                    :END OF MACRO:
+                    middle = 99
+                    :MACRO: SECOND(b, out)
+                    \t~\t
+                    \t~\t
+                    \t|
+                    out = b + 1
+                    \t~\t
+                    \t~\t
+                    \t|
+                    :END OF MACRO:
+                    """;
+            MdlParser.ParsedMdl result = MdlParser.parse(content);
+
+            // "middle" should be in main equations, not in either macro
+            assertThat(result.equations()).hasSize(1);
+            assertThat(result.equations().get(0).name()).isEqualTo("middle");
+
+            // Both macros should be parsed
+            assertThat(result.macros()).hasSize(2);
+            assertThat(result.macros().get(0).name()).isEqualTo("FIRST");
+            assertThat(result.macros().get(0).bodyEquations()).hasSize(1);
+            assertThat(result.macros().get(1).name()).isEqualTo("SECOND");
+            assertThat(result.macros().get(1).bodyEquations()).hasSize(1);
+        }
+
+        @Test
         void shouldHandleNoParsedMacros() {
             String content = "x = 5\n\t~\t\n\t~\t\n\t|";
             MdlParser.ParsedMdl result = MdlParser.parse(content);
