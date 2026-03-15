@@ -1008,6 +1008,22 @@ class ExprCompilerTest {
             // Step 1: NPV = 100 + 100/1.1 = 190.91
             step[0] = 1;
             assertThat(formula.getCurrentValue()).isCloseTo(190.91, within(0.01));
+            // Step 2: NPV = 190.91 + 100/1.21 = 273.55
+            step[0] = 2;
+            assertThat(formula.getCurrentValue()).isCloseTo(273.55, within(0.01));
+        }
+
+        @Test
+        void shouldApplyBothInitialValueAndFactor() {
+            // NPV(stream, discount_rate, initial_value, factor)
+            context.addLiteralConstant("CashFlow", 100);
+            Formula formula = compiler.compile("NPV(CashFlow, 0.10, 50, 2)");
+            // Step 0: NPV = 50 (initial) + 100 * 2 = 250
+            step[0] = 0;
+            assertThat(formula.getCurrentValue()).isCloseTo(250.0, within(0.01));
+            // Step 1: NPV = 250 + 100 * 2 / 1.1 = 431.82
+            step[0] = 1;
+            assertThat(formula.getCurrentValue()).isCloseTo(431.82, within(0.01));
         }
     }
 
