@@ -50,7 +50,7 @@ class VensimExporterTest {
             assertThat(mdl).contains("INITIAL TIME");
             assertThat(mdl).contains("TIME STEP");
             assertThat(mdl).contains("SAVEPER");
-            assertThat(mdl).contains("\\---///");
+            assertThat(mdl).contains("\\\\\\---///");
 
             // Re-import the exported content and verify structures preserved
             ImportResult reImported = importer.importModel(mdl, "sir");
@@ -320,7 +320,7 @@ class VensimExporterTest {
             assertThat(mdl).contains("INITIAL TIME");
             assertThat(mdl).contains("TIME STEP");
             assertThat(mdl).contains("SAVEPER");
-            assertThat(mdl).contains("\\---///");
+            assertThat(mdl).contains("\\\\\\---///");
         }
     }
 

@@ -46,7 +46,7 @@ SAVEPER  =
 	~	The frequency with which output is stored.
 	|
 
-\---///
+\\\---///
 *CLD View
 10,1,Population,200,200
 10,2,Birth Rate,100,100

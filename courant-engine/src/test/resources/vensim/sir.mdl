@@ -77,7 +77,7 @@ SAVEPER  =
 	~	The frequency with which output is stored.
 	|
 
-\---///
+\\\---///
 *SIR Model
 10,1,Susceptible,100,200
 10,2,Infected,300,200

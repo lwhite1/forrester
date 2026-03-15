@@ -208,7 +208,7 @@ class MdlParserTest {
 
         @Test
         void shouldSeparateSketchFromEquations() {
-            String content = "x = 5\n\t~\t\n\t~\t\n\t|\n\n\\---///\n*View 1\n10,1,x,100,200";
+            String content = "x = 5\n\t~\t\n\t~\t\n\t|\n\n\\\\\\---///\n*View 1\n10,1,x,100,200";
             MdlParser.ParsedMdl result = MdlParser.parse(content);
 
             assertThat(result.equations()).hasSize(1);
