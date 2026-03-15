@@ -26,6 +26,9 @@ import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -45,6 +48,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * accumulation of data from the simulation thread before the FX thread reads it.
  */
 public class ChartViewerApplication extends Application {
+
+    private static final Logger log = LoggerFactory.getLogger(ChartViewerApplication.class);
 
     private static final Object LOCK = new Object();
     private static final AtomicBoolean FX_STARTED = new AtomicBoolean(false);
@@ -135,6 +140,9 @@ public class ChartViewerApplication extends Application {
                 Platform.startup(() -> {});
             } catch (IllegalStateException e) {
                 // Toolkit already initialized (e.g., by the app or TestFX)
+            } catch (RuntimeException e) {
+                FX_STARTED.set(false);
+                throw e;
             }
             Platform.setImplicitExit(false);
         }
@@ -338,6 +346,7 @@ public class ChartViewerApplication extends Application {
         try {
             ImageIO.write(bImage, "png", outputFile);
         } catch (IOException e) {
+            log.error("Failed to save chart image to {}", outputFile, e);
             Alert alert = new Alert(Alert.AlertType.ERROR,
                     "Failed to save chart image: " + e.getMessage());
             alert.setHeaderText("Save Error");
