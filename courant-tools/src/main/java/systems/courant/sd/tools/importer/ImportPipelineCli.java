@@ -32,6 +32,10 @@ public class ImportPipelineCli implements Closeable {
         try (ImportPipelineCli cli = new ImportPipelineCli()) {
             int exitCode = cli.run(args);
             System.exit(exitCode);
+        } catch (IllegalArgumentException e) {
+            System.err.println(e.getMessage());
+            printUsage();
+            System.exit(1);
         } catch (Exception e) {
             System.err.println("Error: " + e.getMessage());
             System.exit(1);
@@ -48,6 +52,11 @@ public class ImportPipelineCli implements Closeable {
 
     int run(String[] args) throws IOException {
         CliArgs parsed = parseArgs(args);
+
+        if (parsed.helpRequested) {
+            printUsage();
+            return 0;
+        }
 
         if (parsed.file == null) {
             printUsage();
@@ -163,15 +172,9 @@ public class ImportPipelineCli implements Closeable {
                 case "--dry-run" -> parsed.dryRun = true;
                 case "--overwrite" -> parsed.overwrite = true;
                 case "--json-only" -> parsed.jsonOnly = true;
-                case "--help", "-h" -> {
-                    printUsage();
-                    System.exit(0);
-                }
-                default -> {
-                    System.err.println("Unknown option: " + args[i]);
-                    printUsage();
-                    System.exit(1);
-                }
+                case "--help", "-h" -> parsed.helpRequested = true;
+                default -> throw new IllegalArgumentException(
+                        "Unknown option: " + args[i]);
             }
         }
         return parsed;
@@ -180,9 +183,8 @@ public class ImportPipelineCli implements Closeable {
     private static String requireValue(String[] args, int flagIndex) {
         int valueIndex = flagIndex + 1;
         if (valueIndex >= args.length) {
-            System.err.println("Missing value for " + args[flagIndex]);
-            printUsage();
-            System.exit(1);
+            throw new IllegalArgumentException(
+                    args[flagIndex] + " requires a value");
         }
         return args[valueIndex];
     }
@@ -224,5 +226,6 @@ public class ImportPipelineCli implements Closeable {
         boolean dryRun;
         boolean overwrite;
         boolean jsonOnly;
+        boolean helpRequested;
     }
 }
