@@ -118,7 +118,7 @@ final class StartScreen extends VBox {
                 () -> { if (onOpenFile != null) onOpenFile.run(); });
         openModelCard.setId("startOpenModel");
 
-        VBox tutorialsCard = buildActionCard("Tutorials",
+        VBox tutorialsCard = buildActionCard("Do a Tutorial",
                 "Step-by-step guides to learn modeling",
                 "#2C3E50",
                 () -> { if (onTutorials != null) onTutorials.run(); });
