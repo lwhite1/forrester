@@ -1,15 +1,10 @@
 package systems.courant.sd.app.canvas.renderers;
 
-import systems.courant.sd.model.def.VariableDef;
 import systems.courant.sd.model.def.CausalLinkDef;
-import systems.courant.sd.model.def.CommentDef;
 import systems.courant.sd.model.def.ConnectorRoute;
 import systems.courant.sd.model.def.ElementType;
 import systems.courant.sd.model.def.FlowDef;
-import systems.courant.sd.model.def.ModuleInterface;
-import systems.courant.sd.model.def.PortDef;
 import systems.courant.sd.model.def.ValidationIssue;
-import systems.courant.sd.model.expr.DelayDetector;
 import systems.courant.sd.model.graph.CausalTraceAnalysis;
 import systems.courant.sd.model.graph.FeedbackAnalysis;
 import systems.courant.sd.model.graph.FeedbackAnalysis.CausalLoop;
@@ -17,6 +12,10 @@ import systems.courant.sd.model.graph.FeedbackAnalysis.CausalLoop;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 import systems.courant.sd.app.canvas.CanvasState;
@@ -40,6 +39,8 @@ import systems.courant.sd.app.canvas.controllers.InfoLinkCreationController;
  * Draws connections, elements, selection indicators, and rubber-band overlays.
  */
 public class CanvasRenderer {
+
+    private static final Logger log = LoggerFactory.getLogger(CanvasRenderer.class);
 
     private static final Color RUBBER_BAND_COLOR = ColorPalette.RUBBER_BAND;
     private static final Color STOCK_HOVER_COLOR = ColorPalette.HOVER;
@@ -116,6 +117,20 @@ public class CanvasRenderer {
             MaturityAnalysis maturityAnalysis
     ) {}
 
+    private static final Map<ElementType, ElementTypeRenderer> ELEMENT_RENDERERS;
+
+    static {
+        Map<ElementType, ElementTypeRenderer> map = new EnumMap<>(ElementType.class);
+        map.put(ElementType.STOCK, new StockRenderer());
+        map.put(ElementType.FLOW, new FlowRenderer());
+        map.put(ElementType.AUX, new AuxRenderer());
+        map.put(ElementType.MODULE, new ModuleRenderer());
+        map.put(ElementType.LOOKUP, new LookupRenderer());
+        map.put(ElementType.CLD_VARIABLE, new CldVariableRenderer());
+        map.put(ElementType.COMMENT, new CommentRenderer());
+        ELEMENT_RENDERERS = Map.copyOf(map);
+    }
+
     private final CanvasState canvasState;
     private final Viewport viewport;
 
@@ -188,95 +203,15 @@ public class CanvasRenderer {
                                 boolean hideAux, boolean showDelay) {
         for (String name : canvasState.getDrawOrder()) {
             ElementType type = canvasState.getType(name).orElse(null);
-            double cx = canvasState.getX(name);
-            double cy = canvasState.getY(name);
-
-            if (type == null) {
+            if (type == null || (hideAux && type == ElementType.AUX)) {
                 continue;
             }
-
-            if (hideAux && type == ElementType.AUX) {
-                continue;
-            }
-
-            switch (type) {
-                case STOCK -> {
-                    double w = LayoutMetrics.effectiveWidth(canvasState, name);
-                    double h = LayoutMetrics.effectiveHeight(canvasState, name);
-                    String unit = editor.getStockUnit(name).orElse(null);
-                    ElementRenderer.drawStock(gc, name, unit,
-                            cx - w / 2, cy - h / 2, w, h);
-                }
-                case FLOW -> {
-                    boolean hasDelay = showDelay
-                            && editor.getFlowEquation(name)
-                                    .map(DelayDetector::equationContainsDelay).orElse(false);
-                    ElementRenderer.drawFlow(gc, name, hasDelay,
-                            cx - LayoutMetrics.FLOW_INDICATOR_SIZE / 2,
-                            cy - LayoutMetrics.FLOW_INDICATOR_SIZE / 2,
-                            LayoutMetrics.FLOW_INDICATOR_SIZE, LayoutMetrics.FLOW_INDICATOR_SIZE);
-                }
-                case AUX -> {
-                    double w = LayoutMetrics.effectiveWidth(canvasState, name);
-                    double h = LayoutMetrics.effectiveHeight(canvasState, name);
-                    boolean isLiteral = editor.getVariableByName(name)
-                            .map(VariableDef::isLiteral).orElse(false);
-                    String equation = editor.getVariableEquation(name).orElse(null);
-                    boolean hasDelay = showDelay
-                            && DelayDetector.equationContainsDelay(equation);
-                    ElementRenderer.drawAux(gc, name, isLiteral, equation, hasDelay,
-                            cx - w / 2, cy - h / 2, w, h);
-                }
-                case MODULE -> {
-                    double w = LayoutMetrics.effectiveWidth(canvasState, name);
-                    double h = LayoutMetrics.effectiveHeight(canvasState, name);
-                    List<String> inputPorts = List.of();
-                    List<String> outputPorts = List.of();
-                    var moduleOpt = editor.getModuleByName(name);
-                    if (moduleOpt.isPresent()) {
-                        ModuleInterface iface = moduleOpt.get().definition().moduleInterface();
-                        if (iface != null) {
-                            inputPorts = iface.inputs().stream()
-                                    .map(PortDef::name).toList();
-                            outputPorts = iface.outputs().stream()
-                                    .map(PortDef::name).toList();
-                        }
-                    }
-                    ElementRenderer.drawModule(gc, name, inputPorts, outputPorts,
-                            cx - w / 2, cy - h / 2, w, h);
-                }
-                case LOOKUP -> {
-                    double w = LayoutMetrics.effectiveWidth(canvasState, name);
-                    double h = LayoutMetrics.effectiveHeight(canvasState, name);
-                    int pts = editor.getLookupTableByName(name)
-                            .map(lt -> lt.xValues().length).orElse(0);
-                    ElementRenderer.drawLookup(gc, name, pts,
-                            cx - w / 2, cy - h / 2, w, h);
-                }
-                case CLD_VARIABLE -> {
-                    double w = LayoutMetrics.effectiveWidth(canvasState, name);
-                    double h = LayoutMetrics.effectiveHeight(canvasState, name);
-                    ElementRenderer.drawCldVariable(gc, name,
-                            cx - w / 2, cy - h / 2, w, h);
-                }
-                case COMMENT -> {
-                    CommentDef commentDef = editor.getCommentByName(name);
-                    String text = commentDef != null ? commentDef.text() : "";
-                    double w;
-                    double h;
-                    if (canvasState.hasCustomSize(name)) {
-                        w = canvasState.getWidth(name);
-                        h = canvasState.getHeight(name);
-                    } else {
-                        double[] auto = ElementRenderer.computeCommentSize(text);
-                        w = auto[0];
-                        h = auto[1];
-                        canvasState.setSize(name, w, h);
-                    }
-                    ElementRenderer.drawComment(gc, text,
-                            cx - w / 2, cy - h / 2, w, h);
-                }
-                default -> { }
+            ElementTypeRenderer renderer = ELEMENT_RENDERERS.get(type);
+            if (renderer != null) {
+                renderer.render(gc, name, canvasState.getX(name), canvasState.getY(name),
+                        canvasState, editor, showDelay);
+            } else {
+                log.warn("No renderer registered for element type: {}", type);
             }
         }
     }
