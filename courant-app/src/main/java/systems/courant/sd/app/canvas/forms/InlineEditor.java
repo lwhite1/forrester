@@ -130,7 +130,7 @@ public class InlineEditor {
         });
 
         overlayPane.getChildren().add(textArea);
-        textArea.positionCaret(initialText.length());
+        textArea.positionCaret(initialText == null ? 0 : initialText.length());
         textArea.requestFocus();
     }
 
