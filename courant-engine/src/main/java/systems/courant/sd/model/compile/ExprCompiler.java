@@ -638,7 +638,7 @@ public class ExprCompiler {
                     "SMOOTH requires 2-3 arguments, got " + args.size(), "SMOOTH");
         }
         DoubleSupplier input = compileExpr(args.get(0));
-        double smoothingTime = evaluateConstant(args.get(1), "SMOOTH smoothingTime");
+        DoubleSupplier smoothingTime = compileExpr(args.get(1));
         Smooth smooth;
         if (args.size() == 3) {
             double initial = evaluateConstant(args.get(2), "SMOOTH initialValue");
@@ -653,7 +653,7 @@ public class ExprCompiler {
     private DoubleSupplier compileSmoothI(List<Expr> args) {
         requireArgs("SMOOTHI", args, 3);
         DoubleSupplier input = compileExpr(args.get(0));
-        double smoothingTime = evaluateConstant(args.get(1), "SMOOTHI smoothingTime");
+        DoubleSupplier smoothingTime = compileExpr(args.get(1));
         double initial = evaluateAtCompileTime(args.get(2), "SMOOTHI initialValue");
         if (Double.isNaN(initial)) {
             initial = 0.0;
@@ -669,7 +669,7 @@ public class ExprCompiler {
                     "SMOOTH3 requires 2-3 arguments, got " + args.size(), "SMOOTH3");
         }
         DoubleSupplier input = compileExpr(args.get(0));
-        double smoothingTime = evaluateConstant(args.get(1), "SMOOTH3 smoothingTime");
+        DoubleSupplier smoothingTime = compileExpr(args.get(1));
         Smooth3 smooth3;
         if (args.size() == 3) {
             double initial = evaluateAtCompileTime(args.get(2), "SMOOTH3 initialValue");
@@ -687,7 +687,7 @@ public class ExprCompiler {
     private DoubleSupplier compileSmooth3I(List<Expr> args) {
         requireArgs("SMOOTH3I", args, 3);
         DoubleSupplier input = compileExpr(args.get(0));
-        double smoothingTime = evaluateConstant(args.get(1), "SMOOTH3I smoothingTime");
+        DoubleSupplier smoothingTime = compileExpr(args.get(1));
         double initial = evaluateAtCompileTime(args.get(2), "SMOOTH3I initialValue");
         if (Double.isNaN(initial)) {
             initial = 0.0;

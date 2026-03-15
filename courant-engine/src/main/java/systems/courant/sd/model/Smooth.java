@@ -35,7 +35,7 @@ import java.util.function.LongSupplier;
 public class Smooth implements Formula, Resettable {
 
     private final DoubleSupplier input;
-    private final double smoothingTime;
+    private final DoubleSupplier smoothingTime;
     private final LongSupplier currentStep;
     private final double explicitInitial;
     private final boolean hasExplicitInitial;
@@ -44,12 +44,11 @@ public class Smooth implements Formula, Resettable {
     private boolean initialized;
     private long lastStep = -1;
 
-    private Smooth(DoubleSupplier input, double smoothingTime, LongSupplier currentStep,
+    private Smooth(DoubleSupplier input, DoubleSupplier smoothingTime, LongSupplier currentStep,
                    double explicitInitial, boolean hasExplicitInitial) {
         Preconditions.checkNotNull(input, "input supplier must not be null");
+        Preconditions.checkNotNull(smoothingTime, "smoothingTime supplier must not be null");
         Preconditions.checkNotNull(currentStep, "currentStep supplier must not be null");
-        Preconditions.checkArgument(smoothingTime > 0,
-                "smoothingTime must be positive, but got %s", smoothingTime);
         this.input = input;
         this.smoothingTime = smoothingTime;
         this.currentStep = currentStep;
@@ -61,26 +60,59 @@ public class Smooth implements Formula, Resettable {
      * Creates a SMOOTH formula with the initial value set to the first input value.
      *
      * @param input         supplies the current input value to smooth
-     * @param smoothingTime the averaging time in simulation timesteps
+     * @param smoothingTime supplies the averaging time in simulation timesteps (re-evaluated each step)
      * @param currentStep   supplies the current simulation timestep
      * @return a new Smooth formula
      */
-    public static Smooth of(DoubleSupplier input, double smoothingTime, LongSupplier currentStep) {
+    public static Smooth of(DoubleSupplier input, DoubleSupplier smoothingTime,
+                            LongSupplier currentStep) {
         return new Smooth(input, smoothingTime, currentStep, 0, false);
+    }
+
+    /**
+     * Creates a SMOOTH formula with a constant smoothing time and the initial value
+     * set to the first input value.
+     *
+     * @param input         supplies the current input value to smooth
+     * @param smoothingTime the constant averaging time in simulation timesteps
+     * @param currentStep   supplies the current simulation timestep
+     * @return a new Smooth formula
+     */
+    public static Smooth of(DoubleSupplier input, double smoothingTime,
+                            LongSupplier currentStep) {
+        Preconditions.checkArgument(smoothingTime > 0,
+                "smoothingTime must be positive, but got %s", smoothingTime);
+        return new Smooth(input, () -> smoothingTime, currentStep, 0, false);
     }
 
     /**
      * Creates a SMOOTH formula with an explicit initial value.
      *
      * @param input         supplies the current input value to smooth
-     * @param smoothingTime the averaging time in simulation timesteps
+     * @param smoothingTime supplies the averaging time in simulation timesteps (re-evaluated each step)
+     * @param initialValue  the smoothed value at time zero
+     * @param currentStep   supplies the current simulation timestep
+     * @return a new Smooth formula
+     */
+    public static Smooth of(DoubleSupplier input, DoubleSupplier smoothingTime,
+                            double initialValue, LongSupplier currentStep) {
+        return new Smooth(input, smoothingTime, currentStep, initialValue, true);
+    }
+
+    /**
+     * Creates a SMOOTH formula with a constant smoothing time and explicit initial value.
+     *
+     * @param input         supplies the current input value to smooth
+     * @param smoothingTime the constant averaging time in simulation timesteps
      * @param initialValue  the smoothed value at time zero
      * @param currentStep   supplies the current simulation timestep
      * @return a new Smooth formula
      */
     public static Smooth of(DoubleSupplier input, double smoothingTime, double initialValue,
                             LongSupplier currentStep) {
-        return new Smooth(input, smoothingTime, currentStep, initialValue, true);
+        Preconditions.checkArgument(smoothingTime > 0,
+                "smoothingTime must be positive, but got %s", smoothingTime);
+        return new Smooth(input, () -> smoothingTime, currentStep, initialValue, true);
     }
 
     /**
@@ -112,8 +144,9 @@ public class Smooth implements Formula, Resettable {
         } else if (step > lastStep) {
             long delta = step - lastStep;
             double inputVal = input.getAsDouble();
+            double st = smoothingTime.getAsDouble();
             for (int i = 0; i < delta; i++) {
-                smoothed += (inputVal - smoothed) / smoothingTime;
+                smoothed += (inputVal - smoothed) / st;
             }
             lastStep = step;
         }
