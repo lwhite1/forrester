@@ -13,7 +13,8 @@ import systems.courant.sd.app.canvas.EquationAutoComplete;
  * (since Canvas cannot have children) and positioned at the element's screen
  * coordinates.
  *
- * <p>Enter commits the edit (for TextField), Escape cancels, and focus loss commits.</p>
+ * <p>Enter commits the edit (for TextField), Ctrl+Enter commits (for TextArea),
+ * Escape cancels, and focus loss commits.</p>
  */
 public class InlineEditor {
 
@@ -91,7 +92,7 @@ public class InlineEditor {
      * @param initialText the initial text to display
      * @param width       the width of the TextArea
      * @param height      the height of the TextArea
-     * @param onCommit    callback invoked with the final text on Escape or focus loss
+     * @param onCommit    callback invoked with the final text on Ctrl+Enter or focus loss
      */
     public void openTextArea(double screenX, double screenY, String initialText,
                              double width, double height, Consumer<String> onCommit) {
@@ -108,8 +109,15 @@ public class InlineEditor {
         textArea.setOnKeyPressed(event -> {
             switch (event.getCode()) {
                 case ESCAPE -> {
-                    commitTextArea();
+                    this.onCommit = null;
+                    close();
                     event.consume();
+                }
+                case ENTER -> {
+                    if (event.isControlDown()) {
+                        commitTextArea();
+                        event.consume();
+                    }
                 }
                 default -> { }
             }
@@ -122,7 +130,7 @@ public class InlineEditor {
         });
 
         overlayPane.getChildren().add(textArea);
-        textArea.positionCaret(initialText.length());
+        textArea.positionCaret(initialText == null ? 0 : initialText.length());
         textArea.requestFocus();
     }
 

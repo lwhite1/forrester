@@ -1,7 +1,5 @@
 package systems.courant.sd.app.canvas.controllers;
 
-import systems.courant.sd.model.def.ElementType;
-
 import javafx.scene.Scene;
 import javafx.scene.control.TextArea;
 import javafx.scene.input.KeyCode;
@@ -16,9 +14,11 @@ import org.testfx.framework.junit5.ApplicationExtension;
 import org.testfx.framework.junit5.Start;
 
 import static org.assertj.core.api.Assertions.assertThat;
+
 import systems.courant.sd.app.canvas.CanvasState;
 import systems.courant.sd.app.canvas.ModelEditor;
 import systems.courant.sd.app.canvas.Viewport;
+import systems.courant.sd.model.def.ElementType;
 
 @DisplayName("Inline editing of comment elements (TestFX)")
 @ExtendWith(ApplicationExtension.class)
@@ -128,8 +128,8 @@ class InlineEditCommentFxTest {
     }
 
     @Test
-    @DisplayName("Escape commits comment text")
-    void shouldCommitOnEscape(FxRobot robot) {
+    @DisplayName("Escape discards comment edits and closes editor")
+    void shouldDiscardOnEscape(FxRobot robot) {
         String name = editor.addComment();
         canvasState.addElement(name, ElementType.COMMENT, 400, 300);
 
@@ -139,9 +139,46 @@ class InlineEditCommentFxTest {
         robot.clickOn(area).write("A note");
         robot.push(KeyCode.ESCAPE);
 
+        assertThat(lastCommentName).isNull();
+        assertThat(lastCommentText).isNull();
+        assertThat(postEditCalled).isFalse();
+        assertThat(controller.isActive()).isFalse();
+    }
+
+    @Test
+    @DisplayName("Ctrl+Enter commits comment text")
+    void shouldCommitOnCtrlEnter(FxRobot robot) {
+        String name = editor.addComment();
+        canvasState.addElement(name, ElementType.COMMENT, 400, 300);
+
+        startEditOnFxThread(name, robot);
+
+        TextArea area = (TextArea) overlayPane.getChildren().get(0);
+        robot.clickOn(area).write("A note");
+        robot.push(KeyCode.CONTROL, KeyCode.ENTER);
+
         assertThat(lastCommentName).isEqualTo(name);
         assertThat(lastCommentText).isEqualTo("A note");
+        assertThat(postEditCalled).isTrue();
         assertThat(controller.isActive()).isFalse();
+    }
+
+    @Test
+    @DisplayName("Plain Enter inserts newline, does not commit")
+    void shouldInsertNewlineOnEnter(FxRobot robot) {
+        String name = editor.addComment();
+        canvasState.addElement(name, ElementType.COMMENT, 400, 300);
+
+        startEditOnFxThread(name, robot);
+
+        TextArea area = (TextArea) overlayPane.getChildren().get(0);
+        robot.clickOn(area).write("Line 1");
+        robot.push(KeyCode.ENTER);
+        robot.write("Line 2");
+
+        assertThat(area.getText()).contains("Line 1\nLine 2");
+        assertThat(controller.isActive()).isTrue();
+        assertThat(lastCommentName).isNull();
     }
 
     @Test
