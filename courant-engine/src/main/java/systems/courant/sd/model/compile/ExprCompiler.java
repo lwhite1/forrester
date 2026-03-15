@@ -865,19 +865,22 @@ public class ExprCompiler {
     }
 
     private DoubleSupplier compileNpv(List<Expr> args) {
-        if (args.size() < 2 || args.size() > 3) {
+        if (args.size() < 2 || args.size() > 4) {
             throw new CompilationException(
-                    "NPV requires 2-3 arguments, got " + args.size(), "NPV");
+                    "NPV requires 2-4 arguments, got " + args.size(), "NPV");
         }
         DoubleSupplier stream = compileExpr(args.get(0));
         double discountRate = evaluateConstant(args.get(1), "NPV discountRate");
-        Npv npv;
+        double initialValue = 0;
+        double factor = 1.0;
         if (args.size() == 3) {
-            double factor = evaluateConstant(args.get(2), "NPV factor");
-            npv = Npv.of(stream, discountRate, factor, context.getCurrentStep());
-        } else {
-            npv = Npv.of(stream, discountRate, context.getCurrentStep());
+            factor = evaluateConstant(args.get(2), "NPV factor");
+        } else if (args.size() == 4) {
+            initialValue = evaluateConstant(args.get(2), "NPV initialValue");
+            factor = evaluateConstant(args.get(3), "NPV factor");
         }
+        Npv npv = Npv.of(stream, discountRate, factor, initialValue,
+                context.getCurrentStep());
         resettables.add(npv);
         return npv::getCurrentValue;
     }

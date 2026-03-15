@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -293,6 +294,13 @@ public final class VensimExprTranslator {
         // 14. Check for unsupported functions
         checkUnsupportedFunctions(expr, warnings);
 
+        // 15. Underscore any remaining consecutive identifiers that are not keywords.
+        // At this point, all known multi-word function names (IF THEN ELSE, RANDOM NORMAL,
+        // GET XLS DATA, etc.) have been translated. Any remaining adjacent identifiers
+        // (separated only by whitespace, not operators) must be unknown multi-word variable
+        // names — since two identifiers can never appear adjacent in a valid expression.
+        expr = underscoreConsecutiveIdentifiers(expr);
+
         return new TranslationResult(expr, lookups, warnings);
     }
 
@@ -530,6 +538,38 @@ public final class VensimExprTranslator {
                     Pattern.CASE_INSENSITIVE);
             expr = p.matcher(expr).replaceAll(normalized);
         }
+        return expr;
+    }
+
+    /**
+     * Joins consecutive bare identifiers with underscores, excluding logical keywords
+     * ({@code and}, {@code or}, {@code not}). In a valid Vensim expression, two identifiers
+     * can never appear next to each other without an operator between them — so any remaining
+     * consecutive identifiers must be unknown multi-word variable names.
+     */
+    private static final Set<String> EXPRESSION_KEYWORDS = Set.of("and", "or", "not");
+    private static final Pattern CONSECUTIVE_IDENTS = Pattern.compile(
+            "([a-zA-Z_][a-zA-Z0-9_]*)\\s+([a-zA-Z_][a-zA-Z0-9_]*)");
+
+    private static String underscoreConsecutiveIdentifiers(String expr) {
+        String prev;
+        do {
+            prev = expr;
+            Matcher m = CONSECUTIVE_IDENTS.matcher(expr);
+            StringBuilder sb = new StringBuilder();
+            while (m.find()) {
+                String left = m.group(1);
+                String right = m.group(2);
+                if (EXPRESSION_KEYWORDS.contains(left.toLowerCase(Locale.ROOT))
+                        || EXPRESSION_KEYWORDS.contains(right.toLowerCase(Locale.ROOT))) {
+                    m.appendReplacement(sb, Matcher.quoteReplacement(m.group()));
+                } else {
+                    m.appendReplacement(sb, Matcher.quoteReplacement(left + "_" + right));
+                }
+            }
+            m.appendTail(sb);
+            expr = sb.toString();
+        } while (!expr.equals(prev));
         return expr;
     }
 
