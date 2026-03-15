@@ -47,9 +47,9 @@ public final class XmileExprTranslator {
     // --- Courant → XMILE patterns ---
     private static final Pattern IF_FUNC_PATTERN = Pattern.compile(
             "(?i)\\bIF\\s*\\(");
-    private static final Pattern AND_OP_PATTERN = Pattern.compile("\\band\\b");
-    private static final Pattern OR_OP_PATTERN = Pattern.compile("\\bor\\b");
-    private static final Pattern NOT_OP_PATTERN = Pattern.compile("\\bnot\\b");
+    private static final Pattern AND_OP_PATTERN = Pattern.compile("(?i)\\band\\b");
+    private static final Pattern OR_OP_PATTERN = Pattern.compile("(?i)\\bor\\b");
+    private static final Pattern NOT_OP_PATTERN = Pattern.compile("(?i)\\bnot\\b");
     private static final Pattern DOUBLE_STAR_PATTERN = Pattern.compile("\\*\\*");
     private static final Pattern DOUBLE_EQ_PATTERN = Pattern.compile("==");
     private static final Pattern NOT_EQ_PATTERN = Pattern.compile("!=");

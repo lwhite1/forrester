@@ -236,6 +236,42 @@ class XmileExprTranslatorTest {
         }
 
         @Test
+        void shouldTranslateUppercaseAndOperator() {
+            String result = XmileExprTranslator.toXmile("x > 0 AND y > 0");
+            assertThat(result).isEqualTo("x > 0 AND y > 0");
+        }
+
+        @Test
+        void shouldTranslateMixedCaseAndOperator() {
+            String result = XmileExprTranslator.toXmile("x > 0 And y > 0");
+            assertThat(result).isEqualTo("x > 0 AND y > 0");
+        }
+
+        @Test
+        void shouldTranslateUppercaseOrOperator() {
+            String result = XmileExprTranslator.toXmile("x > 0 OR y > 0");
+            assertThat(result).isEqualTo("x > 0 OR y > 0");
+        }
+
+        @Test
+        void shouldTranslateMixedCaseOrOperator() {
+            String result = XmileExprTranslator.toXmile("x > 0 Or y > 0");
+            assertThat(result).isEqualTo("x > 0 OR y > 0");
+        }
+
+        @Test
+        void shouldTranslateUppercaseNotOperator() {
+            String result = XmileExprTranslator.toXmile("NOT(x > 0)");
+            assertThat(result).isEqualTo("NOT(x > 0)");
+        }
+
+        @Test
+        void shouldTranslateMixedCaseNotOperator() {
+            String result = XmileExprTranslator.toXmile("Not(x > 0)");
+            assertThat(result).isEqualTo("NOT(x > 0)");
+        }
+
+        @Test
         void shouldNotTranslateNotEqualsToNotXmile() {
             // != should become <>, the "not" inside "!=" should not be affected
             String result = XmileExprTranslator.toXmile("x != 5");
