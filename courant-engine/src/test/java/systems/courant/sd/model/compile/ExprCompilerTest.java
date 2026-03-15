@@ -468,6 +468,21 @@ class ExprCompilerTest {
             assertThat(formula.getCurrentValue()).isCloseTo(1000.0, within(1.0));
             assertThat(resettables).hasSize(1);
         }
+
+        @Test
+        void shouldAcceptVariableSmoothingTime() {
+            // Smoothing time is a variable reference, not a constant (#669)
+            context.addLiteralConstant("avg_life", 5);
+            Formula formula = compiler.compile("SMOOTH(Population, avg_life)");
+            assertThat(formula.getCurrentValue()).isCloseTo(1000.0, within(1.0));
+        }
+
+        @Test
+        void shouldAcceptVariableSmoothingTimeInSmooth3() {
+            context.addLiteralConstant("avg_life", 6);
+            Formula formula = compiler.compile("SMOOTH3(Population, avg_life)");
+            assertThat(formula.getCurrentValue()).isCloseTo(1000.0, within(1.0));
+        }
     }
 
     @Nested

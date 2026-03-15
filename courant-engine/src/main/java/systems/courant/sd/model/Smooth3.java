@@ -38,7 +38,7 @@ import java.util.function.LongSupplier;
 public class Smooth3 implements Formula, Resettable {
 
     private final DoubleSupplier input;
-    private final double smoothingTime;
+    private final DoubleSupplier smoothingTime;
     private final LongSupplier currentStep;
     private final double explicitInitial;
     private final boolean hasExplicitInitial;
@@ -49,12 +49,11 @@ public class Smooth3 implements Formula, Resettable {
     private boolean initialized;
     private long lastStep = -1;
 
-    private Smooth3(DoubleSupplier input, double smoothingTime, LongSupplier currentStep,
+    private Smooth3(DoubleSupplier input, DoubleSupplier smoothingTime, LongSupplier currentStep,
                     double explicitInitial, boolean hasExplicitInitial) {
         Preconditions.checkNotNull(input, "input supplier must not be null");
+        Preconditions.checkNotNull(smoothingTime, "smoothingTime supplier must not be null");
         Preconditions.checkNotNull(currentStep, "currentStep supplier must not be null");
-        Preconditions.checkArgument(smoothingTime > 0,
-                "smoothingTime must be positive, but got %s", smoothingTime);
         this.input = input;
         this.smoothingTime = smoothingTime;
         this.currentStep = currentStep;
@@ -70,22 +69,43 @@ public class Smooth3 implements Formula, Resettable {
      * @param currentStep   supplies the current simulation timestep
      * @return a new Smooth3 formula
      */
-    public static Smooth3 of(DoubleSupplier input, double smoothingTime, LongSupplier currentStep) {
+    public static Smooth3 of(DoubleSupplier input, DoubleSupplier smoothingTime,
+                             LongSupplier currentStep) {
         return new Smooth3(input, smoothingTime, currentStep, 0, false);
+    }
+
+    /**
+     * Creates a SMOOTH3 formula with a constant smoothing time.
+     */
+    public static Smooth3 of(DoubleSupplier input, double smoothingTime,
+                             LongSupplier currentStep) {
+        Preconditions.checkArgument(smoothingTime > 0,
+                "smoothingTime must be positive, but got %s", smoothingTime);
+        return new Smooth3(input, () -> smoothingTime, currentStep, 0, false);
     }
 
     /**
      * Creates a SMOOTH3 formula with an explicit initial value.
      *
      * @param input         supplies the current input value to smooth
-     * @param smoothingTime the averaging time in simulation timesteps
+     * @param smoothingTime supplies the averaging time in simulation timesteps
      * @param initialValue  the smoothed value at time zero
      * @param currentStep   supplies the current simulation timestep
      * @return a new Smooth3 formula
      */
+    public static Smooth3 of(DoubleSupplier input, DoubleSupplier smoothingTime,
+                             double initialValue, LongSupplier currentStep) {
+        return new Smooth3(input, smoothingTime, currentStep, initialValue, true);
+    }
+
+    /**
+     * Creates a SMOOTH3 formula with a constant smoothing time and explicit initial value.
+     */
     public static Smooth3 of(DoubleSupplier input, double smoothingTime, double initialValue,
                              LongSupplier currentStep) {
-        return new Smooth3(input, smoothingTime, currentStep, initialValue, true);
+        Preconditions.checkArgument(smoothingTime > 0,
+                "smoothingTime must be positive, but got %s", smoothingTime);
+        return new Smooth3(input, () -> smoothingTime, currentStep, initialValue, true);
     }
 
     /**
@@ -118,7 +138,7 @@ public class Smooth3 implements Formula, Resettable {
             initialized = true;
             lastStep = step;
         } else if (step > lastStep) {
-            double stageTime = smoothingTime / 3.0;
+            double stageTime = smoothingTime.getAsDouble() / 3.0;
             long delta = step - lastStep;
             double inputVal = input.getAsDouble();
             for (int i = 0; i < delta; i++) {

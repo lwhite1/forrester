@@ -87,4 +87,23 @@ public class SmoothTest {
         assertThrows(IllegalArgumentException.class, () ->
                 Smooth.of(() -> 100, -1, () -> 0));
     }
+
+    @Test
+    public void shouldAcceptVariableSmoothingTime() {
+        int[] step = {0};
+        double[] smoothTime = {5};
+        Smooth formula = Smooth.of(() -> 100, () -> smoothTime[0], 0, () -> step[0]);
+
+        // Initialize at step 0
+        assertEquals(0, formula.getCurrentValue(), 0.01);
+
+        // Advance with smoothingTime=5: adjustment = (100-0)/5 = 20
+        step[0] = 1;
+        assertEquals(20, formula.getCurrentValue(), 0.01);
+
+        // Change smoothingTime to 2 for faster convergence: adjustment = (100-20)/2 = 40
+        smoothTime[0] = 2;
+        step[0] = 2;
+        assertEquals(60, formula.getCurrentValue(), 0.01);
+    }
 }
