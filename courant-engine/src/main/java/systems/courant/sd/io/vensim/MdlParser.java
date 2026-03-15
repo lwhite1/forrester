@@ -148,27 +148,52 @@ public final class MdlParser {
             // an equation (the header line followed by the first body equation, or
             // :END OF MACRO: followed by the next regular equation). Split by
             // newlines to detect and separate them.
+            //
+            // When both :END OF MACRO: and :MACRO: appear in the same block,
+            // lines fall into three phases:
+            //   1. preEndLines   — before :END OF MACRO: → belong to current macro
+            //   2. betweenLines  — between :END OF MACRO: and :MACRO: → regular equations
+            //   3. postMacroLines — after :MACRO: → first body of new macro
             String[] eqLines = equationPart.split("\n");
             String macroHeaderLine = null;
             boolean endMacroInBlock = false;
-            List<String> bodyLines = new ArrayList<>();
+            List<String> preEndLines = new ArrayList<>();
+            List<String> betweenLines = new ArrayList<>();
+            List<String> postMacroLines = new ArrayList<>();
+            // 0 = before END, 1 = between END and MACRO, 2 = after MACRO
+            int phase = 0;
 
             for (String line : eqLines) {
                 String lineStripped = line.strip();
                 if (lineStripped.isEmpty()) {
                     continue;
                 }
-                if (MACRO_START_PATTERN.matcher(lineStripped).find()) {
-                    macroHeaderLine = lineStripped;
-                } else if (MACRO_END_PATTERN.matcher(lineStripped).find()) {
+                if (MACRO_END_PATTERN.matcher(lineStripped).find()) {
                     endMacroInBlock = true;
+                    phase = 1;
+                } else if (MACRO_START_PATTERN.matcher(lineStripped).find()) {
+                    macroHeaderLine = lineStripped;
+                    phase = 2;
                 } else {
-                    bodyLines.add(lineStripped);
+                    switch (phase) {
+                        case 0 -> preEndLines.add(lineStripped);
+                        case 1 -> betweenLines.add(lineStripped);
+                        default -> postMacroLines.add(lineStripped);
+                    }
                 }
             }
 
             // Handle :END OF MACRO: — finalize current macro
             if (endMacroInBlock) {
+                // Lines before END belong to the current macro body
+                String preEndEq = String.join(" ", preEndLines).strip();
+                if (!preEndEq.isEmpty() && inMacro && macroBody != null) {
+                    MdlEquation preEq = parseEquationBlock(preEndEq, unitsPart,
+                            commentPart, currentGroup);
+                    if (preEq != null) {
+                        macroBody.add(preEq);
+                    }
+                }
                 if (inMacro && macroName != null && macroParams != null && macroBody != null) {
                     macros.add(buildMacroDef(macroName, macroParams, macroBody));
                 }
@@ -176,9 +201,39 @@ public final class MdlParser {
                 macroName = null;
                 macroParams = null;
                 macroBody = null;
+
+                // Lines between END and MACRO (or end of block) are regular equations
+                String betweenEq = String.join(" ", betweenLines).strip();
+                if (!betweenEq.isEmpty()) {
+                    MdlEquation bEq = parseEquationBlock(betweenEq, unitsPart,
+                            commentPart, currentGroup);
+                    if (bEq != null) {
+                        equations.add(bEq);
+                    }
+                }
+            }
+
+            // When no END was seen, preEndLines hold lines that appeared before
+            // a :MACRO: header (or all lines if no directives at all). They belong
+            // to whatever context was active before this block.
+            if (!endMacroInBlock && !preEndLines.isEmpty()) {
+                String preEq = String.join(" ", preEndLines).strip();
+                if (!preEq.isEmpty()) {
+                    MdlEquation eq = parseEquationBlock(preEq, unitsPart,
+                            commentPart, currentGroup);
+                    if (eq != null) {
+                        if (inMacro && macroBody != null) {
+                            macroBody.add(eq);
+                        } else {
+                            equations.add(eq);
+                        }
+                    }
+                }
             }
 
             // Handle :MACRO: header — start new macro
+            // (must come after preEndLines processing so those lines go to the
+            // previous context, not the new macro)
             if (macroHeaderLine != null) {
                 inMacro = true;
                 macroBody = new ArrayList<>();
@@ -201,8 +256,12 @@ public final class MdlParser {
                 }
             }
 
-            // Process the remaining equation text (if any) from the same block
-            String remainingEq = String.join(" ", bodyLines).strip();
+            // Lines after :MACRO: header are the first body equation of the new
+            // macro. Otherwise, all lines were already dispatched above.
+            List<String> remainingLines = macroHeaderLine != null
+                    ? postMacroLines : List.of();
+
+            String remainingEq = String.join(" ", remainingLines).strip();
             if (remainingEq.isEmpty()) {
                 continue;
             }

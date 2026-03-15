@@ -229,6 +229,26 @@ class VensimExprTranslatorTest {
         }
 
         @Test
+        void shouldPreferExactCaseMatchOverCaseInsensitive() {
+            // Two names that differ only by case should each be replaced with their
+            // own normalized form, not conflated by the case-insensitive fallback.
+            Set<String> names = Set.of("Time Step", "time step");
+            var result = VensimExprTranslator.translate(
+                    "Time Step + time step", "var", names);
+            assertThat(result.expression()).isEqualTo("Time_Step + time_step");
+        }
+
+        @Test
+        void shouldFallBackToCaseInsensitiveWhenNoExactMatch() {
+            // If only "Contact Rate" is known but expression uses "contact rate",
+            // the case-insensitive fallback should still replace it.
+            Set<String> names = Set.of("Contact Rate");
+            var result = VensimExprTranslator.translate(
+                    "contact rate * 2", "var", names);
+            assertThat(result.expression()).isEqualTo("Contact_Rate * 2");
+        }
+
+        @Test
         void shouldNotReplacePartialMatches() {
             Set<String> names = Set.of("Contact Rate");
             var result = VensimExprTranslator.translate(
