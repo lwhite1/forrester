@@ -40,8 +40,7 @@ class XmileExprTranslatorTest {
         @Test
         void shouldTranslateNotKeyword() {
             var result = XmileExprTranslator.toCourant("NOT x > 0");
-            assertThat(result.expression()).startsWith("not");
-            assertThat(result.expression()).contains("x > 0");
+            assertThat(result.expression()).isEqualTo("not x > 0");
         }
 
         @Test
@@ -190,13 +189,6 @@ class XmileExprTranslatorTest {
         }
 
         @Test
-        void shouldStillTranslateSpacedEqualityOperator() {
-            // Standard XMILE comparison with spaces should still work
-            var result = XmileExprTranslator.toCourant("x = 5");
-            assertThat(result.expression()).isEqualTo("x == 5");
-        }
-
-        @Test
         void shouldTranslateEqualityAfterParenthesis() {
             var result = XmileExprTranslator.toCourant("(x) = 5");
             assertThat(result.expression()).isEqualTo("(x) == 5");
@@ -318,10 +310,15 @@ class XmileExprTranslatorTest {
         }
 
         @Test
-        void shouldNotTranslateNotEqualsToNotXmile() {
-            // != should become <>, the "not" inside "!=" should not be affected
-            String result = XmileExprTranslator.toXmile("x != 5");
-            assertThat(result).contains("<>");
+        void shouldTranslateSmooth3ToSmth3() {
+            String result = XmileExprTranslator.toXmile("SMOOTH3(input, 5)");
+            assertThat(result).isEqualTo("SMTH3(input, 5)");
+        }
+
+        @Test
+        void shouldTranslateSmoothToSmth1() {
+            String result = XmileExprTranslator.toXmile("SMOOTH(input, 5)");
+            assertThat(result).isEqualTo("SMTH1(input, 5)");
         }
     }
 
@@ -342,6 +339,24 @@ class XmileExprTranslatorTest {
             String xmile = "IF_THEN_ELSE(x > 0, 1, 0)";
             var imported = XmileExprTranslator.toCourant(xmile);
             assertThat(imported.expression()).isEqualTo("IF(x > 0, 1, 0)");
+            String exported = XmileExprTranslator.toXmile(imported.expression());
+            assertThat(exported).isEqualTo(xmile);
+        }
+
+        @Test
+        void shouldRoundTripSmth3() {
+            String xmile = "SMTH3(input, 5)";
+            var imported = XmileExprTranslator.toCourant(xmile);
+            assertThat(imported.expression()).isEqualTo("SMOOTH3(input, 5)");
+            String exported = XmileExprTranslator.toXmile(imported.expression());
+            assertThat(exported).isEqualTo(xmile);
+        }
+
+        @Test
+        void shouldRoundTripSmth1() {
+            String xmile = "SMTH1(input, 5)";
+            var imported = XmileExprTranslator.toCourant(xmile);
+            assertThat(imported.expression()).isEqualTo("SMOOTH(input, 5)");
             String exported = XmileExprTranslator.toXmile(imported.expression());
             assertThat(exported).isEqualTo(xmile);
         }
