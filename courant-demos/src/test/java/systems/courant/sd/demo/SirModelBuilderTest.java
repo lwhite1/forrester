@@ -11,6 +11,7 @@ import org.junit.jupiter.api.Test;
 
 import static systems.courant.sd.measure.Units.DAY;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.data.Offset.offset;
 
 @DisplayName("SirModelBuilder")
 class SirModelBuilderTest {
@@ -47,7 +48,7 @@ class SirModelBuilderTest {
             // totalPop=1010, infectiousFraction=10/1010, infections=8*(10/1010)*0.1*1000
             double expected = 8.0 * (10.0 / 1010.0) * 0.1 * 1000.0;
             double result = SirModelBuilder.computeNewInfections(8, 0.1, 1000, 10, 0);
-            assertThat(result).isCloseTo(expected, org.assertj.core.data.Offset.offset(1e-10));
+            assertThat(result).isCloseTo(expected, offset(1e-10));
         }
 
         @Test
@@ -55,7 +56,7 @@ class SirModelBuilderTest {
         void shouldClampToSusceptible_whenInfectionsExceedSusceptible() {
             // Very high contact rate to force infections > susceptible
             double result = SirModelBuilder.computeNewInfections(1000, 1.0, 5, 500, 500);
-            assertThat(result).isEqualTo(5.0);
+            assertThat(result).isCloseTo(5.0, offset(1e-10));
         }
     }
 
@@ -112,7 +113,7 @@ class SirModelBuilderTest {
             double finalTotal = model.getStockValues().stream()
                     .mapToDouble(Double::doubleValue).sum();
             assertThat(finalTotal).isCloseTo(initialTotal,
-                    org.assertj.core.data.Offset.offset(1.0));
+                    offset(1.0));
         }
     }
 }

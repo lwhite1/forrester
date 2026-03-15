@@ -83,7 +83,7 @@ public final class SirModelBuilder {
             return new Quantity(newInfections, PEOPLE);
         });
 
-        Flow recoveryRate = Flow.create("Recovered", DAY, () ->
+        Flow recoveryRate = Flow.create("Recovery", DAY, () ->
                 new Quantity(infectious.getValue() * recoveryProportion, PEOPLE));
 
         susceptible.addOutflow(infectionRate);

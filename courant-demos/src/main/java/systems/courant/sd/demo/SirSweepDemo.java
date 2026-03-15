@@ -53,11 +53,14 @@ public class SirSweepDemo {
                 .execute();
 
         String tmpDir = System.getProperty("java.io.tmpdir");
-        result.writeTimeSeriesCsv(tmpDir + "/courant-sweep-timeseries.csv");
-        result.writeSummaryCsv(tmpDir + "/courant-sweep-summary.csv");
+        String timeSeriesPath = tmpDir + "/courant-sweep-timeseries.csv";
+        String summaryPath = tmpDir + "/courant-sweep-summary.csv";
+
+        result.writeTimeSeriesCsv(timeSeriesPath);
+        result.writeSummaryCsv(summaryPath);
 
         System.out.println("Sweep complete: " + result.getRunCount() + " runs");
-        System.out.println("Time series CSV: " + tmpDir + "/courant-sweep-timeseries.csv");
-        System.out.println("Summary CSV:     " + tmpDir + "/courant-sweep-summary.csv");
+        System.out.println("Time series CSV: " + timeSeriesPath);
+        System.out.println("Summary CSV:     " + summaryPath);
     }
 }

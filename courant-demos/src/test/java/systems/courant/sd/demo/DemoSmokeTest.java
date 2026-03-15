@@ -22,7 +22,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 import static systems.courant.sd.measure.Units.DAY;
-import static systems.courant.sd.measure.Units.PEOPLE;
 import static systems.courant.sd.measure.Units.WEEK;
 import static org.assertj.core.api.Assertions.assertThat;
 
