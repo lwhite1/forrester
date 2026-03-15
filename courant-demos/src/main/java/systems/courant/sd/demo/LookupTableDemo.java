@@ -42,6 +42,18 @@ public class LookupTableDemo {
 
     public void run(double initialPopulation, double carryingCapacity, double birthRate,
                     double durationWeeks) {
+        Model model = getModel(initialPopulation, carryingCapacity, birthRate);
+
+        Simulation sim = new Simulation(model, DAY, WEEK, durationWeeks);
+        sim.addEventHandler(new StockLevelChartViewer());
+        sim.execute();
+    }
+
+    public Model getModel() {
+        return getModel(10, 1000, 0.04);
+    }
+
+    public Model getModel(double initialPopulation, double carryingCapacity, double birthRate) {
         Model model = new Model("Population Growth with Crowding Lookup");
         model.setMetadata(ModelMetadata.builder()
                 .license("CC-BY-SA-4.0")
@@ -67,8 +79,6 @@ public class LookupTableDemo {
         model.addStock(population);
         model.addVariable(multiplier);
 
-        Simulation sim = new Simulation(model, DAY, WEEK, durationWeeks);
-        sim.addEventHandler(new StockLevelChartViewer());
-        sim.execute();
+        return model;
     }
 }

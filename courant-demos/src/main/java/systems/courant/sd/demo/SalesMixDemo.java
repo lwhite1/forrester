@@ -45,6 +45,24 @@ public class SalesMixDemo {
     public void run(double initialCustomers, double newCustomersPerDay,
                     double hardwareSalesPerCustomer, double serviceSalesPerCustomerPerMonth,
                     double durationYears) {
+        Model model = getModel(initialCustomers, newCustomersPerDay,
+                hardwareSalesPerCustomer, serviceSalesPerCustomerPerMonth);
+
+        Simulation run = new Simulation(model, WEEK, Times.years(durationYears));
+
+        run.addEventHandler(new StockLevelChartViewer());
+        run.addEventHandler(new CsvSubscriber(
+                System.getProperty("java.io.tmpdir") + "/courant-salesmix.csv"));
+        run.execute();
+    }
+
+    public Model getModel() {
+        return getModel(0, 10, 1000, 10);
+    }
+
+    public Model getModel(double initialCustomers, double newCustomersPerDay,
+                           double hardwareSalesPerCustomer,
+                           double serviceSalesPerCustomerPerMonth) {
         Model model = new Model("Hardware/software sales mix");
         model.setMetadata(ModelMetadata.builder()
                 .license("CC-BY-SA-4.0")
@@ -76,11 +94,6 @@ public class SalesMixDemo {
         model.addVariable(totalSales);
         model.addVariable(proportionHardwareSales);
 
-        Simulation run = new Simulation(model, WEEK, Times.years(durationYears));
-
-        run.addEventHandler(new StockLevelChartViewer());
-        run.addEventHandler(new CsvSubscriber(
-                System.getProperty("java.io.tmpdir") + "/courant-salesmix.csv"));
-        run.execute();
+        return model;
     }
 }

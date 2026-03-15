@@ -59,6 +59,23 @@ public class PopulationRegionAgeDemo {
 
     public void run(double[] initialPopulations, double agingRate, double birthRate,
                     double deathRate, double migrationRate, double durationYears) {
+        Model model = getModel(initialPopulations, agingRate, birthRate, deathRate, migrationRate);
+
+        Simulation run = new Simulation(model, DAY, Times.years(durationYears));
+        run.addEventHandler(new CsvSubscriber(
+                System.getProperty("java.io.tmpdir") + "/courant-population-region-age.csv"));
+        run.addEventHandler(new StockLevelChartViewer());
+        run.execute();
+    }
+
+    public Model getModel() {
+        return getModel(
+                new double[]{500, 800, 200, 400, 600, 150, 300, 500, 100},
+                0.005, 0.003, 0.008, 0.001);
+    }
+
+    public Model getModel(double[] initialPopulations, double agingRate, double birthRate,
+                           double deathRate, double migrationRate) {
         Model model = new Model("Population Region-Age Model");
         model.setMetadata(ModelMetadata.builder()
                 .license("CC-BY-SA-4.0")
@@ -132,10 +149,6 @@ public class PopulationRegionAgeDemo {
 
         model.addMultiArrayedStock(pop);
 
-        Simulation run = new Simulation(model, DAY, Times.years(durationYears));
-        run.addEventHandler(new CsvSubscriber(
-                System.getProperty("java.io.tmpdir") + "/courant-population-region-age.csv"));
-        run.addEventHandler(new StockLevelChartViewer());
-        run.execute();
+        return model;
     }
 }

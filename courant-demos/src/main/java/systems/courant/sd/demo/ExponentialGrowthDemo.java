@@ -38,6 +38,18 @@ public class ExponentialGrowthDemo {
 
     public void run(double initialPopulation, double birthRate, double deathRate,
                     double durationWeeks) {
+        Model model = getModel(initialPopulation, birthRate, deathRate);
+
+        Simulation run = new Simulation(model, TimeUnits.DAY, WEEK, durationWeeks);
+        run.addEventHandler(new StockLevelChartViewer());
+        run.execute();
+    }
+
+    public Model getModel() {
+        return getModel(100, 0.04, 0.03);
+    }
+
+    public Model getModel(double initialPopulation, double birthRate, double deathRate) {
         Model model = new Model("Population with unconstrained growth");
         model.setMetadata(ModelMetadata.builder()
                 .license("CC-BY-SA-4.0")
@@ -53,8 +65,6 @@ public class ExponentialGrowthDemo {
 
         model.addStock(population);
 
-        Simulation run = new Simulation(model, TimeUnits.DAY, WEEK, durationWeeks);
-        run.addEventHandler(new StockLevelChartViewer());
-        run.execute();
+        return model;
     }
 }

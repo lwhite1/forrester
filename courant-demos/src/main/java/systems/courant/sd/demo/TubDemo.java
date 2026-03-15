@@ -40,8 +40,12 @@ public class TubDemo {
                 durationMinutes);
     }
 
-    public void run(double initialWater, double outflowRate, double inflowRate,
-                    int inflowDelayMinutes, double durationMinutes) {
+    public Simulation createSimulation() {
+        return createSimulation(50, 5, 5, 5, 10);
+    }
+
+    public Simulation createSimulation(double initialWater, double outflowRate, double inflowRate,
+                                       int inflowDelayMinutes, double durationMinutes) {
         Model model = new Model("Tub model");
         model.setMetadata(ModelMetadata.builder()
                 .license("CC-BY-SA-4.0")
@@ -66,6 +70,14 @@ public class TubDemo {
         tub.addOutflow(outflow);
 
         model.addStock(tub);
+
+        return run;
+    }
+
+    public void run(double initialWater, double outflowRate, double inflowRate,
+                    int inflowDelayMinutes, double durationMinutes) {
+        Simulation run = createSimulation(initialWater, outflowRate, inflowRate,
+                inflowDelayMinutes, durationMinutes);
 
         run.addEventHandler(new StockLevelChartViewer());
         run.addEventHandler(new CsvSubscriber(

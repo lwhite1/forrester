@@ -35,6 +35,18 @@ public class FirstOrderMaterialDelayDemo {
     }
 
     public void run(double initialCustomers, double averageDelayDays, double durationWeeks) {
+        Model model = getModel(initialCustomers, averageDelayDays);
+
+        Simulation run = new Simulation(model, TimeUnits.DAY, Times.weeks(durationWeeks));
+        run.addEventHandler(new StockLevelChartViewer());
+        run.execute();
+    }
+
+    public Model getModel() {
+        return getModel(1000, 120);
+    }
+
+    public Model getModel(double initialCustomers, double averageDelayDays) {
         Model model = new Model("First order material delay");
         model.setMetadata(ModelMetadata.builder()
                 .license("CC-BY-SA-4.0")
@@ -49,8 +61,6 @@ public class FirstOrderMaterialDelayDemo {
 
         model.addStock(potentialCustomers);
 
-        Simulation run = new Simulation(model, TimeUnits.DAY, Times.weeks(durationWeeks));
-        run.addEventHandler(new StockLevelChartViewer());
-        run.execute();
+        return model;
     }
 }

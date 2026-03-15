@@ -43,9 +43,13 @@ public class FlowTimeDemo {
                 hoursPerDay, tatAdjustmentTimeHours, durationWeeks);
     }
 
-    public void run(double initialWip, double tatGoalHours, double capacity,
-                    double newOrdersPerDay, double hoursPerDay, double tatAdjustmentTimeHours,
-                    double durationWeeks) {
+    public Simulation createSimulation() {
+        return createSimulation(1000, 336, 190, 200, 24.0, 24.0, 4);
+    }
+
+    public Simulation createSimulation(double initialWip, double tatGoalHours, double capacity,
+                                       double newOrdersPerDay, double hoursPerDay,
+                                       double tatAdjustmentTimeHours, double durationWeeks) {
         Model tatModel = new Model("TAT Model");
         tatModel.setMetadata(ModelMetadata.builder()
                 .license("CC-BY-SA-4.0")
@@ -81,6 +85,15 @@ public class FlowTimeDemo {
         tatModel.addStock(wip);
         tatModel.addStock(tat);
         tatModel.addVariable(discrepancy);
+
+        return sim;
+    }
+
+    public void run(double initialWip, double tatGoalHours, double capacity,
+                    double newOrdersPerDay, double hoursPerDay, double tatAdjustmentTimeHours,
+                    double durationWeeks) {
+        Simulation sim = createSimulation(initialWip, tatGoalHours, capacity, newOrdersPerDay,
+                hoursPerDay, tatAdjustmentTimeHours, durationWeeks);
 
         sim.addEventHandler(new StockLevelChartViewer());
         sim.execute();

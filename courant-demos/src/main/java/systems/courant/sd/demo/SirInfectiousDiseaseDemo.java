@@ -39,14 +39,25 @@ public class SirInfectiousDiseaseDemo {
     public void run(double initialSusceptible, double initialInfectious,
                     double initialRecovered, double contactRate, double infectivity,
                     double recoveryProportion, double durationWeeks) {
-        Model model = SirModelBuilder.build("SIR Infectious Disease Model",
-                contactRate, infectivity, initialSusceptible, initialInfectious,
-                initialRecovered, recoveryProportion);
+        Model model = getModel(initialSusceptible, initialInfectious, initialRecovered,
+                contactRate, infectivity, recoveryProportion);
 
         Simulation run = new Simulation(model, DAY, Times.weeks(durationWeeks));
         run.addEventHandler(new CsvSubscriber(
                 System.getProperty("java.io.tmpdir") + "/courant-sir.csv"));
         run.addEventHandler(new StockLevelChartViewer());
         run.execute();
+    }
+
+    public Model getModel() {
+        return getModel(1000, 10, 0, 8, 0.10, 0.20);
+    }
+
+    public Model getModel(double initialSusceptible, double initialInfectious,
+                           double initialRecovered, double contactRate, double infectivity,
+                           double recoveryProportion) {
+        return SirModelBuilder.build("SIR Infectious Disease Model",
+                contactRate, infectivity, initialSusceptible, initialInfectious,
+                initialRecovered, recoveryProportion);
     }
 }
