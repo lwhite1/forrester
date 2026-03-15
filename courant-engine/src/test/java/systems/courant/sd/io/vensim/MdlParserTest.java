@@ -352,4 +352,39 @@ class MdlParserTest {
             assertThat(result.macros()).isEmpty();
         }
     }
+
+    @Nested
+    @DisplayName("Group delimiter matching (#696)")
+    class GroupDelimiterMatching {
+
+        @Test
+        void shouldNotMatchEquationContainingFourStars() {
+            // An equation like "x = y **** z" should NOT be treated as a group delimiter
+            String content = "x = y **** z\n\t~\t\n\t~\t\n\t|";
+            MdlParser.ParsedMdl result = MdlParser.parse(content);
+
+            assertThat(result.equations()).hasSize(1);
+            assertThat(result.equations().get(0).name()).isEqualTo("x");
+        }
+
+        @Test
+        void shouldMatchActualGroupDelimiterLines() {
+            String content = """
+                    ********************************************************
+                    \t.MyGroup
+                    ********************************************************~
+                    \t\tGroup comment.
+                    \t|
+
+                    x = 5
+                    \t~\t
+                    \t~\t
+                    \t|
+                    """;
+            MdlParser.ParsedMdl result = MdlParser.parse(content);
+
+            assertThat(result.equations()).hasSize(1);
+            assertThat(result.equations().get(0).group()).isEqualTo(".MyGroup");
+        }
+    }
 }

@@ -285,9 +285,15 @@ public final class MdlParser {
         return new MdlEquation(equationPart, "", "", units, comment, group);
     }
 
-    private static boolean isGroupDelimiter(String line) {
+    private static boolean isGroupDelimiter(String block) {
         // Group sections start and end with lines of ****
-        return line.contains(GROUP_DELIMITER);
+        // Check each line of the block against the pattern (the block may be multi-line)
+        for (String line : block.split("\n")) {
+            if (GROUP_NAME_PATTERN.matcher(line.strip()).matches()) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private static String extractGroupName(String block) {

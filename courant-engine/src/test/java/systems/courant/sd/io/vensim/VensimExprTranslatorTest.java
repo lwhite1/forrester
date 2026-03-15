@@ -1127,4 +1127,24 @@ class VensimExprTranslatorTest {
                     "MAX(0, annual_profits * FRACTION_INVESTED / SHIP_COST)");
         }
     }
+
+    @Nested
+    @DisplayName("Trailing :NOT: handling (#645)")
+    class TrailingNot {
+
+        @Test
+        void shouldNotCrashOnTrailingNot() {
+            // A trailing :NOT: with no operand should not cause infinite loop or error
+            var result = VensimExprTranslator.translate(
+                    "x > 0 :AND: :NOT:", "var", EMPTY_NAMES);
+            // Should contain the not literally or handle gracefully
+            assertThat(result.expression()).isNotNull();
+        }
+
+        @Test
+        void shouldNotCrashOnStandaloneNot() {
+            var result = VensimExprTranslator.translate(":NOT:", "var", EMPTY_NAMES);
+            assertThat(result.expression()).isNotNull();
+        }
+    }
 }

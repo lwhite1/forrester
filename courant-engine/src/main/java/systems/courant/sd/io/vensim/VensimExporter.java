@@ -489,8 +489,12 @@ public final class VensimExporter {
     static String reverseXidzZidz(String expr) {
         // Pattern: IF((B) == 0, X, (A) / (B))
         Pattern pattern = Pattern.compile("(?i)\\bIF\\s*\\(");
-        Matcher m = pattern.matcher(expr);
-        while (m.find()) {
+        int searchFrom = 0;
+        while (searchFrom < expr.length()) {
+            Matcher m = pattern.matcher(expr);
+            if (!m.find(searchFrom)) {
+                break;
+            }
             int funcStart = m.start();
             int openParen = m.end() - 1;
             int closeParen = findClosingParen(expr, openParen);
@@ -500,11 +504,8 @@ public final class VensimExporter {
             String argsContent = expr.substring(openParen + 1, closeParen);
             List<String> args = splitTopLevelArgs(argsContent);
             if (args.size() != 3) {
-                // Not a 3-arg IF — skip and search for next
-                m = pattern.matcher(expr);
-                if (!m.find(funcStart + 1)) {
-                    break;
-                }
+                // Not a 3-arg IF — skip past this IF call
+                searchFrom = closeParen + 1;
                 continue;
             }
             String condition = args.get(0).strip();
@@ -514,20 +515,14 @@ public final class VensimExporter {
             // Check for (B) == 0 pattern
             String bFromCondition = extractEqZeroOperand(condition);
             if (bFromCondition == null) {
-                m = pattern.matcher(expr);
-                if (!m.find(funcStart + 1)) {
-                    break;
-                }
+                searchFrom = closeParen + 1;
                 continue;
             }
 
             // Check for (A) / (B) in elseExpr, where B matches bFromCondition
             String[] divParts = extractDivision(elseExpr, bFromCondition);
             if (divParts == null) {
-                m = pattern.matcher(expr);
-                if (!m.find(funcStart + 1)) {
-                    break;
-                }
+                searchFrom = closeParen + 1;
                 continue;
             }
             String a = divParts[0];
@@ -542,7 +537,8 @@ public final class VensimExporter {
                 replacement = "XIDZ(" + a + ", " + b + ", " + thenExpr + ")";
             }
             expr = expr.substring(0, funcStart) + replacement + expr.substring(closeParen + 1);
-            m = pattern.matcher(expr);
+            // After replacement, continue searching from after the replacement
+            searchFrom = funcStart + replacement.length();
         }
         return expr;
     }
@@ -552,11 +548,23 @@ public final class VensimExporter {
      * Returns the operand text (without outer parens), or null if no match.
      */
     private static String extractEqZeroOperand(String condition) {
-        // Match patterns: (expr) == 0  or  expr == 0
-        Pattern p = Pattern.compile("^\\(?(.+?)\\)?\\s*==\\s*0$");
-        Matcher m = p.matcher(condition.strip());
-        if (m.matches()) {
-            return m.group(1).strip();
+        String trimmed = condition.strip();
+        // Check for "(expr) == 0" pattern with balanced parens
+        if (trimmed.startsWith("(")) {
+            int closeParen = findClosingParen(trimmed, 0);
+            if (closeParen > 0) {
+                String remainder = trimmed.substring(closeParen + 1).strip();
+                if (remainder.matches("==\\s*0")) {
+                    return trimmed.substring(1, closeParen).strip();
+                }
+            }
+        }
+        // Check for "expr == 0" pattern without parens
+        if (trimmed.matches(".+\\s*==\\s*0$")) {
+            int eqPos = trimmed.lastIndexOf("==");
+            if (eqPos > 0) {
+                return trimmed.substring(0, eqPos).strip();
+            }
         }
         return null;
     }

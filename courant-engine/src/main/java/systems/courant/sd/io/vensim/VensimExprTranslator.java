@@ -515,6 +515,10 @@ public final class VensimExprTranslator {
                 }
             }
             String operand = expr.substring(operandStart, end).strip();
+            if (operand.isEmpty()) {
+                // Trailing :NOT: with no operand — skip replacement
+                break;
+            }
             String replacement = "not(" + operand + ")";
             expr = expr.substring(0, notStart) + replacement + expr.substring(end);
             m = NOT_PATTERN.matcher(expr);
