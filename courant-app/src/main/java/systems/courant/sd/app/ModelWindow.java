@@ -768,34 +768,19 @@ public class ModelWindow {
         editor.addListener(dirtyListener);
         editor.loadFrom(def);
 
+        ViewDef view;
         if (def.stocks().isEmpty() && def.flows().isEmpty()
                 && def.variables().isEmpty()) {
             // CLD or empty model — use embedded view if available
-            ViewDef view;
             if (!def.views().isEmpty() && !def.cldVariables().isEmpty()) {
                 view = def.views().getFirst();
             } else {
                 view = new ViewDef("Main", List.of(), List.of(), List.of());
             }
-            applyView(view, displayName);
         } else {
-            // Run auto-layout on a background thread to avoid blocking the FX thread
-            statusBar.showProgress("Computing layout\u2026");
-            canvas.setDisable(true);
-            Thread layoutThread = new Thread(() -> {
-                ViewDef view = AutoLayout.layout(def);
-                Platform.runLater(() -> {
-                    canvas.setDisable(false);
-                    statusBar.clearProgress();
-                    applyView(view, displayName);
-                });
-            }, "auto-layout");
-            layoutThread.setDaemon(true);
-            layoutThread.start();
+            view = AutoLayout.layout(def);
         }
-    }
 
-    private void applyView(ViewDef view, String displayName) {
         canvas.clearNavigation();
         canvas.clearSparklines();
         canvas.setModel(editor, view);
