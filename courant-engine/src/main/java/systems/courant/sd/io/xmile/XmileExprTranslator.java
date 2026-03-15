@@ -24,7 +24,7 @@ public final class XmileExprTranslator {
             "(?i)\\bNOT\\b");
     private static final Pattern INEQUALITY_PATTERN = Pattern.compile("<>");
     private static final Pattern EQUALITY_SINGLE_PATTERN = Pattern.compile(
-            "(?<![<>!=])=(?!=)");
+            "(?<![<>!=\\w])=(?!=)");
     private static final Pattern SMTH3_PATTERN = Pattern.compile(
             "(?i)\\bSMTH3\\s*\\(");
     private static final Pattern SMTH1_PATTERN = Pattern.compile(
@@ -52,6 +52,10 @@ public final class XmileExprTranslator {
     private static final Pattern DOUBLE_STAR_PATTERN = Pattern.compile("\\*\\*");
     private static final Pattern DOUBLE_EQ_PATTERN = Pattern.compile("==");
     private static final Pattern NOT_EQ_PATTERN = Pattern.compile("!=");
+    private static final Pattern SMOOTH3_PATTERN = Pattern.compile(
+            "(?i)\\bSMOOTH3\\s*\\(");
+    private static final Pattern SMOOTH_PATTERN = Pattern.compile(
+            "(?i)\\bSMOOTH\\s*\\(");
     private static final Pattern TIME_SD_PATTERN = Pattern.compile(
             "\\bTIME\\b");
 
@@ -151,7 +155,11 @@ public final class XmileExprTranslator {
         expr = NOT_EQ_PATTERN.matcher(expr).replaceAll("<>");
         expr = DOUBLE_EQ_PATTERN.matcher(expr).replaceAll("=");
 
-        // 5. TIME → Time
+        // 5. SMOOTH3 → SMTH3, SMOOTH → SMTH1 (order matters: SMOOTH3 before SMOOTH)
+        expr = SMOOTH3_PATTERN.matcher(expr).replaceAll("SMTH3(");
+        expr = SMOOTH_PATTERN.matcher(expr).replaceAll("SMTH1(");
+
+        // 6. TIME → Time
         expr = TIME_SD_PATTERN.matcher(expr).replaceAll("Time");
 
         return expr;
