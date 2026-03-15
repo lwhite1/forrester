@@ -185,7 +185,6 @@ public class Simulation {
         elapsedTime = Duration.ZERO;
         clearHistory();
         resetStatefulFormulas();
-        resetStockValues();
 
         long nanos = Math.round(timeStep.ratioToBaseUnit() * dt * 1_000_000_000L);
         if (nanos <= 0) {
@@ -220,7 +219,7 @@ public class Simulation {
         Map<Flow, Quantity> flowMap = new IdentityHashMap<>();
         List<Stock> allStocks = collectAllStocks();
         for (Stock stock : allStocks) {
-            stock.resetWarnings();
+            stock.resetToInitialValue();
         }
         Map<Stock, Double> deltas = new IdentityHashMap<>();
 
@@ -448,12 +447,6 @@ public class Simulation {
         }
         for (Module module : model.getModules()) {
             resetModuleFormulas(module, seen);
-        }
-    }
-
-    private void resetStockValues() {
-        for (Stock stock : collectAllStocks()) {
-            stock.resetToInitialValue();
         }
     }
 
