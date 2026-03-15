@@ -70,7 +70,7 @@ public class StaffAllocation {
         dailyResourcesForQA = new Variable("Daily resources performing QA",
                 PERSON_DAYS_PER_DAY,
                 () -> Math.min(
-                        actualFractionOfStaffForQA.getValue() * totalDailyStaffing.getValue(),
+                        actualFractionOfStaffForQA.getValue() * dailyResourcesAvailable.getValue(),
                         (1.0 - lossFromOverhead.getValue())
                                 * dailyResourcesAvailable.getValue()));
 
