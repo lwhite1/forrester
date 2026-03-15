@@ -317,7 +317,7 @@ class DemoSmokeTest {
         step1.addOutflow(flow);
         model.addStock(step1);
         new Simulation(model, hour, Times.hours(1)).execute();
-        // Flow should have been clamped to 0, so stock should not decrease further
+        // Flow clamped to 0, engine may also clamp negative stocks
         assertThat(step1.getValue()).isGreaterThanOrEqualTo(-10);
     }
 
