@@ -58,13 +58,13 @@ public class CourantApp extends Application {
      */
     void centerOnPrimaryScreen(Stage stage) {
         Rectangle2D bounds = Screen.getPrimary().getVisualBounds();
-        double sceneWidth = stage.getScene() != null ? stage.getScene().getWidth() : 1200;
-        double sceneHeight = stage.getScene() != null ? stage.getScene().getHeight() : 800;
-        double windowWidth = sceneWidth;
+        var scene = stage.getScene();
+        double sceneWidth = scene != null ? scene.getWidth() : 1200;
+        double sceneHeight = scene != null ? scene.getHeight() : 800;
         double windowHeight = sceneHeight + DECORATION_ALLOWANCE;
 
         stage.setX(Math.max(bounds.getMinX(),
-                bounds.getMinX() + (bounds.getWidth() - windowWidth) / 2));
+                bounds.getMinX() + (bounds.getWidth() - sceneWidth) / 2));
         stage.setY(Math.max(bounds.getMinY(),
                 bounds.getMinY() + (bounds.getHeight() - windowHeight) / 2));
     }
@@ -92,7 +92,7 @@ public class CourantApp extends Application {
         // stage.getY() is the content top on some platforms, so the native title
         // bar may sit above it.
         double regionTop = y - DECORATION_ALLOWANCE;
-        double regionHeight = DECORATION_ALLOWANCE + DECORATION_ALLOWANCE;
+        double regionHeight = 2 * DECORATION_ALLOWANCE;
         Rectangle2D topRegion = new Rectangle2D(x, regionTop, width, regionHeight);
 
         boolean topVisible = Screen.getScreens().stream()
