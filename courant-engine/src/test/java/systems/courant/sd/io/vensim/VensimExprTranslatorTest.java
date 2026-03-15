@@ -233,8 +233,10 @@ class VensimExprTranslatorTest {
             Set<String> names = Set.of("Contact Rate");
             var result = VensimExprTranslator.translate(
                     "MyContact Rate2", "var", names);
-            // Should not match because of surrounding alphanumeric chars
-            assertThat(result.expression()).isEqualTo("MyContact Rate2");
+            // "Contact Rate" should not match due to word boundaries, but the
+            // fallback consecutive-identifier merge joins "MyContact" + "Rate2"
+            // since two identifiers can't be adjacent without an operator
+            assertThat(result.expression()).isEqualTo("MyContact_Rate2");
         }
     }
 
@@ -1064,6 +1066,65 @@ class VensimExprTranslatorTest {
             var result = VensimExprTranslator.translate(
                     "x[a,b] + y[c,d]", "var", EMPTY_NAMES);
             assertThat(result.expression()).isEqualTo("x_a_b + y_c_d");
+        }
+    }
+
+    @Nested
+    @DisplayName("Unknown multi-word name fallback (#665)")
+    class UnknownMultiWordNames {
+
+        @Test
+        void shouldUnderscoreConsecutiveIdentifiers() {
+            var result = VensimExprTranslator.translate(
+                    "Fish * HATCH FRACTION", "var", EMPTY_NAMES);
+            assertThat(result.expression()).isEqualTo("Fish * HATCH_FRACTION");
+        }
+
+        @Test
+        void shouldHandleThreeWordNames() {
+            var result = VensimExprTranslator.translate(
+                    "total number of HB", "var", EMPTY_NAMES);
+            assertThat(result.expression()).isEqualTo("total_number_of_HB");
+        }
+
+        @Test
+        void shouldHandleMultipleUnknownNames() {
+            var result = VensimExprTranslator.translate(
+                    "fish death rate + total catch per year", "var", EMPTY_NAMES);
+            assertThat(result.expression()).isEqualTo(
+                    "fish_death_rate + total_catch_per_year");
+        }
+
+        @Test
+        void shouldNotAffectSingleWordNames() {
+            var result = VensimExprTranslator.translate(
+                    "x * y + z", "var", EMPTY_NAMES);
+            assertThat(result.expression()).isEqualTo("x * y + z");
+        }
+
+        @Test
+        void shouldNotMergeAcrossOperators() {
+            var result = VensimExprTranslator.translate(
+                    "a + b * c", "var", EMPTY_NAMES);
+            assertThat(result.expression()).isEqualTo("a + b * c");
+        }
+
+        @Test
+        void shouldCombineWithKnownNameReplacement() {
+            Set<String> names = Set.of("fish death rate");
+            var result = VensimExprTranslator.translate(
+                    "fish death rate + UNIT SHIP OPERATING COST", "var", names);
+            assertThat(result.expression()).isEqualTo(
+                    "fish_death_rate + UNIT_SHIP_OPERATING_COST");
+        }
+
+        @Test
+        void shouldHandleExpressionWithFunctions() {
+            var result = VensimExprTranslator.translate(
+                    "MAX(0, annual profits * FRACTION INVESTED / SHIP COST)",
+                    "var", EMPTY_NAMES);
+            assertThat(result.expression()).isEqualTo(
+                    "MAX(0, annual_profits * FRACTION_INVESTED / SHIP_COST)");
         }
     }
 }

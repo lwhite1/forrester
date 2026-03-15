@@ -32,6 +32,7 @@ public class Npv implements Formula, Resettable {
     private final DoubleSupplier stream;
     private final double discountRate;
     private final double factor;
+    private final double initialValue;
     private final LongSupplier currentStep;
 
     private double accumulated;
@@ -40,7 +41,7 @@ public class Npv implements Formula, Resettable {
     private long lastStep = -1;
 
     private Npv(DoubleSupplier stream, double discountRate, double factor,
-                LongSupplier currentStep) {
+                double initialValue, LongSupplier currentStep) {
         Preconditions.checkNotNull(stream, "stream supplier must not be null");
         Preconditions.checkNotNull(currentStep, "currentStep supplier must not be null");
         Preconditions.checkArgument(discountRate > -1.0,
@@ -48,6 +49,7 @@ public class Npv implements Formula, Resettable {
         this.stream = stream;
         this.discountRate = discountRate;
         this.factor = factor;
+        this.initialValue = initialValue;
         this.currentStep = currentStep;
     }
 
@@ -61,7 +63,7 @@ public class Npv implements Formula, Resettable {
      */
     public static Npv of(DoubleSupplier stream, double discountRate,
                          LongSupplier currentStep) {
-        return new Npv(stream, discountRate, 1.0, currentStep);
+        return new Npv(stream, discountRate, 1.0, 0, currentStep);
     }
 
     /**
@@ -75,7 +77,22 @@ public class Npv implements Formula, Resettable {
      */
     public static Npv of(DoubleSupplier stream, double discountRate, double factor,
                          LongSupplier currentStep) {
-        return new Npv(stream, discountRate, factor, currentStep);
+        return new Npv(stream, discountRate, factor, 0, currentStep);
+    }
+
+    /**
+     * Creates an NPV formula with a custom factor and initial accumulated value.
+     *
+     * @param stream       supplies the current payment value
+     * @param discountRate the discount rate per timestep
+     * @param factor       multiplier applied to each payment
+     * @param initialValue the starting accumulated value
+     * @param currentStep  supplies the current simulation timestep
+     * @return a new Npv formula
+     */
+    public static Npv of(DoubleSupplier stream, double discountRate, double factor,
+                         double initialValue, LongSupplier currentStep) {
+        return new Npv(stream, discountRate, factor, initialValue, currentStep);
     }
 
     /**
@@ -83,7 +100,7 @@ public class Npv implements Formula, Resettable {
      */
     @Override
     public void reset() {
-        accumulated = 0;
+        accumulated = initialValue;
         cumulativeDiscount = 1.0;
         initialized = false;
         lastStep = -1;
@@ -100,7 +117,7 @@ public class Npv implements Formula, Resettable {
         long step = currentStep.getAsLong();
         if (!initialized) {
             cumulativeDiscount = 1.0;
-            accumulated = stream.getAsDouble() * factor;
+            accumulated = initialValue + stream.getAsDouble() * factor;
             initialized = true;
             lastStep = step;
         } else if (step > lastStep) {
