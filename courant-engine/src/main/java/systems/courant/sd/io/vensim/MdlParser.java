@@ -14,7 +14,7 @@ import java.util.regex.Pattern;
  */
 public final class MdlParser {
 
-    private static final String SKETCH_SEPARATOR = "\\---///";
+    private static final String SKETCH_SEPARATOR = "\\\\\\---///";
     private static final String GROUP_DELIMITER = "****";
     private static final Pattern GROUP_NAME_PATTERN = Pattern.compile(
             "^\\*{4,}\\s*$");

@@ -51,7 +51,7 @@ SAVEPER  =
 	~	The frequency with which output is stored.
 	|
 
-\---///
+\\\---///
 *Teacup Model
 10,1,Teacup Temperature,200,150
 10,2,Room Temperature,400,300

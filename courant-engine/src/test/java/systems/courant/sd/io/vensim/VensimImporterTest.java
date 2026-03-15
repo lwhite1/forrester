@@ -798,7 +798,7 @@ class VensimImporterTest {
                     \t~\t
                     \t|
 
-                    \\---///
+                    \\\\\\---///
                     *View
                     10,1,Population,200,200
                     10,2,Birth Rate,100,100
@@ -855,7 +855,7 @@ class VensimImporterTest {
                     \t~\t
                     \t|
 
-                    \\---///
+                    \\\\\\---///
                     *View
                     10,1,A,100,100
                     10,2,B,200,100
@@ -908,7 +908,7 @@ class VensimImporterTest {
                     \t~\t
                     \t|
 
-                    \\---///
+                    \\\\\\---///
                     *View
                     10,1,X,100,100
                     10,2,Y,200,100
@@ -2588,7 +2588,7 @@ class VensimImporterTest {
                     \t~\t
                     \t|
 
-                    \\---///
+                    \\\\\\---///
                     *View 1
                     10,1,Population,200,200
                     11,2,Birth Rate,100,200
@@ -2717,7 +2717,7 @@ class VensimImporterTest {
                     \t~\t
                     \t|
 
-                    \\---///
+                    \\\\\\---///
                     *View 1
                     10,1,Tank,200,200
                     11,2,flow out,300,200

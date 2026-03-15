@@ -125,7 +125,7 @@ public final class VensimExporter {
         sb.append(buildControlSection(def));
 
         // Sketch section
-        sb.append("\\---///\n");
+        sb.append("\\\\\\---///\n");
         for (ViewDef view : def.views()) {
             sb.append(buildSketchView(view));
         }
