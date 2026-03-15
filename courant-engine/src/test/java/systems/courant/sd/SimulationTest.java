@@ -1010,4 +1010,50 @@ public class SimulationTest {
             assertThat(stock.getValue()).isEqualTo(200.0);
         }
     }
+
+    @Nested
+    @DisplayName("Non-finite flow does not corrupt other flows (#701)")
+    class NonFiniteFlowDeltaCorruption {
+
+        @Test
+        void shouldPreserveValidFlowWhenOtherFlowIsNaN() {
+            Model model = new Model("NaN Delta");
+            Stock stock = new Stock("S", 100, THING);
+
+            Flow validFlow = Flow.create("Valid", MINUTE, () -> new Quantity(10, THING));
+            Flow nanFlow = Flow.create("Bad", MINUTE, () -> new Quantity(Double.NaN, THING));
+
+            stock.addInflow(validFlow);
+            stock.addInflow(nanFlow);
+            model.addStock(stock);
+
+            Simulation sim = new Simulation(model, MINUTE, MINUTE, 3);
+            sim.execute();
+
+            // 4 steps (0..3), valid flow adds 10 per step: 100 + 40 = 140
+            // NaN flow should be skipped, not corrupt the delta
+            assertThat(stock.getValue()).isEqualTo(140.0);
+        }
+
+        @Test
+        void shouldPreserveValidFlowWhenOtherFlowIsInfinity() {
+            Model model = new Model("Inf Delta");
+            Stock stock = new Stock("S", 50, THING);
+
+            Flow validFlow = Flow.create("Valid", MINUTE, () -> new Quantity(5, THING));
+            Flow infFlow = Flow.create("Inf", MINUTE,
+                    () -> new Quantity(Double.POSITIVE_INFINITY, THING));
+
+            stock.addInflow(validFlow);
+            stock.addOutflow(infFlow);
+            model.addStock(stock);
+
+            Simulation sim = new Simulation(model, MINUTE, MINUTE, 2);
+            sim.execute();
+
+            // 3 steps (0..2), valid inflow adds 5 per step: 50 + 15 = 65
+            // Infinity outflow should be skipped
+            assertThat(stock.getValue()).isEqualTo(65.0);
+        }
+    }
 }

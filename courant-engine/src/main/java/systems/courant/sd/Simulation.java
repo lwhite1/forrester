@@ -356,7 +356,9 @@ public class Simulation {
                                     + " at step " + currentStep);
                 }
             }
-            delta += isInflow ? q.getValue() : -q.getValue();
+            if (Double.isFinite(q.getValue())) {
+                delta += isInflow ? q.getValue() : -q.getValue();
+            }
         }
         return delta;
     }
