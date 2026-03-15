@@ -3,6 +3,7 @@ package systems.courant.sd.app;
 import systems.courant.sd.app.canvas.Clipboard;
 
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.geometry.Rectangle2D;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
@@ -16,6 +17,8 @@ import java.util.List;
  * Each window is an independent model editor with its own canvas, undo stack, and file state.
  */
 public class CourantApp extends Application {
+
+    static final double DECORATION_ALLOWANCE = 40;
 
     private final List<ModelWindow> openWindows = new ArrayList<>();
     private final Clipboard clipboard = new Clipboard();
@@ -43,34 +46,61 @@ public class CourantApp extends Application {
                 });
             }
         });
+        centerOnPrimaryScreen(stage);
         stage.show();
-        ensureWindowOnScreen(stage);
+        Platform.runLater(() -> ensureWindowOnScreen(stage));
     }
 
     /**
-     * Ensures that the window's title bar is within the visible bounds of at least one
-     * active screen. If the title bar region is offscreen, the window is repositioned
-     * to the center of the primary screen.
+     * Sets the stage position to center on the primary screen before it is shown.
+     * This prevents the OS window manager from placing the window with the title
+     * bar or menu bar above the visible screen area.
+     */
+    void centerOnPrimaryScreen(Stage stage) {
+        Rectangle2D bounds = Screen.getPrimary().getVisualBounds();
+        double sceneWidth = stage.getScene() != null ? stage.getScene().getWidth() : 1200;
+        double sceneHeight = stage.getScene() != null ? stage.getScene().getHeight() : 800;
+        double windowWidth = sceneWidth;
+        double windowHeight = sceneHeight + DECORATION_ALLOWANCE;
+
+        stage.setX(Math.max(bounds.getMinX(),
+                bounds.getMinX() + (bounds.getWidth() - windowWidth) / 2));
+        stage.setY(Math.max(bounds.getMinY(),
+                bounds.getMinY() + (bounds.getHeight() - windowHeight) / 2));
+    }
+
+    /**
+     * Ensures that the window's title bar and menu bar are within the visible bounds
+     * of at least one active screen. The check region extends from the top of the
+     * window decoration down through the menu bar area. If the window position
+     * contains NaN values (not yet placed by the window manager) or the top region
+     * is offscreen, the window is repositioned to the center of the primary screen.
      */
     void ensureWindowOnScreen(Stage stage) {
-        double titleBarHeight = 30;
         double x = stage.getX();
         double y = stage.getY();
         double width = stage.getWidth();
+        double height = stage.getHeight();
 
-        // The title bar region: full window width, top edge down to titleBarHeight
-        Rectangle2D titleBarRegion = new Rectangle2D(x, y, width, titleBarHeight);
+        if (Double.isNaN(x) || Double.isNaN(y)
+                || Double.isNaN(width) || Double.isNaN(height)) {
+            centerOnPrimaryScreen(stage);
+            return;
+        }
 
-        boolean titleBarVisible = Screen.getScreens().stream()
+        // Check from the decoration top (above content) through the menu bar area.
+        // stage.getY() is the content top on some platforms, so the native title
+        // bar may sit above it.
+        double regionTop = y - DECORATION_ALLOWANCE;
+        double regionHeight = DECORATION_ALLOWANCE + DECORATION_ALLOWANCE;
+        Rectangle2D topRegion = new Rectangle2D(x, regionTop, width, regionHeight);
+
+        boolean topVisible = Screen.getScreens().stream()
                 .map(Screen::getVisualBounds)
-                .anyMatch(bounds -> bounds.intersects(titleBarRegion));
+                .anyMatch(bounds -> bounds.intersects(topRegion));
 
-        if (!titleBarVisible) {
-            Rectangle2D primaryBounds = Screen.getPrimary().getVisualBounds();
-            stage.setX(primaryBounds.getMinX()
-                    + (primaryBounds.getWidth() - stage.getWidth()) / 2);
-            stage.setY(primaryBounds.getMinY()
-                    + (primaryBounds.getHeight() - stage.getHeight()) / 2);
+        if (!topVisible) {
+            centerOnPrimaryScreen(stage);
         }
     }
 
