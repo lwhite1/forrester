@@ -1,0 +1,86 @@
+{
+  "name" : "0203REMaggregatedCLDen1",
+  "variables" : [ {
+    "name" : "TIME_STEP",
+    "equation" : "1",
+    "unit" : "Month"
+  }, {
+    "name" : "INITIAL_TIME",
+    "equation" : "0",
+    "unit" : "Month"
+  }, {
+    "name" : "FINAL_TIME",
+    "equation" : "100",
+    "unit" : "Month"
+  } ],
+  "causalLinks" : [ {
+    "from" : "average lifetime of goods containing REM",
+    "to" : "loss of REM in goods",
+    "polarity" : "UNKNOWN"
+  }, {
+    "from" : "demand for REM in goods",
+    "to" : "use of REM in production of goods",
+    "polarity" : "UNKNOWN"
+  }, {
+    "from" : "processing of REM",
+    "to" : "use of REM in production of goods",
+    "polarity" : "UNKNOWN"
+  }, {
+    "from" : "use of REM in production of goods",
+    "to" : "loss of REM in goods",
+    "polarity" : "UNKNOWN"
+  } ],
+  "views" : [ {
+    "name" : "View 1",
+    "elements" : [ {
+      "name" : "processing of REM",
+      "type" : "aux",
+      "x" : 303.0,
+      "y" : 440.0
+    }, {
+      "name" : "use of REM in production of goods",
+      "type" : "aux",
+      "x" : 305.0,
+      "y" : 306.0
+    }, {
+      "name" : "loss of REM in goods",
+      "type" : "aux",
+      "x" : 305.0,
+      "y" : 186.0
+    }, {
+      "name" : "average lifetime of goods containing REM",
+      "type" : "aux",
+      "x" : 304.0,
+      "y" : 115.0
+    }, {
+      "name" : "demand for REM in goods",
+      "type" : "aux",
+      "x" : 225.0,
+      "y" : 271.0
+    } ],
+    "connectors" : [ {
+      "from" : "average lifetime of goods containing REM",
+      "to" : "loss of REM in goods"
+    }, {
+      "from" : "demand for REM in goods",
+      "to" : "use of REM in production of goods"
+    }, {
+      "from" : "processing of REM",
+      "to" : "use of REM in production of goods"
+    }, {
+      "from" : "use of REM in production of goods",
+      "to" : "loss of REM in goods"
+    } ]
+  } ],
+  "defaultSimulation" : {
+    "timeStep" : "Month",
+    "duration" : 100.0,
+    "durationUnit" : "Month"
+  },
+  "metadata" : {
+    "author" : "Dr. Erik Pruyt",
+    "source" : "Pruyt, E., 2013. Small System Dynamics Models for Big Issues: Triple Jump towards Real-World Complexity. TU Delft Library. ISBN 978-94-6186-195-5",
+    "license" : "CC-BY-NC-SA-4.0",
+    "url" : "https://simulation.tudelft.nl/SD/"
+  }
+}

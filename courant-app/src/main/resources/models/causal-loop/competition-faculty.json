@@ -1,0 +1,143 @@
+{
+  "name" : "0201CompetitionFaculty",
+  "variables" : [ {
+    "name" : "TIME_STEP",
+    "equation" : "1",
+    "unit" : "Month"
+  }, {
+    "name" : "INITIAL_TIME",
+    "equation" : "0",
+    "unit" : "Month"
+  }, {
+    "name" : "FINAL_TIME",
+    "equation" : "100",
+    "unit" : "Month"
+  } ],
+  "causalLinks" : [ {
+    "from" : "scientific papers section A",
+    "to" : "fraction of total budget to section A",
+    "polarity" : "UNKNOWN"
+  }, {
+    "from" : "scientific papers section B",
+    "to" : "fraction of total budget to section A",
+    "polarity" : "UNKNOWN"
+  }, {
+    "from" : "scientific personnel section A",
+    "to" : "scientific papers section A",
+    "polarity" : "UNKNOWN"
+  }, {
+    "from" : "scientific personnel section B",
+    "to" : "scientific papers section B",
+    "polarity" : "UNKNOWN"
+  }, {
+    "from" : "fraction of total budget to section A",
+    "to" : "budget section B",
+    "polarity" : "UNKNOWN"
+  }, {
+    "from" : "fraction of total budget to section A",
+    "to" : "budget section A",
+    "polarity" : "UNKNOWN"
+  }, {
+    "from" : "budget section A",
+    "to" : "scientific personnel section A",
+    "polarity" : "UNKNOWN"
+  }, {
+    "from" : "total TPM budget",
+    "to" : "budget section A",
+    "polarity" : "UNKNOWN"
+  }, {
+    "from" : "total TPM budget",
+    "to" : "budget section B",
+    "polarity" : "UNKNOWN"
+  }, {
+    "from" : "budget section B",
+    "to" : "scientific personnel section B",
+    "polarity" : "UNKNOWN"
+  } ],
+  "views" : [ {
+    "name" : "View 1",
+    "elements" : [ {
+      "name" : "scientific papers section A",
+      "type" : "aux",
+      "x" : 253.0,
+      "y" : 207.0
+    }, {
+      "name" : "scientific papers section B",
+      "type" : "aux",
+      "x" : 446.0,
+      "y" : 206.0
+    }, {
+      "name" : "fraction of total budget to section A",
+      "type" : "aux",
+      "x" : 350.0,
+      "y" : 294.0
+    }, {
+      "name" : "scientific personnel section A",
+      "type" : "aux",
+      "x" : 159.0,
+      "y" : 283.0
+    }, {
+      "name" : "scientific personnel section B",
+      "type" : "aux",
+      "x" : 546.0,
+      "y" : 287.0
+    }, {
+      "name" : "budget section A",
+      "type" : "aux",
+      "x" : 258.0,
+      "y" : 372.0
+    }, {
+      "name" : "budget section B",
+      "type" : "aux",
+      "x" : 451.0,
+      "y" : 374.0
+    }, {
+      "name" : "total TPM budget",
+      "type" : "aux",
+      "x" : 361.0,
+      "y" : 424.0
+    } ],
+    "connectors" : [ {
+      "from" : "scientific papers section A",
+      "to" : "fraction of total budget to section A"
+    }, {
+      "from" : "scientific papers section B",
+      "to" : "fraction of total budget to section A"
+    }, {
+      "from" : "scientific personnel section A",
+      "to" : "scientific papers section A"
+    }, {
+      "from" : "scientific personnel section B",
+      "to" : "scientific papers section B"
+    }, {
+      "from" : "fraction of total budget to section A",
+      "to" : "budget section B"
+    }, {
+      "from" : "fraction of total budget to section A",
+      "to" : "budget section A"
+    }, {
+      "from" : "budget section A",
+      "to" : "scientific personnel section A"
+    }, {
+      "from" : "total TPM budget",
+      "to" : "budget section A"
+    }, {
+      "from" : "total TPM budget",
+      "to" : "budget section B"
+    }, {
+      "from" : "budget section B",
+      "to" : "scientific personnel section B"
+    } ]
+  } ],
+  "defaultSimulation" : {
+    "timeStep" : "Month",
+    "duration" : 100.0,
+    "durationUnit" : "Month"
+  },
+  "metadata" : {
+    "author" : "Dr. Erik Pruyt",
+    "source" : "Pruyt, E., 2013. Small System Dynamics Models for Big Issues: Triple Jump towards Real-World Complexity. TU Delft Library. ISBN 978-94-6186-195-5",
+    "license" : "CC-BY-NC-SA-4.0",
+    "url" : "https://simulation.tudelft.nl/SD/"
+  }
+}

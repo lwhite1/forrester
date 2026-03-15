@@ -1,0 +1,261 @@
+{
+  "name" : "1012_ShaleGASwoUnits",
+  "stocks" : [ {
+    "name" : "annual gas demand",
+    "comment" : "annual gas demand",
+    "initialValue" : 2.0,
+    "unit" : "whateverunitsofreserve/Year"
+  }, {
+    "name" : "gas resource base",
+    "comment" : "gas resource base",
+    "initialValue" : 120.0,
+    "unit" : "whateverunitsofreserve"
+  }, {
+    "name" : "SD Workshoppers",
+    "comment" : "SD Workshoppers",
+    "initialValue" : 0.0,
+    "unit" : ""
+  } ],
+  "flows" : [ {
+    "name" : "annual gas demand net flow",
+    "comment" : "Net flow for annual gas demand",
+    "equation" : "new_gas_demand",
+    "timeUnit" : "Year",
+    "sink" : "annual gas demand"
+  }, {
+    "name" : "gas resource base net flow",
+    "comment" : "Net flow for gas resource base",
+    "equation" : "-depletion_gas_resource_base",
+    "timeUnit" : "Year",
+    "sink" : "gas resource base"
+  }, {
+    "name" : "SD Workshoppers inflow 1",
+    "equation" : "new_SD_workshoppers",
+    "timeUnit" : "Year",
+    "sink" : "SD Workshoppers"
+  }, {
+    "name" : "SD Workshoppers outflow 2",
+    "equation" : "System_Dynamicists",
+    "timeUnit" : "Year",
+    "source" : "SD Workshoppers"
+  } ],
+  "variables" : [ {
+    "name" : "TIME_STEP",
+    "equation" : "0.0625",
+    "unit" : "Year"
+  }, {
+    "name" : "INITIAL_TIME",
+    "equation" : "0",
+    "unit" : "Year"
+  }, {
+    "name" : "FINAL_TIME",
+    "equation" : "100",
+    "unit" : "Year"
+  }, {
+    "name" : "average time to turn SD Workshoppers into System Dynamicist",
+    "comment" : "average time to turn SD Workshoppers into System Dynamicist",
+    "equation" : "1",
+    "unit" : ""
+  }, {
+    "name" : "depletion gas resource base",
+    "comment" : "depletion gas resource base",
+    "equation" : "MIN(annual_gas_demand,gas_resource_base)",
+    "unit" : "whateverunitsofreserve/Year"
+  }, {
+    "name" : "initial gas resource base",
+    "comment" : "initial gas resource base",
+    "equation" : "120",
+    "unit" : "whateverunitsofreserve"
+  }, {
+    "name" : "new gas demand",
+    "comment" : "new gas demand",
+    "equation" : "annual_gas_demand*new_gas_demand_growth_rate",
+    "unit" : "whateverunitsofreserve/Year/Year"
+  }, {
+    "name" : "new gas demand growth rate",
+    "comment" : "new gas demand growth rate",
+    "equation" : "0.02",
+    "unit" : "whateverunitsofreserve/Year/Year"
+  }, {
+    "name" : "new SD workshoppers",
+    "comment" : "new SD workshoppers",
+    "equation" : "0",
+    "unit" : ""
+  }, {
+    "name" : "System Dynamicists",
+    "comment" : "System Dynamicists",
+    "equation" : "SD_Workshoppers/average_time_to_turn_SD_Workshoppers_into_System_Dynamicist",
+    "unit" : ""
+  } ],
+  "views" : [ {
+    "name" : "View 1",
+    "elements" : [ {
+      "name" : "SD Workshoppers",
+      "type" : "stock",
+      "x" : 929.0,
+      "y" : 285.0
+    }, {
+      "name" : "_48",
+      "type" : "flow",
+      "x" : 768.0,
+      "y" : 280.0
+    }, {
+      "name" : "new SD workshoppers",
+      "type" : "aux",
+      "x" : 768.0,
+      "y" : 307.0
+    }, {
+      "name" : "_48",
+      "type" : "flow",
+      "x" : 1098.0,
+      "y" : 277.0
+    }, {
+      "name" : "System Dynamicists",
+      "type" : "aux",
+      "x" : 1098.0,
+      "y" : 304.0
+    }, {
+      "name" : "average time to turn SD Workshoppers into System Dynamicist",
+      "type" : "aux",
+      "x" : 944.0,
+      "y" : 361.0
+    }, {
+      "name" : "new SD workshoppers",
+      "type" : "aux",
+      "x" : 779.0,
+      "y" : 478.0
+    }, {
+      "name" : "System Dynamicists",
+      "type" : "aux",
+      "x" : 1129.0,
+      "y" : 478.0
+    }, {
+      "name" : "average time to turn SD Workshoppers into System Dynamicist",
+      "type" : "aux",
+      "x" : 997.0,
+      "y" : 542.0
+    } ],
+    "connectors" : [ {
+      "from" : "5",
+      "to" : "SD Workshoppers"
+    }, {
+      "from" : "5",
+      "to" : "2"
+    }, {
+      "from" : "10",
+      "to" : "7"
+    }, {
+      "from" : "10",
+      "to" : "SD Workshoppers"
+    }, {
+      "from" : "SD Workshoppers",
+      "to" : "_48"
+    }, {
+      "from" : "average time to turn SD Workshoppers into System Dynamicist",
+      "to" : "System Dynamicists"
+    }, {
+      "from" : "new SD workshoppers",
+      "to" : "System Dynamicists"
+    }, {
+      "from" : "average time to turn SD Workshoppers into System Dynamicist",
+      "to" : "System Dynamicists"
+    } ],
+    "flowRoutes" : [ {
+      "flowName" : "_48",
+      "points" : [ [ 768.0, 280.0 ] ]
+    }, {
+      "flowName" : "_48",
+      "points" : [ [ 1098.0, 277.0 ] ]
+    } ]
+  }, {
+    "name" : "View 2",
+    "elements" : [ {
+      "name" : "gas resource base",
+      "type" : "stock",
+      "x" : 356.0,
+      "y" : 256.0
+    }, {
+      "name" : "annual gas demand",
+      "type" : "stock",
+      "x" : 481.0,
+      "y" : 373.0
+    }, {
+      "name" : "_48",
+      "type" : "flow",
+      "x" : 370.0,
+      "y" : 379.0
+    }, {
+      "name" : "new gas demand",
+      "type" : "aux",
+      "x" : 370.0,
+      "y" : 406.0
+    }, {
+      "name" : "new gas demand growth rate",
+      "type" : "aux",
+      "x" : 283.0,
+      "y" : 333.0
+    }, {
+      "name" : "_48",
+      "type" : "flow",
+      "x" : 483.0,
+      "y" : 257.0
+    }, {
+      "name" : "depletion gas resource base",
+      "type" : "aux",
+      "x" : 483.0,
+      "y" : 284.0
+    }, {
+      "name" : "initial gas resource base",
+      "type" : "aux",
+      "x" : 268.0,
+      "y" : 255.0
+    } ],
+    "connectors" : [ {
+      "from" : "6",
+      "to" : "annual gas demand"
+    }, {
+      "from" : "6",
+      "to" : "3"
+    }, {
+      "from" : "annual gas demand",
+      "to" : "_48"
+    }, {
+      "from" : "new gas demand growth rate",
+      "to" : "_48"
+    }, {
+      "from" : "14",
+      "to" : "11"
+    }, {
+      "from" : "14",
+      "to" : "gas resource base"
+    }, {
+      "from" : "annual gas demand",
+      "to" : "depletion gas resource base"
+    }, {
+      "from" : "gas resource base",
+      "to" : "_48"
+    }, {
+      "from" : "initial gas resource base",
+      "to" : "gas resource base"
+    } ],
+    "flowRoutes" : [ {
+      "flowName" : "_48",
+      "points" : [ [ 370.0, 379.0 ] ]
+    }, {
+      "flowName" : "_48",
+      "points" : [ [ 483.0, 257.0 ] ]
+    } ]
+  } ],
+  "defaultSimulation" : {
+    "timeStep" : "Year",
+    "duration" : 100.0,
+    "durationUnit" : "Year",
+    "dt" : 0.0625
+  },
+  "metadata" : {
+    "author" : "Dr. Erik Pruyt",
+    "source" : "Pruyt, E., 2013. Small System Dynamics Models for Big Issues: Triple Jump towards Real-World Complexity. TU Delft Library. ISBN 978-94-6186-195-5",
+    "license" : "CC-BY-NC-SA-4.0",
+    "url" : "https://simulation.tudelft.nl/SD/"
+  }
+}

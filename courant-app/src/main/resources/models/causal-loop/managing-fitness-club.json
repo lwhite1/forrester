@@ -1,0 +1,242 @@
+{
+  "name" : "0202Managing a Fitness Club CLD EN",
+  "variables" : [ {
+    "name" : "TIME_STEP",
+    "equation" : "1",
+    "unit" : "Month"
+  }, {
+    "name" : "INITIAL_TIME",
+    "equation" : "0",
+    "unit" : "Month"
+  }, {
+    "name" : "FINAL_TIME",
+    "equation" : "100",
+    "unit" : "Month"
+  } ],
+  "causalLinks" : [ {
+    "from" : "number of members",
+    "to" : "average effective waiting time per device",
+    "polarity" : "UNKNOWN"
+  }, {
+    "from" : "number of fitness devices",
+    "to" : "average effective waiting time per device",
+    "polarity" : "UNKNOWN"
+  }, {
+    "from" : "number of members",
+    "to" : "fraction of number of members over desired number of members",
+    "polarity" : "UNKNOWN"
+  }, {
+    "from" : "desired number of members",
+    "to" : "fraction of number of members over desired number of members",
+    "polarity" : "UNKNOWN"
+  }, {
+    "from" : "number of members",
+    "to" : "positive mouth to mouth publicity",
+    "polarity" : "UNKNOWN"
+  }, {
+    "from" : "positive mouth to mouth publicity",
+    "to" : "new members",
+    "polarity" : "UNKNOWN"
+  }, {
+    "from" : "fraction of number of members over desired number of members",
+    "to" : "nonrecurrent enrolment cost",
+    "polarity" : "UNKNOWN"
+  }, {
+    "from" : "nonrecurrent enrolment cost",
+    "to" : "new members",
+    "polarity" : "UNKNOWN"
+  }, {
+    "from" : "monthly membership contribution",
+    "to" : "new members",
+    "polarity" : "UNKNOWN"
+  }, {
+    "from" : "implicite maximum acceptable waiting time per device",
+    "to" : "34",
+    "polarity" : "UNKNOWN"
+  }, {
+    "from" : "average effective waiting time per device",
+    "to" : "fraction of effective waiting time over desired waiting time",
+    "polarity" : "UNKNOWN"
+  }, {
+    "from" : "fraction of effective waiting time over desired waiting time",
+    "to" : "satisfaction",
+    "polarity" : "UNKNOWN"
+  }, {
+    "from" : "satisfaction",
+    "to" : "positive mouth to mouth publicity",
+    "polarity" : "UNKNOWN"
+  }, {
+    "from" : "satisfaction",
+    "to" : "dissatisfied cancellations",
+    "polarity" : "UNKNOWN"
+  }, {
+    "from" : "dissatisfied cancellations",
+    "to" : "number of members",
+    "polarity" : "UNKNOWN"
+  }, {
+    "from" : "new members",
+    "to" : "number of members",
+    "polarity" : "UNKNOWN"
+  }, {
+    "from" : "desired waiting time",
+    "to" : "fraction of effective waiting time over desired waiting time",
+    "polarity" : "UNKNOWN"
+  } ],
+  "views" : [ {
+    "name" : "View 1",
+    "elements" : [ {
+      "name" : "number of members",
+      "type" : "aux",
+      "x" : 392.0,
+      "y" : 251.0
+    }, {
+      "name" : "number of fitness devices",
+      "type" : "aux",
+      "x" : 131.0,
+      "y" : 363.0
+    }, {
+      "name" : "average effective waiting time per device",
+      "type" : "aux",
+      "x" : 296.0,
+      "y" : 359.0
+    }, {
+      "name" : "implicite maximum acceptable waiting time per device",
+      "type" : "aux",
+      "x" : 112.0,
+      "y" : 129.0
+    }, {
+      "name" : "fraction of effective waiting time over desired waiting time",
+      "type" : "aux",
+      "x" : 169.0,
+      "y" : 275.0
+    }, {
+      "name" : "nonrecurrent enrolment cost",
+      "type" : "aux",
+      "x" : 606.0,
+      "y" : 232.0
+    }, {
+      "name" : "monthly membership contribution",
+      "type" : "aux",
+      "x" : 628.0,
+      "y" : 124.0
+    }, {
+      "name" : "desired number of members",
+      "type" : "aux",
+      "x" : 658.0,
+      "y" : 354.0
+    }, {
+      "name" : "fraction of number of members over desired number of members",
+      "type" : "aux",
+      "x" : 497.0,
+      "y" : 361.0
+    }, {
+      "name" : "positive mouth to mouth publicity",
+      "type" : "aux",
+      "x" : 369.0,
+      "y" : 48.0
+    }, {
+      "name" : "new members",
+      "type" : "aux",
+      "x" : 518.0,
+      "y" : 164.0
+    }, {
+      "name" : "satisfaction",
+      "type" : "aux",
+      "x" : 201.0,
+      "y" : 206.0
+    }, {
+      "name" : "dissatisfied cancellations",
+      "type" : "aux",
+      "x" : 318.0,
+      "y" : 190.0
+    }, {
+      "name" : "desired waiting time",
+      "type" : "aux",
+      "x" : 105.0,
+      "y" : 200.0
+    }, {
+      "name" : "more members less m2m publicity loop",
+      "type" : "aux",
+      "x" : 298.0,
+      "y" : 100.0
+    }, {
+      "name" : "more members more m2m publicity loop",
+      "type" : "aux",
+      "x" : 443.0,
+      "y" : 99.0
+    }, {
+      "name" : "more members more leavers loop",
+      "type" : "aux",
+      "x" : 302.0,
+      "y" : 282.0
+    }, {
+      "name" : "more members higher nonrecurrent enrolment costs",
+      "type" : "aux",
+      "x" : 502.0,
+      "y" : 285.0
+    } ],
+    "connectors" : [ {
+      "from" : "number of members",
+      "to" : "average effective waiting time per device"
+    }, {
+      "from" : "number of fitness devices",
+      "to" : "average effective waiting time per device"
+    }, {
+      "from" : "number of members",
+      "to" : "fraction of number of members over desired number of members"
+    }, {
+      "from" : "desired number of members",
+      "to" : "fraction of number of members over desired number of members"
+    }, {
+      "from" : "number of members",
+      "to" : "positive mouth to mouth publicity"
+    }, {
+      "from" : "positive mouth to mouth publicity",
+      "to" : "new members"
+    }, {
+      "from" : "fraction of number of members over desired number of members",
+      "to" : "nonrecurrent enrolment cost"
+    }, {
+      "from" : "nonrecurrent enrolment cost",
+      "to" : "new members"
+    }, {
+      "from" : "monthly membership contribution",
+      "to" : "new members"
+    }, {
+      "from" : "implicite maximum acceptable waiting time per device",
+      "to" : "34"
+    }, {
+      "from" : "average effective waiting time per device",
+      "to" : "fraction of effective waiting time over desired waiting time"
+    }, {
+      "from" : "fraction of effective waiting time over desired waiting time",
+      "to" : "satisfaction"
+    }, {
+      "from" : "satisfaction",
+      "to" : "positive mouth to mouth publicity"
+    }, {
+      "from" : "satisfaction",
+      "to" : "dissatisfied cancellations"
+    }, {
+      "from" : "dissatisfied cancellations",
+      "to" : "number of members"
+    }, {
+      "from" : "new members",
+      "to" : "number of members"
+    }, {
+      "from" : "desired waiting time",
+      "to" : "fraction of effective waiting time over desired waiting time"
+    } ]
+  } ],
+  "defaultSimulation" : {
+    "timeStep" : "Month",
+    "duration" : 100.0,
+    "durationUnit" : "Month"
+  },
+  "metadata" : {
+    "author" : "Dr. Erik Pruyt",
+    "source" : "Pruyt, E., 2013. Small System Dynamics Models for Big Issues: Triple Jump towards Real-World Complexity. TU Delft Library. ISBN 978-94-6186-195-5",
+    "license" : "CC-BY-NC-SA-4.0",
+    "url" : "https://simulation.tudelft.nl/SD/"
+  }
+}

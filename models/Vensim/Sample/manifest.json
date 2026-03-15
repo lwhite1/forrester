@@ -1,0 +1,492 @@
+[
+  {
+    "url": "models/Vensim/Sample/EXTRA/COOL.MDL",
+    "className": "Cool",
+    "id": "cool",
+    "category": "introductory",
+    "difficulty": "introductory",
+    "comment": "Newton's law of cooling: a single stock model of temperature decay toward ambient.",
+    "metadata": {
+      "author": "Ventana Systems",
+      "source": "Vensim Sample Models",
+      "license": "MIT",
+      "url": null
+    }
+  },
+  {
+    "url": "models/Vensim/Sample/EXTRA/POPGAME.MDL",
+    "className": "PopGame",
+    "id": "pop-game",
+    "category": "introductory",
+    "difficulty": "introductory",
+    "comment": "Interactive population growth game illustrating birth and death rate dynamics.",
+    "metadata": {
+      "author": "Ventana Systems",
+      "source": "Vensim Sample Models",
+      "license": "MIT",
+      "url": null
+    }
+  },
+  {
+    "url": "models/Vensim/Sample/EXTRA/SNOWBALL.MDL",
+    "className": "Snowball",
+    "id": "snowball",
+    "category": "introductory",
+    "difficulty": "introductory",
+    "comment": "Exponential growth analogy: a rolling snowball that accumulates mass as it grows.",
+    "metadata": {
+      "author": "Ventana Systems",
+      "source": "Vensim Sample Models",
+      "license": "MIT",
+      "url": null
+    }
+  },
+  {
+    "url": "models/Vensim/Sample/EXTRA/SPEED.MDL",
+    "className": "Speed",
+    "id": "speed",
+    "category": "introductory",
+    "difficulty": "introductory",
+    "comment": "Simple vehicle speed adjustment model demonstrating goal-seeking behavior.",
+    "metadata": {
+      "author": "Ventana Systems",
+      "source": "Vensim Sample Models",
+      "license": "MIT",
+      "url": null
+    }
+  },
+  {
+    "url": "models/Vensim/Sample/INTRO.mdl",
+    "className": "Intro",
+    "id": "intro",
+    "category": "introductory",
+    "difficulty": "introductory",
+    "comment": "Introductory workforce model demonstrating hiring, quitting, and experience accumulation.",
+    "metadata": {
+      "author": "Ventana Systems",
+      "source": "Vensim Sample Models",
+      "license": "MIT",
+      "url": null
+    }
+  },
+  {
+    "url": "models/Vensim/Sample/BPR/BPR0.mdl",
+    "className": "Bpr0",
+    "id": "bpr0",
+    "category": "policy",
+    "difficulty": "introductory",
+    "comment": "Causal loop diagram of a business process reengineering problem with no stock-flow structure.",
+    "metadata": {
+      "author": "Ventana Systems",
+      "source": "Vensim Sample Models",
+      "license": "MIT",
+      "url": null
+    }
+  },
+  {
+    "url": "models/Vensim/Sample/VENAPP/flicker.mdl",
+    "className": "Flicker",
+    "id": "flicker",
+    "category": "causal-loop",
+    "difficulty": "introductory",
+    "comment": "Minimal causal loop diagram demonstrating oscillatory feedback without stocks or flows.",
+    "metadata": {
+      "author": "Ventana Systems",
+      "source": "Vensim Sample Models",
+      "license": "MIT",
+      "url": null
+    }
+  },
+  {
+    "url": "models/Vensim/Sample/EXTRA/BALL.MDL",
+    "className": "Ball",
+    "id": "ball",
+    "category": "physics",
+    "difficulty": "intermediate",
+    "comment": "Bouncing ball simulation modeling position and velocity under gravity with elastic collisions.",
+    "metadata": {
+      "author": "Ventana Systems",
+      "source": "Vensim Sample Models",
+      "license": "MIT",
+      "url": null
+    }
+  },
+  {
+    "url": "models/Vensim/Sample/EXTRA/GRAVITY.MDL",
+    "className": "Gravity",
+    "id": "gravity",
+    "category": "physics",
+    "difficulty": "intermediate",
+    "comment": "Two-body gravitational interaction modeling orbital mechanics with position and velocity stocks.",
+    "metadata": {
+      "author": "Ventana Systems",
+      "source": "Vensim Sample Models",
+      "license": "MIT",
+      "url": null
+    }
+  },
+  {
+    "url": "models/Vensim/Sample/EXTRA/RABFOX.MDL",
+    "className": "RabFox",
+    "id": "rab-fox",
+    "category": "ecology",
+    "difficulty": "intermediate",
+    "comment": "Classic Lotka-Volterra predator-prey model of rabbit and fox population dynamics.",
+    "metadata": {
+      "author": "Ventana Systems",
+      "source": "Vensim Sample Models",
+      "license": "MIT",
+      "url": null
+    }
+  },
+  {
+    "url": "models/Vensim/Sample/EXTRA/EPIDEMIC.MDL",
+    "className": "Epidemic",
+    "id": "epidemic",
+    "category": "epidemiology",
+    "difficulty": "intermediate",
+    "comment": "SIR compartmental model of infectious disease spread through a population.",
+    "metadata": {
+      "author": "Ventana Systems",
+      "source": "Vensim Sample Models",
+      "license": "MIT",
+      "url": null
+    }
+  },
+  {
+    "url": "models/Vensim/Sample/EXTRA/AGE.MDL",
+    "className": "Age",
+    "id": "age",
+    "category": "demographics",
+    "difficulty": "intermediate",
+    "comment": "Age-cohort population model tracking births, aging, and deaths across demographic groups.",
+    "metadata": {
+      "author": "Ventana Systems",
+      "source": "Vensim Sample Models",
+      "license": "MIT",
+      "url": null
+    }
+  },
+  {
+    "url": "models/Vensim/Sample/EXTRA/AGECHAIN.MDL",
+    "className": "AgeChain",
+    "id": "age-chain",
+    "category": "demographics",
+    "difficulty": "intermediate",
+    "comment": "Simplified aging chain model using cascaded stocks to represent population cohort transitions.",
+    "metadata": {
+      "author": "Ventana Systems",
+      "source": "Vensim Sample Models",
+      "license": "MIT",
+      "url": null
+    }
+  },
+  {
+    "url": "models/Vensim/Sample/EXTRA/CAFFEINE.MDL",
+    "className": "Caffeine",
+    "id": "caffeine",
+    "category": "social",
+    "difficulty": "intermediate",
+    "comment": "Pharmacokinetic model of caffeine absorption and elimination in the human body.",
+    "metadata": {
+      "author": "Ventana Systems",
+      "source": "Vensim Sample Models",
+      "license": "MIT",
+      "url": null
+    }
+  },
+  {
+    "url": "models/Vensim/Sample/EXTRA/TUBS.MDL",
+    "className": "Tubs",
+    "id": "tubs",
+    "category": "social",
+    "difficulty": "intermediate",
+    "comment": "Bathtub analogy demonstrating stock-flow relationships with multiple connected reservoirs.",
+    "metadata": {
+      "author": "Ventana Systems",
+      "source": "Vensim Sample Models",
+      "license": "MIT",
+      "url": null
+    }
+  },
+  {
+    "url": "models/Vensim/Sample/EXTRA/DELIV.MDL",
+    "className": "Deliv",
+    "id": "deliv",
+    "category": "supply-chain",
+    "difficulty": "intermediate",
+    "comment": "Delivery delay model showing how order backlogs and capacity affect fulfillment times.",
+    "metadata": {
+      "author": "Ventana Systems",
+      "source": "Vensim Sample Models",
+      "license": "MIT",
+      "url": null
+    }
+  },
+  {
+    "url": "models/Vensim/Sample/EXTRA/EIT.MDL",
+    "className": "Eit",
+    "id": "eit",
+    "category": "technology",
+    "difficulty": "intermediate",
+    "comment": "Technology adoption model exploring diffusion of emerging innovations over time.",
+    "metadata": {
+      "author": "Ventana Systems",
+      "source": "Vensim Sample Models",
+      "license": "MIT",
+      "url": null
+    }
+  },
+  {
+    "url": "models/Vensim/Sample/EXTRA/COMPETE1.MDL",
+    "className": "Compete1",
+    "id": "compete1",
+    "category": "management",
+    "difficulty": "intermediate",
+    "comment": "Competitive dynamics model of two firms vying for market share through pricing and quality.",
+    "metadata": {
+      "author": "Ventana Systems",
+      "source": "Vensim Sample Models",
+      "license": "MIT",
+      "url": null
+    }
+  },
+  {
+    "url": "models/Vensim/Sample/Sub-Model/advertising.mdl",
+    "className": "Advertising",
+    "id": "advertising",
+    "category": "marketing",
+    "difficulty": "intermediate",
+    "comment": "Advertising effectiveness model showing how ad spending drives customer awareness and sales.",
+    "metadata": {
+      "author": "Ventana Systems",
+      "source": "Vensim Sample Models",
+      "license": "MIT",
+      "url": null
+    }
+  },
+  {
+    "url": "models/Vensim/Sample/Sub-Model/Products.mdl",
+    "className": "Products",
+    "id": "products",
+    "category": "marketing",
+    "difficulty": "intermediate",
+    "comment": "Product lifecycle model tracking production, inventory, and market demand interactions.",
+    "metadata": {
+      "author": "Ventana Systems",
+      "source": "Vensim Sample Models",
+      "license": "MIT",
+      "url": null
+    }
+  },
+  {
+    "url": "models/Vensim/Sample/VENAPP/change.mdl",
+    "className": "Change",
+    "id": "change",
+    "category": "control",
+    "difficulty": "intermediate",
+    "comment": "Change management model illustrating resistance and adaptation feedback during organizational transitions.",
+    "metadata": {
+      "author": "Ventana Systems",
+      "source": "Vensim Sample Models",
+      "license": "MIT",
+      "url": null
+    }
+  },
+  {
+    "url": "models/Vensim/Sample/VENAPP/mplayer.mdl",
+    "className": "Mplayer",
+    "id": "mplayer",
+    "category": "control",
+    "difficulty": "intermediate",
+    "comment": "Multi-player game theory model with interacting decision-makers and feedback-driven strategies.",
+    "metadata": {
+      "author": "Ventana Systems",
+      "source": "Vensim Sample Models",
+      "license": "MIT",
+      "url": null
+    }
+  },
+  {
+    "url": "models/Vensim/Sample/EXTRA/BURNOUT.MDL",
+    "className": "Burnout",
+    "id": "burnout",
+    "category": "management",
+    "difficulty": "advanced",
+    "comment": "Employee burnout model capturing workload pressure, fatigue accumulation, and productivity collapse.",
+    "metadata": {
+      "author": "Ventana Systems",
+      "source": "Vensim Sample Models",
+      "license": "MIT",
+      "url": null
+    }
+  },
+  {
+    "url": "models/Vensim/Sample/EXTRA/COMMOD.MDL",
+    "className": "Commod",
+    "id": "commod",
+    "category": "economics",
+    "difficulty": "advanced",
+    "comment": "Commodity market model with price cycles driven by supply-demand imbalances and production delays.",
+    "metadata": {
+      "author": "Ventana Systems",
+      "source": "Vensim Sample Models",
+      "license": "MIT",
+      "url": null
+    }
+  },
+  {
+    "url": "models/Vensim/Sample/EXTRA/CORPGRTH.MDL",
+    "className": "CorpGrth",
+    "id": "corp-grth",
+    "category": "management",
+    "difficulty": "advanced",
+    "comment": "Corporate growth model exploring limits to growth from workforce, demand, and capital constraints.",
+    "metadata": {
+      "author": "Ventana Systems",
+      "source": "Vensim Sample Models",
+      "license": "MIT",
+      "url": null
+    }
+  },
+  {
+    "url": "models/Vensim/Sample/EXTRA/PROCRAST.MDL",
+    "className": "Procrast",
+    "id": "procrast",
+    "category": "management",
+    "difficulty": "advanced",
+    "comment": "Procrastination dynamics model showing how delay, pressure, and deadlines interact in task completion.",
+    "metadata": {
+      "author": "Ventana Systems",
+      "source": "Vensim Sample Models",
+      "license": "MIT",
+      "url": null
+    }
+  },
+  {
+    "url": "models/Vensim/Sample/EXTRA/PROJ.MDL",
+    "className": "Proj",
+    "id": "proj",
+    "category": "management",
+    "difficulty": "advanced",
+    "comment": "Project management model with rework cycles, staffing dynamics, and schedule pressure feedbacks.",
+    "metadata": {
+      "author": "Ventana Systems",
+      "source": "Vensim Sample Models",
+      "license": "MIT",
+      "url": null
+    }
+  },
+  {
+    "url": "models/Vensim/Sample/FINANCE/FINANCE.mdl",
+    "className": "Finance",
+    "id": "finance",
+    "category": "economics",
+    "difficulty": "advanced",
+    "comment": "Corporate financial model integrating income, balance sheet, and cash flow dynamics over time.",
+    "metadata": {
+      "author": "Ventana Systems",
+      "source": "Vensim Sample Models",
+      "license": "MIT",
+      "url": null
+    }
+  },
+  {
+    "url": "models/Vensim/Sample/MARKET/MARKET.mdl",
+    "className": "Market",
+    "id": "market",
+    "category": "economics",
+    "difficulty": "advanced",
+    "comment": "Market dynamics model with product adoption, competitive pricing, and capacity expansion feedbacks.",
+    "metadata": {
+      "author": "Ventana Systems",
+      "source": "Vensim Sample Models",
+      "license": "MIT",
+      "url": null
+    }
+  },
+  {
+    "url": "models/Vensim/Sample/BPR/BPR3.mdl",
+    "className": "Bpr3",
+    "id": "bpr3",
+    "category": "policy",
+    "difficulty": "advanced",
+    "comment": "Full business process reengineering model with stocks, flows, and policy intervention levers.",
+    "metadata": {
+      "author": "Ventana Systems",
+      "source": "Vensim Sample Models",
+      "license": "MIT",
+      "url": null
+    }
+  },
+  {
+    "url": "models/Vensim/Sample/KALMAN/COMPLETE/WFKAL.MDL",
+    "className": "WfKal",
+    "id": "wf-kal",
+    "category": "control",
+    "difficulty": "advanced",
+    "comment": "Kalman filter implementation for workforce estimation under noisy observations.",
+    "metadata": {
+      "author": "Ventana Systems",
+      "source": "Vensim Sample Models",
+      "license": "MIT",
+      "url": null
+    }
+  },
+  {
+    "url": "models/Vensim/Sample/URBAN/URBAN.mdl",
+    "className": "Urban",
+    "id": "urban",
+    "category": "urban",
+    "difficulty": "advanced",
+    "comment": "Forrester's urban dynamics model of city lifecycle with industry, housing, and population sectors.",
+    "metadata": {
+      "author": "Ventana Systems",
+      "source": "Vensim Sample Models",
+      "license": "MIT",
+      "url": null
+    }
+  },
+  {
+    "url": "models/Vensim/Sample/EXTRA/WORLD.MDL",
+    "className": "World",
+    "id": "world",
+    "category": "urban",
+    "difficulty": "advanced",
+    "comment": "Forrester's World2 model of global population, pollution, resources, and capital interactions.",
+    "metadata": {
+      "author": "Ventana Systems",
+      "source": "Vensim Sample Models",
+      "license": "MIT",
+      "url": null
+    }
+  },
+  {
+    "url": "models/Vensim/Sample/VENAPP/WORLDAPP.mdl",
+    "className": "WorldApp",
+    "id": "world-app",
+    "category": "urban",
+    "difficulty": "advanced",
+    "comment": "Vensim application version of the World2 model with interactive controls and scenario settings.",
+    "metadata": {
+      "author": "Ventana Systems",
+      "source": "Vensim Sample Models",
+      "license": "MIT",
+      "url": null
+    }
+  },
+  {
+    "url": "models/Vensim/Sample/WRLD3-03/wrld3-03.mdl",
+    "className": "Wrld303",
+    "id": "wrld3-03",
+    "category": "urban",
+    "difficulty": "advanced",
+    "comment": "World3 model (2003 revision) from Limits to Growth exploring long-term global sustainability scenarios.",
+    "metadata": {
+      "author": "Ventana Systems",
+      "source": "Vensim Sample Models",
+      "license": "MIT",
+      "url": null
+    }
+  }
+]

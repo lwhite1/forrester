@@ -1,849 +1,674 @@
 {
-  "name": "RealEstateBoom",
-  "stocks": [
-    {
-      "name": "REU under construction",
-      "comment": "REU under construction",
-      "initialValue": 0.0,
-      "initialExpression": "immigrants/workers_per_REU_under_construction",
-      "unit": "real estate unit"
-    },
-    {
-      "name": "immigrants",
-      "comment": "immigrants",
-      "initialValue": 2000000.0,
-      "unit": "person"
-    },
-    {
-      "name": "locals",
-      "comment": "locals",
-      "initialValue": 220000.0,
-      "unit": "person"
-    },
-    {
-      "name": "REU supply",
-      "comment": "REU supply",
-      "initialValue": 1800000.0,
-      "unit": "real estate unit"
-    }
-  ],
-  "flows": [
-    {
-      "name": "REU under construction net flow",
-      "comment": "Net flow for REU under construction",
-      "equation": "new_REU_plans_approved-REU_commissioning",
-      "timeUnit": "Month",
-      "sink": "REU under construction"
-    },
-    {
-      "name": "immigrants net flow",
-      "comment": "Net flow for immigrants",
-      "equation": "workforce_immigration-workforce_emigration-immigrant_integration",
-      "timeUnit": "Month",
-      "sink": "immigrants"
-    },
-    {
-      "name": "locals net flow",
-      "comment": "Net flow for locals",
-      "equation": "immigrant_integration",
-      "timeUnit": "Month",
-      "sink": "locals"
-    },
-    {
-      "name": "REU supply net flow",
-      "comment": "Net flow for REU supply",
-      "equation": "REU_commissioning-REU_demolition",
-      "timeUnit": "Month",
-      "sink": "REU supply"
-    }
-  ],
-  "variables": [
-    {
-      "name": "relative attractiveness to immigrate",
-      "comment": "relative attractiveness to immigrate",
-      "equation": "(avg_salary_immigrants/normal_salary_immigrants)/(REU_price/subsidy)",
-      "unit": "Dmnl"
-    },
-    {
-      "name": "workforce emigration",
-      "comment": "workforce emigration",
-      "equation": "MAX((immigrants-labour_demand)/avg_emigration_time,0)",
-      "unit": "person/Month"
-    },
-    {
-      "name": "REU price",
-      "comment": "REU price",
-      "equation": "normal_cost_REU*LOOKUP(REU_shortage_price_effect, REU_shortage)",
-      "unit": "dollar/real estate unit"
-    },
-    {
-      "name": "labour shortage",
-      "comment": "labour shortage",
-      "equation": "labour_demand/immigrants",
-      "unit": "Dmnl"
-    },
-    {
-      "name": "avg salary immigrants",
-      "comment": "avg salary immigrants",
-      "equation": "normal_salary_immigrants*labour_shortage",
-      "unit": "dollar/person/Month"
-    },
-    {
-      "name": "expected new REU due to immigration",
-      "comment": "expected new REU due to immigration",
-      "equation": "(immigrants - immigrants_previous_period)*immigration_multiplication_factor",
-      "unit": "real estate unit"
-    },
-    {
-      "name": "expected REU shortage",
-      "comment": "expected REU shortage",
-      "equation": "REU_demand-REU_supply-REU_under_construction + expected_new_REU_due_to_immigration",
-      "unit": "real estate unit"
-    },
-    {
-      "name": "immigrants previous period",
-      "comment": "immigrants previous period",
-      "equation": "DELAY_FIXED(immigrants, 1, immigrants)",
-      "unit": "person"
-    },
-    {
-      "name": "workforce immigration",
-      "comment": "workforce immigration",
-      "equation": "MAX(relative_attractiveness_to_immigrate*immigrants/avg_immigration_time,0)",
-      "unit": "person/Month"
-    },
-    {
-      "name": "immigrant integration",
-      "comment": "immigrant integration",
-      "equation": "immigrants*immigrant_integration_rate",
-      "unit": "person/Month"
-    },
-    {
-      "name": "labour demand",
-      "comment": "labour demand",
-      "equation": "workers_per_REU_under_construction*REU_under_construction",
-      "unit": "person"
-    },
-    {
-      "name": "new REU plans approved",
-      "comment": "new REU plans approved",
-      "equation": "MAX(expected_REU_shortage/avg_REU_approval_time,0) + Al_Maktoum_exogenous_investment_rate *REU_supply/avg_REU_approval_time",
-      "unit": "real estate unit/Month"
-    },
-    {
-      "name": "normal cost REU",
-      "comment": "normal cost REU",
-      "equation": "50000 + avg_salary_immigrants*REU_construction_time*workers_per_REU_under_construction",
-      "unit": "dollar/real estate unit"
-    },
-    {
-      "name": "REU shortage",
-      "comment": "REU shortage",
-      "equation": "REU_demand/REU_supply",
-      "unit": "Dmnl"
-    },
-    {
-      "name": "REU commissioning",
-      "comment": "REU commissioning",
-      "equation": "MIN(immigrants/workers_per_REU_under_construction,REU_under_construction)/REU_construction_time",
-      "unit": "real estate unit/Month"
-    },
-    {
-      "name": "REU demand",
-      "comment": "REU demand",
-      "equation": "(immigrants+locals)*REU_demand_per_person",
-      "unit": "real estate unit"
-    },
-    {
-      "name": "REU demand per person",
-      "comment": "REU demand per person",
-      "equation": "LOOKUP(REU_demand_per_person_lookup, TIME)",
-      "unit": "real estate unit/person"
-    },
-    {
-      "name": "REU demolition",
-      "comment": "REU demolition",
-      "equation": "REU_supply/avg_lifetime_REU",
-      "unit": "real estate unit/Month"
-    },
-    {
-      "name": "subsidy",
-      "equation": "960",
-      "comment": "subsidy",
-      "unit": "dollar/real estate unit"
-    },
-    {
-      "name": "avg REU approval time",
-      "equation": "1",
-      "comment": "avg REU approval time",
-      "unit": "Month"
-    },
-    {
-      "name": "avg emigration time",
-      "equation": "1",
-      "comment": "avg emigration time",
-      "unit": "Month"
-    },
-    {
-      "name": "avg immigration time",
-      "equation": "1",
-      "comment": "avg immigration time",
-      "unit": "Month"
-    },
-    {
-      "name": "avg lifetime REU",
-      "equation": "500",
-      "comment": "avg lifetime REU",
-      "unit": "Month"
-    },
-    {
-      "name": "Al Maktoum exogenous investment rate",
-      "equation": "0.01",
-      "comment": "Al Maktoum exogenous investment rate",
-      "unit": "Dmnl"
-    },
-    {
-      "name": "immigration multiplication factor",
-      "equation": "1",
-      "comment": "immigration multiplication factor",
-      "unit": "real estate unit/person"
-    },
-    {
-      "name": "immigrant integration rate",
-      "equation": "0.001",
-      "comment": "immigrant integration rate",
-      "unit": "1/Month"
-    },
-    {
-      "name": "normal salary immigrants",
-      "equation": "1000",
-      "comment": "normal salary immigrants",
-      "unit": "dollar/person/Month"
-    },
-    {
-      "name": "REU construction time",
-      "equation": "3",
-      "comment": "REU construction time",
-      "unit": "Month"
-    },
-    {
-      "name": "workers per REU under construction",
-      "equation": "25",
-      "comment": "workers per REU under construction",
-      "unit": "person/real estate unit"
-    }
-  ],
-  "lookupTables": [
-    {
-      "name": "REU shortage price effect",
-      "comment": "REU shortage price effect",
-      "xValues": [
-        0.0,
-        10.0,
-        50.0,
-        100.0
-      ],
-      "yValues": [
-        0.6,
-        4.0,
-        7.5,
-        10.0
-      ],
-      "interpolation": "LINEAR"
-    },
-    {
-      "name": "REU demand per person lookup",
-      "xValues": [
-        0.0,
-        240.0
-      ],
-      "yValues": [
-        1.0,
-        2.0
-      ],
-      "interpolation": "LINEAR"
-    }
-  ],
-  "views": [
-    {
-      "name": "View 1",
-      "elements": [
-        {
-          "name": "REU supply",
-          "type": "stock",
-          "x": 634.0,
-          "y": 176.0
-        },
-        {
-          "name": "locals",
-          "type": "stock",
-          "x": 745.0,
-          "y": 614.0
-        },
-        {
-          "name": "immigrants",
-          "type": "stock",
-          "x": 560.0,
-          "y": 613.0
-        },
-        {
-          "name": "REU demand",
-          "type": "aux",
-          "x": 706.0,
-          "y": 426.0
-        },
-        {
-          "name": "REU under construction",
-          "type": "stock",
-          "x": 411.0,
-          "y": 175.0
-        },
-        {
-          "name": "_444",
-          "type": "flow",
-          "x": 534.0,
-          "y": 176.0
-        },
-        {
-          "name": "REU commissioning",
-          "type": "aux",
-          "x": 534.0,
-          "y": 203.0
-        },
-        {
-          "name": "avg salary immigrants",
-          "type": "aux",
-          "x": 277.0,
-          "y": 428.0
-        },
-        {
-          "name": "_48",
-          "type": "flow",
-          "x": 452.0,
-          "y": 606.0
-        },
-        {
-          "name": "workforce immigration",
-          "type": "aux",
-          "x": 452.0,
-          "y": 633.0
-        },
-        {
-          "name": "labour demand",
-          "type": "aux",
-          "x": 225.0,
-          "y": 337.0
-        },
-        {
-          "name": "workers per REU under construction",
-          "type": "aux",
-          "x": 388.0,
-          "y": 263.0
-        },
-        {
-          "name": "labour shortage",
-          "type": "aux",
-          "x": 219.0,
-          "y": 592.0
-        },
-        {
-          "name": "REU demand per person",
-          "type": "aux",
-          "x": 870.0,
-          "y": 474.0
-        },
-        {
-          "name": "_48",
-          "type": "flow",
-          "x": 301.0,
-          "y": 175.0
-        },
-        {
-          "name": "new REU plans approved",
-          "type": "aux",
-          "x": 301.0,
-          "y": 202.0
-        },
-        {
-          "name": "_48",
-          "type": "flow",
-          "x": 748.0,
-          "y": 175.0
-        },
-        {
-          "name": "REU demolition",
-          "type": "aux",
-          "x": 748.0,
-          "y": 202.0
-        },
-        {
-          "name": "avg lifetime REU",
-          "type": "aux",
-          "x": 761.0,
-          "y": 113.0
-        },
-        {
-          "name": "relative attractiveness to immigrate",
-          "type": "aux",
-          "x": 477.0,
-          "y": 476.0
-        },
-        {
-          "name": "normal salary immigrants",
-          "type": "aux",
-          "x": 339.0,
-          "y": 503.0
-        },
-        {
-          "name": "expected REU shortage",
-          "type": "aux",
-          "x": 108.0,
-          "y": 129.0
-        },
-        {
-          "name": "REU shortage",
-          "type": "aux",
-          "x": 707.0,
-          "y": 322.0
-        },
-        {
-          "name": "avg REU approval time",
-          "type": "aux",
-          "x": 130.0,
-          "y": 247.0
-        },
-        {
-          "name": "avg immigration time",
-          "type": "aux",
-          "x": 378.0,
-          "y": 566.0
-        },
-        {
-          "name": "avg emigration time",
-          "type": "aux",
-          "x": 807.0,
-          "y": 700.0
-        },
-        {
-          "name": "expected new REU due to immigration",
-          "type": "aux",
-          "x": 123.0,
-          "y": 619.0
-        },
-        {
-          "name": "REU demand",
-          "type": "aux",
-          "x": 93.0,
-          "y": 67.0
-        },
-        {
-          "name": "immigration multiplication factor",
-          "type": "aux",
-          "x": 98.0,
-          "y": 716.0
-        },
-        {
-          "name": "REU price",
-          "type": "aux",
-          "x": 463.0,
-          "y": 412.0
-        },
-        {
-          "name": "normal cost REU",
-          "type": "aux",
-          "x": 379.0,
-          "y": 369.0
-        },
-        {
-          "name": "immigrants previous period",
-          "type": "aux",
-          "x": 312.0,
-          "y": 787.0
-        },
-        {
-          "name": "REU construction time",
-          "type": "aux",
-          "x": 487.0,
-          "y": 304.0
-        },
-        {
-          "name": "Al Maktoum exogenous investment rate",
-          "type": "aux",
-          "x": 247.0,
-          "y": 128.0
-        },
-        {
-          "name": "_48",
-          "type": "flow",
-          "x": 579.0,
-          "y": 683.0
-        },
-        {
-          "name": "workforce emigration",
-          "type": "aux",
-          "x": 621.0,
-          "y": 683.0
-        },
-        {
-          "name": "labour demand",
-          "type": "aux",
-          "x": 650.0,
-          "y": 785.0
-        },
-        {
-          "name": "_188",
-          "type": "flow",
-          "x": 654.0,
-          "y": 612.0
-        },
-        {
-          "name": "immigrant integration",
-          "type": "aux",
-          "x": 654.0,
-          "y": 639.0
-        },
-        {
-          "name": "immigrant integration rate",
-          "type": "aux",
-          "x": 665.0,
-          "y": 566.0
-        },
-        {
-          "name": "Time",
-          "type": "aux",
-          "x": 970.0,
-          "y": 550.0
-        },
-        {
-          "name": "REU shortage price effect",
-          "type": "lookup",
-          "x": 511.0,
-          "y": 355.0
-        },
-        {
-          "name": "subsidy",
-          "type": "aux",
-          "x": 565.0,
-          "y": 444.0
-        }
-      ],
-      "connectors": [
-        {
-          "from": "locals",
-          "to": "REU demand"
-        },
-        {
-          "from": "immigrants",
-          "to": "REU demand"
-        },
-        {
-          "from": "10",
-          "to": "REU supply"
-        },
-        {
-          "from": "10",
-          "to": "REU under construction"
-        },
-        {
-          "from": "16",
-          "to": "immigrants"
-        },
-        {
-          "from": "16",
-          "to": "13"
-        },
-        {
-          "from": "REU under construction",
-          "to": "labour demand"
-        },
-        {
-          "from": "workers per REU under construction",
-          "to": "labour demand"
-        },
-        {
-          "from": "REU demand per person",
-          "to": "REU demand"
-        },
-        {
-          "from": "labour demand",
-          "to": "labour shortage"
-        },
-        {
-          "from": "29",
-          "to": "REU under construction"
-        },
-        {
-          "from": "29",
-          "to": "26"
-        },
-        {
-          "from": "34",
-          "to": "31"
-        },
-        {
-          "from": "34",
-          "to": "REU supply"
-        },
-        {
-          "from": "REU supply",
-          "to": "_48"
-        },
-        {
-          "from": "immigrants",
-          "to": "labour shortage"
-        },
-        {
-          "from": "normal salary immigrants",
-          "to": "avg salary immigrants"
-        },
-        {
-          "from": "avg lifetime REU",
-          "to": "_48"
-        },
-        {
-          "from": "expected REU shortage",
-          "to": "new REU plans approved"
-        },
-        {
-          "from": "REU supply",
-          "to": "expected REU shortage"
-        },
-        {
-          "from": "REU under construction",
-          "to": "expected REU shortage"
-        },
-        {
-          "from": "labour shortage",
-          "to": "avg salary immigrants"
-        },
-        {
-          "from": "REU supply",
-          "to": "REU shortage"
-        },
-        {
-          "from": "REU demand",
-          "to": "REU shortage"
-        },
-        {
-          "from": "avg REU approval time",
-          "to": "new REU plans approved"
-        },
-        {
-          "from": "relative attractiveness to immigrate",
-          "to": "_48"
-        },
-        {
-          "from": "immigrants",
-          "to": "workforce immigration"
-        },
-        {
-          "from": "avg immigration time",
-          "to": "_48"
-        },
-        {
-          "from": "expected new REU due to immigration",
-          "to": "expected REU shortage"
-        },
-        {
-          "from": "REU demand",
-          "to": "expected REU shortage"
-        },
-        {
-          "from": "immigration multiplication factor",
-          "to": "expected new REU due to immigration"
-        },
-        {
-          "from": "REU shortage",
-          "to": "REU price"
-        },
-        {
-          "from": "immigrants",
-          "to": "expected new REU due to immigration"
-        },
-        {
-          "from": "immigrants",
-          "to": "immigrants previous period"
-        },
-        {
-          "from": "immigrants previous period",
-          "to": "expected new REU due to immigration"
-        },
-        {
-          "from": "immigrants",
-          "to": "REU commissioning"
-        },
-        {
-          "from": "workers per REU under construction",
-          "to": "REU commissioning"
-        },
-        {
-          "from": "REU under construction",
-          "to": "_444"
-        },
-        {
-          "from": "Al Maktoum exogenous investment rate",
-          "to": "_48"
-        },
-        {
-          "from": "REU supply",
-          "to": "_48"
-        },
-        {
-          "from": "REU construction time",
-          "to": "REU commissioning"
-        },
-        {
-          "from": "normal cost REU",
-          "to": "REU price"
-        },
-        {
-          "from": "83",
-          "to": "80"
-        },
-        {
-          "from": "83",
-          "to": "immigrants"
-        },
-        {
-          "from": "avg emigration time",
-          "to": "workforce emigration"
-        },
-        {
-          "from": "immigrants",
-          "to": "workforce emigration"
-        },
-        {
-          "from": "labour demand",
-          "to": "workforce emigration"
-        },
-        {
-          "from": "workers per REU under construction",
-          "to": "normal cost REU"
-        },
-        {
-          "from": "avg salary immigrants",
-          "to": "normal cost REU"
-        },
-        {
-          "from": "REU construction time",
-          "to": "normal cost REU"
-        },
-        {
-          "from": "REU price",
-          "to": "relative attractiveness to immigrate"
-        },
-        {
-          "from": "95",
-          "to": "locals"
-        },
-        {
-          "from": "95",
-          "to": "immigrants"
-        },
-        {
-          "from": "immigrants",
-          "to": "_188"
-        },
-        {
-          "from": "immigrant integration rate",
-          "to": "_188"
-        },
-        {
-          "from": "immigrants",
-          "to": "REU under construction"
-        },
-        {
-          "from": "workers per REU under construction",
-          "to": "REU under construction"
-        },
-        {
-          "from": "Time",
-          "to": "REU demand per person"
-        },
-        {
-          "from": "REU shortage price effect",
-          "to": "REU price"
-        },
-        {
-          "from": "avg salary immigrants",
-          "to": "relative attractiveness to immigrate"
-        },
-        {
-          "from": "normal salary immigrants",
-          "to": "relative attractiveness to immigrate"
-        },
-        {
-          "from": "subsidy",
-          "to": "relative attractiveness to immigrate"
-        }
-      ],
-      "flowRoutes": [
-        {
-          "flowName": "_444",
-          "points": [
-            [
-              534.0,
-              176.0
-            ]
-          ]
-        },
-        {
-          "flowName": "_48",
-          "points": [
-            [
-              452.0,
-              606.0
-            ]
-          ]
-        },
-        {
-          "flowName": "_48",
-          "points": [
-            [
-              301.0,
-              175.0
-            ]
-          ]
-        },
-        {
-          "flowName": "_48",
-          "points": [
-            [
-              748.0,
-              175.0
-            ]
-          ]
-        },
-        {
-          "flowName": "_48",
-          "points": [
-            [
-              579.0,
-              683.0
-            ]
-          ]
-        },
-        {
-          "flowName": "_188",
-          "points": [
-            [
-              654.0,
-              612.0
-            ]
-          ]
-        }
-      ]
-    }
-  ],
-  "defaultSimulation": {
-    "timeStep": "Month",
-    "duration": 240.0,
-    "durationUnit": "Month"
+  "name" : "1807_RealEstateBoomAndBust_EN",
+  "stocks" : [ {
+    "name" : "REU under construction",
+    "comment" : "REU under construction",
+    "initialValue" : 0.0,
+    "initialExpression" : "immigrants/workers_per_REU_under_construction",
+    "unit" : "real estate unit"
+  }, {
+    "name" : "immigrants",
+    "comment" : "immigrants",
+    "initialValue" : 2000000.0,
+    "unit" : "person"
+  }, {
+    "name" : "locals",
+    "comment" : "locals",
+    "initialValue" : 220000.0,
+    "unit" : "person"
+  }, {
+    "name" : "REU supply",
+    "comment" : "REU supply",
+    "initialValue" : 1800000.0,
+    "unit" : "real estate unit"
+  } ],
+  "flows" : [ {
+    "name" : "REU under construction inflow 1",
+    "equation" : "new_REU_plans_approved",
+    "timeUnit" : "Month",
+    "sink" : "REU under construction"
+  }, {
+    "name" : "REU under construction outflow 2",
+    "equation" : "REU_commissioning",
+    "timeUnit" : "Month",
+    "source" : "REU under construction"
+  }, {
+    "name" : "immigrants inflow 1",
+    "equation" : "workforce_immigration",
+    "timeUnit" : "Month",
+    "sink" : "immigrants"
+  }, {
+    "name" : "immigrants outflow 2",
+    "equation" : "workforce_emigration",
+    "timeUnit" : "Month",
+    "source" : "immigrants"
+  }, {
+    "name" : "immigrants outflow 3",
+    "equation" : "immigrant_integration",
+    "timeUnit" : "Month",
+    "source" : "immigrants"
+  }, {
+    "name" : "locals net flow",
+    "comment" : "Net flow for locals",
+    "equation" : "immigrant_integration",
+    "timeUnit" : "Month",
+    "sink" : "locals"
+  }, {
+    "name" : "REU supply inflow 1",
+    "equation" : "REU_commissioning",
+    "timeUnit" : "Month",
+    "sink" : "REU supply"
+  }, {
+    "name" : "REU supply outflow 2",
+    "equation" : "REU_demolition",
+    "timeUnit" : "Month",
+    "source" : "REU supply"
+  } ],
+  "variables" : [ {
+    "name" : "TIME_STEP",
+    "equation" : "0.0625",
+    "unit" : "Month"
+  }, {
+    "name" : "INITIAL_TIME",
+    "equation" : "0",
+    "unit" : "Month"
+  }, {
+    "name" : "FINAL_TIME",
+    "equation" : "240",
+    "unit" : "Month"
+  }, {
+    "name" : "relative attractiveness to immigrate",
+    "comment" : "relative attractiveness to immigrate",
+    "equation" : "(avg_salary_immigrants/normal_salary_immigrants)/(REU_price/subsidy)",
+    "unit" : "Dmnl"
+  }, {
+    "name" : "subsidy",
+    "comment" : "subsidy",
+    "equation" : "960",
+    "unit" : "dollar/real estate unit"
+  }, {
+    "name" : "workforce emigration",
+    "comment" : "+ MAX(exogenous emigration/avg emigration time,0)",
+    "equation" : "MAX((immigrants-labour_demand)/avg_emigration_time,0)",
+    "unit" : "person/Month"
+  }, {
+    "name" : "REU price",
+    "comment" : "REU price",
+    "equation" : "normal_cost_REU*LOOKUP(REU_shortage_price_effect, REU_shortage)",
+    "unit" : "dollar/real estate unit"
+  }, {
+    "name" : "labour shortage",
+    "comment" : "labour shortage",
+    "equation" : "labour_demand/immigrants",
+    "unit" : "Dmnl"
+  }, {
+    "name" : "avg REU approval time",
+    "comment" : "avg REU approval time",
+    "equation" : "1",
+    "unit" : "Month"
+  }, {
+    "name" : "avg emigration time",
+    "comment" : "avg emigration time",
+    "equation" : "1",
+    "unit" : "Month"
+  }, {
+    "name" : "avg immigration time",
+    "comment" : "avg immigration time",
+    "equation" : "1",
+    "unit" : "Month"
+  }, {
+    "name" : "avg lifetime REU",
+    "comment" : "avg lifetime REU",
+    "equation" : "500",
+    "unit" : "Month"
+  }, {
+    "name" : "avg salary immigrants",
+    "comment" : "avg salary immigrants",
+    "equation" : "normal_salary_immigrants*labour_shortage",
+    "unit" : "dollar/person/Month"
+  }, {
+    "name" : "Al Maktoum exogenous investment rate",
+    "comment" : "-STEP(0.01,10)",
+    "equation" : "0.01",
+    "unit" : "Dmnl"
+  }, {
+    "name" : "expected new REU due to immigration",
+    "comment" : "expected new REU due to immigration",
+    "equation" : "(immigrants - immigrants_previous_period)*immigration_multiplication_factor",
+    "unit" : "real estate unit"
+  }, {
+    "name" : "expected REU shortage",
+    "comment" : "expected REU shortage",
+    "equation" : "REU_demand-REU_supply-REU_under_construction + expected_new_REU_due_to_immigration",
+    "unit" : "real estate unit"
+  }, {
+    "name" : "immigrants previous period",
+    "comment" : "immigrants previous period",
+    "equation" : "DELAY_FIXED(immigrants, 1, immigrants)",
+    "unit" : "person"
+  }, {
+    "name" : "workforce immigration",
+    "comment" : "+MIN((labour demand-immigrants)/avg emigration time,0)   relative  attractiveness to immigrate*immigrants/avg immigration time",
+    "equation" : "MAX(relative_attractiveness_to_immigrate*immigrants/avg_immigration_time,0)",
+    "unit" : "person/Month"
+  }, {
+    "name" : "immigration multiplication factor",
+    "comment" : "immigration multiplication factor",
+    "equation" : "1",
+    "unit" : "real estate unit/person"
+  }, {
+    "name" : "immigrant integration",
+    "comment" : "immigrant integration",
+    "equation" : "immigrants*immigrant_integration_rate",
+    "unit" : "person/Month"
+  }, {
+    "name" : "immigrant integration rate",
+    "comment" : "immigrant integration rate",
+    "equation" : "0.001",
+    "unit" : "1/Month"
+  }, {
+    "name" : "labour demand",
+    "comment" : "number of workers per real estate unit under construction*real estate units under  construction*normal reu construction time\n\t\t/real estate unit construction time",
+    "equation" : "workers_per_REU_under_construction*REU_under_construction",
+    "unit" : "person"
+  }, {
+    "name" : "new REU plans approved",
+    "comment" : "new REU plans approved",
+    "equation" : "MAX(expected_REU_shortage/avg_REU_approval_time,0) + Al_Maktoum_exogenous_investment_rate *REU_supply/avg_REU_approval_time",
+    "unit" : "real estate unit/Month"
+  }, {
+    "name" : "normal cost REU",
+    "comment" : "normal cost REU",
+    "equation" : "50000 + avg_salary_immigrants*REU_construction_time*workers_per_REU_under_construction",
+    "unit" : "dollar/real estate unit"
+  }, {
+    "name" : "normal salary immigrants",
+    "comment" : "normal salary immigrants",
+    "equation" : "1000",
+    "unit" : "dollar/person/Month"
+  }, {
+    "name" : "REU shortage",
+    "comment" : "REU shortage",
+    "equation" : "REU_demand/REU_supply",
+    "unit" : "Dmnl"
+  }, {
+    "name" : "REU commissioning",
+    "comment" : "MIN(real estate units under construction/real estate unit construction  time,MAX(0,buffer))",
+    "equation" : "MIN(immigrants/workers_per_REU_under_construction,REU_under_construction)/REU_construction_time",
+    "unit" : "real estate unit/Month"
+  }, {
+    "name" : "REU construction time",
+    "comment" : "REU construction time",
+    "equation" : "3",
+    "unit" : "Month"
+  }, {
+    "name" : "REU demand",
+    "comment" : "REU demand",
+    "equation" : "(immigrants+locals)*REU_demand_per_person",
+    "unit" : "real estate unit"
+  }, {
+    "name" : "REU demand per person",
+    "comment" : "REU demand per person",
+    "equation" : "LOOKUP(REU_demand_per_person_lookup, TIME)",
+    "unit" : "real estate unit/person"
+  }, {
+    "name" : "REU demolition",
+    "comment" : "REU demolition",
+    "equation" : "REU_supply/avg_lifetime_REU",
+    "unit" : "real estate unit/Month"
+  }, {
+    "name" : "workers per REU under construction",
+    "comment" : "workers per REU under construction",
+    "equation" : "25",
+    "unit" : "person/real estate unit"
+  } ],
+  "lookupTables" : [ {
+    "name" : "REU shortage price effect",
+    "comment" : "REU shortage price effect",
+    "xValues" : [ 0.0, 10.0, 50.0, 100.0 ],
+    "yValues" : [ 0.6, 4.0, 7.5, 10.0 ],
+    "interpolation" : "LINEAR"
+  }, {
+    "name" : "REU_demand_per_person_lookup",
+    "xValues" : [ 0.0, 240.0 ],
+    "yValues" : [ 1.0, 2.0 ],
+    "interpolation" : "LINEAR"
+  } ],
+  "views" : [ {
+    "name" : "View 1",
+    "elements" : [ {
+      "name" : "REU supply",
+      "type" : "stock",
+      "x" : 634.0,
+      "y" : 176.0
+    }, {
+      "name" : "locals",
+      "type" : "stock",
+      "x" : 745.0,
+      "y" : 614.0
+    }, {
+      "name" : "immigrants",
+      "type" : "stock",
+      "x" : 560.0,
+      "y" : 613.0
+    }, {
+      "name" : "REU demand",
+      "type" : "aux",
+      "x" : 706.0,
+      "y" : 426.0
+    }, {
+      "name" : "REU under construction",
+      "type" : "stock",
+      "x" : 411.0,
+      "y" : 175.0
+    }, {
+      "name" : "_444",
+      "type" : "flow",
+      "x" : 534.0,
+      "y" : 176.0
+    }, {
+      "name" : "REU commissioning",
+      "type" : "aux",
+      "x" : 534.0,
+      "y" : 203.0
+    }, {
+      "name" : "avg salary immigrants",
+      "type" : "aux",
+      "x" : 277.0,
+      "y" : 428.0
+    }, {
+      "name" : "_48",
+      "type" : "flow",
+      "x" : 452.0,
+      "y" : 606.0
+    }, {
+      "name" : "workforce immigration",
+      "type" : "aux",
+      "x" : 452.0,
+      "y" : 633.0
+    }, {
+      "name" : "labour demand",
+      "type" : "aux",
+      "x" : 225.0,
+      "y" : 337.0
+    }, {
+      "name" : "workers per REU under construction",
+      "type" : "aux",
+      "x" : 388.0,
+      "y" : 263.0
+    }, {
+      "name" : "labour shortage",
+      "type" : "aux",
+      "x" : 219.0,
+      "y" : 592.0
+    }, {
+      "name" : "REU demand per person",
+      "type" : "aux",
+      "x" : 870.0,
+      "y" : 474.0
+    }, {
+      "name" : "_48",
+      "type" : "flow",
+      "x" : 301.0,
+      "y" : 175.0
+    }, {
+      "name" : "new REU plans approved",
+      "type" : "aux",
+      "x" : 301.0,
+      "y" : 202.0
+    }, {
+      "name" : "_48",
+      "type" : "flow",
+      "x" : 748.0,
+      "y" : 175.0
+    }, {
+      "name" : "REU demolition",
+      "type" : "aux",
+      "x" : 748.0,
+      "y" : 202.0
+    }, {
+      "name" : "avg lifetime REU",
+      "type" : "aux",
+      "x" : 761.0,
+      "y" : 113.0
+    }, {
+      "name" : "relative attractiveness to immigrate",
+      "type" : "aux",
+      "x" : 477.0,
+      "y" : 476.0
+    }, {
+      "name" : "normal salary immigrants",
+      "type" : "aux",
+      "x" : 339.0,
+      "y" : 503.0
+    }, {
+      "name" : "expected REU shortage",
+      "type" : "aux",
+      "x" : 108.0,
+      "y" : 129.0
+    }, {
+      "name" : "REU shortage",
+      "type" : "aux",
+      "x" : 707.0,
+      "y" : 322.0
+    }, {
+      "name" : "avg REU approval time",
+      "type" : "aux",
+      "x" : 130.0,
+      "y" : 247.0
+    }, {
+      "name" : "avg immigration time",
+      "type" : "aux",
+      "x" : 378.0,
+      "y" : 566.0
+    }, {
+      "name" : "avg emigration time",
+      "type" : "aux",
+      "x" : 807.0,
+      "y" : 700.0
+    }, {
+      "name" : "expected new REU due to immigration",
+      "type" : "aux",
+      "x" : 123.0,
+      "y" : 619.0
+    }, {
+      "name" : "REU demand",
+      "type" : "aux",
+      "x" : 93.0,
+      "y" : 67.0
+    }, {
+      "name" : "immigration multiplication factor",
+      "type" : "aux",
+      "x" : 98.0,
+      "y" : 716.0
+    }, {
+      "name" : "REU price",
+      "type" : "aux",
+      "x" : 463.0,
+      "y" : 412.0
+    }, {
+      "name" : "normal cost REU",
+      "type" : "aux",
+      "x" : 379.0,
+      "y" : 369.0
+    }, {
+      "name" : "immigrants previous period",
+      "type" : "aux",
+      "x" : 312.0,
+      "y" : 787.0
+    }, {
+      "name" : "REU construction time",
+      "type" : "aux",
+      "x" : 487.0,
+      "y" : 304.0
+    }, {
+      "name" : "Al Maktoum exogenous investment rate",
+      "type" : "aux",
+      "x" : 247.0,
+      "y" : 128.0
+    }, {
+      "name" : "_48",
+      "type" : "flow",
+      "x" : 579.0,
+      "y" : 683.0
+    }, {
+      "name" : "workforce emigration",
+      "type" : "aux",
+      "x" : 621.0,
+      "y" : 683.0
+    }, {
+      "name" : "labour demand",
+      "type" : "aux",
+      "x" : 650.0,
+      "y" : 785.0
+    }, {
+      "name" : "_188",
+      "type" : "flow",
+      "x" : 654.0,
+      "y" : 612.0
+    }, {
+      "name" : "immigrant integration",
+      "type" : "aux",
+      "x" : 654.0,
+      "y" : 639.0
+    }, {
+      "name" : "immigrant integration rate",
+      "type" : "aux",
+      "x" : 665.0,
+      "y" : 566.0
+    }, {
+      "name" : "Time",
+      "type" : "aux",
+      "x" : 970.0,
+      "y" : 550.0
+    }, {
+      "name" : "REU shortage price effect",
+      "type" : "lookup",
+      "x" : 511.0,
+      "y" : 355.0
+    }, {
+      "name" : "subsidy",
+      "type" : "aux",
+      "x" : 565.0,
+      "y" : 444.0
+    } ],
+    "connectors" : [ {
+      "from" : "locals",
+      "to" : "REU demand"
+    }, {
+      "from" : "immigrants",
+      "to" : "REU demand"
+    }, {
+      "from" : "10",
+      "to" : "REU supply"
+    }, {
+      "from" : "10",
+      "to" : "REU under construction"
+    }, {
+      "from" : "16",
+      "to" : "immigrants"
+    }, {
+      "from" : "16",
+      "to" : "13"
+    }, {
+      "from" : "REU under construction",
+      "to" : "labour demand"
+    }, {
+      "from" : "workers per REU under construction",
+      "to" : "labour demand"
+    }, {
+      "from" : "REU demand per person",
+      "to" : "REU demand"
+    }, {
+      "from" : "labour demand",
+      "to" : "labour shortage"
+    }, {
+      "from" : "29",
+      "to" : "REU under construction"
+    }, {
+      "from" : "29",
+      "to" : "26"
+    }, {
+      "from" : "34",
+      "to" : "31"
+    }, {
+      "from" : "34",
+      "to" : "REU supply"
+    }, {
+      "from" : "REU supply",
+      "to" : "_48"
+    }, {
+      "from" : "immigrants",
+      "to" : "labour shortage"
+    }, {
+      "from" : "normal salary immigrants",
+      "to" : "avg salary immigrants"
+    }, {
+      "from" : "avg lifetime REU",
+      "to" : "_48"
+    }, {
+      "from" : "expected REU shortage",
+      "to" : "new REU plans approved"
+    }, {
+      "from" : "REU supply",
+      "to" : "expected REU shortage"
+    }, {
+      "from" : "REU under construction",
+      "to" : "expected REU shortage"
+    }, {
+      "from" : "labour shortage",
+      "to" : "avg salary immigrants"
+    }, {
+      "from" : "REU supply",
+      "to" : "REU shortage"
+    }, {
+      "from" : "REU demand",
+      "to" : "REU shortage"
+    }, {
+      "from" : "avg REU approval time",
+      "to" : "new REU plans approved"
+    }, {
+      "from" : "relative attractiveness to immigrate",
+      "to" : "_48"
+    }, {
+      "from" : "immigrants",
+      "to" : "workforce immigration"
+    }, {
+      "from" : "avg immigration time",
+      "to" : "_48"
+    }, {
+      "from" : "expected new REU due to immigration",
+      "to" : "expected REU shortage"
+    }, {
+      "from" : "REU demand",
+      "to" : "expected REU shortage"
+    }, {
+      "from" : "immigration multiplication factor",
+      "to" : "expected new REU due to immigration"
+    }, {
+      "from" : "REU shortage",
+      "to" : "REU price"
+    }, {
+      "from" : "immigrants",
+      "to" : "expected new REU due to immigration"
+    }, {
+      "from" : "immigrants",
+      "to" : "immigrants previous period"
+    }, {
+      "from" : "immigrants previous period",
+      "to" : "expected new REU due to immigration"
+    }, {
+      "from" : "immigrants",
+      "to" : "REU commissioning"
+    }, {
+      "from" : "workers per REU under construction",
+      "to" : "REU commissioning"
+    }, {
+      "from" : "REU under construction",
+      "to" : "_444"
+    }, {
+      "from" : "Al Maktoum exogenous investment rate",
+      "to" : "_48"
+    }, {
+      "from" : "REU supply",
+      "to" : "_48"
+    }, {
+      "from" : "REU construction time",
+      "to" : "REU commissioning"
+    }, {
+      "from" : "normal cost REU",
+      "to" : "REU price"
+    }, {
+      "from" : "83",
+      "to" : "80"
+    }, {
+      "from" : "83",
+      "to" : "immigrants"
+    }, {
+      "from" : "avg emigration time",
+      "to" : "workforce emigration"
+    }, {
+      "from" : "immigrants",
+      "to" : "workforce emigration"
+    }, {
+      "from" : "labour demand",
+      "to" : "workforce emigration"
+    }, {
+      "from" : "workers per REU under construction",
+      "to" : "normal cost REU"
+    }, {
+      "from" : "avg salary immigrants",
+      "to" : "normal cost REU"
+    }, {
+      "from" : "REU construction time",
+      "to" : "normal cost REU"
+    }, {
+      "from" : "REU price",
+      "to" : "relative attractiveness to immigrate"
+    }, {
+      "from" : "95",
+      "to" : "locals"
+    }, {
+      "from" : "95",
+      "to" : "immigrants"
+    }, {
+      "from" : "immigrants",
+      "to" : "_188"
+    }, {
+      "from" : "immigrant integration rate",
+      "to" : "_188"
+    }, {
+      "from" : "immigrants",
+      "to" : "REU under construction"
+    }, {
+      "from" : "workers per REU under construction",
+      "to" : "REU under construction"
+    }, {
+      "from" : "Time",
+      "to" : "REU demand per person"
+    }, {
+      "from" : "REU shortage price effect",
+      "to" : "REU price"
+    }, {
+      "from" : "avg salary immigrants",
+      "to" : "relative attractiveness to immigrate"
+    }, {
+      "from" : "normal salary immigrants",
+      "to" : "relative attractiveness to immigrate"
+    }, {
+      "from" : "subsidy",
+      "to" : "relative attractiveness to immigrate"
+    } ],
+    "flowRoutes" : [ {
+      "flowName" : "_444",
+      "points" : [ [ 534.0, 176.0 ] ]
+    }, {
+      "flowName" : "_48",
+      "points" : [ [ 452.0, 606.0 ] ]
+    }, {
+      "flowName" : "_48",
+      "points" : [ [ 301.0, 175.0 ] ]
+    }, {
+      "flowName" : "_48",
+      "points" : [ [ 748.0, 175.0 ] ]
+    }, {
+      "flowName" : "_48",
+      "points" : [ [ 579.0, 683.0 ] ]
+    }, {
+      "flowName" : "_188",
+      "points" : [ [ 654.0, 612.0 ] ]
+    } ]
+  } ],
+  "defaultSimulation" : {
+    "timeStep" : "Month",
+    "duration" : 240.0,
+    "durationUnit" : "Month",
+    "dt" : 0.0625
   },
-  "metadata": {
-    "license": "CC-BY-NC-SA-4.0",
-    "author": "Dr. Erik Pruyt",
-    "source": "Pruyt, E., 2013. Small System Dynamics Models for Big Issues: Triple Jump towards Real-World Complexity. TU Delft Library. ISBN 978-94-6186-195-5",
-    "url": "https://simulation.tudelft.nl/SD/"
+  "metadata" : {
+    "author" : "Dr. Erik Pruyt",
+    "source" : "Pruyt, E., 2013. Small System Dynamics Models for Big Issues: Triple Jump towards Real-World Complexity. TU Delft Library. ISBN 978-94-6186-195-5",
+    "license" : "CC-BY-NC-SA-4.0",
+    "url" : "https://simulation.tudelft.nl/SD/"
   }
 }

@@ -1,0 +1,104 @@
+{
+  "name" : "repair01",
+  "variables" : [ {
+    "name" : "TIME_STEP",
+    "equation" : "1",
+    "unit" : "Month"
+  }, {
+    "name" : "INITIAL_TIME",
+    "equation" : "0",
+    "unit" : "Month"
+  }, {
+    "name" : "FINAL_TIME",
+    "equation" : "100",
+    "unit" : "Month"
+  } ],
+  "causalLinks" : [ {
+    "from" : "workers available for routine maintenance",
+    "to" : "routine maintenance work done",
+    "polarity" : "UNKNOWN"
+  }, {
+    "from" : "routine maintenance work done",
+    "to" : "average machine reliability",
+    "polarity" : "UNKNOWN"
+  }, {
+    "from" : "average machine reliability",
+    "to" : "number of repairs required",
+    "polarity" : "UNKNOWN"
+  }, {
+    "from" : "number of repairs required",
+    "to" : "workers performing repairs",
+    "polarity" : "UNKNOWN"
+  }, {
+    "from" : "workers performing repairs",
+    "to" : "workers available for routine maintenance",
+    "polarity" : "UNKNOWN"
+  }, {
+    "from" : "total maintenance workforce",
+    "to" : "workers available for routine maintenance",
+    "polarity" : "UNKNOWN"
+  } ],
+  "views" : [ {
+    "name" : "View 1",
+    "elements" : [ {
+      "name" : "average machine reliability",
+      "type" : "aux",
+      "x" : 559.0,
+      "y" : 168.0
+    }, {
+      "name" : "number of repairs required",
+      "type" : "aux",
+      "x" : 688.0,
+      "y" : 304.0
+    }, {
+      "name" : "workers performing repairs",
+      "type" : "aux",
+      "x" : 540.0,
+      "y" : 417.0
+    }, {
+      "name" : "total maintenance workforce",
+      "type" : "aux",
+      "x" : 363.0,
+      "y" : 487.0
+    }, {
+      "name" : "workers available for routine maintenance",
+      "type" : "aux",
+      "x" : 347.0,
+      "y" : 361.0
+    }, {
+      "name" : "routine maintenance work done",
+      "type" : "aux",
+      "x" : 373.0,
+      "y" : 227.0
+    } ],
+    "connectors" : [ {
+      "from" : "workers available for routine maintenance",
+      "to" : "routine maintenance work done"
+    }, {
+      "from" : "routine maintenance work done",
+      "to" : "average machine reliability"
+    }, {
+      "from" : "average machine reliability",
+      "to" : "number of repairs required"
+    }, {
+      "from" : "number of repairs required",
+      "to" : "workers performing repairs"
+    }, {
+      "from" : "workers performing repairs",
+      "to" : "workers available for routine maintenance"
+    }, {
+      "from" : "total maintenance workforce",
+      "to" : "workers available for routine maintenance"
+    } ]
+  } ],
+  "defaultSimulation" : {
+    "timeStep" : "Month",
+    "duration" : 100.0,
+    "durationUnit" : "Month"
+  },
+  "metadata" : {
+    "author" : "Ventana Systems",
+    "source" : "Vensim User's Guide",
+    "license" : "MIT"
+  }
+}

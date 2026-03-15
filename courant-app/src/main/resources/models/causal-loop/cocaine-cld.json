@@ -1,0 +1,93 @@
+{
+  "name" : "0601Cocaine_CLD",
+  "variables" : [ {
+    "name" : "TIME_STEP",
+    "equation" : "1",
+    "unit" : "Month"
+  }, {
+    "name" : "INITIAL_TIME",
+    "equation" : "0",
+    "unit" : "Month"
+  }, {
+    "name" : "FINAL_TIME",
+    "equation" : "100",
+    "unit" : "Month"
+  } ],
+  "causalLinks" : [ {
+    "from" : "imports",
+    "to" : "Cocaine",
+    "polarity" : "UNKNOWN"
+  }, {
+    "from" : "use",
+    "to" : "Cocaine",
+    "polarity" : "UNKNOWN"
+  }, {
+    "from" : "Cocaine",
+    "to" : "confiscation",
+    "polarity" : "UNKNOWN"
+  }, {
+    "from" : "confiscation",
+    "to" : "Cocaine",
+    "polarity" : "UNKNOWN"
+  }, {
+    "from" : "confiscation rate",
+    "to" : "confiscation",
+    "polarity" : "UNKNOWN"
+  } ],
+  "views" : [ {
+    "name" : "View 1",
+    "elements" : [ {
+      "name" : "Cocaine",
+      "type" : "aux",
+      "x" : 307.0,
+      "y" : 204.0
+    }, {
+      "name" : "imports",
+      "type" : "aux",
+      "x" : 147.0,
+      "y" : 204.0
+    }, {
+      "name" : "confiscation",
+      "type" : "aux",
+      "x" : 512.0,
+      "y" : 202.0
+    }, {
+      "name" : "use",
+      "type" : "aux",
+      "x" : 306.0,
+      "y" : 311.0
+    }, {
+      "name" : "confiscation rate",
+      "type" : "aux",
+      "x" : 570.0,
+      "y" : 298.0
+    } ],
+    "connectors" : [ {
+      "from" : "imports",
+      "to" : "Cocaine"
+    }, {
+      "from" : "use",
+      "to" : "Cocaine"
+    }, {
+      "from" : "Cocaine",
+      "to" : "confiscation"
+    }, {
+      "from" : "confiscation",
+      "to" : "Cocaine"
+    }, {
+      "from" : "confiscation rate",
+      "to" : "confiscation"
+    } ]
+  } ],
+  "defaultSimulation" : {
+    "timeStep" : "Month",
+    "duration" : 100.0,
+    "durationUnit" : "Month"
+  },
+  "metadata" : {
+    "author" : "Dr. Erik Pruyt",
+    "source" : "Pruyt, E., 2013. Small System Dynamics Models for Big Issues: Triple Jump towards Real-World Complexity. TU Delft Library. ISBN 978-94-6186-195-5",
+    "license" : "CC-BY-NC-SA-4.0",
+    "url" : "https://simulation.tudelft.nl/SD/"
+  }
+}

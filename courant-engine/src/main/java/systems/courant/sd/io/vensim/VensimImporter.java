@@ -17,7 +17,7 @@ import systems.courant.sd.model.def.ViewDef;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
-import java.nio.charset.MalformedInputException;
+import java.nio.charset.CharacterCodingException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -72,7 +72,7 @@ public class VensimImporter implements ModelImporter {
         String content;
         try {
             content = Files.readString(path, StandardCharsets.UTF_8);
-        } catch (MalformedInputException e) {
+        } catch (CharacterCodingException e) {
             content = Files.readString(path, Charset.forName("windows-1252"));
         }
         Path fileName = path.getFileName();

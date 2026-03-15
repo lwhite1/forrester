@@ -1,0 +1,645 @@
+{
+  "name" : "STOCK",
+  "stocks" : [ {
+    "name" : "Cumulative Profit",
+    "comment" : "Cumulative Profit",
+    "initialValue" : 0.0,
+    "unit" : "dollars"
+  }, {
+    "name" : "forecast orders",
+    "comment" : "forecast orders",
+    "initialValue" : 0.0,
+    "initialExpression" : "orders",
+    "unit" : "unit/day"
+  }, {
+    "name" : "Store Inventory",
+    "comment" : "Store Inventory",
+    "initialValue" : 0.0,
+    "initialExpression" : "orders*(leadtime)",
+    "unit" : "unit"
+  }, {
+    "name" : "Qty On Order",
+    "comment" : "Qty On Order",
+    "initialValue" : 0.0,
+    "unit" : "unit"
+  } ],
+  "flows" : [ {
+    "name" : "Cumulative Profit net flow",
+    "comment" : "Net flow for Cumulative Profit",
+    "equation" : "profit",
+    "timeUnit" : "Day",
+    "sink" : "Cumulative Profit"
+  }, {
+    "name" : "forecast orders net flow",
+    "comment" : "Net flow for forecast orders",
+    "equation" : "(orders-forecast_orders)* WEIGHT_TO_CURRENT",
+    "timeUnit" : "Day",
+    "sink" : "forecast orders"
+  }, {
+    "name" : "Store Inventory inflow 1",
+    "equation" : "receipts",
+    "timeUnit" : "Day",
+    "sink" : "Store Inventory"
+  }, {
+    "name" : "Store Inventory outflow 2",
+    "equation" : "units_sold",
+    "timeUnit" : "Day",
+    "source" : "Store Inventory"
+  }, {
+    "name" : "Qty On Order inflow 1",
+    "equation" : "distr_orders",
+    "timeUnit" : "Day",
+    "sink" : "Qty On Order"
+  }, {
+    "name" : "Qty On Order outflow 2",
+    "equation" : "receipts",
+    "timeUnit" : "Day",
+    "source" : "Qty On Order"
+  } ],
+  "variables" : [ {
+    "name" : "TIME_STEP",
+    "equation" : "1",
+    "unit" : "Day"
+  }, {
+    "name" : "INITIAL_TIME",
+    "equation" : "0",
+    "unit" : "Day"
+  }, {
+    "name" : "FINAL_TIME",
+    "equation" : "60",
+    "unit" : "Day"
+  }, {
+    "name" : "distr orders other",
+    "comment" : "distr orders other",
+    "equation" : "0",
+    "unit" : "unit/day"
+  }, {
+    "name" : "ORDER RULE SWITCH",
+    "comment" : "1 for periodic replenishment rule, 2 for minimum rule 3 for other rule",
+    "equation" : "2",
+    "unit" : "Dmnl"
+  }, {
+    "name" : "distr orders",
+    "comment" : "distr orders",
+    "equation" : "IF(ORDER_RULE_SWITCH==1, distr_orders_periodic, IF(ORDER_RULE_SWITCH==2, distr_orders_minimum, distr_orders_other))",
+    "unit" : "unit/day"
+  }, {
+    "name" : "distr orders minimum",
+    "comment" : "distr orders minimum",
+    "equation" : "IF( Store_Inventory+Qty_On_Order<min_inventory_value, (max_inventory_value-Qty_On_Order-Store_Inventory)/TIME_STEP,0)",
+    "unit" : "unit/day"
+  }, {
+    "name" : "Order Cost",
+    "comment" : "Order Cost",
+    "equation" : "IF( distr_orders>0, PROCESSING_COST+transport_cost, 0)",
+    "unit" : "dollars/day"
+  }, {
+    "name" : "transport cost",
+    "comment" : "transport cost",
+    "equation" : "LOOKUP(TRANSPORT_RATE, distr_orders/UNIT_ORDER)",
+    "unit" : "dollars/day"
+  }, {
+    "name" : "max inventory value",
+    "comment" : "max inventory value",
+    "equation" : "100",
+    "unit" : "unit"
+  }, {
+    "name" : "receipts",
+    "comment" : "receipts",
+    "equation" : "DELAY_FIXED(distr_orders, leadtime, 0)",
+    "unit" : "unit/day"
+  }, {
+    "name" : "min inventory value",
+    "comment" : "min inventory value",
+    "equation" : "20",
+    "unit" : "unit"
+  }, {
+    "name" : "UNIT ORDER",
+    "comment" : "UNIT ORDER",
+    "equation" : "1",
+    "unit" : "unit/day"
+  }, {
+    "name" : "distr orders periodic",
+    "comment" : "distr orders periodic",
+    "equation" : "IF(order_placement_day!=0, ( forecast_orders*(leadtime+REPLENISH_PERIOD)- Store_Inventory-Qty_On_Order)/order_placement_day ,0)",
+    "unit" : "unit/day"
+  }, {
+    "name" : "total cost",
+    "comment" : "total cost",
+    "equation" : "Cost_Of_Goods + Holding_Cost + Order_Cost",
+    "unit" : "dollars/day"
+  }, {
+    "name" : "profit",
+    "comment" : "profit",
+    "equation" : "Sales_Revenue -  total_cost",
+    "unit" : "dollars/day"
+  }, {
+    "name" : "order placement day",
+    "comment" : "order placement day",
+    "equation" : "IF(MODULO(TIME,REPLENISH_PERIOD)==0,1,0)",
+    "unit" : "day"
+  }, {
+    "name" : "DAYS PER YEAR",
+    "comment" : "DAYS PER YEAR",
+    "equation" : "365",
+    "unit" : "day/Year"
+  }, {
+    "name" : "WEIGHT TO CURRENT",
+    "comment" : "WEIGHT TO CURRENT",
+    "equation" : "0.2",
+    "unit" : "1/day"
+  }, {
+    "name" : "Cost Of Goods",
+    "comment" : "Cost Of Goods",
+    "equation" : "item_cost*units_sold",
+    "unit" : "dollars/day"
+  }, {
+    "name" : "REPLENISH PERIOD",
+    "comment" : "REPLENISH PERIOD",
+    "equation" : "10",
+    "unit" : "day"
+  }, {
+    "name" : "orders",
+    "comment" : "orders",
+    "equation" : "0",
+    "unit" : ""
+  }, {
+    "name" : "item cost",
+    "comment" : "item cost",
+    "equation" : "(1-PCT_MARGIN/100)*ITEM_PRICE",
+    "unit" : "dollars/unit"
+  }, {
+    "name" : "PCT MARGIN",
+    "comment" : "PCT MARGIN",
+    "equation" : "10",
+    "unit" : "Dmnl"
+  }, {
+    "name" : "leadtime",
+    "comment" : "leadtime",
+    "equation" : "5",
+    "unit" : "day"
+  }, {
+    "name" : "ITEM PRICE",
+    "comment" : "ITEM PRICE",
+    "equation" : "200",
+    "unit" : "dollars/unit"
+  }, {
+    "name" : "PROCESSING COST",
+    "comment" : "PROCESSING COST",
+    "equation" : "2",
+    "unit" : "dollars/day"
+  }, {
+    "name" : "Holding Cost",
+    "comment" : "Holding Cost",
+    "equation" : "Store_Inventory*item_cost*INTEREST/DAYS_PER_YEAR",
+    "unit" : "dollars/day"
+  }, {
+    "name" : "Sales Revenue",
+    "comment" : "Sales Revenue",
+    "equation" : "units_sold*ITEM_PRICE",
+    "unit" : "dollars/day"
+  }, {
+    "name" : "INTEREST",
+    "comment" : "INTEREST",
+    "equation" : "0.25",
+    "unit" : "1/Year"
+  }, {
+    "name" : "units sold",
+    "comment" : "units sold",
+    "equation" : "IF(Store_Inventory-orders>0,orders,Store_Inventory)",
+    "unit" : "unit/day"
+  } ],
+  "lookupTables" : [ {
+    "name" : "TRANSPORT RATE",
+    "comment" : "TRANSPORT RATE",
+    "xValues" : [ 0.0, 5.0, 15.0, 30.0, 50.0, 100.0, 150.0, 200.0, 700.0 ],
+    "yValues" : [ 10.0, 30.0, 75.0, 100.0, 125.0, 165.0, 180.0, 185.0, 235.0 ],
+    "interpolation" : "LINEAR"
+  } ],
+  "subscripts" : [ {
+    "name" : "item",
+    "labels" : [ "I1111", "I2222", "I3333" ]
+  } ],
+  "views" : [ {
+    "name" : "Orders and Inventory",
+    "elements" : [ {
+      "name" : "Store Inventory",
+      "type" : "stock",
+      "x" : 552.0,
+      "y" : 315.0
+    }, {
+      "name" : "orders",
+      "type" : "aux",
+      "x" : 601.0,
+      "y" : 256.0
+    }, {
+      "name" : "leadtime",
+      "type" : "aux",
+      "x" : 557.0,
+      "y" : 160.0
+    }, {
+      "name" : "Qty On Order",
+      "type" : "stock",
+      "x" : 507.0,
+      "y" : 401.0
+    }, {
+      "name" : "_48",
+      "type" : "flow",
+      "x" : 589.0,
+      "y" : 401.0
+    }, {
+      "name" : "_48",
+      "type" : "flow",
+      "x" : 459.0,
+      "y" : 316.0
+    }, {
+      "name" : "receipts",
+      "type" : "aux",
+      "x" : 459.0,
+      "y" : 336.0
+    }, {
+      "name" : "_492",
+      "type" : "flow",
+      "x" : 653.0,
+      "y" : 315.0
+    }, {
+      "name" : "units sold",
+      "type" : "aux",
+      "x" : 653.0,
+      "y" : 335.0
+    }, {
+      "name" : "distr orders periodic",
+      "type" : "aux",
+      "x" : 817.0,
+      "y" : 485.0
+    }, {
+      "name" : "distr orders minimum",
+      "type" : "aux",
+      "x" : 535.0,
+      "y" : 464.0
+    }, {
+      "name" : "ORDER RULE SWITCH",
+      "type" : "aux",
+      "x" : 215.0,
+      "y" : 448.0
+    }, {
+      "name" : "distr orders other",
+      "type" : "aux",
+      "x" : 315.0,
+      "y" : 509.0
+    }, {
+      "name" : "_204",
+      "type" : "flow",
+      "x" : 399.0,
+      "y" : 400.0
+    }, {
+      "name" : "distr orders",
+      "type" : "aux",
+      "x" : 399.0,
+      "y" : 423.0
+    }, {
+      "name" : "max inventory value",
+      "type" : "aux",
+      "x" : 640.0,
+      "y" : 535.0
+    }, {
+      "name" : "min inventory value",
+      "type" : "aux",
+      "x" : 641.0,
+      "y" : 509.0
+    }, {
+      "name" : "TIME STEP",
+      "type" : "aux",
+      "x" : 601.0,
+      "y" : 569.0
+    }, {
+      "name" : "forecast orders",
+      "type" : "stock",
+      "x" : 717.0,
+      "y" : 264.0
+    }, {
+      "name" : "order placement day",
+      "type" : "aux",
+      "x" : 959.0,
+      "y" : 439.0
+    }, {
+      "name" : "WEIGHT TO CURRENT",
+      "type" : "aux",
+      "x" : 600.0,
+      "y" : 216.0
+    }, {
+      "name" : "REPLENISH PERIOD",
+      "type" : "aux",
+      "x" : 924.0,
+      "y" : 372.0
+    }, {
+      "name" : "Time",
+      "type" : "aux",
+      "x" : 1036.0,
+      "y" : 387.0
+    } ],
+    "connectors" : [ {
+      "from" : "orders",
+      "to" : "_492"
+    }, {
+      "from" : "Store Inventory",
+      "to" : "_492"
+    }, {
+      "from" : "leadtime",
+      "to" : "_48"
+    }, {
+      "from" : "_48",
+      "to" : "Store Inventory"
+    }, {
+      "from" : "_48",
+      "to" : "2"
+    }, {
+      "from" : "_492",
+      "to" : "8"
+    }, {
+      "from" : "_492",
+      "to" : "Store Inventory"
+    }, {
+      "from" : "_48",
+      "to" : "5"
+    }, {
+      "from" : "_48",
+      "to" : "Qty On Order"
+    }, {
+      "from" : "receipts",
+      "to" : "_48"
+    }, {
+      "from" : "leadtime",
+      "to" : "Store Inventory"
+    }, {
+      "from" : "orders",
+      "to" : "Store Inventory"
+    }, {
+      "from" : "distr orders periodic",
+      "to" : "37"
+    }, {
+      "from" : "distr orders minimum",
+      "to" : "37"
+    }, {
+      "from" : "ORDER RULE SWITCH",
+      "to" : "37"
+    }, {
+      "from" : "distr orders other",
+      "to" : "37"
+    }, {
+      "from" : "36",
+      "to" : "Qty On Order"
+    }, {
+      "from" : "36",
+      "to" : "3"
+    }, {
+      "from" : "_204",
+      "to" : "receipts"
+    }, {
+      "from" : "max inventory value",
+      "to" : "distr orders minimum"
+    }, {
+      "from" : "min inventory value",
+      "to" : "distr orders minimum"
+    }, {
+      "from" : "TIME STEP",
+      "to" : "distr orders minimum"
+    }, {
+      "from" : "forecast orders",
+      "to" : "distr orders periodic"
+    }, {
+      "from" : "leadtime",
+      "to" : "distr orders periodic"
+    }, {
+      "from" : "order placement day",
+      "to" : "distr orders periodic"
+    }, {
+      "from" : "Qty On Order",
+      "to" : "60"
+    }, {
+      "from" : "56",
+      "to" : "distr orders periodic"
+    }, {
+      "from" : "Store Inventory",
+      "to" : "60"
+    }, {
+      "from" : "orders",
+      "to" : "forecast orders"
+    }, {
+      "from" : "WEIGHT TO CURRENT",
+      "to" : "forecast orders"
+    }, {
+      "from" : "REPLENISH PERIOD",
+      "to" : "order placement day"
+    }, {
+      "from" : "Time",
+      "to" : "order placement day"
+    }, {
+      "from" : "60",
+      "to" : "distr orders periodic"
+    }, {
+      "from" : "60",
+      "to" : "distr orders minimum"
+    } ],
+    "flowRoutes" : [ {
+      "flowName" : "_48",
+      "points" : [ [ 589.0, 401.0 ] ]
+    }, {
+      "flowName" : "_48",
+      "points" : [ [ 459.0, 316.0 ] ]
+    }, {
+      "flowName" : "_492",
+      "points" : [ [ 653.0, 315.0 ] ]
+    }, {
+      "flowName" : "_204",
+      "points" : [ [ 399.0, 400.0 ] ]
+    } ]
+  }, {
+    "name" : "Costs and Profits",
+    "elements" : [ {
+      "name" : "Store Inventory",
+      "type" : "stock",
+      "x" : 157.0,
+      "y" : 228.0
+    }, {
+      "name" : "PCT MARGIN",
+      "type" : "aux",
+      "x" : 147.0,
+      "y" : 139.0
+    }, {
+      "name" : "Cumulative Profit",
+      "type" : "stock",
+      "x" : 744.0,
+      "y" : 92.0
+    }, {
+      "name" : "Sales Revenue",
+      "type" : "aux",
+      "x" : 588.0,
+      "y" : 20.0
+    }, {
+      "name" : "ITEM PRICE",
+      "type" : "aux",
+      "x" : 137.0,
+      "y" : 87.0
+    }, {
+      "name" : "DAYS PER YEAR",
+      "type" : "aux",
+      "x" : 293.0,
+      "y" : 256.0
+    }, {
+      "name" : "_668",
+      "type" : "flow",
+      "x" : 635.0,
+      "y" : 88.0
+    }, {
+      "name" : "profit",
+      "type" : "aux",
+      "x" : 635.0,
+      "y" : 108.0
+    }, {
+      "name" : "Holding Cost",
+      "type" : "aux",
+      "x" : 445.0,
+      "y" : 216.0
+    }, {
+      "name" : "Order Cost",
+      "type" : "aux",
+      "x" : 445.0,
+      "y" : 291.0
+    }, {
+      "name" : "UNIT ORDER",
+      "type" : "aux",
+      "x" : 147.0,
+      "y" : 376.0
+    }, {
+      "name" : "INTEREST",
+      "type" : "aux",
+      "x" : 121.0,
+      "y" : 185.0
+    }, {
+      "name" : "transport cost",
+      "type" : "aux",
+      "x" : 251.0,
+      "y" : 339.0
+    }, {
+      "name" : "PROCESSING COST",
+      "type" : "aux",
+      "x" : 133.0,
+      "y" : 284.0
+    }, {
+      "name" : "item cost",
+      "type" : "aux",
+      "x" : 285.0,
+      "y" : 140.0
+    }, {
+      "name" : "Cost Of Goods",
+      "type" : "aux",
+      "x" : 453.0,
+      "y" : 137.0
+    }, {
+      "name" : "TRANSPORT RATE",
+      "type" : "lookup",
+      "x" : 96.0,
+      "y" : 333.0
+    }, {
+      "name" : "total cost",
+      "type" : "aux",
+      "x" : 589.0,
+      "y" : 209.0
+    }, {
+      "name" : "units sold",
+      "type" : "aux",
+      "x" : 396.0,
+      "y" : 84.0
+    }, {
+      "name" : "distr orders",
+      "type" : "aux",
+      "x" : 185.0,
+      "y" : 417.0
+    } ],
+    "connectors" : [ {
+      "from" : "PCT MARGIN",
+      "to" : "item cost"
+    }, {
+      "from" : "TRANSPORT RATE",
+      "to" : "transport cost"
+    }, {
+      "from" : "transport cost",
+      "to" : "Order Cost"
+    }, {
+      "from" : "Store Inventory",
+      "to" : "Holding Cost"
+    }, {
+      "from" : "DAYS PER YEAR",
+      "to" : "Holding Cost"
+    }, {
+      "from" : "INTEREST",
+      "to" : "Holding Cost"
+    }, {
+      "from" : "distr orders",
+      "to" : "transport cost"
+    }, {
+      "from" : "distr orders",
+      "to" : "Order Cost"
+    }, {
+      "from" : "UNIT ORDER",
+      "to" : "transport cost"
+    }, {
+      "from" : "Order Cost",
+      "to" : "total cost"
+    }, {
+      "from" : "total cost",
+      "to" : "profit"
+    }, {
+      "from" : "Sales Revenue",
+      "to" : "_668"
+    }, {
+      "from" : "units sold",
+      "to" : "Sales Revenue"
+    }, {
+      "from" : "units sold",
+      "to" : "Cost Of Goods"
+    }, {
+      "from" : "ITEM PRICE",
+      "to" : "item cost"
+    }, {
+      "from" : "ITEM PRICE",
+      "to" : "Sales Revenue"
+    }, {
+      "from" : "Holding Cost",
+      "to" : "total cost"
+    }, {
+      "from" : "Cost Of Goods",
+      "to" : "total cost"
+    }, {
+      "from" : "item cost",
+      "to" : "Cost Of Goods"
+    }, {
+      "from" : "item cost",
+      "to" : "Holding Cost"
+    }, {
+      "from" : "PROCESSING COST",
+      "to" : "Order Cost"
+    }, {
+      "from" : "_668",
+      "to" : "Cumulative Profit"
+    }, {
+      "from" : "_668",
+      "to" : "4"
+    } ],
+    "flowRoutes" : [ {
+      "flowName" : "_668",
+      "points" : [ [ 635.0, 88.0 ] ]
+    } ]
+  } ],
+  "defaultSimulation" : {
+    "timeStep" : "Day",
+    "duration" : 60.0,
+    "durationUnit" : "Day"
+  },
+  "metadata" : {
+    "author" : "Ventana Systems",
+    "source" : "Vensim User's Guide",
+    "license" : "MIT"
+  }
+}

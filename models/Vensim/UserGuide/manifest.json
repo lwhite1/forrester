@@ -1,0 +1,296 @@
+[
+  {
+    "url": "models/Vensim/UserGuide/CHAP04/COMPLETE/PROJECT.MDL",
+    "className": "Project",
+    "id": "project",
+    "category": "causal-loop",
+    "difficulty": "introductory",
+    "comment": "Causal loop diagram of project dynamics showing feedback between schedule pressure, overtime, and errors.",
+    "metadata": {
+      "author": "Ventana Systems",
+      "source": "Vensim User's Guide",
+      "license": "MIT",
+      "url": null
+    }
+  },
+  {
+    "url": "models/Vensim/UserGuide/CHAP05/COMPLETE/CUSTOMER.MDL",
+    "className": "Customer",
+    "id": "customer",
+    "category": "causal-loop",
+    "difficulty": "introductory",
+    "comment": "Causal loop diagram of customer acquisition and retention feedback loops.",
+    "metadata": {
+      "author": "Ventana Systems",
+      "source": "Vensim User's Guide",
+      "license": "MIT",
+      "url": null
+    }
+  },
+  {
+    "url": "models/Vensim/UserGuide/CHAP07/Complete/price1.mdl",
+    "className": "Price1",
+    "id": "price1",
+    "category": "causal-loop",
+    "difficulty": "introductory",
+    "comment": "Causal loop diagram of price and demand interactions in a simple market.",
+    "metadata": {
+      "author": "Ventana Systems",
+      "source": "Vensim User's Guide",
+      "license": "MIT",
+      "url": null
+    }
+  },
+  {
+    "url": "models/Vensim/UserGuide/chap20/complete/repair01.mdl",
+    "className": "Repair01",
+    "id": "repair01",
+    "category": "causal-loop",
+    "difficulty": "introductory",
+    "comment": "Causal loop diagram of equipment repair feedback showing failure rates and maintenance capacity.",
+    "metadata": {
+      "author": "Ventana Systems",
+      "source": "Vensim User's Guide",
+      "license": "MIT",
+      "url": null
+    }
+  },
+  {
+    "url": "models/Vensim/UserGuide/CHAP06/COMPLETE/POP.MDL",
+    "className": "Pop",
+    "id": "pop",
+    "category": "introductory",
+    "difficulty": "introductory",
+    "comment": "Simple population model with birth and death flows driven by fractional rates.",
+    "metadata": {
+      "author": "Ventana Systems",
+      "source": "Vensim User's Guide",
+      "license": "MIT",
+      "url": null
+    }
+  },
+  {
+    "url": "models/Vensim/UserGuide/CHAP08/COMPLETE/RABBIT.MDL",
+    "className": "Rabbit",
+    "id": "rabbit",
+    "category": "introductory",
+    "difficulty": "introductory",
+    "comment": "Rabbit population model demonstrating exponential growth with birth and death rates.",
+    "metadata": {
+      "author": "Ventana Systems",
+      "source": "Vensim User's Guide",
+      "license": "MIT",
+      "url": null
+    }
+  },
+  {
+    "url": "models/Vensim/UserGuide/chap20/complete/MentalSimulation01.mdl",
+    "className": "MentalSimulation01",
+    "id": "mental-simulation-01",
+    "category": "control",
+    "difficulty": "introductory",
+    "comment": "Simple mental simulation exercise demonstrating stock-flow intuition with a single accumulator.",
+    "metadata": {
+      "author": "Ventana Systems",
+      "source": "Vensim User's Guide",
+      "license": "MIT",
+      "url": null
+    }
+  },
+  {
+    "url": "models/Vensim/UserGuide/CHAP07/Complete/price3.mdl",
+    "className": "Price3",
+    "id": "price3",
+    "category": "economics",
+    "difficulty": "intermediate",
+    "comment": "Stock-flow market pricing model with inventory adjustments driving price changes over time.",
+    "metadata": {
+      "author": "Ventana Systems",
+      "source": "Vensim User's Guide",
+      "license": "MIT",
+      "url": null
+    }
+  },
+  {
+    "url": "models/Vensim/UserGuide/CHAP03/WFINV.MDL",
+    "className": "WfInv",
+    "id": "wf-inv",
+    "category": "economics",
+    "difficulty": "intermediate",
+    "comment": "Workforce and inventory management model balancing production, hiring, and stock levels.",
+    "metadata": {
+      "author": "Ventana Systems",
+      "source": "Vensim User's Guide",
+      "license": "MIT",
+      "url": null
+    }
+  },
+  {
+    "url": "models/Vensim/UserGuide/CHAP11/COMPLETE/HOUSES.MDL",
+    "className": "Houses",
+    "id": "houses",
+    "category": "economics",
+    "difficulty": "intermediate",
+    "comment": "Housing market model with construction, demolition, and price feedbacks driven by supply-demand gaps.",
+    "metadata": {
+      "author": "Ventana Systems",
+      "source": "Vensim User's Guide",
+      "license": "MIT",
+      "url": null
+    }
+  },
+  {
+    "url": "models/Vensim/UserGuide/CHAP09/COMPLETE/CAP1.MDL",
+    "className": "Cap1",
+    "id": "cap1",
+    "category": "supply-chain",
+    "difficulty": "intermediate",
+    "comment": "Capacity acquisition model showing delays between ordering and receiving production capacity.",
+    "metadata": {
+      "author": "Ventana Systems",
+      "source": "Vensim User's Guide",
+      "license": "MIT",
+      "url": null
+    }
+  },
+  {
+    "url": "models/Vensim/UserGuide/CHAP09/COMPLETE/CUST3.MDL",
+    "className": "Cust3",
+    "id": "cust3",
+    "category": "supply-chain",
+    "difficulty": "intermediate",
+    "comment": "Customer supply chain model with multi-stage ordering, backlog management, and delivery delays.",
+    "metadata": {
+      "author": "Ventana Systems",
+      "source": "Vensim User's Guide",
+      "license": "MIT",
+      "url": null
+    }
+  },
+  {
+    "url": "models/Vensim/UserGuide/CHAP12/COMPLETE/WOM4.MDL",
+    "className": "Wom4",
+    "id": "wom4",
+    "category": "marketing",
+    "difficulty": "intermediate",
+    "comment": "Word-of-mouth diffusion model capturing adoption spread through social contact and communication.",
+    "metadata": {
+      "author": "Ventana Systems",
+      "source": "Vensim User's Guide",
+      "license": "MIT",
+      "url": null
+    }
+  },
+  {
+    "url": "models/Vensim/UserGuide/CHAP15/COMPLETE/SALES.MDL",
+    "className": "Sales",
+    "id": "sales",
+    "category": "marketing",
+    "difficulty": "intermediate",
+    "comment": "Sales forecasting model using exponential smoothing to track and predict demand trends.",
+    "metadata": {
+      "author": "Ventana Systems",
+      "source": "Vensim User's Guide",
+      "license": "MIT",
+      "url": null
+    }
+  },
+  {
+    "url": "models/Vensim/UserGuide/CHAP16/COMPLETE/CFC.MDL",
+    "className": "CFC",
+    "id": "cfc",
+    "category": "policy",
+    "difficulty": "intermediate",
+    "comment": "CFC emissions policy model exploring chlorofluorocarbon regulation and atmospheric accumulation.",
+    "metadata": {
+      "author": "Ventana Systems",
+      "source": "Vensim User's Guide",
+      "license": "MIT",
+      "url": null
+    }
+  },
+  {
+    "url": "models/Vensim/UserGuide/CHAP18/CALIBRAT/COMPLETE/ELECTRIC.MDL",
+    "className": "Electric",
+    "id": "electric",
+    "category": "technology",
+    "difficulty": "intermediate",
+    "comment": "Electric utility model calibrated against historical data for capacity planning and demand forecasting.",
+    "metadata": {
+      "author": "Ventana Systems",
+      "source": "Vensim User's Guide",
+      "license": "MIT",
+      "url": null
+    }
+  },
+  {
+    "url": "models/Vensim/UserGuide/chap20/complete/repair02.mdl",
+    "className": "Repair02",
+    "id": "repair02",
+    "category": "control",
+    "difficulty": "intermediate",
+    "comment": "Stock-flow equipment repair model with maintenance workforce, failure rates, and repair throughput.",
+    "metadata": {
+      "author": "Ventana Systems",
+      "source": "Vensim User's Guide",
+      "license": "MIT",
+      "url": null
+    }
+  },
+  {
+    "url": "models/Vensim/UserGuide/CHAP13/complete/arms3.mdl",
+    "className": "Arms3",
+    "id": "arms3",
+    "category": "policy",
+    "difficulty": "advanced",
+    "comment": "Arms race model with two-nation military spending feedbacks, threat perception, and escalation dynamics.",
+    "metadata": {
+      "author": "Ventana Systems",
+      "source": "Vensim User's Guide",
+      "license": "MIT",
+      "url": null
+    }
+  },
+  {
+    "url": "models/Vensim/UserGuide/CHAP14/YEAST4.MDL",
+    "className": "Yeast4",
+    "id": "yeast4",
+    "category": "ecology",
+    "difficulty": "advanced",
+    "comment": "Yeast population model with nutrient depletion, toxin accumulation, and carrying capacity limits.",
+    "metadata": {
+      "author": "Ventana Systems",
+      "source": "Vensim User's Guide",
+      "license": "MIT",
+      "url": null
+    }
+  },
+  {
+    "url": "models/Vensim/UserGuide/CHAP17/COMPLETE/PROJ3.MDL",
+    "className": "Proj3",
+    "id": "proj3",
+    "category": "management",
+    "difficulty": "advanced",
+    "comment": "Project management model with rework discovery, staffing adjustments, and schedule pressure feedbacks.",
+    "metadata": {
+      "author": "Ventana Systems",
+      "source": "Vensim User's Guide",
+      "license": "MIT",
+      "url": null
+    }
+  },
+  {
+    "url": "models/Vensim/UserGuide/CHAP18/POLICY/COMPLETE/STOCK.MDL",
+    "className": "Stock",
+    "id": "stock",
+    "category": "technology",
+    "difficulty": "advanced",
+    "comment": "Stock management policy model with complex ordering rules, pipeline delays, and optimization analysis.",
+    "metadata": {
+      "author": "Ventana Systems",
+      "source": "Vensim User's Guide",
+      "license": "MIT",
+      "url": null
+    }
+  }
+]

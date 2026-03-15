@@ -1,395 +1,306 @@
 {
-  "name": "PneumonicPlague",
-  "stocks": [
-    {
-      "name": "susceptible population",
-      "comment": "susceptible population",
-      "initialValue": 0.0,
-      "initialExpression": "initial_total_population-infected_population",
-      "unit": "persons"
-    },
-    {
-      "name": "infected population",
-      "comment": "infected population",
-      "initialValue": 1.0,
-      "unit": "persons"
-    },
-    {
-      "name": "recovering population",
-      "comment": "recovering population",
-      "initialValue": 0.0,
-      "unit": "persons"
-    },
-    {
-      "name": "deceased population",
-      "comment": "deceased population",
-      "initialValue": 0.0,
-      "unit": "persons"
-    }
-  ],
-  "flows": [
-    {
-      "name": "susceptible population net flow",
-      "comment": "Net flow for susceptible population",
-      "equation": "-infection",
-      "timeUnit": "Week",
-      "sink": "susceptible population"
-    },
-    {
-      "name": "infected population net flow",
-      "comment": "Net flow for infected population",
-      "equation": "infection-recovery-deaths",
-      "timeUnit": "Week",
-      "sink": "infected population"
-    },
-    {
-      "name": "recovering population net flow",
-      "comment": "Net flow for recovering population",
-      "equation": "recovery",
-      "timeUnit": "Week",
-      "sink": "recovering population"
-    },
-    {
-      "name": "deceased population net flow",
-      "comment": "Net flow for deceased population",
-      "equation": "deaths",
-      "timeUnit": "Week",
-      "sink": "deceased population"
-    }
-  ],
-  "variables": [
-    {
-      "name": "infection",
-      "comment": "infection",
-      "equation": "contact_rate*infection_ratio*susceptible_population*infected_fraction",
-      "unit": "persons/Week"
-    },
-    {
-      "name": "infected fraction",
-      "comment": "infected fraction",
-      "equation": "infected_population/total_population",
-      "unit": "Dmnl"
-    },
-    {
-      "name": "total population",
-      "comment": "total population",
-      "equation": "infected_population+recovering_population+susceptible_population",
-      "unit": "persons"
-    },
-    {
-      "name": "contact rate",
-      "comment": "contact rate",
-      "equation": "20",
-      "unit": "persons/persons/Week"
-    },
-    {
-      "name": "antibiotics coverage of the population",
-      "comment": "antibiotics coverage of the population",
-      "equation": "0",
-      "unit": "Dmnl"
-    },
-    {
-      "name": "recovery",
-      "comment": "recovery",
-      "equation": "(1-fatality_ratio)*infected_population/recovery_time",
-      "unit": "persons/Week"
-    },
-    {
-      "name": "recovery time",
-      "comment": "recovery time",
-      "equation": "0.33",
-      "unit": "Week"
-    },
-    {
-      "name": "infection ratio",
-      "comment": "infection ratio",
-      "equation": "0.75",
-      "unit": "persons/persons"
-    },
-    {
-      "name": "deaths",
-      "comment": "deaths",
-      "equation": "infected_population*fatality_ratio/recovery_time",
-      "unit": "persons/Week"
-    },
-    {
-      "name": "fatality ratio",
-      "comment": "fatality ratio",
-      "equation": "LOOKUP(fatality_ratio_lookup, antibiotics_coverage_of_the_population)",
-      "unit": "Dmnl"
-    },
-    {
-      "name": "initial total population",
-      "equation": "10000",
-      "comment": "initial total population",
-      "unit": "persons"
-    }
-  ],
-  "lookupTables": [
-    {
-      "name": "fatality ratio lookup",
-      "xValues": [
-        0.0,
-        1.0
-      ],
-      "yValues": [
-        0.9,
-        0.15
-      ],
-      "interpolation": "LINEAR"
-    }
-  ],
-  "views": [
-    {
-      "name": "View 1",
-      "elements": [
-        {
-          "name": "susceptible population",
-          "type": "stock",
-          "x": 77.0,
-          "y": 208.0
-        },
-        {
-          "name": "infected population",
-          "type": "stock",
-          "x": 241.0,
-          "y": 204.0
-        },
-        {
-          "name": "recovering population",
-          "type": "stock",
-          "x": 480.0,
-          "y": 206.0
-        },
-        {
-          "name": "deceased population",
-          "type": "stock",
-          "x": 242.0,
-          "y": 345.0
-        },
-        {
-          "name": "_444",
-          "type": "flow",
-          "x": 158.0,
-          "y": 206.0
-        },
-        {
-          "name": "infection",
-          "type": "aux",
-          "x": 158.0,
-          "y": 225.0
-        },
-        {
-          "name": "_140",
-          "type": "flow",
-          "x": 366.0,
-          "y": 205.0
-        },
-        {
-          "name": "recovery",
-          "type": "aux",
-          "x": 366.0,
-          "y": 224.0
-        },
-        {
-          "name": "_380",
-          "type": "flow",
-          "x": 240.0,
-          "y": 286.0
-        },
-        {
-          "name": "deaths",
-          "type": "aux",
-          "x": 280.0,
-          "y": 286.0
-        },
-        {
-          "name": "total population",
-          "type": "aux",
-          "x": 240.0,
-          "y": 78.0
-        },
-        {
-          "name": "contact rate",
-          "type": "aux",
-          "x": 88.0,
-          "y": 291.0
-        },
-        {
-          "name": "infection ratio",
-          "type": "aux",
-          "x": 176.0,
-          "y": 292.0
-        },
-        {
-          "name": "fatality ratio",
-          "type": "aux",
-          "x": 395.0,
-          "y": 285.0
-        },
-        {
-          "name": "antibiotics coverage of the population",
-          "type": "aux",
-          "x": 395.0,
-          "y": 343.0
-        },
-        {
-          "name": "recovery time",
-          "type": "aux",
-          "x": 333.0,
-          "y": 252.0
-        },
-        {
-          "name": "initial total population",
-          "type": "aux",
-          "x": 62.0,
-          "y": 255.0
-        },
-        {
-          "name": "infected fraction",
-          "type": "aux",
-          "x": 189.0,
-          "y": 134.0
-        }
-      ],
-      "connectors": [
-        {
-          "from": "7",
-          "to": "infected population"
-        },
-        {
-          "from": "7",
-          "to": "susceptible population"
-        },
-        {
-          "from": "11",
-          "to": "recovering population"
-        },
-        {
-          "from": "11",
-          "to": "infected population"
-        },
-        {
-          "from": "15",
-          "to": "deceased population"
-        },
-        {
-          "from": "15",
-          "to": "infected population"
-        },
-        {
-          "from": "susceptible population",
-          "to": "_444"
-        },
-        {
-          "from": "infected population",
-          "to": "40"
-        },
-        {
-          "from": "infected population",
-          "to": "_140"
-        },
-        {
-          "from": "infected population",
-          "to": "deaths"
-        },
-        {
-          "from": "infected population",
-          "to": "susceptible population"
-        },
-        {
-          "from": "contact rate",
-          "to": "infection"
-        },
-        {
-          "from": "infection ratio",
-          "to": "infection"
-        },
-        {
-          "from": "fatality ratio",
-          "to": "recovery"
-        },
-        {
-          "from": "fatality ratio",
-          "to": "deaths"
-        },
-        {
-          "from": "antibiotics coverage of the population",
-          "to": "fatality ratio"
-        },
-        {
-          "from": "recovery time",
-          "to": "recovery"
-        },
-        {
-          "from": "recovery time",
-          "to": "deaths"
-        },
-        {
-          "from": "susceptible population",
-          "to": "total population"
-        },
-        {
-          "from": "infected population",
-          "to": "total population"
-        },
-        {
-          "from": "recovering population",
-          "to": "total population"
-        },
-        {
-          "from": "initial total population",
-          "to": "susceptible population"
-        },
-        {
-          "from": "total population",
-          "to": "infected fraction"
-        },
-        {
-          "from": "infected fraction",
-          "to": "_444"
-        }
-      ],
-      "flowRoutes": [
-        {
-          "flowName": "_444",
-          "points": [
-            [
-              158.0,
-              206.0
-            ]
-          ]
-        },
-        {
-          "flowName": "_140",
-          "points": [
-            [
-              366.0,
-              205.0
-            ]
-          ]
-        },
-        {
-          "flowName": "_380",
-          "points": [
-            [
-              240.0,
-              286.0
-            ]
-          ]
-        }
-      ]
-    }
-  ],
-  "defaultSimulation": {
-    "timeStep": "Week",
-    "duration": 6.0,
-    "durationUnit": "Week"
+  "name" : "0608PneumonicPlagueChinaA",
+  "stocks" : [ {
+    "name" : "susceptible population",
+    "comment" : "susceptible population",
+    "initialValue" : 0.0,
+    "initialExpression" : "initial_total_population-infected_population",
+    "unit" : "persons"
+  }, {
+    "name" : "infected population",
+    "comment" : "infected population",
+    "initialValue" : 1.0,
+    "unit" : "persons"
+  }, {
+    "name" : "recovering population",
+    "comment" : "recovering population",
+    "initialValue" : 0.0,
+    "unit" : "persons"
+  }, {
+    "name" : "deceased population",
+    "comment" : "deceased population",
+    "initialValue" : 0.0,
+    "unit" : "persons"
+  } ],
+  "flows" : [ {
+    "name" : "susceptible population net flow",
+    "comment" : "Net flow for susceptible population",
+    "equation" : "-infection",
+    "timeUnit" : "Week",
+    "sink" : "susceptible population"
+  }, {
+    "name" : "infected population inflow 1",
+    "equation" : "infection",
+    "timeUnit" : "Week",
+    "sink" : "infected population"
+  }, {
+    "name" : "infected population outflow 2",
+    "equation" : "recovery",
+    "timeUnit" : "Week",
+    "source" : "infected population"
+  }, {
+    "name" : "infected population outflow 3",
+    "equation" : "deaths",
+    "timeUnit" : "Week",
+    "source" : "infected population"
+  }, {
+    "name" : "recovering population net flow",
+    "comment" : "Net flow for recovering population",
+    "equation" : "recovery",
+    "timeUnit" : "Week",
+    "sink" : "recovering population"
+  }, {
+    "name" : "deceased population net flow",
+    "comment" : "Net flow for deceased population",
+    "equation" : "deaths",
+    "timeUnit" : "Week",
+    "sink" : "deceased population"
+  } ],
+  "variables" : [ {
+    "name" : "TIME_STEP",
+    "equation" : "0.0625",
+    "unit" : "Week"
+  }, {
+    "name" : "INITIAL_TIME",
+    "equation" : "0",
+    "unit" : "Week"
+  }, {
+    "name" : "FINAL_TIME",
+    "equation" : "6",
+    "unit" : "Week"
+  }, {
+    "name" : "fatality ratio",
+    "comment" : "fatality ratio",
+    "equation" : "0.9",
+    "unit" : "Dmnl"
+  }, {
+    "name" : "infection",
+    "comment" : "infection",
+    "equation" : "contact_rate*infection_ratio*susceptible_population*infected_fraction",
+    "unit" : "persons/Week"
+  }, {
+    "name" : "infected fraction",
+    "comment" : "infected fraction",
+    "equation" : "infected_population/total_population",
+    "unit" : "Dmnl"
+  }, {
+    "name" : "total population",
+    "comment" : "total population",
+    "equation" : "infected_population+recovering_population+susceptible_population",
+    "unit" : "persons"
+  }, {
+    "name" : "initial total population",
+    "comment" : "initial total population",
+    "equation" : "10000",
+    "unit" : "persons"
+  }, {
+    "name" : "contact rate",
+    "comment" : "contact rate",
+    "equation" : "20",
+    "unit" : "persons/persons/Week"
+  }, {
+    "name" : "recovery",
+    "comment" : "recovery",
+    "equation" : "(1-fatality_ratio)*infected_population/recovery_time",
+    "unit" : "persons/Week"
+  }, {
+    "name" : "recovery time",
+    "comment" : "recovery time",
+    "equation" : "0.33",
+    "unit" : "Week"
+  }, {
+    "name" : "infection ratio",
+    "comment" : "infection ratio",
+    "equation" : "0.75",
+    "unit" : "persons/persons"
+  }, {
+    "name" : "deaths",
+    "comment" : "deaths",
+    "equation" : "infected_population*fatality_ratio/recovery_time",
+    "unit" : "persons/Week"
+  } ],
+  "views" : [ {
+    "name" : "View 1",
+    "elements" : [ {
+      "name" : "susceptible population",
+      "type" : "stock",
+      "x" : 77.0,
+      "y" : 208.0
+    }, {
+      "name" : "infected population",
+      "type" : "stock",
+      "x" : 241.0,
+      "y" : 204.0
+    }, {
+      "name" : "recovering population",
+      "type" : "stock",
+      "x" : 480.0,
+      "y" : 206.0
+    }, {
+      "name" : "deceased population",
+      "type" : "stock",
+      "x" : 242.0,
+      "y" : 345.0
+    }, {
+      "name" : "_412",
+      "type" : "flow",
+      "x" : 158.0,
+      "y" : 206.0
+    }, {
+      "name" : "infection",
+      "type" : "aux",
+      "x" : 158.0,
+      "y" : 225.0
+    }, {
+      "name" : "_140",
+      "type" : "flow",
+      "x" : 366.0,
+      "y" : 205.0
+    }, {
+      "name" : "recovery",
+      "type" : "aux",
+      "x" : 366.0,
+      "y" : 224.0
+    }, {
+      "name" : "_348",
+      "type" : "flow",
+      "x" : 240.0,
+      "y" : 286.0
+    }, {
+      "name" : "deaths",
+      "type" : "aux",
+      "x" : 280.0,
+      "y" : 286.0
+    }, {
+      "name" : "total population",
+      "type" : "aux",
+      "x" : 240.0,
+      "y" : 78.0
+    }, {
+      "name" : "contact rate",
+      "type" : "aux",
+      "x" : 88.0,
+      "y" : 291.0
+    }, {
+      "name" : "infection ratio",
+      "type" : "aux",
+      "x" : 176.0,
+      "y" : 292.0
+    }, {
+      "name" : "fatality ratio",
+      "type" : "aux",
+      "x" : 395.0,
+      "y" : 285.0
+    }, {
+      "name" : "recovery time",
+      "type" : "aux",
+      "x" : 333.0,
+      "y" : 252.0
+    }, {
+      "name" : "initial total population",
+      "type" : "aux",
+      "x" : 62.0,
+      "y" : 255.0
+    }, {
+      "name" : "infected fraction",
+      "type" : "aux",
+      "x" : 189.0,
+      "y" : 134.0
+    } ],
+    "connectors" : [ {
+      "from" : "7",
+      "to" : "infected population"
+    }, {
+      "from" : "7",
+      "to" : "susceptible population"
+    }, {
+      "from" : "11",
+      "to" : "recovering population"
+    }, {
+      "from" : "11",
+      "to" : "infected population"
+    }, {
+      "from" : "15",
+      "to" : "deceased population"
+    }, {
+      "from" : "15",
+      "to" : "infected population"
+    }, {
+      "from" : "susceptible population",
+      "to" : "_412"
+    }, {
+      "from" : "infected population",
+      "to" : "40"
+    }, {
+      "from" : "infected population",
+      "to" : "_140"
+    }, {
+      "from" : "infected population",
+      "to" : "deaths"
+    }, {
+      "from" : "infected population",
+      "to" : "susceptible population"
+    }, {
+      "from" : "contact rate",
+      "to" : "infection"
+    }, {
+      "from" : "infection ratio",
+      "to" : "infection"
+    }, {
+      "from" : "fatality ratio",
+      "to" : "recovery"
+    }, {
+      "from" : "fatality ratio",
+      "to" : "deaths"
+    }, {
+      "from" : "30",
+      "to" : "fatality ratio"
+    }, {
+      "from" : "recovery time",
+      "to" : "recovery"
+    }, {
+      "from" : "recovery time",
+      "to" : "deaths"
+    }, {
+      "from" : "susceptible population",
+      "to" : "total population"
+    }, {
+      "from" : "infected population",
+      "to" : "total population"
+    }, {
+      "from" : "recovering population",
+      "to" : "total population"
+    }, {
+      "from" : "initial total population",
+      "to" : "susceptible population"
+    }, {
+      "from" : "total population",
+      "to" : "infected fraction"
+    }, {
+      "from" : "infected fraction",
+      "to" : "_412"
+    } ],
+    "flowRoutes" : [ {
+      "flowName" : "_412",
+      "points" : [ [ 158.0, 206.0 ] ]
+    }, {
+      "flowName" : "_140",
+      "points" : [ [ 366.0, 205.0 ] ]
+    }, {
+      "flowName" : "_348",
+      "points" : [ [ 240.0, 286.0 ] ]
+    } ]
+  } ],
+  "defaultSimulation" : {
+    "timeStep" : "Week",
+    "duration" : 6.0,
+    "durationUnit" : "Week",
+    "dt" : 0.0625
   },
-  "metadata": {
-    "license": "CC-BY-NC-SA-4.0",
-    "author": "Dr. Erik Pruyt",
-    "source": "Pruyt, E., 2013. Small System Dynamics Models for Big Issues: Triple Jump towards Real-World Complexity. TU Delft Library. ISBN 978-94-6186-195-5",
-    "url": "https://simulation.tudelft.nl/SD/"
+  "metadata" : {
+    "author" : "Dr. Erik Pruyt",
+    "source" : "Pruyt, E., 2013. Small System Dynamics Models for Big Issues: Triple Jump towards Real-World Complexity. TU Delft Library. ISBN 978-94-6186-195-5",
+    "license" : "CC-BY-NC-SA-4.0",
+    "url" : "https://simulation.tudelft.nl/SD/"
   }
 }

@@ -1,0 +1,1105 @@
+{
+  "name" : "PROJ",
+  "stocks" : [ {
+    "name" : "Cumulative Complex Progress",
+    "comment" : "CUMULATIVE COMPLEX PROGRESS",
+    "initialValue" : 0.0,
+    "unit" : "TASKS"
+  }, {
+    "name" : "Undiscovered Rework",
+    "comment" : "UNDISCOVERED REWORK",
+    "initialValue" : 0.0,
+    "unit" : "TASKS"
+  }, {
+    "name" : "Perceived Productivity",
+    "comment" : "PERCEIVED PRODUCTIVITY",
+    "initialValue" : 0.0,
+    "initialExpression" : "Indicated_Productivity",
+    "unit" : "TASKS/WORKER/MONTH"
+  }, {
+    "name" : "Experienced Workforce",
+    "comment" : "EXPERIENCED WORKFORCE",
+    "initialValue" : 2.0,
+    "unit" : "WORKERS"
+  }, {
+    "name" : "New Workforce",
+    "comment" : "NEW WORKFORCE",
+    "initialValue" : 1.0,
+    "unit" : "WORKERS"
+  }, {
+    "name" : "Scheduled Completion Date",
+    "comment" : "SCHEDULED COMPLETION DATE",
+    "initialValue" : 40.0,
+    "unit" : "MONTH"
+  }, {
+    "name" : "Cumulative Effort",
+    "comment" : "CUMULATIVE EFFORT",
+    "initialValue" : 0.0,
+    "unit" : "WORKER*MONTH"
+  } ],
+  "flows" : [ {
+    "name" : "Cumulative Complex Progress net flow",
+    "comment" : "Net flow for Cumulative Complex Progress",
+    "equation" : "real_progress_rate",
+    "timeUnit" : "Month",
+    "sink" : "Cumulative Complex Progress"
+  }, {
+    "name" : "Undiscovered Rework inflow 1",
+    "equation" : "generation_of_undiscovered_rework",
+    "timeUnit" : "Month",
+    "sink" : "Undiscovered Rework"
+  }, {
+    "name" : "Undiscovered Rework outflow 2",
+    "equation" : "detection_of_undiscovered_rework",
+    "timeUnit" : "Month",
+    "source" : "Undiscovered Rework"
+  }, {
+    "name" : "Perceived Productivity net flow",
+    "comment" : "Net flow for Perceived Productivity",
+    "equation" : "(Indicated_Productivity-Perceived_Productivity)/time_to_perceive_productivity",
+    "timeUnit" : "Month",
+    "sink" : "Perceived Productivity"
+  }, {
+    "name" : "Experienced Workforce net flow",
+    "comment" : "Net flow for Experienced Workforce",
+    "equation" : "workforce_assimilation_rate",
+    "timeUnit" : "Month",
+    "sink" : "Experienced Workforce"
+  }, {
+    "name" : "New Workforce net flow",
+    "comment" : "Net flow for New Workforce",
+    "equation" : "hiring_rate",
+    "timeUnit" : "Month",
+    "sink" : "New Workforce"
+  }, {
+    "name" : "Scheduled Completion Date net flow",
+    "comment" : "Net flow for Scheduled Completion Date",
+    "equation" : "net_additions_to_schedule",
+    "timeUnit" : "Month",
+    "sink" : "Scheduled Completion Date"
+  }, {
+    "name" : "Cumulative Effort net flow",
+    "comment" : "Net flow for Cumulative Effort",
+    "equation" : "workforce*effect_of_schedule_pressure_on_gross_productivity",
+    "timeUnit" : "Month",
+    "sink" : "Cumulative Effort"
+  } ],
+  "variables" : [ {
+    "name" : "TIME_STEP",
+    "equation" : "0.125",
+    "unit" : "Month"
+  }, {
+    "name" : "INITIAL_TIME",
+    "equation" : "0",
+    "unit" : "Month"
+  }, {
+    "name" : "FINAL_TIME",
+    "equation" : "100",
+    "unit" : "Month"
+  }, {
+    "name" : "real progress rate",
+    "comment" : "REAL PROGRESS RATE",
+    "equation" : "apparent_progress_rate*fraction_satisfactory",
+    "unit" : "TASKS/MONTH"
+  }, {
+    "name" : "apparent progress rate",
+    "comment" : "APPARENT PROGRESS RATE",
+    "equation" : "workforce*gross_productivity*effect_of_schedule_pressure_on_gross_productivity",
+    "unit" : "TASKS/MONTH"
+  }, {
+    "name" : "gross productivity",
+    "comment" : "GROSS PRODUCTIVITY",
+    "equation" : "normal_gross_productivity*effect_of_experience_on_gross_productivity",
+    "unit" : "TASKS/WORKER/MONTH"
+  }, {
+    "name" : "normal gross productivity",
+    "comment" : "NORMAL GROSS PRODUCTIVITY",
+    "equation" : "1",
+    "unit" : "TASKS/WORKER/MONTH"
+  }, {
+    "name" : "fraction satisfactory",
+    "comment" : "FRACTION SATISFACTORY",
+    "equation" : "normal_fraction_satisfactory*effect_of_experience_on_fraction_satisfactory*effect_of_schedule_pressure_on_fraction_satisfactory",
+    "unit" : "DIMENSIONLESS"
+  }, {
+    "name" : "normal fraction satisfactory",
+    "comment" : "NORMAL FRACTION SATISFACTORY",
+    "equation" : "LOOKUP(normal_fraction_satisfactory_lookup, fraction_completed)",
+    "unit" : "DIMENSIONLESS"
+  }, {
+    "name" : "effect of experience on gross productivity",
+    "comment" : "EFFECT OF EXPERIENCE ON GROSS PRODUCTIVITY",
+    "equation" : "LOOKUP(effect_of_experience_on_gross_productivity_lookup, fraction_of_workforce_experienced)",
+    "unit" : "DIMENSIONLESS"
+  }, {
+    "name" : "fraction of workforce experienced",
+    "comment" : "FRACTION OF WORKFORCE EXPERIENCED",
+    "equation" : "Experienced_Workforce/workforce",
+    "unit" : "DIMENSIONLESS"
+  }, {
+    "name" : "effect of experience on fraction satisfactory",
+    "comment" : "EFFECT OF EXPERIENCE ON FRACTION SATISFACTORY",
+    "equation" : "LOOKUP(fraction_of_workforce_experienced_lookup, fraction_of_workforce_experienced)",
+    "unit" : "DIMENSIONLESS"
+  }, {
+    "name" : "effect of schedule pressure on fraction satisfactory",
+    "comment" : "EFFECT OF SCHEDULE PRESSURE ON FRACTION SATISFACTORY",
+    "equation" : "LOOKUP(effect_of_schedule_pressure_on_fraction_satisfactory_lookup, indicated_completion_date /Scheduled_Completion_Date)",
+    "unit" : "DIMENSIONLESS"
+  }, {
+    "name" : "effect of schedule pressure on gross productivity",
+    "comment" : "EFFECT OF SCHEDULE PRESSURE ON GROSS PRODUCTIVITY",
+    "equation" : "LOOKUP(effect_of_schedule_pressure_on_gross_productivity_lookup, indicated_completion_date/Scheduled_Completion_Date)",
+    "unit" : "DIMENSIONLESS"
+  }, {
+    "name" : "generation of undiscovered rework",
+    "comment" : "GENERATION OF UNDISCOVERED REWORK",
+    "equation" : "apparent_progress_rate*(1-fraction_satisfactory)",
+    "unit" : "TASKS/MONTH"
+  }, {
+    "name" : "detection of undiscovered rework",
+    "comment" : "DETECTION OF UNDICOVERED REWORK",
+    "equation" : "Undiscovered_Rework/time_to_detect_rework",
+    "unit" : "TASKS/MONTH"
+  }, {
+    "name" : "time to detect rework",
+    "comment" : "TIME TO DETECT REWORK",
+    "equation" : "LOOKUP(time_to_detect_rework_lookup, fraction_perceived_complete)",
+    "unit" : "MONTHS"
+  }, {
+    "name" : "cumulative perceived progress",
+    "comment" : "CUMULATIVE PERCEIVED PROGRESS",
+    "equation" : "Cumulative_Complex_Progress+Undiscovered_Rework",
+    "unit" : "TASKS"
+  }, {
+    "name" : "fraction perceived complete",
+    "comment" : "FRACTION PERCEIVED COMPLETE",
+    "equation" : "cumulative_perceived_progress/current_project_definition",
+    "unit" : "DIMENSIONLESS"
+  }, {
+    "name" : "current project definition",
+    "comment" : "CURRENT PROJECT DEFINITION",
+    "equation" : "LOOKUP(project_definition_lookup, fraction_completed)",
+    "unit" : "TASKS"
+  }, {
+    "name" : "final project definition",
+    "comment" : "FINAL PROJECT DEFINITION",
+    "equation" : "INITIAL( LOOKUP(project_definition_lookup, 1))",
+    "unit" : "TASKS"
+  }, {
+    "name" : "fraction completed",
+    "comment" : "FRACTION COMPLETED",
+    "equation" : "Cumulative_Complex_Progress/final_project_definition",
+    "unit" : "DIMENSIONLESS"
+  }, {
+    "name" : "effort perceived remaining",
+    "comment" : "EFFORT PERCEIVED REMAINING",
+    "equation" : "(current_project_definition-cumulative_perceived_progress)/Perceived_Productivity",
+    "unit" : "WORKER*MONTHS"
+  }, {
+    "name" : "time to perceive productivity",
+    "comment" : "TIME TO PERCEIVE PRODUCTIVITY",
+    "equation" : "6",
+    "unit" : "MONTHS"
+  }, {
+    "name" : "Indicated Productivity",
+    "comment" : "INDICATED PRODUCTIVITY",
+    "equation" : "weight_to_real_productivity*real_productivity+(1-weight_to_real_productivity)*normal_gross_productivity",
+    "unit" : "TASKS/WORKER/MONTH"
+  }, {
+    "name" : "weight to real productivity",
+    "comment" : "WEIGHT TO REAL PRODUCTIVITY",
+    "equation" : "LOOKUP(weight_to_perceived_productivity_lookup, fraction_perceived_complete)",
+    "unit" : "DIMENSIONLESS"
+  }, {
+    "name" : "real productivity",
+    "comment" : "REAL PRODUCTIVITY",
+    "equation" : "normal_gross_productivity*fraction_satisfactory",
+    "unit" : "TASKS/WORKER/MONTH"
+  }, {
+    "name" : "workforce",
+    "comment" : "WORKFORCE",
+    "equation" : "Experienced_Workforce+New_Workforce",
+    "unit" : "WORKERS"
+  }, {
+    "name" : "initial experienced workforce",
+    "comment" : "INITIAL EXPERIENCED WORKFORCE",
+    "equation" : "2",
+    "unit" : "WORKERS"
+  }, {
+    "name" : "workforce assimilation rate",
+    "comment" : "WORKFORCE ASSIMILATION RATE",
+    "equation" : "New_Workforce/assimilation_time",
+    "unit" : "WORKERS/MONTH"
+  }, {
+    "name" : "assimilation time",
+    "comment" : "ASSIMILATION TIME",
+    "equation" : "6",
+    "unit" : "MONTHS"
+  }, {
+    "name" : "initial new workforce",
+    "comment" : "INITIAL NEW WORKFORCE",
+    "equation" : "1",
+    "unit" : "WORKERS"
+  }, {
+    "name" : "hiring rate",
+    "comment" : "HIRING RATE",
+    "equation" : "((workforce_sought-workforce)/workforce_adjustment_time)",
+    "unit" : "WORKERS/MONTH"
+  }, {
+    "name" : "workforce adjustment time",
+    "comment" : "WORKFORCE ADJUSTMENT TIME",
+    "equation" : "3",
+    "unit" : "MONTHS"
+  }, {
+    "name" : "workforce sought",
+    "comment" : "WORKFORCE SOUGHT",
+    "equation" : "willingness_to_change_workforce*indicated_workforce+(1-willingness_to_change_workforce )*workforce",
+    "unit" : "WORKERS"
+  }, {
+    "name" : "willingness to change workforce",
+    "comment" : "WILLINGNESS TO CHANGE WORKFORCE",
+    "equation" : "LOOKUP(willingness_to_change_workforce_lookup, time_remaining)",
+    "unit" : "DIMENSIONLESS"
+  }, {
+    "name" : "indicated workforce",
+    "comment" : "INDICATED WORKFORCE",
+    "equation" : "effort_perceived_remaining/time_remaining",
+    "unit" : "WORKERS"
+  }, {
+    "name" : "time remaining",
+    "comment" : "TIME REMAINING",
+    "equation" : "Scheduled_Completion_Date-TIME",
+    "unit" : "MONTHS"
+  }, {
+    "name" : "initial scheduled completion date",
+    "comment" : "INITIAL SCHEDULED COMPLETION DATE",
+    "equation" : "40",
+    "unit" : "MONTH"
+  }, {
+    "name" : "net additions to schedule",
+    "comment" : "NET ADDITIONS TO SCHEDULE",
+    "equation" : "(indicated_completion_date-Scheduled_Completion_Date)/schedule_adjustment_time",
+    "unit" : "MONTHS/MONTH"
+  }, {
+    "name" : "schedule adjustment time",
+    "comment" : "SCHEDULE ADJUSTMENT TIME",
+    "equation" : "6",
+    "unit" : "MONTHS"
+  }, {
+    "name" : "indicated completion date",
+    "comment" : "INDICATED COMPLETION DATE",
+    "equation" : "TIME+time_perceived_required",
+    "unit" : "MONTH"
+  }, {
+    "name" : "time perceived required",
+    "comment" : "TIME PERCEIVED REQUIRED",
+    "equation" : "effort_perceived_remaining/workforce_sought",
+    "unit" : "MONTHS"
+  }, {
+    "name" : "cost",
+    "comment" : "COST",
+    "equation" : "cost_per_worker_month*Cumulative_Effort",
+    "unit" : "DOLLARS"
+  }, {
+    "name" : "cost per worker month",
+    "comment" : "COST PER WORKER MONTH",
+    "equation" : "3000",
+    "unit" : "DOLLARS/(WORKER*MONTH)"
+  }, {
+    "name" : "MAXLEN",
+    "comment" : "MAXLEN",
+    "equation" : "100",
+    "unit" : "MONTH"
+  } ],
+  "lookupTables" : [ {
+    "name" : "normal fraction satisfactory lookup",
+    "comment" : "normal fraction satisfactory lookup",
+    "xValues" : [ 0.0, 0.2, 0.4, 0.6, 0.8, 1.0 ],
+    "yValues" : [ 0.5, 0.55, 0.63, 0.75, 0.87, 1.0 ],
+    "interpolation" : "LINEAR"
+  }, {
+    "name" : "effect of experience on gross productivity lookup",
+    "comment" : "effect of experience on gross productivity lookup",
+    "xValues" : [ 0.0, 0.2, 0.4, 0.6, 0.8, 1.0 ],
+    "yValues" : [ 0.5, 0.55, 0.65, 0.75, 0.87, 1.0 ],
+    "interpolation" : "LINEAR"
+  }, {
+    "name" : "fraction of workforce experienced lookup",
+    "comment" : "fraction of workforce experienced lookup",
+    "xValues" : [ 0.0, 0.2, 0.4, 0.6, 0.8, 1.0 ],
+    "yValues" : [ 0.5, 0.6, 0.7, 0.8, 0.9, 1.0 ],
+    "interpolation" : "LINEAR"
+  }, {
+    "name" : "effect of schedule pressure on fraction satisfactory lookup",
+    "comment" : "effect of schedule pressure on fraction satisfactory lookup",
+    "xValues" : [ 0.9, 0.95, 1.0, 1.05, 1.1, 1.15, 1.2 ],
+    "yValues" : [ 1.1, 1.06, 1.0, 0.96, 0.9, 0.83, 0.75 ],
+    "interpolation" : "LINEAR"
+  }, {
+    "name" : "effect of schedule pressure on gross productivity lookup",
+    "comment" : "effect of schedule pressure on gross productivity lookup",
+    "xValues" : [ 0.9, 0.95, 1.0, 1.05, 1.1, 1.15, 1.2 ],
+    "yValues" : [ 0.9, 0.92, 1.0, 1.1, 1.18, 1.23, 1.25 ],
+    "interpolation" : "LINEAR"
+  }, {
+    "name" : "time to detect rework lookup",
+    "comment" : "TABLE FOR TIME TO DETECT REWORK",
+    "xValues" : [ 0.0, 0.2, 0.4, 0.6, 0.8, 1.0 ],
+    "yValues" : [ 12.0, 12.0, 12.0, 10.0, 5.0, 0.5 ],
+    "interpolation" : "LINEAR"
+  }, {
+    "name" : "project definition lookup",
+    "comment" : "project definition lookup",
+    "xValues" : [ 0.0, 0.2, 0.4, 0.6, 0.8, 1.0 ],
+    "yValues" : [ 800.0, 830.0, 900.0, 1000.0, 1140.0, 1200.0 ],
+    "interpolation" : "LINEAR"
+  }, {
+    "name" : "weight to perceived productivity lookup",
+    "comment" : "weight to perceived productivity lookup",
+    "xValues" : [ 0.0, 0.2, 0.4, 0.6, 0.8, 1.0 ],
+    "yValues" : [ 0.0, 0.1, 0.25, 0.5, 0.9, 1.0 ],
+    "interpolation" : "LINEAR"
+  }, {
+    "name" : "willingness to change workforce lookup",
+    "comment" : "willingness to change workforce lookup",
+    "xValues" : [ 0.0, 3.0, 6.0, 9.0, 12.0, 15.0, 18.0, 21.0 ],
+    "yValues" : [ 0.0, 0.0, 0.0, 0.1, 0.3, 0.7, 0.9, 1.0 ],
+    "interpolation" : "LINEAR"
+  } ],
+  "views" : [ {
+    "name" : "Title Page"
+  }, {
+    "name" : "progress",
+    "elements" : [ {
+      "name" : "Cumulative Complex Progress",
+      "type" : "stock",
+      "x" : 370.0,
+      "y" : 49.0
+    }, {
+      "name" : "apparent progress rate",
+      "type" : "aux",
+      "x" : 101.0,
+      "y" : 231.0
+    }, {
+      "name" : "fraction satisfactory",
+      "type" : "aux",
+      "x" : 454.0,
+      "y" : 157.0
+    }, {
+      "name" : "effect of schedule pressure on gross productivity",
+      "type" : "aux",
+      "x" : 138.0,
+      "y" : 529.0
+    }, {
+      "name" : "gross productivity",
+      "type" : "aux",
+      "x" : 233.0,
+      "y" : 366.0
+    }, {
+      "name" : "workforce",
+      "type" : "aux",
+      "x" : 149.0,
+      "y" : 393.0
+    }, {
+      "name" : "effect of experience on fraction satisfactory",
+      "type" : "aux",
+      "x" : 385.0,
+      "y" : 231.0
+    }, {
+      "name" : "effect of schedule pressure on fraction satisfactory",
+      "type" : "aux",
+      "x" : 710.0,
+      "y" : 351.0
+    }, {
+      "name" : "normal fraction satisfactory",
+      "type" : "aux",
+      "x" : 702.0,
+      "y" : 214.0
+    }, {
+      "name" : "_0",
+      "type" : "flow",
+      "x" : 195.0,
+      "y" : 53.0
+    }, {
+      "name" : "real progress rate",
+      "type" : "aux",
+      "x" : 195.0,
+      "y" : 91.0
+    }, {
+      "name" : "fraction of workforce experienced",
+      "type" : "aux",
+      "x" : 481.0,
+      "y" : 362.0
+    }, {
+      "name" : "fraction of workforce experienced lookup",
+      "type" : "lookup",
+      "x" : 335.0,
+      "y" : 314.0
+    }, {
+      "name" : "effect of schedule pressure on fraction satisfactory lookup",
+      "type" : "lookup",
+      "x" : 881.0,
+      "y" : 442.0
+    }, {
+      "name" : "Scheduled Completion Date",
+      "type" : "stock",
+      "x" : 606.0,
+      "y" : 521.0
+    }, {
+      "name" : "fraction completed",
+      "type" : "aux",
+      "x" : 691.0,
+      "y" : 147.0
+    }, {
+      "name" : "normal fraction satisfactory lookup",
+      "type" : "lookup",
+      "x" : 723.0,
+      "y" : 281.0
+    }, {
+      "name" : "initial scheduled completion date",
+      "type" : "aux",
+      "x" : 550.0,
+      "y" : 426.0
+    }, {
+      "name" : "indicated completion date",
+      "type" : "aux",
+      "x" : 527.0,
+      "y" : 705.0
+    }, {
+      "name" : "schedule adjustment time",
+      "type" : "aux",
+      "x" : 350.0,
+      "y" : 613.0
+    }, {
+      "name" : "Time",
+      "type" : "aux",
+      "x" : 633.0,
+      "y" : 662.0
+    }, {
+      "name" : "time perceived required",
+      "type" : "aux",
+      "x" : 1097.0,
+      "y" : 411.0
+    }, {
+      "name" : "effect of schedule pressure on gross productivity lookup",
+      "type" : "lookup",
+      "x" : 122.0,
+      "y" : 658.0
+    }, {
+      "name" : "final project definition",
+      "type" : "aux",
+      "x" : 957.0,
+      "y" : 277.0
+    }, {
+      "name" : "project definition lookup",
+      "type" : "lookup",
+      "x" : 1002.0,
+      "y" : 207.0
+    }, {
+      "name" : "cumulative perceived progress",
+      "type" : "aux",
+      "x" : 703.0,
+      "y" : 49.0
+    }, {
+      "name" : "Undiscovered Rework",
+      "type" : "stock",
+      "x" : 597.0,
+      "y" : -26.0
+    }, {
+      "name" : "_0",
+      "type" : "flow",
+      "x" : 417.0,
+      "y" : 518.0
+    }, {
+      "name" : "net additions to schedule",
+      "type" : "aux",
+      "x" : 417.0,
+      "y" : 556.0
+    }, {
+      "name" : "effort perceived remaining",
+      "type" : "aux",
+      "x" : 1034.0,
+      "y" : 51.0
+    }, {
+      "name" : "current project definition",
+      "type" : "aux",
+      "x" : 969.0,
+      "y" : 153.0
+    }, {
+      "name" : "Perceived Productivity",
+      "type" : "stock",
+      "x" : 893.0,
+      "y" : -21.0
+    }, {
+      "name" : "workforce sought",
+      "type" : "aux",
+      "x" : 969.0,
+      "y" : 331.0
+    }, {
+      "name" : "time remaining",
+      "type" : "aux",
+      "x" : 574.0,
+      "y" : 607.0
+    }, {
+      "name" : "fraction perceived complete",
+      "type" : "aux",
+      "x" : 822.0,
+      "y" : 99.0
+    } ],
+    "connectors" : [ {
+      "from" : "apparent progress rate",
+      "to" : "18"
+    }, {
+      "from" : "effect of schedule pressure on gross productivity",
+      "to" : "apparent progress rate"
+    }, {
+      "from" : "gross productivity",
+      "to" : "apparent progress rate"
+    }, {
+      "from" : "workforce",
+      "to" : "apparent progress rate"
+    }, {
+      "from" : "17",
+      "to" : "Cumulative Complex Progress"
+    }, {
+      "from" : "17",
+      "to" : "14"
+    }, {
+      "from" : "fraction of workforce experienced",
+      "to" : "effect of experience on fraction satisfactory"
+    }, {
+      "from" : "fraction of workforce experienced lookup",
+      "to" : "effect of experience on fraction satisfactory"
+    }, {
+      "from" : "effect of schedule pressure on fraction satisfactory lookup",
+      "to" : "effect of schedule pressure on fraction satisfactory"
+    }, {
+      "from" : "34",
+      "to" : "effect of schedule pressure on fraction satisfactory"
+    }, {
+      "from" : "Scheduled Completion Date",
+      "to" : "effect of schedule pressure on fraction satisfactory"
+    }, {
+      "from" : "fraction completed",
+      "to" : "normal fraction satisfactory"
+    }, {
+      "from" : "normal fraction satisfactory lookup",
+      "to" : "normal fraction satisfactory"
+    }, {
+      "from" : "initial scheduled completion date",
+      "to" : "Scheduled Completion Date"
+    }, {
+      "from" : "indicated completion date",
+      "to" : "60"
+    }, {
+      "from" : "schedule adjustment time",
+      "to" : "60"
+    }, {
+      "from" : "Scheduled Completion Date",
+      "to" : "59"
+    }, {
+      "from" : "Time",
+      "to" : "indicated completion date"
+    }, {
+      "from" : "time perceived required",
+      "to" : "indicated completion date"
+    }, {
+      "from" : "effect of schedule pressure on gross productivity lookup",
+      "to" : "effect of schedule pressure on gross productivity"
+    }, {
+      "from" : "indicated completion date",
+      "to" : "effect of schedule pressure on gross productivity"
+    }, {
+      "from" : "Scheduled Completion Date",
+      "to" : "effect of schedule pressure on gross productivity"
+    }, {
+      "from" : "Cumulative Complex Progress",
+      "to" : "fraction completed"
+    }, {
+      "from" : "final project definition",
+      "to" : "fraction completed"
+    }, {
+      "from" : "project definition lookup",
+      "to" : "final project definition"
+    }, {
+      "from" : "Cumulative Complex Progress",
+      "to" : "cumulative perceived progress"
+    }, {
+      "from" : "Undiscovered Rework",
+      "to" : "cumulative perceived progress"
+    }, {
+      "from" : "59",
+      "to" : "Scheduled Completion Date"
+    }, {
+      "from" : "59",
+      "to" : "56"
+    }, {
+      "from" : "cumulative perceived progress",
+      "to" : "effort perceived remaining"
+    }, {
+      "from" : "current project definition",
+      "to" : "effort perceived remaining"
+    }, {
+      "from" : "Perceived Productivity",
+      "to" : "effort perceived remaining"
+    }, {
+      "from" : "fraction completed",
+      "to" : "current project definition"
+    }, {
+      "from" : "project definition lookup",
+      "to" : "current project definition"
+    }, {
+      "from" : "fraction satisfactory",
+      "to" : "real progress rate"
+    }, {
+      "from" : "effect of experience on fraction satisfactory",
+      "to" : "fraction satisfactory"
+    }, {
+      "from" : "effect of schedule pressure on fraction satisfactory",
+      "to" : "fraction satisfactory"
+    }, {
+      "from" : "normal fraction satisfactory",
+      "to" : "fraction satisfactory"
+    }, {
+      "from" : "effort perceived remaining",
+      "to" : "time perceived required"
+    }, {
+      "from" : "workforce sought",
+      "to" : "time perceived required"
+    }, {
+      "from" : "Scheduled Completion Date",
+      "to" : "time remaining"
+    }, {
+      "from" : "Time",
+      "to" : "time remaining"
+    }, {
+      "from" : "cumulative perceived progress",
+      "to" : "fraction perceived complete"
+    }, {
+      "from" : "current project definition",
+      "to" : "fraction perceived complete"
+    } ],
+    "flowRoutes" : [ {
+      "flowName" : "_0",
+      "points" : [ [ 195.0, 53.0 ] ]
+    }, {
+      "flowName" : "_0",
+      "points" : [ [ 417.0, 518.0 ] ]
+    } ]
+  }, {
+    "name" : "workforce",
+    "elements" : [ {
+      "name" : "Experienced Workforce",
+      "type" : "stock",
+      "x" : 519.0,
+      "y" : 248.0
+    }, {
+      "name" : "initial experienced workforce",
+      "type" : "aux",
+      "x" : 391.0,
+      "y" : 161.0
+    }, {
+      "name" : "assimilation time",
+      "type" : "aux",
+      "x" : 140.0,
+      "y" : 320.0
+    }, {
+      "name" : "New Workforce",
+      "type" : "stock",
+      "x" : 452.0,
+      "y" : 441.0
+    }, {
+      "name" : "initial new workforce",
+      "type" : "aux",
+      "x" : 243.0,
+      "y" : 386.0
+    }, {
+      "name" : "workforce",
+      "type" : "aux",
+      "x" : 738.0,
+      "y" : 354.0
+    }, {
+      "name" : "workforce adjustment time",
+      "type" : "aux",
+      "x" : 203.0,
+      "y" : 552.0
+    }, {
+      "name" : "workforce sought",
+      "type" : "aux",
+      "x" : 563.0,
+      "y" : 588.0
+    }, {
+      "name" : "indicated workforce",
+      "type" : "aux",
+      "x" : 707.0,
+      "y" : 664.0
+    }, {
+      "name" : "willingness to change workforce",
+      "type" : "aux",
+      "x" : 396.0,
+      "y" : 646.0
+    }, {
+      "name" : "effort perceived remaining",
+      "type" : "aux",
+      "x" : 840.0,
+      "y" : 725.0
+    }, {
+      "name" : "time remaining",
+      "type" : "aux",
+      "x" : 556.0,
+      "y" : 726.0
+    }, {
+      "name" : "willingness to change workforce lookup",
+      "type" : "lookup",
+      "x" : 246.0,
+      "y" : 720.0
+    }, {
+      "name" : "fraction of workforce experienced",
+      "type" : "aux",
+      "x" : 896.0,
+      "y" : 252.0
+    }, {
+      "name" : "gross productivity",
+      "type" : "aux",
+      "x" : 1036.0,
+      "y" : 464.0
+    }, {
+      "name" : "effect of experience on gross productivity",
+      "type" : "aux",
+      "x" : 984.0,
+      "y" : 386.0
+    }, {
+      "name" : "normal gross productivity",
+      "type" : "aux",
+      "x" : 1044.0,
+      "y" : 528.0
+    }, {
+      "name" : "effect of experience on gross productivity lookup",
+      "type" : "lookup",
+      "x" : 1064.0,
+      "y" : 312.0
+    }, {
+      "name" : "fraction of workforce experienced lookup",
+      "type" : "lookup",
+      "x" : 942.0,
+      "y" : 264.0
+    }, {
+      "name" : "Cumulative Effort",
+      "type" : "stock",
+      "x" : 807.0,
+      "y" : 488.0
+    }, {
+      "name" : "effect of schedule pressure on gross productivity",
+      "type" : "aux",
+      "x" : 796.0,
+      "y" : 582.0
+    }, {
+      "name" : "cost",
+      "type" : "aux",
+      "x" : 975.0,
+      "y" : 598.0
+    }, {
+      "name" : "cost per worker month",
+      "type" : "aux",
+      "x" : 971.0,
+      "y" : 662.0
+    }, {
+      "name" : "_0",
+      "type" : "flow",
+      "x" : 342.0,
+      "y" : 250.0
+    }, {
+      "name" : "workforce assimilation rate",
+      "type" : "aux",
+      "x" : 342.0,
+      "y" : 282.0
+    }, {
+      "name" : "_0",
+      "type" : "flow",
+      "x" : 286.0,
+      "y" : 442.0
+    }, {
+      "name" : "hiring rate",
+      "type" : "aux",
+      "x" : 286.0,
+      "y" : 480.0
+    } ],
+    "connectors" : [ {
+      "from" : "initial experienced workforce",
+      "to" : "Experienced Workforce"
+    }, {
+      "from" : "assimilation time",
+      "to" : "57"
+    }, {
+      "from" : "New Workforce",
+      "to" : "57"
+    }, {
+      "from" : "initial new workforce",
+      "to" : "New Workforce"
+    }, {
+      "from" : "workforce",
+      "to" : "59"
+    }, {
+      "from" : "workforce adjustment time",
+      "to" : "59"
+    }, {
+      "from" : "workforce sought",
+      "to" : "59"
+    }, {
+      "from" : "Experienced Workforce",
+      "to" : "workforce"
+    }, {
+      "from" : "New Workforce",
+      "to" : "workforce"
+    }, {
+      "from" : "indicated workforce",
+      "to" : "workforce sought"
+    }, {
+      "from" : "willingness to change workforce",
+      "to" : "workforce sought"
+    }, {
+      "from" : "workforce",
+      "to" : "workforce sought"
+    }, {
+      "from" : "effort perceived remaining",
+      "to" : "indicated workforce"
+    }, {
+      "from" : "time remaining",
+      "to" : "indicated workforce"
+    }, {
+      "from" : "time remaining",
+      "to" : "willingness to change workforce"
+    }, {
+      "from" : "willingness to change workforce lookup",
+      "to" : "willingness to change workforce"
+    }, {
+      "from" : "Experienced Workforce",
+      "to" : "fraction of workforce experienced"
+    }, {
+      "from" : "workforce",
+      "to" : "fraction of workforce experienced"
+    }, {
+      "from" : "effect of experience on gross productivity",
+      "to" : "gross productivity"
+    }, {
+      "from" : "normal gross productivity",
+      "to" : "gross productivity"
+    }, {
+      "from" : "effect of experience on gross productivity lookup",
+      "to" : "effect of experience on gross productivity"
+    }, {
+      "from" : "fraction of workforce experienced",
+      "to" : "effect of experience on gross productivity"
+    }, {
+      "from" : "effect of schedule pressure on gross productivity",
+      "to" : "Cumulative Effort"
+    }, {
+      "from" : "workforce",
+      "to" : "Cumulative Effort"
+    }, {
+      "from" : "cost per worker month",
+      "to" : "cost"
+    }, {
+      "from" : "Cumulative Effort",
+      "to" : "cost"
+    }, {
+      "from" : "56",
+      "to" : "Experienced Workforce"
+    }, {
+      "from" : "56",
+      "to" : "50"
+    }, {
+      "from" : "58",
+      "to" : "New Workforce"
+    }, {
+      "from" : "58",
+      "to" : "53"
+    } ],
+    "flowRoutes" : [ {
+      "flowName" : "_0",
+      "points" : [ [ 342.0, 250.0 ] ]
+    }, {
+      "flowName" : "_0",
+      "points" : [ [ 286.0, 442.0 ] ]
+    } ]
+  }, {
+    "name" : "rework",
+    "elements" : [ {
+      "name" : "Undiscovered Rework",
+      "type" : "stock",
+      "x" : 669.0,
+      "y" : 325.0
+    }, {
+      "name" : "time to detect rework",
+      "type" : "aux",
+      "x" : 884.0,
+      "y" : 467.0
+    }, {
+      "name" : "apparent progress rate",
+      "type" : "aux",
+      "x" : 338.0,
+      "y" : 452.0
+    }, {
+      "name" : "fraction satisfactory",
+      "type" : "aux",
+      "x" : 561.0,
+      "y" : 455.0
+    }, {
+      "name" : "fraction perceived complete",
+      "type" : "aux",
+      "x" : 766.0,
+      "y" : 556.0
+    }, {
+      "name" : "time to detect rework lookup",
+      "type" : "lookup",
+      "x" : 1065.0,
+      "y" : 547.0
+    }, {
+      "name" : "_0",
+      "type" : "flow",
+      "x" : 490.0,
+      "y" : 331.0
+    }, {
+      "name" : "generation of undiscovered rework",
+      "type" : "aux",
+      "x" : 490.0,
+      "y" : 364.0
+    }, {
+      "name" : "_0",
+      "type" : "flow",
+      "x" : 866.0,
+      "y" : 332.0
+    }, {
+      "name" : "detection of undiscovered rework",
+      "type" : "aux",
+      "x" : 866.0,
+      "y" : 365.0
+    } ],
+    "connectors" : [ {
+      "from" : "time to detect rework",
+      "to" : "22"
+    }, {
+      "from" : "Undiscovered Rework",
+      "to" : "21"
+    }, {
+      "from" : "apparent progress rate",
+      "to" : "20"
+    }, {
+      "from" : "fraction satisfactory",
+      "to" : "20"
+    }, {
+      "from" : "fraction perceived complete",
+      "to" : "time to detect rework"
+    }, {
+      "from" : "time to detect rework lookup",
+      "to" : "time to detect rework"
+    }, {
+      "from" : "19",
+      "to" : "Undiscovered Rework"
+    }, {
+      "from" : "19",
+      "to" : "13"
+    }, {
+      "from" : "21",
+      "to" : "16"
+    }, {
+      "from" : "21",
+      "to" : "Undiscovered Rework"
+    } ],
+    "flowRoutes" : [ {
+      "flowName" : "_0",
+      "points" : [ [ 490.0, 331.0 ] ]
+    }, {
+      "flowName" : "_0",
+      "points" : [ [ 866.0, 332.0 ] ]
+    } ]
+  }, {
+    "name" : "productivity",
+    "elements" : [ {
+      "name" : "Perceived Productivity",
+      "type" : "stock",
+      "x" : 732.0,
+      "y" : 357.0
+    }, {
+      "name" : "Indicated Productivity",
+      "type" : "aux",
+      "x" : 471.0,
+      "y" : 355.0
+    }, {
+      "name" : "time to perceive productivity",
+      "type" : "aux",
+      "x" : 707.0,
+      "y" : 457.0
+    }, {
+      "name" : "normal gross productivity",
+      "type" : "aux",
+      "x" : 215.0,
+      "y" : 430.0
+    }, {
+      "name" : "real productivity",
+      "type" : "aux",
+      "x" : 407.0,
+      "y" : 489.0
+    }, {
+      "name" : "weight to real productivity",
+      "type" : "aux",
+      "x" : 557.0,
+      "y" : 541.0
+    }, {
+      "name" : "fraction perceived complete",
+      "type" : "aux",
+      "x" : 581.0,
+      "y" : 622.0
+    }, {
+      "name" : "weight to perceived productivity lookup",
+      "type" : "lookup",
+      "x" : 855.0,
+      "y" : 538.0
+    }, {
+      "name" : "fraction satisfactory",
+      "type" : "aux",
+      "x" : 345.0,
+      "y" : 622.0
+    } ],
+    "connectors" : [ {
+      "from" : "Indicated Productivity",
+      "to" : "Perceived Productivity"
+    }, {
+      "from" : "time to perceive productivity",
+      "to" : "Perceived Productivity"
+    }, {
+      "from" : "normal gross productivity",
+      "to" : "Indicated Productivity"
+    }, {
+      "from" : "real productivity",
+      "to" : "Indicated Productivity"
+    }, {
+      "from" : "weight to real productivity",
+      "to" : "Indicated Productivity"
+    }, {
+      "from" : "fraction perceived complete",
+      "to" : "weight to real productivity"
+    }, {
+      "from" : "weight to perceived productivity lookup",
+      "to" : "weight to real productivity"
+    }, {
+      "from" : "fraction satisfactory",
+      "to" : "real productivity"
+    }, {
+      "from" : "normal gross productivity",
+      "to" : "real productivity"
+    } ]
+  } ],
+  "defaultSimulation" : {
+    "timeStep" : "Month",
+    "duration" : 100.0,
+    "durationUnit" : "Month",
+    "dt" : 0.125
+  },
+  "metadata" : {
+    "author" : "Ventana Systems",
+    "source" : "Vensim Sample Models",
+    "license" : "MIT"
+  }
+}

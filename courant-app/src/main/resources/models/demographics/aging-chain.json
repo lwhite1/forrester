@@ -1,536 +1,424 @@
 {
-  "name": "Aging",
-  "stocks": [
-    {
-      "name": "adults",
-      "comment": "adults",
-      "initialValue": 9000000.0,
-      "unit": "personen"
-    },
-    {
-      "name": "children",
-      "comment": "children",
-      "initialValue": 4000000.0,
-      "unit": "personen"
-    },
-    {
-      "name": "retirees",
-      "comment": "retirees",
-      "initialValue": 3000000.0,
-      "unit": "personen"
-    }
-  ],
-  "flows": [
-    {
-      "name": "adults net flow",
-      "comment": "Net flow for adults",
-      "equation": "maturing-retiring",
-      "timeUnit": "Year",
-      "sink": "adults"
-    },
-    {
-      "name": "children net flow",
-      "comment": "Net flow for children",
-      "equation": "births-maturing",
-      "timeUnit": "Year",
-      "sink": "children"
-    },
-    {
-      "name": "retirees net flow",
-      "comment": "Net flow for retirees",
-      "equation": "retiring-deaths",
-      "timeUnit": "Year",
-      "sink": "retirees"
-    }
-  ],
-  "variables": [
-    {
-      "name": "grey pressure",
-      "comment": "grey pressure",
-      "equation": "retirees/(adults+children)",
-      "unit": "Dmnl"
-    },
-    {
-      "name": "total population",
-      "comment": "total population",
-      "equation": "adults+children+retirees",
-      "unit": ""
-    },
-    {
-      "name": "inactive population",
-      "comment": "inactive population",
-      "equation": "children + retirees + adults_not_on_labour_market",
-      "unit": "personen"
-    },
-    {
-      "name": "births",
-      "comment": "births",
-      "equation": "average_birth_rate_per_adult*adults",
-      "unit": "personen/Year"
-    },
-    {
-      "name": "average retiree period",
-      "comment": "average retiree period",
-      "equation": "LOOKUP(average_retiree_period_lookup, TIME)",
-      "unit": "Year"
-    },
-    {
-      "name": "burden per active adult",
-      "comment": "burden per active adult",
-      "equation": "inactive_population/adults_on_the_labour_market",
-      "unit": "Dmnl"
-    },
-    {
-      "name": "retiring",
-      "comment": "retiring",
-      "equation": "adults/average_adult_period",
-      "unit": "personen/Year"
-    },
-    {
-      "name": "maturing",
-      "comment": "maturing",
-      "equation": "children/average_childhood_period",
-      "unit": "personen/Year"
-    },
-    {
-      "name": "deaths",
-      "comment": "deaths",
-      "equation": "retirees/average_retiree_period",
-      "unit": "personen/Year"
-    },
-    {
-      "name": "adults not on labour market",
-      "comment": "adults not on labour market",
-      "equation": "adults*(1-average_adult_participation_ratio)",
-      "unit": ""
-    },
-    {
-      "name": "adults on the labour market",
-      "comment": "adults on the labour market",
-      "equation": "adults*average_adult_participation_ratio",
-      "unit": "personen"
-    },
-    {
-      "name": "average birth rate per adult",
-      "equation": "0.02",
-      "comment": "average birth rate per adult",
-      "unit": "personen/personen/Year"
-    },
-    {
-      "name": "average childhood period",
-      "equation": "22",
-      "comment": "average childhood period",
-      "unit": "Year"
-    },
-    {
-      "name": "average adult participation ratio",
-      "equation": "0.5",
-      "comment": "average adult participation ratio",
-      "unit": "Dmnl"
-    },
-    {
-      "name": "average adult period",
-      "equation": "40",
-      "comment": "average adult period",
-      "unit": "Year"
-    },
-    {
-      "name": "initial number of retirees",
-      "equation": "3000000",
-      "comment": "initial number of retirees",
-      "unit": "personen"
-    },
-    {
-      "name": "initial number of children",
-      "equation": "4000000",
-      "comment": "initial number of children",
-      "unit": "personen"
-    },
-    {
-      "name": "initial number of adults",
-      "equation": "9000000",
-      "comment": "initial number of adults",
-      "unit": "personen"
-    }
-  ],
-  "lookupTables": [
-    {
-      "name": "average retiree period lookup",
-      "xValues": [
-        2010.0,
-        2020.0,
-        2030.0,
-        2038.9,
-        2053.76,
-        2072.75,
-        2087.89,
-        2100.0
-      ],
-      "yValues": [
-        20.0,
-        21.0,
-        22.0,
-        22.6535,
-        23.5307,
-        24.2105,
-        24.693,
-        25.0
-      ],
-      "interpolation": "LINEAR"
-    }
-  ],
-  "views": [
-    {
-      "name": "View 1",
-      "elements": [
-        {
-          "name": "children",
-          "type": "stock",
-          "x": 214.0,
-          "y": 196.0
-        },
-        {
-          "name": "adults",
-          "type": "stock",
-          "x": 450.0,
-          "y": 197.0
-        },
-        {
-          "name": "retirees",
-          "type": "stock",
-          "x": 700.0,
-          "y": 196.0
-        },
-        {
-          "name": "_48",
-          "type": "flow",
-          "x": 119.0,
-          "y": 194.0
-        },
-        {
-          "name": "births",
-          "type": "aux",
-          "x": 119.0,
-          "y": 213.0
-        },
-        {
-          "name": "_300",
-          "type": "flow",
-          "x": 333.0,
-          "y": 195.0
-        },
-        {
-          "name": "maturing",
-          "type": "aux",
-          "x": 333.0,
-          "y": 214.0
-        },
-        {
-          "name": "_236",
-          "type": "flow",
-          "x": 570.0,
-          "y": 195.0
-        },
-        {
-          "name": "retiring",
-          "type": "aux",
-          "x": 570.0,
-          "y": 215.0
-        },
-        {
-          "name": "average adult participation ratio",
-          "type": "aux",
-          "x": 461.0,
-          "y": 322.0
-        },
-        {
-          "name": "adults on the labour market",
-          "type": "aux",
-          "x": 326.0,
-          "y": 322.0
-        },
-        {
-          "name": "average birth rate per adult",
-          "type": "aux",
-          "x": 118.0,
-          "y": 275.0
-        },
-        {
-          "name": "initial number of children",
-          "type": "aux",
-          "x": 254.0,
-          "y": 244.0
-        },
-        {
-          "name": "initial number of adults",
-          "type": "aux",
-          "x": 450.0,
-          "y": 241.0
-        },
-        {
-          "name": "initial number of retirees",
-          "type": "aux",
-          "x": 759.0,
-          "y": 244.0
-        },
-        {
-          "name": "_48",
-          "type": "flow",
-          "x": 843.0,
-          "y": 196.0
-        },
-        {
-          "name": "deaths",
-          "type": "aux",
-          "x": 843.0,
-          "y": 215.0
-        },
-        {
-          "name": "average childhood period",
-          "type": "aux",
-          "x": 332.0,
-          "y": 101.0
-        },
-        {
-          "name": "average adult period",
-          "type": "aux",
-          "x": 569.0,
-          "y": 120.0
-        },
-        {
-          "name": "average retiree period",
-          "type": "aux",
-          "x": 843.0,
-          "y": 116.0
-        },
-        {
-          "name": "adults not on labour market",
-          "type": "aux",
-          "x": 590.0,
-          "y": 320.0
-        },
-        {
-          "name": "inactive population",
-          "type": "aux",
-          "x": 458.0,
-          "y": 438.0
-        },
-        {
-          "name": "burden per active adult",
-          "type": "aux",
-          "x": 412.0,
-          "y": 393.0
-        },
-        {
-          "name": "grey pressure",
-          "type": "aux",
-          "x": 608.0,
-          "y": 276.0
-        },
-        {
-          "name": "total population",
-          "type": "aux",
-          "x": 557.0,
-          "y": 42.0
-        },
-        {
-          "name": "Time",
-          "type": "aux",
-          "x": 842.0,
-          "y": 55.0
-        }
-      ],
-      "connectors": [
-        {
-          "from": "7",
-          "to": "children"
-        },
-        {
-          "from": "7",
-          "to": "4"
-        },
-        {
-          "from": "11",
-          "to": "adults"
-        },
-        {
-          "from": "11",
-          "to": "children"
-        },
-        {
-          "from": "15",
-          "to": "retirees"
-        },
-        {
-          "from": "15",
-          "to": "adults"
-        },
-        {
-          "from": "children",
-          "to": "_300"
-        },
-        {
-          "from": "adults",
-          "to": "_236"
-        },
-        {
-          "from": "adults",
-          "to": "_48"
-        },
-        {
-          "from": "average birth rate per adult",
-          "to": "births"
-        },
-        {
-          "from": "30",
-          "to": "27"
-        },
-        {
-          "from": "30",
-          "to": "retirees"
-        },
-        {
-          "from": "average childhood period",
-          "to": "_300"
-        },
-        {
-          "from": "average adult period",
-          "to": "_236"
-        },
-        {
-          "from": "average retiree period",
-          "to": "_48"
-        },
-        {
-          "from": "average adult participation ratio",
-          "to": "adults on the labour market"
-        },
-        {
-          "from": "adults",
-          "to": "adults on the labour market"
-        },
-        {
-          "from": "adults",
-          "to": "adults not on labour market"
-        },
-        {
-          "from": "retirees",
-          "to": "_48"
-        },
-        {
-          "from": "children",
-          "to": "inactive population"
-        },
-        {
-          "from": "adults not on labour market",
-          "to": "inactive population"
-        },
-        {
-          "from": "retirees",
-          "to": "inactive population"
-        },
-        {
-          "from": "average adult participation ratio",
-          "to": "adults not on labour market"
-        },
-        {
-          "from": "inactive population",
-          "to": "burden per active adult"
-        },
-        {
-          "from": "adults on the labour market",
-          "to": "burden per active adult"
-        },
-        {
-          "from": "initial number of retirees",
-          "to": "retirees"
-        },
-        {
-          "from": "adults",
-          "to": "grey pressure"
-        },
-        {
-          "from": "retirees",
-          "to": "grey pressure"
-        },
-        {
-          "from": "initial number of adults",
-          "to": "adults"
-        },
-        {
-          "from": "initial number of children",
-          "to": "children"
-        },
-        {
-          "from": "children",
-          "to": "total population"
-        },
-        {
-          "from": "adults",
-          "to": "total population"
-        },
-        {
-          "from": "retirees",
-          "to": "total population"
-        },
-        {
-          "from": "children",
-          "to": "grey pressure"
-        },
-        {
-          "from": "Time",
-          "to": "average retiree period"
-        }
-      ],
-      "flowRoutes": [
-        {
-          "flowName": "_48",
-          "points": [
-            [
-              119.0,
-              194.0
-            ]
-          ]
-        },
-        {
-          "flowName": "_300",
-          "points": [
-            [
-              333.0,
-              195.0
-            ]
-          ]
-        },
-        {
-          "flowName": "_236",
-          "points": [
-            [
-              570.0,
-              195.0
-            ]
-          ]
-        },
-        {
-          "flowName": "_48",
-          "points": [
-            [
-              843.0,
-              196.0
-            ]
-          ]
-        }
-      ]
-    }
-  ],
-  "defaultSimulation": {
-    "timeStep": "Year",
-    "duration": 90.0,
-    "durationUnit": "Year"
+  "name" : "0604Aging",
+  "stocks" : [ {
+    "name" : "adults",
+    "comment" : "adults",
+    "initialValue" : 9000000.0,
+    "unit" : "personen"
+  }, {
+    "name" : "children",
+    "comment" : "children",
+    "initialValue" : 4000000.0,
+    "unit" : "personen"
+  }, {
+    "name" : "retirees",
+    "comment" : "retirees",
+    "initialValue" : 3000000.0,
+    "unit" : "personen"
+  } ],
+  "flows" : [ {
+    "name" : "adults inflow 1",
+    "equation" : "maturing",
+    "timeUnit" : "Year",
+    "sink" : "adults"
+  }, {
+    "name" : "adults outflow 2",
+    "equation" : "retiring",
+    "timeUnit" : "Year",
+    "source" : "adults"
+  }, {
+    "name" : "children inflow 1",
+    "equation" : "births",
+    "timeUnit" : "Year",
+    "sink" : "children"
+  }, {
+    "name" : "children outflow 2",
+    "equation" : "maturing",
+    "timeUnit" : "Year",
+    "source" : "children"
+  }, {
+    "name" : "retirees inflow 1",
+    "equation" : "retiring",
+    "timeUnit" : "Year",
+    "sink" : "retirees"
+  }, {
+    "name" : "retirees outflow 2",
+    "equation" : "deaths",
+    "timeUnit" : "Year",
+    "source" : "retirees"
+  } ],
+  "variables" : [ {
+    "name" : "TIME_STEP",
+    "equation" : "0.03125",
+    "unit" : "Year"
+  }, {
+    "name" : "INITIAL_TIME",
+    "equation" : "2010",
+    "unit" : "Year"
+  }, {
+    "name" : "FINAL_TIME",
+    "equation" : "2100",
+    "unit" : "Year"
+  }, {
+    "name" : "grey pressure",
+    "comment" : "grey pressure",
+    "equation" : "retirees/(adults+children)",
+    "unit" : "Dmnl"
+  }, {
+    "name" : "total population",
+    "comment" : "total population",
+    "equation" : "adults+children+retirees",
+    "unit" : ""
+  }, {
+    "name" : "inactive population",
+    "comment" : "inactive population",
+    "equation" : "children + retirees + adults_not_on_labour_market",
+    "unit" : "personen"
+  }, {
+    "name" : "births",
+    "comment" : "births",
+    "equation" : "average_birth_rate_per_adult*adults",
+    "unit" : "personen/Year"
+  }, {
+    "name" : "average birth rate per adult",
+    "comment" : "average birth rate per adult",
+    "equation" : "0.02",
+    "unit" : "personen/personen/Year"
+  }, {
+    "name" : "average childhood period",
+    "comment" : "average childhood period",
+    "equation" : "22",
+    "unit" : "Year"
+  }, {
+    "name" : "average adult participation ratio",
+    "comment" : "average adult participation ratio",
+    "equation" : "0.5",
+    "unit" : "Dmnl"
+  }, {
+    "name" : "average retiree period",
+    "comment" : "average retiree period",
+    "equation" : "LOOKUP(average_retiree_period_lookup, TIME)",
+    "unit" : "Year"
+  }, {
+    "name" : "average adult period",
+    "comment" : "average adult period",
+    "equation" : "40",
+    "unit" : "Year"
+  }, {
+    "name" : "initial number of retirees",
+    "comment" : "initial number of retirees",
+    "equation" : "3000000",
+    "unit" : "personen"
+  }, {
+    "name" : "initial number of children",
+    "comment" : "initial number of children",
+    "equation" : "4000000",
+    "unit" : "personen"
+  }, {
+    "name" : "initial number of adults",
+    "comment" : "initial number of adults",
+    "equation" : "9000000",
+    "unit" : "personen"
+  }, {
+    "name" : "burden per active adult",
+    "comment" : "burden per active adult",
+    "equation" : "inactive_population/adults_on_the_labour_market",
+    "unit" : "Dmnl"
+  }, {
+    "name" : "retiring",
+    "comment" : "retiring",
+    "equation" : "adults/average_adult_period",
+    "unit" : "personen/Year"
+  }, {
+    "name" : "maturing",
+    "comment" : "maturing",
+    "equation" : "children/average_childhood_period",
+    "unit" : "personen/Year"
+  }, {
+    "name" : "deaths",
+    "comment" : "deaths",
+    "equation" : "retirees/average_retiree_period",
+    "unit" : "personen/Year"
+  }, {
+    "name" : "adults not on labour market",
+    "comment" : "adults not on labour market",
+    "equation" : "adults*(1-average_adult_participation_ratio)",
+    "unit" : ""
+  }, {
+    "name" : "adults on the labour market",
+    "comment" : "adults on the labour market",
+    "equation" : "adults*average_adult_participation_ratio",
+    "unit" : "personen"
+  } ],
+  "lookupTables" : [ {
+    "name" : "average_retiree_period_lookup",
+    "xValues" : [ 2010.0, 2020.0, 2030.0, 2038.9, 2053.76, 2072.75, 2087.89, 2100.0 ],
+    "yValues" : [ 20.0, 21.0, 22.0, 22.6535, 23.5307, 24.2105, 24.693, 25.0 ],
+    "interpolation" : "LINEAR"
+  } ],
+  "views" : [ {
+    "name" : "View 1",
+    "elements" : [ {
+      "name" : "children",
+      "type" : "stock",
+      "x" : 214.0,
+      "y" : 196.0
+    }, {
+      "name" : "adults",
+      "type" : "stock",
+      "x" : 450.0,
+      "y" : 197.0
+    }, {
+      "name" : "retirees",
+      "type" : "stock",
+      "x" : 700.0,
+      "y" : 196.0
+    }, {
+      "name" : "_48",
+      "type" : "flow",
+      "x" : 119.0,
+      "y" : 194.0
+    }, {
+      "name" : "births",
+      "type" : "aux",
+      "x" : 119.0,
+      "y" : 213.0
+    }, {
+      "name" : "_300",
+      "type" : "flow",
+      "x" : 333.0,
+      "y" : 195.0
+    }, {
+      "name" : "maturing",
+      "type" : "aux",
+      "x" : 333.0,
+      "y" : 214.0
+    }, {
+      "name" : "_236",
+      "type" : "flow",
+      "x" : 570.0,
+      "y" : 195.0
+    }, {
+      "name" : "retiring",
+      "type" : "aux",
+      "x" : 570.0,
+      "y" : 215.0
+    }, {
+      "name" : "average adult participation ratio",
+      "type" : "aux",
+      "x" : 461.0,
+      "y" : 322.0
+    }, {
+      "name" : "adults on the labour market",
+      "type" : "aux",
+      "x" : 326.0,
+      "y" : 322.0
+    }, {
+      "name" : "average birth rate per adult",
+      "type" : "aux",
+      "x" : 118.0,
+      "y" : 275.0
+    }, {
+      "name" : "initial number of children",
+      "type" : "aux",
+      "x" : 254.0,
+      "y" : 244.0
+    }, {
+      "name" : "initial number of adults",
+      "type" : "aux",
+      "x" : 450.0,
+      "y" : 241.0
+    }, {
+      "name" : "initial number of retirees",
+      "type" : "aux",
+      "x" : 759.0,
+      "y" : 244.0
+    }, {
+      "name" : "_48",
+      "type" : "flow",
+      "x" : 843.0,
+      "y" : 196.0
+    }, {
+      "name" : "deaths",
+      "type" : "aux",
+      "x" : 843.0,
+      "y" : 215.0
+    }, {
+      "name" : "average childhood period",
+      "type" : "aux",
+      "x" : 332.0,
+      "y" : 101.0
+    }, {
+      "name" : "average adult period",
+      "type" : "aux",
+      "x" : 569.0,
+      "y" : 120.0
+    }, {
+      "name" : "average retiree period",
+      "type" : "aux",
+      "x" : 843.0,
+      "y" : 116.0
+    }, {
+      "name" : "adults not on labour market",
+      "type" : "aux",
+      "x" : 590.0,
+      "y" : 320.0
+    }, {
+      "name" : "inactive population",
+      "type" : "aux",
+      "x" : 458.0,
+      "y" : 438.0
+    }, {
+      "name" : "burden per active adult",
+      "type" : "aux",
+      "x" : 412.0,
+      "y" : 393.0
+    }, {
+      "name" : "grey pressure",
+      "type" : "aux",
+      "x" : 608.0,
+      "y" : 276.0
+    }, {
+      "name" : "total population",
+      "type" : "aux",
+      "x" : 557.0,
+      "y" : 42.0
+    }, {
+      "name" : "Time",
+      "type" : "aux",
+      "x" : 842.0,
+      "y" : 55.0
+    } ],
+    "connectors" : [ {
+      "from" : "7",
+      "to" : "children"
+    }, {
+      "from" : "7",
+      "to" : "4"
+    }, {
+      "from" : "11",
+      "to" : "adults"
+    }, {
+      "from" : "11",
+      "to" : "children"
+    }, {
+      "from" : "15",
+      "to" : "retirees"
+    }, {
+      "from" : "15",
+      "to" : "adults"
+    }, {
+      "from" : "children",
+      "to" : "_300"
+    }, {
+      "from" : "adults",
+      "to" : "_236"
+    }, {
+      "from" : "adults",
+      "to" : "_48"
+    }, {
+      "from" : "average birth rate per adult",
+      "to" : "births"
+    }, {
+      "from" : "30",
+      "to" : "27"
+    }, {
+      "from" : "30",
+      "to" : "retirees"
+    }, {
+      "from" : "average childhood period",
+      "to" : "_300"
+    }, {
+      "from" : "average adult period",
+      "to" : "_236"
+    }, {
+      "from" : "average retiree period",
+      "to" : "_48"
+    }, {
+      "from" : "average adult participation ratio",
+      "to" : "adults on the labour market"
+    }, {
+      "from" : "adults",
+      "to" : "adults on the labour market"
+    }, {
+      "from" : "adults",
+      "to" : "adults not on labour market"
+    }, {
+      "from" : "retirees",
+      "to" : "_48"
+    }, {
+      "from" : "children",
+      "to" : "inactive population"
+    }, {
+      "from" : "adults not on labour market",
+      "to" : "inactive population"
+    }, {
+      "from" : "retirees",
+      "to" : "inactive population"
+    }, {
+      "from" : "average adult participation ratio",
+      "to" : "adults not on labour market"
+    }, {
+      "from" : "inactive population",
+      "to" : "burden per active adult"
+    }, {
+      "from" : "adults on the labour market",
+      "to" : "burden per active adult"
+    }, {
+      "from" : "initial number of retirees",
+      "to" : "retirees"
+    }, {
+      "from" : "adults",
+      "to" : "grey pressure"
+    }, {
+      "from" : "retirees",
+      "to" : "grey pressure"
+    }, {
+      "from" : "initial number of adults",
+      "to" : "adults"
+    }, {
+      "from" : "initial number of children",
+      "to" : "children"
+    }, {
+      "from" : "children",
+      "to" : "total population"
+    }, {
+      "from" : "adults",
+      "to" : "total population"
+    }, {
+      "from" : "retirees",
+      "to" : "total population"
+    }, {
+      "from" : "children",
+      "to" : "grey pressure"
+    }, {
+      "from" : "Time",
+      "to" : "average retiree period"
+    } ],
+    "flowRoutes" : [ {
+      "flowName" : "_48",
+      "points" : [ [ 119.0, 194.0 ] ]
+    }, {
+      "flowName" : "_300",
+      "points" : [ [ 333.0, 195.0 ] ]
+    }, {
+      "flowName" : "_236",
+      "points" : [ [ 570.0, 195.0 ] ]
+    }, {
+      "flowName" : "_48",
+      "points" : [ [ 843.0, 196.0 ] ]
+    } ]
+  } ],
+  "defaultSimulation" : {
+    "timeStep" : "Year",
+    "duration" : 90.0,
+    "durationUnit" : "Year",
+    "dt" : 0.03125
   },
-  "metadata": {
-    "license": "CC-BY-NC-SA-4.0",
-    "author": "Dr. Erik Pruyt",
-    "source": "Pruyt, E., 2013. Small System Dynamics Models for Big Issues: Triple Jump towards Real-World Complexity. TU Delft Library. ISBN 978-94-6186-195-5",
-    "url": "https://simulation.tudelft.nl/SD/"
+  "metadata" : {
+    "author" : "Dr. Erik Pruyt",
+    "source" : "Pruyt, E., 2013. Small System Dynamics Models for Big Issues: Triple Jump towards Real-World Complexity. TU Delft Library. ISBN 978-94-6186-195-5",
+    "license" : "CC-BY-NC-SA-4.0",
+    "url" : "https://simulation.tudelft.nl/SD/"
   }
 }

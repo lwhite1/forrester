@@ -1,0 +1,1037 @@
+{
+  "name" : "1415_MineralMetalScarcityI_EN",
+  "stocks" : [ {
+    "name" : "Available Supply of RAM",
+    "comment" : "Available Supply of RAM",
+    "initialValue" : 250000.0,
+    "unit" : "t"
+  }, {
+    "name" : "RAM in Goods",
+    "comment" : "RAM in Goods",
+    "initialValue" : 2000000.0,
+    "unit" : "t"
+  }, {
+    "name" : "Extraction Capaciteit under Construction",
+    "comment" : "Extraction Capaciteit under Construction",
+    "initialValue" : 60000.0,
+    "unit" : "t/Year"
+  }, {
+    "name" : "demand for RAM",
+    "comment" : "demand for RAM",
+    "initialValue" : 100000.0,
+    "unit" : "t/Year"
+  }, {
+    "name" : "Installed Extraction Capacity",
+    "comment" : "Installed Extraction Capacity",
+    "initialValue" : 100000.0,
+    "unit" : "t/Year"
+  }, {
+    "name" : "Cumulatively Extracted RAM",
+    "comment" : "Cumulatively Extracted RAM",
+    "initialValue" : 4000000.0,
+    "unit" : "t"
+  }, {
+    "name" : "Intrinsic Demand",
+    "comment" : "Intrinsic Demand",
+    "initialValue" : 100000.0,
+    "unit" : "t/Year"
+  } ],
+  "flows" : [ {
+    "name" : "Available Supply of RAM inflow 1",
+    "equation" : "processing_of_RAM",
+    "timeUnit" : "Year",
+    "sink" : "Available Supply of RAM"
+  }, {
+    "name" : "Available Supply of RAM outflow 2",
+    "equation" : "use_of_RAM_in_production_of_goods",
+    "timeUnit" : "Year",
+    "source" : "Available Supply of RAM"
+  }, {
+    "name" : "RAM in Goods inflow 1",
+    "equation" : "use_of_RAM_in_production_of_goods",
+    "timeUnit" : "Year",
+    "sink" : "RAM in Goods"
+  }, {
+    "name" : "RAM in Goods outflow 2",
+    "equation" : "loss_of_RAM_in_goods",
+    "timeUnit" : "Year",
+    "source" : "RAM in Goods"
+  }, {
+    "name" : "Extraction Capaciteit under Construction inflow 1",
+    "equation" : "newly_planned_extraction_capacity",
+    "timeUnit" : "Year",
+    "sink" : "Extraction Capaciteit under Construction"
+  }, {
+    "name" : "Extraction Capaciteit under Construction outflow 2",
+    "equation" : "commissioning_extraction_capacity",
+    "timeUnit" : "Year",
+    "source" : "Extraction Capaciteit under Construction"
+  }, {
+    "name" : "demand for RAM inflow 1",
+    "equation" : "growth_demand_for_RAM",
+    "timeUnit" : "Year",
+    "sink" : "demand for RAM"
+  }, {
+    "name" : "demand for RAM outflow 2",
+    "equation" : "substitution_loses",
+    "timeUnit" : "Year",
+    "source" : "demand for RAM"
+  }, {
+    "name" : "demand for RAM outflow 3",
+    "equation" : "demand_reduction_via_price_elasticity_of_demand",
+    "timeUnit" : "Year",
+    "source" : "demand for RAM"
+  }, {
+    "name" : "Installed Extraction Capacity inflow 1",
+    "equation" : "commissioning_extraction_capacity",
+    "timeUnit" : "Year",
+    "sink" : "Installed Extraction Capacity"
+  }, {
+    "name" : "Installed Extraction Capacity outflow 2",
+    "equation" : "decommissioning_extraction_capacity_at_end_of_lifetime",
+    "timeUnit" : "Year",
+    "source" : "Installed Extraction Capacity"
+  }, {
+    "name" : "Installed Extraction Capacity outflow 3",
+    "equation" : "decommissioning_unprofitable_extraction_capacity",
+    "timeUnit" : "Year",
+    "source" : "Installed Extraction Capacity"
+  }, {
+    "name" : "Cumulatively Extracted RAM net flow",
+    "comment" : "Net flow for Cumulatively Extracted RAM",
+    "equation" : "real_RAM_extraction",
+    "timeUnit" : "Year",
+    "sink" : "Cumulatively Extracted RAM"
+  }, {
+    "name" : "Intrinsic Demand net flow",
+    "comment" : "Net flow for Intrinsic Demand",
+    "equation" : "net_change_intrinsic_demand",
+    "timeUnit" : "Year",
+    "sink" : "Intrinsic Demand"
+  } ],
+  "variables" : [ {
+    "name" : "TIME_STEP",
+    "equation" : "0.0625",
+    "unit" : "Year"
+  }, {
+    "name" : "INITIAL_TIME",
+    "equation" : "2000",
+    "unit" : "Year"
+  }, {
+    "name" : "FINAL_TIME",
+    "equation" : "2200",
+    "unit" : "Year"
+  }, {
+    "name" : "use of RAM in production of goods",
+    "comment" : "use of RAM in production of goods",
+    "equation" : "MIN(Available_Supply_of_RAM/demand_supply_time,demand_for_RAM)",
+    "unit" : "t/Year"
+  }, {
+    "name" : "demand supply time",
+    "comment" : "demand supply time",
+    "equation" : "1",
+    "unit" : "Year"
+  }, {
+    "name" : "planning time",
+    "comment" : "planning time",
+    "equation" : "1",
+    "unit" : "Year"
+  }, {
+    "name" : "decommissioning unprofitable extraction capacity",
+    "comment" : "SMOOTH3I(winstgevendheid ZAM extractie,5,winstgevendheid ZAM extractie)",
+    "equation" : "Installed_Extraction_Capacity* (-MIN(profitability_of_RAM_extraction,0))/closing_time",
+    "unit" : "t/Year/Year"
+  }, {
+    "name" : "closing time",
+    "comment" : "closing time",
+    "equation" : "1",
+    "unit" : "Year"
+  }, {
+    "name" : "newly planned extraction capacity",
+    "comment" : "newly planned extraction capacity",
+    "equation" : "MIN(MAX(profitability_of_RAM_extraction, 0),1)*MIN(MAX(desired_extraction_capacity-Installed_Extraction_Capacity ,0),Installed_Extraction_Capacity )/planning_time",
+    "unit" : "t/Year/Year"
+  }, {
+    "name" : "supply demand ratio",
+    "comment" : "supply demand ratio",
+    "equation" : "Available_Supply_of_RAM/demand_for_RAM/demand_supply_time",
+    "unit" : "Dmnl"
+  }, {
+    "name" : "substitution loses",
+    "comment" : "IF THEN ELSE(relatieve prijs > relatieve prijs van het goedkoopste  prijssubstituut, (relatieve prijs-relatieve prijs van het goedkoopste  prijssubstituut)/relatieve prijs * vraag naar ZAM, 0)",
+    "equation" : "MAX((relative_price-relative_price_of_the_cheapest_price_substitute)/relative_price  * demand_for_RAM, 0)/demand_supply_time",
+    "unit" : "t/Year/Year"
+  }, {
+    "name" : "economic growth rate",
+    "comment" : "([(2000,-0.4)-(2050,0.4)],(2000,0.03),(2008,0.03),(2009,-0.3),(2010,0.2),(2 011,0.03),(2050,0.03) )",
+    "equation" : "LOOKUP(economic_growth_rate_lookup, relative_price)",
+    "unit" : "1/Year"
+  }, {
+    "name" : "real RAM extraction",
+    "comment" : "maximale ZAM extractie maal schaarsteprijseffect",
+    "equation" : "Installed_Extraction_Capacity*MIN(scarcity_price_effect,1)",
+    "unit" : "t/Year"
+  }, {
+    "name" : "net change intrinsic demand",
+    "comment" : "economic growth rate*Intrinsic Annual Demand",
+    "equation" : "economic_growth_rate*Intrinsic_Demand",
+    "unit" : "t/Year/Year"
+  }, {
+    "name" : "growth demand for RAM",
+    "comment" : "growth demand for RAM",
+    "equation" : "demand_for_RAM*economic_growth_rate",
+    "unit" : "t/Year/Year"
+  }, {
+    "name" : "commissioning extraction capacity",
+    "comment" : "commissioning extraction capacity",
+    "equation" : "DELAY_FIXED( newly_planned_extraction_capacity, precise_construction_time_of_extraction_capacity, Extraction_Capaciteit_under_Construction/precise_construction_time_of_extraction_capacity )",
+    "unit" : "t/Year/Year"
+  }, {
+    "name" : "profitability of RAM extraction",
+    "comment" : "profitability of RAM extraction",
+    "equation" : "(relative_price-average_RAM_extraction_costs)/average_RAM_extraction_costs",
+    "unit" : "Dmnl"
+  }, {
+    "name" : "processing of RAM",
+    "comment" : "MIN(X,Annual Demand-recycled)",
+    "equation" : "real_RAM_extraction",
+    "unit" : "t/Year"
+  }, {
+    "name" : "average RAM extraction costs",
+    "comment" : "([(0,0)-(2e+007,800)],(0,1.25),(2e+006,2.5),(4e+006,5),(6e+006,10),(8e+006, 20),(1e+007,40),(1.2e+007,80),(1.4e+007,160),(1.6e+007,320),(1.8e+007,640)  )",
+    "equation" : "LOOKUP(average_RAM_extraction_costs_lookup, (Cumulatively_Extracted_RAM-initially_cumulatively_extracted_amount))",
+    "unit" : "Dmnl"
+  }, {
+    "name" : "relative price",
+    "comment" : "relative price",
+    "equation" : "scarcity_price_effect * average_RAM_extraction_costs * (1+normal_profitability_margin )",
+    "unit" : "Dmnl"
+  }, {
+    "name" : "average lifetime in goods",
+    "comment" : "average lifetime in goods",
+    "equation" : "15",
+    "unit" : "Year"
+  }, {
+    "name" : "loss of RAM in goods",
+    "comment" : "loss of RAM in goods",
+    "equation" : "RAM_in_Goods/average_lifetime_in_goods",
+    "unit" : "t/Year"
+  }, {
+    "name" : "desired extraction capacity",
+    "comment" : "FORECAST( vraag naar ZAM, 2, 4)",
+    "equation" : "demand_for_RAM",
+    "unit" : "t/Year"
+  }, {
+    "name" : "normal profitability margin",
+    "comment" : "normal profitability margin",
+    "equation" : "0.15",
+    "unit" : "Dmnl"
+  }, {
+    "name" : "initial extraction capacity under construction",
+    "comment" : "initial extraction capacity under construction",
+    "equation" : "60000",
+    "unit" : "t/Year"
+  }, {
+    "name" : "relative price of the cheapest price substitute",
+    "comment" : "relative price of the cheapest price substitute",
+    "equation" : "100",
+    "unit" : "Dmnl"
+  }, {
+    "name" : "demand reduction via price elasticity of demand",
+    "comment" : "demand reduction via price elasticity of demand",
+    "equation" : "-price_elasticity_of_demand*demand_for_RAM*(1/relative_price-1/relative_price_previous_year )/(1/relative_price_previous_year)",
+    "unit" : "t/Year/Year"
+  }, {
+    "name" : "scarcity price effect",
+    "comment" : "scarcity price effect",
+    "equation" : "LOOKUP(scarcity_price_effect_lookup, supply_demand_ratio)",
+    "unit" : "Dmnl"
+  }, {
+    "name" : "price elasticity of demand",
+    "comment" : "price elasticity of demand",
+    "equation" : "0.1",
+    "unit" : "1/Year"
+  }, {
+    "name" : "relative price previous year",
+    "comment" : "MIN(MAX(1/(DELAY1I(relative price, 1, relative price)),0),1)",
+    "equation" : "DELAY_FIXED(relative_price, 1, relative_price)",
+    "unit" : "Dmnl"
+  }, {
+    "name" : "production wrt intrinsic demand",
+    "comment" : "production wrt intrinsic demand",
+    "equation" : "use_of_RAM_in_production_of_goods/Intrinsic_Demand",
+    "unit" : "Dmnl"
+  }, {
+    "name" : "precise construction time of extraction capacity",
+    "comment" : "precise construction time of extraction capacity",
+    "equation" : "8",
+    "unit" : "Year"
+  }, {
+    "name" : "average life time of extraction capacity",
+    "comment" : "average life time of extraction capacity",
+    "equation" : "30",
+    "unit" : "Year"
+  }, {
+    "name" : "decommissioning extraction capacity at end of lifetime",
+    "comment" : "decommissioning extraction capacity at end of lifetime",
+    "equation" : "MAX(Installed_Extraction_Capacity/average_life_time_of_extraction_capacity-decommissioning_unprofitable_extraction_capacity ,0)",
+    "unit" : "t/Year/Year"
+  }, {
+    "name" : "initially cumulatively extracted amount",
+    "comment" : "initially cumulatively extracted amount",
+    "equation" : "4000000",
+    "unit" : "t"
+  }, {
+    "name" : "initial annual demand for RAM",
+    "comment" : "initial annual demand for RAM",
+    "equation" : "100000",
+    "unit" : "t/Year"
+  }, {
+    "name" : "initial available supply of RAM",
+    "comment" : "initial available supply of RAM",
+    "equation" : "250000",
+    "unit" : "t"
+  }, {
+    "name" : "initial extraction infrastructure",
+    "comment" : "initial extraction infrastructure",
+    "equation" : "100000",
+    "unit" : "t/Year"
+  }, {
+    "name" : "initial amount of RAM in goods",
+    "comment" : "initial amount of RAM in goods",
+    "equation" : "2000000",
+    "unit" : "t"
+  } ],
+  "lookupTables" : [ {
+    "name" : "economic_growth_rate_lookup",
+    "xValues" : [ 0.0, 1.0, 100.0 ],
+    "yValues" : [ 0.05, 0.03, -0.1 ],
+    "interpolation" : "LINEAR"
+  }, {
+    "name" : "average_RAM_extraction_costs_lookup",
+    "xValues" : [ 0.0, 2000000.0, 4000000.0, 6000000.0, 8000000.0, 1.0E7, 1.2E7, 1.4E7, 1.6E7, 1.8E7 ],
+    "yValues" : [ 1.0, 2.0, 4.0, 8.0, 16.0, 32.0, 64.0, 128.0, 256.0, 512.0 ],
+    "interpolation" : "LINEAR"
+  }, {
+    "name" : "scarcity_price_effect_lookup",
+    "xValues" : [ 0.0, 0.55, 1.1, 2.2, 10.2752, 22.0 ],
+    "yValues" : [ 100.0, 10.0, 1.0, 0.75, 0.372807, 0.2 ],
+    "interpolation" : "LINEAR"
+  } ],
+  "views" : [ {
+    "name" : "Dashboard",
+    "elements" : [ {
+      "name" : "initial annual demand for RAM",
+      "type" : "aux",
+      "x" : -573.0,
+      "y" : -2.0
+    }, {
+      "name" : "initial available supply of RAM",
+      "type" : "aux",
+      "x" : -572.0,
+      "y" : 140.0
+    }, {
+      "name" : "economic growth rate",
+      "type" : "aux",
+      "x" : -571.0,
+      "y" : 18.0
+    }, {
+      "name" : "initial amount of RAM in goods",
+      "type" : "aux",
+      "x" : -588.0,
+      "y" : 165.0
+    }, {
+      "name" : "scarcity price effect",
+      "type" : "aux",
+      "x" : -573.0,
+      "y" : 84.0
+    }, {
+      "name" : "price elasticity of demand",
+      "type" : "aux",
+      "x" : -560.0,
+      "y" : 59.0
+    }, {
+      "name" : "Time",
+      "type" : "aux",
+      "x" : -599.0,
+      "y" : 433.0
+    }, {
+      "name" : "supply demand ratio",
+      "type" : "aux",
+      "x" : -210.0,
+      "y" : 376.0
+    }, {
+      "name" : "Intrinsic Demand",
+      "type" : "stock",
+      "x" : -511.0,
+      "y" : 551.0
+    }, {
+      "name" : "use of RAM in production of goods",
+      "type" : "aux",
+      "x" : -511.0,
+      "y" : 551.0
+    }, {
+      "name" : "initial extraction infrastructure",
+      "type" : "aux",
+      "x" : -546.0,
+      "y" : 242.0
+    }, {
+      "name" : "initially cumulatively extracted amount",
+      "type" : "aux",
+      "x" : -528.0,
+      "y" : 429.0
+    }, {
+      "name" : "precise construction time of extraction capacity",
+      "type" : "aux",
+      "x" : -505.0,
+      "y" : 319.0
+    }, {
+      "name" : "average life time of extraction capacity",
+      "type" : "aux",
+      "x" : -532.0,
+      "y" : 269.0
+    }, {
+      "name" : "initial extraction capacity under construction",
+      "type" : "aux",
+      "x" : -506.0,
+      "y" : 293.0
+    }, {
+      "name" : "Time",
+      "type" : "aux",
+      "x" : 5.0,
+      "y" : 107.0
+    }, {
+      "name" : "Time",
+      "type" : "aux",
+      "x" : 193.0,
+      "y" : 99.0
+    }, {
+      "name" : "Time",
+      "type" : "aux",
+      "x" : -521.0,
+      "y" : 710.0
+    }, {
+      "name" : "Time",
+      "type" : "aux",
+      "x" : -517.0,
+      "y" : 482.0
+    }, {
+      "name" : "relative price of the cheapest price substitute",
+      "type" : "aux",
+      "x" : -563.0,
+      "y" : 107.0
+    }, {
+      "name" : "Time",
+      "type" : "aux",
+      "x" : -233.0,
+      "y" : 489.0
+    }, {
+      "name" : "Time",
+      "type" : "aux",
+      "x" : -322.0,
+      "y" : 214.0
+    }, {
+      "name" : "normal profitability margin",
+      "type" : "aux",
+      "x" : -570.0,
+      "y" : -27.0
+    }, {
+      "name" : "Time",
+      "type" : "aux",
+      "x" : -571.0,
+      "y" : 47.0
+    }, {
+      "name" : "Time",
+      "type" : "aux",
+      "x" : -533.0,
+      "y" : 69.0
+    } ],
+    "connectors" : [ {
+      "from" : "supply demand ratio",
+      "to" : "scarcity price effect"
+    }, {
+      "from" : "Time",
+      "to" : "economic growth rate"
+    } ]
+  }, {
+    "name" : "Demand Supply",
+    "elements" : [ {
+      "name" : "Available Supply of RAM",
+      "type" : "stock",
+      "x" : 1046.0,
+      "y" : 202.0
+    }, {
+      "name" : "relative price",
+      "type" : "aux",
+      "x" : 486.0,
+      "y" : 241.0
+    }, {
+      "name" : "_156",
+      "type" : "flow",
+      "x" : 1055.0,
+      "y" : 277.0
+    }, {
+      "name" : "processing of RAM",
+      "type" : "aux",
+      "x" : 1106.0,
+      "y" : 277.0
+    }, {
+      "name" : "_508",
+      "type" : "flow",
+      "x" : 1041.0,
+      "y" : 117.0
+    }, {
+      "name" : "use of RAM in production of goods",
+      "type" : "aux",
+      "x" : 968.0,
+      "y" : 117.0
+    }, {
+      "name" : "initial annual demand for RAM",
+      "type" : "aux",
+      "x" : 206.0,
+      "y" : -28.0
+    }, {
+      "name" : "initial available supply of RAM",
+      "type" : "aux",
+      "x" : 1151.0,
+      "y" : 203.0
+    }, {
+      "name" : "economic growth rate",
+      "type" : "aux",
+      "x" : 689.0,
+      "y" : -133.0
+    }, {
+      "name" : "RAM in Goods",
+      "type" : "stock",
+      "x" : 1048.0,
+      "y" : 60.0
+    }, {
+      "name" : "_636",
+      "type" : "flow",
+      "x" : 1041.0,
+      "y" : -20.0
+    }, {
+      "name" : "loss of RAM in goods",
+      "type" : "aux",
+      "x" : 984.0,
+      "y" : -20.0
+    }, {
+      "name" : "initial amount of RAM in goods",
+      "type" : "aux",
+      "x" : 1149.0,
+      "y" : 56.0
+    }, {
+      "name" : "Intrinsic Demand",
+      "type" : "stock",
+      "x" : 756.0,
+      "y" : -215.0
+    }, {
+      "name" : "_48",
+      "type" : "flow",
+      "x" : 630.0,
+      "y" : -214.0
+    }, {
+      "name" : "net change intrinsic demand",
+      "type" : "aux",
+      "x" : 630.0,
+      "y" : -187.0
+    }, {
+      "name" : "scarcity price effect",
+      "type" : "aux",
+      "x" : 593.0,
+      "y" : 318.0
+    }, {
+      "name" : "production wrt intrinsic demand",
+      "type" : "aux",
+      "x" : 912.0,
+      "y" : -212.0
+    }, {
+      "name" : "supply demand ratio",
+      "type" : "aux",
+      "x" : 825.0,
+      "y" : 278.0
+    }, {
+      "name" : "demand for RAM",
+      "type" : "stock",
+      "x" : 633.0,
+      "y" : 56.0
+    }, {
+      "name" : "_48",
+      "type" : "flow",
+      "x" : 518.0,
+      "y" : 68.0
+    }, {
+      "name" : "demand reduction via price elasticity of demand",
+      "type" : "aux",
+      "x" : 518.0,
+      "y" : 95.0
+    }, {
+      "name" : "_48",
+      "type" : "flow",
+      "x" : 634.0,
+      "y" : -21.0
+    }, {
+      "name" : "growth demand for RAM",
+      "type" : "aux",
+      "x" : 692.0,
+      "y" : -21.0
+    }, {
+      "name" : "relative price previous year",
+      "type" : "aux",
+      "x" : 431.0,
+      "y" : 163.0
+    }, {
+      "name" : "price elasticity of demand",
+      "type" : "aux",
+      "x" : 338.0,
+      "y" : 224.0
+    }, {
+      "name" : "_48",
+      "type" : "flow",
+      "x" : 639.0,
+      "y" : 119.0
+    }, {
+      "name" : "substitution loses",
+      "type" : "aux",
+      "x" : 700.0,
+      "y" : 119.0
+    }, {
+      "name" : "relative price of the cheapest price substitute",
+      "type" : "aux",
+      "x" : 733.0,
+      "y" : 188.0
+    }, {
+      "name" : "normal profitability margin",
+      "type" : "aux",
+      "x" : 610.0,
+      "y" : 261.0
+    }, {
+      "name" : "average lifetime in goods",
+      "type" : "aux",
+      "x" : 1149.0,
+      "y" : -20.0
+    }, {
+      "name" : "initial extraction infrastructure",
+      "type" : "aux",
+      "x" : 661.0,
+      "y" : 766.0
+    }, {
+      "name" : "average RAM extraction costs",
+      "type" : "aux",
+      "x" : 669.0,
+      "y" : 401.0
+    }, {
+      "name" : "Cumulatively Extracted RAM",
+      "type" : "stock",
+      "x" : 870.0,
+      "y" : 450.0
+    }, {
+      "name" : "_48",
+      "type" : "flow",
+      "x" : 984.0,
+      "y" : 449.0
+    }, {
+      "name" : "real RAM extraction",
+      "type" : "aux",
+      "x" : 984.0,
+      "y" : 422.0
+    }, {
+      "name" : "initially cumulatively extracted amount",
+      "type" : "aux",
+      "x" : 722.0,
+      "y" : 467.0
+    }, {
+      "name" : "desired extraction capacity",
+      "type" : "aux",
+      "x" : 250.0,
+      "y" : 363.0
+    }, {
+      "name" : "profitability of RAM extraction",
+      "type" : "aux",
+      "x" : 456.0,
+      "y" : 465.0
+    }, {
+      "name" : "Extraction Capaciteit under Construction",
+      "type" : "stock",
+      "x" : 415.0,
+      "y" : 658.0
+    }, {
+      "name" : "Installed Extraction Capacity",
+      "type" : "stock",
+      "x" : 630.0,
+      "y" : 663.0
+    }, {
+      "name" : "_48",
+      "type" : "flow",
+      "x" : 293.0,
+      "y" : 658.0
+    }, {
+      "name" : "newly planned extraction capacity",
+      "type" : "aux",
+      "x" : 293.0,
+      "y" : 685.0
+    }, {
+      "name" : "_428",
+      "type" : "flow",
+      "x" : 528.0,
+      "y" : 646.0
+    }, {
+      "name" : "commissioning extraction capacity",
+      "type" : "aux",
+      "x" : 528.0,
+      "y" : 673.0
+    }, {
+      "name" : "_48",
+      "type" : "flow",
+      "x" : 755.0,
+      "y" : 648.0
+    }, {
+      "name" : "decommissioning extraction capacity at end of lifetime",
+      "type" : "aux",
+      "x" : 755.0,
+      "y" : 684.0
+    }, {
+      "name" : "precise construction time of extraction capacity",
+      "type" : "aux",
+      "x" : 495.0,
+      "y" : 768.0
+    }, {
+      "name" : "average life time of extraction capacity",
+      "type" : "aux",
+      "x" : 853.0,
+      "y" : 610.0
+    }, {
+      "name" : "_48",
+      "type" : "flow",
+      "x" : 629.0,
+      "y" : 560.0
+    }, {
+      "name" : "decommissioning unprofitable extraction capacity",
+      "type" : "aux",
+      "x" : 708.0,
+      "y" : 560.0
+    }, {
+      "name" : "initial extraction capacity under construction",
+      "type" : "aux",
+      "x" : 295.0,
+      "y" : 769.0
+    }, {
+      "name" : "closing time",
+      "type" : "aux",
+      "x" : 860.0,
+      "y" : 544.0
+    }, {
+      "name" : "demand supply time",
+      "type" : "aux",
+      "x" : 640.0,
+      "y" : 224.0
+    }, {
+      "name" : "planning time",
+      "type" : "aux",
+      "x" : 223.0,
+      "y" : 583.0
+    } ],
+    "connectors" : [ {
+      "from" : "4",
+      "to" : "Available Supply of RAM"
+    }, {
+      "from" : "7",
+      "to" : "Available Supply of RAM"
+    }, {
+      "from" : "Available Supply of RAM",
+      "to" : "use of RAM in production of goods"
+    }, {
+      "from" : "_508",
+      "to" : "RAM in Goods"
+    }, {
+      "from" : "16",
+      "to" : "RAM in Goods"
+    }, {
+      "from" : "RAM in Goods",
+      "to" : "loss of RAM in goods"
+    }, {
+      "from" : "24",
+      "to" : "Intrinsic Demand"
+    }, {
+      "from" : "24",
+      "to" : "21"
+    }, {
+      "from" : "initial annual demand for RAM",
+      "to" : "Intrinsic Demand"
+    }, {
+      "from" : "_156",
+      "to" : "27"
+    }, {
+      "from" : "scarcity price effect",
+      "to" : "relative price"
+    }, {
+      "from" : "use of RAM in production of goods",
+      "to" : "production wrt intrinsic demand"
+    }, {
+      "from" : "Intrinsic Demand",
+      "to" : "production wrt intrinsic demand"
+    }, {
+      "from" : "39",
+      "to" : "36"
+    }, {
+      "from" : "39",
+      "to" : "demand for RAM"
+    }, {
+      "from" : "44",
+      "to" : "demand for RAM"
+    }, {
+      "from" : "44",
+      "to" : "41"
+    }, {
+      "from" : "demand for RAM",
+      "to" : "demand reduction via price elasticity of demand"
+    }, {
+      "from" : "demand for RAM",
+      "to" : "growth demand for RAM"
+    }, {
+      "from" : "economic growth rate",
+      "to" : "growth demand for RAM"
+    }, {
+      "from" : "initial annual demand for RAM",
+      "to" : "demand for RAM"
+    }, {
+      "from" : "demand for RAM",
+      "to" : "supply demand ratio"
+    }, {
+      "from" : "demand for RAM",
+      "to" : "use of RAM in production of goods"
+    }, {
+      "from" : "price elasticity of demand",
+      "to" : "demand reduction via price elasticity of demand"
+    }, {
+      "from" : "relative price",
+      "to" : "relative price previous year"
+    }, {
+      "from" : "76",
+      "to" : "relative price"
+    }, {
+      "from" : "relative price",
+      "to" : "demand reduction via price elasticity of demand"
+    }, {
+      "from" : "relative price previous year",
+      "to" : "demand reduction via price elasticity of demand"
+    }, {
+      "from" : "supply demand ratio",
+      "to" : "scarcity price effect"
+    }, {
+      "from" : "63",
+      "to" : "60"
+    }, {
+      "from" : "63",
+      "to" : "demand for RAM"
+    }, {
+      "from" : "demand for RAM",
+      "to" : "substitution loses"
+    }, {
+      "from" : "relative price",
+      "to" : "_48"
+    }, {
+      "from" : "relative price of the cheapest price substitute",
+      "to" : "substitution loses"
+    }, {
+      "from" : "normal profitability margin",
+      "to" : "relative price"
+    }, {
+      "from" : "average lifetime in goods",
+      "to" : "_636"
+    }, {
+      "from" : "initial amount of RAM in goods",
+      "to" : "RAM in Goods"
+    }, {
+      "from" : "initial available supply of RAM",
+      "to" : "Available Supply of RAM"
+    }, {
+      "from" : "81",
+      "to" : "Cumulatively Extracted RAM"
+    }, {
+      "from" : "81",
+      "to" : "78"
+    }, {
+      "from" : "initially cumulatively extracted amount",
+      "to" : "Cumulatively Extracted RAM"
+    }, {
+      "from" : "Cumulatively Extracted RAM",
+      "to" : "average RAM extraction costs"
+    }, {
+      "from" : "initially cumulatively extracted amount",
+      "to" : "average RAM extraction costs"
+    }, {
+      "from" : "94",
+      "to" : "Extraction Capaciteit under Construction"
+    }, {
+      "from" : "94",
+      "to" : "91"
+    }, {
+      "from" : "98",
+      "to" : "Installed Extraction Capacity"
+    }, {
+      "from" : "98",
+      "to" : "Extraction Capaciteit under Construction"
+    }, {
+      "from" : "103",
+      "to" : "100"
+    }, {
+      "from" : "103",
+      "to" : "Installed Extraction Capacity"
+    }, {
+      "from" : "precise construction time of extraction capacity",
+      "to" : "commissioning extraction capacity"
+    }, {
+      "from" : "average life time of extraction capacity",
+      "to" : "_48"
+    }, {
+      "from" : "Installed Extraction Capacity",
+      "to" : "_48"
+    }, {
+      "from" : "113",
+      "to" : "110"
+    }, {
+      "from" : "113",
+      "to" : "Installed Extraction Capacity"
+    }, {
+      "from" : "profitability of RAM extraction",
+      "to" : "_48"
+    }, {
+      "from" : "Installed Extraction Capacity",
+      "to" : "_48"
+    }, {
+      "from" : "initial extraction infrastructure",
+      "to" : "Installed Extraction Capacity"
+    }, {
+      "from" : "decommissioning unprofitable extraction capacity",
+      "to" : "_48"
+    }, {
+      "from" : "Installed Extraction Capacity",
+      "to" : "_48"
+    }, {
+      "from" : "desired extraction capacity",
+      "to" : "_48"
+    }, {
+      "from" : "profitability of RAM extraction",
+      "to" : "_48"
+    }, {
+      "from" : "average RAM extraction costs",
+      "to" : "profitability of RAM extraction"
+    }, {
+      "from" : "demand for RAM",
+      "to" : "desired extraction capacity"
+    }, {
+      "from" : "relative price",
+      "to" : "profitability of RAM extraction"
+    }, {
+      "from" : "economic growth rate",
+      "to" : "net change intrinsic demand"
+    }, {
+      "from" : "Intrinsic Demand",
+      "to" : "net change intrinsic demand"
+    }, {
+      "from" : "real RAM extraction",
+      "to" : "processing of RAM"
+    }, {
+      "from" : "newly planned extraction capacity",
+      "to" : "commissioning extraction capacity"
+    }, {
+      "from" : "Available Supply of RAM",
+      "to" : "supply demand ratio"
+    }, {
+      "from" : "Extraction Capaciteit under Construction",
+      "to" : "_428"
+    }, {
+      "from" : "_636",
+      "to" : "132"
+    }, {
+      "from" : "scarcity price effect",
+      "to" : "real RAM extraction"
+    }, {
+      "from" : "Installed Extraction Capacity",
+      "to" : "_48"
+    }, {
+      "from" : "relative price",
+      "to" : "economic growth rate"
+    }, {
+      "from" : "closing time",
+      "to" : "decommissioning unprofitable extraction capacity"
+    }, {
+      "from" : "demand supply time",
+      "to" : "_48"
+    }, {
+      "from" : "demand supply time",
+      "to" : "supply demand ratio"
+    }, {
+      "from" : "demand supply time",
+      "to" : "use of RAM in production of goods"
+    }, {
+      "from" : "planning time",
+      "to" : "newly planned extraction capacity"
+    } ],
+    "flowRoutes" : [ {
+      "flowName" : "_156",
+      "points" : [ [ 1055.0, 277.0 ] ]
+    }, {
+      "flowName" : "_508",
+      "points" : [ [ 1041.0, 117.0 ] ]
+    }, {
+      "flowName" : "_636",
+      "points" : [ [ 1041.0, -20.0 ] ]
+    }, {
+      "flowName" : "_48",
+      "points" : [ [ 630.0, -214.0 ] ]
+    }, {
+      "flowName" : "_48",
+      "points" : [ [ 518.0, 68.0 ] ]
+    }, {
+      "flowName" : "_48",
+      "points" : [ [ 634.0, -21.0 ] ]
+    }, {
+      "flowName" : "_48",
+      "points" : [ [ 639.0, 119.0 ] ]
+    }, {
+      "flowName" : "_48",
+      "points" : [ [ 984.0, 449.0 ] ]
+    }, {
+      "flowName" : "_48",
+      "points" : [ [ 293.0, 658.0 ] ]
+    }, {
+      "flowName" : "_428",
+      "points" : [ [ 528.0, 646.0 ] ]
+    }, {
+      "flowName" : "_48",
+      "points" : [ [ 755.0, 648.0 ] ]
+    }, {
+      "flowName" : "_48",
+      "points" : [ [ 629.0, 560.0 ] ]
+    } ]
+  }, {
+    "name" : "Extraction Capacity"
+  }, {
+    "name" : "Recycling Capacity",
+    "elements" : [ {
+      "name" : "Time",
+      "type" : "aux",
+      "x" : 276.0,
+      "y" : 159.0
+    }, {
+      "name" : "Time",
+      "type" : "aux",
+      "x" : 274.0,
+      "y" : 535.0
+    } ]
+  } ],
+  "defaultSimulation" : {
+    "timeStep" : "Year",
+    "duration" : 200.0,
+    "durationUnit" : "Year",
+    "dt" : 0.0625
+  },
+  "metadata" : {
+    "author" : "Dr. Erik Pruyt",
+    "source" : "Pruyt, E., 2013. Small System Dynamics Models for Big Issues: Triple Jump towards Real-World Complexity. TU Delft Library. ISBN 978-94-6186-195-5",
+    "license" : "CC-BY-NC-SA-4.0",
+    "url" : "https://simulation.tudelft.nl/SD/"
+  }
+}

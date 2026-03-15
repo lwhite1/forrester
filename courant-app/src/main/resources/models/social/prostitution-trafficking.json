@@ -1,0 +1,631 @@
+{
+  "name" : "1805_ProstitutionHumanTraffickingEN_withoutSolvingUnitErrors",
+  "stocks" : [ {
+    "name" : "supply of prostitutes",
+    "comment" : "23000",
+    "initialValue" : 28254.0,
+    "unit" : "persons"
+  }, {
+    "name" : "sexually active adults",
+    "comment" : "sexually active adults",
+    "initialValue" : 1.2E7,
+    "unit" : "person"
+  }, {
+    "name" : "children",
+    "comment" : "children",
+    "initialValue" : 4000000.0,
+    "unit" : "person"
+  } ],
+  "flows" : [ {
+    "name" : "supply of prostitutes inflow 1",
+    "equation" : "new_Dutch_prostitutes",
+    "timeUnit" : "Year",
+    "sink" : "supply of prostitutes"
+  }, {
+    "name" : "supply of prostitutes inflow 2",
+    "equation" : "new_foreign_prostitutes",
+    "timeUnit" : "Year",
+    "sink" : "supply of prostitutes"
+  }, {
+    "name" : "supply of prostitutes outflow 3",
+    "equation" : "prostitution_outflow",
+    "timeUnit" : "Year",
+    "source" : "supply of prostitutes"
+  }, {
+    "name" : "supply of prostitutes outflow 4",
+    "equation" : "reduction_of_supply_through_illegalisation",
+    "timeUnit" : "Year",
+    "source" : "supply of prostitutes"
+  }, {
+    "name" : "sexually active adults inflow 1",
+    "equation" : "from_minor_to_adult",
+    "timeUnit" : "Year",
+    "sink" : "sexually active adults"
+  }, {
+    "name" : "sexually active adults outflow 2",
+    "equation" : "loss_of_sexual_activity",
+    "timeUnit" : "Year",
+    "source" : "sexually active adults"
+  }, {
+    "name" : "children inflow 1",
+    "equation" : "births",
+    "timeUnit" : "Year",
+    "sink" : "children"
+  }, {
+    "name" : "children outflow 2",
+    "equation" : "from_minor_to_adult",
+    "timeUnit" : "Year",
+    "source" : "children"
+  } ],
+  "variables" : [ {
+    "name" : "TIME_STEP",
+    "equation" : "0.0078125",
+    "unit" : "Year"
+  }, {
+    "name" : "INITIAL_TIME",
+    "equation" : "2000",
+    "unit" : "Year"
+  }, {
+    "name" : "FINAL_TIME",
+    "equation" : "2040",
+    "unit" : "Year"
+  }, {
+    "name" : "from minor to adult",
+    "comment" : "kinderen/duur minderjarigheid",
+    "equation" : "DELAY_FIXED( births, age_of_consent, 222222)",
+    "unit" : "person/Year"
+  }, {
+    "name" : "delivery time",
+    "comment" : "delivery time",
+    "equation" : "1",
+    "unit" : "Year"
+  }, {
+    "name" : "new foreign prostitutes",
+    "comment" : "profitability of prostitution*normal trafficked prostitutes",
+    "equation" : "MAX(profitability_of_prostitution*expected_gap_between_demand_and_supply/delivery_time ,0)",
+    "unit" : "person/Year"
+  }, {
+    "name" : "loss of sexual activity",
+    "comment" : "loss of sexual activity",
+    "equation" : "sexually_active_adults/sexual_lifetime",
+    "unit" : "person/Year"
+  }, {
+    "name" : "expected gap between demand and supply",
+    "comment" : "expected gap between demand and supply",
+    "equation" : "demand_for_prostitutes-supply_of_prostitutes+prostitution_outflow*delivery_time",
+    "unit" : ""
+  }, {
+    "name" : "total annual prostitution revenues",
+    "comment" : "total annual prostitution revenues",
+    "equation" : "supply_of_prostitutes*frequency_of_prostitution_visit*Johns_per_prostitute*average_price_of_sex_services",
+    "unit" : "euro/Year"
+  }, {
+    "name" : "average price of sex services",
+    "comment" : "average price of sex services",
+    "equation" : "SMOOTH3I(2*naked_costs_per_sex_service*supply_demand_effect_on_the_price_of_sex_services , 1, 2*naked_costs_per_sex_service)",
+    "unit" : "euro/service"
+  }, {
+    "name" : "prostitution outflow",
+    "comment" : "prostitution outflow",
+    "equation" : "supply_of_prostitutes/average_lifetime_in_prostitution",
+    "unit" : "person/Year"
+  }, {
+    "name" : "naked costs per sex service",
+    "comment" : "naked costs per sex service",
+    "equation" : "20",
+    "unit" : "euro/service"
+  }, {
+    "name" : "supply demand ratio",
+    "comment" : "supply demand ratio",
+    "equation" : "supply_of_prostitutes/demand_for_prostitutes",
+    "unit" : "Dmnl"
+  }, {
+    "name" : "frequency of prostitution visit",
+    "comment" : "frequency of prostitution visit",
+    "equation" : "24",
+    "unit" : ""
+  }, {
+    "name" : "new Dutch prostitutes",
+    "comment" : "new Dutch prostitutes",
+    "equation" : "MAX(from_minor_to_adult/2*normal_fraction_of_young_Dutch_adults_open_for_a_job_in_prostitution *profitability_of_prostitution*societal_acceptability_of_prostitution,0)",
+    "unit" : "person/Year"
+  }, {
+    "name" : "societal acceptability of prostitution",
+    "comment" : "societal acceptability of prostitution",
+    "equation" : "SMOOTH3( MIN(1,MAX(0,influence_of_illegalisation_on_the_societal_acceptability_of_prostitution *(1-supply_of_prostitutes/100000))), 3)",
+    "unit" : "Dmnl"
+  }, {
+    "name" : "influence of illegalisation on the societal acceptability of prostitution",
+    "comment" : "influence of illegalisation on the societal acceptability of prostitution",
+    "equation" : "1-STEP(0.9,2013)",
+    "unit" : ""
+  }, {
+    "name" : "demand for prostitutes",
+    "comment" : "demand for prostitutes",
+    "equation" : "normal_percentage_clients_of_prostitutes*effect_of_societal_acceptability_on_the_percentage_of_Johns *price_effect_on_the_demand_for_prostitutes/Johns_per_prostitute*sexually_active_adults /2",
+    "unit" : "person/Year"
+  }, {
+    "name" : "reduction of supply through illegalisation",
+    "comment" : "aanbod aan prostituees/TIME STEP * PULSE(2012,1)*1",
+    "equation" : "supply_of_prostitutes/TIME_STEP * PULSE(2013,1)",
+    "unit" : ""
+  }, {
+    "name" : "sexual lifetime",
+    "comment" : "sexual lifetime",
+    "equation" : "45",
+    "unit" : "Year"
+  }, {
+    "name" : "age of consent",
+    "comment" : "age of consent",
+    "equation" : "18",
+    "unit" : "Year"
+  }, {
+    "name" : "average lifetime in prostitution",
+    "comment" : "average lifetime in prostitution",
+    "equation" : "10",
+    "unit" : "Year"
+  }, {
+    "name" : "births",
+    "comment" : "births",
+    "equation" : "sexually_active_adults*birth_rate",
+    "unit" : "person/Year"
+  }, {
+    "name" : "birth rate",
+    "comment" : "birth rate",
+    "equation" : "0.017",
+    "unit" : "1/Year"
+  }, {
+    "name" : "effect of societal acceptability on the percentage of Johns",
+    "comment" : "([(0,0)-(1,3)],(0,0.5),(1,1.2) )",
+    "equation" : "societal_acceptability_of_prostitution/1.5+0.5",
+    "unit" : "Dmnl"
+  }, {
+    "name" : "supply demand effect on the price of sex services",
+    "comment" : "supply demand effect on the price of sex services",
+    "equation" : "LOOKUP(supply_demand_effect_on_the_price_of_sex_services_lookup, supply_demand_ratio)",
+    "unit" : "Dmnl"
+  }, {
+    "name" : "normal fraction of young Dutch adults open for a job in prostitution",
+    "comment" : "normal fraction of young Dutch adults open for a job in prostitution",
+    "equation" : "0.001",
+    "unit" : "Dmnl"
+  }, {
+    "name" : "normal percentage clients of prostitutes",
+    "comment" : "0.12",
+    "equation" : "0.12",
+    "unit" : "Dmnl"
+  }, {
+    "name" : "Johns per prostitute",
+    "comment" : "Johns per prostitute",
+    "equation" : "50",
+    "unit" : "Dmnl"
+  }, {
+    "name" : "price effect on the demand for prostitutes",
+    "comment" : "price effect on the demand for prostitutes",
+    "equation" : "LOOKUP(price_effect_on_the_demand_for_prostitutes_lookup, average_price_of_sex_services)",
+    "unit" : "Dmnl"
+  }, {
+    "name" : "profitability of prostitution",
+    "comment" : "([(0,-0.6)-(500,5)],(0,0),(25,0),(50,0.1),(100,0.4),(200,1),(500,4) )",
+    "equation" : "(average_price_of_sex_services-naked_costs_per_sex_service)/naked_costs_per_sex_service",
+    "unit" : "Dmnl"
+  } ],
+  "lookupTables" : [ {
+    "name" : "supply_demand_effect_on_the_price_of_sex_services_lookup",
+    "xValues" : [ 0.0, 0.05, 0.25, 1.0, 2.0, 3.0 ],
+    "yValues" : [ 5.0, 3.0, 2.0, 1.0, 0.6, 0.5 ],
+    "interpolation" : "LINEAR"
+  }, {
+    "name" : "price_effect_on_the_demand_for_prostitutes_lookup",
+    "xValues" : [ 0.0, 50.0, 100.0, 200.0, 400.0, 800.0, 1000.0 ],
+    "yValues" : [ 4.0, 1.5, 1.0, 0.5, 0.2, 0.1, 0.1 ],
+    "interpolation" : "LINEAR"
+  } ],
+  "views" : [ {
+    "name" : "View 1",
+    "elements" : [ {
+      "name" : "supply of prostitutes",
+      "type" : "stock",
+      "x" : 562.0,
+      "y" : 462.0
+    }, {
+      "name" : "sexually active adults",
+      "type" : "stock",
+      "x" : 600.0,
+      "y" : 169.0
+    }, {
+      "name" : "children",
+      "type" : "stock",
+      "x" : 368.0,
+      "y" : 159.0
+    }, {
+      "name" : "_48",
+      "type" : "flow",
+      "x" : 289.0,
+      "y" : 162.0
+    }, {
+      "name" : "births",
+      "type" : "aux",
+      "x" : 289.0,
+      "y" : 181.0
+    }, {
+      "name" : "_172",
+      "type" : "flow",
+      "x" : 480.0,
+      "y" : 162.0
+    }, {
+      "name" : "from minor to adult",
+      "type" : "aux",
+      "x" : 480.0,
+      "y" : 181.0
+    }, {
+      "name" : "_140",
+      "type" : "flow",
+      "x" : 719.0,
+      "y" : 163.0
+    }, {
+      "name" : "loss of sexual activity",
+      "type" : "aux",
+      "x" : 719.0,
+      "y" : 190.0
+    }, {
+      "name" : "birth rate",
+      "type" : "aux",
+      "x" : 297.0,
+      "y" : 236.0
+    }, {
+      "name" : "age of consent",
+      "type" : "aux",
+      "x" : 502.0,
+      "y" : 233.0
+    }, {
+      "name" : "sexual lifetime",
+      "type" : "aux",
+      "x" : 838.0,
+      "y" : 205.0
+    }, {
+      "name" : "_48",
+      "type" : "flow",
+      "x" : 389.0,
+      "y" : 458.0
+    }, {
+      "name" : "new Dutch prostitutes",
+      "type" : "aux",
+      "x" : 389.0,
+      "y" : 485.0
+    }, {
+      "name" : "_48",
+      "type" : "flow",
+      "x" : 770.0,
+      "y" : 419.0
+    }, {
+      "name" : "new foreign prostitutes",
+      "type" : "aux",
+      "x" : 770.0,
+      "y" : 446.0
+    }, {
+      "name" : "profitability of prostitution",
+      "type" : "aux",
+      "x" : 895.0,
+      "y" : 681.0
+    }, {
+      "name" : "average lifetime in prostitution",
+      "type" : "aux",
+      "x" : 684.0,
+      "y" : 660.0
+    }, {
+      "name" : "_556",
+      "type" : "flow",
+      "x" : 1169.0,
+      "y" : 182.0
+    }, {
+      "name" : "demand for prostitutes",
+      "type" : "aux",
+      "x" : 1212.0,
+      "y" : 182.0
+    }, {
+      "name" : "Johns per prostitute",
+      "type" : "aux",
+      "x" : 953.0,
+      "y" : 271.0
+    }, {
+      "name" : "normal percentage clients of prostitutes",
+      "type" : "aux",
+      "x" : 1318.0,
+      "y" : 142.0
+    }, {
+      "name" : "effect of societal acceptability on the percentage of Johns",
+      "type" : "aux",
+      "x" : 665.0,
+      "y" : 289.0
+    }, {
+      "name" : "supply demand ratio",
+      "type" : "aux",
+      "x" : 1124.0,
+      "y" : 290.0
+    }, {
+      "name" : "normal fraction of young Dutch adults open for a job in prostitution",
+      "type" : "aux",
+      "x" : 303.0,
+      "y" : 620.0
+    }, {
+      "name" : "supply demand effect on the price of sex services",
+      "type" : "aux",
+      "x" : 1160.0,
+      "y" : 386.0
+    }, {
+      "name" : "total annual prostitution revenues",
+      "type" : "aux",
+      "x" : 954.0,
+      "y" : 407.0
+    }, {
+      "name" : "average price of sex services",
+      "type" : "aux",
+      "x" : 1348.0,
+      "y" : 384.0
+    }, {
+      "name" : "price effect on the demand for prostitutes",
+      "type" : "aux",
+      "x" : 1365.0,
+      "y" : 261.0
+    }, {
+      "name" : "_48",
+      "type" : "flow",
+      "x" : 605.0,
+      "y" : 597.0
+    }, {
+      "name" : "prostitution outflow",
+      "type" : "aux",
+      "x" : 649.0,
+      "y" : 597.0
+    }, {
+      "name" : "societal acceptability of prostitution",
+      "type" : "aux",
+      "x" : 478.0,
+      "y" : 373.0
+    }, {
+      "name" : "_48",
+      "type" : "flow",
+      "x" : 552.0,
+      "y" : 566.0
+    }, {
+      "name" : "reduction of supply through illegalisation",
+      "type" : "aux",
+      "x" : 480.0,
+      "y" : 566.0
+    }, {
+      "name" : "TIME STEP",
+      "type" : "aux",
+      "x" : 450.0,
+      "y" : 523.0
+    }, {
+      "name" : "influence of illegalisation on the societal acceptability of prostitution",
+      "type" : "aux",
+      "x" : 479.0,
+      "y" : 299.0
+    }, {
+      "name" : "naked costs per sex service",
+      "type" : "aux",
+      "x" : 1323.0,
+      "y" : 608.0
+    }, {
+      "name" : "frequency of prostitution visit",
+      "type" : "aux",
+      "x" : 946.0,
+      "y" : 481.0
+    }, {
+      "name" : "expected gap between demand and supply",
+      "type" : "aux",
+      "x" : 783.0,
+      "y" : 592.0
+    }, {
+      "name" : "delivery time",
+      "type" : "aux",
+      "x" : 704.0,
+      "y" : 515.0
+    } ],
+    "connectors" : [ {
+      "from" : "7",
+      "to" : "children"
+    }, {
+      "from" : "7",
+      "to" : "4"
+    }, {
+      "from" : "11",
+      "to" : "sexually active adults"
+    }, {
+      "from" : "11",
+      "to" : "children"
+    }, {
+      "from" : "age of consent",
+      "to" : "from minor to adult"
+    }, {
+      "from" : "birth rate",
+      "to" : "births"
+    }, {
+      "from" : "sexually active adults",
+      "to" : "_48"
+    }, {
+      "from" : "24",
+      "to" : "supply of prostitutes"
+    }, {
+      "from" : "24",
+      "to" : "21"
+    }, {
+      "from" : "29",
+      "to" : "supply of prostitutes"
+    }, {
+      "from" : "29",
+      "to" : "26"
+    }, {
+      "from" : "Johns per prostitute",
+      "to" : "demand for prostitutes"
+    }, {
+      "from" : "supply of prostitutes",
+      "to" : "supply demand ratio"
+    }, {
+      "from" : "_140",
+      "to" : "sexually active adults"
+    }, {
+      "from" : "sexual lifetime",
+      "to" : "loss of sexual activity"
+    }, {
+      "from" : "supply demand ratio",
+      "to" : "supply demand effect on the price of sex services"
+    }, {
+      "from" : "supply of prostitutes",
+      "to" : "total annual prostitution revenues"
+    }, {
+      "from" : "supply demand effect on the price of sex services",
+      "to" : "average price of sex services"
+    }, {
+      "from" : "average price of sex services",
+      "to" : "price effect on the demand for prostitutes"
+    }, {
+      "from" : "price effect on the demand for prostitutes",
+      "to" : "demand for prostitutes"
+    }, {
+      "from" : "average price of sex services",
+      "to" : "profitability of prostitution"
+    }, {
+      "from" : "average price of sex services",
+      "to" : "total annual prostitution revenues"
+    }, {
+      "from" : "58",
+      "to" : "55"
+    }, {
+      "from" : "58",
+      "to" : "supply of prostitutes"
+    }, {
+      "from" : "supply of prostitutes",
+      "to" : "prostitution outflow"
+    }, {
+      "from" : "average lifetime in prostitution",
+      "to" : "prostitution outflow"
+    }, {
+      "from" : "societal acceptability of prostitution",
+      "to" : "effect of societal acceptability on the percentage of Johns"
+    }, {
+      "from" : "sexually active adults",
+      "to" : "demand for prostitutes"
+    }, {
+      "from" : "68",
+      "to" : "65"
+    }, {
+      "from" : "68",
+      "to" : "supply of prostitutes"
+    }, {
+      "from" : "supply of prostitutes",
+      "to" : "reduction of supply through illegalisation"
+    }, {
+      "from" : "TIME STEP",
+      "to" : "reduction of supply through illegalisation"
+    }, {
+      "from" : "influence of illegalisation on the societal acceptability of prostitution",
+      "to" : "societal acceptability of prostitution"
+    }, {
+      "from" : "naked costs per sex service",
+      "to" : "profitability of prostitution"
+    }, {
+      "from" : "naked costs per sex service",
+      "to" : "average price of sex services"
+    }, {
+      "from" : "effect of societal acceptability on the percentage of Johns",
+      "to" : "demand for prostitutes"
+    }, {
+      "from" : "normal percentage clients of prostitutes",
+      "to" : "demand for prostitutes"
+    }, {
+      "from" : "demand for prostitutes",
+      "to" : "supply demand ratio"
+    }, {
+      "from" : "frequency of prostitution visit",
+      "to" : "total annual prostitution revenues"
+    }, {
+      "from" : "Johns per prostitute",
+      "to" : "total annual prostitution revenues"
+    }, {
+      "from" : "_140",
+      "to" : "84"
+    }, {
+      "from" : "sexually active adults",
+      "to" : "_140"
+    }, {
+      "from" : "demand for prostitutes",
+      "to" : "expected gap between demand and supply"
+    }, {
+      "from" : "supply of prostitutes",
+      "to" : "expected gap between demand and supply"
+    }, {
+      "from" : "expected gap between demand and supply",
+      "to" : "new foreign prostitutes"
+    }, {
+      "from" : "profitability of prostitution",
+      "to" : "new foreign prostitutes"
+    }, {
+      "from" : "prostitution outflow",
+      "to" : "expected gap between demand and supply"
+    }, {
+      "from" : "supply of prostitutes",
+      "to" : "societal acceptability of prostitution"
+    }, {
+      "from" : "societal acceptability of prostitution",
+      "to" : "_48"
+    }, {
+      "from" : "normal fraction of young Dutch adults open for a job in prostitution",
+      "to" : "new Dutch prostitutes"
+    }, {
+      "from" : "profitability of prostitution",
+      "to" : "new Dutch prostitutes"
+    }, {
+      "from" : "from minor to adult",
+      "to" : "_48"
+    }, {
+      "from" : "delivery time",
+      "to" : "new foreign prostitutes"
+    }, {
+      "from" : "delivery time",
+      "to" : "expected gap between demand and supply"
+    }, {
+      "from" : "births",
+      "to" : "from minor to adult"
+    } ],
+    "flowRoutes" : [ {
+      "flowName" : "_48",
+      "points" : [ [ 289.0, 162.0 ] ]
+    }, {
+      "flowName" : "_172",
+      "points" : [ [ 480.0, 162.0 ] ]
+    }, {
+      "flowName" : "_140",
+      "points" : [ [ 719.0, 163.0 ] ]
+    }, {
+      "flowName" : "_48",
+      "points" : [ [ 389.0, 458.0 ] ]
+    }, {
+      "flowName" : "_48",
+      "points" : [ [ 770.0, 419.0 ] ]
+    }, {
+      "flowName" : "_556",
+      "points" : [ [ 1169.0, 182.0 ] ]
+    }, {
+      "flowName" : "_48",
+      "points" : [ [ 605.0, 597.0 ] ]
+    }, {
+      "flowName" : "_48",
+      "points" : [ [ 552.0, 566.0 ] ]
+    } ]
+  } ],
+  "defaultSimulation" : {
+    "timeStep" : "Year",
+    "duration" : 40.0,
+    "durationUnit" : "Year",
+    "dt" : 0.0078125
+  },
+  "metadata" : {
+    "author" : "Dr. Erik Pruyt",
+    "source" : "Pruyt, E., 2013. Small System Dynamics Models for Big Issues: Triple Jump towards Real-World Complexity. TU Delft Library. ISBN 978-94-6186-195-5",
+    "license" : "CC-BY-NC-SA-4.0",
+    "url" : "https://simulation.tudelft.nl/SD/"
+  }
+}

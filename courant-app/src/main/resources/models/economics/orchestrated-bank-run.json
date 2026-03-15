@@ -1,0 +1,644 @@
+{
+  "name" : "1812_OrchestratedBankRun",
+  "stocks" : [ {
+    "name" : "fixed deposits and loans",
+    "comment" : "fixed deposits and loans",
+    "initialValue" : 1.0E9,
+    "unit" : "EURO"
+  }, {
+    "name" : "intervention cost",
+    "comment" : "intervention cost",
+    "initialValue" : 0.0,
+    "unit" : ""
+  }, {
+    "name" : "liquid assets",
+    "comment" : "liquid assets",
+    "initialValue" : 1.15E9,
+    "unit" : "EURO"
+  }, {
+    "name" : "fixed assets",
+    "comment" : "fixed assets",
+    "initialValue" : 4.6E9,
+    "unit" : "EURO"
+  }, {
+    "name" : "liquid deposits and loans",
+    "comment" : "liquid deposits and loans",
+    "initialValue" : 4.5E9,
+    "unit" : "EURO"
+  } ],
+  "flows" : [ {
+    "name" : "fixed deposits and loans net flow",
+    "comment" : "Net flow for fixed deposits and loans",
+    "equation" : "new_fixed_deposits_and_loans",
+    "timeUnit" : "Day",
+    "sink" : "fixed deposits and loans"
+  }, {
+    "name" : "intervention cost net flow",
+    "comment" : "Net flow for intervention cost",
+    "equation" : "new_liquid_assets",
+    "timeUnit" : "Day",
+    "sink" : "intervention cost"
+  }, {
+    "name" : "liquid assets inflow 1",
+    "equation" : "liquidation",
+    "timeUnit" : "Day",
+    "sink" : "liquid assets"
+  }, {
+    "name" : "liquid assets inflow 2",
+    "equation" : "new_liquid_assets",
+    "timeUnit" : "Day",
+    "sink" : "liquid assets"
+  }, {
+    "name" : "liquid assets outflow 3",
+    "equation" : "liquid_assets_lost",
+    "timeUnit" : "Day",
+    "source" : "liquid assets"
+  }, {
+    "name" : "fixed assets outflow 1",
+    "equation" : "liquidation",
+    "timeUnit" : "Day",
+    "source" : "fixed assets"
+  }, {
+    "name" : "fixed assets outflow 2",
+    "equation" : "liquidation_losses",
+    "timeUnit" : "Day",
+    "source" : "fixed assets"
+  }, {
+    "name" : "liquid deposits and loans net flow",
+    "comment" : "Net flow for liquid deposits and loans",
+    "equation" : "-liquid_deposits_and_loans_lost",
+    "timeUnit" : "Day",
+    "sink" : "liquid deposits and loans"
+  } ],
+  "variables" : [ {
+    "name" : "TIME_STEP",
+    "equation" : "0.0625",
+    "unit" : "Day"
+  }, {
+    "name" : "INITIAL_TIME",
+    "equation" : "0",
+    "unit" : "Day"
+  }, {
+    "name" : "FINAL_TIME",
+    "equation" : "100",
+    "unit" : "Day"
+  }, {
+    "name" : "initial credibility DSB",
+    "comment" : "initial credibility DSB",
+    "equation" : "0.9",
+    "unit" : "Dmnl"
+  }, {
+    "name" : "concerted liquid fraction running",
+    "comment" : "concerted liquid fraction running",
+    "equation" : "organised_run*(STEP(concerted_percentage_running,2)-STEP(concerted_percentage_running ,4))",
+    "unit" : "Dmnl"
+  }, {
+    "name" : "concerted percentage running",
+    "comment" : "concerted percentage running",
+    "equation" : "0.05",
+    "unit" : "Dmnl"
+  }, {
+    "name" : "credibility denials",
+    "comment" : "credibility denials",
+    "equation" : "initial_credibility_DSB-STEP(loss_of_credibility_DSB,1)*organised_run",
+    "unit" : "Dmnl"
+  }, {
+    "name" : "new fixed loan",
+    "comment" : "new fixed loan",
+    "equation" : "0",
+    "unit" : "EURO/Day"
+  }, {
+    "name" : "loss of credibility DSB",
+    "comment" : "loss of credibility DSB",
+    "equation" : "0.8",
+    "unit" : "Dmnl"
+  }, {
+    "name" : "new fixed deposits and loans",
+    "comment" : "new fixed deposits and loans",
+    "equation" : "liquid_deposits_and_loans_lost*new_fixed_loan_as_fraction_of_liq_lost+new_fixed_loan",
+    "unit" : "EURO/Week"
+  }, {
+    "name" : "new liquid assets",
+    "comment" : "new liquid assets",
+    "equation" : "new_fixed_deposits_and_loans+new_liquid_equity",
+    "unit" : "EURO/Day"
+  }, {
+    "name" : "new liquid equity",
+    "comment" : "new liquid equity",
+    "equation" : "0",
+    "unit" : "EURO/Day"
+  }, {
+    "name" : "new fixed loan as fraction of liq lost",
+    "comment" : "new fixed loan as fraction of liq lost",
+    "equation" : "0",
+    "unit" : "Dmnl"
+  }, {
+    "name" : "organised run",
+    "comment" : "organised run",
+    "equation" : "1",
+    "unit" : "Dmnl"
+  }, {
+    "name" : "total asset total liability ratio",
+    "comment" : "total asset total liability ratio",
+    "equation" : "(fixed_assets+liquid_assets)/(liquid_deposits_and_loans+fixed_deposits_and_loans)",
+    "unit" : "Dmnl"
+  }, {
+    "name" : "perceived likelihood bank failure risk",
+    "comment" : "perceived likelihood bank failure risk",
+    "equation" : "MAX(perceived_likelihood_liquidity_failure,perceived_likelihood_solvency_failure)*(1 -credibility_denials)",
+    "unit" : "Dmnl"
+  }, {
+    "name" : "anger",
+    "comment" : "anger",
+    "equation" : "0.5",
+    "unit" : "Dmnl"
+  }, {
+    "name" : "liquid fraction running",
+    "comment" : "liquid fraction running",
+    "equation" : "LOOKUP(liquid_fraction_running_lookup, perceived_likelihood_bank_failure_risk)",
+    "unit" : "Dmnl"
+  }, {
+    "name" : "liquidation losses",
+    "comment" : "liquidation losses",
+    "equation" : "liquidation/(1-liquidation_premium)*liquidation_premium",
+    "unit" : "EURO/Day"
+  }, {
+    "name" : "liquidation time",
+    "comment" : "liquidation time",
+    "equation" : "1",
+    "unit" : "Day"
+  }, {
+    "name" : "liquid asset liability target",
+    "comment" : "liquid asset liability target",
+    "equation" : "0.2",
+    "unit" : "Dmnl"
+  }, {
+    "name" : "liquidation",
+    "comment" : "liquidation",
+    "equation" : "MAX(0,(liquid_asset_liability_target*liquid_deposits_and_loans-liquid_assets)/liquidation_time *(1-liquidation_premium))",
+    "unit" : "EURO/Day"
+  }, {
+    "name" : "liquid deposits and loans lost",
+    "comment" : "MIN((liquid fraction running+concerted liquid fraction running)*hindrance  bank failures*liquid deposits and loans/opnametijd,liquid deposits and  loans/opnametijd)",
+    "equation" : "MIN((liquid_fraction_running*(1+expected_hindrance_possible_bank_failure)*(1+anger)+ concerted_liquid_fraction_running)*liquid_deposits_and_loans /withdrawal_time ,liquid_deposits_and_loans/withdrawal_time)",
+    "unit" : "EURO/Day"
+  }, {
+    "name" : "DNB bank failure declaration",
+    "comment" : "DNB bank failure declaration",
+    "equation" : "IF(liquid_asset_liability_ratio < 0.01  or  total_asset_total_liability_ratio < 0.9, 1, 0)",
+    "unit" : ""
+  }, {
+    "name" : "expected hindrance possible bank failure",
+    "comment" : "expected hindrance possible bank failure",
+    "equation" : "0.5",
+    "unit" : "Dmnl"
+  }, {
+    "name" : "perceived likelihood solvency failure",
+    "comment" : "solvency = total assets/total deposits and loans",
+    "equation" : "LOOKUP(perceived_likelihood_solvency_failure_lookup, total_asset_total_liability_ratio)",
+    "unit" : "Dmnl"
+  }, {
+    "name" : "liquid asset liability ratio",
+    "comment" : "liquid asset liability ratio",
+    "equation" : "liquid_assets/liquid_deposits_and_loans",
+    "unit" : "Dmnl"
+  }, {
+    "name" : "perceived likelihood liquidity failure",
+    "comment" : "perceived likelihood liquidity failure",
+    "equation" : "LOOKUP(perceived_likelihood_liquidity_failure_lookup, liquid_asset_liability_ratio)",
+    "unit" : "Dmnl"
+  }, {
+    "name" : "withdrawal time",
+    "comment" : "withdrawal time",
+    "equation" : "1",
+    "unit" : "Day"
+  }, {
+    "name" : "liquid assets lost",
+    "comment" : "liquid assets lost",
+    "equation" : "liquid_deposits_and_loans_lost",
+    "unit" : "EURO/Day"
+  }, {
+    "name" : "initial number of shares",
+    "comment" : "initial number of shares",
+    "equation" : "100000000",
+    "unit" : "share"
+  }, {
+    "name" : "liquidation premium",
+    "comment" : "liquidation premium",
+    "equation" : "0.15",
+    "unit" : "Dmnl"
+  } ],
+  "lookupTables" : [ {
+    "name" : "liquid_fraction_running_lookup",
+    "xValues" : [ 0.0, 0.25, 0.5, 0.75, 1.0 ],
+    "yValues" : [ 0.0, 0.0, 0.01, 0.1, 0.5 ],
+    "interpolation" : "LINEAR"
+  }, {
+    "name" : "perceived_likelihood_solvency_failure_lookup",
+    "xValues" : [ 0.0, 0.8, 0.9, 1.0, 1.1, 1.2, 2.0 ],
+    "yValues" : [ 1.0, 1.0, 0.9, 0.5, 0.1, 0.0, 0.0 ],
+    "interpolation" : "LINEAR"
+  }, {
+    "name" : "perceived_likelihood_liquidity_failure_lookup",
+    "xValues" : [ -1.0, 0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 1.0 ],
+    "yValues" : [ 1.0, 1.0, 0.8, 0.4, 0.1, 0.01, 0.0, 0.0 ],
+    "interpolation" : "LINEAR"
+  } ],
+  "views" : [ {
+    "name" : "View 1",
+    "elements" : [ {
+      "name" : "liquid assets",
+      "type" : "stock",
+      "x" : 381.0,
+      "y" : 417.0
+    }, {
+      "name" : "liquid deposits and loans",
+      "type" : "stock",
+      "x" : 671.0,
+      "y" : 295.0
+    }, {
+      "name" : "_48",
+      "type" : "flow",
+      "x" : 789.0,
+      "y" : 285.0
+    }, {
+      "name" : "liquid deposits and loans lost",
+      "type" : "aux",
+      "x" : 789.0,
+      "y" : 312.0
+    }, {
+      "name" : "_48",
+      "type" : "flow",
+      "x" : 383.0,
+      "y" : 523.0
+    }, {
+      "name" : "liquid assets lost",
+      "type" : "aux",
+      "x" : 324.0,
+      "y" : 523.0
+    }, {
+      "name" : "initial number of shares",
+      "type" : "aux",
+      "x" : 166.0,
+      "y" : 253.0
+    }, {
+      "name" : "liquidation premium",
+      "type" : "aux",
+      "x" : 557.0,
+      "y" : 488.0
+    }, {
+      "name" : "fixed deposits and loans",
+      "type" : "stock",
+      "x" : 598.0,
+      "y" : 295.0
+    }, {
+      "name" : "fixed assets",
+      "type" : "stock",
+      "x" : 599.0,
+      "y" : 417.0
+    }, {
+      "name" : "liquid asset liability ratio",
+      "type" : "aux",
+      "x" : 320.0,
+      "y" : 303.0
+    }, {
+      "name" : "total asset total liability ratio",
+      "type" : "aux",
+      "x" : 367.0,
+      "y" : 163.0
+    }, {
+      "name" : "perceived likelihood liquidity failure",
+      "type" : "aux",
+      "x" : 272.0,
+      "y" : 101.0
+    }, {
+      "name" : "perceived likelihood solvency failure",
+      "type" : "aux",
+      "x" : 395.0,
+      "y" : 37.0
+    }, {
+      "name" : "expected hindrance possible bank failure",
+      "type" : "aux",
+      "x" : 789.0,
+      "y" : 23.0
+    }, {
+      "name" : "withdrawal time",
+      "type" : "aux",
+      "x" : 827.0,
+      "y" : 405.0
+    }, {
+      "name" : "perceived likelihood bank failure risk",
+      "type" : "aux",
+      "x" : 521.0,
+      "y" : -22.0
+    }, {
+      "name" : "DNB bank failure declaration",
+      "type" : "aux",
+      "x" : 271.0,
+      "y" : -9.0
+    }, {
+      "name" : "liquid fraction running",
+      "type" : "aux",
+      "x" : 668.0,
+      "y" : 28.0
+    }, {
+      "name" : "_620",
+      "type" : "flow",
+      "x" : 490.0,
+      "y" : 417.0
+    }, {
+      "name" : "liquidation",
+      "type" : "aux",
+      "x" : 490.0,
+      "y" : 436.0
+    }, {
+      "name" : "liquidation time",
+      "type" : "aux",
+      "x" : 490.0,
+      "y" : 524.0
+    }, {
+      "name" : "liquid asset liability target",
+      "type" : "aux",
+      "x" : 437.0,
+      "y" : 485.0
+    }, {
+      "name" : "concerted liquid fraction running",
+      "type" : "aux",
+      "x" : 660.0,
+      "y" : 106.0
+    }, {
+      "name" : "_48",
+      "type" : "flow",
+      "x" : 629.0,
+      "y" : 452.0
+    }, {
+      "name" : "liquidation losses",
+      "type" : "aux",
+      "x" : 690.0,
+      "y" : 452.0
+    }, {
+      "name" : "anger",
+      "type" : "aux",
+      "x" : 821.0,
+      "y" : 103.0
+    }, {
+      "name" : "credibility denials",
+      "type" : "aux",
+      "x" : 521.0,
+      "y" : 44.0
+    }, {
+      "name" : "organised run",
+      "type" : "aux",
+      "x" : 521.0,
+      "y" : 105.0
+    }, {
+      "name" : "concerted percentage running",
+      "type" : "aux",
+      "x" : 509.0,
+      "y" : 146.0
+    }, {
+      "name" : "loss of credibility DSB",
+      "type" : "aux",
+      "x" : 459.0,
+      "y" : 81.0
+    }, {
+      "name" : "initial credibility DSB",
+      "type" : "aux",
+      "x" : 575.0,
+      "y" : 78.0
+    }, {
+      "name" : "_48",
+      "type" : "flow",
+      "x" : 601.0,
+      "y" : 205.0
+    }, {
+      "name" : "new fixed deposits and loans",
+      "type" : "aux",
+      "x" : 647.0,
+      "y" : 205.0
+    }, {
+      "name" : "new fixed loan as fraction of liq lost",
+      "type" : "aux",
+      "x" : 522.0,
+      "y" : 240.0
+    }, {
+      "name" : "_48",
+      "type" : "flow",
+      "x" : 286.0,
+      "y" : 411.0
+    }, {
+      "name" : "new liquid assets",
+      "type" : "aux",
+      "x" : 286.0,
+      "y" : 430.0
+    }, {
+      "name" : "new liquid equity",
+      "type" : "aux",
+      "x" : 195.0,
+      "y" : 474.0
+    }, {
+      "name" : "new fixed loan",
+      "type" : "aux",
+      "x" : 518.0,
+      "y" : 207.0
+    }, {
+      "name" : "intervention cost",
+      "type" : "stock",
+      "x" : 196.0,
+      "y" : 361.0
+    }, {
+      "name" : "new fixed deposits and loans",
+      "type" : "aux",
+      "x" : 306.0,
+      "y" : 470.0
+    } ],
+    "connectors" : [ {
+      "from" : "5",
+      "to" : "3"
+    }, {
+      "from" : "liquid deposits and loans lost",
+      "to" : "liquid deposits and loans"
+    }, {
+      "from" : "liquid deposits and loans",
+      "to" : "liquid deposits and loans lost"
+    }, {
+      "from" : "12",
+      "to" : "9"
+    }, {
+      "from" : "12",
+      "to" : "liquid assets"
+    }, {
+      "from" : "_48",
+      "to" : "liquid deposits and loans"
+    }, {
+      "from" : "liquid deposits and loans lost",
+      "to" : "_48"
+    }, {
+      "from" : "liquid assets",
+      "to" : "liquid asset liability ratio"
+    }, {
+      "from" : "liquid deposits and loans",
+      "to" : "liquid asset liability ratio"
+    }, {
+      "from" : "liquid asset liability ratio",
+      "to" : "perceived likelihood liquidity failure"
+    }, {
+      "from" : "total asset total liability ratio",
+      "to" : "perceived likelihood solvency failure"
+    }, {
+      "from" : "expected hindrance possible bank failure",
+      "to" : "_48"
+    }, {
+      "from" : "withdrawal time",
+      "to" : "liquid deposits and loans lost"
+    }, {
+      "from" : "perceived likelihood bank failure risk",
+      "to" : "39"
+    }, {
+      "from" : "total asset total liability ratio",
+      "to" : "DNB bank failure declaration"
+    }, {
+      "from" : "liquid asset liability ratio",
+      "to" : "DNB bank failure declaration"
+    }, {
+      "from" : "perceived likelihood liquidity failure",
+      "to" : "perceived likelihood bank failure risk"
+    }, {
+      "from" : "perceived likelihood solvency failure",
+      "to" : "perceived likelihood bank failure risk"
+    }, {
+      "from" : "liquid fraction running",
+      "to" : "_48"
+    }, {
+      "from" : "43",
+      "to" : "liquid assets"
+    }, {
+      "from" : "43",
+      "to" : "fixed assets"
+    }, {
+      "from" : "liquid deposits and loans",
+      "to" : "_620"
+    }, {
+      "from" : "liquid assets",
+      "to" : "liquidation"
+    }, {
+      "from" : "liquidation time",
+      "to" : "liquidation"
+    }, {
+      "from" : "liquid asset liability target",
+      "to" : "liquidation"
+    }, {
+      "from" : "concerted liquid fraction running",
+      "to" : "_48"
+    }, {
+      "from" : "56",
+      "to" : "53"
+    }, {
+      "from" : "56",
+      "to" : "fixed assets"
+    }, {
+      "from" : "_620",
+      "to" : "_48"
+    }, {
+      "from" : "liquidation premium",
+      "to" : "liquidation"
+    }, {
+      "from" : "liquidation premium",
+      "to" : "_48"
+    }, {
+      "from" : "anger",
+      "to" : "_48"
+    }, {
+      "from" : "credibility denials",
+      "to" : "perceived likelihood bank failure risk"
+    }, {
+      "from" : "organised run",
+      "to" : "credibility denials"
+    }, {
+      "from" : "organised run",
+      "to" : "concerted liquid fraction running"
+    }, {
+      "from" : "fixed deposits and loans",
+      "to" : "total asset total liability ratio"
+    }, {
+      "from" : "liquid deposits and loans",
+      "to" : "total asset total liability ratio"
+    }, {
+      "from" : "liquid assets",
+      "to" : "total asset total liability ratio"
+    }, {
+      "from" : "fixed assets",
+      "to" : "total asset total liability ratio"
+    }, {
+      "from" : "concerted percentage running",
+      "to" : "concerted liquid fraction running"
+    }, {
+      "from" : "loss of credibility DSB",
+      "to" : "credibility denials"
+    }, {
+      "from" : "initial credibility DSB",
+      "to" : "credibility denials"
+    }, {
+      "from" : "81",
+      "to" : "fixed deposits and loans"
+    }, {
+      "from" : "81",
+      "to" : "78"
+    }, {
+      "from" : "_48",
+      "to" : "new fixed deposits and loans"
+    }, {
+      "from" : "new fixed loan as fraction of liq lost",
+      "to" : "_48"
+    }, {
+      "from" : "89",
+      "to" : "liquid assets"
+    }, {
+      "from" : "89",
+      "to" : "86"
+    }, {
+      "from" : "new liquid equity",
+      "to" : "new liquid assets"
+    }, {
+      "from" : "new fixed loan",
+      "to" : "_48"
+    }, {
+      "from" : "_48",
+      "to" : "intervention cost"
+    }, {
+      "from" : "new fixed deposits and loans",
+      "to" : "new liquid assets"
+    } ],
+    "flowRoutes" : [ {
+      "flowName" : "_48",
+      "points" : [ [ 789.0, 285.0 ] ]
+    }, {
+      "flowName" : "_48",
+      "points" : [ [ 383.0, 523.0 ] ]
+    }, {
+      "flowName" : "_620",
+      "points" : [ [ 490.0, 417.0 ] ]
+    }, {
+      "flowName" : "_48",
+      "points" : [ [ 629.0, 452.0 ] ]
+    }, {
+      "flowName" : "_48",
+      "points" : [ [ 601.0, 205.0 ] ]
+    }, {
+      "flowName" : "_48",
+      "points" : [ [ 286.0, 411.0 ] ]
+    } ]
+  } ],
+  "defaultSimulation" : {
+    "timeStep" : "Day",
+    "duration" : 100.0,
+    "durationUnit" : "Day",
+    "dt" : 0.0625
+  },
+  "metadata" : {
+    "author" : "Dr. Erik Pruyt",
+    "source" : "Pruyt, E., 2013. Small System Dynamics Models for Big Issues: Triple Jump towards Real-World Complexity. TU Delft Library. ISBN 978-94-6186-195-5",
+    "license" : "CC-BY-NC-SA-4.0",
+    "url" : "https://simulation.tudelft.nl/SD/"
+  }
+}

@@ -1,0 +1,429 @@
+{
+  "name" : "WFKAL",
+  "stocks" : [ {
+    "name" : "Workforce",
+    "comment" : "The number of working people.",
+    "initialValue" : 0.0,
+    "initialExpression" : "initial_workforce",
+    "unit" : "person"
+  }, {
+    "name" : "Exp Sales",
+    "comment" : "The expected amount of sales.",
+    "initialValue" : 0.0,
+    "initialExpression" : "sales",
+    "unit" : "widget/month"
+  }, {
+    "name" : "Inventory",
+    "comment" : "The amount of inventory on hand.",
+    "initialValue" : 0.0,
+    "initialExpression" : "des_inventory",
+    "unit" : "widget"
+  } ],
+  "flows" : [ {
+    "name" : "Workforce net flow",
+    "comment" : "Net flow for Workforce",
+    "equation" : "net_hire",
+    "timeUnit" : "Month",
+    "sink" : "Workforce"
+  }, {
+    "name" : "Exp Sales net flow",
+    "comment" : "Net flow for Exp Sales",
+    "equation" : "(sales - Exp_Sales)/time_avg_sales",
+    "timeUnit" : "Month",
+    "sink" : "Exp Sales"
+  }, {
+    "name" : "Inventory inflow 1",
+    "equation" : "production",
+    "timeUnit" : "Month",
+    "sink" : "Inventory"
+  }, {
+    "name" : "Inventory outflow 2",
+    "equation" : "sales",
+    "timeUnit" : "Month",
+    "source" : "Inventory"
+  } ],
+  "variables" : [ {
+    "name" : "TIME_STEP",
+    "equation" : "1",
+    "unit" : "Month"
+  }, {
+    "name" : "INITIAL_TIME",
+    "equation" : "0",
+    "unit" : "Month"
+  }, {
+    "name" : "FINAL_TIME",
+    "equation" : "100",
+    "unit" : "Month"
+  }, {
+    "name" : "initial workforce",
+    "comment" : "The number of people working initially.",
+    "equation" : "INITIAL( des_workforce)",
+    "unit" : "person"
+  }, {
+    "name" : "net hire",
+    "comment" : "The net hire rate.",
+    "equation" : "(des_workforce - Workforce)/time_adjust_workforce + net_hire_noise*RANDOM_UNIFORM(-0.5,0.5,0)",
+    "unit" : "person/month"
+  }, {
+    "name" : "net hire noise",
+    "comment" : "Noise in net hiring to to unexpected events.",
+    "equation" : "0",
+    "unit" : "person/month"
+  }, {
+    "name" : "time adjust workforce",
+    "comment" : "The time to adjust the workforce.",
+    "equation" : "12",
+    "unit" : "month"
+  }, {
+    "name" : "des workforce",
+    "comment" : "The desired number of people working.",
+    "equation" : "des_production / norm_productivity",
+    "unit" : "person"
+  }, {
+    "name" : "productivity",
+    "comment" : "The average productivity of workers.",
+    "equation" : "(norm_productivity+RANDOM_UNIFORM(-0.5,0.5,0)*productivity_noise)",
+    "unit" : "widget/person/month"
+  }, {
+    "name" : "norm productivity",
+    "comment" : "The normal average productivity of workers.",
+    "equation" : "1",
+    "unit" : "widget/person/month"
+  }, {
+    "name" : "productivity noise",
+    "comment" : "The magnitude of driving noise in determining productivity.",
+    "equation" : "0",
+    "unit" : "widget/(person*month)"
+  }, {
+    "name" : "des production",
+    "comment" : "The desired production level.",
+    "equation" : "Exp_Sales + inv_correction",
+    "unit" : "widget/month"
+  }, {
+    "name" : "time avg sales",
+    "comment" : "The horizon over which sales are averaged.",
+    "equation" : "6",
+    "unit" : "month"
+  }, {
+    "name" : "inv correction",
+    "comment" : "The desired correction to the level of inventory held.",
+    "equation" : "(des_inventory - Inventory)/ time_correct_inventory",
+    "unit" : "widget/month"
+  }, {
+    "name" : "time correct inventory",
+    "comment" : "The time over which inventory discrepencies are \n\t\t        corrected.",
+    "equation" : "4",
+    "unit" : "month"
+  }, {
+    "name" : "des inventory",
+    "comment" : "The desired amunt of stock to keep in inventory.",
+    "equation" : "Exp_Sales * inventory_coverage",
+    "unit" : "widget"
+  }, {
+    "name" : "inventory coverage",
+    "comment" : "The number of months of sales held in inventory.",
+    "equation" : "3",
+    "unit" : "month"
+  }, {
+    "name" : "production",
+    "comment" : "The rate of production.",
+    "equation" : "Workforce * productivity",
+    "unit" : "widget/month"
+  }, {
+    "name" : "meas inventory",
+    "comment" : "The error prone measured sales.",
+    "equation" : "Inventory * (1+RANDOM_UNIFORM(-0.5,0.5,0)*inventory_meas_noise)",
+    "unit" : "widget"
+  }, {
+    "name" : "inventory meas noise",
+    "comment" : "The magnitude of error in measuring inventory.",
+    "equation" : "0",
+    "unit" : "dmnl"
+  }, {
+    "name" : "meas workforce",
+    "comment" : "The error prone measured sales.",
+    "equation" : "Workforce * (1+RANDOM_UNIFORM(-0.5,0.5,0)*workforce_meas_noise)",
+    "unit" : "person"
+  }, {
+    "name" : "workforce meas noise",
+    "comment" : "The magnitude of error in measuring workforce..",
+    "equation" : "0",
+    "unit" : "dmnl"
+  }, {
+    "name" : "sales",
+    "comment" : "The rate at which products are sold - exogenously input.",
+    "equation" : "0",
+    "unit" : "widget/month"
+  }, {
+    "name" : "meas workforce variance",
+    "comment" : "The variance in measurement. .0833*(.025*100)^2",
+    "equation" : "0.5",
+    "unit" : "dmnl"
+  }, {
+    "name" : "meas inventory variance",
+    "comment" : "The variance in measurement .0833*(.4*300)^2",
+    "equation" : "1200",
+    "unit" : "dmnl"
+  }, {
+    "name" : "inventory drive variance",
+    "comment" : "The variance in driving noise .0833*(.2*1*100)",
+    "equation" : "33",
+    "unit" : "dmnl"
+  }, {
+    "name" : "workforce drive variance",
+    "comment" : "The variance in driving workforce noise .0833*(4)^2",
+    "equation" : "1.3",
+    "unit" : "dmnl"
+  } ],
+  "views" : [ {
+    "name" : "1",
+    "elements" : [ {
+      "name" : "Workforce",
+      "type" : "stock",
+      "x" : 379.0,
+      "y" : 79.0
+    }, {
+      "name" : "initial workforce",
+      "type" : "aux",
+      "x" : 492.0,
+      "y" : 93.0
+    }, {
+      "name" : "des workforce",
+      "type" : "aux",
+      "x" : 88.0,
+      "y" : 154.0
+    }, {
+      "name" : "_0",
+      "type" : "flow",
+      "x" : 251.0,
+      "y" : 79.0
+    }, {
+      "name" : "net hire",
+      "type" : "aux",
+      "x" : 251.0,
+      "y" : 117.0
+    }, {
+      "name" : "time adjust workforce",
+      "type" : "aux",
+      "x" : 99.0,
+      "y" : 107.0
+    }, {
+      "name" : "des production",
+      "type" : "aux",
+      "x" : 83.0,
+      "y" : 251.0
+    }, {
+      "name" : "net hire noise",
+      "type" : "aux",
+      "x" : 188.0,
+      "y" : 35.0
+    }, {
+      "name" : "Exp Sales",
+      "type" : "stock",
+      "x" : 612.0,
+      "y" : 348.0
+    }, {
+      "name" : "inv correction",
+      "type" : "aux",
+      "x" : 203.0,
+      "y" : 297.0
+    }, {
+      "name" : "time avg sales",
+      "type" : "aux",
+      "x" : 676.0,
+      "y" : 248.0
+    }, {
+      "name" : "productivity noise",
+      "type" : "aux",
+      "x" : 284.0,
+      "y" : 151.0
+    }, {
+      "name" : "Inventory",
+      "type" : "stock",
+      "x" : 497.0,
+      "y" : 215.0
+    }, {
+      "name" : "time correct inventory",
+      "type" : "aux",
+      "x" : 323.0,
+      "y" : 401.0
+    }, {
+      "name" : "des inventory",
+      "type" : "aux",
+      "x" : 361.0,
+      "y" : 364.0
+    }, {
+      "name" : "productivity",
+      "type" : "aux",
+      "x" : 270.0,
+      "y" : 256.0
+    }, {
+      "name" : "inventory coverage",
+      "type" : "aux",
+      "x" : 507.0,
+      "y" : 313.0
+    }, {
+      "name" : "_0",
+      "type" : "flow",
+      "x" : 397.0,
+      "y" : 215.0
+    }, {
+      "name" : "production",
+      "type" : "aux",
+      "x" : 397.0,
+      "y" : 253.0
+    }, {
+      "name" : "meas inventory",
+      "type" : "aux",
+      "x" : 588.0,
+      "y" : 159.0
+    }, {
+      "name" : "inventory meas noise",
+      "type" : "aux",
+      "x" : 489.0,
+      "y" : 124.0
+    }, {
+      "name" : "meas workforce",
+      "type" : "aux",
+      "x" : 577.0,
+      "y" : 83.0
+    }, {
+      "name" : "workforce meas noise",
+      "type" : "aux",
+      "x" : 515.0,
+      "y" : 43.0
+    }, {
+      "name" : "norm productivity",
+      "type" : "aux",
+      "x" : 165.0,
+      "y" : 208.0
+    }, {
+      "name" : "_0",
+      "type" : "flow",
+      "x" : 573.0,
+      "y" : 213.0
+    }, {
+      "name" : "sales",
+      "type" : "aux",
+      "x" : 573.0,
+      "y" : 251.0
+    } ],
+    "connectors" : [ {
+      "from" : "initial workforce",
+      "to" : "Workforce"
+    }, {
+      "from" : "_0",
+      "to" : "Workforce"
+    }, {
+      "from" : "_0",
+      "to" : "4"
+    }, {
+      "from" : "des workforce",
+      "to" : "net hire"
+    }, {
+      "from" : "time adjust workforce",
+      "to" : "net hire"
+    }, {
+      "from" : "Workforce",
+      "to" : "net hire"
+    }, {
+      "from" : "des production",
+      "to" : "des workforce"
+    }, {
+      "from" : "Exp Sales",
+      "to" : "des production"
+    }, {
+      "from" : "inv correction",
+      "to" : "des production"
+    }, {
+      "from" : "61",
+      "to" : "Exp Sales"
+    }, {
+      "from" : "time avg sales",
+      "to" : "Exp Sales"
+    }, {
+      "from" : "des inventory",
+      "to" : "inv correction"
+    }, {
+      "from" : "Inventory",
+      "to" : "inv correction"
+    }, {
+      "from" : "time correct inventory",
+      "to" : "inv correction"
+    }, {
+      "from" : "des inventory",
+      "to" : "Inventory"
+    }, {
+      "from" : "_0",
+      "to" : "Inventory"
+    }, {
+      "from" : "_0",
+      "to" : "18"
+    }, {
+      "from" : "60",
+      "to" : "20"
+    }, {
+      "from" : "60",
+      "to" : "Inventory"
+    }, {
+      "from" : "productivity",
+      "to" : "production"
+    }, {
+      "from" : "Workforce",
+      "to" : "_0"
+    }, {
+      "from" : "Exp Sales",
+      "to" : "des inventory"
+    }, {
+      "from" : "inventory coverage",
+      "to" : "des inventory"
+    }, {
+      "from" : "productivity noise",
+      "to" : "productivity"
+    }, {
+      "from" : "des workforce",
+      "to" : "initial workforce"
+    }, {
+      "from" : "net hire noise",
+      "to" : "_0"
+    }, {
+      "from" : "Inventory",
+      "to" : "meas inventory"
+    }, {
+      "from" : "inventory meas noise",
+      "to" : "meas inventory"
+    }, {
+      "from" : "Workforce",
+      "to" : "meas workforce"
+    }, {
+      "from" : "workforce meas noise",
+      "to" : "meas workforce"
+    }, {
+      "from" : "norm productivity",
+      "to" : "des workforce"
+    }, {
+      "from" : "norm productivity",
+      "to" : "productivity"
+    } ],
+    "flowRoutes" : [ {
+      "flowName" : "_0",
+      "points" : [ [ 251.0, 79.0 ] ]
+    }, {
+      "flowName" : "_0",
+      "points" : [ [ 397.0, 215.0 ] ]
+    }, {
+      "flowName" : "_0",
+      "points" : [ [ 573.0, 213.0 ] ]
+    } ]
+  } ],
+  "defaultSimulation" : {
+    "timeStep" : "Month",
+    "duration" : 100.0,
+    "durationUnit" : "Month"
+  },
+  "metadata" : {
+    "author" : "Ventana Systems",
+    "source" : "Vensim Sample Models",
+    "license" : "MIT"
+  }
+}

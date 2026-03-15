@@ -1,0 +1,134 @@
+{
+  "name" : "POPGAME",
+  "stocks" : [ {
+    "name" : "Population",
+    "comment" : "Population",
+    "initialValue" : 100.0,
+    "unit" : "Rabbit"
+  } ],
+  "flows" : [ {
+    "name" : "Population inflow 1",
+    "equation" : "births",
+    "timeUnit" : "Month",
+    "sink" : "Population"
+  }, {
+    "name" : "Population outflow 2",
+    "equation" : "deaths",
+    "timeUnit" : "Month",
+    "source" : "Population"
+  } ],
+  "variables" : [ {
+    "name" : "TIME_STEP",
+    "equation" : "1",
+    "unit" : "Month"
+  }, {
+    "name" : "INITIAL_TIME",
+    "equation" : "0",
+    "unit" : "Month"
+  }, {
+    "name" : "FINAL_TIME",
+    "equation" : "100",
+    "unit" : "Month"
+  }, {
+    "name" : "death rate",
+    "comment" : "death rate",
+    "equation" : "0.01",
+    "unit" : "fraction/Month"
+  }, {
+    "name" : "birth rate",
+    "comment" : "birth rate",
+    "equation" : "0.03",
+    "unit" : "fraction/Month"
+  }, {
+    "name" : "births",
+    "comment" : "births",
+    "equation" : "Population * birth_rate",
+    "unit" : "Rabbit/Month"
+  }, {
+    "name" : "deaths",
+    "comment" : "deaths",
+    "equation" : "Population* death_rate",
+    "unit" : "Rabbit/Month"
+  } ],
+  "views" : [ {
+    "name" : "View 1",
+    "elements" : [ {
+      "name" : "Population",
+      "type" : "stock",
+      "x" : 253.0,
+      "y" : 221.0
+    }, {
+      "name" : "_0",
+      "type" : "flow",
+      "x" : 124.0,
+      "y" : 222.0
+    }, {
+      "name" : "births",
+      "type" : "aux",
+      "x" : 124.0,
+      "y" : 260.0
+    }, {
+      "name" : "_0",
+      "type" : "flow",
+      "x" : 349.0,
+      "y" : 221.0
+    }, {
+      "name" : "deaths",
+      "type" : "aux",
+      "x" : 349.0,
+      "y" : 259.0
+    }, {
+      "name" : "birth rate",
+      "type" : "aux",
+      "x" : 88.0,
+      "y" : 319.0
+    }, {
+      "name" : "death rate",
+      "type" : "aux",
+      "x" : 371.0,
+      "y" : 318.0
+    } ],
+    "connectors" : [ {
+      "from" : "Population",
+      "to" : "11"
+    }, {
+      "from" : "Population",
+      "to" : "13"
+    }, {
+      "from" : "10",
+      "to" : "Population"
+    }, {
+      "from" : "10",
+      "to" : "4"
+    }, {
+      "from" : "12",
+      "to" : "7"
+    }, {
+      "from" : "12",
+      "to" : "Population"
+    }, {
+      "from" : "birth rate",
+      "to" : "births"
+    }, {
+      "from" : "death rate",
+      "to" : "deaths"
+    } ],
+    "flowRoutes" : [ {
+      "flowName" : "_0",
+      "points" : [ [ 124.0, 222.0 ] ]
+    }, {
+      "flowName" : "_0",
+      "points" : [ [ 349.0, 221.0 ] ]
+    } ]
+  } ],
+  "defaultSimulation" : {
+    "timeStep" : "Month",
+    "duration" : 100.0,
+    "durationUnit" : "Month"
+  },
+  "metadata" : {
+    "author" : "Ventana Systems",
+    "source" : "Vensim Sample Models",
+    "license" : "MIT"
+  }
+}

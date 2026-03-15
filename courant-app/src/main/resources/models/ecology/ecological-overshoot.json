@@ -1,417 +1,339 @@
 {
-  "name": "0603EcOvershootCollapseBasedOnEZ416Bossel",
-  "stocks": [
-    {
-      "name": "renewable resources",
-      "comment": "renewable resources",
-      "initialValue": 0.0,
-      "unit": "resource"
-    },
-    {
-      "name": "population",
-      "comment": "population",
-      "initialValue": 0.0,
-      "unit": "consumer"
-    }
-  ],
-  "flows": [
-    {
-      "name": "renewable resources net flow",
-      "comment": "Net flow for renewable resources",
-      "equation": "+regeneration-resource_use",
-      "timeUnit": "Year",
-      "sink": "renewable resources"
-    },
-    {
-      "name": "population net flow",
-      "comment": "Net flow for population",
-      "equation": "+births-deaths",
-      "timeUnit": "Year",
-      "sink": "population"
-    }
-  ],
-  "variables": [
-    {
-      "name": "deaths",
-      "comment": "deaths",
-      "equation": "population/resource_availability_dependent_lifetime",
-      "unit": "consumer/Year"
-    },
-    {
-      "name": "resource availability dependent lifetime",
-      "comment": "resource availability dependent lifetime",
-      "equation": "MAX(15,MIN(100,normal_lifetime*per_capita_renewable_resource_availability))",
-      "unit": ""
-    },
-    {
-      "name": "resource use",
-      "comment": "resource use",
-      "equation": "MIN(renewable_resources/rapid_resource_depletion_time, renewable_resource_consumption_per_capita *population)",
-      "unit": "resource/Year"
-    },
-    {
-      "name": "regeneration",
-      "comment": "regeneration",
-      "equation": "regeneration_rate*renewable_resources*(renewable_resources/carrying_capacity)*(1-renewable_resources /carrying_capacity)+minimum_regeneration_rate*carrying_capacity",
-      "unit": "resource/Year"
-    },
-    {
-      "name": "per capita renewable resource availability",
-      "comment": "per capita renewable resource availability",
-      "equation": "renewable_resources/population",
-      "unit": "resource/consumer"
-    },
-    {
-      "name": "births",
-      "comment": "births",
-      "equation": "normal_birth_rate*population*per_capita_renewable_resource_availability",
-      "unit": "consumer/Year"
-    },
-    {
-      "name": "rapid resource depletion time",
-      "equation": "1",
-      "comment": "rapid resource depletion time",
-      "unit": "Year"
-    },
-    {
-      "name": "INITIAL RESOURCES",
-      "equation": "7000000",
-      "comment": "INITIAL RESOURCES",
-      "unit": "resource"
-    },
-    {
-      "name": "INITIAL CONSUMERS",
-      "equation": "100000",
-      "comment": "INITIAL CONSUMERS",
-      "unit": "consumer"
-    },
-    {
-      "name": "regeneration rate",
-      "equation": "1.2",
-      "comment": "regeneration rate",
-      "unit": "1/Year"
-    },
-    {
-      "name": "normal birth rate",
-      "equation": "0.0035",
-      "comment": "normal birth rate",
-      "unit": "1/Year"
-    },
-    {
-      "name": "minimum regeneration rate",
-      "equation": "0.01",
-      "comment": "minimum regeneration rate",
-      "unit": "1/Year"
-    },
-    {
-      "name": "carrying capacity",
-      "equation": "7500000",
-      "comment": "carrying capacity",
-      "unit": "resource"
-    },
-    {
-      "name": "renewable resource consumption per capita",
-      "equation": "1",
-      "comment": "renewable resource consumption per capita",
-      "unit": "resource/(consumer*Year)"
-    },
-    {
-      "name": "normal lifetime",
-      "equation": "25",
-      "comment": "normal lifetime",
-      "unit": "1/Year"
-    }
-  ],
-  "views": [
-    {
-      "name": "View 1",
-      "elements": [
-        {
-          "name": "renewable resources",
-          "type": "stock",
-          "x": 268.0,
-          "y": 250.0
-        },
-        {
-          "name": "population",
-          "type": "stock",
-          "x": 552.0,
-          "y": 251.0
-        },
-        {
-          "name": "_48",
-          "type": "flow",
-          "x": 167.0,
-          "y": 251.0
-        },
-        {
-          "name": "regeneration",
-          "type": "aux",
-          "x": 167.0,
-          "y": 267.0
-        },
-        {
-          "name": "regeneration rate",
-          "type": "aux",
-          "x": 95.0,
-          "y": 313.0
-        },
-        {
-          "name": "carrying capacity",
-          "type": "aux",
-          "x": 174.0,
-          "y": 172.0
-        },
-        {
-          "name": "renewable resource consumption per capita",
-          "type": "aux",
-          "x": 319.0,
-          "y": 420.0
-        },
-        {
-          "name": "normal birth rate",
-          "type": "aux",
-          "x": 462.0,
-          "y": 328.0
-        },
-        {
-          "name": "normal lifetime",
-          "type": "aux",
-          "x": 740.0,
-          "y": 344.0
-        },
-        {
-          "name": "minimum regeneration rate",
-          "type": "aux",
-          "x": 163.0,
-          "y": 358.0
-        },
-        {
-          "name": "INITIAL RESOURCES",
-          "type": "aux",
-          "x": 268.0,
-          "y": 214.0
-        },
-        {
-          "name": "INITIAL CONSUMERS",
-          "type": "aux",
-          "x": 552.0,
-          "y": 216.0
-        },
-        {
-          "name": "_48",
-          "type": "flow",
-          "x": 363.0,
-          "y": 250.0
-        },
-        {
-          "name": "resource use",
-          "type": "aux",
-          "x": 363.0,
-          "y": 266.0
-        },
-        {
-          "name": "per capita renewable resource availability",
-          "type": "aux",
-          "x": 410.0,
-          "y": 167.0
-        },
-        {
-          "name": "_48",
-          "type": "flow",
-          "x": 468.0,
-          "y": 250.0
-        },
-        {
-          "name": "births",
-          "type": "aux",
-          "x": 468.0,
-          "y": 266.0
-        },
-        {
-          "name": "_48",
-          "type": "flow",
-          "x": 630.0,
-          "y": 251.0
-        },
-        {
-          "name": "deaths",
-          "type": "aux",
-          "x": 630.0,
-          "y": 267.0
-        },
-        {
-          "name": "rapid resource depletion time",
-          "type": "aux",
-          "x": 252.0,
-          "y": 330.0
-        },
-        {
-          "name": "resource availability dependent lifetime",
-          "type": "aux",
-          "x": 675.0,
-          "y": 192.0
-        }
-      ],
-      "connectors": [
-        {
-          "from": "6",
-          "to": "renewable resources"
-        },
-        {
-          "from": "6",
-          "to": "3"
-        },
-        {
-          "from": "19",
-          "to": "16"
-        },
-        {
-          "from": "19",
-          "to": "renewable resources"
-        },
-        {
-          "from": "population",
-          "to": "resource use"
-        },
-        {
-          "from": "renewable resource consumption per capita",
-          "to": "resource use"
-        },
-        {
-          "from": "renewable resources",
-          "to": "resource use"
-        },
-        {
-          "from": "renewable resources",
-          "to": "per capita renewable resource availability"
-        },
-        {
-          "from": "population",
-          "to": "per capita renewable resource availability"
-        },
-        {
-          "from": "30",
-          "to": "population"
-        },
-        {
-          "from": "30",
-          "to": "27"
-        },
-        {
-          "from": "35",
-          "to": "32"
-        },
-        {
-          "from": "35",
-          "to": "population"
-        },
-        {
-          "from": "normal lifetime",
-          "to": "51"
-        },
-        {
-          "from": "population",
-          "to": "deaths"
-        },
-        {
-          "from": "per capita renewable resource availability",
-          "to": "births"
-        },
-        {
-          "from": "normal birth rate",
-          "to": "births"
-        },
-        {
-          "from": "regeneration rate",
-          "to": "regeneration"
-        },
-        {
-          "from": "renewable resources",
-          "to": "regeneration"
-        },
-        {
-          "from": "carrying capacity",
-          "to": "regeneration"
-        },
-        {
-          "from": "minimum regeneration rate",
-          "to": "regeneration"
-        },
-        {
-          "from": "population",
-          "to": "births"
-        },
-        {
-          "from": "INITIAL RESOURCES",
-          "to": "renewable resources"
-        },
-        {
-          "from": "INITIAL CONSUMERS",
-          "to": "population"
-        },
-        {
-          "from": "per capita renewable resource availability",
-          "to": "51"
-        },
-        {
-          "from": "rapid resource depletion time",
-          "to": "resource use"
-        },
-        {
-          "from": "resource availability dependent lifetime",
-          "to": "deaths"
-        }
-      ],
-      "flowRoutes": [
-        {
-          "flowName": "_48",
-          "points": [
-            [
-              167.0,
-              251.0
-            ]
-          ]
-        },
-        {
-          "flowName": "_48",
-          "points": [
-            [
-              363.0,
-              250.0
-            ]
-          ]
-        },
-        {
-          "flowName": "_48",
-          "points": [
-            [
-              468.0,
-              250.0
-            ]
-          ]
-        },
-        {
-          "flowName": "_48",
-          "points": [
-            [
-              630.0,
-              251.0
-            ]
-          ]
-        }
-      ]
-    }
-  ],
-  "defaultSimulation": {
-    "timeStep": "Year",
-    "duration": 500.0,
-    "durationUnit": "Year"
+  "name" : "0603EcOvershootCollapseBasedOnEZ416Bossel",
+  "stocks" : [ {
+    "name" : "renewable resources",
+    "comment" : "renewable resources",
+    "initialValue" : 7000000.0,
+    "unit" : "resource"
+  }, {
+    "name" : "population",
+    "comment" : "population",
+    "initialValue" : 100000.0,
+    "unit" : "consumer"
+  } ],
+  "flows" : [ {
+    "name" : "renewable resources inflow 1",
+    "equation" : "regeneration",
+    "timeUnit" : "Year",
+    "sink" : "renewable resources"
+  }, {
+    "name" : "renewable resources outflow 2",
+    "equation" : "resource_use",
+    "timeUnit" : "Year",
+    "source" : "renewable resources"
+  }, {
+    "name" : "population inflow 1",
+    "equation" : "births",
+    "timeUnit" : "Year",
+    "sink" : "population"
+  }, {
+    "name" : "population outflow 2",
+    "equation" : "deaths",
+    "timeUnit" : "Year",
+    "source" : "population"
+  } ],
+  "variables" : [ {
+    "name" : "TIME_STEP",
+    "equation" : "0.02",
+    "unit" : "Year"
+  }, {
+    "name" : "INITIAL_TIME",
+    "equation" : "0",
+    "unit" : "Year"
+  }, {
+    "name" : "FINAL_TIME",
+    "equation" : "500",
+    "unit" : "Year"
+  }, {
+    "name" : "deaths",
+    "comment" : "deaths",
+    "equation" : "population/resource_availability_dependent_lifetime",
+    "unit" : "consumer/Year"
+  }, {
+    "name" : "resource availability dependent lifetime",
+    "comment" : "MAX(MIN(normal lifetime*per capita renewable resource availability,100),20)",
+    "equation" : "MAX(15,MIN(100,normal_lifetime*per_capita_renewable_resource_availability))",
+    "unit" : ""
+  }, {
+    "name" : "rapid resource depletion time",
+    "comment" : "rapid resource depletion time",
+    "equation" : "1",
+    "unit" : "Year"
+  }, {
+    "name" : "resource use",
+    "comment" : "IF THEN ELSE(renewable resources/rapid resource depletion time < renewable  resource consumption per capita*population, renewable resources/rapid  resource depletion time, renewable resource consumption per  capita*population)",
+    "equation" : "MIN(renewable_resources/rapid_resource_depletion_time, renewable_resource_consumption_per_capita *population)",
+    "unit" : "resource/Year"
+  }, {
+    "name" : "INITIAL RESOURCES",
+    "comment" : "INITIAL RESOURCES",
+    "equation" : "7000000",
+    "unit" : "resource"
+  }, {
+    "name" : "INITIAL CONSUMERS",
+    "comment" : "INITIAL CONSUMERS",
+    "equation" : "100000",
+    "unit" : "consumer"
+  }, {
+    "name" : "regeneration",
+    "comment" : "regeneration",
+    "equation" : "regeneration_rate*renewable_resources*(renewable_resources/carrying_capacity)*(1-renewable_resources /carrying_capacity)+minimum_regeneration_rate*carrying_capacity",
+    "unit" : "resource/Year"
+  }, {
+    "name" : "regeneration rate",
+    "comment" : "regeneration rate",
+    "equation" : "1.2",
+    "unit" : "1/Year"
+  }, {
+    "name" : "normal birth rate",
+    "comment" : "normal birth rate",
+    "equation" : "0.0035",
+    "unit" : "1/Year"
+  }, {
+    "name" : "minimum regeneration rate",
+    "comment" : "minimum regeneration rate",
+    "equation" : "0.01",
+    "unit" : "1/Year"
+  }, {
+    "name" : "carrying capacity",
+    "comment" : "carrying capacity",
+    "equation" : "7500000",
+    "unit" : "resource"
+  }, {
+    "name" : "per capita renewable resource availability",
+    "comment" : "per capita renewable resource availability",
+    "equation" : "renewable_resources/population",
+    "unit" : "resource/consumer"
+  }, {
+    "name" : "renewable resource consumption per capita",
+    "comment" : "renewable resource consumption per capita",
+    "equation" : "1",
+    "unit" : "resource/(consumer*Year)"
+  }, {
+    "name" : "normal lifetime",
+    "comment" : "normal lifetime",
+    "equation" : "25",
+    "unit" : "1/Year"
+  }, {
+    "name" : "births",
+    "comment" : "births",
+    "equation" : "normal_birth_rate*population*per_capita_renewable_resource_availability",
+    "unit" : "consumer/Year"
+  } ],
+  "views" : [ {
+    "name" : "View 1",
+    "elements" : [ {
+      "name" : "renewable resources",
+      "type" : "stock",
+      "x" : 268.0,
+      "y" : 250.0
+    }, {
+      "name" : "population",
+      "type" : "stock",
+      "x" : 552.0,
+      "y" : 251.0
+    }, {
+      "name" : "_48",
+      "type" : "flow",
+      "x" : 167.0,
+      "y" : 251.0
+    }, {
+      "name" : "regeneration",
+      "type" : "aux",
+      "x" : 167.0,
+      "y" : 267.0
+    }, {
+      "name" : "regeneration rate",
+      "type" : "aux",
+      "x" : 95.0,
+      "y" : 313.0
+    }, {
+      "name" : "carrying capacity",
+      "type" : "aux",
+      "x" : 174.0,
+      "y" : 172.0
+    }, {
+      "name" : "renewable resource consumption per capita",
+      "type" : "aux",
+      "x" : 319.0,
+      "y" : 420.0
+    }, {
+      "name" : "normal birth rate",
+      "type" : "aux",
+      "x" : 462.0,
+      "y" : 328.0
+    }, {
+      "name" : "normal lifetime",
+      "type" : "aux",
+      "x" : 740.0,
+      "y" : 344.0
+    }, {
+      "name" : "minimum regeneration rate",
+      "type" : "aux",
+      "x" : 163.0,
+      "y" : 358.0
+    }, {
+      "name" : "INITIAL RESOURCES",
+      "type" : "aux",
+      "x" : 268.0,
+      "y" : 214.0
+    }, {
+      "name" : "INITIAL CONSUMERS",
+      "type" : "aux",
+      "x" : 552.0,
+      "y" : 216.0
+    }, {
+      "name" : "_48",
+      "type" : "flow",
+      "x" : 363.0,
+      "y" : 250.0
+    }, {
+      "name" : "resource use",
+      "type" : "aux",
+      "x" : 363.0,
+      "y" : 266.0
+    }, {
+      "name" : "per capita renewable resource availability",
+      "type" : "aux",
+      "x" : 410.0,
+      "y" : 167.0
+    }, {
+      "name" : "_48",
+      "type" : "flow",
+      "x" : 468.0,
+      "y" : 250.0
+    }, {
+      "name" : "births",
+      "type" : "aux",
+      "x" : 468.0,
+      "y" : 266.0
+    }, {
+      "name" : "_48",
+      "type" : "flow",
+      "x" : 630.0,
+      "y" : 251.0
+    }, {
+      "name" : "deaths",
+      "type" : "aux",
+      "x" : 630.0,
+      "y" : 267.0
+    }, {
+      "name" : "rapid resource depletion time",
+      "type" : "aux",
+      "x" : 252.0,
+      "y" : 330.0
+    }, {
+      "name" : "resource availability dependent lifetime",
+      "type" : "aux",
+      "x" : 675.0,
+      "y" : 192.0
+    } ],
+    "connectors" : [ {
+      "from" : "6",
+      "to" : "renewable resources"
+    }, {
+      "from" : "6",
+      "to" : "3"
+    }, {
+      "from" : "19",
+      "to" : "16"
+    }, {
+      "from" : "19",
+      "to" : "renewable resources"
+    }, {
+      "from" : "population",
+      "to" : "resource use"
+    }, {
+      "from" : "renewable resource consumption per capita",
+      "to" : "resource use"
+    }, {
+      "from" : "renewable resources",
+      "to" : "resource use"
+    }, {
+      "from" : "renewable resources",
+      "to" : "per capita renewable resource availability"
+    }, {
+      "from" : "population",
+      "to" : "per capita renewable resource availability"
+    }, {
+      "from" : "30",
+      "to" : "population"
+    }, {
+      "from" : "30",
+      "to" : "27"
+    }, {
+      "from" : "35",
+      "to" : "32"
+    }, {
+      "from" : "35",
+      "to" : "population"
+    }, {
+      "from" : "normal lifetime",
+      "to" : "51"
+    }, {
+      "from" : "population",
+      "to" : "deaths"
+    }, {
+      "from" : "per capita renewable resource availability",
+      "to" : "births"
+    }, {
+      "from" : "normal birth rate",
+      "to" : "births"
+    }, {
+      "from" : "regeneration rate",
+      "to" : "regeneration"
+    }, {
+      "from" : "renewable resources",
+      "to" : "regeneration"
+    }, {
+      "from" : "carrying capacity",
+      "to" : "regeneration"
+    }, {
+      "from" : "minimum regeneration rate",
+      "to" : "regeneration"
+    }, {
+      "from" : "population",
+      "to" : "births"
+    }, {
+      "from" : "INITIAL RESOURCES",
+      "to" : "renewable resources"
+    }, {
+      "from" : "INITIAL CONSUMERS",
+      "to" : "population"
+    }, {
+      "from" : "per capita renewable resource availability",
+      "to" : "51"
+    }, {
+      "from" : "rapid resource depletion time",
+      "to" : "resource use"
+    }, {
+      "from" : "resource availability dependent lifetime",
+      "to" : "deaths"
+    } ],
+    "flowRoutes" : [ {
+      "flowName" : "_48",
+      "points" : [ [ 167.0, 251.0 ] ]
+    }, {
+      "flowName" : "_48",
+      "points" : [ [ 363.0, 250.0 ] ]
+    }, {
+      "flowName" : "_48",
+      "points" : [ [ 468.0, 250.0 ] ]
+    }, {
+      "flowName" : "_48",
+      "points" : [ [ 630.0, 251.0 ] ]
+    } ]
+  } ],
+  "defaultSimulation" : {
+    "timeStep" : "Year",
+    "duration" : 500.0,
+    "durationUnit" : "Year",
+    "dt" : 0.02
   },
-  "metadata": {
-    "author": "Dr. Erik Pruyt",
-    "source": "Pruyt, E., 2013. Small System Dynamics Models for Big Issues: Triple Jump towards Real-World Complexity. TU Delft Library. ISBN 978-94-6186-195-5",
-    "license": "CC-BY-NC-SA-4.0",
-    "url": "https://simulation.tudelft.nl/SD/model_files_nested/06_03"
+  "metadata" : {
+    "author" : "Dr. Erik Pruyt",
+    "source" : "Pruyt, E., 2013. Small System Dynamics Models for Big Issues: Triple Jump towards Real-World Complexity. TU Delft Library. ISBN 978-94-6186-195-5",
+    "license" : "CC-BY-NC-SA-4.0",
+    "url" : "https://simulation.tudelft.nl/SD/"
   }
 }
