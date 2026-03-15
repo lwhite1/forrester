@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.regex.Matcher;
@@ -61,6 +62,12 @@ public final class VensimExprTranslator {
             "(?i)DELAY\\s+MATERIAL\\s*\\(");
     private static final Pattern RANDOM_0_1_PATTERN = Pattern.compile(
             "(?i)RANDOM\\s+0\\s+1\\s*\\(\\s*\\)");
+    private static final Pattern SUM_FUNC_PATTERN = Pattern.compile(
+            "(?i)\\bSUM\\s*\\(");
+    private static final Pattern VMIN_FUNC_PATTERN = Pattern.compile(
+            "(?i)\\bVMIN\\s*\\(");
+    private static final Pattern BANG_DIM_PATTERN = Pattern.compile(
+            "([a-zA-Z_][a-zA-Z0-9_]*)!");
     private static final Pattern NOT_EQUAL_PATTERN = Pattern.compile("<>");
     private static final Pattern MESSAGE_PATTERN = Pattern.compile(
             "(?i)MESSAGE\\s*\\(");
@@ -150,6 +157,24 @@ public final class VensimExprTranslator {
     public static TranslationResult translate(String vensimExpr, String varName,
                                                Set<String> knownNames,
                                                Set<String> lookupNames) {
+        return translate(vensimExpr, varName, knownNames, lookupNames, Map.of());
+    }
+
+    /**
+     * Translates a Vensim expression to Courant syntax with subscript dimension info
+     * for expanding vector functions like SUM and VMIN.
+     *
+     * @param vensimExpr the Vensim expression string
+     * @param varName the name of the variable this expression belongs to (used for lookup naming)
+     * @param knownNames the set of all known multi-word variable names (in original Vensim form)
+     * @param lookupNames the set of known lookup table names (normalized)
+     * @param subscriptDimensions map from normalized dimension name to its normalized labels
+     * @return the translation result
+     */
+    public static TranslationResult translate(String vensimExpr, String varName,
+                                               Set<String> knownNames,
+                                               Set<String> lookupNames,
+                                               Map<String, List<String>> subscriptDimensions) {
         if (vensimExpr == null || vensimExpr.isBlank()) {
             return new TranslationResult(vensimExpr, List.of(), List.of());
         }
@@ -242,6 +267,11 @@ public final class VensimExprTranslator {
         // 10. Time → TIME (the built-in variable), unless "Time" is a user-defined name
         if (knownNames.stream().noneMatch(n -> n.equalsIgnoreCase("Time"))) {
             expr = TIME_VAR_PATTERN.matcher(expr).replaceAll("TIME");
+        }
+
+        // 10a. Expand SUM(expr[dim!]) and VMIN(expr[dim!]) using subscript dimensions
+        if (subscriptDimensions != null && !subscriptDimensions.isEmpty()) {
+            expr = expandVectorFunctions(expr, subscriptDimensions, warnings);
         }
 
         // 11. Translate subscript bracket notation: name[label] → name_label
@@ -666,15 +696,29 @@ public final class VensimExprTranslator {
 
     /**
      * Translates subscript bracket notation to flattened names.
-     * Converts {@code name[label]} to {@code name_label} where the label
-     * is normalized (spaces → underscores, special chars removed).
+     * Converts {@code name[label]} to {@code name_label} and
+     * {@code name[label1,label2]} to {@code name_label1_label2}.
      */
     private static String translateSubscriptBrackets(String expr) {
         Matcher m = SUBSCRIPT_BRACKET_PATTERN.matcher(expr);
         StringBuilder sb = new StringBuilder();
         while (m.find()) {
             String varName = m.group(1);
-            String subscript = normalizeName(m.group(2));
+            String rawSubscript = m.group(2);
+            String subscript;
+            if (rawSubscript.contains(",")) {
+                StringBuilder subSb = new StringBuilder();
+                String[] parts = rawSubscript.split(",");
+                for (int j = 0; j < parts.length; j++) {
+                    if (j > 0) {
+                        subSb.append("_");
+                    }
+                    subSb.append(normalizeName(parts[j].strip()));
+                }
+                subscript = subSb.toString();
+            } else {
+                subscript = normalizeName(rawSubscript);
+            }
             m.appendReplacement(sb, Matcher.quoteReplacement(varName + "_" + subscript));
         }
         m.appendTail(sb);
@@ -862,6 +906,75 @@ public final class VensimExprTranslator {
             arg = arg.substring(1, arg.length() - 1);
         }
         return arg;
+    }
+
+    /**
+     * Expands SUM(expr[dim!]) and VMIN(expr[dim!]) vector functions.
+     * SUM expands to (val1 + val2 + ...), VMIN expands to MIN(val1, val2, ...).
+     */
+    private static String expandVectorFunctions(String expr,
+                                                 Map<String, List<String>> subscriptDimensions,
+                                                 List<String> warnings) {
+        expr = expandSingleVectorFunction(expr, SUM_FUNC_PATTERN, " + ",
+                subscriptDimensions, warnings);
+        expr = expandSingleVectorFunction(expr, VMIN_FUNC_PATTERN, null,
+                subscriptDimensions, warnings);
+        return expr;
+    }
+
+    private static String expandSingleVectorFunction(String expr, Pattern funcPattern,
+                                                      String joinOp,
+                                                      Map<String, List<String>> subscriptDimensions,
+                                                      List<String> warnings) {
+        Matcher m = funcPattern.matcher(expr);
+        while (m.find()) {
+            int openParen = m.end() - 1;
+            int closeParen = findMatchingParen(expr, openParen);
+            if (closeParen < 0) {
+                break;
+            }
+
+            String innerExpr = expr.substring(openParen + 1, closeParen).strip();
+
+            // Find dimension marked with !
+            Matcher bangMatcher = BANG_DIM_PATTERN.matcher(innerExpr);
+            String dimName = null;
+            List<String> labels = null;
+            while (bangMatcher.find()) {
+                String candidate = bangMatcher.group(1);
+                List<String> candidateLabels = subscriptDimensions.get(candidate);
+                if (candidateLabels != null) {
+                    dimName = candidate;
+                    labels = candidateLabels;
+                    break;
+                }
+            }
+
+            if (dimName == null) {
+                break;
+            }
+
+            List<String> expanded = new ArrayList<>();
+            for (String label : labels) {
+                expanded.add(innerExpr.replace(dimName + "!", label));
+            }
+
+            String replacement;
+            if (joinOp != null) {
+                replacement = "(" + String.join(joinOp, expanded) + ")";
+            } else {
+                // Nest MIN calls: MIN(a, MIN(b, c)) for 3+ elements
+                replacement = expanded.getLast();
+                for (int ei = expanded.size() - 2; ei >= 0; ei--) {
+                    replacement = "MIN(" + expanded.get(ei) + ", " + replacement + ")";
+                }
+            }
+
+            expr = expr.substring(0, m.start()) + replacement
+                    + expr.substring(closeParen + 1);
+            m = funcPattern.matcher(expr);
+        }
+        return expr;
     }
 
     private static void checkUnsupportedFunctions(String expr, List<String> warnings) {

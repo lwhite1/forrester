@@ -121,6 +121,10 @@ public class VensimImporter implements ModelImporter {
         Map<String, List<String>> subscriptDimensions = new LinkedHashMap<>();
         // Map from normalized dimension name → list of original (display) labels
         Map<String, List<String>> subscriptDisplayLabels = new LinkedHashMap<>();
+        // Map from normalized mapping dim name → mapping info (for -> syntax)
+        Map<String, SubscriptMapping> subscriptMappings = new LinkedHashMap<>();
+        // Deferred <-> equivalences (resolved after all : definitions)
+        Map<String, String> equivalences = new LinkedHashMap<>();
 
         for (MdlEquation eq : equations) {
             String name = eq.name().strip();
@@ -148,12 +152,19 @@ public class VensimImporter implements ModelImporter {
             // Collect subscript dimension definitions
             if (eq.operator().equals(":")) {
                 String dimName = VensimExprTranslator.normalizeName(name);
-                List<String> normalizedLabels = Arrays.stream(eq.expression().split(","))
+                String rawExpr = eq.expression().strip();
+
+                // Check for dimension mapping: labels -> targetDim
+                int arrowPos = rawExpr.indexOf("->");
+                String labelsStr = arrowPos >= 0
+                        ? rawExpr.substring(0, arrowPos).strip() : rawExpr;
+
+                List<String> normalizedLabels = Arrays.stream(labelsStr.split(","))
                         .map(String::strip)
                         .filter(s -> !s.isEmpty())
                         .map(VensimExprTranslator::normalizeName)
                         .toList();
-                List<String> displayLabels = Arrays.stream(eq.expression().split(","))
+                List<String> displayLabels = Arrays.stream(labelsStr.split(","))
                         .map(String::strip)
                         .filter(s -> !s.isEmpty())
                         .map(VensimExprTranslator::normalizeDisplayName)
@@ -162,6 +173,38 @@ public class VensimImporter implements ModelImporter {
                     subscriptDimensions.put(dimName, normalizedLabels);
                     subscriptDisplayLabels.put(dimName, displayLabels);
                 }
+
+                // Store mapping if -> is present
+                if (arrowPos >= 0) {
+                    String targetDim = VensimExprTranslator.normalizeName(
+                            rawExpr.substring(arrowPos + 2).strip());
+                    List<String> rawLabels = Arrays.stream(labelsStr.split(","))
+                            .map(String::strip)
+                            .filter(s -> !s.isEmpty())
+                            .toList();
+                    subscriptMappings.put(dimName, new SubscriptMapping(
+                            normalizedLabels, targetDim, name.strip(), rawLabels));
+                }
+            }
+
+            // Dimension equivalence: prereqtask <-> task
+            if (eq.operator().equals("<->")) {
+                String dimName = VensimExprTranslator.normalizeName(name);
+                String targetDim = VensimExprTranslator.normalizeName(
+                        eq.expression().strip());
+                equivalences.put(dimName, targetDim);
+            }
+        }
+
+        // Resolve <-> equivalences after all dimension definitions
+        for (var entry : equivalences.entrySet()) {
+            String dimName = entry.getKey();
+            String targetDim = entry.getValue();
+            List<String> targetLabels = subscriptDimensions.get(targetDim);
+            List<String> targetDisplayLabels = subscriptDisplayLabels.get(targetDim);
+            if (targetLabels != null) {
+                subscriptDimensions.put(dimName, targetLabels);
+                subscriptDisplayLabels.put(dimName, targetDisplayLabels);
             }
         }
 
@@ -245,12 +288,55 @@ public class VensimImporter implements ModelImporter {
                     }
                     continue;
                 }
+
+                // Check for multi-dimensional subscripts: name[sub1,sub2]
+                if (dimNameRaw.contains(",")) {
+                    String normalizedBase = VensimExprTranslator.normalizeName(baseName);
+                    boolean isInteg = INTEG_PATTERN.matcher(eq.expression()).find();
+                    List<List<String>> combos = resolveMultiDimLabels(
+                            dimNameRaw, subscriptDimensions);
+                    List<String> perLabelValues = splitSubscriptValues(
+                            eq.expression(), combos.size());
+                    for (int ci = 0; ci < combos.size(); ci++) {
+                        String expandedName = normalizedBase + "_"
+                                + String.join("_", combos.get(ci));
+                        if (isInteg) {
+                            stockNames.add(expandedName);
+                        }
+                        if (perLabelValues != null) {
+                            String val = perLabelValues.get(ci).strip();
+                            if (isNumericLiteral(val)) {
+                                constantValues.put(expandedName,
+                                        Double.parseDouble(val));
+                            }
+                        }
+                    }
+                    continue;
+                }
+
+                // Check if subscript is a single label (not a dimension name)
+                String normalizedSub = VensimExprTranslator.normalizeName(dimNameRaw);
+                boolean isLabel = subscriptDimensions.values().stream()
+                        .anyMatch(lbls -> lbls.contains(normalizedSub));
+                if (isLabel) {
+                    String normalizedBase = VensimExprTranslator.normalizeName(baseName);
+                    String expandedName = normalizedBase + "_" + normalizedSub;
+                    boolean isInteg = INTEG_PATTERN.matcher(eq.expression()).find();
+                    if (isInteg) {
+                        stockNames.add(expandedName);
+                    }
+                    if (isNumericLiteral(eq.expression())) {
+                        constantValues.put(expandedName,
+                                Double.parseDouble(eq.expression().strip()));
+                    }
+                    continue;
+                }
             }
 
             String eqName = VensimExprTranslator.normalizeName(name);
 
-            if (eq.operator().equals(":")) {
-                // Subscript definition
+            if (eq.operator().equals(":") || eq.operator().equals("<->")) {
+                // Subscript definition or equivalence
                 continue;
             }
             if (eq.operator().equals("()")) {
@@ -315,9 +401,11 @@ public class VensimImporter implements ModelImporter {
             String eqName = VensimExprTranslator.normalizeName(name);
             String displayName = VensimExprTranslator.normalizeDisplayName(name);
             // Subscript range names use a separate namespace — skip duplicate check
-            if (!eq.operator().equals(":") && !allNormalizedNames.add(eqName)) {
+            if (!eq.operator().equals(":") && !eq.operator().equals("<->")
+                    && !allNormalizedNames.add(eqName)) {
                 warnings.add("Duplicate normalized name '" + eqName
-                        + "' (from '" + name + "')");
+                        + "' (from '" + name + "') — skipped");
+                continue;
             }
             String comment = eq.comment().isBlank() ? name : eq.comment();
 
@@ -335,7 +423,8 @@ public class VensimImporter implements ModelImporter {
                             vensimNames, stockNames, flowNames, lookupNames,
                             sketchFlowNames, sketchValveNames, equationsByName,
                             constantValues, timeUnit,
-                            subscriptDimensions, subscriptDisplayLabels, warnings);
+                            subscriptDimensions, subscriptDisplayLabels,
+                            subscriptMappings, warnings);
                 } catch (IllegalArgumentException e) {
                     warnings.add("Error processing '" + name + "': " + e.getMessage());
                 }
@@ -431,6 +520,7 @@ public class VensimImporter implements ModelImporter {
                                    String timeUnit,
                                    Map<String, List<String>> subscriptDimensions,
                                    Map<String, List<String>> subscriptDisplayLabels,
+                                   Map<String, SubscriptMapping> subscriptMappings,
                                    List<String> warnings) {
         String operator = eq.operator();
         String expression = eq.expression();
@@ -448,21 +538,62 @@ public class VensimImporter implements ModelImporter {
                         normalizedLabels, displayLabels, unit, builder,
                         vensimNames, stockNames, flowNames, lookupNames,
                         sketchFlowNames, sketchValveNames, equationsByName,
-                        constantValues, timeUnit, warnings);
+                        constantValues, timeUnit,
+                        subscriptDimensions, subscriptDisplayLabels,
+                        subscriptMappings, warnings);
                 return;
             }
-            // If dimension not found, fall through — the brackets will be normalized away
+
+            // Check for multi-dimensional subscripts: name[sub1,sub2]
+            if (dimNameRaw.contains(",")) {
+                expandMultiDimSubscriptedVariable(eq, baseName, dimNameRaw,
+                        unit, builder, vensimNames, stockNames, flowNames,
+                        lookupNames, sketchFlowNames, sketchValveNames,
+                        equationsByName, constantValues, timeUnit,
+                        subscriptDimensions, subscriptDisplayLabels,
+                        subscriptMappings, warnings);
+                return;
+            }
+
+            // Check if subscript is a single label (not a dimension name)
+            String normalizedSub = VensimExprTranslator.normalizeName(dimNameRaw);
+            boolean isLabel = subscriptDimensions.values().stream()
+                    .anyMatch(lbls -> lbls.contains(normalizedSub));
+            if (isLabel) {
+                String normalizedBase = VensimExprTranslator.normalizeName(baseName);
+                String expandedEqName = normalizedBase + "_" + normalizedSub;
+                String expandedDisplayName =
+                        VensimExprTranslator.normalizeDisplayName(baseName) + " "
+                        + VensimExprTranslator.normalizeDisplayName(dimNameRaw);
+                String lComment = eq.comment().isBlank() ? eq.name().strip() : eq.comment();
+                MdlEquation labelEq = new MdlEquation(
+                        expandedDisplayName, operator, expression,
+                        eq.units(), lComment, eq.group());
+                classifyAndBuild(labelEq, expandedDisplayName, expandedEqName,
+                        unit, lComment, builder, vensimNames, stockNames, flowNames,
+                        lookupNames, sketchFlowNames, sketchValveNames, equationsByName,
+                        constantValues, timeUnit, subscriptDimensions,
+                        subscriptDisplayLabels, subscriptMappings, warnings);
+                return;
+            }
+            // If nothing matches, fall through — the brackets will be normalized away
         }
 
-        // Subscript definition (operator ":")
-        if (operator.equals(":")) {
-            List<String> labels = Arrays.stream(expression.split(","))
-                    .map(String::strip)
-                    .filter(s -> !s.isEmpty())
-                    .map(VensimExprTranslator::normalizeDisplayName)
-                    .toList();
-            if (!labels.isEmpty()) {
-                builder.subscript(displayName, labels);
+        // Subscript definition (operator ":") or equivalence ("<->")
+        if (operator.equals(":") || operator.equals("<->")) {
+            if (operator.equals(":")) {
+                String rawExpr = expression;
+                int arrowPos = rawExpr.indexOf("->");
+                String labelsStr = arrowPos >= 0
+                        ? rawExpr.substring(0, arrowPos).strip() : rawExpr;
+                List<String> labels = Arrays.stream(labelsStr.split(","))
+                        .map(String::strip)
+                        .filter(s -> !s.isEmpty())
+                        .map(VensimExprTranslator::normalizeDisplayName)
+                        .toList();
+                if (!labels.isEmpty()) {
+                    builder.subscript(displayName, labels);
+                }
             }
             return;
         }
@@ -487,7 +618,7 @@ public class VensimImporter implements ModelImporter {
             buildStock(eq, displayName, eqName, expression, unit, comment, builder,
                     vensimNames, flowNames, lookupNames, sketchFlowNames,
                     sketchValveNames, equationsByName, constantValues, timeUnit,
-                    warnings);
+                    subscriptDimensions, warnings);
             return;
         }
 
@@ -499,7 +630,8 @@ public class VensimImporter implements ModelImporter {
             } else {
                 // Non-numeric unchangeable — treat as auxiliary
                 VensimExprTranslator.TranslationResult tr =
-                        VensimExprTranslator.translate(expression, eqName, vensimNames, lookupNames);
+                        VensimExprTranslator.translate(expression, eqName, vensimNames,
+                                lookupNames, subscriptDimensions);
                 addExtractedLookups(tr, builder, lookupNames, warnings);
                 builder.variable(new VariableDef(displayName, comment, tr.expression(), unit));
                 warnings.addAll(tr.warnings());
@@ -530,7 +662,8 @@ public class VensimImporter implements ModelImporter {
         // Check if expression contains WITH LOOKUP
         if (expression.toUpperCase(Locale.ROOT).contains("WITH LOOKUP")) {
             VensimExprTranslator.TranslationResult tr =
-                    VensimExprTranslator.translate(expression, eqName, vensimNames, lookupNames);
+                    VensimExprTranslator.translate(expression, eqName, vensimNames,
+                            lookupNames, subscriptDimensions);
             addExtractedLookups(tr, builder, lookupNames, warnings);
             builder.variable(new VariableDef(displayName, comment, tr.expression(), unit));
             warnings.addAll(tr.warnings());
@@ -539,7 +672,8 @@ public class VensimImporter implements ModelImporter {
 
         // Default: variable
         VensimExprTranslator.TranslationResult tr =
-                VensimExprTranslator.translate(expression, eqName, vensimNames, lookupNames);
+                VensimExprTranslator.translate(expression, eqName, vensimNames,
+                        lookupNames, subscriptDimensions);
         addExtractedLookups(tr, builder, lookupNames, warnings);
         builder.variable(new VariableDef(displayName, comment, tr.expression(), unit));
         warnings.addAll(tr.warnings());
@@ -585,7 +719,11 @@ public class VensimImporter implements ModelImporter {
                                             Set<String> sketchValveNames,
                                             Map<String, MdlEquation> equationsByName,
                                             Map<String, Double> constantValues,
-                                            String timeUnit, List<String> warnings) {
+                                            String timeUnit,
+                                            Map<String, List<String>> subscriptDimensions,
+                                            Map<String, List<String>> subscriptDisplayLabels,
+                                            Map<String, SubscriptMapping> subscriptMappings,
+                                            List<String> warnings) {
         String operator = eq.operator();
         String expression = eq.expression();
         String normalizedBase = VensimExprTranslator.normalizeName(baseName);
@@ -606,8 +744,19 @@ public class VensimImporter implements ModelImporter {
                 // Comma-separated values: assign per-label
                 labelExpression = perLabelValues.get(i).strip();
             } else {
-                // Formula: replace [DimensionName] with [specific label] throughout
-                labelExpression = expression.replace("[" + dimNameRaw + "]", "[" + label + "]");
+                // Formula: replace dimension references within brackets
+                labelExpression = replaceDimInSubscripts(expression, dimNameRaw, label);
+
+                // Apply mapped dimension replacements (e.g., previous cohort → infant)
+                for (var entry : subscriptMappings.entrySet()) {
+                    SubscriptMapping mapping = entry.getValue();
+                    if (mapping.targetDimension().equals(dimName)
+                            && i < mapping.rawLabels().size()) {
+                        String mappedLabel = mapping.rawLabels().get(i);
+                        labelExpression = replaceDimInSubscripts(
+                                labelExpression, mapping.rawDimName(), mappedLabel);
+                    }
+                }
             }
 
             // Create a synthetic equation for this label and classify normally
@@ -617,7 +766,8 @@ public class VensimImporter implements ModelImporter {
             classifyAndBuild(labelEq, expandedDisplayName, expandedEqName, unit, comment,
                     builder, vensimNames, stockNames, flowNames, lookupNames,
                     sketchFlowNames, sketchValveNames, equationsByName,
-                    constantValues, timeUnit, Map.of(), Map.of(), warnings);
+                    constantValues, timeUnit, subscriptDimensions,
+                    subscriptDisplayLabels, subscriptMappings, warnings);
         }
     }
 
@@ -658,6 +808,148 @@ public class VensimImporter implements ModelImporter {
         return null;
     }
 
+    /**
+     * Replaces a dimension name within bracket subscripts in an expression.
+     * Handles both single and comma-separated subscripts.
+     * For example, with dimName="task", replacement="design":
+     * "x[task]" → "x[design]" and "y[task,prereqtask]" → "y[design,prereqtask]"
+     */
+    private static String replaceDimInSubscripts(String expr, String dimName, String replacement) {
+        StringBuilder result = new StringBuilder();
+        int pos = 0;
+        while (pos < expr.length()) {
+            int bracketStart = expr.indexOf('[', pos);
+            if (bracketStart < 0) {
+                result.append(expr, pos, expr.length());
+                break;
+            }
+            int bracketEnd = expr.indexOf(']', bracketStart);
+            if (bracketEnd < 0) {
+                result.append(expr, pos, expr.length());
+                break;
+            }
+            result.append(expr, pos, bracketStart + 1);
+            String content = expr.substring(bracketStart + 1, bracketEnd);
+
+            String[] parts = content.split(",", -1);
+            for (int j = 0; j < parts.length; j++) {
+                if (parts[j].strip().equals(dimName)) {
+                    parts[j] = parts[j].replace(dimName, replacement);
+                }
+            }
+            result.append(String.join(",", parts));
+            result.append(']');
+            pos = bracketEnd + 1;
+        }
+        return result.toString();
+    }
+
+    /**
+     * Resolves multi-dimensional subscript labels into a cross-product list.
+     * Each sub is checked against subscriptDimensions; dimensions expand to labels,
+     * specific labels become singletons.
+     */
+    private static List<List<String>> resolveMultiDimLabels(String dimNameRaw,
+                                                             Map<String, List<String>> subscriptDimensions) {
+        String[] subs = dimNameRaw.split(",");
+        List<List<String>> perDimLabels = new ArrayList<>();
+        for (String sub : subs) {
+            String key = VensimExprTranslator.normalizeName(sub.strip());
+            List<String> dimLabels = subscriptDimensions.get(key);
+            if (dimLabels != null) {
+                perDimLabels.add(dimLabels);
+            } else {
+                perDimLabels.add(List.of(key));
+            }
+        }
+        return crossProduct(perDimLabels);
+    }
+
+    private static List<List<String>> crossProduct(List<List<String>> lists) {
+        List<List<String>> result = new ArrayList<>();
+        result.add(new ArrayList<>());
+        for (List<String> list : lists) {
+            List<List<String>> newResult = new ArrayList<>();
+            for (List<String> existing : result) {
+                for (String item : list) {
+                    List<String> combo = new ArrayList<>(existing);
+                    combo.add(item);
+                    newResult.add(combo);
+                }
+            }
+            result = newResult;
+        }
+        return result;
+    }
+
+    /**
+     * Expands a variable with multi-dimensional subscripts (comma-separated).
+     * Generates cross-product of dimension labels and creates per-combination variables.
+     */
+    private void expandMultiDimSubscriptedVariable(MdlEquation eq, String baseName,
+                                                    String dimNameRaw, String unit,
+                                                    ModelDefinitionBuilder builder,
+                                                    Set<String> vensimNames,
+                                                    Set<String> stockNames,
+                                                    Set<String> flowNames,
+                                                    Set<String> lookupNames,
+                                                    Set<String> sketchFlowNames,
+                                                    Set<String> sketchValveNames,
+                                                    Map<String, MdlEquation> equationsByName,
+                                                    Map<String, Double> constantValues,
+                                                    String timeUnit,
+                                                    Map<String, List<String>> subscriptDimensions,
+                                                    Map<String, List<String>> subscriptDisplayLabels,
+                                                    Map<String, SubscriptMapping> subscriptMappings,
+                                                    List<String> warnings) {
+        List<List<String>> combos = resolveMultiDimLabels(dimNameRaw, subscriptDimensions);
+
+        // Build display label combos
+        String[] rawSubs = dimNameRaw.split(",");
+        List<List<String>> displayPerDim = new ArrayList<>();
+        for (String sub : rawSubs) {
+            String key = VensimExprTranslator.normalizeName(sub.strip());
+            List<String> dimDisplayLabels = subscriptDisplayLabels.get(key);
+            if (dimDisplayLabels != null) {
+                displayPerDim.add(dimDisplayLabels);
+            } else {
+                displayPerDim.add(List.of(VensimExprTranslator.normalizeDisplayName(sub.strip())));
+            }
+        }
+        List<List<String>> displayCombos = crossProduct(displayPerDim);
+
+        String normalizedBase = VensimExprTranslator.normalizeName(baseName);
+        String displayBase = VensimExprTranslator.normalizeDisplayName(baseName);
+
+        List<String> perLabelValues = splitSubscriptValues(
+                eq.expression(), combos.size());
+
+        for (int ci = 0; ci < combos.size(); ci++) {
+            List<String> combo = combos.get(ci);
+            List<String> displayCombo = displayCombos.get(ci);
+
+            String expandedEqName = normalizedBase + "_" + String.join("_", combo);
+            String expandedDisplayName = displayBase + " " + String.join(" ", displayCombo);
+            String comment = eq.comment().isBlank() ? eq.name().strip() : eq.comment();
+
+            String labelExpression;
+            if (perLabelValues != null) {
+                labelExpression = perLabelValues.get(ci).strip();
+            } else {
+                labelExpression = eq.expression();
+            }
+
+            MdlEquation labelEq = new MdlEquation(
+                    expandedDisplayName, eq.operator(), labelExpression,
+                    eq.units(), comment, eq.group());
+            classifyAndBuild(labelEq, expandedDisplayName, expandedEqName,
+                    unit, comment, builder, vensimNames, stockNames, flowNames,
+                    lookupNames, sketchFlowNames, sketchValveNames, equationsByName,
+                    constantValues, timeUnit, subscriptDimensions,
+                    subscriptDisplayLabels, subscriptMappings, warnings);
+        }
+    }
+
     private void buildStock(MdlEquation eq, String displayName, String eqName,
                              String expression, String unit, String comment,
                              ModelDefinitionBuilder builder,
@@ -666,7 +958,9 @@ public class VensimImporter implements ModelImporter {
                              Set<String> sketchValveNames,
                              Map<String, MdlEquation> equationsByName,
                              Map<String, Double> constantValues,
-                             String timeUnit, List<String> warnings) {
+                             String timeUnit,
+                             Map<String, List<String>> subscriptDimensions,
+                             List<String> warnings) {
         // Parse INTEG(rate_expr, initial_value)
         Matcher m = INTEG_PATTERN.matcher(expression);
         if (!m.find()) {
@@ -725,14 +1019,15 @@ public class VensimImporter implements ModelImporter {
                     if (varEq != null && !varEq.expression().isBlank()) {
                         VensimExprTranslator.TranslationResult varTr =
                                 VensimExprTranslator.translate(varEq.expression(),
-                                        flowEqName, vensimNames, lookupNames);
+                                        flowEqName, vensimNames, lookupNames,
+                                        subscriptDimensions);
                         warnings.addAll(varTr.warnings());
                         flowEquation = varTr.expression();
                     } else {
                         // Fallback: use the term expression directly
                         VensimExprTranslator.TranslationResult tr =
                                 VensimExprTranslator.translate(term.expr, eqName,
-                                        vensimNames, lookupNames);
+                                        vensimNames, lookupNames, subscriptDimensions);
                         warnings.addAll(tr.warnings());
                         flowEquation = tr.expression();
                     }
@@ -743,7 +1038,7 @@ public class VensimImporter implements ModelImporter {
                     flowEqName = eqName + flowSuffix;
                     VensimExprTranslator.TranslationResult tr =
                             VensimExprTranslator.translate(term.expr, eqName,
-                                    vensimNames, lookupNames);
+                                    vensimNames, lookupNames, subscriptDimensions);
                     warnings.addAll(tr.warnings());
                     flowEquation = tr.expression();
                 }
@@ -763,7 +1058,8 @@ public class VensimImporter implements ModelImporter {
             String flowDisplayName = displayName + " net flow";
             String flowEqName = eqName + "_net_flow";
             VensimExprTranslator.TranslationResult tr =
-                    VensimExprTranslator.translate(rateExpr, eqName, vensimNames, lookupNames);
+                    VensimExprTranslator.translate(rateExpr, eqName, vensimNames,
+                            lookupNames, subscriptDimensions);
             warnings.addAll(tr.warnings());
 
             builder.flow(new FlowDef(flowDisplayName, "Net flow for " + eq.name(),
@@ -1037,6 +1333,17 @@ public class VensimImporter implements ModelImporter {
      * A single term from a rate expression, with sign information.
      */
     record RateTerm(String expr, boolean positive) {}
+
+    /**
+     * A subscript dimension mapping (e.g., "previous cohort" maps to "all but youngest").
+     *
+     * @param normalizedLabels the normalized label names of this mapping dimension
+     * @param targetDimension  the normalized name of the target dimension
+     * @param rawDimName       the raw Vensim name of this mapping dimension
+     * @param rawLabels        the raw label names (for expression replacement)
+     */
+    record SubscriptMapping(List<String> normalizedLabels, String targetDimension,
+                             String rawDimName, List<String> rawLabels) {}
 
     /**
      * Attempts to split a rate expression into individual additive/subtractive terms
