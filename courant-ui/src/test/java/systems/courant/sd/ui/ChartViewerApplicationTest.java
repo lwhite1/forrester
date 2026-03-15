@@ -193,25 +193,24 @@ class ChartViewerApplicationTest {
     }
 
     @Test
+    @DisplayName("reader thread sees size set by writer thread via synchronized snapshot")
     void shouldReadSizeUnderLockFromAnotherThread() throws InterruptedException {
         // Set size on this thread
         ChartViewerApplication.setSize(1024, 768);
 
         // Read it back from another thread to verify thread-safe publication
-        AtomicReference<double[]> result = new AtomicReference<>();
+        AtomicReference<ChartViewerApplication.ChartData> result = new AtomicReference<>();
         CountDownLatch latch = new CountDownLatch(1);
 
         Thread reader = new Thread(() -> {
-            // setSize writes under LOCK; the values should be visible to this thread
-            // after the synchronized block completes
-            ChartViewerApplication.setSize(1024, 768); // re-set to force sync
-            result.set(new double[]{1024, 768});
+            // snapshot() reads under LOCK; the values set above should be visible
+            result.set(ChartViewerApplication.snapshot());
             latch.countDown();
         });
         reader.start();
 
         assertThat(latch.await(5, TimeUnit.SECONDS)).isTrue();
-        assertThat(result.get()[0]).isEqualTo(1024);
-        assertThat(result.get()[1]).isEqualTo(768);
+        assertThat(result.get().width()).isEqualTo(1024);
+        assertThat(result.get().height()).isEqualTo(768);
     }
 }
