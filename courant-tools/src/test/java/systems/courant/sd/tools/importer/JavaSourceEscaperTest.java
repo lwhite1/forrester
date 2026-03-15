@@ -69,7 +69,20 @@ class JavaSourceEscaperTest {
 
         @Test
         void shouldConvertHyphenSeparated() {
-            assertThat(JavaSourceEscaper.toPascalCase("SIR-model")).isEqualTo("SirModel");
+            assertThat(JavaSourceEscaper.toPascalCase("SIR-model")).isEqualTo("SIRModel");
+        }
+
+        @Test
+        void shouldPreserveAllUppercaseAcronyms() {
+            assertThat(JavaSourceEscaper.toPascalCase("HIV AIDS model")).isEqualTo("HIVAIDSModel");
+            assertThat(JavaSourceEscaper.toPascalCase("GDP growth")).isEqualTo("GDPGrowth");
+            assertThat(JavaSourceEscaper.toPascalCase("SIR")).isEqualTo("SIR");
+        }
+
+        @Test
+        void shouldNotPreserveSingleCharUppercase() {
+            // Single uppercase chars are just capitalized, not "acronyms"
+            assertThat(JavaSourceEscaper.toPascalCase("A-B-C")).isEqualTo("ABC");
         }
 
         @Test

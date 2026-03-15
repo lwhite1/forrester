@@ -53,10 +53,11 @@ public final class JavaSourceEscaper {
     }
 
     /**
-     * Converts a string to PascalCase. Splits on spaces, hyphens, underscores,
-     * and camelCase boundaries.
+     * Converts a string to PascalCase. Splits on non-alphanumeric characters
+     * (spaces, hyphens, underscores, etc.). All-uppercase tokens (acronyms like
+     * SIR, HIV, GDP) are preserved as-is.
      *
-     * <p>Examples: "my model name" → "MyModelName", "SIR-model" → "SirModel"
+     * <p>Examples: "my model name" → "MyModelName", "SIR-model" → "SIRModel"
      */
     public static String toPascalCase(String input) {
         if (input == null || input.isBlank()) {
@@ -69,9 +70,14 @@ public final class JavaSourceEscaper {
             if (token.isEmpty()) {
                 continue;
             }
-            sb.append(Character.toUpperCase(token.charAt(0)));
-            if (token.length() > 1) {
-                sb.append(token.substring(1).toLowerCase());
+            if (token.length() > 1 && token.equals(token.toUpperCase())) {
+                // Preserve all-uppercase tokens (acronyms)
+                sb.append(token);
+            } else {
+                sb.append(Character.toUpperCase(token.charAt(0)));
+                if (token.length() > 1) {
+                    sb.append(token.substring(1).toLowerCase());
+                }
             }
         }
         return sb.toString();
