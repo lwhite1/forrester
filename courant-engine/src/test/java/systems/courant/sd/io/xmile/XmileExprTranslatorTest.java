@@ -87,6 +87,12 @@ class XmileExprTranslatorTest {
         }
 
         @Test
+        void shouldTranslateCaretToDoubleStar() {
+            var result = XmileExprTranslator.toCourant("x^2 + y^3");
+            assertThat(result.expression()).isEqualTo("x**2 + y**3");
+        }
+
+        @Test
         void shouldTranslateSmth3ToSmooth3() {
             var result = XmileExprTranslator.toCourant("SMTH3(input, 5)");
             assertThat(result.expression()).isEqualTo("SMOOTH3(input, 5)");
@@ -208,6 +214,12 @@ class XmileExprTranslatorTest {
         }
 
         @Test
+        void shouldTranslateDoubleStarToCaret() {
+            String result = XmileExprTranslator.toXmile("x**2 + y**3");
+            assertThat(result).isEqualTo("x^2 + y^3");
+        }
+
+        @Test
         void shouldTranslateDoubleEquals() {
             String result = XmileExprTranslator.toXmile("x == 5");
             assertThat(result).isEqualTo("x = 5");
@@ -233,6 +245,42 @@ class XmileExprTranslatorTest {
         @Test
         void shouldHandleBlank() {
             assertThat(XmileExprTranslator.toXmile("  ")).isEqualTo("  ");
+        }
+
+        @Test
+        void shouldTranslateUppercaseAndOperator() {
+            String result = XmileExprTranslator.toXmile("x > 0 AND y > 0");
+            assertThat(result).isEqualTo("x > 0 AND y > 0");
+        }
+
+        @Test
+        void shouldTranslateMixedCaseAndOperator() {
+            String result = XmileExprTranslator.toXmile("x > 0 And y > 0");
+            assertThat(result).isEqualTo("x > 0 AND y > 0");
+        }
+
+        @Test
+        void shouldTranslateUppercaseOrOperator() {
+            String result = XmileExprTranslator.toXmile("x > 0 OR y > 0");
+            assertThat(result).isEqualTo("x > 0 OR y > 0");
+        }
+
+        @Test
+        void shouldTranslateMixedCaseOrOperator() {
+            String result = XmileExprTranslator.toXmile("x > 0 Or y > 0");
+            assertThat(result).isEqualTo("x > 0 OR y > 0");
+        }
+
+        @Test
+        void shouldTranslateUppercaseNotOperator() {
+            String result = XmileExprTranslator.toXmile("NOT(x > 0)");
+            assertThat(result).isEqualTo("NOT(x > 0)");
+        }
+
+        @Test
+        void shouldTranslateMixedCaseNotOperator() {
+            String result = XmileExprTranslator.toXmile("Not(x > 0)");
+            assertThat(result).isEqualTo("NOT(x > 0)");
         }
 
         @Test

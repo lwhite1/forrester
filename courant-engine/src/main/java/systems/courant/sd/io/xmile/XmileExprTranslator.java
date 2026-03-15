@@ -2,7 +2,6 @@ package systems.courant.sd.io.xmile;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
@@ -47,9 +46,9 @@ public final class XmileExprTranslator {
     // --- Courant → XMILE patterns ---
     private static final Pattern IF_FUNC_PATTERN = Pattern.compile(
             "(?i)\\bIF\\s*\\(");
-    private static final Pattern AND_OP_PATTERN = Pattern.compile("\\band\\b");
-    private static final Pattern OR_OP_PATTERN = Pattern.compile("\\bor\\b");
-    private static final Pattern NOT_OP_PATTERN = Pattern.compile("\\bnot\\b");
+    private static final Pattern AND_OP_PATTERN = Pattern.compile("(?i)\\band\\b");
+    private static final Pattern OR_OP_PATTERN = Pattern.compile("(?i)\\bor\\b");
+    private static final Pattern NOT_OP_PATTERN = Pattern.compile("(?i)\\bnot\\b");
     private static final Pattern DOUBLE_STAR_PATTERN = Pattern.compile("\\*\\*");
     private static final Pattern DOUBLE_EQ_PATTERN = Pattern.compile("==");
     private static final Pattern NOT_EQ_PATTERN = Pattern.compile("!=");
@@ -91,7 +90,7 @@ public final class XmileExprTranslator {
         // 2. Logical operators: AND → and, OR → or, NOT → not
         expr = AND_KEYWORD_PATTERN.matcher(expr).replaceAll("and");
         expr = OR_KEYWORD_PATTERN.matcher(expr).replaceAll("or");
-        expr = translateNotKeyword(expr);
+        expr = NOT_KEYWORD_PATTERN.matcher(expr).replaceAll("not");
 
         // 3. ^ → ** (XMILE uses ^ for power, Courant uses **)
         expr = CARET_PATTERN.matcher(expr).replaceAll("**");
@@ -100,14 +99,14 @@ public final class XmileExprTranslator {
         expr = INEQUALITY_PATTERN.matcher(expr).replaceAll("!=");
         expr = EQUALITY_SINGLE_PATTERN.matcher(expr).replaceAll("==");
 
-        // 4. SMTH3 → SMOOTH3, SMTH1 → SMOOTH
+        // 5. SMTH3 → SMOOTH3, SMTH1 → SMOOTH
         expr = SMTH3_PATTERN.matcher(expr).replaceAll("SMOOTH3(");
         expr = SMTH1_PATTERN.matcher(expr).replaceAll("SMOOTH(");
 
-        // 5. Time → TIME (the built-in variable)
+        // 6. Time → TIME (the built-in variable)
         expr = TIME_XMILE_PATTERN.matcher(expr).replaceAll("TIME");
 
-        // 6. Warn about unsupported XMILE functions (left in equation text)
+        // 7. Warn about unsupported XMILE functions (left in equation text)
         if (SAFEDIV_PATTERN.matcher(expr).find()) {
             warnings.add("SAFEDIV function not supported (left in equation as-is)");
         }
@@ -148,28 +147,14 @@ public final class XmileExprTranslator {
         // 3. ** → ^ (Courant uses ** for power, XMILE uses ^)
         expr = DOUBLE_STAR_PATTERN.matcher(expr).replaceAll("^");
 
-        // 4. Comparison operators: == → =, != → <>
+        // 4. Comparison operators: != → <> before == → = (order matters)
         expr = NOT_EQ_PATTERN.matcher(expr).replaceAll("<>");
         expr = DOUBLE_EQ_PATTERN.matcher(expr).replaceAll("=");
 
-        // 4. TIME → Time
+        // 5. TIME → Time
         expr = TIME_SD_PATTERN.matcher(expr).replaceAll("Time");
 
         return expr;
-    }
-
-    /**
-     * Translates the XMILE NOT keyword to Courant "not" keyword.
-     * NOT is followed by its operand.
-     */
-    private static String translateNotKeyword(String expr) {
-        Matcher m = NOT_KEYWORD_PATTERN.matcher(expr);
-        StringBuilder sb = new StringBuilder();
-        while (m.find()) {
-            m.appendReplacement(sb, "not");
-        }
-        m.appendTail(sb);
-        return sb.toString();
     }
 
 }
