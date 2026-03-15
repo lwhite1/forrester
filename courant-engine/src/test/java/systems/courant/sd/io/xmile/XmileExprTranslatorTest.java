@@ -87,6 +87,12 @@ class XmileExprTranslatorTest {
         }
 
         @Test
+        void shouldTranslateCaretToDoubleStar() {
+            var result = XmileExprTranslator.toCourant("x^2 + y^3");
+            assertThat(result.expression()).isEqualTo("x**2 + y**3");
+        }
+
+        @Test
         void shouldTranslateSmth3ToSmooth3() {
             var result = XmileExprTranslator.toCourant("SMTH3(input, 5)");
             assertThat(result.expression()).isEqualTo("SMOOTH3(input, 5)");
@@ -205,6 +211,12 @@ class XmileExprTranslatorTest {
         void shouldTranslateNotOperator() {
             String result = XmileExprTranslator.toXmile("not(x > 0)");
             assertThat(result).isEqualTo("NOT(x > 0)");
+        }
+
+        @Test
+        void shouldTranslateDoubleStarToCaret() {
+            String result = XmileExprTranslator.toXmile("x**2 + y**3");
+            assertThat(result).isEqualTo("x^2 + y^3");
         }
 
         @Test
