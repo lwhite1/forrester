@@ -950,7 +950,7 @@ public final class VensimExprTranslator {
                 }
             }
 
-            if (dimName == null) {
+            if (dimName == null || labels.isEmpty()) {
                 break;
             }
 

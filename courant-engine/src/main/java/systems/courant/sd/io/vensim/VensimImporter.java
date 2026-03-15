@@ -183,7 +183,7 @@ public class VensimImporter implements ModelImporter {
                             .filter(s -> !s.isEmpty())
                             .toList();
                     subscriptMappings.put(dimName, new SubscriptMapping(
-                            normalizedLabels, targetDim, name.strip(), rawLabels));
+                            targetDim, name.strip(), rawLabels));
                 }
             }
 
@@ -936,7 +936,32 @@ public class VensimImporter implements ModelImporter {
             if (perLabelValues != null) {
                 labelExpression = perLabelValues.get(ci).strip();
             } else {
+                // Formula: replace each dimension subscript with the specific label
                 labelExpression = eq.expression();
+                String[] subs = dimNameRaw.split(",");
+                for (int si = 0; si < subs.length; si++) {
+                    String sub = subs[si].strip();
+                    String subKey = VensimExprTranslator.normalizeName(sub);
+                    List<String> dimLabels = subscriptDimensions.get(subKey);
+                    if (dimLabels != null) {
+                        // This sub is a dimension — find which label from the combo
+                        // by tracking which dimension index this is
+                        int dimIdx = 0;
+                        for (int pi = 0; pi < si; pi++) {
+                            String prevKey = VensimExprTranslator.normalizeName(
+                                    subs[pi].strip());
+                            if (subscriptDimensions.containsKey(prevKey)) {
+                                dimIdx++;
+                            }
+                        }
+                        // combo has all labels flattened; need the one for this dim
+                        // For cross-product, each combo element corresponds to the
+                        // dimension order. Find the right label.
+                        String label = combo.get(si);
+                        labelExpression = replaceDimInSubscripts(
+                                labelExpression, sub, label);
+                    }
+                }
             }
 
             MdlEquation labelEq = new MdlEquation(
@@ -989,7 +1014,8 @@ public class VensimImporter implements ModelImporter {
 
         // Parse initial value
         InitialValueResult initResult = parseInitialValue(
-                initExpr, constantValues, vensimNames, lookupNames, warnings, eq.name());
+                initExpr, constantValues, vensimNames, lookupNames,
+                subscriptDimensions, warnings, eq.name());
 
         // Create stock (display name preserves spaces)
         if (initResult.expression != null) {
@@ -1198,6 +1224,7 @@ public class VensimImporter implements ModelImporter {
                                                   Map<String, Double> constantValues,
                                                   Set<String> vensimNames,
                                                   Set<String> lookupNames,
+                                                  Map<String, List<String>> subscriptDimensions,
                                                   List<String> warnings,
                                                   String varName) {
         String trimmed = initExpr.strip();
@@ -1212,7 +1239,8 @@ public class VensimImporter implements ModelImporter {
         }
         // Fall back to treating as an expression (compiled at model build time)
         VensimExprTranslator.TranslationResult tr =
-                VensimExprTranslator.translate(trimmed, varName + "_init", vensimNames, lookupNames);
+                VensimExprTranslator.translate(trimmed, varName + "_init", vensimNames,
+                        lookupNames, subscriptDimensions);
         warnings.addAll(tr.warnings());
         return InitialValueResult.ofExpression(tr.expression());
     }
@@ -1342,7 +1370,7 @@ public class VensimImporter implements ModelImporter {
      * @param rawDimName       the raw Vensim name of this mapping dimension
      * @param rawLabels        the raw label names (for expression replacement)
      */
-    record SubscriptMapping(List<String> normalizedLabels, String targetDimension,
+    record SubscriptMapping(String targetDimension,
                              String rawDimName, List<String> rawLabels) {}
 
     /**

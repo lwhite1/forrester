@@ -989,6 +989,14 @@ class VensimExprTranslatorTest {
         }
 
         @Test
+        void shouldHandleSingleLabelDimension() {
+            Map<String, List<String>> dims = Map.of("d", List.of("only"));
+            var result = VensimExprTranslator.translate(
+                    "SUM(x[d!])", "var", EMPTY_NAMES, Set.of(), dims);
+            assertThat(result.expression()).isEqualTo("(x_only)");
+        }
+
+        @Test
         void shouldHandleSumWithoutDimensions() {
             // Without dimension info, SUM is left as-is
             var result = VensimExprTranslator.translate(
@@ -1018,6 +1026,14 @@ class VensimExprTranslatorTest {
             var result = VensimExprTranslator.translate(
                     "VMIN(x[d!])", "var", EMPTY_NAMES, Set.of(), dims);
             assertThat(result.expression()).isEqualTo("MIN(x_a, x_b)");
+        }
+
+        @Test
+        void shouldHandleSingleLabelVmin() {
+            Map<String, List<String>> dims = Map.of("d", List.of("only"));
+            var result = VensimExprTranslator.translate(
+                    "VMIN(x[d!])", "var", EMPTY_NAMES, Set.of(), dims);
+            assertThat(result.expression()).isEqualTo("x_only");
         }
 
         @Test
