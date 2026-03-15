@@ -38,6 +38,19 @@ public class CoffeeCoolingDemo {
 
     public void run(double initialTemperature, double roomTemperature, double coolingRate,
                     double durationMinutes) {
+        Model model = getModel(initialTemperature, roomTemperature, coolingRate);
+
+        Simulation run = new Simulation(model, MINUTE, MINUTE, durationMinutes);
+        Flow cooling = model.getStocks().getFirst().getOutflows().iterator().next();
+        run.addEventHandler(new FlowChartViewer(cooling));
+        run.execute();
+    }
+
+    public Model getModel() {
+        return getModel(100, 18, 0.10);
+    }
+
+    public Model getModel(double initialTemperature, double roomTemperature, double coolingRate) {
         Model model = new Model("Coffee Cooling");
         model.setMetadata(ModelMetadata.builder()
                 .source("Newton's law of cooling")
@@ -57,8 +70,6 @@ public class CoffeeCoolingDemo {
         model.addStock(coffeeTemperature);
         model.addVariable(discrepancy);
 
-        Simulation run = new Simulation(model, MINUTE, MINUTE, durationMinutes);
-        run.addEventHandler(new FlowChartViewer(cooling));
-        run.execute();
+        return model;
     }
 }

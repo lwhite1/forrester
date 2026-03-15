@@ -50,6 +50,27 @@ public class MultiRegionSirDemo {
     public void run(double[] initialSusceptible, double[] initialInfectious,
                     double[] initialRecovered, double contactRate, double infectivity,
                     double recoveryProportion, double migrationRate, double durationWeeks) {
+        Model model = getModel(initialSusceptible, initialInfectious, initialRecovered,
+                contactRate, infectivity, recoveryProportion, migrationRate);
+
+        Simulation run = new Simulation(model, DAY, Times.weeks(durationWeeks));
+        run.addEventHandler(new CsvSubscriber(
+                System.getProperty("java.io.tmpdir") + "/courant-multi-region-sir.csv"));
+        run.addEventHandler(new StockLevelChartViewer());
+        run.execute();
+    }
+
+    public Model getModel() {
+        return getModel(
+                new double[]{990, 1000, 1000},
+                new double[]{10, 0, 0},
+                new double[]{0, 0, 0},
+                8.0, 0.10, 0.20, 0.01);
+    }
+
+    public Model getModel(double[] initialSusceptible, double[] initialInfectious,
+                           double[] initialRecovered, double contactRate, double infectivity,
+                           double recoveryProportion, double migrationRate) {
         Model model = new Model("Multi-Region SIR Model");
         model.setMetadata(ModelMetadata.builder()
                 .source("Kermack & McKendrick SIR model (1927)")
@@ -105,10 +126,6 @@ public class MultiRegionSirDemo {
         model.addArrayedStock(infectious);
         model.addArrayedStock(recovered);
 
-        Simulation run = new Simulation(model, DAY, Times.weeks(durationWeeks));
-        run.addEventHandler(new CsvSubscriber(
-                System.getProperty("java.io.tmpdir") + "/courant-multi-region-sir.csv"));
-        run.addEventHandler(new StockLevelChartViewer());
-        run.execute();
+        return model;
     }
 }

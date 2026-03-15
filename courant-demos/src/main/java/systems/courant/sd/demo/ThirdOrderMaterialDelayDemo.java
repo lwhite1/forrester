@@ -49,6 +49,24 @@ public class ThirdOrderMaterialDelayDemo {
                     double processDemandPerDay, double step1DelayHours, double step2DelayHours,
                     double step3DelayHours, double durationHours) {
 
+        Model model = getModel(initialStep1, initialStep2, initialStep3,
+                processDemandPerDay, step1DelayHours, step2DelayHours, step3DelayHours);
+
+        Simulation run = new Simulation(model, HOUR, Times.hours(durationHours));
+        run.addEventHandler(new StockLevelChartViewer());
+        run.addEventHandler(new CsvSubscriber(
+                System.getProperty("java.io.tmpdir") + "/courant-third-order-delay.csv"));
+        run.execute();
+    }
+
+    public Model getModel() {
+        return getModel(100, 0, 0, 48, 7.0, 6.3, 3.2);
+    }
+
+    public Model getModel(double initialStep1, double initialStep2, double initialStep3,
+                           double processDemandPerDay, double step1DelayHours,
+                           double step2DelayHours, double step3DelayHours) {
+
         Model model = new Model("Third order material delay");
         model.setMetadata(ModelMetadata.builder()
                 .license("CC-BY-SA-4.0")
@@ -94,10 +112,6 @@ public class ThirdOrderMaterialDelayDemo {
         model.addVariable(totalWIP);
         model.addVariable(pipelineOutput);
 
-        Simulation run = new Simulation(model, HOUR, Times.hours(durationHours));
-        run.addEventHandler(new StockLevelChartViewer());
-        run.addEventHandler(new CsvSubscriber(
-                System.getProperty("java.io.tmpdir") + "/courant-third-order-delay.csv"));
-        run.execute();
+        return model;
     }
 }

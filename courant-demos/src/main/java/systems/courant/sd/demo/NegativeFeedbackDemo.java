@@ -42,6 +42,19 @@ public class NegativeFeedbackDemo {
 
     public void run(double initialInventory, double goalInventory, double adjustmentTimeDays,
                     double durationWeeks) {
+        Model model = getModel(initialInventory, goalInventory, adjustmentTimeDays);
+
+        Simulation run = new Simulation(model, TimeUnits.DAY, WEEK, durationWeeks);
+        run.addEventHandler(new StockLevelChartViewer());
+        run.execute();
+    }
+
+    public Model getModel() {
+        return getModel(100, 860, 8);
+    }
+
+    public Model getModel(double initialInventory, double goalInventory,
+                           double adjustmentTimeDays) {
         Model model = new Model("Negative feedback with goal");
         model.setMetadata(ModelMetadata.builder()
                 .license("CC-BY-SA-4.0")
@@ -60,8 +73,6 @@ public class NegativeFeedbackDemo {
 
         model.addStock(inventoryOnHand);
 
-        Simulation run = new Simulation(model, TimeUnits.DAY, WEEK, durationWeeks);
-        run.addEventHandler(new StockLevelChartViewer());
-        run.execute();
+        return model;
     }
 }

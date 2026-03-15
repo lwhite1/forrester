@@ -39,6 +39,19 @@ public class SShapedPopulationGrowthDemo {
 
     public void run(double initialPopulation, double carryingCapacity,
                     double maxFractionalBirthRate, double durationWeeks) {
+        Model model = getModel(initialPopulation, carryingCapacity, maxFractionalBirthRate);
+
+        Simulation run = new Simulation(model, DAY, WEEK, durationWeeks);
+        run.addEventHandler(new StockLevelChartViewer());
+        run.execute();
+    }
+
+    public Model getModel() {
+        return getModel(10, 1000, 0.04);
+    }
+
+    public Model getModel(double initialPopulation, double carryingCapacity,
+                           double maxFractionalBirthRate) {
         Model model = new Model("Population with S-Shaped Growth");
         model.setMetadata(ModelMetadata.builder()
                 .license("CC-BY-SA-4.0")
@@ -53,8 +66,6 @@ public class SShapedPopulationGrowthDemo {
 
         model.addStock(population);
 
-        Simulation run = new Simulation(model, DAY, WEEK, durationWeeks);
-        run.addEventHandler(new StockLevelChartViewer());
-        run.execute();
+        return model;
     }
 }

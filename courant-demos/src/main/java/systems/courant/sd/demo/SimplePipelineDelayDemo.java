@@ -36,7 +36,12 @@ public class SimplePipelineDelayDemo {
         new SimplePipelineDelayDemo().run(initialWip, arrivalRate, delayDays, durationWeeks);
     }
 
-    public void run(double initialWip, double arrivalRate, int delayDays, double durationWeeks) {
+    public Simulation createSimulation() {
+        return createSimulation(0, 5, 3, 5);
+    }
+
+    public Simulation createSimulation(double initialWip, double arrivalRate, int delayDays,
+                                       double durationWeeks) {
         Model model = new Model("Simple Pipeline Delay");
         model.setMetadata(ModelMetadata.builder()
                 .license("CC-BY-SA-4.0")
@@ -53,6 +58,12 @@ public class SimplePipelineDelayDemo {
         wip.addInflow(arrivals);
         wip.addOutflow(departures);
         model.addStock(wip);
+
+        return run;
+    }
+
+    public void run(double initialWip, double arrivalRate, int delayDays, double durationWeeks) {
+        Simulation run = createSimulation(initialWip, arrivalRate, delayDays, durationWeeks);
 
         run.addEventHandler(new StockLevelChartViewer());
         run.execute();

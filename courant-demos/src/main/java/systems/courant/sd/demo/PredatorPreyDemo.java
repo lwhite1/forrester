@@ -45,6 +45,21 @@ public class PredatorPreyDemo {
     public void run(double initialPrey, double initialPredators, double preyBirthRate,
                     double predationRate, double predatorEfficiency, double predatorDeathRate,
                     double durationYears) {
+        Model model = getModel(initialPrey, initialPredators, preyBirthRate,
+                predationRate, predatorEfficiency, predatorDeathRate);
+
+        Simulation run = new Simulation(model, TimeUnits.DAY, Times.years(durationYears));
+        run.addEventHandler(new StockLevelChartViewer());
+        run.execute();
+    }
+
+    public Model getModel() {
+        return getModel(100, 10, 1.0, 0.01, 0.5, 0.8);
+    }
+
+    public Model getModel(double initialPrey, double initialPredators, double preyBirthRate,
+                           double predationRate, double predatorEfficiency,
+                           double predatorDeathRate) {
         Model model = new Model("Predator-Prey model");
         model.setMetadata(ModelMetadata.builder()
                 .source("Lotka-Volterra predator-prey equations")
@@ -83,8 +98,6 @@ public class PredatorPreyDemo {
         model.addStock(prey);
         model.addStock(predator);
 
-        Simulation run = new Simulation(model, TimeUnits.DAY, Times.years(durationYears));
-        run.addEventHandler(new StockLevelChartViewer());
-        run.execute();
+        return model;
     }
 }

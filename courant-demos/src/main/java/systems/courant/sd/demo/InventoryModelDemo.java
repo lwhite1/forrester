@@ -45,10 +45,14 @@ public class InventoryModelDemo {
                 desiredInventoryMultiplier, durationDays);
     }
 
-    public void run(double initialCarsOnLot, double initialPerceivedSales,
-                    double baseDemand, double stepDemand, int demandStepChangeDay,
-                    double perceptionDelay, double responseDelay, double deliveryDelay,
-                    double desiredInventoryMultiplier, double durationDays) {
+    public Simulation createSimulation() {
+        return createSimulation(200, 20, 20, 22, 25, 5, 3, 5, 10, 100);
+    }
+
+    public Simulation createSimulation(double initialCarsOnLot, double initialPerceivedSales,
+                                       double baseDemand, double stepDemand, int demandStepChangeDay,
+                                       double perceptionDelay, double responseDelay, double deliveryDelay,
+                                       double desiredInventoryMultiplier, double durationDays) {
 
         Model model = new Model("Inventory Model");
         model.setMetadata(ModelMetadata.builder()
@@ -104,6 +108,19 @@ public class InventoryModelDemo {
         model.addVariable(desiredInventory);
         model.addVariable(inventoryGap);
         model.addVariable(ordersToFactory);
+
+        return run;
+    }
+
+    public void run(double initialCarsOnLot, double initialPerceivedSales,
+                    double baseDemand, double stepDemand, int demandStepChangeDay,
+                    double perceptionDelay, double responseDelay, double deliveryDelay,
+                    double desiredInventoryMultiplier, double durationDays) {
+
+        Simulation run = createSimulation(initialCarsOnLot, initialPerceivedSales,
+                baseDemand, stepDemand, demandStepChangeDay,
+                perceptionDelay, responseDelay, deliveryDelay,
+                desiredInventoryMultiplier, durationDays);
 
         run.addEventHandler(new StockLevelChartViewer());
         run.execute();

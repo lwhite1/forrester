@@ -36,6 +36,18 @@ public class ExponentialDecayDemo {
     }
 
     public void run(double initialPopulation, double deathRate, double durationWeeks) {
+        Model model = getModel(initialPopulation, deathRate);
+
+        Simulation run = new Simulation(model, TimeUnits.DAY, Times.weeks(durationWeeks));
+        run.addEventHandler(new StockLevelChartViewer());
+        run.execute();
+    }
+
+    public Model getModel() {
+        return getModel(100, 1 / 80.0);
+    }
+
+    public Model getModel(double initialPopulation, double deathRate) {
         Model model = new Model("Population with exponential decay");
         model.setMetadata(ModelMetadata.builder()
                 .license("CC-BY-SA-4.0")
@@ -49,8 +61,6 @@ public class ExponentialDecayDemo {
 
         model.addStock(population);
 
-        Simulation run = new Simulation(model, TimeUnits.DAY, Times.weeks(durationWeeks));
-        run.addEventHandler(new StockLevelChartViewer());
-        run.execute();
+        return model;
     }
 }
