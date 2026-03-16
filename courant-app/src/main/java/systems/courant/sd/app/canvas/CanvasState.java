@@ -61,6 +61,12 @@ public class CanvasState {
             } else if (ep.type() == ElementType.CLD_VARIABLE) {
                 double w = LayoutMetrics.cldVarWidthForName(ep.name());
                 sizes.put(ep.name(), new Size(w, LayoutMetrics.CLD_VAR_HEIGHT));
+            } else if (ep.type() == ElementType.AUX) {
+                double w = LayoutMetrics.auxWidthForName(ep.name());
+                sizes.put(ep.name(), new Size(w, LayoutMetrics.AUX_HEIGHT));
+            } else if (ep.type() == ElementType.LOOKUP) {
+                double w = LayoutMetrics.lookupWidthForName(ep.name());
+                sizes.put(ep.name(), new Size(w, LayoutMetrics.LOOKUP_HEIGHT));
             }
             drawOrder.add(ep.name());
         }

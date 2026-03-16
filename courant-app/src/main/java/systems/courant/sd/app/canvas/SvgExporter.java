@@ -425,13 +425,13 @@ public final class SvgExporter {
                 "font-family=\"sans-serif\" font-size=\"%.0f\" font-weight=\"bold\" fill=\"%s\">%s</text>%n",
                 cx, cy, LayoutMetrics.STOCK_NAME_FONT_SIZE, svgColor(ColorPalette.TEXT), escapeXml(stockLabel));
 
-        // Unit badge
+        // Unit badge centered below name
         if (unit != null && !unit.isBlank()) {
             w.printf(Locale.US,
-                    "  <text x=\"%.2f\" y=\"%.2f\" text-anchor=\"end\" dominant-baseline=\"auto\" " +
-                    "font-family=\"sans-serif\" font-size=\"%.0f\" fill=\"%s\">%s</text>%n",
-                    x + width - 6, y + height - 4,
-                    LayoutMetrics.BADGE_FONT_SIZE, svgColor(ColorPalette.TEXT_SECONDARY), escapeXml(unit));
+                    "  <text x=\"%.2f\" y=\"%.2f\" text-anchor=\"middle\" dominant-baseline=\"auto\" " +
+                    "font-family=\"sans-serif\" font-size=\"%.0f\" fill=\"%s\">[%s]</text>%n",
+                    cx, y + height - 3,
+                    LayoutMetrics.UNIT_BADGE_FONT_SIZE, svgColor(ColorPalette.BADGE_TEXT), escapeXml(unit));
         }
     }
 
@@ -486,15 +486,12 @@ public final class SvgExporter {
         }
         w.printf(Locale.US,
                 "  <text x=\"%.2f\" y=\"%.2f\" text-anchor=\"start\" dominant-baseline=\"hanging\" " +
-                "font-family=\"sans-serif\" font-size=\"%.0f\" fill=\"%s\">%s</text>%n",
-                x + 5, y + 3, LayoutMetrics.BADGE_FONT_SIZE, svgColor(ColorPalette.TEXT_SECONDARY), escapeXml(badge));
+                "font-family=\"sans-serif\" font-size=\"%.0f\" font-weight=\"bold\" fill=\"%s\">%s</text>%n",
+                x + 5, y + 3, LayoutMetrics.BADGE_FONT_SIZE, svgColor(ColorPalette.BADGE_TEXT), escapeXml(badge));
 
-        // Name centered (truncated to fit)
-        String auxLabel = ElementRenderer.truncate(name, LayoutMetrics.AUX_NAME_FONT, width - 20);
-        w.printf(Locale.US,
-                "  <text x=\"%.2f\" y=\"%.2f\" text-anchor=\"middle\" dominant-baseline=\"central\" " +
-                "font-family=\"sans-serif\" font-size=\"%.0f\" fill=\"%s\">%s</text>%n",
-                cx, cy, LayoutMetrics.AUX_NAME_FONT_SIZE, svgColor(ColorPalette.TEXT), escapeXml(auxLabel));
+        // Name centered — wrap to two lines if needed
+        writeSvgWrappedName(w, name, LayoutMetrics.AUX_NAME_FONT, LayoutMetrics.AUX_NAME_FONT_SIZE,
+                cx, cy, width, 20);
     }
 
     private static void writeModule(PrintWriter w, String name,
@@ -519,9 +516,9 @@ public final class SvgExporter {
         // Module badge
         w.printf(Locale.US,
                 "  <text x=\"%.2f\" y=\"%.2f\" text-anchor=\"start\" dominant-baseline=\"hanging\" " +
-                "font-family=\"sans-serif\" font-size=\"%.0f\" fill=\"%s\">%s</text>%n",
+                "font-family=\"sans-serif\" font-size=\"%.0f\" font-weight=\"bold\" fill=\"%s\">%s</text>%n",
                 x + 5, y + 3, LayoutMetrics.BADGE_FONT_SIZE,
-                svgColor(ColorPalette.TEXT_SECONDARY), ElementRenderer.BADGE_MODULE);
+                svgColor(ColorPalette.BADGE_TEXT), ElementRenderer.BADGE_MODULE);
 
         // Name centered (truncated to fit)
         String modLabel = ElementRenderer.truncate(name, LayoutMetrics.MODULE_NAME_FONT, width - 12);
@@ -546,17 +543,13 @@ public final class SvgExporter {
         // Table badge
         w.printf(Locale.US,
                 "  <text x=\"%.2f\" y=\"%.2f\" text-anchor=\"start\" dominant-baseline=\"hanging\" " +
-                "font-family=\"sans-serif\" font-size=\"%.0f\" fill=\"%s\">%s</text>%n",
+                "font-family=\"sans-serif\" font-size=\"%.0f\" font-weight=\"bold\" fill=\"%s\">%s</text>%n",
                 x + 4, y + 3, LayoutMetrics.BADGE_FONT_SIZE,
-                svgColor(ColorPalette.TEXT_SECONDARY), ElementRenderer.BADGE_LOOKUP);
+                svgColor(ColorPalette.BADGE_TEXT), ElementRenderer.BADGE_LOOKUP);
 
-        // Name centered vertically (truncated to fit)
-        String lookupLabel = ElementRenderer.truncate(name, LayoutMetrics.LOOKUP_NAME_FONT, width - 16);
-        w.printf(Locale.US,
-                "  <text x=\"%.2f\" y=\"%.2f\" text-anchor=\"middle\" dominant-baseline=\"central\" " +
-                "font-family=\"sans-serif\" font-size=\"%.0f\" fill=\"%s\">%s</text>%n",
-                cx, cy,
-                LayoutMetrics.LOOKUP_NAME_FONT_SIZE, svgColor(ColorPalette.TEXT), escapeXml(lookupLabel));
+        // Name centered vertically — wrap to two lines if needed
+        writeSvgWrappedName(w, name, LayoutMetrics.LOOKUP_NAME_FONT, LayoutMetrics.LOOKUP_NAME_FONT_SIZE,
+                cx, cy, width, 16);
     }
 
     private static void writeCldVariable(PrintWriter w, String name,
@@ -612,19 +605,23 @@ public final class SvgExporter {
                 double halfH = LayoutMetrics.effectiveHeight(state, link.from()) / 2;
                 double[] lp = CausalLinkGeometry.selfLoopPoints(fromX, fromY, halfW, halfH);
 
+                boolean isUnknown = link.polarity() == CausalLinkDef.Polarity.UNKNOWN;
+                Color selfLinkColor = isUnknown ? ColorPalette.CAUSAL_UNKNOWN : ColorPalette.CAUSAL_LINK;
+                String dashAttr = isUnknown ? " stroke-dasharray=\"4 3\"" : "";
+
                 // Cubic Bézier path
                 w.printf(Locale.US,
                         "  <path d=\"M %.2f %.2f C %.2f %.2f, %.2f %.2f, %.2f %.2f\" " +
-                        "fill=\"none\" stroke=\"%s\" stroke-width=\"%.1f\"/>%n",
+                        "fill=\"none\" stroke=\"%s\" stroke-width=\"%.1f\"%s/>%n",
                         lp[0], lp[1], lp[2], lp[3], lp[4], lp[5], lp[6], lp[7],
-                        svgColor(ColorPalette.CAUSAL_LINK), LayoutMetrics.CAUSAL_LINK_WIDTH);
+                        svgColor(selfLinkColor), LayoutMetrics.CAUSAL_LINK_WIDTH, dashAttr);
 
                 // Arrowhead at end
                 double[] tan = CausalLinkGeometry.tangentCubic(
                         lp[0], lp[1], lp[2], lp[3], lp[4], lp[5], lp[6], lp[7], 1.0);
                 writeArrowheadFromTangent(w, lp[6], lp[7], tan[0], tan[1],
                         LayoutMetrics.CAUSAL_ARROWHEAD_LENGTH, LayoutMetrics.CAUSAL_ARROWHEAD_WIDTH,
-                        ColorPalette.CAUSAL_LINK);
+                        selfLinkColor);
 
                 // Polarity label at top of loop
                 double[] midPt = CausalLinkGeometry.evaluateCubic(
@@ -642,19 +639,23 @@ public final class SvgExporter {
             FlowGeometry.Point2D cf = FlowGeometry.clipToElement(state, link.from(), cp.x(), cp.y());
             FlowGeometry.Point2D ct = FlowGeometry.clipToElement(state, link.to(), cp.x(), cp.y());
 
+            boolean isUnknown = link.polarity() == CausalLinkDef.Polarity.UNKNOWN;
+            Color curLinkColor = isUnknown ? ColorPalette.CAUSAL_UNKNOWN : ColorPalette.CAUSAL_LINK;
+            String dashAttr = isUnknown ? " stroke-dasharray=\"4 3\"" : "";
+
             // Quadratic Bézier path
             w.printf(Locale.US,
                     "  <path d=\"M %.2f %.2f Q %.2f %.2f, %.2f %.2f\" " +
-                    "fill=\"none\" stroke=\"%s\" stroke-width=\"%.1f\"/>%n",
+                    "fill=\"none\" stroke=\"%s\" stroke-width=\"%.1f\"%s/>%n",
                     cf.x(), cf.y(), cp.x(), cp.y(), ct.x(), ct.y(),
-                    svgColor(ColorPalette.CAUSAL_LINK), LayoutMetrics.CAUSAL_LINK_WIDTH);
+                    svgColor(curLinkColor), LayoutMetrics.CAUSAL_LINK_WIDTH, dashAttr);
 
             // Arrowhead oriented along curve tangent at endpoint
             double[] tan = CausalLinkGeometry.tangent(
                     cf.x(), cf.y(), cp.x(), cp.y(), ct.x(), ct.y(), 1.0);
             writeArrowheadFromTangent(w, ct.x(), ct.y(), tan[0], tan[1],
                     LayoutMetrics.CAUSAL_ARROWHEAD_LENGTH, LayoutMetrics.CAUSAL_ARROWHEAD_WIDTH,
-                    ColorPalette.CAUSAL_LINK);
+                    curLinkColor);
 
             // Polarity label at t=0.8 on the curve, offset perpendicular
             double dx = ct.x() - cf.x();
@@ -685,11 +686,13 @@ public final class SvgExporter {
             case NEGATIVE -> ColorPalette.CAUSAL_NEGATIVE;
             case UNKNOWN -> ColorPalette.CAUSAL_UNKNOWN;
         };
+        double fontSize = polarity == CausalLinkDef.Polarity.UNKNOWN
+                ? LayoutMetrics.CAUSAL_UNKNOWN_FONT_SIZE : LayoutMetrics.CAUSAL_POLARITY_FONT_SIZE;
         w.printf(Locale.US,
                 "  <text x=\"%.2f\" y=\"%.2f\" text-anchor=\"middle\" " +
                 "dominant-baseline=\"central\" font-weight=\"bold\" font-size=\"%.0f\" " +
                 "fill=\"%s\">%s</text>%n",
-                x, y, LayoutMetrics.CAUSAL_POLARITY_FONT_SIZE, svgColor(labelColor), escapeXml(polarity.symbol()));
+                x, y, fontSize, svgColor(labelColor), escapeXml(polarity.symbol()));
     }
 
     private static void writeArrowheadFromTangent(PrintWriter w,
@@ -756,6 +759,45 @@ public final class SvgExporter {
 
     // --- Shared helpers ---
 
+    /**
+     * Writes a name label as SVG, wrapping to two lines with {@code <tspan>} elements if needed.
+     */
+    private static void writeSvgWrappedName(PrintWriter w, String name,
+                                            javafx.scene.text.Font font, double fontSize,
+                                            double cx, double cy, double width, double padding) {
+        double maxWidth = width - padding;
+        javafx.scene.text.Text measure = new javafx.scene.text.Text(name);
+        measure.setFont(font);
+        if (measure.getLayoutBounds().getWidth() <= maxWidth) {
+            // Single line
+            w.printf(Locale.US,
+                    "  <text x=\"%.2f\" y=\"%.2f\" text-anchor=\"middle\" dominant-baseline=\"central\" " +
+                    "font-family=\"sans-serif\" font-size=\"%.0f\" fill=\"%s\">%s</text>%n",
+                    cx, cy, fontSize, svgColor(ColorPalette.TEXT), escapeXml(name));
+        } else {
+            // Wrap to lines, show at most 2
+            java.util.List<String> lines = ElementRenderer.wrapText(name, font, maxWidth);
+            int lineCount = Math.min(lines.size(), 2);
+            double lineHeight = ElementRenderer.measureLineHeight(font);
+            double startY = cy - (lineCount - 1) * lineHeight / 2;
+
+            w.printf(Locale.US,
+                    "  <text x=\"%.2f\" text-anchor=\"middle\" " +
+                    "font-family=\"sans-serif\" font-size=\"%.0f\" fill=\"%s\">%n",
+                    cx, fontSize, svgColor(ColorPalette.TEXT));
+            for (int i = 0; i < lineCount; i++) {
+                String line = lines.get(i);
+                if (i == 1 && lines.size() > 2) {
+                    line = ElementRenderer.truncate(line, font, maxWidth);
+                }
+                w.printf(Locale.US,
+                        "    <tspan x=\"%.2f\" y=\"%.2f\" dominant-baseline=\"central\">%s</tspan>%n",
+                        cx, startY + i * lineHeight, escapeXml(line));
+            }
+            w.println("  </text>");
+        }
+    }
+
     private static void writeCloud(PrintWriter w, double cx, double cy) {
         double r = LayoutMetrics.CLOUD_RADIUS;
         w.printf(Locale.US,
@@ -764,8 +806,8 @@ public final class SvgExporter {
                 cx, cy, r, svgColor(ColorPalette.CLOUD), LayoutMetrics.CLOUD_LINE_WIDTH);
         w.printf(Locale.US,
                 "  <text x=\"%.2f\" y=\"%.2f\" text-anchor=\"middle\" dominant-baseline=\"central\" " +
-                "font-family=\"sans-serif\" font-size=\"%.0f\" fill=\"%s\">~</text>%n",
-                cx, cy, LayoutMetrics.BADGE_FONT_SIZE, svgColor(ColorPalette.CLOUD));
+                "font-family=\"sans-serif\" font-size=\"14\" fill=\"%s\">~</text>%n",
+                cx, cy, svgColor(ColorPalette.CLOUD));
     }
 
     private static void writeArrowhead(PrintWriter w, double fromX, double fromY,

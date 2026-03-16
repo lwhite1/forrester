@@ -75,6 +75,12 @@ public final class SelectionController {
         if (type == ElementType.CLD_VARIABLE) {
             double w = LayoutMetrics.cldVarWidthForName(name);
             canvasState.setSize(name, w, LayoutMetrics.CLD_VAR_HEIGHT);
+        } else if (type == ElementType.AUX) {
+            double w = LayoutMetrics.auxWidthForName(name);
+            canvasState.setSize(name, w, LayoutMetrics.AUX_HEIGHT);
+        } else if (type == ElementType.LOOKUP) {
+            double w = LayoutMetrics.lookupWidthForName(name);
+            canvasState.setSize(name, w, LayoutMetrics.LOOKUP_HEIGHT);
         }
         canvasState.clearSelection();
         canvasState.select(name);
@@ -188,9 +194,16 @@ public final class SelectionController {
             return false;
         }
         canvasState.renameElement(oldName, newName);
-        if (canvasState.getType(newName).orElse(null) == ElementType.CLD_VARIABLE) {
+        ElementType renamedType = canvasState.getType(newName).orElse(null);
+        if (renamedType == ElementType.CLD_VARIABLE) {
             double w = LayoutMetrics.cldVarWidthForName(newName);
             canvasState.setSize(newName, w, LayoutMetrics.CLD_VAR_HEIGHT);
+        } else if (renamedType == ElementType.AUX) {
+            double w = LayoutMetrics.auxWidthForName(newName);
+            canvasState.setSize(newName, w, LayoutMetrics.AUX_HEIGHT);
+        } else if (renamedType == ElementType.LOOKUP) {
+            double w = LayoutMetrics.lookupWidthForName(newName);
+            canvasState.setSize(newName, w, LayoutMetrics.LOOKUP_HEIGHT);
         }
         return true;
     }

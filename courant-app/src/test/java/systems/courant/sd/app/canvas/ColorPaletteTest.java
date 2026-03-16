@@ -79,6 +79,7 @@ class ColorPaletteTest {
             assertThat(ColorPalette.BACKGROUND).isNotNull();
             assertThat(ColorPalette.TEXT).isNotNull();
             assertThat(ColorPalette.TEXT_SECONDARY).isNotNull();
+            assertThat(ColorPalette.BADGE_TEXT).isNotNull();
             assertThat(ColorPalette.CLOUD).isNotNull();
             assertThat(ColorPalette.COMMENT_BORDER).isNotNull();
             assertThat(ColorPalette.DELAY_BADGE).isNotNull();
@@ -87,6 +88,25 @@ class ColorPaletteTest {
             assertThat(ColorPalette.HOVER_FILL).isNotNull();
             assertThat(ColorPalette.COMMENT_TEXT).isNotNull();
             assertThat(ColorPalette.COMMENT_ACCENT).isNotNull();
+        }
+
+        @Test
+        @DisplayName("CAUSAL_UNKNOWN is amber (#F39C12)")
+        void causalUnknownIsAmber() {
+            assertThat(ColorPalette.CAUSAL_UNKNOWN).isEqualTo(Color.web("#F39C12"));
+        }
+
+        @Test
+        @DisplayName("BADGE_TEXT is darker than TEXT_SECONDARY")
+        void badgeTextDarkerThanSecondary() {
+            assertThat(ColorPalette.BADGE_TEXT.getBrightness())
+                    .isLessThan(ColorPalette.TEXT_SECONDARY.getBrightness());
+        }
+
+        @Test
+        @DisplayName("CLOUD is darker gray (#95A5A6)")
+        void cloudIsDarkerGray() {
+            assertThat(ColorPalette.CLOUD).isEqualTo(Color.web("#95A5A6"));
         }
 
         @Test

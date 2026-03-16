@@ -76,14 +76,16 @@ class HitTesterTest {
 
         @Test
         void shouldHitAtEdge() {
-            // Aux is 100x55, half-width=50, half-height=27.5
-            assertThat(HitTester.hitTest(state, 150 + 50, 250)).isEqualTo("rate");
+            // Aux auto-sizes to fit name; height remains AUX_HEIGHT (55)
+            double halfW = LayoutMetrics.effectiveWidth(state, "rate") / 2;
+            assertThat(HitTester.hitTest(state, 150 + halfW, 250)).isEqualTo("rate");
             assertThat(HitTester.hitTest(state, 150, 250 + 27)).isEqualTo("rate");
         }
 
         @Test
         void shouldMissOutside() {
-            assertThat(HitTester.hitTest(state, 150 + 51, 250)).isNull();
+            double halfW = LayoutMetrics.effectiveWidth(state, "rate") / 2;
+            assertThat(HitTester.hitTest(state, 150 + halfW + 1, 250)).isNull();
             assertThat(HitTester.hitTest(state, 150, 250 + 28)).isNull();
         }
     }
