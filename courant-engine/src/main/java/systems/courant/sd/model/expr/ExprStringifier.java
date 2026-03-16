@@ -101,7 +101,8 @@ public final class ExprStringifier {
             return true;
         }
         return name.equals("IF") || name.equals("IF_SHORT")
-                || name.equals("TIME") || name.equals("DT");
+                || name.equals("TIME") || name.equals("DT")
+                || name.equals("PI");
     }
 
     private static void appendBinaryOp(StringBuilder sb, Expr.BinaryOp bin, int contextPrecedence) {

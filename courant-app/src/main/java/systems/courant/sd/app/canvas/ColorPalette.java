@@ -23,14 +23,14 @@ public final class ColorPalette {
     public static final Color BACKGROUND = Color.web("#F8F9FA");
     public static final Color TEXT = Color.web("#2C3E50");
     public static final Color TEXT_SECONDARY = Color.web("#7F8C8D");
-    public static final Color CLOUD = Color.web("#BDC3C7");
+    public static final Color CLOUD = Color.web("#95A5A6");
 
     // CLD (Causal Loop Diagram) colors
     public static final Color CLD_VAR_BORDER = Color.web("#7F8C8D");
     public static final Color CAUSAL_LINK = Color.web("#2C3E50");
     public static final Color CAUSAL_POSITIVE = Color.web("#27AE60");
     public static final Color CAUSAL_NEGATIVE = Color.web("#E74C3C");
-    public static final Color CAUSAL_UNKNOWN = Color.web("#BDC3C7");
+    public static final Color CAUSAL_UNKNOWN = Color.web("#F39C12");
 
     public static final Color HOVER = Color.web("#4A90D9", 0.4);
     public static final Color SELECTION = Color.web("#4A90D9", 0.8);
@@ -67,6 +67,9 @@ public final class ColorPalette {
     public static final Color COMMENT_BORDER = Color.web("#95A5A6", 0.7);
     public static final Color COMMENT_TEXT = Color.web("#5D6D7E");
     public static final Color COMMENT_ACCENT = Color.web("#95A5A6", 0.7);
+
+    /** Darker gray for badge text (value/fx/Table/Module), distinct from TEXT_SECONDARY. */
+    public static final Color BADGE_TEXT = Color.web("#5D6D7E");
 
     // Delay indicator badge
     public static final Color DELAY_BADGE = Color.web("#8E44AD");

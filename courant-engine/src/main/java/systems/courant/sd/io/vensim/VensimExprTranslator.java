@@ -224,10 +224,6 @@ public final class VensimExprTranslator {
         // 4a. Not-equal operator: <> → !=
         expr = NOT_EQUAL_PATTERN.matcher(expr).replaceAll("!=");
 
-        // 4b. Single = (equality) → == (Vensim uses = for both assignment and comparison;
-        // by this point we're processing the RHS, so any remaining = is equality)
-        expr = expr.replaceAll("(?<![<>=!])=(?!=)", "==");
-
         // 5. XIDZ and ZIDZ
         expr = translateXidz(expr, warnings);
         expr = translateZidz(expr, warnings);
@@ -293,6 +289,10 @@ public final class VensimExprTranslator {
 
         // 11. Translate subscript bracket notation: name[label] → name_label
         expr = translateSubscriptBrackets(expr);
+
+        // 11a. Single = (equality) → == (deferred until after bracket translation so
+        // that any = inside subscript brackets is not incorrectly doubled)
+        expr = expr.replaceAll("(?<![<>=!])=(?!=)", "==");
 
         // 12. Rewrite lookupName(arg) → LOOKUP(lookupName, arg)
         expr = rewriteLookupCalls(expr, lookupNames);

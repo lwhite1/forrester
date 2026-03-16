@@ -611,6 +611,24 @@ class ExprCompilerTest {
         }
 
         @Test
+        void shouldUseHalfToEvenRoundingForROUND() {
+            // Half-to-even (banker's rounding): 0.5 rounds to nearest even
+            assertThat(compiler.compile("ROUND(0.5)").getCurrentValue()).isEqualTo(0.0);
+            assertThat(compiler.compile("ROUND(1.5)").getCurrentValue()).isEqualTo(2.0);
+            assertThat(compiler.compile("ROUND(2.5)").getCurrentValue()).isEqualTo(2.0);
+            assertThat(compiler.compile("ROUND(3.5)").getCurrentValue()).isEqualTo(4.0);
+            assertThat(compiler.compile("ROUND(-2.5)").getCurrentValue()).isEqualTo(-2.0);
+        }
+
+        @Test
+        void shouldNotClampLargeDoublesInROUND() {
+            // Values beyond Long.MAX_VALUE must not clamp
+            double huge = 1e19;
+            Formula formula = compiler.compile("ROUND(" + huge + ")");
+            assertThat(formula.getCurrentValue()).isEqualTo(huge);
+        }
+
+        @Test
         void shouldCompileMODULO() {
             Formula formula = compiler.compile("MODULO(7, 3)");
             assertThat(formula.getCurrentValue()).isCloseTo(1.0, within(1e-10));
@@ -1367,6 +1385,32 @@ class ExprCompilerTest {
             Expr ifShortExpr = ExprParser.parse("IF_SHORT(x > 0, x, 0)");
             assertThat(((Expr.Conditional) ifExpr).shortCircuit()).isFalse();
             assertThat(((Expr.Conditional) ifShortExpr).shortCircuit()).isTrue();
+        }
+    }
+
+    @Nested
+    @DisplayName("Warned flag reset")
+    class WarnedFlagReset {
+
+        @Test
+        @DisplayName("should register resettables for warned flags in division by zero")
+        void shouldResetWarnedFlagsOnReset() {
+            context.addLiteralConstant("zero", 0);
+            Formula formula = compiler.compile("Population / zero");
+
+            // First evaluation triggers warning and returns NaN
+            assertThat(formula.getCurrentValue()).isNaN();
+
+            // Resettables should have been registered
+            assertThat(resettables).isNotEmpty();
+
+            // Reset all resettables (simulating model reset between runs)
+            resettables.forEach(Resettable::reset);
+
+            // After reset, the warned flag should be cleared so warning can fire again
+            // The formula should still return NaN (the behavior is the same,
+            // but the warning log would fire again on a real run)
+            assertThat(formula.getCurrentValue()).isNaN();
         }
     }
 }

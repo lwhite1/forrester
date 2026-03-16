@@ -278,6 +278,24 @@ class VensimExporterTest {
             assertThat(VensimExporter.toVensimExpr("_2nd_Batch * 2"))
                     .isEqualTo("2nd Batch * 2");
         }
+
+        @Test
+        void shouldDenormalizeQuotedVariableNamesAsAtomicUnit() {
+            assertThat(VensimExporter.toVensimExpr("\"my_var\" + 5"))
+                    .isEqualTo("\"my var\" + 5");
+        }
+
+        @Test
+        void shouldDenormalizeQuotedDigitPrefixedName() {
+            assertThat(VensimExporter.toVensimExpr("\"_2nd_Batch\" * x"))
+                    .isEqualTo("\"2nd Batch\" * x");
+        }
+
+        @Test
+        void shouldHandleUnclosedQuoteGracefully() {
+            assertThat(VensimExporter.toVensimExpr("\"unclosed + x"))
+                    .isEqualTo("\"unclosed + x");
+        }
     }
 
     @Nested

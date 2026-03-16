@@ -40,21 +40,18 @@ public class BatchImportCli {
     private static final long MAX_DOWNLOAD_BYTES = 10 * 1024 * 1024; // 10 MB
 
     public static void main(String[] args) {
+        System.exit(new BatchImportCli().run(args));
+    }
+
+    int run(String[] args) {
+        CliArgs parsed;
         try {
-            int exitCode = new BatchImportCli().run(args);
-            System.exit(exitCode);
+            parsed = parseArgs(args);
         } catch (IllegalArgumentException e) {
             System.err.println(e.getMessage());
             printUsage();
-            System.exit(1);
-        } catch (Exception e) {
-            System.err.println("Error: " + e.getMessage());
-            System.exit(1);
+            return 1;
         }
-    }
-
-    int run(String[] args) throws IOException {
-        CliArgs parsed = parseArgs(args);
 
         if (parsed.helpRequested) {
             printUsage();
@@ -66,7 +63,13 @@ public class BatchImportCli {
             return 1;
         }
 
-        List<ManifestEntry> entries = readManifest(Path.of(parsed.manifestFile));
+        List<ManifestEntry> entries;
+        try {
+            entries = readManifest(Path.of(parsed.manifestFile));
+        } catch (IOException e) {
+            System.err.println("Error reading manifest: " + e.getMessage());
+            return 1;
+        }
         log.info("Loaded {} manifest entries", entries.size());
 
         ImportPipeline pipeline = new ImportPipeline();

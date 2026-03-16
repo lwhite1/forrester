@@ -390,9 +390,20 @@ public final class CopyPasteController {
                 continue;
             }
 
+            // Consume subscript brackets as part of the reference (e.g. Stock[Region])
+            // so that subscript names are not independently checked and replaced.
+            String suffix = "";
+            if (i < len && equation.charAt(i) == '[') {
+                int close = equation.indexOf(']', i);
+                if (close >= 0) {
+                    suffix = equation.substring(i, close + 1);
+                    i = close + 1;
+                }
+            }
+
             // Check if the element exists in the target editor
             if (editor.hasElement(token) || editor.hasElement(token.replace('_', ' '))) {
-                result.append(token);
+                result.append(token).append(suffix);
             } else {
                 replaced.add(token.replace('_', ' '));
                 result.append("0");

@@ -1,5 +1,8 @@
 package systems.courant.sd.io.vensim;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -13,6 +16,8 @@ import java.util.regex.Pattern;
  * translation is handled by {@link VensimExprTranslator}.
  */
 public final class MdlParser {
+
+    private static final Logger logger = LoggerFactory.getLogger(MdlParser.class);
 
     private static final String SKETCH_SEPARATOR = "\\\\\\---///";
     private static final String GROUP_DELIMITER = "****";
@@ -251,6 +256,10 @@ public final class MdlParser {
                         }
                     }
                 } else {
+                    logger.warn("Malformed :MACRO: header — ignoring: {}",
+                            macroHeaderLine.strip());
+                    inMacro = false;
+                    macroBody = null;
                     macroName = null;
                     macroParams = null;
                 }
@@ -275,6 +284,13 @@ public final class MdlParser {
                     equations.add(equation);
                 }
             }
+        }
+
+        // Recover equations from unclosed macros
+        if (inMacro && macroBody != null && !macroBody.isEmpty()) {
+            logger.warn("Unclosed :MACRO: '{}' at end of file — recovering {} equations",
+                    macroName, macroBody.size());
+            equations.addAll(macroBody);
         }
 
         return equations;

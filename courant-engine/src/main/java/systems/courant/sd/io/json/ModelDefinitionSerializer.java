@@ -80,7 +80,7 @@ public class ModelDefinitionSerializer {
      */
     public String toJson(ModelDefinition def) {
         try {
-            ObjectNode root = toJsonNode(def);
+            ObjectNode root = toJsonNode(def, 0);
             return mapper.writeValueAsString(root);
         } catch (JsonProcessingException e) {
             throw new IllegalArgumentException("Failed to serialize model definition", e);
@@ -137,7 +137,11 @@ public class ModelDefinitionSerializer {
 
     // === Serialization ===
 
-    private ObjectNode toJsonNode(ModelDefinition def) {
+    private ObjectNode toJsonNode(ModelDefinition def, int depth) {
+        if (depth > MAX_MODULE_DEPTH) {
+            throw new IllegalArgumentException(
+                    "Module nesting depth exceeds maximum of " + MAX_MODULE_DEPTH);
+        }
         ObjectNode root = mapper.createObjectNode();
         root.put("name", def.name());
         if (def.comment() != null) {
@@ -160,7 +164,7 @@ public class ModelDefinitionSerializer {
             root.set("lookupTables", serializeLookupTables(def.lookupTables()));
         }
         if (!def.modules().isEmpty()) {
-            root.set("modules", serializeModules(def.modules()));
+            root.set("modules", serializeModules(def.modules(), depth));
         }
         if (!def.subscripts().isEmpty()) {
             root.set("subscripts", serializeSubscripts(def.subscripts()));
@@ -284,12 +288,12 @@ public class ModelDefinitionSerializer {
         return arr;
     }
 
-    private ArrayNode serializeModules(List<ModuleInstanceDef> modules) {
+    private ArrayNode serializeModules(List<ModuleInstanceDef> modules, int depth) {
         ArrayNode arr = mapper.createArrayNode();
         for (ModuleInstanceDef m : modules) {
             ObjectNode node = mapper.createObjectNode();
             node.put("instanceName", m.instanceName());
-            node.set("definition", toJsonNode(m.definition()));
+            node.set("definition", toJsonNode(m.definition(), depth + 1));
             if (!m.inputBindings().isEmpty()) {
                 node.set("inputBindings", mapToJson(m.inputBindings()));
             }

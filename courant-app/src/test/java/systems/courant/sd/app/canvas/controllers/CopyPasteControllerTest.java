@@ -293,6 +293,39 @@ class CopyPasteControllerTest {
             assertThat(cr.equation()).isEqualTo("`Population` * 0");
             assertThat(cr.replaced()).containsExactly("Growth Rate");
         }
+
+        @Test
+        void shouldPreserveSubscriptedReferencesWhenBaseExists() {
+            ModelDefinition def = new ModelDefinitionBuilder()
+                    .name("Test")
+                    .stock("Stock", 100, null)
+                    .build();
+            editor.loadFrom(def);
+
+            String result = CopyPasteController.clearDanglingReferences(
+                    "Stock[Region] * Rate", editor).equation();
+            assertThat(result).isEqualTo("Stock[Region] * 0");
+        }
+
+        @Test
+        void shouldReplaceSubscriptedReferenceWhenBaseIsMissing() {
+            String result = CopyPasteController.clearDanglingReferences(
+                    "Missing[Region] + 1", editor).equation();
+            assertThat(result).isEqualTo("0 + 1");
+        }
+
+        @Test
+        void shouldPreserveMultipleSubscriptDimensions() {
+            ModelDefinition def = new ModelDefinitionBuilder()
+                    .name("Test")
+                    .stock("Population", 100, null)
+                    .build();
+            editor.loadFrom(def);
+
+            String result = CopyPasteController.clearDanglingReferences(
+                    "Population[Region, Age]", editor).equation();
+            assertThat(result).isEqualTo("Population[Region, Age]");
+        }
     }
 
     @Nested

@@ -160,6 +160,19 @@ class ExprStringifierTest {
         assertThat(ExprStringifier.stringify(new Expr.Ref("IF"))).isEqualTo("`IF`");
         assertThat(ExprStringifier.stringify(new Expr.Ref("TIME"))).isEqualTo("`TIME`");
         assertThat(ExprStringifier.stringify(new Expr.Ref("DT"))).isEqualTo("`DT`");
+        assertThat(ExprStringifier.stringify(new Expr.Ref("PI"))).isEqualTo("`PI`");
+    }
+
+    @Test
+    void shouldRoundTripPIAsVariableRef() {
+        // A variable named PI should stringify with backtick quoting and
+        // re-parse as a Ref, not as the zero-arg PI function call
+        Expr ref = new Expr.Ref("PI");
+        String stringified = ExprStringifier.stringify(ref);
+        assertThat(stringified).isEqualTo("`PI`");
+        Expr reparsed = ExprParser.parse(stringified);
+        assertThat(reparsed).isInstanceOf(Expr.Ref.class);
+        assertThat(((Expr.Ref) reparsed).name()).isEqualTo("PI");
     }
 
     @Test

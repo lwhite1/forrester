@@ -125,17 +125,17 @@ class LoopNavigatorBarFxTest {
     }
 
     @Test
-    @DisplayName("update() with null analysis shows 'No loops detected'")
+    @DisplayName("update() with null analysis shows analysis unavailable")
     void updateWithNullAnalysis(FxRobot robot) {
         Platform.runLater(() -> bar.update(null, -1, null, 0));
         WaitForAsyncUtils.waitForFxEvents();
 
         Label label = robot.lookup("#loopNavigatorLabel").queryAs(Label.class);
-        assertThat(label.getText()).isEqualTo("No loops detected");
+        assertThat(label.getText()).isEqualTo("Loop analysis not available");
     }
 
     @Test
-    @DisplayName("update() with empty analysis shows 'No loops detected'")
+    @DisplayName("update() with empty analysis shows no loops found")
     void updateWithEmptyAnalysis(FxRobot robot) {
         FeedbackAnalysis empty = new FeedbackAnalysis(
                 Collections.emptySet(), Collections.emptyList(),
@@ -144,7 +144,7 @@ class LoopNavigatorBarFxTest {
         WaitForAsyncUtils.waitForFxEvents();
 
         Label label = robot.lookup("#loopNavigatorLabel").queryAs(Label.class);
-        assertThat(label.getText()).isEqualTo("No loops detected");
+        assertThat(label.getText()).isEqualTo("No feedback loops found");
     }
 
     @Test
