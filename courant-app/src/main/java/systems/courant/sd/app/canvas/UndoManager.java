@@ -272,7 +272,9 @@ public class UndoManager implements AutoCloseable {
             byte[] compressed = COMPRESSOR.compress(raw);
             return new CompressedData(compressed, raw.length);
         }, compressor);
-        return new UndoEntry(future, label, snapshot);
+        UndoEntry entry = new UndoEntry(future, label, snapshot);
+        future.thenRun(() -> entry.rawSnapshot = null);
+        return entry;
     }
 
     private static Snapshot decompress(UndoEntry entry) {

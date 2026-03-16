@@ -25,7 +25,8 @@ class FunctionDocRegistryTest {
                 "STEP", "RAMP", "PULSE", "PULSE_TRAIN",
                 "SMOOTH", "DELAY3", "DELAY_FIXED",
                 "TREND", "FORECAST", "NPV",
-                "LOOKUP", "RANDOM_NORMAL", "RANDOM_UNIFORM");
+                "LOOKUP", "RANDOM_NORMAL", "RANDOM_UNIFORM",
+                "SAMPLE_IF_TRUE", "FIND_ZERO", "LOOKUP_AREA");
     }
 
     @Test

@@ -85,6 +85,7 @@ class DelayDetectorTest {
                 "SMOOTH3(input, 5)",
                 "DELAY1(input, 5)",
                 "DELAY3(output, 10)",
+                "DELAY1I(output, 10, 0)",
                 "DELAY3I(output, 10, 0)",
                 "DELAY_FIXED(input, 3, 0)"
         })

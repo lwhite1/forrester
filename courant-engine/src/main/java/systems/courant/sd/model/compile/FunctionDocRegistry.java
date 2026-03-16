@@ -435,6 +435,45 @@ public final class FunctionDocRegistry {
                 "RANDOM_UNIFORM(0, 1, 0) → uniform random in [0, 1]",
                 List.of("RANDOM_NORMAL"));
 
+        // ── Advanced SD functions ──────────────────────────────────────
+        add(m, "SAMPLE_IF_TRUE", "SAMPLE_IF_TRUE(condition, input, initial)",
+                "Sample input when condition is true",
+                "SD",
+                List.of(p("condition", "expression that evaluates to true (non-zero) or false (zero)"),
+                        p("input", "value to sample when condition is true"),
+                        p("initial", "initial output value before the first true condition")),
+                "Returns the most recent value of 'input' at a time when 'condition' was true. "
+                        + "Before the condition first becomes true, returns 'initial'. Once the "
+                        + "condition becomes true, the output latches to the current input and holds "
+                        + "that value until the condition is true again.",
+                "SAMPLE_IF_TRUE(Month = 1, Revenue, 0) → Revenue sampled each January",
+                List.of("IF", "SMOOTH"));
+
+        add(m, "FIND_ZERO", "FIND_ZERO(expression, variable, low, high)",
+                "Find zero of an expression by bisection",
+                "SD",
+                List.of(p("expression", "expression that depends on the variable"),
+                        p("variable", "name of the loop variable to solve for"),
+                        p("low", "lower bound of the search interval"),
+                        p("high", "upper bound of the search interval")),
+                "Finds the value of 'variable' in the interval [low, high] that makes "
+                        + "'expression' equal to zero, using bisection. The variable is temporarily "
+                        + "bound to trial values during the search; it does not need to be a model element.",
+                "FIND_ZERO(Supply - Demand, Price, 0, 100) → equilibrium price",
+                List.of("XIDZ", "ZIDZ"));
+
+        add(m, "LOOKUP_AREA", "LOOKUP_AREA(table_name, low, high)",
+                "Area under a lookup table curve",
+                "SD",
+                List.of(p("table_name", "name of a lookup table defined in the model"),
+                        p("low", "lower x-bound of integration"),
+                        p("high", "upper x-bound of integration")),
+                "Computes the area under the lookup table's curve between 'low' and 'high' "
+                        + "using trapezoidal integration. Useful for computing cumulative effects "
+                        + "over a range of input values.",
+                "LOOKUP_AREA(Effect_Curve, 0, 10) → area under Effect_Curve from x=0 to x=10",
+                List.of("LOOKUP"));
+
         // ── Conditional ─────────────────────────────────────────────────
         add(m, "IF", "IF condition THEN a ELSE b", "Conditional expression",
                 "Special",

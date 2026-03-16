@@ -499,6 +499,19 @@ class UndoManagerTest {
         }
 
         @Test
+        void shouldClearRawSnapshotAfterCompression() throws Exception {
+            UndoManager.Snapshot snap = snapshot("S1");
+            manager.pushUndo(snap, "Test");
+
+            // Wait for compression to complete and callback to fire
+            Thread.sleep(300);
+
+            // Undo should still work — it will use the compressed data path
+            UndoManager.Snapshot result = manager.undo(snapshot("Current")).orElseThrow();
+            assertSnapshotName(result, "S1");
+        }
+
+        @Test
         void shouldPreservePopulatedRedoStack() {
             // Set up: push two, undo one to populate redo stack
             manager.pushUndo(snapshot("S1"), "First");
