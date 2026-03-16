@@ -1,8 +1,10 @@
 package systems.courant.sd.measure;
 
+import systems.courant.sd.measure.units.dimensionless.DimensionlessUnits;
 import systems.courant.sd.measure.units.item.ItemUnit;
 import systems.courant.sd.measure.units.time.TimeUnits;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -147,6 +149,79 @@ class UnitRegistryTest {
             }
             assertThat(distinct).as("All threads should get the same Unit instance").hasSize(1);
             assertThat(distinct.iterator().next().getName()).isEqualTo("ConcurrentWidget");
+        }
+    }
+
+    @Nested
+    @DisplayName("Dimensionless name recognition (#673)")
+    class DimensionlessNames {
+
+        @Test
+        @DisplayName("should resolve 'Dmnl' to DIMENSIONLESS unit")
+        void shouldResolveDmnlToDimensionless() {
+            Unit unit = registry.resolve("Dmnl");
+            assertThat(unit).isSameAs(DimensionlessUnits.DIMENSIONLESS);
+        }
+
+        @Test
+        @DisplayName("should resolve 'units' to DIMENSIONLESS unit")
+        void shouldResolveUnitsToDimensionless() {
+            Unit unit = registry.resolve("units");
+            assertThat(unit).isSameAs(DimensionlessUnits.DIMENSIONLESS);
+        }
+
+        @Test
+        @DisplayName("should resolve 'dimensionless' to DIMENSIONLESS unit")
+        void shouldResolveDimensionlessToDimensionless() {
+            Unit unit = registry.resolve("dimensionless");
+            assertThat(unit).isSameAs(DimensionlessUnits.DIMENSIONLESS);
+        }
+
+        @Test
+        @DisplayName("should silently create unit for known acceptable names like 'patient'")
+        void shouldSilentlyCreateKnownAcceptableName() {
+            Unit unit = registry.resolve("patient");
+            assertThat(unit).isNotNull();
+            assertThat(unit.getName()).isEqualTo("patient");
+        }
+
+        @Test
+        @DisplayName("should silently create unit for 'Gallon'")
+        void shouldSilentlyCreateGallon() {
+            Unit unit = registry.resolve("Gallon");
+            assertThat(unit).isNotNull();
+        }
+    }
+
+    @Nested
+    @DisplayName("MAX_CUSTOM_UNITS guard on register() (#632)")
+    class RegisterGuard {
+
+        @Test
+        @DisplayName("register() should enforce MAX_CUSTOM_UNITS limit")
+        void shouldEnforceMaxCustomUnitsOnRegister() {
+            UnitRegistry reg = new UnitRegistry();
+            // Register many custom units up to the limit
+            for (int i = 0; i < 10_000; i++) {
+                reg.register(new ItemUnit("Custom_" + i));
+            }
+            // Next registration should throw
+            assertThatThrownBy(() -> reg.register(new ItemUnit("OneMore")))
+                    .isInstanceOf(IllegalStateException.class)
+                    .hasMessageContaining("10000");
+        }
+
+        @Test
+        @DisplayName("re-registering same name should not increment count")
+        void shouldNotIncrementCountForReRegistration() {
+            UnitRegistry reg = new UnitRegistry();
+            ItemUnit unit = new ItemUnit("Reusable");
+            reg.register(unit);
+            // Re-register same name many times — should not increase count
+            for (int i = 0; i < 100; i++) {
+                reg.register(new ItemUnit("Reusable"));
+            }
+            assertThat(reg.find("Reusable")).isNotNull();
         }
     }
 

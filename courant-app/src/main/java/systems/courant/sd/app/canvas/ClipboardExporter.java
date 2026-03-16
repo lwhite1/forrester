@@ -67,7 +67,11 @@ public final class ClipboardExporter {
         for (double[] row : result.rows()) {
             StringJoiner joiner = new StringJoiner("\t");
             for (int i = 0; i < row.length; i++) {
-                joiner.add(i == 0 ? String.valueOf((int) row[i]) : String.valueOf(row[i]));
+                if (i == 0 && row[i] == Math.floor(row[i]) && !Double.isInfinite(row[i])) {
+                    joiner.add(String.valueOf((long) row[i]));
+                } else {
+                    joiner.add(String.valueOf(row[i]));
+                }
             }
             sb.append(joiner).append('\n');
         }

@@ -90,11 +90,17 @@ public final class Quantity {
     public Quantity add(Quantity other) {
         Preconditions.checkArgument(other.isCompatibleWith(this), INCOMPATIBLE_ERROR_MESSAGE);
 
-        Quantity otherInBaseUnits = other.inBaseUnits();
-        Quantity thisInBaseUnits = inBaseUnits();
-        Quantity result = new Quantity(otherInBaseUnits.getValue() + thisInBaseUnits.getValue(),
-                this.getUnit().getBaseUnit());
-        return getUnit().fromBaseUnits(result);
+        try {
+            Quantity otherInBaseUnits = other.inBaseUnits();
+            Quantity thisInBaseUnits = inBaseUnits();
+            Quantity result = new Quantity(otherInBaseUnits.getValue() + thisInBaseUnits.getValue(),
+                    this.getUnit().getBaseUnit());
+            return getUnit().fromBaseUnits(result);
+        } catch (UnsupportedOperationException e) {
+            throw new UnsupportedOperationException(
+                    "Cannot add " + unit.getName() + " and " + other.unit.getName()
+                            + " — base-unit conversion not supported", e);
+        }
     }
 
     /**
@@ -108,11 +114,17 @@ public final class Quantity {
     public Quantity subtract(Quantity other) {
         Preconditions.checkArgument(other.isCompatibleWith(this), INCOMPATIBLE_ERROR_MESSAGE);
 
-        Quantity otherInBaseUnits = other.inBaseUnits();
-        Quantity thisInBaseUnits = inBaseUnits();
-        Quantity result = new Quantity(thisInBaseUnits.getValue() - otherInBaseUnits.getValue(),
-                this.getUnit().getBaseUnit());
-        return getUnit().fromBaseUnits(result);
+        try {
+            Quantity otherInBaseUnits = other.inBaseUnits();
+            Quantity thisInBaseUnits = inBaseUnits();
+            Quantity result = new Quantity(thisInBaseUnits.getValue() - otherInBaseUnits.getValue(),
+                    this.getUnit().getBaseUnit());
+            return getUnit().fromBaseUnits(result);
+        } catch (UnsupportedOperationException e) {
+            throw new UnsupportedOperationException(
+                    "Cannot subtract " + unit.getName() + " and " + other.unit.getName()
+                            + " — base-unit conversion not supported", e);
+        }
     }
 
     /**
@@ -136,7 +148,13 @@ public final class Quantity {
         if (unit.equals(other.unit)) {
             return Double.compare(value, other.value) < 0;
         }
-        return Double.compare(inBaseUnits().getValue(), other.inBaseUnits().getValue()) < 0;
+        try {
+            return Double.compare(inBaseUnits().getValue(), other.inBaseUnits().getValue()) < 0;
+        } catch (UnsupportedOperationException e) {
+            throw new UnsupportedOperationException(
+                    "Cannot compare " + unit.getName() + " and " + other.unit.getName()
+                            + " — base-unit conversion not supported", e);
+        }
     }
 
     /**
@@ -149,7 +167,13 @@ public final class Quantity {
         if (unit.equals(other.unit)) {
             return Double.compare(value, other.value) <= 0;
         }
-        return Double.compare(inBaseUnits().getValue(), other.inBaseUnits().getValue()) <= 0;
+        try {
+            return Double.compare(inBaseUnits().getValue(), other.inBaseUnits().getValue()) <= 0;
+        } catch (UnsupportedOperationException e) {
+            throw new UnsupportedOperationException(
+                    "Cannot compare " + unit.getName() + " and " + other.unit.getName()
+                            + " — base-unit conversion not supported", e);
+        }
     }
 
     /**
@@ -162,7 +186,13 @@ public final class Quantity {
         if (unit.equals(other.unit)) {
             return Double.compare(value, other.value) > 0;
         }
-        return Double.compare(inBaseUnits().getValue(), other.inBaseUnits().getValue()) > 0;
+        try {
+            return Double.compare(inBaseUnits().getValue(), other.inBaseUnits().getValue()) > 0;
+        } catch (UnsupportedOperationException e) {
+            throw new UnsupportedOperationException(
+                    "Cannot compare " + unit.getName() + " and " + other.unit.getName()
+                            + " — base-unit conversion not supported", e);
+        }
     }
 
     /**
@@ -175,7 +205,13 @@ public final class Quantity {
         if (unit.equals(other.unit)) {
             return Double.compare(value, other.value) >= 0;
         }
-        return Double.compare(inBaseUnits().getValue(), other.inBaseUnits().getValue()) >= 0;
+        try {
+            return Double.compare(inBaseUnits().getValue(), other.inBaseUnits().getValue()) >= 0;
+        } catch (UnsupportedOperationException e) {
+            throw new UnsupportedOperationException(
+                    "Cannot compare " + unit.getName() + " and " + other.unit.getName()
+                            + " — base-unit conversion not supported", e);
+        }
     }
 
     /**
@@ -197,7 +233,13 @@ public final class Quantity {
         if (unit.equals(other.unit)) {
             return Double.compare(value, other.value) == 0;
         }
-        return Double.compare(inBaseUnits().getValue(), other.inBaseUnits().getValue()) == 0;
+        try {
+            return Double.compare(inBaseUnits().getValue(), other.inBaseUnits().getValue()) == 0;
+        } catch (UnsupportedOperationException e) {
+            throw new UnsupportedOperationException(
+                    "Cannot compare " + unit.getName() + " and " + other.unit.getName()
+                            + " — base-unit conversion not supported", e);
+        }
     }
 
     /**
@@ -229,7 +271,12 @@ public final class Quantity {
         if (unit.equals(quantity.unit)) {
             return Double.compare(value, quantity.value) == 0;
         }
-        return Double.compare(quantity.inBaseUnits().getValue(), inBaseUnits().getValue()) == 0;
+        try {
+            return Double.compare(quantity.inBaseUnits().getValue(), inBaseUnits().getValue()) == 0;
+        } catch (UnsupportedOperationException e) {
+            // Units that don't support base-unit conversion (e.g., Fahrenheit vs Celsius)
+            return false;
+        }
     }
 
     /**

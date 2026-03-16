@@ -13,6 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -26,6 +27,31 @@ public class UnitRegistry {
 
     private static final Logger log = LoggerFactory.getLogger(UnitRegistry.class);
     private static final int MAX_CUSTOM_UNITS = 10_000;
+
+    /**
+     * Unit names that should be silently accepted as dimensionless/item units
+     * without a "possible typo" warning. Lowercase for case-insensitive matching.
+     * Includes Vensim conventions, common physical-sounding labels, and generic quantity words.
+     */
+    private static final Set<String> KNOWN_ACCEPTABLE_NAMES = Set.of(
+            "units", "unit", "dmnl", "dimensionless",
+            "fraction", "percent", "percentage", "ratio", "index",
+            "gallon", "gallons", "gallon per minute", "gallons per minute",
+            "liter", "liters", "litre", "litres",
+            "person", "persons", "people",
+            "patient", "patients",
+            "vehicle", "vehicles",
+            "ship", "ships",
+            "fish",
+            "dollar", "dollars", "euro", "euros", "eur", "usd",
+            "widget", "widgets",
+            "item", "items",
+            "job", "jobs",
+            "order", "orders",
+            "call", "calls",
+            "trip", "trips",
+            "ton", "tons", "tonne", "tonnes"
+    );
 
     private final Map<String, Unit> byName = new ConcurrentHashMap<>();
     private final Map<String, Unit> byNameLower = new ConcurrentHashMap<>();
@@ -60,16 +86,40 @@ public class UnitRegistry {
 
     private void registerAll(Unit[] units) {
         for (Unit unit : units) {
-            register(unit);
+            registerBuiltIn(unit);
         }
     }
 
     /**
-     * Registers a unit. If a unit with the same name already exists, it is replaced.
+     * Registers a built-in unit without counting it toward the custom unit limit.
      */
-    public void register(Unit unit) {
+    private void registerBuiltIn(Unit unit) {
         byName.put(unit.getName(), unit);
         byNameLower.put(unit.getName().toLowerCase(), unit);
+    }
+
+    /**
+     * Registers a custom unit. If a unit with the same name already exists, it is replaced.
+     *
+     * @throws IllegalStateException if the registry has exceeded the maximum number of custom units
+     */
+    public void register(Unit unit) {
+        synchronized (this) {
+            if (byName.containsKey(unit.getName())) {
+                // Replacing existing unit — no count change
+                byName.put(unit.getName(), unit);
+                byNameLower.put(unit.getName().toLowerCase(), unit);
+                return;
+            }
+            if (customUnitCount >= MAX_CUSTOM_UNITS) {
+                throw new IllegalStateException(
+                        "Unit registry exceeded " + MAX_CUSTOM_UNITS
+                                + " custom units — possible unbounded auto-creation");
+            }
+            byName.put(unit.getName(), unit);
+            byNameLower.put(unit.getName().toLowerCase(), unit);
+            customUnitCount++;
+        }
     }
 
     /**
@@ -92,16 +142,21 @@ public class UnitRegistry {
                 return unit;
             }
             // Auto-create custom ItemUnit for unknown names
-            log.warn("Auto-creating unit for unknown name '{}' — possible typo", name);
-            if (customUnitCount >= MAX_CUSTOM_UNITS) {
-                throw new IllegalStateException(
-                        "Unit registry exceeded " + MAX_CUSTOM_UNITS
-                                + " custom units — possible unbounded auto-creation");
+            // Treat "Dmnl", "units", "dimensionless" as equivalent to DIMENSIONLESS
+            String lower = name.toLowerCase();
+            if ("dmnl".equals(lower) || "units".equals(lower) || "unit".equals(lower)
+                    || "dimensionless".equals(lower)) {
+                Unit dmnl = systems.courant.sd.measure.units.dimensionless.DimensionlessUnits.DIMENSIONLESS;
+                byName.put(name, dmnl);
+                byNameLower.put(lower, dmnl);
+                return dmnl;
+            }
+            if (!KNOWN_ACCEPTABLE_NAMES.contains(lower)) {
+                log.warn("Auto-creating unit for unknown name '{}' — possible typo", name);
             }
             systems.courant.sd.measure.units.item.ItemUnit custom =
                     new systems.courant.sd.measure.units.item.ItemUnit(name);
             register(custom);
-            customUnitCount++;
             return custom;
         }
     }

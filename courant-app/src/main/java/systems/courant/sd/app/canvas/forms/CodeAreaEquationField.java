@@ -51,8 +51,10 @@ public final class CodeAreaEquationField implements EquationField {
         codeArea.setStyle(BASE_STYLE);
 
         // Load syntax highlighting stylesheet
-        String cssUrl = getClass().getResource("/equation-highlight.css").toExternalForm();
-        codeArea.getStylesheets().add(cssUrl);
+        java.net.URL cssResource = getClass().getResource("/equation-highlight.css");
+        if (cssResource != null) {
+            codeArea.getStylesheets().add(cssResource.toExternalForm());
+        }
 
         // Set initial text
         if (initialText != null && !initialText.isEmpty()) {

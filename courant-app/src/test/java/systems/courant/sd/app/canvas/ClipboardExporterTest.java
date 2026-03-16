@@ -67,6 +67,28 @@ class ClipboardExporterTest {
         }
 
         @Test
+        @DisplayName("should preserve fractional time steps (#641)")
+        void shouldPreserveFractionalTimeSteps() {
+            SimulationRunner.SimulationResult result = new SimulationRunner.SimulationResult(
+                    List.of("Step", "Value"),
+                    List.of(
+                            new double[]{0.0, 10.0},
+                            new double[]{0.5, 15.0},
+                            new double[]{1.0, 20.0},
+                            new double[]{1.5, 25.0}
+                    )
+            );
+
+            String text = ClipboardExporter.formatSimulationResult(result);
+
+            String[] lines = text.split("\n");
+            assertThat(lines[1]).isEqualTo("0\t10.0");
+            assertThat(lines[2]).isEqualTo("0.5\t15.0");
+            assertThat(lines[3]).isEqualTo("1\t20.0");
+            assertThat(lines[4]).isEqualTo("1.5\t25.0");
+        }
+
+        @Test
         @DisplayName("should handle empty rows")
         void shouldHandleEmptyRows() {
             SimulationRunner.SimulationResult result = new SimulationRunner.SimulationResult(
