@@ -5,10 +5,12 @@ import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.StackPane;
+import javafx.scene.text.Text;
 import javafx.scene.text.TextFlow;
 import javafx.stage.Stage;
 
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
@@ -49,5 +51,43 @@ class HelpContentFxTest {
 
         TextFlow textFlow = (TextFlow) scroll.getContent();
         assertThat(textFlow.getChildren()).isNotEmpty();
+    }
+
+    @Test
+    @DisplayName("Simulation settings help matches dialog field names and order (#777)")
+    void simulationSettingsHelpMatchesDialog(FxRobot robot) {
+        AtomicReference<Node> result = new AtomicReference<>();
+        Platform.runLater(() -> result.set(HelpContent.forTopic(HelpTopic.SIMULATION_SETTINGS)));
+        WaitForAsyncUtils.waitForFxEvents();
+
+        ScrollPane scroll = (ScrollPane) result.get();
+        TextFlow textFlow = (TextFlow) scroll.getContent();
+
+        // Extract all text from the TextFlow
+        String fullText = textFlow.getChildren().stream()
+                .filter(n -> n instanceof Text)
+                .map(n -> ((Text) n).getText())
+                .reduce("", String::concat);
+
+        // Verify all dialog fields are mentioned
+        assertThat(fullText).contains("Time Step");
+        assertThat(fullText).contains("Duration Unit");
+        assertThat(fullText).contains("Strict Mode");
+        assertThat(fullText).contains("Save Per");
+
+        // Verify old incorrect field names are NOT present
+        assertThat(fullText).doesNotContain("Start Time");
+        assertThat(fullText).doesNotContain("Stop Time");
+
+        // Verify field order matches dialog: Time Step before Duration before DT before Strict Mode before Save Per
+        int timeStepIdx = fullText.indexOf("Time Step");
+        int durationIdx = fullText.indexOf("Duration");
+        int durationUnitIdx = fullText.indexOf("Duration Unit");
+        int strictModeIdx = fullText.indexOf("Strict Mode");
+        int savePerIdx = fullText.indexOf("Save Per");
+
+        assertThat(timeStepIdx).isLessThan(durationIdx);
+        assertThat(durationUnitIdx).isLessThan(strictModeIdx);
+        assertThat(strictModeIdx).isLessThan(savePerIdx);
     }
 }
