@@ -470,8 +470,8 @@ public final class XmileExporter {
         if (comma < 0) {
             return Optional.empty();
         }
-        int closeParen = trimmed.lastIndexOf(')');
-        if (closeParen <= comma) {
+        int closeParen = FormatUtils.findMatchingCloseParen(trimmed, openParen);
+        if (closeParen < 0 || closeParen <= comma) {
             return Optional.empty();
         }
         return Optional.of(trimmed.substring(comma + 1, closeParen).strip());

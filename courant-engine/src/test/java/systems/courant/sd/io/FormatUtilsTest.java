@@ -79,4 +79,38 @@ class FormatUtilsTest {
                     .isEqualTo(13);
         }
     }
+
+    @Nested
+    @DisplayName("findMatchingCloseParen")
+    class FindMatchingCloseParen {
+
+        @Test
+        void shouldFindMatchingParen() {
+            // "LOOKUP(name, x)" — ( at 6, matching ) at 14
+            assertThat(FormatUtils.findMatchingCloseParen("LOOKUP(name, x)", 6)).isEqualTo(14);
+        }
+
+        @Test
+        void shouldHandleNestedParens() {
+            // "LOOKUP(name, max(a, b))" — ( at 6, matching ) at 22
+            assertThat(FormatUtils.findMatchingCloseParen("LOOKUP(name, max(a, b))", 6)).isEqualTo(22);
+        }
+
+        @Test
+        void shouldStopAtMatchingParen() {
+            // "LOOKUP(name, x) + foo(y)" — ( at 6, matching ) at 14 (not the last one)
+            assertThat(FormatUtils.findMatchingCloseParen("LOOKUP(name, x) + foo(y)", 6)).isEqualTo(14);
+        }
+
+        @Test
+        void shouldReturnMinusOneIfUnmatched() {
+            assertThat(FormatUtils.findMatchingCloseParen("LOOKUP(name, x", 6)).isEqualTo(-1);
+        }
+
+        @Test
+        void shouldHandleDeeplyNested() {
+            // "f(g(h(x)))" — ( at 1, matching ) at 9
+            assertThat(FormatUtils.findMatchingCloseParen("f(g(h(x)))", 1)).isEqualTo(9);
+        }
+    }
 }
