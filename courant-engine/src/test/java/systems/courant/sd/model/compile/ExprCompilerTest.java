@@ -617,6 +617,7 @@ class ExprCompilerTest {
             assertThat(compiler.compile("ROUND(1.5)").getCurrentValue()).isEqualTo(2.0);
             assertThat(compiler.compile("ROUND(2.5)").getCurrentValue()).isEqualTo(2.0);
             assertThat(compiler.compile("ROUND(3.5)").getCurrentValue()).isEqualTo(4.0);
+            assertThat(compiler.compile("ROUND(-2.5)").getCurrentValue()).isEqualTo(-2.0);
         }
 
         @Test

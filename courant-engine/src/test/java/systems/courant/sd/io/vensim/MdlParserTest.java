@@ -388,6 +388,31 @@ class MdlParserTest {
             MdlParser.ParsedMdl result = MdlParser.parse(content);
             assertThat(result.macros()).isEmpty();
         }
+
+        @Test
+        void shouldRecoverEquationsFromUnclosedMacro() {
+            String content = """
+                    x = 1
+                    \t~\t
+                    \t~\t
+                    \t|
+                    :MACRO: UnclosedMacro(a, b)
+                    y = a * 2
+                    \t~\t
+                    \t~\t
+                    \t|
+                    z = 10
+                    \t~\t
+                    \t~\t
+                    \t|
+                    """;
+            MdlParser.ParsedMdl result = MdlParser.parse(content);
+            // x should be in main equations, and y+z should be recovered
+            assertThat(result.equations()).hasSize(3);
+            assertThat(result.equations().get(0).name()).isEqualTo("x");
+            assertThat(result.equations().get(1).name()).isEqualTo("y");
+            assertThat(result.equations().get(2).name()).isEqualTo("z");
+        }
     }
 
     @Nested
