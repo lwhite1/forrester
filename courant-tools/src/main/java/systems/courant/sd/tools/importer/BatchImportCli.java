@@ -145,7 +145,7 @@ public class BatchImportCli {
 
                 succeeded++;
                 log.info("  OK: {}", entry.className());
-            } catch (Exception e) {
+            } catch (IOException | IllegalArgumentException | IllegalStateException e) {
                 failed++;
                 String msg = entry.className() + ": " + e.getMessage();
                 failures.add(msg);
