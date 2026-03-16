@@ -296,11 +296,7 @@ public final class ElementRenderer {
                                    double x, double y, double width, double height) {
         double r = LayoutMetrics.COMMENT_CORNER_RADIUS;
 
-        // Fill — neutral gray note appearance
-        gc.setFill(ColorPalette.COMMENT_FILL);
-        gc.fillRoundRect(x, y, width, height, r, r);
-
-        // Left accent bar instead of full border
+        // Left accent bar
         gc.setFill(ColorPalette.COMMENT_ACCENT);
         gc.fillRect(x, y + r, LayoutMetrics.COMMENT_ACCENT_WIDTH, height - r * 2);
 
