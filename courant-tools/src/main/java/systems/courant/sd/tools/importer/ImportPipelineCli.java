@@ -20,7 +20,7 @@ import java.util.Scanner;
  *   java ImportPipelineCli --file model.xmile --class-name SirDemo \
  *       --license "CC-BY-SA-4.0" --source "Kermack &amp; McKendrick (1927)" \
  *       [--author "..."] [--url "..."] \
- *       [--category epidemiology] \
+ *       [--category epidemiology] [--json-name my-model] \
  *       [--output-dir path/to/src/main/java] \
  *       [--metadata-file metadata.json] \
  *       [--dry-run] [--overwrite]
@@ -81,6 +81,7 @@ public class ImportPipelineCli implements Closeable {
                 metadata,
                 parsed.category,
                 parsed.className,
+                parsed.jsonName,
                 Path.of(parsed.outputDir),
                 parsed.dryRun,
                 parsed.overwrite,
@@ -172,6 +173,7 @@ public class ImportPipelineCli implements Closeable {
                 case "--source" -> { parsed.source = requireValue(args, i); i++; }
                 case "--license" -> { parsed.license = requireValue(args, i); i++; }
                 case "--url" -> { parsed.url = requireValue(args, i); i++; }
+                case "--json-name" -> { parsed.jsonName = requireValue(args, i); i++; }
                 case "--output-dir" -> { parsed.outputDir = requireValue(args, i); i++; }
                 case "--metadata-file" -> { parsed.metadataFile = requireValue(args, i); i++; }
                 case "--dry-run" -> parsed.dryRun = true;
@@ -211,6 +213,7 @@ public class ImportPipelineCli implements Closeable {
 
                 Output:
                   --category <name>       Target sub-package (e.g. "epidemiology")
+                  --json-name <name>      Custom JSON filename (default: derived from class name)
                   --output-dir <path>     Root source directory (default: courant-demos/src/main/java)
                   --json-only             Write model definition as JSON instead of generating Java code
                   --dry-run               Print generated source without writing to disk
@@ -226,6 +229,7 @@ public class ImportPipelineCli implements Closeable {
         String source;
         String license;
         String url;
+        String jsonName;
         String metadataFile;
         String outputDir = "courant-demos/src/main/java";
         boolean dryRun;
