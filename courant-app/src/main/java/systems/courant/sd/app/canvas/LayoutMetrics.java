@@ -58,6 +58,9 @@ public final class LayoutMetrics {
     public static final double CAUSAL_ARROWHEAD_LENGTH = 10;
     public static final double CAUSAL_ARROWHEAD_WIDTH = 7;
     public static final Font CAUSAL_POLARITY_FONT = Font.font("System", FontWeight.BOLD, 12);
+    /** Larger font for the "?" glyph on UNKNOWN polarity links. */
+    public static final double CAUSAL_UNKNOWN_FONT_SIZE = 16;
+    public static final Font CAUSAL_UNKNOWN_FONT = Font.font("System", FontWeight.BOLD, CAUSAL_UNKNOWN_FONT_SIZE);
 
     // Module dimensions
     public static final double MODULE_WIDTH = 120;
@@ -85,9 +88,10 @@ public final class LayoutMetrics {
     public static final double INFO_ARROWHEAD_WIDTH = 6;
 
     // Cloud symbol
-    public static final double CLOUD_RADIUS = 12;
-    public static final double CLOUD_OFFSET = 80;
-    public static final double CLOUD_LINE_WIDTH = 1.5;
+    public static final double CLOUD_RADIUS = 16;
+    public static final double CLOUD_OFFSET = 84;
+    public static final double CLOUD_LINE_WIDTH = 2.5;
+    public static final Font CLOUD_SYMBOL_FONT = Font.font("System", FontWeight.NORMAL, 14);
 
     // Text positioning offsets
     /** Gap below flow diamond to name label. */
@@ -107,7 +111,7 @@ public final class LayoutMetrics {
     public static final double STOCK_NAME_FONT_SIZE = 13;
     public static final double AUX_NAME_FONT_SIZE = 12;
     public static final double MODULE_NAME_FONT_SIZE = 13;
-    public static final double BADGE_FONT_SIZE = 9;
+    public static final double BADGE_FONT_SIZE = 10;
     public static final double FLOW_NAME_FONT_SIZE = 11;
     public static final double LOOKUP_NAME_FONT_SIZE = 11;
     public static final double COMMENT_TEXT_FONT_SIZE = 11;
@@ -124,8 +128,21 @@ public final class LayoutMetrics {
     public static final Font STOCK_NAME_FONT = Font.font("System", FontWeight.BOLD, STOCK_NAME_FONT_SIZE);
     public static final Font AUX_NAME_FONT = Font.font("System", FontWeight.NORMAL, AUX_NAME_FONT_SIZE);
     public static final Font MODULE_NAME_FONT = Font.font("System", FontWeight.BOLD, MODULE_NAME_FONT_SIZE);
-    public static final Font BADGE_FONT = Font.font("System", FontWeight.NORMAL, BADGE_FONT_SIZE);
+    public static final Font BADGE_FONT = Font.font("System", FontWeight.BOLD, BADGE_FONT_SIZE);
     public static final Font FLOW_NAME_FONT = Font.font("System", FontWeight.NORMAL, FLOW_NAME_FONT_SIZE);
+
+    /** Font for the unit badge on stocks (centered below name). */
+    public static final double UNIT_BADGE_FONT_SIZE = 10;
+    public static final Font UNIT_BADGE_FONT = Font.font("System", FontWeight.NORMAL, UNIT_BADGE_FONT_SIZE);
+
+    /** Maximum auto-computed width for AUX variables (2x default). */
+    public static final double AUX_MAX_AUTO_WIDTH = 200;
+    /** Maximum auto-computed width for LOOKUP elements (2x default). */
+    public static final double LOOKUP_MAX_AUTO_WIDTH = 200;
+    /** Horizontal padding around text for AUX variable auto-sizing. */
+    public static final double AUX_TEXT_PADDING = 24;
+    /** Horizontal padding around text for LOOKUP auto-sizing. */
+    public static final double LOOKUP_TEXT_PADDING = 20;
 
     /**
      * Returns the width for a given element type.
@@ -218,5 +235,31 @@ public final class LayoutMetrics {
         text.setFont(AUX_NAME_FONT);
         double textWidth = text.getLayoutBounds().getWidth();
         return Math.max(minWidthFor(ElementType.CLD_VARIABLE), textWidth + CLD_VAR_TEXT_PADDING);
+    }
+
+    /**
+     * Computes the width for an AUX variable based on its text label.
+     * Returns the measured text width plus padding, clamped to
+     * [{@link #minWidthFor(ElementType) minWidth}, {@link #AUX_MAX_AUTO_WIDTH}].
+     */
+    public static double auxWidthForName(String name) {
+        Text text = new Text(name);
+        text.setFont(AUX_NAME_FONT);
+        double textWidth = text.getLayoutBounds().getWidth();
+        return Math.max(minWidthFor(ElementType.AUX),
+                Math.min(textWidth + AUX_TEXT_PADDING, AUX_MAX_AUTO_WIDTH));
+    }
+
+    /**
+     * Computes the width for a LOOKUP element based on its text label.
+     * Returns the measured text width plus padding, clamped to
+     * [{@link #minWidthFor(ElementType) minWidth}, {@link #LOOKUP_MAX_AUTO_WIDTH}].
+     */
+    public static double lookupWidthForName(String name) {
+        Text text = new Text(name);
+        text.setFont(LOOKUP_NAME_FONT);
+        double textWidth = text.getLayoutBounds().getWidth();
+        return Math.max(minWidthFor(ElementType.LOOKUP),
+                Math.min(textWidth + LOOKUP_TEXT_PADDING, LOOKUP_MAX_AUTO_WIDTH));
     }
 }

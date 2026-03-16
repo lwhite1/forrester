@@ -203,8 +203,18 @@ public class LoopNavigatorBar extends HBox {
      */
     public void update(FeedbackAnalysis analysis, int activeIndex,
                        LoopType typeFilter, int filteredCount) {
-        if (analysis == null || analysis.loopCount() == 0) {
-            loopLabel.setText("No loops detected");
+        if (analysis == null) {
+            loopLabel.setText("Loop analysis not available");
+            loopLabel.setTooltip(null);
+            prevButton.setDisable(true);
+            nextButton.setDisable(true);
+            allButton.setDisable(true);
+            filterRBtn.setDisable(true);
+            filterBBtn.setDisable(true);
+            return;
+        }
+        if (analysis.loopCount() == 0) {
+            loopLabel.setText("No feedback loops found");
             loopLabel.setTooltip(null);
             prevButton.setDisable(true);
             nextButton.setDisable(true);

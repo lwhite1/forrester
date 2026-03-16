@@ -5,6 +5,7 @@ import systems.courant.sd.model.def.CausalLinkDef;
 import javafx.geometry.VPos;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
+import javafx.scene.text.Font;
 import javafx.scene.text.TextAlignment;
 import systems.courant.sd.app.canvas.CausalLinkGeometry;
 import systems.courant.sd.app.canvas.ColorPalette;
@@ -162,9 +163,15 @@ public final class ConnectionRenderer {
         double stopT = ah[4];
 
         // Draw the curved line, stopping at the arrowhead base
-        gc.setStroke(ColorPalette.CAUSAL_LINK);
+        Color linkColor = polarity == CausalLinkDef.Polarity.UNKNOWN
+                ? ColorPalette.CAUSAL_UNKNOWN : ColorPalette.CAUSAL_LINK;
+        gc.setStroke(linkColor);
         gc.setLineWidth(LayoutMetrics.CAUSAL_LINK_WIDTH);
-        gc.setLineDashes();
+        if (polarity == CausalLinkDef.Polarity.UNKNOWN) {
+            gc.setLineDashes(4, 3);
+        } else {
+            gc.setLineDashes();
+        }
 
         gc.beginPath();
         gc.moveTo(fromX, fromY);
@@ -176,11 +183,12 @@ public final class ConnectionRenderer {
             gc.lineTo(pt[0], pt[1]);
         }
         gc.stroke();
+        gc.setLineDashes();
 
         // Arrowhead oriented along the curve tangent at the tip
         drawArrowheadFromTangent(gc, tipX, tipY, tanX, tanY,
                 LayoutMetrics.CAUSAL_ARROWHEAD_LENGTH, LayoutMetrics.CAUSAL_ARROWHEAD_WIDTH,
-                ColorPalette.CAUSAL_LINK);
+                linkColor);
 
         // Polarity label near the arrowhead, offset perpendicular to the curve tangent
         double dx = toX - fromX;
@@ -205,8 +213,10 @@ public final class ConnectionRenderer {
                 double labelX = labelPt[0] + perpX * perpOffset;
                 double labelY = labelPt[1] + perpY * perpOffset;
 
+                Font labelFont = polarity == CausalLinkDef.Polarity.UNKNOWN
+                        ? LayoutMetrics.CAUSAL_UNKNOWN_FONT : LayoutMetrics.CAUSAL_POLARITY_FONT;
                 gc.setFill(labelColor);
-                gc.setFont(LayoutMetrics.CAUSAL_POLARITY_FONT);
+                gc.setFont(labelFont);
                 gc.setTextAlign(TextAlignment.CENTER);
                 gc.setTextBaseline(VPos.CENTER);
                 gc.fillText(polarity.symbol(), labelX, labelY);
@@ -230,9 +240,15 @@ public final class ConnectionRenderer {
         double endY = loopPts[7];
 
         // Draw curve
-        gc.setStroke(ColorPalette.CAUSAL_LINK);
+        Color linkColor = polarity == CausalLinkDef.Polarity.UNKNOWN
+                ? ColorPalette.CAUSAL_UNKNOWN : ColorPalette.CAUSAL_LINK;
+        gc.setStroke(linkColor);
         gc.setLineWidth(LayoutMetrics.CAUSAL_LINK_WIDTH);
-        gc.setLineDashes();
+        if (polarity == CausalLinkDef.Polarity.UNKNOWN) {
+            gc.setLineDashes(4, 3);
+        } else {
+            gc.setLineDashes();
+        }
 
         int segments = 30;
         gc.beginPath();
@@ -246,13 +262,14 @@ public final class ConnectionRenderer {
             gc.lineTo(pt[0], pt[1]);
         }
         gc.stroke();
+        gc.setLineDashes();
 
         // Arrowhead at the end
         double[] tan = CausalLinkGeometry.tangentCubic(
                 startX, startY, cp1X, cp1Y, cp2X, cp2Y, endX, endY, 1.0);
         drawArrowheadFromTangent(gc, endX, endY, tan[0], tan[1],
                 LayoutMetrics.CAUSAL_ARROWHEAD_LENGTH, LayoutMetrics.CAUSAL_ARROWHEAD_WIDTH,
-                ColorPalette.CAUSAL_LINK);
+                linkColor);
 
         // Polarity label at the top of the loop
         double[] midPt = CausalLinkGeometry.evaluateCubic(
@@ -262,8 +279,10 @@ public final class ConnectionRenderer {
             case NEGATIVE -> ColorPalette.CAUSAL_NEGATIVE;
             case UNKNOWN -> ColorPalette.CAUSAL_UNKNOWN;
         };
+        Font labelFont = polarity == CausalLinkDef.Polarity.UNKNOWN
+                ? LayoutMetrics.CAUSAL_UNKNOWN_FONT : LayoutMetrics.CAUSAL_POLARITY_FONT;
         gc.setFill(labelColor);
-        gc.setFont(LayoutMetrics.CAUSAL_POLARITY_FONT);
+        gc.setFont(labelFont);
         gc.setTextAlign(TextAlignment.CENTER);
         gc.setTextBaseline(VPos.CENTER);
         gc.fillText(polarity.symbol(), midPt[0], midPt[1] - 10);
@@ -342,9 +361,9 @@ public final class ConnectionRenderer {
         gc.setLineDashes();
         gc.strokeOval(cx - r, cy - r, r * 2, r * 2);
 
-        // Draw a small "~" inside to distinguish from a plain circle
+        // Draw a "~" inside to distinguish from a plain circle
         gc.setFill(ColorPalette.CLOUD);
-        gc.setFont(LayoutMetrics.BADGE_FONT);
+        gc.setFont(LayoutMetrics.CLOUD_SYMBOL_FONT);
         gc.setTextAlign(TextAlignment.CENTER);
         gc.setTextBaseline(VPos.CENTER);
         gc.fillText("~", cx, cy);

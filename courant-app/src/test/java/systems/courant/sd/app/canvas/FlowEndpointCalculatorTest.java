@@ -101,7 +101,7 @@ class FlowEndpointCalculatorTest {
 
             assertThat(pos).isNotNull();
             // Default: left of diamond
-            assertThat(pos.x()).isCloseTo(250 - 80, within(1.0));
+            assertThat(pos.x()).isCloseTo(250 - LayoutMetrics.CLOUD_OFFSET, within(1.0));
             assertThat(pos.y()).isCloseTo(200, within(1.0));
         }
 
@@ -116,7 +116,7 @@ class FlowEndpointCalculatorTest {
 
             assertThat(pos).isNotNull();
             // Default: right of diamond
-            assertThat(pos.x()).isCloseTo(250 + 80, within(1.0));
+            assertThat(pos.x()).isCloseTo(250 + LayoutMetrics.CLOUD_OFFSET, within(1.0));
             assertThat(pos.y()).isCloseTo(200, within(1.0));
         }
     }

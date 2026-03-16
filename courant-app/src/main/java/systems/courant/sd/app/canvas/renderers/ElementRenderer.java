@@ -56,13 +56,13 @@ public final class ElementRenderer {
         gc.fillText(truncate(name, LayoutMetrics.STOCK_NAME_FONT, width - 12),
                 x + width / 2, y + height / 2);
 
-        // Unit badge bottom-right
+        // Unit badge centered below name
         if (unit != null && !unit.isBlank()) {
-            gc.setFill(ColorPalette.TEXT_SECONDARY);
-            gc.setFont(LayoutMetrics.BADGE_FONT);
-            gc.setTextAlign(TextAlignment.RIGHT);
+            gc.setFill(ColorPalette.BADGE_TEXT);
+            gc.setFont(LayoutMetrics.UNIT_BADGE_FONT);
+            gc.setTextAlign(TextAlignment.CENTER);
             gc.setTextBaseline(VPos.BOTTOM);
-            gc.fillText(unit, x + width - 6, y + height - 4);
+            gc.fillText("[" + unit + "]", x + width / 2, y + height - 3);
         }
     }
 
@@ -138,7 +138,7 @@ public final class ElementRenderer {
         gc.fillRoundRect(x, y, width, height, r, r);
 
         // Badge top-left: value for literals, "fx" for formulas
-        gc.setFill(ColorPalette.TEXT_SECONDARY);
+        gc.setFill(ColorPalette.BADGE_TEXT);
         gc.setFont(LayoutMetrics.BADGE_FONT);
         gc.setTextAlign(TextAlignment.LEFT);
         gc.setTextBaseline(VPos.TOP);
@@ -153,13 +153,12 @@ public final class ElementRenderer {
             gc.fillText(BADGE_FORMULA, x + 5, y + 3);
         }
 
-        // Name centered (truncated to fit)
+        // Name centered — wrap to two lines if needed
         gc.setFill(ColorPalette.TEXT);
         gc.setFont(LayoutMetrics.AUX_NAME_FONT);
         gc.setTextAlign(TextAlignment.CENTER);
         gc.setTextBaseline(VPos.CENTER);
-        gc.fillText(truncate(name, LayoutMetrics.AUX_NAME_FONT, width - 20),
-                x + width / 2, y + height / 2);
+        drawWrappedName(gc, name, LayoutMetrics.AUX_NAME_FONT, x, y, width, height, 20);
 
         // Delay badge top-right
         if (hasDelay) {
@@ -191,7 +190,7 @@ public final class ElementRenderer {
         gc.strokeRoundRect(x, y, width, height, r, r);
 
         // Module badge top-left
-        gc.setFill(ColorPalette.TEXT_SECONDARY);
+        gc.setFill(ColorPalette.BADGE_TEXT);
         gc.setFont(LayoutMetrics.BADGE_FONT);
         gc.setTextAlign(TextAlignment.LEFT);
         gc.setTextBaseline(VPos.TOP);
@@ -270,19 +269,18 @@ public final class ElementRenderer {
         gc.fillRoundRect(x, y, width, height, r, r);
 
         // Table badge top-left
-        gc.setFill(ColorPalette.TEXT_SECONDARY);
+        gc.setFill(ColorPalette.BADGE_TEXT);
         gc.setFont(LayoutMetrics.BADGE_FONT);
         gc.setTextAlign(TextAlignment.LEFT);
         gc.setTextBaseline(VPos.TOP);
         gc.fillText(BADGE_LOOKUP, x + 4, y + 3);
 
-        // Name centered vertically (truncated to fit)
+        // Name centered vertically — wrap to two lines if needed
         gc.setFill(ColorPalette.TEXT);
         gc.setFont(LayoutMetrics.LOOKUP_NAME_FONT);
         gc.setTextAlign(TextAlignment.CENTER);
         gc.setTextBaseline(VPos.CENTER);
-        gc.fillText(truncate(name, LayoutMetrics.LOOKUP_NAME_FONT, width - 16),
-                x + width / 2, y + height / 2);
+        drawWrappedName(gc, name, LayoutMetrics.LOOKUP_NAME_FONT, x, y, width, height, 16);
     }
 
     /** Padding inside the comment box (each side). */
@@ -443,6 +441,39 @@ public final class ElementRenderer {
     /** Thread-local Text node for width measurement — safe from any thread. */
     private static final ThreadLocal<Text> MEASURE_TEXT =
             ThreadLocal.withInitial(Text::new);
+
+    /**
+     * Draws a name centered in the element bounding box, wrapping to two lines if needed.
+     * If the name fits on one line, draws centered as usual. If it needs wrapping, draws
+     * up to 2 lines vertically centered. If more than 2 lines, truncates line 2 with ellipsis.
+     *
+     * @param padding  total horizontal padding (both sides combined)
+     */
+    private static void drawWrappedName(GraphicsContext gc, String name, Font font,
+                                        double x, double y, double width, double height,
+                                        double padding) {
+        double maxWidth = width - padding;
+        MEASURE_TEXT.get().setFont(font);
+        MEASURE_TEXT.get().setText(name);
+        if (MEASURE_TEXT.get().getLayoutBounds().getWidth() <= maxWidth) {
+            // Fits on one line
+            gc.fillText(name, x + width / 2, y + height / 2);
+        } else {
+            List<String> lines = wrapText(name, font, maxWidth);
+            double lineHeight = measureLineHeight(font);
+            int lineCount = Math.min(lines.size(), 2);
+            double totalHeight = lineCount * lineHeight;
+            double startY = y + (height - totalHeight) / 2 + lineHeight / 2;
+
+            for (int i = 0; i < lineCount; i++) {
+                String line = lines.get(i);
+                if (i == 1 && lines.size() > 2) {
+                    line = truncate(line, font, maxWidth);
+                }
+                gc.fillText(line, x + width / 2, startY + i * lineHeight);
+            }
+        }
+    }
 
     /**
      * Truncates a name to fit within the given pixel width, appending "..." if needed.
