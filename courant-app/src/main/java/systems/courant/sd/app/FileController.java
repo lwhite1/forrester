@@ -30,7 +30,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
-import java.util.LinkedHashMap;
+import java.util.TreeMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -151,7 +151,7 @@ final class FileController {
                 return menu;
             }
 
-            Map<String, Menu> categoryMenus = new LinkedHashMap<>();
+            Map<String, Menu> categoryMenus = new TreeMap<>();
             for (JsonNode model : models) {
                 String name = model.path("name").asText(null);
                 String category = model.path("category").asText(null);
