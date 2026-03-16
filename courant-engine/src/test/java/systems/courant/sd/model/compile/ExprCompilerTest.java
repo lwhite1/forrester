@@ -1413,4 +1413,26 @@ class ExprCompilerTest {
             assertThat(formula.getCurrentValue()).isNaN();
         }
     }
+
+    @Nested
+    @DisplayName("FIND_ZERO scoping")
+    class FindZeroScoping {
+
+        @Test
+        @DisplayName("should not shadow model variable after FIND_ZERO compilation")
+        void shouldNotShadowVariableAfterFindZero() {
+            // Register x as a literal constant with value 5
+            context.addLiteralConstant("x", 5);
+
+            // Compile FIND_ZERO that uses x as the loop variable
+            // FIND_ZERO(x - 3, x, 0, 10) should find x = 3
+            Formula findZeroFormula = compiler.compile("FIND_ZERO(x - 3, x, 0, 10)");
+            assertThat(findZeroFormula.getCurrentValue()).isCloseTo(3.0, within(1e-6));
+
+            // After FIND_ZERO, compiling a new expression referencing x should resolve
+            // to the original model variable (value 5), not the FIND_ZERO holder
+            Formula afterFormula = compiler.compile("x");
+            assertThat(afterFormula.getCurrentValue()).isEqualTo(5.0);
+        }
+    }
 }

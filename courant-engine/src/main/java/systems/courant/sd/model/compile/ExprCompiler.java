@@ -958,11 +958,15 @@ public class ExprCompiler {
                     "FIND_ZERO second argument must be a variable reference", "FIND_ZERO");
         }
         String varName = ref.name();
-        // Register a dedicated mutable holder so the expression reads from it at runtime.
-        // Each FIND_ZERO gets its own holder — no shared mutable state.
+        // Compile the expression in a child context with the mutable holder, so the
+        // holder only shadows the variable within the FIND_ZERO expression — not in
+        // any formulas compiled afterward in the parent context.
         double[] holder = {0.0};
-        context.addMutableHolder(varName, holder);
-        DoubleSupplier expression = compileExpr(args.get(0));
+        CompilationContext childContext = new CompilationContext(
+                context.getUnitRegistry(), context.getCurrentStep(), context);
+        childContext.addMutableHolder(varName, holder);
+        ExprCompiler childCompiler = new ExprCompiler(childContext, resettables);
+        DoubleSupplier expression = childCompiler.compileExpr(args.get(0));
         DoubleSupplier lo = compileExpr(args.get(2));
         DoubleSupplier hi = compileExpr(args.get(3));
         FindZero findZero = FindZero.of(expression, holder, lo, hi);
