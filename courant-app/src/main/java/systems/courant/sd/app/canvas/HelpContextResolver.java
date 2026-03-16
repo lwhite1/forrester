@@ -13,7 +13,12 @@ import javafx.scene.control.Tooltip;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 
+import java.lang.ref.WeakReference;
+import java.util.Map;
 import java.util.Set;
+import java.util.WeakHashMap;
+
+import javafx.stage.Window;
 
 import systems.courant.sd.app.canvas.dialogs.ContextHelpDialog;
 
@@ -33,6 +38,10 @@ import systems.courant.sd.app.canvas.dialogs.ContextHelpDialog;
  * </ol>
  */
 public final class HelpContextResolver {
+
+    /** Cached help dialog per owner window. Uses WeakHashMap so closed windows are GC'd. */
+    private static final Map<Window, WeakReference<ContextHelpDialog>> helpDialogCache =
+            new WeakHashMap<>();
 
     private HelpContextResolver() {
     }
@@ -242,10 +251,22 @@ public final class HelpContextResolver {
     private static void openHelpForDialog(Dialog<?> dialog) {
         String className = dialog.getClass().getSimpleName();
         HelpTopic topic = topicForDialog(className);
-        ContextHelpDialog helpDialog = new ContextHelpDialog();
-        helpDialog.initOwner(dialog.getDialogPane().getScene().getWindow());
+        Window owner = dialog.getDialogPane().getScene().getWindow();
+
+        // Reuse cached dialog for this owner window, or create a new one
+        ContextHelpDialog helpDialog = null;
+        WeakReference<ContextHelpDialog> ref = helpDialogCache.get(owner);
+        if (ref != null) {
+            helpDialog = ref.get();
+        }
+        if (helpDialog == null) {
+            helpDialog = new ContextHelpDialog();
+            helpDialog.initOwner(owner);
+            helpDialogCache.put(owner, new WeakReference<>(helpDialog));
+        }
         helpDialog.showTopic(topic);
         helpDialog.show();
+        helpDialog.toFront();
     }
 
     private static boolean isEquationFieldFocused(Node focusOwner) {
