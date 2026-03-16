@@ -14,7 +14,7 @@ java -jar courant-app/target/courant-app-*.jar
 
 A blank canvas opens. This is your workspace — you'll drag and drop elements here to build a visual model.
 
-> **Tip:** If you'd rather explore a finished model first, go to **File > Open Example** and pick any of the 8 bundled models. You can run them immediately with **Ctrl+R**.
+> **Tip:** If you'd rather explore a finished model first, go to **File > Open Example** and pick any of the 100+ bundled models. You can run them immediately with **Ctrl+R**.
 
 ---
 
@@ -200,7 +200,7 @@ These five building blocks can model surprisingly complex systems — from disea
 
 ## Next steps
 
-- **Open the example models** — File > Open Example has 8 models covering population growth, epidemiology, ecology, and supply chains
+- **Open the example models** — File > Open Example has more than 100 models covering causal loops, control theory, demographics, ecology, economics, epidemiology, management, marketing, physics, policy, social dynamics, supply chain, technology, urban systems, and more
 - **Try a positive feedback loop** — Build an exponential growth model (stock = Population, inflow = Births = Population * Birth_Rate). Compare it to the negative feedback you just built
 - **Explore causal loop diagrams** — Press **8** to place CLD variables and **9** to draw causal links. Sketch your system's causal structure before formalizing it into stocks and flows
 - **Read the [Expression Language Reference](Expression_Language.md)** — covers all built-in functions (SMOOTH, DELAY3, STEP, RAMP, IF, LOOKUP, etc.)

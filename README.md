@@ -1,6 +1,6 @@
 # Courant — System Dynamics Modeling Tool
 
-> **1.0-Alpha-4 Release** — This system is not ready for production use. APIs, file formats, and features may change without notice.
+> **Current release:** 1.0-Alpha-4
 
 The ability to reason about and make predictions on complex, dynamic systems is essential today. Courant is an open-source [System Dynamics](userdocs/Key%20Reasons%20for%20Using%20System%20Dynamics.md) simulation engine and visual modeling environment written in Java. It was created so that, when it's ready, everyone will have access to a professional quality system dynamics environment for free. 
 
@@ -23,7 +23,7 @@ The engine supports creating training simulations, games, scenario testing, and 
 - **Delay detection** — visual "D" badges on elements containing delay functions (SMOOTH, DELAY3, DELAY_FIXED)
 - **Canvas features** — sparklines in stocks, resizable elements, undo/redo, zoom, diagram export (PNG/JPG)
 - **Import/export** — Vensim `.mdl` import, XMILE import/export, native JSON persistence
-- **35 bundled example models** spanning epidemiology, ecology, economics, demographics, supply chain, technology adoption, and more
+- **More than 100 bundled example models** spanning causal loops, control theory, demographics, ecology, economics, education, environment, epidemiology, management, marketing, physics, policy, population, social dynamics, supply chain, technology adoption, urban systems, and more
 
 ## Screenshots
 
@@ -50,7 +50,7 @@ mvn clean package -DskipTests
 java -jar courant-app/target/courant-app-*.jar
 ```
 
-Open an example model via **File → Open Example** to explore the 35 bundled models.
+Open an example model via **File → Open Example** to explore the 100+ bundled models.
 
 ## Quick Start
 
@@ -173,7 +173,7 @@ Courant can exchange models with other System Dynamics tools:
 
 ### Visual Editor Bundled Models
 
-35 models across 11 categories accessible via **File → Open Example**: introductory, demographics, ecology, economics, epidemiology, management, policy, population, supply chain, technology, and more.
+More than 100 models across 18 categories accessible via **File → Open Example**: introductory, causal loop, control, demographics, ecology, economics, education, environment, epidemiology, management, marketing, physics, policy, population, social, supply chain, technology, and urban.
 
 ## Documentation
 

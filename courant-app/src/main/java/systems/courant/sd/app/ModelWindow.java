@@ -38,6 +38,7 @@ import systems.courant.sd.model.def.ModelDefinition;
 import systems.courant.sd.model.def.ValidationResult;
 import systems.courant.sd.model.def.ViewDef;
 import systems.courant.sd.model.graph.AutoLayout;
+import systems.courant.sd.model.graph.ElementSizes;
 import systems.courant.sd.model.graph.FeedbackAnalysis;
 
 import javafx.application.Platform;
@@ -767,6 +768,7 @@ public class ModelWindow {
         editor.addListener(staleListener);
         editor.addListener(dirtyListener);
         editor.loadFrom(def);
+        var editorSnapshot = this.editor;
 
         if (def.stocks().isEmpty() && def.flows().isEmpty()
                 && def.variables().isEmpty()) {
@@ -777,7 +779,7 @@ public class ModelWindow {
             } else {
                 view = new ViewDef("Main", List.of(), List.of(), List.of());
             }
-            applyView(view, displayName);
+            applyView(editorSnapshot, view, displayName);
         } else {
             // Run auto-layout on a background thread to keep the UI responsive.
             // ELK initialization on first use and layout of large models can
@@ -785,11 +787,13 @@ public class ModelWindow {
             statusBar.showProgress("Computing layout\u2026");
             canvas.setDisable(true);
             Thread layoutThread = new Thread(() -> {
-                ViewDef view = AutoLayout.layout(def);
+                var sizeOverrides = systems.courant.sd.app.canvas.LayoutMetrics
+                        .computeSizeOverrides(def);
+                ViewDef view = AutoLayout.layout(def, sizeOverrides);
                 Platform.runLater(() -> {
                     canvas.setDisable(false);
                     statusBar.clearProgress();
-                    applyView(view, displayName);
+                    applyView(editorSnapshot, view, displayName);
                 });
             }, "auto-layout");
             layoutThread.setDaemon(true);
@@ -797,10 +801,10 @@ public class ModelWindow {
         }
     }
 
-    private void applyView(ViewDef view, String displayName) {
+    private void applyView(ModelEditor ed, ViewDef view, String displayName) {
         canvas.clearNavigation();
         canvas.clearSparklines();
-        canvas.setModel(editor, view);
+        canvas.setModel(ed, view);
         undoManager.clear();
         fileController.setDirty(false);
         if (dashboardPanel != null) {

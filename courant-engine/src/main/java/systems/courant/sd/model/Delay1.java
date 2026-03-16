@@ -122,7 +122,7 @@ public class Delay1 implements Formula, Resettable {
             lastStep = step;
         } else if (step > lastStep) {
             long delta = step - lastStep;
-            for (int d = 0; d < delta; d++) {
+            for (long d = 0; d < delta; d++) {
                 double inputVal = input.getAsDouble();
                 double rate = stage / delayTime;
                 stage += inputVal - rate;

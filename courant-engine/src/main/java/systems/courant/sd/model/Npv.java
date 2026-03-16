@@ -125,7 +125,7 @@ public class Npv implements Formula, Resettable {
             double discountMultiplier = 1 + discountRate;
             double streamVal = stream.getAsDouble();
             // Compound discount for all elapsed steps
-            for (int d = 0; d < delta; d++) {
+            for (long d = 0; d < delta; d++) {
                 cumulativeDiscount *= discountMultiplier;
             }
             // Add only the current step's payment at the final discount level
