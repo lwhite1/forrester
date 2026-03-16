@@ -10,7 +10,9 @@ import systems.courant.sd.model.Model;
 import systems.courant.sd.model.Module;
 import systems.courant.sd.model.NegativeValuePolicy;
 import systems.courant.sd.model.Stock;
+import systems.courant.sd.model.TimeSeries;
 import systems.courant.sd.model.Variable;
+import systems.courant.sd.model.def.TimeSeriesDef;
 import systems.courant.sd.model.def.VariableDef;
 import systems.courant.sd.model.def.DefinitionValidator;
 import systems.courant.sd.model.def.FlowDef;
@@ -129,6 +131,7 @@ public class ModelCompiler {
         resolveInitialExpressions(def.stocks(), context);
 
         buildLookupTables(def, context);
+        buildTimeSeries(def, model, context, stepHolder);
 
         // Variables — use DoubleSupplier[] holders for indirection
         List<DoubleSupplier[]> auxHolders = new ArrayList<>();
@@ -195,6 +198,7 @@ public class ModelCompiler {
         resolveInitialExpressions(innerDef.stocks(), moduleContext);
 
         buildLookupTables(innerDef, moduleContext);
+        buildTimeSeries(innerDef, module, moduleContext, stepHolder);
 
         // Variables with holder indirection
         List<DoubleSupplier[]> auxHolders = new ArrayList<>();
@@ -291,6 +295,33 @@ public class ModelCompiler {
             }
             context.addLookupTable(tDef.name(), table, inputHolder);
             context.addLookupTableDef(tDef.name(), tDef);
+        }
+    }
+
+    private void buildTimeSeries(ModelDefinition def, Model model,
+                                  CompilationContext context, long[] stepHolder) {
+        buildTimeSeriesInto(def, model::addVariable, context, stepHolder);
+    }
+
+    private void buildTimeSeries(ModelDefinition def, Module module,
+                                  CompilationContext context, long[] stepHolder) {
+        buildTimeSeriesInto(def, module::addVariable, context, stepHolder);
+    }
+
+    private void buildTimeSeriesInto(ModelDefinition def,
+                                      java.util.function.Consumer<Variable> variableAdder,
+                                      CompilationContext context, long[] stepHolder) {
+        for (TimeSeriesDef tsDef : def.timeSeries()) {
+            double[] dtHolder = context.getDtHolder();
+            DoubleSupplier timeSupplier = () -> stepHolder[0] * dtHolder[0];
+            TimeSeries ts = TimeSeries.create(
+                    tsDef.timeValues(), tsDef.dataValues(),
+                    timeSupplier, tsDef.interpolation(), tsDef.extrapolation());
+            Unit unit = tsDef.unit() != null ? unitRegistry.resolve(tsDef.unit())
+                    : unitRegistry.resolve("Thing");
+            Variable variable = new Variable(tsDef.name(), unit, ts::getCurrentValue);
+            variableAdder.accept(variable);
+            context.addVariable(tsDef.name(), variable);
         }
     }
 

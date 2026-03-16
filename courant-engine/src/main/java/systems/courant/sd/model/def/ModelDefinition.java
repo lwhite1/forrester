@@ -26,6 +26,7 @@ import java.util.List;
  * @param defaultSimulation optional default simulation settings
  * @param metadata optional attribution and licensing metadata
  * @param referenceDatasets observed/expected time-series datasets for model validation
+ * @param timeSeries exogenous input time-series definitions driven by external data
  */
 public record ModelDefinition(
         String name,
@@ -43,8 +44,28 @@ public record ModelDefinition(
         List<ViewDef> views,
         SimulationSettings defaultSimulation,
         ModelMetadata metadata,
-        List<ReferenceDataset> referenceDatasets
+        List<ReferenceDataset> referenceDatasets,
+        List<TimeSeriesDef> timeSeries
 ) {
+
+    /**
+     * Backward-compatible constructor without time series.
+     */
+    public ModelDefinition(
+            String name, String comment, ModuleInterface moduleInterface,
+            List<StockDef> stocks, List<FlowDef> flows,
+            List<VariableDef> variables,
+            List<LookupTableDef> lookupTables, List<ModuleInstanceDef> modules,
+            List<SubscriptDef> subscripts,
+            List<CldVariableDef> cldVariables, List<CausalLinkDef> causalLinks,
+            List<CommentDef> comments,
+            List<ViewDef> views, SimulationSettings defaultSimulation,
+            ModelMetadata metadata, List<ReferenceDataset> referenceDatasets) {
+        this(name, comment, moduleInterface, stocks, flows, variables,
+                lookupTables, modules, subscripts, cldVariables, causalLinks,
+                comments, views, defaultSimulation, metadata, referenceDatasets,
+                List.of());
+    }
 
     /**
      * Backward-compatible constructor without comments or reference datasets.
@@ -60,7 +81,8 @@ public record ModelDefinition(
             ModelMetadata metadata, List<ReferenceDataset> referenceDatasets) {
         this(name, comment, moduleInterface, stocks, flows, variables,
                 lookupTables, modules, subscripts, cldVariables, causalLinks,
-                List.of(), views, defaultSimulation, metadata, referenceDatasets);
+                List.of(), views, defaultSimulation, metadata, referenceDatasets,
+                List.of());
     }
 
     /**
@@ -77,7 +99,8 @@ public record ModelDefinition(
             ModelMetadata metadata) {
         this(name, comment, moduleInterface, stocks, flows, variables,
                 lookupTables, modules, subscripts, cldVariables, causalLinks,
-                List.of(), views, defaultSimulation, metadata, List.of());
+                List.of(), views, defaultSimulation, metadata, List.of(),
+                List.of());
     }
 
     /**
@@ -93,7 +116,8 @@ public record ModelDefinition(
             List<ViewDef> views, SimulationSettings defaultSimulation) {
         this(name, comment, moduleInterface, stocks, flows, variables,
                 lookupTables, modules, subscripts, cldVariables, causalLinks,
-                List.of(), views, defaultSimulation, null, List.of());
+                List.of(), views, defaultSimulation, null, List.of(),
+                List.of());
     }
 
     /**
@@ -108,7 +132,8 @@ public record ModelDefinition(
             List<ViewDef> views, SimulationSettings defaultSimulation) {
         this(name, comment, moduleInterface, stocks, flows, variables,
                 lookupTables, modules, subscripts, List.of(), List.of(),
-                List.of(), views, defaultSimulation, null, List.of());
+                List.of(), views, defaultSimulation, null, List.of(),
+                List.of());
     }
 
     public ModelDefinition {
@@ -126,6 +151,7 @@ public record ModelDefinition(
         comments = comments == null ? List.of() : List.copyOf(comments);
         views = views == null ? List.of() : List.copyOf(views);
         referenceDatasets = referenceDatasets == null ? List.of() : List.copyOf(referenceDatasets);
+        timeSeries = timeSeries == null ? List.of() : List.copyOf(timeSeries);
     }
 
     /**
@@ -150,6 +176,7 @@ public record ModelDefinition(
         comments.forEach(b::comment);
         views.forEach(b::view);
         referenceDatasets.forEach(b::referenceDataset);
+        timeSeries.forEach(b::timeSeries);
         return b;
     }
 
@@ -195,6 +222,7 @@ public record ModelDefinition(
         return new ModelDefinition(name, comment, moduleInterface,
                 stocks, flows, merged,
                 lookupTables, modules, subscripts, cldVariables, causalLinks,
-                comments, views, defaultSimulation, metadata, List.of());
+                comments, views, defaultSimulation, metadata, List.of(),
+                List.of());
     }
 }
