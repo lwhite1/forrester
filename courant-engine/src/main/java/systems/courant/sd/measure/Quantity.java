@@ -90,6 +90,9 @@ public final class Quantity {
     public Quantity add(Quantity other) {
         Preconditions.checkArgument(other.isCompatibleWith(this), INCOMPATIBLE_ERROR_MESSAGE);
 
+        if (unit.equals(other.unit)) {
+            return new Quantity(value + other.value, unit);
+        }
         try {
             Quantity otherInBaseUnits = other.inBaseUnits();
             Quantity thisInBaseUnits = inBaseUnits();
@@ -114,6 +117,9 @@ public final class Quantity {
     public Quantity subtract(Quantity other) {
         Preconditions.checkArgument(other.isCompatibleWith(this), INCOMPATIBLE_ERROR_MESSAGE);
 
+        if (unit.equals(other.unit)) {
+            return new Quantity(value - other.value, unit);
+        }
         try {
             Quantity otherInBaseUnits = other.inBaseUnits();
             Quantity thisInBaseUnits = inBaseUnits();

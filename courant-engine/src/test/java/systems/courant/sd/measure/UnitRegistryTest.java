@@ -115,6 +115,21 @@ class UnitRegistryTest {
     }
 
     @Test
+    @DisplayName("resolve(null) should throw IllegalArgumentException")
+    void shouldThrowForNullResolve() {
+        assertThatThrownBy(() -> registry.resolve(null))
+                .isInstanceOf(IllegalArgumentException.class);
+    }
+
+    @Test
+    @DisplayName("resolve('') should auto-create unit for blank name")
+    void shouldAutoCreateForBlankResolve() {
+        // Some Vensim models have blank unit names — resolve should handle them
+        Unit unit = registry.resolve("");
+        assertThat(unit).isNotNull();
+    }
+
+    @Test
     void shouldNotLeaveSpuriousUnitAfterResolveTimeUnitFails() {
         String unknownName = "SomeCustomThing";
         assertThatThrownBy(() -> registry.resolveTimeUnit(unknownName))
@@ -186,10 +201,17 @@ class UnitRegistryTest {
         }
 
         @Test
-        @DisplayName("should silently create unit for 'Gallon'")
-        void shouldSilentlyCreateGallon() {
-            Unit unit = registry.resolve("Gallon");
-            assertThat(unit).isNotNull();
+        @DisplayName("should resolve 'fraction' to DIMENSIONLESS unit")
+        void shouldResolveFractionToDimensionless() {
+            Unit unit = registry.resolve("fraction");
+            assertThat(unit).isSameAs(DimensionlessUnits.DIMENSIONLESS);
+        }
+
+        @Test
+        @DisplayName("should resolve 'percent' to DIMENSIONLESS unit")
+        void shouldResolvePercentToDimensionless() {
+            Unit unit = registry.resolve("percent");
+            assertThat(unit).isSameAs(DimensionlessUnits.DIMENSIONLESS);
         }
     }
 

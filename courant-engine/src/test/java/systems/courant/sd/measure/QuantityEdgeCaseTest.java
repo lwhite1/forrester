@@ -119,4 +119,22 @@ public class QuantityEdgeCaseTest {
         Quantity fahrenheit = new Quantity(212, FAHRENHEIT);
         assertDoesNotThrow(fahrenheit::hashCode);
     }
+
+    @Test
+    public void sameUnitFahrenheitAddShouldWork() {
+        Quantity a = new Quantity(100, FAHRENHEIT);
+        Quantity b = new Quantity(50, FAHRENHEIT);
+        Quantity result = a.add(b);
+        assertEquals(150, result.getValue(), 0.0);
+        assertEquals(FAHRENHEIT, result.getUnit());
+    }
+
+    @Test
+    public void sameUnitFahrenheitSubtractShouldWork() {
+        Quantity a = new Quantity(100, FAHRENHEIT);
+        Quantity b = new Quantity(30, FAHRENHEIT);
+        Quantity result = a.subtract(b);
+        assertEquals(70, result.getValue(), 0.0);
+        assertEquals(FAHRENHEIT, result.getUnit());
+    }
 }

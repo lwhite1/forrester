@@ -34,23 +34,21 @@ public class UnitRegistry {
      * Includes Vensim conventions, common physical-sounding labels, and generic quantity words.
      */
     private static final Set<String> KNOWN_ACCEPTABLE_NAMES = Set.of(
+            // Dimensionless conventions
             "units", "unit", "dmnl", "dimensionless",
             "fraction", "percent", "percentage", "ratio", "index",
-            "gallon", "gallons", "gallon per minute", "gallons per minute",
-            "liter", "liters", "litre", "litres",
+            // Domain-specific countable labels commonly used in Vensim models
             "person", "persons", "people",
             "patient", "patients",
             "vehicle", "vehicles",
             "ship", "ships",
             "fish",
-            "dollar", "dollars", "euro", "euros", "eur", "usd",
             "widget", "widgets",
             "item", "items",
             "job", "jobs",
             "order", "orders",
             "call", "calls",
-            "trip", "trips",
-            "ton", "tons", "tonne", "tonnes"
+            "trip", "trips"
     );
 
     private final Map<String, Unit> byName = new ConcurrentHashMap<>();
@@ -131,6 +129,9 @@ public class UnitRegistry {
      * @return the resolved unit
      */
     public Unit resolve(String name) {
+        if (name == null) {
+            throw new IllegalArgumentException("Unit name must not be null");
+        }
         Unit unit = find(name);
         if (unit != null) {
             return unit;
@@ -142,10 +143,10 @@ public class UnitRegistry {
                 return unit;
             }
             // Auto-create custom ItemUnit for unknown names
-            // Treat "Dmnl", "units", "dimensionless" as equivalent to DIMENSIONLESS
+            // Treat dimensionless-equivalent names as DIMENSIONLESS
             String lower = name.toLowerCase();
-            if ("dmnl".equals(lower) || "units".equals(lower) || "unit".equals(lower)
-                    || "dimensionless".equals(lower)) {
+            if (Set.of("dmnl", "units", "unit", "dimensionless",
+                    "fraction", "percent", "percentage", "ratio", "index").contains(lower)) {
                 Unit dmnl = systems.courant.sd.measure.units.dimensionless.DimensionlessUnits.DIMENSIONLESS;
                 byName.put(name, dmnl);
                 byNameLower.put(lower, dmnl);
