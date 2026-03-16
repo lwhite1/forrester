@@ -612,17 +612,20 @@ class ExprCompilerTest {
 
         @Test
         void shouldUseHalfToEvenRoundingForROUND() {
-            // Banker's rounding: 0.5 rounds to nearest even
+            // Half-to-even (banker's rounding): 0.5 rounds to nearest even
+            assertThat(compiler.compile("ROUND(0.5)").getCurrentValue()).isEqualTo(0.0);
+            assertThat(compiler.compile("ROUND(1.5)").getCurrentValue()).isEqualTo(2.0);
             assertThat(compiler.compile("ROUND(2.5)").getCurrentValue()).isEqualTo(2.0);
             assertThat(compiler.compile("ROUND(3.5)").getCurrentValue()).isEqualTo(4.0);
-            assertThat(compiler.compile("ROUND(4.5)").getCurrentValue()).isEqualTo(4.0);
             assertThat(compiler.compile("ROUND(-2.5)").getCurrentValue()).isEqualTo(-2.0);
         }
 
         @Test
-        void shouldHandleLargeValuesInROUND() {
-            // Math.rint returns double, so no long overflow for values > Long.MAX_VALUE
-            assertThat(compiler.compile("ROUND(1e19)").getCurrentValue()).isEqualTo(1e19);
+        void shouldNotClampLargeDoublesInROUND() {
+            // Values beyond Long.MAX_VALUE must not clamp
+            double huge = 1e19;
+            Formula formula = compiler.compile("ROUND(" + huge + ")");
+            assertThat(formula.getCurrentValue()).isEqualTo(huge);
         }
 
         @Test
