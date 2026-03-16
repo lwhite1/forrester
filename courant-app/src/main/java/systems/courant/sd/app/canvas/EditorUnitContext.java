@@ -66,11 +66,17 @@ public final class EditorUnitContext implements DimensionalAnalyzer.UnitContext 
             return Optional.of(CompositeUnit.dimensionless());
         }
 
-        // Check lookup tables — return dimensionless
-        var lookupNames = editor.getLookupTables().stream()
-                .map(t -> t.name())
-                .toList();
-        if (lookupNames.contains(elementName) || lookupNames.contains(resolved)) {
+        // Check lookup tables — use declared unit if present, else dimensionless
+        var lookupOpt = editor.getLookupTableByName(elementName);
+        if (lookupOpt.isEmpty()) {
+            lookupOpt = editor.getLookupTableByName(resolved);
+        }
+        if (lookupOpt.isPresent()) {
+            String unitName = lookupOpt.get().unit();
+            if (unitName != null && !unitName.isBlank()) {
+                Unit unit = registry.resolve(unitName);
+                return Optional.of(CompositeUnit.of(unit));
+            }
             return Optional.of(CompositeUnit.dimensionless());
         }
 
