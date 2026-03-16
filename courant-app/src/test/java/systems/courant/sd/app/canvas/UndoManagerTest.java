@@ -514,6 +514,79 @@ class UndoManagerTest {
     }
 
     @Nested
+    @DisplayName("pushUndoTentative")
+    class PushUndoTentative {
+
+        @Test
+        void shouldPushUndoWithoutClearingRedo() {
+            manager.pushUndo(snapshot("S1"), "First");
+            manager.undo(snapshot("S2"), "Undone");
+            assertThat(manager.canRedo()).isTrue();
+
+            manager.pushUndoTentative(snapshot("S3"), "Tentative");
+
+            assertThat(manager.canUndo()).isTrue();
+            assertThat(manager.canRedo()).isTrue();
+        }
+
+        @Test
+        void shouldEnforceMaxCapacity() {
+            for (int i = 0; i < UndoManager.MAX_UNDO; i++) {
+                manager.pushUndoTentative(snapshot("S" + i), "T" + i);
+            }
+            manager.pushUndoTentative(snapshot("overflow"), "Overflow");
+
+            assertThat(manager.undoDepth()).isEqualTo(UndoManager.MAX_UNDO);
+        }
+
+        @Test
+        void shouldPreserveRedoAfterDiscardOfTentative() {
+            // Build redo history
+            manager.pushUndo(snapshot("S1"), "First");
+            manager.pushUndo(snapshot("S2"), "Second");
+            manager.undo(snapshot("S3"), "Undone");
+            // Undo stack: [S1], Redo stack: [S3]
+            assertThat(manager.canRedo()).isTrue();
+            int redoCountBefore = manager.redoLabels().size();
+
+            // Tentative push then discard — redo must survive
+            manager.pushUndoTentative(snapshot("T"), "Tentative");
+            manager.discardLastUndo();
+
+            assertThat(manager.canRedo()).isTrue();
+            assertThat(manager.redoLabels()).hasSize(redoCountBefore);
+        }
+    }
+
+    @Nested
+    @DisplayName("confirmLastUndo")
+    class ConfirmLastUndo {
+
+        @Test
+        void shouldClearRedoStack() {
+            manager.pushUndo(snapshot("S1"), "First");
+            manager.undo(snapshot("S2"), "Undone");
+            assertThat(manager.canRedo()).isTrue();
+
+            manager.pushUndoTentative(snapshot("S3"), "Tentative");
+            manager.confirmLastUndo();
+
+            assertThat(manager.canRedo()).isFalse();
+            assertThat(manager.canUndo()).isTrue();
+        }
+
+        @Test
+        void shouldBeNoOpWhenRedoIsEmpty() {
+            manager.pushUndoTentative(snapshot("S1"), "Tentative");
+
+            manager.confirmLastUndo();
+
+            assertThat(manager.canRedo()).isFalse();
+            assertThat(manager.canUndo()).isTrue();
+        }
+    }
+
+    @Nested
     @DisplayName("discardLastUndo")
     class DiscardLastUndo {
 

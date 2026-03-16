@@ -111,6 +111,34 @@ public class UndoManager implements AutoCloseable {
     }
 
     /**
+     * Saves the current state tentatively, without clearing the redo stack.
+     * Use this when the operation may be rejected or may fail, so that
+     * redo history is preserved if the undo entry is later discarded.
+     *
+     * <p>If the operation succeeds, call {@link #confirmLastUndo()} to
+     * clear the redo stack. If it fails, call {@link #discardLastUndo()}.
+     *
+     * @param current the state snapshot captured before the mutation
+     * @param label   a human-readable description of the action
+     */
+    public void pushUndoTentative(Snapshot current, String label) {
+        undoStack.push(compressAsync(current, label));
+        if (undoStack.size() > MAX_UNDO) {
+            UndoEntry evicted = undoStack.removeLast();
+            evicted.future().cancel(false);
+        }
+    }
+
+    /**
+     * Confirms the most recent tentative undo entry by clearing the redo
+     * stack. Called after {@link #pushUndoTentative} when the operation
+     * succeeds and the redo history should be invalidated.
+     */
+    public void confirmLastUndo() {
+        cancelAll(redoStack);
+    }
+
+    /**
      * Undoes one step: pops the previous state from the undo stack and pushes
      * the current state onto the redo stack.
      *

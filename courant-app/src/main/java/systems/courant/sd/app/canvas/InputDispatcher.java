@@ -490,7 +490,7 @@ final class InputDispatcher {
                         viewport.toWorldX(event.getX()),
                         viewport.toWorldY(event.getY()),
                         canvasState, editor,
-                        () -> canvas.saveUndoState("Reconnect " + flowLabel),
+                        () -> canvas.saveUndoStateTentative("Reconnect " + flowLabel),
                         () -> {
                             if (um != null) {
                                 um.discardLastUndo();
@@ -501,6 +501,9 @@ final class InputDispatcher {
                         um.discardLastUndo();
                     }
                 } else {
+                    if (um != null) {
+                        um.confirmLastUndo();
+                    }
                     canvas.scheduleRegenerateConnectors();
                 }
             }
