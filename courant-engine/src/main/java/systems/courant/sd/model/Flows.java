@@ -105,7 +105,7 @@ public final class Flows {
                                      LongSupplier stepSupplier, long delay) {
         return Flow.create(name, timeUnit, () -> {
             long referenceStep = stepSupplier.getAsLong() - delay;
-            double value = inflow.getHistoryAtTimeStep((int) referenceStep);
+            double value = inflow.getHistoryAtTimeStep(referenceStep);
             Stock sink = inflow.getSink();
             Preconditions.checkArgument(sink != null, "inflow must have a sink stock assigned");
             return new Quantity(value, sink.getUnit());

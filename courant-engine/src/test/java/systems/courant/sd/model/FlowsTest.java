@@ -121,6 +121,20 @@ public class FlowsTest {
         assertEquals(5.0, departures.flowPerTimeUnit(DAY).getValue(), 0.001);
     }
 
+    @Test
+    public void pipelineDelayShouldHandleLongStepWithoutTruncation() {
+        Stock wip = new Stock("WIP", 0, THING);
+        Flow arrivals = Flows.constant("arrivals", DAY, new Quantity(5, THING));
+        wip.addInflow(arrivals);
+
+        // Step exceeds Integer.MAX_VALUE — reference step also exceeds int range
+        long bigStep = Integer.MAX_VALUE + 10L;
+        Flow departures = Flows.pipelineDelay("departures", DAY, arrivals, () -> bigStep, 3);
+
+        // Reference step is beyond any recorded history, so should return 0 (not wrap negative)
+        assertEquals(0.0, departures.flowPerTimeUnit(DAY).getValue(), 0.001);
+    }
+
     // Flow name and time unit
 
     @Test
