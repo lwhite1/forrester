@@ -11,9 +11,11 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Reads a CSV file into a {@link ReferenceDataset}. The expected format is:
@@ -61,10 +63,15 @@ public final class ReferenceDataCsvReader {
                 throw new IOException("CSV must have at least two columns (time + one variable)");
             }
 
-            // Trim headers
+            // Trim headers and check for duplicates
             String[] columnNames = new String[header.length - 1];
+            Set<String> seen = new HashSet<>();
             for (int i = 1; i < header.length; i++) {
                 columnNames[i - 1] = header[i].trim();
+                if (!seen.add(columnNames[i - 1])) {
+                    throw new IOException(
+                            "Duplicate column header: '" + columnNames[i - 1] + "'");
+                }
             }
 
             List<double[]> rawRows = new ArrayList<>();

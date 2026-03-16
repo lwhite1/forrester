@@ -101,6 +101,9 @@ public class ColumnMappingDialog extends Dialog<ReferenceDataset> {
                 continue;
             }
             double[] data = original.columns().get(csvCol);
+            if (data == null) {
+                continue;
+            }
             mappedColumns.put(targetName, data);
         }
         if (mappedColumns.isEmpty()) {

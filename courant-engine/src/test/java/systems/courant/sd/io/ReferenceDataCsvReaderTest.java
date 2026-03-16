@@ -132,6 +132,17 @@ class ReferenceDataCsvReaderTest {
         }
 
         @Test
+        @DisplayName("should reject duplicate column headers (#637)")
+        void shouldRejectDuplicateHeaders() {
+            String csv = "Time,Population,Population\n0,100,200\n";
+            assertThatThrownBy(() ->
+                    ReferenceDataCsvReader.read(new StringReader(csv), "Bad"))
+                    .isInstanceOf(IOException.class)
+                    .hasMessageContaining("Duplicate column header")
+                    .hasMessageContaining("Population");
+        }
+
+        @Test
         @DisplayName("should reject non-numeric values")
         void shouldRejectNonNumeric() {
             String csv = "Time,X\n0,abc\n";
