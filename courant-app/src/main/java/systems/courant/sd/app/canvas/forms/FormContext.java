@@ -40,10 +40,37 @@ import systems.courant.sd.app.canvas.Styles;
  */
 public class FormContext {
 
-    public ModelCanvas canvas;
-    public ModelEditor editor;
-    public GridPane grid;
+    private ModelCanvas canvas;
+    private ModelEditor editor;
+    private GridPane grid;
     private String elementName;
+    private boolean updatingFields;
+    private Runnable onFormRebuildRequested;
+    private Runnable onOpenExpressionHelp;
+
+    public ModelCanvas getCanvas() {
+        return canvas;
+    }
+
+    public void setCanvas(ModelCanvas canvas) {
+        this.canvas = canvas;
+    }
+
+    public ModelEditor getEditor() {
+        return editor;
+    }
+
+    public void setEditor(ModelEditor editor) {
+        this.editor = editor;
+    }
+
+    public GridPane getGrid() {
+        return grid;
+    }
+
+    public void setGrid(GridPane grid) {
+        this.grid = grid;
+    }
 
     public String getElementName() {
         return elementName;
@@ -52,9 +79,32 @@ public class FormContext {
     public void setElementName(String elementName) {
         this.elementName = elementName;
     }
-    public boolean updatingFields;
-    public Runnable onFormRebuildRequested;
-    public Runnable onOpenExpressionHelp;
+
+    public boolean isUpdatingFields() {
+        return updatingFields;
+    }
+
+    /**
+     * Executes the given action with the reentrancy guard active.
+     * Sets {@code updatingFields} to {@code true} before running the action and
+     * guarantees it is reset to {@code false} afterwards, even if the action throws.
+     */
+    public void withUpdate(Runnable action) {
+        updatingFields = true;
+        try {
+            action.run();
+        } finally {
+            updatingFields = false;
+        }
+    }
+
+    public void setOnFormRebuildRequested(Runnable onFormRebuildRequested) {
+        this.onFormRebuildRequested = onFormRebuildRequested;
+    }
+
+    public void setOnOpenExpressionHelp(Runnable onOpenExpressionHelp) {
+        this.onOpenExpressionHelp = onOpenExpressionHelp;
+    }
 
     /** Cached registry for dimensional analysis — avoids rebuilding on every keystroke. */
     private final UnitRegistry unitRegistry = new UnitRegistry();
