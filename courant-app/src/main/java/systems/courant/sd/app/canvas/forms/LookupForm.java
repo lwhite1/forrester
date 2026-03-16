@@ -56,7 +56,7 @@ public class LookupForm implements ElementForm {
 
     @Override
     public int build(int startRow) {
-        Optional<LookupTableDef> lookupOpt = ctx.editor.getLookupTableByName(ctx.getElementName());
+        Optional<LookupTableDef> lookupOpt = ctx.getEditor().getLookupTableByName(ctx.getElementName());
         if (lookupOpt.isEmpty()) {
             ctx.addReadOnlyRow(startRow++, "Name", ctx.getElementName());
             return startRow;
@@ -91,14 +91,14 @@ public class LookupForm implements ElementForm {
         interpBox.setValue(lookup.interpolation());
         interpBox.setMaxWidth(Double.MAX_VALUE);
         interpBox.setOnAction(e -> {
-            if (!ctx.updatingFields) {
+            if (!ctx.isUpdatingFields()) {
                 String newInterp = interpBox.getValue();
-                ctx.editor.getLookupTableByName(ctx.getElementName()).ifPresent(lt -> {
+                ctx.getEditor().getLookupTableByName(ctx.getElementName()).ifPresent(lt -> {
                     if (!Objects.equals(newInterp, lt.interpolation())) {
                         LookupTableDef updated = new LookupTableDef(
                                 ctx.getElementName(), lt.comment(),
                                 lt.xValues(), lt.yValues(), newInterp, lt.unit());
-                        ctx.canvas.applyMutation(() -> ctx.editor.setLookupTable(ctx.getElementName(), updated));
+                        ctx.getCanvas().applyMutation(() -> ctx.getEditor().setLookupTable(ctx.getElementName(), updated));
                         replaceChart(lt.xValues(), lt.yValues(), newInterp);
                     }
                 });
@@ -137,13 +137,13 @@ public class LookupForm implements ElementForm {
             Runnable commitRow = () -> commitDataPoint(xField, yField, index);
             xField.setOnAction(e -> commitRow.run());
             xField.focusedProperty().addListener((obs, wasFocused, isFocused) -> {
-                if (!isFocused && !ctx.updatingFields) {
+                if (!isFocused && !ctx.isUpdatingFields()) {
                     commitRow.run();
                 }
             });
             yField.setOnAction(e -> commitRow.run());
             yField.focusedProperty().addListener((obs, wasFocused, isFocused) -> {
-                if (!isFocused && !ctx.updatingFields) {
+                if (!isFocused && !ctx.isUpdatingFields()) {
                     commitRow.run();
                 }
             });
@@ -152,13 +152,13 @@ public class LookupForm implements ElementForm {
             tableGrid.add(yField, 1, i + 1);
         }
 
-        ctx.grid.add(tableGrid, 0, row, 2, 1);
+        ctx.getGrid().add(tableGrid, 0, row, 2, 1);
         row++;
 
         // Inline interactive chart
         chartRow = row;
         chart = buildChart(xs, ys, lookup.interpolation());
-        ctx.grid.add(chart, 0, row, 2, 1);
+        ctx.getGrid().add(chart, 0, row, 2, 1);
         row++;
 
         // Add/remove row buttons
@@ -172,7 +172,7 @@ public class LookupForm implements ElementForm {
         removeRowBtn.setOnAction(e -> removeRow());
 
         rowButtons.getChildren().addAll(addRowBtn, removeRowBtn);
-        ctx.grid.add(rowButtons, 0, row, 2, 1);
+        ctx.getGrid().add(rowButtons, 0, row, 2, 1);
         row++;
 
         return row;
@@ -184,9 +184,9 @@ public class LookupForm implements ElementForm {
     }
 
     private void replaceChart(double[] xs, double[] ys, String interpolation) {
-        ctx.grid.getChildren().remove(chart);
+        ctx.getGrid().getChildren().remove(chart);
         chart = buildChart(xs, ys, interpolation);
-        ctx.grid.add(chart, 0, chartRow, 2, 1);
+        ctx.getGrid().add(chart, 0, chartRow, 2, 1);
     }
 
     private static final int SPLINE_INTERPOLATION_POINTS = 100;
@@ -329,7 +329,7 @@ public class LookupForm implements ElementForm {
         deleteItem.setOnAction(e -> deletePointByIndex(pointIndex));
         deleteMenu.getItems().add(deleteItem);
         node.setOnContextMenuRequested(event -> {
-            Optional<LookupTableDef> ltOpt = ctx.editor.getLookupTableByName(ctx.getElementName());
+            Optional<LookupTableDef> ltOpt = ctx.getEditor().getLookupTableByName(ctx.getElementName());
             if (ltOpt.isPresent() && ltOpt.get().xValues().length > MIN_POINTS) {
                 deleteMenu.show(node, event.getScreenX(), event.getScreenY());
             }
@@ -338,7 +338,7 @@ public class LookupForm implements ElementForm {
     }
 
     private double[] getNeighborBounds(int pointIndex) {
-        Optional<LookupTableDef> ltOpt = ctx.editor.getLookupTableByName(ctx.getElementName());
+        Optional<LookupTableDef> ltOpt = ctx.getEditor().getLookupTableByName(ctx.getElementName());
         if (ltOpt.isEmpty()) {
             return new double[]{Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY};
         }
@@ -398,7 +398,7 @@ public class LookupForm implements ElementForm {
     }
 
     public void addPointAtPosition(double x, double y) {
-        Optional<LookupTableDef> ltOpt = ctx.editor.getLookupTableByName(ctx.getElementName());
+        Optional<LookupTableDef> ltOpt = ctx.getEditor().getLookupTableByName(ctx.getElementName());
         if (ltOpt.isEmpty()) {
             return;
         }
@@ -425,11 +425,11 @@ public class LookupForm implements ElementForm {
 
         LookupTableDef updated = new LookupTableDef(
                 ctx.getElementName(), lt.comment(), newX, newY, lt.interpolation(), lt.unit());
-        ctx.canvas.applyMutation(() -> ctx.editor.setLookupTable(ctx.getElementName(), updated));
+        ctx.getCanvas().applyMutation(() -> ctx.getEditor().setLookupTable(ctx.getElementName(), updated));
     }
 
     public void deletePointByIndex(int index) {
-        Optional<LookupTableDef> ltOpt = ctx.editor.getLookupTableByName(ctx.getElementName());
+        Optional<LookupTableDef> ltOpt = ctx.getEditor().getLookupTableByName(ctx.getElementName());
         if (ltOpt.isEmpty() || ltOpt.get().xValues().length <= MIN_POINTS) {
             return;
         }
@@ -447,11 +447,11 @@ public class LookupForm implements ElementForm {
         System.arraycopy(oldY, index + 1, newY, index, oldY.length - index - 1);
         LookupTableDef updated = new LookupTableDef(
                 ctx.getElementName(), lt.comment(), newX, newY, lt.interpolation(), lt.unit());
-        ctx.canvas.applyMutation(() -> ctx.editor.setLookupTable(ctx.getElementName(), updated));
+        ctx.getCanvas().applyMutation(() -> ctx.getEditor().setLookupTable(ctx.getElementName(), updated));
     }
 
     private void commitChartDrag(int index, double newX, double newY) {
-        Optional<LookupTableDef> ltOpt = ctx.editor.getLookupTableByName(ctx.getElementName());
+        Optional<LookupTableDef> ltOpt = ctx.getEditor().getLookupTableByName(ctx.getElementName());
         if (ltOpt.isEmpty()) {
             return;
         }
@@ -476,7 +476,7 @@ public class LookupForm implements ElementForm {
         }
         LookupTableDef updated = new LookupTableDef(
                 ctx.getElementName(), lt.comment(), newXs, newYs, lt.interpolation(), lt.unit());
-        ctx.canvas.applyMutation(() -> ctx.editor.setLookupTable(ctx.getElementName(), updated));
+        ctx.getCanvas().applyMutation(() -> ctx.getEditor().setLookupTable(ctx.getElementName(), updated));
     }
 
     public static String formatPointTooltip(double x, double y) {
@@ -486,15 +486,15 @@ public class LookupForm implements ElementForm {
     private void commitComment(TextArea area) {
         String text = area.getText().trim();
         String comment = text.isEmpty() ? null : text;
-        Optional<LookupTableDef> ltOpt = ctx.editor.getLookupTableByName(ctx.getElementName());
+        Optional<LookupTableDef> ltOpt = ctx.getEditor().getLookupTableByName(ctx.getElementName());
         if (ltOpt.isEmpty() || Objects.equals(comment, ltOpt.get().comment())) {
             return;
         }
-        ctx.canvas.applyMutation(() -> ctx.editor.setLookupComment(ctx.getElementName(), comment));
+        ctx.getCanvas().applyMutation(() -> ctx.getEditor().setLookupComment(ctx.getElementName(), comment));
     }
 
     private void commitDataPoint(TextField xField, TextField yField, int index) {
-        Optional<LookupTableDef> ltOpt = ctx.editor.getLookupTableByName(ctx.getElementName());
+        Optional<LookupTableDef> ltOpt = ctx.getEditor().getLookupTableByName(ctx.getElementName());
         if (ltOpt.isEmpty()) {
             return;
         }
@@ -525,7 +525,7 @@ public class LookupForm implements ElementForm {
             }
             LookupTableDef updated = new LookupTableDef(
                     ctx.getElementName(), lt.comment(), newXs, newYs, lt.interpolation(), lt.unit());
-            ctx.canvas.applyMutation(() -> ctx.editor.setLookupTable(ctx.getElementName(), updated));
+            ctx.getCanvas().applyMutation(() -> ctx.getEditor().setLookupTable(ctx.getElementName(), updated));
         } catch (NumberFormatException ignored) {
             xField.setText(ElementRenderer.formatValue(lt.xValues()[index]));
             yField.setText(ElementRenderer.formatValue(lt.yValues()[index]));
@@ -535,7 +535,7 @@ public class LookupForm implements ElementForm {
     }
 
     private void addRow() {
-        Optional<LookupTableDef> ltOpt = ctx.editor.getLookupTableByName(ctx.getElementName());
+        Optional<LookupTableDef> ltOpt = ctx.getEditor().getLookupTableByName(ctx.getElementName());
         if (ltOpt.isEmpty()) {
             return;
         }
@@ -553,11 +553,11 @@ public class LookupForm implements ElementForm {
         newY[oldY.length] = oldY[oldY.length - 1];
         LookupTableDef updated = new LookupTableDef(
                 ctx.getElementName(), lt.comment(), newX, newY, lt.interpolation(), lt.unit());
-        ctx.canvas.applyMutation(() -> ctx.editor.setLookupTable(ctx.getElementName(), updated));
+        ctx.getCanvas().applyMutation(() -> ctx.getEditor().setLookupTable(ctx.getElementName(), updated));
     }
 
     private void removeRow() {
-        Optional<LookupTableDef> ltOpt = ctx.editor.getLookupTableByName(ctx.getElementName());
+        Optional<LookupTableDef> ltOpt = ctx.getEditor().getLookupTableByName(ctx.getElementName());
         if (ltOpt.isEmpty() || ltOpt.get().xValues().length <= MIN_POINTS) {
             return;
         }
@@ -570,16 +570,16 @@ public class LookupForm implements ElementForm {
         System.arraycopy(oldY, 0, newY, 0, newY.length);
         LookupTableDef updated = new LookupTableDef(
                 ctx.getElementName(), lt.comment(), newX, newY, lt.interpolation(), lt.unit());
-        ctx.canvas.applyMutation(() -> ctx.editor.setLookupTable(ctx.getElementName(), updated));
+        ctx.getCanvas().applyMutation(() -> ctx.getEditor().setLookupTable(ctx.getElementName(), updated));
     }
 
     private void commitUnit(ComboBox<String> box) {
         String unit = box.getValue() != null ? box.getValue().trim() : "";
         String normalizedUnit = unit.isEmpty() ? null : unit;
-        Optional<LookupTableDef> ltOpt = ctx.editor.getLookupTableByName(ctx.getElementName());
+        Optional<LookupTableDef> ltOpt = ctx.getEditor().getLookupTableByName(ctx.getElementName());
         if (ltOpt.isPresent() && Objects.equals(normalizedUnit, ltOpt.get().unit())) {
             return;
         }
-        ctx.canvas.applyMutation(() -> ctx.editor.setLookupUnit(ctx.getElementName(), normalizedUnit));
+        ctx.getCanvas().applyMutation(() -> ctx.getEditor().setLookupUnit(ctx.getElementName(), normalizedUnit));
     }
 }

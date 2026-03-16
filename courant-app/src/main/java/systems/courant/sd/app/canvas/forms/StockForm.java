@@ -32,7 +32,7 @@ public class StockForm implements ElementForm {
 
     @Override
     public int build(int startRow) {
-        Optional<StockDef> stockOpt = ctx.editor.getStockByName(ctx.getElementName());
+        Optional<StockDef> stockOpt = ctx.getEditor().getStockByName(ctx.getElementName());
         if (stockOpt.isEmpty()) {
             ctx.addReadOnlyRow(startRow++, "Name", ctx.getElementName());
             return startRow;
@@ -70,7 +70,7 @@ public class StockForm implements ElementForm {
         policyBox.setValue(policyDisplayValue(stock.negativeValuePolicy()));
         policyBox.setMaxWidth(Double.MAX_VALUE);
         policyBox.setOnAction(e -> {
-            if (!ctx.updatingFields) {
+            if (!ctx.isUpdatingFields()) {
                 commitPolicy();
             }
         });
@@ -85,7 +85,7 @@ public class StockForm implements ElementForm {
 
     @Override
     public void updateValues() {
-        Optional<StockDef> stockOpt = ctx.editor.getStockByName(ctx.getElementName());
+        Optional<StockDef> stockOpt = ctx.getEditor().getStockByName(ctx.getElementName());
         if (stockOpt.isEmpty() || nameField == null) {
             return;
         }
@@ -101,13 +101,13 @@ public class StockForm implements ElementForm {
     private void commitInitialValue(TextField field) {
         try {
             double value = Double.parseDouble(field.getText().trim());
-            Optional<StockDef> stockOpt = ctx.editor.getStockByName(ctx.getElementName());
+            Optional<StockDef> stockOpt = ctx.getEditor().getStockByName(ctx.getElementName());
             if (stockOpt.isEmpty() || stockOpt.get().initialValue() == value) {
                 return;
             }
-            ctx.canvas.applyMutation(() -> ctx.editor.setStockInitialValue(ctx.getElementName(), value));
+            ctx.getCanvas().applyMutation(() -> ctx.getEditor().setStockInitialValue(ctx.getElementName(), value));
         } catch (NumberFormatException ignored) {
-            ctx.editor.getStockByName(ctx.getElementName())
+            ctx.getEditor().getStockByName(ctx.getElementName())
                     .ifPresent(stock -> field.setText(ElementRenderer.formatValue(stock.initialValue())));
             ctx.flashInvalidInput(field);
         }
@@ -115,32 +115,32 @@ public class StockForm implements ElementForm {
 
     private void commitUnit(ComboBox<String> box) {
         String unit = box.getValue() != null ? box.getValue().trim() : "";
-        Optional<StockDef> stockOpt = ctx.editor.getStockByName(ctx.getElementName());
+        Optional<StockDef> stockOpt = ctx.getEditor().getStockByName(ctx.getElementName());
         if (stockOpt.isPresent() && unit.equals(stockOpt.get().unit())) {
             return;
         }
-        ctx.canvas.applyMutation(() -> ctx.editor.setStockUnit(ctx.getElementName(), unit));
+        ctx.getCanvas().applyMutation(() -> ctx.getEditor().setStockUnit(ctx.getElementName(), unit));
     }
 
     private void commitPolicy() {
         String policyValue = "Allow".equals(policyBox.getValue())
                 ? "ALLOW" : "CLAMP_TO_ZERO";
-        Optional<StockDef> stockOpt = ctx.editor.getStockByName(ctx.getElementName());
+        Optional<StockDef> stockOpt = ctx.getEditor().getStockByName(ctx.getElementName());
         String currentPolicy = stockOpt.map(StockDef::negativeValuePolicy).orElse("CLAMP_TO_ZERO");
         if (stockOpt.isPresent() && Objects.equals(policyValue, currentPolicy)) {
             return;
         }
-        ctx.canvas.applyMutation(() -> ctx.editor.setStockNegativeValuePolicy(ctx.getElementName(), policyValue));
+        ctx.getCanvas().applyMutation(() -> ctx.getEditor().setStockNegativeValuePolicy(ctx.getElementName(), policyValue));
     }
 
     private void commitComment(TextArea area) {
         String text = area.getText().trim();
         String comment = text.isEmpty() ? null : text;
-        Optional<StockDef> stockOpt = ctx.editor.getStockByName(ctx.getElementName());
+        Optional<StockDef> stockOpt = ctx.getEditor().getStockByName(ctx.getElementName());
         if (stockOpt.isEmpty() || Objects.equals(comment, stockOpt.get().comment())) {
             return;
         }
-        ctx.canvas.applyMutation(() -> ctx.editor.setStockComment(ctx.getElementName(), comment));
+        ctx.getCanvas().applyMutation(() -> ctx.getEditor().setStockComment(ctx.getElementName(), comment));
     }
 
     /**

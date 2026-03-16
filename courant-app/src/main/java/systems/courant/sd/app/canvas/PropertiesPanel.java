@@ -96,8 +96,8 @@ public class PropertiesPanel extends VBox {
         placeholderLabel.setAlignment(Pos.CENTER);
         placeholderLabel.setMaxWidth(Double.MAX_VALUE);
 
-        ctx.grid = propertyGrid;
-        ctx.onFormRebuildRequested = () -> updateSelection(ctx.canvas, ctx.editor);
+        ctx.setGrid(propertyGrid);
+        ctx.setOnFormRebuildRequested(() -> updateSelection(ctx.getCanvas(), ctx.getEditor()));
 
         showPlaceholder();
     }
@@ -107,7 +107,7 @@ public class PropertiesPanel extends VBox {
      * Called by ModelWindow after construction.
      */
     public void setOnOpenExpressionHelp(Runnable callback) {
-        ctx.onOpenExpressionHelp = callback;
+        ctx.setOnOpenExpressionHelp(callback);
     }
 
     /**
@@ -126,11 +126,9 @@ public class PropertiesPanel extends VBox {
      * Wrapped in updatingFields guard to prevent spurious focus-loss commits.
      */
     public void updateSelection(ModelCanvas canvas, ModelEditor editor) {
-        ctx.canvas = canvas;
-        ctx.editor = editor;
-        ctx.updatingFields = true;
-
-        try {
+        ctx.setCanvas(canvas);
+        ctx.setEditor(editor);
+        ctx.withUpdate(() -> {
             if (canvas == null || editor == null) {
                 showPlaceholder();
                 return;
@@ -157,9 +155,7 @@ public class PropertiesPanel extends VBox {
             } else {
                 showMultiSelection(selection.size());
             }
-        } finally {
-            ctx.updatingFields = false;
-        }
+        });
     }
 
     private void showPlaceholder() {
@@ -183,7 +179,7 @@ public class PropertiesPanel extends VBox {
         ctx.addFieldRow(row++, "Model", nameField);
         nameField.setOnAction(e -> commitModelName(nameField, editor));
         nameField.focusedProperty().addListener((obs, wasFocused, isFocused) -> {
-            if (!isFocused && !ctx.updatingFields) {
+            if (!isFocused && !ctx.isUpdatingFields()) {
                 commitModelName(nameField, editor);
             }
         });
@@ -199,7 +195,7 @@ public class PropertiesPanel extends VBox {
         GridPane.setHgrow(descArea, Priority.ALWAYS);
         ctx.addFieldRow(row++, "Description", descArea);
         descArea.focusedProperty().addListener((obs, wasFocused, isFocused) -> {
-            if (!isFocused && !ctx.updatingFields) {
+            if (!isFocused && !ctx.isUpdatingFields()) {
                 commitModelComment(descArea, editor);
             }
         });
@@ -318,9 +314,9 @@ public class PropertiesPanel extends VBox {
         contextToolbar.getChildren().clear();
         Button deleteBtn = createToolbarButton("Delete");
         deleteBtn.setOnAction(e -> {
-            if (ctx.canvas != null) {
-                ctx.canvas.deleteSelectedElements();
-                ctx.canvas.requestFocus();
+            if (ctx.getCanvas() != null) {
+                ctx.getCanvas().deleteSelectedElements();
+                ctx.getCanvas().requestFocus();
             }
         });
         contextToolbar.getChildren().add(deleteBtn);
@@ -340,13 +336,13 @@ public class PropertiesPanel extends VBox {
         propertyGrid.getChildren().clear();
         int row = 0;
 
-        boolean isCausalLink = ctx.canvas != null && ctx.canvas.isSelectedConnectionCausalLink();
+        boolean isCausalLink = ctx.getCanvas() != null && ctx.getCanvas().isSelectedConnectionCausalLink();
 
         ctx.addReadOnlyRow(row++, "Type", isCausalLink ? "Causal Link" : "Info Link");
         ctx.addReadOnlyRow(row++, "From", connection.from());
         ctx.addReadOnlyRow(row++, "To", connection.to());
 
-        if (isCausalLink && ctx.editor != null) {
+        if (isCausalLink && ctx.getEditor() != null) {
             CausalLinkDef link = findCausalLink(connection);
             if (link != null) {
                 // Polarity combo box
@@ -368,10 +364,10 @@ public class PropertiesPanel extends VBox {
                 propertyGrid.add(explanation, 0, row, 2, 1);
 
                 polarityBox.setOnAction(e -> {
-                    if (!ctx.updatingFields) {
+                    if (!ctx.isUpdatingFields()) {
                         CausalLinkDef.Polarity newPolarity = polarityFromDisplay(polarityBox.getValue());
-                        ctx.canvas.applyMutation(() ->
-                                ctx.editor.setCausalLinkPolarity(
+                        ctx.getCanvas().applyMutation(() ->
+                                ctx.getEditor().setCausalLinkPolarity(
                                         connection.from(), connection.to(), newPolarity));
                         explanation.setText(buildExplanation(connection, newPolarity));
                     }
@@ -383,7 +379,7 @@ public class PropertiesPanel extends VBox {
     }
 
     private CausalLinkDef findCausalLink(ConnectionId connection) {
-        for (CausalLinkDef link : ctx.editor.getCausalLinks()) {
+        for (CausalLinkDef link : ctx.getEditor().getCausalLinks()) {
             if (link.from().equals(connection.from()) && link.to().equals(connection.to())) {
                 return link;
             }
@@ -453,9 +449,9 @@ public class PropertiesPanel extends VBox {
         Button deleteBtn = createToolbarButton("Delete");
         deleteBtn.setId("propertiesDelete");
         deleteBtn.setOnAction(e -> {
-            if (ctx.canvas != null) {
-                ctx.canvas.deleteSelectedElements();
-                ctx.canvas.requestFocus();
+            if (ctx.getCanvas() != null) {
+                ctx.getCanvas().deleteSelectedElements();
+                ctx.getCanvas().requestFocus();
             }
         });
 
@@ -465,18 +461,18 @@ public class PropertiesPanel extends VBox {
             Button drillBtn = createToolbarButton("Drill Into");
             drillBtn.setId("propertiesDrill");
             drillBtn.setOnAction(e -> {
-                if (ctx.canvas != null) {
-                    ctx.canvas.drillInto(ctx.getElementName());
-                    ctx.canvas.requestFocus();
+                if (ctx.getCanvas() != null) {
+                    ctx.getCanvas().drillInto(ctx.getElementName());
+                    ctx.getCanvas().requestFocus();
                 }
             });
 
             Button bindingsBtn = createToolbarButton("Bindings");
             bindingsBtn.setId("propertiesBindings");
             bindingsBtn.setOnAction(e -> {
-                if (ctx.canvas != null) {
-                    ctx.canvas.triggerBindingConfig(ctx.getElementName());
-                    ctx.canvas.requestFocus();
+                if (ctx.getCanvas() != null) {
+                    ctx.getCanvas().triggerBindingConfig(ctx.getElementName());
+                    ctx.getCanvas().requestFocus();
                 }
             });
 
@@ -506,7 +502,7 @@ public class PropertiesPanel extends VBox {
             ctx.addReadOnlyRow(row++, "Name", name);
         }
 
-        if (type != ElementType.COMMENT && ctx.canvas != null) {
+        if (type != ElementType.COMMENT && ctx.getCanvas() != null) {
             propertyGrid.add(new Separator(), 0, row, 2, 1);
             row++;
             row = buildDependencySection(row, name);
@@ -528,7 +524,7 @@ public class PropertiesPanel extends VBox {
     }
 
     private int buildModuleForm(int row) {
-        Optional<ModuleInstanceDef> moduleOpt = ctx.editor.getModuleByName(ctx.getElementName());
+        Optional<ModuleInstanceDef> moduleOpt = ctx.getEditor().getModuleByName(ctx.getElementName());
         if (moduleOpt.isEmpty()) {
             ctx.addReadOnlyRow(row++, "Name", ctx.getElementName());
             return row;
@@ -566,8 +562,8 @@ public class PropertiesPanel extends VBox {
     }
 
     private int buildDependencySection(int row, String elementName) {
-        Set<String> usedBy = ctx.canvas.whereUsed(elementName);
-        Set<String> uses = ctx.canvas.uses(elementName);
+        Set<String> usedBy = ctx.getCanvas().whereUsed(elementName);
+        Set<String> uses = ctx.getCanvas().uses(elementName);
 
         if (!usedBy.isEmpty()) {
             Label label = new Label("Used by");
@@ -602,8 +598,8 @@ public class PropertiesPanel extends VBox {
             link.setStyle(Styles.SMALL_TEXT + " -fx-text-fill: #0066cc;");
             link.setPadding(new Insets(0, 2, 0, 0));
             link.setOnAction(e -> {
-                if (ctx.canvas != null) {
-                    ctx.canvas.selectElement(name);
+                if (ctx.getCanvas() != null) {
+                    ctx.getCanvas().selectElement(name);
                 }
             });
             pane.getChildren().add(link);
