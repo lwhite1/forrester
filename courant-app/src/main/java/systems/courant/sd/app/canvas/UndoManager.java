@@ -93,9 +93,10 @@ public class UndoManager implements AutoCloseable {
      */
     public void pushUndo(Snapshot current, String label) {
         undoStack.push(compressAsync(current, label));
-        redoStack.clear();
+        cancelAll(redoStack);
         if (undoStack.size() > MAX_UNDO) {
-            undoStack.removeLast();
+            UndoEntry evicted = undoStack.removeLast();
+            evicted.future().cancel(false);
         }
     }
 
@@ -222,9 +223,10 @@ public class UndoManager implements AutoCloseable {
      */
     void pushEntry(UndoEntry entry) {
         undoStack.push(entry);
-        redoStack.clear();
+        cancelAll(redoStack);
         if (undoStack.size() > MAX_UNDO) {
-            undoStack.removeLast();
+            UndoEntry evicted = undoStack.removeLast();
+            evicted.future().cancel(false);
         }
     }
 
@@ -232,8 +234,15 @@ public class UndoManager implements AutoCloseable {
      * Clears both undo and redo stacks.
      */
     public void clear() {
-        undoStack.clear();
-        redoStack.clear();
+        cancelAll(undoStack);
+        cancelAll(redoStack);
+    }
+
+    private static void cancelAll(Deque<UndoEntry> stack) {
+        for (UndoEntry entry : stack) {
+            entry.future().cancel(false);
+        }
+        stack.clear();
     }
 
     /**
@@ -243,7 +252,8 @@ public class UndoManager implements AutoCloseable {
      */
     public void discardLastUndo() {
         if (!undoStack.isEmpty()) {
-            undoStack.pop();
+            UndoEntry entry = undoStack.pop();
+            entry.future().cancel(false);
         }
     }
 

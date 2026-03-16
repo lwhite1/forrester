@@ -87,7 +87,11 @@ class DelayDetectorTest {
                 "DELAY3(output, 10)",
                 "DELAY1I(output, 10, 0)",
                 "DELAY3I(output, 10, 0)",
-                "DELAY_FIXED(input, 3, 0)"
+                "DELAY_FIXED(input, 3, 0)",
+                "TREND(input, 4, 0)",
+                "FORECAST(input, 4, 8, 0)",
+                "NPV(stream, 0.1)",
+                "SAMPLE_IF_TRUE(flag, input, 0)"
         })
         void shouldDetectAllDelayFunctions(String equation) {
             assertThat(DelayDetector.equationContainsDelay(equation)).isTrue();

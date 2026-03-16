@@ -23,7 +23,7 @@ class FunctionDocRegistryTest {
                 "SUM", "MEAN", "VMIN", "VMAX", "PROD",
                 "XIDZ", "ZIDZ", "INITIAL",
                 "STEP", "RAMP", "PULSE", "PULSE_TRAIN",
-                "SMOOTH", "DELAY3", "DELAY_FIXED",
+                "SMOOTH", "DELAY1I", "DELAY3", "DELAY3I", "DELAY_FIXED",
                 "TREND", "FORECAST", "NPV",
                 "LOOKUP", "RANDOM_NORMAL", "RANDOM_UNIFORM",
                 "SAMPLE_IF_TRUE", "FIND_ZERO", "LOOKUP_AREA");

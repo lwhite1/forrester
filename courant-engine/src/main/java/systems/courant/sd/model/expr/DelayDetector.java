@@ -12,7 +12,8 @@ public final class DelayDetector {
     /** Delay-family function names (uppercase) recognized by the detector. */
     private static final Set<String> DELAY_FUNCTIONS = Set.of(
             "SMOOTH", "SMOOTHI", "SMOOTH3", "SMOOTH3I",
-            "DELAY1", "DELAY1I", "DELAY3", "DELAY3I", "DELAY_FIXED"
+            "DELAY1", "DELAY1I", "DELAY3", "DELAY3I", "DELAY_FIXED",
+            "TREND", "FORECAST", "NPV", "SAMPLE_IF_TRUE"
     );
 
     private DelayDetector() {
