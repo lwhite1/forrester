@@ -172,6 +172,9 @@ public class CalibrateDialog extends Dialog<CalibrateDialog.Config> {
                     String stock = row.stockCombo.getValue();
                     if (stock != null && !stock.isEmpty()) {
                         double[] data = importedDataset.columns().get(row.csvColumn);
+                        if (data == null) {
+                            continue;
+                        }
                         targets.add(new FitTarget(stock, row.csvColumn, data));
                     }
                 }
