@@ -122,11 +122,11 @@ public abstract class Flow extends Element {
      *
      * @param i the zero-based time step index
      */
-    public double getHistoryAtTimeStep(int i) {
-        if (i < 0 || history.size() <= i) {
+    public double getHistoryAtTimeStep(long i) {
+        if (i < 0 || i >= history.size()) {
             return 0;
         }
-        return history.get(i);
+        return history.get((int) i);
     }
 
     /**

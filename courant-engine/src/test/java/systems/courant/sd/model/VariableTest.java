@@ -43,6 +43,14 @@ public class VariableTest {
     }
 
     @Test
+    public void shouldReturnZeroForLongIndexBeyondIntRange() {
+        Variable var = new Variable("V1", THING, () -> 10.0);
+        var.recordValue();
+        assertEquals(0.0, var.getHistoryAtTimeStep(Integer.MAX_VALUE + 1L), 0.0);
+        assertEquals(0.0, var.getHistoryAtTimeStep(Long.MAX_VALUE), 0.0);
+    }
+
+    @Test
     public void shouldReturnUnit() {
         Variable var = new Variable("V1", THING, () -> 0);
         assertEquals(THING, var.getUnit());
