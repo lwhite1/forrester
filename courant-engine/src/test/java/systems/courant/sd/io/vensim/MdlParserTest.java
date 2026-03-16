@@ -413,6 +413,33 @@ class MdlParserTest {
             assertThat(result.equations().get(1).name()).isEqualTo("y");
             assertThat(result.equations().get(2).name()).isEqualTo("z");
         }
+
+        @Test
+        void shouldNotLoseEquationsWhenMacroHeaderIsMalformed() {
+            String content = """
+                    x = 1
+                    \t~\t
+                    \t~\t
+                    \t|
+                    :MACRO: InvalidMacroNoParentheses
+                    eq1 = 5
+                    \t~\t
+                    \t~\t
+                    \t|
+                    :END OF MACRO:
+                    y = 2
+                    \t~\t
+                    \t~\t
+                    \t|
+                    """;
+            MdlParser.ParsedMdl result = MdlParser.parse(content);
+            // Malformed macro should not consume equations; eq1 and y should be present
+            List<String> names = result.equations().stream()
+                    .map(MdlEquation::name)
+                    .toList();
+            assertThat(names).contains("x", "eq1", "y");
+            assertThat(result.macros()).isEmpty();
+        }
     }
 
     @Nested
