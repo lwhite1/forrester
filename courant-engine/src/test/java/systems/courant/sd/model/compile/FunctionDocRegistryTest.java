@@ -77,6 +77,13 @@ class FunctionDocRegistryTest {
     }
 
     @Test
+    void shouldDocumentIFWithFunctionCallSyntax() {
+        FunctionDoc doc = FunctionDocRegistry.get("IF").orElseThrow();
+        assertThat(doc.signature()).isEqualTo("IF(condition, a, b)");
+        assertThat(doc.example()).isEqualTo("IF(Population > 1000, Growth_Rate, 0)");
+    }
+
+    @Test
     void shouldDocumentRandomNormalWith5Parameters() {
         FunctionDoc doc = FunctionDocRegistry.get("RANDOM_NORMAL").orElseThrow();
         assertThat(doc.parameters()).hasSize(5);
