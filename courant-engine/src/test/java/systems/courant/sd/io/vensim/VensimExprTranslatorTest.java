@@ -788,6 +788,17 @@ class VensimExprTranslatorTest {
             assertThat(result.expression()).contains("scenario == 0");
             assertThat(result.expression()).contains("scenario == 1");
         }
+
+        @Test
+        void shouldNotCorruptEqualityAfterSubscriptBracketTranslation() {
+            // Equality replacement must happen after subscript brackets are removed,
+            // so any = inside brackets won't be doubled
+            var result = VensimExprTranslator.translate(
+                    "IF THEN ELSE(x[Region] = 0, 1, 0)", "var", EMPTY_NAMES);
+            assertThat(result.expression()).contains("== 0");
+            // Should not contain === (tripled equals from double replacement)
+            assertThat(result.expression()).doesNotContain("===");
+        }
     }
 
     @Nested
