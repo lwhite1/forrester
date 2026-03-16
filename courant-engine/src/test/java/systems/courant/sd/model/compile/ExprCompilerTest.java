@@ -1369,4 +1369,30 @@ class ExprCompilerTest {
             assertThat(((Expr.Conditional) ifShortExpr).shortCircuit()).isTrue();
         }
     }
+
+    @Nested
+    @DisplayName("Warned flag reset")
+    class WarnedFlagReset {
+
+        @Test
+        @DisplayName("should register resettables for warned flags in division by zero")
+        void shouldResetWarnedFlagsOnReset() {
+            context.addLiteralConstant("zero", 0);
+            Formula formula = compiler.compile("Population / zero");
+
+            // First evaluation triggers warning and returns NaN
+            assertThat(formula.getCurrentValue()).isNaN();
+
+            // Resettables should have been registered
+            assertThat(resettables).isNotEmpty();
+
+            // Reset all resettables (simulating model reset between runs)
+            resettables.forEach(Resettable::reset);
+
+            // After reset, the warned flag should be cleared so warning can fire again
+            // The formula should still return NaN (the behavior is the same,
+            // but the warning log would fire again on a real run)
+            assertThat(formula.getCurrentValue()).isNaN();
+        }
+    }
 }
