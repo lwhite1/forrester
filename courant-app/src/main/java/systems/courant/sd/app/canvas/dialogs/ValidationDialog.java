@@ -104,7 +104,7 @@ public class ValidationDialog extends Dialog<Void> {
 
     public ValidationDialog(ValidationResult result, Consumer<String> onSelectElement,
                             Stage owner) {
-        HelpContextResolver.installF1Handler(this);
+        HelpContextResolver.addHelpButton(this);
         initModality(Modality.NONE);
         setTitle("Model Validation");
         this.currentResult = result;

@@ -56,7 +56,7 @@ public class OptimizerDialog extends Dialog<OptimizerDialog.Config> {
     private final TextField maxEvalsField;
 
     public OptimizerDialog(List<String> constantNames, List<String> stockNames) {
-        HelpContextResolver.installF1Handler(this);
+        HelpContextResolver.addHelpButton(this);
         setTitle("Optimize");
         setHeaderText("Configure optimization");
 

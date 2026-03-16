@@ -31,7 +31,7 @@ class HelpContentTest {
         for (HelpTopic topic : HelpTopic.values()) {
             assertThat(topic.category()).isIn(
                     "Getting Started", "Elements", "Equations",
-                    "Simulation", "Analysis", "Structure");
+                    "Simulation", "Analysis", "Quality", "Structure");
         }
     }
 
@@ -40,6 +40,6 @@ class HelpContentTest {
         assertThat(HelpTopic.values())
                 .extracting(HelpTopic::category)
                 .contains("Getting Started", "Elements", "Equations",
-                        "Simulation", "Analysis", "Structure");
+                        "Simulation", "Analysis", "Quality", "Structure");
     }
 }

@@ -24,6 +24,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import systems.courant.sd.app.canvas.HelpContextResolver;
 import systems.courant.sd.app.canvas.ParameterRowBase;
 import systems.courant.sd.app.canvas.Styles;
 import systems.courant.sd.io.ReferenceDataCsvReader;
@@ -63,6 +64,7 @@ public class CalibrateDialog extends Dialog<CalibrateDialog.Config> {
 
     public CalibrateDialog(List<String> constantNames, List<String> stockNames) {
         this.stockNames = stockNames;
+        HelpContextResolver.addHelpButton(this);
         setTitle("Calibrate");
         setHeaderText("Fit model parameters to observed data");
 

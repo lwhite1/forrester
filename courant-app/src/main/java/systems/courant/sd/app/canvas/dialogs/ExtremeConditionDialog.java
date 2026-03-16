@@ -74,7 +74,7 @@ public class ExtremeConditionDialog extends Dialog<Void> {
     }
 
     public ExtremeConditionDialog(ExtremeConditionResult result) {
-        HelpContextResolver.installF1Handler(this);
+        HelpContextResolver.addHelpButton(this);
         initModality(Modality.NONE);
         setTitle("Extreme Condition Test Results");
         this.currentResult = result;

@@ -281,6 +281,30 @@ class HelpContextResolverTest {
         }
 
         @Test
+        void shouldMapCalibrateDialog() {
+            assertThat(HelpContextResolver.topicForDialog("CalibrateDialog"))
+                    .isEqualTo(HelpTopic.CALIBRATION);
+        }
+
+        @Test
+        void shouldMapValidationDialog() {
+            assertThat(HelpContextResolver.topicForDialog("ValidationDialog"))
+                    .isEqualTo(HelpTopic.VALIDATION);
+        }
+
+        @Test
+        void shouldMapExtremeConditionDialog() {
+            assertThat(HelpContextResolver.topicForDialog("ExtremeConditionDialog"))
+                    .isEqualTo(HelpTopic.EXTREME_CONDITION);
+        }
+
+        @Test
+        void shouldMapColumnMappingDialog() {
+            assertThat(HelpContextResolver.topicForDialog("ColumnMappingDialog"))
+                    .isEqualTo(HelpTopic.COLUMN_MAPPING);
+        }
+
+        @Test
         void shouldReturnOverviewForUnknownDialog() {
             assertThat(HelpContextResolver.topicForDialog("UnknownDialog"))
                     .isEqualTo(HelpTopic.OVERVIEW);

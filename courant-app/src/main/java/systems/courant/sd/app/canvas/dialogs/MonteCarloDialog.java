@@ -53,7 +53,7 @@ public class MonteCarloDialog extends Dialog<MonteCarloDialog.Config> {
     private final TextField seedField;
 
     public MonteCarloDialog(List<String> constantNames) {
-        HelpContextResolver.installF1Handler(this);
+        HelpContextResolver.addHelpButton(this);
         this.constantNames = constantNames;
         setTitle("Monte Carlo Simulation");
         setHeaderText("Configure Monte Carlo parameters");
