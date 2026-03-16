@@ -270,12 +270,12 @@ public class PropertiesPanel extends VBox {
 
     private void commitModelComment(TextArea descArea, ModelEditor editor) {
         String text = descArea.getText().trim();
-        String comment = text.isEmpty() ? null : text;
-        if (!Objects.equals(comment, editor.getModelComment())) {
+        String comment = text.isEmpty() ? "" : text;
+        if (!comment.equals(editor.getModelComment())) {
             if (ctx.getCanvas() != null) {
                 ctx.getCanvas().saveUndoState("Edit description");
             }
-            editor.setModelComment(comment != null ? comment : "");
+            editor.setModelComment(comment);
         }
     }
 

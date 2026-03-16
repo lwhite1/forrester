@@ -141,15 +141,17 @@ class PropertiesPanelUndoFxTest {
         });
         WaitForAsyncUtils.waitForFxEvents();
 
+        int undoDepthBefore = undoManager.undoDepth();
+
         Platform.runLater(() -> {
             @SuppressWarnings("unchecked")
             ComboBox<String> polarityBox = (ComboBox<String>) panel.lookup("#propPolarity");
-            if (polarityBox != null) {
-                polarityBox.getSelectionModel().select(1);
-            }
+            assertThat(polarityBox).as("polarity combo box").isNotNull();
+            polarityBox.getSelectionModel().select(1);
         });
         WaitForAsyncUtils.waitForFxEvents();
 
-        assertThat(undoManager.canUndo()).isTrue();
+        assertThat(undoManager.undoDepth()).isGreaterThan(undoDepthBefore);
+        assertThat(undoManager.undoLabels().getFirst()).contains("polarity");
     }
 }
