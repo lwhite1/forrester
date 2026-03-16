@@ -311,6 +311,30 @@ class DimensionalAnalyzerTest {
         }
 
         @Test
+        void shouldPropagateUnitForSQRTOfOddExponentInput() {
+            // SQRT of a dimensioned quantity with odd exponents should warn
+            // but propagate the original unit for downstream checking
+            TestContext ctx = new TestContext()
+                    .put("Volume", new CompositeUnit(Map.of(Dimension.LENGTH, 3)));
+            var result = analyze("SQRT(Volume)", ctx);
+            assertThat(result.isConsistent()).isFalse();
+            assertThat(result.warnings().getFirst().message()).contains("SQRT");
+            // Should propagate the original unit, not return dimensionless
+            assertThat(result.inferredUnit()).isNotNull();
+            assertThat(result.inferredUnit().isDimensionless()).isFalse();
+        }
+
+        @Test
+        void shouldHalveExponentsForSQRTOfEvenDimensions() {
+            TestContext ctx = new TestContext()
+                    .put("Area", new CompositeUnit(Map.of(Dimension.LENGTH, 2)));
+            var result = analyze("SQRT(Area)", ctx);
+            assertThat(result.isConsistent()).isTrue();
+            assertThat(result.inferredUnit().exponents())
+                    .containsEntry(Dimension.LENGTH, 1);
+        }
+
+        @Test
         void shouldReturnDimensionlessForSTEP() {
             var result = analyze("STEP(10, 5)", new TestContext());
             assertThat(result.inferredUnit().isDimensionless()).isTrue();

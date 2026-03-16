@@ -180,11 +180,13 @@ public class DimensionalAnalyzer {
                         return arg.power(1).divide(arg.power(1)).multiply(
                                 new CompositeUnit(halveExponents(arg.exponents())));
                     }
-                    // Odd exponents — result has fractional dimensions, treat as dimensionless
+                    // Odd exponents — result has fractional dimensions; propagate the
+                    // original unit so downstream operations still produce mismatch warnings
                     if (!arg.isDimensionless()) {
                         warnings.add(new DimensionWarning(
                                 "SQRT of non-even-dimensioned quantity: "
                                 + arg.displayString()));
+                        return arg;
                     }
                 }
             }
