@@ -34,6 +34,25 @@ public final class EquationReferenceManager {
     }
 
     /**
+     * Returns the names of all elements whose equations reference the given token.
+     * Does not modify any equations.
+     */
+    public List<String> findReferencingElements(String token) {
+        List<String> result = new ArrayList<>();
+        for (FlowDef f : flows) {
+            if (f.equation() != null && containsWholeToken(f.equation(), token)) {
+                result.add(f.name());
+            }
+        }
+        for (VariableDef a : variables) {
+            if (a.equation() != null && containsWholeToken(a.equation(), token)) {
+                result.add(a.name());
+            }
+        }
+        return result;
+    }
+
+    /**
      * Replaces all occurrences of {@code oldToken} with {@code newToken} in every
      * flow and variable equation, respecting word boundaries.
      *
