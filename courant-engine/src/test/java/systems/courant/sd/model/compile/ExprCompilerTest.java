@@ -1380,6 +1380,28 @@ class ExprCompilerTest {
         }
 
         @Test
+        void shouldEvaluateConditionBeforeBranchesInNonShortCircuit() {
+            // The condition depends on a value. Both branches have side effects
+            // that could change the value. Condition must be evaluated first.
+            double[] counter = {0};
+            context.addVariable("counter",
+                    new systems.courant.sd.model.Variable("counter",
+                            ItemUnits.THING, () -> counter[0]));
+            context.addVariable("inc",
+                    new systems.courant.sd.model.Variable("inc",
+                            ItemUnits.THING, () -> { counter[0]++; return 1.0; }));
+
+            // counter starts at 0, so condition (counter > 0) is false.
+            // Both branches evaluate 'inc' which increments counter.
+            // Without the fix, branches evaluate first, making counter > 0 true.
+            Formula formula = compiler.compile("IF(counter > 0, inc, inc + 10)");
+            double result = formula.getCurrentValue();
+            // Condition evaluated first (counter=0, false), then branches run.
+            // Should return else branch value: inc + 10 = 1 + 10 = 11
+            assertThat(result).isEqualTo(11.0);
+        }
+
+        @Test
         void shouldDistinguishIfFromIfShort() {
             Expr ifExpr = ExprParser.parse("IF(x > 0, x, 0)");
             Expr ifShortExpr = ExprParser.parse("IF_SHORT(x > 0, x, 0)");

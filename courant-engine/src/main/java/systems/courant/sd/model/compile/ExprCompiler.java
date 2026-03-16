@@ -1080,12 +1080,14 @@ public class ExprCompiler {
             return () -> condition.getAsDouble() != 0
                     ? thenExpr.getAsDouble() : elseExpr.getAsDouble();
         }
-        // IF: evaluate both branches every step so stateful SD functions (SMOOTH, DELAY3,
-        // TREND, etc.) in the untaken branch keep their internal state current.
+        // IF: evaluate condition first, then both branches every step so stateful
+        // SD functions (SMOOTH, DELAY3, TREND, etc.) in the untaken branch keep
+        // their internal state current without influencing the condition result.
         return () -> {
+            double condVal = condition.getAsDouble();
             double thenVal = thenExpr.getAsDouble();
             double elseVal = elseExpr.getAsDouble();
-            return condition.getAsDouble() != 0 ? thenVal : elseVal;
+            return condVal != 0 ? thenVal : elseVal;
         };
     }
 
