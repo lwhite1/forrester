@@ -64,16 +64,25 @@ public final class ReattachController {
      * flow endpoint; if released on empty space, disconnects to cloud.
      *
      * <p>Saves undo state before the reconnection. If the reconnection
-     * is rejected (e.g. self-loop), the caller should discard the
-     * spurious undo entry.
+     * is rejected (returns {@code false}), the caller should discard the
+     * spurious undo entry. If reconnection throws, the undo entry is
+     * automatically discarded via {@code discardUndo} before rethrowing.
      *
+     * @param discardUndo callback to remove the most recent undo entry on exception
      * @return true if the flow was reconnected, false if rejected
      */
     public boolean complete(double worldX, double worldY, CanvasState state,
-                     ModelEditor editor, Runnable saveUndo) {
+                     ModelEditor editor, Runnable saveUndo, Runnable discardUndo) {
         String stockHit = FlowCreationController.hitTestStockOnly(worldX, worldY, state);
         saveUndo.run();
-        boolean reconnected = editor.reconnectFlow(flowName, end, stockHit);
+        boolean reconnected;
+        try {
+            reconnected = editor.reconnectFlow(flowName, end, stockHit);
+        } catch (RuntimeException ex) {
+            discardUndo.run();
+            cancel();
+            throw ex;
+        }
         cancel();
         return reconnected;
     }
