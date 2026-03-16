@@ -20,6 +20,8 @@ public final class ResizeController {
     private ResizeHandle handle;
     private double anchorX;
     private double anchorY;
+    private double lastSignX = 1;
+    private double lastSignY = 1;
     private boolean undoSaved;
 
     public boolean isActive() {
@@ -52,10 +54,10 @@ public final class ResizeController {
                 + SelectionRenderer.SELECTION_PADDING;
 
         switch (handle) {
-            case TOP_LEFT -> { anchorX = cx + halfW; anchorY = cy + halfH; }
-            case TOP_RIGHT -> { anchorX = cx - halfW; anchorY = cy + halfH; }
-            case BOTTOM_LEFT -> { anchorX = cx + halfW; anchorY = cy - halfH; }
-            case BOTTOM_RIGHT -> { anchorX = cx - halfW; anchorY = cy - halfH; }
+            case TOP_LEFT -> { anchorX = cx + halfW; anchorY = cy + halfH; lastSignX = -1; lastSignY = -1; }
+            case TOP_RIGHT -> { anchorX = cx - halfW; anchorY = cy + halfH; lastSignX = 1; lastSignY = -1; }
+            case BOTTOM_LEFT -> { anchorX = cx + halfW; anchorY = cy - halfH; lastSignX = -1; lastSignY = 1; }
+            case BOTTOM_RIGHT -> { anchorX = cx - halfW; anchorY = cy - halfH; lastSignX = 1; lastSignY = 1; }
             default -> throw new IllegalArgumentException("Unknown handle: " + handle);
         }
     }
@@ -83,8 +85,15 @@ public final class ResizeController {
         double newW = Math.max(minW, rawW);
         double newH = Math.max(minH, rawH);
 
-        double edgeX = anchorX + Math.signum(worldX - anchorX) * (newW / 2 + pad);
-        double edgeY = anchorY + Math.signum(worldY - anchorY) * (newH / 2 + pad);
+        double signX = Math.signum(worldX - anchorX);
+        double signY = Math.signum(worldY - anchorY);
+        // When the cursor is exactly on the anchor axis, signum returns 0 which
+        // would snap the element to the anchor — use the last non-zero direction.
+        if (signX != 0) { lastSignX = signX; } else { signX = lastSignX; }
+        if (signY != 0) { lastSignY = signY; } else { signY = lastSignY; }
+
+        double edgeX = anchorX + signX * (newW / 2 + pad);
+        double edgeY = anchorY + signY * (newH / 2 + pad);
         double newCx = (anchorX + edgeX) / 2;
         double newCy = (anchorY + edgeY) / 2;
 
