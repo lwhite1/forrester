@@ -38,7 +38,7 @@ public class CanvasState {
     private final Map<String, ElementType> types = new LinkedHashMap<>();
     private final Set<String> selection = new LinkedHashSet<>();
     private final SequencedSet<String> drawOrder = new LinkedHashSet<>();
-    private List<String> drawOrderCache;
+    private volatile List<String> drawOrderCache;
     private String viewName = DEFAULT_VIEW_NAME;
 
     /**
