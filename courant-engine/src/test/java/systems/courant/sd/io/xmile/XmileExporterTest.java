@@ -18,6 +18,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @DisplayName("XmileExporter")
 class XmileExporterTest {
@@ -315,6 +316,28 @@ class XmileExporterTest {
             assertThat(xml).contains("name=\"InnerModule\"");
             assertThat(xml).contains("<module");
             assertThat(xml).contains("<connect");
+        }
+
+        @Test
+        void shouldThrowWhenModuleNestingExceedsDepthLimit() {
+            // Build a chain of 52 nested modules (exceeds limit of 50)
+            ModelDefinition current = new ModelDefinitionBuilder()
+                    .name("Leaf")
+                    .constant("x", 1, null)
+                    .build();
+            for (int i = 51; i >= 0; i--) {
+                current = new ModelDefinitionBuilder()
+                        .name("Level_" + i)
+                        .defaultSimulation("Day", 10, "Day")
+                        .module(new ModuleInstanceDef("mod_" + (i + 1), current,
+                                Map.of(), Map.of()))
+                        .build();
+            }
+
+            ModelDefinition root = current;
+            assertThatThrownBy(() -> XmileExporter.toXmile(root))
+                    .isInstanceOf(IllegalStateException.class)
+                    .hasMessageContaining("Module nesting depth exceeds maximum of 50");
         }
 
         @Test
