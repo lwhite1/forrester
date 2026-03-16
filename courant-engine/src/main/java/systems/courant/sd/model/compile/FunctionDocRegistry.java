@@ -503,14 +503,14 @@ public final class FunctionDocRegistry {
                 List.of("LOOKUP"));
 
         // ── Conditional ─────────────────────────────────────────────────
-        add(m, "IF", "IF condition THEN a ELSE b", "Conditional expression",
+        add(m, "IF", "IF(condition, a, b)", "Conditional expression",
                 "Special",
                 List.of(p("condition", "expression that evaluates to true (non-zero) or false (zero)"),
                         p("a", "value returned when condition is true"),
                         p("b", "value returned when condition is false")),
                 "Evaluates the condition and returns 'a' if true (non-zero), 'b' if false (zero). "
                         + "Comparisons return 1 for true and 0 for false.",
-                "IF Population > 1000 THEN Growth_Rate ELSE 0",
+                "IF(Population > 1000, Growth_Rate, 0)",
                 List.of());
 
         DOCS = Collections.unmodifiableMap(m);
