@@ -1165,7 +1165,7 @@ public class VensimImporter implements ModelImporter {
 
         points = deduplicateLookupPoints(points, displayName, warnings);
         builder.lookupTable(new LookupTableDef(displayName, comment,
-                points[0], points[1], "LINEAR"));
+                points[0], points[1], "LINEAR", unit));
         lookupNames.add(eqName);
     }
 

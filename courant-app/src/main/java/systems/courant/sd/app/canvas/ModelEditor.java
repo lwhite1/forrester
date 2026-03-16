@@ -749,7 +749,19 @@ public class ModelEditor {
         checkFxThread();
         return updateInList(lookupTables, name, LookupTableDef::name,
                 lt -> new LookupTableDef(name, comment,
-                        lt.xValues(), lt.yValues(), lt.interpolation()));
+                        lt.xValues(), lt.yValues(), lt.interpolation(), lt.unit()));
+    }
+
+    /**
+     * Sets the unit of a lookup table.
+     *
+     * @return true if the lookup table was found and updated
+     */
+    public boolean setLookupUnit(String name, String unit) {
+        checkFxThread();
+        return updateInList(lookupTables, name, LookupTableDef::name,
+                lt -> new LookupTableDef(lt.name(), lt.comment(),
+                        lt.xValues(), lt.yValues(), lt.interpolation(), unit));
     }
 
     private <T> boolean renameInList(List<T> list, String oldName, String newName,

@@ -79,6 +79,12 @@ public class LookupForm implements ElementForm {
         ctx.addFieldRow(row++, "Description", commentArea,
                 "Documentation for this element");
 
+        // Unit dropdown
+        ComboBox<String> unitBox = ctx.createUnitComboBox(lookup.unit());
+        ctx.addComboCommitHandlers(unitBox, this::commitUnit);
+        ctx.addFieldRow(row++, "Unit", unitBox,
+                "The unit of measurement for the lookup output");
+
         // Interpolation dropdown
         ComboBox<String> interpBox = new ComboBox<>();
         interpBox.getItems().addAll("LINEAR", "SPLINE");
@@ -91,7 +97,7 @@ public class LookupForm implements ElementForm {
                     if (!Objects.equals(newInterp, lt.interpolation())) {
                         LookupTableDef updated = new LookupTableDef(
                                 ctx.getElementName(), lt.comment(),
-                                lt.xValues(), lt.yValues(), newInterp);
+                                lt.xValues(), lt.yValues(), newInterp, lt.unit());
                         ctx.canvas.applyMutation(() -> ctx.editor.setLookupTable(ctx.getElementName(), updated));
                         replaceChart(lt.xValues(), lt.yValues(), newInterp);
                     }
@@ -418,7 +424,7 @@ public class LookupForm implements ElementForm {
         System.arraycopy(oldY, insertAt, newY, insertAt + 1, oldY.length - insertAt);
 
         LookupTableDef updated = new LookupTableDef(
-                ctx.getElementName(), lt.comment(), newX, newY, lt.interpolation());
+                ctx.getElementName(), lt.comment(), newX, newY, lt.interpolation(), lt.unit());
         ctx.canvas.applyMutation(() -> ctx.editor.setLookupTable(ctx.getElementName(), updated));
     }
 
@@ -440,7 +446,7 @@ public class LookupForm implements ElementForm {
         System.arraycopy(oldY, 0, newY, 0, index);
         System.arraycopy(oldY, index + 1, newY, index, oldY.length - index - 1);
         LookupTableDef updated = new LookupTableDef(
-                ctx.getElementName(), lt.comment(), newX, newY, lt.interpolation());
+                ctx.getElementName(), lt.comment(), newX, newY, lt.interpolation(), lt.unit());
         ctx.canvas.applyMutation(() -> ctx.editor.setLookupTable(ctx.getElementName(), updated));
     }
 
@@ -469,7 +475,7 @@ public class LookupForm implements ElementForm {
             }
         }
         LookupTableDef updated = new LookupTableDef(
-                ctx.getElementName(), lt.comment(), newXs, newYs, lt.interpolation());
+                ctx.getElementName(), lt.comment(), newXs, newYs, lt.interpolation(), lt.unit());
         ctx.canvas.applyMutation(() -> ctx.editor.setLookupTable(ctx.getElementName(), updated));
     }
 
@@ -518,7 +524,7 @@ public class LookupForm implements ElementForm {
                 }
             }
             LookupTableDef updated = new LookupTableDef(
-                    ctx.getElementName(), lt.comment(), newXs, newYs, lt.interpolation());
+                    ctx.getElementName(), lt.comment(), newXs, newYs, lt.interpolation(), lt.unit());
             ctx.canvas.applyMutation(() -> ctx.editor.setLookupTable(ctx.getElementName(), updated));
         } catch (NumberFormatException ignored) {
             xField.setText(ElementRenderer.formatValue(lt.xValues()[index]));
@@ -546,7 +552,7 @@ public class LookupForm implements ElementForm {
         newX[oldX.length] = oldX[oldX.length - 1] + 1;
         newY[oldY.length] = oldY[oldY.length - 1];
         LookupTableDef updated = new LookupTableDef(
-                ctx.getElementName(), lt.comment(), newX, newY, lt.interpolation());
+                ctx.getElementName(), lt.comment(), newX, newY, lt.interpolation(), lt.unit());
         ctx.canvas.applyMutation(() -> ctx.editor.setLookupTable(ctx.getElementName(), updated));
     }
 
@@ -563,7 +569,17 @@ public class LookupForm implements ElementForm {
         System.arraycopy(oldX, 0, newX, 0, newX.length);
         System.arraycopy(oldY, 0, newY, 0, newY.length);
         LookupTableDef updated = new LookupTableDef(
-                ctx.getElementName(), lt.comment(), newX, newY, lt.interpolation());
+                ctx.getElementName(), lt.comment(), newX, newY, lt.interpolation(), lt.unit());
         ctx.canvas.applyMutation(() -> ctx.editor.setLookupTable(ctx.getElementName(), updated));
+    }
+
+    private void commitUnit(ComboBox<String> box) {
+        String unit = box.getValue() != null ? box.getValue().trim() : "";
+        String normalizedUnit = unit.isEmpty() ? null : unit;
+        Optional<LookupTableDef> ltOpt = ctx.editor.getLookupTableByName(ctx.getElementName());
+        if (ltOpt.isPresent() && Objects.equals(normalizedUnit, ltOpt.get().unit())) {
+            return;
+        }
+        ctx.canvas.applyMutation(() -> ctx.editor.setLookupUnit(ctx.getElementName(), normalizedUnit));
     }
 }
