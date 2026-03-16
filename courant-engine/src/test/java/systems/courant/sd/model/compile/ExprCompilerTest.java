@@ -611,6 +611,21 @@ class ExprCompilerTest {
         }
 
         @Test
+        void shouldUseHalfToEvenRoundingForROUND() {
+            // Banker's rounding: 0.5 rounds to nearest even
+            assertThat(compiler.compile("ROUND(2.5)").getCurrentValue()).isEqualTo(2.0);
+            assertThat(compiler.compile("ROUND(3.5)").getCurrentValue()).isEqualTo(4.0);
+            assertThat(compiler.compile("ROUND(4.5)").getCurrentValue()).isEqualTo(4.0);
+            assertThat(compiler.compile("ROUND(-2.5)").getCurrentValue()).isEqualTo(-2.0);
+        }
+
+        @Test
+        void shouldHandleLargeValuesInROUND() {
+            // Math.rint returns double, so no long overflow for values > Long.MAX_VALUE
+            assertThat(compiler.compile("ROUND(1e19)").getCurrentValue()).isEqualTo(1e19);
+        }
+
+        @Test
         void shouldCompileMODULO() {
             Formula formula = compiler.compile("MODULO(7, 3)");
             assertThat(formula.getCurrentValue()).isCloseTo(1.0, within(1e-10));
