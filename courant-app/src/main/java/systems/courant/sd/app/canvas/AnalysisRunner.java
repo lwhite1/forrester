@@ -30,6 +30,7 @@ public class AnalysisRunner {
     private final StatusBar statusBar;
     private final BiConsumer<String, String> errorHandler;
     private volatile Future<?> currentTask;
+    private volatile boolean shutdownRequested;
 
     public AnalysisRunner(StatusBar statusBar,
                           BiConsumer<String, String> errorHandler) {
@@ -53,17 +54,21 @@ public class AnalysisRunner {
         currentTask = executor.submit(() -> {
             try {
                 T result = task.call();
-                Platform.runLater(() -> {
-                    statusBar.clearProgress();
-                    onSuccess.accept(result);
-                });
+                if (!shutdownRequested) {
+                    Platform.runLater(() -> {
+                        statusBar.clearProgress();
+                        onSuccess.accept(result);
+                    });
+                }
             } catch (Exception e) { // Callable.call() declares checked Exception
                 log.error("{}: {}", errorTitle, e.toString(), e);
-                Platform.runLater(() -> {
-                    statusBar.clearProgress();
-                    errorHandler.accept(errorTitle,
-                            e.getMessage() != null ? e.getMessage() : e.toString());
-                });
+                if (!shutdownRequested) {
+                    Platform.runLater(() -> {
+                        statusBar.clearProgress();
+                        errorHandler.accept(errorTitle,
+                                e.getMessage() != null ? e.getMessage() : e.toString());
+                    });
+                }
             }
         });
     }
@@ -76,11 +81,15 @@ public class AnalysisRunner {
         currentTask = executor.submit(() -> {
             try {
                 T result = task.call();
-                Platform.runLater(() -> onSuccess.accept(result));
+                if (!shutdownRequested) {
+                    Platform.runLater(() -> onSuccess.accept(result));
+                }
             } catch (Exception e) { // Callable.call() declares checked Exception
                 log.error("{}: {}", errorTitle, e.toString(), e);
-                Platform.runLater(() -> errorHandler.accept(errorTitle,
-                        e.getMessage() != null ? e.getMessage() : e.toString()));
+                if (!shutdownRequested) {
+                    Platform.runLater(() -> errorHandler.accept(errorTitle,
+                            e.getMessage() != null ? e.getMessage() : e.toString()));
+                }
             }
         });
     }
@@ -96,6 +105,7 @@ public class AnalysisRunner {
      * Shuts down the thread pool. Call when the window closes.
      */
     public void shutdown() {
+        shutdownRequested = true;
         executor.shutdownNow();
         try {
             if (!executor.awaitTermination(2, TimeUnit.SECONDS)) {
