@@ -15,6 +15,7 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @DisplayName("ReattachController")
 class ReattachControllerTest {
@@ -52,11 +53,11 @@ class ReattachControllerTest {
 
         @Test
         void shouldReturnTrueWhenReconnectSucceeds() {
-            // Drop on empty space (cloud) — disconnects source, which should succeed
             AtomicBoolean undoSaved = new AtomicBoolean(false);
 
             boolean result = controller.complete(
-                    500, 500, canvasState, editor, () -> undoSaved.set(true));
+                    500, 500, canvasState, editor,
+                    () -> undoSaved.set(true), () -> {});
 
             assertThat(result).isTrue();
             assertThat(undoSaved).isTrue();
@@ -64,12 +65,11 @@ class ReattachControllerTest {
 
         @Test
         void shouldReturnFalseWhenSelfLoopRejected() {
-            // Drop source end on Sink — the sink is already Sink, so reconnecting
-            // source to Sink would create a self-loop (both ends on same stock)
             AtomicBoolean undoSaved = new AtomicBoolean(false);
 
             boolean result = controller.complete(
-                    300, 200, canvasState, editor, () -> undoSaved.set(true));
+                    300, 200, canvasState, editor,
+                    () -> undoSaved.set(true), () -> {});
 
             assertThat(result).isFalse();
             assertThat(undoSaved).isTrue();
@@ -77,19 +77,64 @@ class ReattachControllerTest {
 
         @Test
         void shouldCallSaveUndoBeforeReconnect() {
-            // Verify saveUndo is always called (so caller can discard on failure)
             AtomicBoolean undoSaved = new AtomicBoolean(false);
 
-            controller.complete(500, 500, canvasState, editor, () -> undoSaved.set(true));
+            controller.complete(500, 500, canvasState, editor,
+                    () -> undoSaved.set(true), () -> {});
 
             assertThat(undoSaved).isTrue();
         }
 
         @Test
         void shouldDeactivateAfterComplete() {
-            controller.complete(500, 500, canvasState, editor, () -> {});
+            controller.complete(500, 500, canvasState, editor, () -> {}, () -> {});
 
             assertThat(controller.isActive()).isFalse();
+        }
+
+        @Test
+        void shouldDiscardUndoAndDeactivateOnException() {
+            AtomicBoolean undoSaved = new AtomicBoolean(false);
+            AtomicBoolean undoDiscarded = new AtomicBoolean(false);
+
+            ModelEditor throwingEditor = new ModelEditor() {
+                @Override
+                public boolean reconnectFlow(String flowName,
+                        FlowEndpointCalculator.FlowEnd end, String targetStock) {
+                    throw new IllegalStateException("reconnect failed");
+                }
+            };
+
+            assertThatThrownBy(() -> controller.complete(
+                    500, 500, canvasState, throwingEditor,
+                    () -> undoSaved.set(true),
+                    () -> undoDiscarded.set(true)))
+                    .isInstanceOf(IllegalStateException.class)
+                    .hasMessage("reconnect failed");
+
+            assertThat(undoSaved).isTrue();
+            assertThat(undoDiscarded).isTrue();
+            assertThat(controller.isActive()).isFalse();
+        }
+
+        @Test
+        void shouldNotDiscardUndoOnSuccess() {
+            AtomicBoolean undoDiscarded = new AtomicBoolean(false);
+
+            controller.complete(500, 500, canvasState, editor,
+                    () -> {}, () -> undoDiscarded.set(true));
+
+            assertThat(undoDiscarded).isFalse();
+        }
+
+        @Test
+        void shouldNotDiscardUndoOnRejection() {
+            AtomicBoolean undoDiscarded = new AtomicBoolean(false);
+
+            controller.complete(300, 200, canvasState, editor,
+                    () -> {}, () -> undoDiscarded.set(true));
+
+            assertThat(undoDiscarded).isFalse();
         }
     }
 }
