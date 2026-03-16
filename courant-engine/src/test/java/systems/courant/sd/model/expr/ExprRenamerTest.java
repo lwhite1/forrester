@@ -89,6 +89,17 @@ class ExprRenamerTest {
         }
 
         @Test
+        void shouldNotRenameExtendedBuiltinFunctions() {
+            // Verify functions added to BUILTIN_FUNCTIONS set are protected from renaming
+            assertThat(renameInEquation("ARCSIN(x)", "ARCSIN", "foo"))
+                    .isEqualTo("ARCSIN(x)");
+            assertThat(renameInEquation("XIDZ(a, b, 0)", "XIDZ", "foo"))
+                    .isEqualTo("XIDZ(a, b, 0)");
+            assertThat(renameInEquation("VMIN(a, b)", "VMIN", "foo"))
+                    .isEqualTo("VMIN(a, b)");
+        }
+
+        @Test
         void shouldRenameLookupArgumentAndName() {
             assertThat(renameInEquation("my_table(my_input)", "my_table", "new_table"))
                     .isEqualTo("new_table(my_input)");

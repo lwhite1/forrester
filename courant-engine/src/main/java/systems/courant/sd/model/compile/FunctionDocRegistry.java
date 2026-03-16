@@ -344,7 +344,18 @@ public final class FunctionDocRegistry {
                         + "Produces an immediate partial response that decays exponentially. "
                         + "The average delay equals delay_time.",
                 "DELAY1(Orders, 5) → orders delayed by ~5 time units (exponential)",
-                List.of("DELAY3", "SMOOTH", "DELAY_FIXED"));
+                List.of("DELAY1I", "DELAY3", "SMOOTH", "DELAY_FIXED"));
+
+        add(m, "DELAY1I", "DELAY1I(input, delay_time, initial)",
+                "First-order material delay with initial value",
+                "SD",
+                List.of(p("input", "the value to delay"),
+                        p("delay_time", "average delay duration"),
+                        p("initial", "initial output value at time zero")),
+                "First-order exponential delay with a caller-specified initial value. "
+                        + "Behaves like DELAY1 but starts from 'initial' instead of the first input value.",
+                "DELAY1I(Orders, 5, 100) → first-order delay starting at 100",
+                List.of("DELAY1", "DELAY3I", "SMOOTHI"));
 
         add(m, "DELAY3", "DELAY3(input, delay_time [, initial])", "Third-order material delay",
                 "SD",
@@ -355,7 +366,18 @@ public final class FunctionDocRegistry {
                         + "3 first-order delays). The output represents a smoothed, lagged "
                         + "version of the input. The average delay equals delay_time.",
                 "DELAY3(Orders, 5) → orders delayed by ~5 time units (smoothed)",
-                List.of("SMOOTH", "DELAY_FIXED"));
+                List.of("DELAY3I", "SMOOTH", "DELAY_FIXED"));
+
+        add(m, "DELAY3I", "DELAY3I(input, delay_time, initial)",
+                "Third-order material delay with initial value",
+                "SD",
+                List.of(p("input", "the value to delay"),
+                        p("delay_time", "average delay duration"),
+                        p("initial", "initial output value at time zero")),
+                "Third-order exponential delay with a caller-specified initial value. "
+                        + "Behaves like DELAY3 but starts from 'initial' instead of the first input value.",
+                "DELAY3I(Orders, 5, 100) → third-order delay starting at 100",
+                List.of("DELAY3", "DELAY1I", "SMOOTH3I"));
 
         add(m, "DELAY_FIXED", "DELAY_FIXED(input, delay_time, initial)",
                 "Fixed pipeline delay (exact)",
@@ -393,14 +415,20 @@ public final class FunctionDocRegistry {
                 "FORECAST(Sales, 4, 8, 0) → predicted Sales 8 periods ahead",
                 List.of("TREND", "SMOOTH"));
 
-        add(m, "NPV", "NPV(stream, discount_rate [, factor])", "Net present value",
+        add(m, "NPV", "NPV(stream, discount_rate [, factor] | [, initial, factor])",
+                "Net present value",
                 "SD",
                 List.of(p("stream", "cash flow per time step"),
                         p("discount_rate", "discount rate per time unit"),
+                        p("initial", "(optional, 4-arg form) initial accumulated value; defaults to 0"),
                         p("factor", "(optional) initial accumulation factor; defaults to 1")),
                 "Accumulates the discounted present value of a stream of payments. "
-                        + "Each step, the stream value is discounted back to the initial time.",
-                "NPV(Revenue, 0.1) → cumulative present value of Revenue at 10% rate",
+                        + "Each step, the stream value is discounted back to the initial time. "
+                        + "With 3 arguments, the third is the accumulation factor. "
+                        + "With 4 arguments, the third is an initial value and the fourth is the factor.",
+                "NPV(Revenue, 0.1) → cumulative present value of Revenue at 10% rate\n"
+                        + "NPV(Revenue, 0.1, 2) → same with factor=2\n"
+                        + "NPV(Revenue, 0.1, 500, 1) → starting from initial=500",
                 List.of("TREND", "FORECAST"));
 
         add(m, "LOOKUP", "LOOKUP(table_name, input)", "Table lookup with interpolation",
@@ -434,6 +462,45 @@ public final class FunctionDocRegistry {
                 "Generates a uniformly distributed random number between min and max.",
                 "RANDOM_UNIFORM(0, 1, 0) → uniform random in [0, 1]",
                 List.of("RANDOM_NORMAL"));
+
+        // ── Advanced SD functions ──────────────────────────────────────
+        add(m, "SAMPLE_IF_TRUE", "SAMPLE_IF_TRUE(condition, input, initial)",
+                "Sample input when condition is true",
+                "SD",
+                List.of(p("condition", "expression that evaluates to true (non-zero) or false (zero)"),
+                        p("input", "value to sample when condition is true"),
+                        p("initial", "initial output value before the first true condition")),
+                "Returns the most recent value of 'input' at a time when 'condition' was true. "
+                        + "Before the condition first becomes true, returns 'initial'. Once the "
+                        + "condition becomes true, the output latches to the current input and holds "
+                        + "that value until the condition is true again.",
+                "SAMPLE_IF_TRUE(Month = 1, Revenue, 0) → Revenue sampled each January",
+                List.of("IF", "SMOOTH"));
+
+        add(m, "FIND_ZERO", "FIND_ZERO(expression, variable, low, high)",
+                "Find zero of an expression by bisection",
+                "SD",
+                List.of(p("expression", "expression that depends on the variable"),
+                        p("variable", "name of the loop variable to solve for"),
+                        p("low", "lower bound of the search interval"),
+                        p("high", "upper bound of the search interval")),
+                "Finds the value of 'variable' in the interval [low, high] that makes "
+                        + "'expression' equal to zero, using bisection. The variable is temporarily "
+                        + "bound to trial values during the search; it does not need to be a model element.",
+                "FIND_ZERO(Supply - Demand, Price, 0, 100) → equilibrium price",
+                List.of("XIDZ", "ZIDZ"));
+
+        add(m, "LOOKUP_AREA", "LOOKUP_AREA(table_name, low, high)",
+                "Area under a lookup table curve",
+                "SD",
+                List.of(p("table_name", "name of a lookup table defined in the model"),
+                        p("low", "lower x-bound of integration"),
+                        p("high", "upper x-bound of integration")),
+                "Computes the area under the lookup table's curve between 'low' and 'high' "
+                        + "using trapezoidal integration. Useful for computing cumulative effects "
+                        + "over a range of input values.",
+                "LOOKUP_AREA(Effect_Curve, 0, 10) → area under Effect_Curve from x=0 to x=10",
+                List.of("LOOKUP"));
 
         // ── Conditional ─────────────────────────────────────────────────
         add(m, "IF", "IF condition THEN a ELSE b", "Conditional expression",

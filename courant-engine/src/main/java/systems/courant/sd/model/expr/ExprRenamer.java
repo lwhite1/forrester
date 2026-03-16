@@ -17,12 +17,18 @@ public final class ExprRenamer {
     /** Built-in function names that should never be renamed. */
     private static final Set<String> BUILTIN_FUNCTIONS = Set.of(
             "ABS", "SQRT", "LN", "EXP", "LOG", "SIN", "COS", "TAN",
-            "INT", "ROUND", "MODULO", "POWER", "MIN", "MAX", "SUM", "MEAN",
-            "SMOOTH", "SMOOTH3", "DELAY1", "DELAY3", "DELAY_FIXED",
+            "ARCSIN", "ARCCOS", "ARCTAN", "SIGN", "PI",
+            "INT", "ROUND", "MODULO", "QUANTUM", "POWER", "MIN", "MAX",
+            "SUM", "MEAN", "VMIN", "VMAX", "PROD",
+            "XIDZ", "ZIDZ",
+            "SMOOTH", "SMOOTHI", "SMOOTH3", "SMOOTH3I",
+            "DELAY1", "DELAY1I", "DELAY3", "DELAY3I", "DELAY_FIXED",
             "STEP", "RAMP", "PULSE", "PULSE_TRAIN",
             "TREND", "FORECAST", "NPV",
             "RANDOM_NORMAL", "RANDOM_UNIFORM",
-            "LOOKUP", "IF", "TIME", "DT"
+            "SAMPLE_IF_TRUE", "FIND_ZERO", "LOOKUP_AREA",
+            "LOOKUP", "IF", "TIME", "DT", "INITIAL",
+            "TRUE", "FALSE", "NOT", "OR", "AND"
     );
 
     private ExprRenamer() {
