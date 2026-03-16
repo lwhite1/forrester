@@ -575,13 +575,6 @@ public final class SvgExporter {
         double y = cy - height / 2;
         double r = LayoutMetrics.COMMENT_CORNER_RADIUS;
 
-        // Fill — no full border
-        w.printf(Locale.US,
-                "  <rect x=\"%.2f\" y=\"%.2f\" width=\"%.2f\" height=\"%.2f\" " +
-                "rx=\"%.1f\" ry=\"%.1f\" fill=\"%s\"/>%n",
-                x, y, width, height, r, r,
-                svgColor(ColorPalette.COMMENT_FILL));
-
         // Left accent bar
         w.printf(Locale.US,
                 "  <rect x=\"%.2f\" y=\"%.2f\" width=\"%.1f\" height=\"%.2f\" " +

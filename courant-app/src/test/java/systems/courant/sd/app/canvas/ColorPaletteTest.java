@@ -80,7 +80,6 @@ class ColorPaletteTest {
             assertThat(ColorPalette.TEXT).isNotNull();
             assertThat(ColorPalette.TEXT_SECONDARY).isNotNull();
             assertThat(ColorPalette.CLOUD).isNotNull();
-            assertThat(ColorPalette.COMMENT_FILL).isNotNull();
             assertThat(ColorPalette.COMMENT_BORDER).isNotNull();
             assertThat(ColorPalette.DELAY_BADGE).isNotNull();
             assertThat(ColorPalette.VARIABLE_FILL).isNotNull();

@@ -64,7 +64,6 @@ public final class ColorPalette {
     public static final Color HOVER_FILL = Color.web("#E8ECF0");
 
     // Comment annotation colors
-    public static final Color COMMENT_FILL = Color.web("#F0F1F3");
     public static final Color COMMENT_BORDER = Color.web("#95A5A6", 0.7);
     public static final Color COMMENT_TEXT = Color.web("#5D6D7E");
     public static final Color COMMENT_ACCENT = Color.web("#95A5A6", 0.7);
