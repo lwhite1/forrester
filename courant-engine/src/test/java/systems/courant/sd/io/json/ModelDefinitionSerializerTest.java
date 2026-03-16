@@ -480,6 +480,27 @@ class ModelDefinitionSerializerTest {
             ModelDefinition roundTripped = serializer.fromJson(json);
             assertThat(roundTripped.stocks()).hasSize(3);
         }
+
+        @Test
+        @DisplayName("should reject serialization of deeply nested modules beyond depth limit")
+        void shouldRejectDeeplyNestedModuleSerialization() {
+            // Build a model with 55 levels of nested modules (exceeds limit of 50)
+            ModelDefinition leaf = new ModelDefinitionBuilder()
+                    .name("leaf")
+                    .variable("x", "1", null)
+                    .build();
+            ModelDefinition current = leaf;
+            for (int i = 0; i < 55; i++) {
+                current = new ModelDefinitionBuilder()
+                        .name("level" + i)
+                        .module("child", current, Map.of(), Map.of())
+                        .build();
+            }
+            ModelDefinition deepModel = current;
+            assertThatThrownBy(() -> serializer.toJson(deepModel))
+                    .isInstanceOf(IllegalArgumentException.class)
+                    .hasMessageContaining("nesting depth");
+        }
     }
 
     private ModelDefinition buildSIR() {
