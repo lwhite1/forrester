@@ -60,4 +60,28 @@ public final class FormatUtils {
         }
         return -1;
     }
+
+    /**
+     * Finds the index of the closing parenthesis that matches the opening
+     * parenthesis at {@code openParenPos}, respecting nested parentheses.
+     *
+     * @param content      the string to search
+     * @param openParenPos the index of the opening parenthesis
+     * @return the index of the matching closing parenthesis, or {@code -1} if not found
+     */
+    public static int findMatchingCloseParen(String content, int openParenPos) {
+        int depth = 1;
+        for (int i = openParenPos + 1; i < content.length(); i++) {
+            char c = content.charAt(i);
+            if (c == '(') {
+                depth++;
+            } else if (c == ')') {
+                depth--;
+                if (depth == 0) {
+                    return i;
+                }
+            }
+        }
+        return -1;
+    }
 }

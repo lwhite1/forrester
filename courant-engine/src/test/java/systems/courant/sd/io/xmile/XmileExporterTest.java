@@ -368,5 +368,23 @@ class XmileExporterTest {
             assertThat(XmileExporter.extractLookupReference("a + b")).isEmpty();
             assertThat(XmileExporter.extractLookupInput("a + b")).isEmpty();
         }
+
+        @Test
+        void shouldExtractInputWithTrailingExpression() {
+            // Issue #631: lastIndexOf(')') would grab ') + foo(y' instead of just 'x'
+            assertThat(XmileExporter.extractLookupInput("LOOKUP(name, x) + foo(y)"))
+                    .hasValue("x");
+        }
+
+        @Test
+        void shouldExtractInputWithNestedParens() {
+            assertThat(XmileExporter.extractLookupInput("LOOKUP(my_table, max(a, b))"))
+                    .hasValue("max(a, b)");
+        }
+
+        @Test
+        void shouldReturnEmptyForUnmatchedParen() {
+            assertThat(XmileExporter.extractLookupInput("LOOKUP(name, x")).isEmpty();
+        }
     }
 }

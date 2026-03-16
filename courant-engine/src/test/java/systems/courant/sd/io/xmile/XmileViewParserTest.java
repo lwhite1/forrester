@@ -123,6 +123,32 @@ class XmileViewParserTest {
         assertThat(views.get(0).name()).isEqualTo("View 1");
     }
 
+    @Test
+    void shouldIgnoreNestedDescendantElements() throws Exception {
+        // Issue #635: getElementsByTagName searches all descendants, so nested
+        // elements inside groups would be duplicated in the parent view
+        String xml = """
+                <views xmlns="http://docs.oasis-open.org/xmile/ns/XMILE/v1.0">
+                  <view name="Main">
+                    <stock name="Population" x="100" y="200"/>
+                    <group>
+                      <stock name="Nested" x="300" y="400"/>
+                    </group>
+                  </view>
+                </views>
+                """;
+
+        Element viewsElem = parseElement(xml);
+        List<String> warnings = new ArrayList<>();
+        List<ViewDef> views = XmileViewParser.parse(
+                viewsElem, Set.of("Population", "Nested"), Set.of(), Set.of(), warnings);
+
+        assertThat(views).hasSize(1);
+        // Only "Population" is a direct child; "Nested" is inside <group> and must be excluded
+        assertThat(views.get(0).elements()).hasSize(1);
+        assertThat(views.get(0).elements().get(0).name()).isEqualTo("Population");
+    }
+
     private static Element parseElement(String xml) throws Exception {
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
         factory.setNamespaceAware(true);

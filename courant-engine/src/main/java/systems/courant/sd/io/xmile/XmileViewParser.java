@@ -9,7 +9,7 @@ import systems.courant.sd.model.def.ViewDef;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Element;
-import org.w3c.dom.NodeList;
+import org.w3c.dom.Node;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -43,25 +43,11 @@ public final class XmileViewParser {
                                        Set<String> flowNames, Set<String> lookupNames,
                                        List<String> warnings) {
         List<ViewDef> views = new ArrayList<>();
-        NodeList viewNodes = viewsElement.getElementsByTagNameNS(
-                XmileConstants.NAMESPACE_URI, XmileConstants.VIEW);
 
-        // Also try without namespace for compatibility
-        if (viewNodes.getLength() == 0) {
-            viewNodes = viewsElement.getElementsByTagName(XmileConstants.VIEW);
-        }
-
-        for (int i = 0; i < viewNodes.getLength(); i++) {
-            if (!(viewNodes.item(i) instanceof Element viewElem)) {
-                continue;
-            }
-            // Only parse direct children of <views>
-            if (viewElem.getParentNode() != viewsElement) {
-                continue;
-            }
+        for (Element viewElem : getDirectChildren(viewsElement, XmileConstants.VIEW)) {
             String viewName = viewElem.getAttribute(XmileConstants.ATTR_NAME);
-            if (viewName == null || viewName.isBlank()) {
-                viewName = "View " + (i + 1);
+            if (viewName.isBlank()) {
+                viewName = "View " + (views.size() + 1);
             }
 
             List<ElementPlacement> elements = new ArrayList<>();
@@ -90,18 +76,9 @@ public final class XmileViewParser {
                                        List<ElementPlacement> elements,
                                        Set<String> stockNames, Set<String> flowNames,
                                        Set<String> lookupNames) {
-        NodeList nodes = viewElem.getElementsByTagNameNS(
-                XmileConstants.NAMESPACE_URI, tagName);
-        if (nodes.getLength() == 0) {
-            nodes = viewElem.getElementsByTagName(tagName);
-        }
-
-        for (int i = 0; i < nodes.getLength(); i++) {
-            if (!(nodes.item(i) instanceof Element elem)) {
-                continue;
-            }
+        for (Element elem : getDirectChildren(viewElem, tagName)) {
             String name = elem.getAttribute(XmileConstants.ATTR_NAME);
-            if (name == null || name.isBlank()) {
+            if (name.isBlank()) {
                 continue;
             }
 
@@ -126,16 +103,7 @@ public final class XmileViewParser {
     }
 
     private static void parseConnectors(Element viewElem, List<ConnectorRoute> connectors) {
-        NodeList nodes = viewElem.getElementsByTagNameNS(
-                XmileConstants.NAMESPACE_URI, XmileConstants.CONNECTOR);
-        if (nodes.getLength() == 0) {
-            nodes = viewElem.getElementsByTagName(XmileConstants.CONNECTOR);
-        }
-
-        for (int i = 0; i < nodes.getLength(); i++) {
-            if (!(nodes.item(i) instanceof Element elem)) {
-                continue;
-            }
+        for (Element elem : getDirectChildren(viewElem, XmileConstants.CONNECTOR)) {
             String from = getChildText(elem, XmileConstants.FROM).orElse(null);
             String to = getChildText(elem, XmileConstants.TO).orElse(null);
             if (from == null || from.isBlank() || to == null || to.isBlank()) {
@@ -148,18 +116,9 @@ public final class XmileViewParser {
     }
 
     private static void parseFlowRoutes(Element viewElem, List<FlowRoute> flowRoutes) {
-        NodeList nodes = viewElem.getElementsByTagNameNS(
-                XmileConstants.NAMESPACE_URI, XmileConstants.FLOW);
-        if (nodes.getLength() == 0) {
-            nodes = viewElem.getElementsByTagName(XmileConstants.FLOW);
-        }
-
-        for (int i = 0; i < nodes.getLength(); i++) {
-            if (!(nodes.item(i) instanceof Element elem)) {
-                continue;
-            }
+        for (Element elem : getDirectChildren(viewElem, XmileConstants.FLOW)) {
             String name = elem.getAttribute(XmileConstants.ATTR_NAME);
-            if (name == null || name.isBlank()) {
+            if (name.isBlank()) {
                 continue;
             }
 
@@ -172,25 +131,8 @@ public final class XmileViewParser {
 
     private static List<double[]> parseControlPoints(Element elem) {
         List<double[]> points = new ArrayList<>();
-        NodeList ptsNodes = elem.getElementsByTagNameNS(
-                XmileConstants.NAMESPACE_URI, XmileConstants.PTS);
-        if (ptsNodes.getLength() == 0) {
-            ptsNodes = elem.getElementsByTagName(XmileConstants.PTS);
-        }
-
-        for (int i = 0; i < ptsNodes.getLength(); i++) {
-            if (!(ptsNodes.item(i) instanceof Element ptsElem)) {
-                continue;
-            }
-            NodeList ptNodes = ptsElem.getElementsByTagNameNS(
-                    XmileConstants.NAMESPACE_URI, XmileConstants.PT);
-            if (ptNodes.getLength() == 0) {
-                ptNodes = ptsElem.getElementsByTagName(XmileConstants.PT);
-            }
-            for (int j = 0; j < ptNodes.getLength(); j++) {
-                if (!(ptNodes.item(j) instanceof Element ptElem)) {
-                    continue;
-                }
+        for (Element ptsElem : getDirectChildren(elem, XmileConstants.PTS)) {
+            for (Element ptElem : getDirectChildren(ptsElem, XmileConstants.PT)) {
                 String xStr = ptElem.getAttribute(XmileConstants.ATTR_X);
                 String yStr = ptElem.getAttribute(XmileConstants.ATTR_Y);
                 if (!xStr.isBlank() && !yStr.isBlank()) {
@@ -221,14 +163,33 @@ public final class XmileViewParser {
     }
 
     private static Optional<String> getChildText(Element parent, String tagName) {
-        NodeList nodes = parent.getElementsByTagNameNS(
-                XmileConstants.NAMESPACE_URI, tagName);
-        if (nodes.getLength() == 0) {
-            nodes = parent.getElementsByTagName(tagName);
-        }
-        if (nodes.getLength() > 0 && nodes.item(0) instanceof Element child) {
+        for (Element child : getDirectChildren(parent, tagName)) {
             return Optional.of(child.getTextContent().strip());
         }
         return Optional.empty();
+    }
+
+    /**
+     * Returns direct child elements of {@code parent} matching the given local tag name,
+     * checking both namespaced and non-namespaced variants.
+     * Unlike {@code getElementsByTagNameNS}, this does not search the entire subtree.
+     */
+    private static List<Element> getDirectChildren(Element parent, String localName) {
+        List<Element> result = new ArrayList<>();
+        for (Node n = parent.getFirstChild(); n != null; n = n.getNextSibling()) {
+            if (n instanceof Element child && matchesTag(child, localName)) {
+                result.add(child);
+            }
+        }
+        return result;
+    }
+
+    private static boolean matchesTag(Element elem, String localName) {
+        if (localName.equals(elem.getLocalName())) {
+            String ns = elem.getNamespaceURI();
+            return ns == null || ns.equals(XmileConstants.NAMESPACE_URI);
+        }
+        // Fallback for non-namespace-aware documents
+        return localName.equals(elem.getTagName());
     }
 }
