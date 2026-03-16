@@ -666,11 +666,24 @@ public final class VensimExporter {
         // Replace underscores in identifiers with spaces.
         // An identifier is a sequence of word characters that contains at least one underscore
         // and is not purely numeric.
+        // Quoted references ("name") are treated as atomic units and denormalized whole.
         StringBuilder result = new StringBuilder();
         int i = 0;
         while (i < expr.length()) {
             char c = expr.charAt(i);
-            if (Character.isLetter(c) || c == '_') {
+            if (c == '"') {
+                // Quoted name — read until closing quote and denormalize as a single unit
+                int closeQuote = expr.indexOf('"', i + 1);
+                if (closeQuote < 0) {
+                    // No closing quote — append remainder verbatim
+                    result.append(expr, i, expr.length());
+                    break;
+                }
+                String quotedName = expr.substring(i + 1, closeQuote);
+                String denormed = denormalizeName(quotedName);
+                result.append('"').append(denormed).append('"');
+                i = closeQuote + 1;
+            } else if (Character.isLetter(c) || c == '_') {
                 // Read the full identifier token
                 int start = i;
                 while (i < expr.length() && (Character.isLetterOrDigit(expr.charAt(i))
