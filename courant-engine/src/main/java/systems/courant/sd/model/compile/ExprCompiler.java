@@ -424,7 +424,7 @@ public class ExprCompiler {
             case "ROUND" -> {
                 requireArgs(name, args, 1);
                 DoubleSupplier a = compileExpr(args.get(0));
-                yield () -> Math.round(a.getAsDouble());
+                yield () -> Math.rint(a.getAsDouble());
             }
             case "MODULO" -> {
                 requireArgs(name, args, 2);
