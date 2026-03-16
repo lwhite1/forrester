@@ -38,20 +38,20 @@ public class FanChartPane extends Pane {
     public FanChartPane(MonteCarloResult result, String variableName) {
         this.currentResult = result;
         this.currentVariable = variableName;
-        canvas = new Canvas(800, 500);
+        canvas = new Canvas(0, 0);
         getChildren().add(canvas);
+        canvas.setManaged(false);
+    }
 
-        // Redraw when resized — reads from mutable fields so redraw() updates are respected
-        widthProperty().addListener((obs, old, val) -> {
-            canvas.setWidth(val.doubleValue());
+    @Override
+    protected void layoutChildren() {
+        double w = getWidth();
+        double h = getHeight();
+        if (w != canvas.getWidth() || h != canvas.getHeight()) {
+            canvas.setWidth(w);
+            canvas.setHeight(h);
             drawFanChart(canvas.getGraphicsContext2D(), currentResult, currentVariable);
-        });
-        heightProperty().addListener((obs, old, val) -> {
-            canvas.setHeight(val.doubleValue());
-            drawFanChart(canvas.getGraphicsContext2D(), currentResult, currentVariable);
-        });
-
-        drawFanChart(canvas.getGraphicsContext2D(), result, variableName);
+        }
     }
 
     /**

@@ -64,6 +64,27 @@ class FanChartPaneFxTest {
     }
 
     @Test
+    @DisplayName("Canvas should not overflow a smaller parent (#710)")
+    void shouldNotOverflowSmallerParent(FxRobot robot) {
+        MonteCarloResult mcResult = buildMonteCarloResult();
+        FanChartPane smallPane = new FanChartPane(mcResult, "Tank");
+        javafx.scene.layout.StackPane container = new javafx.scene.layout.StackPane(smallPane);
+        container.setPrefSize(200, 150);
+        container.setMaxSize(200, 150);
+
+        javafx.application.Platform.runLater(() -> {
+            Stage stage = new Stage();
+            stage.setScene(new Scene(container, 200, 150));
+            stage.show();
+        });
+        org.testfx.util.WaitForAsyncUtils.waitForFxEvents();
+
+        Canvas canvas = (Canvas) smallPane.getChildren().getFirst();
+        assertThat(canvas.getWidth()).isLessThanOrEqualTo(201);
+        assertThat(canvas.getHeight()).isLessThanOrEqualTo(151);
+    }
+
+    @Test
     @DisplayName("Redraw does not throw")
     void redrawDoesNotThrow(FxRobot robot) {
         MonteCarloResult mcResult = buildMonteCarloResult();

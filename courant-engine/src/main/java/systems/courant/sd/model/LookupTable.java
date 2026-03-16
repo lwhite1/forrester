@@ -212,12 +212,13 @@ public class LookupTable implements Formula {
         }
 
         private double[][] sortedPoints() {
-            points.sort(Comparator.comparingDouble(p -> p[0]));
-            double[] x = new double[points.size()];
-            double[] y = new double[points.size()];
-            for (int i = 0; i < points.size(); i++) {
-                x[i] = points.get(i)[0];
-                y[i] = points.get(i)[1];
+            List<double[]> sorted = new ArrayList<>(points);
+            sorted.sort(Comparator.comparingDouble(p -> p[0]));
+            double[] x = new double[sorted.size()];
+            double[] y = new double[sorted.size()];
+            for (int i = 0; i < sorted.size(); i++) {
+                x[i] = sorted.get(i)[0];
+                y[i] = sorted.get(i)[1];
             }
             return new double[][]{x, y};
         }

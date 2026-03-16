@@ -165,6 +165,13 @@ class ExprCompilerTest {
     }
 
     @Test
+    void shouldRejectSumWithNoArguments() {
+        assertThatThrownBy(() -> compiler.compile("SUM()"))
+                .isInstanceOf(CompilationException.class)
+                .hasMessageContaining("at least 1 argument");
+    }
+
+    @Test
     void shouldRejectMEANWithZeroArgs() {
         assertThatThrownBy(() -> compiler.compile("MEAN()"))
                 .isInstanceOf(CompilationException.class)

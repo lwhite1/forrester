@@ -54,6 +54,9 @@ public class ExtremeConditionDialog extends Dialog<Void> {
             window.requestFocus();
             return;
         }
+        if (openInstance != null) {
+            openInstance.close();
+        }
         ExtremeConditionDialog dialog = new ExtremeConditionDialog(result);
         openInstance = dialog;
         dialog.show();

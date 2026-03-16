@@ -14,6 +14,7 @@ import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /**
  * Verifies that {@link ModelCanvas} does not throw NPE when methods are called
@@ -77,9 +78,17 @@ class ModelCanvasNullEditorFxTest {
     }
 
     @Test
-    @DisplayName("toModelDefinition should return null when editor is null")
+    @DisplayName("toModelDefinition should throw IllegalStateException when editor is null")
     void toModelDefinitionSafe() {
-        assertThat(canvas.toModelDefinition()).isNull();
+        assertThatThrownBy(() -> canvas.toModelDefinition())
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining("No model loaded");
+    }
+
+    @Test
+    @DisplayName("isModelLoaded should return false when editor is null")
+    void isModelLoadedFalse() {
+        assertThat(canvas.isModelLoaded()).isFalse();
     }
 
     @Test

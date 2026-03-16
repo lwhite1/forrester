@@ -180,6 +180,39 @@ class MacroExpanderTest {
     }
 
     @Nested
+    @DisplayName("Multiple macro calls in one expression")
+    class MultipleCalls {
+
+        @Test
+        void shouldExpandMultipleMacroCallsInSameExpression() {
+            MacroDef macro = new MacroDef(
+                    "DOUBLE",
+                    List.of("x"),
+                    List.of("result"),
+                    List.of(eq("result", "x * 2"))
+            );
+
+            List<MdlEquation> equations = List.of(
+                    eq("y", "DOUBLE(3) + DOUBLE(5)")
+            );
+
+            MacroExpander.ExpansionResult result = MacroExpander.expand(equations, List.of(macro));
+
+            assertThat(result.warnings()).isEmpty();
+            // The output equation should have both calls expanded
+            MdlEquation outputEq = result.expandedEquations().stream()
+                    .filter(e -> e.name().equals("y"))
+                    .findFirst()
+                    .orElseThrow();
+            // Neither DOUBLE call should remain
+            assertThat(outputEq.expression()).doesNotContainIgnoringCase("DOUBLE");
+            // Both expansions should be present
+            assertThat(outputEq.expression()).contains("(3) * 2");
+            assertThat(outputEq.expression()).contains("(5) * 2");
+        }
+    }
+
+    @Nested
     @DisplayName("Error handling")
     class ErrorHandling {
 
