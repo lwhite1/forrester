@@ -49,6 +49,8 @@ import java.util.StringJoiner;
  */
 public final class XmileExporter {
 
+    private static final int MAX_MODULE_DEPTH = 50;
+
     private XmileExporter() {
     }
 
@@ -102,7 +104,7 @@ public final class XmileExporter {
 
         // Write named <model> elements for module definitions (before the main model)
         Set<String> writtenModels = new LinkedHashSet<>();
-        writeModuleModels(doc, root, def, writtenModels);
+        writeModuleModels(doc, root, def, writtenModels, 0);
 
         // Main <model>
         Element modelElem = doc.createElementNS(
@@ -200,7 +202,12 @@ public final class XmileExporter {
      */
     private static void writeModuleModels(Document doc, Element root,
                                            ModelDefinition def,
-                                           Set<String> writtenModels) {
+                                           Set<String> writtenModels,
+                                           int depth) {
+        if (depth > MAX_MODULE_DEPTH) {
+            throw new IllegalStateException(
+                    "Module nesting depth exceeds maximum of " + MAX_MODULE_DEPTH);
+        }
         for (ModuleInstanceDef mod : def.modules()) {
             String modelName = mod.definition().name();
             if (writtenModels.contains(modelName)) {
@@ -209,7 +216,7 @@ public final class XmileExporter {
             writtenModels.add(modelName);
 
             // Recurse first so nested module definitions appear before their parents
-            writeModuleModels(doc, root, mod.definition(), writtenModels);
+            writeModuleModels(doc, root, mod.definition(), writtenModels, depth + 1);
 
             Element modelElem = doc.createElementNS(
                     XmileConstants.NAMESPACE_URI, XmileConstants.MODEL);
