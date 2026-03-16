@@ -56,6 +56,16 @@ public class ExprCompiler {
     }
 
     /**
+     * Creates a single-element boolean array for one-shot warning suppression
+     * and registers it as a resettable so it is cleared between simulation runs.
+     */
+    private boolean[] newWarnedFlag() {
+        boolean[] warned = {false};
+        resettables.add(() -> warned[0] = false);
+        return warned;
+    }
+
+    /**
      * Compiles an expression string into a Formula.
      *
      * @param equation the expression string to parse and compile
@@ -104,7 +114,7 @@ public class ExprCompiler {
             case SUB -> () -> left.getAsDouble() - right.getAsDouble();
             case MUL -> () -> left.getAsDouble() * right.getAsDouble();
             case DIV -> {
-                boolean[] warned = {false};
+                boolean[] warned = newWarnedFlag();
                 yield () -> {
                     double divisor = right.getAsDouble();
                     if (divisor == 0) {
@@ -118,7 +128,7 @@ public class ExprCompiler {
                 };
             }
             case MOD -> {
-                boolean[] warned = {false};
+                boolean[] warned = newWarnedFlag();
                 yield () -> {
                     double divisor = right.getAsDouble();
                     if (divisor == 0) {
@@ -132,7 +142,7 @@ public class ExprCompiler {
                 };
             }
             case POW -> {
-                boolean[] warned = {false};
+                boolean[] warned = newWarnedFlag();
                 yield () -> {
                     double result = Math.pow(left.getAsDouble(), right.getAsDouble());
                     if (Double.isNaN(result) || Double.isInfinite(result)) {
@@ -265,7 +275,7 @@ public class ExprCompiler {
             case "SQRT" -> {
                 requireArgs(name, args, 1);
                 DoubleSupplier a = compileExpr(args.get(0));
-                boolean[] warned = {false};
+                boolean[] warned = newWarnedFlag();
                 yield () -> {
                     double v = a.getAsDouble();
                     if (v < 0) {
@@ -281,7 +291,7 @@ public class ExprCompiler {
             case "LN" -> {
                 requireArgs(name, args, 1);
                 DoubleSupplier a = compileExpr(args.get(0));
-                boolean[] warned = {false};
+                boolean[] warned = newWarnedFlag();
                 yield () -> {
                     double v = a.getAsDouble();
                     if (v <= 0) {
@@ -297,7 +307,7 @@ public class ExprCompiler {
             case "EXP" -> {
                 requireArgs(name, args, 1);
                 DoubleSupplier a = compileExpr(args.get(0));
-                boolean[] warned = {false};
+                boolean[] warned = newWarnedFlag();
                 yield () -> {
                     double result = Math.exp(a.getAsDouble());
                     if (Double.isInfinite(result)) {
@@ -314,7 +324,7 @@ public class ExprCompiler {
                 if (args.size() == 2) {
                     DoubleSupplier a = compileExpr(args.get(0));
                     DoubleSupplier base = compileExpr(args.get(1));
-                    boolean[] warned = {false};
+                    boolean[] warned = newWarnedFlag();
                     yield () -> {
                         double v = a.getAsDouble();
                         double b = base.getAsDouble();
@@ -330,7 +340,7 @@ public class ExprCompiler {
                 }
                 requireArgs(name, args, 1);
                 DoubleSupplier a = compileExpr(args.get(0));
-                boolean[] warned = {false};
+                boolean[] warned = newWarnedFlag();
                 yield () -> {
                     double v = a.getAsDouble();
                     if (v <= 0) {
@@ -361,7 +371,7 @@ public class ExprCompiler {
             case "ARCSIN" -> {
                 requireArgs(name, args, 1);
                 DoubleSupplier a = compileExpr(args.get(0));
-                boolean[] warned = {false};
+                boolean[] warned = newWarnedFlag();
                 yield () -> {
                     double v = a.getAsDouble();
                     if (v < -1 || v > 1) {
@@ -377,7 +387,7 @@ public class ExprCompiler {
             case "ARCCOS" -> {
                 requireArgs(name, args, 1);
                 DoubleSupplier a = compileExpr(args.get(0));
-                boolean[] warned = {false};
+                boolean[] warned = newWarnedFlag();
                 yield () -> {
                     double v = a.getAsDouble();
                     if (v < -1 || v > 1) {
@@ -421,7 +431,7 @@ public class ExprCompiler {
                 requireArgs(name, args, 2);
                 DoubleSupplier a = compileExpr(args.get(0));
                 DoubleSupplier b = compileExpr(args.get(1));
-                boolean[] warned = {false};
+                boolean[] warned = newWarnedFlag();
                 yield () -> {
                     double divisor = b.getAsDouble();
                     if (divisor == 0) {
@@ -438,7 +448,7 @@ public class ExprCompiler {
                 requireArgs(name, args, 2);
                 DoubleSupplier a = compileExpr(args.get(0));
                 DoubleSupplier b = compileExpr(args.get(1));
-                boolean[] warned = {false};
+                boolean[] warned = newWarnedFlag();
                 yield () -> {
                     double quantum = b.getAsDouble();
                     if (quantum == 0) {
@@ -455,7 +465,7 @@ public class ExprCompiler {
                 requireArgs(name, args, 2);
                 DoubleSupplier a = compileExpr(args.get(0));
                 DoubleSupplier b = compileExpr(args.get(1));
-                boolean[] warned = {false};
+                boolean[] warned = newWarnedFlag();
                 yield () -> {
                     double result = Math.pow(a.getAsDouble(), b.getAsDouble());
                     if (Double.isNaN(result) || Double.isInfinite(result)) {
