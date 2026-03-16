@@ -100,8 +100,11 @@ public class Forecast implements Formula, Resettable {
             for (int d = 0; d < delta; d++) {
                 lastInputVal = input.getAsDouble();
                 averageInput += (lastInputVal - averageInput) / averagingTime;
-                if (averageInput != 0) {
-                    trend = (lastInputVal - averageInput) / (averageInput * averagingTime);
+                double denom = averageInput * averagingTime;
+                if (Math.abs(denom) > 1e-15) {
+                    trend = (lastInputVal - averageInput) / denom;
+                    // Clamp to prevent extreme values when averageInput is near zero
+                    trend = Math.max(-10, Math.min(10, trend));
                 } else {
                     trend = 0;
                 }

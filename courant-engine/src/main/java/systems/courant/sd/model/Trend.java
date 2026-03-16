@@ -100,8 +100,11 @@ public class Trend implements Formula, Resettable {
             for (int d = 0; d < delta; d++) {
                 double inputVal = input.getAsDouble();
                 averageInput += (inputVal - averageInput) / averagingTime;
-                if (averageInput != 0) {
-                    trend = (inputVal - averageInput) / (averageInput * averagingTime);
+                double denom = averageInput * averagingTime;
+                if (Math.abs(denom) > 1e-15) {
+                    trend = (inputVal - averageInput) / denom;
+                    // Clamp to prevent extreme values when averageInput is near zero
+                    trend = Math.max(-10, Math.min(10, trend));
                 } else {
                     trend = 0;
                 }
