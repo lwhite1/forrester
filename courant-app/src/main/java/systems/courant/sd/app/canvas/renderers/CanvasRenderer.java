@@ -5,6 +5,8 @@ import systems.courant.sd.model.def.ConnectorRoute;
 import systems.courant.sd.model.def.ElementType;
 import systems.courant.sd.model.def.FlowDef;
 import systems.courant.sd.model.def.ValidationIssue;
+import systems.courant.sd.model.def.VariableDef;
+import systems.courant.sd.model.expr.DelayDetector;
 import systems.courant.sd.model.graph.CausalTraceAnalysis;
 import systems.courant.sd.model.graph.FeedbackAnalysis;
 import systems.courant.sd.model.graph.FeedbackAnalysis.CausalLoop;
@@ -304,7 +306,31 @@ public class CanvasRenderer {
         // 2d. Draw hover indicator (above loops, below selection)
         if (hoveredElement != null && !canvasState.getSelection().contains(hoveredElement)
                 && !isHiddenAux(hoveredElement, hideAux)) {
-            SelectionRenderer.drawHoverIndicator(gc, canvasState, hoveredElement);
+            ElementType hoverType = canvasState.getType(hoveredElement).orElse(null);
+            if (hoverType == ElementType.AUX) {
+                // Redraw aux with hover fill (paints over normal fill)
+                ModelEditor ed = ctx.editor();
+                double hw = LayoutMetrics.effectiveWidth(canvasState, hoveredElement);
+                double hh = LayoutMetrics.effectiveHeight(canvasState, hoveredElement);
+                double hx = canvasState.getX(hoveredElement) - hw / 2;
+                double hy = canvasState.getY(hoveredElement) - hh / 2;
+                boolean isLit = ed.getVariableByName(hoveredElement)
+                        .map(VariableDef::isLiteral).orElse(false);
+                String eq = ed.getVariableEquation(hoveredElement).orElse(null);
+                boolean hasDel = ctx.showDelayBadges()
+                        && DelayDetector.equationContainsDelay(eq);
+                ElementRenderer.drawAux(gc, hoveredElement, isLit, eq, hasDel,
+                        hx, hy, hw, hh, true);
+            } else if (hoverType == ElementType.LOOKUP) {
+                // Redraw lookup with hover fill
+                double hw = LayoutMetrics.effectiveWidth(canvasState, hoveredElement);
+                double hh = LayoutMetrics.effectiveHeight(canvasState, hoveredElement);
+                double hx = canvasState.getX(hoveredElement) - hw / 2;
+                double hy = canvasState.getY(hoveredElement) - hh / 2;
+                ElementRenderer.drawLookup(gc, hoveredElement, hx, hy, hw, hh, true);
+            } else {
+                SelectionRenderer.drawHoverIndicator(gc, canvasState, hoveredElement);
+            }
         }
 
         // 3. Draw selection indicators on top of everything

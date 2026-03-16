@@ -58,9 +58,16 @@ public final class ColorPalette {
     public static final Color TRACE_DOWNSTREAM = Color.web("#E67E22");
     public static final Color TRACE_ORIGIN = Color.web("#8E44AD");
 
+    // Borderless element fills (variables, lookups)
+    public static final Color VARIABLE_FILL = Color.web("#F0F2F5");
+    public static final Color LOOKUP_FILL = Color.web("#F0F2F5");
+    public static final Color HOVER_FILL = Color.web("#E8ECF0");
+
     // Comment annotation colors
-    public static final Color COMMENT_FILL = Color.web("#FFFDE7");
-    public static final Color COMMENT_BORDER = Color.web("#F9A825", 0.6);
+    public static final Color COMMENT_FILL = Color.web("#F0F1F3");
+    public static final Color COMMENT_BORDER = Color.web("#95A5A6", 0.7);
+    public static final Color COMMENT_TEXT = Color.web("#5D6D7E");
+    public static final Color COMMENT_ACCENT = Color.web("#95A5A6", 0.7);
 
     // Delay indicator badge
     public static final Color DELAY_BADGE = Color.web("#8E44AD");

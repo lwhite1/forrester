@@ -83,6 +83,11 @@ class ColorPaletteTest {
             assertThat(ColorPalette.COMMENT_FILL).isNotNull();
             assertThat(ColorPalette.COMMENT_BORDER).isNotNull();
             assertThat(ColorPalette.DELAY_BADGE).isNotNull();
+            assertThat(ColorPalette.VARIABLE_FILL).isNotNull();
+            assertThat(ColorPalette.LOOKUP_FILL).isNotNull();
+            assertThat(ColorPalette.HOVER_FILL).isNotNull();
+            assertThat(ColorPalette.COMMENT_TEXT).isNotNull();
+            assertThat(ColorPalette.COMMENT_ACCENT).isNotNull();
         }
 
         @Test
