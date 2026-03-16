@@ -303,8 +303,18 @@ class VensimExporterTest {
     class NameDenormalization {
 
         @Test
-        void shouldReplaceUnderscoresWithSpaces() {
+        void shouldReplaceUnderscoresWithSpacesForNonVensimNames() {
+            // Names without spaces (XMILE/native): underscores are word separators
             assertThat(VensimExporter.denormalizeName("Population_Growth"))
+                    .isEqualTo("Population Growth");
+        }
+
+        @Test
+        void shouldPreserveUnderscoresWhenNameHasSpaces() {
+            // Names with spaces (Vensim display-name format): underscores are literal
+            assertThat(VensimExporter.denormalizeName("Net_Flow Rate"))
+                    .isEqualTo("Net_Flow Rate");
+            assertThat(VensimExporter.denormalizeName("Population Growth"))
                     .isEqualTo("Population Growth");
         }
 
@@ -323,6 +333,9 @@ class VensimExporterTest {
         @Test
         void shouldStripLeadingUnderscoreFromDigitPrefixedNames() {
             assertThat(VensimExporter.denormalizeName("_2nd_Batch"))
+                    .isEqualTo("2nd Batch");
+            // Vensim display-name format preserves spaces
+            assertThat(VensimExporter.denormalizeName("_2nd Batch"))
                     .isEqualTo("2nd Batch");
         }
 

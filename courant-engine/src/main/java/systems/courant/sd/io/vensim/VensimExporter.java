@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -48,6 +49,10 @@ import java.util.regex.Pattern;
 public final class VensimExporter {
 
     private static final Logger logger = LoggerFactory.getLogger(VensimExporter.class);
+
+    /** System variable names that are already emitted in the control section. */
+    private static final Set<String> SYSTEM_VAR_NAMES = Set.of(
+            "TIME_STEP", "INITIAL_TIME", "FINAL_TIME", "SAVEPER");
 
     private static final Pattern IF_FUNC_PATTERN = Pattern.compile("(?i)\\bIF\\s*\\(");
     private static final Pattern AND_OP_PATTERN = Pattern.compile("\\band\\b", Pattern.CASE_INSENSITIVE);
@@ -81,6 +86,9 @@ public final class VensimExporter {
         StringBuilder sb = new StringBuilder();
         sb.append("{UTF-8}\n");
 
+        // Build name map for expression denormalization (normalized → display name)
+        Map<String, String> nameMap = buildNameMap(def);
+
         // Collect lookup names referenced by variables (embedded as WITH LOOKUP)
         Set<String> embeddedLookupNames = collectEmbeddedLookupNames(def);
 
@@ -94,19 +102,22 @@ public final class VensimExporter {
 
         // Write stocks
         for (StockDef stock : def.stocks()) {
-            sb.append(buildStockBlock(stock, def, inlinedFlowNames));
+            sb.append(buildStockBlock(stock, def, inlinedFlowNames, nameMap));
         }
 
         // Write flows (skip those inlined into INTEG)
         for (FlowDef flow : def.flows()) {
             if (!inlinedFlowNames.contains(flow.name())) {
-                sb.append(buildFlowBlock(flow));
+                sb.append(buildFlowBlock(flow, nameMap));
             }
         }
 
-        // Write variables
+        // Write variables (skip system vars — already in control section)
         for (VariableDef v : def.variables()) {
-            sb.append(buildVariableBlock(v, def, embeddedLookupNames));
+            if (isSystemVar(v.name())) {
+                continue;
+            }
+            sb.append(buildVariableBlock(v, def, embeddedLookupNames, nameMap));
         }
 
         // Write standalone lookup tables
@@ -146,7 +157,8 @@ public final class VensimExporter {
     }
 
     private static String buildStockBlock(StockDef stock, ModelDefinition def,
-                                          Set<String> inlinedFlowNames) {
+                                          Set<String> inlinedFlowNames,
+                                          Map<String, String> nameMap) {
         String vensimName = denormalizeName(stock.name())
                 + formatSubscriptSuffix(stock.subscripts());
 
@@ -171,7 +183,7 @@ public final class VensimExporter {
             for (int i = 0; i < inflowDefs.size(); i++) {
                 FlowDef flow = inflowDefs.get(i);
                 String term = inlinedFlowNames.contains(flow.name())
-                        ? toVensimExpr(flow.equation())
+                        ? toVensimExpr(flow.equation(), nameMap)
                         : denormalizeName(flow.name());
                 if (i > 0) {
                     rateSb.append(" + ");
@@ -181,7 +193,7 @@ public final class VensimExporter {
             for (int i = 0; i < outflowDefs.size(); i++) {
                 FlowDef flow = outflowDefs.get(i);
                 String term = inlinedFlowNames.contains(flow.name())
-                        ? toVensimExpr(flow.equation())
+                        ? toVensimExpr(flow.equation(), nameMap)
                         : denormalizeName(flow.name());
                 if (inflowDefs.isEmpty() && i == 0) {
                     rateSb.append("-").append(term);
@@ -193,7 +205,7 @@ public final class VensimExporter {
         }
 
         String initialStr = (stock.initialExpression() != null && !stock.initialExpression().isBlank())
-                ? toVensimExpr(stock.initialExpression())
+                ? toVensimExpr(stock.initialExpression(), nameMap)
                 : formatDouble(stock.initialValue());
         String equation = "INTEG (\n\t" + rateExpr + ",\n\t\t"
                 + initialStr + ")";
@@ -206,17 +218,18 @@ public final class VensimExporter {
                 + "\t|\n\n";
     }
 
-    private static String buildFlowBlock(FlowDef flow) {
+    private static String buildFlowBlock(FlowDef flow, Map<String, String> nameMap) {
         String vensimName = denormalizeName(flow.name())
                 + formatSubscriptSuffix(flow.subscripts());
-        String equation = toVensimExpr(flow.equation());
+        String equation = toVensimExpr(flow.equation(), nameMap);
         String units = flow.timeUnit() != null ? flow.timeUnit() : "";
         String comment = flow.comment() != null ? flow.comment() : "";
         return buildBlock(vensimName, "=", equation, units, comment);
     }
 
     private static String buildVariableBlock(VariableDef v, ModelDefinition def,
-                                         Set<String> embeddedLookupNames) {
+                                         Set<String> embeddedLookupNames,
+                                         Map<String, String> nameMap) {
         String vensimName = denormalizeName(v.name())
                 + formatSubscriptSuffix(v.subscripts());
 
@@ -227,7 +240,7 @@ public final class VensimExporter {
             if (lookupOpt.isPresent()) {
                 Optional<String> inputExprOpt = extractLookupInput(v.equation());
                 if (inputExprOpt.isPresent()) {
-                    String vensimInput = toVensimExpr(inputExprOpt.get());
+                    String vensimInput = toVensimExpr(inputExprOpt.get(), nameMap);
                     String lookupData = formatLookupData(lookupOpt.get());
                     String equation = "WITH LOOKUP (\n\t" + vensimInput
                             + ",\n\t\t(" + lookupData + "))";
@@ -240,7 +253,7 @@ public final class VensimExporter {
 
         // Check for LOOKUP calls embedded in complex expressions
         String equation = inlineLookupCalls(v.equation(), def, embeddedLookupNames);
-        equation = toVensimExpr(equation);
+        equation = toVensimExpr(equation, nameMap);
         String units = v.unit() != null ? v.unit() : "";
         String comment = v.comment() != null ? v.comment() : "";
         return buildBlock(vensimName, "=", equation, units, comment);
@@ -430,8 +443,19 @@ public final class VensimExporter {
 
     /**
      * Translates a Courant expression to Vensim syntax.
+     * Backward-compatible version without a name map — falls back to replacing
+     * all underscores with spaces in identifier tokens.
      */
     static String toVensimExpr(String sdExpr) {
+        return toVensimExpr(sdExpr, Map.of());
+    }
+
+    /**
+     * Translates a Courant expression to Vensim syntax using a name map.
+     * The name map (normalized name → display name) preserves the original
+     * underscore/space distinction for round-trip fidelity.
+     */
+    static String toVensimExpr(String sdExpr, Map<String, String> nameMap) {
         if (sdExpr == null || sdExpr.isBlank()) {
             return sdExpr;
         }
@@ -474,8 +498,8 @@ public final class VensimExporter {
         // TIME → Time
         expr = TIME_PATTERN.matcher(expr).replaceAll("Time");
 
-        // Denormalize variable names: replace underscores with spaces
-        expr = denormalizeNamesInExpr(expr);
+        // Denormalize variable names using the name map
+        expr = denormalizeNamesInExpr(expr, nameMap);
 
         return expr;
     }
@@ -640,33 +664,44 @@ public final class VensimExporter {
     }
 
     /**
-     * Denormalizes a Courant identifier back to Vensim name format.
-     * Replaces underscores with spaces, and strips a leading underscore
-     * that was added as a digit-prefix escape (e.g. {@code _2nd_Batch → 2nd Batch}).
+     * Denormalizes a Courant name back to Vensim name format.
+     *
+     * <p>If the name already contains spaces (i.e. it came from VensimImporter's
+     * {@code normalizeDisplayName} which preserves spaces), underscores are treated
+     * as literal characters and preserved. Otherwise (XMILE import, native Courant
+     * names), underscores are treated as word separators and replaced with spaces.
+     *
+     * <p>Leading underscore digit-prefix escapes (e.g. {@code _2nd}) are always
+     * removed regardless of format.
      */
     static String denormalizeName(String sdName) {
         if (sdName == null || sdName.isBlank()) {
             return "";
         }
         String stripped = sdName.strip();
-        String result = stripped.replace('_', ' ');
+        // Strip digit-prefix escape: _2nd... → 2nd...
         if (stripped.length() >= 2 && stripped.charAt(0) == '_'
                 && Character.isDigit(stripped.charAt(1))) {
-            result = result.stripLeading();
+            stripped = stripped.substring(1);
         }
-        return result;
+        // If the name already contains spaces (Vensim display-name format),
+        // underscores are literal — preserve them. Otherwise replace with spaces.
+        if (!stripped.contains(" ")) {
+            return stripped.replace('_', ' ');
+        }
+        return stripped;
     }
 
     /**
-     * Denormalizes variable names within an expression.
-     * Replaces underscores with spaces in identifier tokens, while preserving
-     * operators, numbers, and function syntax.
+     * Denormalizes variable names within an expression using a name map.
+     * Looks up each identifier token in the map (normalized name → display name)
+     * to preserve the original underscore/space distinction. Falls back to
+     * replacing underscores with spaces for identifiers not found in the map.
+     *
+     * @param expr    the expression with normalized identifiers
+     * @param nameMap mapping from normalized names to display names
      */
-    private static String denormalizeNamesInExpr(String expr) {
-        // Replace underscores in identifiers with spaces.
-        // An identifier is a sequence of word characters that contains at least one underscore
-        // and is not purely numeric.
-        // Quoted references ("name") are treated as atomic units and denormalized whole.
+    private static String denormalizeNamesInExpr(String expr, Map<String, String> nameMap) {
         StringBuilder result = new StringBuilder();
         int i = 0;
         while (i < expr.length()) {
@@ -695,12 +730,19 @@ public final class VensimExporter {
                 if (isKnownFunction(token)) {
                     result.append(token);
                 } else {
-                    String denormed = token.replace('_', ' ');
-                    if (token.length() >= 2 && token.charAt(0) == '_'
-                            && Character.isDigit(token.charAt(1))) {
-                        denormed = denormed.stripLeading();
+                    // Look up in name map first; fall back to underscore→space replacement
+                    String displayName = nameMap.get(token);
+                    if (displayName != null) {
+                        result.append(denormalizeName(displayName));
+                    } else {
+                        // Fallback for identifiers not in the model (e.g. test expressions)
+                        String denormed = token.replace('_', ' ');
+                        if (token.length() >= 2 && token.charAt(0) == '_'
+                                && Character.isDigit(token.charAt(1))) {
+                            denormed = denormed.stripLeading();
+                        }
+                        result.append(denormed);
                     }
-                    result.append(denormed);
                 }
             } else {
                 result.append(c);
@@ -711,8 +753,57 @@ public final class VensimExporter {
     }
 
     /**
-     * Checks if a token is a known function name that should not be denormalized.
+     * Builds a mapping from normalized (equation-form) names to display names
+     * for all elements in the model. This allows expression denormalization to
+     * preserve the original underscore/space distinction.
      */
+    private static Map<String, String> buildNameMap(ModelDefinition def) {
+        Map<String, String> map = new HashMap<>();
+        for (StockDef s : def.stocks()) {
+            putDisplayName(map, s.name());
+        }
+        for (FlowDef f : def.flows()) {
+            putDisplayName(map, f.name());
+        }
+        for (VariableDef v : def.variables()) {
+            putDisplayName(map, v.name());
+        }
+        for (LookupTableDef l : def.lookupTables()) {
+            putDisplayName(map, l.name());
+        }
+        for (CldVariableDef c : def.cldVariables()) {
+            putDisplayName(map, c.name());
+        }
+        for (SubscriptDef s : def.subscripts()) {
+            putDisplayName(map, s.name());
+            for (String label : s.labels()) {
+                putDisplayName(map, label);
+            }
+        }
+        return map;
+    }
+
+    private static void putDisplayName(Map<String, String> map, String displayName) {
+        if (displayName == null || displayName.isBlank()) {
+            return;
+        }
+        // Convert display name to equation-form (spaces → underscores)
+        String normalized = displayName.strip().replace(' ', '_');
+        map.put(normalized, displayName);
+    }
+
+    /**
+     * Checks if a name is a system variable (e.g. TIME_STEP, INITIAL_TIME)
+     * that is already emitted in the control section.
+     */
+    private static boolean isSystemVar(String name) {
+        if (name == null) {
+            return false;
+        }
+        return SYSTEM_VAR_NAMES.contains(
+                name.strip().toUpperCase(Locale.ROOT).replace(' ', '_'));
+    }
+
     private static boolean isKnownFunction(String token) {
         String upper = token.toUpperCase();
         return switch (upper) {
