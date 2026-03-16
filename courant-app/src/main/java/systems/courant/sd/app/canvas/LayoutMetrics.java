@@ -42,6 +42,7 @@ public final class LayoutMetrics {
     public static final double COMMENT_HEIGHT = 80;
     public static final double COMMENT_BORDER_WIDTH = 1;
     public static final double COMMENT_CORNER_RADIUS = 4;
+    public static final double COMMENT_ACCENT_WIDTH = 4;
     public static final Font COMMENT_TEXT_FONT = Font.font("System", FontWeight.NORMAL, 11);
 
     // CLD variable dimensions

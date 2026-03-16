@@ -121,25 +121,21 @@ public final class ElementRenderer {
     public static void drawAux(GraphicsContext gc, String name, boolean isLiteral, String equation,
                                boolean hasDelay,
                                double x, double y, double width, double height) {
+        drawAux(gc, name, isLiteral, equation, hasDelay, x, y, width, height, false);
+    }
+
+    /**
+     * Draws a variable: rounded rectangle with subtle fill (no border), badge, and centered name.
+     * When hovered, uses a stronger fill to provide visual feedback.
+     */
+    public static void drawAux(GraphicsContext gc, String name, boolean isLiteral, String equation,
+                               boolean hasDelay, double x, double y, double width, double height,
+                               boolean hovered) {
         double r = LayoutMetrics.AUX_CORNER_RADIUS;
 
-        // Fill
-        gc.setFill(ColorPalette.ELEMENT_FILL);
+        // Fill: hover fill when hovered, subtle gray otherwise
+        gc.setFill(hovered ? ColorPalette.HOVER_FILL : ColorPalette.VARIABLE_FILL);
         gc.fillRoundRect(x, y, width, height, r, r);
-
-        // Border: dashed for literals, solid for formulas
-        if (isLiteral) {
-            gc.setStroke(ColorPalette.AUX_LITERAL_BORDER);
-            gc.setLineWidth(LayoutMetrics.AUX_BORDER_WIDTH);
-            gc.setLineDashes(LayoutMetrics.AUX_LITERAL_DASH_LENGTH,
-                    LayoutMetrics.AUX_LITERAL_DASH_GAP);
-        } else {
-            gc.setStroke(ColorPalette.AUX_BORDER);
-            gc.setLineWidth(LayoutMetrics.AUX_BORDER_WIDTH);
-            gc.setLineDashes();
-        }
-        gc.strokeRoundRect(x, y, width, height, r, r);
-        gc.setLineDashes();
 
         // Badge top-left: value for literals, "fx" for formulas
         gc.setFill(ColorPalette.TEXT_SECONDARY);
@@ -255,20 +251,23 @@ public final class ElementRenderer {
      * Draws a lookup table: rounded rectangle with dot-dash border, "tbl" badge,
      * name, and data point count.
      */
-    public static void drawLookup(GraphicsContext gc, String name, int dataPoints,
+    public static void drawLookup(GraphicsContext gc, String name,
                                   double x, double y, double width, double height) {
+        drawLookup(gc, name, x, y, width, height, false);
+    }
+
+    /**
+     * Draws a lookup table: rounded rectangle with subtle fill (no border),
+     * "Table" badge, and centered name. When hovered, uses a stronger fill.
+     */
+    public static void drawLookup(GraphicsContext gc, String name,
+                                  double x, double y, double width, double height,
+                                  boolean hovered) {
         double r = LayoutMetrics.LOOKUP_CORNER_RADIUS;
 
-        // Fill
-        gc.setFill(ColorPalette.ELEMENT_FILL);
+        // Fill: hover fill when hovered, subtle gray otherwise
+        gc.setFill(hovered ? ColorPalette.HOVER_FILL : ColorPalette.LOOKUP_FILL);
         gc.fillRoundRect(x, y, width, height, r, r);
-
-        // Dot-dash border
-        gc.setStroke(ColorPalette.AUX_BORDER);
-        gc.setLineWidth(LayoutMetrics.LOOKUP_BORDER_WIDTH);
-        gc.setLineDashes(8, 3, 2, 3);
-        gc.strokeRoundRect(x, y, width, height, r, r);
-        gc.setLineDashes();
 
         // Table badge top-left
         gc.setFill(ColorPalette.TEXT_SECONDARY);
@@ -277,21 +276,13 @@ public final class ElementRenderer {
         gc.setTextBaseline(VPos.TOP);
         gc.fillText(BADGE_LOOKUP, x + 4, y + 3);
 
-        // Name centered, slightly above middle (truncated to fit)
+        // Name centered vertically (truncated to fit)
         gc.setFill(ColorPalette.TEXT);
         gc.setFont(LayoutMetrics.LOOKUP_NAME_FONT);
         gc.setTextAlign(TextAlignment.CENTER);
         gc.setTextBaseline(VPos.CENTER);
         gc.fillText(truncate(name, LayoutMetrics.LOOKUP_NAME_FONT, width - 16),
-                x + width / 2, y + height / 2 + LayoutMetrics.LABEL_NAME_OFFSET);
-
-        // Data point count below name
-        gc.setFill(ColorPalette.TEXT_SECONDARY);
-        gc.setFont(LayoutMetrics.BADGE_FONT);
-        gc.setTextAlign(TextAlignment.CENTER);
-        gc.setTextBaseline(VPos.CENTER);
-        gc.fillText(dataPoints + " pts", x + width / 2,
-                y + height / 2 + LayoutMetrics.LABEL_SUBLABEL_OFFSET);
+                x + width / 2, y + height / 2);
     }
 
     /** Padding inside the comment box (each side). */
@@ -305,19 +296,17 @@ public final class ElementRenderer {
                                    double x, double y, double width, double height) {
         double r = LayoutMetrics.COMMENT_CORNER_RADIUS;
 
-        // Fill — warm yellow note appearance
+        // Fill — neutral gray note appearance
         gc.setFill(ColorPalette.COMMENT_FILL);
         gc.fillRoundRect(x, y, width, height, r, r);
 
-        // Border
-        gc.setStroke(ColorPalette.COMMENT_BORDER);
-        gc.setLineWidth(LayoutMetrics.COMMENT_BORDER_WIDTH);
-        gc.setLineDashes();
-        gc.strokeRoundRect(x, y, width, height, r, r);
+        // Left accent bar instead of full border
+        gc.setFill(ColorPalette.COMMENT_ACCENT);
+        gc.fillRect(x, y + r, LayoutMetrics.COMMENT_ACCENT_WIDTH, height - r * 2);
 
         // Text content (word-wrapped, top-left aligned)
         if (text != null && !text.isBlank()) {
-            gc.setFill(ColorPalette.TEXT);
+            gc.setFill(ColorPalette.COMMENT_TEXT);
             gc.setFont(LayoutMetrics.COMMENT_TEXT_FONT);
             gc.setTextAlign(TextAlignment.LEFT);
             gc.setTextBaseline(VPos.TOP);

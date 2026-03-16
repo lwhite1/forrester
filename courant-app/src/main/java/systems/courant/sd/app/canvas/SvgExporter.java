@@ -121,13 +121,9 @@ public final class SvgExporter {
                 case CLD_VARIABLE -> writeCldVariable(w, name, cx, cy,
                         LayoutMetrics.effectiveWidth(canvasState, name),
                         LayoutMetrics.effectiveHeight(canvasState, name));
-                case LOOKUP -> {
-                    int pts = editor.getLookupTableByName(name)
-                            .map(lt -> lt.xValues().length).orElse(0);
-                    writeLookup(w, name, pts, cx, cy,
-                            LayoutMetrics.effectiveWidth(canvasState, name),
-                            LayoutMetrics.effectiveHeight(canvasState, name));
-                }
+                case LOOKUP -> writeLookup(w, name, cx, cy,
+                        LayoutMetrics.effectiveWidth(canvasState, name),
+                        LayoutMetrics.effectiveHeight(canvasState, name));
                 case COMMENT -> {
                     var commentDef = editor.getCommentByName(name);
                     String text = commentDef != null ? commentDef.text() : "";
@@ -470,28 +466,11 @@ public final class SvgExporter {
         double y = cy - height / 2;
         double r = LayoutMetrics.AUX_CORNER_RADIUS;
 
-        // Fill
+        // Fill — subtle gray, no border
         w.printf(Locale.US,
                 "  <rect x=\"%.2f\" y=\"%.2f\" width=\"%.2f\" height=\"%.2f\" rx=\"%.1f\" " +
                 "fill=\"%s\"/>%n",
-                x, y, width, height, r, svgColor(ColorPalette.ELEMENT_FILL));
-
-        // Border: dashed for literals, solid for formulas
-        if (isLiteral) {
-            w.printf(Locale.US,
-                    "  <rect x=\"%.2f\" y=\"%.2f\" width=\"%.2f\" height=\"%.2f\" rx=\"%.1f\" " +
-                    "fill=\"none\" stroke=\"%s\" stroke-width=\"%.1f\" " +
-                    "stroke-dasharray=\"%.0f %.0f\"/>%n",
-                    x, y, width, height, r,
-                    svgColor(ColorPalette.AUX_LITERAL_BORDER), LayoutMetrics.AUX_BORDER_WIDTH,
-                    LayoutMetrics.AUX_LITERAL_DASH_LENGTH, LayoutMetrics.AUX_LITERAL_DASH_GAP);
-        } else {
-            w.printf(Locale.US,
-                    "  <rect x=\"%.2f\" y=\"%.2f\" width=\"%.2f\" height=\"%.2f\" rx=\"%.1f\" " +
-                    "fill=\"none\" stroke=\"%s\" stroke-width=\"%.1f\"/>%n",
-                    x, y, width, height, r,
-                    svgColor(ColorPalette.AUX_BORDER), LayoutMetrics.AUX_BORDER_WIDTH);
-        }
+                x, y, width, height, r, svgColor(ColorPalette.VARIABLE_FILL));
 
         // Badge: value for literals, "fx" for formulas
         String badge;
@@ -552,25 +531,17 @@ public final class SvgExporter {
                 cx, cy, LayoutMetrics.MODULE_NAME_FONT_SIZE, svgColor(ColorPalette.TEXT), escapeXml(modLabel));
     }
 
-    private static void writeLookup(PrintWriter w, String name, int dataPoints,
+    private static void writeLookup(PrintWriter w, String name,
                                      double cx, double cy, double width, double height) {
         double x = cx - width / 2;
         double y = cy - height / 2;
         double r = LayoutMetrics.LOOKUP_CORNER_RADIUS;
 
-        // Fill
+        // Fill — subtle gray, no border
         w.printf(Locale.US,
                 "  <rect x=\"%.2f\" y=\"%.2f\" width=\"%.2f\" height=\"%.2f\" rx=\"%.1f\" " +
                 "fill=\"%s\"/>%n",
-                x, y, width, height, r, svgColor(ColorPalette.ELEMENT_FILL));
-
-        // Dot-dash border
-        w.printf(Locale.US,
-                "  <rect x=\"%.2f\" y=\"%.2f\" width=\"%.2f\" height=\"%.2f\" rx=\"%.1f\" " +
-                "fill=\"none\" stroke=\"%s\" stroke-width=\"%.1f\" " +
-                "stroke-dasharray=\"8 3 2 3\"/>%n",
-                x, y, width, height, r,
-                svgColor(ColorPalette.AUX_BORDER), LayoutMetrics.LOOKUP_BORDER_WIDTH);
+                x, y, width, height, r, svgColor(ColorPalette.LOOKUP_FILL));
 
         // Table badge
         w.printf(Locale.US,
@@ -579,20 +550,13 @@ public final class SvgExporter {
                 x + 4, y + 3, LayoutMetrics.BADGE_FONT_SIZE,
                 svgColor(ColorPalette.TEXT_SECONDARY), ElementRenderer.BADGE_LOOKUP);
 
-        // Name centered (truncated to fit)
+        // Name centered vertically (truncated to fit)
         String lookupLabel = ElementRenderer.truncate(name, LayoutMetrics.LOOKUP_NAME_FONT, width - 16);
         w.printf(Locale.US,
                 "  <text x=\"%.2f\" y=\"%.2f\" text-anchor=\"middle\" dominant-baseline=\"central\" " +
                 "font-family=\"sans-serif\" font-size=\"%.0f\" fill=\"%s\">%s</text>%n",
-                cx, cy + LayoutMetrics.LABEL_NAME_OFFSET,
+                cx, cy,
                 LayoutMetrics.LOOKUP_NAME_FONT_SIZE, svgColor(ColorPalette.TEXT), escapeXml(lookupLabel));
-
-        // Data point count
-        w.printf(Locale.US,
-                "  <text x=\"%.2f\" y=\"%.2f\" text-anchor=\"middle\" dominant-baseline=\"central\" " +
-                "font-family=\"sans-serif\" font-size=\"%.0f\" fill=\"%s\">%s</text>%n",
-                cx, cy + LayoutMetrics.LABEL_SUBLABEL_OFFSET,
-                LayoutMetrics.BADGE_FONT_SIZE, svgColor(ColorPalette.TEXT_SECONDARY), dataPoints + " pts");
     }
 
     private static void writeCldVariable(PrintWriter w, String name,
@@ -611,13 +575,19 @@ public final class SvgExporter {
         double y = cy - height / 2;
         double r = LayoutMetrics.COMMENT_CORNER_RADIUS;
 
+        // Fill — no full border
         w.printf(Locale.US,
                 "  <rect x=\"%.2f\" y=\"%.2f\" width=\"%.2f\" height=\"%.2f\" " +
-                "rx=\"%.1f\" ry=\"%.1f\" fill=\"%s\" stroke=\"%s\" stroke-width=\"%.1f\"/>%n",
+                "rx=\"%.1f\" ry=\"%.1f\" fill=\"%s\"/>%n",
                 x, y, width, height, r, r,
-                svgColor(ColorPalette.COMMENT_FILL),
-                svgColor(ColorPalette.COMMENT_BORDER),
-                LayoutMetrics.COMMENT_BORDER_WIDTH);
+                svgColor(ColorPalette.COMMENT_FILL));
+
+        // Left accent bar
+        w.printf(Locale.US,
+                "  <rect x=\"%.2f\" y=\"%.2f\" width=\"%.1f\" height=\"%.2f\" " +
+                "fill=\"%s\" fill-opacity=\"%.2f\"/>%n",
+                x, y + r, LayoutMetrics.COMMENT_ACCENT_WIDTH, height - r * 2,
+                svgColor(ColorPalette.COMMENT_ACCENT), svgOpacity(ColorPalette.COMMENT_ACCENT));
 
         if (text != null && !text.isBlank()) {
             String display = ElementRenderer.truncate(
@@ -626,7 +596,7 @@ public final class SvgExporter {
                     "  <text x=\"%.2f\" y=\"%.2f\" text-anchor=\"start\" dominant-baseline=\"hanging\" " +
                     "font-family=\"sans-serif\" font-size=\"%.0f\" fill=\"%s\">%s</text>%n",
                     x + 6, y + 6, LayoutMetrics.COMMENT_TEXT_FONT_SIZE,
-                    svgColor(ColorPalette.TEXT), escapeXml(display));
+                    svgColor(ColorPalette.COMMENT_TEXT), escapeXml(display));
         }
     }
 
