@@ -77,4 +77,23 @@ class ForecastTest {
         assertEquals(true, val > 110,
                 "Forecast should extrapolate above current input when trend is positive");
     }
+
+    @Test
+    void shouldNotProduceExtremeValuesWhenAverageInputNearZero() {
+        int[] step = {0};
+        double[] inputVal = {0.01};
+        Forecast forecast = Forecast.of(() -> inputVal[0], 5, 3, 0, () -> step[0]);
+        forecast.getCurrentValue(); // initialize
+
+        for (int i = 1; i <= 20; i++) {
+            step[0] = i;
+            inputVal[0] = 0.01 * Math.sin(i * 0.5);
+            double val = forecast.getCurrentValue();
+            assertEquals(false, Double.isNaN(val), "Forecast should not be NaN at step " + i);
+            assertEquals(false, Double.isInfinite(val),
+                    "Forecast should not be Infinite at step " + i);
+            assertEquals(true, Math.abs(val) < 100,
+                    "Forecast should not be extreme at step " + i + ", was " + val);
+        }
+    }
 }

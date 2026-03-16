@@ -60,4 +60,27 @@ class TrendTest {
         assertThrows(IllegalArgumentException.class, () ->
                 Trend.of(() -> 100, -1, 0, () -> 0));
     }
+
+    @Test
+    void shouldNotProduceExtremeValuesWhenAverageInputNearZero() {
+        int[] step = {0};
+        // Input that oscillates around zero: starts at a small positive value
+        // and crosses through zero
+        double[] inputVal = {0.01};
+        Trend trend = Trend.of(() -> inputVal[0], 5, 0, () -> step[0]);
+        trend.getCurrentValue(); // initialize
+
+        // Drive input to near-zero
+        for (int i = 1; i <= 20; i++) {
+            step[0] = i;
+            inputVal[0] = 0.01 * Math.sin(i * 0.5); // crosses zero
+            double trendVal = trend.getCurrentValue();
+            // Should never produce extreme values (NaN, Infinity, or very large)
+            assertEquals(false, Double.isNaN(trendVal), "Trend should not be NaN at step " + i);
+            assertEquals(false, Double.isInfinite(trendVal),
+                    "Trend should not be Infinite at step " + i);
+            assertEquals(true, Math.abs(trendVal) < 100,
+                    "Trend should not be extreme at step " + i + ", was " + trendVal);
+        }
+    }
 }
