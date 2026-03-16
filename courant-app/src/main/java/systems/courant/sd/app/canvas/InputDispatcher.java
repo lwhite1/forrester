@@ -364,7 +364,7 @@ final class InputDispatcher {
             ConnectionId connHit = HitTester.hitTestInfoLink(
                     canvasState, canvas.getConnectors(), worldX, worldY, hideAux);
             boolean isCausal = false;
-            if (connHit == null) {
+            if (connHit == null && editor != null) {
                 connHit = HitTester.hitTestCausalLink(canvasState,
                         editor.getCausalLinks(), worldX, worldY, hideAux);
                 isCausal = connHit != null;
