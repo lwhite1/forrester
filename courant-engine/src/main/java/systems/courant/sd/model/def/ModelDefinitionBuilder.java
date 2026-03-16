@@ -25,6 +25,7 @@ public class ModelDefinitionBuilder {
     private final List<CommentDef> comments = new ArrayList<>();
     private final List<ViewDef> views = new ArrayList<>();
     private final List<ReferenceDataset> referenceDatasets = new ArrayList<>();
+    private final List<TimeSeriesDef> timeSeries = new ArrayList<>();
     private SimulationSettings defaultSimulation;
     private ModelMetadata metadata;
 
@@ -500,6 +501,32 @@ public class ModelDefinitionBuilder {
     public ModelDefinitionBuilder clearReferenceDatasets() { referenceDatasets.clear(); return this; }
 
     /**
+     * Adds an exogenous input time-series definition.
+     *
+     * @param tsDef the time series definition
+     * @return this builder
+     */
+    public ModelDefinitionBuilder timeSeries(TimeSeriesDef tsDef) {
+        timeSeries.add(tsDef);
+        return this;
+    }
+
+    /**
+     * Adds an exogenous input time-series with default interpolation (linear) and extrapolation (hold).
+     *
+     * @param name       the variable name
+     * @param timeValues the time points
+     * @param dataValues the data values
+     * @param unit       the unit of measure (may be null)
+     * @return this builder
+     */
+    public ModelDefinitionBuilder timeSeries(String name, double[] timeValues,
+                                             double[] dataValues, String unit) {
+        timeSeries.add(new TimeSeriesDef(name, timeValues, dataValues, unit));
+        return this;
+    }
+
+    /**
      * Builds and returns an immutable {@link ModelDefinition} from the accumulated state.
      * The model name must have been set via {@link #name(String)} before calling this method.
      *
@@ -520,6 +547,7 @@ public class ModelDefinitionBuilder {
                 name, comment, moduleInterface,
                 stocks, flows, variables, lookupTables,
                 modules, subscripts, cldVariables, causalLinks,
-                comments, views, defaultSimulation, metadata, referenceDatasets);
+                comments, views, defaultSimulation, metadata, referenceDatasets,
+                timeSeries);
     }
 }

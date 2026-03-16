@@ -73,6 +73,9 @@ public final class DefinitionValidator {
         for (CldVariableDef v : def.cldVariables()) {
             checkDuplicateName(v.name(), allNames, lowerToOriginal, errors);
         }
+        for (TimeSeriesDef ts : def.timeSeries()) {
+            checkDuplicateName(ts.name(), allNames, lowerToOriginal, errors);
+        }
 
         // Build set of stock names for flow source/sink validation
         Set<String> stockNames = new HashSet<>();
