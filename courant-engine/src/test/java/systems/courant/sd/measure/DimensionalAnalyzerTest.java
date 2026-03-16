@@ -266,10 +266,48 @@ class DimensionalAnalyzerTest {
         }
 
         @Test
-        void shouldReturnDimensionlessForLOOKUP() {
+        void shouldReturnDimensionlessForLOOKUPWithNoUnit() {
             TestContext ctx = new TestContext().put("table", CompositeUnit.dimensionless());
             var result = analyze("LOOKUP(table, 5)", ctx);
             assertThat(result.inferredUnit().isDimensionless()).isTrue();
+            assertThat(result.isConsistent()).isTrue();
+        }
+
+        @Test
+        void shouldReturnDeclaredUnitForLOOKUP() {
+            TestContext ctx = new TestContext().put("effect_table", ITEMS);
+            var result = analyze("LOOKUP(effect_table, 5)", ctx);
+            assertThat(result.inferredUnit()).isEqualTo(ITEMS);
+            assertThat(result.isConsistent()).isTrue();
+        }
+
+        @Test
+        void shouldReturnDeclaredUnitForLOOKUP_AREA() {
+            TestContext ctx = new TestContext().put("area_table", MASS);
+            var result = analyze("LOOKUP_AREA(area_table, 1, 10)", ctx);
+            assertThat(result.inferredUnit()).isEqualTo(MASS);
+            assertThat(result.isConsistent()).isTrue();
+        }
+
+        @Test
+        void shouldWarnWhenLOOKUPUnitMismatchesContext() {
+            TestContext ctx = new TestContext()
+                    .put("effect_table", ITEMS)
+                    .put("Weight", MASS);
+            var result = analyze("LOOKUP(effect_table, 5) + Weight", ctx);
+            assertThat(result.isConsistent()).isFalse();
+            assertThat(result.warnings().getFirst().message())
+                    .contains("incompatible");
+        }
+
+        @Test
+        void shouldNotWarnWhenLOOKUPUnitMatchesContext() {
+            TestContext ctx = new TestContext()
+                    .put("effect_table", ITEMS)
+                    .put("Pop", ITEMS);
+            var result = analyze("LOOKUP(effect_table, 5) + Pop", ctx);
+            assertThat(result.isConsistent()).isTrue();
+            assertThat(result.inferredUnit()).isEqualTo(ITEMS);
         }
 
         @Test

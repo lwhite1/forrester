@@ -224,7 +224,15 @@ public class DimensionalAnalyzer {
             return CompositeUnit.dimensionless();
         }
 
-        if ("LOOKUP".equals(name)) {
+        if ("LOOKUP".equals(name) || "LOOKUP_AREA".equals(name)) {
+            // Resolve the table's declared output unit from the first argument (table name)
+            if (!call.arguments().isEmpty()
+                    && call.arguments().getFirst() instanceof Expr.Ref tableRef) {
+                CompositeUnit tableUnit = context.resolveUnit(tableRef.name()).orElse(null);
+                if (tableUnit != null) {
+                    return tableUnit;
+                }
+            }
             return CompositeUnit.dimensionless();
         }
 
