@@ -94,16 +94,16 @@ public class ModelTest {
     }
 
     @Test
-    public void shouldWarnOnModuleWithCollidingStockName() {
+    public void shouldWarnAndSkipModuleWithCollidingStockName() {
         Stock stock = new Stock("Population", 100, THING);
         model.addStock(stock);
 
         Module module = new Module("SubModel");
         module.addStock(new Stock("Population", 200, THING));
 
-        // Stock collisions log a warning but do not throw
+        // Stock name collisions log a warning and skip the duplicate
         model.addModule(module);
-        assertThat(model.getStocks()).hasSize(2);
+        assertThat(model.getStocks()).hasSize(1);
     }
 
     @Test
@@ -197,5 +197,17 @@ public class ModelTest {
         assertThat(model.getFlows()).hasSize(1000);
         assertThatThrownBy(() -> model.addFlow(Flow.create("Flow500", MINUTE, () -> new Quantity(0, THING))))
                 .isInstanceOf(IllegalArgumentException.class);
+    }
+
+    @Test
+    public void shouldSkipDuplicateFlowNameInModule() {
+        model.addFlow(Flow.create("Birth Rate", MINUTE, () -> new Quantity(10, THING)));
+
+        Module module = new Module("SubModel");
+        module.addFlow(Flow.create("Birth Rate", MINUTE, () -> new Quantity(5, THING)));
+
+        model.addModule(module);
+        // Should not add the duplicate — only 1 flow
+        assertThat(model.getFlows()).hasSize(1);
     }
 }

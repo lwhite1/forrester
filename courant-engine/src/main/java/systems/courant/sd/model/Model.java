@@ -108,9 +108,8 @@ public class Model extends Element {
      */
     public void addArrayedStock(ArrayedStock arrayedStock) {
         for (Stock stock : arrayedStock.getStocks()) {
-            if (!stocks.contains(stock)) {
+            if (stockNames.add(stock.getName())) {
                 stocks.add(stock);
-                stockNames.add(stock.getName());
             }
         }
     }
@@ -129,9 +128,8 @@ public class Model extends Element {
      */
     public void addMultiArrayedStock(MultiArrayedStock multiArrayedStock) {
         for (Stock stock : multiArrayedStock.getStocks()) {
-            if (!stocks.contains(stock)) {
+            if (stockNames.add(stock.getName())) {
                 stocks.add(stock);
-                stockNames.add(stock.getName());
             }
         }
     }
@@ -166,23 +164,19 @@ public class Model extends Element {
 
         modules.add(module);
         for (Stock stock : module.getStocks()) {
-            if (!stocks.contains(stock)) {
-                if (stockNames.contains(stock.getName())) {
-                    log.warn("Module '{}' stock '{}' has same name as existing stock in model '{}'",
-                            module.getName(), stock.getName(), getName());
-                }
+            if (!stockNames.add(stock.getName())) {
+                log.warn("Module '{}' stock '{}' has same name as existing stock in model '{}'"
+                        + " — skipping duplicate", module.getName(), stock.getName(), getName());
+            } else {
                 stocks.add(stock);
-                stockNames.add(stock.getName());
             }
         }
         for (Flow flow : module.getFlows()) {
-            if (!flows.contains(flow)) {
-                if (flowNames.contains(flow.getName())) {
-                    log.warn("Module '{}' flow '{}' has same name as existing flow in model '{}'",
-                            module.getName(), flow.getName(), getName());
-                }
+            if (!flowNames.add(flow.getName())) {
+                log.warn("Module '{}' flow '{}' has same name as existing flow in model '{}'"
+                        + " — skipping duplicate", module.getName(), flow.getName(), getName());
+            } else {
                 flows.add(flow);
-                flowNames.add(flow.getName());
             }
         }
         for (Variable variable : module.getVariables()) {
