@@ -31,6 +31,7 @@ class ImportPipelineCliTest {
                     "--source", "Some Paper (2024)",
                     "--license", "CC-BY-SA-4.0",
                     "--url", "https://example.com",
+                    "--json-name", "custom-model",
                     "--output-dir", "/tmp/src",
                     "--metadata-file", "meta.json",
                     "--dry-run",
@@ -47,6 +48,7 @@ class ImportPipelineCliTest {
             assertThat(parsed.source).isEqualTo("Some Paper (2024)");
             assertThat(parsed.license).isEqualTo("CC-BY-SA-4.0");
             assertThat(parsed.url).isEqualTo("https://example.com");
+            assertThat(parsed.jsonName).isEqualTo("custom-model");
             assertThat(parsed.outputDir).isEqualTo("/tmp/src");
             assertThat(parsed.metadataFile).isEqualTo("meta.json");
             assertThat(parsed.dryRun).isTrue();
@@ -58,6 +60,12 @@ class ImportPipelineCliTest {
         void shouldDefaultJsonOnlyToFalse() {
             ImportPipelineCli.CliArgs parsed = ImportPipelineCli.parseArgs(new String[]{});
             assertThat(parsed.jsonOnly).isFalse();
+        }
+
+        @Test
+        void shouldDefaultJsonNameToNull() {
+            ImportPipelineCli.CliArgs parsed = ImportPipelineCli.parseArgs(new String[]{});
+            assertThat(parsed.jsonName).isNull();
         }
 
         @Test
@@ -234,6 +242,26 @@ class ImportPipelineCliTest {
                 });
                 assertThat(exitCode).isEqualTo(1);
             }
+        }
+
+        @Test
+        void shouldWriteJsonOnlyWithCustomJsonName(@TempDir Path tempDir) throws IOException {
+            Path model = copyTestModel(tempDir);
+            try (ImportPipelineCli cli = new ImportPipelineCli()) {
+                int exitCode = cli.run(new String[]{
+                        "--file", model.toString(),
+                        "--class-name", "TeacupDemo",
+                        "--license", "CC-BY-SA-4.0",
+                        "--output-dir", tempDir.toString(),
+                        "--json-only",
+                        "--json-name", "my-teacup",
+                        "--overwrite"
+                });
+                assertThat(exitCode).isZero();
+            }
+            Path expectedJson = tempDir.resolve("my-teacup.json");
+            assertThat(expectedJson).exists();
+            assertThat(Files.readString(expectedJson)).contains("Teacup");
         }
 
         @Test
