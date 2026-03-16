@@ -159,7 +159,7 @@ public class Smooth implements Formula, Resettable {
                 }
                 st = 1.0;
             }
-            for (int i = 0; i < delta; i++) {
+            for (long i = 0; i < delta; i++) {
                 smoothed += (inputVal - smoothed) / st;
             }
             lastStep = step;

@@ -156,7 +156,7 @@ public class Smooth3 implements Formula, Resettable {
             double stageTime = st / 3.0;
             long delta = step - lastStep;
             double inputVal = input.getAsDouble();
-            for (int i = 0; i < delta; i++) {
+            for (long i = 0; i < delta; i++) {
                 stage1 += (inputVal - stage1) / stageTime;
                 stage2 += (stage1 - stage2) / stageTime;
                 stage3 += (stage2 - stage3) / stageTime;
