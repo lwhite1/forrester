@@ -124,6 +124,64 @@ class Smooth3Test {
     }
 
     @Test
+    void shouldClampDynamicSmoothingTimeWhenZero() {
+        int[] step = {0};
+        double[] smoothTime = {6};
+        Smooth3 formula = Smooth3.of(() -> 100, () -> smoothTime[0], 0, () -> step[0]);
+
+        formula.getCurrentValue(); // initialize
+
+        step[0] = 1;
+        double afterNormal = formula.getCurrentValue();
+        assertThat(afterNormal).as("Should advance toward input").isGreaterThan(0);
+
+        // Set smoothingTime to 0 — should clamp to 3.0, not produce NaN
+        smoothTime[0] = 0;
+        step[0] = 2;
+        double afterZero = formula.getCurrentValue();
+        assertThat(Double.isNaN(afterZero)).as("Should not produce NaN when smoothingTime is zero").isFalse();
+        assertThat(Double.isInfinite(afterZero)).as("Should not produce Infinity when smoothingTime is zero").isFalse();
+        assertThat(afterZero).as("Should still advance toward input").isGreaterThan(afterNormal);
+    }
+
+    @Test
+    void shouldClampDynamicSmoothingTimeWhenNegative() {
+        int[] step = {0};
+        double[] smoothTime = {6};
+        Smooth3 formula = Smooth3.of(() -> 100, () -> smoothTime[0], 0, () -> step[0]);
+
+        formula.getCurrentValue(); // initialize
+
+        step[0] = 1;
+        formula.getCurrentValue();
+
+        smoothTime[0] = -3;
+        step[0] = 2;
+        double afterNegative = formula.getCurrentValue();
+        assertThat(Double.isNaN(afterNegative)).as("Should not produce NaN when smoothingTime is negative").isFalse();
+        assertThat(Double.isInfinite(afterNegative)).as("Should not produce Infinity when smoothingTime is negative").isFalse();
+    }
+
+    @Test
+    void shouldResetNonPositiveWarningFlag() {
+        int[] step = {0};
+        double[] smoothTime = {0};
+        Smooth3 formula = Smooth3.of(() -> 100, () -> smoothTime[0], 0, () -> step[0]);
+
+        formula.getCurrentValue(); // initialize
+        step[0] = 1;
+        double val1 = formula.getCurrentValue(); // triggers clamp + warning
+        assertThat(Double.isNaN(val1)).isFalse();
+
+        formula.reset();
+        step[0] = 0;
+        formula.getCurrentValue(); // re-initialize
+        step[0] = 1;
+        double val2 = formula.getCurrentValue(); // should clamp again, no crash
+        assertThat(Double.isNaN(val2)).isFalse();
+    }
+
+    @Test
     void shouldAcceptVariableSmoothingTime() {
         int[] step = {0};
         double[] smoothTime = {6};

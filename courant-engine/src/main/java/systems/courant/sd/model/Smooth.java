@@ -2,6 +2,9 @@ package systems.courant.sd.model;
 
 import com.google.common.base.Preconditions;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import systems.courant.sd.model.compile.Resettable;
 
 import java.util.function.DoubleSupplier;
@@ -34,6 +37,8 @@ import java.util.function.LongSupplier;
  */
 public class Smooth implements Formula, Resettable {
 
+    private static final Logger log = LoggerFactory.getLogger(Smooth.class);
+
     private final DoubleSupplier input;
     private final DoubleSupplier smoothingTime;
     private final LongSupplier currentStep;
@@ -43,6 +48,7 @@ public class Smooth implements Formula, Resettable {
     private double smoothed;
     private boolean initialized;
     private long lastStep = -1;
+    private boolean warnedNonPositive;
 
     private Smooth(DoubleSupplier input, DoubleSupplier smoothingTime, LongSupplier currentStep,
                    double explicitInitial, boolean hasExplicitInitial) {
@@ -124,6 +130,7 @@ public class Smooth implements Formula, Resettable {
         smoothed = 0;
         initialized = false;
         lastStep = -1;
+        warnedNonPositive = false;
     }
 
     /**
@@ -145,6 +152,13 @@ public class Smooth implements Formula, Resettable {
             long delta = step - lastStep;
             double inputVal = input.getAsDouble();
             double st = smoothingTime.getAsDouble();
+            if (st <= 0) {
+                if (!warnedNonPositive) {
+                    log.warn("SMOOTH: smoothingTime is {} (non-positive), clamping to 1.0", st);
+                    warnedNonPositive = true;
+                }
+                st = 1.0;
+            }
             for (int i = 0; i < delta; i++) {
                 smoothed += (inputVal - smoothed) / st;
             }
