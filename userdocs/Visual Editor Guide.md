@@ -63,7 +63,7 @@ All panes support right-click CSV export.
 
 ## Additional Features
 
-- **Example models** — File → Open Example provides 35 bundled models across 11 categories
+- **Example models** — File → Open Example provides more than 100 bundled models across 18 categories
 - **Context-sensitive help** — F1 shows documentation for the current tool or selected element type
 - **Activity log** — timestamped event log for model creation, file operations, simulation runs, analysis executions, and validation checks
 - **Equation autocomplete** — element names and built-in functions

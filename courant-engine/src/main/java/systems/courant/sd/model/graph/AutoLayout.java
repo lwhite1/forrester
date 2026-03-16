@@ -69,6 +69,21 @@ public final class AutoLayout {
      * @return a view definition with element placements and connector routes
      */
     public static ViewDef layout(ModelDefinition def) {
+        return layout(def, Map.of());
+    }
+
+    /**
+     * Generates a {@link ViewDef} with all elements placed using ELK's layered algorithm,
+     * using the given per-element size overrides instead of the default {@link ElementSizes}.
+     * This allows callers to pre-compute text-based sizes (e.g. for AUX, LOOKUP, CLD_VARIABLE)
+     * so that the layout algorithm positions elements based on their actual rendered dimensions.
+     *
+     * @param def           the model definition whose elements are to be laid out
+     * @param sizeOverrides per-element size overrides keyed by element name; elements not in
+     *                      this map use the default size for their type
+     * @return a view definition with element placements and connector routes
+     */
+    public static ViewDef layout(ModelDefinition def, Map<String, ElementSizes> sizeOverrides) {
         if (def.stocks().isEmpty() && def.flows().isEmpty() && def.variables().isEmpty()
                 && def.lookupTables().isEmpty()
                 && def.modules().isEmpty() && def.cldVariables().isEmpty()) {
@@ -98,27 +113,27 @@ public final class AutoLayout {
 
         for (StockDef s : def.stocks()) {
             addNode(factory, root, nodeMap, typeMap, s.name(), ElementType.STOCK,
-                    westPorts, eastPorts);
+                    westPorts, eastPorts, sizeOverrides);
         }
         for (FlowDef f : def.flows()) {
             addNode(factory, root, nodeMap, typeMap, f.name(), ElementType.FLOW,
-                    westPorts, eastPorts);
+                    westPorts, eastPorts, sizeOverrides);
         }
         for (VariableDef a : def.variables()) {
             addNode(factory, root, nodeMap, typeMap, a.name(), ElementType.AUX,
-                    westPorts, eastPorts);
+                    westPorts, eastPorts, sizeOverrides);
         }
         for (LookupTableDef t : def.lookupTables()) {
             addNode(factory, root, nodeMap, typeMap, t.name(), ElementType.LOOKUP,
-                    westPorts, eastPorts);
+                    westPorts, eastPorts, sizeOverrides);
         }
         for (ModuleInstanceDef m : def.modules()) {
             addNode(factory, root, nodeMap, typeMap, m.instanceName(), ElementType.MODULE,
-                    westPorts, eastPorts);
+                    westPorts, eastPorts, sizeOverrides);
         }
         for (CldVariableDef v : def.cldVariables()) {
             addNode(factory, root, nodeMap, typeMap, v.name(), ElementType.CLD_VARIABLE,
-                    westPorts, eastPorts);
+                    westPorts, eastPorts, sizeOverrides);
         }
 
         // Set initial X positions from the material flow chain so INTERACTIVE
@@ -225,7 +240,7 @@ public final class AutoLayout {
         }
 
         alignFlowsWithStocks(placements, def);
-        resolveOverlaps(placements);
+        resolveOverlaps(placements, sizeOverrides);
 
         List<ConnectorRoute> connectors = ConnectorGenerator.generate(def);
         return new ViewDef("Auto Layout", placements, connectors, List.of());
@@ -236,11 +251,12 @@ public final class AutoLayout {
                                 Map<String, ElementType> typeMap,
                                 String name, ElementType type,
                                 Map<String, ElkPort> westPorts,
-                                Map<String, ElkPort> eastPorts) {
+                                Map<String, ElkPort> eastPorts,
+                                Map<String, ElementSizes> sizeOverrides) {
         ElkNode node = factory.createElkNode();
         node.setParent(root);
         node.setIdentifier(name);
-        ElementSizes size = ElementSizes.forType(type);
+        ElementSizes size = sizeOverrides.getOrDefault(name, ElementSizes.forType(type));
         node.setWidth(size.width());
         node.setHeight(size.height());
         nodeMap.put(name, node);
@@ -524,7 +540,8 @@ public final class AutoLayout {
     /**
      * Resolves overlaps by checking all element pairs and nudging apart any that overlap.
      */
-    private static void resolveOverlaps(List<ElementPlacement> placements) {
+    private static void resolveOverlaps(List<ElementPlacement> placements,
+                                         Map<String, ElementSizes> sizeOverrides) {
         double minGap = 20;
         for (int pass = 0; pass < 3; pass++) {
             boolean changed = false;
@@ -532,10 +549,14 @@ public final class AutoLayout {
                 for (int j = i + 1; j < placements.size(); j++) {
                     ElementPlacement a = placements.get(i);
                     ElementPlacement b = placements.get(j);
-                    double aw = ElementSizes.forType(a.type()).width() / 2.0;
-                    double ah = ElementSizes.forType(a.type()).height() / 2.0;
-                    double bw = ElementSizes.forType(b.type()).width() / 2.0;
-                    double bh = ElementSizes.forType(b.type()).height() / 2.0;
+                    ElementSizes sizeA = sizeOverrides.getOrDefault(a.name(),
+                            ElementSizes.forType(a.type()));
+                    ElementSizes sizeB = sizeOverrides.getOrDefault(b.name(),
+                            ElementSizes.forType(b.type()));
+                    double aw = sizeA.width() / 2.0;
+                    double ah = sizeA.height() / 2.0;
+                    double bw = sizeB.width() / 2.0;
+                    double bh = sizeB.height() / 2.0;
 
                     double overlapX = (aw + bw + minGap) - Math.abs(a.x() - b.x());
                     double overlapY = (ah + bh + minGap) - Math.abs(a.y() - b.y());

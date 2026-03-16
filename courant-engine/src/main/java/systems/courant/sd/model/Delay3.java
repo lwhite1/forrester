@@ -133,7 +133,7 @@ public class Delay3 implements Formula, Resettable {
             double stageTime = delayTime / 3.0;
             long delta = step - lastStep;
             double inputVal = input.getAsDouble();
-            for (int d = 0; d < delta; d++) {
+            for (long d = 0; d < delta; d++) {
                 // Compute outflow rates from current stage levels
                 double rate1 = stage1 / stageTime;
                 double rate2 = stage2 / stageTime;

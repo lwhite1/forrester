@@ -1,10 +1,20 @@
 package systems.courant.sd.app.canvas;
 
+import systems.courant.sd.model.def.CldVariableDef;
 import systems.courant.sd.model.def.ElementType;
+import systems.courant.sd.model.def.LookupTableDef;
+import systems.courant.sd.model.def.ModelDefinition;
+import systems.courant.sd.model.def.ModuleInstanceDef;
+import systems.courant.sd.model.def.StockDef;
+import systems.courant.sd.model.def.VariableDef;
+import systems.courant.sd.model.graph.ElementSizes;
 
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Element dimensions, spacing, and font metrics for the Layered Flow Diagram.
@@ -139,10 +149,18 @@ public final class LayoutMetrics {
     public static final double AUX_MAX_AUTO_WIDTH = 200;
     /** Maximum auto-computed width for LOOKUP elements (2x default). */
     public static final double LOOKUP_MAX_AUTO_WIDTH = 200;
+    /** Maximum auto-computed width for STOCK elements (2x default). */
+    public static final double STOCK_MAX_AUTO_WIDTH = 280;
+    /** Maximum auto-computed width for MODULE elements (2x default). */
+    public static final double MODULE_MAX_AUTO_WIDTH = 240;
     /** Horizontal padding around text for AUX variable auto-sizing. */
     public static final double AUX_TEXT_PADDING = 24;
     /** Horizontal padding around text for LOOKUP auto-sizing. */
     public static final double LOOKUP_TEXT_PADDING = 20;
+    /** Horizontal padding around text for STOCK auto-sizing. */
+    public static final double STOCK_TEXT_PADDING = 24;
+    /** Horizontal padding around text for MODULE auto-sizing. */
+    public static final double MODULE_TEXT_PADDING = 24;
 
     /**
      * Returns the width for a given element type.
@@ -227,6 +245,32 @@ public final class LayoutMetrics {
     }
 
     /**
+     * Computes the width for a STOCK based on its text label.
+     * Returns the measured text width plus padding, clamped to
+     * [{@link #STOCK_WIDTH}, {@link #STOCK_MAX_AUTO_WIDTH}].
+     */
+    public static double stockWidthForName(String name) {
+        Text text = new Text(name);
+        text.setFont(STOCK_NAME_FONT);
+        double textWidth = text.getLayoutBounds().getWidth();
+        return Math.max(STOCK_WIDTH,
+                Math.min(textWidth + STOCK_TEXT_PADDING, STOCK_MAX_AUTO_WIDTH));
+    }
+
+    /**
+     * Computes the width for a MODULE based on its text label.
+     * Returns the measured text width plus padding, clamped to
+     * [{@link #MODULE_WIDTH}, {@link #MODULE_MAX_AUTO_WIDTH}].
+     */
+    public static double moduleWidthForName(String name) {
+        Text text = new Text(name);
+        text.setFont(MODULE_NAME_FONT);
+        double textWidth = text.getLayoutBounds().getWidth();
+        return Math.max(MODULE_WIDTH,
+                Math.min(textWidth + MODULE_TEXT_PADDING, MODULE_MAX_AUTO_WIDTH));
+    }
+
+    /**
      * Computes the width for a CLD variable based on its text label.
      * Returns the measured text width plus padding, clamped to the minimum.
      */
@@ -261,5 +305,39 @@ public final class LayoutMetrics {
         double textWidth = text.getLayoutBounds().getWidth();
         return Math.max(minWidthFor(ElementType.LOOKUP),
                 Math.min(textWidth + LOOKUP_TEXT_PADDING, LOOKUP_MAX_AUTO_WIDTH));
+    }
+
+    /**
+     * Computes per-element size overrides for elements whose rendered size depends on
+     * their name text (AUX, LOOKUP, CLD_VARIABLE). These overrides should be passed to
+     * {@link systems.courant.sd.model.graph.AutoLayout#layout(ModelDefinition, Map)}
+     * so the layout algorithm uses actual rendered dimensions instead of fixed defaults.
+     *
+     * @param def the model definition whose elements need size computation
+     * @return a map of element name to {@link ElementSizes} for elements with text-dependent widths
+     */
+    public static Map<String, ElementSizes> computeSizeOverrides(ModelDefinition def) {
+        Map<String, ElementSizes> overrides = new HashMap<>();
+        for (StockDef s : def.stocks()) {
+            double w = stockWidthForName(s.name());
+            overrides.put(s.name(), new ElementSizes(w, STOCK_HEIGHT));
+        }
+        for (ModuleInstanceDef m : def.modules()) {
+            double w = moduleWidthForName(m.instanceName());
+            overrides.put(m.instanceName(), new ElementSizes(w, MODULE_HEIGHT));
+        }
+        for (VariableDef v : def.variables()) {
+            double w = auxWidthForName(v.name());
+            overrides.put(v.name(), new ElementSizes(w, AUX_HEIGHT));
+        }
+        for (LookupTableDef t : def.lookupTables()) {
+            double w = lookupWidthForName(t.name());
+            overrides.put(t.name(), new ElementSizes(w, LOOKUP_HEIGHT));
+        }
+        for (CldVariableDef c : def.cldVariables()) {
+            double w = cldVarWidthForName(c.name());
+            overrides.put(c.name(), new ElementSizes(w, CLD_VAR_HEIGHT));
+        }
+        return overrides;
     }
 }

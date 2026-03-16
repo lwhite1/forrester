@@ -1126,7 +1126,8 @@ public class ModelCanvas extends Canvas {
         if (!module.definition().views().isEmpty()) {
             moduleView = module.definition().views().getFirst();
         } else {
-            moduleView = AutoLayout.layout(module.definition());
+            var sizeOverrides = LayoutMetrics.computeSizeOverrides(module.definition());
+            moduleView = AutoLayout.layout(module.definition(), sizeOverrides);
         }
 
         this.editor = moduleEditor;
