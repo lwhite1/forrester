@@ -261,6 +261,9 @@ public class PropertiesPanel extends VBox {
     private void commitModelName(TextField nameField, ModelEditor editor) {
         String newName = nameField.getText().trim();
         if (!newName.isEmpty() && !newName.equals(editor.getModelName())) {
+            if (ctx.getCanvas() != null) {
+                ctx.getCanvas().saveUndoState("Rename model");
+            }
             editor.setModelName(newName);
         }
     }
@@ -269,6 +272,9 @@ public class PropertiesPanel extends VBox {
         String text = descArea.getText().trim();
         String comment = text.isEmpty() ? null : text;
         if (!Objects.equals(comment, editor.getModelComment())) {
+            if (ctx.getCanvas() != null) {
+                ctx.getCanvas().saveUndoState("Edit description");
+            }
             editor.setModelComment(comment != null ? comment : "");
         }
     }
@@ -366,6 +372,8 @@ public class PropertiesPanel extends VBox {
                 polarityBox.setOnAction(e -> {
                     if (!ctx.isUpdatingFields()) {
                         CausalLinkDef.Polarity newPolarity = polarityFromDisplay(polarityBox.getValue());
+                        ctx.getCanvas().saveUndoState(
+                                "Set " + connection.from() + " \u2192 " + connection.to() + " polarity");
                         ctx.getCanvas().applyMutation(() ->
                                 ctx.getEditor().setCausalLinkPolarity(
                                         connection.from(), connection.to(), newPolarity));
