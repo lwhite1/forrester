@@ -94,6 +94,16 @@ class FanChartPaneFxTest {
         assertThat(pane.getChildren()).hasSize(1);
     }
 
+    @Test
+    @DisplayName("Redraw with missing variable does not throw (#894)")
+    void redrawWithMissingVariableDoesNotThrow(FxRobot robot) {
+        MonteCarloResult mcResult = buildMonteCarloResult();
+        javafx.application.Platform.runLater(() -> pane.redraw(mcResult, "NonExistentVariable"));
+        org.testfx.util.WaitForAsyncUtils.waitForFxEvents();
+        // Should display a message instead of throwing
+        assertThat(pane.getChildren()).hasSize(1);
+    }
+
     private static MonteCarloResult buildMonteCarloResult() {
         List<RunResult> runs = new ArrayList<>();
         for (int i = 0; i < 20; i++) {
