@@ -547,14 +547,25 @@ class UndoManagerTest {
             manager.undo(snapshot("S3"), "Undone");
             // Undo stack: [S1], Redo stack: [S3]
             assertThat(manager.canRedo()).isTrue();
-            int redoCountBefore = manager.redoLabels().size();
 
-            // Tentative push then discard — redo must survive
+            // Tentative push then discard — redo must survive with correct content
             manager.pushUndoTentative(snapshot("T"), "Tentative");
             manager.discardLastUndo();
 
             assertThat(manager.canRedo()).isTrue();
-            assertThat(manager.redoLabels()).hasSize(redoCountBefore);
+            assertThat(manager.redoLabels()).hasSize(1);
+            UndoManager.Snapshot redone = manager.redo(snapshot("Current")).orElseThrow();
+            assertSnapshotName(redone, "S3");
+        }
+
+        @Test
+        void shouldExposeOriginalUndoEntryAfterDiscard() {
+            manager.pushUndo(snapshot("S1"), "First");
+            manager.pushUndoTentative(snapshot("T"), "Tentative");
+            manager.discardLastUndo();
+
+            UndoManager.Snapshot result = manager.undo(snapshot("Current")).orElseThrow();
+            assertSnapshotName(result, "S1");
         }
     }
 
@@ -583,6 +594,15 @@ class UndoManagerTest {
 
             assertThat(manager.canRedo()).isFalse();
             assertThat(manager.canUndo()).isTrue();
+        }
+
+        @Test
+        void shouldMakeTentativeEntryUndoableAfterConfirm() {
+            manager.pushUndoTentative(snapshot("BeforeReconnect"), "Reconnect");
+            manager.confirmLastUndo();
+
+            UndoManager.Snapshot result = manager.undo(snapshot("AfterReconnect")).orElseThrow();
+            assertSnapshotName(result, "BeforeReconnect");
         }
     }
 
