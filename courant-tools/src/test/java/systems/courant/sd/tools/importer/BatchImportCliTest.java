@@ -157,10 +157,24 @@ class BatchImportCliTest {
         }
 
         @Test
-        void shouldReturnZeroForHelpViaRun() throws IOException {
+        void shouldReturnZeroForHelpViaRun() {
             BatchImportCli cli = new BatchImportCli();
             int exitCode = cli.run(new String[]{"--help"});
             assertThat(exitCode).isZero();
+        }
+
+        @Test
+        void shouldReturnOneForUnknownOptionViaRun() {
+            BatchImportCli cli = new BatchImportCli();
+            int exitCode = cli.run(new String[]{"--bogus"});
+            assertThat(exitCode).isEqualTo(1);
+        }
+
+        @Test
+        void shouldReturnOneForMissingManifest() {
+            BatchImportCli cli = new BatchImportCli();
+            int exitCode = cli.run(new String[]{"--manifest", "nonexistent.json"});
+            assertThat(exitCode).isEqualTo(1);
         }
     }
 }
