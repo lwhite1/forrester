@@ -276,6 +276,9 @@ public class ModelDefinitionSerializer {
             node.set("xValues", doubleArrayToJson(t.xValues()));
             node.set("yValues", doubleArrayToJson(t.yValues()));
             node.put("interpolation", t.interpolation());
+            if (t.unit() != null) {
+                node.put("unit", t.unit());
+            }
             arr.add(node);
         }
         return arr;
@@ -623,7 +626,8 @@ public class ModelDefinitionSerializer {
                         textOrNull(n, "comment"),
                         jsonToDoubleArray(requiredNode(n, "xValues")),
                         jsonToDoubleArray(requiredNode(n, "yValues")),
-                        requiredText(n, "interpolation")));
+                        requiredText(n, "interpolation"),
+                        textOrNull(n, "unit")));
             }
         }
         return lookupTables;

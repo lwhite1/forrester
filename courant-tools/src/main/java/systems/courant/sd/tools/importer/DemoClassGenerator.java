@@ -230,13 +230,7 @@ public class DemoClassGenerator {
         if (!definition.lookupTables().isEmpty()) {
             sb.append(INDENT).append("// Lookup tables\n");
             for (LookupTableDef table : definition.lookupTables()) {
-                sb.append(INDENT).append("builder.lookupTable(new LookupTableDef(")
-                        .append(escapeString(table.name())).append(", ")
-                        .append(escapeString(table.comment())).append(", ")
-                        .append(doubleArrayLiteral(table.xValues())).append(", ")
-                        .append(doubleArrayLiteral(table.yValues())).append(", ")
-                        .append(escapeString(table.interpolation()))
-                        .append("));\n");
+                emitLookupTableDef(sb, table, INDENT, "builder");
             }
             sb.append('\n');
         }
@@ -340,13 +334,7 @@ public class DemoClassGenerator {
             }
         }
         for (LookupTableDef table : inner.lookupTables()) {
-            sb.append(blockIndent).append("innerBuilder.lookupTable(new LookupTableDef(")
-                    .append(escapeString(table.name())).append(", ")
-                    .append(escapeString(table.comment())).append(", ")
-                    .append(doubleArrayLiteral(table.xValues())).append(", ")
-                    .append(doubleArrayLiteral(table.yValues())).append(", ")
-                    .append(escapeString(table.interpolation()))
-                    .append("));\n");
+            emitLookupTableDef(sb, table, blockIndent, "innerBuilder");
         }
         for (VariableDef v : inner.variables().stream().filter(a -> !a.isLiteral()).toList()) {
             emitVariableDef(sb, v, blockIndent, "innerBuilder");
@@ -448,6 +436,23 @@ public class DemoClassGenerator {
                     .append(escapeString(flow.sink()))
                     .append("));\n");
         }
+    }
+
+    /**
+     * Emits a LookupTableDef constructor call, including unit when present.
+     */
+    private void emitLookupTableDef(StringBuilder sb, LookupTableDef table,
+                                     String indent, String builderName) {
+        sb.append(indent).append(builderName).append(".lookupTable(new LookupTableDef(")
+                .append(escapeString(table.name())).append(", ")
+                .append(escapeString(table.comment())).append(", ")
+                .append(doubleArrayLiteral(table.xValues())).append(", ")
+                .append(doubleArrayLiteral(table.yValues())).append(", ")
+                .append(escapeString(table.interpolation()));
+        if (table.unit() != null) {
+            sb.append(", ").append(escapeString(table.unit()));
+        }
+        sb.append("));\n");
     }
 
     /**

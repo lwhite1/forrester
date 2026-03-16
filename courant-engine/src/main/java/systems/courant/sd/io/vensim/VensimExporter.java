@@ -314,7 +314,7 @@ public final class VensimExporter {
         }
 
         String equation = range + "," + pairs;
-        String units = "";
+        String units = lookup.unit() != null ? lookup.unit() : "";
         String comment = lookup.comment() != null ? lookup.comment() : "";
 
         // Lookup tables use the () operator format: Name( data )

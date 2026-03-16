@@ -11,13 +11,15 @@ import java.util.Objects;
  * @param xValues the x-axis data points
  * @param yValues the y-axis data points (same length as xValues)
  * @param interpolation the interpolation method: "LINEAR" or "SPLINE"
+ * @param unit the output unit of the lookup table, or {@code null} if unspecified
  */
 public record LookupTableDef(
         String name,
         String comment,
         double[] xValues,
         double[] yValues,
-        String interpolation
+        String interpolation,
+        String unit
 ) implements ElementDef {
 
     public LookupTableDef {
@@ -81,7 +83,21 @@ public record LookupTableDef(
     }
 
     /**
-     * Convenience constructor that creates a lookup table definition without a comment.
+     * Backward-compatible constructor without unit.
+     *
+     * @param name          the table name
+     * @param comment       optional description
+     * @param xValues       the x-axis data points (must be strictly increasing)
+     * @param yValues       the y-axis data points (same length as xValues)
+     * @param interpolation the interpolation method: {@code "LINEAR"} or {@code "SPLINE"}
+     */
+    public LookupTableDef(String name, String comment, double[] xValues, double[] yValues,
+                           String interpolation) {
+        this(name, comment, xValues, yValues, interpolation, null);
+    }
+
+    /**
+     * Convenience constructor without comment or unit.
      *
      * @param name          the table name
      * @param xValues       the x-axis data points (must be strictly increasing)
@@ -89,7 +105,7 @@ public record LookupTableDef(
      * @param interpolation the interpolation method: {@code "LINEAR"} or {@code "SPLINE"}
      */
     public LookupTableDef(String name, double[] xValues, double[] yValues, String interpolation) {
-        this(name, null, xValues, yValues, interpolation);
+        this(name, null, xValues, yValues, interpolation, null);
     }
 
     @Override
@@ -104,12 +120,13 @@ public record LookupTableDef(
                 && Objects.equals(comment, that.comment)
                 && Arrays.equals(xValues, that.xValues)
                 && Arrays.equals(yValues, that.yValues)
-                && Objects.equals(interpolation, that.interpolation);
+                && Objects.equals(interpolation, that.interpolation)
+                && Objects.equals(unit, that.unit);
     }
 
     @Override
     public int hashCode() {
-        int result = Objects.hash(name, comment, interpolation);
+        int result = Objects.hash(name, comment, interpolation, unit);
         result = 31 * result + Arrays.hashCode(xValues);
         result = 31 * result + Arrays.hashCode(yValues);
         return result;
