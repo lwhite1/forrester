@@ -94,16 +94,16 @@ public class ModelTest {
     }
 
     @Test
-    public void shouldWarnAndSkipModuleWithCollidingStockName() {
+    public void shouldWarnButAddModuleStockWithCollidingName() {
         Stock stock = new Stock("Population", 100, THING);
         model.addStock(stock);
 
         Module module = new Module("SubModel");
         module.addStock(new Stock("Population", 200, THING));
 
-        // Stock name collisions log a warning and skip the duplicate
+        // Different object with same name: added with a warning (supports multi-instance modules)
         model.addModule(module);
-        assertThat(model.getStocks()).hasSize(1);
+        assertThat(model.getStocks()).hasSize(2);
     }
 
     @Test
@@ -200,14 +200,14 @@ public class ModelTest {
     }
 
     @Test
-    public void shouldSkipDuplicateFlowNameInModule() {
+    public void shouldWarnButAddModuleFlowWithCollidingName() {
         model.addFlow(Flow.create("Birth Rate", MINUTE, () -> new Quantity(10, THING)));
 
         Module module = new Module("SubModel");
         module.addFlow(Flow.create("Birth Rate", MINUTE, () -> new Quantity(5, THING)));
 
+        // Different object with same name: added with a warning (supports multi-instance modules)
         model.addModule(module);
-        // Should not add the duplicate — only 1 flow
-        assertThat(model.getFlows()).hasSize(1);
+        assertThat(model.getFlows()).hasSize(2);
     }
 }
