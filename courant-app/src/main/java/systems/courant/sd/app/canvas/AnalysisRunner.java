@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
@@ -28,6 +29,7 @@ public class AnalysisRunner {
 
     private final StatusBar statusBar;
     private final BiConsumer<String, String> errorHandler;
+    private volatile Future<?> currentTask;
 
     public AnalysisRunner(StatusBar statusBar,
                           BiConsumer<String, String> errorHandler) {
@@ -46,8 +48,9 @@ public class AnalysisRunner {
      */
     public <T> void run(String progressMessage, Callable<T> task,
                         Consumer<T> onSuccess, String errorTitle) {
+        cancelCurrentTask();
         statusBar.showProgress(progressMessage);
-        executor.submit(() -> {
+        currentTask = executor.submit(() -> {
             try {
                 T result = task.call();
                 Platform.runLater(() -> {
@@ -69,7 +72,8 @@ public class AnalysisRunner {
      * Runs a background task without progress indication (e.g. validation).
      */
     public <T> void run(Callable<T> task, Consumer<T> onSuccess, String errorTitle) {
-        executor.submit(() -> {
+        cancelCurrentTask();
+        currentTask = executor.submit(() -> {
             try {
                 T result = task.call();
                 Platform.runLater(() -> onSuccess.accept(result));
@@ -79,6 +83,13 @@ public class AnalysisRunner {
                         e.getMessage() != null ? e.getMessage() : e.toString()));
             }
         });
+    }
+
+    private void cancelCurrentTask() {
+        Future<?> prev = currentTask;
+        if (prev != null && !prev.isDone()) {
+            prev.cancel(true);
+        }
     }
 
     /**
