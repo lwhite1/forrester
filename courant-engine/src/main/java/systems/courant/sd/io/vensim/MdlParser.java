@@ -256,6 +256,10 @@ public final class MdlParser {
                         }
                     }
                 } else {
+                    logger.warn("Malformed :MACRO: header — ignoring: {}",
+                            macroHeaderLine.strip());
+                    inMacro = false;
+                    macroBody = null;
                     macroName = null;
                     macroParams = null;
                 }
