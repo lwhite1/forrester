@@ -72,6 +72,9 @@ public class SimulationResultPane extends BorderPane {
     private static final Logger log = LoggerFactory.getLogger(SimulationResultPane.class);
     private static final String DASHED_STROKE = "-fx-stroke-dash-array: 8 4;";
     private static final String REFERENCE_STROKE = "-fx-stroke-dash-array: 3 3;";
+    /** Maximum data points per chart series. Beyond this, rows are downsampled
+     *  to keep chart rendering responsive. The table always shows all rows. */
+    private static final int MAX_CHART_POINTS = 1000;
     /** Muted/darker versions of series colors for reference data overlay. */
     private static final List<String> REFERENCE_COLORS = List.of(
             "#0d3b66", "#b35900", "#1a661a", "#8b1a1a", "#5c3d7a",
@@ -129,11 +132,15 @@ public class SimulationResultPane extends BorderPane {
 
     private TableView<double[]> buildTable(SimulationRunner.SimulationResult result) {
         TableView<double[]> table = new TableView<>();
+        // Disable column sorting — rows are already in chronological order,
+        // and the String cell values would sort lexicographically ("10" < "2").
+        table.setSortPolicy(t -> false);
         List<String> columns = result.columnNames();
 
         for (int c = 0; c < columns.size(); c++) {
             final int colIndex = c;
             TableColumn<double[], String> col = new TableColumn<>(columns.get(c));
+            col.setSortable(false);
             col.setCellValueFactory(data -> {
                 double[] row = data.getValue();
                 if (colIndex < row.length) {
@@ -193,12 +200,21 @@ public class SimulationResultPane extends BorderPane {
             String tooltipText = ghost.tooltipText();
 
             List<XYChart.Series<Number, Number>> groupSeries = new ArrayList<>();
+            int ghostStride = chartStride(ghostRows.size());
             for (int c = 1; c < ghostColumns.size(); c++) {
                 XYChart.Series<Number, Number> series = new XYChart.Series<>();
                 series.setName(ghostColumns.get(c) + " (" + ghost.name() + ")");
-                for (double[] row : ghostRows) {
+                for (int r = 0; r < ghostRows.size(); r += ghostStride) {
+                    double[] row = ghostRows.get(r);
                     if (c < row.length) {
                         series.getData().add(new XYChart.Data<>(row[0], row[c]));
+                    }
+                }
+                // Always include the last row to preserve the full time range
+                if (ghostStride > 1 && !ghostRows.isEmpty()) {
+                    double[] last = ghostRows.getLast();
+                    if (c < last.length) {
+                        series.getData().add(new XYChart.Data<>(last[0], last[c]));
                     }
                 }
                 // Style with ghost's assigned color
@@ -224,6 +240,7 @@ public class SimulationResultPane extends BorderPane {
         chart.getData().addAll(allGhostSeries);
 
         // --- Current run series ---
+        int stride = chartStride(rows.size());
         List<XYChart.Series<Number, Number>> currentSeries = new ArrayList<>();
         List<String> behaviorModes = new ArrayList<>();
         List<Boolean> isStock = new ArrayList<>();
@@ -235,8 +252,17 @@ public class SimulationResultPane extends BorderPane {
             for (int r = 0; r < rows.size(); r++) {
                 double[] row = rows.get(r);
                 if (c < row.length) {
-                    series.getData().add(new XYChart.Data<>(row[0], row[c]));
                     colValues[r] = row[c];
+                    if (r % stride == 0) {
+                        series.getData().add(new XYChart.Data<>(row[0], row[c]));
+                    }
+                }
+            }
+            // Always include the last row to preserve the full time range
+            if (stride > 1 && !rows.isEmpty()) {
+                double[] last = rows.getLast();
+                if (c < last.length) {
+                    series.getData().add(new XYChart.Data<>(last[0], last[c]));
                 }
             }
             currentSeries.add(series);
@@ -845,5 +871,16 @@ public class SimulationResultPane extends BorderPane {
             return 5 * exp;
         }
         return 10 * exp;
+    }
+
+    /**
+     * Returns the stride for downsampling chart data. Always includes the first
+     * and last rows to preserve the full time range.
+     */
+    private static int chartStride(int rowCount) {
+        if (rowCount <= MAX_CHART_POINTS) {
+            return 1;
+        }
+        return (rowCount - 1) / (MAX_CHART_POINTS - 1);
     }
 }
