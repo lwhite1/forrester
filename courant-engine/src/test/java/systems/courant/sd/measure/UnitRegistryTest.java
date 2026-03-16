@@ -2,6 +2,8 @@ package systems.courant.sd.measure;
 
 import systems.courant.sd.measure.units.dimensionless.DimensionlessUnits;
 import systems.courant.sd.measure.units.item.ItemUnit;
+import systems.courant.sd.measure.units.money.MoneyUnits;
+import systems.courant.sd.measure.units.money.NamedCurrency;
 import systems.courant.sd.measure.units.time.TimeUnits;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -193,11 +195,12 @@ class UnitRegistryTest {
         }
 
         @Test
-        @DisplayName("should silently create unit for known acceptable names like 'patient'")
-        void shouldSilentlyCreateKnownAcceptableName() {
-            Unit unit = registry.resolve("patient");
+        @DisplayName("should silently create unit for domain-specific names like 'Deer'")
+        void shouldSilentlyCreateDomainSpecificName() {
+            Unit unit = registry.resolve("Deer");
             assertThat(unit).isNotNull();
-            assertThat(unit.getName()).isEqualTo("patient");
+            assertThat(unit.getName()).isEqualTo("Deer");
+            assertThat(unit).isInstanceOf(ItemUnit.class);
         }
 
         @Test
@@ -212,6 +215,117 @@ class UnitRegistryTest {
         void shouldResolvePercentToDimensionless() {
             Unit unit = registry.resolve("percent");
             assertThat(unit).isSameAs(DimensionlessUnits.DIMENSIONLESS);
+        }
+    }
+
+    @Nested
+    @DisplayName("Currency recognition (#749)")
+    class CurrencyRecognition {
+
+        @Test
+        @DisplayName("should resolve 'EURO' to a NamedCurrency in MONEY dimension")
+        void shouldResolveEuroToMoney() {
+            Unit unit = registry.resolve("EURO");
+            assertThat(unit).isInstanceOf(NamedCurrency.class);
+            assertThat(unit.getDimension()).isSameAs(Dimension.MONEY);
+            assertThat(unit.getName()).isEqualTo("EURO");
+        }
+
+        @Test
+        @DisplayName("should resolve 'GBP' to a NamedCurrency in MONEY dimension")
+        void shouldResolveGbpToMoney() {
+            Unit unit = registry.resolve("GBP");
+            assertThat(unit).isInstanceOf(NamedCurrency.class);
+            assertThat(unit.getDimension()).isSameAs(Dimension.MONEY);
+        }
+
+        @Test
+        @DisplayName("should resolve 'dollar' to USD via alias")
+        void shouldResolveDollarAlias() {
+            Unit unit = registry.find("dollar");
+            assertThat(unit).isSameAs(MoneyUnits.USD);
+        }
+
+        @Test
+        @DisplayName("should resolve '$' to USD via alias")
+        void shouldResolveDollarSign() {
+            Unit unit = registry.find("$");
+            assertThat(unit).isSameAs(MoneyUnits.USD);
+        }
+
+        @Test
+        @DisplayName("should resolve 'M$' as currency")
+        void shouldResolveMDollar() {
+            Unit unit = registry.resolve("M$");
+            assertThat(unit.getDimension()).isSameAs(Dimension.MONEY);
+        }
+
+        @Test
+        @DisplayName("should resolve currency names case-insensitively")
+        void shouldResolveCurrencyCaseInsensitive() {
+            Unit euro = registry.resolve("euro");
+            assertThat(euro.getDimension()).isSameAs(Dimension.MONEY);
+
+            Unit yen = registry.resolve("JPY");
+            assertThat(yen.getDimension()).isSameAs(Dimension.MONEY);
+        }
+    }
+
+    @Nested
+    @DisplayName("Area unit recognition (#749)")
+    class AreaUnits {
+
+        @Test
+        @DisplayName("should find 'hectare' as a built-in unit")
+        void shouldFindHectare() {
+            Unit unit = registry.find("hectare");
+            assertThat(unit).isNotNull();
+            assertThat(unit.getDimension()).isSameAs(Dimension.LENGTH);
+        }
+
+        @Test
+        @DisplayName("should find 'km2' as a built-in unit")
+        void shouldFindKm2() {
+            Unit unit = registry.find("km2");
+            assertThat(unit).isNotNull();
+            assertThat(unit.getDimension()).isSameAs(Dimension.LENGTH);
+        }
+
+        @Test
+        @DisplayName("should find 'acre' as a built-in unit")
+        void shouldFindAcre() {
+            Unit unit = registry.find("acre");
+            assertThat(unit).isNotNull();
+            assertThat(unit.getDimension()).isSameAs(Dimension.LENGTH);
+        }
+
+        @Test
+        @DisplayName("should find 'hectares' (plural) as a built-in unit")
+        void shouldFindHectaresPlural() {
+            Unit unit = registry.find("hectares");
+            assertThat(unit).isNotNull();
+        }
+    }
+
+    @Nested
+    @DisplayName("Alias registration (#749)")
+    class AliasRegistration {
+
+        @Test
+        @DisplayName("registerAlias should make name resolve to target unit")
+        void shouldRegisterAlias() {
+            UnitRegistry reg = new UnitRegistry();
+            reg.registerAlias("personen", reg.find("Person"));
+            assertThat(reg.find("personen")).isNotNull();
+            assertThat(reg.find("personen").getName()).isEqualTo("Person");
+        }
+
+        @Test
+        @DisplayName("alias should be case-insensitive")
+        void shouldRegisterAliasCaseInsensitive() {
+            UnitRegistry reg = new UnitRegistry();
+            reg.registerAlias("Persoon", reg.find("Person"));
+            assertThat(reg.find("persoon")).isNotNull();
         }
     }
 

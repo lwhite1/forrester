@@ -1,10 +1,12 @@
 package systems.courant.sd.measure;
 
 import systems.courant.sd.measure.units.dimensionless.DimensionlessUnits;
+import systems.courant.sd.measure.units.item.ItemUnit;
 import systems.courant.sd.measure.units.item.ItemUnits;
 import systems.courant.sd.measure.units.length.LengthUnits;
 import systems.courant.sd.measure.units.mass.MassUnits;
 import systems.courant.sd.measure.units.money.MoneyUnits;
+import systems.courant.sd.measure.units.money.NamedCurrency;
 import systems.courant.sd.measure.units.temperature.TemperatureUnits;
 import systems.courant.sd.measure.units.time.TimeUnits;
 import systems.courant.sd.measure.units.volume.VolumeUnits;
@@ -18,8 +20,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Maps unit name strings to {@link Unit} objects. Auto-registers all built-in unit enums.
- * Custom units (e.g. {@link systems.courant.sd.measure.units.item.ItemUnit})
- * can be registered dynamically.
+ * Custom units (e.g. {@link ItemUnit}) can be registered dynamically.
  *
  * <p>Lookup is case-sensitive with a case-insensitive fallback.
  */
@@ -28,28 +29,27 @@ public class UnitRegistry {
     private static final Logger log = LoggerFactory.getLogger(UnitRegistry.class);
     private static final int MAX_CUSTOM_UNITS = 10_000;
 
+    /** Dimensionless-equivalent names (lowercase). Resolved to DIMENSIONLESS. */
+    private static final Set<String> DIMENSIONLESS_NAMES = Set.of(
+            "dmnl", "units", "unit", "dimensionless",
+            "fraction", "percent", "percentage", "ratio", "index");
+
     /**
-     * Unit names that should be silently accepted as dimensionless/item units
-     * without a "possible typo" warning. Lowercase for case-insensitive matching.
-     * Includes Vensim conventions, common physical-sounding labels, and generic quantity words.
+     * Currency names (lowercase) that should be created as {@link NamedCurrency}
+     * in the MONEY dimension rather than as ITEM units.
      */
-    private static final Set<String> KNOWN_ACCEPTABLE_NAMES = Set.of(
-            // Dimensionless conventions
-            "units", "unit", "dmnl", "dimensionless",
-            "fraction", "percent", "percentage", "ratio", "index",
-            // Domain-specific countable labels commonly used in Vensim models
-            "person", "persons", "people",
-            "patient", "patients",
-            "vehicle", "vehicles",
-            "ship", "ships",
-            "fish",
-            "widget", "widgets",
-            "item", "items",
-            "job", "jobs",
-            "order", "orders",
-            "call", "calls",
-            "trip", "trips"
-    );
+    private static final Set<String> CURRENCY_NAMES = Set.of(
+            // Major currencies
+            "eur", "euro", "euros", "gbp", "jpy", "chf", "cad", "aud", "nzd",
+            "cny", "yuan", "inr", "rupee", "rupees", "krw", "won",
+            "sek", "nok", "dkk", "sgd", "hkd", "brl", "real", "reais",
+            "mxn", "peso", "pesos", "zar", "rand",
+            // USD aliases
+            "dollar", "dollars", "$", "us$",
+            // Scale-prefixed
+            "m$", "thou $", "k$",
+            // Generic money labels used in SD models
+            "currency", "money", "cost", "revenue", "price");
 
     private final Map<String, Unit> byName = new ConcurrentHashMap<>();
     private final Map<String, Unit> byNameLower = new ConcurrentHashMap<>();
@@ -68,6 +68,8 @@ public class UnitRegistry {
         registerAll(TemperatureUnits.values());
         registerAll(DimensionlessUnits.values());
         registerTimeUnitAliases();
+        registerCurrencyAliases();
+        registerAreaUnits();
     }
 
     /**
@@ -80,6 +82,43 @@ public class UnitRegistry {
             byName.put(plural, tu);
             byNameLower.put(plural.toLowerCase(), tu);
         }
+    }
+
+    /**
+     * Pre-registers common currency aliases as MONEY-dimension units.
+     */
+    private void registerCurrencyAliases() {
+        registerAlias("dollar", MoneyUnits.USD);
+        registerAlias("dollars", MoneyUnits.USD);
+        registerAlias("$", MoneyUnits.USD);
+        registerAlias("US$", MoneyUnits.USD);
+    }
+
+    /**
+     * Registers area units as composite Length^2 constants with conversion factors to m^2.
+     */
+    private void registerAreaUnits() {
+        // hectare = 10,000 m^2
+        registerBuiltIn(new AreaUnit("hectare", 10_000.0));
+        registerBuiltIn(new AreaUnit("hectares", 10_000.0));
+        registerBuiltIn(new AreaUnit("ha", 10_000.0));
+        // km^2 = 1,000,000 m^2
+        registerBuiltIn(new AreaUnit("km2", 1_000_000.0));
+        registerBuiltIn(new AreaUnit("km²", 1_000_000.0));
+        // acre = 4,046.8564224 m^2
+        registerBuiltIn(new AreaUnit("acre", 4_046.8564224));
+        registerBuiltIn(new AreaUnit("acres", 4_046.8564224));
+    }
+
+    /**
+     * Registers an alias that maps to an existing unit.
+     *
+     * @param alias  the alias name
+     * @param target the unit the alias resolves to
+     */
+    public void registerAlias(String alias, Unit target) {
+        byName.put(alias, target);
+        byNameLower.put(alias.toLowerCase(), target);
     }
 
     private void registerAll(Unit[] units) {
@@ -122,8 +161,16 @@ public class UnitRegistry {
 
     /**
      * Resolves a unit by name. Case-sensitive first, then case-insensitive fallback.
-     * If the name is not found, creates and registers a new
-     * {@link systems.courant.sd.measure.units.item.ItemUnit} with that name.
+     *
+     * <p>If the name is not found:
+     * <ul>
+     *   <li>Dimensionless-equivalent names resolve to {@link DimensionlessUnits#DIMENSIONLESS}</li>
+     *   <li>Currency names create a {@link NamedCurrency} in the MONEY dimension</li>
+     *   <li>All other names create an {@link ItemUnit} in the ITEM dimension</li>
+     * </ul>
+     *
+     * <p>Imported models are expected to carry arbitrary domain-specific names (e.g.,
+     * "Deer", "Widget", "Ship"), so auto-creation is logged at DEBUG level.
      *
      * @param name the unit name
      * @return the resolved unit
@@ -142,21 +189,27 @@ public class UnitRegistry {
             if (unit != null) {
                 return unit;
             }
-            // Auto-create custom ItemUnit for unknown names
-            // Treat dimensionless-equivalent names as DIMENSIONLESS
             String lower = name.toLowerCase();
-            if (Set.of("dmnl", "units", "unit", "dimensionless",
-                    "fraction", "percent", "percentage", "ratio", "index").contains(lower)) {
-                Unit dmnl = systems.courant.sd.measure.units.dimensionless.DimensionlessUnits.DIMENSIONLESS;
+
+            // Dimensionless-equivalent names
+            if (DIMENSIONLESS_NAMES.contains(lower)) {
+                Unit dmnl = DimensionlessUnits.DIMENSIONLESS;
                 byName.put(name, dmnl);
                 byNameLower.put(lower, dmnl);
                 return dmnl;
             }
-            if (!KNOWN_ACCEPTABLE_NAMES.contains(lower)) {
-                log.warn("Auto-creating unit for unknown name '{}' — possible typo", name);
+
+            // Currency names → MONEY dimension
+            if (CURRENCY_NAMES.contains(lower)) {
+                log.debug("Auto-creating currency unit for '{}'", name);
+                NamedCurrency currency = new NamedCurrency(name);
+                register(currency);
+                return currency;
             }
-            systems.courant.sd.measure.units.item.ItemUnit custom =
-                    new systems.courant.sd.measure.units.item.ItemUnit(name);
+
+            // All other names → ITEM dimension
+            log.debug("Auto-creating item unit for '{}'", name);
+            ItemUnit custom = new ItemUnit(name);
             register(custom);
             return custom;
         }
@@ -194,5 +247,57 @@ public class UnitRegistry {
             return unit;
         }
         return byNameLower.get(name.toLowerCase());
+    }
+
+    /**
+     * A simple area unit (Length^2) with a conversion factor to square meters.
+     */
+    private static final class AreaUnit implements Unit {
+
+        private final String name;
+        private final double sqMeters;
+
+        AreaUnit(String name, double sqMeters) {
+            this.name = name;
+            this.sqMeters = sqMeters;
+        }
+
+        @Override
+        public String getName() {
+            return name;
+        }
+
+        @Override
+        public Dimension getDimension() {
+            return Dimension.LENGTH;
+        }
+
+        /**
+         * Returns the ratio to the base length unit (Meter) such that
+         * dimensional analysis treats this as Length^2. The actual conversion
+         * factor is sqrt(sqMeters) so that area = unit * unit = sqMeters m^2.
+         */
+        @Override
+        public double ratioToBaseUnit() {
+            return Math.sqrt(sqMeters);
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            AreaUnit areaUnit = (AreaUnit) o;
+            return name.equals(areaUnit.name);
+        }
+
+        @Override
+        public int hashCode() {
+            return name.hashCode();
+        }
+
+        @Override
+        public String toString() {
+            return name;
+        }
     }
 }
