@@ -301,9 +301,16 @@ public class ModelCanvas extends Canvas {
         return editor;
     }
 
+    /**
+     * Returns whether a model has been loaded into this canvas.
+     */
+    public boolean isModelLoaded() {
+        return editor != null;
+    }
+
     public ModelDefinition toModelDefinition() {
         if (editor == null) {
-            return null;
+            throw new IllegalStateException("No model loaded");
         }
         if (!navController.isInsideModule()) {
             return editor.toModelDefinition(canvasState.toViewDef());

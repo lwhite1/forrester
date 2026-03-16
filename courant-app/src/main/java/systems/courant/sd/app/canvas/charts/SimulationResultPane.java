@@ -798,7 +798,7 @@ public class SimulationResultPane extends BorderPane {
                         for (double[] row : simulationResult.rows()) {
                             String[] line = new String[row.length];
                             for (int i = 0; i < row.length; i++) {
-                                line[i] = (i == 0) ? String.valueOf((int) row[i])
+                                line[i] = (i == 0) ? formatTimeStep(row[i])
                                         : String.valueOf(row[i]);
                             }
                             writer.writeNext(line);

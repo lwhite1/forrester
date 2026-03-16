@@ -150,6 +150,38 @@ class ExtremeConditionDialogTest {
     }
 
     @Test
+    @DisplayName("showOrUpdate should close stale instance before creating new one")
+    void shouldCloseStaleInstanceBeforeCreatingNew() {
+        ExtremeConditionResult result1 = resultWith(1);
+        Platform.runLater(() -> ExtremeConditionDialog.showOrUpdate(result1));
+        WaitForAsyncUtils.waitForFxEvents();
+
+        ExtremeConditionDialog first = ExtremeConditionDialog.getOpenInstance();
+        assertThat(first).isNotNull();
+
+        // Simulate a stale instance: hide without triggering onHidden cleanup
+        // by closing and immediately calling showOrUpdate before event processing
+        Platform.runLater(() -> {
+            first.hide();
+            // openInstance is still set to first (stale), but first is no longer showing
+        });
+        WaitForAsyncUtils.waitForFxEvents();
+
+        // Now showOrUpdate should detect the stale instance and close it properly
+        ExtremeConditionResult result2 = resultWith(2);
+        Platform.runLater(() -> ExtremeConditionDialog.showOrUpdate(result2));
+        WaitForAsyncUtils.waitForFxEvents();
+
+        ExtremeConditionDialog second = ExtremeConditionDialog.getOpenInstance();
+        assertThat(second).isNotNull();
+        assertThat(second).isNotSameAs(first);
+        assertThat(second.isShowing()).isTrue();
+
+        Platform.runLater(() -> second.close());
+        WaitForAsyncUtils.waitForFxEvents();
+    }
+
+    @Test
     @DisplayName("ExtremeConditionDialog extends Dialog")
     void shouldExtendDialog() {
         ExtremeConditionResult result = resultWith(1);

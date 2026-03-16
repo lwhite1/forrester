@@ -83,6 +83,31 @@ public class LookupTableTest {
     }
 
     @Nested
+    class BuilderImmutability {
+
+        @Test
+        public void shouldNotMutateBuilderOnBuild() {
+            LookupTable.Builder builder = LookupTable.builder()
+                    .at(0, 0)
+                    .at(1, 10)
+                    .at(2, 20);
+
+            LookupTable first = builder.buildLinear(() -> 1.5);
+            assertEquals(15.0, first.getCurrentValue(), 0.01);
+
+            // Add more points after first build
+            builder.at(3, 100).at(4, 200);
+            LookupTable second = builder.buildLinear(() -> 1.5);
+
+            // First table should still be correct (not affected by later additions)
+            assertEquals(15.0, first.getCurrentValue(), 0.01);
+            // Second table should use all 5 points
+            assertEquals(15.0, second.evaluate(1.5), 0.01);
+            assertEquals(200.0, second.evaluate(4.0), 0.01);
+        }
+    }
+
+    @Nested
     class Validation {
 
         @Test

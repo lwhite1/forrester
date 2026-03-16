@@ -62,7 +62,9 @@ public class ContextHelpDialog extends Stage {
     public void showTopic(HelpTopic topic) {
         TreeItem<HelpTopic> item = itemsByTopic.get(topic);
         if (item != null) {
-            item.getParent().setExpanded(true);
+            if (item.getParent() != null) {
+                item.getParent().setExpanded(true);
+            }
             treeView.getSelectionModel().select(item);
         }
         showContent(topic);

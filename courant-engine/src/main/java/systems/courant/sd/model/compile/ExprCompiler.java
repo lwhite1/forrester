@@ -488,6 +488,10 @@ public class ExprCompiler {
     private DoubleSupplier compileAggregateFunction(String name, List<Expr> args) {
         return switch (name) {
             case "SUM" -> {
+                if (args.isEmpty()) {
+                    throw new CompilationException(
+                            "SUM requires at least 1 argument", "SUM");
+                }
                 List<DoubleSupplier> compiled = new ArrayList<>();
                 for (Expr arg : args) {
                     compiled.add(compileExpr(arg));
