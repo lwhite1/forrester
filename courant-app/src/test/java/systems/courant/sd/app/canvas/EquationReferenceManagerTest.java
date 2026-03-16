@@ -261,6 +261,41 @@ class EquationReferenceManagerTest {
     }
 
     @Nested
+    @DisplayName("findReferencingElements")
+    class FindReferencingElements {
+
+        @Test
+        void shouldFindFlowsReferencingToken() {
+            flows.add(new FlowDef("Drain", "Rate * Pop", "Day", null, null));
+            flows.add(new FlowDef("Other", "100", "Day", null, null));
+            List<String> result = manager.findReferencingElements("Rate");
+            assertThat(result).containsExactly("Drain");
+        }
+
+        @Test
+        void shouldFindVariablesReferencingToken() {
+            variables.add(new VariableDef("Ratio", "Pop / Total", "units"));
+            variables.add(new VariableDef("Const", "42", "units"));
+            List<String> result = manager.findReferencingElements("Total");
+            assertThat(result).containsExactly("Ratio");
+        }
+
+        @Test
+        void shouldReturnEmptyWhenNoReferences() {
+            flows.add(new FlowDef("Drain", "Pop * 5", "Day", null, null));
+            List<String> result = manager.findReferencingElements("Rate");
+            assertThat(result).isEmpty();
+        }
+
+        @Test
+        void shouldNotMatchSubstrings() {
+            flows.add(new FlowDef("Drain", "Birth_Rate * Pop", "Day", null, null));
+            List<String> result = manager.findReferencingElements("Rate");
+            assertThat(result).isEmpty();
+        }
+    }
+
+    @Nested
     @DisplayName("containsWholeToken (static)")
     class ContainsWholeToken {
 

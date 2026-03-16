@@ -306,7 +306,7 @@ class ModelEditorTest {
         }
 
         @Test
-        void shouldCleanEquationReferencesWhenConstantDeleted() {
+        void shouldPreserveEquationReferencesWhenConstantDeleted() {
             ModelDefinition def = new ModelDefinitionBuilder()
                     .name("Test")
                     .stock("S", 100, "u")
@@ -318,11 +318,12 @@ class ModelEditorTest {
             editor.removeElement("Rate");
 
             FlowDef flow = editor.getFlows().get(0);
-            assertThat(flow.equation()).isEqualTo("S * 0");
+            // Equation retains dangling reference so validation can flag it
+            assertThat(flow.equation()).isEqualTo("S * Rate");
         }
 
         @Test
-        void shouldCleanEquationReferencesWhenStockDeleted() {
+        void shouldPreserveEquationReferencesWhenStockDeleted() {
             ModelDefinition def = new ModelDefinitionBuilder()
                     .name("Test")
                     .stock("Population", 1000, "people")
@@ -334,11 +335,11 @@ class ModelEditorTest {
             editor.removeElement("Population");
 
             FlowDef flow = editor.getFlows().get(0);
-            assertThat(flow.equation()).isEqualTo("0 * k");
+            assertThat(flow.equation()).isEqualTo("Population * k");
         }
 
         @Test
-        void shouldCleanAuxEquationWhenReferencedElementDeleted() {
+        void shouldPreserveAuxEquationWhenReferencedElementDeleted() {
             ModelDefinition def = new ModelDefinitionBuilder()
                     .name("Test")
                     .stock("S", 100, "u")
@@ -350,11 +351,11 @@ class ModelEditorTest {
             editor.removeElement("k");
 
             VariableDef v = editor.getVariables().get(0);
-            assertThat(v.equation()).isEqualTo("S * 0");
+            assertThat(v.equation()).isEqualTo("S * k");
         }
 
         @Test
-        void shouldCleanFlowEquationWhenReferencedAuxDeleted() {
+        void shouldPreserveFlowEquationWhenReferencedAuxDeleted() {
             ModelDefinition def = new ModelDefinitionBuilder()
                     .name("Test")
                     .stock("S", 100, "u")
@@ -366,11 +367,11 @@ class ModelEditorTest {
             editor.removeElement("Calc");
 
             FlowDef flow = editor.getFlows().get(0);
-            assertThat(flow.equation()).isEqualTo("0 + 1");
+            assertThat(flow.equation()).isEqualTo("Calc + 1");
         }
 
         @Test
-        void shouldFireEquationChangedForModifiedEquations() {
+        void shouldFireEquationChangedForAffectedEquations() {
             ModelDefinition def = new ModelDefinitionBuilder()
                     .name("Test")
                     .stock("S", 100, "u")

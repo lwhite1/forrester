@@ -430,11 +430,13 @@ public class ModelEditor {
         // Remove causal links referencing the deleted element
         causalLinks.removeIf(link -> link.from().equals(name) || link.to().equals(name));
 
-        // Clean equation references: replace deleted element's token with "0"
+        // Fire equationChanged for any equations that still reference the deleted element.
+        // The dangling reference will be flagged by validation rather than silently replaced
+        // with "0", which is dangerous in multiplicative/divisive contexts.
         String deletedToken = name.replace(' ', '_');
-        List<String> modifiedElements = equationRefManager.updateEquationReferences(deletedToken, "0");
-        for (String modified : modifiedElements) {
-            fireEquationChanged(modified);
+        List<String> affectedElements = equationRefManager.findReferencingElements(deletedToken);
+        for (String affected : affectedElements) {
+            fireEquationChanged(affected);
         }
 
         fireElementRemoved(name);
