@@ -583,6 +583,17 @@ public class ModelCanvas extends Canvas {
         }
     }
 
+    /**
+     * Saves undo state tentatively without clearing the redo stack.
+     * Call {@link UndoManager#confirmLastUndo()} on success or
+     * {@link UndoManager#discardLastUndo()} on failure.
+     */
+    public void saveUndoStateTentative(String label) {
+        if (undoManager != null && editor != null) {
+            undoManager.pushUndoTentative(captureSnapshot(), label);
+        }
+    }
+
     private void pushUndoSnapshot(UndoManager.Snapshot snapshot, String label) {
         if (undoManager != null) {
             undoManager.pushUndo(snapshot, label);
