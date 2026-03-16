@@ -40,6 +40,9 @@ public final class HelpContent {
             case OPTIMIZATION -> optimizationContent();
             case CALIBRATION -> calibrationContent();
             case MULTI_SWEEP -> multiSweepContent();
+            case VALIDATION -> validationContent();
+            case EXTREME_CONDITION -> extremeConditionContent();
+            case COLUMN_MAPPING -> columnMappingContent();
             case FEEDBACK_LOOPS -> feedbackLoopsContent();
             case CAUSAL_LOOPS -> causalLoopsContent();
             case CAUSAL_TRACE -> causalTraceContent();
@@ -476,6 +479,72 @@ public final class HelpContent {
                 plain("  1. Select the module instance on the parent canvas\n"),
                 plain("  2. In the properties panel, enter expressions for each input port\n\n"),
                 plain("All input ports must be bound before the model can be simulated.")
+        );
+    }
+
+    private static TextFlow validationContent() {
+        return new TextFlow(
+                bold("Model Validation"),
+                plain(" checks your model for structural problems before you run a simulation.\n\n"),
+                bold("What is checked:\n"),
+                plain("  \u2022 "), bold("Missing equations"),
+                plain(" \u2014 flows and variables without a defining equation\n"),
+                plain("  \u2022 "), bold("Undefined references"),
+                plain(" \u2014 equations that refer to elements that do not exist\n"),
+                plain("  \u2022 "), bold("Unit inconsistencies"),
+                plain(" \u2014 mismatched units in equations\n"),
+                plain("  \u2022 "), bold("Unconnected elements"),
+                plain(" \u2014 stocks with no inflows or outflows\n"),
+                plain("  \u2022 "), bold("Circular definitions"),
+                plain(" \u2014 algebraic loops with no stock to break the cycle\n\n"),
+                bold("Severity levels:\n"),
+                plain("  \u2022 "), bold("Error"),
+                plain(" \u2014 will prevent the model from simulating\n"),
+                plain("  \u2022 "), bold("Warning"),
+                plain(" \u2014 the model may simulate but results could be suspect\n\n"),
+                plain("Click a row in the results table to select the affected element on the canvas.")
+        );
+    }
+
+    private static TextFlow extremeConditionContent() {
+        return new TextFlow(
+                bold("Extreme Condition Testing"),
+                plain(" drives each parameter to extreme values and checks whether the model "
+                        + "produces unreasonable results (NaN, Infinity, or sign violations).\n\n"),
+                bold("How it works:\n"),
+                plain("  1. Each parameter is tested one at a time\n"),
+                plain("  2. The parameter is set to extreme values (zero, very large, very small, "
+                        + "negative)\n"),
+                plain("  3. The simulation is run and all variables are checked for anomalies\n\n"),
+                bold("Findings:\n"),
+                plain("  \u2022 "), bold("NaN / Infinity"),
+                plain(" \u2014 a variable produced a mathematically undefined result\n"),
+                plain("  \u2022 "), bold("Sign change"),
+                plain(" \u2014 a variable that should remain non-negative went negative\n\n"),
+                bold("Why it matters:\n"),
+                plain("Real-world inputs can be surprising. Extreme condition testing reveals "
+                        + "hidden assumptions in your model equations and helps you add appropriate "
+                        + "bounds or guards before deployment.")
+        );
+    }
+
+    private static TextFlow columnMappingContent() {
+        return new TextFlow(
+                bold("Column Mapping"),
+                plain(" lets you match columns from an imported CSV file to variables "
+                        + "in your model.\n\n"),
+                bold("How to use:\n"),
+                plain("  \u2022 Each row shows a CSV column name with a dropdown of model variables\n"),
+                plain("  \u2022 Columns whose names match a model variable are auto-selected\n"),
+                plain("  \u2022 Select "), mono("(skip)"),
+                plain(" to exclude a column from the import\n\n"),
+                bold("Name matching:\n"),
+                plain("Matching is case-insensitive and treats spaces and underscores as equivalent. "
+                        + "For example, CSV column \"birth rate\" will auto-match model variable "
+                        + "\"Birth_Rate\".\n\n"),
+                bold("After mapping:"),
+                plain(" The mapped data appears in calibration fit targets or as reference data "
+                        + "on the dashboard chart.")
         );
     }
 

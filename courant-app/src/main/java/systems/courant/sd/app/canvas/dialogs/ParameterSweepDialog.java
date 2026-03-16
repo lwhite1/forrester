@@ -37,7 +37,7 @@ public class ParameterSweepDialog extends Dialog<ParameterSweepDialog.Config> {
     private final ComboBox<String> trackCombo;
 
     public ParameterSweepDialog(List<String> constantNames, List<String> trackableNames) {
-        HelpContextResolver.installF1Handler(this);
+        HelpContextResolver.addHelpButton(this);
         setTitle("Parameter Sweep");
         setHeaderText("Configure parameter sweep");
 

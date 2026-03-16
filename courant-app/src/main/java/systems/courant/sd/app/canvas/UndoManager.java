@@ -20,6 +20,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Snapshot-based undo/redo manager. Stores LZ4-compressed JSON snapshots
@@ -61,12 +62,12 @@ public class UndoManager implements AutoCloseable {
     static final class UndoEntry {
         private final CompletableFuture<CompressedData> future;
         private final String label;
-        private volatile Snapshot rawSnapshot;
+        final AtomicReference<Snapshot> rawSnapshot;
 
         UndoEntry(CompletableFuture<CompressedData> future, String label, Snapshot rawSnapshot) {
             this.future = future;
             this.label = label;
-            this.rawSnapshot = rawSnapshot;
+            this.rawSnapshot = new AtomicReference<>(rawSnapshot);
         }
 
         CompletableFuture<CompressedData> future() { return future; }
@@ -283,16 +284,16 @@ public class UndoManager implements AutoCloseable {
             return new CompressedData(compressed, raw.length);
         }, compressor);
         UndoEntry entry = new UndoEntry(future, label, snapshot);
-        future.thenRun(() -> entry.rawSnapshot = null);
+        future.thenRun(() -> entry.rawSnapshot.set(null));
         return entry;
     }
 
     private static Snapshot decompress(UndoEntry entry) {
-        // Return the raw snapshot if compression hasn't completed yet,
-        // avoiding blocking the FX Application Thread
-        Snapshot raw = entry.rawSnapshot;
+        // Atomically read-and-clear the raw snapshot. Using getAndSet(null)
+        // ensures that at most one thread obtains the raw reference, fixing
+        // the race where two concurrent decompress() calls could share it.
+        Snapshot raw = entry.rawSnapshot.getAndSet(null);
         if (raw != null) {
-            entry.rawSnapshot = null;
             return raw;
         }
         // Prefer non-blocking getNow() to avoid stalling the FX thread.

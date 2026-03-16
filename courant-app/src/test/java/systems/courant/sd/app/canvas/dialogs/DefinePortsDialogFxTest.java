@@ -53,9 +53,9 @@ class DefinePortsDialogFxTest {
     }
 
     @Test
-    @DisplayName("Dialog has OK and Cancel buttons")
-    void hasOkAndCancelButtons(FxRobot robot) {
-        assertThat(dialogPane.getButtonTypes()).hasSize(2);
+    @DisplayName("Dialog has Help, OK, and Cancel buttons")
+    void hasHelpOkAndCancelButtons(FxRobot robot) {
+        assertThat(dialogPane.getButtonTypes()).hasSize(3);
     }
 
     @Test

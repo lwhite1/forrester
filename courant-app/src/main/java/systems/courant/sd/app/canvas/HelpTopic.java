@@ -32,6 +32,11 @@ public enum HelpTopic {
     CALIBRATION("Calibration", "Analysis"),
     MULTI_SWEEP("Multi-Parameter Sweep", "Analysis"),
 
+    // Quality
+    VALIDATION("Model Validation", "Quality"),
+    EXTREME_CONDITION("Extreme Condition Testing", "Quality"),
+    COLUMN_MAPPING("Column Mapping", "Quality"),
+
     // Structure
     FEEDBACK_LOOPS("Feedback Loops", "Structure"),
     CAUSAL_LOOPS("Causal Loop Diagrams", "Structure"),

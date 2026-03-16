@@ -34,7 +34,7 @@ public class SimulationSettingsDialog extends Dialog<SimulationSettings> {
     private final TextField savePerField;
 
     public SimulationSettingsDialog(SimulationSettings existing) {
-        HelpContextResolver.installF1Handler(this);
+        HelpContextResolver.addHelpButton(this);
         setTitle("Simulation Settings");
         setHeaderText("Configure simulation parameters");
 

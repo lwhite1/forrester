@@ -8,6 +8,8 @@ import systems.courant.sd.model.def.ViewDef;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -459,6 +461,55 @@ class UndoManagerTest {
             assertThat(restored.model().metadata()).isNotNull();
             assertThat(restored.model().metadata().author()).isEqualTo("Compressed Author");
             assertThat(restored.model().metadata().license()).isEqualTo("AGPL-3.0");
+        }
+    }
+
+    @Nested
+    @DisplayName("concurrency")
+    class Concurrency {
+
+        @Test
+        void shouldReturnRawSnapshotToExactlyOneThread() throws Exception {
+            // Create an entry with a raw snapshot and a never-completing future
+            // so that all threads hit the rawSnapshot fast path.
+            CompletableFuture<UndoManager.CompressedData> neverComplete = new CompletableFuture<>();
+            UndoManager.Snapshot snap = snapshot("Race");
+            UndoManager.UndoEntry entry = new UndoManager.UndoEntry(
+                    neverComplete, "Race", snap);
+
+            int threadCount = 10;
+            CountDownLatch ready = new CountDownLatch(threadCount);
+            CountDownLatch go = new CountDownLatch(1);
+            AtomicInteger gotRaw = new AtomicInteger(0);
+
+            Thread[] threads = new Thread[threadCount];
+            for (int i = 0; i < threadCount; i++) {
+                threads[i] = new Thread(() -> {
+                    ready.countDown();
+                    try {
+                        go.await();
+                    } catch (InterruptedException e) {
+                        Thread.currentThread().interrupt();
+                        return;
+                    }
+                    // Access the rawSnapshot via getAndSet — only one should win
+                    UndoManager.Snapshot raw = entry.rawSnapshot.getAndSet(null);
+                    if (raw != null) {
+                        gotRaw.incrementAndGet();
+                    }
+                });
+                threads[i].start();
+            }
+
+            ready.await();
+            go.countDown();
+
+            for (Thread t : threads) {
+                t.join(5000);
+            }
+
+            assertThat(gotRaw.get()).isEqualTo(1);
+            neverComplete.cancel(false);
         }
     }
 

@@ -2,9 +2,14 @@ package systems.courant.sd.app.canvas;
 
 import systems.courant.sd.model.def.ElementType;
 
+import javafx.event.ActionEvent;
 import javafx.scene.Node;
+import javafx.scene.control.Button;
+import javafx.scene.control.ButtonBar;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.TabPane;
+import javafx.scene.control.Tooltip;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 
@@ -147,6 +152,9 @@ public final class HelpContextResolver {
             case "ExpressionLanguageDialog" -> HelpTopic.EXPRESSION_LANGUAGE;
             case "SdConceptsDialog" -> HelpTopic.OVERVIEW;
             case "BindingConfigDialog" -> HelpTopic.MODULE_PORTS;
+            case "ValidationDialog" -> HelpTopic.VALIDATION;
+            case "ExtremeConditionDialog" -> HelpTopic.EXTREME_CONDITION;
+            case "ColumnMappingDialog" -> HelpTopic.COLUMN_MAPPING;
             default -> HelpTopic.OVERVIEW;
         };
     }
@@ -200,15 +208,44 @@ public final class HelpContextResolver {
     public static void installF1Handler(Dialog<?> dialog) {
         dialog.getDialogPane().addEventFilter(KeyEvent.KEY_PRESSED, event -> {
             if (event.getCode() == KeyCode.F1) {
-                String className = dialog.getClass().getSimpleName();
-                HelpTopic topic = topicForDialog(className);
-                ContextHelpDialog helpDialog = new ContextHelpDialog();
-                helpDialog.initOwner(dialog.getDialogPane().getScene().getWindow());
-                helpDialog.showTopic(topic);
-                helpDialog.show();
+                openHelpForDialog(dialog);
                 event.consume();
             }
         });
+    }
+
+    /**
+     * Adds a visible "?" help button and an F1 key handler to the given dialog.
+     * The help button appears on the left side of the button bar. Clicking it
+     * (or pressing F1) opens the context help viewer for the dialog's topic.
+     *
+     * <p>This is the preferred method for wiring help into dialogs, replacing
+     * the older {@link #installF1Handler(Dialog)} which only supported F1.
+     *
+     * @param dialog the dialog to add the help button and F1 handler to
+     */
+    public static void addHelpButton(Dialog<?> dialog) {
+        installF1Handler(dialog);
+
+        ButtonType helpType = new ButtonType("?", ButtonBar.ButtonData.HELP);
+        dialog.getDialogPane().getButtonTypes().add(helpType);
+
+        Button helpButton = (Button) dialog.getDialogPane().lookupButton(helpType);
+        helpButton.setId("dialogHelpButton");
+        helpButton.setTooltip(new Tooltip("Help (F1)"));
+        helpButton.addEventFilter(ActionEvent.ACTION, event -> {
+            event.consume();
+            openHelpForDialog(dialog);
+        });
+    }
+
+    private static void openHelpForDialog(Dialog<?> dialog) {
+        String className = dialog.getClass().getSimpleName();
+        HelpTopic topic = topicForDialog(className);
+        ContextHelpDialog helpDialog = new ContextHelpDialog();
+        helpDialog.initOwner(dialog.getDialogPane().getScene().getWindow());
+        helpDialog.showTopic(topic);
+        helpDialog.show();
     }
 
     private static boolean isEquationFieldFocused(Node focusOwner) {

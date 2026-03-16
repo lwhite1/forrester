@@ -32,7 +32,7 @@ public class ColumnMappingDialog extends Dialog<ReferenceDataset> {
      * @param modelVariables the known model variable names available for mapping
      */
     public ColumnMappingDialog(ReferenceDataset dataset, List<String> modelVariables) {
-        HelpContextResolver.installF1Handler(this);
+        HelpContextResolver.addHelpButton(this);
         setTitle("Map Reference Data Columns");
         setHeaderText("Map CSV columns to model variables");
 

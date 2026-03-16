@@ -35,7 +35,7 @@ public class DefinePortsDialog extends Dialog<ModuleInterface> {
     private record PortRow(TextField nameField, TextField unitField, HBox container) {}
 
     public DefinePortsDialog(String moduleName, ModuleInterface existing) {
-        HelpContextResolver.installF1Handler(this);
+        HelpContextResolver.addHelpButton(this);
         setTitle("Define Ports — " + moduleName);
         setHeaderText("Define input and output ports for module '" + moduleName + "'");
         setResizable(true);

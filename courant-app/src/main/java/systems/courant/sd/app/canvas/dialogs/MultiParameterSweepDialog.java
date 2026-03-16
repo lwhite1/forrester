@@ -47,7 +47,7 @@ public class MultiParameterSweepDialog extends Dialog<MultiParameterSweepDialog.
     private final Label combinationCountLabel;
 
     public MultiParameterSweepDialog(List<String> constantNames) {
-        HelpContextResolver.installF1Handler(this);
+        HelpContextResolver.addHelpButton(this);
         setTitle("Multi-Parameter Sweep");
         setHeaderText("Configure parameters to sweep (at least 2)");
 

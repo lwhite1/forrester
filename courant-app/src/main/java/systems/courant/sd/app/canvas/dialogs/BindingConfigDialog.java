@@ -38,7 +38,7 @@ public class BindingConfigDialog extends Dialog<BindingConfigDialog.BindingResul
     private final Map<String, TextField> outputFields = new HashMap<>();
 
     public BindingConfigDialog(ModuleInstanceDef module) {
-        HelpContextResolver.installF1Handler(this);
+        HelpContextResolver.addHelpButton(this);
         setTitle("Configure Bindings — " + module.instanceName());
         setHeaderText("Configure port bindings for module '" + module.instanceName() + "'");
 
