@@ -1,6 +1,6 @@
 # Courant — System Dynamics Modeling Tool
 
-> **Alpha-3 Release** — This system is not recommended for production use. APIs, file formats, and features may change without notice.
+> **1.0-Alpha-4 Release** — This system is not ready for production use. APIs, file formats, and features may change without notice.
 
 The ability to reason about and make predictions on complex, dynamic systems is essential today. Courant is an open-source [System Dynamics](userdocs/Key%20Reasons%20for%20Using%20System%20Dynamics.md) simulation engine and visual modeling environment written in Java. It was created so that, when it's ready, everyone will have access to a professional quality system dynamics environment for free. 
 
