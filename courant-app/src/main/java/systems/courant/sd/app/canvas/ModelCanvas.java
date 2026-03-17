@@ -56,8 +56,6 @@ import systems.courant.sd.app.canvas.renderers.CanvasRenderer;
  */
 public class ModelCanvas extends Canvas {
 
-    private static final double ZOOM_FACTOR = 1.1;
-
     private ModelEditor editor;
     private List<ConnectorRoute> connectors = List.of();
 
@@ -919,14 +917,14 @@ public class ModelCanvas extends Canvas {
     }
 
     public void zoomIn() {
-        viewport.zoomAt(getWidth() / 2, getHeight() / 2, ZOOM_FACTOR);
+        viewport.zoomAt(getWidth() / 2, getHeight() / 2, Viewport.ZOOM_FACTOR);
         redraw();
         inputDispatcher.updateCursor(this);
         fireStatusChanged();
     }
 
     public void zoomOut() {
-        viewport.zoomAt(getWidth() / 2, getHeight() / 2, 1.0 / ZOOM_FACTOR);
+        viewport.zoomAt(getWidth() / 2, getHeight() / 2, 1.0 / Viewport.ZOOM_FACTOR);
         redraw();
         inputDispatcher.updateCursor(this);
         fireStatusChanged();
