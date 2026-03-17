@@ -16,7 +16,7 @@ import org.testfx.framework.junit5.ApplicationExtension;
 
 import java.time.LocalDateTime;
 
-import static org.assertj.core.api.Assertions.assertThatNoException;
+import static org.assertj.core.api.Assertions.assertThat;
 import static systems.courant.sd.measure.Units.MINUTE;
 import static systems.courant.sd.measure.Units.THING;
 
@@ -34,6 +34,7 @@ class StockLevelChartViewerTest {
 
     @BeforeEach
     void setUp() {
+        ChartViewerApplication.reset();
         model = new Model("Growth Model");
         Stock population = new Stock("Population", 100, THING);
         Flow births = Flow.create("Births", MINUTE,
@@ -48,26 +49,32 @@ class StockLevelChartViewerTest {
 
     @Test
     @DisplayName("handleSimulationStartEvent initializes series from model")
-    void shouldHandleStartEvent() {
-        assertThatNoException().isThrownBy(() ->
-                viewer.handleSimulationStartEvent(new SimulationStartEvent(simulation)));
+    void shouldInitializeSeriesFromModel() {
+        viewer.handleSimulationStartEvent(new SimulationStartEvent(simulation));
+
+        ChartViewerApplication.ChartData snap = ChartViewerApplication.snapshot();
+        assertThat(snap.series()).hasSize(1);
+        assertThat(snap.series().getFirst().getName()).isEqualTo("Population");
     }
 
     @Test
-    @DisplayName("handleTimeStepEvent records stock and variable values")
-    void shouldHandleTimeStepEvent() {
+    @DisplayName("handleTimeStepEvent records stock value")
+    void shouldRecordStockValue() {
         viewer.handleSimulationStartEvent(new SimulationStartEvent(simulation));
 
         TimeStepEvent event = new TimeStepEvent(
                 LocalDateTime.now(), model, 0, MINUTE);
+        viewer.handleTimeStepEvent(event);
 
-        assertThatNoException().isThrownBy(() ->
-                viewer.handleTimeStepEvent(event));
+        ChartViewerApplication.ChartData snap = ChartViewerApplication.snapshot();
+        assertThat(snap.series().getFirst().getData()).hasSize(1);
+        assertThat(snap.series().getFirst().getData().getFirst().getYValue().doubleValue())
+                .isEqualTo(100.0);
     }
 
     @Test
     @DisplayName("Multiple time steps accumulate stock values")
-    void shouldHandleMultipleTimeSteps() {
+    void shouldAccumulateMultipleStockValues() {
         viewer.handleSimulationStartEvent(new SimulationStartEvent(simulation));
 
         for (int i = 0; i < 5; i++) {
@@ -75,5 +82,8 @@ class StockLevelChartViewerTest {
                     LocalDateTime.now(), model, i, MINUTE);
             viewer.handleTimeStepEvent(event);
         }
+
+        ChartViewerApplication.ChartData snap = ChartViewerApplication.snapshot();
+        assertThat(snap.series().getFirst().getData()).hasSize(5);
     }
 }
