@@ -77,7 +77,6 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
-import java.util.function.Supplier;
 
 /**
  * An independent editor window for a single Courant model.
@@ -112,13 +111,9 @@ public class ModelWindow {
     private ModelEditListener staleListener;
     private AnalysisRunner analysisRunner;
     private CommandPalette commandPalette;
+    private CommandRegistry commandRegistry;
     private ZoomOverlay zoomOverlay;
-    private Stage quickstartWindow;
-    private Stage sirTutorialWindow;
-    private Stage supplyChainTutorialWindow;
-    private Stage sdConceptsWindow;
-    private Stage exprLangWindow;
-    private Stage shortcutsWindow;
+    private HelpWindowManager helpWindows;
     private ContextHelpDialog contextHelpDialog;
 
     private FileController fileController;
@@ -201,6 +196,7 @@ public class ModelWindow {
             close();
         });
 
+        helpWindows = new HelpWindowManager(stage);
         commandPalette = new CommandPalette(this::buildCommands);
         scene.addEventFilter(KeyEvent.KEY_PRESSED, event -> {
             if (event.isShortcutDown() && event.getCode() == KeyCode.K) {
@@ -324,10 +320,9 @@ public class ModelWindow {
 
         propertiesPanel = new PropertiesPanel();
         propertiesPanel.setOnOpenExpressionHelp(() -> {
-            exprLangWindow = showHelpWindow(exprLangWindow, ExpressionLanguageDialog::new);
-            if (exprLangWindow instanceof ExpressionLanguageDialog eld) {
-                eld.focusSdFunctions();
-            }
+            ExpressionLanguageDialog eld = helpWindows.showOrBring(
+                    ExpressionLanguageDialog.class, ExpressionLanguageDialog::new);
+            eld.focusSdFunctions();
         });
         propertiesPanel.setModelSummaryActions(
                 simulationController::runSimulation,
@@ -368,19 +363,19 @@ public class ModelWindow {
             chooser.setOnGettingStarted(() -> {
                 showEditor();
                 fileController.newModel();
-                quickstartWindow = showHelpWindow(quickstartWindow, QuickstartDialog::new);
+                helpWindows.showOrBring(QuickstartDialog.class, QuickstartDialog::new);
                 canvas.requestFocus();
             });
             chooser.setOnSirTutorial(() -> {
                 showEditor();
                 fileController.newModel();
-                sirTutorialWindow = showHelpWindow(sirTutorialWindow, SirTutorialDialog::new);
+                helpWindows.showOrBring(SirTutorialDialog.class, SirTutorialDialog::new);
                 canvas.requestFocus();
             });
             chooser.setOnSupplyChainTutorial(() -> {
                 showEditor();
                 fileController.newModel();
-                supplyChainTutorialWindow = showHelpWindow(supplyChainTutorialWindow,
+                helpWindows.showOrBring(SupplyChainTutorialDialog.class,
                         SupplyChainTutorialDialog::new);
                 canvas.requestFocus();
             });
@@ -708,28 +703,28 @@ public class ModelWindow {
 
         MenuItem gettingStartedItem = new MenuItem("Getting Started\u2026");
         gettingStartedItem.setOnAction(e ->
-                quickstartWindow = showHelpWindow(quickstartWindow, QuickstartDialog::new));
+                helpWindows.showOrBring(QuickstartDialog.class, QuickstartDialog::new));
 
         MenuItem sirTutorialItem = new MenuItem("Tutorial: SIR Epidemic\u2026");
         sirTutorialItem.setOnAction(e ->
-                sirTutorialWindow = showHelpWindow(sirTutorialWindow, SirTutorialDialog::new));
+                helpWindows.showOrBring(SirTutorialDialog.class, SirTutorialDialog::new));
 
         MenuItem supplyChainTutorialItem = new MenuItem("Tutorial: Supply Chain\u2026");
         supplyChainTutorialItem.setOnAction(e ->
-                supplyChainTutorialWindow = showHelpWindow(supplyChainTutorialWindow,
+                helpWindows.showOrBring(SupplyChainTutorialDialog.class,
                         SupplyChainTutorialDialog::new));
 
         MenuItem sdConceptsItem = new MenuItem("SD Concepts");
         sdConceptsItem.setOnAction(e ->
-                sdConceptsWindow = showHelpWindow(sdConceptsWindow, SdConceptsDialog::new));
+                helpWindows.showOrBring(SdConceptsDialog.class, SdConceptsDialog::new));
 
         MenuItem exprLangItem = new MenuItem("Expression Language");
         exprLangItem.setOnAction(e ->
-                exprLangWindow = showHelpWindow(exprLangWindow, ExpressionLanguageDialog::new));
+                helpWindows.showOrBring(ExpressionLanguageDialog.class, ExpressionLanguageDialog::new));
 
         MenuItem shortcutsItem = new MenuItem("Keyboard Shortcuts");
         shortcutsItem.setOnAction(e ->
-                shortcutsWindow = showHelpWindow(shortcutsWindow, KeyboardShortcutsDialog::new));
+                helpWindows.showOrBring(KeyboardShortcutsDialog.class, KeyboardShortcutsDialog::new));
 
         MenuItem aboutItem = new MenuItem("About Courant");
         aboutItem.setOnAction(e -> {
@@ -753,13 +748,7 @@ public class ModelWindow {
 
     void loadDefinition(ModelDefinition def, String displayName) {
         showEditor();
-        if (editor != null) {
-            editor.removeListener(logListener);
-            editor.removeListener(staleListener);
-            if (dirtyListener != null) {
-                editor.removeListener(dirtyListener);
-            }
-        }
+        detachEditorListeners();
         if (dirtyListener == null) {
             dirtyListener = fileController.createDirtyListener();
         }
@@ -929,30 +918,8 @@ public class ModelWindow {
         if (!contextHelpDialog.isShowing()) {
             contextHelpDialog.show();
         } else {
-            bringToFront(contextHelpDialog);
+            HelpWindowManager.bringToFront(contextHelpDialog);
         }
-    }
-
-    private Stage showHelpWindow(Stage existing, Supplier<? extends Stage> factory) {
-        if (existing != null && existing.isShowing()) {
-            bringToFront(existing);
-            return existing;
-        }
-        Stage window = factory.get();
-        window.initOwner(stage);
-        window.show();
-        return window;
-    }
-
-    /**
-     * Forces a window to the front, working around platform-specific focus-stealing
-     * prevention by briefly toggling alwaysOnTop.
-     */
-    private static void bringToFront(Stage window) {
-        window.setAlwaysOnTop(true);
-        window.toFront();
-        window.requestFocus();
-        Platform.runLater(() -> window.setAlwaysOnTop(false));
     }
 
     private void showUndoHistoryPopup() {
@@ -1218,158 +1185,137 @@ public class ModelWindow {
         return canvas;
     }
 
-    private List<CommandPalette.Command> buildCommands() {
-        List<CommandPalette.Command> commands = new ArrayList<>();
+    private void buildRegistry() {
+        commandRegistry = new CommandRegistry();
 
         // Build tools
-        commands.add(cmd("Add Stock", "Build",
-                () -> switchToolAndFocus(CanvasToolBar.Tool.PLACE_STOCK)));
-        commands.add(cmd("Add Flow", "Build",
-                () -> switchToolAndFocus(CanvasToolBar.Tool.PLACE_FLOW)));
-        commands.add(cmd("Add Variable", "Build",
-                () -> switchToolAndFocus(CanvasToolBar.Tool.PLACE_VARIABLE)));
-        commands.add(cmd("Add Module", "Build",
-                () -> switchToolAndFocus(CanvasToolBar.Tool.PLACE_MODULE)));
-        commands.add(cmd("Add Lookup Table", "Build",
-                () -> switchToolAndFocus(CanvasToolBar.Tool.PLACE_LOOKUP)));
-        commands.add(cmd("Add CLD Variable", "Build",
-                () -> switchToolAndFocus(CanvasToolBar.Tool.PLACE_CLD_VARIABLE)));
-        commands.add(cmd("Draw Causal Link", "Build",
-                () -> switchToolAndFocus(CanvasToolBar.Tool.PLACE_CAUSAL_LINK)));
-        commands.add(cmd("Draw Info Link", "Build",
-                () -> switchToolAndFocus(CanvasToolBar.Tool.PLACE_INFO_LINK)));
-        commands.add(cmd("Add Comment", "Build",
-                () -> switchToolAndFocus(CanvasToolBar.Tool.PLACE_COMMENT)));
-        commands.add(cmd("Select Tool", "Build",
-                () -> switchToolAndFocus(CanvasToolBar.Tool.SELECT)));
+        commandRegistry.add("Add Stock", "Build",
+                () -> switchToolAndFocus(CanvasToolBar.Tool.PLACE_STOCK));
+        commandRegistry.add("Add Flow", "Build",
+                () -> switchToolAndFocus(CanvasToolBar.Tool.PLACE_FLOW));
+        commandRegistry.add("Add Variable", "Build",
+                () -> switchToolAndFocus(CanvasToolBar.Tool.PLACE_VARIABLE));
+        commandRegistry.add("Add Module", "Build",
+                () -> switchToolAndFocus(CanvasToolBar.Tool.PLACE_MODULE));
+        commandRegistry.add("Add Lookup Table", "Build",
+                () -> switchToolAndFocus(CanvasToolBar.Tool.PLACE_LOOKUP));
+        commandRegistry.add("Add CLD Variable", "Build",
+                () -> switchToolAndFocus(CanvasToolBar.Tool.PLACE_CLD_VARIABLE));
+        commandRegistry.add("Draw Causal Link", "Build",
+                () -> switchToolAndFocus(CanvasToolBar.Tool.PLACE_CAUSAL_LINK));
+        commandRegistry.add("Draw Info Link", "Build",
+                () -> switchToolAndFocus(CanvasToolBar.Tool.PLACE_INFO_LINK));
+        commandRegistry.add("Add Comment", "Build",
+                () -> switchToolAndFocus(CanvasToolBar.Tool.PLACE_COMMENT));
+        commandRegistry.add("Select Tool", "Build",
+                () -> switchToolAndFocus(CanvasToolBar.Tool.SELECT));
 
         // Simulate
-        commands.add(cmd("Run Simulation", "Simulate", simulationController::runSimulation));
-        commands.add(cmd("Validate Model", "Simulate", simulationController::validateModel));
-        commands.add(cmd("Simulation Settings", "Simulate", simulationController::openSimulationSettings));
-        commands.add(cmd("Extreme Conditions", "Simulate", simulationController::runExtremeConditionTest));
-        commands.add(cmd("Parameter Sweep", "Simulate", simulationController::runParameterSweep));
-        commands.add(cmd("Multi-Parameter Sweep", "Simulate", simulationController::runMultiParameterSweep));
-        commands.add(cmd("Monte Carlo", "Simulate", simulationController::runMonteCarlo));
-        commands.add(cmd("Optimize", "Simulate", simulationController::runOptimization));
-        commands.add(cmd("Calibrate", "Simulate", simulationController::runCalibration));
+        commandRegistry.add("Run Simulation", "Simulate", simulationController::runSimulation);
+        commandRegistry.add("Validate Model", "Simulate", simulationController::validateModel);
+        commandRegistry.add("Simulation Settings", "Simulate",
+                simulationController::openSimulationSettings);
+        commandRegistry.add("Extreme Conditions", "Simulate",
+                simulationController::runExtremeConditionTest);
+        commandRegistry.add("Parameter Sweep", "Simulate",
+                simulationController::runParameterSweep);
+        commandRegistry.add("Multi-Parameter Sweep", "Simulate",
+                simulationController::runMultiParameterSweep);
+        commandRegistry.add("Monte Carlo", "Simulate", simulationController::runMonteCarlo);
+        commandRegistry.add("Optimize", "Simulate", simulationController::runOptimization);
+        commandRegistry.add("Calibrate", "Simulate", simulationController::runCalibration);
 
         // View
-        commands.add(cmd("Validation Issues", "View", this::showValidationDialog));
-        commands.add(cmd("Zoom to Fit", "View", () -> {
-            canvas.zoomToFit();
-            canvas.requestFocus();
-        }));
-        commands.add(cmd("Reset Zoom", "View", () -> {
-            canvas.resetZoom();
-            canvas.requestFocus();
-        }));
-        commands.add(cmd("Zoom In", "View", () -> {
-            canvas.zoomIn();
-            canvas.requestFocus();
-        }));
-        commands.add(cmd("Zoom Out", "View", () -> {
-            canvas.zoomOut();
-            canvas.requestFocus();
-        }));
-        commands.add(cmd("Toggle Hide Variables", "View", () -> {
-            canvas.setHideVariables(!canvas.isHideVariables());
-            canvas.requestFocus();
-        }));
-        commands.add(cmd("Toggle Hide Info Links", "View", () -> {
-            canvas.setHideInfoLinks(!canvas.isHideInfoLinks());
-            canvas.requestFocus();
-        }));
-        commands.add(cmd("Toggle Delay Indicators", "View", () -> {
-            canvas.setShowDelayBadges(!canvas.isShowDelayBadges());
-            canvas.requestFocus();
-        }));
-        commands.add(cmd("Toggle Activity Log", "View", () -> {
+        commandRegistry.add("Validation Issues", "View", this::showValidationDialog);
+        commandRegistry.add("Zoom to Fit", "View", () -> {
+            canvas.zoomToFit(); canvas.requestFocus(); });
+        commandRegistry.add("Reset Zoom", "View", () -> {
+            canvas.resetZoom(); canvas.requestFocus(); });
+        commandRegistry.add("Zoom In", "View", () -> {
+            canvas.zoomIn(); canvas.requestFocus(); });
+        commandRegistry.add("Zoom Out", "View", () -> {
+            canvas.zoomOut(); canvas.requestFocus(); });
+        commandRegistry.add("Toggle Hide Variables", "View", () -> {
+            canvas.setHideVariables(!canvas.isHideVariables()); canvas.requestFocus(); });
+        commandRegistry.add("Toggle Hide Info Links", "View", () -> {
+            canvas.setHideInfoLinks(!canvas.isHideInfoLinks()); canvas.requestFocus(); });
+        commandRegistry.add("Toggle Delay Indicators", "View", () -> {
+            canvas.setShowDelayBadges(!canvas.isShowDelayBadges()); canvas.requestFocus(); });
+        commandRegistry.add("Toggle Activity Log", "View", () -> {
             boolean show = !activityLogPanel.isVisible();
             activityLogPanel.setVisible(show);
             activityLogPanel.setManaged(show);
-            if (show) {
-                root.setLeft(activityLogPanel);
-            } else {
-                root.setLeft(null);
-            }
-        }));
-        commands.add(cmd("Pop Out / Dock Dashboard", "View", () -> {
-            if (dashboardStage == null) {
-                popOutDashboard();
-            } else {
-                dockDashboard();
-            }
-        }));
+            if (show) { root.setLeft(activityLogPanel); } else { root.setLeft(null); }
+        });
+        commandRegistry.add("Pop Out / Dock Dashboard", "View", () -> {
+            if (dashboardStage == null) { popOutDashboard(); } else { dockDashboard(); }
+        });
 
         // Edit
-        commands.add(cmd("Undo", "Edit", () -> {
-            canvas.performUndo();
-            canvas.requestFocus();
-        }));
-        commands.add(cmd("Redo", "Edit", () -> {
-            canvas.performRedo();
-            canvas.requestFocus();
-        }));
-        commands.add(cmd("Undo History", "Edit", this::showUndoHistoryPopup));
-        commands.add(cmd("Cut", "Edit", () -> {
-            canvas.cutSelection();
-            canvas.requestFocus();
-        }));
-        commands.add(cmd("Copy", "Edit", () -> {
-            canvas.copySelection();
-            canvas.requestFocus();
-        }));
-        commands.add(cmd("Paste", "Edit", () -> {
-            canvas.pasteClipboard();
-            canvas.requestFocus();
-        }));
-        commands.add(cmd("Select All", "Edit", () -> {
-            canvas.selectAll();
-            canvas.requestFocus();
-        }));
+        commandRegistry.add("Undo", "Edit", () -> {
+            canvas.performUndo(); canvas.requestFocus(); });
+        commandRegistry.add("Redo", "Edit", () -> {
+            canvas.performRedo(); canvas.requestFocus(); });
+        commandRegistry.add("Undo History", "Edit", this::showUndoHistoryPopup);
+        commandRegistry.add("Cut", "Edit", () -> {
+            canvas.cutSelection(); canvas.requestFocus(); });
+        commandRegistry.add("Copy", "Edit", () -> {
+            canvas.copySelection(); canvas.requestFocus(); });
+        commandRegistry.add("Paste", "Edit", () -> {
+            canvas.pasteClipboard(); canvas.requestFocus(); });
+        commandRegistry.add("Select All", "Edit", () -> {
+            canvas.selectAll(); canvas.requestFocus(); });
 
         // File
-        commands.add(cmd("New Model", "File", fileController::newModel));
-        commands.add(cmd("New Window", "File", () -> app.openNewWindow()));
-        commands.add(cmd("Open Model", "File", fileController::openFile));
-        commands.add(cmd("Save", "File", fileController::save));
-        commands.add(cmd("Save As", "File", fileController::saveAs));
-        commands.add(cmd("Export Diagram", "File", () -> DiagramExporter.exportDiagram(
+        commandRegistry.add("New Model", "File", fileController::newModel);
+        commandRegistry.add("New Window", "File", () -> app.openNewWindow());
+        commandRegistry.add("Open Model", "File", fileController::openFile);
+        commandRegistry.add("Save", "File", fileController::save);
+        commandRegistry.add("Save As", "File", fileController::saveAs);
+        commandRegistry.add("Export Diagram", "File", () -> DiagramExporter.exportDiagram(
                 canvas.getCanvasState(), canvas.getEditor(),
                 canvas.getConnectors(), canvas.getActiveLoopAnalysis(), stage,
-                editor != null ? editor.getModelName() : null)));
-        commands.add(cmd("Model Info", "File", this::showModelInfoDialog));
+                editor != null ? editor.getModelName() : null));
+        commandRegistry.add("Model Info", "File", this::showModelInfoDialog);
 
-        // Help (reuse tracked windows, same as menu items)
-        commands.add(cmd("Context Help", "Help", this::showContextHelp));
-        commands.add(cmd("Getting Started", "Help",
-                () -> quickstartWindow = showHelpWindow(quickstartWindow, QuickstartDialog::new)));
-        commands.add(cmd("Tutorial: SIR Epidemic", "Help",
-                () -> sirTutorialWindow = showHelpWindow(sirTutorialWindow, SirTutorialDialog::new)));
-        commands.add(cmd("Tutorial: Supply Chain", "Help",
-                () -> supplyChainTutorialWindow = showHelpWindow(supplyChainTutorialWindow,
-                        SupplyChainTutorialDialog::new)));
-        commands.add(cmd("SD Concepts", "Help",
-                () -> sdConceptsWindow = showHelpWindow(sdConceptsWindow, SdConceptsDialog::new)));
-        commands.add(cmd("Expression Language", "Help",
-                () -> exprLangWindow = showHelpWindow(exprLangWindow, ExpressionLanguageDialog::new)));
-        commands.add(cmd("Keyboard Shortcuts", "Help",
-                () -> shortcutsWindow = showHelpWindow(shortcutsWindow, KeyboardShortcutsDialog::new)));
-        commands.add(cmd("About Courant", "Help", () -> {
+        // Help
+        commandRegistry.add("Context Help", "Help", this::showContextHelp);
+        commandRegistry.add("Getting Started", "Help",
+                () -> helpWindows.showOrBring(QuickstartDialog.class, QuickstartDialog::new));
+        commandRegistry.add("Tutorial: SIR Epidemic", "Help",
+                () -> helpWindows.showOrBring(SirTutorialDialog.class, SirTutorialDialog::new));
+        commandRegistry.add("Tutorial: Supply Chain", "Help",
+                () -> helpWindows.showOrBring(SupplyChainTutorialDialog.class,
+                        SupplyChainTutorialDialog::new));
+        commandRegistry.add("SD Concepts", "Help",
+                () -> helpWindows.showOrBring(SdConceptsDialog.class, SdConceptsDialog::new));
+        commandRegistry.add("Expression Language", "Help",
+                () -> helpWindows.showOrBring(ExpressionLanguageDialog.class,
+                        ExpressionLanguageDialog::new));
+        commandRegistry.add("Keyboard Shortcuts", "Help",
+                () -> helpWindows.showOrBring(KeyboardShortcutsDialog.class,
+                        KeyboardShortcutsDialog::new));
+        commandRegistry.add("About Courant", "Help", () -> {
             Alert about = new Alert(Alert.AlertType.INFORMATION);
             about.setTitle("About Courant");
             about.setHeaderText("Courant");
             about.setContentText("A visual System Dynamics modeling environment.\nVersion "
                     + AppVersion.get());
             about.showAndWait();
-        }));
+        });
+    }
+
+    private List<CommandPalette.Command> buildCommands() {
+        if (commandRegistry == null) {
+            buildRegistry();
+        }
+        List<CommandPalette.Command> commands = new ArrayList<>(commandRegistry.toPaletteCommands());
 
         // Dynamic: model element names for navigation
         for (String name : canvas.getCanvasState().getDrawOrder()) {
             ElementType type = canvas.getCanvasState().getType(name).orElse(null);
             String category = formatElementType(type);
-            commands.add(cmd(name, category, () -> {
+            commands.add(new CommandPalette.Command(name, category, () -> {
                 canvas.selectElement(name);
                 canvas.requestFocus();
             }));
@@ -1381,10 +1327,6 @@ public class ModelWindow {
     private void switchToolAndFocus(CanvasToolBar.Tool tool) {
         canvas.switchTool(tool);
         canvas.requestFocus();
-    }
-
-    private static CommandPalette.Command cmd(String name, String category, Runnable action) {
-        return new CommandPalette.Command(name, category, action);
     }
 
     private static String formatElementType(ElementType type) {
@@ -1408,19 +1350,8 @@ public class ModelWindow {
      * via {@link FileController#confirmDiscardChanges()} before calling this method.
      */
     void resetToStartScreen() {
-        // Detach listeners from the current editor
-        if (editor != null) {
-            if (logListener != null) {
-                editor.removeListener(logListener);
-            }
-            if (staleListener != null) {
-                editor.removeListener(staleListener);
-            }
-            if (dirtyListener != null) {
-                editor.removeListener(dirtyListener);
-            }
-            editor = null;
-        }
+        detachEditorListeners();
+        editor = null;
 
         // Cancel pending analysis tasks and create a fresh runner
         if (analysisRunner != null) {
@@ -1464,12 +1395,7 @@ public class ModelWindow {
         updateTitle();
     }
 
-    /**
-     * Closes this window unconditionally. Callers must check for unsaved changes
-     * via {@link FileController#confirmDiscardChanges()} before calling this method.
-     * The CourantApp will be notified via the stage's onHidden handler.
-     */
-    public void close() {
+    private void detachEditorListeners() {
         if (editor != null) {
             if (logListener != null) {
                 editor.removeListener(logListener);
@@ -1481,6 +1407,15 @@ public class ModelWindow {
                 editor.removeListener(dirtyListener);
             }
         }
+    }
+
+    /**
+     * Closes this window unconditionally. Callers must check for unsaved changes
+     * via {@link FileController#confirmDiscardChanges()} before calling this method.
+     * The CourantApp will be notified via the stage's onHidden handler.
+     */
+    public void close() {
+        detachEditorListeners();
         if (analysisRunner != null) {
             analysisRunner.shutdown();
         }
@@ -1489,6 +1424,7 @@ public class ModelWindow {
             contextHelpDialog.close();
             contextHelpDialog = null;
         }
+        helpWindows.closeAll();
         if (dashboardStage != null) {
             dashboardStage.setOnHidden(null);
             dashboardStage.close();

@@ -136,98 +136,8 @@ public class ModelCanvas extends Canvas {
     // View mode: hide info links
     private boolean hideInfoLinks;
 
-    // Inline edit callbacks
-    private final InlineEditController.Callbacks inlineCallbacks =
-            new InlineEditController.Callbacks() {
-                @Override
-                public void applyRename(String oldName, String newName) {
-                    ModelCanvas.this.applyRename(oldName, newName);
-                }
-
-                @Override
-                public void saveAndSetFlowEquation(String name, String equation) {
-                    saveUndoState("Edit " + name + " equation");
-                    editor.setFlowEquation(name, equation);
-                    regenerateAndRedraw();
-                }
-
-                @Override
-                public void saveAndSetAuxEquation(String name, String equation) {
-                    saveUndoState("Edit " + name + " equation");
-                    editor.setVariableEquation(name, equation);
-                    regenerateAndRedraw();
-                }
-
-                @Override
-                public void saveAndSetCommentText(String name, String text) {
-                    saveUndoState("Edit " + name + " text");
-                    editor.setCommentText(name, text);
-                    canvasState.clearSize(name);
-                    regenerateAndRedraw();
-                }
-
-                @Override
-                public void postEdit() {
-                    requestFocus();
-                    inputDispatcher.updateCursor(ModelCanvas.this);
-                }
-            };
-
-    private final CanvasContextMenuController.Callbacks contextMenuCallbacks =
-            new CanvasContextMenuController.Callbacks() {
-                @Override public void startInlineEdit(String name) { ModelCanvas.this.startInlineEdit(name); }
-                @Override public void deleteSelectedElements() { ModelCanvas.this.deleteSelectedElements(); }
-                @Override public void cutSelection() { ModelCanvas.this.cutSelection(); }
-                @Override public void copySelection() { ModelCanvas.this.copySelection(); }
-                @Override public void pasteClipboard() { ModelCanvas.this.pasteClipboard(); }
-                @Override public void selectAll() { ModelCanvas.this.selectAll(); }
-                @Override public void switchTool(CanvasToolBar.Tool tool) { ModelCanvas.this.switchTool(tool); }
-                @Override public void saveUndoState(String label) { ModelCanvas.this.saveUndoState(label); }
-                @Override public void regenerateConnectors() { ModelCanvas.this.scheduleRegenerateConnectors(); }
-                @Override public void redraw() { ModelCanvas.this.redraw(); }
-                @Override public void fireStatusChanged() { ModelCanvas.this.fireStatusChanged(); }
-                @Override public void clearSelectedConnection() { ModelCanvas.this.clearSelectedConnection(); }
-                @Override public void updateCursor() { inputDispatcher.updateCursor(ModelCanvas.this); }
-                @Override public String createElementAt(double wx, double wy, CanvasToolBar.Tool tool) {
-                    String name = selectionController.createElementAt(
-                            wx, wy, tool, editor, canvasState,
-                            () -> ModelCanvas.this.saveUndoState("Add " + tool.label()));
-                    if (name != null) {
-                        ModelCanvas.this.regenerateConnectors();
-                        ModelCanvas.this.redraw();
-                        ModelCanvas.this.fireStatusChanged();
-                    }
-                    return name;
-                }
-                @Override public boolean deleteConnection(ConnectionId conn, boolean isCausal) {
-                    return selectionController.deleteConnection(conn, isCausal, editor,
-                            () -> ModelCanvas.this.saveUndoState(
-                                    "Delete " + conn.from() + " \u2192 " + conn.to() + " connection"));
-                }
-                @Override public boolean canPaste() { return selectionController.canPaste(); }
-                @Override public void classifyCldVariable(String name, ElementType type) {
-                    ModelCanvas.this.classifyCldVariable(name, type);
-                }
-                @Override public void drillInto(String moduleName) { ModelCanvas.this.drillInto(moduleName); }
-                @Override public void openDefinePortsDialog(String moduleName) {
-                    ModelCanvas.this.openDefinePortsDialog(moduleName);
-                }
-                @Override public void openBindingsDialog(String moduleName) {
-                    ModelCanvas.this.openBindingsDialog(moduleName);
-                }
-                @Override public void traceUpstream(String name) {
-                    ModelCanvas.this.traceUpstream(name);
-                }
-                @Override public void traceDownstream(String name) {
-                    ModelCanvas.this.traceDownstream(name);
-                }
-                @Override public void showWhereUsed(String name) {
-                    ModelCanvas.this.showWhereUsed(name);
-                }
-                @Override public void showUses(String name) {
-                    ModelCanvas.this.showUses(name);
-                }
-            };
+    // Unified callbacks for inline edit and context menu controllers
+    private final CanvasCallbacks callbacks = new CanvasCallbacks(this);
 
     public ModelCanvas(Clipboard clipboard) {
         this.copyPaste = new CopyPasteController(clipboard);
@@ -684,7 +594,7 @@ public class ModelCanvas extends Canvas {
     }
 
     public void triggerBindingConfig(String moduleName) {
-        openBindingsDialog(moduleName);
+        openBindingsDialogInternal(moduleName);
     }
 
     public void selectAll() {
@@ -894,7 +804,7 @@ public class ModelCanvas extends Canvas {
         if (editor == null) {
             return;
         }
-        inlineEdit.startEdit(elementName, canvasState, editor, viewport, inlineCallbacks);
+        inlineEdit.startEdit(elementName, canvasState, editor, viewport, callbacks);
     }
 
     public void updateTooltip(String elementName, MouseEvent event) {
@@ -972,7 +882,7 @@ public class ModelCanvas extends Canvas {
 
     // --- Rendering ---
 
-    private void regenerateAndRedraw() {
+    void regenerateAndRedraw() {
         if (editor == null) {
             return;
         }
@@ -1085,7 +995,7 @@ public class ModelCanvas extends Canvas {
 
     // --- Rename ---
 
-    private void applyRename(String oldName, String newName) {
+    void applyRename(String oldName, String newName) {
         if (editor == null) {
             return;
         }
@@ -1249,13 +1159,13 @@ public class ModelCanvas extends Canvas {
 
     public void showElementContextMenu(String elementName, double screenX, double screenY) {
         contextMenuController.showElementContextMenu(
-                this, elementName, canvasState, screenX, screenY, contextMenuCallbacks);
+                this, elementName, canvasState, screenX, screenY, callbacks);
     }
 
     public void showGeneralElementContextMenu(String elementName,
                                        double screenX, double screenY) {
         contextMenuController.showGeneralElementContextMenu(
-                this, elementName, canvasState, screenX, screenY, contextMenuCallbacks);
+                this, elementName, canvasState, screenX, screenY, callbacks);
     }
 
     public void showCausalLinkContextMenu(ConnectionId link,
@@ -1264,22 +1174,22 @@ public class ModelCanvas extends Canvas {
             return;
         }
         contextMenuController.showCausalLinkContextMenu(
-                this, link, editor, screenX, screenY, contextMenuCallbacks);
+                this, link, editor, screenX, screenY, callbacks);
     }
 
     public void showInfoLinkContextMenu(ConnectionId link,
                                  double screenX, double screenY) {
         contextMenuController.showInfoLinkContextMenu(
-                this, link, screenX, screenY, contextMenuCallbacks);
+                this, link, screenX, screenY, callbacks);
     }
 
     public void showCanvasContextMenu(double worldX, double worldY,
                                double screenX, double screenY) {
         contextMenuController.showCanvasContextMenu(
-                this, worldX, worldY, screenX, screenY, contextMenuCallbacks);
+                this, worldX, worldY, screenX, screenY, callbacks);
     }
 
-    private void classifyCldVariable(String name, ElementType targetType) {
+    void classifyCldVariableInternal(String name, ElementType targetType) {
         if (editor == null) {
             return;
         }
@@ -1290,7 +1200,7 @@ public class ModelCanvas extends Canvas {
         }
     }
 
-    private void openDefinePortsDialog(String moduleName) {
+    void openDefinePortsDialogInternal(String moduleName) {
         if (editor == null) {
             return;
         }
@@ -1298,7 +1208,7 @@ public class ModelCanvas extends Canvas {
                 () -> saveUndoState("Define " + moduleName + " ports"), this::fireStatusChanged);
     }
 
-    private void openBindingsDialog(String moduleName) {
+    void openBindingsDialogInternal(String moduleName) {
         if (editor == null) {
             return;
         }
@@ -1376,5 +1286,33 @@ public class ModelCanvas extends Canvas {
         dependencies.forEach(canvasState::addToSelection);
         fireStatusChanged();
         redraw();
+    }
+
+    // --- Package-private helpers for CanvasCallbacks ---
+
+    void updateCursorViaDispatcher() {
+        inputDispatcher.updateCursor(this);
+    }
+
+    String createElementAtForCallback(double wx, double wy, CanvasToolBar.Tool tool) {
+        String name = selectionController.createElementAt(
+                wx, wy, tool, editor, canvasState,
+                () -> saveUndoState("Add " + tool.label()));
+        if (name != null) {
+            regenerateConnectors();
+            redraw();
+            fireStatusChanged();
+        }
+        return name;
+    }
+
+    boolean deleteConnectionForCallback(ConnectionId conn, boolean isCausal) {
+        return selectionController.deleteConnection(conn, isCausal, editor,
+                () -> saveUndoState(
+                        "Delete " + conn.from() + " \u2192 " + conn.to() + " connection"));
+    }
+
+    boolean canPasteForCallback() {
+        return selectionController.canPaste();
     }
 }
