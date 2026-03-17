@@ -36,9 +36,10 @@ class FanChartThreadSafetyTest {
         FanChart chart2 = new FanChart(result2, "Infected");
 
         // Each instance holds its own data — no shared static state
-        assertThat(chart1).isNotSameAs(chart2);
-        // The fact that we can construct two FanChart instances with different data
-        // without any static field interaction proves the race is eliminated.
+        assertThat(chart1).extracting("variableName").isEqualTo("Population");
+        assertThat(chart2).extracting("variableName").isEqualTo("Infected");
+        assertThat(chart1).extracting("result").isSameAs(result1);
+        assertThat(chart2).extracting("result").isSameAs(result2);
     }
 
     @Test
@@ -77,6 +78,11 @@ class FanChartThreadSafetyTest {
         }
 
         assertThat(charts).hasSize(iterations);
+        // Verify each chart retained its own variable name (no cross-contamination)
+        for (int i = 0; i < charts.size(); i++) {
+            assertThat(charts.get(i)).extracting("variableName")
+                    .asString().startsWith("Var");
+        }
     }
 
     private static MonteCarloResult buildMonteCarloResult(int runs, int steps, String modelName) {

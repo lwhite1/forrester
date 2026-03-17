@@ -396,7 +396,9 @@ public class CompilationContext {
      * @param warning the warning message
      */
     public void addWarning(String warning) {
-        warnings.add(warning);
+        if (!warnings.contains(warning)) {
+            warnings.add(warning);
+        }
         if (parent != null) {
             parent.addWarning(warning);
         }

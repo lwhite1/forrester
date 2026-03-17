@@ -44,13 +44,14 @@ public class CsvSubscriber implements EventHandler, Closeable {
         File file = Paths.get(fileName).toFile();
         File parent = file.getParentFile();
         if (parent != null && !parent.mkdirs() && !parent.isDirectory()) {
-            throw new RuntimeException("Failed to create directory: " + parent.getAbsolutePath());
+            throw new java.io.UncheckedIOException(
+                    new IOException("Failed to create directory: " + parent.getAbsolutePath()));
         }
         try {
             csvWriter = new CSVWriter(new OutputStreamWriter(
                     Files.newOutputStream(Paths.get(fileName)), StandardCharsets.UTF_8));
         } catch (IOException e) {
-            throw new RuntimeException("Failed to open CSV file: " + fileName, e);
+            throw new java.io.UncheckedIOException("Failed to open CSV file: " + fileName, e);
         }
     }
 

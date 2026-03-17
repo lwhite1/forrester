@@ -260,6 +260,9 @@ public final class MacroExpander {
      * Splits a comma-separated argument string respecting nested parentheses.
      */
     private static List<String> splitTopLevelArgs(String content) {
+        if (content.isEmpty()) {
+            return List.of();
+        }
         List<String> args = new ArrayList<>();
         int depth = 0;
         int start = 0;

@@ -6,6 +6,9 @@ import systems.courant.sd.model.def.ElementType;
 import systems.courant.sd.model.def.FlowRoute;
 import systems.courant.sd.model.def.ViewDef;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -25,6 +28,8 @@ import java.util.Set;
  * </ul>
  */
 public final class SketchParser {
+
+    private static final Logger log = LoggerFactory.getLogger(SketchParser.class);
 
     private SketchParser() {
     }
@@ -190,8 +195,12 @@ public final class SketchParser {
         String fromId = parts[2].strip();
         String toId = parts[3].strip();
 
-        String from = idToName.getOrDefault(fromId, fromId);
-        String to = idToName.getOrDefault(toId, toId);
+        String from = idToName.get(fromId);
+        String to = idToName.get(toId);
+        if (from == null || to == null) {
+            log.debug("Connector references unknown element ID(s): from={}, to={}", fromId, toId);
+            return;
+        }
 
         if (from.isBlank() || to.isBlank()) {
             return;

@@ -414,7 +414,7 @@ public class XmileImporter implements ModelImporter {
 
         for (Element stockElem : getChildElements(variablesElem, XmileConstants.STOCK)) {
             String name = stockElem.getAttribute(XmileConstants.ATTR_NAME);
-            if (name == null || name.isBlank()) {
+            if (name.isBlank()) {
                 continue;
             }
             stockNames.add(name);
@@ -425,7 +425,7 @@ public class XmileImporter implements ModelImporter {
         // Pass 2: Build model elements
         for (Element stockElem : getChildElements(variablesElem, XmileConstants.STOCK)) {
             String name = stockElem.getAttribute(XmileConstants.ATTR_NAME);
-            if (name == null || name.isBlank()) {
+            if (name.isBlank()) {
                 continue;
             }
             try {
@@ -437,7 +437,7 @@ public class XmileImporter implements ModelImporter {
 
         for (Element flowElem : getChildElements(variablesElem, XmileConstants.FLOW)) {
             String name = flowElem.getAttribute(XmileConstants.ATTR_NAME);
-            if (name == null || name.isBlank()) {
+            if (name.isBlank()) {
                 continue;
             }
             flowNames.add(name);
@@ -451,7 +451,7 @@ public class XmileImporter implements ModelImporter {
 
         for (Element auxElem : getChildElements(variablesElem, XmileConstants.AUX)) {
             String name = auxElem.getAttribute(XmileConstants.ATTR_NAME);
-            if (name == null || name.isBlank()) {
+            if (name.isBlank()) {
                 continue;
             }
             try {
@@ -464,7 +464,7 @@ public class XmileImporter implements ModelImporter {
         // Process module instances
         for (Element moduleElem : getChildElements(variablesElem, XmileConstants.MODULE)) {
             String name = moduleElem.getAttribute(XmileConstants.ATTR_NAME);
-            if (name == null || name.isBlank()) {
+            if (name.isBlank()) {
                 continue;
             }
             try {

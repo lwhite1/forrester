@@ -208,7 +208,7 @@ final class StartScreen extends VBox {
         difficultyBox.setStyle("-fx-font-size: 12px;");
         difficultyBox.setOnAction(e -> {
             String selected = difficultyBox.getValue();
-            activeDifficulty = ALL.equals(selected) ? ALL : selected.toLowerCase();
+            activeDifficulty = ALL.equals(selected) ? ALL : selected;
             applyFilters();
         });
 
@@ -271,7 +271,7 @@ final class StartScreen extends VBox {
         exampleGrid.getChildren().clear();
         for (ExampleEntry example : allExamples) {
             boolean matchesDifficulty = ALL.equals(activeDifficulty)
-                    || example.difficulty.equals(activeDifficulty);
+                    || example.difficulty.equalsIgnoreCase(activeDifficulty);
             boolean matchesDomain = activeDomains.isEmpty()
                     || activeDomains.contains(toDomain(example.category));
             if (matchesDifficulty && matchesDomain) {

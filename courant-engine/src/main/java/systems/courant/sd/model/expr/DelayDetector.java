@@ -59,7 +59,7 @@ public final class DelayDetector {
         try {
             Expr ast = ExprParser.parse(equation);
             return containsDelay(ast);
-        } catch (Exception e) {
+        } catch (ParseException e) {
             return false;
         }
     }

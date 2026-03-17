@@ -40,6 +40,7 @@ public abstract class Flow extends Element {
      */
     public Flow(String name, TimeUnit unit, Unit materialUnit) {
         super(name);
+        com.google.common.base.Preconditions.checkNotNull(unit, "timeUnit must not be null");
         this.timeUnit = unit;
         this.materialUnit = materialUnit;
     }

@@ -278,7 +278,11 @@ public final class VensimExprTranslator {
         expr = CARET_PATTERN.matcher(expr).replaceAll("**");
 
         // 10. Time → TIME (the built-in variable), unless "Time" is a user-defined name
-        if (knownNames.stream().noneMatch(n -> n.equalsIgnoreCase("Time"))) {
+        Set<String> lowerNames = new java.util.HashSet<>(knownNames.size());
+        for (String n : knownNames) {
+            lowerNames.add(n.toLowerCase(Locale.ROOT));
+        }
+        if (!lowerNames.contains("time")) {
             expr = TIME_VAR_PATTERN.matcher(expr).replaceAll("TIME");
         }
 
