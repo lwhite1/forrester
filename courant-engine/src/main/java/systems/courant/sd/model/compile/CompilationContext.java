@@ -389,23 +389,26 @@ public class CompilationContext {
     }
 
     /**
-     * Records a non-fatal compilation warning. These warnings are surfaced
-     * through {@link CompiledModel#getCompilationWarnings()} so callers can
-     * inspect them after compilation.
+     * Records a non-fatal compilation warning. Warnings are stored only at
+     * the root context to avoid duplicates when child contexts propagate
+     * warnings upward. These warnings are surfaced through
+     * {@link CompiledModel#getCompilationWarnings()} so callers can inspect
+     * them after compilation.
      *
      * @param warning the warning message
      */
     public void addWarning(String warning) {
-        if (!warnings.contains(warning)) {
-            warnings.add(warning);
-        }
         if (parent != null) {
             parent.addWarning(warning);
+        } else {
+            warnings.add(warning);
         }
     }
 
     /**
-     * Returns all compilation warnings recorded in this context (local only).
+     * Returns all compilation warnings recorded in this context. Warnings from
+     * child contexts are propagated to the root, so this method should be called
+     * on the root context to retrieve all warnings.
      */
     public List<String> getWarnings() {
         return Collections.unmodifiableList(warnings);

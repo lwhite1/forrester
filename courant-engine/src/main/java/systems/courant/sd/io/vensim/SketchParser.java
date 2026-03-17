@@ -1,13 +1,13 @@
 package systems.courant.sd.io.vensim;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import systems.courant.sd.model.def.ConnectorRoute;
 import systems.courant.sd.model.def.ElementPlacement;
 import systems.courant.sd.model.def.ElementType;
 import systems.courant.sd.model.def.FlowRoute;
 import systems.courant.sd.model.def.ViewDef;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -29,7 +29,7 @@ import java.util.Set;
  */
 public final class SketchParser {
 
-    private static final Logger log = LoggerFactory.getLogger(SketchParser.class);
+    private static final Logger logger = LoggerFactory.getLogger(SketchParser.class);
 
     private SketchParser() {
     }
@@ -197,8 +197,14 @@ public final class SketchParser {
 
         String from = idToName.get(fromId);
         String to = idToName.get(toId);
+
         if (from == null || to == null) {
-            log.debug("Connector references unknown element ID(s): from={}, to={}", fromId, toId);
+            if (from == null) {
+                logger.warn("Connector references unknown element ID '{}'; skipping connector", fromId);
+            }
+            if (to == null) {
+                logger.warn("Connector references unknown element ID '{}'; skipping connector", toId);
+            }
             return;
         }
 

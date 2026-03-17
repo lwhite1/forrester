@@ -6,6 +6,7 @@ import systems.courant.sd.model.def.SimulationSettings;
 
 import javafx.application.Platform;
 import javafx.scene.control.ComboBox;
+import javafx.scene.control.DialogPane;
 import javafx.scene.control.Label;
 import javafx.scene.control.TabPane;
 import javafx.scene.control.TextField;
@@ -294,13 +295,16 @@ class WorkflowSweepAnalysisFxTest {
         robot.clickOn("Parameter Sweep...");
         WaitForAsyncUtils.waitForFxEvents();
 
-        // Error alert appears — dismiss it
-        try {
-            robot.clickOn("OK");
-            WaitForAsyncUtils.waitForFxEvents();
-        } catch (Exception ignored) {
-            // Error may be displayed differently
-        }
+        // Error alert should appear — verify and dismiss it
+        var errorDialog = robot.lookup(".dialog-pane").tryQueryAs(DialogPane.class);
+        assertThat(errorDialog)
+                .as("Error dialog should appear when model has no parameters")
+                .isPresent();
+        assertThat(errorDialog.get().getContentText())
+                .contains("no parameters");
+
+        robot.clickOn("OK");
+        WaitForAsyncUtils.waitForFxEvents();
     }
 
     @Test
@@ -315,12 +319,16 @@ class WorkflowSweepAnalysisFxTest {
         robot.clickOn("Multi-Parameter Sweep...");
         WaitForAsyncUtils.waitForFxEvents();
 
-        try {
-            robot.clickOn("OK");
-            WaitForAsyncUtils.waitForFxEvents();
-        } catch (Exception ignored) {
-            // Error dialog dismissal
-        }
+        // Error alert should appear — verify and dismiss it
+        var errorDialog = robot.lookup(".dialog-pane").tryQueryAs(DialogPane.class);
+        assertThat(errorDialog)
+                .as("Error dialog should appear when model has fewer than 2 parameters")
+                .isPresent();
+        assertThat(errorDialog.get().getContentText())
+                .contains("at least 2 parameters");
+
+        robot.clickOn("OK");
+        WaitForAsyncUtils.waitForFxEvents();
     }
 
     // ── Full analysis workflow ────────────────────────────────────────────

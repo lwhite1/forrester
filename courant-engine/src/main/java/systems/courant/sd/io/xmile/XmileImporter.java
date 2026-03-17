@@ -112,7 +112,7 @@ public class XmileImporter implements ModelImporter {
         if (simSpecsOpt.isPresent()) {
             Element simSpecs = simSpecsOpt.get();
             String tu = simSpecs.getAttribute(XmileConstants.ATTR_TIME_UNITS);
-            if (tu != null && !tu.isBlank()) {
+            if (!tu.isBlank()) {
                 timeUnit = capitalizeFirst(tu);
             }
             start = getChildDouble(simSpecs, XmileConstants.START, 0);
@@ -138,7 +138,7 @@ public class XmileImporter implements ModelImporter {
         List<Element> modelElems = getChildElements(root, XmileConstants.MODEL);
         for (Element me : modelElems) {
             String mName = me.getAttribute(XmileConstants.ATTR_NAME);
-            if (mName != null && !mName.isBlank()) {
+            if (!mName.isBlank()) {
                 namedModels.put(mName, me);
             } else if (mainModelElem == null) {
                 mainModelElem = me;
@@ -336,8 +336,7 @@ public class XmileImporter implements ModelImporter {
 
         // Warn about non-LINEAR interpolation modes
         String interpType = gfElem.getAttribute(XmileConstants.ATTR_TYPE);
-        if (interpType != null && !interpType.isBlank()
-                && !"continuous".equalsIgnoreCase(interpType)) {
+        if (!interpType.isBlank() && !"continuous".equalsIgnoreCase(interpType)) {
             warnings.add("Graphical function '" + lookupName + "' uses interpolation type '"
                     + interpType + "' (only LINEAR/continuous is supported)");
         }
@@ -517,7 +516,7 @@ public class XmileImporter implements ModelImporter {
         for (Element connectElem : getChildElements(moduleElem, XmileConstants.CONNECT)) {
             String to = connectElem.getAttribute(XmileConstants.ATTR_TO);
             String from = connectElem.getAttribute(XmileConstants.ATTR_FROM);
-            if (to == null || to.isBlank() || from == null || from.isBlank()) {
+            if (to.isBlank() || from.isBlank()) {
                 continue;
             }
 
@@ -640,7 +639,7 @@ public class XmileImporter implements ModelImporter {
 
     private static double parseDoubleAttr(Element elem, String attrName, double defaultValue) {
         String val = elem.getAttribute(attrName);
-        if (val != null && !val.isBlank()) {
+        if (!val.isBlank()) {
             try {
                 return Double.parseDouble(val);
             } catch (NumberFormatException ex) {

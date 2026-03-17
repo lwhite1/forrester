@@ -295,6 +295,13 @@ public class UndoManager implements AutoCloseable {
         compressor.shutdownNow();
     }
 
+    /**
+     * Returns true if this manager has been closed.
+     */
+    boolean isClosed() {
+        return compressor.isShutdown();
+    }
+
     private UndoEntry compressAsync(Snapshot snapshot, String label) {
         ModelDefinition model = snapshot.model();
         // Ensure the view is embedded in the model for serialization

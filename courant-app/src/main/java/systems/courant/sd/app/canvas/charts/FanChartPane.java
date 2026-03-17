@@ -79,8 +79,16 @@ public class FanChartPane extends Pane {
             return;
         }
 
-        Map<Double, double[]> pctMap = result.getPercentileSeries(variableName,
-                2.5, 12.5, 25.0, 50.0, 75.0, 87.5, 97.5);
+        Map<Double, double[]> pctMap;
+        try {
+            pctMap = result.getPercentileSeries(variableName,
+                    2.5, 12.5, 25.0, 50.0, 75.0, 87.5, 97.5);
+        } catch (IllegalArgumentException e) {
+            gc.setFill(Color.BLACK);
+            gc.setFont(Font.font(14));
+            gc.fillText("Variable not found: " + variableName, MARGIN_LEFT, h / 2);
+            return;
+        }
         double[] pct2 = pctMap.get(2.5);
         double[] pct97 = pctMap.get(97.5);
         double[] pct12 = pctMap.get(12.5);

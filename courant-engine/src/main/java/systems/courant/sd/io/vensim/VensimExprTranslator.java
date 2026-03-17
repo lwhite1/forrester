@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -200,6 +201,12 @@ public final class VensimExprTranslator {
         List<ExtractedLookup> lookups = new ArrayList<>();
         String expr = vensimExpr.strip();
 
+        // Build a lowercased set for O(1) case-insensitive lookups
+        Set<String> knownNamesLower = new HashSet<>(knownNames.size());
+        for (String name : knownNames) {
+            knownNamesLower.add(name.toLowerCase(Locale.ROOT));
+        }
+
         // 0. Replace quoted variable names: "name with (special) chars" → name_with_special_chars
         expr = translateQuotedNames(expr);
 
@@ -278,11 +285,7 @@ public final class VensimExprTranslator {
         expr = CARET_PATTERN.matcher(expr).replaceAll("**");
 
         // 10. Time → TIME (the built-in variable), unless "Time" is a user-defined name
-        Set<String> lowerNames = new java.util.HashSet<>(knownNames.size());
-        for (String n : knownNames) {
-            lowerNames.add(n.toLowerCase(Locale.ROOT));
-        }
-        if (!lowerNames.contains("time")) {
+        if (!knownNamesLower.contains("time")) {
             expr = TIME_VAR_PATTERN.matcher(expr).replaceAll("TIME");
         }
 

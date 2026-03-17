@@ -150,8 +150,8 @@ public record CompositeUnit(Map<Dimension, Integer> exponents) {
      * Removes zero-exponent entries from a mutable map.
      */
     private static Map<Dimension, Integer> normalize(Map<Dimension, Integer> map) {
-        var copy = new java.util.HashMap<>(map);
-        copy.entrySet().removeIf(e -> e.getValue() == 0);
-        return copy;
+        var result = new LinkedHashMap<>(map);
+        result.entrySet().removeIf(e -> e.getValue() == 0);
+        return result;
     }
 }
