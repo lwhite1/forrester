@@ -176,6 +176,26 @@ class ExprStringifierTest {
     }
 
     @Test
+    @DisplayName("extreme values near Long.MAX_VALUE should not use integer format (#860)")
+    void shouldNotTruncateExtremeValues() {
+        // Long.MAX_VALUE as a double — must not go through the (long) cast branch
+        double maxVal = (double) Long.MAX_VALUE;
+        String result = ExprStringifier.stringify(new Expr.Literal(maxVal));
+        // Should use Double.toString format, not integer format
+        assertThat(result).isEqualTo(Double.toString(maxVal));
+
+        // Long.MIN_VALUE as a double
+        double minVal = (double) Long.MIN_VALUE;
+        result = ExprStringifier.stringify(new Expr.Literal(minVal));
+        assertThat(result).isEqualTo(Double.toString(minVal));
+
+        // Value just beyond 2^53 should also use double format
+        double beyondPrecision = (double) ((1L << 53) + 1);
+        result = ExprStringifier.stringify(new Expr.Literal(beyondPrecision));
+        assertThat(result).isEqualTo(Double.toString(beyondPrecision));
+    }
+
+    @Test
     void shouldQuoteReservedWordsUnderTurkishLocale() {
         Locale original = Locale.getDefault();
         try {
