@@ -256,6 +256,32 @@ class ElementRendererTest {
     }
 
     @Nested
+    @DisplayName("truncate (#854)")
+    class Truncate {
+
+        @Test
+        void shouldReturnNameUnchangedWhenItFits() {
+            String name = "Stock_1";
+            String result = ElementRenderer.truncate(name, LayoutMetrics.AUX_NAME_FONT, 200);
+            assertThat(result).isEqualTo(name);
+        }
+
+        @Test
+        void shouldTruncateLongUnderscoreName() {
+            String name = "normal_immune_population_fraction_region_2_lookup";
+            String result = ElementRenderer.truncate(name, LayoutMetrics.AUX_NAME_FONT, 100);
+            assertThat(result).endsWith("\u2026");
+            assertThat(result.length()).isLessThan(name.length());
+        }
+
+        @Test
+        void shouldReturnEllipsisWhenNothingFits() {
+            String result = ElementRenderer.truncate("ABCDEFG", LayoutMetrics.AUX_NAME_FONT, 1);
+            assertThat(result).isEqualTo("\u2026");
+        }
+    }
+
+    @Nested
     @DisplayName("measureLineHeight (#459)")
     class MeasureLineHeight {
 
