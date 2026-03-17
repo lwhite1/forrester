@@ -77,10 +77,12 @@ public class UnitRegistry {
      * Vensim models use both singular ("Day") and plural ("Days") forms.
      */
     private void registerTimeUnitAliases() {
-        for (TimeUnits tu : TimeUnits.values()) {
-            String plural = tu.getName() + "s";
-            byName.put(plural, tu);
-            byNameLower.put(plural.toLowerCase(), tu);
+        synchronized (this) {
+            for (TimeUnits tu : TimeUnits.values()) {
+                String plural = tu.getName() + "s";
+                byName.put(plural, tu);
+                byNameLower.put(plural.toLowerCase(), tu);
+            }
         }
     }
 
@@ -117,8 +119,10 @@ public class UnitRegistry {
      * @param target the unit the alias resolves to
      */
     public void registerAlias(String alias, Unit target) {
-        byName.put(alias, target);
-        byNameLower.put(alias.toLowerCase(), target);
+        synchronized (this) {
+            byName.put(alias, target);
+            byNameLower.put(alias.toLowerCase(), target);
+        }
     }
 
     private void registerAll(Unit[] units) {
@@ -131,8 +135,10 @@ public class UnitRegistry {
      * Registers a built-in unit without counting it toward the custom unit limit.
      */
     private void registerBuiltIn(Unit unit) {
-        byName.put(unit.getName(), unit);
-        byNameLower.put(unit.getName().toLowerCase(), unit);
+        synchronized (this) {
+            byName.put(unit.getName(), unit);
+            byNameLower.put(unit.getName().toLowerCase(), unit);
+        }
     }
 
     /**
