@@ -19,7 +19,7 @@ public class FlowChartViewer implements EventHandler {
     private final Flow[] flows;
 
     public FlowChartViewer(Flow... flows) {
-        this.flows = flows;
+        this.flows = flows.clone();
     }
 
     @Override
