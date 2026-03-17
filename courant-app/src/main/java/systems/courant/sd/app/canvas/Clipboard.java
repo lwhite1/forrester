@@ -80,7 +80,7 @@ public class Clipboard {
                 case AUX -> editor.getVariableByName(name);
                 case MODULE -> editor.getModuleByName(name);
                 case LOOKUP -> editor.getLookupTableByName(name);
-                case CLD_VARIABLE -> Optional.ofNullable(editor.getCldVariableByName(name));
+                case CLD_VARIABLE -> editor.getCldVariableByName(name);
                 case COMMENT -> Optional.ofNullable(editor.getCommentByName(name));
             };
 
