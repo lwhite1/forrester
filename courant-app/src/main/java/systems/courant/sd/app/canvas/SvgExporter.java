@@ -786,10 +786,7 @@ public final class SvgExporter {
                     "font-family=\"sans-serif\" font-size=\"%.0f\" fill=\"%s\">%n",
                     cx, fontSize, svgColor(ColorPalette.TEXT));
             for (int i = 0; i < lineCount; i++) {
-                String line = lines.get(i);
-                if (i == 1 && lines.size() > 2) {
-                    line = ElementRenderer.truncate(line, font, maxWidth);
-                }
+                String line = ElementRenderer.truncate(lines.get(i), font, maxWidth);
                 w.printf(Locale.US,
                         "    <tspan x=\"%.2f\" y=\"%.2f\" dominant-baseline=\"central\">%s</tspan>%n",
                         cx, startY + i * lineHeight, escapeXml(line));

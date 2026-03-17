@@ -466,10 +466,7 @@ public final class ElementRenderer {
             double startY = y + (height - totalHeight) / 2 + lineHeight / 2;
 
             for (int i = 0; i < lineCount; i++) {
-                String line = lines.get(i);
-                if (i == 1 && lines.size() > 2) {
-                    line = truncate(line, font, maxWidth);
-                }
+                String line = truncate(lines.get(i), font, maxWidth);
                 gc.fillText(line, x + width / 2, startY + i * lineHeight);
             }
         }
