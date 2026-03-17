@@ -1072,13 +1072,13 @@ public class ModelEditor {
         return Collections.unmodifiableList(cldVariables);
     }
 
-    public CldVariableDef getCldVariableByName(String name) {
+    public Optional<CldVariableDef> getCldVariableByName(String name) {
         for (CldVariableDef v : cldVariables) {
             if (v.name().equals(name)) {
-                return v;
+                return Optional.of(v);
             }
         }
-        return null;
+        return Optional.empty();
     }
 
     /**
@@ -1197,10 +1197,11 @@ public class ModelEditor {
     public boolean classifyCldVariable(String name, ElementType targetType) {
         checkFxThread();
 
-        CldVariableDef variable = getCldVariableByName(name);
-        if (variable == null) {
+        Optional<CldVariableDef> opt = getCldVariableByName(name);
+        if (opt.isEmpty()) {
             return false;
         }
+        CldVariableDef variable = opt.get();
 
         // Remove the CLD variable
         cldVariables.removeIf(v -> v.name().equals(name));
