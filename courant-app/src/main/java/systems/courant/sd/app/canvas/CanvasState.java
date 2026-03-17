@@ -289,13 +289,17 @@ public class CanvasState {
     public ViewDef toViewDef() {
         List<ElementPlacement> placements = new ArrayList<>();
         for (String name : drawOrder) {
+            ElementType type = types.get(name);
+            if (type == null) {
+                continue;
+            }
             Position pos = positions.get(name);
             Size size = sizes.get(name);
             if (size != null && size.width() > 0 && size.height() > 0) {
                 placements.add(new ElementPlacement(
-                        name, types.get(name), pos.x(), pos.y(), size.width(), size.height()));
+                        name, type, pos.x(), pos.y(), size.width(), size.height()));
             } else {
-                placements.add(new ElementPlacement(name, types.get(name), pos.x(), pos.y()));
+                placements.add(new ElementPlacement(name, type, pos.x(), pos.y()));
             }
         }
         return new ViewDef(viewName, placements, List.of(), List.of());
