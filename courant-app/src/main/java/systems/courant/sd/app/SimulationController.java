@@ -5,6 +5,7 @@ import systems.courant.sd.app.canvas.ChartUtils;
 import systems.courant.sd.app.canvas.DashboardPanel;
 import systems.courant.sd.app.canvas.ModelCanvas;
 import systems.courant.sd.app.canvas.ModelDefinitionFactory;
+import systems.courant.sd.app.canvas.ModelDefinitionFactory.SimulationTiming;
 import systems.courant.sd.app.canvas.ModelEditListener;
 import systems.courant.sd.app.canvas.ModelEditor;
 import systems.courant.sd.app.canvas.dialogs.MonteCarloDialog;
@@ -18,8 +19,6 @@ import systems.courant.sd.app.canvas.dialogs.SimulationSettingsDialog;
 import systems.courant.sd.app.canvas.StatusBar;
 import systems.courant.sd.app.canvas.dialogs.ExtremeConditionDialog;
 import systems.courant.sd.app.canvas.dialogs.ValidationDialog;
-import systems.courant.sd.measure.Quantity;
-import systems.courant.sd.measure.TimeUnit;
 import systems.courant.sd.model.def.ModelDefinition;
 import systems.courant.sd.model.def.ModelValidator;
 import systems.courant.sd.model.def.SimulationSettings;
@@ -150,8 +149,7 @@ final class SimulationController {
 
         analysisRunner.run("Running sweep...",
                 () -> {
-                    TimeUnit timeStep = ModelDefinitionFactory.resolveTimeStep(finalSettings);
-                    Quantity duration = ModelDefinitionFactory.resolveDuration(finalSettings);
+                    SimulationTiming timing = ModelDefinitionFactory.resolveTiming(finalSettings);
 
                     return ParameterSweep.builder()
                             .parameterName(config.parameterName())
@@ -160,8 +158,8 @@ final class SimulationController {
                             .compiledModelFactory(
                                     ModelDefinitionFactory.createSingleParamFactory(
                                             def, finalSettings, config.parameterName()))
-                            .timeStep(timeStep)
-                            .duration(duration)
+                            .timeStep(timing.timeStep())
+                            .duration(timing.duration())
                             .build()
                             .execute();
                 },
@@ -200,14 +198,13 @@ final class SimulationController {
 
         analysisRunner.run("Running multi-parameter sweep...",
                 () -> {
-                    TimeUnit timeStep = ModelDefinitionFactory.resolveTimeStep(finalSettings);
-                    Quantity duration = ModelDefinitionFactory.resolveDuration(finalSettings);
+                    SimulationTiming timing = ModelDefinitionFactory.resolveTiming(finalSettings);
 
                     MultiParameterSweep.Builder builder = MultiParameterSweep.builder()
                             .compiledModelFactory(
                                     ModelDefinitionFactory.createFactory(def, finalSettings))
-                            .timeStep(timeStep)
-                            .duration(duration);
+                            .timeStep(timing.timeStep())
+                            .duration(timing.duration());
 
                     for (MultiParameterSweepDialog.ParamConfig p : config.parameters()) {
                         builder.parameter(p.name(),
@@ -263,8 +260,7 @@ final class SimulationController {
         analysisRunner.run(
                 "Running Monte Carlo (" + config.iterations() + " iterations)...",
                 () -> {
-                    TimeUnit timeStep = ModelDefinitionFactory.resolveTimeStep(finalSettings);
-                    Quantity duration = ModelDefinitionFactory.resolveDuration(finalSettings);
+                    SimulationTiming timing = ModelDefinitionFactory.resolveTiming(finalSettings);
 
                     MonteCarlo.Builder builder = MonteCarlo.builder()
                             .compiledModelFactory(
@@ -273,8 +269,8 @@ final class SimulationController {
                             .sampling("RANDOM".equals(config.samplingMethod())
                                     ? SamplingMethod.RANDOM : SamplingMethod.LATIN_HYPERCUBE)
                             .seed(config.seed())
-                            .timeStep(timeStep)
-                            .duration(duration);
+                            .timeStep(timing.timeStep())
+                            .duration(timing.duration());
 
                     for (MonteCarloDialog.ParameterConfig p : config.parameters()) {
                         if (p.distribution() == MonteCarloDialog.DistributionType.NORMAL) {
@@ -329,8 +325,7 @@ final class SimulationController {
         analysisRunner.run(
                 "Optimizing (" + config.maxEvaluations() + " max evals)...",
                 () -> {
-                    TimeUnit timeStep = ModelDefinitionFactory.resolveTimeStep(finalSettings);
-                    Quantity duration = ModelDefinitionFactory.resolveDuration(finalSettings);
+                    SimulationTiming timing = ModelDefinitionFactory.resolveTiming(finalSettings);
 
                     ObjectiveFunction objective = switch (config.objectiveType()) {
                         case MINIMIZE -> Objectives.minimize(config.targetVariable());
@@ -351,8 +346,8 @@ final class SimulationController {
                             .objective(objective)
                             .algorithm(algorithm)
                             .maxEvaluations(config.maxEvaluations())
-                            .timeStep(timeStep)
-                            .duration(duration);
+                            .timeStep(timing.timeStep())
+                            .duration(timing.duration());
 
                     for (OptimizerDialog.ParamConfig p : config.parameters()) {
                         if (Double.isNaN(p.initialGuess())) {
@@ -406,8 +401,7 @@ final class SimulationController {
         analysisRunner.run(
                 "Calibrating (" + config.maxEvaluations() + " max evals)...",
                 () -> {
-                    TimeUnit timeStep = ModelDefinitionFactory.resolveTimeStep(finalSettings);
-                    Quantity duration = ModelDefinitionFactory.resolveDuration(finalSettings);
+                    SimulationTiming timing = ModelDefinitionFactory.resolveTiming(finalSettings);
 
                     // Build composite objective: sum SSE across all fit targets
                     List<CalibrateDialog.FitTarget> targets = config.fitTargets();
@@ -434,8 +428,8 @@ final class SimulationController {
                             .objective(objective)
                             .algorithm(algorithm)
                             .maxEvaluations(config.maxEvaluations())
-                            .timeStep(timeStep)
-                            .duration(duration);
+                            .timeStep(timing.timeStep())
+                            .duration(timing.duration());
 
                     for (CalibrateDialog.ParamConfig p : config.parameters()) {
                         if (Double.isNaN(p.initialGuess())) {
@@ -488,14 +482,13 @@ final class SimulationController {
         analysisRunner.run(
                 "Running extreme condition tests (" + totalRuns + " runs)...",
                 () -> {
-                    TimeUnit timeStep = ModelDefinitionFactory.resolveTimeStep(settings);
-                    Quantity duration = ModelDefinitionFactory.resolveDuration(settings);
+                    SimulationTiming timing = ModelDefinitionFactory.resolveTiming(settings);
 
                     ExtremeConditionTest.Builder builder = ExtremeConditionTest.builder()
                             .compiledModelFactory(
                                     ModelDefinitionFactory.createFactory(def, settings))
-                            .timeStep(timeStep)
-                            .duration(duration);
+                            .timeStep(timing.timeStep())
+                            .duration(timing.duration());
 
                     for (VariableDef param : params) {
                         builder.parameter(param.name(), param.literalValue());

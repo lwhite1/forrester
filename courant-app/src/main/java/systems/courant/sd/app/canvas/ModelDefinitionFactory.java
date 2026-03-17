@@ -63,6 +63,18 @@ public final class ModelDefinitionFactory {
     }
 
     /**
+     * Bundles the resolved time step and duration for a simulation run.
+     */
+    public record SimulationTiming(TimeUnit timeStep, Quantity duration) {}
+
+    /**
+     * Resolves both time step and duration from simulation settings.
+     */
+    public static SimulationTiming resolveTiming(SimulationSettings settings) {
+        return new SimulationTiming(resolveTimeStep(settings), resolveDuration(settings));
+    }
+
+    /**
      * Resolves the time step unit from simulation settings.
      */
     public static TimeUnit resolveTimeStep(SimulationSettings settings) {
