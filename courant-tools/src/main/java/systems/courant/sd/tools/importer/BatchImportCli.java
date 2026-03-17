@@ -261,6 +261,7 @@ public class BatchImportCli {
                 .build()) {
             HttpRequest request = HttpRequest.newBuilder()
                     .uri(uri)
+                    .header("User-Agent", "Courant-SD-Importer/1.0")
                     .timeout(DOWNLOAD_TIMEOUT)
                     .GET()
                     .build();

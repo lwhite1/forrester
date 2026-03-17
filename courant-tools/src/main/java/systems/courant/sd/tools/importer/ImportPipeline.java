@@ -65,7 +65,6 @@ public class ImportPipeline {
 
         // Stage 4: Generate output (Java source or JSON)
         String source;
-        String outputExtension;
         if (config.generateCode()) {
             log.info("Generating Java class: {}", config.className());
             String packageName = resolvePackageName(config.category());
@@ -74,7 +73,6 @@ public class ImportPipeline {
                     definition, config.metadata(), config.className(), packageName,
                     srcFileName != null ? srcFileName.toString() : config.sourceFile().toString(),
                     importWarnings, validationErrors);
-            outputExtension = ".java";
         } else {
             log.info("Generating JSON model definition");
             // Attach metadata to the definition for JSON output
@@ -82,7 +80,6 @@ public class ImportPipeline {
                     .metadata(config.metadata())
                     .build();
             source = new ModelDefinitionSerializer().toJson(defWithMeta);
-            outputExtension = ".json";
         }
 
         // Stage 5: Write

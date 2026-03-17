@@ -5,6 +5,8 @@ import systems.courant.sd.measure.TimeUnit;
 import systems.courant.sd.measure.Unit;
 import systems.courant.sd.model.flows.RateConverter;
 
+import com.google.common.base.Preconditions;
+
 import com.carrotsearch.hppc.DoubleArrayList;
 
 import java.util.function.Supplier;
@@ -40,6 +42,7 @@ public abstract class Flow extends Element {
      */
     public Flow(String name, TimeUnit unit, Unit materialUnit) {
         super(name);
+        Preconditions.checkNotNull(unit, "timeUnit cannot be null");
         this.timeUnit = unit;
         this.materialUnit = materialUnit;
     }

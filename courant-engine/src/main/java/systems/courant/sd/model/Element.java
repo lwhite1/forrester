@@ -11,7 +11,7 @@ public abstract class Element {
     private String comment;
 
     protected Element(String name) {
-        Preconditions.checkArgument(name != null, "name cannot be null");
+        Preconditions.checkNotNull(name, "name cannot be null");
         Preconditions.checkArgument(!name.isEmpty(), "name cannot be empty");
         this.name = name;
     }

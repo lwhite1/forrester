@@ -12,7 +12,7 @@ public class ElementTest {
 
     @Test
     public void shouldRejectNullName() {
-        assertThrows(IllegalArgumentException.class, () -> new Stock(null, 0, THING));
+        assertThrows(NullPointerException.class, () -> new Stock(null, 0, THING));
     }
 
     @Test
