@@ -1457,4 +1457,86 @@ class ExprCompilerTest {
             assertThat(afterFormula.getCurrentValue()).isEqualTo(5.0);
         }
     }
+
+    @Nested
+    @DisplayName("Fractional DT (#858)")
+    class FractionalDt {
+
+        private CompilationContext fracCtx;
+        private ExprCompiler fracCompiler;
+        private long[] fracStep;
+
+        @BeforeEach
+        void setUp() {
+            fracStep = new long[]{0};
+            UnitRegistry registry = new UnitRegistry();
+            double[] dtHolder = {0.25};
+            fracCtx = new CompilationContext(registry, () -> fracStep[0], null, dtHolder);
+            fracCompiler = new ExprCompiler(fracCtx, new ArrayList<>());
+            fracCtx.addLiteralConstant("Rate", 0.05);
+        }
+
+        @Test
+        void shouldReturnSimulationTimeNotStepIndex() {
+            Formula formula = fracCompiler.compile("TIME");
+            fracStep[0] = 0;
+            assertThat(formula.getCurrentValue()).isEqualTo(0.0);
+            fracStep[0] = 4;  // 4 steps * 0.25 = time 1.0
+            assertThat(formula.getCurrentValue()).isEqualTo(1.0);
+            fracStep[0] = 40; // 40 steps * 0.25 = time 10.0
+            assertThat(formula.getCurrentValue()).isEqualTo(10.0);
+        }
+
+        @Test
+        void shouldFireStepAtCorrectTime() {
+            Formula formula = fracCompiler.compile("STEP(10, 5)");
+            // time 5 = step 20 (5 / 0.25)
+            fracStep[0] = 19;
+            assertThat(formula.getCurrentValue()).isEqualTo(0.0);
+            fracStep[0] = 20;
+            assertThat(formula.getCurrentValue()).isEqualTo(10.0);
+        }
+
+        @Test
+        void shouldFirePulseAtCorrectTime() {
+            Formula formula = fracCompiler.compile("PULSE(100, 3)");
+            // time 3 = step 12 (3 / 0.25)
+            fracStep[0] = 11;
+            assertThat(formula.getCurrentValue()).isEqualTo(0.0);
+            fracStep[0] = 12;
+            assertThat(formula.getCurrentValue()).isEqualTo(100.0);
+            fracStep[0] = 13;
+            assertThat(formula.getCurrentValue()).isEqualTo(0.0);
+        }
+
+        @Test
+        void shouldRampAtCorrectRate() {
+            Formula formula = fracCompiler.compile("RAMP(2, 4)");
+            // time 4 = step 16, slope=2 per time unit, so 2 * dt = 0.5 per step
+            fracStep[0] = 15;
+            assertThat(formula.getCurrentValue()).isEqualTo(0.0);
+            fracStep[0] = 16; // time 4, ramp starts
+            assertThat(formula.getCurrentValue()).isEqualTo(0.0);
+            fracStep[0] = 20; // time 5, elapsed = 4 steps, value = 0.5 * 4 = 2.0
+            assertThat(formula.getCurrentValue()).isCloseTo(2.0, within(1e-10));
+        }
+
+        @Test
+        void shouldComputePulseTrainWithCorrectTiming() {
+            fracCtx.addLiteralConstant("start", 2);
+            fracCtx.addLiteralConstant("dur", 1);
+            fracCtx.addLiteralConstant("repeat", 4);
+            fracCtx.addLiteralConstant("fin", 20);
+            Formula formula = fracCompiler.compile("PULSE_TRAIN(start, dur, repeat, fin)");
+            // At time 2 (step 8): inside pulse (2 <= 2 < 3)
+            fracStep[0] = 8;
+            assertThat(formula.getCurrentValue()).isEqualTo(1.0);
+            // At time 3.5 (step 14): outside pulse
+            fracStep[0] = 14;
+            assertThat(formula.getCurrentValue()).isEqualTo(0.0);
+            // At time 6 (step 24): second pulse (6 <= 6 < 7)
+            fracStep[0] = 24;
+            assertThat(formula.getCurrentValue()).isEqualTo(1.0);
+        }
+    }
 }
