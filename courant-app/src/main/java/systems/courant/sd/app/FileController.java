@@ -347,7 +347,18 @@ final class FileController {
         Alert alert = new Alert(Alert.AlertType.WARNING);
         alert.setTitle("Import Warnings");
         alert.setHeaderText("Warnings while importing " + fileName);
-        alert.setContentText(String.join("\n", warnings));
+        alert.setContentText(warnings.size() + " warning(s)");
+
+        javafx.scene.control.TextArea textArea = new javafx.scene.control.TextArea(
+                String.join("\n", warnings));
+        textArea.setEditable(false);
+        textArea.setWrapText(true);
+        textArea.setMaxWidth(Double.MAX_VALUE);
+        textArea.setMaxHeight(Double.MAX_VALUE);
+        textArea.setPrefRowCount(Math.min(warnings.size(), 20));
+
+        alert.getDialogPane().setExpandableContent(textArea);
+        alert.getDialogPane().setExpanded(true);
         alert.showAndWait();
     }
 }
