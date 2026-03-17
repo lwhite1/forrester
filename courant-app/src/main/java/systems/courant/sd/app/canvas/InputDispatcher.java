@@ -28,7 +28,6 @@ import systems.courant.sd.app.canvas.controllers.ResizeController;
  */
 final class InputDispatcher {
 
-    private static final double ZOOM_FACTOR = 1.1;
     private static final double MIN_REATTACH_DRAG_SQ = 5 * 5;
 
     private final DragController dragController;
@@ -99,7 +98,7 @@ final class InputDispatcher {
     // --- Scroll ---
 
     void handleScroll(ScrollEvent event, Viewport viewport, Runnable redraw) {
-        double factor = event.getDeltaY() > 0 ? ZOOM_FACTOR : 1.0 / ZOOM_FACTOR;
+        double factor = event.getDeltaY() > 0 ? Viewport.ZOOM_FACTOR : 1.0 / Viewport.ZOOM_FACTOR;
         viewport.zoomAt(event.getX(), event.getY(), factor);
         redraw.run();
         event.consume();
