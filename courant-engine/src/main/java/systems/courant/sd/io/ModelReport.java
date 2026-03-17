@@ -108,7 +108,7 @@ public class ModelReport {
         }
 
         for (Module sub : module.getSubModules().values()) {
-            appendModule(builder, sub, indent + "  ", new HashSet<>(visited));
+            appendModule(builder, sub, indent + "  ", visited);
         }
     }
 
