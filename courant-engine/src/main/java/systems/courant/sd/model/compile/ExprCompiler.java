@@ -254,7 +254,8 @@ public class ExprCompiler {
         return switch (name) {
             case "TIME" -> {
                 requireArgs(name, args, 0);
-                yield () -> context.getCurrentStep().getAsLong();
+                double[] dtH = context.getDtHolder();
+                yield () -> context.getCurrentStep().getAsLong() * dtH[0];
             }
             case "DT" -> {
                 requireArgs(name, args, 0);
@@ -774,7 +775,8 @@ public class ExprCompiler {
         requireArgs("STEP", args, 2);
         double height = evaluateConstant(args.get(0), "STEP height");
         double time = evaluateConstant(args.get(1), "STEP time");
-        Step step = Step.of(height, Math.round(time), context.getCurrentStep());
+        double dt = context.getDt();
+        Step step = Step.of(height, Math.round(time / dt), context.getCurrentStep());
         return step::getCurrentValue;
     }
 
@@ -784,14 +786,15 @@ public class ExprCompiler {
                     "RAMP requires 2-3 arguments, got " + args.size(), "RAMP");
         }
         double slope = evaluateConstant(args.get(0), "RAMP slope");
-        double start = evaluateConstant(args.get(1), "RAMP startStep");
+        double start = evaluateConstant(args.get(1), "RAMP startTime");
+        double dt = context.getDt();
         Ramp ramp;
         if (args.size() == 3) {
-            double end = evaluateConstant(args.get(2), "RAMP endStep");
-            ramp = Ramp.of(slope, Math.round(start), Math.round(end),
+            double end = evaluateConstant(args.get(2), "RAMP endTime");
+            ramp = Ramp.of(slope * dt, Math.round(start / dt), Math.round(end / dt),
                     context.getCurrentStep());
         } else {
-            ramp = Ramp.of(slope, Math.round(start), context.getCurrentStep());
+            ramp = Ramp.of(slope * dt, Math.round(start / dt), context.getCurrentStep());
         }
         return ramp::getCurrentValue;
     }
@@ -803,13 +806,14 @@ public class ExprCompiler {
         }
         double magnitude = evaluateConstant(args.get(0), "PULSE magnitude");
         double start = evaluateConstant(args.get(1), "PULSE startTime");
+        double dt = context.getDt();
         Pulse pulse;
         if (args.size() == 3) {
             double interval = evaluateConstant(args.get(2), "PULSE interval");
-            pulse = Pulse.of(magnitude, Math.round(start),
-                    Math.round(interval), context.getCurrentStep());
+            pulse = Pulse.of(magnitude, Math.round(start / dt),
+                    Math.round(interval / dt), context.getCurrentStep());
         } else {
-            pulse = Pulse.of(magnitude, Math.round(start), context.getCurrentStep());
+            pulse = Pulse.of(magnitude, Math.round(start / dt), context.getCurrentStep());
         }
         return pulse::getCurrentValue;
     }
@@ -820,8 +824,9 @@ public class ExprCompiler {
         DoubleSupplier duration = compileExpr(args.get(1));
         DoubleSupplier repeatInterval = compileExpr(args.get(2));
         DoubleSupplier endTime = compileExpr(args.get(3));
+        double[] dtH = context.getDtHolder();
         return () -> {
-            double t = context.getCurrentStep().getAsLong();
+            double t = context.getCurrentStep().getAsLong() * dtH[0];
             double start = startTime.getAsDouble();
             double end = endTime.getAsDouble();
             double dur = duration.getAsDouble();
