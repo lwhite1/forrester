@@ -273,9 +273,9 @@ public class QuickstartDialog extends Stage {
                 plain("  \u2022 "),
                 bold("Sketch a causal loop diagram"),
                 plain(" \u2014 press "),
-                mono("8"),
+                mono("7"),
                 plain(" for CLD variables and "),
-                mono("9"),
+                mono("8"),
                 plain(" for causal links. Map out your system's feedback "
                         + "structure before formalizing it\n\n"),
                 plain("  \u2022 "),
