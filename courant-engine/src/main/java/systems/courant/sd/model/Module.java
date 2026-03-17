@@ -5,7 +5,6 @@ import systems.courant.sd.measure.TimeUnit;
 
 import com.google.common.base.Preconditions;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -130,7 +129,7 @@ public class Module extends Element {
      * Returns an unmodifiable list of all stocks in this module.
      */
     public List<Stock> getStocks() {
-        return Collections.unmodifiableList(new ArrayList<>(stocks.values()));
+        return List.copyOf(stocks.values());
     }
 
     /**

@@ -57,6 +57,13 @@ public final class IndexedValue {
         this.values = values.clone();
     }
 
+    /** Trusted internal constructor — skips defensive clone. Caller must not retain the array. */
+    @SuppressWarnings("unused") // tag parameter distinguishes from cloning constructor
+    private IndexedValue(SubscriptRange range, double[] values, boolean trusted) {
+        this.range = range;
+        this.values = values;
+    }
+
     // --- Factory methods ---
 
     /**
@@ -411,14 +418,14 @@ public final class IndexedValue {
             for (int i = 0; i < result.length; i++) {
                 result[i] = op.apply(this.values[0], other.values[i]);
             }
-            return new IndexedValue(other.range, result);
+            return new IndexedValue(other.range, result, true);
         }
         if (other.isScalar()) {
             double[] result = new double[this.values.length];
             for (int i = 0; i < result.length; i++) {
                 result[i] = op.apply(this.values[i], other.values[0]);
             }
-            return new IndexedValue(this.range, result);
+            return new IndexedValue(this.range, result, true);
         }
         // Both indexed — need broadcasting
         return broadcastOp(other, op);
@@ -445,7 +452,7 @@ public final class IndexedValue {
             for (int i = 0; i < result.length; i++) {
                 result[i] = op.apply(this.values[i], other.values[i]);
             }
-            return new IndexedValue(this.range, result);
+            return new IndexedValue(this.range, result, true);
         }
 
         // Build result dimensions: all left dims, then right-only dims
@@ -494,7 +501,7 @@ public final class IndexedValue {
             result[i] = op.apply(this.values[leftFlat], other.values[rightFlat]);
         }
 
-        return new IndexedValue(resultRange, result);
+        return new IndexedValue(resultRange, result, true);
     }
 
     // --- Helpers ---

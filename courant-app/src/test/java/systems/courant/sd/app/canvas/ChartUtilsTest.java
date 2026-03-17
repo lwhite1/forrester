@@ -37,6 +37,7 @@ class ChartUtilsTest {
         @DisplayName("Very small fractional values show decimals")
         void smallFractionalValues() {
             assertThat(ChartUtils.formatNumber(0.0001)).isEqualTo("0.0001");
+            assertThat(ChartUtils.formatNumber(0.000001)).isEqualTo("1.00000e-06");
         }
 
         @Test

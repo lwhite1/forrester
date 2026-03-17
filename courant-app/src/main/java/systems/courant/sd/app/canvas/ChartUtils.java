@@ -155,6 +155,9 @@ public final class ChartUtils {
                 && Math.abs(value) <= Long.MAX_VALUE) {
             return String.valueOf((long) value);
         }
+        if (value != 0 && Math.abs(value) < 0.0001) {
+            return String.format(Locale.US, "%g", value);
+        }
         return String.format(Locale.US, "%.4f", value);
     }
 }

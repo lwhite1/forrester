@@ -3,9 +3,13 @@ package systems.courant.sd.demo;
 import systems.courant.sd.Simulation;
 import systems.courant.sd.demo.agile.AgileSoftwareDevelopmentDemo;
 import systems.courant.sd.demo.waterfall.WaterfallSoftwareDevelopmentDemo;
+import systems.courant.sd.io.CsvSubscriber;
 import systems.courant.sd.measure.Quantity;
+import systems.courant.sd.measure.Units;
+import systems.courant.sd.measure.units.time.TimeUnits;
 import systems.courant.sd.measure.units.time.Times;
 import systems.courant.sd.model.Flow;
+import systems.courant.sd.model.Flows;
 import systems.courant.sd.model.Model;
 import systems.courant.sd.model.Stock;
 import systems.courant.sd.sweep.MonteCarlo;
@@ -220,7 +224,7 @@ class DemoSmokeTest {
     void thirdOrderDelayDemo() {
         Model model = new ThirdOrderMaterialDelayDemo().getModel();
         assertThat(model.getStocks()).isNotEmpty();
-        var hour = systems.courant.sd.measure.units.time.TimeUnits.HOUR;
+        var hour = TimeUnits.HOUR;
         Simulation sim = new Simulation(model, hour, Times.hours(24));
         sim.execute();
         Stock step2 = findStock(model, "Step 2");
@@ -282,15 +286,15 @@ class DemoSmokeTest {
     @Test
     @DisplayName("ThirdOrderMaterialDelayDemo flows clamp to zero when stocks are negative")
     void thirdOrderDelayFlowsClamped() {
-        var hour = systems.courant.sd.measure.units.time.TimeUnits.HOUR;
+        var hour = TimeUnits.HOUR;
         var model = new Model("Clamp Test");
-        var step1 = new systems.courant.sd.model.Stock("Step 1", -10,
-                systems.courant.sd.measure.Units.DIMENSIONLESS);
+        var step1 = new Stock("Step 1", -10,
+                Units.DIMENSIONLESS);
         double delayHours = 5.0;
-        var flow = systems.courant.sd.model.Flow.create("Step 1 delay", hour, () ->
+        var flow = Flow.create("Step 1 delay", hour, () ->
                 new Quantity(Math.max(0, Math.min(step1.getValue(),
                         step1.getValue() / delayHours)),
-                        systems.courant.sd.measure.Units.DIMENSIONLESS));
+                        Units.DIMENSIONLESS));
         step1.addOutflow(flow);
         model.addStock(step1);
         new Simulation(model, hour, Times.hours(1)).execute();
@@ -301,15 +305,15 @@ class DemoSmokeTest {
     @Test
     @DisplayName("FlowTimeDemo TAT stays non-negative during simulation")
     void flowTimeDemoTatNonNegative() {
-        var hour = systems.courant.sd.measure.units.time.TimeUnits.HOUR;
+        var hour = TimeUnits.HOUR;
         var model = new Model("TAT Clamp Test");
-        var tat = new systems.courant.sd.model.Stock("TAT", 0, hour);
+        var tat = new Stock("TAT", 0, hour);
         double capacity = 100;
         double hoursPerDay = 24.0;
         double adjustmentTime = 24.0;
-        var wip = new systems.courant.sd.model.Stock("WIP", 500,
-                systems.courant.sd.measure.Units.DIMENSIONLESS);
-        var tatAdjustment = systems.courant.sd.model.Flow.create("TAT Adjustment", hour, () -> {
+        var wip = new Stock("WIP", 500,
+                Units.DIMENSIONLESS);
+        var tatAdjustment = Flow.create("TAT Adjustment", hour, () -> {
             double currentTAT = Math.max(0, tat.getValue());
             double actualTAT = (wip.getValue() / capacity) * hoursPerDay;
             return new Quantity((actualTAT - currentTAT) / adjustmentTime, hour);
@@ -324,24 +328,24 @@ class DemoSmokeTest {
     @Test
     @DisplayName("FlowTimeDemo throughput uses clamped history index when TAT exceeds current step (#466)")
     void flowTimeDemoClampedHistoryIndex() {
-        var hour = systems.courant.sd.measure.units.time.TimeUnits.HOUR;
+        var hour = TimeUnits.HOUR;
         var model = new Model("FlowTime Clamp Test");
         double capacity = 190;
         double tatGoalHours = 336;
 
-        Stock wip = new Stock("WIP", 1000, systems.courant.sd.measure.Units.DIMENSIONLESS);
+        Stock wip = new Stock("WIP", 1000, Units.DIMENSIONLESS);
         Stock tat = new Stock("TAT", tatGoalHours, hour);
 
         Simulation sim = new Simulation(model, hour, WEEK, 1);
 
-        Flow demand = systems.courant.sd.model.Flows.linearGrowth("New Orders", DAY, wip, 200);
+        Flow demand = Flows.linearGrowth("New Orders", DAY, wip, 200);
 
         Flow throughput = Flow.create("Delivered Reports", DAY, () -> {
             int demandDelay = Math.max(0, (int) Math.round(tat.getValue()));
             int stepToGet = Math.max(0, (int) sim.getCurrentStep() - demandDelay);
             double demandPlusDelay = demand.getHistoryAtTimeStep(stepToGet);
             return new Quantity(Math.min(capacity, demandPlusDelay),
-                    systems.courant.sd.measure.Units.DIMENSIONLESS);
+                    Units.DIMENSIONLESS);
         });
 
         wip.addInflow(demand);
@@ -370,12 +374,12 @@ class DemoSmokeTest {
     void csvSubscriberWritesToTmpdir(@TempDir Path tempDir) throws Exception {
         String csvPath = tempDir.resolve("courant-test.csv").toString();
         var model = new Model("CSV Path Test");
-        var stock = new Stock("Level", 100, systems.courant.sd.measure.Units.DIMENSIONLESS);
+        var stock = new Stock("Level", 100, Units.DIMENSIONLESS);
         model.addStock(stock);
 
-        var csv = new systems.courant.sd.io.CsvSubscriber(csvPath);
-        var sim = new Simulation(model, systems.courant.sd.measure.Units.MINUTE,
-                systems.courant.sd.measure.Units.MINUTE, 2);
+        var csv = new CsvSubscriber(csvPath);
+        var sim = new Simulation(model, MINUTE,
+                MINUTE, 2);
         sim.addEventHandler(csv);
         sim.execute();
 

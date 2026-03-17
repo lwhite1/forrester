@@ -55,6 +55,7 @@ public class ModelDefinitionSerializer {
 
     private static final Logger log = LoggerFactory.getLogger(ModelDefinitionSerializer.class);
     private static final int MAX_MODULE_DEPTH = 50;
+    private static final long MAX_FILE_SIZE = 10 * 1024 * 1024; // 10 MB
 
     private final ObjectMapper mapper;
 
@@ -123,8 +124,6 @@ public class ModelDefinitionSerializer {
      * @throws IOException if the file cannot be read
      * @throws IllegalArgumentException if the JSON is malformed or missing required fields
      */
-    private static final long MAX_FILE_SIZE = 10 * 1024 * 1024; // 10 MB
-
     public ModelDefinition fromFile(Path path) throws IOException {
         long size = Files.size(path);
         if (size > MAX_FILE_SIZE) {
