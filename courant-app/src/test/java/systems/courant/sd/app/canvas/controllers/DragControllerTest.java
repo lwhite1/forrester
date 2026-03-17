@@ -58,7 +58,7 @@ class DragControllerTest {
         @Test
         void shouldSetDraggingTrue() {
             state.select("A");
-            controller.start("A", 50, 60, state);
+            controller.start("A", 50, 60, state, viewport);
 
             assertThat(controller.isDragging()).isTrue();
         }
@@ -66,7 +66,7 @@ class DragControllerTest {
         @Test
         void shouldSetDragTarget() {
             state.select("A");
-            controller.start("A", 50, 60, state);
+            controller.start("A", 50, 60, state, viewport);
 
             assertThat(controller.getDragTarget()).isEqualTo("A");
         }
@@ -74,7 +74,7 @@ class DragControllerTest {
         @Test
         void shouldNotHaveMoved() {
             state.select("A");
-            controller.start("A", 50, 60, state);
+            controller.start("A", 50, 60, state, viewport);
 
             assertThat(controller.hasMoved()).isFalse();
         }
@@ -87,7 +87,7 @@ class DragControllerTest {
         @Test
         void shouldMoveSelectedElementByWorldDelta() {
             state.select("A");
-            controller.start("A", 50, 60, state);
+            controller.start("A", 50, 60, state, viewport);
 
             controller.drag(70, 80, state, viewport, () -> {});
 
@@ -100,7 +100,7 @@ class DragControllerTest {
         void shouldMoveAllSelectedElements() {
             state.select("A");
             state.addToSelection("B");
-            controller.start("A", 50, 60, state);
+            controller.start("A", 50, 60, state, viewport);
 
             controller.drag(70, 80, state, viewport, () -> {});
 
@@ -114,7 +114,7 @@ class DragControllerTest {
         void shouldApplyScaleToWorldDelta() {
             viewport.zoomAt(0, 0, 2.0); // scale = 2.0
             state.select("A");
-            controller.start("A", 50, 60, state);
+            controller.start("A", 50, 60, state, viewport);
 
             controller.drag(70, 80, state, viewport, () -> {});
 
@@ -124,10 +124,26 @@ class DragControllerTest {
         }
 
         @Test
+        void shouldNotJumpWhenScaleChangesMidDrag() {
+            state.select("A");
+            controller.start("A", 100, 100, state, viewport);
+
+            // Zoom in to 2x at the pivot (100,100)
+            viewport.zoomAt(100, 100, 2.0);
+
+            // Continue dragging at screen (120, 120)
+            controller.drag(120, 120, state, viewport, () -> {});
+
+            // World delta = toWorldX(120) - 100 = 10 at scale 2.0
+            assertThat(state.getX("A")).isCloseTo(110, within(0.001));
+            assertThat(state.getY("A")).isCloseTo(210, within(0.001));
+        }
+
+        @Test
         void shouldSaveUndoOnFirstDrag() {
             AtomicInteger undoCount = new AtomicInteger(0);
             state.select("A");
-            controller.start("A", 50, 60, state);
+            controller.start("A", 50, 60, state, viewport);
 
             controller.drag(60, 70, state, viewport, undoCount::incrementAndGet);
 
@@ -138,7 +154,7 @@ class DragControllerTest {
         void shouldNotSaveUndoOnSubsequentDrags() {
             AtomicInteger undoCount = new AtomicInteger(0);
             state.select("A");
-            controller.start("A", 50, 60, state);
+            controller.start("A", 50, 60, state, viewport);
 
             controller.drag(60, 70, state, viewport, undoCount::incrementAndGet);
             controller.drag(80, 90, state, viewport, undoCount::incrementAndGet);
@@ -150,7 +166,7 @@ class DragControllerTest {
         @Test
         void shouldReportHasMoved() {
             state.select("A");
-            controller.start("A", 50, 60, state);
+            controller.start("A", 50, 60, state, viewport);
 
             controller.drag(70, 80, state, viewport, () -> {});
 
@@ -170,7 +186,7 @@ class DragControllerTest {
         @Test
         void shouldComputeDeltaRelativeToStartPosition() {
             state.select("A");
-            controller.start("A", 50, 60, state);
+            controller.start("A", 50, 60, state, viewport);
 
             // Multiple drag calls should all compute delta from original start
             controller.drag(60, 70, state, viewport, () -> {});
@@ -188,7 +204,7 @@ class DragControllerTest {
         @Test
         void shouldSetDraggingFalse() {
             state.select("A");
-            controller.start("A", 50, 60, state);
+            controller.start("A", 50, 60, state, viewport);
             controller.drag(70, 80, state, viewport, () -> {});
 
             controller.end();
@@ -199,7 +215,7 @@ class DragControllerTest {
         @Test
         void shouldClearDragTarget() {
             state.select("A");
-            controller.start("A", 50, 60, state);
+            controller.start("A", 50, 60, state, viewport);
 
             controller.end();
 
@@ -209,7 +225,7 @@ class DragControllerTest {
         @Test
         void shouldPreserveFinalPositions() {
             state.select("A");
-            controller.start("A", 50, 60, state);
+            controller.start("A", 50, 60, state, viewport);
             controller.drag(70, 80, state, viewport, () -> {});
 
             controller.end();
@@ -226,12 +242,12 @@ class DragControllerTest {
         @Test
         void shouldAllowRestartAfterEnd() {
             state.select("A");
-            controller.start("A", 50, 60, state);
+            controller.start("A", 50, 60, state, viewport);
             controller.drag(70, 80, state, viewport, () -> {});
             controller.end();
 
             // Start a new drag
-            controller.start("A", 0, 0, state);
+            controller.start("A", 0, 0, state, viewport);
 
             assertThat(controller.isDragging()).isTrue();
             assertThat(controller.getDragTarget()).isEqualTo("A");
@@ -242,11 +258,11 @@ class DragControllerTest {
             AtomicInteger undoCount = new AtomicInteger(0);
             state.select("A");
 
-            controller.start("A", 50, 60, state);
+            controller.start("A", 50, 60, state, viewport);
             controller.drag(70, 80, state, viewport, undoCount::incrementAndGet);
             controller.end();
 
-            controller.start("A", 0, 0, state);
+            controller.start("A", 0, 0, state, viewport);
             controller.drag(10, 10, state, viewport, undoCount::incrementAndGet);
 
             assertThat(undoCount.get()).isEqualTo(2);

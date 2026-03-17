@@ -358,7 +358,7 @@ final class InputDispatcher {
             }
 
             // Start drag for all selected elements
-            dragController.start(hit, event.getX(), event.getY(), canvasState);
+            dragController.start(hit, event.getX(), event.getY(), canvasState, canvas.viewport());
         } else {
             // No element hit — check for connection click (info links then causal links)
             ConnectionId connHit = HitTester.hitTestInfoLink(
