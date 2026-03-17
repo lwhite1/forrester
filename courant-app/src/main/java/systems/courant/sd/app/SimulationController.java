@@ -250,6 +250,13 @@ final class SimulationController {
         }
 
         MonteCarloDialog.Config config = configOpt.get();
+
+        String validationError = validateDistributionParameters(config.parameters());
+        if (!validationError.isEmpty()) {
+            showError.accept(validationError);
+            return;
+        }
+
         ModelDefinition def = canvas.toModelDefinition();
         SimulationSettings finalSettings = settings;
 
@@ -502,6 +509,30 @@ final class SimulationController {
                             params.size() + " parameters, " + result.findings().size() + " findings"));
                 },
                 "Extreme Condition Test Error");
+    }
+
+    /**
+     * Validates distribution parameters for Monte Carlo configurations.
+     * Returns an empty string if all parameters are valid, or a descriptive
+     * error message for the first invalid parameter found.
+     */
+    static String validateDistributionParameters(List<MonteCarloDialog.ParameterConfig> parameters) {
+        for (MonteCarloDialog.ParameterConfig p : parameters) {
+            if (p.distribution() == MonteCarloDialog.DistributionType.NORMAL) {
+                if (p.param2() <= 0) {
+                    return "Parameter '" + p.name()
+                            + "': Normal distribution requires a positive standard deviation, got "
+                            + p.param2() + ".";
+                }
+            } else {
+                if (p.param1() >= p.param2()) {
+                    return "Parameter '" + p.name()
+                            + "': Uniform distribution requires min < max, got min="
+                            + p.param1() + ", max=" + p.param2() + ".";
+                }
+            }
+        }
+        return "";
     }
 
     private void showMultiSweepSensitivity(
