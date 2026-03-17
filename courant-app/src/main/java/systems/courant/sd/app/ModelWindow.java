@@ -787,14 +787,24 @@ public class ModelWindow {
             statusBar.showProgress("Computing layout\u2026");
             canvas.setDisable(true);
             Thread layoutThread = new Thread(() -> {
-                var sizeOverrides = systems.courant.sd.app.canvas.LayoutMetrics
-                        .computeSizeOverrides(def);
-                ViewDef view = AutoLayout.layout(def, sizeOverrides);
-                Platform.runLater(() -> {
-                    canvas.setDisable(false);
-                    statusBar.clearProgress();
-                    applyView(editorSnapshot, view, displayName);
-                });
+                try {
+                    var sizeOverrides = systems.courant.sd.app.canvas.LayoutMetrics
+                            .computeSizeOverrides(def);
+                    ViewDef view = AutoLayout.layout(def, sizeOverrides);
+                    Platform.runLater(() -> {
+                        canvas.setDisable(false);
+                        statusBar.clearProgress();
+                        applyView(editorSnapshot, view, displayName);
+                    });
+                } catch (Exception e) {
+                    log.error("Auto-layout failed", e);
+                    Platform.runLater(() -> {
+                        canvas.setDisable(false);
+                        statusBar.clearProgress();
+                        showError("Layout Error",
+                                "Auto-layout failed: " + e.getMessage());
+                    });
+                }
             }, "auto-layout");
             layoutThread.setDaemon(true);
             layoutThread.start();
