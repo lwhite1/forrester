@@ -55,7 +55,7 @@ public final class ExprStringifier {
             throw new IllegalArgumentException(
                     "Cannot stringify non-finite literal: " + v);
         }
-        if (v == (long) v && Math.abs(v) < 1e15) {
+        if (Math.abs(v) < (1L << 53) && v == (long) v) {
             sb.append((long) v);
         } else {
             sb.append(v);
