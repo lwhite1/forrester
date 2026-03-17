@@ -1,5 +1,7 @@
 package systems.courant.sd.model;
 
+import com.google.common.base.Preconditions;
+
 import java.util.Arrays;
 import java.util.function.DoubleSupplier;
 
@@ -43,18 +45,36 @@ public class TimeSeries implements Formula {
 
     /**
      * Creates a time series with linear interpolation and hold extrapolation.
+     *
+     * @param timeValues    sorted ascending time points (at least 2, all finite)
+     * @param dataValues    data values at each time point (same length, all finite)
+     * @param timeSupplier  supplies the current simulation time
+     * @return a new TimeSeries
+     * @throws IllegalArgumentException if arrays differ in length, have fewer than 2 points,
+     *                                  time values are not strictly ascending, or any value is
+     *                                  not finite
      */
     public static TimeSeries linear(double[] timeValues, double[] dataValues,
                                      DoubleSupplier timeSupplier) {
+        validateArrays(timeValues, dataValues);
         return new TimeSeries(timeValues.clone(), dataValues.clone(),
                 timeSupplier, false, false);
     }
 
     /**
      * Creates a time series with step interpolation and hold extrapolation.
+     *
+     * @param timeValues    sorted ascending time points (at least 2, all finite)
+     * @param dataValues    data values at each time point (same length, all finite)
+     * @param timeSupplier  supplies the current simulation time
+     * @return a new TimeSeries
+     * @throws IllegalArgumentException if arrays differ in length, have fewer than 2 points,
+     *                                  time values are not strictly ascending, or any value is
+     *                                  not finite
      */
     public static TimeSeries step(double[] timeValues, double[] dataValues,
                                    DoubleSupplier timeSupplier) {
+        validateArrays(timeValues, dataValues);
         return new TimeSeries(timeValues.clone(), dataValues.clone(),
                 timeSupplier, true, false);
     }
@@ -62,15 +82,20 @@ public class TimeSeries implements Formula {
     /**
      * Creates a time series with configurable interpolation and extrapolation.
      *
-     * @param timeValues     sorted ascending time points
-     * @param dataValues     data values at each time point
+     * @param timeValues     sorted ascending time points (at least 2, all finite)
+     * @param dataValues     data values at each time point (same length, all finite)
      * @param timeSupplier   supplies the current simulation time
      * @param interpolation  "LINEAR" or "STEP"
      * @param extrapolation  "HOLD" or "ZERO"
+     * @return a new TimeSeries
+     * @throws IllegalArgumentException if arrays differ in length, have fewer than 2 points,
+     *                                  time values are not strictly ascending, or any value is
+     *                                  not finite
      */
     public static TimeSeries create(double[] timeValues, double[] dataValues,
                                      DoubleSupplier timeSupplier,
                                      String interpolation, String extrapolation) {
+        validateArrays(timeValues, dataValues);
         boolean isStep = "STEP".equalsIgnoreCase(interpolation);
         boolean isZero = "ZERO".equalsIgnoreCase(extrapolation);
         return new TimeSeries(timeValues.clone(), dataValues.clone(),
@@ -115,5 +140,27 @@ public class TimeSeries implements Formula {
         double v1 = dataValues[hi];
         double fraction = (t - t0) / (t1 - t0);
         return v0 + fraction * (v1 - v0);
+    }
+
+    private static void validateArrays(double[] timeValues, double[] dataValues) {
+        Preconditions.checkArgument(timeValues.length == dataValues.length,
+                "time and data arrays must have the same length, but got %s and %s",
+                timeValues.length, dataValues.length);
+        Preconditions.checkArgument(timeValues.length >= 2,
+                "At least 2 data points are required, but got %s",
+                timeValues.length);
+        for (int i = 0; i < timeValues.length; i++) {
+            Preconditions.checkArgument(Double.isFinite(timeValues[i]),
+                    "time values must be finite, but time[%s]=%s",
+                    (Object) i, timeValues[i]);
+            Preconditions.checkArgument(Double.isFinite(dataValues[i]),
+                    "data values must be finite, but data[%s]=%s",
+                    (Object) i, dataValues[i]);
+        }
+        for (int i = 1; i < timeValues.length; i++) {
+            Preconditions.checkArgument(timeValues[i] > timeValues[i - 1],
+                    "time values must be strictly ascending, but time[%s]=%s is not greater than time[%s]=%s",
+                    i, timeValues[i], i - 1, timeValues[i - 1]);
+        }
     }
 }

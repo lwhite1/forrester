@@ -15,10 +15,16 @@ public final class FormatUtils {
      *
      * @param value the value to format
      * @return the formatted string
+     * @throws IllegalArgumentException if value is NaN or infinite
      */
     public static String formatDouble(double value) {
-        if (value == Math.floor(value) && !Double.isInfinite(value)
-                && Math.abs(value) < 1e15) {
+        if (Double.isNaN(value)) {
+            throw new IllegalArgumentException("Cannot format NaN as a numeric string");
+        }
+        if (Double.isInfinite(value)) {
+            throw new IllegalArgumentException("Cannot format Infinity as a numeric string");
+        }
+        if (value == Math.floor(value) && Math.abs(value) < 1e15) {
             return String.valueOf((long) value);
         }
         return String.valueOf(value);

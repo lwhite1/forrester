@@ -735,6 +735,49 @@ class VensimExporterTest {
                     .isEqualTo("SMOOTH3(x, 3)");
             assertThat(VensimExporter.toVensimExpr("DELAY1(x, 3)"))
                     .isEqualTo("DELAY1(x, 3)");
+            assertThat(VensimExporter.toVensimExpr("DELAY3I(x, 3, init)"))
+                    .isEqualTo("DELAY3I(x, 3, init)");
+        }
+    }
+
+    @Nested
+    @DisplayName("SAMPLE_IF_TRUE / FIND_ZERO / LOOKUP_AREA reverse mapping (#866)")
+    class MissingFunctionReverse {
+
+        @Test
+        void shouldReverseSampleIfTrue() {
+            assertThat(VensimExporter.toVensimExpr("SAMPLE_IF_TRUE(cond, input, initial)"))
+                    .isEqualTo("SAMPLE IF TRUE(cond, input, initial)");
+        }
+
+        @Test
+        void shouldReverseFindZero() {
+            assertThat(VensimExporter.toVensimExpr("FIND_ZERO(x, lo, hi)"))
+                    .isEqualTo("FIND ZERO(x, lo, hi)");
+        }
+
+        @Test
+        void shouldReverseLookupArea() {
+            assertThat(VensimExporter.toVensimExpr("LOOKUP_AREA(table, lo, hi)"))
+                    .isEqualTo("LOOKUP AREA(table, lo, hi)");
+        }
+
+        @Test
+        void shouldPreserveFunctionNamesInMixedExpressions() {
+            // Ensure underscores in function names are not replaced with spaces
+            // by the denormalization step
+            assertThat(VensimExporter.toVensimExpr("SAMPLE_IF_TRUE(flag, my_var, 0)"))
+                    .isEqualTo("SAMPLE IF TRUE(flag, my var, 0)");
+        }
+
+        @Test
+        void shouldHandleCaseInsensitiveReversal() {
+            assertThat(VensimExporter.toVensimExpr("sample_if_true(cond, x, 0)"))
+                    .isEqualTo("SAMPLE IF TRUE(cond, x, 0)");
+            assertThat(VensimExporter.toVensimExpr("find_zero(x, 0, 10)"))
+                    .isEqualTo("FIND ZERO(x, 0, 10)");
+            assertThat(VensimExporter.toVensimExpr("lookup_area(tbl, 0, 5)"))
+                    .isEqualTo("LOOKUP AREA(tbl, 0, 5)");
         }
     }
 
