@@ -1234,6 +1234,16 @@ public class ModelCanvas extends Canvas {
     }
 
     public void clearNavigation() {
+        if (navController.isInsideModule()) {
+            // Close the current module-level UndoManager
+            this.undoManager.close();
+            // Restore the root UndoManager and close all intermediate ones
+            List<NavigationStack.Frame> frames = navController.frames();
+            this.undoManager = frames.getFirst().undoManager();
+            for (int i = 1; i < frames.size(); i++) {
+                frames.get(i).undoManager().close();
+            }
+        }
         navController.clear();
     }
 
