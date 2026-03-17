@@ -15,8 +15,8 @@ public final class DragController {
     private boolean dragging;
     private String dragTarget;
     private boolean undoSaved;
-    private double startScreenX;
-    private double startScreenY;
+    private double startWorldX;
+    private double startWorldY;
     private final Map<String, CanvasState.Position> startPositions = new HashMap<>();
 
     public boolean isDragging() {
@@ -35,12 +35,13 @@ public final class DragController {
      * Begins a drag operation for the given target element.
      * Captures the starting positions of all currently selected elements.
      */
-    public void start(String target, double screenX, double screenY, CanvasState state) {
+    public void start(String target, double screenX, double screenY,
+              CanvasState state, Viewport viewport) {
         dragging = true;
         dragTarget = target;
         undoSaved = false;
-        startScreenX = screenX;
-        startScreenY = screenY;
+        startWorldX = viewport.toWorldX(screenX);
+        startWorldY = viewport.toWorldY(screenY);
         startPositions.clear();
         for (String name : state.getSelection()) {
             startPositions.put(name,
@@ -61,8 +62,10 @@ public final class DragController {
             saveUndo.run();
             undoSaved = true;
         }
-        double worldDx = (screenX - startScreenX) / viewport.getScale();
-        double worldDy = (screenY - startScreenY) / viewport.getScale();
+        double worldX = viewport.toWorldX(screenX);
+        double worldY = viewport.toWorldY(screenY);
+        double worldDx = worldX - startWorldX;
+        double worldDy = worldY - startWorldY;
         for (Map.Entry<String, CanvasState.Position> entry : startPositions.entrySet()) {
             CanvasState.Position startPos = entry.getValue();
             state.setPosition(entry.getKey(),
