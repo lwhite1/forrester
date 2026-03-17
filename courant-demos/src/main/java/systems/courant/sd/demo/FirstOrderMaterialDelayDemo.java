@@ -5,6 +5,8 @@
 
 package systems.courant.sd.demo;
 
+import com.google.common.base.Preconditions;
+
 import systems.courant.sd.Simulation;
 import systems.courant.sd.measure.units.time.TimeUnits;
 import systems.courant.sd.measure.units.time.Times;
@@ -47,6 +49,8 @@ public class FirstOrderMaterialDelayDemo {
     }
 
     public Model getModel(double initialCustomers, double averageDelayDays) {
+        Preconditions.checkArgument(averageDelayDays > 0, "averageDelayDays must be > 0");
+
         Model model = new Model("First order material delay");
         model.setMetadata(ModelMetadata.builder()
                 .license("CC-BY-SA-4.0")

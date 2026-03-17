@@ -5,6 +5,8 @@
 
 package systems.courant.sd.demo;
 
+import com.google.common.base.Preconditions;
+
 import systems.courant.sd.Simulation;
 import systems.courant.sd.measure.Quantity;
 import systems.courant.sd.model.Flow;
@@ -53,6 +55,10 @@ public class InventoryModelDemo {
                                        double baseDemand, double stepDemand, int demandStepChangeDay,
                                        double perceptionDelay, double responseDelay, double deliveryDelay,
                                        double desiredInventoryMultiplier, double durationDays) {
+
+        Preconditions.checkArgument(perceptionDelay > 0, "perceptionDelay must be > 0");
+        Preconditions.checkArgument(responseDelay > 0, "responseDelay must be > 0");
+        Preconditions.checkArgument(deliveryDelay > 0, "deliveryDelay must be > 0");
 
         Model model = new Model("Inventory Model");
         model.setMetadata(ModelMetadata.builder()

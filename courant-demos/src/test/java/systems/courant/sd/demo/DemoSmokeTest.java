@@ -29,6 +29,7 @@ import static systems.courant.sd.measure.Units.DAY;
 import static systems.courant.sd.measure.Units.MINUTE;
 import static systems.courant.sd.measure.Units.WEEK;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /**
  * Smoke tests for all demo models. Each test verifies that the actual demo class
@@ -436,6 +437,53 @@ class DemoSmokeTest {
                 }
             }
         }
+    }
+
+    // ---- Division-by-zero validation tests ----
+
+    @Test
+    @DisplayName("InventoryModelDemo rejects zero perceptionDelay")
+    void inventoryDemoZeroPerceptionDelay() {
+        assertThatThrownBy(() -> new InventoryModelDemo()
+                .createSimulation(200, 20, 20, 22, 25, 0, 3, 5, 10, 100))
+                .isInstanceOf(IllegalArgumentException.class);
+    }
+
+    @Test
+    @DisplayName("InventoryModelDemo rejects zero responseDelay")
+    void inventoryDemoZeroResponseDelay() {
+        assertThatThrownBy(() -> new InventoryModelDemo()
+                .createSimulation(200, 20, 20, 22, 25, 5, 0, 5, 10, 100))
+                .isInstanceOf(IllegalArgumentException.class);
+    }
+
+    @Test
+    @DisplayName("InventoryModelDemo rejects zero deliveryDelay")
+    void inventoryDemoZeroDeliveryDelay() {
+        assertThatThrownBy(() -> new InventoryModelDemo()
+                .createSimulation(200, 20, 20, 22, 25, 5, 3, 0, 10, 100))
+                .isInstanceOf(IllegalArgumentException.class);
+    }
+
+    @Test
+    @DisplayName("FirstOrderMaterialDelayDemo rejects zero averageDelayDays")
+    void firstOrderDelayDemoZeroDelay() {
+        assertThatThrownBy(() -> new FirstOrderMaterialDelayDemo().getModel(1000, 0))
+                .isInstanceOf(IllegalArgumentException.class);
+    }
+
+    @Test
+    @DisplayName("ThirdOrderMaterialDelayDemo rejects zero step delays")
+    void thirdOrderDelayDemoZeroDelays() {
+        assertThatThrownBy(() -> new ThirdOrderMaterialDelayDemo()
+                .getModel(100, 0, 0, 48, 0, 6.3, 3.2))
+                .isInstanceOf(IllegalArgumentException.class);
+        assertThatThrownBy(() -> new ThirdOrderMaterialDelayDemo()
+                .getModel(100, 0, 0, 48, 7.0, 0, 3.2))
+                .isInstanceOf(IllegalArgumentException.class);
+        assertThatThrownBy(() -> new ThirdOrderMaterialDelayDemo()
+                .getModel(100, 0, 0, 48, 7.0, 6.3, 0))
+                .isInstanceOf(IllegalArgumentException.class);
     }
 
     // ---- Helpers ----
