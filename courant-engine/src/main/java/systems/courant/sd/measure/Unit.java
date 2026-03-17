@@ -76,4 +76,15 @@ public interface Unit {
     default double toBaseUnits(double amount) {
         return amount * ratioToBaseUnit();
     }
+
+    /**
+     * Returns whether this unit supports ratio-based conversion to/from the dimension's base unit.
+     * Most units return {@code true}; units like Fahrenheit return {@code false} because their
+     * conversion requires an offset that cannot be expressed as a simple ratio.
+     *
+     * @return {@code true} if {@link #toBaseUnits} and {@link #fromBaseUnits} are supported
+     */
+    default boolean supportsBaseConversion() {
+        return true;
+    }
 }

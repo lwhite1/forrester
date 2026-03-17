@@ -122,4 +122,14 @@ public class TemperatureUnitsTest {
         Quantity m = new Quantity(100, Units.METER);
         assertFalse(f.isCompatibleWith(m));
     }
+
+    @Test
+    public void celsiusShouldSupportBaseConversion() {
+        assertTrue(TemperatureUnits.CELSIUS.supportsBaseConversion());
+    }
+
+    @Test
+    public void fahrenheitShouldNotSupportBaseConversion() {
+        assertFalse(TemperatureUnits.FAHRENHEIT.supportsBaseConversion());
+    }
 }
