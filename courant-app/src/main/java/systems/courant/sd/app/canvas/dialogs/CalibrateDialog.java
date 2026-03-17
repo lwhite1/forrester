@@ -214,6 +214,11 @@ public class CalibrateDialog extends Dialog<CalibrateDialog.Config> {
             if (mapped != null) {
                 importedDataset = mapped;
                 buildFitTargetRows();
+            } else {
+                importedDataset = null;
+                fitTargetRows.clear();
+                fitTargetBox.getChildren().clear();
+                datasetLabel.setText("No columns mapped — import again");
             }
         } catch (IOException ex) {
             datasetLabel.setText("Error: " + ex.getMessage());
