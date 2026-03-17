@@ -216,8 +216,8 @@ public class PropertiesPanel extends VBox {
         // Simulation settings summary
         SimulationSettings settings = editor.getSimulationSettings();
         if (settings != null) {
-            String settingsText = String.format("Duration: %.0f %s, dt = 1 %s",
-                    settings.duration(), settings.durationUnit(), settings.timeStep());
+            String settingsText = String.format("Duration: %.0f %s, dt = %s %s",
+                    settings.duration(), settings.durationUnit(), settings.dt(), settings.timeStep());
             ctx.addReadOnlyRow(row++, "Simulation", settingsText);
         }
 

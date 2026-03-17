@@ -2,6 +2,7 @@ package systems.courant.sd.model.graph;
 
 import systems.courant.sd.model.def.VariableDef;
 import systems.courant.sd.model.def.CldVariableDef;
+import systems.courant.sd.model.def.CommentDef;
 import systems.courant.sd.model.def.ConnectorRoute;
 import systems.courant.sd.model.def.ElementPlacement;
 import systems.courant.sd.model.def.FlowDef;
@@ -10,6 +11,7 @@ import systems.courant.sd.model.def.LookupTableDef;
 import systems.courant.sd.model.def.ModelDefinition;
 import systems.courant.sd.model.def.ModuleInstanceDef;
 import systems.courant.sd.model.def.StockDef;
+import systems.courant.sd.model.def.TimeSeriesDef;
 import systems.courant.sd.model.def.ViewDef;
 
 import java.util.ArrayList;
@@ -106,6 +108,12 @@ public final class ViewValidator {
         }
         for (CldVariableDef v : def.cldVariables()) {
             names.add(v.name());
+        }
+        for (CommentDef c : def.comments()) {
+            names.add(c.name());
+        }
+        for (TimeSeriesDef ts : def.timeSeries()) {
+            names.add(ts.name());
         }
         return names;
     }

@@ -805,7 +805,7 @@ public final class VensimExporter {
     }
 
     private static boolean isKnownFunction(String token) {
-        String upper = token.toUpperCase();
+        String upper = token.toUpperCase(Locale.ROOT);
         return switch (upper) {
             case "IF", "THEN", "ELSE", "INTEG", "SMOOTH", "DELAY3", "MIN", "MAX",
                  "ABS", "EXP", "LN", "LOG", "SQRT", "SIN", "COS", "TAN",

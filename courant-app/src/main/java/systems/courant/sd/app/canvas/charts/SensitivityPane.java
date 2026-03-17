@@ -45,9 +45,6 @@ import java.util.function.BiFunction;
  */
 public class SensitivityPane extends BorderPane {
 
-    private static final String NEGATIVE_COLOR = "#4393c3";
-    private static final String POSITIVE_COLOR = "#d6604d";
-
     private final List<String> trackableNames;
     private final BiFunction<String, Void, List<ParameterImpact>> impactComputer;
     private List<ParameterImpact> currentImpacts;

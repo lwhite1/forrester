@@ -158,6 +158,41 @@ class SampleIfTrueTest {
     }
 
     @Nested
+    @DisplayName("NaN condition (#871)")
+    class NanCondition {
+
+        @Test
+        @DisplayName("should treat NaN condition as false at step 0")
+        void shouldTreatNanAsFalseAtStepZero() {
+            int[] step = {0};
+            double[] input = {42.0};
+            SampleIfTrue formula = SampleIfTrue.of(
+                    () -> Double.NaN, () -> input[0], 99.0, () -> step[0]);
+
+            assertThat(formula.getCurrentValue()).isEqualTo(99.0);
+        }
+
+        @Test
+        @DisplayName("should treat NaN condition as false and hold previous value")
+        void shouldTreatNanAsFalseAndHold() {
+            int[] step = {0};
+            double[] input = {10.0};
+            double[] cond = {1.0};
+            SampleIfTrue formula = SampleIfTrue.of(
+                    () -> cond[0], () -> input[0], 0.0, () -> step[0]);
+
+            // Step 0: condition true, sample 10
+            assertThat(formula.getCurrentValue()).isEqualTo(10.0);
+
+            // Step 1: condition NaN, input changes to 20, should hold 10
+            step[0] = 1;
+            cond[0] = Double.NaN;
+            input[0] = 20.0;
+            assertThat(formula.getCurrentValue()).isEqualTo(10.0);
+        }
+    }
+
+    @Nested
     @DisplayName("Null guards")
     class NullGuards {
 
