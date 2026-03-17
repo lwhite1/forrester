@@ -14,6 +14,7 @@ import javafx.stage.Stage;
 
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * Standalone JavaFX viewer that renders percentile bands (a "fan chart") from a
@@ -124,13 +125,13 @@ public class FanChart extends Application {
             gc.fillText("Variable not found: " + variableName, MARGIN_LEFT, HEIGHT / 2);
             return;
         }
-        double[] pct2 = pctMap.get(2.5);
-        double[] pct97 = pctMap.get(97.5);
-        double[] pct12 = pctMap.get(12.5);
-        double[] pct87 = pctMap.get(87.5);
-        double[] p25 = pctMap.get(25.0);
-        double[] p75 = pctMap.get(75.0);
-        double[] median = pctMap.get(50.0);
+        double[] pct2 = Objects.requireNonNull(pctMap.get(2.5), "Missing 2.5th percentile");
+        double[] pct97 = Objects.requireNonNull(pctMap.get(97.5), "Missing 97.5th percentile");
+        double[] pct12 = Objects.requireNonNull(pctMap.get(12.5), "Missing 12.5th percentile");
+        double[] pct87 = Objects.requireNonNull(pctMap.get(87.5), "Missing 87.5th percentile");
+        double[] p25 = Objects.requireNonNull(pctMap.get(25.0), "Missing 25th percentile");
+        double[] p75 = Objects.requireNonNull(pctMap.get(75.0), "Missing 75th percentile");
+        double[] median = Objects.requireNonNull(pctMap.get(50.0), "Missing 50th percentile");
 
         double[][] lowerSeries = {pct2, pct12, p25};
         double[][] upperSeries = {pct97, pct87, p75};
