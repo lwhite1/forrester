@@ -48,4 +48,15 @@
         <Class name="systems.courant.sd.measure.Dimension"/>
         <Bug pattern="IC_SUPERCLASS_USES_SUBCLASS_DURING_INITIALIZATION"/>
     </Match>
+    <!--
+        AT_STALE_THREAD_WRITE_OF_PRIMITIVE: ModelEditor counter fields
+        (nextStockId, nextFlowId, etc.) are FX-thread-confined, enforced by
+        checkFxThread(). SpotBugs flags them because the class also contains
+        CopyOnWriteArrayList fields, but no background thread ever reads the
+        counters.
+    -->
+    <Match>
+        <Class name="systems.courant.sd.app.canvas.ModelEditor"/>
+        <Bug pattern="AT_STALE_THREAD_WRITE_OF_PRIMITIVE"/>
+    </Match>
 </FindBugsFilter>
