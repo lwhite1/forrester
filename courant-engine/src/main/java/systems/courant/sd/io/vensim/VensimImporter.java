@@ -1208,8 +1208,6 @@ public class VensimImporter implements ModelImporter {
             sortedYs[i] = ys[indices[i]];
         }
 
-        boolean wasUnsorted = !sorted;
-
         // Deduplicate consecutive x-values (keep last y-value)
         List<Double> newXs = new ArrayList<>();
         List<Double> newYs = new ArrayList<>();
@@ -1226,14 +1224,11 @@ public class VensimImporter implements ModelImporter {
             }
         }
 
-        if (wasUnsorted && dupes > 0) {
+        if (dupes > 0) {
             warnings.add("Lookup '" + name + "': sorted non-monotonic x-values and removed "
                     + dupes + " duplicate(s)");
-        } else if (wasUnsorted) {
-            warnings.add("Lookup '" + name + "': sorted non-monotonic x-values");
         } else {
-            warnings.add("Lookup '" + name + "': removed " + dupes
-                    + " duplicate x-value(s)");
+            warnings.add("Lookup '" + name + "': sorted non-monotonic x-values");
         }
         return new double[][]{
                 newXs.stream().mapToDouble(Double::doubleValue).toArray(),

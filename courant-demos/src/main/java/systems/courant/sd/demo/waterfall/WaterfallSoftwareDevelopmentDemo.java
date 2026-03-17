@@ -48,15 +48,38 @@ import systems.courant.sd.ui.StockLevelChartViewer;
 public class WaterfallSoftwareDevelopmentDemo {
 
     public static void main(String[] args) {
+        // Workforce parameters
+        double initialNewHires = 2;
+        double initialExperienced = 4;
+        double workforceNeed = 30;
+        double hiringDelayWeeks = 8;
+        double assimilationDelayWeeks = 16;
+        double trainersPerNewHire = 0.2;
+        double avgEmploymentDays = 673;
+        double communicationOverhead = 0.003;
+        // StaffAllocation parameters
+        double plannedFractionForQA = 0.15;
+        double overheadLoss = 0.10;
+        // SoftwareProduction parameters
+        double projectSize = 500;
+        double baseFCC = 0.80;
+        double nominalProductivityExp = 1.0;
+        double nominalProductivityNew = 0.5;
+        double baseReworkDiscovery = 0.05;
+        double testingReworkDiscovery = 0.40;
+        double integrationCoefficient = 1.5;
+        // Simulation
+        int durationDays = 200;
+
         new WaterfallSoftwareDevelopmentDemo().run(
-                // Workforce parameters
-                2, 4, 30, 8, 16, 0.2, 673, 0.003,
-                // StaffAllocation parameters
-                0.15, 0.10,
-                // SoftwareProduction parameters
-                500, 0.80, 1.0, 0.5, 0.05, 0.40, 1.5,
-                // Simulation duration in days (work finishes ~day 175; 200 gives margin)
-                200
+                initialNewHires, initialExperienced, workforceNeed,
+                hiringDelayWeeks, assimilationDelayWeeks,
+                trainersPerNewHire, avgEmploymentDays, communicationOverhead,
+                plannedFractionForQA, overheadLoss,
+                projectSize, baseFCC,
+                nominalProductivityExp, nominalProductivityNew,
+                baseReworkDiscovery, testingReworkDiscovery, integrationCoefficient,
+                durationDays
         );
     }
 

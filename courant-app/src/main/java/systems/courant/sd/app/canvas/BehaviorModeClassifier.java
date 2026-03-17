@@ -53,7 +53,7 @@ public final class BehaviorModeClassifier {
                 // If the value at the end is near zero relative to the start, it's decay.
                 double first = values[0];
                 double last = values[values.length - 1];
-                if (first != 0 && last / first < 0.1) {
+                if (first != 0 && Math.abs(last / first) < 0.1) {
                     return "Exponential decay";
                 }
                 return "Goal-seeking";

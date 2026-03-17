@@ -51,9 +51,13 @@ public final class ExprStringifier {
 
     private static void appendLiteral(StringBuilder sb, Expr.Literal lit) {
         double v = lit.value();
-        if (Double.isNaN(v) || Double.isInfinite(v)) {
-            throw new IllegalArgumentException(
-                    "Cannot stringify non-finite literal: " + v);
+        if (Double.isNaN(v)) {
+            sb.append("NAN");
+            return;
+        }
+        if (Double.isInfinite(v)) {
+            sb.append(v > 0 ? "INF" : "(-INF)");
+            return;
         }
         if (v == (long) v && Math.abs(v) < 1e15) {
             sb.append((long) v);

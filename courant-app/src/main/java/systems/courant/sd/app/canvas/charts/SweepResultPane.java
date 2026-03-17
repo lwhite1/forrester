@@ -79,6 +79,10 @@ public class SweepResultPane extends BorderPane {
                 ? result.getStockNames().indexOf(variableName)
                 : result.getVariableNames().indexOf(variableName);
 
+        if (colIndex < 0) {
+            return;
+        }
+
         for (int r = 0; r < result.getRunCount(); r++) {
             RunResult run = result.getResult(r);
             double paramValue = run.getParameterValue();

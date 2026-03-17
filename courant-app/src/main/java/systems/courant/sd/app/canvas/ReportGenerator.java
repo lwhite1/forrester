@@ -369,6 +369,9 @@ public final class ReportGenerator {
     }
 
     private static String formatNumber(double value) {
+        if (!Double.isFinite(value)) {
+            return String.valueOf(value);
+        }
         if (value == (long) value) {
             return String.valueOf((long) value);
         }

@@ -128,17 +128,17 @@ class ExprStringifierTest {
     }
 
     @Test
-    void shouldThrowForNaNLiteral() {
-        assertThatThrownBy(() -> ExprStringifier.stringify(new Expr.Literal(Double.NaN)))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("non-finite");
+    void shouldStringifyNaNLiteral() {
+        assertThat(ExprStringifier.stringify(new Expr.Literal(Double.NaN)))
+                .isEqualTo("NAN");
     }
 
     @Test
-    void shouldThrowForInfinityLiteral() {
-        assertThatThrownBy(() -> ExprStringifier.stringify(new Expr.Literal(Double.POSITIVE_INFINITY)))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("non-finite");
+    void shouldStringifyInfinityLiteral() {
+        assertThat(ExprStringifier.stringify(new Expr.Literal(Double.POSITIVE_INFINITY)))
+                .isEqualTo("INF");
+        assertThat(ExprStringifier.stringify(new Expr.Literal(Double.NEGATIVE_INFINITY)))
+                .isEqualTo("(-INF)");
     }
 
     @Test

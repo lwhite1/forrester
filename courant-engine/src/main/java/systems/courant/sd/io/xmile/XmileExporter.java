@@ -294,6 +294,14 @@ public final class XmileExporter {
             elem.appendChild(units);
         }
 
+        // <doc>
+        if (stock.comment() != null && !stock.comment().isBlank()) {
+            Element docElem = doc.createElementNS(
+                    XmileConstants.NAMESPACE_URI, "doc");
+            docElem.setTextContent(stock.comment());
+            elem.appendChild(docElem);
+        }
+
         // <non_negative>
         if ("CLAMP_TO_ZERO".equals(stock.negativeValuePolicy())) {
             Element nonNeg = doc.createElementNS(
@@ -323,6 +331,14 @@ public final class XmileExporter {
                     XmileConstants.NAMESPACE_URI, XmileConstants.UNITS);
             units.setTextContent(flow.timeUnit());
             elem.appendChild(units);
+        }
+
+        // <doc>
+        if (flow.comment() != null && !flow.comment().isBlank()) {
+            Element docElem = doc.createElementNS(
+                    XmileConstants.NAMESPACE_URI, "doc");
+            docElem.setTextContent(flow.comment());
+            elem.appendChild(docElem);
         }
 
         variablesElem.appendChild(elem);
@@ -365,6 +381,14 @@ public final class XmileExporter {
                     XmileConstants.NAMESPACE_URI, XmileConstants.UNITS);
             units.setTextContent(v.unit());
             elem.appendChild(units);
+        }
+
+        // <doc>
+        if (v.comment() != null && !v.comment().isBlank()) {
+            Element docElem = doc.createElementNS(
+                    XmileConstants.NAMESPACE_URI, "doc");
+            docElem.setTextContent(v.comment());
+            elem.appendChild(docElem);
         }
 
         variablesElem.appendChild(elem);

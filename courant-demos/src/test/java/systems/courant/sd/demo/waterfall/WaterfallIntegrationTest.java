@@ -6,6 +6,7 @@ import systems.courant.sd.measure.units.time.TimeUnits;
 import systems.courant.sd.model.Model;
 import org.junit.jupiter.api.Test;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class WaterfallIntegrationTest {
@@ -60,7 +61,7 @@ class WaterfallIntegrationTest {
         Model model = demo.getModel();
 
         // 3 modules should be registered
-        assertTrue(model.getModules().size() == 3, "Model should have 3 modules");
+        assertEquals(3, model.getModules().size(), "Model should have 3 modules");
 
         // Workforce stocks
         assertTrue(model.getStockNames().contains("Newly hired"),

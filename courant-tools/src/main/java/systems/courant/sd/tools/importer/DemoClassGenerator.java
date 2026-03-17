@@ -95,7 +95,6 @@ public class DemoClassGenerator {
     private void emitImports(StringBuilder sb, ModelDefinition definition) {
         sb.append("import systems.courant.sd.Simulation;\n");
         sb.append("import systems.courant.sd.model.ModelMetadata;\n");
-        sb.append("import systems.courant.sd.model.compile.CompiledModel;\n");
         sb.append("import systems.courant.sd.model.compile.ModelCompiler;\n");
         sb.append("import systems.courant.sd.model.def.ModelDefinitionBuilder;\n");
 
