@@ -277,12 +277,11 @@ public final class Quantity {
         if (unit.equals(quantity.unit)) {
             return Double.compare(value, quantity.value) == 0;
         }
-        try {
-            return Double.compare(quantity.inBaseUnits().getValue(), inBaseUnits().getValue()) == 0;
-        } catch (UnsupportedOperationException e) {
+        if (!unit.supportsBaseConversion() || !quantity.unit.supportsBaseConversion()) {
             // Units that don't support base-unit conversion (e.g., Fahrenheit vs Celsius)
             return false;
         }
+        return Double.compare(quantity.inBaseUnits().getValue(), inBaseUnits().getValue()) == 0;
     }
 
     /**
@@ -292,13 +291,12 @@ public final class Quantity {
      */
     @Override
     public int hashCode() {
-        try {
+        if (unit.supportsBaseConversion()) {
             double baseValue = inBaseUnits().getValue();
             return 31 * Double.hashCode(baseValue) + getDimension().hashCode();
-        } catch (UnsupportedOperationException e) {
-            // Units that don't support base-unit conversion (e.g., Fahrenheit)
-            return 31 * Double.hashCode(value) + unit.hashCode();
         }
+        // Units that don't support base-unit conversion (e.g., Fahrenheit)
+        return 31 * Double.hashCode(value) + unit.hashCode();
     }
 
     /**

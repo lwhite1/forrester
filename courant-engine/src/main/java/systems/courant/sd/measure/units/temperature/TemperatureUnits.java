@@ -62,6 +62,11 @@ public enum TemperatureUnits implements Unit {
         public double fromBaseUnits(double inBaseUnits) {
             throw conversionError();
         }
+
+        @Override
+        public boolean supportsBaseConversion() {
+            return false;
+        }
     };
 
     private final String name;
