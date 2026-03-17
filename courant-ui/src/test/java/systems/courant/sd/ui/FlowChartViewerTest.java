@@ -16,7 +16,7 @@ import org.testfx.framework.junit5.ApplicationExtension;
 
 import java.time.LocalDateTime;
 
-import static org.assertj.core.api.Assertions.assertThatNoException;
+import static org.assertj.core.api.Assertions.assertThat;
 import static systems.courant.sd.measure.Units.MINUTE;
 import static systems.courant.sd.measure.Units.THING;
 
@@ -35,6 +35,7 @@ class FlowChartViewerTest {
 
     @BeforeEach
     void setUp() {
+        ChartViewerApplication.reset();
         model = new Model("Test");
         Stock tank = new Stock("Tank", 100, THING);
         flow = Flow.create("Drain", MINUTE, () -> new Quantity(5.0, THING));
@@ -47,27 +48,33 @@ class FlowChartViewerTest {
     }
 
     @Test
-    @DisplayName("handleSimulationStartEvent initializes flow series without error")
-    void shouldHandleStartEvent() {
-        assertThatNoException().isThrownBy(() ->
-                viewer.handleSimulationStartEvent(new SimulationStartEvent(simulation)));
+    @DisplayName("handleSimulationStartEvent initializes flow series")
+    void shouldInitializeFlowSeries() {
+        viewer.handleSimulationStartEvent(new SimulationStartEvent(simulation));
+
+        ChartViewerApplication.ChartData snap = ChartViewerApplication.snapshot();
+        assertThat(snap.series()).hasSize(1);
+        assertThat(snap.series().getFirst().getName()).isEqualTo("Drain");
     }
 
     @Test
-    @DisplayName("handleTimeStepEvent records flow values without error")
-    void shouldHandleTimeStepEvent() {
+    @DisplayName("handleTimeStepEvent records flow value")
+    void shouldRecordFlowValue() {
         viewer.handleSimulationStartEvent(new SimulationStartEvent(simulation));
 
         TimeStepEvent event = new TimeStepEvent(
                 LocalDateTime.now(), model, 0, MINUTE);
+        viewer.handleTimeStepEvent(event);
 
-        assertThatNoException().isThrownBy(() ->
-                viewer.handleTimeStepEvent(event));
+        ChartViewerApplication.ChartData snap = ChartViewerApplication.snapshot();
+        assertThat(snap.series().getFirst().getData()).hasSize(1);
+        assertThat(snap.series().getFirst().getData().getFirst().getYValue().doubleValue())
+                .isEqualTo(5.0);
     }
 
     @Test
-    @DisplayName("Multiple time steps accumulate without error")
-    void shouldHandleMultipleTimeSteps() {
+    @DisplayName("Multiple time steps accumulate data points")
+    void shouldAccumulateMultipleDataPoints() {
         viewer.handleSimulationStartEvent(new SimulationStartEvent(simulation));
 
         for (int i = 0; i < 5; i++) {
@@ -75,5 +82,8 @@ class FlowChartViewerTest {
                     LocalDateTime.now(), model, i, MINUTE);
             viewer.handleTimeStepEvent(event);
         }
+
+        ChartViewerApplication.ChartData snap = ChartViewerApplication.snapshot();
+        assertThat(snap.series().getFirst().getData()).hasSize(5);
     }
 }
