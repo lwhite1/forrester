@@ -24,7 +24,6 @@ import javafx.application.Platform;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -48,30 +47,31 @@ import static systems.courant.sd.app.canvas.EquationReferenceManager.replaceToke
  *
  * <p>Thread confinement: all mutable state must be accessed on the JavaFX Application
  * Thread. The only safe cross-thread operation is {@link #toModelDefinition()}, which
- * builds an immutable snapshot for background analysis tasks.</p>
+ * builds an immutable snapshot for background analysis tasks. Element lists use
+ * {@link CopyOnWriteArrayList} to allow safe snapshot iteration from background threads.</p>
  */
 public class ModelEditor {
 
     private static final Logger log = LoggerFactory.getLogger(ModelEditor.class);
 
-    private String modelName = "Untitled";
-    private String modelComment = "";
-    private ModelMetadata metadata;
-    private final List<StockDef> stocks = new ArrayList<>();
-    private final List<FlowDef> flows = new ArrayList<>();
-    private final List<VariableDef> variables = new ArrayList<>();
-    private final List<ModuleInstanceDef> modules = new ArrayList<>();
-    private final List<LookupTableDef> lookupTables = new ArrayList<>();
-    private final List<CldVariableDef> cldVariables = new ArrayList<>();
-    private final List<CausalLinkDef> causalLinks = new ArrayList<>();
-    private final List<CommentDef> comments = new ArrayList<>();
-    private final List<SubscriptDef> subscripts = new ArrayList<>();
-    private final List<ReferenceDataset> referenceDatasets = new ArrayList<>();
+    private volatile String modelName = "Untitled";
+    private volatile String modelComment = "";
+    private volatile ModelMetadata metadata;
+    private final List<StockDef> stocks = new CopyOnWriteArrayList<>();
+    private final List<FlowDef> flows = new CopyOnWriteArrayList<>();
+    private final List<VariableDef> variables = new CopyOnWriteArrayList<>();
+    private final List<ModuleInstanceDef> modules = new CopyOnWriteArrayList<>();
+    private final List<LookupTableDef> lookupTables = new CopyOnWriteArrayList<>();
+    private final List<CldVariableDef> cldVariables = new CopyOnWriteArrayList<>();
+    private final List<CausalLinkDef> causalLinks = new CopyOnWriteArrayList<>();
+    private final List<CommentDef> comments = new CopyOnWriteArrayList<>();
+    private final List<SubscriptDef> subscripts = new CopyOnWriteArrayList<>();
+    private final List<ReferenceDataset> referenceDatasets = new CopyOnWriteArrayList<>();
     private final Set<String> nameIndex = new HashSet<>();
     private final List<ModelEditListener> listeners = new CopyOnWriteArrayList<>();
     private final EquationReferenceManager equationRefManager =
             new EquationReferenceManager(flows, variables);
-    private SimulationSettings simulationSettings;
+    private volatile SimulationSettings simulationSettings;
     private int nextStockId = 1;
     private int nextFlowId = 1;
     private int nextVariableId = 1;
