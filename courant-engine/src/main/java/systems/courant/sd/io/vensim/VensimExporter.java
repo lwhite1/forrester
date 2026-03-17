@@ -72,6 +72,12 @@ public final class VensimExporter {
             "(?i)\\bRANDOM_UNIFORM\\s*\\(");
     private static final Pattern PULSE_TRAIN_EXPORT_PATTERN = Pattern.compile(
             "(?i)\\bPULSE_TRAIN\\s*\\(");
+    private static final Pattern SAMPLE_IF_TRUE_EXPORT_PATTERN = Pattern.compile(
+            "(?i)\\bSAMPLE_IF_TRUE\\s*\\(");
+    private static final Pattern FIND_ZERO_EXPORT_PATTERN = Pattern.compile(
+            "(?i)\\bFIND_ZERO\\s*\\(");
+    private static final Pattern LOOKUP_AREA_EXPORT_PATTERN = Pattern.compile(
+            "(?i)\\bLOOKUP_AREA\\s*\\(");
 
     private VensimExporter() {
     }
@@ -474,6 +480,15 @@ public final class VensimExporter {
         // PULSE_TRAIN → PULSE TRAIN
         expr = PULSE_TRAIN_EXPORT_PATTERN.matcher(expr).replaceAll("PULSE TRAIN(");
 
+        // SAMPLE_IF_TRUE → SAMPLE IF TRUE
+        expr = SAMPLE_IF_TRUE_EXPORT_PATTERN.matcher(expr).replaceAll("SAMPLE IF TRUE(");
+
+        // FIND_ZERO → FIND ZERO
+        expr = FIND_ZERO_EXPORT_PATTERN.matcher(expr).replaceAll("FIND ZERO(");
+
+        // LOOKUP_AREA → LOOKUP AREA
+        expr = LOOKUP_AREA_EXPORT_PATTERN.matcher(expr).replaceAll("LOOKUP AREA(");
+
         // IF(...) → IF THEN ELSE(...)
         expr = IF_FUNC_PATTERN.matcher(expr).replaceAll("IF THEN ELSE(");
 
@@ -807,7 +822,7 @@ public final class VensimExporter {
     private static boolean isKnownFunction(String token) {
         String upper = token.toUpperCase(Locale.ROOT);
         return switch (upper) {
-            case "IF", "THEN", "ELSE", "INTEG", "SMOOTH", "DELAY3", "MIN", "MAX",
+            case "IF", "THEN", "ELSE", "INTEG", "SMOOTH", "DELAY3", "DELAY3I", "MIN", "MAX",
                  "ABS", "EXP", "LN", "LOG", "SQRT", "SIN", "COS", "TAN",
                  "INT", "ROUND", "SUM", "MEAN",
                  "LOOKUP", "WITH", "XIDZ", "ZIDZ", "PULSE", "STEP",
@@ -817,6 +832,9 @@ public final class VensimExporter {
                  "TREND", "FORECAST", "NPV",
                  "RANDOM_UNIFORM", "RANDOM_NORMAL", "RANDOM", "UNIFORM",
                  "PULSE_TRAIN", "TRAIN",
+                 "SAMPLE_IF_TRUE", "SAMPLE", "TRUE",
+                 "FIND_ZERO", "FIND", "ZERO",
+                 "LOOKUP_AREA", "AREA",
                  "AND", "OR", "NOT", "TIME", "DT" -> true;
             default -> false;
         };

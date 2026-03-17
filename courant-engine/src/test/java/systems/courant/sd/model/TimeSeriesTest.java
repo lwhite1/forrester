@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.Assertions.within;
 
 @DisplayName("TimeSeries")
@@ -86,6 +87,113 @@ class TimeSeriesTest {
             assertThat(ts.getCurrentValue()).isEqualTo(0.0);
             time[0] = 5.0;
             assertThat(ts.getCurrentValue()).isEqualTo(0.0);
+        }
+    }
+
+    @Nested
+    @DisplayName("Input validation")
+    class InputValidation {
+
+        @Test
+        void shouldRejectMismatchedArrayLengths() {
+            assertThatThrownBy(() ->
+                    TimeSeries.linear(new double[]{0, 1, 2}, new double[]{10, 20}, () -> 0))
+                    .isInstanceOf(IllegalArgumentException.class)
+                    .hasMessageContaining("same length");
+        }
+
+        @Test
+        void shouldRejectEmptyArrays() {
+            assertThatThrownBy(() ->
+                    TimeSeries.linear(new double[]{}, new double[]{}, () -> 0))
+                    .isInstanceOf(IllegalArgumentException.class)
+                    .hasMessageContaining("At least 2");
+        }
+
+        @Test
+        void shouldRejectSinglePoint() {
+            assertThatThrownBy(() ->
+                    TimeSeries.linear(new double[]{1.0}, new double[]{10.0}, () -> 0))
+                    .isInstanceOf(IllegalArgumentException.class)
+                    .hasMessageContaining("At least 2");
+        }
+
+        @Test
+        void shouldRejectNonAscendingTimeValues() {
+            assertThatThrownBy(() ->
+                    TimeSeries.linear(new double[]{0, 2, 1}, new double[]{10, 20, 30}, () -> 0))
+                    .isInstanceOf(IllegalArgumentException.class)
+                    .hasMessageContaining("strictly ascending");
+        }
+
+        @Test
+        void shouldRejectDuplicateTimeValues() {
+            assertThatThrownBy(() ->
+                    TimeSeries.linear(new double[]{0, 1, 1}, new double[]{10, 20, 30}, () -> 0))
+                    .isInstanceOf(IllegalArgumentException.class)
+                    .hasMessageContaining("strictly ascending");
+        }
+
+        @Test
+        void shouldRejectNaNInTimeValues() {
+            assertThatThrownBy(() ->
+                    TimeSeries.linear(new double[]{0, Double.NaN}, new double[]{10, 20}, () -> 0))
+                    .isInstanceOf(IllegalArgumentException.class)
+                    .hasMessageContaining("time values must be finite");
+        }
+
+        @Test
+        void shouldRejectInfinityInTimeValues() {
+            assertThatThrownBy(() ->
+                    TimeSeries.linear(
+                            new double[]{0, Double.POSITIVE_INFINITY},
+                            new double[]{10, 20}, () -> 0))
+                    .isInstanceOf(IllegalArgumentException.class)
+                    .hasMessageContaining("time values must be finite");
+        }
+
+        @Test
+        void shouldRejectNaNInDataValues() {
+            assertThatThrownBy(() ->
+                    TimeSeries.linear(new double[]{0, 1}, new double[]{10, Double.NaN}, () -> 0))
+                    .isInstanceOf(IllegalArgumentException.class)
+                    .hasMessageContaining("data values must be finite");
+        }
+
+        @Test
+        void shouldRejectNegativeInfinityInDataValues() {
+            assertThatThrownBy(() ->
+                    TimeSeries.linear(
+                            new double[]{0, 1},
+                            new double[]{Double.NEGATIVE_INFINITY, 20}, () -> 0))
+                    .isInstanceOf(IllegalArgumentException.class)
+                    .hasMessageContaining("data values must be finite");
+        }
+
+        @Test
+        void shouldRejectInvalidInputInStepFactory() {
+            assertThatThrownBy(() ->
+                    TimeSeries.step(new double[]{}, new double[]{}, () -> 0))
+                    .isInstanceOf(IllegalArgumentException.class)
+                    .hasMessageContaining("At least 2");
+        }
+
+        @Test
+        void shouldRejectInvalidInputInCreateFactory() {
+            assertThatThrownBy(() ->
+                    TimeSeries.create(new double[]{}, new double[]{}, () -> 0,
+                            "LINEAR", "HOLD"))
+                    .isInstanceOf(IllegalArgumentException.class)
+                    .hasMessageContaining("At least 2");
+        }
+
+        @Test
+        void shouldAcceptValidMinimalInput() {
+            double[] time = {0};
+            TimeSeries ts = TimeSeries.linear(
+                    new double[]{0, 1}, new double[]{10, 20}, () -> time[0]);
+            time[0] = 0.5;
+            assertThat(ts.getCurrentValue()).isCloseTo(15.0, within(1e-10));
         }
     }
 }

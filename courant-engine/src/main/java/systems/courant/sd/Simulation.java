@@ -186,8 +186,18 @@ public class Simulation {
         clearHistory();
         resetStatefulFormulas();
 
-        long nanos = Math.round(timeStep.ratioToBaseUnit() * dt * 1_000_000_000L);
-        if (nanos <= 0) {
+        // Compute the step duration in seconds (ratioToBaseUnit is in seconds).
+        // Use seconds + nanosecond remainder to avoid long overflow when
+        // ratioToBaseUnit * dt * 1e9 exceeds Long.MAX_VALUE (#888).
+        double stepSeconds = timeStep.ratioToBaseUnit() * dt;
+        if (stepSeconds <= 0 || !Double.isFinite(stepSeconds)) {
+            throw new IllegalArgumentException(
+                    "Time step too small to represent in nanoseconds: " + timeStep.getName()
+                            + " (ratioToBaseUnit=" + timeStep.ratioToBaseUnit() + ")");
+        }
+        long wholeSeconds = (long) stepSeconds;
+        long nanoAdjustment = Math.round((stepSeconds - wholeSeconds) * 1_000_000_000L);
+        if (wholeSeconds == 0 && nanoAdjustment <= 0) {
             throw new IllegalArgumentException(
                     "Time step too small to represent in nanoseconds: " + timeStep.getName()
                             + " (ratioToBaseUnit=" + timeStep.ratioToBaseUnit() + ")");
@@ -214,7 +224,7 @@ public class Simulation {
                             + "). Check duration and time step values.");
         }
 
-        Duration stepDuration = Duration.ofNanos(nanos);
+        Duration stepDuration = Duration.ofSeconds(wholeSeconds, nanoAdjustment);
         long deadlineMs = timeoutMs > 0 ? System.currentTimeMillis() + timeoutMs : Long.MAX_VALUE;
         Map<Flow, Quantity> flowMap = new IdentityHashMap<>();
         List<Stock> allStocks = collectAllStocks();

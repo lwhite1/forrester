@@ -11,6 +11,10 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+
 import systems.courant.sd.measure.Dimension;
 
 import static systems.courant.sd.measure.Units.DAY;
@@ -20,6 +24,7 @@ import static systems.courant.sd.measure.Units.MINUTE;
 import static systems.courant.sd.measure.Units.SECOND;
 import static systems.courant.sd.measure.Units.THING;
 import static systems.courant.sd.measure.Units.WEEK;
+import static systems.courant.sd.measure.Units.YEAR;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -1124,6 +1129,146 @@ public class SimulationTest {
             // Second run: should reset to 75
             sim.execute();
             assertThat(stock.getValue()).isEqualTo(0.0);
+        }
+    }
+
+    @Nested
+    @DisplayName("currentDateTime overflow for large dt (#888)")
+    class CurrentDateTimeOverflow {
+
+        @Test
+        void shouldNotOverflowWithLargeDtAndYearTimeStep() {
+            // dt=300 with YEAR: ratioToBaseUnit=31_536_000, so stepSeconds=9_460_800_000.
+            // Before the fix, 31_536_000 * 300 * 1e9 overflowed a long.
+            Model model = new Model("Large Dt");
+            Stock stock = new Stock("S", 1000, THING);
+            Flow drain = Flow.create("Drain", YEAR, () -> new Quantity(100, THING));
+            stock.addOutflow(drain);
+            model.addStock(stock);
+
+            LocalDateTime start = LocalDateTime.of(2000, 1, 1, 0, 0);
+            Simulation sim = new Simulation(model, YEAR, new Quantity(300, YEAR), start);
+            sim.setDt(300);
+            sim.execute();
+
+            // Simulation completes without overflow — stock value is finite
+            assertThat(Double.isFinite(stock.getValue())).isTrue();
+        }
+
+        @Test
+        void shouldProduceCorrectTimestampsForLargeDt() {
+            Model model = new Model("Timestamp Check");
+            LocalDateTime start = LocalDateTime.of(2000, 1, 1, 0, 0);
+            Simulation sim = new Simulation(model, YEAR, new Quantity(300, YEAR), start);
+            sim.setDt(300);
+
+            List<LocalDateTime> timestamps = new ArrayList<>();
+            sim.addEventHandler(new systems.courant.sd.event.EventHandler() {
+                @Override
+                public void handleSimulationStartEvent(
+                        systems.courant.sd.event.SimulationStartEvent e) { }
+                @Override
+                public void handleTimeStepEvent(
+                        systems.courant.sd.event.TimeStepEvent e) {
+                    timestamps.add(e.getCurrentTime());
+                }
+                @Override
+                public void handleSimulationEndEvent(
+                        systems.courant.sd.event.SimulationEndEvent e) { }
+            });
+
+            sim.execute();
+
+            // Step 0 fires at startTime, step 1 fires at startTime + 300 years
+            assertThat(timestamps).hasSize(2);
+            assertThat(timestamps.get(0)).isEqualTo(start);
+            // 300 years * 365 days * 86400 seconds = 9_460_800_000 seconds
+            assertThat(timestamps.get(1)).isAfter(start);
+        }
+
+        @Test
+        void shouldHandleLargeDtWithMonthTimeStep() {
+            // dt=100 with MONTH: ratioToBaseUnit=2_592_000, stepSeconds=259_200_000
+            // Still well within long range but exercises the new code path
+            Model model = new Model("Large Dt Month");
+            LocalDateTime start = LocalDateTime.of(2000, 1, 1, 0, 0);
+            Simulation sim = new Simulation(model, DAY, new Quantity(100, DAY), start);
+            sim.setDt(100);
+
+            List<LocalDateTime> timestamps = new ArrayList<>();
+            sim.addEventHandler(new systems.courant.sd.event.EventHandler() {
+                @Override
+                public void handleSimulationStartEvent(
+                        systems.courant.sd.event.SimulationStartEvent e) { }
+                @Override
+                public void handleTimeStepEvent(
+                        systems.courant.sd.event.TimeStepEvent e) {
+                    timestamps.add(e.getCurrentTime());
+                }
+                @Override
+                public void handleSimulationEndEvent(
+                        systems.courant.sd.event.SimulationEndEvent e) { }
+            });
+
+            sim.execute();
+
+            // 100 days / (DAY * dt=100) = 1 step, plus initial = 2
+            assertThat(timestamps).hasSize(2);
+            assertThat(timestamps.get(0)).isEqualTo(start);
+            // 100 days = 8_640_000 seconds advanced
+            assertThat(timestamps.get(1)).isEqualTo(start.plusSeconds(8_640_000L));
+        }
+
+        @Test
+        void shouldStillRejectSubNanosecondTimeStep() {
+            // Ensure the fix didn't break the existing sub-nanosecond guard
+            Model model = new Model("Sub-Nano Guard");
+            TimeUnit tinyUnit = new TimeUnit() {
+                @Override
+                public String getName() { return "SubNano"; }
+                @Override
+                public Dimension getDimension() { return Dimension.TIME; }
+                @Override
+                public double ratioToBaseUnit() { return 0.4e-9; }
+            };
+            Simulation sim = new Simulation(model, tinyUnit, new Quantity(1, SECOND));
+
+            assertThatThrownBy(sim::execute)
+                    .isInstanceOf(IllegalArgumentException.class)
+                    .hasMessageContaining("too small to represent in nanoseconds");
+        }
+
+        @Test
+        void shouldHandleFractionalSecondStepDuration() {
+            // dt=0.5 with SECOND: stepSeconds=0.5, wholeSeconds=0, nanoAdjustment=500_000_000
+            Model model = new Model("Fractional Step");
+            LocalDateTime start = LocalDateTime.of(2025, 6, 1, 12, 0);
+            Simulation sim = new Simulation(model, SECOND, new Quantity(3, SECOND), start);
+            sim.setDt(0.5);
+
+            List<LocalDateTime> timestamps = new ArrayList<>();
+            sim.addEventHandler(new systems.courant.sd.event.EventHandler() {
+                @Override
+                public void handleSimulationStartEvent(
+                        systems.courant.sd.event.SimulationStartEvent e) { }
+                @Override
+                public void handleTimeStepEvent(
+                        systems.courant.sd.event.TimeStepEvent e) {
+                    timestamps.add(e.getCurrentTime());
+                }
+                @Override
+                public void handleSimulationEndEvent(
+                        systems.courant.sd.event.SimulationEndEvent e) { }
+            });
+
+            sim.execute();
+
+            // 3s / (1s * 0.5) = 6 steps, plus initial = 7
+            assertThat(timestamps).hasSize(7);
+            assertThat(timestamps.get(0)).isEqualTo(start);
+            // Each step advances 0.5 seconds = 500_000_000 nanos
+            assertThat(timestamps.get(2)).isEqualTo(start.plusSeconds(1));
+            assertThat(timestamps.get(6)).isEqualTo(start.plusSeconds(3));
         }
     }
 }
