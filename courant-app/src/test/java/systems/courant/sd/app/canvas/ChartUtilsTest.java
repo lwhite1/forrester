@@ -6,6 +6,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
+import java.util.List;
 import java.util.Locale;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -104,6 +105,52 @@ class ChartUtilsTest {
             Locale.setDefault(Locale.GERMANY);
             assertThat(ChartUtils.formatNumber(42.0)).isEqualTo("42");
             assertThat(ChartUtils.formatNumber(0.0)).isEqualTo("0");
+        }
+    }
+
+    @Nested
+    @DisplayName("filterSimulationSettings() (#880)")
+    class FilterSimulationSettings {
+
+        @Test
+        @DisplayName("filters out simulation settings variable names")
+        void shouldFilterSettingsNames() {
+            List<String> names = List.of("Population", "TIME_STEP", "INITIAL_TIME",
+                    "FINAL_TIME", "SAVEPER", "Birth Rate");
+            assertThat(ChartUtils.filterSimulationSettings(names))
+                    .containsExactly("Population", "Birth Rate");
+        }
+
+        @Test
+        @DisplayName("filters space-separated variants")
+        void shouldFilterSpaceSeparatedNames() {
+            List<String> names = List.of("Tank", "TIME STEP", "INITIAL TIME", "FINAL TIME");
+            assertThat(ChartUtils.filterSimulationSettings(names))
+                    .containsExactly("Tank");
+        }
+
+        @Test
+        @DisplayName("returns all names when no settings present")
+        void shouldReturnAllWhenNoSettings() {
+            List<String> names = List.of("Stock A", "Flow B", "Var C");
+            assertThat(ChartUtils.filterSimulationSettings(names))
+                    .containsExactly("Stock A", "Flow B", "Var C");
+        }
+
+        @Test
+        @DisplayName("isSimulationSetting returns false for normal names")
+        void shouldNotFlagNormalNames() {
+            assertThat(ChartUtils.isSimulationSetting("Population")).isFalse();
+            assertThat(ChartUtils.isSimulationSetting("Time")).isFalse();
+        }
+
+        @Test
+        @DisplayName("isSimulationSetting returns true for all known settings")
+        void shouldFlagAllKnownSettings() {
+            assertThat(ChartUtils.isSimulationSetting("TIME_STEP")).isTrue();
+            assertThat(ChartUtils.isSimulationSetting("INITIAL_TIME")).isTrue();
+            assertThat(ChartUtils.isSimulationSetting("FINAL_TIME")).isTrue();
+            assertThat(ChartUtils.isSimulationSetting("SAVEPER")).isTrue();
         }
     }
 

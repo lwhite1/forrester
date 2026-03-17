@@ -17,6 +17,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 
 /**
  * Shared chart utilities: color palette, series coloring, and number formatting.
@@ -38,7 +39,33 @@ public final class ChartUtils {
     /** Opacity applied to ghost run chart series. */
     public static final double GHOST_OPACITY = 0.30;
 
+    /**
+     * Simulation settings variable names that should be excluded from analysis
+     * dropdowns and output plots.
+     */
+    private static final Set<String> SIMULATION_SETTINGS_NAMES = Set.of(
+            "TIME_STEP", "INITIAL_TIME", "FINAL_TIME", "SAVEPER",
+            "TIME STEP", "INITIAL TIME", "FINAL TIME",
+            "Time Step", "Initial Time", "Final Time");
+
     private ChartUtils() {
+    }
+
+    /**
+     * Returns true if the given variable name is a simulation settings variable
+     * that should be excluded from analysis dropdowns and output charts.
+     */
+    public static boolean isSimulationSetting(String name) {
+        return SIMULATION_SETTINGS_NAMES.contains(name);
+    }
+
+    /**
+     * Filters a list of variable names, removing simulation settings variables.
+     */
+    public static List<String> filterSimulationSettings(List<String> names) {
+        return names.stream()
+                .filter(n -> !isSimulationSetting(n))
+                .toList();
     }
 
     public static void applySeriesColors(List<XYChart.Series<Number, Number>> allSeries) {
