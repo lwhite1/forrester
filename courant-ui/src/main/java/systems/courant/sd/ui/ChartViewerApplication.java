@@ -247,6 +247,8 @@ public class ChartViewerApplication extends Application {
 
     /**
      * Adds a data point to each series using a formatted timestamp as the x-axis label.
+     *
+     * @throws IllegalArgumentException if the total number of values does not match the number of series
      */
     public static void addValues(List<Double> modelEntityValues,
                                  List<Double> variableValues,
@@ -254,8 +256,9 @@ public class ChartViewerApplication extends Application {
         synchronized (LOCK) {
             List<Double> allValues = new ArrayList<>(modelEntityValues);
             allValues.addAll(variableValues);
+            validateValueCount(allValues.size());
 
-            for (int i = 0; i < allValues.size() && i < series.size(); i++) {
+            for (int i = 0; i < allValues.size(); i++) {
                 double value = allValues.get(i);
                 series.get(i).getData()
                         .add(new XYChart.Data<>(currentTime.format(formatter), value));
@@ -265,6 +268,8 @@ public class ChartViewerApplication extends Application {
 
     /**
      * Adds a data point to each series using the step number as the x-axis label.
+     *
+     * @throws IllegalArgumentException if the total number of values does not match the number of series
      */
     public static void addValues(List<Double> modelEntityValues,
                                  List<Double> variableValues,
@@ -272,12 +277,28 @@ public class ChartViewerApplication extends Application {
         synchronized (LOCK) {
             List<Double> allValues = new ArrayList<>(modelEntityValues);
             allValues.addAll(variableValues);
+            validateValueCount(allValues.size());
 
-            for (int i = 0; i < allValues.size() && i < series.size(); i++) {
+            for (int i = 0; i < allValues.size(); i++) {
                 double value = allValues.get(i);
                 series.get(i).getData()
                         .add(new XYChart.Data<>(String.valueOf(step), value));
             }
+        }
+    }
+
+    /**
+     * Validates that the number of values matches the number of series.
+     * Must be called while holding {@link #LOCK}.
+     *
+     * @param valueCount the total number of values to add
+     * @throws IllegalArgumentException if valueCount does not equal the series count
+     */
+    private static void validateValueCount(int valueCount) {
+        if (valueCount != series.size()) {
+            throw new IllegalArgumentException(
+                    "Value count (%d) does not match series count (%d)"
+                            .formatted(valueCount, series.size()));
         }
     }
 

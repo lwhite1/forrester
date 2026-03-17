@@ -19,6 +19,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /**
  * Tests for ChartViewerApplication's static data accumulation methods.
@@ -94,30 +95,73 @@ class ChartViewerApplicationTest {
     }
 
     @Test
-    @DisplayName("addValues gracefully handles more values than series")
-    void shouldHandleExtraValues() {
+    @DisplayName("addValues with step throws on more values than series (#865)")
+    void shouldThrowOnMoreValuesThanSeries() {
         ChartViewerApplication.setSeries(List.of("OnlyOne"), List.of());
-        ChartViewerApplication.addValues(List.of(1.0, 2.0, 3.0), List.of(), 0);
 
-        // Only the first value should be recorded (one series exists)
-        ChartViewerApplication.ChartData snap = ChartViewerApplication.snapshot();
-        assertThat(snap.series()).hasSize(1);
-        assertThat(snap.series().getFirst().getData()).hasSize(1);
-        assertThat(snap.series().getFirst().getData().getFirst().getYValue().doubleValue())
-                .isEqualTo(1.0);
+        assertThatThrownBy(() ->
+                ChartViewerApplication.addValues(List.of(1.0, 2.0, 3.0), List.of(), 0))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("Value count (3) does not match series count (1)");
     }
 
     @Test
-    @DisplayName("addValues gracefully handles fewer values than series")
-    void shouldHandleFewerValues() {
+    @DisplayName("addValues with step throws on fewer values than series (#865)")
+    void shouldThrowOnFewerValuesThanSeries() {
         ChartViewerApplication.setSeries(List.of("A", "B", "C"), List.of());
-        ChartViewerApplication.addValues(List.of(1.0), List.of(), 0);
 
-        // Only the first series should have a data point
+        assertThatThrownBy(() ->
+                ChartViewerApplication.addValues(List.of(1.0), List.of(), 0))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("Value count (1) does not match series count (3)");
+    }
+
+    @Test
+    @DisplayName("addValues with timestamp throws on more values than series (#865)")
+    void shouldThrowOnMoreValuesThanSeriesWithTimestamp() {
+        ChartViewerApplication.setSeries(List.of("OnlyOne"), List.of());
+
+        assertThatThrownBy(() ->
+                ChartViewerApplication.addValues(List.of(1.0, 2.0), List.of(),
+                        LocalDateTime.of(2026, 1, 1, 12, 0)))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("Value count (2) does not match series count (1)");
+    }
+
+    @Test
+    @DisplayName("addValues with timestamp throws on fewer values than series (#865)")
+    void shouldThrowOnFewerValuesThanSeriesWithTimestamp() {
+        ChartViewerApplication.setSeries(List.of("A", "B", "C"), List.of());
+
+        assertThatThrownBy(() ->
+                ChartViewerApplication.addValues(List.of(1.0), List.of(),
+                        LocalDateTime.of(2026, 1, 1, 12, 0)))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("Value count (1) does not match series count (3)");
+    }
+
+    @Test
+    @DisplayName("addValues throws on zero values when series exist (#865)")
+    void shouldThrowOnZeroValuesWhenSeriesExist() {
+        ChartViewerApplication.setSeries(List.of("A"), List.of());
+
+        assertThatThrownBy(() ->
+                ChartViewerApplication.addValues(List.of(), List.of(), 0))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("Value count (0) does not match series count (1)");
+    }
+
+    @Test
+    @DisplayName("addValues succeeds when values match series count exactly (#865)")
+    void shouldSucceedWhenValuesMatchSeriesCount() {
+        ChartViewerApplication.setSeries(List.of("A", "B"), List.of("C"));
+        ChartViewerApplication.addValues(List.of(1.0, 2.0), List.of(3.0), 0);
+
         ChartViewerApplication.ChartData snap = ChartViewerApplication.snapshot();
+        assertThat(snap.series()).hasSize(3);
         assertThat(snap.series().get(0).getData()).hasSize(1);
-        assertThat(snap.series().get(1).getData()).isEmpty();
-        assertThat(snap.series().get(2).getData()).isEmpty();
+        assertThat(snap.series().get(1).getData()).hasSize(1);
+        assertThat(snap.series().get(2).getData()).hasSize(1);
     }
 
     @Test

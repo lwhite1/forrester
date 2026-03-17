@@ -143,13 +143,9 @@ public class FanChart extends Application {
             maxVal = Math.max(maxVal, pct97[i]);
         }
 
-        // Add 5% padding
-        double range = maxVal - minVal;
-        if (range == 0) {
-            range = 1;
-        }
-        minVal -= range * 0.05;
-        maxVal += range * 0.05;
+        double[] padded = padAxisRange(minVal, maxVal);
+        minVal = padded[0];
+        maxVal = padded[1];
 
         double plotWidth = WIDTH - MARGIN_LEFT - MARGIN_RIGHT;
         double plotHeight = HEIGHT - MARGIN_TOP - MARGIN_BOTTOM;
@@ -235,5 +231,25 @@ public class FanChart extends Application {
         // X-axis label
         gc.setFont(Font.font(12));
         gc.fillText("Step", MARGIN_LEFT + plotWidth / 2 - 15, HEIGHT - 5);
+    }
+
+    /**
+     * Computes a padded y-axis range from the raw data min/max. When the data range is
+     * non-zero, adds 5% padding on each side. When all values are constant (range == 0),
+     * produces a sensible range centered on the constant value, proportional to its
+     * magnitude — or +/-1 when the constant value is zero.
+     *
+     * @param rawMin the minimum data value
+     * @param rawMax the maximum data value
+     * @return a two-element array {@code [paddedMin, paddedMax]}
+     */
+    static double[] padAxisRange(double rawMin, double rawMax) {
+        double range = rawMax - rawMin;
+        if (range != 0) {
+            return new double[]{rawMin - range * 0.05, rawMax + range * 0.05};
+        }
+        // All values are constant — use 10% of |value| as half-range, or 1 if value is 0
+        double halfRange = (rawMin == 0) ? 1.0 : Math.abs(rawMin) * 0.1;
+        return new double[]{rawMin - halfRange, rawMax + halfRange};
     }
 }
