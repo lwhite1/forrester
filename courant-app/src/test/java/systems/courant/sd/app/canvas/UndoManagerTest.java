@@ -387,6 +387,25 @@ class UndoManagerTest {
         }
 
         @Test
+        void shouldTimeoutWithinMillisecondsNotSeconds() {
+            // Inject an entry whose future never completes and raw snapshot is null.
+            // The old code would block for 5 seconds; the new code times out in ~100ms.
+            CompletableFuture<UndoManager.CompressedData> neverComplete = new CompletableFuture<>();
+            UndoManager.UndoEntry entry = new UndoManager.UndoEntry(
+                    neverComplete, "Stuck", null);
+            manager.pushEntry(entry);
+
+            long start = System.nanoTime();
+            assertThatThrownBy(() -> manager.undo(snapshot("Current")))
+                    .isInstanceOf(IllegalStateException.class)
+                    .hasMessageContaining("100 ms");
+            long elapsed = (System.nanoTime() - start) / 1_000_000;
+
+            assertThat(elapsed).isLessThan(500); // well under 5 seconds
+            neverComplete.cancel(false);
+        }
+
+        @Test
         void shouldThrowOnCompressionFailure() {
             // Inject an entry whose compression future completed exceptionally
             // and whose rawSnapshot is null (simulating a lost snapshot)
