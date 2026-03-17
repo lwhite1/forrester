@@ -9,7 +9,7 @@ import static org.assertj.core.api.Assertions.within;
 import systems.courant.sd.app.canvas.FlowGeometry;
 
 @DisplayName("FlowGeometry")
-class CanvasRendererTest {
+class FlowGeometryTest {
 
     @Nested
     @DisplayName("clipToBorder")
