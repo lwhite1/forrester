@@ -131,7 +131,6 @@ public final class SvgExporter {
                             LayoutMetrics.effectiveWidth(canvasState, name),
                             LayoutMetrics.effectiveHeight(canvasState, name));
                 }
-                default -> { }
             }
         }
 
