@@ -138,6 +138,9 @@ public class SimulationResultPane extends BorderPane {
         List<String> columns = result.columnNames();
 
         for (int c = 0; c < columns.size(); c++) {
+            if (c > 0 && ChartUtils.isSimulationSetting(columns.get(c))) {
+                continue;
+            }
             final int colIndex = c;
             TableColumn<double[], String> col = new TableColumn<>(columns.get(c));
             col.setSortable(false);
@@ -202,6 +205,9 @@ public class SimulationResultPane extends BorderPane {
             List<XYChart.Series<Number, Number>> groupSeries = new ArrayList<>();
             int ghostStride = chartStride(ghostRows.size());
             for (int c = 1; c < ghostColumns.size(); c++) {
+                if (ChartUtils.isSimulationSetting(ghostColumns.get(c))) {
+                    continue;
+                }
                 XYChart.Series<Number, Number> series = new XYChart.Series<>();
                 series.setName(ghostColumns.get(c) + " (" + ghost.name() + ")");
                 for (int r = 0; r < ghostRows.size(); r += ghostStride) {
@@ -245,8 +251,11 @@ public class SimulationResultPane extends BorderPane {
         List<String> behaviorModes = new ArrayList<>();
         List<Boolean> isStock = new ArrayList<>();
         for (int c = 1; c < columns.size(); c++) {
-            XYChart.Series<Number, Number> series = new XYChart.Series<>();
             String name = columns.get(c);
+            if (ChartUtils.isSimulationSetting(name)) {
+                continue;
+            }
+            XYChart.Series<Number, Number> series = new XYChart.Series<>();
             series.setName(name);
             double[] colValues = new double[rows.size()];
             for (int r = 0; r < rows.size(); r++) {

@@ -96,6 +96,9 @@ public class OptimizationResultPane extends BorderPane {
 
         for (int c = 0; c < allNames.size(); c++) {
             String name = allNames.get(c);
+            if (ChartUtils.isSimulationSetting(name)) {
+                continue;
+            }
             boolean isStock = c < bestRun.getStockNames().size();
             int colIndex = isStock ? c : c - bestRun.getStockNames().size();
 

@@ -29,8 +29,8 @@ public class MonteCarloResultPane extends BorderPane {
         this.result = result;
 
         List<String> allNames = new ArrayList<>();
-        allNames.addAll(result.getStockNames());
-        allNames.addAll(result.getVariableNames());
+        allNames.addAll(ChartUtils.filterSimulationSettings(result.getStockNames()));
+        allNames.addAll(ChartUtils.filterSimulationSettings(result.getVariableNames()));
 
         ComboBox<String> varCombo = new ComboBox<>(FXCollections.observableArrayList(allNames));
 

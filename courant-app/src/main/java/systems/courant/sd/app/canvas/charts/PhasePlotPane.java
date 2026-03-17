@@ -107,7 +107,10 @@ public class PhasePlotPane extends BorderPane {
     public static List<String> getVariableNames(SimulationRunner.SimulationResult result) {
         List<String> names = new ArrayList<>();
         for (int i = 1; i < result.columnNames().size(); i++) {
-            names.add(result.columnNames().get(i));
+            String name = result.columnNames().get(i);
+            if (!ChartUtils.isSimulationSetting(name)) {
+                names.add(name);
+            }
         }
         return names;
     }

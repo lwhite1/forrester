@@ -1,6 +1,7 @@
 package systems.courant.sd.app;
 
 import systems.courant.sd.app.canvas.AnalysisRunner;
+import systems.courant.sd.app.canvas.ChartUtils;
 import systems.courant.sd.app.canvas.DashboardPanel;
 import systems.courant.sd.app.canvas.ModelCanvas;
 import systems.courant.sd.app.canvas.ModelDefinitionFactory;
@@ -128,7 +129,9 @@ final class SimulationController {
         List<String> trackableNames = new ArrayList<>();
         activeEditor.getStocks().forEach(s -> trackableNames.add(s.name()));
         activeEditor.getFlows().forEach(f -> trackableNames.add(f.name()));
-        activeEditor.getVariables().forEach(a -> trackableNames.add(a.name()));
+        activeEditor.getVariables().stream()
+                .filter(a -> !ChartUtils.isSimulationSetting(a.name()))
+                .forEach(a -> trackableNames.add(a.name()));
 
         if (parameterNames.isEmpty()) {
             showError.accept("Model has no parameters to sweep.");
@@ -528,8 +531,8 @@ final class SimulationController {
     }
 
     private static List<String> collectTrackableNames(List<String> stocks, List<String> variables) {
-        List<String> names = new ArrayList<>(stocks);
-        names.addAll(variables);
+        List<String> names = new ArrayList<>(ChartUtils.filterSimulationSettings(stocks));
+        names.addAll(ChartUtils.filterSimulationSettings(variables));
         return names;
     }
 

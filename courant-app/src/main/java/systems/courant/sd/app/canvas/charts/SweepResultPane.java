@@ -38,8 +38,8 @@ public class SweepResultPane extends BorderPane {
         this.paramName = paramName;
 
         List<String> trackableNames = new ArrayList<>();
-        trackableNames.addAll(result.getStockNames());
-        trackableNames.addAll(result.getVariableNames());
+        trackableNames.addAll(ChartUtils.filterSimulationSettings(result.getStockNames()));
+        trackableNames.addAll(ChartUtils.filterSimulationSettings(result.getVariableNames()));
 
         ComboBox<String> varCombo = new ComboBox<>(FXCollections.observableArrayList(trackableNames));
         if (!trackableNames.isEmpty()) {
