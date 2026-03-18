@@ -26,7 +26,8 @@ public class CldVariableForm implements ElementForm {
 
     @Override
     public int build(int startRow) {
-        CldVariableDef variable = ctx.getEditor().getCldVariableByName(ctx.getElementName());
+        CldVariableDef variable = ctx.getEditor().getCldVariableByName(ctx.getElementName())
+                .orElse(null);
         if (variable == null) {
             ctx.addReadOnlyRow(startRow++, "Name", ctx.getElementName());
             return startRow;
@@ -52,7 +53,8 @@ public class CldVariableForm implements ElementForm {
 
     @Override
     public void updateValues() {
-        CldVariableDef variable = ctx.getEditor().getCldVariableByName(ctx.getElementName());
+        CldVariableDef variable = ctx.getEditor().getCldVariableByName(ctx.getElementName())
+                .orElse(null);
         if (variable == null || nameField == null) {
             return;
         }
@@ -63,7 +65,8 @@ public class CldVariableForm implements ElementForm {
     private void commitComment(TextArea area) {
         String text = area.getText().trim();
         String comment = text.isEmpty() ? null : text;
-        CldVariableDef variable = ctx.getEditor().getCldVariableByName(ctx.getElementName());
+        CldVariableDef variable = ctx.getEditor().getCldVariableByName(ctx.getElementName())
+                .orElse(null);
         if (variable == null || Objects.equals(comment, variable.comment())) {
             return;
         }

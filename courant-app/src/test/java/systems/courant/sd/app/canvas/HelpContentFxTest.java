@@ -79,15 +79,17 @@ class HelpContentFxTest {
         assertThat(fullText).doesNotContain("Start Time");
         assertThat(fullText).doesNotContain("Stop Time");
 
-        // Verify field order matches dialog: Time Step before Duration before DT before Strict Mode before Save Per
+        // Verify field order matches dialog: Time Step, DT, Save Per, Duration, Duration Unit, Strict Mode
         int timeStepIdx = fullText.indexOf("Time Step");
-        int durationIdx = fullText.indexOf("Duration");
+        int dtIdx = fullText.indexOf("DT");
+        int savePerIdx = fullText.indexOf("Save Per");
+        int durationIdx = fullText.indexOf("\nDuration");
         int durationUnitIdx = fullText.indexOf("Duration Unit");
         int strictModeIdx = fullText.indexOf("Strict Mode");
-        int savePerIdx = fullText.indexOf("Save Per");
 
-        assertThat(timeStepIdx).isLessThan(durationIdx);
+        assertThat(timeStepIdx).isLessThan(dtIdx);
+        assertThat(dtIdx).isLessThan(savePerIdx);
+        assertThat(savePerIdx).isLessThan(durationIdx);
         assertThat(durationUnitIdx).isLessThan(strictModeIdx);
-        assertThat(strictModeIdx).isLessThan(savePerIdx);
     }
 }

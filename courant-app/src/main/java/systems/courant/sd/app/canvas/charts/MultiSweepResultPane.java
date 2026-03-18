@@ -69,7 +69,7 @@ public class MultiSweepResultPane extends BorderPane {
             table.getColumns().add(col);
         }
 
-        List<String> stockNames = result.getStockNames();
+        List<String> stockNames = ChartUtils.filterSimulationSettings(result.getStockNames());
         for (String stockName : stockNames) {
             TableColumn<RunResult, String> finalCol = new TableColumn<>(stockName + "_final");
             finalCol.setCellValueFactory(data -> {
@@ -170,6 +170,9 @@ public class MultiSweepResultPane extends BorderPane {
         for (int c = 0; c < allNames.size(); c++) {
             boolean isStock = c < run.getStockNames().size();
             int colIndex = isStock ? c : c - run.getStockNames().size();
+            if (ChartUtils.isSimulationSetting(allNames.get(c))) {
+                continue;
+            }
 
             XYChart.Series<Number, Number> series = new XYChart.Series<>();
             series.setName(allNames.get(c));

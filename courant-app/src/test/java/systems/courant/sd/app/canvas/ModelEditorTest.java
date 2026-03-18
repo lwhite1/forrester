@@ -18,6 +18,8 @@ import systems.courant.sd.model.def.ViewDef;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.atomic.AtomicReference;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -2160,6 +2162,45 @@ class ModelEditorTest {
 
             assertThat(name).isNotEqualTo("Variable 1");
             assertThat(editor.hasElement(name)).isTrue();
+        }
+    }
+
+    @Nested
+    @DisplayName("toModelDefinition thread safety")
+    class ToModelDefinitionThreadSafety {
+
+        @Test
+        void shouldNotThrowWhenSnapshotTakenConcurrentlyWithMutations() throws Exception {
+            AtomicReference<Throwable> failure = new AtomicReference<>();
+            CountDownLatch start = new CountDownLatch(1);
+            CountDownLatch done = new CountDownLatch(1);
+
+            // Background thread repeatedly calls toModelDefinition()
+            Thread reader = new Thread(() -> {
+                try {
+                    start.await();
+                    for (int i = 0; i < 1000; i++) {
+                        editor.toModelDefinition();
+                    }
+                } catch (Throwable t) {
+                    failure.set(t);
+                } finally {
+                    done.countDown();
+                }
+            });
+            reader.start();
+
+            // Main thread mutates the editor while background thread reads
+            start.countDown();
+            for (int i = 0; i < 200; i++) {
+                editor.addStock();
+                editor.addFlow();
+                editor.addVariable();
+                editor.addCldVariable();
+            }
+
+            done.await();
+            assertThat(failure.get()).isNull();
         }
     }
 

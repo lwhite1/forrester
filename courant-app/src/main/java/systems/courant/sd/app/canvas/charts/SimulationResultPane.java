@@ -138,6 +138,9 @@ public class SimulationResultPane extends BorderPane {
         List<String> columns = result.columnNames();
 
         for (int c = 0; c < columns.size(); c++) {
+            if (c > 0 && ChartUtils.isSimulationSetting(columns.get(c))) {
+                continue;
+            }
             final int colIndex = c;
             TableColumn<double[], String> col = new TableColumn<>(columns.get(c));
             col.setSortable(false);
@@ -187,9 +190,66 @@ public class SimulationResultPane extends BorderPane {
         chart.setAnimated(false);
         chart.setLegendVisible(false);
 
-        // --- Ghost series from previous runs (one group per ghost) ---
+        // Ghost series (rendered behind current)
         List<List<XYChart.Series<Number, Number>>> ghostSeriesGroups = new ArrayList<>();
         List<XYChart.Series<Number, Number>> allGhostSeries = new ArrayList<>();
+        buildGhostSeries(ghostRuns, ghostSeriesGroups, allGhostSeries);
+        chart.getData().addAll(allGhostSeries);
+
+        // Current run series
+        List<XYChart.Series<Number, Number>> currentSeries = new ArrayList<>();
+        List<String> behaviorModes = new ArrayList<>();
+        List<Boolean> isStock = new ArrayList<>();
+        buildCurrentSeries(columns, rows, stockNames, currentSeries, behaviorModes, isStock);
+        chart.getData().addAll(currentSeries);
+        ChartUtils.applySeriesColors(currentSeries);
+
+        Runnable rescaleYAxis = createYAxisRescaler(yAxis);
+        rescaleYAxis.run();
+
+        // Apply dashed stroke to non-stock (variable/auxiliary) series
+        if (!stockNames.isEmpty()) {
+            for (int i = 0; i < currentSeries.size(); i++) {
+                if (!isStock.get(i)) {
+                    applyDashedStyle(currentSeries.get(i));
+                }
+            }
+        }
+
+        // Net flow series
+        List<XYChart.Series<Number, Number>> netFlowSeries =
+                buildNetFlowSeries(columns, rows, stockNames, currentSeries);
+
+        // Reference data overlay
+        List<XYChart.Series<Number, Number>> allRefSeries = addReferenceDataOverlay();
+
+        // Sidebar
+        VBox sidebar = buildSidebar(currentSeries, behaviorModes, isStock, stockNames,
+                rescaleYAxis, netFlowSeries, ghostRuns, ghostSeriesGroups, allGhostSeries,
+                clearHistory, allRefSeries);
+
+        ScrollPane sidebarScroll = new ScrollPane(sidebar);
+        sidebarScroll.setFitToWidth(true);
+        sidebarScroll.setPrefWidth(200);
+
+        // Context menu
+        ContextMenu contextMenu = buildChartContextMenu();
+        chart.setOnContextMenuRequested(e ->
+                contextMenu.show(chart, e.getScreenX(), e.getScreenY()));
+
+        ChartTimeCursor[] cursorHolder = new ChartTimeCursor[1];
+        StackPane chartWithCursor = ChartTimeCursor.install(chart, cursorHolder);
+        timeCursor = cursorHolder[0];
+
+        BorderPane pane = new BorderPane();
+        pane.setCenter(chartWithCursor);
+        pane.setRight(sidebarScroll);
+        return pane;
+    }
+
+    private void buildGhostSeries(List<GhostRun> ghostRuns,
+                                   List<List<XYChart.Series<Number, Number>>> ghostSeriesGroups,
+                                   List<XYChart.Series<Number, Number>> allGhostSeries) {
         for (int g = 0; g < ghostRuns.size(); g++) {
             GhostRun ghost = ghostRuns.get(g);
             SimulationRunner.SimulationResult ghostResult = ghost.result();
@@ -202,6 +262,9 @@ public class SimulationResultPane extends BorderPane {
             List<XYChart.Series<Number, Number>> groupSeries = new ArrayList<>();
             int ghostStride = chartStride(ghostRows.size());
             for (int c = 1; c < ghostColumns.size(); c++) {
+                if (ChartUtils.isSimulationSetting(ghostColumns.get(c))) {
+                    continue;
+                }
                 XYChart.Series<Number, Number> series = new XYChart.Series<>();
                 series.setName(ghostColumns.get(c) + " (" + ghost.name() + ")");
                 for (int r = 0; r < ghostRows.size(); r += ghostStride) {
@@ -210,14 +273,12 @@ public class SimulationResultPane extends BorderPane {
                         series.getData().add(new XYChart.Data<>(row[0], row[c]));
                     }
                 }
-                // Always include the last row to preserve the full time range
                 if (ghostStride > 1 && !ghostRows.isEmpty()) {
                     double[] last = ghostRows.getLast();
                     if (c < last.length) {
                         series.getData().add(new XYChart.Data<>(last[0], last[c]));
                     }
                 }
-                // Style with ghost's assigned color
                 String style = "-fx-stroke: " + ghostColor + "; -fx-opacity: "
                         + ChartUtils.GHOST_OPACITY + ";";
                 series.nodeProperty().addListener((obs, oldNode, newNode) -> {
@@ -235,18 +296,19 @@ public class SimulationResultPane extends BorderPane {
             ghostSeriesGroups.add(groupSeries);
             allGhostSeries.addAll(groupSeries);
         }
+    }
 
-        // Add ghost series first so they render behind current
-        chart.getData().addAll(allGhostSeries);
-
-        // --- Current run series ---
+    private void buildCurrentSeries(List<String> columns, List<double[]> rows,
+                                     Set<String> stockNames,
+                                     List<XYChart.Series<Number, Number>> currentSeries,
+                                     List<String> behaviorModes, List<Boolean> isStock) {
         int stride = chartStride(rows.size());
-        List<XYChart.Series<Number, Number>> currentSeries = new ArrayList<>();
-        List<String> behaviorModes = new ArrayList<>();
-        List<Boolean> isStock = new ArrayList<>();
         for (int c = 1; c < columns.size(); c++) {
-            XYChart.Series<Number, Number> series = new XYChart.Series<>();
             String name = columns.get(c);
+            if (ChartUtils.isSimulationSetting(name)) {
+                continue;
+            }
+            XYChart.Series<Number, Number> series = new XYChart.Series<>();
             series.setName(name);
             double[] colValues = new double[rows.size()];
             for (int r = 0; r < rows.size(); r++) {
@@ -258,7 +320,6 @@ public class SimulationResultPane extends BorderPane {
                     }
                 }
             }
-            // Always include the last row to preserve the full time range
             if (stride > 1 && !rows.isEmpty()) {
                 double[] last = rows.getLast();
                 if (c < last.length) {
@@ -269,12 +330,10 @@ public class SimulationResultPane extends BorderPane {
             behaviorModes.add(BehaviorModeClassifier.classify(colValues));
             isStock.add(stockNames.contains(name));
         }
+    }
 
-        chart.getData().addAll(currentSeries);
-        ChartUtils.applySeriesColors(currentSeries);
-
-        // Y-axis rescaling: recompute bounds from visible series (#542)
-        Runnable rescaleYAxis = () -> {
+    private Runnable createYAxisRescaler(NumberAxis yAxis) {
+        return () -> {
             double yMin = Double.MAX_VALUE;
             double yMax = -Double.MAX_VALUE;
             for (XYChart.Series<Number, Number> s : chart.getData()) {
@@ -303,18 +362,11 @@ public class SimulationResultPane extends BorderPane {
             yAxis.setUpperBound(yMax + pad);
             yAxis.setTickUnit(niceTickUnit(yMax - yMin + 2 * pad));
         };
-        rescaleYAxis.run();
+    }
 
-        // Apply dashed stroke to non-stock (variable/auxiliary) series
-        if (!stockNames.isEmpty()) {
-            for (int i = 0; i < currentSeries.size(); i++) {
-                if (!isStock.get(i)) {
-                    applyDashedStyle(currentSeries.get(i));
-                }
-            }
-        }
-
-        // --- Net flow series for each stock ---
+    private List<XYChart.Series<Number, Number>> buildNetFlowSeries(
+            List<String> columns, List<double[]> rows, Set<String> stockNames,
+            List<XYChart.Series<Number, Number>> currentSeries) {
         Map<String, double[]> netFlows = computeNetFlows(columns, rows, flows, stockNames);
         List<XYChart.Series<Number, Number>> netFlowSeries = new ArrayList<>();
         Map<XYChart.Series<Number, Number>, Integer> netFlowColorIndex = new LinkedHashMap<>();
@@ -331,7 +383,6 @@ public class SimulationResultPane extends BorderPane {
                 netFlowColorIndex.put(nfSeries, i);
             }
         }
-
         if (!netFlowSeries.isEmpty()) {
             chart.getData().addAll(netFlowSeries);
             for (XYChart.Series<Number, Number> nf : netFlowSeries) {
@@ -341,30 +392,70 @@ public class SimulationResultPane extends BorderPane {
                 setSeriesVisible(nf, false);
             }
         }
+        return netFlowSeries;
+    }
 
-        // --- Sidebar ---
+    private List<XYChart.Series<Number, Number>> addReferenceDataOverlay() {
+        List<XYChart.Series<Number, Number>> allRefSeries = new ArrayList<>();
+        if (referenceDatasets.isEmpty()) {
+            return allRefSeries;
+        }
+        for (ReferenceDataset refData : referenceDatasets) {
+            for (String varName : refData.variableNames()) {
+                XYChart.Series<Number, Number> refSeries = new XYChart.Series<>();
+                refSeries.setName(varName + " (observed)");
+                double[] timeVals = refData.timeValues();
+                double[] dataVals = refData.columns().get(varName);
+                for (int i = 0; i < timeVals.length; i++) {
+                    if (!Double.isNaN(dataVals[i])) {
+                        refSeries.getData().add(new XYChart.Data<>(timeVals[i], dataVals[i]));
+                    }
+                }
+                allRefSeries.add(refSeries);
+            }
+        }
+        chart.getData().addAll(allRefSeries);
+        for (int i = 0; i < allRefSeries.size(); i++) {
+            XYChart.Series<Number, Number> refSeries = allRefSeries.get(i);
+            String refColor = REFERENCE_COLORS.get(i % REFERENCE_COLORS.size());
+            String refStyle = "-fx-stroke: " + refColor + "; " + REFERENCE_STROKE;
+            refSeries.nodeProperty().addListener((obs, oldNode, newNode) -> {
+                if (newNode != null) {
+                    newNode.setStyle(refStyle);
+                }
+            });
+            if (refSeries.getNode() != null) {
+                refSeries.getNode().setStyle(refStyle);
+            }
+        }
+        return allRefSeries;
+    }
+
+    private VBox buildSidebar(List<XYChart.Series<Number, Number>> currentSeries,
+                               List<String> behaviorModes, List<Boolean> isStock,
+                               Set<String> stockNames, Runnable rescaleYAxis,
+                               List<XYChart.Series<Number, Number>> netFlowSeries,
+                               List<GhostRun> ghostRuns,
+                               List<List<XYChart.Series<Number, Number>>> ghostSeriesGroups,
+                               List<XYChart.Series<Number, Number>> allGhostSeries,
+                               Runnable clearHistory,
+                               List<XYChart.Series<Number, Number>> allRefSeries) {
         VBox sidebar = new VBox(6);
         sidebar.setPadding(new Insets(10));
 
-        // Select All / None controls
         List<CheckBox> seriesCheckBoxes = new ArrayList<>();
-
         Hyperlink selectAll = new Hyperlink("All");
         selectAll.setStyle("-fx-font-size: 11px;");
         selectAll.setOnAction(e -> seriesCheckBoxes.forEach(cb -> cb.setSelected(true)));
-
         Hyperlink selectNone = new Hyperlink("None");
         selectNone.setStyle("-fx-font-size: 11px;");
         selectNone.setOnAction(e -> seriesCheckBoxes.forEach(cb -> cb.setSelected(false)));
-
         HBox selectionBar = new HBox(4, new Label("Show:"), selectAll, selectNone);
         selectionBar.setAlignment(Pos.CENTER_LEFT);
         sidebar.getChildren().add(selectionBar);
 
-        // Group series by stock vs variable when stock names are available
         boolean hasGrouping = !stockNames.isEmpty()
                 && currentSeries.stream().anyMatch(s -> !stockNames.contains(s.getName()));
-
         if (hasGrouping) {
             addSectionHeader(sidebar, "Stocks");
             for (int i = 0; i < currentSeries.size(); i++) {
@@ -387,42 +478,6 @@ public class SimulationResultPane extends BorderPane {
             }
         }
 
-        // --- Reference data overlay ---
-        List<XYChart.Series<Number, Number>> allRefSeries = new ArrayList<>();
-        if (!referenceDatasets.isEmpty()) {
-            for (ReferenceDataset refData : referenceDatasets) {
-                for (String varName : refData.variableNames()) {
-                    XYChart.Series<Number, Number> refSeries = new XYChart.Series<>();
-                    refSeries.setName(varName + " (observed)");
-                    double[] timeVals = refData.timeValues();
-                    double[] dataVals = refData.columns().get(varName);
-                    for (int i = 0; i < timeVals.length; i++) {
-                        if (!Double.isNaN(dataVals[i])) {
-                            refSeries.getData().add(new XYChart.Data<>(timeVals[i], dataVals[i]));
-                        }
-                    }
-                    allRefSeries.add(refSeries);
-                }
-            }
-            chart.getData().addAll(allRefSeries);
-
-            // Style reference series: dotted lines in muted colors
-            for (int i = 0; i < allRefSeries.size(); i++) {
-                XYChart.Series<Number, Number> refSeries = allRefSeries.get(i);
-                String refColor = REFERENCE_COLORS.get(i % REFERENCE_COLORS.size());
-                String refStyle = "-fx-stroke: " + refColor + "; " + REFERENCE_STROKE;
-                refSeries.nodeProperty().addListener((obs, oldNode, newNode) -> {
-                    if (newNode != null) {
-                        newNode.setStyle(refStyle);
-                    }
-                });
-                if (refSeries.getNode() != null) {
-                    refSeries.getNode().setStyle(refStyle);
-                }
-            }
-        }
-
-        // Net flow toggle
         if (!netFlowSeries.isEmpty()) {
             sidebar.getChildren().add(new Separator());
             CheckBox showNetFlows = new CheckBox("Show net flows");
@@ -437,17 +492,29 @@ public class SimulationResultPane extends BorderPane {
             sidebar.getChildren().add(showNetFlows);
         }
 
-        // Ghost controls (only if there are ghost runs)
         if (!ghostRuns.isEmpty()) {
-            sidebar.getChildren().add(new Separator());
+            addGhostControls(sidebar, ghostRuns, ghostSeriesGroups, allGhostSeries, clearHistory);
+        }
 
-            Label ghostHeader = new Label("Previous Runs");
-            ghostHeader.setId("ghostRunsHeader");
-            ghostHeader.setStyle("-fx-font-size: 11px; -fx-font-weight: bold; -fx-text-fill: #555;");
-            sidebar.getChildren().add(ghostHeader);
+        if (!allRefSeries.isEmpty()) {
+            addReferenceDataLegend(sidebar, allRefSeries);
+        }
 
-            // Per-ghost entries: color swatch, editable name, visibility toggle
-            for (int g = 0; g < ghostRuns.size(); g++) {
+        return sidebar;
+    }
+
+    private void addGhostControls(VBox sidebar, List<GhostRun> ghostRuns,
+                                   List<List<XYChart.Series<Number, Number>>> ghostSeriesGroups,
+                                   List<XYChart.Series<Number, Number>> allGhostSeries,
+                                   Runnable clearHistory) {
+        sidebar.getChildren().add(new Separator());
+
+        Label ghostHeader = new Label("Previous Runs");
+        ghostHeader.setId("ghostRunsHeader");
+        ghostHeader.setStyle("-fx-font-size: 11px; -fx-font-weight: bold; -fx-text-fill: #555;");
+        sidebar.getChildren().add(ghostHeader);
+
+        for (int g = 0; g < ghostRuns.size(); g++) {
                 GhostRun ghost = ghostRuns.get(g);
                 List<XYChart.Series<Number, Number>> groupSeries = ghostSeriesGroups.get(g);
                 String ghostColor = ChartUtils.GHOST_COLORS.get(
@@ -559,37 +626,34 @@ public class SimulationResultPane extends BorderPane {
             sidebar.getChildren().add(clearButton);
         }
 
-        // Reference data sidebar section
-        if (!allRefSeries.isEmpty()) {
-            sidebar.getChildren().add(new Separator());
-            Label refHeader = new Label("Reference Data");
-            refHeader.setId("referenceDataHeader");
-            refHeader.setStyle("-fx-font-size: 11px; -fx-font-weight: bold; -fx-text-fill: #555;");
-            sidebar.getChildren().add(refHeader);
+    private void addReferenceDataLegend(VBox sidebar,
+                                         List<XYChart.Series<Number, Number>> allRefSeries) {
+        sidebar.getChildren().add(new Separator());
+        Label refHeader = new Label("Reference Data");
+        refHeader.setId("referenceDataHeader");
+        refHeader.setStyle("-fx-font-size: 11px; -fx-font-weight: bold; -fx-text-fill: #555;");
+        sidebar.getChildren().add(refHeader);
 
-            for (int i = 0; i < allRefSeries.size(); i++) {
-                XYChart.Series<Number, Number> refSeries = allRefSeries.get(i);
-                String refColor = REFERENCE_COLORS.get(i % REFERENCE_COLORS.size());
+        for (int i = 0; i < allRefSeries.size(); i++) {
+            XYChart.Series<Number, Number> refSeries = allRefSeries.get(i);
+            String refColor = REFERENCE_COLORS.get(i % REFERENCE_COLORS.size());
 
-                CheckBox refCb = new CheckBox();
-                refCb.setSelected(true);
-                refCb.selectedProperty().addListener((obs, wasSelected, isSelected) -> {
-                    setSeriesVisible(refSeries, isSelected);
-                });
+            CheckBox refCb = new CheckBox();
+            refCb.setSelected(true);
+            refCb.selectedProperty().addListener((obs, wasSelected, isSelected) -> {
+                setSeriesVisible(refSeries, isSelected);
+            });
 
-                Label refLabel = new Label(refSeries.getName());
-                refLabel.setStyle("-fx-text-fill: " + refColor + "; -fx-font-size: 11px;");
+            Label refLabel = new Label(refSeries.getName());
+            refLabel.setStyle("-fx-text-fill: " + refColor + "; -fx-font-size: 11px;");
 
-                HBox refRow = new HBox(4, refCb, refLabel);
-                refRow.setAlignment(Pos.CENTER_LEFT);
-                sidebar.getChildren().add(refRow);
-            }
+            HBox refRow = new HBox(4, refCb, refLabel);
+            refRow.setAlignment(Pos.CENTER_LEFT);
+            sidebar.getChildren().add(refRow);
         }
+    }
 
-        ScrollPane sidebarScroll = new ScrollPane(sidebar);
-        sidebarScroll.setFitToWidth(true);
-        sidebarScroll.setPrefWidth(200);
-
+    private ContextMenu buildChartContextMenu() {
         ContextMenu contextMenu = new ContextMenu();
         MenuItem saveItem = new MenuItem("Save as PNG...");
         saveItem.setOnAction(e -> saveChartAsPng());
@@ -601,17 +665,7 @@ public class SimulationResultPane extends BorderPane {
         importRefItem.setId("importReferenceDataMenuItem");
         importRefItem.setOnAction(e -> importReferenceData());
         contextMenu.getItems().addAll(saveItem, exportCsvItem, copyItem, importRefItem);
-        chart.setOnContextMenuRequested(e ->
-                contextMenu.show(chart, e.getScreenX(), e.getScreenY()));
-
-        ChartTimeCursor[] cursorHolder = new ChartTimeCursor[1];
-        StackPane chartWithCursor = ChartTimeCursor.install(chart, cursorHolder);
-        timeCursor = cursorHolder[0];
-
-        BorderPane pane = new BorderPane();
-        pane.setCenter(chartWithCursor);
-        pane.setRight(sidebarScroll);
-        return pane;
+        return contextMenu;
     }
 
     /**

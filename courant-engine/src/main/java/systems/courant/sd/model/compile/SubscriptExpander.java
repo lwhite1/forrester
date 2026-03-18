@@ -178,18 +178,31 @@ public class SubscriptExpander {
         Matcher matcher = namePattern.matcher(equation);
         StringBuilder result = new StringBuilder();
         while (matcher.find()) {
-            String matchedName = matcher.group();
-            if (subscriptedNames.contains(matchedName)) {
+            String matchedText = matcher.group();
+            // Strip backticks to get the raw element name
+            String rawName;
+            boolean wasQuoted;
+            if (matchedText.startsWith("`") && matchedText.endsWith("`")) {
+                rawName = matchedText.substring(1, matchedText.length() - 1);
+                wasQuoted = true;
+            } else {
+                rawName = matchedText;
+                wasQuoted = false;
+            }
+            if (subscriptedNames.contains(rawName)) {
                 // Check if already has a bracket suffix (don't double-expand)
                 int afterMatch = matcher.end();
                 if (afterMatch < equation.length() && equation.charAt(afterMatch) == '[') {
-                    matcher.appendReplacement(result, Matcher.quoteReplacement(matchedName));
+                    matcher.appendReplacement(result, Matcher.quoteReplacement(matchedText));
                 } else {
-                    matcher.appendReplacement(result,
-                            Matcher.quoteReplacement(matchedName + "[" + label + "]"));
+                    // Place [label] after the closing backtick if quoted
+                    String replacement = wasQuoted
+                            ? "`" + rawName + "`[" + label + "]"
+                            : rawName + "[" + label + "]";
+                    matcher.appendReplacement(result, Matcher.quoteReplacement(replacement));
                 }
             } else {
-                matcher.appendReplacement(result, Matcher.quoteReplacement(matchedName));
+                matcher.appendReplacement(result, Matcher.quoteReplacement(matchedText));
             }
         }
         matcher.appendTail(result);
@@ -268,9 +281,12 @@ public class SubscriptExpander {
             if (i > 0) {
                 sb.append('|');
             }
-            // Use lookahead/lookbehind for identifier boundaries
+            String quoted = Pattern.quote(sorted.get(i));
+            // Match backtick-quoted form first, then unquoted with word boundaries
+            sb.append("`").append(quoted).append("`");
+            sb.append("|");
             sb.append("(?<![\\w])");
-            sb.append(Pattern.quote(sorted.get(i)));
+            sb.append(quoted);
             sb.append("(?![\\w])");
         }
         return Pattern.compile(sb.toString());

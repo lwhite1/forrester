@@ -14,6 +14,7 @@ import javafx.stage.Stage;
 
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * Standalone JavaFX viewer that renders percentile bands (a "fan chart") from a
@@ -123,10 +124,16 @@ public class FanChart extends Application {
             gc.fillText("Variable not found: " + variableName, MARGIN_LEFT, HEIGHT / 2);
             return;
         }
+        double[] pct2 = Objects.requireNonNull(pctMap.get(2.5), "Missing 2.5th percentile");
+        double[] pct97 = Objects.requireNonNull(pctMap.get(97.5), "Missing 97.5th percentile");
+        double[] pct12 = Objects.requireNonNull(pctMap.get(12.5), "Missing 12.5th percentile");
+        double[] pct87 = Objects.requireNonNull(pctMap.get(87.5), "Missing 87.5th percentile");
+        double[] p25 = Objects.requireNonNull(pctMap.get(25.0), "Missing 25th percentile");
+        double[] p75 = Objects.requireNonNull(pctMap.get(75.0), "Missing 75th percentile");
+        double[] median = Objects.requireNonNull(pctMap.get(50.0), "Missing 50th percentile");
 
-        double[][] lowerSeries = {pctMap.get(2.5), pctMap.get(12.5), pctMap.get(25.0)};
-        double[][] upperSeries = {pctMap.get(97.5), pctMap.get(87.5), pctMap.get(75.0)};
-        double[] median = pctMap.get(50.0);
+        double[][] lowerSeries = {pct2, pct12, p25};
+        double[][] upperSeries = {pct97, pct87, p75};
 
         double minVal = Double.MAX_VALUE;
         double maxVal = -Double.MAX_VALUE;
@@ -135,12 +142,9 @@ public class FanChart extends Application {
             maxVal = Math.max(maxVal, upperSeries[0][i]);
         }
 
-        double range = maxVal - minVal;
-        if (range == 0) {
-            range = 1;
-        }
-        minVal -= range * 0.05;
-        maxVal += range * 0.05;
+        double[] padded = padAxisRange(minVal, maxVal);
+        minVal = padded[0];
+        maxVal = padded[1];
 
         double plotWidth = WIDTH - MARGIN_LEFT - MARGIN_RIGHT;
         double plotHeight = HEIGHT - MARGIN_TOP - MARGIN_BOTTOM;
@@ -238,5 +242,25 @@ public class FanChart extends Application {
 
         gc.setFont(Font.font(12));
         gc.fillText("Step", MARGIN_LEFT + plotWidth / 2 - 15, HEIGHT - 5);
+    }
+
+    /**
+     * Computes a padded y-axis range from the raw data min/max. When the data range is
+     * non-zero, adds 5% padding on each side. When all values are constant (range == 0),
+     * produces a sensible range centered on the constant value, proportional to its
+     * magnitude — or +/-1 when the constant value is zero.
+     *
+     * @param rawMin the minimum data value
+     * @param rawMax the maximum data value
+     * @return a two-element array {@code [paddedMin, paddedMax]}
+     */
+    static double[] padAxisRange(double rawMin, double rawMax) {
+        double range = rawMax - rawMin;
+        if (range != 0) {
+            return new double[]{rawMin - range * 0.05, rawMax + range * 0.05};
+        }
+        // All values are constant — use 10% of |value| as half-range, or 1 if value is 0
+        double halfRange = (rawMin == 0) ? 1.0 : Math.abs(rawMin) * 0.1;
+        return new double[]{rawMin - halfRange, rawMax + halfRange};
     }
 }

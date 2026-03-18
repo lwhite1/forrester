@@ -11,6 +11,7 @@ import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
+import javafx.scene.control.Separator;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.GridPane;
 import systems.courant.sd.app.canvas.HelpContextResolver;
@@ -74,18 +75,31 @@ public class SimulationSettingsDialog extends Dialog<SimulationSettings> {
         grid.setVgap(10);
         grid.setPadding(new Insets(20, 20, 10, 10));
 
+        // Time Step section
         grid.add(new Label("Time Step:"), 0, 0);
         grid.add(timeStepCombo, 1, 0);
-        grid.add(new Label("Duration:"), 0, 1);
-        grid.add(durationField, 1, 1);
-        grid.add(new Label("Duration Unit:"), 0, 2);
-        grid.add(durationUnitCombo, 1, 2);
-        grid.add(new Label("DT:"), 0, 3);
-        grid.add(dtField, 1, 3);
-        grid.add(new Label("Strict Mode:"), 0, 4);
-        grid.add(strictModeCheckBox, 1, 4);
-        grid.add(new Label("Save Per:"), 0, 5);
-        grid.add(savePerField, 1, 5);
+        grid.add(new Label("DT:"), 0, 1);
+        grid.add(dtField, 1, 1);
+        grid.add(new Label("Save Per:"), 0, 2);
+        grid.add(savePerField, 1, 2);
+
+        Separator timeSep = new Separator();
+        timeSep.setId("simTimeSeparator");
+        grid.add(timeSep, 0, 3, 2, 1);
+
+        // Duration section
+        grid.add(new Label("Duration:"), 0, 4);
+        grid.add(durationField, 1, 4);
+        grid.add(new Label("Duration Unit:"), 0, 5);
+        grid.add(durationUnitCombo, 1, 5);
+
+        Separator durationSep = new Separator();
+        durationSep.setId("simDurationSeparator");
+        grid.add(durationSep, 0, 6, 2, 1);
+
+        // Strict Mode (last)
+        grid.add(new Label("Strict Mode:"), 0, 7);
+        grid.add(strictModeCheckBox, 1, 7);
 
         getDialogPane().setContent(grid);
         getDialogPane().setPrefWidth(Styles.screenAwareWidth(Styles.CONFIG_DIALOG_WIDTH));

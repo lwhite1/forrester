@@ -149,6 +149,27 @@ class ModelReportTest {
         }
 
         @Test
+        void shouldPrintSharedSubModuleOnlyOnce() {
+            Module parent = new Module("Parent");
+            Module siblingA = new Module("SiblingA");
+            Module siblingB = new Module("SiblingB");
+            Module shared = new Module("Shared");
+            shared.addStock(new Stock("SharedStock", 1, THING));
+            siblingA.addSubModule(shared);
+            siblingB.addSubModule(new Module("Shared"));
+            parent.addSubModule(siblingA);
+            parent.addSubModule(siblingB);
+            model.addModulePreserved(parent);
+
+            String report = ModelReport.create(model);
+
+            // "Module: Shared" should appear in the report, but the second occurrence
+            // should be detected as a cycle and skipped
+            assertThat(report).contains("Module: Shared");
+            assertThat(report).contains("cycle detected, skipping");
+        }
+
+        @Test
         void shouldDetectModuleCycle() {
             // Create a module that references itself via submodule with same name
             Module module = new Module("Loop");

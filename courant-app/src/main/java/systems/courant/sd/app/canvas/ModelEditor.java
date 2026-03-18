@@ -17,28 +17,20 @@ import systems.courant.sd.model.def.SimulationSettings;
 import systems.courant.sd.model.def.StockDef;
 import systems.courant.sd.model.def.SubscriptDef;
 import systems.courant.sd.model.def.ViewDef;
-import systems.courant.sd.model.graph.ConnectorGenerator;
 
 import javafx.application.Platform;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.UnaryOperator;
-
-import static systems.courant.sd.app.canvas.ElementNameValidator.parseIdSuffix;
-import static systems.courant.sd.app.canvas.ElementNameValidator.resolveUniqueName;
-import static systems.courant.sd.app.canvas.EquationReferenceManager.replaceToken;
 
 /**
  * Mutable model editing layer that sits between the UI and the engine's immutable
@@ -48,37 +40,41 @@ import static systems.courant.sd.app.canvas.EquationReferenceManager.replaceToke
  *
  * <p>Thread confinement: all mutable state must be accessed on the JavaFX Application
  * Thread. The only safe cross-thread operation is {@link #toModelDefinition()}, which
- * builds an immutable snapshot for background analysis tasks.</p>
+ * builds an immutable snapshot for background analysis tasks. Element lists use
+ * {@link CopyOnWriteArrayList} to allow safe snapshot iteration from background threads.</p>
  */
 public class ModelEditor {
 
     private static final Logger log = LoggerFactory.getLogger(ModelEditor.class);
 
-    private String modelName = "Untitled";
-    private String modelComment = "";
-    private ModelMetadata metadata;
-    private final List<StockDef> stocks = new ArrayList<>();
-    private final List<FlowDef> flows = new ArrayList<>();
-    private final List<VariableDef> variables = new ArrayList<>();
-    private final List<ModuleInstanceDef> modules = new ArrayList<>();
-    private final List<LookupTableDef> lookupTables = new ArrayList<>();
-    private final List<CldVariableDef> cldVariables = new ArrayList<>();
-    private final List<CausalLinkDef> causalLinks = new ArrayList<>();
-    private final List<CommentDef> comments = new ArrayList<>();
-    private final List<SubscriptDef> subscripts = new ArrayList<>();
-    private final List<ReferenceDataset> referenceDatasets = new ArrayList<>();
+    private final List<StockDef> stocks = new CopyOnWriteArrayList<>();
+    private final List<FlowDef> flows = new CopyOnWriteArrayList<>();
+    private final List<VariableDef> variables = new CopyOnWriteArrayList<>();
+    private final List<ModuleInstanceDef> modules = new CopyOnWriteArrayList<>();
+    private final List<LookupTableDef> lookupTables = new CopyOnWriteArrayList<>();
+    private final List<CldVariableDef> cldVariables = new CopyOnWriteArrayList<>();
+    private final List<CausalLinkDef> causalLinks = new CopyOnWriteArrayList<>();
+    private final List<CommentDef> comments = new CopyOnWriteArrayList<>();
+    private final List<SubscriptDef> subscripts = new CopyOnWriteArrayList<>();
+    private final List<ReferenceDataset> referenceDatasets = new CopyOnWriteArrayList<>();
     private final Set<String> nameIndex = new HashSet<>();
     private final List<ModelEditListener> listeners = new CopyOnWriteArrayList<>();
+
     private final EquationReferenceManager equationRefManager =
             new EquationReferenceManager(flows, variables);
-    private SimulationSettings simulationSettings;
-    private int nextStockId = 1;
-    private int nextFlowId = 1;
-    private int nextVariableId = 1;
-    private int nextModuleId = 1;
-    private int nextLookupId = 1;
-    private int nextCldVariableId = 1;
-    private int nextCommentId = 1;
+    private final ElementFactory factory = new ElementFactory(
+            stocks, flows, variables, modules, lookupTables, cldVariables,
+            causalLinks, comments, nameIndex);
+    private final ElementCascadeManager cascadeManager = new ElementCascadeManager(
+            stocks, flows, variables, modules, lookupTables, cldVariables,
+            causalLinks, comments, nameIndex, equationRefManager);
+    private final FlowConnectionManager flowConnMgr = new FlowConnectionManager(
+            flows, modules, nameIndex, equationRefManager);
+    private final ModelQueryFacade queryFacade = new ModelQueryFacade(
+            stocks, flows, variables, modules, lookupTables, cldVariables,
+            causalLinks, comments, subscripts, referenceDatasets, nameIndex);
+
+    // ── Listeners ────────────────────────────────────────────────────────
 
     public void addListener(ModelEditListener listener) {
         if (listener != null) {
@@ -101,28 +97,22 @@ public class ModelEditor {
     }
 
     private void fireElementAdded(String name, String typeName) {
-        for (ModelEditListener l : listeners) {
-            l.onElementAdded(name, typeName);
-        }
+        for (ModelEditListener l : listeners) { l.onElementAdded(name, typeName); }
     }
 
     private void fireElementRemoved(String name) {
-        for (ModelEditListener l : listeners) {
-            l.onElementRemoved(name);
-        }
+        for (ModelEditListener l : listeners) { l.onElementRemoved(name); }
     }
 
     private void fireElementRenamed(String oldName, String newName) {
-        for (ModelEditListener l : listeners) {
-            l.onElementRenamed(oldName, newName);
-        }
+        for (ModelEditListener l : listeners) { l.onElementRenamed(oldName, newName); }
     }
 
     private void fireEquationChanged(String elementName) {
-        for (ModelEditListener l : listeners) {
-            l.onEquationChanged(elementName);
-        }
+        for (ModelEditListener l : listeners) { l.onEquationChanged(elementName); }
     }
+
+    // ── Load / Snapshot ──────────────────────────────────────────────────
 
     /**
      * Loads all elements from an immutable {@link ModelDefinition} into mutable lists,
@@ -130,8 +120,8 @@ public class ModelEditor {
      */
     public void loadFrom(ModelDefinition definition) {
         checkFxThread();
-        modelName = definition.name();
-        modelComment = definition.comment() != null ? definition.comment() : "";
+        queryFacade.modelName = definition.name();
+        queryFacade.modelComment = definition.comment() != null ? definition.comment() : "";
         stocks.clear();
         flows.clear();
         variables.clear();
@@ -154,8 +144,8 @@ public class ModelEditor {
         comments.addAll(definition.comments());
         subscripts.addAll(definition.subscripts());
         referenceDatasets.addAll(definition.referenceDatasets());
-        simulationSettings = definition.defaultSimulation();
-        metadata = definition.metadata();
+        queryFacade.simulationSettings = definition.defaultSimulation();
+        queryFacade.metadata = definition.metadata();
 
         stocks.forEach(s -> nameIndex.add(s.name()));
         flows.forEach(f -> nameIndex.add(f.name()));
@@ -165,220 +155,132 @@ public class ModelEditor {
         cldVariables.forEach(v -> nameIndex.add(v.name()));
         comments.forEach(c -> nameIndex.add(c.name()));
 
-        // Set per-type counters past any existing numeric suffix
-        nextStockId = maxIdFrom(stocks.stream().map(StockDef::name), "Stock ");
-        nextFlowId = maxIdFrom(flows.stream().map(FlowDef::name), "Flow ");
-        nextVariableId = maxIdFrom(variables.stream().map(VariableDef::name), "Variable ");
-        nextModuleId = maxIdFrom(modules.stream().map(ModuleInstanceDef::instanceName), "Module ");
-        nextLookupId = maxIdFrom(lookupTables.stream().map(LookupTableDef::name), "Lookup ");
-        nextCldVariableId = maxIdFrom(cldVariables.stream().map(CldVariableDef::name), "Variable ");
-        nextCommentId = maxIdFrom(comments.stream().map(CommentDef::name), "Comment ");
+        factory.resetCounters();
     }
 
-    private static int maxIdFrom(java.util.stream.Stream<String> names, String prefix) {
-        int[] max = {0};
-        names.forEach(name -> {
-            if (name.startsWith(prefix)) {
-                try {
-                    int num = Integer.parseInt(name.substring(prefix.length()));
-                    if (num > max[0]) {
-                        max[0] = num;
-                    }
-                } catch (NumberFormatException ex) {
-                    log.trace("Not an auto-named element: '{}'", name, ex);
-                }
-            }
-        });
-        return max[0] + 1;
-    }
+    // ── Element creation ─────────────────────────────────────────────────
 
-    /**
-     * Adds a new stock with an auto-generated name.
-     * @return the name of the created stock
-     */
+    /** @return the name of the created stock */
     public String addStock() {
         checkFxThread();
-        String name = "Stock " + nextStockId++;
-        stocks.add(new StockDef(name, 0, "units"));
-        nameIndex.add(name);
+        String name = factory.addStock();
         fireElementAdded(name, "Stock");
         return name;
     }
 
-    /**
-     * Adds a new flow with an auto-generated name and cloud-to-cloud connections.
-     * @return the name of the created flow
-     */
     public String addFlow() {
         checkFxThread();
         return addFlow(null, null);
     }
 
-    /**
-     * Adds a new flow with an auto-generated name and the specified source/sink connections.
-     * @param source the source stock name (null for a cloud source)
-     * @param sink the sink stock name (null for a cloud sink)
-     * @return the name of the created flow
-     */
+    /** @return the name of the created flow */
     public String addFlow(String source, String sink) {
         checkFxThread();
-        String name = "Flow " + nextFlowId++;
-        String materialUnit = inferMaterialUnit(source, sink);
-        flows.add(new FlowDef(name, null, "0", "Day", materialUnit, source, sink, List.of()));
-        nameIndex.add(name);
+        String name = factory.addFlow(source, sink);
         fireElementAdded(name, "Flow");
         return name;
     }
 
-    /**
-     * Adds a new auxiliary with an auto-generated name.
-     * @return the name of the created auxiliary
-     */
+    /** @return the name of the created auxiliary */
     public String addVariable() {
         checkFxThread();
-        String name = "Variable " + nextVariableId++;
-        variables.add(new VariableDef(name, "0", "units"));
-        nameIndex.add(name);
+        String name = factory.addVariable();
         fireElementAdded(name, "Variable");
         return name;
     }
 
-    /**
-     * Adds a new stock copied from a template with an auto-generated name.
-     * @return the name of the created stock
-     */
+    /** @return the name of the created stock */
     public String addStockFrom(StockDef template) {
         checkFxThread();
-        String name = resolveUniqueName(template.name(), "Stock ", nextStockId, nameIndex);
-        if (name.startsWith("Stock ")) {
-            nextStockId = parseIdSuffix(name, "Stock ") + 1;
-        }
-        stocks.add(new StockDef(name, template.comment(), template.initialValue(),
-                template.unit(), template.negativeValuePolicy()));
-        nameIndex.add(name);
-        return name;
+        return factory.addStockFrom(template);
     }
 
-    /**
-     * Adds a new flow copied from a template with an auto-generated name
-     * and the specified source/sink connections.
-     * @return the name of the created flow
-     */
+    /** @return the name of the created flow */
     public String addFlowFrom(FlowDef template, String source, String sink) {
         checkFxThread();
-        String name = resolveUniqueName(template.name(), "Flow ", nextFlowId, nameIndex);
-        if (name.startsWith("Flow ")) {
-            nextFlowId = parseIdSuffix(name, "Flow ") + 1;
-        }
-        String matUnit = template.materialUnit() != null
-                ? template.materialUnit() : inferMaterialUnit(source, sink);
-        flows.add(new FlowDef(name, template.comment(), template.equation(),
-                template.timeUnit(), matUnit, source, sink, List.of()));
-        nameIndex.add(name);
-        return name;
+        return factory.addFlowFrom(template, source, sink);
     }
 
-    /**
-     * Adds a new auxiliary copied from a template with an auto-generated name
-     * and the specified equation.
-     * @return the name of the created auxiliary
-     */
+    /** @return the name of the created auxiliary */
     public String addVariableFrom(VariableDef template, String equation) {
         checkFxThread();
-        String name = resolveUniqueName(template.name(), "Variable ", nextVariableId, nameIndex);
-        if (name.startsWith("Variable ")) {
-            nextVariableId = parseIdSuffix(name, "Variable ") + 1;
-        }
-        variables.add(new VariableDef(name, template.comment(), equation, template.unit(),
-                template.subscripts()));
-        nameIndex.add(name);
-        return name;
+        return factory.addVariableFrom(template, equation);
     }
 
-    /**
-     * Adds a new module instance copied from a template with an auto-generated name.
-     * @return the instance name of the created module
-     */
+    /** @return the instance name of the created module */
     public String addModuleFrom(ModuleInstanceDef template) {
         checkFxThread();
-        String name = resolveUniqueName(template.instanceName(), "Module ", nextModuleId, nameIndex);
-        if (name.startsWith("Module ")) {
-            nextModuleId = parseIdSuffix(name, "Module ") + 1;
-        }
-        modules.add(new ModuleInstanceDef(name, template.definition(),
-                template.inputBindings(), template.outputBindings()));
-        nameIndex.add(name);
-        return name;
+        return factory.addModuleFrom(template);
     }
 
-    /**
-     * Adds a new module instance with an auto-generated name and empty definition.
-     * @return the instance name of the created module
-     */
+    /** @return the instance name of the created module */
     public String addModule() {
         checkFxThread();
-        String name = "Module " + nextModuleId++;
-        ModelDefinition emptyDef = new ModelDefinition(
-                name, null, null,
-                List.of(), List.of(), List.of(),
-                List.of(), List.of(), List.of(), List.of(), null);
-        modules.add(new ModuleInstanceDef(name, emptyDef, Map.of(), Map.of()));
-        nameIndex.add(name);
+        String name = factory.addModule();
         fireElementAdded(name, "Module");
         return name;
     }
 
-    /**
-     * Adds a new lookup table with an auto-generated name and default data points.
-     * @return the name of the created lookup table
-     */
+    /** @return the name of the created lookup table */
     public String addLookup() {
         checkFxThread();
-        String name = "Lookup " + nextLookupId++;
-        lookupTables.add(new LookupTableDef(name,
-                new double[]{0.0, 1.0}, new double[]{0.0, 1.0}, "LINEAR"));
-        nameIndex.add(name);
+        String name = factory.addLookup();
         fireElementAdded(name, "Lookup");
         return name;
     }
 
-    /**
-     * Adds a new lookup table copied from a template with an auto-generated name.
-     * @return the name of the created lookup table
-     */
+    /** @return the name of the created lookup table */
     public String addLookupFrom(LookupTableDef template) {
         checkFxThread();
-        String name = resolveUniqueName(template.name(), "Lookup ", nextLookupId, nameIndex);
-        if (name.startsWith("Lookup ")) {
-            nextLookupId = parseIdSuffix(name, "Lookup ") + 1;
-        }
-        lookupTables.add(new LookupTableDef(name, template.comment(),
-                template.xValues(), template.yValues(), template.interpolation()));
-        nameIndex.add(name);
+        return factory.addLookupFrom(template);
+    }
+
+    /** @return the name of the created CLD variable */
+    public String addCldVariable() {
+        checkFxThread();
+        String name = factory.addCldVariable();
+        fireElementAdded(name, "CLD Variable");
         return name;
     }
 
-    /**
-     * Returns the lookup table with the given name.
-     */
-    public Optional<LookupTableDef> getLookupTableByName(String name) {
-        return findByName(lookupTables, name, LookupTableDef::name);
+    /** @return the name of the created CLD variable */
+    public String addCldVariableFrom(CldVariableDef template) {
+        checkFxThread();
+        String name = factory.addCldVariableFrom(template);
+        fireElementAdded(name, "CLD Variable");
+        return name;
+    }
+
+    /** @return the name of the created comment */
+    public String addComment() {
+        checkFxThread();
+        String name = factory.addComment();
+        fireElementAdded(name, "Comment");
+        return name;
+    }
+
+    /** @return the name of the created comment */
+    public String addCommentFrom(CommentDef template) {
+        checkFxThread();
+        return factory.addCommentFrom(template);
     }
 
     /**
-     * Replaces the lookup table definition for the given name.
-     * @return true if the lookup table was found and updated
+     * Adds a causal link between two elements.
+     * @return true if both endpoints exist and the link was added
      */
-    public boolean setLookupTable(String name, LookupTableDef updated) {
+    public boolean addCausalLink(String from, String to, CausalLinkDef.Polarity polarity) {
         checkFxThread();
-        for (int i = 0; i < lookupTables.size(); i++) {
-            if (lookupTables.get(i).name().equals(name)) {
-                lookupTables.set(i, updated);
-                return true;
-            }
-        }
-        return false;
+        return factory.addCausalLink(from, to, polarity);
     }
+
+    /** Adds a reference dataset for model validation overlay. */
+    public void addReferenceDataset(ReferenceDataset dataset) {
+        checkFxThread();
+        referenceDatasets.add(dataset);
+    }
+
+    // ── Remove / Rename ──────────────────────────────────────────────────
 
     /**
      * Removes the element with the given name from the appropriate list.
@@ -387,58 +289,10 @@ public class ModelEditor {
      */
     public void removeElement(String name) {
         checkFxThread();
-        nameIndex.remove(name);
-        boolean wasStock = stocks.removeIf(s -> s.name().equals(name));
-
-        if (wasStock) {
-            // Nullify flow source/sink references to the deleted stock
-            for (int i = 0; i < flows.size(); i++) {
-                FlowDef f = flows.get(i);
-                boolean sourceMatch = name.equals(f.source());
-                boolean sinkMatch = name.equals(f.sink());
-                if (sourceMatch || sinkMatch) {
-                    flows.set(i, new FlowDef(
-                            f.name(),
-                            f.comment(),
-                            f.equation(),
-                            f.timeUnit(),
-                            f.materialUnit(),
-                            sourceMatch ? null : f.source(),
-                            sinkMatch ? null : f.sink(),
-                            f.subscripts()
-                    ));
-                }
-            }
-        }
-
-        if (!wasStock) {
-            if (flows.removeIf(f -> f.name().equals(name))) {
-                // flow removed — fall through to clean equations
-            } else if (variables.removeIf(a -> a.name().equals(name))) {
-                // variable removed — fall through to clean equations
-            } else {
-                if (!lookupTables.removeIf(lt -> lt.name().equals(name))) {
-                    if (!modules.removeIf(m -> m.instanceName().equals(name))) {
-                        if (!cldVariables.removeIf(v -> v.name().equals(name))) {
-                            comments.removeIf(c -> c.name().equals(name));
-                        }
-                    }
-                }
-            }
-        }
-
-        // Remove causal links referencing the deleted element
-        causalLinks.removeIf(link -> link.from().equals(name) || link.to().equals(name));
-
-        // Fire equationChanged for any equations that still reference the deleted element.
-        // The dangling reference will be flagged by validation rather than silently replaced
-        // with "0", which is dangerous in multiplicative/divisive contexts.
-        String deletedToken = name.replace(' ', '_');
-        List<String> affectedElements = equationRefManager.findReferencingElements(deletedToken);
+        List<String> affectedElements = cascadeManager.remove(name);
         for (String affected : affectedElements) {
             fireEquationChanged(affected);
         }
-
         fireElementRemoved(name);
     }
 
@@ -451,150 +305,74 @@ public class ModelEditor {
      */
     public boolean renameElement(String oldName, String newName) {
         checkFxThread();
-        if (oldName == null || newName == null || oldName.equals(newName)) {
-            return false;
+        boolean renamed = cascadeManager.rename(oldName, newName);
+        if (renamed) {
+            fireElementRenamed(oldName, newName);
         }
-
-        // Reject if newName is already in use by any element
-        if (hasElement(newName)) {
-            return false;
-        }
-
-        boolean found = renameInList(stocks, oldName, newName, StockDef::name,
-                (s, n) -> new StockDef(n, s.comment(), s.initialValue(),
-                        s.unit(), s.negativeValuePolicy()))
-                || renameInList(flows, oldName, newName, FlowDef::name,
-                (f, n) -> new FlowDef(n, f.comment(), f.equation(),
-                        f.timeUnit(), f.materialUnit(), f.source(), f.sink(), f.subscripts()))
-                || renameInList(variables, oldName, newName, VariableDef::name,
-                (a, n) -> new VariableDef(n, a.comment(), a.equation(), a.unit(), a.subscripts()))
-                || renameInList(modules, oldName, newName, ModuleInstanceDef::instanceName,
-                (m, n) -> new ModuleInstanceDef(n, m.definition(),
-                        m.inputBindings(), m.outputBindings()))
-                || renameInList(lookupTables, oldName, newName, LookupTableDef::name,
-                (lt, n) -> new LookupTableDef(n, lt.comment(),
-                        lt.xValues(), lt.yValues(), lt.interpolation()))
-                || renameInList(cldVariables, oldName, newName, CldVariableDef::name,
-                (v, n) -> new CldVariableDef(n, v.comment()))
-                || renameInList(comments, oldName, newName, CommentDef::name,
-                (c, n) -> new CommentDef(n, c.text()));
-
-        if (!found) {
-            return false;
-        }
-
-        nameIndex.remove(oldName);
-        nameIndex.add(newName);
-
-        // Update causal link references
-        for (int i = 0; i < causalLinks.size(); i++) {
-            CausalLinkDef link = causalLinks.get(i);
-            boolean fromMatch = oldName.equals(link.from());
-            boolean toMatch = oldName.equals(link.to());
-            if (fromMatch || toMatch) {
-                causalLinks.set(i, new CausalLinkDef(
-                        fromMatch ? newName : link.from(),
-                        toMatch ? newName : link.to(),
-                        link.polarity(),
-                        link.comment()));
-            }
-        }
-
-        // Update flow source/sink references
-        for (int i = 0; i < flows.size(); i++) {
-            FlowDef f = flows.get(i);
-            boolean sourceMatch = oldName.equals(f.source());
-            boolean sinkMatch = oldName.equals(f.sink());
-            if (sourceMatch || sinkMatch) {
-                flows.set(i, new FlowDef(
-                        f.name(), f.comment(), f.equation(), f.timeUnit(),
-                        f.materialUnit(),
-                        sourceMatch ? newName : f.source(),
-                        sinkMatch ? newName : f.sink(),
-                        f.subscripts()));
-            }
-        }
-
-        // Update module input/output bindings that reference the old name
-        for (int i = 0; i < modules.size(); i++) {
-            ModuleInstanceDef m = modules.get(i);
-            boolean changed = false;
-            Map<String, String> newInputs = new java.util.LinkedHashMap<>(m.inputBindings());
-            for (Map.Entry<String, String> entry : newInputs.entrySet()) {
-                if (oldName.equals(entry.getValue())) {
-                    entry.setValue(newName);
-                    changed = true;
-                }
-            }
-            Map<String, String> newOutputs = new java.util.LinkedHashMap<>(m.outputBindings());
-            for (Map.Entry<String, String> entry : newOutputs.entrySet()) {
-                if (oldName.equals(entry.getValue())) {
-                    entry.setValue(newName);
-                    changed = true;
-                }
-            }
-            if (changed) {
-                modules.set(i, new ModuleInstanceDef(
-                        m.instanceName(), m.definition(), newInputs, newOutputs));
-            }
-        }
-
-        // Update equation references (underscore convention)
-        String oldToken = oldName.replace(' ', '_');
-        String newToken = newName.replace(' ', '_');
-        equationRefManager.updateEquationReferences(oldToken, newToken);
-
-        fireElementRenamed(oldName, newName);
-        return true;
+        return renamed;
     }
 
     /**
+     * Removes a causal link between two elements.
+     * @return true if the link was found and removed
+     */
+    public boolean removeCausalLink(String from, String to) {
+        checkFxThread();
+        return causalLinks.removeIf(link -> link.from().equals(from) && link.to().equals(to));
+    }
+
+    // ── Flow connections and info-link rerouting ─────────────────────────
+
+    /**
      * Reconnects a flow endpoint to a different stock, or disconnects it (pass null for stockName).
-     *
-     * @param flowName the flow to modify
-     * @param end which end (SOURCE or SINK) to reconnect
-     * @param stockName the new stock to connect to, or null to disconnect (cloud)
-     * @return true if the flow was found and updated
      */
     public boolean reconnectFlow(String flowName, FlowEndpointCalculator.FlowEnd end,
                                  String stockName) {
         checkFxThread();
-        // Validate: if a stock name is given, it must actually exist
-        if (stockName != null && !hasElement(stockName)) {
-            return false;
-        }
+        return flowConnMgr.reconnectFlow(flowName, end, stockName);
+    }
 
-        for (int i = 0; i < flows.size(); i++) {
-            if (flows.get(i).name().equals(flowName)) {
-                FlowDef f = flows.get(i);
+    /** @return true if a reference was found and removed */
+    public boolean removeConnectionReference(String fromName, String toName) {
+        checkFxThread();
+        return flowConnMgr.removeConnectionReference(fromName, toName);
+    }
 
-                // Prevent self-loop: stockName must not equal the opposite endpoint
-                if (stockName != null) {
-                    String opposite = (end == FlowEndpointCalculator.FlowEnd.SOURCE)
-                            ? f.sink() : f.source();
-                    if (stockName.equals(opposite)) {
-                        return false;
-                    }
-                }
+    /** @return true if the equation was updated */
+    public boolean rerouteConnectionSource(String oldFrom, String newFrom, String to) {
+        checkFxThread();
+        return flowConnMgr.rerouteConnectionSource(oldFrom, newFrom, to);
+    }
 
-                if (end == FlowEndpointCalculator.FlowEnd.SOURCE) {
-                    flows.set(i, new FlowDef(f.name(), f.comment(), f.equation(),
-                            f.timeUnit(), f.materialUnit(), stockName, f.sink(), f.subscripts()));
-                } else {
-                    flows.set(i, new FlowDef(f.name(), f.comment(), f.equation(),
-                            f.timeUnit(), f.materialUnit(), f.source(), stockName, f.subscripts()));
-                }
+    /** @return true if the reroute was performed */
+    public boolean rerouteConnectionTarget(String from, String oldTo, String newTo) {
+        checkFxThread();
+        return flowConnMgr.rerouteConnectionTarget(from, oldTo, newTo);
+    }
+
+    /**
+     * Generates connector routes from the current model state's dependency graph,
+     * including binding-derived connectors for module input/output bindings.
+     */
+    public List<ConnectorRoute> generateConnectors() {
+        return flowConnMgr.generateConnectors(toModelDefinition());
+    }
+
+    // ── Property setters ─────────────────────────────────────────────────
+
+    /** @return true if the lookup table was found and updated */
+    public boolean setLookupTable(String name, LookupTableDef updated) {
+        checkFxThread();
+        for (int i = 0; i < lookupTables.size(); i++) {
+            if (lookupTables.get(i).name().equals(name)) {
+                lookupTables.set(i, updated);
                 return true;
             }
         }
         return false;
     }
 
-    /**
-     * Sets the equation of a flow.
-     *
-     * @return true if the flow was found and updated
-     */
+    /** @return true if the flow was found and updated */
     public boolean setFlowEquation(String name, String equation) {
         checkFxThread();
         if (equation == null || equation.isBlank()) {
@@ -609,11 +387,7 @@ public class ModelEditor {
         return updated;
     }
 
-    /**
-     * Sets the equation of a variable.
-     *
-     * @return true if the variable was found and updated
-     */
+    /** @return true if the variable was found and updated */
     public boolean setVariableEquation(String name, String equation) {
         checkFxThread();
         if (equation == null || equation.isBlank()) {
@@ -627,11 +401,7 @@ public class ModelEditor {
         return updated;
     }
 
-    /**
-     * Sets the initial value of a stock.
-     *
-     * @return true if the stock was found and updated
-     */
+    /** @return true if the stock was found and updated */
     public boolean setStockInitialValue(String name, double value) {
         checkFxThread();
         return updateInList(stocks, name, StockDef::name,
@@ -639,11 +409,7 @@ public class ModelEditor {
                         s.unit(), s.negativeValuePolicy()));
     }
 
-    /**
-     * Sets the unit of a stock.
-     *
-     * @return true if the stock was found and updated
-     */
+    /** @return true if the stock was found and updated */
     public boolean setStockUnit(String name, String unit) {
         checkFxThread();
         if (unit == null) {
@@ -654,11 +420,7 @@ public class ModelEditor {
                         unit, s.negativeValuePolicy()));
     }
 
-    /**
-     * Sets the negative value policy of a stock.
-     *
-     * @return true if the stock was found and updated
-     */
+    /** @return true if the stock was found and updated */
     public boolean setStockNegativeValuePolicy(String name, String policy) {
         checkFxThread();
         return updateInList(stocks, name, StockDef::name,
@@ -666,11 +428,7 @@ public class ModelEditor {
                         s.unit(), policy));
     }
 
-    /**
-     * Sets the time unit of a flow.
-     *
-     * @return true if the flow was found and updated
-     */
+    /** @return true if the flow was found and updated */
     public boolean setFlowTimeUnit(String name, String timeUnit) {
         checkFxThread();
         if (timeUnit == null || timeUnit.isBlank()) {
@@ -681,11 +439,7 @@ public class ModelEditor {
                         timeUnit, f.materialUnit(), f.source(), f.sink(), f.subscripts()));
     }
 
-    /**
-     * Sets the material unit of a flow.
-     *
-     * @return true if the flow was found and updated
-     */
+    /** @return true if the flow was found and updated */
     public boolean setFlowMaterialUnit(String name, String materialUnit) {
         checkFxThread();
         return updateInList(flows, name, FlowDef::name,
@@ -693,11 +447,7 @@ public class ModelEditor {
                         f.timeUnit(), materialUnit, f.source(), f.sink(), f.subscripts()));
     }
 
-    /**
-     * Sets the unit of a variable.
-     *
-     * @return true if the variable was found and updated
-     */
+    /** @return true if the variable was found and updated */
     public boolean setVariableUnit(String name, String unit) {
         checkFxThread();
         if (unit == null) {
@@ -707,11 +457,7 @@ public class ModelEditor {
                 a -> new VariableDef(a.name(), a.comment(), a.equation(), unit, a.subscripts()));
     }
 
-    /**
-     * Sets the comment of a stock.
-     *
-     * @return true if the stock was found and updated
-     */
+    /** @return true if the stock was found and updated */
     public boolean setStockComment(String name, String comment) {
         checkFxThread();
         return updateInList(stocks, name, StockDef::name,
@@ -719,11 +465,7 @@ public class ModelEditor {
                         s.unit(), s.negativeValuePolicy()));
     }
 
-    /**
-     * Sets the comment of a flow.
-     *
-     * @return true if the flow was found and updated
-     */
+    /** @return true if the flow was found and updated */
     public boolean setFlowComment(String name, String comment) {
         checkFxThread();
         return updateInList(flows, name, FlowDef::name,
@@ -731,22 +473,14 @@ public class ModelEditor {
                         f.timeUnit(), f.materialUnit(), f.source(), f.sink(), f.subscripts()));
     }
 
-    /**
-     * Sets the comment of a variable.
-     *
-     * @return true if the variable was found and updated
-     */
+    /** @return true if the variable was found and updated */
     public boolean setVariableComment(String name, String comment) {
         checkFxThread();
         return updateInList(variables, name, VariableDef::name,
                 a -> new VariableDef(a.name(), comment, a.equation(), a.unit(), a.subscripts()));
     }
 
-    /**
-     * Sets the comment of a lookup table.
-     *
-     * @return true if the lookup table was found and updated
-     */
+    /** @return true if the lookup table was found and updated */
     public boolean setLookupComment(String name, String comment) {
         checkFxThread();
         return updateInList(lookupTables, name, LookupTableDef::name,
@@ -754,11 +488,7 @@ public class ModelEditor {
                         lt.xValues(), lt.yValues(), lt.interpolation(), lt.unit()));
     }
 
-    /**
-     * Sets the unit of a lookup table.
-     *
-     * @return true if the lookup table was found and updated
-     */
+    /** @return true if the lookup table was found and updated */
     public boolean setLookupUnit(String name, String unit) {
         checkFxThread();
         return updateInList(lookupTables, name, LookupTableDef::name,
@@ -766,199 +496,62 @@ public class ModelEditor {
                         lt.xValues(), lt.yValues(), lt.interpolation(), unit));
     }
 
-    private <T> boolean renameInList(List<T> list, String oldName, String newName,
-                                      Function<T, String> nameGetter,
-                                      BiFunction<T, String, T> renamer) {
-        return updateInList(list, oldName, nameGetter, item -> renamer.apply(item, newName));
+    /** @return true if the CLD variable was found and updated */
+    public boolean setCldVariableComment(String name, String comment) {
+        checkFxThread();
+        return updateInList(cldVariables, name, CldVariableDef::name,
+                v -> new CldVariableDef(name, comment));
     }
 
-    /**
-     * Finds the element with the given name in the list and replaces it with the
-     * result of applying the updater function. Returns true if the element was found.
-     */
-    private <T> boolean updateInList(List<T> list, String name,
-                                      Function<T, String> nameGetter,
-                                      UnaryOperator<T> updater) {
-        for (int i = 0; i < list.size(); i++) {
-            if (nameGetter.apply(list.get(i)).equals(name)) {
-                list.set(i, updater.apply(list.get(i)));
+    /** @return true if the causal link was found and updated */
+    public boolean setCausalLinkPolarity(String from, String to, CausalLinkDef.Polarity polarity) {
+        checkFxThread();
+        for (int i = 0; i < causalLinks.size(); i++) {
+            CausalLinkDef link = causalLinks.get(i);
+            if (link.from().equals(from) && link.to().equals(to)) {
+                causalLinks.set(i, new CausalLinkDef(from, to, polarity, link.comment()));
                 return true;
             }
         }
         return false;
     }
 
-    /**
-     * Returns the first element in the list whose name matches.
-     */
-    private <T> Optional<T> findByName(List<T> list, String name, Function<T, String> nameGetter) {
-        for (T item : list) {
-            if (nameGetter.apply(item).equals(name)) {
-                return Optional.of(item);
-            }
-        }
-        return Optional.empty();
-    }
-
-    /**
-     * Infers a material unit from the connected stock(s). Checks sink first, then source.
-     * Returns null if neither endpoint is a known stock.
-     */
-    private String inferMaterialUnit(String source, String sink) {
-        if (sink != null) {
-            Optional<StockDef> sinkStock = getStockByName(sink);
-            if (sinkStock.isPresent()) {
-                return sinkStock.get().unit();
-            }
-        }
-        if (source != null) {
-            Optional<StockDef> sourceStock = getStockByName(source);
-            if (sourceStock.isPresent()) {
-                return sourceStock.get().unit();
-            }
-        }
-        return null;
-    }
-
-    // Equation reference management delegated to EquationReferenceManager
-
-    /**
-     * Returns true if any element (stock, flow, variable, constant, or module) has the given name.
-     * Uses an O(1) hash set lookup instead of scanning all five element lists.
-     */
-    public boolean hasElement(String name) {
-        return nameIndex.contains(name);
-    }
-
-    public static final int MAX_NAME_LENGTH = ElementNameValidator.MAX_NAME_LENGTH;
-
-    /**
-     * Returns true if the given name is valid for an element identifier.
-     * Delegates to {@link ElementNameValidator#isValidName(String)}.
-     */
-    public static boolean isValidName(String name) {
-        return ElementNameValidator.isValidName(name);
-    }
-
-    public SimulationSettings getSimulationSettings() {
-        return simulationSettings;
+    /** @return true if the comment was found and updated */
+    public boolean setCommentText(String name, String text) {
+        checkFxThread();
+        return updateInList(comments, name, CommentDef::name,
+                c -> new CommentDef(name, text));
     }
 
     public void setSimulationSettings(SimulationSettings simulationSettings) {
         checkFxThread();
-        this.simulationSettings = simulationSettings;
-    }
-
-    public String getModelName() {
-        return modelName;
+        queryFacade.simulationSettings = simulationSettings;
     }
 
     public void setModelName(String name) {
         checkFxThread();
         if (name != null && !name.isBlank()) {
-            modelName = name;
+            queryFacade.modelName = name;
         }
-    }
-
-    public String getModelComment() {
-        return modelComment;
     }
 
     public void setModelComment(String comment) {
         checkFxThread();
-        modelComment = comment != null ? comment : "";
-    }
-
-    public ModelMetadata getMetadata() {
-        return metadata;
+        queryFacade.modelComment = comment != null ? comment : "";
     }
 
     public void setMetadata(ModelMetadata metadata) {
         checkFxThread();
-        this.metadata = metadata;
+        queryFacade.metadata = metadata;
     }
 
-    public List<StockDef> getStocks() {
-        return Collections.unmodifiableList(stocks);
+    private <T> boolean updateInList(List<T> list, String name,
+                                      Function<T, String> nameGetter,
+                                      UnaryOperator<T> updater) {
+        return ElementCascadeManager.updateInList(list, name, nameGetter, updater);
     }
 
-    public List<FlowDef> getFlows() {
-        return Collections.unmodifiableList(flows);
-    }
-
-    public List<VariableDef> getVariables() {
-        return Collections.unmodifiableList(variables);
-    }
-
-    public List<SubscriptDef> getSubscripts() {
-        return Collections.unmodifiableList(subscripts);
-    }
-
-    /**
-     * Returns the names of literal-valued variables (tunable parameters).
-     */
-    public List<String> getParameterNames() {
-        return variables.stream()
-                .filter(VariableDef::isLiteral)
-                .map(VariableDef::name)
-                .toList();
-    }
-
-    /**
-     * Returns the stock with the given name.
-     */
-    public Optional<StockDef> getStockByName(String name) {
-        return findByName(stocks, name, StockDef::name);
-    }
-
-    /**
-     * Returns the flow with the given name.
-     */
-    public Optional<FlowDef> getFlowByName(String name) {
-        return findByName(flows, name, FlowDef::name);
-    }
-
-    /**
-     * Returns the variable with the given name.
-     */
-    public Optional<VariableDef> getVariableByName(String name) {
-        return findByName(variables, name, VariableDef::name);
-    }
-
-    public Optional<String> getStockUnit(String name) {
-        return findByName(stocks, name, StockDef::name).map(StockDef::unit);
-    }
-
-    public Optional<String> getFlowEquation(String name) {
-        return findByName(flows, name, FlowDef::name).map(FlowDef::equation);
-    }
-
-    public Optional<String> getVariableEquation(String name) {
-        return findByName(variables, name, VariableDef::name).map(VariableDef::equation);
-    }
-
-    public List<ModuleInstanceDef> getModules() {
-        return Collections.unmodifiableList(modules);
-    }
-
-    /**
-     * Returns the module instance with the given name.
-     */
-    public Optional<ModuleInstanceDef> getModuleByName(String name) {
-        return findByName(modules, name, ModuleInstanceDef::instanceName);
-    }
-
-    /**
-     * Returns the index of the module with the given name, or -1 if not found.
-     */
-    public int getModuleIndex(String name) {
-        for (int i = 0; i < modules.size(); i++) {
-            if (modules.get(i).instanceName().equals(name)) {
-                return i;
-            }
-        }
-        return -1;
-    }
+    // ── Module mutation ──────────────────────────────────────────────────
 
     /**
      * Replaces the definition of the module at the given index, preserving
@@ -977,8 +570,6 @@ public class ModelEditor {
 
     /**
      * Updates the module interface (port definitions) of the module with the given name.
-     * Existing bindings for ports that still exist are preserved; bindings for
-     * removed ports are dropped.
      *
      * @return true if the module was found and updated
      */
@@ -1021,168 +612,7 @@ public class ModelEditor {
         return false;
     }
 
-    public List<LookupTableDef> getLookupTables() {
-        return Collections.unmodifiableList(lookupTables);
-    }
-
-    // === CLD Variables and Causal Links ===
-
-    /**
-     * Adds a new CLD variable with an auto-generated name.
-     * @return the name of the created variable
-     */
-    public String addCldVariable() {
-        checkFxThread();
-        String name = resolveUniqueName("Variable " + nextCldVariableId,
-                "Variable ", nextCldVariableId, nameIndex);
-        nextCldVariableId = parseIdSuffix(name, "Variable ") + 1;
-        cldVariables.add(new CldVariableDef(name));
-        nameIndex.add(name);
-        fireElementAdded(name, "CLD Variable");
-        return name;
-    }
-
-    /**
-     * Adds a CLD variable copied from a template.
-     * @return the name of the created variable
-     */
-    public String addCldVariableFrom(CldVariableDef template) {
-        checkFxThread();
-        String name = resolveUniqueName(template.name(), "Variable ", nextCldVariableId, nameIndex);
-        if (name.startsWith("Variable ")) {
-            nextCldVariableId = parseIdSuffix(name, "Variable ") + 1;
-        }
-        cldVariables.add(new CldVariableDef(name, template.comment()));
-        nameIndex.add(name);
-        fireElementAdded(name, "CLD Variable");
-        return name;
-    }
-
-    /**
-     * Sets the comment on a CLD variable.
-     * @return true if the variable was found and updated
-     */
-    public boolean setCldVariableComment(String name, String comment) {
-        checkFxThread();
-        return updateInList(cldVariables, name, CldVariableDef::name,
-                v -> new CldVariableDef(name, comment));
-    }
-
-    public List<CldVariableDef> getCldVariables() {
-        return Collections.unmodifiableList(cldVariables);
-    }
-
-    public CldVariableDef getCldVariableByName(String name) {
-        for (CldVariableDef v : cldVariables) {
-            if (v.name().equals(name)) {
-                return v;
-            }
-        }
-        return null;
-    }
-
-    /**
-     * Adds a causal link between two elements.
-     * @return true if both endpoints exist and the link was added
-     */
-    public boolean addCausalLink(String from, String to, CausalLinkDef.Polarity polarity) {
-        checkFxThread();
-        if (!hasElement(from) || !hasElement(to)) {
-            return false;
-        }
-        for (CausalLinkDef existing : causalLinks) {
-            if (existing.from().equals(from) && existing.to().equals(to)) {
-                return false;
-            }
-        }
-        causalLinks.add(new CausalLinkDef(from, to, polarity));
-        return true;
-    }
-
-    /**
-     * Removes a causal link between two elements.
-     * @return true if the link was found and removed
-     */
-    public boolean removeCausalLink(String from, String to) {
-        checkFxThread();
-        return causalLinks.removeIf(link -> link.from().equals(from) && link.to().equals(to));
-    }
-
-    /**
-     * Sets the polarity of an existing causal link.
-     * @return true if the link was found and updated
-     */
-    public boolean setCausalLinkPolarity(String from, String to, CausalLinkDef.Polarity polarity) {
-        checkFxThread();
-        for (int i = 0; i < causalLinks.size(); i++) {
-            CausalLinkDef link = causalLinks.get(i);
-            if (link.from().equals(from) && link.to().equals(to)) {
-                causalLinks.set(i, new CausalLinkDef(from, to, polarity, link.comment()));
-                return true;
-            }
-        }
-        return false;
-    }
-
-    public List<CausalLinkDef> getCausalLinks() {
-        return Collections.unmodifiableList(causalLinks);
-    }
-
-    // === Comments ===
-
-    /**
-     * Adds a new comment with an auto-generated name.
-     * @return the name of the created comment
-     */
-    public String addComment() {
-        checkFxThread();
-        String name = "Comment " + nextCommentId++;
-        comments.add(new CommentDef(name, ""));
-        nameIndex.add(name);
-        fireElementAdded(name, "Comment");
-        return name;
-    }
-
-    /**
-     * Adds a comment copied from a template with an auto-generated name.
-     * @return the name of the created comment
-     */
-    public String addCommentFrom(CommentDef template) {
-        checkFxThread();
-        String name = resolveUniqueName(template.name(), "Comment ", nextCommentId, nameIndex);
-        if (name.startsWith("Comment ")) {
-            nextCommentId = parseIdSuffix(name, "Comment ") + 1;
-        }
-        comments.add(new CommentDef(name, template.text()));
-        nameIndex.add(name);
-        return name;
-    }
-
-    /**
-     * Sets the text of a comment.
-     * @return true if the comment was found and updated
-     */
-    public boolean setCommentText(String name, String text) {
-        checkFxThread();
-        return updateInList(comments, name, CommentDef::name,
-                c -> new CommentDef(name, text));
-    }
-
-    /**
-     * Returns the comment with the given name, or null if not found.
-     */
-    public CommentDef getCommentByName(String name) {
-        for (CommentDef c : comments) {
-            if (c.name().equals(name)) {
-                return c;
-            }
-        }
-        return null;
-    }
-
-    public List<CommentDef> getComments() {
-        return Collections.unmodifiableList(comments);
-    }
+    // ── CLD classification ───────────────────────────────────────────────
 
     /**
      * Classifies a CLD variable by converting it into a stock-and-flow element type.
@@ -1197,10 +627,11 @@ public class ModelEditor {
     public boolean classifyCldVariable(String name, ElementType targetType) {
         checkFxThread();
 
-        CldVariableDef variable = getCldVariableByName(name);
-        if (variable == null) {
+        Optional<CldVariableDef> opt = getCldVariableByName(name);
+        if (opt.isEmpty()) {
             return false;
         }
+        CldVariableDef variable = opt.get();
 
         // Remove the CLD variable
         cldVariables.removeIf(v -> v.name().equals(name));
@@ -1225,155 +656,41 @@ public class ModelEditor {
         return true;
     }
 
-    /**
-     * Rebuilds an immutable {@link ModelDefinition} snapshot from the current editor state.
-     */
-    public ModelDefinition toModelDefinition() {
-        return toModelDefinition(null);
-    }
+    // ── Query delegations (read-only) ────────────────────────────────────
 
-    /**
-     * Rebuilds an immutable {@link ModelDefinition} snapshot including the given view layout.
-     *
-     * @param view the canvas layout to include, or null to omit view data
-     */
-    public ModelDefinition toModelDefinition(ViewDef view) {
-        return new ModelDefinition(
-                modelName,
-                modelComment.isBlank() ? null : modelComment,
-                null,
-                List.copyOf(stocks),
-                List.copyOf(flows),
-                List.copyOf(variables),
-                List.copyOf(lookupTables),
-                List.copyOf(modules),
-                List.copyOf(subscripts),
-                List.copyOf(cldVariables),
-                List.copyOf(causalLinks),
-                List.copyOf(comments),
-                view != null ? List.of(view) : List.of(),
-                simulationSettings,
-                metadata,
-                List.copyOf(referenceDatasets)
-        );
-    }
+    public boolean hasElement(String name) { return queryFacade.hasElement(name); }
+    public String getModelName() { return queryFacade.getModelName(); }
+    public String getModelComment() { return queryFacade.getModelComment(); }
+    public ModelMetadata getMetadata() { return queryFacade.getMetadata(); }
+    public SimulationSettings getSimulationSettings() { return queryFacade.getSimulationSettings(); }
+    public List<StockDef> getStocks() { return queryFacade.getStocks(); }
+    public List<FlowDef> getFlows() { return queryFacade.getFlows(); }
+    public List<VariableDef> getVariables() { return queryFacade.getVariables(); }
+    public List<SubscriptDef> getSubscripts() { return queryFacade.getSubscripts(); }
+    public List<ModuleInstanceDef> getModules() { return queryFacade.getModules(); }
+    public List<LookupTableDef> getLookupTables() { return queryFacade.getLookupTables(); }
+    public List<CldVariableDef> getCldVariables() { return queryFacade.getCldVariables(); }
+    public List<CausalLinkDef> getCausalLinks() { return queryFacade.getCausalLinks(); }
+    public List<CommentDef> getComments() { return queryFacade.getComments(); }
+    public List<ReferenceDataset> getReferenceDatasets() { return queryFacade.getReferenceDatasets(); }
+    public List<String> getParameterNames() { return queryFacade.getParameterNames(); }
+    public Optional<StockDef> getStockByName(String name) { return queryFacade.getStockByName(name); }
+    public Optional<FlowDef> getFlowByName(String name) { return queryFacade.getFlowByName(name); }
+    public Optional<VariableDef> getVariableByName(String name) { return queryFacade.getVariableByName(name); }
+    public Optional<ModuleInstanceDef> getModuleByName(String name) { return queryFacade.getModuleByName(name); }
+    public Optional<LookupTableDef> getLookupTableByName(String name) { return queryFacade.getLookupTableByName(name); }
+    public Optional<CldVariableDef> getCldVariableByName(String name) { return queryFacade.getCldVariableByName(name); }
+    public CommentDef getCommentByName(String name) { return queryFacade.getCommentByName(name); }
+    public Optional<String> getStockUnit(String name) { return queryFacade.getStockUnit(name); }
+    public Optional<String> getFlowEquation(String name) { return queryFacade.getFlowEquation(name); }
+    public Optional<String> getVariableEquation(String name) { return queryFacade.getVariableEquation(name); }
+    public int getModuleIndex(String name) { return queryFacade.getModuleIndex(name); }
+    public ModelDefinition toModelDefinition() { return toModelDefinition(null); }
+    public ModelDefinition toModelDefinition(ViewDef view) { return queryFacade.toModelDefinition(view); }
 
-    /**
-     * Adds a reference dataset for model validation overlay.
-     */
-    public void addReferenceDataset(ReferenceDataset dataset) {
-        checkFxThread();
-        referenceDatasets.add(dataset);
-    }
+    public static final int MAX_NAME_LENGTH = ElementNameValidator.MAX_NAME_LENGTH;
 
-    /**
-     * Returns an unmodifiable view of the reference datasets.
-     */
-    public List<ReferenceDataset> getReferenceDatasets() {
-        return Collections.unmodifiableList(referenceDatasets);
-    }
-
-    /**
-     * Removes a single equation reference that creates the info link from {@code fromName}
-     * to {@code toName}. The reference token is replaced with "0" in the target element's
-     * equation only (not globally). Material flow connections are not affected.
-     *
-     * @return true if a reference was found and removed
-     */
-    public boolean removeConnectionReference(String fromName, String toName) {
-        checkFxThread();
-        String fromToken = fromName.replace(' ', '_');
-        return equationRefManager.updateEquationByName(toName,
-                eq -> replaceToken(eq, fromToken, "0"));
-    }
-
-    /**
-     * Reroutes the source (from) end of an info link: in the target's equation,
-     * replaces the old source token with the new source token.
-     *
-     * @return true if the equation was updated
-     */
-    public boolean rerouteConnectionSource(String oldFrom, String newFrom, String to) {
-        checkFxThread();
-        String oldToken = oldFrom.replace(' ', '_');
-        String newToken = newFrom.replace(' ', '_');
-        return equationRefManager.updateEquationByName(to,
-                eq -> replaceToken(eq, oldToken, newToken));
-    }
-
-    /**
-     * Reroutes the target (to) end of an info link: removes the source reference
-     * from the old target's equation and adds it to the new target's equation.
-     *
-     * @return true if the reroute was performed
-     */
-    public boolean rerouteConnectionTarget(String from, String oldTo, String newTo) {
-        checkFxThread();
-        String fromToken = from.replace(' ', '_');
-
-        // Remove reference from old target
-        removeConnectionReference(from, oldTo);
-
-        // Add reference to new target's equation
-        return equationRefManager.addConnectionReference(newTo, fromToken);
-    }
-
-    /**
-     * Generates connector routes from the current model state's dependency graph,
-     * including binding-derived connectors for module input/output bindings.
-     */
-    public List<ConnectorRoute> generateConnectors() {
-        List<ConnectorRoute> base = ConnectorGenerator.generate(toModelDefinition());
-        java.util.Set<String> seen = new java.util.LinkedHashSet<>();
-        for (ConnectorRoute r : base) {
-            seen.add(r.from() + " -> " + r.to());
-        }
-        List<ConnectorRoute> result = new java.util.ArrayList<>(base);
-
-        for (ModuleInstanceDef module : modules) {
-            String moduleName = module.instanceName();
-
-            // Input bindings: single-token expressions that match an existing element
-            for (Map.Entry<String, String> entry : module.inputBindings().entrySet()) {
-                String expr = entry.getValue();
-                if (expr != null && !expr.isBlank() && isSingleToken(expr)) {
-                    String elementName = expr.replace('_', ' ');
-                    if (nameIndex.contains(elementName)) {
-                        String key = elementName + " -> " + moduleName;
-                        if (seen.add(key)) {
-                            result.add(new ConnectorRoute(elementName, moduleName));
-                        }
-                    }
-                }
-            }
-
-            // Output bindings: alias names that match an existing element
-            for (Map.Entry<String, String> entry : module.outputBindings().entrySet()) {
-                String alias = entry.getValue();
-                if (alias != null && !alias.isBlank() && nameIndex.contains(alias)) {
-                    String key = moduleName + " -> " + alias;
-                    if (seen.add(key)) {
-                        result.add(new ConnectorRoute(moduleName, alias));
-                    }
-                }
-            }
-        }
-
-        return result;
-    }
-
-    /**
-     * Returns true if the expression is a single identifier token (no operators or whitespace).
-     */
-    private static boolean isSingleToken(String expr) {
-        String trimmed = expr.trim();
-        for (int i = 0; i < trimmed.length(); i++) {
-            char c = trimmed.charAt(i);
-            if (c == ' ' || c == '+' || c == '-' || c == '*' || c == '/'
-                    || c == '(' || c == ')' || c == ',') {
-                return false;
-            }
-        }
-        return !trimmed.isEmpty();
+    public static boolean isValidName(String name) {
+        return ElementNameValidator.isValidName(name);
     }
 }

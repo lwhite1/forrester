@@ -379,8 +379,8 @@ public final class SensitivitySummary {
 
     private static String formatValue(double value) {
         if (value == Math.floor(value) && Double.isFinite(value)
-                && Math.abs(value) <= Long.MAX_VALUE) {
-            return String.valueOf((long) value);
+                && Math.abs(value) < 9.0e18) {
+            return String.format(Locale.US, "%.0f", value);
         }
         return String.format(Locale.US, "%.2f", value);
     }

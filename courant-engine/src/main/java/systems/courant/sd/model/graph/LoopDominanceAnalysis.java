@@ -1,6 +1,7 @@
 package systems.courant.sd.model.graph;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -26,6 +27,23 @@ public record LoopDominanceAnalysis(
         int stepCount,
         double[][] activity
 ) {
+
+    public LoopDominanceAnalysis {
+        double[][] copy = new double[activity.length][];
+        for (int i = 0; i < activity.length; i++) {
+            copy[i] = Arrays.copyOf(activity[i], activity[i].length);
+        }
+        activity = copy;
+    }
+
+    @Override
+    public double[][] activity() {
+        double[][] copy = new double[activity.length][];
+        for (int i = 0; i < activity.length; i++) {
+            copy[i] = Arrays.copyOf(activity[i], activity[i].length);
+        }
+        return copy;
+    }
 
     /**
      * Computes loop dominance from simulation result data and loop analysis.

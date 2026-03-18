@@ -59,7 +59,7 @@ public final class ExprStringifier {
             sb.append(v > 0 ? "INF" : "(-INF)");
             return;
         }
-        if (v == (long) v && Math.abs(v) < 1e15) {
+        if (Math.abs(v) < (1L << 53) && v == (long) v) {
             sb.append((long) v);
         } else {
             sb.append(v);

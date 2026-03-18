@@ -8,6 +8,7 @@ import javafx.scene.canvas.GraphicsContext;
  */
 public class Viewport {
 
+    public static final double ZOOM_FACTOR = 1.1;
     private static final double MIN_SCALE = 0.1;
     private static final double MAX_SCALE = 5.0;
 

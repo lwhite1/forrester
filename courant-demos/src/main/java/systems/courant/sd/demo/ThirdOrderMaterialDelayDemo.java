@@ -5,6 +5,8 @@
 
 package systems.courant.sd.demo;
 
+import com.google.common.base.Preconditions;
+
 import systems.courant.sd.Simulation;
 import systems.courant.sd.io.CsvSubscriber;
 import systems.courant.sd.measure.Quantity;
@@ -66,6 +68,10 @@ public class ThirdOrderMaterialDelayDemo {
     public Model getModel(double initialStep1, double initialStep2, double initialStep3,
                            double processDemandPerDay, double step1DelayHours,
                            double step2DelayHours, double step3DelayHours) {
+
+        Preconditions.checkArgument(step1DelayHours > 0, "step1DelayHours must be > 0");
+        Preconditions.checkArgument(step2DelayHours > 0, "step2DelayHours must be > 0");
+        Preconditions.checkArgument(step3DelayHours > 0, "step3DelayHours must be > 0");
 
         Model model = new Model("Third order material delay");
         model.setMetadata(ModelMetadata.builder()

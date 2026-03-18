@@ -164,9 +164,9 @@ class IndexedValueTest {
         }
 
         @Test
-        void shouldRejectDivisionByZero() {
-            assertThrows(ArithmeticException.class, () ->
-                    IndexedValue.scalar(1).divide(IndexedValue.scalar(0)));
+        void shouldReturnNaNForDivisionByZero() {
+            IndexedValue result = IndexedValue.scalar(1).divide(IndexedValue.scalar(0));
+            assertTrue(Double.isNaN(result.scalarValue()));
         }
     }
 
@@ -374,10 +374,13 @@ class IndexedValueTest {
         }
 
         @Test
-        void shouldRejectDivisionByZeroInBroadcast() {
+        void shouldReturnNaNForDivisionByZeroInBroadcast() {
             IndexedValue a = IndexedValue.of(region, 10, 20, 30);
             IndexedValue b = IndexedValue.of(region, 1, 0, 3);
-            assertThrows(ArithmeticException.class, () -> a.divide(b));
+            IndexedValue result = a.divide(b);
+            assertEquals(10.0, result.get(0));
+            assertTrue(Double.isNaN(result.get(1)));
+            assertEquals(10.0, result.get(2));
         }
     }
 
@@ -705,9 +708,12 @@ class IndexedValueTest {
         }
 
         @Test
-        void shouldRejectDivideByZeroDouble() {
+        void shouldReturnNaNForDivideByZeroDouble() {
             IndexedValue v = IndexedValue.of(region, 10, 20, 30);
-            assertThrows(ArithmeticException.class, () -> v.divide(0));
+            IndexedValue result = v.divide(0);
+            for (int i = 0; i < result.size(); i++) {
+                assertTrue(Double.isNaN(result.get(i)));
+            }
         }
     }
 

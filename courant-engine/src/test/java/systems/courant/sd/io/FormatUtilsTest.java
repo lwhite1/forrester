@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 
 @DisplayName("FormatUtils")
 class FormatUtilsTest {
@@ -34,8 +35,24 @@ class FormatUtilsTest {
         }
 
         @Test
-        void shouldFormatInfinity() {
-            assertThat(FormatUtils.formatDouble(Double.POSITIVE_INFINITY)).isEqualTo("Infinity");
+        void shouldRejectNaN() {
+            assertThatIllegalArgumentException()
+                    .isThrownBy(() -> FormatUtils.formatDouble(Double.NaN))
+                    .withMessageContaining("NaN");
+        }
+
+        @Test
+        void shouldRejectPositiveInfinity() {
+            assertThatIllegalArgumentException()
+                    .isThrownBy(() -> FormatUtils.formatDouble(Double.POSITIVE_INFINITY))
+                    .withMessageContaining("Infinity");
+        }
+
+        @Test
+        void shouldRejectNegativeInfinity() {
+            assertThatIllegalArgumentException()
+                    .isThrownBy(() -> FormatUtils.formatDouble(Double.NEGATIVE_INFINITY))
+                    .withMessageContaining("Infinity");
         }
 
         @Test

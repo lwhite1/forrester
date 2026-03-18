@@ -241,6 +241,48 @@ class SubscriptExpanderTest {
         }
     }
 
+    @Nested
+    @DisplayName("Backtick-quoted identifiers (#859)")
+    class BacktickQuotedIdentifiers {
+
+        @Test
+        @DisplayName("should place [label] after closing backtick, not inside")
+        void shouldHandleBacktickQuotedName() {
+            ModelDefinition def = new ModelDefinitionBuilder()
+                    .name("Quoted Ref")
+                    .subscript("Region", List.of("North", "South"))
+                    .stock("Population Growth", 100, "Person", List.of("Region"))
+                    .variable("net rate", "`Population Growth` * 0.02", "Person/Year",
+                            List.of("Region"))
+                    .build();
+
+            ModelDefinition expanded = SubscriptExpander.expand(def);
+
+            assertThat(expanded.variables().get(0).equation())
+                    .isEqualTo("`Population Growth`[North] * 0.02");
+            assertThat(expanded.variables().get(1).equation())
+                    .isEqualTo("`Population Growth`[South] * 0.02");
+        }
+
+        @Test
+        @DisplayName("should handle mix of quoted and unquoted subscripted refs")
+        void shouldHandleMixedQuotedAndUnquoted() {
+            ModelDefinition def = new ModelDefinitionBuilder()
+                    .name("Mixed Quoting")
+                    .subscript("Region", List.of("A"))
+                    .stock("Population Growth", 100, "Person", List.of("Region"))
+                    .stock("Pop", 50, "Person", List.of("Region"))
+                    .variable("total", "`Population Growth` + Pop", "Person",
+                            List.of("Region"))
+                    .build();
+
+            ModelDefinition expanded = SubscriptExpander.expand(def);
+
+            assertThat(expanded.variables().get(0).equation())
+                    .isEqualTo("`Population Growth`[A] + Pop[A]");
+        }
+    }
+
     @Test
     void shouldThrowOnUnknownSubscriptDimension() {
         ModelDefinition def = new ModelDefinitionBuilder()

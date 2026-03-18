@@ -13,6 +13,8 @@ import org.testfx.framework.junit5.ApplicationExtension;
 import org.testfx.framework.junit5.Start;
 import org.testfx.util.WaitForAsyncUtils;
 
+import java.util.concurrent.TimeUnit;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 @DisplayName("FileController.openExample() guards unsaved changes (#463)")
@@ -30,6 +32,19 @@ class FileControllerOpenExampleFxTest {
         stage.show();
     }
 
+    /**
+     * Waits for the background auto-layout thread to complete and for the
+     * resulting {@code Platform.runLater(applyView)} to be processed.
+     */
+    private void awaitLayout() {
+        try {
+            window.layoutFuture().get(10, TimeUnit.SECONDS);
+        } catch (Exception e) {
+            throw new RuntimeException("Layout did not complete in time", e);
+        }
+        WaitForAsyncUtils.waitForFxEvents();
+    }
+
     @Test
     @DisplayName("openExample loads model when no unsaved changes exist")
     void shouldLoadExampleWhenClean(FxRobot robot) {
@@ -38,6 +53,7 @@ class FileControllerOpenExampleFxTest {
         Platform.runLater(() ->
                 window.getFileController().openExample("Bathtub", "introductory/bathtub.json"));
         WaitForAsyncUtils.waitForFxEvents();
+        awaitLayout();
 
         assertThat(stage.getTitle()).contains("Bathtub");
         assertThat(window.isDirty()).isFalse();
@@ -51,6 +67,7 @@ class FileControllerOpenExampleFxTest {
         Platform.runLater(() ->
                 window.getFileController().openExample("Bathtub", "introductory/bathtub.json"));
         WaitForAsyncUtils.waitForFxEvents();
+        awaitLayout();
         assertThat(stage.getTitle()).contains("Bathtub");
 
         // Mark dirty
@@ -79,6 +96,7 @@ class FileControllerOpenExampleFxTest {
         Platform.runLater(() ->
                 window.getFileController().openExample("Bathtub", "introductory/bathtub.json"));
         WaitForAsyncUtils.waitForFxEvents();
+        awaitLayout();
 
         // Mark dirty
         Platform.runLater(() -> window.getFileController().markDirty());
@@ -93,6 +111,7 @@ class FileControllerOpenExampleFxTest {
         // Click OK to discard changes
         robot.clickOn("OK");
         WaitForAsyncUtils.waitForFxEvents();
+        awaitLayout();
 
         // Model should now show the new example (title may truncate long names)
         assertThat(stage.getTitle()).contains("Aging");
@@ -112,6 +131,7 @@ class FileControllerOpenExampleFxTest {
         Platform.runLater(() ->
                 window.getFileController().openExample("Bathtub", "introductory/bathtub.json"));
         WaitForAsyncUtils.waitForFxEvents();
+        awaitLayout();
 
         assertThat(window.getCurrentFile()).isNull();
     }

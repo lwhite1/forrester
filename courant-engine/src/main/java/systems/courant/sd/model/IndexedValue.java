@@ -244,16 +244,10 @@ public final class IndexedValue {
     /**
      * Divides this value by {@code other} with automatic broadcasting.
      * Result dimensions: left dimensions first, then right-only dimensions.
-     *
-     * @throws ArithmeticException if any element of {@code other} is zero
+     * Division by zero returns {@code Double.NaN}, consistent with ExprCompiler.
      */
     public IndexedValue divide(IndexedValue other) {
-        return binaryOp(other, (a, b) -> {
-            if (b == 0) {
-                throw new ArithmeticException("Division by zero in IndexedValue");
-            }
-            return a / b;
-        });
+        return binaryOp(other, (a, b) -> b == 0 ? Double.NaN : a / b);
     }
 
     // --- Scalar convenience overloads ---
@@ -410,7 +404,7 @@ public final class IndexedValue {
     private IndexedValue binaryOp(IndexedValue other, DoubleBinaryOp op) {
         // Both scalar
         if (this.isScalar() && other.isScalar()) {
-            return scalar(op.apply(this.values[0], other.values[0]));
+            return new IndexedValue(null, new double[]{op.apply(this.values[0], other.values[0])}, true);
         }
         // One scalar, one indexed
         if (this.isScalar()) {
