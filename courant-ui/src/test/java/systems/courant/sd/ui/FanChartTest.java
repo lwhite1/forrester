@@ -116,6 +116,19 @@ class FanChartTest {
         }
 
         @Test
+        @DisplayName("near-constant data uses constant-value logic to avoid extreme y-coordinates (#955)")
+        void shouldTreatNearConstantDataAsConstant() {
+            // Range of 1e-12 relative to values around 1000 is negligible
+            double[] result = FanChart.padAxisRange(1000.0, 1000.0 + 1e-12);
+
+            // Should use constant-value logic: halfRange = |1000| * 0.1 = 100
+            assertThat(result[0]).isCloseTo(900.0, within(1.0));
+            assertThat(result[1]).isCloseTo(1100.0, within(1.0));
+            // Crucially, the final range must be large enough to avoid division issues
+            assertThat(result[1] - result[0]).isGreaterThan(1.0);
+        }
+
+        @Test
         @DisplayName("padded min is always less than padded max")
         void shouldAlwaysProducePaddedMinLessThanPaddedMax() {
             double[][] testCases = {

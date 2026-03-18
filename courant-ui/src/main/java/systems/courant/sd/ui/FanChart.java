@@ -256,11 +256,14 @@ public class FanChart extends Application {
      */
     static double[] padAxisRange(double rawMin, double rawMax) {
         double range = rawMax - rawMin;
-        if (range != 0) {
+        double magnitude = Math.max(Math.abs(rawMin), Math.abs(rawMax));
+        // Treat near-constant data the same as constant to avoid extreme y-coordinates
+        if (range > 0 && range > magnitude * 1e-10) {
             return new double[]{rawMin - range * 0.05, rawMax + range * 0.05};
         }
-        // All values are constant — use 10% of |value| as half-range, or 1 if value is 0
-        double halfRange = (rawMin == 0) ? 1.0 : Math.abs(rawMin) * 0.1;
-        return new double[]{rawMin - halfRange, rawMax + halfRange};
+        // All values are (near-)constant — use 10% of |value| as half-range, or 1 if value is ~0
+        double mid = (rawMin + rawMax) / 2;
+        double halfRange = (mid == 0) ? 1.0 : Math.abs(mid) * 0.1;
+        return new double[]{mid - halfRange, mid + halfRange};
     }
 }
