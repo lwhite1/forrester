@@ -249,20 +249,42 @@ public final class HelpContent {
         return new TextFlow(
                 bold("Simulation Settings"),
                 plain(" control how the model is simulated.\n\n"),
-                bold("Parameters:\n"),
-                plain("  \u2022 "), bold("Time Step"),
-                plain(" \u2014 the base time unit (Day, Week, Month, Year, etc.)\n"),
-                plain("  \u2022 "), bold("Duration"),
-                plain(" \u2014 how long the simulation runs (e.g. 100)\n"),
-                plain("  \u2022 "), bold("Duration Unit"),
-                plain(" \u2014 the unit for the duration value\n"),
-                plain("  \u2022 "), bold("DT"),
-                plain(" \u2014 the integration step size. Smaller values give "
-                        + "more accuracy but take longer\n"),
-                plain("  \u2022 "), bold("Strict Mode"),
-                plain(" \u2014 fail fast on NaN or Infinity during simulation\n"),
-                plain("  \u2022 "), bold("Save Per"),
-                plain(" \u2014 how often results are recorded (e.g. every 10 time steps)\n\n"),
+
+                bold("Time Step\n"),
+                plain("The base unit of time for the simulation model. This defines what "
+                        + "\"one unit of time\" means in your equations and determines the "
+                        + "units for flows and rates. For example, if Time Step is Year, "
+                        + "a flow value of 10 means 10 per year.\n\n"),
+
+                bold("DT (Delta Time)\n"),
+                plain("The integration step size, expressed as a fraction of the Time Step. "
+                        + "A DT of 1 means each integration step advances by one full Time Step "
+                        + "unit. A DT of 0.25 means each step advances by one quarter of a "
+                        + "Time Step. Smaller values give more accuracy but take longer to "
+                        + "compute. For example, with Time Step = Day and DT = 0.5, each "
+                        + "integration step advances 0.5 days.\n\n"),
+
+                bold("Save Per\n"),
+                plain("How often results are recorded, measured in integration steps (DT steps). "
+                        + "A Save Per of 1 records every integration step. A Save Per of 10 "
+                        + "records every 10th integration step. For example, with DT = 0.25 "
+                        + "and Save Per = 4, results are recorded once per Time Step.\n\n"),
+
+                bold("Duration\n"),
+                plain("How long the simulation runs, measured in Duration Units. "
+                        + "For example, a Duration of 100 with Duration Unit set to Year "
+                        + "means the simulation runs for 100 simulated years.\n\n"),
+
+                bold("Duration Unit\n"),
+                plain("The unit for the Duration value. This determines the total simulated "
+                        + "time span. Common choices include Day, Week, Month, and Year.\n\n"),
+
+                bold("Strict Mode\n"),
+                plain("When enabled, the simulation fails immediately if any variable "
+                        + "produces NaN or Infinity. When disabled, the simulator reverts "
+                        + "to the previous value and continues. Enable this during model "
+                        + "development to catch errors early.\n\n"),
+
                 bold("Euler integration:\n\n"),
                 mono("  Stock(t + DT) = Stock(t) + (Inflow(t) \u2212 Outflow(t)) \u00d7 DT\n\n"),
                 bold("Tips:\n"),
