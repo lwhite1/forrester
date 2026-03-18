@@ -100,6 +100,17 @@ public class CsvSubscriberTest {
     }
 
     @Test
+    public void shouldNotOpenFileUntilFirstSimulationEvent() throws IOException {
+        Path csvFile = tempDir.resolve("lazy.csv");
+        CsvSubscriber csv = new CsvSubscriber(csvFile.toString());
+        // File should not exist yet — writer is lazily initialized
+        assertTrue(!Files.exists(csvFile), "File should not be created until first write");
+        csv.close();
+        // After close without any simulation, file should still not exist
+        assertTrue(!Files.exists(csvFile), "File should not be created when closed without use");
+    }
+
+    @Test
     public void shouldCreateParentDirectories() throws IOException {
         Path nested = tempDir.resolve("a/b/c/output.csv");
         CsvSubscriber csv = new CsvSubscriber(nested.toString());
