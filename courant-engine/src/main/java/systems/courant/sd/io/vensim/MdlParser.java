@@ -114,17 +114,11 @@ public final class MdlParser {
     }
 
     private static List<MdlEquation> parseEquations(String section, List<MacroDef> macros) {
-        // Join continuation lines (backslash + newline + optional whitespace → space)
         section = CONTINUATION_PATTERN.matcher(section).replaceAll(" ");
 
         List<MdlEquation> equations = new ArrayList<>();
-        String currentGroup = "";
-        boolean inMacro = false;
-        String macroName = null;
-        List<String> macroParams = null;
-        List<MdlEquation> macroBody = null;
+        MacroState state = new MacroState();
 
-        // Split on pipe delimiter
         String[] blocks = section.split("\\|");
 
         for (String block : blocks) {
@@ -133,13 +127,11 @@ public final class MdlParser {
                 continue;
             }
 
-            // Check for group delimiters (lines of ****)
             if (isGroupDelimiter(trimmed)) {
-                currentGroup = extractGroupName(trimmed);
+                state.currentGroup = extractGroupName(trimmed);
                 continue;
             }
 
-            // Split block on tilde to get [equation, units, comment]
             String[] tildeParts = trimmed.split("~", -1);
             String equationPart = tildeParts[0].strip();
             String unitsPart = tildeParts.length > 1 ? tildeParts[1].strip() : "";
@@ -149,151 +141,174 @@ public final class MdlParser {
                 continue;
             }
 
-            // The :MACRO: header or :END OF MACRO: may share a pipe-block with
-            // an equation (the header line followed by the first body equation, or
-            // :END OF MACRO: followed by the next regular equation). Split by
-            // newlines to detect and separate them.
-            //
-            // When both :END OF MACRO: and :MACRO: appear in the same block,
-            // lines fall into three phases:
-            //   1. preEndLines   — before :END OF MACRO: → belong to current macro
-            //   2. betweenLines  — between :END OF MACRO: and :MACRO: → regular equations
-            //   3. postMacroLines — after :MACRO: → first body of new macro
-            String[] eqLines = equationPart.split("\n");
-            String macroHeaderLine = null;
-            boolean endMacroInBlock = false;
-            List<String> preEndLines = new ArrayList<>();
-            List<String> betweenLines = new ArrayList<>();
-            List<String> postMacroLines = new ArrayList<>();
-            // 0 = before END, 1 = between END and MACRO, 2 = after MACRO
-            int phase = 0;
+            ClassifiedLines classified = classifyBlockLines(equationPart);
 
-            for (String line : eqLines) {
-                String lineStripped = line.strip();
-                if (lineStripped.isEmpty()) {
-                    continue;
-                }
-                if (MACRO_END_PATTERN.matcher(lineStripped).find()) {
-                    endMacroInBlock = true;
-                    phase = 1;
-                } else if (MACRO_START_PATTERN.matcher(lineStripped).find()) {
-                    macroHeaderLine = lineStripped;
-                    phase = 2;
-                } else {
-                    switch (phase) {
-                        case 0 -> preEndLines.add(lineStripped);
-                        case 1 -> betweenLines.add(lineStripped);
-                        default -> postMacroLines.add(lineStripped);
-                    }
-                }
+            if (classified.endMacroInBlock) {
+                finalizeEndOfMacro(classified, state, unitsPart, commentPart,
+                        equations, macros);
             }
 
-            // Handle :END OF MACRO: — finalize current macro
-            if (endMacroInBlock) {
-                // Lines before END belong to the current macro body
-                String preEndEq = String.join(" ", preEndLines).strip();
-                if (!preEndEq.isEmpty() && inMacro && macroBody != null) {
-                    MdlEquation preEq = parseEquationBlock(preEndEq, unitsPart,
-                            commentPart, currentGroup);
-                    if (preEq != null) {
-                        macroBody.add(preEq);
-                    }
-                }
-                if (inMacro && macroName != null && macroParams != null && macroBody != null) {
-                    macros.add(buildMacroDef(macroName, macroParams, macroBody));
-                }
-                inMacro = false;
-                macroName = null;
-                macroParams = null;
-                macroBody = null;
-
-                // Lines between END and MACRO (or end of block) are regular equations
-                String betweenEq = String.join(" ", betweenLines).strip();
-                if (!betweenEq.isEmpty()) {
-                    MdlEquation bEq = parseEquationBlock(betweenEq, unitsPart,
-                            commentPart, currentGroup);
-                    if (bEq != null) {
-                        equations.add(bEq);
-                    }
-                }
+            if (!classified.endMacroInBlock && !classified.preEndLines.isEmpty()) {
+                dispatchPreEndLines(classified.preEndLines, state, unitsPart,
+                        commentPart, equations);
             }
 
-            // When no END was seen, preEndLines hold lines that appeared before
-            // a :MACRO: header (or all lines if no directives at all). They belong
-            // to whatever context was active before this block.
-            if (!endMacroInBlock && !preEndLines.isEmpty()) {
-                String preEq = String.join(" ", preEndLines).strip();
-                if (!preEq.isEmpty()) {
-                    MdlEquation eq = parseEquationBlock(preEq, unitsPart,
-                            commentPart, currentGroup);
-                    if (eq != null) {
-                        if (inMacro && macroBody != null) {
-                            macroBody.add(eq);
-                        } else {
-                            equations.add(eq);
-                        }
-                    }
-                }
+            if (classified.macroHeaderLine != null) {
+                startNewMacro(classified.macroHeaderLine, state);
             }
 
-            // Handle :MACRO: header — start new macro
-            // (must come after preEndLines processing so those lines go to the
-            // previous context, not the new macro)
-            if (macroHeaderLine != null) {
-                inMacro = true;
-                macroBody = new ArrayList<>();
-                Matcher headerMatcher = MACRO_HEADER_PATTERN.matcher(macroHeaderLine);
-                if (headerMatcher.find()) {
-                    macroName = headerMatcher.group(1).strip();
-                    String paramStr = headerMatcher.group(2).strip();
-                    macroParams = new ArrayList<>();
-                    if (!paramStr.isEmpty()) {
-                        for (String p : paramStr.split(",")) {
-                            String param = p.strip();
-                            if (!param.isEmpty()) {
-                                macroParams.add(param);
-                            }
-                        }
-                    }
-                } else {
-                    logger.warn("Malformed :MACRO: header — ignoring: {}",
-                            macroHeaderLine.strip());
-                    inMacro = false;
-                    macroBody = null;
-                    macroName = null;
-                    macroParams = null;
-                }
-            }
-
-            // Lines after :MACRO: header are the first body equation of the new
-            // macro. Otherwise, all lines were already dispatched above.
-            List<String> remainingLines = macroHeaderLine != null
-                    ? postMacroLines : List.of();
-
-            String remainingEq = String.join(" ", remainingLines).strip();
-            if (remainingEq.isEmpty()) {
-                continue;
-            }
-
-            MdlEquation equation = parseEquationBlock(remainingEq, unitsPart, commentPart,
-                    currentGroup);
-            if (equation != null) {
-                if (inMacro && macroBody != null) {
-                    macroBody.add(equation);
-                } else {
-                    equations.add(equation);
-                }
-            }
+            dispatchRemainingLines(classified, state, unitsPart, commentPart, equations);
         }
 
-        // Recover equations from unclosed macros
-        if (inMacro && macroBody != null && !macroBody.isEmpty()) {
+        if (state.inMacro && state.macroBody != null && !state.macroBody.isEmpty()) {
             logger.warn("Unclosed :MACRO: '{}' at end of file — recovering {} equations",
-                    macroName, macroBody.size());
-            equations.addAll(macroBody);
+                    state.macroName, state.macroBody.size());
+            equations.addAll(state.macroBody);
         }
 
         return equations;
+    }
+
+    private static final class MacroState {
+        String currentGroup = "";
+        boolean inMacro = false;
+        String macroName = null;
+        List<String> macroParams = null;
+        List<MdlEquation> macroBody = null;
+    }
+
+    private record ClassifiedLines(List<String> preEndLines, List<String> betweenLines,
+                                    List<String> postMacroLines, String macroHeaderLine,
+                                    boolean endMacroInBlock) {
+    }
+
+    private static ClassifiedLines classifyBlockLines(String equationPart) {
+        String[] eqLines = equationPart.split("\n");
+        String macroHeaderLine = null;
+        boolean endMacroInBlock = false;
+        List<String> preEndLines = new ArrayList<>();
+        List<String> betweenLines = new ArrayList<>();
+        List<String> postMacroLines = new ArrayList<>();
+        int phase = 0;
+
+        for (String line : eqLines) {
+            String lineStripped = line.strip();
+            if (lineStripped.isEmpty()) {
+                continue;
+            }
+            if (MACRO_END_PATTERN.matcher(lineStripped).find()) {
+                endMacroInBlock = true;
+                phase = 1;
+            } else if (MACRO_START_PATTERN.matcher(lineStripped).find()) {
+                macroHeaderLine = lineStripped;
+                phase = 2;
+            } else {
+                switch (phase) {
+                    case 0 -> preEndLines.add(lineStripped);
+                    case 1 -> betweenLines.add(lineStripped);
+                    default -> postMacroLines.add(lineStripped);
+                }
+            }
+        }
+
+        return new ClassifiedLines(preEndLines, betweenLines, postMacroLines,
+                macroHeaderLine, endMacroInBlock);
+    }
+
+    private static void finalizeEndOfMacro(ClassifiedLines classified, MacroState state,
+                                            String unitsPart, String commentPart,
+                                            List<MdlEquation> equations,
+                                            List<MacroDef> macros) {
+        String preEndEq = String.join(" ", classified.preEndLines).strip();
+        if (!preEndEq.isEmpty() && state.inMacro && state.macroBody != null) {
+            MdlEquation preEq = parseEquationBlock(preEndEq, unitsPart,
+                    commentPart, state.currentGroup);
+            if (preEq != null) {
+                state.macroBody.add(preEq);
+            }
+        }
+        if (state.inMacro && state.macroName != null
+                && state.macroParams != null && state.macroBody != null) {
+            macros.add(buildMacroDef(state.macroName, state.macroParams, state.macroBody));
+        }
+        state.inMacro = false;
+        state.macroName = null;
+        state.macroParams = null;
+        state.macroBody = null;
+
+        String betweenEq = String.join(" ", classified.betweenLines).strip();
+        if (!betweenEq.isEmpty()) {
+            MdlEquation bEq = parseEquationBlock(betweenEq, unitsPart,
+                    commentPart, state.currentGroup);
+            if (bEq != null) {
+                equations.add(bEq);
+            }
+        }
+    }
+
+    private static void dispatchPreEndLines(List<String> preEndLines, MacroState state,
+                                             String unitsPart, String commentPart,
+                                             List<MdlEquation> equations) {
+        String preEq = String.join(" ", preEndLines).strip();
+        if (!preEq.isEmpty()) {
+            MdlEquation eq = parseEquationBlock(preEq, unitsPart,
+                    commentPart, state.currentGroup);
+            if (eq != null) {
+                if (state.inMacro && state.macroBody != null) {
+                    state.macroBody.add(eq);
+                } else {
+                    equations.add(eq);
+                }
+            }
+        }
+    }
+
+    private static void startNewMacro(String macroHeaderLine, MacroState state) {
+        state.inMacro = true;
+        state.macroBody = new ArrayList<>();
+        Matcher headerMatcher = MACRO_HEADER_PATTERN.matcher(macroHeaderLine);
+        if (headerMatcher.find()) {
+            state.macroName = headerMatcher.group(1).strip();
+            String paramStr = headerMatcher.group(2).strip();
+            state.macroParams = new ArrayList<>();
+            if (!paramStr.isEmpty()) {
+                for (String p : paramStr.split(",")) {
+                    String param = p.strip();
+                    if (!param.isEmpty()) {
+                        state.macroParams.add(param);
+                    }
+                }
+            }
+        } else {
+            logger.warn("Malformed :MACRO: header — ignoring: {}",
+                    macroHeaderLine.strip());
+            state.inMacro = false;
+            state.macroBody = null;
+            state.macroName = null;
+            state.macroParams = null;
+        }
+    }
+
+    private static void dispatchRemainingLines(ClassifiedLines classified, MacroState state,
+                                                String unitsPart, String commentPart,
+                                                List<MdlEquation> equations) {
+        List<String> remainingLines = classified.macroHeaderLine != null
+                ? classified.postMacroLines : List.of();
+
+        String remainingEq = String.join(" ", remainingLines).strip();
+        if (remainingEq.isEmpty()) {
+            return;
+        }
+
+        MdlEquation equation = parseEquationBlock(remainingEq, unitsPart, commentPart,
+                state.currentGroup);
+        if (equation != null) {
+            if (state.inMacro && state.macroBody != null) {
+                state.macroBody.add(equation);
+            } else {
+                equations.add(equation);
+            }
+        }
     }
 
     /**

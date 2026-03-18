@@ -64,6 +64,15 @@ public class LookupForm implements ElementForm {
         LookupTableDef lookup = lookupOpt.get();
 
         int row = startRow;
+        row = buildHeaderFields(row, lookup);
+        row = buildInterpolationDropdown(row, lookup);
+        row = buildDataPointsTable(row, lookup);
+        row = buildChartAndButtons(row, lookup);
+
+        return row;
+    }
+
+    private int buildHeaderFields(int row, LookupTableDef lookup) {
         TextField nameField = ctx.createNameField();
         ctx.addFieldRow(row++, "Name", nameField,
                 "The name used to reference this lookup table in equations.\n"
@@ -79,13 +88,15 @@ public class LookupForm implements ElementForm {
         ctx.addFieldRow(row++, "Description", commentArea,
                 "Documentation for this element");
 
-        // Unit dropdown
         ComboBox<String> unitBox = ctx.createUnitComboBox(lookup.unit());
         ctx.addComboCommitHandlers(unitBox, this::commitUnit);
         ctx.addFieldRow(row++, "Unit", unitBox,
                 "The unit of measurement for the lookup output");
 
-        // Interpolation dropdown
+        return row;
+    }
+
+    private int buildInterpolationDropdown(int row, LookupTableDef lookup) {
         ComboBox<String> interpBox = new ComboBox<>();
         interpBox.getItems().addAll("LINEAR", "SPLINE");
         interpBox.setValue(lookup.interpolation());
@@ -108,14 +119,15 @@ public class LookupForm implements ElementForm {
                 "How values between data points are estimated.\n"
                 + "LINEAR: straight lines between points.\n"
                 + "SPLINE: smooth curves through points.");
+        return row;
+    }
 
-        // Data points summary
+    private int buildDataPointsTable(int row, LookupTableDef lookup) {
         double[] xs = lookup.xValues();
         double[] ys = lookup.yValues();
         ctx.addReadOnlyRow(row++, "Data Points", xs.length + " points",
                 "The x/y pairs defining the lookup function");
 
-        // Editable table of x/y pairs
         GridPane tableGrid = new GridPane();
         tableGrid.setHgap(4);
         tableGrid.setVgap(2);
@@ -128,40 +140,47 @@ public class LookupForm implements ElementForm {
         tableGrid.add(yHeader, 1, 0);
 
         for (int i = 0; i < xs.length; i++) {
-            TextField xField = new TextField(ElementRenderer.formatValue(xs[i]));
-            TextField yField = new TextField(ElementRenderer.formatValue(ys[i]));
-            xField.setPrefWidth(70);
-            yField.setPrefWidth(70);
-
-            final int index = i;
-            Runnable commitRow = () -> commitDataPoint(xField, yField, index);
-            xField.setOnAction(e -> commitRow.run());
-            xField.focusedProperty().addListener((obs, wasFocused, isFocused) -> {
-                if (!isFocused && !ctx.isUpdatingFields()) {
-                    commitRow.run();
-                }
-            });
-            yField.setOnAction(e -> commitRow.run());
-            yField.focusedProperty().addListener((obs, wasFocused, isFocused) -> {
-                if (!isFocused && !ctx.isUpdatingFields()) {
-                    commitRow.run();
-                }
-            });
-
-            tableGrid.add(xField, 0, i + 1);
-            tableGrid.add(yField, 1, i + 1);
+            addDataPointRow(tableGrid, xs[i], ys[i], i);
         }
 
         ctx.getGrid().add(tableGrid, 0, row, 2, 1);
         row++;
+        return row;
+    }
 
-        // Inline interactive chart
+    private void addDataPointRow(GridPane tableGrid, double xVal, double yVal, int index) {
+        TextField xField = new TextField(ElementRenderer.formatValue(xVal));
+        TextField yField = new TextField(ElementRenderer.formatValue(yVal));
+        xField.setPrefWidth(70);
+        yField.setPrefWidth(70);
+
+        Runnable commitRow = () -> commitDataPoint(xField, yField, index);
+        xField.setOnAction(e -> commitRow.run());
+        xField.focusedProperty().addListener((obs, wasFocused, isFocused) -> {
+            if (!isFocused && !ctx.isUpdatingFields()) {
+                commitRow.run();
+            }
+        });
+        yField.setOnAction(e -> commitRow.run());
+        yField.focusedProperty().addListener((obs, wasFocused, isFocused) -> {
+            if (!isFocused && !ctx.isUpdatingFields()) {
+                commitRow.run();
+            }
+        });
+
+        tableGrid.add(xField, 0, index + 1);
+        tableGrid.add(yField, 1, index + 1);
+    }
+
+    private int buildChartAndButtons(int row, LookupTableDef lookup) {
+        double[] xs = lookup.xValues();
+        double[] ys = lookup.yValues();
+
         chartRow = row;
         chart = buildChart(xs, ys, lookup.interpolation());
         ctx.getGrid().add(chart, 0, row, 2, 1);
         row++;
 
-        // Add/remove row buttons
         HBox rowButtons = new HBox(4);
         Button addRowBtn = new Button("+ Row");
         addRowBtn.setStyle(Styles.SMALL_TEXT);

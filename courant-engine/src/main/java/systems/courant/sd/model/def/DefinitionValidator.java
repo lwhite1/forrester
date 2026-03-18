@@ -50,11 +50,20 @@ public final class DefinitionValidator {
      */
     public static List<String> validateStructure(ModelDefinition def) {
         List<String> errors = new ArrayList<>();
-        Set<String> allNames = new HashSet<>();
-        // Case-insensitive duplicate detection: maps lowercase → first-seen original name
-        Map<String, String> lowerToOriginal = new HashMap<>();
+        Set<String> allNames = collectAndCheckDuplicateNames(def, errors);
+        validateFlowStockReferences(def, errors);
+        validateEquationsParse(def, errors);
+        validateFormulaReferences(def, buildKnownNames(allNames, def), errors);
+        validateModuleBindings(def, errors);
+        validateNoCircularModules(def, errors);
+        validateCausalLinks(def, errors);
+        return errors;
+    }
 
-        // Collect all element names and check for duplicates (case-insensitive)
+    private static Set<String> collectAndCheckDuplicateNames(ModelDefinition def,
+                                                              List<String> errors) {
+        Set<String> allNames = new HashSet<>();
+        Map<String, String> lowerToOriginal = new HashMap<>();
         for (StockDef stock : def.stocks()) {
             checkDuplicateName(stock.name(), allNames, lowerToOriginal, errors);
         }
@@ -76,14 +85,14 @@ public final class DefinitionValidator {
         for (TimeSeriesDef ts : def.timeSeries()) {
             checkDuplicateName(ts.name(), allNames, lowerToOriginal, errors);
         }
+        return allNames;
+    }
 
-        // Build set of stock names for flow source/sink validation
+    private static void validateFlowStockReferences(ModelDefinition def, List<String> errors) {
         Set<String> stockNames = new HashSet<>();
         for (StockDef stock : def.stocks()) {
             stockNames.add(stock.name());
         }
-
-        // Validate flow source/sink references
         for (FlowDef flow : def.flows()) {
             if (flow.source() != null && !stockNames.contains(flow.source())) {
                 errors.add("Flow '" + flow.name() + "' references non-existent source stock: '"
@@ -94,8 +103,9 @@ public final class DefinitionValidator {
                         + flow.sink() + "'. The stock may have been renamed or deleted.");
             }
         }
+    }
 
-        // Validate flow equations parse
+    private static void validateEquationsParse(ModelDefinition def, List<String> errors) {
         for (FlowDef flow : def.flows()) {
             try {
                 ExprParser.parse(flow.equation());
@@ -104,8 +114,6 @@ public final class DefinitionValidator {
                         + ". Double-click the flow to edit its equation.");
             }
         }
-
-        // Validate variable equations parse
         for (VariableDef v : def.variables()) {
             try {
                 ExprParser.parse(v.equation());
@@ -115,53 +123,55 @@ public final class DefinitionValidator {
                         + ". Double-click the variable to edit its equation.");
             }
         }
+    }
 
-        // Validate that formula references resolve to known element names
+    private static Set<String> buildKnownNames(Set<String> allNames, ModelDefinition def) {
         Set<String> knownNames = new HashSet<>(allNames);
-        // Add module output port aliases as known names
         for (ModuleInstanceDef module : def.modules()) {
             knownNames.addAll(module.outputBindings().values());
         }
-        validateFormulaReferences(def, knownNames, errors);
+        return knownNames;
+    }
 
-        // Validate module interface bindings
+    private static void validateModuleBindings(ModelDefinition def, List<String> errors) {
         for (ModuleInstanceDef module : def.modules()) {
             ModuleInterface iface = module.definition().moduleInterface();
-            if (iface != null) {
-                Set<String> inputPortNames = new HashSet<>();
-                for (PortDef port : iface.inputs()) {
-                    inputPortNames.add(port.name());
+            if (iface == null) {
+                continue;
+            }
+            Set<String> inputPortNames = new HashSet<>();
+            for (PortDef port : iface.inputs()) {
+                inputPortNames.add(port.name());
+            }
+            for (String bindingPort : module.inputBindings().keySet()) {
+                if (!inputPortNames.contains(bindingPort)) {
+                    errors.add("Module '" + module.instanceName()
+                            + "' binds non-existent input port: '" + bindingPort
+                            + "'. Check the module definition for valid port names.");
                 }
-                for (String bindingPort : module.inputBindings().keySet()) {
-                    if (!inputPortNames.contains(bindingPort)) {
-                        errors.add("Module '" + module.instanceName()
-                                + "' binds non-existent input port: '" + bindingPort
-                                + "'. Check the module definition for valid port names.");
-                    }
+            }
+            Set<String> outputPortNames = new HashSet<>();
+            for (PortDef port : iface.outputs()) {
+                outputPortNames.add(port.name());
+            }
+            for (String bindingPort : module.outputBindings().keySet()) {
+                if (!outputPortNames.contains(bindingPort)) {
+                    errors.add("Module '" + module.instanceName()
+                            + "' binds non-existent output port: '" + bindingPort
+                            + "'. Check the module definition for valid port names.");
                 }
-                Set<String> outputPortNames = new HashSet<>();
-                for (PortDef port : iface.outputs()) {
-                    outputPortNames.add(port.name());
-                }
-                for (String bindingPort : module.outputBindings().keySet()) {
-                    if (!outputPortNames.contains(bindingPort)) {
-                        errors.add("Module '" + module.instanceName()
-                                + "' binds non-existent output port: '" + bindingPort
-                                + "'. Check the module definition for valid port names.");
-                    }
-                }
-                // Check that all required input ports are bound
-                for (String inputPort : inputPortNames) {
-                    if (!module.inputBindings().containsKey(inputPort)) {
-                        errors.add("Module '" + module.instanceName()
-                                + "' is missing binding for required input port: '" + inputPort
-                                + "'. Bind it to an element in the parent model.");
-                    }
+            }
+            for (String inputPort : inputPortNames) {
+                if (!module.inputBindings().containsKey(inputPort)) {
+                    errors.add("Module '" + module.instanceName()
+                            + "' is missing binding for required input port: '" + inputPort
+                            + "'. Bind it to an element in the parent model.");
                 }
             }
         }
+    }
 
-        // Check for circular module references
+    private static void validateNoCircularModules(ModelDefinition def, List<String> errors) {
         Set<String> rootPath = new HashSet<>();
         rootPath.add(def.name());
         for (ModuleInstanceDef module : def.modules()) {
@@ -171,8 +181,9 @@ public final class DefinitionValidator {
                         + "'. A module cannot contain itself, directly or indirectly.");
             }
         }
+    }
 
-        // Validate causal links for self-loops and duplicates
+    private static void validateCausalLinks(ModelDefinition def, List<String> errors) {
         Set<String> seenLinks = new HashSet<>();
         for (CausalLinkDef link : def.causalLinks()) {
             if (link.from().equals(link.to())) {
@@ -185,8 +196,6 @@ public final class DefinitionValidator {
                         + ". Remove the extra link.");
             }
         }
-
-        return errors;
     }
 
     private static final Set<String> BUILTIN_NAMES = Set.of(

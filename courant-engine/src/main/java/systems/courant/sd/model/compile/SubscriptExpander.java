@@ -37,13 +37,32 @@ public class SubscriptExpander {
             return def;
         }
 
-        // Build subscript dimension lookup: dimension name → labels
+        Map<String, List<String>> dimensionLabels = buildDimensionLabels(def);
+        Set<String> subscriptedNames = collectSubscriptedNames(def);
+
+        if (subscriptedNames.isEmpty()) {
+            return def;
+        }
+
+        Pattern namePattern = buildNamePattern(subscriptedNames);
+
+        return def.toBuilder()
+                .clearStocks().clearFlows().clearVariables()
+                .stocks(expandStocks(def, dimensionLabels, subscriptedNames, namePattern))
+                .flows(expandFlows(def, dimensionLabels, subscriptedNames, namePattern))
+                .variables(expandVariables(def, dimensionLabels, subscriptedNames, namePattern))
+                .build();
+    }
+
+    private static Map<String, List<String>> buildDimensionLabels(ModelDefinition def) {
         Map<String, List<String>> dimensionLabels = new HashMap<>();
         for (SubscriptDef sub : def.subscripts()) {
             dimensionLabels.put(sub.name(), sub.labels());
         }
+        return dimensionLabels;
+    }
 
-        // Identify which element names are subscripted (to rewrite equations)
+    private static Set<String> collectSubscriptedNames(ModelDefinition def) {
         Set<String> subscriptedNames = new HashSet<>();
         for (StockDef s : def.stocks()) {
             if (!s.subscripts().isEmpty()) {
@@ -60,25 +79,23 @@ public class SubscriptExpander {
                 subscriptedNames.add(a.name());
             }
         }
+        return subscriptedNames;
+    }
 
-        if (subscriptedNames.isEmpty()) {
-            return def;
-        }
-
-        // Build regex pattern to match subscripted element names as whole words
-        Pattern namePattern = buildNamePattern(subscriptedNames);
-
-        // Expand stocks
-        List<StockDef> expandedStocks = new ArrayList<>();
+    private static List<StockDef> expandStocks(ModelDefinition def,
+                                                Map<String, List<String>> dimensionLabels,
+                                                Set<String> subscriptedNames,
+                                                Pattern namePattern) {
+        List<StockDef> expanded = new ArrayList<>();
         for (StockDef s : def.stocks()) {
             if (s.subscripts().isEmpty()) {
-                expandedStocks.add(s);
+                expanded.add(s);
             } else {
                 List<List<String>> labelLists = resolveLabels(
                         s.subscripts(), dimensionLabels, "Stock", s.name());
                 for (List<String> combo : cartesianProduct(labelLists)) {
                     String suffix = joinLabels(combo);
-                    expandedStocks.add(new StockDef(
+                    expanded.add(new StockDef(
                             s.name() + "[" + suffix + "]",
                             s.comment(),
                             s.initialValue(),
@@ -89,12 +106,17 @@ public class SubscriptExpander {
                 }
             }
         }
+        return expanded;
+    }
 
-        // Expand flows
-        List<FlowDef> expandedFlows = new ArrayList<>();
+    private static List<FlowDef> expandFlows(ModelDefinition def,
+                                              Map<String, List<String>> dimensionLabels,
+                                              Set<String> subscriptedNames,
+                                              Pattern namePattern) {
+        List<FlowDef> expanded = new ArrayList<>();
         for (FlowDef f : def.flows()) {
             if (f.subscripts().isEmpty()) {
-                expandedFlows.add(f);
+                expanded.add(f);
             } else {
                 List<List<String>> labelLists = resolveLabels(
                         f.subscripts(), dimensionLabels, "Flow", f.name());
@@ -106,7 +128,7 @@ public class SubscriptExpander {
                             f.source(), suffix, subscriptedNames);
                     String expandedSink = expandReference(
                             f.sink(), suffix, subscriptedNames);
-                    expandedFlows.add(new FlowDef(
+                    expanded.add(new FlowDef(
                             f.name() + "[" + suffix + "]",
                             f.comment(),
                             expandedEq,
@@ -118,12 +140,17 @@ public class SubscriptExpander {
                 }
             }
         }
+        return expanded;
+    }
 
-        // Expand variables
-        List<VariableDef> expandedAuxes = new ArrayList<>();
+    private static List<VariableDef> expandVariables(ModelDefinition def,
+                                                      Map<String, List<String>> dimensionLabels,
+                                                      Set<String> subscriptedNames,
+                                                      Pattern namePattern) {
+        List<VariableDef> expanded = new ArrayList<>();
         for (VariableDef a : def.variables()) {
             if (a.subscripts().isEmpty()) {
-                expandedAuxes.add(a);
+                expanded.add(a);
             } else {
                 List<List<String>> labelLists = resolveLabels(
                         a.subscripts(), dimensionLabels, "Auxiliary", a.name());
@@ -131,7 +158,7 @@ public class SubscriptExpander {
                     String suffix = joinLabels(combo);
                     String expandedEq = rewriteEquation(
                             a.equation(), suffix, subscriptedNames, namePattern);
-                    expandedAuxes.add(new VariableDef(
+                    expanded.add(new VariableDef(
                             a.name() + "[" + suffix + "]",
                             a.comment(),
                             expandedEq,
@@ -139,13 +166,7 @@ public class SubscriptExpander {
                 }
             }
         }
-
-        return def.toBuilder()
-                .clearStocks().clearFlows().clearVariables()
-                .stocks(expandedStocks)
-                .flows(expandedFlows)
-                .variables(expandedAuxes)
-                .build();
+        return expanded;
     }
 
     /**

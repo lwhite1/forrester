@@ -145,7 +145,25 @@ public class Finance {
                 .name("FINANCE")
                 .defaultSimulation("Year", 5.0, "Year", 0.0625);
 
-        // Stocks
+        defineStocks(builder);
+        defineConstants(builder);
+        defineVariables(builder);
+        defineFlows(builder);
+
+        var definition = builder.build();
+        var compiled = new ModelCompiler().compile(definition);
+
+        compiled.getModel().setMetadata(ModelMetadata.builder()
+                .author("Ventana Systems")
+                .source("Vensim Sample Models")
+                .license("MIT")
+                .build());
+
+        Simulation sim = compiled.createSimulation();
+        sim.execute();
+    }
+
+    private void defineStocks(ModelDefinitionBuilder builder) {
         builder.stock(new StockDef("Accounts Receivable", "Accounts Receivable", 0.0, "billings / (1/average_payable_delay + fractional_loss_rate)", "$", null, List.of()));
         builder.stock(new StockDef("Awaiting Billing", "Awaiting Billing", 0.0, "price * production * billing_processing_time", "$", null, List.of()));
         builder.stock(new StockDef("Book Value", "Book Value", 0.0, "$", null));
@@ -160,7 +178,9 @@ public class Finance {
         builder.stock(new StockDef("Capacity", "Capacity", 0.0, "desired_capacity", "Gadget/Year", null, List.of()));
         builder.stock(new StockDef("Waiting Customers", "Waiting Customers", 0.0, "New_Backlog/product_per_customer", "Person", null, List.of()));
 
-        // Constants
+    }
+
+    private void defineConstants(ModelDefinitionBuilder builder) {
         builder.constant("TIME_STEP", 0.0625, "Year");
         builder.constant("INITIAL_TIME", 0.0, "Year");
         builder.constant("FINAL_TIME", 5.0, "Year");
@@ -197,7 +217,9 @@ public class Finance {
         builder.constant("time to adjust capacity", 1.0, "Year");
         builder.constant("time to correct backlog", 0.5, "Year");
 
-        // Variables
+    }
+
+    private void defineVariables(ModelDefinitionBuilder builder) {
         builder.variable(new VariableDef("billings", "billings", "Awaiting_Billing/billing_processing_time", "$/Year"));
         builder.variable(new VariableDef("borrowing", "borrowing", "new_investment * debt_financing_fraction", "$/Year"));
         builder.variable(new VariableDef("cash receipts", "cash receipts", "Accounts_Receivable/average_payable_delay", "$/Year"));
@@ -240,7 +262,9 @@ public class Finance {
         builder.variable(new VariableDef("replacement investment", "replacement investment", "reductions", "Gadget/Year/Year"));
         builder.variable(new VariableDef("total orders", "total orders", "new_orders + replacement_orders", "Gadget/Year"));
 
-        // Flows
+    }
+
+    private void defineFlows(ModelDefinitionBuilder builder) {
         builder.flow(new FlowDef("Accounts Receivable inflow 1", null, "billings", "Year", null, "Accounts Receivable"));
         builder.flow(new FlowDef("Accounts Receivable outflow 2", null, "cash_receipts", "Year", "Accounts Receivable", null));
         builder.flow(new FlowDef("Accounts Receivable outflow 3", null, "losses", "Year", "Accounts Receivable", null));
@@ -266,17 +290,5 @@ public class Finance {
         builder.flow(new FlowDef("Capacity outflow 2", null, "reductions", "Year", "Capacity", null));
         builder.flow(new FlowDef("Waiting Customers inflow 1", null, "committals", "Year", null, "Waiting Customers"));
         builder.flow(new FlowDef("Waiting Customers outflow 2", null, "completions", "Year", "Waiting Customers", null));
-
-        var definition = builder.build();
-        var compiled = new ModelCompiler().compile(definition);
-
-        compiled.getModel().setMetadata(ModelMetadata.builder()
-                .author("Ventana Systems")
-                .source("Vensim Sample Models")
-                .license("MIT")
-                .build());
-
-        Simulation sim = compiled.createSimulation();
-        sim.execute();
     }
 }

@@ -266,123 +266,141 @@ class VensimBatchImportTest {
     }
 
     private void writeSummary(List<ModelResult> results, Path path) throws IOException {
+        try (PrintWriter w = new PrintWriter(Files.newBufferedWriter(path, StandardCharsets.UTF_8))) {
+            writeSummaryHeader(w);
+            writeOverallResults(w, results);
+            writeResultsBySource(w, results);
+            writeCompileFailures(w, results);
+            writeImportFailures(w, results);
+            writeSimulationFailures(w, results);
+            writeSuccessfulModels(w, results);
+            writeCommonWarnings(w, results);
+            writeFullLogsLinks(w);
+        }
+    }
+
+    private void writeSummaryHeader(PrintWriter w) {
+        w.printf("# Vensim Import Compatibility Summary%n%n");
+        w.printf("**Date:** %s%n", LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")));
+        w.printf("**Source:** `models/Vensim/Sample`, `models/Vensim/UserGuide`, and `models/Delft`%n");
+        w.printf("**Tool:** `VensimBatchImportTest.java`%n%n");
+    }
+
+    private void writeOverallResults(PrintWriter w, List<ModelResult> results) {
         long total = results.size();
         long importOk = results.stream().filter(r -> r.importOk).count();
         long compileOk = results.stream().filter(r -> r.compileOk).count();
         long simOk = results.stream().filter(r -> r.simulateOk).count();
 
-        // Separate by source
-        Map<String, List<ModelResult>> bySource = new TreeMap<>();
+        w.printf("## Results at a Glance%n%n");
+        w.printf("| Phase | Pass | Fail | Rate |%n");
+        w.printf("|---|---|---|---|%n");
+        w.printf("| Import (parse .mdl) | %d | %d | %d%% |%n", importOk, total - importOk, pct(importOk, total));
+        w.printf("| Compile | %d | %d | %d%% |%n", compileOk, total - compileOk, pct(compileOk, total));
+        w.printf("| Simulate | %d | %d | %d%% |%n%n", simOk, total - simOk, pct(simOk, total));
+    }
+
+    private void writeResultsBySource(PrintWriter w, List<ModelResult> results) {
+        w.printf("## Results by Source Directory%n%n");
+
+        Map<String, List<ModelResult>> byTopDir = new LinkedHashMap<>();
         for (ModelResult r : results) {
-            bySource.computeIfAbsent(r.source, k -> new ArrayList<>()).add(r);
+            byTopDir.computeIfAbsent(r.source, k -> new ArrayList<>()).add(r);
         }
 
-        try (PrintWriter w = new PrintWriter(Files.newBufferedWriter(path, StandardCharsets.UTF_8))) {
-            w.printf("# Vensim Import Compatibility Summary%n%n");
-            w.printf("**Date:** %s%n", LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")));
-            w.printf("**Source:** `models/Vensim/Sample`, `models/Vensim/UserGuide`, and `models/Delft`%n");
-            w.printf("**Tool:** `VensimBatchImportTest.java`%n%n");
+        for (var entry : byTopDir.entrySet()) {
+            List<ModelResult> group = entry.getValue();
+            long gTotal = group.size();
+            long gImport = group.stream().filter(r -> r.importOk).count();
+            long gCompile = group.stream().filter(r -> r.compileOk).count();
+            long gSim = group.stream().filter(r -> r.simulateOk).count();
 
-            w.printf("## Results at a Glance%n%n");
-            w.printf("| Phase | Pass | Fail | Rate |%n");
-            w.printf("|---|---|---|---|%n");
-            w.printf("| Import (parse .mdl) | %d | %d | %d%% |%n", importOk, total - importOk, pct(importOk, total));
-            w.printf("| Compile | %d | %d | %d%% |%n", compileOk, total - compileOk, pct(compileOk, total));
-            w.printf("| Simulate | %d | %d | %d%% |%n%n", simOk, total - simOk, pct(simOk, total));
-
-            // Breakdown by source directory
-            w.printf("## Results by Source Directory%n%n");
-
-            // Group by source label (Sample, UserGuide, Delft)
-            Map<String, List<ModelResult>> byTopDir = new LinkedHashMap<>();
-            for (ModelResult r : results) {
-                byTopDir.computeIfAbsent(r.source, k -> new ArrayList<>()).add(r);
-            }
-
-            for (var entry : byTopDir.entrySet()) {
-                List<ModelResult> group = entry.getValue();
-                long gTotal = group.size();
-                long gImport = group.stream().filter(r -> r.importOk).count();
-                long gCompile = group.stream().filter(r -> r.compileOk).count();
-                long gSim = group.stream().filter(r -> r.simulateOk).count();
-
-                w.printf("### %s (%d models)%n%n", entry.getKey(), gTotal);
-                w.printf("| Phase | Pass | Fail | Rate |%n|---|---|---|---|%n");
-                w.printf("| Import | %d | %d | %d%% |%n", gImport, gTotal - gImport, pct(gImport, gTotal));
-                w.printf("| Compile | %d | %d | %d%% |%n", gCompile, gTotal - gCompile, pct(gCompile, gTotal));
-                w.printf("| Simulate | %d | %d | %d%% |%n%n", gSim, gTotal - gSim, pct(gSim, gTotal));
-            }
-
-            // Compile failures detail
-            List<ModelResult> failures = results.stream().filter(r -> r.importOk && !r.compileOk).toList();
-            if (!failures.isEmpty()) {
-                w.printf("## Compile Failures (%d models)%n%n", failures.size());
-                w.printf("| Model | Error Summary |%n|---|---|%n");
-                for (ModelResult r : failures) {
-                    w.printf("| %s | %s |%n", r.relativePath, truncate(r.compileError, 120));
-                }
-                w.println();
-            }
-
-            // Import failures detail
-            List<ModelResult> importFailures = results.stream().filter(r -> !r.importOk).toList();
-            if (!importFailures.isEmpty()) {
-                w.printf("## Import Failures (%d models)%n%n", importFailures.size());
-                w.printf("| Model | Error Summary |%n|---|---|%n");
-                for (ModelResult r : importFailures) {
-                    w.printf("| %s | %s |%n", r.relativePath, truncate(r.compileError, 120));
-                }
-                w.println();
-            }
-
-            // Simulation failures (compiled but sim failed)
-            List<ModelResult> simFailures = results.stream()
-                    .filter(r -> r.compileOk && !r.simulateOk)
-                    .toList();
-            if (!simFailures.isEmpty()) {
-                w.printf("## Simulation Failures (%d models)%n%n", simFailures.size());
-                w.printf("| Model | Error Summary |%n|---|---|%n");
-                for (ModelResult r : simFailures) {
-                    w.printf("| %s | %s |%n", r.relativePath,
-                            r.simulateError != null ? truncate(r.simulateError, 120) : "Unknown");
-                }
-                w.println();
-            }
-
-            // Successful models list
-            List<ModelResult> successes = results.stream().filter(r -> r.simulateOk).toList();
-            w.printf("## Successfully Simulated Models (%d)%n%n", successes.size());
-            w.printf("| Model | Stocks | Flows | Auxes | Warnings |%n|---|---|---|---|---|%n");
-            for (ModelResult r : successes) {
-                w.printf("| %s | %d | %d | %d | %d |%n",
-                        r.relativePath, r.stocks, r.flows, r.auxes, r.warnings.size());
-            }
-            w.println();
-
-            // Common warnings
-            Map<String, Integer> warningCounts = new TreeMap<>();
-            for (ModelResult r : results) {
-                for (String warn : r.warnings) {
-                    // Normalize warning text
-                    String key = warn.length() > 80 ? warn.substring(0, 80) + "..." : warn;
-                    warningCounts.merge(key, 1, Integer::sum);
-                }
-            }
-            if (!warningCounts.isEmpty()) {
-                w.printf("## Common Warnings%n%n");
-                w.printf("| Warning | Count |%n|---|---|%n");
-                warningCounts.entrySet().stream()
-                        .sorted(Map.Entry.<String, Integer>comparingByValue().reversed())
-                        .forEach(e -> w.printf("| %s | %d |%n", e.getKey(), e.getValue()));
-                w.println();
-            }
-
-            w.printf("## Full Logs%n%n");
-            w.printf("- **Per-model details:** `devdocs/vensim-import-log-%s.md`%n",
-                    LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")));
-            w.printf("- **Compatibility matrix:** `devdocs/vensim-compatibility-matrix-%s.csv`%n",
-                    LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")));
+            w.printf("### %s (%d models)%n%n", entry.getKey(), gTotal);
+            w.printf("| Phase | Pass | Fail | Rate |%n|---|---|---|---|%n");
+            w.printf("| Import | %d | %d | %d%% |%n", gImport, gTotal - gImport, pct(gImport, gTotal));
+            w.printf("| Compile | %d | %d | %d%% |%n", gCompile, gTotal - gCompile, pct(gCompile, gTotal));
+            w.printf("| Simulate | %d | %d | %d%% |%n%n", gSim, gTotal - gSim, pct(gSim, gTotal));
         }
+    }
+
+    private void writeCompileFailures(PrintWriter w, List<ModelResult> results) {
+        List<ModelResult> failures = results.stream().filter(r -> r.importOk && !r.compileOk).toList();
+        if (failures.isEmpty()) {
+            return;
+        }
+        w.printf("## Compile Failures (%d models)%n%n", failures.size());
+        w.printf("| Model | Error Summary |%n|---|---|%n");
+        for (ModelResult r : failures) {
+            w.printf("| %s | %s |%n", r.relativePath, truncate(r.compileError, 120));
+        }
+        w.println();
+    }
+
+    private void writeImportFailures(PrintWriter w, List<ModelResult> results) {
+        List<ModelResult> importFailures = results.stream().filter(r -> !r.importOk).toList();
+        if (importFailures.isEmpty()) {
+            return;
+        }
+        w.printf("## Import Failures (%d models)%n%n", importFailures.size());
+        w.printf("| Model | Error Summary |%n|---|---|%n");
+        for (ModelResult r : importFailures) {
+            w.printf("| %s | %s |%n", r.relativePath, truncate(r.compileError, 120));
+        }
+        w.println();
+    }
+
+    private void writeSimulationFailures(PrintWriter w, List<ModelResult> results) {
+        List<ModelResult> simFailures = results.stream()
+                .filter(r -> r.compileOk && !r.simulateOk)
+                .toList();
+        if (simFailures.isEmpty()) {
+            return;
+        }
+        w.printf("## Simulation Failures (%d models)%n%n", simFailures.size());
+        w.printf("| Model | Error Summary |%n|---|---|%n");
+        for (ModelResult r : simFailures) {
+            w.printf("| %s | %s |%n", r.relativePath,
+                    r.simulateError != null ? truncate(r.simulateError, 120) : "Unknown");
+        }
+        w.println();
+    }
+
+    private void writeSuccessfulModels(PrintWriter w, List<ModelResult> results) {
+        List<ModelResult> successes = results.stream().filter(r -> r.simulateOk).toList();
+        w.printf("## Successfully Simulated Models (%d)%n%n", successes.size());
+        w.printf("| Model | Stocks | Flows | Auxes | Warnings |%n|---|---|---|---|---|%n");
+        for (ModelResult r : successes) {
+            w.printf("| %s | %d | %d | %d | %d |%n",
+                    r.relativePath, r.stocks, r.flows, r.auxes, r.warnings.size());
+        }
+        w.println();
+    }
+
+    private void writeCommonWarnings(PrintWriter w, List<ModelResult> results) {
+        Map<String, Integer> warningCounts = new TreeMap<>();
+        for (ModelResult r : results) {
+            for (String warn : r.warnings) {
+                String key = warn.length() > 80 ? warn.substring(0, 80) + "..." : warn;
+                warningCounts.merge(key, 1, Integer::sum);
+            }
+        }
+        if (warningCounts.isEmpty()) {
+            return;
+        }
+        w.printf("## Common Warnings%n%n");
+        w.printf("| Warning | Count |%n|---|---|%n");
+        warningCounts.entrySet().stream()
+                .sorted(Map.Entry.<String, Integer>comparingByValue().reversed())
+                .forEach(e -> w.printf("| %s | %d |%n", e.getKey(), e.getValue()));
+        w.println();
+    }
+
+    private void writeFullLogsLinks(PrintWriter w) {
+        w.printf("## Full Logs%n%n");
+        w.printf("- **Per-model details:** `devdocs/vensim-import-log-%s.md`%n",
+                LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")));
+        w.printf("- **Compatibility matrix:** `devdocs/vensim-compatibility-matrix-%s.csv`%n",
+                LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")));
     }
 
     private static long pct(long num, long denom) {

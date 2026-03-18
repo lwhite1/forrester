@@ -92,10 +92,37 @@ public final class AutoLayout {
         }
 
         DependencyGraph depGraph = DependencyGraph.fromDefinition(def);
-
         ElkGraphFactory factory = ElkGraphFactory.eINSTANCE;
+        ElkNode root = createRootNode(factory);
 
-        // Single flat graph — topology drives all positioning
+        Map<String, ElkNode> nodeMap = new LinkedHashMap<>();
+        Map<String, ElementType> typeMap = new HashMap<>();
+        Map<String, ElkPort> westPorts = new HashMap<>();
+        Map<String, ElkPort> eastPorts = new HashMap<>();
+        populateElementNodes(factory, root, def, nodeMap, typeMap,
+                westPorts, eastPorts, sizeOverrides);
+
+        Map<String, Integer> chainOrder = computeMaterialFlowOrder(def);
+        assignNonChainPositions(chainOrder, depGraph, nodeMap);
+        applyChainPositions(chainOrder, nodeMap);
+
+        Set<String> backEdgeKeys = identifyBackEdges(depGraph, def, chainOrder);
+        addMaterialFlowEdges(factory, root, def, nodeMap, westPorts, eastPorts, backEdgeKeys);
+        addInfoLinkEdges(factory, root, def, depGraph, nodeMap, backEdgeKeys);
+        addCausalLinkEdges(factory, root, def, nodeMap, chainOrder);
+
+        RecursiveGraphLayoutEngine engine = new RecursiveGraphLayoutEngine();
+        engine.layout(root, new NullElkProgressMonitor());
+
+        List<ElementPlacement> placements = extractPlacements(nodeMap, typeMap);
+        alignFlowsWithStocks(placements, def);
+        resolveOverlaps(placements, sizeOverrides);
+
+        List<ConnectorRoute> connectors = ConnectorGenerator.generate(def);
+        return new ViewDef("Auto Layout", placements, connectors, List.of());
+    }
+
+    private static ElkNode createRootNode(ElkGraphFactory factory) {
         ElkNode root = factory.createElkNode();
         root.setProperty(CoreOptions.ALGORITHM, "org.eclipse.elk.layered");
         root.setProperty(CoreOptions.DIRECTION, Direction.RIGHT);
@@ -104,13 +131,16 @@ public final class AutoLayout {
         root.setProperty(CoreOptions.SPACING_EDGE_NODE, 30.0);
         root.setProperty(LayeredOptions.CYCLE_BREAKING_STRATEGY,
                 CycleBreakingStrategy.INTERACTIVE);
+        return root;
+    }
 
-        // Create all element nodes
-        Map<String, ElkNode> nodeMap = new LinkedHashMap<>();
-        Map<String, ElementType> typeMap = new HashMap<>();
-        Map<String, ElkPort> westPorts = new HashMap<>();
-        Map<String, ElkPort> eastPorts = new HashMap<>();
-
+    private static void populateElementNodes(ElkGraphFactory factory, ElkNode root,
+                                              ModelDefinition def,
+                                              Map<String, ElkNode> nodeMap,
+                                              Map<String, ElementType> typeMap,
+                                              Map<String, ElkPort> westPorts,
+                                              Map<String, ElkPort> eastPorts,
+                                              Map<String, ElementSizes> sizeOverrides) {
         for (StockDef s : def.stocks()) {
             addNode(factory, root, nodeMap, typeMap, s.name(), ElementType.STOCK,
                     westPorts, eastPorts, sizeOverrides);
@@ -135,15 +165,10 @@ public final class AutoLayout {
             addNode(factory, root, nodeMap, typeMap, v.name(), ElementType.CLD_VARIABLE,
                     westPorts, eastPorts, sizeOverrides);
         }
+    }
 
-        // Set initial X positions from the material flow chain so INTERACTIVE
-        // cycle breaking preserves the natural left-to-right stock-flow ordering.
-        Map<String, Integer> chainOrder = computeMaterialFlowOrder(def);
-
-        // Assign X positions to non-chain nodes (constants, variables) based on
-        // their consumers' chain positions — place them just before their earliest consumer.
-        assignNonChainPositions(chainOrder, depGraph, nodeMap);
-
+    private static void applyChainPositions(Map<String, Integer> chainOrder,
+                                             Map<String, ElkNode> nodeMap) {
         double xSpacing = 200;
         for (Map.Entry<String, ElkNode> entry : nodeMap.entrySet()) {
             Integer order = chainOrder.get(entry.getKey());
@@ -151,12 +176,14 @@ public final class AutoLayout {
                 entry.getValue().setX(order * xSpacing);
             }
         }
+    }
 
-        // Identify back-edges within SCCs using the material flow chain order.
-        // An edge is a back-edge if it goes from a later chain position to an earlier one.
-        Set<String> backEdgeKeys = identifyBackEdges(depGraph, def, chainOrder);
-
-        // Add material flow edges (high priority)
+    private static void addMaterialFlowEdges(ElkGraphFactory factory, ElkNode root,
+                                               ModelDefinition def,
+                                               Map<String, ElkNode> nodeMap,
+                                               Map<String, ElkPort> westPorts,
+                                               Map<String, ElkPort> eastPorts,
+                                               Set<String> backEdgeKeys) {
         for (FlowDef f : def.flows()) {
             ElkNode flowNode = nodeMap.get(f.name());
             if (flowNode == null) {
@@ -185,8 +212,12 @@ public final class AutoLayout {
                 }
             }
         }
+    }
 
-        // Add info link edges (low priority, excluding material edge duplicates)
+    private static void addInfoLinkEdges(ElkGraphFactory factory, ElkNode root,
+                                          ModelDefinition def, DependencyGraph depGraph,
+                                          Map<String, ElkNode> nodeMap,
+                                          Set<String> backEdgeKeys) {
         Set<String> materialEdges = buildMaterialEdgeKeys(def);
         for (String[] edge : depGraph.allEdges()) {
             String from = edge[0];
@@ -208,8 +239,12 @@ public final class AutoLayout {
                 elkEdge.setProperty(LayeredOptions.FEEDBACK_EDGES, true);
             }
         }
+    }
 
-        // Add causal link edges, marking back-edges for cycle breaking
+    private static void addCausalLinkEdges(ElkGraphFactory factory, ElkNode root,
+                                            ModelDefinition def,
+                                            Map<String, ElkNode> nodeMap,
+                                            Map<String, Integer> chainOrder) {
         Set<String> causalBackEdges = identifyCausalLinkBackEdges(def, chainOrder);
         for (CausalLinkDef link : def.causalLinks()) {
             ElkNode sourceNode = nodeMap.get(link.from());
@@ -223,12 +258,10 @@ public final class AutoLayout {
                 }
             }
         }
+    }
 
-        // Run ELK layout
-        RecursiveGraphLayoutEngine engine = new RecursiveGraphLayoutEngine();
-        engine.layout(root, new NullElkProgressMonitor());
-
-        // Extract center coordinates from ELK's top-left positions
+    private static List<ElementPlacement> extractPlacements(Map<String, ElkNode> nodeMap,
+                                                             Map<String, ElementType> typeMap) {
         List<ElementPlacement> placements = new ArrayList<>();
         for (Map.Entry<String, ElkNode> entry : nodeMap.entrySet()) {
             String name = entry.getKey();
@@ -238,12 +271,7 @@ public final class AutoLayout {
             double cy = node.getY() + node.getHeight() / 2.0;
             placements.add(new ElementPlacement(name, type, cx, cy));
         }
-
-        alignFlowsWithStocks(placements, def);
-        resolveOverlaps(placements, sizeOverrides);
-
-        List<ConnectorRoute> connectors = ConnectorGenerator.generate(def);
-        return new ViewDef("Auto Layout", placements, connectors, List.of());
+        return placements;
     }
 
     private static void addNode(ElkGraphFactory factory, ElkNode root,

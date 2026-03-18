@@ -235,7 +235,26 @@ public class Wrld303 {
                 .name("wrld3-03")
                 .defaultSimulation("Year", 200.0, "Year", 0.5);
 
-        // Stocks
+        defineStocks(builder);
+        defineConstants(builder);
+        defineLookupTables(builder);
+        defineVariables(builder);
+        defineFlows(builder);
+
+        var definition = builder.build();
+        var compiled = new ModelCompiler().compile(definition);
+
+        compiled.getModel().setMetadata(ModelMetadata.builder()
+                .author("Ventana Systems")
+                .source("Vensim Sample Models")
+                .license("MIT")
+                .build());
+
+        Simulation sim = compiled.createSimulation();
+        sim.execute();
+    }
+
+    private void defineStocks(ModelDefinitionBuilder builder) {
         builder.stock(new StockDef("Arable Land", "Arable land (AL#85).", 9.0E8, "hectare", null));
         builder.stock(new StockDef("Potentially Arable Land", "POTENTIALLY ARABLE LAND (PAL#86).", 2.3E9, "hectare", null));
         builder.stock(new StockDef("Land Yield Technology", "LAND YIELD TECHNOLOGY INITIATED (LYTD#--)", 1.0, "Dmnl", null));
@@ -252,7 +271,9 @@ public class Wrld303 {
         builder.stock(new StockDef("Nonrenewable Resources", "Non-renewable resource (NR#129)", 1.0E12, "Resource units", null));
         builder.stock(new StockDef("Resource Conservation Technology", "Non-renewable resource technology (NRTD#--)", 1.0, "Dmnl", null));
 
-        // Constants
+    }
+
+    private void defineConstants(ModelDefinitionBuilder builder) {
         builder.constant("TIME_STEP", 0.5, "Year");
         builder.constant("INITIAL_TIME", 1900.0, "Year");
         builder.constant("FINAL_TIME", 2100.0, "Year");
@@ -335,7 +356,9 @@ public class Wrld303 {
         builder.constant("technology development delay", 20.0, "year");
         builder.constant("PRICE OF FOOD", 0.22, "$/Veg equiv kg");
 
-        // Lookup tables
+    }
+
+    private void defineLookupTables(ModelDefinitionBuilder builder) {
         builder.lookupTable(new LookupTableDef("Education Index LOOKUP", "Education Index LOOKUP", new double[]{0.0, 1000.0, 2000.0, 3000.0, 4000.0, 5000.0, 6000.0, 7000.0}, new double[]{0.0, 0.81, 0.88, 0.92, 0.95, 0.98, 0.99, 1.0}, "LINEAR"));
         builder.lookupTable(new LookupTableDef("GDP per capita LOOKUP", "GDP per capita LOOKUP", new double[]{0.0, 200.0, 400.0, 600.0, 800.0, 1000.0}, new double[]{120.0, 600.0, 1200.0, 1800.0, 2500.0, 3200.0}, "LINEAR"));
         builder.lookupTable(new LookupTableDef("Life Expectancy Index LOOKUP", "Life Expectancy Index LOOKUP", new double[]{25.0, 35.0, 45.0, 55.0, 65.0, 75.0, 85.0}, new double[]{0.0, 0.16, 0.33, 0.5, 0.67, 0.84, 1.0}, "LINEAR"));
@@ -392,7 +415,9 @@ public class Wrld303 {
         builder.lookupTable(new LookupTableDef("resource technology change mult table", "Table relating resource use to technological change.\n\t\t         (NRCMT#--)", new double[]{-1.0, 0.0}, new double[]{0.0, 0.0}, "LINEAR"));
         builder.lookupTable(new LookupTableDef("per capita resource use mult table", "Table relating industrial output to resource usage\n\t\t         per capita (PCRUMT#132.1).", new double[]{0.0, 200.0, 400.0, 600.0, 800.0, 1000.0, 1200.0, 1400.0, 1600.0}, new double[]{0.0, 0.85, 2.6, 3.4, 3.8, 4.1, 4.4, 4.7, 5.0}, "LINEAR"));
 
-        // Variables
+    }
+
+    private void defineVariables(ModelDefinitionBuilder builder) {
         builder.variable(new VariableDef("Absorption Land GHA", "\"Absorption Land (GHA)\"", "persistent_pollution_generation_rate*ha_per_unit_of_pollution/ha_per_Gha", "Ghectares"));
         builder.variable(new VariableDef("Arable Land in Gigahectares GHA", "\"Arable Land in Gigahectares (GHA)\"", "Arable_Land/ha_per_Gha", "Ghectares"));
         builder.variable(new VariableDef("Education Index", "Education Index", "LOOKUP(Education_Index_LOOKUP, GDP_per_capita/GDP_pc_unit)", "Dmnl"));
@@ -557,7 +582,9 @@ public class Wrld303 {
         builder.variable(new VariableDef("persistent pollution intensity industry", "pollution intensity indicator (PLINID#--).", "persistent_pollution_generation_industry * persistent_pollution_generation_factor / industrial_output", "Pollution units/$"));
         builder.variable(new VariableDef("resource use intensity", "ADAPTIVE TECHNOLOGICAL CONTROL CARDS nonrenewable\n\t\t         resource usage intensity (RESINT#--)", "resource_usage_rate / industrial_output", "Resource units/$"));
 
-        // Flows
+    }
+
+    private void defineFlows(ModelDefinitionBuilder builder) {
         builder.flow(new FlowDef("Arable Land inflow 1", null, "land_development_rate", "Year", null, "Arable Land"));
         builder.flow(new FlowDef("Arable Land outflow 2", null, "land_erosion_rate", "Year", "Arable Land", null));
         builder.flow(new FlowDef("Arable Land outflow 3", null, "land_removal_for_urban_and_industrial_use", "Year", "Arable Land", null));
@@ -575,17 +602,5 @@ public class Wrld303 {
         builder.flow(new FlowDef("Population 65 Plus net flow", "Net flow for Population 65 Plus", "( maturation_64_to_65 - deaths_65_plus )", "Year", null, "Population 65 Plus"));
         builder.flow(new FlowDef("Nonrenewable Resources net flow", "Net flow for Nonrenewable Resources", "( - resource_usage_rate  )", "Year", null, "Nonrenewable Resources"));
         builder.flow(new FlowDef("Resource Conservation Technology net flow", "Net flow for Resource Conservation Technology", "resource_technology_change_rate", "Year", null, "Resource Conservation Technology"));
-
-        var definition = builder.build();
-        var compiled = new ModelCompiler().compile(definition);
-
-        compiled.getModel().setMetadata(ModelMetadata.builder()
-                .author("Ventana Systems")
-                .source("Vensim Sample Models")
-                .license("MIT")
-                .build());
-
-        Simulation sim = compiled.createSimulation();
-        sim.execute();
     }
 }

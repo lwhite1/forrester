@@ -56,6 +56,13 @@ public class LoopNavigatorBar extends HBox {
         setStyle("-fx-background-color: #EBF0F5; -fx-border-color: #D0D6DD; "
                 + "-fx-border-width: 0 0 1 0;");
 
+        configureNavigationButtons();
+        configureFilterButtons();
+        configureHelpIcon();
+        assembleChildren();
+    }
+
+    private void configureNavigationButtons() {
         prevButton.setId("loopPrev");
         prevButton.setTooltip(new Tooltip("Previous loop ([)"));
         prevButton.setOnAction(e -> {
@@ -85,8 +92,9 @@ public class LoopNavigatorBar extends HBox {
 
         loopLabel.setId("loopNavigatorLabel");
         loopLabel.setStyle("-fx-font-size: 12px;");
+    }
 
-        // Type filter buttons
+    private void configureFilterButtons() {
         filterAllBtn.setId("filterAll");
         filterAllBtn.setToggleGroup(filterGroup);
         filterAllBtn.setSelected(true);
@@ -117,13 +125,9 @@ public class LoopNavigatorBar extends HBox {
                 onFilterChanged.accept(getSelectedFilter());
             }
         });
+    }
 
-        Label filterLabel = new Label("Filter:");
-        filterLabel.setStyle("-fx-font-size: 11px; -fx-text-fill: #666;");
-
-        Region spacer = new Region();
-        spacer.setPrefWidth(12);
-
+    private void configureHelpIcon() {
         helpIcon.setId("loopHelpIcon");
         helpIcon.setStyle("-fx-font-size: 11px; -fx-font-weight: bold;"
                 + " -fx-min-width: 22; -fx-min-height: 22;"
@@ -151,6 +155,14 @@ public class LoopNavigatorBar extends HBox {
             alert.getDialogPane().setMinWidth(450);
             alert.showAndWait();
         });
+    }
+
+    private void assembleChildren() {
+        Label filterLabel = new Label("Filter:");
+        filterLabel.setStyle("-fx-font-size: 11px; -fx-text-fill: #666;");
+
+        Region spacer = new Region();
+        spacer.setPrefWidth(12);
 
         Region spacer2 = new Region();
         spacer2.setPrefWidth(8);
