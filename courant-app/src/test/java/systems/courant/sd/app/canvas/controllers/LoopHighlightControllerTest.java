@@ -161,6 +161,47 @@ class LoopHighlightControllerTest {
     }
 
     @Nested
+    @DisplayName("setActiveIndex validation (#951)")
+    class SetActiveIndexValidation {
+
+        @Test
+        void shouldRejectIndexOutsideFilteredSet() {
+            controller.setActive(true, LoopHighlightControllerTest.this::mixedModel);
+            controller.setTypeFilter(LoopType.REINFORCING);
+
+            // Find a balancing loop index
+            FeedbackAnalysis analysis = controller.getAnalysis();
+            int bIndex = -1;
+            for (int i = 0; i < analysis.loopCount(); i++) {
+                if (analysis.loopType(i) == LoopType.BALANCING) {
+                    bIndex = i;
+                    break;
+                }
+            }
+            assertThat(bIndex).as("model should have a balancing loop").isGreaterThanOrEqualTo(0);
+
+            // Setting a B index while R filter is active should reset to -1
+            controller.setActiveIndex(bIndex);
+            assertThat(controller.getActiveIndex()).isEqualTo(-1);
+        }
+
+        @Test
+        void shouldAcceptIndexInFilteredSet() {
+            controller.setActive(true, LoopHighlightControllerTest.this::mixedModel);
+            controller.setTypeFilter(LoopType.REINFORCING);
+
+            // Step forward to get a valid R index
+            controller.stepForward();
+            int rIndex = controller.getActiveIndex();
+            assertThat(rIndex).isGreaterThanOrEqualTo(0);
+
+            // Setting it again explicitly should keep it
+            controller.setActiveIndex(rIndex);
+            assertThat(controller.getActiveIndex()).isEqualTo(rIndex);
+        }
+    }
+
+    @Nested
     @DisplayName("filtered active analysis")
     class FilteredActiveAnalysis {
 
