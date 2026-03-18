@@ -347,7 +347,7 @@ public final class ElementRenderer {
             return "NaN";
         }
         if (value == Math.floor(value) && !Double.isInfinite(value)
-                && Math.abs(value) <= Long.MAX_VALUE) {
+                && value >= Long.MIN_VALUE && value < (double) Long.MAX_VALUE) {
             return String.valueOf((long) value);
         }
         return String.valueOf(value);

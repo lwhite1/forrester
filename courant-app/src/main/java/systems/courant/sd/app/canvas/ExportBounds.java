@@ -31,7 +31,8 @@ final class ExportBounds {
      * Includes flow label areas below diamond indicators.
      */
     static Bounds compute(CanvasState canvasState, ModelEditor editor) {
-        if (canvasState.getDrawOrder().isEmpty() && editor.getFlows().isEmpty()) {
+        if (canvasState.getDrawOrder().isEmpty() && editor.getFlows().isEmpty()
+                && editor.getCausalLinks().isEmpty()) {
             return new Bounds(0, 0, 2 * PADDING, 2 * PADDING);
         }
 

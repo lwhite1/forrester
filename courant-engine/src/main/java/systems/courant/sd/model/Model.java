@@ -21,8 +21,10 @@ public class Model extends Element {
     private static final Logger log = LoggerFactory.getLogger(Model.class);
 
     private final List<Stock> stocks = new ArrayList<>();
+    private final Set<Stock> stockIdentity = new HashSet<>();
     private final Set<String> stockNames = new HashSet<>();
     private final List<Flow> flows = new ArrayList<>();
+    private final Set<Flow> flowIdentity = new HashSet<>();
     private final Set<String> flowNames = new HashSet<>();
     private final Map<String, Variable> variables = new LinkedHashMap<>();
     private final List<Module> modules = new ArrayList<>();
@@ -64,6 +66,7 @@ public class Model extends Element {
                     "Duplicate stock name '" + stock.getName() + "' in model '" + getName() + "'");
         }
         stocks.add(stock);
+        stockIdentity.add(stock);
     }
 
     /**
@@ -72,6 +75,7 @@ public class Model extends Element {
      */
     public void removeStock(Stock stock) {
         if (stocks.remove(stock)) {
+            stockIdentity.remove(stock);
             stockNames.remove(stock.getName());
             for (Flow flow : stock.getInflows()) {
                 flow.setSink(null);
@@ -110,6 +114,7 @@ public class Model extends Element {
         for (Stock stock : arrayedStock.getStocks()) {
             if (stockNames.add(stock.getName())) {
                 stocks.add(stock);
+                stockIdentity.add(stock);
             }
         }
     }
@@ -130,6 +135,7 @@ public class Model extends Element {
         for (Stock stock : multiArrayedStock.getStocks()) {
             if (stockNames.add(stock.getName())) {
                 stocks.add(stock);
+                stockIdentity.add(stock);
             }
         }
     }
@@ -164,7 +170,7 @@ public class Model extends Element {
 
         modules.add(module);
         for (Stock stock : module.getStocks()) {
-            if (!stocks.contains(stock)) {
+            if (stockIdentity.add(stock)) {
                 if (stockNames.contains(stock.getName())) {
                     log.warn("Module '{}' stock '{}' has same name as existing stock in model '{}'",
                             module.getName(), stock.getName(), getName());
@@ -174,7 +180,7 @@ public class Model extends Element {
             }
         }
         for (Flow flow : module.getFlows()) {
-            if (!flows.contains(flow)) {
+            if (flowIdentity.add(flow)) {
                 if (flowNames.contains(flow.getName())) {
                     log.warn("Module '{}' flow '{}' has same name as existing flow in model '{}'",
                             module.getName(), flow.getName(), getName());
@@ -223,6 +229,7 @@ public class Model extends Element {
                     "Duplicate flow name '" + flow.getName() + "' in model '" + getName() + "'");
         }
         flows.add(flow);
+        flowIdentity.add(flow);
     }
 
     /**

@@ -2,8 +2,10 @@ package systems.courant.sd.model;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
@@ -18,6 +20,7 @@ public class Subscript {
 
     private final String name;
     private final List<String> labels;
+    private final Map<String, Integer> labelIndex;
 
     /**
      * Creates a new subscript with the given name and labels.
@@ -46,6 +49,11 @@ public class Subscript {
         }
         this.name = name;
         this.labels = Collections.unmodifiableList(copy);
+        Map<String, Integer> index = new HashMap<>(copy.size());
+        for (int i = 0; i < copy.size(); i++) {
+            index.put(copy.get(i), i);
+        }
+        this.labelIndex = Collections.unmodifiableMap(index);
     }
 
     /**
@@ -80,8 +88,8 @@ public class Subscript {
      * @throws IllegalArgumentException if the label is not found
      */
     public int indexOf(String label) {
-        int index = labels.indexOf(label);
-        if (index < 0) {
+        Integer index = labelIndex.get(label);
+        if (index == null) {
             throw new IllegalArgumentException(
                     "Label '" + label + "' not found in subscript '" + name + "'");
         }
