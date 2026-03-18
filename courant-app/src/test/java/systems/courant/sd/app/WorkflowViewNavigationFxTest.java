@@ -17,6 +17,8 @@ import org.testfx.framework.junit5.ApplicationExtension;
 import org.testfx.framework.junit5.Start;
 import org.testfx.util.WaitForAsyncUtils;
 
+import java.util.concurrent.TimeUnit;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
@@ -41,6 +43,12 @@ class WorkflowViewNavigationFxTest {
     private void loadExample(String name, String resourcePath) {
         Platform.runLater(() ->
                 window.getFileController().openExample(name, resourcePath));
+        WaitForAsyncUtils.waitForFxEvents();
+        try {
+            window.layoutFuture().get(10, TimeUnit.SECONDS);
+        } catch (Exception e) {
+            throw new RuntimeException("Layout did not complete", e);
+        }
         WaitForAsyncUtils.waitForFxEvents();
     }
 
