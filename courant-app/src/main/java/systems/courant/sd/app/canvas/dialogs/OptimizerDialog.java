@@ -48,18 +48,34 @@ public class OptimizerDialog extends Dialog<OptimizerDialog.Config> {
 
     private final ObservableList<ParamRow> paramRows = FXCollections.observableArrayList();
     private final IntegerProperty fieldChangeCounter = new SimpleIntegerProperty(0);
-    private final ComboBox<ObjectiveType> objectiveCombo;
-    private final ComboBox<String> targetVarCombo;
-    private final TextField targetValueField;
-    private final Label targetValueLabel;
-    private final ComboBox<String> algorithmCombo;
-    private final TextField maxEvalsField;
+    private ComboBox<ObjectiveType> objectiveCombo;
+    private ComboBox<String> targetVarCombo;
+    private TextField targetValueField;
+    private Label targetValueLabel;
+    private ComboBox<String> algorithmCombo;
+    private TextField maxEvalsField;
 
     public OptimizerDialog(List<String> constantNames, List<String> stockNames) {
         HelpContextResolver.addHelpButton(this);
         setTitle("Optimize");
         setHeaderText("Configure optimization");
 
+        Label paramsLabel = new Label("Parameters");
+        paramsLabel.setStyle(Styles.SECTION_HEADER);
+
+        VBox content = new VBox(10,
+                paramsLabel,
+                buildParametersSection(constantNames),
+                buildSettingsGrid(stockNames),
+                buildValidationLabel());
+        content.setPadding(new Insets(10));
+        getDialogPane().setContent(content);
+        getDialogPane().setPrefWidth(Styles.screenAwareWidth(Styles.CONFIG_DIALOG_WIDTH));
+
+        configureButtons();
+    }
+
+    private ScrollPane buildParametersSection(List<String> constantNames) {
         VBox paramBox = new VBox(6);
         paramBox.setPadding(new Insets(5));
 
@@ -73,7 +89,6 @@ public class OptimizerDialog extends Dialog<OptimizerDialog.Config> {
 
         paramBox.getChildren().add(addButton);
 
-        // Add one default row
         ParamRow defaultRow = new ParamRow(constantNames, paramBox);
         paramRows.add(defaultRow);
         paramBox.getChildren().add(0, defaultRow.getPane());
@@ -81,7 +96,10 @@ public class OptimizerDialog extends Dialog<OptimizerDialog.Config> {
         ScrollPane paramScroll = new ScrollPane(paramBox);
         paramScroll.setFitToWidth(true);
         paramScroll.setPrefHeight(150);
+        return paramScroll;
+    }
 
+    private GridPane buildSettingsGrid(List<String> stockNames) {
         objectiveCombo = new ComboBox<>(FXCollections.observableArrayList(ObjectiveType.values()));
         objectiveCombo.setValue(ObjectiveType.MINIMIZE);
         objectiveCombo.setId("optObjective");
@@ -132,9 +150,10 @@ public class OptimizerDialog extends Dialog<OptimizerDialog.Config> {
         settingsGrid.add(new Label("Max Evaluations:"), 0, 4);
         settingsGrid.add(maxEvalsField, 1, 4);
 
-        Label paramsLabel = new Label("Parameters");
-        paramsLabel.setStyle(Styles.SECTION_HEADER);
+        return settingsGrid;
+    }
 
+    private Label buildValidationLabel() {
         Label validationLabel = new Label();
         validationLabel.setStyle(Styles.VALIDATION_ERROR);
         validationLabel.setWrapText(true);
@@ -146,12 +165,10 @@ public class OptimizerDialog extends Dialog<OptimizerDialog.Config> {
                         objectiveCombo.valueProperty(), targetVarCombo.valueProperty(),
                         paramRows, fieldChangeCounter)
         );
+        return validationLabel;
+    }
 
-        VBox content = new VBox(10, paramsLabel, paramScroll, settingsGrid, validationLabel);
-        content.setPadding(new Insets(10));
-        getDialogPane().setContent(content);
-        getDialogPane().setPrefWidth(Styles.screenAwareWidth(Styles.CONFIG_DIALOG_WIDTH));
-
+    private void configureButtons() {
         ButtonType okButton = new ButtonType("OK", ButtonBar.ButtonData.OK_DONE);
         getDialogPane().getButtonTypes().addAll(okButton, ButtonType.CANCEL);
 
@@ -164,27 +181,31 @@ public class OptimizerDialog extends Dialog<OptimizerDialog.Config> {
 
         setResultConverter(button -> {
             if (button == okButton) {
-                List<ParamConfig> params = new ArrayList<>();
-                for (ParamRow row : paramRows) {
-                    if (row.isValid()) {
-                        params.add(row.toConfig());
-                    }
-                }
-                double targetVal = 0;
-                if (objectiveCombo.getValue() == ObjectiveType.TARGET) {
-                    targetVal = Double.parseDouble(targetValueField.getText().trim());
-                }
-                return new Config(
-                        params,
-                        objectiveCombo.getValue(),
-                        targetVarCombo.getValue(),
-                        targetVal,
-                        algorithmCombo.getValue(),
-                        Integer.parseInt(maxEvalsField.getText().trim())
-                );
+                return buildConfig();
             }
             return null;
         });
+    }
+
+    private Config buildConfig() {
+        List<ParamConfig> params = new ArrayList<>();
+        for (ParamRow row : paramRows) {
+            if (row.isValid()) {
+                params.add(row.toConfig());
+            }
+        }
+        double targetVal = 0;
+        if (objectiveCombo.getValue() == ObjectiveType.TARGET) {
+            targetVal = Double.parseDouble(targetValueField.getText().trim());
+        }
+        return new Config(
+                params,
+                objectiveCombo.getValue(),
+                targetVarCombo.getValue(),
+                targetVal,
+                algorithmCombo.getValue(),
+                Integer.parseInt(maxEvalsField.getText().trim())
+        );
     }
 
     private boolean isInvalid() {

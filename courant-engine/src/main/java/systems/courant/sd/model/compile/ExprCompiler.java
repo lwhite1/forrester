@@ -268,232 +268,227 @@ public class ExprCompiler {
 
     private DoubleSupplier compileMathFunction(String name, List<Expr> args) {
         return switch (name) {
-            case "ABS" -> {
-                requireArgs(name, args, 1);
-                DoubleSupplier a = compileExpr(args.get(0));
-                yield () -> Math.abs(a.getAsDouble());
-            }
-            case "SQRT" -> {
-                requireArgs(name, args, 1);
-                DoubleSupplier a = compileExpr(args.get(0));
-                boolean[] warned = newWarnedFlag();
-                yield () -> {
-                    double v = a.getAsDouble();
-                    if (v < 0) {
-                        if (!warned[0]) {
-                            logger.warn("SQRT of negative value: {}", v);
-                            warned[0] = true;
-                        }
-                        return Double.NaN;
-                    }
-                    return Math.sqrt(v);
-                };
-            }
-            case "LN" -> {
-                requireArgs(name, args, 1);
-                DoubleSupplier a = compileExpr(args.get(0));
-                boolean[] warned = newWarnedFlag();
-                yield () -> {
-                    double v = a.getAsDouble();
-                    if (v <= 0) {
-                        if (!warned[0]) {
-                            logger.warn("LN of non-positive value: {}", v);
-                            warned[0] = true;
-                        }
-                        return Double.NaN;
-                    }
-                    return Math.log(v);
-                };
-            }
-            case "EXP" -> {
-                requireArgs(name, args, 1);
-                DoubleSupplier a = compileExpr(args.get(0));
-                boolean[] warned = newWarnedFlag();
-                yield () -> {
-                    double result = Math.exp(a.getAsDouble());
-                    if (Double.isInfinite(result)) {
-                        if (!warned[0]) {
-                            logger.warn("EXP overflow");
-                            warned[0] = true;
-                        }
-                        return Double.NaN;
-                    }
-                    return result;
-                };
-            }
-            case "LOG" -> {
-                if (args.size() == 2) {
-                    DoubleSupplier a = compileExpr(args.get(0));
-                    DoubleSupplier base = compileExpr(args.get(1));
-                    boolean[] warned = newWarnedFlag();
-                    yield () -> {
-                        double v = a.getAsDouble();
-                        double b = base.getAsDouble();
-                        if (v <= 0 || b <= 0 || b == 1) {
-                            if (!warned[0]) {
-                                logger.warn("LOG with invalid arguments: value={}, base={}", v, b);
-                                warned[0] = true;
-                            }
-                            return Double.NaN;
-                        }
-                        return Math.log(v) / Math.log(b);
-                    };
-                }
-                requireArgs(name, args, 1);
-                DoubleSupplier a = compileExpr(args.get(0));
-                boolean[] warned = newWarnedFlag();
-                yield () -> {
-                    double v = a.getAsDouble();
-                    if (v <= 0) {
-                        if (!warned[0]) {
-                            logger.warn("LOG of non-positive value: {}", v);
-                            warned[0] = true;
-                        }
-                        return Double.NaN;
-                    }
-                    return Math.log10(v);
-                };
-            }
-            case "SIN" -> {
-                requireArgs(name, args, 1);
-                DoubleSupplier a = compileExpr(args.get(0));
-                yield () -> Math.sin(a.getAsDouble());
-            }
-            case "COS" -> {
-                requireArgs(name, args, 1);
-                DoubleSupplier a = compileExpr(args.get(0));
-                yield () -> Math.cos(a.getAsDouble());
-            }
-            case "TAN" -> {
-                requireArgs(name, args, 1);
-                DoubleSupplier a = compileExpr(args.get(0));
-                yield () -> Math.tan(a.getAsDouble());
-            }
-            case "ARCSIN" -> {
-                requireArgs(name, args, 1);
-                DoubleSupplier a = compileExpr(args.get(0));
-                boolean[] warned = newWarnedFlag();
-                yield () -> {
-                    double v = a.getAsDouble();
-                    if (v < -1 || v > 1) {
-                        if (!warned[0]) {
-                            logger.warn("ARCSIN of value outside [-1, 1]: {}", v);
-                            warned[0] = true;
-                        }
-                        return Double.NaN;
-                    }
-                    return Math.asin(v);
-                };
-            }
-            case "ARCCOS" -> {
-                requireArgs(name, args, 1);
-                DoubleSupplier a = compileExpr(args.get(0));
-                boolean[] warned = newWarnedFlag();
-                yield () -> {
-                    double v = a.getAsDouble();
-                    if (v < -1 || v > 1) {
-                        if (!warned[0]) {
-                            logger.warn("ARCCOS of value outside [-1, 1]: {}", v);
-                            warned[0] = true;
-                        }
-                        return Double.NaN;
-                    }
-                    return Math.acos(v);
-                };
-            }
-            case "ARCTAN" -> {
-                requireArgs(name, args, 1);
-                DoubleSupplier a = compileExpr(args.get(0));
-                yield () -> Math.atan(a.getAsDouble());
-            }
-            case "SIGN" -> {
-                requireArgs(name, args, 1);
-                DoubleSupplier a = compileExpr(args.get(0));
-                yield () -> Math.signum(a.getAsDouble());
-            }
-            case "PI" -> {
-                requireArgs(name, args, 0);
-                yield () -> Math.PI;
-            }
-            case "INT" -> {
-                requireArgs(name, args, 1);
-                DoubleSupplier a = compileExpr(args.get(0));
-                yield () -> {
-                    double v = a.getAsDouble();
-                    return v >= 0 ? Math.floor(v) : Math.ceil(v);
-                };
-            }
-            case "ROUND" -> {
-                requireArgs(name, args, 1);
-                DoubleSupplier a = compileExpr(args.get(0));
-                yield () -> Math.rint(a.getAsDouble());
-            }
-            case "MODULO" -> {
-                requireArgs(name, args, 2);
-                DoubleSupplier a = compileExpr(args.get(0));
-                DoubleSupplier b = compileExpr(args.get(1));
-                boolean[] warned = newWarnedFlag();
-                yield () -> {
-                    double divisor = b.getAsDouble();
-                    if (divisor == 0) {
-                        if (!warned[0]) {
-                            logger.warn("MODULO by zero");
-                            warned[0] = true;
-                        }
-                        return Double.NaN;
-                    }
-                    return a.getAsDouble() % divisor;
-                };
-            }
-            case "QUANTUM" -> {
-                requireArgs(name, args, 2);
-                DoubleSupplier a = compileExpr(args.get(0));
-                DoubleSupplier b = compileExpr(args.get(1));
-                boolean[] warned = newWarnedFlag();
-                yield () -> {
-                    double quantum = b.getAsDouble();
-                    if (quantum == 0) {
-                        if (!warned[0]) {
-                            logger.warn("QUANTUM with zero quantum size");
-                            warned[0] = true;
-                        }
-                        return a.getAsDouble();
-                    }
-                    return Math.floor(a.getAsDouble() / quantum) * quantum;
-                };
-            }
-            case "POWER" -> {
-                requireArgs(name, args, 2);
-                DoubleSupplier a = compileExpr(args.get(0));
-                DoubleSupplier b = compileExpr(args.get(1));
-                boolean[] warned = newWarnedFlag();
-                yield () -> {
-                    double result = Math.pow(a.getAsDouble(), b.getAsDouble());
-                    if (Double.isNaN(result) || Double.isInfinite(result)) {
-                        if (!warned[0]) {
-                            logger.warn("POWER produced non-finite result");
-                            warned[0] = true;
-                        }
-                        return Double.NaN;
-                    }
-                    return result;
-                };
-            }
-            case "MIN" -> {
-                requireArgs(name, args, 2);
-                DoubleSupplier a = compileExpr(args.get(0));
-                DoubleSupplier b = compileExpr(args.get(1));
-                yield () -> Math.min(a.getAsDouble(), b.getAsDouble());
-            }
-            case "MAX" -> {
-                requireArgs(name, args, 2);
-                DoubleSupplier a = compileExpr(args.get(0));
-                DoubleSupplier b = compileExpr(args.get(1));
-                yield () -> Math.max(a.getAsDouble(), b.getAsDouble());
-            }
+            case "ABS" -> compileAbs(args);
+            case "SQRT" -> compileSqrt(args);
+            case "LN" -> compileLn(args);
+            case "EXP" -> compileExp(args);
+            case "LOG" -> compileLog(args);
+            case "SIN" -> compileTrig("SIN", args, Math::sin);
+            case "COS" -> compileTrig("COS", args, Math::cos);
+            case "TAN" -> compileTrig("TAN", args, Math::tan);
+            case "ARCSIN" -> compileArcSinCos("ARCSIN", args, Math::asin);
+            case "ARCCOS" -> compileArcSinCos("ARCCOS", args, Math::acos);
+            case "ARCTAN" -> compileTrig("ARCTAN", args, Math::atan);
+            case "SIGN" -> compileTrig("SIGN", args, Math::signum);
+            case "PI" -> compilePi(args);
+            case "INT" -> compileInt(args);
+            case "ROUND" -> compileRound(args);
+            case "MODULO" -> compileModulo(args);
+            case "QUANTUM" -> compileQuantum(args);
+            case "POWER" -> compilePower(args);
+            case "MIN" -> compileMinMax("MIN", args, Math::min);
+            case "MAX" -> compileMinMax("MAX", args, Math::max);
             default -> throw new CompilationException(
                     "Unknown math function: " + name, name);
         };
+    }
+
+    private DoubleSupplier compileAbs(List<Expr> args) {
+        requireArgs("ABS", args, 1);
+        DoubleSupplier a = compileExpr(args.get(0));
+        return () -> Math.abs(a.getAsDouble());
+    }
+
+    private DoubleSupplier compileSqrt(List<Expr> args) {
+        requireArgs("SQRT", args, 1);
+        DoubleSupplier a = compileExpr(args.get(0));
+        boolean[] warned = newWarnedFlag();
+        return () -> {
+            double v = a.getAsDouble();
+            if (v < 0) {
+                if (!warned[0]) {
+                    logger.warn("SQRT of negative value: {}", v);
+                    warned[0] = true;
+                }
+                return Double.NaN;
+            }
+            return Math.sqrt(v);
+        };
+    }
+
+    private DoubleSupplier compileLn(List<Expr> args) {
+        requireArgs("LN", args, 1);
+        DoubleSupplier a = compileExpr(args.get(0));
+        boolean[] warned = newWarnedFlag();
+        return () -> {
+            double v = a.getAsDouble();
+            if (v <= 0) {
+                if (!warned[0]) {
+                    logger.warn("LN of non-positive value: {}", v);
+                    warned[0] = true;
+                }
+                return Double.NaN;
+            }
+            return Math.log(v);
+        };
+    }
+
+    private DoubleSupplier compileExp(List<Expr> args) {
+        requireArgs("EXP", args, 1);
+        DoubleSupplier a = compileExpr(args.get(0));
+        boolean[] warned = newWarnedFlag();
+        return () -> {
+            double result = Math.exp(a.getAsDouble());
+            if (Double.isInfinite(result)) {
+                if (!warned[0]) {
+                    logger.warn("EXP overflow");
+                    warned[0] = true;
+                }
+                return Double.NaN;
+            }
+            return result;
+        };
+    }
+
+    private DoubleSupplier compileLog(List<Expr> args) {
+        if (args.size() == 2) {
+            DoubleSupplier a = compileExpr(args.get(0));
+            DoubleSupplier base = compileExpr(args.get(1));
+            boolean[] warned = newWarnedFlag();
+            return () -> {
+                double v = a.getAsDouble();
+                double b = base.getAsDouble();
+                if (v <= 0 || b <= 0 || b == 1) {
+                    if (!warned[0]) {
+                        logger.warn("LOG with invalid arguments: value={}, base={}", v, b);
+                        warned[0] = true;
+                    }
+                    return Double.NaN;
+                }
+                return Math.log(v) / Math.log(b);
+            };
+        }
+        requireArgs("LOG", args, 1);
+        DoubleSupplier a = compileExpr(args.get(0));
+        boolean[] warned = newWarnedFlag();
+        return () -> {
+            double v = a.getAsDouble();
+            if (v <= 0) {
+                if (!warned[0]) {
+                    logger.warn("LOG of non-positive value: {}", v);
+                    warned[0] = true;
+                }
+                return Double.NaN;
+            }
+            return Math.log10(v);
+        };
+    }
+
+    private DoubleSupplier compileTrig(String funcName, List<Expr> args,
+                                       java.util.function.DoubleUnaryOperator op) {
+        requireArgs(funcName, args, 1);
+        DoubleSupplier a = compileExpr(args.get(0));
+        return () -> op.applyAsDouble(a.getAsDouble());
+    }
+
+    private DoubleSupplier compileArcSinCos(String funcName, List<Expr> args,
+                                             java.util.function.DoubleUnaryOperator op) {
+        requireArgs(funcName, args, 1);
+        DoubleSupplier a = compileExpr(args.get(0));
+        boolean[] warned = newWarnedFlag();
+        return () -> {
+            double v = a.getAsDouble();
+            if (v < -1 || v > 1) {
+                if (!warned[0]) {
+                    logger.warn("{} of value outside [-1, 1]: {}", funcName, v);
+                    warned[0] = true;
+                }
+                return Double.NaN;
+            }
+            return op.applyAsDouble(v);
+        };
+    }
+
+    private DoubleSupplier compilePi(List<Expr> args) {
+        requireArgs("PI", args, 0);
+        return () -> Math.PI;
+    }
+
+    private DoubleSupplier compileInt(List<Expr> args) {
+        requireArgs("INT", args, 1);
+        DoubleSupplier a = compileExpr(args.get(0));
+        return () -> {
+            double v = a.getAsDouble();
+            return v >= 0 ? Math.floor(v) : Math.ceil(v);
+        };
+    }
+
+    private DoubleSupplier compileRound(List<Expr> args) {
+        requireArgs("ROUND", args, 1);
+        DoubleSupplier a = compileExpr(args.get(0));
+        return () -> Math.rint(a.getAsDouble());
+    }
+
+    private DoubleSupplier compileModulo(List<Expr> args) {
+        requireArgs("MODULO", args, 2);
+        DoubleSupplier a = compileExpr(args.get(0));
+        DoubleSupplier b = compileExpr(args.get(1));
+        boolean[] warned = newWarnedFlag();
+        return () -> {
+            double divisor = b.getAsDouble();
+            if (divisor == 0) {
+                if (!warned[0]) {
+                    logger.warn("MODULO by zero");
+                    warned[0] = true;
+                }
+                return Double.NaN;
+            }
+            return a.getAsDouble() % divisor;
+        };
+    }
+
+    private DoubleSupplier compileQuantum(List<Expr> args) {
+        requireArgs("QUANTUM", args, 2);
+        DoubleSupplier a = compileExpr(args.get(0));
+        DoubleSupplier b = compileExpr(args.get(1));
+        boolean[] warned = newWarnedFlag();
+        return () -> {
+            double quantum = b.getAsDouble();
+            if (quantum == 0) {
+                if (!warned[0]) {
+                    logger.warn("QUANTUM with zero quantum size");
+                    warned[0] = true;
+                }
+                return a.getAsDouble();
+            }
+            return Math.floor(a.getAsDouble() / quantum) * quantum;
+        };
+    }
+
+    private DoubleSupplier compilePower(List<Expr> args) {
+        requireArgs("POWER", args, 2);
+        DoubleSupplier a = compileExpr(args.get(0));
+        DoubleSupplier b = compileExpr(args.get(1));
+        boolean[] warned = newWarnedFlag();
+        return () -> {
+            double result = Math.pow(a.getAsDouble(), b.getAsDouble());
+            if (Double.isNaN(result) || Double.isInfinite(result)) {
+                if (!warned[0]) {
+                    logger.warn("POWER produced non-finite result");
+                    warned[0] = true;
+                }
+                return Double.NaN;
+            }
+            return result;
+        };
+    }
+
+    private DoubleSupplier compileMinMax(String funcName, List<Expr> args,
+                                          java.util.function.DoubleBinaryOperator op) {
+        requireArgs(funcName, args, 2);
+        DoubleSupplier a = compileExpr(args.get(0));
+        DoubleSupplier b = compileExpr(args.get(1));
+        return () -> op.applyAsDouble(a.getAsDouble(), b.getAsDouble());
     }
 
     private DoubleSupplier compileAggregateFunction(String name, List<Expr> args) {

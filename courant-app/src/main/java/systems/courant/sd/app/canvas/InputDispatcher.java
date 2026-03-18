@@ -224,62 +224,86 @@ final class InputDispatcher {
 
     private void handlePrimaryPress(MouseEvent event, ModelCanvas canvas) {
         Viewport viewport = canvas.viewport();
-        CanvasState canvasState = canvas.canvasState();
-        ModelEditor editor = canvas.getEditor();
         CanvasToolBar.Tool activeTool = canvas.getActiveTool();
-        boolean hideAux = canvas.isHideVariables();
 
         double worldX = viewport.toWorldX(event.getX());
         double worldY = viewport.toWorldY(event.getY());
 
-        // Double-click: drill into module or start inline editing
-        if (event.getClickCount() == 2
-                && activeTool == CanvasToolBar.Tool.SELECT
-                && !flowCreation.isPending()) {
-            String hit = HitTester.hitTest(canvasState, worldX, worldY, hideAux);
-            if (hit != null) {
-                if (canvasState.getType(hit).orElse(null) == ElementType.MODULE) {
-                    canvas.drillInto(hit);
-                } else {
-                    canvas.startInlineEdit(hit);
-                }
-                event.consume();
-                return;
-            }
+        if (handleDoubleClick(event, canvas, activeTool, worldX, worldY)) {
+            return;
+        }
+        if (handleSelectModeInteractions(event, canvas, activeTool, worldX, worldY)) {
+            return;
+        }
+        if (handleConnectionToolClick(event, canvas, activeTool, worldX, worldY)) {
+            return;
+        }
+        if (handlePlacementToolClick(event, canvas, activeTool, worldX, worldY)) {
+            return;
         }
 
-        // Flow endpoint reattachment: check cloud + connected endpoints (SELECT mode only)
-        if (activeTool == CanvasToolBar.Tool.SELECT && !flowCreation.isPending()) {
-            FlowEndpointCalculator.CloudHit cloudHit =
-                    FlowEndpointCalculator.hitTestClouds(worldX, worldY, canvasState, editor);
-            if (cloudHit == null) {
-                cloudHit = FlowEndpointCalculator.hitTestConnectedEndpoints(
-                        worldX, worldY, canvasState, editor);
-            }
-            if (cloudHit != null) {
-                reattachController.start(cloudHit, canvasState);
-                canvas.requestRedraw();
-                updateCursor(canvas);
-                event.consume();
-                return;
-            }
+        handleSelectClick(worldX, worldY, event, canvas);
+    }
+
+    private boolean handleDoubleClick(MouseEvent event, ModelCanvas canvas,
+                                      CanvasToolBar.Tool activeTool,
+                                      double worldX, double worldY) {
+        if (event.getClickCount() != 2
+                || activeTool != CanvasToolBar.Tool.SELECT
+                || flowCreation.isPending()) {
+            return false;
+        }
+        CanvasState canvasState = canvas.canvasState();
+        boolean hideAux = canvas.isHideVariables();
+        String hit = HitTester.hitTest(canvasState, worldX, worldY, hideAux);
+        if (hit == null) {
+            return false;
+        }
+        if (canvasState.getType(hit).orElse(null) == ElementType.MODULE) {
+            canvas.drillInto(hit);
+        } else {
+            canvas.startInlineEdit(hit);
+        }
+        event.consume();
+        return true;
+    }
+
+    private boolean handleSelectModeInteractions(MouseEvent event, ModelCanvas canvas,
+                                                 CanvasToolBar.Tool activeTool,
+                                                 double worldX, double worldY) {
+        if (activeTool != CanvasToolBar.Tool.SELECT || flowCreation.isPending()) {
+            return false;
+        }
+        CanvasState canvasState = canvas.canvasState();
+        ModelEditor editor = canvas.getEditor();
+
+        // Flow endpoint reattachment
+        FlowEndpointCalculator.CloudHit cloudHit =
+                FlowEndpointCalculator.hitTestClouds(worldX, worldY, canvasState, editor);
+        if (cloudHit == null) {
+            cloudHit = FlowEndpointCalculator.hitTestConnectedEndpoints(
+                    worldX, worldY, canvasState, editor);
+        }
+        if (cloudHit != null) {
+            reattachController.start(cloudHit, canvasState);
+            canvas.requestRedraw();
+            updateCursor(canvas);
+            event.consume();
+            return true;
         }
 
-        // Resize handle check: takes priority over move drag
-        if (activeTool == CanvasToolBar.Tool.SELECT && !flowCreation.isPending()) {
-            ResizeHandle.HandleHit handleHit = ResizeHandle.hitTest(canvasState, worldX, worldY);
-            if (handleHit != null) {
-                resizeController.start(handleHit, canvasState);
-                updateCursor(canvas);
-                event.consume();
-                return;
-            }
+        // Resize handle
+        ResizeHandle.HandleHit handleHit = ResizeHandle.hitTest(canvasState, worldX, worldY);
+        if (handleHit != null) {
+            resizeController.start(handleHit, canvasState);
+            updateCursor(canvas);
+            event.consume();
+            return true;
         }
 
-        // Connection reroute: clicking near an endpoint of the selected connection
+        // Connection reroute
         ConnectionId selectedConnection = canvas.getSelectedConnection();
-        if (activeTool == CanvasToolBar.Tool.SELECT && !flowCreation.isPending()
-                && selectedConnection != null) {
+        if (selectedConnection != null) {
             ConnectionRerouteController.RerouteHit rerouteHit =
                     ConnectionRerouteController.hitTestEndpoint(
                             selectedConnection, canvasState, canvas.getConnectors(),
@@ -288,47 +312,46 @@ final class InputDispatcher {
                 rerouteController.prepare(rerouteHit);
                 updateCursor(canvas);
                 event.consume();
-                return;
+                return true;
             }
         }
 
-        // PLACE_FLOW: two-click protocol
+        return false;
+    }
+
+    private boolean handleConnectionToolClick(MouseEvent event, ModelCanvas canvas,
+                                              CanvasToolBar.Tool activeTool,
+                                              double worldX, double worldY) {
         if (activeTool == CanvasToolBar.Tool.PLACE_FLOW) {
             canvas.handleFlowClick(worldX, worldY);
-            updateCursor(canvas);
-            event.consume();
-            return;
-        }
-
-        // PLACE_CAUSAL_LINK: two-click protocol
-        if (activeTool == CanvasToolBar.Tool.PLACE_CAUSAL_LINK) {
+        } else if (activeTool == CanvasToolBar.Tool.PLACE_CAUSAL_LINK) {
             canvas.handleCausalLinkClick(worldX, worldY);
-            updateCursor(canvas);
-            event.consume();
-            return;
-        }
-
-        // PLACE_INFO_LINK: two-click protocol
-        if (activeTool == CanvasToolBar.Tool.PLACE_INFO_LINK) {
+        } else if (activeTool == CanvasToolBar.Tool.PLACE_INFO_LINK) {
             canvas.handleInfoLinkClick(worldX, worldY);
-            updateCursor(canvas);
-            event.consume();
-            return;
+        } else {
+            return false;
         }
+        updateCursor(canvas);
+        event.consume();
+        return true;
+    }
 
-        // Placement mode: other PLACE_* tools — click on empty space to create
-        if (activeTool != CanvasToolBar.Tool.SELECT) {
-            String hit = HitTester.hitTest(canvasState, worldX, worldY, hideAux);
-            if (hit == null) {
-                canvas.createElementAt(worldX, worldY);
-                updateCursor(canvas);
-                event.consume();
-                return;
-            }
+    private boolean handlePlacementToolClick(MouseEvent event, ModelCanvas canvas,
+                                             CanvasToolBar.Tool activeTool,
+                                             double worldX, double worldY) {
+        if (activeTool == CanvasToolBar.Tool.SELECT) {
+            return false;
         }
-
-        // Select mode
-        handleSelectClick(worldX, worldY, event, canvas);
+        CanvasState canvasState = canvas.canvasState();
+        boolean hideAux = canvas.isHideVariables();
+        String hit = HitTester.hitTest(canvasState, worldX, worldY, hideAux);
+        if (hit != null) {
+            return false;
+        }
+        canvas.createElementAt(worldX, worldY);
+        updateCursor(canvas);
+        event.consume();
+        return true;
     }
 
     private void handleSelectClick(double worldX, double worldY,

@@ -114,7 +114,6 @@ public class FanChart extends Application {
             return;
         }
 
-        // Compute all percentile series in a single pass
         Map<Double, double[]> pctMap;
         try {
             pctMap = result.getPercentileSeries(variableName,
@@ -136,12 +135,11 @@ public class FanChart extends Application {
         double[][] lowerSeries = {pct2, pct12, p25};
         double[][] upperSeries = {pct97, pct87, p75};
 
-        // Compute axis ranges
         double minVal = Double.MAX_VALUE;
         double maxVal = -Double.MAX_VALUE;
         for (int i = 0; i < stepCount; i++) {
-            minVal = Math.min(minVal, pct2[i]);
-            maxVal = Math.max(maxVal, pct97[i]);
+            minVal = Math.min(minVal, lowerSeries[0][i]);
+            maxVal = Math.max(maxVal, upperSeries[0][i]);
         }
 
         double[] padded = padAxisRange(minVal, maxVal);
@@ -151,11 +149,21 @@ public class FanChart extends Application {
         double plotWidth = WIDTH - MARGIN_LEFT - MARGIN_RIGHT;
         double plotHeight = HEIGHT - MARGIN_TOP - MARGIN_BOTTOM;
 
-        // Background
         gc.setFill(Color.WHITE);
         gc.fillRect(0, 0, WIDTH, HEIGHT);
 
-        // Draw filled bands from outermost to innermost
+        drawBands(gc, stepCount, lowerSeries, upperSeries, minVal, maxVal, plotWidth, plotHeight);
+        drawMedianLine(gc, stepCount, median, minVal, maxVal, plotWidth, plotHeight);
+        drawAxes(gc, plotWidth, plotHeight);
+        drawAxisLabels(gc, stepCount, minVal, maxVal, plotWidth, plotHeight);
+        drawTitle(gc, variableName + " — Monte Carlo Fan Chart (" + result.getRunCount() + " runs)",
+                plotWidth);
+    }
+
+    private void drawBands(GraphicsContext gc, int stepCount,
+                           double[][] lowerSeries, double[][] upperSeries,
+                           double minVal, double maxVal,
+                           double plotWidth, double plotHeight) {
         for (int b = 0; b < BANDS.length; b++) {
             double opacity = BANDS[b][2];
             gc.setFill(Color.color(BASE_COLOR.getRed(), BASE_COLOR.getGreen(),
@@ -164,12 +172,10 @@ public class FanChart extends Application {
             double[] xPoints = new double[stepCount * 2];
             double[] yPoints = new double[stepCount * 2];
 
-            // Upper edge: left to right
             for (int i = 0; i < stepCount; i++) {
                 xPoints[i] = MARGIN_LEFT + (i * plotWidth / (stepCount - 1));
                 yPoints[i] = MARGIN_TOP + plotHeight - ((upperSeries[b][i] - minVal) / (maxVal - minVal) * plotHeight);
             }
-            // Lower edge: right to left
             for (int i = 0; i < stepCount; i++) {
                 xPoints[stepCount + i] = MARGIN_LEFT + ((stepCount - 1 - i) * plotWidth / (stepCount - 1));
                 double lowerVal = lowerSeries[b][stepCount - 1 - i];
@@ -179,8 +185,11 @@ public class FanChart extends Application {
 
             gc.fillPolygon(xPoints, yPoints, stepCount * 2);
         }
+    }
 
-        // Draw median line
+    private void drawMedianLine(GraphicsContext gc, int stepCount, double[] median,
+                                double minVal, double maxVal,
+                                double plotWidth, double plotHeight) {
         gc.setStroke(Color.color(BASE_COLOR.getRed(), BASE_COLOR.getGreen(),
                 BASE_COLOR.getBlue(), 0.9));
         gc.setLineWidth(2);
@@ -195,18 +204,21 @@ public class FanChart extends Application {
             }
         }
         gc.stroke();
+    }
 
-        // Draw axes
+    private void drawAxes(GraphicsContext gc, double plotWidth, double plotHeight) {
         gc.setStroke(Color.BLACK);
         gc.setLineWidth(1);
         gc.strokeLine(MARGIN_LEFT, MARGIN_TOP, MARGIN_LEFT, MARGIN_TOP + plotHeight);
         gc.strokeLine(MARGIN_LEFT, MARGIN_TOP + plotHeight, MARGIN_LEFT + plotWidth, MARGIN_TOP + plotHeight);
+    }
 
-        // Axis labels
+    private void drawAxisLabels(GraphicsContext gc, int stepCount,
+                                double minVal, double maxVal,
+                                double plotWidth, double plotHeight) {
         gc.setFill(Color.BLACK);
         gc.setFont(Font.font(12));
 
-        // Y-axis ticks (5 ticks)
         int yTicks = 5;
         for (int i = 0; i <= yTicks; i++) {
             double val = minVal + (maxVal - minVal) * i / yTicks;
@@ -215,7 +227,6 @@ public class FanChart extends Application {
             gc.fillText(String.format(Locale.US, "%.0f", val), 5, y + 4);
         }
 
-        // X-axis ticks (up to 10 ticks)
         int xTicks = Math.min(10, stepCount - 1);
         for (int i = 0; i <= xTicks; i++) {
             int step = (int) Math.round((double) i * (stepCount - 1) / xTicks);
@@ -223,13 +234,12 @@ public class FanChart extends Application {
             gc.strokeLine(x, MARGIN_TOP + plotHeight, x, MARGIN_TOP + plotHeight + 5);
             gc.fillText(String.valueOf(step), x - 5, MARGIN_TOP + plotHeight + 20);
         }
+    }
 
-        // Title
+    private void drawTitle(GraphicsContext gc, String title, double plotWidth) {
         gc.setFont(Font.font(14));
-        gc.fillText(variableName + " — Monte Carlo Fan Chart (" + result.getRunCount() + " runs)",
-                MARGIN_LEFT, MARGIN_TOP - 15);
+        gc.fillText(title, MARGIN_LEFT, MARGIN_TOP - 15);
 
-        // X-axis label
         gc.setFont(Font.font(12));
         gc.fillText("Step", MARGIN_LEFT + plotWidth / 2 - 15, HEIGHT - 5);
     }

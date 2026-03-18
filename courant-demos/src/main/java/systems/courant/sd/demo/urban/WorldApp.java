@@ -93,14 +93,34 @@ public class WorldApp {
                 .name("WORLDAPP")
                 .defaultSimulation("Year", 200.0, "Year", 0.25);
 
-        // Stocks
+        defineStocks(builder);
+        defineConstants(builder);
+        defineLookupTables(builder);
+        defineVariables(builder);
+        defineFlows(builder);
+
+        var definition = builder.build();
+        var compiled = new ModelCompiler().compile(definition);
+
+        compiled.getModel().setMetadata(ModelMetadata.builder()
+                .author("Ventana Systems")
+                .source("Vensim Sample Models")
+                .license("MIT")
+                .build());
+
+        Simulation sim = compiled.createSimulation();
+        sim.execute();
+    }
+
+    private void defineStocks(ModelDefinitionBuilder builder) {
         builder.stock(new StockDef("Capital Agriculture Fraction", "The fraction of capital in agriculture.", 0.2, "Dimensionless", null));
         builder.stock(new StockDef("Capital", "The capital stock.", 4.0E8, "Capital units", null));
         builder.stock(new StockDef("Natural Resources", "The amount of natural resources remaining.", 9.0E11, "Resource units", null));
         builder.stock(new StockDef("Pollution", "The amount of non-incorporated pollution.", 2.0E8, "Pollution units", null));
         builder.stock(new StockDef("Population", "World population.", 1.65E9, "People", null));
+    }
 
-        // Constants
+    private void defineConstants(ModelDefinitionBuilder builder) {
         builder.constant("TIME_STEP", 0.25, "Year");
         builder.constant("INITIAL_TIME", 1900.0, "Year");
         builder.constant("FINAL_TIME", 2100.0, "Year");
@@ -124,8 +144,9 @@ public class WorldApp {
         builder.constant("population density normal", 26.5, "Person / ( Kilometer * Kilometer )");
         builder.constant("population initial", 1.65E9, "People");
         builder.constant("quality of life normal", 1.0, "Satisfaction units");
+    }
 
-        // Lookup tables
+    private void defineLookupTables(ModelDefinitionBuilder builder) {
         builder.lookupTable(new LookupTableDef("births crowding mult tab", "The table for the effect of crowding on the number of\n\t\t         births.", new double[]{0.0, 1.0, 2.0, 3.0, 4.0, 5.0}, new double[]{1.05, 1.0, 0.9, 0.7, 0.6, 0.55}, "LINEAR"));
         builder.lookupTable(new LookupTableDef("births food mult tab", "The table for the effect of food on the number of births.", new double[]{0.0, 1.0, 2.0, 3.0, 4.0}, new double[]{0.0, 1.0, 1.6, 1.9, 2.0}, "LINEAR"));
         builder.lookupTable(new LookupTableDef("births material mult tab", "Table for the effect of the material standard of living on\n\t\t         births.", new double[]{0.0, 1.0, 2.0, 3.0, 4.0, 5.0}, new double[]{1.2, 1.0, 0.85, 0.75, 0.7, 0.7}, "LINEAR"));
@@ -148,8 +169,9 @@ public class WorldApp {
         builder.lookupTable(new LookupTableDef("quality food mult tab", "The table for the effect of food on the quality of life.", new double[]{0.0, 1.0, 2.0, 3.0, 4.0}, new double[]{0.0, 1.0, 1.8, 2.4, 2.7}, "LINEAR"));
         builder.lookupTable(new LookupTableDef("quality material mult tab", "Table for the effect of the material standard of living on\n\t\t         quality of\n\t\t         life.", new double[]{0.0, 1.0, 2.0, 3.0, 4.0, 5.0}, new double[]{0.2, 1.0, 1.7, 2.3, 2.7, 2.9}, "LINEAR"));
         builder.lookupTable(new LookupTableDef("quality pollution mult tab", "The table for the effect of pollution on the quality of\n\t\t         life.", new double[]{0.0, 10.0, 20.0, 30.0, 40.0, 50.0, 60.0}, new double[]{1.04, 0.85, 0.5, 0.3, 0.15, 0.05, 0.02}, "LINEAR"));
+    }
 
-        // Variables
+    private void defineVariables(ModelDefinitionBuilder builder) {
         builder.variable(new VariableDef("natural resource utilization normal", "The normal rate of natural resources.", "natural_resource_utilization_normal_c", "Resource units / Person / Year"));
         builder.variable(new VariableDef("capital investment rate normal", "The normal per capita rate of capital investment.", "capital_investment_rate_normal_c", "Capital units / Person / Year"));
         builder.variable(new VariableDef("capital depreciation", "The rate at which the capital stock depreciates.", "Capital * capital_depreciation_normal", "Capital units / Year"));
@@ -190,8 +212,9 @@ public class WorldApp {
         builder.variable(new VariableDef("quality material multiplier", "The effect of the material standard of living on the\n\t\t         quality of life.", "LOOKUP(quality_material_mult_tab, material_standard_of_living)", "Dimensionless"));
         builder.variable(new VariableDef("quality of life", "The quality of life.", "quality_of_life_normal * quality_material_multiplier * quality_crowding_multiplier * quality_food_multiplier * quality_pollution_multiplier", "Satisfaction units"));
         builder.variable(new VariableDef("quality pollution multiplier", "The effect of pollution on the quality of life.", "LOOKUP(quality_pollution_mult_tab, pollution_ratio)", "Dimensionless"));
+    }
 
-        // Flows
+    private void defineFlows(ModelDefinitionBuilder builder) {
         builder.flow(new FlowDef("Capital Agriculture Fraction net flow", "Net flow for Capital Agriculture Fraction", "( capital_agriculture_fraction_indicated * capital_investment_from_quality_ratio - Capital_Agriculture_Fraction ) / capital_agriculture_fraction_adjustment_time", "Year", null, "Capital Agriculture Fraction"));
         builder.flow(new FlowDef("Capital inflow 1", null, "capital_investment", "Year", null, "Capital"));
         builder.flow(new FlowDef("Capital outflow 2", null, "capital_depreciation", "Year", "Capital", null));
@@ -200,17 +223,5 @@ public class WorldApp {
         builder.flow(new FlowDef("Pollution outflow 2", null, "pollution_absorption", "Year", "Pollution", null));
         builder.flow(new FlowDef("Population inflow 1", null, "births", "Year", null, "Population"));
         builder.flow(new FlowDef("Population outflow 2", null, "deaths", "Year", "Population", null));
-
-        var definition = builder.build();
-        var compiled = new ModelCompiler().compile(definition);
-
-        compiled.getModel().setMetadata(ModelMetadata.builder()
-                .author("Ventana Systems")
-                .source("Vensim Sample Models")
-                .license("MIT")
-                .build());
-
-        Simulation sim = compiled.createSimulation();
-        sim.execute();
     }
 }

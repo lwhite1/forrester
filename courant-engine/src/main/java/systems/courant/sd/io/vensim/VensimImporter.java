@@ -103,27 +103,82 @@ public class VensimImporter implements ModelImporter {
         List<String> warnings = new ArrayList<>();
         MdlParser.ParsedMdl parsed = MdlParser.parse(content);
 
-        // Expand macro calls before classification
-        List<MdlEquation> equations;
+        List<MdlEquation> equations = expandMacros(parsed, warnings);
+
+        SubscriptContext subscripts = collectNamesAndSubscripts(equations);
+        resolveEquivalences(subscripts);
+
+        SimulationSettings sim = extractSimulationSettings(
+                subscripts.controlVars, warnings);
+
+        ModelDefinitionBuilder builder = new ModelDefinitionBuilder()
+                .name(modelName)
+                .defaultSimulation(sim.timeUnit, sim.duration, sim.timeUnit, sim.timeStep);
+
+        registerEquivalenceDimensions(subscripts, builder);
+        injectSimulationConstants(builder, sim);
+
+        PreClassificationResult preClassification = preClassifyEquations(
+                equations, subscripts, sim, warnings);
+
+        boolean isCld = detectCldMode(
+                preClassification.stockNames, parsed.sketchLines());
+        Set<String> sketchValveNames = extractSketchFlowValveNames(
+                parsed.sketchLines());
+        Map<String, MdlEquation> equationsByName = buildEquationsByNameIndex(
+                equations);
+
+        Set<String> sketchFlowNames = buildModelDefinitions(
+                equations, isCld, builder, subscripts, preClassification,
+                sketchValveNames, equationsByName, sim.timeUnit, warnings);
+
+        parseSketchViews(parsed.sketchLines(), builder, isCld,
+                preClassification.stockNames, sketchFlowNames,
+                preClassification.lookupNames, preClassification.cldVariableNames);
+
+        if (baseDir != null) {
+            resolveCompanionCsvFiles(equations, baseDir, builder, warnings);
+        }
+
+        return new ImportResult(builder.build(), warnings);
+    }
+
+    private record SimulationSettings(double initialTime, double finalTime,
+                                      double timeStep, String timeUnit,
+                                      double duration) {}
+
+    private record PreClassificationResult(Set<String> stockNames,
+                                           Set<String> flowNames,
+                                           Set<String> lookupNames,
+                                           Set<String> cldVariableNames,
+                                           Set<String> allNormalizedNames,
+                                           Map<String, Double> constantValues) {}
+
+    private record SubscriptContext(Set<String> vensimNames,
+                                    Map<String, MdlEquation> controlVars,
+                                    Map<String, List<String>> subscriptDimensions,
+                                    Map<String, List<String>> subscriptDisplayLabels,
+                                    Map<String, SubscriptMapping> subscriptMappings,
+                                    Map<String, String> equivalences,
+                                    Map<String, String> equivalenceDisplayNames) {}
+
+    private List<MdlEquation> expandMacros(MdlParser.ParsedMdl parsed,
+                                            List<String> warnings) {
         if (!parsed.macros().isEmpty()) {
             MacroExpander.ExpansionResult expansion = MacroExpander.expand(
                     parsed.equations(), parsed.macros());
-            equations = expansion.expandedEquations();
             warnings.addAll(expansion.warnings());
-        } else {
-            equations = parsed.equations();
+            return expansion.expandedEquations();
         }
+        return parsed.equations();
+    }
 
-        // Pass 1: Collect all variable names and subscript dimensions
+    private SubscriptContext collectNamesAndSubscripts(List<MdlEquation> equations) {
         Set<String> vensimNames = new HashSet<>();
         Map<String, MdlEquation> controlVars = new LinkedHashMap<>();
-        // Map from normalized dimension name → list of normalized labels
         Map<String, List<String>> subscriptDimensions = new LinkedHashMap<>();
-        // Map from normalized dimension name → list of original (display) labels
         Map<String, List<String>> subscriptDisplayLabels = new LinkedHashMap<>();
-        // Map from normalized mapping dim name → mapping info (for -> syntax)
         Map<String, SubscriptMapping> subscriptMappings = new LinkedHashMap<>();
-        // Deferred <-> equivalences (resolved after all : definitions)
         Map<String, String> equivalences = new LinkedHashMap<>();
         Map<String, String> equivalenceDisplayNames = new LinkedHashMap<>();
 
@@ -133,14 +188,9 @@ public class VensimImporter implements ModelImporter {
                 continue;
             }
             vensimNames.add(name);
-            // Also add the unquoted form so replaceMultiWordNames can match
-            // references that appear without quotes in other equations
             if (name.startsWith("\"") && name.endsWith("\"") && name.length() > 2) {
                 vensimNames.add(name.substring(1, name.length() - 1));
             }
-            // For subscripted names like "growth rate[Region]", also register
-            // the base name "growth rate" so multi-word replacement works
-            // after dimension substitution (e.g., "growth rate[North]")
             Matcher baseMatcher = SUBSCRIPT_NAME_PATTERN.matcher(name);
             if (baseMatcher.matches()) {
                 vensimNames.add(baseMatcher.group(1).strip());
@@ -150,12 +200,10 @@ public class VensimImporter implements ModelImporter {
                 controlVars.put(normalizeSystemVarKey(name), eq);
             }
 
-            // Collect subscript dimension definitions
             if (eq.operator().equals(":")) {
                 String dimName = VensimExprTranslator.normalizeName(name);
                 String rawExpr = eq.expression().strip();
 
-                // Check for dimension mapping: labels -> targetDim
                 int arrowPos = rawExpr.indexOf("->");
                 String labelsStr = arrowPos >= 0
                         ? rawExpr.substring(0, arrowPos).strip() : rawExpr;
@@ -175,7 +223,6 @@ public class VensimImporter implements ModelImporter {
                     subscriptDisplayLabels.put(dimName, displayLabels);
                 }
 
-                // Store mapping if -> is present
                 if (arrowPos >= 0) {
                     String targetDim = VensimExprTranslator.normalizeName(
                             rawExpr.substring(arrowPos + 2).strip());
@@ -188,7 +235,6 @@ public class VensimImporter implements ModelImporter {
                 }
             }
 
-            // Dimension equivalence: prereqtask <-> task
             if (eq.operator().equals("<->")) {
                 String dimName = VensimExprTranslator.normalizeName(name);
                 String displayName = VensimExprTranslator.normalizeDisplayName(name);
@@ -199,26 +245,32 @@ public class VensimImporter implements ModelImporter {
             }
         }
 
-        // Resolve <-> equivalences after all dimension definitions.
-        // Iterate until no new resolutions are made to handle transitive chains
-        // (e.g. A <-> B, B <-> C: first pass resolves B, second pass resolves A via B).
+        return new SubscriptContext(vensimNames, controlVars, subscriptDimensions,
+                subscriptDisplayLabels, subscriptMappings, equivalences,
+                equivalenceDisplayNames);
+    }
+
+    private void resolveEquivalences(SubscriptContext subscripts) {
         boolean changed = true;
         while (changed) {
             changed = false;
-            for (var entry : equivalences.entrySet()) {
+            for (var entry : subscripts.equivalences.entrySet()) {
                 String dimName = entry.getKey();
                 String targetDim = entry.getValue();
-                List<String> targetLabels = subscriptDimensions.get(targetDim);
-                List<String> targetDisplayLabels = subscriptDisplayLabels.get(targetDim);
-                if (targetLabels != null && !targetLabels.equals(subscriptDimensions.get(dimName))) {
-                    subscriptDimensions.put(dimName, targetLabels);
-                    subscriptDisplayLabels.put(dimName, targetDisplayLabels);
+                List<String> targetLabels = subscripts.subscriptDimensions.get(targetDim);
+                List<String> targetDisplayLabels = subscripts.subscriptDisplayLabels.get(targetDim);
+                if (targetLabels != null
+                        && !targetLabels.equals(subscripts.subscriptDimensions.get(dimName))) {
+                    subscripts.subscriptDimensions.put(dimName, targetLabels);
+                    subscripts.subscriptDisplayLabels.put(dimName, targetDisplayLabels);
                     changed = true;
                 }
             }
         }
+    }
 
-        // Extract simulation settings from control variables
+    private SimulationSettings extractSimulationSettings(
+            Map<String, MdlEquation> controlVars, List<String> warnings) {
         double initialTime = getDoubleFromControl(controlVars, "INITIAL TIME", 0.0, warnings);
         double finalTime = getDoubleFromControl(controlVars, "FINAL TIME", 100.0, warnings);
         double timeStepValue = getDoubleFromControl(controlVars, "TIME STEP", 1.0, warnings);
@@ -231,38 +283,43 @@ public class VensimImporter implements ModelImporter {
             duration = 100;
         }
 
-        ModelDefinitionBuilder builder = new ModelDefinitionBuilder()
-                .name(modelName)
-                .defaultSimulation(timeUnit, duration, timeUnit, timeStepValue);
+        return new SimulationSettings(initialTime, finalTime, timeStepValue,
+                timeUnit, duration);
+    }
 
-        // Register resolved equivalence dimensions as subscripts
-        for (var entry : equivalences.entrySet()) {
+    private void registerEquivalenceDimensions(SubscriptContext subscripts,
+                                                ModelDefinitionBuilder builder) {
+        for (var entry : subscripts.equivalences.entrySet()) {
             String dimName = entry.getKey();
-            List<String> labels = subscriptDisplayLabels.get(dimName);
-            String displayName = equivalenceDisplayNames.get(dimName);
+            List<String> labels = subscripts.subscriptDisplayLabels.get(dimName);
+            String displayName = subscripts.equivalenceDisplayNames.get(dimName);
             if (labels != null && displayName != null) {
                 builder.subscript(displayName, labels);
             }
         }
+    }
 
-        // Inject Vensim built-in simulation constants so expressions can reference them
-        builder.constant("TIME_STEP", timeStepValue, timeUnit);
-        builder.constant("INITIAL_TIME", initialTime, timeUnit);
-        builder.constant("FINAL_TIME", finalTime, timeUnit);
+    private void injectSimulationConstants(ModelDefinitionBuilder builder,
+                                            SimulationSettings sim) {
+        builder.constant("TIME_STEP", sim.timeStep, sim.timeUnit);
+        builder.constant("INITIAL_TIME", sim.initialTime, sim.timeUnit);
+        builder.constant("FINAL_TIME", sim.finalTime, sim.timeUnit);
+    }
 
-        // Pass 2: Classify and build model elements
+    private PreClassificationResult preClassifyEquations(
+            List<MdlEquation> equations, SubscriptContext subscripts,
+            SimulationSettings sim, List<String> warnings) {
         Set<String> stockNames = new HashSet<>();
         Set<String> flowNames = new HashSet<>();
         Set<String> lookupNames = new HashSet<>();
         Set<String> cldVariableNames = new HashSet<>();
         Set<String> allNormalizedNames = new HashSet<>();
 
-        // First sub-pass: identify stocks, lookups, and collect constant values
-        // so that INTEG initial values like "Initial number of muskrats" can be resolved
         Map<String, Double> constantValues = new HashMap<>();
-        constantValues.put("TIME_STEP", timeStepValue);
-        constantValues.put("INITIAL_TIME", initialTime);
-        constantValues.put("FINAL_TIME", finalTime);
+        constantValues.put("TIME_STEP", sim.timeStep);
+        constantValues.put("INITIAL_TIME", sim.initialTime);
+        constantValues.put("FINAL_TIME", sim.finalTime);
+
         for (MdlEquation eq : equations) {
             String name = eq.name().strip();
             if (name.isEmpty() || isSystemVar(name)) {
@@ -272,83 +329,11 @@ public class VensimImporter implements ModelImporter {
                 continue;
             }
 
-            // Check for subscripted variable names and register expanded names
             Matcher subMatcher = SUBSCRIPT_NAME_PATTERN.matcher(name);
             if (subMatcher.matches()) {
-                String baseName = subMatcher.group(1).strip();
-                String dimNameRaw = subMatcher.group(2).strip();
-                String dimKey = VensimExprTranslator.normalizeName(dimNameRaw);
-                List<String> labels = subscriptDimensions.get(dimKey);
-                if (labels != null) {
-                    String normalizedBase = VensimExprTranslator.normalizeName(baseName);
-                    boolean isInteg = INTEG_PATTERN.matcher(eq.expression()).find();
-                    // Try splitting comma-separated constant values for expanded names
-                    List<String> perLabelValues = splitSubscriptValues(
-                            eq.expression(), labels.size());
-                    for (int li = 0; li < labels.size(); li++) {
-                        String expandedName = normalizedBase + "_" + labels.get(li);
-                        if (isInteg) {
-                            stockNames.add(expandedName);
-                        }
-                        // Register per-label numeric constants under both key forms:
-                        // base_label (expanded name) and normalizeName(base[label]) (what
-                        // parseInitialValue will look up)
-                        if (perLabelValues != null) {
-                            String val = perLabelValues.get(li).strip();
-                            if (isNumericLiteral(val)) {
-                                double numVal = Double.parseDouble(val);
-                                constantValues.put(expandedName, numVal);
-                                // Also register under the key normalizeName produces
-                                // from "base[label]" (strips brackets without separator)
-                                String altKey = VensimExprTranslator.normalizeName(
-                                        baseName + "[" + labels.get(li) + "]");
-                                constantValues.put(altKey, numVal);
-                            }
-                        }
-                    }
-                    continue;
-                }
-
-                // Check for multi-dimensional subscripts: name[sub1,sub2]
-                if (dimNameRaw.contains(",")) {
-                    String normalizedBase = VensimExprTranslator.normalizeName(baseName);
-                    boolean isInteg = INTEG_PATTERN.matcher(eq.expression()).find();
-                    List<List<String>> combos = resolveMultiDimLabels(
-                            dimNameRaw, subscriptDimensions);
-                    List<String> perLabelValues = splitSubscriptValues(
-                            eq.expression(), combos.size());
-                    for (int ci = 0; ci < combos.size(); ci++) {
-                        String expandedName = normalizedBase + "_"
-                                + String.join("_", combos.get(ci));
-                        if (isInteg) {
-                            stockNames.add(expandedName);
-                        }
-                        if (perLabelValues != null) {
-                            String val = perLabelValues.get(ci).strip();
-                            if (isNumericLiteral(val)) {
-                                constantValues.put(expandedName,
-                                        Double.parseDouble(val));
-                            }
-                        }
-                    }
-                    continue;
-                }
-
-                // Check if subscript is a single label (not a dimension name)
-                String normalizedSub = VensimExprTranslator.normalizeName(dimNameRaw);
-                boolean isLabel = subscriptDimensions.values().stream()
-                        .anyMatch(lbls -> lbls.contains(normalizedSub));
-                if (isLabel) {
-                    String normalizedBase = VensimExprTranslator.normalizeName(baseName);
-                    String expandedName = normalizedBase + "_" + normalizedSub;
-                    boolean isInteg = INTEG_PATTERN.matcher(eq.expression()).find();
-                    if (isInteg) {
-                        stockNames.add(expandedName);
-                    }
-                    if (isNumericLiteral(eq.expression())) {
-                        constantValues.put(expandedName,
-                                Double.parseDouble(eq.expression().strip()));
-                    }
+                if (preClassifySubscriptedEquation(subMatcher, eq,
+                        subscripts.subscriptDimensions, stockNames,
+                        constantValues)) {
                     continue;
                 }
             }
@@ -356,7 +341,6 @@ public class VensimImporter implements ModelImporter {
             String eqName = VensimExprTranslator.normalizeName(name);
 
             if (eq.operator().equals(":") || eq.operator().equals("<->")) {
-                // Subscript definition or equivalence
                 continue;
             }
             if (eq.operator().equals("()")) {
@@ -370,10 +354,8 @@ public class VensimImporter implements ModelImporter {
             if (eq.operator().equals(":=")) {
                 continue;
             }
-            // Collect numeric constants for initial value resolution
             if (isNumericLiteral(eq.expression())) {
                 constantValues.put(eqName, Double.parseDouble(eq.expression().strip()));
-                // Also map the original multi-word name (normalized with underscores)
                 String altNormalized = name.replace(" ", "_");
                 if (!altNormalized.equals(eqName)) {
                     constantValues.put(altNormalized, Double.parseDouble(eq.expression().strip()));
@@ -381,22 +363,96 @@ public class VensimImporter implements ModelImporter {
             }
         }
 
-        // Detect CLD mode: no stocks AND no flow valves in sketch section.
-        // A pure CLD has only type-10 elements and type-1 connectors, no type-11 flow valves.
-        boolean hasFlowValves = parsed.sketchLines().stream()
+        return new PreClassificationResult(stockNames, flowNames, lookupNames,
+                cldVariableNames, allNormalizedNames, constantValues);
+    }
+
+    private boolean preClassifySubscriptedEquation(
+            Matcher subMatcher, MdlEquation eq,
+            Map<String, List<String>> subscriptDimensions,
+            Set<String> stockNames,
+            Map<String, Double> constantValues) {
+        String baseName = subMatcher.group(1).strip();
+        String dimNameRaw = subMatcher.group(2).strip();
+        String dimKey = VensimExprTranslator.normalizeName(dimNameRaw);
+        List<String> labels = subscriptDimensions.get(dimKey);
+        if (labels != null) {
+            String normalizedBase = VensimExprTranslator.normalizeName(baseName);
+            boolean isInteg = INTEG_PATTERN.matcher(eq.expression()).find();
+            List<String> perLabelValues = splitSubscriptValues(
+                    eq.expression(), labels.size());
+            for (int li = 0; li < labels.size(); li++) {
+                String expandedName = normalizedBase + "_" + labels.get(li);
+                if (isInteg) {
+                    stockNames.add(expandedName);
+                }
+                if (perLabelValues != null) {
+                    String val = perLabelValues.get(li).strip();
+                    if (isNumericLiteral(val)) {
+                        double numVal = Double.parseDouble(val);
+                        constantValues.put(expandedName, numVal);
+                        String altKey = VensimExprTranslator.normalizeName(
+                                baseName + "[" + labels.get(li) + "]");
+                        constantValues.put(altKey, numVal);
+                    }
+                }
+            }
+            return true;
+        }
+
+        if (dimNameRaw.contains(",")) {
+            String normalizedBase = VensimExprTranslator.normalizeName(baseName);
+            boolean isInteg = INTEG_PATTERN.matcher(eq.expression()).find();
+            List<List<String>> combos = resolveMultiDimLabels(
+                    dimNameRaw, subscriptDimensions);
+            List<String> perLabelValues = splitSubscriptValues(
+                    eq.expression(), combos.size());
+            for (int ci = 0; ci < combos.size(); ci++) {
+                String expandedName = normalizedBase + "_"
+                        + String.join("_", combos.get(ci));
+                if (isInteg) {
+                    stockNames.add(expandedName);
+                }
+                if (perLabelValues != null) {
+                    String val = perLabelValues.get(ci).strip();
+                    if (isNumericLiteral(val)) {
+                        constantValues.put(expandedName,
+                                Double.parseDouble(val));
+                    }
+                }
+            }
+            return true;
+        }
+
+        String normalizedSub = VensimExprTranslator.normalizeName(dimNameRaw);
+        boolean isLabel = subscriptDimensions.values().stream()
+                .anyMatch(lbls -> lbls.contains(normalizedSub));
+        if (isLabel) {
+            String normalizedBase = VensimExprTranslator.normalizeName(baseName);
+            String expandedName = normalizedBase + "_" + normalizedSub;
+            boolean isInteg = INTEG_PATTERN.matcher(eq.expression()).find();
+            if (isInteg) {
+                stockNames.add(expandedName);
+            }
+            if (isNumericLiteral(eq.expression())) {
+                constantValues.put(expandedName,
+                        Double.parseDouble(eq.expression().strip()));
+            }
+            return true;
+        }
+
+        return false;
+    }
+
+    private boolean detectCldMode(Set<String> stockNames,
+                                   List<String> sketchLines) {
+        boolean hasFlowValves = sketchLines.stream()
                 .anyMatch(line -> line.strip().startsWith("11,"));
-        boolean isCld = stockNames.isEmpty() && !hasFlowValves
-                && !parsed.sketchLines().isEmpty();
+        return stockNames.isEmpty() && !hasFlowValves && !sketchLines.isEmpty();
+    }
 
-        // Pre-extract flow valve names from sketch section (type-11 lines).
-        // These are the original Vensim flow valve names used to match decomposed
-        // INTEG rate terms so we preserve the original names instead of synthetic ones.
-        Set<String> sketchValveNames = extractSketchFlowValveNames(parsed.sketchLines());
-
-        // Pre-collect variable equations for flow valve name matching.
-        // When a decomposed INTEG rate term matches a sketch valve name, the flow
-        // gets the variable's actual equation (not just a reference) and the variable
-        // is skipped to avoid duplicate names.
+    private Map<String, MdlEquation> buildEquationsByNameIndex(
+            List<MdlEquation> equations) {
         Map<String, MdlEquation> equationsByName = new LinkedHashMap<>();
         for (MdlEquation eq : equations) {
             String name = eq.name().strip();
@@ -405,24 +461,29 @@ public class VensimImporter implements ModelImporter {
                 equationsByName.put(norm, eq);
             }
         }
+        return equationsByName;
+    }
 
-        // Second sub-pass: build definitions
+    private Set<String> buildModelDefinitions(
+            List<MdlEquation> equations, boolean isCld,
+            ModelDefinitionBuilder builder, SubscriptContext subscripts,
+            PreClassificationResult preClassification,
+            Set<String> sketchValveNames,
+            Map<String, MdlEquation> equationsByName,
+            String timeUnit, List<String> warnings) {
         Set<String> sketchFlowNames = new HashSet<>();
         for (MdlEquation eq : equations) {
             String name = eq.name().strip();
             if (name.isEmpty() || isSystemVar(name)) {
                 continue;
             }
-            // Skip Vensim "A FUNCTION OF" documentation blocks — they're metadata,
-            // not executable equations, and would create duplicates of the real equation
             if (isDocumentationBlock(eq.expression())) {
                 continue;
             }
             String eqName = VensimExprTranslator.normalizeName(name);
             String displayName = VensimExprTranslator.normalizeDisplayName(name);
-            // Subscript range names use a separate namespace — skip duplicate check
             if (!eq.operator().equals(":") && !eq.operator().equals("<->")
-                    && !allNormalizedNames.add(eqName)) {
+                    && !preClassification.allNormalizedNames.add(eqName)) {
                 warnings.add("Duplicate normalized name '" + eqName
                         + "' (from '" + name + "') — skipped");
                 continue;
@@ -432,7 +493,7 @@ public class VensimImporter implements ModelImporter {
             if (isCld) {
                 try {
                     classifyAndBuildCld(eq, displayName, eqName, comment, builder,
-                            cldVariableNames, warnings);
+                            preClassification.cldVariableNames, warnings);
                 } catch (IllegalArgumentException e) {
                     warnings.add("Error processing '" + name + "': " + e.getMessage());
                 }
@@ -440,41 +501,42 @@ public class VensimImporter implements ModelImporter {
                 String unit = cleanUnits(eq.units());
                 try {
                     classifyAndBuild(eq, displayName, eqName, unit, comment, builder,
-                            vensimNames, stockNames, flowNames, lookupNames,
+                            subscripts.vensimNames, preClassification.stockNames,
+                            preClassification.flowNames, preClassification.lookupNames,
                             sketchFlowNames, sketchValveNames, equationsByName,
-                            constantValues, timeUnit,
-                            subscriptDimensions, subscriptDisplayLabels,
-                            subscriptMappings, warnings);
+                            preClassification.constantValues, timeUnit,
+                            subscripts.subscriptDimensions,
+                            subscripts.subscriptDisplayLabels,
+                            subscripts.subscriptMappings, warnings);
                 } catch (IllegalArgumentException e) {
                     warnings.add("Error processing '" + name + "': " + e.getMessage());
                 }
             }
         }
+        return sketchFlowNames;
+    }
 
-        // Parse sketch section (use original sketch flow names, not auto-generated _net_flow names)
-        if (!parsed.sketchLines().isEmpty()) {
-            List<ViewDef> views = SketchParser.parse(
-                    parsed.sketchLines(), stockNames, sketchFlowNames, lookupNames,
-                    cldVariableNames);
-            for (ViewDef view : views) {
-                builder.view(view);
-                // In CLD mode, convert sketch connectors to causal links
-                if (isCld) {
-                    for (ConnectorRoute connector : view.connectors()) {
-                        builder.causalLink(new CausalLinkDef(
-                                connector.from(), connector.to(),
-                                CausalLinkDef.Polarity.UNKNOWN));
-                    }
+    private void parseSketchViews(List<String> sketchLines,
+                                   ModelDefinitionBuilder builder, boolean isCld,
+                                   Set<String> stockNames, Set<String> sketchFlowNames,
+                                   Set<String> lookupNames,
+                                   Set<String> cldVariableNames) {
+        if (sketchLines.isEmpty()) {
+            return;
+        }
+        List<ViewDef> views = SketchParser.parse(
+                sketchLines, stockNames, sketchFlowNames, lookupNames,
+                cldVariableNames);
+        for (ViewDef view : views) {
+            builder.view(view);
+            if (isCld) {
+                for (ConnectorRoute connector : view.connectors()) {
+                    builder.causalLink(new CausalLinkDef(
+                            connector.from(), connector.to(),
+                            CausalLinkDef.Polarity.UNKNOWN));
                 }
             }
         }
-
-        // Phase 2: Attempt to resolve companion CSV files for GET DIRECT DATA references
-        if (baseDir != null) {
-            resolveCompanionCsvFiles(equations, baseDir, builder, warnings);
-        }
-
-        return new ImportResult(builder.build(), warnings);
     }
 
     /**

@@ -73,7 +73,26 @@ public class Urban {
                 .name("URBAN")
                 .defaultSimulation("Year", 250.0, "Year");
 
-        // Stocks
+        defineStocks(builder);
+        defineConstants(builder);
+        defineLookupTables(builder);
+        defineVariables(builder);
+        defineFlows(builder);
+
+        var definition = builder.build();
+        var compiled = new ModelCompiler().compile(definition);
+
+        compiled.getModel().setMetadata(ModelMetadata.builder()
+                .author("Ventana Systems")
+                .source("Vensim Sample Models")
+                .license("MIT")
+                .build());
+
+        Simulation sim = compiled.createSimulation();
+        sim.execute();
+    }
+
+    private void defineStocks(ModelDefinitionBuilder builder) {
         builder.stock(new StockDef("Declining Industry", "Declining Industry", 100.0, "production unit", null));
         builder.stock(new StockDef("New Enterprise", "New Enterprise", 200.0, "production unit", null));
         builder.stock(new StockDef("New Enterprise Average", "New Industry Average", 0.0, "New_Enterprise* (1-new_enterprise_growth_rate_initial* new_enterprise_average_time)", "production unit", null, List.of()));
@@ -95,7 +114,9 @@ public class Urban {
         builder.stock(new StockDef("Worker Housing", "Worker Housing", 21000.0, "housing unit", null));
         builder.stock(new StockDef("Worker Housing Average", "Worker Housing Average", 0.0, "Worker_Housing* (1-worker_housing_growth_rate_initial* worker_housing_average_time)", "housing unit", null, List.of()));
 
-        // Constants
+    }
+
+    private void defineConstants(ModelDefinitionBuilder builder) {
         builder.constant("TIME_STEP", 1.0, "Year");
         builder.constant("INITIAL_TIME", 0.0, "Year");
         builder.constant("FINAL_TIME", 250.0, "Year");
@@ -197,7 +218,9 @@ public class Urban {
         builder.constant("worker housing growth rate initial", 0.03, "fraction/year");
         builder.constant("worker housing obsolescense norm", 0.02, "fraction/year");
 
-        // Lookup tables
+    }
+
+    private void defineLookupTables(ModelDefinitionBuilder builder) {
         builder.lookupTable(new LookupTableDef("declining industry from enterprise mult tab", "Declining Industry from Enterprise Multiplier \n\t\t      Table", new double[]{-3.0, -2.0, -1.0, 0.0, 1.0, 2.0, 3.0}, new double[]{0.4, 0.5, 0.7, 1.0, 1.6, 2.4, 4.0}, "LINEAR"));
         builder.lookupTable(new LookupTableDef("declining industry from land mult tab", "Declining Industry from Land Multiplier\n\t\t      Table", new double[]{0.8, 0.85, 0.9, 0.95, 1.0}, new double[]{1.0, 1.2, 1.6, 2.2, 6.0}, "LINEAR"));
         builder.lookupTable(new LookupTableDef("enterprise growth mult tab", "Enterprise from growth Multiplier Table", new double[]{-0.1, -0.05, 0.0, 0.05, 0.1, 0.15}, new double[]{0.2, 0.6, 1.0, 1.4, 1.8, 2.2}, "LINEAR"));
@@ -252,7 +275,9 @@ public class Urban {
         builder.lookupTable(new LookupTableDef("worker housing tax mult tab", "Worker Housing From Tax Multiplier Table", new double[]{-2.0, 0.0, 2.0, 4.0}, new double[]{1.2, 1.0, 0.7, 0.3}, "LINEAR"));
         builder.lookupTable(new LookupTableDef("worker housing underemp mult tab", "Worker Housing from Underemployed Multiplier\n\t\t      Table", new double[]{0.0, 1.0, 2.0, 3.0, 4.0, 5.0}, new double[]{0.5, 0.8, 1.0, 1.2, 1.3, 1.3}, "LINEAR"));
 
-        // Variables
+    }
+
+    private void defineVariables(ModelDefinitionBuilder builder) {
         builder.variable(new VariableDef("declining industry demolition program", "Declining Industry Demolition Program", "declining_industry_demolition_rate*Declining_Industry* IF(TIME >= SWITCH_TIME_7,1,0)", "production unit/year"));
         builder.variable(new VariableDef("labor training prog", "Labor Training ProGram", "LABOR_TRAINING_RATE*Labor* IF(TIME >= SWITCH_TIME_2,1,0)", "worker/year"));
         builder.variable(new VariableDef("low cost hous prog", "Low Cost Housing Program", "low_cost_housing_constr_des*labor_construction_ratio", "housing unit/year"));
@@ -388,7 +413,9 @@ public class Urban {
         builder.variable(new VariableDef("worker housing tax mult", "Worker Housing From Tax Multiplier", "LOOKUP(worker_housing_tax_mult_tab, 1.44*LN(tax_ratio))", "dimensionless"));
         builder.variable(new VariableDef("worker housing underemp mult", "Worker Housing from Underemployed Multiplier", "LOOKUP(worker_housing_underemp_mult_tab, labor_underemp_ratio)", "dimensionless"));
 
-        // Flows
+    }
+
+    private void defineFlows(ModelDefinitionBuilder builder) {
         builder.flow(new FlowDef("Declining Industry net flow", "Net flow for Declining Industry", "(mature_business_decline- declining_industry_demise)", "Year", null, "Declining Industry"));
         builder.flow(new FlowDef("New Enterprise net flow", "Net flow for New Enterprise", "(new_enterprise_Construction- new_enterprise_decline)", "Year", null, "New Enterprise"));
         builder.flow(new FlowDef("New Enterprise Average net flow", "Net flow for New Enterprise Average", "(New_Enterprise-New_Enterprise_Average)/ new_enterprise_average_time", "Year", null, "New Enterprise Average"));
@@ -409,17 +436,5 @@ public class Urban {
         builder.flow(new FlowDef("Underemp Housing net flow", "Net flow for Underemp Housing", "(worker_housing_obsolescence+low_cost_hous_prog- slum_housing_demolition)", "Year", null, "Underemp Housing"));
         builder.flow(new FlowDef("Worker Housing net flow", "Net flow for Worker Housing", "(premium_housing_obsolescence+ worker_housing_construction-worker_housing_obsolescence)", "Year", null, "Worker Housing"));
         builder.flow(new FlowDef("Worker Housing Average net flow", "Net flow for Worker Housing Average", "(Worker_Housing-Worker_Housing_Average)/ worker_housing_average_time", "Year", null, "Worker Housing Average"));
-
-        var definition = builder.build();
-        var compiled = new ModelCompiler().compile(definition);
-
-        compiled.getModel().setMetadata(ModelMetadata.builder()
-                .author("Ventana Systems")
-                .source("Vensim Sample Models")
-                .license("MIT")
-                .build());
-
-        Simulation sim = compiled.createSimulation();
-        sim.execute();
     }
 }

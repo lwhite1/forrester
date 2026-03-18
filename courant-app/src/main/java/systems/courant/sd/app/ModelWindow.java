@@ -1203,8 +1203,15 @@ public class ModelWindow {
 
     private void buildRegistry() {
         commandRegistry = new CommandRegistry();
+        addBuildCommands();
+        addSimulateCommands();
+        addViewCommands();
+        addEditCommands();
+        addFileCommands();
+        addHelpCommands();
+    }
 
-        // Build tools
+    private void addBuildCommands() {
         commandRegistry.add("Add Stock", "Build",
                 () -> switchToolAndFocus(CanvasToolBar.Tool.PLACE_STOCK));
         commandRegistry.add("Add Flow", "Build",
@@ -1225,8 +1232,9 @@ public class ModelWindow {
                 () -> switchToolAndFocus(CanvasToolBar.Tool.PLACE_COMMENT));
         commandRegistry.add("Select Tool", "Build",
                 () -> switchToolAndFocus(CanvasToolBar.Tool.SELECT));
+    }
 
-        // Simulate
+    private void addSimulateCommands() {
         commandRegistry.add("Run Simulation", "Simulate", simulationController::runSimulation);
         commandRegistry.add("Validate Model", "Simulate", simulationController::validateModel);
         commandRegistry.add("Simulation Settings", "Simulate",
@@ -1240,8 +1248,9 @@ public class ModelWindow {
         commandRegistry.add("Monte Carlo", "Simulate", simulationController::runMonteCarlo);
         commandRegistry.add("Optimize", "Simulate", simulationController::runOptimization);
         commandRegistry.add("Calibrate", "Simulate", simulationController::runCalibration);
+    }
 
-        // View
+    private void addViewCommands() {
         commandRegistry.add("Validation Issues", "View", this::showValidationDialog);
         commandRegistry.add("Zoom to Fit", "View", () -> {
             canvas.zoomToFit(); canvas.requestFocus(); });
@@ -1266,8 +1275,9 @@ public class ModelWindow {
         commandRegistry.add("Pop Out / Dock Dashboard", "View", () -> {
             if (dashboardStage == null) { popOutDashboard(); } else { dockDashboard(); }
         });
+    }
 
-        // Edit
+    private void addEditCommands() {
         commandRegistry.add("Undo", "Edit", () -> {
             canvas.performUndo(); canvas.requestFocus(); });
         commandRegistry.add("Redo", "Edit", () -> {
@@ -1281,8 +1291,9 @@ public class ModelWindow {
             canvas.pasteClipboard(); canvas.requestFocus(); });
         commandRegistry.add("Select All", "Edit", () -> {
             canvas.selectAll(); canvas.requestFocus(); });
+    }
 
-        // File
+    private void addFileCommands() {
         commandRegistry.add("New Model", "File", fileController::newModel);
         commandRegistry.add("New Window", "File", () -> app.openNewWindow());
         commandRegistry.add("Open Model", "File", fileController::openFile);
@@ -1293,8 +1304,9 @@ public class ModelWindow {
                 canvas.getConnectors(), canvas.getActiveLoopAnalysis(), stage,
                 editor != null ? editor.getModelName() : null));
         commandRegistry.add("Model Info", "File", this::showModelInfoDialog);
+    }
 
-        // Help
+    private void addHelpCommands() {
         commandRegistry.add("Context Help", "Help", this::showContextHelp);
         commandRegistry.add("Getting Started", "Help",
                 () -> helpWindows.showOrBring(QuickstartDialog.class, QuickstartDialog::new));
@@ -1326,8 +1338,11 @@ public class ModelWindow {
             buildRegistry();
         }
         List<CommandPalette.Command> commands = new ArrayList<>(commandRegistry.toPaletteCommands());
+        addElementNavigationCommands(commands);
+        return commands;
+    }
 
-        // Dynamic: model element names for navigation
+    private void addElementNavigationCommands(List<CommandPalette.Command> commands) {
         for (String name : canvas.getCanvasState().getDrawOrder()) {
             ElementType type = canvas.getCanvasState().getType(name).orElse(null);
             String category = formatElementType(type);
@@ -1336,8 +1351,6 @@ public class ModelWindow {
                 canvas.requestFocus();
             }));
         }
-
-        return commands;
     }
 
     private void switchToolAndFocus(CanvasToolBar.Tool tool) {

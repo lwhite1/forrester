@@ -136,7 +136,27 @@ public class EnergyTransition {
                 .name("1816_EnergyTransitionManagement_Q2b_EN")
                 .defaultSimulation("Year", 90.0, "Year", 0.0078125);
 
-        // Stocks
+        defineStocks(builder);
+        defineConstants(builder);
+        defineLookupTables(builder);
+        defineVariables(builder);
+        defineFlows(builder);
+
+        var definition = builder.build();
+        var compiled = new ModelCompiler().compile(definition);
+
+        compiled.getModel().setMetadata(ModelMetadata.builder()
+                .author("Dr. Erik Pruyt")
+                .source("Pruyt, E., 2013. Small System Dynamics Models for Big Issues: Triple Jump towards Real-World Complexity. TU Delft Library. ISBN 978-94-6186-195-5")
+                .license("CC-BY-NC-SA-4.0")
+                .url("https://simulation.tudelft.nl/SD/")
+                .build());
+
+        Simulation sim = compiled.createSimulation();
+        sim.execute();
+    }
+
+    private void defineStocks(ModelDefinitionBuilder builder) {
         builder.stock(new StockDef("installed capacity T3", "installed capacity T3", 1.5, "MW", null));
         builder.stock(new StockDef("marginal cost new capacity T3", "marginal cost new capacity T3", 8000000.0, "EURO/MW", null));
         builder.stock(new StockDef("capacity under construction T3", "capacity under construction T3", 0.5, "MW", null));
@@ -150,7 +170,9 @@ public class EnergyTransition {
         builder.stock(new StockDef("cumulatively decommissioned capacity T1", "cumulatively decommissioned capacity T1", 1.0E7, "MW", null));
         builder.stock(new StockDef("installed capacity T1", "installed capacity T1", 0.0, "initial_capacity_T1", "MW", null, List.of()));
 
-        // Constants
+    }
+
+    private void defineConstants(ModelDefinitionBuilder builder) {
         builder.constant("TIME_STEP", 0.0078125, "Year");
         builder.constant("INITIAL_TIME", 2010.0, "Year");
         builder.constant("FINAL_TIME", 2100.0, "Year");
@@ -180,10 +202,14 @@ public class EnergyTransition {
         builder.constant("lifetime techmology T1", 30.0, "YEAR");
         builder.constant("progress ratio T1", 0.9, "dmnl");
 
-        // Lookup tables
+    }
+
+    private void defineLookupTables(ModelDefinitionBuilder builder) {
         builder.lookupTable(new LookupTableDef("expected_capacity_required_lookup", null, new double[]{2010.0, 2100.0}, new double[]{15700.0, 45000.0}, "LINEAR"));
 
-        // Variables
+    }
+
+    private void defineVariables(ModelDefinitionBuilder builder) {
         builder.variable(new VariableDef("marginal cost new capacity previous year T3", "marginal cost new capacity previous year T3", "marginal_cost_new_capacity_T3/learning_curve_period", "EURO/MW/YEAR"));
         builder.variable(new VariableDef("marginal cost new capacity previous year T2", "marginal cost new capacity previous year T2", "marginal_cost_new_capacity_T2/learning_curve_period", "EURO/MW/YEAR"));
         builder.variable(new VariableDef("marginal cost new capacity previous year T1", "marginal cost new capacity previous year T1", "marginal_cost_new_capacity_T1/learning_curve_period", "EURO/MW/YEAR"));
@@ -219,7 +245,9 @@ public class EnergyTransition {
         builder.variable(new VariableDef("initial capacity T1", "initial capacity T1", "15000-3", "MW"));
         builder.variable(new VariableDef("experience curve parameter T1", "experience curve parameter T1", "-LOG(progress_ratio_T1, 2)", "dmnl"));
 
-        // Flows
+    }
+
+    private void defineFlows(ModelDefinitionBuilder builder) {
         builder.flow(new FlowDef("installed capacity T3 inflow 1", null, "commissioning_capacity_T3", "Year", null, "installed capacity T3"));
         builder.flow(new FlowDef("installed capacity T3 outflow 2", null, "decommissioning_capacity_T3", "Year", "installed capacity T3", null));
         builder.flow(new FlowDef("marginal cost new capacity T3 inflow 1", null, "marginal_cost_capacity_T3", "Year", null, "marginal cost new capacity T3"));
@@ -241,18 +269,5 @@ public class EnergyTransition {
         builder.flow(new FlowDef("cumulatively decommissioned capacity T1 net flow", "Net flow for cumulatively decommissioned capacity T1", "decommissioning_capacity_T1", "Year", null, "cumulatively decommissioned capacity T1"));
         builder.flow(new FlowDef("installed capacity T1 inflow 1", null, "commissioning_capacity_T1", "Year", null, "installed capacity T1"));
         builder.flow(new FlowDef("installed capacity T1 outflow 2", null, "decommissioning_capacity_T1", "Year", "installed capacity T1", null));
-
-        var definition = builder.build();
-        var compiled = new ModelCompiler().compile(definition);
-
-        compiled.getModel().setMetadata(ModelMetadata.builder()
-                .author("Dr. Erik Pruyt")
-                .source("Pruyt, E., 2013. Small System Dynamics Models for Big Issues: Triple Jump towards Real-World Complexity. TU Delft Library. ISBN 978-94-6186-195-5")
-                .license("CC-BY-NC-SA-4.0")
-                .url("https://simulation.tudelft.nl/SD/")
-                .build());
-
-        Simulation sim = compiled.createSimulation();
-        sim.execute();
     }
 }
