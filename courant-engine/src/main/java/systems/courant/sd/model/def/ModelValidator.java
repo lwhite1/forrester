@@ -1,5 +1,6 @@
 package systems.courant.sd.model.def;
 
+import systems.courant.sd.model.NameResolver;
 import systems.courant.sd.model.def.ValidationIssue.Severity;
 import systems.courant.sd.model.expr.Expr;
 import systems.courant.sd.model.expr.ExprDependencies;
@@ -396,16 +397,6 @@ public final class ModelValidator {
      * Checks if a name is referenced, accounting for the underscore/space name resolution.
      */
     private static boolean isReferenced(String name, Set<String> referencedNames) {
-        if (referencedNames.contains(name)) {
-            return true;
-        }
-        // Check underscore variant (equations use underscores for names with spaces)
-        String underscored = name.replace(' ', '_');
-        if (referencedNames.contains(underscored)) {
-            return true;
-        }
-        // Check space variant (element named with underscores, equation uses spaces)
-        String spaced = name.replace('_', ' ');
-        return referencedNames.contains(spaced);
+        return NameResolver.containsName(name, referencedNames);
     }
 }

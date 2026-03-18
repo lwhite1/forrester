@@ -1,5 +1,6 @@
 package systems.courant.sd.model.graph;
 
+import systems.courant.sd.model.NameResolver;
 import systems.courant.sd.model.def.VariableDef;
 import systems.courant.sd.model.def.CausalLinkDef;
 import systems.courant.sd.model.def.FlowDef;
@@ -786,14 +787,7 @@ public record FeedbackAnalysis(
      * underscore-to-space mapping used in equations.
      */
     private static String resolveName(String ref, Set<String> allNames) {
-        if (allNames.contains(ref)) {
-            return ref;
-        }
-        String spaced = ref.replace('_', ' ');
-        if (allNames.contains(spaced)) {
-            return spaced;
-        }
-        return null;
+        return NameResolver.resolveInSet(ref, allNames);
     }
 
 }

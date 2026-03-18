@@ -4,6 +4,7 @@ import systems.courant.sd.measure.TimeUnit;
 import systems.courant.sd.measure.UnitRegistry;
 import systems.courant.sd.model.Flow;
 import systems.courant.sd.model.LookupTable;
+import systems.courant.sd.model.NameResolver;
 import systems.courant.sd.model.Stock;
 import systems.courant.sd.model.Variable;
 import systems.courant.sd.model.def.LookupTableDef;
@@ -168,16 +169,9 @@ public class CompilationContext {
      * with isolated input holders.
      */
     public Optional<LookupTableDef> resolveLookupTableDef(String name) {
-        LookupTableDef def = lookupTableDefs.get(name);
+        LookupTableDef def = NameResolver.resolve(name, lookupTableDefs::get);
         if (def != null) {
             return Optional.of(def);
-        }
-        if (name.contains("_")) {
-            String spaceName = name.replace('_', ' ');
-            def = lookupTableDefs.get(spaceName);
-            if (def != null) {
-                return Optional.of(def);
-            }
         }
         if (parent != null) {
             return parent.resolveLookupTableDef(name);
@@ -256,16 +250,9 @@ public class CompilationContext {
      * Returns null if not found as a constant.
      */
     public OptionalDouble resolveConstant(String name) {
-        Double val = literalConstants.get(name);
+        Double val = NameResolver.resolve(name, literalConstants::get);
         if (val != null) {
             return OptionalDouble.of(val);
-        }
-        if (name.contains("_")) {
-            String spaceName = name.replace('_', ' ');
-            val = literalConstants.get(spaceName);
-            if (val != null) {
-                return OptionalDouble.of(val);
-            }
         }
         if (parent != null) {
             return parent.resolveConstant(name);
@@ -281,16 +268,9 @@ public class CompilationContext {
      * @return the lookup table, or empty if not found
      */
     public Optional<LookupTable> resolveLookupTable(String name) {
-        LookupTable table = lookupTables.get(name);
+        LookupTable table = NameResolver.resolve(name, lookupTables::get);
         if (table != null) {
             return Optional.of(table);
-        }
-        if (name.contains("_")) {
-            String spaceName = name.replace('_', ' ');
-            table = lookupTables.get(spaceName);
-            if (table != null) {
-                return Optional.of(table);
-            }
         }
         if (parent != null) {
             return parent.resolveLookupTable(name);
@@ -334,16 +314,9 @@ public class CompilationContext {
      * @return the single-element input holder array, or empty if not found
      */
     public Optional<double[]> resolveLookupInputHolder(String name) {
-        double[] holder = lookupInputHolders.get(name);
+        double[] holder = NameResolver.resolve(name, lookupInputHolders::get);
         if (holder != null) {
             return Optional.of(holder);
-        }
-        if (name.contains("_")) {
-            String spaceName = name.replace('_', ' ');
-            holder = lookupInputHolders.get(spaceName);
-            if (holder != null) {
-                return Optional.of(holder);
-            }
         }
         if (parent != null) {
             return parent.resolveLookupInputHolder(name);
