@@ -49,7 +49,8 @@ class LookupFormTest {
         ctx.setGrid(new GridPane());
         ctx.setElementName("Lookup 1");
 
-        form = new LookupForm(ctx);
+        FormFieldBuilder fields = new FormFieldBuilder(ctx);
+        form = new LookupForm(ctx, fields);
 
         stage.setScene(new Scene(new StackPane(), 100, 100));
         stage.show();

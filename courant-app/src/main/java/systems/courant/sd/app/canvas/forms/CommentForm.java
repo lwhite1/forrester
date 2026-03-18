@@ -15,18 +15,20 @@ import java.util.Objects;
 public class CommentForm implements ElementForm {
 
     private final FormContext ctx;
+    private final FormFieldBuilder fields;
 
     private TextArea textArea;
 
-    public CommentForm(FormContext ctx) {
+    public CommentForm(FormContext ctx, FormFieldBuilder fields) {
         this.ctx = ctx;
+        this.fields = fields;
     }
 
     @Override
     public int build(int startRow) {
         CommentDef comment = ctx.getEditor().getCommentByName(ctx.getElementName());
         if (comment == null) {
-            ctx.addReadOnlyRow(startRow++, "Name", ctx.getElementName());
+            fields.addReadOnlyRow(startRow++, "Name", ctx.getElementName());
             return startRow;
         }
 
@@ -39,8 +41,8 @@ public class CommentForm implements ElementForm {
         textArea.setPromptText("Enter annotation text...");
         textArea.setMaxWidth(Double.MAX_VALUE);
         GridPane.setHgrow(textArea, Priority.ALWAYS);
-        ctx.addTextAreaCommitHandlers(textArea, this::commitText);
-        ctx.addFieldRow(row++, "Text", textArea,
+        fields.addTextAreaCommitHandlers(textArea, this::commitText);
+        fields.addFieldRow(row++, "Text", textArea,
                 "Free-text annotation displayed on the canvas");
 
         return row;

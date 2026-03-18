@@ -5,8 +5,6 @@ import systems.courant.sd.model.def.VariableDef;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
-import javafx.scene.layout.GridPane;
-import javafx.scene.layout.Priority;
 
 import java.util.Objects;
 import java.util.Optional;
@@ -20,42 +18,46 @@ import systems.courant.sd.app.canvas.EquationField;
 public class VariableForm implements ElementForm {
 
     private final FormContext ctx;
+    private final FormFieldBuilder fields;
+    private final DimensionalAnalysisUI dimAnalysis;
 
     private TextField nameField;
     private EquationField equationField;
     private ComboBox<String> unitBox;
     private TextArea commentArea;
 
-    public VariableForm(FormContext ctx) {
+    public VariableForm(FormContext ctx, FormFieldBuilder fields, DimensionalAnalysisUI dimAnalysis) {
         this.ctx = ctx;
+        this.fields = fields;
+        this.dimAnalysis = dimAnalysis;
     }
 
     @Override
     public int build(int startRow) {
         Optional<VariableDef> varOpt = ctx.getEditor().getVariableByName(ctx.getElementName());
         if (varOpt.isEmpty()) {
-            ctx.addReadOnlyRow(startRow++, "Name", ctx.getElementName());
+            fields.addReadOnlyRow(startRow++, "Name", ctx.getElementName());
             return startRow;
         }
         VariableDef v = varOpt.get();
 
         int row = startRow;
-        nameField = ctx.createNameField();
-        ctx.addFieldRow(row++, "Name", nameField,
+        nameField = fields.createNameField();
+        fields.addFieldRow(row++, "Name", nameField,
                 "The name used to reference this variable in equations");
 
-        commentArea = ctx.addCommentArea(row++, v.comment(), this::commitComment);
+        commentArea = fields.addCommentArea(row++, v.comment(), this::commitComment);
 
-        equationField = ctx.createEquationField(v.equation());
-        ctx.addEquationCommitHandlers(equationField, this::commitEquation);
+        equationField = fields.createEquationField(v.equation());
+        fields.addEquationCommitHandlers(equationField, this::commitEquation);
         EquationAutoComplete.attach(equationField, ctx.getEditor(), ctx.getElementName());
-        ctx.addFieldRow(row++, "Equation", ctx.wrapWithHelpButton(equationField),
+        fields.addFieldRow(row++, "Equation", fields.wrapWithHelpButton(equationField),
                 "A formula computed each time step from other model elements");
-        ctx.attachEquationValidation(equationField, row++);
+        dimAnalysis.attachEquationValidation(equationField, row++);
 
-        unitBox = ctx.createUnitComboBox(v.unit());
-        ctx.addComboCommitHandlers(unitBox, this::commitUnit);
-        ctx.addFieldRow(row++, "Unit", unitBox,
+        unitBox = fields.createUnitComboBox(v.unit());
+        fields.addComboCommitHandlers(unitBox, this::commitUnit);
+        fields.addFieldRow(row++, "Unit", unitBox,
                 "The unit of measurement");
 
         return row;

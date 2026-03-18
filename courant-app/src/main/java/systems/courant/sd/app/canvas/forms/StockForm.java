@@ -5,8 +5,6 @@ import systems.courant.sd.model.def.StockDef;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
-import javafx.scene.layout.GridPane;
-import javafx.scene.layout.Priority;
 
 import java.util.Objects;
 import java.util.Optional;
@@ -19,6 +17,7 @@ import systems.courant.sd.app.canvas.renderers.ElementRenderer;
 public class StockForm implements ElementForm {
 
     private final FormContext ctx;
+    private final FormFieldBuilder fields;
 
     private TextField nameField;
     private TextField initialValueField;
@@ -26,35 +25,36 @@ public class StockForm implements ElementForm {
     private ComboBox<String> policyBox;
     private TextArea commentArea;
 
-    public StockForm(FormContext ctx) {
+    public StockForm(FormContext ctx, FormFieldBuilder fields) {
         this.ctx = ctx;
+        this.fields = fields;
     }
 
     @Override
     public int build(int startRow) {
         Optional<StockDef> stockOpt = ctx.getEditor().getStockByName(ctx.getElementName());
         if (stockOpt.isEmpty()) {
-            ctx.addReadOnlyRow(startRow++, "Name", ctx.getElementName());
+            fields.addReadOnlyRow(startRow++, "Name", ctx.getElementName());
             return startRow;
         }
         StockDef stock = stockOpt.get();
 
         int row = startRow;
-        nameField = ctx.createNameField();
-        ctx.addFieldRow(row++, "Name", nameField,
+        nameField = fields.createNameField();
+        fields.addFieldRow(row++, "Name", nameField,
                 "The name used to reference this stock in equations");
 
-        commentArea = ctx.addCommentArea(row++, stock.comment(), this::commitComment);
+        commentArea = fields.addCommentArea(row++, stock.comment(), this::commitComment);
 
-        initialValueField = ctx.createTextField(
+        initialValueField = fields.createTextField(
                 ElementRenderer.formatValue(stock.initialValue()));
-        ctx.addCommitHandlers(initialValueField, this::commitInitialValue);
-        ctx.addFieldRow(row++, "Initial Value", initialValueField,
+        fields.addCommitHandlers(initialValueField, this::commitInitialValue);
+        fields.addFieldRow(row++, "Initial Value", initialValueField,
                 "The starting value at the beginning of the simulation");
 
-        unitBox = ctx.createUnitComboBox(stock.unit());
-        ctx.addComboCommitHandlers(unitBox, this::commitUnit);
-        ctx.addFieldRow(row++, "Unit", unitBox,
+        unitBox = fields.createUnitComboBox(stock.unit());
+        fields.addComboCommitHandlers(unitBox, this::commitUnit);
+        fields.addFieldRow(row++, "Unit", unitBox,
                 "The unit of measurement (e.g., Person, Kilogram, USD)");
 
         policyBox = new ComboBox<>();
@@ -66,7 +66,7 @@ public class StockForm implements ElementForm {
                 commitPolicy();
             }
         });
-        ctx.addFieldRow(row++, "Negative Values", policyBox,
+        fields.addFieldRow(row++, "Negative Values", policyBox,
                 "What happens when the stock goes below zero.\n"
                 + "'Clamp to Zero' prevents negative values (common for physical "
                 + "quantities like population or inventory).\n"
@@ -101,7 +101,7 @@ public class StockForm implements ElementForm {
         } catch (NumberFormatException ignored) {
             ctx.getEditor().getStockByName(ctx.getElementName())
                     .ifPresent(stock -> field.setText(ElementRenderer.formatValue(stock.initialValue())));
-            ctx.flashInvalidInput(field);
+            fields.flashInvalidInput(field);
         }
     }
 

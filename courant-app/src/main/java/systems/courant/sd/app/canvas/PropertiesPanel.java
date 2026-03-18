@@ -32,7 +32,9 @@ import systems.courant.sd.app.canvas.forms.CldVariableForm;
 import systems.courant.sd.app.canvas.forms.CommentForm;
 import systems.courant.sd.app.canvas.forms.ElementForm;
 import systems.courant.sd.app.canvas.forms.FlowForm;
+import systems.courant.sd.app.canvas.forms.DimensionalAnalysisUI;
 import systems.courant.sd.app.canvas.forms.FormContext;
+import systems.courant.sd.app.canvas.forms.FormFieldBuilder;
 import systems.courant.sd.app.canvas.forms.LookupForm;
 import systems.courant.sd.app.canvas.forms.StockForm;
 import systems.courant.sd.app.canvas.forms.VariableForm;
@@ -56,6 +58,8 @@ public class PropertiesPanel extends VBox {
     private final GridPane propertyGrid = new GridPane();
     private final Label placeholderLabel = new Label("No selection");
     private final FormContext ctx = new FormContext();
+    private final FormFieldBuilder fields = new FormFieldBuilder(ctx);
+    private final DimensionalAnalysisUI dimAnalysis = new DimensionalAnalysisUI(ctx);
 
     private ElementForm currentForm;
     private ElementType cachedFormType;
@@ -173,10 +177,10 @@ public class PropertiesPanel extends VBox {
         int row = 0;
 
         // Model name (editable)
-        TextField nameField = ctx.createTextField(
+        TextField nameField = fields.createTextField(
                 editor.getModelName() != null ? editor.getModelName() : "Untitled");
         nameField.setId("modelNameField");
-        ctx.addFieldRow(row++, "Model", nameField);
+        fields.addFieldRow(row++, "Model", nameField);
         nameField.setOnAction(e -> commitModelName(nameField, editor));
         nameField.focusedProperty().addListener((obs, wasFocused, isFocused) -> {
             if (!isFocused && !ctx.isUpdatingFields()) {
@@ -193,7 +197,7 @@ public class PropertiesPanel extends VBox {
         descArea.setMaxWidth(Double.MAX_VALUE);
         descArea.setPromptText("Model description...");
         GridPane.setHgrow(descArea, Priority.ALWAYS);
-        ctx.addFieldRow(row++, "Description", descArea);
+        fields.addFieldRow(row++, "Description", descArea);
         descArea.focusedProperty().addListener((obs, wasFocused, isFocused) -> {
             if (!isFocused && !ctx.isUpdatingFields()) {
                 commitModelComment(descArea, editor);
@@ -218,7 +222,7 @@ public class PropertiesPanel extends VBox {
         if (settings != null) {
             String settingsText = String.format("Duration: %.0f %s, dt = %s %s",
                     settings.duration(), settings.durationUnit(), settings.dt(), settings.timeStep());
-            ctx.addReadOnlyRow(row++, "Simulation", settingsText);
+            fields.addReadOnlyRow(row++, "Simulation", settingsText);
         }
 
         // Separator before quick actions
@@ -328,7 +332,7 @@ public class PropertiesPanel extends VBox {
         contextToolbar.getChildren().add(deleteBtn);
 
         propertyGrid.getChildren().clear();
-        ctx.addReadOnlyRow(0, "Selection", count + " elements selected");
+        fields.addReadOnlyRow(0, "Selection", count + " elements selected");
 
         getChildren().addAll(contextToolbar, separator, scrollPane);
     }
@@ -344,9 +348,9 @@ public class PropertiesPanel extends VBox {
 
         boolean isCausalLink = ctx.getCanvas() != null && ctx.getCanvas().isSelectedConnectionCausalLink();
 
-        ctx.addReadOnlyRow(row++, "Type", isCausalLink ? "Causal Link" : "Info Link");
-        ctx.addReadOnlyRow(row++, "From", connection.from());
-        ctx.addReadOnlyRow(row++, "To", connection.to());
+        fields.addReadOnlyRow(row++, "Type", isCausalLink ? "Causal Link" : "Info Link");
+        fields.addReadOnlyRow(row++, "From", connection.from());
+        fields.addReadOnlyRow(row++, "To", connection.to());
 
         if (isCausalLink && ctx.getEditor() != null) {
             CausalLinkDef link = findCausalLink(connection);
@@ -358,7 +362,7 @@ public class PropertiesPanel extends VBox {
                 polarityBox.setValue(polarityDisplayText(link.polarity()));
                 polarityBox.setMaxWidth(Double.MAX_VALUE);
                 GridPane.setHgrow(polarityBox, Priority.ALWAYS);
-                ctx.addFieldRow(row++, "Polarity", polarityBox,
+                fields.addFieldRow(row++, "Polarity", polarityBox,
                         "The direction of causal influence");
 
                 // English explanation label
@@ -491,7 +495,7 @@ public class PropertiesPanel extends VBox {
         propertyGrid.getChildren().clear();
         int row = 0;
 
-        ctx.addReadOnlyRow(row++, "Type", formatType(type));
+        fields.addReadOnlyRow(row++, "Type", formatType(type));
 
         if (type == null) {
             getChildren().addAll(contextToolbar, separator, scrollPane);
@@ -507,7 +511,7 @@ public class PropertiesPanel extends VBox {
         } else if (type == ElementType.MODULE) {
             row = buildModuleForm(row);
         } else {
-            ctx.addReadOnlyRow(row++, "Name", name);
+            fields.addReadOnlyRow(row++, "Name", name);
         }
 
         if (type != ElementType.COMMENT && ctx.getCanvas() != null) {
@@ -521,12 +525,12 @@ public class PropertiesPanel extends VBox {
 
     private ElementForm createForm(ElementType type) {
         return switch (type) {
-            case STOCK -> new StockForm(ctx);
-            case FLOW -> new FlowForm(ctx);
-            case AUX -> new VariableForm(ctx);
-            case LOOKUP -> new LookupForm(ctx);
-            case CLD_VARIABLE -> new CldVariableForm(ctx);
-            case COMMENT -> new CommentForm(ctx);
+            case STOCK -> new StockForm(ctx, fields);
+            case FLOW -> new FlowForm(ctx, fields, dimAnalysis);
+            case AUX -> new VariableForm(ctx, fields, dimAnalysis);
+            case LOOKUP -> new LookupForm(ctx, fields);
+            case CLD_VARIABLE -> new CldVariableForm(ctx, fields);
+            case COMMENT -> new CommentForm(ctx, fields);
             case MODULE -> null;
         };
     }
@@ -534,21 +538,21 @@ public class PropertiesPanel extends VBox {
     private int buildModuleForm(int row) {
         Optional<ModuleInstanceDef> moduleOpt = ctx.getEditor().getModuleByName(ctx.getElementName());
         if (moduleOpt.isEmpty()) {
-            ctx.addReadOnlyRow(row++, "Name", ctx.getElementName());
+            fields.addReadOnlyRow(row++, "Name", ctx.getElementName());
             return row;
         }
         ModuleInstanceDef module = moduleOpt.get();
 
-        TextField nameField = ctx.createNameField();
-        ctx.addFieldRow(row++, "Instance Name", nameField);
+        TextField nameField = fields.createNameField();
+        fields.addFieldRow(row++, "Instance Name", nameField);
 
         Map<String, String> inputs = module.inputBindings();
         if (inputs.isEmpty()) {
-            ctx.addReadOnlyRow(row++, "Inputs", "(none)");
+            fields.addReadOnlyRow(row++, "Inputs", "(none)");
         } else {
             boolean first = true;
             for (Map.Entry<String, String> entry : inputs.entrySet()) {
-                ctx.addReadOnlyRow(row++, first ? "Inputs" : "",
+                fields.addReadOnlyRow(row++, first ? "Inputs" : "",
                         entry.getKey() + " = " + entry.getValue());
                 first = false;
             }
@@ -556,11 +560,11 @@ public class PropertiesPanel extends VBox {
 
         Map<String, String> outputs = module.outputBindings();
         if (outputs.isEmpty()) {
-            ctx.addReadOnlyRow(row++, "Outputs", "(none)");
+            fields.addReadOnlyRow(row++, "Outputs", "(none)");
         } else {
             boolean first = true;
             for (Map.Entry<String, String> entry : outputs.entrySet()) {
-                ctx.addReadOnlyRow(row++, first ? "Outputs" : "",
+                fields.addReadOnlyRow(row++, first ? "Outputs" : "",
                         entry.getKey() + " -> " + entry.getValue());
                 first = false;
             }
@@ -581,7 +585,7 @@ public class PropertiesPanel extends VBox {
             propertyGrid.add(links, 1, row);
             row++;
         } else {
-            ctx.addReadOnlyRow(row++, "Used by", "(none)");
+            fields.addReadOnlyRow(row++, "Used by", "(none)");
         }
 
         if (!uses.isEmpty()) {
@@ -592,7 +596,7 @@ public class PropertiesPanel extends VBox {
             propertyGrid.add(links, 1, row);
             row++;
         } else {
-            ctx.addReadOnlyRow(row++, "Uses", "(none)");
+            fields.addReadOnlyRow(row++, "Uses", "(none)");
         }
 
         return row;
