@@ -1,13 +1,10 @@
 package systems.courant.sd.app.canvas.renderers;
 
-import systems.courant.sd.model.def.ElementType;
-
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
 import systems.courant.sd.app.canvas.CanvasState;
 import systems.courant.sd.app.canvas.CausalLinkGeometry;
 import systems.courant.sd.app.canvas.ColorPalette;
-import systems.courant.sd.app.canvas.LayoutMetrics;
 
 /**
  * Draws selection indicators (dashed outlines and corner handles) around selected elements.
@@ -31,11 +28,8 @@ public final class SelectionRenderer {
      * Uses a dashed rectangle for stock/aux/constant and a dashed diamond for flow.
      */
     public static void drawSelectionIndicator(GraphicsContext gc, CanvasState state, String name) {
-        ElementType type = state.getType(name).orElse(null);
-        double cx = state.getX(name);
-        double cy = state.getY(name);
-
-        if (type == null || Double.isNaN(cx) || Double.isNaN(cy)) {
+        OutlineGeometry.Shape shape = OutlineGeometry.resolve(state, name, SELECTION_PADDING);
+        if (shape == null) {
             return;
         }
 
@@ -43,12 +37,9 @@ public final class SelectionRenderer {
         gc.setLineWidth(SELECTION_LINE_WIDTH);
         gc.setLineDashes(SELECTION_DASH_LENGTH, SELECTION_DASH_GAP);
 
-        if (type == ElementType.FLOW) {
-            drawDiamondIndicator(gc, cx, cy);
-        } else {
-            double halfW = LayoutMetrics.effectiveWidth(state, name) / 2 + SELECTION_PADDING;
-            double halfH = LayoutMetrics.effectiveHeight(state, name) / 2 + SELECTION_PADDING;
-            drawRectIndicator(gc, cx, cy, halfW, halfH);
+        switch (shape) {
+            case OutlineGeometry.Diamond d -> drawDiamondIndicator(gc, d);
+            case OutlineGeometry.Rect r -> drawRectIndicator(gc, r);
         }
 
         gc.setLineDashes();
@@ -111,59 +102,30 @@ public final class SelectionRenderer {
      * Uses a solid outline (no dashes, no handles) to distinguish from selection.
      */
     public static void drawHoverIndicator(GraphicsContext gc, CanvasState state, String name) {
-        ElementType type = state.getType(name).orElse(null);
-        double cx = state.getX(name);
-        double cy = state.getY(name);
-
-        if (type == null || Double.isNaN(cx) || Double.isNaN(cy)) {
-            return;
-        }
-
-        gc.setStroke(ColorPalette.HOVER);
-        gc.setLineWidth(HOVER_LINE_WIDTH);
-
-        if (type == ElementType.FLOW) {
-            double half = LayoutMetrics.FLOW_INDICATOR_SIZE / 2 + SELECTION_PADDING;
-            double[] xPoints = {cx, cx + half, cx, cx - half};
-            double[] yPoints = {cy - half, cy, cy + half, cy};
-            gc.strokePolygon(xPoints, yPoints, 4);
-        } else {
-            double halfW = LayoutMetrics.effectiveWidth(state, name) / 2 + SELECTION_PADDING;
-            double halfH = LayoutMetrics.effectiveHeight(state, name) / 2 + SELECTION_PADDING;
-            gc.strokeRect(cx - halfW, cy - halfH, halfW * 2, halfH * 2);
-        }
+        OutlineGeometry.strokeElementOutline(gc, state, name, SELECTION_PADDING,
+                ColorPalette.HOVER, HOVER_LINE_WIDTH);
     }
 
-    private static void drawRectIndicator(GraphicsContext gc, double cx, double cy,
-                                          double halfW, double halfH) {
-        double x = cx - halfW;
-        double y = cy - halfH;
-        double w = halfW * 2;
-        double h = halfH * 2;
-
-        gc.strokeRect(x, y, w, h);
+    private static void drawRectIndicator(GraphicsContext gc, OutlineGeometry.Rect r) {
+        gc.strokeRect(r.x(), r.y(), r.w(), r.h());
 
         // Corner handles
         gc.setFill(SELECTION_COLOR);
-        drawHandle(gc, x, y);
-        drawHandle(gc, x + w, y);
-        drawHandle(gc, x, y + h);
-        drawHandle(gc, x + w, y + h);
+        drawHandle(gc, r.x(), r.y());
+        drawHandle(gc, r.x() + r.w(), r.y());
+        drawHandle(gc, r.x(), r.y() + r.h());
+        drawHandle(gc, r.x() + r.w(), r.y() + r.h());
     }
 
-    private static void drawDiamondIndicator(GraphicsContext gc, double cx, double cy) {
-        double half = LayoutMetrics.FLOW_INDICATOR_SIZE / 2 + SELECTION_PADDING;
-
-        double[] xPoints = {cx, cx + half, cx, cx - half};
-        double[] yPoints = {cy - half, cy, cy + half, cy};
-        gc.strokePolygon(xPoints, yPoints, 4);
+    private static void drawDiamondIndicator(GraphicsContext gc, OutlineGeometry.Diamond d) {
+        gc.strokePolygon(d.xPoints(), d.yPoints(), 4);
 
         // Corner handles at diamond tips
         gc.setFill(SELECTION_COLOR);
-        drawHandle(gc, cx, cy - half);
-        drawHandle(gc, cx + half, cy);
-        drawHandle(gc, cx, cy + half);
-        drawHandle(gc, cx - half, cy);
+        drawHandle(gc, d.cx(), d.cy() - d.half());
+        drawHandle(gc, d.cx() + d.half(), d.cy());
+        drawHandle(gc, d.cx(), d.cy() + d.half());
+        drawHandle(gc, d.cx() - d.half(), d.cy());
     }
 
     private static void drawHandle(GraphicsContext gc, double x, double y) {

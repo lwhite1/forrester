@@ -1,6 +1,5 @@
 package systems.courant.sd.app.canvas.renderers;
 
-import systems.courant.sd.model.def.ElementType;
 import systems.courant.sd.model.graph.CausalTraceAnalysis;
 import systems.courant.sd.model.graph.CausalTraceAnalysis.TraceDirection;
 
@@ -9,7 +8,6 @@ import javafx.scene.paint.Color;
 import systems.courant.sd.app.canvas.CanvasState;
 import systems.courant.sd.app.canvas.CausalLinkGeometry;
 import systems.courant.sd.app.canvas.ColorPalette;
-import systems.courant.sd.app.canvas.LayoutMetrics;
 
 /**
  * Draws visual highlights for elements and edges in a causal trace.
@@ -40,14 +38,6 @@ public final class CausalTraceRenderer {
      */
     public static void drawTraceHighlight(GraphicsContext gc, CanvasState state,
                                            String name, CausalTraceAnalysis trace) {
-        ElementType type = state.getType(name).orElse(null);
-        double cx = state.getX(name);
-        double cy = state.getY(name);
-
-        if (type == null || Double.isNaN(cx) || Double.isNaN(cy)) {
-            return;
-        }
-
         int depth = trace.depthOf(name);
         double opacity = trace.opacityForDepth(depth);
         boolean isOrigin = name.equals(trace.origin());
@@ -58,26 +48,9 @@ public final class CausalTraceRenderer {
         Color fillColor = Color.color(baseColor.getRed(), baseColor.getGreen(),
                 baseColor.getBlue(), opacity * 0.08);
 
-        gc.setStroke(strokeColor);
-        gc.setLineWidth(isOrigin ? ORIGIN_LINE_WIDTH : GLOW_LINE_WIDTH);
         gc.setLineDashes();
-
-        if (type == ElementType.FLOW) {
-            double half = LayoutMetrics.FLOW_INDICATOR_SIZE / 2 + GLOW_PADDING;
-            double[] xPoints = {cx, cx + half, cx, cx - half};
-            double[] yPoints = {cy - half, cy, cy + half, cy};
-            gc.setFill(fillColor);
-            gc.fillPolygon(xPoints, yPoints, 4);
-            gc.strokePolygon(xPoints, yPoints, 4);
-        } else {
-            double halfW = LayoutMetrics.effectiveWidth(state, name) / 2 + GLOW_PADDING;
-            double halfH = LayoutMetrics.effectiveHeight(state, name) / 2 + GLOW_PADDING;
-            double x = cx - halfW;
-            double y = cy - halfH;
-            gc.setFill(fillColor);
-            gc.fillRect(x, y, halfW * 2, halfH * 2);
-            gc.strokeRect(x, y, halfW * 2, halfH * 2);
-        }
+        OutlineGeometry.drawElementOutline(gc, state, name, GLOW_PADDING,
+                fillColor, strokeColor, isOrigin ? ORIGIN_LINE_WIDTH : GLOW_LINE_WIDTH);
     }
 
     /**
